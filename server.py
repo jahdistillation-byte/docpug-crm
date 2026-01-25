@@ -206,3 +206,4 @@ def create_owner():
 
     return {"ok": True, "data": res.data[0]}
 
+
