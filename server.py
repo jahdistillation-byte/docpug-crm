@@ -206,6 +206,3 @@ def create_owner():
 
     return {"ok": True, "data": res.data[0]}
 
-if __name__ == "__main__":
-    # http://localhost:8080
-    app.run(host="127.0.0.1", port=8080, debug=True)
