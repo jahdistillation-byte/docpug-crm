@@ -204,5 +204,57 @@ def create_owner():
     )
 
     return {"ok": True, "data": res.data[0]}
+@app.get("/api/patients")
+def get_patients():
+    owner_id = request.args.get("owner_id")
 
+    if not owner_id:
+        return {"ok": False, "error": "owner_id required"}, 400
+
+    res = (
+        supabase
+        .table("patients")
+        .select("*")
+        .eq("org_id", ORG_ID)
+        .eq("owner_id", owner_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    return {"ok": True, "data": res.data}
+@app.post("/api/patients")
+def create_patient():
+    data = request.get_json(force=True)
+
+    owner_id = data.get("owner_id")
+    name = (data.get("name") or "").strip()
+    species = (data.get("species") or "").strip()
+    breed = (data.get("breed") or "").strip()
+    age = data.get("age")
+    weight_kg = data.get("weight_kg")
+    note = (data.get("note") or "").strip()
+
+    if not owner_id:
+        return {"ok": False, "error": "owner_id required"}, 400
+
+    if not name:
+        return {"ok": False, "error": "Імʼя пацієнта обовʼязкове"}, 400
+
+    res = (
+        supabase
+        .table("patients")
+        .insert({
+            "org_id": ORG_ID,
+            "owner_id": owner_id,
+            "name": name,
+            "species": species,
+            "breed": breed,
+            "age": age,
+            "weight_kg": weight_kg,
+            "note": note
+        })
+        .execute()
+    )
+
+    return {"ok": True, "data": res.data[0]}
 
