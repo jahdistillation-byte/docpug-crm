@@ -2571,24 +2571,22 @@ async function init() {
 
   migrateLegacyVisitFilesIfNeeded();
 
-  loadOwners();
-  renderOwners();
-
   initOwnersUI();
   initOwnerUI();
   initPatientUI();
   initVisitUI();
   initVisitsTabUI();
 
-  // render registries if user opened tab
-renderServicesTab();
-renderStockTab();
+  renderServicesTab();
+  renderStockTab();
 
   $("#btnReload")?.addEventListener("click", async () => {
     await loadMe();
+    await loadOwners();
   });
 
   await loadMe();
+  await loadOwners(); // ← ВАЖНО: ждём данные, потом рендер
 }
 
 // ===== iOS / Telegram WebApp viewport fix =====
