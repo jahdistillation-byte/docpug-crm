@@ -10,6 +10,7 @@ from supabase import create_client
 
 # 1️⃣ СНАЧАЛА грузим .env
 load_dotenv()
+ORG_ID = os.getenv("ORG_ID")
 
 # 2️⃣ ТОЛЬКО ПОТОМ создаём Supabase
 supabase = create_client(
