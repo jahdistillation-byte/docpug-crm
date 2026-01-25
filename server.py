@@ -18,7 +18,7 @@ supabase = create_client(
 
 )
 
-ORG_ID = "c31b3658-0126-4486-94b4-7d5bee453af5"
+OORG_ID = os.getenv("ORG_ID", "")
 
 
 print("SUPABASE_URL =", os.getenv("SUPABASE_URL"))
