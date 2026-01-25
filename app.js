@@ -2204,51 +2204,46 @@ function initOwnersUI() {
 
 function initOwnerUI() {
   $("#btnAddPet")?.addEventListener("click", async () => {
-  const ownerId = state.selectedOwnerId;
-  if (!ownerId) return alert("Спочатку обери власника");
+    const ownerId = state.selectedOwnerId;
+    if (!ownerId) return alert("Спочатку обери власника");
 
-  const name = prompt("Кличка:");
-  if (!name) return;
+    const name = prompt("Кличка:");
+    if (!name) return;
 
-  const species = prompt("Вид (пес/кот/птица…):", "пес") || "";
-  const breed = prompt("Порода (необязательно):") || "";
-  const age = prompt("Возраст (например: 3 года / 8 мес):") || "";
-  const weight_kg = prompt("Вес (кг, например 7.5):") || "";
-  const note = prompt("Заметки (необязательно):") || "";
+    const species = prompt("Вид (пес/кот/птица…):", "пес") || "";
+    const breed = prompt("Порода (необязательно):") || "";
+    const age = prompt("Возраст (например: 3 года / 8 мес):") || "";
+    const weight_kg = prompt("Вес (кг, например 7.5):") || "";
+    const note = prompt("Заметки (необязательно):") || "";
 
-  // ВАЖНО: owner_id уходит на сервер
-  const created = await createPatientApi({
-    owner_id: ownerId,
-    name: name.trim(),
-    species: species.trim(),
-    breed: breed.trim(),
-    age: age.trim(),
-    weight_kg: weight_kg.trim(),
-    note: note.trim(),
-  });
+    const created = await createPatientApi({
+      owner_id: ownerId,
+      name: name.trim(),
+      species: species.trim(),
+      breed: breed.trim(),
+      age: age.trim(),
+      weight_kg: weight_kg.trim(),
+      note: note.trim(),
+    });
 
-  if (!created) return;
+    if (!created) return;
 
-  // чтобы UI увидел нового пациента — кладем в локалку тоже (пока гибрид)
-  const patients = loadPatients();
-  patients.unshift({
-    id: created.id,
-    owner_id: created.owner_id,
-    name: created.name,
-    species: created.species,
-    breed: created.breed,
-    age: created.age,
-    weight_kg: created.weight_kg,
-    notes: created.note || "",
-  });
-  savePatients(patients);
-
-  renderOwnerPage(ownerId);
-});
-
+    // пока гибрид: кладем и в localStorage
+    const patients = loadPatients();
+    patients.unshift({
+      id: created.id,
+      owner_id: created.owner_id,
+      name: created.name,
+      species: created.species,
+      breed: created.breed,
+      age: created.age,
+      weight_kg: created.weight_kg,
+      notes: created.note || "",
+    });
     savePatients(patients);
+
     renderOwnerPage(ownerId);
-  };
+  });
 
   $("#petsList")?.addEventListener("click", (e) => {
     const delBtn = e.target.closest("[data-del-pet]");
@@ -2266,6 +2261,7 @@ function initOwnerUI() {
       if (petId) openPatient(petId);
     }
   });
+}
 
 
 function initVisitsTabUI() {
