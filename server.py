@@ -8,24 +8,23 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from supabase import create_client
 
 # 1️⃣ СНАЧАЛА грузим .env
-load_dotenv()
 ORG_ID = os.getenv("ORG_ID")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
+if not ORG_ID:
+    raise RuntimeError("ORG_ID is missing (set it in Render Environment)")
+if not SUPABASE_URL:
+    raise RuntimeError("SUPABASE_URL is missing (set it in Render Environment)")
+if not SUPABASE_SERVICE_KEY:
+    raise RuntimeError("SUPABASE_SERVICE_KEY is missing (set it in Render Environment)")
+
 
 # 2️⃣ ТОЛЬКО ПОТОМ создаём Supabase
-supabase = create_client(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_SERVICE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-)
-
-OORG_ID = os.getenv("ORG_ID", "")
-
-
-print("SUPABASE_URL =", os.getenv("SUPABASE_URL"))
-print(
-    "SUPABASE_SERVICE_KEY starts =",
-    (os.getenv("SUPABASE_SERVICE_KEY") or "")[:12]
-)
+print("SUPABASE_URL =", SUPABASE_URL)
+print("ORG_ID =", ORG_ID)
 
 app = Flask(__name__)
 
