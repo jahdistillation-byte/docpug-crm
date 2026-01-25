@@ -282,7 +282,8 @@ async function loadOwners() {
     }
 
     state.owners = Array.isArray(json.data) ? json.data : [];
-    renderOwners();
+LS.set(OWNERS_KEY, state.owners);
+renderOwners();
   } catch (e) {
     console.error(e);
     alert("Помилка завантаження власників (network)");
@@ -1201,8 +1202,9 @@ function renderPatientsTab() {
 
   const patients = loadPatients();
   const owners = (Array.isArray(state.owners) && state.owners.length)
-    ? state.owners
-    : LS.get(OWNERS_KEY, []);
+  ? state.owners
+  : LS.get(OWNERS_KEY, []);
+  renderOwners();
   const ownerById = new Map(owners.map((o) => [o.id, o]));
 
   if (!patients.length) {
@@ -2239,8 +2241,11 @@ function initOwnerUI() {
       age: created.age,
       weight_kg: created.weight_kg,
       notes: created.note || "",
+      
     });
   });
+savePatients(patients);
+renderOwnerPage(ownerId); // чтобы сразу появился в списке
 
   $("#petsList")?.addEventListener("click", (e) => {
     const delBtn = e.target.closest("[data-del-pet]");
