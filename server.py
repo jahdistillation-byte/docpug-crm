@@ -181,6 +181,18 @@ def get_owners():
     )
     return {"ok": True, "data": res.data}
 
+@app.get("/api/patients")
+def list_patients():
+    res = (
+        supabase
+        .table("patients")
+        .select("*")
+        .eq("org_id", ORG_ID)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return {"ok": True, "data": res.data or []}
+
 
 @app.post("/api/owners")
 def create_owner():
