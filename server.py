@@ -5,7 +5,6 @@ import uuid
 from flask import Flask, request, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
-from dotenv import load_dotenv
 from supabase import create_client
 
 # 1️⃣ СНАЧАЛА грузим .env
