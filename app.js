@@ -2240,9 +2240,6 @@ function initOwnerUI() {
       weight_kg: created.weight_kg,
       notes: created.note || "",
     });
-    savePatients(patients);
-
-    renderOwnerPage(ownerId);
   });
 
   $("#petsList")?.addEventListener("click", (e) => {
