@@ -1,0 +1,867 @@
+:root{
+  --bg:#0b0b0f;
+  --card:#151522;
+  --border:#26263a;
+  --text:#f1f1f1;
+  --muted:#a7a7c4;
+  --accent:#6b4eff;
+  --accent2:#8b5cff;
+  --danger:#ff4e6b;
+  --ok:#36d399;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.wrap{
+  max-width:520px;
+  margin:0 auto;
+  padding:14px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo{
+  width:42px;height:42px;
+  display:grid;place-items:center;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#101019;
+}
+
+.title{font-weight:800;letter-spacing:.2px}
+.subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  padding-bottom:8px;
+  margin-bottom:10px;
+}
+
+.tab{
+  flex:0 0 auto;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#101019;
+  color:var(--text);
+  font-weight:650;
+  cursor:pointer;
+  transition:transform .06s ease;
+}
+.tab:active{transform:scale(.98)}
+.tab.active{
+  border-color:rgba(107,78,255,.65);
+  background:linear-gradient(180deg, rgba(107,78,255,.18), rgba(16,16,25,.6));
+}
+
+.content{min-height:60vh}
+
+.page{display:none}
+.page.active{display:block}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+}
+
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+h2{margin:0 0 8px 0;font-size:18px}
+
+.hint{
+  font-size:12px;
+  color:var(--muted);
+  margin:8px 0 12px 0;
+}
+
+.mono{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size:12px;
+  color:#d7d7ff;
+}
+
+.primary, .ghost{
+  border:none;
+  cursor:pointer;
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:750;
+}
+.primary{
+  background:var(--accent);
+  color:#fff;
+}
+.ghost{
+  background:#101019;
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:10px 12px;
+}
+
+.list{display:flex;flex-direction:column;gap:10px}
+
+.item{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+  background:#101019;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+.item .left{display:flex;flex-direction:column;gap:4px}
+.item .name{font-weight:800}
+.item .meta{font-size:12px;color:var(--muted)}
+.item .right{display:flex;gap:8px;align-items:center}
+
+.pill{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  background:#0b0b0f;
+  width:max-content;
+}
+
+.iconBtn{
+  width:36px;height:36px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#0b0b0f;
+  color:var(--text);
+  cursor:pointer;
+}
+
+.footer{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:12px;
+  padding:8px 2px;
+}
+
+.dot{
+  width:10px;height:10px;border-radius:50%;
+  background:#777;
+  display:inline-block;
+}
+
+/* История / заметки в карточках */
+.history{
+  margin-top:8px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#0b0b0f;
+  color:var(--text);
+  font-size:13px;
+  line-height:1.45;
+}
+.history-label{
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:4px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+
+/* ===== Modal (custom, вместо prompt) ===== */
+.modal{ position:fixed; inset:0; display:none; z-index:1000; }
+.modal.open{ display:block; }
+.modal__backdrop{
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+}
+.modal__panel{
+  position:relative;
+  max-width:520px;
+  margin:10vh auto 0 auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow: 0 18px 60px rgba(0,0,0,.6);
+}
+.modal__head{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(107,78,255,.10), rgba(21,21,34,1));
+}
+.modal__title{ font-weight:900; font-size:16px; }
+.modal__sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+.modal__body{ padding:14px; display:flex; flex-direction:column; gap:12px; }
+.modal__foot{
+  padding:14px;
+  display:flex; justify-content:flex-end; gap:10px;
+  border-top:1px solid var(--border);
+  background:#101019;
+}
+
+.field .label{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+.input, .textarea{
+  width:100%;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#0b0b0f;
+  color:var(--text);
+  padding:10px 12px;
+  font-size:14px;
+  outline:none;
+}
+.textarea{ resize:vertical; min-height:120px; }
+.input:focus, .textarea:focus{
+  border-color: rgba(107,78,255,.65);
+  box-shadow: 0 0 0 3px rgba(107,78,255,.15);
+}
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:520px){
+  .modal__panel{ margin:6vh 12px 0 12px; }
+  .grid2{ grid-template-columns:1fr; }
+}
+
+/* ===== Files UI ===== */
+.fileRow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:#101019;
+}
+
+.fileIcon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#0b0b0f;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex:0 0 auto;
+}
+
+.fileMain{
+  min-width:0;
+  flex:1 1 auto;
+}
+
+.fileName{
+  font-weight:800;
+  line-height:1.15;
+  /* ✅ больше места под имя */
+  max-width: 100%;
+}
+
+.fileName a{
+  color:var(--text);
+  text-decoration:none;
+
+  /* ✅ делаем “умную” обрезку */
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fileMeta{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+
+  /* ✅ мета одной строкой */
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fileActions{
+  display:flex;
+  gap:8px;
+  flex:0 0 auto;
+
+  /* ✅ не даём кнопкам прыгать и переноситься */
+  flex-wrap:nowrap;
+  align-items:center;
+}
+
+.miniBtn{
+  border:1px solid var(--border);
+  background:#0b0b0f;
+  color:var(--text);
+  padding:8px 10px;
+  border-radius:12px;
+  font-weight:750;
+  cursor:pointer;
+  text-decoration:none;
+  font-size:12px;
+  line-height:1;
+  white-space:nowrap;
+}
+.miniBtn:hover{
+  border-color:rgba(107,78,255,.65);
+}
+
+.miniBtn.danger{
+  border-color:rgba(255,78,107,.35);
+}
+.miniBtn.danger2{
+  background:rgba(255,78,107,.12);
+  border-color:rgba(255,78,107,.55);
+}
+
+/* ✅ на очень узких экранах — кнопки уходят вниз красиво */
+@media (max-width: 520px){
+  .fileRow{ align-items:flex-start; }
+  .fileActions{ flex-wrap:wrap; justify-content:flex-end; }
+}
+.printSheet{
+  background:#fff;
+  color:#111;
+  border-radius:14px;
+  padding:18px;
+  min-height:280px;
+  border:1px solid #e7e7ee;
+  font-size:14px;
+}
+.printSheet h1{font-size:18px;margin:0 0 8px 0;}
+.printSheet .muted{color:#555;font-size:12px;margin-bottom:10px;}
+.printSheet .sec{margin-top:10px;}
+.printSheet .secTitle{font-weight:700;margin-bottom:4px;}
+.printSheet .line{white-space:pre-wrap;}
+
+@media print{
+  body{background:#fff !important;}
+  #tabs, #topbar, .page.active:not([data-page="visit"]) { display:none !important; }
+  .page[data-page="visit"]{display:none !important;}
+  #dischargeModal{position:static !important; inset:auto !important; background:transparent !important;}
+  #dischargeModal .modalCard{box-shadow:none !important; border:none !important; padding:0 !important;}
+  #dischargeModal textarea, #dischargeModal input, #dischargeModal .row, #dischargeModal .hint { display:none !important; }
+  #disPreview{border:none !important; padding:0 !important;}
+}
+/* ===== Discharge / Print ===== */
+.modal__panel--wide { max-width: 980px; }
+
+.printCard{
+  margin-top: 14px;
+  border: 1px solid #2a2a3f;
+  border-radius: 16px;
+  background: rgba(20,20,30,.55);
+  padding: 12px;
+}
+
+.printA4{
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #0b0b10;
+  color: #f4f4ff;
+  border-radius: 14px;
+  border: 1px solid rgba(170,110,255,.35);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  padding: 18mm 16mm;
+  position: relative;
+  overflow: hidden;
+}
+
+/* лёгкий фиолетовый визуал */
+.printA4:before{
+  content:"";
+  position:absolute;
+  inset:-40px;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(160,90,255,.25), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(120,60,255,.18), transparent 50%),
+    radial-gradient(circle at 30% 90%, rgba(190,120,255,.12), transparent 50%);
+  pointer-events:none;
+}
+
+.printTop, .printPatient, .printBlocks, .printFooter { position: relative; z-index: 1; }
+
+.printTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.printLogo{ display:flex; gap:10px; align-items:center; }
+.printLogoMark{
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(155,90,255,.18);
+  border: 1px solid rgba(170,110,255,.45);
+  font-size: 22px;
+}
+.printBrand{ font-weight: 900; font-size: 20px; letter-spacing:.3px; }
+.printTag{ opacity:.85; font-size: 12px; margin-top: 2px; }
+
+.printMeta{
+  text-align:right;
+  font-size: 12px;
+  opacity: .9;
+}
+.printMetaLine span{ opacity:.75; margin-right:6px; }
+
+.printPatient{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(10,10,16,.55);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.printPatientTitle{ font-weight:800; margin-bottom:8px; }
+.printPatientGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+  font-size: 12px;
+}
+.printPatientGrid span{ opacity:.75; margin-right:6px; }
+
+.printBlocks{ display:flex; flex-direction:column; gap: 10px; }
+
+.printBlock{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(10,10,16,.45);
+  border-radius: 14px;
+  padding: 12px;
+}
+.printH{ font-weight:900; margin-bottom:6px; }
+.printTxt{ font-size: 12.5px; line-height: 1.45; opacity:.95; }
+.printTxt.pre{ white-space: pre-wrap; }
+
+.printFooter{
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding-top: 10px;
+  font-size: 11px;
+  opacity: .9;
+}
+.printContacts{ margin-bottom: 6px; }
+.printNote{ opacity:.75; }
+
+/* Печать: печатаем только A4 */
+@media print {
+  body { background: #fff !important; }
+  .wrap, .topbar, .tabs, .content, .footer,
+  .modal__head, .modal__foot, .modal__backdrop,
+  .modal__body > :not(.printCard) {
+    display: none !important;
+  }
+
+  #dischargeModal {
+    position: static !important;
+    display: block !important;
+  }
+
+  .printCard { border:none; background:transparent; padding:0; margin:0; }
+  .printA4 {
+    width: auto; min-height: auto;
+    border: none; border-radius: 0;
+    box-shadow: none;
+    color: #111;
+    background: #fff;
+    padding: 0;
+  }
+  .printA4:before { display:none; }
+}
+/* ===== FIX: Discharge modal scrolling & buttons ===== */
+/* =========================
+   DISCHARGE MODAL — ONE FIX
+   (desktop + mobile + Telegram)
+   ========================= */
+
+/* 1) панель модалки — колонка, тело скроллится */
+#dischargeModal .modal__panel{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+
+  /* держим в экране */
+  max-height: calc(var(--vh, 1vh) * 100 - 24px);
+  margin: 6vh auto 0 auto;
+}
+
+/* wide версия тоже в пределах экрана */
+#dischargeModal .modal__panel--wide{
+  max-width: 980px;
+}
+
+/* 2) тело модалки — единственное место со скроллом */
+#dischargeModal .modal__body{
+  flex: 1 1 auto;
+  min-height: 0;                 /* КРИТИЧНО для flex+scroll */
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+
+  /* запас, чтобы до футера докручивалось */
+  padding-bottom: 110px;
+}
+
+/* 3) футер всегда виден и кликабелен */
+#dischargeModal .modal__foot{
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 9999;
+
+  background: rgba(11,11,15,0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+/* 4) если какой-то слой перекрывал кнопки */
+#dischargeModal .modal__foot,
+#dischargeModal .modal__foot *{
+  pointer-events:auto !important;
+}
+
+/* 5) превью A4 НЕ должно перекрывать футер */
+#dischargeModal .printCard,
+#dischargeModal #disPreview,
+#dischargeModal #disA4{
+  position: relative;
+  z-index: 1;
+}
+
+/* 6) превью в браузере — аккуратно по центру,
+      НО сам #disA4 остаётся реальным A4 для PDF */
+#dischargeModal .printCard{
+  margin-top: 14px;
+}
+
+#disA4{
+  width: 210mm;
+  height: 297mm;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0;              /* важно для рендера */
+  padding: 16mm;
+  background: linear-gradient(135deg, #0b0b0f, #140b2a);
+
+  page-break-inside: avoid;
+  break-inside: avoid;
+
+  transform: none !important;
+}
+
+/* контейнер предпросмотра — центрируем */
+#dischargeModal .printA4{
+  width: 210mm;
+  max-width: 100%;
+  margin: 0 auto;
+  transform: none !important;
+}
+
+/* мобильная подстройка */
+@media (max-width:520px){
+  #dischargeModal .modal__panel{
+    margin: 3vh 12px 0 12px;
+    max-height: calc(var(--vh, 1vh) * 100 - 12px);
+  }
+}
+/* =========================
+   FINAL FIX — Discharge modal (Telegram / Mobile / Desktop)
+   вставь В САМЫЙ КОНЕЦ style.css
+========================= */
+
+#dischargeModal .modal__panel {
+  /* нормальная геометрия + чтобы низ не обрезался */
+  margin: 6vh auto !important;
+  max-height: calc(var(--vh, 1vh) * 100 - 12vh) !important; /* учитывает твой setVH() */
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#dischargeModal .modal__body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;                 /* КРИТИЧНО для flex+scroll */
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: 120px !important;         /* запас, чтобы докручивать до футера */
+}
+
+#dischargeModal .modal__foot {
+  flex: 0 0 auto !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;                 /* кнопки всегда выше всего */
+  background: rgba(11,11,15,0.92) !important;
+  backdrop-filter: blur(8px) !important;
+  border-top: 1px solid rgba(255,255,255,0.10) !important;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  pointer-events: auto !important;
+}
+
+#dischargeModal .modal__foot,
+#dischargeModal .modal__foot * {
+  pointer-events: auto !important;
+}
+
+/* Превью A4 НЕ должно перехватывать клики (оно только для просмотра) */
+#dischargeModal #disPreview,
+#dischargeModal .printCard,
+#dischargeModal .printA4,
+#dischargeModal #disA4 {
+  position: relative !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* A4: убираем конфликт "height фикс" vs "min-height" */
+#disA4 {
+  width: 210mm !important;
+  min-height: 297mm !important;
+  height: auto !important;
+  max-width: none !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* На мобилке панель почти во весь экран */
+@media (max-width: 520px){
+  #dischargeModal .modal__panel{
+    width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+    max-height: calc(var(--vh, 1vh) * 100 - 16px) !important;
+  }
+
+  /* ===== Discharge: Services block (pro) ===== */
+.servicesPro{
+  display:grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap:14px;
+  align-items:start;
+}
+
+.servicesNames{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.svcChip{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+  line-height:1.25;
+  font-weight:800;
+}
+
+.svcChip small{
+  display:block;
+  margin-top:4px;
+  opacity:.75;
+  font-weight:600;
+  font-size:12px;
+}
+
+.servicesTable{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.20);
+}
+
+.servicesTable thead th{
+  text-align:right;
+  padding:10px 10px;
+  font-size:12px;
+  letter-spacing:.02em;
+  opacity:.85;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  font-variant-numeric: tabular-nums;
+}
+
+.servicesTable thead th:first-child{
+  text-align:left;
+}
+
+.servicesTable tbody td{
+  padding:10px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  text-align:right;
+  font-variant-numeric: tabular-nums; /* чтобы цифры стояли ровно */
+}
+
+.servicesTable tbody tr:last-child td{
+  border-bottom:none;
+}
+
+.servicesTable td:first-child{
+  text-align:left;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:240px;
+  opacity:.95;
+}
+
+.servicesTable tfoot td{
+  padding:10px 10px;
+  border-top:1px solid rgba(255,255,255,.10);
+  font-weight:900;
+  text-align:right;
+  background: rgba(255,255,255,.04);
+  font-variant-numeric: tabular-nums;
+}
+
+.servicesTable tfoot td:first-child{
+  text-align:left;
+}
+
+/* На узких экранах — в колонку, чтобы не было каши */
+@media (max-width:520px){
+  .servicesPro{ grid-template-columns:1fr; }
+  .servicesTable td:first-child{ max-width:100%; }
+}
+
+} 
+#dischargeModal .modal__foot { z-index: 9999 !important; }
+#dischargeModal .modal__foot * { pointer-events: auto !important; }
+#dischargeModal #disPreview { pointer-events: none !important; }
+
+/* ==== FIX: services block in A4 (no overlap) ==== */
+#printServicesFix, #pServices { /* запасной якорь */
+  white-space: normal !important;
+}
+
+#pServices *{
+  white-space: normal !important;
+  box-sizing: border-box;
+}
+
+.servicesPro{
+  display:block;
+  width:100%;
+}
+
+.servicesNames{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:0 0 10px 0;
+}
+
+.svcChip{
+  display:inline-flex;
+  flex-direction:column;
+  gap:2px;
+  padding:6px 8px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  background: rgba(255,255,255,.04);
+  font-size:12px;
+  line-height:1.2;
+}
+
+.svcChip small{ opacity:.75; font-size:11px; }
+
+.servicesTable{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;           /* ключ: не разъезжается */
+  font-size:12px;
+}
+
+.servicesTable th,
+.servicesTable td{
+  padding:6px 8px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  vertical-align:top;
+  word-break: break-word;       /* ключ: длинные названия не ломают */
+}
+
+.servicesTable th:nth-child(2),
+.servicesTable td:nth-child(2){ width:52px; }
+.servicesTable th:nth-child(3),
+.servicesTable td:nth-child(3){ width:80px; }
+.servicesTable th:nth-child(4),
+.servicesTable td:nth-child(4){ width:90px; }
+
+.servicesTable tfoot td{
+  border-bottom:none;
+  padding-top:8px;
+  font-weight:700;
+}
+/* ================================
+   Patients — delete button
+   ================================ */
+
+.pet-row{
+  position: relative;
+  padding-right: 44px;
+}
+
+.pet-del{
+  position:absolute;
+  right:10px;
+  top:10px;
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.pet-del:hover{
+  border-color: rgba(255,255,255,.22);
+}
+
+.pet-del:active{
+  transform: translateY(1px);
+}

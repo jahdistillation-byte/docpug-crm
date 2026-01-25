@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Doc.PUG CRM Mini</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🐾</div>
+        <div>
+          <div class="title">Doc.PUG CRM</div>
+          <div class="subtitle" id="meLine">Загрузка профиля…</div>
+        </div>
+      </div>
+      <button class="ghost" id="btnReload" title="Перезагрузить профиль">↻</button>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab" data-route="owners">Владельцы</button>
+      <button class="tab" data-route="patients">Пациенты</button>
+      <button class="tab" data-route="visits">Визиты</button>
+      <button class="tab" data-route="services">Послуги</button>
+      <button class="tab" data-route="calendar">Календарь</button>
+      <button class="tab" data-route="stock">Склад</button>
+    </nav>
+
+    <main class="content">
+      <!-- Owners -->
+      <section class="page" data-page="owners">
+        <div class="card">
+          <div class="row">
+            <h2>Владельцы</h2>
+            <button class="primary" id="btnAddOwner">+ Добавить</button>
+          </div>
+          <div class="hint">
+            Сейчас список демо/локальный. Дальше подключим API:
+            <span class="mono">GET /api/owners</span>
+          </div>
+          <div id="ownersList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- Owner -->
+      <section class="page" data-page="owner">
+        <div class="card">
+          <div class="row">
+            <button class="ghost" id="btnBackOwners">← Назад</button>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="primary" id="btnAddPet">+ Животное</button>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="title" id="ownerName" style="font-size:18px;font-weight:800;">Владелец</div>
+            <div class="subtitle" id="ownerMeta" style="margin-top:4px;">—</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <h2 style="margin-bottom:8px;">Животные</h2>
+            <div id="petsList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Patients tab (rendered by JS) -->
+      <section class="page" data-page="patients"></section>
+
+      <!-- Patient -->
+      <section class="page" data-page="patient">
+        <div class="card">
+          <div class="row">
+            <button class="ghost" id="btnBackOwner">← Назад</button>
+            <button class="primary" id="btnAddVisit">+ Визит</button>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="title" id="patientName" style="font-size:18px;font-weight:800;">Пациент</div>
+            <div class="subtitle" id="patientMeta" style="margin-top:4px;">—</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <h2 style="margin-bottom:8px;">Історія візитів</h2>
+            <div id="visitsList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Visit -->
+      <section class="page" data-page="visit">
+        <div class="card">
+          <div class="row">
+            <button class="ghost" id="btnBackPatient">← Назад</button>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="ghost" id="btnDischarge" title="Виписка / друк">📄 Виписка</button>
+              <div class="pill" id="visitDatePill">—</div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="title" style="font-size:18px;font-weight:800;">Визит</div>
+            <div class="subtitle" id="visitMeta" style="margin-top:4px;">—</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <h2 style="margin-bottom:8px;">Нотатки / призначення</h2>
+            <div class="history" id="visitNoteBox">—</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <h2 style="margin-bottom:8px;">Файли (аналізи, УЗД, PDF)</h2>
+            <input id="visitFiles" type="file" multiple />
+            <div class="hint">Після вибору файлів вони завантажаться і прикріпляться до цього візиту.</div>
+            <div id="visitFilesList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Visits tab -->
+      <section class="page" data-page="visits">
+        <div class="card">
+          <div class="row" style="justify-content:space-between; gap:12px;">
+            <h2 style="margin:0;">Візити</h2>
+            <input id="visitsSearch" type="search"
+                   placeholder="Пошук: пацієнт / власник / Dx / нотатка / дата…"
+                   style="max-width:360px; width:100%;" />
+          </div>
+          <div class="hint" style="margin-top:8px;">
+            Глобальний журнал всіх візитів. Клік по рядку — відкрити візит.
+          </div>
+          <div id="visitsTabList" class="list" style="margin-top:12px;"></div>
+        </div>
+      </section>
+
+      <!-- Services tab -->
+      <section class="page" data-page="services">
+        <div class="card">
+          <div class="row" style="justify-content:space-between; gap:12px;">
+            <h2 style="margin:0;">Послуги</h2>
+            <button class="primary" id="btnAddService">+ Додати</button>
+          </div>
+          <div class="hint" style="margin-top:8px;">
+            Прайс послуг. Старі візити не змінюються після оновлення ціни (бо візит зберігає “знімок”).
+          </div>
+          <div id="servicesList" class="list" style="margin-top:12px;"></div>
+        </div>
+      </section>
+
+      <!-- Calendar tab -->
+      <section class="page" data-page="calendar">
+        <div class="card">
+          <h2>Календарь</h2>
+          <div class="hint">Пока заглушка.</div>
+        </div>
+      </section>
+
+      <!-- Stock tab -->
+      <section class="page" data-page="stock">
+        <div class="card">
+          <div class="row" style="justify-content:space-between; gap:12px;">
+            <h2 style="margin:0;">Склад</h2>
+            <button class="primary" id="btnAddStock">+ Додати</button>
+          </div>
+
+          <div class="hint" style="margin-top:8px;">
+            Реєстр препаратів/товарів. Тут ми ведемо: назву, ціну (за одиницю), одиницю, залишок.
+          </div>
+
+          <div id="stockList" class="list" style="margin-top:12px;"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span class="dot" id="apiDot"></span>
+      <span id="apiLine">API: неизвестно</span>
+    </footer>
+  </div>
+
+  <!-- Visit modal -->
+  <div class="modal" id="visitModal" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title">Візит</div>
+          <div class="modal__sub" id="visitModalSub">Пацієнт: —</div>
+        </div>
+        <button class="iconBtn" id="visitClose" title="Закрыть">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <label class="field">
+          <div class="label">Дата</div>
+          <input class="input" id="visitDate" type="date">
+        </label>
+
+        <label class="field">
+          <div class="label">Скарги / стан / анамнез</div>
+          <textarea class="textarea" id="visitNote" rows="6"
+            placeholder="Напр.: чхає 2 дні, апетит знижений, t°..."></textarea>
+        </label>
+
+        <div class="grid2">
+          <label class="field">
+            <div class="label">Діагноз (коротко)</div>
+            <input class="input" id="visitDx" placeholder="Напр.: риніт / ГРЗ">
+          </label>
+          <label class="field">
+            <div class="label">Вага (кг)</div>
+            <input class="input" id="visitWeight" placeholder="2.3">
+          </label>
+        </div>
+
+        <label class="field">
+          <div class="label">Призначення</div>
+          <textarea class="textarea" id="visitRx" rows="6"
+            placeholder="Препарат • доза • кратність • курс"></textarea>
+        </label>
+      </div>
+
+      <div class="modal__foot">
+        <button class="ghost" id="visitCancel">Отмена</button>
+        <button class="primary" id="visitSave">Сохранить визит</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discharge modal -->
+  <div class="modal" id="dischargeModal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-discharge></div>
+
+    <div class="modal__panel modal__panel--wide" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title">Виписка для клієнта</div>
+          <div class="modal__sub" id="disSub">Візит: —</div>
+        </div>
+        <button class="iconBtn" data-close-discharge title="Закрыть">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <div class="grid2">
+          <label class="field">
+            <div class="label">Скарга / стан</div>
+            <textarea class="textarea" id="disComplaint" rows="4"></textarea>
+          </label>
+          <label class="field">
+            <div class="label">Діагноз</div>
+            <input class="input" id="disDx" placeholder="Dx">
+          </label>
+        </div>
+
+        <label class="field">
+          <div class="label">Призначення</div>
+          <textarea class="textarea" id="disRx" rows="5"></textarea>
+        </label>
+
+        <label class="field">
+          <div class="label">Рекомендації</div>
+          <textarea class="textarea" id="disRecs" rows="5"></textarea>
+        </label>
+
+        <label class="field">
+          <div class="label">Контроль / коли звернутися</div>
+          <textarea class="textarea" id="disFollow" rows="3"></textarea>
+        </label>
+
+        <div class="printCard" id="disPreview">
+          <div class="printA4" id="disA4">
+            <div class="printTop">
+              <div class="printLogo">
+                <div class="printLogoMark">🐾</div>
+                <div class="printLogoText">
+                  <div class="printBrand">Doc.PUG</div>
+                  <div class="printTag">Коли важливо — ми поруч.</div>
+                </div>
+              </div>
+              <div class="printMeta">
+                <div class="printMetaLine"><span>Дата:</span> <b id="pDate">—</b></div>
+                <div class="printMetaLine"><span>Візит ID:</span> <b id="pVisitId">—</b></div>
+              </div>
+            </div>
+
+            <div class="printPatient">
+              <div class="printPatientTitle">Дані пацієнта</div>
+              <div class="printPatientGrid">
+                <div><span>Пацієнт:</span> <b id="pPet">—</b></div>
+                <div><span>Вага:</span> <b id="pWeight">—</b></div>
+                <div><span>Власник:</span> <b id="pOwner">—</b></div>
+                <div><span>Телефон:</span> <b id="pPhone">—</b></div>
+              </div>
+            </div>
+
+            <div class="printBlocks">
+              <div class="printBlock">
+                <div class="printH">Скарга / стан</div>
+                <div class="printTxt" id="pComplaint">—</div>
+              </div>
+              <div class="printBlock">
+                <div class="printH">Діагноз</div>
+                <div class="printTxt" id="pDx">—</div>
+              </div>
+              <div class="printBlock">
+                <div class="printH">Призначення</div>
+                <div class="printTxt pre" id="pRx">—</div>
+              </div>
+
+              <div class="printBlock">
+                <div class="printH">Послуги</div>
+                <div class="printTxt" id="pServices">—</div>
+                <div id="pTotal" style="display:none;"></div>
+              </div>
+
+              <div class="printBlock">
+  <div class="printH">Препарати</div>
+  <div class="printTxt" id="pStock">—</div>
+  <div id="pStockTotal" style="display:none;"></div>
+</div>
+
+<div class="printBlock">
+  <div class="printH">Разом</div>
+  <div class="printTxt" id="pGrandTotal">—</div>
+</div>
+              <div class="printBlock">
+                <div class="printH">Рекомендації</div>
+                <div class="printTxt pre" id="pRecs">—</div>
+              </div>
+              <div class="printBlock">
+                <div class="printH">Контроль</div>
+                <div class="printTxt pre" id="pFollow">—</div>
+              </div>
+            </div>
+
+            <div class="printFooter">
+              <div class="printContacts">
+                <b>Doc.PUG</b> • Telegram/WhatsApp/Viber: <b>+380 50 707 52 36</b>
+              </div>
+              <div class="printNote">
+                Інформація має рекомендаційний характер і не замінює повторний огляд у разі погіршення стану.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal__foot">
+        <button class="ghost" data-close-discharge>Закрыть</button>
+        <button class="ghost" id="disSave">Зберегти</button>
+        <button class="ghost" id="disDownload">Скачати PDF</button>
+        <button class="primary" id="disPrint">Друк / PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
