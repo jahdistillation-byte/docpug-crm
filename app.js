@@ -1336,37 +1336,50 @@ function renderVisitsTab() {
   }
 
   filtered.forEach((v) => {
-    const pet = petById.get(v.pet_id);
-    const owner = pet ? ownerById.get(pet.owner_id) : null;
+  const pet = petById.get(v.pet_id);
+  const owner = pet ? ownerById.get(pet.owner_id) : null;
 
-    const petLine = pet
-      ? `${pet.name || "—"}${pet.species ? " • " + pet.species : ""}${pet.breed ? " • " + pet.breed : ""}`
-      : "Пацієнт: —";
+  const petLine = pet
+    ? `${pet.name || "—"}${pet.species ? " • " + pet.species : ""}${
+        pet.breed ? " • " + pet.breed : ""
+      }`
+    : "Пацієнт: —";
 
-    const ownerLine = owner
-      ? `${owner.name || "—"}${owner.phone ? " • " + owner.phone : ""}`
-      : "Власник: —";
+  const ownerLine = owner
+    ? `${owner.name || "—"}${owner.phone ? " • " + owner.phone : ""}`
+    : "Власник: —";
 
-    const el = document.createElement("div");
-    el.className = "item";
-    el.style.cursor = "pointer";
-    el.dataset.openVisit = v.id;
+  const el = document.createElement("div");
+  el.className = "item";
+  el.style.cursor = "pointer";
+  el.dataset.openVisit = v.id; // ✅ клик по карточке откроет
 
-    el.innerHTML = `
-      <div class="left" style="width:100%;">
-        <div class="name">${escapeHtml(v.date || "—")}</div>
-        <div class="meta">${escapeHtml(petLine)} • ${escapeHtml(ownerLine)}</div>
-        ${v.note ? `<div class="meta" style="opacity:.9;margin-top:6px;">${escapeHtml(v.note)}</div>` : ""}
-      </div>
-      <div class="right" style="display:flex; gap:6px;">
-        <button class="iconBtn" title="Відкрити" data-open-visit="${escapeHtml(v.id)}">➡️</button>
-        <button class="iconBtn" title="Видалити" data-del-visit="${escapeHtml(v.id)}">🗑</button>
-      </div>
-    `;
+  el.innerHTML = `
+    <div class="left" style="width:100%;">
+      <div class="name">${escapeHtml(v.date || "—")}</div>
+      <div class="meta">${escapeHtml(petLine)} • ${escapeHtml(ownerLine)}</div>
+      ${
+        v.note
+          ? `<div class="meta" style="opacity:.9;margin-top:6px;">${escapeHtml(v.note)}</div>`
+          : ""
+      }
+    </div>
+    <div class="right" style="display:flex; gap:6px;">
+      <button class="iconBtn" title="Відкрити" data-open-visit="${escapeHtml(v.id)}">➡️</button>
+      <button class="iconBtn" title="Видалити" data-del-visit="${escapeHtml(v.id)}">🗑</button>
+    </div>
+  `;
 
-    // ✅ ВОТ ЭТОГО НЕ ХВАТАЛО
-    list.appendChild(el);
+  // ✅ чтобы клик по кнопкам не открывал карточку
+  el.querySelectorAll("[data-open-visit],[data-del-visit]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
   });
+
+  list.appendChild(el);
+});
 }
 
 // ===== Owner page =====
@@ -2254,7 +2267,7 @@ function initOwnerUI() {
       breed: created.breed,
       age: created.age,
       weight_kg: created.weight_kg,
-      notes: created.note || "",
+      notes: created.notes || "",
     });
 
     savePatients(patients);
