@@ -290,17 +290,38 @@ async function loadOwners() {
 }
 
 async function createPatientApi(payload) {
-  const res = await fetch("/api/patients", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const json = await res.json();
-  if (!json.ok) {
-    alert(json.error || "Помилка створення пацієнта");
+  try {
+    const res = await fetch("/api/patients", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        owner_id: payload.owner_id,
+        name: payload.name,
+        species: payload.species,
+      }),
+    });
+
+    // ❗ если сервер вернул HTML / ошибку — не пытаемся парсить JSON
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("API /patients error:", text);
+      alert("Помилка сервера при створенні пацієнта");
+      return null;
+    }
+
+    const json = await res.json();
+
+    if (!json?.ok) {
+      alert(json?.error || "Помилка створення пацієнта");
+      return null;
+    }
+
+    return json.data;
+  } catch (e) {
+    console.error("createPatientApi failed:", e);
+    alert("Помилка зʼєднання з сервером");
     return null;
   }
-  return json.data;
 }
 
 async function createOwner(name, phone = "", note = "") {
