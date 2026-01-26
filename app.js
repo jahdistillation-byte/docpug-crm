@@ -2240,7 +2240,7 @@ function initOwnerUI() {
       breed: breed.trim(),
       age: age.trim(),
       weight_kg: weight_kg.trim(),
-      note: note.trim(),
+      notes: note.trim(),
     });
 
     if (!created) return;
