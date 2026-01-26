@@ -291,29 +291,50 @@ async function loadOwners() {
 
 async function createPatientApi(payload) {
   try {
+    // нормализуем поля под бэк
+    const bodyObj = {
+      owner_id: payload?.owner_id,
+      name: (payload?.name || "").trim(),
+      species: (payload?.species || "").trim(),
+      breed: (payload?.breed || "").trim(),
+      age: (payload?.age || "").trim(),
+      weight_kg: (payload?.weight_kg || "").trim(),
+      // иногда ты называешь это note, иногда notes
+      notes: (payload?.notes || payload?.note || "").trim(),
+    };
+
+    // убираем пустые строки/undefined, чтобы не бесить бэк
+    Object.keys(bodyObj).forEach((k) => {
+      if (bodyObj[k] === "" || bodyObj[k] == null) delete bodyObj[k];
+    });
+
     const res = await fetch("/api/patients", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
-      body: JSON.stringify({
-        owner_id: payload.owner_id,
-        name: payload.name,
-        species: payload.species,
-      }),
+      credentials: "include",
+      body: JSON.stringify(bodyObj),
     });
 
-    // ❗ если сервер вернул не JSON (500, HTML и т.д.)
+    // всегда сначала читаем как текст (на 500 сервер часто шлёт HTML)
+    const text = await res.text();
+    let json = null;
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = null;
+    }
+
     if (!res.ok) {
-      const text = await res.text();
-      console.error("API /patients error:", text);
-      alert("Помилка сервера при створенні пацієнта");
+      console.error("API /patients HTTP", res.status, text);
+      alert(`Помилка сервера при створенні пацієнта (HTTP ${res.status})`);
       return null;
     }
 
-    const json = await res.json();
-
     if (!json || !json.ok) {
+      console.error("API /patients bad json:", text);
       alert(json?.error || "Помилка створення пацієнта");
       return null;
     }
