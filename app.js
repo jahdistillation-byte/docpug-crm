@@ -303,6 +303,22 @@ async function createPatientApi(payload) {
   return json.data;
 }
 
+async function createOwner(name, phone = "", note = "") {
+  const res = await fetch("/api/owners", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, phone, note }),
+  });
+
+  const json = await res.json();
+  if (!json.ok) {
+    alert(json.error || "Помилка створення власника");
+    return null;
+  }
+
+  return json.data;
+}
+
 async function deleteOwner(id) {
   const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
     method: "DELETE",
@@ -2328,7 +2344,6 @@ function initPatientUI() {
   const visitId = item.dataset.visitId;
   if (visitId) openVisit(visitId);
 });
-  };
 
   // Upload files -> server -> files + links
   $("#visitFiles")?.addEventListener("change", async (e) => {
@@ -2478,7 +2493,7 @@ function initPatientUI() {
 
     if (state.route === "visits") renderVisitsTab();
   });
-
+}
 // ===== Visit page UI (buttons on visit page) =====
 function initVisitUI() {
   $("#btnBackPatient")?.addEventListener("click", () => {
