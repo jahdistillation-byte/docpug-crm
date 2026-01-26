@@ -293,7 +293,9 @@ async function createPatientApi(payload) {
   try {
     const res = await fetch("/api/patients", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         owner_id: payload.owner_id,
         name: payload.name,
@@ -301,7 +303,7 @@ async function createPatientApi(payload) {
       }),
     });
 
-    // ❗ если сервер вернул HTML / ошибку — не пытаемся парсить JSON
+    // ❗ если сервер вернул не JSON (500, HTML и т.д.)
     if (!res.ok) {
       const text = await res.text();
       console.error("API /patients error:", text);
@@ -311,14 +313,14 @@ async function createPatientApi(payload) {
 
     const json = await res.json();
 
-    if (!json?.ok) {
+    if (!json || !json.ok) {
       alert(json?.error || "Помилка створення пацієнта");
       return null;
     }
 
     return json.data;
-  } catch (e) {
-    console.error("createPatientApi failed:", e);
+  } catch (err) {
+    console.error("createPatientApi failed:", err);
     alert("Помилка зʼєднання з сервером");
     return null;
   }
