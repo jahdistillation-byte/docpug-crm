@@ -2263,7 +2263,6 @@ function initOwnerUI() {
   });
 }
 
-
 function initVisitsTabUI() {
   const page = $(`.page[data-page="visits"]`);
   if (!page) return;
@@ -2528,12 +2527,27 @@ function deletePatientEverywhere(petId) {
 function deleteVisitEverywhere(visitId) {
   if (!visitId) return false;
 
-  // 1) удалить визит из VISITS
   const visits = loadVisits();
-  const before = visits.length;
-  const next = visits.filter((v) => v.id !== visitId);
-  if (next.length === before) return false; // не нашли визит
-  saveVisits(next);
+  const toDelete = visits.find((v) => v.id === visitId);
+  if (!toDelete) return false; // не нашли визит
+
+  // ✅ restore stock when deleting the whole visit (до удаления визита)
+  if (Array.isArray(toDelete.stock) && toDelete.stock.length) {
+    const stock = loadStock();
+    const byId = new Map(stock.map((x) => [x.id, x]));
+
+    toDelete.stock.forEach((line) => {
+      const id = line?.stockId;
+      const q = Math.max(1, Number(line?.qty) || 1);
+      const item = byId.get(id);
+      if (item) item.qty = (Number(item.qty) || 0) + q;
+    });
+
+    saveStock(Array.from(byId.values()));
+  }
+
+  // 1) удалить визит из VISITS
+  saveVisits(visits.filter((v) => v.id !== visitId));
 
   // 2) убрать привязки visit_files
   saveVisitFiles(loadVisitFiles().filter((l) => l.visit_id !== visitId));
@@ -2548,7 +2562,6 @@ function deleteVisitEverywhere(visitId) {
   // 4) если сейчас открыт этот визит — закрыть экран визита
   if (state.selectedVisitId === visitId) {
     state.selectedVisitId = null;
-    // вернемся назад логично: пациент -> пациент, иначе визиты
     if (state.selectedPetId) openPatient(state.selectedPetId);
     else setHash("visits");
   }
