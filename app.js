@@ -28,7 +28,11 @@ const state = {
   route: "owners",
   apiOk: null,
   me: null,
+
   owners: [],
+  patients: [],   // ✅ список пациентов с сервера
+  visits: [],     // ✅ список визитов с сервера (по выбранному пациенту или все)
+
   selectedOwnerId: null,
   selectedPetId: null,
   selectedPet: null,
