@@ -2514,6 +2514,181 @@ function renderVisitPage(visit, pet) {
     - #visitStkList
   И НЕ трогаем склад здесь, чтобы не смешивать локалку и сервер.
 */
+// =========================
+// DISCHARGE helpers (MUST exist)
+// =========================
+function parseVisitNote(note) {
+  const t = String(note || "");
+
+  // ожидаем формат:
+  // "Діагноз: ...\n\nСкарги/анамнез: ..."
+  const dxMatch = t.match(/Діагноз:\s*(.*?)(\n|$)/i);
+  const dx = (dxMatch?.[1] || "").trim();
+
+  const compMatch = t.match(/Скарги\/анамнез:\s*([\s\S]*)/i);
+  const complaint = (compMatch?.[1] || "").trim();
+
+  // если нет шаблонов — считаем весь note жалобой
+  return {
+    dx: dx || "",
+    complaint: complaint || (!dx ? t.trim() : ""),
+  };
+}
+
+function fillDischargeForm(visit, existing) {
+  // existing = то, что ты сохраняешь в local discharge (если есть)
+  const ex = existing || {};
+
+  const parsed = parseVisitNote(visit?.note || "");
+  const complaint = (ex.complaint ?? ex.disComplaint ?? parsed.complaint ?? "").toString();
+  const dx = (ex.dx ?? ex.disDx ?? parsed.dx ?? "").toString();
+  const rx = (ex.rx ?? ex.disRx ?? visit?.rx ?? "").toString();
+  const recs = (ex.recs ?? ex.disRecs ?? "").toString();
+  const follow = (ex.follow ?? ex.disFollow ?? "").toString();
+
+  const c = document.getElementById("disComplaint");
+  const d = document.getElementById("disDx");
+  const r = document.getElementById("disRx");
+  const re = document.getElementById("disRecs");
+  const f = document.getElementById("disFollow");
+
+  if (c) c.value = complaint;
+  if (d) d.value = dx;
+  if (r) r.value = rx;
+  if (re) re.value = recs;
+  if (f) f.value = follow;
+}
+
+function renderDischargeA4(visitId) {
+  const a4 = document.getElementById("disA4");
+  if (!a4) return;
+
+  // берём визит из кеша
+  const v = getVisitByIdSync(visitId);
+  if (!v) {
+    a4.innerHTML = `<div class="hint">Візит не знайдено</div>`;
+    return;
+  }
+
+  // pet + owner (если есть)
+  const patients = (Array.isArray(state.patients) && state.patients.length) ? state.patients : loadPatients();
+  const pet = (patients || []).find((p) => String(p.id) === String(v.pet_id)) || null;
+  const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
+
+  // discharge data (local)
+  const dis = getDischarge(visitId) || {};
+  const parsed = parseVisitNote(v.note || "");
+
+  const complaint = String(dis.complaint ?? parsed.complaint ?? "").trim();
+  const dx = String(dis.dx ?? parsed.dx ?? "").trim();
+  const rx = String(dis.rx ?? v.rx ?? "").trim();
+  const recs = String(dis.recs ?? "").trim();
+  const follow = String(dis.follow ?? "").trim();
+
+  // services/stock (если у тебя эти функции есть — отлично)
+  let svcHtml = "—";
+  try {
+    const expanded = expandServiceLines(v);
+    const total = calcServicesTotal(v);
+    svcHtml = renderServicesProA4(expanded, total);
+  } catch {}
+
+  let stkHtml = "—";
+  try {
+    const expandedS = expandStockLines(v);
+    const totalS = calcStockTotal(v);
+    if (!expandedS.length) stkHtml = `<div class="hint" style="opacity:.75">—</div>`;
+    else {
+      const rows = expandedS.map((x) => `
+        <tr>
+          <td>${escapeHtml(x.name || "—")}</td>
+          <td>${escapeHtml(String(x.qty))}</td>
+          <td>${escapeHtml(String(x.price))}</td>
+          <td>${escapeHtml(String(x.lineTotal))}</td>
+        </tr>
+      `).join("");
+      stkHtml = `
+        <div class="servicesPro">
+          <table class="servicesTable">
+            <thead>
+              <tr><th>Препарат</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr><td colspan="3">Разом</td><td>${escapeHtml(String(totalS))} грн</td></tr>
+            </tfoot>
+          </table>
+        </div>
+      `;
+    }
+  } catch {}
+
+  a4.innerHTML = `
+    <div class="printCard">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+        <div>
+          <div style="font-weight:800;font-size:18px;">Направлення / Виписка</div>
+          <div style="opacity:.85;margin-top:4px;">Doc.PUG</div>
+        </div>
+        <div class="pill">${escapeHtml(String(v.date || "—"))}</div>
+      </div>
+
+      <hr style="margin:12px 0; opacity:.25;" />
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div class="history-label">Пацієнт</div>
+          <div>${escapeHtml(pet?.name || "—")}</div>
+          <div style="opacity:.85;font-size:13px;">
+            ${escapeHtml([pet?.species, pet?.breed, pet?.age, v?.weight_kg ? `${v.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
+          </div>
+        </div>
+        <div>
+          <div class="history-label">Власник</div>
+          <div>${escapeHtml(owner?.name || "—")}</div>
+          <div style="opacity:.85;font-size:13px;">
+            ${escapeHtml([owner?.phone, owner?.note].filter(Boolean).join(" • ") || "—")}
+          </div>
+        </div>
+      </div>
+
+      <div class="history" style="margin-top:12px;">
+        <div class="history-label">Скарги / стан</div>
+        <div>${escapeHtml(complaint || "—")}</div>
+      </div>
+
+      <div class="history" style="margin-top:10px;">
+        <div class="history-label">Діагноз</div>
+        <div>${escapeHtml(dx || "—")}</div>
+      </div>
+
+      <div class="history" style="margin-top:10px;">
+        <div class="history-label">Призначення</div>
+        <div>${escapeHtml(rx || "—")}</div>
+      </div>
+
+      <div class="history" style="margin-top:10px;">
+        <div class="history-label">Послуги</div>
+        ${svcHtml}
+      </div>
+
+      <div class="history" style="margin-top:10px;">
+        <div class="history-label">Препарати</div>
+        ${stkHtml}
+      </div>
+
+      <div class="history" style="margin-top:10px;">
+        <div class="history-label">Рекомендації</div>
+        <div>${escapeHtml(recs || "—")}</div>
+      </div>
+
+      <div class="history" style="margin-top:10px;">
+        <div class="history-label">Контроль / при погіршенні</div>
+        <div>${escapeHtml(follow || "—")}</div>
+      </div>
+    </div>
+  `;
+}
 
 // ===== Discharge modal (SERVER-safe) =====
 async function openDischargeModal(visitId) {
