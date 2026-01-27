@@ -3225,6 +3225,29 @@ function initVisitFilesUI() {
       renderVisitFiles(visitId);
       return;
     }
+// ================================
+// VISIT: add service / stock buttons
+// ================================
+document.addEventListener("click", (e) => {
+  const btn = e.target && e.target.closest ? e.target.closest("button") : null;
+  if (!btn) return;
+
+  // --- add service ---
+  if (btn.id === "visitSvcAdd") {
+    e.preventDefault();
+    e.stopPropagation();
+    addVisitService();
+    return;
+  }
+
+  // --- add stock ---
+  if (btn.id === "visitStkAdd") {
+    e.preventDefault();
+    e.stopPropagation();
+    addVisitStock();
+    return;
+  }
+});
 
     if (action === "delete") {
       const file = getFileById(fileId);
