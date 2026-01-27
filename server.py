@@ -90,17 +90,16 @@ def update_with_optional_fallback(table: str, row_id: str, payload: dict, option
     optional_fields = optional_fields or []
     payload = clean_payload(payload)
 
-    # Без payload смысла нет
     if not payload:
         return None
 
     try:
-        return supabase.table(table).update(payload).eq("id", row_id).execute()
+        return supabase.table(table).update(payload).eq("org_id", ORG_ID).eq("id", row_id).execute()
     except Exception as e:
         msg = str(e)
         if "PGRST204" in msg:
             fallback = {k: v for k, v in payload.items() if k not in optional_fields}
-            return supabase.table(table).update(fallback).eq("id", row_id).execute()
+            return supabase.table(table).update(fallback).eq("org_id", ORG_ID).eq("id", row_id).execute()
         raise
 
 def safe_int(x, default=0):
@@ -278,20 +277,18 @@ def api_delete_patient(pet_id):
 # =========================
 @app.get("/api/visits")
 def api_get_visits():
+    visit_id = request.args.get("id")
     pet_id = request.args.get("pet_id")
 
     q = supabase.table("visits").select("*").eq("org_id", ORG_ID)
+
+    if visit_id:
+        q = q.eq("id", visit_id)
     if pet_id:
         q = q.eq("pet_id", pet_id)
 
     res = q.execute()
     rows = res.data or []
-
-    # 🔴 КРИТИЧЕСКИ ВАЖНО
-    for r in rows:
-        r["services"] = []
-        r["stock"] = []
-
     return ok(rows)
 
 @app.post("/api/visits")
