@@ -1344,7 +1344,7 @@ function renderStockTab() {
   const page = document.querySelector('.page[data-page="stock"]');
   if (!page) return;
 
-  const items = loadStock();
+  const items = []; // временно, чтобы приложение ожило
 
   page.innerHTML = `
     <div class="card">
