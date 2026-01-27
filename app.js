@@ -1297,6 +1297,96 @@ function initStockUI() {
   state.stockUiBound = true;
 }
 
+function renderServicesTab() {
+  const page = document.querySelector('.page[data-page="services"]');
+  if (!page) return;
+
+  const items = loadServices();
+
+  page.innerHTML = `
+    <div class="card">
+      <div class="row">
+        <h2>Послуги</h2>
+        <button id="btnAddService" class="btn">+ Додати</button>
+      </div>
+
+      <div class="hint">Локальний реєстр послуг (поки що). Активні — доступні у візиті.</div>
+      <div id="servicesList" class="list"></div>
+    </div>
+  `;
+
+  const list = page.querySelector("#servicesList");
+  if (!list) return;
+
+  if (!items.length) {
+    list.innerHTML = `<div class="hint">Поки порожньо. Натисни “Додати”.</div>`;
+  } else {
+    list.innerHTML = items.map((s) => `
+      <div class="item">
+        <div class="left" style="width:100%">
+          <div class="name">${escapeHtml(s.name || "—")}</div>
+          <div class="meta">${escapeHtml(String(Number(s.price)||0))} грн • ${s.active === false ? "❌ вимкнено" : "✅ активно"}</div>
+          <div class="pill">id: ${escapeHtml(s.id)}</div>
+        </div>
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" data-svc-action="edit" data-svc-id="${escapeHtml(s.id)}">✏️</button>
+          <button class="iconBtn" data-svc-action="toggle" data-svc-id="${escapeHtml(s.id)}">⚡️</button>
+          <button class="iconBtn" data-svc-action="del" data-svc-id="${escapeHtml(s.id)}">🗑</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  if (!state.servicesUiBound) initServicesUI();
+}
+
+function renderStockTab() {
+  const page = document.querySelector('.page[data-page="stock"]');
+  if (!page) return;
+
+  const items = loadStock();
+
+  page.innerHTML = `
+    <div class="card">
+      <div class="row">
+        <h2>Склад</h2>
+        <button id="btnAddStock" class="btn">+ Додати</button>
+      </div>
+
+      <div class="hint">Локальний склад (поки що). Залишок змінюється при додаванні/видаленні у візиті.</div>
+      <div id="stockList" class="list"></div>
+    </div>
+  `;
+
+  const list = page.querySelector("#stockList");
+  if (!list) return;
+
+  if (!items.length) {
+    list.innerHTML = `<div class="hint">Поки порожньо. Натисни “Додати”.</div>`;
+  } else {
+    list.innerHTML = items.map((it) => `
+      <div class="item">
+        <div class="left" style="width:100%">
+          <div class="name">${escapeHtml(it.name || "—")}</div>
+          <div class="meta">
+            ${escapeHtml(String(Number(it.price)||0))} грн/${escapeHtml(it.unit||"шт")}
+            • залишок: <b>${escapeHtml(String(Number(it.qty)||0))}</b>
+            • ${it.active === false ? "❌ вимкнено" : "✅ активно"}
+          </div>
+          <div class="pill">id: ${escapeHtml(it.id)}</div>
+        </div>
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" data-stk-action="edit" data-stk-id="${escapeHtml(it.id)}">✏️</button>
+          <button class="iconBtn" data-stk-action="qty" data-stk-id="${escapeHtml(it.id)}">📦</button>
+          <button class="iconBtn" data-stk-action="toggle" data-stk-id="${escapeHtml(it.id)}">⚡️</button>
+          <button class="iconBtn" data-stk-action="del" data-stk-id="${escapeHtml(it.id)}">🗑</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  if (!state.stockUiBound) initStockUI();
+}
 // =========================
 // ✅ Files schema (LOCAL cache of server files meta)
 // =========================
