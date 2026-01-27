@@ -2697,6 +2697,16 @@ function initVisitsTabUI() {
   });
 }
 
+function closeVisitModal() {
+  const modal = $("#visitModal");
+  if (!modal) return;
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  delete modal.dataset.visitId;
+}
+
+
 // =========================
 // VISIT MODAL helpers (GLOBAL)
 // =========================
