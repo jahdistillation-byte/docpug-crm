@@ -308,6 +308,39 @@ async function createPatientApi(payload) {
       if (bodyObj[k] === "" || bodyObj[k] == null) delete bodyObj[k];
     });
 
+    async function createVisitApi(payload) {
+  try {
+    const res = await fetch("/api/visits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    if (!res.ok) {
+      console.error("API /visits HTTP", res.status, text);
+      alert(`Помилка сервера при створенні візиту (HTTP ${res.status})`);
+      return null;
+    }
+
+    if (!json || !json.ok) {
+      console.error("API /visits bad json:", text);
+      alert(json?.error || "Помилка створення візиту");
+      return null;
+    }
+
+    return json.data; // ожидаем, что сервер вернёт созданный визит
+  } catch (e) {
+    console.error("createVisitApi failed:", e);
+    alert("Помилка зʼєднання з сервером");
+    return null;
+  }
+}
+
     const res = await fetch("/api/patients", {
       method: "POST",
       headers: {
@@ -384,11 +417,24 @@ function savePatients(p) {
   LS.set(PATIENTS_KEY, p);
 }
 
-function loadVisits() {
+function loadVisitsLocal() {
   return LS.get(VISITS_KEY, []);
 }
-function saveVisits(v) {
+function saveVisitsLocal(v) {
   LS.set(VISITS_KEY, v);
+}
+
+async function loadVisits() {
+  const res = await fetch("/api/visits");
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || "Помилка завантаження візитів");
+  return Array.isArray(json.data) ? json.data : [];
+}
+
+async function saveVisits(v) {
+  // временно заглушка — потом сделаем нормальный upsert
+  // чтобы код не падал, если где-то случайно вызовется saveVisits()
+  saveVisitsLocal(v);
 }
 
 // ===== Discharges =====
@@ -2494,62 +2540,65 @@ function initPatientUI() {
   });
 
   // save visit (create/edit)
-  $("#visitSave")?.addEventListener("click", () => {
-    const pet = state.selectedPet;
-    if (!pet) return alert("Пацієнт не обраний");
+  // save visit (create/edit)
+$("#visitSave")?.addEventListener("click", async () => {
+  const pet = state.selectedPet;
+  if (!pet) return alert("Пацієнт не обраний");
 
-    const date = $("#visitDate")?.value || todayISO();
-    const notePlain = ($("#visitNote")?.value || "").trim();
-    const dx = ($("#visitDx")?.value || "").trim();
-    const weight = ($("#visitWeight")?.value || "").trim();
-    const rx = ($("#visitRx")?.value || "").trim();
+  const date = $("#visitDate")?.value || todayISO();
+  const notePlain = ($("#visitNote")?.value || "").trim();
+  const dx = ($("#visitDx")?.value || "").trim();
+  const weight = ($("#visitWeight")?.value || "").trim();
+  const rx = ($("#visitRx")?.value || "").trim();
 
-    if (!notePlain && !dx && !rx) return alert("Заповни хоча б щось");
+  if (!notePlain && !dx && !rx) return alert("Заповни хоча б щось");
 
-    const visits = loadVisits();
+  const visits = loadVisits();
 
-    // EDIT
-    if (state.selectedVisitId) {
-      const v = visits.find((x) => x.id === state.selectedVisitId);
-      if (!v) return alert("Візит не знайдено");
+  // EDIT
+  if (state.selectedVisitId) {
+    const v = visits.find((x) => x.id === state.selectedVisitId);
+    if (!v) return alert("Візит не знайдено");
 
-      if (typeof ensureVisitServicesShape === "function") ensureVisitServicesShape(v);
+    if (typeof ensureVisitServicesShape === "function") ensureVisitServicesShape(v);
+    if (typeof ensureVisitStockShape === "function") ensureVisitStockShape(v);
 
-      v.date = date;
-      v.note = buildVisitNote(dx, notePlain);
-      v.rx = rx;
-      v.weight_kg = weight;
-
-      saveVisits(visits);
-      closeVisitModal();
-
-      if (state.selectedPetId) renderVisits(state.selectedPetId);
-      openVisit(state.selectedVisitId);
-
-      if (state.route === "visits") renderVisitsTab();
-      return;
-    }
-
-    // CREATE
-    const newId = String(Date.now());
-    visits.unshift({
-  id: newId,
-  pet_id: pet.id,
-  date,
-  note: buildVisitNote(dx, notePlain),
-  rx,
-  weight_kg: weight,
-  services: [],
-  stock: [], // ✅ важно
-});
+    v.date = date;
+    v.note = buildVisitNote(dx, notePlain);
+    v.rx = rx;
+    v.weight_kg = weight;
 
     saveVisits(visits);
     closeVisitModal();
-    renderVisits(pet.id);
+
+    if (state.selectedPetId) renderVisits(state.selectedPetId);
+    openVisit(state.selectedVisitId);
 
     if (state.route === "visits") renderVisitsTab();
+    return;
+  }
+
+  // CREATE (локально как было)
+  const newId = String(Date.now());
+  visits.unshift({
+    id: newId,
+    pet_id: pet.id,
+    date,
+    note: buildVisitNote(dx, notePlain),
+    rx,
+    weight_kg: weight,
+    services: [],
+    stock: [],
   });
-}
+
+  saveVisits(visits);
+  closeVisitModal();
+  renderVisits(pet.id);
+
+  if (state.route === "visits") renderVisitsTab();
+});
+ }
+
 // ===== Visit page UI (buttons on visit page) =====
 function initVisitUI() {
   $("#btnBackPatient")?.addEventListener("click", () => {
