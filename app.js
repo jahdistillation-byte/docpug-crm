@@ -118,6 +118,14 @@ function setApiStatus(ok, text) {
     ok === true ? "var(--ok)" : ok === false ? "var(--danger)" : "#777";
   line.textContent = text;
 }
+function buildVisitNote(dx, complaint) {
+  const a = String(dx || "").trim();
+  const b = String(complaint || "").trim();
+
+  if (a && b) return `Діагноз: ${a}\n\nСкарги/анамнез: ${b}`;
+  if (a) return `Діагноз: ${a}`;
+  return b; // если диагноза нет — оставляем только жалобы
+}
 
 function setMeLine(text) {
   const el = $("#meLine");
@@ -3276,6 +3284,16 @@ async function deleteVisitEverywhere(visitId) {
   return true;
 }
 
+function loadStock() {
+  return LS.get(STOCK_KEY, []);
+}
+function saveStock(items) {
+  LS.set(STOCK_KEY, items);
+}
+function getStockById(id) {
+  return loadStock().find((x) => x.id === id) || null;
+}
+
 // =========================
 // INIT
 // =========================
@@ -3291,8 +3309,8 @@ async function init() {
   initVisitsTabUI();
 
   // услуги оставляем локально (как есть)
-  renderServicesTab();
-  renderStockTab();
+  // renderServicesTab();
+// renderStockTab();
 
   $("#btnReload")?.addEventListener("click", async () => {
     await loadMe();
