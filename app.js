@@ -421,18 +421,25 @@ function savePatients(p) {
   LS.set(PATIENTS_KEY, p);
 }
 
-function loadVisitsLocal() {
+function loadVisits() {
+  // ✅ локальные визиты (старый формат)
   return LS.get(VISITS_KEY, []);
 }
-function saveVisitsLocal(v) {
+function saveVisits(v) {
   LS.set(VISITS_KEY, v);
 }
 
-async function loadVisits() {
-  const res = await fetch("/api/visits");
+// ✅ серверные визиты — отдельно
+async function loadVisitsApi(params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch("/api/visits" + (qs ? `?${qs}` : ""));
   const json = await res.json();
-  if (!json.ok) throw new Error(json.error || "Помилка завантаження візитів");
-  return Array.isArray(json.data) ? json.data : [];
+
+  if (!json || !json.ok || !Array.isArray(json.data)) {
+    console.error("loadVisitsApi bad response", json);
+    return [];
+  }
+  return json.data;
 }
 
 async function saveVisits(v) {
@@ -462,8 +469,8 @@ function setDischarge(visitId, data) {
 }
 
 // ===== Data getters =====
-function getVisitsByPetId(petId) {
-  return loadVisits().filter((x) => x.pet_id === petId);
+async function getVisitsByPetId(petId) {
+  return await loadVisitsApi({ pet_id: petId });
 }
 function getVisitById(visitId) {
   return loadVisits().find((v) => v.id === visitId) || null;
@@ -1572,16 +1579,16 @@ function openPatient(petId, opts = { pushHash: true }) {
   if (opts.pushHash) setHash("patient", petId);
 }
 
-function renderVisits(petId) {
+async function renderVisits(petId) {
   const list = $("#visitsList");
   if (!list) return;
 
-  const visits = getVisitsByPetId(petId);
+  const visits = await getVisitsByPetId(petId);
   list.innerHTML = "";
 
   if (!visits.length) {
     list.innerHTML = `<div class="hint">Поки візитів немає. Натисни “+ Візит”.</div>`;
-    return;
+    return;  
   }
 
   visits.forEach((v) => {
