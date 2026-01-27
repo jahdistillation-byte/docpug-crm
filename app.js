@@ -3429,6 +3429,67 @@ async function deletePatientApi(petId) {
     return false;
   }
 }
+function addVisitService() {
+  const visitId = state.selectedVisitId;
+  if (!visitId) {
+    alert("Спочатку відкрий візит");
+    return;
+  }
+
+  const select = document.querySelector("#visitSvcSelect");
+  const qtyInput = document.querySelector("#visitSvcQty");
+  const list = document.querySelector("#visitSvcList");
+
+  if (!select || !qtyInput || !list) {
+    console.warn("visit service UI not found");
+    return;
+  }
+
+  const serviceId = select.value;
+  const qty = Number(qtyInput.value || 1);
+
+  if (!serviceId) return;
+
+  const service = SERVICES.find(s => String(s.id) === String(serviceId));
+  if (!service) return;
+
+  const row = document.createElement("div");
+  row.className = "miniRow";
+  row.textContent = `${service.name} × ${qty} = ${service.price * qty} грн`;
+
+  list.appendChild(row);
+
+  renderVisitTotal?.();
+}
+function addVisitStock() {
+  const visitId = state.selectedVisitId;
+  if (!visitId) {
+    alert("Спочатку відкрий візит");
+    return;
+  }
+
+  const select = document.querySelector("#visitStkSelect");
+  const qtyInput = document.querySelector("#visitStkQty");
+  const list = document.querySelector("#visitStkList");
+
+  if (!select || !qtyInput || !list) return;
+
+  const itemId = select.value;
+  const qty = Number(qtyInput.value || 1);
+
+  if (!itemId) return;
+
+  const item = STOCK.find(s => String(s.id) === String(itemId));
+  if (!item) return;
+
+  const row = document.createElement("div");
+  row.className = "miniRow";
+  row.textContent = `${item.name} × ${qty} = ${item.price * qty} грн`;
+
+  list.appendChild(row);
+
+  renderVisitTotal?.();
+}
 
 async function deletePatientEverywhere(petId) {
   const patients = loadPatients();
