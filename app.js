@@ -72,27 +72,28 @@ function getVisitByIdSync(id) {
 function normalizeVisitFromServer(visit) {
   if (!visit) return visit;
 
-  const parseMaybeJson = (x) => {
-    if (Array.isArray(x)) return x;
-    if (typeof x === "string") {
-      try {
-        const parsed = JSON.parse(x);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  };
-
-  // услуги
-  if (!Array.isArray(visit.services)) {
-    visit.services = parseMaybeJson(visit.services_json);
+  // services_json: array OR string
+  const sj = visit.services_json;
+  let sjArr = null;
+  if (Array.isArray(sj)) sjArr = sj;
+  else if (typeof sj === "string") {
+    try { sjArr = JSON.parse(sj); } catch { sjArr = null; }
   }
 
-  // склад
+  if (!Array.isArray(visit.services)) {
+    visit.services = Array.isArray(sjArr) ? sjArr : [];
+  }
+
+  // stock_json: array OR string
+  const stj = visit.stock_json;
+  let stArr = null;
+  if (Array.isArray(stj)) stArr = stj;
+  else if (typeof stj === "string") {
+    try { stArr = JSON.parse(stj); } catch { stArr = null; }
+  }
+
   if (!Array.isArray(visit.stock)) {
-    visit.stock = parseMaybeJson(visit.stock_json);
+    visit.stock = Array.isArray(stArr) ? stArr : [];
   }
 
   return visit;
@@ -395,7 +396,10 @@ async function loadOwners() {
       ? json.data
       : (json.data ? [json.data] : []);
 
+const norm = arr.map(normalizeVisitFromServer); // ✅ добавили
+
     state.owners = arr;
+
 
     // ✅ кеш в localStorage (чтобы ownerById работал даже без state.owners)
     LS.set(OWNERS_KEY, arr);
@@ -730,6 +734,8 @@ async function updateVisitApi(visitId, payload) {
     }
 
     const updated = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+    updated = normalizeVisitFromServer(updated); // ✅
+
     if (updated?.id) cacheVisits([updated]);
     return updated;
   } catch (e) {
