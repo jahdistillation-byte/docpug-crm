@@ -2037,27 +2037,32 @@ function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
 
-   // back
-  document.addEventListener("click", (e) => {
-    if (e.target.closest("#btnBackPatient")) {
-      if (state.selectedPetId) openPatient(state.selectedPetId);
-      else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
-      else setHash("owners");
-    }
+  // back + discharge (capture so nothing can block it)
+  document.addEventListener(
+    "click",
+    (e) => {
+      if (e.target.closest("#btnBackPatient")) {
+        if (state.selectedPetId) openPatient(state.selectedPetId);
+        else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
+        else setHash("owners");
+        return;
+      }
 
-    if (e.target.closest("#btnDischarge")) {
-      const visitId = state.selectedVisitId;
-      if (!visitId) return alert("Спочатку відкрий візит.");
-      openDischargeModal(visitId);
-    }
-  });
+      if (e.target.closest("#btnDischarge")) {
+        const visitId = state.selectedVisitId;
+        if (!visitId) return alert("Спочатку відкрий візит.");
+        openDischargeModal(visitId);
+        return;
+      }
+    },
+    true
+  );
 
-  // ---------- SERVICES + STOCK (delegated, robust) ----------
-  document.addEventListener("click", async (e) => {
+  // SERVICES + STOCK (capture=true)
+  const handler = async (e) => {
     try {
       // add service
-      const svcAddBtn = e.target.closest("#visitSvcAdd");
-      if (svcAddBtn) {
+      if (e.target.closest("#visitSvcAdd")) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -2067,6 +2072,8 @@ function initVisitUI() {
         const serviceId = document.getElementById("visitSvcSelect")?.value || "";
         const qty = Math.max(1, Number(document.getElementById("visitSvcQty")?.value || 1));
         if (!serviceId) return;
+
+        console.log("[visit-ui] add service", { vid, serviceId, qty });
 
         const ok = await addServiceLineToVisit(vid, serviceId, qty);
         if (!ok) return alert("Не вдалося додати послугу");
@@ -2091,6 +2098,8 @@ function initVisitUI() {
         const vid = state.selectedVisitId;
         if (!vid) return;
 
+        console.log("[visit-ui] del service", { vid, idx });
+
         const ok = await removeServiceLineFromVisit(vid, idx);
         if (!ok) return alert("Не вдалося прибрати послугу");
 
@@ -2103,8 +2112,7 @@ function initVisitUI() {
       }
 
       // add stock
-      const stkAddBtn = e.target.closest("#visitStkAdd");
-      if (stkAddBtn) {
+      if (e.target.closest("#visitStkAdd")) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -2114,6 +2122,8 @@ function initVisitUI() {
         const stockId = document.getElementById("visitStkSelect")?.value || "";
         const qty = Math.max(1, Number(document.getElementById("visitStkQty")?.value || 1));
         if (!stockId) return;
+
+        console.log("[visit-ui] add stock", { vid, stockId, qty });
 
         const ok = await addStockLineToVisit(vid, stockId, qty);
         if (!ok) return alert("Не вдалося додати препарат");
@@ -2138,6 +2148,8 @@ function initVisitUI() {
         const vid = state.selectedVisitId;
         if (!vid) return;
 
+        console.log("[visit-ui] del stock", { vid, idx });
+
         const ok = await removeStockLineFromVisit(vid, idx);
         if (!ok) return alert("Не вдалося прибрати препарат");
 
@@ -2152,7 +2164,10 @@ function initVisitUI() {
       console.error("Visit UI click failed:", err);
       alert("Помилка: " + (err?.message || err));
     }
-  });
+  };
+
+  document.addEventListener("click", handler, true);
+  document.addEventListener("touchstart", handler, { passive: false, capture: true });
 }
 
 // ===== Visit page =====
@@ -2242,7 +2257,7 @@ function renderVisitPage(visit, pet) {
           )} грн = <b>${escapeHtml(String(x.lineTotal))} грн</b></div>
             </div>
             <div class="fileActions">
-              <button class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+             <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
             </div>
           </div>
         `
@@ -2282,7 +2297,7 @@ function renderVisitPage(visit, pet) {
           )} грн = <b>${escapeHtml(String(x.lineTotal))} грн</b></div>
             </div>
             <div class="fileActions">
-              <button class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+              <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
             </div>
           </div>
         `
@@ -2302,7 +2317,7 @@ function renderVisitPage(visit, pet) {
           svcOptions || `<option value="">(Немає послуг)</option>`
         }</select>
         <input id="visitSvcQty" type="number" min="1" value="1" style="width:90px;" />
-        <button id="visitSvcAdd" class="miniBtn">Додати</button>
+        <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
       </div>
 
       <div id="visitSvcList">${svcListHtml}</div>
@@ -2320,7 +2335,7 @@ function renderVisitPage(visit, pet) {
           stkOptions || `<option value="">(Немає препаратів)</option>`
         }</select>
         <input id="visitStkQty" type="number" min="1" value="1" style="width:90px;" />
-        <button id="visitStkAdd" class="miniBtn">Додати</button>
+        <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
       </div>
 
       <div id="visitStkList">${stkListHtml}</div>
