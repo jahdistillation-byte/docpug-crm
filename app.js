@@ -48,6 +48,7 @@ const state = {
   selectedVisitId: null,
 
   dischargeListenersBound: false,
+  ownersUiBound: false,
   printCssInjected: false,
 visitAddBtnsBound: false,
   visitFilesUiBound: false,
@@ -2605,25 +2606,37 @@ function closeDischargeModal() {
 }
 
 
-// ===== UI init (Owners) — server-first =====
+// ===== UI init (Owners) — server-first (delegated, survives rerenders) =====
 function initOwnersUI() {
-  // ➕ Добавить владельца
-  $("#btnAddOwner")?.addEventListener("click", async () => {
-    const name = (prompt("Имя владельца:") || "").trim();
-    if (!name) return;
+  if (state.ownersUiBound) return;
+  state.ownersUiBound = true;
 
-    const phone = (prompt("Телефон (необязательно):") || "").trim();
-    const note = (prompt("Заметка/город (необязательно):") || "").trim();
+  // Delegated clicks so buttons keep working after innerHTML rerenders
+  document.addEventListener("click", async (e) => {
+    // ➕ Добавить владельца (support a few possible ids/selectors)
+    const addBtn = e.target.closest("#btnAddOwner, [data-action='add-owner'], [data-action='addOwner'], .btnAddOwner");
+    if (addBtn) {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const created = await createOwner(name, phone, note);
-    if (!created) return;
+      const name = (prompt("Имя владельца:") || "").trim();
+      if (!name) return;
 
-    // ✅ всегда берём актуальный список с сервера
-    await loadOwners();
-  });
+      const phone = (prompt("Телефон (необязательно):") || "").trim();
+      const note = (prompt("Заметка/город (необязательно):") || "").trim();
 
-  // 🗑 / ➡️ Клик по списку владельцев
-  $("#ownersList")?.addEventListener("click", async (e) => {
+      const created = await createOwner(name, phone, note);
+      if (!created) return;
+
+      // ✅ всегда берём актуальный список с сервера
+      await loadOwners();
+      return;
+    }
+
+    // 🗑 / ➡️ Клик по списку владельцев
+    const ownersList = e.target.closest("#ownersList");
+    if (!ownersList) return;
+
     // 🗑 Удаление
     const delBtn = e.target.closest("[data-del]");
     if (delBtn) {
@@ -2638,7 +2651,6 @@ function initOwnersUI() {
         return;
       }
 
-      // ✅ всегда берём актуальный список с сервера
       await loadOwners();
       return;
     }
@@ -2651,7 +2663,10 @@ function initOwnersUI() {
     }
   });
 
-  $("#btnBackOwners")?.addEventListener("click", () => setHash("owners"));
+  // Back button can stay direct (usually static), but also make it safe:
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#btnBackOwners")) setHash("owners");
+  });
 }
 
 // =========================
