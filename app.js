@@ -69,15 +69,43 @@ function getVisitByIdSync(id) {
   return state.visitsById.get(String(id)) || null;
 }
 
+function normalizeVisitFromServer(visit) {
+  if (!visit) return visit;
+
+  const parseMaybeJson = (x) => {
+    if (Array.isArray(x)) return x;
+    if (typeof x === "string") {
+      try {
+        const parsed = JSON.parse(x);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // услуги
+  if (!Array.isArray(visit.services)) {
+    visit.services = parseMaybeJson(visit.services_json);
+  }
+
+  // склад
+  if (!Array.isArray(visit.stock)) {
+    visit.stock = parseMaybeJson(visit.stock_json);
+  }
+
+  return visit;
+}
+
 async function fetchVisitById(id) {
   if (!id) return null;
 
-  // loadVisitsApi у тебя ниже уже делает "массивизацию" и кеширование,
-  // но тут страхуемся на случай странного ответа
   const data = await loadVisitsApi({ id });
-
   const arr = Array.isArray(data) ? data : (data ? [data] : []);
-  const v = arr[0] || null;
+  let v = arr[0] || null;
+
+  v = normalizeVisitFromServer(v);
 
   if (v?.id != null) state.visitsById.set(String(v.id), v);
   return v;
