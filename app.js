@@ -2052,81 +2052,105 @@ function initVisitUI() {
     }
   });
 
-  // ---------- SERVICES ----------
+  // ---------- SERVICES + STOCK (delegated, robust) ----------
   document.addEventListener("click", async (e) => {
-    // add service
-    if (e.target.id === "visitSvcAdd") {
-      const vid = state.selectedVisitId;
-      if (!vid) return;
+    try {
+      // add service
+      const svcAddBtn = e.target.closest("#visitSvcAdd");
+      if (svcAddBtn) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      const serviceId = $("#visitSvcSelect")?.value;
-      const qty = Math.max(1, Number($("#visitSvcQty")?.value || 1));
-      if (!serviceId) return;
+        const vid = state.selectedVisitId;
+        if (!vid) return;
 
-      const ok = await addServiceLineToVisit(vid, serviceId, qty);
-      if (!ok) return alert("Не вдалося додати послугу");
+        const serviceId = document.getElementById("visitSvcSelect")?.value || "";
+        const qty = Math.max(1, Number(document.getElementById("visitSvcQty")?.value || 1));
+        if (!serviceId) return;
 
-      const fresh = await fetchVisitById(vid);
-      if (!fresh) return;
+        const ok = await addServiceLineToVisit(vid, serviceId, qty);
+        if (!ok) return alert("Не вдалося додати послугу");
 
-      renderVisitPage(fresh, state.selectedPet);
-      renderDischargeA4(vid);
-    }
+        const fresh = await fetchVisitById(vid);
+        if (!fresh) return;
 
-    // remove service
-    const svcDel = e.target.closest("[data-svc-del]");
-    if (svcDel) {
-      const idx = Number(svcDel.dataset.svcDel);
-      if (!Number.isFinite(idx)) return;
+        renderVisitPage(fresh, state.selectedPet);
+        renderDischargeA4(vid);
+        return;
+      }
 
-      const vid = state.selectedVisitId;
-      if (!vid) return;
+      // remove service
+      const svcDel = e.target.closest("[data-svc-del]");
+      if (svcDel) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      const ok = await removeServiceLineFromVisit(vid, idx);
-      if (!ok) return alert("Не вдалося прибрати послугу");
+        const idx = Number(svcDel.dataset.svcDel);
+        if (!Number.isFinite(idx)) return;
 
-      const fresh = await fetchVisitById(vid);
-      if (!fresh) return;
+        const vid = state.selectedVisitId;
+        if (!vid) return;
 
-      renderVisitPage(fresh, state.selectedPet);
-      renderDischargeA4(vid);
-    }
+        const ok = await removeServiceLineFromVisit(vid, idx);
+        if (!ok) return alert("Не вдалося прибрати послугу");
 
-    // ---------- STOCK ----------
-    if (e.target.id === "visitStkAdd") {
-      const vid = state.selectedVisitId;
-      if (!vid) return;
+        const fresh = await fetchVisitById(vid);
+        if (!fresh) return;
 
-      const stockId = $("#visitStkSelect")?.value;
-      const qty = Math.max(1, Number($("#visitStkQty")?.value || 1));
-      if (!stockId) return;
+        renderVisitPage(fresh, state.selectedPet);
+        renderDischargeA4(vid);
+        return;
+      }
 
-      const ok = await addStockLineToVisit(vid, stockId, qty);
-      if (!ok) return alert("Не вдалося додати препарат");
+      // add stock
+      const stkAddBtn = e.target.closest("#visitStkAdd");
+      if (stkAddBtn) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      const fresh = await fetchVisitById(vid);
-      if (!fresh) return;
+        const vid = state.selectedVisitId;
+        if (!vid) return;
 
-      renderVisitPage(fresh, state.selectedPet);
-      renderDischargeA4(vid);
-    }
+        const stockId = document.getElementById("visitStkSelect")?.value || "";
+        const qty = Math.max(1, Number(document.getElementById("visitStkQty")?.value || 1));
+        if (!stockId) return;
 
-    const stkDel = e.target.closest("[data-stk-del]");
-    if (stkDel) {
-      const idx = Number(stkDel.dataset.stkDel);
-      if (!Number.isFinite(idx)) return;
+        const ok = await addStockLineToVisit(vid, stockId, qty);
+        if (!ok) return alert("Не вдалося додати препарат");
 
-      const vid = state.selectedVisitId;
-      if (!vid) return;
+        const fresh = await fetchVisitById(vid);
+        if (!fresh) return;
 
-      const ok = await removeStockLineFromVisit(vid, idx);
-      if (!ok) return alert("Не вдалося прибрати препарат");
+        renderVisitPage(fresh, state.selectedPet);
+        renderDischargeA4(vid);
+        return;
+      }
 
-      const fresh = await fetchVisitById(vid);
-      if (!fresh) return;
+      // remove stock
+      const stkDel = e.target.closest("[data-stk-del]");
+      if (stkDel) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      renderVisitPage(fresh, state.selectedPet);
-      renderDischargeA4(vid);
+        const idx = Number(stkDel.dataset.stkDel);
+        if (!Number.isFinite(idx)) return;
+
+        const vid = state.selectedVisitId;
+        if (!vid) return;
+
+        const ok = await removeStockLineFromVisit(vid, idx);
+        if (!ok) return alert("Не вдалося прибрати препарат");
+
+        const fresh = await fetchVisitById(vid);
+        if (!fresh) return;
+
+        renderVisitPage(fresh, state.selectedPet);
+        renderDischargeA4(vid);
+        return;
+      }
+    } catch (err) {
+      console.error("Visit UI click failed:", err);
+      alert("Помилка: " + (err?.message || err));
     }
   });
 }
