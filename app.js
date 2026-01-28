@@ -17,6 +17,15 @@ const FILES_KEY = "docpug_files_v1";
 const VISIT_FILES_KEY = "docpug_visit_files_v1";
 const MIGRATION_KEY = "docpug_files_migrated_v1";
 
+// =========================
+// Legacy migration (safe stub)
+// Some builds call migrateLegacyVisitFilesIfNeeded() during init.
+// If legacy file-linking is no longer used, this keeps the app from crashing.
+// =========================
+async function migrateLegacyVisitFilesIfNeeded() {
+  return; // no-op
+}
+
 // ✅ Services registry
 const SERVICES_KEY = "docpug_services_v1";
 
@@ -3176,8 +3185,10 @@ function getStockById(id) {
 async function init() {
   initTabs();
   seedIfEmpty();
-  migrateLegacyVisitFilesIfNeeded();
-
+  // legacy migration (может отсутствовать)
+if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
+  await migrateLegacyVisitFilesIfNeeded();
+}
   initOwnersUI();
   initOwnerUI();
   initPatientUI();
