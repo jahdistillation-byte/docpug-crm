@@ -40,7 +40,7 @@ const state = {
 
   dischargeListenersBound: false,
   printCssInjected: false,
-
+visitAddBtnsBound: false,
   servicesUiBound: false,
   stockUiBound: false,
   visitFilesUiBound: false,
@@ -3182,7 +3182,6 @@ function initVisitFilesUI() {
   });
 
   // ---------- Actions on files list: detach / delete ----------
-
 
   state.visitFilesUiBound = true;
 }
