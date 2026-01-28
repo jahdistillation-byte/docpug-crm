@@ -3422,3 +3422,99 @@ window.addEventListener("resize", setVH);
 
 // ===== INIT =====
 init();
+
+window.addVisitService = async function addVisitService() {
+  console.log("addVisitService click");
+};
+
+window.addVisitStock = async function addVisitStock() {
+  console.log("addVisitStock click");
+};
+
+if (!state.visitAddBtnsBound) {
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#visitSvcAdd")) {
+      e.preventDefault();
+      addVisitService();
+      return;
+    }
+
+    if (e.target.closest("#visitStkAdd")) {
+      e.preventDefault();
+      addVisitStock();
+      return;
+    }
+  });
+
+  state.visitAddBtnsBound = true;
+}
+// ===== VISIT: add service / stock buttons (FORCE) =====
+window.addVisitService = async function addVisitService() {
+  const visitId = state.selectedVisitId;
+  if (!visitId) { alert("Спочатку відкрий візит"); return; }
+
+  const select = document.querySelector("#visitSvcSelect");
+  const qtyInput = document.querySelector("#visitSvcQty");
+  const list = document.querySelector("#visitSvcList");
+
+  if (!select || !qtyInput || !list) {
+    console.warn("visit service UI not found", { select, qtyInput, list });
+    return;
+  }
+
+  const serviceId = select.value;
+  const qty = Number(qtyInput.value || 1);
+  if (!serviceId) return;
+
+  const service = (window.SERVICES || SERVICES || []).find(s => String(s.id) === String(serviceId));
+  if (!service) { console.warn("service not found", serviceId); return; }
+
+  const row = document.createElement("div");
+  row.className = "miniRow";
+  row.textContent = `${service.name} × ${qty} = ${service.price * qty} грн`;
+  list.appendChild(row);
+
+  if (typeof renderVisitTotal === "function") renderVisitTotal();
+};
+
+window.addVisitStock = async function addVisitStock() {
+  const visitId = state.selectedVisitId;
+  if (!visitId) { alert("Спочатку відкрий візит"); return; }
+
+  const select = document.querySelector("#visitStkSelect");
+  const qtyInput = document.querySelector("#visitStkQty");
+  const list = document.querySelector("#visitStkList");
+
+  if (!select || !qtyInput || !list) {
+    console.warn("visit stock UI not found", { select, qtyInput, list });
+    return;
+  }
+
+  const itemId = select.value;
+  const qty = Number(qtyInput.value || 1);
+  if (!itemId) return;
+
+  const item = (window.STOCK || STOCK || []).find(s => String(s.id) === String(itemId));
+  if (!item) { console.warn("stock item not found", itemId); return; }
+
+  const row = document.createElement("div");
+  row.className = "miniRow";
+  row.textContent = `${item.name} × ${qty} = ${item.price * qty} грн`;
+  list.appendChild(row);
+
+  if (typeof renderVisitTotal === "function") renderVisitTotal();
+};
+
+// Делегирование кликов — работает даже если UI перерисовывается
+document.addEventListener("click", (e) => {
+  if (e.target.closest("#visitSvcAdd")) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.addVisitService();
+  }
+  if (e.target.closest("#visitStkAdd")) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.addVisitStock();
+  }
+});
