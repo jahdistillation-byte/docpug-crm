@@ -3432,6 +3432,7 @@ window.addVisitStock = async function addVisitStock() {
 };
 
 if (!state.visitAddBtnsBound) {
+  state.visitAddBtnsBound = true;
   document.addEventListener("click", (e) => {
     if (e.target.closest("#visitSvcAdd")) {
       e.preventDefault();
@@ -3446,7 +3447,7 @@ if (!state.visitAddBtnsBound) {
     }
   });
 
-  state.visitAddBtnsBound = true;
+
 }
 // ===== VISIT: add service / stock buttons (FORCE) =====
 window.addVisitService = async function addVisitService() {
@@ -3475,7 +3476,7 @@ const service = (services || []).find(s => String(s.id) === String(serviceId));
   row.textContent = `${service.name} × ${qty} = ${service.price * qty} грн`;
   list.appendChild(row);
 
-  if (typeof renderVisitTotal === "function") renderVisitTotal();
+
 };
 
 window.addVisitStock = async function addVisitStock() {
@@ -3504,7 +3505,7 @@ const item = (items || []).find(s => String(s.id) === String(itemId));
   row.textContent = `${item.name} × ${qty} = ${item.price * qty} грн`;
   list.appendChild(row);
 
-  if (typeof renderVisitTotal === "function") renderVisitTotal();
+
 };
 
 // Делегирование кликов — работает даже если UI перерисовывается
