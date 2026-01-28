@@ -41,8 +41,6 @@ const state = {
   dischargeListenersBound: false,
   printCssInjected: false,
 visitAddBtnsBound: false,
-  servicesUiBound: false,
-  stockUiBound: false,
   visitFilesUiBound: false,
 
   // ✅ Visits cache (server)
@@ -739,6 +737,7 @@ async function pushVisitStockToServer(visitId, stockArr) {
   };
 
   const updated = await updateVisitApi(visitId, payload);
+  if (updated?.id) cacheVisits([updated]);
   return !!updated;
 }
 
@@ -874,9 +873,6 @@ async function addServiceLineToVisit(visitId, serviceId, qty = 1, { snap = true 
   const ok = await pushVisitServicesToServer(visitId, nextServices);
   if (!ok) return false;
 
-  // обновим локальный кеш визита (чтобы UI сразу видел новое)
-  const fresh = await fetchVisitById(visitId);
-  if (fresh?.id) cacheVisits([fresh]);
 
   return true;
 }
@@ -980,7 +976,7 @@ async function addStockLineToVisit(
   visitId,
   stockId,
   qty = 1,
-  { snap = true, decrement = true } = {}
+  { snap = true, decrement = false } = {}
 ) {
   if (!visitId || !stockId) return false;
 
@@ -1198,18 +1194,104 @@ function initServicesUI() {
     }
   });
 
-  state.servicesUiBound = true;
+  
 }
 
 // =========================
-// ✅ STOCK UI (registry)
+// ✅ SERVICES UI (registry) — bind once per page
 // =========================
-function initStockUI() {
-  const page = $(`.page[data-page="stock"]`);
+function initServicesUI() {
+  const page = document.querySelector('.page[data-page="services"]');
   if (!page) return;
 
+  // ✅ защита от повторного навешивания
+  if (page.dataset.boundServices === "1") return;
+  page.dataset.boundServices = "1";
+
   // add
-  $("#btnAddStock", page)?.addEventListener("click", async () => {
+  page.querySelector("#btnAddService")?.addEventListener("click", async () => {
+    const name = (prompt("Назва послуги:", "") || "").trim();
+    if (!name) return;
+
+    const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
+    const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+
+    const id =
+      "svc_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
+
+    const items = loadServices();
+    items.unshift({ id, name, price, active: true });
+    saveServices(items);
+
+    renderServicesTab();
+    await refreshVisitUIIfOpen();
+  });
+
+  // actions: edit/toggle/delete
+  page.querySelector("#servicesList")?.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-svc-action]");
+    if (!btn) return;
+
+    const action = btn.dataset.svcAction;
+    const id = btn.dataset.svcId;
+    if (!action || !id) return;
+
+    const items = loadServices();
+    const idx = items.findIndex((x) => x.id === id);
+    if (idx < 0) return;
+
+    if (action === "edit") {
+      const cur = items[idx];
+      const name = (prompt("Назва:", cur.name || "") || "").trim();
+      if (!name) return;
+
+      const priceRaw = (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
+      const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+
+      items[idx] = { ...cur, name, price };
+      saveServices(items);
+
+      renderServicesTab();
+      await refreshVisitUIIfOpen();
+      return;
+    }
+
+    if (action === "toggle") {
+      items[idx].active = items[idx].active === false ? true : false;
+      saveServices(items);
+
+      renderServicesTab();
+      await refreshVisitUIIfOpen();
+      return;
+    }
+
+    if (action === "del") {
+      const cur = items[idx];
+      if (!confirm(`Видалити послугу "${cur.name}"?`)) return;
+
+      items.splice(idx, 1);
+      saveServices(items);
+
+      renderServicesTab();
+      await refreshVisitUIIfOpen();
+      return;
+    }
+  });
+}
+
+// =========================
+// ✅ STOCK UI (registry) — bind once per page
+// =========================
+function initStockUI() {
+  const page = document.querySelector('.page[data-page="stock"]');
+  if (!page) return;
+
+  // ✅ защита от повторного навешивания
+  if (page.dataset.boundStock === "1") return;
+  page.dataset.boundStock = "1";
+
+  // add
+  page.querySelector("#btnAddStock")?.addEventListener("click", async () => {
     const name = (prompt("Назва позиції (препарат/товар):", "") || "").trim();
     if (!name) return;
 
@@ -1233,7 +1315,7 @@ function initStockUI() {
   });
 
   // actions
-  $("#stockList", page)?.addEventListener("click", async (e) => {
+  page.querySelector("#stockList")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-stk-action]");
     if (!btn) return;
 
@@ -1260,22 +1342,21 @@ function initStockUI() {
 
       items[idx] = { ...cur, name, price, unit };
       saveStock(items);
-      renderStockTab();
 
+      renderStockTab();
       await refreshVisitUIIfOpen();
       return;
     }
 
     if (action === "qty") {
       const cur = items[idx];
-      const qtyRaw =
-        (prompt("Новий залишок:", String(cur.qty ?? 0)) || "0").trim();
+      const qtyRaw = (prompt("Новий залишок:", String(cur.qty ?? 0)) || "0").trim();
       const qty = Math.max(0, Number(qtyRaw.replace(",", ".")) || 0);
 
       items[idx] = { ...cur, qty };
       saveStock(items);
-      renderStockTab();
 
+      renderStockTab();
       await refreshVisitUIIfOpen();
       return;
     }
@@ -1283,8 +1364,8 @@ function initStockUI() {
     if (action === "toggle") {
       items[idx].active = items[idx].active === false ? true : false;
       saveStock(items);
-      renderStockTab();
 
+      renderStockTab();
       await refreshVisitUIIfOpen();
       return;
     }
@@ -1295,21 +1376,25 @@ function initStockUI() {
 
       items.splice(idx, 1);
       saveStock(items);
-      renderStockTab();
 
+      renderStockTab();
       await refreshVisitUIIfOpen();
       return;
     }
   });
-
-  state.stockUiBound = true;
 }
 
+// =========================
+// ✅ Renders — IMPORTANT: reset dataset-bound because innerHTML replaces nodes
+// =========================
 function renderServicesTab() {
   const page = document.querySelector('.page[data-page="services"]');
   if (!page) return;
 
   const items = loadServices();
+
+  // ❗️после innerHTML старые кнопки исчезают -> надо разрешить bind заново
+  page.dataset.boundServices = "0";
 
   page.innerHTML = `
     <div class="card">
@@ -1345,14 +1430,17 @@ function renderServicesTab() {
     `).join("");
   }
 
-  if (!state.servicesUiBound) initServicesUI();
+  initServicesUI();
 }
 
 function renderStockTab() {
   const page = document.querySelector('.page[data-page="stock"]');
   if (!page) return;
 
-  const items = loadStock(); // временно, чтобы приложение ожило
+  const items = loadStock();
+
+  // ❗️после innerHTML старые кнопки исчезают -> надо разрешить bind заново
+  page.dataset.boundStock = "0";
 
   page.innerHTML = `
     <div class="card">
@@ -1393,141 +1481,7 @@ function renderStockTab() {
     `).join("");
   }
 
-  if (!state.stockUiBound) initStockUI();
-}
-// =========================
-// ✅ Files schema (LOCAL cache of server files meta)
-// =========================
-function loadFiles() {
-  return LS.get(FILES_KEY, []);
-}
-function saveFiles(items) {
-  LS.set(FILES_KEY, items);
-}
-function loadVisitFiles() {
-  return LS.get(VISIT_FILES_KEY, []);
-}
-function saveVisitFiles(items) {
-  LS.set(VISIT_FILES_KEY, items);
-}
-
-function fileIdFromStored(storedName) {
-  const s = String(storedName || "");
-  return "f_" + s.replace(/[^a-zA-Z0-9_]/g, "_");
-}
-
-function upsertFilesFromServerMeta(serverFilesMeta) {
-  const files = loadFiles();
-  const map = new Map(files.map((f) => [f.id, f]));
-
-  (serverFilesMeta || []).forEach((meta) => {
-    const stored = meta?.stored_name;
-    if (!stored) return;
-
-    const id = fileIdFromStored(stored);
-    const prev = map.get(id);
-
-    map.set(id, {
-      id,
-      stored_name: stored,
-      url: meta.url || (stored ? `/uploads/${stored}` : "#"),
-      name: meta.name || prev?.name || stored,
-      size: Number(meta.size ?? prev?.size ?? 0),
-      type: meta.type || prev?.type || "",
-      created_at: prev?.created_at || nowISO(),
-    });
-  });
-
-  const next = Array.from(map.values());
-  saveFiles(next);
-  return next;
-}
-
-function linkFilesToVisit(visitId, fileIds) {
-  const links = loadVisitFiles();
-  const existing = new Set(
-    links.filter((l) => l.visit_id === visitId).map((l) => l.file_id)
-  );
-
-  const toAdd = (fileIds || [])
-    .filter((fid) => fid && !existing.has(fid))
-    .map((fid) => ({
-      id: "vf_" + Date.now() + "_" + Math.random().toString(16).slice(2),
-      visit_id: visitId,
-      file_id: fid,
-      created_at: nowISO(),
-    }));
-
-  if (toAdd.length) saveVisitFiles([...toAdd, ...links]);
-}
-
-function getFilesForVisit(visitId) {
-  const files = loadFiles();
-  const byId = new Map(files.map((f) => [f.id, f]));
-
-  const links = loadVisitFiles().filter((l) => l.visit_id === visitId);
-  links.sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
-
-  return links.map((l) => byId.get(l.file_id)).filter(Boolean);
-}
-
-function detachFileFromVisit(visitId, fileId) {
-  saveVisitFiles(
-    loadVisitFiles().filter((l) => !(l.visit_id === visitId && l.file_id === fileId))
-  );
-}
-
-function countLinksForFile(fileId) {
-  return loadVisitFiles().filter((l) => l.file_id === fileId).length;
-}
-
-function deleteFileEverywhereLocal(fileId) {
-  saveVisitFiles(loadVisitFiles().filter((l) => l.file_id !== fileId));
-  saveFiles(loadFiles().filter((f) => f.id !== fileId));
-}
-
-function getFileById(fileId) {
-  return loadFiles().find((f) => f.id === fileId) || null;
-}
-
-// =========================
-// ✅ Migration: legacy visit.files -> files + visit_files
-// =========================
-function migrateLegacyVisitFilesIfNeeded() {
-  if (LS.get(MIGRATION_KEY, false) === true) return;
-
-  const visits = loadVisits();
-  const hasLegacy = visits.some((v) => Array.isArray(v.files) && v.files.length);
-
-  if (!hasLegacy) {
-    LS.set(MIGRATION_KEY, true);
-    return;
-  }
-
-  let allMeta = [];
-  visits.forEach((v) => {
-    if (Array.isArray(v.files) && v.files.length) allMeta = allMeta.concat(v.files);
-  });
-
-  upsertFilesFromServerMeta(allMeta);
-
-  let changed = false;
-  visits.forEach((v) => {
-    if (Array.isArray(v.files) && v.files.length) {
-      const ids = v.files
-        .map((meta) => (meta?.stored_name ? fileIdFromStored(meta.stored_name) : null))
-        .filter(Boolean);
-
-      linkFilesToVisit(v.id, ids);
-      delete v.files;
-      changed = true;
-    }
-  });
-
-  if (changed) saveVisits(visits);
-
-  LS.set(MIGRATION_KEY, true);
-  console.log("✅ Migration done: legacy visit.files -> files + visit_files");
+  initStockUI();
 }
 
 // =========================
@@ -1760,165 +1714,137 @@ function renderPatientsTab() {
 // =========================
 // VISITS TAB — SERVER ONLY (state.visits from /api/visits)
 // =========================
+// =========================
+// VISITS TAB — SERVER ONLY (safe clicks)
+// =========================
 async function renderVisitsTab() {
-  const page = $(`.page[data-page="visits"]`);
+  const page = document.querySelector('.page[data-page="visits"]');
   if (!page) return;
 
-  const list = $("#visitsTabList", page) || $("#visitsList", page);
-  const search = $("#visitsSearch", page);
+  page.innerHTML = `
+    <div class="card">
+      <div class="row">
+        <h2>Візити</h2>
+        <input id="visitsSearch" class="inp" placeholder="Пошук…" style="max-width:260px" />
+      </div>
+      <div class="hint">Всі візити з сервера. Клік по картці — відкрити.</div>
+      <div id="visitsTabList" class="list"></div>
+    </div>
+  `;
+
+  const list = page.querySelector("#visitsTabList");
+  const search = page.querySelector("#visitsSearch");
   if (!list) return;
 
-  // если визиты ещё не загружены — загрузим с сервера
+  // загрузка визитов
   if (!Array.isArray(state.visits) || !state.visits.length) {
-    list.innerHTML = `<div class="hint">Завантаження візитів…</div>`;
-    const arr = await loadVisitsApi(); // ✅ server
+    list.innerHTML = `<div class="hint">Завантаження…</div>`;
+    const arr = await loadVisitsApi();
     state.visits = Array.isArray(arr) ? arr : [];
   }
 
-  const visits = Array.isArray(state.visits) ? state.visits : [];
+  function paint() {
+    const visits = Array.isArray(state.visits) ? state.visits : [];
 
-  const patients =
-    Array.isArray(state.patients) && state.patients.length
-      ? state.patients
-      : loadPatients(); // fallback
+    const patients = state.patients?.length ? state.patients : loadPatients();
+    const owners = state.owners?.length ? state.owners : LS.get(OWNERS_KEY, []);
 
-  const owners =
-    Array.isArray(state.owners) && state.owners.length
-      ? state.owners
-      : LS.get(OWNERS_KEY, []); // fallback
+    const petById = new Map((patients || []).map(p => [String(p.id), p]));
+    const ownerById = new Map((owners || []).map(o => [String(o.id), o]));
 
-  const petById = new Map((patients || []).map((p) => [p.id, p]));
-  const ownerById = new Map((owners || []).map((o) => [o.id, o]));
+    const q = (search?.value || "").trim().toLowerCase();
 
-  const q = (search?.value || "").trim().toLowerCase();
-  const sorted = visits
-    .slice()
-    .sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    const filtered = visits
+      .slice()
+      .sort((a, b) => String(b.id).localeCompare(String(a.id)))
+      .filter(v => {
+        if (!q) return true;
+        const pet = petById.get(String(v.pet_id));
+        const owner = pet ? ownerById.get(String(pet.owner_id)) : null;
 
-  const filtered = !q
-    ? sorted
-    : sorted.filter((v) => {
-        const pet = petById.get(v.pet_id);
-        const owner = pet ? ownerById.get(pet.owner_id) : null;
-
-        const hay = [
-          v.date,
-          v.note,
-          v.rx,
-          v.weight_kg,
-          pet?.name,
-          pet?.species,
-          pet?.breed,
-          owner?.name,
-          owner?.phone,
-          owner?.note,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return hay.includes(q);
+        return [
+          v.date, v.note, v.rx,
+          pet?.name, pet?.species, pet?.breed,
+          owner?.name, owner?.phone
+        ].filter(Boolean).join(" ").toLowerCase().includes(q);
       });
 
-  list.innerHTML = "";
+    list.innerHTML = "";
 
-  if (!filtered.length) {
-    list.innerHTML = `<div class="hint">Нічого не знайдено.</div>`;
-    return;
+    if (!filtered.length) {
+      list.innerHTML = `<div class="hint">Нічого не знайдено.</div>`;
+      return;
+    }
+
+    filtered.forEach(v => {
+      const pet = petById.get(String(v.pet_id));
+      const owner = pet ? ownerById.get(String(pet.owner_id)) : null;
+
+      const el = document.createElement("div");
+      el.className = "item";
+      el.dataset.visitId = String(v.id);
+      el.style.cursor = "pointer";
+
+      el.innerHTML = `
+        <div class="left" style="width:100%;">
+          <div class="name">${escapeHtml(v.date || "—")}</div>
+          <div class="meta">
+            ${escapeHtml(pet?.name || "—")}
+            ${pet?.species ? " • " + escapeHtml(pet.species) : ""}
+            ${owner?.name ? " • " + escapeHtml(owner.name) : ""}
+          </div>
+          ${v.note ? `<div class="meta" style="opacity:.85">${escapeHtml(v.note)}</div>` : ""}
+        </div>
+
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" data-action="open">➡️</button>
+          <button class="iconBtn" data-action="delete">🗑</button>
+        </div>
+      `;
+
+      list.appendChild(el);
+    });
   }
 
-  filtered.forEach((v) => {
-    const pet = petById.get(v.pet_id);
-    const owner = pet ? ownerById.get(pet.owner_id) : null;
+  // поиск
+  search?.addEventListener("input", paint);
 
-    const petLine = pet
-      ? `${pet.name || "—"}${pet.species ? " • " + pet.species : ""}${
-          pet.breed ? " • " + pet.breed : ""
-        }`
-      : "Пацієнт: —";
-
-    const ownerLine = owner
-      ? `${owner.name || "—"}${owner.phone ? " • " + owner.phone : ""}`
-      : "Власник: —";
-
-    const el = document.createElement("div");
-    el.className = "item";
-    el.style.cursor = "pointer";
-    el.dataset.openVisit = v.id;
-
-    el.innerHTML = `
-      <div class="left" style="width:100%;">
-        <div class="name">${escapeHtml(v.date || "—")}</div>
-        <div class="meta">${escapeHtml(petLine)} • ${escapeHtml(ownerLine)}</div>
-        ${
-          v.note
-            ? `<div class="meta" style="opacity:.9;margin-top:6px;">${escapeHtml(
-                v.note
-              )}</div>`
-            : ""
-        }
-      </div>
-      <div class="right" style="display:flex; gap:6px;">
-        <button class="iconBtn" title="Відкрити" data-open-visit="${escapeHtml(
-          v.id
-        )}">➡️</button>
-        <button class="iconBtn" title="Видалити" data-del-visit="${escapeHtml(
-          v.id
-        )}">🗑</button>
-      </div>
-    `;
-
-    // чтобы клик по кнопкам не открывал карточку
-    el.querySelectorAll("[data-open-visit],[data-del-visit]").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    });
-
-    list.appendChild(el);
-  });
-
-  // ✅ один обработчик на список
+  // ✅ ОДИН обработчик — без конфликтов
   list.onclick = async (e) => {
-    const delBtn = e.target.closest("[data-del-visit]");
-    if (delBtn) {
+    const card = e.target.closest(".item[data-visit-id]");
+    if (!card) return;
+
+    const visitId = card.dataset.visitId;
+
+    // delete
+    if (e.target.closest('[data-action="delete"]')) {
       e.preventDefault();
       e.stopPropagation();
-      const vid = delBtn.dataset.delVisit;
-      if (!vid) return;
+
       if (!confirm("Видалити візит?")) return;
 
-      const ok = await deleteVisitApi(vid);
+      const ok = await deleteVisitApi(visitId);
       if (ok) {
-        // перезагрузим с сервера и перерисуем
         const arr = await loadVisitsApi();
-        state.visits = Array.isArray(arr) ? arr : [];
-        renderVisitsTab();
+        state.visits = arr;
+        paint();
       }
       return;
     }
 
-    const openBtn = e.target.closest("[data-open-visit]");
-    const openCard = e.target.closest("[data-open-visit],[data-open-visit-card],[data-open-visit-row],[data-open-visit]");
-    const zone = openBtn || e.target.closest("[data-open-visit]") || e.target.closest("[data-open-visit-card]") || e.target.closest("[data-open-visit-row]");
-
-    const open = e.target.closest("[data-open-visit]") || e.target.closest("[data-open-visit-card]") || e.target.closest("[data-open-visit-row]");
-    const card = e.target.closest("[data-open-visit]");
-    if (card) {
-      const vid = card.dataset.openVisit;
-      if (vid) openVisit(vid);
-      return;
+    // open (кнопка ИЛИ клик по карточке)
+    if (
+      e.target.closest('[data-action="open"]') ||
+      e.target.closest(".item[data-visit-id]")
+    ) {
+      openVisit(visitId);
     }
-
-    // клик по самой карточке
-    const item = e.target.closest(".item[data-open-visit]");
-    if (item?.dataset?.openVisit) openVisit(item.dataset.openVisit);
   };
-}
 
+  paint();
+}
 // =========================
-// OWNER PAGE — server first patients list
+// OWNER PAGE — server first patients list (render only)
 // =========================
 function renderOwnerPage(ownerId) {
   const owner = getOwnerById(ownerId);
@@ -1928,7 +1854,8 @@ function renderOwnerPage(ownerId) {
     return;
   }
 
-  state.selectedOwnerId = ownerId;
+  // ✅ keep ids consistent
+  state.selectedOwnerId = String(ownerId);
 
   const ownerName = $("#ownerName");
   const ownerMeta = $("#ownerMeta");
@@ -1945,7 +1872,9 @@ function renderOwnerPage(ownerId) {
       ? state.patients
       : loadPatients(); // fallback
 
-  const pets = (patients || []).filter((p) => p.owner_id === ownerId);
+  const pets = (patients || []).filter(
+    (p) => String(p.owner_id) === String(ownerId)
+  );
 
   const list = $("#petsList");
   if (!list) return;
@@ -1962,15 +1891,13 @@ function renderOwnerPage(ownerId) {
     el.className = "item";
 
     el.innerHTML = `
-      <div class="left" data-open-pet="${escapeHtml(
-        pet.id
-      )}" style="width:100%; cursor:pointer;">
+      <div class="left" data-open-pet="${escapeHtml(String(pet.id))}" style="width:100%; cursor:pointer;">
         <div class="name">${escapeHtml(pet.name || "Без клички")}</div>
         <div class="meta">
           ${escapeHtml(pet.species || "")}
           ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
           ${pet.age ? " • " + escapeHtml(pet.age) : ""}
-          ${pet.weight_kg ? " • " + escapeHtml(pet.weight_kg) + " кг" : ""}
+          ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
         </div>
 
         ${
@@ -1986,15 +1913,14 @@ function renderOwnerPage(ownerId) {
       </div>
 
       <div class="right">
-        <button class="iconBtn" title="Удалить" data-del-pet="${escapeHtml(
-          pet.id
-        )}">🗑</button>
+        <button class="iconBtn" title="Удалить" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
       </div>
     `;
 
     list.appendChild(el);
   });
 }
+
 // =========================
 // NAV: open pages (server-first)
 // =========================
@@ -2017,7 +1943,7 @@ function openPatient(petId, opts = { pushHash: true }) {
 
   state.selectedPetId = String(petId);
   state.selectedPet = pet;
-  state.selectedOwnerId = pet.owner_id || state.selectedOwnerId;
+  state.selectedOwnerId = String(pet.owner_id || state.selectedOwnerId || "");
 
   const patientName = $("#patientName");
   const patientMeta = $("#patientMeta");
@@ -2030,7 +1956,7 @@ function openPatient(petId, opts = { pushHash: true }) {
       }${pet.weight_kg ? " • " + pet.weight_kg + " кг" : ""}`.trim() || "—";
   }
 
-  // ✅ visits from server
+  // ✅ visits from server (async, не await — просто запускаем)
   renderVisits(String(petId));
 
   setRoute("patient");
@@ -2038,7 +1964,8 @@ function openPatient(petId, opts = { pushHash: true }) {
 }
 
 // =========================
-// Patient -> Visits list (SERVER)
+// Patient -> Visits list (SERVER) — RENDER ONLY
+// ВАЖНО: клики/удаление/редактирование обрабатывает initPatientUI()
 // =========================
 async function renderVisits(petId) {
   const list = $("#visitsList");
@@ -2046,7 +1973,7 @@ async function renderVisits(petId) {
 
   list.innerHTML = `<div class="hint">Завантаження…</div>`;
 
-  const visits = await getVisitsByPetId(petId); // already server: loadVisitsApi({pet_id})
+  const visits = await getVisitsByPetId(petId); // server
   list.innerHTML = "";
 
   if (!visits.length) {
@@ -2054,7 +1981,6 @@ async function renderVisits(petId) {
     return;
   }
 
-  // кешируем
   cacheVisits(visits);
 
   visits
@@ -2067,86 +1993,136 @@ async function renderVisits(petId) {
       el.style.cursor = "pointer";
 
       el.innerHTML = `
-  <div class="left" style="width:100%;">
-    <div class="name">${escapeHtml(v.date || "—")}</div>
+        <div class="left" style="width:100%;">
+          <div class="name">${escapeHtml(v.date || "—")}</div>
 
-    ${v.note ? `<div class="meta">${escapeHtml(v.note)}</div>` : ""}
+          ${v.note ? `<div class="meta">${escapeHtml(v.note)}</div>` : ""}
 
-    ${
-      v.rx
-        ? `
-      <div class="history" style="margin-top:6px;">
-        <div class="history-label">Призначення</div>
-        ${escapeHtml(v.rx)}
-      </div>
-    `
-        : ""
-    }
-  </div>
+          ${
+            v.rx
+              ? `
+            <div class="history" style="margin-top:6px;">
+              <div class="history-label">Призначення</div>
+              ${escapeHtml(v.rx)}
+            </div>
+          `
+              : ""
+          }
+        </div>
 
-  <div class="right" style="display:flex; gap:6px;">
-    <button
-      class="iconBtn"
-      title="Відкрити"
-      data-open-visit-btn="${escapeHtml(String(v.id))}"
-    >➡️</button>
-
-    <button
-      class="iconBtn"
-      title="Редагувати"
-      data-edit-visit="${escapeHtml(String(v.id))}"
-    >✏️</button>
-
-    <button
-      class="iconBtn"
-      title="Видалити візит"
-      data-del-visit="${escapeHtml(String(v.id))}"
-    >🗑</button>
-  </div>
-`;
-
-      // чтобы кнопки не открывали карточку
-      el.querySelectorAll("[data-open-visit-btn],[data-del-visit]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        });
-      });
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
+          <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
+        </div>
+      `;
 
       list.appendChild(el);
     });
+}
 
-  // один обработчик
-  list.onclick = async (e) => {
-    // delete visit
-    const delBtn = e.target.closest("[data-del-visit]");
-    if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      const vid = delBtn.dataset.delVisit;
+// =========================
+// VISIT UI (bind once)
+// =========================
+function initVisitUI() {
+  if (state.visitUiBound) return;
+  state.visitUiBound = true;
+
+   // back
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#btnBackPatient")) {
+      if (state.selectedPetId) openPatient(state.selectedPetId);
+      else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
+      else setHash("owners");
+    }
+
+    if (e.target.closest("#btnDischarge")) {
+      const visitId = state.selectedVisitId;
+      if (!visitId) return alert("Спочатку відкрий візит.");
+      openDischargeModal(visitId);
+    }
+  });
+
+  // ---------- SERVICES ----------
+  document.addEventListener("click", async (e) => {
+    // add service
+    if (e.target.id === "visitSvcAdd") {
+      const vid = state.selectedVisitId;
       if (!vid) return;
-      if (!confirm("Видалити візит?")) return;
 
-      const ok = await deleteVisitApi(vid);
-      if (ok) renderVisits(petId);
-      return;
+      const serviceId = $("#visitSvcSelect")?.value;
+      const qty = Math.max(1, Number($("#visitSvcQty")?.value || 1));
+      if (!serviceId) return;
+
+      const ok = await addServiceLineToVisit(vid, serviceId, qty);
+      if (!ok) return alert("Не вдалося додати послугу");
+
+      const fresh = await fetchVisitById(vid);
+      if (!fresh) return;
+
+      renderVisitPage(fresh, state.selectedPet);
+      renderDischargeA4(vid);
     }
 
-    // open visit
-    const openBtn = e.target.closest("[data-open-visit-btn]");
-    if (openBtn?.dataset?.openVisitBtn) {
-      openVisit(openBtn.dataset.openVisitBtn);
-      return;
+    // remove service
+    const svcDel = e.target.closest("[data-svc-del]");
+    if (svcDel) {
+      const idx = Number(svcDel.dataset.svcDel);
+      if (!Number.isFinite(idx)) return;
+
+      const vid = state.selectedVisitId;
+      if (!vid) return;
+
+      const ok = await removeServiceLineFromVisit(vid, idx);
+      if (!ok) return alert("Не вдалося прибрати послугу");
+
+      const fresh = await fetchVisitById(vid);
+      if (!fresh) return;
+
+      renderVisitPage(fresh, state.selectedPet);
+      renderDischargeA4(vid);
     }
 
-    const card = e.target.closest(".item[data-open-visit]");
-    if (card?.dataset?.openVisit) openVisit(card.dataset.openVisit);
-  };
+    // ---------- STOCK ----------
+    if (e.target.id === "visitStkAdd") {
+      const vid = state.selectedVisitId;
+      if (!vid) return;
+
+      const stockId = $("#visitStkSelect")?.value;
+      const qty = Math.max(1, Number($("#visitStkQty")?.value || 1));
+      if (!stockId) return;
+
+      const ok = await addStockLineToVisit(vid, stockId, qty);
+      if (!ok) return alert("Не вдалося додати препарат");
+
+      const fresh = await fetchVisitById(vid);
+      if (!fresh) return;
+
+      renderVisitPage(fresh, state.selectedPet);
+      renderDischargeA4(vid);
+    }
+
+    const stkDel = e.target.closest("[data-stk-del]");
+    if (stkDel) {
+      const idx = Number(stkDel.dataset.stkDel);
+      if (!Number.isFinite(idx)) return;
+
+      const vid = state.selectedVisitId;
+      if (!vid) return;
+
+      const ok = await removeStockLineFromVisit(vid, idx);
+      if (!ok) return alert("Не вдалося прибрати препарат");
+
+      const fresh = await fetchVisitById(vid);
+      if (!fresh) return;
+
+      renderVisitPage(fresh, state.selectedPet);
+      renderDischargeA4(vid);
+    }
+  });
 }
 
 // ===== Visit page =====
 async function openVisit(visitId, opts = { pushHash: true }) {
-  // ✅ server-first: try cache, else fetch
   let visit = getVisitByIdSync(visitId);
   if (!visit) visit = await fetchVisitById(visitId);
 
@@ -2160,22 +2136,24 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 
   state.selectedVisitId = String(visitId);
 
-  // ✅ server-first pet
   const patients =
     Array.isArray(state.patients) && state.patients.length
       ? state.patients
-      : loadPatients(); // fallback
+      : loadPatients();
 
-  const pet = (patients || []).find((p) => String(p.id) === String(visit.pet_id)) || null;
+  const pet =
+    (patients || []).find((p) => String(p.id) === String(visit.pet_id)) || null;
 
   if (pet) {
-    state.selectedPetId = String(pet.id);
     state.selectedPet = pet;
+    state.selectedPetId = String(pet.id);
     state.selectedOwnerId = pet.owner_id || state.selectedOwnerId;
   }
 
   renderVisitPage(visit, pet);
+  initVisitUI(); // 🔥 ВАЖНО
   setRoute("visit");
+
   if (opts.pushHash) setHash("visit", visitId);
 }
 
@@ -2320,187 +2298,6 @@ function renderVisitPage(visit, pet) {
 
     ${(!note && !rx && !expanded.length && !stkExpanded.length) ? `<div class="hint" style="margin-top:10px;">Поки порожньо.</div>` : ""}
   `;
-
-  // =========================
-  // SERVICES: add/remove -> server
-  // =========================
-  const svcAddBtn = $("#visitSvcAdd");
-  const svcSel = $("#visitSvcSelect");
-  const svcQtyEl = $("#visitSvcQty");
-
-  if (svcAddBtn && svcSel && svcQtyEl) {
-    svcAddBtn.onclick = async () => {
-      const vid = state.selectedVisitId;
-      if (!vid) return alert("Спочатку відкрий візит.");
-
-      const serviceId = svcSel.value;
-      if (!serviceId) return;
-
-      const qty = Math.max(1, Number(svcQtyEl.value || 1));
-
-      // берём свежий визит
-      const current = await fetchVisitById(vid);
-      if (!current) return alert("Візит не знайдено");
-
-      ensureVisitServicesShape(current);
-
-      const svc = getServiceById(serviceId);
-      if (!svc) return alert("Послуга не знайдена");
-
-      current.services.push({
-        serviceId,
-        qty: Math.max(1, Number(qty) || 1),
-        priceSnap: Number(svc.price) || 0,
-        nameSnap: String(svc.name || "").trim(),
-      });
-
-      const pushed = await pushVisitServicesToServer(vid, current.services);
-      if (!pushed) return alert("Не вдалося зберегти послугу на сервері");
-
-      const fresh = await fetchVisitById(vid);
-      if (!fresh) return;
-
-      ensureVisitServicesShape(fresh);
-      ensureVisitStockShape(fresh);
-
-      renderVisitPage(fresh, pet);
-      renderDischargeA4(vid);
-    };
-  }
-
-  // delete service line
-  $("#visitSvcList")?.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-svc-del]");
-    if (!btn) return;
-
-    const idx = Number(btn.dataset.svcDel);
-    if (!Number.isFinite(idx)) return;
-
-    const vid = state.selectedVisitId;
-    if (!vid) return;
-
-    const current = await fetchVisitById(vid);
-    if (!current) return alert("Візит не знайдено");
-
-    ensureVisitServicesShape(current);
-    if (idx < 0 || idx >= current.services.length) return;
-
-    current.services.splice(idx, 1);
-
-    const pushed = await pushVisitServicesToServer(vid, current.services);
-    if (!pushed) return alert("Не вдалося зберегти зміни на сервері");
-
-    const fresh = await fetchVisitById(vid);
-    if (!fresh) return;
-
-    ensureVisitServicesShape(fresh);
-    ensureVisitStockShape(fresh);
-
-    renderVisitPage(fresh, pet);
-    renderDischargeA4(vid);
-  });
-
-  // =========================
-  // STOCK: add/remove -> server
-  // =========================
-  const stkAddBtn = $("#visitStkAdd");
-  const stkSel = $("#visitStkSelect");
-  const stkQtyEl = $("#visitStkQty");
-
-  if (stkAddBtn && stkSel && stkQtyEl) {
-    stkAddBtn.onclick = async () => {
-      const vid = state.selectedVisitId;
-      if (!vid) return alert("Спочатку відкрий візит.");
-
-      const stockId = stkSel.value;
-      if (!stockId) return;
-
-      const qty = Math.max(1, Number(stkQtyEl.value || 1));
-
-      const current = await fetchVisitById(vid);
-      if (!current) return alert("Візит не знайдено");
-
-      ensureVisitStockShape(current);
-
-      const it = getStockById(stockId);
-      if (!it || it.active === false) return alert("Позиція складу не знайдена/вимкнена");
-
-      const left = Number(it.qty) || 0;
-      if (left < qty) return alert(`Недостатньо залишку. Доступно: ${left}`);
-
-      current.stock.push({
-        stockId,
-        qty: Math.max(1, Number(qty) || 1),
-        priceSnap: Number(it.price) || 0,
-        nameSnap: String(it.name || "").trim(),
-        unitSnap: String(it.unit || "шт").trim(),
-      });
-
-      const pushed = await pushVisitStockToServer(vid, current.stock);
-      if (!pushed) return alert("Не вдалося зберегти препарат на сервері");
-
-      // ⚠️ ВАЖНО: у тебя склад пока локальный, поэтому уменьшаем локальный остаток
-      // (когда сделаем серверный склад — это уберём)
-      const stock = loadStock();
-      const sidx = stock.findIndex((x) => x.id === stockId);
-      if (sidx >= 0) {
-        stock[sidx].qty = Math.max(0, (Number(stock[sidx].qty) || 0) - qty);
-        saveStock(stock);
-      }
-
-      const fresh = await fetchVisitById(vid);
-      if (!fresh) return;
-
-      ensureVisitServicesShape(fresh);
-      ensureVisitStockShape(fresh);
-
-      renderVisitPage(fresh, pet);
-      renderDischargeA4(vid);
-    };
-  }
-
-  // delete stock line
-  $("#visitStkList")?.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-stk-del]");
-    if (!btn) return;
-
-    const idx = Number(btn.dataset.stkDel);
-    if (!Number.isFinite(idx)) return;
-
-    const vid = state.selectedVisitId;
-    if (!vid) return;
-
-    const current = await fetchVisitById(vid);
-    if (!current) return alert("Візит не знайдено");
-
-    ensureVisitStockShape(current);
-    if (idx < 0 || idx >= current.stock.length) return;
-
-    const removed = current.stock[idx];
-    current.stock.splice(idx, 1);
-
-    const pushed = await pushVisitStockToServer(vid, current.stock);
-    if (!pushed) return alert("Не вдалося зберегти зміни на сервері");
-
-    // локально возвращаем остаток (пока склад не серверный)
-    if (removed?.stockId) {
-      const stock = loadStock();
-      const sidx = stock.findIndex((x) => x.id === removed.stockId);
-      if (sidx >= 0) {
-        stock[sidx].qty = (Number(stock[sidx].qty) || 0) + Math.max(1, Number(removed.qty) || 1);
-        saveStock(stock);
-      }
-    }
-
-    const fresh = await fetchVisitById(vid);
-    if (!fresh) return;
-
-    ensureVisitServicesShape(fresh);
-    ensureVisitStockShape(fresh);
-
-    renderVisitPage(fresh, pet);
-    renderDischargeA4(vid);
-  });
 }
 // =========================
 
@@ -2980,6 +2777,8 @@ function closeVisitModal() {
 }
 
 
+
+
 // =========================
 // VISIT MODAL helpers (GLOBAL)
 // =========================
@@ -3273,19 +3072,6 @@ $("#visitSave")?.addEventListener("click", async () => {
 // =========================
 // VISIT PAGE UI (buttons on visit page)
 // =========================
-function initVisitUI() {
-  $("#btnBackPatient")?.addEventListener("click", () => {
-    if (state.selectedPetId) openPatient(state.selectedPetId);
-    else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
-    else setHash("owners");
-  });
-
-  $("#btnDischarge")?.addEventListener("click", () => {
-    const visitId = state.selectedVisitId;
-    if (!visitId) return alert("Спочатку відкрий візит.");
-    openDischargeModal(visitId);
-  });
-}
 
 // =========================
 // DELETE — server-first (patients + visits)
@@ -3422,4 +3208,3 @@ window.addEventListener("resize", setVH);
 
 // ===== INIT =====
 init();
-
