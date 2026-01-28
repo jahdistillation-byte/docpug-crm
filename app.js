@@ -3466,7 +3466,8 @@ window.addVisitService = async function addVisitService() {
   const qty = Number(qtyInput.value || 1);
   if (!serviceId) return;
 
-  const service = (window.SERVICES || SERVICES || []).find(s => String(s.id) === String(serviceId));
+  const services = LS.get(SERVICES_KEY, []);
+const service = (services || []).find(s => String(s.id) === String(serviceId));
   if (!service) { console.warn("service not found", serviceId); return; }
 
   const row = document.createElement("div");
@@ -3494,7 +3495,8 @@ window.addVisitStock = async function addVisitStock() {
   const qty = Number(qtyInput.value || 1);
   if (!itemId) return;
 
-  const item = (window.STOCK || STOCK || []).find(s => String(s.id) === String(itemId));
+  const items = LS.get(STOCK_KEY, []);
+const item = (items || []).find(s => String(s.id) === String(itemId));
   if (!item) { console.warn("stock item not found", itemId); return; }
 
   const row = document.createElement("div");
