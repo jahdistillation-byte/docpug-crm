@@ -857,34 +857,34 @@ function ensureVisitServicesShape(visit) {
 // =========================
 // ✅ SERVER: add/remove service line in VISIT
 // =========================
-async function addServiceLineToVisit(visitId, serviceId, qty = 1, { snap = true } = {}) {
-  if (!visitId || !serviceId) return false;
+async function addServiceLineToVisit(visitId, serviceId, qty) {
+  console.log("[API] addServiceLineToVisit START", { visitId, serviceId, qty });
 
-  const current = await fetchVisitById(visitId);
-  if (!current) return false;
+  const visit = await fetchVisitById(visitId);
+  console.log("[API] fetched visit", visit);
 
-  ensureVisitServicesShape(current);
+  if (!visit) return false;
+
+  ensureVisitServicesShape(visit);
 
   const svc = getServiceById(serviceId);
+  console.log("[API] service snapshot", svc);
+
   if (!svc) return false;
 
-  const line = {
+  visit.services.push({
     serviceId,
-    qty: Math.max(1, Number(qty) || 1),
-  };
+    qty,
+    priceSnap: Number(svc.price) || 0,
+    nameSnap: String(svc.name || ""),
+  });
 
-  if (snap) {
-    line.priceSnap = Number(svc.price) || 0;
-    line.nameSnap = String(svc.name || "").trim();
-  }
+  console.log("[API] services BEFORE push", visit.services);
 
-  const nextServices = [...current.services, line];
+  const ok = await pushVisitServicesToServer(visitId, visit.services);
+  console.log("[API] push result", ok);
 
-  const ok = await pushVisitServicesToServer(visitId, nextServices);
-  if (!ok) return false;
-
-
-  return true;
+  return ok;
 }
 
 async function removeServiceLineFromVisit(visitId, index) {
