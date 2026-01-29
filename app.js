@@ -2648,6 +2648,8 @@ function initDischargeModalUI() {
         if (!vid) return;
 
         const form = readDischargeForm();
+        // ✅ локально тоже сохраняем — чтобы при любом ререндере форма не "сбрасывалась"
+setDischarge(vid, form);
         const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
         if (!current) return alert("Візит не знайдено");
 
@@ -2688,6 +2690,9 @@ function initDischargeModalUI() {
           cacheVisits([fresh]);
           if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
         }
+
+        // ✅ перезаполним форму (на всякий случай)
+fillDischargeForm(fresh, getDischarge(vid) || form);
 
         renderDischargeA4(vid);
         await refreshVisitUIIfOpen();
@@ -2747,28 +2752,28 @@ function initDischargeModalUI() {
   state.dischargeListenersBound = true;
 }
 
-function openDischargeModal(visitId) {
+async function openDischargeModal(visitId) {
   const modal = $("#dischargeModal");
   if (!modal) return alert("Не знайдено #dischargeModal в HTML");
 
   const vid = String(visitId || "");
   if (!vid) return;
 
-  // запомним какой визит редактируем
   modal.dataset.visitId = vid;
 
-  // заполним форму из визита + локальных данных
-  const v = getVisitByIdSync(vid);
+  // ✅ ВАЖНО: гарантируем, что визит есть (кеш или сервер)
+  let v = getVisitByIdSync(vid);
+  if (!v) v = await fetchVisitById(vid);
+  if (v?.id) cacheVisits([v]);
+
   const existing = getDischarge(vid) || {};
   fillDischargeForm(v || {}, existing);
 
-  // сразу перерендерим A4
-  renderDischargeA4(vid);
+  await renderDischargeA4(vid);
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 }
-
 function closeDischargeModal() {
   const modal = $("#dischargeModal");
   if (!modal) return;
