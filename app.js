@@ -2823,10 +2823,11 @@ if (!state.dischargeListenersBound) {
   });
 
   state.dischargeListenersBound = true;
-}
+
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+}
 
 function closeDischargeModal() {
   const modal = $("#dischargeModal");
