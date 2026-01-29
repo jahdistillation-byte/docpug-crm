@@ -110,13 +110,30 @@ function normalizeVisitFromServer(visit) {
 async function fetchVisitById(id) {
   if (!id) return null;
 
+  const vid = String(id);
+
+  // ✅ то что уже есть в кеше
+  const prev = state.visitsById.get(vid) || null;
+
   const data = await loadVisitsApi({ id });
   const arr = Array.isArray(data) ? data : (data ? [data] : []);
   let v = arr[0] || null;
 
   v = normalizeVisitFromServer(v);
 
-  if (v?.id != null) state.visitsById.set(String(v.id), v);
+  // ✅ если сервер прислал пусто, но в кеше было — НЕ теряем
+  if (prev) {
+    if (Array.isArray(prev.services) && prev.services.length && (!Array.isArray(v.services) || v.services.length === 0)) {
+      v.services = prev.services;
+      v.services_json = prev.services;
+    }
+    if (Array.isArray(prev.stock) && prev.stock.length && (!Array.isArray(v.stock) || v.stock.length === 0)) {
+      v.stock = prev.stock;
+      v.stock_json = prev.stock;
+    }
+  }
+
+  if (v?.id != null) state.visitsById.set(vid, v);
   return v;
 }
 
