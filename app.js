@@ -421,7 +421,6 @@ async function loadOwners() {
       ? json.data
       : (json.data ? [json.data] : []);
 
-const norm = arr.map(normalizeVisitFromServer); // ✅ добавили
 
     state.owners = arr;
 
@@ -1232,86 +1231,6 @@ async function refreshVisitUIIfOpen() {
   renderDischargeA4(state.selectedVisitId);
 }
 
-// =========================
-// ✅ SERVICES UI (registry)
-// =========================
-function initServicesUI() {
-  const page = $(`.page[data-page="services"]`);
-  if (!page) return;
-
-  // add
-  $("#btnAddService", page)?.addEventListener("click", async () => {
-    const name = (prompt("Назва послуги:", "") || "").trim();
-    if (!name) return;
-
-    const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
-    const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
-
-    const id =
-      "svc_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
-
-    const items = loadServices();
-    items.unshift({ id, name, price, active: true });
-    saveServices(items);
-
-    renderServicesTab();
-    await refreshVisitUIIfOpen();
-  });
-
-  // actions: edit/toggle/delete
-  $("#servicesList", page)?.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-svc-action]");
-    if (!btn) return;
-
-    const action = btn.dataset.svcAction;
-    const id = btn.dataset.svcId;
-    if (!action || !id) return;
-
-    const items = loadServices();
-    const idx = items.findIndex((x) => x.id === id);
-    if (idx < 0) return;
-
-    if (action === "edit") {
-      const cur = items[idx];
-      const name = (prompt("Назва:", cur.name || "") || "").trim();
-      if (!name) return;
-
-      const priceRaw =
-        (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
-      const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
-
-      items[idx] = { ...cur, name, price };
-      saveServices(items);
-      renderServicesTab();
-
-      await refreshVisitUIIfOpen();
-      return;
-    }
-
-    if (action === "toggle") {
-      items[idx].active = items[idx].active === false ? true : false;
-      saveServices(items);
-      renderServicesTab();
-
-      await refreshVisitUIIfOpen();
-      return;
-    }
-
-    if (action === "del") {
-      const cur = items[idx];
-      if (!confirm(`Видалити послугу "${cur.name}"?`)) return;
-
-      items.splice(idx, 1);
-      saveServices(items);
-      renderServicesTab();
-
-      await refreshVisitUIIfOpen();
-      return;
-    }
-  });
-
-  
-}
 
 // =========================
 // ✅ SERVICES UI (registry) — bind once per page
@@ -2692,9 +2611,12 @@ function parseRxCombined(text) {
   return { rx, recs, follow };
 }
 
-// ===== Discharge modal (SERVER-safe) =====
-// bind listeners ONCE (delegated — survives rerenders)
-if (!state.dischargeListenersBound) {
+function initDischargeModalUI() {
+  if (state.dischargeListenersBound) return;
+
+  const modal = $("#dischargeModal");
+  if (!modal) return; // если в HTML нет модалки — просто выходим
+
   const live = () => {
     const vid = modal.dataset.visitId;
     if (vid) renderDischargeA4(vid);
@@ -2705,116 +2627,107 @@ if (!state.dischargeListenersBound) {
     if (el) el.addEventListener("input", live);
   });
 
-  // ✅ ONE delegated click handler for all modal buttons
-  modal.addEventListener("click", async (e) => {
-    const vid = modal.dataset.visitId;
+  modal.addEventListener(
+    "click",
+    async (e) => {
+      const vid = modal.dataset.visitId;
 
-    // --- SAVE ---
-    if (e.target.closest("#disSave")) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!vid) return;
+      // --- SAVE ---
+      if (e.target.closest("#disSave")) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!vid) return;
 
-      console.log("[discharge] SAVE click", { vid });
+        const form = readDischargeForm();
+        const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+        if (!current) return alert("Візит не знайдено");
 
-      const form = readDischargeForm();
+        const safeServices =
+          Array.isArray(current.services) && current.services.length
+            ? current.services
+            : Array.isArray(current.services_json)
+            ? current.services_json
+            : [];
 
-      // тянем текущий визит чтобы не потерять services/stock
-      const current = (getVisitByIdSync && getVisitByIdSync(vid)) || (await fetchVisitById(vid));
-      if (!current) return alert("Візит не знайдено");
+        const safeStock =
+          Array.isArray(current.stock) && current.stock.length
+            ? current.stock
+            : Array.isArray(current.stock_json)
+            ? current.stock_json
+            : [];
 
-      // 🛡 безопасно достаем услуги и склад (services ИЛИ services_json)
-      const safeServices =
-        Array.isArray(current.services) && current.services.length
-          ? current.services
-          : Array.isArray(current.services_json)
-          ? current.services_json
-          : [];
+        const payload = {
+          pet_id: current.pet_id,
+          date: current.date,
+          weight_kg: current.weight_kg,
 
-      const safeStock =
-        Array.isArray(current.stock) && current.stock.length
-          ? current.stock
-          : Array.isArray(current.stock_json)
-          ? current.stock_json
-          : [];
+          note: buildVisitNote(form.dx, form.complaint),
+          rx: buildRxCombined(form.rx, form.recs, form.follow),
 
-      const payload = {
-        pet_id: current.pet_id,
-        date: current.date,
-        weight_kg: current.weight_kg,
+          services: safeServices,
+          services_json: safeServices,
 
-        note: buildVisitNote(form.dx, form.complaint),
-        rx: buildRxCombined(form.rx, form.recs, form.follow),
+          stock: safeStock,
+          stock_json: safeStock,
+        };
 
-        services: safeServices,
-        services_json: safeServices,
+        const updated = await updateVisitApi(vid, payload);
+        if (!updated) return alert("Помилка збереження візиту");
 
-        stock: safeStock,
-        stock_json: safeStock,
-      };
-
-      console.log("[discharge] PUT payload", payload);
-
-      const updated = await updateVisitApi(vid, payload);
-      console.log("[discharge] updateVisitApi result", updated);
-
-      if (!updated) return alert("Помилка збереження візиту");
-
-      const fresh = await fetchVisitById(vid);
-      console.log("[discharge] fresh after PUT", fresh);
-
-      if (fresh?.id) {
-        cacheVisits([fresh]);
-        if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
-      }
-
-      renderDischargeA4(vid);
-      await refreshVisitUIIfOpen();
-
-      alert("✅ Збережено на сервері");
-      return;
-    }
-
-    // --- PRINT ---
-    if (e.target.closest("#disPrint")) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!vid) return;
-      printA4Only(vid);
-      return;
-    }
-
-    // --- DOWNLOAD PDF ---
-    if (e.target.closest("#disDownload")) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!vid) return;
-
-      const btn = document.getElementById("disDownload");
-      if (btn) {
-        btn.textContent = "Генерую…";
-        btn.disabled = true;
-      }
-
-      try {
-        await downloadA4Pdf(vid);
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Скачати PDF";
+        const fresh = await fetchVisitById(vid);
+        if (fresh?.id) {
+          cacheVisits([fresh]);
+          if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
         }
+
+        renderDischargeA4(vid);
+        await refreshVisitUIIfOpen();
+
+        alert("✅ Збережено на сервері");
+        return;
       }
-      return;
-    }
 
-    // --- CLOSE ---
-    if (e.target.closest("[data-close-discharge]")) {
-      closeDischargeModal();
-      return;
-    }
-  }, true);
+      // --- PRINT ---
+      if (e.target.closest("#disPrint")) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!vid) return;
+        printA4Only(vid);
+        return;
+      }
 
-  // Escape
+      // --- DOWNLOAD PDF ---
+      if (e.target.closest("#disDownload")) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!vid) return;
+
+        const btn = $("#disDownload");
+        if (btn) {
+          btn.textContent = "Генерую…";
+          btn.disabled = true;
+        }
+
+        try {
+          await downloadA4Pdf(vid);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Скачати PDF";
+          }
+        }
+        return;
+      }
+
+      // --- CLOSE ---
+      if (e.target.closest("[data-close-discharge]")) {
+        closeDischargeModal();
+        return;
+      }
+    },
+    true
+  );
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeDischargeModal();
@@ -2823,10 +2736,6 @@ if (!state.dischargeListenersBound) {
   });
 
   state.dischargeListenersBound = true;
-
-
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
 }
 
 function closeDischargeModal() {
