@@ -689,8 +689,9 @@ async function loadVisitsApi(params = {}) {
       ? json.data
       : (json.data ? [json.data] : []);
 
-    cacheVisits(arr);
-    return arr;
+    const normArr = arr.map(normalizeVisitFromServer);
+cacheVisits(normArr);
+return normArr;
   } catch (e) {
     console.error("loadVisitsApi failed:", e);
     alert("Помилка зʼєднання з сервером");
@@ -2731,39 +2732,71 @@ async function openDischargeModal(visitId) {
   const form = readDischargeForm(); // {complaint, dx, rx, recs, follow} — как у тебя
 
   // тянем текущий визит чтобы не потерять services/stock
-  const current = await fetchVisitById(vid);
-  if (!current) return alert("Візит не знайдено");
+  // тянем текущий визит чтобы не потерять services/stock
+const current =
+  (typeof getVisitByIdSync === "function" && getVisitByIdSync(vid)) ||
+  (await fetchVisitById(vid));
 
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    weight_kg: current.weight_kg,
+if (!current) {
+  alert("Візит не знайдено");
+  return;
+}
 
-    // ✅ note с диагнозом/жалобой
-    note: buildVisitNote(form.dx, form.complaint),
+// 🛡 безопасно достаем услуги и склад (из services ИЛИ services_json)
+const safeServices =
+  Array.isArray(current.services) && current.services.length
+    ? current.services
+    : Array.isArray(current.services_json)
+    ? current.services_json
+    : [];
 
-    // ✅ rx общий (призначення + реком + контроль)
-    rx: buildRxCombined(form.rx, form.recs, form.follow),
+const safeStock =
+  Array.isArray(current.stock) && current.stock.length
+    ? current.stock
+    : Array.isArray(current.stock_json)
+    ? current.stock_json
+    : [];
 
-    // ✅ НЕ ТРОГАЕМ услуги/склад — и обязательно дублируем в *_json
-    services: Array.isArray(current.services) ? current.services : [],
-    services_json: Array.isArray(current.services) ? current.services : [],
+const payload = {
+  pet_id: current.pet_id,
+  date: current.date,
+  weight_kg: current.weight_kg,
 
-    stock: Array.isArray(current.stock) ? current.stock : [],
-    stock_json: Array.isArray(current.stock) ? current.stock : [],
-  };
+  // ✅ диагноз + жалоба
+  note: buildVisitNote(form.dx, form.complaint),
 
-  const updated = await updateVisitApi(vid, payload);
-  if (!updated) return;
+  // ✅ назначения + рекомендации + контроль
+  rx: buildRxCombined(form.rx, form.recs, form.follow),
 
-  // обновим UI
-  const fresh = await fetchVisitById(vid);
-  if (fresh?.id) cacheVisits([fresh]);
+  // ✅ услуги — НЕ ТРОГАЕМ, только пробрасываем
+  services: safeServices,
+  services_json: safeServices,
 
-  renderDischargeA4(vid);
-  await refreshVisitUIIfOpen();
+  // ✅ склад — НЕ ТРОГАЕМ
+  stock: safeStock,
+  stock_json: safeStock,
+};
 
-  alert("✅ Збережено на сервері");
+const updated = await updateVisitApi(vid, payload);
+if (!updated) {
+  alert("Помилка збереження візиту");
+  return;
+}
+
+// 🔄 перетягиваем свежую версию визита с сервера и кладём в кеш
+const fresh = await fetchVisitById(vid);
+if (fresh?.id) {
+  cacheVisits([fresh]);
+  if (String(state.selectedVisitId) === String(vid)) {
+    state.selectedVisit = fresh;
+  }
+}
+
+// 🔄 обновляем UI
+renderDischargeA4(vid);
+await refreshVisitUIIfOpen();
+
+alert("✅ Збережено на сервері");
 });
 
     // PRINT (A4 only)
