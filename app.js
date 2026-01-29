@@ -2693,180 +2693,140 @@ function parseRxCombined(text) {
 }
 
 // ===== Discharge modal (SERVER-safe) =====
-async function openDischargeModal(visitId) {
-  const modal = $("#dischargeModal");
-  if (!modal) return;
-
-  // 1) гарантируем, что визит есть (кеш или сервер)
-  let visit = getVisitByIdSync(visitId);
-  if (!visit) {
-    visit = await fetchVisitById(visitId);
-  }
-  if (!visit) return alert("Візит не знайдено");
-
-  // 2) форма + превью
-  const existing = getDischarge(visitId) || null;
-  fillDischargeForm(visit, existing);
-  renderDischargeA4(visitId);
-
-  modal.dataset.visitId = String(visitId);
-
-  // bind listeners ONCE
-  if (!state.dischargeListenersBound) {
-    const live = () => {
-      const vid = modal.dataset.visitId;
-      if (vid) renderDischargeA4(vid);
-    };
-
-    ["#disComplaint", "#disDx", "#disRx", "#disRecs", "#disFollow"].forEach((sel) => {
-      const el = $(sel);
-      if (el) el.addEventListener("input", live);
-    });
-
-    // SAVE (local for now)
-    $("#disSave")?.addEventListener("click", async () => {
-  const vid = modal.dataset.visitId;
-  if (!vid) return;
-
-  const form = readDischargeForm();
-
-  // ✅ ВСЕГДА тянем визит с сервера (не из кеша)
-  const raw = await fetchVisitById(vid);
-  if (!raw) {
-    alert("Візит не знайдено");
-    return;
-  }
-
-  // ✅ нормализуем: подтянет services из services_json если нужно
-  const current = (typeof normalizeVisitFromServer === "function")
-    ? normalizeVisitFromServer({ ...raw })
-    : { ...raw };
-
-  // ✅ парсер JSON-строки -> массив
-  const toArr = (x) => {
-    if (Array.isArray(x)) return x;
-    if (typeof x === "string" && x.trim()) {
-      try {
-        const parsed = JSON.parse(x);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
+// bind listeners ONCE (delegated — survives rerenders)
+if (!state.dischargeListenersBound) {
+  const live = () => {
+    const vid = modal.dataset.visitId;
+    if (vid) renderDischargeA4(vid);
   };
 
-  // 🛡 берём услуги/склад из services ИЛИ из *_json
-  const safeServices =
-    (Array.isArray(current.services) && current.services.length ? current.services : null) ||
-    (toArr(current.services_json).length ? toArr(current.services_json) : null) ||
-    [];
+  ["#disComplaint", "#disDx", "#disRx", "#disRecs", "#disFollow"].forEach((sel) => {
+    const el = $(sel);
+    if (el) el.addEventListener("input", live);
+  });
 
-  const safeStock =
-    (Array.isArray(current.stock) && current.stock.length ? current.stock : null) ||
-    (toArr(current.stock_json).length ? toArr(current.stock_json) : null) ||
-    [];
+  // ✅ ONE delegated click handler for all modal buttons
+  modal.addEventListener("click", async (e) => {
+    const vid = modal.dataset.visitId;
 
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    weight_kg: current.weight_kg,
-
-    note: buildVisitNote(form.dx, form.complaint),
-    rx: buildRxCombined(form.rx, form.recs, form.follow),
-
-    // ✅ КЛЮЧЕВО: *_json отправляем СТРОКОЙ
-    services: safeServices,
-    services_json: JSON.stringify(safeServices),
-
-    stock: safeStock,
-    stock_json: JSON.stringify(safeStock),
-  };
-
-  const updated = await updateVisitApi(vid, payload);
-  if (!updated) {
-    alert("Помилка збереження візиту");
-    return;
-  }
-
-  // ✅ перетягиваем с сервера и кладём в кеш уже нормализованным
-  const freshRaw = await fetchVisitById(vid);
-  if (freshRaw?.id) {
-    const fresh = (typeof normalizeVisitFromServer === "function")
-      ? normalizeVisitFromServer({ ...freshRaw })
-      : freshRaw;
-
-    cacheVisits([fresh]);
-    if (String(state.selectedVisitId) === String(vid)) {
-      state.selectedVisit = fresh;
-    }
-  }
-
-  renderDischargeA4(vid);
-  await refreshVisitUIIfOpen();
-
-  alert("✅ Збережено на сервері");
-});
-
-    // PRINT (A4 only)
-    $("#disPrint")?.addEventListener("click", () => {
-      const vid = modal.dataset.visitId;
+    // --- SAVE ---
+    if (e.target.closest("#disSave")) {
+      e.preventDefault();
+      e.stopPropagation();
       if (!vid) return;
-      printA4Only(vid);
-    });
 
-    // DOWNLOAD PDF — Android Telegram fix
-    const bindDownload = () => {
-      const btn = document.getElementById("disDownload");
-      if (!btn) return;
+      console.log("[discharge] SAVE click", { vid });
 
-      const run = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      const form = readDischargeForm();
 
-        const vid = modal.dataset.visitId;
-        if (!vid) return;
+      // тянем текущий визит чтобы не потерять services/stock
+      const current = (getVisitByIdSync && getVisitByIdSync(vid)) || (await fetchVisitById(vid));
+      if (!current) return alert("Візит не знайдено");
 
-        btn.textContent = "Генерую…";
-        btn.disabled = true;
+      // 🛡 безопасно достаем услуги и склад (services ИЛИ services_json)
+      const safeServices =
+        Array.isArray(current.services) && current.services.length
+          ? current.services
+          : Array.isArray(current.services_json)
+          ? current.services_json
+          : [];
 
-        Promise.resolve()
-          .then(() => downloadA4Pdf(vid))
-          .finally(() => {
-            btn.disabled = false;
-            btn.textContent = "Скачати PDF";
-          });
+      const safeStock =
+        Array.isArray(current.stock) && current.stock.length
+          ? current.stock
+          : Array.isArray(current.stock_json)
+          ? current.stock_json
+          : [];
+
+      const payload = {
+        pet_id: current.pet_id,
+        date: current.date,
+        weight_kg: current.weight_kg,
+
+        note: buildVisitNote(form.dx, form.complaint),
+        rx: buildRxCombined(form.rx, form.recs, form.follow),
+
+        services: safeServices,
+        services_json: safeServices,
+
+        stock: safeStock,
+        stock_json: safeStock,
       };
 
-      // сброс старых
-      btn.onclick = null;
-      btn.ontouchstart = null;
+      console.log("[discharge] PUT payload", payload);
 
-      btn.addEventListener("click", run, { passive: false });
-      btn.addEventListener("touchstart", run, { passive: false });
-    };
+      const updated = await updateVisitApi(vid, payload);
+      console.log("[discharge] updateVisitApi result", updated);
 
-    bindDownload();
-    setTimeout(bindDownload, 0);
+      if (!updated) return alert("Помилка збереження візиту");
 
-    // close handlers
-    modal.addEventListener("click", (e) => {
-      if (e.target.closest("[data-close-discharge]")) closeDischargeModal();
-    });
+      const fresh = await fetchVisitById(vid);
+      console.log("[discharge] fresh after PUT", fresh);
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeDischargeModal();
-        closeVisitModal();
+      if (fresh?.id) {
+        cacheVisits([fresh]);
+        if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
       }
-    });
 
-    state.dischargeListenersBound = true;
-  }
+      renderDischargeA4(vid);
+      await refreshVisitUIIfOpen();
+
+      alert("✅ Збережено на сервері");
+      return;
+    }
+
+    // --- PRINT ---
+    if (e.target.closest("#disPrint")) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!vid) return;
+      printA4Only(vid);
+      return;
+    }
+
+    // --- DOWNLOAD PDF ---
+    if (e.target.closest("#disDownload")) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!vid) return;
+
+      const btn = document.getElementById("disDownload");
+      if (btn) {
+        btn.textContent = "Генерую…";
+        btn.disabled = true;
+      }
+
+      try {
+        await downloadA4Pdf(vid);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Скачати PDF";
+        }
+      }
+      return;
+    }
+
+    // --- CLOSE ---
+    if (e.target.closest("[data-close-discharge]")) {
+      closeDischargeModal();
+      return;
+    }
+  }, true);
+
+  // Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeDischargeModal();
+      closeVisitModal();
+    }
+  });
+
+  state.dischargeListenersBound = true;
+}
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
-}
 
 function closeDischargeModal() {
   const modal = $("#dischargeModal");
