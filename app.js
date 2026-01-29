@@ -2500,9 +2500,10 @@ function fillDischargeForm(visit, existing) {
   const parsed = parseVisitNote(visit?.note || "");
   const complaint = (ex.complaint ?? ex.disComplaint ?? parsed.complaint ?? "").toString();
   const dx = (ex.dx ?? ex.disDx ?? parsed.dx ?? "").toString();
-  const rx = (ex.rx ?? ex.disRx ?? visit?.rx ?? "").toString();
-  const recs = (ex.recs ?? ex.disRecs ?? "").toString();
-  const follow = (ex.follow ?? ex.disFollow ?? "").toString();
+  const parsedRx = parseRxCombined(visit?.rx || "");
+const rx = (ex.rx ?? ex.disRx ?? parsedRx.rx ?? "").toString();
+const recs = (ex.recs ?? ex.disRecs ?? parsedRx.recs ?? "").toString();
+const follow = (ex.follow ?? ex.disFollow ?? parsedRx.follow ?? "").toString();
 
   const c = document.getElementById("disComplaint");
   const d = document.getElementById("disDx");
@@ -2658,6 +2659,38 @@ function renderDischargeA4(visitId) {
   `;
 }
 
+function buildRxCombined(rx, recs, follow) {
+  const parts = [];
+  const a = String(rx || "").trim();
+  const b = String(recs || "").trim();
+  const c = String(follow || "").trim();
+
+  if (a) parts.push(a);
+  if (b) parts.push(`Рекомендації:\n${b}`);
+  if (c) parts.push(`Контроль / при погіршенні:\n${c}`);
+
+  return parts.join("\n\n").trim();
+}
+
+function parseRxCombined(text) {
+  const t = String(text || "");
+
+  // пробуем вытащить секции по маркерам
+  const recsMatch = t.match(/(?:^|\n)Рекомендації:\n([\s\S]*?)(?=\n\nКонтроль \/ при погіршенні:\n|\s*$)/);
+  const followMatch = t.match(/(?:^|\n)Контроль \/ при погіршенні:\n([\s\S]*)$/);
+
+  const recs = (recsMatch?.[1] || "").trim();
+  const follow = (followMatch?.[1] || "").trim();
+
+  // "чистый rx" = то что до "Рекомендації:" (если есть)
+  let rx = t;
+  const cut = t.indexOf("\n\nРекомендації:\n");
+  if (cut >= 0) rx = t.slice(0, cut);
+  rx = rx.trim();
+
+  return { rx, recs, follow };
+}
+
 // ===== Discharge modal (SERVER-safe) =====
 async function openDischargeModal(visitId) {
   const modal = $("#dischargeModal");
@@ -2690,13 +2723,48 @@ async function openDischargeModal(visitId) {
     });
 
     // SAVE (local for now)
-    $("#disSave")?.addEventListener("click", () => {
-      const vid = modal.dataset.visitId;
-      if (!vid) return;
-      setDischarge(vid, readDischargeForm());
-      renderDischargeA4(vid);
-      alert("✅ Збережено");
-    });
+    $("#disSave")?.addEventListener("click", async () => {
+  const vid = modal.dataset.visitId;
+  if (!vid) return;
+
+  // читаем форму
+  const form = readDischargeForm(); // {complaint, dx, rx, recs, follow} — как у тебя
+
+  // тянем текущий визит чтобы не потерять services/stock
+  const current = await fetchVisitById(vid);
+  if (!current) return alert("Візит не знайдено");
+
+  const payload = {
+    pet_id: current.pet_id,
+    date: current.date,
+    weight_kg: current.weight_kg,
+
+    // ✅ note с диагнозом/жалобой
+    note: buildVisitNote(form.dx, form.complaint),
+
+    // ✅ rx общий (призначення + реком + контроль)
+    rx: buildRxCombined(form.rx, form.recs, form.follow),
+
+    // ✅ НЕ ТРОГАЕМ услуги/склад — и обязательно дублируем в *_json
+    services: Array.isArray(current.services) ? current.services : [],
+    services_json: Array.isArray(current.services) ? current.services : [],
+
+    stock: Array.isArray(current.stock) ? current.stock : [],
+    stock_json: Array.isArray(current.stock) ? current.stock : [],
+  };
+
+  const updated = await updateVisitApi(vid, payload);
+  if (!updated) return;
+
+  // обновим UI
+  const fresh = await fetchVisitById(vid);
+  if (fresh?.id) cacheVisits([fresh]);
+
+  renderDischargeA4(vid);
+  await refreshVisitUIIfOpen();
+
+  alert("✅ Збережено на сервері");
+});
 
     // PRINT (A4 only)
     $("#disPrint")?.addEventListener("click", () => {
@@ -3199,14 +3267,18 @@ $("#visitSave")?.addEventListener("click", async () => {
 
     // базовый payload
     const payload = {
-      pet_id: pet.id,
-      date,
-      note: buildVisitNote(dx, notePlain),
-      rx,
-      weight_kg: weight,
-      services: [],
-      stock: [],
-    };
+  pet_id: pet.id,
+  date,
+  note: buildVisitNote(dx, notePlain),
+  rx,
+  weight_kg: weight,
+
+  // ✅ ВСЕГДА дублируем в *_json чтобы сервер точно хранил
+  services: [],
+  services_json: [],
+  stock: [],
+  stock_json: [],
+};
 
     // =========================
     // EDIT (server)
@@ -3217,7 +3289,10 @@ $("#visitSave")?.addEventListener("click", async () => {
       if (!current) return alert("Візит не знайдено");
 
       payload.services = Array.isArray(current.services) ? current.services : [];
-      payload.stock = Array.isArray(current.stock) ? current.stock : [];
+payload.services_json = payload.services;
+
+payload.stock = Array.isArray(current.stock) ? current.stock : [];
+payload.stock_json = payload.stock;
 
       const updated = await updateVisitApi(editVisitId, payload);
       if (!updated) return;
