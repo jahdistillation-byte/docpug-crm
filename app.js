@@ -762,18 +762,20 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
   };
 
   const updated = await updateVisitApi(visitId, payload);
-  // ✅ ВСТАВИТЬ ВОТ ТУТ (после updateVisitApi)
+
   if (updated) {
     const vid = String(visitId);
     const v = state.visitsById.get(vid) || { ...current, id: visitId };
 
     v.services = payload.services;
-    v.services_json = payload.services; // на всякий
+    v.services_json = payload.services;
     v.stock = payload.stock;
     v.stock_json = payload.stock;
 
     state.visitsById.set(vid, v);
     if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
+
+    if (typeof renderVisitDetails === "function") renderVisitDetails(visitId);
   }
 
   return !!updated;
@@ -829,7 +831,7 @@ async function pushVisitStockToServer(visitId, stockArr) {
 
   return !!updated;
 }
-  return !!updated;
+
 }
 
 async function deleteVisitApi(visitId) {
@@ -967,6 +969,7 @@ async function addServiceLineToVisit(visitId, serviceId, qty) {
 
   return ok;
 }
+
 
 async function removeServiceLineFromVisit(visitId, index) {
   if (!visitId) return false;
