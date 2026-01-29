@@ -735,50 +735,78 @@ async function createVisitApi(payload) {
 
 async function updateVisitApi(visitId, payload) {
   try {
-    const res = await fetch(`/api/visits?id=${visitId}`, {
+    const url = `/api/visits?id=${encodeURIComponent(String(visitId))}`;
+
+    const res = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload || {}),
     });
 
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "update failed");
+    // ✅ читаем как текст (чтобы не падать на HTML/405)
+    const text = await res.text();
 
-    // --- НОРМАЛИЗАЦИЯ ---
-    const raw = Array.isArray(json.data)
-      ? (json.data[0] || null)
-      : (json.data || null);
-
-    let updated = normalizeVisitFromServer(raw);
-
-    // --- 🔒 НЕ ДАЁМ ПРОПАДАТЬ SERVICES / STOCK ---
-    if (updated?.id != null) {
-      const vid = String(updated.id);
-      const prev = state.visitsById.get(vid) || null;
-
-      if (prev) {
-        const prevServices = Array.isArray(prev.services) ? prev.services : [];
-        const prevStock = Array.isArray(prev.stock) ? prev.stock : [];
-
-        const updHasServices =
-          Array.isArray(updated.services) && updated.services.length > 0;
-        const updHasStock =
-          Array.isArray(updated.stock) && updated.stock.length > 0;
-
-        if (!updHasServices && prevServices.length) {
-          updated.services = prevServices;
-          updated.services_json = prevServices;
-        }
-
-        if (!updHasStock && prevStock.length) {
-          updated.stock = prevStock;
-          updated.stock_json = prevStock;
-        }
-      }
-
-      cacheVisits([updated]);
+    // ✅ пробуем распарсить JSON
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch (_) {
+      json = null;
     }
 
+    // ✅ если сервер вернул не-200/ok — покажем нормальную ошибку
+    if (!res.ok) {
+      console.error("updateVisitApi HTTP error:", res.status, text);
+      alert(`API error ${res.status}`);
+      return null;
+    }
+
+    // ✅ если JSON нет или формат не тот
+    if (!json || typeof json !== "object") {
+      console.error("updateVisitApi: server returned non-JSON:", text);
+      alert("Сервер повернув не JSON (перевір /api/visits PUT)");
+      return null;
+    }
+
+    if (!json.ok) {
+      console.error("updateVisitApi: json.ok=false:", json);
+      alert(json.error || "update failed");
+      return null;
+    }
+
+    // --- НОРМАЛИЗАЦИЯ ---
+    const raw = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+    let updated = normalizeVisitFromServer(raw);
+
+    // если сервер вернул вообще пусто — не ломаем кеш
+    if (!updated || updated.id == null) {
+      console.warn("updateVisitApi: updated visit has no id:", updated, json);
+      return updated || null;
+    }
+
+    const vid = String(updated.id);
+
+    // --- 🔒 НЕ ДАЁМ ПРОПАДАТЬ SERVICES / STOCK ---
+    const prev = state.visitsById.get(vid) || null;
+    if (prev) {
+      const prevServices = Array.isArray(prev.services) ? prev.services : [];
+      const prevStock = Array.isArray(prev.stock) ? prev.stock : [];
+
+      const updHasServices = Array.isArray(updated.services) && updated.services.length > 0;
+      const updHasStock = Array.isArray(updated.stock) && updated.stock.length > 0;
+
+      // если сервер вернул "урезанный" визит (без services/stock) — сохраняем старое
+      if (!updHasServices && prevServices.length) {
+        updated.services = prevServices;
+        updated.services_json = prevServices;
+      }
+      if (!updHasStock && prevStock.length) {
+        updated.stock = prevStock;
+        updated.stock_json = prevStock;
+      }
+    }
+
+    cacheVisits([updated]);
     return updated;
 
   } catch (e) {

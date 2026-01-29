@@ -291,6 +291,46 @@ def api_get_visits():
     rows = res.data or []
     return ok(rows)
 
+@app.put("/api/visits")
+def api_update_visit_query():
+    visit_id = request.args.get("id")
+    if not visit_id:
+        return fail("id required", 400)
+
+    d = request.get_json(silent=True) or {}
+
+    payload = {
+        "date": d.get("date"),
+        "note": d.get("note"),
+        "dx": d.get("dx"),          # 🔴 ВАЖНО: диагноз
+        "rx": d.get("rx"),
+        "weight_kg": d.get("weight_kg"),
+    }
+
+    # если прислали — обновляем, если нет — не трогаем
+    if "services" in d:
+        payload["services"] = d.get("services")
+    if "stock" in d:
+        payload["stock"] = d.get("stock")
+
+    res = update_with_optional_fallback(
+        "visits",
+        visit_id,
+        payload,
+        optional_fields=["services", "stock"]
+    )
+
+    if res is None:
+        return ok(True)
+
+    row = (
+        res.data[0]
+        if getattr(res, "data", None)
+        else {"id": visit_id, **clean_payload(payload)}
+    )
+
+    return ok(row)
+
 @app.post("/api/visits")
 def api_create_visit():
     d = request.get_json() or {}
@@ -330,6 +370,8 @@ def api_update_visit(visit_id):
         "rx": d.get("rx"),
         "weight_kg": d.get("weight_kg"),
     }
+
+    
 
     # ✅ если прислали — обновляем (иначе не трогаем)
     if "services" in d:
