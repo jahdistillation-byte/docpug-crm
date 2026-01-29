@@ -2510,6 +2510,16 @@ function fillDischargeForm(visit, existing) {
   if (f) f.value = follow;
 }
 
+function readDischargeForm() {
+  return {
+    complaint: (document.getElementById("disComplaint")?.value || "").trim(),
+    dx:        (document.getElementById("disDx")?.value || "").trim(),
+    rx:        (document.getElementById("disRx")?.value || "").trim(),
+    recs:      (document.getElementById("disRecs")?.value || "").trim(),
+    follow:    (document.getElementById("disFollow")?.value || "").trim(),
+  };
+}
+
 function renderDischargeA4(visitId) {
   const a4 = document.getElementById("disA4");
   if (!a4) return;
