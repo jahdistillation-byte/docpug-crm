@@ -763,6 +763,7 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
 
   const updated = await updateVisitApi(visitId, payload);
 
+  // ✅ Обновляем кеш/selectedVisit, чтобы UI мог брать актуальные данные
   if (updated) {
     const vid = String(visitId);
     const v = state.visitsById.get(vid) || { ...current, id: visitId };
@@ -774,8 +775,6 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
 
     state.visitsById.set(vid, v);
     if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
-
-    if (typeof renderVisitDetails === "function") renderVisitDetails(visitId);
   }
 
   return !!updated;
@@ -796,23 +795,8 @@ async function pushVisitStockToServer(visitId, stockArr) {
   };
 
   const updated = await updateVisitApi(visitId, payload);
-  async function pushVisitStockToServer(visitId, stockArr) {
-  const current = await fetchVisitById(visitId);
-  if (!current) return false;
 
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    note: current.note,
-    rx: current.rx,
-    weight_kg: current.weight_kg,
-    services: Array.isArray(current.services) ? current.services : [],
-    stock: Array.isArray(stockArr) ? stockArr : [],
-  };
-
-  const updated = await updateVisitApi(visitId, payload);
-
-  // ✅ ВСТАВИТЬ ВОТ ТУТ (после updateVisitApi)
+  // ✅ Обновляем кеш/selectedVisit
   if (updated) {
     const vid = String(visitId);
     const v = state.visitsById.get(vid) || { ...current, id: visitId };
@@ -826,12 +810,7 @@ async function pushVisitStockToServer(visitId, stockArr) {
     if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
   }
 
-  // если хочешь, можешь оставить, но уже не обязательно:
-  // if (updated?.id) cacheVisits([updated]);
-
   return !!updated;
-}
-
 }
 
 async function deleteVisitApi(visitId) {
