@@ -80,8 +80,13 @@ function normalizeVisitFromServer(visit) {
     try { sjArr = JSON.parse(sj); } catch { sjArr = null; }
   }
 
-  if (!Array.isArray(visit.services)) {
-    visit.services = Array.isArray(sjArr) ? sjArr : [];
+  // IMPORTANT:
+  // Server may always return `services: []` even when services_json has data.
+  // So we refresh services from services_json when services is missing OR empty.
+  const hasServicesArr = Array.isArray(visit.services);
+  const hasSjArr = Array.isArray(sjArr);
+  if (!hasServicesArr || (visit.services.length === 0 && hasSjArr && sjArr.length > 0)) {
+    visit.services = hasSjArr ? sjArr : [];
   }
 
   // stock_json: array OR string
@@ -92,8 +97,11 @@ function normalizeVisitFromServer(visit) {
     try { stArr = JSON.parse(stj); } catch { stArr = null; }
   }
 
-  if (!Array.isArray(visit.stock)) {
-    visit.stock = Array.isArray(stArr) ? stArr : [];
+  // Same issue as services: server can return `stock: []` even when stock_json has data.
+  const hasStockArr = Array.isArray(visit.stock);
+  const hasStArr = Array.isArray(stArr);
+  if (!hasStockArr || (visit.stock.length === 0 && hasStArr && stArr.length > 0)) {
+    visit.stock = hasStArr ? stArr : [];
   }
 
   return visit;
@@ -751,38 +759,8 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
   const current = await fetchVisitById(visitId);
   if (!current) return false;
 
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    note: current.note,
-    rx: current.rx,
-    weight_kg: current.weight_kg,
-    services: Array.isArray(servicesArr) ? servicesArr : [],
-    stock: Array.isArray(current.stock) ? current.stock : [],
-  };
-
-  const updated = await updateVisitApi(visitId, payload);
-
-  // ✅ Обновляем кеш/selectedVisit, чтобы UI мог брать актуальные данные
-  if (updated) {
-    const vid = String(visitId);
-    const v = state.visitsById.get(vid) || { ...current, id: visitId };
-
-    v.services = payload.services;
-    v.services_json = payload.services;
-    v.stock = payload.stock;
-    v.stock_json = payload.stock;
-
-    state.visitsById.set(vid, v);
-    if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
-  }
-
-  return !!updated;
-}
-
-async function pushVisitStockToServer(visitId, stockArr) {
-  const current = await fetchVisitById(visitId);
-  if (!current) return false;
+  const services = Array.isArray(servicesArr) ? servicesArr : [];
+  const stock = Array.isArray(current.stock) ? current.stock : [];
 
   const payload = {
     pet_id: current.pet_id,
@@ -790,21 +768,27 @@ async function pushVisitStockToServer(visitId, stockArr) {
     note: current.note,
     rx: current.rx,
     weight_kg: current.weight_kg,
-    services: Array.isArray(current.services) ? current.services : [],
-    stock: Array.isArray(stockArr) ? stockArr : [],
+
+    // ✅ отправляем и так, и так (какой-то бэк хранит services_json)
+    services,
+    services_json: services,
+
+    // ✅ не трогаем склад
+    stock,
+    stock_json: stock,
   };
 
   const updated = await updateVisitApi(visitId, payload);
 
-  // ✅ Обновляем кеш/selectedVisit
+  // ✅ обновим локальный кеш, чтобы UI мог брать актуальные данные
   if (updated) {
     const vid = String(visitId);
     const v = state.visitsById.get(vid) || { ...current, id: visitId };
 
-    v.services = payload.services;
-    v.services_json = payload.services;
-    v.stock = payload.stock;
-    v.stock_json = payload.stock;
+    v.services = services;
+    v.services_json = services;
+    v.stock = stock;
+    v.stock_json = stock;
 
     state.visitsById.set(vid, v);
     if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
