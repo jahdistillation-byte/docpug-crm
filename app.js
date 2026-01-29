@@ -762,6 +762,20 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
   };
 
   const updated = await updateVisitApi(visitId, payload);
+  // ✅ ВСТАВИТЬ ВОТ ТУТ (после updateVisitApi)
+  if (updated) {
+    const vid = String(visitId);
+    const v = state.visitsById.get(vid) || { ...current, id: visitId };
+
+    v.services = payload.services;
+    v.services_json = payload.services; // на всякий
+    v.stock = payload.stock;
+    v.stock_json = payload.stock;
+
+    state.visitsById.set(vid, v);
+    if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
+  }
+
   return !!updated;
 }
 
@@ -780,7 +794,41 @@ async function pushVisitStockToServer(visitId, stockArr) {
   };
 
   const updated = await updateVisitApi(visitId, payload);
-  if (updated?.id) cacheVisits([updated]);
+  async function pushVisitStockToServer(visitId, stockArr) {
+  const current = await fetchVisitById(visitId);
+  if (!current) return false;
+
+  const payload = {
+    pet_id: current.pet_id,
+    date: current.date,
+    note: current.note,
+    rx: current.rx,
+    weight_kg: current.weight_kg,
+    services: Array.isArray(current.services) ? current.services : [],
+    stock: Array.isArray(stockArr) ? stockArr : [],
+  };
+
+  const updated = await updateVisitApi(visitId, payload);
+
+  // ✅ ВСТАВИТЬ ВОТ ТУТ (после updateVisitApi)
+  if (updated) {
+    const vid = String(visitId);
+    const v = state.visitsById.get(vid) || { ...current, id: visitId };
+
+    v.services = payload.services;
+    v.services_json = payload.services;
+    v.stock = payload.stock;
+    v.stock_json = payload.stock;
+
+    state.visitsById.set(vid, v);
+    if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
+  }
+
+  // если хочешь, можешь оставить, но уже не обязательно:
+  // if (updated?.id) cacheVisits([updated]);
+
+  return !!updated;
+}
   return !!updated;
 }
 
