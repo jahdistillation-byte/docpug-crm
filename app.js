@@ -2738,6 +2738,28 @@ function initDischargeModalUI() {
   state.dischargeListenersBound = true;
 }
 
+function openDischargeModal(visitId) {
+  const modal = $("#dischargeModal");
+  if (!modal) return alert("Не знайдено #dischargeModal в HTML");
+
+  const vid = String(visitId || "");
+  if (!vid) return;
+
+  // запомним какой визит редактируем
+  modal.dataset.visitId = vid;
+
+  // заполним форму из визита + локальных данных
+  const v = getVisitByIdSync(vid);
+  const existing = getDischarge(vid) || {};
+  fillDischargeForm(v || {}, existing);
+
+  // сразу перерендерим A4
+  renderDischargeA4(vid);
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
 function closeDischargeModal() {
   const modal = $("#dischargeModal");
   if (!modal) return;
@@ -2745,6 +2767,7 @@ function closeDischargeModal() {
   modal.setAttribute("aria-hidden", "true");
   delete modal.dataset.visitId;
 }
+
 
 
 // ===== UI init (Owners) — server-first (delegated, survives rerenders) =====
@@ -3357,6 +3380,7 @@ if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
   initPatientUI();
   initVisitUI();
   initVisitsTabUI();
+  initDischargeModalUI()
 
   // услуги оставляем локально (как есть)
   // renderServicesTab();
