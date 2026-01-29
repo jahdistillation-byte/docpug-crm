@@ -2728,75 +2728,84 @@ async function openDischargeModal(visitId) {
   const vid = modal.dataset.visitId;
   if (!vid) return;
 
-  // читаем форму
-  const form = readDischargeForm(); // {complaint, dx, rx, recs, follow} — как у тебя
+  const form = readDischargeForm();
 
-  // тянем текущий визит чтобы не потерять services/stock
-  // тянем текущий визит чтобы не потерять services/stock
-const current =
-  (typeof getVisitByIdSync === "function" && getVisitByIdSync(vid)) ||
-  (await fetchVisitById(vid));
-
-if (!current) {
-  alert("Візит не знайдено");
-  return;
-}
-
-// 🛡 безопасно достаем услуги и склад (из services ИЛИ services_json)
-const safeServices =
-  Array.isArray(current.services) && current.services.length
-    ? current.services
-    : Array.isArray(current.services_json)
-    ? current.services_json
-    : [];
-
-const safeStock =
-  Array.isArray(current.stock) && current.stock.length
-    ? current.stock
-    : Array.isArray(current.stock_json)
-    ? current.stock_json
-    : [];
-
-const payload = {
-  pet_id: current.pet_id,
-  date: current.date,
-  weight_kg: current.weight_kg,
-
-  // ✅ диагноз + жалоба
-  note: buildVisitNote(form.dx, form.complaint),
-
-  // ✅ назначения + рекомендации + контроль
-  rx: buildRxCombined(form.rx, form.recs, form.follow),
-
-  // ✅ услуги — НЕ ТРОГАЕМ, только пробрасываем
-  services: safeServices,
-  services_json: safeServices,
-
-  // ✅ склад — НЕ ТРОГАЕМ
-  stock: safeStock,
-  stock_json: safeStock,
-};
-
-const updated = await updateVisitApi(vid, payload);
-if (!updated) {
-  alert("Помилка збереження візиту");
-  return;
-}
-
-// 🔄 перетягиваем свежую версию визита с сервера и кладём в кеш
-const fresh = await fetchVisitById(vid);
-if (fresh?.id) {
-  cacheVisits([fresh]);
-  if (String(state.selectedVisitId) === String(vid)) {
-    state.selectedVisit = fresh;
+  // ✅ ВСЕГДА тянем визит с сервера (не из кеша)
+  const raw = await fetchVisitById(vid);
+  if (!raw) {
+    alert("Візит не знайдено");
+    return;
   }
-}
 
-// 🔄 обновляем UI
-renderDischargeA4(vid);
-await refreshVisitUIIfOpen();
+  // ✅ нормализуем: подтянет services из services_json если нужно
+  const current = (typeof normalizeVisitFromServer === "function")
+    ? normalizeVisitFromServer({ ...raw })
+    : { ...raw };
 
-alert("✅ Збережено на сервері");
+  // ✅ парсер JSON-строки -> массив
+  const toArr = (x) => {
+    if (Array.isArray(x)) return x;
+    if (typeof x === "string" && x.trim()) {
+      try {
+        const parsed = JSON.parse(x);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // 🛡 берём услуги/склад из services ИЛИ из *_json
+  const safeServices =
+    (Array.isArray(current.services) && current.services.length ? current.services : null) ||
+    (toArr(current.services_json).length ? toArr(current.services_json) : null) ||
+    [];
+
+  const safeStock =
+    (Array.isArray(current.stock) && current.stock.length ? current.stock : null) ||
+    (toArr(current.stock_json).length ? toArr(current.stock_json) : null) ||
+    [];
+
+  const payload = {
+    pet_id: current.pet_id,
+    date: current.date,
+    weight_kg: current.weight_kg,
+
+    note: buildVisitNote(form.dx, form.complaint),
+    rx: buildRxCombined(form.rx, form.recs, form.follow),
+
+    // ✅ КЛЮЧЕВО: *_json отправляем СТРОКОЙ
+    services: safeServices,
+    services_json: JSON.stringify(safeServices),
+
+    stock: safeStock,
+    stock_json: JSON.stringify(safeStock),
+  };
+
+  const updated = await updateVisitApi(vid, payload);
+  if (!updated) {
+    alert("Помилка збереження візиту");
+    return;
+  }
+
+  // ✅ перетягиваем с сервера и кладём в кеш уже нормализованным
+  const freshRaw = await fetchVisitById(vid);
+  if (freshRaw?.id) {
+    const fresh = (typeof normalizeVisitFromServer === "function")
+      ? normalizeVisitFromServer({ ...freshRaw })
+      : freshRaw;
+
+    cacheVisits([fresh]);
+    if (String(state.selectedVisitId) === String(vid)) {
+      state.selectedVisit = fresh;
+    }
+  }
+
+  renderDischargeA4(vid);
+  await refreshVisitUIIfOpen();
+
+  alert("✅ Збережено на сервері");
 });
 
     // PRINT (A4 only)
