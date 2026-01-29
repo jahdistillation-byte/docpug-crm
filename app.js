@@ -2723,13 +2723,20 @@ setDischarge(vid, form);
 const safeStock    = safeVisitArray(current.stock, current.stock_json);
 
         const payload = {
-          pet_id: current.pet_id,
-          date: current.date,
-          weight_kg: current.weight_kg,
+  pet_id: current.pet_id,
+  date: current.date,
+  weight_kg: current.weight_kg,
 
-          note: buildVisitNote(form.dx, form.complaint),
-          rx: buildRxCombined(form.rx, form.recs, form.follow),
-        };
+  note: buildVisitNote(form.dx, form.complaint),
+  rx: buildRxCombined(form.rx, form.recs, form.follow),
+
+  // ✅ ВОТ ЭТО ГЛАВНОЕ: чтобы услуги/препараты не терялись после перезахода
+  services: safeServices,
+  services_json: safeServices,
+
+  stock: safeStock,
+  stock_json: safeStock,
+};
 
         const updated = await updateVisitApi(vid, payload);
         if (!updated) return alert("Помилка збереження візиту");
