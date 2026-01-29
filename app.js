@@ -763,17 +763,57 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
   const stock = Array.isArray(current.stock) ? current.stock : [];
 
   const payload = {
+  pet_id: current.pet_id,
+  date: current.date,
+  note: current.note,
+  rx: current.rx,
+  weight_kg: current.weight_kg,
+
+  services: Array.isArray(servicesArr) ? servicesArr : [],
+  services_json: Array.isArray(servicesArr) ? servicesArr : [],
+
+  stock: Array.isArray(current.stock) ? current.stock : [],
+  stock_json: Array.isArray(current.stock) ? current.stock : [],
+};
+
+  const updated = await updateVisitApi(visitId, payload);
+
+  // ✅ обновим локальный кеш, чтобы UI мог брать актуальные данные
+  if (updated) {
+    const vid = String(visitId);
+    const v = state.visitsById.get(vid) || { ...current, id: visitId };
+
+    v.services = services;
+    v.services_json = services;
+    v.stock = stock;
+    v.stock_json = stock;
+
+    state.visitsById.set(vid, v);
+    if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
+  }
+
+  return !!updated;
+}
+
+async function pushVisitStockToServer(visitId, stockArr) {
+  const current = await fetchVisitById(visitId);
+  if (!current) return false;
+
+  const stock = Array.isArray(stockArr) ? stockArr : [];
+  const services = Array.isArray(current.services) ? current.services : [];
+
+  const payload = {
     pet_id: current.pet_id,
     date: current.date,
     note: current.note,
     rx: current.rx,
     weight_kg: current.weight_kg,
 
-    // ✅ отправляем и так, и так (какой-то бэк хранит services_json)
+    // ✅ не трогаем услуги
     services,
     services_json: services,
 
-    // ✅ не трогаем склад
+    // ✅ пушим склад
     stock,
     stock_json: stock,
   };
@@ -787,6 +827,7 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
 
     v.services = services;
     v.services_json = services;
+
     v.stock = stock;
     v.stock_json = stock;
 
@@ -2125,11 +2166,11 @@ function initVisitUI() {
         const ok = await addServiceLineToVisit(vid, serviceId, qty);
         if (!ok) return alert("Не вдалося додати послугу");
 
-        const fresh = await fetchVisitById(vid);
-        if (!fresh) return;
+       const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
+if (!v) return;
 
-        renderVisitPage(fresh, state.selectedPet);
-        renderDischargeA4(vid);
+renderVisitPage(v, state.selectedPet);
+renderDischargeA4(vid);
         return;
       }
 
