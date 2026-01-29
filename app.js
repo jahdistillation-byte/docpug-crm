@@ -2448,16 +2448,25 @@ function readDischargeForm() {
   };
 }
 
-function renderDischargeA4(visitId) {
+async function renderDischargeA4(visitId) {
   const a4 = document.getElementById("disA4");
   if (!a4) return;
 
-  // берём визит из кеша
-  const v = getVisitByIdSync(visitId);
+  // 1) пробуем из кеша
+  let v = getVisitByIdSync(visitId);
+
+  // 2) если нет — тянем с сервера и кладём в кеш
+  if (!v) {
+    v = await fetchVisitById(visitId);
+    if (v?.id) cacheVisits([v]);
+  }
+
   if (!v) {
     a4.innerHTML = `<div class="hint">Візит не знайдено</div>`;
     return;
   }
+
+  // дальше оставь твой код как есть...
 
   // pet + owner (если есть)
   const patients = (Array.isArray(state.patients) && state.patients.length) ? state.patients : loadPatients();
