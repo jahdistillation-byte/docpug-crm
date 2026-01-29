@@ -735,33 +735,52 @@ async function createVisitApi(payload) {
 
 async function updateVisitApi(visitId, payload) {
   try {
-    const res = await fetch(`/api/visits/${encodeURIComponent(visitId)}`, {
+    const res = await fetch(`/api/visits?id=${visitId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const text = await res.text();
-    let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "update failed");
 
-    if (!res.ok) {
-      console.error("API /visits PUT HTTP", res.status, text);
-      alert(`Помилка сервера при оновленні візиту (HTTP ${res.status})`);
-      return null;
+    // --- НОРМАЛИЗАЦИЯ ---
+    const raw = Array.isArray(json.data)
+      ? (json.data[0] || null)
+      : (json.data || null);
+
+    let updated = normalizeVisitFromServer(raw);
+
+    // --- 🔒 НЕ ДАЁМ ПРОПАДАТЬ SERVICES / STOCK ---
+    if (updated?.id != null) {
+      const vid = String(updated.id);
+      const prev = state.visitsById.get(vid) || null;
+
+      if (prev) {
+        const prevServices = Array.isArray(prev.services) ? prev.services : [];
+        const prevStock = Array.isArray(prev.stock) ? prev.stock : [];
+
+        const updHasServices =
+          Array.isArray(updated.services) && updated.services.length > 0;
+        const updHasStock =
+          Array.isArray(updated.stock) && updated.stock.length > 0;
+
+        if (!updHasServices && prevServices.length) {
+          updated.services = prevServices;
+          updated.services_json = prevServices;
+        }
+
+        if (!updHasStock && prevStock.length) {
+          updated.stock = prevStock;
+          updated.stock_json = prevStock;
+        }
+      }
+
+      cacheVisits([updated]);
     }
 
-    if (!json || !json.ok) {
-      console.error("API /visits PUT bad json:", json, text);
-      alert(json?.error || "Помилка оновлення візиту");
-      return null;
-    }
+    return updated;
 
-    const raw = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
-const updated = normalizeVisitFromServer(raw);
-if (updated?.id) cacheVisits([updated]);
-return updated;
   } catch (e) {
     console.error("updateVisitApi failed:", e);
     alert("Помилка зʼєднання з сервером");
@@ -2682,12 +2701,6 @@ const safeStock    = safeVisitArray(current.stock, current.stock_json);
 
           note: buildVisitNote(form.dx, form.complaint),
           rx: buildRxCombined(form.rx, form.recs, form.follow),
-
-          services: safeServices,
-          services_json: safeServices,
-
-          stock: safeStock,
-          stock_json: safeStock,
         };
 
         const updated = await updateVisitApi(vid, payload);
