@@ -733,11 +733,10 @@ async function updateVisitApi(visitId, payload) {
       return null;
     }
 
-    const updated = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
-    updated = normalizeVisitFromServer(updated); // ✅
-
-    if (updated?.id) cacheVisits([updated]);
-    return updated;
+    const raw = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+const updated = normalizeVisitFromServer(raw);
+if (updated?.id) cacheVisits([updated]);
+return updated;
   } catch (e) {
     console.error("updateVisitApi failed:", e);
     alert("Помилка зʼєднання з сервером");
