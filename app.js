@@ -2619,7 +2619,26 @@ function parseRxCombined(text) {
 
   return { rx, recs, follow };
 }
+function normalizeJsonArray(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
 
+function safeVisitArray(primary, backup) {
+  // primary = visit.services или visit.stock
+  // backup  = visit.services_json или visit.stock_json (могут быть строкой)
+  const a = normalizeJsonArray(primary);
+  if (a.length) return a;
+  return normalizeJsonArray(backup);
+}
 function initDischargeModalUI() {
   if (state.dischargeListenersBound) return;
 
@@ -2653,19 +2672,8 @@ setDischarge(vid, form);
         const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
         if (!current) return alert("Візит не знайдено");
 
-        const safeServices =
-          Array.isArray(current.services) && current.services.length
-            ? current.services
-            : Array.isArray(current.services_json)
-            ? current.services_json
-            : [];
-
-        const safeStock =
-          Array.isArray(current.stock) && current.stock.length
-            ? current.stock
-            : Array.isArray(current.stock_json)
-            ? current.stock_json
-            : [];
+        const safeServices = safeVisitArray(current.services, current.services_json);
+const safeStock    = safeVisitArray(current.stock, current.stock_json);
 
         const payload = {
           pet_id: current.pet_id,
@@ -3237,10 +3245,10 @@ $("#visitSave")?.addEventListener("click", async () => {
       const current = await fetchVisitById(editVisitId);
       if (!current) return alert("Візит не знайдено");
 
-      payload.services = Array.isArray(current.services) ? current.services : [];
+      payload.services = safeVisitArray(current.services, current.services_json);
 payload.services_json = payload.services;
 
-payload.stock = Array.isArray(current.stock) ? current.stock : [];
+payload.stock = safeVisitArray(current.stock, current.stock_json);
 payload.stock_json = payload.stock;
 
       const updated = await updateVisitApi(editVisitId, payload);
