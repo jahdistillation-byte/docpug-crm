@@ -1599,6 +1599,13 @@ function renderStockTab() {
   initStockUI();
 }
 
+function a4FilenameFromVisit(visitId) {
+  // пробуем взять визит из кеша
+  const v = getVisitByIdSync(visitId) || {};
+  const date = String(v.date || todayISO());
+  return `DocPUG_${date}_visit_${String(visitId)}.pdf`;
+}
+
 // =========================
 // PDF / PRINT (A4) — robust + Telegram
 // =========================
