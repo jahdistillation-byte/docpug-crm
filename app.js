@@ -2255,10 +2255,19 @@ async function openVisit(visitId, opts = { pushHash: true }) {
   if (!vid) return;
 
   let visit = getVisitByIdSync(vid);
-  if (!visit) visit = await fetchVisitById(vid);
 
+  // 🔁 если визита нет — пробуем загрузить с сервера
+  if (!visit) {
+    try {
+      const arr = await loadVisitsApi({ id: vid });
+      visit = arr?.[0] || null;
+    } catch {}
+  }
+
+  // ⛔ только ТЕПЕРЬ можно сказать что не найдено
   if (!visit) {
     alert("Візит не знайдено");
+    setHash("visits");
     return;
   }
 
