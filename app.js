@@ -2702,101 +2702,77 @@ function initDischargeModalUI() {
     if (el) el.addEventListener("input", live);
   });
 
-  modal.addEventListener(
-    "click",
-    async (e) => {
-      const vid = modal.dataset.visitId;
+  document.addEventListener(
+  "click",
+  async (e) => {
+    const modal = $("#dischargeModal");
+    if (!modal) return;
 
-      // --- SAVE ---
-      if (e.target.closest("#disSave")) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!vid) return;
+    const vid = modal.dataset.visitId;
 
-        const form = readDischargeForm();
-        // ✅ локально тоже сохраняем — чтобы при любом ререндере форма не "сбрасывалась"
-setDischarge(vid, form);
-        const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-        if (!current) return alert("Візит не знайдено");
+    // --- SAVE ---
+    if (e.target.closest("#disSave")) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!vid) return;
 
-        const safeServices = safeVisitArray(current.services, current.services_json);
-const safeStock    = safeVisitArray(current.stock, current.stock_json);
+      const form = readDischargeForm();
+      setDischarge(vid, form);
 
-        const payload = {
-  pet_id: current.pet_id,
-  date: current.date,
-  weight_kg: current.weight_kg,
+      const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+      if (!current) return alert("Візит не знайдено");
 
-  note: buildVisitNote(form.dx, form.complaint),
-  rx: buildRxCombined(form.rx, form.recs, form.follow),
+      const payload = {
+        pet_id: current.pet_id,
+        date: current.date,
+        weight_kg: current.weight_kg,
+        note: buildVisitNote(form.dx, form.complaint),
+        rx: buildRxCombined(form.rx, form.recs, form.follow),
+      };
 
-  // ✅ ВОТ ЭТО ГЛАВНОЕ: чтобы услуги/препараты не терялись после перезахода
-  services: safeServices,
-  services_json: safeServices,
+      const updated = await updateVisitApi(vid, payload);
+      if (!updated) return alert("Помилка збереження візиту");
 
-  stock: safeStock,
-  stock_json: safeStock,
-};
-
-        const updated = await updateVisitApi(vid, payload);
-        if (!updated) return alert("Помилка збереження візиту");
-
-        const fresh = await fetchVisitById(vid);
-        if (fresh?.id) {
-          cacheVisits([fresh]);
-          if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
-        }
-
-        // ✅ перезаполним форму (на всякий случай)
-fillDischargeForm(fresh, getDischarge(vid) || form);
-
-        renderDischargeA4(vid);
-        await refreshVisitUIIfOpen();
-
-        alert("✅ Збережено на сервері");
-        return;
+      const fresh = await fetchVisitById(vid);
+      if (fresh?.id) {
+        cacheVisits([fresh]);
+        if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
       }
 
-      // --- PRINT ---
-      if (e.target.closest("#disPrint")) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!vid) return;
-        printA4Only(vid);
-        return;
-      }
+      fillDischargeForm(fresh, getDischarge(vid) || form);
+      renderDischargeA4(vid);
+      await refreshVisitUIIfOpen();
 
-      // --- DOWNLOAD PDF ---
-      if (e.target.closest("#disDownload")) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!vid) return;
+      alert("✅ Збережено на сервері");
+      return;
+    }
 
-        const btn = $("#disDownload");
-        if (btn) {
-          btn.textContent = "Генерую…";
-          btn.disabled = true;
-        }
+    // --- PRINT ---
+    if (e.target.closest("#disPrint")) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!vid) return;
+      printA4Only(vid);
+      return;
+    }
 
-        try {
-          await downloadA4Pdf(vid);
-        } finally {
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = "Скачати PDF";
-          }
-        }
-        return;
-      }
+    // --- DOWNLOAD PDF ---
+    if (e.target.closest("#disDownload")) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!vid) return;
+      await downloadA4Pdf(vid);
+      return;
+    }
 
-      // --- CLOSE ---
-      if (e.target.closest("[data-close-discharge]")) {
-        closeDischargeModal();
-        return;
-      }
-    },
-    true
-  );
+    // --- CLOSE ---
+    if (e.target.closest("[data-close-discharge]")) {
+      closeDischargeModal();
+      return;
+    }
+  },
+  true
+);
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
