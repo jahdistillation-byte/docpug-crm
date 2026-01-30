@@ -210,7 +210,7 @@ function parseHash() {
 
   const [routeRaw, idRaw] = raw.split(":");
   const route = (routeRaw || "owners").trim() || "owners";
-  const id = (idRaw || null);
+  const id = idRaw != null ? String(idRaw).trim() : null;
 
   return { route, id };
 }
@@ -735,7 +735,7 @@ async function createVisitApi(payload) {
 
 async function updateVisitApi(visitId, payload) {
   try {
-    const url = `/api/visits?id=${encodeURIComponent(String(visitId))}`;
+    const url = `/api/visits?id=${encodeURIComponent(String(visitId || "").trim())}`;
 
     const res = await fetch(url, {
       method: "PUT",
@@ -2251,8 +2251,11 @@ renderDischargeA4(vid);
 
 // ===== Visit page =====
 async function openVisit(visitId, opts = { pushHash: true }) {
-  let visit = getVisitByIdSync(visitId);
-  if (!visit) visit = await fetchVisitById(visitId);
+  const vid = String(visitId || "").trim();
+  if (!vid) return;
+
+  let visit = getVisitByIdSync(vid);
+  if (!visit) visit = await fetchVisitById(vid);
 
   if (!visit) {
     alert("Візит не знайдено");
@@ -2262,7 +2265,7 @@ async function openVisit(visitId, opts = { pushHash: true }) {
   ensureVisitServicesShape(visit);
   ensureVisitStockShape(visit);
 
-  state.selectedVisitId = String(visitId);
+  state.selectedVisitId = vid;
 
   const patients =
     Array.isArray(state.patients) && state.patients.length
@@ -2279,10 +2282,10 @@ async function openVisit(visitId, opts = { pushHash: true }) {
   }
 
   renderVisitPage(visit, pet);
-  initVisitUI(); // 🔥 ВАЖНО
+  initVisitUI();
   setRoute("visit");
 
-  if (opts.pushHash) setHash("visit", visitId);
+  if (opts.pushHash) setHash("visit", vid);
 }
 
 // =========================

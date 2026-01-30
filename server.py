@@ -299,6 +299,13 @@ def api_get_visits():
     visit_id = request.args.get("id")
     pet_id = request.args.get("pet_id")
 
+    # 🔴 ЗАЩИТА ОТ МУСОРА
+    if visit_id:
+        visit_id = visit_id.strip()
+        # если это не UUID — сразу 400
+        if len(visit_id) < 10:
+            return fail("invalid visit id", 400)
+
     q = supabase.table("visits").select("*").eq("org_id", ORG_ID)
 
     if visit_id:
@@ -309,7 +316,6 @@ def api_get_visits():
     res = q.execute()
     rows = res.data or []
 
-    # 🔴 КРИТИЧНО: всегда добавляем services / stock
     for r in rows:
         r["services"] = r.get("services") or []
         r["stock"] = r.get("stock") or []
