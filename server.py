@@ -49,17 +49,44 @@ def ok(data=None):
 def fail(error, code=400):
     return jsonify({"ok": False, "error": error}), code
 
-def clean_payload(d: dict) -> dict:
-    """Удаляем пустые строки и None, чтобы не ломать insert/update."""
-    d = d or {}
-    out = {}
-    for k, v in d.items():
-        if v is None:
-            continue
-        if isinstance(v, str) and v.strip() == "":
-            continue
-        out[k] = v
-    return out
+def clean_payload(d):
+    """
+    Удаляем пустые строки и None.
+    Поддерживает dict и list[dict] (для batch insert/update).
+    """
+    if d is None:
+        return d
+
+    # list[dict]
+    if isinstance(d, list):
+        out_list = []
+        for item in d:
+            if isinstance(item, dict):
+                out = {}
+                for k, v in item.items():
+                    if v is None:
+                        continue
+                    if isinstance(v, str) and v.strip() == "":
+                        continue
+                    out[k] = v
+                out_list.append(out)
+            else:
+                out_list.append(item)
+        return out_list
+
+    # dict
+    if isinstance(d, dict):
+        out = {}
+        for k, v in d.items():
+            if v is None:
+                continue
+            if isinstance(v, str) and v.strip() == "":
+                continue
+            out[k] = v
+        return out
+
+    return d
+
 
 def allowed_file(filename: str) -> bool:
     if not filename or "." not in filename:
@@ -67,10 +94,12 @@ def allowed_file(filename: str) -> bool:
     ext = filename.rsplit(".", 1)[1].lower()
     return ext in ALLOWED_EXT
 
-def insert_with_optional_fallback(table: str, payload: dict, optional_fields=None):
+
+def insert_with_optional_fallback(table: str, payload, optional_fields=None):
     """
     Иногда PostgREST/Supabase кидает PGRST204 если колонки нет.
     Тогда вставляем без optional полей.
+    payload может быть dict или list[dict].
     """
     optional_fields = optional_fields or []
     payload = clean_payload(payload)
@@ -80,10 +109,23 @@ def insert_with_optional_fallback(table: str, payload: dict, optional_fields=Non
     except Exception as e:
         msg = str(e)
         if "PGRST204" in msg:
-            fallback = {k: v for k, v in payload.items() if k not in optional_fields}
-            return supabase.table(table).insert(fallback).execute()
-        raise
+            # dict payload
+            if isinstance(payload, dict):
+                fallback = {k: v for k, v in payload.items() if k not in optional_fields}
+                return supabase.table(table).insert(fallback).execute()
 
+            # list[dict] payload
+            if isinstance(payload, list):
+                fallback_list = []
+                for row in payload:
+                    if isinstance(row, dict):
+                        fallback_list.append({k: v for k, v in row.items() if k not in optional_fields})
+                    else:
+                        fallback_list.append(row)
+                return supabase.table(table).insert(fallback_list).execute()
+
+        raise
+    
 def update_with_optional_fallback(table: str, row_id: str, payload: dict, optional_fields=None):
     optional_fields = optional_fields or []
     payload = clean_payload(payload)
@@ -141,6 +183,104 @@ def normalize_visit_row(r: dict) -> dict:
     r["stock"] = _as_list(stock) or []
 
     return r
+
+def _pick_services_from_payload(d: dict):
+    return d.get("services") or d.get("services_json") or []
+
+def _pick_stock_from_payload(d: dict):
+    return d.get("stock") or d.get("stock_json") or []
+
+def load_visit_lines(visit_ids):
+    services_by_visit = {vid: [] for vid in visit_ids}
+    stock_by_visit = {vid: [] for vid in visit_ids}
+
+    if not visit_ids:
+        return services_by_visit, stock_by_visit
+
+    # services
+    try:
+        res = (
+            supabase.table("visit_services")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .in_("visit_id", visit_ids)
+            .execute()
+        )
+        for r in (res.data or []):
+            vid = r.get("visit_id")
+            if not vid:
+                continue
+            services_by_visit.setdefault(vid, []).append({
+                "serviceId": r.get("service_id") or r.get("serviceId"),
+                "qty": r.get("qty") or 1,
+                "priceSnap": r.get("price_snap") or r.get("priceSnap"),
+                "nameSnap": r.get("name_snap") or r.get("nameSnap"),
+            })
+    except Exception:
+        pass
+
+    # stock
+    try:
+        res = (
+            supabase.table("visit_stock")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .in_("visit_id", visit_ids)
+            .execute()
+        )
+        for r in (res.data or []):
+            vid = r.get("visit_id")
+            if not vid:
+                continue
+            stock_by_visit.setdefault(vid, []).append({
+                "stockId": r.get("stock_id") or r.get("stockId"),
+                "qty": r.get("qty") or 1,
+                "priceSnap": r.get("price_snap") or r.get("priceSnap"),
+                "nameSnap": r.get("name_snap") or r.get("nameSnap"),
+            })
+    except Exception:
+        pass
+
+    return services_by_visit, stock_by_visit
+
+
+def save_visit_lines(visit_id: str, d: dict):
+    services = _pick_services_from_payload(d)
+    stock = _pick_stock_from_payload(d)
+
+    # чистим старое
+    supabase.table("visit_services").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+    supabase.table("visit_stock").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+
+    # вставляем новое services
+    if isinstance(services, list) and services:
+        rows = []
+        for x in services:
+            rows.append({
+                "org_id": ORG_ID,
+                "visit_id": visit_id,
+                "service_id": x.get("serviceId") or x.get("service_id"),
+                "qty": x.get("qty") or 1,
+                "price_snap": x.get("priceSnap") or x.get("price_snap"),
+                "name_snap": x.get("nameSnap") or x.get("name_snap"),
+            })
+        insert_with_optional_fallback("visit_services", rows, optional_fields=["price_snap", "name_snap"])
+
+    # вставляем новое stock
+    if isinstance(stock, list) and stock:
+        rows = []
+        for x in stock:
+            rows.append({
+                "org_id": ORG_ID,
+                "visit_id": visit_id,
+                "stock_id": x.get("stockId") or x.get("stock_id"),
+                "qty": x.get("qty") or 1,
+                "price_snap": x.get("priceSnap") or x.get("price_snap"),
+                "name_snap": x.get("nameSnap") or x.get("name_snap"),
+            })
+        insert_with_optional_fallback("visit_stock", rows, optional_fields=["price_snap", "name_snap"])
+
+
 
 # =========================
 # TELEGRAM AUTH (optional)
@@ -303,7 +443,6 @@ def api_get_visits():
     visit_id = request.args.get("id")
     pet_id = request.args.get("pet_id")
 
-    # 🔴 защита от мусора
     if visit_id:
         visit_id = visit_id.strip()
         if len(visit_id) < 10:
@@ -319,8 +458,14 @@ def api_get_visits():
     res = q.execute()
     rows = res.data or []
 
-    # ✅ НОРМАЛИЗАЦИЯ services / stock
-    rows = [normalize_visit_row(r) for r in rows]
+    # подтягиваем линии из visit_services / visit_stock
+    ids = [r.get("id") for r in rows if r.get("id")]
+    services_by_visit, stock_by_visit = load_visit_lines(ids)
+
+    for r in rows:
+        vid = r.get("id")
+        r["services"] = services_by_visit.get(vid, [])
+        r["stock"] = stock_by_visit.get(vid, [])
 
     return ok(rows)
 
@@ -352,12 +497,13 @@ def build_services_payload(d: dict):
 
 @app.put("/api/visits")
 def api_update_visit_query():
-    visit_id = request.args.get("id")
+    visit_id = (request.args.get("id") or "").strip()
     if not visit_id:
         return fail("id required", 400)
 
     d = request.get_json(silent=True) or {}
 
+    # 1) обновляем базовые поля визита (то, что реально есть в таблице visits)
     payload = {
         "date": d.get("date"),
         "note": d.get("note"),
@@ -366,39 +512,48 @@ def api_update_visit_query():
         "weight_kg": d.get("weight_kg"),
     }
 
-    payload.update(build_services_payload(d))
+    res = update_with_optional_fallback("visits", visit_id, payload)
 
-    res = update_with_optional_fallback(
-        "visits",
-        visit_id,
-        payload,
-        optional_fields=["services", "services_json", "stock", "stock_json"]
-    )
+    # 2) сохраняем услуги/склад в отдельных таблицах (visit_services / visit_stock)
+    # важно: вызываем ВСЕГДА, даже если списки пустые — это позволит "очистить" услуги/склад
+    try:
+        save_visit_lines(visit_id, d)
+    except Exception as e:
+        return fail(f"save_visit_lines failed: {e}", 500)
 
-    if res is None:
-        return ok(True)
+    # 3) возвращаем свежие данные: visits + подтянутые lines
+    base = None
+    if res is not None and getattr(res, "data", None):
+        base = res.data[0]
+    else:
+        # если update вернул пусто — просто перечитаем визит
+        get_res = (
+            supabase.table("visits")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .eq("id", visit_id)
+            .execute()
+        )
+        base = (get_res.data[0] if get_res.data else {"id": visit_id, **clean_payload(payload)})
 
-    row = (
-        res.data[0]
-        if getattr(res, "data", None)
-        else {"id": visit_id, **clean_payload(payload)}
-    )
+    # подтягиваем услуги/склад из line-таблиц
+    services_map, stock_map = load_visit_lines([visit_id])
+    base["services"] = services_map.get(visit_id, [])
+    base["stock"] = stock_map.get(visit_id, [])
 
-    # ✅ нормализуем ответ
-    row = normalize_visit_row(row)
-
-    return ok(row)
+    return ok(base)
 
 @app.post("/api/visits")
 def api_create_visit():
-    d = request.get_json() or {}
+    d = request.get_json(silent=True) or {}
 
-    if not d.get("pet_id"):
+    pet_id = (d.get("pet_id") or "").strip()
+    if not pet_id:
         return fail("pet_id required", 400)
 
     payload = {
         "org_id": ORG_ID,
-        "pet_id": d["pet_id"],
+        "pet_id": pet_id,
         "date": d.get("date"),
         "note": d.get("note"),
         "dx": d.get("dx"),
@@ -406,18 +561,27 @@ def api_create_visit():
         "weight_kg": d.get("weight_kg"),
     }
 
-    # если фронт вдруг присылает services/stock при создании — тоже поддержим
-    payload.update(build_services_payload(d))
+    # 1) создаём визит
+    res = insert_with_optional_fallback("visits", payload)
+    row = (res.data[0] if getattr(res, "data", None) and res.data else None)
 
-    res = insert_with_optional_fallback(
-        "visits",
-        payload,
-        optional_fields=["services", "services_json", "stock", "stock_json"]
-    )
+    # если вдруг вернулось пусто — всё равно создадим id локально (на всякий)
+    if not row:
+        row = {"id": str(uuid.uuid4()), **payload}
 
-    row = res.data[0] if getattr(res, "data", None) and res.data else {"id": str(uuid.uuid4()), **payload}
+    visit_id = row["id"]
 
-    row = normalize_visit_row(row)
+    # 2) если фронт прислал услуги/склад — сохраняем их в line-таблицы
+    try:
+        save_visit_lines(visit_id, d)
+    except Exception as e:
+        return fail(f"save_visit_lines failed: {e}", 500)
+
+    # 3) возвращаем визит + lines (как фронт ожидает)
+    services_map, stock_map = load_visit_lines([visit_id])
+    row["services"] = services_map.get(visit_id, [])
+    row["stock"] = stock_map.get(visit_id, [])
+
     return ok(row)
 
 @app.delete("/api/visits/<visit_id>")
