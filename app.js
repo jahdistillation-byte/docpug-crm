@@ -2753,13 +2753,22 @@ function initDischargeModalUI() {
       const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
       if (!current) return alert("Візит не знайдено");
 
-      const payload = {
-        pet_id: current.pet_id,
-        date: current.date,
-        weight_kg: current.weight_kg,
-        note: buildVisitNote(form.dx, form.complaint),
-        rx: buildRxCombined(form.rx, form.recs, form.follow),
-      };
+      const services = safeVisitArray(current.services, current.services_json);
+const stock    = safeVisitArray(current.stock, current.stock_json);
+
+const payload = {
+  pet_id: current.pet_id,
+  date: current.date,
+  weight_kg: current.weight_kg,
+  note: buildVisitNote(form.dx, form.complaint),
+  rx: buildRxCombined(form.rx, form.recs, form.follow),
+
+  // ✅ НЕ ДАЁМ СЕРВЕРУ ЗАТЕРЕТЬ
+  services,
+  services_json: services,
+  stock,
+  stock_json: stock,
+};
 
       const updated = await updateVisitApi(vid, payload);
       if (!updated) return alert("Помилка збереження візиту");
