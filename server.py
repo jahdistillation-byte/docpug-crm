@@ -197,15 +197,19 @@ def load_visit_lines(visit_ids):
     if not visit_ids:
         return services_by_visit, stock_by_visit
 
+    # =====================
     # services
+    # =====================
     try:
-        res = (
-            supabase.table("visit_services")
-            .select("*")
-            .eq("org_id", ORG_ID)
-            .in_("visit_id", visit_ids)
-            .execute()
-        )
+        q = supabase.table("visit_services").select("*").in_("visit_id", visit_ids)
+
+        # пробуем с org_id, если колонки нет — упадет и мы повторим без org_id
+        try:
+            q = q.eq("org_id", ORG_ID)
+            res = q.execute()
+        except Exception:
+            res = supabase.table("visit_services").select("*").in_("visit_id", visit_ids).execute()
+
         for r in (res.data or []):
             vid = r.get("visit_id")
             if not vid:
@@ -219,15 +223,18 @@ def load_visit_lines(visit_ids):
     except Exception:
         pass
 
+    # =====================
     # stock
+    # =====================
     try:
-        res = (
-            supabase.table("visit_stock")
-            .select("*")
-            .eq("org_id", ORG_ID)
-            .in_("visit_id", visit_ids)
-            .execute()
-        )
+        q = supabase.table("visit_stock").select("*").in_("visit_id", visit_ids)
+
+        try:
+            q = q.eq("org_id", ORG_ID)
+            res = q.execute()
+        except Exception:
+            res = supabase.table("visit_stock").select("*").in_("visit_id", visit_ids).execute()
+
         for r in (res.data or []):
             vid = r.get("visit_id")
             if not vid:
@@ -248,15 +255,30 @@ def save_visit_lines(visit_id: str, d: dict):
     services = _pick_services_from_payload(d)
     stock = _pick_stock_from_payload(d)
 
-    # чистим старое
-    supabase.table("visit_services").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
-    supabase.table("visit_stock").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+    # =====================
+    # delete old (services)
+    # =====================
+    try:
+        supabase.table("visit_services").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+    except Exception:
+        supabase.table("visit_services").delete().eq("visit_id", visit_id).execute()
 
-    # вставляем новое services
+    # =====================
+    # delete old (stock)
+    # =====================
+    try:
+        supabase.table("visit_stock").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+    except Exception:
+        supabase.table("visit_stock").delete().eq("visit_id", visit_id).execute()
+
+    # =====================
+    # insert new services
+    # =====================
     if isinstance(services, list) and services:
         rows = []
         for x in services:
             rows.append({
+                # org_id добавляем, но он станет "optional" (если колонки нет — вырежется)
                 "org_id": ORG_ID,
                 "visit_id": visit_id,
                 "service_id": x.get("serviceId") or x.get("service_id"),
@@ -264,9 +286,16 @@ def save_visit_lines(visit_id: str, d: dict):
                 "price_snap": x.get("priceSnap") or x.get("price_snap"),
                 "name_snap": x.get("nameSnap") or x.get("name_snap"),
             })
-        insert_with_optional_fallback("visit_services", rows, optional_fields=["price_snap", "name_snap"])
 
-    # вставляем новое stock
+        insert_with_optional_fallback(
+            "visit_services",
+            rows,
+            optional_fields=["org_id", "price_snap", "name_snap"]
+        )
+
+    # =====================
+    # insert new stock
+    # =====================
     if isinstance(stock, list) and stock:
         rows = []
         for x in stock:
@@ -278,7 +307,12 @@ def save_visit_lines(visit_id: str, d: dict):
                 "price_snap": x.get("priceSnap") or x.get("price_snap"),
                 "name_snap": x.get("nameSnap") or x.get("name_snap"),
             })
-        insert_with_optional_fallback("visit_stock", rows, optional_fields=["price_snap", "name_snap"])
+
+        insert_with_optional_fallback(
+            "visit_stock",
+            rows,
+            optional_fields=["org_id", "price_snap", "name_snap"]
+        )
 
 
 
