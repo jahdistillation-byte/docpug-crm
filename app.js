@@ -115,26 +115,41 @@ async function fetchVisitById(id) {
   // ✅ то что уже есть в кеше
   const prev = state.visitsById.get(vid) || null;
 
-  const data = await loadVisitsApi({ id });
-  const arr = Array.isArray(data) ? data : (data ? [data] : []);
-  let v = arr[0] || null;
+  try {
+    const res = await fetch(`/api/visits?id=${encodeURIComponent(vid)}`, {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
 
-  v = normalizeVisitFromServer(v);
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
 
-  // ✅ если сервер прислал пусто, но в кеше было — НЕ теряем
-  if (prev) {
-    if (Array.isArray(prev.services) && prev.services.length && (!Array.isArray(v.services) || v.services.length === 0)) {
-      v.services = prev.services;
-      v.services_json = prev.services;
+    if (!res.ok || !json || !json.ok) return prev; // ✅ тихо возвращаем кеш
+
+    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
+    let v = arr[0] || null;
+
+    v = normalizeVisitFromServer(v);
+
+    // ✅ если сервер прислал пусто, но в кеше было — НЕ теряем
+    if (prev && v) {
+      if (Array.isArray(prev.services) && prev.services.length && (!Array.isArray(v.services) || v.services.length === 0)) {
+        v.services = prev.services;
+        v.services_json = prev.services;
+      }
+      if (Array.isArray(prev.stock) && prev.stock.length && (!Array.isArray(v.stock) || v.stock.length === 0)) {
+        v.stock = prev.stock;
+        v.stock_json = prev.stock;
+      }
     }
-    if (Array.isArray(prev.stock) && prev.stock.length && (!Array.isArray(v.stock) || v.stock.length === 0)) {
-      v.stock = prev.stock;
-      v.stock_json = prev.stock;
-    }
+
+    if (v?.id != null) state.visitsById.set(vid, v);
+    return v || prev;
+  } catch (e) {
+    console.warn("fetchVisitById failed, return cache:", e);
+    return prev;
   }
-
-  if (v?.id != null) state.visitsById.set(vid, v);
-  return v;
 }
 
 // ===== LocalStorage helper =====
@@ -737,11 +752,15 @@ async function updateVisitApi(visitId, payload) {
   try {
     const url = `/api/visits?id=${encodeURIComponent(String(visitId || "").trim())}`;
 
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
+   const res = await fetch(url, {
+  method: "PUT",
+  credentials: "include", // ✅ ВАЖНО
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  },
+  body: JSON.stringify(payload || {}),
+});
 
     // ✅ читаем как текст (чтобы не падать на HTML/405)
     const text = await res.text();
@@ -904,11 +923,11 @@ async function pushVisitStockToServer(visitId, stockArr) {
 
 async function deleteVisitApi(visitId) {
   try {
-    const res = await fetch(`/api/visits/${encodeURIComponent(visitId)}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
+    const res = await fetch(`/api/visits?id=${encodeURIComponent(String(visitId))}`, {
+  method: "DELETE",
+  credentials: "include",
+  headers: { Accept: "application/json" },
+});
 
     const text = await res.text();
     let json = null;
@@ -3306,6 +3325,11 @@ payload.stock_json = payload.stock;
     // =========================
     // CREATE (server)
     // =========================
+    payload.services = Array.isArray(payload.services) ? payload.services : [];
+payload.services_json = payload.services;
+
+payload.stock = Array.isArray(payload.stock) ? payload.stock : [];
+payload.stock_json = payload.stock;
     const created = await createVisitApi(payload);
     if (!created?.id) return;
 
@@ -3437,7 +3461,6 @@ if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
   initOwnerUI();
   initPatientUI();
   initVisitUI();
-  initVisitsTabUI();
   initDischargeModalUI()
 
   // услуги оставляем локально (как есть)
