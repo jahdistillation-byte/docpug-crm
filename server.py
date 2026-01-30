@@ -32,8 +32,6 @@ supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 # =========================
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25MB
-
-# Чтобы корректно работало за nginx/proxy (если нужно)
 app.config["PREFERRED_URL_SCHEME"] = "https"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -109,17 +107,41 @@ def safe_int(x, default=0):
         return default
 
 def file_url(stored_name: str) -> str:
-    # Отдаём через наш сервер: /uploads/<stored_name>
     return f"/uploads/{stored_name}"
+
+def _as_list(x):
+    if x is None:
+        return []
+    if isinstance(x, list):
+        return x
+    return x
+
+def normalize_visit_row(r: dict) -> dict:
+    """
+    Ключевая штука:
+    фронт ожидает services[] и stock[].
+    В БД это может быть services/stock или services_json/stock_json.
+    """
+    r = r or {}
+
+    # services
+    services = r.get("services")
+    if services is None:
+        services = r.get("services_json")
+    r["services"] = _as_list(services) or []
+
+    # stock
+    stock = r.get("stock")
+    if stock is None:
+        stock = r.get("stock_json")
+    r["stock"] = _as_list(stock) or []
+
+    return r
 
 # =========================
 # TELEGRAM AUTH (optional)
 # =========================
 def verify_tg_init_data(init_data: str):
-    """
-    Возвращает dict user из Telegram WebApp initData, если подпись валидная.
-    Если токена нет/данных нет — None.
-    """
     if not init_data or not TELEGRAM_BOT_TOKEN:
         return None
 
@@ -165,7 +187,6 @@ def uploads(f):
 
 @app.get("/<path:path>")
 def static_any(path):
-    # Блокируем случайный доступ в api/uploads
     if path.startswith("api/") or path.startswith("uploads/"):
         return fail("Not found", 404)
     return send_from_directory(BASE_DIR, path)
@@ -224,8 +245,6 @@ def api_create_owner():
 def api_delete_owner(owner_id):
     if not owner_id:
         return fail("owner_id required", 400)
-
-    # Удаляем owner (если есть FK в БД — лучше настроить cascade или запрещать)
     supabase.table("owners").delete().eq("org_id", ORG_ID).eq("id", owner_id).execute()
     return ok(True)
 
@@ -289,7 +308,37 @@ def api_get_visits():
 
     res = q.execute()
     rows = res.data or []
+
+    # ✅ ВАЖНО: нормализуем услуги/склад при выдаче
+    rows = [normalize_visit_row(r) for r in rows]
+
     return ok(rows)
+
+def build_services_payload(d: dict):
+    """
+    Сохраняем в то, что реально есть в БД.
+    Если в БД нет колонки services, обычно есть services_json.
+    Чтобы не гадать — пишем в обе, а fallback сам отрежет несуществующее.
+    """
+    out = {}
+
+    if "services" in d:
+        out["services"] = d.get("services")
+        out["services_json"] = d.get("services")
+
+    if "services_json" in d:
+        out["services_json"] = d.get("services_json")
+        out["services"] = d.get("services_json")
+
+    if "stock" in d:
+        out["stock"] = d.get("stock")
+        out["stock_json"] = d.get("stock")
+
+    if "stock_json" in d:
+        out["stock_json"] = d.get("stock_json")
+        out["stock"] = d.get("stock_json")
+
+    return out
 
 @app.put("/api/visits")
 def api_update_visit_query():
@@ -302,22 +351,18 @@ def api_update_visit_query():
     payload = {
         "date": d.get("date"),
         "note": d.get("note"),
-        "dx": d.get("dx"),          # 🔴 ВАЖНО: диагноз
+        "dx": d.get("dx"),
         "rx": d.get("rx"),
         "weight_kg": d.get("weight_kg"),
     }
 
-    # если прислали — обновляем, если нет — не трогаем
-    if "services" in d:
-        payload["services"] = d.get("services")
-    if "stock" in d:
-        payload["stock"] = d.get("stock")
+    payload.update(build_services_payload(d))
 
     res = update_with_optional_fallback(
         "visits",
         visit_id,
         payload,
-        optional_fields=["services", "stock"]
+        optional_fields=["services", "services_json", "stock", "stock_json"]
     )
 
     if res is None:
@@ -328,6 +373,9 @@ def api_update_visit_query():
         if getattr(res, "data", None)
         else {"id": visit_id, **clean_payload(payload)}
     )
+
+    # ✅ нормализуем ответ
+    row = normalize_visit_row(row)
 
     return ok(row)
 
@@ -348,12 +396,18 @@ def api_create_visit():
         "weight_kg": d.get("weight_kg"),
     }
 
-    res = insert_with_optional_fallback("visits", payload)
+    # если фронт вдруг присылает services/stock при создании — тоже поддержим
+    payload.update(build_services_payload(d))
 
-    row = res.data[0]
-    row["services"] = []
-    row["stock"] = []
+    res = insert_with_optional_fallback(
+        "visits",
+        payload,
+        optional_fields=["services", "services_json", "stock", "stock_json"]
+    )
 
+    row = res.data[0] if getattr(res, "data", None) and res.data else {"id": str(uuid.uuid4()), **payload}
+
+    row = normalize_visit_row(row)
     return ok(row)
 
 @app.put("/api/visits/<visit_id>")
@@ -364,26 +418,26 @@ def api_update_visit(visit_id):
     d = request.get_json(silent=True) or {}
 
     payload = {
-        # org_id НЕ меняем
         "date": d.get("date"),
         "note": d.get("note"),
+        "dx": d.get("dx"),  # ✅ у тебя этого не было — диагноз не сохранялся
         "rx": d.get("rx"),
         "weight_kg": d.get("weight_kg"),
     }
 
-    
+    payload.update(build_services_payload(d))
 
-    # ✅ если прислали — обновляем (иначе не трогаем)
-    if "services" in d:
-        payload["services"] = d.get("services")
-    if "stock" in d:
-        payload["stock"] = d.get("stock")
-
-    res = update_with_optional_fallback("visits", visit_id, payload, optional_fields=["services", "stock"])
+    res = update_with_optional_fallback(
+        "visits",
+        visit_id,
+        payload,
+        optional_fields=["services", "services_json", "stock", "stock_json"]
+    )
     if res is None:
         return ok(True)
 
     row = (res.data[0] if getattr(res, "data", None) else None) or {"id": visit_id, **clean_payload(payload)}
+    row = normalize_visit_row(row)
     return ok(row)
 
 @app.delete("/api/visits/<visit_id>")
@@ -399,7 +453,6 @@ def api_delete_visit(visit_id):
 # =========================
 @app.post("/api/upload")
 def api_upload():
-    # ожидаем multipart/form-data с files[]
     if "files" not in request.files:
         return fail("No files[] provided", 400)
 
@@ -425,13 +478,11 @@ def api_upload():
 
         f.save(path)
 
-        # size
         try:
             size = os.path.getsize(path)
         except Exception:
             size = 0
 
-        # mime
         mime = mimetypes.guess_type(path)[0] or f.mimetype or ""
 
         saved.append({
@@ -445,7 +496,6 @@ def api_upload():
     if not saved:
         return fail("No valid files saved", 400)
 
-    # ВАЖНО: твой фронт ждёт { ok:true, files:[...] }
     return jsonify({"ok": True, "files": saved})
 
 # =========================
@@ -458,12 +508,10 @@ def api_delete_upload():
     if not stored_name:
         return fail("stored_name required", 400)
 
-    # защитимся от ../
     stored_name = os.path.basename(stored_name)
     path = os.path.join(UPLOAD_DIR, stored_name)
 
     if not os.path.exists(path):
-        # не ошибка: уже удалён
         return ok(True)
 
     try:
@@ -474,12 +522,7 @@ def api_delete_upload():
     return ok(True)
 
 # =========================
-# RUN (если локально)
+# RUN
 # =========================
 if __name__ == "__main__":
-    # локально:
-    # export ORG_ID=...
-    # export SUPABASE_URL=...
-    # export SUPABASE_SERVICE_KEY=...
-    # export TELEGRAM_BOT_TOKEN=... (optional)
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=True)
