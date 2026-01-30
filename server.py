@@ -309,8 +309,10 @@ def api_get_visits():
     res = q.execute()
     rows = res.data or []
 
-    # ✅ ВАЖНО: нормализуем услуги/склад при выдаче
-    rows = [normalize_visit_row(r) for r in rows]
+    # 🔴 КРИТИЧНО: всегда добавляем services / stock
+    for r in rows:
+        r["services"] = r.get("services") or []
+        r["stock"] = r.get("stock") or []
 
     return ok(rows)
 
@@ -410,20 +412,6 @@ def api_create_visit():
     row = normalize_visit_row(row)
     return ok(row)
 
-@app.put("/api/visits/<visit_id>")
-def api_update_visit(visit_id):
-    if not visit_id:
-        return fail("visit_id required", 400)
-
-    d = request.get_json(silent=True) or {}
-
-    payload = {
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),  # ✅ у тебя этого не было — диагноз не сохранялся
-        "rx": d.get("rx"),
-        "weight_kg": d.get("weight_kg"),
-    }
 
     payload.update(build_services_payload(d))
 
