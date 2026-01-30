@@ -114,7 +114,11 @@ def _as_list(x):
         return []
     if isinstance(x, list):
         return x
-    return x
+    # если вдруг пришел один объект — оборачиваем в список
+    if isinstance(x, dict):
+        return [x]
+    # всё остальное считаем мусором
+    return []
 
 def normalize_visit_row(r: dict) -> dict:
     """
@@ -299,10 +303,9 @@ def api_get_visits():
     visit_id = request.args.get("id")
     pet_id = request.args.get("pet_id")
 
-    # 🔴 ЗАЩИТА ОТ МУСОРА
+    # 🔴 защита от мусора
     if visit_id:
         visit_id = visit_id.strip()
-        # если это не UUID — сразу 400
         if len(visit_id) < 10:
             return fail("invalid visit id", 400)
 
@@ -316,9 +319,8 @@ def api_get_visits():
     res = q.execute()
     rows = res.data or []
 
-    for r in rows:
-        r["services"] = r.get("services") or []
-        r["stock"] = r.get("stock") or []
+    # ✅ НОРМАЛИЗАЦИЯ services / stock
+    rows = [normalize_visit_row(r) for r in rows]
 
     return ok(rows)
 
@@ -415,22 +417,6 @@ def api_create_visit():
 
     row = res.data[0] if getattr(res, "data", None) and res.data else {"id": str(uuid.uuid4()), **payload}
 
-    row = normalize_visit_row(row)
-    return ok(row)
-
-
-    payload.update(build_services_payload(d))
-
-    res = update_with_optional_fallback(
-        "visits",
-        visit_id,
-        payload,
-        optional_fields=["services", "services_json", "stock", "stock_json"]
-    )
-    if res is None:
-        return ok(True)
-
-    row = (res.data[0] if getattr(res, "data", None) else None) or {"id": visit_id, **clean_payload(payload)}
     row = normalize_visit_row(row)
     return ok(row)
 
