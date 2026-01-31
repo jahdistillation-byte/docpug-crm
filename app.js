@@ -17,6 +17,42 @@ const FILES_KEY = "docpug_files_v1";
 const VISIT_FILES_KEY = "docpug_visit_files_v1";
 const MIGRATION_KEY = "docpug_files_migrated_v1";
 
+function upsertFilesFromServerMeta(serverMeta) {
+  const list = Array.isArray(serverMeta) ? serverMeta : [];
+  if (!list.length) return;
+
+  const cur = Array.isArray(LS.get(FILES_KEY, []))
+    ? LS.get(FILES_KEY, [])
+    : [];
+
+  const byId = new Map(cur.map((f) => [String(f.id), f]));
+
+  for (const m of list) {
+    if (!m) continue;
+
+    const stored = m.stored_name || m.storedName || "";
+    if (!stored) continue;
+
+    const id = String(m.id || fileIdFromStored(stored));
+
+    const row = {
+      id,
+      stored_name: stored,
+      url: m.url || `/uploads/${stored}`,
+      name: m.name || m.original_name || stored,
+      size: Number(m.size || 0),
+      type: m.type || m.mime || "",
+    };
+
+    const prev = byId.get(id) || {};
+    byId.set(id, { ...prev, ...row });
+  }
+
+  const next = Array.from(byId.values());
+  if (typeof state !== "undefined") state.files = next;
+  LS.set(FILES_KEY, next);
+}
+
 // =========================
 // Legacy migration (safe stub)
 // Some builds call migrateLegacyVisitFilesIfNeeded() during init.
