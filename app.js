@@ -1087,17 +1087,29 @@ async function removeServiceLineFromVisit(visitId, index) {
 // =========================
 function expandServiceLines(visit) {
   const lines = Array.isArray(visit?.services) ? visit.services : [];
-  return lines.map((line) => {
-    const svc = getServiceById(line.serviceId);
 
-    const name = line.nameSnap || svc?.name || "Невідома послуга";
-    const price = Number.isFinite(Number(line.priceSnap))
-      ? Number(line.priceSnap)
-      : Number(svc?.price || 0);
+  return lines
+    .filter((line) => line && (line.serviceId || line.service_id))
+    .map((line) => {
+      // ✅ поддержка camelCase + snake_case
+      const serviceId = line.serviceId || line.service_id;
 
-    const qty = Math.max(1, Number(line.qty) || 1);
-    return { name, price, qty, lineTotal: price * qty };
-  });
+      const qtyRaw = line.qty ?? line.quantity ?? 1;
+      const qty = Math.max(1, Number(qtyRaw) || 1);
+
+      const snapName = line.nameSnap ?? line.name_snap ?? "";
+      const snapPrice = line.priceSnap ?? line.price_snap;
+
+      // локальный реестр (fallback, если снапшота нет)
+      const svc = getServiceById(serviceId);
+
+      const name = String(snapName || svc?.name || "Невідома послуга").trim();
+
+      const snapPriceNum = Number(snapPrice);
+      const price = Number.isFinite(snapPriceNum) ? snapPriceNum : Number(svc?.price || 0);
+
+      return { name, price, qty, lineTotal: price * qty };
+    });
 }
 
 function calcServicesTotal(visit) {
