@@ -17,6 +17,74 @@ const FILES_KEY = "docpug_files_v1";
 const VISIT_FILES_KEY = "docpug_visit_files_v1";
 const MIGRATION_KEY = "docpug_files_migrated_v1";
 
+// =========================
+// FILES helpers (LOCAL links)
+// =========================
+
+// если нет такой функции — добавь (чтобы не было ReferenceError)
+function fileIdFromStored(storedName) {
+  return "f_" + String(storedName || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function loadVisitFilesLinks() {
+  const arr = LS.get(VISIT_FILES_KEY, []);
+  return Array.isArray(arr) ? arr : [];
+}
+
+function saveVisitFilesLinks(arr) {
+  LS.set(VISIT_FILES_KEY, Array.isArray(arr) ? arr : []);
+}
+
+function getFileIdsForVisit(visitId) {
+  const vid = String(visitId || "");
+  if (!vid) return [];
+  return loadVisitFilesLinks()
+    .filter((x) => String(x.visit_id) === vid)
+    .map((x) => String(x.file_id))
+    .filter(Boolean);
+}
+
+function linkFilesToVisit(visitId, fileIds) {
+  const vid = String(visitId || "");
+  if (!vid) return;
+
+  const ids = (Array.isArray(fileIds) ? fileIds : [])
+    .map((x) => String(x || ""))
+    .filter(Boolean);
+
+  if (!ids.length) return;
+
+  const links = loadVisitFilesLinks();
+
+  for (const fid of ids) {
+    const exists = links.some(
+      (r) => String(r.visit_id) === vid && String(r.file_id) === fid
+    );
+    if (!exists) links.push({ visit_id: vid, file_id: fid, created_at: nowISO() });
+  }
+
+  saveVisitFilesLinks(links);
+}
+
+function detachFileFromVisit(visitId, fileId) {
+  const vid = String(visitId || "");
+  const fid = String(fileId || "");
+  if (!vid || !fid) return;
+
+  const next = loadVisitFilesLinks().filter(
+    (r) => !(String(r.visit_id) === vid && String(r.file_id) === fid)
+  );
+  saveVisitFilesLinks(next);
+}
+
+// =========================
+// FILE HELPERS (needed for uploads)
+// =========================
+function fileIdFromStored(storedName) {
+  if (!storedName) return null;
+  return "file_" + String(storedName).replace(/[^a-zA-Z0-9]/g, "_");
+}
+
 function upsertFilesFromServerMeta(serverMeta) {
   const list = Array.isArray(serverMeta) ? serverMeta : [];
   if (!list.length) return;
@@ -2500,6 +2568,7 @@ async function openVisit(visitId, opts = { pushHash: true }) {
   }
 
   renderVisitPage(visit, pet);
+  renderVisitFiles(vid);
   initVisitUI();
   setRoute("visit");
 
@@ -3241,6 +3310,71 @@ function closeVisitModal() {
 }
 
 
+// =========================
+// VISIT_FILES (LOCAL links) — minimal working
+// =========================
+
+// visit_files: [{ visit_id, file_id, created_at }]
+function loadVisitFilesLinks() {
+  const arr = LS.get(VISIT_FILES_KEY, []);
+  return Array.isArray(arr) ? arr : [];
+}
+
+function saveVisitFilesLinks(arr) {
+  LS.set(VISIT_FILES_KEY, Array.isArray(arr) ? arr : []);
+}
+
+// вернуть file_ids привязанные к визиту
+function getFileIdsForVisit(visitId) {
+  const vid = String(visitId || "");
+  if (!vid) return [];
+  return loadVisitFilesLinks()
+    .filter((x) => String(x.visit_id) === vid)
+    .map((x) => String(x.file_id))
+    .filter(Boolean);
+}
+
+// ✅ привязать список fileIds к визиту (добавляет, без дублей)
+function linkFilesToVisit(visitId, fileIds) {
+  const vid = String(visitId || "");
+  if (!vid) return;
+
+  const ids = (Array.isArray(fileIds) ? fileIds : [])
+    .map((x) => String(x || ""))
+    .filter(Boolean);
+
+  if (!ids.length) return;
+
+  const links = loadVisitFilesLinks();
+
+  for (const fid of ids) {
+    const exists = links.some(
+      (r) => String(r.visit_id) === vid && String(r.file_id) === String(fid)
+    );
+    if (!exists) {
+      links.push({
+        visit_id: vid,
+        file_id: String(fid),
+        created_at: nowISO(),
+      });
+    }
+  }
+
+  saveVisitFilesLinks(links);
+}
+
+// ✅ отвязать 1 файл от визита
+function detachFileFromVisit(visitId, fileId) {
+  const vid = String(visitId || "");
+  const fid = String(fileId || "");
+  if (!vid || !fid) return;
+
+  const next = loadVisitFilesLinks().filter(
+    (r) => !(String(r.visit_id) === vid && String(r.file_id) === fid)
+  );
+
+  saveVisitFilesLinks(next);
+}
 
 
 // =========================
@@ -3674,6 +3808,52 @@ window.addEventListener("resize", setVH);
 // ===== INIT =====
 init();
 
-function renderVisitFiles() {
-  // TODO: позже сделаем отображение файлов
+// =========================
+// VISIT FILES render (minimal)
+// =========================
+function renderVisitFiles(visitId) {
+  const wrap = document.getElementById("visitFilesList");
+  if (!wrap) return; // если блока нет в HTML — тихо выходим
+
+  const allFiles = LS.get(FILES_KEY, []);
+  const byId = new Map((Array.isArray(allFiles) ? allFiles : []).map((f) => [String(f.id), f]));
+
+  const ids = getFileIdsForVisit(visitId);
+
+  if (!ids.length) {
+    wrap.innerHTML = `<div class="hint">Поки файлів немає.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = ids
+    .map((id) => {
+      const f = byId.get(String(id));
+      if (!f) return "";
+      const url = f.url || (f.stored_name ? `/uploads/${f.stored_name}` : "#");
+      const name = f.name || f.stored_name || "file";
+      return `
+        <div class="fileRow">
+          <div class="fileMain">
+            <div class="fileName">${escapeHtml(name)}</div>
+            <div class="fileMeta">${escapeHtml(f.type || "")} ${f.size ? "• " + escapeHtml(String(f.size)) + " bytes" : ""}</div>
+          </div>
+          <div class="fileActions">
+            <a class="miniBtn" href="${escapeHtml(url)}" target="_blank" rel="noopener">Відкрити</a>
+            <button type="button" class="miniBtn danger" data-detach-file="${escapeHtml(String(id))}">Відвʼязати</button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  // один обработчик на wrap
+  wrap.onclick = (e) => {
+    const btn = e.target.closest("[data-detach-file]");
+    if (!btn) return;
+    e.preventDefault();
+    const fid = btn.dataset.detachFile;
+    if (!fid) return;
+    detachFileFromVisit(visitId, fid);
+    renderVisitFiles(visitId);
+  };
 }
