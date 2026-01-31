@@ -1793,15 +1793,57 @@ try {
   console.warn("navigator.share failed:", err);
 }
 
+// ✅ Telegram Android: blob-download режется → грузим PDF на сервер и открываем HTTPS
+const tg =
+  window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+
+const isAndroidTg =
+  !!tg && String(tg.platform || "").toLowerCase().includes("android");
+
+if (isAndroidTg) {
+  try {
+    const fd = new FormData();
+    const file = new File([pdfBlob], filename || "docpug.pdf", {
+      type: "application/pdf",
+    });
+    fd.append("files", file);
+
+    const upRes = await fetch("/api/upload", {
+      method: "POST",
+      body: fd,
+    });
+
+    const upJson = await upRes.json();
+
+    if (!upJson?.ok || !upJson?.files?.length) {
+      throw new Error(upJson?.error || "upload failed");
+    }
+
+    const urlRel = upJson.files[0].url; // "/uploads/xxxx.pdf"
+    const urlAbs = new URL(urlRel, window.location.origin).toString();
+
+    // открываем уже HTTPS — Telegram Android это не режет
+    tg.openLink(urlAbs, { try_instant_view: false });
+
+    return; // ✅ важно: выходим из downloadA4Pdf
+  } catch (err) {
+    console.warn("Android TG upload/open failed, fallback to blob:", err);
+    // если upload упал — пойдём в blob-скачку ниже
+  }
+}
+
 // ✅ fallback для ПК / iOS / обычного браузера
 const blobUrl = URL.createObjectURL(pdfBlob);
 
 const a = document.createElement("a");
 a.href = blobUrl;
-a.download = filename;
+a.download = filename || "docpug.pdf";
+a.target = "_blank";
+a.rel = "noopener";
+
 document.body.appendChild(a);
 a.click();
-document.body.removeChild(a);
+a.remove();
 
 setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
   } catch (e) {
@@ -3615,11 +3657,13 @@ if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
     await loadMe();
     await loadOwners();
     await loadPatientsApi();
+    await loadServicesApi();
   });
 
   await loadMe();
   await loadOwners();
   await loadPatientsApi();
+  await loadServicesApi();
 }
 
 // ===== iOS / Telegram WebApp viewport fix =====
