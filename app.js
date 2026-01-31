@@ -41,6 +41,7 @@ const state = {
   owners: [],
   patients: [], // ✅ список пациентов с сервера
   visits: [],   // ✅ список визитов с сервера (по выбранному пациенту или все)
+  services: [], // ✅ реестр услуг с сервера
 
   selectedOwnerId: null,
   selectedPetId: null,
@@ -511,6 +512,101 @@ async function loadPatientsApi() {
     renderPatientsTab();
     if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
     return [];
+  }
+}
+
+// =========================
+// Services API (server-first)
+// =========================
+async function loadServicesApi() {
+  try {
+    const res = await fetch("/api/services", {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    if (!res.ok || !json || !json.ok) {
+      console.warn("loadServicesApi failed:", res.status, text);
+      return [];
+    }
+
+    const arr = Array.isArray(json.data)
+      ? json.data
+      : (json.data ? [json.data] : []);
+
+    state.services = arr;
+    LS.set(SERVICES_KEY, arr); // fallback cache
+    return arr;
+  } catch (e) {
+    console.warn("loadServicesApi network fail:", e);
+    const cached = LS.get(SERVICES_KEY, []);
+    state.services = cached;
+    return cached;
+  }
+}
+
+async function createServiceApi(payload) {
+  try {
+    const res = await fetch("/api/services", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    if (!res.ok || !json || !json.ok) return null;
+    return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+  } catch (e) {
+    console.error("createServiceApi failed:", e);
+    return null;
+  }
+}
+
+async function updateServiceApi(id, patch) {
+  try {
+    const res = await fetch(`/api/services?id=${encodeURIComponent(String(id))}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(patch || {}),
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    if (!res.ok || !json || !json.ok) return null;
+    return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+  } catch (e) {
+    console.error("updateServiceApi failed:", e);
+    return null;
+  }
+}
+
+async function deleteServiceApi(id) {
+  try {
+    const res = await fetch(`/api/services?id=${encodeURIComponent(String(id))}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    return !!(res.ok && json && json.ok);
+  } catch (e) {
+    console.error("deleteServiceApi failed:", e);
+    return false;
   }
 }
 
@@ -1010,13 +1106,15 @@ function getPetsByOwnerId(ownerId) {
 // SERVICES registry (LOCAL registry ok)
 // =========================
 function loadServices() {
-  return LS.get(SERVICES_KEY, []);
+  const arr =
+    Array.isArray(state.services) && state.services.length
+      ? state.services
+      : LS.get(SERVICES_KEY, []);
+  return arr || [];
 }
-function saveServices(items) {
-  LS.set(SERVICES_KEY, items);
-}
+
 function getServiceById(id) {
-  return loadServices().find((s) => s.id === id) || null;
+  return loadServices().find((s) => String(s.id) === String(id)) || null;
 }
 
 function ensureVisitServicesShape(visit) {
@@ -1323,22 +1421,19 @@ function initServicesUI() {
 
   // add
   page.querySelector("#btnAddService")?.addEventListener("click", async () => {
-    const name = (prompt("Назва послуги:", "") || "").trim();
-    if (!name) return;
+  const name = (prompt("Назва послуги:", "") || "").trim();
+  if (!name) return;
 
-    const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
-    const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+  const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
+  const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
 
-    const id =
-      "svc_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
+  const created = await createServiceApi({ name, price, active: true });
+  if (!created) return alert("Не вдалося створити послугу");
 
-    const items = loadServices();
-    items.unshift({ id, name, price, active: true });
-    saveServices(items);
-
-    renderServicesTab();
-    await refreshVisitUIIfOpen();
-  });
+  await loadServicesApi();
+  renderServicesTab();
+  await refreshVisitUIIfOpen();
+});
 
   // actions: edit/toggle/delete
   page.querySelector("#servicesList")?.addEventListener("click", async (e) => {
@@ -1353,42 +1448,49 @@ function initServicesUI() {
     const idx = items.findIndex((x) => x.id === id);
     if (idx < 0) return;
 
-    if (action === "edit") {
-      const cur = items[idx];
-      const name = (prompt("Назва:", cur.name || "") || "").trim();
-      if (!name) return;
+   if (action === "edit") {
+  const cur = items[idx];
 
-      const priceRaw = (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
-      const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+  const name = (prompt("Назва:", cur.name || "") || "").trim();
+  if (!name) return;
 
-      items[idx] = { ...cur, name, price };
-      saveServices(items);
+  const priceRaw = (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
+  const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
 
-      renderServicesTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
+  const updated = await updateServiceApi(id, { name, price });
+  if (!updated) return alert("Не вдалося оновити");
 
-    if (action === "toggle") {
-      items[idx].active = items[idx].active === false ? true : false;
-      saveServices(items);
+  await loadServicesApi();
+  renderServicesTab();
+  await refreshVisitUIIfOpen();
+  return;
+}
 
-      renderServicesTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
+   if (action === "toggle") {
+  const cur = items[idx];
+  const nextActive = cur.active === false ? true : false;
 
-    if (action === "del") {
-      const cur = items[idx];
-      if (!confirm(`Видалити послугу "${cur.name}"?`)) return;
+  const updated = await updateServiceApi(id, { active: nextActive });
+  if (!updated) return alert("Не вдалося змінити active");
 
-      items.splice(idx, 1);
-      saveServices(items);
+  await loadServicesApi();
+  renderServicesTab();
+  await refreshVisitUIIfOpen();
+  return;
+}
 
-      renderServicesTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
+   if (action === "del") {
+  const cur = items[idx];
+  if (!confirm(`Видалити послугу "${cur.name}"?`)) return;
+
+  const ok = await deleteServiceApi(id);
+  if (!ok) return alert("Не вдалося видалити");
+
+  await loadServicesApi();
+  renderServicesTab();
+  await refreshVisitUIIfOpen();
+  return;
+}
   });
 }
 
