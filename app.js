@@ -1771,82 +1771,59 @@ async function downloadA4Pdf(visitId) {
 
     if (!pdfBlob) throw new Error("html2pdf: не удалось получить blob");
 
-   const filename = a4FilenameFromVisit(visitId);
+  // =========================
+// Android Telegram FIX:
+// не открываем blob: (Android часто блокирует)
+// а загружаем PDF на сервер и открываем https URL
+// =========================
+const filename = a4FilenameFromVisit(visitId);
 
-// ✅ Android / mobile: пробуем системное "Поделиться" (работает лучше всего)
+let uploadedUrl = null;
 try {
-  if (navigator.share && navigator.canShare) {
-    const file = new File([pdfBlob], filename, {
-      type: "application/pdf",
-    });
+  const fd = new FormData();
+  fd.append("files", new File([pdfBlob], filename, { type: "application/pdf" }));
 
-    if (navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: filename,
-        text: "Виписка Doc.PUG (PDF)",
-      });
-      return; // ✅ ГОТОВО — пользователь сам сохранит / отправит
-    }
-  }
-} catch (err) {
-  console.warn("navigator.share failed:", err);
+  const upRes = await fetch("/api/upload", { method: "POST", body: fd });
+  const upJson = await upRes.json();
+
+  if (!upJson.ok) throw new Error(upJson.error || "upload failed");
+  const f0 = upJson.files && upJson.files[0];
+  if (!f0?.url) throw new Error("upload: no file url");
+
+  // делаем абсолютную ссылку
+  uploadedUrl = new URL(f0.url, window.location.origin).toString();
+} catch (e) {
+  console.warn("PDF upload failed, fallback to blob:", e);
 }
 
-// ✅ Telegram Android: blob-download режется → грузим PDF на сервер и открываем HTTPS
+// tg openLink работает лучше с https, чем с blob
 const tg =
   window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
-const isAndroidTg =
-  !!tg && String(tg.platform || "").toLowerCase().includes("android");
-
-if (isAndroidTg) {
-  try {
-    const fd = new FormData();
-    const file = new File([pdfBlob], filename || "docpug.pdf", {
-      type: "application/pdf",
-    });
-    fd.append("files", file);
-
-    const upRes = await fetch("/api/upload", {
-      method: "POST",
-      body: fd,
-    });
-
-    const upJson = await upRes.json();
-
-    if (!upJson?.ok || !upJson?.files?.length) {
-      throw new Error(upJson?.error || "upload failed");
-    }
-
-    const urlRel = upJson.files[0].url; // "/uploads/xxxx.pdf"
-    const urlAbs = new URL(urlRel, window.location.origin).toString();
-
-    // открываем уже HTTPS — Telegram Android это не режет
-    tg.openLink(urlAbs, { try_instant_view: false });
-
-    return; // ✅ важно: выходим из downloadA4Pdf
-  } catch (err) {
-    console.warn("Android TG upload/open failed, fallback to blob:", err);
-    // если upload упал — пойдём в blob-скачку ниже
+if (uploadedUrl) {
+  if (tg && typeof tg.openLink === "function") {
+    tg.openLink(uploadedUrl, { try_instant_view: false });
+  } else {
+    window.location.href = uploadedUrl; // в браузере тоже ок
   }
+  return;
 }
 
-// ✅ fallback для ПК / iOS / обычного браузера
+// ===== fallback (если upload не удался): blob (может не работать в Android TG)
 const blobUrl = URL.createObjectURL(pdfBlob);
 
-const a = document.createElement("a");
-a.href = blobUrl;
-a.download = filename || "docpug.pdf";
-a.target = "_blank";
-a.rel = "noopener";
-
-document.body.appendChild(a);
-a.click();
-a.remove();
-
-setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
-  } catch (e) {
+try {
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = filename;
+  a.target = "_blank";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+} finally {
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+}
     console.error(e);
     alert("Не удалось сформировать PDF: " + (e?.message || e));
   } finally {
