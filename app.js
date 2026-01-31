@@ -1669,18 +1669,39 @@ async function downloadA4Pdf(visitId) {
 
     if (!pdfBlob) throw new Error("html2pdf: не удалось получить blob");
 
-    const blobUrl = URL.createObjectURL(pdfBlob);
+   const filename = a4FilenameFromVisit(visitId);
 
-    const tg =
-      window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+// ✅ Android / mobile: пробуем системное "Поделиться" (работает лучше всего)
+try {
+  if (navigator.share && navigator.canShare) {
+    const file = new File([pdfBlob], filename, {
+      type: "application/pdf",
+    });
 
-    if (tg && typeof tg.openLink === "function") {
-      tg.openLink(blobUrl, { try_instant_view: false });
-    } else {
-      window.open(blobUrl, "_blank");
+    if (navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: filename,
+        text: "Виписка Doc.PUG (PDF)",
+      });
+      return; // ✅ ГОТОВО — пользователь сам сохранит / отправит
     }
+  }
+} catch (err) {
+  console.warn("navigator.share failed:", err);
+}
 
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+// ✅ fallback для ПК / iOS / обычного браузера
+const blobUrl = URL.createObjectURL(pdfBlob);
+
+const a = document.createElement("a");
+a.href = blobUrl;
+a.download = filename;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+
+setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
   } catch (e) {
     console.error(e);
     alert("Не удалось сформировать PDF: " + (e?.message || e));

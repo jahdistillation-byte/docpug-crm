@@ -418,7 +418,88 @@ def api_me():
             "mode": "telegram",
         }
     })
+# =========================
+# SERVICES API
+# =========================
 
+@app.get("/api/services")
+def api_services_list():
+    try:
+        rows = (
+            supabase.table("services")
+            .select("id, name, price, active")
+            .eq("org_id", ORG_ID)
+            .order("name")
+            .execute()
+        )
+        return {"ok": True, "data": rows.data or []}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/api/services")
+def api_services_create(payload: dict):
+    try:
+        name = (payload.get("name") or "").strip()
+        price = payload.get("price") or 0
+        active = payload.get("active", True)
+
+        if not name:
+            return {"ok": False, "error": "name required"}
+
+        row = (
+            supabase.table("services")
+            .insert(
+                {
+                    "org_id": ORG_ID,
+                    "name": name,
+                    "price": price,
+                    "active": bool(active),
+                }
+            )
+            .execute()
+        )
+        return {"ok": True, "data": row.data or []}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.put("/api/services")
+def api_services_update(id: str, payload: dict):
+    try:
+        patch = {}
+        if "name" in payload:
+            patch["name"] = (payload.get("name") or "").strip()
+        if "price" in payload:
+            patch["price"] = payload.get("price") or 0
+        if "active" in payload:
+            patch["active"] = bool(payload.get("active"))
+
+        row = (
+            supabase.table("services")
+            .update(patch)
+            .eq("org_id", ORG_ID)
+            .eq("id", id)
+            .execute()
+        )
+        return {"ok": True, "data": row.data or []}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.delete("/api/services")
+def api_services_delete(id: str):
+    try:
+        (
+            supabase.table("services")
+            .delete()
+            .eq("org_id", ORG_ID)
+            .eq("id", id)
+            .execute()
+        )
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 # =========================
 # API: OWNERS
 # =========================
