@@ -282,7 +282,7 @@ def save_visit_lines(visit_id: str, d: dict):
             .execute()
 
     # =====================
-    # insert new services WITH SNAPSHOT
+    # insert new services WITH SNAPSHOT (FROM PAYLOAD)
     # =====================
     if isinstance(services, list) and services:
         rows = []
@@ -291,30 +291,22 @@ def save_visit_lines(visit_id: str, d: dict):
             service_id = x.get("serviceId") or x.get("service_id")
             qty = x.get("qty") or 1
 
-            snap_price = None
-            snap_name = None
+            # ✅ берём снапшот из того, что прислал фронт
+            # поддержим оба варианта ключей
+            snap_price = x.get("priceSnap")
+            if snap_price is None:
+                snap_price = x.get("price_snap")
 
-            if service_id:
-                try:
-                    s = (
-                        supabase.table("services")
-                        .select("price, name")
-                        .eq("id", service_id)
-                        .single()
-                        .execute()
-                    )
-                    if s and s.data:
-                        snap_price = s.data.get("price")
-                        snap_name = s.data.get("name")
-                except Exception:
-                    pass
+            snap_name = x.get("nameSnap")
+            if snap_name is None:
+                snap_name = x.get("name_snap")
 
             rows.append({
-                "org_id": ORG_ID,
+                "org_id": ORG_ID,          # станет optional (если колонки нет — вырежется)
                 "visit_id": visit_id,
-                "service_id": service_id,
+                "service_id": service_id,  # важно: это строка svc_... и это ОК
                 "qty": qty,
-                "price_snap": snap_price,
+                "price_snap": snap_price,  # важно: теперь не 0, если фронт прислал
                 "name_snap": snap_name,
             })
 
@@ -323,6 +315,8 @@ def save_visit_lines(visit_id: str, d: dict):
             rows,
             optional_fields=["org_id", "price_snap", "name_snap"]
         )
+
+    # (stock часть у тебя ниже — оставь как есть)
 
     # =====================
     # insert new stock
