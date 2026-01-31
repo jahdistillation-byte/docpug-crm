@@ -422,10 +422,6 @@ def api_me():
 # SERVICES API
 # =========================
 
-# =========================
-# SERVICES API (FastAPI)
-# =========================
-
 @app.get("/api/services")
 def api_services_list():
     try:
@@ -436,21 +432,24 @@ def api_services_list():
             .order("name")
             .execute()
         )
-        return {"ok": True, "data": res.data or []}
+        return jsonify({"ok": True, "data": res.data or []})
     except Exception as e:
-        print("❌ /api/services GET error:", e)
-        return {"ok": False, "error": str(e)}
+        print("❌ /api/services GET error:", repr(e))
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.post("/api/services")
-def api_services_create(payload: dict):
+def api_services_create():
+    """Create service. Payload is read from request.json (Flask does NOT pass args here)."""
     try:
+        payload = request.get_json(silent=True) or {}
+
         name = (payload.get("name") or "").strip()
         price = payload.get("price") or 0
         active = payload.get("active", True)
 
         if not name:
-            return {"ok": False, "error": "name required"}
+            return jsonify({"ok": False, "error": "name required"}), 400
 
         res = (
             supabase.table("services")
@@ -462,15 +461,25 @@ def api_services_create(payload: dict):
             })
             .execute()
         )
-        return {"ok": True, "data": res.data or []}
+        return jsonify({"ok": True, "data": res.data or []})
     except Exception as e:
-        print("❌ /api/services POST error:", e)
-        return {"ok": False, "error": str(e)}
+        print("❌ /api/services POST error:", repr(e))
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.put("/api/services")
-def api_services_update(id: str, payload: dict):
+def api_services_update():
+    """Update service.
+    Supports:
+      - /api/services?id=...  (query)
+      - or payload {id: ...}
+    """
     try:
+        payload = request.get_json(silent=True) or {}
+        svc_id = (request.args.get("id") or payload.get("id") or "").strip()
+        if not svc_id:
+            return jsonify({"ok": False, "error": "id required"}), 400
+
         patch = {}
         if "name" in payload:
             patch["name"] = (payload.get("name") or "").strip()
@@ -479,33 +488,46 @@ def api_services_update(id: str, payload: dict):
         if "active" in payload:
             patch["active"] = bool(payload.get("active"))
 
+        if not patch:
+            return jsonify({"ok": False, "error": "nothing to update"}), 400
+
         res = (
             supabase.table("services")
             .update(patch)
             .eq("org_id", ORG_ID)
-            .eq("id", id)
+            .eq("id", svc_id)
             .execute()
         )
-        return {"ok": True, "data": res.data or []}
+        return jsonify({"ok": True, "data": res.data or []})
     except Exception as e:
-        print("❌ /api/services PUT error:", e)
-        return {"ok": False, "error": str(e)}
+        print("❌ /api/services PUT error:", repr(e))
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.delete("/api/services")
-def api_services_delete(id: str):
+def api_services_delete():
+    """Delete service.
+    Supports:
+      - /api/services?id=... (query)
+      - or payload {id: ...}
+    """
     try:
+        payload = request.get_json(silent=True) or {}
+        svc_id = (request.args.get("id") or payload.get("id") or "").strip()
+        if not svc_id:
+            return jsonify({"ok": False, "error": "id required"}), 400
+
         (
             supabase.table("services")
             .delete()
             .eq("org_id", ORG_ID)
-            .eq("id", id)
+            .eq("id", svc_id)
             .execute()
         )
-        return {"ok": True}
+        return jsonify({"ok": True, "data": True})
     except Exception as e:
-        print("❌ /api/services DELETE error:", e)
-        return {"ok": False, "error": str(e)}
+        print("❌ /api/services DELETE error:", repr(e))
+        return jsonify({"ok": False, "error": str(e)}), 500
 # =========================
 # API: OWNERS
 # =========================
