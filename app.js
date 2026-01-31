@@ -3403,41 +3403,26 @@ function initVisitFilesUI() {
         .map((m) => (m?.stored_name ? fileIdFromStored(m.stored_name) : null))
         .filter(Boolean);
 
-      // 1) ПЫТАЕМСЯ привязать к визиту на сервере (если эндпоинт уже есть)
-      //    Если эндпоинта нет — просто молча падём в fallback.
-      try {
-        const stored_names = savedMeta.map((m) => m?.stored_name).filter(Boolean);
+     // ✅ Привязка файлов к визиту — пока ЛОКАЛЬНО.
+// (server endpoint /api/visits/:id/files пока отсутствует)
+try {
+  // уже есть savedMeta и fileIds выше по коду
+  linkFilesToVisit(visitId, fileIds);
 
-        if (stored_names.length) {
-          const linkRes = await fetch(`/api/visits/${encodeURIComponent(visitId)}/files`, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
-            body: JSON.stringify({ stored_names }),
-          });
-
-          const linkText = await linkRes.text();
-          let linkJson = null;
-          try { linkJson = linkText ? JSON.parse(linkText) : null; } catch {}
-
-          if (!linkRes.ok || !linkJson || linkJson.ok !== true) {
-            console.warn("⚠️ attach files endpoint not ready or failed:", linkRes.status, linkText);
-            // fallback local
-            linkFilesToVisit(visitId, fileIds);
-          }
-        } else {
-          linkFilesToVisit(visitId, fileIds);
-        }
-      } catch (attachErr) {
-        console.warn("⚠️ attach files fallback:", attachErr);
-        linkFilesToVisit(visitId, fileIds);
-      }
-
-      renderVisitFiles(visitId);
+  // перерисуем список файлов, если функция реально существует
+  if (typeof renderVisitFiles === "function") {
+    renderVisitFiles(visitId);
+  }
+} catch (attachErr) {
+  console.warn("⚠️ local attach files failed:", attachErr);
+  // даже если упало — не валим весь экран
+}
     } catch (err) {
       console.error(err);
       alert("Помилка завантаження: " + (err?.message || err));
-      if (state.selectedVisitId) renderVisitFiles(state.selectedVisitId);
+      if (state.selectedVisitId && typeof renderVisitFiles === "function") {
+  renderVisitFiles(state.selectedVisitId);
+}
     } finally {
       // сброс input
       try { e.target.value = ""; } catch {}
@@ -3688,3 +3673,7 @@ window.addEventListener("resize", setVH);
 
 // ===== INIT =====
 init();
+
+function renderVisitFiles() {
+  // TODO: позже сделаем отображение файлов
+}

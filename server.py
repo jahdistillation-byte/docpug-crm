@@ -89,8 +89,12 @@ def clean_payload(d):
 
 
 def allowed_file(filename: str) -> bool:
-    if not filename or "." not in filename:
-        return False
+    if not filename:
+        return True  # ✅ разрешаем файлы без имени (Android / Telegram)
+
+    if "." not in filename:
+        return True  # ✅ разрешаем без расширения
+
     ext = filename.rsplit(".", 1)[1].lower()
     return ext in ALLOWED_EXT
 
