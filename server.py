@@ -256,35 +256,66 @@ def save_visit_lines(visit_id: str, d: dict):
     stock = _pick_stock_from_payload(d)
 
     # =====================
-    # delete old (services)
+    # delete old services
     # =====================
     try:
-        supabase.table("visit_services").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+        supabase.table("visit_services").delete() \
+            .eq("org_id", ORG_ID) \
+            .eq("visit_id", visit_id) \
+            .execute()
     except Exception:
-        supabase.table("visit_services").delete().eq("visit_id", visit_id).execute()
+        supabase.table("visit_services").delete() \
+            .eq("visit_id", visit_id) \
+            .execute()
 
     # =====================
-    # delete old (stock)
+    # delete old stock
     # =====================
     try:
-        supabase.table("visit_stock").delete().eq("org_id", ORG_ID).eq("visit_id", visit_id).execute()
+        supabase.table("visit_stock").delete() \
+            .eq("org_id", ORG_ID) \
+            .eq("visit_id", visit_id) \
+            .execute()
     except Exception:
-        supabase.table("visit_stock").delete().eq("visit_id", visit_id).execute()
+        supabase.table("visit_stock").delete() \
+            .eq("visit_id", visit_id) \
+            .execute()
 
     # =====================
-    # insert new services
+    # insert new services WITH SNAPSHOT
     # =====================
     if isinstance(services, list) and services:
         rows = []
+
         for x in services:
+            service_id = x.get("serviceId") or x.get("service_id")
+            qty = x.get("qty") or 1
+
+            snap_price = None
+            snap_name = None
+
+            if service_id:
+                try:
+                    s = (
+                        supabase.table("services")
+                        .select("price, name")
+                        .eq("id", service_id)
+                        .single()
+                        .execute()
+                    )
+                    if s and s.data:
+                        snap_price = s.data.get("price")
+                        snap_name = s.data.get("name")
+                except Exception:
+                    pass
+
             rows.append({
-                # org_id добавляем, но он станет "optional" (если колонки нет — вырежется)
                 "org_id": ORG_ID,
                 "visit_id": visit_id,
-                "service_id": x.get("serviceId") or x.get("service_id"),
-                "qty": x.get("qty") or 1,
-                "price_snap": x.get("priceSnap") or x.get("price_snap"),
-                "name_snap": x.get("nameSnap") or x.get("name_snap"),
+                "service_id": service_id,
+                "qty": qty,
+                "price_snap": snap_price,
+                "name_snap": snap_name,
             })
 
         insert_with_optional_fallback(
@@ -298,14 +329,15 @@ def save_visit_lines(visit_id: str, d: dict):
     # =====================
     if isinstance(stock, list) and stock:
         rows = []
+
         for x in stock:
             rows.append({
                 "org_id": ORG_ID,
                 "visit_id": visit_id,
                 "stock_id": x.get("stockId") or x.get("stock_id"),
                 "qty": x.get("qty") or 1,
-                "price_snap": x.get("priceSnap") or x.get("price_snap"),
-                "name_snap": x.get("nameSnap") or x.get("name_snap"),
+                "price_snap": x.get("priceSnap"),
+                "name_snap": x.get("nameSnap"),
             })
 
         insert_with_optional_fallback(
