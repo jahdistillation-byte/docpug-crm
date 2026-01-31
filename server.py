@@ -422,18 +422,23 @@ def api_me():
 # SERVICES API
 # =========================
 
+# =========================
+# SERVICES API (FastAPI)
+# =========================
+
 @app.get("/api/services")
 def api_services_list():
     try:
-        rows = (
+        res = (
             supabase.table("services")
             .select("id, name, price, active")
             .eq("org_id", ORG_ID)
             .order("name")
             .execute()
         )
-        return {"ok": True, "data": rows.data or []}
+        return {"ok": True, "data": res.data or []}
     except Exception as e:
+        print("❌ /api/services GET error:", e)
         return {"ok": False, "error": str(e)}
 
 
@@ -447,20 +452,19 @@ def api_services_create(payload: dict):
         if not name:
             return {"ok": False, "error": "name required"}
 
-        row = (
+        res = (
             supabase.table("services")
-            .insert(
-                {
-                    "org_id": ORG_ID,
-                    "name": name,
-                    "price": price,
-                    "active": bool(active),
-                }
-            )
+            .insert({
+                "org_id": ORG_ID,
+                "name": name,
+                "price": price,
+                "active": bool(active),
+            })
             .execute()
         )
-        return {"ok": True, "data": row.data or []}
+        return {"ok": True, "data": res.data or []}
     except Exception as e:
+        print("❌ /api/services POST error:", e)
         return {"ok": False, "error": str(e)}
 
 
@@ -475,15 +479,16 @@ def api_services_update(id: str, payload: dict):
         if "active" in payload:
             patch["active"] = bool(payload.get("active"))
 
-        row = (
+        res = (
             supabase.table("services")
             .update(patch)
             .eq("org_id", ORG_ID)
             .eq("id", id)
             .execute()
         )
-        return {"ok": True, "data": row.data or []}
+        return {"ok": True, "data": res.data or []}
     except Exception as e:
+        print("❌ /api/services PUT error:", e)
         return {"ok": False, "error": str(e)}
 
 
@@ -499,6 +504,7 @@ def api_services_delete(id: str):
         )
         return {"ok": True}
     except Exception as e:
+        print("❌ /api/services DELETE error:", e)
         return {"ok": False, "error": str(e)}
 # =========================
 # API: OWNERS
