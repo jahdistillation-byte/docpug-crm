@@ -865,3 +865,26 @@ h2{margin:0 0 8px 0;font-size:18px}
 .pet-del:active{
   transform: translateY(1px);
 }
+/* ===== Services sections (strong selector) ===== */
+.page[data-page="services"] .svcSectionTitle {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  margin: 10px 0 12px;
+  padding-left: 2px;
+  position: relative;
+}
+
+.page[data-page="services"] .svcSectionTitle::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 36px;
+  height: 2px;
+  background: linear-gradient(90deg, #7c5cff, #a88bff);
+  border-radius: 2px;
+  opacity: .9;
+}
