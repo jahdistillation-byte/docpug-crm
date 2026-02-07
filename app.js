@@ -133,6 +133,16 @@ async function migrateLegacyVisitFilesIfNeeded() {
 // ✅ Services registry
 const SERVICES_KEY = "docpug_services_v1";
 
+function normalizeServiceRow(s) {
+  const cat =
+    (s?.cat ?? s?.category ?? s?.section ?? s?.group ?? s?.type ?? "").toString().trim();
+
+  return {
+    ...s,
+    cat: cat || "Інше",
+  };
+}
+
 // ✅ Stock registry (пока просто ключ, UI добавим дальше)
 const STOCK_KEY = "docpug_stock_v1";
 
@@ -155,6 +165,8 @@ const state = {
   // ✅ ПОИСК В ВИЗИТЕ (добавь)
   visitSvcQuery: "",
   visitStkQuery: "",
+
+  servicesQuery: "",
 
   dischargeListenersBound: false,
   ownersUiBound: false,
@@ -638,40 +650,51 @@ async function loadServicesApi() {
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
 
+    // если сервер не ок — берём кеш
     if (!res.ok || !json || !json.ok) {
       console.warn("loadServicesApi failed:", res.status, text);
-      return [];
+      const cached = LS.get(SERVICES_KEY, []);
+      state.services = Array.isArray(cached) ? cached : [];
+      return state.services;
     }
 
     const arr = Array.isArray(json.data)
       ? json.data
       : (json.data ? [json.data] : []);
 
-    // ===== 🔥 ВАЖНОЕ МЕСТО: MERGE С LOCALSTORAGE =====
-
+    // ✅ MERGE с кешем: сохраняем cat даже если сервер его не отдаёт
     const cached = LS.get(SERVICES_KEY, []);
     const cachedById = new Map(
-      (cached || []).map(s => [String(s.id), s])
+      (Array.isArray(cached) ? cached : []).map((s) => [String(s.id), s])
     );
 
-    const merged = (arr || []).map(s => {
-      const prev = cachedById.get(String(s.id)) || {};
+    const merged = (Array.isArray(arr) ? arr : []).map((s) => {
+      const prev = cachedById.get(String(s?.id)) || {};
+
+      // нормализуем поле категории (cat / category / section / group / type)
+      const rawCat =
+        (s?.cat ?? s?.category ?? s?.section ?? s?.group ?? s?.type ??
+         prev?.cat ?? prev?.category ?? prev?.section ?? prev?.group ?? prev?.type ??
+         "");
+
+      const cat = String(rawCat || "").trim() || "Інше";
+
       return {
-        ...prev,           // тут может быть cat
-        ...s,              // серверные данные поверх
-        cat: s.cat ?? prev.cat ?? "Інше", // 🔑 КЛЮЧ
+        ...prev,    // старое (может хранить cat)
+        ...s,       // серверное
+        cat,        // ✅ итоговая категория (гарантирована)
       };
     });
 
     state.services = merged;
-    LS.set(SERVICES_KEY, merged); // сохраняем уже С cat
+    LS.set(SERVICES_KEY, merged);
     return merged;
 
   } catch (e) {
     console.warn("loadServicesApi network fail:", e);
     const cached = LS.get(SERVICES_KEY, []);
-    state.services = cached;
-    return cached;
+    state.services = Array.isArray(cached) ? cached : [];
+    return state.services;
   }
 }
 
@@ -1545,6 +1568,11 @@ function initServicesUI() {
   if (page.dataset.boundServices === "1") return;
   page.dataset.boundServices = "1";
 
+  page.querySelector("#servicesSearch")?.addEventListener("input", async (e) => {
+  state.servicesQuery = String(e.target.value || "");
+  renderServicesTab();
+});
+
   // add
     page.querySelector("#btnAddService")?.addEventListener("click", async () => {
     const name = (prompt("Назва послуги:", "") || "").trim();
@@ -1573,6 +1601,13 @@ function initServicesUI() {
     if (!action || !id) return;
 
     const items = loadServices();
+    const q = String(state.servicesQuery || "").trim().toLowerCase();
+const filtered = (items || []).filter((s) => {
+  if (!q) return true;
+  const name = String(s?.name || "").toLowerCase();
+  const cat = String(s?.cat || "").toLowerCase();
+  return (name + " " + cat).includes(q);
+});
     const idx = items.findIndex((x) => x.id === id);
     if (idx < 0) return;
 
@@ -1743,10 +1778,20 @@ function renderServicesTab() {
 
   page.innerHTML = `
     <div class="card">
-      <div class="row">
-        <h2>Послуги</h2>
-        <button id="btnAddService" class="btn">+ Додати</button>
-      </div>
+      <div class="row" style="gap:10px; flex-wrap:wrap;">
+  <h2 style="flex:1;">Послуги</h2>
+
+  <input
+    id="servicesSearch"
+    class="inp"
+    type="search"
+    placeholder="Пошук послуг…"
+    value="${escapeHtml(state.servicesQuery || "")}"
+    style="max-width:260px;"
+  />
+
+  <button id="btnAddService" class="btn">+ Додати</button>
+</div>
 
       <div class="hint">Локальний реєстр послуг (поки що). Активні — доступні у візиті.</div>
       <div id="servicesList" class="list"></div>
@@ -1756,10 +1801,10 @@ function renderServicesTab() {
   const list = page.querySelector("#servicesList");
   if (!list) return;
 
-    if (!items.length) {
+    if (!filtered.length) {
     list.innerHTML = `<div class="hint">Поки порожньо. Натисни “Додати”.</div>`;
   } else {
-    const groups = groupBy(items, (s) => s.cat);
+    const groups = groupBy(filtered, (s) => s.cat);
     const order = ["Терапія", "Аналізи", "Хірургія", "Діагностика", "Виїзд", "Інше"];
 
     const cats = Object.keys(groups).sort((a, b) => {
