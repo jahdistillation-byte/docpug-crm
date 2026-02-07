@@ -143,22 +143,25 @@ const state = {
   me: null,
 
   owners: [],
-  patients: [], // ✅ список пациентов с сервера
-  visits: [],   // ✅ список визитов с сервера (по выбранному пациенту или все)
-  services: [], // ✅ реестр услуг с сервера
+  patients: [],
+  visits: [],
+  services: [],
 
   selectedOwnerId: null,
   selectedPetId: null,
   selectedPet: null,
   selectedVisitId: null,
 
+  // ✅ ПОИСК В ВИЗИТЕ (добавь)
+  visitSvcQuery: "",
+  visitStkQuery: "",
+
   dischargeListenersBound: false,
   ownersUiBound: false,
   printCssInjected: false,
-visitAddBtnsBound: false,
+  visitAddBtnsBound: false,
   visitFilesUiBound: false,
 
-  // ✅ Visits cache (server)
   visitsById: new Map(),
 };
 
@@ -465,16 +468,18 @@ function seedIfEmpty() {
   }
 
   // seed services registry (if absent)
-  if (!LS.get(SERVICES_KEY, null)) {
+    if (!LS.get(SERVICES_KEY, null)) {
     LS.set(SERVICES_KEY, [
-      { id: "svc_exam", name: "Огляд", price: 500, active: true },
-      { id: "svc_trip", name: "Виїзд", price: 1500, active: true },
-      { id: "svc_vax", name: "Вакцинація", price: 800, active: true },
+      { id: "svc_exam",       name: "Огляд",            price: 500,  active: true, cat: "Терапія" },
+      { id: "svc_trip",       name: "Виїзд",            price: 1500, active: true, cat: "Виїзд" },
+      { id: "svc_vax",        name: "Вакцинація",       price: 800,  active: true, cat: "Терапія" },
 
-      // (можеш залишити або прибрати)
-      { id: "svc_consult", name: "Консультація", price: 500, active: true },
-      { id: "svc_cat_castr", name: "Кастрація кота", price: 2500, active: true },
-      { id: "svc_dog_castr", name: "Кастрація пса", price: 3500, active: true },
+      { id: "svc_consult",    name: "Консультація",     price: 500,  active: true, cat: "Терапія" },
+      { id: "svc_cat_castr",  name: "Кастрація кота",   price: 2500, active: true, cat: "Хірургія" },
+      { id: "svc_dog_castr",  name: "Кастрація пса",    price: 3500, active: true, cat: "Хірургія" },
+
+      // приклад аналізів (можеш прибрати)
+      // { id: "svc_cbc",     name: "ЗАК",              price: 450,  active: true, cat: "Аналізи" },
     ]);
   }
 
@@ -1524,14 +1529,16 @@ function initServicesUI() {
   page.dataset.boundServices = "1";
 
   // add
-  page.querySelector("#btnAddService")?.addEventListener("click", async () => {
-  const name = (prompt("Назва послуги:", "") || "").trim();
-  if (!name) return;
+    page.querySelector("#btnAddService")?.addEventListener("click", async () => {
+    const name = (prompt("Назва послуги:", "") || "").trim();
+    if (!name) return;
 
-  const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
-  const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+    const cat = (prompt("Категорія (Терапія/Аналізи/Хірургія/Діагностика/Виїзд/Інше):", "Терапія") || "Терапія").trim() || "Інше";
 
-  const created = await createServiceApi({ name, price, active: true });
+    const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
+    const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+
+    const created = await createServiceApi({ name, price, active: true, cat });
   if (!created) return alert("Не вдалося створити послугу");
 
   await loadServicesApi();
@@ -1555,13 +1562,15 @@ function initServicesUI() {
    if (action === "edit") {
   const cur = items[idx];
 
-  const name = (prompt("Назва:", cur.name || "") || "").trim();
+   const name = (prompt("Назва:", cur.name || "") || "").trim();
   if (!name) return;
+
+  const cat = (prompt("Категорія:", String(cur.cat || "Терапія")) || "Терапія").trim() || "Інше";
 
   const priceRaw = (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
   const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
 
-  const updated = await updateServiceApi(id, { name, price });
+  const updated = await updateServiceApi(id, { name, price, cat });
   if (!updated) return alert("Не вдалося оновити");
 
   await loadServicesApi();
@@ -1730,24 +1739,50 @@ function renderServicesTab() {
   const list = page.querySelector("#servicesList");
   if (!list) return;
 
-  if (!items.length) {
+    if (!items.length) {
     list.innerHTML = `<div class="hint">Поки порожньо. Натисни “Додати”.</div>`;
   } else {
-    list.innerHTML = items.map((s) => `
-      <div class="item">
-        <div class="left" style="width:100%">
-          <div class="name">${escapeHtml(s.name || "—")}</div>
-          <div class="meta">${escapeHtml(String(Number(s.price)||0))} грн • ${s.active === false ? "❌ вимкнено" : "✅ активно"}</div>
-          <div class="pill">id: ${escapeHtml(s.id)}</div>
+    const groups = groupBy(items, (s) => s.cat);
+    const order = ["Терапія", "Аналізи", "Хірургія", "Діагностика", "Виїзд", "Інше"];
+
+    const cats = Object.keys(groups).sort((a, b) => {
+      const ia = order.indexOf(a);
+      const ib = order.indexOf(b);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
+
+    list.innerHTML = cats.map((cat) => {
+      const rows = groups[cat].map((s) => `
+        <div class="item">
+          <div class="left" style="width:100%">
+            <div class="name">${escapeHtml(s.name || "—")}</div>
+            <div class="meta">${escapeHtml(String(Number(s.price)||0))} грн • ${s.active === false ? "❌ вимкнено" : "✅ активно"}</div>
+            <div class="pill">id: ${escapeHtml(s.id)}</div>
+          </div>
+          <div class="right" style="display:flex; gap:6px;">
+            <button class="iconBtn" data-svc-action="edit" data-svc-id="${escapeHtml(s.id)}">✏️</button>
+            <button class="iconBtn" data-svc-action="toggle" data-svc-id="${escapeHtml(s.id)}">⚡️</button>
+            <button class="iconBtn" data-svc-action="del" data-svc-id="${escapeHtml(s.id)}">🗑</button>
+          </div>
         </div>
-        <div class="right" style="display:flex; gap:6px;">
-          <button class="iconBtn" data-svc-action="edit" data-svc-id="${escapeHtml(s.id)}">✏️</button>
-          <button class="iconBtn" data-svc-action="toggle" data-svc-id="${escapeHtml(s.id)}">⚡️</button>
-          <button class="iconBtn" data-svc-action="del" data-svc-id="${escapeHtml(s.id)}">🗑</button>
+      `).join("");
+
+      return `
+        <div class="svcSection">
+          <div class="svcSectionTitle">${escapeHtml(cat)}</div>
+          ${rows}
         </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
+
+  function groupBy(arr, keyFn) {
+  return (arr || []).reduce((acc, item) => {
+    const k = (keyFn(item) || "Інше").toString();
+    (acc[k] ||= []).push(item);
+    return acc;
+  }, {});
+}
 
   initServicesUI();
 }
@@ -2524,6 +2559,36 @@ renderDischargeA4(vid);
 
   document.addEventListener("click", handler, true);
   document.addEventListener("touchstart", handler, { passive: false, capture: true });
+    // 🔍 ПОИСК ПОСЛУГ И ПРЕПАРАТОВ (делегированно, чтобы не слетал при renderVisitPage)
+  document.addEventListener(
+    "input",
+    async (e) => {
+      const t = e.target;
+
+      // поиск услуг
+      if (t && t.id === "visitSvcSearch") {
+        state.visitSvcQuery = String(t.value || "");
+        const vid = state.selectedVisitId;
+        if (!vid) return;
+        const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
+        if (!v) return;
+        renderVisitPage(v, state.selectedPet);
+        return;
+      }
+
+      // поиск препаратов
+      if (t && t.id === "visitStkSearch") {
+        state.visitStkQuery = String(t.value || "");
+        const vid = state.selectedVisitId;
+        if (!vid) return;
+        const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
+        if (!v) return;
+        renderVisitPage(v, state.selectedPet);
+        return;
+      }
+    },
+    true
+  );
 }
 
 // ===== Visit page =====
@@ -2601,8 +2666,11 @@ function renderVisitPage(visit, pet) {
   // --- SERVICES ---
   ensureVisitServicesShape(visit);
 
+    const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
+
   const svcOptions = loadServices()
     .filter((s) => s.active !== false)
+    .filter((s) => !svcQ || String(s.name || "").toLowerCase().includes(svcQ))
     .map(
       (s) =>
         `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(
@@ -2637,8 +2705,11 @@ function renderVisitPage(visit, pet) {
   // --- STOCK ---
   ensureVisitStockShape(visit);
 
-  const stkOptions = loadStock()
+  const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
+
+    const stkOptions = loadStock()
     .filter((it) => it.active !== false)
+    .filter((it) => !stkQ || String(it.name || "").toLowerCase().includes(stkQ))
     .map((it) => {
       const left = Number(it.qty) || 0;
       const unit = String(it.unit || "шт");
@@ -2682,6 +2753,11 @@ function renderVisitPage(visit, pet) {
       <div class="history-label">Послуги</div>
 
       <div style="display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap;">
+      <input id="visitSvcSearch"
+       type="search"
+       placeholder="Пошук послуги…"
+       value="${escapeHtml(state.visitSvcQuery || "")}"
+       style="flex:1; min-width:220px;" />
         <select id="visitSvcSelect" style="flex:1; min-width:220px;">${
           svcOptions || `<option value="">(Немає послуг)</option>`
         }</select>
@@ -2700,6 +2776,11 @@ function renderVisitPage(visit, pet) {
       <div class="history-label">Препарати (склад)</div>
 
       <div style="display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap;">
+      <input id="visitStkSearch"
+       type="search"
+       placeholder="Пошук препарату…"
+       value="${escapeHtml(state.visitStkQuery || "")}"
+       style="flex:1; min-width:220px;" />
         <select id="visitStkSelect" style="flex:1; min-width:220px;">${
           stkOptions || `<option value="">(Немає препаратів)</option>`
         }</select>
