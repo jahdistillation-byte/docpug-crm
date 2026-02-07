@@ -1771,7 +1771,22 @@ function renderServicesTab() {
   const page = document.querySelector('.page[data-page="services"]');
   if (!page) return;
 
-  const items = loadServices();
+  const items = Array.isArray(loadServices()) ? loadServices() : [];
+
+  // ✅ поиск (храним строку в state)
+  state.servicesQuery = state.servicesQuery ?? "";
+  const q = String(state.servicesQuery || "").trim().toLowerCase();
+
+  // ✅ ВОТ ОНО: filtered (у тебя его не было -> падало)
+  const filtered = items.filter((s) => {
+    if (!q) return true;
+    const hay = [
+      s?.name,
+      s?.cat,
+      s?.id
+    ].filter(Boolean).join(" ").toLowerCase();
+    return hay.includes(q);
+  });
 
   // ❗️после innerHTML старые кнопки исчезают -> надо разрешить bind заново
   page.dataset.boundServices = "0";
@@ -1779,74 +1794,86 @@ function renderServicesTab() {
   page.innerHTML = `
     <div class="card">
       <div class="row" style="gap:10px; flex-wrap:wrap;">
-  <h2 style="flex:1;">Послуги</h2>
+        <h2 style="flex:1;">Послуги</h2>
 
-  <input
-    id="servicesSearch"
-    class="inp"
-    type="search"
-    placeholder="Пошук послуг…"
-    value="${escapeHtml(state.servicesQuery || "")}"
-    style="max-width:260px;"
-  />
+        <input
+          id="servicesSearch"
+          class="inp"
+          type="search"
+          placeholder="Пошук послуг…"
+          value="${escapeHtml(state.servicesQuery || "")}"
+          style="max-width:260px;"
+        />
 
-  <button id="btnAddService" class="btn">+ Додати</button>
-</div>
+        <button id="btnAddService" class="btn">+ Додати</button>
+      </div>
 
       <div class="hint">Локальний реєстр послуг (поки що). Активні — доступні у візиті.</div>
       <div id="servicesList" class="list"></div>
     </div>
   `;
 
+  // ✅ биндим поиск (после innerHTML!)
+  const search = page.querySelector("#servicesSearch");
+  if (search) {
+    search.addEventListener("input", () => {
+      state.servicesQuery = String(search.value || "");
+      renderServicesTab(); // перерисовка списка
+    });
+  }
+
   const list = page.querySelector("#servicesList");
   if (!list) return;
 
-    if (!filtered.length) {
+  if (!filtered.length) {
     list.innerHTML = `<div class="hint">Поки порожньо. Натисни “Додати”.</div>`;
-  } else {
-    const groups = groupBy(filtered, (s) => s.cat);
-    const order = ["Терапія", "Аналізи", "Хірургія", "Діагностика", "Виїзд", "Інше"];
-
-    const cats = Object.keys(groups).sort((a, b) => {
-      const ia = order.indexOf(a);
-      const ib = order.indexOf(b);
-      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
-    });
-
-    list.innerHTML = cats.map((cat) => {
-      const rows = groups[cat].map((s) => `
-        <div class="item">
-          <div class="left" style="width:100%">
-            <div class="name">${escapeHtml(s.name || "—")}</div>
-            <div class="meta">${escapeHtml(String(Number(s.price)||0))} грн • ${s.active === false ? "❌ вимкнено" : "✅ активно"}</div>
-            <div class="pill">id: ${escapeHtml(s.id)}</div>
-          </div>
-          <div class="right" style="display:flex; gap:6px;">
-            <button class="iconBtn" data-svc-action="edit" data-svc-id="${escapeHtml(s.id)}">✏️</button>
-            <button class="iconBtn" data-svc-action="toggle" data-svc-id="${escapeHtml(s.id)}">⚡️</button>
-            <button class="iconBtn" data-svc-action="del" data-svc-id="${escapeHtml(s.id)}">🗑</button>
-          </div>
-        </div>
-      `).join("");
-
-      return `
-        <div class="svcSection">
-          <div class="svcSectionTitle">${escapeHtml(cat)}</div>
-          ${rows}
-        </div>
-      `;
-    }).join("");
+    initServicesUI();
+    return;
   }
 
-  function groupBy(arr, keyFn) {
-  return (arr || []).reduce((acc, item) => {
-    const k = (keyFn(item) || "Інше").toString();
-    (acc[k] ||= []).push(item);
-    return acc;
-  }, {});
-}
+  // ✅ группируем по категории (если пусто -> "Інше")
+  const groups = groupBy(filtered, (s) => String(s?.cat || "").trim() || "Інше");
+  const order = ["Терапія", "Аналізи", "Хірургія", "Діагностика", "Виїзд", "Інше"];
+
+  const cats = Object.keys(groups).sort((a, b) => {
+    const ia = order.indexOf(a);
+    const ib = order.indexOf(b);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
+
+  list.innerHTML = cats.map((cat) => {
+    const rows = (groups[cat] || []).map((s) => `
+      <div class="item">
+        <div class="left" style="width:100%">
+          <div class="name">${escapeHtml(s?.name || "—")}</div>
+          <div class="meta">${escapeHtml(String(Number(s?.price)||0))} грн • ${s?.active === false ? "❌ вимкнено" : "✅ активно"}</div>
+          <div class="pill">id: ${escapeHtml(String(s?.id || ""))}</div>
+        </div>
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" data-svc-action="edit" data-svc-id="${escapeHtml(String(s?.id || ""))}">✏️</button>
+          <button class="iconBtn" data-svc-action="toggle" data-svc-id="${escapeHtml(String(s?.id || ""))}">⚡️</button>
+          <button class="iconBtn" data-svc-action="del" data-svc-id="${escapeHtml(String(s?.id || ""))}">🗑</button>
+        </div>
+      </div>
+    `).join("");
+
+    return `
+      <div class="svcSection">
+        <div class="svcSectionTitle">${escapeHtml(cat)}</div>
+        ${rows}
+      </div>
+    `;
+  }).join("");
 
   initServicesUI();
+
+  function groupBy(arr, keyFn) {
+    return (arr || []).reduce((acc, item) => {
+      const k = String(keyFn(item) || "Інше").trim() || "Інше";
+      (acc[k] ||= []).push(item);
+      return acc;
+    }, {});
+  }
 }
 
 function renderStockTab() {
