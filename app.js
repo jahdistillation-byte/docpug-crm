@@ -132,6 +132,7 @@ async function migrateLegacyVisitFilesIfNeeded() {
 
 // ✅ Services registry
 const SERVICES_KEY = "docpug_services_v1";
+const SERVICES_CAT_KEY = "docpug_services_cat_v1"; // { [id]: "Категорія" }
 
 function normalizeServiceRow(s) {
   const cat =
@@ -662,32 +663,24 @@ async function loadServicesApi() {
       ? json.data
       : (json.data ? [json.data] : []);
 
-    // ✅ MERGE с кешем: сохраняем cat даже если сервер его не отдаёт
-    const cached = LS.get(SERVICES_KEY, []);
-    const cachedById = new Map(
-      (Array.isArray(cached) ? cached : []).map((s) => [String(s.id), s])
-    );
+    // ✅ 1) читаем карту категорий
+    const catMap = loadServicesCatMap();
 
+    // ✅ 2) наклеиваем cat на то, что пришло с сервера
     const merged = (Array.isArray(arr) ? arr : []).map((s) => {
-      const prev = cachedById.get(String(s?.id)) || {};
+      const id = String(s?.id || "");
+      const savedCat = catMap[id];
 
-      // нормализуем поле категории (cat / category / section / group / type)
       const rawCat =
-        (s?.cat ?? s?.category ?? s?.section ?? s?.group ?? s?.type ??
-         prev?.cat ?? prev?.category ?? prev?.section ?? prev?.group ?? prev?.type ??
-         "");
+        (s?.cat ?? s?.category ?? s?.section ?? s?.group ?? s?.type ?? savedCat ?? "");
 
       const cat = String(rawCat || "").trim() || "Інше";
 
-      return {
-        ...prev,    // старое (может хранить cat)
-        ...s,       // серверное
-        cat,        // ✅ итоговая категория (гарантирована)
-      };
+      return { ...s, cat };
     });
 
     state.services = merged;
-    LS.set(SERVICES_KEY, merged);
+    LS.set(SERVICES_KEY, merged); // кэш для оффлайна
     return merged;
 
   } catch (e) {
@@ -1266,6 +1259,17 @@ function getServiceById(id) {
   return loadServices().find((s) => String(s.id) === String(id)) || null;
 }
 
+function loadServicesCatMap() {
+  const map = LS.get(SERVICES_CAT_KEY, {});
+  return map && typeof map === "object" ? map : {};
+}
+
+function saveServiceCatToMap(id, cat) {
+  const map = loadServicesCatMap();
+  map[String(id)] = String(cat || "Інше");
+  LS.set(SERVICES_CAT_KEY, map);
+}
+
 function ensureVisitServicesShape(visit) {
   if (!visit) return;
   if (!Array.isArray(visit.services)) visit.services = [];
@@ -1586,6 +1590,8 @@ function initServicesUI() {
     const created = await createServiceApi({ name, price, active: true, cat });
   if (!created) return alert("Не вдалося створити послугу");
 
+saveServiceCatToMap(created.id, cat);
+
   await loadServicesApi();
   renderServicesTab();
   await refreshVisitUIIfOpen();
@@ -1624,6 +1630,8 @@ const filtered = (items || []).filter((s) => {
 
   const updated = await updateServiceApi(id, { name, price, cat });
   if (!updated) return alert("Не вдалося оновити");
+
+  saveServiceCatToMap(id, cat);
 
   await loadServicesApi();
   renderServicesTab();
