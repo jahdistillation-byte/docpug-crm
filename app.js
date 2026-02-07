@@ -647,9 +647,26 @@ async function loadServicesApi() {
       ? json.data
       : (json.data ? [json.data] : []);
 
-    state.services = arr;
-    LS.set(SERVICES_KEY, arr); // fallback cache
-    return arr;
+    // ===== 🔥 ВАЖНОЕ МЕСТО: MERGE С LOCALSTORAGE =====
+
+    const cached = LS.get(SERVICES_KEY, []);
+    const cachedById = new Map(
+      (cached || []).map(s => [String(s.id), s])
+    );
+
+    const merged = (arr || []).map(s => {
+      const prev = cachedById.get(String(s.id)) || {};
+      return {
+        ...prev,           // тут может быть cat
+        ...s,              // серверные данные поверх
+        cat: s.cat ?? prev.cat ?? "Інше", // 🔑 КЛЮЧ
+      };
+    });
+
+    state.services = merged;
+    LS.set(SERVICES_KEY, merged); // сохраняем уже С cat
+    return merged;
+
   } catch (e) {
     console.warn("loadServicesApi network fail:", e);
     const cached = LS.get(SERVICES_KEY, []);
