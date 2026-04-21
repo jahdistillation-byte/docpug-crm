@@ -860,6 +860,51 @@ async function createOwner(name, phone = "", note = "") {
     return null;
   }
 }
+async function updateOwner(id, payload = {}) {
+  try {
+    const bodyObj = {
+      name: String(payload.name || "").trim(),
+      phone: String(payload.phone || "").trim(),
+      note: String(payload.note || "").trim(),
+    };
+
+    Object.keys(bodyObj).forEach((k) => {
+      if (bodyObj[k] === "") delete bodyObj[k];
+    });
+
+    const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(bodyObj),
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    if (!res.ok) {
+      console.error("API /owners PUT HTTP", res.status, text);
+      alert(`Помилка оновлення власника (HTTP ${res.status})`);
+      return null;
+    }
+
+    if (!json || !json.ok) {
+      console.error("API /owners PUT bad json:", json, text);
+      alert(json?.error || "Помилка оновлення власника");
+      return null;
+    }
+
+    return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+  } catch (e) {
+    console.error("updateOwner failed:", e);
+    alert("Помилка зʼєднання з сервером");
+    return null;
+  }
+}
 
 async function deleteOwner(id) {
   try {
@@ -2108,9 +2153,10 @@ function renderOwners() {
         }</div>
         <div class="pill">id: ${escapeHtml(owner.id)}</div>
       </div>
-      <div class="right">
-        <button class="iconBtn" title="Удалить" data-del="${escapeHtml(owner.id)}">🗑</button>
-      </div>
+      <div class="right" style="display:flex; gap:6px;">
+  <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}">✏️</button>
+  <button class="iconBtn" title="Удалить" data-del="${escapeHtml(owner.id)}">🗑</button>
+</div>
       
     `;
     list.appendChild(el);
@@ -3323,7 +3369,35 @@ function initOwnersUI() {
     // 🗑 / ➡️ Клик по списку владельцев
     const ownersList = e.target.closest("#ownersList");
     if (!ownersList) return;
+// ✏️ Редактирование
+const editBtn = e.target.closest("[data-edit-owner]");
+if (editBtn) {
+  e.preventDefault();
+  e.stopPropagation();
 
+  const id = editBtn.dataset.editOwner;
+  if (!id) return;
+
+  const owner = (state.owners || []).find((o) => String(o.id) === String(id));
+  if (!owner) return alert("Власника не знайдено");
+
+  const name = (prompt("Імʼя власника:", owner.name || "") || "").trim();
+  if (!name) return;
+
+  const phone = (prompt("Телефон:", owner.phone || "") || "").trim();
+  const note = (prompt("Нотатка / місто:", owner.note || "") || "").trim();
+
+  const updated = await updateOwner(id, { name, phone, note });
+  if (!updated) return;
+
+  await loadOwners();
+
+  if (state.selectedOwnerId && String(state.selectedOwnerId) === String(id)) {
+    renderOwnerPage(id);
+  }
+
+  return;
+}
     // 🗑 Удаление
     const delBtn = e.target.closest("[data-del]");
     if (delBtn) {
