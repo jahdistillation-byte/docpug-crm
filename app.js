@@ -2227,16 +2227,17 @@ function renderPatientsTab() {
           </div>
         </div>
 
-        <div class="right">
-          <button class="iconBtn" title="Видалити пацієнта" data-del-pet="${escapeHtml(p.id)}">🗑</button>
-        </div>
+       <div class="right" style="display:flex; gap:6px;">
+  <button class="iconBtn" title="Редагувати" data-edit-pet="${escapeHtml(p.id)}">✏️</button>
+  <button class="iconBtn" title="Видалити пацієнта" data-del-pet="${escapeHtml(p.id)}">🗑</button>
+</div>
       `;
 
       list.appendChild(el);
     });
 
   // один обработчик на весь список
-  list.onclick = (e) => {
+  list.onclick = async (e) => {
     // 🗑 delete
     const delBtn = e.target.closest("[data-del-pet]");
     if (delBtn) {
@@ -2355,6 +2356,18 @@ async function renderVisitsTab() {
 
   // ✅ ОДИН обработчик — без конфликтов
   list.onclick = async (e) => {
+    // ✏️ edit
+const editBtn = e.target.closest("[data-edit-pet]");
+if (editBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const petId = editBtn.dataset.editPet;
+
+  alert("Редагування пацієнта: " + petId);
+
+  return;
+}
     const card = e.target.closest(".item[data-visit-id]");
     if (!card) return;
 
