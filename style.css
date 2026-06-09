@@ -1465,3 +1465,120 @@ h2{
     justify-content:flex-start;
   }
 }
+/* ===== Patient medical card v1 ===== */
+
+.patientHero{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  margin-bottom:18px;
+}
+
+.patientLabel{
+  margin-top:18px;
+  font-size:12px;
+  font-weight:850;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.patientName{
+  font-size:34px;
+  font-weight:950;
+  letter-spacing:-1px;
+  color:var(--text);
+  margin-top:4px;
+}
+
+.patientMetaLine,
+.patientOwnerLine{
+  margin-top:6px;
+  color:var(--muted);
+  font-weight:750;
+}
+
+.patientActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.patientTabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:16px 0 18px;
+}
+
+.patientTab{
+  border:1px solid rgba(116,96,170,.18);
+  background:rgba(255,255,255,.52);
+  color:var(--text);
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.patientTab.active{
+  background:linear-gradient(135deg, #6b4eff, #9a6bff);
+  color:#fff;
+  box-shadow:0 12px 28px rgba(107,78,255,.22);
+}
+
+.patientStats{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(140px, 1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.patientGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.patientInfoBox{
+  padding:18px;
+  border-radius:24px;
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(116,96,170,.16);
+  box-shadow:
+    0 14px 34px rgba(48,39,82,.08),
+    inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.patientInfoRow{
+  padding:8px 0;
+  color:var(--muted);
+}
+
+.patientLabGrid{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.patientVisitsList{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+@media (max-width:900px){
+  .patientHero{
+    flex-direction:column;
+  }
+
+  .patientStats{
+    grid-template-columns:repeat(2, 1fr);
+  }
+
+  .patientGrid{
+    grid-template-columns:1fr;
+  }
+}

@@ -2645,11 +2645,10 @@ function openOwner(ownerId, opts = { pushHash: true }) {
 
 // ===== Patient page =====
 function openPatient(petId, opts = { pushHash: true }) {
-  // ✅ server-first patients
   const patients =
     Array.isArray(state.patients) && state.patients.length
       ? state.patients
-      : loadPatients(); // fallback только если state пустой
+      : loadPatients();
 
   const pet = (patients || []).find((p) => String(p.id) === String(petId));
   if (!pet) return alert("Пацієнт не знайдено");
@@ -2658,79 +2657,245 @@ function openPatient(petId, opts = { pushHash: true }) {
   state.selectedPet = pet;
   state.selectedOwnerId = String(pet.owner_id || state.selectedOwnerId || "");
 
-  const patientName = $("#patientName");
-  const patientMeta = $("#patientMeta");
-
-  if (patientName) patientName.textContent = pet.name || "Пацієнт";
-  if (patientMeta) {
-    patientMeta.textContent =
-      `${pet.species || ""}${pet.breed ? " • " + pet.breed : ""}${
-        pet.age ? " • " + pet.age : ""
-      }${pet.weight_kg ? " • " + pet.weight_kg + " кг" : ""}`.trim() || "—";
-  }
-
-  // ✅ visits from server (async, не await — просто запускаем)
-  renderVisits(String(petId));
+  renderPatientCard(pet);
 
   setRoute("patient");
   if (opts.pushHash) setHash("patient", petId);
 }
 
-// =========================
-// Patient -> Visits list (SERVER) — RENDER ONLY
-// ВАЖНО: клики/удаление/редактирование обрабатывает initPatientUI()
-// =========================
-async function renderVisits(petId) {
-  const list = $("#visitsList");
-  if (!list) return;
+async function renderPatientCard(pet) {
+  const root = $("#patientCardRoot");
+  if (!root) return;
 
-  list.innerHTML = `<div class="hint">Завантаження…</div>`;
+  const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
 
-  const visits = await getVisitsByPetId(petId); // server
-  list.innerHTML = "";
+  root.innerHTML = `
+    <div class="patientHero">
+      <div>
+        <button class="ghost" id="btnBackOwner">← Назад</button>
 
-  if (!visits.length) {
-    list.innerHTML = `<div class="hint">Поки візитів немає. Натисни “+ Візит”.</div>`;
+        <div class="patientLabel">Медична карта пацієнта</div>
+        <div class="patientName">🐾 ${escapeHtml(pet.name || "Пацієнт")}</div>
+
+        <div class="patientMetaLine">
+          ${escapeHtml(pet.species || "Вид не указан")}
+          ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+          ${pet.age ? " • " + escapeHtml(pet.age) : ""}
+          ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
+        </div>
+
+        <div class="patientOwnerLine">
+          👤 ${escapeHtml(owner?.name || "Власник не указан")}
+          ${owner?.phone ? " • 📞 " + escapeHtml(owner.phone) : ""}
+        </div>
+      </div>
+
+      <div class="patientActions">
+        <button class="ghost" data-edit-pet="${escapeHtml(String(pet.id))}">✏️ Редагувати</button>
+        <button class="primary" id="btnAddVisit">+ Візит</button>
+      </div>
+    </div>
+
+    <div class="patientTabs">
+      <button class="patientTab active" data-patient-tab="overview">Обзор</button>
+      <button class="patientTab" data-patient-tab="visits">Визиты</button>
+      <button class="patientTab" data-patient-tab="labs">Анализы</button>
+      <button class="patientTab" data-patient-tab="files">Файлы</button>
+      <button class="patientTab" data-patient-tab="finance">Финансы</button>
+    </div>
+
+    <div id="patientTabContent"></div>
+  `;
+
+  bindPatientCardButtons();
+  await renderPatientTab("overview", pet);
+}
+
+function bindPatientCardButtons() {
+  $("#btnBackOwner")?.addEventListener("click", () => {
+    if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
+    else setHash("owners");
+  });
+
+  $("#btnAddVisit")?.addEventListener("click", () => {
+    const pet = state.selectedPet;
+    if (!pet) return alert("Пацієнт не обраний");
+    openVisitModalForCreate(pet);
+  });
+
+  $$(".patientTab").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      $$(".patientTab").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const tab = btn.dataset.patientTab;
+      await renderPatientTab(tab, state.selectedPet);
+    });
+  });
+}
+
+async function renderPatientTab(tab, pet) {
+  const box = $("#patientTabContent");
+  if (!box || !pet) return;
+
+  if (tab === "overview") {
+    box.innerHTML = `<div class="hint">Завантаження…</div>`;
+
+    const visits = await getVisitsByPetId(pet.id);
+    cacheVisits(visits);
+
+    const lastVisit = visits
+      .slice()
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
+
+    const totalPaid = visits.reduce((sum, v) => {
+      return sum + calcServicesTotal(v) + calcStockTotal(v);
+    }, 0);
+
+    box.innerHTML = `
+      <div class="patientStats">
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📋</div>
+          <div>
+            <div class="ownerStatValue">${visits.length}</div>
+            <div class="ownerStatLabel">візитів</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">⚖️</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(pet.weight_kg || "—")}</div>
+            <div class="ownerStatLabel">вага, кг</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📅</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
+            <div class="ownerStatLabel">останній візит</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">💰</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div>
+            <div class="ownerStatLabel">сума</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="patientGrid">
+        <div class="patientInfoBox">
+          <h2>Паспорт пацієнта</h2>
+          <div class="patientInfoRow"><b>Кличка:</b> ${escapeHtml(pet.name || "—")}</div>
+          <div class="patientInfoRow"><b>Вид:</b> ${escapeHtml(pet.species || "—")}</div>
+          <div class="patientInfoRow"><b>Порода:</b> ${escapeHtml(pet.breed || "—")}</div>
+          <div class="patientInfoRow"><b>Вік:</b> ${escapeHtml(pet.age || "—")}</div>
+          <div class="patientInfoRow"><b>Вага:</b> ${escapeHtml(pet.weight_kg || "—")} кг</div>
+        </div>
+
+        <div class="patientInfoBox">
+          <h2>Нотатки лікаря</h2>
+          <div class="meta">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
+        </div>
+      </div>
+    `;
     return;
   }
 
+  if (tab === "visits") {
+    await renderVisits(pet.id);
+    return;
+  }
+
+  if (tab === "labs") {
+    box.innerHTML = `
+      <div class="patientInfoBox">
+        <h2>Анализы</h2>
+        <div class="patientLabGrid">
+          <button class="primary">+ ЗАК</button>
+          <button class="primary">+ БХ</button>
+          <button class="ghost">+ Прикріпити PDF / фото</button>
+        </div>
+
+        <div class="hint" style="margin-top:14px;">
+          Тут буде історія аналізів: ЗАК, БХ, рентген, УЗД, PDF лабораторії.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (tab === "files") {
+    box.innerHTML = `
+      <div class="patientInfoBox">
+        <h2>Файлы пациента</h2>
+        <div class="hint">Тут будуть рентгени, УЗД, PDF, фото, лабораторії.</div>
+      </div>
+    `;
+    return;
+  }
+
+  if (tab === "finance") {
+    box.innerHTML = `
+      <div class="patientInfoBox">
+        <h2>Финансы пациента</h2>
+        <div class="hint">Тут буде сума по пацієнту, середній чек, борги, оплати.</div>
+      </div>
+    `;
+  }
+}
+
+async function renderVisits(petId) {
+  const box = $("#patientTabContent");
+  if (!box) return;
+
+  box.innerHTML = `<div class="hint">Завантаження…</div>`;
+
+  const visits = await getVisitsByPetId(petId);
   cacheVisits(visits);
 
-  visits
-    .slice()
-    .sort((a, b) => String(b.id).localeCompare(String(a.id)))
-    .forEach((v) => {
-      const el = document.createElement("div");
-      el.className = "item";
-      el.dataset.openVisit = String(v.id);
-      el.style.cursor = "pointer";
+  if (!visits.length) {
+    box.innerHTML = `<div class="hint">Поки візитів немає. Натисни “+ Візит”.</div>`;
+    return;
+  }
 
-      el.innerHTML = `
-        <div class="left" style="width:100%;">
-          <div class="name">${escapeHtml(v.date || "—")}</div>
+  box.innerHTML = `
+    <div class="patientVisitsList">
+      ${visits
+        .slice()
+        .sort((a, b) => String(b.id).localeCompare(String(a.id)))
+        .map((v) => `
+          <div class="item" data-open-visit="${escapeHtml(String(v.id))}" style="cursor:pointer;">
+            <div class="left" style="width:100%;">
+              <div class="name">${escapeHtml(v.date || "—")}</div>
 
-          ${v.note ? `<div class="meta">${escapeHtml(v.note)}</div>` : ""}
+              ${v.note ? `<div class="meta">${escapeHtml(v.note)}</div>` : ""}
 
-          ${
-            v.rx
-              ? `
-            <div class="history" style="margin-top:6px;">
-              <div class="history-label">Призначення</div>
-              ${escapeHtml(v.rx)}
+              ${
+                v.rx
+                  ? `
+                    <div class="history" style="margin-top:8px;">
+                      <div class="history-label">Призначення</div>
+                      ${escapeHtml(v.rx)}
+                    </div>
+                  `
+                  : ""
+              }
             </div>
-          `
-              : ""
-          }
-        </div>
 
-        <div class="right" style="display:flex; gap:6px;">
-          <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
-          <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
-        </div>
-      `;
-
-      list.appendChild(el);
-    });
+            <div class="right" style="display:flex; gap:6px;">
+              <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
+              <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
+            </div>
+          </div>
+        `)
+        .join("")}
+    </div>
+  `;
 }
 
 // =========================
