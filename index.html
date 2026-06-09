@@ -7,26 +7,56 @@
   <link rel="stylesheet" href="style.css?v=20260207_1">
 </head>
 <body>
-  <div class="wrap">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">🐾</div>
+ <body>
+  <div class="appShell">
+    <aside class="sideNav">
+      <div class="sideBrand">
+        <div class="sideLogo">🐾</div>
         <div>
-          <div class="title">Doc.PUG CRM</div>
-          <div class="subtitle" id="meLine">Загрузка профиля…</div>
+          <div class="sideTitle">Doc.PUG</div>
+          <div class="sideSub">CRM</div>
         </div>
       </div>
-      <button class="ghost" id="btnReload" title="Перезагрузить профиль">↻</button>
-    </header>
 
-    <nav class="tabs" id="tabs">
-      <button class="tab" data-route="owners">Владельцы</button>
-      <button class="tab" data-route="patients">Пациенты</button>
-      <button class="tab" data-route="visits">Визиты</button>
-      <button class="tab" data-route="services">Послуги</button>
-      <button class="tab" data-route="calendar">Календарь</button>
-      <button class="tab" data-route="stock">Склад</button>
-    </nav>
+      <div class="sideClinic">
+        <div class="sideClinicTitle">Doc.PUG Clinic</div>
+        <div class="sideClinicSub" id="meLine">Загрузка профиля…</div>
+      </div>
+
+      <nav class="tabs sideTabs" id="tabs">
+        <button class="tab" data-route="owners">👤 Владельцы</button>
+        <button class="tab" data-route="patients">🐾 Пациенты</button>
+        <button class="tab" data-route="visits">📋 Визиты</button>
+        <button class="tab" data-route="services">➕ Послуги</button>
+        <button class="tab" data-route="calendar">📅 Календарь</button>
+        <button class="tab" data-route="stock">📦 Склад</button>
+      </nav>
+
+      <div class="sideBottom">
+        <div class="sideStatus">
+          <span class="dot" id="apiDot"></span>
+          <span id="apiLine">API: неизвестно</span>
+        </div>
+
+        <button class="sideQuick" id="btnReload" title="Перезагрузить профиль">
+          ↻ Обновить
+        </button>
+      </div>
+    </aside>
+
+    <section class="mainArea">
+      <header class="mainTop">
+        <div>
+          <div class="mainEyebrow">Doc.PUG CRM</div>
+          <div class="mainTitle">Панель управления</div>
+        </div>
+
+        <div class="topSearch">
+          Поиск владельца, пациента, телефона…
+        </div>
+      </header>
+
+      <main class="content">
 
     <main class="content">
       <!-- Owners -->
@@ -174,10 +204,8 @@
       </section>
     </main>
 
-    <footer class="footer">
-      <span class="dot" id="apiDot"></span>
-      <span id="apiLine">API: неизвестно</span>
-    </footer>
+          </main>
+    </section>
   </div>
 
   <!-- Visit modal -->

@@ -1033,3 +1033,219 @@ textarea{
   background:rgba(255,255,255,.55) !important;
   border-color:var(--border) !important;
 }
+/* ===== Doc.PUG CRM v3 — Sidebar Glass Layout ===== */
+
+.appShell{
+  min-height:100vh;
+  width:100%;
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:24px;
+  padding:18px;
+  position:relative;
+}
+
+.sideNav{
+  min-height:calc(100vh - 36px);
+  border-radius:32px;
+  padding:22px;
+  background:
+    linear-gradient(180deg, rgba(24,22,37,.86), rgba(56,38,94,.76)),
+    radial-gradient(circle at 30% 10%, rgba(139,92,255,.42), transparent 35%);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 24px 80px rgba(34,28,61,.28);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  color:#fff;
+  position:sticky;
+  top:18px;
+  display:flex;
+  flex-direction:column;
+}
+
+.sideBrand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.sideLogo{
+  width:52px;
+  height:52px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg, #6b4eff, #a177ff);
+  box-shadow:0 16px 36px rgba(107,78,255,.36);
+  font-size:24px;
+}
+
+.sideTitle{
+  font-weight:900;
+  font-size:24px;
+  letter-spacing:-.5px;
+}
+
+.sideSub{
+  opacity:.65;
+  font-weight:700;
+}
+
+.sideClinic{
+  padding:16px;
+  border-radius:20px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.14);
+  margin-bottom:18px;
+}
+
+.sideClinicTitle{
+  font-weight:850;
+  margin-bottom:6px;
+}
+
+.sideClinicSub{
+  font-size:13px;
+  opacity:.72;
+}
+
+.sideTabs{
+  display:flex !important;
+  flex-direction:column;
+  gap:10px;
+  overflow:visible;
+  padding:0;
+  margin:0;
+}
+
+.sideTabs .tab{
+  width:100%;
+  justify-content:flex-start;
+  text-align:left;
+  border-radius:18px;
+  padding:14px 16px;
+  background:transparent !important;
+  border:1px solid transparent !important;
+  color:rgba(255,255,255,.88) !important;
+  box-shadow:none !important;
+  font-size:15px;
+}
+
+.sideTabs .tab:hover{
+  background:rgba(255,255,255,.10) !important;
+  border-color:rgba(255,255,255,.12) !important;
+}
+
+.sideTabs .tab.active{
+  background:linear-gradient(135deg, rgba(107,78,255,.92), rgba(163,113,255,.72)) !important;
+  color:#fff !important;
+  border-color:rgba(255,255,255,.22) !important;
+  box-shadow:0 14px 34px rgba(107,78,255,.35) !important;
+}
+
+.sideBottom{
+  margin-top:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.sideStatus{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:13px;
+}
+
+.sideQuick{
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  border-radius:18px;
+  padding:13px 14px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.mainArea{
+  min-width:0;
+  padding:18px 14px 28px 0;
+}
+
+.mainTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  margin-bottom:22px;
+}
+
+.mainEyebrow{
+  color:var(--muted);
+  font-weight:800;
+  font-size:13px;
+}
+
+.mainTitle{
+  font-size:32px;
+  font-weight:950;
+  letter-spacing:-1px;
+  color:var(--text);
+}
+
+.topSearch{
+  width:min(460px, 40vw);
+  padding:14px 18px;
+  border-radius:18px;
+  background:rgba(255,255,255,.46);
+  border:1px solid var(--border);
+  color:var(--muted);
+  box-shadow:0 12px 40px rgba(43,36,73,.08);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+.content{
+  min-height:calc(100vh - 130px);
+}
+
+.footer,
+.topbar{
+  display:none !important;
+}
+
+@media (max-width:900px){
+  .appShell{
+    grid-template-columns:1fr;
+    padding:12px;
+  }
+
+  .sideNav{
+    position:relative;
+    top:auto;
+    min-height:auto;
+  }
+
+  .sideTabs{
+    display:grid !important;
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .mainArea{
+    padding:0;
+  }
+
+  .mainTop{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .topSearch{
+    width:100%;
+  }
+}
