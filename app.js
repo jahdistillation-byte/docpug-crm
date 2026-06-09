@@ -2238,15 +2238,42 @@ function renderPatientsTab() {
 
   // один обработчик на весь список
   list.onclick = async (e) => {
-    // ✏️ edit
+    /// ✏️ edit
 const editBtn = e.target.closest("[data-edit-pet]");
 if (editBtn) {
   e.preventDefault();
   e.stopPropagation();
 
   const petId = editBtn.dataset.editPet;
+  if (!petId) return;
 
-  alert("Редагування пацієнта: " + petId);
+  const pet = (state.patients || []).find((p) => String(p.id) === String(petId));
+  if (!pet) return alert("Пацієнта не знайдено");
+
+  const name = (prompt("Кличка:", pet.name || "") || "").trim();
+  if (!name) return;
+
+  const species = (prompt("Вид:", pet.species || "") || "").trim();
+  const breed = (prompt("Порода:", pet.breed || "") || "").trim();
+  const age = (prompt("Вік:", pet.age || "") || "").trim();
+  const weight_kg = (prompt("Вага кг:", pet.weight_kg || "") || "").trim();
+  const notes = (prompt("Нотатки:", pet.notes || "") || "").trim();
+
+  const updated = await updatePatientApi(petId, {
+    name,
+    species,
+    breed,
+    age,
+    weight_kg,
+    notes,
+  });
+
+  if (!updated) return;
+
+  await loadPatientsApi();
+  renderPatientsTab();
+
+  if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
 
   return;
 }
@@ -3933,7 +3960,54 @@ payload.stock_json = payload.stock;
 // =========================
 // VISIT PAGE UI (buttons on visit page)
 // =========================
+async function updatePatientApi(petId, payload = {}) {
+  try {
+    const bodyObj = {
+      name: String(payload.name || "").trim(),
+      species: String(payload.species || "").trim(),
+      breed: String(payload.breed || "").trim(),
+      age: String(payload.age || "").trim(),
+      weight_kg: String(payload.weight_kg || "").trim(),
+      notes: String(payload.notes || "").trim(),
+    };
 
+    Object.keys(bodyObj).forEach((k) => {
+      if (bodyObj[k] === "") delete bodyObj[k];
+    });
+
+    const res = await fetch(`/api/patients/${encodeURIComponent(petId)}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(bodyObj),
+    });
+
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    if (!res.ok) {
+      console.error("API /patients PUT HTTP", res.status, text);
+      alert(`Помилка оновлення пацієнта (HTTP ${res.status})`);
+      return null;
+    }
+
+    if (!json || !json.ok) {
+      console.error("API /patients PUT bad json:", json, text);
+      alert(json?.error || "Помилка оновлення пацієнта");
+      return null;
+    }
+
+    return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+  } catch (e) {
+    console.error("updatePatientApi failed:", e);
+    alert("Помилка зʼєднання з сервером");
+    return null;
+  }
+}
 // =========================
 // DELETE — server-first (patients + visits)
 // =========================
