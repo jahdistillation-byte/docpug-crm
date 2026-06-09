@@ -1582,3 +1582,119 @@ h2{
     grid-template-columns:1fr;
   }
 }
+/* ===== Visit page — clinic card ===== */
+
+.visitHero{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-start;
+  margin-bottom:18px;
+}
+
+.visitHeroTitle{
+  font-size:28px;
+  font-weight:950;
+  letter-spacing:-.7px;
+  margin-top:8px;
+}
+
+.visitHeroMeta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.visitGrid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:16px;
+  margin-top:16px;
+}
+
+.visitBlock{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.58);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 14px 45px rgba(43,36,73,.08);
+}
+
+.visitBlockTitle{
+  font-size:13px;
+  font-weight:900;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:10px;
+}
+
+.visitText{
+  font-size:15px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  color:var(--text);
+}
+
+.visitFinanceRow{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin:16px 0;
+}
+
+.visitStat{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.65);
+  border-radius:20px;
+  padding:14px;
+}
+
+.visitStatLabel{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+}
+
+.visitStatValue{
+  margin-top:6px;
+  font-size:22px;
+  font-weight:950;
+}
+
+.visitPicker{
+  display:grid;
+  grid-template-columns:1fr 1fr 90px auto;
+  gap:8px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.visitLine{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,.55);
+  margin-top:8px;
+}
+
+.visitLineName{
+  font-weight:900;
+}
+
+.visitLineMeta{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+@media(max-width:900px){
+  .visitGrid{grid-template-columns:1fr;}
+  .visitFinanceRow{grid-template-columns:1fr;}
+  .visitPicker{grid-template-columns:1fr;}
+}
