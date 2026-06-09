@@ -1338,3 +1338,130 @@ body{
 h2{
   letter-spacing:-.3px;
 }
+
+/* ===== Owner page v1 ===== */
+
+.ownerHero{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  padding:8px 0 18px;
+}
+
+.ownerHeroLabel{
+  font-size:12px;
+  font-weight:850;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:6px;
+}
+
+.ownerHeroName{
+  font-size:30px;
+  font-weight:950;
+  letter-spacing:-.8px;
+  color:var(--text);
+}
+
+.ownerHeroMeta{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:8px;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.ownerHeroActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.ownerStats{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(140px, 1fr));
+  gap:12px;
+  margin:4px 0 20px;
+}
+
+.ownerStat{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px;
+  border-radius:22px;
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(116,96,170,.16);
+  box-shadow:
+    0 14px 34px rgba(48,39,82,.08),
+    inset 0 1px 0 rgba(255,255,255,.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.ownerStatIcon{
+  width:42px;
+  height:42px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg, rgba(107,78,255,.18), rgba(154,107,255,.10));
+  border:1px solid rgba(107,78,255,.16);
+  font-size:20px;
+}
+
+.ownerStatValue{
+  font-size:20px;
+  font-weight:950;
+  color:var(--text);
+}
+
+.ownerStatLabel{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:750;
+}
+
+.ownerPetCard{
+  align-items:center;
+}
+
+.ownerPetTop{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+}
+
+.ownerPetBadges{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+@media (max-width:900px){
+  .ownerHero{
+    flex-direction:column;
+  }
+
+  .ownerHeroActions{
+    justify-content:flex-start;
+  }
+
+  .ownerStats{
+    grid-template-columns:repeat(2, 1fr);
+  }
+
+  .ownerPetTop{
+    flex-direction:column;
+  }
+
+  .ownerPetBadges{
+    justify-content:flex-start;
+  }
+}

@@ -2472,27 +2472,98 @@ function renderOwnerPage(ownerId) {
     return;
   }
 
-  // ✅ keep ids consistent
   state.selectedOwnerId = String(ownerId);
 
-  const ownerName = $("#ownerName");
-  const ownerMeta = $("#ownerMeta");
-
-  if (ownerName) ownerName.textContent = owner.name || "Без имени";
-  if (ownerMeta) {
-    ownerMeta.textContent =
-      `${owner.phone || ""}${owner.note ? " • " + owner.note : ""}`.trim() || "—";
-  }
-
-  // ✅ server-first patients
   const patients =
     Array.isArray(state.patients) && state.patients.length
       ? state.patients
-      : loadPatients(); // fallback
+      : loadPatients();
 
   const pets = (patients || []).filter(
     (p) => String(p.owner_id) === String(ownerId)
   );
+
+  const allVisits = Array.from(state.visitsById.values());
+
+  const ownerPetIds = new Set(pets.map((p) => String(p.id)));
+
+  const ownerVisits = allVisits.filter((v) =>
+    ownerPetIds.has(String(v.pet_id))
+  );
+
+  const visitsCount = ownerVisits.length;
+
+  const lastVisit = ownerVisits
+    .slice()
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
+
+  const totalPaid = ownerVisits.reduce((sum, v) => {
+    return sum + calcServicesTotal(v) + calcStockTotal(v);
+  }, 0);
+
+  const ownerName = $("#ownerName");
+  const ownerMeta = $("#ownerMeta");
+
+  if (ownerName) {
+    ownerName.innerHTML = `
+      <div class="ownerHero">
+        <div>
+          <div class="ownerHeroLabel">Картка власника</div>
+          <div class="ownerHeroName">👤 ${escapeHtml(owner.name || "Без имени")}</div>
+
+          <div class="ownerHeroMeta">
+            <span>📞 ${escapeHtml(owner.phone || "Телефон не указан")}</span>
+            ${
+              owner.note
+                ? `<span>📍 ${escapeHtml(owner.note)}</span>`
+                : ""
+            }
+          </div>
+        </div>
+
+        <div class="ownerHeroActions">
+          <button class="ghost" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
+          <button class="primary" id="btnAddPet">+ Животное</button>
+        </div>
+      </div>
+
+      <div class="ownerStats">
+        <div class="ownerStat">
+          <div class="ownerStatIcon">🐾</div>
+          <div>
+            <div class="ownerStatValue">${pets.length}</div>
+            <div class="ownerStatLabel">пацієнтів</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📋</div>
+          <div>
+            <div class="ownerStatValue">${visitsCount}</div>
+            <div class="ownerStatLabel">візитів</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">💰</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div>
+            <div class="ownerStatLabel">оплачено</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📅</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
+            <div class="ownerStatLabel">останній візит</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (ownerMeta) ownerMeta.textContent = "";
 
   const list = $("#petsList");
   if (!list) return;
@@ -2505,17 +2576,41 @@ function renderOwnerPage(ownerId) {
   }
 
   pets.forEach((pet) => {
+    const petVisits = ownerVisits.filter(
+      (v) => String(v.pet_id) === String(pet.id)
+    );
+
+    const petLastVisit = petVisits
+      .slice()
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
+
     const el = document.createElement("div");
-    el.className = "item";
+    el.className = "item ownerPetCard";
 
     el.innerHTML = `
-      <div class="left" data-open-pet="${escapeHtml(String(pet.id))}" style="width:100%; cursor:pointer;">
-        <div class="name">${escapeHtml(pet.name || "Без клички")}</div>
-        <div class="meta">
-          ${escapeHtml(pet.species || "")}
-          ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-          ${pet.age ? " • " + escapeHtml(pet.age) : ""}
-          ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
+      <div
+        class="left"
+        data-open-pet="${escapeHtml(String(pet.id))}"
+        style="width:100%; cursor:pointer;"
+      >
+        <div class="ownerPetTop">
+          <div>
+            <div class="name" style="font-size:19px;">
+              🐾 ${escapeHtml(pet.name || "Без клички")}
+            </div>
+
+            <div class="meta" style="margin-top:6px;">
+              ${escapeHtml(pet.species || "Вид не указан")}
+              ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+              ${pet.age ? " • " + escapeHtml(pet.age) : ""}
+              ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
+            </div>
+          </div>
+
+          <div class="ownerPetBadges">
+            <div class="pill">📋 ${petVisits.length} візитів</div>
+            <div class="pill">📅 ${escapeHtml(petLastVisit?.date || "—")}</div>
+          </div>
         </div>
 
         ${
@@ -2530,8 +2625,8 @@ function renderOwnerPage(ownerId) {
         }
       </div>
 
-      <div class="right">
-        <button class="iconBtn" title="Удалить" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
+      <div class="right" style="display:flex; gap:8px; align-items:center;">
+        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
       </div>
     `;
 
