@@ -2134,28 +2134,39 @@ function renderOwners() {
 
   list.innerHTML = "";
 
-  const owners = Array.isArray(state.owners) ? state.owners : [];
+  const q = String($("#globalSearch")?.value || "").trim().toLowerCase();
+
+  const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
+
+  const owners = ownersRaw.filter((owner) => {
+    if (!q) return true;
+
+    const hay = [
+      owner.name,
+      owner.phone,
+      owner.note,
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return hay.includes(q);
+  });
 
   if (!owners.length) {
-    list.innerHTML = `<div class="hint">Пока пусто. Нажми “Добавить”.</div>`;
+    list.innerHTML = `<div class="hint">Нічого не знайдено.</div>`;
     return;
   }
 
   owners.forEach((owner) => {
     const el = document.createElement("div");
     el.className = "item";
+    el.dataset.openOwner = String(owner.id);
+    el.style.cursor = "pointer";
 
     const petsCount = (state.patients || []).filter(
       p => String(p.owner_id) === String(owner.id)
     ).length;
 
     el.innerHTML = `
-      <div
-        class="left"
-        data-open-owner="${escapeHtml(owner.id)}"
-        style="cursor:pointer; width:100%;"
-      >
-
+      <div class="left" style="flex:1; min-width:0;">
         <div class="name" style="font-size:20px;">
           👤 ${escapeHtml(owner.name || "Без имени")}
         </div>
@@ -2170,43 +2181,15 @@ function renderOwners() {
             : ""
         }
 
-        <div
-          style="
-            display:flex;
-            gap:10px;
-            flex-wrap:wrap;
-            margin-top:10px;
-          "
-        >
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
           <div class="pill">🐾 ${petsCount} пацієнтів</div>
           <div class="pill">📝 CRM</div>
         </div>
-
       </div>
 
-      <div
-        class="right"
-        style="
-          display:flex;
-          gap:8px;
-          align-items:center;
-        "
-      >
-        <button
-          class="iconBtn"
-          title="Редагувати"
-          data-edit-owner="${escapeHtml(owner.id)}"
-        >
-          ✏️
-        </button>
-
-        <button
-          class="iconBtn"
-          title="Удалить"
-          data-del="${escapeHtml(owner.id)}"
-        >
-          🗑
-        </button>
+      <div class="right" style="display:flex; gap:8px; align-items:center; flex:0 0 auto;">
+        <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}">✏️</button>
+        <button class="iconBtn" title="Удалить" data-del="${escapeHtml(owner.id)}">🗑</button>
       </div>
     `;
 
@@ -4161,25 +4144,34 @@ function getStockById(id) {
 async function init() {
   initTabs();
   seedIfEmpty();
+
   // legacy migration (может отсутствовать)
-if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
-  await migrateLegacyVisitFilesIfNeeded();
-}
+  if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
+    await migrateLegacyVisitFilesIfNeeded();
+  }
+
   initOwnersUI();
   initOwnerUI();
   initPatientUI();
   initVisitUI();
-  initDischargeModalUI()
+  initDischargeModalUI();
 
   // услуги оставляем локально (как есть)
   // renderServicesTab();
-// renderStockTab();
+  // renderStockTab();
 
   $("#btnReload")?.addEventListener("click", async () => {
     await loadMe();
     await loadOwners();
     await loadPatientsApi();
     await loadServicesApi();
+  });
+
+  // 🔍 Глобальный поиск без потери фокуса
+  $("#globalSearch")?.addEventListener("input", () => {
+    if (state.route === "owners") renderOwners();
+    if (state.route === "patients") renderPatientsTab();
+    if (state.route === "visits") renderVisitsTab();
   });
 
   await loadMe();
