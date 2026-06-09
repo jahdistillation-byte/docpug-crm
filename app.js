@@ -2238,6 +2238,18 @@ function renderPatientsTab() {
 
   // один обработчик на весь список
   list.onclick = async (e) => {
+    // ✏️ edit
+const editBtn = e.target.closest("[data-edit-pet]");
+if (editBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const petId = editBtn.dataset.editPet;
+
+  alert("Редагування пацієнта: " + petId);
+
+  return;
+}
     // 🗑 delete
     const delBtn = e.target.closest("[data-del-pet]");
     if (delBtn) {
@@ -2356,18 +2368,7 @@ async function renderVisitsTab() {
 
   // ✅ ОДИН обработчик — без конфликтов
   list.onclick = async (e) => {
-    // ✏️ edit
-const editBtn = e.target.closest("[data-edit-pet]");
-if (editBtn) {
-  e.preventDefault();
-  e.stopPropagation();
 
-  const petId = editBtn.dataset.editPet;
-
-  alert("Редагування пацієнта: " + petId);
-
-  return;
-}
     const card = e.target.closest(".item[data-visit-id]");
     if (!card) return;
 
