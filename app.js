@@ -2145,24 +2145,74 @@ function renderOwners() {
     const el = document.createElement("div");
     el.className = "item";
 
+    const petsCount = (state.patients || []).filter(
+      p => String(p.owner_id) === String(owner.id)
+    ).length;
+
     el.innerHTML = `
-      <div class="left" data-open-owner="${escapeHtml(owner.id)}" style="cursor:pointer;">
-        <div class="name">${escapeHtml(owner.name || "Без имени")}</div>
-        <div class="meta">${escapeHtml(owner.phone || "")}${
-          owner.note ? " • " + escapeHtml(owner.note) : ""
-        }</div>
-        <div class="pill">id: ${escapeHtml(owner.id)}</div>
+      <div
+        class="left"
+        data-open-owner="${escapeHtml(owner.id)}"
+        style="cursor:pointer; width:100%;"
+      >
+
+        <div class="name" style="font-size:20px;">
+          👤 ${escapeHtml(owner.name || "Без имени")}
+        </div>
+
+        <div class="meta" style="margin-top:6px;">
+          📞 ${escapeHtml(owner.phone || "Не указан")}
+        </div>
+
+        ${
+          owner.note
+            ? `<div class="meta">📍 ${escapeHtml(owner.note)}</div>`
+            : ""
+        }
+
+        <div
+          style="
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-top:10px;
+          "
+        >
+          <div class="pill">🐾 ${petsCount} пацієнтів</div>
+          <div class="pill">📝 CRM</div>
+        </div>
+
       </div>
-      <div class="right" style="display:flex; gap:6px;">
-  <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}">✏️</button>
-  <button class="iconBtn" title="Удалить" data-del="${escapeHtml(owner.id)}">🗑</button>
-</div>
-      
+
+      <div
+        class="right"
+        style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+        "
+      >
+        <button
+          class="iconBtn"
+          title="Редагувати"
+          data-edit-owner="${escapeHtml(owner.id)}"
+        >
+          ✏️
+        </button>
+
+        <button
+          class="iconBtn"
+          title="Удалить"
+          data-del="${escapeHtml(owner.id)}"
+        >
+          🗑
+        </button>
+      </div>
     `;
+
     list.appendChild(el);
   });
 }
-
 // =========================
 // PATIENTS TAB — server first (state), LS only fallback
 // =========================
