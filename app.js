@@ -3134,57 +3134,45 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
-  
-
   const box = $("#visitNoteBox");
   if (!box) return;
 
   const note = visit.note || "";
   const rx = visit.rx || "";
 
-  // --- SERVICES ---
   ensureVisitServicesShape(visit);
+  ensureVisitStockShape(visit);
 
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
 
   const svcOptions = loadServices()
     .filter((s) => s.active !== false)
     .filter((s) => !svcQ || String(s.name || "").toLowerCase().includes(svcQ))
-    .map(
-      (s) =>
-        `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(
-          String(Number(s.price) || 0)
-        )} грн</option>`
-    )
+    .map((s) => `
+      <option value="${escapeHtml(s.id)}">
+        ${escapeHtml(s.name)} — ${escapeHtml(String(Number(s.price) || 0))} грн
+      </option>
+    `)
     .join("");
 
   const expanded = expandServiceLines(visit);
   const total = calcServicesTotal(visit);
 
   const svcListHtml = expanded.length
-    ? expanded
-        .map(
-          (x, idx) => `
-          <div class="visitLine">
-            <div>
-              <div class="visitLineName">${escapeHtml(x.name)}</div>
-              <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(
-            String(x.price)
-          )} грн</div>
-            </div>
+    ? expanded.map((x, idx) => `
+      <div class="visitLine">
+        <div>
+          <div class="visitLineName">${escapeHtml(x.name)}</div>
+          <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
+        </div>
 
-            <div style="display:flex; gap:10px; align-items:center;">
-              <b>${escapeHtml(String(x.lineTotal))} грн</b>
-              <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
-            </div>
-          </div>
-        `
-        )
-        .join("")
+        <div style="display:flex; gap:10px; align-items:center;">
+          <b>${escapeHtml(String(x.lineTotal))} грн</b>
+          <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+        </div>
+      </div>
+    `).join("")
     : `<div class="hint">Поки послуг немає. Додай нижче.</div>`;
-
-  // --- STOCK ---
-  ensureVisitStockShape(visit);
 
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
 
@@ -3196,11 +3184,11 @@ function renderVisitPage(visit, pet) {
       const unit = String(it.unit || "шт");
       const price = Number(it.price) || 0;
 
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(
-        it.name
-      )} — ${escapeHtml(String(price))} грн/${escapeHtml(
-        unit
-      )} • залишок: ${escapeHtml(String(left))}</option>`;
+      return `
+        <option value="${escapeHtml(it.id)}">
+          ${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}
+        </option>
+      `;
     })
     .join("");
 
@@ -3208,25 +3196,21 @@ function renderVisitPage(visit, pet) {
   const stkTotal = calcStockTotal(visit);
 
   const stkListHtml = stkExpanded.length
-    ? stkExpanded
-        .map(
-          (x, idx) => `
-          <div class="visitLine">
-            <div>
-              <div class="visitLineName">${escapeHtml(x.name)}</div>
-              <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(
-            String(x.price)
-          )} грн/${escapeHtml(x.unit || "шт")}</div>
-            </div>
-
-            <div style="display:flex; gap:10px; align-items:center;">
-              <b>${escapeHtml(String(x.lineTotal))} грн</b>
-              <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
-            </div>
+    ? stkExpanded.map((x, idx) => `
+      <div class="visitLine">
+        <div>
+          <div class="visitLineName">${escapeHtml(x.name)}</div>
+          <div class="visitLineMeta">
+            ${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}
           </div>
-        `
-        )
-        .join("")
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <b>${escapeHtml(String(x.lineTotal))} грн</b>
+          <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+        </div>
+      </div>
+    `).join("")
     : `<div class="hint">Поки препаратів немає. Додай нижче.</div>`;
 
   const grandTotal = total + stkTotal;
@@ -3249,45 +3233,31 @@ function renderVisitPage(visit, pet) {
       </div>
     </div>
 
-    ${
-      note
-        ? `
-        <div class="visitBlock">
-          <div class="visitBlockTitle">Скарга / стан</div>
-          <div class="visitText">${escapeHtml(note)}</div>
-        </div>
-      `
-        : ""
-    }
+    ${note ? `
+      <div class="visitBlock">
+        <div class="visitBlockTitle">Скарга / стан</div>
+        <div class="visitText">${escapeHtml(note)}</div>
+      </div>
+    ` : ""}
 
-    ${
-      rx
-        ? `
-        <div class="visitBlock" style="margin-top:16px;">
-          <div class="visitBlockTitle">Призначення</div>
-          <div class="visitText">${escapeHtml(rx)}</div>
-        </div>
-      `
-        : ""
-    }
+    ${rx ? `
+      <div class="visitBlock" style="margin-top:16px;">
+        <div class="visitBlockTitle">Призначення</div>
+        <div class="visitText">${escapeHtml(rx)}</div>
+      </div>
+    ` : ""}
 
     <div class="visitBlock" style="margin-top:16px;">
       <div class="visitBlockTitle">Послуги</div>
 
       <div class="visitPicker">
-        <input
-          id="visitSvcSearch"
-          type="search"
-          placeholder="Пошук послуги…"
-          value="${escapeHtml(state.visitSvcQuery || "")}"
-        />
+        <input id="visitSvcSearch" type="search" placeholder="Пошук послуги…" value="${escapeHtml(state.visitSvcQuery || "")}" />
 
         <select id="visitSvcSelect">
           ${svcOptions || `<option value="">Немає послуг</option>`}
         </select>
 
         <input id="visitSvcQty" type="number" min="1" value="1" />
-
         <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
       </div>
 
@@ -3300,19 +3270,13 @@ function renderVisitPage(visit, pet) {
       <div class="visitBlockTitle">Препарати / склад</div>
 
       <div class="visitPicker">
-        <input
-          id="visitStkSearch"
-          type="search"
-          placeholder="Пошук препарату…"
-          value="${escapeHtml(state.visitStkQuery || "")}"
-        />
+        <input id="visitStkSearch" type="search" placeholder="Пошук препарату…" value="${escapeHtml(state.visitStkQuery || "")}" />
 
         <select id="visitStkSelect">
           ${stkOptions || `<option value="">Немає препаратів</option>`}
         </select>
 
         <input id="visitStkQty" type="number" min="1" value="1" />
-
         <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
       </div>
 
@@ -3328,115 +3292,6 @@ function renderVisitPage(visit, pet) {
     }
   `;
 }
-  // --- STOCK ---
-  ensureVisitStockShape(visit);
-
-  const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
-
-    const stkOptions = loadStock()
-    .filter((it) => it.active !== false)
-    .filter((it) => !stkQ || String(it.name || "").toLowerCase().includes(stkQ))
-    .map((it) => {
-      const left = Number(it.qty) || 0;
-      const unit = String(it.unit || "шт");
-      const price = Number(it.price) || 0;
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(
-        it.name
-      )} — ${escapeHtml(String(price))} грн/${escapeHtml(
-        unit
-      )} • залишок: ${escapeHtml(String(left))}</option>`;
-    })
-    .join("");
-
-  const stkExpanded = expandStockLines(visit);
-  const stkTotal = calcStockTotal(visit);
-
-  const stkListHtml = stkExpanded.length
-    ? stkExpanded
-        .map(
-          (x, idx) => `
-          <div class="fileRow" style="align-items:center;">
-            <div class="fileMain">
-              <div class="fileName">${escapeHtml(x.name)}</div>
-              <div class="fileMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(
-            String(x.price)
-          )} грн = <b>${escapeHtml(String(x.lineTotal))} грн</b></div>
-            </div>
-            <div class="fileActions">
-              <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
-            </div>
-          </div>
-        `
-        )
-        .join("")
-    : `<div class="hint">Поки препаратів немає. Додай нижче.</div>`;
-
-  box.innerHTML = `
-    ${note ? `<div style="margin-bottom:10px;"><div class="history-label">Скарга / стан</div>${escapeHtml(note)}</div>` : ""}
-    ${rx ? `<div style="margin-bottom:12px;"><div class="history-label">Призначення</div>${escapeHtml(rx)}</div>` : ""}
-
-    <div class="history" style="margin-top:10px;">
-      <div class="history-label">Послуги</div>
-
-      <div style="display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap;">
-        <input
-          id="visitSvcSearch"
-          type="search"
-          placeholder="Пошук послуги…"
-          value="${escapeHtml(state.visitSvcQuery || "")}"
-          style="flex:1; min-width:220px;"
-        />
-
-        <select id="visitSvcSelect" style="flex:1; min-width:220px;">
-          ${svcOptions || `<option value="">(Немає послуг)</option>`}
-        </select>
-
-        <input id="visitSvcQty" type="number" min="1" value="1" style="width:90px;" />
-        <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
-      </div>
-
-      <div id="visitSvcList">${svcListHtml}</div>
-
-      <div style="margin-top:10px; display:flex; justify-content:flex-end;">
-        <div class="pill">
-          Разом за послуги: <b>${escapeHtml(String(total))} грн</b>
-        </div>
-      </div>
-    </div>
-
-    <div class="history" style="margin-top:10px;">
-      <div class="history-label">Препарати (склад)</div>
-
-      <div style="display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap;">
-        <input
-          id="visitStkSearch"
-          type="search"
-          placeholder="Пошук препарату…"
-          value="${escapeHtml(state.visitStkQuery || "")}"
-          style="flex:1; min-width:220px;"
-        />
-
-        <select id="visitStkSelect" style="flex:1; min-width:220px;">
-          ${stkOptions || `<option value="">(Немає препаратів)</option>`}
-        </select>
-
-        <input id="visitStkQty" type="number" min="1" value="1" style="width:90px;" />
-        <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
-      </div>
-
-      <div id="visitStkList">${stkListHtml}</div>
-
-      <div style="margin-top:10px; display:flex; justify-content:flex-end;">
-        <div class="pill">
-          Разом за препарати: <b>${escapeHtml(String(stkTotal))} грн</b>
-        </div>
-      </div>
-    </div>
-
-    ${(!note && !rx && !expanded.length && !stkExpanded.length)
-      ? `<div class="hint" style="margin-top:10px;">Поки порожньо.</div>`
-      : ""}
-  `;// <-- ВОТ ЭТОЙ СКОБКИ У ТЕБЯ НЕ ХВАТАЛО
 
 // =========================
 
