@@ -2924,6 +2924,40 @@ async function renderVisits(petId) {
     </div>
   `;
 }
+  box.onclick = async (e) => {
+    const editBtn = e.target.closest("[data-edit-visit]");
+    if (editBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const visitId = editBtn.dataset.editVisit;
+      if (visitId) await openVisitModalForEdit(visitId);
+      return;
+    }
+
+    const delBtn = e.target.closest("[data-del-visit]");
+    if (delBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const visitId = delBtn.dataset.delVisit;
+      if (!visitId) return;
+
+      if (!confirm("Видалити цей візит?")) return;
+
+      const ok = await deleteVisitApi(visitId);
+      if (!ok) return alert("Не вдалося видалити візит.");
+
+      await renderVisits(petId);
+      return;
+    }
+
+    const card = e.target.closest("[data-open-visit]");
+    if (card) {
+      const visitId = card.dataset.openVisit;
+      if (visitId) openVisit(visitId);
+    }
+  };
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
