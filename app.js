@@ -2867,7 +2867,7 @@ async function renderVisits(petId) {
     return;
   }
 
-    box.innerHTML = `
+  box.innerHTML = `
     <div class="patientVisitsList">
       ${visits
         .slice()
@@ -2923,7 +2923,7 @@ async function renderVisits(petId) {
         .join("")}
     </div>
   `;
-
+}
   box.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
@@ -2931,9 +2931,7 @@ async function renderVisits(petId) {
       e.stopPropagation();
 
       const visitId = editBtn.dataset.editVisit;
-      if (visitId) {
-        await openVisitModalForEdit(visitId);
-      }
+      if (visitId) await openVisitModalForEdit(visitId);
       return;
     }
 
@@ -2948,10 +2946,7 @@ async function renderVisits(petId) {
       if (!confirm("Видалити цей візит?")) return;
 
       const ok = await deleteVisitApi(visitId);
-      if (!ok) {
-        alert("Не вдалося видалити візит.");
-        return;
-      }
+      if (!ok) return alert("Не вдалося видалити візит.");
 
       await renderVisits(petId);
       return;
@@ -2960,12 +2955,9 @@ async function renderVisits(petId) {
     const card = e.target.closest("[data-open-visit]");
     if (card) {
       const visitId = card.dataset.openVisit;
-      if (visitId) {
-        openVisit(visitId);
-      }
+      if (visitId) openVisit(visitId);
     }
   };
-}
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
@@ -3202,42 +3194,55 @@ function renderVisitPage(visit, pet) {
   const box = $("#visitNoteBox");
   if (!box) return;
 
-  const note = visit.note || "";
-  const rx = visit.rx || "";
+  const note = String(visit.note || "").trim();
+  const rx = String(visit.rx || "").trim();
 
+  const parsed = parseVisitNote(note);
+  const dx = parsed.dx || "—";
+  const complaint = parsed.complaint || "—";
+
+  // --- SERVICES ---
   ensureVisitServicesShape(visit);
-  ensureVisitStockShape(visit);
 
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
 
   const svcOptions = loadServices()
     .filter((s) => s.active !== false)
     .filter((s) => !svcQ || String(s.name || "").toLowerCase().includes(svcQ))
-    .map((s) => `
-      <option value="${escapeHtml(s.id)}">
-        ${escapeHtml(s.name)} — ${escapeHtml(String(Number(s.price) || 0))} грн
-      </option>
-    `)
+    .map((s) => {
+      return `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(
+        String(Number(s.price) || 0)
+      )} грн</option>`;
+    })
     .join("");
 
   const expanded = expandServiceLines(visit);
   const total = calcServicesTotal(visit);
 
   const svcListHtml = expanded.length
-    ? expanded.map((x, idx) => `
-      <div class="visitLine">
-        <div>
-          <div class="visitLineName">${escapeHtml(x.name)}</div>
-          <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
-        </div>
+    ? expanded
+        .map(
+          (x, idx) => `
+            <div class="visitLine">
+              <div>
+                <div class="visitLineName">${escapeHtml(x.name)}</div>
+                <div class="visitLineMeta">
+                  ${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн
+                </div>
+              </div>
 
-        <div style="display:flex; gap:10px; align-items:center;">
-          <b>${escapeHtml(String(x.lineTotal))} грн</b>
-          <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
-        </div>
-      </div>
-    `).join("")
+              <div class="visitLineRight">
+                <b>${escapeHtml(String(x.lineTotal))} грн</b>
+                <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+              </div>
+            </div>
+          `
+        )
+        .join("")
     : `<div class="hint">Поки послуг немає. Додай нижче.</div>`;
+
+  // --- STOCK ---
+  ensureVisitStockShape(visit);
 
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
 
@@ -3249,11 +3254,9 @@ function renderVisitPage(visit, pet) {
       const unit = String(it.unit || "шт");
       const price = Number(it.price) || 0;
 
-      return `
-        <option value="${escapeHtml(it.id)}">
-          ${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}
-        </option>
-      `;
+      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(
+        String(price)
+      )} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
     })
     .join("");
 
@@ -3261,119 +3264,95 @@ function renderVisitPage(visit, pet) {
   const stkTotal = calcStockTotal(visit);
 
   const stkListHtml = stkExpanded.length
-    ? stkExpanded.map((x, idx) => `
-      <div class="visitLine">
-        <div>
-          <div class="visitLineName">${escapeHtml(x.name)}</div>
-          <div class="visitLineMeta">
-            ${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}
-          </div>
-        </div>
+    ? stkExpanded
+        .map(
+          (x, idx) => `
+            <div class="visitLine">
+              <div>
+                <div class="visitLineName">${escapeHtml(x.name)}</div>
+                <div class="visitLineMeta">
+                  ${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}
+                </div>
+              </div>
 
-        <div style="display:flex; gap:10px; align-items:center;">
-          <b>${escapeHtml(String(x.lineTotal))} грн</b>
-          <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
-        </div>
-      </div>
-    `).join("")
+              <div class="visitLineRight">
+                <b>${escapeHtml(String(x.lineTotal))} грн</b>
+                <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+              </div>
+            </div>
+          `
+        )
+        .join("")
     : `<div class="hint">Поки препаратів немає. Додай нижче.</div>`;
 
   const grandTotal = total + stkTotal;
 
   box.innerHTML = `
-    <div class="visitFinanceRow">
-      <div class="visitStat">
-        <div class="visitStatLabel">Послуги</div>
-        <div class="visitStatValue">${escapeHtml(String(total))} грн</div>
+    <div class="visitMoneyGrid">
+      <div class="visitMoneyCard">
+        <div class="visitMoneyLabel">Послуги</div>
+        <div class="visitMoneyValue">${escapeHtml(String(total))} грн</div>
       </div>
 
-      <div class="visitStat">
-        <div class="visitStatLabel">Препарати</div>
-        <div class="visitStatValue">${escapeHtml(String(stkTotal))} грн</div>
+      <div class="visitMoneyCard">
+        <div class="visitMoneyLabel">Препарати</div>
+        <div class="visitMoneyValue">${escapeHtml(String(stkTotal))} грн</div>
       </div>
 
-      <div class="visitStat">
-        <div class="visitStatLabel">Разом</div>
-        <div class="visitStatValue">${escapeHtml(String(grandTotal))} грн</div>
+      <div class="visitMoneyCard visitMoneyCardTotal">
+        <div class="visitMoneyLabel">Разом</div>
+        <div class="visitMoneyValue">${escapeHtml(String(grandTotal))} грн</div>
       </div>
     </div>
 
-    ${note ? `
-      <div class="visitBlock">
-        <div class="visitBlockTitle">Скарга / стан</div>
-        <div class="visitText">${escapeHtml(note)}</div>
-      </div>
-    ` : ""}
+    <div class="visitBlock">
+      <div class="visitBlockTitle">Медична частина</div>
 
-    ${rx ? `
-      <div class="visitBlock" style="margin-top:16px;">
-        <div class="visitBlockTitle">Призначення</div>
-        <div class="visitText">${escapeHtml(rx)}</div>
-      </div>
-    ` : ""}
+      <div class="visitMedGrid">
+        <div class="visitMedItem">
+          <div class="history-label">Діагноз</div>
+          <div class="visitText">${escapeHtml(dx)}</div>
+        </div>
 
-    <div class="visitBlock" style="margin-top:16px;">
+        <div class="visitMedItem">
+          <div class="history-label">Скарга / стан</div>
+          <div class="visitText">${escapeHtml(complaint)}</div>
+        </div>
+
+        <div class="visitMedItem visitMedItemWide">
+          <div class="history-label">Призначення</div>
+          <div class="visitText">${escapeHtml(rx || "—")}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="visitBlock">
       <div class="visitBlockTitle">Послуги</div>
 
       <div class="visitPicker">
         <input id="visitSvcSearch" type="search" placeholder="Пошук послуги…" value="${escapeHtml(state.visitSvcQuery || "")}" />
-
-        <select id="visitSvcSelect">
-          ${svcOptions || `<option value="">Немає послуг</option>`}
-        </select>
-
+        <select id="visitSvcSelect">${svcOptions || `<option value="">Немає послуг</option>`}</select>
         <input id="visitSvcQty" type="number" min="1" value="1" />
         <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
       </div>
 
-      <div style="margin-top:12px;">
-        ${svcListHtml}
-      </div>
+      <div class="visitLines">${svcListHtml}</div>
     </div>
 
-    <div class="visitBlock" style="margin-top:16px;">
+    <div class="visitBlock">
       <div class="visitBlockTitle">Препарати / склад</div>
 
       <div class="visitPicker">
         <input id="visitStkSearch" type="search" placeholder="Пошук препарату…" value="${escapeHtml(state.visitStkQuery || "")}" />
-
-        <select id="visitStkSelect">
-          ${stkOptions || `<option value="">Немає препаратів</option>`}
-        </select>
-
+        <select id="visitStkSelect">${stkOptions || `<option value="">Немає препаратів</option>`}</select>
         <input id="visitStkQty" type="number" min="1" value="1" />
         <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
       </div>
 
-      <div style="margin-top:12px;">
-        ${stkListHtml}
-      </div>
+      <div class="visitLines">${stkListHtml}</div>
     </div>
-
-    ${
-      !note && !rx && !expanded.length && !stkExpanded.length
-        ? `<div class="hint" style="margin-top:10px;">Поки порожньо.</div>`
-        : ""
-    }
   `;
 }
-
-// =========================
-
-
-/*
-  =========================
-  STOCK: позже
-  =========================
-  Мы специально НЕ биндим:
-    - #visitStkAdd
-    - #visitStkList
-  И НЕ трогаем склад здесь, чтобы не смешивать локалку и сервер.
-*/
-// =========================
-// DISCHARGE helpers (MUST exist)
-// =========================
-
 function parseVisitNote(note) {
   const t = String(note || "");
 

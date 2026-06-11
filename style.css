@@ -661,3 +661,151 @@ input,select,textarea,.input,.textarea,.inp{
     max-height:calc(var(--vh, 1vh) * 100 - 20px) !important;
   }
 }
+#visitNoteBox{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  padding:0 !important;
+}
+
+.visitMoneyGrid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.visitMoneyCard{
+  padding:16px;
+  border-radius:22px;
+  background:rgba(255,255,255,.68);
+  border:1px solid rgba(116,96,170,.16);
+  box-shadow:0 12px 34px rgba(48,39,82,.07);
+}
+
+.visitMoneyCardTotal{
+  background:linear-gradient(135deg, rgba(107,78,255,.14), rgba(255,255,255,.76));
+  border-color:rgba(107,78,255,.22);
+}
+
+.visitMoneyLabel{
+  font-size:12px;
+  font-weight:900;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.visitMoneyValue{
+  font-size:24px;
+  font-weight:950;
+  color:var(--text);
+}
+
+.visitBlock{
+  margin-top:14px;
+  padding:18px;
+  border-radius:24px;
+  background:rgba(255,255,255,.70);
+  border:1px solid rgba(116,96,170,.15);
+  box-shadow:0 14px 38px rgba(48,39,82,.07);
+}
+
+.visitBlockTitle{
+  font-size:12px;
+  font-weight:950;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  margin-bottom:12px;
+}
+
+.visitMedGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.visitMedItem{
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.64);
+  border:1px solid rgba(116,96,170,.12);
+}
+
+.visitMedItemWide{
+  grid-column:1 / -1;
+}
+
+.visitText{
+  white-space:pre-wrap;
+  line-height:1.5;
+  color:var(--text);
+  font-size:14px;
+}
+
+.visitPicker{
+  display:grid;
+  grid-template-columns:1fr 1fr 90px auto;
+  gap:8px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.visitPicker input,
+.visitPicker select{
+  height:42px;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.78) !important;
+}
+
+.visitLines{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.visitLine{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(116,96,170,.13);
+}
+
+.visitLineName{
+  font-weight:900;
+}
+
+.visitLineMeta{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+.visitLineRight{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .visitMoneyGrid,
+  .visitMedGrid,
+  .visitPicker{
+    grid-template-columns:1fr;
+  }
+
+  .visitLine{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .visitLineRight{
+    width:100%;
+    justify-content:space-between;
+  }
+}
