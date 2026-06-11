@@ -3100,7 +3100,7 @@ renderDischargeA4(vid);
     async (e) => {
       const t = e.target;
 
-      // поиск услуг
+      // поиск услуг ф
       if (t && t.id === "visitSvcSearch") {
         state.visitSvcQuery = String(t.value || "");
         const vid = state.selectedVisitId;
