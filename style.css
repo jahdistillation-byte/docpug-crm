@@ -491,3 +491,43 @@ input,select,textarea,.input,.textarea,.inp{
   .fileRow{align-items:flex-start}
   .fileActions{flex-wrap:wrap;justify-content:flex-end}
 }
+.visitCardTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+}
+
+.visitDate{
+  font-size:18px;
+  font-weight:950;
+  color:var(--text);
+}
+
+.visitDx{
+  margin-top:4px;
+  color:var(--muted);
+  font-weight:750;
+  font-size:13px;
+}
+
+.visitCardBadges{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.visitMiniBlock{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(120,100,180,.14);
+}
+
+.visitMiniText{
+  color:var(--text);
+  line-height:1.45;
+  white-space:pre-wrap;
+}

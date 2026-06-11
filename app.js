@@ -2848,7 +2848,6 @@ async function renderPatientTab(tab, pet) {
     `;
   }
 }
-
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
@@ -2859,7 +2858,12 @@ async function renderVisits(petId) {
   cacheVisits(visits);
 
   if (!visits.length) {
-    box.innerHTML = `<div class="hint">Поки візитів немає. Натисни “+ Візит”.</div>`;
+    box.innerHTML = `
+      <div class="patientInfoBox">
+        <h2>Історія візитів</h2>
+        <div class="hint">Поки візитів немає. Натисни “+ Візит”.</div>
+      </div>
+    `;
     return;
   }
 
@@ -2867,40 +2871,59 @@ async function renderVisits(petId) {
     <div class="patientVisitsList">
       ${visits
         .slice()
-        .sort((a, b) => String(b.id).localeCompare(String(a.id)))
-        .map((v) => `
-          <div class="item" data-open-visit="${escapeHtml(String(v.id))}" style="cursor:pointer;">
-            <div class="left" style="width:100%;">
-              <div class="name">${escapeHtml(v.date || "—")}</div>
+        .sort((a, b) => String(b.date || b.id).localeCompare(String(a.date || a.id)))
+        .map((v) => {
+          const parsed = parseVisitNote(v.note || "");
+          const dx = parsed.dx || "Без діагнозу";
+          const complaint = parsed.complaint || "Скарги не вказані";
 
-              ${v.note ? `<div class="meta">${escapeHtml(v.note)}</div>` : ""}
+          const servicesTotal = calcServicesTotal(v);
+          const stockTotal = calcStockTotal(v);
+          const grandTotal = servicesTotal + stockTotal;
 
-              ${
-                v.rx
-                  ? `
-                    <div class="history" style="margin-top:8px;">
-                      <div class="history-label">Призначення</div>
-                      ${escapeHtml(v.rx)}
-                    </div>
-                  `
-                  : ""
-              }
+          return `
+            <div class="item visitCard" data-open-visit="${escapeHtml(String(v.id))}" style="cursor:pointer;">
+              <div class="left" style="width:100%;">
+                <div class="visitCardTop">
+                  <div>
+                    <div class="visitDate">${escapeHtml(v.date || "—")}</div>
+                    <div class="visitDx">Діагноз: ${escapeHtml(dx)}</div>
+                  </div>
+
+                  <div class="visitCardBadges">
+                    <div class="pill">💰 ${escapeHtml(String(grandTotal))} грн</div>
+                    <div class="pill">📄 Візит</div>
+                  </div>
+                </div>
+
+                <div class="visitMiniBlock">
+                  <div class="history-label">Скарга / стан</div>
+                  <div class="visitMiniText">${escapeHtml(complaint)}</div>
+                </div>
+
+                ${
+                  v.rx
+                    ? `
+                      <div class="visitMiniBlock">
+                        <div class="history-label">Призначення</div>
+                        <div class="visitMiniText">${escapeHtml(v.rx)}</div>
+                      </div>
+                    `
+                    : ""
+                }
+              </div>
+
+              <div class="right" style="display:flex; gap:6px;">
+                <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
+                <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
+              </div>
             </div>
-
-            <div class="right" style="display:flex; gap:6px;">
-              <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
-              <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
-            </div>
-          </div>
-        `)
+          `;
+        })
         .join("")}
     </div>
   `;
 }
-
-// =========================
-// VISIT UI (bind once)
-// =========================
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
