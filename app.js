@@ -2923,7 +2923,7 @@ async function renderVisits(petId) {
         .join("")}
     </div>
   `;
-}
+
   box.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
@@ -2958,6 +2958,7 @@ async function renderVisits(petId) {
       if (visitId) openVisit(visitId);
     }
   };
+}
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
