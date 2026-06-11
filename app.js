@@ -2867,7 +2867,7 @@ async function renderVisits(petId) {
     return;
   }
 
-  box.innerHTML = `
+    box.innerHTML = `
     <div class="patientVisitsList">
       ${visits
         .slice()
@@ -2923,7 +2923,7 @@ async function renderVisits(petId) {
         .join("")}
     </div>
   `;
-}
+
   box.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
@@ -2931,7 +2931,9 @@ async function renderVisits(petId) {
       e.stopPropagation();
 
       const visitId = editBtn.dataset.editVisit;
-      if (visitId) await openVisitModalForEdit(visitId);
+      if (visitId) {
+        await openVisitModalForEdit(visitId);
+      }
       return;
     }
 
@@ -2946,7 +2948,10 @@ async function renderVisits(petId) {
       if (!confirm("Видалити цей візит?")) return;
 
       const ok = await deleteVisitApi(visitId);
-      if (!ok) return alert("Не вдалося видалити візит.");
+      if (!ok) {
+        alert("Не вдалося видалити візит.");
+        return;
+      }
 
       await renderVisits(petId);
       return;
@@ -2955,9 +2960,12 @@ async function renderVisits(petId) {
     const card = e.target.closest("[data-open-visit]");
     if (card) {
       const visitId = card.dataset.openVisit;
-      if (visitId) openVisit(visitId);
+      if (visitId) {
+        openVisit(visitId);
+      }
     }
   };
+}
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
