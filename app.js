@@ -3096,6 +3096,74 @@ function initVisitUI() {
   // SERVICES + STOCK (capture=true)
   const handler = async (e) => {
     try {
+      if (e.target.closest("#visitMedSave")) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const vid = state.selectedVisitId;
+  if (!vid) return alert("Візит не обраний");
+
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+  if (!current) return alert("Візит не знайдено");
+
+  const dx = String(document.getElementById("visitMedDx")?.value || "").trim();
+  const complaint = String(document.getElementById("visitMedComplaint")?.value || "").trim();
+  const rx = String(document.getElementById("visitMedRx")?.value || "").trim();
+
+  const services = Array.isArray(current.services) ? current.services : [];
+  const stock = Array.isArray(current.stock) ? current.stock : [];
+
+  const payload = {
+    pet_id: current.pet_id,
+    date: current.date,
+    weight_kg: current.weight_kg,
+
+    note: buildVisitNote(dx, complaint),
+    rx,
+
+    services,
+    services_json: services,
+    stock,
+    stock_json: stock,
+  };
+
+  const btn = document.getElementById("visitMedSave");
+  const hint = document.getElementById("visitMedSaveHint");
+
+  if (btn) btn.textContent = "Збереження…";
+
+  const updated = await updateVisitApi(vid, payload);
+  if (!updated) {
+    if (btn) btn.textContent = "💾 Зберегти";
+    return alert("Не вдалося зберегти медичну частину");
+  }
+
+  const merged = {
+    ...current,
+    ...updated,
+    note: payload.note,
+    rx: payload.rx,
+    services,
+    services_json: services,
+    stock,
+    stock_json: stock,
+  };
+
+  state.visitsById.set(String(vid), merged);
+  if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = merged;
+
+  if (btn) btn.textContent = "✅ Збережено";
+  if (hint) hint.textContent = "Медична частина збережена.";
+
+  renderDischargeA4(vid);
+
+  setTimeout(() => {
+    if (btn) btn.textContent = "💾 Зберегти";
+    if (hint) hint.textContent = "Можна редагувати прямо тут. Після змін натисни “Зберегти”.";
+  }, 1200);
+
+  return;
+}
       // add service
       if (e.target.closest("#visitSvcAdd")) {
         e.preventDefault();
@@ -3306,8 +3374,8 @@ function renderVisitPage(visit, pet) {
   const rx = String(visit.rx || "").trim();
 
   const parsed = parseVisitNote(note);
-  const dx = parsed.dx || "—";
-  const complaint = parsed.complaint || "—";
+  const dx = parsed.dx || "";
+  const complaint = parsed.complaint || "";
 
   // --- SERVICES ---
   ensureVisitServicesShape(visit);
@@ -3414,23 +3482,46 @@ function renderVisitPage(visit, pet) {
     </div>
 
     <div class="visitBlock">
-      <div class="visitBlockTitle">Медична частина</div>
+      <div class="visitBlockHead">
+        <div class="visitBlockTitle">Медична частина</div>
+        <button type="button" class="miniBtn" id="visitMedSave">💾 Зберегти</button>
+      </div>
 
-      <div class="visitMedGrid">
-        <div class="visitMedItem">
+      <div class="visitMedGrid visitMedGridEdit">
+        <label class="field visitMedItem">
           <div class="history-label">Діагноз</div>
-          <div class="visitText">${escapeHtml(dx)}</div>
-        </div>
+          <input
+            class="input"
+            id="visitMedDx"
+            type="text"
+            placeholder="Напр.: цистит / гастроентерит / отит"
+            value="${escapeHtml(dx)}"
+          />
+        </label>
 
-        <div class="visitMedItem">
+        <label class="field visitMedItem">
           <div class="history-label">Скарга / стан</div>
-          <div class="visitText">${escapeHtml(complaint)}</div>
-        </div>
+          <textarea
+            class="textarea visitMedTextarea"
+            id="visitMedComplaint"
+            rows="5"
+            placeholder="Скарги, анамнез, стан на момент огляду..."
+          >${escapeHtml(complaint)}</textarea>
+        </label>
 
-        <div class="visitMedItem visitMedItemWide">
+        <label class="field visitMedItem visitMedItemWide">
           <div class="history-label">Призначення</div>
-          <div class="visitText">${escapeHtml(rx || "—")}</div>
-        </div>
+          <textarea
+            class="textarea visitMedTextarea"
+            id="visitMedRx"
+            rows="6"
+            placeholder="Препарат • доза • кратність • курс"
+          >${escapeHtml(rx)}</textarea>
+        </label>
+      </div>
+
+      <div class="hint" id="visitMedSaveHint" style="margin-top:10px;">
+        Можна редагувати прямо тут. Після змін натисни “Зберегти”.
       </div>
     </div>
 
