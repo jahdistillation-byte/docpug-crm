@@ -1122,47 +1122,48 @@ async function updateVisitApi(visitId, payload) {
 // Push helpers (services/stock) — keep other fields intact
 // =========================
 async function pushVisitServicesToServer(visitId, servicesArr) {
-  const current = await fetchVisitById(visitId);
+  const vid = String(visitId);
+
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
   if (!current) return false;
 
   const services = Array.isArray(servicesArr) ? servicesArr : [];
   const stock = Array.isArray(current.stock) ? current.stock : [];
 
   const payload = {
-  pet_id: current.pet_id,
-  date: current.date,
-  note: current.note,
-  rx: current.rx,
-  weight_kg: current.weight_kg,
+    pet_id: current.pet_id,
+    date: current.date,
+    note: current.note,
+    rx: current.rx,
+    weight_kg: current.weight_kg,
 
-  services: Array.isArray(servicesArr) ? servicesArr : [],
-  services_json: Array.isArray(servicesArr) ? servicesArr : [],
+    services,
+    services_json: services,
 
-  stock: Array.isArray(current.stock) ? current.stock : [],
-  stock_json: Array.isArray(current.stock) ? current.stock : [],
-};
+    stock,
+    stock_json: stock,
+  };
 
-  const updated = await updateVisitApi(visitId, payload);
+  const updated = await updateVisitApi(vid, payload);
+  if (!updated) return false;
 
-  // ✅ обновим локальный кеш, чтобы UI мог брать актуальные данные
-  if (updated) {
-    const vid = String(visitId);
-    const v = state.visitsById.get(vid) || { ...current, id: visitId };
+  const cached = state.visitsById.get(vid) || current;
 
-    v.services = services;
-    v.services_json = services;
-    v.stock = stock;
-    v.stock_json = stock;
+  cached.services = services;
+  cached.services_json = services;
+  cached.stock = stock;
+  cached.stock_json = stock;
 
-    state.visitsById.set(vid, v);
-    if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
-  }
+  state.visitsById.set(vid, cached);
+  if (String(state.selectedVisitId) === vid) state.selectedVisit = cached;
 
-  return !!updated;
+  return true;
 }
 
 async function pushVisitStockToServer(visitId, stockArr) {
-  const current = await fetchVisitById(visitId);
+  const vid = String(visitId);
+
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
   if (!current) return false;
 
   const stock = Array.isArray(stockArr) ? stockArr : [];
@@ -1175,46 +1176,42 @@ async function pushVisitStockToServer(visitId, stockArr) {
     rx: current.rx,
     weight_kg: current.weight_kg,
 
-    // ✅ не трогаем услуги
     services,
     services_json: services,
 
-    // ✅ пушим склад
     stock,
     stock_json: stock,
   };
 
-  const updated = await updateVisitApi(visitId, payload);
+  const updated = await updateVisitApi(vid, payload);
+  if (!updated) return false;
 
-  // ✅ обновим локальный кеш, чтобы UI мог брать актуальные данные
-  if (updated) {
-    const vid = String(visitId);
-    const v = state.visitsById.get(vid) || { ...current, id: visitId };
+  const cached = state.visitsById.get(vid) || current;
 
-    v.services = services;
-    v.services_json = services;
+  cached.services = services;
+  cached.services_json = services;
+  cached.stock = stock;
+  cached.stock_json = stock;
 
-    v.stock = stock;
-    v.stock_json = stock;
+  state.visitsById.set(vid, cached);
+  if (String(state.selectedVisitId) === vid) state.selectedVisit = cached;
 
-    state.visitsById.set(vid, v);
-    if (String(state.selectedVisitId) === vid) state.selectedVisit = v;
-  }
-
-  return !!updated;
+  return true;
 }
 
 async function deleteVisitApi(visitId) {
   try {
     const res = await fetch(`/api/visits?id=${encodeURIComponent(String(visitId))}`, {
-  method: "DELETE",
-  credentials: "include",
-  headers: { Accept: "application/json" },
-});
+      method: "DELETE",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
 
     const text = await res.text();
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {}
 
     if (!res.ok) {
       console.error("API /visits DELETE HTTP", res.status, text);
@@ -1228,9 +1225,7 @@ async function deleteVisitApi(visitId) {
       return false;
     }
 
-    // почистим кеш визитов
     state.visitsById.delete(String(visitId));
-
     return true;
   } catch (e) {
     console.error("deleteVisitApi failed:", e);
@@ -1245,12 +1240,15 @@ async function deleteVisitApi(visitId) {
 function loadDischarges() {
   return LS.get(DISCHARGES_KEY, {});
 }
+
 function saveDischarges(obj) {
   LS.set(DISCHARGES_KEY, obj);
 }
+
 function getDischarge(visitId) {
   return loadDischarges()[visitId] || null;
 }
+
 function setDischarge(visitId, data) {
   const all = loadDischarges();
   all[visitId] = {
@@ -1275,9 +1273,11 @@ async function getVisitById(visitId) {
 }
 
 function getOwnerById(ownerId) {
-  const arr = Array.isArray(state.owners) && state.owners.length
-    ? state.owners
-    : LS.get(OWNERS_KEY, []);
+  const arr =
+    Array.isArray(state.owners) && state.owners.length
+      ? state.owners
+      : LS.get(OWNERS_KEY, []);
+
   return (arr || []).find((o) => String(o.id) === String(ownerId)) || null;
 }
 
@@ -1286,17 +1286,19 @@ function getPetsByOwnerId(ownerId) {
     Array.isArray(state.patients) && state.patients.length
       ? state.patients
       : loadPatients();
+
   return (patients || []).filter((p) => String(p.owner_id) === String(ownerId));
 }
 
 // =========================
-// SERVICES registry (LOCAL registry ok)
+// SERVICES registry
 // =========================
 function loadServices() {
   const arr =
     Array.isArray(state.services) && state.services.length
       ? state.services
       : LS.get(SERVICES_KEY, []);
+
   return arr || [];
 }
 
@@ -1321,73 +1323,53 @@ function ensureVisitServicesShape(visit) {
 }
 
 // =========================
-// ✅ SERVER: add/remove service line in VISIT
+// SERVICES in VISIT
 // =========================
 async function addServiceLineToVisit(visitId, serviceId, qty) {
-
   if (!visitId || !serviceId) return false;
 
   const vid = String(visitId);
-
   const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-
   if (!current) return false;
 
   ensureVisitServicesShape(current);
 
   const svc = getServiceById(serviceId);
-
   if (!svc || svc.active === false) return false;
 
   const q = Math.max(1, Number(qty) || 1);
-
   const price = Number(svc.price) || 0;
 
   const line = {
-
     serviceId: String(serviceId),
-
     service_id: String(serviceId),
-
     qty: q,
-
     quantity: q,
-
     priceSnap: price,
-
     price_snap: price,
-
     nameSnap: String(svc.name || "").trim(),
-
     name_snap: String(svc.name || "").trim(),
-
   };
 
   current.services = [...current.services, line];
-
   current.services_json = current.services;
 
   state.visitsById.set(vid, current);
-
   if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
 
   pushVisitServicesToServer(vid, current.services).catch((e) => {
-
     console.error("Background service save failed:", e);
-
     alert("Послуга додалась на екрані, але не збереглась на сервері. Натисни Оновити.");
-
   });
 
   return true;
-
 }
-
 
 async function removeServiceLineFromVisit(visitId, index) {
   if (!visitId) return false;
 
-  const current = await fetchVisitById(visitId);
+  const vid = String(visitId);
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
   if (!current) return false;
 
   ensureVisitServicesShape(current);
@@ -1399,11 +1381,16 @@ async function removeServiceLineFromVisit(visitId, index) {
   const nextServices = current.services.slice();
   nextServices.splice(idx, 1);
 
-  const ok = await pushVisitServicesToServer(visitId, nextServices);
-  if (!ok) return false;
+  current.services = nextServices;
+  current.services_json = nextServices;
 
-  const fresh = await fetchVisitById(visitId);
-  if (fresh?.id) cacheVisits([fresh]);
+  state.visitsById.set(vid, current);
+  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+
+  pushVisitServicesToServer(vid, nextServices).catch((e) => {
+    console.error("Background service remove failed:", e);
+    alert("Послуга прибралась на екрані, але не збереглась на сервері. Натисни Оновити.");
+  });
 
   return true;
 }
