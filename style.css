@@ -1009,3 +1009,127 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   padding:6px 8px !important;
   line-height:1.25 !important;
 }
+.labsList{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:16px;
+}
+
+.labCard{
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(116,96,170,.16);
+  border-radius:22px;
+  padding:16px;
+  box-shadow:0 14px 34px rgba(48,39,82,.08);
+}
+
+.labCardHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.labTitle{
+  font-size:18px;
+  font-weight:950;
+}
+
+.labDate{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+.labRows{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.labRow{
+  display:grid;
+  grid-template-columns:1.3fr 140px 90px 180px;
+  gap:12px;
+  align-items:center;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.66);
+  border:1px solid rgba(116,96,170,.12);
+}
+
+.labName{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.labName span{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.labValue{
+  font-weight:950;
+}
+
+.labStatus{
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.lab-normal{color:#159c67}
+.lab-low{color:#d98b00}
+.lab-high{color:#d93655}
+.lab-empty{color:var(--muted)}
+
+.labScale{
+  position:relative;
+  height:10px;
+  border-radius:999px;
+  background:linear-gradient(90deg,
+    rgba(217,139,0,.22),
+    rgba(21,156,103,.22),
+    rgba(217,54,85,.22)
+  );
+  overflow:visible;
+}
+
+.labScaleNorm{
+  position:absolute;
+  left:32%;
+  right:32%;
+  top:0;
+  bottom:0;
+  border-radius:999px;
+  background:rgba(21,156,103,.28);
+}
+
+.labScaleDot{
+  position:absolute;
+  top:50%;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  transform:translate(-50%, -50%);
+  background:#777;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+
+.labScaleDot.lab-normal{background:#20b981}
+.labScaleDot.lab-low{background:#f59e0b}
+.labScaleDot.lab-high{background:#ef4565}
+.labScaleDot.lab-empty{background:#9ca3af}
+
+@media(max-width:900px){
+  .labRow{
+    grid-template-columns:1fr;
+  }
+
+  .labScale{
+    width:100%;
+  }
+}

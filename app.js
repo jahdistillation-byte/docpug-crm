@@ -2936,111 +2936,9 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "labs") {
-    box.innerHTML = `
-      <div class="patientInfoBox">
-        <div class="row" style="gap:10px; flex-wrap:wrap;">
-          <h2 style="margin:0; flex:1;">Аналізи</h2>
-          <button class="primary" id="btnAddZak" type="button">+ ЗАК</button>
-          <button class="primary" id="btnAddBh" type="button">+ БХ</button>
-          <button class="ghost" id="btnAttachLab" type="button">+ Прикріпити PDF / фото</button>
-          <input id="patientLabFileInput" type="file" accept="image/*,.pdf" style="display:none;" />
-        </div>
-
-        <div class="hint" style="margin-top:14px;">
-          Тут зберігаються аналізи цього пацієнта: ЗАК, БХ, PDF або фото лабораторії.
-        </div>
-
-        <div id="patientLabsList" class="list" style="margin-top:14px;"></div>
-      </div>
-    `;
-
-    renderLabsList();
-
-    const addLab = (type) => {
-      const date = (prompt("Дата аналізу:", todayISO ? todayISO() : new Date().toISOString().slice(0, 10)) || "").trim();
-      if (!date) return;
-
-      const note = (prompt(`Результати / нотатка для ${type}:`, "") || "").trim();
-
-      const labs = getPetLabs(petId);
-      labs.unshift({
-        id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-        type,
-        date,
-        note,
-        created_at: new Date().toISOString(),
-      });
-
-      setPetLabs(petId, labs);
-      renderLabsList();
-    };
-
-    document.getElementById("btnAddZak")?.addEventListener("click", () => addLab("ЗАК"));
-    document.getElementById("btnAddBh")?.addEventListener("click", () => addLab("БХ"));
-
-    document.getElementById("btnAttachLab")?.addEventListener("click", () => {
-      document.getElementById("patientLabFileInput")?.click();
-    });
-
-    document.getElementById("patientLabFileInput")?.addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      const date = (prompt("Дата файлу:", todayISO ? todayISO() : new Date().toISOString().slice(0, 10)) || "").trim();
-      if (!date) return;
-
-      const note = (prompt("Коментар до файлу:", "") || "").trim();
-
-      const labs = getPetLabs(petId);
-      labs.unshift({
-        id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-        type: "Файл лабораторії",
-        date,
-        note,
-        fileName: file.name,
-        created_at: new Date().toISOString(),
-      });
-
-      setPetLabs(petId, labs);
-      e.target.value = "";
-      renderLabsList();
-    });
-
-    document.getElementById("patientLabsList")?.addEventListener("click", (e) => {
-      const del = e.target.closest("[data-lab-del]");
-      if (del) {
-        const id = del.dataset.labDel;
-        if (!id) return;
-        if (!confirm("Видалити аналіз?")) return;
-
-        const labs = getPetLabs(petId).filter((x) => String(x.id) !== String(id));
-        setPetLabs(petId, labs);
-        renderLabsList();
-        return;
-      }
-
-      const edit = e.target.closest("[data-lab-edit]");
-      if (edit) {
-        const id = edit.dataset.labEdit;
-        if (!id) return;
-
-        const labs = getPetLabs(petId);
-        const idx = labs.findIndex((x) => String(x.id) === String(id));
-        if (idx < 0) return;
-
-        const cur = labs[idx];
-        const date = (prompt("Дата аналізу:", cur.date || "") || "").trim();
-        if (!date) return;
-
-        const note = (prompt("Результати / нотатка:", cur.note || "") || "").trim();
-        labs[idx] = { ...cur, date, note, updated_at: new Date().toISOString() };
-        setPetLabs(petId, labs);
-        renderLabsList();
-      }
-    });
-
-    return;
-  }
+  renderLabsTab(pet);
+  return;
+}
 
   if (tab === "files") {
     box.innerHTML = `
@@ -3097,6 +2995,253 @@ async function renderPatientTab(tab, pet) {
       </div>
     `;
   }
+}
+const LABS_KEY = "docpug_labs_v1";
+
+const LAB_REF = {
+  dog: {
+    ALT: [10, 100, "Од/л"],
+    AST: [10, 50, "Од/л"],
+    ALP: [20, 150, "Од/л"],
+    BIL: [0, 10, "мкмоль/л"],
+    CREA: [44, 159, "мкмоль/л"],
+    UREA: [2.5, 9.6, "ммоль/л"],
+    GLU: [3.3, 6.1, "ммоль/л"],
+
+    WBC: [6, 17, "×10⁹/л"],
+    RBC: [5.5, 8.5, "×10¹²/л"],
+    HGB: [120, 180, "г/л"],
+    HCT: [37, 55, "%"],
+    PLT: [200, 500, "×10⁹/л"],
+  },
+
+  cat: {
+    ALT: [20, 100, "Од/л"],
+    AST: [10, 50, "Од/л"],
+    ALP: [10, 80, "Од/л"],
+    BIL: [0, 8, "мкмоль/л"],
+    CREA: [70, 165, "мкмоль/л"],
+    UREA: [5.7, 12.9, "ммоль/л"],
+    GLU: [3.3, 6.7, "ммоль/л"],
+
+    WBC: [5.5, 19.5, "×10⁹/л"],
+    RBC: [5, 10, "×10¹²/л"],
+    HGB: [80, 150, "г/л"],
+    HCT: [24, 45, "%"],
+    PLT: [300, 800, "×10⁹/л"],
+  },
+};
+
+const LAB_LABELS = {
+  ALT: "АЛТ",
+  AST: "АСТ",
+  ALP: "Лужна фосфатаза",
+  BIL: "Білірубін",
+  CREA: "Креатинін",
+  UREA: "Сечовина",
+  GLU: "Глюкоза",
+
+  WBC: "Лейкоцити",
+  RBC: "Еритроцити",
+  HGB: "Гемоглобін",
+  HCT: "Гематокрит",
+  PLT: "Тромбоцити",
+};
+
+const LAB_GROUPS = {
+  "Біохімія": ["ALT", "AST", "ALP", "BIL", "CREA", "UREA", "GLU"],
+  "ЗАК": ["WBC", "RBC", "HGB", "HCT", "PLT"],
+};
+
+function getPetSpeciesKey(pet) {
+  const s = String(pet?.species || "").toLowerCase();
+
+  if (s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
+  if (s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
+
+  return "dog";
+}
+
+function loadLabs() {
+  const arr = LS.get(LABS_KEY, []);
+  return Array.isArray(arr) ? arr : [];
+}
+
+function saveLabs(arr) {
+  LS.set(LABS_KEY, Array.isArray(arr) ? arr : []);
+}
+
+function getLabsByPetId(petId) {
+  return loadLabs().filter((x) => String(x.pet_id) === String(petId));
+}
+
+function getLabStatus(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "empty";
+  if (n < min) return "low";
+  if (n > max) return "high";
+  return "normal";
+}
+
+function labStatusLabel(status) {
+  if (status === "low") return "↓ нижче";
+  if (status === "high") return "↑ вище";
+  if (status === "normal") return "норма";
+  return "—";
+}
+
+function labScalePercent(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 50;
+
+  const span = max - min;
+  const visualMin = min - span * 0.6;
+  const visualMax = max + span * 0.6;
+
+  const pct = ((n - visualMin) / (visualMax - visualMin)) * 100;
+  return Math.max(3, Math.min(97, pct));
+}
+
+function renderLabScale(value, min, max) {
+  const status = getLabStatus(value, min, max);
+  const pct = labScalePercent(value, min, max);
+
+  return `
+    <div class="labScale">
+      <div class="labScaleNorm"></div>
+      <div class="labScaleDot lab-${status}" style="left:${pct}%"></div>
+    </div>
+  `;
+}
+
+function renderLabsTab(pet) {
+  const box = $("#patientTabContent");
+  if (!box || !pet) return;
+
+  const speciesKey = getPetSpeciesKey(pet);
+  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
+  const labs = getLabsByPetId(pet.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  box.innerHTML = `
+    <div class="patientInfoBox">
+      <div class="row" style="align-items:flex-start;">
+        <div>
+          <h2>Аналізи</h2>
+          <div class="hint">
+            Норми підтягуються автоматично: ${escapeHtml(speciesLabel)}.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="primary" id="btnAddBioLab">+ БХ</button>
+          <button class="primary" id="btnAddCbcLab">+ ЗАК</button>
+        </div>
+      </div>
+
+      <div id="labsList" class="labsList">
+        ${
+          labs.length
+            ? labs.map((lab) => renderLabCard(lab, speciesKey)).join("")
+            : `<div class="hint">Поки аналізів немає. Натисни “+ БХ” або “+ ЗАК”.</div>`
+        }
+      </div>
+    </div>
+  `;
+
+  $("#btnAddBioLab")?.addEventListener("click", () => addLabForPet(pet, "Біохімія"));
+  $("#btnAddCbcLab")?.addEventListener("click", () => addLabForPet(pet, "ЗАК"));
+
+  $("#labsList")?.addEventListener("click", (e) => {
+    const del = e.target.closest("[data-del-lab]");
+    if (!del) return;
+
+    const id = del.dataset.delLab;
+    if (!id) return;
+
+    if (!confirm("Видалити аналіз?")) return;
+
+    const next = loadLabs().filter((x) => String(x.id) !== String(id));
+    saveLabs(next);
+    renderLabsTab(pet);
+  });
+}
+
+function addLabForPet(pet, groupName) {
+  const date = prompt("Дата аналізу:", todayISO()) || todayISO();
+  const keys = LAB_GROUPS[groupName] || [];
+
+  const values = {};
+
+  keys.forEach((key) => {
+    const label = LAB_LABELS[key] || key;
+    const raw = prompt(`${label}:`, "");
+    if (raw !== null && String(raw).trim() !== "") {
+      values[key] = Number(String(raw).replace(",", "."));
+    }
+  });
+
+  const lab = {
+    id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+    pet_id: String(pet.id),
+    type: groupName,
+    date,
+    values,
+    created_at: new Date().toISOString(),
+  };
+
+  const arr = loadLabs();
+  arr.unshift(lab);
+  saveLabs(arr);
+
+  renderLabsTab(pet);
+}
+
+function renderLabCard(lab, speciesKey) {
+  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
+  const values = lab.values || {};
+  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
+
+  return `
+    <div class="labCard">
+      <div class="labCardHead">
+        <div>
+          <div class="labTitle">${escapeHtml(lab.type || "Аналіз")}</div>
+          <div class="labDate">${escapeHtml(lab.date || "—")}</div>
+        </div>
+        <button class="iconBtn" data-del-lab="${escapeHtml(lab.id)}">🗑</button>
+      </div>
+
+      <div class="labRows">
+        ${keys.map((key) => {
+          const value = values[key];
+          const ref = ranges[key];
+          if (!ref) return "";
+
+          const [min, max, unit] = ref;
+          const status = getLabStatus(value, min, max);
+
+          return `
+            <div class="labRow">
+              <div class="labName">
+                <b>${escapeHtml(LAB_LABELS[key] || key)}</b>
+                <span>норма: ${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</span>
+              </div>
+
+              <div class="labValue lab-${status}">
+                ${value ?? "—"} ${escapeHtml(unit)}
+              </div>
+
+              <div class="labStatus lab-${status}">
+                ${labStatusLabel(status)}
+              </div>
+
+              ${renderLabScale(value, min, max)}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
 }
 
 async function renderVisits(petId) {
