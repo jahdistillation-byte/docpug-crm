@@ -1456,3 +1456,298 @@ input,select,textarea,.input,.textarea,.inp{
   transform-origin:top center !important;
   margin:0 auto !important;
 }
+/* =========================================================
+   Doc.PUG Discharge — FINAL clean violet glass redesign
+   ВСТАВИТЬ В САМЫЙ КОНЕЦ style.css
+========================================================= */
+
+/* modal background */
+#dischargeModal .modal__backdrop{
+  background:rgba(7,6,14,.72) !important;
+  backdrop-filter:blur(16px) !important;
+  -webkit-backdrop-filter:blur(16px) !important;
+}
+
+/* modal shell */
+#dischargeModal .modal__panel{
+  width:calc(100vw - 96px) !important;
+  max-width:1320px !important;
+  height:calc(100vh - 72px) !important;
+  max-height:none !important;
+  margin:36px auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+  border-radius:30px !important;
+
+  background:
+    radial-gradient(circle at 10% 0%, rgba(126,82,255,.22), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(107,78,255,.18), transparent 38%),
+    linear-gradient(135deg, rgba(23,17,45,.96), rgba(48,35,87,.94)) !important;
+
+  border:1px solid rgba(190,165,255,.18) !important;
+  box-shadow:0 36px 120px rgba(0,0,0,.58) !important;
+  color:#fff !important;
+}
+
+/* head */
+#dischargeModal .modal__head{
+  flex:0 0 auto !important;
+  padding:24px 32px 18px !important;
+  background:transparent !important;
+  border-bottom:1px solid rgba(255,255,255,.10) !important;
+}
+
+#dischargeModal .modal__title{
+  font-size:24px !important;
+  font-weight:950 !important;
+  letter-spacing:-.4px !important;
+  color:#fff !important;
+}
+
+#dischargeModal .modal__sub{
+  margin-top:4px !important;
+  color:rgba(255,255,255,.68) !important;
+  font-size:13px !important;
+}
+
+/* body layout */
+#dischargeModal .modal__body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow:auto !important;
+  padding:24px 28px !important;
+
+  display:grid !important;
+  grid-template-columns:470px 1fr !important;
+  gap:22px !important;
+  align-items:stretch !important;
+
+  background:transparent !important;
+}
+
+/* left form card */
+#dischargeModal .modal__body > .grid2,
+#dischargeModal .modal__body > .field{
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+}
+
+#dischargeModal .modal__body > .grid2{
+  grid-column:1 !important;
+  display:grid !important;
+  grid-template-columns:1.2fr .9fr !important;
+  gap:14px !important;
+  padding:20px !important;
+  border-radius:24px 24px 0 0 !important;
+}
+
+#dischargeModal .modal__body > .field{
+  grid-column:1 !important;
+  margin:0 !important;
+  padding:0 20px 18px !important;
+  border-top:0 !important;
+  border-radius:0 !important;
+  background:rgba(255,255,255,.075) !important;
+}
+
+#dischargeModal .modal__body > .field:last-of-type{
+  border-radius:0 0 24px 24px !important;
+  padding-bottom:20px !important;
+}
+
+/* labels */
+#dischargeModal .label{
+  color:rgba(230,220,255,.78) !important;
+  font-size:12px !important;
+  font-weight:900 !important;
+  margin-bottom:8px !important;
+}
+
+/* inputs */
+#dischargeModal .input,
+#dischargeModal .textarea{
+  width:100% !important;
+  color:#fff !important;
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(255,255,255,.15) !important;
+  border-radius:16px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+}
+
+#dischargeModal .input::placeholder,
+#dischargeModal .textarea::placeholder{
+  color:rgba(255,255,255,.38) !important;
+}
+
+#dischargeModal #disComplaint{min-height:118px !important;}
+#dischargeModal #disRx{min-height:142px !important;}
+#dischargeModal #disRecs{min-height:130px !important;}
+#dischargeModal #disFollow{min-height:112px !important;}
+
+/* preview card */
+#dischargeModal #disPreview{
+  grid-column:2 !important;
+  grid-row:1 / span 4 !important;
+  margin:0 !important;
+  padding:28px !important;
+  overflow:auto !important;
+  max-height:none !important;
+
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  border-radius:24px !important;
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+}
+
+/* A4 preview scale */
+#dischargeModal #disA4{
+  transform:scale(.74) !important;
+  transform-origin:top center !important;
+  margin:0 auto !important;
+}
+
+/* footer */
+#dischargeModal .modal__foot{
+  flex:0 0 auto !important;
+  padding:18px 28px !important;
+  background:rgba(16,11,34,.86) !important;
+  border-top:1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(18px) !important;
+  -webkit-backdrop-filter:blur(18px) !important;
+}
+
+#dischargeModal .modal__foot .ghost{
+  color:#fff !important;
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+}
+
+#dischargeModal .modal__foot .primary{
+  color:#fff !important;
+  background:linear-gradient(135deg,#7b5cff,#a970ff) !important;
+  box-shadow:0 14px 34px rgba(123,92,255,.34) !important;
+}
+
+/* =========================================================
+   A4 document — clean light branded document
+========================================================= */
+
+#disA4.printA4,
+.printA4{
+  width:210mm !important;
+  min-height:297mm !important;
+  padding:18mm 16mm !important;
+  border-radius:22px !important;
+  overflow:hidden !important;
+
+  background:
+    radial-gradient(circle at 12% 6%, rgba(126,82,255,.14), transparent 34%),
+    radial-gradient(circle at 90% 10%, rgba(107,78,255,.10), transparent 36%),
+    linear-gradient(135deg,#fbfaff 0%,#f4f1ff 44%,#ffffff 100%) !important;
+
+  color:#171525 !important;
+  border:1px solid rgba(116,96,170,.18) !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.22) !important;
+}
+
+.printA4,
+.printA4 *{
+  color:#171525 !important;
+  text-shadow:none !important;
+}
+
+.printA4::before,
+.printA4::after,
+#disA4::before,
+#disA4::after{
+  display:none !important;
+  content:none !important;
+}
+
+.printA4 .history,
+.printA4 .printBlock,
+.printA4 .servicesPro,
+.printA4 .printPatient{
+  background:rgba(255,255,255,.78) !important;
+  border:1px solid rgba(116,96,170,.15) !important;
+  border-radius:16px !important;
+  box-shadow:
+    0 10px 26px rgba(43,36,73,.07),
+    inset 0 1px 0 rgba(255,255,255,.86) !important;
+  backdrop-filter:blur(8px) !important;
+  -webkit-backdrop-filter:blur(8px) !important;
+}
+
+.printA4 .history-label,
+.printA4 .printH,
+.printA4 th{
+  color:#6b4eff !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+}
+
+.printA4 .pill{
+  background:rgba(107,78,255,.08) !important;
+  color:#4f35d6 !important;
+  border:1px solid rgba(107,78,255,.16) !important;
+  font-weight:850 !important;
+}
+
+.printA4 .servicesTable{
+  width:100% !important;
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  overflow:hidden !important;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.72) !important;
+}
+
+.printA4 .servicesTable th{
+  background:rgba(107,78,255,.09) !important;
+  color:#4f35d6 !important;
+}
+
+.printA4 .servicesTable td,
+.printA4 .servicesTable th{
+  border-bottom:1px solid rgba(116,96,170,.12) !important;
+}
+
+.printA4 .servicesTable tfoot td{
+  background:rgba(107,78,255,.07) !important;
+  font-weight:950 !important;
+}
+
+/* mobile */
+@media(max-width:1000px){
+  #dischargeModal .modal__panel{
+    width:calc(100vw - 20px) !important;
+    height:calc(100vh - 20px) !important;
+    margin:10px auto !important;
+  }
+
+  #dischargeModal .modal__body{
+    grid-template-columns:1fr !important;
+  }
+
+  #dischargeModal #disPreview{
+    grid-column:1 !important;
+    grid-row:auto !important;
+  }
+
+  #dischargeModal #disA4{
+    transform:scale(.55) !important;
+  }
+}
