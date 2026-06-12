@@ -1479,10 +1479,22 @@ async function addStockLineToVisit(
 
   const q = Math.max(1, Number(qty) || 1);
 
-  // ✅ decrement from LOCAL stock registry
+  const price = Number(
+    it?.price ??
+    it?.price_uah ??
+    it?.sell_price ??
+    it?.sale_price ??
+    it?.cost ??
+    0
+  ) || 0;
+
   if (decrement) {
     const stock = loadStock();
-    const idx = stock.findIndex((x) => x.id === stockId);
+
+    const idx = stock.findIndex(
+      (x) => String(x.id) === String(stockId)
+    );
+
     if (idx < 0) return false;
 
     const curQty = Number(stock[idx].qty) || 0;
@@ -1492,26 +1504,40 @@ async function addStockLineToVisit(
     saveStock(stock);
   }
 
-  const line = { stockId: String(stockId), qty: q };
+  const line = {
+    stockId: String(stockId),
+    stock_id: String(stockId),
 
-  if (snap) {
-    line.priceSnap = Number(it.price) || 0;
-    line.nameSnap = String(it.name || "").trim();
-    line.unitSnap = String(it.unit || "шт").trim();
-  }
+    qty: q,
+    quantity: q,
+
+    priceSnap: price,
+    price_snap: price,
+
+    nameSnap: String(it.name || "").trim(),
+    name_snap: String(it.name || "").trim(),
+
+    unitSnap: String(it.unit || "шт").trim(),
+    unit_snap: String(it.unit || "шт").trim(),
+  };
 
   const nextStock = [...current.stock, line];
 
-  const ok = await pushVisitStockToServer(visitId, nextStock);
+  const ok = await pushVisitStockToServer(
+    visitId,
+    nextStock
+  );
+
   if (!ok) return false;
 
-  // обновим кеш визита
   const fresh = await fetchVisitById(visitId);
-  if (fresh?.id) cacheVisits([fresh]);
+
+  if (fresh?.id) {
+    cacheVisits([fresh]);
+  }
 
   return true;
 }
-
 // ✅ SERVER: remove stock line from VISIT + (optionally) restore local STOCK registry
 async function removeStockLineFromVisit(visitId, index, { restore = true } = {}) {
   if (!visitId) return false;
@@ -1559,20 +1585,44 @@ function expandStockLines(visit) {
   const lines = Array.isArray(visit?.stock) ? visit.stock : [];
 
   return lines
-    .filter((line) => line && line.stockId)
+    .filter((line) => line && (line.stockId || line.stock_id))
     .map((line) => {
-      const it = getStockById(line.stockId);
+      const stockId = line.stockId || line.stock_id;
+      const it = getStockById(stockId);
 
-      const name = String(line.nameSnap || it?.name || "Невідома позиція").trim();
-      const unit = String(line.unitSnap || it?.unit || "шт").trim();
+      const name = String(
+        line.nameSnap ??
+        line.name_snap ??
+        it?.name ??
+        "Невідома позиція"
+      ).trim();
 
-      const priceSnapNum = Number(line.priceSnap);
-      const price = Number.isFinite(priceSnapNum) ? priceSnapNum : Number(it?.price || 0);
+      const unit = String(
+        line.unitSnap ??
+        line.unit_snap ??
+        it?.unit ??
+        "шт"
+      ).trim();
 
-      const qty = Math.max(1, Number(line.qty) || 1);
-      const lineTotal = (Number(price) || 0) * qty;
+      const price = Number(
+        line.priceSnap ??
+        line.price_snap ??
+        it?.price ??
+        it?.price_uah ??
+        it?.sell_price ??
+        it?.sale_price ??
+        it?.cost ??
+        0
+      ) || 0;
 
-      return { name, unit, price: Number(price) || 0, qty, lineTotal };
+      const qty = Math.max(
+        1,
+        Number(line.qty ?? line.quantity ?? 1) || 1
+      );
+
+      const lineTotal = price * qty;
+
+      return { name, unit, price, qty, lineTotal };
     });
 }
 
