@@ -1304,3 +1304,67 @@ input,select,textarea,.input,.textarea,.inp{
     transform:scale(.55) !important;
   }
 }
+/* ===== Doc.PUG A4 — calm dark violet glass, closer to old version ===== */
+
+#disA4.printA4,
+.printA4{
+  background:
+    radial-gradient(circle at 18% 10%, rgba(112,54,180,.22), transparent 34%),
+    radial-gradient(circle at 88% 20%, rgba(74,44,135,.18), transparent 38%),
+    linear-gradient(135deg, #130d22 0%, #1b1030 46%, #0d0b14 100%) !important;
+  color:rgba(255,255,255,.88) !important;
+  border:1px solid rgba(173,130,255,.22) !important;
+  box-shadow:0 26px 90px rgba(0,0,0,.42) !important;
+}
+
+.printA4 .history,
+.printA4 .printBlock,
+.printA4 .servicesPro,
+.printA4 .printPatient{
+  background:rgba(8,7,14,.38) !important;
+  border:1px solid rgba(173,130,255,.18) !important;
+  border-radius:18px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 12px 34px rgba(0,0,0,.16) !important;
+  backdrop-filter:blur(10px) !important;
+}
+
+.printA4 .history-label,
+.printA4 .printH,
+.printA4 th{
+  color:rgba(216,196,255,.66) !important;
+  font-weight:850 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+}
+
+.printA4,
+.printA4 div,
+.printA4 td{
+  color:rgba(255,255,255,.88) !important;
+}
+
+.printA4 .pill{
+  background:rgba(8,7,14,.32) !important;
+  color:rgba(235,225,255,.86) !important;
+  border:1px solid rgba(173,130,255,.18) !important;
+}
+
+.printA4 .servicesTable{
+  background:rgba(8,7,14,.20) !important;
+}
+
+.printA4 .servicesTable th{
+  background:rgba(173,130,255,.08) !important;
+}
+
+.printA4 .servicesTable td,
+.printA4 .servicesTable th{
+  border-bottom:1px solid rgba(173,130,255,.12) !important;
+}
+
+.printA4 .servicesTable tfoot td{
+  background:rgba(173,130,255,.08) !important;
+  font-weight:900 !important;
+}
