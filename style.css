@@ -1133,3 +1133,51 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
     width:100%;
   }
 }
+.labPdfA4{
+  width:210mm;
+  min-height:297mm;
+  padding:18mm 16mm;
+  margin:0 auto;
+  background:
+    radial-gradient(circle at 12% 6%, rgba(107,78,255,.18), transparent 34%),
+    linear-gradient(135deg,#fbfaff 0%,#f3f0ff 45%,#ffffff 100%);
+  color:#171525;
+  border-radius:22px;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
+
+.labPdfHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  border-bottom:1px solid rgba(116,96,170,.22);
+  padding-bottom:14px;
+}
+
+.labPdfTitle{
+  font-size:22px;
+  font-weight:950;
+}
+
+.labPdfBrand{
+  margin-top:4px;
+  opacity:.8;
+}
+
+.labPdfPatient,
+.labPdfBlock{
+  margin-top:14px;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.76);
+  border:1px solid rgba(116,96,170,.16);
+  box-shadow:0 10px 26px rgba(43,36,73,.07);
+}
+
+.labPdfFooter{
+  margin-top:18px;
+  color:#6f6b82;
+  font-size:12px;
+  text-align:center;
+}

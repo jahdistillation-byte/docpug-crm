@@ -2352,7 +2352,8 @@ if (editBtn) {
   const name = (prompt("Кличка:", pet.name || "") || "").trim();
   if (!name) return;
 
-  const species = (prompt("Вид:", pet.species || "") || "").trim();
+  const species = askSpecies(pet.species || "dog");
+if (!species) return;
   const breed = (prompt("Порода:", pet.breed || "") || "").trim();
   const age = (prompt("Вік:", pet.age || "") || "").trim();
   const weight_kg = (prompt("Вага кг:", pet.weight_kg || "") || "").trim();
@@ -2666,7 +2667,7 @@ function renderOwnerPage(ownerId) {
             </div>
 
             <div class="meta" style="margin-top:6px;">
-              ${escapeHtml(pet.species || "Вид не указан")}
+              ${escapeHtml(speciesLabel(pet.species))}
               ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
               ${pet.age ? " • " + escapeHtml(pet.age) : ""}
               ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
@@ -2744,7 +2745,7 @@ async function renderPatientCard(pet) {
         <div class="patientName">🐾 ${escapeHtml(pet.name || "Пацієнт")}</div>
 
         <div class="patientMetaLine">
-          ${escapeHtml(pet.species || "Вид не указан")}
+          ${escapeHtml(speciesLabel(pet.species))}
           ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
           ${pet.age ? " • " + escapeHtml(pet.age) : ""}
           ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
@@ -2804,64 +2805,6 @@ async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
   if (!box || !pet) return;
 
-  const petId = String(pet.id || "");
-
-  function loadPatientLabs() {
-    const key = "DOCPUG_PATIENT_LABS_V1";
-    try {
-      const raw = localStorage.getItem(key);
-      const obj = raw ? JSON.parse(raw) : {};
-      return obj && typeof obj === "object" ? obj : {};
-    } catch {
-      return {};
-    }
-  }
-
-  function savePatientLabs(obj) {
-    const key = "DOCPUG_PATIENT_LABS_V1";
-    localStorage.setItem(key, JSON.stringify(obj || {}));
-  }
-
-  function getPetLabs(id) {
-    const all = loadPatientLabs();
-    const arr = all[String(id)] || [];
-    return Array.isArray(arr) ? arr : [];
-  }
-
-  function setPetLabs(id, arr) {
-    const all = loadPatientLabs();
-    all[String(id)] = Array.isArray(arr) ? arr : [];
-    savePatientLabs(all);
-  }
-
-  function renderLabsList() {
-    const list = document.getElementById("patientLabsList");
-    if (!list) return;
-
-    const labs = getPetLabs(petId).slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
-
-    if (!labs.length) {
-      list.innerHTML = `<div class="hint">Поки аналізів немає. Натисни “+ ЗАК”, “+ БХ” або прикріпи файл.</div>`;
-      return;
-    }
-
-    list.innerHTML = labs.map((lab) => `
-      <div class="item">
-        <div class="left" style="width:100%;">
-          <div class="name">${escapeHtml(lab.type || "Аналіз")}</div>
-          <div class="meta">${escapeHtml(lab.date || "—")}</div>
-          ${lab.note ? `<div class="history" style="margin-top:10px; white-space:pre-wrap;">${escapeHtml(lab.note)}</div>` : ""}
-          ${lab.fileName ? `<div class="pill" style="margin-top:10px;">📎 ${escapeHtml(lab.fileName)}</div>` : ""}
-        </div>
-
-        <div class="right" style="display:flex; gap:6px;">
-          <button class="iconBtn" title="Редагувати" data-lab-edit="${escapeHtml(String(lab.id))}">✏️</button>
-          <button class="iconBtn" title="Видалити" data-lab-del="${escapeHtml(String(lab.id))}">🗑</button>
-        </div>
-      </div>
-    `).join("");
-  }
-
   if (tab === "overview") {
     box.innerHTML = `<div class="hint">Завантаження…</div>`;
 
@@ -2915,7 +2858,7 @@ async function renderPatientTab(tab, pet) {
         <div class="patientInfoBox">
           <h2>Паспорт пацієнта</h2>
           <div class="patientInfoRow"><b>Кличка:</b> ${escapeHtml(pet.name || "—")}</div>
-          <div class="patientInfoRow"><b>Вид:</b> ${escapeHtml(pet.species || "—")}</div>
+          <div class="patientInfoRow"><b>Вид:</b> ${escapeHtml(speciesLabel ? speciesLabel(pet.species) : pet.species || "—")}</div>
           <div class="patientInfoRow"><b>Порода:</b> ${escapeHtml(pet.breed || "—")}</div>
           <div class="patientInfoRow"><b>Вік:</b> ${escapeHtml(pet.age || "—")}</div>
           <div class="patientInfoRow"><b>Вага:</b> ${escapeHtml(pet.weight_kg || "—")} кг</div>
@@ -2936,9 +2879,9 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "labs") {
-  renderLabsTab(pet);
-  return;
-}
+    renderLabsTab(pet);
+    return;
+  }
 
   if (tab === "files") {
     box.innerHTML = `
@@ -2994,6 +2937,7 @@ async function renderPatientTab(tab, pet) {
         </div>
       </div>
     `;
+    return;
   }
 }
 const LABS_KEY = "docpug_labs_v1";
@@ -3054,10 +2998,10 @@ const LAB_GROUPS = {
 };
 
 function getPetSpeciesKey(pet) {
-  const s = String(pet?.species || "").toLowerCase();
+  const s = String(pet?.species || "").toLowerCase().trim();
 
-  if (s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
-  if (s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
+  if (s === "cat" || s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
+  if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
 
   return "dog";
 }
@@ -3127,9 +3071,7 @@ function renderLabsTab(pet) {
       <div class="row" style="align-items:flex-start;">
         <div>
           <h2>Аналізи</h2>
-          <div class="hint">
-            Норми підтягуються автоматично: ${escapeHtml(speciesLabel)}.
-          </div>
+          <div class="hint">Норми підтягуються автоматично: ${escapeHtml(speciesLabel)}.</div>
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -3151,25 +3093,41 @@ function renderLabsTab(pet) {
   $("#btnAddBioLab")?.addEventListener("click", () => addLabForPet(pet, "Біохімія"));
   $("#btnAddCbcLab")?.addEventListener("click", () => addLabForPet(pet, "ЗАК"));
 
-  $("#labsList")?.addEventListener("click", (e) => {
+  $("#labsList")?.addEventListener("click", async (e) => {
     const del = e.target.closest("[data-del-lab]");
-    if (!del) return;
+    if (del) {
+      const id = del.dataset.delLab;
+      if (!id) return;
 
-    const id = del.dataset.delLab;
-    if (!id) return;
+      if (!confirm("Видалити аналіз?")) return;
 
-    if (!confirm("Видалити аналіз?")) return;
+      const next = loadLabs().filter((x) => String(x.id) !== String(id));
+      saveLabs(next);
+      renderLabsTab(pet);
+      return;
+    }
 
-    const next = loadLabs().filter((x) => String(x.id) !== String(id));
-    saveLabs(next);
-    renderLabsTab(pet);
+    const edit = e.target.closest("[data-edit-lab]");
+    if (edit) {
+      const id = edit.dataset.editLab;
+      if (!id) return;
+      editLabForPet(pet, id);
+      return;
+    }
+
+    const pdf = e.target.closest("[data-pdf-lab]");
+    if (pdf) {
+      const id = pdf.dataset.pdfLab;
+      if (!id) return;
+      await downloadLabPdf(pet, id);
+      return;
+    }
   });
 }
 
 function addLabForPet(pet, groupName) {
   const date = prompt("Дата аналізу:", todayISO()) || todayISO();
   const keys = LAB_GROUPS[groupName] || [];
-
   const values = {};
 
   keys.forEach((key) => {
@@ -3192,8 +3150,152 @@ function addLabForPet(pet, groupName) {
   const arr = loadLabs();
   arr.unshift(lab);
   saveLabs(arr);
-
   renderLabsTab(pet);
+}
+
+function editLabForPet(pet, labId) {
+  const arr = loadLabs();
+  const idx = arr.findIndex((x) => String(x.id) === String(labId));
+  if (idx < 0) return alert("Аналіз не знайдено");
+
+  const lab = arr[idx];
+  const keys = LAB_GROUPS[lab.type] || Object.keys(lab.values || {});
+  const nextValues = { ...(lab.values || {}) };
+
+  const date = prompt("Дата аналізу:", lab.date || todayISO()) || lab.date || todayISO();
+
+  keys.forEach((key) => {
+    const label = LAB_LABELS[key] || key;
+    const oldVal = nextValues[key] ?? "";
+    const raw = prompt(`${label}:`, String(oldVal));
+
+    if (raw === null) return;
+
+    if (String(raw).trim() === "") {
+      delete nextValues[key];
+    } else {
+      nextValues[key] = Number(String(raw).replace(",", "."));
+    }
+  });
+
+  arr[idx] = {
+    ...lab,
+    date,
+    values: nextValues,
+    updated_at: new Date().toISOString(),
+  };
+
+  saveLabs(arr);
+  renderLabsTab(pet);
+}
+
+async function downloadLabPdf(pet, labId) {
+  if (typeof window.html2pdf === "undefined") {
+    return alert("html2pdf не подключен");
+  }
+
+  const lab = loadLabs().find((x) => String(x.id) === String(labId));
+  if (!lab) return alert("Аналіз не знайдено");
+
+  const root = document.createElement("div");
+  root.style.position = "fixed";
+  root.style.left = "-99999px";
+  root.style.top = "0";
+  root.innerHTML = renderLabPdfHtml(pet, lab);
+  document.body.appendChild(root);
+
+  const a4 = root.querySelector(".labPdfA4");
+  if (!a4) {
+    root.remove();
+    return alert("Не вдалося створити PDF");
+  }
+
+  const filename = `DocPUG_${String(lab.type || "lab")}_${String(pet.name || "patient")}_${String(lab.date || todayISO())}.pdf`;
+
+  try {
+    await window.html2pdf()
+      .set({
+        margin: 0,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: null,
+          logging: false,
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
+      })
+      .from(a4)
+      .save();
+  } catch (e) {
+    console.error(e);
+    alert("Не вдалося скачати PDF: " + (e?.message || e));
+  } finally {
+    root.remove();
+  }
+}
+
+function renderLabPdfHtml(pet, lab) {
+  const speciesKey = getPetSpeciesKey(pet);
+  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
+  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
+  const values = lab.values || {};
+  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
+
+  const rows = keys.map((key) => {
+    const ref = ranges[key];
+    if (!ref) return "";
+
+    const [min, max, unit] = ref;
+    const value = values[key];
+    const status = getLabStatus(value, min, max);
+
+    return `
+      <tr>
+        <td>${escapeHtml(LAB_LABELS[key] || key)}</td>
+        <td><b>${escapeHtml(value ?? "—")}</b> ${escapeHtml(unit)}</td>
+        <td>${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</td>
+        <td class="lab-${status}">${escapeHtml(labStatusLabel(status))}</td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <div class="labPdfA4">
+      <div class="labPdfHeader">
+        <div>
+          <div class="labPdfTitle">Аналіз / ${escapeHtml(lab.type || "—")}</div>
+          <div class="labPdfBrand">Doc.PUG</div>
+        </div>
+        <div class="pill">${escapeHtml(lab.date || "—")}</div>
+      </div>
+
+      <div class="labPdfPatient">
+        <div>
+          <div class="history-label">Пацієнт</div>
+          <div><b>${escapeHtml(pet.name || "—")}</b></div>
+          <div class="meta">${escapeHtml(speciesLabel)}</div>
+        </div>
+      </div>
+
+      <div class="labPdfBlock">
+        <table class="servicesTable">
+          <thead>
+            <tr>
+              <th>Показник</th>
+              <th>Результат</th>
+              <th>Норма</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+
+      <div class="labPdfFooter">Doc.PUG • Коли важливо — ми поруч.</div>
+    </div>
+  `;
 }
 
 function renderLabCard(lab, speciesKey) {
@@ -4413,7 +4515,8 @@ function initOwnerUI() {
     const name = (prompt("Кличка:") || "").trim();
     if (!name) return;
 
-    const species = (prompt("Вид (пес/кот/птица…):", "пес") || "").trim();
+    const species = askSpecies("dog");
+if (!species) return;
     const breed = (prompt("Порода (необязательно):") || "").trim();
     const age = (prompt("Возраст (например: 3 года / 8 мес):") || "").trim();
     const weight_kg = (prompt("Вес (кг, например 7.5):") || "").trim();
@@ -4617,6 +4720,40 @@ function openVisitModalForCreate(pet) {
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+}
+
+function normalizeSpecies(value) {
+  const s = String(value || "").toLowerCase().trim();
+
+  if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
+  if (s === "cat" || s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
+
+  return "dog";
+}
+
+function speciesLabel(value) {
+  const key = normalizeSpecies(value);
+  if (key === "cat") return "кіт";
+  return "пес";
+}
+
+function askSpecies(current = "dog") {
+  const cur = normalizeSpecies(current);
+  const raw = prompt(
+    "Вид пацієнта:\n1 — пес\n2 — кіт",
+    cur === "cat" ? "2" : "1"
+  );
+
+  if (raw === null) return null;
+
+  const v = String(raw).trim().toLowerCase();
+
+  if (v === "2" || v === "cat" || v.includes("кот") || v.includes("кіт")) return "cat";
+  return "dog";
+}
+
+function getPetSpeciesKey(pet) {
+  return normalizeSpecies(pet?.species);
 }
 
 async function openVisitModalForEdit(visitId) {
