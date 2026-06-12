@@ -1324,33 +1324,63 @@ function ensureVisitServicesShape(visit) {
 // ✅ SERVER: add/remove service line in VISIT
 // =========================
 async function addServiceLineToVisit(visitId, serviceId, qty) {
-  console.log("[API] addServiceLineToVisit START", { visitId, serviceId, qty });
 
-  const visit = await fetchVisitById(visitId);
-  console.log("[API] fetched visit", visit);
+  if (!visitId || !serviceId) return false;
 
-  if (!visit) return false;
+  const vid = String(visitId);
 
-  ensureVisitServicesShape(visit);
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+
+  if (!current) return false;
+
+  ensureVisitServicesShape(current);
 
   const svc = getServiceById(serviceId);
-  console.log("[API] service snapshot", svc);
 
-  if (!svc) return false;
+  if (!svc || svc.active === false) return false;
 
-  visit.services.push({
-    serviceId,
-    qty,
-    priceSnap: Number(svc.price) || 0,
-    nameSnap: String(svc.name || ""),
+  const q = Math.max(1, Number(qty) || 1);
+
+  const price = Number(svc.price) || 0;
+
+  const line = {
+
+    serviceId: String(serviceId),
+
+    service_id: String(serviceId),
+
+    qty: q,
+
+    quantity: q,
+
+    priceSnap: price,
+
+    price_snap: price,
+
+    nameSnap: String(svc.name || "").trim(),
+
+    name_snap: String(svc.name || "").trim(),
+
+  };
+
+  current.services = [...current.services, line];
+
+  current.services_json = current.services;
+
+  state.visitsById.set(vid, current);
+
+  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+
+  pushVisitServicesToServer(vid, current.services).catch((e) => {
+
+    console.error("Background service save failed:", e);
+
+    alert("Послуга додалась на екрані, але не збереглась на сервері. Натисни Оновити.");
+
   });
 
-  console.log("[API] services BEFORE push", visit.services);
+  return true;
 
-  const ok = await pushVisitServicesToServer(visitId, visit.services);
-  console.log("[API] push result", ok);
-
-  return ok;
 }
 
 
