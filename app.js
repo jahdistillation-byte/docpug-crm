@@ -1479,120 +1479,119 @@ function ensureVisitStockShape(visit) {
 
 // ✅ SERVER: add stock line into VISIT + (optionally) decrement local STOCK registry
 async function addStockLineToVisit(
+
   visitId,
+
   stockId,
+
   qty = 1,
+
   { snap = true, decrement = false } = {}
+
 ) {
+
   if (!visitId || !stockId) return false;
 
-  const current = await fetchVisitById(visitId);
+  const vid = String(visitId);
+
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+
   if (!current) return false;
 
   ensureVisitStockShape(current);
 
   const it = getStockById(stockId);
+
   if (!it || it.active === false) return false;
 
   const q = Math.max(1, Number(qty) || 1);
 
-  const price = Number(
-    it?.price ??
-    it?.price_uah ??
-    it?.sell_price ??
-    it?.sale_price ??
-    it?.cost ??
-    0
-  ) || 0;
-
-  if (decrement) {
-    const stock = loadStock();
-
-    const idx = stock.findIndex(
-      (x) => String(x.id) === String(stockId)
-    );
-
-    if (idx < 0) return false;
-
-    const curQty = Number(stock[idx].qty) || 0;
-    if (curQty < q) return false;
-
-    stock[idx].qty = curQty - q;
-    saveStock(stock);
-  }
+  const price = Number(it.price ?? it.price_uah ?? it.sell_price ?? it.sale_price ?? it.cost ?? 0) || 0;
 
   const line = {
+
     stockId: String(stockId),
+
     stock_id: String(stockId),
 
     qty: q,
+
     quantity: q,
 
     priceSnap: price,
+
     price_snap: price,
 
     nameSnap: String(it.name || "").trim(),
+
     name_snap: String(it.name || "").trim(),
 
     unitSnap: String(it.unit || "шт").trim(),
+
     unit_snap: String(it.unit || "шт").trim(),
+
   };
 
-  const nextStock = [...current.stock, line];
+  current.stock = [...current.stock, line];
 
-  const ok = await pushVisitStockToServer(
-    visitId,
-    nextStock
-  );
+  current.stock_json = current.stock;
 
-  if (!ok) return false;
+  state.visitsById.set(vid, current);
 
-  const fresh = await fetchVisitById(visitId);
+  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
 
-  if (fresh?.id) {
-    cacheVisits([fresh]);
-  }
+  pushVisitStockToServer(vid, current.stock).catch((e) => {
+
+    console.error("Background stock save failed:", e);
+
+    alert("Препарат додався на екрані, але не зберігся на сервері. Натисни Оновити.");
+
+  });
 
   return true;
+
 }
 // ✅ SERVER: remove stock line from VISIT + (optionally) restore local STOCK registry
 async function removeStockLineFromVisit(visitId, index, { restore = true } = {}) {
+
   if (!visitId) return false;
 
-  const current = await fetchVisitById(visitId);
+  const vid = String(visitId);
+
+  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+
   if (!current) return false;
 
   ensureVisitStockShape(current);
 
   const idx = Number(index);
+
   if (!Number.isFinite(idx)) return false;
+
   if (idx < 0 || idx >= current.stock.length) return false;
 
-  const line = current.stock[idx];
-
   const nextStock = current.stock.slice();
+
   nextStock.splice(idx, 1);
 
-  const ok = await pushVisitStockToServer(visitId, nextStock);
-  if (!ok) return false;
+  current.stock = nextStock;
 
-  // ✅ restore into LOCAL stock registry
-  if (restore && line?.stockId) {
-    const stock = loadStock();
-    const sidx = stock.findIndex((x) => x.id === line.stockId);
-    if (sidx >= 0) {
-      const curQty = Number(stock[sidx].qty) || 0;
-      const q = Math.max(1, Number(line.qty) || 1);
-      stock[sidx].qty = curQty + q;
-      saveStock(stock);
-    }
-  }
+  current.stock_json = nextStock;
 
-  // обновим кеш визита
-  const fresh = await fetchVisitById(visitId);
-  if (fresh?.id) cacheVisits([fresh]);
+  state.visitsById.set(vid, current);
+
+  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+
+  pushVisitStockToServer(vid, nextStock).catch((e) => {
+
+    console.error("Background stock remove failed:", e);
+
+    alert("Препарат прибрався на екрані, але не зберігся на сервері. Натисни Оновити.");
+
+  });
 
   return true;
+
 }
 
 // =========================
