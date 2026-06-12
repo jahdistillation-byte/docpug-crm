@@ -2804,6 +2804,64 @@ async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
   if (!box || !pet) return;
 
+  const petId = String(pet.id || "");
+
+  function loadPatientLabs() {
+    const key = "DOCPUG_PATIENT_LABS_V1";
+    try {
+      const raw = localStorage.getItem(key);
+      const obj = raw ? JSON.parse(raw) : {};
+      return obj && typeof obj === "object" ? obj : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function savePatientLabs(obj) {
+    const key = "DOCPUG_PATIENT_LABS_V1";
+    localStorage.setItem(key, JSON.stringify(obj || {}));
+  }
+
+  function getPetLabs(id) {
+    const all = loadPatientLabs();
+    const arr = all[String(id)] || [];
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function setPetLabs(id, arr) {
+    const all = loadPatientLabs();
+    all[String(id)] = Array.isArray(arr) ? arr : [];
+    savePatientLabs(all);
+  }
+
+  function renderLabsList() {
+    const list = document.getElementById("patientLabsList");
+    if (!list) return;
+
+    const labs = getPetLabs(petId).slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+
+    if (!labs.length) {
+      list.innerHTML = `<div class="hint">Поки аналізів немає. Натисни “+ ЗАК”, “+ БХ” або прикріпи файл.</div>`;
+      return;
+    }
+
+    list.innerHTML = labs.map((lab) => `
+      <div class="item">
+        <div class="left" style="width:100%;">
+          <div class="name">${escapeHtml(lab.type || "Аналіз")}</div>
+          <div class="meta">${escapeHtml(lab.date || "—")}</div>
+          ${lab.note ? `<div class="history" style="margin-top:10px; white-space:pre-wrap;">${escapeHtml(lab.note)}</div>` : ""}
+          ${lab.fileName ? `<div class="pill" style="margin-top:10px;">📎 ${escapeHtml(lab.fileName)}</div>` : ""}
+        </div>
+
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" title="Редагувати" data-lab-edit="${escapeHtml(String(lab.id))}">✏️</button>
+          <button class="iconBtn" title="Видалити" data-lab-del="${escapeHtml(String(lab.id))}">🗑</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
   if (tab === "overview") {
     box.innerHTML = `<div class="hint">Завантаження…</div>`;
 
@@ -2865,7 +2923,7 @@ async function renderPatientTab(tab, pet) {
 
         <div class="patientInfoBox">
           <h2>Нотатки лікаря</h2>
-          <div class="meta">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
+          <div class="meta" style="white-space:pre-wrap;">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
         </div>
       </div>
     `;
@@ -2880,20 +2938,166 @@ async function renderPatientTab(tab, pet) {
   if (tab === "labs") {
     box.innerHTML = `
       <div class="patientInfoBox">
-        <h2>Анализы</h2>
-        <div class="patientLabGrid">
-          <button class="primary">+ ЗАК</button>
-          <button class="primary">+ БХ</button>
-          <button class="ghost">+ Прикріпити PDF / фото</button>
+        <div class="row" style="gap:10px; flex-wrap:wrap;">
+          <h2 style="margin:0; flex:1;">Аналізи</h2>
+          <button class="primary" id="btnAddZak" type="button">+ ЗАК</button>
+          <button class="primary" id="btnAddBh" type="button">+ БХ</button>
+          <button class="ghost" id="btnAttachLab" type="button">+ Прикріпити PDF / фото</button>
+          <input id="patientLabFileInput" type="file" accept="image/*,.pdf" style="display:none;" />
         </div>
 
         <div class="hint" style="margin-top:14px;">
-          Тут буде історія аналізів: ЗАК, БХ, рентген, УЗД, PDF лабораторії.
+          Тут зберігаються аналізи цього пацієнта: ЗАК, БХ, PDF або фото лабораторії.
         </div>
+
+        <div id="patientLabsList" class="list" style="margin-top:14px;"></div>
+      </div>
+    `;
+
+    renderLabsList();
+
+    const addLab = (type) => {
+      const date = (prompt("Дата аналізу:", todayISO ? todayISO() : new Date().toISOString().slice(0, 10)) || "").trim();
+      if (!date) return;
+
+      const note = (prompt(`Результати / нотатка для ${type}:`, "") || "").trim();
+
+      const labs = getPetLabs(petId);
+      labs.unshift({
+        id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+        type,
+        date,
+        note,
+        created_at: new Date().toISOString(),
+      });
+
+      setPetLabs(petId, labs);
+      renderLabsList();
+    };
+
+    document.getElementById("btnAddZak")?.addEventListener("click", () => addLab("ЗАК"));
+    document.getElementById("btnAddBh")?.addEventListener("click", () => addLab("БХ"));
+
+    document.getElementById("btnAttachLab")?.addEventListener("click", () => {
+      document.getElementById("patientLabFileInput")?.click();
+    });
+
+    document.getElementById("patientLabFileInput")?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const date = (prompt("Дата файлу:", todayISO ? todayISO() : new Date().toISOString().slice(0, 10)) || "").trim();
+      if (!date) return;
+
+      const note = (prompt("Коментар до файлу:", "") || "").trim();
+
+      const labs = getPetLabs(petId);
+      labs.unshift({
+        id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+        type: "Файл лабораторії",
+        date,
+        note,
+        fileName: file.name,
+        created_at: new Date().toISOString(),
+      });
+
+      setPetLabs(petId, labs);
+      e.target.value = "";
+      renderLabsList();
+    });
+
+    document.getElementById("patientLabsList")?.addEventListener("click", (e) => {
+      const del = e.target.closest("[data-lab-del]");
+      if (del) {
+        const id = del.dataset.labDel;
+        if (!id) return;
+        if (!confirm("Видалити аналіз?")) return;
+
+        const labs = getPetLabs(petId).filter((x) => String(x.id) !== String(id));
+        setPetLabs(petId, labs);
+        renderLabsList();
+        return;
+      }
+
+      const edit = e.target.closest("[data-lab-edit]");
+      if (edit) {
+        const id = edit.dataset.labEdit;
+        if (!id) return;
+
+        const labs = getPetLabs(petId);
+        const idx = labs.findIndex((x) => String(x.id) === String(id));
+        if (idx < 0) return;
+
+        const cur = labs[idx];
+        const date = (prompt("Дата аналізу:", cur.date || "") || "").trim();
+        if (!date) return;
+
+        const note = (prompt("Результати / нотатка:", cur.note || "") || "").trim();
+        labs[idx] = { ...cur, date, note, updated_at: new Date().toISOString() };
+        setPetLabs(petId, labs);
+        renderLabsList();
+      }
+    });
+
+    return;
+  }
+
+  if (tab === "files") {
+    box.innerHTML = `
+      <div class="patientInfoBox">
+        <h2>Файлы пациента</h2>
+        <div class="hint">Тут будуть рентгени, УЗД, PDF, фото, лабораторії.</div>
       </div>
     `;
     return;
   }
+
+  if (tab === "finance") {
+    const visits = await getVisitsByPetId(pet.id);
+    cacheVisits(visits);
+
+    const servicesTotal = visits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
+    const stockTotal = visits.reduce((sum, v) => sum + calcStockTotal(v), 0);
+    const grandTotal = servicesTotal + stockTotal;
+    const avg = visits.length ? Math.round(grandTotal / visits.length) : 0;
+
+    box.innerHTML = `
+      <div class="patientStats">
+        <div class="ownerStat">
+          <div class="ownerStatIcon">💰</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(grandTotal))} грн</div>
+            <div class="ownerStatLabel">усього</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">🧾</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(servicesTotal))} грн</div>
+            <div class="ownerStatLabel">послуги</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">💊</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(stockTotal))} грн</div>
+            <div class="ownerStatLabel">препарати</div>
+          </div>
+        </div>
+
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📊</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(avg))} грн</div>
+            <div class="ownerStatLabel">середній чек</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
 
   if (tab === "files") {
     box.innerHTML = `
@@ -2913,7 +3117,6 @@ async function renderPatientTab(tab, pet) {
       </div>
     `;
   }
-}
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
