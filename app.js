@@ -3122,12 +3122,14 @@ renderDischargeA4(vid);
         const ok = await removeServiceLineFromVisit(vid, idx);
         if (!ok) return alert("Не вдалося прибрати послугу");
 
-        const fresh = await fetchVisitById(vid);
-        if (!fresh) return;
+        const fresh = getVisitByIdSync(vid);
 
-        renderVisitPage(fresh, state.selectedPet);
-        renderDischargeA4(vid);
-        return;
+if (fresh) {
+  renderVisitPage(fresh, state.selectedPet);
+  renderDischargeA4(vid);
+}
+
+return;
       }
 
       // add stock
@@ -3147,12 +3149,14 @@ renderDischargeA4(vid);
         const ok = await addStockLineToVisit(vid, stockId, qty);
         if (!ok) return alert("Не вдалося додати препарат");
 
-        const fresh = await fetchVisitById(vid);
-        if (!fresh) return;
+        const fresh = getVisitByIdSync(vid);
 
-        renderVisitPage(fresh, state.selectedPet);
-        renderDischargeA4(vid);
-        return;
+if (fresh) {
+  renderVisitPage(fresh, state.selectedPet);
+  renderDischargeA4(vid);
+}
+
+return;
       }
 
       // remove stock
@@ -3172,12 +3176,14 @@ renderDischargeA4(vid);
         const ok = await removeStockLineFromVisit(vid, idx);
         if (!ok) return alert("Не вдалося прибрати препарат");
 
-        const fresh = await fetchVisitById(vid);
-        if (!fresh) return;
+        const fresh = getVisitByIdSync(vid);
 
-        renderVisitPage(fresh, state.selectedPet);
-        renderDischargeA4(vid);
-        return;
+if (fresh) {
+  renderVisitPage(fresh, state.selectedPet);
+  renderDischargeA4(vid);
+}
+
+return;
       }
     } catch (err) {
       console.error("Visit UI click failed:", err);
