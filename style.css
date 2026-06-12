@@ -930,3 +930,86 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   background:rgba(107,78,255,.10) !important;
   font-weight:950 !important;
 }
+/* ===== FINAL FIX: компактная премиальная выписка Doc.PUG ===== */
+
+.printA4{
+  background:
+    radial-gradient(circle at 12% 6%, rgba(107,78,255,.20), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(154,107,255,.14), transparent 36%),
+    linear-gradient(135deg,#f7f5ff 0%,#f1edff 46%,#ffffff 100%) !important;
+}
+
+/* Убираем огромные пустые блоки */
+.printA4 .history,
+.printA4 .printBlock,
+.printA4 .servicesPro,
+.printA4 .printPatient{
+  min-height:unset !important;
+  height:auto !important;
+  padding:12px 14px !important;
+  margin-top:8px !important;
+  background:rgba(255,255,255,.76) !important;
+  border:1px solid rgba(107,78,255,.18) !important;
+  border-radius:16px !important;
+  box-shadow:0 10px 26px rgba(43,36,73,.07) !important;
+}
+
+/* Сохраняем абзацы, пробелы и переносы */
+.printA4 .preserveText,
+.printA4 .history{
+  white-space:pre-wrap !important;
+  line-height:1.5 !important;
+}
+
+/* Заголовки блоков */
+.printA4 .history-label,
+.printA4 .printH,
+.printA4 th{
+  color:#6b4eff !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+}
+
+/* Компактные таблицы */
+.printA4 .servicesPro{
+  padding:0 !important;
+  overflow:hidden !important;
+}
+
+.printA4 .servicesTable{
+  width:100% !important;
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  font-size:12px !important;
+}
+
+.printA4 .servicesTable th,
+.printA4 .servicesTable td{
+  padding:6px 8px !important;
+  line-height:1.25 !important;
+  border-bottom:1px solid rgba(116,96,170,.12) !important;
+}
+
+.printA4 .servicesTable th{
+  background:linear-gradient(135deg, rgba(107,78,255,.13), rgba(154,107,255,.08)) !important;
+  color:#5c42df !important;
+}
+
+.printA4 .servicesTable tfoot td{
+  background:rgba(107,78,255,.08) !important;
+  font-weight:950 !important;
+}
+
+/* Чуть компактнее вся карточка внутри A4 */
+.printA4 > .printCard{
+  padding:14px !important;
+}
+
+/* Дата */
+.printA4 .pill{
+  background:rgba(107,78,255,.08) !important;
+  color:#4f35d6 !important;
+  border:1px solid rgba(107,78,255,.18) !important;
+  font-weight:900 !important;
+}
