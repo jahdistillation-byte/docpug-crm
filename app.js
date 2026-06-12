@@ -1492,7 +1492,7 @@ async function addStockLineToVisit(
     saveStock(stock);
   }
 
-  const line = { stockId, qty: q };
+  const line = { stockId: String(stockId), qty: q };
 
   if (snap) {
     line.priceSnap = Number(it.price) || 0;
@@ -2959,6 +2959,49 @@ async function renderVisits(petId) {
     }
   };
 }
+
+function refreshVisitServiceSelect() {
+  const select = document.getElementById("visitSvcSelect");
+  if (!select) return;
+
+  const q = String(state.visitSvcQuery || "").trim().toLowerCase();
+
+  const options = loadServices()
+    .filter((s) => s.active !== false)
+    .filter((s) => !q || String(s.name || "").toLowerCase().includes(q))
+    .map((s) => {
+      return `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(
+        String(Number(s.price) || 0)
+      )} грн</option>`;
+    })
+    .join("");
+
+  select.innerHTML = options || `<option value="">Немає послуг</option>`;
+}
+
+function refreshVisitStockSelect() {
+  const select = document.getElementById("visitStkSelect");
+  if (!select) return;
+
+  const q = String(state.visitStkQuery || "").trim().toLowerCase();
+
+  const options = loadStock()
+    .filter((it) => it.active !== false)
+    .filter((it) => !q || String(it.name || "").toLowerCase().includes(q))
+    .map((it) => {
+      const left = Number(it.qty) || 0;
+      const unit = String(it.unit || "шт");
+      const price = Number(it.price) || 0;
+
+      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(
+        String(price)
+      )} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
+    })
+    .join("");
+
+  select.innerHTML = options || `<option value="">Немає препаратів</option>`;
+}
+
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
@@ -3096,34 +3139,26 @@ renderDischargeA4(vid);
   document.addEventListener("touchstart", handler, { passive: false, capture: true });
     // 🔍 ПОИСК ПОСЛУГ И ПРЕПАРАТОВ (делегированно, чтобы не слетал при renderVisitPage)
   document.addEventListener(
-    "input",
-    async (e) => {
-      const t = e.target;
+  "input",
+  (e) => {
+    const t = e.target;
 
-      // поиск услуг ф
-      if (t && t.id === "visitSvcSearch") {
-        state.visitSvcQuery = String(t.value || "");
-        const vid = state.selectedVisitId;
-        if (!vid) return;
-        const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
-        if (!v) return;
-        renderVisitPage(v, state.selectedPet);
-        return;
-      }
+    // поиск услуг
+    if (t && t.id === "visitSvcSearch") {
+      state.visitSvcQuery = String(t.value || "");
+      refreshVisitServiceSelect();
+      return;
+    }
 
-      // поиск препаратов
-      if (t && t.id === "visitStkSearch") {
-        state.visitStkQuery = String(t.value || "");
-        const vid = state.selectedVisitId;
-        if (!vid) return;
-        const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
-        if (!v) return;
-        renderVisitPage(v, state.selectedPet);
-        return;
-      }
-    },
-    true
-  );
+    // поиск препаратов
+    if (t && t.id === "visitStkSearch") {
+      state.visitStkQuery = String(t.value || "");
+      refreshVisitStockSelect();
+      return;
+    }
+  },
+  true
+);
 }
 
 // ===== Visit page =====
@@ -4459,7 +4494,8 @@ function saveStock(items) {
   LS.set(STOCK_KEY, items);
 }
 function getStockById(id) {
-  return loadStock().find((x) => x.id === id) || null;
+  const sid = String(id || "");
+  return loadStock().find((x) => String(x.id) === sid) || null;
 }
 
 // =========================
