@@ -898,3 +898,29 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   min-height:0 !important;
   height:auto !important;
 }
+/* FIX: A4 blocks should fit content */
+
+.printA4 .history,
+.printA4 .printBlock{
+  min-height:0 !important;
+  height:auto !important;
+  padding:12px 14px !important;
+  margin-top:10px !important;
+  display:block !important;
+}
+
+.printA4 .history .preserveText,
+.printA4 .history > div:last-child{
+  white-space:pre-wrap !important;
+  line-height:1.45 !important;
+  margin-top:6px !important;
+}
+
+.printA4 .history-label{
+  margin-bottom:6px !important;
+}
+
+/* чуть компактнее весь лист */
+.printA4{
+  padding-top:14mm !important;
+}
