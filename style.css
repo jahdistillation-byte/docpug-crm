@@ -558,7 +558,7 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .visitLineMeta{font-size:13px;color:var(--muted);margin-top:3px}
 .visitLineRight{display:flex;align-items:center;gap:10px;white-space:nowrap}
 
-/* DISCHARGE MODAL */
+/* DISCHARGE MODAL — CLEAN */
 
 #dischargeModal .modal__backdrop{
   background:rgba(8,7,16,.62);
@@ -574,12 +574,9 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   flex-direction:column;
   overflow:hidden;
   border-radius:30px;
-  background:
-    radial-gradient(circle at 8% 0%, rgba(130,92,255,.16), transparent 35%),
-    linear-gradient(135deg, rgba(255,255,255,.88), rgba(245,243,255,.82));
+  background:rgba(246,244,255,.94);
   border:1px solid rgba(116,96,170,.20);
   box-shadow:0 34px 110px rgba(0,0,0,.36);
-  backdrop-filter:blur(24px);
 }
 
 #dischargeModal .modal__head{
@@ -587,56 +584,62 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   padding:20px 26px;
   background:linear-gradient(135deg,#2b1f4d,#5a3da0);
   color:#fff;
-  border-bottom:1px solid rgba(255,255,255,.16);
 }
+
 #dischargeModal .modal__title{
   color:#fff;
   font-size:22px;
   font-weight:950;
 }
+
 #dischargeModal .modal__sub{
   color:rgba(255,255,255,.72);
 }
 
 #dischargeModal .modal__body{
-  flex:1 1 auto;
+  flex:1;
   min-height:0;
-  overflow:auto;
+  overflow:hidden;
   padding:22px;
+  display:block;
+}
+
+.dischargeLayout{
+  height:100%;
   display:grid;
   grid-template-columns:410px 1fr;
   gap:20px;
-  background:
-    radial-gradient(circle at 10% 0%, rgba(107,78,255,.08), transparent 35%),
-    linear-gradient(135deg,#f8f7ff,#eef0f8);
 }
 
-#dischargeModal .modal__body > .grid2{
-  grid-column:1;
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-  margin:0;
-  padding:18px;
-  border-radius:24px 24px 0 0;
+.dischargeForm,
+.dischargePreview{
+  min-height:0;
+  overflow:auto;
+  border-radius:24px;
   background:rgba(255,255,255,.72);
   border:1px solid rgba(116,96,170,.16);
-  border-bottom:0;
+  padding:18px;
   box-shadow:0 14px 38px rgba(43,36,73,.08);
 }
 
-#dischargeModal .modal__body > .field{
-  grid-column:1;
-  margin:0;
-  padding:0 18px 14px;
-  background:rgba(255,255,255,.72);
-  border-left:1px solid rgba(116,96,170,.16);
-  border-right:1px solid rgba(116,96,170,.16);
+.dischargeTopGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
 }
-#dischargeModal .modal__body > .field:last-of-type{
-  padding-bottom:18px;
-  border-bottom:1px solid rgba(116,96,170,.16);
-  border-radius:0 0 24px 24px;
+
+.dischargeSectionTitle{
+  font-size:12px;
+  font-weight:950;
+  color:#6f6b82;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+#dischargeModal .field{
+  display:block;
+  margin-bottom:14px;
 }
 
 #dischargeModal .label{
@@ -645,6 +648,7 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   font-weight:950;
   margin-bottom:7px;
 }
+
 #dischargeModal .input,
 #dischargeModal .textarea{
   width:100%;
@@ -652,7 +656,6 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   background:rgba(255,255,255,.86);
   border:1px solid rgba(116,96,170,.18);
   border-radius:16px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
   font-size:14px;
   line-height:1.45;
 }
@@ -662,20 +665,16 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 #dischargeModal #disRecs{min-height:130px}
 #dischargeModal #disFollow{min-height:105px}
 
-#dischargeModal #disPreview{
-  grid-column:2;
-  grid-row:1 / span 4;
-  margin:0;
-  padding:22px;
+#disPreview{
+  height:100%;
   overflow:auto;
-  border-radius:24px;
-  background:rgba(255,255,255,.68);
-  border:1px solid rgba(116,96,170,.16);
-  box-shadow:0 14px 38px rgba(43,36,73,.08);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
 }
 
 #dischargeModal #disA4{
-  transform:scale(.72);
+  transform:scale(.62);
   transform-origin:top center;
   margin:0 auto;
   pointer-events:none;
@@ -684,108 +683,111 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 #dischargeModal .modal__foot{
   flex:0 0 auto;
   padding:16px 24px;
-  background:rgba(255,255,255,.90);
+  background:rgba(255,255,255,.92);
   border-top:1px solid rgba(116,96,170,.16);
-  backdrop-filter:blur(16px);
 }
 
 /* A4 / PDF */
 
-.printCard{
-  margin-top:14px;
-  border:1px solid var(--border);
-  border-radius:16px;
-  background:rgba(255,255,255,.55);
-  padding:12px;
+.printA4{
+  width:210mm !important;
+  min-height:297mm !important;
+  margin:0 auto !important;
+  padding:14mm 14mm !important;
+  border-radius:22px !important;
+  overflow:hidden !important;
+  color:#171525 !important;
+  background:
+    radial-gradient(circle at 12% 6%, rgba(107,78,255,.20), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(154,107,255,.14), transparent 36%),
+    linear-gradient(135deg,#f7f5ff 0%,#f1edff 46%,#ffffff 100%) !important;
+  border:1px solid rgba(107,78,255,.22) !important;
+  box-shadow:0 24px 70px rgba(43,36,73,.16) !important;
 }
 
-.printA4{
-  width:210mm;
-  min-height:297mm;
-  margin:0 auto;
-  padding:18mm 16mm;
-  position:relative;
-  overflow:hidden;
-  border-radius:22px;
-  color:#171525;
-  background:
-    radial-gradient(circle at 12% 6%, rgba(107,78,255,.12), transparent 34%),
-    radial-gradient(circle at 88% 10%, rgba(139,92,255,.09), transparent 36%),
-    linear-gradient(135deg,#fbfaff 0%,#f3f0ff 45%,#ffffff 100%);
-  border:1px solid rgba(116,96,170,.18);
-  box-shadow:0 24px 70px rgba(43,36,73,.16);
-}
-.printA4,.printA4 *{
-  color:#171525;
-  text-shadow:none;
-}
-.printA4::before,.printA4::after,#disA4::before,#disA4::after{
-  display:none!important;
-  content:none!important;
+.printA4,
+.printA4 *{
+  color:#171525 !important;
+  text-shadow:none !important;
 }
 
 .printA4 .history,
 .printA4 .printBlock,
 .printA4 .servicesPro,
 .printA4 .printPatient{
-  background:rgba(255,255,255,.76);
-  border:1px solid rgba(116,96,170,.15);
-  border-radius:16px;
-  box-shadow:0 10px 26px rgba(43,36,73,.07), inset 0 1px 0 rgba(255,255,255,.86);
+  min-height:unset !important;
+  height:auto !important;
+  padding:12px 14px !important;
+  margin-top:8px !important;
+  background:rgba(255,255,255,.76) !important;
+  border:1px solid rgba(107,78,255,.18) !important;
+  border-radius:16px !important;
+  box-shadow:0 10px 26px rgba(43,36,73,.07) !important;
+}
+
+.printA4 .preserveText,
+.printA4 .history{
+  white-space:pre-wrap !important;
+  line-height:1.5 !important;
 }
 
 .printA4 .history-label,
 .printA4 .printH,
 .printA4 th{
-  color:#6b4eff;
-  font-weight:950;
-  letter-spacing:.08em;
-  text-transform:uppercase;
+  color:#6b4eff !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
 }
 
-.servicesTable{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  table-layout:fixed;
-  font-size:12px;
-  overflow:hidden;
-  border-radius:14px;
-  background:rgba(255,255,255,.76);
-}
-.servicesTable th{
-  background:rgba(107,78,255,.09);
-  color:#4f35d6;
-}
-.servicesTable th,.servicesTable td{
-  padding:6px 8px;
-  border-bottom:1px solid rgba(116,96,170,.12);
-  vertical-align:top;
-  word-break:break-word;
-}
-.servicesTable tfoot td{
-  background:rgba(107,78,255,.07);
-  font-weight:950;
-  border-bottom:none;
+.printA4 .servicesPro{
+  padding:0 !important;
+  overflow:hidden !important;
 }
 
-.footer,.topbar{display:none!important}
+.printA4 .servicesTable{
+  width:100% !important;
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  font-size:12px !important;
+}
 
-/* RESPONSIVE */
+.printA4 .servicesTable th,
+.printA4 .servicesTable td{
+  padding:6px 8px !important;
+  line-height:1.25 !important;
+  border-bottom:1px solid rgba(116,96,170,.12) !important;
+}
 
+.printA4 .servicesTable th{
+  background:linear-gradient(135deg, rgba(107,78,255,.13), rgba(154,107,255,.08)) !important;
+  color:#5c42df !important;
+}
+
+.printA4 .servicesTable tfoot td{
+  background:rgba(107,78,255,.08) !important;
+  font-weight:950 !important;
+}
+
+.printA4 > .printCard{
+  padding:14px !important;
+}
+
+.printA4 .pill{
+  background:rgba(107,78,255,.08) !important;
+  color:#4f35d6 !important;
+  border:1px solid rgba(107,78,255,.18) !important;
+  font-weight:900 !important;
+}
 @media(max-width:1000px){
-  #dischargeModal .modal__panel{
-    width:calc(100vw - 20px);
-    height:calc(100vh - 20px);
-    margin:10px auto;
+  .dischargeLayout{
+    grid-template-columns:1fr !important;
   }
-  #dischargeModal .modal__body{
-    grid-template-columns:1fr;
+
+  #disPreview{
+    height:auto;
   }
-  #dischargeModal #disPreview{
-    grid-column:1;
-    grid-row:auto;
-  }
+
   #dischargeModal #disA4{
     transform:scale(.55);
   }
@@ -821,195 +823,4 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   .modal__panel{margin:6vh 12px 0}
   .fileRow{align-items:flex-start}
   .fileActions{flex-wrap:wrap;justify-content:flex-end}
-}
-#dischargeModal .modal__body{
-  display:block !important;
-  padding:22px !important;
-}
-
-.dischargeLayout{
-  display:grid !important;
-  grid-template-columns:410px 1fr !important;
-  gap:20px !important;
-  align-items:start !important;
-}
-
-.dischargeForm,
-.dischargePreview{
-  background:rgba(255,255,255,.72);
-  border:1px solid rgba(116,96,170,.16);
-  border-radius:24px;
-  padding:18px;
-  box-shadow:0 14px 38px rgba(43,36,73,.08);
-}
-
-.dischargeTopGrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
-.dischargeSectionTitle{
-  font-size:12px;
-  font-weight:950;
-  color:#6f6b82;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  margin-bottom:12px;
-}
-
-#dischargeModal .field{
-  display:block;
-  margin-bottom:14px;
-}
-
-#disPreview{
-  margin:0 !important;
-  height:calc(100vh - 240px);
-  overflow:auto;
-}
-
-#dischargeModal #disA4{
-  transform:scale(.72);
-  transform-origin:top center;
-  margin:0 auto;
-}
-
-@media(max-width:1000px){
-  .dischargeLayout{
-    grid-template-columns:1fr !important;
-  }
-}
-/* ===== FINAL: Doc.PUG premium discharge PDF ===== */
-
-.printA4{
-  background:
-    radial-gradient(circle at 12% 6%, rgba(107,78,255,.22), transparent 34%),
-    radial-gradient(circle at 86% 12%, rgba(154,107,255,.16), transparent 36%),
-    linear-gradient(135deg,#f5f1ff 0%,#eee8ff 42%,#ffffff 100%) !important;
-  border:1px solid rgba(107,78,255,.22) !important;
-  box-shadow:0 28px 80px rgba(43,36,73,.18) !important;
-}
-
-.printA4 .history,
-.printA4 .printBlock,
-.printA4 .servicesPro,
-.printA4 .printPatient{
-  background:rgba(255,255,255,.70) !important;
-  border:1px solid rgba(107,78,255,.20) !important;
-  border-radius:18px !important;
-  box-shadow:
-    0 14px 34px rgba(43,36,73,.09),
-    inset 0 1px 0 rgba(255,255,255,.90) !important;
-}
-
-.printA4 .history-label,
-.printA4 .printH,
-.printA4 th{
-  color:#6b4eff !important;
-  font-weight:950 !important;
-  letter-spacing:.10em !important;
-  text-transform:uppercase !important;
-}
-
-.printA4 .history,
-.printA4 .printBlock{
-  white-space:pre-wrap !important;
-}
-
-.printA4 .preserveText{
-  white-space:pre-wrap !important;
-  line-height:1.5 !important;
-}
-
-.printA4 .servicesTable th{
-  background:linear-gradient(135deg, rgba(107,78,255,.13), rgba(154,107,255,.09)) !important;
-}
-
-.printA4 .servicesTable tfoot td{
-  background:rgba(107,78,255,.10) !important;
-  font-weight:950 !important;
-}
-/* ===== FINAL FIX: компактная премиальная выписка Doc.PUG ===== */
-
-.printA4{
-  background:
-    radial-gradient(circle at 12% 6%, rgba(107,78,255,.20), transparent 34%),
-    radial-gradient(circle at 86% 12%, rgba(154,107,255,.14), transparent 36%),
-    linear-gradient(135deg,#f7f5ff 0%,#f1edff 46%,#ffffff 100%) !important;
-}
-
-/* Убираем огромные пустые блоки */
-.printA4 .history,
-.printA4 .printBlock,
-.printA4 .servicesPro,
-.printA4 .printPatient{
-  min-height:unset !important;
-  height:auto !important;
-  padding:12px 14px !important;
-  margin-top:8px !important;
-  background:rgba(255,255,255,.76) !important;
-  border:1px solid rgba(107,78,255,.18) !important;
-  border-radius:16px !important;
-  box-shadow:0 10px 26px rgba(43,36,73,.07) !important;
-}
-
-/* Сохраняем абзацы, пробелы и переносы */
-.printA4 .preserveText,
-.printA4 .history{
-  white-space:pre-wrap !important;
-  line-height:1.5 !important;
-}
-
-/* Заголовки блоков */
-.printA4 .history-label,
-.printA4 .printH,
-.printA4 th{
-  color:#6b4eff !important;
-  font-weight:950 !important;
-  letter-spacing:.08em !important;
-  text-transform:uppercase !important;
-}
-
-/* Компактные таблицы */
-.printA4 .servicesPro{
-  padding:0 !important;
-  overflow:hidden !important;
-}
-
-.printA4 .servicesTable{
-  width:100% !important;
-  border-collapse:separate !important;
-  border-spacing:0 !important;
-  font-size:12px !important;
-}
-
-.printA4 .servicesTable th,
-.printA4 .servicesTable td{
-  padding:6px 8px !important;
-  line-height:1.25 !important;
-  border-bottom:1px solid rgba(116,96,170,.12) !important;
-}
-
-.printA4 .servicesTable th{
-  background:linear-gradient(135deg, rgba(107,78,255,.13), rgba(154,107,255,.08)) !important;
-  color:#5c42df !important;
-}
-
-.printA4 .servicesTable tfoot td{
-  background:rgba(107,78,255,.08) !important;
-  font-weight:950 !important;
-}
-
-/* Чуть компактнее вся карточка внутри A4 */
-.printA4 > .printCard{
-  padding:14px !important;
-}
-
-/* Дата */
-.printA4 .pill{
-  background:rgba(107,78,255,.08) !important;
-  color:#4f35d6 !important;
-  border:1px solid rgba(107,78,255,.18) !important;
-  font-weight:900 !important;
 }
