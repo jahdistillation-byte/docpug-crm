@@ -911,3 +911,100 @@ input,select,textarea,.input,.textarea,.inp{
     grid-template-columns:1fr !important;
   }
 }
+/* ===== FIX: Discharge modal layout on existing HTML classes ===== */
+
+#dischargeModal .modal__panel{
+  max-width:1180px !important;
+  width:calc(100vw - 56px) !important;
+  max-height:calc(100vh - 40px) !important;
+  margin:20px auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+  border-radius:28px !important;
+}
+
+#dischargeModal .modal__body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow:auto !important;
+  padding:20px !important;
+  display:grid !important;
+  grid-template-columns:420px 1fr !important;
+  gap:20px !important;
+  align-items:start !important;
+}
+
+#dischargeModal .modal__body > .grid2{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:14px !important;
+  padding:18px !important;
+  border-radius:24px !important;
+  background:rgba(255,255,255,.65) !important;
+  border:1px solid rgba(116,96,170,.16) !important;
+  box-shadow:0 16px 44px rgba(48,39,82,.08) !important;
+}
+
+#dischargeModal .modal__body > .field{
+  grid-column:1 !important;
+  margin:0 !important;
+  padding:18px !important;
+  border-radius:24px !important;
+  background:rgba(255,255,255,.65) !important;
+  border:1px solid rgba(116,96,170,.16) !important;
+}
+
+#dischargeModal #disPreview{
+  grid-column:2 !important;
+  grid-row:1 / span 4 !important;
+  margin:0 !important;
+  max-height:calc(100vh - 190px) !important;
+  overflow:auto !important;
+}
+
+#dischargeModal .textarea{
+  width:100% !important;
+  min-height:120px !important;
+}
+
+#dischargeModal #disRx{
+  min-height:150px !important;
+}
+
+#dischargeModal #disRecs{
+  min-height:130px !important;
+}
+
+#dischargeModal #disFollow{
+  min-height:100px !important;
+}
+
+#dischargeModal #disA4{
+  transform:scale(.72) !important;
+  transform-origin:top center !important;
+  margin:0 auto !important;
+}
+
+#dischargeModal .modal__foot{
+  position:sticky !important;
+  bottom:0 !important;
+  z-index:9999 !important;
+  background:rgba(255,255,255,.88) !important;
+  backdrop-filter:blur(18px) !important;
+}
+
+@media(max-width:1000px){
+  #dischargeModal .modal__body{
+    grid-template-columns:1fr !important;
+  }
+
+  #dischargeModal #disPreview{
+    grid-column:1 !important;
+    grid-row:auto !important;
+  }
+
+  #dischargeModal #disA4{
+    transform:scale(.55) !important;
+  }
+}
