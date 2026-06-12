@@ -1008,3 +1008,81 @@ input,select,textarea,.input,.textarea,.inp{
     transform:scale(.55) !important;
   }
 }
+/* ===== Doc.PUG A4 Discharge — branded violet glass ===== */
+
+#disA4.printA4,
+.printA4{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(139,92,255,.20), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgba(107,78,255,.16), transparent 32%),
+    linear-gradient(135deg, #f7f5ff 0%, #eef0fa 52%, #ffffff 100%) !important;
+  color:#171525 !important;
+  border:1px solid rgba(107,78,255,.18) !important;
+  box-shadow:0 20px 70px rgba(43,36,73,.16) !important;
+}
+
+.printCard,
+.printA4 .history,
+.printA4 .printBlock,
+.printA4 .servicesPro{
+  background:rgba(255,255,255,.68) !important;
+  border:1px solid rgba(107,78,255,.16) !important;
+  border-radius:18px !important;
+  box-shadow:
+    0 12px 34px rgba(43,36,73,.08),
+    inset 0 1px 0 rgba(255,255,255,.72) !important;
+  backdrop-filter:blur(12px) !important;
+}
+
+.printA4 .pill{
+  background:linear-gradient(135deg, rgba(107,78,255,.14), rgba(255,255,255,.82)) !important;
+  color:#4b35d8 !important;
+  border:1px solid rgba(107,78,255,.20) !important;
+  font-weight:850 !important;
+}
+
+.printA4 .history-label,
+.printA4 .printH,
+.printA4 th{
+  color:#6f5aa8 !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+}
+
+.printA4 h1,
+.printA4 .printBrand,
+.printA4 b{
+  color:#171525 !important;
+}
+
+.printA4 .servicesTable{
+  background:rgba(255,255,255,.55) !important;
+  border-radius:14px !important;
+  overflow:hidden !important;
+}
+
+.printA4 .servicesTable th{
+  background:rgba(107,78,255,.08) !important;
+}
+
+.printA4 .servicesTable td,
+.printA4 .servicesTable th{
+  border-bottom:1px solid rgba(107,78,255,.12) !important;
+}
+
+.printA4 .servicesTable tfoot td{
+  background:rgba(107,78,255,.08) !important;
+  font-weight:950 !important;
+}
+
+.printA4::before{
+  content:"Doc.PUG";
+  position:absolute;
+  right:18mm;
+  bottom:14mm;
+  font-size:42px;
+  font-weight:950;
+  color:rgba(107,78,255,.045);
+  pointer-events:none;
+}
