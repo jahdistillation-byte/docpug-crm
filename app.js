@@ -3744,13 +3744,56 @@ async function renderDischargeA4(visitId) {
      <div class="history dischargeFinanceBlock" style="margin-top:10px;">
   <div class="history-label">Послуги / Препарати</div>
 
-  <div class="financeSubTitle">Послуги</div>
-  ${svcHtml}
+  <div class="servicesPro">
+    <table class="servicesTable">
+      <thead>
+        <tr>
+          <th>Назва</th>
+          <th>Тип</th>
+          <th>К-сть</th>
+          <th>Ціна</th>
+          <th>Сума</th>
+        </tr>
+      </thead>
 
-  <div class="financeDivider"></div>
+      <tbody>
+        ${
+          [
+            ...expandServiceLines(v).map(x => ({ ...x, type: "Послуга" })),
+            ...expandStockLines(v).map(x => ({ ...x, type: "Препарат" }))
+          ]
+          .map(x => `
+            <tr>
+              <td>${escapeHtml(x.name || "—")}</td>
+              <td>${escapeHtml(x.type)}</td>
+              <td>${escapeHtml(String(x.qty || 1))}</td>
+              <td>${escapeHtml(String(x.price || 0))}</td>
+              <td>${escapeHtml(String(x.lineTotal || 0))}</td>
+            </tr>
+          `)
+          .join("") || `
+            <tr>
+              <td colspan="5">—</td>
+            </tr>
+          `
+        }
+      </tbody>
 
-  <div class="financeSubTitle">Препарати</div>
-  ${stkHtml}
+      <tfoot>
+        <tr>
+          <td colspan="4">Разом</td>
+          <td>
+            ${escapeHtml(
+              String(
+                (calcServicesTotal(v) || 0) +
+                (calcStockTotal(v) || 0)
+              )
+            )} грн
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
 </div>
 
       <div class="history" style="margin-top:10px;">

@@ -874,3 +874,27 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   padding:5px 8px !important;
   line-height:1.25 !important;
 }
+.printA4 .dischargeFinanceBlock{
+  min-height:0 !important;
+  height:auto !important;
+  padding:12px 14px !important;
+}
+
+.printA4 .dischargeFinanceBlock .servicesPro{
+  margin-top:8px !important;
+  padding:0 !important;
+  min-height:0 !important;
+  height:auto !important;
+  overflow:hidden !important;
+}
+
+.printA4 .servicesTable th,
+.printA4 .servicesTable td{
+  padding:6px 8px !important;
+  line-height:1.25 !important;
+}
+
+.printA4 .history{
+  min-height:0 !important;
+  height:auto !important;
+}
