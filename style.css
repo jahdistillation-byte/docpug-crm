@@ -880,3 +880,53 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
     grid-template-columns:1fr !important;
   }
 }
+/* ===== FINAL: Doc.PUG premium discharge PDF ===== */
+
+.printA4{
+  background:
+    radial-gradient(circle at 12% 6%, rgba(107,78,255,.22), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(154,107,255,.16), transparent 36%),
+    linear-gradient(135deg,#f5f1ff 0%,#eee8ff 42%,#ffffff 100%) !important;
+  border:1px solid rgba(107,78,255,.22) !important;
+  box-shadow:0 28px 80px rgba(43,36,73,.18) !important;
+}
+
+.printA4 .history,
+.printA4 .printBlock,
+.printA4 .servicesPro,
+.printA4 .printPatient{
+  background:rgba(255,255,255,.70) !important;
+  border:1px solid rgba(107,78,255,.20) !important;
+  border-radius:18px !important;
+  box-shadow:
+    0 14px 34px rgba(43,36,73,.09),
+    inset 0 1px 0 rgba(255,255,255,.90) !important;
+}
+
+.printA4 .history-label,
+.printA4 .printH,
+.printA4 th{
+  color:#6b4eff !important;
+  font-weight:950 !important;
+  letter-spacing:.10em !important;
+  text-transform:uppercase !important;
+}
+
+.printA4 .history,
+.printA4 .printBlock{
+  white-space:pre-wrap !important;
+}
+
+.printA4 .preserveText{
+  white-space:pre-wrap !important;
+  line-height:1.5 !important;
+}
+
+.printA4 .servicesTable th{
+  background:linear-gradient(135deg, rgba(107,78,255,.13), rgba(154,107,255,.09)) !important;
+}
+
+.printA4 .servicesTable tfoot td{
+  background:rgba(107,78,255,.10) !important;
+  font-weight:950 !important;
+}

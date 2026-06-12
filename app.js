@@ -3618,10 +3618,8 @@ async function renderDischargeA4(visitId) {
   const a4 = document.getElementById("disA4");
   if (!a4) return;
 
-  // 1) пробуем из кеша
   let v = getVisitByIdSync(visitId);
 
-  // 2) если нет — тянем с сервера и кладём в кеш
   if (!v) {
     v = await fetchVisitById(visitId);
     if (v?.id) cacheVisits([v]);
@@ -3632,24 +3630,24 @@ async function renderDischargeA4(visitId) {
     return;
   }
 
-  // дальше оставь твой код как есть...
+  const patients = (Array.isArray(state.patients) && state.patients.length)
+    ? state.patients
+    : loadPatients();
 
-  // pet + owner (если есть)
-  const patients = (Array.isArray(state.patients) && state.patients.length) ? state.patients : loadPatients();
   const pet = (patients || []).find((p) => String(p.id) === String(v.pet_id)) || null;
   const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
 
-  // discharge data (local)
   const dis = getDischarge(visitId) || {};
   const parsed = parseVisitNote(v.note || "");
 
   const complaint = String(dis.complaint ?? parsed.complaint ?? "").trim();
   const dx = String(dis.dx ?? parsed.dx ?? "").trim();
-  const rx = String(dis.rx ?? v.rx ?? "").trim();
-  const recs = String(dis.recs ?? "").trim();
-  const follow = String(dis.follow ?? "").trim();
 
-  // services/stock (если у тебя эти функции есть — отлично)
+  const parsedRx = parseRxCombined(v.rx || "");
+  const rx = String(dis.rx ?? parsedRx.rx ?? v.rx ?? "").trim();
+  const recs = String(dis.recs ?? parsedRx.recs ?? "").trim();
+  const follow = String(dis.follow ?? parsedRx.follow ?? "").trim();
+
   let svcHtml = "—";
   try {
     const expanded = expandServiceLines(v);
@@ -3661,8 +3659,10 @@ async function renderDischargeA4(visitId) {
   try {
     const expandedS = expandStockLines(v);
     const totalS = calcStockTotal(v);
-    if (!expandedS.length) stkHtml = `<div class="hint" style="opacity:.75">—</div>`;
-    else {
+
+    if (!expandedS.length) {
+      stkHtml = `<div class="hint" style="opacity:.75">—</div>`;
+    } else {
       const rows = expandedS.map((x) => `
         <tr>
           <td>${escapeHtml(x.name || "—")}</td>
@@ -3671,15 +3671,24 @@ async function renderDischargeA4(visitId) {
           <td>${escapeHtml(String(x.lineTotal))}</td>
         </tr>
       `).join("");
+
       stkHtml = `
         <div class="servicesPro">
           <table class="servicesTable">
             <thead>
-              <tr><th>Препарат</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr>
+              <tr>
+                <th>Препарат</th>
+                <th>К-сть</th>
+                <th>Ціна</th>
+                <th>Сума</th>
+              </tr>
             </thead>
             <tbody>${rows}</tbody>
             <tfoot>
-              <tr><td colspan="3">Разом</td><td>${escapeHtml(String(totalS))} грн</td></tr>
+              <tr>
+                <td colspan="3">Разом</td>
+                <td>${escapeHtml(String(totalS))} грн</td>
+              </tr>
             </tfoot>
           </table>
         </div>
@@ -3691,44 +3700,45 @@ async function renderDischargeA4(visitId) {
     <div class="printCard">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
         <div>
-          <div style="font-weight:800;font-size:18px;">Направлення / Виписка</div>
+          <div style="font-weight:900;font-size:20px;">Направлення / Виписка</div>
           <div style="opacity:.85;margin-top:4px;">Doc.PUG</div>
         </div>
         <div class="pill">${escapeHtml(String(v.date || "—"))}</div>
       </div>
 
-      <hr style="margin:12px 0; opacity:.25;" />
+      <hr style="margin:14px 0; opacity:.22;" />
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div>
           <div class="history-label">Пацієнт</div>
-          <div>${escapeHtml(pet?.name || "—")}</div>
+          <div style="font-weight:850;">${escapeHtml(pet?.name || "—")}</div>
           <div style="opacity:.85;font-size:13px;">
             ${escapeHtml([pet?.species, pet?.breed, pet?.age, v?.weight_kg ? `${v.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
           </div>
         </div>
+
         <div>
           <div class="history-label">Власник</div>
-          <div>${escapeHtml(owner?.name || "—")}</div>
+          <div style="font-weight:850;">${escapeHtml(owner?.name || "—")}</div>
           <div style="opacity:.85;font-size:13px;">
             ${escapeHtml([owner?.phone, owner?.note].filter(Boolean).join(" • ") || "—")}
           </div>
         </div>
       </div>
 
-      <div class="history" style="margin-top:12px;">
+      <div class="history" style="margin-top:14px;">
         <div class="history-label">Скарги / стан</div>
-        <div>${escapeHtml(complaint || "—")}</div>
+        <div class="preserveText">${escapeHtml(complaint || "—")}</div>
       </div>
 
       <div class="history" style="margin-top:10px;">
         <div class="history-label">Діагноз</div>
-        <div>${escapeHtml(dx || "—")}</div>
+        <div class="preserveText">${escapeHtml(dx || "—")}</div>
       </div>
 
       <div class="history" style="margin-top:10px;">
         <div class="history-label">Призначення</div>
-        <div>${escapeHtml(rx || "—")}</div>
+        <div class="preserveText">${escapeHtml(rx || "—")}</div>
       </div>
 
       <div class="history" style="margin-top:10px;">
@@ -3743,30 +3753,16 @@ async function renderDischargeA4(visitId) {
 
       <div class="history" style="margin-top:10px;">
         <div class="history-label">Рекомендації</div>
-        <div>${escapeHtml(recs || "—")}</div>
+        <div class="preserveText">${escapeHtml(recs || "—")}</div>
       </div>
 
       <div class="history" style="margin-top:10px;">
         <div class="history-label">Контроль / при погіршенні</div>
-        <div>${escapeHtml(follow || "—")}</div>
+        <div class="preserveText">${escapeHtml(follow || "—")}</div>
       </div>
     </div>
   `;
 }
-
-function buildRxCombined(rx, recs, follow) {
-  const parts = [];
-  const a = String(rx || "").trim();
-  const b = String(recs || "").trim();
-  const c = String(follow || "").trim();
-
-  if (a) parts.push(a);
-  if (b) parts.push(`Рекомендації:\n${b}`);
-  if (c) parts.push(`Контроль / при погіршенні:\n${c}`);
-
-  return parts.join("\n\n").trim();
-}
-
 function parseRxCombined(text) {
   const t = String(text || "");
 
