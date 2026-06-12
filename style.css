@@ -832,3 +832,82 @@ input,select,textarea,.input,.textarea,.inp{
 .visitMedItemWide{
   grid-column:1 / -1;
 }
+
+/* ===== Visit medical editor — compact premium layout ===== */
+
+#visitNoteBox .visitBlock{
+  padding:18px !important;
+}
+
+.visitBlockHead{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  margin-bottom:14px !important;
+}
+
+.visitMedGridEdit{
+  display:grid !important;
+  grid-template-columns: 260px 1fr !important;
+  gap:14px !important;
+  align-items:start !important;
+}
+
+.visitMedGridEdit .visitMedItem{
+  display:block !important;
+  min-height:auto !important;
+  padding:0 !important;
+  border:none !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+
+.visitMedGridEdit .visitMedItemWide{
+  grid-column:1 / -1 !important;
+}
+
+#visitMedDx,
+#visitMedComplaint,
+#visitMedRx{
+  width:100% !important;
+  border-radius:16px !important;
+  border:1px solid rgba(107,78,255,.16) !important;
+  background:rgba(255,255,255,.72) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+}
+
+#visitMedDx{
+  height:46px !important;
+  min-height:46px !important;
+}
+
+#visitMedComplaint{
+  min-height:130px !important;
+  resize:vertical !important;
+}
+
+#visitMedRx{
+  min-height:170px !important;
+  resize:vertical !important;
+}
+
+#visitMedSave{
+  background:linear-gradient(135deg,#6b4eff,#9b6cff) !important;
+  color:#fff !important;
+  border:none !important;
+  box-shadow:0 10px 24px rgba(107,78,255,.22) !important;
+}
+
+#visitMedSaveHint{
+  margin-top:10px !important;
+  opacity:.75 !important;
+}
+
+@media(max-width:900px){
+  .visitMedGridEdit{
+    grid-template-columns:1fr !important;
+  }
+}
