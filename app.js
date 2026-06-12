@@ -3741,15 +3741,17 @@ async function renderDischargeA4(visitId) {
         <div class="preserveText">${escapeHtml(rx || "—")}</div>
       </div>
 
-      <div class="history" style="margin-top:10px;">
-        <div class="history-label">Послуги</div>
-        ${svcHtml}
-      </div>
+     <div class="history dischargeFinanceBlock" style="margin-top:10px;">
+  <div class="history-label">Послуги / Препарати</div>
 
-      <div class="history" style="margin-top:10px;">
-        <div class="history-label">Препарати</div>
-        ${stkHtml}
-      </div>
+  <div class="financeSubTitle">Послуги</div>
+  ${svcHtml}
+
+  <div class="financeDivider"></div>
+
+  <div class="financeSubTitle">Препарати</div>
+  ${stkHtml}
+</div>
 
       <div class="history" style="margin-top:10px;">
         <div class="history-label">Рекомендації</div>

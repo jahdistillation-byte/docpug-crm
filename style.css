@@ -824,3 +824,53 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   .fileRow{align-items:flex-start}
   .fileActions{flex-wrap:wrap;justify-content:flex-end}
 }
+/* ===== FIX A4 compact blocks ===== */
+
+.printA4 .history{
+  min-height:0 !important;
+  height:auto !important;
+  padding:10px 12px !important;
+  margin-top:8px !important;
+}
+
+.printA4 .preserveText,
+.printA4 .history > div:not(.history-label){
+  white-space:pre-wrap !important;
+  line-height:1.45 !important;
+}
+
+.dischargeFinanceBlock{
+  padding:12px !important;
+}
+
+.financeSubTitle{
+  margin:8px 0 6px;
+  font-size:11px;
+  font-weight:950;
+  color:#6b4eff !important;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.financeDivider{
+  height:1px;
+  margin:10px 0;
+  background:rgba(107,78,255,.14);
+}
+
+.printA4 .servicesPro{
+  margin-top:6px !important;
+  padding:0 !important;
+  min-height:0 !important;
+  height:auto !important;
+}
+
+.printA4 .servicesTable{
+  margin:0 !important;
+}
+
+.printA4 .servicesTable th,
+.printA4 .servicesTable td{
+  padding:5px 8px !important;
+  line-height:1.25 !important;
+}
