@@ -809,3 +809,26 @@ input,select,textarea,.input,.textarea,.inp{
     justify-content:space-between;
   }
 }
+.visitMedGridEdit{
+  display:grid;
+  grid-template-columns: 1fr 2fr;
+  gap:16px;
+}
+
+#visitMedDx{
+  min-height:44px;
+}
+
+#visitMedComplaint{
+  min-height:140px;
+  resize:vertical;
+}
+
+#visitMedRx{
+  min-height:220px;
+  resize:vertical;
+}
+
+.visitMedItemWide{
+  grid-column:1 / -1;
+}

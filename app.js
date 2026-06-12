@@ -3151,6 +3151,15 @@ function initVisitUI() {
 
   state.visitsById.set(String(vid), merged);
   if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = merged;
+  setDischarge(vid, {
+
+  complaint,
+
+  dx,
+
+  rx,
+
+});
 
   if (btn) btn.textContent = "✅ Збережено";
   if (hint) hint.textContent = "Медична частина збережена.";
