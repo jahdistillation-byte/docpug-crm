@@ -2963,7 +2963,7 @@ function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
 
-  // back + discharge (capture so nothing can block it)
+  // back + discharge (capture so nothing can block it лол)
   document.addEventListener(
     "click",
     (e) => {
