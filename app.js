@@ -3099,24 +3099,6 @@ async function renderPatientTab(tab, pet) {
   }
 }
 
-  if (tab === "files") {
-    box.innerHTML = `
-      <div class="patientInfoBox">
-        <h2>Файлы пациента</h2>
-        <div class="hint">Тут будуть рентгени, УЗД, PDF, фото, лабораторії.</div>
-      </div>
-    `;
-    return;
-  }
-
-  if (tab === "finance") {
-    box.innerHTML = `
-      <div class="patientInfoBox">
-        <h2>Финансы пациента</h2>
-        <div class="hint">Тут буде сума по пацієнту, середній чек, борги, оплати.</div>
-      </div>
-    `;
-  }
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
