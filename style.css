@@ -822,3 +822,61 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   .fileRow{align-items:flex-start}
   .fileActions{flex-wrap:wrap;justify-content:flex-end}
 }
+#dischargeModal .modal__body{
+  display:block !important;
+  padding:22px !important;
+}
+
+.dischargeLayout{
+  display:grid !important;
+  grid-template-columns:410px 1fr !important;
+  gap:20px !important;
+  align-items:start !important;
+}
+
+.dischargeForm,
+.dischargePreview{
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(116,96,170,.16);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 14px 38px rgba(43,36,73,.08);
+}
+
+.dischargeTopGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.dischargeSectionTitle{
+  font-size:12px;
+  font-weight:950;
+  color:#6f6b82;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+#dischargeModal .field{
+  display:block;
+  margin-bottom:14px;
+}
+
+#disPreview{
+  margin:0 !important;
+  height:calc(100vh - 240px);
+  overflow:auto;
+}
+
+#dischargeModal #disA4{
+  transform:scale(.72);
+  transform-origin:top center;
+  margin:0 auto;
+}
+
+@media(max-width:1000px){
+  .dischargeLayout{
+    grid-template-columns:1fr !important;
+  }
+}

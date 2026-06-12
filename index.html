@@ -234,10 +234,10 @@
 <div class="modal" id="dischargeModal" aria-hidden="true">
   <div class="modal__backdrop" data-close-discharge></div>
 
-  <div class="modal__panel modal__panel--wide dischargeModalPanel" role="dialog" aria-modal="true">
-    <div class="modal__head dischargeHead">
+  <div class="modal__panel modal__panel--wide" role="dialog" aria-modal="true">
+    <div class="modal__head">
       <div>
-        <div class="modal__title">Виписка для клієнта</div>
+        <div class="modal__title">📄 Виписка для клієнта</div>
         <div class="modal__sub" id="disSub">Візит: —</div>
       </div>
       <button class="iconBtn" data-close-discharge title="Закрыть">✕</button>
@@ -246,12 +246,12 @@
     <div class="modal__body dischargeBody">
       <div class="dischargeLayout">
         <section class="dischargeForm">
-          <div class="dischargeSectionTitle">Дані виписки</div>
+          <div class="dischargeSectionTitle">📝 Дані виписки</div>
 
-          <div class="grid2">
+          <div class="dischargeTopGrid">
             <label class="field">
               <div class="label">Скарга / стан</div>
-              <textarea class="textarea" id="disComplaint" rows="5"></textarea>
+              <textarea class="textarea" id="disComplaint" rows="4"></textarea>
             </label>
 
             <label class="field">
@@ -261,24 +261,23 @@
           </div>
 
           <label class="field">
-            <div class="label">Призначення</div>
-            <textarea class="textarea" id="disRx" rows="6"></textarea>
+            <div class="label">💊 Призначення</div>
+            <textarea class="textarea" id="disRx" rows="5"></textarea>
           </label>
 
           <label class="field">
-            <div class="label">Рекомендації</div>
+            <div class="label">✅ Рекомендації</div>
             <textarea class="textarea" id="disRecs" rows="5"></textarea>
           </label>
 
           <label class="field">
-            <div class="label">Контроль / коли звернутися</div>
-            <textarea class="textarea" id="disFollow" rows="4"></textarea>
+            <div class="label">🚨 Контроль / коли звернутися</div>
+            <textarea class="textarea" id="disFollow" rows="3"></textarea>
           </label>
         </section>
 
         <section class="dischargePreview">
-          <div class="dischargeSectionTitle">Попередній перегляд</div>
-
+          <div class="dischargeSectionTitle">👁️ Попередній перегляд</div>
           <div class="printCard" id="disPreview">
             <div class="printA4" id="disA4"></div>
           </div>
@@ -286,7 +285,7 @@
       </div>
     </div>
 
-    <div class="modal__foot dischargeFoot">
+    <div class="modal__foot">
       <button class="ghost" data-close-discharge>Закрыть</button>
       <button class="ghost" id="disSave">Зберегти</button>
       <button class="ghost" id="disDownload">Скачати PDF</button>
