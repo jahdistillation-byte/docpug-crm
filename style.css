@@ -531,593 +531,35 @@ input,select,textarea,.input,.textarea,.inp{
   line-height:1.45;
   white-space:pre-wrap;
 }
-/* ===== Doc.PUG Discharge Modal Premium ===== */
-
-#dischargeModal .dischargeModalPanel{
-  max-width:1180px !important;
-  width:calc(100vw - 56px) !important;
-  max-height:calc(var(--vh, 1vh) * 100 - 40px) !important;
-  margin:20px auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-  border-radius:28px !important;
-  background:rgba(255,255,255,.78) !important;
-  border:1px solid rgba(116,96,170,.18) !important;
-  box-shadow:0 28px 90px rgba(23,21,37,.22) !important;
-  backdrop-filter:blur(24px) !important;
-  -webkit-backdrop-filter:blur(24px) !important;
-}
-
-#dischargeModal .dischargeHead{
-  flex:0 0 auto !important;
-  background:rgba(255,255,255,.72) !important;
-  border-bottom:1px solid rgba(116,96,170,.14) !important;
-  padding:18px 20px !important;
-}
-
-#dischargeModal .dischargeBody{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow:auto !important;
-  padding:20px !important;
-  background:
-    radial-gradient(circle at 10% 0%, rgba(107,78,255,.08), transparent 34%),
-    linear-gradient(135deg, rgba(255,255,255,.42), rgba(248,247,255,.58)) !important;
-}
-
-.dischargeLayout{
-  display:grid;
-  grid-template-columns:420px 1fr;
-  gap:20px;
-  align-items:start;
-}
-
-.dischargeForm,
-.dischargePreview{
-  border:1px solid rgba(116,96,170,.16);
-  background:rgba(255,255,255,.62);
-  border-radius:24px;
-  padding:18px;
-  box-shadow:
-    0 16px 44px rgba(48,39,82,.08),
-    inset 0 1px 0 rgba(255,255,255,.75);
-}
-
-.dischargeSectionTitle{
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--muted);
-  margin-bottom:14px;
-}
-
-#dischargeModal .field{
-  margin-bottom:14px;
-}
-
-#dischargeModal .label{
-  font-size:12px;
-  font-weight:850;
-  color:var(--muted);
-  margin-bottom:7px;
-}
-
-#dischargeModal .input,
-#dischargeModal .textarea{
-  background:rgba(255,255,255,.82) !important;
-  border:1px solid rgba(116,96,170,.18) !important;
-  color:var(--text) !important;
-  border-radius:16px !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
-}
-
-#dischargeModal .textarea{
-  min-height:118px;
-}
-
-#dischargeModal .printCard{
-  margin:0 !important;
-  padding:18px !important;
-  border-radius:22px !important;
-  background:rgba(255,255,255,.58) !important;
-  border:1px solid rgba(116,96,170,.14) !important;
-  overflow:auto;
-  max-height:calc(var(--vh, 1vh) * 100 - 220px);
-  pointer-events:auto !important;
-}
-
-#dischargeModal #disA4{
-  pointer-events:none !important;
-  margin:0 auto !important;
-}
-
-#dischargeModal .dischargeFoot{
-  flex:0 0 auto !important;
-  position:sticky !important;
-  bottom:0 !important;
-  z-index:9999 !important;
-  background:rgba(255,255,255,.82) !important;
-  border-top:1px solid rgba(116,96,170,.16) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-  padding:14px 20px calc(14px + env(safe-area-inset-bottom)) !important;
-}
-
-#dischargeModal .dischargeFoot,
-#dischargeModal .dischargeFoot *{
-  pointer-events:auto !important;
-}
-
-@media(max-width:1000px){
-  .dischargeLayout{
-    grid-template-columns:1fr;
-  }
-
-  #dischargeModal .dischargeModalPanel{
-    width:calc(100vw - 20px) !important;
-    margin:10px auto !important;
-    max-height:calc(var(--vh, 1vh) * 100 - 20px) !important;
-  }
-}
-#visitNoteBox{
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
-  padding:0 !important;
-}
-
-.visitMoneyGrid{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:12px;
-  margin-bottom:16px;
-}
-
-.visitMoneyCard{
-  padding:16px;
-  border-radius:22px;
-  background:rgba(255,255,255,.68);
-  border:1px solid rgba(116,96,170,.16);
-  box-shadow:0 12px 34px rgba(48,39,82,.07);
-}
-
-.visitMoneyCardTotal{
-  background:linear-gradient(135deg, rgba(107,78,255,.14), rgba(255,255,255,.76));
-  border-color:rgba(107,78,255,.22);
-}
-
-.visitMoneyLabel{
-  font-size:12px;
-  font-weight:900;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-.visitMoneyValue{
-  font-size:24px;
-  font-weight:950;
-  color:var(--text);
-}
-
-.visitBlock{
-  margin-top:14px;
-  padding:18px;
-  border-radius:24px;
-  background:rgba(255,255,255,.70);
-  border:1px solid rgba(116,96,170,.15);
-  box-shadow:0 14px 38px rgba(48,39,82,.07);
-}
-
-.visitBlockTitle{
-  font-size:12px;
-  font-weight:950;
-  color:var(--muted);
-  text-transform:uppercase;
-  letter-spacing:.10em;
-  margin-bottom:12px;
-}
-
-.visitMedGrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
-.visitMedItem{
-  padding:14px;
-  border-radius:18px;
-  background:rgba(255,255,255,.64);
-  border:1px solid rgba(116,96,170,.12);
-}
-
-.visitMedItemWide{
-  grid-column:1 / -1;
-}
-
-.visitText{
-  white-space:pre-wrap;
-  line-height:1.5;
-  color:var(--text);
-  font-size:14px;
-}
-
-.visitPicker{
-  display:grid;
-  grid-template-columns:1fr 1fr 90px auto;
-  gap:8px;
-  align-items:center;
-  margin-bottom:12px;
-}
-
-.visitPicker input,
-.visitPicker select{
-  height:42px;
-  border-radius:14px !important;
-  background:rgba(255,255,255,.78) !important;
-}
-
-.visitLines{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.visitLine{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:12px;
-  border-radius:16px;
-  background:rgba(255,255,255,.72);
-  border:1px solid rgba(116,96,170,.13);
-}
-
-.visitLineName{
-  font-weight:900;
-}
-
-.visitLineMeta{
-  font-size:13px;
-  color:var(--muted);
-  margin-top:3px;
-}
-
-.visitLineRight{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  white-space:nowrap;
-}
-
-@media(max-width:900px){
-  .visitMoneyGrid,
-  .visitMedGrid,
-  .visitPicker{
-    grid-template-columns:1fr;
-  }
-
-  .visitLine{
-    align-items:flex-start;
-    flex-direction:column;
-  }
-
-  .visitLineRight{
-    width:100%;
-    justify-content:space-between;
-  }
-}
-.visitMedGridEdit{
-  display:grid;
-  grid-template-columns: 1fr 2fr;
-  gap:16px;
-}
-
-#visitMedDx{
-  min-height:44px;
-}
-
-#visitMedComplaint{
-  min-height:140px;
-  resize:vertical;
-}
-
-#visitMedRx{
-  min-height:220px;
-  resize:vertical;
-}
-
-.visitMedItemWide{
-  grid-column:1 / -1;
-}
-
-/* ===== Visit medical editor — compact premium layout ===== */
-
-#visitNoteBox .visitBlock{
-  padding:18px !important;
-}
-
-.visitBlockHead{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:12px !important;
-  margin-bottom:14px !important;
-}
-
-.visitMedGridEdit{
-  display:grid !important;
-  grid-template-columns: 260px 1fr !important;
-  gap:14px !important;
-  align-items:start !important;
-}
-
-.visitMedGridEdit .visitMedItem{
-  display:block !important;
-  min-height:auto !important;
-  padding:0 !important;
-  border:none !important;
-  background:transparent !important;
-  box-shadow:none !important;
-}
-
-.visitMedGridEdit .visitMedItemWide{
-  grid-column:1 / -1 !important;
-}
-
-#visitMedDx,
-#visitMedComplaint,
-#visitMedRx{
-  width:100% !important;
-  border-radius:16px !important;
-  border:1px solid rgba(107,78,255,.16) !important;
-  background:rgba(255,255,255,.72) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
-  font-size:14px !important;
-  line-height:1.45 !important;
-}
-
-#visitMedDx{
-  height:46px !important;
-  min-height:46px !important;
-}
-
-#visitMedComplaint{
-  min-height:130px !important;
-  resize:vertical !important;
-}
-
-#visitMedRx{
-  min-height:170px !important;
-  resize:vertical !important;
-}
-
-#visitMedSave{
-  background:linear-gradient(135deg,#6b4eff,#9b6cff) !important;
-  color:#fff !important;
-  border:none !important;
-  box-shadow:0 10px 24px rgba(107,78,255,.22) !important;
-}
-
-#visitMedSaveHint{
-  margin-top:10px !important;
-  opacity:.75 !important;
-}
-
-@media(max-width:900px){
-  .visitMedGridEdit{
-    grid-template-columns:1fr !important;
-  }
-}
-/* ===== FIX: Discharge modal layout on existing HTML classes ===== */
-
-#dischargeModal .modal__panel{
-  max-width:1180px !important;
-  width:calc(100vw - 56px) !important;
-  max-height:calc(100vh - 40px) !important;
-  margin:20px auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-  border-radius:28px !important;
-}
-
-#dischargeModal .modal__body{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow:auto !important;
-  padding:20px !important;
-  display:grid !important;
-  grid-template-columns:420px 1fr !important;
-  gap:20px !important;
-  align-items:start !important;
-}
-
-#dischargeModal .modal__body > .grid2{
-  display:flex !important;
-  flex-direction:column !important;
-  gap:14px !important;
-  padding:18px !important;
-  border-radius:24px !important;
-  background:rgba(255,255,255,.65) !important;
-  border:1px solid rgba(116,96,170,.16) !important;
-  box-shadow:0 16px 44px rgba(48,39,82,.08) !important;
-}
-
-#dischargeModal .modal__body > .field{
-  grid-column:1 !important;
-  margin:0 !important;
-  padding:18px !important;
-  border-radius:24px !important;
-  background:rgba(255,255,255,.65) !important;
-  border:1px solid rgba(116,96,170,.16) !important;
-}
-
-#dischargeModal #disPreview{
-  grid-column:2 !important;
-  grid-row:1 / span 4 !important;
-  margin:0 !important;
-  max-height:calc(100vh - 190px) !important;
-  overflow:auto !important;
-}
-
-#dischargeModal .textarea{
-  width:100% !important;
-  min-height:120px !important;
-}
-
-#dischargeModal #disRx{
-  min-height:150px !important;
-}
-
-#dischargeModal #disRecs{
-  min-height:130px !important;
-}
-
-#dischargeModal #disFollow{
-  min-height:100px !important;
-}
-
-#dischargeModal #disA4{
-  transform:scale(.72) !important;
-  transform-origin:top center !important;
-  margin:0 auto !important;
-}
-
-#dischargeModal .modal__foot{
-  position:sticky !important;
-  bottom:0 !important;
-  z-index:9999 !important;
-  background:rgba(255,255,255,.88) !important;
-  backdrop-filter:blur(18px) !important;
-}
-
-@media(max-width:1000px){
-  #dischargeModal .modal__body{
-    grid-template-columns:1fr !important;
-  }
-
-  #dischargeModal #disPreview{
-    grid-column:1 !important;
-    grid-row:auto !important;
-  }
-
-  #dischargeModal #disA4{
-    transform:scale(.55) !important;
-  }
-}
-/* ===== Doc.PUG A4 Discharge — branded violet glass ===== */
-
-#disA4.printA4,
-.printA4{
-  background:
-    radial-gradient(circle at 12% 8%, rgba(139,92,255,.20), transparent 34%),
-    radial-gradient(circle at 88% 18%, rgba(107,78,255,.16), transparent 32%),
-    linear-gradient(135deg, #f7f5ff 0%, #eef0fa 52%, #ffffff 100%) !important;
-  color:#171525 !important;
-  border:1px solid rgba(107,78,255,.18) !important;
-  box-shadow:0 20px 70px rgba(43,36,73,.16) !important;
-}
-
-.printCard,
-.printA4 .history,
-.printA4 .printBlock,
-.printA4 .servicesPro{
-  background:rgba(255,255,255,.68) !important;
-  border:1px solid rgba(107,78,255,.16) !important;
-  border-radius:18px !important;
-  box-shadow:
-    0 12px 34px rgba(43,36,73,.08),
-    inset 0 1px 0 rgba(255,255,255,.72) !important;
-  backdrop-filter:blur(12px) !important;
-}
-
-.printA4 .pill{
-  background:linear-gradient(135deg, rgba(107,78,255,.14), rgba(255,255,255,.82)) !important;
-  color:#4b35d8 !important;
-  border:1px solid rgba(107,78,255,.20) !important;
-  font-weight:850 !important;
-}
-
-.printA4 .history-label,
-.printA4 .printH,
-.printA4 th{
-  color:#6f5aa8 !important;
-  font-weight:950 !important;
-  letter-spacing:.08em !important;
-  text-transform:uppercase !important;
-}
-
-.printA4 h1,
-.printA4 .printBrand,
-.printA4 b{
-  color:#171525 !important;
-}
-
-.printA4 .servicesTable{
-  background:rgba(255,255,255,.55) !important;
-  border-radius:14px !important;
-  overflow:hidden !important;
-}
-
-.printA4 .servicesTable th{
-  background:rgba(107,78,255,.08) !important;
-}
-
-.printA4 .servicesTable td,
-.printA4 .servicesTable th{
-  border-bottom:1px solid rgba(107,78,255,.12) !important;
-}
-
-.printA4 .servicesTable tfoot td{
-  background:rgba(107,78,255,.08) !important;
-  font-weight:950 !important;
-}
-
-.printA4::before{
-  content:"Doc.PUG";
-  position:absolute;
-  right:18mm;
-  bottom:14mm;
-  font-size:42px;
-  font-weight:950;
-  color:rgba(107,78,255,.045);
-  pointer-events:none;
-}
-/* ===== Doc.PUG Discharge Modal — Violet Glass Premium ===== */
+/* =========================================================
+   DISCHARGE MODAL — CLEAN FIX
+========================================================= */
 
 #dischargeModal .modal__backdrop{
   background:rgba(10,8,18,.62) !important;
-  backdrop-filter:blur(14px) !important;
-  -webkit-backdrop-filter:blur(14px) !important;
+  backdrop-filter:blur(12px) !important;
 }
 
 #dischargeModal .modal__panel{
-  max-width:1220px !important;
-  width:calc(100vw - 56px) !important;
-  max-height:calc(100vh - 38px) !important;
-  margin:19px auto !important;
+  width:calc(100vw - 80px) !important;
+  max-width:1240px !important;
+  height:calc(100vh - 70px) !important;
+  margin:35px auto !important;
   display:flex !important;
   flex-direction:column !important;
   overflow:hidden !important;
   border-radius:28px !important;
-  color:#fff !important;
-  background:
-    radial-gradient(circle at 8% 0%, rgba(160,105,255,.32), transparent 38%),
-    radial-gradient(circle at 92% 12%, rgba(107,78,255,.28), transparent 40%),
-    linear-gradient(135deg, rgba(31,27,54,.92), rgba(76,57,121,.82)) !important;
-  border:1px solid rgba(255,255,255,.18) !important;
-  box-shadow:0 34px 110px rgba(10,8,18,.55) !important;
-  backdrop-filter:blur(28px) !important;
-  -webkit-backdrop-filter:blur(28px) !important;
+  background:rgba(255,255,255,.86) !important;
+  border:1px solid rgba(116,96,170,.20) !important;
+  box-shadow:0 30px 100px rgba(0,0,0,.35) !important;
 }
 
 #dischargeModal .modal__head{
-  background:transparent !important;
-  border-bottom:1px solid rgba(255,255,255,.14) !important;
-  padding:22px 26px !important;
+  flex:0 0 auto !important;
+  padding:20px 26px !important;
+  background:linear-gradient(135deg,#2b1f4d,#5a3da0) !important;
+  color:#fff !important;
+  border-bottom:1px solid rgba(255,255,255,.16) !important;
 }
 
 #dischargeModal .modal__title{
@@ -1134,514 +576,98 @@ input,select,textarea,.input,.textarea,.inp{
   flex:1 1 auto !important;
   min-height:0 !important;
   overflow:auto !important;
-  padding:24px !important;
+  padding:22px !important;
   display:grid !important;
-  grid-template-columns:430px 1fr !important;
-  gap:22px !important;
-  align-items:start !important;
+  grid-template-columns:410px 1fr !important;
+  gap:20px !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(107,78,255,.09), transparent 35%),
+    linear-gradient(135deg,#f8f7ff,#eef0f8) !important;
 }
 
-#dischargeModal .modal__body > .grid2,
-#dischargeModal .modal__body > .field,
-#dischargeModal #disPreview{
-  background:rgba(255,255,255,.10) !important;
-  border:1px solid rgba(255,255,255,.14) !important;
-  border-radius:24px !important;
-  box-shadow:
-    0 18px 50px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.16) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-}
-
+/* левая форма */
 #dischargeModal .modal__body > .grid2{
+  grid-column:1 !important;
   display:grid !important;
-  grid-template-columns:1.1fr .9fr !important;
-  gap:14px !important;
+  grid-template-columns:1fr !important;
+  gap:12px !important;
+  margin:0 !important;
   padding:18px !important;
+  border-radius:24px 24px 0 0 !important;
+  background:rgba(255,255,255,.72) !important;
+  border:1px solid rgba(116,96,170,.16) !important;
+  box-shadow:0 14px 38px rgba(43,36,73,.08) !important;
 }
 
 #dischargeModal .modal__body > .field{
   grid-column:1 !important;
-  padding:18px !important;
   margin:0 !important;
+  padding:0 18px 14px !important;
+  background:rgba(255,255,255,.72) !important;
+  border-left:1px solid rgba(116,96,170,.16) !important;
+  border-right:1px solid rgba(116,96,170,.16) !important;
 }
 
-#dischargeModal #disPreview{
-  grid-column:2 !important;
-  grid-row:1 / span 4 !important;
-  margin:0 !important;
-  padding:28px !important;
-  overflow:auto !important;
-  max-height:calc(100vh - 220px) !important;
+#dischargeModal .modal__body > .field:last-of-type{
+  padding-bottom:18px !important;
+  border-bottom:1px solid rgba(116,96,170,.16) !important;
+  border-radius:0 0 24px 24px !important;
 }
 
 #dischargeModal .label{
-  color:rgba(255,255,255,.78) !important;
+  color:#6f6b82 !important;
   font-size:12px !important;
   font-weight:900 !important;
+  margin-bottom:7px !important;
 }
 
 #dischargeModal .input,
 #dischargeModal .textarea{
   width:100% !important;
-  color:#fff !important;
-  background:rgba(255,255,255,.10) !important;
-  border:1px solid rgba(255,255,255,.18) !important;
-  border-radius:16px !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14) !important;
-}
-
-#dischargeModal .textarea{
-  min-height:118px !important;
-}
-
-#dischargeModal #disRx{
-  min-height:150px !important;
-}
-
-#dischargeModal #disRecs{
-  min-height:135px !important;
-}
-
-#dischargeModal #disFollow{
-  min-height:110px !important;
-}
-
-#dischargeModal .modal__foot{
-  flex:0 0 auto !important;
-  background:rgba(42,34,77,.78) !important;
-  border-top:1px solid rgba(255,255,255,.14) !important;
-  backdrop-filter:blur(20px) !important;
-  -webkit-backdrop-filter:blur(20px) !important;
-  padding:16px 24px !important;
-}
-
-#dischargeModal .modal__foot .ghost{
-  color:#fff !important;
-  background:rgba(255,255,255,.10) !important;
-  border:1px solid rgba(255,255,255,.22) !important;
-}
-
-#dischargeModal .modal__foot .primary{
-  background:linear-gradient(135deg,#7b5cff,#b178ff) !important;
-  box-shadow:0 14px 34px rgba(123,92,255,.34) !important;
-}
-
-/* ===== A4 inside modal/PDF — violet glass document ===== */
-
-#disA4.printA4,
-.printA4{
-  background:
-    radial-gradient(circle at 15% 0%, rgba(155,92,255,.34), transparent 35%),
-    radial-gradient(circle at 90% 15%, rgba(107,78,255,.24), transparent 38%),
-    linear-gradient(135deg,#f5efff 0%,#ebe4ff 45%,#fff 100%) !important;
-  color:#181429 !important;
-  border:1px solid rgba(107,78,255,.22) !important;
-  border-radius:22px !important;
-  box-shadow:0 24px 70px rgba(31,27,54,.22) !important;
-}
-
-#dischargeModal #disA4{
-  transform:scale(.74) !important;
-  transform-origin:top center !important;
-  margin:0 auto !important;
-}
-
-.printA4 .history,
-.printA4 .printBlock,
-.printA4 .servicesPro,
-.printA4 .printPatient{
-  background:rgba(255,255,255,.64) !important;
-  border:1px solid rgba(107,78,255,.16) !important;
-  border-radius:18px !important;
-  box-shadow:
-    0 12px 34px rgba(43,36,73,.08),
-    inset 0 1px 0 rgba(255,255,255,.70) !important;
-}
-
-.printA4 .history-label,
-.printA4 .printH,
-.printA4 th{
-  color:#7656d8 !important;
-  font-weight:950 !important;
-  letter-spacing:.09em !important;
-  text-transform:uppercase !important;
-}
-
-.printA4 .pill{
-  background:linear-gradient(135deg, rgba(107,78,255,.14), rgba(255,255,255,.86)) !important;
-  color:#5538d8 !important;
-  border:1px solid rgba(107,78,255,.22) !important;
-  font-weight:900 !important;
-}
-
-.printA4 .servicesTable th{
-  background:rgba(107,78,255,.08) !important;
-}
-
-.printA4 .servicesTable td,
-.printA4 .servicesTable th{
-  border-bottom:1px solid rgba(107,78,255,.12) !important;
-}
-
-.printA4 .servicesTable tfoot td{
-  background:rgba(107,78,255,.08) !important;
-  font-weight:950 !important;
-}
-
-@media(max-width:1000px){
-  #dischargeModal .modal__body{
-    grid-template-columns:1fr !important;
-  }
-
-  #dischargeModal #disPreview{
-    grid-column:1 !important;
-    grid-row:auto !important;
-  }
-
-  #dischargeModal #disA4{
-    transform:scale(.55) !important;
-  }
-}
-/* ===== Doc.PUG A4 — calm dark violet glass, closer to old version ===== */
-
-#disA4.printA4,
-.printA4{
-  background:
-    radial-gradient(circle at 18% 10%, rgba(112,54,180,.22), transparent 34%),
-    radial-gradient(circle at 88% 20%, rgba(74,44,135,.18), transparent 38%),
-    linear-gradient(135deg, #130d22 0%, #1b1030 46%, #0d0b14 100%) !important;
-  color:rgba(255,255,255,.88) !important;
-  border:1px solid rgba(173,130,255,.22) !important;
-  box-shadow:0 26px 90px rgba(0,0,0,.42) !important;
-}
-
-.printA4 .history,
-.printA4 .printBlock,
-.printA4 .servicesPro,
-.printA4 .printPatient{
-  background:rgba(8,7,14,.38) !important;
-  border:1px solid rgba(173,130,255,.18) !important;
-  border-radius:18px !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 12px 34px rgba(0,0,0,.16) !important;
-  backdrop-filter:blur(10px) !important;
-}
-
-.printA4 .history-label,
-.printA4 .printH,
-.printA4 th{
-  color:rgba(216,196,255,.66) !important;
-  font-weight:850 !important;
-  letter-spacing:.08em !important;
-  text-transform:uppercase !important;
-}
-
-.printA4,
-.printA4 div,
-.printA4 td{
-  color:rgba(255,255,255,.88) !important;
-}
-
-.printA4 .pill{
-  background:rgba(8,7,14,.32) !important;
-  color:rgba(235,225,255,.86) !important;
-  border:1px solid rgba(173,130,255,.18) !important;
-}
-
-.printA4 .servicesTable{
-  background:rgba(8,7,14,.20) !important;
-}
-
-.printA4 .servicesTable th{
-  background:rgba(173,130,255,.08) !important;
-}
-
-.printA4 .servicesTable td,
-.printA4 .servicesTable th{
-  border-bottom:1px solid rgba(173,130,255,.12) !important;
-}
-
-.printA4 .servicesTable tfoot td{
-  background:rgba(173,130,255,.08) !important;
-  font-weight:900 !important;
-}
-/* ===== HARD RESET: нормальная выписка Doc.PUG, без вырвиглаза ===== */
-
-#disA4.printA4,
-.printA4{
-  background:
-    radial-gradient(circle at 18% 8%, rgba(110,78,255,.10), transparent 34%),
-    radial-gradient(circle at 88% 18%, rgba(139,92,255,.08), transparent 36%),
-    linear-gradient(135deg, #f7f6ff 0%, #f1effa 48%, #ffffff 100%) !important;
-
   color:#171525 !important;
+  background:rgba(255,255,255,.86) !important;
   border:1px solid rgba(116,96,170,.18) !important;
-  border-radius:22px !important;
-  box-shadow:0 24px 70px rgba(43,36,73,.14) !important;
-  overflow:hidden !important;
+  border-radius:16px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
 }
 
-.printA4,
-.printA4 *{
-  color:#171525 !important;
-  text-shadow:none !important;
-}
+#dischargeModal #disComplaint{min-height:110px !important;}
+#dischargeModal #disRx{min-height:145px !important;}
+#dischargeModal #disRecs{min-height:130px !important;}
+#dischargeModal #disFollow{min-height:105px !important;}
 
-.printA4 .history,
-.printA4 .printBlock,
-.printA4 .servicesPro,
-.printA4 .printPatient{
-  background:rgba(255,255,255,.72) !important;
+/* правый предпросмотр */
+#dischargeModal #disPreview{
+  grid-column:2 !important;
+  grid-row:1 / span 4 !important;
+  margin:0 !important;
+  padding:22px !important;
+  overflow:auto !important;
+  border-radius:24px !important;
+  background:rgba(255,255,255,.68) !important;
   border:1px solid rgba(116,96,170,.16) !important;
-  border-radius:18px !important;
-  box-shadow:
-    0 10px 28px rgba(43,36,73,.07),
-    inset 0 1px 0 rgba(255,255,255,.8) !important;
-  backdrop-filter:blur(8px) !important;
-  -webkit-backdrop-filter:blur(8px) !important;
+  box-shadow:0 14px 38px rgba(43,36,73,.08) !important;
 }
 
-.printA4 .history-label,
-.printA4 .printH,
-.printA4 th{
-  color:#6f5aa8 !important;
-  font-weight:900 !important;
-  letter-spacing:.08em !important;
-  text-transform:uppercase !important;
-}
-
-.printA4 .pill{
-  background:rgba(255,255,255,.76) !important;
-  color:#4f3bd1 !important;
-  border:1px solid rgba(107,78,255,.18) !important;
-  font-weight:850 !important;
-}
-
-.printA4 .servicesTable{
-  background:rgba(255,255,255,.72) !important;
-  border-radius:14px !important;
-  overflow:hidden !important;
-}
-
-.printA4 .servicesTable th{
-  background:rgba(107,78,255,.08) !important;
-  color:#6f5aa8 !important;
-}
-
-.printA4 .servicesTable td,
-.printA4 .servicesTable th{
-  border-bottom:1px solid rgba(116,96,170,.12) !important;
-}
-
-.printA4 .servicesTable tfoot td{
-  background:rgba(107,78,255,.07) !important;
-  font-weight:900 !important;
-}
-
-/* Убираем странные водяные знаки/псевдоэлементы */
-.printA4::before,
-.printA4::after,
-#disA4::before,
-#disA4::after{
-  display:none !important;
-  content:none !important;
-}
-
-/* Превью в модалке — нормальный масштаб */
 #dischargeModal #disA4{
   transform:scale(.72) !important;
   transform-origin:top center !important;
   margin:0 auto !important;
 }
-/* =========================================================
-   Doc.PUG Discharge — FINAL clean violet glass redesign
-   ВСТАВИТЬ В САМЫЙ КОНЕЦ style.css
-========================================================= */
 
-/* modal background */
-#dischargeModal .modal__backdrop{
-  background:rgba(7,6,14,.72) !important;
-  backdrop-filter:blur(16px) !important;
-  -webkit-backdrop-filter:blur(16px) !important;
-}
-
-/* modal shell */
-#dischargeModal .modal__panel{
-  width:calc(100vw - 96px) !important;
-  max-width:1320px !important;
-  height:calc(100vh - 72px) !important;
-  max-height:none !important;
-  margin:36px auto !important;
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-  border-radius:30px !important;
-
-  background:
-    radial-gradient(circle at 10% 0%, rgba(126,82,255,.22), transparent 34%),
-    radial-gradient(circle at 88% 10%, rgba(107,78,255,.18), transparent 38%),
-    linear-gradient(135deg, rgba(23,17,45,.96), rgba(48,35,87,.94)) !important;
-
-  border:1px solid rgba(190,165,255,.18) !important;
-  box-shadow:0 36px 120px rgba(0,0,0,.58) !important;
-  color:#fff !important;
-}
-
-/* head */
-#dischargeModal .modal__head{
-  flex:0 0 auto !important;
-  padding:24px 32px 18px !important;
-  background:transparent !important;
-  border-bottom:1px solid rgba(255,255,255,.10) !important;
-}
-
-#dischargeModal .modal__title{
-  font-size:24px !important;
-  font-weight:950 !important;
-  letter-spacing:-.4px !important;
-  color:#fff !important;
-}
-
-#dischargeModal .modal__sub{
-  margin-top:4px !important;
-  color:rgba(255,255,255,.68) !important;
-  font-size:13px !important;
-}
-
-/* body layout */
-#dischargeModal .modal__body{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow:auto !important;
-  padding:24px 28px !important;
-
-  display:grid !important;
-  grid-template-columns:470px 1fr !important;
-  gap:22px !important;
-  align-items:stretch !important;
-
-  background:transparent !important;
-}
-
-/* left form card */
-#dischargeModal .modal__body > .grid2,
-#dischargeModal .modal__body > .field{
-  background:rgba(255,255,255,.075) !important;
-  border:1px solid rgba(255,255,255,.13) !important;
-  box-shadow:
-    0 18px 55px rgba(0,0,0,.22),
-    inset 0 1px 0 rgba(255,255,255,.10) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-}
-
-#dischargeModal .modal__body > .grid2{
-  grid-column:1 !important;
-  display:grid !important;
-  grid-template-columns:1.2fr .9fr !important;
-  gap:14px !important;
-  padding:20px !important;
-  border-radius:24px 24px 0 0 !important;
-}
-
-#dischargeModal .modal__body > .field{
-  grid-column:1 !important;
-  margin:0 !important;
-  padding:0 20px 18px !important;
-  border-top:0 !important;
-  border-radius:0 !important;
-  background:rgba(255,255,255,.075) !important;
-}
-
-#dischargeModal .modal__body > .field:last-of-type{
-  border-radius:0 0 24px 24px !important;
-  padding-bottom:20px !important;
-}
-
-/* labels */
-#dischargeModal .label{
-  color:rgba(230,220,255,.78) !important;
-  font-size:12px !important;
-  font-weight:900 !important;
-  margin-bottom:8px !important;
-}
-
-/* inputs */
-#dischargeModal .input,
-#dischargeModal .textarea{
-  width:100% !important;
-  color:#fff !important;
-  background:rgba(255,255,255,.075) !important;
-  border:1px solid rgba(255,255,255,.15) !important;
-  border-radius:16px !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08) !important;
-  font-size:14px !important;
-  line-height:1.45 !important;
-}
-
-#dischargeModal .input::placeholder,
-#dischargeModal .textarea::placeholder{
-  color:rgba(255,255,255,.38) !important;
-}
-
-#dischargeModal #disComplaint{min-height:118px !important;}
-#dischargeModal #disRx{min-height:142px !important;}
-#dischargeModal #disRecs{min-height:130px !important;}
-#dischargeModal #disFollow{min-height:112px !important;}
-
-/* preview card */
-#dischargeModal #disPreview{
-  grid-column:2 !important;
-  grid-row:1 / span 4 !important;
-  margin:0 !important;
-  padding:28px !important;
-  overflow:auto !important;
-  max-height:none !important;
-
-  background:rgba(255,255,255,.075) !important;
-  border:1px solid rgba(255,255,255,.13) !important;
-  border-radius:24px !important;
-  box-shadow:
-    0 18px 55px rgba(0,0,0,.22),
-    inset 0 1px 0 rgba(255,255,255,.10) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-}
-
-/* A4 preview scale */
-#dischargeModal #disA4{
-  transform:scale(.74) !important;
-  transform-origin:top center !important;
-  margin:0 auto !important;
-}
-
-/* footer */
+/* низ */
 #dischargeModal .modal__foot{
   flex:0 0 auto !important;
-  padding:18px 28px !important;
-  background:rgba(16,11,34,.86) !important;
-  border-top:1px solid rgba(255,255,255,.10) !important;
-  backdrop-filter:blur(18px) !important;
-  -webkit-backdrop-filter:blur(18px) !important;
-}
-
-#dischargeModal .modal__foot .ghost{
-  color:#fff !important;
-  background:rgba(255,255,255,.08) !important;
-  border:1px solid rgba(255,255,255,.16) !important;
-}
-
-#dischargeModal .modal__foot .primary{
-  color:#fff !important;
-  background:linear-gradient(135deg,#7b5cff,#a970ff) !important;
-  box-shadow:0 14px 34px rgba(123,92,255,.34) !important;
+  padding:16px 24px !important;
+  background:rgba(255,255,255,.88) !important;
+  border-top:1px solid rgba(116,96,170,.16) !important;
+  backdrop-filter:blur(16px) !important;
 }
 
 /* =========================================================
-   A4 document — clean light branded document
+   A4 DOCUMENT — CLEAN VIOLET GLASS
 ========================================================= */
 
 #disA4.printA4,
@@ -1649,17 +675,15 @@ input,select,textarea,.input,.textarea,.inp{
   width:210mm !important;
   min-height:297mm !important;
   padding:18mm 16mm !important;
-  border-radius:22px !important;
-  overflow:hidden !important;
-
   background:
-    radial-gradient(circle at 12% 6%, rgba(126,82,255,.14), transparent 34%),
-    radial-gradient(circle at 90% 10%, rgba(107,78,255,.10), transparent 36%),
-    linear-gradient(135deg,#fbfaff 0%,#f4f1ff 44%,#ffffff 100%) !important;
-
+    radial-gradient(circle at 12% 6%, rgba(107,78,255,.13), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(139,92,255,.10), transparent 36%),
+    linear-gradient(135deg,#fbfaff 0%,#f3f0ff 45%,#ffffff 100%) !important;
   color:#171525 !important;
   border:1px solid rgba(116,96,170,.18) !important;
-  box-shadow:0 24px 70px rgba(0,0,0,.22) !important;
+  border-radius:22px !important;
+  box-shadow:0 24px 70px rgba(43,36,73,.16) !important;
+  overflow:hidden !important;
 }
 
 .printA4,
@@ -1680,14 +704,12 @@ input,select,textarea,.input,.textarea,.inp{
 .printA4 .printBlock,
 .printA4 .servicesPro,
 .printA4 .printPatient{
-  background:rgba(255,255,255,.78) !important;
+  background:rgba(255,255,255,.76) !important;
   border:1px solid rgba(116,96,170,.15) !important;
   border-radius:16px !important;
   box-shadow:
     0 10px 26px rgba(43,36,73,.07),
     inset 0 1px 0 rgba(255,255,255,.86) !important;
-  backdrop-filter:blur(8px) !important;
-  -webkit-backdrop-filter:blur(8px) !important;
 }
 
 .printA4 .history-label,
@@ -1699,20 +721,13 @@ input,select,textarea,.input,.textarea,.inp{
   text-transform:uppercase !important;
 }
 
-.printA4 .pill{
-  background:rgba(107,78,255,.08) !important;
-  color:#4f35d6 !important;
-  border:1px solid rgba(107,78,255,.16) !important;
-  font-weight:850 !important;
-}
-
 .printA4 .servicesTable{
   width:100% !important;
   border-collapse:separate !important;
   border-spacing:0 !important;
   overflow:hidden !important;
   border-radius:14px !important;
-  background:rgba(255,255,255,.72) !important;
+  background:rgba(255,255,255,.76) !important;
 }
 
 .printA4 .servicesTable th{
@@ -1730,7 +745,6 @@ input,select,textarea,.input,.textarea,.inp{
   font-weight:950 !important;
 }
 
-/* mobile */
 @media(max-width:1000px){
   #dischargeModal .modal__panel{
     width:calc(100vw - 20px) !important;
