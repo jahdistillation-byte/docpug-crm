@@ -3697,116 +3697,111 @@ async function renderDischargeA4(visitId) {
   } catch {}
 
   a4.innerHTML = `
-    <div class="printCard">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
-        <div>
-          <div style="font-weight:900;font-size:20px;">Направлення / Виписка</div>
-          <div style="opacity:.85;margin-top:4px;">Doc.PUG</div>
-        </div>
-        <div class="pill">${escapeHtml(String(v.date || "—"))}</div>
+  <div class="a4Doc">
+    <div class="a4Header">
+      <div>
+        <div class="a4Title">Направлення / Виписка</div>
+        <div class="a4Brand">Doc.PUG</div>
       </div>
+      <div class="pill">${escapeHtml(String(v.date || "—"))}</div>
+    </div>
 
-      <hr style="margin:14px 0; opacity:.22;" />
+    <div class="a4Divider"></div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div>
-          <div class="history-label">Пацієнт</div>
-          <div style="font-weight:850;">${escapeHtml(pet?.name || "—")}</div>
-          <div style="opacity:.85;font-size:13px;">
-            ${escapeHtml([pet?.species, pet?.breed, pet?.age, v?.weight_kg ? `${v.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
-          </div>
-        </div>
-
-        <div>
-          <div class="history-label">Власник</div>
-          <div style="font-weight:850;">${escapeHtml(owner?.name || "—")}</div>
-          <div style="opacity:.85;font-size:13px;">
-            ${escapeHtml([owner?.phone, owner?.note].filter(Boolean).join(" • ") || "—")}
-          </div>
+    <div class="a4PatientGrid">
+      <div>
+        <div class="history-label">Пацієнт</div>
+        <div class="a4Name">${escapeHtml(pet?.name || "—")}</div>
+        <div class="a4Meta">
+          ${escapeHtml([pet?.species, pet?.breed, pet?.age, v?.weight_kg ? `${v.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
         </div>
       </div>
 
-      <div class="history" style="margin-top:14px;">
-        <div class="history-label">Скарги / стан</div>
-        <div class="preserveText">${escapeHtml(complaint || "—")}</div>
-      </div>
-
-      <div class="history" style="margin-top:10px;">
-        <div class="history-label">Діагноз</div>
-        <div class="preserveText">${escapeHtml(dx || "—")}</div>
-      </div>
-
-      <div class="history" style="margin-top:10px;">
-        <div class="history-label">Призначення</div>
-        <div class="preserveText">${escapeHtml(rx || "—")}</div>
-      </div>
-
-     <div class="history dischargeFinanceBlock" style="margin-top:10px;">
-  <div class="history-label">Послуги / Препарати</div>
-
-  <div class="servicesPro">
-    <table class="servicesTable">
-      <thead>
-        <tr>
-          <th>Назва</th>
-          <th>Тип</th>
-          <th>К-сть</th>
-          <th>Ціна</th>
-          <th>Сума</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        ${
-          [
-            ...expandServiceLines(v).map(x => ({ ...x, type: "Послуга" })),
-            ...expandStockLines(v).map(x => ({ ...x, type: "Препарат" }))
-          ]
-          .map(x => `
-            <tr>
-              <td>${escapeHtml(x.name || "—")}</td>
-              <td>${escapeHtml(x.type)}</td>
-              <td>${escapeHtml(String(x.qty || 1))}</td>
-              <td>${escapeHtml(String(x.price || 0))}</td>
-              <td>${escapeHtml(String(x.lineTotal || 0))}</td>
-            </tr>
-          `)
-          .join("") || `
-            <tr>
-              <td colspan="5">—</td>
-            </tr>
-          `
-        }
-      </tbody>
-
-      <tfoot>
-        <tr>
-          <td colspan="4">Разом</td>
-          <td>
-            ${escapeHtml(
-              String(
-                (calcServicesTotal(v) || 0) +
-                (calcStockTotal(v) || 0)
-              )
-            )} грн
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>
-
-      <div class="history" style="margin-top:10px;">
-        <div class="history-label">Рекомендації</div>
-        <div class="preserveText">${escapeHtml(recs || "—")}</div>
-      </div>
-
-      <div class="history" style="margin-top:10px;">
-        <div class="history-label">Контроль / при погіршенні</div>
-        <div class="preserveText">${escapeHtml(follow || "—")}</div>
+      <div>
+        <div class="history-label">Власник</div>
+        <div class="a4Name">${escapeHtml(owner?.name || "—")}</div>
+        <div class="a4Meta">
+          ${escapeHtml([owner?.phone, owner?.note].filter(Boolean).join(" • ") || "—")}
+        </div>
       </div>
     </div>
-  `;
+
+    <div class="a4Block">
+      <div class="history-label">Скарги / стан</div>
+      <div class="preserveText">${escapeHtml(complaint || "—")}</div>
+    </div>
+
+    <div class="a4Block">
+      <div class="history-label">Діагноз</div>
+      <div class="preserveText">${escapeHtml(dx || "—")}</div>
+    </div>
+
+    <div class="a4Block">
+      <div class="history-label">Призначення</div>
+      <div class="preserveText">${escapeHtml(rx || "—")}</div>
+    </div>
+
+    <div class="a4Block dischargeFinanceBlock">
+      <div class="history-label">Послуги / Препарати</div>
+
+      <div class="servicesPro">
+        <table class="servicesTable">
+          <thead>
+            <tr>
+              <th>Назва</th>
+              <th>Тип</th>
+              <th>К-сть</th>
+              <th>Ціна</th>
+              <th>Сума</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${
+              [
+                ...expandServiceLines(v).map(x => ({ ...x, type: "Послуга" })),
+                ...expandStockLines(v).map(x => ({ ...x, type: "Препарат" }))
+              ]
+              .map(x => `
+                <tr>
+                  <td>${escapeHtml(x.name || "—")}</td>
+                  <td>${escapeHtml(x.type)}</td>
+                  <td>${escapeHtml(String(x.qty || 1))}</td>
+                  <td>${escapeHtml(String(x.price || 0))}</td>
+                  <td>${escapeHtml(String(x.lineTotal || 0))}</td>
+                </tr>
+              `)
+              .join("") || `
+                <tr>
+                  <td colspan="5">—</td>
+                </tr>
+              `
+            }
+          </tbody>
+
+          <tfoot>
+            <tr>
+              <td colspan="4">Разом</td>
+              <td>
+                ${escapeHtml(String((calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0)))} грн
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="a4Block">
+      <div class="history-label">Рекомендації</div>
+      <div class="preserveText">${escapeHtml(recs || "—")}</div>
+    </div>
+
+    <div class="a4Block">
+      <div class="history-label">Контроль / при погіршенні</div>
+      <div class="preserveText">${escapeHtml(follow || "—")}</div>
+    </div>
+  </div>
+`;
 }
 function parseRxCombined(text) {
   const t = String(text || "");

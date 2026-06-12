@@ -924,3 +924,88 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .printA4{
   padding-top:14mm !important;
 }
+/* ===== FINAL A4 clean layout, no .history conflicts ===== */
+
+.printA4 .a4Doc{
+  width:100%;
+  height:auto;
+  padding:0;
+}
+
+.printA4 .a4Header{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+
+.printA4 .a4Title{
+  font-weight:950;
+  font-size:20px;
+  letter-spacing:-.3px;
+}
+
+.printA4 .a4Brand{
+  opacity:.85;
+  margin-top:4px;
+}
+
+.printA4 .a4Divider{
+  height:1px;
+  background:rgba(116,96,170,.24);
+  margin:14px 0;
+}
+
+.printA4 .a4PatientGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.printA4 .a4Name{
+  font-weight:850;
+}
+
+.printA4 .a4Meta{
+  opacity:.85;
+  font-size:13px;
+}
+
+.printA4 .a4Block{
+  display:block !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  margin-top:10px !important;
+  padding:12px 14px !important;
+  background:rgba(255,255,255,.78) !important;
+  border:1px solid rgba(107,78,255,.16) !important;
+  border-radius:16px !important;
+  box-shadow:0 10px 26px rgba(43,36,73,.07) !important;
+}
+
+.printA4 .a4Block .preserveText{
+  display:block !important;
+  white-space:pre-wrap !important;
+  line-height:1.45 !important;
+  margin-top:6px !important;
+}
+
+.printA4 .a4Block .history-label{
+  margin:0 0 6px 0 !important;
+}
+
+.printA4 .dischargeFinanceBlock .servicesPro{
+  margin-top:8px !important;
+  padding:0 !important;
+  min-height:0 !important;
+  height:auto !important;
+  overflow:hidden !important;
+}
+
+.printA4 .servicesTable th,
+.printA4 .servicesTable td{
+  padding:6px 8px !important;
+  line-height:1.25 !important;
+}
