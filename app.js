@@ -2962,6 +2962,23 @@ function setPatientFiles(petId, arr) {
   all[String(petId)] = Array.isArray(arr) ? arr : [];
   savePatientFiles(all);
 }
+async function uploadPatientFile(file) {
+  const fd = new FormData();
+  fd.append("files", file);
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: fd,
+  });
+
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || "Upload failed");
+
+  const uploaded = json.files?.[0];
+  if (!uploaded) throw new Error("No uploaded file");
+
+  return uploaded;
+}
 
 function renderPatientFilesTab(pet) {
   const box = $("#patientTabContent");
@@ -2996,24 +3013,27 @@ function renderPatientFilesTab(pet) {
     $("#patientFileInput")?.click();
   });
 
-  $("#patientFileInput")?.addEventListener("change", (e) => {
+  $("#patientFileInput")?.addEventListener("change", async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const type = (prompt("Тип файлу: рентген / УЗД / PDF / фото / лабораторія", "PDF") || "Файл").trim();
     const note = (prompt("Коментар:", "") || "").trim();
 
-    const arr = getPatientFiles(petId);
-    arr.unshift({
-      id: "pfile_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-      name: file.name,
-      size: file.size,
-      mime: file.type,
-      type,
-      note,
-      date: todayISO(),
-      created_at: new Date().toISOString(),
-    });
+    const uploaded = await uploadPatientFile(file);
+
+const arr = getPatientFiles(petId);
+arr.unshift({
+  id: "pfile_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+  name: uploaded.name || file.name,
+  url: uploaded.url || uploaded.path || uploaded.href || "",
+  size: file.size,
+  mime: file.type,
+  type,
+  note,
+  date: todayISO(),
+  created_at: new Date().toISOString(),
+});
 
     setPatientFiles(petId, arr);
     e.target.value = "";
@@ -3034,6 +3054,16 @@ function renderPatientFilesTab(pet) {
 }
 
 function renderPatientFileRow(file) {
+  const rawUrl =
+    file.url ||
+    file.path ||
+    file.href ||
+    file.fileUrl ||
+    file.file_url ||
+    "";
+
+  const url = rawUrl ? new URL(rawUrl, window.location.origin).toString() : "";
+
   return `
     <div class="item">
       <div class="left" style="width:100%;">
@@ -3045,7 +3075,12 @@ function renderPatientFileRow(file) {
         ${file.note ? `<div class="history" style="white-space:pre-wrap;">${escapeHtml(file.note)}</div>` : ""}
       </div>
 
-      <div class="right">
+      <div class="right" style="display:flex; gap:8px;">
+        ${
+          url
+            ? `<a class="miniBtn" href="${escapeHtml(url)}" target="_blank" rel="noopener">Відкрити</a>`
+            : `<span class="hint">немає url</span>`
+        }
         <button class="iconBtn" title="Видалити" data-del-patient-file="${escapeHtml(file.id)}">🗑</button>
       </div>
     </div>
