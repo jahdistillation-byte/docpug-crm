@@ -1258,3 +1258,102 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   font-size:12px;
   text-align:center;
 }
+/* ===== LAB PDF — premium glass Doc.PUG ===== */
+
+.labPdfA4{
+  background:
+    radial-gradient(circle at 12% 6%, rgba(107,78,255,.22), transparent 34%),
+    radial-gradient(circle at 92% 12%, rgba(154,107,255,.18), transparent 36%),
+    linear-gradient(135deg,#fbfaff 0%,#f2edff 44%,#ffffff 100%) !important;
+  color:#171525 !important;
+}
+
+.labPdfHead{
+  padding:18px 20px;
+  border-radius:24px;
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(107,78,255,.16);
+  box-shadow:0 16px 38px rgba(43,36,73,.10);
+  backdrop-filter:blur(14px);
+}
+
+.labPdfTitle::before{
+  content:"🧪 ";
+}
+
+.labPdfTitle{
+  font-size:32px !important;
+  font-weight:950 !important;
+  letter-spacing:-.8px;
+}
+
+.labPdfBrand{
+  color:#6b4eff !important;
+  font-weight:950 !important;
+}
+
+.labPdfDivider{
+  height:4px !important;
+  border-radius:999px;
+  background:linear-gradient(90deg,#6b4eff,#9a6bff,rgba(255,255,255,.4)) !important;
+  margin:20px 0 22px !important;
+}
+
+.labPdfGrid > div{
+  background:rgba(255,255,255,.66) !important;
+  border:1px solid rgba(107,78,255,.16) !important;
+  border-radius:22px !important;
+  box-shadow:0 14px 34px rgba(43,36,73,.08) !important;
+  backdrop-filter:blur(12px);
+}
+
+.labPdfGrid > div:first-child::before{
+  content:"🐾";
+  float:right;
+  font-size:28px;
+  opacity:.32;
+}
+
+.labPdfGrid > div:last-child::before{
+  content:"📊";
+  float:right;
+  font-size:28px;
+  opacity:.32;
+}
+
+.labPdfTableBox{
+  border-radius:24px !important;
+  background:rgba(255,255,255,.70) !important;
+  border:1px solid rgba(107,78,255,.16) !important;
+  box-shadow:0 18px 46px rgba(43,36,73,.10) !important;
+  overflow:hidden;
+}
+
+.labPdfA4 .servicesTable thead th{
+  background:linear-gradient(135deg,#6b4eff,#9a6bff) !important;
+  color:#fff !important;
+  padding:13px 14px !important;
+}
+
+.labPdfA4 .servicesTable td{
+  padding:13px 14px !important;
+  border-bottom:1px solid rgba(107,78,255,.10) !important;
+}
+
+.labPdfA4 .servicesTable tbody tr:nth-child(even){
+  background:rgba(107,78,255,.045) !important;
+}
+
+.labPdfA4 .servicesTable td:nth-child(2)::before{
+  content:"● ";
+  color:#6b4eff;
+}
+
+.labPdfFooter{
+  margin-top:30px !important;
+  padding:16px !important;
+  border-radius:18px;
+  background:rgba(255,255,255,.50);
+  border:1px solid rgba(107,78,255,.12);
+  color:#6f6b82 !important;
+}
