@@ -2098,7 +2098,7 @@ async function downloadA4Pdf(visitId) {
       },
     },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-    pagebreak: { mode: ["avoid-all"] },
+    pagebreak: { mode: ["css", "legacy"] },
   };
 
   try {

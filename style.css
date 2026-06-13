@@ -1357,3 +1357,87 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   border:1px solid rgba(107,78,255,.12);
   color:#6f6b82 !important;
 }
+/* ===== FIX LAB PDF POSITION ===== */
+
+.labPdfA4{
+  width:210mm !important;
+  min-height:297mm !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:18mm !important;
+
+  display:block !important;
+  align-items:unset !important;
+  justify-content:unset !important;
+
+  page-break-before:auto !important;
+  page-break-after:auto !important;
+  page-break-inside:auto !important;
+  break-before:auto !important;
+  break-after:auto !important;
+  break-inside:auto !important;
+}
+
+.labPdfDoc{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+  transform:none !important;
+}
+
+.labPdfHead{
+  margin-top:0 !important;
+}
+
+.labPdfTableBox{
+  margin-top:18px !important;
+  page-break-inside:auto !important;
+  break-inside:auto !important;
+}
+
+.labPdfA4 .servicesTable{
+  page-break-inside:auto !important;
+  break-inside:auto !important;
+}
+/* ===== FIX LAB PDF POSITION ===== */
+
+.labPdfA4{
+  width:210mm !important;
+  min-height:297mm !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:18mm !important;
+
+  display:block !important;
+  align-items:unset !important;
+  justify-content:unset !important;
+
+  page-break-before:auto !important;
+  page-break-after:auto !important;
+  page-break-inside:auto !important;
+  break-before:auto !important;
+  break-after:auto !important;
+  break-inside:auto !important;
+}
+
+.labPdfDoc{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+  transform:none !important;
+}
+
+.labPdfHead{
+  margin-top:0 !important;
+}
+
+.labPdfTableBox{
+  margin-top:18px !important;
+  page-break-inside:auto !important;
+  break-inside:auto !important;
+}
+
+.labPdfA4 .servicesTable{
+  page-break-inside:auto !important;
+  break-inside:auto !important;
+}
