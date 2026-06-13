@@ -2884,11 +2884,8 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "files") {
-
   renderPatientFilesTab(pet);
-
   return;
-
 }
 
   if (tab === "finance") {
