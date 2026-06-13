@@ -5552,42 +5552,6 @@ async function deleteMedcardApi(entryId) {
   }
 }
 
-function medcardPromptEntry(existing = {}) {
-  const today = typeof todayISO === "function"
-    ? todayISO()
-    : new Date().toISOString().slice(0, 10);
-
-  const entry_date = (prompt("Дата запису:", existing.entry_date || today) || "").trim();
-  if (!entry_date) return null;
-
-  const entry_time = (prompt("Час запису, наприклад 18:40:", existing.entry_time || "") || "").trim();
-
-  return {
-    entry_date,
-    entry_time,
-
-    weight_kg: (prompt("Вага кг:", existing.weight_kg || "") || "").trim(),
-    temperature: (prompt("Температура:", existing.temperature || "") || "").trim(),
-
-    appetite: (prompt("Апетит:", existing.appetite || "") || "").trim(),
-    water: (prompt("Вода / спрага:", existing.water || "") || "").trim(),
-    urine: (prompt("Сечовипускання:", existing.urine || "") || "").trim(),
-    stool: (prompt("Кал:", existing.stool || "") || "").trim(),
-
-    mucosa: (prompt("Слизові / ясна:", existing.mucosa || "") || "").trim(),
-    breathing: (prompt("Дихання:", existing.breathing || "") || "").trim(),
-    pulse: (prompt("Пульс / серце:", existing.pulse || "") || "").trim(),
-
-    condition: (prompt("Загальний стан:", existing.condition || "") || "").trim(),
-    treatment: (prompt("Що зроблено / введено:", existing.treatment || "") || "").trim(),
-    dynamics: (prompt("Динаміка:", existing.dynamics || "") || "").trim(),
-    plan: (prompt("План / контроль:", existing.plan || "") || "").trim(),
-
-    doctor: (prompt("Лікар:", existing.doctor || "") || "").trim(),
-    note: (prompt("Додаткова нотатка:", existing.note || "") || "").trim(),
-  };
-}
-
 function renderMedcardEntryCard(x) {
   const dateLine = [x.entry_date, x.entry_time].filter(Boolean).join(" • ") || "—";
 
@@ -5674,6 +5638,209 @@ function renderMedcardEntryCard(x) {
   `;
 }
 
+function ensureMedcardModal() {
+  let modal = document.getElementById("medcardModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "medcardModal";
+  modal.setAttribute("aria-hidden", "true");
+
+  modal.innerHTML = `
+    <div class="modal__backdrop" data-close-medcard-modal></div>
+
+    <div class="modal__panel medcardModalPanel" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title" id="medcardModalTitle">Нова запись веткартки</div>
+          <div class="modal__sub">Стан, лікування, динаміка та план пацієнта</div>
+        </div>
+        <button class="iconBtn" data-close-medcard-modal type="button">✕</button>
+      </div>
+
+      <div class="modal__body medcardModalBody">
+        <div class="medFormGrid">
+          <label class="field">
+            <div class="label">Дата</div>
+            <input class="input" id="medEntryDate" type="date">
+          </label>
+
+          <label class="field">
+            <div class="label">Час</div>
+            <input class="input" id="medEntryTime" type="time">
+          </label>
+
+          <label class="field">
+            <div class="label">Вага, кг</div>
+            <input class="input" id="medWeight" placeholder="Напр.: 12.4">
+          </label>
+
+          <label class="field">
+            <div class="label">Температура</div>
+            <input class="input" id="medTemp" placeholder="Напр.: 39.2">
+          </label>
+
+          <label class="field">
+            <div class="label">Пульс / серце</div>
+            <input class="input" id="medPulse" placeholder="Напр.: 120, ритмічний">
+          </label>
+
+          <label class="field">
+            <div class="label">Слизові / ясна</div>
+            <input class="input" id="medMucosa" placeholder="Рожеві / бліді / ціаноз">
+          </label>
+
+          <label class="field">
+            <div class="label">Апетит</div>
+            <input class="input" id="medAppetite" placeholder="Добрий / знижений / відсутній">
+          </label>
+
+          <label class="field">
+            <div class="label">Вода / спрага</div>
+            <input class="input" id="medWater" placeholder="П’є / не п’є / полідипсія">
+          </label>
+
+          <label class="field">
+            <div class="label">Сечовипускання</div>
+            <input class="input" id="medUrine" placeholder="Норма / часте / немає">
+          </label>
+
+          <label class="field">
+            <div class="label">Кал</div>
+            <input class="input" id="medStool" placeholder="Норма / діарея / запор">
+          </label>
+
+          <label class="field">
+            <div class="label">Дихання</div>
+            <input class="input" id="medBreathing" placeholder="Норма / часте / утруднене">
+          </label>
+
+          <label class="field">
+            <div class="label">Лікар</div>
+            <input class="input" id="medDoctor" placeholder="ПІБ лікаря">
+          </label>
+        </div>
+
+        <label class="field">
+          <div class="label">Загальний стан</div>
+          <textarea class="textarea" id="medCondition" rows="4" placeholder="Опис стану пацієнта..."></textarea>
+        </label>
+
+        <label class="field">
+          <div class="label">Проведено / призначено</div>
+          <textarea class="textarea" id="medTreatment" rows="4" placeholder="Препарати, маніпуляції, інфузії, процедури..."></textarea>
+        </label>
+
+        <label class="field">
+          <div class="label">Динаміка</div>
+          <textarea class="textarea" id="medDynamics" rows="3" placeholder="Що змінилось після лікування / за період спостереження..."></textarea>
+        </label>
+
+        <label class="field">
+          <div class="label">План / контроль</div>
+          <textarea class="textarea" id="medPlan" rows="3" placeholder="Контроль, повторний огляд, аналізи, зміна терапії..."></textarea>
+        </label>
+
+        <label class="field">
+          <div class="label">Додаткова нотатка</div>
+          <textarea class="textarea" id="medNote" rows="3" placeholder="Будь-які додаткові деталі..."></textarea>
+        </label>
+      </div>
+
+      <div class="modal__foot">
+        <button class="ghost" data-close-medcard-modal type="button">Скасувати</button>
+        <button class="primary" id="medcardSaveBtn" type="button">Зберегти</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close-medcard-modal]")) {
+      closeMedcardModal();
+    }
+  });
+
+  return modal;
+}
+
+function medcardFormSet(existing = {}) {
+  const today = typeof todayISO === "function"
+    ? todayISO()
+    : new Date().toISOString().slice(0, 10);
+
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || "";
+  };
+
+  set("medEntryDate", existing.entry_date || today);
+  set("medEntryTime", existing.entry_time || "");
+
+  set("medWeight", existing.weight_kg || "");
+  set("medTemp", existing.temperature || "");
+  set("medPulse", existing.pulse || "");
+  set("medMucosa", existing.mucosa || "");
+
+  set("medAppetite", existing.appetite || "");
+  set("medWater", existing.water || "");
+  set("medUrine", existing.urine || "");
+  set("medStool", existing.stool || "");
+  set("medBreathing", existing.breathing || "");
+  set("medDoctor", existing.doctor || "");
+
+  set("medCondition", existing.condition || "");
+  set("medTreatment", existing.treatment || "");
+  set("medDynamics", existing.dynamics || "");
+  set("medPlan", existing.plan || "");
+  set("medNote", existing.note || "");
+}
+
+function medcardFormRead() {
+  const val = (id) => String(document.getElementById(id)?.value || "").trim();
+
+  const entry_date = val("medEntryDate");
+  if (!entry_date) {
+    alert("Вкажи дату запису");
+    return null;
+  }
+
+  return {
+    entry_date,
+    entry_time: val("medEntryTime"),
+
+    weight_kg: val("medWeight"),
+    temperature: val("medTemp"),
+    pulse: val("medPulse"),
+    mucosa: val("medMucosa"),
+
+    appetite: val("medAppetite"),
+    water: val("medWater"),
+    urine: val("medUrine"),
+    stool: val("medStool"),
+    breathing: val("medBreathing"),
+
+    condition: val("medCondition"),
+    treatment: val("medTreatment"),
+    dynamics: val("medDynamics"),
+    plan: val("medPlan"),
+
+    doctor: val("medDoctor"),
+    note: val("medNote"),
+  };
+}
+
+function closeMedcardModal() {
+  const modal = document.getElementById("medcardModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  delete modal.dataset.entryId;
+  delete modal.dataset.patientId;
+}
+
 async function renderMedcardTab(pet) {
   const box = $("#patientTabContent");
   if (!box || !pet) return;
@@ -5705,14 +5872,33 @@ async function renderMedcardTab(pet) {
     </div>
   `;
 
-  $("#btnAddMedcardEntry")?.addEventListener("click", async () => {
-    const payload = medcardPromptEntry();
-    if (!payload) return;
+  $("#btnAddMedcardEntry")?.addEventListener("click", () => {
+    const modal = ensureMedcardModal();
 
-    const created = await createMedcardApi(pet.id, payload);
-    if (!created) return;
+    modal.dataset.patientId = String(pet.id);
+    delete modal.dataset.entryId;
 
-    await renderMedcardTab(pet);
+    const title = document.getElementById("medcardModalTitle");
+    if (title) title.textContent = "Нова запись веткартки";
+
+    medcardFormSet({});
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+
+    const saveBtn = document.getElementById("medcardSaveBtn");
+    if (saveBtn) {
+      saveBtn.onclick = async () => {
+        const payload = medcardFormRead();
+        if (!payload) return;
+
+        const created = await createMedcardApi(pet.id, payload);
+        if (!created) return;
+
+        closeMedcardModal();
+        await renderMedcardTab(pet);
+      };
+    }
   });
 
   $("#medcardList")?.addEventListener("click", async (e) => {
@@ -5736,13 +5922,32 @@ async function renderMedcardTab(pet) {
       const current = items.find((x) => String(x.id) === String(id));
       if (!current) return alert("Запис не знайдено");
 
-      const payload = medcardPromptEntry(current);
-      if (!payload) return;
+      const modal = ensureMedcardModal();
 
-      const updated = await updateMedcardApi(id, payload);
-      if (!updated) return;
+      modal.dataset.patientId = String(pet.id);
+      modal.dataset.entryId = String(id);
 
-      await renderMedcardTab(pet);
+      const title = document.getElementById("medcardModalTitle");
+      if (title) title.textContent = "Редагування запису веткартки";
+
+      medcardFormSet(current);
+
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+
+      const saveBtn = document.getElementById("medcardSaveBtn");
+      if (saveBtn) {
+        saveBtn.onclick = async () => {
+          const payload = medcardFormRead();
+          if (!payload) return;
+
+          const updated = await updateMedcardApi(id, payload);
+          if (!updated) return;
+
+          closeMedcardModal();
+          await renderMedcardTab(pet);
+        };
+      }
     }
   });
 }
