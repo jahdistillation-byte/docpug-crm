@@ -1133,27 +1133,21 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
     width:100%;
   }
 }
+/* ===== LAB PDF PREMIUM — scoped only ===== */
+
 .labPdfA4{
   width:210mm;
   min-height:297mm;
   padding:18mm;
-
   background:
-    radial-gradient(circle at top right,
-      rgba(107,78,255,.15),
-      transparent 35%),
-    radial-gradient(circle at bottom left,
-      rgba(160,120,255,.10),
-      transparent 35%),
-    #ffffff;
-
+    radial-gradient(circle at top right, rgba(107,78,255,.18), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(160,120,255,.10), transparent 35%),
+    linear-gradient(135deg,#fbfaff,#f4f0ff 45%,#fff);
   color:#171525;
-  font-family:Inter,system-ui,sans-serif;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
 }
 
-.labPdfDoc{
-  position:relative;
-}
+.labPdfDoc{position:relative}
 
 .labPdfHead{
   display:flex;
@@ -1164,13 +1158,13 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 
 .labPdfTitle{
   font-size:34px;
-  font-weight:900;
+  font-weight:950;
   line-height:1;
 }
 
 .labPdfBrand{
   font-size:22px;
-  font-weight:800;
+  font-weight:900;
   color:#6b4eff;
   margin-top:8px;
 }
@@ -1178,11 +1172,7 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .labPdfDivider{
   height:3px;
   border-radius:999px;
-  background:linear-gradient(
-    90deg,
-    #6b4eff,
-    #9d7cff
-  );
+  background:linear-gradient(90deg,#6b4eff,#9d7cff);
   margin-bottom:24px;
 }
 
@@ -1194,50 +1184,47 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 }
 
 .labPdfGrid > div{
-  background:#fff;
-  border:1px solid rgba(107,78,255,.12);
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(107,78,255,.14);
   border-radius:18px;
   padding:16px;
-  box-shadow:0 8px 25px rgba(20,20,50,.05);
+  box-shadow:0 10px 28px rgba(43,36,73,.07);
 }
 
-.a4Name{
+.labPdfA4 .a4Name{
   font-size:22px;
-  font-weight:800;
+  font-weight:900;
 }
 
-.a4Meta{
+.labPdfA4 .a4Meta{
   margin-top:6px;
   color:#666;
 }
 
-.history-label{
-  color:#8a8aa0;
+.labPdfA4 .history-label{
+  color:#8a7cc8;
   font-size:12px;
   text-transform:uppercase;
   letter-spacing:.12em;
   margin-bottom:8px;
+  font-weight:950;
 }
 
 .labPdfTableBox{
-  background:#fff;
+  background:rgba(255,255,255,.86);
   border-radius:22px;
   overflow:hidden;
-  border:1px solid rgba(107,78,255,.12);
-  box-shadow:0 12px 30px rgba(20,20,50,.06);
+  border:1px solid rgba(107,78,255,.14);
+  box-shadow:0 14px 34px rgba(43,36,73,.08);
 }
 
-.servicesTable{
+.labPdfA4 .servicesTable{
   width:100%;
   border-collapse:collapse;
 }
 
-.servicesTable thead th{
-  background:linear-gradient(
-    135deg,
-    #6b4eff,
-    #8f6cff
-  );
+.labPdfA4 .servicesTable thead th{
+  background:linear-gradient(135deg,#6b4eff,#8f6cff);
   color:white;
   font-size:13px;
   text-transform:uppercase;
@@ -1245,22 +1232,22 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   padding:14px;
 }
 
-.servicesTable td{
+.labPdfA4 .servicesTable td{
   padding:14px;
   border-bottom:1px solid #ececf4;
 }
 
-.servicesTable tr:nth-child(even){
+.labPdfA4 .servicesTable tr:nth-child(even){
   background:#faf9ff;
 }
 
-.pill{
+.labPdfA4 .pill{
   background:#f2edff;
   border:1px solid rgba(107,78,255,.15);
   color:#6b4eff;
   border-radius:999px;
   padding:10px 16px;
-  font-weight:700;
+  font-weight:800;
 }
 
 .labPdfFooter{
