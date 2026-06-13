@@ -26,7 +26,7 @@ if not ORG_ID or not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
     raise RuntimeError("Missing ENV vars: ORG_ID / SUPABASE_URL / SUPABASE_SERVICE_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
+print("SUPABASE STORAGE READY")
 # =========================
 # APP
 # =========================
@@ -797,22 +797,34 @@ def api_upload():
 
         ext = safe_name.rsplit(".", 1)[1].lower()
         stored_name = f"{uuid.uuid4().hex}.{ext}"
-        path = os.path.join(UPLOAD_DIR, stored_name)
 
-        f.save(path)
+        # путь внутри Supabase bucket
+        storage_path = f"{ORG_ID}/patients/{stored_name}"
+
+        file_bytes = f.read()
+        mime = mimetypes.guess_type(safe_name)[0] or f.mimetype or "application/octet-stream"
 
         try:
-            size = os.path.getsize(path)
-        except Exception:
-            size = 0
+            supabase.storage.from_("patient-files").upload(
+                storage_path,
+                file_bytes,
+                {
+                    "content-type": mime,
+                    "upsert": "false",
+                }
+            )
 
-        mime = mimetypes.guess_type(path)[0] or f.mimetype or ""
+            public_url = supabase.storage.from_("patient-files").get_public_url(storage_path)
+
+        except Exception as e:
+            return fail(f"Supabase upload failed: {e}", 500)
 
         saved.append({
             "stored_name": stored_name,
-            "url": file_url(stored_name),
+            "storage_path": storage_path,
+            "url": public_url,
             "name": original_name,
-            "size": size,
+            "size": len(file_bytes),
             "type": mime,
         })
 
