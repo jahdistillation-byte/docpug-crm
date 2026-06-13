@@ -3116,12 +3116,16 @@ function renderLabsTab(pet) {
     }
 
     const pdf = e.target.closest("[data-pdf-lab]");
-    if (pdf) {
-      const id = pdf.dataset.pdfLab;
-      if (!id) return;
-      await downloadLabPdf(pet, id);
-      return;
-    }
+if (pdf) {
+  const id = pdf.dataset.pdfLab;
+  if (!id) return;
+
+  const lab = loadLabs().find((x) => String(x.id) === String(id));
+  if (!lab) return alert("Аналіз не знайдено");
+
+  await downloadLabPdf(pet, lab);
+  return;
+}
   });
 }
 
@@ -3310,7 +3314,12 @@ function renderLabCard(lab, speciesKey) {
           <div class="labTitle">${escapeHtml(lab.type || "Аналіз")}</div>
           <div class="labDate">${escapeHtml(lab.date || "—")}</div>
         </div>
-        <button class="iconBtn" data-del-lab="${escapeHtml(lab.id)}">🗑</button>
+
+        <div style="display:flex; gap:8px;">
+          <button class="iconBtn" title="Редагувати" data-edit-lab="${escapeHtml(lab.id)}">✏️</button>
+          <button class="iconBtn" title="PDF для клієнта" data-pdf-lab="${escapeHtml(lab.id)}">📄</button>
+          <button class="iconBtn" title="Видалити" data-del-lab="${escapeHtml(lab.id)}">🗑</button>
+        </div>
       </div>
 
       <div class="labRows">
@@ -3345,7 +3354,97 @@ function renderLabCard(lab, speciesKey) {
     </div>
   `;
 }
+async function downloadLabPdf(pet, lab) {
+  if (typeof window.html2pdf === "undefined") {
+    return alert("html2pdf не підключений");
+  }
 
+  const speciesKey = getPetSpeciesKey(pet);
+  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
+  const keys = LAB_GROUPS[lab.type] || Object.keys(lab.values || {});
+
+  const wrap = document.createElement("div");
+  wrap.className = "labPdfA4";
+
+  wrap.innerHTML = `
+    <div class="labPdfDoc">
+      <div class="labPdfHead">
+        <div>
+          <div class="labPdfTitle">Результати аналізу</div>
+          <div class="labPdfBrand">Doc.PUG</div>
+        </div>
+        <div class="pill">${escapeHtml(lab.date || "—")}</div>
+      </div>
+
+      <div class="labPdfDivider"></div>
+
+      <div class="labPdfGrid">
+        <div>
+          <div class="history-label">Пацієнт</div>
+          <div class="a4Name">${escapeHtml(pet?.name || "—")}</div>
+          <div class="a4Meta">
+            ${escapeHtml([pet?.species, pet?.breed, pet?.age, pet?.weight_kg ? `${pet.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
+          </div>
+        </div>
+
+        <div>
+          <div class="history-label">Тип аналізу</div>
+          <div class="a4Name">${escapeHtml(lab.type || "Аналіз")}</div>
+          <div class="a4Meta">Норми: ${speciesKey === "cat" ? "кіт" : "собака"}</div>
+        </div>
+      </div>
+
+      <div class="labPdfTableBox">
+        <table class="servicesTable">
+          <thead>
+            <tr>
+              <th>Показник</th>
+              <th>Результат</th>
+              <th>Норма</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${keys.map((key) => {
+              const ref = ranges[key];
+              if (!ref) return "";
+
+              const [min, max, unit] = ref;
+              const value = lab.values?.[key];
+              const status = getLabStatus(value, min, max);
+
+              return `
+                <tr>
+                  <td>${escapeHtml(LAB_LABELS[key] || key)}</td>
+                  <td><b>${escapeHtml(value ?? "—")} ${escapeHtml(unit)}</b></td>
+                  <td>${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</td>
+                  <td>${escapeHtml(labStatusLabel(status))}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(wrap);
+
+  const filename = `DocPUG_${pet?.name || "patient"}_${lab.type || "lab"}_${lab.date || todayISO()}.pdf`;
+
+  await window.html2pdf()
+    .set({
+      margin: 0,
+      filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: null },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    })
+    .from(wrap)
+    .save();
+
+  wrap.remove();
+}
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
