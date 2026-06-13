@@ -1587,3 +1587,48 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   }
 
 }
+/* MEDCARD MODAL FIX */
+
+#medcardModal .medcardModalPanel{
+  width: min(980px, calc(100vw - 40px)) !important;
+  max-width: 980px !important;
+  max-height: calc(100vh - 50px) !important;
+  margin: 25px auto !important;
+}
+
+#medcardModal .medcardModalBody{
+  padding: 22px !important;
+  overflow: auto !important;
+}
+
+#medcardModal .medFormGrid{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+#medcardModal .field{
+  display: block !important;
+  margin: 0 !important;
+}
+
+#medcardModal .input,
+#medcardModal .textarea{
+  width: 100% !important;
+}
+
+#medcardModal .textarea{
+  min-height: 90px !important;
+}
+
+#medcardModal #medCondition,
+#medcardModal #medTreatment{
+  min-height: 120px !important;
+}
+
+@media(max-width: 900px){
+  #medcardModal .medFormGrid{
+    grid-template-columns: 1fr !important;
+  }
+}
