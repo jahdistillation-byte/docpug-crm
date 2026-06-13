@@ -2884,14 +2884,12 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "files") {
-    box.innerHTML = `
-      <div class="patientInfoBox">
-        <h2>Файлы пациента</h2>
-        <div class="hint">Тут будуть рентгени, УЗД, PDF, фото, лабораторії.</div>
-      </div>
-    `;
-    return;
-  }
+
+  renderPatientFilesTab(pet);
+
+  return;
+
+}
 
   if (tab === "finance") {
     const visits = await getVisitsByPetId(pet.id);
@@ -2939,6 +2937,129 @@ async function renderPatientTab(tab, pet) {
     `;
     return;
   }
+}
+const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
+
+function loadPatientFiles() {
+  try {
+    const raw = localStorage.getItem(PATIENT_FILES_KEY);
+    const obj = raw ? JSON.parse(raw) : {};
+    return obj && typeof obj === "object" ? obj : {};
+  } catch {
+    return {};
+  }
+}
+
+function savePatientFiles(obj) {
+  localStorage.setItem(PATIENT_FILES_KEY, JSON.stringify(obj || {}));
+}
+
+function getPatientFiles(petId) {
+  const all = loadPatientFiles();
+  const arr = all[String(petId)] || [];
+  return Array.isArray(arr) ? arr : [];
+}
+
+function setPatientFiles(petId, arr) {
+  const all = loadPatientFiles();
+  all[String(petId)] = Array.isArray(arr) ? arr : [];
+  savePatientFiles(all);
+}
+
+function renderPatientFilesTab(pet) {
+  const box = $("#patientTabContent");
+  if (!box || !pet) return;
+
+  const petId = String(pet.id);
+  const files = getPatientFiles(petId);
+
+  box.innerHTML = `
+    <div class="patientInfoBox">
+      <div class="row" style="gap:10px; flex-wrap:wrap;">
+        <div style="flex:1;">
+          <h2>Файли пацієнта</h2>
+          <div class="hint">Рентген, УЗД, PDF, фото, лабораторії та інші документи.</div>
+        </div>
+
+        <button class="primary" id="btnAddPatientFile" type="button">+ Прикріпити файл</button>
+        <input id="patientFileInput" type="file" accept="image/*,.pdf,.doc,.docx" style="display:none;" />
+      </div>
+
+      <div id="patientFilesList" class="list" style="margin-top:16px;">
+        ${
+          files.length
+            ? files.map(renderPatientFileRow).join("")
+            : `<div class="hint">Поки файлів немає. Натисни “+ Прикріпити файл”.</div>`
+        }
+      </div>
+    </div>
+  `;
+
+  $("#btnAddPatientFile")?.addEventListener("click", () => {
+    $("#patientFileInput")?.click();
+  });
+
+  $("#patientFileInput")?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const type = (prompt("Тип файлу: рентген / УЗД / PDF / фото / лабораторія", "PDF") || "Файл").trim();
+    const note = (prompt("Коментар:", "") || "").trim();
+
+    const arr = getPatientFiles(petId);
+    arr.unshift({
+      id: "pfile_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+      name: file.name,
+      size: file.size,
+      mime: file.type,
+      type,
+      note,
+      date: todayISO(),
+      created_at: new Date().toISOString(),
+    });
+
+    setPatientFiles(petId, arr);
+    e.target.value = "";
+    renderPatientFilesTab(pet);
+  });
+
+  $("#patientFilesList")?.addEventListener("click", (e) => {
+    const del = e.target.closest("[data-del-patient-file]");
+    if (!del) return;
+
+    const id = del.dataset.delPatientFile;
+    if (!confirm("Видалити файл з картки?")) return;
+
+    const next = getPatientFiles(petId).filter((x) => String(x.id) !== String(id));
+    setPatientFiles(petId, next);
+    renderPatientFilesTab(pet);
+  });
+}
+
+function renderPatientFileRow(file) {
+  return `
+    <div class="item">
+      <div class="left" style="width:100%;">
+        <div class="name">📎 ${escapeHtml(file.name || "Файл")}</div>
+        <div class="meta">
+          ${escapeHtml(file.type || "Файл")} • ${escapeHtml(file.date || "—")}
+          ${file.size ? " • " + escapeHtml(formatFileSize(file.size)) : ""}
+        </div>
+        ${file.note ? `<div class="history" style="white-space:pre-wrap;">${escapeHtml(file.note)}</div>` : ""}
+      </div>
+
+      <div class="right">
+        <button class="iconBtn" title="Видалити" data-del-patient-file="${escapeHtml(file.id)}">🗑</button>
+      </div>
+    </div>
+  `;
+}
+
+function formatFileSize(bytes) {
+  const n = Number(bytes) || 0;
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 const LABS_KEY = "docpug_labs_v1";
 
