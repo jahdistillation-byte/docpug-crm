@@ -855,7 +855,138 @@ def api_delete_upload():
         return fail(f"Cannot delete file: {e}", 500)
 
     return ok(True)
+# =========================
+# API: PATIENT MEDCARD
+# =========================
 
+@app.get("/api/patients/<patient_id>/medcard")
+def api_get_patient_medcard(patient_id):
+    try:
+        res = (
+            supabase
+            .table("patient_medcard_entries")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .eq("patient_id", patient_id)
+            .order("entry_date", desc=True)
+            .order("entry_time", desc=True)
+            .execute()
+        )
+
+        return jsonify({"ok": True, "items": res.data or []})
+    except Exception as e:
+        return fail(f"Cannot load medcard: {e}", 500)
+
+
+@app.post("/api/patients/<patient_id>/medcard")
+def api_create_patient_medcard(patient_id):
+    d = request.get_json(silent=True) or {}
+
+    payload = {
+        "org_id": ORG_ID,
+        "patient_id": patient_id,
+
+        "entry_date": d.get("entry_date"),
+        "entry_time": d.get("entry_time"),
+
+        "weight_kg": d.get("weight_kg"),
+        "temperature": d.get("temperature"),
+
+        "appetite": d.get("appetite"),
+        "water": d.get("water"),
+        "urine": d.get("urine"),
+        "stool": d.get("stool"),
+
+        "mucosa": d.get("mucosa"),
+        "breathing": d.get("breathing"),
+        "pulse": d.get("pulse"),
+
+        "condition": d.get("condition"),
+        "treatment": d.get("treatment"),
+        "dynamics": d.get("dynamics"),
+        "plan": d.get("plan"),
+
+        "doctor": d.get("doctor"),
+        "note": d.get("note"),
+    }
+
+    # убираем пустые поля, чтобы Supabase не ругался на date/time
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+
+    try:
+        res = (
+            supabase
+            .table("patient_medcard_entries")
+            .insert(payload)
+            .execute()
+        )
+
+        item = res.data[0] if res.data else None
+        return jsonify({"ok": True, "item": item})
+    except Exception as e:
+        return fail(f"Cannot create medcard entry: {e}", 500)
+
+
+@app.put("/api/medcard/<entry_id>")
+def api_update_medcard_entry(entry_id):
+    d = request.get_json(silent=True) or {}
+
+    allowed = [
+        "entry_date",
+        "entry_time",
+        "weight_kg",
+        "temperature",
+        "appetite",
+        "water",
+        "urine",
+        "stool",
+        "mucosa",
+        "breathing",
+        "pulse",
+        "condition",
+        "treatment",
+        "dynamics",
+        "plan",
+        "doctor",
+        "note",
+    ]
+
+    payload = {k: d.get(k) for k in allowed if k in d}
+    payload["updated_at"] = "now()"
+
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+
+    try:
+        res = (
+            supabase
+            .table("patient_medcard_entries")
+            .update(payload)
+            .eq("org_id", ORG_ID)
+            .eq("id", entry_id)
+            .execute()
+        )
+
+        item = res.data[0] if res.data else None
+        return jsonify({"ok": True, "item": item})
+    except Exception as e:
+        return fail(f"Cannot update medcard entry: {e}", 500)
+
+
+@app.delete("/api/medcard/<entry_id>")
+def api_delete_medcard_entry(entry_id):
+    try:
+        (
+            supabase
+            .table("patient_medcard_entries")
+            .delete()
+            .eq("org_id", ORG_ID)
+            .eq("id", entry_id)
+            .execute()
+        )
+
+        return jsonify({"ok": True})
+    except Exception as e:
+        return fail(f"Cannot delete medcard entry: {e}", 500)
 # =========================
 # RUN
 # =========================

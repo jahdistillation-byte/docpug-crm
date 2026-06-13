@@ -2765,10 +2765,11 @@ async function renderPatientCard(pet) {
 
     <div class="patientTabs">
       <button class="patientTab active" data-patient-tab="overview">Обзор</button>
-      <button class="patientTab" data-patient-tab="visits">Визиты</button>
-      <button class="patientTab" data-patient-tab="labs">Анализы</button>
-      <button class="patientTab" data-patient-tab="files">Файлы</button>
-      <button class="patientTab" data-patient-tab="finance">Финансы</button>
+<button class="patientTab" data-patient-tab="visits">Визиты</button>
+<button class="patientTab" data-patient-tab="medcard">Веткартка</button>
+<button class="patientTab" data-patient-tab="labs">Анализы</button>
+<button class="patientTab" data-patient-tab="files">Файлы</button>
+<button class="patientTab" data-patient-tab="finance">Финансы</button>
     </div>
 
     <div id="patientTabContent"></div>
@@ -2877,7 +2878,10 @@ async function renderPatientTab(tab, pet) {
     await renderVisits(pet.id);
     return;
   }
-
+if (tab === "medcard") {
+  await renderMedcardTab(pet);
+  return;
+}
   if (tab === "labs") {
     renderLabsTab(pet);
     return;
@@ -5478,6 +5482,269 @@ function saveStock(items) {
 function getStockById(id) {
   const sid = String(id || "");
   return loadStock().find((x) => String(x.id) === sid) || null;
+}
+// =========================
+// PATIENT MEDCARD / VET CARD
+// =========================
+
+async function loadMedcardApi(patientId) {
+  try {
+    const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}/medcard`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Cannot load medcard");
+    return Array.isArray(json.items) ? json.items : [];
+  } catch (e) {
+    console.error("loadMedcardApi failed:", e);
+    alert("Не вдалося завантажити веткартку: " + (e?.message || e));
+    return [];
+  }
+}
+
+async function createMedcardApi(patientId, payload) {
+  try {
+    const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}/medcard`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Cannot create medcard entry");
+    return json.item || null;
+  } catch (e) {
+    console.error("createMedcardApi failed:", e);
+    alert("Не вдалося створити запис: " + (e?.message || e));
+    return null;
+  }
+}
+
+async function updateMedcardApi(entryId, payload) {
+  try {
+    const res = await fetch(`/api/medcard/${encodeURIComponent(entryId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Cannot update medcard entry");
+    return json.item || null;
+  } catch (e) {
+    console.error("updateMedcardApi failed:", e);
+    alert("Не вдалося оновити запис: " + (e?.message || e));
+    return null;
+  }
+}
+
+async function deleteMedcardApi(entryId) {
+  try {
+    const res = await fetch(`/api/medcard/${encodeURIComponent(entryId)}`, {
+      method: "DELETE",
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Cannot delete medcard entry");
+    return true;
+  } catch (e) {
+    console.error("deleteMedcardApi failed:", e);
+    alert("Не вдалося видалити запис: " + (e?.message || e));
+    return false;
+  }
+}
+
+function medcardPromptEntry(existing = {}) {
+  const today = typeof todayISO === "function"
+    ? todayISO()
+    : new Date().toISOString().slice(0, 10);
+
+  const entry_date = (prompt("Дата запису:", existing.entry_date || today) || "").trim();
+  if (!entry_date) return null;
+
+  const entry_time = (prompt("Час запису, наприклад 18:40:", existing.entry_time || "") || "").trim();
+
+  return {
+    entry_date,
+    entry_time,
+
+    weight_kg: (prompt("Вага кг:", existing.weight_kg || "") || "").trim(),
+    temperature: (prompt("Температура:", existing.temperature || "") || "").trim(),
+
+    appetite: (prompt("Апетит:", existing.appetite || "") || "").trim(),
+    water: (prompt("Вода / спрага:", existing.water || "") || "").trim(),
+    urine: (prompt("Сечовипускання:", existing.urine || "") || "").trim(),
+    stool: (prompt("Кал:", existing.stool || "") || "").trim(),
+
+    mucosa: (prompt("Слизові / ясна:", existing.mucosa || "") || "").trim(),
+    breathing: (prompt("Дихання:", existing.breathing || "") || "").trim(),
+    pulse: (prompt("Пульс / серце:", existing.pulse || "") || "").trim(),
+
+    condition: (prompt("Загальний стан:", existing.condition || "") || "").trim(),
+    treatment: (prompt("Що зроблено / введено:", existing.treatment || "") || "").trim(),
+    dynamics: (prompt("Динаміка:", existing.dynamics || "") || "").trim(),
+    plan: (prompt("План / контроль:", existing.plan || "") || "").trim(),
+
+    doctor: (prompt("Лікар:", existing.doctor || "") || "").trim(),
+    note: (prompt("Додаткова нотатка:", existing.note || "") || "").trim(),
+  };
+}
+
+function renderMedcardEntryCard(x) {
+  const dateLine = [x.entry_date, x.entry_time].filter(Boolean).join(" • ") || "—";
+
+  const vitals = [
+    x.temperature ? `🌡 T: ${escapeHtml(x.temperature)}` : "",
+    x.weight_kg ? `⚖️ ${escapeHtml(x.weight_kg)} кг` : "",
+    x.pulse ? `❤️ ${escapeHtml(x.pulse)}` : "",
+  ].filter(Boolean).join(" · ");
+
+  const smallRows = [
+    ["Апетит", x.appetite],
+    ["Вода", x.water],
+    ["Сеча", x.urine],
+    ["Кал", x.stool],
+    ["Слизові", x.mucosa],
+    ["Дихання", x.breathing],
+  ].filter(([, v]) => String(v || "").trim());
+
+  return `
+    <div class="medEntry">
+      <div class="medEntryHead">
+        <div>
+          <div class="medEntryDate">${escapeHtml(dateLine)}</div>
+          ${vitals ? `<div class="medEntryVitals">${vitals}</div>` : ""}
+        </div>
+
+        <div class="medEntryActions">
+          <button class="iconBtn" title="Редагувати" data-edit-medcard="${escapeHtml(String(x.id))}">✏️</button>
+          <button class="iconBtn" title="Видалити" data-del-medcard="${escapeHtml(String(x.id))}">🗑</button>
+        </div>
+      </div>
+
+      ${
+        smallRows.length
+          ? `
+            <div class="medEntryGrid">
+              ${smallRows.map(([label, value]) => `
+                <div class="medMini">
+                  <div class="medMiniLabel">${escapeHtml(label)}</div>
+                  <div class="medMiniValue">${escapeHtml(value || "—")}</div>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        x.condition
+          ? `<div class="medBlock"><div class="history-label">Стан</div><div>${escapeHtml(x.condition)}</div></div>`
+          : ""
+      }
+
+      ${
+        x.treatment
+          ? `<div class="medBlock"><div class="history-label">Проведено / призначено</div><div>${escapeHtml(x.treatment)}</div></div>`
+          : ""
+      }
+
+      ${
+        x.dynamics
+          ? `<div class="medBlock"><div class="history-label">Динаміка</div><div>${escapeHtml(x.dynamics)}</div></div>`
+          : ""
+      }
+
+      ${
+        x.plan
+          ? `<div class="medBlock"><div class="history-label">План</div><div>${escapeHtml(x.plan)}</div></div>`
+          : ""
+      }
+
+      ${
+        x.note
+          ? `<div class="medBlock"><div class="history-label">Нотатка</div><div>${escapeHtml(x.note)}</div></div>`
+          : ""
+      }
+
+      ${
+        x.doctor
+          ? `<div class="medDoctor">👩‍⚕️ ${escapeHtml(x.doctor)}</div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+async function renderMedcardTab(pet) {
+  const box = $("#patientTabContent");
+  if (!box || !pet) return;
+
+  box.innerHTML = `<div class="hint">Завантаження веткартки…</div>`;
+
+  const items = await loadMedcardApi(pet.id);
+
+  box.innerHTML = `
+    <div class="patientInfoBox">
+      <div class="row" style="align-items:flex-start; gap:12px;">
+        <div>
+          <h2 style="margin:0;">Ветеринарна картка</h2>
+          <div class="hint">
+            Медичний щоденник пацієнта: стан, температура, лікування, динаміка, план.
+          </div>
+        </div>
+
+        <button class="primary" id="btnAddMedcardEntry" type="button">+ Запис</button>
+      </div>
+
+      <div id="medcardList" class="medcardList">
+        ${
+          items.length
+            ? items.map(renderMedcardEntryCard).join("")
+            : `<div class="hint">Поки записів немає. Натисни “+ Запис”.</div>`
+        }
+      </div>
+    </div>
+  `;
+
+  $("#btnAddMedcardEntry")?.addEventListener("click", async () => {
+    const payload = medcardPromptEntry();
+    if (!payload) return;
+
+    const created = await createMedcardApi(pet.id, payload);
+    if (!created) return;
+
+    await renderMedcardTab(pet);
+  });
+
+  $("#medcardList")?.addEventListener("click", async (e) => {
+    const del = e.target.closest("[data-del-medcard]");
+    if (del) {
+      const id = del.dataset.delMedcard;
+      if (!id) return;
+
+      if (!confirm("Видалити запис веткартки?")) return;
+
+      const ok = await deleteMedcardApi(id);
+      if (ok) await renderMedcardTab(pet);
+      return;
+    }
+
+    const edit = e.target.closest("[data-edit-medcard]");
+    if (edit) {
+      const id = edit.dataset.editMedcard;
+      if (!id) return;
+
+      const current = items.find((x) => String(x.id) === String(id));
+      if (!current) return alert("Запис не знайдено");
+
+      const payload = medcardPromptEntry(current);
+      if (!payload) return;
+
+      const updated = await updateMedcardApi(id, payload);
+      if (!updated) return;
+
+      await renderMedcardTab(pet);
+    }
+  });
 }
 
 // =========================
