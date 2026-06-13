@@ -41,6 +41,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "heic", "dcm"}
 
 # =========================
+# STATIC UPLOADS
+# =========================
+@app.get("/uploads/<path:filename>")
+def uploaded_file(filename):
+    filename = os.path.basename(filename)
+    return send_from_directory(UPLOAD_DIR, filename)
 # HELPERS
 # =========================
 def ok(data=None):
