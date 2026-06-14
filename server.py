@@ -541,6 +541,7 @@ def api_services_delete():
 # =========================
 # API: OWNERS
 # =========================
+
 @app.get("/api/owners")
 def api_get_owners():
     res = supabase.table("owners").select("*").eq("org_id", ORG_ID).execute()
@@ -570,6 +571,45 @@ def api_delete_owner(owner_id):
         return fail("owner_id required", 400)
     supabase.table("owners").delete().eq("org_id", ORG_ID).eq("id", owner_id).execute()
     return ok(True)
+
+# =========================
+# API: STAFF
+# =========================
+
+@app.get("/api/staff")
+def api_staff():
+    try:
+        res = (
+            supabase.table("staff")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .execute()
+        )
+
+        return ok(res.data or [])
+
+    except Exception as e:
+        return fail(str(e))
+
+
+# =========================
+# API: CALENDAR
+# =========================
+
+@app.get("/api/calendar")
+def api_calendar():
+    try:
+        res = (
+            supabase.table("calendar_events")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .execute()
+        )
+
+        return ok(res.data or [])
+
+    except Exception as e:
+        return fail(str(e))
 
 # =========================
 # API: PATIENTS
@@ -617,6 +657,7 @@ def api_delete_patient(pet_id):
 # =========================
 # API: VISITS
 # =========================
+
 @app.get("/api/visits")
 def api_get_visits():
     visit_id = request.args.get("id")
