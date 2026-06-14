@@ -1726,3 +1726,80 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
     flex-direction:column;
   }
 }
+.financeGrid2{
+  display:grid;
+  grid-template-columns:1.4fr .9fr;
+  gap:14px;
+  margin-top:14px;
+}
+
+.financeMonthList,
+.financeTopList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.financeMonthRow{
+  display:grid;
+  grid-template-columns:90px 1fr 90px;
+  gap:10px;
+  align-items:center;
+}
+
+.financeMonthLabel{
+  font-weight:900;
+  color:var(--muted);
+}
+
+.financeMonthBarWrap{
+  height:12px;
+  border-radius:999px;
+  background:rgba(107,78,255,.10);
+  overflow:hidden;
+}
+
+.financeMonthBar{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+
+.financeMonthSum{
+  text-align:right;
+  font-weight:950;
+}
+
+.financeTopRow{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(116,96,170,.14);
+}
+
+.financeTopName{
+  font-weight:900;
+}
+
+.financeTopCount{
+  font-weight:950;
+  color:var(--accent);
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .financeGrid2{
+    grid-template-columns:1fr;
+  }
+
+  .financeMonthRow{
+    grid-template-columns:1fr;
+  }
+
+  .financeMonthSum{
+    text-align:left;
+  }
+}

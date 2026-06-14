@@ -2948,6 +2948,57 @@ if (tab === "medcard") {
       }).join("")
     : `<div class="hint">Поки витрат немає.</div>`;
 
+      const serviceCount = new Map();
+
+  visits.forEach((v) => {
+    expandServiceLines(v).forEach((x) => {
+      const name = String(x.name || "Послуга");
+      serviceCount.set(name, (serviceCount.get(name) || 0) + Number(x.qty || 1));
+    });
+  });
+
+  const topServices = Array.from(serviceCount.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const topServicesHtml = topServices.length
+    ? topServices.map(([name, count]) => `
+        <div class="financeTopRow">
+          <div class="financeTopName">${escapeHtml(name)}</div>
+          <div class="financeTopCount">${escapeHtml(String(count))} раз</div>
+        </div>
+      `).join("")
+    : `<div class="hint">Поки послуг немає.</div>`;
+
+  const monthMap = new Map();
+
+  visits.forEach((v) => {
+    const date = String(v.date || "").slice(0, 7) || "Без дати";
+    const total = calcServicesTotal(v) + calcStockTotal(v);
+    monthMap.set(date, (monthMap.get(date) || 0) + total);
+  });
+
+  const monthRows = Array.from(monthMap.entries())
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+
+  const maxMonth = Math.max(1, ...monthRows.map(([, total]) => total));
+
+  const monthBarsHtml = monthRows.length
+    ? monthRows.map(([month, total]) => {
+        const pct = Math.max(4, Math.round((total / maxMonth) * 100));
+
+        return `
+          <div class="financeMonthRow">
+            <div class="financeMonthLabel">${escapeHtml(month)}</div>
+            <div class="financeMonthBarWrap">
+              <div class="financeMonthBar" style="width:${pct}%"></div>
+            </div>
+            <div class="financeMonthSum">${escapeHtml(String(total))} грн</div>
+          </div>
+        `;
+      }).join("")
+    : `<div class="hint">Поки немає даних для графіка.</div>`;
+
   box.innerHTML = `
     <div class="patientStats financeStats">
       <div class="ownerStat">
@@ -3013,6 +3064,33 @@ if (tab === "medcard") {
         <div>
           <div class="ownerStatValue">${escapeHtml(String(lastVisitTotal))} грн</div>
           <div class="ownerStatLabel">останній чек</div>
+        </div>
+      </div>
+    </div>
+    <div class="financeGrid2">
+      <div class="patientInfoBox financePanel">
+        <div class="financePanelHead">
+          <div>
+            <h2>Витрати по місяцях</h2>
+            <div class="hint">Динаміка витрат цього пацієнта.</div>
+          </div>
+        </div>
+
+        <div class="financeMonthList">
+          ${monthBarsHtml}
+        </div>
+      </div>
+
+      <div class="patientInfoBox financePanel">
+        <div class="financePanelHead">
+          <div>
+            <h2>ТОП послуг</h2>
+            <div class="hint">Що найчастіше призначали пацієнту.</div>
+          </div>
+        </div>
+
+        <div class="financeTopList">
+          ${topServicesHtml}
         </div>
       </div>
     </div>
