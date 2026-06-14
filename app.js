@@ -381,11 +381,12 @@ function routeFromHash() {
   if (TAB_ROUTES.has(route)) {
     setRoute(route);
 
-    if (route === "owners") renderOwners();
-    if (route === "patients") renderPatientsTab();
-    if (route === "visits") renderVisitsTab();
-    if (route === "services") renderServicesTab();
-    if (route === "stock") renderStockTab();
+  if (route === "owners") renderOwners();
+if (route === "patients") renderPatientsTab();
+if (route === "visits") renderVisitsTab();
+if (route === "services") renderServicesTab();
+if (route === "stock") renderStockTab();
+if (route === "calendar") renderCalendarTab();
 
     return;
   }
@@ -2528,6 +2529,7 @@ async function renderVisitsTab() {
 
   paint();
 }
+
 // =========================
 // OWNER PAGE — server first patients list (render only)
 // =========================
@@ -3389,6 +3391,54 @@ function getPetSpeciesKey(pet) {
   if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
 
   return "dog";
+}
+function renderCalendarTab() {
+  const page = document.querySelector('.page[data-page="calendar"]');
+  if (!page) return;
+
+  page.innerHTML = `
+    <div class="card">
+      <div class="calendarHeader">
+        <div>
+          <h2>Календар</h2>
+          <div class="hint">День, тиждень, місяць, зміни лікарів та записи пацієнтів.</div>
+        </div>
+
+        <div class="calendarModes">
+          <button class="primary">День</button>
+          <button class="ghost">Тиждень</button>
+          <button class="ghost">Місяць</button>
+          <button class="ghost">Маршрути</button>
+        </div>
+      </div>
+
+      <div class="calendarTop">
+        <button class="ghost">←</button>
+        <div class="calendarDate">${typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0,10)}</div>
+        <button class="ghost">→</button>
+      </div>
+
+      <div class="calendarShiftPanel">
+        <div class="shiftCard">
+          <div class="shiftDoctor">👨‍⚕️ Александр</div>
+          <div class="shiftTime">08:00 — 20:00</div>
+          <div class="shiftMeta">2 записи · 3 окна</div>
+        </div>
+
+        <div class="shiftCard">
+          <div class="shiftDoctor">👩‍⚕️ Ірина</div>
+          <div class="shiftTime">10:00 — 18:00</div>
+          <div class="shiftMeta">1 запись · 2 окна</div>
+        </div>
+
+        <div class="shiftCard shiftOff">
+          <div class="shiftDoctor">👨‍⚕️ Дмитро</div>
+          <div class="shiftTime">Вихідний</div>
+          <div class="shiftMeta">Немає зміни</div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function loadLabs() {
