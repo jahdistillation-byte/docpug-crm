@@ -1632,3 +1632,32 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
     grid-template-columns: 1fr !important;
   }
 }
+/* MEDCARD MODAL SCROLL FIX */
+
+#medcardModal .medcardModalPanel{
+  height: calc(100vh - 40px) !important;
+  max-height: calc(100vh - 40px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#medcardModal .modal__head{
+  flex: 0 0 auto !important;
+}
+
+#medcardModal .medcardModalBody{
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding-bottom: 24px !important;
+}
+
+#medcardModal .modal__foot{
+  flex: 0 0 auto !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  background: rgba(255,255,255,.92) !important;
+  backdrop-filter: blur(14px) !important;
+}
