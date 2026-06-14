@@ -1803,3 +1803,78 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
     text-align:left;
   }
 }
+/* CALENDAR MVP */
+
+.calendarHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.calendarModes{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.calendarTop{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:14px 0;
+}
+
+.calendarDate{
+  font-size:22px;
+  font-weight:950;
+  letter-spacing:-.4px;
+}
+
+.calendarShiftPanel{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(180px, 1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.shiftCard{
+  padding:16px;
+  border-radius:22px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(116,96,170,.16);
+  box-shadow:0 14px 34px rgba(48,39,82,.08);
+}
+
+.shiftDoctor{
+  font-size:17px;
+  font-weight:950;
+}
+
+.shiftTime{
+  margin-top:6px;
+  font-weight:900;
+  color:var(--text);
+}
+
+.shiftMeta{
+  margin-top:6px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.shiftOff{
+  opacity:.58;
+}
+
+@media(max-width:900px){
+  .calendarHeader{
+    flex-direction:column;
+  }
+
+  .calendarShiftPanel{
+    grid-template-columns:1fr;
+  }
+}
