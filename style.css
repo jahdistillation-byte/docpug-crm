@@ -1661,3 +1661,68 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   background: rgba(255,255,255,.92) !important;
   backdrop-filter: blur(14px) !important;
 }
+/* PATIENT FINANCE */
+
+.financeStats{
+  margin-bottom:14px;
+}
+
+.financeStatsSecond{
+  margin-top:0;
+}
+
+.financePanel{
+  margin-top:14px;
+}
+
+.financePanelHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.financeVisitsList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.financeVisitRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(116,96,170,.14);
+  box-shadow:0 10px 26px rgba(48,39,82,.06);
+}
+
+.financeVisitDate{
+  font-weight:950;
+  font-size:16px;
+}
+
+.financeVisitMeta{
+  margin-top:4px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:750;
+}
+
+.financeVisitSum{
+  font-size:18px;
+  font-weight:950;
+  color:var(--accent);
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .financeVisitRow{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}

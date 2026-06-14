@@ -2893,51 +2893,146 @@ if (tab === "medcard") {
 }
 
   if (tab === "finance") {
-    const visits = await getVisitsByPetId(pet.id);
-    cacheVisits(visits);
+  const visits = await getVisitsByPetId(pet.id);
+  cacheVisits(visits);
 
-    const servicesTotal = visits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
-    const stockTotal = visits.reduce((sum, v) => sum + calcStockTotal(v), 0);
-    const grandTotal = servicesTotal + stockTotal;
-    const avg = visits.length ? Math.round(grandTotal / visits.length) : 0;
+  const sortedVisits = visits
+    .slice()
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
 
-    box.innerHTML = `
-      <div class="patientStats">
-        <div class="ownerStat">
-          <div class="ownerStatIcon">💰</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(String(grandTotal))} грн</div>
-            <div class="ownerStatLabel">усього</div>
+  const servicesTotal = visits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
+  const stockTotal = visits.reduce((sum, v) => sum + calcStockTotal(v), 0);
+  const grandTotal = servicesTotal + stockTotal;
+  const avg = visits.length ? Math.round(grandTotal / visits.length) : 0;
+
+  const lastVisit = sortedVisits[0] || null;
+  const lastVisitTotal = lastVisit
+    ? calcServicesTotal(lastVisit) + calcStockTotal(lastVisit)
+    : 0;
+
+  let avgInterval = "—";
+  if (sortedVisits.length >= 2) {
+    const dates = sortedVisits
+      .map((v) => new Date(v.date))
+      .filter((d) => !Number.isNaN(d.getTime()))
+      .sort((a, b) => b - a);
+
+    const gaps = [];
+    for (let i = 0; i < dates.length - 1; i++) {
+      const diffDays = Math.round((dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0) gaps.push(diffDays);
+    }
+
+    if (gaps.length) {
+      avgInterval = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) + " дн.";
+    }
+  }
+
+  const checksHtml = sortedVisits.length
+    ? sortedVisits.map((v) => {
+        const s = calcServicesTotal(v);
+        const st = calcStockTotal(v);
+        const total = s + st;
+
+        return `
+          <div class="financeVisitRow">
+            <div>
+              <div class="financeVisitDate">${escapeHtml(v.date || "—")}</div>
+              <div class="financeVisitMeta">
+                Послуги: ${escapeHtml(String(s))} грн · Препарати: ${escapeHtml(String(st))} грн
+              </div>
+            </div>
+            <div class="financeVisitSum">${escapeHtml(String(total))} грн</div>
           </div>
-        </div>
+        `;
+      }).join("")
+    : `<div class="hint">Поки витрат немає.</div>`;
 
-        <div class="ownerStat">
-          <div class="ownerStatIcon">🧾</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(String(servicesTotal))} грн</div>
-            <div class="ownerStatLabel">послуги</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">💊</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(String(stockTotal))} грн</div>
-            <div class="ownerStatLabel">препарати</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">📊</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(String(avg))} грн</div>
-            <div class="ownerStatLabel">середній чек</div>
-          </div>
+  box.innerHTML = `
+    <div class="patientStats financeStats">
+      <div class="ownerStat">
+        <div class="ownerStatIcon">💰</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(String(grandTotal))} грн</div>
+          <div class="ownerStatLabel">усього</div>
         </div>
       </div>
-    `;
-    return;
-  }
+
+      <div class="ownerStat">
+        <div class="ownerStatIcon">🧾</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(String(servicesTotal))} грн</div>
+          <div class="ownerStatLabel">послуги</div>
+        </div>
+      </div>
+
+      <div class="ownerStat">
+        <div class="ownerStatIcon">💊</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(String(stockTotal))} грн</div>
+          <div class="ownerStatLabel">препарати</div>
+        </div>
+      </div>
+
+      <div class="ownerStat">
+        <div class="ownerStatIcon">📊</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(String(avg))} грн</div>
+          <div class="ownerStatLabel">середній чек</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="patientStats financeStats financeStatsSecond">
+      <div class="ownerStat">
+        <div class="ownerStatIcon">📋</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(String(visits.length))}</div>
+          <div class="ownerStatLabel">візитів</div>
+        </div>
+      </div>
+
+      <div class="ownerStat">
+        <div class="ownerStatIcon">📅</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
+          <div class="ownerStatLabel">останній візит</div>
+        </div>
+      </div>
+
+      <div class="ownerStat">
+        <div class="ownerStatIcon">⏱️</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(avgInterval)}</div>
+          <div class="ownerStatLabel">середній інтервал</div>
+        </div>
+      </div>
+
+      <div class="ownerStat">
+        <div class="ownerStatIcon">🧮</div>
+        <div>
+          <div class="ownerStatValue">${escapeHtml(String(lastVisitTotal))} грн</div>
+          <div class="ownerStatLabel">останній чек</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="patientInfoBox financePanel">
+      <div class="financePanelHead">
+        <div>
+          <h2>Історія витрат</h2>
+          <div class="hint">Чеки по всіх візитах цього пацієнта.</div>
+        </div>
+      </div>
+
+      <div class="financeVisitsList">
+        ${checksHtml}
+      </div>
+    </div>
+  `;
+
+  return;
+}
 }
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
