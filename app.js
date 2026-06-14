@@ -375,7 +375,7 @@ function setRoute(route) {
   }
 }
 
-function routeFromHash() {
+async function routeFromHash() {
   const { route, id } = parseHash();
 
   if (TAB_ROUTES.has(route)) {
@@ -3392,9 +3392,103 @@ function getPetSpeciesKey(pet) {
 
   return "dog";
 }
-function renderCalendarTab() {
+async function loadStaffApi() {
+  try {
+    const res = await fetch("/api/staff");
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error || "Cannot load staff");
+
+    return Array.isArray(json.items)
+      ? json.items
+      : Array.isArray(json.data)
+        ? json.data
+        : [];
+  } catch (e) {
+    console.error("loadStaffApi failed:", e);
+    alert("Не вдалося завантажити ветеринарів: " + (e?.message || e));
+    return [];
+  }
+}
+
+async function loadCalendarApi() {
+  try {
+    const res = await fetch("/api/calendar");
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error || "Cannot load calendar");
+
+    return Array.isArray(json.items)
+      ? json.items
+      : Array.isArray(json.data)
+        ? json.data
+        : [];
+  } catch (e) {
+    console.error("loadCalendarApi failed:", e);
+    alert("Не вдалося завантажити календар: " + (e?.message || e));
+    return [];
+  }
+}
+
+async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
   if (!page) return;
+
+  const today = typeof todayISO === "function"
+    ? todayISO()
+    : new Date().toISOString().slice(0, 10);
+
+  page.innerHTML = `
+    <div class="card">
+      <div class="hint">Завантаження календаря…</div>
+    </div>
+  `;
+
+  const staff = await loadStaffApi();
+  const events = await loadCalendarApi();
+
+  const todayEvents = events.filter((x) => String(x.event_date || "") === today);
+
+  const shiftCardsHtml = staff.length
+    ? staff.map((doc) => {
+        const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
+        const isAssistant = String(doc.role || "").toLowerCase().includes("assistant");
+
+        return `
+          <div class="shiftCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+            <div class="shiftDoctor">
+              ${isAssistant ? "🧑‍⚕️" : "👨‍⚕️"} ${escapeHtml(doc.name || "Працівник")}
+            </div>
+            <div class="shiftTime">${isAssistant ? "Асистент" : "Ветеринар"}</div>
+            <div class="shiftMeta">${escapeHtml(String(docEvents.length))} записів сьогодні</div>
+          </div>
+        `;
+      }).join("")
+    : `<div class="hint">Ветеринарів поки немає в Supabase.</div>`;
+
+  const eventRowsHtml = todayEvents.length
+    ? todayEvents
+        .slice()
+        .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")))
+        .map((ev) => {
+          const doc = staff.find((s) => String(s.id) === String(ev.staff_id));
+          return `
+            <div class="calendarEventRow">
+              <div class="calendarEventTime">
+                ${escapeHtml((ev.start_time || "").slice(0, 5))}
+                ${ev.end_time ? `— ${escapeHtml(String(ev.end_time).slice(0, 5))}` : ""}
+              </div>
+              <div class="calendarEventMain">
+                <div class="calendarEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+                <div class="calendarEventMeta">
+                  ${doc ? `👨‍⚕️ ${escapeHtml(doc.name)}` : "Без лікаря"}
+                  ${ev.location ? ` · 📍 ${escapeHtml(ev.location)}` : ""}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")
+    : `<div class="hint">На сьогодні записів немає.</div>`;
 
   page.innerHTML = `
     <div class="card">
@@ -3414,27 +3508,24 @@ function renderCalendarTab() {
 
       <div class="calendarTop">
         <button class="ghost">←</button>
-        <div class="calendarDate">${typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0,10)}</div>
+        <div class="calendarDate">${escapeHtml(today)}</div>
         <button class="ghost">→</button>
       </div>
 
       <div class="calendarShiftPanel">
-        <div class="shiftCard">
-          <div class="shiftDoctor">👨‍⚕️ Александр</div>
-          <div class="shiftTime">08:00 — 20:00</div>
-          <div class="shiftMeta">2 записи · 3 окна</div>
+        ${shiftCardsHtml}
+      </div>
+
+      <div class="patientInfoBox calendarEventsPanel">
+        <div class="calendarPanelHead">
+          <div>
+            <h2>Записи на день</h2>
+            <div class="hint">Події з Supabase calendar_events.</div>
+          </div>
         </div>
 
-        <div class="shiftCard">
-          <div class="shiftDoctor">👩‍⚕️ Ірина</div>
-          <div class="shiftTime">10:00 — 18:00</div>
-          <div class="shiftMeta">1 запись · 2 окна</div>
-        </div>
-
-        <div class="shiftCard shiftOff">
-          <div class="shiftDoctor">👨‍⚕️ Дмитро</div>
-          <div class="shiftTime">Вихідний</div>
-          <div class="shiftMeta">Немає зміни</div>
+        <div class="calendarEventList">
+          ${eventRowsHtml}
         </div>
       </div>
     </div>
