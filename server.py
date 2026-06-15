@@ -582,7 +582,7 @@ def api_staff():
         res = (
             supabase.table("staff")
             .select("*")
-            .eq("org_id", ORG_ID)
+            .order("name")
             .execute()
         )
 
@@ -602,7 +602,8 @@ def api_calendar():
         res = (
             supabase.table("calendar_events")
             .select("*")
-            .eq("org_id", ORG_ID)
+            .order("event_date")
+            .order("start_time")
             .execute()
         )
 
