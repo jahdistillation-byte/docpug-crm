@@ -611,6 +611,8 @@ def api_calendar():
 
     except Exception as e:
         return fail(str(e))
+    
+    
 
 # =========================
 # API: PATIENTS
@@ -813,6 +815,71 @@ def api_delete_visit(visit_id):
     supabase.table("visits").delete().eq("org_id", ORG_ID).eq("id", visit_id).execute()
     return ok(True)
 
+
+
+@app.post("/api/staff")
+def api_create_staff():
+    d = request.get_json(silent=True) or {}
+
+    name = (d.get("name") or "").strip()
+    if not name:
+        return fail("name required", 400)
+
+    payload = {
+        "org_id": ORG_ID,
+        "name": name,
+        "role": d.get("role") or "vet",
+        "avatar": d.get("avatar"),
+        "color": d.get("color") or "#7C5CFF",
+        "phone": d.get("phone"),
+        "shift_rate": d.get("shift_rate") or 0,
+        "percent_rate": d.get("percent_rate") or 0,
+        "bonus_rate": d.get("bonus_rate") or 0,
+        "note": d.get("note"),
+        "is_active": True,
+    }
+
+    res = supabase.table("staff").insert(payload).execute()
+    row = res.data[0] if getattr(res, "data", None) else payload
+    return ok(row)
+
+
+@app.post("/api/calendar")
+def api_create_calendar_event():
+    d = request.get_json(silent=True) or {}
+
+    title = (d.get("title") or "").strip()
+    event_date = (d.get("event_date") or "").strip()
+    start_time = (d.get("start_time") or "").strip()
+
+    if not title:
+        return fail("title required", 400)
+    if not event_date:
+        return fail("event_date required", 400)
+    if not start_time:
+        return fail("start_time required", 400)
+
+    payload = {
+        "org_id": ORG_ID,
+        "event_type": d.get("event_type") or "appointment",
+        "title": title,
+        "event_date": event_date,
+        "start_time": start_time,
+        "end_time": d.get("end_time"),
+        "staff_id": d.get("staff_id"),
+        "patient_id": d.get("patient_id"),
+        "owner_id": d.get("owner_id"),
+        "visit_id": d.get("visit_id"),
+        "location": d.get("location"),
+        "status": d.get("status") or "planned",
+        "note": d.get("note"),
+    }
+
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+
+    res = supabase.table("calendar_events").insert(payload).execute()
+    row = res.data[0] if getattr(res, "data", None) else payload
+    return ok(row)
 # =========================
 # API: UPLOAD FILES (local uploads folder)
 # =========================
