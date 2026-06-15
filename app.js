@@ -3477,10 +3477,11 @@ async function renderCalendarTab() {
                           ${escapeHtml(String(ev.start_time || "").slice(0, 5))}
                           ${ev.end_time ? `— ${escapeHtml(String(ev.end_time).slice(0, 5))}` : ""}
                         </div>
+                        ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
                         ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
                       </div>
                     `).join("")
-                  : `<div class="calEmptySlot">+</div>`
+                  : `<div class="calEmptySlot">Перетягни лікаря</div>`
               }
             </div>
           `;
@@ -3489,12 +3490,26 @@ async function renderCalendarTab() {
     `;
   }).join("");
 
+  const staffPaletteHtml = staff.map((doc) => `
+    <div
+      class="calStaffDrag"
+      draggable="true"
+      data-drag-staff-id="${escapeHtml(doc.id)}"
+      data-drag-staff-name="${escapeHtml(doc.name || "")}"
+      data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}"
+      style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
+    >
+      <div class="calStaffDragName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+      <div class="calStaffDragRole">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
+    </div>
+  `).join("");
+
   page.innerHTML = `
     <div class="card calendarCard">
       <div class="calendarHeader">
         <div>
           <h2>Календар</h2>
-          <div class="hint">День, тиждень, місяць, зміни лікарів та записи пацієнтів.</div>
+          <div class="hint">Перетягни ветеринара справа на потрібний час.</div>
         </div>
 
         <div class="calendarModes">
@@ -3511,18 +3526,137 @@ async function renderCalendarTab() {
         <button class="ghost">→</button>
       </div>
 
-      <div class="calendarDayGrid">
-        <div class="calTimeCol">
-          <div class="calTimeHead">Час</div>
-          ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
+      <div class="calendarWorkArea">
+        <div class="calendarDayGrid">
+          <div class="calTimeCol">
+            <div class="calTimeHead">Час</div>
+            ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
+          </div>
+
+          <div class="calDoctorsGrid">
+            ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
+          </div>
         </div>
 
-        <div class="calDoctorsGrid">
-          ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
-        </div>
+        <aside class="calStaffPanel">
+          <div class="calStaffPanelHead">
+            <div>
+              <div class="calStaffPanelTitle">Ветеринари</div>
+              <div class="calStaffPanelSub">Перетягни в слот</div>
+            </div>
+            <button class="miniBtn" id="btnAddStaffFromCalendar" type="button">+ Додати</button>
+          </div>
+
+          <div class="calStaffDragList">
+            ${staffPaletteHtml || `<div class="hint">Немає співробітників.</div>`}
+          </div>
+        </aside>
       </div>
     </div>
   `;
+
+  $$(".calStaffDrag").forEach((card) => {
+    card.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", JSON.stringify({
+        staff_id: card.dataset.dragStaffId,
+        staff_name: card.dataset.dragStaffName,
+        color: card.dataset.dragStaffColor,
+      }));
+      e.dataTransfer.effectAllowed = "copy";
+      card.classList.add("dragging");
+    });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+    });
+  });
+
+  $$(".calSlot").forEach((slot) => {
+    slot.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      slot.classList.add("calSlotDrop");
+    });
+
+    slot.addEventListener("dragleave", () => {
+      slot.classList.remove("calSlotDrop");
+    });
+
+    slot.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      slot.classList.remove("calSlotDrop");
+
+      let data = null;
+      try {
+        data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}");
+      } catch {
+        return;
+      }
+
+      const staffId = data.staff_id;
+      if (!staffId) return;
+
+      const hour = slot.dataset.hour;
+      const title = (prompt(`Запис на ${hour}. Назва:`, "Новий прийом") || "").trim();
+      if (!title) return;
+
+      const durationRaw = prompt("Тривалість у хвилинах:", "60") || "60";
+      const duration = Math.max(15, Number(durationRaw) || 60);
+      const endTime = addMinutesToTime(hour, duration);
+
+      const note = (prompt("Коментар:", "") || "").trim();
+
+      const created = await createCalendarEventApi({
+        title,
+        event_date: today,
+        start_time: hour,
+        end_time: endTime,
+        staff_id: staffId,
+        note,
+      });
+
+      if (created) {
+        await renderCalendarTab();
+      }
+    });
+  });
+
+  $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => {
+    alert("Наступний крок: зробимо форму додавання ветеринара в Supabase.");
+  });
+}
+
+async function createCalendarEventApi(payload) {
+  try {
+    const res = await fetch("/api/calendar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error === "time slot busy"
+        ? "Цей час вже зайнятий у цього лікаря"
+        : "Не вдалося створити запис: " + (json.error || "unknown error")
+      );
+      return null;
+    }
+
+    return json.data || json.item || null;
+  } catch (e) {
+    console.error("createCalendarEventApi failed:", e);
+    alert("Помилка створення запису: " + (e?.message || e));
+    return null;
+  }
+}
+
+function addMinutesToTime(time, minutes) {
+  const [h, m] = String(time || "00:00").split(":").map(Number);
+  const d = new Date();
+  d.setHours(h || 0, m || 0, 0, 0);
+  d.setMinutes(d.getMinutes() + Number(minutes || 60));
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
 }
 
 function loadLabs() {
