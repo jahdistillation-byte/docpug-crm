@@ -2131,11 +2131,13 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 }
 
 .calSlotCovered{
-  border-color:transparent !important;
-  background:transparent !important;
+  opacity:.18;
   pointer-events:none;
 }
 
+.calSlotCovered::after{
+  content:"";
+}
 .calSlotCovered .calEmptySlot{
   display:none !important;
 }

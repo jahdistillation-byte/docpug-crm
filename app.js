@@ -3501,7 +3501,7 @@ async function renderCalendarTab() {
                     const endMin = toMinutes(end || start);
                     const duration = Math.max(slotMinutes, endMin - startMin);
                     const slots = Math.max(1, duration / slotMinutes);
-                    const height = Math.round(slots * slotHeight + (slots - 1) * 8);
+                    const height = Math.round(slots * slotHeight + (slots - 1) * 8 + 20);
 
                     return `
                       <div
