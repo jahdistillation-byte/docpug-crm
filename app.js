@@ -3446,52 +3446,51 @@ async function renderCalendarTab() {
 
   const staff = await loadStaffApi();
   const events = await loadCalendarApi();
-
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
-  const shiftCardsHtml = staff.length
-    ? staff.map((doc) => {
-        const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
-        const isAssistant = String(doc.role || "").toLowerCase().includes("assistant");
+  const hours = [];
+  for (let h = 8; h <= 21; h++) {
+    hours.push(String(h).padStart(2, "0") + ":00");
+  }
 
-        return `
-          <div class="shiftCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-            <div class="shiftDoctor">
-              ${isAssistant ? "🧑‍⚕️" : "👨‍⚕️"} ${escapeHtml(doc.name || "Працівник")}
-            </div>
-            <div class="shiftTime">${isAssistant ? "Асистент" : "Ветеринар"}</div>
-            <div class="shiftMeta">${escapeHtml(String(docEvents.length))} записів сьогодні</div>
-          </div>
-        `;
-      }).join("")
-    : `<div class="hint">Ветеринарів поки немає в Supabase.</div>`;
+  const staffHtml = staff.map((doc) => {
+    const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
 
-  const eventRowsHtml = todayEvents.length
-    ? todayEvents
-        .slice()
-        .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")))
-        .map((ev) => {
-          const doc = staff.find((s) => String(s.id) === String(ev.staff_id));
+    return `
+      <div class="calDoctorCol">
+        <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+          <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+          <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
+        </div>
+
+        ${hours.map((hour) => {
+          const hourEvents = docEvents.filter((ev) => String(ev.start_time || "").slice(0, 2) === hour.slice(0, 2));
+
           return `
-            <div class="calendarEventRow">
-              <div class="calendarEventTime">
-                ${escapeHtml((ev.start_time || "").slice(0, 5))}
-                ${ev.end_time ? `— ${escapeHtml(String(ev.end_time).slice(0, 5))}` : ""}
-              </div>
-              <div class="calendarEventMain">
-                <div class="calendarEventTitle">${escapeHtml(ev.title || "Запис")}</div>
-                <div class="calendarEventMeta">
-                  ${doc ? `👨‍⚕️ ${escapeHtml(doc.name)}` : "Без лікаря"}
-                  ${ev.location ? ` · 📍 ${escapeHtml(ev.location)}` : ""}
-                </div>
-              </div>
+            <div class="calSlot" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(doc.id)}">
+              ${
+                hourEvents.length
+                  ? hourEvents.map((ev) => `
+                      <div class="calEventCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+                        <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+                        <div class="calEventTime">
+                          ${escapeHtml(String(ev.start_time || "").slice(0, 5))}
+                          ${ev.end_time ? `— ${escapeHtml(String(ev.end_time).slice(0, 5))}` : ""}
+                        </div>
+                        ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
+                      </div>
+                    `).join("")
+                  : `<div class="calEmptySlot">+</div>`
+              }
             </div>
           `;
-        }).join("")
-    : `<div class="hint">На сьогодні записів немає.</div>`;
+        }).join("")}
+      </div>
+    `;
+  }).join("");
 
   page.innerHTML = `
-    <div class="card">
+    <div class="card calendarCard">
       <div class="calendarHeader">
         <div>
           <h2>Календар</h2>
@@ -3512,20 +3511,14 @@ async function renderCalendarTab() {
         <button class="ghost">→</button>
       </div>
 
-      <div class="calendarShiftPanel">
-        ${shiftCardsHtml}
-      </div>
-
-      <div class="patientInfoBox calendarEventsPanel">
-        <div class="calendarPanelHead">
-          <div>
-            <h2>Записи на день</h2>
-            <div class="hint">Події з Supabase calendar_events.</div>
-          </div>
+      <div class="calendarDayGrid">
+        <div class="calTimeCol">
+          <div class="calTimeHead">Час</div>
+          ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
         </div>
 
-        <div class="calendarEventList">
-          ${eventRowsHtml}
+        <div class="calDoctorsGrid">
+          ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
         </div>
       </div>
     </div>
