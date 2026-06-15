@@ -3454,41 +3454,85 @@ async function renderCalendarTab() {
   }
 
   const staffHtml = staff.map((doc) => {
-    const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
+  const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
 
-    return `
-      <div class="calDoctorCol">
-        <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-          <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-          <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
-        </div>
+  const toMinutes = (t) => {
+    const [h, m] = String(t || "00:00").split(":").map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
 
-        ${hours.map((hour) => {
-          const hourEvents = docEvents.filter((ev) => String(ev.start_time || "").slice(0, 2) === hour.slice(0, 2));
+  const slotMinutes = 60;
+  const slotHeight = 78;
 
-          return `
-            <div class="calSlot" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(doc.id)}">
-              ${
-                hourEvents.length
-                  ? hourEvents.map((ev) => `
-                      <div class="calEventCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+  return `
+    <div class="calDoctorCol">
+      <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+        <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+        <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
+      </div>
+
+      ${hours.map((hour) => {
+        const hourStart = toMinutes(hour);
+
+        const hourEvents = docEvents.filter((ev) => {
+          const start = String(ev.start_time || "").slice(0, 5);
+          return toMinutes(start) === hourStart;
+        });
+
+        const isCoveredByLongEvent = docEvents.some((ev) => {
+          const start = toMinutes(String(ev.start_time || "").slice(0, 5));
+          const end = toMinutes(String(ev.end_time || "").slice(0, 5));
+          return start < hourStart && end > hourStart;
+        });
+
+        return `
+          <div
+            class="calSlot ${isCoveredByLongEvent ? "calSlotCovered" : ""}"
+            data-hour="${escapeHtml(hour)}"
+            data-staff-id="${escapeHtml(doc.id)}"
+          >
+            ${
+              hourEvents.length
+                ? hourEvents.map((ev) => {
+                    const start = String(ev.start_time || "").slice(0, 5);
+                    const end = String(ev.end_time || "").slice(0, 5);
+
+                    const startMin = toMinutes(start);
+                    const endMin = toMinutes(end || start);
+                    const duration = Math.max(slotMinutes, endMin - startMin);
+                    const slots = Math.max(1, duration / slotMinutes);
+                    const height = Math.round(slots * slotHeight - 10);
+
+                    return `
+                      <div
+                        class="calEventCard calEventLong"
+                        style="
+                          border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")};
+                          min-height:${height}px;
+                        "
+                      >
                         <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+
                         <div class="calEventTime">
-                          ${escapeHtml(String(ev.start_time || "").slice(0, 5))}
-                          ${ev.end_time ? `— ${escapeHtml(String(ev.end_time).slice(0, 5))}` : ""}
+                          ${escapeHtml(start)}
+                          ${end ? `— ${escapeHtml(end)}` : ""}
                         </div>
+
                         ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
                         ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
                       </div>
-                    `).join("")
+                    `;
+                  }).join("")
+                : isCoveredByLongEvent
+                  ? ""
                   : `<div class="calEmptySlot">Перетягни лікаря</div>`
-              }
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }).join("");
+            }
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}).join("");
 
   const staffPaletteHtml = staff.map((doc) => `
     <div
