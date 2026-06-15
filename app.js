@@ -3495,11 +3495,12 @@ async function renderCalendarTab() {
               hourEvents.length
                 ? hourEvents.map((ev) => {
                     const start = String(ev.start_time || "").slice(0, 5);
-                    const end = String(ev.end_time || "").slice(0, 5);
+const end = String(ev.end_time || "").slice(0, 5);
 
-                    const startMin = toMinutes(start);
-                    const endMin = toMinutes(end || start);
-                    const durationMinutes = Math.max(60, endMinutes - startMin);
+const startMin = toMinutes(start);
+const endMin = toMinutes(end || start);
+
+const durationMinutes = Math.max(60, endMin - startMin);
 const slots = Math.max(1, durationMinutes / 60);
 const height = Math.round(slots * slotHeight + (slots - 1) * 8);
 
