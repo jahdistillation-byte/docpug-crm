@@ -3502,7 +3502,7 @@ const endMin = toMinutes(end || start);
 
 const durationMinutes = Math.max(60, endMin - startMin);
 const slots = Math.max(1, durationMinutes / 60);
-const height = Math.round(slots * slotHeight + (slots - 1) * 8);
+const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
 
                     return `
                       <div

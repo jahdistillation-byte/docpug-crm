@@ -2162,3 +2162,22 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .calEventDelete:hover{
   background:rgba(255,78,107,.18);
 }
+.calSlot{
+  position:relative;
+  min-height:86px;
+  overflow:visible !important;
+}
+
+.calEventLong{
+  position:absolute;
+  left:8px;
+  right:8px;
+  top:8px;
+  z-index:10;
+  overflow:hidden;
+}
+
+.calSlotCovered{
+  visibility:hidden;
+  pointer-events:none;
+}
