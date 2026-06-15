@@ -851,6 +851,8 @@ def api_create_calendar_event():
     title = (d.get("title") or "").strip()
     event_date = (d.get("event_date") or "").strip()
     start_time = (d.get("start_time") or "").strip()
+    end_time = (d.get("end_time") or "").strip()
+    staff_id = d.get("staff_id")
 
     if not title:
         return fail("title required", 400)
@@ -858,6 +860,30 @@ def api_create_calendar_event():
         return fail("event_date required", 400)
     if not start_time:
         return fail("start_time required", 400)
+    if not end_time:
+        return fail("end_time required", 400)
+    if not staff_id:
+        return fail("staff_id required", 400)
+
+    # проверка пересечения записей этого врача
+    existing = (
+        supabase.table("calendar_events")
+        .select("*")
+        .eq("staff_id", staff_id)
+        .eq("event_date", event_date)
+        .execute()
+    )
+
+    for ev in existing.data or []:
+        ev_start = str(ev.get("start_time") or "")[:5]
+        ev_end = str(ev.get("end_time") or "")[:5]
+
+        if not ev_start or not ev_end:
+            continue
+
+        # пересечение: start < existing_end AND end > existing_start
+        if start_time < ev_end and end_time > ev_start:
+            return fail("time slot busy", 409)
 
     payload = {
         "org_id": ORG_ID,
@@ -865,8 +891,8 @@ def api_create_calendar_event():
         "title": title,
         "event_date": event_date,
         "start_time": start_time,
-        "end_time": d.get("end_time"),
-        "staff_id": d.get("staff_id"),
+        "end_time": end_time,
+        "staff_id": staff_id,
         "patient_id": d.get("patient_id"),
         "owner_id": d.get("owner_id"),
         "visit_id": d.get("visit_id"),
@@ -879,6 +905,7 @@ def api_create_calendar_event():
 
     res = supabase.table("calendar_events").insert(payload).execute()
     row = res.data[0] if getattr(res, "data", None) else payload
+
     return ok(row)
 # =========================
 # API: UPLOAD FILES (local uploads folder)
