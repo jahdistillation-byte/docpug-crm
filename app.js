@@ -3449,7 +3449,7 @@ async function renderCalendarTab() {
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
   const hours = [];
-  for (let h = 8; h <= 21; h++) {
+  for (let h = 7; h <= 24; h++) {
     hours.push(String(h).padStart(2, "0") + ":00");
   }
 
@@ -3462,7 +3462,7 @@ async function renderCalendarTab() {
   };
 
   const slotMinutes = 60;
-  const slotHeight = 78;
+  const slotHeight = 86;
 
   return `
     <div class="calDoctorCol">
@@ -3501,7 +3501,7 @@ async function renderCalendarTab() {
                     const endMin = toMinutes(end || start);
                     const duration = Math.max(slotMinutes, endMin - startMin);
                     const slots = Math.max(1, duration / slotMinutes);
-                    const height = Math.round(slots * slotHeight - 10);
+                    const height = Math.round(slots * slotHeight + (slots - 1) * 8);
 
                     return `
                       <div
@@ -3511,7 +3511,10 @@ async function renderCalendarTab() {
                           min-height:${height}px;
                         "
                       >
-                        <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+                        <div class="calEventTop">
+  <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+  <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
+</div>
 
                         <div class="calEventTime">
                           ${escapeHtml(start)}
@@ -3667,6 +3670,21 @@ async function renderCalendarTab() {
   $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => {
     alert("Наступний крок: зробимо форму додавання ветеринара в Supabase.");
   });
+
+  $$("[data-del-calendar-event]").forEach((btn) => {
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const id = btn.dataset.delCalendarEvent;
+    if (!id) return;
+
+    if (!confirm("Видалити запис з календаря?")) return;
+
+    const ok = await deleteCalendarEventApi(id);
+    if (ok) await renderCalendarTab();
+  });
+});
 }
 
 async function createCalendarEventApi(payload) {
@@ -3692,6 +3710,27 @@ async function createCalendarEventApi(payload) {
     console.error("createCalendarEventApi failed:", e);
     alert("Помилка створення запису: " + (e?.message || e));
     return null;
+  }
+}
+
+async function deleteCalendarEventApi(eventId) {
+  try {
+    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
+      method: "DELETE",
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert("Не вдалося видалити запис: " + (json.error || "unknown error"));
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    console.error("deleteCalendarEventApi failed:", e);
+    alert("Помилка видалення запису: " + (e?.message || e));
+    return false;
   }
 }
 

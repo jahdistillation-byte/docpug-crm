@@ -614,6 +614,14 @@ def api_calendar():
     
     
 
+@app.delete("/api/calendar/<event_id>")
+def api_delete_calendar_event(event_id):
+    if not event_id:
+        return fail("event_id required", 400)
+
+    supabase.table("calendar_events").delete().eq("id", event_id).execute()
+    return ok(True)
+
 # =========================
 # API: PATIENTS
 # =========================

@@ -2139,3 +2139,24 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .calSlotCovered .calEmptySlot{
   display:none !important;
 }
+.calEventTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.calEventDelete{
+  width:24px;
+  height:24px;
+  border:0;
+  border-radius:9px;
+  background:rgba(255,78,107,.10);
+  color:#b92f49;
+  font-weight:950;
+  cursor:pointer;
+}
+
+.calEventDelete:hover{
+  background:rgba(255,78,107,.18);
+}
