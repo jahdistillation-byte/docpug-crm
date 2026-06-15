@@ -6,6 +6,7 @@ import json
 import mimetypes
 from urllib.parse import parse_qsl
 
+from datetime import datetime, timezone
 from flask import Flask, request, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -622,6 +623,36 @@ def api_delete_calendar_event(event_id):
     supabase.table("calendar_events").delete().eq("id", event_id).execute()
     return ok(True)
 
+@app.put("/api/calendar/<event_id>")
+def api_update_calendar_event(event_id):
+    if not event_id:
+        return fail("event_id required", 400)
+
+    d = request.get_json(silent=True) or {}
+
+    payload = {
+        "title": d.get("title"),
+        "event_date": d.get("event_date"),
+        "start_time": d.get("start_time"),
+        "end_time": d.get("end_time"),
+        "staff_id": d.get("staff_id"),
+        "location": d.get("location"),
+        "status": d.get("status"),
+        "note": d.get("note"),
+    }
+
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+
+    res = (
+        supabase.table("calendar_events")
+        .update(payload)
+        .eq("id", event_id)
+        .execute()
+    )
+
+    row = res.data[0] if getattr(res, "data", None) else payload
+    return ok(row)
 # =========================
 # API: PATIENTS
 # =========================
