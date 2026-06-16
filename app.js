@@ -3703,7 +3703,100 @@ $("#calNextDay")?.addEventListener("click", async () => {
     if (ok) await renderCalendarTab();
   });
 });
+$$("[data-edit-calendar-event]").forEach((card) => {
+  card.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-del-calendar-event]")) return;
+
+    const id = card.dataset.editCalendarEvent;
+    if (!id) return;
+
+    const ev = todayEvents.find((x) => String(x.id) === String(id));
+    if (!ev) return alert("Запис не знайдено");
+
+    const title = (prompt("Назва запису:", ev.title || "") || "").trim();
+    if (!title) return;
+
+    const start_time = (prompt("Початок:", String(ev.start_time || "").slice(0, 5)) || "").trim();
+    if (!start_time) return;
+
+    const end_time = (prompt("Кінець:", String(ev.end_time || "").slice(0, 5)) || "").trim();
+    if (!end_time) return;
+
+    const note = (prompt("Коментар:", ev.note || "") || "").trim();
+
+    const updated = await updateCalendarEventApi(id, {
+      title,
+      event_date: ev.event_date || today,
+      start_time,
+      end_time,
+      staff_id: ev.staff_id,
+      note,
+    });
+
+    if (updated) await renderCalendarTab();
+  });
+});
+$$("[data-edit-calendar-event]").forEach((card) => {
+  card.addEventListener("click", async (e) => {
+
+    if (e.target.closest("[data-del-calendar-event]")) return;
+
+    const id = card.dataset.editCalendarEvent;
+    if (!id) return;
+
+    const ev = todayEvents.find(
+      (x) => String(x.id) === String(id)
+    );
+
+    if (!ev) {
+      alert("Запис не знайдено");
+      return;
+    }
+
+    const title =
+      (prompt("Назва запису:", ev.title || "") || "").trim();
+
+    if (!title) return;
+
+    const start_time =
+      (prompt(
+        "Початок:",
+        String(ev.start_time || "").slice(0, 5)
+      ) || "").trim();
+
+    if (!start_time) return;
+
+    const end_time =
+      (prompt(
+        "Кінець:",
+        String(ev.end_time || "").slice(0, 5)
+      ) || "").trim();
+
+    if (!end_time) return;
+
+    const note =
+      (prompt("Коментар:", ev.note || "") || "").trim();
+
+    const updated = await updateCalendarEventApi(id, {
+      title,
+      event_date: ev.event_date || today,
+      start_time,
+      end_time,
+      staff_id: ev.staff_id,
+      note,
+    });
+
+    if (updated) {
+      await renderCalendarTab();
+    }
+  });
+});
 }
+
+
+
+
+
 
 async function createCalendarEventApi(payload) {
   try {
@@ -3727,6 +3820,29 @@ async function createCalendarEventApi(payload) {
   } catch (e) {
     console.error("createCalendarEventApi failed:", e);
     alert("Помилка створення запису: " + (e?.message || e));
+    return null;
+  }
+}
+
+async function updateCalendarEventApi(eventId, payload) {
+  try {
+    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert("Не вдалося оновити запис: " + (json.error || "unknown error"));
+      return null;
+    }
+
+    return json.data || json.item || null;
+  } catch (e) {
+    console.error("updateCalendarEventApi failed:", e);
+    alert("Помилка оновлення запису: " + (e?.message || e));
     return null;
   }
 }
