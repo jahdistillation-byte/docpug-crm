@@ -3506,12 +3506,13 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
 
                     return `
                       <div
-                        class="calEventCard calEventLong"
-                        style="
-                          border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")};
-                          min-height:${height}px;
-                        "
-                      >
+  class="calEventCard calEventLong"
+  data-edit-calendar-event="${escapeHtml(String(ev.id))}"
+  style="
+    border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")};
+    min-height:${height}px;
+  "
+>
                         <div class="calEventTop">
   <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
   <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
