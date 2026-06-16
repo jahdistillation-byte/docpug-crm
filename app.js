@@ -3434,9 +3434,11 @@ async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
   if (!page) return;
 
-  const today = typeof todayISO === "function"
+  const today = window.__calendarDate || (
+  typeof todayISO === "function"
     ? todayISO()
-    : new Date().toISOString().slice(0, 10);
+    : new Date().toISOString().slice(0, 10)
+);
 
   page.innerHTML = `
     <div class="card">
@@ -3570,9 +3572,9 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
       </div>
 
       <div class="calendarTop">
-        <button class="ghost">←</button>
-        <div class="calendarDate">${escapeHtml(today)}</div>
-        <button class="ghost">→</button>
+       <button class="ghost" id="calPrevDay" type="button">←</button>
+<div class="calendarDate">${escapeHtml(today)}</div>
+<button class="ghost" id="calNextDay" type="button">→</button>
       </div>
 
       <div class="calendarWorkArea">
@@ -3672,6 +3674,20 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => {
     alert("Наступний крок: зробимо форму додавання ветеринара в Supabase.");
   });
+
+  $("#calPrevDay")?.addEventListener("click", async () => {
+  const d = new Date(today);
+  d.setDate(d.getDate() - 1);
+  window.__calendarDate = d.toISOString().slice(0, 10);
+  await renderCalendarTab();
+});
+
+$("#calNextDay")?.addEventListener("click", async () => {
+  const d = new Date(today);
+  d.setDate(d.getDate() + 1);
+  window.__calendarDate = d.toISOString().slice(0, 10);
+  await renderCalendarTab();
+});
 
   $$("[data-del-calendar-event]").forEach((btn) => {
   btn.addEventListener("click", async (e) => {
