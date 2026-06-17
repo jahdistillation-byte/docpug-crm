@@ -2252,3 +2252,29 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   gap:8px;
   justify-content:flex-end;
 }
+
+.calendarWorkArea{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap:16px;
+  align-items:start;
+  width:100%;
+}
+
+.calendarDayGrid{
+  display:grid;
+  grid-template-columns:70px minmax(0, 1fr);
+  gap:12px;
+  width:100%;
+  min-width:0;
+}
+
+.calDoctorsGrid{
+  min-width:0;
+  overflow-x:auto;
+}
+
+.calStaffPanel{
+  width:260px;
+  flex-shrink:0;
+}
