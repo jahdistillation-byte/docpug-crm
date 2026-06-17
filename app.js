@@ -6915,7 +6915,7 @@ window.addEventListener("resize", setVH);
 init();
 
 // =========================
-// VISIT FILES render (minimal)
+// VISIT FILES render (minimal) вотето да, срм ебать его в гриву
 // =========================
 function renderVisitFiles(visitId) {
   const wrap = document.getElementById("visitFilesList");
