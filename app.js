@@ -17,6 +17,8 @@ const FILES_KEY = "docpug_files_v1";
 const VISIT_FILES_KEY = "docpug_visit_files_v1";
 const MIGRATION_KEY = "docpug_files_migrated_v1";
 
+
+let calendarMode = "day";
 // =========================
 // FILES helpers (LOCAL links)
 // =========================
@@ -3450,6 +3452,55 @@ async function renderCalendarTab() {
   const events = await loadCalendarApi();
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
+  if (calendarMode === "schedule") {
+
+  page.innerHTML = `
+    <div class="card">
+
+      <div class="calendarHeader">
+        <div>
+          <h2>Графік змін</h2>
+          <div class="hint">
+            Керування робочими змінами персоналу.
+          </div>
+        </div>
+      </div>
+
+      <div class="scheduleList">
+
+        ${staff.map((doc) => `
+          <div class="scheduleCard">
+
+            <div>
+              <div class="scheduleName">
+                ${escapeHtml(doc.name)}
+              </div>
+
+              <div class="hint">
+                ${doc.role === "assistant"
+                  ? "Асистент"
+                  : "Ветеринар"}
+              </div>
+            </div>
+
+            <label class="scheduleToggle">
+              <input
+                type="checkbox"
+                checked
+              />
+              <span>На зміні</span>
+            </label>
+
+          </div>
+        `).join("")}
+
+      </div>
+
+    </div>
+  `;
+
+  return;
+}
   const hours = [];
   for (let h = 7; h <= 24; h++) {
     hours.push(String(h).padStart(2, "0") + ":00");
@@ -3564,12 +3615,12 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
         </div>
 
         <div class="calendarModes">
-          <button class="primary">День</button>
-          <button class="ghost">Тиждень</button>
-          <button class="ghost">Місяць</button>
-          <button class="ghost">Маршрути</button>
-        </div>
-      </div>
+  <button class="primary" data-cal-mode="day">День</button>
+  <button class="ghost" data-cal-mode="week">Тиждень</button>
+  <button class="ghost" data-cal-mode="month">Місяць</button>
+  <button class="ghost" data-cal-mode="schedule">Графік</button>
+  <button class="ghost" data-cal-mode="routes">Маршрути</button>
+</div>
 
       <div class="calendarTop">
        <button class="ghost" id="calPrevDay" type="button">←</button>
@@ -3716,6 +3767,12 @@ $$("[data-edit-calendar-event]").forEach((card) => {
     openCalendarEditModal(ev, today, async () => {
       await renderCalendarTab();
     });
+  });
+});
+$$("[data-cal-mode]").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    calendarMode = btn.dataset.calMode;
+    await renderCalendarTab();
   });
 });
 }
