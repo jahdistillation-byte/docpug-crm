@@ -3504,11 +3504,18 @@ const scheduleMap = new Map(
 );
   page.innerHTML = `
     <div class="card calendarCard">
-      <div class="calendarHeader">
-        <div>
-          <h2>Календар</h2>
-       <div class="hint">Співробітники клініки, ставки, спеціалізації та налаштування календаря.</div>
-        </div>
+      <div class="row" style="justify-content:space-between;align-items:center;">
+  <div>
+    <h2>Ветеринари</h2>
+    <div class="hint">
+      Співробітники клініки, ставки, спеціалізації та налаштування календаря.
+    </div>
+  </div>
+
+  <button class="primary" id="btnAddStaff">
+    + Додати ветеринара
+  </button>
+</div>
 
         <div class="calendarModes">
           <button class="ghost" data-cal-mode="day">День</button>
@@ -3517,12 +3524,6 @@ const scheduleMap = new Map(
           <button class="primary" data-cal-mode="schedule">Ветеринари</button>
           <button class="ghost" data-cal-mode="routes">Маршрути</button>
         </div>
-      </div>
-
-      <div class="calendarTop">
-        <button class="ghost" id="calPrevDay" type="button">←</button>
-        <div class="calendarDate">${escapeHtml(today)}</div>
-        <button class="ghost" id="calNextDay" type="button">→</button>
       </div>
 
       <div class="scheduleList">
@@ -3561,6 +3562,10 @@ const scheduleMap = new Map(
       </div>
     </div>
   `;
+
+  $("#btnAddStaff")?.addEventListener("click", () => {
+  openCreateStaffModal();
+});
 
   $("[data-cal-mode='day']")?.addEventListener("click", async () => {
     calendarMode = "day";
@@ -3895,8 +3900,44 @@ $$("[data-cal-mode]").forEach((btn) => {
 }
 
 
+function openCreateStaffModal() {
+  const name = prompt("ПІБ ветеринара");
+  if (!name) return;
 
+  const role = prompt("Посада (vet / assistant)", "vet") || "vet";
 
+  createStaffApi({
+    name,
+    role
+  }).then(() => {
+    renderCalendarTab();
+  });
+}
+
+async function createStaffApi(payload) {
+  try {
+    const res = await fetch("/api/staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error || "Помилка створення ветеринара");
+      return null;
+    }
+
+    return json.data || null;
+  } catch (e) {
+    console.error(e);
+    alert("Помилка створення ветеринара");
+    return null;
+  }
+}
 
 
 async function createCalendarEventApi(payload) {
