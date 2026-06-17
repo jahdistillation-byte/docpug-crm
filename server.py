@@ -592,7 +592,34 @@ def api_staff():
     except Exception as e:
         return fail(str(e))
 
+@app.post("/api/staff")
+def api_create_staff():
+    d = request.get_json(silent=True) or {}
 
+    name = (d.get("name") or "").strip()
+    if not name:
+        return fail("name required", 400)
+
+    payload = {
+        "name": name,
+        "role": d.get("role") or "vet",
+        "color": d.get("color") or "#7C5CFF",
+        "specialization": d.get("specialization"),
+        "phone": d.get("phone"),
+        "shift_rate": d.get("shift_rate"),
+        "visit_percent": d.get("visit_percent"),
+        "note": d.get("note"),
+    }
+
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+
+    try:
+        res = supabase.table("staff").insert(payload).execute()
+        row = res.data[0] if getattr(res, "data", None) else payload
+        return ok(row)
+
+    except Exception as e:
+        return fail(str(e))
 # =========================
 # API: CALENDAR
 # =========================
@@ -712,7 +739,7 @@ def api_delete_staff_schedule():
     d = request.get_json(silent=True) or {}
 
     work_date = d.get("work_date")
-    staff_id = d.get("staff_id")
+    staff_id = d.get("staff_id")    
 
     if not work_date or not staff_id:
         return fail("work_date and staff_id required", 400)

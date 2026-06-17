@@ -3534,7 +3534,7 @@ const scheduleMap = new Map(
       <div class="scheduleList">
         ${staff.map((doc) => {
   const row = scheduleMap.get(String(doc.id));
-  const isActive = row ? row.is_active !== false : true;
+  const isActive = row ? row.is_active !== false : false;
 
   return `
           <div class="scheduleCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
