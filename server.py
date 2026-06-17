@@ -920,8 +920,28 @@ def api_delete_visit(visit_id):
     if not visit_id:
         return fail("visit_id required", 400)
 
-    supabase.table("visits").delete().eq("org_id", ORG_ID).eq("id", visit_id).execute()
-    return ok(True)
+    try:
+        # 1) удаляем запись из календаря, связанную с визитом
+        supabase.table("calendar_events").delete().eq("visit_id", visit_id).execute()
+
+        # 2) удаляем строки услуг/склада, если такие таблицы есть
+        try:
+            supabase.table("visit_services").delete().eq("visit_id", visit_id).execute()
+        except Exception:
+            pass
+
+        try:
+            supabase.table("visit_stock").delete().eq("visit_id", visit_id).execute()
+        except Exception:
+            pass
+
+        # 3) удаляем сам визит
+        supabase.table("visits").delete().eq("org_id", ORG_ID).eq("id", visit_id).execute()
+
+        return ok(True)
+
+    except Exception as e:
+        return fail(str(e), 500)
 
 
 

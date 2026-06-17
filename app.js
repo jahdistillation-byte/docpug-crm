@@ -6251,6 +6251,22 @@ payload.services_json = payload.services;
 
 payload.stock = Array.isArray(payload.stock) ? payload.stock : [];
 payload.stock_json = payload.stock;
+const existingEvents = await loadCalendarApi();
+
+const isBusy = existingEvents.some((ev) => {
+  if (String(ev.staff_id) !== String(staffId)) return false;
+  if (String(ev.event_date) !== String(date)) return false;
+
+  const evStart = String(ev.start_time || "").slice(0, 5);
+  const evEnd = String(ev.end_time || "").slice(0, 5);
+
+  return startTime < evEnd && endTime > evStart;
+});
+
+if (isBusy) {
+  alert("Цей час уже зайнятий у цього ветеринара. Оберіть інший час.");
+  return;
+}
     const created = await createVisitApi(payload);
 if (!created?.id) return;
 
