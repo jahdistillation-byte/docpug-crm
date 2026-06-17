@@ -1204,7 +1204,7 @@ async function pushVisitStockToServer(visitId, stockArr) {
 
 async function deleteVisitApi(visitId) {
   try {
-    const res = await fetch(`/api/visits?id=${encodeURIComponent(String(visitId))}`, {
+    const res = await fetch(`/api/visits/${encodeURIComponent(String(visitId))}`, {
       method: "DELETE",
       credentials: "include",
       headers: { Accept: "application/json" },
