@@ -653,6 +653,76 @@ def api_update_calendar_event(event_id):
 
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
+
+# =========================
+# API: STAFF SCHEDULE
+# =========================
+
+@app.get("/api/staff-schedule")
+def api_get_staff_schedule():
+    work_date = request.args.get("date")
+
+    try:
+        q = supabase.table("staff_schedule").select("*")
+
+        if work_date:
+            q = q.eq("work_date", work_date)
+
+        res = q.order("work_date").execute()
+        return ok(res.data or [])
+
+    except Exception as e:
+        return fail(str(e))
+
+
+@app.post("/api/staff-schedule")
+def api_upsert_staff_schedule():
+    d = request.get_json(silent=True) or {}
+
+    work_date = d.get("work_date")
+    staff_id = d.get("staff_id")
+
+    if not work_date or not staff_id:
+        return fail("work_date and staff_id required", 400)
+
+    payload = {
+        "work_date": work_date,
+        "staff_id": staff_id,
+        "is_active": d.get("is_active", True),
+        "start_time": d.get("start_time") or "09:00",
+        "end_time": d.get("end_time") or "18:00",
+    }
+
+    try:
+        res = (
+            supabase.table("staff_schedule")
+            .upsert(payload, on_conflict="work_date,staff_id")
+            .execute()
+        )
+
+        row = res.data[0] if getattr(res, "data", None) else payload
+        return ok(row)
+
+    except Exception as e:
+        return fail(str(e))
+
+
+@app.delete("/api/staff-schedule")
+def api_delete_staff_schedule():
+    d = request.get_json(silent=True) or {}
+
+    work_date = d.get("work_date")
+    staff_id = d.get("staff_id")
+
+    if not work_date or not staff_id:
+        return fail("work_date and staff_id required", 400)
+
+    try:
+        supabase.table("staff_schedule").delete().eq("work_date", work_date).eq("staff_id", staff_id).execute()
+        return ok(True)
+
+    except Exception as e:
+        return fail(str(e))
 # =========================
 # API: PATIENTS
 # =========================
