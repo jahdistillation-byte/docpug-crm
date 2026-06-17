@@ -3526,13 +3526,13 @@ const scheduleMap = new Map(
         </div>
       </div>
 
-      <div class="scheduleList">
+      <div class="vetList">
         ${staff.map((doc) => {
   const row = scheduleMap.get(String(doc.id));
   const isActive = row ? row.is_active !== false : false;
 
   return `
-          <div class="scheduleCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+          <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
             <div>
               <div>
   <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
