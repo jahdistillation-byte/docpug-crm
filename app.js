@@ -3542,7 +3542,13 @@ const scheduleMap = new Map(
         </div>
 
         <div class="vetActions">
-          <button class="ghost" type="button">✏️ Редагувати</button>
+          <button
+  class="ghost"
+  type="button"
+  data-edit-staff="${escapeHtml(String(doc.id))}"
+>
+  ✏️ Редагувати
+</button>
           <button
             class="scheduleStatus ${isActive ? "active" : ""}"
             type="button"
