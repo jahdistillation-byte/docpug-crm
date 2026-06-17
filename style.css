@@ -2337,3 +2337,28 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   min-width:260px !important;
   max-width:260px !important;
 }
+/* Staff / Vets section */
+.scheduleList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scheduleCard {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+}
+
+.scheduleCard > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
+.scheduleName {
+  font-size: 18px;
+  font-weight: 900;
+}
