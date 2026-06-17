@@ -2278,3 +2278,62 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   width:260px;
   flex-shrink:0;
 }
+/* HARD FIX CALENDAR LAYOUT */
+
+.calendarCard{
+  width:100% !important;
+  max-width:none !important;
+  overflow:hidden !important;
+}
+
+.calendarHeader{
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:flex-start !important;
+  gap:16px !important;
+}
+
+.calendarModes{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-end !important;
+  align-items:center !important;
+  gap:8px !important;
+  min-width:420px !important;
+}
+
+.calendarTop{
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  margin:18px 0 !important;
+}
+
+.calendarWorkArea{
+  display:grid !important;
+  grid-template-columns:minmax(0, 1fr) 260px !important;
+  gap:16px !important;
+  width:100% !important;
+  align-items:start !important;
+}
+
+.calendarDayGrid{
+  display:grid !important;
+  grid-template-columns:70px minmax(0, 1fr) !important;
+  gap:12px !important;
+  width:100% !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+}
+
+.calDoctorsGrid{
+  min-width:0 !important;
+  overflow-x:auto !important;
+}
+
+.calStaffPanel{
+  width:260px !important;
+  min-width:260px !important;
+  max-width:260px !important;
+}
