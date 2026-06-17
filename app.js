@@ -3613,6 +3613,19 @@ const scheduleMap = new Map(
     btn.textContent = isActive ? "На зміні" : "Вихідний";
   });
 });
+$$("[data-edit-staff]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.editStaff;
+
+    const staffRow = staff.find(
+      (x) => String(x.id) === String(id)
+    );
+
+    if (!staffRow) return;
+
+    openEditStaffModal(staffRow);
+  });
+});
 
   return;
 }
@@ -6943,4 +6956,48 @@ function renderVisitFiles(visitId) {
     detachFileFromVisit(visitId, fid);
     renderVisitFiles(visitId);
   };
+}
+async function updateStaffApi(staffId, payload) {
+  try {
+    const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error || "Помилка оновлення ветеринара");
+      return null;
+    }
+
+    return json.data || null;
+  } catch (e) {
+    console.error(e);
+    alert("Помилка оновлення ветеринара");
+    return null;
+  }
+}
+
+async function openEditStaffModal(staffRow) {
+  const name = prompt("ПІБ ветеринара", staffRow.name || "");
+  if (!name) return;
+
+  const specialization = prompt("Спеціалізація", staffRow.specialization || "") || "";
+  const phone = prompt("Телефон", staffRow.phone || "") || "";
+  const shiftRate = prompt("Ставка за зміну", staffRow.shift_rate || 0) || 0;
+  const percentRate = prompt("% від візиту", staffRow.percent_rate || 0) || 0;
+
+  const saved = await updateStaffApi(staffRow.id, {
+    name,
+    specialization,
+    phone,
+    shift_rate: Number(shiftRate) || 0,
+    percent_rate: Number(percentRate) || 0,
+  });
+
+  if (saved) {
+    await renderCalendarTab();
+  }
 }

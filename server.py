@@ -951,6 +951,39 @@ def api_create_staff():
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
 
+@app.put("/api/staff/<staff_id>")
+def api_update_staff(staff_id):
+    if not staff_id:
+        return fail("staff_id required", 400)
+
+    d = request.get_json(silent=True) or {}
+
+    payload = {
+        "name": d.get("name"),
+        "role": d.get("role"),
+        "avatar": d.get("avatar"),
+        "color": d.get("color"),
+        "phone": d.get("phone"),
+        "specialization": d.get("specialization"),
+        "shift_rate": d.get("shift_rate"),
+        "percent_rate": d.get("percent_rate"),
+        "bonus_rate": d.get("bonus_rate"),
+        "note": d.get("note"),
+        "is_active": d.get("is_active"),
+    }
+
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+
+    res = (
+        supabase.table("staff")
+        .update(payload)
+        .eq("id", staff_id)
+        .execute()
+    )
+
+    row = res.data[0] if getattr(res, "data", None) else payload
+    return ok(row)
+
 
 @app.post("/api/calendar")
 def api_create_calendar_event():
