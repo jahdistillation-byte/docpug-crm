@@ -197,6 +197,29 @@
         <label class="field">
           <div class="label">Дата</div>
           <input class="input" id="visitDate" type="date">
+          <div class="grid2">
+  <label class="field">
+    <div class="label">Час початку</div>
+    <input class="input" id="visitStartTime" type="time" value="10:00">
+  </label>
+
+  <label class="field">
+    <div class="label">Тривалість, хв</div>
+    <select class="input" id="visitDuration">
+      <option value="30">30 хв</option>
+      <option value="60" selected>60 хв</option>
+      <option value="90">90 хв</option>
+      <option value="120">120 хв</option>
+    </select>
+  </label>
+</div>
+
+<label class="field">
+  <div class="label">Ветеринар</div>
+  <select class="input" id="visitStaff">
+    <option value="">Оберіть ветеринара</option>
+  </select>
+</label>
         </label>
 
         <label class="field">

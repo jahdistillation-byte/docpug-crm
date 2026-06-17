@@ -5938,6 +5938,19 @@ function openVisitModalForCreate(pet) {
   $("#visitDx").value = "";
   $("#visitWeight").value = pet?.weight_kg || "";
   $("#visitRx").value = "";
+  loadStaffApi().then((staff) => {
+  const select = $("#visitStaff");
+  if (!select) return;
+
+  select.innerHTML = `
+    <option value="">Оберіть ветеринара</option>
+    ${staff.map((doc) => `
+      <option value="${escapeHtml(String(doc.id))}">
+        ${escapeHtml(doc.name || "Працівник")}
+      </option>
+    `).join("")}
+  `;
+});
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
@@ -6174,7 +6187,16 @@ $("#visitSave")?.addEventListener("click", async () => {
     const weight = ($("#visitWeight")?.value || "").trim();
     const rx = ($("#visitRx")?.value || "").trim();
 
+    const startTime = ($("#visitStartTime")?.value || "10:00").trim();
+const duration = Number($("#visitDuration")?.value || 60);
+const staffId = ($("#visitStaff")?.value || "").trim();
+const endTime = addMinutesToTime(startTime, duration);
+
+
     if (!notePlain && !dx && !rx) return alert("Заповни хоча б щось");
+
+    if (!staffId) return alert("Оберіть ветеринара");
+if (!startTime) return alert("Оберіть час початку");
 
     // базовый payload
     const payload = {
@@ -6230,9 +6252,22 @@ payload.services_json = payload.services;
 payload.stock = Array.isArray(payload.stock) ? payload.stock : [];
 payload.stock_json = payload.stock;
     const created = await createVisitApi(payload);
-    if (!created?.id) return;
+if (!created?.id) return;
 
-    closeVisitModal();
+await createCalendarEventApi({
+  title: `${pet.name || "Пацієнт"} — ${dx || notePlain || "Візит"}`,
+  event_date: date,
+  start_time: startTime,
+  end_time: endTime,
+  staff_id: staffId,
+  patient_id: pet.id,
+  owner_id: pet.owner_id,
+  visit_id: created.id,
+  note: notePlain || dx || "",
+  status: "planned",
+});
+
+closeVisitModal();
 
     if (state.selectedPetId) await renderVisits(state.selectedPetId);
 
