@@ -194,6 +194,23 @@
       </div>
 
       <div class="modal__body">
+        <div id="visitPatientBlock" style="display:none;">
+  <label class="field">
+    <div class="label">Пацієнт</div>
+    <select class="input" id="visitPatientSelect">
+      <option value="">Оберіть пацієнта</option>
+    </select>
+  </label>
+
+  <button
+    class="ghost"
+    id="btnCreatePatientFromVisit"
+    type="button"
+    style="margin-bottom:12px;"
+  >
+    + Новий пацієнт
+  </button>
+</div>
         <label class="field">
           <div class="label">Дата</div>
           <input class="input" id="visitDate" type="date">
@@ -385,6 +402,7 @@
     </div>
   </aside>
 </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <script src="app.js?v=20260129_1"></script>

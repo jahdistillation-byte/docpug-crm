@@ -3676,7 +3676,8 @@ $$("[data-edit-staff]").forEach((btn) => {
           <div
             class="calSlot ${isCoveredByLongEvent ? "calSlotCovered" : ""}"
             data-hour="${escapeHtml(hour)}"
-            data-staff-id="${escapeHtml(doc.id)}"
+            data-staff-id="${escapeHtml(String(doc.id))}"
+data-staff-name="${escapeHtml(doc.name || "")}"
           >
             ${
               hourEvents.length
@@ -3809,6 +3810,14 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   });
 
   $$(".calSlot").forEach((slot) => {
+    slot.addEventListener("click", () => {
+  if (slot.querySelector(".calEventCard")) return;
+
+  const hour = slot.dataset.hour;
+  const staffId = slot.dataset.staffId;
+
+  openVisitFromCalendar(hour, staffId);
+});
     slot.addEventListener("dragover", (e) => {
       e.preventDefault();
       slot.classList.add("calSlotDrop");
@@ -7079,3 +7088,44 @@ $("#staffSave")?.addEventListener("click", async () => {
 
   await renderCalendarTab();
 });
+async function openVisitFromCalendar(hour, staffId) {
+
+  const modal = $("#visitModal");
+  if (!modal) return;
+
+  delete modal.dataset.visitId;
+
+  const select = $("#visitPatientSelect");
+
+  const patients = await loadPatientsApi();
+
+  if (select) {
+    select.innerHTML = `
+      <option value="">Оберіть пацієнта</option>
+      ${patients.map((p) => `
+        <option value="${escapeHtml(String(p.id))}">
+          ${escapeHtml(p.name || "Пацієнт")}
+        </option>
+      `).join("")}
+    `;
+  }
+
+  $("#visitPatientBlock").style.display = "block";
+
+  $("#visitDate").value =
+    window.__calendarDate || todayISO();
+
+  $("#visitStartTime").value = hour || "10:00";
+
+  $("#visitDuration").value = "60";
+
+  $("#visitStaff").value = staffId || "";
+
+  $("#visitNote").value = "";
+  $("#visitDx").value = "";
+  $("#visitWeight").value = "";
+  $("#visitRx").value = "";
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
