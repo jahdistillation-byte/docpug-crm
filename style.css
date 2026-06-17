@@ -2212,3 +2212,17 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   gap:10px;
   font-weight:600;
 }
+.scheduleStatus{
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:950;
+  cursor:pointer;
+  background:rgba(150,150,160,.14);
+  color:var(--muted);
+}
+
+.scheduleStatus.active{
+  background:rgba(107,78,255,.14);
+  color:var(--accent);
+}

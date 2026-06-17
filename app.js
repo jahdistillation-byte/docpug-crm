@@ -3453,51 +3453,90 @@ async function renderCalendarTab() {
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
   if (calendarMode === "schedule") {
-
   page.innerHTML = `
-    <div class="card">
-
+    <div class="card calendarCard">
       <div class="calendarHeader">
         <div>
-          <h2>Графік змін</h2>
-          <div class="hint">
-            Керування робочими змінами персоналу.
-          </div>
+          <h2>Календар</h2>
+          <div class="hint">Графік змін ветеринарів на обраний день.</div>
+        </div>
+
+        <div class="calendarModes">
+          <button class="ghost" data-cal-mode="day">День</button>
+          <button class="ghost" data-cal-mode="week">Тиждень</button>
+          <button class="ghost" data-cal-mode="month">Місяць</button>
+          <button class="primary" data-cal-mode="schedule">Графік</button>
+          <button class="ghost" data-cal-mode="routes">Маршрути</button>
         </div>
       </div>
 
-      <div class="scheduleList">
-
-        ${staff.map((doc) => `
-          <div class="scheduleCard">
-
-            <div>
-              <div class="scheduleName">
-                ${escapeHtml(doc.name)}
-              </div>
-
-              <div class="hint">
-                ${doc.role === "assistant"
-                  ? "Асистент"
-                  : "Ветеринар"}
-              </div>
-            </div>
-
-            <label class="scheduleToggle">
-              <input
-                type="checkbox"
-                checked
-              />
-              <span>На зміні</span>
-            </label>
-
-          </div>
-        `).join("")}
-
+      <div class="calendarTop">
+        <button class="ghost" id="calPrevDay" type="button">←</button>
+        <div class="calendarDate">${escapeHtml(today)}</div>
+        <button class="ghost" id="calNextDay" type="button">→</button>
       </div>
 
+      <div class="scheduleList">
+        ${staff.map((doc) => `
+          <div class="scheduleCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+            <div>
+              <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+              <div class="hint">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
+            </div>
+
+            <button
+              class="scheduleStatus active"
+              type="button"
+              data-schedule-staff-id="${escapeHtml(String(doc.id))}"
+            >
+              На зміні
+            </button>
+          </div>
+        `).join("")}
+      </div>
     </div>
   `;
+
+  $("[data-cal-mode='day']")?.addEventListener("click", async () => {
+    calendarMode = "day";
+    await renderCalendarTab();
+  });
+
+  $("[data-cal-mode='week']")?.addEventListener("click", async () => {
+    calendarMode = "week";
+    await renderCalendarTab();
+  });
+
+  $("[data-cal-mode='month']")?.addEventListener("click", async () => {
+    calendarMode = "month";
+    await renderCalendarTab();
+  });
+
+  $("[data-cal-mode='routes']")?.addEventListener("click", async () => {
+    calendarMode = "routes";
+    await renderCalendarTab();
+  });
+
+  $("#calPrevDay")?.addEventListener("click", async () => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - 1);
+    window.__calendarDate = d.toISOString().slice(0, 10);
+    await renderCalendarTab();
+  });
+
+  $("#calNextDay")?.addEventListener("click", async () => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    window.__calendarDate = d.toISOString().slice(0, 10);
+    await renderCalendarTab();
+  });
+
+  $$(".scheduleStatus").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
+      btn.textContent = btn.classList.contains("active") ? "На зміні" : "Вихідний";
+    });
+  });
 
   return;
 }
