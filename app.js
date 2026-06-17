@@ -3527,40 +3527,34 @@ const scheduleMap = new Map(
       </div>
 
       <div class="vetList">
-        ${staff.map((doc) => {
-  const row = scheduleMap.get(String(doc.id));
-  const isActive = row ? row.is_active !== false : false;
+  ${staff.map((doc) => {
+    const row = scheduleMap.get(String(doc.id));
+    const isActive = row ? row.is_active !== false : false;
 
-  return `
-          <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-            <div>
-              <div>
-  <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+    return `
+      <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+        <div class="vetInfo">
+          <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+          <div class="hint">${escapeHtml(doc.specialization || "Без спеціалізації")}</div>
+          <div class="hint">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
+          <div class="hint">💰 Зміна: ${escapeHtml(String(doc.shift_rate || 0))} грн</div>
+          <div class="hint">📈 %: ${escapeHtml(String(doc.percent_rate || 0))}</div>
+        </div>
 
-  <div class="hint">
-    ${escapeHtml(doc.specialization || "Без спеціалізації")}
-  </div>
-
-  <div class="hint">
-    💰 Зміна: ${escapeHtml(String(doc.shift_rate || 0))} грн
-  </div>
-
-  <div class="hint">
-    📈 %: ${escapeHtml(String(doc.percent_rate || 0))}
-  </div>
-</div>
-            <button
-              class="scheduleStatus ${isActive ? "active" : ""}"
-              type="button"
-              data-schedule-staff-id="${escapeHtml(String(doc.id))}"
-            >
-              ${isActive ? "На зміні" : "Вихідний"}
-            </button>
-</div>
-`;
-}).join("")}
+        <div class="vetActions">
+          <button class="ghost" type="button">✏️ Редагувати</button>
+          <button
+            class="scheduleStatus ${isActive ? "active" : ""}"
+            type="button"
+            data-schedule-staff-id="${escapeHtml(String(doc.id))}"
+          >
+            ${isActive ? "На зміні" : "Вихідний"}
+          </button>
+        </div>
       </div>
-    </div>
+    `;
+  }).join("")}
+</div>
   `;
 
   $("#btnAddStaff")?.addEventListener("click", () => {
