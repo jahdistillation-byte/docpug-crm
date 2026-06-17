@@ -6986,24 +6986,45 @@ async function updateStaffApi(staffId, payload) {
   }
 }
 
-async function openEditStaffModal(staffRow) {
-  const name = prompt("ПІБ ветеринара", staffRow.name || "");
-  if (!name) return;
+function openEditStaffModal(staffRow) {
+  $("#staffId").value = staffRow.id || "";
+  $("#staffName").value = staffRow.name || "";
+  $("#staffRole").value = staffRow.role || "vet";
+  $("#staffSpecialization").value = staffRow.specialization || "";
+  $("#staffPhone").value = staffRow.phone || "";
+  $("#staffShiftRate").value = staffRow.shift_rate || 0;
+  $("#staffPercentRate").value = staffRow.percent_rate || 0;
+  $("#staffColor").value = staffRow.color || "#7C5CFF";
+  $("#staffNote").value = staffRow.note || "";
 
-  const specialization = prompt("Спеціалізація", staffRow.specialization || "") || "";
-  const phone = prompt("Телефон", staffRow.phone || "") || "";
-  const shiftRate = prompt("Ставка за зміну", staffRow.shift_rate || 0) || 0;
-  const percentRate = prompt("% від візиту", staffRow.percent_rate || 0) || 0;
-
-  const saved = await updateStaffApi(staffRow.id, {
-    name,
-    specialization,
-    phone,
-    shift_rate: Number(shiftRate) || 0,
-    percent_rate: Number(percentRate) || 0,
-  });
-
-  if (saved) {
-    await renderCalendarTab();
-  }
+  $("#staffDrawer").classList.add("open");
+  $("#staffDrawer").setAttribute("aria-hidden", "false");
 }
+$$("[data-close-staff]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    $("#staffDrawer")?.classList.remove("open");
+    $("#staffDrawer")?.setAttribute("aria-hidden", "true");
+  });
+});
+$("#staffSave")?.addEventListener("click", async () => {
+  const staffId = $("#staffId").value;
+
+  const payload = {
+    name: $("#staffName").value.trim(),
+    role: $("#staffRole").value,
+    specialization: $("#staffSpecialization").value.trim(),
+    phone: $("#staffPhone").value.trim(),
+    shift_rate: Number($("#staffShiftRate").value || 0),
+    percent_rate: Number($("#staffPercentRate").value || 0),
+    color: $("#staffColor").value,
+    note: $("#staffNote").value.trim(),
+  };
+
+  const saved = await updateStaffApi(staffId, payload);
+
+  if (!saved) return;
+
+  $("#staffDrawer").classList.remove("open");
+
+  await renderCalendarTab();
+});
