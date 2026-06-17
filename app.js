@@ -3713,27 +3713,9 @@ $$("[data-edit-calendar-event]").forEach((card) => {
     const ev = todayEvents.find((x) => String(x.id) === String(id));
     if (!ev) return alert("Запис не знайдено");
 
-    const title = (prompt("Назва запису:", ev.title || "") || "").trim();
-    if (!title) return;
-
-    const start_time = (prompt("Початок:", String(ev.start_time || "").slice(0, 5)) || "").trim();
-    if (!start_time) return;
-
-    const end_time = (prompt("Кінець:", String(ev.end_time || "").slice(0, 5)) || "").trim();
-    if (!end_time) return;
-
-    const note = (prompt("Коментар:", ev.note || "") || "").trim();
-
-    const updated = await updateCalendarEventApi(id, {
-      title,
-      event_date: ev.event_date || today,
-      start_time,
-      end_time,
-      staff_id: ev.staff_id,
-      note,
+    openCalendarEditModal(ev, today, async () => {
+      await renderCalendarTab();
     });
-
-    if (updated) await renderCalendarTab();
   });
 });
 }
@@ -3871,6 +3853,103 @@ function renderLabScale(value, min, max) {
       <div class="labScaleDot lab-${status}" style="left:${pct}%"></div>
     </div>
   `;
+}
+
+function ensureCalendarModal() {
+  let modal = document.getElementById("calendarEventModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "calendarEventModal";
+  modal.innerHTML = `
+    <div class="modal__backdrop" data-close-calendar-modal></div>
+    <div class="modal__panel calEditPanel">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title">Редагування запису</div>
+          <div class="modal__sub">Час, лікар, коментар</div>
+        </div>
+        <button class="iconBtn" data-close-calendar-modal type="button">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <label class="field">
+          <div class="label">Назва</div>
+          <input class="input" id="calEditTitle">
+        </label>
+
+        <div class="medFormGrid">
+          <label class="field">
+            <div class="label">Початок</div>
+            <input class="input" id="calEditStart" type="time">
+          </label>
+
+          <label class="field">
+            <div class="label">Кінець</div>
+            <input class="input" id="calEditEnd" type="time">
+          </label>
+        </div>
+
+        <label class="field">
+          <div class="label">Коментар</div>
+          <textarea class="textarea" id="calEditNote" rows="4"></textarea>
+        </label>
+      </div>
+
+      <div class="modal__foot">
+        <button class="ghost" data-close-calendar-modal type="button">Скасувати</button>
+        <button class="primary" id="calEditSaveBtn" type="button">Зберегти</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close-calendar-modal]")) {
+      modal.classList.remove("open");
+    }
+  });
+
+  return modal;
+}
+
+function openCalendarEditModal(ev, today, onSaved) {
+  const modal = ensureCalendarModal();
+
+  $("#calEditTitle").value = ev.title || "";
+  $("#calEditStart").value = String(ev.start_time || "").slice(0, 5);
+  $("#calEditEnd").value = String(ev.end_time || "").slice(0, 5);
+  $("#calEditNote").value = ev.note || "";
+
+  modal.classList.add("open");
+
+  $("#calEditSaveBtn").onclick = async () => {
+    const title = ($("#calEditTitle").value || "").trim();
+    const start_time = ($("#calEditStart").value || "").trim();
+    const end_time = ($("#calEditEnd").value || "").trim();
+    const note = ($("#calEditNote").value || "").trim();
+
+    if (!title || !start_time || !end_time) {
+      alert("Заповни назву, початок і кінець");
+      return;
+    }
+
+    const updated = await updateCalendarEventApi(ev.id, {
+      title,
+      event_date: ev.event_date || today,
+      start_time,
+      end_time,
+      staff_id: ev.staff_id,
+      note,
+    });
+
+    if (updated) {
+      modal.classList.remove("open");
+      if (typeof onSaved === "function") await onSaved();
+    }
+  };
 }
 
 function renderLabsTab(pet) {

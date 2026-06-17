@@ -2181,3 +2181,6 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   visibility:hidden;
   pointer-events:none;
 }
+.calEditPanel{
+  max-width:620px;
+}
