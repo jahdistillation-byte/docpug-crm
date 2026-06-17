@@ -293,6 +293,75 @@
     </div>
   </div>
 </div>
+<div class="drawer" id="staffDrawer" aria-hidden="true">
+  <div class="drawer__backdrop" data-close-staff></div>
+
+  <aside class="drawer__panel">
+    <div class="drawer__head">
+      <div>
+        <div class="drawer__title" id="staffDrawerTitle">Ветеринар</div>
+        <div class="drawer__sub">Профіль співробітника клініки</div>
+      </div>
+      <button class="iconBtn" data-close-staff type="button">✕</button>
+    </div>
+
+    <div class="drawer__body">
+      <input id="staffId" type="hidden">
+
+      <label class="field">
+        <div class="label">ПІБ</div>
+        <input class="input" id="staffName" placeholder="Напр.: Іваненко Марія">
+      </label>
+
+      <label class="field">
+        <div class="label">Роль</div>
+        <select class="input" id="staffRole">
+          <option value="vet">Ветеринар</option>
+          <option value="assistant">Асистент</option>
+          <option value="admin">Адміністратор</option>
+          <option value="director">Директор</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <div class="label">Спеціалізація</div>
+        <input class="input" id="staffSpecialization" placeholder="Терапія, УЗД, дерматологія...">
+      </label>
+
+      <label class="field">
+        <div class="label">Телефон</div>
+        <input class="input" id="staffPhone" placeholder="+380...">
+      </label>
+
+      <div class="grid2">
+        <label class="field">
+          <div class="label">Ставка за зміну, грн</div>
+          <input class="input" id="staffShiftRate" type="number" placeholder="1500">
+        </label>
+
+        <label class="field">
+          <div class="label">% від візиту</div>
+          <input class="input" id="staffPercentRate" type="number" placeholder="5">
+        </label>
+      </div>
+
+      <label class="field">
+        <div class="label">Колір у календарі</div>
+        <input class="input" id="staffColor" type="color" value="#7C5CFF">
+      </label>
+
+      <label class="field">
+        <div class="label">Нотатка</div>
+        <textarea class="textarea" id="staffNote" rows="4" placeholder="Графік, умови оплати, сильні сторони..."></textarea>
+      </label>
+    </div>
+
+    <div class="drawer__foot">
+      <button class="ghost" data-close-staff type="button">Скасувати</button>
+      <button class="primary" id="staffSave" type="button">Зберегти</button>
+    </div>
+  </aside>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <script src="app.js?v=20260129_1"></script>

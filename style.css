@@ -2390,3 +2390,60 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   gap: 8px;
   align-items: center;
 }
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+
+.drawer.open {
+  display: block;
+}
+
+.drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 16, 35, .28);
+  backdrop-filter: blur(4px);
+}
+
+.drawer__panel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: min(460px, calc(100vw - 36px));
+  background: rgba(255,255,255,.96);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(40,30,80,.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.drawer__head,
+.drawer__foot {
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.drawer__body {
+  padding: 0 18px 18px;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+}
+
+.drawer__title {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.drawer__sub {
+  color: var(--muted);
+  font-size: 13px;
+}
