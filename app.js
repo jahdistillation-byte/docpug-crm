@@ -3617,7 +3617,7 @@ const scheduleMap = new Map(
     hours.push(String(h).padStart(2, "0") + ":00");
   }
 
-  const staffHtml = staff.map((doc) => {
+  const staffHtml = staffOnShift.map((doc) => {
   const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
 
   const toMinutes = (t) => {
@@ -3703,7 +3703,7 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   `;
 }).join("");
 
-  const staffPaletteHtml = staff.map((doc) => `
+  const staffPaletteHtml = staffOnShift.map((doc) => `
     <div
       class="calStaffDrag"
       draggable="true"
