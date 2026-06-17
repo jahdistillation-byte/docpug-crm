@@ -3431,6 +3431,44 @@ async function loadCalendarApi() {
     return [];
   }
 }
+async function loadStaffScheduleApi(date) {
+  try {
+    const res = await fetch(`/api/staff-schedule?date=${encodeURIComponent(date)}`);
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error || "Cannot load staff schedule");
+
+    return Array.isArray(json.items)
+      ? json.items
+      : Array.isArray(json.data)
+        ? json.data
+        : [];
+  } catch (e) {
+    console.error("loadStaffScheduleApi failed:", e);
+    alert("Не вдалося завантажити графік змін: " + (e?.message || e));
+    return [];
+  }
+}
+
+async function saveStaffScheduleApi(payload) {
+  try {
+    const res = await fetch("/api/staff-schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error || "Cannot save staff schedule");
+
+    return json.data || json.item || null;
+  } catch (e) {
+    console.error("saveStaffScheduleApi failed:", e);
+    alert("Не вдалося зберегти зміну: " + (e?.message || e));
+    return null;
+  }
+}
 
 async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
@@ -3449,10 +3487,27 @@ async function renderCalendarTab() {
   `;
 
   const staff = await loadStaffApi();
-  const events = await loadCalendarApi();
-  const todayEvents = events.filter((x) => String(x.event_date || "") === today);
+const events = await loadCalendarApi();
+const staffSchedule = await loadStaffScheduleApi(today);
+
+const activeStaffIds = new Set(
+  staffSchedule
+    .filter((x) => x.is_active !== false)
+    .map((x) => String(x.staff_id))
+);
+
+const staffOnShift = staffSchedule.length
+  ? staff.filter((doc) => activeStaffIds.has(String(doc.id)))
+  : staff;
+
+const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
   if (calendarMode === "schedule") {
+    const schedule = await loadStaffScheduleApi(today);
+
+const scheduleMap = new Map(
+  schedule.map((x) => [String(x.staff_id), x])
+);
   page.innerHTML = `
     <div class="card calendarCard">
       <div class="calendarHeader">
@@ -3477,7 +3532,11 @@ async function renderCalendarTab() {
       </div>
 
       <div class="scheduleList">
-        ${staff.map((doc) => `
+        ${staff.map((doc) => {
+  const row = scheduleMap.get(String(doc.id));
+  const isActive = row ? row.is_active !== false : true;
+
+  return `
           <div class="scheduleCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
             <div>
               <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
@@ -3485,14 +3544,15 @@ async function renderCalendarTab() {
             </div>
 
             <button
-              class="scheduleStatus active"
+              class="scheduleStatus ${isActive ? "active" : ""}"
               type="button"
               data-schedule-staff-id="${escapeHtml(String(doc.id))}"
             >
-              На зміні
+              ${isActive ? "На зміні" : "Вихідний"}
             </button>
-          </div>
-        `).join("")}
+</div>
+`;
+}).join("")}
       </div>
     </div>
   `;
@@ -3532,11 +3592,23 @@ async function renderCalendarTab() {
   });
 
   $$(".scheduleStatus").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      btn.classList.toggle("active");
-      btn.textContent = btn.classList.contains("active") ? "На зміні" : "Вихідний";
+  btn.addEventListener("click", async () => {
+    const staffId = btn.dataset.scheduleStaffId;
+
+    const isActive = !btn.classList.contains("active");
+
+    const saved = await saveStaffScheduleApi({
+      work_date: today,
+      staff_id: staffId,
+      is_active: isActive,
     });
+
+    if (!saved) return;
+
+    btn.classList.toggle("active", isActive);
+    btn.textContent = isActive ? "На зміні" : "Вихідний";
   });
+});
 
   return;
 }
