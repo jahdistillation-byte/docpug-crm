@@ -2789,12 +2789,6 @@ function bindPatientCardButtons() {
     else setHash("owners");
   });
 
-  $("#btnAddVisit")?.addEventListener("click", () => {
-    const pet = state.selectedPet;
-    if (!pet) return alert("Пацієнт не обраний");
-    openVisitModalForCreate(pet);
-  });
-
   $$(".patientTab").forEach((btn) => {
     btn.addEventListener("click", async () => {
       $$(".patientTab").forEach((b) => b.classList.remove("active"));
@@ -3513,14 +3507,14 @@ const scheduleMap = new Map(
       <div class="calendarHeader">
         <div>
           <h2>Календар</h2>
-          <div class="hint">Графік змін ветеринарів на обраний день.</div>
+       <div class="hint">Співробітники клініки, ставки, спеціалізації та налаштування календаря.</div>
         </div>
 
         <div class="calendarModes">
           <button class="ghost" data-cal-mode="day">День</button>
           <button class="ghost" data-cal-mode="week">Тиждень</button>
           <button class="ghost" data-cal-mode="month">Місяць</button>
-          <button class="primary" data-cal-mode="schedule">Графік</button>
+          <button class="primary" data-cal-mode="schedule">Ветеринари</button>
           <button class="ghost" data-cal-mode="routes">Маршрути</button>
         </div>
       </div>
@@ -3539,10 +3533,21 @@ const scheduleMap = new Map(
   return `
           <div class="scheduleCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
             <div>
-              <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-              <div class="hint">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
-            </div>
+              <div>
+  <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
 
+  <div class="hint">
+    ${escapeHtml(doc.specialization || "Без спеціалізації")}
+  </div>
+
+  <div class="hint">
+    💰 Зміна: ${escapeHtml(String(doc.shift_rate || 0))} грн
+  </div>
+
+  <div class="hint">
+    📈 %: ${escapeHtml(String(doc.percent_rate || 0))}
+  </div>
+</div>
             <button
               class="scheduleStatus ${isActive ? "active" : ""}"
               type="button"
@@ -3729,7 +3734,7 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   <button class="primary" data-cal-mode="day">День</button>
   <button class="ghost" data-cal-mode="week">Тиждень</button>
   <button class="ghost" data-cal-mode="month">Місяць</button>
-  <button class="ghost" data-cal-mode="schedule">Графік</button>
+  <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
   <button class="ghost" data-cal-mode="routes">Маршрути</button>
 </div>
 </div>
