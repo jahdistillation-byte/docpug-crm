@@ -2184,22 +2184,6 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .calEditPanel{
   max-width:620px;
 }
-.scheduleList{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.scheduleCard{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  padding:18px;
-  border:1px solid rgba(0,0,0,.06);
-  border-radius:18px;
-  background:#fff;
-}
 
 .scheduleName{
   font-weight:700;
@@ -2229,16 +2213,6 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 /* CALENDAR SCHEDULE MODE FIX */
 
 .calendarCard{
-  width:100%;
-  box-sizing:border-box;
-}
-
-.scheduleList{
-  width:100%;
-  max-width:none;
-}
-
-.scheduleCard{
   width:100%;
   box-sizing:border-box;
 }
@@ -2338,20 +2312,7 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   max-width:260px !important;
 }
 /* Staff / Vets section */
-.scheduleList {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
 
-.scheduleCard {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-  padding: 18px 20px;
-}
 
 .scheduleCard > div:first-child {
   display: grid;
@@ -2361,4 +2322,22 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .scheduleName {
   font-size: 18px;
   font-weight: 900;
+}
+/* Staff / Vets section */
+.scheduleList {
+  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px;
+}
+
+.scheduleCard {
+  width: 100% !important;
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border-radius: 18px;
 }
