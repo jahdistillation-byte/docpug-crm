@@ -2447,3 +2447,66 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   color: var(--muted);
   font-size: 13px;
 }
+.vetCard {
+  position: relative;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 22px;
+  padding: 22px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.72);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.86), rgba(255,255,255,.58));
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 18px 48px rgba(50, 35, 95, .10),
+    inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.vetCard::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 23px;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,.55),
+    rgba(255,255,255,0) 42%
+  );
+}
+
+.vetInfo {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vetInfo .scheduleName {
+  font-size: 20px;
+  font-weight: 950;
+  color: #151025;
+  letter-spacing: -0.02em;
+}
+
+.vetInfo .hint {
+  font-size: 14px;
+  color: rgba(35, 28, 55, .68);
+  font-weight: 650;
+}
+
+.vetActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.vetCard .ghost,
+.vetCard .scheduleStatus {
+  position: relative;
+  z-index: 2;
+}

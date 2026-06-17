@@ -3535,10 +3535,10 @@ const scheduleMap = new Map(
       <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
         <div class="vetInfo">
           <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-          <div class="hint">${escapeHtml(doc.specialization || "Без спеціалізації")}</div>
-          <div class="hint">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
-          <div class="hint">💰 Зміна: ${escapeHtml(String(doc.shift_rate || 0))} грн</div>
-          <div class="hint">📈 %: ${escapeHtml(String(doc.percent_rate || 0))}</div>
+          <div class="hint">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
+<div class="hint">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
+<div class="hint">💰 Ставка: ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</div>
+<div class="hint">📈 Відсоток: ${escapeHtml(String(doc.percent_rate || 0))}%</div>
         </div>
 
         <div class="vetActions">
