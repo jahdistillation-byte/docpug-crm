@@ -3660,6 +3660,7 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   <button class="ghost" data-cal-mode="schedule">Графік</button>
   <button class="ghost" data-cal-mode="routes">Маршрути</button>
 </div>
+</div>
 
       <div class="calendarTop">
        <button class="ghost" id="calPrevDay" type="button">←</button>
