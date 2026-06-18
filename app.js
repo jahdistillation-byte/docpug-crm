@@ -6187,8 +6187,19 @@ $("#visitSave")?.addEventListener("click", async () => {
     const modal = $("#visitModal");
     const editVisitId = modal?.dataset?.visitId || ""; // ✅ set in openVisitModalForEdit; empty in create
 
-    const pet = state.selectedPet;
-    if (!pet) return alert("Пацієнт не обраний");
+    let pet = state.selectedPet;
+
+const selectedPatientId = ($("#visitPatientSelect")?.value || "").trim();
+
+if (!pet && selectedPatientId) {
+  const patients = window.__visitPatientList || await loadPatientsApi();
+
+  pet = patients.find(
+    (p) => String(p.id) === String(selectedPatientId)
+  );
+}
+
+if (!pet) return alert("Пацієнт не обраний");
 
     const date = ($("#visitDate")?.value || todayISO()).trim();
     const notePlain = ($("#visitNote")?.value || "").trim();
@@ -7095,20 +7106,12 @@ async function openVisitFromCalendar(hour, staffId) {
 
   delete modal.dataset.visitId;
 
-  const select = $("#visitPatientSelect");
-
   const patients = await loadPatientsApi();
+window.__visitPatientList = patients;
 
-  if (select) {
-    select.innerHTML = `
-      <option value="">Оберіть пацієнта</option>
-      ${patients.map((p) => `
-        <option value="${escapeHtml(String(p.id))}">
-          ${escapeHtml(p.name || "Пацієнт")}
-        </option>
-      `).join("")}
-    `;
-  }
+$("#visitPatientSelect").value = "";
+$("#visitPatientSearch").value = "";
+$("#visitPatientResults").innerHTML = "";
 
   $("#visitPatientBlock").style.display = "block";
 
@@ -7129,3 +7132,57 @@ async function openVisitFromCalendar(hour, staffId) {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 }
+$("#visitPatientSearch")?.addEventListener("input", () => {
+  const q = ($("#visitPatientSearch").value || "").toLowerCase().trim();
+  const box = $("#visitPatientResults");
+  const hidden = $("#visitPatientSelect");
+
+  if (!box || !hidden) return;
+
+  hidden.value = "";
+
+  if (!q) {
+    box.innerHTML = "";
+    return;
+  }
+
+  const patients = window.__visitPatientList || [];
+
+  const found = patients
+    .filter((p) => {
+      const text = [
+        p.name,
+        p.owner_name,
+        p.owner_phone,
+        p.phone,
+        p.species,
+        p.breed,
+      ].join(" ").toLowerCase();
+
+      return text.includes(q);
+    })
+    .slice(0, 12);
+
+  box.innerHTML = found.length
+    ? found.map((p) => `
+      <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(p.id))}">
+        <strong>${escapeHtml(p.name || "Пацієнт")}</strong>
+        <span>${escapeHtml(p.owner_name || "Власник не вказаний")} · ${escapeHtml(p.owner_phone || p.phone || "телефон не вказаний")}</span>
+      </div>
+    `).join("")
+    : `<div class="hint">Нічого не знайдено</div>`;
+
+  $$("[data-select-visit-patient]").forEach((item) => {
+    item.addEventListener("click", () => {
+      const id = item.dataset.selectVisitPatient;
+      const patient = patients.find((p) => String(p.id) === String(id));
+
+      hidden.value = id;
+      $("#visitPatientSearch").value = patient
+        ? `${patient.name || "Пацієнт"} · ${patient.owner_name || ""}`
+        : id;
+
+      box.innerHTML = "";
+    });
+  });
+});

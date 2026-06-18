@@ -2510,3 +2510,27 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 .vetCard .scheduleStatus {
   font-weight: 900;
 }
+.patientSearchResults {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.patientSearchItem {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(124,92,255,.14);
+  cursor: pointer;
+}
+
+.patientSearchItem:hover {
+  background: rgba(124,92,255,.10);
+}
+
+.patientSearchItem strong {
+  display: block;
+  font-weight: 900;
+}

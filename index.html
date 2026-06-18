@@ -197,9 +197,16 @@
         <div id="visitPatientBlock" style="display:none;">
   <label class="field">
     <div class="label">Пацієнт</div>
-    <select class="input" id="visitPatientSelect">
-      <option value="">Оберіть пацієнта</option>
-    </select>
+    <input
+  class="input"
+  id="visitPatientSearch"
+  placeholder="Пошук: пацієнт, власник, телефон..."
+  autocomplete="off"
+/>
+
+<input id="visitPatientSelect" type="hidden">
+
+<div id="visitPatientResults" class="patientSearchResults"></div>
   </label>
 
   <button
