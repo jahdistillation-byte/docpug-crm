@@ -7158,12 +7158,17 @@ $("#visitNote").value = "";
   $("#visitRx").value = "";
 $("#visitNewPatientBox").style.display = "none";
 
-$("#btnCreatePatientFromVisit")?.onclick = () => {
-  const box = $("#visitNewPatientBox");
+const btnCreatePatientFromVisit = $("#btnCreatePatientFromVisit");
 
-  box.style.display =
-    box.style.display === "none" ? "block" : "none";
-};
+if (btnCreatePatientFromVisit) {
+  btnCreatePatientFromVisit.onclick = () => {
+    const box = $("#visitNewPatientBox");
+    if (!box) return;
+
+    box.style.display =
+      box.style.display === "none" ? "block" : "none";
+  };
+}
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
