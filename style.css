@@ -2534,3 +2534,25 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   display: block;
   font-weight: 900;
 }
+/* Calendar doctors horizontal scroll fix */
+.calendarDayGrid {
+  display: grid !important;
+  grid-template-columns: 70px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  padding-bottom: 10px !important;
+}
+
+.calDoctorsGrid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+  gap: 12px !important;
+  min-width: 980px !important;
+}
+
+.calDoctorCol {
+  min-width: 0 !important;
+}
