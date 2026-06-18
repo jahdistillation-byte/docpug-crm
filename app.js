@@ -7156,6 +7156,14 @@ $("#visitNote").value = "";
   $("#visitDx").value = "";
   $("#visitWeight").value = "";
   $("#visitRx").value = "";
+$("#visitNewPatientBox").style.display = "none";
+
+$("#btnCreatePatientFromVisit")?.onclick = () => {
+  const box = $("#visitNewPatientBox");
+
+  box.style.display =
+    box.style.display === "none" ? "block" : "none";
+};
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
