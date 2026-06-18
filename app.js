@@ -7122,9 +7122,23 @@ $("#visitPatientResults").innerHTML = "";
 
   $("#visitDuration").value = "60";
 
-  $("#visitStaff").value = staffId || "";
+const staff = await loadStaffApi();
 
-  $("#visitNote").value = "";
+const staffSelect = $("#visitStaff");
+if (staffSelect) {
+  staffSelect.innerHTML = `
+    <option value="">Оберіть ветеринара</option>
+    ${staff.map((doc) => `
+      <option value="${escapeHtml(String(doc.id))}">
+        ${escapeHtml(doc.name || "Працівник")}
+      </option>
+    `).join("")}
+  `;
+
+  staffSelect.value = String(staffId || "");
+}
+
+$("#visitNote").value = "";
   $("#visitDx").value = "";
   $("#visitWeight").value = "";
   $("#visitRx").value = "";
