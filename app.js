@@ -3814,9 +3814,15 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   if (slot.querySelector(".calEventCard")) return;
 
   const hour = slot.dataset.hour;
-  const staffId = slot.dataset.staffId;
+const staffId = slot.dataset.staffId;
 
-  openVisitFromCalendar(hour, staffId);
+console.log("CLICK SLOT", {
+  hour,
+  staffId,
+  slot
+});
+
+openVisitFromCalendar(hour, staffId);
 });
     slot.addEventListener("dragover", (e) => {
       e.preventDefault();
