@@ -3718,7 +3718,12 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
                   }).join("")
                 : isCoveredByLongEvent
                   ? ""
-                  : `<div class="calEmptySlot">Перетягни лікаря</div>`
+                 : `<div
+    class="calEmptySlot"
+    data-empty-slot="1"
+    data-hour="${escapeHtml(hour)}"
+    data-staff-id="${escapeHtml(String(doc.id))}"
+  >+ Запис</div>`
             }
           </div>
         `;
@@ -3810,19 +3815,18 @@ const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
   });
 
   $$(".calSlot").forEach((slot) => {
-    slot.addEventListener("click", () => {
+    slot.addEventListener("click", (e) => {
+  if (slot.classList.contains("calSlotCovered")) return;
   if (slot.querySelector(".calEventCard")) return;
 
-  const hour = slot.dataset.hour;
-const staffId = slot.dataset.staffId;
+  const target = e.target.closest("[data-empty-slot]") || slot;
 
-console.log("CLICK SLOT", {
-  hour,
-  staffId,
-  slot
-});
+  const hour = target.dataset.hour || slot.dataset.hour;
+  const staffId = target.dataset.staffId || slot.dataset.staffId;
 
-openVisitFromCalendar(hour, staffId);
+  if (!hour || !staffId) return;
+
+  openVisitFromCalendar(hour, staffId);
 });
     slot.addEventListener("dragover", (e) => {
       e.preventDefault();
