@@ -2534,28 +2534,34 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   display: block;
   font-weight: 900;
 }
-/* FIX: doctors columns must stay in one horizontal row */
-.calDoctorsGrid {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: 12px !important;
-  width: max-content !important;
-  min-width: max-content !important;
-  overflow: visible !important;
+/* Calendar day: keep doctors in one horizontal row */
+.calendarWorkArea{
+  overflow-x:auto !important;
+  overflow-y:visible !important;
 }
 
-.calDoctorCol {
-  flex: 0 0 280px !important;
-  width: 280px !important;
-  min-width: 280px !important;
+.calendarDayGrid{
+  display:grid !important;
+  grid-template-columns:70px auto !important;
+  gap:12px !important;
+  width:max-content !important;
+  min-width:100% !important;
+  overflow:visible !important;
+  padding-bottom:10px !important;
 }
 
-.calendarDayGrid {
-  overflow-x: auto !important;
-  overflow-y: visible !important;
+.calDoctorsGrid{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:nowrap !important;
+  gap:12px !important;
+  width:max-content !important;
+  min-width:max-content !important;
+  overflow:visible !important;
 }
 
-.calDoctorCol {
-  min-width: 0 !important;
+.calDoctorCol{
+  flex:0 0 280px !important;
+  width:280px !important;
+  min-width:280px !important;
 }
