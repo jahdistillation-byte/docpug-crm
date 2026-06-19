@@ -2536,8 +2536,10 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 }
 /* Calendar day: keep doctors in one horizontal row */
 .calendarWorkArea{
+  display:block !important;
   overflow-x:auto !important;
   overflow-y:visible !important;
+  width:100% !important;
 }
 
 .calendarDayGrid{
@@ -2564,4 +2566,8 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   flex:0 0 280px !important;
   width:280px !important;
   min-width:280px !important;
+}
+
+.calStaffPanel{
+  display:none !important;
 }
