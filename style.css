@@ -2645,3 +2645,114 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
 #visitPatientResults{
   max-height:170px !important;
 }
+/* Modern calendar event edit modal */
+#calendarEditModal .modal__panel,
+#calEditModal .modal__panel,
+#eventEditModal .modal__panel {
+  width: min(760px, calc(100vw - 36px)) !important;
+  max-width: 760px !important;
+  max-height: calc(100vh - 40px) !important;
+  margin: 20px auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(124,92,255,.20), transparent 34%),
+    radial-gradient(circle at 95% 10%, rgba(154,107,255,.14), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(245,241,255,.93)) !important;
+
+  border: 1px solid rgba(124,92,255,.18) !important;
+  box-shadow: 0 30px 100px rgba(33,22,70,.32) !important;
+  backdrop-filter: blur(26px) !important;
+}
+
+#calendarEditModal .modal__head,
+#calEditModal .modal__head,
+#eventEditModal .modal__head {
+  flex: 0 0 auto !important;
+  padding: 20px 22px !important;
+  background: rgba(255,255,255,.74) !important;
+  border-bottom: 1px solid rgba(124,92,255,.14) !important;
+}
+
+#calendarEditModal .modal__title,
+#calEditModal .modal__title,
+#eventEditModal .modal__title {
+  font-size: 22px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.4px !important;
+}
+
+#calendarEditModal .modal__sub,
+#calEditModal .modal__sub,
+#eventEditModal .modal__sub {
+  color: #6f6b82 !important;
+  font-weight: 750 !important;
+}
+
+#calendarEditModal .modal__body,
+#calEditModal .modal__body,
+#eventEditModal .modal__body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 22px !important;
+
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 16px !important;
+}
+
+#calendarEditModal .field,
+#calEditModal .field,
+#eventEditModal .field {
+  margin: 0 !important;
+}
+
+#calendarEditModal .field:has(textarea),
+#calEditModal .field:has(textarea),
+#eventEditModal .field:has(textarea) {
+  grid-column: 1 / -1 !important;
+}
+
+#calendarEditModal .input,
+#calendarEditModal .textarea,
+#calendarEditModal input,
+#calendarEditModal textarea,
+#calendarEditModal select,
+#calEditModal .input,
+#calEditModal .textarea,
+#calEditModal input,
+#calEditModal textarea,
+#calEditModal select,
+#eventEditModal .input,
+#eventEditModal .textarea,
+#eventEditModal input,
+#eventEditModal textarea,
+#eventEditModal select {
+  width: 100% !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.88) !important;
+  border: 1px solid rgba(124,92,255,.16) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.85),
+    0 8px 22px rgba(43,36,73,.04) !important;
+}
+
+#calendarEditModal textarea,
+#calEditModal textarea,
+#eventEditModal textarea {
+  min-height: 130px !important;
+}
+
+#calendarEditModal .modal__foot,
+#calEditModal .modal__foot,
+#eventEditModal .modal__foot {
+  flex: 0 0 auto !important;
+  padding: 16px 22px !important;
+  background: rgba(255,255,255,.86) !important;
+  border-top: 1px solid rgba(124,92,255,.14) !important;
+  backdrop-filter: blur(18px) !important;
+}
