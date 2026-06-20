@@ -818,6 +818,8 @@ async function createPatientApi(payload) {
   }
 }
 
+
+
     // =========================
 // Owners API (robust + include)
 // =========================
@@ -6207,6 +6209,40 @@ if (!pet && selectedPatientId) {
   pet = patients.find(
     (p) => String(p.id) === String(selectedPatientId)
   );
+}
+
+// ✅ Новый пациент из календаря
+if (!pet && $("#visitNewPatientBox")?.style.display !== "none") {
+  const ownerName = ($("#visitNewOwnerName")?.value || "").trim();
+  const ownerPhone = ($("#visitNewOwnerPhone")?.value || "").trim();
+  const petName = ($("#visitNewPetName")?.value || "").trim();
+  const species = ($("#visitNewPetSpecies")?.value || "").trim();
+  const breed = ($("#visitNewPetBreed")?.value || "").trim();
+
+  if (!ownerName) return alert("Вкажи власника");
+  if (!ownerPhone) return alert("Вкажи телефон власника");
+  if (!petName) return alert("Вкажи кличку пацієнта");
+
+  const owner = await createOwner(ownerName, ownerPhone, "");
+
+  if (!owner?.id) return alert("Не вдалося створити власника");
+
+  const createdPet = await createPatientApi({
+    owner_id: owner.id,
+    name: petName,
+    species,
+    breed,
+  });
+
+  if (!createdPet?.id) return alert("Не вдалося створити пацієнта");
+
+  pet = createdPet;
+
+  state.selectedPet = pet;
+  state.selectedPetId = pet.id;
+
+  await loadOwners();
+  await loadPatientsApi();
 }
 
 if (!pet) return alert("Пацієнт не обраний");
