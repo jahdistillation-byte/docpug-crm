@@ -7118,11 +7118,23 @@ async function openVisitFromCalendar(hour, staffId) {
 
   const patients = await loadPatientsApi();
 
-window.__visitPatientList = patients.map((p) => ({
-  ...p,
-  owner_name: p.owner_name || p.owner || "",
-  owner_phone: p.owner_phone || p.phone || "",
-}));
+if (!Array.isArray(state.owners) || !state.owners.length) {
+  await loadOwners();
+}
+
+const ownersMap = new Map(
+  (state.owners || []).map((o) => [String(o.id), o])
+);
+
+window.__visitPatientList = patients.map((p) => {
+  const owner = ownersMap.get(String(p.owner_id));
+
+  return {
+    ...p,
+    owner_name: owner?.name || p.owner_name || p.owner || "",
+    owner_phone: owner?.phone || p.owner_phone || p.phone || "",
+  };
+});
 
 $("#visitPatientSelect").value = "";
 $("#visitPatientSearch").value = "";
