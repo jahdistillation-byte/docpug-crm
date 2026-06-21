@@ -3569,9 +3569,17 @@ if (calendarMode === "week") {
                         <div class="weekEventTitle">
                           ${escapeHtml(ev.title || "Візит")}
                         </div>
-                        <div class="weekEventMeta">
-                          ${escapeHtml(ev.note || "")}
-                        </div>
+                        <div class="weekEventVet">
+  👨‍⚕️ ${escapeHtml(
+    (staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || "Лікар не вказаний"
+  )}
+</div>
+
+${ev.note ? `
+  <div class="weekEventMeta">
+    ${escapeHtml(ev.note)}
+  </div>
+` : ""}
                       </div>
                     `).join("")
                     : `<div class="weekEmpty">Немає записів</div>`
