@@ -2860,3 +2860,94 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   padding:12px 18px !important;
   border-radius:16px !important;
 }
+/* Week calendar */
+.weekCalendarGrid{
+  display:grid;
+  grid-template-columns:repeat(7, minmax(180px, 1fr));
+  gap:12px;
+  overflow-x:auto;
+  padding-bottom:10px;
+}
+
+.weekDayCol{
+  min-height:520px;
+  border-radius:24px;
+  background:rgba(255,255,255,.48);
+  border:1px solid rgba(124,92,255,.14);
+  box-shadow:0 14px 34px rgba(48,39,82,.06);
+  overflow:hidden;
+}
+
+.weekDayHead{
+  padding:14px;
+  background:rgba(255,255,255,.74);
+  border-bottom:1px solid rgba(124,92,255,.12);
+}
+
+.weekDayName{
+  font-size:18px;
+  font-weight:950;
+}
+
+.weekDayDate{
+  margin-top:4px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.weekDayBody{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.weekEventCard{
+  cursor:pointer;
+  padding:12px;
+  border-radius:18px;
+  background:rgba(255,255,255,.86);
+  border-left:5px solid var(--accent);
+  box-shadow:0 12px 28px rgba(48,39,82,.08);
+}
+
+.weekEventCard:hover{
+  transform:translateY(-1px);
+  box-shadow:0 16px 34px rgba(48,39,82,.12);
+}
+
+.weekEventTime{
+  font-size:12px;
+  color:var(--accent);
+  font-weight:950;
+}
+
+.weekEventTitle{
+  margin-top:6px;
+  font-weight:950;
+}
+
+.weekEventMeta{
+  margin-top:5px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:750;
+}
+
+.weekEmpty{
+  height:80px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  border:1px dashed rgba(124,92,255,.16);
+  color:var(--muted);
+  font-weight:850;
+  opacity:.55;
+}
+
+@media(max-width:1100px){
+  .weekCalendarGrid{
+    grid-template-columns:repeat(7, 220px);
+  }
+}

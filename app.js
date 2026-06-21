@@ -3497,6 +3497,141 @@ const staffOnShift = staffSchedule.length
   : staff;
 
 const todayEvents = events.filter((x) => String(x.event_date || "") === today);
+if (calendarMode === "week") {
+  const base = new Date(today);
+  const day = base.getDay() || 7;
+  const monday = new Date(base);
+  monday.setDate(base.getDate() - day + 1);
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toISOString().slice(0, 10);
+  });
+
+  const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+
+  const weekEvents = events.filter((ev) =>
+    weekDays.includes(String(ev.event_date || ""))
+  );
+
+  page.innerHTML = `
+    <div class="card calendarCard">
+      <div class="calendarHeader">
+        <div>
+          <h2>Календар</h2>
+          <div class="hint">Тижневий розклад записів клініки.</div>
+        </div>
+
+        <div class="calendarModes">
+          <button class="ghost" data-cal-mode="day">День</button>
+          <button class="primary" data-cal-mode="week">Тиждень</button>
+          <button class="ghost" data-cal-mode="month">Місяць</button>
+          <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
+          <button class="ghost" data-cal-mode="routes">Маршрути</button>
+        </div>
+      </div>
+
+      <div class="calendarTop">
+        <button class="ghost" id="calPrevWeek" type="button">←</button>
+        <div class="calendarDate">
+          ${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}
+        </div>
+        <button class="ghost" id="calNextWeek" type="button">→</button>
+      </div>
+
+      <div class="weekCalendarGrid">
+        ${weekDays.map((date, i) => {
+          const dayEvents = weekEvents
+            .filter((ev) => String(ev.event_date || "") === date)
+            .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")));
+
+          return `
+            <div class="weekDayCol">
+              <div class="weekDayHead">
+                <div class="weekDayName">${dayNames[i]}</div>
+                <div class="weekDayDate">${escapeHtml(date)}</div>
+              </div>
+
+              <div class="weekDayBody" data-week-date="${escapeHtml(date)}">
+                ${
+                  dayEvents.length
+                    ? dayEvents.map((ev) => `
+                      <div
+                        class="weekEventCard"
+                        data-cal-event-id="${escapeHtml(String(ev.id))}"
+                      >
+                        <div class="weekEventTime">
+                          ${escapeHtml(String(ev.start_time || "").slice(0, 5))}
+                          —
+                          ${escapeHtml(String(ev.end_time || "").slice(0, 5))}
+                        </div>
+                        <div class="weekEventTitle">
+                          ${escapeHtml(ev.title || "Візит")}
+                        </div>
+                        <div class="weekEventMeta">
+                          ${escapeHtml(ev.note || "")}
+                        </div>
+                      </div>
+                    `).join("")
+                    : `<div class="weekEmpty">Немає записів</div>`
+                }
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+
+  $("[data-cal-mode='day']")?.addEventListener("click", async () => {
+    calendarMode = "day";
+    await renderCalendarTab();
+  });
+
+  $("[data-cal-mode='month']")?.addEventListener("click", async () => {
+    calendarMode = "month";
+    await renderCalendarTab();
+  });
+
+  $("[data-cal-mode='schedule']")?.addEventListener("click", async () => {
+    calendarMode = "schedule";
+    await renderCalendarTab();
+  });
+
+  $("[data-cal-mode='routes']")?.addEventListener("click", async () => {
+    calendarMode = "routes";
+    await renderCalendarTab();
+  });
+
+  $("#calPrevWeek")?.addEventListener("click", async () => {
+    const d = new Date(weekDays[0]);
+    d.setDate(d.getDate() - 7);
+    window.__calendarDate = d.toISOString().slice(0, 10);
+    await renderCalendarTab();
+  });
+
+  $("#calNextWeek")?.addEventListener("click", async () => {
+    const d = new Date(weekDays[0]);
+    d.setDate(d.getDate() + 7);
+    window.__calendarDate = d.toISOString().slice(0, 10);
+    await renderCalendarTab();
+  });
+
+  $$("[data-cal-event-id]").forEach((card) => {
+    card.addEventListener("click", () => {
+      const id = card.dataset.calEventId;
+      const ev = weekEvents.find((x) => String(x.id) === String(id));
+      if (!ev) return;
+
+      openCalendarEditModal(ev, ev.event_date || today, async () => {
+        await renderCalendarTab();
+      });
+    });
+  });
+
+  return;
+}
 
   if (calendarMode === "schedule") {
     const schedule = await loadStaffScheduleApi(today);
