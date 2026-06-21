@@ -2535,7 +2535,7 @@ async function renderVisitsTab() {
 }
 
 // =========================
-// OWNER PAGE — server first patients list (render only)
+// OWNER PAGE — server first patients list (render only) лол
 // =========================
 function renderOwnerPage(ownerId) {
   const owner = getOwnerById(ownerId);
