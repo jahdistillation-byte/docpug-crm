@@ -576,6 +576,99 @@ def api_delete_owner(owner_id):
 # =========================
 # API: STAFF
 # =========================
+# =========================
+# API: SPECIALIZATIONS
+# =========================
+
+@app.get("/api/specializations")
+def api_get_specializations():
+    try:
+        res = (
+            supabase.table("specializations")
+            .select("*")
+            .eq("org_id", ORG_ID)
+            .order("name")
+            .execute()
+        )
+
+        return ok(res.data or [])
+
+    except Exception as e:
+        return fail(str(e), 500)
+
+
+@app.post("/api/specializations")
+def api_create_specialization():
+    try:
+        d = request.get_json(silent=True) or {}
+
+        name = (d.get("name") or "").strip()
+        if not name:
+            return fail("name required", 400)
+
+        payload = {
+            "org_id": ORG_ID,
+            "name": name,
+            "color": d.get("color") or "#7C5CFF",
+            "is_active": True,
+        }
+
+        res = supabase.table("specializations").insert(payload).execute()
+        row = res.data[0] if getattr(res, "data", None) else payload
+
+        return ok(row)
+
+    except Exception as e:
+        return fail(str(e), 500)
+
+
+@app.put("/api/specializations/<spec_id>")
+def api_update_specialization(spec_id):
+    try:
+        if not spec_id:
+            return fail("spec_id required", 400)
+
+        d = request.get_json(silent=True) or {}
+
+        payload = {
+            "name": d.get("name"),
+            "color": d.get("color"),
+            "is_active": d.get("is_active"),
+        }
+
+        payload = {k: v for k, v in payload.items() if v not in ("", None)}
+
+        res = (
+            supabase.table("specializations")
+            .update(payload)
+            .eq("org_id", ORG_ID)
+            .eq("id", spec_id)
+            .execute()
+        )
+
+        row = res.data[0] if getattr(res, "data", None) else payload
+        return ok(row)
+
+    except Exception as e:
+        return fail(str(e), 500)
+
+
+@app.delete("/api/specializations/<spec_id>")
+def api_delete_specialization(spec_id):
+    try:
+        if not spec_id:
+            return fail("spec_id required", 400)
+
+        # мягкое удаление, чтобы старые врачи/фильтры не ломались
+        supabase.table("specializations").update({
+            "is_active": False
+        }).eq("org_id", ORG_ID).eq("id", spec_id).execute()
+
+        return ok(True)
+
+    except Exception as e:
+        return fail(str(e), 500)
+    
 
 @app.get("/api/staff")
 def api_staff():
