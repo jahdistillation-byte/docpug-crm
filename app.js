@@ -3643,6 +3643,7 @@ ${ev.note ? `
 
   if (calendarMode === "schedule") {
     const schedule = await loadStaffScheduleApi(today);
+    const specializations = await loadSpecializationsApi();
 
 const scheduleMap = new Map(
   schedule.map((x) => [String(x.staff_id), x])
@@ -3670,6 +3671,30 @@ const scheduleMap = new Map(
           <button class="ghost" data-cal-mode="routes">Маршрути</button>
         </div>
       </div>
+
+
+      <div class="specPanel">
+  <div class="specPanelHead">
+    <div>
+      <div class="specPanelTitle">Напрями клініки</div>
+      <div class="hint">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
+    </div>
+
+    <button class="primary" id="btnAddSpec" type="button">+ Додати напрям</button>
+  </div>
+
+  <div class="specList">
+    ${
+      specializations.length
+        ? specializations.map((s) => `
+          <div class="specPill" style="border-left:5px solid ${escapeHtml(s.color || "#7C5CFF")}">
+            ${escapeHtml(s.name || "Напрям")}
+          </div>
+        `).join("")
+        : `<div class="hint">Напрями ще не створені.</div>`
+    }
+  </div>
+</div>
 
       <div class="vetList">
   ${staff.map((doc) => {
@@ -3710,6 +3735,18 @@ const scheduleMap = new Map(
 
   $("#btnAddStaff")?.addEventListener("click", () => {
   openCreateStaffModal();
+});
+
+$("#btnAddSpec")?.addEventListener("click", async () => {
+  const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
+  if (!name) return;
+
+  const created = await createSpecializationApi({
+    name,
+    color: "#7C5CFF",
+  });
+
+  if (created) await renderCalendarTab();
 });
 
   $("[data-cal-mode='day']")?.addEventListener("click", async () => {
@@ -4089,6 +4126,43 @@ function openCreateStaffModal() {
   }).then(() => {
     renderCalendarTab();
   });
+}
+
+async function loadSpecializationsApi() {
+  try {
+    const res = await fetch("/api/specializations");
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error || "Cannot load specializations");
+
+    return Array.isArray(json.data) ? json.data : [];
+  } catch (e) {
+    console.error("loadSpecializationsApi failed:", e);
+    return [];
+  }
+}
+
+async function createSpecializationApi(payload) {
+  try {
+    const res = await fetch("/api/specializations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error || "Не вдалося створити напрям");
+      return null;
+    }
+
+    return json.data || null;
+  } catch (e) {
+    console.error("createSpecializationApi failed:", e);
+    alert("Помилка створення напряму");
+    return null;
+  }
 }
 
 async function createStaffApi(payload) {

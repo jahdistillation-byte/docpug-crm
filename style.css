@@ -3002,3 +3002,39 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   font-size:11px !important;
   line-height:1.25 !important;
 }
+
+.specPanel{
+  margin:16px 0;
+  padding:16px;
+  border-radius:24px;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(124,92,255,.16);
+  box-shadow:0 14px 34px rgba(48,39,82,.06);
+}
+
+.specPanelHead{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+.specPanelTitle{
+  font-size:18px;
+  font-weight:950;
+}
+
+.specList{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.specPill{
+  padding:9px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(124,92,255,.14);
+  font-weight:850;
+}
