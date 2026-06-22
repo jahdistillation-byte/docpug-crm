@@ -4114,18 +4114,21 @@ $$("[data-cal-mode]").forEach((btn) => {
 }
 
 
-function openCreateStaffModal() {
-  const name = prompt("ПІБ ветеринара");
-  if (!name) return;
+async function openCreateStaffModal() {
+  $("#staffId").value = "";
+  $("#staffName").value = "";
+  $("#staffRole").value = "vet";
+  $("#staffSpecialization").value = "";
+  $("#staffPhone").value = "";
+  $("#staffShiftRate").value = 0;
+  $("#staffPercentRate").value = 0;
+  $("#staffColor").value = "#7C5CFF";
+  $("#staffNote").value = "";
 
-  const role = prompt("Посада (vet / assistant)", "vet") || "vet";
+  await renderStaffSpecsBox([]);
 
-  createStaffApi({
-    name,
-    role
-  }).then(() => {
-    renderCalendarTab();
-  });
+  $("#staffDrawer").classList.add("open");
+  $("#staffDrawer").setAttribute("aria-hidden", "false");
 }
 
 async function loadSpecializationsApi() {
@@ -7320,7 +7323,33 @@ async function updateStaffApi(staffId, payload) {
   }
 }
 
-function openEditStaffModal(staffRow) {
+async function renderStaffSpecsBox(selectedIds = []) {
+  const box = $("#staffSpecsBox");
+  if (!box) return;
+
+  const specs = await loadSpecializationsApi();
+  const selected = new Set((selectedIds || []).map(String));
+
+  box.innerHTML = specs.length
+    ? specs.map((s) => `
+      <label class="staffSpecCheck">
+        <input
+          type="checkbox"
+          data-staff-spec
+          value="${escapeHtml(String(s.id))}"
+          ${selected.has(String(s.id)) ? "checked" : ""}
+        >
+        <span
+          class="staffSpecDot"
+          style="background:${escapeHtml(s.color || "#7C5CFF")}"
+        ></span>
+        <span>${escapeHtml(s.name || "Напрям")}</span>
+      </label>
+    `).join("")
+    : `<div class="hint">Спочатку додай напрями клініки вище.</div>`;
+}
+
+async function openEditStaffModal(staffRow) {
   $("#staffId").value = staffRow.id || "";
   $("#staffName").value = staffRow.name || "";
   $("#staffRole").value = staffRow.role || "vet";
@@ -7331,6 +7360,7 @@ function openEditStaffModal(staffRow) {
   $("#staffColor").value = staffRow.color || "#7C5CFF";
   $("#staffNote").value = staffRow.note || "";
 
+  await renderStaffSpecsBox(staffRow.specialization_ids || []);
   $("#staffDrawer").classList.add("open");
   $("#staffDrawer").setAttribute("aria-hidden", "false");
 }
@@ -7341,12 +7371,15 @@ $$("[data-close-staff]").forEach((btn) => {
   });
 });
 $("#staffSave")?.addEventListener("click", async () => {
-  const staffId = $("#staffId").value;
+  const staffId = ($("#staffId").value || "").trim();
+
+  const specializationIds = $$("[data-staff-spec]:checked").map((el) => el.value);
 
   const payload = {
     name: $("#staffName").value.trim(),
     role: $("#staffRole").value,
     specialization: $("#staffSpecialization").value.trim(),
+    specialization_ids: specializationIds,
     phone: $("#staffPhone").value.trim(),
     shift_rate: Number($("#staffShiftRate").value || 0),
     percent_rate: Number($("#staffPercentRate").value || 0),
@@ -7354,11 +7387,23 @@ $("#staffSave")?.addEventListener("click", async () => {
     note: $("#staffNote").value.trim(),
   };
 
-  const saved = await updateStaffApi(staffId, payload);
+  if (!payload.name) {
+    alert("Вкажи ПІБ співробітника");
+    return;
+  }
+
+  let saved = null;
+
+  if (staffId) {
+    saved = await updateStaffApi(staffId, payload);
+  } else {
+    saved = await createStaffApi(payload);
+  }
 
   if (!saved) return;
 
-  $("#staffDrawer").classList.remove("open");
+  $("#staffDrawer")?.classList.remove("open");
+  $("#staffDrawer")?.setAttribute("aria-hidden", "true");
 
   await renderCalendarTab();
 });

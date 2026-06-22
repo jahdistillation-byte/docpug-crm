@@ -3038,3 +3038,37 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   border:1px solid rgba(124,92,255,.14);
   font-weight:850;
 }
+.staffSpecsBox{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.staffSpecCheck{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 11px;
+  border-radius:14px;
+  background:rgba(255,255,255,.76);
+  border:1px solid rgba(124,92,255,.14);
+  font-weight:850;
+  cursor:pointer;
+}
+
+.staffSpecCheck input{
+  display:none;
+}
+
+.staffSpecCheck:has(input:checked){
+  background:rgba(124,92,255,.12);
+  border-color:rgba(124,92,255,.32);
+  color:#4f35d6;
+}
+
+.staffSpecDot{
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  display:inline-block;
+}
