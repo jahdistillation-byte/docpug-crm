@@ -3706,6 +3706,30 @@ const scheduleMap = new Map(
         <div class="vetInfo">
           <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
           <div class="hint">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
+          <div class="vetSpecBadges">
+  ${
+    (() => {
+      const docSpecIds = Array.isArray(doc.specialization_ids)
+        ? doc.specialization_ids.map(String)
+        : [];
+
+      const docSpecs = specializations.filter((s) =>
+        docSpecIds.includes(String(s.id))
+      );
+
+      return docSpecs.length
+        ? docSpecs.map((s) => `
+          <span
+            class="vetSpecBadge"
+            style="border-left-color:${escapeHtml(s.color || "#7C5CFF")}"
+          >
+            ${escapeHtml(s.name)}
+          </span>
+        `).join("")
+        : `<span class="vetSpecBadge muted">Без напрямів</span>`;
+    })()
+  }
+</div>
 <div class="hint">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
 <div class="hint">💰 Ставка: ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</div>
 <div class="hint">📈 Відсоток: ${escapeHtml(String(doc.percent_rate || 0))}%</div>
