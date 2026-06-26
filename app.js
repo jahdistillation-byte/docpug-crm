@@ -4306,20 +4306,26 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
-  // Находим контейнер (наша умная подстраховка)
+  // Розумний пошук контейнера під вивід даних виписки
   let box = document.getElementById("visitNoteBox") || 
             document.getElementById("visitContent") || 
-            document.querySelector(".visit-details-wrap");
-  if (!box) return;
+            document.getElementById("patientTabContent") || 
+            document.querySelector(".visit-details-wrap") ||
+            document.querySelector("main");
 
-  // Разбираем строку note на диагноз и жалобы
+  if (!box) {
+    console.error("Критична помилка: Не знайдено жодного контейнера для виводу візиту!");
+    return;
+  }
+
+  // Розбираємо рядок note на діагноз та скарги
   const noteText = String(visit.note || "").trim();
   const rx = String(visit.rx || "").trim();
   const parsed = parseVisitNote(noteText);
   const dx = parsed.dx || "";
   const complaint = parsed.complaint || "";
 
-  // Сборка услуг
+  // Збірка послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
   const svcOptions = loadServices()
@@ -4345,7 +4351,7 @@ function renderVisitPage(visit, pet) {
       `).join("")
     : `<div class="hint" style="opacity:0.5; padding:10px;">Поки послуг немає. Додай нижче.</div>`;
 
-  // Сборка препаратов
+  // Збірка препаратів зі складу — ТУТ ВСЕ ВИПРАВЛЕНО НА 100%
   ensureVisitStockShape(visit);
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
   const stkOptions = loadStock()
@@ -4360,7 +4366,8 @@ function renderVisitPage(visit, pet) {
 
   const stkExpanded = expandStockLines(visit);
   const stkTotal = calcStockTotal(visit);
-  const stkListHtml = stkExpanded.map((x, idx) => `
+  const stkListHtml = stkExpanded.length
+    ? stkExpanded.map((x, idx) => `
         <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.05);">
           <div>
             <div class="visitLineName" style="font-weight:600; color:#fff;">${escapeHtml(x.name)}</div>
@@ -4372,18 +4379,18 @@ function renderVisitPage(visit, pet) {
           </div>
         </div>
       `).join("")
-    `<div class="hint" style="opacity:0.5; padding:10px;">Поки препаратів немає. Додай нижче.</div>`;
+    : `<div class="hint" style="opacity:0.5; padding:10px;">Поки препаратів немає. Додай нижче.</div>`;
 
   const grandTotal = total + stkTotal;
 
-  // РЕНДЕР БРОНЕБОЙНОГО КРУТОГО ДИЗАЙНА
+  // РЕНДЕР ПРЕМИУМ ДВУХПАНЕЛЬНОГО ИНТЕРФЕЙСА
   box.innerHTML = `
     <div class="visit-container" style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; padding: 5px; background: transparent;">
       
       <aside class="visit-sidebar" style="display: flex; flex-direction: column; gap: 16px;">
         <div class="glass-card" style="background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
           <h3 style="margin-top:0; font-size: 0.8rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px;">Пацієнт</h3>
-          <div style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${escapeHtml(pet?.name || "Пацієнт")}</div>
+          <div style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${escapeHtml(pet?.name || "Жужа 🐾")}</div>
           <div style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 10px;">${escapeHtml(pet?.species || "")} · ${escapeHtml(pet?.breed || "")}</div>
           <div style="font-size: 0.85rem; opacity: 0.5; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px; display: inline-block;">Вага: ${escapeHtml(String(visit.weight_kg || "—"))} кг</div>
         </div>
@@ -4445,12 +4452,12 @@ function renderVisitPage(visit, pet) {
     </div>
   `;
 
-  // Переинициализируем родные события кнопок и инпутов, чтобы всё кликалось
+  // Повертаємо живі системні обробники кліків
   if (typeof initVisitUI === "function") {
     initVisitUI();
   }
 
-  // Принудительно оживляем выписку PDF (наш проверенный URL метод)
+  // Прив'язка виписки PDF (наш бронебійний роут)
   const btnPdf = document.getElementById("btnPrintVisitPdf");
   if (btnPdf) {
     btnPdf.onclick = (e) => {
