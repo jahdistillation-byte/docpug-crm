@@ -4293,7 +4293,7 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 // Отрисовка страницы приёма и медицинских блоков
 // =========================
 function renderVisitPage(visit, pet) {
-  // 1. Обновляем заголовки и мета-информацию
+  // 1. Оновлюємо заголовки та мета-інформацію
   const pill = document.getElementById("visitDatePill");
   if (pill) pill.textContent = visit.date || "—";
 
@@ -4307,7 +4307,7 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
-  // 2. Безопасный разбор комбинированной нотатки (note) на Диагноз и Жалобы
+  // 2. Безпечний розбір комбінованої нотатки (note) на Діагноз та Скарги
   const noteText = String(visit.note || "").trim();
   const parsed = parseVisitNote(noteText);
   
@@ -4320,7 +4320,7 @@ function renderVisitPage(visit, pet) {
   const rxTextarea = document.getElementById("visitMedRx");
   if (rxTextarea) rxTextarea.value = String(visit.rx || "").trim();
 
-  // 3. Собираем селектор услуг
+  // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
   const svcSelect = document.getElementById("visitSvcSelect");
@@ -4332,28 +4332,28 @@ function renderVisitPage(visit, pet) {
       .join("");
   }
 
-  // Отрисовываем список выбранных услуг визита
+  // ВІДРИСОВКА ОНОВЛЕНИХ ФУТУРИСТИЧНИХ ПОСЛУГ
   const expandedServices = expandServiceLines(visit);
   const servicesTotal = calcServicesTotal(visit);
   const svcContainer = document.getElementById("visitSvcListContainer");
   if (svcContainer) {
     svcContainer.innerHTML = expandedServices.length
       ? expandedServices.map((x, idx) => `
-          <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div>
-              <div style="font-weight:600; color:#fff;">${escapeHtml(x.name)}</div>
-              <div style="font-size:0.8rem; opacity:0.5; color:#fff;">${x.qty} × ${x.price} грн</div>
+          <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); padding: 12px 18px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: inset 0 1px 1px rgba(255,255,255,0.05); transition: all 0.25s ease;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-weight:600; color:#fff; font-size: 0.95rem; letter-spacing: 0.3px;">${escapeHtml(x.name)}</div>
+              <div style="font-size:0.8rem; color: rgba(255,255,255,0.4); font-weight: 500;">${x.qty} × <span style="color: #c084fc;">${x.price} ₴</span></div>
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
-              <b style="color:#fff;">${x.lineTotal} грн</b>
-              <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+            <div style="display:flex; gap:16px; align-items:center;">
+              <b style="color: #fff; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px;">${x.lineTotal} ₴</b>
+              <button type="button" data-svc-del="${idx}" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);" onmouseenter="this.style.background='rgba(239, 68, 68, 0.25)', this.style.boxShadow='0 0 15px rgba(239, 68, 68, 0.4)', this.style.color='#fff'" onmouseleave="this.style.background='rgba(239, 68, 68, 0.1)', this.style.boxShadow='none', this.style.color='#f87171'">✕</button>
             </div>
           </div>
         `).join("")
-      : `<div class="hint" style="opacity:0.5; padding:10px; color:#fff;">Поки послуг немає. Додай вище.</div>`;
+      : `<div class="hint" style="opacity:0.4; padding:12px; color:#fff; font-size: 0.9rem; font-style: italic;">Поки послуг немає. Додайте вище.</div>`;
   }
 
-  // 4. Собираем селектор товаров / склада
+  // 4. Збираємо селектор товарів / складу
   ensureVisitStockShape(visit);
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
   const stkSelect = document.getElementById("visitStkSelect");
@@ -4365,38 +4365,180 @@ function renderVisitPage(visit, pet) {
       .join("");
   }
 
-  // Отрисовываем выбранные товары из склада
+  // ВІДРИСОВКА ОНОВЛЕНОГО ФУТУРИСТИЧНОГО СКЛАДУ
   const expandedStock = expandStockLines(visit);
   const stockTotal = calcStockTotal(visit);
   const stkContainer = document.getElementById("visitStkListContainer");
   if (stkContainer) {
     stkContainer.innerHTML = expandedStock.length
       ? expandedStock.map((x, idx) => `
-          <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div>
-              <div style="font-weight:600; color:#fff;">${escapeHtml(x.name)}</div>
-              <div style="font-size:0.8rem; opacity:0.5; color:#fff;">${x.qty} × ${x.price} грн</div>
+          <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); padding: 12px 18px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: inset 0 1px 1px rgba(255,255,255,0.05); transition: all 0.25s ease;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-weight:600; color:#fff; font-size: 0.95rem; letter-spacing: 0.3px;">${escapeHtml(x.name)}</div>
+              <div style="font-size:0.8rem; color: rgba(255,255,255,0.4); font-weight: 500;">${x.qty} × <span style="color: #c084fc;">${x.price} ₴</span></div>
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
-              <b style="color:#fff;">${x.lineTotal} грн</b>
-              <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+            <div style="display:flex; gap:16px; align-items:center;">
+              <b style="color: #fff; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px;">${x.lineTotal} ₴</b>
+              <button type="button" data-stk-del="${idx}" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);" onmouseenter="this.style.background='rgba(239, 68, 68, 0.25)', this.style.boxShadow='0 0 15px rgba(239, 68, 68, 0.4)', this.style.color='#fff'" onmouseleave="this.style.background='rgba(239, 68, 68, 0.1)', this.style.boxShadow='none', this.style.color='#f87171'">✕</button>
             </div>
           </div>
         `).join("")
-      : `<div class="hint" style="opacity:0.5; padding:10px; color:#fff;">Поки препаратів немає. Додай вище.</div>`;
+      : `<div class="hint" style="opacity:0.4; padding:12px; color:#fff; font-size: 0.9rem; font-style: italic;">Поки препаратів немає. Додайте вище.</div>`;
   }
 
-  // 5. Выводим общую финансовую сумму
+  // 5. Виводимо загальну фінансову суму
   const grandTotal = servicesTotal + stockTotal;
   const totalDisplay = document.getElementById("visitGrandTotal");
   if (totalDisplay) totalDisplay.textContent = `${grandTotal} ₴`;
 
-  // Навешиваем обработчик на выгрузку печатной выписки
+  // Відновлюємо оригінальні обробники подій кнопок та пошуку (initVisitUI)
+  if (typeof initVisitUI === "function") {
+    initVisitUI();
+  }
+
+  // Навешуємо відкриття PDF виписки на кнопку
+  // === СТИЛЬНАЯ ПРЕМИУМ-ВЫПИСКА ДЛЯ КЛИЕНТА ===
   const btnPdf = document.getElementById("btnPrintVisitPdf");
   if (btnPdf) {
     btnPdf.onclick = (e) => {
       e.preventDefault();
-      window.open(`/api/visits?id=${encodeURIComponent(visit.id)}&pdf=true`, "_blank");
+      
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return alert("Будь ласка, дозвольте спливаючі вікна для цього сайту!");
+
+      // Собираем свежие строки услуг и товаров прямо из DOM для точности
+      const servicesRows = expandedServices.map(x => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.95rem;">${escapeHtml(x.name)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; text-align: center; font-size: 0.95rem;">${x.qty}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #1e1b4b; text-align: right; font-weight: 600; font-size: 0.95rem;">${x.lineTotal} ₴</td>
+        </tr>
+      `).join("");
+
+      const stockRows = expandedStock.map(x => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.95rem;">${escapeHtml(x.name)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; text-align: center; font-size: 0.95rem;">${x.qty}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #1e1b4b; text-align: right; font-weight: 600; font-size: 0.95rem;">${x.lineTotal} ₴</td>
+        </tr>
+      `).join("");
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Виписка: ${escapeHtml(pet?.name || "Пацієнт")}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+            body { font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; padding: 40px; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .wrapper { max-width: 800px; margin: 0 auto; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 30px; }
+            .logo { font-size: 1.6rem; font-weight: 700; color: #1e1b4b; display: flex; align-items: center; gap: 8px; }
+            .logo span { color: #a855f7; }
+            .clinic-info { text-align: right; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
+            .section { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #f1f5f9; }
+            .section-title { font-weight: 700; font-size: 0.9rem; color: #6b21a8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            .meta-item { font-size: 0.95rem; color: #334155; }
+            .meta-item b { color: #1e293b; font-weight: 600; }
+            .text-block { font-size: 0.95rem; color: #334155; line-height: 1.6; white-space: pre-wrap; margin: 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            th { background: #f1f5f9; padding: 10px 12px; font-weight: 600; font-size: 0.85rem; color: #475569; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; }
+            th:first-child { border-radius: 6px 0 0 6px; }
+            th:last-child { border-radius: 0 6px 6px 0; }
+            .grand-total-box { display: flex; justify-content: space-between; align-items: center; background: #faf5ff; border: 1px solid #f3e8ff; border-radius: 12px; padding: 18px 24px; margin-top: 30px; }
+            .grand-total-label { font-size: 1rem; font-weight: 600; color: #6b21a8; }
+            .grand-total-value { font-size: 1.6rem; font-weight: 800; color: #7e22ce; }
+            @media print {
+              body { padding: 0; }
+              .section { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; }
+              .grand-total-box { background: #faf5ff !important; border: 1px solid #e9d5ff !important; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="wrapper">
+            
+            <div class="header">
+              <div class="logo">🐾 Doc.PUG <span>CRM</span></div>
+              <div class="clinic-info">
+                <b>Ветеринарна клініка Doc.PUG</b><br>
+                Електронний медичний висновок<br>
+                Дата візиту: ${escapeHtml(visit.date || "")}
+              </div>
+            </div>
+            
+            <div class="section">
+              <div class="section-title">🐾 Пацієнт та власник</div>
+              <div class="grid-2">
+                <div class="meta-item"><b>Кличка:</b> ${escapeHtml(pet?.name || "—")}</div>
+                <div class="meta-item"><b>Вага:</b> ${escapeHtml(String(visit.weight_kg || "—"))} кг</div>
+                <div class="meta-item"><b>Вид / Порода:</b> ${escapeHtml(pet?.species || "")} ${escapeHtml(pet?.breed || "—")}</div>
+                <div class="meta-item"><b>Статус:</b> Амбулаторний прийом</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">📝 Скарги та анамнез стану</div>
+              <p class="text-block">${escapeHtml(document.getElementById("visitMedComplaint")?.value || "—")}</p>
+            </div>
+
+            <div class="section">
+              <div class="section-title">🔍 Встановлений діагноз</div>
+              <p class="text-block" style="font-weight: 600; color: #1e293b;">${escapeHtml(document.getElementById("visitMedDx")?.value || "Клінічно здоровий")}</p>
+            </div>
+
+            <div class="section">
+              <div class="section-title">💊 Призначене лікування (Rx)</div>
+              <p class="text-block" style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">${escapeHtml(document.getElementById("visitMedRx")?.value || "Рекомендовано нагляд")}</p>
+            </div>
+
+            ${servicesRows ? `
+            <div class="section" style="background: #fff; padding: 10px 0; border: none;">
+              <div class="section-title" style="padding-left: 12px;">💼 Надані клінічні послуги</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Назва послуги</th>
+                    <th style="text-align:center; width: 80px;">К-сть</th>
+                    <th style="text-align:right; width: 120px;">Сума</th>
+                  </tr>
+                </thead>
+                <tbody>${servicesRows}</tbody>
+              </table>
+            </div>` : ""}
+
+            ${stockRows ? `
+            <div class="section" style="background: #fff; padding: 10px 0; border: none;">
+              <div class="section-title" style="padding-left: 12px;">📦 Використані медикаменти та матеріали</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Назва препарату</th>
+                    <th style="text-align:center; width: 80px;">К-сть</th>
+                    <th style="text-align:right; width: 120px;">Сума</th>
+                  </tr>
+                </thead>
+                <tbody>${stockRows}</tbody>
+              </table>
+            </div>` : ""}
+
+            <div class="grand-total-box">
+              <div class="grand-total-label">Загальна вартість прийому</div>
+              <div class="grand-total-value">${grandTotal} ₴</div>
+            </div>
+
+          </div>
+          <script>
+            window.onload = function() { 
+              setTimeout(function() { window.print(); }, 300); 
+            };
+          </script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     };
   }
 }
