@@ -2363,7 +2363,7 @@ async function renderPatientTab(tab, pet) {
 
      // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — БРОНЕБОЙНЫЙ ВАРИАНТ С ЛОГАМИ
         // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ВАРИАНТ С АВТО-СОЗДАНИЕМ МОДАЛКИ
-        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ПРАВИЛЬНЫЙ ВАРИАНТ
+        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
     const btnAddVisit = document.getElementById("btnAddVisit");
     if (btnAddVisit) {
       btnAddVisit.onclick = () => {
@@ -2381,44 +2381,7 @@ async function renderPatientTab(tab, pet) {
       };
     }
 
-        // 2. Если у тебя есть стандартная функция заполнения, пробуем вызвать её
-        if (typeof openVisitModalForCreate === "function") {
-          try {
-            openVisitModalForCreate(pet);
-          } catch(e) { console.log("Стандартный установщик пропущен, включаем форс-инжект"); }
-        }
-
-        // 3. ФОРС-ОТКРЫТИЕ: Показываем модалку на экране железно через инлайн-стили
-        setTimeout(() => {
-          modal.style.opacity = "1";
-          modal.style.pointerEvents = "auto";
-          modal.style.transform = "translate(-50%, -50%) scale(1)";
-          
-          // Подставляем дефолтную дату, если она не заполнилась
-          const dateInput = document.getElementById("visitDate");
-          if (dateInput && !dateInput.value) {
-            dateInput.value = new Date().toISOString().split('T')[0];
-          }
-        }, 50);
-        
-        // Привязываем сохранение к твоей системной функции (если кнопка сохранения создана нами)
-        const saveBtn = document.getElementById("btnSaveDynamicVisit");
-        if (saveBtn) {
-          saveBtn.onclick = async () => {
-            if (typeof saveVisit === "function") {
-              await saveVisit(); // Вызов твоей родной функции сохранения из app.js
-              document.getElementById("closeMyModal").click();
-              if (typeof renderVisits === "function") renderVisits(pet.id || pet._id);
-            } else {
-              alert("Візит зафіксовано в системі!");
-              document.getElementById("closeMyModal").click();
-            }
-          };
-        }
-      };
-    
-
-  // Навешиваем клики на вкладкыи
+  // Навешиваем клики на вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     btn.onclick = () => {
       const targetTab = btn.dataset.pTab;
@@ -2548,7 +2511,7 @@ async function renderPatientTab(tab, pet) {
     `;
     return;
   }
-
+}
 
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
