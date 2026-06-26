@@ -6617,6 +6617,187 @@ function setVH() {
 }
 setVH();
 window.addEventListener("resize", setVH);
+
+// ==========================================================================
+// ГЛОБАЛЬНЫЙ МОДУЛЬ ПРОФИЛЯ ВЛАСНИКА (ОТКРЫТИЕ И РЕНДЕР)
+// ==========================================================================
+async function openOwner(id, options = {}) {
+  const oid = String(id || "");
+  if (!oid) return;
+
+  console.log(`🐾 Виклик openOwner для ID: ${oid}`);
+  state.selectedOwnerId = oid;
+  state.selectedPetId = null;
+  state.selectedPet = null;
+  state.selectedVisitId = null;
+
+  if (options.pushHash !== false) {
+    setHash("owner", oid);
+  }
+
+  // Переключаем стеклянные секции контента
+  const ownerSection = document.getElementById('owner') || document.getElementById('owner-profile-section');
+  if (ownerSection) {
+    $$(".content-section").forEach((p) => p.style.display = "none");
+    ownerSection.style.display = "block";
+  } else {
+    if (typeof setRoute === "function") setRoute("owner");
+  }
+
+  await renderOwnerPage(oid);
+}
+
+async function renderOwnerPage(ownerId) {
+  const oid = String(ownerId);
+  console.log(`🐾 Збірка профілю власника для ID: ${oid}`);
+  
+  const cachedOwners = typeof LS !== "undefined" ? LS.get(OWNERS_KEY, []) : [];
+  const list = (state.owners && state.owners.length) ? state.owners : cachedOwners;
+  const owner = list.find((x) => String(x.id) === oid);
+
+  if (!owner) {
+    console.warn("Власника не знайдено в реєстрах");
+    alert("Владелец не найден");
+    setHash("owners");
+    return;
+  }
+
+  // Заполняем текстовую информацию в профиле (visionOS шапка)
+  const nameEl = document.getElementById('owner-profile-name');
+  const phoneEl = document.getElementById('owner-profile-phone');
+  const infoEl = document.getElementById('owner-profile-info');
+
+  if (nameEl) nameEl.textContent = owner.name || "Без імені";
+  if (phoneEl) phoneEl.textContent = `📞 ${owner.phone || "Не вказано"}`;
+  if (infoEl) infoEl.textContent = `📍 Примітка: ${owner.note || "немає"}`;
+
+  // Твоя оригинальная бизнес-математика по визитам и финансам
+  const allVisits = state.visitsById ? Array.from(state.visitsById.values()) : [];
+  const myPatients = (state.patients || []).filter((p) => String(p.owner_id) === oid);
+  const ownerPetIds = new Set(myPatients.map((p) => String(p.id)));
+  const ownerVisits = allVisits.filter((v) => ownerPetIds.has(String(v.pet_id)));
+  
+  const visitsCount = ownerVisits.length;
+  const lastVisit = ownerVisits
+    .slice()
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
+
+  const totalPaid = ownerVisits.reduce((sum, v) => {
+    const sSvc = typeof calcServicesTotal === "function" ? calcServicesTotal(v) : 0;
+    const sStk = typeof calcStockTotal === "function" ? calcStockTotal(v) : 0;
+    return sum + sSvc + sStk;
+  }, 0);
+
+  // Отрендерим блок статистики динамически, если в HTML заготовлен общий контейнер info
+  if (infoEl) {
+    infoEl.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+        <div style="color: var(--text-muted); font-size: 0.9rem;">📍 Примітка: ${escapeHtml(owner.note || "немає")}</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 10px;">
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">🐾</div>
+            <div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${myPatients.length}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">пацієнтів</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">📋</div>
+            <div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${visitsCount}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">візитів</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">💰</div>
+            <div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: var(--color-success);">${totalPaid} грн</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">оплачено</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">📅</div>
+            <div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #fff; white-space: nowrap;">${escapeHtml(lastVisit?.date || "—")}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">останній візит</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button class="btn-tab" id="btnEditOwnerProfile" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">✏️ Редагувати</button>
+          <button class="btn-primary" id="btnAddPet" style="padding: 10px 20px; font-size: 0.85rem;">+ Додати тварину</button>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      const btnAddPet = document.getElementById("btnAddPet");
+      if (btnAddPet) btnAddPet.onclick = () => { if (typeof openCreatePetModal === "function") openCreatePetModal(ownerId); };
+      const btnEdit = document.getElementById("btnEditOwnerProfile");
+      if (btnEdit && typeof openEditOwnerModal === "function") btnEdit.onclick = () => openEditOwnerModal(owner);
+    }, 50);
+  }
+
+  // Вывод карточек питомцев в сетку
+  const pList = document.getElementById('owner-patients-container') || document.getElementById('ownerPatientsList') || document.getElementById("petsList");
+  if (!pList) return;
+
+  pList.innerHTML = "";
+
+  if (!myPatients.length) {
+    pList.innerHTML = `
+      <div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">
+        Поки немає тварин. Натисни “+ Додати тварину”.
+      </div>
+    `;
+    return;
+  }
+
+  myPatients.forEach((pet) => {
+    const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
+    const petLastVisit = petVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
+
+    const card = document.createElement("div");
+    card.style.cssText = "background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px; transition: var(--transition); display: flex; flex-direction: column; gap: 14px; position: relative; cursor: pointer;";
+    
+    card.onmouseenter = () => { card.style.background = "rgba(255,255,255,0.05)"; card.style.borderColor = "var(--primary-neon)"; };
+    card.onmouseleave = () => { card.style.background = "var(--glass-bg)"; card.style.borderColor = "var(--glass-border)"; };
+
+    const spec = String(pet.species || "").toLowerCase();
+    const icon = spec.includes("кіт") || spec.includes("кот") ? "🐱" : "🐶";
+
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+        <div style="display: flex; gap: 14px; align-items: center;">
+          <div style="font-size: 2rem; background: rgba(255,255,255,0.03); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+            ${icon}
+          </div>
+          <div>
+            <h4 style="margin: 0 0 4px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">🐾 ${escapeHtml(pet.name || "Без клички")}</h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              ${escapeHtml(pet.species || "тварина")} ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+              ${pet.age ? " • " + escapeHtml(pet.age) : ""}
+            </div>
+          </div>
+        </div>
+        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; z-index: 10;">🗑</button>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge" style="background: rgba(163, 97, 255, 0.08); color: var(--primary-neon); border: 1px solid rgba(163, 97, 255, 0.15); padding: 4px 10px; font-size: 0.75rem;">📋 ${petVisits.length} візитів</span>
+      </div>
+    `;
+
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("[data-del-pet]")) return;
+      if (typeof openPatient === "function") openPatient(pet.id);
+      else setHash("patient", pet.id);
+    });
+
+    pList.appendChild(card);
+  });
+}
 // ==========================================================================
 // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ PUGCRM (ГЕНЕРАЛЬНЫЙ ЗАПУСК)
 // ==========================================================================
