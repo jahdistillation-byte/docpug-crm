@@ -5168,15 +5168,37 @@ function openVisitModalForCreate(pet) {
   $("#visitDx").value = "";
   $("#visitWeight").value = pet?.weight_kg || "";
   $("#visitRx").value = "";
-  
-  loadStaffApi().then((staff) => {
-    const select = $("#visitStaff");
-    if (!select) return;
-    select.innerHTML = `
-      <option value="">Оберіть ветеринара</option>
-      ${staff.map((doc) => `<option value="${escapeHtml(String(doc.id))}">${escapeHtml(doc.name || "Працівник")}</option>`).join("")}
-    `;
-  });
+
+  // БРОНЕБОЙНАЯ КАТЧ-СИСТЕМА ДЛЯ ВЕТЕРИНАРОВ
+  loadStaffApi()
+    .then((staff) => {
+      const select = $("#visitStaff");
+      if (!select) return;
+
+      // Если сервер вернул пустой список, создаем дефолтного врача
+      const doctors = Array.isArray(staff) && staff.length > 0 
+        ? staff 
+        : [{ id: "default", name: "Черговий лікар 🩺" }];
+
+      select.innerHTML = `
+        <option value="">Оберіть ветеринара</option>
+        ${doctors.map((doc) => `
+          <option value="${escapeHtml(String(doc.id))}">
+            ${escapeHtml(doc.name || "Працівник")}
+          </option>
+        `).join("")}
+      `;
+    })
+    .catch((err) => {
+      console.warn("Не вдалося завантажити ветеринарів с сервера, ставим заглушку:", err);
+      const select = $("#visitStaff");
+      if (select) {
+        select.innerHTML = `
+          <option value="">Оберіть ветеринара</option>
+          <option value="default" selected>Черговий лікар 🩺</option>
+        `;
+      }
+    });
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
