@@ -6075,28 +6075,123 @@ function closeMedcardModal() {
   delete modal.dataset.patientId;
 }
 
+// ==========================================
+// ВЕТЕРИНАРНАЯ КАРТА — ЧИСТЫЙ РЕНДЕР ШАБЛОНОВ
+// ==========================================
 async function renderMedcardTab(pet) {
   const box = $("#patientTabContent");
   if (!box || !pet) return;
 
-  box.innerHTML = `<div class="hint">Завантаження веткартки…</div>`;
+  // Очищаем старую верстку и подготавливаем каркас таба
+  box.innerHTML = "";
+
+  const container = document.createElement("div");
+  container.className = "patientInfoBox";
+
+  const rowHead = document.createElement("div");
+  rowHead.className = "row";
+  rowHead.style.cssText = "align-items: flex-start; gap: 12px; margin-bottom: 20px;";
+  rowHead.innerHTML = `
+    <div>
+      <h2 style="margin:0;">Ветеринарна картка</h2>
+      <div class="hint">Медичний щоденник пацієнта: стан, температура, лікування, динаміка, план.</div>
+    </div>
+    <button class="primary" id="btnAddMedcardEntry" type="button">+ Запис</button>
+  `;
+  container.appendChild(rowHead);
+
+  const listElement = document.createElement("div");
+  listElement.id = "medcardList";
+  listElement.className = "medcardList";
+  container.appendChild(listElement);
+  box.appendChild(container);
+
+  // Тянем записи из API
   const items = await loadMedcardApi(pet.id);
 
-  box.innerHTML = `
-    <div class="patientInfoBox">
-      <div class="row" style="align-items:flex-start; gap:12px;">
-        <div>
-          <h2 style="margin:0;">Ветеринарна картка</h2>
-          <div class="hint">Медичний щоденник пацієнта: стан, температура, лікування, динаміка, plan.</div>
-        </div>
-        <button class="primary" id="btnAddMedcardEntry" type="button">+ Запис</button>
-      </div>
-      <div id="medcardList" class="medcardList">
-        ${items.length ? items.map(renderMedcardEntryCard).join("") : `<div class="hint">Поки записів немає. Натисни “+ Запис”.</div>`}
-      </div>
-    </div>
-  `;
+  if (!items.length) {
+    listElement.innerHTML = `<div class="hint">Поки записів немає. Натисніть “+ Запис”.</div>`;
+  } else {
+    const mainTemplate = document.getElementById("medcard-entry-template");
+    const miniTemplate = document.getElementById("medcard-mini-row-template");
 
+    if (!mainTemplate || !miniTemplate) {
+      console.error("Помилка: Шаблони medcard не знайдено в index.html");
+      return;
+    }
+
+    items.forEach((x) => {
+      const clone = mainTemplate.content.cloneNode(true);
+
+      // 1. Наполнение базовой инфы
+      const dateLine = [x.entry_date, x.entry_time].filter(Boolean).join(" • ") || "—";
+      clone.querySelector(".med-card-date").textContent = dateLine;
+
+      // 2. Наполнение витальных параметров (Строка: Температура, Вес, Пульс)
+      const vitalsArr = [
+        x.temperature ? `🌡 T: ${x.temperature}` : "",
+        x.weight_kg ? `⚖️ ${x.weight_kg} кг` : "",
+        x.pulse ? `❤️ ${x.pulse}` : "",
+      ].filter(Boolean);
+      clone.querySelector(".med-card-vitals").textContent = vitalsArr.join(" · ") || "Параметри не вказані";
+
+      // 3. Динамическая сетка мини-параметров (Аппетит, Слизистые и т.д.)
+      const grid = clone.querySelector(".med-card-vitals-grid");
+      const smallRows = [
+        ["Апетит", x.appetite],
+        ["Вода", x.water],
+        ["Сеча", x.urine],
+        ["Кал", x.stool],
+        ["Слизові", x.mucosa],
+        ["Дихання", x.breathing],
+      ].filter(([, val]) => String(val || "").trim());
+
+      if (smallRows.length === 0) {
+        grid.style.display = "none";
+      } else {
+        smallRows.forEach(([label, value]) => {
+          const cellClone = miniTemplate.content.cloneNode(true);
+          cellClone.querySelector(".med-mini-label").textContent = label;
+          cellClone.querySelector(".med-mini-value").textContent = value || "—";
+          grid.appendChild(cellClone);
+        });
+      }
+
+      // 4. Текстовые медицинские блоки (Скрываем блоки, если они пустые)
+      const fillTextBlock = (selector, dataVal) => {
+        const block = clone.querySelector(selector);
+        if (dataVal && dataVal.trim()) {
+          block.querySelector(".m-text").textContent = dataVal;
+        } else {
+          block.style.display = "none";
+        }
+      };
+
+      fillTextBlock(".m-block-condition", x.condition);
+      fillTextBlock(".m-block-treatment", x.treatment);
+      fillTextBlock(".m-block-dynamics", x.dynamics);
+      fillTextBlock(".m-block-plan", x.plan);
+      fillTextBlock(".m-block-note", x.note);
+
+      // 5. Имя врача
+      const docEl = clone.querySelector(".med-card-doctor");
+      if (x.doctor && x.doctor.trim()) {
+        docEl.textContent = `👩‍⚕️ ${x.doctor}`;
+      } else {
+        docEl.style.display = "none";
+      }
+
+      // 6. Айдишники к кнопкам для обработчиков редактирования/удаления
+      clone.querySelector(".m-edit-btn").dataset.editMedcard = String(x.id);
+      clone.querySelector(".m-del-btn").dataset.delMedcard = String(x.id);
+
+      listElement.appendChild(clone);
+    });
+  }
+
+  // ==========================================
+  // ЖЕЛЕЗНЫЕ ОБРАБОТЧИКИ (Остаются без изменений)
+  // ==========================================
   $("#btnAddMedcardEntry")?.addEventListener("click", () => {
     const modal = ensureMedcardModal();
     modal.dataset.patientId = String(pet.id);
@@ -6124,7 +6219,7 @@ async function renderMedcardTab(pet) {
     }
   });
 
-  $("#medcardList")?.addEventListener("click", async (e) => {
+  listElement.onclick = async (e) => {
     const del = e.target.closest("[data-del-medcard]");
     if (del) {
       const id = del.dataset.delMedcard; if (!id) return;
@@ -6166,7 +6261,7 @@ async function renderMedcardTab(pet) {
         };
       }
     }
-  });
+  };
 }
 
 // =========================
