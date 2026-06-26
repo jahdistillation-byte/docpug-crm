@@ -4767,11 +4767,14 @@ function closeDischargeModal() {
 // =========================
 // РЕНДЕР СПИСКА ВЛАДЕЛЬЦЕВ (Восстановленный)
 // =========================
+// =========================
+// OWNERS — Адаптированный рендер для стеклянной таблицы
+// =========================
 function renderOwners() {
-  const list = document.getElementById("ownersList");
-  if (!list) return;
+  const tbody = document.getElementById("owners-table-body");
+  if (!tbody) return;
 
-  list.innerHTML = "";
+  tbody.innerHTML = "";
 
   const q = String(document.getElementById("globalSearch")?.value || "").trim().toLowerCase();
   const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
@@ -4788,49 +4791,37 @@ function renderOwners() {
   });
 
   if (!filteredOwners.length) {
-    list.innerHTML = `<div class="hint" style="padding: 20px; text-align: center; opacity: 0.5;">Нічого не знайдено.</div>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; opacity: 0.5;">Нічого не знайдено.</td></tr>`;
     return;
   }
 
   filteredOwners.forEach((owner) => {
-    const el = document.createElement("div");
-    el.className = "item";
-    el.dataset.openOwner = String(owner.id);
-    el.style.cursor = "pointer";
+    const tr = document.createElement("tr");
+    
+    // При клике на строку открываем страницу владельца
+    tr.style.cursor = "pointer";
+    tr.dataset.openOwner = String(owner.id);
 
     const petsCount = (state.patients || []).filter(
       p => String(p.owner_id) === String(owner.id)
     ).length;
 
-    el.innerHTML = `
-      <div class="left" style="flex:1; min-width:0;">
-        <div class="name" style="font-size:20px; font-weight: 600;">
-          👤 ${escapeHtml(owner.name || "Без імені")}
-        </div>
-
-        <div class="meta" style="margin-top:6px; opacity: 0.8;">
-          📞 ${escapeHtml(owner.phone || "Не вказано")}
-        </div>
-
-        ${
-          owner.note
-            ? `<div class="meta" style="margin-top:2px; opacity: 0.6;">📍 ${escapeHtml(owner.note)}</div>`
-            : ""
-        }
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-          <div class="pill">🐾 ${petsCount} пацієнтів</div>
-          <div class="pill">📝 CRM</div>
-        </div>
-      </div>
-
-      <div class="right" style="display:flex; gap:8px; align-items:center; flex:0 0 auto;">
-        <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}">✏️</button>
-        <button class="iconBtn" title="Видалити" data-del="${escapeHtml(owner.id)}">🗑</button>
-      </div>
+    tr.innerHTML = `
+      <td style="font-weight: 600;">👤 ${escapeHtml(owner.name || "Без імені")}</td>
+      <td>📞 ${escapeHtml(owner.phone || "Не вказано")}</td>
+      <td>
+        <span style="background: rgba(147, 51, 234, 0.2); color: #c084fc; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;">
+          🐾 ${petsCount} пацієнтів
+        </span>
+      </td>
+      <td>📍 ${escapeHtml(owner.note || "—")}</td>
+      <td style="display:flex; gap:8px;">
+        <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
+        <button class="iconBtn" title="Видалити" data-del="${escapeHtml(owner.id)}" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">🗑</button>
+      </td>
     `;
 
-    list.appendChild(el);
+    tbody.appendChild(tr);
   });
 }
 
