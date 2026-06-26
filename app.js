@@ -3466,333 +3466,507 @@ async function saveStaffScheduleApi(payload) {
   }
 }
 
+/* ==========================================================================
+   PUGCRM - CORE LOGIC & INTERACTIVE INTERFACE (CLEANED & OPTIMIZED)
+   ========================================================================== */
+
 async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
-  if (!page) return;
+  // Поддержка стандартной селекции контента (если используется разметка .content-section)
+  const fallbackPage = document.getElementById('calendar');
+  const targetPage = page || fallbackPage;
+  if (!targetPage) return;
 
   const today = window.__calendarDate || (
-  typeof todayISO === "function"
-    ? todayISO()
-    : new Date().toISOString().slice(0, 10)
-);
+    typeof todayISO === "function"
+      ? todayISO()
+      : new Date().toISOString().slice(0, 10)
+  );
 
-  page.innerHTML = `
-    <div class="card">
-      <div class="hint">Завантаження календаря…</div>
+  // Стеклянный лоадер
+  targetPage.innerHTML = `
+    <div class="calendar-container" style="align-items: center; justify-content: center; min-height: 200px;">
+      <div style="color: var(--primary-color); font-weight: 600; letter-spacing: 0.5px;">🐾 Завантаження преміум календаря PUGCRM…</div>
     </div>
   `;
 
   const staff = await loadStaffApi();
-const events = await loadCalendarApi();
-const staffSchedule = await loadStaffScheduleApi(today);
+  const events = await loadCalendarApi();
+  const staffSchedule = await loadStaffScheduleApi(today);
 
-const activeStaffIds = new Set(
-  staffSchedule
-    .filter((x) => x.is_active !== false)
-    .map((x) => String(x.staff_id))
-);
-
-const staffOnShift = staffSchedule.length
-  ? staff.filter((doc) => activeStaffIds.has(String(doc.id)))
-  : staff;
-
-const todayEvents = events.filter((x) => String(x.event_date || "") === today);
-if (calendarMode === "week") {
-  const base = new Date(today);
-  const day = base.getDay() || 7;
-  const monday = new Date(base);
-  monday.setDate(base.getDate() - day + 1);
-
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d.toISOString().slice(0, 10);
-  });
-
-  const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
-
-  const weekEvents = events.filter((ev) =>
-    weekDays.includes(String(ev.event_date || ""))
+  const activeStaffIds = new Set(
+    staffSchedule
+      .filter((x) => x.is_active !== false)
+      .map((x) => String(x.staff_id))
   );
 
-  page.innerHTML = `
-    <div class="card calendarCard">
-      <div class="calendarHeader">
-        <div>
-          <h2>Календар</h2>
-          <div class="hint">Тижневий розклад записів клініки.</div>
+  const staffOnShift = staffSchedule.length
+    ? staff.filter((doc) => activeStaffIds.has(String(doc.id)))
+    : staff;
+
+  const todayEvents = events.filter((x) => String(x.event_date || "") === today);
+
+  /* ------------------------------------------------------------------------
+     РЕЖИМ: НЕДЕЛЯ (WEEK VIEW)
+     ------------------------------------------------------------------------ */
+  if (calendarMode === "week") {
+    const base = new Date(today);
+    const day = base.getDay() || 7;
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - day + 1);
+
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d.toISOString().slice(0, 10);
+    });
+
+    const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+    const weekEvents = events.filter((ev) => weekDays.includes(String(ev.event_date || "")));
+
+    targetPage.innerHTML = `
+      <div class="calendar-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h2>Календар</h2>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Тижневий розклад записів клініки.</div>
+          </div>
+
+          <div class="nav-buttons-group">
+            <button class="btn-tab" data-cal-mode="day">День</button>
+            <button class="btn-tab active" data-cal-mode="week">Тиждень</button>
+            <button class="btn-tab" data-cal-mode="month">Місяць</button>
+            <button class="btn-tab" data-cal-mode="schedule">Ветеринари</button>
+            <button class="btn-tab" data-cal-mode="routes">Маршрути</button>
+          </div>
         </div>
 
-        <div class="calendarModes">
-          <button class="ghost" data-cal-mode="day">День</button>
-          <button class="primary" data-cal-mode="week">Тиждень</button>
-          <button class="ghost" data-cal-mode="month">Місяць</button>
-          <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
-          <button class="ghost" data-cal-mode="routes">Маршрути</button>
+        <div class="date-picker-panel">
+          <button class="btn-arrow" id="calPrevWeek" type="button">←</button>
+          <div class="current-date-title">
+            ${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}
+          </div>
+          <button class="btn-arrow" id="calNextWeek" type="button">→</button>
+        </div>
+
+        <div class="calendar-grid-wrapper">
+          <div class="calendar-grid" style="grid-template-columns: repeat(7, minmax(180px, 1fr));">
+            ${weekDays.map((date, i) => {
+              const dayEvents = weekEvents
+                .filter((ev) => String(ev.event_date || "") === date)
+                .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")));
+
+              return `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div class="vet-column-header" style="height: auto; text-align: center;">
+                    <div class="vet-name">${dayNames[i]}</div>
+                    <div class="vet-spec">${escapeHtml(date)}</div>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 8px; min-height: 300px; background: rgba(255,255,255,0.2); padding: 8px; border-radius: var(--radius-md);" data-week-date="${escapeHtml(date)}">
+                    ${
+                      dayEvents.length
+                        ? dayEvents.map((ev) => `
+                          <div class="appointment-cell has-appointment" data-cal-event-id="${escapeHtml(String(ev.id))}" style="min-height: auto; cursor: pointer; padding: 2px;">
+                            <div style="padding: 10px; width: 100%; background: var(--primary-light); border-left: 4px solid var(--primary-color); border-radius: var(--radius-sm); text-align: left;">
+                              <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary-color);">
+                                ${escapeHtml(String(ev.start_time || "").slice(0, 5))} — ${escapeHtml(String(ev.end_time || "").slice(0, 5))}
+                              </div>
+                              <strong style="font-size: 0.85rem; color: var(--text-main); display: block; margin: 2px 0;">${escapeHtml(ev.title || "Візит")}</strong>
+                              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                👨‍⚕️ ${(staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || "Лікар не вказаний"}
+                              </div>
+                              ${ev.note ? `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; border-top: 1px dashed rgba(0,0,0,0.05); padding-top: 4px;">📝 ${escapeHtml(ev.note)}</div>` : ""}
+                            </div>
+                          </div>
+                        `).join("")
+                        : `<div style="text-align:center; color: var(--text-muted); font-size: 0.8rem; margin-top: 20px;">Немає записів</div>`
+                    }
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
         </div>
       </div>
+    `;
 
-      <div class="calendarTop">
-        <button class="ghost" id="calPrevWeek" type="button">←</button>
-        <div class="calendarDate">
-          ${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}
+    bindCalendarModes();
+
+    $("#calPrevWeek")?.addEventListener("click", async () => {
+      const d = new Date(weekDays[0]);
+      d.setDate(d.getDate() - 7);
+      window.__calendarDate = d.toISOString().slice(0, 10);
+      await renderCalendarTab();
+    });
+
+    $("#calNextWeek")?.addEventListener("click", async () => {
+      const d = new Date(weekDays[0]);
+      d.setDate(d.getDate() + 7);
+      window.__calendarDate = d.toISOString().slice(0, 10);
+      await renderCalendarTab();
+    });
+
+    $$("[data-cal-event-id]").forEach((card) => {
+      card.addEventListener("click", () => {
+        const id = card.dataset.calEventId;
+        const ev = weekEvents.find((x) => String(x.id) === String(id));
+        if (!ev) return;
+
+        openCalendarEditModal(ev, ev.event_date || today, async () => {
+          await renderCalendarTab();
+        });
+      });
+    });
+
+    return;
+  }
+
+  /* ------------------------------------------------------------------------
+     РЕЖИМ: ВЕТЕРИНАРЫ (SCHEDULE / STAFF MANAGEMENT)
+     ------------------------------------------------------------------------ */
+  if (calendarMode === "schedule") {
+    const schedule = await loadStaffScheduleApi(today);
+    const specializations = await loadSpecializationsApi();
+    const scheduleMap = new Map(schedule.map((x) => [String(x.staff_id), x]));
+
+    targetPage.innerHTML = `
+      <div class="calendar-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h2>Ветеринари</h2>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Співробітники клініки, ставки, спеціалізації та налаштування зміни.</div>
+          </div>
+
+          <div class="nav-buttons-group">
+            <button class="btn-tab" data-cal-mode="day">День</button>
+            <button class="btn-tab" data-cal-mode="week">Тиждень</button>
+            <button class="btn-tab" data-cal-mode="month">Місяць</button>
+            <button class="btn-tab active" data-cal-mode="schedule">Ветеринари</button>
+            <button class="btn-tab" data-cal-mode="routes">Маршрути</button>
+          </div>
         </div>
-        <button class="ghost" id="calNextWeek" type="button">→</button>
-      </div>
 
-      <div class="weekCalendarGrid">
-        ${weekDays.map((date, i) => {
-          const dayEvents = weekEvents
-            .filter((ev) => String(ev.event_date || "") === date)
-            .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")));
+        <div class="data-table-container" style="margin-bottom: 24px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 600;">Напрями клініки</h3>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
+            </div>
+            <button class="btn-primary" id="btnAddSpec" type="button" style="padding: 8px 16px; font-size: 0.85rem;">+ Додати напрям</button>
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            ${
+              specializations.length
+                ? specializations.map((s) => `
+                  <span class="badge" style="border-left: 5px solid ${escapeHtml(s.color || "#7C5CFF")}; background: #fff; box-shadow: var(--shadow-premium); padding: 8px 14px; border-radius: var(--radius-md);">
+                    ${escapeHtml(s.name || "Напрям")}
+                  </span>
+                `).join("")
+                : `<div style="font-size: 0.85rem; color: var(--text-muted);">Напрями ще не створені.</div>`
+            }
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+          <button class="btn-primary" id="btnAddStaff">+ Додати ветеринара</button>
+        </div>
+
+        <div class="patients-grid">
+          ${staff.map((doc) => {
+            const row = scheduleMap.get(String(doc.id));
+            const isActive = row ? row.is_active !== false : false;
+
+            return `
+              <div class="patient-premium-card" style="border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")}; flex-direction: column; align-items: stretch; gap: 12px;">
+                <div>
+                  <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main); margin-bottom: 4px;">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+                  <div style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600; margin-bottom: 8px;">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
+                  
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+                    ${
+                      (() => {
+                        const docSpecIds = Array.isArray(doc.specialization_ids) ? doc.specialization_ids.map(String) : [];
+                        const docSpecs = specializations.filter((s) => docSpecIds.includes(String(s.id)));
+                        return docSpecs.length
+                          ? docSpecs.map((s) => `<span class="badge" style="background: rgba(93, 67, 239, 0.06); color: var(--primary-color); font-size: 0.7rem; padding: 4px 8px;">${escapeHtml(s.name)}</span>`).join("")
+                          : `<span class="badge" style="background: #eee; color: #888; font-size: 0.7rem; padding: 4px 8px;">Без напрямів</span>`;
+                      })()
+                    }
+                  </div>
+                  
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">💰 Ставка: <b>${escapeHtml(String(doc.shift_rate || 0))} грн</b> / зміна</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">📈 Відсоток: <b>${escapeHtml(String(doc.percent_rate || 0))}%</b></div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: auto; border-top: 1px solid rgba(0,0,0,0.04); padding-top: 12px; justify-content: space-between; align-items: center;">
+                  <button class="btn-tab" type="button" data-edit-staff="${escapeHtml(String(doc.id))}" style="padding: 6px 12px; font-size: 0.8rem;">✏️ Редагувати</button>
+                  <button class="badge ${isActive ? 'badge-success' : 'badge-danger'}" type="button" data-schedule-staff-id="${escapeHtml(String(doc.id))}" style="cursor:pointer; border: none; padding: 8px 14px;">
+                    ${isActive ? "● На зміні" : "○ Вихідний"}
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+
+    bindCalendarModes();
+
+    $("#btnAddStaff")?.addEventListener("click", () => openCreateStaffModal());
+
+    $("#btnAddSpec")?.addEventListener("click", async () => {
+      const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
+      if (!name) return;
+      const created = await createSpecializationApi({ name, color: "#7C5CFF" });
+      if (created) await renderCalendarTab();
+    });
+
+    $$(".badge[data-schedule-staff-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const staffId = btn.dataset.scheduleStaffId;
+        const isActive = !btn.classList.contains("badge-success");
+
+        const saved = await saveStaffScheduleApi({
+          work_date: today,
+          staff_id: staffId,
+          is_active: isActive,
+        });
+
+        if (!saved) return;
+        btn.className = `badge ${isActive ? 'badge-success' : 'badge-danger'}`;
+        btn.textContent = isActive ? "● На зміні" : "○ Вихідний";
+      });
+    });
+
+    $$("[data-edit-staff]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.editStaff;
+        const staffRow = staff.find((x) => String(x.id) === String(id));
+        if (staffRow) openEditStaffModal(staffRow);
+      });
+    });
+
+    return;
+  }
+
+  /* ------------------------------------------------------------------------
+     РЕЖИМ: ДЕНЬ (DAY VIEW WITH DRAG & DROP)
+     ------------------------------------------------------------------------ */
+  const hours = [];
+  for (let h = 7; h <= 24; h++) {
+    hours.push(String(h).padStart(2, "0") + ":00");
+  }
+
+  const staffHtml = staffOnShift.map((doc) => {
+    const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
+    const toMinutes = (t) => {
+      const [h, m] = String(t || "00:00").split(":").map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
+    return `
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="vet-column-header" style="border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")};">
+          <div class="vet-name">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+          <div class="vet-spec">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
+        </div>
+
+        ${hours.map((hour) => {
+          const hourStart = toMinutes(hour);
+          const hourEvents = docEvents.filter((ev) => toMinutes(String(ev.start_time || "").slice(0, 5)) === hourStart);
+          const isCoveredByLongEvent = docEvents.some((ev) => {
+            const start = toMinutes(String(ev.start_time || "").slice(0, 5));
+            const end = toMinutes(String(ev.end_time || "").slice(0, 5));
+            return start < hourStart && end > hourStart;
+          });
 
           return `
-            <div class="weekDayCol">
-              <div class="weekDayHead">
-                <div class="weekDayName">${dayNames[i]}</div>
-                <div class="weekDayDate">${escapeHtml(date)}</div>
-              </div>
+            <div class="calendar-grid-cell-container calSlot ${isCoveredByLongEvent ? 'calSlotCovered' : ''}" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}" data-staff-name="${escapeHtml(doc.name || "")}" style="min-height: 85px; position: relative;">
+              ${
+                hourEvents.length
+                  ? hourEvents.map((ev) => {
+                      const start = String(ev.start_time || "").slice(0, 5);
+                      const end = String(ev.end_time || "").slice(0, 5);
+                      const startMin = toMinutes(start);
+                      const endMin = toMinutes(end || start);
+                      const durationMinutes = Math.max(60, endMin - startMin);
+                      const slots = Math.max(1, durationMinutes / 60);
+                      const height = Math.round(slots * 85 + (slots - 1) * 12 - 10);
 
-              <div class="weekDayBody" data-week-date="${escapeHtml(date)}">
-                ${
-                  dayEvents.length
-                    ? dayEvents.map((ev) => `
-                      <div
-                        class="weekEventCard"
-                        data-cal-event-id="${escapeHtml(String(ev.id))}"
-                      >
-                        <div class="weekEventTime">
-                          ${escapeHtml(String(ev.start_time || "").slice(0, 5))}
-                          —
-                          ${escapeHtml(String(ev.end_time || "").slice(0, 5))}
+                      return `
+                        <div class="appointment-cell has-appointment" data-edit-calendar-event="${escapeHtml(String(ev.id))}" style="position: absolute; width: 100%; top: 0; left: 0; min-height: ${height}px; z-index: 5; padding: 2px; border: none; background: transparent;">
+                          <div style="padding: 10px; width: 100%; height: 100%; background: var(--primary-light); border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")}; border-radius: var(--radius-md); text-align: left; box-shadow: var(--shadow-premium);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                              <strong style="font-size: 0.9rem; color: var(--text-main); display: block; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;">${escapeHtml(ev.title || "Запис")}</strong>
+                              <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button" style="background: none; border: none; color: var(--color-danger); font-size: 1.1rem; cursor: pointer; line-height: 1;">×</button>
+                            </div>
+                            <div style="font-size: 0.75rem; font-weight: 600; color: var(--primary-color); margin-bottom: 4px;">🕒 ${escapeHtml(start)} ${end ? `— ${escapeHtml(end)}` : ""}</div>
+                            ${ev.note ? `<div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📝 ${escapeHtml(ev.note)}</div>` : ""}
+                            ${ev.location ? `<div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📍 ${escapeHtml(ev.location)}</div>` : ""}
+                          </div>
                         </div>
-                        <div class="weekEventTitle">
-                          ${escapeHtml(ev.title || "Візит")}
-                        </div>
-                        <div class="weekEventVet">
-  👨‍⚕️ ${escapeHtml(
-    (staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || "Лікар не вказаний"
-  )}
-</div>
-
-${ev.note ? `
-  <div class="weekEventMeta">
-    ${escapeHtml(ev.note)}
-  </div>
-` : ""}
-                      </div>
-                    `).join("")
-                    : `<div class="weekEmpty">Немає записів</div>`
-                }
-              </div>
+                      `;
+                    }).join("")
+                  : isCoveredByLongEvent
+                    ? ""
+                    : `<div class="appointment-cell" data-empty-slot="1" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}" style="width: 100%; height: 100%;">+ Запис</div>`
+              }
             </div>
           `;
         }).join("")}
       </div>
+    `;
+  }).join("");
+
+  const staffPaletteHtml = staffOnShift.map((doc) => `
+    <div class="calStaffDrag" draggable="true" data-drag-staff-id="${escapeHtml(doc.id)}" data-drag-staff-name="${escapeHtml(doc.name || "")}" data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}" style="border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")}; background: rgba(255,255,255,0.7); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; cursor: grab; box-shadow: var(--shadow-premium); transition: var(--transition);">
+      <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
+    </div>
+  `).join("");
+
+  targetPage.innerHTML = `
+    <div class="calendar-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h2>Календар</h2>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Перетягніть ветеринара справа на потрібний час.</div>
+        </div>
+
+        <div class="nav-buttons-group">
+          <button class="btn-tab active" data-cal-mode="day">День</button>
+          <button class="btn-tab" data-cal-mode="week">Тиждень</button>
+          <button class="btn-tab" data-cal-mode="month">Місяць</button>
+          <button class="btn-tab" data-cal-mode="schedule">Ветеринари</button>
+          <button class="btn-tab" data-cal-mode="routes">Маршрути</button>
+        </div>
+      </div>
+
+      <div class="date-picker-panel">
+        <button class="btn-arrow" id="calPrevDay" type="button">←</button>
+        <div class="current-date-title">${escapeHtml(today)}</div>
+        <button class="btn-arrow" id="calNextDay" type="button">→</button>
+      </div>
+
+      <div style="display: flex; gap: 24px; align-items: flex-start; width: 100%;">
+        
+        <div class="calendar-grid-wrapper" style="flex-grow: 1;">
+          <div class="calendar-grid" style="grid-template-columns: 70px repeat(${staffOnShift.length}, minmax(220px, 1fr));">
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="time-column-header">Час</div>
+              ${hours.map((h) => `<div class="time-cell" style="min-height: 85px;">${escapeHtml(h)}</div>`).join("")}
+            </div>
+
+            ${staffHtml || `<div style="grid-column: span 2; padding: 40px; text-align: center; color: var(--text-muted);">Ветеринарів поки немає на зміні.</div>`}
+          </div>
+        </div>
+
+        <aside style="width: 240px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium); flex-shrink: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Ветеринари</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Перетягни в слот</div>
+            </div>
+            <button class="btn-primary" id="btnAddStaffFromCalendar" type="button" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-sm);">+ Додати</button>
+          </div>
+
+          <div class="calStaffDragList">
+            ${staffPaletteHtml || `<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 20px;">Немає співробітників.</div>`}
+          </div>
+        </aside>
+      </div>
     </div>
   `;
 
-  $("[data-cal-mode='day']")?.addEventListener("click", async () => {
-    calendarMode = "day";
-    await renderCalendarTab();
+  // Инициализация событий перетаскивания (Drag & Drop)
+  $$(".calStaffDrag").forEach((card) => {
+    card.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", JSON.stringify({
+        staff_id: card.dataset.dragStaffId,
+        staff_name: card.dataset.dragStaffName,
+        color: card.dataset.dragStaffColor,
+      }));
+      e.dataTransfer.effectAllowed = "copy";
+      card.style.opacity = "0.5";
+    });
+    card.addEventListener("dragend", () => { card.style.opacity = "1"; });
   });
 
-  $("[data-cal-mode='month']")?.addEventListener("click", async () => {
-    calendarMode = "month";
-    await renderCalendarTab();
-  });
+  $$(".calSlot").forEach((slot) => {
+    slot.addEventListener("click", (e) => {
+      if (slot.classList.contains("calSlotCovered")) return;
+      if (e.target.closest(".calEventDelete")) return;
+      if (slot.querySelector(".appointment-cell.has-appointment")) return;
 
-  $("[data-cal-mode='schedule']")?.addEventListener("click", async () => {
-    calendarMode = "schedule";
-    await renderCalendarTab();
-  });
+      const target = e.target.closest("[data-empty-slot]") || slot;
+      const hour = target.dataset.hour || slot.dataset.hour;
+      const staffId = target.dataset.staffId || slot.dataset.staffId;
 
-  $("[data-cal-mode='routes']")?.addEventListener("click", async () => {
-    calendarMode = "routes";
-    await renderCalendarTab();
-  });
+      if (hour && staffId) openVisitFromCalendar(hour, staffId);
+    });
 
-  $("#calPrevWeek")?.addEventListener("click", async () => {
-    const d = new Date(weekDays[0]);
-    d.setDate(d.getDate() - 7);
-    window.__calendarDate = d.toISOString().slice(0, 10);
-    await renderCalendarTab();
-  });
+    slot.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      slot.style.background = "rgba(93, 67, 239, 0.08)";
+    });
 
-  $("#calNextWeek")?.addEventListener("click", async () => {
-    const d = new Date(weekDays[0]);
-    d.setDate(d.getDate() + 7);
-    window.__calendarDate = d.toISOString().slice(0, 10);
-    await renderCalendarTab();
-  });
+    slot.addEventListener("dragleave", () => {
+      slot.style.background = "";
+    });
 
-  $$("[data-cal-event-id]").forEach((card) => {
-    card.addEventListener("click", () => {
-      const id = card.dataset.calEventId;
-      const ev = weekEvents.find((x) => String(x.id) === String(id));
-      if (!ev) return;
+    slot.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      slot.style.background = "";
 
-      openCalendarEditModal(ev, ev.event_date || today, async () => {
-        await renderCalendarTab();
+      let data = null;
+      try { data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}"); } catch { return; }
+
+      const staffId = data.staff_id;
+      if (!staffId) return;
+
+      const hour = slot.dataset.hour;
+      const title = (prompt(`Запис на ${hour}. Назва:`, "Новий прийом") || "").trim();
+      if (!title) return;
+
+      const durationRaw = prompt("Тривалість у хвилинах:", "60") || "60";
+      const duration = Math.max(15, Number(durationRaw) || 60);
+      const endTime = addMinutesToTime(hour, duration);
+      const note = (prompt("Коментар:", "") || "").trim();
+
+      const created = await createCalendarEventApi({
+        title,
+        event_date: today,
+        start_time: hour,
+        end_time: endTime,
+        staff_id: staffId,
+        note,
       });
+
+      if (created) await renderCalendarTab();
     });
   });
 
-  return;
+  $("#btnAddStaffFromCalendar")?.addEventListener("click", () => openCreateStaffModal());
+  bindCalendarNavigation(today);
+  bindCalendarEventsLogics(todayEvents);
 }
 
-  if (calendarMode === "schedule") {
-    const schedule = await loadStaffScheduleApi(today);
-    const specializations = await loadSpecializationsApi();
-
-const scheduleMap = new Map(
-  schedule.map((x) => [String(x.staff_id), x])
-);
-  page.innerHTML = `
-    <div class="card calendarCard">
-      <div class="row" style="justify-content:space-between;align-items:center;">
-  <div>
-    <h2>Ветеринари</h2>
-    <div class="hint">
-      Співробітники клініки, ставки, спеціалізації та налаштування календаря.
-    </div>
-  </div>
-
-  <button class="primary" id="btnAddStaff">
-    + Додати ветеринара
-  </button>
-</div>
-
-        <div class="calendarModes">
-          <button class="ghost" data-cal-mode="day">День</button>
-          <button class="ghost" data-cal-mode="week">Тиждень</button>
-          <button class="ghost" data-cal-mode="month">Місяць</button>
-          <button class="primary" data-cal-mode="schedule">Ветеринари</button>
-          <button class="ghost" data-cal-mode="routes">Маршрути</button>
-        </div>
-      </div>
-
-
-      <div class="specPanel">
-  <div class="specPanelHead">
-    <div>
-      <div class="specPanelTitle">Напрями клініки</div>
-      <div class="hint">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
-    </div>
-
-    <button class="primary" id="btnAddSpec" type="button">+ Додати напрям</button>
-  </div>
-
-  <div class="specList">
-    ${
-      specializations.length
-        ? specializations.map((s) => `
-          <div class="specPill" style="border-left:5px solid ${escapeHtml(s.color || "#7C5CFF")}">
-            ${escapeHtml(s.name || "Напрям")}
-          </div>
-        `).join("")
-        : `<div class="hint">Напрями ще не створені.</div>`
-    }
-  </div>
-</div>
-
-      <div class="vetList">
-  ${staff.map((doc) => {
-    const row = scheduleMap.get(String(doc.id));
-    const isActive = row ? row.is_active !== false : false;
-
-    return `
-      <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-        <div class="vetInfo">
-          <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-          <div class="hint">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
-          <div class="vetSpecBadges">
-  ${
-    (() => {
-      const docSpecIds = Array.isArray(doc.specialization_ids)
-        ? doc.specialization_ids.map(String)
-        : [];
-
-      const docSpecs = specializations.filter((s) =>
-        docSpecIds.includes(String(s.id))
-      );
-
-      return docSpecs.length
-        ? docSpecs.map((s) => `
-          <span
-            class="vetSpecBadge"
-            style="border-left-color:${escapeHtml(s.color || "#7C5CFF")}"
-          >
-            ${escapeHtml(s.name)}
-          </span>
-        `).join("")
-        : `<span class="vetSpecBadge muted">Без напрямів</span>`;
-    })()
-  }
-</div>
-<div class="hint">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
-<div class="hint">💰 Ставка: ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</div>
-<div class="hint">📈 Відсоток: ${escapeHtml(String(doc.percent_rate || 0))}%</div>
-        </div>
-
-        <div class="vetActions">
-          <button
-  class="ghost"
-  type="button"
-  data-edit-staff="${escapeHtml(String(doc.id))}"
->
-  ✏️ Редагувати
-</button>
-          <button
-            class="scheduleStatus ${isActive ? "active" : ""}"
-            type="button"
-            data-schedule-staff-id="${escapeHtml(String(doc.id))}"
-          >
-            ${isActive ? "На зміні" : "Вихідний"}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("")}
-</div>
-  `;
-
-  $("#btnAddStaff")?.addEventListener("click", () => {
-  openCreateStaffModal();
-});
-
-$("#btnAddSpec")?.addEventListener("click", async () => {
-  const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
-  if (!name) return;
-
-  const created = await createSpecializationApi({
-    name,
-    color: "#7C5CFF",
+/* --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ПРИВЯЗКИ СОБЫТИЙ КАЛЕНДАРЯ --- */
+function bindCalendarModes() {
+  $$("[data-cal-mode]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      calendarMode = btn.dataset.calMode;
+      await renderCalendarTab();
+    });
   });
+}
 
-  if (created) await renderCalendarTab();
-});
-
-  $("[data-cal-mode='day']")?.addEventListener("click", async () => {
-    calendarMode = "day";
-    await renderCalendarTab();
-  });
-
-  $("[data-cal-mode='week']")?.addEventListener("click", async () => {
-    calendarMode = "week";
-    await renderCalendarTab();
-  });
-
-  $("[data-cal-mode='month']")?.addEventListener("click", async () => {
-    calendarMode = "month";
-    await renderCalendarTab();
-  });
-
-  $("[data-cal-mode='routes']")?.addEventListener("click", async () => {
-    calendarMode = "routes";
-    await renderCalendarTab();
-  });
-
+function bindCalendarNavigation(today) {
   $("#calPrevDay")?.addEventListener("click", async () => {
     const d = new Date(today);
     d.setDate(d.getDate() - 1);
@@ -3806,940 +3980,32 @@ $("#btnAddSpec")?.addEventListener("click", async () => {
     window.__calendarDate = d.toISOString().slice(0, 10);
     await renderCalendarTab();
   });
-
-  $$(".scheduleStatus").forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    const staffId = btn.dataset.scheduleStaffId;
-
-    const isActive = !btn.classList.contains("active");
-
-    const saved = await saveStaffScheduleApi({
-      work_date: today,
-      staff_id: staffId,
-      is_active: isActive,
-    });
-
-    if (!saved) return;
-
-    btn.classList.toggle("active", isActive);
-    btn.textContent = isActive ? "На зміні" : "Вихідний";
-  });
-});
-$$("[data-edit-staff]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const id = btn.dataset.editStaff;
-
-    const staffRow = staff.find(
-      (x) => String(x.id) === String(id)
-    );
-
-    if (!staffRow) return;
-
-    openEditStaffModal(staffRow);
-  });
-});
-
-  return;
 }
-  const hours = [];
-  for (let h = 7; h <= 24; h++) {
-    hours.push(String(h).padStart(2, "0") + ":00");
-  }
 
-  const staffHtml = staffOnShift.map((doc) => {
-  const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
-
-  const toMinutes = (t) => {
-    const [h, m] = String(t || "00:00").split(":").map(Number);
-    return (h || 0) * 60 + (m || 0);
-  };
-
-  const slotMinutes = 60;
-  const slotHeight = 86;
-
-  return `
-    <div class="calDoctorCol">
-      <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-        <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-        <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
-      </div>
-
-      ${hours.map((hour) => {
-        const hourStart = toMinutes(hour);
-
-        const hourEvents = docEvents.filter((ev) => {
-          const start = String(ev.start_time || "").slice(0, 5);
-          return toMinutes(start) === hourStart;
-        });
-
-        const isCoveredByLongEvent = docEvents.some((ev) => {
-          const start = toMinutes(String(ev.start_time || "").slice(0, 5));
-          const end = toMinutes(String(ev.end_time || "").slice(0, 5));
-          return start < hourStart && end > hourStart;
-        });
-
-        return `
-          <div
-            class="calSlot ${isCoveredByLongEvent ? "calSlotCovered" : ""}"
-            data-hour="${escapeHtml(hour)}"
-            data-staff-id="${escapeHtml(String(doc.id))}"
-data-staff-name="${escapeHtml(doc.name || "")}"
-          >
-            ${
-              hourEvents.length
-                ? hourEvents.map((ev) => {
-                    const start = String(ev.start_time || "").slice(0, 5);
-const end = String(ev.end_time || "").slice(0, 5);
-
-const startMin = toMinutes(start);
-const endMin = toMinutes(end || start);
-
-const durationMinutes = Math.max(60, endMin - startMin);
-const slots = Math.max(1, durationMinutes / 60);
-const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
-
-                    return `
-                      <div
-  class="calEventCard calEventLong"
-  data-edit-calendar-event="${escapeHtml(String(ev.id))}"
-  style="
-    border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")};
-    min-height:${height}px;
-  "
->
-                        <div class="calEventTop">
-  <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
-  <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
-</div>
-
-                        <div class="calEventTime">
-                          ${escapeHtml(start)}
-                          ${end ? `— ${escapeHtml(end)}` : ""}
-                        </div>
-
-                        ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
-                        ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
-                      </div>
-                    `;
-                  }).join("")
-                : isCoveredByLongEvent
-                  ? ""
-                 : `<div
-    class="calEmptySlot"
-    data-empty-slot="1"
-    data-hour="${escapeHtml(hour)}"
-    data-staff-id="${escapeHtml(String(doc.id))}"
-  >+ Запис</div>`
-            }
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
-}).join("");
-
-  const staffPaletteHtml = staffOnShift.map((doc) => `
-    <div
-      class="calStaffDrag"
-      draggable="true"
-      data-drag-staff-id="${escapeHtml(doc.id)}"
-      data-drag-staff-name="${escapeHtml(doc.name || "")}"
-      data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}"
-      style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
-    >
-      <div class="calStaffDragName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-      <div class="calStaffDragRole">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
-    </div>
-  `).join("");
-
-  page.innerHTML = `
-    <div class="card calendarCard">
-      <div class="calendarHeader">
-        <div>
-          <h2>Календар</h2>
-          <div class="hint">Перетягни ветеринара справа на потрібний час.</div>
-        </div>
-
-        <div class="calendarModes">
-  <button class="primary" data-cal-mode="day">День</button>
-  <button class="ghost" data-cal-mode="week">Тиждень</button>
-  <button class="ghost" data-cal-mode="month">Місяць</button>
-  <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
-  <button class="ghost" data-cal-mode="routes">Маршрути</button>
-</div>
-</div>
-
-      <div class="calendarTop">
-       <button class="ghost" id="calPrevDay" type="button">←</button>
-<div class="calendarDate">${escapeHtml(today)}</div>
-<button class="ghost" id="calNextDay" type="button">→</button>
-      </div>
-
-      <div class="calendarWorkArea">
-        <div class="calendarDayGrid">
-          <div class="calTimeCol">
-            <div class="calTimeHead">Час</div>
-            ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
-          </div>
-
-          <div class="calDoctorsGrid">
-            ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
-          </div>
-        </div>
-
-        <aside class="calStaffPanel">
-          <div class="calStaffPanelHead">
-            <div>
-              <div class="calStaffPanelTitle">Ветеринари</div>
-              <div class="calStaffPanelSub">Перетягни в слот</div>
-            </div>
-            <button class="miniBtn" id="btnAddStaffFromCalendar" type="button">+ Додати</button>
-          </div>
-
-          <div class="calStaffDragList">
-            ${staffPaletteHtml || `<div class="hint">Немає співробітників.</div>`}
-          </div>
-        </aside>
-      </div>
-    </div>
-  `;
-
-  $$(".calStaffDrag").forEach((card) => {
-    card.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", JSON.stringify({
-        staff_id: card.dataset.dragStaffId,
-        staff_name: card.dataset.dragStaffName,
-        color: card.dataset.dragStaffColor,
-      }));
-      e.dataTransfer.effectAllowed = "copy";
-      card.classList.add("dragging");
-    });
-
-    card.addEventListener("dragend", () => {
-      card.classList.remove("dragging");
-    });
-  });
-
-  $$(".calSlot").forEach((slot) => {
-    slot.addEventListener("click", (e) => {
-  if (slot.classList.contains("calSlotCovered")) return;
-  if (slot.querySelector(".calEventCard")) return;
-
-  const target = e.target.closest("[data-empty-slot]") || slot;
-
-  const hour = target.dataset.hour || slot.dataset.hour;
-  const staffId = target.dataset.staffId || slot.dataset.staffId;
-
-  if (!hour || !staffId) return;
-
-  openVisitFromCalendar(hour, staffId);
-});
-    slot.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      slot.classList.add("calSlotDrop");
-    });
-
-    slot.addEventListener("dragleave", () => {
-      slot.classList.remove("calSlotDrop");
-    });
-
-    slot.addEventListener("drop", async (e) => {
-      e.preventDefault();
-      slot.classList.remove("calSlotDrop");
-
-      let data = null;
-      try {
-        data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}");
-      } catch {
-        return;
-      }
-
-      const staffId = data.staff_id;
-      if (!staffId) return;
-
-      const hour = slot.dataset.hour;
-      const title = (prompt(`Запис на ${hour}. Назва:`, "Новий прийом") || "").trim();
-      if (!title) return;
-
-      const durationRaw = prompt("Тривалість у хвилинах:", "60") || "60";
-      const duration = Math.max(15, Number(durationRaw) || 60);
-      const endTime = addMinutesToTime(hour, duration);
-
-      const note = (prompt("Коментар:", "") || "").trim();
-
-      const created = await createCalendarEventApi({
-        title,
-        event_date: today,
-        start_time: hour,
-        end_time: endTime,
-        staff_id: staffId,
-        note,
-      });
-
-      if (created) {
-        await renderCalendarTab();
-      }
-    });
-  });
-
-  $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => {
-    alert("Наступний крок: зробимо форму додавання ветеринара в Supabase.");
-  });
-
-  $("#calPrevDay")?.addEventListener("click", async () => {
-  const d = new Date(today);
-  d.setDate(d.getDate() - 1);
-  window.__calendarDate = d.toISOString().slice(0, 10);
-  await renderCalendarTab();
-});
-
-$("#calNextDay")?.addEventListener("click", async () => {
-  const d = new Date(today);
-  d.setDate(d.getDate() + 1);
-  window.__calendarDate = d.toISOString().slice(0, 10);
-  await renderCalendarTab();
-});
-
+function bindCalendarEventsLogics(todayEvents) {
   $$("[data-del-calendar-event]").forEach((btn) => {
-  btn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const id = btn.dataset.delCalendarEvent;
-    if (!id) return;
-
-    if (!confirm("Видалити запис з календаря?")) return;
-
-    const ok = await deleteCalendarEventApi(id);
-    if (ok) await renderCalendarTab();
-  });
-});
-$$("[data-edit-calendar-event]").forEach((card) => {
-  card.addEventListener("click", async (e) => {
-    if (e.target.closest("[data-del-calendar-event]")) return;
-
-    const id = card.dataset.editCalendarEvent;
-    if (!id) return;
-
-    const ev = todayEvents.find((x) => String(x.id) === String(id));
-    if (!ev) return alert("Запис не знайдено");
-
-    openCalendarEditModal(ev, today, async () => {
-      await renderCalendarTab();
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const id = btn.dataset.delCalendarEvent;
+      if (id && confirm("Видалити запис з календаря?")) {
+        const ok = await deleteCalendarEventApi(id);
+        if (ok) await renderCalendarTab();
+      }
     });
   });
-});
-$$("[data-cal-mode]").forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    calendarMode = btn.dataset.calMode;
-    await renderCalendarTab();
+
+  $$("[data-edit-calendar-event]").forEach((card) => {
+    card.addEventListener("click", async (e) => {
+      if (e.target.closest("[data-del-calendar-event]")) return;
+      const id = card.dataset.editCalendarEvent;
+      const ev = todayEvents.find((x) => String(x.id) === String(id));
+      if (ev) {
+        openCalendarEditModal(ev, window.__calendarDate || new Date().toISOString().slice(0, 10), async () => {
+          await renderCalendarTab();
+        });
+      }
+    });
   });
-});
-}
-
-
-async function openCreateStaffModal() {
-  $("#staffId").value = "";
-  $("#staffName").value = "";
-  $("#staffRole").value = "vet";
-  $("#staffSpecialization").value = "";
-  $("#staffPhone").value = "";
-  $("#staffShiftRate").value = 0;
-  $("#staffPercentRate").value = 0;
-  $("#staffColor").value = "#7C5CFF";
-  $("#staffNote").value = "";
-
-  await renderStaffSpecsBox([]);
-
-  $("#staffDrawer").classList.add("open");
-  $("#staffDrawer").setAttribute("aria-hidden", "false");
-}
-
-async function loadSpecializationsApi() {
-  try {
-    const res = await fetch("/api/specializations");
-    const json = await res.json();
-
-    if (!json.ok) throw new Error(json.error || "Cannot load specializations");
-
-    return Array.isArray(json.data) ? json.data : [];
-  } catch (e) {
-    console.error("loadSpecializationsApi failed:", e);
-    return [];
-  }
-}
-
-async function createSpecializationApi(payload) {
-  try {
-    const res = await fetch("/api/specializations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert(json.error || "Не вдалося створити напрям");
-      return null;
-    }
-
-    return json.data || null;
-  } catch (e) {
-    console.error("createSpecializationApi failed:", e);
-    alert("Помилка створення напряму");
-    return null;
-  }
-}
-
-async function createStaffApi(payload) {
-  try {
-    const res = await fetch("/api/staff", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert(json.error || "Помилка створення ветеринара");
-      return null;
-    }
-
-    return json.data || null;
-  } catch (e) {
-    console.error(e);
-    alert("Помилка створення ветеринара");
-    return null;
-  }
-}
-
-
-async function createCalendarEventApi(payload) {
-  try {
-    const res = await fetch("/api/calendar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert(json.error === "time slot busy"
-        ? "Цей час вже зайнятий у цього лікаря"
-        : "Не вдалося створити запис: " + (json.error || "unknown error")
-      );
-      return null;
-    }
-
-    return json.data || json.item || null;
-  } catch (e) {
-    console.error("createCalendarEventApi failed:", e);
-    alert("Помилка створення запису: " + (e?.message || e));
-    return null;
-  }
-}
-
-async function updateCalendarEventApi(eventId, payload) {
-  try {
-    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert("Не вдалося оновити запис: " + (json.error || "unknown error"));
-      return null;
-    }
-
-    return json.data || json.item || null;
-  } catch (e) {
-    console.error("updateCalendarEventApi failed:", e);
-    alert("Помилка оновлення запису: " + (e?.message || e));
-    return null;
-  }
-}
-
-async function deleteCalendarEventApi(eventId) {
-  try {
-    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
-      method: "DELETE",
-    });
-
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert("Не вдалося видалити запис: " + (json.error || "unknown error"));
-      return false;
-    }
-
-    return true;
-  } catch (e) {
-    console.error("deleteCalendarEventApi failed:", e);
-    alert("Помилка видалення запису: " + (e?.message || e));
-    return false;
-  }
-}
-
-function addMinutesToTime(time, minutes) {
-  const [h, m] = String(time || "00:00").split(":").map(Number);
-  const d = new Date();
-  d.setHours(h || 0, m || 0, 0, 0);
-  d.setMinutes(d.getMinutes() + Number(minutes || 60));
-  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-}
-
-function loadLabs() {
-  const arr = LS.get(LABS_KEY, []);
-  return Array.isArray(arr) ? arr : [];
-}
-
-function saveLabs(arr) {
-  LS.set(LABS_KEY, Array.isArray(arr) ? arr : []);
-}
-
-function getLabsByPetId(petId) {
-  return loadLabs().filter((x) => String(x.pet_id) === String(petId));
-}
-
-function getLabStatus(value, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "empty";
-  if (n < min) return "low";
-  if (n > max) return "high";
-  return "normal";
-}
-
-function labStatusLabel(status) {
-  if (status === "low") return "↓ нижче";
-  if (status === "high") return "↑ вище";
-  if (status === "normal") return "норма";
-  return "—";
-}
-
-function labScalePercent(value, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 50;
-
-  const span = max - min;
-  const visualMin = min - span * 0.6;
-  const visualMax = max + span * 0.6;
-
-  const pct = ((n - visualMin) / (visualMax - visualMin)) * 100;
-  return Math.max(3, Math.min(97, pct));
-}
-
-function renderLabScale(value, min, max) {
-  const status = getLabStatus(value, min, max);
-  const pct = labScalePercent(value, min, max);
-
-  return `
-    <div class="labScale">
-      <div class="labScaleNorm"></div>
-      <div class="labScaleDot lab-${status}" style="left:${pct}%"></div>
-    </div>
-  `;
-}
-
-function ensureCalendarModal() {
-  let modal = document.getElementById("calendarEventModal");
-  if (modal) return modal;
-
-  modal = document.createElement("div");
-  modal.className = "modal";
-  modal.id = "calendarEventModal";
-  modal.innerHTML = `
-    <div class="modal__backdrop" data-close-calendar-modal></div>
-    <div class="modal__panel calEditPanel">
-      <div class="modal__head">
-        <div>
-          <div class="modal__title">Редагування запису</div>
-          <div class="modal__sub">Час, лікар, коментар</div>
-        </div>
-        <button class="iconBtn" data-close-calendar-modal type="button">✕</button>
-      </div>
-
-      <div class="modal__body">
-        <label class="field">
-          <div class="label">Назва</div>
-          <input class="input" id="calEditTitle">
-        </label>
-
-        <div class="medFormGrid">
-          <label class="field">
-            <div class="label">Початок</div>
-            <input class="input" id="calEditStart" type="time">
-          </label>
-
-          <label class="field">
-            <div class="label">Кінець</div>
-            <input class="input" id="calEditEnd" type="time">
-          </label>
-        </div>
-
-        <label class="field">
-          <div class="label">Коментар</div>
-          <textarea class="textarea" id="calEditNote" rows="4"></textarea>
-        </label>
-      </div>
-
-      <div class="modal__foot">
-        <button class="ghost" data-close-calendar-modal type="button">Скасувати</button>
-        <button class="primary" id="calEditSaveBtn" type="button">Зберегти</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", (e) => {
-    if (e.target.closest("[data-close-calendar-modal]")) {
-      modal.classList.remove("open");
-    }
-  });
-
-  return modal;
-}
-
-function openCalendarEditModal(ev, today, onSaved) {
-  const modal = ensureCalendarModal();
-
-  $("#calEditTitle").value = ev.title || "";
-  $("#calEditStart").value = String(ev.start_time || "").slice(0, 5);
-  $("#calEditEnd").value = String(ev.end_time || "").slice(0, 5);
-  $("#calEditNote").value = ev.note || "";
-
-  modal.classList.add("open");
-
-  $("#calEditSaveBtn").onclick = async () => {
-    const title = ($("#calEditTitle").value || "").trim();
-    const start_time = ($("#calEditStart").value || "").trim();
-    const end_time = ($("#calEditEnd").value || "").trim();
-    const note = ($("#calEditNote").value || "").trim();
-
-    if (!title || !start_time || !end_time) {
-      alert("Заповни назву, початок і кінець");
-      return;
-    }
-
-    const updated = await updateCalendarEventApi(ev.id, {
-      title,
-      event_date: ev.event_date || today,
-      start_time,
-      end_time,
-      staff_id: ev.staff_id,
-      note,
-    });
-
-    if (updated) {
-      modal.classList.remove("open");
-      if (typeof onSaved === "function") await onSaved();
-    }
-  };
-}
-
-function renderLabsTab(pet) {
-  const box = $("#patientTabContent");
-  if (!box || !pet) return;
-
-  const speciesKey = getPetSpeciesKey(pet);
-  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
-  const labs = getLabsByPetId(pet.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
-
-  box.innerHTML = `
-    <div class="patientInfoBox">
-      <div class="row" style="align-items:flex-start;">
-        <div>
-          <h2>Аналізи</h2>
-          <div class="hint">Норми підтягуються автоматично: ${escapeHtml(speciesLabel)}.</div>
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="primary" id="btnAddBioLab">+ БХ</button>
-          <button class="primary" id="btnAddCbcLab">+ ЗАК</button>
-        </div>
-      </div>
-
-      <div id="labsList" class="labsList">
-        ${
-          labs.length
-            ? labs.map((lab) => renderLabCard(lab, speciesKey)).join("")
-            : `<div class="hint">Поки аналізів немає. Натисни “+ БХ” або “+ ЗАК”.</div>`
-        }
-      </div>
-    </div>
-  `;
-
-  $("#btnAddBioLab")?.addEventListener("click", () => addLabForPet(pet, "Біохімія"));
-  $("#btnAddCbcLab")?.addEventListener("click", () => addLabForPet(pet, "ЗАК"));
-
-  $("#labsList")?.addEventListener("click", async (e) => {
-    const del = e.target.closest("[data-del-lab]");
-    if (del) {
-      const id = del.dataset.delLab;
-      if (!id) return;
-
-      if (!confirm("Видалити аналіз?")) return;
-
-      const next = loadLabs().filter((x) => String(x.id) !== String(id));
-      saveLabs(next);
-      renderLabsTab(pet);
-      return;
-    }
-
-    const edit = e.target.closest("[data-edit-lab]");
-    if (edit) {
-      const id = edit.dataset.editLab;
-      if (!id) return;
-      editLabForPet(pet, id);
-      return;
-    }
-
-    const pdf = e.target.closest("[data-pdf-lab]");
-if (pdf) {
-  const id = pdf.dataset.pdfLab;
-  if (!id) return;
-
-  const lab = loadLabs().find((x) => String(x.id) === String(id));
-  if (!lab) return alert("Аналіз не знайдено");
-
-  await downloadLabPdf(pet, lab);
-  return;
-}
-  });
-}
-
-function addLabForPet(pet, groupName) {
-  const date = prompt("Дата аналізу:", todayISO()) || todayISO();
-  const keys = LAB_GROUPS[groupName] || [];
-  const values = {};
-
-  keys.forEach((key) => {
-    const label = LAB_LABELS[key] || key;
-    const raw = prompt(`${label}:`, "");
-    if (raw !== null && String(raw).trim() !== "") {
-      values[key] = Number(String(raw).replace(",", "."));
-    }
-  });
-
-  const lab = {
-    id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-    pet_id: String(pet.id),
-    type: groupName,
-    date,
-    values,
-    created_at: new Date().toISOString(),
-  };
-
-  const arr = loadLabs();
-  arr.unshift(lab);
-  saveLabs(arr);
-  renderLabsTab(pet);
-}
-
-function editLabForPet(pet, labId) {
-  const arr = loadLabs();
-  const idx = arr.findIndex((x) => String(x.id) === String(labId));
-  if (idx < 0) return alert("Аналіз не знайдено");
-
-  const lab = arr[idx];
-  const keys = LAB_GROUPS[lab.type] || Object.keys(lab.values || {});
-  const nextValues = { ...(lab.values || {}) };
-
-  const date = prompt("Дата аналізу:", lab.date || todayISO()) || lab.date || todayISO();
-
-  keys.forEach((key) => {
-    const label = LAB_LABELS[key] || key;
-    const oldVal = nextValues[key] ?? "";
-    const raw = prompt(`${label}:`, String(oldVal));
-
-    if (raw === null) return;
-
-    if (String(raw).trim() === "") {
-      delete nextValues[key];
-    } else {
-      nextValues[key] = Number(String(raw).replace(",", "."));
-    }
-  });
-
-  arr[idx] = {
-    ...lab,
-    date,
-    values: nextValues,
-    updated_at: new Date().toISOString(),
-  };
-
-  saveLabs(arr);
-  renderLabsTab(pet);
-}
-
-async function downloadLabPdf(pet, labId) {
-  if (typeof window.html2pdf === "undefined") {
-    return alert("html2pdf не подключен");
-  }
-
-  const lab = loadLabs().find((x) => String(x.id) === String(labId));
-  if (!lab) return alert("Аналіз не знайдено");
-
-  const root = document.createElement("div");
-  root.style.position = "fixed";
-  root.style.left = "-99999px";
-  root.style.top = "0";
-  root.innerHTML = renderLabPdfHtml(pet, lab);
-  document.body.appendChild(root);
-
-  const a4 = root.querySelector(".labPdfA4");
-  if (!a4) {
-    root.remove();
-    return alert("Не вдалося створити PDF");
-  }
-
-  const filename = `DocPUG_${String(lab.type || "lab")}_${String(pet.name || "patient")}_${String(lab.date || todayISO())}.pdf`;
-
-  try {
-    await window.html2pdf()
-      .set({
-        margin: 0,
-        filename,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: null,
-          logging: false,
-        },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-      })
-      .from(a4)
-      .save();
-  } catch (e) {
-    console.error(e);
-    alert("Не вдалося скачати PDF: " + (e?.message || e));
-  } finally {
-    root.remove();
-  }
-}
-
-function renderLabPdfHtml(pet, lab) {
-  const speciesKey = getPetSpeciesKey(pet);
-  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
-  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
-  const values = lab.values || {};
-  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
-
-  const rows = keys.map((key) => {
-    const ref = ranges[key];
-    if (!ref) return "";
-
-    const [min, max, unit] = ref;
-    const value = values[key];
-    const status = getLabStatus(value, min, max);
-
-    return `
-      <tr>
-        <td>${escapeHtml(LAB_LABELS[key] || key)}</td>
-        <td><b>${escapeHtml(value ?? "—")}</b> ${escapeHtml(unit)}</td>
-        <td>${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</td>
-        <td class="lab-${status}">${escapeHtml(labStatusLabel(status))}</td>
-      </tr>
-    `;
-  }).join("");
-
-  return `
-    <div class="labPdfA4">
-      <div class="labPdfHeader">
-        <div>
-          <div class="labPdfTitle">Аналіз / ${escapeHtml(lab.type || "—")}</div>
-          <div class="labPdfBrand">Doc.PUG</div>
-        </div>
-        <div class="pill">${escapeHtml(lab.date || "—")}</div>
-      </div>
-
-      <div class="labPdfPatient">
-        <div>
-          <div class="history-label">Пацієнт</div>
-          <div><b>${escapeHtml(pet.name || "—")}</b></div>
-          <div class="meta">${escapeHtml(speciesLabel)}</div>
-        </div>
-      </div>
-
-      <div class="labPdfBlock">
-        <table class="servicesTable">
-          <thead>
-            <tr>
-              <th>Показник</th>
-              <th>Результат</th>
-              <th>Норма</th>
-              <th>Статус</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-
-      <div class="labPdfFooter">Doc.PUG • Коли важливо — ми поруч.</div>
-    </div>
-  `;
-}
-
-function renderLabCard(lab, speciesKey) {
-  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
-  const values = lab.values || {};
-  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
-
-  return `
-    <div class="labCard">
-      <div class="labCardHead">
-        <div>
-          <div class="labTitle">${escapeHtml(lab.type || "Аналіз")}</div>
-          <div class="labDate">${escapeHtml(lab.date || "—")}</div>
-        </div>
-
-        <div style="display:flex; gap:8px;">
-          <button class="iconBtn" title="Редагувати" data-edit-lab="${escapeHtml(lab.id)}">✏️</button>
-          <button class="iconBtn" title="PDF для клієнта" data-pdf-lab="${escapeHtml(lab.id)}">📄</button>
-          <button class="iconBtn" title="Видалити" data-del-lab="${escapeHtml(lab.id)}">🗑</button>
-        </div>
-      </div>
-
-      <div class="labRows">
-        ${keys.map((key) => {
-          const value = values[key];
-          const ref = ranges[key];
-          if (!ref) return "";
-
-          const [min, max, unit] = ref;
-          const status = getLabStatus(value, min, max);
-
-          return `
-            <div class="labRow">
-              <div class="labName">
-                <b>${escapeHtml(LAB_LABELS[key] || key)}</b>
-                <span>норма: ${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</span>
-              </div>
-
-              <div class="labValue lab-${status}">
-                ${value ?? "—"} ${escapeHtml(unit)}
-              </div>
-
-              <div class="labStatus lab-${status}">
-                ${labStatusLabel(status)}
-              </div>
-
-              ${renderLabScale(value, min, max)}
-            </div>
-          `;
-        }).join("")}
-      </div>
-    </div>
-  `;
 }
 async function downloadLabPdf(pet, lab) {
   if (typeof window.html2pdf === "undefined") {
