@@ -627,3 +627,69 @@ aside[style*="width: 240px"] {
     background: var(--accent-color);
     color: #fff;
 }
+/* Контейнер для переключателя вкладок пациента */
+.patient-tabs-nav {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px border rgba(255, 255, 255, 0.1);
+    padding: 6px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    scrollbar-width: none; /* Убираем скроллбар в Firefox */
+}
+
+.patient-tabs-nav::-webkit-scrollbar {
+    display: none; /* Убираем скроллбар в Chrome/Safari */
+}
+
+/* Кнопка вкладки */
+.patient-tab-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+/* Эффект при наведении */
+.patient-tab-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Активная вкладка в стиле Apple */
+.patient-tab-btn.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+/* Контейнер контента с плавной анимацией появления */
+.patient-tab-content {
+    animation: fadeInTab 0.35s ease forwards;
+}
+
+@keyframes fadeInTab {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
