@@ -1060,3 +1060,63 @@ aside[style*="width: 240px"] {
   .visit-grid-layout { grid-template-columns: 1fr; }
   .field-row-grid { grid-template-columns: 1fr; }
 }
+/* Навигация вкладок на странице визита */
+.visit-tabs-nav {
+  display: flex;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  width: max-content;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.tab-nav-btn {
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  padding: 10px 20px !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.tab-nav-btn:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.tab-nav-btn.active {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+  font-weight: 600 !important;
+}
+
+/* Фикс для кнопок в пикере внутри табов */
+.premium-picker-bar button {
+  height: 38px !important;
+  padding: 0 16px !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #60a5fa !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+.premium-picker-bar button:hover {
+  background: #3b82f6 !important;
+  color: #fff !important;
+}
+.premium-picker-bar button.stock-btn {
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  color: #c084fc !important;
+}
+.premium-picker-bar button.stock-btn:hover {
+  background: #8b5cf6 !important;
+  color: #fff !important;
+}
