@@ -4393,7 +4393,6 @@ function renderVisitPage(visit, pet) {
         
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
           <button type="button" class="miniBtn" id="visitMedSave" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; background: #a855f7; color: #fff; border: none; cursor: pointer; transition: all 0.2s;">💾 Зберегти зміни</button>
-          
           <button type="button" class="miniBtn" id="btnPrintVisitPdf" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s;">📄 Виписка для клієнта</button>
         </div>
       </aside>
@@ -4443,16 +4442,19 @@ function renderVisitPage(visit, pet) {
     </div>
   `;
 
-  // === НАВЕШИВАЕМ СОБЫТИЕ НА КНОПКУ ВЫПИСКИ И СРАЗУ ПРОВЕРЯЕМ ЕЁ ===
+  // === ЖЕСТКАЯ ПРИНУДИТЕЛЬНАЯ ПЕРЕИНИЦИАЛИЗАЦИЯ ВСЕХ ОБРАБОТЧИКОВ ===
+  if (typeof initVisitUI === "function") {
+    console.log("Восстанавливаем системные слушатели кликов...");
+    initVisitUI();
+  }
+
+  // === ПРИВЯЗЫВАЕМ ПЕЧАТЬ ВЫПИСКИ ИЗ НАШЕГО ОБЪЕКТА ===
   const btnPrint = document.getElementById("btnPrintVisitPdf");
   if (btnPrint) {
     btnPrint.onclick = (e) => {
       e.preventDefault();
-      console.log("Запуск генерации выписки для визита:", visit.id);
-
-      // Генерируем чистое печатное окно (print-friendly) с данными из JSON
       const printWindow = window.open("", "_blank");
-      if (!printWindow) return alert("Будь ласка, дозвольте спливаючі вікна для цього сайту!");
+      if (!printWindow) return alert("Будь ласка, дозвольте спливаючі вікна!");
 
       const servicesRows = expanded.map(x => `
         <tr>
@@ -4470,70 +4472,45 @@ function renderVisitPage(visit, pet) {
         </tr>
       `).join("");
 
-      // Формируем красивый премиальный бланк выписки для клиентаклиники Doc.PUG
       printWindow.document.write(`
         <html>
         <head>
-          <title>Виписка з карти: ${escapeHtml(pet?.name || "Пацієнт")}</title>
+          <title>Виписка: ${escapeHtml(pet?.name || "Пацієнт")}</title>
           <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 40px; line-height: 1.6; }
+            body { font-family: sans-serif; color: #333; margin: 40px; }
             .header { text-align: center; border-bottom: 2px solid #a855f7; padding-bottom: 20px; margin-bottom: 30px; }
             .section { margin-bottom: 25px; }
-            .section-title { font-weight: 700; font-size: 1.1rem; color: #a855f7; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th { background: #f9f9f9; padding: 10px; font-weight: 600; text-align: left; border-bottom: 2px solid #eee; }
+            .section-title { font-weight: 700; font-size: 1.1rem; color: #a855f7; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; }
+            th { background: #f9f9f9; padding: 10px; border-bottom: 2px solid #eee; text-align: left; }
             .total { text-align: right; font-size: 1.2rem; font-weight: 700; margin-top: 20px; color: #a855f7; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1 style="margin: 0; font-size: 1.8rem;">🩺 Ветеринарна клініка Doc.PUG</h1>
-            <p style="margin: 5px 0 0 0; opacity: 0.7;">Консультаційний висновок / Виписка від ${escapeHtml(visit.date || "")}</p>
+            <h1>🩺 Ветеринарна клініка Doc.PUG</h1>
+            <p>Консультаційний висновок від ${escapeHtml(visit.date || "")}</p>
           </div>
-          
           <div class="section">
             <div class="section-title">🐾 Пацієнт</div>
             <p><b>Кличка:</b> ${escapeHtml(pet?.name || "—")} &nbsp;&nbsp; <b>Вид/Порода:</b> ${escapeHtml(pet?.species || "")} ${escapeHtml(pet?.breed || "")} &nbsp;&nbsp; <b>Вага:</b> ${escapeHtml(String(visit.weight_kg || "—"))} кг</p>
           </div>
-
           <div class="section">
             <div class="section-title">📝 Анамнез та Скарги</div>
             <p style="white-space: pre-wrap;">${escapeHtml(complaint || "—")}</p>
           </div>
-
           <div class="section">
             <div class="section-title">🔍 Встановлений діагноз</div>
             <p><b>${escapeHtml(dx || "Діагноз не вказано")}</b></p>
           </div>
-
           <div class="section">
             <div class="section-title">💊 Призначене лікування (Rx)</div>
             <p style="white-space: pre-wrap;">${escapeHtml(rx || "—")}</p>
           </div>
-
-          ${servicesRows ? `
-          <div class="section">
-            <div class="section-title">💼 Надані послуги</div>
-            <table>
-              <thead><tr><th>Назва</th><th style="text-align:center;">К-сть</th><th style="text-align:right;">Сума</th></tr></thead>
-              <tbody>${servicesRows}</tbody>
-            </table>
-          </div>` : ""}
-
-          ${stockRows ? `
-          <div class="section">
-            <div class="section-title">📦 Використані препарати та матеріали</div>
-            <table>
-              <thead><tr><th>Назва</th><th style="text-align:center;">К-сть</th><th style="text-align:right;">Сума</th></tr></thead>
-              <tbody>${stockRows}</tbody>
-            </table>
-          </div>` : ""}
-
+          ${servicesRows ? `<div class="section"><div class="section-title">💼 Надані послуги</div><table><thead><tr><th>Назва</th><th>К-сть</th><th style="text-align:right;">Сума</th></tr></thead><tbody>${servicesRows}</tbody></table></div>` : ""}
+          ${stockRows ? `<div class="section"><div class="section-title">📦 Препарати</div><table><thead><tr><th>Назва</th><th>К-сть</th><th style="text-align:right;">Сума</th></tr></thead><tbody>${stockRows}</tbody></table></div>` : ""}
           <div class="total">Всього за візит: ${grandTotal} ₴</div>
-
-          <script>
-            window.onload = function() { window.print(); };
-          </script>
+          <script>window.onload = function() { window.print(); };</script>
         </body>
         </html>
       `);
