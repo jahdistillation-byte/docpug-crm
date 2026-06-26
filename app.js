@@ -1969,6 +1969,7 @@ async function renderVisitsTab() {
   const search = page.querySelector("#visitsSearch");
   if (!list) return;
 
+  // завантаження візитів
   if (!Array.isArray(state.visits) || !state.visits.length) {
     list.innerHTML = `<div class="hint">Завантаження…</div>`;
     const arr = await loadVisitsApi();
@@ -2035,6 +2036,39 @@ async function renderVisitsTab() {
   }
 
   search?.addEventListener("input", paint);
+
+  // ✅ Обробник тепер всередині функції і чітко бачить змінну list
+  list.onclick = async (e) => {
+    const card = e.target.closest(".item[data-visit-id]");
+    if (!card) return;
+
+    const visitId = card.dataset.visitId;
+
+    // видалення візиту
+    if (e.target.closest('[data-action="delete"]')) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!confirm("Видалити візит?")) return;
+
+      const ok = await deleteVisitApi(visitId);
+      if (ok) {
+        const arr = await loadVisitsApi();
+        state.visits = arr;
+        paint();
+      }
+      return;
+    }
+
+    // відкриття візиту
+    if (
+      e.target.closest('[data-action="open"]') ||
+      e.target.closest(".item[data-visit-id]")
+    ) {
+      openVisit(visitId);
+    }
+  };
+
   paint();
 }
 // ==========================================================================
