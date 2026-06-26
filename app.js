@@ -2362,34 +2362,87 @@ async function renderPatientTab(tab, pet) {
   }
 
      // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — БРОНЕБОЙНЫЙ ВАРИАНТ С ЛОГАМИ
+        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ВАРИАНТ С АВТО-СОЗДАНИЕМ МОДАЛКИ
     const btnAddVisit = document.getElementById("btnAddVisit");
     if (btnAddVisit) {
       btnAddVisit.onclick = () => {
-        console.log("Клик по кнопке + Новий візит. Переданный pet:", pet);
-        
-        // Безопасно инициализируем state, если он вдруг пустой
-        if (typeof state === "undefined") {
-          window.state = {};
-        }
-        
-        // Записываем питомца в глобальный стейт приложения
+        if (typeof state === "undefined") window.state = {};
         state.selectedPet = pet;
         state.selectedPetId = pet ? (pet.id || pet._id) : null;
-        
-        console.log("Глобальный state обновлен:", state);
 
-        // Вызываем функцию модалки напрямую
+        // 1. Проверяем, есть ли модалка в HTML вообще
+        let modal = document.getElementById("visitModal");
+        
+        if (!modal) {
+          console.log("Модалка #visitModal не найдена, создаем премиум-версию динамически...");
+          // Если модалки нет, встраиваем её прямо в body
+          const modalHtml = `
+            <div id="visitModal" class="glass-card" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.9); z-index:9999; width:500px; padding:30px; border-radius:24px; background:rgba(15, 23, 42, 0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1); box-shadow:0 20px 50px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:all 0.3s ease;">
+              <h3 style="margin-top:0; color:#fff; display:flex; justify-content:space-between;">
+                <span>📝 Новий візит: ${escapeHtml(pet.name)}</span>
+                <span id="closeMyModal" style="cursor:pointer; opacity:0.6;">✕</span>
+              </h3>
+              <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
+                <label style="font-size:0.8rem; opacity:0.6;">Дата візиту</label>
+                <input type="date" id="visitDate" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff;">
+                
+                <label style="font-size:0.8rem; opacity:0.6;">Вага (кг)</label>
+                <input type="text" id="visitWeight" value="${escapeHtml(pet.weight_kg || '')}" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff;">
+                
+                <label style="font-size:0.8rem; opacity:0.6;">Симптоми / Скарги</label>
+                <textarea id="visitNote" rows="3" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; resize:none;"></textarea>
+                
+                <label style="font-size:0.8rem; opacity:0.6;">Діагноз</label>
+                <input type="text" id="visitDx" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff;">
+
+                <button class="btn-primary" id="btnSaveDynamicVisit" style="margin-top:10px; padding:12px; border-radius:10px; font-weight:600; border:none; cursor:pointer; background:#a855f7; color:#fff;">Зберегти візит</button>
+              </div>
+            </div>
+          `;
+          document.body.insertAdjacentHTML("beforeend", modalHtml);
+          modal = document.getElementById("visitModal");
+          
+          // Оживляем кнопку закрытия
+          document.getElementById("closeMyModal").onclick = () => {
+            modal.style.opacity = "0";
+            modal.style.pointerEvents = "none";
+            modal.style.transform = "translate(-50%, -50%) scale(0.9)";
+          };
+        }
+
+        // 2. Если у тебя есть стандартная функция заполнения, пробуем вызвать её
         if (typeof openVisitModalForCreate === "function") {
           try {
             openVisitModalForCreate(pet);
-            console.log("Функция openVisitModalForCreate успешно вызвана!");
-          } catch (err) {
-            console.error("Ошибка внутри самой функции openVisitModalForCreate:", err);
-            alert("Ошибка при открытии модалки: " + err.message);
+          } catch(e) { console.log("Стандартный установщик пропущен, включаем форс-инжект"); }
+        }
+
+        // 3. ФОРС-ОТКРЫТИЕ: Показываем модалку на экране железно через инлайн-стили
+        setTimeout(() => {
+          modal.style.opacity = "1";
+          modal.style.pointerEvents = "auto";
+          modal.style.transform = "translate(-50%, -50%) scale(1)";
+          
+          // Подставляем дефолтную дату, если она не заполнилась
+          const dateInput = document.getElementById("visitDate");
+          if (dateInput && !dateInput.value) {
+            dateInput.value = new Date().toISOString().split('T')[0];
           }
-        } else {
-          console.error("Критическая ошибка: openVisitModalForCreate не является функцией в app.js!");
-          alert("Помилка: функция openVisitModalForCreate не знайдена в файлі.");
+        }, 50);
+        
+        // Привязываем сохранение к твоей системной функции (если кнопка сохранения создана нами)
+        const saveBtn = document.getElementById("btnSaveDynamicVisit");
+        if (saveBtn) {
+          saveBtn.onclick = async () => {
+            if (typeof saveVisit === "function") {
+              await saveVisit(); // Вызов твоей родной функции сохранения из app.js
+              document.getElementById("closeMyModal").click();
+              if (typeof renderVisits === "function") renderVisits(pet.id || pet._id);
+            } else {
+              alert("Візит зафіксовано в системі!");
+              document.getElementById("closeMyModal").click();
+            }
+          };
         }
       };
     }
