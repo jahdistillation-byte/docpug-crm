@@ -2199,72 +2199,116 @@ function printA4Only(visitId) {
 // =========================
 // OWNERS — server state rendering
 // =========================
+// ==========================================================================
+// ОБНОВЛЕННЫЙ РЕНДЕРИНГ ТАБЛИЦЫ ВЛАСНИКОВ (ОБЪЕДИНЕНИЕ С ТВОЕЙ ЛОГИКОЙ)
+// ==========================================================================
 function renderOwners() {
-  const list = $("#ownersList");
-  if (!list) return;
+  console.log("🐾 Рендеринг вкладки власників...");
+  
+  // Ищем новый контейнер таблицы из index.html
+  const tbody = document.getElementById('owners-table-body');
+  if (!tbody) return console.warn("Элемент owners-table-body не найден в HTML");
 
-  list.innerHTML = "";
+  tbody.innerHTML = "";
 
-  const q = String($("#globalSearch")?.value || "").trim().toLowerCase();
-
+  // Твоя логика глобального поиска
+  const q = String(document.getElementById('globalSearch')?.value || "").trim().toLowerCase();
   const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
 
+  // Фильтруем массив по поисковому запросу
   const owners = ownersRaw.filter((owner) => {
     if (!q) return true;
-
     const hay = [
       owner.name,
       owner.phone,
       owner.note,
     ].filter(Boolean).join(" ").toLowerCase();
-
     return hay.includes(q);
   });
 
+  // Если ничего не нашли
   if (!owners.length) {
-    list.innerHTML = `<div class="hint">Нічого не знайдено.</div>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">
+          Нічого не знайдено.
+        </td>
+      </tr>
+    `;
     return;
   }
 
+  // Рендерим отфильтрованных владельцев в таблицу
   owners.forEach((owner) => {
-    const el = document.createElement("div");
-    el.className = "item";
-    el.dataset.openOwner = String(owner.id);
-    el.style.cursor = "pointer";
+    const tr = document.createElement("tr");
+    tr.style.cursor = "pointer";
 
+    // Твой оригинальный подсчет количества пациентов у этого владельцы
     const petsCount = (state.patients || []).filter(
       p => String(p.owner_id) === String(owner.id)
     ).length;
 
-    el.innerHTML = `
-      <div class="left" style="flex:1; min-width:0;">
-        <div class="name" style="font-size:20px;">
-          👤 ${escapeHtml(owner.name || "Без имени")}
+    tr.innerHTML = `
+      <td style="font-weight: 600; color: #fff;">
+        👤 ${escapeHtml(owner.name || "Без імені")}
+      </td>
+      <td>
+        <span style="color: var(--primary-neon); font-weight: 500;">
+          📞 ${escapeHtml(owner.phone || "Не вказано")}
+        </span>
+      </td>
+      <td>
+        <span class="badge" style="background: rgba(163, 97, 255, 0.1); color: var(--primary-neon); border: 1px solid rgba(163, 97, 255, 0.2); padding: 4px 10px; font-size: 0.75rem;">
+          🐾 ${petsCount} пацієнтів
+        </span>
+      </td>
+      <td style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted);">
+        📍 ${escapeHtml(owner.note || "—")}
+      </td>
+      <td>
+        <div style="display: flex; gap: 8px; align-items: center;" onclick="event.stopPropagation();">
+          <button class="btn-tab" data-open-owner="${escapeHtml(String(owner.id))}" style="padding: 6px 12px; font-size: 0.8rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+            📂 Відкрити
+          </button>
+          <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+          <button class="iconBtn" title="Видалити" data-del="${escapeHtml(owner.id)}" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">🗑</button>
         </div>
-
-        <div class="meta" style="margin-top:6px;">
-          📞 ${escapeHtml(owner.phone || "Не указан")}
-        </div>
-
-        ${
-          owner.note
-            ? `<div class="meta">📍 ${escapeHtml(owner.note)}</div>`
-            : ""
-        }
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-          <div class="pill">🐾 ${petsCount} пацієнтів</div>
-          <div class="pill">📝 CRM</div>
-        </div>
-      </div>
-
-      <div class="right" style="display:flex; gap:8px; align-items:center; flex:0 0 auto;">
-        <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}">✏️</button>
-        <button class="iconBtn" title="Удалить" data-del="${escapeHtml(owner.id)}">🗑</button>
-      </div>
+      </td>
     `;
 
-    list.appendChild(el);
+    // 1. Клик по всей строке или по кнопке "Відкрити" переводит в карточку
+    const openTarget = () => {
+      if (typeof openOwner === 'function') openOwner(owner.id);
+      else setHash('owner', owner.id);
+    };
+    tr.addEventListener('click', openTarget);
+    tr.querySelector('[data-open-owner]').addEventListener('click', openTarget);
+
+    // 2. Твоя оригинальная кнопка Редактировать
+    tr.querySelector(`[data-edit-owner="${owner.id}"]`).addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof openEditOwnerModal === 'function') openEditOwnerModal(owner);
+    });
+
+    // 3. Твоя оригинальная кнопка Удалить
+    tr.querySelector(`[data-del="${owner.id}"]`).addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Видалити власника ${owner.name}?`)) return;
+      
+      // Здесь вызывается твой API удаления (например, deleteOwnerApi)
+      if (typeof deleteOwnerApi === 'function') {
+        const ok = await deleteOwnerApi(owner.id);
+        if (ok) await loadOwners();
+      } else {
+        // Офлайн-фолбек, если бэка нет
+        const next = (state.owners || []).filter(x => String(x.id) !== String(owner.id));
+        state.owners = next;
+        LS.set(OWNERS_KEY, next);
+        renderOwners();
+      }
+    });
+
+    tbody.appendChild(tr);
   });
 }
 // =========================
@@ -3843,7 +3887,7 @@ async function renderCalendarTab() {
     </div>
   `).join("");
 
-  targetPage.innerHTML = `
+    targetPage.innerHTML = `
     <div class="calendar-container">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
@@ -3866,9 +3910,13 @@ async function renderCalendarTab() {
         <button class="btn-arrow" id="calNextDay" type="button">→</button>
       </div>
 
+      <div id="calTopScrollContainer" class="calendar-top-scrollbar-container">
+        <div id="calTopScrollSpacer" style="height: 1px;"></div>
+      </div>
+
       <div style="display: flex; gap: 24px; align-items: flex-start; width: 100%;">
         
-        <div class="calendar-grid-wrapper" style="flex-grow: 1;">
+        <div id="calMainScrollContainer" class="calendar-grid-wrapper" style="flex-grow: 1;">
           <div class="calendar-grid" style="grid-template-columns: 70px repeat(${staffOnShift.length}, minmax(220px, 1fr));">
             
             <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -3880,13 +3928,13 @@ async function renderCalendarTab() {
           </div>
         </div>
 
-        <aside style="width: 240px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium); flex-shrink: 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <aside style="width: 260px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border-radius: var(--radius-lg); padding: 20px; flex-shrink: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
               <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Ветеринари</div>
               <div style="font-size: 0.75rem; color: var(--text-muted);">Перетягни в слот</div>
             </div>
-            <button class="btn-primary" id="btnAddStaffFromCalendar" type="button" style="padding: 6px 10px; font-size: 0.75rem; border-radius: var(--radius-sm);">+ Додати</button>
+            <button id="btnAddStaffFromCalendar" type="button">+ Додати</button>
           </div>
 
           <div class="calStaffDragList">
@@ -3896,7 +3944,6 @@ async function renderCalendarTab() {
       </div>
     </div>
   `;
-
   // Инициализация событий перетаскивания (Drag & Drop)
   $$(".calStaffDrag").forEach((card) => {
     card.addEventListener("dragstart", (e) => {

@@ -486,3 +486,79 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 0 25px rgba(163, 97, 255, 0.6);
 }
+/* --- МИНИМАЛИСТИЧНАЯ ПАНЕЛЬ ВЕТЕРИНАРОВ (APPLE ULTRA-SLIM) --- */
+aside[style*="width: 240px"] {
+    width: 260px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 20px !important;
+}
+
+/* Умная кнопка додавання */
+#btnAddStaffFromCalendar {
+    background: rgba(163, 97, 255, 0.1) !important;
+    border: 1px solid rgba(163, 97, 255, 0.3) !important;
+    color: var(--primary-neon) !important;
+    padding: 6px 14px !important;
+    border-radius: 20px !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: none !important;
+}
+#btnAddStaffFromCalendar:hover {
+    background: var(--primary-neon) !important;
+    color: #fff !important;
+    box-shadow: var(--primary-glow) !important;
+}
+
+/* Сверхтонкие стеклянные плашки перетаскивания */
+.calStaffDrag {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 10px 14px !important;
+    margin-bottom: 8px !important;
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.calStaffDrag:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(4px);
+}
+.calStaffDragName {
+    color: #fff !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+}
+.calStaffDragRole {
+    color: var(--text-muted) !important;
+    font-size: 0.7rem !important;
+}
+
+/* --- КРАСИВЫЙ СИНХРОННЫЙ ВЕРХНИЙ СКРОЛЛБАР --- */
+.calendar-top-scrollbar-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-bottom: 10px;
+}
+/* Скрываем сам пустой блок, оставляем только трек полосы */
+.calendar-top-scrollbar-container::-webkit-scrollbar {
+    height: 5px;
+}
+.calendar-top-scrollbar-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01);
+}
+.calendar-top-scrollbar-container::-webkit-scrollbar-thumb {
+    background: rgba(163, 97, 255, 0.2);
+    border-radius: 10px;
+}
+.calendar-top-scrollbar-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-neon);
+}
