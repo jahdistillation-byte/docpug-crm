@@ -3905,65 +3905,90 @@ async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
 
-  box.innerHTML = `<div class="hint">Завантаження…</div>`;
+  box.innerHTML = ""; // Полностью очищаем контейнер вкладки от старого контента
 
   const visits = await getVisitsByPetId(petId);
   cacheVisits(visits);
 
   if (!visits.length) {
-    box.innerHTML = `
-      <div class="patientInfoBox">
-        <h2>Історія візитів</h2>
-        <div class="hint">Поки візитів немає. Натисни “+ Візит”.</div>
-      </div>
-    `;
+    box.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки візитів немає. Натисніть "+ Новий візит".</div>`;
     return;
   }
 
-  box.innerHTML = `
-    <div class="patientVisitsList">
-      ${visits
-        .slice()
-        .sort((a, b) => String(b.date || b.id).localeCompare(String(a.date || a.id)))
-        .map((v) => {
-          const parsed = typeof parseVisitNote === "function" ? parseVisitNote(v.note || "") : { dx: "", complaint: v.note };
-          const dx = parsed.dx || "Без діагнозу";
-          const complaint = parsed.complaint || "Скарги не вказані";
+  // Достаем наш нативный HTML5-шаблон из index.html
+  const template = document.getElementById("visit-timeline-item-template");
+  if (!template) {
+    console.error("Помилка: Шаблон visit-timeline-item-template не знайдено в index.html");
+    return;
+  }
 
-          const servicesTotal = calcServicesTotal(v);
-          const stockTotal = calcStockTotal(v);
-          const grandTotal = servicesTotal + stockTotal;
+  // Создаем обертку для всего списка (контейнер таймлайна)
+  const timelineContainer = document.createElement("div");
+  timelineContainer.style.cssText = "position: relative; padding-left: 0px; margin-top: 10px;";
+  
+  // Добавляем одну направляющую линию трека времени
+  const lineTrack = document.createElement("div");
+  lineTrack.style.cssText = "position: absolute; left: 12px; top: 15px; bottom: 15px; width: 2px; background: linear-gradient(180deg, #c084fc 0%, rgba(147, 51, 234, 0.1) 100%); box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); opacity: 0.6;";
+  timelineContainer.appendChild(lineTrack);
 
-          return `
-            <div class="item visitCard" data-open-visit="${escapeHtml(String(v.id))}" style="cursor:pointer;">
-              <div class="left" style="width:100%;">
-                <div class="visitCardTop">
-                  <div>
-                    <div class="visitDate">${escapeHtml(v.date || "—")}</div>
-                    <div class="visitDx">Діагноз: ${escapeHtml(dx)}</div>
-                  </div>
-                  <div class="visitCardBadges">
-                    <div class="pill">💰 ${escapeHtml(String(grandTotal))} грн</div>
-                    <div class="pill">📄 Візит</div>
-                  </div>
-                </div>
-                <div class="visitMiniBlock">
-                  <div class="history-label">Скарга / стан</div>
-                  <div class="visitMiniText">${escapeHtml(complaint)}</div>
-                </div>
-                ${v.rx ? `<div class="visitMiniBlock"><div class="history-label">Призначення</div><div class="visitMiniText">${escapeHtml(v.rx)}</div></div>` : ""}
-              </div>
-              <div class="right" style="display:flex; gap:6px;">
-                <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
-                <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
-              </div>
-            </div>
-          `;
-        })
-        .join("")}
-    </div>
-  `;
+  // Сортируем визиты от новых к старым
+  const sortedVisits = visits
+    .slice()
+    .sort((a, b) => String(b.date || b.id).localeCompare(String(a.date || a.id)));
 
+  sortedVisits.forEach((v) => {
+    // Глубокое клонирование структуры шаблона из index.html
+    const clone = template.content.cloneNode(true);
+    
+    // Парсим сохраненный диагноз и жалобы
+    const parsed = typeof parseVisitNote === "function" ? parseVisitNote(v.note || "") : { dx: "", complaint: v.note };
+    const dx = parsed.dx || "Без встановленого діагнозу";
+    const complaint = parsed.complaint || "Скарги не вказані";
+    
+    // Считаем общую стоимость приёма
+    const grandTotal = (calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0);
+
+    // Безопасно наполняем текстовые узлы внутри клона
+    const cardEl = clone.querySelector(".visit-card-el");
+    cardEl.dataset.openVisit = String(v.id);
+    
+    clone.querySelector(".v-date").textContent = `📅 ${v.date || "—"}`;
+    clone.querySelector(".v-dx").textContent = dx;
+    clone.querySelector(".v-price-badge").textContent = `💰 ${grandTotal} ₴`;
+    clone.querySelector(".v-complaint").textContent = complaint;
+
+    // Блок назначений (Rx) показываем и наполняем только если в нём есть текст
+    if (v.rx && v.rx.trim()) {
+      clone.querySelector(".v-rx-container").style.display = "block";
+      clone.querySelector(".v-rx").textContent = v.rx;
+    }
+
+    // Привязываем оригинальные data-аттрибуты с ID визита к кнопкам действий
+    clone.querySelector(".v-edit-btn").dataset.editVisit = String(v.id);
+    clone.querySelector(".v-del-btn").dataset.delVisit = String(v.id);
+
+    // Добавляем премиальные hover-эффекты динамически через JS (чтобы не забивать стили)
+    cardEl.addEventListener("mouseenter", () => {
+      cardEl.style.background = "rgba(255, 255, 255, 0.05)";
+      cardEl.style.borderColor = "rgba(168, 85, 247, 0.3)";
+      cardEl.style.transform = "translateY(-2px)";
+      cardEl.style.boxShadow = "0 12px 40px rgba(147, 51, 234, 0.15)";
+    });
+    cardEl.addEventListener("mouseleave", () => {
+      cardEl.style.background = "rgba(255, 255, 255, 0.02)";
+      cardEl.style.borderColor = "rgba(255, 255, 255, 0.06)";
+      cardEl.style.transform = "translateY(0)";
+      cardEl.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.2)";
+    });
+
+    // Пушим карточку в контейнер
+    timelineContainer.appendChild(clone);
+  });
+
+  // Вставляем собранный таймлайн в DOM
+  box.appendChild(timelineContainer);
+
+  // Железно возвращаем оригинальный обработчик кликов (делегирование событий на родителе)
   box.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
