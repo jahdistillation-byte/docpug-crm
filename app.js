@@ -4293,27 +4293,23 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 // Отрисовка страницы приёма и медицинских блоков
 // =========================
 function renderVisitPage(visit, pet) {
-  // Инициализируем вкладку по умолчанию, если не задана
-  if (!state.currentVisitTab) {
-    state.currentVisitTab = 'med'; 
+  console.log("=== ЗАПУСК РЕНДЕРА СТРАНИЦЫ ВИЗИТА ===", { visit, pet });
+
+  // 1. Ищем пустую секцию визита
+  const visitSection = document.querySelector('section[data-page="visit"]');
+  if (!visitSection) {
+    console.error("Критическая ошибка: секция data-page='visit' не найдена в HTML!");
+    return;
   }
 
-  const pill = document.getElementById("visitDatePill") || $("#visitDatePill");
-  if (pill) pill.textContent = visit?.date || "—";
-
-  const meta = document.getElementById("visitMeta") || $("#visitMeta");
-  if (meta) {
-    const parts = [];
-    if (pet?.name) parts.push(pet.name);
-    if (pet?.species) parts.push(pet.species);
-    if (pet?.breed) parts.push(pet.breed);
-    if (visit?.weight_kg) parts.push(`${visit.weight_kg} кг`);
-    meta.textContent = parts.length ? parts.join(" • ") : "—";
+  // 2. Если внутри секции ещё нет нашего контейнера, создаем его динамически
+  let box = document.getElementById("visitNoteBox");
+  if (!box) {
+    visitSection.innerHTML = '<div id="visitNoteBox"></div>';
+    box = document.getElementById("visitNoteBox");
   }
 
-  const box = document.getElementById("visitNoteBox") || $("#visitNoteBox");
-  if (!box) return;
-
+  // Безопасное экранирование строк
   const safe = (str) => {
     if (!str) return "";
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -4325,141 +4321,146 @@ function renderVisitPage(visit, pet) {
   const dx = parsed.dx || "";
   const complaint = parsed.complaint || "";
 
-  // ==================== РЕНДЕР ВКЛАДОК (КОНТЕНТ) ====================
-  let tabContentHtml = "";
+  // Сборка услуг
+  if (typeof ensureVisitServicesShape === "function") ensureVisitServicesShape(visit);
+  const rawServices = typeof loadServices === "function" ? loadServices() : [];
+  const svcOptions = Array.isArray(rawServices) ? rawServices
+    .filter((s) => s.active !== false)
+    .map((s) => `<option value="${safe(s.id)}">${safe(s.name)} — ${safe(String(Number(s.price) || 0))} грн</option>`)
+    .join("") : "";
 
-  if (state.currentVisitTab === 'med') {
-    // Вкладка 1: Медицинская часть
-    tabContentHtml = `
-      <div class="visit-form-group">
-        <label class="premium-field">
-          <span class="field-title">Діагноз / Попередній діагноз</span>
-          <input class="premium-input text-bold" id="visitMedDx" type="text" placeholder="Введіть діагноз..." value="${safe(dx)}" />
-        </label>
-        <div class="field-row-grid">
-          <label class="premium-field">
-            <span class="field-title">Скарги клієнта & Клінічний стан</span>
-            <textarea class="premium-textarea" id="visitMedComplaint" rows="6" placeholder="Опишіть симптомы...">${safe(complaint)}</textarea>
-          </label>
-          <label class="premium-field">
-            <span class="field-title">Призначення & Рекомендації (Rx)</span>
-            <textarea class="premium-textarea rx-accent" id="visitMedRx" rows="6" placeholder="Схема лікування...">${safe(rx)}</textarea>
-          </label>
-        </div>
-      </div>
-    `;
-  } else if (state.currentVisitTab === 'items') {
-    // Вкладка 2: Услуги и товары
-    if (typeof ensureVisitServicesShape === "function") ensureVisitServicesShape(visit);
-    const svcOptions = (typeof loadServices === "function" ? loadServices() : [])
-      .filter((s) => s.active !== false)
-      .map((s) => `<option value="${safe(s.id)}">${safe(s.name)} — ${safe(String(Number(s.price) || 0))} грн</option>`)
-      .join("");
-    const expanded = (typeof expandServiceLines === "function" ? expandServiceLines(visit) : []) || [];
-    const svcListHtml = expanded.length
-      ? expanded.map((x, idx) => `
-          <div class="premium-row">
-            <div class="visitLineLeft"><span>🩺</span> <b>${safe(x.name)}</b></div>
-            <div class="visitLineRight">
-              <span>${safe(String(x.qty))} шт × ${safe(String(x.price))} грн</span>
-              <button type="button" class="action-circle-btn delete" data-svc-del="${idx}">✕</button>
-            </div>
+  const expanded = (typeof expandServiceLines === "function" ? expandServiceLines(visit) : []) || [];
+  const svcListHtml = expanded.length
+    ? expanded.map((x, idx) => `
+        <div class="premium-row">
+          <div class="visitLineLeft"><span>🩺</span> <b>${safe(x.name)}</b></div>
+          <div class="visitLineRight">
+            <span>${safe(String(x.qty))} шт × ${safe(String(x.price))} грн</span>
+            <button type="button" class="action-circle-btn delete" data-svc-del="${idx}">✕</button>
           </div>
-        `).join("")
-      : `<div class="premium-hint">🧬 Послуги ще не додано. Виберіть зі списку нижче.</div>`;
+        </div>
+      `).join("")
+    : `<div class="premium-hint">🧬 Послуги ще не додано. Виберіть зі списку нижче.</div>`;
 
-    if (typeof ensureVisitStockShape === "function") ensureVisitStockShape(visit);
-    const stkOptions = (typeof loadStock === "function" ? loadStock() : [])
-      .filter((it) => it.active !== false)
-      .map((it) => `<option value="${safe(it.id)}">${safe(it.name)} — ${safe(String(Number(it.price) || 0))} грн (Залишок: ${safe(String(it.qty || 0))})</option>`)
-      .join("");
-    const stkExpanded = (typeof expandStockLines === "function" ? expandStockLines(visit) : []) || [];
-    const stkListHtml = stkExpanded.length
-      ? stkExpanded.map((x, idx) => `
-          <div class="premium-row">
-            <div class="visitLineLeft"><span>💊</span> <b>${safe(x.name)}</b></div>
-            <div class="visitLineRight">
-              <span>${safe(String(x.qty))} ${safe(x.unit || "шт")} × ${safe(String(x.price))} грн</span>
-              <button type="button" class="action-circle-btn delete" data-stk-del="${idx}">✕</button>
-            </div>
+  // Сборка склада
+  if (typeof ensureVisitStockShape === "function") ensureVisitStockShape(visit);
+  const rawStock = typeof loadStock === "function" ? loadStock() : [];
+  const stkOptions = Array.isArray(rawStock) ? rawStock
+    .filter((it) => it.active !== false)
+    .map((it) => `<option value="${safe(it.id)}">${safe(it.name)} — ${safe(String(Number(it.price) || 0))} грн</option>`)
+    .join("") : "";
+
+  const stkExpanded = (typeof expandStockLines === "function" ? expandStockLines(visit) : []) || [];
+  const stkListHtml = stkExpanded.length
+    ? stkExpanded.map((x, idx) => `
+        <div class="premium-row">
+          <div class="visitLineLeft"><span>💊</span> <b>${safe(x.name)}</b></div>
+          <div class="visitLineRight">
+            <span>${safe(String(x.qty))} шт × ${safe(String(x.price))} грн</span>
+            <button type="button" class="action-circle-btn delete" data-stk-del="${idx}">✕</button>
           </div>
-        `).join("")
-      : `<div class="premium-hint">📦 Товари не додано. Виберіть зі списку нижче.</div>`;
-
-    tabContentHtml = `
-      <div class="visit-items-tab-content">
-        <h4 style="margin: 0 0 12px 0; font-size: 1rem; opacity: 0.9;">Надані послуги</h4>
-        <div class="visit-lines-container" style="margin-bottom: 16px;">${svcListHtml}</div>
-        <div class="premium-picker-bar" style="margin-bottom: 24px;">
-          <select id="visitSvcSelect" class="premium-select">${svcOptions}</select>
-          <input id="visitSvcQty" type="number" min="1" value="1" class="premium-qty-input" />
-          <button id="visitSvcAdd" type="button">Додати послугу</button>
         </div>
-
-        <h4 style="margin: 0 0 12px 0; font-size: 1rem; opacity: 0.9;">Препарати та товари</h4>
-        <div class="visit-lines-container" style="margin-bottom: 16px;">${stkListHtml}</div>
-        <div class="premium-picker-bar">
-          <select id="visitStkSelect" class="premium-select">${stkOptions}</select>
-          <input id="visitStkQty" type="number" min="1" value="1" class="premium-qty-input" />
-          <button id="visitStkAdd" type="button" class="stock-btn">Видати товар</button>
-        </div>
-      </div>
-    `;
-  } else if (state.currentVisitTab === 'files') {
-    // Вкладка 3: Файлы
-    tabContentHtml = `
-      <div class="file-upload-placeholder">
-        <div class="upload-icon">☁️</div>
-        <div class="upload-text">Перетягніть файли сюди або <span class="upload-link">відкрийте провідник</span></div>
-        <div class="upload-subtext" style="color: rgba(255,255,255,0.4); margin-top:8px;">Аналізи крові, рентген, результати УЗД</div>
-      </div>
-    `;
-  }
+      `).join("")
+    : `<div class="premium-hint">📦 Товари не додано. Виберіть зі списку нижче.</div>`;
 
   const totalSvc = typeof calcServicesTotal === "function" ? calcServicesTotal(visit) : 0;
   const totalStk = typeof calcStockTotal === "function" ? calcStockTotal(visit) : 0;
   const grandTotal = totalSvc + totalStk;
 
-  // Главная разметка с табами сверху основного контента
+  // Генерируем премиальный интерфейс
   box.innerHTML = `
     <div class="visit-grid-layout">
-      
       <aside class="visit-sidebar-sticky">
         <div class="glass-card main-info">
           <div class="patient-avatar-badge">🐾</div>
           <div class="sidebar-patient-name">${safe(pet?.name || "Пацієнт")}</div>
           <div class="sidebar-patient-breed">${safe(pet?.species || "")} • ${safe(pet?.breed || "Без породи")}</div>
           <div class="sidebar-divider"></div>
-          <div class="sidebar-meta-item"><span class="label">Дата візиту:</span><span class="val">${safe(visit?.date || "—")}</span></div>
-          <div class="sidebar-meta-item"><span class="label">Вага малюка:</span><span class="val highlight">${visit?.weight_kg ? visit.weight_kg + ' кг' : '—'}</span></div>
+          <div class="sidebar-meta-item"><span class="label">Дата:</span><span class="val">${safe(visit?.date || "—")}</span></div>
+          <div class="sidebar-meta-item"><span class="label">Вага:</span><span class="val highlight">${visit?.weight_kg ? visit.weight_kg + ' кг' : '—'}</span></div>
           <div class="sidebar-meta-item"><span class="label">Статус:</span><span class="status-badge premium">В роботі</span></div>
         </div>
-
         <div class="glass-card finance-card">
           <div class="finance-label">Загальна вартість</div>
           <div class="finance-amount">${grandTotal} <span class="currency">₴</span></div>
         </div>
-        
         <div class="sidebar-actions">
           <button type="button" id="visitMedSave" class="premium-neon-btn">💾 Зберегти візит</button>
         </div>
       </aside>
 
       <main class="visit-main-content">
-        
         <div class="visit-tabs-nav">
-          <button type="button" class="tab-nav-btn ${state.currentVisitTab === 'med' ? 'active' : ''}" onclick="state.currentVisitTab = 'med'; window.onhashchange();">📋 Анамнез, огляд</button>
-          <button type="button" class="tab-nav-btn ${state.currentVisitTab === 'items' ? 'active' : ''}" onclick="state.currentVisitTab = 'items'; window.onhashchange();">🩺 Послуги та товари</button>
-          <button type="button" class="tab-nav-btn ${state.currentVisitTab === 'files' ? 'active' : ''}" onclick="state.currentVisitTab = 'files'; window.onhashchange();">📂 Файли</button>
+          <button type="button" class="tab-nav-btn active" data-target="visit-tab-med">📋 Анамнез, огляд</button>
+          <button type="button" class="tab-nav-btn" data-target="visit-tab-items">🩺 Послуги та товари</button>
+          <button type="button" class="tab-nav-btn" data-target="visit-tab-files">📂 Файли</button>
         </div>
 
-        <div class="glass-card sub-tab-card">
-          ${tabContentHtml}
+        <div id="visit-tab-med" class="visit-tab-content">
+          <div class="glass-card sub-tab-card">
+            <div class="visit-form-group">
+              <label class="premium-field">
+                <span class="field-title">Діагноз / Попередній діагноз</span>
+                <input class="premium-input text-bold" id="visitMedDx" type="text" placeholder="Введіть діагноз..." value="${safe(dx)}" />
+              </label>
+              <div class="field-row-grid">
+                <label class="premium-field">
+                  <span class="field-title">Скарги клієнта & Клінічний стан</span>
+                  <textarea class="premium-textarea" id="visitMedComplaint" rows="6" placeholder="Опишіть симптомы...">${safe(complaint)}</textarea>
+                </label>
+                <label class="premium-field">
+                  <span class="field-title">Призначення & Рекомендації (Rx)</span>
+                  <textarea class="premium-textarea rx-accent" id="visitMedRx" rows="6" placeholder="Схема лікування...">${safe(rx)}</textarea>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
+        <div id="visit-tab-items" class="visit-tab-content" style="display: none;">
+          <div class="glass-card sub-tab-card">
+            <h4 style="margin: 0 0 12px 0; font-size: 1rem;">Надані послуги</h4>
+            <div class="visit-lines-container" style="margin-bottom: 16px;">${svcListHtml}</div>
+            <div class="premium-picker-bar" style="margin-bottom: 24px;">
+              <select id="visitSvcSelect" class="premium-select" style="flex:1;">${svcOptions}</select>
+              <input id="visitSvcQty" type="number" min="1" value="1" class="premium-qty-input" />
+              <button id="visitSvcAdd" type="button">Додати послугу</button>
+            </div>
+
+            <h4 style="margin: 12px 0 12px 0; font-size: 1rem;">Препарати та товари</h4>
+            <div class="visit-lines-container" style="margin-bottom: 16px;">${stkListHtml}</div>
+            <div class="premium-picker-bar">
+              <select id="visitStkSelect" class="premium-select" style="flex:1;">${stkOptions}</select>
+              <input id="visitStkQty" type="number" min="1" value="1" class="premium-qty-input" />
+              <button id="visitStkAdd" type="button" class="stock-btn">Видати товар</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="visit-tab-files" class="visit-tab-content" style="display: none;">
+          <div class="glass-card sub-tab-card">
+            <div class="file-upload-placeholder">
+              <div class="upload-icon">☁️</div>
+              <div class="upload-text">Перетягніть файли сюди...</div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   `;
+
+  // Логика табов
+  const tabButtons = box.querySelectorAll(".tab-nav-btn");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      box.querySelectorAll(".visit-tab-content").forEach(c => c.style.display = "none");
+      this.classList.add("active");
+      const targetId = this.getAttribute("data-target");
+      const targetContent = box.querySelector(`#${targetId}`);
+      if (targetContent) targetContent.style.display = "block";
+    });
+  });
 }
 
 function parseVisitNote(note) {
