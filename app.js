@@ -2710,10 +2710,24 @@ function renderOwnerPage(ownerId) {
 // =========================
 // NAV: open pages (server-first)
 // =========================
-function openOwner(ownerId, opts = { pushHash: true }) {
-  setRoute("owner");
-  renderOwnerPage(ownerId);
-  if (opts.pushHash) setHash("owner", ownerId);
+function setRoute(route) {
+  const r = String(route || "owners").trim() || "owners";
+  
+  // Ищем наш новый тег section по ID (из нового index.html)
+  const pageExists = document.getElementById(r); 
+  const finalRoute = pageExists ? r : "owners";
+
+  state.route = finalRoute;
+
+  // Скрываем все разделы контента и показываем только активный
+  $$(".content-section").forEach((p) => {
+    p.style.display = p.id === finalRoute ? "block" : "none";
+  });
+
+  // Подсвечиваем активную кнопку в нашем новом боковом меню
+  $$(".sidebar-menu .menu-item").forEach((item) => {
+    item.classList.toggle("active", item.getAttribute("data-target") === finalRoute);
+  });
 }
 
 // ===== Patient page =====
@@ -6492,43 +6506,34 @@ async function renderMedcardTab(pet) {
 // =========================
 // INIT
 // =========================
-async function init() {
-  initTabs();
-  seedIfEmpty();
-
-  // legacy migration (может отсутствовать)
-  if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
-    await migrateLegacyVisitFilesIfNeeded();
+function initTabs() {
+  // Подслушиваем клики по нашему новому боковому меню (.sidebar-menu)
+  const sidebarMenu = $(".sidebar-menu");
+  if (sidebarMenu) {
+    sidebarMenu.addEventListener("click", (e) => {
+      const item = e.target.closest(".menu-item");
+      if (!item) return;
+      const targetRoute = item.getAttribute("data-target");
+      if (TAB_ROUTES.has(targetRoute)) {
+        setHash(targetRoute);
+      }
+    });
   }
 
-  initOwnersUI();
-  initOwnerUI();
-  initPatientUI();
-  initVisitUI();
-  initDischargeModalUI();
+  // Оставляем этот блок для совместимости со старыми кнопками, если они где-то остались
+  const tabs = $("#tabs");
+  if (tabs) {
+    tabs.addEventListener("click", (e) => {
+      const btn = e.target.closest(".tab");
+      if (!btn) return;
+      const route = btn.dataset.route;
+      if (!TAB_ROUTES.has(route)) return;
+      setHash(route);
+    });
+  }
 
-  // услуги оставляем локально (как есть)
-  // renderServicesTab();
-  // renderStockTab();
-
-  $("#btnReload")?.addEventListener("click", async () => {
-    await loadMe();
-    await loadOwners();
-    await loadPatientsApi();
-    await loadServicesApi();
-  });
-
-  // 🔍 Глобальный поиск без потери фокуса
-  $("#globalSearch")?.addEventListener("input", () => {
-    if (state.route === "owners") renderOwners();
-    if (state.route === "patients") renderPatientsTab();
-    if (state.route === "visits") renderVisitsTab();
-  });
-
-  await loadMe();
-  await loadOwners();
-  await loadPatientsApi();
-  await loadServicesApi();
+  window.addEventListener("hashchange", routeFromHash);
+  routeFromHash();
 }
 
 // ===== iOS / Telegram WebApp viewport fix =====
