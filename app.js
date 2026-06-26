@@ -2364,6 +2364,7 @@ async function renderPatientTab(tab, pet) {
      // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — БРОНЕБОЙНЫЙ ВАРИАНТ С ЛОГАМИ
         // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ВАРИАНТ С АВТО-СОЗДАНИЕМ МОДАЛКИ
         // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
+       // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
     const btnAddVisit = document.getElementById("btnAddVisit");
     if (btnAddVisit) {
       btnAddVisit.onclick = () => {
@@ -2454,7 +2455,7 @@ async function renderPatientTab(tab, pet) {
        dynamicBox.innerHTML = `
          <div class="glass-card" style="padding: 20px; border-radius: 16px;">
            <h3 style="margin-top:0; color:#fff; margin-bottom: 15px;">✏️ Редагувати профіль</h3>
-           <p style="opacity: 0.7;">Розділ редагування даних ${escapeHtml(pet.name)} знаходиться в розробці.</p>
+           <p style="opacity: 0.7;">Розділ редагування данных ${escapeHtml(pet.name)} знаходиться в розробці.</p>
          </div>
        `;
     }
@@ -5153,17 +5154,17 @@ function openVisitModalForCreate(pet) {
   $("#visitDate").value = todayISO();
   $("#visitNote").value = "";
   $("#visitDx").value = "";
-  $("#visitWeight").value = pet?.weight_kg || "";
+  $("#visitWeight").value = pet?.weight_kg || pet?.weight || "";
   $("#visitRx").value = "";
 
   const select = $("#visitStaff");
 
-  // Функция для заполнения селекта врачами
+  // Единственное правильное объявление функции заполнения врачей
   const fillStaffSelect = (staffList) => {
     if (!select) return;
     select.innerHTML = `
       <option value="">Оберіть ветеринара</option>
-      ${staffHtml = staffList.map((doc) => `
+      ${staffList.map((doc) => `
         <option value="${escapeHtml(String(doc.id))}">
           ${escapeHtml(doc.name || "Працівник")}
         </option>
@@ -5171,57 +5172,40 @@ function openVisitModalForCreate(pet) {
     `;
   };
 
-  // Проверяем наличие функции загрузки сотрудников
+  // Функция-заглушка на случай сбоев бэкенда
+  const fillStaffFallback = () => {
+    if (!select) return;
+    select.innerHTML = `
+      <option value="">Оберіть ветеринара</option>
+      <option value="default_doc" selected>Черговий лікар 🩺</option>
+    `;
+  };
+
+  // Загружаем врачей с подстраховкой (catch) под ошибки сервера
   if (typeof loadStaffApi === "function") {
     loadStaffApi()
       .then((staff) => {
-        // Если бэкенд ответил успешно, но список пустой
         if (!staff || staff.length === 0) {
           staff = [{ id: "default_doc", name: "Черговий лікар 🩺" }];
         }
         fillStaffSelect(staff);
       })
       .catch((err) => {
-        // Если сервер упал с httpx.ReadError — подставляем заглушку
         console.warn("Бэкенд недоступен, ставим дефолтного врача:", err);
         fillStaffFallback();
       });
   } else {
-    // Если loadStaffApi вообще не определена
     fillStaffFallback();
   }
 
-  // Вспомогательные микро-функции для страховки
-  function fillStaffSelect(doctors) {
-    if (!select) return;
-    select.innerHTML = `
-      <option value="">Оберіть ветеринара</option>
-      ${doctors.map((doc) => `
-        <option value="${escapeHtml(String(doc.id))}">
-          ${escapeHtml(doc.name || "Працівник")}
-        </option>
-      `).join("")}
-    `;
-  }
-
-  function fillStaffFallback() {
-    const select = $("#visitStaff");
-    if (select) {
-      select.innerHTML = `
-        <option value="">Оберіть ветеринара</option>
-        <option value="default" selected>Черговий лікар 🩺</option>
-      `;
-    }
-  }
-
-  // ЖЕЛЕЗНО открываем модалку в любом случае
+  // ЖЕЛЕЗНО открываем и отображаем модалку на экране
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   
-  // Дополнительный форс стилей отображения
+  // Принудительные инлайн-стили, чтобы сбросить любые проблемы кэша отображения
   modal.style.opacity = "1";
   modal.style.pointerEvents = "auto";
-  modal.style.display = "block"; 
+  modal.style.display = "block";
 }
 
 async function openVisitModalForEdit(visitId) {
