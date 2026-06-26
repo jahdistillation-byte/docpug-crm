@@ -1880,13 +1880,14 @@ function renderPatientsTab() {
   const page = document.querySelector('.page[data-page="patients"]');
   if (!page) return;
 
+  // Очищаем и задаем структуру страницы
   page.innerHTML = `
-    <div class="card">
-      <div class="row">
-        <h2>Пацієнти</h2>
+    <div class="glass-card" style="padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+        <h2 style="margin:0;">Пацієнти</h2>
+        <div class="hint">Всі пацієнти клініки</div>
       </div>
-      <div class="hint">Список всіх пацієнтів (клік — відкрити картку).</div>
-      <div id="patientsTabList" class="list"></div>
+      <div id="patientsTabList"></div>
     </div>
   `;
 
@@ -1898,7 +1899,7 @@ function renderPatientsTab() {
   const ownerById = new Map((owners || []).map((o) => [o.id, o]));
 
   if (!patients.length) {
-    patientListElement.innerHTML = `<div class="hint">Поки пацієнтів немає. Додай їх у “Власники → Тварина”.</div>`;
+    patientListElement.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки пацієнтів немає.</div>`;
     return;
   }
 
@@ -1911,55 +1912,54 @@ function renderPatientsTab() {
       const ownerLine = owner ? (owner.name || "") : "";
 
       const el = document.createElement("div");
-      el.className = "item";
-      el.style.cursor = "pointer";
+      el.className = "glass-card";
+      el.style.cssText = "padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); cursor:pointer; transition: 0.2s;";
       el.dataset.openPet = p.id;
 
       el.innerHTML = `
-        <div class="left" style="width:100%">
-          <div class="name">${escapeHtml(p.name || "Без клички")}</div>
-          <div class="meta">
+        <div style="flex:1;">
+          <div style="font-size: 1.2rem; font-weight: 600;">🐾 ${escapeHtml(p.name || "Без клички")}</div>
+          <div style="font-size: 0.9rem; opacity: 0.6; margin-top: 4px;">
             ${escapeHtml(p.species || "")}
             ${p.breed ? " • " + escapeHtml(p.breed) : ""}
             ${p.age ? " • " + escapeHtml(p.age) : ""}
             ${p.weight_kg ? " • " + escapeHtml(p.weight_kg) + " кг" : ""}
-            ${ownerLine ? " • " + escapeHtml(ownerLine) : ""}
+            ${ownerLine ? " • 👤 " + escapeHtml(ownerLine) : ""}
           </div>
         </div>
-        <div class="right" style="display:flex; gap:6px;">
+        <div style="display:flex; gap:10px;">
           <button class="iconBtn" title="Редагувати" data-edit-pet="${escapeHtml(p.id)}">✏️</button>
-          <button class="iconBtn" title="Видалити пацієнта" data-del-pet="${escapeHtml(p.id)}">🗑</button>
+          <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(p.id)}">🗑</button>
         </div>
       `;
       patientListElement.appendChild(el);
     });
 
+  // Делегированный клик
   patientListElement.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-pet]");
     if (editBtn) {
       e.preventDefault(); e.stopPropagation();
       const petId = editBtn.dataset.editPet;
-      if (!petId) return;
-
       const pet = (state.patients || []).find((p) => String(p.id) === String(petId));
-      if (!pet) return alert("Пацієнта не знайдено");
+      if (!pet) return;
 
       const name = (prompt("Кличка:", pet.name || "") || "").trim();
       if (!name) return;
-
       const species = askSpecies(pet.species || "dog");
       if (!species) return;
-      const breed = (prompt("Порода:", pet.breed || "") || "").trim();
-      const age = (prompt("Вік:", pet.age || "") || "").trim();
-      const weight_kg = (prompt("Вага кг:", pet.weight_kg || "") || "").trim();
-      const notes = (prompt("Нотатки:", pet.notes || "") || "").trim();
-
-      const updated = await updatePatientApi(petId, { name, species, breed, age, weight_kg, notes });
-      if (!updated) return;
-
-      await loadPatientsApi();
-      renderPatientsTab();
-      if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
+      
+      const updated = await updatePatientApi(petId, { 
+        name, species, 
+        breed: (prompt("Порода:", pet.breed || "") || "").trim(),
+        age: (prompt("Вік:", pet.age || "") || "").trim(),
+        weight_kg: (prompt("Вага кг:", pet.weight_kg || "") || "").trim(),
+        notes: (prompt("Нотатки:", pet.notes || "") || "").trim()
+      });
+      if (updated) {
+        await loadPatientsApi();
+        renderPatientsTab();
+      }
       return;
     }
 
@@ -1972,9 +1972,10 @@ function renderPatientsTab() {
     }
 
     const openZone = e.target.closest("[data-open-pet]");
-    if (!openZone) return;
-    const petId = openZone.dataset.openPet;
-    if (petId) openPatient(petId);
+    if (openZone) {
+      const petId = openZone.dataset.openPet;
+      if (petId) openPatient(petId);
+    }
   };
 }
 
@@ -2111,14 +2112,19 @@ async function renderOwnerPage(ownerId) {
   const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : await loadPatientsApi();
   const pets = (patients || []).filter((p) => String(p.owner_id) === String(ownerId));
 
-  // Получаем визиты
-  let visits = Array.isArray(state.visits) ? state.visits : await loadVisitsApi();
+    // Гарантируем, что визиты загружены
+  if (!Array.isArray(state.visits) || state.visits.length === 0) {
+      state.visits = await loadVisitsApi();
+  }
   
   const ownerPetIds = new Set(pets.map((p) => String(p.id)));
-  const ownerVisits = visits.filter((v) => ownerPetIds.has(String(v.pet_id)));
+  // Фильтруем все загруженные визиты
+  const ownerVisits = state.visits.filter((v) => ownerPetIds.has(String(v.pet_id)));
   
   const visitsCount = ownerVisits.length;
+  // Считаем суммы: если визит null, берем 0
   const totalPaid = ownerVisits.reduce((sum, v) => sum + (calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0), 0);
+  // Сортируем и берем последний
   const lastVisit = ownerVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
   // 1. Рендер Hero-блока (инфо владельца и статистика)
@@ -6169,3 +6175,24 @@ $("#visitPatientSearch")?.addEventListener("input", () => {
     });
   });
 });
+// Эта функция считает всё для любого ID (владельца или пациента)
+function getFinancialStats(entityId, type = 'owner') {
+  const allVisits = Array.isArray(state.visits) ? state.visits : [];
+  
+  let filteredVisits = [];
+  if (type === 'owner') {
+    // Находим всех питомцев владельца и считаем их визиты
+    const pets = (state.patients || []).filter(p => String(p.owner_id) === String(entityId));
+    const petIds = new Set(pets.map(p => String(p.id)));
+    filteredVisits = allVisits.filter(v => petIds.has(String(v.pet_id)));
+  } else {
+    // Просто считаем для конкретного пациента
+    filteredVisits = allVisits.filter(v => String(v.pet_id) === String(entityId));
+  }
+
+  return {
+    count: filteredVisits.length,
+    total: filteredVisits.reduce((sum, v) => sum + (calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0), 0),
+    lastDate: filteredVisits.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0]?.date || "—"
+  };
+}
