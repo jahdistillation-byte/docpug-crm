@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doc.PUG CRM - Преміум Панель</title>
-    <!-- Подключаем современный премиальный шрифт Inter -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,10 +11,8 @@
 
     <div class="app-container">
         
-        <!-- 1. БОКОВОЕ МЕНЮ (SIDEBAR) -->
         <aside class="sidebar">
             <div class="sidebar-logo">
-                <!-- Твоя фирменная иконка или эмодзи -->
                 <span>🐾</span>
                 <span>Doc.PUG <span style="color: var(--accent-color); font-size: 0.8rem; block-size: min-content;">CRM</span></span>
             </div>
@@ -49,20 +46,14 @@
             </nav>
         </aside>
 
-        <!-- 2. ГЛАВНАЯ РАБОЧАЯ ОБЛАСТЬ -->
         <main class="main-content">
             
-            <!-- ВЕРХНЯЯ ПАНЕЛЬ С ПОИСКОМ -->
             <header class="header-panel">
                 <div class="search-bar">
                     <input type="text" id="global-search" placeholder="Пошук власника, пацієнта, телефону...">
                 </div>
-                <!-- Сюда в будущем можно добавить аватарку вошедшего врача или уведомления -->
             </header>
 
-            <!-- ========================================== -->
-            <!-- РАЗДЕЛ: КАЛЕНДАРЬ                          -->
-            <!-- ========================================== -->
             <section id="calendar" class="content-section">
                 <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <div>
@@ -88,43 +79,17 @@
                 <div class="calendar-container">
                     <div class="calendar-grid-wrapper">
                         <div id="calendar-grid" class="calendar-grid">
-                            <!-- JS динамически построит сетку здесь -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </section>
 
-            <!-- ========================================== -->
-            <!-- РАЗДЕЛ: ВЛАДЕЛЬЦЫ                          -->
-            <!-- ========================================== -->
             <section id="owners" class="content-section" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2>Власники тварин</h2>
                     <button class="btn-primary" id="add-owner-btn">+ Додати власника</button>
                 </div>
-                            <section id="owner" class="content-section" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-                    <div>
-                        <h2 id="owner-profile-name">👤 Завантаження профілю...</h2>
-                        <div id="owner-profile-phone" style="font-size: 1rem; color: var(--primary-neon); font-weight: 600; margin-top: 4px;"></div>
-                    </div>
-                    <button class="btn-tab" onclick="location.hash = 'owners'" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
-                        &larr; Назад до списку
-                    </button>
-                </div>
-
-                <div id="owner-profile-info" style="margin-bottom: 30px; width: 100%;"></div>
-
-                <div style="margin-top: 40px;">
-                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                        🐾 Пацієнти цього власника
-                    </h3>
-                    
-                    <div class="patients-grid" id="owner-patients-container">
-                        </div>
-                </div>
-            </section>
-            
+                
                 <div class="data-table-container">
                     <table class="data-table">
                         <thead>
@@ -137,15 +102,59 @@
                             </tr>
                         </thead>
                         <tbody id="owners-table-body">
-                            <!-- Данные загрузятся из базы -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- ========================================== -->
-            <!-- РАЗДЕЛ: ПАЦИЕНТЫ                          -->
-            <!-- ========================================== -->
+            <section id="owner" class="content-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2 id="owner-profile-name">👤 Завантаження...</h2>
+                        <div id="owner-profile-phone" style="font-size: 1rem; color: var(--primary-neon); font-weight: 600; margin-top: 4px;"></div>
+                    </div>
+                    <button class="btn-tab" onclick="location.hash = 'owners'">&larr; До списку</button>
+                </div>
+                <div id="owner-profile-info" style="margin-bottom: 24px;"></div>
+                
+                <h3 style="margin-bottom: 16px; color: #fff;">🐾 Пацієнти власника</h3>
+                <div class="patients-grid" id="owner-patients-container"></div>
+            </section>
+
+            <section id="patient-profile-section" class="content-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Медична карта пацієнта</span>
+                        <h2 id="patient-card-title" style="margin-top: 4px;">🐾 Завантаження...</h2>
+                        <div id="patient-card-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;"></div>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-tab" id="btn-edit-patient">✏️ Редагувати</button>
+                        <button class="btn-primary" id="btn-add-visit-from-card">+ Візит</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 24px;">
+                    <button class="btn-tab active" onclick="switchPatientTab('pet-tab-visits', this)">📝 Візити</button>
+                    <button class="btn-tab" onclick="switchPatientTab('pet-tab-labs', this)">🔬 Аналізи</button>
+                    <button class="btn-tab" onclick="switchPatientTab('pet-tab-files', this)">📁 Файли</button>
+                </div>
+
+                <div id="pet-tab-visits" class="pet-sub-tab">
+                    <div id="patient-visits-timeline" style="display: flex; flex-direction: column; gap: 16px;">
+                        </div>
+                </div>
+
+                <div id="pet-tab-labs" class="pet-sub-tab" style="display: none;">
+                    <div id="patient-labs-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+                        </div>
+                </div>
+
+                <div id="pet-tab-files" class="pet-sub-tab" style="display: none;">
+                    <div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 40px;">Файли відсутні</div>
+                </div>
+            </section>
+
             <section id="patients" class="content-section" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2>Пацієнти (Тварини)</h2>
@@ -153,13 +162,9 @@
                 </div>
                 
                 <div class="patients-grid" id="patients-grid-container">
-                    <!-- Премиальные карточки питомцев рендерятся тут -->
-                </div>
+                    </div>
             </section>
 
-            <!-- ========================================== -->
-            <!-- РАЗДЕЛ: ВИЗИТЫ                             -->
-            <!-- ========================================== -->
             <section id="visits" class="content-section" style="display: none;">
                 <h2>Історія візитів та записів</h2>
                 <div class="data-table-container" style="margin-top: 20px;">
@@ -174,34 +179,22 @@
                             </tr>
                         </thead>
                         <tbody id="visits-table-body">
-                            <!-- Данные из базы -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- ========================================== -->
-            <!-- РАЗДЕЛ: УСЛУГИ                             -->
-            <!-- ========================================== -->
             <section id="services" class="content-section" style="display: none;">
                 <h2>Прайс-лист послуг</h2>
-                <!-- Будет заполнено позже -->
             </section>
 
-            <!-- ========================================== -->
-            <!-- РАЗДЕЛ: СКЛАД                              -->
-            <!-- ========================================== -->
             <section id="warehouse" class="content-section" style="display: none;">
                 <h2>Облік складу та медикаментів</h2>
-                <!-- Будет заполнено позже -->
             </section>
 
         </main>
     </div>
 
-    <!-- ========================================== -->
-    <!-- МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ ЗАПИСИ          -->
-    <!-- ========================================== -->
     <div id="appointment-modal" class="modal-overlay">
         <div class="modal-window">
             <h3>Новий запис на прийом</h3>
@@ -231,7 +224,6 @@
         </div>
     </div>
 
-    <!-- Подключаем логику приложения -->
     <script src="app.js"></script>
 </body>
 </html>
