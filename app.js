@@ -5159,7 +5159,6 @@ function openVisitModalForCreate(pet) {
 
   const select = $("#visitStaff");
 
-  // Единственное правильное объявление функции заполнения врачей
   const fillStaffSelect = (staffList) => {
     if (!select) return;
     select.innerHTML = `
@@ -5172,7 +5171,6 @@ function openVisitModalForCreate(pet) {
     `;
   };
 
-  // Функция-заглушка на случай сбоев бэкенда
   const fillStaffFallback = () => {
     if (!select) return;
     select.innerHTML = `
@@ -5181,7 +5179,6 @@ function openVisitModalForCreate(pet) {
     `;
   };
 
-  // Загружаем врачей с подстраховкой (catch) под ошибки сервера
   if (typeof loadStaffApi === "function") {
     loadStaffApi()
       .then((staff) => {
@@ -5198,33 +5195,58 @@ function openVisitModalForCreate(pet) {
     fillStaffFallback();
   }
 
-  // ЖЕЛЕЗНО открываем и отображаем модалку на экране
+  // === ФУНКЦИЯ ЗАКРЫТИЯ МОДАЛКИ ===
+  const closeVisitModal = () => {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    
+    // Скрываем инлайново
+    modal.style.display = "none";
+    modal.style.opacity = "0";
+    modal.style.pointerEvents = "none";
+  };
+
+  // Ищем кнопку закрытия внутри оригинальной модалки (если там есть крестик с классом close или похожим)
+  const closeBtn = modal.querySelector(".close, .btn-close, [data-close]");
+  if (closeBtn) {
+    closeBtn.onclick = closeVisitModal;
+  }
+
+  // Навешиваем ручной перехват формы сохранения, чтобы закрывать окно при успехе
+  const form = modal.querySelector("form");
+  if (form) {
+    const originalOnSubmit = form.onsubmit;
+    form.onsubmit = async (e) => {
+      if (originalOnSubmit) {
+        await originalOnSubmit(e);
+      }
+      // Закрываем панель после отправки формы
+      closeVisitModal();
+    };
+  }
+
+  // === ЭФФЕКТНОЕ ЦЕНТРИРОВАНИЕ И УВЕЛИЧЕНИЕ (Apple VisionOS Style) ===
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   
-  // Принудительные инлайн-стили, чтобы сбросить любые проблемы кэша отображения
+  // Жестко позиционируем по центру и делаем крупнее (width: 650px)
+  modal.style.position = "fixed";
+  modal.style.top = "50% ";
+  modal.style.left = "50%";
+  modal.style.transform = "translate(-50%, -50%) scale(1)";
+  modal.style.width = "650px"; 
+  modal.style.maxWidth = "90vw";
+  modal.style.maxHeight = "85vh";
+  modal.style.overflowY = "auto";
+  modal.style.padding = "30px";
+  modal.style.borderRadius = "24px";
+  modal.style.zIndex = "10000";
+  
+  // Включаем видимость
+  modal.style.display = "block";
   modal.style.opacity = "1";
   modal.style.pointerEvents = "auto";
-  modal.style.display = "block";
-}
-
-async function openVisitModalForEdit(visitId) {
-  const modal = $("#visitModal");
-  if (!modal) return alert("Не знайдено #visitModal в HTML");
-
-  const v = await fetchVisitById(visitId);
-  if (!v) return alert("Візит не знайдено");
-
-  modal.dataset.visitId = String(visitId);
-
-  $("#visitDate").value = v.date || todayISO();
-  $("#visitNote").value = v.note || "";
-  $("#visitDx").value = "";
-  $("#visitWeight").value = v.weight_kg || "";
-  $("#visitRx").value = v.rx || "";
-
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
+  modal.style.transition = "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)";
 }
 
 // =========================
