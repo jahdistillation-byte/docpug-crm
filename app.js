@@ -4764,6 +4764,75 @@ function closeDischargeModal() {
   modal.setAttribute("aria-hidden", "true");
   delete modal.dataset.visitId;
 }
+// =========================
+// РЕНДЕР СПИСКА ВЛАДЕЛЬЦЕВ (Восстановленный)
+// =========================
+function renderOwners() {
+  const list = document.getElementById("ownersList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  const q = String(document.getElementById("globalSearch")?.value || "").trim().toLowerCase();
+  const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
+
+  const filteredOwners = ownersRaw.filter((owner) => {
+    if (!q) return true;
+    const hay = [
+      owner.name,
+      owner.phone,
+      owner.note,
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return hay.includes(q);
+  });
+
+  if (!filteredOwners.length) {
+    list.innerHTML = `<div class="hint" style="padding: 20px; text-align: center; opacity: 0.5;">Нічого не знайдено.</div>`;
+    return;
+  }
+
+  filteredOwners.forEach((owner) => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.dataset.openOwner = String(owner.id);
+    el.style.cursor = "pointer";
+
+    const petsCount = (state.patients || []).filter(
+      p => String(p.owner_id) === String(owner.id)
+    ).length;
+
+    el.innerHTML = `
+      <div class="left" style="flex:1; min-width:0;">
+        <div class="name" style="font-size:20px; font-weight: 600;">
+          👤 ${escapeHtml(owner.name || "Без імені")}
+        </div>
+
+        <div class="meta" style="margin-top:6px; opacity: 0.8;">
+          📞 ${escapeHtml(owner.phone || "Не вказано")}
+        </div>
+
+        ${
+          owner.note
+            ? `<div class="meta" style="margin-top:2px; opacity: 0.6;">📍 ${escapeHtml(owner.note)}</div>`
+            : ""
+        }
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <div class="pill">🐾 ${petsCount} пацієнтів</div>
+          <div class="pill">📝 CRM</div>
+        </div>
+      </div>
+
+      <div class="right" style="display:flex; gap:8px; align-items:center; flex:0 0 auto;">
+        <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}">✏️</button>
+        <button class="iconBtn" title="Видалити" data-del="${escapeHtml(owner.id)}">🗑</button>
+      </div>
+    `;
+
+    list.appendChild(el);
+  });
+}
 
 function initOwnersUI() {
   if (state.ownersUiBound) return;
