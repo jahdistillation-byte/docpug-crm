@@ -1845,8 +1845,11 @@ function printA4Only(visitId) {
   }, 50);
 }
 
+// =========================
+// PATIENTS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
+// =========================
 function renderPatientsTab() {
-  const page = $(`.page[data-page="patients"]`);
+  const page = document.querySelector('.page[data-page="patients"]');
   if (!page) return;
 
   page.innerHTML = `
@@ -1859,19 +1862,19 @@ function renderPatientsTab() {
     </div>
   `;
 
-  const list = $("#patientsTabList", page);
-  if (!list) return;
+  const patientListElement = document.getElementById("patientsTabList");
+  if (!patientListElement) return;
 
   const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
   const owners = Array.isArray(state.owners) && state.owners.length ? state.owners : LS.get(OWNERS_KEY, []);
   const ownerById = new Map((owners || []).map((o) => [o.id, o]));
 
   if (!patients.length) {
-    list.innerHTML = `<div class="hint">Поки пацієнтів немає. Додай їх у “Власники → Тварина”.</div>`;
+    patientListElement.innerHTML = `<div class="hint">Поки пацієнтів немає. Додай їх у “Власники → Тварина”.</div>`;
     return;
   }
 
-  list.innerHTML = "";
+  patientListElement.innerHTML = "";
   patients
     .slice()
     .sort((a, b) => String(b.id).localeCompare(String(a.id)))
@@ -1900,15 +1903,13 @@ function renderPatientsTab() {
           <button class="iconBtn" title="Видалити пацієнта" data-del-pet="${escapeHtml(p.id)}">🗑</button>
         </div>
       `;
-      list.appendChild(el);
+      patientListElement.appendChild(el);
     });
 
-  list.onclick = async (e) => {
+  patientListElement.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-pet]");
     if (editBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const petId = editBtn.dataset.editPet;
       if (!petId) return;
 
@@ -1936,8 +1937,7 @@ function renderPatientsTab() {
 
     const delBtn = e.target.closest("[data-del-pet]");
     if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       const petId = delBtn.dataset.delPet;
       if (petId) deletePatientEverywhere(petId);
       return;
@@ -1950,6 +1950,9 @@ function renderPatientsTab() {
   };
 }
 
+// =========================
+// VISITS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
+// =========================
 async function renderVisitsTab() {
   const page = document.querySelector('.page[data-page="visits"]');
   if (!page) return;
@@ -1965,13 +1968,12 @@ async function renderVisitsTab() {
     </div>
   `;
 
-  const list = page.querySelector("#visitsTabList");
-  const search = page.querySelector("#visitsSearch");
-  if (!list) return;
+  const visitListElement = document.getElementById("visitsTabList");
+  const search = document.getElementById("visitsSearch");
+  if (!visitListElement) return;
 
-  // завантаження візитів
   if (!Array.isArray(state.visits) || !state.visits.length) {
-    list.innerHTML = `<div class="hint">Завантаження…</div>`;
+    visitListElement.innerHTML = `<div class="hint">Завантаження…</div>`;
     const arr = await loadVisitsApi();
     state.visits = Array.isArray(arr) ? arr : [];
   }
@@ -2000,10 +2002,10 @@ async function renderVisitsTab() {
         ].filter(Boolean).join(" ").toLowerCase().includes(q);
       });
 
-    list.innerHTML = "";
+    visitListElement.innerHTML = "";
 
     if (!filtered.length) {
-      list.innerHTML = `<div class="hint">Нічого не знайдено.</div>`;
+      visitListElement.innerHTML = `<div class="hint">Нічого не знайдено.</div>`;
       return;
     }
 
@@ -2031,24 +2033,20 @@ async function renderVisitsTab() {
           <button class="iconBtn" data-action="delete">🗑</button>
         </div>
       `;
-      list.appendChild(el);
+      visitListElement.appendChild(el);
     });
   }
 
   search?.addEventListener("input", paint);
 
-  // ✅ Обробник тепер всередині функції і чітко бачить змінну list
-  list.onclick = async (e) => {
+  visitListElement.onclick = async (e) => {
     const card = e.target.closest(".item[data-visit-id]");
     if (!card) return;
 
     const visitId = card.dataset.visitId;
 
-    // видалення візиту
     if (e.target.closest('[data-action="delete"]')) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       if (!confirm("Видалити візит?")) return;
 
       const ok = await deleteVisitApi(visitId);
@@ -2060,55 +2058,13 @@ async function renderVisitsTab() {
       return;
     }
 
-    // відкриття візиту
-    if (
-      e.target.closest('[data-action="open"]') ||
-      e.target.closest(".item[data-visit-id]")
-    ) {
+    if (e.target.closest('[data-action="open"]') || e.target.closest(".item[data-visit-id]")) {
       openVisit(visitId);
     }
   };
 
   paint();
 }
-// ==========================================================================
-// Doc.PUG CRM Mini — app.js (МЕДКАРТА ПАЦИЕНТА, АНАЛИТИКА И ФИНАНСОВЫЙ ДАШБОРД)
-// Часть 4 (Строки 2501 — 3000)
-// ==========================================================================
-
-  // Завершение обработчика кликов для таблицы визитов
-  list.onclick = async (e) => {
-    const card = e.target.closest(".item[data-visit-id]");
-    if (!card) return;
-
-    const visitId = card.dataset.visitId;
-
-    // delete
-    if (e.target.closest('[data-action="delete"]')) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!confirm("Видалити візит?")) return;
-
-      const ok = await deleteVisitApi(visitId);
-      if (ok) {
-        const arr = await loadVisitsApi();
-        state.visits = arr;
-        paint();
-      }
-      return;
-    }
-
-    // open (кнопка ИЛИ клик по карточке)
-    if (
-      e.target.closest('[data-action="open"]') ||
-      e.target.closest(".item[data-visit-id]")
-    ) {
-      openVisit(visitId);
-    }
-  };
-
-  paint();
 
 // =========================
 // OWNER PAGE — Рендеринг карточки владельца и его животных
