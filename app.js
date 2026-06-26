@@ -6727,134 +6727,150 @@ $("#staffSave")?.addEventListener("click", async () => {
 
   await renderCalendarTab();
 });
+// ==========================================================================
+// ОБНОВЛЕННЫЙ МОДУЛЬ ЗАПИСИ НА ПРИЕМ ( visionOS GLASS STYLE )
+// ==========================================================================
 async function openVisitFromCalendar(hour, staffId) {
+  console.log(`🐾 Відкриття запису на час: ${hour}, ID лікаря: ${staffId}`);
+  
+  const modal = document.getElementById('appointment-modal');
+  if (!modal) return console.warn("appointment-modal не знайдено в HTML");
 
-  const modal = $("#visitModal");
-  if (!modal) return;
+  // Включаем эффект стекла (CSS класс active)
+  modal.classList.add('active');
 
-  delete modal.dataset.visitId;
+  // Элементы формы нового HTML
+  const form = document.getElementById('appointment-form');
+  const ownerInput = document.getElementById('modal-owner-search');
+  const patientSelect = document.getElementById('modal-patient-select');
+  const reasonTextarea = document.getElementById('modal-visit-reason');
 
-  const patients = await loadPatientsApi();
-
-if (!Array.isArray(state.owners) || !state.owners.length) {
-  await loadOwners();
-}
-
-const ownersMap = new Map(
-  (state.owners || []).map((o) => [String(o.id), o])
-);
-
-window.__visitPatientList = patients.map((p) => {
-  const owner = ownersMap.get(String(p.owner_id));
-
-  return {
-    ...p,
-    owner_name: owner?.name || p.owner_name || p.owner || "",
-    owner_phone: owner?.phone || p.owner_phone || p.phone || "",
-  };
-});
-
-$("#visitPatientSelect").value = "";
-$("#visitPatientSearch").value = "";
-$("#visitPatientResults").innerHTML = "";
-
-  $("#visitPatientBlock").style.display = "block";
-
-  $("#visitDate").value =
-    window.__calendarDate || todayISO();
-
-  $("#visitStartTime").value = hour || "10:00";
-
-  $("#visitDuration").value = "60";
-
-const staff = await loadStaffApi();
-
-const staffSelect = $("#visitStaff");
-if (staffSelect) {
-  staffSelect.innerHTML = `
-    <option value="">Оберіть ветеринара</option>
-    ${staff.map((doc) => `
-      <option value="${escapeHtml(String(doc.id))}">
-        ${escapeHtml(doc.name || "Працівник")}
-      </option>
-    `).join("")}
-  `;
-
-  staffSelect.value = String(staffId || "");
-}
-
-$("#visitNote").value = "";
-  $("#visitDx").value = "";
-  $("#visitWeight").value = "";
-  $("#visitRx").value = "";
-$("#visitNewPatientBox").style.display = "none";
-
-const btnCreatePatientFromVisit = $("#btnCreatePatientFromVisit");
-
-if (btnCreatePatientFromVisit) {
-  btnCreatePatientFromVisit.onclick = () => {
-    const box = $("#visitNewPatientBox");
-    if (!box) return;
-
-    box.style.display =
-      box.style.display === "none" ? "block" : "none";
-  };
-}
-
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-}
-$("#visitPatientSearch")?.addEventListener("input", () => {
-  const q = ($("#visitPatientSearch").value || "").toLowerCase().trim();
-  const box = $("#visitPatientResults");
-  const hidden = $("#visitPatientSelect");
-
-  if (!box || !hidden) return;
-
-  hidden.value = "";
-
-  if (!q) {
-    box.innerHTML = "";
-    return;
+  // Создаем контейнер для автокомплита (результатов поиска), если его ещё нет
+  let searchResultsBox = document.getElementById('modal-owner-results');
+  if (!searchResultsBox && ownerInput) {
+    searchResultsBox = document.createElement('div');
+    searchResultsBox.id = 'modal-owner-results';
+    searchResultsBox.style.cssText = "background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; position: absolute; width: calc(100% - 32px); z-index: 9999; margin-top: 50px; box-shadow: var(--shadow-premium);";
+    ownerInput.parentNode.style.position = 'relative';
+    ownerInput.parentNode.appendChild(searchResultsBox);
   }
 
-  const patients = window.__visitPatientList || [];
+  // Загружаем данные, если локальная память пуста
+  const patients = await loadPatientsApi();
+  if (!Array.isArray(state.owners) || !state.owners.length) {
+    await loadOwners();
+  }
 
-  const found = patients
-    .filter((p) => {
-      const text = [
-        p.name,
-        p.owner_name,
-        p.owner_phone,
-        p.phone,
-        p.species,
-        p.breed,
-      ].join(" ").toLowerCase();
+  const ownersMap = new Map((state.owners || []).map((o) => [String(o.id), o]));
 
-      return text.includes(q);
-    })
-    .slice(0, 12);
-
-  box.innerHTML = found.length
-    ? found.map((p) => `
-      <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(p.id))}">
-        <strong>${escapeHtml(p.name || "Пацієнт")}</strong>
-        <span>${escapeHtml(p.owner_name || "Власник не вказаний")} · ${escapeHtml(p.owner_phone || p.phone || "телефон не вказаний")}</span>
-      </div>
-    `).join("")
-    : `<div class="hint">Нічого не знайдено</div>`;
-
-  $$("[data-select-visit-patient]").forEach((item) => {
-    item.addEventListener("click", () => {
-      const id = item.dataset.selectVisitPatient;
-      const patient = patients.find((p) => String(p.id) === String(id));
-
-      hidden.value = id;
-      $("#visitPatientSearch").value = patient
-        ? `${patient.name || "Пацієнт"} · ${patient.owner_name || ""}`
-        : id;
-
-      box.innerHTML = "";
-    });
+  // Мапим список для умного хайтек-поиска
+  window.__visitPatientList = patients.map((p) => {
+    const owner = ownersMap.get(String(p.owner_id));
+    return {
+      ...p,
+      owner_name: owner?.name || p.owner_name || p.owner || "",
+      owner_phone: owner?.phone || p.owner_phone || p.phone || "",
+    };
   });
-});
+
+  // Очищаем форму при каждом открытии
+  if (ownerInput) {
+    ownerInput.value = '';
+    ownerInput.focus();
+  }
+  if (reasonTextarea) reasonTextarea.value = '';
+  if (patientSelect) {
+    patientSelect.innerHTML = '<option value="">Спочатку виберіть власника</option>';
+    patientSelect.value = "";
+  }
+  if (searchResultsBox) searchResultsBox.innerHTML = '';
+
+  // Закрытие модалки
+  const closeModal = () => {
+    modal.classList.remove('active');
+    if (searchResultsBox) searchResultsBox.innerHTML = '';
+  };
+
+  const closeBtn = document.getElementById('close-modal-btn');
+  if (closeBtn) closeBtn.onclick = closeModal;
+  modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+
+  // ЖИВОЙ ИНТЕРАКТИВНЫЙ ПОИСК ВНУТРИ МОДАЛКИ
+  if (ownerInput && searchResultsBox) {
+    // Удаляем старые слушатели, вешаем чистый новый
+    const newOwnerInput = ownerInput.cloneNode(true);
+    ownerInput.parentNode.replaceChild(newOwnerInput, ownerInput);
+    
+    newOwnerInput.addEventListener("input", () => {
+      const q = (newOwnerInput.value || "").toLowerCase().trim();
+      if (!q) {
+        searchResultsBox.innerHTML = "";
+        return;
+      }
+
+      const allPatients = window.__visitPatientList || [];
+      const found = allPatients.filter((p) => {
+        return [p.name, p.owner_name, p.owner_phone, p.species, p.breed]
+          .join(" ").toLowerCase().includes(q);
+      }).slice(0, 8);
+
+      searchResultsBox.innerHTML = found.length
+        ? found.map((p) => `
+          <div class="patientSearchItem" data-select-id="${escapeHtml(String(p.id))}" style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;">
+            <strong style="color: #fff; display: block; font-size: 0.9rem;">${escapeHtml(p.name)} (${escapeHtml(p.species)})</strong>
+            <span style="color: var(--text-muted); font-size: 0.75rem;">${escapeHtml(p.owner_name)} · ${escapeHtml(p.owner_phone)}</span>
+          </div>
+        `).join("")
+        : `<div style="padding: 12px; color: var(--text-muted); font-size: 0.85rem; text-align: center;">Нічого не знайдено</div>`;
+
+      // При клике на найденную строку
+      Array.from(searchResultsBox.querySelectorAll("[data-select-id]")).forEach((item) => {
+        item.addEventListener("click", () => {
+          const pId = item.dataset.selectId;
+          const selectedPatient = allPatients.find((x) => String(x.id) === String(pId));
+
+          if (selectedPatient) {
+            newOwnerInput.value = `${selectedPatient.owner_name} (${selectedPatient.owner_phone})`;
+            
+            // Заполняем выпадающий список питомцем
+            if (patientSelect) {
+              patientSelect.innerHTML = `<option value="${escapeHtml(String(selectedPatient.id))}">${escapeHtml(selectedPatient.name)} [${escapeHtml(selectedPatient.species)}]</option>`;
+              patientSelect.value = String(selectedPatient.id);
+            }
+          }
+          searchResultsBox.innerHTML = "";
+        });
+      });
+    });
+  }
+
+  // ОТПРАВКА ДАННЫХ В SUPABASE ПРИ НАЖАТИИ "ЗАПИСАТИ"
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+
+      const ownerVal = document.getElementById('modal-owner-search')?.value || "Клієнт";
+      const selectedPatientId = patientSelect ? patientSelect.value : null;
+      const selectedPatientText = patientSelect && patientSelect.options[patientSelect.selectedIndex] ? patientSelect.options[patientSelect.selectedIndex].text : "Пацієнт";
+      const note = (reasonTextarea ? reasonTextarea.value : "").trim();
+      
+      const duration = 60; 
+      const endTime = addMinutesToTime(hour, duration);
+      const currentDate = window.__calendarDate || new Date().toISOString().slice(0, 10);
+
+      const created = await createCalendarEventApi({
+        title: `Прийом: ${selectedPatientText.split(' [')[0]} (${ownerVal.split(' (')[0]})`,
+        event_date: currentDate,
+        start_time: hour,
+        end_time: endTime,
+        staff_id: staffId,
+        note: note,
+      });
+
+      if (created) {
+        closeModal();
+        await renderCalendarTab(); // Обновляем сетку, чтобы плашка появилась мгновенно
+      }
+    };
+  }
+}
