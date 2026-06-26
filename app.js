@@ -2361,23 +2361,35 @@ async function renderPatientTab(tab, pet) {
     };
   }
 
- // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ТЕПЕР ЖЕЛЕЗНО И БЕЗ ОШИБОК!
+     // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — БРОНЕБОЙНЫЙ ВАРИАНТ С ЛОГАМИ
     const btnAddVisit = document.getElementById("btnAddVisit");
     if (btnAddVisit) {
       btnAddVisit.onclick = () => {
-        // Гарантируем, что в глобальном стейте лежит актуальный питомец
-        if (state) {
-          state.selectedPet = pet;
-          if (pet.id || pet._id) {
-            state.selectedPetId = pet.id || pet._id;
-          }
+        console.log("Клик по кнопке + Новий візит. Переданный pet:", pet);
+        
+        // Безопасно инициализируем state, если он вдруг пустой
+        if (typeof state === "undefined") {
+          window.state = {};
         }
         
-        // Вызываем создание визита
+        // Записываем питомца в глобальный стейт приложения
+        state.selectedPet = pet;
+        state.selectedPetId = pet ? (pet.id || pet._id) : null;
+        
+        console.log("Глобальный state обновлен:", state);
+
+        // Вызываем функцию модалки напрямую
         if (typeof openVisitModalForCreate === "function") {
-          openVisitModalForCreate(pet);
+          try {
+            openVisitModalForCreate(pet);
+            console.log("Функция openVisitModalForCreate успешно вызвана!");
+          } catch (err) {
+            console.error("Ошибка внутри самой функции openVisitModalForCreate:", err);
+            alert("Ошибка при открытии модалки: " + err.message);
+          }
         } else {
-          alert("Помилка: функция openVisitModalForCreate не знайдена");
+          console.error("Критическая ошибка: openVisitModalForCreate не является функцией в app.js!");
+          alert("Помилка: функция openVisitModalForCreate не знайдена в файлі.");
         }
       };
     }
