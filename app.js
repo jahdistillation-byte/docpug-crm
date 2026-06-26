@@ -2295,69 +2295,67 @@ async function renderPatientTab(tab, pet) {
 
   const stats = getFinancialStats(pet.id, 'patient');
 
-  // Шаг 1: Рендерим постоянную верхнюю часть (Hero + Капсульное меню), если её ещё нет
-  if (!box || !document.getElementById("patientTabContent")) {
-    root.innerHTML = `
-      <div class="glass-card" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
-        <div style="display:flex; justify-content:space-between; align-items:start;">
-          <div>
-            <div style="font-size:0.75rem; text-transform:uppercase; opacity:0.5; letter-spacing:1px; margin-bottom:4px;">Медична карта пацієнта</div>
-            <h2 style="margin:0; font-size: 2.2rem; color: #fff;">🐾 ${escapeHtml(pet.name || "Без імені")}</h2>
-            <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
-              ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
-              ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-            </div>
-          </div>
-          <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);">+ Новий візит</button>
-        </div>
-
-        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
-          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Візитів</div>
-            <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${stats.count}</div>
-          </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Вага</div>
-            <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${escapeHtml(pet.weight_kg || "—")} кг</div>
-          </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Останній візит</div>
-            <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 4px;">${escapeHtml(stats.lastDate || "—")}</div>
-          </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Всього сплачено</div>
-            <div style="font-size: 1.4rem; font-weight: 700; color: #22c55e;">${stats.total} ₴</div>
+  // Шаг 1: Полностью обновляем контейнер, чтобы гарантированно применились новые вкладки
+  root.innerHTML = `
+    <div class="glass-card" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
+      <div style="display:flex; justify-content:space-between; align-items:start;">
+        <div>
+          <div style="font-size:0.75rem; text-transform:uppercase; opacity:0.5; letter-spacing:1px; margin-bottom:4px;">Медична карта пацієнта</div>
+          <h2 style="margin:0; font-size: 2.2rem; color: #fff;">🐾 ${escapeHtml(pet.name || "Без імені")}</h2>
+          <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
+            ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
+            ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
           </div>
         </div>
+        <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);">+ Новий візит</button>
       </div>
 
-      <div class="patient-tabs-nav" style="display:flex; gap:6px; margin-bottom:24px; padding:6px; background: rgba(255, 255, 255, 0.04); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); width: fit-content; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
-        <button class="patient-tab-btn" data-p-tab="overview">👁️ Обзор</button>
-        <button class="patient-tab-btn" data-p-tab="visits">📅 Візити</button>
-        <button class="patient-tab-btn" data-p-tab="medcard">🩺 Веткарта</button>
-        <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
-        <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
-        <button class="patient-tab-btn" data-p-tab="finance">💎 Фінанси</button>
-        <button class="patient-tab-btn" data-p-tab="edit">✏️ Редагувати</button>
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
+        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Візитів</div>
+          <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${stats.count}</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Вага</div>
+          <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${escapeHtml(pet.weight_kg || "—")} кг</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Останній візит</div>
+          <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 4px;">${escapeHtml(stats.lastDate || "—")}</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Всього сплачено</div>
+          <div style="font-size: 1.4rem; font-weight: 700; color: #22c55e;">${stats.total} ₴</div>
+        </div>
       </div>
+    </div>
 
-      <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
-    `;
+    <div class="patient-tabs-nav" style="display:flex; gap:6px; margin-bottom:24px; padding:6px; background: rgba(255, 255, 255, 0.04); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); width: fit-content; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+      <button class="patient-tab-btn" data-p-tab="overview">👁️ Обзор</button>
+      <button class="patient-tab-btn" data-p-tab="visits">📅 Візити</button>
+      <button class="patient-tab-btn" data-p-tab="medcard">🩺 Веткарта</button>
+      <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
+      <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
+      <button class="patient-tab-btn" data-p-tab="finance">💎 Финанси</button>
+      <button class="patient-tab-btn" data-p-tab="edit">✏️ Редагувати</button>
+    </div>
 
-    // Навешиваем клики на обновленные кнопки вкладок
-    root.querySelectorAll("[data-p-tab]").forEach((btn) => {
-      btn.onclick = () => {
-        const targetTab = btn.dataset.pTab;
-        renderPatientTab(targetTab, pet);
-      };
-    });
-  }
+    <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
+  `;
 
-  // Перевыбираем обновленный box
+  // Навешиваем события клика заново на свежие кнопки
+  root.querySelectorAll("[data-p-tab]").forEach((btn) => {
+    btn.onclick = () => {
+      const targetTab = btn.dataset.pTab;
+      renderPatientTab(targetTab, pet);
+    };
+  });
+
+  // Ищем заново созданный динамический бокс для контента
   const dynamicBox = $("#patientTabContent");
   if (!dynamicBox) return;
 
-  // Стилизация активной/неактивной вкладки в стиле Apple / VisionOS
+  // Жестко красим кнопки через инлайн-стили, сбрасывая кэш
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     const isActive = btn.dataset.pTab === tab;
     btn.style.padding = "10px 18px";
@@ -2369,10 +2367,10 @@ async function renderPatientTab(tab, pet) {
     btn.style.color = isActive ? "#fff" : "rgba(255, 255, 255, 0.6)";
     btn.style.background = isActive ? "rgba(255, 255, 255, 0.15)" : "transparent";
     btn.style.boxShadow = isActive ? "0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)" : "none";
-    btn.style.transition = "all 0.25s ease";
+    btn.style.transition = "all 0.2s ease";
   });
 
-  // Шаг 2: Рендерим внутреннее содержимое выбранного таба
+  // Шаг 2: Отрисовка контента
   if (tab === "overview") {
     dynamicBox.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
@@ -2418,12 +2416,12 @@ async function renderPatientTab(tab, pet) {
 
   if (tab === "edit") {
     if (typeof renderEditPetForm === "function") {
-       renderEditPetForm(pet); // Если есть готовая функция формы редактирования
+       renderEditPetForm(pet);
     } else {
        dynamicBox.innerHTML = `
          <div class="glass-card" style="padding: 20px; border-radius: 16px;">
            <h3 style="margin-top:0; color:#fff; margin-bottom: 15px;">✏️ Редагувати профіль</h3>
-           <p style="opacity: 0.7;">Раздел редактирования данных ${escapeHtml(pet.name)} находится в разработке.</p>
+           <p style="opacity: 0.7;">Розділ редагування даних ${escapeHtml(pet.name)} знаходиться в розробці.</p>
          </div>
        `;
     }
