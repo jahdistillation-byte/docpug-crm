@@ -3093,3 +3093,82 @@ input:focus,select:focus,textarea:focus,.input:focus,.textarea:focus,.inp:focus{
   opacity:.65;
   border-left-color:#b9b9c7;
 }
+/* --- СТИЛИ ДЛЯ КАЛЕНДАРЯ (Добавить или заменить в style.css) --- */
+
+/* 1. Главный контейнер всего раздела "Календарь" (вся белая область) */
+.calendar-panel {
+    background-color: var(--card-background); /* Или твой цвет фона панели */
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Легкая тень для премиальности */
+    overflow: hidden; /* Чтобы скролл был только внутри, а не по всей панели */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Контейнер, который объединяет и время, и сетку врачей */
+.calendar-layout {
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
+    /* --- ЭТО РЕШАЕТ ТВОЮ ПРОБЛЕМУ: Горизонтальный скролл --- */
+    overflow-x: auto; 
+    scroll-behavior: smooth; /* Плавная прокрутка */
+}
+
+/* Стилизация полосы прокрутки, чтобы она была тонкой и красивой */
+.calendar-layout::-webkit-scrollbar {
+    height: 6px; /* Тонкая */
+}
+.calendar-layout::-webkit-scrollbar-track {
+    background: #f0f0f0; /* Цвет дорожки */
+}
+.calendar-layout::-webkit-scrollbar-thumb {
+    background: #c1b6f0; /* Цвет ползунка (твой фиолетовый) */
+    border-radius: 3px;
+}
+
+/* 3. Колонка "Час" (время). Сделаем её прилипающей! */
+.time-column {
+    position: sticky; /* Прилипает! */
+    left: 0;          /* К левому краю */
+    background-color: #fff; /* Фон такой же, как у календаря, чтобы не просвечивало */
+    z-index: 10;      /* Поверх остальных */
+    width: 60px;      /* Фиксированная ширина */
+    flex-shrink: 0;   /* Не сжимается */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.03); /* Маленькая тень, чтобы отделить */
+}
+
+/* 4. Сетка с карточками врачей (все, кроме колонки времени) */
+.doctors-grid {
+    display: flex; /* Используем flex для колонок врачей */
+    flex-grow: 1;
+    overflow-x: hidden; /* Сам этот блок не скроллится, скроллится родитель */
+}
+
+/* 5. Карточка одного ветеринара (Заголовок колонки) */
+.doctor-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 0 10px;    /* Отступы между карточками */
+    width: 200px;       /* Задаем фиксированную ширину, чтобы они не сужались */
+    flex-shrink: 0;     /* Не даем сжиматься */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Легкая тень */
+    border: 1px solid #eaeaea; /* Тонкая рамка */
+    transition: all 0.2s ease;
+}
+
+/* Премиальная деталь: эффект при наведении на карточку */
+.doctor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #9d8df2; /* Изменяем цвет рамки на твой фиолетовый */
+}
+
+/* Улучшим отображение специализации */
+.doctor-card .role-badge {
+    color: #666;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
