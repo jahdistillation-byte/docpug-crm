@@ -102,7 +102,29 @@
                     <h2>Власники тварин</h2>
                     <button class="btn-primary" id="add-owner-btn">+ Додати власника</button>
                 </div>
-                
+                            <section id="owner" class="content-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h2 id="owner-profile-name">👤 Завантаження профілю...</h2>
+                        <div id="owner-profile-phone" style="font-size: 1rem; color: var(--primary-neon); font-weight: 600; margin-top: 4px;"></div>
+                    </div>
+                    <button class="btn-tab" onclick="location.hash = 'owners'" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                        &larr; Назад до списку
+                    </button>
+                </div>
+
+                <div id="owner-profile-info" style="margin-bottom: 30px; width: 100%;"></div>
+
+                <div style="margin-top: 40px;">
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        🐾 Пацієнти цього власника
+                    </h3>
+                    
+                    <div class="patients-grid" id="owner-patients-container">
+                        </div>
+                </div>
+            </section>
+            
                 <div class="data-table-container">
                     <table class="data-table">
                         <thead>
