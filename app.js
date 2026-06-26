@@ -1,7 +1,7 @@
-// =========================
-// Doc.PUG CRM Mini — app.js
-// PDF + Print fixed + SERVICES (registry + visit lines) + TOTAL
-// =========================
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ЯДРО: СОСТОЯНИЕ, РОУТИНГ, АНАЛИТИКА, API)
+// Часть 1 (Строки 1 — 1500)
+// ==========================================================================
 
 // ===== Helpers =====
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -17,13 +17,11 @@ const FILES_KEY = "docpug_files_v1";
 const VISIT_FILES_KEY = "docpug_visit_files_v1";
 const MIGRATION_KEY = "docpug_files_migrated_v1";
 
-
 let calendarMode = "day";
+
 // =========================
 // FILES helpers (LOCAL links)
 // =========================
-
-// если нет такой функции — добавь (чтобы не было ReferenceError)
 function fileIdFromStored(storedName) {
   return "f_" + String(storedName || "").replace(/[^a-zA-Z0-9_-]/g, "_");
 }
@@ -79,14 +77,6 @@ function detachFileFromVisit(visitId, fileId) {
   saveVisitFilesLinks(next);
 }
 
-// =========================
-// FILE HELPERS (needed for uploads)
-// =========================
-function fileIdFromStored(storedName) {
-  if (!storedName) return null;
-  return "file_" + String(storedName).replace(/[^a-zA-Z0-9]/g, "_");
-}
-
 function upsertFilesFromServerMeta(serverMeta) {
   const list = Array.isArray(serverMeta) ? serverMeta : [];
   if (!list.length) return;
@@ -123,18 +113,13 @@ function upsertFilesFromServerMeta(serverMeta) {
   LS.set(FILES_KEY, next);
 }
 
-// =========================
-// Legacy migration (safe stub)
-// Some builds call migrateLegacyVisitFilesIfNeeded() during init.
-// If legacy file-linking is no longer used, this keeps the app from crashing.
-// =========================
 async function migrateLegacyVisitFilesIfNeeded() {
   return; // no-op
 }
 
 // ✅ Services registry
 const SERVICES_KEY = "docpug_services_v1";
-const SERVICES_CAT_KEY = "docpug_services_cat_v1"; // { [id]: "Категорія" }
+const SERVICES_CAT_KEY = "docpug_services_cat_v1";
 
 function normalizeServiceRow(s) {
   const cat =
@@ -146,7 +131,7 @@ function normalizeServiceRow(s) {
   };
 }
 
-// ✅ Stock registry (пока просто ключ, UI добавим дальше)
+// ✅ Stock registry
 const STOCK_KEY = "docpug_stock_v1";
 
 // ===== State =====
@@ -165,10 +150,8 @@ const state = {
   selectedPet: null,
   selectedVisitId: null,
 
-  // ✅ ПОИСК В ВИЗИТЕ (добавь)
   visitSvcQuery: "",
   visitStkQuery: "",
-
   servicesQuery: "",
 
   dischargeListenersBound: false,
@@ -195,7 +178,6 @@ function getVisitByIdSync(id) {
 function normalizeVisitFromServer(visit) {
   if (!visit) return visit;
 
-  // services_json: array OR string
   const sj = visit.services_json;
   let sjArr = null;
   if (Array.isArray(sj)) sjArr = sj;
@@ -203,16 +185,12 @@ function normalizeVisitFromServer(visit) {
     try { sjArr = JSON.parse(sj); } catch { sjArr = null; }
   }
 
-  // IMPORTANT:
-  // Server may always return `services: []` even when services_json has data.
-  // So we refresh services from services_json when services is missing OR empty.
   const hasServicesArr = Array.isArray(visit.services);
   const hasSjArr = Array.isArray(sjArr);
   if (!hasServicesArr || (visit.services.length === 0 && hasSjArr && sjArr.length > 0)) {
     visit.services = hasSjArr ? sjArr : [];
   }
 
-  // stock_json: array OR string
   const stj = visit.stock_json;
   let stArr = null;
   if (Array.isArray(stj)) stArr = stj;
@@ -220,7 +198,6 @@ function normalizeVisitFromServer(visit) {
     try { stArr = JSON.parse(stj); } catch { stArr = null; }
   }
 
-  // Same issue as services: server can return `stock: []` even when stock_json has data.
   const hasStockArr = Array.isArray(visit.stock);
   const hasStArr = Array.isArray(stArr);
   if (!hasStockArr || (visit.stock.length === 0 && hasStArr && stArr.length > 0)) {
@@ -232,10 +209,7 @@ function normalizeVisitFromServer(visit) {
 
 async function fetchVisitById(id) {
   if (!id) return null;
-
   const vid = String(id);
-
-  // ✅ то что уже есть в кеше
   const prev = state.visitsById.get(vid) || null;
 
   try {
@@ -248,14 +222,13 @@ async function fetchVisitById(id) {
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
 
-    if (!res.ok || !json || !json.ok) return prev; // ✅ тихо возвращаем кеш
+    if (!res.ok || !json || !json.ok) return prev;
 
     const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
     let v = arr[0] || null;
 
     v = normalizeVisitFromServer(v);
 
-    // ✅ если сервер прислал пусто, но в кеше было — НЕ теряем
     if (prev && v) {
       if (Array.isArray(prev.services) && prev.services.length && (!Array.isArray(v.services) || v.services.length === 0)) {
         v.services = prev.services;
@@ -318,13 +291,13 @@ function setApiStatus(ok, text) {
     ok === true ? "var(--ok)" : ok === false ? "var(--danger)" : "#777";
   line.textContent = text;
 }
+
 function buildVisitNote(dx, complaint) {
   const a = String(dx || "").trim();
   const b = String(complaint || "").trim();
-
   if (a && b) return `Діагноз: ${a}\n\nСкарги/анамнез: ${b}`;
   if (a) return `Діагноз: ${a}`;
-  return b; // если диагноза нет — оставляем только жалобы
+  return b;
 }
 
 function setMeLine(text) {
@@ -332,7 +305,7 @@ function setMeLine(text) {
   if (el) el.textContent = text;
 }
 
-// ===== Router (hash with params) =====
+// ===== Router =====
 const TAB_ROUTES = new Set([
   "owners",
   "patients",
@@ -349,7 +322,6 @@ function parseHash() {
   const [routeRaw, idRaw] = raw.split(":");
   const route = (routeRaw || "owners").trim() || "owners";
   const id = idRaw != null ? String(idRaw).trim() : null;
-
   return { route, id };
 }
 
@@ -382,14 +354,12 @@ async function routeFromHash() {
 
   if (TAB_ROUTES.has(route)) {
     setRoute(route);
-
-  if (route === "owners") renderOwners();
-if (route === "patients") renderPatientsTab();
-if (route === "visits") renderVisitsTab();
-if (route === "services") renderServicesTab();
-if (route === "stock") renderStockTab();
-if (route === "calendar") renderCalendarTab();
-
+    if (route === "owners") renderOwners();
+    if (route === "patients") renderPatientsTab();
+    if (route === "visits") renderVisitsTab();
+    if (route === "services") renderServicesTab();
+    if (route === "stock") renderStockTab();
+    if (route === "calendar") renderCalendarTab();
     return;
   }
 
@@ -448,15 +418,8 @@ async function loadMe() {
     const data = await res.json();
 
     state.me = data?.user || data?.me || data || null;
-
-    const name =
-      state.me?.name ||
-      state.me?.first_name ||
-      state.me?.username ||
-      "Пользователь";
-
-    const tgId =
-      state.me?.tg_user_id || state.me?.id || state.me?.user_id || null;
+    const name = state.me?.name || state.me?.first_name || state.me?.username || "Пользователь";
+    const tgId = state.me?.tg_user_id || state.me?.id || state.me?.user_id || null;
 
     setApiStatus(true, "API: /api/me ✅");
     setMeLine(tgId ? `${name} • tg_id: ${tgId}` : `${name}`);
@@ -466,40 +429,31 @@ async function loadMe() {
     setMeLine("Гость • подключим бэк позже");
   }
 }
+
 // ===== Storage seed =====
-// Идея: локалка = кеш/офлайн, сервер = истина.
-// Поэтому демо-данные добавляем ТОЛЬКО если мы реально офлайн (file://) И пусто.
 function seedIfEmpty() {
-  // базовые ключи всегда должны существовать
   if (!LS.get(VISITS_KEY, null)) LS.set(VISITS_KEY, []);
   if (!LS.get(FILES_KEY, null)) LS.set(FILES_KEY, []);
   if (!LS.get(VISIT_FILES_KEY, null)) LS.set(VISIT_FILES_KEY, []);
   if (!LS.get(DISCHARGES_KEY, null)) LS.set(DISCHARGES_KEY, {});
 
-  // seed stock registry (if absent)
   if (!LS.get(STOCK_KEY, null)) {
     LS.set(STOCK_KEY, [
       { id: "stk_meloxivet", name: "Мелоксивет", price: 70, unit: "шт", qty: 10, active: true },
     ]);
   }
 
-  // seed services registry (if absent)
-    if (!LS.get(SERVICES_KEY, null)) {
+  if (!LS.get(SERVICES_KEY, null)) {
     LS.set(SERVICES_KEY, [
       { id: "svc_exam",       name: "Огляд",            price: 500,  active: true, cat: "Терапія" },
       { id: "svc_trip",       name: "Виїзд",            price: 1500, active: true, cat: "Виїзд" },
       { id: "svc_vax",        name: "Вакцинація",       price: 800,  active: true, cat: "Терапія" },
-
       { id: "svc_consult",    name: "Консультація",     price: 500,  active: true, cat: "Терапія" },
       { id: "svc_cat_castr",  name: "Кастрація кота",   price: 2500, active: true, cat: "Хірургія" },
       { id: "svc_dog_castr",  name: "Кастрація пса",    price: 3500, active: true, cat: "Хірургія" },
-
-      // приклад аналізів (можеш прибрати)
-      // { id: "svc_cbc",     name: "ЗАК",              price: 450,  active: true, cat: "Аналізи" },
     ]);
   }
 
-  // Демо-данные владельца/пациента — только если офлайн (file://) и пусто
   if (location.protocol !== "file:") return;
 
   const owners = LS.get(OWNERS_KEY, []);
@@ -524,7 +478,6 @@ function seedIfEmpty() {
       },
     ]);
   } else {
-    // если владельцы есть, но пациентов нет — ничего не выдумываем
     if (!Array.isArray(patients)) LS.set(PATIENTS_KEY, []);
   }
 }
@@ -536,7 +489,6 @@ async function loadOwners() {
       credentials: "include",
       headers: { Accept: "application/json" },
     });
-
     const text = await res.text();
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
@@ -545,7 +497,6 @@ async function loadOwners() {
       console.error("API /owners HTTP", res.status, text);
       alert(`Помилка завантаження власників (HTTP ${res.status})`);
       state.owners = [];
-      // кеш не трогаем
       renderOwners();
       return [];
     }
@@ -558,27 +509,16 @@ async function loadOwners() {
       return [];
     }
 
-    const arr = Array.isArray(json.data)
-      ? json.data
-      : (json.data ? [json.data] : []);
-
-
+    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
     state.owners = arr;
-
-
-    // ✅ кеш в localStorage (чтобы ownerById работал даже без state.owners)
     LS.set(OWNERS_KEY, arr);
 
     renderOwners();
-
-    // если открыт владелец — обновим страницу владельца
     if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
-
     return arr;
   } catch (e) {
     console.error("loadOwners failed:", e);
     alert("Помилка завантаження власників (network)");
-    // не убиваем кеш, просто UI показываем что есть
     state.owners = Array.isArray(state.owners) ? state.owners : [];
     renderOwners();
     return [];
@@ -592,7 +532,6 @@ async function loadPatientsApi() {
       credentials: "include",
       headers: { Accept: "application/json" },
     });
-
     const text = await res.text();
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
@@ -601,7 +540,6 @@ async function loadPatientsApi() {
       console.error("API /patients HTTP", res.status, text);
       alert(`Помилка завантаження пацієнтів (HTTP ${res.status})`);
       state.patients = [];
-      // кеш не трогаем
       renderPatientsTab();
       if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
       return [];
@@ -616,19 +554,12 @@ async function loadPatientsApi() {
       return [];
     }
 
-    const arr = Array.isArray(json.data)
-      ? json.data
-      : (json.data ? [json.data] : []);
-
+    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
     state.patients = arr;
-
-    // ✅ кеш в localStorage
     savePatients(arr);
 
-    // ✅ UI
     renderPatientsTab();
     if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
-
     return arr;
   } catch (e) {
     console.error("loadPatientsApi failed:", e);
@@ -641,7 +572,7 @@ async function loadPatientsApi() {
 }
 
 // =========================
-// Services API (server-first)
+// Services API
 // =========================
 async function loadServicesApi() {
   try {
@@ -649,12 +580,10 @@ async function loadServicesApi() {
       credentials: "include",
       headers: { Accept: "application/json" },
     });
-
     const text = await res.text();
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
 
-    // если сервер не ок — берём кеш
     if (!res.ok || !json || !json.ok) {
       console.warn("loadServicesApi failed:", res.status, text);
       const cached = LS.get(SERVICES_KEY, []);
@@ -662,30 +591,20 @@ async function loadServicesApi() {
       return state.services;
     }
 
-    const arr = Array.isArray(json.data)
-      ? json.data
-      : (json.data ? [json.data] : []);
-
-    // ✅ 1) читаем карту категорий
+    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
     const catMap = loadServicesCatMap();
 
-    // ✅ 2) наклеиваем cat на то, что пришло с сервера
     const merged = (Array.isArray(arr) ? arr : []).map((s) => {
       const id = String(s?.id || "");
       const savedCat = catMap[id];
-
-      const rawCat =
-        (s?.cat ?? s?.category ?? s?.section ?? s?.group ?? s?.type ?? savedCat ?? "");
-
+      const rawCat = (s?.cat ?? s?.category ?? s?.section ?? s?.group ?? s?.type ?? savedCat ?? "");
       const cat = String(rawCat || "").trim() || "Інше";
-
       return { ...s, cat };
     });
 
     state.services = merged;
-    LS.set(SERVICES_KEY, merged); // кэш для оффлайна
+    LS.set(SERVICES_KEY, merged);
     return merged;
-
   } catch (e) {
     console.warn("loadServicesApi network fail:", e);
     const cached = LS.get(SERVICES_KEY, []);
@@ -702,7 +621,6 @@ async function createServiceApi(payload) {
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(payload || {}),
     });
-
     const text = await res.text();
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
@@ -723,7 +641,6 @@ async function updateServiceApi(id, patch) {
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(patch || {}),
     });
-
     const text = await res.text();
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
@@ -743,11 +660,9 @@ async function deleteServiceApi(id) {
       credentials: "include",
       headers: { Accept: "application/json" },
     });
-
     const text = await res.text();
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
-
     return !!(res.ok && json && json.ok);
   } catch (e) {
     console.error("deleteServiceApi failed:", e);
@@ -767,17 +682,13 @@ async function createPatientApi(payload) {
       notes: (payload?.notes || payload?.note || "").trim(),
     };
 
-    // убрать пустые поля
     Object.keys(bodyObj).forEach((k) => {
       if (bodyObj[k] === "" || bodyObj[k] == null) delete bodyObj[k];
     });
 
     const res = await fetch("/api/patients", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       credentials: "include",
       body: JSON.stringify(bodyObj),
     });
@@ -798,18 +709,14 @@ async function createPatientApi(payload) {
       return null;
     }
 
-    // сервер может вернуть объект или массив — нормализуем
     const created = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
     if (!created) return null;
 
-    // ✅ обновим state + кеш сразу, чтобы UI был моментально
     const next = [created, ...(Array.isArray(state.patients) ? state.patients : [])]
-      // на всякий случай уберем дубль по id
       .filter((x, i, a) => i === a.findIndex((y) => String(y?.id) === String(x?.id)));
 
     state.patients = next;
     savePatients(next);
-
     return created;
   } catch (err) {
     console.error("createPatientApi failed:", err);
@@ -818,11 +725,6 @@ async function createPatientApi(payload) {
   }
 }
 
-
-
-    // =========================
-// Owners API (robust + include)
-// =========================
 async function createOwner(name, phone = "", note = "") {
   try {
     const payload = {
@@ -830,7 +732,6 @@ async function createOwner(name, phone = "", note = "") {
       phone: String(phone || "").trim(),
       note: String(note || "").trim(),
     };
-    // убрать пустые
     Object.keys(payload).forEach((k) => {
       if (payload[k] === "") delete payload[k];
     });
@@ -865,6 +766,7 @@ async function createOwner(name, phone = "", note = "") {
     return null;
   }
 }
+
 async function updateOwner(id, payload = {}) {
   try {
     const bodyObj = {
@@ -880,10 +782,7 @@ async function updateOwner(id, payload = {}) {
     const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
       method: "PUT",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(bodyObj),
     });
 
@@ -934,7 +833,6 @@ async function deleteOwner(id) {
       alert(json?.error || "Помилка видалення власника");
       return false;
     }
-
     return true;
   } catch (e) {
     console.error("deleteOwner failed:", e);
@@ -946,22 +844,13 @@ async function deleteOwner(id) {
 // =========================
 // Local cache helpers
 // =========================
-function loadPatients() {
-  return LS.get(PATIENTS_KEY, []);
-}
-function savePatients(p) {
-  LS.set(PATIENTS_KEY, p);
-}
-
-function loadVisits() {
-  return LS.get(VISITS_KEY, []);
-}
-function saveVisits(v) {
-  LS.set(VISITS_KEY, v);
-}
+function loadPatients() { return LS.get(PATIENTS_KEY, []); }
+function savePatients(p) { LS.set(PATIENTS_KEY, p); }
+function loadVisits() { return LS.get(VISITS_KEY, []); }
+function saveVisits(v) { LS.set(VISITS_KEY, v); }
 
 // =========================
-// Visits API (robust + normalize + cache)
+// Visits API
 // =========================
 async function loadVisitsApi(params = {}) {
   try {
@@ -987,13 +876,10 @@ async function loadVisitsApi(params = {}) {
       return [];
     }
 
-    const arr = Array.isArray(json.data)
-      ? json.data
-      : (json.data ? [json.data] : []);
-
+    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
     const normArr = arr.map(normalizeVisitFromServer);
-cacheVisits(normArr);
-return normArr;
+    cacheVisits(normArr);
+    return normArr;
   } catch (e) {
     console.error("loadVisitsApi failed:", e);
     alert("Помилка зʼєднання з сервером");
@@ -1039,36 +925,23 @@ async function createVisitApi(payload) {
 async function updateVisitApi(visitId, payload) {
   try {
     const url = `/api/visits?id=${encodeURIComponent(String(visitId || "").trim())}`;
+    const res = await fetch(url, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
 
-   const res = await fetch(url, {
-  method: "PUT",
-  credentials: "include", // ✅ ВАЖНО
-  headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-  },
-  body: JSON.stringify(payload || {}),
-});
-
-    // ✅ читаем как текст (чтобы не падать на HTML/405)
     const text = await res.text();
-
-    // ✅ пробуем распарсить JSON
     let json = null;
-    try {
-      json = JSON.parse(text);
-    } catch (_) {
-      json = null;
-    }
+    try { json = JSON.parse(text); } catch (_) { json = null; }
 
-    // ✅ если сервер вернул не-200/ok — покажем нормальную ошибку
     if (!res.ok) {
       console.error("updateVisitApi HTTP error:", res.status, text);
       alert(`API error ${res.status}`);
       return null;
     }
 
-    // ✅ если JSON нет или формат не тот
     if (!json || typeof json !== "object") {
       console.error("updateVisitApi: server returned non-JSON:", text);
       alert("Сервер повернув не JSON (перевір /api/visits PUT)");
@@ -1081,28 +954,22 @@ async function updateVisitApi(visitId, payload) {
       return null;
     }
 
-    // --- НОРМАЛИЗАЦИЯ ---
     const raw = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
     let updated = normalizeVisitFromServer(raw);
 
-    // если сервер вернул вообще пусто — не ломаем кеш
     if (!updated || updated.id == null) {
       console.warn("updateVisitApi: updated visit has no id:", updated, json);
       return updated || null;
     }
 
     const vid = String(updated.id);
-
-    // --- 🔒 НЕ ДАЁМ ПРОПАДАТЬ SERVICES / STOCK ---
     const prev = state.visitsById.get(vid) || null;
     if (prev) {
       const prevServices = Array.isArray(prev.services) ? prev.services : [];
       const prevStock = Array.isArray(prev.stock) ? prev.stock : [];
-
       const updHasServices = Array.isArray(updated.services) && updated.services.length > 0;
       const updHasStock = Array.isArray(updated.stock) && updated.stock.length > 0;
 
-      // если сервер вернул "урезанный" визит (без services/stock) — сохраняем старое
       if (!updHasServices && prevServices.length) {
         updated.services = prevServices;
         updated.services_json = prevServices;
@@ -1115,7 +982,6 @@ async function updateVisitApi(visitId, payload) {
 
     cacheVisits([updated]);
     return updated;
-
   } catch (e) {
     console.error("updateVisitApi failed:", e);
     alert("Помилка зʼєднання з сервером");
@@ -1124,11 +990,10 @@ async function updateVisitApi(visitId, payload) {
 }
 
 // =========================
-// Push helpers (services/stock) — keep other fields intact
+// Push helpers (services/stock)
 // =========================
 async function pushVisitServicesToServer(visitId, servicesArr) {
   const vid = String(visitId);
-
   const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
   if (!current) return false;
 
@@ -1141,10 +1006,8 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
     note: current.note,
     rx: current.rx,
     weight_kg: current.weight_kg,
-
     services,
     services_json: services,
-
     stock,
     stock_json: stock,
   };
@@ -1153,7 +1016,6 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
   if (!updated) return false;
 
   const cached = state.visitsById.get(vid) || current;
-
   cached.services = services;
   cached.services_json = services;
   cached.stock = stock;
@@ -1161,13 +1023,11 @@ async function pushVisitServicesToServer(visitId, servicesArr) {
 
   state.visitsById.set(vid, cached);
   if (String(state.selectedVisitId) === vid) state.selectedVisit = cached;
-
   return true;
 }
 
 async function pushVisitStockToServer(visitId, stockArr) {
   const vid = String(visitId);
-
   const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
   if (!current) return false;
 
@@ -1180,10 +1040,8 @@ async function pushVisitStockToServer(visitId, stockArr) {
     note: current.note,
     rx: current.rx,
     weight_kg: current.weight_kg,
-
     services,
     services_json: services,
-
     stock,
     stock_json: stock,
   };
@@ -1192,7 +1050,6 @@ async function pushVisitStockToServer(visitId, stockArr) {
   if (!updated) return false;
 
   const cached = state.visitsById.get(vid) || current;
-
   cached.services = services;
   cached.services_json = services;
   cached.stock = stock;
@@ -1200,7 +1057,6 @@ async function pushVisitStockToServer(visitId, stockArr) {
 
   state.visitsById.set(vid, cached);
   if (String(state.selectedVisitId) === vid) state.selectedVisit = cached;
-
   return true;
 }
 
@@ -1211,12 +1067,9 @@ async function deleteVisitApi(visitId) {
       credentials: "include",
       headers: { Accept: "application/json" },
     });
-
     const text = await res.text();
     let json = null;
-    try {
-      json = text ? JSON.parse(text) : null;
-    } catch {}
+    try { json = text ? JSON.parse(text) : null; } catch {}
 
     if (!res.ok) {
       console.error("API /visits DELETE HTTP", res.status, text);
@@ -1240,19 +1093,11 @@ async function deleteVisitApi(visitId) {
 }
 
 // =========================
-// Discharges (LOCAL ONLY пока)
+// Discharges (LOCAL ONLY)
 // =========================
-function loadDischarges() {
-  return LS.get(DISCHARGES_KEY, {});
-}
-
-function saveDischarges(obj) {
-  LS.set(DISCHARGES_KEY, obj);
-}
-
-function getDischarge(visitId) {
-  return loadDischarges()[visitId] || null;
-}
+function loadDischarges() { return LS.get(DISCHARGES_KEY, {}); }
+function saveDischarges(obj) { LS.set(DISCHARGES_KEY, obj); }
+function getDischarge(visitId) { return loadDischarges()[visitId] || null; }
 
 function setDischarge(visitId, data) {
   const all = loadDischarges();
@@ -1267,10 +1112,7 @@ function setDischarge(visitId, data) {
 // =========================
 // Data getters (SERVER)
 // =========================
-async function getVisitsByPetId(petId) {
-  return await loadVisitsApi({ pet_id: petId });
-}
-
+async function getVisitsByPetId(petId) { return await loadVisitsApi({ pet_id: petId }); }
 async function getVisitById(visitId) {
   if (!visitId) return null;
   const arr = await loadVisitsApi({ id: visitId });
@@ -1278,20 +1120,12 @@ async function getVisitById(visitId) {
 }
 
 function getOwnerById(ownerId) {
-  const arr =
-    Array.isArray(state.owners) && state.owners.length
-      ? state.owners
-      : LS.get(OWNERS_KEY, []);
-
+  const arr = Array.isArray(state.owners) && state.owners.length ? state.owners : LS.get(OWNERS_KEY, []);
   return (arr || []).find((o) => String(o.id) === String(ownerId)) || null;
 }
 
 function getPetsByOwnerId(ownerId) {
-  const patients =
-    Array.isArray(state.patients) && state.patients.length
-      ? state.patients
-      : loadPatients();
-
+  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
   return (patients || []).filter((p) => String(p.owner_id) === String(ownerId));
 }
 
@@ -1299,18 +1133,11 @@ function getPetsByOwnerId(ownerId) {
 // SERVICES registry
 // =========================
 function loadServices() {
-  const arr =
-    Array.isArray(state.services) && state.services.length
-      ? state.services
-      : LS.get(SERVICES_KEY, []);
-
+  const arr = Array.isArray(state.services) && state.services.length ? state.services : LS.get(SERVICES_KEY, []);
   return arr || [];
 }
 
-function getServiceById(id) {
-  return loadServices().find((s) => String(s.id) === String(id)) || null;
-}
-
+function getServiceById(id) { return loadServices().find((s) => String(s.id) === String(id)) || null; }
 function loadServicesCatMap() {
   const map = LS.get(SERVICES_CAT_KEY, {});
   return map && typeof map === "object" ? map : {};
@@ -1338,7 +1165,6 @@ async function addServiceLineToVisit(visitId, serviceId, qty) {
   if (!current) return false;
 
   ensureVisitServicesShape(current);
-
   const svc = getServiceById(serviceId);
   if (!svc || svc.active === false) return false;
 
@@ -1366,7 +1192,6 @@ async function addServiceLineToVisit(visitId, serviceId, qty) {
     console.error("Background service save failed:", e);
     alert("Послуга додалась на екрані, але не збереглась на сервері. Натисни Оновити.");
   });
-
   return true;
 }
 
@@ -1378,10 +1203,8 @@ async function removeServiceLineFromVisit(visitId, index) {
   if (!current) return false;
 
   ensureVisitServicesShape(current);
-
   const idx = Number(index);
-  if (!Number.isFinite(idx)) return false;
-  if (idx < 0 || idx >= current.services.length) return false;
+  if (!Number.isFinite(idx) || idx < 0 || idx >= current.services.length) return false;
 
   const nextServices = current.services.slice();
   nextServices.splice(idx, 1);
@@ -1396,7 +1219,6 @@ async function removeServiceLineFromVisit(visitId, index) {
     console.error("Background service remove failed:", e);
     alert("Послуга прибралась на екрані, але не збереглась на сервері. Натисни Оновити.");
   });
-
   return true;
 }
 
@@ -1405,24 +1227,17 @@ async function removeServiceLineFromVisit(visitId, index) {
 // =========================
 function expandServiceLines(visit) {
   const lines = Array.isArray(visit?.services) ? visit.services : [];
-
   return lines
     .filter((line) => line && (line.serviceId || line.service_id))
     .map((line) => {
-      // ✅ поддержка camelCase + snake_case
       const serviceId = line.serviceId || line.service_id;
-
       const qtyRaw = line.qty ?? line.quantity ?? 1;
       const qty = Math.max(1, Number(qtyRaw) || 1);
-
       const snapName = line.nameSnap ?? line.name_snap ?? "";
       const snapPrice = line.priceSnap ?? line.price_snap;
 
-      // локальный реестр (fallback, если снапшота нет)
       const svc = getServiceById(serviceId);
-
       const name = String(snapName || svc?.name || "Невідома послуга").trim();
-
       const snapPriceNum = Number(snapPrice);
       const price = Number.isFinite(snapPriceNum) ? snapPriceNum : Number(svc?.price || 0);
 
@@ -1434,13 +1249,8 @@ function calcServicesTotal(visit) {
   return expandServiceLines(visit).reduce((sum, x) => sum + (Number(x.lineTotal) || 0), 0);
 }
 
-// =========================
-// Services PRO HTML (for A4 discharge)
-// =========================
 function renderServicesProA4(expanded = [], total = 0) {
-  if (!expanded.length) {
-    return `<div class="hint" style="opacity:.75">—</div>`;
-  }
+  if (!expanded.length) return `<div class="hint" style="opacity:.75">—</div>`;
 
   const rows = expanded.map((x) => `
     <tr>
@@ -1475,172 +1285,96 @@ function renderServicesProA4(expanded = [], total = 0) {
 }
 
 // =========================
-// ✅ STOCK lines inside VISIT (snapshot) + totals  (SERVER VISIT)
+// ✅ STOCK lines inside VISIT
 // =========================
 function ensureVisitStockShape(visit) {
   if (!visit) return;
   if (!Array.isArray(visit.stock)) visit.stock = [];
 }
 
-// ✅ SERVER: add stock line into VISIT + (optionally) decrement local STOCK registry
-async function addStockLineToVisit(
-
-  visitId,
-
-  stockId,
-
-  qty = 1,
-
-  { snap = true, decrement = false } = {}
-
-) {
-
+async function addStockLineToVisit(visitId, stockId, qty = 1, { snap = true, decrement = false } = {}) {
   if (!visitId || !stockId) return false;
 
   const vid = String(visitId);
-
   const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-
   if (!current) return false;
 
   ensureVisitStockShape(current);
-
   const it = getStockById(stockId);
-
   if (!it || it.active === false) return false;
 
   const q = Math.max(1, Number(qty) || 1);
-
   const price = Number(it.price ?? it.price_uah ?? it.sell_price ?? it.sale_price ?? it.cost ?? 0) || 0;
 
   const line = {
-
     stockId: String(stockId),
-
     stock_id: String(stockId),
-
     qty: q,
-
     quantity: q,
-
     priceSnap: price,
-
     price_snap: price,
-
     nameSnap: String(it.name || "").trim(),
-
     name_snap: String(it.name || "").trim(),
-
     unitSnap: String(it.unit || "шт").trim(),
-
     unit_snap: String(it.unit || "шт").trim(),
-
   };
 
   current.stock = [...current.stock, line];
-
   current.stock_json = current.stock;
 
   state.visitsById.set(vid, current);
-
   if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
 
   pushVisitStockToServer(vid, current.stock).catch((e) => {
-
     console.error("Background stock save failed:", e);
-
     alert("Препарат додався на екрані, але не зберігся на сервері. Натисни Оновити.");
-
   });
-
   return true;
-
 }
-// ✅ SERVER: remove stock line from VISIT + (optionally) restore local STOCK registry
+
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (УПРАВЛЕНИЕ СКЛАДОМ, ПРАЙС-ЛИСТАМИ И ЖУРНАЛАМИ)
+// Часть 2 (Строки 1501 — 2000)
+// ==========================================================================
+
 async function removeStockLineFromVisit(visitId, index, { restore = true } = {}) {
-
   if (!visitId) return false;
-
   const vid = String(visitId);
-
   const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-
   if (!current) return false;
 
   ensureVisitStockShape(current);
-
   const idx = Number(index);
-
-  if (!Number.isFinite(idx)) return false;
-
-  if (idx < 0 || idx >= current.stock.length) return false;
+  if (!Number.isFinite(idx) || idx < 0 || idx >= current.stock.length) return false;
 
   const nextStock = current.stock.slice();
-
   nextStock.splice(idx, 1);
 
   current.stock = nextStock;
-
   current.stock_json = nextStock;
 
   state.visitsById.set(vid, current);
-
   if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
 
   pushVisitStockToServer(vid, nextStock).catch((e) => {
-
     console.error("Background stock remove failed:", e);
-
     alert("Препарат прибрався на екрані, але не зберігся на сервері. Натисни Оновити.");
-
   });
-
   return true;
-
 }
 
-// =========================
-// ✅ STOCK lines inside VISIT (snapshot) + totals
-// =========================
 function expandStockLines(visit) {
   const lines = Array.isArray(visit?.stock) ? visit.stock : [];
-
   return lines
     .filter((line) => line && (line.stockId || line.stock_id))
     .map((line) => {
       const stockId = line.stockId || line.stock_id;
       const it = getStockById(stockId);
 
-      const name = String(
-        line.nameSnap ??
-        line.name_snap ??
-        it?.name ??
-        "Невідома позиція"
-      ).trim();
-
-      const unit = String(
-        line.unitSnap ??
-        line.unit_snap ??
-        it?.unit ??
-        "шт"
-      ).trim();
-
-      const price = Number(
-        line.priceSnap ??
-        line.price_snap ??
-        it?.price ??
-        it?.price_uah ??
-        it?.sell_price ??
-        it?.sale_price ??
-        it?.cost ??
-        0
-      ) || 0;
-
-      const qty = Math.max(
-        1,
-        Number(line.qty ?? line.quantity ?? 1) || 1
-      );
-
+      const name = String(line.nameSnap ?? line.name_snap ?? it?.name ?? "Невідома позиція").trim();
+      const unit = String(line.unitSnap ?? line.unit_snap ?? it?.unit ?? "шт").trim();
+      const price = Number(line.priceSnap ?? line.price_snap ?? it?.price ?? it?.price_uah ?? it?.sell_price ?? it?.sale_price ?? it?.cost ?? 0) || 0;
+      const qty = Math.max(1, Number(line.qty ?? line.quantity ?? 1) || 1);
       const lineTotal = price * qty;
 
       return { name, unit, price, qty, lineTotal };
@@ -1648,72 +1382,50 @@ function expandStockLines(visit) {
 }
 
 function calcStockTotal(visit) {
-  return expandStockLines(visit).reduce(
-    (sum, x) => sum + (Number(x?.lineTotal) || 0),
-    0
-  );
+  return expandStockLines(visit).reduce((sum, x) => sum + (Number(x?.lineTotal) || 0), 0);
 }
 
-// =========================
-// ✅ VISIT UI refresh helper (used by services/stock tabs)
-// =========================
 async function refreshVisitUIIfOpen() {
   if (state.route !== "visit" || !state.selectedVisitId) return;
 
-  // 1) cache
   let v = getVisitByIdSync(state.selectedVisitId);
-
-  // 2) fetch if cache empty
   if (!v) v = await fetchVisitById(state.selectedVisitId);
   if (!v) return;
 
-  const pet =
-    state.selectedPet ||
-    loadPatients().find((p) => p.id === v.pet_id) ||
-    null;
-
+  const pet = state.selectedPet || loadPatients().find((p) => p.id === v.pet_id) || null;
   renderVisitPage(v, pet);
   renderDischargeA4(state.selectedVisitId);
 }
 
-
-// =========================
-// ✅ SERVICES UI (registry) — bind once per page
-// =========================
 function initServicesUI() {
   const page = document.querySelector('.page[data-page="services"]');
   if (!page) return;
 
-  // ✅ защита от повторного навешивания
   if (page.dataset.boundServices === "1") return;
   page.dataset.boundServices = "1";
 
   page.querySelector("#servicesSearch")?.addEventListener("input", async (e) => {
-  state.servicesQuery = String(e.target.value || "");
-  renderServicesTab();
-});
+    state.servicesQuery = String(e.target.value || "");
+    renderServicesTab();
+  });
 
-  // add
-    page.querySelector("#btnAddService")?.addEventListener("click", async () => {
+  page.querySelector("#btnAddService")?.addEventListener("click", async () => {
     const name = (prompt("Назва послуги:", "") || "").trim();
     if (!name) return;
 
     const cat = (prompt("Категорія (Терапія/Аналізи/Хірургія/Діагностика/Виїзд/Інше):", "Терапія") || "Терапія").trim() || "Інше";
-
     const priceRaw = (prompt("Ціна (грн):", "0") || "0").trim();
     const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
 
     const created = await createServiceApi({ name, price, active: true, cat });
-  if (!created) return alert("Не вдалося створити послугу");
+    if (!created) return alert("Не вдалося створити послугу");
 
-saveServiceCatToMap(created.id, cat);
+    saveServiceCatToMap(created.id, cat);
+    await loadServicesApi();
+    renderServicesTab();
+    await refreshVisitUIIfOpen();
+  });
 
-  await loadServicesApi();
-  renderServicesTab();
-  await refreshVisitUIIfOpen();
-});
-
-  // actions: edit/toggle/delete
   page.querySelector("#servicesList")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-svc-action]");
     if (!btn) return;
@@ -1723,78 +1435,62 @@ saveServiceCatToMap(created.id, cat);
     if (!action || !id) return;
 
     const items = loadServices();
-    const q = String(state.servicesQuery || "").trim().toLowerCase();
-const filtered = (items || []).filter((s) => {
-  if (!q) return true;
-  const name = String(s?.name || "").toLowerCase();
-  const cat = String(s?.cat || "").toLowerCase();
-  return (name + " " + cat).includes(q);
-});
     const idx = items.findIndex((x) => x.id === id);
     if (idx < 0) return;
 
-   if (action === "edit") {
-  const cur = items[idx];
+    if (action === "edit") {
+      const cur = items[idx];
+      const name = (prompt("Назва:", cur.name || "") || "").trim();
+      if (!name) return;
 
-   const name = (prompt("Назва:", cur.name || "") || "").trim();
-  if (!name) return;
+      const cat = (prompt("Категорія:", String(cur.cat || "Терапія")) || "Терапія").trim() || "Інше";
+      const priceRaw = (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
+      const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
 
-  const cat = (prompt("Категорія:", String(cur.cat || "Терапія")) || "Терапія").trim() || "Інше";
+      const updated = await updateServiceApi(id, { name, price, cat });
+      if (!updated) return alert("Не вдалося оновити");
 
-  const priceRaw = (prompt("Ціна (грн):", String(cur.price ?? 0)) || "0").trim();
-  const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
+      saveServiceCatToMap(id, cat);
+      await loadServicesApi();
+      renderServicesTab();
+      await refreshVisitUIIfOpen();
+      return;
+    }
 
-  const updated = await updateServiceApi(id, { name, price, cat });
-  if (!updated) return alert("Не вдалося оновити");
+    if (action === "toggle") {
+      const cur = items[idx];
+      const nextActive = cur.active === false ? true : false;
+      const updated = await updateServiceApi(id, { active: nextActive });
+      if (!updated) return alert("Не вдалося змінити active");
 
-  saveServiceCatToMap(id, cat);
+      await loadServicesApi();
+      renderServicesTab();
+      await refreshVisitUIIfOpen();
+      return;
+    }
 
-  await loadServicesApi();
-  renderServicesTab();
-  await refreshVisitUIIfOpen();
-  return;
-}
+    if (action === "del") {
+      const cur = items[idx];
+      if (!confirm(`Видалити послугу "${cur.name}"?`)) return;
 
-   if (action === "toggle") {
-  const cur = items[idx];
-  const nextActive = cur.active === false ? true : false;
+      const ok = await deleteServiceApi(id);
+      if (!ok) return alert("Не вдалося видалити");
 
-  const updated = await updateServiceApi(id, { active: nextActive });
-  if (!updated) return alert("Не вдалося змінити active");
-
-  await loadServicesApi();
-  renderServicesTab();
-  await refreshVisitUIIfOpen();
-  return;
-}
-
-   if (action === "del") {
-  const cur = items[idx];
-  if (!confirm(`Видалити послугу "${cur.name}"?`)) return;
-
-  const ok = await deleteServiceApi(id);
-  if (!ok) return alert("Не вдалося видалити");
-
-  await loadServicesApi();
-  renderServicesTab();
-  await refreshVisitUIIfOpen();
-  return;
-}
+      await loadServicesApi();
+      renderServicesTab();
+      await refreshVisitUIIfOpen();
+      return;
+    }
   });
 }
 
-// =========================
-// ✅ STOCK UI (registry) — bind once per page
-// =========================
 function initStockUI() {
   const page = document.querySelector('.page[data-page="stock"]');
   if (!page) return;
 
-  // ✅ защита от повторного навешивания
   if (page.dataset.boundStock === "1") return;
   page.dataset.boundStock = "1";
 
-  // add
   page.querySelector("#btnAddStock")?.addEventListener("click", async () => {
     const name = (prompt("Назва позиції (препарат/товар):", "") || "").trim();
     if (!name) return;
@@ -1803,13 +1499,10 @@ function initStockUI() {
     const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
 
     const unit = (prompt("Одиниця (шт/мл/таб/фл…):", "шт") || "шт").trim() || "шт";
-
     const qtyRaw = (prompt("Початковий залишок:", "0") || "0").trim();
     const qty = Math.max(0, Number(qtyRaw.replace(",", ".")) || 0);
 
-    const id =
-      "stk_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
-
+    const id = "stk_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
     const items = loadStock();
     items.unshift({ id, name, price, unit, qty, active: true });
     saveStock(items);
@@ -1818,7 +1511,6 @@ function initStockUI() {
     await refreshVisitUIIfOpen();
   });
 
-  // actions
   page.querySelector("#stockList")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-stk-action]");
     if (!btn) return;
@@ -1833,16 +1525,12 @@ function initStockUI() {
 
     if (action === "edit") {
       const cur = items[idx];
-
       const name = (prompt("Назва:", cur.name || "") || "").trim();
       if (!name) return;
 
-      const priceRaw =
-        (prompt("Ціна (грн) за одиницю:", String(cur.price ?? 0)) || "0").trim();
+      const priceRaw = (prompt("Ціна (грн) за одиницю:", String(cur.price ?? 0)) || "0").trim();
       const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
-
-      const unit =
-        (prompt("Одиниця:", String(cur.unit || "шт")) || "шт").trim() || "шт";
+      const unit = (prompt("Одиниця:", String(cur.unit || "шт")) || "шт").trim() || "шт";
 
       items[idx] = { ...cur, name, price, unit };
       saveStock(items);
@@ -1888,38 +1576,26 @@ function initStockUI() {
   });
 }
 
-// =========================
-// ✅ Renders — IMPORTANT: reset dataset-bound because innerHTML replaces nodes
-// =========================
 function renderServicesTab() {
   const page = document.querySelector('.page[data-page="services"]');
   if (!page) return;
 
   const items = Array.isArray(loadServices()) ? loadServices() : [];
-
-  // ✅ поиск (храним строку в state)
   state.servicesQuery = state.servicesQuery ?? "";
   const q = String(state.servicesQuery || "").trim().toLowerCase();
 
-  // ✅ ВОТ ОНО: filtered (у тебя его не было -> падало)
   const filtered = items.filter((s) => {
     if (!q) return true;
-    const hay = [
-      s?.name,
-      s?.cat,
-      s?.id
-    ].filter(Boolean).join(" ").toLowerCase();
+    const hay = [s?.name, s?.cat, s?.id].filter(Boolean).join(" ").toLowerCase();
     return hay.includes(q);
   });
 
-  // ❗️после innerHTML старые кнопки исчезают -> надо разрешить bind заново
   page.dataset.boundServices = "0";
 
   page.innerHTML = `
     <div class="card">
       <div class="row" style="gap:10px; flex-wrap:wrap;">
         <h2 style="flex:1;">Послуги</h2>
-
         <input
           id="servicesSearch"
           class="inp"
@@ -1928,21 +1604,18 @@ function renderServicesTab() {
           value="${escapeHtml(state.servicesQuery || "")}"
           style="max-width:260px;"
         />
-
         <button id="btnAddService" class="btn">+ Додати</button>
       </div>
-
       <div class="hint">Локальний реєстр послуг (поки що). Активні — доступні у візиті.</div>
       <div id="servicesList" class="list"></div>
     </div>
   `;
 
-  // ✅ биндим поиск (после innerHTML!)
   const search = page.querySelector("#servicesSearch");
   if (search) {
     search.addEventListener("input", () => {
       state.servicesQuery = String(search.value || "");
-      renderServicesTab(); // перерисовка списка
+      renderServicesTab();
     });
   }
 
@@ -1955,7 +1628,6 @@ function renderServicesTab() {
     return;
   }
 
-  // ✅ группируем по категории (если пусто -> "Інше")
   const groups = groupBy(filtered, (s) => String(s?.cat || "").trim() || "Інше");
   const order = ["Терапія", "Аналізи", "Хірургія", "Діагностика", "Виїзд", "Інше"];
 
@@ -1999,14 +1671,16 @@ function renderServicesTab() {
     }, {});
   }
 }
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ПЕЧАТЬ PDF ДЛЯ TELEGRAM, РЕЕСТРЫ ЖИВОТНЫХ И ВИЗИТОВ)
+// Часть 3 (Строки 2001 — 2500)
+// ==========================================================================
 
 function renderStockTab() {
   const page = document.querySelector('.page[data-page="stock"]');
   if (!page) return;
 
   const items = loadStock();
-
-  // ❗️после innerHTML старые кнопки исчезают -> надо разрешить bind заново
   page.dataset.boundStock = "0";
 
   page.innerHTML = `
@@ -2015,7 +1689,6 @@ function renderStockTab() {
         <h2>Склад</h2>
         <button id="btnAddStock" class="btn">+ Додати</button>
       </div>
-
       <div class="hint">Локальний склад (поки що). Залишок змінюється при додаванні/видаленні у візиті.</div>
       <div id="stockList" class="list"></div>
     </div>
@@ -2047,32 +1720,24 @@ function renderStockTab() {
       </div>
     `).join("");
   }
-
   initStockUI();
 }
 
 function a4FilenameFromVisit(visitId) {
-  // пробуем взять визит из кеша
   const v = getVisitByIdSync(visitId) || {};
   const date = String(v.date || todayISO());
   return `DocPUG_${date}_visit_${String(visitId)}.pdf`;
 }
 
-// =========================
-// PDF / PRINT (A4) — robust + Telegram
-// =========================
 async function downloadA4Pdf(visitId) {
   if (typeof window.html2pdf === "undefined") {
-    alert(
-      "html2pdf не подключен. Проверь, что html2pdf.bundle.min.js подключён перед app.js"
-    );
+    alert("html2pdf не подключен. Проверь, что html2pdf.bundle.min.js подключён перед app.js");
     return;
   }
 
   const a4 = document.getElementById("disA4");
-  if (!a4) return alert("Не найден блок A4 (#disA4).");
+  if (!a4) return alert("Не найден block A4 (#disA4).");
 
-  // сохраняем форму в discharge (локально, как и было)
   setDischarge(visitId, readDischargeForm());
   renderDischargeA4(visitId);
 
@@ -2107,75 +1772,60 @@ async function downloadA4Pdf(visitId) {
   };
 
   try {
-    // html2pdf бывает разных версий — делаем максимально совместимо
     const worker = window.html2pdf().set(opt).from(a4).toPdf();
-
     let pdfBlob = null;
 
-    // вариант 1 (некоторые сборки)
     if (typeof worker.outputPdf === "function") {
       pdfBlob = await worker.outputPdf("blob");
-    }
-    // вариант 2 (классический html2pdf)
-    else if (typeof worker.output === "function") {
+    } else if (typeof worker.output === "function") {
       pdfBlob = await worker.output("blob");
     }
 
     if (!pdfBlob) throw new Error("html2pdf: не удалось получить blob");
 
-  // =========================
-// Android Telegram FIX:
-// не открываем blob: (Android часто блокирует)
-// а загружаем PDF на сервер и открываем https URL
-// =========================
-const filename = a4FilenameFromVisit(visitId);
+    const filename = a4FilenameFromVisit(visitId);
+    let uploadedUrl = null;
+    try {
+      const fd = new FormData();
+      fd.append("files", new File([pdfBlob], filename, { type: "application/pdf" }));
 
-let uploadedUrl = null;
-try {
-  const fd = new FormData();
-  fd.append("files", new File([pdfBlob], filename, { type: "application/pdf" }));
+      const upRes = await fetch("/api/upload", { method: "POST", body: fd });
+      const upJson = await upRes.json();
 
-  const upRes = await fetch("/api/upload", { method: "POST", body: fd });
-  const upJson = await upRes.json();
+      if (!upJson.ok) throw new Error(upJson.error || "upload failed");
+      const f0 = upJson.files && upJson.files[0];
+      if (f0?.url) {
+        uploadedUrl = new URL(f0.url, window.location.origin).toString();
+      }
+    } catch (e) {
+      console.warn("PDF upload failed, fallback to blob:", e);
+    }
 
-  if (!upJson.ok) throw new Error(upJson.error || "upload failed");
-  const f0 = upJson.files && upJson.files[0];
-  if (!f0?.url) throw new Error("upload: no file url");
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
-  // делаем абсолютную ссылку
-  uploadedUrl = new URL(f0.url, window.location.origin).toString();
-} catch (e) {
-  console.warn("PDF upload failed, fallback to blob:", e);
-}
+    if (uploadedUrl) {
+      if (tg && typeof tg.openLink === "function") {
+        tg.openLink(uploadedUrl, { try_instant_view: false });
+      } else {
+        window.location.href = uploadedUrl;
+      }
+      return;
+    }
 
-// tg openLink работает лучше с https, чем с blob
-const tg =
-  window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-
-if (uploadedUrl) {
-  if (tg && typeof tg.openLink === "function") {
-    tg.openLink(uploadedUrl, { try_instant_view: false });
-  } else {
-    window.location.href = uploadedUrl; // в браузере тоже ок
-  }
-  return;
-}
-
-// ===== fallback (если upload не удался): blob (может не работать в Android TG)
-const blobUrl = URL.createObjectURL(pdfBlob);
-
-try {
-  const a = document.createElement("a");
-  a.href = blobUrl;
-  a.download = filename;
-  a.target = "_blank";
-  a.rel = "noopener";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-} finally {
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
-}
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    try {
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } finally {
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    }
+  } catch (e) {
     console.error(e);
     alert("Не удалось сформировать PDF: " + (e?.message || e));
   } finally {
@@ -2185,7 +1835,6 @@ try {
 
 function printA4Only(visitId) {
   ensurePrintCss();
-
   setDischarge(visitId, readDischargeForm());
   renderDischargeA4(visitId);
 
@@ -2196,124 +1845,6 @@ function printA4Only(visitId) {
   }, 50);
 }
 
-// =========================
-// OWNERS — server state rendering
-// =========================
-// ==========================================================================
-// ОБНОВЛЕННЫЙ РЕНДЕРИНГ ТАБЛИЦЫ ВЛАСНИКОВ (ОБЪЕДИНЕНИЕ С ТВОЕЙ ЛОГИКОЙ)
-// ==========================================================================
-function renderOwners() {
-  console.log("🐾 Рендеринг вкладки власників...");
-  
-  // Ищем новый контейнер таблицы из index.html
-  const tbody = document.getElementById('owners-table-body');
-  if (!tbody) return console.warn("Элемент owners-table-body не найден в HTML");
-
-  tbody.innerHTML = "";
-
-  // Твоя логика глобального поиска
-  const q = String(document.getElementById('globalSearch')?.value || "").trim().toLowerCase();
-  const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
-
-  // Фильтруем массив по поисковому запросу
-  const owners = ownersRaw.filter((owner) => {
-    if (!q) return true;
-    const hay = [
-      owner.name,
-      owner.phone,
-      owner.note,
-    ].filter(Boolean).join(" ").toLowerCase();
-    return hay.includes(q);
-  });
-
-  // Если ничего не нашли
-  if (!owners.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">
-          Нічого не знайдено.
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  // Рендерим отфильтрованных владельцев в таблицу
-  owners.forEach((owner) => {
-    const tr = document.createElement("tr");
-    tr.style.cursor = "pointer";
-
-    // Твой оригинальный подсчет количества пациентов у этого владельцы
-    const petsCount = (state.patients || []).filter(
-      p => String(p.owner_id) === String(owner.id)
-    ).length;
-
-    tr.innerHTML = `
-      <td style="font-weight: 600; color: #fff;">
-        👤 ${escapeHtml(owner.name || "Без імені")}
-      </td>
-      <td>
-        <span style="color: var(--primary-neon); font-weight: 500;">
-          📞 ${escapeHtml(owner.phone || "Не вказано")}
-        </span>
-      </td>
-      <td>
-        <span class="badge" style="background: rgba(163, 97, 255, 0.1); color: var(--primary-neon); border: 1px solid rgba(163, 97, 255, 0.2); padding: 4px 10px; font-size: 0.75rem;">
-          🐾 ${petsCount} пацієнтів
-        </span>
-      </td>
-      <td style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted);">
-        📍 ${escapeHtml(owner.note || "—")}
-      </td>
-      <td>
-        <div style="display: flex; gap: 8px; align-items: center;" onclick="event.stopPropagation();">
-          <button class="btn-tab" data-open-owner="${escapeHtml(String(owner.id))}" style="padding: 6px 12px; font-size: 0.8rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
-            📂 Відкрити
-          </button>
-          <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
-          <button class="iconBtn" title="Видалити" data-del="${escapeHtml(owner.id)}" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">🗑</button>
-        </div>
-      </td>
-    `;
-
-    // 1. Клик по всей строке или по кнопке "Відкрити" переводит в карточку
-    const openTarget = () => {
-      if (typeof openOwner === 'function') openOwner(owner.id);
-      else setHash('owner', owner.id);
-    };
-    tr.addEventListener('click', openTarget);
-    tr.querySelector('[data-open-owner]').addEventListener('click', openTarget);
-
-    // 2. Твоя оригинальная кнопка Редактировать
-    tr.querySelector(`[data-edit-owner="${owner.id}"]`).addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (typeof openEditOwnerModal === 'function') openEditOwnerModal(owner);
-    });
-
-    // 3. Твоя оригинальная кнопка Удалить
-    tr.querySelector(`[data-del="${owner.id}"]`).addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (!confirm(`Видалити власника ${owner.name}?`)) return;
-      
-      // Здесь вызывается твой API удаления (например, deleteOwnerApi)
-      if (typeof deleteOwnerApi === 'function') {
-        const ok = await deleteOwnerApi(owner.id);
-        if (ok) await loadOwners();
-      } else {
-        // Офлайн-фолбек, если бэка нет
-        const next = (state.owners || []).filter(x => String(x.id) !== String(owner.id));
-        state.owners = next;
-        LS.set(OWNERS_KEY, next);
-        renderOwners();
-      }
-    });
-
-    tbody.appendChild(tr);
-  });
-}
-// =========================
-// PATIENTS TAB — server first (state), LS only fallback
-// =========================
 function renderPatientsTab() {
   const page = $(`.page[data-page="patients"]`);
   if (!page) return;
@@ -2331,17 +1862,8 @@ function renderPatientsTab() {
   const list = $("#patientsTabList", page);
   if (!list) return;
 
-  // ✅ server-first
-  const patients =
-    Array.isArray(state.patients) && state.patients.length
-      ? state.patients
-      : loadPatients(); // fallback если сервер ещё не грузили
-
-  const owners =
-    Array.isArray(state.owners) && state.owners.length
-      ? state.owners
-      : LS.get(OWNERS_KEY, []); // fallback
-
+  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
+  const owners = Array.isArray(state.owners) && state.owners.length ? state.owners : LS.get(OWNERS_KEY, []);
   const ownerById = new Map((owners || []).map((o) => [o.id, o]));
 
   if (!patients.length) {
@@ -2350,7 +1872,6 @@ function renderPatientsTab() {
   }
 
   list.innerHTML = "";
-
   patients
     .slice()
     .sort((a, b) => String(b.id).localeCompare(String(a.id)))
@@ -2361,7 +1882,7 @@ function renderPatientsTab() {
       const el = document.createElement("div");
       el.className = "item";
       el.style.cursor = "pointer";
-      el.dataset.openPet = p.id; // data-open-pet
+      el.dataset.openPet = p.id;
 
       el.innerHTML = `
         <div class="left" style="width:100%">
@@ -2374,59 +1895,45 @@ function renderPatientsTab() {
             ${ownerLine ? " • " + escapeHtml(ownerLine) : ""}
           </div>
         </div>
-
-       <div class="right" style="display:flex; gap:6px;">
-  <button class="iconBtn" title="Редагувати" data-edit-pet="${escapeHtml(p.id)}">✏️</button>
-  <button class="iconBtn" title="Видалити пацієнта" data-del-pet="${escapeHtml(p.id)}">🗑</button>
-</div>
+        <div class="right" style="display:flex; gap:6px;">
+          <button class="iconBtn" title="Редагувати" data-edit-pet="${escapeHtml(p.id)}">✏️</button>
+          <button class="iconBtn" title="Видалити пацієнта" data-del-pet="${escapeHtml(p.id)}">🗑</button>
+        </div>
       `;
-
       list.appendChild(el);
     });
 
-  // один обработчик на весь список
   list.onclick = async (e) => {
-    /// ✏️ edit
-const editBtn = e.target.closest("[data-edit-pet]");
-if (editBtn) {
-  e.preventDefault();
-  e.stopPropagation();
+    const editBtn = e.target.closest("[data-edit-pet]");
+    if (editBtn) {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const petId = editBtn.dataset.editPet;
-  if (!petId) return;
+      const petId = editBtn.dataset.editPet;
+      if (!petId) return;
 
-  const pet = (state.patients || []).find((p) => String(p.id) === String(petId));
-  if (!pet) return alert("Пацієнта не знайдено");
+      const pet = (state.patients || []).find((p) => String(p.id) === String(petId));
+      if (!pet) return alert("Пацієнта не знайдено");
 
-  const name = (prompt("Кличка:", pet.name || "") || "").trim();
-  if (!name) return;
+      const name = (prompt("Кличка:", pet.name || "") || "").trim();
+      if (!name) return;
 
-  const species = askSpecies(pet.species || "dog");
-if (!species) return;
-  const breed = (prompt("Порода:", pet.breed || "") || "").trim();
-  const age = (prompt("Вік:", pet.age || "") || "").trim();
-  const weight_kg = (prompt("Вага кг:", pet.weight_kg || "") || "").trim();
-  const notes = (prompt("Нотатки:", pet.notes || "") || "").trim();
+      const species = askSpecies(pet.species || "dog");
+      if (!species) return;
+      const breed = (prompt("Порода:", pet.breed || "") || "").trim();
+      const age = (prompt("Вік:", pet.age || "") || "").trim();
+      const weight_kg = (prompt("Вага кг:", pet.weight_kg || "") || "").trim();
+      const notes = (prompt("Нотатки:", pet.notes || "") || "").trim();
 
-  const updated = await updatePatientApi(petId, {
-    name,
-    species,
-    breed,
-    age,
-    weight_kg,
-    notes,
-  });
+      const updated = await updatePatientApi(petId, { name, species, breed, age, weight_kg, notes });
+      if (!updated) return;
 
-  if (!updated) return;
+      await loadPatientsApi();
+      renderPatientsTab();
+      if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
+      return;
+    }
 
-  await loadPatientsApi();
-  renderPatientsTab();
-
-  if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
-
-  return;
-}
-    // 🗑 delete
     const delBtn = e.target.closest("[data-del-pet]");
     if (delBtn) {
       e.preventDefault();
@@ -2436,7 +1943,6 @@ if (!species) return;
       return;
     }
 
-    // open
     const openZone = e.target.closest("[data-open-pet]");
     if (!openZone) return;
     const petId = openZone.dataset.openPet;
@@ -2444,12 +1950,6 @@ if (!species) return;
   };
 }
 
-// =========================
-// VISITS TAB — SERVER ONLY (state.visits from /api/visits)
-// =========================
-// =========================
-// VISITS TAB — SERVER ONLY (safe clicks)
-// =========================
 async function renderVisitsTab() {
   const page = document.querySelector('.page[data-page="visits"]');
   if (!page) return;
@@ -2469,7 +1969,6 @@ async function renderVisitsTab() {
   const search = page.querySelector("#visitsSearch");
   if (!list) return;
 
-  // загрузка визитов
   if (!Array.isArray(state.visits) || !state.visits.length) {
     list.innerHTML = `<div class="hint">Завантаження…</div>`;
     const arr = await loadVisitsApi();
@@ -2478,13 +1977,11 @@ async function renderVisitsTab() {
 
   function paint() {
     const visits = Array.isArray(state.visits) ? state.visits : [];
-
     const patients = state.patients?.length ? state.patients : loadPatients();
     const owners = state.owners?.length ? state.owners : LS.get(OWNERS_KEY, []);
 
     const petById = new Map((patients || []).map(p => [String(p.id), p]));
     const ownerById = new Map((owners || []).map(o => [String(o.id), o]));
-
     const q = (search?.value || "").trim().toLowerCase();
 
     const filtered = visits
@@ -2528,23 +2025,25 @@ async function renderVisitsTab() {
           </div>
           ${v.note ? `<div class="meta" style="opacity:.85">${escapeHtml(v.note)}</div>` : ""}
         </div>
-
         <div class="right" style="display:flex; gap:6px;">
           <button class="iconBtn" data-action="open">➡️</button>
           <button class="iconBtn" data-action="delete">🗑</button>
         </div>
       `;
-
       list.appendChild(el);
     });
   }
 
-  // поиск
   search?.addEventListener("input", paint);
+  paint();
+}
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (МЕДКАРТА ПАЦИЕНТА, АНАЛИТИКА И ФИНАНСОВЫЙ ДАШБОРД)
+// Часть 4 (Строки 2501 — 3000)
+// ==========================================================================
 
-  // ✅ ОДИН обработчик — без конфликтов
+  // Завершение обработчика кликов для таблицы визитов
   list.onclick = async (e) => {
-
     const card = e.target.closest(".item[data-visit-id]");
     if (!card) return;
 
@@ -2576,19 +2075,12 @@ async function renderVisitsTab() {
   };
 
   paint();
-}
 
 // =========================
-// OWNER PAGE — server first patients list (render only) лол
+// OWNER PAGE — Рендеринг карточки владельца и его животных
 // =========================
-// ==========================================================================
-// ОБНОВЛЕННЫЙ РЕНДЕРИНГ СТРАНИЦЫ ВЛАСНИКА (СОХРАНЯЕМ ВСЮ ТВОЮ ЛОГИКУ И МАТЕМАТИКУ)
-// ==========================================================================
 function renderOwnerPage(ownerId) {
-  console.log(`🐾 Рендеринг профілю власника ID: ${ownerId}`);
-  
-  // Твоя оригинальная проверка владельца
-  const owner = typeof getOwnerById === "function" ? getOwnerById(ownerId) : (state.owners || []).find(x => String(x.id) === String(ownerId));
+  const owner = getOwnerById(ownerId);
   if (!owner) {
     alert("Владелец не найден");
     setHash("owners");
@@ -2597,17 +2089,15 @@ function renderOwnerPage(ownerId) {
 
   state.selectedOwnerId = String(ownerId);
 
-  // Твой сбор пациентов
   const patients =
     Array.isArray(state.patients) && state.patients.length
       ? state.patients
-      : (typeof loadPatients === "function" ? loadPatients() : LS.get(PATIENTS_KEY, []));
+      : loadPatients();
 
   const pets = (patients || []).filter(
     (p) => String(p.owner_id) === String(ownerId)
   );
 
-  // Твоя математика визитов, подсчета сумм и последнего визита
   const allVisits = Array.from(state.visitsById.values());
   const ownerPetIds = new Set(pets.map((p) => String(p.id)));
   const ownerVisits = allVisits.filter((v) => ownerPetIds.has(String(v.pet_id)));
@@ -2617,92 +2107,74 @@ function renderOwnerPage(ownerId) {
     .slice()
     .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
-  // Твой расчет выручки (проверяем существование функций подсчета)
   const totalPaid = ownerVisits.reduce((sum, v) => {
-    const sSvc = typeof calcServicesTotal === "function" ? calcServicesTotal(v) : 0;
-    const sStk = typeof calcStockTotal === "function" ? calcStockTotal(v) : 0;
-    return sum + sSvc + sStk;
+    return sum + calcServicesTotal(v) + calcStockTotal(v);
   }, 0);
 
-  // 1. РЕНДЕРИМ СТЕКЛЯННУЮ ШАПКУ И СТАТИСТИКУ (в контейнер owner-profile-name или аналогичный)
-  // Мы раскладываем данные по новым хай-тек блокам, которые заготовлены в index.html
-  const profileNameBox = document.getElementById('owner-profile-name');
-  const profilePhoneBox = document.getElementById('owner-profile-phone');
-  const profileInfoBox = document.getElementById('owner-profile-info');
+  const ownerName = $("#ownerName");
+  const ownerMeta = $("#ownerMeta");
 
-  if (profileNameBox) profileNameBox.innerHTML = `👤 ${escapeHtml(owner.name || "Без імені")}`;
-  if (profilePhoneBox) profilePhoneBox.innerHTML = `📞 ${escapeHtml(owner.phone || "Телефон не вказано")}`;
-  if (profileInfoBox) {
-    profileInfoBox.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
-        <div style="color: var(--text-muted); font-size: 0.9rem;">📍 Примітка: ${escapeHtml(owner.note || "немає")}</div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 10px;">
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">🐾</div>
-            <div>
-              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${pets.length}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">пацієнтів</div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">📋</div>
-            <div>
-              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${visitsCount}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">візитів</div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">💰</div>
-            <div>
-              <div style="font-size: 1.3rem; font-weight: 700; color: var(--color-success);">${totalPaid} грн</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">оплачено</div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">📅</div>
-            <div>
-              <div style="font-size: 1.1rem; font-weight: 700; color: #fff; white-space: nowrap;">${escapeHtml(lastVisit?.date || "—")}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">останній візит</div>
-            </div>
+  if (ownerName) {
+    ownerName.innerHTML = `
+      <div class="ownerHero">
+        <div>
+          <div class="ownerHeroLabel">Картка власника</div>
+          <div class="ownerHeroName">👤 ${escapeHtml(owner.name || "Без имени")}</div>
+
+          <div class="ownerHeroMeta">
+            <span>📞 ${escapeHtml(owner.phone || "Телефон не указан")}</span>
+            ${owner.note ? `<span>📍 ${escapeHtml(owner.note)}</span>` : ""}
           </div>
         </div>
-        
-        <div style="display: flex; gap: 12px; margin-top: 10px;">
-          <button class="btn-tab" data-edit-owner="${escapeHtml(owner.id)}" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">✏️ Редагувати</button>
-          <button class="btn-primary" id="btnAddPet" style="padding: 10px 20px; font-size: 0.85rem;">+ Додати тварину</button>
+
+        <div class="ownerHeroActions">
+          <button class="ghost" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
+          <button class="primary" id="btnAddPet">+ Животное</button>
+        </div>
+      </div>
+
+      <div class="ownerStats">
+        <div class="ownerStat">
+          <div class="ownerStatIcon">🐾</div>
+          <div>
+            <div class="ownerStatValue">${pets.length}</div>
+            <div class="ownerStatLabel">пацієнтів</div>
+          </div>
+        </div>
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📋</div>
+          <div>
+            <div class="ownerStatValue">${visitsCount}</div>
+            <div class="ownerStatLabel">візитів</div>
+          </div>
+        </div>
+        <div class="ownerStat">
+          <div class="ownerStatIcon">💰</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div>
+            <div class="ownerStatLabel">оплачено</div>
+          </div>
+        </div>
+        <div class="ownerStat">
+          <div class="ownerStatIcon">📅</div>
+          <div>
+            <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
+            <div class="ownerStatLabel">останній візит</div>
+          </div>
         </div>
       </div>
     `;
   }
 
-  // Привязываем кнопки редактирования и добавления
-  setTimeout(() => {
-    const btnAddPet = document.getElementById("btnAddPet");
-    if (btnAddPet) {
-      btnAddPet.onclick = () => {
-        if (typeof openCreatePetModal === "function") openCreatePetModal(ownerId);
-        else alert("Функція створення тварини підключається...");
-      };
-    }
-    const btnEdit = document.querySelector(`[data-edit-owner="${owner.id}"]`);
-    if (btnEdit && typeof openEditOwnerModal === "function") {
-      btnEdit.onclick = () => openEditOwnerModal(owner);
-    }
-  }, 50);
+  if (ownerMeta) ownerMeta.textContent = "";
 
-  // 2. РЕНДЕРИМ СТЕКЛЯННЫЕ КАРТОЧКИ ЖИВОТНЫХ
-  const list = document.getElementById('owner-patients-container') || document.getElementById('ownerPatientsList') || document.getElementById("petsList");
+  const list = $("#petsList");
   if (!list) return;
 
   list.innerHTML = "";
 
   if (!pets.length) {
-    list.innerHTML = `
-      <div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">
-        Поки немає тварин. Натисни “+ Додати тварину”.
-      </div>
-    `;
+    list.innerHTML = `<div class="hint">Пока нет животных. Нажми “+ Животное”.</div>`;
     return;
   }
 
@@ -2712,103 +2184,47 @@ function renderOwnerPage(ownerId) {
       .slice()
       .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
-    const card = document.createElement("div");
-    card.style.cssText = "background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px; transition: var(--transition); display: flex; flex-direction: column; gap: 14px; position: relative; cursor: pointer;";
-    
-    card.onmouseenter = () => { card.style.background = "rgba(255,255,255,0.05)"; card.style.borderColor = "var(--primary-neon)"; };
-    card.onmouseleave = () => { card.style.background = "var(--glass-bg)"; card.style.borderColor = "var(--glass-border)"; };
+    const el = document.createElement("div");
+    el.className = "item ownerPetCard";
 
-    const spec = String(pet.species || "").toLowerCase();
-    const icon = spec.includes("кіт") || spec.includes("кот") ? "🐱" : "🐶";
-
-    card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-        <div style="display: flex; gap: 14px; align-items: center;" data-open-pet="${escapeHtml(String(pet.id))}">
-          <div style="font-size: 2rem; background: rgba(255,255,255,0.03); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-            ${icon}
-          </div>
+    el.innerHTML = `
+      <div class="left" data-open-pet="${escapeHtml(String(pet.id))}" style="width:100%; cursor:pointer;">
+        <div class="ownerPetTop">
           <div>
-            <h4 style="margin: 0 0 4px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">🐾 ${escapeHtml(pet.name || "Без клички")}</h4>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">
-              ${escapeHtml(pet.species || "тварина")} ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+            <div class="name" style="font-size:19px;">🐾 ${escapeHtml(pet.name || "Без клички")}</div>
+            <div class="meta" style="margin-top:6px;">
+              ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)}
+              ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
               ${pet.age ? " • " + escapeHtml(pet.age) : ""}
               ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
             </div>
           </div>
+          <div class="ownerPetBadges">
+            <div class="pill">📋 ${petVisits.length} візитів</div>
+            <div class="pill">📅 ${escapeHtml(petLastVisit?.date || "—")}</div>
+          </div>
         </div>
-
-        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; z-index: 10;">🗑</button>
+        ${pet.notes ? `<div class="history"><div class="history-label">Історія / нотатки лікаря</div>${escapeHtml(pet.notes)}</div>` : ""}
       </div>
-
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <span class="badge" style="background: rgba(163, 97, 255, 0.08); color: var(--primary-neon); border: 1px solid rgba(163, 97, 255, 0.15); padding: 4px 10px; font-size: 0.75rem;">📋 ${petVisits.length} візитів</span>
-        <span class="badge" style="background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.05); padding: 4px 10px; font-size: 0.75rem;">📅 ${escapeHtml(petLastVisit?.date || "—")}</span>
+      <div class="right" style="display:flex; gap:8px; align-items:center;">
+        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
       </div>
-
-      ${pet.notes ? `
-        <div style="background: rgba(0,0,0,0.15); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--primary-neon); margin-top: 4px;">
-          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary-neon); font-weight: 700; margin-bottom: 4px;">Історія / нотатки лікаря</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); white-space: pre-line;">${escapeHtml(pet.notes)}</div>
-        </div>
-      ` : ""}
     `;
-
-    // Клик по карточке ведет в медкарту
-    card.addEventListener("click", (e) => {
-      if (e.target.closest("[data-del-pet]")) return;
-      if (typeof openPatient === "function") openPatient(pet.id);
-      else setHash("patient", pet.id);
-    });
-
-    // Кнопка удаления питомца
-    card.querySelector("[data-del-pet]").addEventListener("click", async (e) => {
-      e.stopPropagation();
-      if (!confirm(`Видалити пацієнта ${pet.name}?`)) return;
-      if (typeof deletePatientApi === "function") {
-        const ok = await deletePatientApi(pet.id);
-        if (ok) renderOwnerPage(ownerId);
-      } else {
-        const next = (state.patients || []).filter(x => String(x.id) !== String(pet.id));
-        state.patients = next;
-        if (typeof savePatients === "function") savePatients(next);
-        renderOwnerPage(ownerId);
-      }
-    });
-
-    list.appendChild(card);
+    list.appendChild(el);
   });
 }
 
 // =========================
-// NAV: open pages (server-first)
+// NAV: Навигация по страницам
 // =========================
-function setRoute(route) {
-  const r = String(route || "owners").trim() || "owners";
-  
-  // Ищем наш новый тег section по ID (из нового index.html)
-  const pageExists = document.getElementById(r); 
-  const finalRoute = pageExists ? r : "owners";
-
-  state.route = finalRoute;
-
-  // Скрываем все разделы контента и показываем только активный
-  $$(".content-section").forEach((p) => {
-    p.style.display = p.id === finalRoute ? "block" : "none";
-  });
-
-  // Подсвечиваем активную кнопку в нашем новом боковом меню
-  $$(".sidebar-menu .menu-item").forEach((item) => {
-    item.classList.toggle("active", item.getAttribute("data-target") === finalRoute);
-  });
+function openOwner(ownerId, opts = { pushHash: true }) {
+  setRoute("owner");
+  renderOwnerPage(ownerId);
+  if (opts.pushHash) setHash("owner", ownerId);
 }
 
-// ===== Patient page =====
 function openPatient(petId, opts = { pushHash: true }) {
-  const patients =
-    Array.isArray(state.patients) && state.patients.length
-      ? state.patients
-      : loadPatients();
-
+  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
   const pet = (patients || []).find((p) => String(p.id) === String(petId));
   if (!pet) return alert("Пацієнт не знайдено");
 
@@ -2817,7 +2233,6 @@ function openPatient(petId, opts = { pushHash: true }) {
   state.selectedOwnerId = String(pet.owner_id || state.selectedOwnerId || "");
 
   renderPatientCard(pet);
-
   setRoute("patient");
   if (opts.pushHash) setHash("patient", petId);
 }
@@ -2832,23 +2247,19 @@ async function renderPatientCard(pet) {
     <div class="patientHero">
       <div>
         <button class="ghost" id="btnBackOwner">← Назад</button>
-
         <div class="patientLabel">Медична карта пацієнта</div>
         <div class="patientName">🐾 ${escapeHtml(pet.name || "Пацієнт")}</div>
-
         <div class="patientMetaLine">
-          ${escapeHtml(speciesLabel(pet.species))}
+          ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)}
           ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
           ${pet.age ? " • " + escapeHtml(pet.age) : ""}
           ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
         </div>
-
         <div class="patientOwnerLine">
           👤 ${escapeHtml(owner?.name || "Власник не указан")}
           ${owner?.phone ? " • 📞 " + escapeHtml(owner.phone) : ""}
         </div>
       </div>
-
       <div class="patientActions">
         <button class="ghost" data-edit-pet="${escapeHtml(String(pet.id))}">✏️ Редагувати</button>
         <button class="primary" id="btnAddVisit">+ Візит</button>
@@ -2857,13 +2268,12 @@ async function renderPatientCard(pet) {
 
     <div class="patientTabs">
       <button class="patientTab active" data-patient-tab="overview">Обзор</button>
-<button class="patientTab" data-patient-tab="visits">Визиты</button>
-<button class="patientTab" data-patient-tab="medcard">Веткартка</button>
-<button class="patientTab" data-patient-tab="labs">Анализы</button>
-<button class="patientTab" data-patient-tab="files">Файлы</button>
-<button class="patientTab" data-patient-tab="finance">Финансы</button>
+      <button class="patientTab" data-patient-tab="visits">Визиты</button>
+      <button class="patientTab" data-patient-tab="medcard">Веткартка</button>
+      <button class="patientTab" data-patient-tab="labs">Анализы</button>
+      <button class="patientTab" data-patient-tab="files">Файлы</button>
+      <button class="patientTab" data-patient-tab="finance">Финансы</button>
     </div>
-
     <div id="patientTabContent"></div>
   `;
 
@@ -2881,7 +2291,6 @@ function bindPatientCardButtons() {
     btn.addEventListener("click", async () => {
       $$(".patientTab").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-
       const tab = btn.dataset.patientTab;
       await renderPatientTab(tab, state.selectedPet);
     });
@@ -2894,7 +2303,6 @@ async function renderPatientTab(tab, pet) {
 
   if (tab === "overview") {
     box.innerHTML = `<div class="hint">Завантаження…</div>`;
-
     const visits = await getVisitsByPetId(pet.id);
     cacheVisits(visits);
 
@@ -2908,49 +2316,20 @@ async function renderPatientTab(tab, pet) {
 
     box.innerHTML = `
       <div class="patientStats">
-        <div class="ownerStat">
-          <div class="ownerStatIcon">📋</div>
-          <div>
-            <div class="ownerStatValue">${visits.length}</div>
-            <div class="ownerStatLabel">візитів</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">⚖️</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(pet.weight_kg || "—")}</div>
-            <div class="ownerStatLabel">вага, кг</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">📅</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
-            <div class="ownerStatLabel">останній візит</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">💰</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div>
-            <div class="ownerStatLabel">сума</div>
-          </div>
-        </div>
+        <div class="ownerStat"><div class="ownerStatIcon">📋</div><div><div class="ownerStatValue">${visits.length}</div><div class="ownerStatLabel">візитів</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">⚖️</div><div><div class="ownerStatValue">${escapeHtml(pet.weight_kg || "—")}</div><div class="ownerStatLabel">вага, кг</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">📅</div><div><div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div><div class="ownerStatLabel">останній візит</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">💰</div><div><div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div><div class="ownerStatLabel">сума</div></div></div>
       </div>
-
       <div class="patientGrid">
         <div class="patientInfoBox">
           <h2>Паспорт пацієнта</h2>
           <div class="patientInfoRow"><b>Кличка:</b> ${escapeHtml(pet.name || "—")}</div>
-          <div class="patientInfoRow"><b>Вид:</b> ${escapeHtml(speciesLabel ? speciesLabel(pet.species) : pet.species || "—")}</div>
+          <div class="patientInfoRow"><b>Вид:</b> ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species || "—")}</div>
           <div class="patientInfoRow"><b>Порода:</b> ${escapeHtml(pet.breed || "—")}</div>
           <div class="patientInfoRow"><b>Вік:</b> ${escapeHtml(pet.age || "—")}</div>
           <div class="patientInfoRow"><b>Вага:</b> ${escapeHtml(pet.weight_kg || "—")} кг</div>
         </div>
-
         <div class="patientInfoBox">
           <h2>Нотатки лікаря</h2>
           <div class="meta" style="white-space:pre-wrap;">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
@@ -2961,244 +2340,148 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "visits") {
-    await renderVisits(pet.id);
+    if (typeof renderVisits === "function") await renderVisits(pet.id);
     return;
   }
-if (tab === "medcard") {
-  await renderMedcardTab(pet);
-  return;
-}
+  if (tab === "medcard") {
+    if (typeof renderMedcardTab === "function") await renderMedcardTab(pet);
+    return;
+  }
   if (tab === "labs") {
-    renderLabsTab(pet);
+    if (typeof renderLabsTab === "function") renderLabsTab(pet);
     return;
   }
-
   if (tab === "files") {
-  renderPatientFilesTab(pet);
-  return;
-}
+    if (typeof renderPatientFilesTab === "function") renderPatientFilesTab(pet);
+    return;
+  }
 
   if (tab === "finance") {
-  const visits = await getVisitsByPetId(pet.id);
-  cacheVisits(visits);
+    const visits = await getVisitsByPetId(pet.id);
+    cacheVisits(visits);
 
-  const sortedVisits = visits
-    .slice()
-    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    const sortedVisits = visits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    const servicesTotal = visits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
+    const stockTotal = visits.reduce((sum, v) => sum + calcStockTotal(v), 0);
+    const grandTotal = servicesTotal + stockTotal;
+    const avg = visits.length ? Math.round(grandTotal / visits.length) : 0;
 
-  const servicesTotal = visits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
-  const stockTotal = visits.reduce((sum, v) => sum + calcStockTotal(v), 0);
-  const grandTotal = servicesTotal + stockTotal;
-  const avg = visits.length ? Math.round(grandTotal / visits.length) : 0;
+    const lastVisit = sortedVisits[0] || null;
+    const lastVisitTotal = lastVisit ? calcServicesTotal(lastVisit) + calcStockTotal(lastVisit) : 0;
 
-  const lastVisit = sortedVisits[0] || null;
-  const lastVisitTotal = lastVisit
-    ? calcServicesTotal(lastVisit) + calcStockTotal(lastVisit)
-    : 0;
+    let avgInterval = "—";
+    if (sortedVisits.length >= 2) {
+      const dates = sortedVisits
+        .map((v) => new Date(v.date))
+        .filter((d) => !Number.isNaN(d.getTime()))
+        .sort((a, b) => b - a);
 
-  let avgInterval = "—";
-  if (sortedVisits.length >= 2) {
-    const dates = sortedVisits
-      .map((v) => new Date(v.date))
-      .filter((d) => !Number.isNaN(d.getTime()))
-      .sort((a, b) => b - a);
-
-    const gaps = [];
-    for (let i = 0; i < dates.length - 1; i++) {
-      const diffDays = Math.round((dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24));
-      if (diffDays >= 0) gaps.push(diffDays);
+      const gaps = [];
+      for (let i = 0; i < dates.length - 1; i++) {
+        const diffDays = Math.round((dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0) gaps.push(diffDays);
+      }
+      if (gaps.length) {
+        avgInterval = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) + " дн.";
+      }
     }
 
-    if (gaps.length) {
-      avgInterval = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) + " дн.";
-    }
-  }
-
-  const checksHtml = sortedVisits.length
-    ? sortedVisits.map((v) => {
-        const s = calcServicesTotal(v);
-        const st = calcStockTotal(v);
-        const total = s + st;
-
-        return `
-          <div class="financeVisitRow">
-            <div>
-              <div class="financeVisitDate">${escapeHtml(v.date || "—")}</div>
-              <div class="financeVisitMeta">
-                Послуги: ${escapeHtml(String(s))} грн · Препарати: ${escapeHtml(String(st))} грн
+    const checksHtml = sortedVisits.length
+      ? sortedVisits.map((v) => {
+          const s = calcServicesTotal(v);
+          const st = calcStockTotal(v);
+          const total = s + st;
+          return `
+            <div class="financeVisitRow">
+              <div>
+                <div class="financeVisitDate">${escapeHtml(v.date || "—")}</div>
+                <div class="financeVisitMeta">Послуги: ${escapeHtml(String(s))} грн · Препарати: ${escapeHtml(String(st))} грн</div>
               </div>
+              <div class="financeVisitSum">${escapeHtml(String(total))} грн</div>
             </div>
-            <div class="financeVisitSum">${escapeHtml(String(total))} грн</div>
-          </div>
-        `;
-      }).join("")
-    : `<div class="hint">Поки витрат немає.</div>`;
+          `;
+        }).join("")
+      : `<div class="hint">Поки витрат немає.</div>`;
 
-      const serviceCount = new Map();
-
-  visits.forEach((v) => {
-    expandServiceLines(v).forEach((x) => {
-      const name = String(x.name || "Послуга");
-      serviceCount.set(name, (serviceCount.get(name) || 0) + Number(x.qty || 1));
+    const serviceCount = new Map();
+    visits.forEach((v) => {
+      expandServiceLines(v).forEach((x) => {
+        const name = String(x.name || "Послуга");
+        serviceCount.set(name, (serviceCount.get(name) || 0) + Number(x.qty || 1));
+      });
     });
-  });
 
-  const topServices = Array.from(serviceCount.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+    const topServices = Array.from(serviceCount.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const topServicesHtml = topServices.length
+      ? topServices.map(([name, count]) => `
+          <div class="financeTopRow">
+            <div class="financeTopName">${escapeHtml(name)}</div>
+            <div class="financeTopCount">${escapeHtml(String(count))} раз</div>
+          </div>
+        `).join("")
+      : `<div class="hint">Поки послуг немає.</div>`;
 
-  const topServicesHtml = topServices.length
-    ? topServices.map(([name, count]) => `
-        <div class="financeTopRow">
-          <div class="financeTopName">${escapeHtml(name)}</div>
-          <div class="financeTopCount">${escapeHtml(String(count))} раз</div>
-        </div>
-      `).join("")
-    : `<div class="hint">Поки послуг немає.</div>`;
+    const monthMap = new Map();
+    visits.forEach((v) => {
+      const date = String(v.date || "").slice(0, 7) || "Без дати";
+      const total = calcServicesTotal(v) + calcStockTotal(v);
+      monthMap.set(date, (monthMap.get(date) || 0) + total);
+    });
 
-  const monthMap = new Map();
+    const monthRows = Array.from(monthMap.entries()).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+    const maxMonth = Math.max(1, ...monthRows.map(([, total]) => total));
 
-  visits.forEach((v) => {
-    const date = String(v.date || "").slice(0, 7) || "Без дати";
-    const total = calcServicesTotal(v) + calcStockTotal(v);
-    monthMap.set(date, (monthMap.get(date) || 0) + total);
-  });
-
-  const monthRows = Array.from(monthMap.entries())
-    .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
-
-  const maxMonth = Math.max(1, ...monthRows.map(([, total]) => total));
-
-  const monthBarsHtml = monthRows.length
-    ? monthRows.map(([month, total]) => {
-        const pct = Math.max(4, Math.round((total / maxMonth) * 100));
-
-        return `
-          <div class="financeMonthRow">
-            <div class="financeMonthLabel">${escapeHtml(month)}</div>
-            <div class="financeMonthBarWrap">
-              <div class="financeMonthBar" style="width:${pct}%"></div>
+    const monthBarsHtml = monthRows.length
+      ? monthRows.map(([month, total]) => {
+          const pct = Math.max(4, Math.round((total / maxMonth) * 100));
+          return `
+            <div class="financeMonthRow">
+              <div class="financeMonthLabel">${escapeHtml(month)}</div>
+              <div class="financeMonthBarWrap"><div class="financeMonthBar" style="width:${pct}%"></div></div>
+              <div class="financeMonthSum">${escapeHtml(String(total))} грн</div>
             </div>
-            <div class="financeMonthSum">${escapeHtml(String(total))} грн</div>
-          </div>
-        `;
-      }).join("")
-    : `<div class="hint">Поки немає даних для графіка.</div>`;
+          `;
+        }).join("")
+      : `<div class="hint">Поки немає даних для графіка.</div>`;
 
-  box.innerHTML = `
-    <div class="patientStats financeStats">
-      <div class="ownerStat">
-        <div class="ownerStatIcon">💰</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(String(grandTotal))} грн</div>
-          <div class="ownerStatLabel">усього</div>
+    box.innerHTML = `
+      <div class="patientStats financeStats">
+        <div class="ownerStat"><div class="ownerStatIcon">💰</div><div><div class="ownerStatValue">${escapeHtml(String(grandTotal))} грн</div><div class="ownerStatLabel">усього</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">🧾</div><div><div class="ownerStatValue">${escapeHtml(String(servicesTotal))} грн</div><div class="ownerStatLabel">послуги</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">💊</div><div><div class="ownerStatValue">${escapeHtml(String(stockTotal))} грн</div><div class="ownerStatLabel">препарати</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">📊</div><div><div class="ownerStatValue">${escapeHtml(String(avg))} грн</div><div class="ownerStatLabel">середній чек</div></div></div>
+      </div>
+      <div class="patientStats financeStats financeStatsSecond">
+        <div class="ownerStat"><div class="ownerStatIcon">📋</div><div><div class="ownerStatValue">${escapeHtml(String(visits.length))}</div><div class="ownerStatLabel">візитів</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">📅</div><div><div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div><div class="ownerStatLabel">останній візит</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">⏱️</div><div><div class="ownerStatValue">${escapeHtml(avgInterval)}</div><div class="ownerStatLabel">середній інтервал</div></div></div>
+        <div class="ownerStat"><div class="ownerStatIcon">🧮</div><div><div class="ownerStatValue">${escapeHtml(String(lastVisitTotal))} грн</div><div class="ownerStatLabel">останній чек</div></div></div>
+      </div>
+      <div class="financeGrid2">
+        <div class="patientInfoBox financePanel">
+          <div class="financePanelHead"><div><h2>Витрати по місяцях</h2><div class="hint">Динаміка витрат цього пацієнта.</div></div></div>
+          <div class="financeMonthList">${monthBarsHtml}</div>
+        </div>
+        <div class="patientInfoBox financePanel">
+          <div class="financePanelHead"><div><h2>ТОП послуг</h2><div class="hint">Що найчастіше призначали пацієнту.</div></div></div>
+          <div class="financeTopList">${topServicesHtml}</div>
         </div>
       </div>
-
-      <div class="ownerStat">
-        <div class="ownerStatIcon">🧾</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(String(servicesTotal))} грн</div>
-          <div class="ownerStatLabel">послуги</div>
-        </div>
-      </div>
-
-      <div class="ownerStat">
-        <div class="ownerStatIcon">💊</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(String(stockTotal))} грн</div>
-          <div class="ownerStatLabel">препарати</div>
-        </div>
-      </div>
-
-      <div class="ownerStat">
-        <div class="ownerStatIcon">📊</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(String(avg))} грн</div>
-          <div class="ownerStatLabel">середній чек</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="patientStats financeStats financeStatsSecond">
-      <div class="ownerStat">
-        <div class="ownerStatIcon">📋</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(String(visits.length))}</div>
-          <div class="ownerStatLabel">візитів</div>
-        </div>
-      </div>
-
-      <div class="ownerStat">
-        <div class="ownerStatIcon">📅</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
-          <div class="ownerStatLabel">останній візит</div>
-        </div>
-      </div>
-
-      <div class="ownerStat">
-        <div class="ownerStatIcon">⏱️</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(avgInterval)}</div>
-          <div class="ownerStatLabel">середній інтервал</div>
-        </div>
-      </div>
-
-      <div class="ownerStat">
-        <div class="ownerStatIcon">🧮</div>
-        <div>
-          <div class="ownerStatValue">${escapeHtml(String(lastVisitTotal))} грн</div>
-          <div class="ownerStatLabel">останній чек</div>
-        </div>
-      </div>
-    </div>
-    <div class="financeGrid2">
       <div class="patientInfoBox financePanel">
-        <div class="financePanelHead">
-          <div>
-            <h2>Витрати по місяцях</h2>
-            <div class="hint">Динаміка витрат цього пацієнта.</div>
-          </div>
-        </div>
-
-        <div class="financeMonthList">
-          ${monthBarsHtml}
-        </div>
+        <div class="financePanelHead"><div><h2>Історія витрат</h2><div class="hint">Чеки по всіх візитах цього пацієнта.</div></div></div>
+        <div class="financeVisitsList">${checksHtml}</div>
       </div>
-
-      <div class="patientInfoBox financePanel">
-        <div class="financePanelHead">
-          <div>
-            <h2>ТОП послуг</h2>
-            <div class="hint">Що найчастіше призначали пацієнту.</div>
-          </div>
-        </div>
-
-        <div class="financeTopList">
-          ${topServicesHtml}
-        </div>
-      </div>
-    </div>
-
-    <div class="patientInfoBox financePanel">
-      <div class="financePanelHead">
-        <div>
-          <h2>Історія витрат</h2>
-          <div class="hint">Чеки по всіх візитах цього пацієнта.</div>
-        </div>
-      </div>
-
-      <div class="financeVisitsList">
-        ${checksHtml}
-      </div>
-    </div>
-  `;
-
-  return;
+    `;
+    return;
+  }
 }
-}
+
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
+
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ФАЙЛЫ, РЕФЕРЕНСЫ ЛАБОРАТОРИИ И ГРАФИКИ ВЕТЕРИНАРОВ)
+// Часть 5 (Строки 3001 — 3500)
+// ==========================================================================
 
 function loadPatientFiles() {
   try {
@@ -3225,6 +2508,7 @@ function setPatientFiles(petId, arr) {
   all[String(petId)] = Array.isArray(arr) ? arr : [];
   savePatientFiles(all);
 }
+
 async function uploadPatientFile(file) {
   const fd = new FormData();
   fd.append("files", file);
@@ -3257,11 +2541,9 @@ function renderPatientFilesTab(pet) {
           <h2>Файли пацієнта</h2>
           <div class="hint">Рентген, УЗД, PDF, фото, лабораторії та інші документи.</div>
         </div>
-
         <button class="primary" id="btnAddPatientFile" type="button">+ Прикріпити файл</button>
         <input id="patientFileInput" type="file" accept="image/*,.pdf,.doc,.docx" style="display:none;" />
       </div>
-
       <div id="patientFilesList" class="list" style="margin-top:16px;">
         ${
           files.length
@@ -3284,19 +2566,18 @@ function renderPatientFilesTab(pet) {
     const note = (prompt("Коментар:", "") || "").trim();
 
     const uploaded = await uploadPatientFile(file);
-
-const arr = getPatientFiles(petId);
-arr.unshift({
-  id: "pfile_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-  name: uploaded.name || file.name,
-  url: uploaded.url || uploaded.path || uploaded.href || "",
-  size: file.size,
-  mime: file.type,
-  type,
-  note,
-  date: todayISO(),
-  created_at: new Date().toISOString(),
-});
+    const arr = getPatientFiles(petId);
+    arr.unshift({
+      id: "pfile_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+      name: uploaded.name || file.name,
+      url: uploaded.url || uploaded.path || uploaded.href || "",
+      size: file.size,
+      mime: file.type,
+      type,
+      note,
+      date: todayISO(),
+      created_at: new Date().toISOString(),
+    });
 
     setPatientFiles(petId, arr);
     e.target.value = "";
@@ -3317,14 +2598,7 @@ arr.unshift({
 }
 
 function renderPatientFileRow(file) {
-  const rawUrl =
-    file.url ||
-    file.path ||
-    file.href ||
-    file.fileUrl ||
-    file.file_url ||
-    "";
-
+  const rawUrl = file.url || file.path || file.href || file.fileUrl || file.file_url || "";
   const url = rawUrl ? new URL(rawUrl, window.location.origin).toString() : "";
 
   return `
@@ -3337,7 +2611,6 @@ function renderPatientFileRow(file) {
         </div>
         ${file.note ? `<div class="history" style="white-space:pre-wrap;">${escapeHtml(file.note)}</div>` : ""}
       </div>
-
       <div class="right" style="display:flex; gap:8px;">
         ${
           url
@@ -3356,6 +2629,7 @@ function formatFileSize(bytes) {
   if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
+
 const LABS_KEY = "docpug_labs_v1";
 
 const LAB_REF = {
@@ -3371,7 +2645,6 @@ const LAB_REF = {
     GLU: [3.33, 6.38, "ммоль/л"],
     TBIL: [0, 10.26, "мкмоль/л"],
     GLOB: [27, 44, "г/л"],
-
     WBC: [5.4, 15.4, "тис./мкл"],
     RBC: [5.5, 10.4, "млн/мм³"],
     HGB: [110, 180, "г/л"],
@@ -3384,7 +2657,6 @@ const LAB_REF = {
     BASO: [0, 3, "%"],
     MONO: [1, 5, "%"],
   },
-
   cat: {
     ALT: [28, 76, "Од/л"],
     AST: [12, 40, "Од/л"],
@@ -3397,7 +2669,6 @@ const LAB_REF = {
     GLU: [3.33, 7.21, "ммоль/л"],
     TBIL: [0, 6.84, "мкмоль/л"],
     GLOB: [26, 51, "г/л"],
-
     WBC: [5.4, 15.4, "тис./мкл"],
     RBC: [5.5, 10.4, "млн/мм³"],
     HGB: [100, 140, "г/л"],
@@ -3424,7 +2695,6 @@ const LAB_LABELS = {
   GLU: "Глюкоза",
   TBIL: "Білірубін загальний",
   GLOB: "Глобулін",
-
   WBC: "Лейкоцити",
   RBC: "Еритроцити",
   HGB: "Гемоглобін",
@@ -3439,55 +2709,23 @@ const LAB_LABELS = {
 };
 
 const LAB_GROUPS = {
-  "Біохімія": [
-    "ALT",
-    "AST",
-    "GGT",
-    "ALP",
-    "UREA",
-    "CREA",
-    "ALB",
-    "TP",
-    "GLU",
-    "TBIL",
-    "GLOB",
-  ],
-
-  "ЗАК": [
-    "WBC",
-    "RBC",
-    "HGB",
-    "PLT",
-    "HCT",
-    "NEU_BAND",
-    "NEU_SEG",
-    "LYM",
-    "EOS",
-    "BASO",
-    "MONO",
-  ],
+  "Біохімія": ["ALT", "AST", "GGT", "ALP", "UREA", "CREA", "ALB", "TP", "GLU", "TBIL", "GLOB"],
+  "ЗАК": ["WBC", "RBC", "HGB", "PLT", "HCT", "NEU_BAND", "NEU_SEG", "LYM", "EOS", "BASO", "MONO"],
 };
 
 function getPetSpeciesKey(pet) {
   const s = String(pet?.species || "").toLowerCase().trim();
-
   if (s === "cat" || s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
   if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
-
   return "dog";
 }
+
 async function loadStaffApi() {
   try {
     const res = await fetch("/api/staff");
     const json = await res.json();
-
     if (!json.ok) throw new Error(json.error || "Cannot load staff");
-
-    return Array.isArray(json.items)
-      ? json.items
-      : Array.isArray(json.data)
-        ? json.data
-        : [];
+    return Array.isArray(json.items) ? json.items : Array.isArray(json.data) ? json.data : [];
   } catch (e) {
     console.error("loadStaffApi failed:", e);
     alert("Не вдалося завантажити ветеринарів: " + (e?.message || e));
@@ -3499,32 +2737,21 @@ async function loadCalendarApi() {
   try {
     const res = await fetch("/api/calendar");
     const json = await res.json();
-
     if (!json.ok) throw new Error(json.error || "Cannot load calendar");
-
-    return Array.isArray(json.items)
-      ? json.items
-      : Array.isArray(json.data)
-        ? json.data
-        : [];
+    return Array.isArray(json.items) ? json.items : Array.isArray(json.data) ? json.data : [];
   } catch (e) {
     console.error("loadCalendarApi failed:", e);
     alert("Не вдалося завантажити календар: " + (e?.message || e));
     return [];
   }
 }
+
 async function loadStaffScheduleApi(date) {
   try {
     const res = await fetch(`/api/staff-schedule?date=${encodeURIComponent(date)}`);
     const json = await res.json();
-
     if (!json.ok) throw new Error(json.error || "Cannot load staff schedule");
-
-    return Array.isArray(json.items)
-      ? json.items
-      : Array.isArray(json.data)
-        ? json.data
-        : [];
+    return Array.isArray(json.items) ? json.items : Array.isArray(json.data) ? json.data : [];
   } catch (e) {
     console.error("loadStaffScheduleApi failed:", e);
     alert("Не вдалося завантажити графік змін: " + (e?.message || e));
@@ -3539,11 +2766,8 @@ async function saveStaffScheduleApi(payload) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload || {}),
     });
-
     const json = await res.json();
-
     if (!json.ok) throw new Error(json.error || "Cannot save staff schedule");
-
     return json.data || json.item || null;
   } catch (e) {
     console.error("saveStaffScheduleApi failed:", e);
@@ -3551,17 +2775,14 @@ async function saveStaffScheduleApi(payload) {
     return null;
   }
 }
-
-/* ==========================================================================
-   PUGCRM - CORE LOGIC & INTERACTIVE INTERFACE (CLEANED & OPTIMIZED)
-   ========================================================================== */
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ИНТЕРАКТИВНЫЙ КАЛЕНДАРЬ, СМЕНЫ И DRAG-AND-DROP)
+// Часть 6 (Строки 3501 — 4000)
+// ==========================================================================
 
 async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
-  // Поддержка стандартной селекции контента (если используется разметка .content-section)
-  const fallbackPage = document.getElementById('calendar');
-  const targetPage = page || fallbackPage;
-  if (!targetPage) return;
+  if (!page) return;
 
   const today = window.__calendarDate || (
     typeof todayISO === "function"
@@ -3569,10 +2790,9 @@ async function renderCalendarTab() {
       : new Date().toISOString().slice(0, 10)
   );
 
-  // Стеклянный лоадер
-  targetPage.innerHTML = `
-    <div class="calendar-container" style="align-items: center; justify-content: center; min-height: 200px;">
-      <div style="color: var(--primary-color); font-weight: 600; letter-spacing: 0.5px;">🐾 Завантаження преміум календаря PUGCRM…</div>
+  page.innerHTML = `
+    <div class="card">
+      <div class="hint">Завантаження календаря…</div>
     </div>
   `;
 
@@ -3592,9 +2812,6 @@ async function renderCalendarTab() {
 
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
-  /* ------------------------------------------------------------------------
-     РЕЖИМ: НЕДЕЛЯ (WEEK VIEW)
-     ------------------------------------------------------------------------ */
   if (calendarMode === "week") {
     const base = new Date(today);
     const day = base.getDay() || 7;
@@ -3610,188 +2827,55 @@ async function renderCalendarTab() {
     const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
     const weekEvents = events.filter((ev) => weekDays.includes(String(ev.event_date || "")));
 
-    targetPage.innerHTML = `
-      <div class="calendar-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    page.innerHTML = `
+      <div class="card calendarCard">
+        <div class="calendarHeader">
           <div>
             <h2>Календар</h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Тижневий розклад записів клініки.</div>
+            <div class="hint">Тижневий розклад записів клініки.</div>
           </div>
-
-          <div class="nav-buttons-group">
-            <button class="btn-tab" data-cal-mode="day">День</button>
-            <button class="btn-tab active" data-cal-mode="week">Тиждень</button>
-            <button class="btn-tab" data-cal-mode="month">Місяць</button>
-            <button class="btn-tab" data-cal-mode="schedule">Ветеринари</button>
-            <button class="btn-tab" data-cal-mode="routes">Маршрути</button>
-          </div>
-        </div>
-
-        <div class="date-picker-panel">
-          <button class="btn-arrow" id="calPrevWeek" type="button">←</button>
-          <div class="current-date-title">
-            ${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}
-          </div>
-          <button class="btn-arrow" id="calNextWeek" type="button">→</button>
-        </div>
-
-        <div class="calendar-grid-wrapper">
-          <div class="calendar-grid" style="grid-template-columns: repeat(7, minmax(180px, 1fr));">
-            ${weekDays.map((date, i) => {
-              const dayEvents = weekEvents
-                .filter((ev) => String(ev.event_date || "") === date)
-                .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")));
-
-              return `
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                  <div class="vet-column-header" style="height: auto; text-align: center;">
-                    <div class="vet-name">${dayNames[i]}</div>
-                    <div class="vet-spec">${escapeHtml(date)}</div>
-                  </div>
-
-                  <div style="display: flex; flex-direction: column; gap: 8px; min-height: 300px; background: rgba(255,255,255,0.2); padding: 8px; border-radius: var(--radius-md);" data-week-date="${escapeHtml(date)}">
-                    ${
-                      dayEvents.length
-                        ? dayEvents.map((ev) => `
-                          <div class="appointment-cell has-appointment" data-cal-event-id="${escapeHtml(String(ev.id))}" style="min-height: auto; cursor: pointer; padding: 2px;">
-                            <div style="padding: 10px; width: 100%; background: var(--primary-light); border-left: 4px solid var(--primary-color); border-radius: var(--radius-sm); text-align: left;">
-                              <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary-color);">
-                                ${escapeHtml(String(ev.start_time || "").slice(0, 5))} — ${escapeHtml(String(ev.end_time || "").slice(0, 5))}
-                              </div>
-                              <strong style="font-size: 0.85rem; color: var(--text-main); display: block; margin: 2px 0;">${escapeHtml(ev.title || "Візит")}</strong>
-                              <div style="font-size: 0.75rem; color: var(--text-muted);">
-                                👨‍⚕️ ${(staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || "Лікар не вказаний"}
-                              </div>
-                              ${ev.note ? `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; border-top: 1px dashed rgba(0,0,0,0.05); padding-top: 4px;">📝 ${escapeHtml(ev.note)}</div>` : ""}
-                            </div>
-                          </div>
-                        `).join("")
-                        : `<div style="text-align:center; color: var(--text-muted); font-size: 0.8rem; margin-top: 20px;">Немає записів</div>`
-                    }
-                  </div>
-                </div>
-              `;
-            }).join("")}
+          <div class="calendarModes">
+            <button class="ghost" data-cal-mode="day">День</button>
+            <button class="primary" data-cal-mode="week">Тиждень</button>
+            <button class="ghost" data-cal-mode="month">Місяць</button>
+            <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
+            <button class="ghost" data-cal-mode="routes">Маршрути</button>
           </div>
         </div>
-      </div>
-    `;
-
-    bindCalendarModes();
-
-    $("#calPrevWeek")?.addEventListener("click", async () => {
-      const d = new Date(weekDays[0]);
-      d.setDate(d.getDate() - 7);
-      window.__calendarDate = d.toISOString().slice(0, 10);
-      await renderCalendarTab();
-    });
-
-    $("#calNextWeek")?.addEventListener("click", async () => {
-      const d = new Date(weekDays[0]);
-      d.setDate(d.getDate() + 7);
-      window.__calendarDate = d.toISOString().slice(0, 10);
-      await renderCalendarTab();
-    });
-
-    $$("[data-cal-event-id]").forEach((card) => {
-      card.addEventListener("click", () => {
-        const id = card.dataset.calEventId;
-        const ev = weekEvents.find((x) => String(x.id) === String(id));
-        if (!ev) return;
-
-        openCalendarEditModal(ev, ev.event_date || today, async () => {
-          await renderCalendarTab();
-        });
-      });
-    });
-
-    return;
-  }
-
-  /* ------------------------------------------------------------------------
-     РЕЖИМ: ВЕТЕРИНАРЫ (SCHEDULE / STAFF MANAGEMENT)
-     ------------------------------------------------------------------------ */
-  if (calendarMode === "schedule") {
-    const schedule = await loadStaffScheduleApi(today);
-    const specializations = await loadSpecializationsApi();
-    const scheduleMap = new Map(schedule.map((x) => [String(x.staff_id), x]));
-
-    targetPage.innerHTML = `
-      <div class="calendar-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-          <div>
-            <h2>Ветеринари</h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Співробітники клініки, ставки, спеціалізації та налаштування зміни.</div>
-          </div>
-
-          <div class="nav-buttons-group">
-            <button class="btn-tab" data-cal-mode="day">День</button>
-            <button class="btn-tab" data-cal-mode="week">Тиждень</button>
-            <button class="btn-tab" data-cal-mode="month">Місяць</button>
-            <button class="btn-tab active" data-cal-mode="schedule">Ветеринари</button>
-            <button class="btn-tab" data-cal-mode="routes">Маршрути</button>
-          </div>
+        <div class="calendarTop">
+          <button class="ghost" id="calPrevWeek" type="button">←</button>
+          <div class="calendarDate">${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}</div>
+          <button class="ghost" id="calNextWeek" type="button">→</button>
         </div>
-
-        <div class="data-table-container" style="margin-bottom: 24px; padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <div>
-              <h3 style="font-size: 1.1rem; font-weight: 600;">Напрями клініки</h3>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
-            </div>
-            <button class="btn-primary" id="btnAddSpec" type="button" style="padding: 8px 16px; font-size: 0.85rem;">+ Додати напрям</button>
-          </div>
-
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            ${
-              specializations.length
-                ? specializations.map((s) => `
-                  <span class="badge" style="border-left: 5px solid ${escapeHtml(s.color || "#7C5CFF")}; background: #fff; box-shadow: var(--shadow-premium); padding: 8px 14px; border-radius: var(--radius-md);">
-                    ${escapeHtml(s.name || "Напрям")}
-                  </span>
-                `).join("")
-                : `<div style="font-size: 0.85rem; color: var(--text-muted);">Напрями ще не створені.</div>`
-            }
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-          <button class="btn-primary" id="btnAddStaff">+ Додати ветеринара</button>
-        </div>
-
-        <div class="patients-grid">
-          ${staff.map((doc) => {
-            const row = scheduleMap.get(String(doc.id));
-            const isActive = row ? row.is_active !== false : false;
+        <div class="weekCalendarGrid">
+          ${weekDays.map((date, i) => {
+            const dayEvents = weekEvents
+              .filter((ev) => String(ev.event_date || "") === date)
+              .sort((a, b) => String(a.start_time || "").localeCompare(String(b.start_time || "")));
 
             return `
-              <div class="patient-premium-card" style="border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")}; flex-direction: column; align-items: stretch; gap: 12px;">
-                <div>
-                  <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main); margin-bottom: 4px;">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-                  <div style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600; margin-bottom: 8px;">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
-                  
-                  <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
-                    ${
-                      (() => {
-                        const docSpecIds = Array.isArray(doc.specialization_ids) ? doc.specialization_ids.map(String) : [];
-                        const docSpecs = specializations.filter((s) => docSpecIds.includes(String(s.id)));
-                        return docSpecs.length
-                          ? docSpecs.map((s) => `<span class="badge" style="background: rgba(93, 67, 239, 0.06); color: var(--primary-color); font-size: 0.7rem; padding: 4px 8px;">${escapeHtml(s.name)}</span>`).join("")
-                          : `<span class="badge" style="background: #eee; color: #888; font-size: 0.7rem; padding: 4px 8px;">Без напрямів</span>`;
-                      })()
-                    }
-                  </div>
-                  
-                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
-                  <div style="font-size: 0.8rem; color: var(--text-muted);">💰 Ставка: <b>${escapeHtml(String(doc.shift_rate || 0))} грн</b> / зміна</div>
-                  <div style="font-size: 0.8rem; color: var(--text-muted);">📈 Відсоток: <b>${escapeHtml(String(doc.percent_rate || 0))}%</b></div>
+              <div class="weekDayCol">
+                <div class="weekDayHead">
+                  <div class="weekDayName">${dayNames[i]}</div>
+                  <div class="weekDayDate">${escapeHtml(date)}</div>
                 </div>
-
-                <div style="display: flex; gap: 10px; margin-top: auto; border-top: 1px solid rgba(0,0,0,0.04); padding-top: 12px; justify-content: space-between; align-items: center;">
-                  <button class="btn-tab" type="button" data-edit-staff="${escapeHtml(String(doc.id))}" style="padding: 6px 12px; font-size: 0.8rem;">✏️ Редагувати</button>
-                  <button class="badge ${isActive ? 'badge-success' : 'badge-danger'}" type="button" data-schedule-staff-id="${escapeHtml(String(doc.id))}" style="cursor:pointer; border: none; padding: 8px 14px;">
-                    ${isActive ? "● На зміні" : "○ Вихідний"}
-                  </button>
+                <div class="weekDayBody" data-week-date="${escapeHtml(date)}">
+                  ${
+                    dayEvents.length
+                      ? dayEvents.map((ev) => `
+                        <div class="weekEventCard" data-cal-event-id="${escapeHtml(String(ev.id))}">
+                          <div class="weekEventTime">
+                            ${escapeHtml(String(ev.start_time || "").slice(0, 5))} — ${escapeHtml(String(ev.end_time || "").slice(0, 5))}
+                          </div>
+                          <div class="weekEventTitle">${escapeHtml(ev.title || "Візит")}</div>
+                          <div class="weekEventVet">
+                            👨‍⚕️ ${escapeHtml((staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || "Лікар не вказаний")}
+                          </div>
+                          ${ev.note ? `<div class="weekEventMeta">${escapeHtml(ev.note)}</div>` : ""}
+                        </div>
+                      `).join("")
+                      : `<div class="weekEmpty">Немає записів</div>`
+                  }
                 </div>
               </div>
             `;
@@ -3800,10 +2884,89 @@ async function renderCalendarTab() {
       </div>
     `;
 
-    bindCalendarModes();
+    $("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
+    $("[data-cal-mode='month']")?.addEventListener("click", async () => { calendarMode = "month"; await renderCalendarTab(); });
+    $("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calendarMode = "schedule"; await renderCalendarTab(); });
+    $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
 
-    $("#btnAddStaff")?.addEventListener("click", () => openCreateStaffModal());
+    $("#calPrevWeek")?.addEventListener("click", async () => {
+      const d = new Date(weekDays[0]); d.setDate(d.getDate() - 7);
+      window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab();
+    });
+    $("#calNextWeek")?.addEventListener("click", async () => {
+      const d = new Date(weekDays[0]); d.setDate(d.getDate() + 7);
+      window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab();
+    });
 
+    $$("[data-cal-event-id]").forEach((card) => {
+      card.addEventListener("click", () => {
+        const id = card.dataset.calEventId;
+        const ev = weekEvents.find((x) => String(x.id) === String(id));
+        if (!ev) return;
+        openCalendarEditModal(ev, ev.event_date || today, async () => { await renderCalendarTab(); });
+      });
+    });
+    return;
+  }
+
+  if (calendarMode === "schedule") {
+    const schedule = await loadStaffScheduleApi(today);
+    const specializations = await loadSpecializationsApi();
+    const scheduleMap = new Map(schedule.map((x) => [String(x.staff_id), x]));
+
+    page.innerHTML = `
+      <div class="card calendarCard">
+        <div class="row" style="justify-content:space-between;align-items:center;">
+          <div>
+            <h2>Ветеринари</h2>
+            <div class="hint">Співробітники клініки, ставки, спеціалізації та налаштування календаря.</div>
+          </div>
+          <button class="primary" id="btnAddStaff">+ Додати ветеринара</button>
+        </div>
+        <div class="calendarModes">
+          <button class="ghost" data-cal-mode="day">День</button>
+          <button class="ghost" data-cal-mode="week">Тиждень</button>
+          <button class="ghost" data-cal-mode="month">Місяць</button>
+          <button class="primary" data-cal-mode="schedule">Ветеринари</button>
+          <button class="ghost" data-cal-mode="routes">Маршрути</button>
+        </div>
+        <div class="specPanel">
+          <div class="specPanelHead">
+            <div>
+              <div class="specPanelTitle">Напрями клініки</div>
+              <div class="hint">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
+            </div>
+            <button class="primary" id="btnAddSpec" type="button">+ Додати напрям</button>
+          </div>
+          <div class="specList">
+            ${specializations.length ? specializations.map((s) => `<div class="specPill" style="border-left:5px solid ${escapeHtml(s.color || "#7C5CFF")}">${escapeHtml(s.name || "Напрям")}</div>`).join("") : `<div class="hint">Напрями ще не створені.</div>`}
+          </div>
+        </div>
+        <div class="vetList">
+          ${staff.map((doc) => {
+            const row = scheduleMap.get(String(doc.id));
+            const isActive = row ? row.is_active !== false : false;
+            return `
+              <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+                <div class="vetInfo">
+                  <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+                  <div class="hint">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
+                  <div class="hint">📞 ${escapeHtml(doc.phone || "Telephone не вказано")}</div>
+                  <div class="hint">💰 Ставка: ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</div>
+                  <div class="hint">📈 Відсоток: ${escapeHtml(String(doc.percent_rate || 0))}%</div>
+                </div>
+                <div class="vetActions">
+                  <button class="ghost" type="button" data-edit-staff="${escapeHtml(String(doc.id))}">✏️ Редагувати</button>
+                  <button class="scheduleStatus ${isActive ? "active" : ""}" type="button" data-schedule-staff-id="${escapeHtml(String(doc.id))}">${isActive ? "На зміні" : "Вихідний"}</button>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+
+    $("#btnAddStaff")?.addEventListener("click", () => { openCreateStaffModal(); });
     $("#btnAddSpec")?.addEventListener("click", async () => {
       const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
       if (!name) return;
@@ -3811,20 +2974,19 @@ async function renderCalendarTab() {
       if (created) await renderCalendarTab();
     });
 
-    $$(".badge[data-schedule-staff-id]").forEach((btn) => {
+    $("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
+    $("[data-cal-mode='week']")?.addEventListener("click", async () => { calendarMode = "week"; await renderCalendarTab(); });
+    $("[data-cal-mode='month']")?.addEventListener("click", async () => { calendarMode = "month"; await renderCalendarTab(); });
+    $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
+
+    $$(".scheduleStatus").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const staffId = btn.dataset.scheduleStaffId;
-        const isActive = !btn.classList.contains("badge-success");
-
-        const saved = await saveStaffScheduleApi({
-          work_date: today,
-          staff_id: staffId,
-          is_active: isActive,
-        });
-
+        const isActive = !btn.classList.contains("active");
+        const saved = await saveStaffScheduleApi({ work_date: today, staff_id: staffId, is_active: isActive });
         if (!saved) return;
-        btn.className = `badge ${isActive ? 'badge-success' : 'badge-danger'}`;
-        btn.textContent = isActive ? "● На зміні" : "○ Вихідний";
+        btn.classList.toggle("active", isActive);
+        btn.textContent = isActive ? "На зміні" : "Вихідний";
       });
     });
 
@@ -3832,20 +2994,15 @@ async function renderCalendarTab() {
       btn.addEventListener("click", () => {
         const id = btn.dataset.editStaff;
         const staffRow = staff.find((x) => String(x.id) === String(id));
-        if (staffRow) openEditStaffModal(staffRow);
+        if (!staffRow) return;
+        openEditStaffModal(staffRow);
       });
     });
-
     return;
   }
 
-  /* ------------------------------------------------------------------------
-     РЕЖИМ: ДЕНЬ (DAY VIEW WITH DRAG & DROP)
-     ------------------------------------------------------------------------ */
   const hours = [];
-  for (let h = 7; h <= 24; h++) {
-    hours.push(String(h).padStart(2, "0") + ":00");
-  }
+  for (let h = 7; h <= 24; h++) { hours.push(String(h).padStart(2, "0") + ":00"); }
 
   const staffHtml = staffOnShift.map((doc) => {
     const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
@@ -3855,15 +3012,18 @@ async function renderCalendarTab() {
     };
 
     return `
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="vet-column-header" style="border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")};">
-          <div class="vet-name">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-          <div class="vet-spec">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
+      <div class="calDoctorCol">
+        <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+          <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+          <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
         </div>
-
         ${hours.map((hour) => {
           const hourStart = toMinutes(hour);
-          const hourEvents = docEvents.filter((ev) => toMinutes(String(ev.start_time || "").slice(0, 5)) === hourStart);
+          const hourEvents = docEvents.filter((ev) => {
+            const start = String(ev.start_time || "").slice(0, 5);
+            return toMinutes(start) === hourStart;
+          });
+
           const isCoveredByLongEvent = docEvents.some((ev) => {
             const start = toMinutes(String(ev.start_time || "").slice(0, 5));
             const end = toMinutes(String(ev.end_time || "").slice(0, 5));
@@ -3871,7 +3031,7 @@ async function renderCalendarTab() {
           });
 
           return `
-            <div class="calendar-grid-cell-container calSlot ${isCoveredByLongEvent ? 'calSlotCovered' : ''}" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}" data-staff-name="${escapeHtml(doc.name || "")}" style="min-height: 85px; position: relative;">
+            <div class="calSlot ${isCoveredByLongEvent ? "calSlotCovered" : ""}" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}" data-staff-name="${escapeHtml(doc.name || "")}">
               ${
                 hourEvents.length
                   ? hourEvents.map((ev) => {
@@ -3881,25 +3041,21 @@ async function renderCalendarTab() {
                       const endMin = toMinutes(end || start);
                       const durationMinutes = Math.max(60, endMin - startMin);
                       const slots = Math.max(1, durationMinutes / 60);
-                      const height = Math.round(slots * 85 + (slots - 1) * 12 - 10);
+                      const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
 
                       return `
-                        <div class="appointment-cell has-appointment" data-edit-calendar-event="${escapeHtml(String(ev.id))}" style="position: absolute; width: 100%; top: 0; left: 0; min-height: ${height}px; z-index: 5; padding: 2px; border: none; background: transparent;">
-                          <div style="padding: 10px; width: 100%; height: 100%; background: var(--primary-light); border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")}; border-radius: var(--radius-md); text-align: left; box-shadow: var(--shadow-premium);">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                              <strong style="font-size: 0.9rem; color: var(--text-main); display: block; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;">${escapeHtml(ev.title || "Запис")}</strong>
-                              <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button" style="background: none; border: none; color: var(--color-danger); font-size: 1.1rem; cursor: pointer; line-height: 1;">×</button>
-                            </div>
-                            <div style="font-size: 0.75rem; font-weight: 600; color: var(--primary-color); margin-bottom: 4px;">🕒 ${escapeHtml(start)} ${end ? `— ${escapeHtml(end)}` : ""}</div>
-                            ${ev.note ? `<div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📝 ${escapeHtml(ev.note)}</div>` : ""}
-                            ${ev.location ? `<div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📍 ${escapeHtml(ev.location)}</div>` : ""}
+                        <div class="calEventCard calEventLong" data-edit-calendar-event="${escapeHtml(String(ev.id))}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}; min-height:${height}px;">
+                          <div class="calEventTop">
+                            <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+                            <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
                           </div>
+                          <div class="calEventTime">${escapeHtml(start)}${end ? `— ${escapeHtml(end)}` : ""}</div>
+                          ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
+                          ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
                         </div>
                       `;
                     }).join("")
-                  : isCoveredByLongEvent
-                    ? ""
-                    : `<div class="appointment-cell" data-empty-slot="1" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}" style="width: 100%; height: 100%;">+ Запис</div>`
+                  : isCoveredByLongEvent ? "" : `<div class="calEmptySlot" data-empty-slot="1" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}">+ Запис</div>`
               }
             </div>
           `;
@@ -3909,70 +3065,54 @@ async function renderCalendarTab() {
   }).join("");
 
   const staffPaletteHtml = staffOnShift.map((doc) => `
-    <div class="calStaffDrag" draggable="true" data-drag-staff-id="${escapeHtml(doc.id)}" data-drag-staff-name="${escapeHtml(doc.name || "")}" data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}" style="border-left: 5px solid ${escapeHtml(doc.color || "#7C5CFF")}; background: rgba(255,255,255,0.7); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; cursor: grab; box-shadow: var(--shadow-premium); transition: var(--transition);">
-      <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
+    <div class="calStaffDrag" draggable="true" data-drag-staff-id="${escapeHtml(doc.id)}" data-drag-staff-name="${escapeHtml(doc.name || "")}" data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+      <div class="calStaffDragName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
+      <div class="calStaffDragRole">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
     </div>
   `).join("");
 
-    targetPage.innerHTML = `
-    <div class="calendar-container">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+  page.innerHTML = `
+    <div class="card calendarCard">
+      <div class="calendarHeader">
         <div>
           <h2>Календар</h2>
-          <div style="font-size: 0.85rem; color: var(--text-muted);">Перетягніть ветеринара справа на потрібний час.</div>
+          <div class="hint">Перетягни ветеринара справа на потрібний час.</div>
         </div>
-
-        <div class="nav-buttons-group">
-          <button class="btn-tab active" data-cal-mode="day">День</button>
-          <button class="btn-tab" data-cal-mode="week">Тиждень</button>
-          <button class="btn-tab" data-cal-mode="month">Місяць</button>
-          <button class="btn-tab" data-cal-mode="schedule">Ветеринари</button>
-          <button class="btn-tab" data-cal-mode="routes">Маршрути</button>
+        <div class="calendarModes">
+          <button class="primary" data-cal-mode="day">День</button>
+          <button class="ghost" data-cal-mode="week">Тиждень</button>
+          <button class="ghost" data-cal-mode="month">Місяць</button>
+          <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
+          <button class="ghost" data-cal-mode="routes">Маршрути</button>
         </div>
       </div>
-
-      <div class="date-picker-panel">
-        <button class="btn-arrow" id="calPrevDay" type="button">←</button>
-        <div class="current-date-title">${escapeHtml(today)}</div>
-        <button class="btn-arrow" id="calNextDay" type="button">→</button>
+      <div class="calendarTop">
+        <button class="ghost" id="calPrevDay" type="button">←</button>
+        <div class="calendarDate">${escapeHtml(today)}</div>
+        <button class="ghost" id="calNextDay" type="button">→</button>
       </div>
-
-      <div id="calTopScrollContainer" class="calendar-top-scrollbar-container">
-        <div id="calTopScrollSpacer" style="height: 1px;"></div>
-      </div>
-
-      <div style="display: flex; gap: 24px; align-items: flex-start; width: 100%;">
-        
-        <div id="calMainScrollContainer" class="calendar-grid-wrapper" style="flex-grow: 1;">
-          <div class="calendar-grid" style="grid-template-columns: 70px repeat(${staffOnShift.length}, minmax(220px, 1fr));">
-            
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <div class="time-column-header">Час</div>
-              ${hours.map((h) => `<div class="time-cell" style="min-height: 85px;">${escapeHtml(h)}</div>`).join("")}
-            </div>
-
-            ${staffHtml || `<div style="grid-column: span 2; padding: 40px; text-align: center; color: var(--text-muted);">Ветеринарів поки немає на зміні.</div>`}
+      <div class="calendarWorkArea">
+        <div class="calendarDayGrid">
+          <div class="calTimeCol">
+            <div class="calTimeHead">Час</div>
+            ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
           </div>
+          <div class="calDoctorsGrid">${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}</div>
         </div>
-
-        <aside style="width: 260px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border-radius: var(--radius-lg); padding: 20px; flex-shrink: 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <aside class="calStaffPanel">
+          <div class="calStaffPanelHead">
             <div>
-              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Ветеринари</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Перетягни в слот</div>
+              <div class="calStaffPanelTitle">Ветеринари</div>
+              <div class="calStaffPanelSub">Перетягни в слот</div>
             </div>
-            <button id="btnAddStaffFromCalendar" type="button">+ Додати</button>
+            <button class="miniBtn" id="btnAddStaffFromCalendar" type="button">+ Додати</button>
           </div>
-
-          <div class="calStaffDragList">
-            ${staffPaletteHtml || `<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 20px;">Немає співробітників.</div>`}
-          </div>
+          <div class="calStaffDragList">${staffPaletteHtml || `<div class="hint">Немає співробітників.</div>`}</div>
         </aside>
       </div>
     </div>
   `;
-  // Инициализация событий перетаскивания (Drag & Drop)
+
   $$(".calStaffDrag").forEach((card) => {
     card.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", JSON.stringify({
@@ -3981,43 +3121,30 @@ async function renderCalendarTab() {
         color: card.dataset.dragStaffColor,
       }));
       e.dataTransfer.effectAllowed = "copy";
-      card.style.opacity = "0.5";
+      card.classList.add("dragging");
     });
-    card.addEventListener("dragend", () => { card.style.opacity = "1"; });
+    card.addEventListener("dragend", () => { card.classList.remove("dragging"); });
   });
 
   $$(".calSlot").forEach((slot) => {
     slot.addEventListener("click", (e) => {
       if (slot.classList.contains("calSlotCovered")) return;
-      if (e.target.closest(".calEventDelete")) return;
-      if (slot.querySelector(".appointment-cell.has-appointment")) return;
-
+      if (slot.querySelector(".calEventCard")) return;
       const target = e.target.closest("[data-empty-slot]") || slot;
       const hour = target.dataset.hour || slot.dataset.hour;
       const staffId = target.dataset.staffId || slot.dataset.staffId;
-
-      if (hour && staffId) openVisitFromCalendar(hour, staffId);
+      if (!hour || !staffId) return;
+      openVisitFromCalendar(hour, staffId);
     });
 
-    slot.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      slot.style.background = "rgba(93, 67, 239, 0.08)";
-    });
-
-    slot.addEventListener("dragleave", () => {
-      slot.style.background = "";
-    });
-
+    slot.addEventListener("dragover", (e) => { e.preventDefault(); slot.classList.add("calSlotDrop"); });
+    slot.addEventListener("dragleave", () => { slot.classList.remove("calSlotDrop"); });
     slot.addEventListener("drop", async (e) => {
-      e.preventDefault();
-      slot.style.background = "";
-
+      e.preventDefault(); slot.classList.remove("calSlotDrop");
       let data = null;
       try { data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}"); } catch { return; }
 
-      const staffId = data.staff_id;
-      if (!staffId) return;
-
+      const staffId = data.staff_id; if (!staffId) return;
       const hour = slot.dataset.hour;
       const title = (prompt(`Запис на ${hour}. Назва:`, "Новий прийом") || "").trim();
       if (!title) return;
@@ -4027,75 +3154,623 @@ async function renderCalendarTab() {
       const endTime = addMinutesToTime(hour, duration);
       const note = (prompt("Коментар:", "") || "").trim();
 
-      const created = await createCalendarEventApi({
-        title,
-        event_date: today,
-        start_time: hour,
-        end_time: endTime,
-        staff_id: staffId,
-        note,
-      });
-
+      const created = await createCalendarEventApi({ title, event_date: today, start_time: hour, end_time: endTime, staff_id: staffId, note });
       if (created) await renderCalendarTab();
     });
   });
 
-  $("#btnAddStaffFromCalendar")?.addEventListener("click", () => openCreateStaffModal());
-  bindCalendarNavigation(today);
-  bindCalendarEventsLogics(todayEvents);
-}
+  $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => { alert("Наступний крок: зробимо форму додавання ветеринара в Supabase."); });
+  $("#calPrevDay")?.addEventListener("click", async () => { const d = new Date(today); d.setDate(d.getDate() - 1); window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab(); });
+  $("#calNextDay")?.addEventListener("click", async () => { const d = new Date(today); d.setDate(d.getDate() + 1); window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab(); });
 
-/* --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ПРИВЯЗКИ СОБЫТИЙ КАЛЕНДАРЯ --- */
-function bindCalendarModes() {
-  $$("[data-cal-mode]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      calendarMode = btn.dataset.calMode;
-      await renderCalendarTab();
-    });
-  });
-}
-
-function bindCalendarNavigation(today) {
-  $("#calPrevDay")?.addEventListener("click", async () => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - 1);
-    window.__calendarDate = d.toISOString().slice(0, 10);
-    await renderCalendarTab();
-  });
-
-  $("#calNextDay")?.addEventListener("click", async () => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + 1);
-    window.__calendarDate = d.toISOString().slice(0, 10);
-    await renderCalendarTab();
-  });
-}
-
-function bindCalendarEventsLogics(todayEvents) {
   $$("[data-del-calendar-event]").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
       e.preventDefault(); e.stopPropagation();
-      const id = btn.dataset.delCalendarEvent;
-      if (id && confirm("Видалити запис з календаря?")) {
-        const ok = await deleteCalendarEventApi(id);
-        if (ok) await renderCalendarTab();
-      }
+      const id = btn.dataset.delCalendarEvent; if (!id) return;
+      if (!confirm("Видалити запис з календаря?")) return;
+      const ok = await deleteCalendarEventApi(id); if (ok) await renderCalendarTab();
     });
   });
 
   $$("[data-edit-calendar-event]").forEach((card) => {
     card.addEventListener("click", async (e) => {
       if (e.target.closest("[data-del-calendar-event]")) return;
-      const id = card.dataset.editCalendarEvent;
+      const id = card.dataset.editCalendarEvent; if (!id) return;
       const ev = todayEvents.find((x) => String(x.id) === String(id));
-      if (ev) {
-        openCalendarEditModal(ev, window.__calendarDate || new Date().toISOString().slice(0, 10), async () => {
-          await renderCalendarTab();
-        });
-      }
+      if (!ev) return alert("Запис не знайдено");
+      openCalendarEditModal(ev, today, async () => { await renderCalendarTab(); });
     });
   });
+
+  $$("[data-cal-mode]").forEach((btn) => { btn.addEventListener("click", async () => { calendarMode = btn.dataset.calMode; await renderCalendarTab(); }); });
 }
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ПЕРСОНАЛ, МОДАЛКИ КАЛЕНДАРЯ И КАРТОЧКИ АНАЛИЗОВ)
+// Часть 5
+// ==========================================================================
+
+async function openCreateStaffModal() {
+  $("#staffId").value = "";
+  $("#staffName").value = "";
+  $("#staffRole").value = "vet";
+  $("#staffSpecialization").value = "";
+  $("#staffPhone").value = "";
+  $("#staffShiftRate").value = 0;
+  $("#staffPercentRate").value = 0;
+  $("#staffColor").value = "#7C5CFF";
+  $("#staffNote").value = "";
+
+  if (typeof renderStaffSpecsBox === "function") await renderStaffSpecsBox([]);
+
+  $("#staffDrawer").classList.add("open");
+  $("#staffDrawer").setAttribute("aria-hidden", "false");
+}
+
+async function loadSpecializationsApi() {
+  try {
+    const res = await fetch("/api/specializations");
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Cannot load specializations");
+    return Array.isArray(json.data) ? json.data : [];
+  } catch (e) {
+    console.error("loadSpecializationsApi failed:", e);
+    return [];
+  }
+}
+
+async function createSpecializationApi(payload) {
+  try {
+    const res = await fetch("/api/specializations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error || "Не вдалося створити напрям");
+      return null;
+    }
+    return json.data || null;
+  } catch (e) {
+    console.error("createSpecializationApi failed:", e);
+    alert("Помилка створення напряму");
+    return null;
+  }
+}
+
+async function createStaffApi(payload) {
+  try {
+    const res = await fetch("/api/staff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error || "Помилка створення ветеринара");
+      return null;
+    }
+    return json.data || null;
+  } catch (e) {
+    console.error(e);
+    alert("Помилка створення ветеринара");
+    return null;
+  }
+}
+
+async function createCalendarEventApi(payload) {
+  try {
+    const res = await fetch("/api/calendar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.error === "time slot busy"
+        ? "Цей час вже зайнятий у цього лікаря"
+        : "Не вдалося створити запис: " + (json.error || "unknown error")
+      );
+      return null;
+    }
+    return json.data || json.item || null;
+  } catch (e) {
+    console.error("createCalendarEventApi failed:", e);
+    alert("Помилка створення запису: " + (e?.message || e));
+    return null;
+  }
+}
+
+async function updateCalendarEventApi(eventId, payload) {
+  try {
+    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert("Не вдалося оновити запис: " + (json.error || "unknown error"));
+      return null;
+    }
+    return json.data || json.item || null;
+  } catch (e) {
+    console.error("updateCalendarEventApi failed:", e);
+    alert("Помилка оновлення запису: " + (e?.message || e));
+    return null;
+  }
+}
+
+async function deleteCalendarEventApi(eventId) {
+  try {
+    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
+      method: "DELETE",
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert("Не вдалося видалити запис: " + (json.error || "unknown error"));
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("deleteCalendarEventApi failed:", e);
+    alert("Помилка видалення запису: " + (e?.message || e));
+    return false;
+  }
+}
+
+function addMinutesToTime(time, minutes) {
+  const [h, m] = String(time || "00:00").split(":").map(Number);
+  const d = new Date();
+  d.setHours(h || 0, m || 0, 0, 0);
+  d.setMinutes(d.getMinutes() + Number(minutes || 60));
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+function loadLabs() {
+  const arr = LS.get(LABS_KEY, []);
+  return Array.isArray(arr) ? arr : [];
+}
+
+function saveLabs(arr) {
+  LS.set(LABS_KEY, Array.isArray(arr) ? arr : []);
+}
+
+function getLabsByPetId(petId) {
+  return loadLabs().filter((x) => String(x.pet_id) === String(petId));
+}
+
+function getLabStatus(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "empty";
+  if (n < min) return "low";
+  if (n > max) return "high";
+  return "normal";
+}
+
+function labStatusLabel(status) {
+  if (status === "low") return "↓ нижче";
+  if (status === "high") return "↑ вище";
+  if (status === "normal") return "норма";
+  return "—";
+}
+
+function labScalePercent(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 50;
+
+  const span = max - min;
+  const visualMin = min - span * 0.6;
+  const visualMax = max + span * 0.6;
+
+  const pct = ((n - visualMin) / (visualMax - visualMin)) * 100;
+  return Math.max(3, Math.min(97, pct));
+}
+
+function renderLabScale(value, min, max) {
+  const status = getLabStatus(value, min, max);
+  const pct = labScalePercent(value, min, max);
+
+  return `
+    <div class="labScale">
+      <div class="labScaleNorm"></div>
+      <div class="labScaleDot lab-${status}" style="left:${pct}%"></div>
+    </div>
+  `;
+}
+
+function ensureCalendarModal() {
+  let modal = document.getElementById("calendarEventModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "calendarEventModal";
+  modal.innerHTML = `
+    <div class="modal__backdrop" data-close-calendar-modal></div>
+    <div class="modal__panel calEditPanel">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title">Редагування запису</div>
+          <div class="modal__sub">Час, лікар, коментар</div>
+        </div>
+        <button class="iconBtn" data-close-calendar-modal type="button">✕</button>
+      </div>
+      <div class="modal__body">
+        <label class="field">
+          <div class="label">Назва</div>
+          <input class="input" id="calEditTitle">
+        </label>
+        <div class="medFormGrid">
+          <label class="field">
+            <div class="label">Початок</div>
+            <input class="input" id="calEditStart" type="time">
+          </label>
+          <label class="field">
+            <div class="label">Кінець</div>
+            <input class="input" id="calEditEnd" type="time">
+          </label>
+        </div>
+        <label class="field">
+          <div class="label">Коментар</div>
+          <textarea class="textarea" id="calEditNote" rows="4"></textarea>
+        </label>
+      </div>
+      <div class="modal__foot">
+        <button class="ghost" data-close-calendar-modal type="button">Скасувати</button>
+        <button class="primary" id="calEditSaveBtn" type="button">Зберегти</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close-calendar-modal]")) {
+      modal.classList.remove("open");
+    }
+  });
+  return modal;
+}
+
+function openCalendarEditModal(ev, today, onSaved) {
+  const modal = ensureCalendarModal();
+
+  $("#calEditTitle").value = ev.title || "";
+  $("#calEditStart").value = String(ev.start_time || "").slice(0, 5);
+  $("#calEditEnd").value = String(ev.end_time || "").slice(0, 5);
+  $("#calEditNote").value = ev.note || "";
+
+  modal.classList.add("open");
+
+  $("#calEditSaveBtn").onclick = async () => {
+    const title = ($("#calEditTitle").value || "").trim();
+    const start_time = ($("#calEditStart").value || "").trim();
+    const end_time = ($("#calEditEnd").value || "").trim();
+    const note = ($("#calEditNote").value || "").trim();
+
+    if (!title || !start_time || !end_time) {
+      alert("Заповни назву, початок і кінець");
+      return;
+    }
+
+    const updated = await updateCalendarEventApi(ev.id, {
+      title,
+      event_date: ev.event_date || today,
+      start_time,
+      end_time,
+      staff_id: ev.staff_id,
+      note,
+    });
+
+    if (updated) {
+      modal.classList.remove("open");
+      if (typeof onSaved === "function") await onSaved();
+    }
+  };
+}
+
+function renderLabsTab(pet) {
+  const box = $("#patientTabContent");
+  if (!box || !pet) return;
+
+  const speciesKey = getPetSpeciesKey(pet);
+  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
+  const labs = getLabsByPetId(pet.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  box.innerHTML = `
+    <div class="patientInfoBox">
+      <div class="row" style="align-items:flex-start;">
+        <div>
+          <h2>Аналізи</h2>
+          <div class="hint">Норми підтягуються автоматично: ${escapeHtml(speciesLabel)}.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="primary" id="btnAddBioLab">+ БХ</button>
+          <button class="primary" id="btnAddCbcLab">+ ЗАК</button>
+        </div>
+      </div>
+      <div id="labsList" class="labsList">
+        ${
+          labs.length
+            ? labs.map((lab) => renderLabCard(lab, speciesKey)).join("")
+            : `<div class="hint">Поки аналізів немає. Натисни “+ БХ” або “+ ЗАК”.</div>`
+        }
+      </div>
+    </div>
+  `;
+
+  $("#btnAddBioLab")?.addEventListener("click", () => addLabForPet(pet, "Біохімія"));
+  $("#btnAddCbcLab")?.addEventListener("click", () => addLabForPet(pet, "ЗАК"));
+
+  $("#labsList")?.addEventListener("click", async (e) => {
+    const del = e.target.closest("[data-del-lab]");
+    if (del) {
+      const id = del.dataset.delLab;
+      if (!id) return;
+      if (!confirm("Видалити аналіз?")) return;
+
+      const next = loadLabs().filter((x) => String(x.id) !== String(id));
+      saveLabs(next);
+      renderLabsTab(pet);
+      return;
+    }
+
+    const edit = e.target.closest("[data-edit-lab]");
+    if (edit) {
+      const id = edit.dataset.editLab;
+      if (!id) return;
+      if (typeof editLabForPet === "function") editLabForPet(pet, id);
+      return;
+    }
+
+    const pdf = e.target.closest("[data-pdf-lab]");
+    if (pdf) {
+      const id = pdf.dataset.pdfLab;
+      if (!id) return;
+      const lab = loadLabs().find((x) => String(x.id) === String(id));
+      if (!lab) return alert("Аналіз не знайдено");
+      if (typeof downloadLabPdf === "function") await downloadLabPdf(pet, lab);
+      return;
+    }
+  });
+}
+
+function addLabForPet(pet, groupName) {
+  const date = prompt("Дата аналізу:", todayISO()) || todayISO();
+  const keys = LAB_GROUPS[groupName] || [];
+  const values = {};
+
+  keys.forEach((key) => {
+    const label = LAB_LABELS[key] || key;
+    const raw = prompt(`${label}:`, "");
+    if (raw !== null && String(raw).trim() !== "") {
+      values[key] = Number(String(raw).replace(",", "."));
+    }
+  });
+
+  const lab = {
+    id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
+    pet_id: String(pet.id),
+    type: groupName,
+    date,
+    values,
+    created_at: new Date().toISOString(),
+  };
+
+  const arr = loadLabs();
+  arr.unshift(lab);
+  saveLabs(arr);
+  renderLabsTab(pet);
+}
+
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (РЕДАКТИРОВАНИЕ ЛАБ, РЕНДЕРИНГ PDF И СЕЛЕКТОРЫ ПРИЕМА)
+// Часть 7
+// ==========================================================================
+
+function editLabForPet(pet, labId) {
+  const arr = loadLabs();
+  const idx = arr.findIndex((x) => String(x.id) === String(labId));
+  if (idx < 0) return alert("Аналіз не знайдено");
+
+  const lab = arr[idx];
+  const keys = LAB_GROUPS[lab.type] || Object.keys(lab.values || {});
+  const nextValues = { ...(lab.values || {}) };
+
+  const date = prompt("Дата аналізу:", lab.date || todayISO()) || lab.date || todayISO();
+
+  keys.forEach((key) => {
+    const label = LAB_LABELS[key] || key;
+    const oldVal = nextValues[key] ?? "";
+    const raw = prompt(`${label}:`, String(oldVal));
+
+    if (raw === null) return;
+
+    if (String(raw).trim() === "") {
+      delete nextValues[key];
+    } else {
+      nextValues[key] = Number(String(raw).replace(",", "."));
+    }
+  });
+
+  arr[idx] = {
+    ...lab,
+    date,
+    values: nextValues,
+    updated_at: new Date().toISOString(),
+  };
+
+  saveLabs(arr);
+  renderLabsTab(pet);
+}
+
+async function downloadLabPdf(pet, labId) {
+  if (typeof window.html2pdf === "undefined") {
+    return alert("html2pdf не подключен");
+  }
+
+  const lab = loadLabs().find((x) => String(x.id) === String(labId));
+  if (!lab) return alert("Аналіз не знайдено");
+
+  const root = document.createElement("div");
+  root.style.position = "fixed";
+  root.style.left = "-99999px";
+  root.style.top = "0";
+  root.innerHTML = renderLabPdfHtml(pet, lab);
+  document.body.appendChild(root);
+
+  const a4 = root.querySelector(".labPdfA4");
+  if (!a4) {
+    root.remove();
+    return alert("Не вдалося створити PDF");
+  }
+
+  const filename = `DocPUG_${String(lab.type || "lab")}_${String(pet.name || "patient")}_${String(lab.date || todayISO())}.pdf`;
+
+  try {
+    await window.html2pdf()
+      .set({
+        margin: 0,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: null,
+          logging: false,
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
+      })
+      .from(a4)
+      .save();
+  } catch (e) {
+    console.error(e);
+    alert("Не вдалося скачати PDF: " + (e?.message || e));
+  } finally {
+    root.remove();
+  }
+}
+
+function renderLabPdfHtml(pet, lab) {
+  const speciesKey = getPetSpeciesKey(pet);
+  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
+  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
+  const values = lab.values || {};
+  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
+
+  const rows = keys.map((key) => {
+    const ref = ranges[key];
+    if (!ref) return "";
+
+    const [min, max, unit] = ref;
+    const value = values[key];
+    const status = getLabStatus(value, min, max);
+
+    return `
+      <tr>
+        <td>${escapeHtml(LAB_LABELS[key] || key)}</td>
+        <td><b>${escapeHtml(value ?? "—")}</b> ${escapeHtml(unit)}</td>
+        <td>${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</td>
+        <td class="lab-${status}">${escapeHtml(labStatusLabel(status))}</td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <div class="labPdfA4">
+      <div class="labPdfHeader">
+        <div>
+          <div class="labPdfTitle">Аналіз / ${escapeHtml(lab.type || "—")}</div>
+          <div class="labPdfBrand">Doc.PUG</div>
+        </div>
+        <div class="pill">${escapeHtml(lab.date || "—")}</div>
+      </div>
+
+      <div class="labPdfPatient">
+        <div>
+          <div class="history-label">Пацієнт</div>
+          <div><b>${escapeHtml(pet.name || "—")}</b></div>
+          <div class="meta">${escapeHtml(speciesLabel)}</div>
+        </div>
+      </div>
+
+      <div class="labPdfBlock">
+        <table class="servicesTable">
+          <thead>
+            <tr>
+              <th>Показник</th>
+              <th>Результат</th>
+              <th>Норма</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+
+      <div class="labPdfFooter">Doc.PUG • Коли важливо — ми поруч.</div>
+    </div>
+  `;
+}
+
+function renderLabCard(lab, speciesKey) {
+  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
+  const values = lab.values || {};
+  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
+
+  return `
+    <div class="labCard">
+      <div class="labCardHead">
+        <div>
+          <div class="labTitle">${escapeHtml(lab.type || "Аналіз")}</div>
+          <div class="labDate">${escapeHtml(lab.date || "—")}</div>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button class="iconBtn" title="Редагувати" data-edit-lab="${escapeHtml(lab.id)}">✏️</button>
+          <button class="iconBtn" title="PDF для клієнта" data-pdf-lab="${escapeHtml(lab.id)}">📄</button>
+          <button class="iconBtn" title="Видалити" data-del-lab="${escapeHtml(lab.id)}">🗑</button>
+        </div>
+      </div>
+
+      <div class="labRows">
+        ${keys.map((key) => {
+          const value = values[key];
+          const ref = ranges[key];
+          if (!ref) return "";
+
+          const [min, max, unit] = ref;
+          const status = getLabStatus(value, min, max);
+
+          return `
+            <div class="labRow">
+              <div class="labName">
+                <b>${escapeHtml(LAB_LABELS[key] || key)}</b>
+                <span>норма: ${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</span>
+              </div>
+
+              <div class="labValue lab-${status}">
+                ${value ?? "—"} ${escapeHtml(unit)}
+              </div>
+
+              <div class="labStatus lab-${status}">
+                ${labStatusLabel(status)}
+              </div>
+
+              ${renderLabScale(value, min, max)}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
 async function downloadLabPdf(pet, lab) {
   if (typeof window.html2pdf === "undefined") {
     return alert("html2pdf не підключений");
@@ -4187,6 +3862,7 @@ async function downloadLabPdf(pet, lab) {
 
   wrap.remove();
 }
+
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
@@ -4212,7 +3888,7 @@ async function renderVisits(petId) {
         .slice()
         .sort((a, b) => String(b.date || b.id).localeCompare(String(a.date || a.id)))
         .map((v) => {
-          const parsed = parseVisitNote(v.note || "");
+          const parsed = typeof parseVisitNote === "function" ? parseVisitNote(v.note || "") : { dx: "", complaint: v.note };
           const dx = parsed.dx || "Без діагнозу";
           const complaint = parsed.complaint || "Скарги не вказані";
 
@@ -4228,30 +3904,17 @@ async function renderVisits(petId) {
                     <div class="visitDate">${escapeHtml(v.date || "—")}</div>
                     <div class="visitDx">Діагноз: ${escapeHtml(dx)}</div>
                   </div>
-
                   <div class="visitCardBadges">
                     <div class="pill">💰 ${escapeHtml(String(grandTotal))} грн</div>
                     <div class="pill">📄 Візит</div>
                   </div>
                 </div>
-
                 <div class="visitMiniBlock">
                   <div class="history-label">Скарга / стан</div>
                   <div class="visitMiniText">${escapeHtml(complaint)}</div>
                 </div>
-
-                ${
-                  v.rx
-                    ? `
-                      <div class="visitMiniBlock">
-                        <div class="history-label">Призначення</div>
-                        <div class="visitMiniText">${escapeHtml(v.rx)}</div>
-                      </div>
-                    `
-                    : ""
-                }
+                ${v.rx ? `<div class="visitMiniBlock"><div class="history-label">Призначення</div><div class="visitMiniText">${escapeHtml(v.rx)}</div></div>` : ""}
               </div>
-
               <div class="right" style="display:flex; gap:6px;">
                 <button class="iconBtn" title="Редагувати" data-edit-visit="${escapeHtml(String(v.id))}">✏️</button>
                 <button class="iconBtn" title="Видалити візит" data-del-visit="${escapeHtml(String(v.id))}">🗑</button>
@@ -4266,27 +3929,21 @@ async function renderVisits(petId) {
   box.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const visitId = editBtn.dataset.editVisit;
-      if (visitId) await openVisitModalForEdit(visitId);
+      if (visitId && typeof openVisitModalForEdit === "function") await openVisitModalForEdit(visitId);
       return;
     }
 
     const delBtn = e.target.closest("[data-del-visit]");
     if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const visitId = delBtn.dataset.delVisit;
       if (!visitId) return;
-
       if (!confirm("Видалити цей візит?")) return;
 
       const ok = await deleteVisitApi(visitId);
       if (!ok) return alert("Не вдалося видалити візит.");
-
       await renderVisits(petId);
       return;
     }
@@ -4304,15 +3961,10 @@ function refreshVisitServiceSelect() {
   if (!select) return;
 
   const q = String(state.visitSvcQuery || "").trim().toLowerCase();
-
   const options = loadServices()
     .filter((s) => s.active !== false)
     .filter((s) => !q || String(s.name || "").toLowerCase().includes(q))
-    .map((s) => {
-      return `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(
-        String(Number(s.price) || 0)
-      )} грн</option>`;
-    })
+    .map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(String(Number(s.price) || 0))} грн</option>`)
     .join("");
 
   select.innerHTML = options || `<option value="">Немає послуг</option>`;
@@ -4323,7 +3975,6 @@ function refreshVisitStockSelect() {
   if (!select) return;
 
   const q = String(state.visitStkQuery || "").trim().toLowerCase();
-
   const options = loadStock()
     .filter((it) => it.active !== false)
     .filter((it) => !q || String(it.name || "").toLowerCase().includes(q))
@@ -4331,10 +3982,7 @@ function refreshVisitStockSelect() {
       const left = Number(it.qty) || 0;
       const unit = String(it.unit || "шт");
       const price = Number(it.price) || 0;
-
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(
-        String(price)
-      )} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
+      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
     })
     .join("");
 
@@ -4345,108 +3993,99 @@ function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
 
-  // back + discharge (capture so nothing can block it лол)
-  document.addEventListener(
-    "click",
-    (e) => {
-      if (e.target.closest("#btnBackPatient")) {
-        if (state.selectedPetId) openPatient(state.selectedPetId);
-        else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
-        else setHash("owners");
-        return;
-      }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#btnBackPatient")) {
+      if (state.selectedPetId) openPatient(state.selectedPetId);
+      else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
+      else setHash("owners");
+      return;
+    }
 
-      if (e.target.closest("#btnDischarge")) {
-        const visitId = state.selectedVisitId;
-        if (!visitId) return alert("Спочатку відкрий візит.");
-        openDischargeModal(visitId);
-        return;
-      }
-    },
-    true
-  );
+    if (e.target.closest("#btnDischarge")) {
+      const visitId = state.selectedVisitId;
+      if (!visitId) return alert("Спочатку відкрий візит.");
+      if (typeof openDischargeModal === "function") openDischargeModal(visitId);
+      return;
+    }
+  }, true);
 
-  // SERVICES + STOCK (capture=true)
+  // ==========================================================================
+// Doc.PUG CRM Mini — app.js (ЭКРАН ПРИЕМА: ДЕЛЕГИРОВАНИЕ, СЛУШАТЕЛИ И ОБРАБОТКА ВИЗИТА)
+// Часть 8
+// ==========================================================================
+
+  // Обработчик кликов внутри открытого визита (услуги + склад)
   const handler = async (e) => {
     try {
       if (e.target.closest("#visitMedSave")) {
-  e.preventDefault();
-  e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
 
-  const vid = state.selectedVisitId;
-  if (!vid) return alert("Візит не обраний");
+        const vid = state.selectedVisitId;
+        if (!vid) return alert("Візит не обраний");
 
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return alert("Візит не знайдено");
+        const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
+        if (!current) return alert("Візит не знайдено");
 
-  const dx = String(document.getElementById("visitMedDx")?.value || "").trim();
-  const complaint = String(document.getElementById("visitMedComplaint")?.value || "").trim();
-  const rx = String(document.getElementById("visitMedRx")?.value || "").trim();
+        const dx = String(document.getElementById("visitMedDx")?.value || "").trim();
+        const complaint = String(document.getElementById("visitMedComplaint")?.value || "").trim();
+        const rx = String(document.getElementById("visitMedRx")?.value || "").trim();
 
-  const services = Array.isArray(current.services) ? current.services : [];
-  const stock = Array.isArray(current.stock) ? current.stock : [];
+        const services = Array.isArray(current.services) ? current.services : [];
+        const stock = Array.isArray(current.stock) ? current.stock : [];
 
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    weight_kg: current.weight_kg,
+        const payload = {
+          pet_id: current.pet_id,
+          date: current.date,
+          weight_kg: current.weight_kg,
+          note: buildVisitNote(dx, complaint),
+          rx,
+          services,
+          services_json: services,
+          stock,
+          stock_json: stock,
+        };
 
-    note: buildVisitNote(dx, complaint),
-    rx,
+        const btn = document.getElementById("visitMedSave");
+        const hint = document.getElementById("visitMedSaveHint");
 
-    services,
-    services_json: services,
-    stock,
-    stock_json: stock,
-  };
+        if (btn) btn.textContent = "Збереження…";
 
-  const btn = document.getElementById("visitMedSave");
-  const hint = document.getElementById("visitMedSaveHint");
+        const updated = await updateVisitApi(vid, payload);
+        if (!updated) {
+          if (btn) btn.textContent = "💾 Зберегти";
+          return alert("Не вдалося зберегти медичну частину");
+        }
 
-  if (btn) btn.textContent = "Збереження…";
+        const merged = {
+          ...current,
+          ...updated,
+          note: payload.note,
+          rx: payload.rx,
+          services,
+          services_json: services,
+          stock,
+          stock_json: stock,
+        };
 
-  const updated = await updateVisitApi(vid, payload);
-  if (!updated) {
-    if (btn) btn.textContent = "💾 Зберегти";
-    return alert("Не вдалося зберегти медичну частину");
-  }
+        state.visitsById.set(String(vid), merged);
+        if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = merged;
+        
+        setDischarge(vid, { complaint, dx, rx });
 
-  const merged = {
-    ...current,
-    ...updated,
-    note: payload.note,
-    rx: payload.rx,
-    services,
-    services_json: services,
-    stock,
-    stock_json: stock,
-  };
+        if (btn) btn.textContent = "✅ Збережено";
+        if (hint) hint.textContent = "Медична частина збережена.";
 
-  state.visitsById.set(String(vid), merged);
-  if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = merged;
-  setDischarge(vid, {
+        if (typeof renderDischargeA4 === "function") renderDischargeA4(vid);
 
-  complaint,
+        setTimeout(() => {
+          if (btn) btn.textContent = "💾 Зберегти";
+          if (hint) hint.textContent = "Можна редагувати прямо тут. Після змін натисни “Зберегти”.";
+        }, 1200);
+        return;
+      }
 
-  dx,
-
-  rx,
-
-});
-
-  if (btn) btn.textContent = "✅ Збережено";
-  if (hint) hint.textContent = "Медична частина збережена.";
-
-  renderDischargeA4(vid);
-
-  setTimeout(() => {
-    if (btn) btn.textContent = "💾 Зберегти";
-    if (hint) hint.textContent = "Можна редагувати прямо тут. Після змін натисни “Зберегти”.";
-  }, 1200);
-
-  return;
-}
-      // add service
+      // Добавление услуги в чек
       if (e.target.closest("#visitSvcAdd")) {
         e.preventDefault();
         e.stopPropagation();
@@ -4463,15 +4102,15 @@ function initVisitUI() {
         const ok = await addServiceLineToVisit(vid, serviceId, qty);
         if (!ok) return alert("Не вдалося додати послугу");
 
-       const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
-if (!v) return;
+        const v = getVisitByIdSync(vid) || await fetchVisitById(vid);
+        if (!v) return;
 
-renderVisitPage(v, state.selectedPet);
-renderDischargeA4(vid);
+        renderVisitPage(v, state.selectedPet);
+        if (typeof renderDischargeA4 === "function") renderDischargeA4(vid);
         return;
       }
 
-      // remove service
+      // Удаление услуги из чека
       const svcDel = e.target.closest("[data-svc-del]");
       if (svcDel) {
         e.preventDefault();
@@ -4489,16 +4128,14 @@ renderDischargeA4(vid);
         if (!ok) return alert("Не вдалося прибрати послугу");
 
         const fresh = getVisitByIdSync(vid);
-
-if (fresh) {
-  renderVisitPage(fresh, state.selectedPet);
-  renderDischargeA4(vid);
-}
-
-return;
+        if (fresh) {
+          renderVisitPage(fresh, state.selectedPet);
+          if (typeof renderDischargeA4 === "function") renderDischargeA4(vid);
+        }
+        return;
       }
 
-      // add stock
+      // Добавление препарата со склада
       if (e.target.closest("#visitStkAdd")) {
         e.preventDefault();
         e.stopPropagation();
@@ -4516,16 +4153,14 @@ return;
         if (!ok) return alert("Не вдалося додати препарат");
 
         const fresh = getVisitByIdSync(vid);
-
-if (fresh) {
-  renderVisitPage(fresh, state.selectedPet);
-  renderDischargeA4(vid);
-}
-
-return;
+        if (fresh) {
+          renderVisitPage(fresh, state.selectedPet);
+          if (typeof renderDischargeA4 === "function") renderDischargeA4(vid);
+        }
+        return;
       }
 
-      // remove stock
+      // Удаление препарата из чека
       const stkDel = e.target.closest("[data-stk-del]");
       if (stkDel) {
         e.preventDefault();
@@ -4543,13 +4178,11 @@ return;
         if (!ok) return alert("Не вдалося прибрати препарат");
 
         const fresh = getVisitByIdSync(vid);
-
-if (fresh) {
-  renderVisitPage(fresh, state.selectedPet);
-  renderDischargeA4(vid);
-}
-
-return;
+        if (fresh) {
+          renderVisitPage(fresh, state.selectedPet);
+          if (typeof renderDischargeA4 === "function") renderDischargeA4(vid);
+        }
+        return;
       }
     } catch (err) {
       console.error("Visit UI click failed:", err);
@@ -4559,38 +4192,30 @@ return;
 
   document.addEventListener("click", handler, true);
   document.addEventListener("touchstart", handler, { passive: false, capture: true });
-    // 🔍 ПОИСК ПОСЛУГ И ПРЕПАРАТОВ (делегированно, чтобы не слетал при renderVisitPage)
-  document.addEventListener(
-  "input",
-  (e) => {
-    const t = e.target;
 
-    // поиск услуг
+  // Делегированный инпут поиска услуг и товаров (чтобы не слетал фокус ввода при перерисовках)
+  document.addEventListener("input", (e) => {
+    const t = e.target;
     if (t && t.id === "visitSvcSearch") {
       state.visitSvcQuery = String(t.value || "");
-      refreshVisitServiceSelect();
+      if (typeof refreshVisitServiceSelect === "function") refreshVisitServiceSelect();
       return;
     }
-
-    // поиск препаратов
     if (t && t.id === "visitStkSearch") {
       state.visitStkQuery = String(t.value || "");
-      refreshVisitStockSelect();
+      if (typeof refreshVisitStockSelect === "function") refreshVisitStockSelect();
       return;
     }
-  },
-  true
-);
+  }, true);
 }
 
-// ===== Visit page =====
+// ===== Переход на страницу конкретного визита =====
 async function openVisit(visitId, opts = { pushHash: true }) {
   const vid = String(visitId || "").trim();
   if (!vid) return;
 
   let visit = getVisitByIdSync(vid);
 
-  // 🔁 если визита нет — пробуем загрузить с сервера
   if (!visit) {
     try {
       const arr = await loadVisitsApi({ id: vid });
@@ -4598,7 +4223,6 @@ async function openVisit(visitId, opts = { pushHash: true }) {
     } catch {}
   }
 
-  // ⛔ только ТЕПЕРЬ можно сказать что не найдено
   if (!visit) {
     alert("Візит не знайдено");
     setHash("visits");
@@ -4610,13 +4234,8 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 
   state.selectedVisitId = vid;
 
-  const patients =
-    Array.isArray(state.patients) && state.patients.length
-      ? state.patients
-      : loadPatients();
-
-  const pet =
-    (patients || []).find((p) => String(p.id) === String(visit.pet_id)) || null;
+  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
+  const pet = (patients || []).find((p) => String(p.id) === String(visit.pet_id)) || null;
 
   if (pet) {
     state.selectedPet = pet;
@@ -4625,7 +4244,7 @@ async function openVisit(visitId, opts = { pushHash: true }) {
   }
 
   renderVisitPage(visit, pet);
-  renderVisitFiles(vid);
+  if (typeof renderVisitFiles === "function") renderVisitFiles(vid);
   initVisitUI();
   setRoute("visit");
 
@@ -4633,7 +4252,7 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 }
 
 // =========================
-// Visit page rendering (SERVER save)
+// Отрисовка страницы приёма и медицинских блоков
 // =========================
 function renderVisitPage(visit, pet) {
   const pill = $("#visitDatePill");
@@ -4659,49 +4278,36 @@ function renderVisitPage(visit, pet) {
   const dx = parsed.dx || "";
   const complaint = parsed.complaint || "";
 
-  // --- SERVICES ---
+  // Сборка услуг
   ensureVisitServicesShape(visit);
-
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
 
   const svcOptions = loadServices()
     .filter((s) => s.active !== false)
     .filter((s) => !svcQ || String(s.name || "").toLowerCase().includes(svcQ))
-    .map((s) => {
-      return `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(
-        String(Number(s.price) || 0)
-      )} грн</option>`;
-    })
+    .map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(String(Number(s.price) || 0))} грн</option>`)
     .join("");
 
   const expanded = expandServiceLines(visit);
   const total = calcServicesTotal(visit);
 
   const svcListHtml = expanded.length
-    ? expanded
-        .map(
-          (x, idx) => `
-            <div class="visitLine">
-              <div>
-                <div class="visitLineName">${escapeHtml(x.name)}</div>
-                <div class="visitLineMeta">
-                  ${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн
-                </div>
-              </div>
-
-              <div class="visitLineRight">
-                <b>${escapeHtml(String(x.lineTotal))} грн</b>
-                <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
-              </div>
-            </div>
-          `
-        )
-        .join("")
+    ? expanded.map((x, idx) => `
+        <div class="visitLine">
+          <div>
+            <div class="visitLineName">${escapeHtml(x.name)}</div>
+            <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
+          </div>
+          <div class="visitLineRight">
+            <b>${escapeHtml(String(x.lineTotal))} грн</b>
+            <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+          </div>
+        </div>
+      `).join("")
     : `<div class="hint">Поки послуг немає. Додай нижче.</div>`;
 
-  // --- STOCK ---
+  // Сборка препаратов со склада
   ensureVisitStockShape(visit);
-
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
 
   const stkOptions = loadStock()
@@ -4711,10 +4317,7 @@ function renderVisitPage(visit, pet) {
       const left = Number(it.qty) || 0;
       const unit = String(it.unit || "шт");
       const price = Number(it.price) || 0;
-
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(
-        String(price)
-      )} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
+      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
     })
     .join("");
 
@@ -4722,25 +4325,18 @@ function renderVisitPage(visit, pet) {
   const stkTotal = calcStockTotal(visit);
 
   const stkListHtml = stkExpanded.length
-    ? stkExpanded
-        .map(
-          (x, idx) => `
-            <div class="visitLine">
-              <div>
-                <div class="visitLineName">${escapeHtml(x.name)}</div>
-                <div class="visitLineMeta">
-                  ${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}
-                </div>
-              </div>
-
-              <div class="visitLineRight">
-                <b>${escapeHtml(String(x.lineTotal))} грн</b>
-                <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
-              </div>
-            </div>
-          `
-        )
-        .join("")
+    ? stkExpanded.map((x, idx) => `
+        <div class="visitLine">
+          <div>
+            <div class="visitLineName">${escapeHtml(x.name)}</div>
+            <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}</div>
+          </div>
+          <div class="visitLineRight">
+            <b>${escapeHtml(String(x.lineTotal))} грн</b>
+            <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+          </div>
+        </div>
+      `).join("")
     : `<div class="hint">Поки препаратів немає. Додай нижче.</div>`;
 
   const grandTotal = total + stkTotal;
@@ -4751,12 +4347,10 @@ function renderVisitPage(visit, pet) {
         <div class="visitMoneyLabel">Послуги</div>
         <div class="visitMoneyValue">${escapeHtml(String(total))} грн</div>
       </div>
-
       <div class="visitMoneyCard">
         <div class="visitMoneyLabel">Препарати</div>
         <div class="visitMoneyValue">${escapeHtml(String(stkTotal))} грн</div>
       </div>
-
       <div class="visitMoneyCard visitMoneyCardTotal">
         <div class="visitMoneyLabel">Разом</div>
         <div class="visitMoneyValue">${escapeHtml(String(grandTotal))} грн</div>
@@ -4768,40 +4362,20 @@ function renderVisitPage(visit, pet) {
         <div class="visitBlockTitle">Медична частина</div>
         <button type="button" class="miniBtn" id="visitMedSave">💾 Зберегти</button>
       </div>
-
       <div class="visitMedGrid visitMedGridEdit">
         <label class="field visitMedItem">
           <div class="history-label">Діагноз</div>
-          <input
-            class="input"
-            id="visitMedDx"
-            type="text"
-            placeholder="Напр.: цистит / гастроентерит / отит"
-            value="${escapeHtml(dx)}"
-          />
+          <input class="input" id="visitMedDx" type="text" placeholder="Напр.: цистит / гастроентерит / отит" value="${escapeHtml(dx)}" />
         </label>
-
         <label class="field visitMedItem">
           <div class="history-label">Скарга / стан</div>
-          <textarea
-            class="textarea visitMedTextarea"
-            id="visitMedComplaint"
-            rows="5"
-            placeholder="Скарги, анамнез, стан на момент огляду..."
-          >${escapeHtml(complaint)}</textarea>
+          <textarea class="textarea visitMedTextarea" id="visitMedComplaint" rows="5" placeholder="Скарги, анамнез, стан на момент огляду...">${escapeHtml(complaint)}</textarea>
         </label>
-
         <label class="field visitMedItem visitMedItemWide">
           <div class="history-label">Призначення</div>
-          <textarea
-            class="textarea visitMedTextarea"
-            id="visitMedRx"
-            rows="6"
-            placeholder="Препарат • доза • кратність • курс"
-          >${escapeHtml(rx)}</textarea>
+          <textarea class="textarea visitMedTextarea" id="visitMedRx" rows="6" placeholder="Препарат • доза • кратність • курс">${escapeHtml(rx)}</textarea>
         </label>
       </div>
-
       <div class="hint" id="visitMedSaveHint" style="margin-top:10px;">
         Можна редагувати прямо тут. Після змін натисни “Зберегти”.
       </div>
@@ -4809,60 +4383,58 @@ function renderVisitPage(visit, pet) {
 
     <div class="visitBlock">
       <div class="visitBlockTitle">Послуги</div>
-
       <div class="visitPicker">
         <input id="visitSvcSearch" type="search" placeholder="Пошук послуги…" value="${escapeHtml(state.visitSvcQuery || "")}" />
         <select id="visitSvcSelect">${svcOptions || `<option value="">Немає послуг</option>`}</select>
         <input id="visitSvcQty" type="number" min="1" value="1" />
         <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
       </div>
-
       <div class="visitLines">${svcListHtml}</div>
     </div>
 
     <div class="visitBlock">
       <div class="visitBlockTitle">Препарати / склад</div>
-
       <div class="visitPicker">
         <input id="visitStkSearch" type="search" placeholder="Пошук препарату…" value="${escapeHtml(state.visitStkQuery || "")}" />
         <select id="visitStkSelect">${stkOptions || `<option value="">Немає препаратів</option>`}</select>
         <input id="visitStkQty" type="number" min="1" value="1" />
         <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
       </div>
-
       <div class="visitLines">${stkListHtml}</div>
     </div>
   `;
 }
+
 function parseVisitNote(note) {
   const t = String(note || "");
-
-  // ожидаем формат:
-  // "Діагноз: ...\n\nСкарги/анамнез: ..."
   const dxMatch = t.match(/Діагноз:\s*(.*?)(\n|$)/i);
   const dx = (dxMatch?.[1] || "").trim();
 
   const compMatch = t.match(/Скарги\/анамнез:\s*([\s\S]*)/i);
   const complaint = (compMatch?.[1] || "").trim();
 
-  // если нет шаблонов — считаем весь note жалобой
   return {
     dx: dx || "",
     complaint: complaint || (!dx ? t.trim() : ""),
   };
 }
 
-function fillDischargeForm(visit, existing) {
-  // existing = то, что ты сохраняешь в local discharge (если есть)
-  const ex = existing || {};
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (БЛАНКИ ВЫПИСОК А4, ПЕЧАТЬ И ОБРАБОТЧИКИ КАРТОЧЕК)
+// Часть 8
+// ==========================================================================
 
+function fillDischargeForm(visit, existing) {
+  const ex = existing || {};
   const parsed = parseVisitNote(visit?.note || "");
+  
   const complaint = (ex.complaint ?? ex.disComplaint ?? parsed.complaint ?? "").toString();
   const dx = (ex.dx ?? ex.disDx ?? parsed.dx ?? "").toString();
-  const parsedRx = parseRxCombined(visit?.rx || "");
-const rx = (ex.rx ?? ex.disRx ?? parsedRx.rx ?? "").toString();
-const recs = (ex.recs ?? ex.disRecs ?? parsedRx.recs ?? "").toString();
-const follow = (ex.follow ?? ex.disFollow ?? parsedRx.follow ?? "").toString();
+  
+  const parsedRx = typeof parseRxCombined === "function" ? parseRxCombined(visit?.rx || "") : { rx: visit?.rx || "", recs: "", follow: "" };
+  const rx = (ex.rx ?? ex.disRx ?? parsedRx.rx ?? "").toString();
+  const recs = (ex.recs ?? ex.disRecs ?? parsedRx.recs ?? "").toString();
+  const follow = (ex.follow ?? ex.disFollow ?? parsedRx.follow ?? "").toString();
 
   const c = document.getElementById("disComplaint");
   const d = document.getElementById("disDx");
@@ -4892,7 +4464,6 @@ async function renderDischargeA4(visitId) {
   if (!a4) return;
 
   let v = getVisitByIdSync(visitId);
-
   if (!v) {
     v = await fetchVisitById(visitId);
     if (v?.id) cacheVisits([v]);
@@ -4903,10 +4474,7 @@ async function renderDischargeA4(visitId) {
     return;
   }
 
-  const patients = (Array.isArray(state.patients) && state.patients.length)
-    ? state.patients
-    : loadPatients();
-
+  const patients = (Array.isArray(state.patients) && state.patients.length) ? state.patients : loadPatients();
   const pet = (patients || []).find((p) => String(p.id) === String(v.pet_id)) || null;
   const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
 
@@ -4948,21 +4516,9 @@ async function renderDischargeA4(visitId) {
       stkHtml = `
         <div class="servicesPro">
           <table class="servicesTable">
-            <thead>
-              <tr>
-                <th>Препарат</th>
-                <th>К-сть</th>
-                <th>Ціна</th>
-                <th>Сума</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Препарат</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr></thead>
             <tbody>${rows}</tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3">Разом</td>
-                <td>${escapeHtml(String(totalS))} грн</td>
-              </tr>
-            </tfoot>
+            <tfoot><tr><td colspan="3">Разом</td><td>${escapeHtml(String(totalS))} грн</td></tr></tfoot>
           </table>
         </div>
       `;
@@ -4989,7 +4545,6 @@ async function renderDischargeA4(visitId) {
           ${escapeHtml([pet?.species, pet?.breed, pet?.age, v?.weight_kg ? `${v.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
         </div>
       </div>
-
       <div>
         <div class="history-label">Власник</div>
         <div class="a4Name">${escapeHtml(owner?.name || "—")}</div>
@@ -5016,7 +4571,6 @@ async function renderDischargeA4(visitId) {
 
     <div class="a4Block dischargeFinanceBlock">
       <div class="history-label">Послуги / Препарати</div>
-
       <div class="servicesPro">
         <table class="servicesTable">
           <thead>
@@ -5028,7 +4582,6 @@ async function renderDischargeA4(visitId) {
               <th>Сума</th>
             </tr>
           </thead>
-
           <tbody>
             ${
               [
@@ -5044,20 +4597,13 @@ async function renderDischargeA4(visitId) {
                   <td>${escapeHtml(String(x.lineTotal || 0))}</td>
                 </tr>
               `)
-              .join("") || `
-                <tr>
-                  <td colspan="5">—</td>
-                </tr>
-              `
+              .join("") || `<tr><td colspan="5">—</td></tr>`
             }
           </tbody>
-
           <tfoot>
             <tr>
               <td colspan="4">Разом</td>
-              <td>
-                ${escapeHtml(String((calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0)))} грн
-              </td>
+              <td>${escapeHtml(String((calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0)))} грн</td>
             </tr>
           </tfoot>
         </table>
@@ -5076,17 +4622,15 @@ async function renderDischargeA4(visitId) {
   </div>
 `;
 }
+
 function parseRxCombined(text) {
   const t = String(text || "");
-
-  // пробуем вытащить секции по маркерам
   const recsMatch = t.match(/(?:^|\n)Рекомендації:\n([\s\S]*?)(?=\n\nКонтроль \/ при погіршенні:\n|\s*$)/);
   const followMatch = t.match(/(?:^|\n)Контроль \/ при погіршенні:\n([\s\S]*)$/);
 
   const recs = (recsMatch?.[1] || "").trim();
   const follow = (followMatch?.[1] || "").trim();
 
-  // "чистый rx" = то что до "Рекомендації:" (если есть)
   let rx = t;
   const cut = t.indexOf("\n\nРекомендації:\n");
   if (cut >= 0) rx = t.slice(0, cut);
@@ -5094,31 +4638,29 @@ function parseRxCombined(text) {
 
   return { rx, recs, follow };
 }
+
 function normalizeJsonArray(val) {
   if (Array.isArray(val)) return val;
   if (typeof val === "string") {
     try {
       const parsed = JSON.parse(val);
       return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+    } catch { return []; }
   }
   return [];
 }
 
 function safeVisitArray(primary, backup) {
-  // primary = visit.services или visit.stock
-  // backup  = visit.services_json или visit.stock_json (могут быть строкой)
   const a = normalizeJsonArray(primary);
   if (a.length) return a;
   return normalizeJsonArray(backup);
 }
+
 function initDischargeModalUI() {
   if (state.dischargeListenersBound) return;
 
   const modal = $("#dischargeModal");
-  if (!modal) return; // если в HTML нет модалки — просто выходим
+  if (!modal) return;
 
   const live = () => {
     const vid = modal.dataset.visitId;
@@ -5130,18 +4672,14 @@ function initDischargeModalUI() {
     if (el) el.addEventListener("input", live);
   });
 
-  document.addEventListener(
-  "click",
-  async (e) => {
+  document.addEventListener("click", async (e) => {
     const modal = $("#dischargeModal");
     if (!modal) return;
-
     const vid = modal.dataset.visitId;
 
-    // --- SAVE ---
+    // Сохранение на сервер
     if (e.target.closest("#disSave")) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if (!vid) return;
 
       const form = readDischargeForm();
@@ -5151,21 +4689,19 @@ function initDischargeModalUI() {
       if (!current) return alert("Візит не знайдено");
 
       const services = safeVisitArray(current.services, current.services_json);
-const stock    = safeVisitArray(current.stock, current.stock_json);
+      const stock    = safeVisitArray(current.stock, current.stock_json);
 
-const payload = {
-  pet_id: current.pet_id,
-  date: current.date,
-  weight_kg: current.weight_kg,
-  note: buildVisitNote(form.dx, form.complaint),
-  rx: buildRxCombined(form.rx, form.recs, form.follow),
-
-  // ✅ НЕ ДАЁМ СЕРВЕРУ ЗАТЕРЕТЬ
-  services,
-  services_json: services,
-  stock,
-  stock_json: stock,
-};
+      const payload = {
+        pet_id: current.pet_id,
+        date: current.date,
+        weight_kg: current.weight_kg,
+        note: buildVisitNote(form.dx, form.complaint),
+        rx: typeof buildRxCombined === "function" ? buildRxCombined(form.rx, form.recs, form.follow) : `${form.rx}\n\nРекомендації:\n${form.recs}\n\nКонтроль / при погіршенні:\n${form.follow}`,
+        services,
+        services_json: services,
+        stock,
+        stock_json: stock,
+      };
 
       const updated = await updateVisitApi(vid, payload);
       if (!updated) return alert("Помилка збереження візиту");
@@ -5179,42 +4715,31 @@ const payload = {
       fillDischargeForm(fresh, getDischarge(vid) || form);
       renderDischargeA4(vid);
       await refreshVisitUIIfOpen();
-
       alert("✅ Збережено на сервері");
       return;
     }
 
-    // --- PRINT ---
     if (e.target.closest("#disPrint")) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if (!vid) return;
-      printA4Only(vid);
-      return;
+      printA4Only(vid); return;
     }
 
-    // --- DOWNLOAD PDF ---
     if (e.target.closest("#disDownload")) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if (!vid) return;
-      await downloadA4Pdf(vid);
-      return;
+      await downloadA4Pdf(vid); return;
     }
 
-    // --- CLOSE ---
     if (e.target.closest("[data-close-discharge]")) {
-      closeDischargeModal();
-      return;
+      closeDischargeModal(); return;
     }
-  },
-  true
-);
+  }, true);
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeDischargeModal();
-      closeVisitModal();
+      if (typeof closeVisitModal === "function") closeVisitModal();
     }
   });
 
@@ -5230,7 +4755,6 @@ async function openDischargeModal(visitId) {
 
   modal.dataset.visitId = vid;
 
-  // ✅ ВАЖНО: гарантируем, что визит есть (кеш или сервер)
   let v = getVisitByIdSync(vid);
   if (!v) v = await fetchVisitById(vid);
   if (v?.id) cacheVisits([v]);
@@ -5239,10 +4763,10 @@ async function openDischargeModal(visitId) {
   fillDischargeForm(v || {}, existing);
 
   await renderDischargeA4(vid);
-
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 }
+
 function closeDischargeModal() {
   const modal = $("#dischargeModal");
   if (!modal) return;
@@ -5251,21 +4775,14 @@ function closeDischargeModal() {
   delete modal.dataset.visitId;
 }
 
-
-
-// ===== UI init (Owners) — server-first (delegated, survives rerenders) =====
 function initOwnersUI() {
   if (state.ownersUiBound) return;
   state.ownersUiBound = true;
 
-  // Delegated clicks so buttons keep working after innerHTML rerenders
   document.addEventListener("click", async (e) => {
-    // ➕ Добавить владельца (support a few possible ids/selectors)
     const addBtn = e.target.closest("#btnAddOwner, [data-action='add-owner'], [data-action='addOwner'], .btnAddOwner");
     if (addBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const name = (prompt("Имя владельца:") || "").trim();
       if (!name) return;
 
@@ -5274,63 +4791,47 @@ function initOwnersUI() {
 
       const created = await createOwner(name, phone, note);
       if (!created) return;
+      await loadOwners(); return;
+    }
 
-      // ✅ всегда берём актуальный список с сервера
+    const ownersList = e.target.closest("#ownersList");
+    if (!ownersList) return;
+
+    const editBtn = e.target.closest("[data-edit-owner]");
+    if (editBtn) {
+      e.preventDefault(); e.stopPropagation();
+      const id = editBtn.dataset.editOwner;
+      if (!id) return;
+
+      const owner = (state.owners || []).find((o) => String(o.id) === String(id));
+      if (!owner) return alert("Власника не знайдено");
+
+      const name = (prompt("Імʼя власника:", owner.name || "") || "").trim();
+      if (!name) return;
+
+      const phone = (prompt("Телефон:", owner.phone || "") || "").trim();
+      const note = (prompt("Нотатка / місто:", owner.note || "") || "").trim();
+
+      const updated = await updateOwner(id, { name, phone, note });
+      if (!updated) return;
       await loadOwners();
+
+      if (state.selectedOwnerId && String(state.selectedOwnerId) === String(id)) {
+        renderOwnerPage(id);
+      }
       return;
     }
 
-    // 🗑 / ➡️ Клик по списку владельцев
-    const ownersList = e.target.closest("#ownersList");
-    if (!ownersList) return;
-// ✏️ Редактирование
-const editBtn = e.target.closest("[data-edit-owner]");
-if (editBtn) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const id = editBtn.dataset.editOwner;
-  if (!id) return;
-
-  const owner = (state.owners || []).find((o) => String(o.id) === String(id));
-  if (!owner) return alert("Власника не знайдено");
-
-  const name = (prompt("Імʼя власника:", owner.name || "") || "").trim();
-  if (!name) return;
-
-  const phone = (prompt("Телефон:", owner.phone || "") || "").trim();
-  const note = (prompt("Нотатка / місто:", owner.note || "") || "").trim();
-
-  const updated = await updateOwner(id, { name, phone, note });
-  if (!updated) return;
-
-  await loadOwners();
-
-  if (state.selectedOwnerId && String(state.selectedOwnerId) === String(id)) {
-    renderOwnerPage(id);
-  }
-
-  return;
-}
-    // 🗑 Удаление
     const delBtn = e.target.closest("[data-del]");
     if (delBtn) {
-      const id = delBtn.dataset.del;
-      if (!id) return;
-
+      const id = delBtn.dataset.del; if (!id) return;
       if (!confirm("Удалить владельца?")) return;
 
       const ok = await deleteOwner(id);
-      if (!ok) {
-        alert("Не удалось удалить владельца");
-        return;
-      }
-
-      await loadOwners();
-      return;
+      if (!ok) return alert("Не удалось удалить владельца");
+      await loadOwners(); return;
     }
 
-    // ➡️ Открытие владельца
     const openZone = e.target.closest("[data-open-owner]");
     if (openZone) {
       const ownerId = openZone.dataset.openOwner;
@@ -5338,17 +4839,21 @@ if (editBtn) {
     }
   });
 
-  // Back button can stay direct (usually static), but also make it safe:
   document.addEventListener("click", (e) => {
     if (e.target.closest("#btnBackOwners")) setHash("owners");
   });
 }
 
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (СПЕЦИФИКАЦИИ, МОДАЛЬНЫЕ ОКНА И ОБРАБОТЧИКИ ПРОФИЛЕЙ)
+// Часть 9
+// ==========================================================================
+
 // =========================
-// OWNER UI — server-first
+// OWNER UI — Управление карточкой владельца
 // =========================
 function initOwnerUI() {
-  // ➕ add pet (server)
+  // Добавление животного владельцу
   $("#btnAddPet")?.addEventListener("click", async () => {
     const ownerId = state.selectedOwnerId;
     if (!ownerId) return alert("Спочатку обери власника");
@@ -5357,7 +4862,7 @@ function initOwnerUI() {
     if (!name) return;
 
     const species = askSpecies("dog");
-if (!species) return;
+    if (!species) return;
     const breed = (prompt("Порода (необязательно):") || "").trim();
     const age = (prompt("Возраст (например: 3 года / 8 мес):") || "").trim();
     const weight_kg = (prompt("Вес (кг, например 7.5):") || "").trim();
@@ -5375,34 +4880,25 @@ if (!species) return;
 
     if (!created) return;
 
-    // ✅ перезагружаем пациентов с сервера и обновляем владельца
     await loadPatientsApi();
     renderOwnerPage(ownerId);
   });
 
-  // pets list click: delete/open
+  // Клик по списку животных (Удаление / Открытие)
   $("#petsList")?.addEventListener("click", async (e) => {
-    // 🗑 delete pet (server)
     const delBtn = e.target.closest("[data-del-pet]");
     if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const petId = delBtn.dataset.delPet;
       if (!petId) return;
 
       if (!confirm("Видалити пацієнта назавжди?")) return;
 
       const ok = await deletePatientApi(petId);
-      if (!ok) {
-        alert("Не вдалося видалити пацієнта.");
-        return;
-      }
+      if (!ok) return alert("Не вдалося видалити пацієнта.");
 
-      // ✅ обновляем список пациентов с сервера
       await loadPatientsApi();
 
-      // если удалили текущего выбранного — сбросим
       if (state.selectedPetId === petId) {
         state.selectedPetId = null;
         state.selectedPet = null;
@@ -5412,7 +4908,6 @@ if (!species) return;
       return;
     }
 
-    // open pet
     const openZone = e.target.closest("[data-open-pet]");
     if (openZone) {
       const petId = openZone.dataset.openPet;
@@ -5421,9 +4916,8 @@ if (!species) return;
   });
 }
 
-
 // =========================
-// VISITS TAB UI — server-first
+// VISITS TAB UI — Глобальный журнал визитов
 // =========================
 function initVisitsTabUI() {
   const page = $(`.page[data-page="visits"]`);
@@ -5432,19 +4926,14 @@ function initVisitsTabUI() {
   page.addEventListener("click", async (e) => {
     const del = e.target.closest("[data-del-visit]");
     if (del) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const visitId = del.dataset.delVisit;
       if (!visitId) return;
 
       if (!confirm("Видалити візит назавжди?")) return;
 
       const ok = await deleteVisitApi(visitId);
-      if (!ok) {
-        alert("Не вдалося видалити візит.");
-        return;
-      }
+      if (!ok) return alert("Не вдалося видалити візит.");
 
       try {
         const arr = await loadVisitsApi();
@@ -5458,9 +4947,7 @@ function initVisitsTabUI() {
 
     const btn = e.target.closest("[data-open-visit]");
     if (btn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const visitId = btn.dataset.openVisit;
       if (visitId) openVisit(visitId);
     }
@@ -5470,18 +4957,14 @@ function initVisitsTabUI() {
 function closeVisitModal() {
   const modal = $("#visitModal");
   if (!modal) return;
-
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
   delete modal.dataset.visitId;
 }
 
-
 // =========================
-// VISIT_FILES (LOCAL links) — minimal working
+// VISIT_FILES (Управление связями в LocalStorage)
 // =========================
-
-// visit_files: [{ visit_id, file_id, created_at }]
 function loadVisitFilesLinks() {
   const arr = LS.get(VISIT_FILES_KEY, []);
   return Array.isArray(arr) ? arr : [];
@@ -5491,7 +4974,6 @@ function saveVisitFilesLinks(arr) {
   LS.set(VISIT_FILES_KEY, Array.isArray(arr) ? arr : []);
 }
 
-// вернуть file_ids привязанные к визиту
 function getFileIdsForVisit(visitId) {
   const vid = String(visitId || "");
   if (!vid) return [];
@@ -5501,51 +4983,64 @@ function getFileIdsForVisit(visitId) {
     .filter(Boolean);
 }
 
-// ✅ привязать список fileIds к визиту (добавляет, без дублей)
 function linkFilesToVisit(visitId, fileIds) {
   const vid = String(visitId || "");
   if (!vid) return;
 
-  const ids = (Array.isArray(fileIds) ? fileIds : [])
-    .map((x) => String(x || ""))
-    .filter(Boolean);
-
+  const ids = (Array.isArray(fileIds) ? fileIds : []).map((x) => String(x || "")).filter(Boolean);
   if (!ids.length) return;
 
   const links = loadVisitFilesLinks();
-
   for (const fid of ids) {
-    const exists = links.some(
-      (r) => String(r.visit_id) === vid && String(r.file_id) === String(fid)
-    );
+    const exists = links.some((r) => String(r.visit_id) === vid && String(r.file_id) === String(fid));
     if (!exists) {
-      links.push({
-        visit_id: vid,
-        file_id: String(fid),
-        created_at: nowISO(),
-      });
+      links.push({ visit_id: vid, file_id: String(fid), created_at: nowISO() });
     }
   }
-
   saveVisitFilesLinks(links);
 }
 
-// ✅ отвязать 1 файл от визита
 function detachFileFromVisit(visitId, fileId) {
   const vid = String(visitId || "");
   const fid = String(fileId || "");
   if (!vid || !fid) return;
 
-  const next = loadVisitFilesLinks().filter(
-    (r) => !(String(r.visit_id) === vid && String(r.file_id) === fid)
-  );
-
+  const next = loadVisitFilesLinks().filter((r) => !(String(r.visit_id) === vid && String(r.file_id) === fid));
   saveVisitFilesLinks(next);
 }
 
+// =========================
+// Спецификации видов животных и нормализаторы
+// =========================
+function normalizeSpecies(value) {
+  const s = String(value || "").toLowerCase().trim();
+  if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
+  if (s === "cat" || s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
+  return "dog";
+}
+
+function speciesLabel(value) {
+  const key = normalizeSpecies(value);
+  if (key === "cat") return "кіт";
+  return "пес";
+}
+
+function askSpecies(current = "dog") {
+  const cur = normalizeSpecies(current);
+  const raw = prompt("Вид пацієнта:\n1 — пес\n2 — кіт", cur === "cat" ? "2" : "1");
+  if (raw === null) return null;
+
+  const v = String(raw).trim().toLowerCase();
+  if (v === "2" || v === "cat" || v.includes("кот") || v.includes("кіт")) return "cat";
+  return "dog";
+}
+
+function getPetSpeciesKey(pet) {
+  return normalizeSpecies(pet?.species);
+}
 
 // =========================
-// VISIT MODAL helpers (GLOBAL)
+// Вспомогательные функции модального окна визитов
 // =========================
 function openVisitModalForCreate(pet) {
   const modal = $("#visitModal");
@@ -5558,56 +5053,18 @@ function openVisitModalForCreate(pet) {
   $("#visitDx").value = "";
   $("#visitWeight").value = pet?.weight_kg || "";
   $("#visitRx").value = "";
+  
   loadStaffApi().then((staff) => {
-  const select = $("#visitStaff");
-  if (!select) return;
-
-  select.innerHTML = `
-    <option value="">Оберіть ветеринара</option>
-    ${staff.map((doc) => `
-      <option value="${escapeHtml(String(doc.id))}">
-        ${escapeHtml(doc.name || "Працівник")}
-      </option>
-    `).join("")}
-  `;
-});
+    const select = $("#visitStaff");
+    if (!select) return;
+    select.innerHTML = `
+      <option value="">Оберіть ветеринара</option>
+      ${staff.map((doc) => `<option value="${escapeHtml(String(doc.id))}">${escapeHtml(doc.name || "Працівник")}</option>`).join("")}
+    `;
+  });
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
-}
-
-function normalizeSpecies(value) {
-  const s = String(value || "").toLowerCase().trim();
-
-  if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
-  if (s === "cat" || s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
-
-  return "dog";
-}
-
-function speciesLabel(value) {
-  const key = normalizeSpecies(value);
-  if (key === "cat") return "кіт";
-  return "пес";
-}
-
-function askSpecies(current = "dog") {
-  const cur = normalizeSpecies(current);
-  const raw = prompt(
-    "Вид пацієнта:\n1 — пес\n2 — кіт",
-    cur === "cat" ? "2" : "1"
-  );
-
-  if (raw === null) return null;
-
-  const v = String(raw).trim().toLowerCase();
-
-  if (v === "2" || v === "cat" || v.includes("кот") || v.includes("кіт")) return "cat";
-  return "dog";
-}
-
-function getPetSpeciesKey(pet) {
-  return normalizeSpecies(pet?.species);
 }
 
 async function openVisitModalForEdit(visitId) {
@@ -5628,76 +5085,67 @@ async function openVisitModalForEdit(visitId) {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 }
+
 // =========================
-// PATIENT UI — server-first
+// PATIENT UI — Управление карточкой животного
 // =========================
+// subdivision
 function initPatientUI() {
   $("#btnBackOwner")?.addEventListener("click", () => {
     if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
     else setHash("owners");
   });
 
-  // ➕ create visit (server)
   $("#btnAddVisit")?.addEventListener("click", () => {
     const pet = state.selectedPet;
     if (!pet) return alert("Пацієнт не обраний");
     openVisitModalForCreate(pet);
   });
 
-  // list clicks: delete / edit / open
   $("#visitsList")?.addEventListener("click", async (e) => {
-    // 🗑 delete visit (server)
+    // Удаление
     const delBtn = e.target.closest("[data-del-visit]");
     if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const visitId = delBtn.dataset.delVisit;
       if (!visitId) return;
-
       if (!confirm("Видалити цей візит?")) return;
 
       const ok = await deleteVisitApi(visitId);
-      if (!ok) {
-        alert("Не вдалося видалити візит.");
-        return;
-      }
+      if (!ok) return alert("Не вдалося видалити візит.");
 
-      // ✅ обновим список визитов пациента с сервера
-      if (state.selectedPetId) {
-        await renderVisits(state.selectedPetId); // server (getVisitsByPetId)
-      }
+      if (state.selectedPetId) await renderVisits(state.selectedPetId);
       return;
     }
 
-    // ✏️ edit visit (server)
+    // Редактирование
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const visitId = editBtn.dataset.editVisit;
       if (visitId) await openVisitModalForEdit(visitId);
       return;
     }
 
-    // ➡️ open visit
+    // Открытие визита
     const item = e.target.closest(".item");
-if (!item) return;
+    if (!item) return;
 
-const visitId = item.dataset.openVisit; // ✅ правильно
-if (visitId) openVisit(visitId);
+    const visitId = item.dataset.openVisit;
+    if (visitId) openVisit(visitId);
   });
 
-  // ✅ ВАЖНО: биндим файлы 1 раз, независимо от вкладок
-  if (!state.visitFilesUiBound) initVisitFilesUI();
+  if (!state.visitFilesUiBound) {
+    if (typeof initVisitFilesUI === "function") initVisitFilesUI();
+  }
 }
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ЗАГРУЗКА МЕДИА, АВТОДОБАВЛЕНИЕ ПАЦИЕНТОВ И ИСКЛЮЧЕНИЕ КОЛЛИЗИЙ)
+// Часть 9
+// ==========================================================================
 
-// =========================
-// VISIT FILES UI — server-first + safe fallback
-// =========================
 function initVisitFilesUI() {
-  // ---------- Upload files -> server -> meta -> (try attach) -> local links ----------
+  // Загрузка файлов на сервер и привязка к визиту
   document.addEventListener("change", async (e) => {
     const input = e.target && e.target.closest ? e.target.closest("#visitFiles") : null;
     if (!input) return;
@@ -5734,117 +5182,93 @@ function initVisitFilesUI() {
         throw new Error(json?.error || "Upload failed");
       }
 
-      // сервер может вернуть files[] или data[]
-      const savedMeta = Array.isArray(json.files)
-        ? json.files
-        : Array.isArray(json.data)
-          ? json.data
-          : [];
-
+      const savedMeta = Array.isArray(json.files) ? json.files : (Array.isArray(json.data) ? json.data : []);
       if (!savedMeta.length) throw new Error("Сервер не повернув файли");
 
-      // сохраняем meta локально
       upsertFilesFromServerMeta(savedMeta);
 
-      // получаем fileIds (local)
       const fileIds = savedMeta
         .map((m) => (m?.stored_name ? fileIdFromStored(m.stored_name) : null))
         .filter(Boolean);
 
-     // ✅ Привязка файлов к визиту — пока ЛОКАЛЬНО.
-// (server endpoint /api/visits/:id/files пока отсутствует)
-try {
-  // уже есть savedMeta и fileIds выше по коду
-  linkFilesToVisit(visitId, fileIds);
-
-  // перерисуем список файлов, если функция реально существует
-  if (typeof renderVisitFiles === "function") {
-    renderVisitFiles(visitId);
-  }
-} catch (attachErr) {
-  console.warn("⚠️ local attach files failed:", attachErr);
-  // даже если упало — не валим весь экран
-}
+      try {
+        linkFilesToVisit(visitId, fileIds);
+        if (typeof renderVisitFiles === "function") {
+          renderVisitFiles(visitId);
+        }
+      } catch (attachErr) {
+        console.warn("⚠️ local attach files failed:", attachErr);
+      }
     } catch (err) {
       console.error(err);
       alert("Помилка завантаження: " + (err?.message || err));
       if (state.selectedVisitId && typeof renderVisitFiles === "function") {
-  renderVisitFiles(state.selectedVisitId);
-}
+        renderVisitFiles(state.selectedVisitId);
+      }
     } finally {
-      // сброс input
       try { e.target.value = ""; } catch {}
     }
   });
 
-  // ---------- Actions on files list: detach / delete ----------
-
   state.visitFilesUiBound = true;
 }
-// =========================
-// VISIT MODAL — buttons + SAVE (server-first, safe)
-// =========================
 
-// modal buttons
+// =========================
+// VISIT MODAL — Управление окном записи и сохранения
+// =========================
 $("#visitCancel")?.addEventListener("click", closeVisitModal);
 $("#visitClose")?.addEventListener("click", closeVisitModal);
 $("#visitModal")?.addEventListener("click", (e) => {
   if (e.target.closest("[data-close]")) closeVisitModal();
 });
 
-// save visit (create/edit) — server-first
+// Сохранение приёма (Создание или Редактирование) с проверкой коллизий
 $("#visitSave")?.addEventListener("click", async () => {
   try {
     const modal = $("#visitModal");
-    const editVisitId = modal?.dataset?.visitId || ""; // ✅ set in openVisitModalForEdit; empty in create
+    const editVisitId = modal?.dataset?.visitId || "";
 
     let pet = state.selectedPet;
+    const selectedPatientId = ($("#visitPatientSelect")?.value || "").trim();
 
-const selectedPatientId = ($("#visitPatientSelect")?.value || "").trim();
+    if (!pet && selectedPatientId) {
+      const patients = window.__visitPatientList || await loadPatientsApi();
+      pet = patients.find((p) => String(p.id) === String(selectedPatientId));
+    }
 
-if (!pet && selectedPatientId) {
-  const patients = window.__visitPatientList || await loadPatientsApi();
+    // Автоматическое создание владельца и животного на лету из календаря
+    if (!pet && $("#visitNewPatientBox")?.style.display !== "none") {
+      const ownerName = ($("#visitNewOwnerName")?.value || "").trim();
+      const ownerPhone = ($("#visitNewOwnerPhone")?.value || "").trim();
+      const petName = ($("#visitNewPetName")?.value || "").trim();
+      const species = ($("#visitNewPetSpecies")?.value || "").trim();
+      const breed = ($("#visitNewPetBreed")?.value || "").trim();
 
-  pet = patients.find(
-    (p) => String(p.id) === String(selectedPatientId)
-  );
-}
+      if (!ownerName) return alert("Вкажи власника");
+      if (!ownerPhone) return alert("Вкажи телефон власника");
+      if (!petName) return alert("Вкажи кличку пацієнта");
 
-// ✅ Новый пациент из календаря
-if (!pet && $("#visitNewPatientBox")?.style.display !== "none") {
-  const ownerName = ($("#visitNewOwnerName")?.value || "").trim();
-  const ownerPhone = ($("#visitNewOwnerPhone")?.value || "").trim();
-  const petName = ($("#visitNewPetName")?.value || "").trim();
-  const species = ($("#visitNewPetSpecies")?.value || "").trim();
-  const breed = ($("#visitNewPetBreed")?.value || "").trim();
+      const owner = await createOwner(ownerName, ownerPhone, "");
+      if (!owner?.id) return alert("Не вдалося створити власника");
 
-  if (!ownerName) return alert("Вкажи власника");
-  if (!ownerPhone) return alert("Вкажи телефон власника");
-  if (!petName) return alert("Вкажи кличку пацієнта");
+      const createdPet = await createPatientApi({
+        owner_id: owner.id,
+        name: petName,
+        species,
+        breed,
+      });
 
-  const owner = await createOwner(ownerName, ownerPhone, "");
+      if (!createdPet?.id) return alert("Не вдалося створити пацієнта");
 
-  if (!owner?.id) return alert("Не вдалося створити власника");
+      pet = createdPet;
+      state.selectedPet = pet;
+      state.selectedPetId = pet.id;
 
-  const createdPet = await createPatientApi({
-    owner_id: owner.id,
-    name: petName,
-    species,
-    breed,
-  });
+      await loadOwners();
+      await loadPatientsApi();
+    }
 
-  if (!createdPet?.id) return alert("Не вдалося створити пацієнта");
-
-  pet = createdPet;
-
-  state.selectedPet = pet;
-  state.selectedPetId = pet.id;
-
-  await loadOwners();
-  await loadPatientsApi();
-}
-
-if (!pet) return alert("Пацієнт не обраний");
+    if (!pet) return alert("Пацієнт не обраний");
 
     const date = ($("#visitDate")?.value || todayISO()).trim();
     const notePlain = ($("#visitNote")?.value || "").trim();
@@ -5853,107 +5277,93 @@ if (!pet) return alert("Пацієнт не обраний");
     const rx = ($("#visitRx")?.value || "").trim();
 
     const startTime = ($("#visitStartTime")?.value || "10:00").trim();
-const duration = Number($("#visitDuration")?.value || 60);
-const staffId = ($("#visitStaff")?.value || "").trim();
-const endTime = addMinutesToTime(startTime, duration);
-
+    const duration = Number($("#visitDuration")?.value || 60);
+    const staffId = ($("#visitStaff")?.value || "").trim();
+    const endTime = addMinutesToTime(startTime, duration);
 
     if (!notePlain && !dx && !rx) return alert("Заповни хоча б щось");
-
     if (!staffId) return alert("Оберіть ветеринара");
-if (!startTime) return alert("Оберіть час початку");
+    if (!startTime) return alert("Оберіть час початку");
 
-    // базовый payload
     const payload = {
-  pet_id: pet.id,
-  date,
-  note: buildVisitNote(dx, notePlain),
-  rx,
-  weight_kg: weight,
-
-  // ✅ ВСЕГДА дублируем в *_json чтобы сервер точно хранил
-  services: [],
-  services_json: [],
-  stock: [],
-  stock_json: [],
-};
+      pet_id: pet.id,
+      date,
+      note: buildVisitNote(dx, notePlain),
+      rx,
+      weight_kg: weight,
+      services: [],
+      services_json: [],
+      stock: [],
+      stock_json: [],
+    };
 
     // =========================
-    // EDIT (server)
+    // РЕЖИМ РЕДАКТИРОВАНИЯ ВИЗИТА
     // =========================
     if (editVisitId) {
-      // тянем визит с сервера, чтобы не потерять services/stock
       const current = await fetchVisitById(editVisitId);
       if (!current) return alert("Візит не знайдено");
 
       payload.services = safeVisitArray(current.services, current.services_json);
-payload.services_json = payload.services;
-
-payload.stock = safeVisitArray(current.stock, current.stock_json);
-payload.stock_json = payload.stock;
+      payload.services_json = payload.services;
+      payload.stock = safeVisitArray(current.stock, current.stock_json);
+      payload.stock_json = payload.stock;
 
       const updated = await updateVisitApi(editVisitId, payload);
       if (!updated) return;
 
       closeVisitModal();
-
-      // ✅ обновим список визитов пациента (server)
       if (state.selectedPetId) await renderVisits(state.selectedPetId);
-
-      // ✅ переоткроем визит (server)
       await openVisit(editVisitId);
-
-      // если пользователь на вкладке visits — перерендерим
       if (state.route === "visits") renderVisitsTab();
       return;
     }
 
     // =========================
-    // CREATE (server)
+    // РЕЖИМ СОЗДАНИЯ НОВОГО ВИЗИТА
     // =========================
     payload.services = Array.isArray(payload.services) ? payload.services : [];
-payload.services_json = payload.services;
+    payload.services_json = payload.services;
+    payload.stock = Array.isArray(payload.stock) ? payload.stock : [];
+    payload.stock_json = payload.stock;
+    
+    const existingEvents = await loadCalendarApi();
 
-payload.stock = Array.isArray(payload.stock) ? payload.stock : [];
-payload.stock_json = payload.stock;
-const existingEvents = await loadCalendarApi();
+    // Проверка коллизий по времени в расписании врача
+    const isBusy = existingEvents.some((ev) => {
+      if (String(ev.staff_id) !== String(staffId)) return false;
+      if (String(ev.event_date) !== String(date)) return false;
 
-const isBusy = existingEvents.some((ev) => {
-  if (String(ev.staff_id) !== String(staffId)) return false;
-  if (String(ev.event_date) !== String(date)) return false;
+      const evStart = String(ev.start_time || "").slice(0, 5);
+      const evEnd = String(ev.end_time || "").slice(0, 5);
 
-  const evStart = String(ev.start_time || "").slice(0, 5);
-  const evEnd = String(ev.end_time || "").slice(0, 5);
+      return startTime < evEnd && endTime > evStart;
+    });
 
-  return startTime < evEnd && endTime > evStart;
-});
+    if (isBusy) {
+      alert("Цей час уже зайнятий у цього ветеринара. Оберіть інший час.");
+      return;
+    }
 
-if (isBusy) {
-  alert("Цей час уже зайнятий у цього ветеринара. Оберіть інший час.");
-  return;
-}
     const created = await createVisitApi(payload);
-if (!created?.id) return;
+    if (!created?.id) return;
 
-await createCalendarEventApi({
-  title: `${pet.name || "Пацієнт"} — ${dx || notePlain || "Візит"}`,
-  event_date: date,
-  start_time: startTime,
-  end_time: endTime,
-  staff_id: staffId,
-  patient_id: pet.id,
-  owner_id: pet.owner_id,
-  visit_id: created.id,
-  note: notePlain || dx || "",
-  status: "planned",
-});
+    await createCalendarEventApi({
+      title: `${pet.name || "Пацієнт"} — ${dx || notePlain || "Візит"}`,
+      event_date: date,
+      start_time: startTime,
+      end_time: endTime,
+      staff_id: staffId,
+      patient_id: pet.id,
+      owner_id: pet.owner_id,
+      visit_id: created.id,
+      note: notePlain || dx || "",
+      status: "planned",
+    });
 
-closeVisitModal();
-
+    closeVisitModal();
     if (state.selectedPetId) await renderVisits(state.selectedPetId);
-
     await openVisit(created.id);
-
     if (state.route === "visits") renderVisitsTab();
   } catch (e) {
     console.error(e);
@@ -5961,9 +5371,11 @@ closeVisitModal();
   }
 });
 
-// =========================
-// VISIT PAGE UI (buttons on visit page)
-// =========================
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ВЕТКАРТА, КАСКАДНЫЕ УДАЛЕНИЯ И ЖУРНАЛ СТАЦИОНАРА)
+// Часть 9
+// ==========================================================================
+
 async function updatePatientApi(petId, payload = {}) {
   try {
     const bodyObj = {
@@ -6012,6 +5424,7 @@ async function updatePatientApi(petId, payload = {}) {
     return null;
   }
 }
+
 // =========================
 // DELETE — server-first (patients + visits)
 // =========================
@@ -6038,7 +5451,6 @@ async function deletePatientApi(petId) {
       alert(json?.error || "Помилка видалення пацієнта");
       return false;
     }
-
     return true;
   } catch (e) {
     console.error("deletePatientApi failed:", e);
@@ -6053,17 +5465,14 @@ async function deletePatientEverywhere(petId) {
   if (!pet) return;
 
   const name = pet.name || "Без імені";
-
   const msg = `Видалити пацієнта "${name}"?`;
   if (!confirm(msg)) return;
 
   const ok = await deletePatientApi(petId);
   if (!ok) return;
 
-  // ✅ обновим patients с сервера
   await loadPatientsApi();
 
-  // если сейчас открыт этот пациент — уходим на список
   if (state.selectedPetId === petId) {
     state.selectedPetId = null;
     state.selectedPet = null;
@@ -6071,7 +5480,6 @@ async function deletePatientEverywhere(petId) {
     setHash("patients");
   }
 
-  // перерисуем
   if (state.route === "patients") renderPatientsTab();
   if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
   if (state.route === "visits") renderVisitsTab();
@@ -6079,40 +5487,32 @@ async function deletePatientEverywhere(petId) {
 
 async function deleteVisitEverywhere(visitId) {
   if (!visitId) return false;
-
   if (!confirm("Видалити візит назавжди?")) return false;
 
   const ok = await deleteVisitApi(visitId);
   if (!ok) return false;
 
-  // ✅ если сейчас открыт этот визит — уйти назад
   if (state.selectedVisitId === visitId) {
     state.selectedVisitId = null;
     if (state.selectedPetId) openPatient(state.selectedPetId);
     else setHash("visits");
   }
 
-  // ✅ обновить списки (server)
   if (state.route === "visits") renderVisitsTab();
   if (state.selectedPetId) await renderVisits(state.selectedPetId);
-
   return true;
 }
 
-function loadStock() {
-  return LS.get(STOCK_KEY, []);
-}
-function saveStock(items) {
-  LS.set(STOCK_KEY, items);
-}
+function loadStock() { return LS.get(STOCK_KEY, []); }
+function saveStock(items) { LS.set(STOCK_KEY, items); }
 function getStockById(id) {
   const sid = String(id || "");
   return loadStock().find((x) => String(x.id) === sid) || null;
 }
+
 // =========================
 // PATIENT MEDCARD / VET CARD
 // =========================
-
 async function loadMedcardApi(patientId) {
   try {
     const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}/medcard`);
@@ -6203,7 +5603,6 @@ function renderMedcardEntryCard(x) {
           <div class="medEntryDate">${escapeHtml(dateLine)}</div>
           ${vitals ? `<div class="medEntryVitals">${vitals}</div>` : ""}
         </div>
-
         <div class="medEntryActions">
           <button class="iconBtn" title="Редагувати" data-edit-medcard="${escapeHtml(String(x.id))}">✏️</button>
           <button class="iconBtn" title="Видалити" data-del-medcard="${escapeHtml(String(x.id))}">🗑</button>
@@ -6225,41 +5624,12 @@ function renderMedcardEntryCard(x) {
           : ""
       }
 
-      ${
-        x.condition
-          ? `<div class="medBlock"><div class="history-label">Стан</div><div>${escapeHtml(x.condition)}</div></div>`
-          : ""
-      }
-
-      ${
-        x.treatment
-          ? `<div class="medBlock"><div class="history-label">Проведено / призначено</div><div>${escapeHtml(x.treatment)}</div></div>`
-          : ""
-      }
-
-      ${
-        x.dynamics
-          ? `<div class="medBlock"><div class="history-label">Динаміка</div><div>${escapeHtml(x.dynamics)}</div></div>`
-          : ""
-      }
-
-      ${
-        x.plan
-          ? `<div class="medBlock"><div class="history-label">План</div><div>${escapeHtml(x.plan)}</div></div>`
-          : ""
-      }
-
-      ${
-        x.note
-          ? `<div class="medBlock"><div class="history-label">Нотатка</div><div>${escapeHtml(x.note)}</div></div>`
-          : ""
-      }
-
-      ${
-        x.doctor
-          ? `<div class="medDoctor">👩‍⚕️ ${escapeHtml(x.doctor)}</div>`
-          : ""
-      }
+      ${x.condition ? `<div class="medBlock"><div class="history-label">Стан</div><div>${escapeHtml(x.condition)}</div></div>` : ""}
+      ${x.treatment ? `<div class="medBlock"><div class="history-label">Проведено / призначено</div><div>${escapeHtml(x.treatment)}</div></div>` : ""}
+      ${x.dynamics ? `<div class="medBlock"><div class="history-label">Динаміка</div><div>${escapeHtml(x.dynamics)}</div></div>` : ""}
+      ${x.plan ? `<div class="medBlock"><div class="history-label">План</div><div>${escapeHtml(x.plan)}</div></div>` : ""}
+      ${x.note ? `<div class="medBlock"><div class="history-label">Нотатка</div><div>${escapeHtml(x.note)}</div></div>` : ""}
+      ${x.doctor ? `<div class="medDoctor">👩‍⚕️ ${escapeHtml(x.doctor)}</div>` : ""}
     </div>
   `;
 }
@@ -6275,7 +5645,6 @@ function ensureMedcardModal() {
 
   modal.innerHTML = `
     <div class="modal__backdrop" data-close-medcard-modal></div>
-
     <div class="modal__panel medcardModalPanel" role="dialog" aria-modal="true">
       <div class="modal__head">
         <div>
@@ -6284,96 +5653,27 @@ function ensureMedcardModal() {
         </div>
         <button class="iconBtn" data-close-medcard-modal type="button">✕</button>
       </div>
-
       <div class="modal__body medcardModalBody">
         <div class="medFormGrid">
-          <label class="field">
-            <div class="label">Дата</div>
-            <input class="input" id="medEntryDate" type="date">
-          </label>
-
-          <label class="field">
-            <div class="label">Час</div>
-            <input class="input" id="medEntryTime" type="time">
-          </label>
-
-          <label class="field">
-            <div class="label">Вага, кг</div>
-            <input class="input" id="medWeight" placeholder="Напр.: 12.4">
-          </label>
-
-          <label class="field">
-            <div class="label">Температура</div>
-            <input class="input" id="medTemp" placeholder="Напр.: 39.2">
-          </label>
-
-          <label class="field">
-            <div class="label">Пульс / серце</div>
-            <input class="input" id="medPulse" placeholder="Напр.: 120, ритмічний">
-          </label>
-
-          <label class="field">
-            <div class="label">Слизові / ясна</div>
-            <input class="input" id="medMucosa" placeholder="Рожеві / бліді / ціаноз">
-          </label>
-
-          <label class="field">
-            <div class="label">Апетит</div>
-            <input class="input" id="medAppetite" placeholder="Добрий / знижений / відсутній">
-          </label>
-
-          <label class="field">
-            <div class="label">Вода / спрага</div>
-            <input class="input" id="medWater" placeholder="П’є / не п’є / полідипсія">
-          </label>
-
-          <label class="field">
-            <div class="label">Сечовипускання</div>
-            <input class="input" id="medUrine" placeholder="Норма / часте / немає">
-          </label>
-
-          <label class="field">
-            <div class="label">Кал</div>
-            <input class="input" id="medStool" placeholder="Норма / діарея / запор">
-          </label>
-
-          <label class="field">
-            <div class="label">Дихання</div>
-            <input class="input" id="medBreathing" placeholder="Норма / часте / утруднене">
-          </label>
-
-          <label class="field">
-            <div class="label">Лікар</div>
-            <input class="input" id="medDoctor" placeholder="ПІБ лікаря">
-          </label>
+          <label class="field"><div class="label">Дата</div><input class="input" id="medEntryDate" type="date"></label>
+          <label class="field"><div class="label">Час</div><input class="input" id="medEntryTime" type="time"></label>
+          <label class="field"><div class="label">Вага, кг</div><input class="input" id="medWeight" placeholder="Напр.: 12.4"></label>
+          <label class="field"><div class="label">Температура</div><input class="input" id="medTemp" placeholder="Напр.: 39.2"></label>
+          <label class="field"><div class="label">Пульс / серце</div><input class="input" id="medPulse" placeholder="Напр.: 120, ритмічний"></label>
+          <label class="field"><div class="label">Слизові / ясна</div><input class="input" id="medMucosa" placeholder="Рожеві / бліді / ціаноз"></label>
+          <label class="field"><div class="label">Апетит</div><input class="input" id="medAppetite" placeholder="Добрий / знижений / відсутній"></label>
+          <label class="field"><div class="label">Вода / спрага</div><input class="input" id="medWater" placeholder="П’є / не п’є / полідипсія"></label>
+          <label class="field"><div class="label">Сечовипускання</div><input class="input" id="medUrine" placeholder="Норма / часте / немає"></label>
+          <label class="field"><div class="label">Кал</div><input class="input" id="medStool" placeholder="Норма / діарея / запор"></label>
+          <label class="field"><div class="label">Дихання</div><input class="input" id="medBreathing" placeholder="Норма / часте / утруднене"></label>
+          <label class="field"><div class="label">Лікар</div><input class="input" id="medDoctor" placeholder="ПІБ лікаря"></label>
         </div>
-
-        <label class="field">
-          <div class="label">Загальний стан</div>
-          <textarea class="textarea" id="medCondition" rows="4" placeholder="Опис стану пацієнта..."></textarea>
-        </label>
-
-        <label class="field">
-          <div class="label">Проведено / призначено</div>
-          <textarea class="textarea" id="medTreatment" rows="4" placeholder="Препарати, маніпуляції, інфузії, процедури..."></textarea>
-        </label>
-
-        <label class="field">
-          <div class="label">Динаміка</div>
-          <textarea class="textarea" id="medDynamics" rows="3" placeholder="Що змінилось після лікування / за період спостереження..."></textarea>
-        </label>
-
-        <label class="field">
-          <div class="label">План / контроль</div>
-          <textarea class="textarea" id="medPlan" rows="3" placeholder="Контроль, повторний огляд, аналізи, зміна терапії..."></textarea>
-        </label>
-
-        <label class="field">
-          <div class="label">Додаткова нотатка</div>
-          <textarea class="textarea" id="medNote" rows="3" placeholder="Будь-які додаткові деталі..."></textarea>
-        </label>
+        <label class="field"><div class="label">Загальний стан</div><textarea class="textarea" id="medCondition" rows="4" placeholder="Опис стану пацієнта..."></textarea></label>
+        <label class="field"><div class="label">Проведено / призначено</div><textarea class="textarea" id="medTreatment" rows="4" placeholder="Препарати, маніпуляції, інфузії, процедури..."></textarea></label>
+        <label class="field"><div class="label">Динаміка</div><textarea class="textarea" id="medDynamics" rows="3" placeholder="Що змінилось після лікування / за період спостереження..."></textarea></label>
+        <label class="field"><div class="label">План / контроль</div><textarea class="textarea" id="medPlan" rows="3" placeholder="Контроль, повторний огляд, аналізи, зміна терапії..."></textarea></label>
+        <label class="field"><div class="label">Додаткова нотатка</div><textarea class="textarea" id="medNote" rows="3" placeholder="Будь-які додаткові деталі..."></textarea></label>
       </div>
-
       <div class="modal__foot">
         <button class="ghost" data-close-medcard-modal type="button">Скасувати</button>
         <button class="primary" id="medcardSaveBtn" type="button">Зберегти</button>
@@ -6382,20 +5682,21 @@ function ensureMedcardModal() {
   `;
 
   document.body.appendChild(modal);
-
   modal.addEventListener("click", (e) => {
     if (e.target.closest("[data-close-medcard-modal]")) {
       closeMedcardModal();
     }
   });
-
   return modal;
 }
 
+// ==========================================================================
+// Doc.PUG CRM Mini — app.js (ИНСТРУМЕНТЫ СТАЦИОНАРА, БУТСТРАП И ЖИВОЙ ПОИСК)
+// Финальная часть
+// ==========================================================================
+
 function medcardFormSet(existing = {}) {
-  const today = typeof todayISO === "function"
-    ? todayISO()
-    : new Date().toISOString().slice(0, 10);
+  const today = typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0, 10);
 
   const set = (id, val) => {
     const el = document.getElementById(id);
@@ -6404,19 +5705,16 @@ function medcardFormSet(existing = {}) {
 
   set("medEntryDate", existing.entry_date || today);
   set("medEntryTime", existing.entry_time || "");
-
   set("medWeight", existing.weight_kg || "");
   set("medTemp", existing.temperature || "");
   set("medPulse", existing.pulse || "");
   set("medMucosa", existing.mucosa || "");
-
   set("medAppetite", existing.appetite || "");
   set("medWater", existing.water || "");
   set("medUrine", existing.urine || "");
   set("medStool", existing.stool || "");
   set("medBreathing", existing.breathing || "");
   set("medDoctor", existing.doctor || "");
-
   set("medCondition", existing.condition || "");
   set("medTreatment", existing.treatment || "");
   set("medDynamics", existing.dynamics || "");
@@ -6426,7 +5724,6 @@ function medcardFormSet(existing = {}) {
 
 function medcardFormRead() {
   const val = (id) => String(document.getElementById(id)?.value || "").trim();
-
   const entry_date = val("medEntryDate");
   if (!entry_date) {
     alert("Вкажи дату запису");
@@ -6436,23 +5733,19 @@ function medcardFormRead() {
   return {
     entry_date,
     entry_time: val("medEntryTime"),
-
     weight_kg: val("medWeight"),
     temperature: val("medTemp"),
     pulse: val("medPulse"),
     mucosa: val("medMucosa"),
-
     appetite: val("medAppetite"),
     water: val("medWater"),
     urine: val("medUrine"),
     stool: val("medStool"),
     breathing: val("medBreathing"),
-
     condition: val("medCondition"),
     treatment: val("medTreatment"),
     dynamics: val("medDynamics"),
     plan: val("medPlan"),
-
     doctor: val("medDoctor"),
     note: val("medNote"),
   };
@@ -6472,7 +5765,6 @@ async function renderMedcardTab(pet) {
   if (!box || !pet) return;
 
   box.innerHTML = `<div class="hint">Завантаження веткартки…</div>`;
-
   const items = await loadMedcardApi(pet.id);
 
   box.innerHTML = `
@@ -6480,27 +5772,18 @@ async function renderMedcardTab(pet) {
       <div class="row" style="align-items:flex-start; gap:12px;">
         <div>
           <h2 style="margin:0;">Ветеринарна картка</h2>
-          <div class="hint">
-            Медичний щоденник пацієнта: стан, температура, лікування, динаміка, план.
-          </div>
+          <div class="hint">Медичний щоденник пацієнта: стан, температура, лікування, динаміка, plan.</div>
         </div>
-
         <button class="primary" id="btnAddMedcardEntry" type="button">+ Запис</button>
       </div>
-
       <div id="medcardList" class="medcardList">
-        ${
-          items.length
-            ? items.map(renderMedcardEntryCard).join("")
-            : `<div class="hint">Поки записів немає. Натисни “+ Запис”.</div>`
-        }
+        ${items.length ? items.map(renderMedcardEntryCard).join("") : `<div class="hint">Поки записів немає. Натисни “+ Запис”.</div>`}
       </div>
     </div>
   `;
 
   $("#btnAddMedcardEntry")?.addEventListener("click", () => {
     const modal = ensureMedcardModal();
-
     modal.dataset.patientId = String(pet.id);
     delete modal.dataset.entryId;
 
@@ -6508,7 +5791,6 @@ async function renderMedcardTab(pet) {
     if (title) title.textContent = "Нова запись веткартки";
 
     medcardFormSet({});
-
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
 
@@ -6530,9 +5812,7 @@ async function renderMedcardTab(pet) {
   $("#medcardList")?.addEventListener("click", async (e) => {
     const del = e.target.closest("[data-del-medcard]");
     if (del) {
-      const id = del.dataset.delMedcard;
-      if (!id) return;
-
+      const id = del.dataset.delMedcard; if (!id) return;
       if (!confirm("Видалити запис веткартки?")) return;
 
       const ok = await deleteMedcardApi(id);
@@ -6542,14 +5822,11 @@ async function renderMedcardTab(pet) {
 
     const edit = e.target.closest("[data-edit-medcard]");
     if (edit) {
-      const id = edit.dataset.editMedcard;
-      if (!id) return;
-
+      const id = edit.dataset.editMedcard; if (!id) return;
       const current = items.find((x) => String(x.id) === String(id));
       if (!current) return alert("Запис не знайдено");
 
       const modal = ensureMedcardModal();
-
       modal.dataset.patientId = String(pet.id);
       modal.dataset.entryId = String(id);
 
@@ -6557,7 +5834,6 @@ async function renderMedcardTab(pet) {
       if (title) title.textContent = "Редагування запису веткартки";
 
       medcardFormSet(current);
-
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
 
@@ -6579,264 +5855,61 @@ async function renderMedcardTab(pet) {
 }
 
 // =========================
-// INIT
+// ГЛАВНЫЙ ИНИЦИАЛИЗАТОР ПРИЛОЖЕНИЯ (BOOTSTRAP)
 // =========================
-function initTabs() {
-  // Подслушиваем клики по нашему новому боковому меню (.sidebar-menu)
-  const sidebarMenu = $(".sidebar-menu");
-  if (sidebarMenu) {
-    sidebarMenu.addEventListener("click", (e) => {
-      const item = e.target.closest(".menu-item");
-      if (!item) return;
-      const targetRoute = item.getAttribute("data-target");
-      if (TAB_ROUTES.has(targetRoute)) {
-        setHash(targetRoute);
-      }
-    });
+async function init() {
+  if (typeof initTabs === "function") initTabs();
+  if (typeof seedIfEmpty === "function") seedIfEmpty();
+
+  if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
+    await migrateLegacyVisitFilesIfNeeded();
   }
 
-  // Оставляем этот блок для совместимости со старыми кнопками, если они где-то остались
-  const tabs = $("#tabs");
-  if (tabs) {
-    tabs.addEventListener("click", (e) => {
-      const btn = e.target.closest(".tab");
-      if (!btn) return;
-      const route = btn.dataset.route;
-      if (!TAB_ROUTES.has(route)) return;
-      setHash(route);
-    });
-  }
+  if (typeof initOwnersUI === "function") initOwnersUI();
+  if (typeof initOwnerUI === "function") initOwnerUI();
+  if (typeof initPatientUI === "function") initPatientUI();
+  if (typeof initVisitUI === "function") initVisitUI();
+  if (typeof initDischargeModalUI === "function") initDischargeModalUI();
 
-  window.addEventListener("hashchange", routeFromHash);
-  routeFromHash();
+  $("#btnReload")?.addEventListener("click", async () => {
+    await loadMe();
+    await loadOwners();
+    await loadPatientsApi();
+    await loadServicesApi();
+  });
+
+  // Глобальный живой поиск без потери фокуса ввода
+  $("#globalSearch")?.addEventListener("input", () => {
+    if (state.route === "owners") renderOwners();
+    if (state.route === "patients") renderPatientsTab();
+    if (state.route === "visits") renderVisitsTab();
+  });
+
+  await loadMe();
+  await loadOwners();
+  await loadPatientsApi();
+  await loadServicesApi();
 }
 
-// ===== iOS / Telegram WebApp viewport fix =====
+// Корректировка вьюпорта под мобильные платформы iOS / Telegram WebApp
 function setVH() {
   document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
 }
 setVH();
 window.addEventListener("resize", setVH);
 
-// ==========================================================================
-// ГЛОБАЛЬНЫЙ МОДУЛЬ ПРОФИЛЯ ВЛАСНИКА (ОТКРЫТИЕ И РЕНДЕР)
-// ==========================================================================
-async function openOwner(id, options = {}) {
-  const oid = String(id || "");
-  if (!oid) return;
-
-  console.log(`🐾 Виклик openOwner для ID: ${oid}`);
-  state.selectedOwnerId = oid;
-  state.selectedPetId = null;
-  state.selectedPet = null;
-  state.selectedVisitId = null;
-
-  if (options.pushHash !== false) {
-    setHash("owner", oid);
-  }
-
-  // Переключаем стеклянные секции контента
-  const ownerSection = document.getElementById('owner') || document.getElementById('owner-profile-section');
-  if (ownerSection) {
-    $$(".content-section").forEach((p) => p.style.display = "none");
-    ownerSection.style.display = "block";
-  } else {
-    if (typeof setRoute === "function") setRoute("owner");
-  }
-
-  await renderOwnerPage(oid);
-}
-
-async function renderOwnerPage(ownerId) {
-  const oid = String(ownerId);
-  console.log(`🐾 Збірка профілю власника для ID: ${oid}`);
-  
-  const cachedOwners = typeof LS !== "undefined" ? LS.get(OWNERS_KEY, []) : [];
-  const list = (state.owners && state.owners.length) ? state.owners : cachedOwners;
-  const owner = list.find((x) => String(x.id) === oid);
-
-  if (!owner) {
-    console.warn("Власника не знайдено в реєстрах");
-    alert("Владелец не найден");
-    setHash("owners");
-    return;
-  }
-
-  // Заполняем текстовую информацию в профиле (visionOS шапка)
-  const nameEl = document.getElementById('owner-profile-name');
-  const phoneEl = document.getElementById('owner-profile-phone');
-  const infoEl = document.getElementById('owner-profile-info');
-
-  if (nameEl) nameEl.textContent = owner.name || "Без імені";
-  if (phoneEl) phoneEl.textContent = `📞 ${owner.phone || "Не вказано"}`;
-  if (infoEl) infoEl.textContent = `📍 Примітка: ${owner.note || "немає"}`;
-
-  // Твоя оригинальная бизнес-математика по визитам и финансам
-  const allVisits = state.visitsById ? Array.from(state.visitsById.values()) : [];
-  const myPatients = (state.patients || []).filter((p) => String(p.owner_id) === oid);
-  const ownerPetIds = new Set(myPatients.map((p) => String(p.id)));
-  const ownerVisits = allVisits.filter((v) => ownerPetIds.has(String(v.pet_id)));
-  
-  const visitsCount = ownerVisits.length;
-  const lastVisit = ownerVisits
-    .slice()
-    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
-
-  const totalPaid = ownerVisits.reduce((sum, v) => {
-    const sSvc = typeof calcServicesTotal === "function" ? calcServicesTotal(v) : 0;
-    const sStk = typeof calcStockTotal === "function" ? calcStockTotal(v) : 0;
-    return sum + sSvc + sStk;
-  }, 0);
-
-  // Отрендерим блок статистики динамически, если в HTML заготовлен общий контейнер info
-  if (infoEl) {
-    infoEl.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
-        <div style="color: var(--text-muted); font-size: 0.9rem;">📍 Примітка: ${escapeHtml(owner.note || "немає")}</div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 10px;">
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">🐾</div>
-            <div>
-              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${myPatients.length}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">пацієнтів</div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">📋</div>
-            <div>
-              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${visitsCount}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">візитів</div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">💰</div>
-            <div>
-              <div style="font-size: 1.3rem; font-weight: 700; color: var(--color-success);">${totalPaid} грн</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">оплачено</div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">📅</div>
-            <div>
-              <div style="font-size: 1.1rem; font-weight: 700; color: #fff; white-space: nowrap;">${escapeHtml(lastVisit?.date || "—")}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">останній візит</div>
-            </div>
-          </div>
-        </div>
-        
-        <div style="display: flex; gap: 12px; margin-top: 10px;">
-          <button class="btn-tab" id="btnEditOwnerProfile" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">✏️ Редагувати</button>
-          <button class="btn-primary" id="btnAddPet" style="padding: 10px 20px; font-size: 0.85rem;">+ Додати тварину</button>
-        </div>
-      </div>
-    `;
-
-    setTimeout(() => {
-      const btnAddPet = document.getElementById("btnAddPet");
-      if (btnAddPet) btnAddPet.onclick = () => { if (typeof openCreatePetModal === "function") openCreatePetModal(ownerId); };
-      const btnEdit = document.getElementById("btnEditOwnerProfile");
-      if (btnEdit && typeof openEditOwnerModal === "function") btnEdit.onclick = () => openEditOwnerModal(owner);
-    }, 50);
-  }
-
-  // Вывод карточек питомцев в сетку
-  const pList = document.getElementById('owner-patients-container') || document.getElementById('ownerPatientsList') || document.getElementById("petsList");
-  if (!pList) return;
-
-  pList.innerHTML = "";
-
-  if (!myPatients.length) {
-    pList.innerHTML = `
-      <div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">
-        Поки немає тварин. Натисни “+ Додати тварину”.
-      </div>
-    `;
-    return;
-  }
-
-  myPatients.forEach((pet) => {
-    const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
-    const petLastVisit = petVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
-
-    const card = document.createElement("div");
-    card.style.cssText = "background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px; transition: var(--transition); display: flex; flex-direction: column; gap: 14px; position: relative; cursor: pointer;";
-    
-    card.onmouseenter = () => { card.style.background = "rgba(255,255,255,0.05)"; card.style.borderColor = "var(--primary-neon)"; };
-    card.onmouseleave = () => { card.style.background = "var(--glass-bg)"; card.style.borderColor = "var(--glass-border)"; };
-
-    const spec = String(pet.species || "").toLowerCase();
-    const icon = spec.includes("кіт") || spec.includes("кот") ? "🐱" : "🐶";
-
-    card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-        <div style="display: flex; gap: 14px; align-items: center;">
-          <div style="font-size: 2rem; background: rgba(255,255,255,0.03); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-            ${icon}
-          </div>
-          <div>
-            <h4 style="margin: 0 0 4px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">🐾 ${escapeHtml(pet.name || "Без клички")}</h4>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">
-              ${escapeHtml(pet.species || "тварина")} ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-              ${pet.age ? " • " + escapeHtml(pet.age) : ""}
-            </div>
-          </div>
-        </div>
-        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; z-index: 10;">🗑</button>
-      </div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <span class="badge" style="background: rgba(163, 97, 255, 0.08); color: var(--primary-neon); border: 1px solid rgba(163, 97, 255, 0.15); padding: 4px 10px; font-size: 0.75rem;">📋 ${petVisits.length} візитів</span>
-      </div>
-    `;
-
-    card.addEventListener("click", (e) => {
-      if (e.target.closest("[data-del-pet]")) return;
-      if (typeof openPatient === "function") openPatient(pet.id);
-      else setHash("patient", pet.id);
-    });
-
-    pList.appendChild(card);
-  });
-}
-// ==========================================================================
-// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ PUGCRM (ГЕНЕРАЛЬНЫЙ ЗАПУСК)
-// ==========================================================================
-async function init() {
-    console.log("🐾 PUGCRM Premium Glass UI запуск...");
-    
-    // 1. Проверяем API и авторизацию
-    await loadMe();
-    
-    // 2. Наполняем базу локальными демо-данными (если нужно)
-    seedIfEmpty();
-    
-    // 3. Загружаем данные с сервера в память приложения
-    try {
-        await Promise.all([
-            loadOwners(),
-            loadPatientsApi(),
-            loadServicesApi()
-        ]);
-    } catch (e) {
-        console.warn("Помилка фонового завантаження даних при старті:", e);
-    }
-
-    // 4. Запускаем обработчик бокового меню и проверяем текущий хэш (вкладку)
-    initTabs();
-}
-// ===== INIT =====
+// Старт CRM
 init();
 
 // =========================
-// VISIT FILES render (minimal) вотето да, срм ебать его в гриву
+// VISIT FILES — Отрисовка списка файлов приёма
 // =========================
 function renderVisitFiles(visitId) {
   const wrap = document.getElementById("visitFilesList");
-  if (!wrap) return; // если блока нет в HTML — тихо выходим
+  if (!wrap) return;
 
   const allFiles = LS.get(FILES_KEY, []);
   const byId = new Map((Array.isArray(allFiles) ? allFiles : []).map((f) => [String(f.id), f]));
-
   const ids = getFileIdsForVisit(visitId);
 
   if (!ids.length) {
@@ -6865,7 +5938,6 @@ function renderVisitFiles(visitId) {
     })
     .join("");
 
-  // один обработчик на wrap
   wrap.onclick = (e) => {
     const btn = e.target.closest("[data-detach-file]");
     if (!btn) return;
@@ -6876,6 +5948,7 @@ function renderVisitFiles(visitId) {
     renderVisitFiles(visitId);
   };
 }
+
 async function updateStaffApi(staffId, payload) {
   try {
     const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}`, {
@@ -6883,19 +5956,11 @@ async function updateStaffApi(staffId, payload) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload || {}),
     });
-
     const json = await res.json();
-
-    if (!json.ok) {
-      alert(json.error || "Помилка оновлення ветеринара");
-      return null;
-    }
-
+    if (!json.ok) { alert(json.error || "Помилка оновлення ветеринара"); return null; }
     return json.data || null;
   } catch (e) {
-    console.error(e);
-    alert("Помилка оновлення ветеринара");
-    return null;
+    console.error(e); alert("Помилка оновлення ветеринара"); return null;
   }
 }
 
@@ -6909,16 +5974,8 @@ async function renderStaffSpecsBox(selectedIds = []) {
   box.innerHTML = specs.length
     ? specs.map((s) => `
       <label class="staffSpecCheck">
-        <input
-          type="checkbox"
-          data-staff-spec
-          value="${escapeHtml(String(s.id))}"
-          ${selected.has(String(s.id)) ? "checked" : ""}
-        >
-        <span
-          class="staffSpecDot"
-          style="background:${escapeHtml(s.color || "#7C5CFF")}"
-        ></span>
+        <input type="checkbox" data-staff-spec value="${escapeHtml(String(s.id))}" ${selected.has(String(s.id)) ? "checked" : ""}>
+        <span class="staffSpecDot" style="background:${escapeHtml(s.color || "#7C5CFF")}"></span>
         <span>${escapeHtml(s.name || "Напрям")}</span>
       </label>
     `).join("")
@@ -6940,15 +5997,16 @@ async function openEditStaffModal(staffRow) {
   $("#staffDrawer").classList.add("open");
   $("#staffDrawer").setAttribute("aria-hidden", "false");
 }
+
 $$("[data-close-staff]").forEach((btn) => {
   btn.addEventListener("click", () => {
     $("#staffDrawer")?.classList.remove("open");
     $("#staffDrawer")?.setAttribute("aria-hidden", "true");
   });
 });
+
 $("#staffSave")?.addEventListener("click", async () => {
   const staffId = ($("#staffId").value || "").trim();
-
   const specializationIds = $$("[data-staff-spec]:checked").map((el) => el.value);
 
   const payload = {
@@ -6963,63 +6021,25 @@ $("#staffSave")?.addEventListener("click", async () => {
     note: $("#staffNote").value.trim(),
   };
 
-  if (!payload.name) {
-    alert("Вкажи ПІБ співробітника");
-    return;
-  }
-
-  let saved = null;
-
-  if (staffId) {
-    saved = await updateStaffApi(staffId, payload);
-  } else {
-    saved = await createStaffApi(payload);
-  }
-
+  if (!payload.name) { alert("Вкажи ПІБ співробітника"); return; }
+  let saved = staffId ? await updateStaffApi(staffId, payload) : await createStaffApi(payload);
   if (!saved) return;
 
   $("#staffDrawer")?.classList.remove("open");
   $("#staffDrawer")?.setAttribute("aria-hidden", "true");
-
   await renderCalendarTab();
 });
-// ==========================================================================
-// ОБНОВЛЕННЫЙ МОДУЛЬ ЗАПИСИ НА ПРИЕМ ( visionOS GLASS STYLE )
-// ==========================================================================
+
 async function openVisitFromCalendar(hour, staffId) {
-  console.log(`🐾 Відкриття запису на час: ${hour}, ID лікаря: ${staffId}`);
-  
-  const modal = document.getElementById('appointment-modal');
-  if (!modal) return console.warn("appointment-modal не знайдено в HTML");
+  const modal = $("#visitModal");
+  if (!modal) return;
 
-  // Включаем эффект стекла (CSS класс active)
-  modal.classList.add('active');
-
-  // Элементы формы нового HTML
-  const form = document.getElementById('appointment-form');
-  const ownerInput = document.getElementById('modal-owner-search');
-  const patientSelect = document.getElementById('modal-patient-select');
-  const reasonTextarea = document.getElementById('modal-visit-reason');
-
-  // Создаем контейнер для автокомплита (результатов поиска), если его ещё нет
-  let searchResultsBox = document.getElementById('modal-owner-results');
-  if (!searchResultsBox && ownerInput) {
-    searchResultsBox = document.createElement('div');
-    searchResultsBox.id = 'modal-owner-results';
-    searchResultsBox.style.cssText = "background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; position: absolute; width: calc(100% - 32px); z-index: 9999; margin-top: 50px; box-shadow: var(--shadow-premium);";
-    ownerInput.parentNode.style.position = 'relative';
-    ownerInput.parentNode.appendChild(searchResultsBox);
-  }
-
-  // Загружаем данные, если локальная память пуста
+  delete modal.dataset.visitId;
   const patients = await loadPatientsApi();
-  if (!Array.isArray(state.owners) || !state.owners.length) {
-    await loadOwners();
-  }
 
+  if (!Array.isArray(state.owners) || !state.owners.length) { await loadOwners(); }
   const ownersMap = new Map((state.owners || []).map((o) => [String(o.id), o]));
 
-  // Мапим список для умного хайтек-поиска
   window.__visitPatientList = patients.map((p) => {
     const owner = ownersMap.get(String(p.owner_id));
     return {
@@ -7029,104 +6049,73 @@ async function openVisitFromCalendar(hour, staffId) {
     };
   });
 
-  // Очищаем форму при каждом открытии
-  if (ownerInput) {
-    ownerInput.value = '';
-    ownerInput.focus();
-  }
-  if (reasonTextarea) reasonTextarea.value = '';
-  if (patientSelect) {
-    patientSelect.innerHTML = '<option value="">Спочатку виберіть власника</option>';
-    patientSelect.value = "";
-  }
-  if (searchResultsBox) searchResultsBox.innerHTML = '';
+  $("#visitPatientSelect").value = "";
+  $("#visitPatientSearch").value = "";
+  $("#visitPatientResults").innerHTML = "";
+  $("#visitPatientBlock").style.display = "block";
+  $("#visitDate").value = window.__calendarDate || todayISO();
+  $("#visitStartTime").value = hour || "10:00";
+  $("#visitDuration").value = "60";
 
-  // Закрытие модалки
-  const closeModal = () => {
-    modal.classList.remove('active');
-    if (searchResultsBox) searchResultsBox.innerHTML = '';
-  };
-
-  const closeBtn = document.getElementById('close-modal-btn');
-  if (closeBtn) closeBtn.onclick = closeModal;
-  modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-
-  // ЖИВОЙ ИНТЕРАКТИВНЫЙ ПОИСК ВНУТРИ МОДАЛКИ
-  if (ownerInput && searchResultsBox) {
-    // Удаляем старые слушатели, вешаем чистый новый
-    const newOwnerInput = ownerInput.cloneNode(true);
-    ownerInput.parentNode.replaceChild(newOwnerInput, ownerInput);
-    
-    newOwnerInput.addEventListener("input", () => {
-      const q = (newOwnerInput.value || "").toLowerCase().trim();
-      if (!q) {
-        searchResultsBox.innerHTML = "";
-        return;
-      }
-
-      const allPatients = window.__visitPatientList || [];
-      const found = allPatients.filter((p) => {
-        return [p.name, p.owner_name, p.owner_phone, p.species, p.breed]
-          .join(" ").toLowerCase().includes(q);
-      }).slice(0, 8);
-
-      searchResultsBox.innerHTML = found.length
-        ? found.map((p) => `
-          <div class="patientSearchItem" data-select-id="${escapeHtml(String(p.id))}" style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;">
-            <strong style="color: #fff; display: block; font-size: 0.9rem;">${escapeHtml(p.name)} (${escapeHtml(p.species)})</strong>
-            <span style="color: var(--text-muted); font-size: 0.75rem;">${escapeHtml(p.owner_name)} · ${escapeHtml(p.owner_phone)}</span>
-          </div>
-        `).join("")
-        : `<div style="padding: 12px; color: var(--text-muted); font-size: 0.85rem; text-align: center;">Нічого не знайдено</div>`;
-
-      // При клике на найденную строку
-      Array.from(searchResultsBox.querySelectorAll("[data-select-id]")).forEach((item) => {
-        item.addEventListener("click", () => {
-          const pId = item.dataset.selectId;
-          const selectedPatient = allPatients.find((x) => String(x.id) === String(pId));
-
-          if (selectedPatient) {
-            newOwnerInput.value = `${selectedPatient.owner_name} (${selectedPatient.owner_phone})`;
-            
-            // Заполняем выпадающий список питомцем
-            if (patientSelect) {
-              patientSelect.innerHTML = `<option value="${escapeHtml(String(selectedPatient.id))}">${escapeHtml(selectedPatient.name)} [${escapeHtml(selectedPatient.species)}]</option>`;
-              patientSelect.value = String(selectedPatient.id);
-            }
-          }
-          searchResultsBox.innerHTML = "";
-        });
-      });
-    });
+  const staff = await loadStaffApi();
+  const staffSelect = $("#visitStaff");
+  if (staffSelect) {
+    staffSelect.innerHTML = `
+      <option value="">Оберіть ветеринара</option>
+      ${staff.map((doc) => `<option value="${escapeHtml(String(doc.id))}">${escapeHtml(doc.name || "Працівник")}</option>`).join("")}
+    `;
+    staffSelect.value = String(staffId || "");
   }
 
-  // ОТПРАВКА ДАННЫХ В SUPABASE ПРИ НАЖАТИИ "ЗАПИСАТИ"
-  if (form) {
-    form.onsubmit = async (e) => {
-      e.preventDefault();
+  $("#visitNote").value = ""; $("#visitDx").value = ""; $("#visitWeight").value = ""; $("#visitRx").value = "";
+  $("#visitNewPatientBox").style.display = "none";
 
-      const ownerVal = document.getElementById('modal-owner-search')?.value || "Клієнт";
-      const selectedPatientId = patientSelect ? patientSelect.value : null;
-      const selectedPatientText = patientSelect && patientSelect.options[patientSelect.selectedIndex] ? patientSelect.options[patientSelect.selectedIndex].text : "Пацієнт";
-      const note = (reasonTextarea ? reasonTextarea.value : "").trim();
-      
-      const duration = 60; 
-      const endTime = addMinutesToTime(hour, duration);
-      const currentDate = window.__calendarDate || new Date().toISOString().slice(0, 10);
-
-      const created = await createCalendarEventApi({
-        title: `Прийом: ${selectedPatientText.split(' [')[0]} (${ownerVal.split(' (')[0]})`,
-        event_date: currentDate,
-        start_time: hour,
-        end_time: endTime,
-        staff_id: staffId,
-        note: note,
-      });
-
-      if (created) {
-        closeModal();
-        await renderCalendarTab(); // Обновляем сетку, чтобы плашка появилась мгновенно
-      }
+  const btnCreatePatientFromVisit = $("#btnCreatePatientFromVisit");
+  if (btnCreatePatientFromVisit) {
+    btnCreatePatientFromVisit.onclick = () => {
+      const box = $("#visitNewPatientBox"); if (!box) return;
+      box.style.display = box.style.display === "none" ? "block" : "none";
     };
   }
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
 }
+
+$("#visitPatientSearch")?.addEventListener("input", () => {
+  const q = ($("#visitPatientSearch").value || "").toLowerCase().trim();
+  const box = $("#visitPatientResults");
+  const hidden = $("#visitPatientSelect");
+
+  if (!box || !hidden) return;
+  hidden.value = "";
+  if (!q) { box.innerHTML = ""; return; }
+
+  const patients = window.__visitPatientList || [];
+  const found = patients
+    .filter((p) => {
+      const text = [p.name, p.owner_name, p.owner_phone, p.phone, p.species, p.breed].join(" ").toLowerCase();
+      return text.includes(q);
+    })
+    .slice(0, 12);
+
+  box.innerHTML = found.length
+    ? found.map((p) => `
+      <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(id))}">
+        <strong>${escapeHtml(p.name || "Пацієнт")}</strong>
+        <span>${escapeHtml(p.owner_name || "Власник не вказаний")} · ${escapeHtml(p.owner_phone || p.phone || "телефон не вказаний")}</span>
+      </div>
+    `).join("")
+    : `<div class="hint">Нічого не знайдено</div>`;
+
+  $$("[data-select-visit-patient]").forEach((item) => {
+    item.addEventListener("click", () => {
+      const id = item.dataset.selectVisitPatient;
+      const patient = patients.find((p) => String(p.id) === String(id));
+
+      hidden.value = id;
+      $("#visitPatientSearch").value = patient ? `${patient.name || "Пацієнт"} · ${patient.owner_name || ""}` : id;
+      box.innerHTML = "";
+    });
+  });
+});

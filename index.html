@@ -23,11 +23,11 @@
             </div>
             
             <nav style="flex-grow: 1;">
-                <ul class="sidebar-menu">
-                    <li class="menu-item active" data-target="calendar">
+                <ul class="sidebar-menu" id="tabs">
+                    <li class="menu-item" data-target="calendar">
                         <a href="#calendar">📅 Календарь</a>
                     </li>
-                    <li class="menu-item" data-target="owners">
+                    <li class="menu-item active" data-target="owners">
                         <a href="#owners">👥 Власники</a>
                     </li>
                     <li class="menu-item" data-target="patients">
@@ -50,53 +50,22 @@
             
             <header class="header-panel">
                 <div class="search-bar">
-                    <input type="text" id="global-search" placeholder="Пошук власника, пацієнта, телефону...">
+                    <input type="text" id="globalSearch" placeholder="Пошук власника, пацієнта, телефону...">
                 </div>
             </header>
 
-            <section id="calendar" class="content-section">
-                <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <div>
-                        <h2>Календар</h2>
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">Перетягніть ветеринара справа на потрібний час.</span>
-                    </div>
-                    
-                    <div class="calendar-nav">
-                        <button id="prev-day" class="btn-arrow">&larr;</button>
-                        <span id="current-date" class="current-date-title">2026-06-26</span>
-                        <button id="next-day" class="btn-arrow">&rarr;</button>
-                    </div>
-                    
-                    <div class="nav-buttons-group">
-                        <button class="btn-tab active" data-view="day">День</button>
-                        <button class="btn-tab" data-view="week">Тиждень</button>
-                        <button class="btn-tab" data-view="month">Місяць</button>
-                        <button class="btn-tab" data-view="veterinarians">Ветеринари</button>
-                        <button class="btn-tab" data-view="routes">Маршрути</button>
-                    </div>
-                </div>
-                
-                <div class="calendar-container">
-                    <div class="calendar-grid-wrapper">
-                        <div id="calendar-grid" class="calendar-grid">
-                            </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="owners" class="content-section" style="display: none;">
+            <section class="page content-section" data-page="owners">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2>Власники тварин</h2>
-                    <button class="btn-primary" id="add-owner-btn">+ Додати власника</button>
+                    <button class="btn-primary" id="btnAddOwner">+ Додати власника</button>
                 </div>
-                
                 <div class="data-table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ПІБ</th>
                                 <th>Телефон</th>
-                                <th>Email</th>
+                                <th>Email/Статус</th>
                                 <th>Адреса</th>
                                 <th>Дії</th>
                             </tr>
@@ -105,125 +74,122 @@
                             </tbody>
                     </table>
                 </div>
+                <div id="ownersList" style="display:none;"></div>
             </section>
 
-            <section id="owner" class="content-section" style="display: none;">
+            <section class="page content-section" data-page="owner" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <div>
-                        <h2 id="owner-profile-name">👤 Завантаження...</h2>
-                        <div id="owner-profile-phone" style="font-size: 1rem; color: var(--primary-neon); font-weight: 600; margin-top: 4px;"></div>
+                        <div id="ownerName" style="font-size: 1.5rem; font-weight: 700; color: #fff;">Власник</div>
+                        <div id="ownerMeta" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">—</div>
                     </div>
-                    <button class="btn-tab" onclick="location.hash = 'owners'">&larr; До списку</button>
-                </div>
-                <div id="owner-profile-info" style="margin-bottom: 24px;"></div>
-                
-                <h3 style="margin-bottom: 16px; color: #fff;">🐾 Пацієнти власника</h3>
-                <div class="patients-grid" id="owner-patients-container"></div>
-            </section>
-
-            <section id="patient-profile-section" class="content-section" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-                    <div>
-                        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Медична карта пацієнта</span>
-                        <h2 id="patient-card-title" style="margin-top: 4px;">🐾 Завантаження...</h2>
-                        <div id="patient-card-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;"></div>
-                    </div>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="btn-tab" id="btn-edit-patient">✏️ Редагувати</button>
-                        <button class="btn-primary" id="btn-add-visit-from-card">+ Візит</button>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 24px;">
-                    <button class="btn-tab active" onclick="switchPatientTab('pet-tab-visits', this)">📝 Візити</button>
-                    <button class="btn-tab" onclick="switchPatientTab('pet-tab-labs', this)">🔬 Аналізи</button>
-                    <button class="btn-tab" onclick="switchPatientTab('pet-tab-files', this)">📁 Файли</button>
-                </div>
-
-                <div id="pet-tab-visits" class="pet-sub-tab">
-                    <div id="patient-visits-timeline" style="display: flex; flex-direction: column; gap: 16px;">
-                        </div>
-                </div>
-
-                <div id="pet-tab-labs" class="pet-sub-tab" style="display: none;">
-                    <div id="patient-labs-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
-                        </div>
-                </div>
-
-                <div id="pet-tab-files" class="pet-sub-tab" style="display: none;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 40px;">Файли відсутні</div>
-                </div>
-            </section>
-
-            <section id="patients" class="content-section" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2>Пацієнти (Тварини)</h2>
-                    <button class="btn-primary" id="add-patient-btn">+ Додати пацієнта</button>
+                    <button class="btn-tab" id="btnBackOwners">&larr; До списку</button>
                 </div>
                 
-                <div class="patients-grid" id="patients-grid-container">
+                <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="color: #fff; font-size: 1.2rem;">🐾 Пацієнти цього власника</h3>
+                    <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
+                </div>
+                <div class="patients-grid" id="petsList">
                     </div>
             </section>
 
-            <section id="visits" class="content-section" style="display: none;">
-                <h2>Історія візитів та записів</h2>
-                <div class="data-table-container" style="margin-top: 20px;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Дата/Час</th>
-                                <th>Пацієнт</th>
-                                <th>Власник</th>
-                                <th>Ветеринар</th>
-                                <th>Статус</th>
-                            </tr>
-                        </thead>
-                        <tbody id="visits-table-body">
-                            </tbody>
-                    </table>
-                </div>
+            <section class="page content-section" data-page="patient" style="display: none;">
+                <button class="btn-tab" id="btnBackPatient" style="margin-bottom: 20px;">&larr; Назад до профілю</button>
+                <div id="patientCardRoot"></div>
             </section>
 
-            <section id="services" class="content-section" style="display: none;">
-                <h2>Прайс-лист послуг</h2>
+            <section class="page content-section" data-page="calendar" style="display: none;">
+                <div id="calendar-grid-target"></div>
             </section>
 
-            <section id="warehouse" class="content-section" style="display: none;">
-                <h2>Облік складу та медикаментів</h2>
-            </section>
+            <section class="page content-section" data-page="patients" style="display: none;"></section>
+            <section class="page content-section" data-page="visit" style="display: none;"></section>
+            <section class="page content-section" data-page="visits" style="display: none;"></section>
+            <section class="page content-section" data-page="services" style="display: none;"></section>
+            <section class="page content-section" data-page="stock" style="display: none;"></section>
 
         </main>
     </div>
 
-    <div id="appointment-modal" class="modal-overlay">
-        <div class="modal-window">
-            <h3>Новий запис на прийом</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Заповніть дані для реєстрації візиту</p>
-            
-            <form id="appointment-form">
-                <div class="form-group">
-                    <label>Власник</label>
-                    <input type="text" class="form-input" id="modal-owner-search" placeholder="Почніть вводити ім'я або телефон..." required>
+    <div class="modal modal-overlay" id="visitModal" aria-hidden="true" style="display:none;">
+        <div class="modal__panel modal-window" role="dialog" aria-modal="true" style="background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);">
+            <div class="modal__head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div>
+                    <div class="modal__title" style="font-size:1.3rem; font-weight:700; color:#fff;">Новий запис прийому</div>
+                    <div class="modal__sub" id="visitModalSub" style="font-size:0.85rem; color:var(--text-muted);">Пацієнт: —</div>
                 </div>
-                <div class="form-group">
-                    <label>Пацієнт (Тварина)</label>
-                    <select class="form-input" id="modal-patient-select" required>
-                        <option value="">Спочатку виберіть власника</option>
+                <button class="iconBtn" id="visitClose" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+            </div>
+
+            <div class="modal__body" style="display:flex; flex-direction:column; gap:14px; max-height:70vh; overflow-y:auto; padding-right:10px;">
+                <div id="visitPatientBlock" style="display:none;">
+                    <label class="field">
+                        <div class="label" style="color:#fff; margin-bottom:6px; font-size:0.85rem;">Пацієнт</div>
+                        <input class="form-input" id="visitPatientSearch" placeholder="Пошук: пацієнт, власник, телефон..." autocomplete="off">
+                        <input id="visitPatientSelect" type="hidden">
+                        <div id="visitPatientResults" class="patientSearchResults" style="margin-top:4px;"></div>
+                    </label>
+                    <button class="btn-tab" id="btnCreatePatientFromVisit" type="button" style="margin: 10px 0;">+ Новий пацієнт</button>
+                </div>
+
+                <label class="field">
+                    <div class="label" style="color:#fff; margin-bottom:6px;">Дата</div>
+                    <input class="form-input" id="visitDate" type="date">
+                </label>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <label class="field">
+                        <div class="label" style="color:#fff; margin-bottom:6px;">Час початку</div>
+                        <input class="form-input" id="visitStartTime" type="time" value="10:00">
+                    </label>
+                    <label class="field">
+                        <div class="label" style="color:#fff; margin-bottom:6px;">Тривалість</div>
+                        <select class="form-input" id="visitDuration">
+                            <option value="30">30 хв</option>
+                            <option value="60" selected>60 хв</option>
+                            <option value="90">90 хв</option>
+                        </select>
+                    </label>
+                </div>
+
+                <label class="field">
+                    <div class="label" style="color:#fff; margin-bottom:6px;">Ветеринар</div>
+                    <select class="form-input" id="visitStaff">
+                        <option value="">Оберіть ветеринара</option>
                     </select>
+                </label>
+
+                <label class="field">
+                    <div class="label" style="color:#fff; margin-bottom:6px;">Скарги / анамнез</div>
+                    <textarea class="form-input" id="visitNote" rows="3" placeholder="Опишіть стан..."></textarea>
+                </label>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <label class="field">
+                        <div class="label" style="color:#fff; margin-bottom:6px;">Діагноз</div>
+                        <input class="form-input" id="visitDx" placeholder="Риніт">
+                    </label>
+                    <label class="field">
+                        <div class="label" style="color:#fff; margin-bottom:6px;">Вага (кг)</div>
+                        <input class="form-input" id="visitWeight" placeholder="4.5">
+                    </label>
                 </div>
-                <div class="form-group">
-                    <label>Причина візиту / Скарги</label>
-                    <textarea class="form-input" id="modal-visit-reason" rows="3" placeholder="Наприклад: вакцинація, чистка зубів..." required></textarea>
-                </div>
-                
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                    <button type="button" class="btn-tab" id="close-modal-btn">Скасувати</button>
-                    <button type="submit" class="btn-primary">Записати</button>
-                </div>
-            </form>
+
+                <label class="field">
+                    <div class="label" style="color:#fff; margin-bottom:6px;">Призначення лікаря</div>
+                    <textarea class="form-input" id="visitRx" rows="3" placeholder="Препарат, доза..."></textarea>
+                </label>
+            </div>
+
+            <div class="modal__foot" style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+                <button class="btn-tab" id="visitCancel">Скасувати</button>
+                <button class="btn-primary" id="visitSave">Зберегти візит</button>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
