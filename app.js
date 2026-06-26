@@ -2363,52 +2363,23 @@ async function renderPatientTab(tab, pet) {
 
      // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — БРОНЕБОЙНЫЙ ВАРИАНТ С ЛОГАМИ
         // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ВАРИАНТ С АВТО-СОЗДАНИЕМ МОДАЛКИ
+        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ПРАВИЛЬНЫЙ ВАРИАНТ
     const btnAddVisit = document.getElementById("btnAddVisit");
     if (btnAddVisit) {
       btnAddVisit.onclick = () => {
+        // 1. Синхронизируем состояние приложения перед открытием
         if (typeof state === "undefined") window.state = {};
         state.selectedPet = pet;
         state.selectedPetId = pet ? (pet.id || pet._id) : null;
 
-        // 1. Проверяем, есть ли модалка в HTML вообще
-        let modal = document.getElementById("visitModal");
-        
-        if (!modal) {
-          console.log("Модалка #visitModal не найдена, создаем премиум-версию динамически...");
-          // Если модалки нет, встраиваем её прямо в body
-          const modalHtml = `
-            <div id="visitModal" class="glass-card" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.9); z-index:9999; width:500px; padding:30px; border-radius:24px; background:rgba(15, 23, 42, 0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1); box-shadow:0 20px 50px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:all 0.3s ease;">
-              <h3 style="margin-top:0; color:#fff; display:flex; justify-content:space-between;">
-                <span>📝 Новий візит: ${escapeHtml(pet.name)}</span>
-                <span id="closeMyModal" style="cursor:pointer; opacity:0.6;">✕</span>
-              </h3>
-              <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
-                <label style="font-size:0.8rem; opacity:0.6;">Дата візиту</label>
-                <input type="date" id="visitDate" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff;">
-                
-                <label style="font-size:0.8rem; opacity:0.6;">Вага (кг)</label>
-                <input type="text" id="visitWeight" value="${escapeHtml(pet.weight_kg || '')}" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff;">
-                
-                <label style="font-size:0.8rem; opacity:0.6;">Симптоми / Скарги</label>
-                <textarea id="visitNote" rows="3" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; resize:none;"></textarea>
-                
-                <label style="font-size:0.8rem; opacity:0.6;">Діагноз</label>
-                <input type="text" id="visitDx" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff;">
-
-                <button class="btn-primary" id="btnSaveDynamicVisit" style="margin-top:10px; padding:12px; border-radius:10px; font-weight:600; border:none; cursor:pointer; background:#a855f7; color:#fff;">Зберегти візит</button>
-              </div>
-            </div>
-          `;
-          document.body.insertAdjacentHTML("beforeend", modalHtml);
-          modal = document.getElementById("visitModal");
-          
-          // Оживляем кнопку закрытия
-          document.getElementById("closeMyModal").onclick = () => {
-            modal.style.opacity = "0";
-            modal.style.pointerEvents = "none";
-            modal.style.transform = "translate(-50%, -50%) scale(0.9)";
-          };
+        // 2. Вызываем оригинальную функцию создания визита
+        if (typeof openVisitModalForCreate === "function") {
+          openVisitModalForCreate(pet);
+        } else {
+          alert("Помилка: функція openVisitModalForCreate не знайдена в системі.");
         }
+      };
+    }
 
         // 2. Если у тебя есть стандартная функция заполнения, пробуем вызвать её
         if (typeof openVisitModalForCreate === "function") {
@@ -2445,7 +2416,7 @@ async function renderPatientTab(tab, pet) {
           };
         }
       };
-    }
+    
 
   // Навешиваем клики на вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
@@ -2577,7 +2548,7 @@ async function renderPatientTab(tab, pet) {
     `;
     return;
   }
-}
+
 
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
@@ -5222,39 +5193,72 @@ function openVisitModalForCreate(pet) {
   $("#visitWeight").value = pet?.weight_kg || "";
   $("#visitRx").value = "";
 
-  // БРОНЕБОЙНАЯ КАТЧ-СИСТЕМА ДЛЯ ВЕТЕРИНАРОВ
-  loadStaffApi()
-    .then((staff) => {
-      const select = $("#visitStaff");
-      if (!select) return;
+  const select = $("#visitStaff");
 
-      // Если сервер вернул пустой список, создаем дефолтного врача
-      const doctors = Array.isArray(staff) && staff.length > 0 
-        ? staff 
-        : [{ id: "default", name: "Черговий лікар 🩺" }];
+  // Функция для заполнения селекта врачами
+  const fillStaffSelect = (staffList) => {
+    if (!select) return;
+    select.innerHTML = `
+      <option value="">Оберіть ветеринара</option>
+      ${staffHtml = staffList.map((doc) => `
+        <option value="${escapeHtml(String(doc.id))}">
+          ${escapeHtml(doc.name || "Працівник")}
+        </option>
+      `).join("")}
+    `;
+  };
 
+  // Проверяем наличие функции загрузки сотрудников
+  if (typeof loadStaffApi === "function") {
+    loadStaffApi()
+      .then((staff) => {
+        // Если бэкенд ответил успешно, но список пустой
+        if (!staff || staff.length === 0) {
+          staff = [{ id: "default_doc", name: "Черговий лікар 🩺" }];
+        }
+        fillStaffSelect(staff);
+      })
+      .catch((err) => {
+        // Если сервер упал с httpx.ReadError — подставляем заглушку
+        console.warn("Бэкенд недоступен, ставим дефолтного врача:", err);
+        fillStaffFallback();
+      });
+  } else {
+    // Если loadStaffApi вообще не определена
+    fillStaffFallback();
+  }
+
+  // Вспомогательные микро-функции для страховки
+  function fillStaffSelect(doctors) {
+    if (!select) return;
+    select.innerHTML = `
+      <option value="">Оберіть ветеринара</option>
+      ${doctors.map((doc) => `
+        <option value="${escapeHtml(String(doc.id))}">
+          ${escapeHtml(doc.name || "Працівник")}
+        </option>
+      `).join("")}
+    `;
+  }
+
+  function fillStaffFallback() {
+    const select = $("#visitStaff");
+    if (select) {
       select.innerHTML = `
         <option value="">Оберіть ветеринара</option>
-        ${doctors.map((doc) => `
-          <option value="${escapeHtml(String(doc.id))}">
-            ${escapeHtml(doc.name || "Працівник")}
-          </option>
-        `).join("")}
+        <option value="default" selected>Черговий лікар 🩺</option>
       `;
-    })
-    .catch((err) => {
-      console.warn("Не вдалося завантажити ветеринарів с сервера, ставим заглушку:", err);
-      const select = $("#visitStaff");
-      if (select) {
-        select.innerHTML = `
-          <option value="">Оберіть ветеринара</option>
-          <option value="default" selected>Черговий лікар 🩺</option>
-        `;
-      }
-    });
+    }
+  }
 
+  // ЖЕЛЕЗНО открываем модалку в любом случае
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+  
+  // Дополнительный форс стилей отображения
+  modal.style.opacity = "1";
+  modal.style.pointerEvents = "auto";
+  modal.style.display = "block"; 
 }
 
 async function openVisitModalForEdit(visitId) {
