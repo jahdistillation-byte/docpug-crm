@@ -333,20 +333,48 @@ function setHash(route, id = null) {
 
 function setRoute(route) {
   const r = String(route || "owners").trim() || "owners";
-  const pageExists = $(`.page[data-page="${r}"]`);
+  const pageExists = document.querySelector(`.page[data-page="${r}"]`);
   const finalRoute = pageExists ? r : "owners";
 
   state.route = finalRoute;
 
-  $$(".page").forEach((p) => {
+  // Переключаем секции (в новом HTML они скрыты через display: none)
+  Array.from(document.querySelectorAll(".page")).forEach((p) => {
     p.classList.toggle("active", p.dataset.page === finalRoute);
+    if (p.dataset.page === finalRoute) {
+      p.style.display = "block";
+    } else {
+      p.style.display = "none";
+    }
   });
 
+  // Подсвечиваем активную вкладку в новом боковом меню
   if (TAB_ROUTES.has(finalRoute)) {
-    $$("#tabs .tab").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.route === finalRoute);
+    Array.from(document.querySelectorAll("#tabs .menu-item, #tabs .tab")).forEach((btn) => {
+      const btnRoute = btn.dataset.target || btn.dataset.route;
+      btn.classList.toggle("active", btnRoute === finalRoute);
     });
   }
+}
+
+function initTabs() {
+  const tabs = document.getElementById("tabs");
+  if (!tabs) return;
+
+  tabs.addEventListener("click", (e) => {
+    // Ловим клик по новому классу .menu-item
+    const btn = e.target.closest(".menu-item") || e.target.closest(".tab");
+    if (!btn) return;
+    
+    // Берем маршрут из нового data-target
+    const route = btn.dataset.target || btn.dataset.route;
+    if (!TAB_ROUTES.has(route)) return;
+    
+    setHash(route);
+  });
+
+  window.addEventListener("hashchange", routeFromHash);
+  routeFromHash();
 }
 
 async function routeFromHash() {
@@ -4825,6 +4853,9 @@ function renderOwners() {
   });
 }
 
+// =========================
+// UI ВЛАДЕЛЬЦЕВ — Адаптировано под новую таблицу
+// =========================
 function initOwnersUI() {
   if (state.ownersUiBound) return;
   state.ownersUiBound = true;
@@ -4844,7 +4875,8 @@ function initOwnersUI() {
       await loadOwners(); return;
     }
 
-    const ownersList = e.target.closest("#ownersList");
+    // ✅ ВОТ ОНО: Теперь скрипт ловит клики в новом tbody
+    const ownersList = e.target.closest("#owners-table-body") || e.target.closest("#ownersList") || e.target.closest(".data-table-container");
     if (!ownersList) return;
 
     const editBtn = e.target.closest("[data-edit-owner]");
@@ -4874,6 +4906,7 @@ function initOwnersUI() {
 
     const delBtn = e.target.closest("[data-del]");
     if (delBtn) {
+      e.preventDefault(); e.stopPropagation();
       const id = delBtn.dataset.del; if (!id) return;
       if (!confirm("Удалить владельца?")) return;
 
@@ -4884,6 +4917,7 @@ function initOwnersUI() {
 
     const openZone = e.target.closest("[data-open-owner]");
     if (openZone) {
+      e.preventDefault(); e.stopPropagation();
       const ownerId = openZone.dataset.openOwner;
       if (ownerId) openOwner(ownerId);
     }
@@ -4893,7 +4927,6 @@ function initOwnersUI() {
     if (e.target.closest("#btnBackOwners")) setHash("owners");
   });
 }
-
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (СПЕЦИФИКАЦИИ, МОДАЛЬНЫЕ ОКНА И ОБРАБОТЧИКИ ПРОФИЛЕЙ)
 // Часть 9
