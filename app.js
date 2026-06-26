@@ -5195,58 +5195,86 @@ function openVisitModalForCreate(pet) {
     fillStaffFallback();
   }
 
-  // === ФУНКЦИЯ ЗАКРЫТИЯ МОДАЛКИ ===
+  // === ЖЕЛЕЗНАЯ ФУНКЦИЯ ЗАКРЫТИЯ ===
   const closeVisitModal = () => {
     modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
     
-    // Скрываем инлайново
+    // Прячем инлайново, возвращая старые стили
     modal.style.display = "none";
     modal.style.opacity = "0";
     modal.style.pointerEvents = "none";
+    
+    // Убираем глобальный слушатель Esc, чтобы память не текла
+    document.removeEventListener("keydown", handleEscClose);
   };
 
-  // Ищем кнопку закрытия внутри оригинальной модалки (если там есть крестик с классом close или похожим)
-  const closeBtn = modal.querySelector(".close, .btn-close, [data-close]");
-  if (closeBtn) {
-    closeBtn.onclick = closeVisitModal;
-  }
+  // Закрытие по нажатию клавиши ESC
+  const handleEscClose = (e) => {
+    if (e.key === "Escape") closeVisitModal();
+  };
+  document.addEventListener("keydown", handle_esc = (e) => {
+    if (e.key === "Escape") {
+      closeVisitModal();
+      document.removeEventListener("keydown", e.callee);
+    }
+  });
 
-  // Навешиваем ручной перехват формы сохранения, чтобы закрывать окно при успехе
-  const form = modal.querySelector("form");
-  if (form) {
-    const originalOnSubmit = form.onsubmit;
-    form.onsubmit = async (e) => {
-      if (originalOnSubmit) {
-        await originalOnSubmit(e);
-      }
-      // Закрываем панель после отправки формы
+  // Ищем абсолютно любой элемент закрытия внутри модалки (крестик, кнопка скасувати)
+  const anyCloseElements = modal.querySelectorAll(".close, .btn-close, [data-close], .cancel-btn, #btnCancelVisit");
+  anyCloseElements.forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
       closeVisitModal();
     };
+  });
+
+  // Если в твоем HTML на крестике висит обычный тег вроде <span>✕</span> без класса, 
+  // давай перехватим клик по нему через делегирование событий на самой модалке
+  modal.onclick = (e) => {
+    if (e.target.innerText === "✕" || e.target.classList.contains("close-modal")) {
+      closeVisitModal();
+    }
+  };
+
+  // Перехватываем submit формы, чтобы обновить журнал и закрыть панель
+  const form = modal.querySelector("form");
+  if (form) {
+    // Безопасно подмешиваем закрытие к родному событию
+    form.addEventListener("submit", () => {
+      // Даем 300мс на выполнение оригинального асинхронного сохранения в базу
+      setTimeout(() => {
+        closeVisitModal();
+        // Обновляем список визитов на экране
+        if (state && state.selectedPetId && typeof renderVisits === "function") {
+          renderVisits(state.selectedPetId);
+        }
+      }, 300);
+    });
   }
 
-  // === ЭФФЕКТНОЕ ЦЕНТРИРОВАНИЕ И УВЕЛИЧЕНИЕ (Apple VisionOS Style) ===
+  // === ПРЕМИАЛЬНЫЙ ЦЕНТРИРОВАННЫЙ ВИД (Apple VisionOS / macOS Style) ===
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   
-  // Жестко позиционируем по центру и делаем крупнее (width: 650px)
+  // Выравниваем строго по центру экрана и делаем шире
   modal.style.position = "fixed";
-  modal.style.top = "50% ";
+  modal.style.top = "50%";
   modal.style.left = "50%";
   modal.style.transform = "translate(-50%, -50%) scale(1)";
-  modal.style.width = "650px"; 
-  modal.style.maxWidth = "90vw";
+  modal.style.width = "680px"; 
+  modal.style.maxWidth = "95vw";
   modal.style.maxHeight = "85vh";
   modal.style.overflowY = "auto";
-  modal.style.padding = "30px";
+  modal.style.padding = "32px";
   modal.style.borderRadius = "24px";
   modal.style.zIndex = "10000";
   
-  // Включаем видимость
+  // Рендерим отображение
   modal.style.display = "block";
   modal.style.opacity = "1";
   modal.style.pointerEvents = "auto";
-  modal.style.transition = "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)";
+  modal.style.transition = "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
 }
 
 // =========================
