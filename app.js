@@ -4368,8 +4368,10 @@ function renderVisitPage(visit, pet) {
   const grandTotal = totalSvc + totalStk;
 
   // Генерируем премиальный интерфейс
+    // Генерируем премиальный интерфейс с фиксацией отображения первой вкладки
   box.innerHTML = `
     <div class="visit-grid-layout">
+      
       <aside class="visit-sidebar-sticky">
         <div class="glass-card main-info">
           <div class="patient-avatar-badge">🐾</div>
@@ -4380,11 +4382,13 @@ function renderVisitPage(visit, pet) {
           <div class="sidebar-meta-item"><span class="label">Вага:</span><span class="val highlight">${visit?.weight_kg ? visit.weight_kg + ' кг' : '—'}</span></div>
           <div class="sidebar-meta-item"><span class="label">Статус:</span><span class="status-badge premium">В роботі</span></div>
         </div>
+        
         <div class="glass-card finance-card">
           <div class="finance-label">Загальна вартість</div>
           <div class="finance-amount">${grandTotal} <span class="currency">₴</span></div>
         </div>
-        <div class="sidebar-actions">
+        
+        <div class="sidebar-actions" style="margin-top: auto; padding-top: 10px;">
           <button type="button" id="visitMedSave" class="premium-neon-btn">💾 Зберегти візит</button>
         </div>
       </aside>
@@ -4396,7 +4400,7 @@ function renderVisitPage(visit, pet) {
           <button type="button" class="tab-nav-btn" data-target="visit-tab-files">📂 Файли</button>
         </div>
 
-        <div id="visit-tab-med" class="visit-tab-content">
+        <div id="visit-tab-med" class="visit-tab-content" style="display: block;">
           <div class="glass-card sub-tab-card">
             <div class="visit-form-group">
               <label class="premium-field">
@@ -4406,11 +4410,11 @@ function renderVisitPage(visit, pet) {
               <div class="field-row-grid">
                 <label class="premium-field">
                   <span class="field-title">Скарги клієнта & Клінічний стан</span>
-                  <textarea class="premium-textarea" id="visitMedComplaint" rows="6" placeholder="Опишіть симптомы...">${safe(complaint)}</textarea>
+                  <textarea class="premium-textarea" id="visitMedComplaint" rows="6" placeholder="Опишіть симптоми та стан...">${safe(complaint)}</textarea>
                 </label>
                 <label class="premium-field">
                   <span class="field-title">Призначення & Рекомендації (Rx)</span>
-                  <textarea class="premium-textarea rx-accent" id="visitMedRx" rows="6" placeholder="Схема лікування...">${safe(rx)}</textarea>
+                  <textarea class="premium-textarea rx-accent" id="visitMedRx" rows="6" placeholder="Схема лікування, дозування препаратів...">${safe(rx)}</textarea>
                 </label>
               </div>
             </div>
@@ -4419,7 +4423,7 @@ function renderVisitPage(visit, pet) {
 
         <div id="visit-tab-items" class="visit-tab-content" style="display: none;">
           <div class="glass-card sub-tab-card">
-            <h4 style="margin: 0 0 12px 0; font-size: 1rem;">Надані послуги</h4>
+            <h4 style="margin: 0 0 12px 0; font-size: 1rem; color: #fff; opacity: 0.9;">Надані послуги</h4>
             <div class="visit-lines-container" style="margin-bottom: 16px;">${svcListHtml}</div>
             <div class="premium-picker-bar" style="margin-bottom: 24px;">
               <select id="visitSvcSelect" class="premium-select" style="flex:1;">${svcOptions}</select>
@@ -4427,7 +4431,7 @@ function renderVisitPage(visit, pet) {
               <button id="visitSvcAdd" type="button">Додати послугу</button>
             </div>
 
-            <h4 style="margin: 12px 0 12px 0; font-size: 1rem;">Препарати та товари</h4>
+            <h4 style="margin: 12px 0 12px 0; font-size: 1rem; color: #fff; opacity: 0.9;">Препарати та товари</h4>
             <div class="visit-lines-container" style="margin-bottom: 16px;">${stkListHtml}</div>
             <div class="premium-picker-bar">
               <select id="visitStkSelect" class="premium-select" style="flex:1;">${stkOptions}</select>
@@ -4441,7 +4445,7 @@ function renderVisitPage(visit, pet) {
           <div class="glass-card sub-tab-card">
             <div class="file-upload-placeholder">
               <div class="upload-icon">☁️</div>
-              <div class="upload-text">Перетягніть файли сюди...</div>
+              <div class="upload-text">Перетягніть файли сюди або <span class="upload-link">відкрийте провідник</span></div>
             </div>
           </div>
         </div>
