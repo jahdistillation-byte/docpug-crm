@@ -2361,19 +2361,26 @@ async function renderPatientTab(tab, pet) {
     };
   }
 
-  // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ»
-  const btnAddVisit = document.getElementById("btnAddVisit");
-  if (btnAddVisit) {
-    btnAddVisit.onclick = () => {
-      if (typeof openNewVisitModal === "function") {
-        openNewVisitModal(pet.id); // Вызываем твое модальное окно создания визита
-      } else if (typeof createVisit === "function") {
-        createVisit(pet.id);
-      } else {
-        alert("Функція створення нового візиту підключается...");
-      }
-    };
-  }
+ // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ТЕПЕР ЖЕЛЕЗНО И БЕЗ ОШИБОК!
+    const btnAddVisit = document.getElementById("btnAddVisit");
+    if (btnAddVisit) {
+      btnAddVisit.onclick = () => {
+        // Гарантируем, что в глобальном стейте лежит актуальный питомец
+        if (state) {
+          state.selectedPet = pet;
+          if (pet.id || pet._id) {
+            state.selectedPetId = pet.id || pet._id;
+          }
+        }
+        
+        // Вызываем создание визита
+        if (typeof openVisitModalForCreate === "function") {
+          openVisitModalForCreate(pet);
+        } else {
+          alert("Помилка: функция openVisitModalForCreate не знайдена");
+        }
+      };
+    }
 
   // Навешиваем клики на вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
