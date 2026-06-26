@@ -2295,8 +2295,14 @@ async function renderPatientTab(tab, pet) {
 
   const stats = getFinancialStats(pet.id, 'patient');
 
-  // Шаг 1: Полностью обновляем контейнер, чтобы гарантированно применились новые вкладки
+  // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
   root.innerHTML = `
+    <div style="margin-bottom: 16px;">
+      <button id="btnBackToProfile" class="patient-tab-btn" style="background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 10px;">
+        ← Назад до списку
+      </button>
+    </div>
+
     <div class="glass-card" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
       <div style="display:flex; justify-content:space-between; align-items:start;">
         <div>
@@ -2307,7 +2313,7 @@ async function renderPatientTab(tab, pet) {
             ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
           </div>
         </div>
-        <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);">+ Новий візит</button>
+        <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4); border:none; padding: 12px 20px; border-radius: 12px; font-weight:600; cursor:pointer;">+ Новий візит</button>
       </div>
 
       <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
@@ -2336,14 +2342,40 @@ async function renderPatientTab(tab, pet) {
       <button class="patient-tab-btn" data-p-tab="medcard">🩺 Веткарта</button>
       <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
       <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
-      <button class="patient-tab-btn" data-p-tab="finance">💎 Финанси</button>
+      <button class="patient-tab-btn" data-p-tab="finance">💎 Фінанси</button>
       <button class="patient-tab-btn" data-p-tab="edit">✏️ Редагувати</button>
     </div>
 
     <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
   `;
 
-  // Навешиваем события клика заново на свежие кнопки
+  // ОЖИВЛЯЕМ КНОПКУ «НАЗАД»
+  const btnBack = document.getElementById("btnBackToProfile");
+  if (btnBack) {
+    btnBack.onclick = () => {
+      // Здесь вызываем твою глобальную функцию перехода назад. 
+      // Например, если у тебя используется хэш-роутер, то:
+      window.location.hash = "#patients"; 
+      // Или если функция отрисовки списка клиентов называется renderPatientsList:
+      // if (typeof renderPatientsList === "function") renderPatientsList();
+    };
+  }
+
+  // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ»
+  const btnAddVisit = document.getElementById("btnAddVisit");
+  if (btnAddVisit) {
+    btnAddVisit.onclick = () => {
+      if (typeof openNewVisitModal === "function") {
+        openNewVisitModal(pet.id); // Вызываем твое модальное окно создания визита
+      } else if (typeof createVisit === "function") {
+        createVisit(pet.id);
+      } else {
+        alert("Функція створення нового візиту підключается...");
+      }
+    };
+  }
+
+  // Навешиваем клики на вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     btn.onclick = () => {
       const targetTab = btn.dataset.pTab;
@@ -2351,11 +2383,10 @@ async function renderPatientTab(tab, pet) {
     };
   });
 
-  // Ищем заново созданный динамический бокс для контента
   const dynamicBox = $("#patientTabContent");
   if (!dynamicBox) return;
 
-  // Жестко красим кнопки через инлайн-стили, сбрасывая кэш
+  // Красим вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     const isActive = btn.dataset.pTab === tab;
     btn.style.padding = "10px 18px";
@@ -2370,7 +2401,7 @@ async function renderPatientTab(tab, pet) {
     btn.style.transition = "all 0.2s ease";
   });
 
-  // Шаг 2: Отрисовка контента
+  // Шаг 2: Контент табов
   if (tab === "overview") {
     dynamicBox.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
@@ -2398,22 +2429,18 @@ async function renderPatientTab(tab, pet) {
     if (typeof renderVisits === "function") await renderVisits(pet.id);
     return;
   }
-  
   if (tab === "medcard") {
     if (typeof renderMedcardTab === "function") await renderMedcardTab(pet);
     return;
   }
-  
   if (tab === "labs") {
     if (typeof renderLabsTab === "function") renderLabsTab(pet);
     return;
   }
-  
   if (tab === "files") {
     if (typeof renderPatientFilesTab === "function") renderPatientFilesTab(pet);
     return;
   }
-
   if (tab === "edit") {
     if (typeof renderEditPetForm === "function") {
        renderEditPetForm(pet);
