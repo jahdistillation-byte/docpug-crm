@@ -1,39 +1,39 @@
 /* ==========================================================================
-   PUGCRM - PREMIUM GLASS LIGHT UI
-   COMBINING HIGH-TECH & LIGHTNESS
+   PUGCRM - ULTRA-GLASSMORPHISM UI (visionOS/Apple Style)
+   DEEP PURPLE, NEON, & HIGH-TECH TRANSPARENCY
    ========================================================================== */
 
-/* --- 1. ПЕРЕМЕННЫЕ И ДИЗАЙН-СИСТЕМА (AMETHYST LIGHT) --- */
+/* --- 1. ПЕРЕМЕННЫЕ И ДИЗАЙН-СИСТЕМА (NEON & DEEP SPACE) --- */
 :root {
-    /* Фоновая палитра (Возвращаем светлое, но благородное) */
-    --bg-app: radial-gradient(circle at center, #f5f2ff 0%, #e8e3f9 100%); /* Мягкий аметистовый фон */
+    /* Фоновая палитра (Глубокий космос, см. image_1.png) */
+    --bg-app: radial-gradient(circle at center, #2e1a4f 0%, #1a0b2e 100%);
     
-    /* Стеклянные панели (Светлое стекло) */
-    --glass-bg: rgba(255, 255, 255, 0.45);
-    --glass-border: rgba(255, 255, 255, 0.7);
-    --glass-blur: blur(20px) saturate(160%);
+    /* Стеклянные панели (Ultra-Glass, Apple Style) */
+    --glass-bg: rgba(255, 255, 255, 0.03); /* Очень прозрачное */
+    --glass-border: rgba(255, 255, 255, 0.08); /* Тонкая хайтек рамка */
+    --glass-blur: blur(35px) saturate(200%); /* Мощное размытие и насыщенность */
     
-    /* Текстовые цвета (Возвращаем четкость) */
-    --text-main: #2b2640;         /* Глубокий фиолетовый для заголовков */
-    --text-muted: #6e7282;        /* Приглушенный серый для метаданных */
+    /* Текстовые цвета */
+    --text-main: #ffffff;         /* Белоснежный */
+    --text-muted: rgba(255, 255, 255, 0.6); /* Полупрозрачный белый */
     
-    /* Фирменные НЕОНОВЫЕ акценты (Но мягче) */
-    --primary-neon: #936fff;      /* Приглушенный фиолетовый неон */
-    --primary-glow: 0 0 12px rgba(147, 111, 255, 0.35);
-    --accent-neon: #ff85f9;       /* Мягкий розовый неон */
+    /* Фирменные НЕОНОВЫЕ акценты (см. image_4.png) */
+    --primary-neon: #a361ff;      /* Яркий фиолетовый неон */
+    --primary-glow: 0 0 15px rgba(163, 97, 255, 0.5);
+    --accent-neon: #ff61f6;       /* Розовый неон для ховеров */
     
-    /* Статусы */
-    --color-success: #27c26c;
-    --color-warning: #ffb020;
-    --color-danger: #ff4d4d;
+    /* "Ядовитые" статусы */
+    --color-success: #00ff88;
+    --color-warning: #ffe600;
+    --color-danger: #ff3333;
 
     /* Системные переменные */
-    --sidebar-width: 260px;
-    --radius-lg: 20px;
-    --radius-md: 12px;
+    --sidebar-width: 280px;
+    --radius-lg: 24px;            /* Более мягкие скругления */
+    --radius-md: 14px;
     --radius-sm: 8px;
-    --transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
-    --shadow-premium: 0 4px 15px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.01);
+    --transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 /* --- 2. БАЗОВЫЕ СТИЛИ И СБРОС --- */
@@ -60,12 +60,12 @@ body {
     min-height: 100vh;
 }
 
-/* Боковое меню (Sidebar - Светлое стекло) */
+/* Боковое меню (Sidebar - Глубокое матовое стекло) */
 .sidebar {
     width: var(--sidebar-width);
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: rgba(20, 10, 35, 0.6);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
@@ -80,64 +80,65 @@ body {
 .sidebar-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     color: var(--text-main);
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    margin-bottom: 40px;
+    margin-bottom: 50px;
 }
 
 .sidebar-logo span:first-child {
-    font-size: 1.6rem;
-    color: var(--primary-neon);
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 5px var(--primary-neon));
 }
 
 /* Профиль клиники */
 .user-profile-badge {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.03);
     border-radius: var(--radius-md);
-    padding: 14px;
-    margin-bottom: 30px;
-    border: 1px solid var(--glass-border);
+    padding: 16px;
+    margin-bottom: 35px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .user-profile-badge h4 {
-    font-size: 0.9rem;
+    color: var(--text-main);
+    font-size: 1rem;
     font-weight: 600;
 }
 
 .user-profile-badge span {
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
 }
 
-/* Навигация */
+/* Навигация (Неоновые пункты) */
 .sidebar-menu {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .menu-item a {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     color: var(--text-muted);
     text-decoration: none;
-    padding: 12px 16px;
+    padding: 14px 18px;
     border-radius: var(--radius-md);
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 1rem;
     transition: var(--transition);
 }
 
 .menu-item a:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.04);
 }
 
-/* Активный пункт с неоновым свечением (см. image_4.png) */
+/* Активный пункт меню с неоновым свечением */
 .menu-item.active a {
     color: #ffffff;
     background: var(--primary-neon);
@@ -152,51 +153,58 @@ body {
     max-width: calc(100% - var(--sidebar-width));
 }
 
-/* Верхняя шапка */
+/* Верхняя шапка (Панель управления) */
 .header-panel {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .search-bar {
-    width: 380px;
+    width: 400px;
+    position: relative;
 }
 
 .search-bar input {
     width: 100%;
-    padding: 14px 20px;
-    background: #ffffff; /* Поиск делаем просто белым, чтобы был фокус */
-    border: 1px solid transparent;
+    padding: 16px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: 30px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    color: var(--text-main);
     transition: var(--transition);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
 
 .search-bar input:focus {
     border-color: var(--primary-neon);
-    box-shadow: 0 0 10px rgba(147, 111, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 15px rgba(163, 97, 255, 0.1);
 }
 
-/* --- 4. КНОПКИ И ПЕРЕКЛЮЧАТЕЛИ (AMETHYST GLASS) --- */
+/* --- 4. КНОПКИ И ПЕРЕКЛЮЧАТЕЛИ (NEON GLASS STYLE) --- */
 .nav-buttons-group {
     display: flex;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.3);
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(10px);
-    padding: 6px;
-    border-radius: 30px;
+    padding: 8px;
+    border-radius: 40px;
     border: 1px solid var(--glass-border);
 }
 
 .btn-tab {
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    border-radius: 30px;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
 }
 
 .btn-tab:hover {
@@ -209,105 +217,272 @@ body {
     box-shadow: var(--primary-glow);
 }
 
-/* Датапикер (Стрелочки) */
+/* Датапикер (Светящиеся стрелочки) */
 .btn-arrow {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     border: 1px solid var(--glass-border);
     background: var(--glass-bg);
+    backdrop-filter: blur(5px);
     color: var(--text-main);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
 }
 
 .btn-arrow:hover {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
     border-color: var(--accent-neon);
     color: var(--accent-neon);
 }
 
-/* --- 5. МОДУЛЬ КАЛЕНДАРЯ (LIGHT GRID WITH NEON ACCENTS) --- */
+.current-date-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+/* --- 5. МОДУЛЬ КАЛЕНДАРЯ (ULTRA GLASS GRID) --- */
+
+/* Главная плашка календаря - Максимальное стекло */
 .calendar-container {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    padding: 24px;
+    padding: 30px;
     box-shadow: var(--shadow-premium);
+    display: flex;
+    flex-direction: column;
     overflow: hidden; 
 }
 
-/* Скроллбар */
+/* Обертка для горизонтального скролла */
+.calendar-grid-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 15px;
+}
+
+/* Неоновый скроллбар */
+.calendar-grid-wrapper::-webkit-scrollbar {
+    height: 7px;
+}
 .calendar-grid-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(147, 111, 255, 0.2);
+    background: rgba(163, 97, 255, 0.3);
+    border-radius: 10px;
 }
 .calendar-grid-wrapper::-webkit-scrollbar-thumb:hover {
     background: var(--primary-neon);
-}
-
-/* Сетка (Возвращаем светлую, см. image_2.png) */
-.calendar-grid {
-    grid-template-columns: 70px repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
-}
-
-/* Липкая колонка времени */
-.time-column-header,
-.time-cell {
-    background: #ffffff; /* Светлая липкая колонка */
-    backdrop-filter: blur(10px);
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-/* Карточки ветеринаров (см. image_2.png, но со стеклом) */
-.vet-column-header {
-    background: #ffffff; /* Возвращаем белый фон */
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-premium);
-}
-
-.vet-column-header:hover {
-    transform: translateY(-2px);
-    border-color: var(--primary-neon);
-}
-
-/* Ячейки времени (Стеклянные) */
-.appointment-cell {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px dashed rgba(0, 0, 0, 0.04);
-    color: rgba(0, 0, 0, 0.2);
-}
-
-.appointment-cell:hover {
-    background: #ffffff;
-    border: 1px solid var(--primary-neon);
-    color: var(--primary-neon);
     box-shadow: var(--primary-glow);
 }
 
-/* --- 6. ТАБЛИЦЫ И ОСТАЛЬНОЕ --- */
+/* Сетка календаря */
+.calendar-grid {
+    display: grid;
+    /* Время зафиксировано, колонки врачей не сжимаются меньше 240px */
+    grid-template-columns: 80px repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
+    min-width: max-content; 
+}
+
+/* Липкая колонка времени (Тонированное стекло) */
+.time-column-header,
+.time-cell {
+    position: sticky;
+    left: 0;
+    background: rgba(26, 11, 46, 0.9); /* Глубокий фон под цвет базы */
+    backdrop-filter: blur(15px);
+    z-index: 10;
+    font-weight: 700;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.time-column-header {
+    height: 80px;
+    text-transform: uppercase;
+}
+
+/* Стеклянные карточки ветеринаров (Хай-тек шапки) */
+.vet-column-header {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    transition: var(--transition);
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.vet-name {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 1.05rem;
+    margin-bottom: 3px;
+}
+
+.vet-spec {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Эффект при наведении на врача (Неоновая рамка) */
+.vet-column-header:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--primary-neon);
+    box-shadow: 0 8px 30px rgba(163, 97, 255, 0.2);
+}
+
+/* Ячейки времени (Пустые) */
+.appointment-cell {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+/* Эффект при наведении на пустую ячейку (Появляется неоновый плюс) */
+.appointment-cell:hover {
+    background: rgba(163, 97, 255, 0.05);
+    border: 1px solid var(--primary-neon);
+    color: var(--primary-neon);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(163, 97, 255, 0.1);
+}
+
+/* --- 6. ТАБЛИЦЫ (ХАЙ-ТЕК СПИСКИ) --- */
 .data-table-container {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    padding: 20px;
+    padding: 25px;
     box-shadow: var(--shadow-premium);
 }
 
-.badge-success { background: rgba(39, 194, 108, 0.1); color: var(--color-success); border: 1px solid rgba(39, 194, 108, 0.15); }
-.badge-danger { background: rgba(255, 77, 77, 0.1); color: var(--color-danger); border: 1px solid rgba(255, 77, 77, 0.15); }
-
-/* Модалки (Светлое ультра-стекло) */
-.modal-window {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.9);
+.data-table th {
+    padding: 16px 20px;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
 }
 
+.data-table td {
+    padding: 18px 20px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Неоновые статусы */
+.badge-success { background: rgba(0, 255, 136, 0.1); color: var(--color-success); border: 1px solid rgba(0, 255, 136, 0.2); }
+.badge-danger { background: rgba(255, 51, 51, 0.1); color: var(--color-danger); border: 1px solid rgba(255, 51, 51, 0.2); }
+
+
+/* --- 7. ПАЦИЕНТЫ И МОДАЛКИ (GLASS MODAL ИСПРАВЛЕНИЕ) --- */
+.patients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.patient-premium-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 25px;
+    transition: var(--transition);
+}
+
+.patient-premium-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* МОДАЛЬНЫЕ ОКНА (ULTRA GLASS ИСПРАВЛЕНИЕ АРТЕФАКТА, СМ. IMAGE_6.PNG) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 5, 20, 0.7); /* Очень темный бэкдроп */
+    backdrop-filter: blur(15px); /* Сильное размытие фона */
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-window {
+    background: rgba(25, 15, 40, 0.8);
+    backdrop-filter: blur(40px); /* Сверхчеткое размытие внутри окна */
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 550px;
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.8);
+    transition: var(--transition);
+}
+
+.modal-overlay.active .modal-window {
+    transform: scale(1);
+}
+
+/* Главная Хайтек Кнопка */
 .btn-primary {
     background: var(--primary-neon);
     color: #fff;
+    padding: 16px 30px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
     box-shadow: var(--primary-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(163, 97, 255, 0.6);
 }
