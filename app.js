@@ -2581,8 +2581,14 @@ async function renderVisitsTab() {
 // =========================
 // OWNER PAGE — server first patients list (render only) лол
 // =========================
+// ==========================================================================
+// ОБНОВЛЕННЫЙ РЕНДЕРИНГ СТРАНИЦЫ ВЛАСНИКА (СОХРАНЯЕМ ВСЮ ТВОЮ ЛОГИКУ И МАТЕМАТИКУ)
+// ==========================================================================
 function renderOwnerPage(ownerId) {
-  const owner = getOwnerById(ownerId);
+  console.log(`🐾 Рендеринг профілю власника ID: ${ownerId}`);
+  
+  // Твоя оригинальная проверка владельца
+  const owner = typeof getOwnerById === "function" ? getOwnerById(ownerId) : (state.owners || []).find(x => String(x.id) === String(ownerId));
   if (!owner) {
     alert("Владелец не найден");
     setHash("owners");
@@ -2591,163 +2597,185 @@ function renderOwnerPage(ownerId) {
 
   state.selectedOwnerId = String(ownerId);
 
+  // Твой сбор пациентов
   const patients =
     Array.isArray(state.patients) && state.patients.length
       ? state.patients
-      : loadPatients();
+      : (typeof loadPatients === "function" ? loadPatients() : LS.get(PATIENTS_KEY, []));
 
   const pets = (patients || []).filter(
     (p) => String(p.owner_id) === String(ownerId)
   );
 
+  // Твоя математика визитов, подсчета сумм и последнего визита
   const allVisits = Array.from(state.visitsById.values());
-
   const ownerPetIds = new Set(pets.map((p) => String(p.id)));
-
-  const ownerVisits = allVisits.filter((v) =>
-    ownerPetIds.has(String(v.pet_id))
-  );
-
+  const ownerVisits = allVisits.filter((v) => ownerPetIds.has(String(v.pet_id)));
   const visitsCount = ownerVisits.length;
 
   const lastVisit = ownerVisits
     .slice()
     .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
+  // Твой расчет выручки (проверяем существование функций подсчета)
   const totalPaid = ownerVisits.reduce((sum, v) => {
-    return sum + calcServicesTotal(v) + calcStockTotal(v);
+    const sSvc = typeof calcServicesTotal === "function" ? calcServicesTotal(v) : 0;
+    const sStk = typeof calcStockTotal === "function" ? calcStockTotal(v) : 0;
+    return sum + sSvc + sStk;
   }, 0);
 
-  const ownerName = $("#ownerName");
-  const ownerMeta = $("#ownerMeta");
+  // 1. РЕНДЕРИМ СТЕКЛЯННУЮ ШАПКУ И СТАТИСТИКУ (в контейнер owner-profile-name или аналогичный)
+  // Мы раскладываем данные по новым хай-тек блокам, которые заготовлены в index.html
+  const profileNameBox = document.getElementById('owner-profile-name');
+  const profilePhoneBox = document.getElementById('owner-profile-phone');
+  const profileInfoBox = document.getElementById('owner-profile-info');
 
-  if (ownerName) {
-    ownerName.innerHTML = `
-      <div class="ownerHero">
-        <div>
-          <div class="ownerHeroLabel">Картка власника</div>
-          <div class="ownerHeroName">👤 ${escapeHtml(owner.name || "Без имени")}</div>
-
-          <div class="ownerHeroMeta">
-            <span>📞 ${escapeHtml(owner.phone || "Телефон не указан")}</span>
-            ${
-              owner.note
-                ? `<span>📍 ${escapeHtml(owner.note)}</span>`
-                : ""
-            }
+  if (profileNameBox) profileNameBox.innerHTML = `👤 ${escapeHtml(owner.name || "Без імені")}`;
+  if (profilePhoneBox) profilePhoneBox.innerHTML = `📞 ${escapeHtml(owner.phone || "Телефон не вказано")}`;
+  if (profileInfoBox) {
+    profileInfoBox.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+        <div style="color: var(--text-muted); font-size: 0.9rem;">📍 Примітка: ${escapeHtml(owner.note || "немає")}</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 10px;">
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">🐾</div>
+            <div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${pets.length}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">пацієнтів</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">📋</div>
+            <div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #fff;">${visitsCount}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">візитів</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">💰</div>
+            <div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: var(--color-success);">${totalPaid} грн</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">оплачено</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.8rem;">📅</div>
+            <div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #fff; white-space: nowrap;">${escapeHtml(lastVisit?.date || "—")}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">останній візит</div>
+            </div>
           </div>
         </div>
-
-        <div class="ownerHeroActions">
-          <button class="ghost" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
-          <button class="primary" id="btnAddPet">+ Животное</button>
-        </div>
-      </div>
-
-      <div class="ownerStats">
-        <div class="ownerStat">
-          <div class="ownerStatIcon">🐾</div>
-          <div>
-            <div class="ownerStatValue">${pets.length}</div>
-            <div class="ownerStatLabel">пацієнтів</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">📋</div>
-          <div>
-            <div class="ownerStatValue">${visitsCount}</div>
-            <div class="ownerStatLabel">візитів</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">💰</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div>
-            <div class="ownerStatLabel">оплачено</div>
-          </div>
-        </div>
-
-        <div class="ownerStat">
-          <div class="ownerStatIcon">📅</div>
-          <div>
-            <div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div>
-            <div class="ownerStatLabel">останній візит</div>
-          </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button class="btn-tab" data-edit-owner="${escapeHtml(owner.id)}" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">✏️ Редагувати</button>
+          <button class="btn-primary" id="btnAddPet" style="padding: 10px 20px; font-size: 0.85rem;">+ Додати тварину</button>
         </div>
       </div>
     `;
   }
 
-  if (ownerMeta) ownerMeta.textContent = "";
+  // Привязываем кнопки редактирования и добавления
+  setTimeout(() => {
+    const btnAddPet = document.getElementById("btnAddPet");
+    if (btnAddPet) {
+      btnAddPet.onclick = () => {
+        if (typeof openCreatePetModal === "function") openCreatePetModal(ownerId);
+        else alert("Функція створення тварини підключається...");
+      };
+    }
+    const btnEdit = document.querySelector(`[data-edit-owner="${owner.id}"]`);
+    if (btnEdit && typeof openEditOwnerModal === "function") {
+      btnEdit.onclick = () => openEditOwnerModal(owner);
+    }
+  }, 50);
 
-  const list = $("#petsList");
+  // 2. РЕНДЕРИМ СТЕКЛЯННЫЕ КАРТОЧКИ ЖИВОТНЫХ
+  const list = document.getElementById('owner-patients-container') || document.getElementById('ownerPatientsList') || document.getElementById("petsList");
   if (!list) return;
 
   list.innerHTML = "";
 
   if (!pets.length) {
-    list.innerHTML = `<div class="hint">Пока нет животных. Нажми “+ Животное”.</div>`;
+    list.innerHTML = `
+      <div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">
+        Поки немає тварин. Натисни “+ Додати тварину”.
+      </div>
+    `;
     return;
   }
 
   pets.forEach((pet) => {
-    const petVisits = ownerVisits.filter(
-      (v) => String(v.pet_id) === String(pet.id)
-    );
-
+    const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
     const petLastVisit = petVisits
       .slice()
       .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
-    const el = document.createElement("div");
-    el.className = "item ownerPetCard";
+    const card = document.createElement("div");
+    card.style.cssText = "background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 20px; transition: var(--transition); display: flex; flex-direction: column; gap: 14px; position: relative; cursor: pointer;";
+    
+    card.onmouseenter = () => { card.style.background = "rgba(255,255,255,0.05)"; card.style.borderColor = "var(--primary-neon)"; };
+    card.onmouseleave = () => { card.style.background = "var(--glass-bg)"; card.style.borderColor = "var(--glass-border)"; };
 
-    el.innerHTML = `
-      <div
-        class="left"
-        data-open-pet="${escapeHtml(String(pet.id))}"
-        style="width:100%; cursor:pointer;"
-      >
-        <div class="ownerPetTop">
+    const spec = String(pet.species || "").toLowerCase();
+    const icon = spec.includes("кіт") || spec.includes("кот") ? "🐱" : "🐶";
+
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+        <div style="display: flex; gap: 14px; align-items: center;" data-open-pet="${escapeHtml(String(pet.id))}">
+          <div style="font-size: 2rem; background: rgba(255,255,255,0.03); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+            ${icon}
+          </div>
           <div>
-            <div class="name" style="font-size:19px;">
-              🐾 ${escapeHtml(pet.name || "Без клички")}
-            </div>
-
-            <div class="meta" style="margin-top:6px;">
-              ${escapeHtml(speciesLabel(pet.species))}
-              ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+            <h4 style="margin: 0 0 4px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">🐾 ${escapeHtml(pet.name || "Без клички")}</h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              ${escapeHtml(pet.species || "тварина")} ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
               ${pet.age ? " • " + escapeHtml(pet.age) : ""}
               ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
             </div>
           </div>
-
-          <div class="ownerPetBadges">
-            <div class="pill">📋 ${petVisits.length} візитів</div>
-            <div class="pill">📅 ${escapeHtml(petLastVisit?.date || "—")}</div>
-          </div>
         </div>
 
-        ${
-          pet.notes
-            ? `
-          <div class="history">
-            <div class="history-label">Історія / нотатки лікаря</div>
-            ${escapeHtml(pet.notes)}
-          </div>
-        `
-            : ""
-        }
+        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; z-index: 10;">🗑</button>
       </div>
 
-      <div class="right" style="display:flex; gap:8px; align-items:center;">
-        <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge" style="background: rgba(163, 97, 255, 0.08); color: var(--primary-neon); border: 1px solid rgba(163, 97, 255, 0.15); padding: 4px 10px; font-size: 0.75rem;">📋 ${petVisits.length} візитів</span>
+        <span class="badge" style="background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.05); padding: 4px 10px; font-size: 0.75rem;">📅 ${escapeHtml(petLastVisit?.date || "—")}</span>
       </div>
+
+      ${pet.notes ? `
+        <div style="background: rgba(0,0,0,0.15); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--primary-neon); margin-top: 4px;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary-neon); font-weight: 700; margin-bottom: 4px;">Історія / нотатки лікаря</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); white-space: pre-line;">${escapeHtml(pet.notes)}</div>
+        </div>
+      ` : ""}
     `;
 
-    list.appendChild(el);
+    // Клик по карточке ведет в медкарту
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("[data-del-pet]")) return;
+      if (typeof openPatient === "function") openPatient(pet.id);
+      else setHash("patient", pet.id);
+    });
+
+    // Кнопка удаления питомца
+    card.querySelector("[data-del-pet]").addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Видалити пацієнта ${pet.name}?`)) return;
+      if (typeof deletePatientApi === "function") {
+        const ok = await deletePatientApi(pet.id);
+        if (ok) renderOwnerPage(ownerId);
+      } else {
+        const next = (state.patients || []).filter(x => String(x.id) !== String(pet.id));
+        state.patients = next;
+        if (typeof savePatients === "function") savePatients(next);
+        renderOwnerPage(ownerId);
+      }
+    });
+
+    list.appendChild(card);
   });
 }
 
