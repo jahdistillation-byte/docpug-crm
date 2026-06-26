@@ -4783,15 +4783,15 @@ function renderOwners() {
   const q = String(document.getElementById("globalSearch")?.value || "").trim().toLowerCase();
   const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
 
-  const filteredOwners = ownersRaw.filter((owner) => {
+    const filteredOwners = ownersRaw.filter((owner) => {
     if (!q) return true;
-    const hay = [
-      owner.name,
-      owner.phone,
-      owner.note,
-    ].filter(Boolean).join(" ").toLowerCase();
-
-    return hay.includes(q);
+    
+    // Безопасное приведение к строке и нижнему регистру
+    const name = (owner.name || "").toString().toLowerCase();
+    const phone = (owner.phone || "").toString().toLowerCase();
+    const note = (owner.note || "").toString().toLowerCase();
+    
+    return name.includes(q) || phone.includes(q) || note.includes(q);
   });
 
   if (!filteredOwners.length) {
