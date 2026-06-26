@@ -4316,7 +4316,7 @@ function renderVisitPage(visit, pet) {
   const dx = parsed.dx || "";
   const complaint = parsed.complaint || "";
 
-  // Сборка услуг
+  // ==================== СБОРКА УСЛУГ ====================
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
 
@@ -4331,20 +4331,23 @@ function renderVisitPage(visit, pet) {
 
   const svcListHtml = expanded.length
     ? expanded.map((x, idx) => `
-        <div class="visitLine">
-          <div>
-            <div class="visitLineName">${escapeHtml(x.name)}</div>
-            <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
+        <div class="visitLine premium-row">
+          <div class="visitLineLeft">
+            <div class="visitLineIcon">🩺</div>
+            <div>
+              <div class="visitLineName">${escapeHtml(x.name)}</div>
+              <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
+            </div>
           </div>
           <div class="visitLineRight">
-            <b>${escapeHtml(String(x.lineTotal))} грн</b>
-            <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+            <span class="visitLineTotalValue">${escapeHtml(String(x.lineTotal))} грн</span>
+            <button type="button" class="action-circle-btn delete" data-svc-del="${idx}" title="Прибрати">✕</button>
           </div>
         </div>
       `).join("")
-    : `<div class="hint">Поки послуг немає. Додай нижче.</div>`;
+    : `<div class="premium-hint">🧬 Послуги ще не додано. Виберіть зі списку нижче.</div>`;
 
-  // Сборка препаратов со склада
+  // ==================== СБОРКА ПРЕПАРАТОВ СО СКЛАДА ====================
   ensureVisitStockShape(visit);
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
 
@@ -4355,7 +4358,7 @@ function renderVisitPage(visit, pet) {
       const left = Number(it.qty) || 0;
       const unit = String(it.unit || "шт");
       const price = Number(it.price) || 0;
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
+      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} (Залишок: ${escapeHtml(String(left))})</option>`;
     })
     .join("");
 
@@ -4364,80 +4367,141 @@ function renderVisitPage(visit, pet) {
 
   const stkListHtml = stkExpanded.length
     ? stkExpanded.map((x, idx) => `
-        <div class="visitLine">
-          <div>
-            <div class="visitLineName">${escapeHtml(x.name)}</div>
-            <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}</div>
+        <div class="visitLine premium-row">
+          <div class="visitLineLeft">
+            <div class="visitLineIcon">💊</div>
+            <div>
+              <div class="visitLineName">${escapeHtml(x.name)}</div>
+              <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн/${escapeHtml(x.unit || "шт")}</div>
+            </div>
           </div>
           <div class="visitLineRight">
-            <b>${escapeHtml(String(x.lineTotal))} грн</b>
-            <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+            <span class="visitLineTotalValue">${escapeHtml(String(x.lineTotal))} грн</span>
+            <button type="button" class="action-circle-btn delete" data-stk-del="${idx}" title="Прибрати">✕</button>
           </div>
         </div>
       `).join("")
-    : `<div class="hint">Поки препаратів немає. Додай нижче.</div>`;
+    : `<div class="premium-hint">📦 Товари чи препарати не додано. Виберіть зі списку нижче.</div>`;
 
   const grandTotal = total + stkTotal;
 
-  // ОБНОВЛЕННАЯ СТРУКТУРА (премиум-вид)
+  // ==================== ПРЕМИУМ HTML СТРУКТУРА ====================
   box.innerHTML = `
-    <div class="visit-container" style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; padding: 10px;">
+    <div class="visit-grid-layout">
       
-      <aside class="visit-sidebar">
-        <div class="glass-panel" style="margin-bottom: 20px;">
-          <h3 style="margin-top:0; font-size: 1rem; opacity: 0.7;">Деталі візиту</h3>
-          <div style="font-size: 1.1rem; font-weight: 600; margin: 10px 0;">${visit.date || "—"}</div>
-          <div style="font-size: 0.9rem; opacity: 0.8;">${pet?.name || "Пацієнт"}</div>
-          <div style="font-size: 0.8rem; opacity: 0.5;">${pet?.species || ""} · ${pet?.breed || ""}</div>
+      <aside class="visit-sidebar-sticky">
+        
+        <div class="glass-card main-info">
+          <div class="patient-avatar-badge">🐾</div>
+          <div class="sidebar-patient-name">${escapeHtml(pet?.name || "Пацієнт")}</div>
+          <div class="sidebar-patient-breed">${escapeHtml(pet?.species || "")} • ${escapeHtml(pet?.breed || "Без породи")}</div>
+          
+          <div class="sidebar-divider"></div>
+          
+          <div class="sidebar-meta-item">
+            <span class="label">Дата візиту:</span>
+            <span class="val">${escapeHtml(visit.date || "—")}</span>
+          </div>
+          <div class="sidebar-meta-item">
+            <span class="label">Вага малюка:</span>
+            <span class="val highlight">${visit.weight_kg ? visit.weight_kg + ' кг' : '—'}</span>
+          </div>
+          <div class="sidebar-meta-item">
+            <span class="label">Статус:</span>
+            <span class="status-badge premium">В роботі</span>
+          </div>
         </div>
 
-        <div class="visitMoneyCard visitMoneyCardTotal glass-panel" style="text-align: center;">
-          <div class="visitMoneyLabel" style="opacity: 0.6;">Разом до сплати</div>
-          <div class="visitMoneyValue" style="font-size: 1.8rem; font-weight: 700; color: #a855f7;">${grandTotal} ₴</div>
+        <div class="glass-card finance-card">
+          <div class="finance-label">Загальна вартість</div>
+          <div class="finance-amount">${grandTotal} <span class="currency">₴</span></div>
         </div>
         
-        <div style="margin-top: 20px;">
-            <button type="button" class="miniBtn" id="visitMedSave" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600;">💾 Зберегти зміни</button>
+        <div class="sidebar-actions">
+          <button type="button" id="visitMedSave" class="premium-neon-btn">
+            <span class="btn-icon">💾</span> Зберегти візит
+          </button>
         </div>
       </aside>
 
-      <main class="visit-main">
-        <div class="glass-panel" style="margin-bottom: 20px;">
-          <div class="visitBlockTitle">Медична частина</div>
-          <div class="visitMedGrid visitMedGridEdit">
-            <label class="field visitMedItem">
-              <div class="history-label">Діагноз</div>
-              <input class="input" id="visitMedDx" type="text" value="${escapeHtml(dx)}" />
+      <main class="visit-main-content">
+        
+        <div class="glass-card section-card">
+          <div class="section-card-header">
+            <span class="section-card-icon">🩺</span>
+            <h3 class="section-card-title">Медична частина</h3>
+          </div>
+          
+          <div class="visit-form-group">
+            <label class="premium-field">
+              <span class="field-title">Діагноз / Попередній діагноз</span>
+              <input class="premium-input text-bold" id="visitMedDx" type="text" placeholder="Введіть діагноз..." value="${escapeHtml(dx)}" />
             </label>
-            <label class="field visitMedItem">
-              <div class="history-label">Скарга / стан</div>
-              <textarea class="textarea visitMedTextarea" id="visitMedComplaint" rows="3">${escapeHtml(complaint)}</textarea>
-            </label>
-            <label class="field visitMedItem">
-              <div class="history-label">Призначення</div>
-              <textarea class="textarea visitMedTextarea" id="visitMedRx" rows="3">${escapeHtml(rx)}</textarea>
-            </label>
+            
+            <div class="field-row-grid">
+              <label class="premium-field">
+                <span class="field-title">Скарги клієнта & Клінічний стан</span>
+                <textarea class="premium-textarea" id="visitMedComplaint" rows="4" placeholder="Опишіть симптоми, анамнез та результати первинного огляду...">${escapeHtml(complaint)}</textarea>
+              </label>
+              
+              <label class="premium-field">
+                <span class="field-title">Призначення & Рекомендації (Rx)</span>
+                <textarea class="premium-textarea rx-accent" id="visitMedRx" rows="4" placeholder="Схема лікування, дозування препаратів та рекомендації власнику...">${escapeHtml(rx)}</textarea>
+              </label>
+            </div>
           </div>
         </div>
 
-        <div class="glass-panel" style="margin-bottom: 20px;">
-          <div class="visitBlockTitle">Послуги та Препарати</div>
-          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <select id="visitSvcSelect" style="flex: 2;">${svcOptions}</select>
-            <input id="visitSvcQty" type="number" min="1" value="1" style="width: 60px;" />
-            <button id="visitSvcAdd" type="button" class="miniBtn">Додати послугу</button>
+        <div class="glass-card section-card">
+          <div class="section-card-header">
+            <span class="section-card-icon">💼</span>
+            <h3 class="section-card-title">Надані послуги</h3>
           </div>
-          <div class="visitLines">${svcListHtml}</div>
           
-          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+          <div class="visit-lines-container">${svcListHtml}</div>
           
-          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <select id="visitStkSelect" style="flex: 2;">${stkOptions}</select>
-            <input id="visitStkQty" type="number" min="1" value="1" style="width: 60px;" />
-            <button id="visitStkAdd" type="button" class="miniBtn">Додати препарат</button>
+          <div class="premium-picker-bar">
+            <div class="select-wrapper">
+              <select id="visitSvcSelect" class="premium-select">${svcOptions}</select>
+            </div>
+            <input id="visitSvcQty" type="number" min="1" value="1" class="premium-qty-input" title="Кількість" />
+            <button id="visitSvcAdd" type="button" class="add-line-btn">
+              <span>+</span> Додати послугу
+            </button>
           </div>
-          <div class="visitLines">${stkListHtml}</div>
         </div>
+
+        <div class="glass-card section-card">
+          <div class="section-card-header">
+            <span class="section-card-icon">🧪</span>
+            <h3 class="section-card-title">Препарати та товари зі складу</h3>
+          </div>
+          
+          <div class="visit-lines-container">${stkListHtml}</div>
+          
+          <div class="premium-picker-bar">
+            <div class="select-wrapper">
+              <select id="visitStkSelect" class="premium-select">${stkOptions}</select>
+            </div>
+            <input id="visitStkQty" type="number" min="1" value="1" class="premium-qty-input" title="Кількість" />
+            <button id="visitStkAdd" type="button" class="add-line-btn stock-accent">
+              <span>+</span> Видати зі складу
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card section-card">
+          <div class="section-card-header">
+            <span class="section-card-icon">📂</span>
+            <h3 class="section-card-title">Файли та аналізи</h3>
+          </div>
+          <div class="file-upload-placeholder">
+            <div class="upload-icon">☁️</div>
+            <div class="upload-text">Перетягніть файли сюди або <span class="upload-link">відкрийте провідник</span></div>
+            <div class="upload-subtext">Аналізи крові, результати УЗД, Рентген (PDF, JPEG, PNG)</div>
+          </div>
+        </div>
+
       </main>
     </div>
   `;

@@ -710,3 +710,353 @@ aside[style*="width: 240px"] {
     grid-template-columns: 350px 1fr; /* Левая панель и правая часть */
     gap: 20px;
 }
+
+/* ==========================================================================
+   PREMIUM VISIT PAGE - GLASSMORPHISM FIXES
+   ========================================================================== */
+
+.visit-grid-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  padding: 10px 0;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.visit-sidebar-sticky {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Базовая стеклянная карточка */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(25px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25) !important;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Паспорт пациента в сайдбаре */
+.patient-avatar-badge {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.15));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-patient-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-patient-breed {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 4px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 18px 0;
+}
+
+.sidebar-meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.sidebar-meta-item:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-meta-item .label {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.sidebar-meta-item .val {
+  color: #fff;
+  font-weight: 500;
+}
+
+.sidebar-meta-item .val.highlight {
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+/* Финансовый блок */
+.finance-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(168, 85, 247, 0.03) 100%) !important;
+  border-color: rgba(168, 85, 247, 0.2) !important;
+  text-align: center;
+}
+
+.finance-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.finance-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #fff 40%, #c084fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Главная Кнопка Сохранения */
+.premium-neon-btn {
+  width: 100%;
+  height: auto !important;
+  padding: 14px 20px !important;
+  border-radius: 16px !important;
+  border: none !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  color: #fff !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+.premium-neon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(139, 92, 246, 0.4) !important;
+  filter: brightness(1.1);
+}
+
+/* Контентная зона */
+.section-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.section-card-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Сетка полей */
+.visit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.premium-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* СБРОС И КОРРЕКЦИЯ ИНПУТОВ */
+.premium-input, 
+.premium-textarea, 
+.premium-select {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-size: 0.95rem !important;
+  box-sizing: border-box !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+  min-height: unset !important;
+  transition: all 0.2s ease !important;
+}
+
+.premium-input:focus, 
+.premium-textarea:focus, 
+.premium-select:focus {
+  outline: none !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+.premium-input.text-bold {
+  font-weight: 600 !important;
+  color: #f1f5f9 !important;
+}
+
+.premium-textarea {
+  resize: vertical;
+}
+
+.premium-textarea.rx-accent:focus {
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15) !important;
+}
+
+/* Интерактивные строки (Услуги/Товары) */
+.premium-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.visitLineIcon {
+  font-size: 1.1rem;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Нижний Пикер-Бар */
+.premium-picker-bar {
+  display: flex;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+}
+
+.premium-picker-bar .select-wrapper {
+  flex: 1;
+}
+
+.premium-picker-bar .premium-select {
+  padding: 10px 12px !important;
+  margin: 0 !important;
+}
+
+.premium-qty-input {
+  width: 65px !important;
+  height: 38px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  text-align: center !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Кнопки добавить */
+.add-line-btn {
+  height: 38px !important;
+  padding: 0 16px !important;
+  background: rgba(59, 130, 246, 0.12) !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+  color: #60a5fa !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+}
+
+.add-line-btn:hover {
+  background: #3b82f6 !important;
+  color: #fff !important;
+}
+
+.add-line-btn.stock-accent {
+  background: rgba(168, 85, 247, 0.12) !important;
+  border: 1px solid rgba(168, 85, 247, 0.25) !important;
+  color: #c084fc !important;
+}
+
+.add-line-btn.stock-accent:hover {
+  background: #8b5cf6 !important;
+  color: #fff !important;
+}
+
+/* Круглая кнопка удаления крестиком */
+.action-circle-btn.delete {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+/* Область для файлов */
+.file-upload-placeholder {
+  border: 2px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.01);
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .visit-grid-layout { grid-template-columns: 1fr; }
+  .field-row-grid { grid-template-columns: 1fr; }
+}
