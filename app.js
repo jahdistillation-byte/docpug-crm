@@ -2331,19 +2331,20 @@ async function renderPatientTab(tab, pet) {
         </div>
       </div>
 
-      <div class="patient-nav" style="display:flex; gap:8px; margin-bottom:24px; padding:6px; background: rgba(255, 255, 255, 0.03); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); width: fit-content; backdrop-filter: blur(10px);">
-        <button class="nav-tab ${tab === 'overview' ? 'active' : ''}" data-p-tab="overview" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Обзор</button>
-        <button class="nav-tab ${tab === 'visits' ? 'active' : ''}" data-p-tab="visits" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Візити</button>
-        <button class="nav-tab ${tab === 'medcard' ? 'active' : ''}" data-p-tab="medcard" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Веткарта</button>
-        <button class="nav-tab ${tab === 'labs' ? 'active' : ''}" data-p-tab="labs" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Аналізи</button>
-        <button class="nav-tab ${tab === 'files' ? 'active' : ''}" data-p-tab="files" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Файли</button>
-        <button class="nav-tab ${tab === 'finance' ? 'active' : ''}" data-p-tab="finance" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Фінанси</button>
+      <div class="patient-tabs-nav" style="display:flex; gap:6px; margin-bottom:24px; padding:6px; background: rgba(255, 255, 255, 0.04); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); width: fit-content; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <button class="patient-tab-btn" data-p-tab="overview">👁️ Обзор</button>
+        <button class="patient-tab-btn" data-p-tab="visits">📅 Візити</button>
+        <button class="patient-tab-btn" data-p-tab="medcard">🩺 Веткарта</button>
+        <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
+        <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
+        <button class="patient-tab-btn" data-p-tab="finance">💎 Фінанси</button>
+        <button class="patient-tab-btn" data-p-tab="edit">✏️ Редагувати</button>
       </div>
 
       <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
     `;
 
-    // Навешиваем клики на табы-капсулы
+    // Навешиваем клики на обновленные кнопки вкладок
     root.querySelectorAll("[data-p-tab]").forEach((btn) => {
       btn.onclick = () => {
         const targetTab = btn.dataset.pTab;
@@ -2356,10 +2357,19 @@ async function renderPatientTab(tab, pet) {
   const dynamicBox = $("#patientTabContent");
   if (!dynamicBox) return;
 
-  // Подсвечиваем активную кнопку
+  // Стилизация активной/неактивной вкладки в стиле Apple / VisionOS
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
-    btn.style.background = btn.dataset.pTab === tab ? "var(--accent-color, #a855f7)" : "transparent";
-    btn.style.boxShadow = btn.dataset.pTab === tab ? "0 4px 12px rgba(168, 85, 247, 0.3)" : "none";
+    const isActive = btn.dataset.pTab === tab;
+    btn.style.padding = "10px 18px";
+    btn.style.borderRadius = "10px";
+    btn.style.border = "none";
+    btn.style.cursor = "pointer";
+    btn.style.fontSize = "14px";
+    btn.style.fontWeight = isActive ? "600" : "500";
+    btn.style.color = isActive ? "#fff" : "rgba(255, 255, 255, 0.6)";
+    btn.style.background = isActive ? "rgba(255, 255, 255, 0.15)" : "transparent";
+    btn.style.boxShadow = isActive ? "0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)" : "none";
+    btn.style.transition = "all 0.25s ease";
   });
 
   // Шаг 2: Рендерим внутреннее содержимое выбранного таба
@@ -2390,22 +2400,38 @@ async function renderPatientTab(tab, pet) {
     if (typeof renderVisits === "function") await renderVisits(pet.id);
     return;
   }
+  
   if (tab === "medcard") {
     if (typeof renderMedcardTab === "function") await renderMedcardTab(pet);
     return;
   }
+  
   if (tab === "labs") {
     if (typeof renderLabsTab === "function") renderLabsTab(pet);
     return;
   }
+  
   if (tab === "files") {
     if (typeof renderPatientFilesTab === "function") renderPatientFilesTab(pet);
     return;
   }
 
+  if (tab === "edit") {
+    if (typeof renderEditPetForm === "function") {
+       renderEditPetForm(pet); // Если есть готовая функция формы редактирования
+    } else {
+       dynamicBox.innerHTML = `
+         <div class="glass-card" style="padding: 20px; border-radius: 16px;">
+           <h3 style="margin-top:0; color:#fff; margin-bottom: 15px;">✏️ Редагувати профіль</h3>
+           <p style="opacity: 0.7;">Раздел редактирования данных ${escapeHtml(pet.name)} находится в разработке.</p>
+         </div>
+       `;
+    }
+    return;
+  }
+
   if (tab === "finance") {
     dynamicBox.innerHTML = `<div class="hint">Формування финансової аналітики…</div>`;
-    // Оставляем твою готовую крутую финансовую логику, просто пакуем её вывод в красивый dynamicBox
     const petVisits = Array.isArray(state.visits) ? state.visits.filter(v => String(v.pet_id) === String(pet.id)) : [];
     const sortedVisits = petVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
     const servicesTotal = petVisits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
@@ -6185,3 +6211,5 @@ function getFinancialStats(entityId, type = 'owner') {
     lastDate: filteredVisits.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0]?.date || "—"
   };
 }
+
+
