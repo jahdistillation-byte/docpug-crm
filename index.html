@@ -71,7 +71,7 @@
                             </tr>
                         </thead>
                         <tbody id="owners-table-body">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
                 <div id="ownersList" style="display:none;"></div>
@@ -91,7 +91,7 @@
                     <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
                 </div>
                 <div class="patients-grid" id="petsList">
-                    </div>
+                </div>
             </section>
 
             <section class="page content-section" data-page="patient" style="display: none;">
@@ -104,7 +104,78 @@
             </section>
 
             <section class="page content-section" data-page="patients" style="display: none;"></section>
-            <section class="page content-section" data-page="visit" style="display: none;"></section>
+            
+            <section class="page content-section" data-page="visit" style="display: none; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.6rem; color: #fff;">Протокол прийому пацієнта</h2>
+                        <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;" id="visitMeta">Завантаження даних...</div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div class="status-pill" id="visitDatePill" style="background: rgba(255,255,255,0.06); padding: 8px 16px; border-radius: 20px; font-weight: 600; color: #fff; border: 1px solid rgba(255,255,255,0.1);">—</div>
+                    </div>
+                </div>
+
+                <div class="visit-premium-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start;">
+                    
+                    <aside style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="glass-card" style="background: rgba(168, 85, 247, 0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 24px; border-radius: 16px; border: 1px solid rgba(168, 85, 247, 0.25); text-align: center;">
+                            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #fff;">Разом до сплати</div>
+                            <div style="font-size: 2.2rem; font-weight: 800; color: #c084fc; line-height: 1;" id="visitGrandTotal">0 ₴</div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button type="button" class="btn-primary" id="visitMedSave" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; background: #a855f7; color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); transition: all 0.2s;">💾 Зберегти зміни</button>
+                            <button type="button" class="btn-secondary" id="btnPrintVisitPdf" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.12); cursor: pointer; transition: all 0.2s;">📄 Виписка для клієнта</button>
+                        </div>
+                    </aside>
+
+                    <main style="display: flex; flex-direction: column; gap: 24px;">
+                        <div id="visitNoteBox" style="display: none;"></div>
+
+                        <div class="glass-card" style="background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); padding: 24px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">Медична частина</div>
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <label class="field">
+                                    <div style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 6px; color: #fff;">Діагноз</div>
+                                    <input class="form-input" id="visitMedDx" type="text" style="width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); color: #fff;" placeholder="Вкажіть діагноз...">
+                                </label>
+                                <label class="field">
+                                    <div style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 6px; color: #fff;">Скарга / стан</div>
+                                    <textarea class="form-input" id="visitMedComplaint" rows="4" style="width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); color: #fff; resize: none;" placeholder="Скарги, анамнез, стан при огляді..."></textarea>
+                                </label>
+                                <label class="field">
+                                    <div style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 6px; color: #fff;">Призначення лікарняне (Rx)</div>
+                                    <textarea class="form-input" id="visitMedRx" rows="4" style="width: 100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); color: #fff; resize: none;" placeholder="Схема лікування, препарати, дозування..."></textarea>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="glass-card" style="background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); padding: 24px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 16px;">💼 Надані послуги</div>
+                            <div class="visitPicker" style="display: flex; gap: 12px; margin-bottom: 16px;">
+                                <input class="form-input" id="visitSvcSearch" type="search" placeholder="Пошук послуги…" style="flex: 1; background: rgba(0,0,0,0.2);">
+                                <select class="form-input" id="visitSvcSelect" style="flex: 2; background: rgba(0,0,0,0.3); color: #fff;"></select>
+                                <input class="form-input" id="visitSvcQty" type="number" min="1" value="1" style="width: 70px; background: rgba(0,0,0,0.2);">
+                                <button id="visitSvcAdd" type="button" class="btn-primary" style="padding: 0 20px; height: 42px;">Додати</button>
+                            </div>
+                            <div class="visitLines" id="visitSvcListContainer"></div>
+                        </div>
+
+                        <div class="glass-card" style="background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); padding: 24px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 16px;">📦 Використані препарати / склад</div>
+                            <div class="visitPicker" style="display: flex; gap: 12px; margin-bottom: 16px;">
+                                <input class="form-input" id="visitStkSearch" type="search" placeholder="Пошук препарату…" style="flex: 1; background: rgba(0,0,0,0.2);">
+                                <select class="form-input" id="visitStkSelect" style="flex: 2; background: rgba(0,0,0,0.3); color: #fff;"></select>
+                                <input class="form-input" id="visitStkQty" type="number" min="1" value="1" style="width: 70px; background: rgba(0,0,0,0.2);">
+                                <button id="visitStkAdd" type="button" class="btn-primary" style="padding: 0 20px; height: 42px;">Додати</button>
+                            </div>
+                            <div class="visitLines" id="visitStkListContainer"></div>
+                        </div>
+                    </main>
+                </div>
+            </section>
+
             <section class="page content-section" data-page="visits" style="display: none;"></section>
             <section class="page content-section" data-page="services" style="display: none;"></section>
             <section class="page content-section" data-page="stock" style="display: none;"></section>
