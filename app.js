@@ -4306,26 +4306,13 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
-  // === УМНАЯ ПОДСТРАХОВКА КРИТИЧЕСКОГО КОНТЕЙНЕРА ===
-  let box = document.getElementById("visitNoteBox");
-  
-  if (!box) {
-    console.warn("Предупреждение: #visitNoteBox не найден, ищем альтернативные блоки визита...");
-    // Пробуем найти любой блок, связанный с контентом визита
-    box = document.getElementById("visitContent") || document.querySelector(".visit-details-wrap") || document.querySelector("main");
-  }
-  
-  // Если вообще ничего не нашлось, берем элемент visitModal
-  if (!box) {
-    box = document.getElementById("visitModal");
-  }
+  // Находим контейнер (наша умная подстраховка)
+  let box = document.getElementById("visitNoteBox") || 
+            document.getElementById("visitContent") || 
+            document.querySelector(".visit-details-wrap");
+  if (!box) return;
 
-  if (!box) {
-    console.error("Критическая ошибка: На странице не обнаружено ни одного контейнера для рендеринга визита!");
-    return;
-  }
-  // ==================================================
-
+  // Разбираем строку note на диагноз и жалобы
   const noteText = String(visit.note || "").trim();
   const rx = String(visit.rx || "").trim();
   const parsed = parseVisitNote(noteText);
@@ -4345,18 +4332,18 @@ function renderVisitPage(visit, pet) {
   const total = calcServicesTotal(visit);
   const svcListHtml = expanded.length
     ? expanded.map((x, idx) => `
-        <div class="visitLine">
+        <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.05);">
           <div>
-            <div class="visitLineName">${escapeHtml(x.name)}</div>
-            <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
+            <div class="visitLineName" style="font-weight:600; color:#fff;">${escapeHtml(x.name)}</div>
+            <div class="visitLineMeta" style="font-size:0.8rem; opacity:0.5;">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
           </div>
-          <div class="visitLineRight">
-            <b>${escapeHtml(String(x.lineTotal))} грн</b>
-            <button type="button" class="miniBtn danger" data-svc-del="${idx}">Прибрати</button>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <b style="color:#fff;">${escapeHtml(String(x.lineTotal))} грн</b>
+            <button type="button" class="miniBtn danger" data-svc-del="${idx}" style="padding:4px 8px; font-size:0.75rem;">Прибрати</button>
           </div>
         </div>
       `).join("")
-    : `<div class="hint">Поки послуг немає. Додай нижче.</div>`;
+    : `<div class="hint" style="opacity:0.5; padding:10px;">Поки послуг немає. Додай нижче.</div>`;
 
   // Сборка препаратов
   ensureVisitStockShape(visit);
@@ -4367,170 +4354,109 @@ function renderVisitPage(visit, pet) {
     .map((it) => {
       const left = Number(it.qty) || 0;
       const price = Number(it.price) || 0;
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн • залишок: ${escapeHtml(String(left))}</option>`;
+      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн • зал: ${escapeHtml(String(left))}</option>`;
     })
     .join("");
 
   const stkExpanded = expandStockLines(visit);
   const stkTotal = calcStockTotal(visit);
-  const stkListHtml = stkExpanded.length
-    ? stkExpanded.map((x, idx) => `
-        <div class="visitLine">
+  const stkListHtml = stkExpanded.map((x, idx) => `
+        <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.05);">
           <div>
-            <div class="visitLineName">${escapeHtml(x.name)}</div>
-            <div class="visitLineMeta">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
+            <div class="visitLineName" style="font-weight:600; color:#fff;">${escapeHtml(x.name)}</div>
+            <div class="visitLineMeta" style="font-size:0.8rem; opacity:0.5;">${escapeHtml(String(x.qty))} × ${escapeHtml(String(x.price))} грн</div>
           </div>
-          <div class="visitLineRight">
-            <b>${escapeHtml(String(x.lineTotal))} грн</b>
-            <button type="button" class="miniBtn danger" data-stk-del="${idx}">Прибрати</button>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <b style="color:#fff;">${escapeHtml(String(x.lineTotal))} грн</b>
+            <button type="button" class="miniBtn danger" data-stk-del="${idx}" style="padding:4px 8px; font-size:0.75rem;">Прибрати</button>
           </div>
         </div>
       `).join("")
-    : `<div class="hint">Поки препаратів немає. Додай нижче.</div>`;
+    `<div class="hint" style="opacity:0.5; padding:10px;">Поки препаратів немає. Додай нижче.</div>`;
 
   const grandTotal = total + stkTotal;
 
-  // РЕНДЕР ПРЕМИУМ ДВУХПАНЕЛЬНОГО ИНТЕРФЕЙСА
+  // РЕНДЕР БРОНЕБОЙНОГО КРУТОГО ДИЗАЙНА
   box.innerHTML = `
-    <div class="visit-container" style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; padding: 5px;">
+    <div class="visit-container" style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; padding: 5px; background: transparent;">
       
       <aside class="visit-sidebar" style="display: flex; flex-direction: column; gap: 16px;">
-        <div class="glass-panel" style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
-          <h3 style="margin-top:0; font-size: 0.95rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px;">Пацієнт</h3>
-          <div style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 6px;">${escapeHtml(pet?.name || "Жужа 🐾")}</div>
-          <div style="font-size: 0.9rem; opacity: 0.7;">${escapeHtml(pet?.species || "Тварина")} · ${escapeHtml(pet?.breed || "Порода")}</div>
-          <div style="font-size: 0.85rem; opacity: 0.5; margin-top: 8px;">Вага: ${escapeHtml(String(visit.weight_kg || "—"))} кг</div>
+        <div class="glass-card" style="background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+          <h3 style="margin-top:0; font-size: 0.8rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px;">Пацієнт</h3>
+          <div style="font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${escapeHtml(pet?.name || "Пацієнт")}</div>
+          <div style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 10px;">${escapeHtml(pet?.species || "")} · ${escapeHtml(pet?.breed || "")}</div>
+          <div style="font-size: 0.85rem; opacity: 0.5; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px; display: inline-block;">Вага: ${escapeHtml(String(visit.weight_kg || "—"))} кг</div>
         </div>
 
-        <div class="glass-panel" style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 16px; border: 1px solid rgba(168, 85, 247, 0.2); text-align: center;">
-          <div style="font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; margin-bottom: 4px;">Разом до сплати</div>
+        <div class="glass-card" style="background: rgba(168, 85, 247, 0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px; border-radius: 16px; border: 1px solid rgba(168, 85, 247, 0.25); text-align: center;">
+          <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Разом до сплати</div>
           <div style="font-size: 1.8rem; font-weight: 800; color: #c084fc;">${grandTotal} ₴</div>
         </div>
         
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-          <button type="button" class="miniBtn" id="visitMedSave" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; background: #a855f7; color: #fff; border: none; cursor: pointer; transition: all 0.2s;">💾 Зберегти зміни</button>
-          <button type="button" class="miniBtn" id="btnPrintVisitPdf" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s;">📄 Виписка для клієнта</button>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
+          <button type="button" class="btn-primary" id="visitMedSave" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; background: #a855f7; color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); transition: all 0.2s;">💾 Зберегти зміни</button>
+          <button type="button" class="btn-secondary" id="btnPrintVisitPdf" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.12); cursor: pointer; transition: all 0.2s;">📄 Виписка для клієнта</button>
         </div>
       </aside>
 
       <main class="visit-main" style="display: flex; flex-direction: column; gap: 20px;">
-        <div class="glass-panel" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
-          <div class="visitBlockTitle" style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">Медична частина</div>
+        
+        <div class="glass-card" style="background: rgba(255,255,255,0.02); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">Медична частина</div>
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <label class="field">
-              <div class="history-label" style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 4px;">Діагноз</div>
-              <input class="input" id="visitMedDx" type="text" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #fff;" value="${escapeHtml(dx)}" />
+              <div style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 6px; font-weight: 500;">Діагноз</div>
+              <input class="input" id="visitMedDx" type="text" style="width:100%; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 10px; color: #fff;" value="${escapeHtml(dx)}" />
             </label>
             <label class="field">
-              <div class="history-label" style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 4px;">Скарга / стан</div>
-              <textarea class="textarea" id="visitMedComplaint" rows="3" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #fff; resize: none;">${escapeHtml(complaint)}</textarea>
+              <div style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 4px;">Скарга / стан</div>
+              <textarea class="textarea" id="visitMedComplaint" rows="3" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; color: #fff; resize: none; font-family:inherit;">${escapeHtml(complaint)}</textarea>
             </label>
             <label class="field">
-              <div class="history-label" style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 4px;">Призначення (Rx)</div>
-              <textarea class="textarea" id="visitMedRx" rows="3" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #fff; resize: none;">${escapeHtml(rx)}</textarea>
+              <div class="history-label" style="font-size: 0.85rem; opacity: 0.5; margin-bottom: 4px;">Призначення</div>
+              <textarea class="textarea" id="visitMedRx" rows="3" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; color: #fff; resize: none; font-family:inherit;">${escapeHtml(rx)}</textarea>
             </label>
           </div>
         </div>
 
-        <div class="glass-panel" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
-          <div class="visitBlockTitle" style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 12px;">Послуги</div>
-          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 12px;">
-            <input id="visitSvcSearch" type="search" placeholder="Пошук послуги…" value="${escapeHtml(state.visitSvcQuery || "")}" style="flex: 1;" />
-            <select id="visitSvcSelect" style="flex: 2;">${svcOptions || `<option value="">Немає послуг</option>`}</select>
-            <input id="visitSvcQty" type="number" min="1" value="1" style="width: 60px;" />
-            <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
+        <div class="glass-card" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 12px;">Послуги</div>
+          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input id="visitSvcSearch" type="search" placeholder="Пошук послуги…" value="${escapeHtml(state.visitSvcQuery || "")}" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; flex:1;" />
+            <select id="visitSvcSelect" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; flex: 2;">${svcOptions}</select>
+            <input id="visitSvcQty" type="number" min="1" value="1" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; width: 65px;" />
+            <button id="visitSvcAdd" type="button" class="miniBtn" style="padding:10px 16px;">Додати</button>
           </div>
           <div class="visitLines">${svcListHtml}</div>
         </div>
 
-        <div class="glass-panel" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
-          <div class="visitBlockTitle" style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 12px;">Препарати / склад</div>
-          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 12px;">
-            <input id="visitStkSearch" type="search" placeholder="Пошук препарату…" value="${escapeHtml(state.visitStkQuery || "")}" style="flex: 1;" />
-            <select id="visitStkSelect" style="flex: 2;">${stkOptions || `<option value="">Немає препаратів</option>`}</select>
-            <input id="visitStkQty" type="number" min="1" value="1" style="width: 60px;" />
-            <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
+        <div class="glass-card" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 12px;">Препарати / склад</div>
+          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input id="visitStkSearch" type="search" placeholder="Пошук препарату…" value="${escapeHtml(state.visitStkQuery || "")}" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; flex:1;" />
+            <select id="visitStkSelect" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; flex: 2;">${stkOptions}</select>
+            <input id="visitStkQty" type="number" min="1" value="1" style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px; color:#fff; width: 65px;" />
+            <button id="visitStkAdd" type="button" class="miniBtn" style="padding:10px 16px;">Додати</button>
           </div>
           <div class="visitLines">${stkListHtml}</div>
         </div>
-      </main>
 
+      </main>
     </div>
   `;
 
-  // === ЖЕСТКАЯ ПРИНУДИТЕЛЬНАЯ ПЕРЕИНИЦИАЛИЗАЦИЯ ВСЕХ ОБРАБОТЧИКОВ ===
+  // Переинициализируем родные события кнопок и инпутов, чтобы всё кликалось
   if (typeof initVisitUI === "function") {
-    console.log("Восстанавливаем системные слушатели кликов...");
     initVisitUI();
   }
 
-  // === ПРИВЯЗЫВАЕМ ПЕЧАТЬ ВЫПИСКИ ИЗ НАШЕГО ОБЪЕКТА ===
-  const btnPrint = document.getElementById("btnPrintVisitPdf");
-  if (btnPrint) {
-    btnPrint.onclick = (e) => {
+  // Принудительно оживляем выписку PDF (наш проверенный URL метод)
+  const btnPdf = document.getElementById("btnPrintVisitPdf");
+  if (btnPdf) {
+    btnPdf.onclick = (e) => {
       e.preventDefault();
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) return alert("Будь ласка, дозвольте спливаючі вікна!");
-
-      const servicesRows = expanded.map(x => `
-        <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(x.name)}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${x.qty}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${x.lineTotal} ₴</td>
-        </tr>
-      `).join("");
-
-      const stockRows = stkExpanded.map(x => `
-        <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(x.name)}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${x.qty}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${x.lineTotal} ₴</td>
-        </tr>
-      `).join("");
-
-      printWindow.document.write(`
-        <html>
-        <head>
-          <title>Виписка: ${escapeHtml(pet?.name || "Пацієнт")}</title>
-          <style>
-            body { font-family: sans-serif; color: #333; margin: 40px; }
-            .header { text-align: center; border-bottom: 2px solid #a855f7; padding-bottom: 20px; margin-bottom: 30px; }
-            .section { margin-bottom: 25px; }
-            .section-title { font-weight: 700; font-size: 1.1rem; color: #a855f7; border-bottom: 1px solid #eee; margin-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; }
-            th { background: #f9f9f9; padding: 10px; border-bottom: 2px solid #eee; text-align: left; }
-            .total { text-align: right; font-size: 1.2rem; font-weight: 700; margin-top: 20px; color: #a855f7; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>🩺 Ветеринарна клініка Doc.PUG</h1>
-            <p>Консультаційний висновок від ${escapeHtml(visit.date || "")}</p>
-          </div>
-          <div class="section">
-            <div class="section-title">🐾 Пацієнт</div>
-            <p><b>Кличка:</b> ${escapeHtml(pet?.name || "—")} &nbsp;&nbsp; <b>Вид/Порода:</b> ${escapeHtml(pet?.species || "")} ${escapeHtml(pet?.breed || "")} &nbsp;&nbsp; <b>Вага:</b> ${escapeHtml(String(visit.weight_kg || "—"))} кг</p>
-          </div>
-          <div class="section">
-            <div class="section-title">📝 Анамнез та Скарги</div>
-            <p style="white-space: pre-wrap;">${escapeHtml(complaint || "—")}</p>
-          </div>
-          <div class="section">
-            <div class="section-title">🔍 Встановлений діагноз</div>
-            <p><b>${escapeHtml(dx || "Діагноз не вказано")}</b></p>
-          </div>
-          <div class="section">
-            <div class="section-title">💊 Призначене лікування (Rx)</div>
-            <p style="white-space: pre-wrap;">${escapeHtml(rx || "—")}</p>
-          </div>
-          ${servicesRows ? `<div class="section"><div class="section-title">💼 Надані послуги</div><table><thead><tr><th>Назва</th><th>К-сть</th><th style="text-align:right;">Сума</th></tr></thead><tbody>${servicesRows}</tbody></table></div>` : ""}
-          ${stockRows ? `<div class="section"><div class="section-title">📦 Препарати</div><table><thead><tr><th>Назва</th><th>К-сть</th><th style="text-align:right;">Сума</th></tr></thead><tbody>${stockRows}</tbody></table></div>` : ""}
-          <div class="total">Всього за візит: ${grandTotal} ₴</div>
-          <script>window.onload = function() { window.print(); };</script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
+      const url = `/api/visits?id=${encodeURIComponent(visit.id)}&pdf=true`;
+      window.open(url, "_blank");
     };
   }
 }
