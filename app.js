@@ -4306,10 +4306,26 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
-  const box = $("#visitNoteBox");
-  if (!box) return;
+  // === УМНАЯ ПОДСТРАХОВКА КРИТИЧЕСКОГО КОНТЕЙНЕРА ===
+  let box = document.getElementById("visitNoteBox");
+  
+  if (!box) {
+    console.warn("Предупреждение: #visitNoteBox не найден, ищем альтернативные блоки визита...");
+    // Пробуем найти любой блок, связанный с контентом визита
+    box = document.getElementById("visitContent") || document.querySelector(".visit-details-wrap") || document.querySelector("main");
+  }
+  
+  // Если вообще ничего не нашлось, берем элемент visitModal
+  if (!box) {
+    box = document.getElementById("visitModal");
+  }
 
-  // Разбираем строку note на диагноз и жалобы
+  if (!box) {
+    console.error("Критическая ошибка: На странице не обнаружено ни одного контейнера для рендеринга визита!");
+    return;
+  }
+  // ==================================================
+
   const noteText = String(visit.note || "").trim();
   const rx = String(visit.rx || "").trim();
   const parsed = parseVisitNote(noteText);
