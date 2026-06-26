@@ -5200,77 +5200,76 @@ function openVisitModalForCreate(pet) {
     modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
     
-    // Прячем инлайново, возвращая старые стили
+    // Скрываем инлайново, полностью убирая видимость
     modal.style.display = "none";
     modal.style.opacity = "0";
     modal.style.pointerEvents = "none";
     
-    // Убираем глобальный слушатель Esc, чтобы память не текла
+    // Убираем слушатель Esc, чтобы не засорять память
     document.removeEventListener("keydown", handleEscClose);
   };
 
-  // Закрытие по нажатию клавиши ESC
+  // Закрытие по нажатию на кнопку ESC
   const handleEscClose = (e) => {
     if (e.key === "Escape") closeVisitModal();
   };
-  document.addEventListener("keydown", handle_esc = (e) => {
-    if (e.key === "Escape") {
-      closeVisitModal();
-      document.removeEventListener("keydown", e.callee);
-    }
-  });
+  document.addEventListener("keydown", handleEscClose);
 
-  // Ищем абсолютно любой элемент закрытия внутри модалки (крестик, кнопка скасувати)
-  const anyCloseElements = modal.querySelectorAll(".close, .btn-close, [data-close], .cancel-btn, #btnCancelVisit");
-  anyCloseElements.forEach(btn => {
+  // Перехватываем клик по абсолютно любым крестикам, кнопкам закрытия или "Скасувати"
+  const allCloseElements = modal.querySelectorAll(".close, .btn-close, [data-close], .cancel-btn, #btnCancelVisit");
+  allCloseElements.forEach(btn => {
     btn.onclick = (e) => {
       e.preventDefault();
       closeVisitModal();
     };
   });
 
-  // Если в твоем HTML на крестике висит обычный тег вроде <span>✕</span> без класса, 
-  // давай перехватим клик по нему через делегирование событий на самой модалке
+  // Умный поиск крестика по тексту (если в index.html это просто <span>✕</span> или кнопка без классов)
   modal.onclick = (e) => {
-    if (e.target.innerText === "✕" || e.target.classList.contains("close-modal")) {
+    const text = e.target.innerText ? e.target.innerText.trim() : "";
+    if (text === "✕" || text === "Скасувати" || e.target.classList.contains("close-modal")) {
+      e.preventDefault();
       closeVisitModal();
     }
   };
 
-  // Перехватываем submit формы, чтобы обновить журнал и закрыть панель
+  // Перехватываем сохранение формы, чтобы закрывать окно и обновлять список
   const form = modal.querySelector("form");
   if (form) {
-    // Безопасно подмешиваем закрытие к родному событию
     form.addEventListener("submit", () => {
-      // Даем 300мс на выполнение оригинального асинхронного сохранения в базу
+      // Даем 250мс на то, чтобы твой оригинальный асинхронный submit отправил данные на сервер Render
       setTimeout(() => {
         closeVisitModal();
-        // Обновляем список визитов на экране
+        // Принудительно обновляем список визитов на экране, чтобы новый визит сразу появился
         if (state && state.selectedPetId && typeof renderVisits === "function") {
           renderVisits(state.selectedPetId);
         }
-      }, 300);
+      }, 250);
     });
   }
 
-  // === ПРЕМИАЛЬНЫЙ ЦЕНТРИРОВАННЫЙ ВИД (Apple VisionOS / macOS Style) ===
+  // === ЭФФЕКТНОЕ ЦЕНТРИРОВАНИЕ И УВЕЛИЧЕНИЕ (Apple VisionOS / macOS Style) ===
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   
-  // Выравниваем строго по центру экрана и делаем шире
+  // Жестко выравниваем строго по центру экрана и увеличиваем ширину
   modal.style.position = "fixed";
   modal.style.top = "50%";
   modal.style.left = "50%";
   modal.style.transform = "translate(-50%, -50%) scale(1)";
+  
+  // Размеры панельки
   modal.style.width = "680px"; 
   modal.style.maxWidth = "95vw";
   modal.style.maxHeight = "85vh";
-  modal.style.overflowY = "auto";
+  modal.style.overflowY = "auto"; // Если поля не влезут, внутри появится аккуратный скролл
+  
+  // Красивые премиум-отступы и скругления
   modal.style.padding = "32px";
   modal.style.borderRadius = "24px";
-  modal.style.zIndex = "10000";
+  modal.style.zIndex = "10000"; // Поверх всех остальных элементов CRM
   
-  // Рендерим отображение
+  // Включаем отображение
   modal.style.display = "block";
   modal.style.opacity = "1";
   modal.style.pointerEvents = "auto";
