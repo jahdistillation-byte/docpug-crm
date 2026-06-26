@@ -4306,7 +4306,7 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
-  // Розумний пошук контейнера під вивід даних виписки
+  // Розумний пошук контейнера під вивід даних
   let box = document.getElementById("visitNoteBox") || 
             document.getElementById("visitContent") || 
             document.getElementById("patientTabContent") || 
@@ -4318,12 +4318,24 @@ function renderVisitPage(visit, pet) {
     return;
   }
 
-  // Розбираємо рядок note на діагноз та скарги
+  // БЕЗОПАСНЫЙ РАЗБОР СТРОКИ NOTE (без падений, если parseVisitNote не объявлена)
   const noteText = String(visit.note || "").trim();
   const rx = String(visit.rx || "").trim();
-  const parsed = parseVisitNote(noteText);
-  const dx = parsed.dx || "";
-  const complaint = parsed.complaint || "";
+  let dx = "";
+  let complaint = "";
+
+  if (typeof parseVisitNote === "function") {
+    const parsed = parseVisitNote(noteText);
+    dx = parsed.dx || "";
+    complaint = parsed.complaint || "";
+  } else {
+    // Встроенный безопасный парсинг, если функция не долетела
+    const dxMatch = noteText.match(/Діагноз:\s*(.*?)(\n|$)/i);
+    dx = (dxMatch?.[1] || "").trim();
+    const compMatch = noteText.match(/Скарги\/анамнез:\s*([\s\S]*)/i);
+    complaint = (compMatch?.[1] || "").trim();
+    if (!dx && !complaint) complaint = noteText;
+  }
 
   // Збірка послуг
   ensureVisitServicesShape(visit);
@@ -4351,7 +4363,7 @@ function renderVisitPage(visit, pet) {
       `).join("")
     : `<div class="hint" style="opacity:0.5; padding:10px;">Поки послуг немає. Додай нижче.</div>`;
 
-  // Збірка препаратів зі складу — ТУТ ВСЕ ВИПРАВЛЕНО НА 100%
+  // Збірка препаратів зі складу
   ensureVisitStockShape(visit);
   const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
   const stkOptions = loadStock()
@@ -4452,18 +4464,17 @@ function renderVisitPage(visit, pet) {
     </div>
   `;
 
-  // Повертаємо живі системні обробники кліків
+  // Восстанавливаем обработчики кликов интерфейса визита
   if (typeof initVisitUI === "function") {
     initVisitUI();
   }
 
-  // Прив'язка виписки PDF (наш бронебійний роут)
+  // Навешиваем открытие PDF выписки на кнопку
   const btnPdf = document.getElementById("btnPrintVisitPdf");
   if (btnPdf) {
     btnPdf.onclick = (e) => {
       e.preventDefault();
-      const url = `/api/visits?id=${encodeURIComponent(visit.id)}&pdf=true`;
-      window.open(url, "_blank");
+      window.open(`/api/visits?id=${encodeURIComponent(visit.id)}&pdf=true`, "_blank");
     };
   }
 }
