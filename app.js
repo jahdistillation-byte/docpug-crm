@@ -4379,66 +4379,66 @@ function renderVisitPage(visit, pet) {
 
   const grandTotal = total + stkTotal;
 
+  // ОБНОВЛЕННАЯ СТРУКТУРА (премиум-вид)
   box.innerHTML = `
-    <div class="visitMoneyGrid">
-      <div class="visitMoneyCard">
-        <div class="visitMoneyLabel">Послуги</div>
-        <div class="visitMoneyValue">${escapeHtml(String(total))} грн</div>
-      </div>
-      <div class="visitMoneyCard">
-        <div class="visitMoneyLabel">Препарати</div>
-        <div class="visitMoneyValue">${escapeHtml(String(stkTotal))} грн</div>
-      </div>
-      <div class="visitMoneyCard visitMoneyCardTotal">
-        <div class="visitMoneyLabel">Разом</div>
-        <div class="visitMoneyValue">${escapeHtml(String(grandTotal))} грн</div>
-      </div>
-    </div>
+    <div class="visit-container" style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; padding: 10px;">
+      
+      <aside class="visit-sidebar">
+        <div class="glass-panel" style="margin-bottom: 20px;">
+          <h3 style="margin-top:0; font-size: 1rem; opacity: 0.7;">Деталі візиту</h3>
+          <div style="font-size: 1.1rem; font-weight: 600; margin: 10px 0;">${visit.date || "—"}</div>
+          <div style="font-size: 0.9rem; opacity: 0.8;">${pet?.name || "Пацієнт"}</div>
+          <div style="font-size: 0.8rem; opacity: 0.5;">${pet?.species || ""} · ${pet?.breed || ""}</div>
+        </div>
 
-    <div class="visitBlock">
-      <div class="visitBlockHead">
-        <div class="visitBlockTitle">Медична частина</div>
-        <button type="button" class="miniBtn" id="visitMedSave">💾 Зберегти</button>
-      </div>
-      <div class="visitMedGrid visitMedGridEdit">
-        <label class="field visitMedItem">
-          <div class="history-label">Діагноз</div>
-          <input class="input" id="visitMedDx" type="text" placeholder="Напр.: цистит / гастроентерит / отит" value="${escapeHtml(dx)}" />
-        </label>
-        <label class="field visitMedItem">
-          <div class="history-label">Скарга / стан</div>
-          <textarea class="textarea visitMedTextarea" id="visitMedComplaint" rows="5" placeholder="Скарги, анамнез, стан на момент огляду...">${escapeHtml(complaint)}</textarea>
-        </label>
-        <label class="field visitMedItem visitMedItemWide">
-          <div class="history-label">Призначення</div>
-          <textarea class="textarea visitMedTextarea" id="visitMedRx" rows="6" placeholder="Препарат • доза • кратність • курс">${escapeHtml(rx)}</textarea>
-        </label>
-      </div>
-      <div class="hint" id="visitMedSaveHint" style="margin-top:10px;">
-        Можна редагувати прямо тут. Після змін натисни “Зберегти”.
-      </div>
-    </div>
+        <div class="visitMoneyCard visitMoneyCardTotal glass-panel" style="text-align: center;">
+          <div class="visitMoneyLabel" style="opacity: 0.6;">Разом до сплати</div>
+          <div class="visitMoneyValue" style="font-size: 1.8rem; font-weight: 700; color: #a855f7;">${grandTotal} ₴</div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="button" class="miniBtn" id="visitMedSave" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600;">💾 Зберегти зміни</button>
+        </div>
+      </aside>
 
-    <div class="visitBlock">
-      <div class="visitBlockTitle">Послуги</div>
-      <div class="visitPicker">
-        <input id="visitSvcSearch" type="search" placeholder="Пошук послуги…" value="${escapeHtml(state.visitSvcQuery || "")}" />
-        <select id="visitSvcSelect">${svcOptions || `<option value="">Немає послуг</option>`}</select>
-        <input id="visitSvcQty" type="number" min="1" value="1" />
-        <button id="visitSvcAdd" type="button" class="miniBtn">Додати</button>
-      </div>
-      <div class="visitLines">${svcListHtml}</div>
-    </div>
+      <main class="visit-main">
+        <div class="glass-panel" style="margin-bottom: 20px;">
+          <div class="visitBlockTitle">Медична частина</div>
+          <div class="visitMedGrid visitMedGridEdit">
+            <label class="field visitMedItem">
+              <div class="history-label">Діагноз</div>
+              <input class="input" id="visitMedDx" type="text" value="${escapeHtml(dx)}" />
+            </label>
+            <label class="field visitMedItem">
+              <div class="history-label">Скарга / стан</div>
+              <textarea class="textarea visitMedTextarea" id="visitMedComplaint" rows="3">${escapeHtml(complaint)}</textarea>
+            </label>
+            <label class="field visitMedItem">
+              <div class="history-label">Призначення</div>
+              <textarea class="textarea visitMedTextarea" id="visitMedRx" rows="3">${escapeHtml(rx)}</textarea>
+            </label>
+          </div>
+        </div>
 
-    <div class="visitBlock">
-      <div class="visitBlockTitle">Препарати / склад</div>
-      <div class="visitPicker">
-        <input id="visitStkSearch" type="search" placeholder="Пошук препарату…" value="${escapeHtml(state.visitStkQuery || "")}" />
-        <select id="visitStkSelect">${stkOptions || `<option value="">Немає препаратів</option>`}</select>
-        <input id="visitStkQty" type="number" min="1" value="1" />
-        <button id="visitStkAdd" type="button" class="miniBtn">Додати</button>
-      </div>
-      <div class="visitLines">${stkListHtml}</div>
+        <div class="glass-panel" style="margin-bottom: 20px;">
+          <div class="visitBlockTitle">Послуги та Препарати</div>
+          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <select id="visitSvcSelect" style="flex: 2;">${svcOptions}</select>
+            <input id="visitSvcQty" type="number" min="1" value="1" style="width: 60px;" />
+            <button id="visitSvcAdd" type="button" class="miniBtn">Додати послугу</button>
+          </div>
+          <div class="visitLines">${svcListHtml}</div>
+          
+          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+          
+          <div class="visitPicker" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <select id="visitStkSelect" style="flex: 2;">${stkOptions}</select>
+            <input id="visitStkQty" type="number" min="1" value="1" style="width: 60px;" />
+            <button id="visitStkAdd" type="button" class="miniBtn">Додати препарат</button>
+          </div>
+          <div class="visitLines">${stkListHtml}</div>
+        </div>
+      </main>
     </div>
   `;
 }
