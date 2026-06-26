@@ -2418,7 +2418,7 @@ async function renderPatientTab(tab, pet) {
       };
     
 
-  // Навешиваем клики на вкладки
+  // Навешиваем клики на вкладкыи
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     btn.onclick = () => {
       const targetTab = btn.dataset.pTab;
