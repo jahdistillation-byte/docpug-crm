@@ -2292,38 +2292,41 @@ async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
   if (!box || !pet) return;
 
-  if (tab === "overview") {
+    if (tab === "overview") {
     box.innerHTML = `<div class="hint">Завантаження…</div>`;
     const visits = await getVisitsByPetId(pet.id);
     cacheVisits(visits);
 
-    const lastVisit = visits
-      .slice()
-      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
-
-    const totalPaid = visits.reduce((sum, v) => {
-      return sum + calcServicesTotal(v) + calcStockTotal(v);
-    }, 0);
-
+    const stats = getFinancialStats(pet.id, 'patient'); // Используем наш «единый мозг»
+    
     box.innerHTML = `
-      <div class="patientStats">
-        <div class="ownerStat"><div class="ownerStatIcon">📋</div><div><div class="ownerStatValue">${visits.length}</div><div class="ownerStatLabel">візитів</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">⚖️</div><div><div class="ownerStatValue">${escapeHtml(pet.weight_kg || "—")}</div><div class="ownerStatLabel">вага, кг</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">📅</div><div><div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div><div class="ownerStatLabel">останній візит</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">💰</div><div><div class="ownerStatValue">${escapeHtml(String(totalPaid))} грн</div><div class="ownerStatLabel">сума</div></div></div>
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:20px;">
+        ${[
+           ['📋', 'Візитів', stats.count],
+           ['⚖️', 'Вага, кг', pet.weight_kg || '—'],
+           ['📅', 'Останній', stats.lastDate],
+           ['💰', 'Всього ₴', stats.total]
+        ].map(i => `
+          <div class="glass-card" style="padding:15px; border-radius:12px; text-align:center;">
+             <div style="font-size:1.2rem;">${i[0]}</div>
+             <div style="font-weight:700; font-size:1.1rem; margin-top:5px;">${i[2]}</div>
+             <div style="font-size:0.7rem; opacity:0.5; text-transform:uppercase;">${i[1]}</div>
+          </div>
+        `).join('')}
       </div>
-      <div class="patientGrid">
-        <div class="patientInfoBox">
-          <h2>Паспорт пацієнта</h2>
-          <div class="patientInfoRow"><b>Кличка:</b> ${escapeHtml(pet.name || "—")}</div>
-          <div class="patientInfoRow"><b>Вид:</b> ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species || "—")}</div>
-          <div class="patientInfoRow"><b>Порода:</b> ${escapeHtml(pet.breed || "—")}</div>
-          <div class="patientInfoRow"><b>Вік:</b> ${escapeHtml(pet.age || "—")}</div>
-          <div class="patientInfoRow"><b>Вага:</b> ${escapeHtml(pet.weight_kg || "—")} кг</div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="glass-card" style="padding:20px; border-radius:16px;">
+          <h3 style="margin-top:0;">🐾 Паспорт пацієнта</h3>
+          <div style="opacity:0.8;">
+             <div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05)"><b>Кличка:</b> ${escapeHtml(pet.name)}</div>
+             <div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05)"><b>Вид:</b> ${escapeHtml(pet.species)}</div>
+             <div style="padding:8px 0;"><b>Порода:</b> ${escapeHtml(pet.breed || "—")}</div>
+          </div>
         </div>
-        <div class="patientInfoBox">
-          <h2>Нотатки лікаря</h2>
-          <div class="meta" style="white-space:pre-wrap;">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
+        <div class="glass-card" style="padding:20px; border-radius:16px;">
+          <h3 style="margin-top:0;">📝 Нотатки лікаря</h3>
+          <p style="opacity:0.7; white-space:pre-wrap;">${escapeHtml(pet.notes || "Немає записів.")}</p>
         </div>
       </div>
     `;

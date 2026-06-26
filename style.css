@@ -597,3 +597,33 @@ aside[style*="width: 240px"] {
     transform: translateY(-5px);
     border-color: var(--accent-color);
 }
+.patient-hero {
+    background: linear-gradient(160deg, rgba(30, 15, 50, 0.8), rgba(15, 10, 30, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 20px;
+}
+
+.tab-nav {
+    display: flex;
+    gap: 8px;
+    background: rgba(0,0,0,0.2);
+    padding: 6px;
+    border-radius: 12px;
+    width: fit-content;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background: var(--accent-color);
+    color: #fff;
+}
