@@ -562,3 +562,38 @@ aside[style*="width: 240px"] {
 .calendar-top-scrollbar-container::-webkit-scrollbar-thumb:hover {
     background: var(--primary-neon);
 }
+/* Растянутый верхний блок */
+.owner-hero {
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(76, 29, 149, 0.2), rgba(15, 23, 42, 0.4));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+/* Рамка для животных */
+.pets-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 24px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.pet-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+}
+
+.pet-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+}

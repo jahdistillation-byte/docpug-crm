@@ -2097,7 +2097,7 @@ async function renderVisitsTab() {
 // =========================
 // OWNER PAGE — Рендеринг карточки владельца и его животных
 // =========================
-function renderOwnerPage(ownerId) {
+async function renderOwnerPage(ownerId) {
   const owner = getOwnerById(ownerId);
   if (!owner) {
     alert("Власника не знайдено");
@@ -2107,90 +2107,91 @@ function renderOwnerPage(ownerId) {
 
   state.selectedOwnerId = String(ownerId);
 
-  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
+  // Гарантируем наличие данных
+  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : await loadPatientsApi();
   const pets = (patients || []).filter((p) => String(p.owner_id) === String(ownerId));
 
-  // Фильтруем визиты (используем состояние, если оно уже загружено)
-  const allVisits = Array.isArray(state.visits) ? state.visits : [];
+  // Получаем визиты
+  let visits = Array.isArray(state.visits) ? state.visits : await loadVisitsApi();
+  
   const ownerPetIds = new Set(pets.map((p) => String(p.id)));
-  const ownerVisits = allVisits.filter((v) => ownerPetIds.has(String(v.pet_id)));
+  const ownerVisits = visits.filter((v) => ownerPetIds.has(String(v.pet_id)));
   
   const visitsCount = ownerVisits.length;
+  const totalPaid = ownerVisits.reduce((sum, v) => sum + (calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0), 0);
   const lastVisit = ownerVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
-  const totalPaid = ownerVisits.reduce((sum, v) => sum + calcServicesTotal(v) + calcStockTotal(v), 0);
 
-  // Обновляем Header в карточке владельца
+  // 1. Рендер Hero-блока (инфо владельца и статистика)
   const ownerNameEl = $("#ownerName");
   if (ownerNameEl) {
     ownerNameEl.innerHTML = `
-      <div class="glass-card" style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+      <div class="glass-card" style="background: linear-gradient(135deg, rgba(76, 29, 149, 0.2), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 100%; margin-bottom: 30px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
             <h2 style="margin:0; font-size: 1.8rem; color: #fff;">👤 ${escapeHtml(owner.name || "Без імені")}</h2>
             <div style="margin-top:8px; opacity: 0.7;">📞 ${escapeHtml(owner.phone || "Телефон не вказано")}</div>
             ${owner.note ? `<div style="margin-top:4px; opacity: 0.5;">📍 ${escapeHtml(owner.note)}</div>` : ""}
           </div>
-          <div style="display:flex; gap: 10px;">
-            <button class="btn-tab" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
-          </div>
+          <button class="btn-tab" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
         </div>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 24px;">
-          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
-            <div style="font-size: 0.8rem; opacity: 0.5;">Пацієнтів</div>
-            <div style="font-size: 1.2rem; font-weight: 600;">${pets.length}</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 24px;">
+          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Пацієнтів</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #a855f7;">${pets.length}</div>
           </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
-            <div style="font-size: 0.8rem; opacity: 0.5;">Візитів</div>
-            <div style="font-size: 1.2rem; font-weight: 600;">${visitsCount}</div>
+          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Візитів</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #a855f7;">${visitsCount}</div>
           </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
-            <div style="font-size: 0.8rem; opacity: 0.5;">Всього сплачено</div>
-            <div style="font-size: 1.2rem; font-weight: 600;">${totalPaid} грн</div>
+          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Всього сплачено</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #a855f7;">${totalPaid} ₴</div>
           </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;">
-            <div style="font-size: 0.8rem; opacity: 0.5;">Останній візит</div>
-            <div style="font-size: 1.2rem; font-weight: 600;">${escapeHtml(lastVisit?.date || "—")}</div>
+          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Останній візит</div>
+            <div style="font-size: 1.1rem; font-weight: 600; margin-top: 4px;">${escapeHtml(lastVisit?.date || "—")}</div>
           </div>
         </div>
       </div>
     `;
   }
 
-  // Рендер списка животных
+  // 2. Рендер списка животных с "рамкой"
   const list = $("#petsList");
   if (!list) return;
 
+  // Добавляем класс рамки из CSS
+  list.className = "pets-container"; 
   list.innerHTML = "";
+
   if (!pets.length) {
-    list.innerHTML = `<div class="hint" style="text-align:center; padding: 40px;">Поки немає тварин у цього власника.</div>`;
-    return;
-  }
+    list.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки немає тварин у цього власника.</div>`;
+  } else {
+    pets.forEach((pet) => {
+      const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
+      
+      const el = document.createElement("div");
+      el.className = "pet-card"; // Используем стиль карточки
+      el.style.cssText = "cursor:pointer; display: flex; justify-content: space-between; align-items: center;";
+      el.dataset.openPet = String(pet.id);
 
-  pets.forEach((pet) => {
-    const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
-    const petLastVisit = petVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
-
-    const el = document.createElement("div");
-    el.className = "glass-card";
-    el.style.cssText = "padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); cursor:pointer; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;";
-    el.dataset.openPet = String(pet.id);
-
-    el.innerHTML = `
-      <div style="flex:1;">
-        <div style="font-size: 1.2rem; font-weight: 600;">🐾 ${escapeHtml(pet.name || "Без імені")}</div>
-        <div style="font-size: 0.9rem; opacity: 0.6; margin-top: 4px;">
-           ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)}
-           ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-           • ${petVisits.length} візитів
+      el.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;">🐾 ${escapeHtml(pet.name || "Без імені")}</div>
+          <div style="font-size: 0.9rem; opacity: 0.6;">
+             ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)}
+             ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+             • ${petVisits.length} візитів
+          </div>
         </div>
-      </div>
-      <div>
-        <button class="iconBtn" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
-      </div>
-    `;
-    list.appendChild(el);
-  });
+        <div style="padding-left: 15px;">
+          <button class="iconBtn" data-del-pet="${escapeHtml(String(pet.id))}">🗑</button>
+        </div>
+      `;
+      list.appendChild(el);
+    });
+  }
 
   // Переключаем секции
   document.querySelectorAll(".page").forEach(p => p.style.display = "none");
