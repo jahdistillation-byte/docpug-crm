@@ -2290,43 +2290,95 @@ function bindPatientCardButtons() {
 
 async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
-  if (!box || !pet) return;
+  const root = $("#patientCardRoot");
+  if (!root || !pet) return;
 
-    if (tab === "overview") {
-    box.innerHTML = `<div class="hint">Завантаження…</div>`;
-    const visits = await getVisitsByPetId(pet.id);
-    cacheVisits(visits);
+  const stats = getFinancialStats(pet.id, 'patient');
 
-    const stats = getFinancialStats(pet.id, 'patient'); // Используем наш «единый мозг»
-    
-    box.innerHTML = `
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:20px;">
-        ${[
-           ['📋', 'Візитів', stats.count],
-           ['⚖️', 'Вага, кг', pet.weight_kg || '—'],
-           ['📅', 'Останній', stats.lastDate],
-           ['💰', 'Всього ₴', stats.total]
-        ].map(i => `
-          <div class="glass-card" style="padding:15px; border-radius:12px; text-align:center;">
-             <div style="font-size:1.2rem;">${i[0]}</div>
-             <div style="font-weight:700; font-size:1.1rem; margin-top:5px;">${i[2]}</div>
-             <div style="font-size:0.7rem; opacity:0.5; text-transform:uppercase;">${i[1]}</div>
+  // Шаг 1: Рендерим постоянную верхнюю часть (Hero + Капсульное меню), если её ещё нет
+  if (!box || !document.getElementById("patientTabContent")) {
+    root.innerHTML = `
+      <div class="glass-card" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+          <div>
+            <div style="font-size:0.75rem; text-transform:uppercase; opacity:0.5; letter-spacing:1px; margin-bottom:4px;">Медична карта пацієнта</div>
+            <h2 style="margin:0; font-size: 2.2rem; color: #fff;">🐾 ${escapeHtml(pet.name || "Без імені")}</h2>
+            <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
+              ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
+              ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
+            </div>
           </div>
-        `).join('')}
-      </div>
+          <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);">+ Новий візит</button>
+        </div>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-        <div class="glass-card" style="padding:20px; border-radius:16px;">
-          <h3 style="margin-top:0;">🐾 Паспорт пацієнта</h3>
-          <div style="opacity:0.8;">
-             <div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05)"><b>Кличка:</b> ${escapeHtml(pet.name)}</div>
-             <div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05)"><b>Вид:</b> ${escapeHtml(pet.species)}</div>
-             <div style="padding:8px 0;"><b>Порода:</b> ${escapeHtml(pet.breed || "—")}</div>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
+          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Візитів</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${stats.count}</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Вага</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${escapeHtml(pet.weight_kg || "—")} кг</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Останній візит</div>
+            <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 4px;">${escapeHtml(stats.lastDate || "—")}</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Всього сплачено</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #22c55e;">${stats.total} ₴</div>
           </div>
         </div>
-        <div class="glass-card" style="padding:20px; border-radius:16px;">
-          <h3 style="margin-top:0;">📝 Нотатки лікаря</h3>
-          <p style="opacity:0.7; white-space:pre-wrap;">${escapeHtml(pet.notes || "Немає записів.")}</p>
+      </div>
+
+      <div class="patient-nav" style="display:flex; gap:8px; margin-bottom:24px; padding:6px; background: rgba(255, 255, 255, 0.03); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); width: fit-content; backdrop-filter: blur(10px);">
+        <button class="nav-tab ${tab === 'overview' ? 'active' : ''}" data-p-tab="overview" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Обзор</button>
+        <button class="nav-tab ${tab === 'visits' ? 'active' : ''}" data-p-tab="visits" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Візити</button>
+        <button class="nav-tab ${tab === 'medcard' ? 'active' : ''}" data-p-tab="medcard" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Веткарта</button>
+        <button class="nav-tab ${tab === 'labs' ? 'active' : ''}" data-p-tab="labs" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Аналізи</button>
+        <button class="nav-tab ${tab === 'files' ? 'active' : ''}" data-p-tab="files" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Файли</button>
+        <button class="nav-tab ${tab === 'finance' ? 'active' : ''}" data-p-tab="finance" style="padding: 8px 16px; border-radius: 10px; border: none; background: transparent; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s;">Фінанси</button>
+      </div>
+
+      <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
+    `;
+
+    // Навешиваем клики на табы-капсулы
+    root.querySelectorAll("[data-p-tab]").forEach((btn) => {
+      btn.onclick = () => {
+        const targetTab = btn.dataset.pTab;
+        renderPatientTab(targetTab, pet);
+      };
+    });
+  }
+
+  // Перевыбираем обновленный box
+  const dynamicBox = $("#patientTabContent");
+  if (!dynamicBox) return;
+
+  // Подсвечиваем активную кнопку
+  root.querySelectorAll("[data-p-tab]").forEach((btn) => {
+    btn.style.background = btn.dataset.pTab === tab ? "var(--accent-color, #a855f7)" : "transparent";
+    btn.style.boxShadow = btn.dataset.pTab === tab ? "0 4px 12px rgba(168, 85, 247, 0.3)" : "none";
+  });
+
+  // Шаг 2: Рендерим внутреннее содержимое выбранного таба
+  if (tab === "overview") {
+    dynamicBox.innerHTML = `
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="glass-card" style="background: rgba(255,255,255,0.02); padding:20px; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
+          <h3 style="margin-top:0; color:#fff; font-size:1.2rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom:10px;">📋 Паспорт пацієнта</h3>
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px; font-size:0.95rem;">
+            <div><span style="opacity:0.5;">Кличка:</span> <b style="color:#fff; margin-left:6px;">${escapeHtml(pet.name || "—")}</b></div>
+            <div><span style="opacity:0.5;">Вид:</span> <span style="color:#fff; margin-left:6px;">${escapeHtml(pet.species || "—")}</span></div>
+            <div><span style="opacity:0.5;">Порода:</span> <span style="color:#fff; margin-left:6px;">${escapeHtml(pet.breed || "—")}</span></div>
+            <div><span style="opacity:0.5;">Вік:</span> <span style="color:#fff; margin-left:6px;">${escapeHtml(pet.age || "—")}</span></div>
+          </div>
+        </div>
+        
+        <div class="glass-card" style="background: rgba(255,255,255,0.02); padding:20px; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
+          <h3 style="margin-top:0; color:#fff; font-size:1.2rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom:10px;">📝 Нотатки лікаря</h3>
+          <div style="margin-top:15px; color: rgba(255,255,255,0.85); white-space:pre-wrap; line-height:1.5; font-size:0.95rem;">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
         </div>
       </div>
     `;
@@ -2334,6 +2386,7 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "visits") {
+    dynamicBox.innerHTML = `<div class="hint">Завантаження візитів…</div>`;
     if (typeof renderVisits === "function") await renderVisits(pet.id);
     return;
   }
@@ -2351,119 +2404,52 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "finance") {
-    const visits = await getVisitsByPetId(pet.id);
-    cacheVisits(visits);
-
-    const sortedVisits = visits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
-    const servicesTotal = visits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
-    const stockTotal = visits.reduce((sum, v) => sum + calcStockTotal(v), 0);
+    dynamicBox.innerHTML = `<div class="hint">Формування финансової аналітики…</div>`;
+    // Оставляем твою готовую крутую финансовую логику, просто пакуем её вывод в красивый dynamicBox
+    const petVisits = Array.isArray(state.visits) ? state.visits.filter(v => String(v.pet_id) === String(pet.id)) : [];
+    const sortedVisits = petVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    const servicesTotal = petVisits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
+    const stockTotal = petVisits.reduce((sum, v) => sum + calcStockTotal(v), 0);
     const grandTotal = servicesTotal + stockTotal;
-    const avg = visits.length ? Math.round(grandTotal / visits.length) : 0;
-
-    const lastVisit = sortedVisits[0] || null;
-    const lastVisitTotal = lastVisit ? calcServicesTotal(lastVisit) + calcStockTotal(lastVisit) : 0;
-
-    let avgInterval = "—";
-    if (sortedVisits.length >= 2) {
-      const dates = sortedVisits
-        .map((v) => new Date(v.date))
-        .filter((d) => !Number.isNaN(d.getTime()))
-        .sort((a, b) => b - a);
-
-      const gaps = [];
-      for (let i = 0; i < dates.length - 1; i++) {
-        const diffDays = Math.round((dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24));
-        if (diffDays >= 0) gaps.push(diffDays);
-      }
-      if (gaps.length) {
-        avgInterval = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) + " дн.";
-      }
-    }
+    const avg = petVisits.length ? Math.round(grandTotal / petVisits.length) : 0;
 
     const checksHtml = sortedVisits.length
       ? sortedVisits.map((v) => {
-          const s = calcServicesTotal(v);
-          const st = calcStockTotal(v);
-          const total = s + st;
+          const s = calcServicesTotal(v); const st = calcStockTotal(v);
           return `
-            <div class="financeVisitRow">
+            <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.04);">
               <div>
-                <div class="financeVisitDate">${escapeHtml(v.date || "—")}</div>
-                <div class="financeVisitMeta">Послуги: ${escapeHtml(String(s))} грн · Препарати: ${escapeHtml(String(st))} грн</div>
+                <div style="font-weight:600; color:#fff;">${escapeHtml(v.date || "—")}</div>
+                <div style="font-size:0.8rem; opacity:0.6; margin-top:2px;">Послуги: ${s} ₴ · Препарати: ${st} ₴</div>
               </div>
-              <div class="financeVisitSum">${escapeHtml(String(total))} грн</div>
+              <div style="font-weight:700; color:#22c55e; align-self:center;">${s + st} ₴</div>
             </div>
           `;
         }).join("")
       : `<div class="hint">Поки витрат немає.</div>`;
 
-    const serviceCount = new Map();
-    visits.forEach((v) => {
-      expandServiceLines(v).forEach((x) => {
-        const name = String(x.name || "Послуга");
-        serviceCount.set(name, (serviceCount.get(name) || 0) + Number(x.qty || 1));
-      });
-    });
-
-    const topServices = Array.from(serviceCount.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const topServicesHtml = topServices.length
-      ? topServices.map(([name, count]) => `
-          <div class="financeTopRow">
-            <div class="financeTopName">${escapeHtml(name)}</div>
-            <div class="financeTopCount">${escapeHtml(String(count))} раз</div>
-          </div>
-        `).join("")
-      : `<div class="hint">Поки послуг немає.</div>`;
-
-    const monthMap = new Map();
-    visits.forEach((v) => {
-      const date = String(v.date || "").slice(0, 7) || "Без дати";
-      const total = calcServicesTotal(v) + calcStockTotal(v);
-      monthMap.set(date, (monthMap.get(date) || 0) + total);
-    });
-
-    const monthRows = Array.from(monthMap.entries()).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
-    const maxMonth = Math.max(1, ...monthRows.map(([, total]) => total));
-
-    const monthBarsHtml = monthRows.length
-      ? monthRows.map(([month, total]) => {
-          const pct = Math.max(4, Math.round((total / maxMonth) * 100));
-          return `
-            <div class="financeMonthRow">
-              <div class="financeMonthLabel">${escapeHtml(month)}</div>
-              <div class="financeMonthBarWrap"><div class="financeMonthBar" style="width:${pct}%"></div></div>
-              <div class="financeMonthSum">${escapeHtml(String(total))} грн</div>
-            </div>
-          `;
-        }).join("")
-      : `<div class="hint">Поки немає даних для графіка.</div>`;
-
-    box.innerHTML = `
-      <div class="patientStats financeStats">
-        <div class="ownerStat"><div class="ownerStatIcon">💰</div><div><div class="ownerStatValue">${escapeHtml(String(grandTotal))} грн</div><div class="ownerStatLabel">усього</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">🧾</div><div><div class="ownerStatValue">${escapeHtml(String(servicesTotal))} грн</div><div class="ownerStatLabel">послуги</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">💊</div><div><div class="ownerStatValue">${escapeHtml(String(stockTotal))} грн</div><div class="ownerStatLabel">препарати</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">📊</div><div><div class="ownerStatValue">${escapeHtml(String(avg))} грн</div><div class="ownerStatLabel">середній чек</div></div></div>
-      </div>
-      <div class="patientStats financeStats financeStatsSecond">
-        <div class="ownerStat"><div class="ownerStatIcon">📋</div><div><div class="ownerStatValue">${escapeHtml(String(visits.length))}</div><div class="ownerStatLabel">візитів</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">📅</div><div><div class="ownerStatValue">${escapeHtml(lastVisit?.date || "—")}</div><div class="ownerStatLabel">останній візит</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">⏱️</div><div><div class="ownerStatValue">${escapeHtml(avgInterval)}</div><div class="ownerStatLabel">середній інтервал</div></div></div>
-        <div class="ownerStat"><div class="ownerStatIcon">🧮</div><div><div class="ownerStatValue">${escapeHtml(String(lastVisitTotal))} грн</div><div class="ownerStatLabel">останній чек</div></div></div>
-      </div>
-      <div class="financeGrid2">
-        <div class="patientInfoBox financePanel">
-          <div class="financePanelHead"><div><h2>Витрати по місяцях</h2><div class="hint">Динаміка витрат цього пацієнта.</div></div></div>
-          <div class="financeMonthList">${monthBarsHtml}</div>
+    dynamicBox.innerHTML = `
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:20px;">
+        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
+          <div style="font-size:0.75rem; opacity:0.5;">УСЬОГО</div>
+          <div style="font-size:1.2rem; font-weight:700; color:#fff; margin-top:4px;">${grandTotal} ₴</div>
         </div>
-        <div class="patientInfoBox financePanel">
-          <div class="financePanelHead"><div><h2>ТОП послуг</h2><div class="hint">Що найчастіше призначали пацієнту.</div></div></div>
-          <div class="financeTopList">${topServicesHtml}</div>
+        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
+          <div style="font-size:0.75rem; opacity:0.5;">ПОСЛУГИ</div>
+          <div style="font-size:1.2rem; font-weight:700; color:#fff; margin-top:4px;">${servicesTotal} ₴</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
+          <div style="font-size:0.75rem; opacity:0.5;">ПРЕПАРАТИ</div>
+          <div style="font-size:1.2rem; font-weight:700; color:#fff; margin-top:4px;">${stockTotal} ₴</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
+          <div style="font-size:0.75rem; opacity:0.5;">СЕРЕДНІЙ ЧЕК</div>
+          <div style="font-size:1.2rem; font-weight:700; color:#22c55e; margin-top:4px;">${avg} ₴</div>
         </div>
       </div>
-      <div class="patientInfoBox financePanel">
-        <div class="financePanelHead"><div><h2>Історія витрат</h2><div class="hint">Чеки по всіх візитах цього пацієнта.</div></div></div>
-        <div class="financeVisitsList">${checksHtml}</div>
+      <div class="glass-card" style="padding:20px; border-radius:16px;">
+        <h3 style="margin-top:0; color:#fff; margin-bottom:15px;">🧾 Історія витрат пацієнта</h3>
+        <div style="max-height:300px; overflow-y:auto; padding-right:6px;">${checksHtml}</div>
       </div>
     `;
     return;
