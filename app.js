@@ -4369,6 +4369,7 @@ function renderVisitPage(visit, pet) {
 
   // Генерируем премиальный интерфейс
     // Генерируем премиальный интерфейс с фиксацией отображения первой вкладки
+    // Генерируем премиальный интерфейс с кнопкой выписки
   box.innerHTML = `
     <div class="visit-grid-layout">
       
@@ -4388,8 +4389,12 @@ function renderVisitPage(visit, pet) {
           <div class="finance-amount">${grandTotal} <span class="currency">₴</span></div>
         </div>
         
-        <div class="sidebar-actions" style="margin-top: auto; padding-top: 10px;">
+        <div class="sidebar-actions" style="margin-top: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 10px;">
           <button type="button" id="visitMedSave" class="premium-neon-btn">💾 Зберегти візит</button>
+          
+          <button type="button" id="visitPrintPdf" class="premium-secondary-btn" style="width: 100%; padding: 14px; border-radius: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-sizing: border-box;">
+            <span>📄</span> Виписка для клієнта
+          </button>
         </div>
       </aside>
 
@@ -4410,7 +4415,7 @@ function renderVisitPage(visit, pet) {
               <div class="field-row-grid">
                 <label class="premium-field">
                   <span class="field-title">Скарги клієнта & Клінічний стан</span>
-                  <textarea class="premium-textarea" id="visitMedComplaint" rows="6" placeholder="Опишіть симптоми та стан...">${safe(complaint)}</textarea>
+                  <textarea class="premium-textarea" id="visitMedComplaint" rows="6" placeholder="Опишіть симптомы та стан...">${safe(complaint)}</textarea>
                 </label>
                 <label class="premium-field">
                   <span class="field-title">Призначення & Рекомендації (Rx)</span>
