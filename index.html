@@ -1,452 +1,215 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>Doc.PUG CRM Mini</title>
-  <link rel="stylesheet" href="style.css?v=20260207_1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doc.PUG CRM - Преміум Панель</title>
+    <!-- Подключаем современный премиальный шрифт Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div class="appShell">
-    <aside class="sideNav">
-      <div class="sideBrand">
-        <div class="sideLogo">🐾</div>
-        <div>
-          <div class="sideTitle">Doc.PUG</div>
-          <div class="sideSub">CRM</div>
+
+    <div class="app-container">
+        
+        <!-- 1. БОКОВОЕ МЕНЮ (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <!-- Твоя фирменная иконка или эмодзи -->
+                <span>🐾</span>
+                <span>Doc.PUG <span style="color: var(--accent-color); font-size: 0.8rem; block-size: min-content;">CRM</span></span>
+            </div>
+            
+            <div class="user-profile-badge">
+                <h4>Doc.PUG Clinic</h4>
+                <span>Адміністратор</span>
+            </div>
+            
+            <nav style="flex-grow: 1;">
+                <ul class="sidebar-menu">
+                    <li class="menu-item active" data-target="calendar">
+                        <a href="#calendar">📅 Календарь</a>
+                    </li>
+                    <li class="menu-item" data-target="owners">
+                        <a href="#owners">👥 Власники</a>
+                    </li>
+                    <li class="menu-item" data-target="patients">
+                        <a href="#patients">🐾 Пацієнти</a>
+                    </li>
+                    <li class="menu-item" data-target="visits">
+                        <a href="#visits">📝 Візити</a>
+                    </li>
+                    <li class="menu-item" data-target="services">
+                        <a href="#services">💼 Послуги</a>
+                    </li>
+                    <li class="menu-item" data-target="warehouse">
+                        <a href="#warehouse">📦 Склад</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 2. ГЛАВНАЯ РАБОЧАЯ ОБЛАСТЬ -->
+        <main class="main-content">
+            
+            <!-- ВЕРХНЯЯ ПАНЕЛЬ С ПОИСКОМ -->
+            <header class="header-panel">
+                <div class="search-bar">
+                    <input type="text" id="global-search" placeholder="Пошук власника, пацієнта, телефону...">
+                </div>
+                <!-- Сюда в будущем можно добавить аватарку вошедшего врача или уведомления -->
+            </header>
+
+            <!-- ========================================== -->
+            <!-- РАЗДЕЛ: КАЛЕНДАРЬ                          -->
+            <!-- ========================================== -->
+            <section id="calendar" class="content-section">
+                <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2>Календар</h2>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Перетягніть ветеринара справа на потрібний час.</span>
+                    </div>
+                    
+                    <div class="calendar-nav">
+                        <button id="prev-day" class="btn-arrow">&larr;</button>
+                        <span id="current-date" class="current-date-title">2026-06-26</span>
+                        <button id="next-day" class="btn-arrow">&rarr;</button>
+                    </div>
+                    
+                    <div class="nav-buttons-group">
+                        <button class="btn-tab active" data-view="day">День</button>
+                        <button class="btn-tab" data-view="week">Тиждень</button>
+                        <button class="btn-tab" data-view="month">Місяць</button>
+                        <button class="btn-tab" data-view="veterinarians">Ветеринари</button>
+                        <button class="btn-tab" data-view="routes">Маршрути</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-container">
+                    <div class="calendar-grid-wrapper">
+                        <div id="calendar-grid" class="calendar-grid">
+                            <!-- JS динамически построит сетку здесь -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- РАЗДЕЛ: ВЛАДЕЛЬЦЫ                          -->
+            <!-- ========================================== -->
+            <section id="owners" class="content-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>Власники тварин</h2>
+                    <button class="btn-primary" id="add-owner-btn">+ Додати власника</button>
+                </div>
+                
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ПІБ</th>
+                                <th>Телефон</th>
+                                <th>Email</th>
+                                <th>Адреса</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="owners-table-body">
+                            <!-- Данные загрузятся из базы -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- РАЗДЕЛ: ПАЦИЕНТЫ                          -->
+            <!-- ========================================== -->
+            <section id="patients" class="content-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>Пацієнти (Тварини)</h2>
+                    <button class="btn-primary" id="add-patient-btn">+ Додати пацієнта</button>
+                </div>
+                
+                <div class="patients-grid" id="patients-grid-container">
+                    <!-- Премиальные карточки питомцев рендерятся тут -->
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- РАЗДЕЛ: ВИЗИТЫ                             -->
+            <!-- ========================================== -->
+            <section id="visits" class="content-section" style="display: none;">
+                <h2>Історія візитів та записів</h2>
+                <div class="data-table-container" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Дата/Час</th>
+                                <th>Пацієнт</th>
+                                <th>Власник</th>
+                                <th>Ветеринар</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visits-table-body">
+                            <!-- Данные из базы -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- РАЗДЕЛ: УСЛУГИ                             -->
+            <!-- ========================================== -->
+            <section id="services" class="content-section" style="display: none;">
+                <h2>Прайс-лист послуг</h2>
+                <!-- Будет заполнено позже -->
+            </section>
+
+            <!-- ========================================== -->
+            <!-- РАЗДЕЛ: СКЛАД                              -->
+            <!-- ========================================== -->
+            <section id="warehouse" class="content-section" style="display: none;">
+                <h2>Облік складу та медикаментів</h2>
+                <!-- Будет заполнено позже -->
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ ЗАПИСИ          -->
+    <!-- ========================================== -->
+    <div id="appointment-modal" class="modal-overlay">
+        <div class="modal-window">
+            <h3>Новий запис на прийом</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Заповніть дані для реєстрації візиту</p>
+            
+            <form id="appointment-form">
+                <div class="form-group">
+                    <label>Власник</label>
+                    <input type="text" class="form-input" id="modal-owner-search" placeholder="Почніть вводити ім'я або телефон..." required>
+                </div>
+                <div class="form-group">
+                    <label>Пацієнт (Тварина)</label>
+                    <select class="form-input" id="modal-patient-select" required>
+                        <option value="">Спочатку виберіть власника</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Причина візиту / Скарги</label>
+                    <textarea class="form-input" id="modal-visit-reason" rows="3" placeholder="Наприклад: вакцинація, чистка зубів..." required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button type="button" class="btn-tab" id="close-modal-btn">Скасувати</button>
+                    <button type="submit" class="btn-primary">Записати</button>
+                </div>
+            </form>
         </div>
-      </div>
-
-      <div class="sideClinic">
-        <div class="sideClinicTitle">Doc.PUG Clinic</div>
-        <div class="sideClinicSub" id="meLine">Загрузка профиля…</div>
-      </div>
-
-      <nav class="tabs sideTabs" id="tabs">
-        <button class="tab" data-route="owners">👤 Владельцы</button>
-        <button class="tab" data-route="patients">🐾 Пациенты</button>
-        <button class="tab" data-route="visits">📋 Визиты</button>
-        <button class="tab" data-route="services">➕ Послуги</button>
-        <button class="tab" data-route="calendar">📅 Календарь</button>
-        <button class="tab" data-route="stock">📦 Склад</button>
-      </nav>
-
-      <div class="sideBottom">
-        <div class="sideStatus">
-          <span class="dot" id="apiDot"></span>
-          <span id="apiLine">API: неизвестно</span>
-        </div>
-
-        <button class="sideQuick" id="btnReload" title="Перезагрузить профиль">
-          ↻ Обновить
-        </button>
-      </div>
-    </aside>
-
-    <section class="mainArea">
-      <header class="mainTop">
-        <div>
-          <div class="mainEyebrow">Doc.PUG CRM</div>
-          <div class="mainTitle">Панель управления</div>
-        </div>
-
-        <input
-          class="topSearch"
-          id="globalSearch"
-          type="search"
-          placeholder="Поиск владельца, пациента, телефона…"
-        />
-      </header>
-
-      <main class="content">
-        <section class="page" data-page="owners">
-          <div class="card">
-            <div class="row">
-              <h2>Владельцы</h2>
-              <button class="primary" id="btnAddOwner">+ Добавить</button>
-            </div>
-            <div class="hint">
-              Сейчас список демо/локальный. Дальше подключим API:
-              <span class="mono">GET /api/owners</span>
-            </div>
-            <div id="ownersList" class="list"></div>
-          </div>
-        </section>
-
-        <section class="page" data-page="owner">
-          <div class="card">
-            <div class="row">
-              <button class="ghost" id="btnBackOwners">← Назад</button>
-              <button class="primary" id="btnAddPet">+ Животное</button>
-            </div>
-
-            <div style="margin-top:10px;">
-              <div class="title" id="ownerName" style="font-size:18px;font-weight:800;">Владелец</div>
-              <div class="subtitle" id="ownerMeta" style="margin-top:4px;">—</div>
-            </div>
-
-            <div style="margin-top:14px;">
-              <h2 style="margin-bottom:8px;">Животные</h2>
-              <div id="petsList" class="list"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="page" data-page="patients"></section>
-
-        <section class="page" data-page="patient">
-          <div id="patientCardRoot"></div>
-        </section>
-
-        <section class="page" data-page="visit">
-          <div class="card">
-            <div class="row">
-              <button class="ghost" id="btnBackPatient">← Назад</button>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <button class="ghost" id="btnDischarge" title="Виписка / друк">📄 Виписка</button>
-                <div class="pill" id="visitDatePill">—</div>
-              </div>
-            </div>
-
-            <div style="margin-top:10px;">
-              <div class="title" style="font-size:18px;font-weight:800;">Визит</div>
-              <div class="subtitle" id="visitMeta" style="margin-top:4px;">—</div>
-            </div>
-
-            <div style="margin-top:14px;">
-              <h2 style="margin-bottom:8px;">Нотатки / призначення</h2>
-              <div class="history" id="visitNoteBox">—</div>
-            </div>
-
-            <div style="margin-top:14px;">
-              <h2 style="margin-bottom:8px;">Файли (аналізи, УЗД, PDF)</h2>
-              <input id="visitFiles" type="file" multiple />
-              <div class="hint">Після вибору файлів вони завантажаться і прикріпляться до цього візиту.</div>
-              <div id="visitFilesList" class="list"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="page" data-page="visits">
-          <div class="card">
-            <div class="row" style="justify-content:space-between; gap:12px;">
-              <h2 style="margin:0;">Візити</h2>
-              <input id="visitsSearch" type="search"
-                placeholder="Пошук: пацієнт / власник / Dx / нотатка / дата…"
-                style="max-width:360px; width:100%;" />
-            </div>
-            <div class="hint" style="margin-top:8px;">
-              Глобальний журнал всіх візитів. Клік по рядку — відкрити візит.
-            </div>
-            <div id="visitsTabList" class="list" style="margin-top:12px;"></div>
-          </div>
-        </section>
-
-        <section class="page" data-page="services">
-          <div class="card">
-            <div class="row" style="justify-content:space-between; gap:12px;">
-              <h2 style="margin:0;">Послуги</h2>
-              <button class="primary" id="btnAddService">+ Додати</button>
-            </div>
-            <div class="hint" style="margin-top:8px;">
-              Прайс послуг. Старі візити не змінюються після оновлення ціни.
-            </div>
-            <div id="servicesList" class="list" style="margin-top:12px;"></div>
-          </div>
-        </section>
-
-        <section class="page" data-page="calendar">
-          <div class="card">
-            <h2>Календарь</h2>
-            <div class="hint">Пока заглушка.</div>
-          </div>
-        </section>
-
-        <section class="page" data-page="stock">
-          <div class="card">
-            <div class="row" style="justify-content:space-between; gap:12px;">
-              <h2 style="margin:0;">Склад</h2>
-              <button class="primary" id="btnAddStock">+ Додати</button>
-            </div>
-
-            <div class="hint" style="margin-top:8px;">
-              Реєстр препаратів/товарів. Тут ми ведемо: назву, ціну, одиницю, залишок.
-            </div>
-
-            <div id="stockList" class="list" style="margin-top:12px;"></div>
-          </div>
-        </section>
-      </main>
-    </section>
-  </div>
-
-  <!-- Visit mod al -->
-  <div class="modal" id="visitModal" aria-hidden="true">
-    <div class="modal__backdrop" data-close></div>
-    <div class="modal__panel" role="dialog" aria-modal="true">
-      <div class="modal__head">
-        <div>
-          <div class="modal__title">Візит</div>
-          <div class="modal__sub" id="visitModalSub">Пацієнт: —</div>
-        </div>
-        <button class="iconBtn" id="visitClose" title="Закрыть">✕</button>
-      </div>
-
-      <div class="modal__body">
-        <div id="visitPatientBlock" style="display:none;">
-  <label class="field">
-    <div class="label">Пацієнт</div>
-    <input
-  class="input"
-  id="visitPatientSearch"
-  placeholder="Пошук: пацієнт, власник, телефон..."
-  autocomplete="off"
-/>
-
-<input id="visitPatientSelect" type="hidden">
-
-<div id="visitPatientResults" class="patientSearchResults"></div>
-  </label>
-
-  <button
-    class="ghost"
-    id="btnCreatePatientFromVisit"
-    type="button"
-    style="margin-bottom:12px;"
-  >
-    + Новий пацієнт
-  </button>
-
-  <div id="visitNewPatientBox" style="display:none; margin-bottom:12px;">
-  <label class="field">
-    <div class="label">Власник</div>
-    <input class="input" id="visitNewOwnerName" placeholder="ПІБ власника">
-  </label>
-
-  <label class="field">
-    <div class="label">Телефон власника</div>
-    <input class="input" id="visitNewOwnerPhone" placeholder="+380...">
-  </label>
-
-  <label class="field">
-    <div class="label">Кличка пацієнта</div>
-    <input class="input" id="visitNewPetName" placeholder="Напр.: Буся">
-  </label>
-
-  <div class="grid2">
-    <label class="field">
-      <div class="label">Вид</div>
-      <input class="input" id="visitNewPetSpecies" placeholder="Собака / кіт">
-    </label>
-
-    <label class="field">
-      <div class="label">Порода</div>
-      <input class="input" id="visitNewPetBreed" placeholder="Порода">
-    </label>
-  </div>
-</div>
-</div>
-        <label class="field">
-          <div class="label">Дата</div>
-          <input class="input" id="visitDate" type="date">
-          <div class="grid2">
-  <label class="field">
-    <div class="label">Час початку</div>
-    <input class="input" id="visitStartTime" type="time" value="10:00">
-  </label>
-
-  <label class="field">
-    <div class="label">Тривалість, хв</div>
-    <select class="input" id="visitDuration">
-      <option value="30">30 хв</option>
-      <option value="60" selected>60 хв</option>
-      <option value="90">90 хв</option>
-      <option value="120">120 хв</option>
-    </select>
-  </label>
-</div>
-
-<label class="field">
-  <div class="label">Ветеринар</div>
-  <select class="input" id="visitStaff">
-    <option value="">Оберіть ветеринара</option>
-  </select>
-</label>
-        </label>
-
-        <label class="field">
-          <div class="label">Скарги / стан / анамнез</div>
-          <textarea class="textarea" id="visitNote" rows="6"
-            placeholder="Напр.: чхає 2 дні, апетит знижений, t°..."></textarea>
-        </label>
-
-        <div class="grid2">
-          <label class="field">
-            <div class="label">Діагноз (коротко)</div>
-            <input class="input" id="visitDx" placeholder="Напр.: риніт / ГРЗ">
-          </label>
-          <label class="field">
-            <div class="label">Вага (кг)</div>
-            <input class="input" id="visitWeight" placeholder="2.3">
-          </label>
-        </div>
-
-        <label class="field">
-          <div class="label">Призначення</div>
-          <textarea class="textarea" id="visitRx" rows="6"
-            placeholder="Препарат • доза • кратність • курс"></textarea>
-        </label>
-      </div>
-
-      <div class="modal__foot">
-        <button class="ghost" id="visitCancel">Отмена</button>
-        <button class="primary" id="visitSave">Сохранить визит</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Discharge modal -->
-<div class="modal" id="dischargeModal" aria-hidden="true">
-  <div class="modal__backdrop" data-close-discharge></div>
-
-  <div class="modal__panel modal__panel--wide" role="dialog" aria-modal="true">
-    <div class="modal__head">
-      <div>
-        <div class="modal__title">📄 Виписка для клієнта</div>
-        <div class="modal__sub" id="disSub">Візит: —</div>
-      </div>
-      <button class="iconBtn" data-close-discharge title="Закрыть">✕</button>
     </div>
 
-    <div class="modal__body dischargeBody">
-      <div class="dischargeLayout">
-        <section class="dischargeForm">
-          <div class="dischargeSectionTitle">📝 Дані виписки</div>
-
-          <div class="dischargeTopGrid">
-            <label class="field">
-              <div class="label">Скарга / стан</div>
-              <textarea class="textarea" id="disComplaint" rows="4"></textarea>
-            </label>
-
-            <label class="field">
-              <div class="label">Діагноз</div>
-              <input class="input" id="disDx" placeholder="Dx">
-            </label>
-          </div>
-
-          <label class="field">
-            <div class="label">💊 Призначення</div>
-            <textarea class="textarea" id="disRx" rows="5"></textarea>
-          </label>
-
-          <label class="field">
-            <div class="label">✅ Рекомендації</div>
-            <textarea class="textarea" id="disRecs" rows="5"></textarea>
-          </label>
-
-          <label class="field">
-            <div class="label">🚨 Контроль / коли звернутися</div>
-            <textarea class="textarea" id="disFollow" rows="3"></textarea>
-          </label>
-        </section>
-
-        <section class="dischargePreview">
-          <div class="dischargeSectionTitle">👁️ Попередній перегляд</div>
-          <div id="disPreview">
-  <div class="printA4" id="disA4"></div>
-</div>
-        </section>
-      </div>
-    </div>
-
-    <div class="modal__foot">
-      <button class="ghost" data-close-discharge>Закрыть</button>
-      <button class="ghost" id="disSave">Зберегти</button>
-      <button class="ghost" id="disDownload">Скачати PDF</button>
-      <button class="primary" id="disPrint">Друк / PDF</button>
-    </div>
-  </div>
-</div>
-<div class="drawer" id="staffDrawer" aria-hidden="true">
-  <div class="drawer__backdrop" data-close-staff></div>
-
-  <aside class="drawer__panel">
-    <div class="drawer__head">
-      <div>
-        <div class="drawer__title" id="staffDrawerTitle">Ветеринар</div>
-        <div class="drawer__sub">Профіль співробітника клініки</div>
-      </div>
-      <button class="iconBtn" data-close-staff type="button">✕</button>
-    </div>
-
-    <div class="drawer__body">
-      <input id="staffId" type="hidden">
-
-      <label class="field">
-        <div class="label">ПІБ</div>
-        <input class="input" id="staffName" placeholder="Напр.: Іваненко Марія">
-      </label>
-
-      <label class="field">
-        <div class="label">Роль</div>
-        <select class="input" id="staffRole">
-          <option value="vet">Ветеринар</option>
-          <option value="assistant">Асистент</option>
-          <option value="admin">Адміністратор</option>
-          <option value="director">Директор</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <div class="label">Спеціалізація</div>
-        <input class="input" id="staffSpecialization" placeholder="Терапія, УЗД, дерматологія...">
-      </label>
-      <label class="field">
-  <div class="label">Напрями / спеціалізації</div>
-  <div id="staffSpecsBox" class="staffSpecsBox">
-    <div class="hint">Напрями завантажуються...</div>
-  </div>
-</label>
-
-      <label class="field">
-        <div class="label">Телефон</div>
-        <input class="input" id="staffPhone" placeholder="+380...">
-      </label>
-
-      <div class="grid2">
-        <label class="field">
-          <div class="label">Ставка за зміну, грн</div>
-          <input class="input" id="staffShiftRate" type="number" placeholder="1500">
-        </label>
-
-        <label class="field">
-          <div class="label">% від візиту</div>
-          <input class="input" id="staffPercentRate" type="number" placeholder="5">
-        </label>
-      </div>
-
-      <label class="field">
-        <div class="label">Колір у календарі</div>
-        <input class="input" id="staffColor" type="color" value="#7C5CFF">
-      </label>
-
-      <label class="field">
-        <div class="label">Нотатка</div>
-        <textarea class="textarea" id="staffNote" rows="4" placeholder="Графік, умови оплати, сильні сторони..."></textarea>
-      </label>
-    </div>
-
-    <div class="drawer__foot">
-      <button class="ghost" data-close-staff type="button">Скасувати</button>
-      <button class="primary" id="staffSave" type="button">Зберегти</button>
-    </div>
-  </aside>
-</div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-  <script src="app.js?v=20260129_1"></script>
+    <!-- Подключаем логику приложения -->
+    <script src="app.js"></script>
 </body>
 </html>
