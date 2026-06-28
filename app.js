@@ -6350,13 +6350,37 @@ async function init() {
   });
 
   // Глобальный живой поиск
+ // Глобальный живой поиск
   $("#globalSearch")?.addEventListener("input", () => {
     if (state.route === "owners") renderOwners();
     if (state.route === "patients") renderPatientsTab();
     if (state.route === "visits") renderVisitsTab();
   });
 
-  await loadMe();
+  // Загружаем профиль и динамическую тему клиники с сервера
+  try {
+    const response = await fetch("/api/me");
+    const data = await response.json();
+    
+    if (data && data.me) {
+      // Ставим имя клиники в заголовок, если есть такой элемент
+      const clinicTitleEl = document.getElementById("clinicNameTitle") || document.querySelector(".clinic-title");
+      if (clinicTitleEl && data.me.clinic_name) {
+        clinicTitleEl.textContent = data.me.clinic_name;
+      }
+
+      // 🌟 МАГИЯ ПЕРЕКРАСКИ: если сервер вернул тему клиники, применяем её
+      if (data.me.theme) {
+        document.body.dataset.theme = data.me.theme;
+        LS.set("docpug_clinic_theme", data.me.theme);
+        console.log(`[Bootstrap] Установлена тема клиники: ${data.me.theme}`);
+      }
+    }
+  } catch (err) {
+    console.warn("Не удалось загрузить динамическую тему с сервера, катимся на локальной:", err);
+    if (typeof bootstrapClinicTheme === "function") bootstrapClinicTheme();
+  }
+
   await loadOwners();
   await loadPatientsApi();
   await loadServicesApi();

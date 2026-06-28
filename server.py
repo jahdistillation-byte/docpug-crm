@@ -417,16 +417,42 @@ def api_me():
         or ""
     )
 
+    # 1. Проверяем Telegram-авторизацию
     user = verify_tg_init_data(init_data)
-    if not user:
-        return jsonify({"me": {"name": "Guest", "mode": "browser"}})
+    
+    # 2. По умолчанию берем настройки темы для текущего ORG_ID сервера
+    theme = "purple"
+    clinic_name = "Doc.PUG Clinic"
+    
+    try:
+        res_org = supabase.table("organizations").select("name, theme_settings").eq("id", ORG_ID).single().execute()
+        if res_org.data:
+            clinic_name = res_org.data.get("name", clinic_name)
+            theme_settings = res_org.data.get("theme_settings") or {}
+            theme = theme_settings.get("theme", "purple")
+    except Exception as e:
+        print("⚠️ Не удалось подтянуть тему организации из БД:", repr(e))
 
+    # Если зашли просто через браузер (без ТГ)
+    if not user:
+        return jsonify({
+            "me": {
+                "name": "Гість", 
+                "mode": "browser",
+                "clinic_name": clinic_name,
+                "theme": theme
+            }
+        })
+
+    # Если зашли через Telegram WebApp
     return jsonify({
         "me": {
             "name": user.get("first_name"),
             "tg_user_id": str(user.get("id")),
             "username": user.get("username"),
             "mode": "telegram",
+            "clinic_name": clinic_name,
+            "theme": theme
         }
     })
 # =========================
