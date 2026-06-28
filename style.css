@@ -1417,3 +1417,236 @@ body {
 .dock-menu .menu-item:hover a {
     color: var(--accent-color); 
 }
+/* --- БЕЛАЯ ТЕМА (iOS Water Glass Style) --- */
+body[data-theme="white"] {
+    --accent-color: #5856d6;
+    --accent-glow: rgba(88, 86, 214, 0.15);
+    --bg-gradient: linear-gradient(160deg, #e8eaf0 0%, #f2f2f7 50%, #e5e7ed 100%);
+    --card-bg: rgba(255, 255, 255, 0.55);
+    --text-main: #1c1c1e;
+    --text-muted: #6e6e73;
+    --glass-border: rgba(0, 0, 0, 0.07);
+    --glass-bg: rgba(255, 255, 255, 0.45);
+    --glass-blur: blur(30px) saturate(200%);
+    --primary-neon: #5856d6;
+    --primary-glow: 0 0 15px rgba(88, 86, 214, 0.25);
+    --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Фон тела */
+body[data-theme="white"] {
+    background: var(--bg-gradient);
+    color: var(--text-main);
+}
+
+/* Все стеклянные карточки */
+body[data-theme="white"] .glass-card,
+body[data-theme="white"] .data-table-container,
+body[data-theme="white"] .calendar-container,
+body[data-theme="white"] .patient-premium-card,
+body[data-theme="white"] .patient-hero,
+body[data-theme="white"] .glass-panel {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(30px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    color: #1c1c1e !important;
+}
+
+/* Сайдбар */
+body[data-theme="white"] .sidebar {
+    background: rgba(242, 242, 247, 0.75) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.07) !important;
+}
+
+body[data-theme="white"] .sidebar-logo,
+body[data-theme="white"] .menu-item a {
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .menu-item a {
+    color: #6e6e73 !important;
+}
+
+body[data-theme="white"] .menu-item.active a {
+    background: var(--accent-color) !important;
+    color: #fff !important;
+}
+
+body[data-theme="white"] .menu-item a:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #1c1c1e !important;
+}
+
+/* Строка поиска */
+body[data-theme="white"] .search-bar input {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #1c1c1e !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+body[data-theme="white"] .search-bar input::placeholder {
+    color: #8e8e93 !important;
+}
+
+body[data-theme="white"] .search-bar input:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.15) !important;
+}
+
+/* Текст */
+body[data-theme="white"] .text-main,
+body[data-theme="white"] h1,
+body[data-theme="white"] h2,
+body[data-theme="white"] h3,
+body[data-theme="white"] h4,
+body[data-theme="white"] .section-card-title,
+body[data-theme="white"] .vet-name,
+body[data-theme="white"] .sidebar-patient-name,
+body[data-theme="white"] .current-date-title,
+body[data-theme="white"] .finance-amount {
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .text-muted,
+body[data-theme="white"] .vet-spec,
+body[data-theme="white"] .sidebar-patient-breed,
+body[data-theme="white"] .field-title,
+body[data-theme="white"] .sidebar-meta-item .label,
+body[data-theme="white"] .finance-label {
+    color: #6e6e73 !important;
+}
+
+/* Таблицы */
+body[data-theme="white"] .data-table th {
+    color: #1c1c1e !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body[data-theme="white"] .data-table td {
+    color: #3c3c43 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Инпуты */
+body[data-theme="white"] .premium-input,
+body[data-theme="white"] .premium-textarea,
+body[data-theme="white"] .premium-select {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .premium-input:focus,
+body[data-theme="white"] .premium-textarea:focus,
+body[data-theme="white"] .premium-select:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.15) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Dock снизу */
+body[data-theme="white"] .mac-dock {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(35px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item a {
+    color: #6e6e73 !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item:hover a {
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item.active {
+    background: rgba(88, 86, 214, 0.12) !important;
+    border: 1px solid rgba(88, 86, 214, 0.25) !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item.active a {
+    color: var(--accent-color) !important;
+}
+
+/* Кнопки вкладок */
+body[data-theme="white"] .btn-tab,
+body[data-theme="white"] .patient-tab-btn,
+body[data-theme="white"] .tab-nav-btn {
+    color: #6e6e73 !important;
+}
+
+body[data-theme="white"] .btn-tab.active,
+body[data-theme="white"] .patient-tab-btn.active,
+body[data-theme="white"] .tab-nav-btn.active {
+    background: rgba(255, 255, 255, 0.8) !important;
+    color: #1c1c1e !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ячейки календаря */
+body[data-theme="white"] .appointment-cell {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: 1px dashed rgba(0, 0, 0, 0.1) !important;
+    color: rgba(0, 0, 0, 0.2) !important;
+}
+
+body[data-theme="white"] .appointment-cell:hover {
+    background: rgba(88, 86, 214, 0.06) !important;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+}
+
+/* Хедер ветеринара в календаре */
+body[data-theme="white"] .vet-column-header {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Профиль в сайдбаре */
+body[data-theme="white"] .user-profile-badge {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+}
+
+body[data-theme="white"] .user-profile-badge h4 {
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .user-profile-badge span {
+    color: #6e6e73 !important;
+}
+
+/* Finance gradient fix */
+body[data-theme="white"] .finance-amount {
+    background: linear-gradient(135deg, #1c1c1e 40%, #5856d6 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* Настройки — карточки тем */
+body[data-theme="white"] .theme-btn-pill {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .theme-btn-pill:hover {
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+
+body[data-theme="white"] .theme-btn-pill.active {
+    border-color: var(--accent-color) !important;
+    background: rgba(88, 86, 214, 0.06) !important;
+}
