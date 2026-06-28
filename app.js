@@ -659,7 +659,7 @@ async function createServiceApi(payload) {
     const res = await fetch("/api/services", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       body: JSON.stringify(payload || {}),
     });
     const text = await res.text();
@@ -679,7 +679,7 @@ async function updateServiceApi(id, patch) {
     const res = await fetch(`/api/services?id=${encodeURIComponent(String(id))}`, {
       method: "PUT",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       body: JSON.stringify(patch || {}),
     });
     const text = await res.text();
@@ -729,7 +729,7 @@ async function createPatientApi(payload) {
 
     const res = await fetch("/api/patients", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       credentials: "include",
       body: JSON.stringify(bodyObj),
     });
@@ -779,7 +779,7 @@ async function createOwner(name, phone = "", note = "") {
 
     const res = await fetch("/api/owners", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       credentials: "include",
       body: JSON.stringify(payload),
     });
@@ -823,7 +823,7 @@ async function updateOwner(id, payload = {}) {
     const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
       method: "PUT",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       body: JSON.stringify(bodyObj),
     });
 
@@ -932,7 +932,7 @@ async function createVisitApi(payload) {
   try {
     const res = await fetch("/api/visits", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       credentials: "include",
       body: JSON.stringify(payload),
     });
