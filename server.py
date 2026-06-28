@@ -18,16 +18,16 @@ print("### RUNNING server.py ###")
 # =========================
 # ENVы
 # =========================
-ORG_ID = os.getenv("ORG_ID")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-if not ORG_ID or not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
-    raise RuntimeError("Missing ENV vars: ORG_ID / SUPABASE_URL / SUPABASE_SERVICE_KEY")
+if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+    raise RuntimeError("Missing ENV vars: SUPABASE_URL / SUPABASE_SERVICE_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 print("SUPABASE STORAGE READY")
+
 # =========================
 # APP
 # =========================
@@ -42,12 +42,23 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "heic", "dcm"}
 
 # =========================
+# ДИНАМИЧЕСКИЙ ORG_ID (ИЗОЛЯЦИЯ КЛИНИК)
+# =========================
+def get_current_org_id():
+    """Динамически извлекает ID организации из заголовков запроса фронтенда."""
+    org_id = request.headers.get("X-Org-ID")
+    if org_id:
+        return org_id.strip()
+    return os.getenv("ORG_ID")
+
+# =========================
 # STATIC UPLOADS
 # =========================
 @app.get("/uploads/<path:filename>")
 def uploaded_file(filename):
     filename = os.path.basename(filename)
     return send_from_directory(UPLOAD_DIR, filename)
+
 # HELPERS
 # =========================
 def ok(data=None):
@@ -67,7 +78,7 @@ def clean_payload(d):
     # list[dict]
     if isinstance(d, list):
         out_list = []
-        for item in d:
+        for item  in d:
             if isinstance(item, dict):
                 out = {}
                 for k, v in item.items():
@@ -144,13 +155,14 @@ def update_with_optional_fallback(table: str, row_id: str, payload: dict, option
     if not payload:
         return None
 
+    current_org = get_current_org_id()
     try:
-        return supabase.table(table).update(payload).eq("org_id", ORG_ID).eq("id", row_id).execute()
+        return supabase.table(table).update(payload).eq("org_id", current_org).eq("id", row_id).execute()
     except Exception as e:
         msg = str(e)
         if "PGRST204" in msg:
             fallback = {k: v for k, v in payload.items() if k not in optional_fields}
-            return supabase.table(table).update(fallback).eq("org_id", ORG_ID).eq("id", row_id).execute()
+            return supabase.table(table).update(fallback).eq("org_id", current_org).eq("id", row_id).execute()
         raise
 
 def safe_int(x, default=0):
@@ -208,15 +220,17 @@ def load_visit_lines(visit_ids):
     if not visit_ids:
         return services_by_visit, stock_by_visit
 
+    current_org = get_current_org_id()
+
     # =====================
     # services
     # =====================
     try:
         q = supabase.table("visit_services").select("*").in_("visit_id", visit_ids)
 
-        # пробуем с org_id, если колонки нет — упадет и мы повторим без org_id
+        # пробуем с org_id, еслиционной колонки нет — упадет и мы повторим без org_id
         try:
-            q = q.eq("org_id", ORG_ID)
+            q = q.eq("org_id", current_org)
             res = q.execute()
         except Exception:
             res = supabase.table("visit_services").select("*").in_("visit_id", visit_ids).execute()
@@ -241,7 +255,7 @@ def load_visit_lines(visit_ids):
         q = supabase.table("visit_stock").select("*").in_("visit_id", visit_ids)
 
         try:
-            q = q.eq("org_id", ORG_ID)
+            q = q.eq("org_id", current_org)
             res = q.execute()
         except Exception:
             res = supabase.table("visit_stock").select("*").in_("visit_id", visit_ids).execute()
@@ -265,13 +279,14 @@ def load_visit_lines(visit_ids):
 def save_visit_lines(visit_id: str, d: dict):
     services = _pick_services_from_payload(d)
     stock = _pick_stock_from_payload(d)
+    current_org = get_current_org_id()
 
     # =====================
     # delete old services
     # =====================
     try:
         supabase.table("visit_services").delete() \
-            .eq("org_id", ORG_ID) \
+            .eq("org_id", current_org) \
             .eq("visit_id", visit_id) \
             .execute()
     except Exception:
@@ -284,7 +299,7 @@ def save_visit_lines(visit_id: str, d: dict):
     # =====================
     try:
         supabase.table("visit_stock").delete() \
-            .eq("org_id", ORG_ID) \
+            .eq("org_id", current_org) \
             .eq("visit_id", visit_id) \
             .execute()
     except Exception:
@@ -302,22 +317,15 @@ def save_visit_lines(visit_id: str, d: dict):
             service_id = x.get("serviceId") or x.get("service_id")
             qty = x.get("qty") or 1
 
-            # ✅ берём снапшот из того, что прислал фронт
-            # поддержим оба варианта ключей
-            snap_price = x.get("priceSnap")
-            if snap_price is None:
-                snap_price = x.get("price_snap")
-
-            snap_name = x.get("nameSnap")
-            if snap_name is None:
-                snap_name = x.get("name_snap")
+            snap_price = x.get("priceSnap") or x.get("price_snap")
+            snap_name = x.get("nameSnap") or x.get("name_snap")
 
             rows.append({
-                "org_id": ORG_ID,          # станет optional (если колонки нет — вырежется)
+                "org_id": current_org,          
                 "visit_id": visit_id,
-                "service_id": service_id,  # важно: это строка svc_... и это ОК
+                "service_id": service_id,  
                 "qty": qty,
-                "price_snap": snap_price,  # важно: теперь не 0, если фронт прислал
+                "price_snap": snap_price,  
                 "name_snap": snap_name,
             })
 
@@ -327,8 +335,6 @@ def save_visit_lines(visit_id: str, d: dict):
             optional_fields=["org_id", "price_snap", "name_snap"]
         )
 
-    # (stock часть у тебя ниже — оставь как есть)
-
     # =====================
     # insert new stock
     # =====================
@@ -337,12 +343,12 @@ def save_visit_lines(visit_id: str, d: dict):
 
         for x in stock:
             rows.append({
-                "org_id": ORG_ID,
+                "org_id": current_org,
                 "visit_id": visit_id,
                 "stock_id": x.get("stockId") or x.get("stock_id"),
                 "qty": x.get("qty") or 1,
-                "price_snap": x.get("priceSnap"),
-                "name_snap": x.get("nameSnap"),
+                "price_snap": x.get("priceSnap") or x.get("price_snap"),
+                "name_snap": x.get("nameSnap") or x.get("name_snap"),
             })
 
         insert_with_optional_fallback(
@@ -350,7 +356,6 @@ def save_visit_lines(visit_id: str, d: dict):
             rows,
             optional_fields=["org_id", "price_snap", "name_snap"]
         )
-
 
 
 # =========================
@@ -417,23 +422,18 @@ def api_me():
         or ""
     )
 
-    # 1. Проверяем Telegram-авторизацию
     user = verify_tg_init_data(init_data)
-    
-    # 2. По умолчанию берем настройки темы для текущего ORG_ID сервера
     theme = "purple"
     clinic_name = "Doc.PUG Clinic"
+    current_org = get_current_org_id()
     
     try:
-        res_org = supabase.table("organizations").select("name, theme_settings").eq("id", ORG_ID).single().execute()
+        res_org = supabase.table("orgs").select("name").eq("id", current_org).execute()
         if res_org.data:
-            clinic_name = res_org.data.get("name", clinic_name)
-            theme_settings = res_org.data.get("theme_settings") or {}
-            theme = theme_settings.get("theme", "purple")
+            clinic_name = res_org.data[0].get("name", clinic_name)
     except Exception as e:
         print("⚠️ Не удалось подтянуть тему организации из БД:", repr(e))
 
-    # Если зашли просто через браузер (без ТГ)
     if not user:
         return jsonify({
             "me": {
@@ -444,7 +444,6 @@ def api_me():
             }
         })
 
-    # Если зашли через Telegram WebApp
     return jsonify({
         "me": {
             "name": user.get("first_name"),
@@ -455,17 +454,18 @@ def api_me():
             "theme": theme
         }
     })
+
 # =========================
 # SERVICES API
 # =========================
-
 @app.get("/api/services")
 def api_services_list():
     try:
+        current_org = get_current_org_id()
         res = (
             supabase.table("services")
             .select("id, name, price, active")
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .order("name")
             .execute()
         )
@@ -477,10 +477,8 @@ def api_services_list():
 
 @app.post("/api/services")
 def api_services_create():
-    """Create service. Payload is read from request.json (Flask does NOT pass args here)."""
     try:
         payload = request.get_json(silent=True) or {}
-
         name = (payload.get("name") or "").strip()
         price = payload.get("price") or 0
         active = payload.get("active", True)
@@ -488,10 +486,11 @@ def api_services_create():
         if not name:
             return jsonify({"ok": False, "error": "name required"}), 400
 
+        current_org = get_current_org_id()
         res = (
             supabase.table("services")
             .insert({
-                "org_id": ORG_ID,
+                "org_id": current_org,
                 "name": name,
                 "price": price,
                 "active": bool(active),
@@ -506,11 +505,6 @@ def api_services_create():
 
 @app.put("/api/services")
 def api_services_update():
-    """Update service.
-    Supports:
-      - /api/services?id=...  (query)
-      - or payload {id: ...}
-    """
     try:
         payload = request.get_json(silent=True) or {}
         svc_id = (request.args.get("id") or payload.get("id") or "").strip()
@@ -528,10 +522,11 @@ def api_services_update():
         if not patch:
             return jsonify({"ok": False, "error": "nothing to update"}), 400
 
+        current_org = get_current_org_id()
         res = (
             supabase.table("services")
             .update(patch)
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .eq("id", svc_id)
             .execute()
         )
@@ -543,21 +538,17 @@ def api_services_update():
 
 @app.delete("/api/services")
 def api_services_delete():
-    """Delete service.
-    Supports:
-      - /api/services?id=... (query)
-      - or payload {id: ...}
-    """
     try:
         payload = request.get_json(silent=True) or {}
         svc_id = (request.args.get("id") or payload.get("id") or "").strip()
         if not svc_id:
             return jsonify({"ok": False, "error": "id required"}), 400
 
+        current_org = get_current_org_id()
         (
             supabase.table("services")
             .delete()
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .eq("id", svc_id)
             .execute()
         )
@@ -565,13 +556,14 @@ def api_services_delete():
     except Exception as e:
         print("❌ /api/services DELETE error:", repr(e))
         return jsonify({"ok": False, "error": str(e)}), 500
+
 # =========================
 # API: OWNERS
 # =========================
-
 @app.get("/api/owners")
 def api_get_owners():
-    res = supabase.table("owners").select("*").eq("org_id", ORG_ID).execute()
+    current_org = get_current_org_id()
+    res = supabase.table("owners").select("*").eq("org_id", current_org).execute()
     return ok(res.data or [])
 
 @app.post("/api/owners")
@@ -581,8 +573,9 @@ def api_create_owner():
     if not name:
         return fail("name required", 400)
 
+    current_org = get_current_org_id()
     payload = {
-        "org_id": ORG_ID,
+        "org_id": current_org,
         "name": name,
         "phone": d.get("phone"),
         "note": d.get("note"),
@@ -596,29 +589,25 @@ def api_create_owner():
 def api_delete_owner(owner_id):
     if not owner_id:
         return fail("owner_id required", 400)
-    supabase.table("owners").delete().eq("org_id", ORG_ID).eq("id", owner_id).execute()
+    current_org = get_current_org_id()
+    supabase.table("owners").delete().eq("org_id", current_org).eq("id", owner_id).execute()
     return ok(True)
 
 # =========================
-# API: STAFF
-# =========================
-# =========================
 # API: SPECIALIZATIONS
 # =========================
-
 @app.get("/api/specializations")
 def api_get_specializations():
     try:
+        current_org = get_current_org_id()
         res = (
             supabase.table("specializations")
             .select("*")
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .order("name")
             .execute()
         )
-
         return ok(res.data or [])
-
     except Exception as e:
         return fail(str(e), 500)
 
@@ -627,13 +616,13 @@ def api_get_specializations():
 def api_create_specialization():
     try:
         d = request.get_json(silent=True) or {}
-
         name = (d.get("name") or "").strip()
         if not name:
             return fail("name required", 400)
 
+        current_org = get_current_org_id()
         payload = {
-            "org_id": ORG_ID,
+            "org_id": current_org,
             "name": name,
             "color": d.get("color") or "#7C5CFF",
             "is_active": True,
@@ -641,9 +630,7 @@ def api_create_specialization():
 
         res = supabase.table("specializations").insert(payload).execute()
         row = res.data[0] if getattr(res, "data", None) else payload
-
         return ok(row)
-
     except Exception as e:
         return fail(str(e), 500)
 
@@ -655,26 +642,24 @@ def api_update_specialization(spec_id):
             return fail("spec_id required", 400)
 
         d = request.get_json(silent=True) or {}
-
         payload = {
             "name": d.get("name"),
             "color": d.get("color"),
             "is_active": d.get("is_active"),
         }
-
         payload = {k: v for k, v in payload.items() if v not in ("", None)}
 
+        current_org = get_current_org_id()
         res = (
             supabase.table("specializations")
             .update(payload)
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .eq("id", spec_id)
             .execute()
         )
 
         row = res.data[0] if getattr(res, "data", None) else payload
         return ok(row)
-
     except Exception as e:
         return fail(str(e), 500)
 
@@ -685,13 +670,11 @@ def api_delete_specialization(spec_id):
         if not spec_id:
             return fail("spec_id required", 400)
 
-        # мягкое удаление, чтобы старые врачи/фильтры не ломались
+        current_org = get_current_org_id()
         supabase.table("specializations").update({
             "is_active": False
-        }).eq("org_id", ORG_ID).eq("id", spec_id).execute()
-
+        }).eq("org_id", current_org).eq("id", spec_id).execute()
         return ok(True)
-
     except Exception as e:
         return fail(str(e), 500)
     
@@ -699,381 +682,28 @@ def api_delete_specialization(spec_id):
 @app.get("/api/staff")
 def api_staff():
     try:
+        current_org = get_current_org_id()
         res = (
             supabase.table("staff")
             .select("*")
+            .eq("org_id", current_org)
             .order("name")
             .execute()
         )
-
         return ok(res.data or [])
-
     except Exception as e:
         return fail(str(e))
-
-# =========================
-# API: CALENDAR
-# =========================
-
-@app.get("/api/calendar")
-def api_calendar():
-    try:
-        res = (
-            supabase.table("calendar_events")
-            .select("*")
-            .order("event_date")
-            .order("start_time")
-            .execute()
-        )
-
-        return ok(res.data or [])
-
-    except Exception as e:
-        return fail(str(e))
-    
-    
-
-@app.delete("/api/calendar/<event_id>")
-def api_delete_calendar_event(event_id):
-    if not event_id:
-        return fail("event_id required", 400)
-
-    supabase.table("calendar_events").delete().eq("id", event_id).execute()
-    return ok(True)
-
-@app.put("/api/calendar/<event_id>")
-def api_update_calendar_event(event_id):
-    if not event_id:
-        return fail("event_id required", 400)
-
-    d = request.get_json(silent=True) or {}
-
-    payload = {
-        "title": d.get("title"),
-        "event_date": d.get("event_date"),
-        "start_time": d.get("start_time"),
-        "end_time": d.get("end_time"),
-        "staff_id": d.get("staff_id"),
-        "location": d.get("location"),
-        "status": d.get("status"),
-        "note": d.get("note"),
-    }
-
-    payload = {k: v for k, v in payload.items() if v not in ("", None)}
-    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
-
-    res = (
-        supabase.table("calendar_events")
-        .update(payload)
-        .eq("id", event_id)
-        .execute()
-    )
-
-    row = res.data[0] if getattr(res, "data", None) else payload
-    return ok(row)
-
-# =========================
-# API: STAFF SCHEDULE
-# =========================
-
-@app.get("/api/staff-schedule")
-def api_get_staff_schedule():
-    work_date = request.args.get("date")
-
-    try:
-        q = supabase.table("staff_schedule").select("*")
-
-        if work_date:
-            q = q.eq("work_date", work_date)
-
-        res = q.order("work_date").execute()
-        return ok(res.data or [])
-
-    except Exception as e:
-        return fail(str(e))
-
-
-@app.post("/api/staff-schedule")
-def api_upsert_staff_schedule():
-    d = request.get_json(silent=True) or {}
-
-    work_date = d.get("work_date")
-    staff_id = d.get("staff_id")
-
-    if not work_date or not staff_id:
-        return fail("work_date and staff_id required", 400)
-
-    payload = {
-        "work_date": work_date,
-        "staff_id": staff_id,
-        "is_active": d.get("is_active", True),
-        "start_time": d.get("start_time") or "09:00",
-        "end_time": d.get("end_time") or "18:00",
-    }
-
-    try:
-        res = (
-            supabase.table("staff_schedule")
-            .upsert(payload, on_conflict="work_date,staff_id")
-            .execute()
-        )
-
-        row = res.data[0] if getattr(res, "data", None) else payload
-        return ok(row)
-
-    except Exception as e:
-        return fail(str(e))
-
-
-@app.delete("/api/staff-schedule")
-def api_delete_staff_schedule():
-    d = request.get_json(silent=True) or {}
-
-    work_date = d.get("work_date")
-    staff_id = d.get("staff_id")    
-
-    if not work_date or not staff_id:
-        return fail("work_date and staff_id required", 400)
-
-    try:
-        supabase.table("staff_schedule").delete().eq("work_date", work_date).eq("staff_id", staff_id).execute()
-        return ok(True)
-
-    except Exception as e:
-        return fail(str(e))
-# =========================
-# API: PATIENTS
-# =========================
-@app.get("/api/patients")
-def api_get_patients():
-    owner_id = request.args.get("owner_id")
-    q = supabase.table("patients").select("*").eq("org_id", ORG_ID)
-    if owner_id:
-        q = q.eq("owner_id", owner_id)
-    res = q.execute()
-    return ok(res.data or [])
-
-@app.post("/api/patients")
-def api_create_patient():
-    d = request.get_json(silent=True) or {}
-
-    owner_id = (d.get("owner_id") or "").strip()
-    name = (d.get("name") or "").strip()
-    if not owner_id or not name:
-        return fail("owner_id & name required", 400)
-
-    payload = {
-        "org_id": ORG_ID,
-        "owner_id": owner_id,
-        "name": name,
-        "species": d.get("species"),
-        "breed": d.get("breed"),
-        "age": d.get("age"),
-        "weight_kg": d.get("weight_kg"),
-        "notes": d.get("notes") or d.get("note"),
-    }
-
-    res = insert_with_optional_fallback("patients", payload, optional_fields=["notes"])
-    row = (res.data[0] if getattr(res, "data", None) else None) or payload
-    return ok(row)
-
-@app.delete("/api/patients/<pet_id>")
-def api_delete_patient(pet_id):
-    if not pet_id:
-        return fail("pet_id required", 400)
-    supabase.table("patients").delete().eq("org_id", ORG_ID).eq("id", pet_id).execute()
-    return ok(True)
-
-# =========================
-# API: VISITS
-# =========================
-
-@app.get("/api/visits")
-def api_get_visits():
-    visit_id = request.args.get("id")
-    pet_id = request.args.get("pet_id")
-
-    if visit_id:
-        visit_id = visit_id.strip()
-        if len(visit_id) < 10:
-            return fail("invalid visit id", 400)
-
-    q = supabase.table("visits").select("*").eq("org_id", ORG_ID)
-
-    if visit_id:
-        q = q.eq("id", visit_id)
-    if pet_id:
-        q = q.eq("pet_id", pet_id)
-
-    res = q.execute()
-    rows = res.data or []
-
-    # подтягиваем линии из visit_services / visit_stock
-    ids = [r.get("id") for r in rows if r.get("id")]
-    services_by_visit, stock_by_visit = load_visit_lines(ids)
-
-    for r in rows:
-        vid = r.get("id")
-        r["services"] = services_by_visit.get(vid, [])
-        r["stock"] = stock_by_visit.get(vid, [])
-
-    return ok(rows)
-
-def build_services_payload(d: dict):
-    """
-    Сохраняем в то, что реально есть в БД.
-    Если в БД нет колонки services, обычно есть services_json.
-    Чтобы не гадать — пишем в обе, а fallback сам отрежет несуществующее.
-    """
-    out = {}
-
-    if "services" in d:
-        out["services"] = d.get("services")
-        out["services_json"] = d.get("services")
-
-    if "services_json" in d:
-        out["services_json"] = d.get("services_json")
-        out["services"] = d.get("services_json")
-
-    if "stock" in d:
-        out["stock"] = d.get("stock")
-        out["stock_json"] = d.get("stock")
-
-    if "stock_json" in d:
-        out["stock_json"] = d.get("stock_json")
-        out["stock"] = d.get("stock_json")
-
-    return out
-
-@app.put("/api/visits")
-def api_update_visit_query():
-    visit_id = (request.args.get("id") or "").strip()
-    if not visit_id:
-        return fail("id required", 400)
-
-    d = request.get_json(silent=True) or {}
-
-    # 1) обновляем базовые поля визита (то, что реально есть в таблице visits)
-    payload = {
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),
-        "rx": d.get("rx"),
-        "weight_kg": d.get("weight_kg"),
-    }
-
-    res = update_with_optional_fallback("visits", visit_id, payload)
-
-    # 2) сохраняем услуги/склад в отдельных таблицах (visit_services / visit_stock)
-    # важно: вызываем ВСЕГДА, даже если списки пустые — это позволит "очистить" услуги/склад
-    try:
-        save_visit_lines(visit_id, d)
-    except Exception as e:
-        return fail(f"save_visit_lines failed: {e}", 500)
-
-    # 3) возвращаем свежие данные: visits + подтянутые lines
-    base = None
-    if res is not None and getattr(res, "data", None):
-        base = res.data[0]
-    else:
-        # если update вернул пусто — просто перечитаем визит
-        get_res = (
-            supabase.table("visits")
-            .select("*")
-            .eq("org_id", ORG_ID)
-            .eq("id", visit_id)
-            .execute()
-        )
-        base = (get_res.data[0] if get_res.data else {"id": visit_id, **clean_payload(payload)})
-
-    # подтягиваем услуги/склад из line-таблиц
-    services_map, stock_map = load_visit_lines([visit_id])
-    base["services"] = services_map.get(visit_id, [])
-    base["stock"] = stock_map.get(visit_id, [])
-
-    return ok(base)
-
-@app.post("/api/visits")
-def api_create_visit():
-    d = request.get_json(silent=True) or {}
-
-    pet_id = (d.get("pet_id") or "").strip()
-    if not pet_id:
-        return fail("pet_id required", 400)
-
-    payload = {
-        "org_id": ORG_ID,
-        "pet_id": pet_id,
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),
-        "rx": d.get("rx"),
-        "weight_kg": d.get("weight_kg"),
-    }
-
-    # 1) создаём визит
-    res = insert_with_optional_fallback("visits", payload)
-    row = (res.data[0] if getattr(res, "data", None) and res.data else None)
-
-    # если вдруг вернулось пусто — всё равно создадим id локально (на всякий)
-    if not row:
-        row = {"id": str(uuid.uuid4()), **payload}
-
-    visit_id = row["id"]
-
-    # 2) если фронт прислал услуги/склад — сохраняем их в line-таблицы
-    try:
-        save_visit_lines(visit_id, d)
-    except Exception as e:
-        return fail(f"save_visit_lines failed: {e}", 500)
-
-    # 3) возвращаем визит + lines (как фронт ожидает)
-    services_map, stock_map = load_visit_lines([visit_id])
-    row["services"] = services_map.get(visit_id, [])
-    row["stock"] = stock_map.get(visit_id, [])
-
-    return ok(row)
-
-@app.delete("/api/visits/<visit_id>")
-def api_delete_visit(visit_id):
-    if not visit_id:
-        return fail("visit_id required", 400)
-
-    try:
-        # 1) удаляем запись из календаря, связанную с визитом
-        supabase.table("calendar_events").delete().eq("visit_id", visit_id).execute()
-
-        # 2) удаляем строки услуг/склада, если такие таблицы есть
-        try:
-            supabase.table("visit_services").delete().eq("visit_id", visit_id).execute()
-        except Exception:
-            pass
-
-        try:
-            supabase.table("visit_stock").delete().eq("visit_id", visit_id).execute()
-        except Exception:
-            pass
-
-        # 3) удаляем сам визит
-        supabase.table("visits").delete().eq("org_id", ORG_ID).eq("id", visit_id).execute()
-
-        return ok(True)
-
-    except Exception as e:
-        return fail(str(e), 500)
-
-
 
 @app.post("/api/staff")
 def api_create_staff():
     d = request.get_json(silent=True) or {}
-
     name = (d.get("name") or "").strip()
     if not name:
         return fail("name required", 400)
 
+    current_org = get_current_org_id()
     payload = {
-        "org_id": ORG_ID,
+        "org_id": current_org,
         "name": name,
         "role": d.get("role") or "vet",
         "avatar": d.get("avatar"),
@@ -1096,7 +726,6 @@ def api_update_staff(staff_id):
         return fail("staff_id required", 400)
 
     d = request.get_json(silent=True) or {}
-
     payload = {
         "name": d.get("name"),
         "role": d.get("role"),
@@ -1110,20 +739,38 @@ def api_update_staff(staff_id):
         "note": d.get("note"),
         "is_active": d.get("is_active"),
     }
-
     payload = {k: v for k, v in payload.items() if v not in ("", None)}
 
+    current_org = get_current_org_id()
     res = (
         supabase.table("staff")
         .update(payload)
+        .eq("org_id", current_org)
         .eq("id", staff_id)
         .execute()
     )
-
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
 
-
+# =========================
+# API: CALENDAR
+# =========================
+@app.get("/api/calendar")
+def api_calendar():
+    try:
+        current_org = get_current_org_id()
+        res = (
+            supabase.table("calendar_events")
+            .select("*")
+            .eq("org_id", current_org)
+            .order("event_date")
+            .order("start_time")
+            .execute()
+        )
+        return ok(res.data or [])
+    except Exception as e:
+        return fail(str(e))
+    
 @app.post("/api/calendar")
 def api_create_calendar_event():
     d = request.get_json(silent=True) or {}
@@ -1134,21 +781,14 @@ def api_create_calendar_event():
     end_time = (d.get("end_time") or "").strip()
     staff_id = d.get("staff_id")
 
-    if not title:
-        return fail("title required", 400)
-    if not event_date:
-        return fail("event_date required", 400)
-    if not start_time:
-        return fail("start_time required", 400)
-    if not end_time:
-        return fail("end_time required", 400)
-    if not staff_id:
-        return fail("staff_id required", 400)
+    if not title or not event_date or not start_time or not end_time or not staff_id:
+        return fail("missing required fields", 400)
 
-    # проверка пересечения записей этого врача
+    current_org = get_current_org_id()
     existing = (
         supabase.table("calendar_events")
         .select("*")
+        .eq("org_id", current_org)
         .eq("staff_id", staff_id)
         .eq("event_date", event_date)
         .execute()
@@ -1157,16 +797,11 @@ def api_create_calendar_event():
     for ev in existing.data or []:
         ev_start = str(ev.get("start_time") or "")[:5]
         ev_end = str(ev.get("end_time") or "")[:5]
-
-        if not ev_start or not ev_end:
-            continue
-
-        # пересечение: start < existing_end AND end > existing_start
         if start_time < ev_end and end_time > ev_start:
             return fail("time slot busy", 409)
 
     payload = {
-        "org_id": ORG_ID,
+        "org_id": current_org,
         "event_type": d.get("event_type") or "appointment",
         "title": title,
         "event_date": event_date,
@@ -1180,61 +815,304 @@ def api_create_calendar_event():
         "status": d.get("status") or "planned",
         "note": d.get("note"),
     }
-
-    payload = {k: v for k, v in payload.items() if v not in ("", None)}
-
     res = supabase.table("calendar_events").insert(payload).execute()
     row = res.data[0] if getattr(res, "data", None) else payload
-
     return ok(row)
+
+@app.delete("/api/calendar/<event_id>")
+def api_delete_calendar_event(event_id):
+    if not event_id:
+        return fail("event_id required", 400)
+
+    current_org = get_current_org_id()
+    supabase.table("calendar_events").delete().eq("org_id", current_org).eq("id", event_id).execute()
+    return ok(True)
+
+@app.put("/api/calendar/<event_id>")
+def api_update_calendar_event(event_id):
+    if not event_id:
+        return fail("event_id required", 400)
+
+    d = request.get_json(silent=True) or {}
+    payload = {
+        "title": d.get("title"),
+        "event_date": d.get("event_date"),
+        "start_time": d.get("start_time"),
+        "end_time": d.get("end_time"),
+        "staff_id": d.get("staff_id"),
+        "location": d.get("location"),
+        "status": d.get("status"),
+        "note": d.get("note"),
+    }
+    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+
+    current_org = get_current_org_id()
+    res = (
+        supabase.table("calendar_events")
+        .update(payload)
+        .eq("org_id", current_org)
+        .eq("id", event_id)
+        .execute()
+    )
+    row = res.data[0] if getattr(res, "data", None) else payload
+    return ok(row)
+
 # =========================
-# API: UPLOAD FILES (local uploads folder)
+# API: STAFF SCHEDULE
+# =========================
+@app.get("/api/staff-schedule")
+def api_get_staff_schedule():
+    work_date = request.args.get("date")
+    current_org = get_current_org_id()
+    try:
+        q = supabase.table("staff_schedule").select("*").eq("org_id", current_org)
+        if work_date:
+            q = q.eq("work_date", work_date)
+        res = q.order("work_date").execute()
+        return ok(res.data or [])
+    except Exception as e:
+        return fail(str(e))
+
+@app.post("/api/staff-schedule")
+def api_upsert_staff_schedule():
+    d = request.get_json(silent=True) or {}
+    work_date = d.get("work_date")
+    staff_id = d.get("staff_id")
+    if not work_date or not staff_id:
+        return fail("work_date and staff_id required", 400)
+
+    current_org = get_current_org_id()
+    payload = {
+        "org_id": current_org,
+        "work_date": work_date,
+        "staff_id": staff_id,
+        "is_active": d.get("is_active", True),
+        "start_time": d.get("start_time") or "09:00",
+        "end_time": d.get("end_time") or "18:00",
+    }
+    try:
+        res = (
+            supabase.table("staff_schedule")
+            .upsert(payload, on_conflict="work_date,staff_id")
+            .execute()
+        )
+        row = res.data[0] if getattr(res, "data", None) else payload
+        return ok(row)
+    except Exception as e:
+        return fail(str(e))
+
+@app.delete("/api/staff-schedule")
+def api_delete_staff_schedule():
+    d = request.get_json(silent=True) or {}
+    work_date = d.get("work_date")
+    staff_id = d.get("staff_id")    
+    if not work_date or not staff_id:
+        return fail("work_date and staff_id required", 400)
+
+    current_org = get_current_org_id()
+    try:
+        supabase.table("staff_schedule").delete().eq("org_id", current_org).eq("work_date", work_date).eq("staff_id", staff_id).execute()
+        return ok(True)
+    except Exception as e:
+        return fail(str(e))
+
+# =========================
+# API: PATIENTS
+# =========================
+@app.get("/api/patients")
+def api_get_patients():
+    owner_id = request.args.get("owner_id")
+    current_org = get_current_org_id()
+    q = supabase.table("patients").select("*").eq("org_id", current_org)
+    if owner_id:
+        q = q.eq("owner_id", owner_id)
+    res = q.execute()
+    return ok(res.data or [])
+
+@app.post("/api/patients")
+def api_create_patient():
+    d = request.get_json(silent=True) or {}
+    owner_id = (d.get("owner_id") or "").strip()
+    name = (d.get("name") or "").strip()
+    if not owner_id or not name:
+        return fail("owner_id & name required", 400)
+
+    current_org = get_current_org_id()
+    payload = {
+        "org_id": current_org,
+        "owner_id": owner_id,
+        "name": name,
+        "species": d.get("species"),
+        "breed": d.get("breed"),
+        "age": d.get("age"),
+        "weight_kg": d.get("weight_kg"),
+        "notes": d.get("notes") or d.get("note"),
+    }
+    res = insert_with_optional_fallback("patients", payload, optional_fields=["notes"])
+    row = (res.data[0] if getattr(res, "data", None) else None) or payload
+    return ok(row)
+
+@app.delete("/api/patients/<pet_id>")
+def api_delete_patient(pet_id):
+    if not pet_id:
+        return fail("pet_id required", 400)
+    current_org = get_current_org_id()
+    supabase.table("patients").delete().eq("org_id", current_org).eq("id", pet_id).execute()
+    return ok(True)
+
+# =========================
+# API: VISITS
+# =========================
+@app.get("/api/visits")
+def api_get_visits():
+    visit_id = request.args.get("id")
+    pet_id = request.args.get("pet_id")
+    if visit_id:
+        visit_id = visit_id.strip()
+        if len(visit_id) < 10:
+            return fail("invalid visit id", 400)
+
+    current_org = get_current_org_id()
+    q = supabase.table("visits").select("*").eq("org_id", current_org)
+    if visit_id:
+        q = q.eq("id", visit_id)
+    if pet_id:
+        q = q.eq("pet_id", pet_id)
+    res = q.execute()
+    rows = res.data or []
+
+    ids = [r.get("id") for r in rows if r.get("id")]
+    services_by_visit, stock_by_visit = load_visit_lines(ids)
+    for r in rows:
+        vid = r.get("id")
+        r["services"] = services_by_visit.get(vid, [])
+        r["stock"] = stock_by_visit.get(vid, [])
+    return ok(rows)
+
+@app.put("/api/visits")
+def api_update_visit_query():
+    visit_id = (request.args.get("id") or "").strip()
+    if not visit_id:
+        return fail("id required", 400)
+    d = request.get_json(silent=True) or {}
+    payload = {
+        "date": d.get("date"),
+        "note": d.get("note"),
+        "dx": d.get("dx"),
+        "rx": d.get("rx"),
+        "weight_kg": d.get("weight_kg"),
+    }
+    res = update_with_optional_fallback("visits", visit_id, payload)
+    try:
+        save_visit_lines(visit_id, d)
+    except Exception as e:
+        return fail(f"save_visit_lines failed: {e}", 500)
+
+    current_org = get_current_org_id()
+    base = None
+    if res is not None and getattr(res, "data", None):
+        base = res.data[0]
+    else:
+        get_res = (
+            supabase.table("visits")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("id", visit_id)
+            .execute()
+        )
+        base = (get_res.data[0] if get_res.data else {"id": visit_id, **clean_payload(payload)})
+
+    services_map, stock_map = load_visit_lines([visit_id])
+    base["services"] = services_map.get(visit_id, [])
+    base["stock"] = stock_map.get(visit_id, [])
+    return ok(base)
+
+@app.post("/api/visits")
+def api_create_visit():
+    d = request.get_json(silent=True) or {}
+    pet_id = (d.get("pet_id") or "").strip()
+    if not pet_id:
+        return fail("pet_id required", 400)
+
+    current_org = get_current_org_id()
+    payload = {
+        "org_id": current_org,
+        "pet_id": pet_id,
+        "date": d.get("date"),
+        "note": d.get("note"),
+        "dx": d.get("dx"),
+        "rx": d.get("rx"),
+        "weight_kg": d.get("weight_kg"),
+    }
+    res = insert_with_optional_fallback("visits", payload)
+    row = (res.data[0] if getattr(res, "data", None) and res.data else None)
+    if not row:
+        row = {"id": str(uuid.uuid4()), **payload}
+    visit_id = row["id"]
+    try:
+        save_visit_lines(visit_id, d)
+    except Exception as e:
+        return fail(f"save_visit_lines failed: {e}", 500)
+
+    services_map, stock_map = load_visit_lines([visit_id])
+    row["services"] = services_map.get(visit_id, [])
+    row["stock"] = stock_map.get(visit_id, [])
+    return ok(row)
+
+@app.delete("/api/visits/<visit_id>")
+def api_delete_visit(visit_id):
+    if not visit_id:
+        return fail("visit_id required", 400)
+    current_org = get_current_org_id()
+    try:
+        supabase.table("calendar_events").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
+        try:
+            supabase.table("visit_services").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
+        except Exception:
+            pass
+        try:
+            supabase.table("visit_stock").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
+        except Exception:
+            pass
+        supabase.table("visits").delete().eq("org_id", current_org).eq("id", visit_id).execute()
+        return ok(True)
+    except Exception as e:
+        return fail(str(e), 500)
+
+# =========================
+# API: UPLOAD FILES
 # =========================
 @app.post("/api/upload")
 def api_upload():
     if "files" not in request.files:
         return fail("No files[] provided", 400)
-
     files = request.files.getlist("files")
     if not files:
         return fail("Empty files[]", 400)
-
     saved = []
-
+    current_org = get_current_org_id()
     for f in files:
         if not f or not f.filename:
             continue
-
         original_name = f.filename
         safe_name = secure_filename(original_name)
-
         if not allowed_file(safe_name):
             return fail(f"File type not allowed: {original_name}", 400)
-
         ext = safe_name.rsplit(".", 1)[1].lower()
         stored_name = f"{uuid.uuid4().hex}.{ext}"
-
-        # путь внутри Supabase bucket
-        storage_path = f"{ORG_ID}/patients/{stored_name}"
-
+        storage_path = f"{current_org}/patients/{stored_name}"
         file_bytes = f.read()
         mime = mimetypes.guess_type(safe_name)[0] or f.mimetype or "application/octet-stream"
-
         try:
             supabase.storage.from_("patient-files").upload(
                 storage_path,
                 file_bytes,
-                {
-                    "content-type": mime,
-                    "upsert": "false",
-                }
+                {"content-type": mime, "upsert": "false"}
             )
-
             public_url = supabase.storage.from_("patient-files").get_public_url(storage_path)
-
         except Exception as e:
             return fail(f"Supabase upload failed: {e}", 500)
-
         saved.append({
             "stored_name": stored_name,
             "storage_path": storage_path,
@@ -1243,92 +1121,73 @@ def api_upload():
             "size": len(file_bytes),
             "type": mime,
         })
-
     if not saved:
         return fail("No valid files saved", 400)
-
     return jsonify({"ok": True, "files": saved})
 
-# =========================
-# API: DELETE UPLOAD (local)
-# =========================
 @app.post("/api/delete_upload")
 def api_delete_upload():
     d = request.get_json(silent=True) or {}
     stored_name = (d.get("stored_name") or "").strip()
     if not stored_name:
         return fail("stored_name required", 400)
-
     stored_name = os.path.basename(stored_name)
     path = os.path.join(UPLOAD_DIR, stored_name)
-
     if not os.path.exists(path):
         return ok(True)
-
     try:
         os.remove(path)
     except Exception as e:
         return fail(f"Cannot delete file: {e}", 500)
-
     return ok(True)
+
 # =========================
 # API: PATIENT MEDCARD
 # =========================
-
 @app.get("/api/patients/<patient_id>/medcard")
 def api_get_patient_medcard(patient_id):
     try:
+        current_org = get_current_org_id()
         res = (
             supabase
             .table("patient_medcard_entries")
             .select("*")
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .eq("patient_id", patient_id)
             .order("entry_date", desc=True)
             .order("entry_time", desc=True)
             .execute()
         )
-
         return jsonify({"ok": True, "items": res.data or []})
     except Exception as e:
         return fail(f"Cannot load medcard: {e}", 500)
 
-
 @app.post("/api/patients/<patient_id>/medcard")
 def api_create_patient_medcard(patient_id):
     d = request.get_json(silent=True) or {}
-
+    current_org = get_current_org_id()
     payload = {
-        "org_id": ORG_ID,
+        "org_id": current_org,
         "patient_id": patient_id,
-
         "entry_date": d.get("entry_date"),
         "entry_time": d.get("entry_time"),
-
         "weight_kg": d.get("weight_kg"),
         "temperature": d.get("temperature"),
-
         "appetite": d.get("appetite"),
         "water": d.get("water"),
         "urine": d.get("urine"),
         "stool": d.get("stool"),
-
         "mucosa": d.get("mucosa"),
         "breathing": d.get("breathing"),
         "pulse": d.get("pulse"),
-
         "condition": d.get("condition"),
         "treatment": d.get("treatment"),
         "dynamics": d.get("dynamics"),
         "plan": d.get("plan"),
-
         "doctor": d.get("doctor"),
         "note": d.get("note"),
     }
-
-    # убираем пустые поля, чтобы Supabase не ругался на date/time
     payload = {k: v for k, v in payload.items() if v not in ("", None)}
-
     try:
         res = (
             supabase
@@ -1336,109 +1195,77 @@ def api_create_patient_medcard(patient_id):
             .insert(payload)
             .execute()
         )
-
         item = res.data[0] if res.data else None
         return jsonify({"ok": True, "item": item})
     except Exception as e:
         return fail(f"Cannot create medcard entry: {e}", 500)
 
-
 @app.put("/api/medcard/<entry_id>")
 def api_update_medcard_entry(entry_id):
     d = request.get_json(silent=True) or {}
-
     allowed = [
-        "entry_date",
-        "entry_time",
-        "weight_kg",
-        "temperature",
-        "appetite",
-        "water",
-        "urine",
-        "stool",
-        "mucosa",
-        "breathing",
-        "pulse",
-        "condition",
-        "treatment",
-        "dynamics",
-        "plan",
-        "doctor",
-        "note",
+        "entry_date", "entry_time", "weight_kg", "temperature", "appetite",
+        "water", "urine", "stool", "mucosa", "breathing", "pulse",
+        "condition", "treatment", "dynamics", "plan", "doctor", "note"
     ]
-
     payload = {k: d.get(k) for k in allowed if k in d}
     payload["updated_at"] = "now()"
-
     payload = {k: v for k, v in payload.items() if v not in ("", None)}
-
+    current_org = get_current_org_id()
     try:
         res = (
             supabase
             .table("patient_medcard_entries")
             .update(payload)
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .eq("id", entry_id)
             .execute()
         )
-
         item = res.data[0] if res.data else None
         return jsonify({"ok": True, "item": item})
     except Exception as e:
         return fail(f"Cannot update medcard entry: {e}", 500)
 
-
 @app.delete("/api/medcard/<entry_id>")
 def api_delete_medcard_entry(entry_id):
     try:
+        current_org = get_current_org_id()
         (
             supabase
             .table("patient_medcard_entries")
             .delete()
-            .eq("org_id", ORG_ID)
+            .eq("org_id", current_org)
             .eq("id", entry_id)
             .execute()
         )
-
         return jsonify({"ok": True})
     except Exception as e:
         return fail(f"Cannot delete medcard entry: {e}", 500)
+
 # =========================
-# RUN
+# LOGIN
 # =========================
 @app.post("/api/login")
 def api_clinic_login():
     d = request.get_json(silent=True) or {}
     username = (d.get("username") or "").strip()
     password = (d.get("password") or "").strip()
-
     if not username or not password:
         return jsonify({"ok": False, "error": "Введіть логін та пароль"}), 400
-
     try:
-        # Ищем пользователя в нашей таблице
         res = supabase.table("clinic_users").select("org_id, password_plain").eq("username", username).execute()
-        
         if not res.data:
             return jsonify({"ok": False, "error": "Невірний логін або пароль"}), 401
-            
         user_data = res.data[0]
-        
-        # Проверяем пароль
         if user_data["password_plain"] != password:
             return jsonify({"ok": False, "error": "Невірний логін або пароль"}), 401
-
-        # Тянем данные клиники (имя, настройки темы)
         org_id = user_data["org_id"]
-        # Так как настройки хранятся в orgs (или organizations), вернем его настройки
-        # Если в твоей таблице orgs нет theme_settings, вернем дефолт
         theme = "purple"
         try:
             res_org = supabase.table("orgs").select("name").eq("id", org_id).execute()
             clinic_name = res_org.data[0]["name"] if res_org.data else "Клініка"
         except Exception:
             clinic_name = "Клініка"
-
         return jsonify({
             "ok": True,
             "data": {
@@ -1448,7 +1275,6 @@ def api_clinic_login():
                 "username": username
             }
         })
-
     except Exception as e:
         return jsonify({"ok": False, "error": f"Ошибка сервера: {str(e)}"}), 500
     
