@@ -1924,3 +1924,8 @@ body[data-theme="white"] .premium-neon-btn {
     background: #007aff !important;
     box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3) !important;
 }
+#staffDrawer.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
+}
