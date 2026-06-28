@@ -1134,3 +1134,102 @@ aside[style*="width: 240px"] {
   color: #fff !important;
   transform: translateY(-1px);
 }
+/* ==============================================================
+   ГЛОБАЛЬНЫЙ МАКОВСКИЙ DOCK СНИЗУ
+============================================================== */
+.mac-dock {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    
+    /* Стекло как в macOS/visionOS */
+    background: rgba(30, 20, 45, 0.7);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    
+    padding: 8px 16px;
+}
+
+.dock-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 8px;
+    align-items: center;
+}
+
+.dock-menu .menu-item {
+    border-radius: 20px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-menu .menu-item a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dock-menu .menu-item a .dock-icon {
+    font-size: 1.2rem;
+}
+
+/* Эффекты наведения (Hover) */
+.dock-menu .menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+.dock-menu .menu-item:hover a {
+    color: #fff;
+}
+
+/* Активная вкладка */
+.dock-menu .menu-item.active {
+    background: rgba(168, 85, 247, 0.25);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+}
+
+.dock-menu .menu-item.active a {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Адаптация под телефоны */
+@media (max-width: 768px) {
+    .mac-dock {
+        width: 90vw;
+        padding: 6px 10px;
+        bottom: 12px;
+    }
+    .dock-menu {
+        justify-content: space-between;
+        width: 100%;
+        gap: 4px;
+    }
+    .dock-menu .menu-item a {
+        padding: 12px;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.7rem;
+    }
+    .dock-menu .menu-item a .dock-text {
+        display: none; /* Прячем текст на узких экранах, оставляем только иконки */
+    }
+    .dock-menu .menu-item a .dock-icon {
+        font-size: 1.4rem;
+    }
+}

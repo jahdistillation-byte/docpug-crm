@@ -9,13 +9,20 @@
 </head>
 <body>
 
-    <div class="app-container">
-
-        <main class="main-content">
+    <div class="app-container" style="padding-bottom: 100px;">
+        
+        <main class="main-content" style="max-width: 1400px; margin: 0 auto;">
             
-            <header class="header-panel">
-                <div class="search-bar">
-                    <input type="text" id="globalSearch" placeholder="Пошук власника, пацієнта, телефону...">
+            <header class="header-panel" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <div class="top-logo" style="font-size: 1.4rem; font-weight: 700; color: #fff;">
+                    🐾 Doc.PUG <span style="color: #a855f7; font-size: 0.9rem;">CRM</span>
+                </div>
+                <div class="search-bar" style="flex: 1; max-width: 400px; margin: 0 20px;">
+                    <input type="text" id="globalSearch" placeholder="Пошук власника, пацієнта..." style="width: 100%;">
+                </div>
+                <div class="user-profile-badge" style="text-align: right;">
+                    <div style="font-weight: 600; color: #fff;">Doc.PUG Clinic</div>
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">Адміністратор</div>
                 </div>
             </header>
 
@@ -35,8 +42,7 @@
                                 <th>Дії</th>
                             </tr>
                         </thead>
-                        <tbody id="owners-table-body">
-                        </tbody>
+                        <tbody id="owners-table-body"></tbody>
                     </table>
                 </div>
                 <div id="ownersList" style="display:none;"></div>
@@ -55,8 +61,7 @@
                     <h3 style="color: #fff; font-size: 1.2rem;">🐾 Пацієнти цього власника</h3>
                     <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
                 </div>
-                <div class="patients-grid" id="petsList">
-                </div>
+                <div class="patients-grid" id="petsList"></div>
             </section>
 
             <section class="page content-section" data-page="patient" style="display: none;">
@@ -148,29 +153,29 @@
         </main>
     </div>
 
-    <nav class="floating-dock">
-        <div class="dock-logo">🐾</div>
+    <nav class="mac-dock">
         <ul class="dock-menu" id="tabs">
             <li class="menu-item" data-target="calendar">
-                <a href="#calendar">📅 Календар</a>
+                <a href="#calendar"><span class="dock-icon">📅</span> <span class="dock-text">Календар</span></a>
             </li>
             <li class="menu-item active" data-target="owners">
-                <a href="#owners">👥 Власники</a>
+                <a href="#owners"><span class="dock-icon">👥</span> <span class="dock-text">Власники</span></a>
             </li>
             <li class="menu-item" data-target="patients">
-                <a href="#patients">🐾 Пацієнти</a>
+                <a href="#patients"><span class="dock-icon">🐾</span> <span class="dock-text">Пацієнти</span></a>
             </li>
             <li class="menu-item" data-target="visits">
-                <a href="#visits">📝 Візити</a>
+                <a href="#visits"><span class="dock-icon">📝</span> <span class="dock-text">Візити</span></a>
             </li>
             <li class="menu-item" data-target="services">
-                <a href="#services">💼 Послуги</a>
+                <a href="#services"><span class="dock-icon">💼</span> <span class="dock-text">Послуги</span></a>
             </li>
             <li class="menu-item" data-target="stock">
-                <a href="#stock">📦 Склад</a>
+                <a href="#stock"><span class="dock-icon">📦</span> <span class="dock-text">Склад</span></a>
             </li>
         </ul>
     </nav>
+
 
     <div class="modal modal-overlay" id="visitModal" aria-hidden="true" style="display:none;">
         <div class="modal__panel modal-window" role="dialog" aria-modal="true" style="background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);">
@@ -270,7 +275,7 @@
                         <div class="v-complaint text-clamp"></div>
                     </div>
                     
-                    <div class="v-rx-container visit-section-box rx-box">
+                    <div class="v-rx-container visit-section-box rx-box" style="display: none;">
                         <div class="visit-box-label">Призначене лікування (Rx)</div>
                         <div class="v-rx text-clamp code-font"></div>
                     </div>
@@ -295,40 +300,18 @@
                     <button class="iconBtn m-del-btn" title="Видалити">🗑</button>
                 </div>
             </div>
-
             <div class="med-card-vitals-grid"></div>
-
             <div class="med-card-blocks">
-                <div class="m-block-condition">
-                    <div class="history-label">Загальний стан</div>
-                    <div class="m-text"></div>
-                </div>
-                
-                <div class="m-block-treatment">
-                    <div class="history-label">Проведено / призначено</div>
-                    <div class="m-text text-highlight"></div>
-                </div>
-
-                <div class="m-block-dynamics">
-                    <div class="history-label">Динаміка</div>
-                    <div class="m-text"></div>
-                </div>
-
-                <div class="m-block-plan">
-                    <div class="history-label">План / контроль</div>
-                    <div class="m-text"></div>
-                </div>
-
-                <div class="m-block-note">
-                    <div class="history-label">Додаткова нотатка</div>
-                    <div class="m-text text-italic"></div>
-                </div>
+                <div class="m-block-condition"><div class="history-label">Загальний стан</div><div class="m-text"></div></div>
+                <div class="m-block-treatment"><div class="history-label">Проведено / призначено</div><div class="m-text text-highlight"></div></div>
+                <div class="m-block-dynamics"><div class="history-label">Динаміка</div><div class="m-text"></div></div>
+                <div class="m-block-plan"><div class="history-label">План / контроль</div><div class="m-text"></div></div>
+                <div class="m-block-note"><div class="history-label">Додаткова нотатка</div><div class="m-text text-italic"></div></div>
             </div>
-
             <div class="med-card-doctor"></div>
         </div>
     </template>
-
+    
     <template id="medcard-mini-row-template">
         <div class="med-mini-cell">
             <div class="med-mini-label"></div>
