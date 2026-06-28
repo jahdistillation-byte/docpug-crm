@@ -313,6 +313,7 @@ const TAB_ROUTES = new Set([
   "services",
   "calendar",
   "stock",
+  "settings",
 ]);
 
 function parseHash() {
@@ -408,6 +409,8 @@ async function routeFromHash() {
     else setHash("owners");
     return;
   }
+
+  if (route === "settings") renderSettingsTab();
 
   setHash("owners");
 }
@@ -6262,6 +6265,64 @@ async function renderMedcardTab(pet) {
       }
     }
   };
+}
+
+// ==========================================
+// НАСТРОЙКИ СИСТЕМЫ — ЛОГИКА И ХЕНДЛЕРЫ
+// ==========================================
+function renderSettingsTab() {
+  const page = document.querySelector('.page[data-page="settings"]');
+  if (!page) return;
+
+  // Если слушатели уже привязаны, повторно не вешаем
+  if (page.dataset.boundSettings === "1") return;
+  page.dataset.boundSettings = "1";
+
+  // Обработчик переключения тем оформления
+  page.querySelectorAll("[data-theme-set]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const selectedTheme = btn.dataset.themeSet;
+      
+      // Снимаем класс active со всех кнопок тем в блоке
+      page.querySelectorAll("[data-theme-set]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Нативно переключаем тему на body через дата-атрибут
+      document.body.dataset.theme = selectedTheme;
+      
+      // Сохраняем выбор в LocalStorage клиники, чтобы тема не слетала при перезагрузке
+      LS.set("docpug_clinic_theme", selectedTheme);
+    });
+  });
+
+  // Обработчик изменения языкового пакета (Локализация)
+  $("#systemLanguageSelect")?.addEventListener("change", (e) => {
+    const selectedLang = e.target.value;
+    LS.set("docpug_clinic_lang", selectedLang);
+    alert(`Мову системи змінено на: ${selectedLang === 'uk' ? 'Українську' : selectedLang === 'en' ? 'English' : 'Polski'}. Наразі виконується синхронізація мовних пакетів.`);
+  });
+
+  // Кнопка Выйти из профиля (Разлогин клиники)
+  $("#btn-logout")?.addEventListener("click", () => {
+    if (confirm("Ви дійсно бажаєте вийти з облікового запису клініки?")) {
+      // Очищаем токены сессии (когда подключим бэк)
+      alert("Вихід виконано. Перенаправлення на сторінку авторизації...");
+      window.location.hash = "#owners"; // Временный сброс роута
+    }
+  });
+}
+
+// Восстановление темы оформления при старте CRM приложения
+function bootstrapClinicTheme() {
+  const savedTheme = LS.get("docpug_clinic_theme", "purple");
+  document.body.dataset.theme = savedTheme;
+  
+  // Подсвечиваем правильную кнопку в HTML, если мы на странице настроек
+  const activeBtn = document.querySelector(`[data-theme-set="${savedTheme}"]`);
+  if (activeBtn) {
+    document.querySelectorAll("[data-theme-set]").forEach((b) => b.classList.remove("active"));
+    activeBtn.classList.add("active");
+  }
 }
 
 // =========================

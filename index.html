@@ -9,13 +9,13 @@
 </head>
 <body>
 
-    <div class="app-container" style="padding-bottom: 100px;">
+    <div class="app-container" style="padding-bottom: 120px;">
         
         <main class="main-content" style="max-width: 1400px; margin: 0 auto;">
             
             <header class="header-panel" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <div class="top-logo" style="font-size: 1.4rem; font-weight: 700; color: #fff;">
-                    🐾 Doc.PUG <span style="color: #a855f7; font-size: 0.9rem;">CRM</span>
+                    🐾 Doc.PUG <span style="color: var(--accent-color); font-size: 0.9rem;">CRM</span>
                 </div>
                 <div class="search-bar" style="flex: 1; max-width: 400px; margin: 0 20px;">
                     <input type="text" id="globalSearch" placeholder="Пошук власника, пацієнта..." style="width: 100%;">
@@ -150,6 +150,46 @@
             <section class="page content-section" data-page="services" style="display: none;"></section>
             <section class="page content-section" data-page="stock" style="display: none;"></section>
 
+            <section class="page content-section" data-page="settings" style="display: none;">
+                <div style="margin-bottom: 24px;">
+                    <h2>Налаштування системи</h2>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 4px;">Персоналізація вашого робочого простору Doc.PUG</p>
+                </div>
+
+                <div class="settings-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                    <div class="glass-card settings-card">
+                        <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.1rem;">🎨 Візуальна тема</h3>
+                        <div class="theme-picker-container">
+                            <button class="theme-btn-pill active" data-theme-set="purple"><span class="color-dot purple"></span> Фіолетова</button>
+                            <button class="theme-btn-pill" data-theme-set="black"><span class="color-dot black"></span> Чорний космос</button>
+                            <button class="theme-btn-pill" data-theme-set="white"><span class="color-dot white"></span> Чиста біла</button>
+                            <button class="theme-btn-pill" data-theme-set="blue"><span class="color-dot blue"></span> Неонова синя</button>
+                            <button class="theme-btn-pill" data-theme-set="green"><span class="color-dot green"></span> Смарагдова</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card settings-card">
+                        <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.1rem;">🌍 Мова системи (Language)</h3>
+                        <div class="field">
+                            <select class="form-input" id="systemLanguageSelect" style="width: 100%; background: rgba(0,0,0,0.3); color: #fff;">
+                                <option value="uk">Українська</option>
+                                <option value="en">English (UK/US)</option>
+                                <option value="pl">Polski</option>
+                            </select>
+                        </div>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 8px;">Зміна локалізації оновить усі протоколи та друковані форми виписок.</p>
+                    </div>
+
+                    <div class="glass-card settings-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.1rem;">👤 Мій профіль</h3>
+                            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 14px;" id="settings-clinic-info">ID Клініки: c_98af230f</div>
+                        </div>
+                        <button class="btn-danger" id="btn-logout" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;">🚪 Вийти з профілю</button>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -173,9 +213,11 @@
             <li class="menu-item" data-target="stock">
                 <a href="#stock"><span class="dock-icon">📦</span> <span class="dock-text">Склад</span></a>
             </li>
+            <li class="menu-item" data-target="settings">
+                <a href="#settings"><span class="dock-icon">⚙️</span> <span class="dock-text">Налаштування</span></a>
+            </li>
         </ul>
     </nav>
-
 
     <div class="modal modal-overlay" id="visitModal" aria-hidden="true" style="display:none;">
         <div class="modal__panel modal-window" role="dialog" aria-modal="true" style="background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);">
