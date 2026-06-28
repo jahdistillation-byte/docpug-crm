@@ -389,6 +389,10 @@ async function routeFromHash() {
     if (route === "services") renderServicesTab();
     if (route === "stock") renderStockTab();
     if (route === "calendar") renderCalendarTab();
+     if (route === "settings") {
+       // Поскольку настройки статические, просто инициализируем их UI
+       initSettingsUI();
+    }
     return;
   }
 
@@ -6341,6 +6345,9 @@ async function init() {
   if (typeof initPatientUI === "function") initPatientUI();
   if (typeof initVisitUI === "function") initVisitUI();
   if (typeof initDischargeModalUI === "function") initDischargeModalUI();
+  
+  // 🔥 ВСТАВЛЯЙ СЮДА:
+  if (typeof initSettingsUI === "function") initSettingsUI();
 
   $("#btnReload")?.addEventListener("click", async () => {
     await loadMe();
@@ -6360,7 +6367,11 @@ async function init() {
   await loadOwners();
   await loadPatientsApi();
   await loadServicesApi();
+// Финальный штрих (применяем тему из LocalStorage)
+  if (typeof bootstrapClinicTheme === "function") bootstrapClinicTheme();
+  
 }
+
 
 // Корректировка вьюпорта под мобильные платформы iOS / Telegram WebApp
 function setVH() {
@@ -6451,6 +6462,8 @@ async function renderStaffSpecsBox(selectedIds = []) {
       </label>
     `).join("")
     : `<div class="hint">Спочатку додай напрями клініки вище.</div>`;
+    
+    
 }
 
 async function openEditStaffModal(staffRow) {
@@ -6610,4 +6623,32 @@ function getFinancialStats(entityId, type = 'owner') {
     total: filteredVisits.reduce((sum, v) => sum + (calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0), 0),
     lastDate: filteredVisits.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0]?.date || "—"
   };
+}
+function initSettingsUI() {
+  const page = document.querySelector('.page[data-page="settings"]');
+  if (!page) return;
+
+  // Слушатель тем
+  page.querySelectorAll("[data-theme-set]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const theme = btn.dataset.themeSet;
+      document.body.dataset.theme = theme;
+      LS.set("docpug_clinic_theme", theme);
+      
+      page.querySelectorAll("[data-theme-set]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  // Слушатель языка
+  const langSelect = document.getElementById("systemLanguageSelect");
+  if (langSelect) {
+    langSelect.addEventListener("change", (e) => {
+      LS.set("docpug_clinic_lang", e.target.value);
+      console.log("Language changed to:", e.target.value);
+      // Тут в будущем будет вызов функции перевода интерфейса i18n
+    });
+    // Устанавливаем сохраненный язык
+    langSelect.value = LS.get("docpug_clinic_lang", "uk");
+  }
 }
