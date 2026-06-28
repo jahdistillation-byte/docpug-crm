@@ -1406,5 +1406,51 @@ def api_delete_medcard_entry(entry_id):
 # =========================
 # RUN
 # =========================
+@app.post("/api/login")
+def api_clinic_login():
+    d = request.get_json(silent=True) or {}
+    username = (d.get("username") or "").strip()
+    password = (d.get("password") or "").strip()
+
+    if not username or not password:
+        return jsonify({"ok": False, "error": "Введіть логін та пароль"}), 400
+
+    try:
+        # Ищем пользователя в нашей таблице
+        res = supabase.table("clinic_users").select("org_id, password_plain").eq("username", username).execute()
+        
+        if not res.data:
+            return jsonify({"ok": False, "error": "Невірний логін або пароль"}), 401
+            
+        user_data = res.data[0]
+        
+        # Проверяем пароль
+        if user_data["password_plain"] != password:
+            return jsonify({"ok": False, "error": "Невірний логін або пароль"}), 401
+
+        # Тянем данные клиники (имя, настройки темы)
+        org_id = user_data["org_id"]
+        # Так как настройки хранятся в orgs (или organizations), вернем его настройки
+        # Если в твоей таблице orgs нет theme_settings, вернем дефолт
+        theme = "purple"
+        try:
+            res_org = supabase.table("orgs").select("name").eq("id", org_id).execute()
+            clinic_name = res_org.data[0]["name"] if res_org.data else "Клініка"
+        except Exception:
+            clinic_name = "Клініка"
+
+        return jsonify({
+            "ok": True,
+            "data": {
+                "org_id": org_id,
+                "clinic_name": clinic_name,
+                "theme": theme,
+                "username": username
+            }
+        })
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Ошибка сервера: {str(e)}"}), 500
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=True)

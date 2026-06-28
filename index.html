@@ -8,6 +8,37 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-glass-panel">
+    <div class="auth-art-zone">
+      <div class="pug-digital-avatar">🐾</div>
+      <div class="pug-bubble">Привіт! Дивлюсь у планшет, чекаю твій логін... 🐶</div>
+    </div>
+    
+    <div class="auth-form-zone">
+      <div class="auth-header">
+        <h1>🐾 Doc.PUG <span>CRM</span></h1>
+        <p>Вхід у командний центр клініки</p>
+      </div>
+      
+      <div id="authError" class="auth-error-msg" style="display: none;"></div>
+      
+      <form id="authForm" onsubmit="return false;">
+        <div class="auth-field">
+          <label>Логін клініки</label>
+          <input type="text" id="authUsername" placeholder="Наприклад, Zoolux" required autocomplete="username">
+        </div>
+        
+        <div class="auth-field">
+          <label>Пароль доступу</label>
+          <input type="password" id="authPassword" placeholder="••••" required autocomplete="current-password">
+        </div>
+        
+        <button type="submit" id="btnAuthSubmit" class="auth-submit-btn">Увійти у систему →</button>
+      </form>
+    </div>
+  </div>
+</div>
 
     <div class="app-container" style="padding-bottom: 120px;">
         

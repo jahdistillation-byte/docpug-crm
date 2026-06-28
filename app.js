@@ -6323,6 +6323,72 @@ function bootstrapClinicTheme() {
 // ГЛАВНЫЙ ИНИЦИАЛИЗАТОР ПРИЛОЖЕНИЯ (BOOTSTRAP)
 // =========================
 async function init() {
+  // === ПРЕМИУМ ЛОГИН КЛИНИКИ ===
+  const authForm = document.getElementById("authForm");
+  const authOverlay = document.getElementById("authOverlay");
+  
+  // Проверяем, входил ли пользователь ранее в этой сессии
+  const cachedOrg = sessionStorage.getItem("pug_active_org_id");
+  if (cachedOrg) {
+    if (authOverlay) authOverlay.style.display = "none";
+  }
+
+  if (authForm) {
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById("authUsername")?.value;
+      const password = document.getElementById("authPassword")?.value;
+      const errorBox = document.getElementById("authError");
+      const btnSubmit = document.getElementById("btnAuthSubmit");
+
+      if (errorBox) errorBox.style.display = "none";
+      if (btnSubmit) btnSubmit.textContent = "Перевірка доступу...";
+
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const json = await res.get_json ? await res.get_json() : await res.json();
+
+        if (!res.ok || !json.ok) {
+          if (errorBox) {
+            errorBox.textContent = json.error || "Помилка авторизації";
+            errorBox.style.display = "block";
+          }
+          if (btnSubmit) btnSubmit.textContent = "Увійти у систему →";
+          return;
+        }
+
+        // Сохраняем активный org_id в сессию браузера
+        sessionStorage.setItem("pug_active_org_id", json.data.org_id);
+        console.log(`Успешный вход в клинику: ${json.data.clinic_name}`);
+
+        // Прячем красивый оверлей
+        if (authOverlay) {
+          authOverlay.style.transition = "all 0.4s ease";
+          authOverlay.style.opacity = "0";
+          setTimeout(() => authOverlay.style.display = "none", 400);
+        }
+
+        // Принудительно перезагружаем данные CRM под эту конкретную клинику
+        await loadOwners();
+        await loadPatientsApi();
+        await loadServicesApi();
+
+      } catch (err) {
+        if (errorBox) {
+          errorBox.textContent = "Не вдалося з'єднатися з сервером.";
+          errorBox.style.display = "block";
+        }
+        if (btnSubmit) btnSubmit.textContent = "Увійти у систему →";
+      }
+    });
+  }
+  
   if (typeof initTabs === "function") initTabs();
   if (typeof seedIfEmpty === "function") seedIfEmpty();
 

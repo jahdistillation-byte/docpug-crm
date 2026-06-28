@@ -1650,3 +1650,277 @@ body[data-theme="white"] .theme-btn-pill.active {
     border-color: var(--accent-color) !important;
     background: rgba(88, 86, 214, 0.06) !important;
 }
+
+/* Премиум Экран Входа */
+.auth-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%);
+  z-index: 999999;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+
+.auth-glass-panel {
+  display: flex;
+  width: 800px; max-width: 90vw; height: 480px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 28px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.auth-art-zone {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(0, 0, 0, 0.3));
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px; position: relative;
+}
+
+.pug-digital-avatar {
+  font-size: 5rem;
+  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
+  animation: floatAnim 4s ease-in-out infinite;
+}
+
+.pug-bubble {
+  margin-top: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 12px 18px; border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem; text-align: center; line-height: 1.4;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.auth-form-zone {
+  width: 420px; padding: 44px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+.auth-header h1 {
+  font-size: 1.8rem; margin: 0; color: #fff; font-weight: 700;
+}
+.auth-header h1 span { color: #c084fc; }
+.auth-header p {
+  margin: 6px 0 28px 0; font-size: 0.9rem; color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-field {
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px;
+}
+.auth-field label {
+  font-size: 0.8rem; font-weight: 600; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.auth-field input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 16px; border-radius: 12px;
+  color: #fff; font-size: 1rem; transition: all 0.2s ease;
+}
+.auth-field input:focus {
+  outline: none; border-color: #c084fc; background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+}
+
+.auth-submit-btn {
+  width: 100%; padding: 14px; background: #9333ea;
+  color: #fff; border: none; border-radius: 12px;
+  font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.3);
+}
+.auth-submit-btn:hover {
+  background: #a855f7; transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(147, 51, 234, 0.5);
+}
+
+.auth-error-msg {
+  background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171; padding: 10px 14px; border-radius: 10px;
+  font-size: 0.85rem; margin-bottom: 20px; font-weight: 500;
+}
+
+@keyframes floatAnim {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+/* --- iOS BLUE ТЕМА (замена белой) --- */
+body[data-theme="white"] {
+    --accent-color: #007aff;
+    --accent-glow: rgba(0, 122, 255, 0.15);
+    --bg-gradient: linear-gradient(145deg, #dde3ec 0%, #e8ecf2 40%, #d8dfe9 100%);
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --text-main: #1c1c1e;
+    --text-muted: #8e8e93;
+    --glass-border: rgba(255, 255, 255, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-blur: blur(30px) saturate(180%);
+    --primary-neon: #007aff;
+    --primary-glow: 0 4px 16px rgba(0, 122, 255, 0.2);
+    --shadow-premium: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+body[data-theme="white"] {
+    background: var(--bg-gradient);
+    color: var(--text-main);
+}
+
+body[data-theme="white"] .glass-card,
+body[data-theme="white"] .data-table-container,
+body[data-theme="white"] .calendar-container,
+body[data-theme="white"] .patient-premium-card,
+body[data-theme="white"] .patient-hero,
+body[data-theme="white"] .glass-panel,
+body[data-theme="white"] .owner-hero {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+    color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .sidebar {
+    background: rgba(220, 228, 238, 0.75) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    border-right: 0.5px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+body[data-theme="white"] .sidebar-logo { color: #1c1c1e !important; }
+body[data-theme="white"] .menu-item a { color: #6e6e73 !important; }
+body[data-theme="white"] .menu-item a:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    color: #1c1c1e !important;
+}
+body[data-theme="white"] .menu-item.active a {
+    background: #007aff !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3) !important;
+}
+
+body[data-theme="white"] .search-bar input {
+    background: rgba(255, 255, 255, 0.55) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.85) !important;
+    color: #1c1c1e !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+body[data-theme="white"] .search-bar input::placeholder { color: #8e8e93 !important; }
+body[data-theme="white"] .search-bar input:focus {
+    border-color: rgba(0, 122, 255, 0.4) !important;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12) !important;
+}
+
+body[data-theme="white"] h1,
+body[data-theme="white"] h2,
+body[data-theme="white"] h3,
+body[data-theme="white"] h4,
+body[data-theme="white"] .section-card-title,
+body[data-theme="white"] .vet-name,
+body[data-theme="white"] .sidebar-patient-name,
+body[data-theme="white"] .current-date-title { color: #1c1c1e !important; }
+
+body[data-theme="white"] .text-muted,
+body[data-theme="white"] .vet-spec,
+body[data-theme="white"] .sidebar-patient-breed,
+body[data-theme="white"] .field-title,
+body[data-theme="white"] .sidebar-meta-item .label,
+body[data-theme="white"] .finance-label { color: #8e8e93 !important; }
+
+body[data-theme="white"] .data-table th {
+    color: #1c1c1e !important;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08) !important;
+}
+body[data-theme="white"] .data-table td {
+    color: #3c3c43 !important;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+body[data-theme="white"] .premium-input,
+body[data-theme="white"] .premium-textarea,
+body[data-theme="white"] .premium-select {
+    background: rgba(255, 255, 255, 0.65) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.1) !important;
+    color: #1c1c1e !important;
+}
+body[data-theme="white"] .premium-input:focus,
+body[data-theme="white"] .premium-textarea:focus,
+body[data-theme="white"] .premium-select:focus {
+    border-color: rgba(0, 122, 255, 0.4) !important;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+body[data-theme="white"] .mac-dock {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(35px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+body[data-theme="white"] .dock-menu .menu-item a { color: #8e8e93 !important; }
+body[data-theme="white"] .dock-menu .menu-item:hover a { color: #1c1c1e !important; }
+body[data-theme="white"] .dock-menu .menu-item.active {
+    background: rgba(0, 122, 255, 0.1) !important;
+    border: 0.5px solid rgba(0, 122, 255, 0.25) !important;
+}
+body[data-theme="white"] .dock-menu .menu-item.active a { color: #007aff !important; }
+
+body[data-theme="white"] .btn-tab,
+body[data-theme="white"] .patient-tab-btn,
+body[data-theme="white"] .tab-nav-btn { color: #8e8e93 !important; }
+body[data-theme="white"] .btn-tab.active,
+body[data-theme="white"] .patient-tab-btn.active,
+body[data-theme="white"] .tab-nav-btn.active {
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: #1c1c1e !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-theme="white"] .appointment-cell {
+    background: rgba(255, 255, 255, 0.35) !important;
+    border: 1px dashed rgba(0, 0, 0, 0.08) !important;
+    color: rgba(0, 0, 0, 0.2) !important;
+}
+body[data-theme="white"] .appointment-cell:hover {
+    background: rgba(0, 122, 255, 0.06) !important;
+    border: 1px solid rgba(0, 122, 255, 0.3) !important;
+    color: #007aff !important;
+}
+
+body[data-theme="white"] .vet-column-header {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.85) !important;
+}
+body[data-theme="white"] .user-profile-badge {
+    background: rgba(255, 255, 255, 0.45) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.8) !important;
+}
+body[data-theme="white"] .user-profile-badge h4 { color: #1c1c1e !important; }
+body[data-theme="white"] .user-profile-badge span { color: #8e8e93 !important; }
+
+body[data-theme="white"] .finance-amount {
+    background: linear-gradient(135deg, #1c1c1e 40%, #007aff 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+body[data-theme="white"] .theme-btn-pill {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.08) !important;
+    color: #1c1c1e !important;
+}
+body[data-theme="white"] .theme-btn-pill.active {
+    border-color: #007aff !important;
+    background: rgba(0, 122, 255, 0.06) !important;
+}
+
+body[data-theme="white"] .btn-primary,
+body[data-theme="white"] .premium-neon-btn {
+    background: #007aff !important;
+    box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3) !important;
+}
