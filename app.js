@@ -215,7 +215,7 @@ async function fetchVisitById(id) {
   try {
     const res = await fetch(`/api/visits?id=${encodeURIComponent(vid)}`, {
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
 
     const text = await res.text();
@@ -262,6 +262,12 @@ const LS = {
     localStorage.setItem(key, JSON.stringify(val));
   },
 };
+
+function getOrgHeaders() {
+    const orgId = sessionStorage.getItem("pug_active_org_id");
+    return orgId ? { "X-Org-ID": orgId } : {};
+}
+
 
 function escapeHtml(str) {
   return String(str ?? "")
@@ -520,11 +526,11 @@ function seedIfEmpty() {
 // ===== API: Owners =====
 async function loadOwners() {
   try {
-    const res = await fetch("/api/owners", {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    const text = await res.text();
+   const res = await fetch("/api/owners", {
+    credentials: "include",
+    headers: { Accept: "application/json", ...getOrgHeaders() },
+});
+    const text = await res.text()
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
 
@@ -565,7 +571,7 @@ async function loadPatientsApi() {
   try {
     const res = await fetch("/api/patients", {
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
     const text = await res.text();
     let json = null;
@@ -613,7 +619,7 @@ async function loadServicesApi() {
   try {
     const res = await fetch("/api/services", {
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
     const text = await res.text();
     let json = null;
@@ -653,7 +659,7 @@ async function createServiceApi(payload) {
     const res = await fetch("/api/services", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
       body: JSON.stringify(payload || {}),
     });
     const text = await res.text();
@@ -673,7 +679,7 @@ async function updateServiceApi(id, patch) {
     const res = await fetch(`/api/services?id=${encodeURIComponent(String(id))}`, {
       method: "PUT",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
       body: JSON.stringify(patch || {}),
     });
     const text = await res.text();
@@ -693,7 +699,7 @@ async function deleteServiceApi(id) {
     const res = await fetch(`/api/services?id=${encodeURIComponent(String(id))}`, {
       method: "DELETE",
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
     const text = await res.text();
     let json = null;
@@ -723,7 +729,7 @@ async function createPatientApi(payload) {
 
     const res = await fetch("/api/patients", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
       credentials: "include",
       body: JSON.stringify(bodyObj),
     });
@@ -773,7 +779,7 @@ async function createOwner(name, phone = "", note = "") {
 
     const res = await fetch("/api/owners", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
       credentials: "include",
       body: JSON.stringify(payload),
     });
@@ -817,7 +823,7 @@ async function updateOwner(id, payload = {}) {
     const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
       method: "PUT",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
       body: JSON.stringify(bodyObj),
     });
 
@@ -850,7 +856,7 @@ async function deleteOwner(id) {
     const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
       method: "DELETE",
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
 
     const text = await res.text();
@@ -892,7 +898,7 @@ async function loadVisitsApi(params = {}) {
     const qs = new URLSearchParams(params).toString();
     const res = await fetch("/api/visits" + (qs ? `?${qs}` : ""), {
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
 
     const text = await res.text();
@@ -926,7 +932,7 @@ async function createVisitApi(payload) {
   try {
     const res = await fetch("/api/visits", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() }
       credentials: "include",
       body: JSON.stringify(payload),
     });
@@ -1100,7 +1106,7 @@ async function deleteVisitApi(visitId) {
     const res = await fetch(`/api/visits/${encodeURIComponent(String(visitId))}`, {
       method: "DELETE",
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
     const text = await res.text();
     let json = null;
@@ -5755,7 +5761,7 @@ async function deletePatientApi(petId) {
     const res = await fetch(`/api/patients/${encodeURIComponent(petId)}`, {
       method: "DELETE",
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
 
     const text = await res.text();
@@ -6388,7 +6394,7 @@ async function init() {
       }
     });
   }
-  
+
   if (typeof initTabs === "function") initTabs();
   if (typeof seedIfEmpty === "function") seedIfEmpty();
 
