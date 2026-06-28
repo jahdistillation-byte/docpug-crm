@@ -1263,12 +1263,37 @@ body[data-theme="black"] {
 }
 
 /* Чистая белая тема (Светлый матовый VisionOS) */
+/* --- БЕЛАЯ ТЕМА (iOS WATER GLASS STYLE) --- */
 body[data-theme="white"] {
-    --accent-color: #7c3aed;
-    --accent-glow: rgba(124, 58, 237, 0.2);
-    --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    --card-bg: rgba(0, 0, 0, 0.03);
-    --text-main: #0f172a;
+    --accent-color: #5856d6;
+    --accent-glow: rgba(88, 86, 214, 0.2);
+    --bg-gradient: #f2f2f7; /* Светлый iOS фон */
+    --card-bg: rgba(255, 255, 255, 0.7); /* Полупрозрачность для эффекта воды */
+    --text-main: #1c1c1e; /* Темно-серый текст Apple */
+    --text-muted: #8e8e93;
+    --input-bg: rgba(0, 0, 0, 0.05);
+    --glass-border: rgba(0, 0, 0, 0.1);
+}
+
+/* --- СТЕКЛЯННЫЕ КАРТОЧКИ (VisionOS/iOS Style) --- */
+.glass-card {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 20px;
+    padding: 24px;
+    color: var(--text-main) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+}
+
+/* Сделаем Dock таким же "водянистым" */
+.mac-dock {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 /* Неоновая синяя тема */
