@@ -16,7 +16,7 @@ from supabase import create_client
 print("### RUNNING server.py ###")
 
 # =========================
-# ENV
+# ENVы
 # =========================
 ORG_ID = os.getenv("ORG_ID")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
