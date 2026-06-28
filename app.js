@@ -3017,7 +3017,7 @@ async function renderCalendarTab() {
       </div>
     `;
 
-    $("#btnAddStaff")?.addEventListener("click", () => { openCreateStaffModal(); });
+    $("#btnAddStaffFromCalendar")?.addEventListener("click", () => { openCreateStaffModal(); });
     $("#btnAddSpec")?.addEventListener("click", async () => {
       const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
       if (!name) return;
