@@ -6274,54 +6274,44 @@ async function renderMedcardTab(pet) {
 // ==========================================
 // НАСТРОЙКИ СИСТЕМЫ — ЛОГИКА И ХЕНДЛЕРЫ
 // ==========================================
-function renderSettingsTab() {
+// Функция инициализации настроек: темы, язык
+function initSettingsUI() {
   const page = document.querySelector('.page[data-page="settings"]');
   if (!page) return;
 
-  // Если слушатели уже привязаны, повторно не вешаем
   if (page.dataset.boundSettings === "1") return;
   page.dataset.boundSettings = "1";
 
-  // Обработчик переключения тем оформления
+  // Слушатель тем
   page.querySelectorAll("[data-theme-set]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const selectedTheme = btn.dataset.themeSet;
+      const theme = btn.dataset.themeSet;
+      // Применяем тему
+      document.body.dataset.theme = theme;
+      // Сохраняем в память
+      LS.set("docpug_clinic_theme", theme);
       
-      // Снимаем класс active со всех кнопок тем в блоке
-      page.querySelectorAll("[data-theme-set]").forEach((b) => b.classList.remove("active"));
+      // Обновляем визуал кнопок
+      page.querySelectorAll("[data-theme-set]").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
-      // Нативно переключаем тему на body через дата-атрибут
-      document.body.dataset.theme = selectedTheme;
-      
-      // Сохраняем выбор в LocalStorage клиники, чтобы тема не слетала при перезагрузке
-      LS.set("docpug_clinic_theme", selectedTheme);
     });
   });
 
-  // Обработчик изменения языкового пакета (Локализация)
-  $("#systemLanguageSelect")?.addEventListener("change", (e) => {
-    const selectedLang = e.target.value;
-    LS.set("docpug_clinic_lang", selectedLang);
-    alert(`Мову системи змінено на: ${selectedLang === 'uk' ? 'Українську' : selectedLang === 'en' ? 'English' : 'Polski'}. Наразі виконується синхронізація мовних пакетів.`);
-  });
-
-  // Кнопка Выйти из профиля (Разлогин клиники)
-  $("#btn-logout")?.addEventListener("click", () => {
-    if (confirm("Ви дійсно бажаєте вийти з облікового запису клініки?")) {
-      // Очищаем токены сессии (когда подключим бэк)
-      alert("Вихід виконано. Перенаправлення на сторінку авторизації...");
-      window.location.hash = "#owners"; // Временный сброс роута
-    }
-  });
+  // Слушатель языка
+  const langSelect = document.getElementById("systemLanguageSelect");
+  if (langSelect) {
+    langSelect.addEventListener("change", (e) => {
+      LS.set("docpug_clinic_lang", e.target.value);
+    });
+    langSelect.value = LS.get("docpug_clinic_lang", "uk");
+  }
 }
 
-// Восстановление темы оформления при старте CRM приложения
+// Функция для применения темы при загрузке страницы
 function bootstrapClinicTheme() {
   const savedTheme = LS.get("docpug_clinic_theme", "purple");
   document.body.dataset.theme = savedTheme;
   
-  // Подсвечиваем правильную кнопку в HTML, если мы на странице настроек
   const activeBtn = document.querySelector(`[data-theme-set="${savedTheme}"]`);
   if (activeBtn) {
     document.querySelectorAll("[data-theme-set]").forEach((b) => b.classList.remove("active"));
@@ -6346,8 +6336,11 @@ async function init() {
   if (typeof initVisitUI === "function") initVisitUI();
   if (typeof initDischargeModalUI === "function") initDischargeModalUI();
   
-  // 🔥 ВСТАВЛЯЙ СЮДА:
+  // ВСТАВЛЯЕМ ВЫЗОВ ИНИЦИАЛИЗАЦИИ НАСТРОЕК ЗДЕСЬ
   if (typeof initSettingsUI === "function") initSettingsUI();
+
+  // Применяем сохраненную тему
+  if (typeof bootstrapClinicTheme === "function") bootstrapClinicTheme();
 
   $("#btnReload")?.addEventListener("click", async () => {
     await loadMe();
@@ -6356,7 +6349,7 @@ async function init() {
     await loadServicesApi();
   });
 
-  // Глобальный живой поиск без потери фокуса ввода
+  // Глобальный живой поиск
   $("#globalSearch")?.addEventListener("input", () => {
     if (state.route === "owners") renderOwners();
     if (state.route === "patients") renderPatientsTab();
@@ -6367,9 +6360,6 @@ async function init() {
   await loadOwners();
   await loadPatientsApi();
   await loadServicesApi();
-// Финальный штрих (применяем тему из LocalStorage)
-  if (typeof bootstrapClinicTheme === "function") bootstrapClinicTheme();
-  
 }
 
 

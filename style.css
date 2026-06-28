@@ -1346,3 +1346,38 @@ body {
     color: #fff;
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
+/* Улучшенный Dock с использованием CSS-переменных */
+.mac-dock {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    
+    background: rgba(30, 20, 45, 0.7);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    
+    padding: 8px 16px;
+}
+
+/* Активная вкладка теперь использует переменную темы */
+.dock-menu .menu-item.active {
+    background: var(--accent-glow); /* Теперь тут используется свечение темы */
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.dock-menu .menu-item.active a {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* При наведении тоже используем переменную акцента, если хочешь */
+.dock-menu .menu-item:hover a {
+    color: var(--accent-color); 
+}
