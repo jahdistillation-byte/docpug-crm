@@ -1144,17 +1144,24 @@ aside[style*="width: 240px"] {
     transform: translateX(-50%);
     z-index: 9999;
     
-    /* Стекло как в macOS/visionOS */
-    background: rgba(30, 20, 45, 0.7);
+    /* СТЕКЛО, КОТОРОЕ МЕНЯЕТСЯ С ТЕМОЙ */
+    background: rgba(255, 255, 255, 0.05); 
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Добавляем обводку, которая тоже может быть акцентной */
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 28px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     
     padding: 8px 16px;
+    transition: background 0.3s ease;
+}
+/* При наведении подсвечиваем активным цветом */
+.dock-menu .menu-item.active {
+    background: var(--accent-glow) !important;
+    border: 1px solid var(--accent-color) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
 }
 
 .dock-menu {
@@ -1347,6 +1354,7 @@ body {
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
 /* Улучшенный Dock с использованием CSS-переменных */
+/* style.css — исправленный док */
 .mac-dock {
     position: fixed;
     bottom: 20px;
@@ -1354,22 +1362,25 @@ body {
     transform: translateX(-50%);
     z-index: 9999;
     
-    background: rgba(30, 20, 45, 0.7);
+    /* СТЕКЛО, КОТОРОЕ МЕНЯЕТСЯ С ТЕМОЙ */
+    background: rgba(255, 255, 255, 0.05); 
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Добавляем обводку, которая тоже может быть акцентной */
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 28px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     
     padding: 8px 16px;
+    transition: background 0.3s ease;
 }
 
-/* Активная вкладка теперь использует переменную темы */
+/* При наведении подсвечиваем активным цветом */
 .dock-menu .menu-item.active {
-    background: var(--accent-glow); /* Теперь тут используется свечение темы */
-    border: 1px solid var(--accent-color);
-    box-shadow: 0 0 15px var(--accent-glow);
+    background: var(--accent-glow) !important;
+    border: 1px solid var(--accent-color) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
 }
 
 .dock-menu .menu-item.active a {
