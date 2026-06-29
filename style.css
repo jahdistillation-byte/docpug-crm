@@ -2023,3 +2023,9 @@ body[data-theme="green"] .dock-menu .menu-item.active {
   opacity: 1;
   pointer-events: auto;
 }
+
+#staffDrawer.open {
+  display: flex; /* или block, в зависимости от верстки */
+  opacity: 1;
+  pointer-events: auto;
+}
