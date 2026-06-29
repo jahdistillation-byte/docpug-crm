@@ -6742,3 +6742,10 @@ function initSettingsUI() {
     langSelect.value = LS.get("docpug_clinic_lang", "uk");
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btnAddStaff');
+  if (btn) {
+    btn.addEventListener('click', openCreateStaffModal);
+  }
+});
