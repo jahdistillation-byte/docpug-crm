@@ -2673,3 +2673,17 @@ body[data-theme="white"] .specPill {
     position: static;
   }
 }
+/* FIX: старые JS-модалки открываются через .open, а не .active */
+.modal-overlay.open,
+.modal.open {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 999999 !important;
+}
+
+.modal-overlay:not(.open):not(.active),
+.modal:not(.open):not(.active) {
+  display: none;
+}
