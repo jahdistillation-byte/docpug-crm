@@ -6750,18 +6750,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Глобальный перехватчик клика для нашей премиальной шторки
 document.addEventListener('click', function(event) {
-    // Проверяем, кликнули ли мы по кнопке "+ Додати ветеринара"
-    // Замени 'add-vet-btn' на реальный ID или класс твоей кнопки
-    if (event.target && (event.target.id === 'addVetBtn' || event.target.closest('#addVetBtn'))) {
+    // Ищем клик именно по кнопке btnAddStaff или элементам внутри неё
+    if (event.target && (event.target.id === 'btnAddStaff' || event.target.closest('#btnAddStaff'))) {
         event.preventDefault();
-        console.log("Брат, клик пойман через делегирование!");
+        console.log("🚀 PUGCRM: Клик по '+ Додати ветеринара' успешно пойман!");
         
         const drawer = document.getElementById('staffDrawer');
         if (drawer) {
             drawer.classList.add('open');
+            console.log("💎 PUGCRM: Шторка staffDrawer успешно открыта!");
         } else {
-            console.error("Шторка staffDrawer не найдена!");
+            console.error("❌ Ошибка: Элемент шторки #staffDrawer не найден в HTML!");
         }
     }
 });
