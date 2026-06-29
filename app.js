@@ -6749,3 +6749,19 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', openCreateStaffModal);
   }
 });
+
+document.addEventListener('click', function(event) {
+    // Проверяем, кликнули ли мы по кнопке "+ Додати ветеринара"
+    // Замени 'add-vet-btn' на реальный ID или класс твоей кнопки
+    if (event.target && (event.target.id === 'addVetBtn' || event.target.closest('#addVetBtn'))) {
+        event.preventDefault();
+        console.log("Брат, клик пойман через делегирование!");
+        
+        const drawer = document.getElementById('staffDrawer');
+        if (drawer) {
+            drawer.classList.add('open');
+        } else {
+            console.error("Шторка staffDrawer не найдена!");
+        }
+    }
+});
