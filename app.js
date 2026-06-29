@@ -6623,13 +6623,16 @@ async function openVisitFromCalendar(hour, staffId) {
     };
   });
 
-  $("#visitPatientSelect").value = "";
-  $("#visitPatientSearch").value = "";
-  $("#visitPatientResults").innerHTML = "";
-  $("#visitPatientBlock").style.display = "block";
-  $("#visitDate").value = window.__calendarDate || todayISO();
-  $("#visitStartTime").value = hour || "10:00";
-  $("#visitDuration").value = "60";
+ $("#visitPatientSelect") && ($("#visitPatientSelect").value = "");
+$("#visitPatientSearch") && ($("#visitPatientSearch").value = "");
+$("#visitPatientResults") && ($("#visitPatientResults").innerHTML = "");
+
+const visitPatientBlock = $("#visitPatientBlock");
+if (visitPatientBlock) visitPatientBlock.style.display = "block";
+
+$("#visitDate") && ($("#visitDate").value = window.__calendarDate || todayISO());
+$("#visitStartTime") && ($("#visitStartTime").value = hour || "10:00");
+$("#visitDuration") && ($("#visitDuration").value = "60");
 
   const staff = await loadStaffApi();
   const staffSelect = $("#visitStaff");
@@ -6641,8 +6644,13 @@ async function openVisitFromCalendar(hour, staffId) {
     staffSelect.value = String(staffId || "");
   }
 
-  $("#visitNote").value = ""; $("#visitDx").value = ""; $("#visitWeight").value = ""; $("#visitRx").value = "";
-  $("#visitNewPatientBox").style.display = "none";
+  $("#visitNote") && ($("#visitNote").value = "");
+$("#visitDx") && ($("#visitDx").value = "");
+$("#visitWeight") && ($("#visitWeight").value = "");
+$("#visitRx") && ($("#visitRx").value = "");
+
+const visitNewPatientBox = $("#visitNewPatientBox");
+if (visitNewPatientBox) visitNewPatientBox.style.display = "none";
 
   const btnCreatePatientFromVisit = $("#btnCreatePatientFromVisit");
   if (btnCreatePatientFromVisit) {
@@ -6675,7 +6683,7 @@ $("#visitPatientSearch")?.addEventListener("input", () => {
 
   box.innerHTML = found.length
     ? found.map((p) => `
-      <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(id))}">
+      <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(p.id))}">
         <strong>${escapeHtml(p.name || "Пацієнт")}</strong>
         <span>${escapeHtml(p.owner_name || "Власник не вказаний")} · ${escapeHtml(p.owner_phone || p.phone || "телефон не вказаний")}</span>
       </div>
