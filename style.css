@@ -2029,3 +2029,136 @@ body[data-theme="green"] .dock-menu .menu-item.active {
   opacity: 1;
   pointer-events: auto;
 }
+/* ==========================================================================
+   PUGCRM - CALENDAR PREMIUM 2026 PRO FIXES (visionOS GLASS EFFECT)
+   ========================================================================== */
+
+/* Обновленный контейнер сетки */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    padding: 10px;
+    min-width: max-content;
+}
+
+/* Фикс липких элементов: идеальное стекло без швов */
+.time-column-header,
+.time-cell {
+    position: sticky;
+    left: 0;
+    background: rgba(20, 10, 35, 0.7) !important;
+    backdrop-filter: blur(25px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(140%) !important;
+    border-right: 1px solid var(--glass-border);
+    z-index: 20;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+body[data-theme="white"] .time-column-header,
+body[data-theme="white"] .time-cell {
+    background: rgba(220, 228, 238, 0.8) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1c1c1e !important;
+}
+
+/* Премиальные карточки визитов (записей на приём) */
+.calendar-appointment-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+/* Левая цветная полоса статуса визита */
+.calendar-appointment-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent-color, var(--primary-neon));
+    transition: var(--transition);
+}
+
+/* Статусы записей */
+.calendar-appointment-card.status-planned::before  { background: var(--primary-neon); }
+.calendar-appointment-card.status-active::before   { background: var(--color-warning); }
+.calendar-appointment-card.status-done::before     { background: var(--color-success); }
+
+/* Эффект парения при наведении */
+.calendar-appointment-card:hover {
+    transform: translateY(-3px) scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 15px var(--accent-glow);
+}
+
+/* Контент внутри карточки записи */
+.app-card-time {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary-neon);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.app-card-pet {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.app-card-owner {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Адаптация карточек под БЕЛУЮ ТЕМУ (iOS Water Glass) */
+body[data-theme="white"] .calendar-appointment-card {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+body[data-theme="white"] .calendar-appointment-card:hover {
+    background: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+body[data-theme="white"] .app-card-time {
+    color: var(--accent-color) !important;
+}
+
+/* Красивая сетка часов (фоновые полосы времени внутри календаря) */
+.time-grid-line {
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
+    width: 100%;
+    height: 0;
+}
+body[data-theme="white"] .time-grid-line {
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+}
+
+/* Индикатор текущего времени (Красная неоновая нить 2026 года) */
+.current-time-indicator {
+    position: absolute;
+    left: 80px;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ff3333 0%, rgba(255, 51, 51, 0) 100%);
+    box-shadow: 0 0 8px #ff3333;
+    z-index: 15;
+    pointer-events: none;
+}
