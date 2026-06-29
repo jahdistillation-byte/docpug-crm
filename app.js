@@ -3241,21 +3241,25 @@ async function renderCalendarTab() {
 // ==========================================================================
 
 async function openCreateStaffModal() {
-  $("#staffId").value = "";
-  $("#staffName").value = "";
-  $("#staffRole").value = "vet";
-  $("#staffSpecialization").value = "";
-  $("#staffPhone").value = "";
-  $("#staffShiftRate").value = 0;
-  $("#staffPercentRate").value = 0;
-  $("#staffColor").value = "#7C5CFF";
-  $("#staffNote").value = "";
+  // Сначала открыть окно
+  const staffDrawer = document.getElementById("staffDrawer");
+  staffDrawer.classList.add("open");
+  staffDrawer.setAttribute("aria-hidden", "false");
+
+  // Затем очистить поля
+  document.getElementById("staffId").value = "";
+  document.getElementById("staffName").value = "";
+  document.getElementById("staffRole").value = "vet";
+  document.getElementById("staffSpecialization").value = "";
+  document.getElementById("staffPhone").value = "";
+  document.getElementById("staffShiftRate").value = 0;
+  document.getElementById("staffPercentRate").value = 0;
+  document.getElementById("staffColor").value = "#7C5CFF";
+  document.getElementById("staffNote").value = "";
 
   if (typeof renderStaffSpecsBox === "function") await renderStaffSpecsBox([]);
-
-  $("#staffDrawer").classList.add("open");
-  $("#staffDrawer").setAttribute("aria-hidden", "false");
 }
+
 
 async function loadSpecializationsApi() {
   try {
