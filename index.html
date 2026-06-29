@@ -250,6 +250,7 @@
         </ul>
     </nav>
 
+    <!-- VISIT MODAL -->
     <div class="modal modal-overlay" id="visitModal" aria-hidden="true" style="display:none;">
         <div class="modal__panel modal-window" role="dialog" aria-modal="true" style="background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);">
             <div class="modal__head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -327,6 +328,62 @@
         </div>
     </div>
 
+    <!-- STAFF DRAWER -->
+    <div id="staffDrawer" class="modal-overlay" aria-hidden="true">
+        <div class="modal-window" style="max-width:520px; overflow-y:auto; max-height:90vh;">
+            <h3 style="margin:0 0 20px;color:#fff">Ветеринар</h3>
+            <input type="hidden" id="staffId">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">ПІБ *</div>
+                    <input id="staffName" class="premium-input" style="width:100%" placeholder="Іванов Іван Іванович">
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Роль</div>
+                    <select id="staffRole" class="premium-select" style="width:100%">
+                        <option value="vet">Ветеринар</option>
+                        <option value="assistant">Асистент</option>
+                    </select>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Спеціалізація</div>
+                    <input id="staffSpecialization" class="premium-input" style="width:100%" placeholder="Хірург, терапевт...">
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Телефон</div>
+                    <input id="staffPhone" class="premium-input" style="width:100%" placeholder="+380...">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Ставка (грн/зміна)</div>
+                        <input id="staffShiftRate" class="premium-input" style="width:100%" type="number" value="0">
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Відсоток %</div>
+                        <input id="staffPercentRate" class="premium-input" style="width:100%" type="number" value="0">
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Колір</div>
+                    <input id="staffColor" type="color" value="#7C5CFF" style="width:60px;height:36px;border:none;background:none;cursor:pointer">
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Нотатка</div>
+                    <textarea id="staffNote" class="premium-input" style="width:100%;resize:vertical" rows="2"></textarea>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:8px">Напрями</div>
+                    <div id="staffSpecsBox"></div>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
+                <button class="premium-secondary-btn premium-neon-btn" data-close-staff style="width:auto;padding:12px 20px">Скасувати</button>
+                <button id="staffSave" class="premium-neon-btn" style="width:auto;padding:12px 24px">💾 Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPLATES -->
     <template id="visit-timeline-item-template">
         <div class="timeline-item">
             <div class="timeline-node"></div>
@@ -342,12 +399,10 @@
                             <div class="status-pill type">📄 Амбулаторно</div>
                         </div>
                     </div>
-                    
                     <div class="visit-section-box complaint-box">
                         <div class="visit-box-label">Скарга / Стан пацієнта</div>
                         <div class="v-complaint text-clamp"></div>
                     </div>
-                    
                     <div class="v-rx-container visit-section-box rx-box" style="display: none;">
                         <div class="visit-box-label">Призначене лікування (Rx)</div>
                         <div class="v-rx text-clamp code-font"></div>
@@ -394,62 +449,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <script src="app.js"></script>
-    <!-- STAFF DRAWER -->
-<div id="staffDrawer" class="modal-overlay" aria-hidden="true">
-  <div class="modal-window" style="max-width:520px">
-    <h3 style="margin:0 0 20px;color:#fff">Ветеринар</h3>
-    
-    <input type="hidden" id="staffId">
-    
-    <div style="display:flex;flex-direction:column;gap:14px;">
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">ПІБ *</div>
-        <input id="staffName" class="premium-input" style="width:100%" placeholder="Іванов Іван Іванович">
-      </div>
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Роль</div>
-        <select id="staffRole" class="premium-select" style="width:100%">
-          <option value="vet">Ветеринар</option>
-          <option value="assistant">Асистент</option>
-        </select>
-      </div>
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Спеціалізація</div>
-        <input id="staffSpecialization" class="premium-input" style="width:100%" placeholder="Хірург, терапевт...">
-      </div>
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Телефон</div>
-        <input id="staffPhone" class="premium-input" style="width:100%" placeholder="+380...">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div>
-          <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Ставка (грн/зміна)</div>
-          <input id="staffShiftRate" class="premium-input" style="width:100%" type="number" value="0">
-        </div>
-        <div>
-          <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Відсоток %</div>
-          <input id="staffPercentRate" class="premium-input" style="width:100%" type="number" value="0">
-        </div>
-      </div>
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Колір</div>
-        <input id="staffColor" type="color" value="#7C5CFF" style="width:60px;height:36px;border:none;background:none;cursor:pointer">
-      </div>
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Нотатка</div>
-        <textarea id="staffNote" class="premium-input" style="width:100%;resize:vertical" rows="2"></textarea>
-      </div>
-      <div>
-        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:8px">Напрями</div>
-        <div id="staffSpecsBox"></div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
-      <button class="premium-secondary-btn premium-neon-btn" data-close-staff style="width:auto;padding:12px 20px">Скасувати</button>
-      <button id="staffSave" class="premium-neon-btn" style="width:auto;padding:12px 24px">💾 Зберегти</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
