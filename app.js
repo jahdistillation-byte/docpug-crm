@@ -7145,16 +7145,21 @@ document.addEventListener('click', function(event) {
 
 async function loadStaffScheduleRangeApi(from, to) {
   try {
+    const headers = {};
+
+    const orgId = LS?.get?.("docpug_org_id");
+    if (orgId) headers["X-Org-ID"] = orgId;
+
     const res = await fetch(
       `/api/staff-schedule-range?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-      {
-        headers: authHeaders()
-      }
+      { headers }
     );
 
     const json = await res.json();
 
-    if (!json.ok) throw new Error(json.error || "range load failed");
+    if (!json.ok) {
+      throw new Error(json.error || "range load failed");
+    }
 
     return json.data || [];
   } catch (e) {
