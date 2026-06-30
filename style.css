@@ -3565,3 +3565,135 @@ body[data-theme="white"] .pugVisitCancel {
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--accent-color) 18%, transparent), rgba(255,255,255,.055)) !important;
 }
+/* =======================================================
+   DOC.PUG — MONTH CALENDAR
+======================================================= */
+
+.monthWeekHead {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin: 18px 0 10px;
+}
+
+.monthWeekHead div {
+  color: var(--text-muted, rgba(255,255,255,.55));
+  font-weight: 800;
+  font-size: .85rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.monthDay {
+  min-height: 150px;
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.08);
+  cursor: pointer;
+  transition: .2s ease;
+  overflow: hidden;
+}
+
+.monthDay:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-color, #a855f7);
+  background: color-mix(in srgb, var(--accent-color) 10%, rgba(255,255,255,.04));
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+}
+
+.monthDay.muted {
+  opacity: .35;
+}
+
+.monthDay.today {
+  border-color: var(--accent-color, #a855f7);
+  box-shadow: 0 0 0 1px var(--accent-glow, rgba(168,85,247,.3));
+}
+
+.monthDayTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.monthDayNum {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  color: var(--text-main, #fff);
+  background: rgba(255,255,255,.055);
+}
+
+.monthVisitCount {
+  font-size: .72rem;
+  color: var(--accent-color, #a855f7);
+  font-weight: 800;
+}
+
+.monthStaffList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.monthStaffPill {
+  padding: 7px 9px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.07);
+  color: var(--text-main, #fff);
+  font-size: .78rem;
+  font-weight: 750;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.monthEmptyShift {
+  padding: 8px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.025);
+  border: 1px dashed rgba(255,255,255,.07);
+  color: var(--text-muted, rgba(255,255,255,.45));
+  font-size: .78rem;
+}
+
+.monthMore {
+  color: var(--accent-color, #a855f7);
+  font-size: .78rem;
+  font-weight: 850;
+  padding-left: 4px;
+}
+
+body[data-theme="white"] .monthDay,
+body[data-theme="white"] .monthStaffPill {
+  background: rgba(255,255,255,.58) !important;
+  border-color: rgba(0,0,0,.07) !important;
+  color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .monthDayNum {
+  color: #1c1c1e !important;
+  background: rgba(255,255,255,.75) !important;
+}
+
+@media (max-width: 1100px) {
+  .monthGrid,
+  .monthWeekHead {
+    grid-template-columns: repeat(7, 150px);
+    overflow-x: auto;
+  }
+}

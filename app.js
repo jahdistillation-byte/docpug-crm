@@ -2959,7 +2959,144 @@ async function renderCalendarTab() {
     });
     return;
   }
+  if (calendarMode === "month") {
+    const base = new Date(today);
+    const year = base.getFullYear();
+    const month = base.getMonth();
 
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0);
+
+    const startDay = monthStart.getDay() || 7;
+    const gridStart = new Date(monthStart);
+    gridStart.setDate(monthStart.getDate() - startDay + 1);
+
+    const monthDays = Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(gridStart);
+      d.setDate(gridStart.getDate() + i);
+      return d.toISOString().slice(0, 10);
+    });
+
+    const monthNames = [
+      "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+      "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+    ];
+
+    const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+
+    const monthEvents = events.filter((ev) => {
+      const d = String(ev.event_date || "");
+      return monthDays.includes(d);
+    });
+
+    const monthSchedules = await Promise.all(
+      monthDays.map(async (date) => {
+        const rows = await loadStaffScheduleApi(date);
+        return [date, rows];
+      })
+    );
+
+    const scheduleByDate = new Map(monthSchedules);
+
+    page.innerHTML = `
+      <div class="card calendarCard">
+        <div class="calendarHeader">
+          <div>
+            <h2>Місячний графік</h2>
+            <div class="hint">Плануй зміни ветеринарів на весь місяць.</div>
+          </div>
+          <div class="calendarModes">
+            <button class="ghost" data-cal-mode="day">День</button>
+            <button class="ghost" data-cal-mode="week">Тиждень</button>
+            <button class="primary" data-cal-mode="month">Місяць</button>
+            <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
+            <button class="ghost" data-cal-mode="routes">Маршрути</button>
+          </div>
+        </div>
+
+        <div class="calendarTop">
+          <button class="ghost" id="calPrevMonth" type="button">←</button>
+          <div class="calendarDate">${monthNames[month]} ${year}</div>
+          <button class="ghost" id="calNextMonth" type="button">→</button>
+        </div>
+
+        <div class="monthWeekHead">
+          ${dayNames.map((d) => `<div>${d}</div>`).join("")}
+        </div>
+
+        <div class="monthGrid">
+          ${monthDays.map((date) => {
+            const d = new Date(date);
+            const isCurrentMonth = d.getMonth() === month;
+            const isToday = date === (typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0, 10));
+
+            const daySchedule = scheduleByDate.get(date) || [];
+            const activeIds = new Set(
+              daySchedule
+                .filter((x) => x.is_active !== false)
+                .map((x) => String(x.staff_id))
+            );
+
+            const activeStaff = daySchedule.length
+              ? staff.filter((doc) => activeIds.has(String(doc.id)))
+              : [];
+
+            const dayEvents = monthEvents.filter((ev) => String(ev.event_date || "") === date);
+
+            return `
+              <div class="monthDay ${isCurrentMonth ? "" : "muted"} ${isToday ? "today" : ""}" data-month-date="${escapeHtml(date)}">
+                <div class="monthDayTop">
+                  <div class="monthDayNum">${d.getDate()}</div>
+                  ${dayEvents.length ? `<div class="monthVisitCount">${dayEvents.length} записів</div>` : ""}
+                </div>
+
+                <div class="monthStaffList">
+                  ${
+                    activeStaff.length
+                      ? activeStaff.slice(0, 3).map((doc) => `
+                        <div class="monthStaffPill" style="border-left:4px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+                          👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}
+                        </div>
+                      `).join("")
+                      : `<div class="monthEmptyShift">Змін немає</div>`
+                  }
+                  ${activeStaff.length > 3 ? `<div class="monthMore">+${activeStaff.length - 3} ще</div>` : ""}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+
+    $("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
+    $("[data-cal-mode='week']")?.addEventListener("click", async () => { calendarMode = "week"; await renderCalendarTab(); });
+    $("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calendarMode = "schedule"; await renderCalendarTab(); });
+    $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
+
+    $("#calPrevMonth")?.addEventListener("click", async () => {
+      const d = new Date(year, month - 1, 1);
+      window.__calendarDate = d.toISOString().slice(0, 10);
+      await renderCalendarTab();
+    });
+
+    $("#calNextMonth")?.addEventListener("click", async () => {
+      const d = new Date(year, month + 1, 1);
+      window.__calendarDate = d.toISOString().slice(0, 10);
+      await renderCalendarTab();
+    });
+
+    $$("[data-month-date]").forEach((cell) => {
+      cell.addEventListener("click", async () => {
+        window.__calendarDate = cell.dataset.monthDate;
+        calendarMode = "day";
+        await renderCalendarTab();
+      });
+    });
+
+    return;
+  }
+  
   if (calendarMode === "schedule") {
     const schedule = await loadStaffScheduleApi(today);
     const specializations = await loadSpecializationsApi();
