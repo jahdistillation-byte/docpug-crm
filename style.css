@@ -2901,3 +2901,610 @@ body[data-theme="white"] .specPill {
 
     min-width:190px;
 }
+/* =======================================================
+   DOC.PUG — PREMIUM VISIT MODAL V2
+======================================================= */
+
+.pugVisitOverlay.open {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(168, 85, 247, 0.2), transparent 28%),
+    radial-gradient(circle at 82% 70%, rgba(124, 58, 237, 0.22), transparent 30%),
+    rgba(5, 3, 14, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+}
+
+.pugVisitModal {
+  width: min(1180px, 94vw);
+  max-height: 92vh;
+  overflow: hidden;
+  border-radius: 30px;
+  padding: 28px;
+  background:
+    linear-gradient(135deg, rgba(49, 35, 82, 0.92), rgba(17, 12, 35, 0.94)),
+    radial-gradient(circle at top left, rgba(168, 85, 247, 0.22), transparent 35%);
+  border: 1px solid rgba(196, 181, 253, 0.22);
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.58),
+    0 0 70px rgba(168, 85, 247, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #fff;
+  animation: pugVisitPop 0.24s ease both;
+}
+
+@keyframes pugVisitPop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header */
+
+.pugVisitHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.pugVisitHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pugVisitIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.55rem;
+  background: linear-gradient(135deg, #a855f7, #6d28d9);
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.55);
+}
+
+.pugVisitTitle {
+  font-size: 2rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.pugVisitSub {
+  margin-top: 6px;
+  font-size: 0.98rem;
+  color: rgba(233, 213, 255, 0.68);
+}
+
+.pugVisitClose {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pugVisitClose:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(196, 181, 253, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Body layout */
+
+.pugVisitBody {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1fr);
+  gap: 16px;
+  max-height: calc(92vh - 170px);
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.pugVisitBody::-webkit-scrollbar,
+.pugPatientResults::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pugVisitBody::-webkit-scrollbar-thumb,
+.pugPatientResults::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.35);
+}
+
+.pugVisitSection {
+  border-radius: 22px;
+  padding: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
+  border: 1px solid rgba(255, 255, 255, 0.105);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 10px 34px rgba(0, 0, 0, 0.18);
+}
+
+.pugVisitPatientBlock {
+  border-color: rgba(168, 85, 247, 0.38);
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.08),
+    0 16px 45px rgba(0, 0, 0, 0.2);
+}
+
+.pugVisitMedicalBlock {
+  grid-column: 1 / -1;
+}
+
+.pugSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: 1.15rem;
+  color: #fff;
+}
+
+.pugSectionTitle span {
+  color: #c084fc;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
+}
+
+.pugSectionTitle strong {
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+/* Fields */
+
+.pugVisitFieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.pugVisitField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pugVisitField > span {
+  color: rgba(237, 233, 254, 0.72);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.pugVisitInput {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(196, 181, 253, 0.16);
+  background: rgba(10, 7, 25, 0.36);
+  color: #fff;
+  padding: 12px 14px;
+  font-size: 0.96rem;
+  outline: none;
+  transition: 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.pugVisitInput::placeholder {
+  color: rgba(233, 213, 255, 0.38);
+}
+
+.pugVisitInput:focus {
+  border-color: rgba(168, 85, 247, 0.78);
+  background: rgba(20, 13, 42, 0.55);
+  box-shadow:
+    0 0 0 4px rgba(168, 85, 247, 0.13),
+    0 0 22px rgba(168, 85, 247, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.pugVisitTextarea {
+  resize: vertical;
+  min-height: 92px;
+  line-height: 1.45;
+}
+
+/* Search */
+
+.pugSearchWrap {
+  position: relative;
+}
+
+.pugSearchIcon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(233, 213, 255, 0.56);
+  z-index: 1;
+}
+
+.pugVisitSearch {
+  padding-left: 42px;
+}
+
+.pugPatientResults {
+  margin-top: 14px;
+  max-height: 280px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pugPatientResults .hint {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Patient result cards */
+
+.patientSearchItem {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 15px !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: #fff !important;
+  cursor: pointer;
+  transition: 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.patientSearchItem::before {
+  content: "🐾";
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(91, 33, 182, 0.9));
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.28);
+  font-size: 1.25rem;
+}
+
+.patientSearchItem:hover {
+  transform: translateY(-2px);
+  border-color: rgba(168, 85, 247, 0.55) !important;
+  background:
+    linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(255, 255, 255, 0.055)) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+}
+
+.patientSearchItem strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 850;
+  color: #fff;
+}
+
+.patientSearchItem span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.86rem;
+  color: rgba(233, 213, 255, 0.68);
+}
+
+.pugAddPatientBtn {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 12px;
+  border-radius: 15px;
+  border: 1px dashed rgba(168, 85, 247, 0.55);
+  background: rgba(168, 85, 247, 0.065);
+  color: #c084fc;
+  font-size: 0.98rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pugAddPatientBtn:hover {
+  background: rgba(168, 85, 247, 0.14);
+  color: #fff;
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.16);
+}
+/* =======================================================
+   DOC.PUG — PREMIUM VISIT MODAL V2 / PART 2
+======================================================= */
+
+.pugVisitMedicalGrid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr 0.45fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.pugFieldWide {
+  grid-row: span 2;
+}
+
+.pugFieldWideRight {
+  grid-column: 2 / -1;
+}
+
+.pugVisitFoot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.095);
+}
+
+.pugVisitCancel,
+.pugVisitSave {
+  min-height: 52px;
+  border-radius: 15px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.96rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition: 0.22s ease;
+}
+
+.pugVisitCancel {
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.pugVisitCancel:hover {
+  background: rgba(255, 255, 255, 0.105);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.pugVisitSave {
+  min-width: 230px;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  border-color: rgba(216, 180, 254, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 0 28px rgba(168, 85, 247, 0.38),
+    0 12px 30px rgba(124, 58, 237, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.pugVisitSave:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 38px rgba(168, 85, 247, 0.52),
+    0 18px 42px rgba(124, 58, 237, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Date/time native controls polish */
+
+.pugVisitInput[type="date"],
+.pugVisitInput[type="time"],
+.pugVisitInput select {
+  color-scheme: dark;
+}
+
+.pugVisitInput::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+/* Better select look */
+
+select.pugVisitInput {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(233, 213, 255, 0.8) 50%),
+    linear-gradient(135deg, rgba(233, 213, 255, 0.8) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 22px,
+    calc(100% - 14px) 22px;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 42px;
+}
+
+select.pugVisitInput option {
+  background: #171027;
+  color: #fff;
+}
+
+/* Cleaner fallback for old modal globals */
+
+#visitModal.modal-overlay.open,
+#visitModal.modal.open {
+  display: flex !important;
+}
+
+#visitModal:not(.open) {
+  display: none !important;
+}
+
+/* Patient block hidden/open still controlled by JS */
+
+#visitPatientBlock[style*="display: block"] {
+  display: block !important;
+}
+
+/* Small selected visual polish */
+
+#visitPatientSearch:not(:placeholder-shown) {
+  border-color: rgba(168, 85, 247, 0.55);
+}
+
+/* Soft inner separators */
+
+.pugVisitDetailsBlock,
+.pugVisitMedicalBlock {
+  position: relative;
+}
+
+.pugVisitDetailsBlock::after,
+.pugVisitMedicalBlock::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    transparent 32%,
+    rgba(168, 85, 247, 0.045)
+  );
+  opacity: 0.7;
+}
+
+/* White / iOS theme support */
+
+body[data-theme="white"] .pugVisitOverlay.open {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(0, 122, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 84% 74%, rgba(88, 86, 214, 0.14), transparent 32%),
+    rgba(235, 239, 247, 0.72) !important;
+}
+
+body[data-theme="white"] .pugVisitModal {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(236, 240, 248, 0.78)) !important;
+  color: #1c1c1e !important;
+  border-color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+body[data-theme="white"] .pugVisitTitle,
+body[data-theme="white"] .pugSectionTitle,
+body[data-theme="white"] .pugSectionTitle strong,
+body[data-theme="white"] .patientSearchItem strong {
+  color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .pugVisitSub,
+body[data-theme="white"] .pugVisitField > span,
+body[data-theme="white"] .patientSearchItem span {
+  color: #6e6e73 !important;
+}
+
+body[data-theme="white"] .pugVisitSection,
+body[data-theme="white"] .patientSearchItem {
+  background: rgba(255, 255, 255, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body[data-theme="white"] .pugVisitInput {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1c1c1e !important;
+}
+
+body[data-theme="white"] .pugVisitInput::placeholder {
+  color: rgba(60, 60, 67, 0.35) !important;
+}
+
+body[data-theme="white"] .pugVisitClose,
+body[data-theme="white"] .pugVisitCancel {
+  background: rgba(255, 255, 255, 0.65) !important;
+  color: #1c1c1e !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Responsive */
+
+@media (max-width: 980px) {
+  .pugVisitModal {
+    width: 96vw;
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .pugVisitBody {
+    grid-template-columns: 1fr;
+    max-height: calc(92vh - 160px);
+  }
+
+  .pugVisitMedicalBlock {
+    grid-column: auto;
+  }
+
+  .pugVisitMedicalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pugFieldWide,
+  .pugFieldWideRight {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .pugVisitFoot {
+    flex-direction: column-reverse;
+  }
+
+  .pugVisitCancel,
+  .pugVisitSave {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .pugVisitOverlay.open {
+    padding: 10px;
+  }
+
+  .pugVisitHead {
+    align-items: center;
+  }
+
+  .pugVisitIcon {
+    width: 46px;
+    height: 46px;
+    font-size: 1.25rem;
+  }
+
+  .pugVisitTitle {
+    font-size: 1.45rem;
+  }
+
+  .pugVisitFieldsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pugVisitClose {
+    width: 44px;
+    height: 44px;
+  }
+}
