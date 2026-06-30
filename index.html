@@ -251,82 +251,120 @@
     </nav>
 
     <!-- VISIT MODAL -->
-    <div class="modal modal-overlay" id="visitModal" aria-hidden="true" style="display:none;">
-        <div class="modal__panel modal-window" role="dialog" aria-modal="true" style="background: rgba(25, 15, 40, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);">
-            <div class="modal__head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <div>
-                    <div class="modal__title" style="font-size:1.3rem; font-weight:700; color:#fff;">Новий запис прийому</div>
-                    <div class="modal__sub" id="visitModalSub" style="font-size:0.85rem; color:var(--text-muted);">Пацієнт: —</div>
-                </div>
-                <button class="iconBtn" id="visitClose" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
-            </div>
+<div class="modal modal-overlay pugVisitOverlay" id="visitModal" aria-hidden="true" style="display:none;">
+  <div class="pugVisitModal" role="dialog" aria-modal="true">
 
-            <div class="modal__body" style="display:flex; flex-direction:column; gap:14px; max-height:70vh; overflow-y:auto; padding-right:10px;">
-                <div id="visitPatientBlock" style="display:none;">
-                    <label class="field">
-                        <div class="label" style="color:#fff; margin-bottom:6px; font-size:0.85rem;">Пацієнт</div>
-                        <input class="form-input" id="visitPatientSearch" placeholder="Пошук: пацієнт, власник, телефон..." autocomplete="off">
-                        <input id="visitPatientSelect" type="hidden">
-                        <div id="visitPatientResults" class="patientSearchResults" style="margin-top:4px;"></div>
-                    </label>
-                    <button class="btn-tab" id="btnCreatePatientFromVisit" type="button" style="margin: 10px 0;">+ Новий пацієнт</button>
-                </div>
-
-                <label class="field">
-                    <div class="label" style="color:#fff; margin-bottom:6px;">Дата</div>
-                    <input class="form-input" id="visitDate" type="date">
-                </label>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <label class="field">
-                        <div class="label" style="color:#fff; margin-bottom:6px;">Час початку</div>
-                        <input class="form-input" id="visitStartTime" type="time" value="10:00">
-                    </label>
-                    <label class="field">
-                        <div class="label" style="color:#fff; margin-bottom:6px;">Тривалість</div>
-                        <select class="form-input" id="visitDuration">
-                            <option value="30">30 хв</option>
-                            <option value="60" selected>60 хв</option>
-                            <option value="90">90 хв</option>
-                        </select>
-                    </label>
-                </div>
-
-                <label class="field">
-                    <div class="label" style="color:#fff; margin-bottom:6px;">Ветеринар</div>
-                    <select class="form-input" id="visitStaff">
-                        <option value="">Оберіть ветеринара</option>
-                    </select>
-                </label>
-
-                <label class="field">
-                    <div class="label" style="color:#fff; margin-bottom:6px;">Скарги / анамнез</div>
-                    <textarea class="form-input" id="visitNote" rows="3" placeholder="Опишіть стан..."></textarea>
-                </label>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <label class="field">
-                        <div class="label" style="color:#fff; margin-bottom:6px;">Діагноз</div>
-                        <input class="form-input" id="visitDx" placeholder="Риніт">
-                    </label>
-                    <label class="field">
-                        <div class="label" style="color:#fff; margin-bottom:6px;">Вага (кг)</div>
-                        <input class="form-input" id="visitWeight" placeholder="4.5">
-                    </label>
-                </div>
-
-                <label class="field">
-                    <div class="label" style="color:#fff; margin-bottom:6px;">Призначення лікаря</div>
-                    <textarea class="form-input" id="visitRx" rows="3" placeholder="Препарат, доза..."></textarea>
-                </label>
-            </div>
-
-            <div class="modal__foot" style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
-                <button class="btn-tab" id="visitCancel">Скасувати</button>
-                <button class="btn-primary" id="visitSave">Зберегти візит</button>
-            </div>
+    <div class="pugVisitHead">
+      <div class="pugVisitHeadLeft">
+        <div class="pugVisitIcon">📅</div>
+        <div>
+          <div class="pugVisitTitle">Новий запис прийому</div>
+          <div class="pugVisitSub" id="visitModalSub">Пацієнт: —</div>
         </div>
+      </div>
+
+      <button class="pugVisitClose" id="visitClose" type="button">×</button>
     </div>
+
+    <div class="pugVisitBody">
+
+      <div id="visitPatientBlock" class="pugVisitSection pugVisitPatientBlock" style="display:none;">
+        <div class="pugSectionTitle">
+          <span>👤</span>
+          <strong>1. Пацієнт</strong>
+        </div>
+
+        <div class="pugSearchWrap">
+          <span class="pugSearchIcon">⌕</span>
+          <input
+            class="pugVisitInput pugVisitSearch"
+            id="visitPatientSearch"
+            placeholder="Пошук: пацієнт, власник, телефон..."
+            autocomplete="off"
+          >
+          <input id="visitPatientSelect" type="hidden">
+        </div>
+
+        <div id="visitPatientResults" class="patientSearchResults pugPatientResults"></div>
+
+        <button class="pugAddPatientBtn" id="btnCreatePatientFromVisit" type="button">
+          <span>＋</span> Новий пацієнт
+        </button>
+      </div>
+
+      <div class="pugVisitSection pugVisitDetailsBlock">
+        <div class="pugSectionTitle">
+          <span>📅</span>
+          <strong>2. Деталі прийому</strong>
+        </div>
+
+        <div class="pugVisitFieldsGrid">
+          <label class="pugVisitField">
+            <span>Дата</span>
+            <input class="pugVisitInput" id="visitDate" type="date">
+          </label>
+
+          <label class="pugVisitField">
+            <span>Час початку</span>
+            <input class="pugVisitInput" id="visitStartTime" type="time" value="10:00">
+          </label>
+
+          <label class="pugVisitField">
+            <span>Тривалість</span>
+            <select class="pugVisitInput" id="visitDuration">
+              <option value="30">30 хв</option>
+              <option value="60" selected>60 хв</option>
+              <option value="90">90 хв</option>
+            </select>
+          </label>
+
+          <label class="pugVisitField">
+            <span>Ветеринар</span>
+            <select class="pugVisitInput" id="visitStaff">
+              <option value="">Оберіть ветеринара</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="pugVisitSection pugVisitMedicalBlock">
+        <div class="pugSectionTitle">
+          <span>🩺</span>
+          <strong>3. Медична інформація</strong>
+        </div>
+
+        <div class="pugVisitMedicalGrid">
+          <label class="pugVisitField pugFieldWide">
+            <span>Скарги / анамнез</span>
+            <textarea class="pugVisitInput pugVisitTextarea" id="visitNote" rows="4" placeholder="Опишіть симптоми, стан, історію хвороби..."></textarea>
+          </label>
+
+          <label class="pugVisitField">
+            <span>Діагноз</span>
+            <input class="pugVisitInput" id="visitDx" placeholder="Введіть діагноз...">
+          </label>
+
+          <label class="pugVisitField">
+            <span>Вага (кг)</span>
+            <input class="pugVisitInput" id="visitWeight" placeholder="Напр. 4.5">
+          </label>
+
+          <label class="pugVisitField pugFieldWideRight">
+            <span>Призначення лікаря</span>
+            <textarea class="pugVisitInput pugVisitTextarea" id="visitRx" rows="3" placeholder="Препарат, доза, рекомендації..."></textarea>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pugVisitFoot">
+      <button class="pugVisitCancel" id="visitCancel" type="button">✕ Скасувати</button>
+      <button class="pugVisitSave" id="visitSave" type="button">💾 Зберегти візит</button>
+    </div>
+
+  </div>
+</div>
 
     <!-- STAFF DыыRAWER -->
     <div id="staffDrawer" class="modal-overlay" aria-hidden="true">
