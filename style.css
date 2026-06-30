@@ -4078,3 +4078,16 @@ body[data-theme="white"] .monthDayNum {
 .monthBulkApply {
   width: 100%;
 }
+.monthDay.rangeSelected {
+  border-color: var(--accent-color, #a855f7) !important;
+  background: color-mix(in srgb, var(--accent-color) 16%, rgba(255,255,255,.04)) !important;
+  box-shadow: 0 0 0 1px var(--accent-glow), 0 14px 32px rgba(0,0,0,.24);
+}
+
+.monthSelectedBox {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent-color) 10%, rgba(255,255,255,.04));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 35%, rgba(255,255,255,.1));
+}
