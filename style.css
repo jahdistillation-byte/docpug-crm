@@ -3508,3 +3508,60 @@ body[data-theme="white"] .pugVisitCancel {
     height: 44px;
   }
 }
+/* =======================================================
+   VISIT MODAL — THEME ADAPTIVE PATCH
+======================================================= */
+
+.pugVisitModal {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-color) 18%, rgba(20,12,35,.94)), rgba(10,7,22,.95)) !important;
+  border-color: color-mix(in srgb, var(--accent-color) 34%, rgba(255,255,255,.12)) !important;
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.58),
+    0 0 70px color-mix(in srgb, var(--accent-color) 22%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+.pugVisitIcon,
+.pugVisitSave {
+  background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 72%, #000)) !important;
+  box-shadow:
+    0 0 28px var(--accent-glow),
+    0 12px 30px color-mix(in srgb, var(--accent-color) 26%, transparent) !important;
+}
+
+.pugVisitPatientBlock {
+  border-color: color-mix(in srgb, var(--accent-color) 44%, rgba(255,255,255,.12)) !important;
+}
+
+.pugSectionTitle span,
+.pugAddPatientBtn {
+  color: var(--accent-color) !important;
+}
+
+.pugVisitInput:focus {
+  border-color: color-mix(in srgb, var(--accent-color) 78%, white) !important;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent-color) 14%, transparent),
+    0 0 22px color-mix(in srgb, var(--accent-color) 16%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+.pugAddPatientBtn {
+  border-color: color-mix(in srgb, var(--accent-color) 55%, rgba(255,255,255,.15)) !important;
+  background: color-mix(in srgb, var(--accent-color) 8%, transparent) !important;
+}
+
+.pugAddPatientBtn:hover {
+  background: color-mix(in srgb, var(--accent-color) 16%, transparent) !important;
+}
+
+.patientSearchItem::before {
+  background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 70%, #000)) !important;
+}
+
+.patientSearchItem:hover {
+  border-color: color-mix(in srgb, var(--accent-color) 55%, rgba(255,255,255,.1)) !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-color) 18%, transparent), rgba(255,255,255,.055)) !important;
+}
