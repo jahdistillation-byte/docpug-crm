@@ -4701,3 +4701,421 @@ body[data-theme="white"] .monthDayNum {
   min-width: 108px;
   justify-content: center;
 }
+.staffProfilePro {
+  width: min(1320px, calc(100vw - 34px));
+  height: min(850px, calc(100vh - 34px));
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.staffProfileSidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--staff-color) 20%, transparent), transparent 45%),
+    rgba(255,255,255,0.025);
+}
+
+.staffProfileSideTop {
+  text-align: center;
+}
+
+.staffProfileSideName {
+  margin-top: 12px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.staffProfileSideRole {
+  margin-top: 3px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.staffProfileSideStatus {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  color: #dfffee;
+  background: rgba(34,197,94,0.17);
+  border: 1px solid rgba(34,197,94,0.35);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.staffProfileNav {
+  display: grid;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.staffProfileNav button {
+  width: 100%;
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.staffProfileNav button:hover,
+.staffProfileNav button.active {
+  background: linear-gradient(135deg, rgba(168,85,247,0.42), rgba(124,92,255,0.22));
+  color: var(--text);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.staffProfileContactCard {
+  margin-top: auto;
+  padding: 15px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+  display: grid;
+  gap: 9px;
+  font-size: 13px;
+}
+
+.staffProfileContactCard h4 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.staffProfileMain {
+  min-width: 0;
+  overflow: auto;
+  padding: 28px;
+}
+
+.staffProfileHeaderPro {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.staffProfileBreadcrumb {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  margin-bottom: 5px;
+}
+
+.staffProfileHeaderPro h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 34px;
+  letter-spacing: -0.05em;
+}
+
+.staffProfileSubtitle {
+  margin-top: 5px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.staffProfileKpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.staffKpiCard {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.staffKpiIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--staff-color) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--staff-color) 30%, transparent);
+}
+
+.staffKpiCard span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.staffKpiCard strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.staffKpiCard small {
+  display: block;
+  margin-top: 3px;
+  color: #5ff28c;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.staffProfileDashboardGrid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.15fr 0.95fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.staffPanel {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.staffPanel h3 {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.staffPanelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.staffPanelHead h3 {
+  margin: 0;
+}
+
+.staffPanelHead span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.staffFakeLineChart,
+.staffFakeBarChart {
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 12px 8px 4px;
+  border-radius: 16px;
+  background:
+    linear-gradient(to top, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 100% 25%;
+}
+
+.staffFakeLineChart span {
+  flex: 1;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(to top, rgba(34,197,94,0.22), rgba(34,197,94,0.95));
+  box-shadow: 0 12px 26px rgba(34,197,94,0.16);
+}
+
+.staffFakeBarChart span {
+  flex: 1;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(to top, rgba(168,85,247,0.35), rgba(168,85,247,1));
+  box-shadow: 0 12px 26px rgba(168,85,247,0.18);
+}
+
+.staffChartLabels {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.staffRatingPanel {
+  grid-row: span 1;
+}
+
+.staffRatingBig {
+  color: var(--text);
+  font-size: 34px;
+  font-weight: 950;
+}
+
+.staffRatingBig span {
+  color: #ffd65a;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+.staffRatingPanel p {
+  color: var(--muted);
+  margin: 6px 0 16px;
+}
+
+.staffRatingRows {
+  display: grid;
+  gap: 8px;
+}
+
+.staffRatingRows div {
+  display: grid;
+  grid-template-columns: 28px 1fr 26px;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.staffRatingRows b {
+  display: block;
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a855f7, #7c5cff);
+}
+
+.staffRatingRows em {
+  font-style: normal;
+  text-align: right;
+}
+
+.staffCallsPanel {
+  grid-column: span 1;
+}
+
+.staffCallRow {
+  display: grid;
+  grid-template-columns: 70px 1fr 105px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.staffCallRow:last-child {
+  border-bottom: 0;
+}
+
+.staffCallRow b,
+.staffCallRow strong {
+  color: var(--text);
+}
+
+.staffCallRow span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.staffCallRow .done {
+  color: #5ff28c;
+  font-weight: 900;
+}
+
+.staffFinanceRows {
+  display: grid;
+  gap: 12px;
+}
+
+.staffFinanceRows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--muted);
+}
+
+.staffFinanceRows b {
+  color: var(--text);
+}
+
+.staffSkillsPanel {
+  grid-column: span 2;
+}
+
+.staffSkillList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.staffSkillList span,
+.staffSkillList button {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--staff-color) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--staff-color) 28%, transparent);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.staffSkillList button {
+  cursor: pointer;
+  color: #c4b5fd;
+  background: rgba(124,92,255,0.12);
+}
+
+@media (max-width: 1050px) {
+  .staffProfilePro {
+    grid-template-columns: 1fr;
+    height: min(900px, calc(100vh - 24px));
+  }
+
+  .staffProfileSidebar {
+    display: none;
+  }
+
+  .staffProfileKpis,
+  .staffProfileDashboardGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .staffSkillsPanel {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .staffProfileMain {
+    padding: 18px;
+  }
+
+  .staffProfileKpis,
+  .staffProfileDashboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .staffSkillsPanel {
+    grid-column: span 1;
+  }
+}

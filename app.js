@@ -3718,112 +3718,236 @@ return;
 // Часть 5
 // ==========================================================================
 
-async function openCreateStaffModal() {
-  // Сначала открыть окно
-  const staffDrawer = document.getElementById("staffDrawer");
-  staffDrawer.classList.add("open");
-  staffDrawer.setAttribute("aria-hidden", "false");
-
-  // Затем очистить поля
-  document.getElementById("staffId").value = "";
-  document.getElementById("staffName").value = "";
-  document.getElementById("staffRole").value = "vet";
-  document.getElementById("staffSpecialization").value = "";
-  document.getElementById("staffPhone").value = "";
-  document.getElementById("staffShiftRate").value = 0;
-  document.getElementById("staffPercentRate").value = 0;
-  document.getElementById("staffColor").value = "#7C5CFF";
-  document.getElementById("staffNote").value = "";
-
-  if (typeof renderStaffSpecsBox === "function") await renderStaffSpecsBox([]);
-}
-
 function openStaffProfileModal(doc) {
   const staffColor = doc.color || "#7C5CFF";
   const staffName = doc.name || "Працівник";
   const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
+
   const roleLabel =
     doc.role === "assistant" ? "Асистент" :
     doc.role === "admin" ? "Адміністратор" :
     "Ветеринарний лікар";
 
+  const demoRevenue = 86430;
+  const demoVisits = 28;
+  const demoChecks = 26;
+  const demoAvgCheck = 3324;
+
   const modal = document.createElement("div");
   modal.className = "staffProfileOverlay";
+
   modal.innerHTML = `
-    <div class="staffProfileModal" style="--staff-color:${escapeHtml(staffColor)};">
+    <div class="staffProfileModal staffProfilePro" style="--staff-color:${escapeHtml(staffColor)};">
       <button class="staffProfileClose" type="button">×</button>
 
-      <div class="staffProfileHero">
-        ${
-          doc.avatar
-            ? `<img class="staffProfileAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
-            : `<div class="staffProfileAvatarLetter">${escapeHtml(staffLetter)}</div>`
-        }
+      <aside class="staffProfileSidebar">
+        <div class="staffProfileSideTop">
+          ${
+            doc.avatar
+              ? `<img class="staffProfileAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+              : `<div class="staffProfileAvatarLetter">${escapeHtml(staffLetter)}</div>`
+          }
 
-        <div>
-          <h2>${escapeHtml(staffName)}</h2>
-          <div class="staffProfileRole">${escapeHtml(roleLabel)}</div>
-          <div class="staffProfileTags">
-            <span>${escapeHtml(doc.specialization || "Напрями не вказані")}</span>
+          <div class="staffProfileSideName">${escapeHtml(staffName)}</div>
+          <div class="staffProfileSideRole">${escapeHtml(roleLabel)}</div>
+          <div class="staffProfileSideStatus">На зміні</div>
+        </div>
+
+        <nav class="staffProfileNav">
+          <button class="active" type="button">▦ Огляд</button>
+          <button type="button">☎ Виклики</button>
+          <button type="button">💰 Фінанси</button>
+          <button type="button">📈 Графіки</button>
+          <button type="button">⚖ Штрафи та бонуси</button>
+          <button type="button">🎓 Навички</button>
+          <button type="button">📄 Документи</button>
+          <button type="button">⚙ Налаштування</button>
+        </nav>
+
+        <div class="staffProfileContactCard">
+          <h4>Контакти</h4>
+          <div>📞 ${escapeHtml(doc.phone || "Не вказано")}</div>
+          <div>✉ Email не вказано</div>
+          <div>👥 Працює з —</div>
+          <div>ID #STF-${escapeHtml(String(doc.id || "0000")).padStart(4, "0")}</div>
+        </div>
+      </aside>
+
+      <main class="staffProfileMain">
+        <header class="staffProfileHeaderPro">
+          <div>
+            <div class="staffProfileBreadcrumb">Команда / Профіль співробітника</div>
+            <h2>${escapeHtml(staffName)}</h2>
+            <div class="staffProfileSubtitle">${escapeHtml(roleLabel)} · ${escapeHtml(doc.specialization || "Напрями не вказані")}</div>
           </div>
-        </div>
-      </div>
 
-      <div class="staffProfileStats">
-        <div>
-          <span>Візити цього місяця</span>
-          <strong>—</strong>
-        </div>
-        <div>
-          <span>Закрито чеків</span>
-          <strong>—</strong>
-        </div>
-        <div>
-          <span>Виручка</span>
-          <strong>— грн</strong>
-        </div>
-        <div>
-          <span>Середній чек</span>
-          <strong>— грн</strong>
-        </div>
-      </div>
+          <button class="ghost staffProfileEditInside" type="button" data-edit-staff-from-profile="${escapeHtml(String(doc.id))}">
+            ✏️ Редагувати
+          </button>
+        </header>
 
-      <div class="staffProfileGrid">
-        <section>
-          <h3>Фінанси</h3>
-          <p><b>Ставка:</b> ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</p>
-          <p><b>Відсоток:</b> ${escapeHtml(String(doc.percent_rate || 0))}%</p>
-          <p><b>Штрафи:</b> поки не додано</p>
-          <p><b>Бонуси:</b> поки не додано</p>
-        </section>
+        <section class="staffProfileKpis">
+          <div class="staffKpiCard">
+            <div class="staffKpiIcon">📅</div>
+            <div>
+              <span>Візити цього місяця</span>
+              <strong>${demoVisits}</strong>
+              <small>↑ 21% до минулого місяця</small>
+            </div>
+          </div>
 
-        <section>
-          <h3>Навички</h3>
-          <div class="staffSkillList">
-            <span>Терапія</span>
-            <span>Хірургія</span>
-            <span>УЗД</span>
+          <div class="staffKpiCard">
+            <div class="staffKpiIcon">✅</div>
+            <div>
+              <span>Закрито чеків</span>
+              <strong>${demoChecks}</strong>
+              <small>↑ 18% до минулого місяця</small>
+            </div>
+          </div>
+
+          <div class="staffKpiCard">
+            <div class="staffKpiIcon">💳</div>
+            <div>
+              <span>Виручка</span>
+              <strong>${demoRevenue.toLocaleString("uk-UA")} грн</strong>
+              <small>↑ 24% до минулого місяця</small>
+            </div>
+          </div>
+
+          <div class="staffKpiCard">
+            <div class="staffKpiIcon">📊</div>
+            <div>
+              <span>Середній чек</span>
+              <strong>${demoAvgCheck.toLocaleString("uk-UA")} грн</strong>
+              <small>↑ 6% до минулого місяця</small>
+            </div>
           </div>
         </section>
 
-        <section>
-          <h3>Останні виклики</h3>
-          <div class="hint">Тут буде історія візитів лікаря: пацієнт, послуги, сума, статус.</div>
-        </section>
+        <section class="staffProfileDashboardGrid">
+          <div class="staffPanel staffChartPanel">
+            <div class="staffPanelHead">
+              <h3>Виручка за 6 місяців</h3>
+              <span>грн</span>
+            </div>
+            <div class="staffFakeLineChart">
+              <span style="height:35%"></span>
+              <span style="height:48%"></span>
+              <span style="height:62%"></span>
+              <span style="height:76%"></span>
+              <span style="height:80%"></span>
+              <span style="height:92%"></span>
+            </div>
+            <div class="staffChartLabels">
+              <span>Січ</span><span>Лют</span><span>Бер</span><span>Кві</span><span>Тра</span><span>Чер</span>
+            </div>
+          </div>
 
-        <section>
-          <h3>Нотатка</h3>
-          <div class="hint">${escapeHtml(doc.note || "Нотатка не додана.")}</div>
+          <div class="staffPanel staffChartPanel">
+            <div class="staffPanelHead">
+              <h3>Кількість візитів</h3>
+              <span>візити</span>
+            </div>
+            <div class="staffFakeBarChart">
+              <span style="height:62%"></span>
+              <span style="height:58%"></span>
+              <span style="height:68%"></span>
+              <span style="height:86%"></span>
+              <span style="height:78%"></span>
+              <span style="height:82%"></span>
+            </div>
+            <div class="staffChartLabels">
+              <span>Січ</span><span>Лют</span><span>Бер</span><span>Кві</span><span>Тра</span><span>Чер</span>
+            </div>
+          </div>
+
+          <div class="staffPanel staffRatingPanel">
+            <h3>⭐ Рейтинг та оцінки</h3>
+            <div class="staffRatingBig">4.9 <span>★★★★★</span></div>
+            <p>на основі 78 оцінок</p>
+            <div class="staffRatingRows">
+              <div><span>5★</span><b style="width:88%"></b><em>71</em></div>
+              <div><span>4★</span><b style="width:18%"></b><em>6</em></div>
+              <div><span>3★</span><b style="width:4%"></b><em>1</em></div>
+            </div>
+          </div>
+
+          <div class="staffPanel staffCallsPanel">
+            <h3>Останні виклики</h3>
+
+            <div class="staffCallRow">
+              <div><b>16:20</b><span>09.05.2026</span></div>
+              <div><strong>Мейн-кун Барсік</strong><span>Операція, анестезія</span></div>
+              <div><b>14 200 грн</b><span class="done">Завершено</span></div>
+            </div>
+
+            <div class="staffCallRow">
+              <div><b>14:10</b><span>09.05.2026</span></div>
+              <div><strong>Лабрадор Рекс</strong><span>УЗД черевної порожнини</span></div>
+              <div><b>1 850 грн</b><span class="done">Завершено</span></div>
+            </div>
+
+            <div class="staffCallRow">
+              <div><b>11:35</b><span>09.05.2026</span></div>
+              <div><strong>Йоркшир Моллі</strong><span>Терапевтичний прийом</span></div>
+              <div><b>620 грн</b><span class="done">Завершено</span></div>
+            </div>
+          </div>
+
+          <div class="staffPanel">
+            <h3>Фінансова інформація</h3>
+            <div class="staffFinanceRows">
+              <div><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></div>
+              <div><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></div>
+              <div><span>Виплачено цього місяця</span><b>0 грн</b></div>
+              <div><span>Бонуси цього місяця</span><b>0 грн</b></div>
+              <div><span>Штрафи цього місяця</span><b>0 грн</b></div>
+            </div>
+          </div>
+
+          <div class="staffPanel">
+            <h3>Штрафи та бонуси</h3>
+            <div class="staffFinanceRows">
+              <div><span>Запізнення</span><b>0</b></div>
+              <div><span>Прогули</span><b>0</b></div>
+              <div><span>Попередження</span><b>0</b></div>
+              <div><span>Бонуси</span><b>0 грн</b></div>
+              <div><span>Штрафи</span><b>0 грн</b></div>
+            </div>
+          </div>
+
+          <div class="staffPanel staffSkillsPanel">
+            <h3>Навички та сертифікації</h3>
+            <div class="staffSkillList">
+              <span>Терапія</span>
+              <span>Хірургія</span>
+              <span>УЗД</span>
+              <span>Анестезіологія</span>
+              <span>Вакцинація</span>
+              <button type="button">+ Додати навичку</button>
+            </div>
+          </div>
+
+          <div class="staffPanel">
+            <h3>Нотатка</h3>
+            <div class="hint">${escapeHtml(doc.note || "Нотатка не додана.")}</div>
+          </div>
         </section>
-      </div>
+      </main>
     </div>
   `;
 
   document.body.appendChild(modal);
 
   modal.querySelector(".staffProfileClose")?.addEventListener("click", () => modal.remove());
+
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.remove();
+  });
+
+  modal.querySelector("[data-edit-staff-from-profile]")?.addEventListener("click", () => {
+    modal.remove();
+    openEditStaffModal(doc);
   });
 }
 
