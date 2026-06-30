@@ -3229,36 +3229,32 @@ const openMonthShiftDrawer = (date) => {
   $("#monthAllOff")?.addEventListener("click", () => {
     $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, false));
   });
+  
+
+
   $$(".monthBulkDay").forEach((btn) => {
   btn.addEventListener("click", () => {
     btn.classList.toggle("active");
   });
 });
-
 $("#monthBulkApply")?.addEventListener("click", async () => {
   const staffId = $("#monthBulkStaff")?.value;
   const from = $("#monthBulkFrom")?.value;
   const to = $("#monthBulkTo")?.value;
 
-  if (!staffId || !from || !to) {
-    alert("Оберіть лікаря та період.");
+  const selectedDays = $$(".monthBulkDay.active")
+    .map((btn) => Number(btn.dataset.bulkDay));
+
+  if (!staffId || !from || !to || !selectedDays.length) {
+    alert("Оберіть лікаря, період і дні тижня.");
     return;
   }
 
-  const activeWeekDays = new Set(
-    $$(".monthBulkDay.active").map((btn) => Number(btn.dataset.bulkDay))
-  );
-
-  if (!activeWeekDays.size) {
-    alert("Оберіть хоча б один день тижня.");
-    return;
-  }
-
-  const start = new Date(from);
-  const end = new Date(to);
+  const start = new Date(from + "T12:00:00");
+  const end = new Date(to + "T12:00:00");
 
   if (start > end) {
-    alert("Дата 'Від' не може бути пізніше дати 'До'.");
+    alert("Дата 'від' не може бути пізніше дати 'до'.");
     return;
   }
 
@@ -3267,32 +3263,33 @@ $("#monthBulkApply")?.addEventListener("click", async () => {
 
   while (cursor <= end) {
     const jsDay = cursor.getDay();
-    const isoDay = jsDay === 0 ? 7 : jsDay;
+    const normalizedDay = jsDay === 0 ? 7 : jsDay;
 
-    if (activeWeekDays.has(isoDay)) {
-      dates.push(cursor.toISOString().slice(0, 10));
+    if (selectedDays.includes(normalizedDay)) {
+      dates.push(localISO(cursor));
     }
 
     cursor.setDate(cursor.getDate() + 1);
   }
 
   if (!dates.length) {
-    alert("У вибраному періоді немає відповідних днів.");
+    alert("У вибраному періоді немає таких днів.");
     return;
   }
 
-  if (!confirm(`Призначити ${dates.length} змін?`)) return;
+  if (!confirm(`Застосувати графік для ${dates.length} днів?`)) return;
 
-  for (const doc of staff) {
-  await saveStaffScheduleApi({
-    work_date: date,
-    staff_id: doc.id,
-    is_active: activeStaffIds.has(String(doc.id)),
-  });
-}
+  for (const workDate of dates) {
+    await saveStaffScheduleApi({
+      work_date: workDate,
+      staff_id: staffId,
+      is_active: true,
+    });
+  }
 
   await renderCalendarTab();
 });
+
 
   $("#monthGoToDay")?.addEventListener("click", async () => {
     window.__calendarDate = date;
@@ -3305,15 +3302,13 @@ $("#monthBulkApply")?.addEventListener("click", async () => {
       $$(".monthShiftToggle.active").map((btn) => String(btn.dataset.monthShiftStaff))
     );
 
-    await Promise.all(
-      staff.map((doc) =>
-        saveStaffScheduleApi({
-          work_date: date,
-          staff_id: doc.id,
-          is_active: activeStaffIds.has(String(doc.id)),
-        })
-      )
-    );
+    for (const doc of staff) {
+  await saveStaffScheduleApi({
+    work_date: date,
+    staff_id: doc.id,
+    is_active: activeStaffIds.has(String(doc.id)),
+  });
+}
 
     await renderCalendarTab();
   });
