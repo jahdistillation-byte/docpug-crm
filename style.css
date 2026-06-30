@@ -2687,3 +2687,217 @@ body[data-theme="white"] .specPill {
 .modal:not(.open):not(.active) {
   display: none;
 }
+/* =======================================================
+   PREMIUM VISIT MODAL v2
+======================================================= */
+
+#visitModal .modal-card{
+    width:min(1120px,96vw);
+    max-height:92vh;
+    overflow:auto;
+
+    padding:34px;
+
+    border-radius:28px;
+
+    background:
+        linear-gradient(180deg,#2b2042,#1d1631);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.45),
+        inset 0 1px rgba(255,255,255,.05);
+}
+
+.visitHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:24px;
+}
+
+.visitHeader h2{
+    margin:0;
+    font-size:34px;
+    font-weight:700;
+}
+
+.visitHeader p{
+    margin-top:6px;
+    color:#9e97b8;
+}
+
+.visitGrid{
+    display:grid;
+    grid-template-columns:520px 1fr;
+    gap:24px;
+}
+
+.visitBlock{
+
+    background:rgba(255,255,255,.03);
+
+    border:1px solid rgba(255,255,255,.07);
+
+    border-radius:22px;
+
+    padding:22px;
+}
+
+.visitBlockTitle{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:24px;
+    font-weight:700;
+
+    margin-bottom:18px;
+}
+
+.visitBlockTitle span{
+
+    width:36px;
+    height:36px;
+
+    border-radius:12px;
+
+    background:#8d52ff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    box-shadow:0 0 24px rgba(141,82,255,.55);
+}
+
+.visitSearch{
+
+    background:#2b2442;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:14px;
+
+    padding:14px 18px;
+
+    color:white;
+}
+
+.patientSearchResults{
+
+    margin-top:14px;
+
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+
+    max-height:360px;
+
+    overflow:auto;
+}
+
+.patientSearchItem{
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:12px 16px;
+
+    border-radius:14px;
+
+    background:rgba(255,255,255,.03);
+
+    border:1px solid rgba(255,255,255,.05);
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.patientSearchItem:hover{
+
+    background:#342754;
+
+    border-color:#8d52ff;
+
+    transform:translateY(-2px);
+}
+
+.patientLeft{
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.patientAvatar{
+
+    width:54px;
+    height:54px;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#9959ff,#6b37ff);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:26px;
+}
+
+.patientInfo strong{
+
+    display:block;
+
+    font-size:17px;
+}
+
+.patientInfo small{
+
+    color:#aaa2c8;
+}
+
+.patientSpecies{
+
+    padding:6px 14px;
+
+    border-radius:999px;
+
+    background:#5c2bb8;
+
+    color:white;
+
+    font-size:13px;
+}
+
+.visitFields{
+
+    display:grid;
+    gap:18px;
+}
+
+.visitFields.two{
+
+    grid-template-columns:1fr 1fr;
+}
+
+.visitFooter{
+
+    margin-top:28px;
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:16px;
+}
+
+.visitFooter button{
+
+    min-width:190px;
+}
