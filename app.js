@@ -3413,26 +3413,72 @@ return;
           </div>
         </div>
         <div class="vetList">
-          ${staff.map((doc) => {
-            const row = scheduleMap.get(String(doc.id));
-            const isActive = row ? row.is_active !== false : false;
-            return `
-              <div class="vetCard" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-                <div class="vetInfo">
-                  <div class="scheduleName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-                  <div class="hint">🩺 ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</div>
-                  <div class="hint">📞 ${escapeHtml(doc.phone || "Telephone не вказано")}</div>
-                  <div class="hint">💰 Ставка: ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</div>
-                  <div class="hint">📈 Відсоток: ${escapeHtml(String(doc.percent_rate || 0))}%</div>
-                </div>
-                <div class="vetActions">
-                  <button class="ghost" type="button" data-edit-staff="${escapeHtml(String(doc.id))}">✏️ Редагувати</button>
-                  <button class="scheduleStatus ${isActive ? "active" : ""}" type="button" data-schedule-staff-id="${escapeHtml(String(doc.id))}">${isActive ? "На зміні" : "Вихідний"}</button>
-                </div>
-              </div>
-            `;
-          }).join("")}
+  ${staff.map((doc) => {
+    const row = scheduleMap.get(String(doc.id));
+    const isActive = row ? row.is_active !== false : false;
+
+    const staffColor = doc.color || "#7C5CFF";
+    const staffName = doc.name || "Працівник";
+    const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
+
+    return `
+      <div class="vetCard premiumVetCard" style="--staff-color:${escapeHtml(staffColor)};">
+        
+        <div class="vetAvatarWrap">
+          ${
+            doc.avatar
+              ? `<img class="vetAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+              : `<div class="vetAvatarLetter">${escapeHtml(staffLetter)}</div>`
+          }
         </div>
+
+        <div class="vetInfo premiumVetInfo">
+          <div class="premiumVetTop">
+            <div>
+              <div class="premiumVetName">${escapeHtml(staffName)}</div>
+              <div class="premiumVetRole">${escapeHtml(doc.role || "Ветеринарний лікар")}</div>
+            </div>
+
+            <button 
+              class="scheduleStatus premiumStatus ${isActive ? "active" : ""}" 
+              type="button" 
+              data-schedule-staff-id="${escapeHtml(String(doc.id))}">
+              ${isActive ? "На зміні" : "Вихідний"}
+            </button>
+          </div>
+
+          <div class="premiumVetSpecs">
+            <span class="premiumSpecTag">${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</span>
+          </div>
+
+          <div class="premiumVetMeta">
+            <div class="premiumMetaItem">
+              <span>Телефон</span>
+              <strong>${escapeHtml(doc.phone || "Не вказано")}</strong>
+            </div>
+
+            <div class="premiumMetaItem">
+              <span>Ставка</span>
+              <strong>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</strong>
+            </div>
+
+            <div class="premiumMetaItem">
+              <span>Відсоток</span>
+              <strong>${escapeHtml(String(doc.percent_rate || 0))}%</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="vetActions premiumVetActions">
+          <button class="ghost premiumEditBtn" type="button" data-edit-staff="${escapeHtml(String(doc.id))}">
+            ✏️ Редагувати
+          </button>
+        </div>
+
+      </div>
+    `;
+  }).join("")}
+</div>
       </div>
     `;
 

@@ -4352,3 +4352,167 @@ body[data-theme="white"] .monthDayNum {
   height: 40px !important;
   font-size: 0.85rem !important;
 }
+.premiumVetCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  gap: 18px;
+  align-items: stretch;
+  padding: 20px;
+  border: 1px solid rgba(124, 92, 255, 0.14);
+  border-left: 5px solid var(--staff-color);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--staff-color) 16%, transparent), transparent 34%),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.18);
+}
+
+.vetAvatarWrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.vetAvatarLetter,
+.vetAvatarImg {
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--staff-color) 55%, white 15%);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--staff-color) 26%, transparent);
+}
+
+.vetAvatarLetter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--staff-color), rgba(255, 255, 255, 0.12));
+  color: white;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.vetAvatarImg {
+  object-fit: cover;
+  display: block;
+}
+
+.premiumVetInfo {
+  min-width: 0;
+}
+
+.premiumVetTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.premiumVetName {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.premiumVetRole {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.premiumVetSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.premiumSpecTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--staff-color) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--staff-color) 28%, transparent);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.premiumVetMeta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.premiumMetaItem {
+  padding: 11px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.premiumMetaItem span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.premiumMetaItem strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.premiumVetActions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.premiumEditBtn {
+  white-space: nowrap;
+  border-radius: 14px;
+}
+
+.premiumStatus {
+  white-space: nowrap;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .premiumVetCard {
+    grid-template-columns: 56px 1fr;
+  }
+
+  .vetAvatarLetter,
+  .vetAvatarImg {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    font-size: 22px;
+  }
+
+  .premiumVetActions {
+    grid-column: 1 / -1;
+  }
+
+  .premiumVetMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .premiumVetTop {
+    flex-direction: column;
+  }
+}
