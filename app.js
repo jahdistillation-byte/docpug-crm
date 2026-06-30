@@ -3277,15 +3277,13 @@ $("#monthBulkApply")?.addEventListener("click", async () => {
 
   if (!confirm(`Призначити ${dates.length} змін?`)) return;
 
-  await Promise.all(
-    dates.map((workDate) =>
-      saveStaffScheduleApi({
-        work_date: workDate,
-        staff_id: staffId,
-        is_active: true,
-      })
-    )
-  );
+  for (const doc of staff) {
+  await saveStaffScheduleApi({
+    work_date: date,
+    staff_id: doc.id,
+    is_active: activeStaffIds.has(String(doc.id)),
+  });
+}
 
   await renderCalendarTab();
 });
