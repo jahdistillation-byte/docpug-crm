@@ -3003,28 +3003,30 @@ for (const date of monthDays) {
 
 const scheduleByDate = new Map(monthSchedules);
 
-    page.innerHTML = `
-      <div class="card calendarCard">
-        <div class="calendarHeader">
-          <div>
-            <h2>Місячний графік</h2>
-            <div class="hint">Плануй зміни ветеринарів на весь місяць.</div>
-          </div>
-          <div class="calendarModes">
-            <button class="ghost" data-cal-mode="day">День</button>
-            <button class="ghost" data-cal-mode="week">Тиждень</button>
-            <button class="primary" data-cal-mode="month">Місяць</button>
-            <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
-            <button class="ghost" data-cal-mode="routes">Маршрути</button>
-          </div>
-        </div>
+page.innerHTML = `
+  <div class="card calendarCard">
+    <div class="calendarHeader">
+      <div>
+        <h2>Місячний графік</h2>
+        <div class="hint">Плануй зміни ветеринарів на весь місяць.</div>
+      </div>
+      <div class="calendarModes">
+        <button class="ghost" data-cal-mode="day">День</button>
+        <button class="ghost" data-cal-mode="week">Тиждень</button>
+        <button class="primary" data-cal-mode="month">Місяць</button>
+        <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
+        <button class="ghost" data-cal-mode="routes">Маршрути</button>
+      </div>
+    </div>
 
-        <div class="calendarTop">
-          <button class="ghost" id="calPrevMonth" type="button">←</button>
-          <div class="calendarDate">${monthNames[month]} ${year}</div>
-          <button class="ghost" id="calNextMonth" type="button">→</button>
-        </div>
+    <div class="calendarTop">
+      <button class="ghost" id="calPrevMonth" type="button">←</button>
+      <div class="calendarDate">${monthNames[month]} ${year}</div>
+      <button class="ghost" id="calNextMonth" type="button">→</button>
+    </div>
 
+    <div class="monthPlannerLayout">
+      <div class="monthPlannerMain">
         <div class="monthWeekHead">
           ${dayNames.map((d) => `<div>${d}</div>`).join("")}
         </div>
@@ -3071,28 +3073,37 @@ const scheduleByDate = new Map(monthSchedules);
             `;
           }).join("")}
         </div>
-        <div class="monthShiftDrawer" id="monthShiftDrawer"></div>
       </div>
-    `;
 
-    $("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
-    $("[data-cal-mode='week']")?.addEventListener("click", async () => { calendarMode = "week"; await renderCalendarTab(); });
-    $("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calendarMode = "schedule"; await renderCalendarTab(); });
-    $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
+      <aside class="monthShiftDrawer" id="monthShiftDrawer">
+        <div class="monthDrawerPlaceholder">
+          <div class="monthDrawerPlaceholderIcon">📅</div>
+          <div class="monthDrawerPlaceholderTitle">Обери день</div>
+          <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+`;
 
-    $("#calPrevMonth")?.addEventListener("click", async () => {
-      const d = new Date(year, month - 1, 1);
-      window.__calendarDate = d.toISOString().slice(0, 10);
-      await renderCalendarTab();
-    });
+$("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
+$("[data-cal-mode='week']")?.addEventListener("click", async () => { calendarMode = "week"; await renderCalendarTab(); });
+$("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calendarMode = "schedule"; await renderCalendarTab(); });
+$("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
 
-    $("#calNextMonth")?.addEventListener("click", async () => {
-      const d = new Date(year, month + 1, 1);
-      window.__calendarDate = d.toISOString().slice(0, 10);
-      await renderCalendarTab();
-    });
+$("#calPrevMonth")?.addEventListener("click", async () => {
+  const d = new Date(year, month - 1, 1);
+  window.__calendarDate = d.toISOString().slice(0, 10);
+  await renderCalendarTab();
+});
 
-    const openMonthShiftDrawer = (date) => {
+$("#calNextMonth")?.addEventListener("click", async () => {
+  const d = new Date(year, month + 1, 1);
+  window.__calendarDate = d.toISOString().slice(0, 10);
+  await renderCalendarTab();
+});
+
+const openMonthShiftDrawer = (date) => {
   const drawer = $("#monthShiftDrawer");
   if (!drawer) return;
 
@@ -3137,7 +3148,7 @@ const scheduleByDate = new Map(monthSchedules);
 
       <div class="monthDrawerActions">
         <button class="ghost" id="monthGoToDay" type="button">Відкрити день</button>
-        <button class="primary" id="monthSaveShift" type="button">💾 Зберегти графік</button>
+        <button class="primary" id="monthSaveShift" type="button">💾 Зберегти</button>
       </div>
     </div>
   `;
@@ -3152,6 +3163,13 @@ const scheduleByDate = new Map(monthSchedules);
 
   $("#monthDrawerClose")?.addEventListener("click", () => {
     drawer.classList.remove("open");
+    drawer.innerHTML = `
+      <div class="monthDrawerPlaceholder">
+        <div class="monthDrawerPlaceholderIcon">📅</div>
+        <div class="monthDrawerPlaceholderTitle">Обери день</div>
+        <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
+      </div>
+    `;
   });
 
   $$(".monthShiftToggle").forEach((btn) => {
@@ -3189,22 +3207,23 @@ const scheduleByDate = new Map(monthSchedules);
       )
     );
 
-  await renderCalendarTab();
+    await renderCalendarTab();
   });
 };
 
 $$("[data-month-date]").forEach((cell) => {
   cell.addEventListener("click", () => {
     const date = cell.dataset.monthDate;
-    console.log("MONTH CLICK:", date);
-
     if (!date) return;
+
+    $$("[data-month-date]").forEach((x) => x.classList.remove("selected"));
+    cell.classList.add("selected");
 
     openMonthShiftDrawer(date);
   });
 });
 
-    return;
+return;
   }
 
   if (calendarMode === "schedule") {

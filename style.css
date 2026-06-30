@@ -3870,3 +3870,76 @@ body[data-theme="white"] .monthDayNum {
   gap: 12px;
   margin-top: 18px;
 }
+.monthPlannerLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.monthPlannerMain {
+  min-width: 0;
+}
+
+.monthShiftDrawer {
+  display: block;
+  position: sticky;
+  top: 24px;
+  z-index: 20;
+}
+
+.monthDrawerPlaceholder,
+.monthDrawerCard {
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.11);
+  box-shadow: 0 18px 45px rgba(0,0,0,.22);
+}
+
+.monthDrawerPlaceholder {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.monthDrawerPlaceholderIcon {
+  font-size: 2rem;
+}
+
+.monthDrawerPlaceholderTitle {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-main, #fff);
+}
+
+.monthDay.selected {
+  border-color: var(--accent-color, #a855f7) !important;
+  box-shadow: 0 0 0 1px var(--accent-glow), 0 16px 38px rgba(0,0,0,.24);
+}
+
+.monthDrawerStaff {
+  grid-template-columns: 1fr;
+}
+
+.monthDrawerActions {
+  flex-direction: column;
+}
+
+.monthDrawerActions button {
+  width: 100%;
+}
+
+@media (max-width: 1250px) {
+  .monthPlannerLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .monthShiftDrawer {
+    position: static;
+  }
+}
