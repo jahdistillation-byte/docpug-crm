@@ -3092,9 +3092,7 @@ const scheduleByDate = new Map(monthSchedules);
       await renderCalendarTab();
     });
 
-    const openMonthShiftDrawer = (date) => {
-  const drawer = $("#monthShiftDrawer");
-  if (!drawer) return;
+  
 
   const daySchedule = scheduleByDate.get(date) || [];
   const activeIds = new Set(
@@ -3149,6 +3147,109 @@ const scheduleByDate = new Map(monthSchedules);
       btn.classList.toggle("active", active);
       btn.querySelector("b").textContent = active ? "На зміні" : "Вихідний";
     });
+  });
+
+  $("#monthGoToDay")?.addEventListener("click", async () => {
+    window.__calendarDate = date;
+    calendarMode = "day";
+    await renderCalendarTab();
+  });
+
+  $("#monthSaveShift")?.addEventListener("click", async () => {
+    const activeStaffIds = new Set(
+      $$(".monthShiftToggle.active").map((btn) => String(btn.dataset.monthShiftStaff))
+    );
+
+    await Promise.all(
+      staff.map((doc) =>
+        saveStaffScheduleApi({
+          work_date: date,
+          staff_id: doc.id,
+          is_active: activeStaffIds.has(String(doc.id)),
+        })
+      )
+    );
+
+    await renderCalendarTab();
+  });
+};
+
+const openMonthShiftDrawer = (date) => {
+  const drawer = $("#monthShiftDrawer");
+  if (!drawer) return;
+
+  const daySchedule = scheduleByDate.get(date) || [];
+
+  const activeIds = new Set(
+    daySchedule
+      .filter((x) => x.is_active !== false)
+      .map((x) => String(x.staff_id))
+  );
+
+  drawer.innerHTML = `
+    <div class="monthDrawerCard">
+      <div class="monthDrawerHead">
+        <div>
+          <div class="monthDrawerTitle">📅 Графік на ${escapeHtml(date)}</div>
+          <div class="hint">Обери, хто працює в цей день.</div>
+        </div>
+        <button class="ghost" id="monthDrawerClose" type="button">×</button>
+      </div>
+
+      <div class="monthDrawerQuick">
+        <button class="ghost" id="monthAllActive" type="button">Усі на зміні</button>
+        <button class="ghost" id="monthAllOff" type="button">Усім вихідний</button>
+      </div>
+
+      <div class="monthDrawerStaff">
+        ${staff.map((doc) => {
+          const active = activeIds.has(String(doc.id));
+
+          return `
+            <button
+              class="monthShiftToggle ${active ? "active" : ""}"
+              type="button"
+              data-month-shift-staff="${escapeHtml(String(doc.id))}"
+              style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
+            >
+              <span>👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</span>
+              <b>${active ? "На зміні" : "Вихідний"}</b>
+            </button>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="monthDrawerActions">
+        <button class="ghost" id="monthGoToDay" type="button">Відкрити день</button>
+        <button class="primary" id="monthSaveShift" type="button">💾 Зберегти графік</button>
+      </div>
+    </div>
+  `;
+
+  drawer.classList.add("open");
+
+  const setToggleState = (btn, active) => {
+    btn.classList.toggle("active", active);
+    const label = btn.querySelector("b");
+    if (label) label.textContent = active ? "На зміні" : "Вихідний";
+  };
+
+  $("#monthDrawerClose")?.addEventListener("click", () => {
+    drawer.classList.remove("open");
+  });
+
+  $$(".monthShiftToggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setToggleState(btn, !btn.classList.contains("active"));
+    });
+  });
+
+  $("#monthAllActive")?.addEventListener("click", () => {
+    $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, true));
+  });
+
+  $("#monthAllOff")?.addEventListener("click", () => {
+    $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, false));
   });
 
   $("#monthGoToDay")?.addEventListener("click", async () => {
@@ -3461,7 +3562,7 @@ $$("[data-month-date]").forEach((cell) => {
   });
 
   $$("[data-cal-mode]").forEach((btn) => { btn.addEventListener("click", async () => { calendarMode = btn.dataset.calMode; await renderCalendarTab(); }); });
-}
+
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ПЕРСОНАЛ, МОДАЛКИ КАЛЕНДАРЯ И КАРТОЧКИ АНАЛИЗОВ)
 // Часть 5
