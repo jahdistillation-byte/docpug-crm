@@ -3106,6 +3106,14 @@ $("#calNextMonth")?.addEventListener("click", async () => {
   window.__calendarDate = localISO(d);
   await renderCalendarTab();
 });
+const selectedMonthDates = new Set();
+
+const paintSelectedMonthDays = () => {
+  $$("[data-month-date]").forEach((cell) => {
+    const date = cell.dataset.monthDate;
+    cell.classList.toggle("rangeSelected", selectedMonthDates.has(date));
+  });
+};
 
 const openMonthShiftDrawer = (date) => {
   const drawer = $("#monthShiftDrawer");
@@ -3145,6 +3153,27 @@ const openMonthShiftDrawer = (date) => {
       `).join("")}
     </select>
   </label>
+
+${selectedMonthDates.size > 1 ? `
+  <div class="monthSelectedBox">
+    <div class="monthBulkTitle">Виділено днів: ${selectedMonthDates.size}</div>
+
+    <label class="monthBulkField">
+      <span>Лікар для виділених днів</span>
+      <select id="monthSelectedStaff">
+        ${staff.map((doc) => `
+          <option value="${escapeHtml(String(doc.id))}">
+            ${escapeHtml(doc.name || "Працівник")}
+          </option>
+        `).join("")}
+      </select>
+    </label>
+
+    <button class="primary monthBulkApply" id="monthApplySelectedDates" type="button">
+      Застосувати на виділені дні
+    </button>
+  </div>
+` : ""}
 
   <div class="monthBulkDates">
     <label class="monthBulkField">
@@ -3289,7 +3318,28 @@ $("#monthBulkApply")?.addEventListener("click", async () => {
 
   await renderCalendarTab();
 });
+$("#monthApplySelectedDates")?.addEventListener("click", async () => {
+  const staffId = $("#monthSelectedStaff")?.value;
 
+  if (!staffId || selectedMonthDates.size < 2) {
+    alert("Виділи дні та обери лікаря.");
+    return;
+  }
+
+  const dates = Array.from(selectedMonthDates).sort();
+
+  if (!confirm(`Призначити лікаря на ${dates.length} днів?`)) return;
+
+  for (const workDate of dates) {
+    await saveStaffScheduleApi({
+      work_date: workDate,
+      staff_id: staffId,
+      is_active: true,
+    });
+  }
+
+  await renderCalendarTab();
+});
 
   $("#monthGoToDay")?.addEventListener("click", async () => {
     window.__calendarDate = date;
