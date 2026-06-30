@@ -4091,3 +4091,199 @@ body[data-theme="white"] .monthDayNum {
   background: color-mix(in srgb, var(--accent-color) 10%, rgba(255,255,255,.04));
   border: 1px solid color-mix(in srgb, var(--accent-color) 35%, rgba(255,255,255,.1));
 }
+.monthGrid,
+.monthDay,
+.monthDay * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.monthDay {
+  cursor: pointer;
+}
+/* ==========================================================
+   MONTH PLANNER FINAL POLISH
+========================================================== */
+
+.monthLayout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 380px;
+    gap:28px;
+    align-items:start;
+}
+
+.monthGrid{
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+.monthDay{
+    cursor:pointer;
+    transition:.18s ease;
+}
+
+.monthDay:hover{
+    transform:translateY(-2px);
+}
+
+.monthShiftDrawer{
+    width:380px;
+    flex:0 0 380px;
+    position:sticky;
+    top:24px;
+    align-self:start;
+}
+
+.monthDrawerCard{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.monthDrawerHead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.monthDrawerTitle{
+    font-size:30px;
+    font-weight:700;
+    line-height:1.1;
+}
+
+.monthDrawerQuick{
+    display:flex;
+    gap:10px;
+}
+
+.monthBulkBox{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    padding:18px;
+    border-radius:18px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
+}
+
+.monthBulkTitle{
+    font-size:18px;
+    font-weight:700;
+}
+
+.monthBulkField{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:0;
+}
+
+.monthBulkField span{
+    font-size:12px;
+    font-weight:600;
+    opacity:.7;
+}
+
+.monthBulkField input,
+.monthBulkField select{
+    width:100%;
+    box-sizing:border-box;
+}
+
+.monthBulkDates{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.monthBulkDates input{
+    min-width:0;
+}
+
+.monthBulkDays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+.monthBulkDay{
+    height:38px;
+    border-radius:12px;
+    font-weight:600;
+}
+
+.monthBulkApply{
+    width:100%;
+    margin-top:6px;
+}
+
+.monthDrawerStaff{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.monthShiftToggle{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    min-height:52px;
+    padding:0 16px;
+    border-radius:16px;
+    transition:.18s;
+}
+
+.monthShiftToggle:hover{
+    transform:translateX(3px);
+}
+
+.monthDrawerActions{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:auto;
+}
+
+.monthDrawerActions button{
+    width:100%;
+}
+
+/* Placeholder */
+
+.monthDrawerPlaceholder{
+    height:100%;
+    min-height:620px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    gap:12px;
+    opacity:.8;
+}
+
+.monthDrawerPlaceholderIcon{
+    font-size:54px;
+}
+
+.monthDrawerPlaceholderTitle{
+    font-size:34px;
+    font-weight:700;
+}
+
+/* Responsive */
+
+@media (max-width:1450px){
+
+    .monthLayout{
+        grid-template-columns:1fr;
+    }
+
+    .monthShiftDrawer{
+        width:100%;
+        position:relative;
+        top:0;
+    }
+
+}
