@@ -7148,7 +7148,7 @@ document.addEventListener('click', function(event) {
 async function loadStaffScheduleRangeApi(from, to) {
   try {
     const res = await fetch(
-      `${API_BASE}/staff-schedule-range?from=${from}&to=${to}`,
+      `/api/staff-schedule-range?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
       {
         headers: authHeaders()
       }
@@ -7156,11 +7156,11 @@ async function loadStaffScheduleRangeApi(from, to) {
 
     const json = await res.json();
 
-    if (!json.ok) throw new Error(json.error);
+    if (!json.ok) throw new Error(json.error || "range load failed");
 
     return json.data || [];
   } catch (e) {
-    console.error(e);
+    console.error("loadStaffScheduleRangeApi failed:", e);
     return [];
   }
 }
