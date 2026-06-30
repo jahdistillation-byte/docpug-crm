@@ -3943,3 +3943,64 @@ body[data-theme="white"] .monthDayNum {
     position: static;
   }
 }
+/* MONTH PLANNER SIZE FIX */
+
+.monthPlannerLayout {
+  grid-template-columns: minmax(0, 1fr) 280px !important;
+  gap: 14px !important;
+}
+
+.monthGrid {
+  grid-template-columns: repeat(7, minmax(92px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.monthDay {
+  min-height: 118px !important;
+  padding: 10px !important;
+  border-radius: 16px !important;
+}
+
+.monthDrawerCard,
+.monthDrawerPlaceholder {
+  padding: 14px !important;
+  border-radius: 20px !important;
+}
+
+.monthDrawerTitle {
+  font-size: 1rem !important;
+}
+
+.monthDrawerQuick {
+  gap: 8px !important;
+}
+
+.monthDrawerQuick .ghost {
+  padding: 8px 10px !important;
+  font-size: 0.78rem !important;
+}
+
+.monthShiftToggle {
+  padding: 11px !important;
+  border-radius: 14px !important;
+  font-size: 0.82rem !important;
+}
+
+.monthShiftToggle b {
+  font-size: 0.72rem !important;
+}
+
+.monthDrawerActions {
+  gap: 8px !important;
+}
+
+.monthDrawerActions button {
+  padding: 10px 12px !important;
+  font-size: 0.82rem !important;
+}
+
+.monthStaffPill,
+.monthEmptyShift {
+  font-size: 0.72rem !important;
+  padding: 6px 8px !important;
+}
