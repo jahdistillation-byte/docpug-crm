@@ -2959,35 +2959,35 @@ async function renderCalendarTab() {
     });
     return;
   }
-  if (calendarMode === "month") {
-    const base = new Date(today);
-    const year = base.getFullYear();
-    const month = base.getMonth();
+ if (calendarMode === "month") {
+  const base = new Date(today);
+  const year = base.getFullYear();
+  const month = base.getMonth();
 
-    const monthStart = new Date(year, month, 1);
-    const monthEnd = new Date(year, month + 1, 0);
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
 
-    const startDay = monthStart.getDay() || 7;
-    const gridStart = new Date(monthStart);
-    gridStart.setDate(monthStart.getDate() - startDay + 1);
+  const startDay = monthStart.getDay() || 7;
+  const gridStart = new Date(monthStart);
+  gridStart.setDate(monthStart.getDate() - startDay + 1);
 
-    const monthDays = Array.from({ length: 42 }, (_, i) => {
-  const d = new Date(gridStart);
-  d.setDate(gridStart.getDate() + i);
-  return localISO(d);
-});
+  const localISO = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
 
-    const monthNames = [
-      "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
-      "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-    ];
-    
-const localISO = (d) => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
+  const monthDays = Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(gridStart);
+    d.setDate(gridStart.getDate() + i);
+    return localISO(d);
+  });
+
+  const monthNames = [
+    "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+    "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+  ];
     const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
     const monthEvents = events.filter((ev) => {
