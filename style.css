@@ -4674,3 +4674,30 @@ body[data-theme="white"] .monthDayNum {
     align-items: flex-start;
   }
 }
+.staffProfileOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(2, 6, 18, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.staffProfileModal {
+  margin: 0;
+  transform: none;
+}
+
+.premiumVetActions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.premiumProfileBtn,
+.premiumEditBtn {
+  min-width: 108px;
+  justify-content: center;
+}

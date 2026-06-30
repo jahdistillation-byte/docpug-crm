@@ -3748,7 +3748,7 @@ function openStaffProfileModal(doc) {
     "Ветеринарний лікар";
 
   const modal = document.createElement("div");
-  modal.className = "modalOverlay";
+  modal.className = "staffProfileOverlay";
   modal.innerHTML = `
     <div class="staffProfileModal" style="--staff-color:${escapeHtml(staffColor)};">
       <button class="staffProfileClose" type="button">×</button>
