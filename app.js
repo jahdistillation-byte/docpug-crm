@@ -3189,12 +3189,17 @@ const scheduleByDate = new Map(monthSchedules);
       )
     );
 
-    await renderCalendarTab();
+  await renderCalendarTab();
   });
-};((cell) => {
+};
+
+$$("[data-month-date]").forEach((cell) => {
   cell.addEventListener("click", () => {
     const date = cell.dataset.monthDate;
+    console.log("MONTH CLICK:", date);
+
     if (!date) return;
+
     openMonthShiftDrawer(date);
   });
 });
