@@ -2972,16 +2972,22 @@ async function renderCalendarTab() {
     gridStart.setDate(monthStart.getDate() - startDay + 1);
 
     const monthDays = Array.from({ length: 42 }, (_, i) => {
-      const d = new Date(gridStart);
-      d.setDate(gridStart.getDate() + i);
-      return d.toISOString().slice(0, 10);
-    });
+  const d = new Date(gridStart);
+  d.setDate(gridStart.getDate() + i);
+  return localISO(d);
+});
 
     const monthNames = [
       "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
       "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
     ];
-
+    
+const localISO = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
     const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
     const monthEvents = events.filter((ev) => {
@@ -3090,14 +3096,14 @@ $("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calenda
 $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
 
 $("#calPrevMonth")?.addEventListener("click", async () => {
-  const d = new Date(year, month - 1, 1);
-  window.__calendarDate = d.toISOString().slice(0, 10);
+  const d = new Date(year, month - 1, 1, 12, 0, 0);
+  window.__calendarDate = localISO(d);
   await renderCalendarTab();
 });
 
 $("#calNextMonth")?.addEventListener("click", async () => {
-  const d = new Date(year, month + 1, 1);
-  window.__calendarDate = d.toISOString().slice(0, 10);
+  const d = new Date(year, month + 1, 1, 12, 0, 0);
+  window.__calendarDate = localISO(d);
   await renderCalendarTab();
 });
 
