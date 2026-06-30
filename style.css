@@ -4516,3 +4516,161 @@ body[data-theme="white"] .monthDayNum {
     flex-direction: column;
   }
 }
+.staffProfileModal {
+  position: relative;
+  width: min(980px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 26px;
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--staff-color) 32%, white 8%);
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--staff-color) 22%, transparent), transparent 34%),
+    rgba(13, 22, 42, 0.96);
+  box-shadow: 0 28px 90px rgba(0,0,0,0.55);
+}
+
+.staffProfileClose {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.staffProfileHero {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.staffProfileAvatarLetter,
+.staffProfileAvatarImg {
+  width: 84px;
+  height: 84px;
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--staff-color) 55%, white 12%);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--staff-color) 28%, transparent);
+}
+
+.staffProfileAvatarLetter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--staff-color), rgba(255,255,255,0.14));
+  color: white;
+  font-size: 38px;
+  font-weight: 900;
+}
+
+.staffProfileAvatarImg {
+  object-fit: cover;
+}
+
+.staffProfileHero h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.04em;
+}
+
+.staffProfileRole {
+  margin-top: 4px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.staffProfileTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.staffProfileTags span,
+.staffSkillList span {
+  display: inline-flex;
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--staff-color) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--staff-color) 26%, transparent);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.staffProfileStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.staffProfileStats div,
+.staffProfileGrid section {
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  padding: 16px;
+}
+
+.staffProfileStats span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.staffProfileStats strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 22px;
+  color: var(--text);
+}
+
+.staffProfileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.staffProfileGrid h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.staffProfileGrid p {
+  margin: 8px 0;
+  color: var(--muted);
+}
+
+.staffProfileGrid b {
+  color: var(--text);
+}
+
+.staffSkillList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .staffProfileStats,
+  .staffProfileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .staffProfileHero {
+    align-items: flex-start;
+  }
+}

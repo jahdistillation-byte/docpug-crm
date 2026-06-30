@@ -3470,10 +3470,14 @@ return;
         </div>
 
         <div class="vetActions premiumVetActions">
-          <button class="ghost premiumEditBtn" type="button" data-edit-staff="${escapeHtml(String(doc.id))}">
-            ✏️ Редагувати
-          </button>
-        </div>
+  <button class="ghost premiumProfileBtn" type="button" data-open-staff-profile="${escapeHtml(String(doc.id))}">
+    👤 Профіль
+  </button>
+
+  <button class="ghost premiumEditBtn" type="button" data-edit-staff="${escapeHtml(String(doc.id))}">
+    ✏️ Редагувати
+  </button>
+</div>
 
       </div>
     `;
@@ -3514,6 +3518,15 @@ return;
         openEditStaffModal(staffRow);
       });
     });
+
+    $$("[data-open-staff-profile]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.openStaffProfile;
+    const staffRow = staff.find((x) => String(x.id) === String(id));
+    if (!staffRow) return;
+    openStaffProfileModal(staffRow);
+  });
+});
     return;
   }
 
@@ -3725,6 +3738,94 @@ async function openCreateStaffModal() {
   if (typeof renderStaffSpecsBox === "function") await renderStaffSpecsBox([]);
 }
 
+function openStaffProfileModal(doc) {
+  const staffColor = doc.color || "#7C5CFF";
+  const staffName = doc.name || "Працівник";
+  const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
+  const roleLabel =
+    doc.role === "assistant" ? "Асистент" :
+    doc.role === "admin" ? "Адміністратор" :
+    "Ветеринарний лікар";
+
+  const modal = document.createElement("div");
+  modal.className = "modalOverlay";
+  modal.innerHTML = `
+    <div class="staffProfileModal" style="--staff-color:${escapeHtml(staffColor)};">
+      <button class="staffProfileClose" type="button">×</button>
+
+      <div class="staffProfileHero">
+        ${
+          doc.avatar
+            ? `<img class="staffProfileAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+            : `<div class="staffProfileAvatarLetter">${escapeHtml(staffLetter)}</div>`
+        }
+
+        <div>
+          <h2>${escapeHtml(staffName)}</h2>
+          <div class="staffProfileRole">${escapeHtml(roleLabel)}</div>
+          <div class="staffProfileTags">
+            <span>${escapeHtml(doc.specialization || "Напрями не вказані")}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="staffProfileStats">
+        <div>
+          <span>Візити цього місяця</span>
+          <strong>—</strong>
+        </div>
+        <div>
+          <span>Закрито чеків</span>
+          <strong>—</strong>
+        </div>
+        <div>
+          <span>Виручка</span>
+          <strong>— грн</strong>
+        </div>
+        <div>
+          <span>Середній чек</span>
+          <strong>— грн</strong>
+        </div>
+      </div>
+
+      <div class="staffProfileGrid">
+        <section>
+          <h3>Фінанси</h3>
+          <p><b>Ставка:</b> ${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</p>
+          <p><b>Відсоток:</b> ${escapeHtml(String(doc.percent_rate || 0))}%</p>
+          <p><b>Штрафи:</b> поки не додано</p>
+          <p><b>Бонуси:</b> поки не додано</p>
+        </section>
+
+        <section>
+          <h3>Навички</h3>
+          <div class="staffSkillList">
+            <span>Терапія</span>
+            <span>Хірургія</span>
+            <span>УЗД</span>
+          </div>
+        </section>
+
+        <section>
+          <h3>Останні виклики</h3>
+          <div class="hint">Тут буде історія візитів лікаря: пацієнт, послуги, сума, статус.</div>
+        </section>
+
+        <section>
+          <h3>Нотатка</h3>
+          <div class="hint">${escapeHtml(doc.note || "Нотатка не додана.")}</div>
+        </section>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector(".staffProfileClose")?.addEventListener("click", () => modal.remove());
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
+}
 
 async function loadSpecializationsApi() {
   try {
