@@ -3126,6 +3126,46 @@ const openMonthShiftDrawer = (date) => {
         <button class="ghost" id="monthAllActive" type="button">Усі на зміні</button>
         <button class="ghost" id="monthAllOff" type="button">Усім вихідний</button>
       </div>
+      <div class="monthBulkBox">
+  <div class="monthBulkTitle">Масове призначення</div>
+
+  <label class="monthBulkField">
+    <span>Лікар</span>
+    <select id="monthBulkStaff">
+      ${staff.map((doc) => `
+        <option value="${escapeHtml(String(doc.id))}">
+          ${escapeHtml(doc.name || "Працівник")}
+        </option>
+      `).join("")}
+    </select>
+  </label>
+
+  <div class="monthBulkDates">
+    <label class="monthBulkField">
+      <span>Від</span>
+      <input id="monthBulkFrom" type="date" value="${escapeHtml(date)}">
+    </label>
+
+    <label class="monthBulkField">
+      <span>До</span>
+      <input id="monthBulkTo" type="date" value="${escapeHtml(date)}">
+    </label>
+  </div>
+
+  <div class="monthBulkDays">
+    <button type="button" class="monthBulkDay active" data-bulk-day="1">Пн</button>
+    <button type="button" class="monthBulkDay active" data-bulk-day="2">Вт</button>
+    <button type="button" class="monthBulkDay active" data-bulk-day="3">Ср</button>
+    <button type="button" class="monthBulkDay active" data-bulk-day="4">Чт</button>
+    <button type="button" class="monthBulkDay active" data-bulk-day="5">Пт</button>
+    <button type="button" class="monthBulkDay" data-bulk-day="6">Сб</button>
+    <button type="button" class="monthBulkDay" data-bulk-day="7">Нд</button>
+  </div>
+
+  <button class="primary monthBulkApply" id="monthBulkApply" type="button">
+    Застосувати графік
+  </button>
+</div>
 
       <div class="monthDrawerStaff">
         ${staff.map((doc) => {
@@ -3183,6 +3223,72 @@ const openMonthShiftDrawer = (date) => {
   $("#monthAllOff")?.addEventListener("click", () => {
     $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, false));
   });
+  $$(".monthBulkDay").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    btn.classList.toggle("active");
+  });
+});
+
+$("#monthBulkApply")?.addEventListener("click", async () => {
+  const staffId = $("#monthBulkStaff")?.value;
+  const from = $("#monthBulkFrom")?.value;
+  const to = $("#monthBulkTo")?.value;
+
+  if (!staffId || !from || !to) {
+    alert("Оберіть лікаря та період.");
+    return;
+  }
+
+  const activeWeekDays = new Set(
+    $$(".monthBulkDay.active").map((btn) => Number(btn.dataset.bulkDay))
+  );
+
+  if (!activeWeekDays.size) {
+    alert("Оберіть хоча б один день тижня.");
+    return;
+  }
+
+  const start = new Date(from);
+  const end = new Date(to);
+
+  if (start > end) {
+    alert("Дата 'Від' не може бути пізніше дати 'До'.");
+    return;
+  }
+
+  const dates = [];
+  const cursor = new Date(start);
+
+  while (cursor <= end) {
+    const jsDay = cursor.getDay();
+    const isoDay = jsDay === 0 ? 7 : jsDay;
+
+    if (activeWeekDays.has(isoDay)) {
+      dates.push(cursor.toISOString().slice(0, 10));
+    }
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  if (!dates.length) {
+    alert("У вибраному періоді немає відповідних днів.");
+    return;
+  }
+
+  if (!confirm(`Призначити ${dates.length} змін?`)) return;
+
+  await Promise.all(
+    dates.map((workDate) =>
+      saveStaffScheduleApi({
+        work_date: workDate,
+        staff_id: staffId,
+        is_active: true,
+      })
+    )
+  );
+
+  await renderCalendarTab();
+});
 
   $("#monthGoToDay")?.addEventListener("click", async () => {
     window.__calendarDate = date;

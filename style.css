@@ -4004,3 +4004,77 @@ body[data-theme="white"] .monthDayNum {
   font-size: 0.72rem !important;
   padding: 6px 8px !important;
 }
+/* MONTH BULK SCHEDULE */
+
+.monthBulkBox {
+  margin: 14px 0 16px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.monthBulkTitle {
+  font-weight: 900;
+  color: var(--text-main, #fff);
+  margin-bottom: 12px;
+}
+
+.monthBulkField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.monthBulkField span {
+  font-size: .76rem;
+  font-weight: 800;
+  color: var(--text-muted, rgba(255,255,255,.58));
+}
+
+.monthBulkField input,
+.monthBulkField select {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.22);
+  color: var(--text-main, #fff);
+  padding: 0 10px;
+  outline: none;
+}
+
+.monthBulkDates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.monthBulkDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+
+.monthBulkDay {
+  min-height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  color: var(--text-muted, rgba(255,255,255,.62));
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.monthBulkDay.active {
+  color: var(--accent-color);
+  border-color: color-mix(in srgb, var(--accent-color) 55%, rgba(255,255,255,.1));
+  background: color-mix(in srgb, var(--accent-color) 16%, rgba(255,255,255,.04));
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+.monthBulkApply {
+  width: 100%;
+}
