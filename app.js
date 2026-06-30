@@ -3066,6 +3066,7 @@ async function renderCalendarTab() {
             `;
           }).join("")}
         </div>
+        <div class="monthShiftDrawer" id="monthShiftDrawer"></div>
       </div>
     `;
 
@@ -3086,17 +3087,101 @@ async function renderCalendarTab() {
       await renderCalendarTab();
     });
 
-    $$("[data-month-date]").forEach((cell) => {
-      cell.addEventListener("click", async () => {
-        window.__calendarDate = cell.dataset.monthDate;
-        calendarMode = "day";
-        await renderCalendarTab();
-      });
+    const openMonthShiftDrawer = (date) => {
+  const drawer = $("#monthShiftDrawer");
+  if (!drawer) return;
+
+  const daySchedule = scheduleByDate.get(date) || [];
+  const activeIds = new Set(
+    daySchedule
+      .filter((x) => x.is_active !== false)
+      .map((x) => String(x.staff_id))
+  );
+
+  drawer.innerHTML = `
+    <div class="monthDrawerCard">
+      <div class="monthDrawerHead">
+        <div>
+          <div class="monthDrawerTitle">Графік на ${escapeHtml(date)}</div>
+          <div class="hint">Обери ветеринарів, які працюють у цей день.</div>
+        </div>
+        <button class="ghost" id="monthDrawerClose" type="button">×</button>
+      </div>
+
+      <div class="monthDrawerStaff">
+        ${staff.map((doc) => {
+          const active = activeIds.has(String(doc.id));
+          return `
+            <button
+              class="monthShiftToggle ${active ? "active" : ""}"
+              type="button"
+              data-month-shift-staff="${escapeHtml(String(doc.id))}"
+              style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
+            >
+              <span>👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</span>
+              <b>${active ? "На зміні" : "Вихідний"}</b>
+            </button>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="monthDrawerActions">
+        <button class="ghost" id="monthGoToDay" type="button">Відкрити день</button>
+        <button class="primary" id="monthSaveShift" type="button">💾 Зберегти графік</button>
+      </div>
+    </div>
+  `;
+
+  drawer.classList.add("open");
+
+  $("#monthDrawerClose")?.addEventListener("click", () => {
+    drawer.classList.remove("open");
+  });
+
+  $$(".monthShiftToggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const active = !btn.classList.contains("active");
+      btn.classList.toggle("active", active);
+      btn.querySelector("b").textContent = active ? "На зміні" : "Вихідний";
     });
+  });
+
+  $("#monthGoToDay")?.addEventListener("click", async () => {
+    window.__calendarDate = date;
+    calendarMode = "day";
+    await renderCalendarTab();
+  });
+
+  $("#monthSaveShift")?.addEventListener("click", async () => {
+    const activeStaffIds = new Set(
+      $$(".monthShiftToggle.active").map((btn) => String(btn.dataset.monthShiftStaff))
+    );
+
+    await Promise.all(
+      staff.map((doc) =>
+        saveStaffScheduleApi({
+          work_date: date,
+          staff_id: doc.id,
+          is_active: activeStaffIds.has(String(doc.id)),
+        })
+      )
+    );
+
+    await renderCalendarTab();
+  });
+};
+
+$$("[data-month-date]").forEach((cell) => {
+  cell.addEventListener("click", () => {
+    const date = cell.dataset.monthDate;
+    if (!date) return;
+    openMonthShiftDrawer(date);
+  });
+});
 
     return;
   }
-  
+
   if (calendarMode === "schedule") {
     const schedule = await loadStaffScheduleApi(today);
     const specializations = await loadSpecializationsApi();

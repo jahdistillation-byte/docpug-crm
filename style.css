@@ -3697,3 +3697,83 @@ body[data-theme="white"] .monthDayNum {
     overflow-x: auto;
   }
 }
+/* MONTH SHIFT DRAWER */
+
+.monthShiftDrawer {
+  display: none;
+  margin-top: 18px;
+}
+
+.monthShiftDrawer.open {
+  display: block;
+}
+
+.monthDrawerCard {
+  border-radius: 22px;
+  padding: 20px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 18px 45px rgba(0,0,0,.24);
+}
+
+.monthDrawerHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.monthDrawerTitle {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--text-main, #fff);
+}
+
+.monthDrawerStaff {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.monthShiftToggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--text-main, #fff);
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.monthShiftToggle:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-color);
+}
+
+.monthShiftToggle b {
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
+.monthShiftToggle.active {
+  background: color-mix(in srgb, var(--accent-color) 16%, rgba(255,255,255,.04));
+  border-color: color-mix(in srgb, var(--accent-color) 55%, rgba(255,255,255,.1));
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.monthShiftToggle.active b {
+  color: var(--accent-color);
+}
+
+.monthDrawerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
