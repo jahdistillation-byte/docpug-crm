@@ -2989,14 +2989,19 @@ async function renderCalendarTab() {
       return monthDays.includes(d);
     });
 
-    const monthSchedules = await Promise.all(
-      monthDays.map(async (date) => {
-        const rows = await loadStaffScheduleApi(date);
-        return [date, rows];
-      })
-    );
+   const monthSchedules = [];
 
-    const scheduleByDate = new Map(monthSchedules);
+for (const date of monthDays) {
+  try {
+    const rows = await loadStaffScheduleApi(date);
+    monthSchedules.push([date, Array.isArray(rows) ? rows : []]);
+  } catch (err) {
+    console.warn("Не вдалося завантажити графік на дату:", date, err);
+    monthSchedules.push([date, []]);
+  }
+}
+
+const scheduleByDate = new Map(monthSchedules);
 
     page.innerHTML = `
       <div class="card calendarCard">
