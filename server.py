@@ -874,6 +874,32 @@ def api_get_staff_schedule():
     except Exception as e:
         return fail(str(e))
 
+@app.get("/api/staff-schedule-range")
+def api_get_staff_schedule_range():
+    current_org = get_current_org_id()
+
+    date_from = request.args.get("from")
+    date_to = request.args.get("to")
+
+    if not date_from or not date_to:
+        return fail("from and to required", 400)
+
+    try:
+        res = (
+            supabase.table("staff_schedule")
+            .select("*")
+            .eq("org_id", current_org)
+            .gte("work_date", date_from)
+            .lte("work_date", date_to)
+            .order("work_date")
+            .execute()
+        )
+
+        return ok(res.data or [])
+
+    except Exception as e:
+        return fail(str(e))   
+
 @app.post("/api/staff-schedule")
 def api_upsert_staff_schedule():
     d = request.get_json(silent=True) or {}
@@ -901,6 +927,8 @@ def api_upsert_staff_schedule():
         return ok(row)
     except Exception as e:
         return fail(str(e))
+    
+    
 
 @app.delete("/api/staff-schedule")
 def api_delete_staff_schedule():
@@ -916,6 +944,7 @@ def api_delete_staff_schedule():
         return ok(True)
     except Exception as e:
         return fail(str(e))
+
 
 # =========================
 # API: PATIENTS

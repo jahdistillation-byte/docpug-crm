@@ -2989,19 +2989,17 @@ async function renderCalendarTab() {
       return monthDays.includes(d);
     });
 
-    const monthSchedules = [];
+    const scheduleRows = await loadStaffScheduleRangeApi(
+  monthDays[0],
+  monthDays[monthDays.length - 1]
+);
 
-for (const date of monthDays) {
-  try {
-    const rows = await loadStaffScheduleApi(date);
-    monthSchedules.push([date, Array.isArray(rows) ? rows : []]);
-  } catch (err) {
-    console.warn("Не вдалося завантажити графік на дату:", date, err);
-    monthSchedules.push([date, []]);
-  }
-}
-
-const scheduleByDate = new Map(monthSchedules);
+const scheduleByDate = new Map(
+  monthDays.map((date) => [
+    date,
+    scheduleRows.filter((row) => String(row.work_date || "") === date),
+  ])
+);
 
 page.innerHTML = `
   <div class="card calendarCard">
@@ -7040,3 +7038,23 @@ document.addEventListener('click', function(event) {
         }
     }
 });
+
+async function loadStaffScheduleRangeApi(from, to) {
+  try {
+    const res = await fetch(
+      `${API_BASE}/staff-schedule-range?from=${from}&to=${to}`,
+      {
+        headers: authHeaders()
+      }
+    );
+
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error);
+
+    return json.data || [];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}
