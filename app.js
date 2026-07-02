@@ -3800,17 +3800,27 @@ async function openStaffProfileModal(doc) {
 
   const hasLastVisits = lastVisits.length > 0;
 
-  const hasRating = Number(dashboard.rating_count || 0) > 0;
+const hasRating = Number(dashboard.rating_count || 0) > 0;
 
-  const skills = Array.isArray(dashboard.skills)
+const skills = Array.isArray(dashboard.skills)
+  ? dashboard.skills
+  : [];
 
-    ? dashboard.skills
+const achievements = Array.isArray(dashboard.achievements)
+  ? dashboard.achievements
+  : [];
 
-    : [];
+const xp = Number(dashboard.xp || 0);
+const level = Number(dashboard.level || 1);
+const nextLevelXp = Number(dashboard.next_level_xp || 100);
+const xpPercent = nextLevelXp > 0
+  ? Math.min(100, Math.round((xp / nextLevelXp) * 100))
+  : 0;
 
-  // ====== ПОТОМ СОЗДАЕМ MODAL ======
-  const modal = document.createElement("div");
-  modal.className = "staffProfileOverlay";
+// ====== ПОТОМ СОЗДАЕМ MODAL ======
+
+const modal = document.createElement("div");
+modal.className = "staffProfileOverlay";
 
   modal.innerHTML = `
     <div class="staffProfileModal staffProfilePro" style="--staff-color:${escapeHtml(staffColor)};">
@@ -3946,6 +3956,50 @@ async function openStaffProfileModal(doc) {
               <span>Січ</span><span>Лют</span><span>Бер</span><span>Кві</span><span>Тра</span><span>Чер</span>
             </div>
           </div>
+
+          <div class="staffPanel staffCareerPanel">
+  <div class="staffPanelHead">
+    <h3>🏆 Карʼєра</h3>
+    <span>Level ${level}</span>
+  </div>
+
+  <div class="staffLevelBox">
+    <div class="staffLevelTop">
+      <strong>Рівень ${level}</strong>
+      <span>${xp} / ${nextLevelXp} XP</span>
+    </div>
+
+    <div class="staffXpBar">
+      <div style="width:${xpPercent}%"></div>
+    </div>
+
+    <p>До наступного рівня залишилось ${Math.max(0, nextLevelXp - xp)} XP</p>
+  </div>
+
+  ${
+    achievements.length
+      ? `
+        <div class="staffAchievementList">
+          ${achievements.map((a) => `
+            <div class="staffAchievementItem">
+              <div>${escapeHtml(a.icon || "🏅")}</div>
+              <div>
+                <b>${escapeHtml(a.title || "Досягнення")}</b>
+                <span>${escapeHtml(a.description || "")}</span>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `
+      : `
+        <div class="staffEmptyState">
+          <div class="staffEmptyIcon">🏅</div>
+          <b>Досягнень ще немає</b>
+          <span>Коли співробітник буде проводити прийоми, отримувати оцінки та виконувати цілі — тут зʼявляться його досягнення.</span>
+        </div>
+      `
+  }
+</div>
 
           <div class="staffPanel staffRatingPanel">
   <h3>⭐ Рейтинг та оцінки</h3>

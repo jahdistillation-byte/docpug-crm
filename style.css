@@ -5229,3 +5229,93 @@ body[data-theme="white"] .monthDayNum {
   color: #5ff28c;
   font-weight: 900;
 }
+.staffCareerPanel {
+  grid-column: span 1;
+}
+
+.staffLevelBox {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 14px;
+}
+
+.staffLevelTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.staffLevelTop strong {
+  color: var(--text);
+  font-size: 17px;
+}
+
+.staffLevelTop span {
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.staffXpBar {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 12px;
+  background: rgba(255,255,255,0.08);
+}
+
+.staffXpBar div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #a855f7);
+  box-shadow: 0 0 18px rgba(168,85,247,0.35);
+}
+
+.staffLevelBox p {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.staffAchievementList {
+  display: grid;
+  gap: 10px;
+}
+
+.staffAchievementItem {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.staffAchievementItem > div:first-child {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(168,85,247,0.16);
+  font-size: 20px;
+}
+
+.staffAchievementItem b {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.staffAchievementItem span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
