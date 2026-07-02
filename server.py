@@ -753,26 +753,168 @@ def api_update_staff(staff_id):
     return ok(row)
 @app.get("/api/staff/<staff_id>/dashboard")
 def api_staff_dashboard(staff_id):
-    return ok({
-        "visits_this_month": 0,
-        "closed_checks": 0,
-        "revenue": 0,
-        "avg_check": 0,
-        "revenue_growth_percent": 0,
-        "visits_growth_percent": 0,
-        "checks_growth_percent": 0,
-        "avg_check_growth_percent": 0,
-        "last_visits": [],
-        "revenue_chart": [],
-        "visits_chart": [],
-        "penalties": {
-            "late": 0,
-            "absences": 0,
-            "warnings": 0,
-            "bonuses_amount": 0,
-            "penalties_amount": 0
-        }
-    })
+    try:
+        current_org = get_current_org_id()
+
+        visits_res = (
+            supabase.table("visits")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("staff_id", staff_id)
+            .execute()
+        )
+
+        visits = visits_res.data or []
+
+        now = datetime.now(timezone.utc)
+        current_month = now.strftime("%Y-%m")
+        prev_month_num = now.month - 1
+        prev_year = now.year
+
+        if prev_month_num == 0:
+            prev_month_num = 12
+            prev_year -= 1
+
+        prev_month = f"{prev_year}-{prev_month_num:02d}"
+
+        current_visits = [
+            v for v in visits
+            if str(v.get("date") or "").startswith(current_month)
+        ]
+
+        prev_visits = [
+            v for v in visits
+            if str(v.get("date") or "").startswith(prev_month)
+        ]
+
+        def calc_visit_total(visit_id):
+            total = 0
+
+            try:
+                services_res = (
+                    supabase.table("visit_services")
+                    .select("*")
+                    .eq("visit_id", visit_id)
+                    .execute()
+                )
+
+                for s in services_res.data or []:
+                    qty = s.get("qty") or 1
+                    price = s.get("price_snap") or 0
+                    try:
+                        total += float(qty) * float(price)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+            try:
+                stock_res = (
+                    supabase.table("visit_stock")
+                    .select("*")
+                    .eq("visit_id", visit_id)
+                    .execute()
+                )
+
+                for st in stock_res.data or []:
+                    qty = st.get("qty") or 1
+                    price = st.get("price_snap") or 0
+                    try:
+                        total += float(qty) * float(price)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+            return total
+
+        current_revenue = sum(calc_visit_total(v.get("id")) for v in current_visits if v.get("id"))
+        prev_revenue = sum(calc_visit_total(v.get("id")) for v in prev_visits if v.get("id"))
+
+        visits_this_month = len(current_visits)
+        closed_checks = len([v for v in current_visits if v.get("id")])
+
+        avg_check = round(current_revenue / closed_checks) if closed_checks else 0
+
+        def growth(current, previous):
+            try:
+                current = float(current or 0)
+                previous = float(previous or 0)
+                if previous <= 0:
+                    return 0
+                return round(((current - previous) / previous) * 100)
+            except Exception:
+                return 0
+
+        visits_growth = growth(len(current_visits), len(prev_visits))
+        checks_growth = growth(len(current_visits), len(prev_visits))
+        revenue_growth = growth(current_revenue, prev_revenue)
+
+        prev_avg = round(prev_revenue / len(prev_visits)) if prev_visits else 0
+        avg_check_growth = growth(avg_check, prev_avg)
+
+        last_visits = sorted(
+            visits,
+            key=lambda x: str(x.get("date") or ""),
+            reverse=True
+        )[:5]
+
+        normalized_last_visits = []
+
+        for v in last_visits:
+            total = calc_visit_total(v.get("id")) if v.get("id") else 0
+
+            patient_name = "Пацієнт"
+            try:
+                pet_id = v.get("pet_id")
+                if pet_id:
+                    pet_res = (
+                        supabase.table("patients")
+                        .select("name, species, breed")
+                        .eq("org_id", current_org)
+                        .eq("id", pet_id)
+                        .execute()
+                    )
+                    if pet_res.data:
+                        patient_name = pet_res.data[0].get("name") or "Пацієнт"
+            except Exception:
+                pass
+
+            normalized_last_visits.append({
+                "id": v.get("id"),
+                "date": v.get("date"),
+                "patient_name": patient_name,
+                "note": v.get("note") or "",
+                "dx": v.get("dx") or "",
+                "rx": v.get("rx") or "",
+                "total": round(total),
+                "status": "Завершено"
+            })
+
+        return ok({
+            "visits_this_month": visits_this_month,
+            "closed_checks": closed_checks,
+            "revenue": round(current_revenue),
+            "avg_check": avg_check,
+            "revenue_growth_percent": revenue_growth,
+            "visits_growth_percent": visits_growth,
+            "checks_growth_percent": checks_growth,
+            "avg_check_growth_percent": avg_check_growth,
+            "last_visits": normalized_last_visits,
+            "revenue_chart": [],
+            "visits_chart": [],
+            "penalties": {
+                "late": 0,
+                "absences": 0,
+                "warnings": 0,
+                "bonuses_amount": 0,
+                "penalties_amount": 0
+            }
+        })
+
+    except Exception as e:
+        print("❌ /api/staff/<staff_id>/dashboard error:", repr(e))
+        return fail(str(e), 500)
 # =========================
 # API: CALENDAR
 # =========================
@@ -1047,12 +1189,13 @@ def api_update_visit_query():
         return fail("id required", 400)
     d = request.get_json(silent=True) or {}
     payload = {
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),
-        "rx": d.get("rx"),
-        "weight_kg": d.get("weight_kg"),
-    }
+    "staff_id": d.get("staff_id"),
+    "date": d.get("date"),
+    "note": d.get("note"),
+    "dx": d.get("dx"),
+    "rx": d.get("rx"),
+    "weight_kg": d.get("weight_kg"),
+}
     res = update_with_optional_fallback("visits", visit_id, payload)
     try:
         save_visit_lines(visit_id, d)
@@ -1087,14 +1230,15 @@ def api_create_visit():
 
     current_org = get_current_org_id()
     payload = {
-        "org_id": current_org,
-        "pet_id": pet_id,
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),
-        "rx": d.get("rx"),
-        "weight_kg": d.get("weight_kg"),
-    }
+    "org_id": current_org,
+    "pet_id": pet_id,
+    "staff_id": d.get("staff_id"),
+    "date": d.get("date"),
+    "note": d.get("note"),
+    "dx": d.get("dx"),
+    "rx": d.get("rx"),
+    "weight_kg": d.get("weight_kg"),
+}
     res = insert_with_optional_fallback("visits", payload)
     row = (res.data[0] if getattr(res, "data", None) and res.data else None)
     if not row:

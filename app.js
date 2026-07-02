@@ -2835,7 +2835,8 @@ async function loadStaffDashboardApi(staffId) {
 
     if (!res.ok) throw new Error("dashboard failed");
 
-    return await res.json();
+    const json = await res.json();
+    return json.data || json;
   } catch (e) {
     console.warn("loadStaffDashboardApi error:", e);
 
