@@ -2826,6 +2826,41 @@ async function saveStaffScheduleApi(payload) {
     return null;
   }
 }
+
+async function loadStaffDashboardApi(staffId) {
+  try {
+    const res = await fetch(`${API_BASE}/staff/${encodeURIComponent(staffId)}/dashboard`, {
+      headers: authHeaders()
+    });
+
+    if (!res.ok) throw new Error("dashboard failed");
+
+    return await res.json();
+  } catch (e) {
+    console.warn("loadStaffDashboardApi error:", e);
+
+    return {
+      visits_this_month: 0,
+      closed_checks: 0,
+      revenue: 0,
+      avg_check: 0,
+      revenue_growth_percent: 0,
+      visits_growth_percent: 0,
+      checks_growth_percent: 0,
+      avg_check_growth_percent: 0,
+      last_visits: [],
+      revenue_chart: [],
+      visits_chart: [],
+      penalties: {
+        late: 0,
+        absences: 0,
+        warnings: 0,
+        bonuses_amount: 0,
+        penalties_amount: 0
+      }
+    };
+  }
+}
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ИНТЕРАКТИВНЫЙ КАЛЕНДАРЬ, СМЕНЫ И DRAG-AND-DROP)
 // Часть 6 (Строки 3501 — 4000)
@@ -3718,7 +3753,7 @@ return;
 // Часть 5
 // ==========================================================================
 
-function openStaffProfileModal(doc) {
+async function openStaffProfileModal(doc) {
   const staffColor = doc.color || "#7C5CFF";
   const staffName = doc.name || "Працівник";
   const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
@@ -3728,10 +3763,17 @@ function openStaffProfileModal(doc) {
     doc.role === "admin" ? "Адміністратор" :
     "Ветеринарний лікар";
 
-  const demoRevenue = 86430;
-  const demoVisits = 28;
-  const demoChecks = 26;
-  const demoAvgCheck = 3324;
+const dashboard = await loadStaffDashboardApi(doc.id);
+
+const demoRevenue = Number(dashboard.revenue || 0);
+const demoVisits = Number(dashboard.visits_this_month || 0);
+const demoChecks = Number(dashboard.closed_checks || 0);
+const demoAvgCheck = Number(dashboard.avg_check || 0);
+
+const revenueGrowth = Number(dashboard.revenue_growth_percent || 0);
+const visitsGrowth = Number(dashboard.visits_growth_percent || 0);
+const checksGrowth = Number(dashboard.checks_growth_percent || 0);
+const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
 
   const modal = document.createElement("div");
   modal.className = "staffProfileOverlay";
@@ -3790,7 +3832,7 @@ function openStaffProfileModal(doc) {
   <div>
     <div class="staffInsightTitle">Що варто знати сьогодні</div>
     <div class="staffInsightText">
-      ${escapeHtml(staffName)} працює стабільно: виручка зросла на <b>24%</b>, кількість візитів — на <b>18%</b>.
+      ${escapeHtml(staffName)} працює стабільно: виручка змінилась на <b>${revenueGrowth}%</b>, кількість візитів — на <b>${visitsGrowth}%</b>.
       Скарг не зафіксовано. До плану місяця залишилось <b>13 570 грн</b>.
     </div>
   </div>
@@ -3802,7 +3844,7 @@ function openStaffProfileModal(doc) {
             <div>
               <span>Візити цього місяця</span>
               <strong>${demoVisits}</strong>
-              <small>↑ 21% до минулого місяця</small>
+              <small>↑ ${visitsGrowth}% до минулого місяця</small>
             </div>
           </div>
 
@@ -3811,7 +3853,7 @@ function openStaffProfileModal(doc) {
             <div>
               <span>Закрито чеків</span>
               <strong>${demoChecks}</strong>
-              <small>↑ 18% до минулого місяця</small>
+              <small>↑ ${checksGrowth}% до минулого місяця/small>
             </div>
           </div>
 
@@ -3820,7 +3862,7 @@ function openStaffProfileModal(doc) {
             <div>
               <span>Виручка</span>
               <strong>${demoRevenue.toLocaleString("uk-UA")} грн</strong>
-              <small>↑ 24% до минулого місяця</small>
+              <small>↑ ${revenueGrowth}% до минулого місяця</small>
             </div>
           </div>
 
@@ -3829,7 +3871,7 @@ function openStaffProfileModal(doc) {
             <div>
               <span>Середній чек</span>
               <strong>${demoAvgCheck.toLocaleString("uk-UA")} грн</strong>
-              <small>↑ 6% до минулого місяця</small>
+              <small>↑ ${avgCheckGrowth}% до минулого місяця</small>
             </div>
           </div>
         </section>
