@@ -3853,7 +3853,7 @@ const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
             <div>
               <span>Закрито чеків</span>
               <strong>${demoChecks}</strong>
-              <small>↑ ${checksGrowth}% до минулого місяця/small>
+              <small>↑ ${checksGrowth}% до минулого місяця</small>
             </div>
           </div>
 

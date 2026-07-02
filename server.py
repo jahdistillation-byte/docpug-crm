@@ -751,7 +751,28 @@ def api_update_staff(staff_id):
     )
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
-
+@app.get("/api/staff/<staff_id>/dashboard")
+def api_staff_dashboard(staff_id):
+    return ok({
+        "visits_this_month": 0,
+        "closed_checks": 0,
+        "revenue": 0,
+        "avg_check": 0,
+        "revenue_growth_percent": 0,
+        "visits_growth_percent": 0,
+        "checks_growth_percent": 0,
+        "avg_check_growth_percent": 0,
+        "last_visits": [],
+        "revenue_chart": [],
+        "visits_chart": [],
+        "penalties": {
+            "late": 0,
+            "absences": 0,
+            "warnings": 0,
+            "bonuses_amount": 0,
+            "penalties_amount": 0
+        }
+    })
 # =========================
 # API: CALENDAR
 # =========================
