@@ -5162,3 +5162,70 @@ body[data-theme="white"] .monthDayNum {
 .staffInsightText b {
   color: #5ff28c;
 }
+.staffEmptyState {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 7px;
+  padding: 18px;
+  color: var(--muted);
+}
+
+.staffEmptyState b {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.staffEmptyState span {
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.staffEmptyIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.09);
+  font-size: 22px;
+}
+
+.staffVisitRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 78px 1fr 110px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.staffVisitRow:hover {
+  background: rgba(255,255,255,0.035);
+}
+
+.staffVisitRow b,
+.staffVisitRow strong {
+  color: var(--text);
+}
+
+.staffVisitRow span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.staffVisitRow .done {
+  color: #5ff28c;
+  font-weight: 900;
+}

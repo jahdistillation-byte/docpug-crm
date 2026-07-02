@@ -3755,27 +3755,60 @@ return;
 // ==========================================================================
 
 async function openStaffProfileModal(doc) {
+
   const staffColor = doc.color || "#7C5CFF";
+
   const staffName = doc.name || "Працівник";
+
   const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
 
   const roleLabel =
+
     doc.role === "assistant" ? "Асистент" :
+
     doc.role === "admin" ? "Адміністратор" :
+
     "Ветеринарний лікар";
 
-const dashboard = await loadStaffDashboardApi(doc.id);
+  // ====== ЗАГРУЖАЕМ DASHBOARD ======
 
-const demoRevenue = Number(dashboard.revenue || 0);
-const demoVisits = Number(dashboard.visits_this_month || 0);
-const demoChecks = Number(dashboard.closed_checks || 0);
-const demoAvgCheck = Number(dashboard.avg_check || 0);
+  const dashboard = await loadStaffDashboardApi(doc.id);
 
-const revenueGrowth = Number(dashboard.revenue_growth_percent || 0);
-const visitsGrowth = Number(dashboard.visits_growth_percent || 0);
-const checksGrowth = Number(dashboard.checks_growth_percent || 0);
-const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
+  const demoRevenue = Number(dashboard.revenue || 0);
 
+  const demoVisits = Number(dashboard.visits_this_month || 0);
+
+  const demoChecks = Number(dashboard.closed_checks || 0);
+
+  const demoAvgCheck = Number(dashboard.avg_check || 0);
+
+  const revenueGrowth = Number(dashboard.revenue_growth_percent || 0);
+
+  const visitsGrowth = Number(dashboard.visits_growth_percent || 0);
+
+  const checksGrowth = Number(dashboard.checks_growth_percent || 0);
+
+  const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
+
+  // ====== ДОБАВИТЬ ВОТ СЮДА ======
+
+  const lastVisits = Array.isArray(dashboard.last_visits)
+
+    ? dashboard.last_visits
+
+    : [];
+
+  const hasLastVisits = lastVisits.length > 0;
+
+  const hasRating = Number(dashboard.rating_count || 0) > 0;
+
+  const skills = Array.isArray(dashboard.skills)
+
+    ? dashboard.skills
+
+    : [];
+
+  // ====== ПОТОМ СОЗДАЕМ MODAL ======
   const modal = document.createElement("div");
   modal.className = "staffProfileOverlay";
 
@@ -3798,7 +3831,7 @@ const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
 
         <nav class="staffProfileNav">
           <button class="active" type="button">▦ Огляд</button>
-          <button type="button">☎ Виклики</button>
+         <button type="button">🩺 Прийоми</button>
           <button type="button">💰 Фінанси</button>
           <button type="button">📈 Графіки</button>
           <button type="button">⚖ Штрафи та бонуси</button>
@@ -3915,37 +3948,56 @@ const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
           </div>
 
           <div class="staffPanel staffRatingPanel">
-            <h3>⭐ Рейтинг та оцінки</h3>
-            <div class="staffRatingBig">4.9 <span>★★★★★</span></div>
-            <p>на основі 78 оцінок</p>
-            <div class="staffRatingRows">
-              <div><span>5★</span><b style="width:88%"></b><em>71</em></div>
-              <div><span>4★</span><b style="width:18%"></b><em>6</em></div>
-              <div><span>3★</span><b style="width:4%"></b><em>1</em></div>
-            </div>
-          </div>
+  <h3>⭐ Рейтинг та оцінки</h3>
+
+  ${
+    hasRating
+      ? `
+        <div class="staffRatingBig">${Number(dashboard.rating_avg || 0).toFixed(1)} <span>★★★★★</span></div>
+        <p>на основі ${Number(dashboard.rating_count || 0)} оцінок</p>
+      `
+      : `
+        <div class="staffEmptyState">
+          <div class="staffEmptyIcon">⭐</div>
+          <b>Оцінок ще немає</b>
+          <span>Після завершення прийому адміністратор зможе поставити оцінку лікарю.</span>
+        </div>
+      `
+  }
+</div>
 
           <div class="staffPanel staffCallsPanel">
-            <h3>Останні виклики</h3>
+  <h3>Останні прийоми</h3>
 
-            <div class="staffCallRow">
-              <div><b>16:20</b><span>09.05.2026</span></div>
-              <div><strong>Мейн-кун Барсік</strong><span>Операція, анестезія</span></div>
-              <div><b>14 200 грн</b><span class="done">Завершено</span></div>
-            </div>
-
-            <div class="staffCallRow">
-              <div><b>14:10</b><span>09.05.2026</span></div>
-              <div><strong>Лабрадор Рекс</strong><span>УЗД черевної порожнини</span></div>
-              <div><b>1 850 грн</b><span class="done">Завершено</span></div>
-            </div>
-
-            <div class="staffCallRow">
-              <div><b>11:35</b><span>09.05.2026</span></div>
-              <div><strong>Йоркшир Моллі</strong><span>Терапевтичний прийом</span></div>
-              <div><b>620 грн</b><span class="done">Завершено</span></div>
-            </div>
+  ${
+    hasLastVisits
+      ? lastVisits.map((v) => `
+        <button class="staffVisitRow" type="button" data-open-visit-id="${escapeHtml(String(v.id || ""))}">
+          <div>
+            <b>${escapeHtml(v.date || "—")}</b>
+            <span>${escapeHtml(v.status || "Прийом")}</span>
           </div>
+
+          <div>
+            <strong>${escapeHtml(v.patient_name || "Пацієнт")}</strong>
+            <span>${escapeHtml(v.dx || v.note || "Без опису")}</span>
+          </div>
+
+          <div>
+            <b>${Number(v.total || 0).toLocaleString("uk-UA")} грн</b>
+            <span class="done">Відкрити →</span>
+          </div>
+        </button>
+      `).join("")
+      : `
+        <div class="staffEmptyState">
+          <div class="staffEmptyIcon">🩺</div>
+          <b>Прийомів ще немає</b>
+          <span>Коли прийоми будуть прив’язані до цього лікаря, вони з’являться тут автоматично.</span>
+        </div>
+      `
+  }
+</div>
 
           <div class="staffPanel">
             <h3>Фінансова інформація</h3>
@@ -3969,17 +4021,26 @@ const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
             </div>
           </div>
 
-          <div class="staffPanel staffSkillsPanel">
-            <h3>Навички та сертифікації</h3>
-            <div class="staffSkillList">
-              <span>Терапія</span>
-              <span>Хірургія</span>
-              <span>УЗД</span>
-              <span>Анестезіологія</span>
-              <span>Вакцинація</span>
-              <button type="button">+ Додати навичку</button>
-            </div>
-          </div>
+         <div class="staffPanel staffSkillsPanel">
+  <h3>Навички та сертифікації</h3>
+
+  ${
+    skills.length
+      ? `
+        <div class="staffSkillList">
+          ${skills.map((s) => `<span>${escapeHtml(s.name || s)}</span>`).join("")}
+          <button type="button">+ Додати навичку</button>
+        </div>
+      `
+      : `
+        <div class="staffEmptyState">
+          <div class="staffEmptyIcon">🎓</div>
+          <b>Навички ще не додані</b>
+          <span>Додамо реальні навички, сертифікати та спеціалізації співробітника.</span>
+        </div>
+      `
+  }
+</div>
 
           <div class="staffPanel">
             <h3>Нотатка</h3>
