@@ -3785,6 +3785,16 @@ function openStaffProfileModal(doc) {
             ✏️ Редагувати
           </button>
         </header>
+<section class="staffInsightCard">
+  <div class="staffInsightIcon">✨</div>
+  <div>
+    <div class="staffInsightTitle">Що варто знати сьогодні</div>
+    <div class="staffInsightText">
+      ${escapeHtml(staffName)} працює стабільно: виручка зросла на <b>24%</b>, кількість візитів — на <b>18%</b>.
+      Скарг не зафіксовано. До плану місяця залишилось <b>13 570 грн</b>.
+    </div>
+  </div>
+</section>
 
         <section class="staffProfileKpis">
           <div class="staffKpiCard">

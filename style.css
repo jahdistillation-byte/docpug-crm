@@ -5119,3 +5119,46 @@ body[data-theme="white"] .monthDayNum {
     grid-column: span 1;
   }
 }
+.staffInsightCard {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(168,85,247,0.22), transparent 42%),
+    rgba(255,255,255,0.045);
+  border: 1px solid rgba(168,85,247,0.22);
+  box-shadow: 0 18px 42px rgba(0,0,0,0.18);
+}
+
+.staffInsightIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: rgba(168,85,247,0.18);
+  border: 1px solid rgba(168,85,247,0.28);
+  font-size: 20px;
+}
+
+.staffInsightTitle {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 950;
+  margin-bottom: 5px;
+}
+
+.staffInsightText {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 750;
+}
+
+.staffInsightText b {
+  color: #5ff28c;
+}
