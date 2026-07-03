@@ -6476,16 +6476,17 @@ $("#visitSave")?.addEventListener("click", async () => {
     if (!startTime) return alert("Оберіть час початку");
 
     const payload = {
-      pet_id: pet.id,
-      date,
-      note: buildVisitNote(dx, notePlain),
-      rx,
-      weight_kg: weight,
-      services: [],
-      services_json: [],
-      stock: [],
-      stock_json: [],
-    };
+  pet_id: pet.id,
+  staff_id: staffId,
+  date,
+  note: buildVisitNote(dx, notePlain),
+  rx,
+  weight_kg: weight,
+  services: [],
+  services_json: [],
+  stock: [],
+  stock_json: [],
+};
 
     // =========================
     // РЕЖИМ РЕДАКТИРОВАНИЯ ВИЗИТА

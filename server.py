@@ -915,7 +915,9 @@ def api_staff_dashboard(staff_id):
     except Exception as e:
         print("❌ /api/staff/<staff_id>/dashboard error:", repr(e))
         return fail(str(e), 500)
-# =========================
+    
+    
+    
 # API: CALENDAR
 # =========================
 @app.get("/api/calendar")
@@ -1195,6 +1197,7 @@ def api_update_visit_query():
     "dx": d.get("dx"),
     "rx": d.get("rx"),
     "weight_kg": d.get("weight_kg"),
+    "staff_id": d.get("staff_id"),
 }
     res = update_with_optional_fallback("visits", visit_id, payload)
     try:
