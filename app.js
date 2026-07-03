@@ -1910,26 +1910,156 @@ async function renderTeamProfilePage(doc) {
   const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
   const staffColor = doc.color || "#7C5CFF";
 
+  const roleLabel =
+    doc.role === "assistant" ? "Асистент" :
+    doc.role === "admin" ? "Адміністратор" :
+    "Ветеринарний лікар";
+
+  const dashboard = await loadStaffDashboardApi(doc.id);
+
+  const revenue = Number(dashboard.revenue || 0);
+  const visits = Number(dashboard.visits_this_month || 0);
+  const checks = Number(dashboard.closed_checks || 0);
+  const avgCheck = Number(dashboard.avg_check || 0);
+  const rating = Number(dashboard.rating_avg || dashboard.rating || 0);
+
+  const revenueGrowth = Number(dashboard.revenue_growth_percent || 0);
+  const visitsGrowth = Number(dashboard.visits_growth_percent || 0);
+  const checksGrowth = Number(dashboard.checks_growth_percent || 0);
+  const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
+
   page.innerHTML = `
-    <div class="teamProfileFull">
-      <button class="ghost" id="btnBackToTeam" type="button">← Назад до команди</button>
+    <div class="teamProfileFullPage" style="--staff-color:${escapeHtml(staffColor)};">
 
-      <div class="teamProfileHeroFull" style="--staff-color:${escapeHtml(staffColor)};">
-        <div class="teamProfileAvatarFull">${escapeHtml(staffLetter)}</div>
+      <div class="teamProfileTopbar">
+        <button class="ghost" id="btnBackToTeam" type="button">← Команда</button>
 
-        <div>
-          <div class="teamProfileCrumb">Команда / Профіль співробітника</div>
-          <h1>${escapeHtml(staffName)}</h1>
-          <p>${escapeHtml(doc.role || "Ветеринарний лікар")} · ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</p>
+        <div class="teamProfileTopActions">
+          <button class="ghost" type="button">⬇ Експорт</button>
+          <button class="primary" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
+        </div>
+      </div>
+
+      <section class="teamProfileHero">
+        <div class="teamProfileAvatar">
+          ${
+            doc.avatar
+              ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+              : `<span>${escapeHtml(staffLetter)}</span>`
+          }
         </div>
 
-        <button class="primary" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
-      </div>
+        <div class="teamProfileHeroInfo">
+          <div class="teamProfileCrumb">Команда / Профіль співробітника</div>
+          <h1>${escapeHtml(staffName)} 👋</h1>
+          <p>${escapeHtml(roleLabel)} · ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</p>
 
-      <div class="card" style="margin-top:20px;">
-        <h2>Профіль працює</h2>
-        <div class="hint">Тепер це не модалка, а повноцінна сторінка всередині розділу Команда.</div>
-      </div>
+          <div class="teamProfileBadges">
+            <span class="teamStatusBadge">На зміні</span>
+            <span>${escapeHtml(doc.phone || "Телефон не вказано")}</span>
+            <span>Email не вказано</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="teamInsightCard">
+        <div class="teamInsightIcon">✨</div>
+        <div>
+          <b>Що варто знати сьогодні</b>
+          <p>
+            ${escapeHtml(staffName)} має стабільні показники: виручка змінилась на 
+            <strong>${revenueGrowth}%</strong>, кількість візитів — на 
+            <strong>${visitsGrowth}%</strong>. Поточний рейтинг клієнтів — 
+            <strong>${rating ? rating.toFixed(2) : "—"}</strong>.
+          </p>
+        </div>
+      </section>
+
+      <section class="teamKpiGrid">
+        ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
+        ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
+        ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
+        ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
+        ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
+      </section>
+
+      <section class="teamDashboardGrid">
+        <div class="teamPanel teamPanelWide">
+          <div class="teamPanelHead">
+            <h3>Виручка за 6 місяців</h3>
+            <span>грн</span>
+          </div>
+          ${renderTeamBars(["Січ", "Лют", "Бер", "Кві", "Тра", "Чер"], [45, 62, 80, 94, 112, 137], "green")}
+        </div>
+
+        <div class="teamPanel teamPanelWide">
+          <div class="teamPanelHead">
+            <h3>Кількість візитів за 6 місяців</h3>
+            <span>візити</span>
+          </div>
+          ${renderTeamBars(["Січ", "Лют", "Бер", "Кві", "Тра", "Чер"], [18, 23, 27, 35, 31, 36], "purple")}
+        </div>
+
+        <div class="teamPanel">
+          <div class="teamPanelHead">
+            <h3>🎯 Сьогодні</h3>
+          </div>
+          <div class="teamTodayRows">
+            <p><span>Статус</span><b>На зміні</b></p>
+            <p><span>Записів сьогодні</span><b>0</b></p>
+            <p><span>Виконано</span><b>0</b></p>
+            <p><span>Попереду</span><b>0</b></p>
+          </div>
+        </div>
+
+        <div class="teamPanel">
+          <div class="teamPanelHead">
+            <h3>🏆 Карʼєра</h3>
+            <span>Level 1</span>
+          </div>
+          <div class="teamXpBox">
+            <div><b>Рівень 1</b><span>0 / 100 XP</span></div>
+            <i><em style="width:0%"></em></i>
+            <p>До наступного рівня залишилось 100 XP</p>
+          </div>
+        </div>
+
+        <div class="teamPanel">
+          <div class="teamPanelHead">
+            <h3>💼 Популярні послуги</h3>
+          </div>
+          <div class="teamServiceRows">
+            <p><span>Консультація</span><b>—</b></p>
+            <p><span>Вакцинація</span><b>—</b></p>
+            <p><span>УЗД</span><b>—</b></p>
+            <p><span>Хірургія</span><b>—</b></p>
+          </div>
+        </div>
+
+        <div class="teamPanel">
+          <div class="teamPanelHead">
+            <h3>💰 Фінансова інформація</h3>
+          </div>
+          <div class="teamTodayRows">
+            <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
+            <p><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></p>
+            <p><span>Бонуси</span><b>—</b></p>
+            <p><span>Нараховано</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
+          </div>
+        </div>
+
+        <div class="teamPanel teamPanelFull">
+          <div class="teamPanelHead">
+            <h3>⭐ Рейтинг клієнтів</h3>
+            <span>автоматично</span>
+          </div>
+          <div class="teamReviewsEmpty">
+            <div>⭐</div>
+            <b>${rating ? rating.toFixed(2) : "Поки немає оцінок"}</b>
+            <p>Оцінки будуть підтягуватись після відгуку клієнта, без ручної роботи адміністратора.</p>
+          </div>
+        </div>
+      </section>
     </div>
   `;
 
@@ -1940,6 +2070,37 @@ async function renderTeamProfilePage(doc) {
   document.getElementById("btnEditStaffFromFullProfile")?.addEventListener("click", () => {
     openEditStaffModal(doc);
   });
+}
+
+function renderTeamKpiCard(icon, title, value, growth) {
+  const g = Number(growth || 0);
+  return `
+    <div class="teamKpiCard">
+      <div class="teamKpiIcon">${icon}</div>
+      <div>
+        <span>${escapeHtml(title)}</span>
+        <strong>${escapeHtml(String(value))}</strong>
+        <small>${g >= 0 ? "↑" : "↓"} ${Math.abs(g)}% до минулого місяця</small>
+      </div>
+    </div>
+  `;
+}
+
+function renderTeamBars(labels, values, color) {
+  const max = Math.max(...values, 1);
+
+  return `
+    <div class="teamBars">
+      ${values.map((v, i) => `
+        <div class="teamBarItem">
+          <div class="teamBarTrack">
+            <i class="${color}" style="height:${Math.round((v / max) * 100)}%"></i>
+          </div>
+          <span>${escapeHtml(labels[i])}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ПЕЧАТЬ PDF ДЛЯ TELEGRAM, РЕЕСТРЫ ЖИВОТНЫХ И ВИЗИТОВ)
