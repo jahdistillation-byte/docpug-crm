@@ -5319,3 +5319,147 @@ body[data-theme="white"] .monthDayNum {
   color: var(--muted);
   font-size: 12px;
 }
+/* ===== TEAM PROFILE PAGE — STEP 1 HERO ===== */
+
+.teamProfileFullPage {
+  width: min(1400px, calc(100vw - 48px));
+  margin: 32px auto 140px;
+  color: #fff;
+}
+
+.teamProfileTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.teamProfileTopActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.teamProfileHero {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 26px;
+  align-items: center;
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 10% 20%, color-mix(in srgb, var(--staff-color) 28%, transparent), transparent 34%),
+    linear-gradient(135deg, rgba(24, 18, 56, .92), rgba(10, 14, 30, .86));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 24px 70px rgba(0,0,0,.32);
+  margin-bottom: 18px;
+}
+
+.teamProfileAvatar {
+  width: 118px;
+  height: 118px;
+  border-radius: 34px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--staff-color), #b45cff);
+  box-shadow: 0 18px 55px color-mix(in srgb, var(--staff-color) 45%, transparent);
+  border: 1px solid rgba(255,255,255,.22);
+  overflow: hidden;
+}
+
+.teamProfileAvatar span {
+  font-size: 58px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.teamProfileAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.teamProfileCrumb {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,.52);
+  margin-bottom: 8px;
+}
+
+.teamProfileHeroInfo h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.teamProfileHeroInfo p {
+  margin: 10px 0 16px;
+  color: rgba(255,255,255,.72);
+  font-weight: 700;
+}
+
+.teamProfileBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.teamProfileBadges span {
+  padding: 9px 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.76);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.teamProfileBadges .teamStatusBadge {
+  color: #61ff9b;
+  background: rgba(34,197,94,.15);
+  border-color: rgba(34,197,94,.32);
+}
+
+.teamInsightCard {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px 22px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(180,92,255,.22), transparent 36%),
+    rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 18px 50px rgba(0,0,0,.22);
+  margin-bottom: 18px;
+}
+
+.teamInsightIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(180,92,255,.18);
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: 22px;
+}
+
+.teamInsightCard b {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+.teamInsightCard p {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  line-height: 1.55;
+  font-weight: 650;
+}
+
+.teamInsightCard strong {
+  color: #5cff9a;
+}
