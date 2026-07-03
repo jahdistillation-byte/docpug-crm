@@ -1719,18 +1719,126 @@ async function renderTeamTab() {
   const page = document.querySelector('.page[data-page="team"]');
   if (!page) return;
 
+  const today = typeof todayISO === "function"
+    ? todayISO()
+    : new Date().toISOString().slice(0, 10);
+
   page.innerHTML = `
     <div class="card">
+      <div class="hint">Завантаження команди…</div>
+    </div>
+  `;
+
+  const staff = await loadStaffApi();
+  const specializations = await loadSpecializationsApi();
+  const schedule = await loadStaffScheduleApi(today);
+
+  const scheduleMap = new Map(schedule.map((x) => [String(x.staff_id), x]));
+
+  page.innerHTML = `
+    <div class="card teamPageCard">
       <div class="row" style="justify-content:space-between;align-items:center;">
         <div>
           <h2>Команда</h2>
-          <div class="hint">Окремий розділ для співробітників клініки. Календар більше не перевантажуємо.</div>
+          <div class="hint">Співробітники клініки, ставки, спеціалізації та профілі.</div>
         </div>
-        <button class="primary" type="button" id="btnAddStaffTeam">+ Додати співробітника</button>
+        <button class="primary" id="btnAddStaffTeam" type="button">+ Додати співробітника</button>
       </div>
 
-      <div class="hint" style="margin-top:18px;">
-        Якщо ти бачиш цю сторінку після натискання кнопки “Команда” — маршрут працює.
+      <div class="specPanel">
+        <div class="specPanelHead">
+          <div>
+            <div class="specPanelTitle">Напрями клініки</div>
+            <div class="hint">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
+          </div>
+          <button class="primary" id="btnAddSpecTeam" type="button">+ Додати напрям</button>
+        </div>
+
+        <div class="specList">
+          ${
+            specializations.length
+              ? specializations.map((s) => `
+                <div class="specPill" style="border-left:5px solid ${escapeHtml(s.color || "#7C5CFF")}">
+                  ${escapeHtml(s.name || "Напрям")}
+                </div>
+              `).join("")
+              : `<div class="hint">Напрями ще не створені.</div>`
+          }
+        </div>
+      </div>
+
+      <div class="vetList">
+        ${
+          staff.length
+            ? staff.map((doc) => {
+                const row = scheduleMap.get(String(doc.id));
+                const isActive = row ? row.is_active !== false : false;
+
+                const staffColor = doc.color || "#7C5CFF";
+                const staffName = doc.name || "Працівник";
+                const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
+
+                return `
+                  <div class="vetCard premiumVetCard" style="--staff-color:${escapeHtml(staffColor)};">
+                    <div class="vetAvatarWrap">
+                      ${
+                        doc.avatar
+                          ? `<img class="vetAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+                          : `<div class="vetAvatarLetter">${escapeHtml(staffLetter)}</div>`
+                      }
+                    </div>
+
+                    <div class="vetInfo premiumVetInfo">
+                      <div class="premiumVetTop">
+                        <div>
+                          <div class="premiumVetName">${escapeHtml(staffName)}</div>
+                          <div class="premiumVetRole">${escapeHtml(doc.role || "Ветеринарний лікар")}</div>
+                        </div>
+
+                        <button 
+                          class="scheduleStatus premiumStatus ${isActive ? "active" : ""}" 
+                          type="button" 
+                          data-team-schedule-staff-id="${escapeHtml(String(doc.id))}">
+                          ${isActive ? "На зміні" : "Вихідний"}
+                        </button>
+                      </div>
+
+                      <div class="premiumVetSpecs">
+                        <span class="premiumSpecTag">${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</span>
+                      </div>
+
+                      <div class="premiumVetMeta">
+                        <div class="premiumMetaItem">
+                          <span>Телефон</span>
+                          <strong>${escapeHtml(doc.phone || "Не вказано")}</strong>
+                        </div>
+
+                        <div class="premiumMetaItem">
+                          <span>Ставка</span>
+                          <strong>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</strong>
+                        </div>
+
+                        <div class="premiumMetaItem">
+                          <span>Відсоток</span>
+                          <strong>${escapeHtml(String(doc.percent_rate || 0))}%</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="vetActions premiumVetActions">
+                      <button class="ghost premiumProfileBtn" type="button" data-open-team-profile="${escapeHtml(String(doc.id))}">
+                        👤 Профіль
+                      </button>
+
+                      <button class="ghost premiumEditBtn" type="button" data-edit-team-staff="${escapeHtml(String(doc.id))}">
+                        ✏️ Редагувати
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join("")
+            : `<div class="hint">Співробітників ще немає.</div>`
+        }
       </div>
     </div>
   `;
@@ -1741,6 +1849,96 @@ async function renderTeamTab() {
     } else {
       alert("Форму додавання співробітника підключимо наступним кроком.");
     }
+  });
+
+  document.getElementById("btnAddSpecTeam")?.addEventListener("click", async () => {
+    const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
+    if (!name) return;
+
+    const created = await createSpecializationApi({
+      name,
+      color: "#7C5CFF",
+    });
+
+    if (created) await renderTeamTab();
+  });
+
+  document.querySelectorAll("[data-team-schedule-staff-id]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const staffId = btn.dataset.teamScheduleStaffId;
+      const isActive = !btn.classList.contains("active");
+
+      const saved = await saveStaffScheduleApi({
+        work_date: today,
+        staff_id: staffId,
+        is_active: isActive,
+      });
+
+      if (!saved) return;
+
+      btn.classList.toggle("active", isActive);
+      btn.textContent = isActive ? "На зміні" : "Вихідний";
+    });
+  });
+
+  document.querySelectorAll("[data-edit-team-staff]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.editTeamStaff;
+      const staffRow = staff.find((x) => String(x.id) === String(id));
+      if (!staffRow) return;
+
+      openEditStaffModal(staffRow);
+    });
+  });
+
+  document.querySelectorAll("[data-open-team-profile]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.openTeamProfile;
+    const staffRow = staff.find((x) => String(x.id) === String(id));
+    if (!staffRow) return;
+
+    renderTeamProfilePage(staffRow);
+  });
+});
+}
+
+async function renderTeamProfilePage(doc) {
+  const page = document.querySelector('.page[data-page="team"]');
+  if (!page) return;
+
+  const staffName = doc.name || "Працівник";
+  const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
+  const staffColor = doc.color || "#7C5CFF";
+
+  page.innerHTML = `
+    <div class="teamProfileFull">
+      <button class="ghost" id="btnBackToTeam" type="button">← Назад до команди</button>
+
+      <div class="teamProfileHeroFull" style="--staff-color:${escapeHtml(staffColor)};">
+        <div class="teamProfileAvatarFull">${escapeHtml(staffLetter)}</div>
+
+        <div>
+          <div class="teamProfileCrumb">Команда / Профіль співробітника</div>
+          <h1>${escapeHtml(staffName)}</h1>
+          <p>${escapeHtml(doc.role || "Ветеринарний лікар")} · ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</p>
+        </div>
+
+        <button class="primary" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h2>Профіль працює</h2>
+        <div class="hint">Тепер це не модалка, а повноцінна сторінка всередині розділу Команда.</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnBackToTeam")?.addEventListener("click", () => {
+    renderTeamTab();
+  });
+
+  document.getElementById("btnEditStaffFromFullProfile")?.addEventListener("click", () => {
+    openEditStaffModal(doc);
   });
 }
 // ==========================================================================
