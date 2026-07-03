@@ -319,6 +319,7 @@ const TAB_ROUTES = new Set([
   "services",
   "calendar",
   "stock",
+  "team",
   "settings",
 ]);
 
@@ -394,6 +395,7 @@ async function routeFromHash() {
     if (route === "visits") renderVisitsTab();
     if (route === "services") renderServicesTab();
     if (route === "stock") renderStockTab();
+    if (route === "team") renderTeamTab();
     if (route === "calendar") renderCalendarTab();
      if (route === "settings") {
        // Поскольку настройки статические, просто инициализируем их UI
@@ -1711,6 +1713,35 @@ function renderServicesTab() {
       return acc;
     }, {});
   }
+}
+
+async function renderTeamTab() {
+  const page = document.querySelector('.page[data-page="team"]');
+  if (!page) return;
+
+  page.innerHTML = `
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <div>
+          <h2>Команда</h2>
+          <div class="hint">Окремий розділ для співробітників клініки. Календар більше не перевантажуємо.</div>
+        </div>
+        <button class="primary" type="button" id="btnAddStaffTeam">+ Додати співробітника</button>
+      </div>
+
+      <div class="hint" style="margin-top:18px;">
+        Якщо ти бачиш цю сторінку після натискання кнопки “Команда” — маршрут працює.
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnAddStaffTeam")?.addEventListener("click", () => {
+    if (typeof openCreateStaffModal === "function") {
+      openCreateStaffModal();
+    } else {
+      alert("Форму додавання співробітника підключимо наступним кроком.");
+    }
+  });
 }
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ПЕЧАТЬ PDF ДЛЯ TELEGRAM, РЕЕСТРЫ ЖИВОТНЫХ И ВИЗИТОВ)
@@ -3843,6 +3874,7 @@ modal.className = "staffProfileOverlay";
           <button class="active" type="button">▦ Огляд</button>
          <button type="button">🩺 Прийоми</button>
           <button type="button">💰 Фінанси</button>
+          
           <button type="button">📈 Графіки</button>
           <button type="button">⚖ Штрафи та бонуси</button>
           <button type="button">🎓 Навички</button>
