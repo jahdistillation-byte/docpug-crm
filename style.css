@@ -5922,11 +5922,19 @@ body[data-theme="white"] .monthDayNum {
 /* ===== TEAM PROFILE DASHBOARD — LAYOUT FIX ===== */
 
 .teamDashProfile {
-  width: min(1420px, calc(100vw - 56px));
-  margin: 64px auto 150px;
-  grid-template-columns: 230px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
+
+    width: calc(100vw - 32px);
+
+    max-width: 1680px;
+
+    margin: 42px 16px 150px;
+
+    display: grid;
+
+    grid-template-columns: 240px minmax(0,1fr);
+
+    gap: 22px;
+
 }
 
 .teamDashSidebar {
@@ -6009,5 +6017,296 @@ body[data-theme="white"] .monthDayNum {
   .teamDashGrid .teamDashPanel:nth-child(5),
   .teamDashGrid .teamDashPanel:nth-child(6) {
     min-height: 180px;
+  }
+}
+/* ===== TEAM PROFILE — WIDE PREMIUM OVERRIDE ===== */
+
+.teamDashProfile {
+  width: calc(100vw - 24px);
+  max-width: none;
+  margin: 30px 12px 150px;
+  display: grid;
+  grid-template-columns: 285px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.teamDashSidebar {
+  min-height: calc(100vh - 205px);
+  max-height: calc(100vh - 205px);
+  overflow: hidden;
+  border-radius: 30px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--staff-color) 30%, transparent), transparent 30%),
+    linear-gradient(180deg, rgba(18, 22, 44, .94), rgba(8, 13, 28, .86));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.teamBackBtn {
+  height: 42px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.78);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.teamDashAvatar {
+  width: 124px;
+  height: 124px;
+  border-radius: 36px;
+  margin-bottom: 14px;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,.28), transparent 30%),
+    linear-gradient(135deg, var(--staff-color), #b45cff);
+  box-shadow:
+    0 18px 45px color-mix(in srgb, var(--staff-color) 45%, transparent),
+    0 0 80px color-mix(in srgb, var(--staff-color) 25%, transparent);
+}
+
+.teamDashName {
+  font-size: 26px;
+  letter-spacing: -0.035em;
+}
+
+.teamDashRole {
+  font-size: 15px;
+}
+
+.teamDashStatus {
+  margin-top: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 24px rgba(34,197,94,.13);
+}
+
+.teamDashContact {
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 18px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+}
+
+.teamDashNav {
+  gap: 7px;
+}
+
+.teamDashNav button {
+  min-height: 42px;
+  border-radius: 15px;
+  font-size: 14px;
+  transition: .18s ease;
+}
+
+.teamDashNav button.active {
+  background:
+    radial-gradient(circle at 0% 50%, rgba(255,255,255,.16), transparent 40%),
+    linear-gradient(135deg, rgba(124,92,255,.72), rgba(180,92,255,.32));
+  box-shadow: 0 12px 34px rgba(124,92,255,.22);
+}
+
+.teamDashIdBox {
+  margin-top: 18px;
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
+}
+
+.teamDashMain {
+  min-width: 0;
+  padding-right: 0;
+}
+
+.teamDashTop {
+  min-height: 58px;
+  margin-bottom: 16px;
+}
+
+.teamDashTop h1 {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.teamDashTop p {
+  font-size: 15px;
+}
+
+.teamDashActions {
+  gap: 12px;
+}
+
+.teamGhostBtn,
+.teamPrimaryBtn {
+  min-height: 46px;
+  border-radius: 16px;
+  padding: 0 18px;
+}
+
+.teamGhostBtn {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+}
+
+.teamPrimaryBtn {
+  background: linear-gradient(135deg, #7c5cff, #b45cff);
+  box-shadow:
+    0 18px 42px rgba(124,92,255,.34),
+    inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+.teamDashKpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.teamKpiCard {
+  min-height: 116px;
+  border-radius: 24px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(124,92,255,.22), transparent 42%),
+    linear-gradient(145deg, rgba(17, 24, 49, .9), rgba(8, 13, 28, .8));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow:
+    0 18px 54px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.teamKpiIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.18), transparent 35%),
+    rgba(124,92,255,.24);
+}
+
+.teamKpiCard strong {
+  font-size: 25px;
+}
+
+.teamDashInsight {
+  border-radius: 24px;
+  padding: 19px 22px;
+  margin-bottom: 16px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(180,92,255,.24), transparent 36%),
+    linear-gradient(135deg, rgba(23, 18, 54, .9), rgba(8, 13, 28, .82));
+  border: 1px solid rgba(180,92,255,.16);
+}
+
+.teamDashGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 330px;
+  gap: 14px;
+}
+
+.teamDashPanel {
+  border-radius: 24px;
+  padding: 19px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124,92,255,.1), transparent 36%),
+    linear-gradient(145deg, rgba(15, 22, 45, .9), rgba(8, 13, 28, .8));
+  border: 1px solid rgba(255,255,255,.095);
+  box-shadow:
+    0 18px 54px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.teamDashPanelLarge {
+  min-height: 286px;
+}
+
+.teamDashPanelHead h3 {
+  font-size: 18px;
+}
+
+.teamBars {
+  height: 205px;
+  gap: 17px;
+  padding-top: 8px;
+}
+
+.teamBarTrack {
+  max-width: 48px;
+  border-radius: 15px 15px 6px 6px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+}
+
+.teamBarTrack i.green {
+  background:
+    linear-gradient(180deg, #42f08a, rgba(34,197,94,.38));
+  box-shadow: 0 -10px 34px rgba(34,197,94,.22);
+}
+
+.teamBarTrack i.purple {
+  background:
+    linear-gradient(180deg, #bf5cff, rgba(124,92,255,.42));
+  box-shadow: 0 -10px 34px rgba(180,92,255,.22);
+}
+
+.teamDashRows p {
+  padding: 12px 0;
+}
+
+.teamDashXp i {
+  height: 11px;
+}
+
+.teamDashFull {
+  grid-column: 1 / -1;
+  min-height: 150px;
+}
+
+/* keep the profile above the dock visually */
+.mac-dock {
+  z-index: 80;
+}
+
+.teamDashProfile {
+  position: relative;
+  z-index: 2;
+}
+
+/* responsive */
+@media (max-width: 1450px) {
+  .teamDashProfile {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  .teamDashGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+  }
+
+  .teamKpiCard strong {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 1250px) {
+  .teamDashProfile {
+    grid-template-columns: 1fr;
+  }
+
+  .teamDashSidebar {
+    position: relative;
+    max-height: none;
+    min-height: auto;
+  }
+
+  .teamDashKpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teamDashGrid {
+    grid-template-columns: 1fr;
   }
 }
