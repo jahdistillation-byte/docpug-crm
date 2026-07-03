@@ -5463,3 +5463,459 @@ body[data-theme="white"] .monthDayNum {
 .teamInsightCard strong {
   color: #5cff9a;
 }
+/* ===== TEAM PROFILE DASHBOARD ===== */
+
+.teamDashProfile {
+  width: min(1500px, calc(100vw - 40px));
+  margin: 28px auto 140px;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 24px;
+  color: #fff;
+}
+
+.teamDashSidebar,
+.teamDashPanel,
+.teamKpiCard,
+.teamDashInsight {
+  background: rgba(10, 16, 34, .78);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 18px 55px rgba(0,0,0,.28);
+  backdrop-filter: blur(22px);
+}
+
+.teamDashSidebar {
+  border-radius: 26px;
+  padding: 18px;
+  min-height: 720px;
+}
+
+.teamBackBtn {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.8);
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 22px;
+}
+
+.teamDashAvatar {
+  width: 118px;
+  height: 118px;
+  margin: 0 auto 14px;
+  border-radius: 36px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--staff-color), #b45cff);
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--staff-color) 45%, transparent);
+}
+
+.teamDashAvatar span {
+  font-size: 58px;
+  font-weight: 900;
+}
+
+.teamDashAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.teamDashName {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.teamDashRole {
+  text-align: center;
+  color: rgba(255,255,255,.65);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.teamDashStatus {
+  width: fit-content;
+  margin: 12px auto 18px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  color: #5cff9a;
+  background: rgba(34,197,94,.16);
+  border: 1px solid rgba(34,197,94,.32);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.teamDashContact {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.72);
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.teamDashNav {
+  display: grid;
+  gap: 8px;
+}
+
+.teamDashNav button {
+  border: 0;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: rgba(255,255,255,.68);
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.teamDashNav button.active,
+.teamDashNav button:hover {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(124,92,255,.5), rgba(180,92,255,.24));
+}
+
+.teamDashIdBox {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.teamDashIdBox span {
+  display: block;
+  color: rgba(255,255,255,.45);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.teamDashIdBox b {
+  font-size: 14px;
+}
+
+.teamDashMain {
+  min-width: 0;
+}
+
+.teamDashTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.teamDashTop h1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -0.04em;
+}
+
+.teamDashTop p {
+  margin: 6px 0 0;
+  color: rgba(255,255,255,.65);
+  font-weight: 700;
+}
+
+.teamDashActions {
+  display: flex;
+  gap: 12px;
+}
+
+.teamGhostBtn,
+.teamPrimaryBtn {
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.teamGhostBtn {
+  background: rgba(255,255,255,.055);
+  color: rgba(255,255,255,.82);
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.teamPrimaryBtn {
+  background: linear-gradient(135deg, #7c5cff, #b45cff);
+  color: #fff;
+  border: 0;
+  box-shadow: 0 16px 36px rgba(124,92,255,.35);
+}
+
+.teamDashKpis {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.teamKpiCard {
+  min-height: 128px;
+  border-radius: 22px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(124,92,255,.18), transparent 42%),
+    rgba(12, 18, 38, .82);
+}
+
+.teamKpiIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,92,255,.22);
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: 22px;
+}
+
+.teamKpiCard span {
+  display: block;
+  color: rgba(255,255,255,.62);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.teamKpiCard strong {
+  display: block;
+  margin: 5px 0;
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+
+.teamKpiCard small {
+  color: #5cff9a;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.teamDashInsight {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(180,92,255,.2), transparent 38%),
+    rgba(12,18,38,.78);
+}
+
+.teamInsightIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,92,255,.22);
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: 22px;
+}
+
+.teamDashInsight b {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.teamDashInsight p {
+  margin: 0;
+  color: rgba(255,255,255,.72);
+  line-height: 1.5;
+  font-weight: 650;
+}
+
+.teamDashInsight strong {
+  color: #5cff9a;
+}
+
+.teamDashGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr .9fr;
+  gap: 14px;
+}
+
+.teamDashPanel {
+  border-radius: 22px;
+  padding: 18px;
+  min-height: 190px;
+}
+
+.teamDashPanelLarge {
+  min-height: 300px;
+}
+
+.teamDashFull {
+  grid-column: 1 / -1;
+}
+
+.teamDashPanelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.teamDashPanelHead h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.teamDashPanelHead span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.62);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.teamBars {
+  height: 220px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 10px 8px 0;
+}
+
+.teamBarItem {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.teamBarTrack {
+  flex: 1;
+  width: 100%;
+  max-width: 46px;
+  border-radius: 14px 14px 5px 5px;
+  background: rgba(255,255,255,.045);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.teamBarTrack i {
+  width: 100%;
+  display: block;
+  border-radius: 14px 14px 5px 5px;
+}
+
+.teamBarTrack i.green {
+  background: linear-gradient(180deg, #36e07f, rgba(34,197,94,.38));
+}
+
+.teamBarTrack i.purple {
+  background: linear-gradient(180deg, #b45cff, rgba(124,92,255,.42));
+}
+
+.teamBarItem span {
+  margin-top: 10px;
+  color: rgba(255,255,255,.74);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.teamDashRows {
+  display: grid;
+  gap: 10px;
+}
+
+.teamDashRows p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+
+.teamDashRows p:last-child {
+  border-bottom: 0;
+}
+
+.teamDashRows span {
+  color: rgba(255,255,255,.58);
+  font-weight: 700;
+}
+
+.teamDashRows b {
+  color: #fff;
+}
+
+.teamDashXp div {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.teamDashXp i {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  overflow: hidden;
+}
+
+.teamDashXp em {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7c5cff, #b45cff);
+}
+
+.teamDashXp p {
+  color: rgba(255,255,255,.62);
+  font-weight: 700;
+}
+
+.teamDashReviews {
+  text-align: center;
+  padding: 26px;
+}
+
+.teamDashReviews div {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.teamDashReviews b {
+  font-size: 24px;
+}
+
+.teamDashReviews p {
+  color: rgba(255,255,255,.62);
+  font-weight: 700;
+}
+
+@media (max-width: 1200px) {
+  .teamDashProfile {
+    grid-template-columns: 1fr;
+  }
+
+  .teamDashKpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .teamDashGrid {
+    grid-template-columns: 1fr;
+  }
+}

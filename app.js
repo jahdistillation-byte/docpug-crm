@@ -1929,40 +1929,67 @@ async function renderTeamProfilePage(doc) {
   const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
 
   page.innerHTML = `
-    <div class="teamProfileFullPage" style="--staff-color:${escapeHtml(staffColor)};">
+  <div class="teamDashProfile" style="--staff-color:${escapeHtml(staffColor)};">
 
-      <div class="teamProfileTopbar">
-        <button class="ghost" id="btnBackToTeam" type="button">← Команда</button>
+    <aside class="teamDashSidebar">
+      <button class="teamBackBtn" id="btnBackToTeam" type="button">← Команда</button>
 
-        <div class="teamProfileTopActions">
-          <button class="ghost" type="button">⬇ Експорт</button>
-          <button class="primary" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
+      <div class="teamDashAvatar">
+        ${
+          doc.avatar
+            ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+            : `<span>${escapeHtml(staffLetter)}</span>`
+        }
+      </div>
+
+      <div class="teamDashName">${escapeHtml(staffName)}</div>
+      <div class="teamDashRole">${escapeHtml(roleLabel)}</div>
+      <div class="teamDashStatus">На зміні</div>
+
+      <div class="teamDashContact">
+        <div>📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
+        <div>✉ Email не вказано</div>
+      </div>
+
+      <div class="teamDashNav">
+        <button class="active" type="button">▦ Огляд</button>
+        <button type="button">📈 Аналітика</button>
+        <button type="button">🩺 Прийоми</button>
+        <button type="button">💰 Фінанси</button>
+        <button type="button">🏆 Досягнення</button>
+        <button type="button">⭐ Відгуки</button>
+        <button type="button">⚙ Налаштування</button>
+      </div>
+
+      <div class="teamDashIdBox">
+        <span>ID співробітника</span>
+        <b>#STF-${escapeHtml(String(doc.id || "0000")).slice(0, 8)}</b>
+      </div>
+    </aside>
+
+    <main class="teamDashMain">
+
+      <div class="teamDashTop">
+        <div>
+          <h1>${escapeHtml(staffName)} 👋</h1>
+          <p>Ваші показники, досягнення та ефективність</p>
+        </div>
+
+        <div class="teamDashActions">
+          <button class="teamGhostBtn" type="button">⬇ Експорт</button>
+          <button class="teamPrimaryBtn" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
         </div>
       </div>
 
-      <section class="teamProfileHero">
-        <div class="teamProfileAvatar">
-          ${
-            doc.avatar
-              ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
-              : `<span>${escapeHtml(staffLetter)}</span>`
-          }
-        </div>
-
-        <div class="teamProfileHeroInfo">
-          <div class="teamProfileCrumb">Команда / Профіль співробітника</div>
-          <h1>${escapeHtml(staffName)} 👋</h1>
-          <p>${escapeHtml(roleLabel)} · ${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</p>
-
-          <div class="teamProfileBadges">
-            <span class="teamStatusBadge">На зміні</span>
-            <span>${escapeHtml(doc.phone || "Телефон не вказано")}</span>
-            <span>Email не вказано</span>
-          </div>
-        </div>
+      <section class="teamDashKpis">
+        ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
+        ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
+        ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
+        ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
+        ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
       </section>
 
-      <section class="teamInsightCard">
+      <section class="teamDashInsight">
         <div class="teamInsightIcon">✨</div>
         <div>
           <b>Що варто знати сьогодні</b>
@@ -1975,36 +2002,28 @@ async function renderTeamProfilePage(doc) {
         </div>
       </section>
 
-      <section class="teamKpiGrid">
-        ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
-        ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
-        ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
-        ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
-        ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
-      </section>
-
-      <section class="teamDashboardGrid">
-        <div class="teamPanel teamPanelWide">
-          <div class="teamPanelHead">
+      <section class="teamDashGrid">
+        <div class="teamDashPanel teamDashPanelLarge">
+          <div class="teamDashPanelHead">
             <h3>Виручка за 6 місяців</h3>
             <span>грн</span>
           </div>
           ${renderTeamBars(["Січ", "Лют", "Бер", "Кві", "Тра", "Чер"], [45, 62, 80, 94, 112, 137], "green")}
         </div>
 
-        <div class="teamPanel teamPanelWide">
-          <div class="teamPanelHead">
+        <div class="teamDashPanel teamDashPanelLarge">
+          <div class="teamDashPanelHead">
             <h3>Кількість візитів за 6 місяців</h3>
             <span>візити</span>
           </div>
           ${renderTeamBars(["Січ", "Лют", "Бер", "Кві", "Тра", "Чер"], [18, 23, 27, 35, 31, 36], "purple")}
         </div>
 
-        <div class="teamPanel">
-          <div class="teamPanelHead">
+        <div class="teamDashPanel">
+          <div class="teamDashPanelHead">
             <h3>🎯 Сьогодні</h3>
           </div>
-          <div class="teamTodayRows">
+          <div class="teamDashRows">
             <p><span>Статус</span><b>На зміні</b></p>
             <p><span>Записів сьогодні</span><b>0</b></p>
             <p><span>Виконано</span><b>0</b></p>
@@ -2012,23 +2031,23 @@ async function renderTeamProfilePage(doc) {
           </div>
         </div>
 
-        <div class="teamPanel">
-          <div class="teamPanelHead">
+        <div class="teamDashPanel">
+          <div class="teamDashPanelHead">
             <h3>🏆 Карʼєра</h3>
             <span>Level 1</span>
           </div>
-          <div class="teamXpBox">
+          <div class="teamDashXp">
             <div><b>Рівень 1</b><span>0 / 100 XP</span></div>
             <i><em style="width:0%"></em></i>
             <p>До наступного рівня залишилось 100 XP</p>
           </div>
         </div>
 
-        <div class="teamPanel">
-          <div class="teamPanelHead">
+        <div class="teamDashPanel">
+          <div class="teamDashPanelHead">
             <h3>💼 Популярні послуги</h3>
           </div>
-          <div class="teamServiceRows">
+          <div class="teamDashRows">
             <p><span>Консультація</span><b>—</b></p>
             <p><span>Вакцинація</span><b>—</b></p>
             <p><span>УЗД</span><b>—</b></p>
@@ -2036,11 +2055,11 @@ async function renderTeamProfilePage(doc) {
           </div>
         </div>
 
-        <div class="teamPanel">
-          <div class="teamPanelHead">
+        <div class="teamDashPanel">
+          <div class="teamDashPanelHead">
             <h3>💰 Фінансова інформація</h3>
           </div>
-          <div class="teamTodayRows">
+          <div class="teamDashRows">
             <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
             <p><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></p>
             <p><span>Бонуси</span><b>—</b></p>
@@ -2048,20 +2067,21 @@ async function renderTeamProfilePage(doc) {
           </div>
         </div>
 
-        <div class="teamPanel teamPanelFull">
-          <div class="teamPanelHead">
+        <div class="teamDashPanel teamDashFull">
+          <div class="teamDashPanelHead">
             <h3>⭐ Рейтинг клієнтів</h3>
             <span>автоматично</span>
           </div>
-          <div class="teamReviewsEmpty">
+          <div class="teamDashReviews">
             <div>⭐</div>
             <b>${rating ? rating.toFixed(2) : "Поки немає оцінок"}</b>
             <p>Оцінки будуть підтягуватись після відгуку клієнта, без ручної роботи адміністратора.</p>
           </div>
         </div>
       </section>
-    </div>
-  `;
+    </main>
+  </div>
+`;
 
   document.getElementById("btnBackToTeam")?.addEventListener("click", () => {
     renderTeamTab();
