@@ -1916,6 +1916,9 @@ async function renderTeamProfilePage(doc) {
     "Ветеринарний лікар";
 
   const dashboard = await loadStaffDashboardApi(doc.id);
+  const liveStats = await buildStaffLiveStats(doc.id);
+
+Object.assign(dashboard, liveStats);
 
   const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
@@ -2090,6 +2093,64 @@ async function renderTeamProfilePage(doc) {
   document.getElementById("btnEditStaffFromFullProfile")?.addEventListener("click", () => {
     openEditStaffModal(doc);
   });
+}
+
+async function buildStaffLiveStats(staffId) {
+  const staffIdStr = String(staffId);
+
+  const visits = await loadVisitsApi();
+  const calendarEvents = await loadCalendarApi();
+
+  const staffCalendarEvents = calendarEvents.filter((ev) => {
+    return String(ev.staff_id || "") === staffIdStr;
+  });
+
+  const visitIdsFromCalendar = new Set(
+    staffCalendarEvents
+      .map((ev) => String(ev.visit_id || ev.visitId || ev.source_visit_id || ""))
+      .filter(Boolean)
+  );
+
+  const staffVisits = visits.filter((v) => {
+    return (
+      String(v.staff_id || v.doctor_id || v.vet_id || "") === staffIdStr ||
+      visitIdsFromCalendar.has(String(v.id))
+    );
+  });
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const monthVisits = staffVisits.filter((v) => {
+    const d = new Date(v.date || v.event_date || v.created_at || "");
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const revenue = monthVisits.reduce((sum, v) => {
+    return sum + calcServicesTotal(v) + calcStockTotal(v);
+  }, 0);
+
+  const closedChecks = monthVisits.length;
+  const avgCheck = closedChecks ? Math.round(revenue / closedChecks) : 0;
+
+  return {
+    revenue,
+    visits_this_month: monthVisits.length,
+    closed_checks: closedChecks,
+    avg_check: avgCheck,
+    rating_avg: 0,
+    rating: 0,
+
+    revenue_growth_percent: 0,
+    visits_growth_percent: 0,
+    checks_growth_percent: 0,
+    avg_check_growth_percent: 0,
+
+    live_staff_visits: staffVisits,
+    live_month_visits: monthVisits,
+    live_calendar_events: staffCalendarEvents,
+  };
 }
 
 function renderTeamKpiCard(icon, title, value, growth) {
