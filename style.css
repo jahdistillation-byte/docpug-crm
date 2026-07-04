@@ -6358,3 +6358,13 @@ body[data-theme="white"] .monthDayNum {
 .teamDashTop {
   align-items: flex-start;
 }
+.teamChartBox {
+  height: 215px;
+  width: 100%;
+  position: relative;
+}
+
+.teamChartBox canvas {
+  width: 100% !important;
+  height: 100% !important;
+}

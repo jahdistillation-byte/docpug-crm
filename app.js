@@ -2011,7 +2011,9 @@ Object.assign(dashboard, liveStats);
             <h3>Виручка за 6 місяців</h3>
             <span>грн</span>
           </div>
-          ${renderTeamBars(["Січ", "Лют", "Бер", "Кві", "Тра", "Чер"], [45, 62, 80, 94, 112, 137], "green")}
+          <div class="teamChartBox">
+  <canvas id="staffRevenueChart"></canvas>
+</div>
         </div>
 
         <div class="teamDashPanel teamDashPanelLarge">
@@ -2019,7 +2021,9 @@ Object.assign(dashboard, liveStats);
             <h3>Кількість візитів за 6 місяців</h3>
             <span>візити</span>
           </div>
-          ${renderTeamBars(["Січ", "Лют", "Бер", "Кві", "Тра", "Чер"], [18, 23, 27, 35, 31, 36], "purple")}
+          <div class="teamChartBox">
+  <canvas id="staffVisitsChart"></canvas>
+</div>
         </div>
 
         <div class="teamDashPanel">
@@ -2086,6 +2090,8 @@ Object.assign(dashboard, liveStats);
   </div>
 `;
 
+
+
   document.getElementById("btnBackToTeam")?.addEventListener("click", () => {
     renderTeamTab();
   });
@@ -2093,6 +2099,111 @@ Object.assign(dashboard, liveStats);
   document.getElementById("btnEditStaffFromFullProfile")?.addEventListener("click", () => {
     openEditStaffModal(doc);
   });
+  requestAnimationFrame(() => {
+  renderStaffProfileCharts(dashboard);
+});
+}
+
+function buildStaffMonthlyChartsFromVisits(visits) {
+  const months = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
+
+  const now = new Date();
+  const result = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    result.push({
+      year: d.getFullYear(),
+      monthIndex: d.getMonth(),
+      label: months[d.getMonth()],
+      revenue: 0,
+      visits: 0,
+    });
+  }
+
+  visits.forEach((v) => {
+    const date = new Date(v.date || v.event_date || v.created_at || "");
+    if (Number.isNaN(date.getTime())) return;
+
+    const bucket = result.find((x) => {
+      return x.year === date.getFullYear() && x.monthIndex === date.getMonth();
+    });
+
+    if (!bucket) return;
+
+    bucket.visits += 1;
+    bucket.revenue += calcServicesTotal(v) + calcStockTotal(v);
+  });
+
+  return result;
+}
+let staffRevenueChartInstance = null;
+let staffVisitsChartInstance = null;
+
+function renderStaffProfileCharts(dashboard) {
+  if (typeof Chart === "undefined") {
+    console.warn("Chart.js не завантажився");
+    return;
+  }
+
+  const visits = dashboard.live_staff_visits || dashboard.live_month_visits || [];
+  const chartData = buildStaffMonthlyChartsFromVisits(visits);
+
+  const labels = chartData.map((x) => x.label);
+  const revenueValues = chartData.map((x) => x.revenue);
+  const visitsValues = chartData.map((x) => x.visits);
+
+  const revenueCanvas = document.getElementById("staffRevenueChart");
+  const visitsCanvas = document.getElementById("staffVisitsChart");
+
+  if (staffRevenueChartInstance) staffRevenueChartInstance.destroy();
+  if (staffVisitsChartInstance) staffVisitsChartInstance.destroy();
+
+  if (revenueCanvas) {
+    const ctx = revenueCanvas.getContext("2d");
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, "rgba(54, 224, 127, 0.95)");
+    gradient.addColorStop(1, "rgba(54, 224, 127, 0.18)");
+
+    staffRevenueChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Виручка",
+          data: revenueValues,
+          backgroundColor: gradient,
+          borderRadius: 14,
+          borderSkipped: false,
+        }],
+      },
+      options: buildTeamChartOptions("грн"),
+    });
+  }
+
+  if (visitsCanvas) {
+    const ctx = visitsCanvas.getContext("2d");
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, "rgba(180, 92, 255, 0.95)");
+    gradient.addColorStop(1, "rgba(124, 92, 255, 0.18)");
+
+    staffVisitsChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Візити",
+          data: visitsValues,
+          backgroundColor: gradient,
+          borderRadius: 14,
+          borderSkipped: false,
+        }],
+      },
+      options: buildTeamChartOptions("візити"),
+    });
+  }
 }
 
 async function buildStaffLiveStats(staffId) {
@@ -2150,6 +2261,77 @@ async function buildStaffLiveStats(staffId) {
     live_staff_visits: staffVisits,
     live_month_visits: monthVisits,
     live_calendar_events: staffCalendarEvents,
+  };
+}
+
+function buildTeamChartOptions(unitLabel) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: {
+      duration: 800,
+      easing: "easeOutQuart",
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "rgba(10, 16, 34, 0.96)",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+        borderColor: "rgba(255,255,255,0.12)",
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context) {
+            const value = Number(context.raw || 0);
+
+            if (unitLabel === "грн") {
+              return `${value.toLocaleString("uk-UA")} грн`;
+            }
+
+            return `${value} ${unitLabel}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: "rgba(255,255,255,0.72)",
+          font: {
+            weight: "700",
+          },
+        },
+        border: {
+          display: false,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "rgba(255,255,255,0.06)",
+        },
+        ticks: {
+          color: "rgba(255,255,255,0.48)",
+          callback: function(value) {
+            if (unitLabel === "грн") {
+              return Number(value).toLocaleString("uk-UA");
+            }
+
+            return value;
+          },
+        },
+        border: {
+          display: false,
+        },
+      },
+    },
   };
 }
 
