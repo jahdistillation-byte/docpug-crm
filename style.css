@@ -6310,3 +6310,47 @@ body[data-theme="white"] .monthDayNum {
     grid-template-columns: 1fr;
   }
 }
+/* ===== TEAM PROFILE — HORIZONTAL SHIFT FIX ===== */
+
+.teamDashProfile {
+  width: calc(100vw - 80px);
+  margin: 30px 40px 150px;
+  grid-template-columns: 285px minmax(0, calc(100vw - 420px));
+}
+
+.teamDashMain {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.teamDashKpis {
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+}
+
+.teamDashGrid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+}
+
+.teamDashPanel,
+.teamKpiCard,
+.teamDashInsight {
+  min-width: 0;
+}
+
+@media (max-width: 1450px) {
+  .teamDashProfile {
+    width: calc(100vw - 64px);
+    margin-left: 32px;
+    margin-right: 32px;
+    grid-template-columns: 270px minmax(0, calc(100vw - 390px));
+  }
+
+  .teamDashKpis {
+    grid-template-columns: repeat(5, minmax(130px, 1fr));
+  }
+
+  .teamDashGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
