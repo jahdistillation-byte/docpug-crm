@@ -6310,47 +6310,51 @@ body[data-theme="white"] .monthDayNum {
     grid-template-columns: 1fr;
   }
 }
-/* ===== TEAM PROFILE — HORIZONTAL SHIFT FIX ===== */
+/* ===== TEAM PROFILE — REAL STRUCTURE FIX ===== */
 
 .teamDashProfile {
-  width: calc(100vw - 80px);
-  margin: 30px 40px 150px;
-  grid-template-columns: 285px minmax(0, calc(100vw - 420px));
+  width: min(1320px, calc(100vw - 48px)) !important;
+  margin: 34px auto 150px !important;
+  grid-template-columns: 280px minmax(0, 1fr) !important;
+  overflow: visible !important;
 }
 
 .teamDashMain {
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow: visible !important;
 }
 
 .teamDashKpis {
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
 .teamDashGrid {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
-.teamDashPanel,
+.teamDashPanel:nth-child(3),
+.teamDashPanel:nth-child(4),
+.teamDashPanel:nth-child(5),
+.teamDashPanel:nth-child(6) {
+  min-height: 185px;
+}
+
+.teamDashFull {
+  grid-column: 1 / -1 !important;
+}
+
 .teamKpiCard,
+.teamDashPanel,
 .teamDashInsight {
-  min-width: 0;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-@media (max-width: 1450px) {
-  .teamDashProfile {
-    width: calc(100vw - 64px);
-    margin-left: 32px;
-    margin-right: 32px;
-    grid-template-columns: 270px minmax(0, calc(100vw - 390px));
-  }
+.teamDashActions {
+  max-width: 100%;
+}
 
-  .teamDashKpis {
-    grid-template-columns: repeat(5, minmax(130px, 1fr));
-  }
-
-  .teamDashGrid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
+.teamDashTop {
+  align-items: flex-start;
 }
