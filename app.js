@@ -2301,7 +2301,155 @@ function buildTeamAnalyticsInsight(totalRevenue, visitsCount, avgCheck) {
 }
 
 function renderTeamVisitsTab(root, state) {
-  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>🩺 Прийоми</h2><p class="hint">Тут буде історія прийомів цього співробітника.</p></div>`;
+  const visits = state.dashboard.live_staff_visits || [];
+  const today = typeof todayISO === "function"
+    ? todayISO()
+    : new Date().toISOString().slice(0, 10);
+
+  const monthVisits = state.dashboard.live_month_visits || [];
+
+  const todayVisits = visits.filter((v) => {
+    const d = String(v.date || v.event_date || "").slice(0, 10);
+    return d === today;
+  });
+
+  const plannedVisits = visits.filter((v) => {
+    const status = String(v.status || "").toLowerCase();
+    return status.includes("plan") || status.includes("scheduled") || status.includes("заплан");
+  });
+
+  const sortedVisits = [...visits].sort((a, b) => {
+    const da = new Date(a.date || a.event_date || a.created_at || 0);
+    const db = new Date(b.date || b.event_date || b.created_at || 0);
+    return db - da;
+  });
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>🩺 Прийоми</h2>
+        <p>Історія прийомів, пацієнти та робоча активність співробітника.</p>
+      </div>
+    </section>
+
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard("📋", "Усього прийомів", visits.length, 0)}
+      ${renderTeamKpiCard("📅", "Цього місяця", monthVisits.length, 0)}
+      ${renderTeamKpiCard("🎯", "Сьогодні", todayVisits.length, 0)}
+      ${renderTeamKpiCard("⏳", "Заплановано", plannedVisits.length, 0)}
+    </section>
+
+    <div class="teamVisitFilters">
+      <button class="active" type="button" data-visit-filter="all">Усі</button>
+      <button type="button" data-visit-filter="today">Сьогодні</button>
+      <button type="button" data-visit-filter="month">Місяць</button>
+      <button type="button" data-visit-filter="planned">Заплановані</button>
+    </div>
+
+    <section class="teamVisitsLayout">
+      <div class="teamVisitsList" id="teamVisitsList">
+        ${renderTeamVisitCards(sortedVisits)}
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>📌 Підсумок</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Усього прийомів</span><b>${visits.length}</b></p>
+          <p><span>Сьогодні</span><b>${todayVisits.length}</b></p>
+          <p><span>Цього місяця</span><b>${monthVisits.length}</b></p>
+          <p><span>Заплановано</span><b>${plannedVisits.length}</b></p>
+        </div>
+      </div>
+    </section>
+  `;
+
+  root.querySelectorAll("[data-visit-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      root.querySelectorAll("[data-visit-filter]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const filter = btn.dataset.visitFilter;
+      let filtered = sortedVisits;
+
+      if (filter === "today") filtered = todayVisits;
+      if (filter === "month") filtered = monthVisits;
+      if (filter === "planned") filtered = plannedVisits;
+
+      const list = root.querySelector("#teamVisitsList");
+      if (list) list.innerHTML = renderTeamVisitCards(filtered);
+    });
+  });
+}
+function renderTeamVisitCards(visits) {
+  if (!visits.length) {
+    return `
+      <div class="teamDashPanel teamDashFull">
+        <h3>Прийомів ще немає</h3>
+        <p class="hint">Коли співробітник буде проводити прийоми, вони зʼявляться тут.</p>
+      </div>
+    `;
+  }
+
+  return visits.map((v) => {
+    const date = String(v.date || v.event_date || v.created_at || "").slice(0, 10) || "—";
+    const time = String(v.time || v.start_time || "").slice(0, 5) || "—";
+    const total = calcServicesTotal(v) + calcStockTotal(v);
+
+    const petName =
+      v.pet_name ||
+      v.patient_name ||
+      v.pet?.name ||
+      "Пацієнт";
+
+    const ownerName =
+      v.owner_name ||
+      v.client_name ||
+      v.owner?.name ||
+      "Власник не вказаний";
+
+    const status = v.status || "Завершено";
+
+    return `
+      <div class="teamVisitCard">
+        <div class="teamVisitIcon">🐾</div>
+
+        <div class="teamVisitMain">
+          <div class="teamVisitTitle">${escapeHtml(petName)}</div>
+          <div class="teamVisitMeta">
+            ${escapeHtml(date)} · ${escapeHtml(time)}
+          </div>
+          <div class="teamVisitOwner">
+            Власник: ${escapeHtml(ownerName)}
+          </div>
+        </div>
+
+        <div class="teamVisitRight">
+          <span class="teamVisitStatus">${escapeHtml(status)}</span>
+          <b>${total.toLocaleString("uk-UA")} грн</b>
+          <button type="button" class="teamVisitOpenBtn" onclick="openVisitFromTeam('${escapeHtml(String(v.id || ""))}')">
+            Відкрити →
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+function openVisitFromTeam(visitId) {
+  if (!visitId) return;
+
+  if (typeof openVisitModalForEdit === "function") {
+    openVisitModalForEdit(visitId);
+    return;
+  }
+
+  if (typeof openVisitModal === "function") {
+    openVisitModal(visitId);
+    return;
+  }
+
+  alert("Відкриття візиту підключимо наступним кроком.");
 }
 
 function renderTeamFinanceTab(root, state) {
