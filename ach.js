@@ -159,14 +159,14 @@ function getAchievementReward(trackId, currentStep, unlockedSteps) {
   const title = currentStep?.name || "Досягнення";
 
   if (trackId === "career") {
-    return {
-      icon: "👑",
-      label: "Титул і рамка",
-      title,
-      frame: rarity,
-      badge: "career",
-    };
-  }
+  return {
+    icon: "🏆",
+    label: "Професійний титул",
+    title,
+    frame: rarity,
+    badge: "career",
+  };
+}
 
   if (trackId === "dogs") {
     return {
@@ -390,27 +390,40 @@ function achievementRarityLabel(rarity) {
   return map[rarity] || "Досягнення";
 }
 function getUnlockedCareerTitles(career) {
+  const titles = [
+    {
+      id: "none",
+      label: "Без титулу",
+      rarity: "common",
+      icon: "—",
+    }
+  ];
+
   const careerTrack = career.achievements.find((a) => a.id === "career");
 
   if (!careerTrack) {
-    return [{
+    titles.push({
       id: career.title || "Новий спеціаліст",
       label: career.title || "Новий спеціаліст",
       rarity: "common",
       icon: career.levelIcon || "✨",
-    }];
+    });
+
+    return titles;
   }
 
-  const titles = careerTrack.steps
+  careerTrack.steps
     .filter((s) => careerTrack.rawCurrent >= s.target)
-    .map((s) => ({
-      id: s.name,
-      label: s.name,
-      rarity: s.rarity,
-      icon: s.icon,
-    }));
+    .forEach((s) => {
+      titles.push({
+        id: s.name,
+        label: s.name,
+        rarity: s.rarity,
+        icon: s.icon,
+      });
+    });
 
-  if (!titles.length) {
+  if (titles.length === 1) {
     titles.push({
       id: career.title || "Новий спеціаліст",
       label: career.title || "Новий спеціаліст",
@@ -423,7 +436,14 @@ function getUnlockedCareerTitles(career) {
 }
 
 function getUnlockedCareerFrames(career) {
-  const frames = [];
+  const frames = [
+    {
+      id: "none",
+      label: "Без рамки",
+      rarity: "common",
+      icon: "⬜",
+    }
+  ];
 
   career.achievements.forEach((a) => {
     const frame = a.reward?.frame;

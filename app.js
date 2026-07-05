@@ -1931,12 +1931,7 @@ const careerPrefs = getStaffCareerPrefs(doc.id);
 const unlockedTitles = getUnlockedCareerTitles(career);
 const unlockedFrames = getUnlockedCareerFrames(career);
 
-const selectedTitle = unlockedTitles.find((x) => x.id === careerPrefs.titleId);
-const selectedFrame = unlockedFrames.find((x) => x.id === careerPrefs.frameId);
-
-const profileTitle = selectedTitle?.label || career.title || roleLabel;
-const profileFrame = selectedFrame?.id || career.activeFrame || "";
-const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
+const selectedTitle = careerPrefs.selectedTitle && unlockedTitles.includes(careerPrefs.selectedTitle)
 
   const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
@@ -1964,7 +1959,7 @@ const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
       </div>
 
       <div class="teamDashName">${escapeHtml(staffName)}</div>
-<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>
+${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>` : ""}
 <div class="teamDashRole">${escapeHtml(roleLabel)}</div>
       <div class="teamDashStatus">На зміні</div>
 
