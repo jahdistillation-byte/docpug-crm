@@ -28,6 +28,8 @@ function buildStaffCareer(state) {
   const title = getCareerTitle(totalVisits);
   const levelIcon = getCareerIcon(totalVisits);
 
+  const activeFrame = getActiveCareerFrame(achievements);
+
   return {
     xp,
     level: level.level,
@@ -37,6 +39,7 @@ function buildStaffCareer(state) {
     progressPercent: level.progressPercent,
     title,
     levelIcon,
+    activeFrame,
     achievements,
     unlockedCount,
     clinicRank: "—",
@@ -120,12 +123,13 @@ function trackAch(id, icon, groupName, current, steps) {
   const target = activeStep.target;
   const visibleCurrent = Math.min(safeCurrent, target);
   const progress = Math.min(100, Math.round((visibleCurrent / target) * 100));
-
   const unlocked = !nextStep;
 
   const earnedXp = steps.reduce((sum, s) => {
     return sum + (safeCurrent >= s.target ? Number(s.xp || 0) : 0);
   }, 0);
+
+  const reward = getAchievementReward(id, currentStep, unlockedSteps);
 
   return {
     id,
@@ -145,7 +149,136 @@ function trackAch(id, icon, groupName, current, steps) {
     unlockedSteps,
     totalSteps: steps.length,
     steps,
+    reward,
   };
+}
+
+function getAchievementReward(trackId, currentStep, unlockedSteps) {
+  if (!unlockedSteps) {
+    return {
+      icon: "🔒",
+      label: "Нагорода попереду",
+      title: "Відкриється після першого етапу",
+      frame: null,
+      badge: null,
+    };
+  }
+
+  const rarity = currentStep?.rarity || "common";
+  const title = currentStep?.name || "Досягнення";
+
+  if (trackId === "career") {
+    return {
+      icon: "👑",
+      label: "Титул і рамка",
+      title,
+      frame: rarity,
+      badge: "career",
+    };
+  }
+
+  if (trackId === "dogs") {
+    return {
+      icon: "🐶",
+      label: "Значок собак",
+      title,
+      frame: rarity === "legendary" ? "legendary" : null,
+      badge: "dogs",
+    };
+  }
+
+  if (trackId === "cats") {
+    return {
+      icon: "🐱",
+      label: "Значок котів",
+      title,
+      frame: rarity === "legendary" ? "legendary" : null,
+      badge: "cats",
+    };
+  }
+
+  if (trackId === "finance") {
+    return {
+      icon: "💰",
+      label: "Фінансова відзнака",
+      title,
+      frame: rarity === "legendary" ? "gold" : null,
+      badge: "finance",
+    };
+  }
+
+  if (trackId === "vaccine") {
+    return {
+      icon: "🛡",
+      label: "Значок профілактики",
+      title,
+      frame: null,
+      badge: "vaccine",
+    };
+  }
+
+  if (trackId === "surgery") {
+    return {
+      icon: "⚕️",
+      label: "Хірургічна відзнака",
+      title,
+      frame: rarity === "legendary" ? "mythic" : null,
+      badge: "surgery",
+    };
+  }
+
+  if (trackId === "activity") {
+    return {
+      icon: "🔥",
+      label: "Відзнака активності",
+      title,
+      frame: null,
+      badge: "activity",
+    };
+  }
+
+  if (trackId === "collection") {
+    return {
+      icon: "🏅",
+      label: "Колекційна рамка",
+      title,
+      frame: rarity,
+      badge: "collection",
+    };
+  }
+
+  return {
+    icon: "🏆",
+    label: "Нагорода",
+    title,
+    frame: null,
+    badge: "achievement",
+  };
+}
+
+function getActiveCareerFrame(achievements) {
+  const priority = {
+    mythic: 6,
+    legendary: 5,
+    gold: 5,
+    epic: 4,
+    rare: 3,
+    uncommon: 2,
+    common: 1,
+  };
+
+  let best = null;
+
+  achievements.forEach((a) => {
+    const frame = a.reward?.frame;
+    if (!frame) return;
+
+    if (!best || (priority[frame] || 0) > (priority[best] || 0)) {
+      best = frame;
+    }
+  });
+
+  return best;
 }
 
 function countVisitsBySpecies(visits, words) {
@@ -239,12 +372,12 @@ function renderAchievementCard(a) {
           <i><em style="width:${a.progress}%"></em></i>
         </div>
 
-        <div class="achievementSteps">
-          ${a.steps.map((s) => `
-            <span class="${a.rawCurrent >= s.target ? "done" : ""}" title="${escapeHtml(s.name)}">
-              ${s.icon}
-            </span>
-          `).join("")}
+        <div class="achievementReward ${a.unlockedSteps ? "unlocked" : ""}">
+          <span>${a.reward?.icon || "🏆"}</span>
+          <div>
+            <b>${escapeHtml(a.reward?.label || "Нагорода")}</b>
+            <small>${escapeHtml(a.reward?.title || "Відкриється пізніше")}</small>
+          </div>
         </div>
       </div>
 

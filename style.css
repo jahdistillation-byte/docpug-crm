@@ -6752,3 +6752,74 @@ body[data-theme="white"] .monthDayNum {
     grid-column: 1 / -1;
   }
 }
+
+.achievementReward {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.07);
+  opacity: .55;
+}
+
+.achievementReward.unlocked {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255,204,77,.12), transparent 42%),
+    rgba(255,255,255,.055);
+}
+
+.achievementReward span {
+  width: 34px;
+  height: 34px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,92,255,.2);
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.achievementReward b {
+  display: block;
+  color: #fff;
+  font-size: 13px;
+}
+
+.achievementReward small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255,255,255,.56);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.teamDashAvatar.frame-common {
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18);
+}
+
+.teamDashAvatar.frame-uncommon {
+  box-shadow: 0 0 0 3px rgba(34,197,94,.55), 0 0 28px rgba(34,197,94,.18);
+}
+
+.teamDashAvatar.frame-rare {
+  box-shadow: 0 0 0 3px rgba(59,130,246,.65), 0 0 30px rgba(59,130,246,.2);
+}
+
+.teamDashAvatar.frame-epic {
+  box-shadow: 0 0 0 3px rgba(180,92,255,.7), 0 0 36px rgba(180,92,255,.28);
+}
+
+.teamDashAvatar.frame-legendary,
+.teamDashAvatar.frame-gold {
+  box-shadow: 0 0 0 3px rgba(255,204,77,.85), 0 0 42px rgba(255,204,77,.28);
+}
+
+.teamDashAvatar.frame-mythic {
+  box-shadow:
+    0 0 0 3px rgba(255,90,90,.85),
+    0 0 34px rgba(255,90,90,.28),
+    0 0 60px rgba(180,92,255,.18);
+}
