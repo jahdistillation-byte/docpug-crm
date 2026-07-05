@@ -188,15 +188,15 @@ function getAchievementReward(trackId, currentStep, unlockedSteps) {
     };
   }
 
-  if (trackId === "finance") {
-    return {
-      icon: "💰",
-      label: "Фінансова відзнака",
-      title,
-      frame: rarity === "legendary" ? "gold" : null,
-      badge: "finance",
-    };
-  }
+ if (trackId === "finance") {
+  return {
+    icon: "💰",
+    label: "Відзнака внеску",
+    title,
+    frame: null,
+    badge: "finance",
+  };
+}
 
   if (trackId === "vaccine") {
     return {
@@ -391,9 +391,17 @@ function achievementRarityLabel(rarity) {
 }
 function getUnlockedCareerTitles(career) {
   const careerTrack = career.achievements.find((a) => a.id === "career");
-  if (!careerTrack) return [];
 
-  return careerTrack.steps
+  if (!careerTrack) {
+    return [{
+      id: career.title || "Новий спеціаліст",
+      label: career.title || "Новий спеціаліст",
+      rarity: "common",
+      icon: career.levelIcon || "✨",
+    }];
+  }
+
+  const titles = careerTrack.steps
     .filter((s) => careerTrack.rawCurrent >= s.target)
     .map((s) => ({
       id: s.name,
@@ -401,6 +409,17 @@ function getUnlockedCareerTitles(career) {
       rarity: s.rarity,
       icon: s.icon,
     }));
+
+  if (!titles.length) {
+    titles.push({
+      id: career.title || "Новий спеціаліст",
+      label: career.title || "Новий спеціаліст",
+      rarity: "common",
+      icon: career.levelIcon || "✨",
+    });
+  }
+
+  return titles;
 }
 
 function getUnlockedCareerFrames(career) {
@@ -413,7 +432,7 @@ function getUnlockedCareerFrames(career) {
     frames.push({
       id: frame,
       label: a.reward?.title || a.groupName,
-      rarity: a.rarity,
+      rarity: frame === "gold" ? "legendary" : frame,
       icon: a.reward?.icon || "🏆",
     });
   });
