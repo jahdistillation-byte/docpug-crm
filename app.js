@@ -2319,18 +2319,49 @@ function renderTeamReviewsTab(root, state) {
 function renderTeamSettingsTab(root, state) {
   root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⚙ Налаштування</h2><p class="hint">Тут будуть налаштування профілю співробітника.</p></div>`;
 }
-function buildStaffMonthlyChartsFromVisits(visits, monthsCount = 6) {
-  const months = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
-
+function buildStaffChartsFromVisits(visits, monthsCount = 6) {
+  const monthNames = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
   const now = new Date();
   const result = [];
 
+  if (Number(monthsCount) === 1) {
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      result.push({
+        year,
+        monthIndex: month,
+        day,
+        label: String(day),
+        revenue: 0,
+        visits: 0,
+      });
+    }
+
+    visits.forEach((v) => {
+      const date = new Date(v.date || v.event_date || v.created_at || "");
+      if (Number.isNaN(date.getTime())) return;
+      if (date.getFullYear() !== year || date.getMonth() !== month) return;
+
+      const bucket = result[date.getDate() - 1];
+      if (!bucket) return;
+
+      bucket.visits += 1;
+      bucket.revenue += calcServicesTotal(v) + calcStockTotal(v);
+    });
+
+    return result;
+  }
+
   for (let i = monthsCount - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
     result.push({
       year: d.getFullYear(),
       monthIndex: d.getMonth(),
-      label: months[d.getMonth()],
+      label: monthNames[d.getMonth()],
       revenue: 0,
       visits: 0,
     });
