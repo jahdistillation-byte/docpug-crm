@@ -6368,3 +6368,35 @@ body[data-theme="white"] .monthDayNum {
   width: 100% !important;
   height: 100% !important;
 }
+.teamSubHero {
+  margin-bottom: 16px;
+  padding: 24px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(180,92,255,.22), transparent 36%),
+    linear-gradient(135deg, rgba(15,22,45,.92), rgba(8,13,28,.82));
+  border: 1px solid rgba(255,255,255,.095);
+  box-shadow: 0 18px 54px rgba(0,0,0,.25);
+}
+
+.teamSubHero h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.teamSubHero p {
+  margin: 8px 0 0;
+  color: rgba(255,255,255,.65);
+  font-weight: 700;
+}
+
+.teamAnalyticsInsight p {
+  margin: 0;
+  color: rgba(255,255,255,.7);
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+.teamAnalyticsInsight b {
+  color: #5cff9a;
+}

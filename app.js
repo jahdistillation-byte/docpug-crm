@@ -2288,7 +2288,89 @@ function renderTeamOverviewTab(root, state) {
   `;
 }
 function renderTeamAnalyticsTab(root, state) {
-  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>📈 Аналітика</h2><p class="hint">Тут буде глибока аналітика співробітника.</p></div>`;
+  const visits = state.dashboard.live_staff_visits || [];
+  const monthVisits = state.dashboard.live_month_visits || [];
+
+  const totalRevenue = monthVisits.reduce((sum, v) => {
+    return sum + calcServicesTotal(v) + calcStockTotal(v);
+  }, 0);
+
+  const avgCheck = monthVisits.length ? Math.round(totalRevenue / monthVisits.length) : 0;
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>📈 Аналітика</h2>
+        <p>Динаміка роботи, виручка, візити та ефективність співробітника.</p>
+      </div>
+    </section>
+
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard("💰", "Виручка за місяць", `${totalRevenue.toLocaleString("uk-UA")} грн`, 0)}
+      ${renderTeamKpiCard("🐾", "Візитів за місяць", monthVisits.length, 0)}
+      ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, 0)}
+    </section>
+
+    <section class="teamDashGrid">
+      <div class="teamDashPanel teamDashPanelLarge">
+        <div class="teamDashPanelHead">
+          <h3>Виручка за 6 місяців</h3>
+          <span>грн</span>
+        </div>
+        <div class="teamChartBox">
+          <canvas id="staffRevenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="teamDashPanel teamDashPanelLarge">
+        <div class="teamDashPanelHead">
+          <h3>Кількість візитів за 6 місяців</h3>
+          <span>візити</span>
+        </div>
+        <div class="teamChartBox">
+          <canvas id="staffVisitsChart"></canvas>
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>🧠 Висновок</h3>
+        </div>
+        <div class="teamAnalyticsInsight">
+          ${buildTeamAnalyticsInsight(totalRevenue, monthVisits.length, avgCheck)}
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>📌 Показники</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Усього прийомів</span><b>${visits.length}</b></p>
+          <p><span>Прийомів цього місяця</span><b>${monthVisits.length}</b></p>
+          <p><span>Виручка цього місяця</span><b>${totalRevenue.toLocaleString("uk-UA")} грн</b></p>
+          <p><span>Середній чек</span><b>${avgCheck.toLocaleString("uk-UA")} грн</b></p>
+        </div>
+      </div>
+    </section>
+  `;
+
+  requestAnimationFrame(() => renderStaffProfileCharts(state.dashboard));
+}
+function buildTeamAnalyticsInsight(totalRevenue, visitsCount, avgCheck) {
+  if (!visitsCount) {
+    return `
+      <p>Поки що немає достатньо даних для аналітики. Створіть кілька прийомів з цим співробітником — і CRM почне показувати динаміку.</p>
+    `;
+  }
+
+  return `
+    <p>
+      За поточний місяць співробітник провів <b>${visitsCount}</b> прийомів
+      на суму <b>${totalRevenue.toLocaleString("uk-UA")} грн</b>.
+      Середній чек складає <b>${avgCheck.toLocaleString("uk-UA")} грн</b>.
+    </p>
+  `;
 }
 
 function renderTeamVisitsTab(root, state) {
