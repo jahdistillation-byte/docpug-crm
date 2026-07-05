@@ -1970,9 +1970,9 @@ Object.assign(dashboard, liveStats);
       </div>
     </aside>
 
-    <main class="teamDashMain">
+    </aside>
 
-      <main class="teamDashMain">
+<main class="teamDashMain">
 
   <div class="teamDashTop">
     <div>
@@ -2014,7 +2014,7 @@ Object.assign(dashboard, liveStats);
       <section class="teamDashGrid">
         <div class="teamDashPanel teamDashPanelLarge">
           <div class="teamDashPanelHead">
-            <h3>Виручка за 6 місяців</h3>
+            <h3>Виручка</h3>
             <span>грн</span>
           </div>
           <div class="teamChartBox">
@@ -2024,7 +2024,7 @@ Object.assign(dashboard, liveStats);
 
         <div class="teamDashPanel teamDashPanelLarge">
           <div class="teamDashPanelHead">
-            <h3>Кількість візитів за 6 місяців</h3>
+           <h3>Кількість візитів</h3>
             <span>візити</span>
           </div>
           <div class="teamChartBox">
@@ -2144,7 +2144,18 @@ function renderTeamProfileTab(tab, state) {
 
   if (tab === "overview") {
     renderTeamOverviewTab(root, state);
-    requestAnimationFrame(() => renderStaffProfileCharts(state.dashboard));
+    requestAnimationFrame(() => {
+  renderStaffProfileCharts(state.dashboard, 1);
+
+  document.querySelectorAll("[data-chart-range]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-chart-range]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      renderStaffProfileCharts(state.dashboard, Number(btn.dataset.chartRange || 1));
+    });
+  });
+});
     return;
   }
 
@@ -2219,7 +2230,7 @@ function renderTeamOverviewTab(root, state) {
     <section class="teamDashGrid">
       <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>Виручка за 6 місяців</h3>
+         <h3>Виручка</h3>
           <span>грн</span>
         </div>
         <div class="teamChartBox">
@@ -2229,7 +2240,7 @@ function renderTeamOverviewTab(root, state) {
 
       <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>Кількість візитів за 6 місяців</h3>
+          <h3>Кількість візитів</h3>
           <span>візити</span>
         </div>
         <div class="teamChartBox">
@@ -2311,10 +2322,17 @@ function renderTeamAnalyticsTab(root, state) {
       ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, 0)}
     </section>
 
+<div class="teamChartRange">
+  <button class="active" data-chart-range="1" type="button">1 місяць</button>
+  <button data-chart-range="3" type="button">3 місяці</button>
+  <button data-chart-range="6" type="button">6 місяців</button>
+</div>
+
+
     <section class="teamDashGrid">
       <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>Виручка за 6 місяців</h3>
+          <h3>Виручка</h3>
           <span>грн</span>
         </div>
         <div class="teamChartBox">
@@ -2324,7 +2342,7 @@ function renderTeamAnalyticsTab(root, state) {
 
       <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>Кількість візитів за 6 місяців</h3>
+          <h3>Кількість візитів</h3>
           <span>візити</span>
         </div>
         <div class="teamChartBox">
@@ -2392,7 +2410,7 @@ function renderTeamReviewsTab(root, state) {
 function renderTeamSettingsTab(root, state) {
   root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⚙ Налаштування</h2><p class="hint">Тут будуть налаштування профілю співробітника.</p></div>`;
 }
-function buildStaffMonthlyChartsFromVisits(visits) {
+function buildStaffMonthlyChartsFromVisits(visits, monthsCount = 6) {
   const months = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
 
   const now = new Date();
@@ -2428,14 +2446,14 @@ function buildStaffMonthlyChartsFromVisits(visits) {
 let staffRevenueChartInstance = null;
 let staffVisitsChartInstance = null;
 
-function renderStaffProfileCharts(dashboard) {
+function renderStaffProfileCharts(dashboard, monthsCount = 6) {
   if (typeof Chart === "undefined") {
     console.warn("Chart.js не завантажився");
     return;
   }
 
   const visits = dashboard.live_staff_visits || dashboard.live_month_visits || [];
-  const chartData = buildStaffMonthlyChartsFromVisits(visits);
+  const chartData = buildStaffMonthlyChartsFromVisits(visits, monthsCount);
 
   const labels = chartData.map((x) => x.label);
   const revenueValues = chartData.map((x) => x.revenue);
@@ -4865,7 +4883,7 @@ modal.className = "staffProfileOverlay";
         <section class="staffProfileDashboardGrid">
           <div class="staffPanel staffChartPanel">
             <div class="staffPanelHead">
-              <h3>Виручка за 6 місяців</h3>
+              <h3>Виручка</h3>
               <span>грн</span>
             </div>
             <div class="staffFakeLineChart">
