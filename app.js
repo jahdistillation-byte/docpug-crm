@@ -1920,6 +1920,24 @@ async function renderTeamProfilePage(doc) {
 
 Object.assign(dashboard, liveStats);
 
+const career = buildStaffCareer({
+  doc,
+  dashboard,
+  revenue: Number(dashboard.revenue || 0),
+});
+
+const careerPrefs = getStaffCareerPrefs(doc.id);
+
+const unlockedTitles = getUnlockedCareerTitles(career);
+const unlockedFrames = getUnlockedCareerFrames(career);
+
+const selectedTitle = unlockedTitles.find((x) => x.id === careerPrefs.titleId);
+const selectedFrame = unlockedFrames.find((x) => x.id === careerPrefs.frameId);
+
+const profileTitle = selectedTitle?.label || career.title || roleLabel;
+const profileFrame = selectedFrame?.id || career.activeFrame || "";
+const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
+
   const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
   const checks = Number(dashboard.closed_checks || 0);
@@ -1937,7 +1955,7 @@ Object.assign(dashboard, liveStats);
     <aside class="teamDashSidebar">
       <button class="teamBackBtn" id="btnBackToTeam" type="button">← Команда</button>
 
-      <div class="teamDashAvatar">
+      <div class="teamDashAvatar ${escapeHtml(profileFrameClass)}">
         ${
           doc.avatar
             ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
@@ -1946,7 +1964,8 @@ Object.assign(dashboard, liveStats);
       </div>
 
       <div class="teamDashName">${escapeHtml(staffName)}</div>
-      <div class="teamDashRole">${escapeHtml(roleLabel)}</div>
+<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>
+<div class="teamDashRole">${escapeHtml(roleLabel)}</div>
       <div class="teamDashStatus">На зміні</div>
 
       <div class="teamDashContact">
@@ -2612,12 +2631,81 @@ function buildStaffCareer(state) {
   };
 }
 
+
 function renderTeamReviewsTab(root, state) {
   root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⭐ Відгуки</h2><p class="hint">Тут будуть оцінки та відгуки клієнтів.</p></div>`;
 }
 
 function renderTeamSettingsTab(root, state) {
-  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⚙ Налаштування</h2><p class="hint">Тут будуть налаштування профілю співробітника.</p></div>`;
+  const career = buildStaffCareer(state);
+  const titles = getUnlockedCareerTitles(career);
+  const frames = getUnlockedCareerFrames(career);
+  const prefs = getStaffCareerPrefs(state.doc.id);
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>⚙ Налаштування профілю</h2>
+        <p>Виберіть активний титул і рамку, які будуть показані у профілі.</p>
+      </div>
+    </section>
+
+    <section class="teamDashGrid">
+      <div class="teamDashPanel teamDashFull">
+        <div class="teamDashPanelHead">
+          <h3>🏆 Активний титул</h3>
+        </div>
+
+        <div class="careerChoiceGrid">
+          ${
+            titles.length
+              ? titles.map((t) => `
+                <button class="careerChoice ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
+                  <span>${escapeHtml(t.icon)}</span>
+                  <b>${escapeHtml(t.label)}</b>
+                  <small>${escapeHtml(achievementRarityLabel(t.rarity))}</small>
+                </button>
+              `).join("")
+              : `<div class="hint">Поки немає відкритих титулів.</div>`
+          }
+        </div>
+      </div>
+
+      <div class="teamDashPanel teamDashFull">
+        <div class="teamDashPanelHead">
+          <h3>🖼 Активна рамка</h3>
+        </div>
+
+        <div class="careerChoiceGrid">
+          ${
+            frames.length
+              ? frames.map((f) => `
+                <button class="careerChoice ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
+                  <span>${escapeHtml(f.icon)}</span>
+                  <b>${escapeHtml(f.label)}</b>
+                  <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
+                </button>
+              `).join("")
+              : `<div class="hint">Поки немає відкритих рамок.</div>`
+          }
+        </div>
+      </div>
+    </section>
+  `;
+
+  root.querySelectorAll("[data-title-choice]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      saveStaffCareerPrefs(state.doc.id, { titleId: btn.dataset.titleChoice });
+      renderTeamSettingsTab(root, state);
+    });
+  });
+
+  root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      saveStaffCareerPrefs(state.doc.id, { frameId: btn.dataset.frameChoice });
+      renderTeamSettingsTab(root, state);
+    });
+  });
 }
 function buildStaffChartsFromVisits(visits, monthsCount = 6) {
   const monthNames = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];

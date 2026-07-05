@@ -6823,3 +6823,47 @@ body[data-theme="white"] .monthDayNum {
     0 0 34px rgba(255,90,90,.28),
     0 0 60px rgba(180,92,255,.18);
 }
+.careerChoiceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.careerChoice {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  text-align: left;
+  align-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.045);
+  color: #fff;
+  cursor: pointer;
+}
+
+.careerChoice span {
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,92,255,.2);
+}
+
+.careerChoice b {
+  display: block;
+}
+
+.careerChoice small {
+  display: block;
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+}
+
+.careerChoice.active {
+  border-color: rgba(180,92,255,.65);
+  background: rgba(124,92,255,.18);
+  box-shadow: 0 0 30px rgba(124,92,255,.16);
+}

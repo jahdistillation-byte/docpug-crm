@@ -398,3 +398,53 @@ function achievementRarityLabel(rarity) {
 
   return map[rarity] || "Досягнення";
 }
+function getUnlockedCareerTitles(career) {
+  const careerTrack = career.achievements.find((a) => a.id === "career");
+  if (!careerTrack) return [];
+
+  return careerTrack.steps
+    .filter((s) => careerTrack.rawCurrent >= s.target)
+    .map((s) => ({
+      id: s.name,
+      label: s.name,
+      rarity: s.rarity,
+      icon: s.icon,
+    }));
+}
+
+function getUnlockedCareerFrames(career) {
+  const frames = [];
+
+  career.achievements.forEach((a) => {
+    const frame = a.reward?.frame;
+    if (!frame) return;
+
+    frames.push({
+      id: frame,
+      label: a.reward?.title || a.groupName,
+      rarity: a.rarity,
+      icon: a.reward?.icon || "🏆",
+    });
+  });
+
+  const unique = new Map();
+  frames.forEach((f) => unique.set(f.id, f));
+
+  return Array.from(unique.values());
+}
+
+function getStaffCareerPrefs(staffId) {
+  try {
+    return JSON.parse(localStorage.getItem(`staff_career_prefs_${staffId}`) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveStaffCareerPrefs(staffId, prefs) {
+  const current = getStaffCareerPrefs(staffId);
+  localStorage.setItem(`staff_career_prefs_${staffId}`, JSON.stringify({
+    ...current,
+    ...prefs,
+  }));
+}
