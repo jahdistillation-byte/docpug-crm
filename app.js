@@ -1989,110 +1989,6 @@ Object.assign(dashboard, liveStats);
   <div id="teamProfileContent"></div>
 
 </main>
-
-      <section class="teamDashKpis">
-        ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
-        ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
-        ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
-        ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
-        ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
-      </section>
-
-      <section class="teamDashInsight">
-        <div class="teamInsightIcon">✨</div>
-        <div>
-          <b>Що варто знати сьогодні</b>
-          <p>
-            ${escapeHtml(staffName)} має стабільні показники: виручка змінилась на 
-            <strong>${revenueGrowth}%</strong>, кількість візитів — на 
-            <strong>${visitsGrowth}%</strong>. Поточний рейтинг клієнтів — 
-            <strong>${rating ? rating.toFixed(2) : "—"}</strong>.
-          </p>
-        </div>
-      </section>
-
-      <section class="teamDashGrid">
-        <div class="teamDashPanel teamDashPanelLarge">
-          <div class="teamDashPanelHead">
-            <h3>Виручка</h3>
-            <span>грн</span>
-          </div>
-          <div class="teamChartBox">
-  <canvas id="staffRevenueChart"></canvas>
-</div>
-        </div>
-
-        <div class="teamDashPanel teamDashPanelLarge">
-          <div class="teamDashPanelHead">
-           <h3>Кількість візитів</h3>
-            <span>візити</span>
-          </div>
-          <div class="teamChartBox">
-  <canvas id="staffVisitsChart"></canvas>
-</div>
-        </div>
-
-        <div class="teamDashPanel">
-          <div class="teamDashPanelHead">
-            <h3>🎯 Сьогодні</h3>
-          </div>
-          <div class="teamDashRows">
-            <p><span>Статус</span><b>На зміні</b></p>
-            <p><span>Записів сьогодні</span><b>0</b></p>
-            <p><span>Виконано</span><b>0</b></p>
-            <p><span>Попереду</span><b>0</b></p>
-          </div>
-        </div>
-
-        <div class="teamDashPanel">
-          <div class="teamDashPanelHead">
-            <h3>🏆 Карʼєра</h3>
-            <span>Level 1</span>
-          </div>
-          <div class="teamDashXp">
-            <div><b>Рівень 1</b><span>0 / 100 XP</span></div>
-            <i><em style="width:0%"></em></i>
-            <p>До наступного рівня залишилось 100 XP</p>
-          </div>
-        </div>
-
-        <div class="teamDashPanel">
-          <div class="teamDashPanelHead">
-            <h3>💼 Популярні послуги</h3>
-          </div>
-          <div class="teamDashRows">
-            <p><span>Консультація</span><b>—</b></p>
-            <p><span>Вакцинація</span><b>—</b></p>
-            <p><span>УЗД</span><b>—</b></p>
-            <p><span>Хірургія</span><b>—</b></p>
-          </div>
-        </div>
-
-        <div class="teamDashPanel">
-          <div class="teamDashPanelHead">
-            <h3>💰 Фінансова інформація</h3>
-          </div>
-          <div class="teamDashRows">
-            <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
-            <p><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></p>
-            <p><span>Бонуси</span><b>—</b></p>
-            <p><span>Нараховано</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
-          </div>
-        </div>
-
-        <div class="teamDashPanel teamDashFull">
-          <div class="teamDashPanelHead">
-            <h3>⭐ Рейтинг клієнтів</h3>
-            <span>автоматично</span>
-          </div>
-          <div class="teamDashReviews">
-            <div>⭐</div>
-            <b>${rating ? rating.toFixed(2) : "Поки немає оцінок"}</b>
-            <p>Оцінки будуть підтягуватись після відгуку клієнта, без ручної роботи адміністратора.</p>
-          </div>
-        </div>
-      </section>
-    </main>
   </div>
 `;
 
@@ -2105,9 +2001,7 @@ Object.assign(dashboard, liveStats);
   document.getElementById("btnEditStaffFromFullProfile")?.addEventListener("click", () => {
     openEditStaffModal(doc);
   });
-  requestAnimationFrame(() => {
-  renderStaffProfileCharts(dashboard);
-});
+
 
 const profileState = {
   doc,
