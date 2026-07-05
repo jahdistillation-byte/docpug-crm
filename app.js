@@ -2702,18 +2702,28 @@ function renderTeamSettingsTab(root, state) {
   `;
 
   root.querySelectorAll("[data-title-choice]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      saveStaffCareerPrefs(state.doc.id, { titleId: btn.dataset.titleChoice });
-      renderTeamSettingsTab(root, state);
-    });
-  });
+  btn.addEventListener("click", () => {
+    const titleId = btn.dataset.titleChoice || "none";
 
-  root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      saveStaffCareerPrefs(state.doc.id, { frameId: btn.dataset.frameChoice });
-      renderTeamSettingsTab(root, state);
-    });
+    console.log("SAVE TITLE:", state.doc.id, titleId);
+
+    saveStaffCareerPrefs(state.doc.id, { titleId });
+
+    renderTeamSettingsTab(root, state);
   });
+});
+
+root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const frameId = btn.dataset.frameChoice || "none";
+
+    console.log("SAVE FRAME:", state.doc.id, frameId);
+
+    saveStaffCareerPrefs(state.doc.id, { frameId });
+
+    renderTeamSettingsTab(root, state);
+  });
+});
 }
 function buildStaffChartsFromVisits(visits, monthsCount = 6) {
   const monthNames = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
