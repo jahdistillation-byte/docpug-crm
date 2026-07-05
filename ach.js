@@ -1,78 +1,153 @@
-function getVeterinaryAchievements(stats) {
-  const list = [
-    ach("first_visit", "Перший крок", "Провести перший прийом", "career", "common", 1, stats.totalVisits, 50, "⚪"),
-    ach("career_25", "Практикант", "25 прийомів", "career", "common", 25, stats.totalVisits, 100, "🥉"),
-    ach("career_100", "Досвідчений ветеринар", "100 прийомів", "career", "uncommon", 100, stats.totalVisits, 200, "🟢"),
-    ach("career_500", "Майстер ветеринарії", "500 прийомів", "career", "rare", 500, stats.totalVisits, 400, "🔵"),
-    ach("career_1000", "Експерт ветеринарії", "1000 прийомів", "career", "epic", 1000, stats.totalVisits, 800, "🟣"),
-    ach("career_2500", "Легенда ветеринарії", "2500 прийомів", "career", "legendary", 2500, stats.totalVisits, 1500, "👑"),
+function buildStaffCareer(state) {
+  const visits = state.dashboard.live_staff_visits || [];
+  const revenue = Number(state.revenue || state.dashboard.revenue || 0);
 
-    ach("dog_50", "Друг собак", "50 прийомів собак", "dogs", "common", 50, stats.dogVisits, 120, "🐶"),
-    ach("dog_250", "Знавець собак", "250 прийомів собак", "dogs", "uncommon", 250, stats.dogVisits, 250, "🐶"),
-    ach("dog_1000", "Кінологічний експерт", "1000 прийомів собак", "dogs", "epic", 1000, stats.dogVisits, 600, "🐶"),
-    ach("dog_2500", "Повелитель собак", "2500 прийомів собак", "dogs", "legendary", 2500, stats.dogVisits, 1200, "👑"),
+  const totalVisits = visits.length;
+  const dogVisits = countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
+  const catVisits = countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
+  const vaccineVisits = countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
+  const surgeryVisits = countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
 
-    ach("cat_50", "Друг котів", "50 прийомів котів", "cats", "common", 50, stats.catVisits, 120, "🐱"),
-    ach("cat_250", "Знавець котів", "250 прийомів котів", "cats", "uncommon", 250, stats.catVisits, 250, "🐱"),
-    ach("cat_1000", "Котячий шептун", "1000 прийомів котів", "cats", "epic", 1000, stats.catVisits, 600, "🐱"),
-    ach("cat_2500", "Повелитель котів", "2500 прийомів котів", "cats", "legendary", 2500, stats.catVisits, 1200, "👑"),
-
-    ach("rev_100k", "Перші 100 000", "100 000 грн виручки", "finance", "uncommon", 100000, stats.revenue, 250, "💵"),
-    ach("rev_1m", "Мільйонний оборот", "1 000 000 грн виручки", "finance", "rare", 1000000, stats.revenue, 700, "💰"),
-    ach("rev_10m", "Десятимільйонний оборот", "10 000 000 грн виручки", "finance", "legendary", 10000000, stats.revenue, 2000, "💎"),
-
-    ach("vaccine_100", "Імунний захисник", "100 вакцинацій", "vaccine", "uncommon", 100, stats.vaccineVisits, 250, "💉"),
-    ach("vaccine_1000", "Майстер профілактики", "1000 вакцинацій", "vaccine", "epic", 1000, stats.vaccineVisits, 900, "🛡"),
-
-    ach("surgery_1", "Перший скальпель", "Перша операція", "surgery", "common", 1, stats.surgeryVisits, 100, "🔪"),
-    ach("surgery_100", "Хірург", "100 операцій", "surgery", "rare", 100, stats.surgeryVisits, 500, "⚕️"),
-    ach("surgery_500", "Майстер скальпеля", "500 операцій", "surgery", "legendary", 500, stats.surgeryVisits, 1500, "👑"),
-
-    ach("activity_7", "Безперервна практика", "7 змін поспіль без вихідного", "activity", "rare", 7, stats.consecutiveShifts, 400, "🔥"),
-    ach("activity_15", "Надійний спеціаліст", "15 змін поспіль без вихідного", "activity", "epic", 15, stats.consecutiveShifts, 800, "⚡"),
-
-    ach("collection_5", "Колекціонер досвіду I", "Відкрити 5 досягнень", "collection", "common", 5, 0, 200, "🏅"),
-    ach("collection_10", "Колекціонер досвіду II", "Відкрити 10 досягнень", "collection", "uncommon", 10, 0, 400, "🏅"),
-    ach("collection_20", "Колекціонер досвіду III", "Відкрити 20 досягнень", "collection", "epic", 20, 0, 900, "🏆"),
-    ach("collection_30", "Жива легенда", "Відкрити всі 30 досягнень", "collection", "mythic", 30, 0, 2500, "👑"),
-  ];
-
-  const unlockedBeforeCollection = list.filter((a) => a.category !== "collection" && a.unlocked).length;
-
-  return list.map((a) => {
-    if (a.category !== "collection") return a;
-
-    const current = unlockedBeforeCollection;
-    const progress = Math.min(100, Math.round((current / a.target) * 100));
-
-    return {
-      ...a,
-      current,
-      progress,
-      unlocked: current >= a.target,
-    };
+  const achievements = getVeterinaryAchievements({
+    totalVisits,
+    dogVisits,
+    catVisits,
+    revenue,
+    vaccineVisits,
+    surgeryVisits,
+    consecutiveShifts: 0,
   });
+
+  const unlockedCount = achievements.reduce((sum, a) => sum + Number(a.unlockedSteps || 0), 0);
+
+  const xp = achievements.reduce((sum, a) => {
+    return sum + Number(a.xp || 0);
+  }, totalVisits * 10);
+
+  const level = calculateCareerLevel(xp);
+  const title = getCareerTitle(totalVisits);
+  const levelIcon = getCareerIcon(totalVisits);
+
+  return {
+    xp,
+    level: level.level,
+    xpInLevel: level.xpInLevel,
+    neededForNext: level.neededForNext,
+    nextLevelXp: level.nextLevelXp,
+    progressPercent: level.progressPercent,
+    title,
+    levelIcon,
+    achievements,
+    unlockedCount,
+    clinicRank: "—",
+  };
 }
 
-function ach(id, name, description, category, rarity, target, current, xp, icon) {
+function getVeterinaryAchievements(stats) {
+  const tracks = [
+    trackAch("career", "📖", "Шлях ветеринара", stats.totalVisits, [
+      step("Перший крок", "Провести перший прийом", 1, "common", 50, "⚪"),
+      step("Практикант", "25 прийомів", 25, "common", 100, "🥉"),
+      step("Досвідчений ветеринар", "100 прийомів", 100, "uncommon", 200, "🟢"),
+      step("Майстер ветеринарії", "500 прийомів", 500, "rare", 400, "🔵"),
+      step("Експерт ветеринарії", "1000 прийомів", 1000, "epic", 800, "🟣"),
+      step("Легенда ветеринарії", "2500 прийомів", 2500, "legendary", 1500, "👑"),
+    ]),
+
+    trackAch("dogs", "🐶", "Собаки", stats.dogVisits, [
+      step("Друг собак", "50 прийомів собак", 50, "common", 120, "🐶"),
+      step("Знавець собак", "250 прийомів собак", 250, "uncommon", 250, "🐶"),
+      step("Кінологічний експерт", "1000 прийомів собак", 1000, "epic", 600, "🐶"),
+      step("Повелитель собак", "2500 прийомів собак", 2500, "legendary", 1200, "👑"),
+    ]),
+
+    trackAch("cats", "🐱", "Коти", stats.catVisits, [
+      step("Друг котів", "50 прийомів котів", 50, "common", 120, "🐱"),
+      step("Знавець котів", "250 прийомів котів", 250, "uncommon", 250, "🐱"),
+      step("Котячий шептун", "1000 прийомів котів", 1000, "epic", 600, "🐱"),
+      step("Повелитель котів", "2500 прийомів котів", 2500, "legendary", 1200, "👑"),
+    ]),
+
+    trackAch("finance", "💰", "Фінанси", stats.revenue, [
+      step("Перші 100 000", "100 000 грн виручки", 100000, "uncommon", 250, "💵"),
+      step("Мільйонний оборот", "1 000 000 грн виручки", 1000000, "rare", 700, "💰"),
+      step("Десятимільйонний оборот", "10 000 000 грн виручки", 10000000, "legendary", 2000, "💎"),
+    ]),
+
+    trackAch("vaccine", "💉", "Вакцинація", stats.vaccineVisits, [
+      step("Імунний захисник", "100 вакцинацій", 100, "uncommon", 250, "💉"),
+      step("Майстер профілактики", "1000 вакцинацій", 1000, "epic", 900, "🛡"),
+    ]),
+
+    trackAch("surgery", "🔪", "Хірургія", stats.surgeryVisits, [
+      step("Перший скальпель", "Перша операція", 1, "common", 100, "🔪"),
+      step("Хірург", "100 операцій", 100, "rare", 500, "⚕️"),
+      step("Майстер скальпеля", "500 операцій", 500, "legendary", 1500, "👑"),
+    ]),
+
+    trackAch("activity", "🔥", "Активність", stats.consecutiveShifts, [
+      step("Безперервна практика", "7 змін поспіль без вихідного", 7, "rare", 400, "🔥"),
+      step("Надійний спеціаліст", "15 змін поспіль без вихідного", 15, "epic", 800, "⚡"),
+    ]),
+  ];
+
+  const unlockedSteps = tracks.reduce((sum, t) => sum + t.unlockedSteps, 0);
+
+  tracks.push(
+    trackAch("collection", "🏅", "Колекція досвіду", unlockedSteps, [
+      step("Колекціонер досвіду I", "Відкрити 5 етапів", 5, "common", 200, "🏅"),
+      step("Колекціонер досвіду II", "Відкрити 10 етапів", 10, "uncommon", 400, "🏅"),
+      step("Колекціонер досвіду III", "Відкрити 20 етапів", 20, "epic", 900, "🏆"),
+      step("Жива легенда", "Відкрити всі етапи", 25, "mythic", 2500, "👑"),
+    ])
+  );
+
+  return tracks;
+}
+
+function step(name, description, target, rarity, xp, icon) {
+  return { name, description, target, rarity, xp, icon };
+}
+
+function trackAch(id, icon, groupName, current, steps) {
   const safeCurrent = Number(current || 0);
-  const safeTarget = Number(target || 1);
-  const progress = Math.min(100, Math.round((safeCurrent / safeTarget) * 100));
+
+  const unlockedSteps = steps.filter((s) => safeCurrent >= s.target).length;
+  const currentStep = [...steps].reverse().find((s) => safeCurrent >= s.target) || steps[0];
+  const nextStep = steps.find((s) => safeCurrent < s.target) || null;
+
+  const activeStep = nextStep || currentStep;
+  const target = activeStep.target;
+  const visibleCurrent = Math.min(safeCurrent, target);
+  const progress = Math.min(100, Math.round((visibleCurrent / target) * 100));
+
+  const unlocked = !nextStep;
+
+  const earnedXp = steps.reduce((sum, s) => {
+    return sum + (safeCurrent >= s.target ? Number(s.xp || 0) : 0);
+  }, 0);
 
   return {
     id,
-    name,
-    description,
-    category,
-    rarity,
-    target: safeTarget,
-    current: safeCurrent,
-    progress,
-    unlocked: safeCurrent >= safeTarget,
-    xp,
     icon,
+    groupName,
+    name: activeStep.name,
+    description: activeStep.description,
+    rarity: activeStep.rarity,
+    target,
+    current: visibleCurrent,
+    rawCurrent: safeCurrent,
+    progress,
+    unlocked,
+    xp: earnedXp,
+    nextStep,
+    currentStep,
+    unlockedSteps,
+    totalSteps: steps.length,
+    steps,
   };
 }
+
 function countVisitsBySpecies(visits, words) {
   return visits.filter((v) => {
     const txt = [
@@ -100,6 +175,7 @@ function countVisitsByText(visits, words) {
     return words.some((w) => txt.includes(w));
   }).length;
 }
+
 function calculateCareerLevel(xp) {
   const level = Math.max(1, Math.floor(Math.sqrt(Number(xp || 0) / 120)) + 1);
   const currentLevelXp = Math.pow(level - 1, 2) * 120;
@@ -136,29 +212,43 @@ function getCareerIcon(totalVisits) {
   if (totalVisits >= 1) return "⚪";
   return "✨";
 }
+
 function renderAchievementCard(a) {
+  const isComplete = a.unlocked;
+  const statusText = isComplete ? "Гілку завершено" : "Наступна ціль";
+
   return `
-    <div class="achievementCard ${a.unlocked ? "unlocked" : "locked"} rarity-${escapeHtml(a.rarity)}">
+    <div class="achievementCard ${isComplete ? "unlocked" : "locked"} rarity-${escapeHtml(a.rarity)}">
       <div class="achievementIcon">${a.icon}</div>
 
       <div class="achievementBody">
         <div class="achievementTop">
-          <b>${escapeHtml(a.name)}</b>
+          <b>${escapeHtml(a.groupName)}</b>
           <span>${escapeHtml(achievementRarityLabel(a.rarity))}</span>
         </div>
+
+        <div class="achievementStage">${escapeHtml(a.name)}</div>
 
         <p>${escapeHtml(a.description)}</p>
 
         <div class="achievementProgress">
           <div>
-            <span>${a.current.toLocaleString("uk-UA")} / ${a.target.toLocaleString("uk-UA")}</span>
+            <span>${statusText}: ${Number(a.current || 0).toLocaleString("uk-UA")} / ${Number(a.target || 0).toLocaleString("uk-UA")}</span>
             <b>${a.progress}%</b>
           </div>
           <i><em style="width:${a.progress}%"></em></i>
         </div>
+
+        <div class="achievementSteps">
+          ${a.steps.map((s) => `
+            <span class="${a.rawCurrent >= s.target ? "done" : ""}" title="${escapeHtml(s.name)}">
+              ${s.icon}
+            </span>
+          `).join("")}
+        </div>
       </div>
 
-      <div class="achievementXp">+${Number(a.xp || 0)} XP</div>
+      <div class="achievementXp">+${Number(a.xp || 0).toLocaleString("uk-UA")} XP</div>
     </div>
   `;
 }
