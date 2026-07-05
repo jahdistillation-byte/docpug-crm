@@ -2705,10 +2705,8 @@ function renderTeamSettingsTab(root, state) {
   btn.addEventListener("click", () => {
     const titleId = btn.dataset.titleChoice || "none";
 
-    console.log("SAVE TITLE:", state.doc.id, titleId);
-
     saveStaffCareerPrefs(state.doc.id, { titleId });
-
+    applyCareerLookToSidebar(state);
     renderTeamSettingsTab(root, state);
   });
 });
@@ -2717,13 +2715,55 @@ root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const frameId = btn.dataset.frameChoice || "none";
 
-    console.log("SAVE FRAME:", state.doc.id, frameId);
-
     saveStaffCareerPrefs(state.doc.id, { frameId });
-
+    applyCareerLookToSidebar(state);
     renderTeamSettingsTab(root, state);
   });
 });
+}
+
+function applyCareerLookToSidebar(state) {
+  const career = buildStaffCareer(state);
+  const prefs = getStaffCareerPrefs(state.doc.id);
+
+  const titles = getUnlockedCareerTitles(career);
+  const frames = getUnlockedCareerFrames(career);
+
+  const selectedTitle = titles.find((x) => x.id === prefs.titleId);
+  const selectedFrame = frames.find((x) => x.id === prefs.frameId);
+
+  const titleText =
+    prefs.titleId === "none"
+      ? ""
+      : selectedTitle?.label || career.title || "";
+
+  const frameId =
+    prefs.frameId === "none"
+      ? ""
+      : selectedFrame?.id || career.activeFrame || "";
+
+  const avatar = document.querySelector(".teamDashAvatar");
+  if (avatar) {
+    avatar.className = `teamDashAvatar ${frameId ? `frame-${frameId}` : ""}`;
+  }
+
+  const nameEl = document.querySelector(".teamDashName");
+  if (!nameEl) return;
+
+  let titleEl = document.querySelector(".teamDashTitle");
+
+  if (!titleText) {
+    titleEl?.remove();
+    return;
+  }
+
+  if (!titleEl) {
+    titleEl = document.createElement("div");
+    titleEl.className = "teamDashTitle";
+    nameEl.insertAdjacentElement("afterend", titleEl);
+  }
+
+  titleEl.innerHTML = `🏆 ${escapeHtml(titleText)}`;
 }
 function buildStaffChartsFromVisits(visits, monthsCount = 6) {
   const monthNames = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
