@@ -6867,3 +6867,19 @@ body[data-theme="white"] .monthDayNum {
   background: rgba(124,92,255,.18);
   box-shadow: 0 0 30px rgba(124,92,255,.16);
 }
+.teamDashTitle {
+  width: fit-content;
+  margin: 8px auto 4px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #ffe28a;
+  font-weight: 950;
+  font-size: 12px;
+  text-align: center;
+  letter-spacing: .02em;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255,204,77,.22), transparent 42%),
+    rgba(255,255,255,.055);
+  border: 1px solid rgba(255,204,77,.22);
+  box-shadow: 0 0 28px rgba(255,204,77,.1);
+}
