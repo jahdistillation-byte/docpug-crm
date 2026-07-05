@@ -1931,9 +1931,22 @@ const careerPrefs = getStaffCareerPrefs(doc.id);
 const unlockedTitles = getUnlockedCareerTitles(career);
 const unlockedFrames = getUnlockedCareerFrames(career);
 
-const selectedTitle = careerPrefs.selectedTitle && unlockedTitles.includes(careerPrefs.selectedTitle)
+const selectedTitle = unlockedTitles.find((x) => x.id === careerPrefs.titleId);
+const selectedFrame = unlockedFrames.find((x) => x.id === careerPrefs.frameId);
 
-  const revenue = Number(dashboard.revenue || 0);
+const profileTitle =
+  careerPrefs.titleId === "none"
+    ? ""
+    : selectedTitle?.label || career.title || roleLabel;
+
+const profileFrame =
+  careerPrefs.frameId === "none"
+    ? ""
+    : selectedFrame?.id || career.activeFrame || "";
+
+const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
+
+const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
   const checks = Number(dashboard.closed_checks || 0);
   const avgCheck = Number(dashboard.avg_check || 0);
