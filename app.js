@@ -1954,15 +1954,15 @@ Object.assign(dashboard, liveStats);
         <div>✉ Email не вказано</div>
       </div>
 
-      <div class="teamDashNav">
-        <button class="active" type="button">▦ Огляд</button>
-        <button type="button">📈 Аналітика</button>
-        <button type="button">🩺 Прийоми</button>
-        <button type="button">💰 Фінанси</button>
-        <button type="button">🏆 Досягнення</button>
-        <button type="button">⭐ Відгуки</button>
-        <button type="button">⚙ Налаштування</button>
-      </div>
+      <div class="teamDashNav" id="teamProfileNav">
+  <button class="active" type="button" data-profile-tab="overview">▦ Огляд</button>
+  <button type="button" data-profile-tab="analytics">📈 Аналітика</button>
+  <button type="button" data-profile-tab="visits">🩺 Прийоми</button>
+  <button type="button" data-profile-tab="finance">💰 Фінанси</button>
+  <button type="button" data-profile-tab="achievements">🏆 Досягнення</button>
+  <button type="button" data-profile-tab="reviews">⭐ Відгуки</button>
+  <button type="button" data-profile-tab="settings">⚙ Налаштування</button>
+</div>
 
       <div class="teamDashIdBox">
         <span>ID співробітника</span>
@@ -1972,17 +1972,23 @@ Object.assign(dashboard, liveStats);
 
     <main class="teamDashMain">
 
-      <div class="teamDashTop">
-        <div>
-          <h1>${escapeHtml(staffName)} 👋</h1>
-          <p>Ваші показники, досягнення та ефективність</p>
-        </div>
+      <main class="teamDashMain">
 
-        <div class="teamDashActions">
-          <button class="teamGhostBtn" type="button">⬇ Експорт</button>
-          <button class="teamPrimaryBtn" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
-        </div>
-      </div>
+  <div class="teamDashTop">
+    <div>
+      <h1>${escapeHtml(staffName)} 👋</h1>
+      <p>Ваші показники, досягнення та ефективність</p>
+    </div>
+
+    <div class="teamDashActions">
+      <button class="teamGhostBtn" type="button">⬇ Експорт</button>
+      <button class="teamPrimaryBtn" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
+    </div>
+  </div>
+
+  <div id="teamProfileContent"></div>
+
+</main>
 
       <section class="teamDashKpis">
         ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
@@ -2102,8 +2108,208 @@ Object.assign(dashboard, liveStats);
   requestAnimationFrame(() => {
   renderStaffProfileCharts(dashboard);
 });
+
+const profileState = {
+  doc,
+  dashboard,
+  staffName,
+  staffColor,
+  roleLabel,
+  revenue,
+  visits,
+  checks,
+  avgCheck,
+  rating,
+  revenueGrowth,
+  visitsGrowth,
+  checksGrowth,
+  avgCheckGrowth,
+};
+
+renderTeamProfileTab("overview", profileState);
+
+document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-profile-tab]").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    renderTeamProfileTab(btn.dataset.profileTab, profileState);
+  });
+});
 }
 
+function renderTeamProfileTab(tab, state) {
+  const root = document.getElementById("teamProfileContent");
+  if (!root) return;
+
+  if (tab === "overview") {
+    renderTeamOverviewTab(root, state);
+    requestAnimationFrame(() => renderStaffProfileCharts(state.dashboard));
+    return;
+  }
+
+  if (tab === "analytics") {
+    renderTeamAnalyticsTab(root, state);
+    return;
+  }
+
+  if (tab === "visits") {
+    renderTeamVisitsTab(root, state);
+    return;
+  }
+
+  if (tab === "finance") {
+    renderTeamFinanceTab(root, state);
+    return;
+  }
+
+  if (tab === "achievements") {
+    renderTeamAchievementsTab(root, state);
+    return;
+  }
+
+  if (tab === "reviews") {
+    renderTeamReviewsTab(root, state);
+    return;
+  }
+
+  if (tab === "settings") {
+    renderTeamSettingsTab(root, state);
+    return;
+  }
+}
+function renderTeamOverviewTab(root, state) {
+  const {
+    dashboard,
+    staffName,
+    revenue,
+    visits,
+    checks,
+    avgCheck,
+    rating,
+    revenueGrowth,
+    visitsGrowth,
+    checksGrowth,
+    avgCheckGrowth,
+    doc,
+  } = state;
+
+  root.innerHTML = `
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
+      ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
+      ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
+      ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
+      ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
+    </section>
+
+    <section class="teamDashInsight">
+      <div class="teamInsightIcon">✨</div>
+      <div>
+        <b>Що варто знати сьогодні</b>
+        <p>
+          ${escapeHtml(staffName)} має стабільні показники: виручка змінилась на 
+          <strong>${revenueGrowth}%</strong>, кількість візитів — на 
+          <strong>${visitsGrowth}%</strong>. Поточний рейтинг клієнтів — 
+          <strong>${rating ? rating.toFixed(2) : "—"}</strong>.
+        </p>
+      </div>
+    </section>
+
+    <section class="teamDashGrid">
+      <div class="teamDashPanel teamDashPanelLarge">
+        <div class="teamDashPanelHead">
+          <h3>Виручка за 6 місяців</h3>
+          <span>грн</span>
+        </div>
+        <div class="teamChartBox">
+          <canvas id="staffRevenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="teamDashPanel teamDashPanelLarge">
+        <div class="teamDashPanelHead">
+          <h3>Кількість візитів за 6 місяців</h3>
+          <span>візити</span>
+        </div>
+        <div class="teamChartBox">
+          <canvas id="staffVisitsChart"></canvas>
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>🎯 Сьогодні</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Статус</span><b>На зміні</b></p>
+          <p><span>Записів сьогодні</span><b>0</b></p>
+          <p><span>Виконано</span><b>0</b></p>
+          <p><span>Попереду</span><b>0</b></p>
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>🏆 Карʼєра</h3>
+          <span>Level 1</span>
+        </div>
+        <div class="teamDashXp">
+          <div><b>Рівень 1</b><span>0 / 100 XP</span></div>
+          <i><em style="width:0%"></em></i>
+          <p>До наступного рівня залишилось 100 XP</p>
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>💼 Популярні послуги</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Консультація</span><b>—</b></p>
+          <p><span>Вакцинація</span><b>—</b></p>
+          <p><span>УЗД</span><b>—</b></p>
+          <p><span>Хірургія</span><b>—</b></p>
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>💰 Фінансова інформація</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
+          <p><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></p>
+          <p><span>Бонуси</span><b>—</b></p>
+          <p><span>Нараховано</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
+        </div>
+      </div>
+    </section>
+  `;
+}
+function renderTeamAnalyticsTab(root, state) {
+  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>📈 Аналітика</h2><p class="hint">Тут буде глибока аналітика співробітника.</p></div>`;
+}
+
+function renderTeamVisitsTab(root, state) {
+  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>🩺 Прийоми</h2><p class="hint">Тут буде історія прийомів цього співробітника.</p></div>`;
+}
+
+function renderTeamFinanceTab(root, state) {
+  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>💰 Фінанси</h2><p class="hint">Тут будуть нарахування, ставка, відсотки, бонуси та виплати.</p></div>`;
+}
+
+function renderTeamAchievementsTab(root, state) {
+  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>🏆 Досягнення</h2><p class="hint">Тут будуть професійні досягнення співробітника.</p></div>`;
+}
+
+function renderTeamReviewsTab(root, state) {
+  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⭐ Відгуки</h2><p class="hint">Тут будуть оцінки та відгуки клієнтів.</p></div>`;
+}
+
+function renderTeamSettingsTab(root, state) {
+  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⚙ Налаштування</h2><p class="hint">Тут будуть налаштування профілю співробітника.</p></div>`;
+}
 function buildStaffMonthlyChartsFromVisits(visits) {
   const months = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
 
