@@ -2428,8 +2428,9 @@ function renderTeamVisitCards(visits) {
         <div class="teamVisitRight">
           <span class="teamVisitStatus">${escapeHtml(status)}</span>
           <b>${total.toLocaleString("uk-UA")} грн</b>
-          <button type="button" class="teamVisitOpenBtn" onclick="openVisitFromTeam('${escapeHtml(String(v.id || ""))}')">
-            Відкрити →
+          <button type="button" class="teamVisitOpenBtn" onclick="openVisitFromTeam('${escapeHtml(String(v.id || v.visit_id || v._id || ""))}')">
+  Відкрити →
+</button>
           </button>
         </div>
       </div>
@@ -2441,24 +2442,13 @@ function openVisitFromTeam(visitId) {
 
   const id = String(visitId);
 
-  const visits = typeof loadVisits === "function"
-    ? loadVisits()
-    : [];
-
-  const visit = visits.find((v) => String(v.id) === id);
-
-  if (!visit) {
-    alert("Візит не знайдено");
+  if (typeof openVisit === "function") {
+    openVisit(id);
     return;
   }
 
   if (typeof openVisitModalForEdit === "function") {
-    openVisitModalForEdit(visit);
-    return;
-  }
-
-  if (typeof openVisitModal === "function") {
-    openVisitModal(visit);
+    openVisitModalForEdit(id);
     return;
   }
 
@@ -3612,7 +3602,7 @@ const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ФАЙЛЫ, РЕФЕРЕНСЫ ЛАБОРАТОРИИ И ГРАФИКИ ВЕТЕРИНАРОВ)
-// Часть 5 (Строки 3001 — 3500)
+// Часть 5 (Строки 3001 — 3500)<button type="button" class="teamVisitOpenBtn" onclick="console.log(v); openVisitFromTeam('${escapeHtml(String(v.id || ""))}')">
 // ==========================================================================
 
 function loadPatientFiles() {
