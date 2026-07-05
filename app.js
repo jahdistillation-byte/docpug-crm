@@ -2038,16 +2038,27 @@ function renderTeamProfileTab(tab, state) {
 
   if (tab === "overview") {
     renderTeamOverviewTab(root, state);
-    requestAnimationFrame(() => {
+   requestAnimationFrame(() => {
   renderStaffProfileCharts(state.dashboard, 1);
 
-  document.querySelectorAll("[data-chart-range]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("[data-chart-range]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
+  const rangeBox = root.querySelector(".teamChartRange");
+  if (!rangeBox) return;
 
-      renderStaffProfileCharts(state.dashboard, Number(btn.dataset.chartRange || 1));
+  rangeBox.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-chart-range]");
+    if (!btn) return;
+
+    const months = Number(btn.dataset.chartRange || 1);
+
+    console.log("CHART RANGE CLICK:", months);
+
+    rangeBox.querySelectorAll("[data-chart-range]").forEach((b) => {
+      b.classList.remove("active");
     });
+
+    btn.classList.add("active");
+
+    renderStaffProfileCharts(state.dashboard, months);
   });
 });
     return;
@@ -2310,7 +2321,7 @@ function buildStaffMonthlyChartsFromVisits(visits, monthsCount = 6) {
   const now = new Date();
   const result = [];
 
-  for (let i = 5; i >= 0; i--) {
+  for (let i = monthsCount - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     result.push({
       year: d.getFullYear(),
