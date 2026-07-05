@@ -1968,7 +1968,6 @@ Object.assign(dashboard, liveStats);
         <span>ID співробітника</span>
         <b>#STF-${escapeHtml(String(doc.id || "0000")).slice(0, 8)}</b>
       </div>
-    </aside>
 
     </aside>
 
@@ -2037,33 +2036,15 @@ function renderTeamProfileTab(tab, state) {
   if (!root) return;
 
   if (tab === "overview") {
-    renderTeamOverviewTab(root, state);
-    window.__lastTeamDashboard = state.dashboard;
-   requestAnimationFrame(() => {
-  renderStaffProfileCharts(state.dashboard, 1);
+  renderTeamOverviewTab(root, state);
+  window.__lastTeamDashboard = state.dashboard;
 
-  const rangeBox = root.querySelector(".teamChartRange");
-  if (!rangeBox) return;
-
-  rangeBox.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-chart-range]");
-    if (!btn) return;
-
-    const months = Number(btn.dataset.chartRange || 1);
-
-    console.log("CHART RANGE CLICK:", months);
-
-    rangeBox.querySelectorAll("[data-chart-range]").forEach((b) => {
-      b.classList.remove("active");
-    });
-
-    btn.classList.add("active");
-
-    renderStaffProfileCharts(state.dashboard, months);
+  requestAnimationFrame(() => {
+    renderStaffProfileCharts(state.dashboard, 6);
   });
-});
-    return;
-  }
+
+  return;
+}
 
   if (tab === "analytics") {
     renderTeamAnalyticsTab(root, state);
@@ -2279,7 +2260,29 @@ function renderTeamAnalyticsTab(root, state) {
     </section>
   `;
 
-  requestAnimationFrame(() => renderStaffProfileCharts(state.dashboard));
+  window.__lastTeamDashboard = state.dashboard;
+
+requestAnimationFrame(() => {
+  renderStaffProfileCharts(state.dashboard, 1);
+
+  const rangeBox = root.querySelector(".teamChartRange");
+  if (!rangeBox) return;
+
+  rangeBox.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-chart-range]");
+    if (!btn) return;
+
+    const months = Number(btn.dataset.chartRange || 1);
+    console.log("CHART RANGE CLICK:", months);
+
+    rangeBox.querySelectorAll("[data-chart-range]").forEach((b) => {
+      b.classList.remove("active");
+    });
+
+    btn.classList.add("active");
+    renderStaffProfileCharts(state.dashboard, months);
+  });
+});
 }
 function buildTeamAnalyticsInsight(totalRevenue, visitsCount, avgCheck) {
   if (!visitsCount) {
