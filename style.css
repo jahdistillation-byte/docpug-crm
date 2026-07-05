@@ -6534,3 +6534,35 @@ body[data-theme="white"] .monthDayNum {
     justify-items: start;
   }
 }
+.teamFinanceList {
+  display: grid;
+  gap: 10px;
+}
+
+.teamFinanceRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.teamFinanceRow b {
+  display: block;
+  color: #fff;
+}
+
+.teamFinanceRow span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255,255,255,.58);
+  font-weight: 700;
+}
+
+.teamFinanceRow strong {
+  color: #5cff9a;
+  white-space: nowrap;
+}

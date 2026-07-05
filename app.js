@@ -2456,7 +2456,75 @@ function openVisitFromTeam(visitId) {
 }
 
 function renderTeamFinanceTab(root, state) {
-  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>💰 Фінанси</h2><p class="hint">Тут будуть нарахування, ставка, відсотки, бонуси та виплати.</p></div>`;
+  const doc = state.doc;
+  const visits = state.dashboard.live_month_visits || [];
+
+  const revenue = visits.reduce((sum, v) => {
+    return sum + calcServicesTotal(v) + calcStockTotal(v);
+  }, 0);
+
+  const shiftRate = Number(doc.shift_rate || 0);
+  const percentRate = Number(doc.percent_rate || 0);
+
+  const percentAmount = Math.round(revenue * (percentRate / 100));
+  const totalToPay = shiftRate + percentAmount;
+
+  const checksHtml = visits.length
+    ? visits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || ""))).map((v) => {
+        const total = calcServicesTotal(v) + calcStockTotal(v);
+        return `
+          <div class="teamFinanceRow">
+            <div>
+              <b>${escapeHtml(v.date || v.event_date || "—")}</b>
+              <span>${escapeHtml(v.pet_name || v.patient_name || "Пацієнт")}</span>
+            </div>
+            <strong>${total.toLocaleString("uk-UA")} грн</strong>
+          </div>
+        `;
+      }).join("")
+    : `<div class="hint">Поки немає прийомів для фінансового розрахунку.</div>`;
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>💰 Фінанси</h2>
+        <p>Нарахування, ставка, відсоток від виручки та фінансова історія співробітника.</p>
+      </div>
+    </section>
+
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard("💵", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, 0)}
+      ${renderTeamKpiCard("🏦", "Ставка", `${shiftRate.toLocaleString("uk-UA")} грн`, 0)}
+      ${renderTeamKpiCard("📈", "Відсоток", `${percentRate}%`, 0)}
+      ${renderTeamKpiCard("✅", "До виплати", `${totalToPay.toLocaleString("uk-UA")} грн`, 0)}
+    </section>
+
+    <section class="teamVisitsLayout">
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>🧾 Фінансова історія</h3>
+          <span>поточний місяць</span>
+        </div>
+        <div class="teamFinanceList">
+          ${checksHtml}
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>📌 Розрахунок</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Виручка місяця</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
+          <p><span>Ставка</span><b>${shiftRate.toLocaleString("uk-UA")} грн</b></p>
+          <p><span>${percentRate}% від виручки</span><b>${percentAmount.toLocaleString("uk-UA")} грн</b></p>
+          <p><span>Бонуси</span><b>—</b></p>
+          <p><span>Штрафи</span><b>—</b></p>
+          <p><span>До виплати</span><b>${totalToPay.toLocaleString("uk-UA")} грн</b></p>
+        </div>
+      </div>
+    </section>
+  `;
 }
 
 function renderTeamAchievementsTab(root, state) {
