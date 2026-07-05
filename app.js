@@ -2219,7 +2219,7 @@ function renderTeamAnalyticsTab(root, state) {
     <section class="teamDashGrid">
       <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>Виручка</h3>
+          <h3>${window.__staffChartRange === 1 ? "Виручка по днях" : "Виручка по місяцях"}</h3>
           <span>грн</span>
         </div>
         <div class="teamChartBox">
@@ -2229,7 +2229,7 @@ function renderTeamAnalyticsTab(root, state) {
 
       <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>Кількість візитів</h3>
+          <h3>${window.__staffChartRange === 1 ? "Кількість візитів по днях" : "Кількість візитів по місяцях"}</h3>
           <span>візити</span>
         </div>
         <div class="teamChartBox">
@@ -2261,7 +2261,7 @@ function renderTeamAnalyticsTab(root, state) {
   `;
 
   window.__lastTeamDashboard = state.dashboard;
-
+window.__staffChartRange = 1;
 requestAnimationFrame(() => {
   renderStaffProfileCharts(state.dashboard, 1);
 
@@ -2393,7 +2393,7 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
   }
 
   const visits = dashboard.live_staff_visits || dashboard.live_month_visits || [];
-  const chartData = buildStaffMonthlyChartsFromVisits(visits, monthsCount);
+ const chartData = buildStaffChartsFromVisits(visits, monthsCount);
 
   const labels = chartData.map((x) => x.label);
   const revenueValues = chartData.map((x) => x.revenue);
@@ -2450,6 +2450,23 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
       options: buildTeamChartOptions("візити"),
     });
   }
+}
+
+function switchStaffChartRange(monthsCount, btn) {
+  window.__staffChartRange = Number(monthsCount || 1);
+
+  document.querySelectorAll("[data-chart-range]").forEach((b) => {
+    b.classList.remove("active");
+  });
+
+  btn?.classList.add("active");
+
+  if (!window.__lastTeamDashboard) {
+    console.warn("Немає dashboard для графіка");
+    return;
+  }
+
+  renderStaffProfileCharts(window.__lastTeamDashboard, window.__staffChartRange);
 }
 
 async function buildStaffLiveStats(staffId) {
