@@ -2566,11 +2566,15 @@ function buildTeamChartOptions(unitLabel) {
           display: false,
         },
         ticks: {
-          color: "rgba(255,255,255,0.72)",
-          font: {
-            weight: "700",
-          },
-        },
+  color: "rgba(255,255,255,0.72)",
+  autoSkip: false,
+  maxRotation: 0,
+  minRotation: 0,
+  font: {
+    weight: "700",
+    size: 10,
+  },
+},
         border: {
           display: false,
         },
