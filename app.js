@@ -2439,17 +2439,30 @@ function renderTeamVisitCards(visits) {
 function openVisitFromTeam(visitId) {
   if (!visitId) return;
 
+  const id = String(visitId);
+
+  const visits = typeof loadVisits === "function"
+    ? loadVisits()
+    : [];
+
+  const visit = visits.find((v) => String(v.id) === id);
+
+  if (!visit) {
+    alert("Візит не знайдено");
+    return;
+  }
+
   if (typeof openVisitModalForEdit === "function") {
-    openVisitModalForEdit(visitId);
+    openVisitModalForEdit(visit);
     return;
   }
 
   if (typeof openVisitModal === "function") {
-    openVisitModal(visitId);
+    openVisitModal(visit);
     return;
   }
 
-  alert("Відкриття візиту підключимо наступним кроком.");
+  alert("Не вдалося відкрити візит");
 }
 
 function renderTeamFinanceTab(root, state) {
