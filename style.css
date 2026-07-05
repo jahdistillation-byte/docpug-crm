@@ -6566,3 +6566,189 @@ body[data-theme="white"] .monthDayNum {
   color: #5cff9a;
   white-space: nowrap;
 }
+.teamCareerHero {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.teamCareerLevel,
+.teamCareerProgress {
+  border-radius: 24px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(180,92,255,.22), transparent 36%),
+    linear-gradient(145deg, rgba(15,22,45,.92), rgba(8,13,28,.84));
+  border: 1px solid rgba(255,255,255,.095);
+  box-shadow: 0 18px 54px rgba(0,0,0,.25);
+}
+
+.teamCareerLevel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.teamCareerBadge {
+  width: 62px;
+  height: 62px;
+  border-radius: 21px;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  background: rgba(124,92,255,.22);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.teamCareerTitle {
+  font-size: 23px;
+  font-weight: 950;
+}
+
+.teamCareerSub {
+  color: rgba(255,255,255,.62);
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.teamCareerProgress div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: rgba(255,255,255,.7);
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.teamCareerProgress i,
+.achievementProgress i {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.09);
+  overflow: hidden;
+}
+
+.teamCareerProgress em,
+.achievementProgress em {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c5cff, #b45cff);
+}
+
+.teamAchievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.achievementCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124,92,255,.13), transparent 36%),
+    linear-gradient(145deg, rgba(15,22,45,.9), rgba(8,13,28,.8));
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 18px 54px rgba(0,0,0,.22);
+  opacity: .62;
+}
+
+.achievementCard.unlocked {
+  opacity: 1;
+}
+
+.achievementIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.achievementTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.achievementTop b {
+  color: #fff;
+}
+
+.achievementTop span {
+  color: rgba(255,255,255,.56);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.achievementBody p {
+  margin: 5px 0 10px;
+  color: rgba(255,255,255,.62);
+  font-weight: 700;
+}
+
+.achievementProgress div {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255,255,255,.58);
+  font-weight: 800;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.achievementXp {
+  color: #5cff9a;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.rarity-common.unlocked {
+  border-color: rgba(255,255,255,.16);
+}
+
+.rarity-uncommon.unlocked {
+  border-color: rgba(34,197,94,.32);
+}
+
+.rarity-rare.unlocked {
+  border-color: rgba(59,130,246,.36);
+}
+
+.rarity-epic.unlocked {
+  border-color: rgba(180,92,255,.42);
+}
+
+.rarity-legendary.unlocked {
+  border-color: rgba(255,204,77,.5);
+  box-shadow: 0 18px 54px rgba(0,0,0,.22), 0 0 34px rgba(255,204,77,.08);
+}
+
+.rarity-mythic.unlocked {
+  border-color: rgba(255,90,90,.55);
+  box-shadow: 0 18px 54px rgba(0,0,0,.22), 0 0 38px rgba(255,90,90,.12);
+}
+
+@media (max-width: 1100px) {
+  .teamCareerHero,
+  .teamAchievementsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievementCard {
+    grid-template-columns: 56px 1fr;
+  }
+
+  .achievementXp {
+    grid-column: 1 / -1;
+  }
+}

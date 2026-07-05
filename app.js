@@ -2527,8 +2527,89 @@ function renderTeamFinanceTab(root, state) {
   `;
 }
 
-function renderTeamAchievementsTab(root, state) {
-  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>🏆 Досягнення</h2><p class="hint">Тут будуть професійні досягнення співробітника.</p></div>`;
+async function renderTeamAchievementsTab(root, state) {
+  const career = buildStaffCareer(state);
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>🏆 Карʼєра ветеринара</h2>
+        <p>Рівень, титули, досягнення та місце співробітника у рейтингу клініки.</p>
+      </div>
+    </section>
+
+    <section class="teamCareerHero">
+      <div class="teamCareerLevel">
+        <div class="teamCareerBadge">${career.levelIcon}</div>
+        <div>
+          <div class="teamCareerTitle">${escapeHtml(career.title)}</div>
+          <div class="teamCareerSub">Рівень ${career.level} · ${career.xp.toLocaleString("uk-UA")} XP</div>
+        </div>
+      </div>
+
+      <div class="teamCareerProgress">
+        <div>
+          <span>До наступного рівня</span>
+          <b>${career.nextLevelXp ? `${career.xpInLevel} / ${career.neededForNext} XP` : "Максимальний рівень"}</b>
+        </div>
+        <i><em style="width:${career.progressPercent}%"></em></i>
+      </div>
+    </section>
+
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard("⭐", "XP", career.xp.toLocaleString("uk-UA"), 0)}
+      ${renderTeamKpiCard("🏅", "Відкрито", `${career.unlockedCount} / ${career.achievements.length}`, 0)}
+      ${renderTeamKpiCard("👑", "Титул", career.title, 0)}
+      ${renderTeamKpiCard("🏆", "Рейтинг клініки", `#${career.clinicRank}`, 0)}
+    </section>
+
+    <section class="teamAchievementsGrid">
+      ${career.achievements.map(renderAchievementCard).join("")}
+    </section>
+  `;
+}
+function buildStaffCareer(state) {
+  const visits = state.dashboard.live_staff_visits || [];
+  const revenue = Number(state.revenue || 0);
+
+  const totalVisits = visits.length;
+  const dogVisits = countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
+  const catVisits = countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
+  const vaccineVisits = countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
+  const surgeryVisits = countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
+
+  const achievements = getVeterinaryAchievements({
+    totalVisits,
+    dogVisits,
+    catVisits,
+    revenue,
+    vaccineVisits,
+    surgeryVisits,
+    consecutiveShifts: 0,
+  });
+
+  const unlocked = achievements.filter((a) => a.unlocked);
+  const xp = achievements.reduce((sum, a) => {
+    return sum + (a.unlocked ? Number(a.xp || 0) : 0);
+  }, totalVisits * 10);
+
+  const level = calculateCareerLevel(xp);
+  const title = getCareerTitle(totalVisits);
+  const levelIcon = getCareerIcon(totalVisits);
+
+  return {
+    xp,
+    level: level.level,
+    xpInLevel: level.xpInLevel,
+    neededForNext: level.neededForNext,
+    nextLevelXp: level.nextLevelXp,
+    progressPercent: level.progressPercent,
+    title,
+    levelIcon,
+    achievements,
+    unlockedCount: unlocked.length,
+    clinicRank: "—",
+  };
 }
 
 function renderTeamReviewsTab(root, state) {
