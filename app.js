@@ -3788,13 +3788,17 @@ async function saveStaffScheduleApi(payload) {
 
 async function loadStaffDashboardApi(staffId) {
   try {
-    const res = await fetch(`${API_BASE}/staff/${encodeURIComponent(staffId)}/dashboard`, {
-      headers: authHeaders()
+    const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/dashboard`, {
+      credentials: "include",
+      headers: { Accept: "application/json", ...getOrgHeaders() },
     });
 
-    if (!res.ok) throw new Error("dashboard failed");
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch {}
 
-    const json = await res.json();
+    if (!res.ok || !json) throw new Error("dashboard failed");
+
     return json.data || json;
   } catch (e) {
     console.warn("loadStaffDashboardApi error:", e);
@@ -3804,6 +3808,8 @@ async function loadStaffDashboardApi(staffId) {
       closed_checks: 0,
       revenue: 0,
       avg_check: 0,
+      rating_avg: 0,
+      rating: 0,
       revenue_growth_percent: 0,
       visits_growth_percent: 0,
       checks_growth_percent: 0,
