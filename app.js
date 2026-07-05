@@ -2038,6 +2038,7 @@ function renderTeamProfileTab(tab, state) {
 
   if (tab === "overview") {
     renderTeamOverviewTab(root, state);
+    window.__lastTeamDashboard = state.dashboard;
    requestAnimationFrame(() => {
   renderStaffProfileCharts(state.dashboard, 1);
 
