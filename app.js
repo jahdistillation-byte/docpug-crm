@@ -2684,6 +2684,7 @@ function formatSeasonLabel(seasonKey) {
 
   return `${map[q] || "поточний сезон"} ${year || ""}`.trim();
 }
+
 function buildStaffCareer(state) {
   const visits = state.dashboard.live_staff_visits || [];
   const revenue = Number(state.revenue || 0);
