@@ -188,12 +188,12 @@ function getAchievementReward(trackId, currentStep, unlockedSteps) {
     };
   }
 
- if (trackId === "finance") {
+if (trackId === "finance") {
   return {
     icon: "💰",
-    label: "Відзнака внеску",
+    label: "Фінансова відзнака",
     title,
-    frame: null,
+    frame: rarity === "legendary" ? "gold" : rarity,
     badge: "finance",
   };
 }
