@@ -2625,7 +2625,7 @@ function renderTeamSettingsTab(root, state) {
           ${
             titles.length
               ? titles.map((t) => `
-                <button class="careerChoice ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
+                <button class="careerChoice rarity-${escapeHtml(t.rarity)} ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
                   <span>${escapeHtml(t.icon)}</span>
                   <b>${escapeHtml(t.label)}</b>
                   <small>${escapeHtml(achievementRarityLabel(t.rarity))}</small>
@@ -2645,7 +2645,7 @@ function renderTeamSettingsTab(root, state) {
           ${
             frames.length
               ? frames.map((f) => `
-                <button class="careerChoice ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
+                <button class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
                   <span>${escapeHtml(f.icon)}</span>
                   <b>${escapeHtml(f.label)}</b>
                   <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
