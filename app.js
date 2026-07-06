@@ -2553,14 +2553,23 @@ function renderTeamFinanceTab(root, state) {
 
 async function renderTeamAchievementsTab(root, state) {
   const career = buildStaffCareer(state);
+  const rating = await loadStaffRatingApi();
+
+  const ratingRows = rating.rows || [];
+  const currentStaffId = String(state.doc.id || "");
+
+  const currentRank = ratingRows.find((r) => String(r.staff_id) === currentStaffId);
+  const totalStaff = ratingRows.length;
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
         <h2>🏆 Карʼєра ветеринара</h2>
-        <p>Рівень, титули, досягнення та місце співробітника у рейтингу клініки.</p>
+        <p>Рівень, сезонний рейтинг клініки, титули та професійні досягнення.</p>
       </div>
     </section>
+
+    ${renderClinicRatingBoard(ratingRows, currentStaffId, rating.season_key)}
 
     <section class="teamCareerHero">
       <div class="teamCareerLevel">
@@ -2574,7 +2583,7 @@ async function renderTeamAchievementsTab(root, state) {
       <div class="teamCareerProgress">
         <div>
           <span>До наступного рівня</span>
-          <b>${career.nextLevelXp ? `${career.xpInLevel} / ${career.neededForNext} XP` : "Максимальний рівень"}</b>
+          <b>${career.xpInLevel} / ${career.neededForNext} XP</b>
         </div>
         <i><em style="width:${career.progressPercent}%"></em></i>
       </div>
@@ -2584,13 +2593,96 @@ async function renderTeamAchievementsTab(root, state) {
       ${renderTeamKpiCard("⭐", "XP", career.xp.toLocaleString("uk-UA"), 0)}
       ${renderTeamKpiCard("🏅", "Відкрито", `${career.unlockedCount} / ${career.achievements.length}`, 0)}
       ${renderTeamKpiCard("👑", "Титул", career.title, 0)}
-      ${renderTeamKpiCard("🏆", "Рейтинг клініки", `#${career.clinicRank}`, 0)}
+      ${renderTeamKpiCard("🏆", "Рейтинг клініки", currentRank ? `#${currentRank.rank} із ${totalStaff}` : "—", 0)}
     </section>
 
     <section class="teamAchievementsGrid">
       ${career.achievements.map(renderAchievementCard).join("")}
     </section>
   `;
+}
+function renderClinicRatingBoard(rows, currentStaffId, seasonKey) {
+  if (!rows.length) {
+    return `
+      <section class="clinicRatingBoard">
+        <div class="clinicRatingHead">
+          <div>
+            <h3>🏆 Рейтинг клініки</h3>
+            <p>Поки немає даних рейтингу. Перерахуйте сезон на сервері.</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  const seasonLabel = formatSeasonLabel(seasonKey);
+
+  return `
+    <section class="clinicRatingBoard">
+      <div class="clinicRatingHead">
+        <div>
+          <h3>🏆 Рейтинг клініки</h3>
+          <p>Сезон ${escapeHtml(seasonLabel)} · оновлення кожні 3 місяці</p>
+        </div>
+        <span>${escapeHtml(seasonKey || "—")}</span>
+      </div>
+
+      <div class="clinicRatingTable">
+        ${rows.map((r) => renderClinicRatingRow(r, currentStaffId)).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderClinicRatingRow(r, currentStaffId) {
+  const rank = Number(r.rank || 0);
+  const isCurrent = String(r.staff_id) === String(currentStaffId);
+
+  const medal =
+    rank === 1 ? "🥇" :
+    rank === 2 ? "🥈" :
+    rank === 3 ? "🥉" :
+    `#${rank}`;
+
+  const avatar = r.avatar
+    ? `<img src="${escapeHtml(r.avatar)}" alt="${escapeHtml(r.staff_name || "Працівник")}">`
+    : `<span>${escapeHtml(String(r.staff_name || "?").trim().charAt(0).toUpperCase() || "?")}</span>`;
+
+  return `
+    <div class="clinicRatingRow ${isCurrent ? "current" : ""} rank-${rank}">
+      <div class="clinicRatingPlace">${medal}</div>
+
+      <div class="clinicRatingAvatar">
+        ${avatar}
+      </div>
+
+      <div class="clinicRatingPerson">
+        <b>${escapeHtml(r.staff_name || "Працівник")}</b>
+        <span>${isCurrent ? "Ваш профіль" : "Співробітник клініки"}</span>
+      </div>
+
+      <div class="clinicRatingStats">
+        <div><span>Score</span><b>${Number(r.score || 0).toLocaleString("uk-UA")}</b></div>
+        <div><span>Візити</span><b>${Number(r.visits_count || 0).toLocaleString("uk-UA")}</b></div>
+        <div><span>Виручка</span><b>${Number(r.revenue || 0).toLocaleString("uk-UA")} грн</b></div>
+        <div><span>Сер. чек</span><b>${Number(r.avg_check || 0).toLocaleString("uk-UA")} грн</b></div>
+      </div>
+    </div>
+  `;
+}
+
+function formatSeasonLabel(seasonKey) {
+  const s = String(seasonKey || "");
+  const [year, q] = s.split("-Q");
+
+  const map = {
+    "1": "I квартал",
+    "2": "II квартал",
+    "3": "III квартал",
+    "4": "IV квартал",
+  };
+
+  return `${map[q] || "поточний сезон"} ${year || ""}`.trim();
 }
 function buildStaffCareer(state) {
   const visits = state.dashboard.live_staff_visits || [];
@@ -9121,5 +9213,21 @@ async function loadStaffScheduleRangeApi(from, to) {
   } catch (e) {
     console.error("loadStaffScheduleRangeApi failed:", e);
     return [];
+  }
+}
+async function loadStaffRatingApi() {
+  try {
+    const res = await fetch("/api/staff/rating");
+    const json = await res.json();
+
+    if (!json.ok) {
+      console.warn("Rating load error:", json.error);
+      return { season_key: "—", rows: [] };
+    }
+
+    return json.data || { season_key: "—", rows: [] };
+  } catch (e) {
+    console.error(e);
+    return { season_key: "—", rows: [] };
   }
 }

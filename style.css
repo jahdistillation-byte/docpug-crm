@@ -7589,3 +7589,162 @@ body[data-theme="white"] .monthDayNum {
     min-width:180px;
     justify-content:center;
 }
+/* ===== Clinic MMO Rating ===== */
+
+.clinicRatingBoard {
+  border: 1px solid rgba(255,255,255,.1);
+  background:
+    radial-gradient(circle at top left, rgba(180,92,255,.18), transparent 34%),
+    linear-gradient(135deg, rgba(18,24,52,.92), rgba(8,10,24,.92));
+  border-radius: 26px;
+  padding: 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.32);
+}
+
+.clinicRatingHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.clinicRatingHead h3 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.clinicRatingHead p {
+  margin: 0;
+  color: rgba(255,255,255,.58);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.clinicRatingHead > span {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.76);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.clinicRatingTable {
+  display: grid;
+  gap: 10px;
+}
+
+.clinicRatingRow {
+  display: grid;
+  grid-template-columns: 56px 52px 1fr 2.2fr;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.045);
+}
+
+.clinicRatingRow.current {
+  border-color: rgba(180,92,255,.65);
+  background:
+    radial-gradient(circle at top left, rgba(180,92,255,.24), transparent 42%),
+    rgba(124,92,255,.1);
+  box-shadow: 0 0 0 1px rgba(180,92,255,.14), 0 18px 45px rgba(124,92,255,.16);
+}
+
+.clinicRatingRow.rank-1 {
+  border-color: rgba(255,200,87,.42);
+}
+
+.clinicRatingRow.rank-2 {
+  border-color: rgba(210,220,255,.32);
+}
+
+.clinicRatingRow.rank-3 {
+  border-color: rgba(205,127,50,.36);
+}
+
+.clinicRatingPlace {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.clinicRatingAvatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(78,166,255,.95), rgba(180,92,255,.95));
+  color: #fff;
+  font-weight: 950;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.clinicRatingAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.clinicRatingPerson b {
+  display: block;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.clinicRatingPerson span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255,255,255,.48);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clinicRatingStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.clinicRatingStats div {
+  border-radius: 14px;
+  padding: 9px 10px;
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.clinicRatingStats span {
+  display: block;
+  color: rgba(255,255,255,.45);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.clinicRatingStats b {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+@media (max-width: 900px) {
+  .clinicRatingRow {
+    grid-template-columns: 44px 46px 1fr;
+  }
+
+  .clinicRatingStats {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
