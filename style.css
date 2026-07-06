@@ -7352,3 +7352,167 @@ body[data-theme="white"] .monthDayNum {
     transform: scale(1.045);
   }
 }
+.teamDashAvatar,
+.profilePhotoPreview {
+  position: relative;
+  isolation: isolate;
+  overflow: visible !important;
+}
+
+.teamDashAvatar img,
+.profilePhotoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
+.teamDashAvatar::before,
+.profilePhotoPreview::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+}
+
+.teamDashAvatar::after,
+.profilePhotoPreview::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+}
+
+.teamDashAvatar.frame-common::before,
+.profilePhotoPreview.frame-common::before {
+  opacity: 1;
+  border: 3px solid rgba(255,255,255,.45);
+  box-shadow: 0 0 0 5px rgba(255,255,255,.05), 0 0 28px rgba(255,255,255,.16);
+}
+
+.teamDashAvatar.frame-bronze::before,
+.profilePhotoPreview.frame-bronze::before {
+  opacity: 1;
+  border: 3px solid rgba(190,120,58,.9);
+  box-shadow: 0 0 0 5px rgba(190,120,58,.12), 0 0 34px rgba(190,120,58,.25);
+}
+
+.teamDashAvatar.frame-uncommon::before,
+.profilePhotoPreview.frame-uncommon::before,
+.teamDashAvatar.frame-dogs::before,
+.profilePhotoPreview.frame-dogs::before {
+  opacity: 1;
+  border: 3px solid rgba(34,197,94,.88);
+  box-shadow: 0 0 0 5px rgba(34,197,94,.13), 0 0 36px rgba(34,197,94,.32);
+}
+
+.teamDashAvatar.frame-rare::before,
+.profilePhotoPreview.frame-rare::before {
+  opacity: 1;
+  border: 3px solid rgba(59,130,246,.95);
+  box-shadow: 0 0 0 5px rgba(59,130,246,.14), 0 0 40px rgba(59,130,246,.36);
+}
+
+.teamDashAvatar.frame-epic::before,
+.profilePhotoPreview.frame-epic::before {
+  opacity: 1;
+  border: 3px solid rgba(180,92,255,.95);
+  box-shadow: 0 0 0 5px rgba(180,92,255,.15), 0 0 44px rgba(180,92,255,.42);
+}
+
+.teamDashAvatar.frame-legendary::before,
+.profilePhotoPreview.frame-legendary::before,
+.teamDashAvatar.frame-gold::before,
+.profilePhotoPreview.frame-gold::before {
+  opacity: 1;
+  border: 3px solid rgba(255,204,77,.98);
+  box-shadow:
+    0 0 0 5px rgba(255,204,77,.16),
+    0 0 38px rgba(255,204,77,.48),
+    0 0 78px rgba(255,170,0,.22);
+}
+
+.teamDashAvatar.frame-mythic::before,
+.profilePhotoPreview.frame-mythic::before {
+  opacity: 1;
+  border: 3px solid rgba(255,120,190,.98);
+  box-shadow:
+    0 0 0 5px rgba(255,120,190,.15),
+    0 0 42px rgba(255,120,190,.36),
+    0 0 78px rgba(180,92,255,.25);
+}
+
+.teamDashAvatar.frame-legendary::after,
+.profilePhotoPreview.frame-legendary::after,
+.teamDashAvatar.frame-gold::after,
+.profilePhotoPreview.frame-gold::after,
+.teamDashAvatar.frame-mythic::after,
+.profilePhotoPreview.frame-mythic::after {
+  opacity: .45;
+  background: conic-gradient(from 0deg, transparent, rgba(255,204,77,.5), transparent, rgba(180,92,255,.35), transparent);
+  filter: blur(10px);
+  animation: frameAuraSpin 5.5s linear infinite;
+}
+
+.teamDashAvatar.frame-dogs::after,
+.profilePhotoPreview.frame-dogs::after {
+  opacity: .32;
+  background: conic-gradient(from 0deg, transparent, rgba(34,197,94,.45), transparent, rgba(255,204,77,.26), transparent);
+  filter: blur(10px);
+  animation: frameAuraSpin 6.5s linear infinite;
+}
+
+@keyframes frameAuraSpin {
+  to { transform: rotate(360deg); }
+}
+
+.profilePhotoPanel {
+  margin-top: 16px;
+}
+
+.profilePhotoSettings {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.profilePhotoPreview {
+  width: 86px;
+  height: 86px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 950;
+  font-size: 34px;
+  background: linear-gradient(135deg, rgba(78,166,255,.95), rgba(180,92,255,.95));
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.profilePhotoInfo b {
+  display: block;
+  font-size: 15px;
+  font-weight: 950;
+  color: #fff;
+}
+
+.profilePhotoInfo p {
+  margin: 6px 0 14px;
+  color: rgba(255,255,255,.58);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.profilePhotoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
