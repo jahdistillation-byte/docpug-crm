@@ -2140,8 +2140,6 @@ def api_clinic_login():
     except Exception as e:
         return jsonify({"ok": False, "error": f"Ошибка сервера: {str(e)}"}), 500
     
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=True)
 
 @app.delete("/api/specializations/<spec_id>")
 def api_delete_specialization(spec_id):
