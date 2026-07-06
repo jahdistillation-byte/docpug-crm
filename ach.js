@@ -1,44 +1,34 @@
-// ==========================================================================
-// Doc.PUG CRM — Achievements / Career System
-// Чистая версия: титулы, рамки, награды, dev unlock
-// ==========================================================================
-
 function buildStaffCareer(state) {
-  const dashboard = state.dashboard || {};
-  const visits = dashboard.live_staff_visits || [];
-  const baseRevenue = Number(state.revenue || dashboard.revenue || 0);
+  const visits = state.dashboard.live_staff_visits || [];
+  const revenue = Number(state.revenue || state.dashboard.revenue || 0);
 
-  const devUnlockAll = localStorage.getItem("DEV_UNLOCK_ALL_ACHIEVEMENTS") === "1";
+  const totalVisits = visits.length;
+  const dogVisits = countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
+  const catVisits = countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
+  const vaccineVisits = countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
+  const surgeryVisits = countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
 
-  const stats = {
-    totalVisits: devUnlockAll ? 3000 : visits.length,
-    dogVisits: devUnlockAll ? 3000 : countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]),
-    catVisits: devUnlockAll ? 3000 : countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]),
-    revenue: devUnlockAll ? 100000000 : baseRevenue,
-    vaccineVisits: devUnlockAll ? 1200 : countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]),
-    surgeryVisits: devUnlockAll ? 700 : countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]),
-    consecutiveShifts: devUnlockAll ? 20 : 0,
-  };
-
-  const achievements = getVeterinaryAchievements(stats);
-
-  const unlockedCount = achievements.reduce((sum, a) => {
-    return sum + Number(a.unlockedSteps || 0);
-  }, 0);
-
-  const xpFromVisits = stats.totalVisits * 10;
-  const xpFromAchievements = achievements.reduce((sum, a) => {
-    return sum + Number(a.xp || 0);
-  }, 0);
-
-  const xp = xpFromVisits + xpFromAchievements;
-  const level = calculateCareerLevel(xp);
-
-  const careerProfile = buildCareerProfile({
-    staffId: state.doc?.id || "unknown",
-    achievements,
-    totalVisits: stats.totalVisits,
+  const achievements = getVeterinaryAchievements({
+    totalVisits,
+    dogVisits,
+    catVisits,
+    revenue,
+    vaccineVisits,
+    surgeryVisits,
+    consecutiveShifts: 0,
   });
+
+  const unlockedCount = achievements.reduce((sum, a) => sum + Number(a.unlockedSteps || 0), 0);
+
+  const xp = achievements.reduce((sum, a) => {
+    return sum + Number(a.xp || 0);
+  }, totalVisits * 10);
+
+  const level = calculateCareerLevel(xp);
+  const title = getCareerTitle(totalVisits);
+  const levelIcon = getCareerIcon(totalVisits);
+
+  const activeFrame = getActiveCareerFrame(achievements);
 
   return {
     xp,
@@ -47,86 +37,70 @@ function buildStaffCareer(state) {
     neededForNext: level.neededForNext,
     nextLevelXp: level.nextLevelXp,
     progressPercent: level.progressPercent,
-
-    title: careerProfile.selectedTitle?.label || "Новий спеціаліст",
-    levelIcon: careerProfile.selectedTitle?.icon || "✨",
-    activeFrame: careerProfile.selectedFrame?.id === "none" ? "" : careerProfile.selectedFrame?.id || "",
-
+    title,
+    levelIcon,
+    activeFrame,
     achievements,
     unlockedCount,
     clinicRank: "—",
-
-    availableTitles: careerProfile.availableTitles,
-    availableFrames: careerProfile.availableFrames,
-    selectedTitle: careerProfile.selectedTitle,
-    selectedFrame: careerProfile.selectedFrame,
   };
 }
 
 function getVeterinaryAchievements(stats) {
   const tracks = [
-    trackAch("career", "📖", "Шлях ветеринара", stats.totalVisits, [
-      step("Перший крок", "Провести перший прийом", 1, "common", 50, "⚪", { title: true, frame: "common" }),
-      step("Практикант", "25 прийомів", 25, "common", 100, "🥉", { title: true, frame: "bronze" }),
-      step("Досвідчений ветеринар", "100 прийомів", 100, "uncommon", 200, "🟢", { title: true, frame: "uncommon" }),
-      step("Майстер ветеринарії", "500 прийомів", 500, "rare", 400, "🔵", { title: true, frame: "rare" }),
-      step("Експерт ветеринарії", "1000 прийомів", 1000, "epic", 800, "🟣", { title: true, frame: "epic" }),
-      step("Легенда ветеринарії", "2500 прийомів", 2500, "legendary", 1500, "👑", { title: true, frame: "legendary" }),
-    ]),
-
     trackAch("dogs", "🐶", "Робота з собаками", stats.dogVisits, [
-      step("Базовий досвід із собаками", "50 прийомів собак", 50, "common", 80, "🐶", { title: true }),
-      step("Досвід роботи з собаками", "250 прийомів собак", 250, "uncommon", 160, "🐶", { title: true }),
-      step("Експерт з собак", "1000 прийомів собак", 1000, "epic", 350, "🐶", { title: true }),
-      step("Провідний спеціаліст з собак", "2500 прийомів собак", 2500, "legendary", 700, "🐶", { title: true, frame: "dogs" }),
-    ]),
+  step("Базовий досвід", "50 прийомів собак", 50, "common", 80, "🐶"),
+  step("Досвід роботи з собаками", "250 прийомів собак", 250, "uncommon", 160, "🐶"),
+  step("Експерт з собак", "1000 прийомів собак", 1000, "epic", 350, "🐶"),
+  step("Провідний спеціаліст з собак", "2500 прийомів собак", 2500, "legendary", 700, "👑"),
+]),
 
-    trackAch("cats", "🐱", "Робота з котами", stats.catVisits, [
-      step("Базовий досвід із котами", "50 прийомів котів", 50, "common", 80, "🐱", { title: true }),
-      step("Досвід роботи з котами", "250 прийомів котів", 250, "uncommon", 160, "🐱", { title: true }),
-      step("Експерт з котів", "1000 прийомів котів", 1000, "epic", 350, "🐱", { title: true }),
-      step("Провідний спеціаліст з котів", "2500 прийомів котів", 2500, "legendary", 700, "👑", { title: true, frame: "legendary" }),
-    ]),
+trackAch("cats", "🐱", "Робота з котами", stats.catVisits, [
+  step("Базовий досвід", "50 прийомів котів", 50, "common", 80, "🐱"),
+  step("Досвід роботи з котами", "250 прийомів котів", 250, "uncommon", 160, "🐱"),
+  step("Експерт з котів", "1000 прийомів котів", 1000, "epic", 350, "🐱"),
+  step("Провідний спеціаліст з котів", "2500 прийомів котів", 2500, "legendary", 700, "👑"),
+]),
 
-    trackAch("finance", "💰", "Фінансовий внесок", stats.revenue, [
-      step("Перші 100 000 грн", "100 000 грн виручки", 100000, "uncommon", 100, "💵", { badge: true }),
-      step("Стабільний внесок", "1 000 000 грн виручки", 1000000, "rare", 250, "💰", { badge: true }),
-      step("Високий фінансовий результат", "10 000 000 грн виручки", 10000000, "legendary", 600, "💎", { badge: true, frame: "gold" }),
-    ]),
+trackAch("finance", "💰", "Фінансовий внесок", stats.revenue, [
+  step("Перші 100 000 грн", "100 000 грн виручки", 100000, "uncommon", 100, "💵"),
+  step("Стабільний внесок", "1 000 000 грн виручки", 1000000, "rare", 250, "💰"),
+  step("Високий фінансовий результат", "10 000 000 грн виручки", 10000000, "legendary", 600, "💎"),
+]),
 
-    trackAch("vaccine", "💉", "Профілактика", stats.vaccineVisits, [
-      step("Профілактична практика", "100 вакцинацій", 100, "uncommon", 120, "💉", { badge: true }),
-      step("Майстер профілактики", "1000 вакцинацій", 1000, "epic", 350, "🛡", { title: true }),
-    ]),
+trackAch("vaccine", "💉", "Профілактика", stats.vaccineVisits, [
+  step("Профілактична практика", "100 вакцинацій", 100, "uncommon", 120, "💉"),
+  step("Майстер профілактики", "1000 вакцинацій", 1000, "epic", 350, "🛡"),
+]),
 
-    trackAch("surgery", "⚕️", "Хірургічний досвід", stats.surgeryVisits, [
-      step("Перший хірургічний досвід", "Перша операція", 1, "common", 80, "⚕️", { badge: true }),
-      step("Хірургічна практика", "100 операцій", 100, "rare", 250, "⚕️", { title: true }),
-      step("Майстер хірургії", "500 операцій", 500, "legendary", 700, "👑", { title: true, frame: "mythic" }),
-    ]),
+trackAch("surgery", "⚕️", "Хірургічний досвід", stats.surgeryVisits, [
+  step("Перший хірургічний досвід", "Перша операція", 1, "common", 80, "⚕️"),
+  step("Хірургічна практика", "100 операцій", 100, "rare", 250, "⚕️"),
+  step("Майстер хірургії", "500 операцій", 500, "legendary", 700, "👑"),
+]),
 
-    trackAch("activity", "🔥", "Професійна активність", stats.consecutiveShifts, [
-      step("Стабільна присутність", "7 змін поспіль без вихідного", 7, "rare", 150, "🔥", { badge: true }),
-      step("Надійний спеціаліст", "15 змін поспіль без вихідного", 15, "epic", 300, "⚡", { title: true }),
-    ]),
+trackAch("activity", "🔥", "Професійна активність", stats.consecutiveShifts, [
+  step("Стабільна присутність", "7 змін поспіль без вихідного", 7, "rare", 150, "🔥"),
+  step("Надійний спеціаліст", "15 змін поспіль без вихідного", 15, "epic", 300, "⚡"),
+]),
   ];
 
   const unlockedSteps = tracks.reduce((sum, t) => sum + t.unlockedSteps, 0);
 
   tracks.push(
     trackAch("collection", "🏅", "Колекція досвіду", unlockedSteps, [
-      step("Колекціонер досвіду I", "Відкрити 5 етапів", 5, "common", 200, "🏅", { badge: true }),
-      step("Колекціонер досвіду II", "Відкрити 10 етапів", 10, "uncommon", 400, "🏅", { badge: true }),
-      step("Колекціонер досвіду III", "Відкрити 20 етапів", 20, "epic", 900, "🏆", { frame: "epic" }),
-      step("Жива легенда", "Відкрити всі етапи", 25, "mythic", 2500, "👑", { title: true, frame: "mythic" }),
+      step("Колекціонер досвіду I", "Відкрити 5 етапів", 5, "common", 200, "🏅"),
+      step("Колекціонер досвіду II", "Відкрити 10 етапів", 10, "uncommon", 400, "🏅"),
+      step("Колекціонер досвіду III", "Відкрити 20 етапів", 20, "epic", 900, "🏆"),
+      step("Жива легенда", "Відкрити всі етапи", 25, "mythic", 2500, "👑"),
     ])
   );
 
   return tracks;
 }
 
-function step(name, description, target, rarity, xp, icon, reward = {}) {
-  return { name, description, target, rarity, xp, icon, reward };
+function step(name, description, target, rarity, xp, icon) {
+  return { name, description, target, rarity, xp, icon };
 }
 
 function trackAch(id, icon, groupName, current, steps) {
@@ -146,6 +120,8 @@ function trackAch(id, icon, groupName, current, steps) {
     return sum + (safeCurrent >= s.target ? Number(s.xp || 0) : 0);
   }, 0);
 
+  const reward = getAchievementReward(id, currentStep, unlockedSteps);
+
   return {
     id,
     icon,
@@ -164,7 +140,7 @@ function trackAch(id, icon, groupName, current, steps) {
     unlockedSteps,
     totalSteps: steps.length,
     steps,
-    reward: getAchievementReward(id, currentStep, unlockedSteps),
+    reward,
   };
 }
 
@@ -175,174 +151,191 @@ function getAchievementReward(trackId, currentStep, unlockedSteps) {
       label: "Нагорода попереду",
       title: "Відкриється після першого етапу",
       frame: null,
-      titleReward: null,
       badge: null,
     };
   }
 
+  const rarity = currentStep?.rarity || "common";
   const title = currentStep?.name || "Досягнення";
-  const reward = currentStep?.reward || {};
 
+  if (trackId === "career") {
   return {
-    icon: currentStep?.icon || "🏆",
-    label: getRewardLabel(trackId, reward),
+    icon: "🏆",
+    label: "Професійний титул",
     title,
-    frame: reward.frame || null,
-    titleReward: reward.title ? title : null,
-    badge: reward.badge ? trackId : null,
+    frame: rarity,
+    badge: "career",
   };
 }
 
-function getRewardLabel(trackId, reward) {
-  if (reward.title && reward.frame) return "Титул і рамка";
-  if (reward.title) return "Професійний титул";
-  if (reward.frame) return "Рамка профілю";
+  if (trackId === "dogs") {
+    return {
+      icon: "🐶",
+      label: "Значок собак",
+      title,
+      frame: rarity === "legendary" ? "legendary" : null,
+      badge: "dogs",
+    };
+  }
 
-  const map = {
-    dogs: "Профільна відзнака",
-    cats: "Профільна відзнака",
-    finance: "Відзнака внеску",
-    vaccine: "Відзнака профілактики",
-    surgery: "Хірургічна відзнака",
-    activity: "Відзнака активності",
-    collection: "Колекційна відзнака",
+  if (trackId === "cats") {
+    return {
+      icon: "🐱",
+      label: "Значок котів",
+      title,
+      frame: rarity === "legendary" ? "legendary" : null,
+      badge: "cats",
+    };
+  }
+
+if (trackId === "finance") {
+  return {
+    icon: "💰",
+    label: "Фінансова відзнака",
+    title,
+    frame: rarity === "legendary" ? "gold" : rarity,
+    badge: "finance",
   };
-
-  return map[trackId] || "Нагорода";
 }
 
-// ==========================================================================
-// Career Profile — єдине джерело титулів/рамок
-// ==========================================================================
+  if (trackId === "vaccine") {
+    return {
+      icon: "🛡",
+      label: "Значок профілактики",
+      title,
+      frame: null,
+      badge: "vaccine",
+    };
+  }
 
-function buildCareerProfile({ staffId, achievements, totalVisits }) {
-  const prefs = getStaffCareerPrefs(staffId);
+  if (trackId === "surgery") {
+    return {
+      icon: "⚕️",
+      label: "Хірургічна відзнака",
+      title,
+      frame: rarity === "legendary" ? "mythic" : null,
+      badge: "surgery",
+    };
+  }
 
-  const availableTitles = getUnlockedCareerTitlesFromAchievements(achievements, totalVisits);
-  const availableFrames = getUnlockedCareerFramesFromAchievements(achievements);
+  if (trackId === "activity") {
+    return {
+      icon: "🔥",
+      label: "Відзнака активності",
+      title,
+      frame: null,
+      badge: "activity",
+    };
+  }
 
-  const selectedTitle =
-    availableTitles.find((x) => x.id === prefs.titleId) ||
-    availableTitles.find((x) => x.id !== "none") ||
-    availableTitles[0];
-
-  const selectedFrame =
-    availableFrames.find((x) => x.id === prefs.frameId) ||
-    availableFrames.find((x) => x.id !== "none") ||
-    availableFrames[0];
+  if (trackId === "collection") {
+    return {
+      icon: "🏅",
+      label: "Колекційна рамка",
+      title,
+      frame: rarity,
+      badge: "collection",
+    };
+  }
 
   return {
-    availableTitles,
-    availableFrames,
-    selectedTitle,
-    selectedFrame,
+    icon: "🏆",
+    label: "Нагорода",
+    title,
+    frame: null,
+    badge: "achievement",
   };
 }
 
-function getUnlockedCareerTitlesFromAchievements(achievements, totalVisits = 0) {
-  const titles = [
-    {
-      id: "none",
-      label: "Без титулу",
-      rarity: "common",
-      icon: "—",
-    },
-  ];
+function getActiveCareerFrame(achievements) {
+  const priority = {
+    mythic: 6,
+    legendary: 5,
+    gold: 5,
+    epic: 4,
+    rare: 3,
+    uncommon: 2,
+    common: 1,
+  };
 
-  achievements.forEach((track) => {
-    track.steps.forEach((s) => {
-      if (track.rawCurrent < s.target) return;
-      if (!s.reward?.title) return;
+  let best = null;
 
-      titles.push({
-        id: `${track.id}:${s.name}`,
-        label: s.name,
-        rarity: s.rarity,
-        icon: s.icon,
-      });
-    });
+  achievements.forEach((a) => {
+    const frame = a.reward?.frame;
+    if (!frame) return;
+
+    if (!best || (priority[frame] || 0) > (priority[best] || 0)) {
+      best = frame;
+    }
   });
 
-  if (titles.length === 1 && totalVisits >= 1) {
-    titles.push({
-      id: "career:Перший крок",
-      label: "Перший крок",
-      rarity: "common",
-      icon: "⚪",
-    });
-  }
-
-  return uniqueById(titles);
+  return best;
 }
 
-function getUnlockedCareerFramesFromAchievements(achievements) {
-  const frames = [
-    {
-      id: "none",
-      label: "Без рамки",
-      rarity: "common",
-      icon: "⬜",
-    },
-  ];
+function countVisitsBySpecies(visits, words) {
+  return visits.filter((v) => {
+    const txt = [
+      v.species,
+      v.pet_species,
+      v.patient_species,
+      v.pet?.species,
+      v.patient?.species,
+    ].filter(Boolean).join(" ").toLowerCase();
 
-  achievements.forEach((track) => {
-    track.steps.forEach((s) => {
-      if (track.rawCurrent < s.target) return;
-      if (!s.reward?.frame) return;
-
-      frames.push({
-        id: s.reward.frame,
-        label: s.name,
-        rarity: s.reward.frame === "gold" ? "legendary" : s.rarity,
-        icon: s.icon,
-      });
-    });
-  });
-
-  return uniqueById(frames);
+    return words.some((w) => txt.includes(w));
+  }).length;
 }
 
-function uniqueById(arr) {
-  const map = new Map();
-  arr.forEach((x) => map.set(x.id, x));
-  return Array.from(map.values());
+function countVisitsByText(visits, words) {
+  return visits.filter((v) => {
+    const txt = [
+      v.note,
+      v.rx,
+      v.dx,
+      v.diagnosis,
+      JSON.stringify(v.services || v.services_json || []),
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return words.some((w) => txt.includes(w));
+  }).length;
 }
 
-// Старые названия оставляем для app.js, чтобы ничего не сломалось
-function getUnlockedCareerTitles(career) {
-  return career.availableTitles || getUnlockedCareerTitlesFromAchievements(career.achievements || [], 0);
+function calculateCareerLevel(xp) {
+  const level = Math.max(1, Math.floor(Math.sqrt(Number(xp || 0) / 120)) + 1);
+  const currentLevelXp = Math.pow(level - 1, 2) * 120;
+  const nextLevelXp = Math.pow(level, 2) * 120;
+  const xpInLevel = Math.max(0, Number(xp || 0) - currentLevelXp);
+  const neededForNext = nextLevelXp - currentLevelXp;
+  const progressPercent = Math.min(100, Math.round((xpInLevel / neededForNext) * 100));
+
+  return {
+    level,
+    nextLevelXp,
+    xpInLevel,
+    neededForNext,
+    progressPercent,
+  };
 }
 
-function getUnlockedCareerFrames(career) {
-  return career.availableFrames || getUnlockedCareerFramesFromAchievements(career.achievements || []);
+function getCareerTitle(totalVisits) {
+  if (totalVisits >= 2500) return "Легенда ветеринарії";
+  if (totalVisits >= 1000) return "Експерт ветеринарії";
+  if (totalVisits >= 500) return "Майстер ветеринарії";
+  if (totalVisits >= 100) return "Досвідчений ветеринар";
+  if (totalVisits >= 25) return "Практикант";
+  if (totalVisits >= 1) return "Перший крок";
+  return "Новий спеціаліст";
 }
 
-// ==========================================================================
-// LocalStorage prefs
-// ==========================================================================
-
-function getStaffCareerPrefs(staffId) {
-  try {
-    return JSON.parse(localStorage.getItem(`staff_career_prefs_${staffId}`) || "{}");
-  } catch {
-    return {};
-  }
+function getCareerIcon(totalVisits) {
+  if (totalVisits >= 2500) return "👑";
+  if (totalVisits >= 1000) return "🟣";
+  if (totalVisits >= 500) return "🔵";
+  if (totalVisits >= 100) return "🟢";
+  if (totalVisits >= 25) return "🥉";
+  if (totalVisits >= 1) return "⚪";
+  return "✨";
 }
-
-function saveStaffCareerPrefs(staffId, prefs) {
-  const current = getStaffCareerPrefs(staffId);
-  localStorage.setItem(
-    `staff_career_prefs_${staffId}`,
-    JSON.stringify({
-      ...current,
-      ...prefs,
-    })
-  );
-}
-
-// ==========================================================================
-// Render
-// ==========================================================================
 
 function renderAchievementCard(a) {
   const isComplete = a.unlocked;
@@ -387,64 +380,101 @@ function renderAchievementCard(a) {
 function achievementRarityLabel(rarity) {
   const map = {
     common: "Звичайне",
-    bronze: "Бронзове",
     uncommon: "Незвичайне",
     rare: "Рідкісне",
     epic: "Епічне",
     legendary: "Легендарне",
     mythic: "Міфічне",
-    gold: "Золоте",
   };
 
   return map[rarity] || "Досягнення";
 }
+function getUnlockedCareerTitles(career) {
+  const titles = [
+    {
+      id: "none",
+      label: "Без титулу",
+      rarity: "common",
+      icon: "—",
+    }
+  ];
 
-// ==========================================================================
-// Helpers
-// ==========================================================================
+  const careerTrack = career.achievements.find((a) => a.id === "career");
 
-function countVisitsBySpecies(visits, words) {
-  return visits.filter((v) => {
-    const txt = [
-      v.species,
-      v.pet_species,
-      v.patient_species,
-      v.pet?.species,
-      v.patient?.species,
-    ].filter(Boolean).join(" ").toLowerCase();
+  if (!careerTrack) {
+    titles.push({
+      id: career.title || "Новий спеціаліст",
+      label: career.title || "Новий спеціаліст",
+      rarity: "common",
+      icon: career.levelIcon || "✨",
+    });
 
-    return words.some((w) => txt.includes(w));
-  }).length;
+    return titles;
+  }
+
+  careerTrack.steps
+    .filter((s) => careerTrack.rawCurrent >= s.target)
+    .forEach((s) => {
+      titles.push({
+        id: s.name,
+        label: s.name,
+        rarity: s.rarity,
+        icon: s.icon,
+      });
+    });
+
+  if (titles.length === 1) {
+    titles.push({
+      id: career.title || "Новий спеціаліст",
+      label: career.title || "Новий спеціаліст",
+      rarity: "common",
+      icon: career.levelIcon || "✨",
+    });
+  }
+
+  return titles;
 }
 
-function countVisitsByText(visits, words) {
-  return visits.filter((v) => {
-    const txt = [
-      v.note,
-      v.rx,
-      v.dx,
-      v.diagnosis,
-      JSON.stringify(v.services || v.services_json || []),
-    ].filter(Boolean).join(" ").toLowerCase();
+function getUnlockedCareerFrames(career) {
+  const frames = [
+    {
+      id: "none",
+      label: "Без рамки",
+      rarity: "common",
+      icon: "⬜",
+    }
+  ];
 
-    return words.some((w) => txt.includes(w));
-  }).length;
+  career.achievements.forEach((a) => {
+    const frame = a.reward?.frame;
+    if (!frame) return;
+
+    frames.push({
+      id: frame,
+      label: a.reward?.title || a.groupName,
+      rarity: frame === "gold" ? "legendary" : frame,
+      icon: a.reward?.icon || "🏆",
+    });
+  });
+
+  const unique = new Map();
+  frames.forEach((f) => unique.set(f.id, f));
+
+  return Array.from(unique.values());
 }
 
-function calculateCareerLevel(xp) {
-  const safeXp = Number(xp || 0);
-  const level = Math.max(1, Math.floor(Math.sqrt(safeXp / 120)) + 1);
-  const currentLevelXp = Math.pow(level - 1, 2) * 120;
-  const nextLevelXp = Math.pow(level, 2) * 120;
-  const xpInLevel = Math.max(0, safeXp - currentLevelXp);
-  const neededForNext = nextLevelXp - currentLevelXp;
-  const progressPercent = Math.min(100, Math.round((xpInLevel / neededForNext) * 100));
+function getStaffCareerPrefs(staffId) {
+  try {
+    return JSON.parse(localStorage.getItem(`staff_career_prefs_${staffId}`) || "{}");
+  } catch {
+    return {};
+  }
+}
 
-  return {
-    level,
-    nextLevelXp,
-    xpInLevel,
-    neededForNext,
-    progressPercent,
-  };
+function saveStaffCareerPrefs(staffId, prefs) {
+  const current = getStaffCareerPrefs(staffId);
+  localStorage.setItem(`staff_career_prefs_${staffId}`, JSON.stringify({
+    ...current,
+    ...prefs,
+  }));
 }

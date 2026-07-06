@@ -1918,45 +1918,35 @@ async function renderTeamProfilePage(doc) {
   const dashboard = await loadStaffDashboardApi(doc.id);
   const liveStats = await buildStaffLiveStats(doc.id);
 
-  Object.assign(dashboard, liveStats);
+Object.assign(dashboard, liveStats);
 
-  const career = buildStaffCareer({
-    doc,
-    dashboard,
-    revenue: Number(dashboard.revenue || 0),
-  });
+const career = buildStaffCareer({
+  doc,
+  dashboard,
+  revenue: Number(dashboard.revenue || 0),
+});
 
-  const careerPrefs = getStaffCareerPrefs(doc.id);
+const careerPrefs = getStaffCareerPrefs(doc.id);
 
-  const unlockedTitles = getUnlockedCareerTitles(career);
-  const unlockedFrames = getUnlockedCareerFrames(career);
+const unlockedTitles = getUnlockedCareerTitles(career);
+const unlockedFrames = getUnlockedCareerFrames(career);
 
-  const selectedTitle = unlockedTitles.find((x) => x.id === careerPrefs.titleId);
-  const selectedFrame = unlockedFrames.find((x) => x.id === careerPrefs.frameId);
+const selectedTitle = unlockedTitles.find((x) => x.id === careerPrefs.titleId);
+const selectedFrame = unlockedFrames.find((x) => x.id === careerPrefs.frameId);
 
-  const profileTitle =
-    careerPrefs.titleId === "none"
-      ? ""
-      : selectedTitle?.label || career.title || roleLabel;
+const profileTitle =
+  careerPrefs.titleId === "none"
+    ? ""
+    : selectedTitle?.label || career.title || roleLabel;
 
-  const profileFrame =
-    careerPrefs.frameId === "none"
-      ? ""
-      : selectedFrame?.id || career.activeFrame || "";
+const profileFrame =
+  careerPrefs.frameId === "none"
+    ? ""
+    : selectedFrame?.id || career.activeFrame || "";
 
-  const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
+const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
 
-  const profilePhotoSrc =
-    typeof getStaffProfilePhoto === "function"
-      ? getStaffProfilePhoto(doc.id, doc.avatar || "")
-      : (doc.avatar || "");
-
-  const showCrown =
-    profileFrameClass.includes("legendary") ||
-    profileFrameClass.includes("mythic") ||
-    profileFrameClass.includes("gold");
-
-  const revenue = Number(dashboard.revenue || 0);
+const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
   const checks = Number(dashboard.closed_checks || 0);
   const avgCheck = Number(dashboard.avg_check || 0);
@@ -1968,63 +1958,67 @@ async function renderTeamProfilePage(doc) {
   const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
 
   page.innerHTML = `
-    <div class="teamDashProfile" style="--staff-color:${escapeHtml(staffColor)};">
+  <div class="teamDashProfile" style="--staff-color:${escapeHtml(staffColor)};">
 
-      <aside class="teamDashSidebar">
-        <button class="teamBackBtn" id="btnBackToTeam" type="button">← Команда</button>
+    <aside class="teamDashSidebar">
+      <button class="teamBackBtn" id="btnBackToTeam" type="button">← Команда</button>
 
-        <div class="teamDashAvatar ${escapeHtml(profileFrameClass)}">
-          ${showCrown ? `<i class="teamFrameCrown">👑</i>` : ""}
+      <div class="teamDashAvatar ${escapeHtml(profileFrameClass)}">
+        ${
+          doc.avatar
+            ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+            : `<span>${escapeHtml(staffLetter)}</span>`
+        }
+      </div>
 
-          ${
-            profilePhotoSrc
-              ? `<img src="${escapeHtml(profilePhotoSrc)}" alt="${escapeHtml(staffName)}">`
-              : `<span>${escapeHtml(staffLetter)}</span>`
-          }
-        </div>
+      <div class="teamDashName">${escapeHtml(staffName)}</div>
+${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>` : ""}
+<div class="teamDashRole">${escapeHtml(roleLabel)}</div>
+      <div class="teamDashStatus">На зміні</div>
 
-        <div class="teamDashName">${escapeHtml(staffName)}</div>
-        ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>` : ""}
-        <div class="teamDashRole">${escapeHtml(roleLabel)}</div>
-        <div class="teamDashStatus">На зміні</div>
+      <div class="teamDashContact">
+        <div>📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
+        <div>✉ Email не вказано</div>
+      </div>
 
-        <div class="teamDashContact">
-          <div>📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
-          <div>✉ Email не вказано</div>
-        </div>
+      <div class="teamDashNav" id="teamProfileNav">
+  <button class="active" type="button" data-profile-tab="overview">▦ Огляд</button>
+  <button type="button" data-profile-tab="analytics">📈 Аналітика</button>
+  <button type="button" data-profile-tab="visits">🩺 Прийоми</button>
+  <button type="button" data-profile-tab="finance">💰 Фінанси</button>
+  <button type="button" data-profile-tab="achievements">🏆 Досягнення</button>
+  <button type="button" data-profile-tab="reviews">⭐ Відгуки</button>
+  <button type="button" data-profile-tab="settings">⚙ Налаштування</button>
+</div>
 
-        <div class="teamDashNav" id="teamProfileNav">
-          <button class="active" type="button" data-profile-tab="overview">▦ Огляд</button>
-          <button type="button" data-profile-tab="analytics">📈 Аналітика</button>
-          <button type="button" data-profile-tab="visits">🩺 Прийоми</button>
-          <button type="button" data-profile-tab="finance">💰 Фінанси</button>
-          <button type="button" data-profile-tab="achievements">🏆 Досягнення</button>
-          <button type="button" data-profile-tab="settings">⚙ Налаштування</button>
-        </div>
+      <div class="teamDashIdBox">
+        <span>ID співробітника</span>
+        <b>#STF-${escapeHtml(String(doc.id || "0000")).slice(0, 8)}</b>
+      </div>
 
-        <div class="teamDashIdBox">
-          <span>ID співробітника</span>
-          <b>#STF-${escapeHtml(String(doc.id || "0000")).slice(0, 8)}</b>
-        </div>
-      </aside>
+    </aside>
 
-      <main class="teamDashMain">
-        <div class="teamDashTop">
-          <div>
-            <h1>${escapeHtml(staffName)} 👋</h1>
-            <p>Ваші показники, досягнення та ефективність</p>
-          </div>
+<main class="teamDashMain">
 
-          <div class="teamDashActions">
-            <button class="teamGhostBtn" type="button">⬇ Експорт</button>
-            <button class="teamPrimaryBtn" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
-          </div>
-        </div>
-
-        <div id="teamProfileContent"></div>
-      </main>
+  <div class="teamDashTop">
+    <div>
+      <h1>${escapeHtml(staffName)} 👋</h1>
+      <p>Ваші показники, досягнення та ефективність</p>
     </div>
-  `;
+
+    <div class="teamDashActions">
+      <button class="teamGhostBtn" type="button">⬇ Експорт</button>
+      <button class="teamPrimaryBtn" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
+    </div>
+  </div>
+
+  <div id="teamProfileContent"></div>
+
+</main>
+  </div>
+`;
+
+
 
   document.getElementById("btnBackToTeam")?.addEventListener("click", () => {
     renderTeamTab();
@@ -2034,37 +2028,34 @@ async function renderTeamProfilePage(doc) {
     openEditStaffModal(doc);
   });
 
-  const profileState = {
-    doc,
-    dashboard,
-    staffName,
-    staffColor,
-    roleLabel,
-    revenue,
-    visits,
-    checks,
-    avgCheck,
-    rating,
-    revenueGrowth,
-    visitsGrowth,
-    checksGrowth,
-    avgCheckGrowth,
-  };
 
-  renderTeamProfileTab("overview", profileState);
+const profileState = {
+  doc,
+  dashboard,
+  staffName,
+  staffColor,
+  roleLabel,
+  revenue,
+  visits,
+  checks,
+  avgCheck,
+  rating,
+  revenueGrowth,
+  visitsGrowth,
+  checksGrowth,
+  avgCheckGrowth,
+};
 
-  if (typeof applyCareerLookToSidebar === "function") {
-    applyCareerLookToSidebar(profileState);
-  }
+renderTeamProfileTab("overview", profileState);
 
-  document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("[data-profile-tab]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
+document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-profile-tab]").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
 
-      renderTeamProfileTab(btn.dataset.profileTab, profileState);
-    });
+    renderTeamProfileTab(btn.dataset.profileTab, profileState);
   });
+});
 }
 
 function renderTeamProfileTab(tab, state) {
@@ -2102,145 +2093,124 @@ function renderTeamProfileTab(tab, state) {
     return;
   }
 
+  if (tab === "reviews") {
+    renderTeamReviewsTab(root, state);
+    return;
+  }
 
   if (tab === "settings") {
     renderTeamSettingsTab(root, state);
     return;
   }
 }
-function renderTeamSettingsTab(root, state) {
-  const career = buildStaffCareer(state);
-  const titles = getUnlockedCareerTitles(career);
-  const frames = getUnlockedCareerFrames(career);
-  const prefs = getStaffCareerPrefs(state.doc.id);
-
-  const photoSrc = getStaffProfilePhoto(state.doc.id, state.doc.avatar || "");
-  const photoLetter = (state.staffName || "?").trim().charAt(0).toUpperCase() || "?";
-  const previewFrame = career.activeFrame ? `frame-${career.activeFrame}` : "";
+function renderTeamOverviewTab(root, state) {
+  const {
+    dashboard,
+    staffName,
+    revenue,
+    visits,
+    checks,
+    avgCheck,
+    rating,
+    revenueGrowth,
+    visitsGrowth,
+    checksGrowth,
+    avgCheckGrowth,
+    doc,
+  } = state;
 
   root.innerHTML = `
-    <section class="teamSubHero">
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
+      ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
+      ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
+      ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
+      ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
+    </section>
+
+    <section class="teamDashInsight">
+      <div class="teamInsightIcon">✨</div>
       <div>
-        <h2>⚙ Налаштування профілю</h2>
-        <p>Налаштуйте професійний вигляд профілю: титул, рамку та фото.</p>
+        <b>Що варто знати сьогодні</b>
+        <p>
+          ${escapeHtml(staffName)} має стабільні показники: виручка змінилась на 
+          <strong>${revenueGrowth}%</strong>, кількість візитів — на 
+          <strong>${visitsGrowth}%</strong>. Поточний рейтинг клієнтів — 
+          <strong>${rating ? rating.toFixed(2) : "—"}</strong>.
+        </p>
       </div>
     </section>
 
     <section class="teamDashGrid">
-      <div class="teamDashPanel teamDashFull">
+      <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>🏆 Активний титул</h3>
+         <h3>Виручка</h3>
+          <span>грн</span>
         </div>
-
-        <div class="careerChoiceGrid">
-          ${
-            titles.length
-              ? titles.map((t) => `
-                <button class="careerChoice rarity-${escapeHtml(t.rarity)} ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
-                  <span>${escapeHtml(t.icon)}</span>
-                  <b>${escapeHtml(t.label)}</b>
-                  <small>${escapeHtml(achievementRarityLabel(t.rarity))}</small>
-                </button>
-              `).join("")
-              : `<div class="hint">Поки немає відкритих титулів.</div>`
-          }
+        <div class="teamChartBox">
+          <canvas id="staffRevenueChart"></canvas>
         </div>
       </div>
 
-      <div class="teamDashPanel teamDashFull">
+      <div class="teamDashPanel teamDashPanelLarge">
         <div class="teamDashPanelHead">
-          <h3>🖼 Активна рамка</h3>
+          <h3>Кількість візитів</h3>
+          <span>візити</span>
         </div>
-
-        <div class="careerChoiceGrid">
-          ${
-            frames.length
-              ? frames.map((f) => `
-                <button class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
-                  <span>${escapeHtml(f.icon)}</span>
-                  <b>${escapeHtml(f.label)}</b>
-                  <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
-                </button>
-              `).join("")
-              : `<div class="hint">Поки немає відкритих рамок.</div>`
-          }
+        <div class="teamChartBox">
+          <canvas id="staffVisitsChart"></canvas>
         </div>
       </div>
 
-      <div class="teamDashPanel teamDashFull profilePhotoPanel">
+      <div class="teamDashPanel">
         <div class="teamDashPanelHead">
-          <h3>📷 Фото профілю</h3>
-          <span>JPG / PNG</span>
+          <h3>🎯 Сьогодні</h3>
         </div>
+        <div class="teamDashRows">
+          <p><span>Статус</span><b>На зміні</b></p>
+          <p><span>Записів сьогодні</span><b>0</b></p>
+          <p><span>Виконано</span><b>0</b></p>
+          <p><span>Попереду</span><b>0</b></p>
+        </div>
+      </div>
 
-        <div class="profilePhotoSettings">
-          <div class="profilePhotoPreview ${escapeHtml(previewFrame)}">
-            ${
-              photoSrc
-                ? `<img src="${escapeHtml(photoSrc)}" alt="${escapeHtml(state.staffName || "Працівник")}">`
-                : `<span>${escapeHtml(photoLetter)}</span>`
-            }
-          </div>
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>🏆 Карʼєра</h3>
+          <span>Level 1</span>
+        </div>
+        <div class="teamDashXp">
+          <div><b>Рівень 1</b><span>0 / 100 XP</span></div>
+          <i><em style="width:0%"></em></i>
+          <p>До наступного рівня залишилось 100 XP</p>
+        </div>
+      </div>
 
-          <div class="profilePhotoInfo">
-            <b>Фото співробітника</b>
-            <p>Фото буде показане у профілі. Рамка накладається поверх аватарки.</p>
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>💼 Популярні послуги</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Консультація</span><b>—</b></p>
+          <p><span>Вакцинація</span><b>—</b></p>
+          <p><span>УЗД</span><b>—</b></p>
+          <p><span>Хірургія</span><b>—</b></p>
+        </div>
+      </div>
 
-            <div class="profilePhotoActions">
-              <label class="teamPrimaryBtn profileUploadBtn">
-                Змінити фото
-                <input id="staffPhotoInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-              </label>
-
-              <button class="teamGhostBtn" id="btnRemoveStaffPhoto" type="button">
-                Видалити фото
-              </button>
-            </div>
-          </div>
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>💰 Фінансова інформація</h3>
+        </div>
+        <div class="teamDashRows">
+          <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
+          <p><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></p>
+          <p><span>Бонуси</span><b>—</b></p>
+          <p><span>Нараховано</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
         </div>
       </div>
     </section>
   `;
-
-  root.querySelectorAll("[data-title-choice]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      saveStaffCareerPrefs(state.doc.id, { titleId: btn.dataset.titleChoice || "none" });
-      applyCareerLookToSidebar(state);
-      renderTeamSettingsTab(root, state);
-    });
-  });
-
-  root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      saveStaffCareerPrefs(state.doc.id, { frameId: btn.dataset.frameChoice || "none" });
-      applyCareerLookToSidebar(state);
-      renderTeamSettingsTab(root, state);
-    });
-  });
-
-  root.querySelector("#staffPhotoInput")?.addEventListener("change", (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Фото завелике. Максимум 5 МБ.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      saveStaffProfilePhoto(state.doc.id, String(reader.result || ""));
-      applyCareerLookToSidebar(state);
-      renderTeamSettingsTab(root, state);
-    };
-    reader.readAsDataURL(file);
-  });
-
-  root.querySelector("#btnRemoveStaffPhoto")?.addEventListener("click", () => {
-    removeStaffProfilePhoto(state.doc.id);
-    applyCareerLookToSidebar(state);
-    renderTeamSettingsTab(root, state);
-  });
 }
 function renderTeamAnalyticsTab(root, state) {
   const visits = state.dashboard.live_staff_visits || [];
@@ -2625,6 +2595,49 @@ async function renderTeamAchievementsTab(root, state) {
     </section>
   `;
 }
+function buildStaffCareer(state) {
+  const visits = state.dashboard.live_staff_visits || [];
+  const revenue = Number(state.revenue || 0);
+
+  const totalVisits = visits.length;
+  const dogVisits = countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
+  const catVisits = countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
+  const vaccineVisits = countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
+  const surgeryVisits = countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
+
+  const achievements = getVeterinaryAchievements({
+    totalVisits,
+    dogVisits,
+    catVisits,
+    revenue,
+    vaccineVisits,
+    surgeryVisits,
+    consecutiveShifts: 0,
+  });
+
+  const unlocked = achievements.filter((a) => a.unlocked);
+  const xp = achievements.reduce((sum, a) => {
+    return sum + (a.unlocked ? Number(a.xp || 0) : 0);
+  }, totalVisits * 10);
+
+  const level = calculateCareerLevel(xp);
+  const title = getCareerTitle(totalVisits);
+  const levelIcon = getCareerIcon(totalVisits);
+
+  return {
+    xp,
+    level: level.level,
+    xpInLevel: level.xpInLevel,
+    neededForNext: level.neededForNext,
+    nextLevelXp: level.nextLevelXp,
+    progressPercent: level.progressPercent,
+    title,
+    levelIcon,
+    achievements,
+    unlockedCount: unlocked.length,
+    clinicRank: "—",
+  };
+}
 
 
 function renderTeamReviewsTab(root, state) {
@@ -2636,9 +2649,7 @@ function renderTeamSettingsTab(root, state) {
   const titles = getUnlockedCareerTitles(career);
   const frames = getUnlockedCareerFrames(career);
   const prefs = getStaffCareerPrefs(state.doc.id);
-const photoSrc = getStaffProfilePhoto(state.doc.id, state.doc.avatar || "");
-const photoLetter = (state.staffName || "?").trim().charAt(0).toUpperCase() || "?";
-const previewFrame = career.activeFrame ? `frame-${career.activeFrame}` : "";
+
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
@@ -2657,7 +2668,7 @@ const previewFrame = career.activeFrame ? `frame-${career.activeFrame}` : "";
           ${
             titles.length
               ? titles.map((t) => `
-                <button class="careerChoice rarity-${escapeHtml(t.rarity)} ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
+                <button class="careerChoice ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
                   <span>${escapeHtml(t.icon)}</span>
                   <b>${escapeHtml(t.label)}</b>
                   <small>${escapeHtml(achievementRarityLabel(t.rarity))}</small>
@@ -2672,43 +2683,12 @@ const previewFrame = career.activeFrame ? `frame-${career.activeFrame}` : "";
         <div class="teamDashPanelHead">
           <h3>🖼 Активна рамка</h3>
         </div>
-<section class="teamDashPanel teamDashFull profilePhotoPanel">
-  <div class="teamDashPanelHead">
-    <h3>📷 Фото профілю</h3>
-    <span>JPG / PNG</span>
-  </div>
 
-  <div class="profilePhotoSettings">
-    <div class="profilePhotoPreview ${escapeHtml(previewFrame)}">
-      ${
-        photoSrc
-          ? `<img src="${escapeHtml(photoSrc)}" alt="${escapeHtml(state.staffName || "Працівник")}">`
-          : `<span>${escapeHtml(photoLetter)}</span>`
-      }
-    </div>
-
-    <div class="profilePhotoInfo">
-      <b>Фото співробітника</b>
-      <p>Фото буде показане у профілі та списку команди. Рамка накладається поверх аватарки.</p>
-
-      <div class="profilePhotoActions">
-        <label class="teamPrimaryBtn profileUploadBtn">
-          Змінити фото
-          <input id="staffPhotoInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-        </label>
-
-        <button class="teamGhostBtn" id="btnRemoveStaffPhoto" type="button">
-          Видалити фото
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
         <div class="careerChoiceGrid">
           ${
             frames.length
               ? frames.map((f) => `
-                <button class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
+                <button class="careerChoice ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
                   <span>${escapeHtml(f.icon)}</span>
                   <b>${escapeHtml(f.label)}</b>
                   <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
@@ -2763,23 +2743,8 @@ function applyCareerLookToSidebar(state) {
       : selectedFrame?.id || career.activeFrame || "";
 
   const avatar = document.querySelector(".teamDashAvatar");
-  const photoSrc = getStaffProfilePhoto(state.doc.id, state.doc.avatar || "");
-  const letter = (state.staffName || state.doc.name || "?").trim().charAt(0).toUpperCase() || "?";
-
   if (avatar) {
     avatar.className = `teamDashAvatar ${frameId ? `frame-${frameId}` : ""}`;
-    avatar.innerHTML = `
-      ${
-        frameId === "legendary" || frameId === "mythic" || frameId === "gold"
-          ? `<i class="teamFrameCrown">👑</i>`
-          : ""
-      }
-      ${
-        photoSrc
-          ? `<img src="${escapeHtml(photoSrc)}" alt="${escapeHtml(state.staffName || state.doc.name || "Працівник")}">`
-          : `<span>${escapeHtml(letter)}</span>`
-      }
-    `;
   }
 
   const nameEl = document.querySelector(".teamDashName");
