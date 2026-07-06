@@ -1946,10 +1946,7 @@ const profileFrame =
 
 const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
 
-const profilePhoto =
-  localStorage.getItem("staff_photo_" + doc.id) ||
-  doc.avatar ||
-  "";
+const profilePhoto = state.doc.avatar || "";
 
 const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
@@ -2773,7 +2770,7 @@ root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
 });
 const photoInput = root.querySelector("#staffPhotoInput");
 
-photoInput?.addEventListener("change", () => {
+photoInput?.addEventListener("change", async () => {
   const file = photoInput.files?.[0];
   if (!file) return;
 
@@ -2782,16 +2779,43 @@ photoInput?.addEventListener("change", () => {
     return;
   }
 
-  const reader = new FileReader();
+  try {
+    const fd = new FormData();
+    fd.append("files", file);
 
-  reader.onload = () => {
-    localStorage.setItem("staff_photo_" + state.doc.id, String(reader.result || ""));
-    console.log("Фото сохранено");
-console.log(localStorage.getItem("staff_photo_" + state.doc.id));
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: fd,
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      throw new Error(json.error || "Upload failed");
+    }
+
+    const uploaded = json.files?.[0];
+
+    if (!uploaded?.url) {
+      throw new Error("Сервер не повернув URL фото");
+    }
+
+    const avatarUrl = uploaded.url;
+
+    await updateStaffApi(state.doc.id, {
+      ...state.doc,
+      avatar: avatarUrl,
+    });
+
+    state.doc.avatar = avatarUrl;
+
     renderTeamSettingsTab(root, state);
-  };
+    applyCareerLookToSidebar?.(state);
 
-  reader.readAsDataURL(file);
+  } catch (e) {
+    console.error(e);
+    alert("Не вдалося завантажити фото: " + (e.message || e));
+  }
 });
 }
 
