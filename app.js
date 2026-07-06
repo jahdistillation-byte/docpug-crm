@@ -1946,6 +1946,11 @@ const profileFrame =
 
 const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
 
+const profilePhoto =
+  localStorage.getItem("staff_photo_" + doc.id) ||
+  doc.avatar ||
+  "";
+
 const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
   const checks = Number(dashboard.closed_checks || 0);
@@ -2766,11 +2771,34 @@ root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
     renderTeamSettingsTab(root, state);
   });
 });
+const photoInput = root.querySelector("#staffPhotoInput");
+
+photoInput?.addEventListener("change", () => {
+  const file = photoInput.files?.[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("Фото завелике. Максимум 5 МБ.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    localStorage.setItem("staff_photo_" + state.doc.id, String(reader.result || ""));
+    console.log("Фото сохранено");
+console.log(localStorage.getItem("staff_photo_" + state.doc.id));
+    renderTeamSettingsTab(root, state);
+  };
+
+  reader.readAsDataURL(file);
+});
 }
 
 function applyCareerLookToSidebar(state) {
   const career = buildStaffCareer(state);
   const prefs = getStaffCareerPrefs(state.doc.id);
+
 
   const titles = getUnlockedCareerTitles(career);
   const frames = getUnlockedCareerFrames(career);
