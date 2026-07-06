@@ -739,7 +739,7 @@ def api_update_staff(staff_id):
         "note": d.get("note"),
         "is_active": d.get("is_active"),
     }
-    payload = {k: v for k, v in payload.items() if v not in ("", None)}
+    payload = {k: v for k, v in payload.items() if v is not None}
 
     current_org = get_current_org_id()
     res = (
