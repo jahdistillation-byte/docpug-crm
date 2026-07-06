@@ -1946,7 +1946,7 @@ const profileFrame =
 
 const profileFrameClass = profileFrame ? `frame-${profileFrame}` : "";
 
-const profilePhoto = state.doc.avatar || "";
+const profilePhoto = doc.avatar || "";
 
 const revenue = Number(dashboard.revenue || 0);
   const visits = Number(dashboard.visits_this_month || 0);
