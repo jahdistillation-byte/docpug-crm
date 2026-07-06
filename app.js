@@ -1377,7 +1377,7 @@ async function addStockLineToVisit(visitId, stockId, qty = 1, { snap = true, dec
 
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (УПРАВЛЕНИЕ СКЛАДОМ, ПРАЙС-ЛИСТАМИ И ЖУРНАЛАМИ)
-// Часть 2 (Строки 1501 — 2000)
+// Часть 2 (Строки 1501 — 2000) ыфв
 // ==========================================================================
 
 async function removeStockLineFromVisit(visitId, index, { restore = true } = {}) {
