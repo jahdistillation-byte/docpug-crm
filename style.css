@@ -7162,3 +7162,193 @@ body[data-theme="white"] .monthDayNum {
     transform: scale(1.035);
   }
 }
+/* =========================================================
+   Premium avatar frames — decorative version
+   ========================================================= */
+
+.teamDashAvatar {
+  position: relative;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
+.teamDashAvatar::before,
+.teamDashAvatar::after {
+  pointer-events: none;
+}
+
+/* базовый внутренний блеск */
+.teamDashAvatar[class*="frame-"] {
+  border: 0 !important;
+}
+
+.teamDashAvatar[class*="frame-"]::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 34px;
+  z-index: -1;
+  background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,.06));
+  box-shadow: 0 18px 70px rgba(0,0,0,.45);
+}
+
+.teamDashAvatar[class*="frame-"]::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 39px;
+  z-index: -2;
+  opacity: .75;
+  filter: blur(10px);
+}
+
+/* COMMON */
+.teamDashAvatar.frame-common::before {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.08)),
+    linear-gradient(45deg, transparent 18%, rgba(255,255,255,.24) 20%, transparent 23%);
+}
+
+.teamDashAvatar.frame-common::after {
+  background: rgba(255,255,255,.22);
+}
+
+/* BRONZE */
+.teamDashAvatar.frame-bronze::before {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,218,160,.95), transparent 14%),
+    radial-gradient(circle at 82% 82%, rgba(255,170,70,.7), transparent 16%),
+    linear-gradient(135deg, #8b4a20, #f1a85c 38%, #6e3518 70%, #ffd09a);
+}
+
+.teamDashAvatar.frame-bronze::after {
+  background: rgba(190,120,58,.45);
+}
+
+/* UNCOMMON / GREEN */
+.teamDashAvatar.frame-uncommon::before {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(190,255,130,.85), transparent 15%),
+    radial-gradient(circle at 80% 80%, rgba(34,197,94,.9), transparent 16%),
+    conic-gradient(from 160deg, #14532d, #22c55e, #bbf7d0, #16a34a, #052e16, #22c55e, #14532d);
+}
+
+.teamDashAvatar.frame-uncommon::after {
+  background: rgba(34,197,94,.48);
+}
+
+/* RARE / BLUE */
+.teamDashAvatar.frame-rare::before {
+  background:
+    radial-gradient(circle at 22% 18%, rgba(180,220,255,.95), transparent 13%),
+    radial-gradient(circle at 80% 78%, rgba(59,130,246,.9), transparent 16%),
+    conic-gradient(from 200deg, #0f2a5f, #3b82f6, #bfdbfe, #2563eb, #0b1740, #60a5fa, #0f2a5f);
+}
+
+.teamDashAvatar.frame-rare::after {
+  background: rgba(59,130,246,.52);
+}
+
+/* EPIC / PURPLE */
+.teamDashAvatar.frame-epic::before {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(245,208,254,.9), transparent 13%),
+    radial-gradient(circle at 82% 82%, rgba(217,70,239,.95), transparent 16%),
+    conic-gradient(from 210deg, #3b0764, #a855f7, #f0abfc, #7e22ce, #1e0638, #c084fc, #3b0764);
+}
+
+.teamDashAvatar.frame-epic::after {
+  background: rgba(180,92,255,.56);
+}
+
+/* LEGENDARY / GOLD */
+.teamDashAvatar.frame-legendary::before,
+.teamDashAvatar.frame-gold::before {
+  inset: -9px;
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 16% 16%, rgba(255,255,210,.95), transparent 12%),
+    radial-gradient(circle at 84% 84%, rgba(255,180,0,.9), transparent 16%),
+    conic-gradient(from 220deg, #7a4b00, #facc15, #fff7ad, #f59e0b, #4a2600, #ffd166, #7a4b00);
+  box-shadow:
+    0 0 0 2px rgba(255,230,140,.28),
+    0 0 26px rgba(255,204,77,.42),
+    0 0 70px rgba(255,170,0,.25),
+    0 18px 70px rgba(0,0,0,.5);
+}
+
+.teamDashAvatar.frame-legendary::after,
+.teamDashAvatar.frame-gold::after {
+  background: rgba(255,204,77,.68);
+  animation: frameGlowGold 2.8s ease-in-out infinite;
+}
+
+/* MYTHIC */
+.teamDashAvatar.frame-mythic::before {
+  inset: -9px;
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 16% 16%, rgba(255,220,255,.95), transparent 12%),
+    radial-gradient(circle at 84% 84%, rgba(56,189,248,.85), transparent 16%),
+    conic-gradient(from 220deg, #312e81, #ec4899, #22d3ee, #a855f7, #0f172a, #f0abfc, #312e81);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.12),
+    0 0 34px rgba(236,72,153,.32),
+    0 0 80px rgba(56,189,248,.22),
+    0 18px 70px rgba(0,0,0,.5);
+}
+
+.teamDashAvatar.frame-mythic::after {
+  background: linear-gradient(135deg, rgba(236,72,153,.6), rgba(56,189,248,.5));
+  animation: frameGlowMythic 2.5s ease-in-out infinite;
+}
+
+/* маленькая корона для топовых рамок */
+.teamDashAvatar.frame-legendary .teamFrameCrown,
+.teamDashAvatar.frame-gold .teamFrameCrown,
+.teamDashAvatar.frame-mythic .teamFrameCrown {
+  display: grid;
+}
+
+.teamFrameCrown {
+  display: none;
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 26px;
+  place-items: center;
+  font-size: 20px;
+  z-index: 5;
+  filter: drop-shadow(0 0 12px rgba(255,204,77,.55));
+}
+
+/* если crown не добавим в HTML — рамка всё равно работает */
+.teamDashAvatar.frame-legendary::marker,
+.teamDashAvatar.frame-gold::marker,
+.teamDashAvatar.frame-mythic::marker {
+  display: none;
+}
+
+@keyframes frameGlowGold {
+  0%, 100% {
+    opacity: .45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: .9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes frameGlowMythic {
+  0%, 100% {
+    opacity: .42;
+    transform: scale(1);
+  }
+  50% {
+    opacity: .82;
+    transform: scale(1.045);
+  }
+}

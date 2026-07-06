@@ -78,7 +78,7 @@ function getVeterinaryAchievements(stats) {
       step("Базовий досвід із собаками", "50 прийомів собак", 50, "common", 80, "🐶", { title: true }),
       step("Досвід роботи з собаками", "250 прийомів собак", 250, "uncommon", 160, "🐶", { title: true }),
       step("Експерт з собак", "1000 прийомів собак", 1000, "epic", 350, "🐶", { title: true }),
-      step("Провідний спеціаліст з собак", "2500 прийомів собак", 2500, "legendary", 700, "👑", { title: true, frame: "legendary" }),
+      step("Провідний спеціаліст з собак", "2500 прийомів собак", 2500, "legendary", 700, "🐶", { title: true, frame: "dogs" }),
     ]),
 
     trackAch("cats", "🐱", "Робота з котами", stats.catVisits, [

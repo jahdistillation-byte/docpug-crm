@@ -1964,12 +1964,13 @@ const revenue = Number(dashboard.revenue || 0);
       <button class="teamBackBtn" id="btnBackToTeam" type="button">← Команда</button>
 
       <div class="teamDashAvatar ${escapeHtml(profileFrameClass)}">
-        ${
-          doc.avatar
-            ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
-            : `<span>${escapeHtml(staffLetter)}</span>`
-        }
-      </div>
+  <i class="teamFrameCrown">👑</i>
+  ${
+    doc.avatar
+      ? `<img src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
+      : `<span>${escapeHtml(staffLetter)}</span>`
+  }
+</div>
 
       <div class="teamDashName">${escapeHtml(staffName)}</div>
 ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>` : ""}
