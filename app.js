@@ -2595,49 +2595,6 @@ async function renderTeamAchievementsTab(root, state) {
     </section>
   `;
 }
-function buildStaffCareer(state) {
-  const visits = state.dashboard.live_staff_visits || [];
-  const revenue = Number(state.revenue || 0);
-
-  const totalVisits = visits.length;
-  const dogVisits = countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
-  const catVisits = countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
-  const vaccineVisits = countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
-  const surgeryVisits = countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
-
-  const achievements = getVeterinaryAchievements({
-    totalVisits,
-    dogVisits,
-    catVisits,
-    revenue,
-    vaccineVisits,
-    surgeryVisits,
-    consecutiveShifts: 0,
-  });
-
-  const unlocked = achievements.filter((a) => a.unlocked);
-  const xp = achievements.reduce((sum, a) => {
-    return sum + (a.unlocked ? Number(a.xp || 0) : 0);
-  }, totalVisits * 10);
-
-  const level = calculateCareerLevel(xp);
-  const title = getCareerTitle(totalVisits);
-  const levelIcon = getCareerIcon(totalVisits);
-
-  return {
-    xp,
-    level: level.level,
-    xpInLevel: level.xpInLevel,
-    neededForNext: level.neededForNext,
-    nextLevelXp: level.nextLevelXp,
-    progressPercent: level.progressPercent,
-    title,
-    levelIcon,
-    achievements,
-    unlockedCount: unlocked.length,
-    clinicRank: "—",
-  };
-}
 
 
 function renderTeamReviewsTab(root, state) {
