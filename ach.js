@@ -1,12 +1,11 @@
 function buildStaffCareer(state) {
-  const visits = state.dashboard.live_staff_visits || [];
-  const revenue = Number(state.revenue || state.dashboard.revenue || 0);
+  const devUnlockAll = localStorage.getItem("DEV_UNLOCK_ALL_ACHIEVEMENTS") === "1";
 
-  const totalVisits = visits.length;
-  const dogVisits = countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
-  const catVisits = countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
-  const vaccineVisits = countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
-  const surgeryVisits = countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
+  const totalVisits = devUnlockAll ? 3000 : visits.length;
+const dogVisits = devUnlockAll ? 3000 : countVisitsBySpecies(visits, ["dog", "соб", "пес", "пёс"]);
+const catVisits = devUnlockAll ? 3000 : countVisitsBySpecies(visits, ["cat", "кіт", "кот", "кош"]);
+const vaccineVisits = devUnlockAll ? 1200 : countVisitsByText(visits, ["вакцин", "щепл", "vaccine"]);
+const surgeryVisits = devUnlockAll ? 700 : countVisitsByText(visits, ["операц", "хірург", "хирург", "surgery"]);
 
   const achievements = getVeterinaryAchievements({
     totalVisits,
@@ -15,7 +14,7 @@ function buildStaffCareer(state) {
     revenue,
     vaccineVisits,
     surgeryVisits,
-    consecutiveShifts: 0,
+    consecutiveShifts: devUnlockAll ? 20 : 0,
   });
 
   const unlockedCount = achievements.reduce((sum, a) => sum + Number(a.unlockedSteps || 0), 0);
