@@ -1987,7 +1987,6 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
   <button type="button" data-profile-tab="visits">🩺 Прийоми</button>
   <button type="button" data-profile-tab="finance">💰 Фінанси</button>
   <button type="button" data-profile-tab="achievements">🏆 Досягнення</button>
-  <button type="button" data-profile-tab="reviews">⭐ Відгуки</button>
   <button type="button" data-profile-tab="settings">⚙ Налаштування</button>
 </div>
 
@@ -2093,10 +2092,6 @@ function renderTeamProfileTab(tab, state) {
     return;
   }
 
-  if (tab === "reviews") {
-    renderTeamReviewsTab(root, state);
-    return;
-  }
 
   if (tab === "settings") {
     renderTeamSettingsTab(root, state);
@@ -2640,15 +2635,19 @@ function buildStaffCareer(state) {
 }
 
 
-function renderTeamReviewsTab(root, state) {
-  root.innerHTML = `<div class="teamDashPanel teamDashFull"><h2>⭐ Відгуки</h2><p class="hint">Тут будуть оцінки та відгуки клієнтів.</p></div>`;
-}
-
 function renderTeamSettingsTab(root, state) {
   const career = buildStaffCareer(state);
   const titles = getUnlockedCareerTitles(career);
   const frames = getUnlockedCareerFrames(career);
   const prefs = getStaffCareerPrefs(state.doc.id);
+
+  const profilePhoto =
+    localStorage.getItem("staff_photo_" + state.doc.id) ||
+    state.doc.avatar ||
+    "";
+
+const staffLetter =
+    (state.staffName || "?").trim().charAt(0).toUpperCase();
 
   root.innerHTML = `
     <section class="teamSubHero">
@@ -2679,25 +2678,72 @@ function renderTeamSettingsTab(root, state) {
         </div>
       </div>
 
-      <div class="teamDashPanel teamDashFull">
-        <div class="teamDashPanelHead">
-          <h3>🖼 Активна рамка</h3>
-        </div>
+     <div class="teamDashPanel teamDashFull">
+  <div class="teamDashPanelHead">
+    <h3>📷 Фото профілю</h3>
+    <span>PNG / JPG</span>
+  </div>
 
-        <div class="careerChoiceGrid">
-          ${
-            frames.length
-              ? frames.map((f) => `
-                <button class="careerChoice ${prefs.frameId === f.id ? "active" : ""}" type="button" data-frame-choice="${escapeHtml(f.id)}">
-                  <span>${escapeHtml(f.icon)}</span>
-                  <b>${escapeHtml(f.label)}</b>
-                  <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
-                </button>
-              `).join("")
-              : `<div class="hint">Поки немає відкритих рамок.</div>`
-          }
-        </div>
-      </div>
+  <div class="teamPhotoSettings">
+
+    <div class="teamPhotoPreview">
+      ${
+        profilePhoto
+          ? `<img src="${escapeHtml(profilePhoto)}" alt="${escapeHtml(state.staffName)}">`
+          : `<span>${escapeHtml(staffLetter)}</span>`
+      }
+    </div>
+
+    <div class="teamPhotoRight">
+
+      <h4>Фото співробітника</h4>
+
+      <p>
+        Фото використовується у профілі ветеринара та списку команди.
+      </p>
+
+      <label class="teamPrimaryBtn profileUploadBtn">
+        📷 Завантажити фото
+        <input
+          id="staffPhotoInput"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          hidden>
+      </label>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="teamDashPanel teamDashFull">
+
+  <div class="teamDashPanelHead">
+    <h3>🖼 Активна рамка</h3>
+  </div>
+
+  <div class="careerChoiceGrid">
+    ${
+      frames.length
+        ? frames.map((f) => `
+          <button
+            class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}"
+            type="button"
+            data-frame-choice="${escapeHtml(f.id)}">
+
+            <span>${escapeHtml(f.icon)}</span>
+
+            <b>${escapeHtml(f.label)}</b>
+
+            <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
+
+          </button>
+        `).join("")
+        : `<div class="hint">Поки немає відкритих рамок.</div>`
+    }
+  </div>
+
+</div>
     </section>
   `;
 
