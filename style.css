@@ -7577,3 +7577,15 @@ body[data-theme="white"] .monthDayNum {
     grid-template-columns: 1fr;
   }
 }
+.teamPhotoButtons{
+    display:flex;
+    gap:12px;
+    margin-top:18px;
+    flex-wrap:wrap;
+}
+
+.teamPhotoButtons .teamPrimaryBtn,
+.teamPhotoButtons .teamGhostBtn{
+    min-width:180px;
+    justify-content:center;
+}

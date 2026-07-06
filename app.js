@@ -2643,19 +2643,14 @@ function renderTeamSettingsTab(root, state) {
   const frames = getUnlockedCareerFrames(career);
   const prefs = getStaffCareerPrefs(state.doc.id);
 
-  const profilePhoto =
-    localStorage.getItem("staff_photo_" + state.doc.id) ||
-    state.doc.avatar ||
-    "";
-
-const staffLetter =
-    (state.staffName || "?").trim().charAt(0).toUpperCase();
+  const profilePhoto = state.doc.avatar || "";
+  const staffLetter = (state.staffName || "?").trim().charAt(0).toUpperCase() || "?";
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
         <h2>⚙ Налаштування профілю</h2>
-        <p>Налаштуйте професійний вигляд профілю: активний титул, рамку та відзнаки.</p>
+        <p>Налаштуйте професійний вигляд профілю: активний титул, фото та рамку.</p>
       </div>
     </section>
 
@@ -2680,143 +2675,142 @@ const staffLetter =
         </div>
       </div>
 
-     <div class="teamDashPanel teamDashFull">
-  <div class="teamDashPanelHead">
-    <h3>📷 Фото профілю</h3>
-    <span>PNG / JPG</span>
-  </div>
+      <div class="teamDashPanel teamDashFull">
+        <div class="teamDashPanelHead">
+          <h3>📷 Фото профілю</h3>
+          <span>PNG / JPG</span>
+        </div>
 
-  <div class="teamPhotoSettings">
+        <div class="teamPhotoSettings">
+          <div class="teamPhotoPreview">
+            ${
+              profilePhoto
+                ? `<img src="${escapeHtml(profilePhoto)}" alt="${escapeHtml(state.staffName || "Працівник")}">`
+                : `<span>${escapeHtml(staffLetter)}</span>`
+            }
+          </div>
 
-    <div class="teamPhotoPreview">
-      ${
-        profilePhoto
-          ? `<img src="${escapeHtml(profilePhoto)}" alt="${escapeHtml(state.staffName)}">`
-          : `<span>${escapeHtml(staffLetter)}</span>`
-      }
-    </div>
+          <div class="teamPhotoRight">
+            <h4>Фото співробітника</h4>
 
-    <div class="teamPhotoRight">
+            <p>
+              Фото використовується у профілі ветеринара та списку команди.
+            </p>
 
-      <h4>Фото співробітника</h4>
+            <div class="teamPhotoButtons">
+              <label class="teamPrimaryBtn profileUploadBtn">
+                📷 Завантажити фото
+                <input
+                  id="staffPhotoInput"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden>
+              </label>
 
-      <p>
-        Фото використовується у профілі ветеринара та списку команди.
-      </p>
+              <button
+                id="btnDeleteStaffPhoto"
+                class="teamGhostBtn"
+                type="button">
+                🗑 Видалити фото
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <label class="teamPrimaryBtn profileUploadBtn">
-        📷 Завантажити фото
-        <input
-          id="staffPhotoInput"
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          hidden>
-      </label>
+      <div class="teamDashPanel teamDashFull">
+        <div class="teamDashPanelHead">
+          <h3>🖼 Активна рамка</h3>
+        </div>
 
-    </div>
+        <div class="careerChoiceGrid">
+          ${
+            frames.length
+              ? frames.map((f) => `
+                <button
+                  class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}"
+                  type="button"
+                  data-frame-choice="${escapeHtml(f.id)}">
 
-  </div>
-</div>
-
-<div class="teamDashPanel teamDashFull">
-
-  <div class="teamDashPanelHead">
-    <h3>🖼 Активна рамка</h3>
-  </div>
-
-  <div class="careerChoiceGrid">
-    ${
-      frames.length
-        ? frames.map((f) => `
-          <button
-            class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}"
-            type="button"
-            data-frame-choice="${escapeHtml(f.id)}">
-
-            <span>${escapeHtml(f.icon)}</span>
-
-            <b>${escapeHtml(f.label)}</b>
-
-            <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
-
-          </button>
-        `).join("")
-        : `<div class="hint">Поки немає відкритих рамок.</div>`
-    }
-  </div>
-
-</div>
+                  <span>${escapeHtml(f.icon)}</span>
+                  <b>${escapeHtml(f.label)}</b>
+                  <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
+                </button>
+              `).join("")
+              : `<div class="hint">Поки немає відкритих рамок.</div>`
+          }
+        </div>
+      </div>
     </section>
   `;
 
   root.querySelectorAll("[data-title-choice]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const titleId = btn.dataset.titleChoice || "none";
+    btn.addEventListener("click", () => {
+      const titleId = btn.dataset.titleChoice || "none";
 
-    saveStaffCareerPrefs(state.doc.id, { titleId });
-    applyCareerLookToSidebar(state);
-    renderTeamSettingsTab(root, state);
-  });
-});
-
-root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const frameId = btn.dataset.frameChoice || "none";
-
-    saveStaffCareerPrefs(state.doc.id, { frameId });
-    applyCareerLookToSidebar(state);
-    renderTeamSettingsTab(root, state);
-  });
-});
-const photoInput = root.querySelector("#staffPhotoInput");
-
-photoInput?.addEventListener("change", async () => {
-  const file = photoInput.files?.[0];
-  if (!file) return;
-
-  if (file.size > 5 * 1024 * 1024) {
-    alert("Фото завелике. Максимум 5 МБ.");
-    return;
-  }
-
-  try {
-    const fd = new FormData();
-    fd.append("files", file);
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: fd,
+      saveStaffCareerPrefs(state.doc.id, { titleId });
+      applyCareerLookToSidebar(state);
+      renderTeamSettingsTab(root, state);
     });
+  });
 
-    const json = await res.json();
+  root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const frameId = btn.dataset.frameChoice || "none";
 
-    if (!json.ok) {
-      throw new Error(json.error || "Upload failed");
+      saveStaffCareerPrefs(state.doc.id, { frameId });
+      applyCareerLookToSidebar(state);
+      renderTeamSettingsTab(root, state);
+    });
+  });
+
+  const photoInput = root.querySelector("#staffPhotoInput");
+
+  photoInput?.addEventListener("change", async () => {
+    const file = photoInput.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Фото завелике. Максимум 5 МБ.");
+      return;
     }
 
-    const uploaded = json.files?.[0];
+    try {
+      const url = await uploadFile(file);
 
-    if (!uploaded?.url) {
-      throw new Error("Сервер не повернув URL фото");
+      await updateStaffApi(state.doc.id, {
+        ...state.doc,
+        avatar: url,
+      });
+
+      state.doc.avatar = url;
+
+      renderTeamSettingsTab(root, state);
+      applyCareerLookToSidebar(state);
+    } catch (e) {
+      console.error(e);
+      alert("Не вдалося завантажити фото: " + (e.message || e));
     }
+  });
 
-    const avatarUrl = uploaded.url;
+  root.querySelector("#btnDeleteStaffPhoto")?.addEventListener("click", async () => {
+    if (!confirm("Видалити фото?")) return;
 
-    await updateStaffApi(state.doc.id, {
-      ...state.doc,
-      avatar: avatarUrl,
-    });
+    try {
+      await updateStaffApi(state.doc.id, {
+        ...state.doc,
+        avatar: "",
+      });
 
-    state.doc.avatar = avatarUrl;
+      state.doc.avatar = "";
 
-    renderTeamSettingsTab(root, state);
-    applyCareerLookToSidebar?.(state);
-
-  } catch (e) {
-    console.error(e);
-    alert("Не вдалося завантажити фото: " + (e.message || e));
-  }
-});
+      renderTeamSettingsTab(root, state);
+      applyCareerLookToSidebar(state);
+    } catch (e) {
+      console.error(e);
+      alert("Не вдалося видалити фото: " + (e.message || e));
+    }
+  });
 }
 
 function applyCareerLookToSidebar(state) {
