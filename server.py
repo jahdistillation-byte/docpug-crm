@@ -1405,13 +1405,21 @@ def api_delete_staff_schedule():
 # =========================
 @app.get("/api/patients")
 def api_get_patients():
-    owner_id = request.args.get("owner_id")
-    current_org = get_current_org_id()
-    q = supabase.table("patients").select("*").eq("org_id", current_org)
-    if owner_id:
-        q = q.eq("owner_id", owner_id)
-    res = q.execute()
-    return ok(res.data or [])
+    try:
+        owner_id = request.args.get("owner_id")
+        current_org = get_current_org_id()
+
+        q = supabase.table("patients").select("*").eq("org_id", current_org)
+
+        if owner_id:
+            q = q.eq("owner_id", owner_id)
+
+        res = q.execute()
+        return ok(res.data or [])
+
+    except Exception as e:
+        print("❌ /api/patients GET error:", repr(e))
+        return fail("Не вдалося завантажити пацієнтів. Спробуйте ще раз.", 500)
 
 @app.post("/api/patients")
 def api_create_patient():
@@ -1809,4 +1817,4 @@ def api_clinic_login():
         return jsonify({"ok": False, "error": f"Ошибка сервера: {str(e)}"}), 500
     
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=False)
