@@ -2724,8 +2724,12 @@ async function renderTeamFinanceTab(root, state) {
                   <strong class="${a.type === "bonus" ? "moneyPlus" : "moneyMinus"}">
                     ${a.type === "bonus" ? "+" : "-"}${Number(a.amount || 0).toLocaleString("uk-UA")} грн
                   </strong>
-                  <button class="iconBtn" data-delete-adjustment="${escapeHtml(a.id)}">🗑</button>
-                </div>
+                  <button
+    class="financeDeleteBtn"
+    data-delete-adjustment="${item.id}"
+    title="Видалити">
+    ✕
+</button>
               `).join("")
               : `<div class="hint">Поки немає бонусів або штрафів за цей місяць.</div>`
           }
