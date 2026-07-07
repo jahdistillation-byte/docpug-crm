@@ -2691,74 +2691,101 @@ async function renderTeamFinanceTab(root, state) {
   const totalToPay = Math.max(0, shiftRate + percentAmount + bonuses - penalties);
 
   root.innerHTML = `
-    <section class="teamSubHero">
-      <div>
-        <h2>💰 Фінанси</h2>
-        <p>Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць.</p>
-      </div>
-    </section>
+  <section class="teamSubHero">
+    <div>
+      <h2>💰 Фінанси</h2>
+      <p>Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць.</p>
+    </div>
+  </section>
 
-    <section class="teamDashKpis">
-      ${renderTeamKpiCard("💵", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, 0)}
-      ${renderTeamKpiCard("🏦", "Ставка", `${shiftRate.toLocaleString("uk-UA")} грн`, 0)}
-      ${renderTeamKpiCard("📈", "Відсоток", `${percentRate}%`, 0)}
-      ${renderTeamKpiCard("✅", "До виплати", `${totalToPay.toLocaleString("uk-UA")} грн`, 0)}
-    </section>
+  <section class="teamDashKpis">
+    ${renderTeamKpiCard("💵", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, 0)}
+    ${renderTeamKpiCard("🏦", "Ставка", `${shiftRate.toLocaleString("uk-UA")} грн`, 0)}
+    ${renderTeamKpiCard("📈", "Відсоток", `${percentRate}%`, 0)}
+    ${renderTeamKpiCard("✅", "До виплати", `${totalToPay.toLocaleString("uk-UA")} грн`, 0)}
+  </section>
 
-    <section class="teamVisitsLayout">
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>🧾 Бонуси та штрафи</h3>
-          <button class="teamPrimaryBtn" id="btnAddFinanceAdjustment" type="button">+ Додати</button>
-        </div>
+  <section class="teamVisitsLayout">
 
-        <div class="teamFinanceList">
-          ${
-            adjustments.length
-              ? adjustments.map((a) => `
-                <div class="teamFinanceRow">
-                  <div>
-                    <b>${a.type === "bonus" ? "Бонус" : "Штраф"} · ${escapeHtml(a.adjustment_date || "—")}</b>
-                    <span>${escapeHtml(a.reason || "Без коментаря")}</span>
-                  </div>
-                  <strong class="${a.type === "bonus" ? "moneyPlus" : "moneyMinus"}">
-                    ${a.type === "bonus" ? "+" : "-"}${Number(a.amount || 0).toLocaleString("uk-UA")} грн
-                  </strong>
-                  <button class="financeDeleteBtn"
-        data-delete-adjustment="${item.id}"
-        title="Видалити">
-
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-<path d="M8 8L16 16M16 8L8 16"
-stroke="currentColor"
-stroke-width="2.5"
-stroke-linecap="round"/>
-</svg>
-
-</button>
-              `).join("")
-              : `<div class="hint">Поки немає бонусів або штрафів за цей місяць.</div>`
-          }
-        </div>
+    <div class="teamDashPanel">
+      <div class="teamDashPanelHead">
+        <h3>🧾 Бонуси та штрафи</h3>
+        <button class="teamPrimaryBtn"
+                id="btnAddFinanceAdjustment"
+                type="button">
+          + Додати
+        </button>
       </div>
 
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>📌 Розрахунок</h3>
-        </div>
-        <div class="teamDashRows">
-          <p><span>Виручка місяця</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>Ставка</span><b>${shiftRate.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>${percentRate}% від виручки</span><b>${percentAmount.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>Бонуси</span><b class="moneyPlus">+${bonuses.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>Штрафи</span><b class="moneyMinus">-${penalties.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>До виплати</span><b>${totalToPay.toLocaleString("uk-UA")} грн</b></p>
-        </div>
-      </div>
-    </section>
-  `;
+      <div class="teamFinanceList">
+        ${
+          adjustments.length
+            ? adjustments.map((a) => `
+              <div class="teamFinanceRow">
 
-  bindFinanceAdjustments(root, state);
+                <div>
+                  <b>
+                    ${a.type === "bonus" ? "Бонус" : "Штраф"}
+                    ·
+                    ${escapeHtml(a.adjustment_date || "—")}
+                  </b>
+
+                  <span>
+                    ${escapeHtml(a.reason || "Без коментаря")}
+                  </span>
+                </div>
+
+                <strong class="${a.type === "bonus" ? "moneyPlus" : "moneyMinus"}">
+                  ${a.type === "bonus" ? "+" : "-"}
+                  ${Number(a.amount || 0).toLocaleString("uk-UA")} грн
+                </strong>
+
+                <button
+                  class="financeDeleteBtn"
+                  type="button"
+                  data-delete-adjustment="${escapeHtml(a.id)}"
+                  title="Видалити">
+
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                    <path
+                      d="M8 8L16 16M16 8L8 16"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"/>
+                  </svg>
+
+                </button>
+
+              </div>
+            `).join("")
+            : `
+              <div class="hint">
+                Поки немає бонусів або штрафів за цей місяць.
+              </div>
+            `
+        }
+      </div>
+    </div>
+
+    <div class="teamDashPanel">
+      <div class="teamDashPanelHead">
+        <h3>📌 Розрахунок</h3>
+      </div>
+
+      <div class="teamDashRows">
+        <p><span>Виручка місяця</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
+        <p><span>Ставка</span><b>${shiftRate.toLocaleString("uk-UA")} грн</b></p>
+        <p><span>${percentRate}% від виручки</span><b>${percentAmount.toLocaleString("uk-UA")} грн</b></p>
+        <p><span>Бонуси</span><b class="moneyPlus">+${bonuses.toLocaleString("uk-UA")} грн</b></p>
+        <p><span>Штрафи</span><b class="moneyMinus">-${penalties.toLocaleString("uk-UA")} грн</b></p>
+        <p><span>До виплати</span><b>${totalToPay.toLocaleString("uk-UA")} грн</b></p>
+      </div>
+    </div>
+
+  </section>
+`;
+
+bindFinanceAdjustments(root, state);
 }
 
 function bindFinanceAdjustments(root, state) {
