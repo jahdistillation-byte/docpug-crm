@@ -1025,19 +1025,83 @@ def api_rebuild_staff_rating():
         visit_ids = [v.get("id") for v in visits if v.get("id")]
         services_by_visit, stock_by_visit = load_visit_lines(visit_ids)
 
+        # подтягиваем справочник услуг
+        services_res = (
+            supabase.table("services")
+            .select("*")
+            .eq("org_id", current_org)
+            .execute()
+        )
+        services_map = {
+            str(s.get("id")): s
+            for s in (services_res.data or [])
+            if s.get("id")
+        }
+
+        # подтягиваем справочник склада
+        stock_res = (
+            supabase.table("stock")
+            .select("*")
+            .eq("org_id", current_org)
+            .execute()
+        )
+        stock_map = {
+            str(s.get("id")): s
+            for s in (stock_res.data or [])
+            if s.get("id")
+        }
+
         def calc_rating_total(v):
             visit_id = v.get("id")
             total = 0
 
             for s in services_by_visit.get(visit_id, []):
-                qty = float(s.get("qty") or 1)
-                price = float(s.get("priceSnap") or s.get("price_snap") or 0)
-                total += qty * price
+                try:
+                    qty = float(s.get("qty") or 1)
+
+                    service_id = str(
+                        s.get("serviceId")
+                        or s.get("service_id")
+                        or ""
+                    )
+
+                    service_row = services_map.get(service_id) or {}
+
+                    price = float(
+                        s.get("priceSnap")
+                        or s.get("price_snap")
+                        or s.get("price")
+                        or service_row.get("price")
+                        or 0
+                    )
+
+                    total += qty * price
+                except Exception:
+                    pass
 
             for st in stock_by_visit.get(visit_id, []):
-                qty = float(st.get("qty") or 1)
-                price = float(st.get("priceSnap") or st.get("price_snap") or 0)
-                total += qty * price
+                try:
+                    qty = float(st.get("qty") or 1)
+
+                    stock_id = str(
+                        st.get("stockId")
+                        or st.get("stock_id")
+                        or ""
+                    )
+
+                    stock_row = stock_map.get(stock_id) or {}
+
+                    price = float(
+                        st.get("priceSnap")
+                        or st.get("price_snap")
+                        or st.get("price")
+                        or stock_row.get("price")
+                        or 0
+                    )
+
+                    total += qty * price
+                except Exception:
+                    pass
 
             return round(total)
 
@@ -1097,7 +1161,6 @@ def api_rebuild_staff_rating():
     except Exception as e:
         print("❌ /api/staff/rating/rebuild error:", repr(e))
         return fail(str(e), 500)
-
 
 @app.get("/api/staff/rating")
 def api_get_staff_rating():
