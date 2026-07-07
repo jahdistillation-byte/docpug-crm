@@ -2239,15 +2239,10 @@ function renderStaffSkillsPanel(doc) {
         </button>
       </div>
 
-      <div class="staffSkillsList" id="staffSkillsList">
+      <div class="staffSkillsCards" id="staffSkillsList">
         ${
           skills.length
-            ? skills.map((skill) => `
-              <span class="staffSkillPill">
-                ${escapeHtml(skill)}
-                <button type="button" data-remove-skill="${escapeHtml(skill)}">×</button>
-              </span>
-            `).join("")
+            ? skills.map((skill) => renderStaffSkillCard(skill)).join("")
             : `<p class="hint">Навички ще не додані. Наприклад: УЗД, хірургія, кастрація, неврологія.</p>`
         }
       </div>
@@ -2255,12 +2250,104 @@ function renderStaffSkillsPanel(doc) {
   `;
 }
 
-function bindStaffSkillsPanel(root, state) {
-  root.querySelector("#btnAddStaffSkill")?.addEventListener("click", async () => {
-    const skill = prompt("Введіть навичку: наприклад УЗД, хірургія, кастрація");
-    if (!skill) return;
+function renderStaffSkillCard(skill) {
+  const icon = getSkillIcon(skill);
 
-    const cleanSkill = skill.trim();
+  return `
+    <div class="staffSkillCard">
+      <button class="staffSkillRemove" type="button" data-remove-skill="${escapeHtml(skill)}">×</button>
+      <div class="staffSkillIcon">${icon}</div>
+      <b>${escapeHtml(skill)}</b>
+      <span>${escapeHtml(getSkillDescription(skill))}</span>
+    </div>
+  `;
+}
+
+function bindStaffSkillsPanel(root, state) {
+  root.querySelector("#btnAddStaffSkill")?.addEventListener("click", () => {
+    openStaffSkillModal(root, state);
+  });
+
+  root.querySelectorAll("[data-remove-skill]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const skill = btn.dataset.removeSkill;
+      const skills = getStaffSkills(state.doc);
+      const updatedSkills = skills.filter((s) => s !== skill);
+
+      await updateStaffApi(state.doc.id, {
+        ...state.doc,
+        skills: updatedSkills,
+      });
+
+      state.doc.skills = updatedSkills;
+      renderTeamOverviewTab(root, state);
+    });
+  });
+}
+
+function openStaffSkillModal(root, state) {
+  const existing = document.querySelector(".staffSkillModalOverlay");
+  existing?.remove();
+
+  const presets = ["УЗД", "Хірургія", "Кастрація", "Неврологія", "Дерматологія", "Кардіологія"];
+
+  const modal = document.createElement("div");
+  modal.className = "staffSkillModalOverlay";
+
+  modal.innerHTML = `
+    <div class="staffSkillModal">
+      <button class="staffSkillModalClose" type="button">×</button>
+
+      <div class="staffSkillModalHead">
+        <div class="staffSkillModalIcon">🧠</div>
+        <div>
+          <h2>Додати навичку</h2>
+          <p>Вкажіть професійну навичку співробітника.</p>
+        </div>
+      </div>
+
+      <label class="staffSkillField">
+        <span>Назва навички</span>
+        <input id="staffSkillInput" type="text" placeholder="Наприклад: УЗД, хірургія, кастрація">
+      </label>
+
+      <div class="staffSkillPresets">
+        <span>Популярні навички</span>
+        <div>
+          ${presets.map((p) => `
+            <button type="button" data-skill-preset="${escapeHtml(p)}">
+              ${getSkillIcon(p)} ${escapeHtml(p)}
+            </button>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="staffSkillModalActions">
+        <button class="teamGhostBtn" type="button" id="btnCancelSkill">Скасувати</button>
+        <button class="teamPrimaryBtn" type="button" id="btnSaveSkill">Додати +</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const input = modal.querySelector("#staffSkillInput");
+  input?.focus();
+
+  const close = () => modal.remove();
+
+  modal.querySelector(".staffSkillModalClose")?.addEventListener("click", close);
+  modal.querySelector("#btnCancelSkill")?.addEventListener("click", close);
+
+  modal.querySelectorAll("[data-skill-preset]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      input.value = btn.dataset.skillPreset || "";
+      input.focus();
+    });
+  });
+
+  modal.querySelector("#btnSaveSkill")?.addEventListener("click", async () => {
+    const cleanSkill = input.value.trim();
     if (!cleanSkill) return;
 
     const skills = getStaffSkills(state.doc);
@@ -2278,25 +2365,34 @@ function bindStaffSkillsPanel(root, state) {
     });
 
     state.doc.skills = updatedSkills;
+    close();
     renderTeamOverviewTab(root, state);
   });
+}
+function getSkillIcon(skill) {
+  const s = String(skill || "").toLowerCase();
 
-  root.querySelectorAll("[data-remove-skill]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const skill = btn.dataset.removeSkill;
-      const skills = getStaffSkills(state.doc);
+  if (s.includes("узд") || s.includes("ультра")) return "🖥️";
+  if (s.includes("хірур") || s.includes("хирург")) return "✂️";
+  if (s.includes("кастр") || s.includes("стерил")) return "🐾";
+  if (s.includes("невро")) return "🧠";
+  if (s.includes("дермат")) return "🩹";
+  if (s.includes("карді") || s.includes("кардио")) return "❤️";
 
-      const updatedSkills = skills.filter((s) => s !== skill);
+  return "✨";
+}
 
-      await updateStaffApi(state.doc.id, {
-        ...state.doc,
-        skills: updatedSkills,
-      });
+function getSkillDescription(skill) {
+  const s = String(skill || "").toLowerCase();
 
-      state.doc.skills = updatedSkills;
-      renderTeamOverviewTab(root, state);
-    });
-  });
+  if (s.includes("узд")) return "Діагностика за допомогою ультразвуку";
+  if (s.includes("хірур") || s.includes("хирург")) return "Хірургічні втручання різної складності";
+  if (s.includes("кастр") || s.includes("стерил")) return "Стерилізація та кастрація тварин";
+  if (s.includes("невро")) return "Діагностика та лікування нервової системи";
+  if (s.includes("дермат")) return "Шкіра, шерсть, алергії та дерматологія";
+  if (s.includes("карді") || s.includes("кардио")) return "Серце, судини та кардіологічна діагностика";
+
+  return "Професійна навичка співробітника";
 }
 
 function renderTeamAnalyticsTab(root, state) {
