@@ -2752,27 +2752,8 @@ async function renderTeamFinanceTab(root, state) {
 }
 
 function bindFinanceAdjustments(root, state) {
-  root.querySelector("#btnAddFinanceAdjustment")?.addEventListener("click", async () => {
-    const type = prompt("Що додати? bonus або penalty", "penalty");
-    if (!type || !["bonus", "penalty"].includes(type)) return;
-
-    const amount = Number(prompt("Сума, грн:", "100") || 0);
-    if (!amount || amount <= 0) return;
-
-    const reason = prompt("Причина:", type === "penalty" ? "Запізнення" : "Бонус за результат") || "";
-
-    const res = await createStaffAdjustmentApi(state.doc.id, {
-      type,
-      amount,
-      reason,
-    });
-
-    if (!res.ok) {
-      alert(res.error || "Не вдалося додати");
-      return;
-    }
-
-    renderTeamFinanceTab(root, state);
+  root.querySelector("#btnAddFinanceAdjustment")?.addEventListener("click", () => {
+    openFinanceAdjustmentModal(root, state);
   });
 
   root.querySelectorAll("[data-delete-adjustment]").forEach((btn) => {
@@ -2786,6 +2767,108 @@ function bindFinanceAdjustments(root, state) {
     });
   });
 }
+function openFinanceAdjustmentModal(root, state) {
+  document.querySelector(".financeAdjustModalOverlay")?.remove();
+
+  const modal = document.createElement("div");
+  modal.className = "financeAdjustModalOverlay";
+
+  modal.innerHTML = `
+    <div class="financeAdjustModal">
+      <button class="financeAdjustClose" type="button">×</button>
+
+      <div class="financeAdjustHead">
+        <div class="financeAdjustIcon">💰</div>
+        <div>
+          <h2>Додати нарахування</h2>
+          <p>Додайте бонус або штраф співробітнику за поточний місяць.</p>
+        </div>
+      </div>
+
+      <div class="financeTypeSwitch">
+        <button class="active" type="button" data-adjust-type="bonus">✅ Бонус</button>
+        <button type="button" data-adjust-type="penalty">⚠️ Штраф</button>
+      </div>
+
+      <label class="financeAdjustField">
+        <span>Сума, грн</span>
+        <input id="financeAdjustAmount" type="number" min="1" step="1" placeholder="Наприклад: 500">
+      </label>
+
+      <label class="financeAdjustField">
+        <span>Причина</span>
+        <input id="financeAdjustReason" type="text" placeholder="Наприклад: запізнення або бонус за результат">
+      </label>
+
+      <div class="financeQuickReasons">
+        <span>Швидкі причини</span>
+        <div>
+          <button type="button" data-reason="Запізнення">Запізнення</button>
+          <button type="button" data-reason="Пропуск зміни">Пропуск зміни</button>
+          <button type="button" data-reason="Бонус за результат">Бонус за результат</button>
+          <button type="button" data-reason="Додаткова зміна">Додаткова зміна</button>
+        </div>
+      </div>
+
+      <div class="financeAdjustActions">
+        <button class="teamGhostBtn" id="btnCancelAdjust" type="button">Скасувати</button>
+        <button class="teamPrimaryBtn" id="btnSaveAdjust" type="button">Додати</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  let selectedType = "bonus";
+
+  const close = () => modal.remove();
+
+  modal.querySelector(".financeAdjustClose")?.addEventListener("click", close);
+  modal.querySelector("#btnCancelAdjust")?.addEventListener("click", close);
+
+  modal.querySelectorAll("[data-adjust-type]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedType = btn.dataset.adjustType || "bonus";
+
+      modal.querySelectorAll("[data-adjust-type]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  modal.querySelectorAll("[data-reason]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const reasonInput = modal.querySelector("#financeAdjustReason");
+      if (reasonInput) reasonInput.value = btn.dataset.reason || "";
+    });
+  });
+
+  modal.querySelector("#btnSaveAdjust")?.addEventListener("click", async () => {
+    const amount = Number(modal.querySelector("#financeAdjustAmount")?.value || 0);
+    const reason = modal.querySelector("#financeAdjustReason")?.value?.trim() || "";
+
+    if (!amount || amount <= 0) {
+      alert("Вкажіть суму.");
+      return;
+    }
+
+    const res = await createStaffAdjustmentApi(state.doc.id, {
+      type: selectedType,
+      amount,
+      reason,
+    });
+
+    if (!res.ok) {
+      alert(res.error || "Не вдалося додати запис");
+      return;
+    }
+
+    close();
+    renderTeamFinanceTab(root, state);
+  });
+
+  modal.querySelector("#financeAdjustAmount")?.focus();
+}
+
 
 async function renderTeamAchievementsTab(root, state) {
   const career = buildStaffCareer(state);
