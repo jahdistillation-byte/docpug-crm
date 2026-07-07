@@ -1844,12 +1844,13 @@ async function renderTeamTab() {
   `;
 
   document.getElementById("btnAddStaffTeam")?.addEventListener("click", () => {
-    if (typeof openCreateStaffModal === "function") {
-      openCreateStaffModal();
-    } else {
-      alert("Форму додавання співробітника підключимо наступним кроком.");
-    }
-  });
+  if (typeof openCreateStaffModal === "function") {
+    openCreateStaffModal();
+  } else {
+    console.warn("openCreateStaffModal не знайдена");
+    alert("Форма додавання співробітника не підключена.");
+  }
+});
 
   document.getElementById("btnAddSpecTeam")?.addEventListener("click", async () => {
     const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
