@@ -738,6 +738,7 @@ def api_update_staff(staff_id):
         "bonus_rate": d.get("bonus_rate"),
         "note": d.get("note"),
         "is_active": d.get("is_active"),
+        "skills": d.get("skills"),
     }
     payload = {k: v for k, v in payload.items() if v is not None}
 

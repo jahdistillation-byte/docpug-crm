@@ -2183,17 +2183,7 @@ function renderTeamOverviewTab(root, state) {
         </div>
       </div>
 
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>💼 Популярні послуги</h3>
-        </div>
-        <div class="teamDashRows">
-          <p><span>Консультація</span><b>—</b></p>
-          <p><span>Вакцинація</span><b>—</b></p>
-          <p><span>УЗД</span><b>—</b></p>
-          <p><span>Хірургія</span><b>—</b></p>
-        </div>
-      </div>
+      ${renderStaffSkillsPanel(doc)}
 
       <div class="teamDashPanel">
         <div class="teamDashPanelHead">
@@ -2206,8 +2196,16 @@ function renderTeamOverviewTab(root, state) {
           <p><span>Нараховано</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
         </div>
       </div>
-    </section>
+        </section>
+
   `;
+
+  if (typeof bindStaffSkillsPanel === "function") {
+
+    bindStaffSkillsPanel(root, state);
+
+  }
+
 }
 function renderTeamAnalyticsTab(root, state) {
   const visits = state.dashboard.live_staff_visits || [];
