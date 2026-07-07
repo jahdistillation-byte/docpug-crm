@@ -8338,3 +8338,43 @@ body[data-theme="white"] .monthDayNum {
   border-radius: 999px;
   border: 2px solid rgba(10,8,24,.9);
 }
+.calendarMainArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.calTopScroll {
+  height: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 0 10px;
+}
+
+.calTopScrollInner {
+  height: 1px;
+}
+
+.calendarDayGrid {
+  max-height: calc(100vh - 330px);
+  overflow: auto;
+  border-radius: 22px;
+}
+
+.calTopScroll::-webkit-scrollbar,
+.calendarDayGrid::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.calTopScroll::-webkit-scrollbar-track,
+.calendarDayGrid::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.045);
+  border-radius: 999px;
+}
+
+.calTopScroll::-webkit-scrollbar-thumb,
+.calendarDayGrid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(190,92,255,.95));
+  border-radius: 999px;
+  border: 2px solid rgba(10,8,24,.9);
+}

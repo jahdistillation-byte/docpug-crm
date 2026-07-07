@@ -5484,7 +5484,12 @@ async function renderCalendarTab() {
       </div>
 
       <div class="calendarWorkArea">
-  <div class="calendarDayGrid">
+  <div class="calendarMainArea">
+    <div class="calTopScroll" id="calTopScroll">
+      <div class="calTopScrollInner" id="calTopScrollInner"></div>
+    </div>
+
+    <div class="calendarDayGrid" id="calendarDayGrid">
           <div class="calTimeCol">
             <div class="calTimeHead">Час</div>
             ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
@@ -5493,9 +5498,10 @@ async function renderCalendarTab() {
           <div class="calDoctorsGrid">
             ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
           </div>
-        </div>
+                </div>
+      </div>
 
-        <aside class="calStaffPanel">
+      <aside class="calStaffPanel">
           <div class="calStaffPanelHead">
             <div>
               <div class="calStaffPanelTitle">Ветеринари</div>
@@ -5511,7 +5517,7 @@ async function renderCalendarTab() {
       </div>
     </div>
   `;
-  
+  initCalendarTopScroll();
 
   $$(".calStaffDrag").forEach((card) => {
     card.addEventListener("dragstart", (e) => {
@@ -5644,6 +5650,25 @@ async function renderCalendarTab() {
       await renderCalendarTab();
     });
   });
+  function initCalendarTopScroll() {
+  const topScroll = document.getElementById("calTopScroll");
+  const topInner = document.getElementById("calTopScrollInner");
+  const grid = document.getElementById("calendarDayGrid");
+
+  if (!topScroll || !topInner || !grid) return;
+
+  requestAnimationFrame(() => {
+    topInner.style.width = `${grid.scrollWidth}px`;
+
+    topScroll.onscroll = () => {
+      grid.scrollLeft = topScroll.scrollLeft;
+    };
+
+    grid.onscroll = () => {
+      topScroll.scrollLeft = grid.scrollLeft;
+    };
+  });
+}
 }
 
 // ==========================================================================
