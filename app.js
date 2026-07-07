@@ -2207,6 +2207,98 @@ function renderTeamOverviewTab(root, state) {
   }
 
 }
+function getStaffSkills(doc) {
+  const raw = doc?.skills;
+
+  if (Array.isArray(raw)) return raw;
+
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return raw
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function renderStaffSkillsPanel(doc) {
+  const skills = getStaffSkills(doc);
+
+  return `
+    <div class="teamDashPanel staffSkillsPanel">
+      <div class="teamDashPanelHead">
+        <h3>🧠 Навички</h3>
+        <button class="teamGhostBtn mini" id="btnAddStaffSkill" type="button">
+          + Додати
+        </button>
+      </div>
+
+      <div class="staffSkillsList" id="staffSkillsList">
+        ${
+          skills.length
+            ? skills.map((skill) => `
+              <span class="staffSkillPill">
+                ${escapeHtml(skill)}
+                <button type="button" data-remove-skill="${escapeHtml(skill)}">×</button>
+              </span>
+            `).join("")
+            : `<p class="hint">Навички ще не додані. Наприклад: УЗД, хірургія, кастрація, неврологія.</p>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function bindStaffSkillsPanel(root, state) {
+  root.querySelector("#btnAddStaffSkill")?.addEventListener("click", async () => {
+    const skill = prompt("Введіть навичку: наприклад УЗД, хірургія, кастрація");
+    if (!skill) return;
+
+    const cleanSkill = skill.trim();
+    if (!cleanSkill) return;
+
+    const skills = getStaffSkills(state.doc);
+
+    if (skills.some((s) => s.toLowerCase() === cleanSkill.toLowerCase())) {
+      alert("Така навичка вже є.");
+      return;
+    }
+
+    const updatedSkills = [...skills, cleanSkill];
+
+    await updateStaffApi(state.doc.id, {
+      ...state.doc,
+      skills: updatedSkills,
+    });
+
+    state.doc.skills = updatedSkills;
+    renderTeamOverviewTab(root, state);
+  });
+
+  root.querySelectorAll("[data-remove-skill]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const skill = btn.dataset.removeSkill;
+      const skills = getStaffSkills(state.doc);
+
+      const updatedSkills = skills.filter((s) => s !== skill);
+
+      await updateStaffApi(state.doc.id, {
+        ...state.doc,
+        skills: updatedSkills,
+      });
+
+      state.doc.skills = updatedSkills;
+      renderTeamOverviewTab(root, state);
+    });
+  });
+}
+
 function renderTeamAnalyticsTab(root, state) {
   const visits = state.dashboard.live_staff_visits || [];
   const monthVisits = state.dashboard.live_month_visits || [];
