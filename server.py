@@ -922,8 +922,50 @@ def get_current_season_key():
     return f"{now.year}-Q{quarter}"
 
 
-def calc_rating_visit_total(visit_id):
+def calc_rating_visit_total(visit):
     total = 0
+
+    if not visit:
+        return 0
+
+    visit_id = visit.get("id")
+
+    # 1) Считаем услуги/склад, если они лежат прямо в visits
+    for arr_key in ["services", "services_json"]:
+        items = visit.get(arr_key) or []
+        if isinstance(items, list):
+            for x in items:
+                try:
+                    qty = float(x.get("qty") or 1)
+                    price = float(
+                        x.get("priceSnap")
+                        or x.get("price_snap")
+                        or x.get("price")
+                        or 0
+                    )
+                    total += qty * price
+                except Exception:
+                    pass
+
+    for arr_key in ["stock", "stock_json"]:
+        items = visit.get(arr_key) or []
+        if isinstance(items, list):
+            for x in items:
+                try:
+                    qty = float(x.get("qty") or 1)
+                    price = float(
+                        x.get("priceSnap")
+                        or x.get("price_snap")
+                        or x.get("price")
+                        or 0
+                    )
+                    total += qty * price
+                except Exception:
+                    pass
+
+    # 2) Если в самом визите суммы нет — пробуем visit_services / visit_stock
+    if total > 0 or not visit_id:
+        return round(total)
 
     try:
         services_res = (
@@ -955,7 +997,7 @@ def calc_rating_visit_total(visit_id):
     except Exception:
         pass
 
-    return total
+    return round(total)
 
 
 @app.post("/api/staff/rating/rebuild")
@@ -992,10 +1034,9 @@ def api_rebuild_staff_rating():
 
             visits_count = len(staff_visits)
             revenue = round(sum(
-                calc_rating_visit_total(v.get("id"))
-                for v in staff_visits
-                if v.get("id")
-            ))
+    calc_rating_visit_total(v)
+    for v in staff_visits
+))
 
             avg_check = round(revenue / visits_count) if visits_count else 0
             xp = visits_count * 10
