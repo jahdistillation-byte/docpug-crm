@@ -8082,3 +8082,12 @@ body[data-theme="white"] .monthDayNum {
   gap: 12px;
   margin-top: 28px;
 }
+.teamDashPanel.teamDashFull {
+  grid-column: 1 / -1;
+}
+
+.panelMutedTitle {
+  color: rgba(255,255,255,.5);
+  font-size: 14px;
+  font-weight: 800;
+}

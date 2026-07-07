@@ -2185,9 +2185,9 @@ function renderTeamOverviewTab(root, state) {
 
       ${renderStaffSkillsPanel(doc)}
 
-      <div class="teamDashPanel">
+      <div class="teamDashPanel teamDashFull">
         <div class="teamDashPanelHead">
-          <h3>💰 Фінансова інформація</h3>
+          <h3>💰 Фінансова інформація <span class="panelMutedTitle">(за цей місяць)</span></h3>
         </div>
         <div class="teamDashRows">
           <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
