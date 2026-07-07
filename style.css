@@ -8263,3 +8263,34 @@ body[data-theme="white"] .monthDayNum {
     color:#ff6b6b;
     transform:scale(1.06);
 }
+.calTopScroll {
+  width: 100%;
+  height: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 10px 0 14px;
+  padding: 0 2px;
+}
+
+.calTopScrollInner {
+  height: 1px;
+}
+
+.calTopScroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.calTopScroll::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.045);
+  border-radius: 999px;
+}
+
+.calTopScroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(190,92,255,.95));
+  border-radius: 999px;
+  border: 2px solid rgba(10,8,24,.9);
+}
+
+.calTopScroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(160,110,255,1), rgba(220,120,255,1));
+}

@@ -5484,7 +5484,11 @@ async function renderCalendarTab() {
       </div>
 
       <div class="calendarWorkArea">
-        <div class="calendarDayGrid">
+  <div class="calTopScroll" id="calTopScroll">
+    <div class="calTopScrollInner" id="calTopScrollInner"></div>
+  </div>
+
+  <div class="calendarDayGrid" id="calendarDayGrid">
           <div class="calTimeCol">
             <div class="calTimeHead">Час</div>
             ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
@@ -5511,6 +5515,7 @@ async function renderCalendarTab() {
       </div>
     </div>
   `;
+  initCalendarTopScroll();
 
   $$(".calStaffDrag").forEach((card) => {
     card.addEventListener("dragstart", (e) => {
@@ -5641,6 +5646,26 @@ async function renderCalendarTab() {
     btn.addEventListener("click", async () => {
       calendarMode = btn.dataset.calMode;
       await renderCalendarTab();
+    });
+  });
+}
+
+function initCalendarTopScroll() {
+  const topScroll = document.getElementById("calTopScroll");
+  const topInner = document.getElementById("calTopScrollInner");
+  const grid = document.getElementById("calendarDayGrid");
+
+  if (!topScroll || !topInner || !grid) return;
+
+  requestAnimationFrame(() => {
+    topInner.style.width = `${grid.scrollWidth}px`;
+
+    topScroll.addEventListener("scroll", () => {
+      grid.scrollLeft = topScroll.scrollLeft;
+    });
+
+    grid.addEventListener("scroll", () => {
+      topScroll.scrollLeft = grid.scrollLeft;
     });
   });
 }
