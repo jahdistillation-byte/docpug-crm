@@ -1186,7 +1186,18 @@ def api_get_staff_rating():
         print("❌ /api/staff/rating error:", repr(e))
         return fail(str(e), 500)
 
-
+def rebuild_staff_rating_silent():
+    try:
+        with app.test_request_context(
+            headers={
+                "X-Org-ID": get_current_org_id()
+            }
+        ):
+            res = api_rebuild_staff_rating()
+            return res
+    except Exception as e:
+        print("⚠️ rating silent rebuild failed:", repr(e))
+        return None
     
 # API: CALENDAR
 # =========================
@@ -1292,6 +1303,13 @@ def api_update_calendar_event(event_id):
     )
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
+
+def rebuild_staff_rating_silent():
+    try:
+        return api_rebuild_staff_rating()
+    except Exception as e:
+        print("⚠️ rating silent rebuild failed:", repr(e))
+        return None
 
 # =========================
 # API: STAFF SCHEDULE
@@ -1428,10 +1446,14 @@ def api_delete_patient(pet_id):
 # =========================
 # API: VISITS
 # =========================
+# =========================
+# API: VISITS
+# =========================
 @app.get("/api/visits")
 def api_get_visits():
     visit_id = request.args.get("id")
     pet_id = request.args.get("pet_id")
+
     if visit_id:
         visit_id = visit_id.strip()
         if len(visit_id) < 10:
@@ -1439,44 +1461,57 @@ def api_get_visits():
 
     current_org = get_current_org_id()
     q = supabase.table("visits").select("*").eq("org_id", current_org)
+
     if visit_id:
         q = q.eq("id", visit_id)
     if pet_id:
         q = q.eq("pet_id", pet_id)
+
     res = q.execute()
     rows = res.data or []
 
     ids = [r.get("id") for r in rows if r.get("id")]
     services_by_visit, stock_by_visit = load_visit_lines(ids)
+
     for r in rows:
         vid = r.get("id")
         r["services"] = services_by_visit.get(vid, [])
         r["stock"] = stock_by_visit.get(vid, [])
+
     return ok(rows)
+
 
 @app.put("/api/visits")
 def api_update_visit_query():
     visit_id = (request.args.get("id") or "").strip()
     if not visit_id:
         return fail("id required", 400)
+
     d = request.get_json(silent=True) or {}
+
     payload = {
-    "staff_id": d.get("staff_id"),
-    "date": d.get("date"),
-    "note": d.get("note"),
-    "dx": d.get("dx"),
-    "rx": d.get("rx"),
-    "weight_kg": d.get("weight_kg"),
-    "staff_id": d.get("staff_id"),
-}
+        "staff_id": d.get("staff_id"),
+        "date": d.get("date"),
+        "note": d.get("note"),
+        "dx": d.get("dx"),
+        "rx": d.get("rx"),
+        "weight_kg": d.get("weight_kg"),
+    }
+
     res = update_with_optional_fallback("visits", visit_id, payload)
+
     try:
         save_visit_lines(visit_id, d)
     except Exception as e:
         return fail(f"save_visit_lines failed: {e}", 500)
 
+    try:
+        rebuild_staff_rating_silent()
+    except Exception as e:
+        print("⚠️ rating rebuild after update visit failed:", repr(e))
+
     current_org = get_current_org_id()
-    base = None
+
     if res is not None and getattr(res, "data", None):
         base = res.data[0]
     else:
@@ -1487,63 +1522,90 @@ def api_update_visit_query():
             .eq("id", visit_id)
             .execute()
         )
-        base = (get_res.data[0] if get_res.data else {"id": visit_id, **clean_payload(payload)})
+        base = get_res.data[0] if get_res.data else {"id": visit_id, **clean_payload(payload)}
 
     services_map, stock_map = load_visit_lines([visit_id])
     base["services"] = services_map.get(visit_id, [])
     base["stock"] = stock_map.get(visit_id, [])
+
     return ok(base)
+
 
 @app.post("/api/visits")
 def api_create_visit():
     d = request.get_json(silent=True) or {}
     pet_id = (d.get("pet_id") or "").strip()
+
     if not pet_id:
         return fail("pet_id required", 400)
 
     current_org = get_current_org_id()
+
     payload = {
-    "org_id": current_org,
-    "pet_id": pet_id,
-    "staff_id": d.get("staff_id"),
-    "date": d.get("date"),
-    "note": d.get("note"),
-    "dx": d.get("dx"),
-    "rx": d.get("rx"),
-    "weight_kg": d.get("weight_kg"),
-}
+        "org_id": current_org,
+        "pet_id": pet_id,
+        "staff_id": d.get("staff_id"),
+        "date": d.get("date"),
+        "note": d.get("note"),
+        "dx": d.get("dx"),
+        "rx": d.get("rx"),
+        "weight_kg": d.get("weight_kg"),
+    }
+
     res = insert_with_optional_fallback("visits", payload)
     row = (res.data[0] if getattr(res, "data", None) and res.data else None)
+
     if not row:
         row = {"id": str(uuid.uuid4()), **payload}
+
     visit_id = row["id"]
+
     try:
         save_visit_lines(visit_id, d)
     except Exception as e:
         return fail(f"save_visit_lines failed: {e}", 500)
 
+    try:
+        rebuild_staff_rating_silent()
+    except Exception as e:
+        print("⚠️ rating rebuild after create visit failed:", repr(e))
+
     services_map, stock_map = load_visit_lines([visit_id])
     row["services"] = services_map.get(visit_id, [])
     row["stock"] = stock_map.get(visit_id, [])
+
     return ok(row)
+
 
 @app.delete("/api/visits/<visit_id>")
 def api_delete_visit(visit_id):
     if not visit_id:
         return fail("visit_id required", 400)
+
     current_org = get_current_org_id()
+
     try:
         supabase.table("calendar_events").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
+
         try:
             supabase.table("visit_services").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
         except Exception:
             pass
+
         try:
             supabase.table("visit_stock").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
         except Exception:
             pass
+
         supabase.table("visits").delete().eq("org_id", current_org).eq("id", visit_id).execute()
+
+        try:
+            rebuild_staff_rating_silent()
+        except Exception as e:
+            print("⚠️ rating rebuild after delete visit failed:", repr(e))
+
         return ok(True)
+
     except Exception as e:
         return fail(str(e), 500)
 
