@@ -8091,3 +8091,11 @@ body[data-theme="white"] .monthDayNum {
   font-size: 14px;
   font-weight: 800;
 }
+
+.moneyPlus {
+  color: #4ade80 !important;
+}
+
+.moneyMinus {
+  color: #fb7185 !important;
+}

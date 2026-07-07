@@ -2665,9 +2665,11 @@ function openVisitFromTeam(visitId) {
   alert("Не вдалося відкрити візит");
 }
 
-function renderTeamFinanceTab(root, state) {
+async function renderTeamFinanceTab(root, state) {
   const doc = state.doc;
   const visits = state.dashboard.live_month_visits || [];
+
+  const adjustments = await loadStaffAdjustmentsApi(doc.id);
 
   const revenue = visits.reduce((sum, v) => {
     return sum + calcServicesTotal(v) + calcStockTotal(v);
@@ -2677,28 +2679,22 @@ function renderTeamFinanceTab(root, state) {
   const percentRate = Number(doc.percent_rate || 0);
 
   const percentAmount = Math.round(revenue * (percentRate / 100));
-  const totalToPay = shiftRate + percentAmount;
 
-  const checksHtml = visits.length
-    ? visits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || ""))).map((v) => {
-        const total = calcServicesTotal(v) + calcStockTotal(v);
-        return `
-          <div class="teamFinanceRow">
-            <div>
-              <b>${escapeHtml(v.date || v.event_date || "—")}</b>
-              <span>${escapeHtml(v.pet_name || v.patient_name || "Пацієнт")}</span>
-            </div>
-            <strong>${total.toLocaleString("uk-UA")} грн</strong>
-          </div>
-        `;
-      }).join("")
-    : `<div class="hint">Поки немає прийомів для фінансового розрахунку.</div>`;
+  const bonuses = adjustments
+    .filter((x) => x.type === "bonus")
+    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+  const penalties = adjustments
+    .filter((x) => x.type === "penalty")
+    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+  const totalToPay = Math.max(0, shiftRate + percentAmount + bonuses - penalties);
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
         <h2>💰 Фінанси</h2>
-        <p>Нарахування, ставка, відсоток від виручки та фінансова історія співробітника.</p>
+        <p>Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць.</p>
       </div>
     </section>
 
@@ -2712,11 +2708,27 @@ function renderTeamFinanceTab(root, state) {
     <section class="teamVisitsLayout">
       <div class="teamDashPanel">
         <div class="teamDashPanelHead">
-          <h3>🧾 Фінансова історія</h3>
-          <span>поточний місяць</span>
+          <h3>🧾 Бонуси та штрафи</h3>
+          <button class="teamPrimaryBtn" id="btnAddFinanceAdjustment" type="button">+ Додати</button>
         </div>
+
         <div class="teamFinanceList">
-          ${checksHtml}
+          ${
+            adjustments.length
+              ? adjustments.map((a) => `
+                <div class="teamFinanceRow">
+                  <div>
+                    <b>${a.type === "bonus" ? "Бонус" : "Штраф"} · ${escapeHtml(a.adjustment_date || "—")}</b>
+                    <span>${escapeHtml(a.reason || "Без коментаря")}</span>
+                  </div>
+                  <strong class="${a.type === "bonus" ? "moneyPlus" : "moneyMinus"}">
+                    ${a.type === "bonus" ? "+" : "-"}${Number(a.amount || 0).toLocaleString("uk-UA")} грн
+                  </strong>
+                  <button class="iconBtn" data-delete-adjustment="${escapeHtml(a.id)}">🗑</button>
+                </div>
+              `).join("")
+              : `<div class="hint">Поки немає бонусів або штрафів за цей місяць.</div>`
+          }
         </div>
       </div>
 
@@ -2728,13 +2740,51 @@ function renderTeamFinanceTab(root, state) {
           <p><span>Виручка місяця</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
           <p><span>Ставка</span><b>${shiftRate.toLocaleString("uk-UA")} грн</b></p>
           <p><span>${percentRate}% від виручки</span><b>${percentAmount.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>Бонуси</span><b>—</b></p>
-          <p><span>Штрафи</span><b>—</b></p>
+          <p><span>Бонуси</span><b class="moneyPlus">+${bonuses.toLocaleString("uk-UA")} грн</b></p>
+          <p><span>Штрафи</span><b class="moneyMinus">-${penalties.toLocaleString("uk-UA")} грн</b></p>
           <p><span>До виплати</span><b>${totalToPay.toLocaleString("uk-UA")} грн</b></p>
         </div>
       </div>
     </section>
   `;
+
+  bindFinanceAdjustments(root, state);
+}
+
+function bindFinanceAdjustments(root, state) {
+  root.querySelector("#btnAddFinanceAdjustment")?.addEventListener("click", async () => {
+    const type = prompt("Що додати? bonus або penalty", "penalty");
+    if (!type || !["bonus", "penalty"].includes(type)) return;
+
+    const amount = Number(prompt("Сума, грн:", "100") || 0);
+    if (!amount || amount <= 0) return;
+
+    const reason = prompt("Причина:", type === "penalty" ? "Запізнення" : "Бонус за результат") || "";
+
+    const res = await createStaffAdjustmentApi(state.doc.id, {
+      type,
+      amount,
+      reason,
+    });
+
+    if (!res.ok) {
+      alert(res.error || "Не вдалося додати");
+      return;
+    }
+
+    renderTeamFinanceTab(root, state);
+  });
+
+  root.querySelectorAll("[data-delete-adjustment]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Видалити запис?")) return;
+
+      const id = btn.dataset.deleteAdjustment;
+      await deleteStaffAdjustmentApi(id);
+
+      renderTeamFinanceTab(root, state);
+    });
+  });
 }
 
 async function renderTeamAchievementsTab(root, state) {
@@ -3090,6 +3140,28 @@ function renderTeamSettingsTab(root, state) {
       alert("Не вдалося видалити фото: " + (e.message || e));
     }
   });
+}
+
+async function loadStaffAdjustmentsApi(staffId) {
+  const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/adjustments`);
+  const json = await res.json();
+  return json.ok ? (json.data || []) : [];
+}
+
+async function createStaffAdjustmentApi(staffId, payload) {
+  const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/adjustments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload || {}),
+  });
+  return await res.json();
+}
+
+async function deleteStaffAdjustmentApi(adjustmentId) {
+  const res = await fetch(`/api/staff/adjustments/${encodeURIComponent(adjustmentId)}`, {
+    method: "DELETE",
+  });
+  return await res.json();
 }
 
 function applyCareerLookToSidebar(state) {

@@ -916,7 +916,88 @@ def api_staff_dashboard(staff_id):
     except Exception as e:
         print("❌ /api/staff/<staff_id>/dashboard error:", repr(e))
         return fail(str(e), 500)
-    
+
+@app.get("/api/staff/<staff_id>/adjustments")
+def api_get_staff_adjustments(staff_id):
+    try:
+        current_org = get_current_org_id()
+        month = request.args.get("month") or datetime.now(timezone.utc).strftime("%Y-%m")
+
+        date_from = f"{month}-01"
+        y, m = month.split("-")
+        y = int(y)
+        m = int(m)
+        if m == 12:
+            date_to = f"{y + 1}-01-01"
+        else:
+            date_to = f"{y}-{m + 1:02d}-01"
+
+        res = (
+            supabase.table("staff_finance_adjustments")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("staff_id", staff_id)
+            .gte("adjustment_date", date_from)
+            .lt("adjustment_date", date_to)
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        return ok(res.data or [])
+
+    except Exception as e:
+        return fail(str(e), 500)
+
+
+@app.post("/api/staff/<staff_id>/adjustments")
+def api_create_staff_adjustment(staff_id):
+    try:
+        current_org = get_current_org_id()
+        d = request.get_json(silent=True) or {}
+
+        adj_type = d.get("type")
+        amount = int(d.get("amount") or 0)
+        reason = (d.get("reason") or "").strip()
+
+        if adj_type not in ("bonus", "penalty"):
+            return fail("type must be bonus or penalty", 400)
+
+        if amount <= 0:
+            return fail("amount must be positive", 400)
+
+        payload = {
+            "org_id": current_org,
+            "staff_id": staff_id,
+            "type": adj_type,
+            "amount": amount,
+            "reason": reason,
+            "adjustment_date": d.get("adjustment_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        }
+
+        res = supabase.table("staff_finance_adjustments").insert(payload).execute()
+        row = res.data[0] if getattr(res, "data", None) else payload
+        return ok(row)
+
+    except Exception as e:
+        return fail(str(e), 500)
+
+
+@app.delete("/api/staff/adjustments/<adjustment_id>")
+def api_delete_staff_adjustment(adjustment_id):
+    try:
+        current_org = get_current_org_id()
+
+        supabase.table("staff_finance_adjustments") \
+            .delete() \
+            .eq("org_id", current_org) \
+            .eq("id", adjustment_id) \
+            .execute()
+
+        return ok(True)
+
+    except Exception as e:
+        return fail(str(e), 500)
+
 def get_current_season_key():
     now = datetime.now(timezone.utc)
     quarter = ((now.month - 1) // 3) + 1
