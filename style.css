@@ -8244,3 +8244,22 @@ body[data-theme="white"] .monthDayNum {
   gap: 12px;
   margin-top: 28px;
 }
+.financeDeleteBtn{
+    width:34px;
+    height:34px;
+    border:none;
+    border-radius:12px;
+    background:rgba(255,255,255,.05);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    color:rgba(255,255,255,.55);
+    transition:.2s;
+}
+
+.financeDeleteBtn:hover{
+    background:rgba(255,70,70,.15);
+    color:#ff6b6b;
+    transform:scale(1.06);
+}
