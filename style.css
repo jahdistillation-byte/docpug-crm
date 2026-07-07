@@ -8294,3 +8294,47 @@ body[data-theme="white"] .monthDayNum {
 .calTopScroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(90deg, rgba(160,110,255,1), rgba(220,120,255,1));
 }
+.calendarWorkArea {
+  align-items: flex-start;
+}
+
+.calendarDayGrid {
+  max-height: calc(100vh - 330px);
+  overflow: auto;
+  border-radius: 22px;
+  min-width: 0;
+}
+
+.calTimeHead,
+.calDoctorHead {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  backdrop-filter: blur(14px);
+}
+
+.calTimeHead {
+  background: rgba(18, 14, 42, .96);
+}
+
+.calDoctorHead {
+  background:
+    radial-gradient(circle at top left, rgba(180,92,255,.18), transparent 45%),
+    linear-gradient(135deg, rgba(28,22,62,.97), rgba(11,13,31,.97));
+}
+
+.calendarDayGrid::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.calendarDayGrid::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.045);
+  border-radius: 999px;
+}
+
+.calendarDayGrid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(190,92,255,.95));
+  border-radius: 999px;
+  border: 2px solid rgba(10,8,24,.9);
+}
