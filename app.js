@@ -4806,6 +4806,10 @@ async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
   if (!page) return;
 
+  if (calendarMode === "schedule") {
+    calendarMode = "day";
+  }
+
   const today = window.__calendarDate || (
     typeof todayISO === "function"
       ? todayISO()
@@ -4856,19 +4860,21 @@ async function renderCalendarTab() {
             <h2>Календар</h2>
             <div class="hint">Тижневий розклад записів клініки.</div>
           </div>
+
           <div class="calendarModes">
             <button class="ghost" data-cal-mode="day">День</button>
             <button class="primary" data-cal-mode="week">Тиждень</button>
             <button class="ghost" data-cal-mode="month">Місяць</button>
-            <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
             <button class="ghost" data-cal-mode="routes">Маршрути</button>
           </div>
         </div>
+
         <div class="calendarTop">
           <button class="ghost" id="calPrevWeek" type="button">←</button>
           <div class="calendarDate">${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}</div>
           <button class="ghost" id="calNextWeek" type="button">→</button>
         </div>
+
         <div class="weekCalendarGrid">
           ${weekDays.map((date, i) => {
             const dayEvents = weekEvents
@@ -4881,6 +4887,7 @@ async function renderCalendarTab() {
                   <div class="weekDayName">${dayNames[i]}</div>
                   <div class="weekDayDate">${escapeHtml(date)}</div>
                 </div>
+
                 <div class="weekDayBody" data-week-date="${escapeHtml(date)}">
                   ${
                     dayEvents.length
@@ -4906,18 +4913,33 @@ async function renderCalendarTab() {
       </div>
     `;
 
-    $("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
-    $("[data-cal-mode='month']")?.addEventListener("click", async () => { calendarMode = "month"; await renderCalendarTab(); });
-    $("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calendarMode = "schedule"; await renderCalendarTab(); });
-    $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
+    $("[data-cal-mode='day']")?.addEventListener("click", async () => {
+      calendarMode = "day";
+      await renderCalendarTab();
+    });
+
+    $("[data-cal-mode='month']")?.addEventListener("click", async () => {
+      calendarMode = "month";
+      await renderCalendarTab();
+    });
+
+    $("[data-cal-mode='routes']")?.addEventListener("click", async () => {
+      calendarMode = "routes";
+      await renderCalendarTab();
+    });
 
     $("#calPrevWeek")?.addEventListener("click", async () => {
-      const d = new Date(weekDays[0]); d.setDate(d.getDate() - 7);
-      window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab();
+      const d = new Date(weekDays[0]);
+      d.setDate(d.getDate() - 7);
+      window.__calendarDate = d.toISOString().slice(0, 10);
+      await renderCalendarTab();
     });
+
     $("#calNextWeek")?.addEventListener("click", async () => {
-      const d = new Date(weekDays[0]); d.setDate(d.getDate() + 7);
-      window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab();
+      const d = new Date(weekDays[0]);
+      d.setDate(d.getDate() + 7);
+      window.__calendarDate = d.toISOString().slice(0, 10);
+      await renderCalendarTab();
     });
 
     $$("[data-cal-event-id]").forEach((card) => {
@@ -4925,40 +4947,45 @@ async function renderCalendarTab() {
         const id = card.dataset.calEventId;
         const ev = weekEvents.find((x) => String(x.id) === String(id));
         if (!ev) return;
-        openCalendarEditModal(ev, ev.event_date || today, async () => { await renderCalendarTab(); });
+
+        openCalendarEditModal(ev, ev.event_date || today, async () => {
+          await renderCalendarTab();
+        });
       });
     });
+
     return;
   }
- if (calendarMode === "month") {
-  const base = new Date(today);
-  const year = base.getFullYear();
-  const month = base.getMonth();
 
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
+  if (calendarMode === "month") {
+    const base = new Date(today);
+    const year = base.getFullYear();
+    const month = base.getMonth();
 
-  const startDay = monthStart.getDay() || 7;
-  const gridStart = new Date(monthStart);
-  gridStart.setDate(monthStart.getDate() - startDay + 1);
+    const monthStart = new Date(year, month, 1);
 
-  const localISO = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
+    const startDay = monthStart.getDay() || 7;
+    const gridStart = new Date(monthStart);
+    gridStart.setDate(monthStart.getDate() - startDay + 1);
 
-  const monthDays = Array.from({ length: 42 }, (_, i) => {
-    const d = new Date(gridStart);
-    d.setDate(gridStart.getDate() + i);
-    return localISO(d);
-  });
+    const localISO = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
 
-  const monthNames = [
-    "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
-    "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-  ];
+    const monthDays = Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(gridStart);
+      d.setDate(gridStart.getDate() + i);
+      return localISO(d);
+    });
+
+    const monthNames = [
+      "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+      "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+    ];
+
     const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
     const monthEvents = events.filter((ev) => {
@@ -4967,545 +4994,403 @@ async function renderCalendarTab() {
     });
 
     const scheduleRows = await loadStaffScheduleRangeApi(
-  monthDays[0],
-  monthDays[monthDays.length - 1]
-);
-
-const scheduleByDate = new Map(
-  monthDays.map((date) => [
-    date,
-    scheduleRows.filter((row) => String(row.work_date || "") === date),
-  ])
-);
-
-page.innerHTML = `
-  <div class="card calendarCard">
-    <div class="calendarHeader">
-      <div>
-        <h2>Місячний графік</h2>
-        <div class="hint">Плануй зміни ветеринарів на весь місяць.</div>
-      </div>
-      <div class="calendarModes">
-        <button class="ghost" data-cal-mode="day">День</button>
-        <button class="ghost" data-cal-mode="week">Тиждень</button>
-        <button class="primary" data-cal-mode="month">Місяць</button>
-        <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
-        <button class="ghost" data-cal-mode="routes">Маршрути</button>
-      </div>
-    </div>
-
-    <div class="calendarTop">
-      <button class="ghost" id="calPrevMonth" type="button">←</button>
-      <div class="calendarDate">${monthNames[month]} ${year}</div>
-      <button class="ghost" id="calNextMonth" type="button">→</button>
-    </div>
-
-    <div class="monthPlannerLayout">
-      <div class="monthPlannerMain">
-        <div class="monthWeekHead">
-          ${dayNames.map((d) => `<div>${d}</div>`).join("")}
-        </div>
-
-        <div class="monthGrid">
-          ${monthDays.map((date) => {
-            const d = new Date(date);
-            const isCurrentMonth = d.getMonth() === month;
-            const isToday = date === (typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0, 10));
-
-            const daySchedule = scheduleByDate.get(date) || [];
-            const activeIds = new Set(
-              daySchedule
-                .filter((x) => x.is_active !== false)
-                .map((x) => String(x.staff_id))
-            );
-
-            const activeStaff = daySchedule.length
-              ? staff.filter((doc) => activeIds.has(String(doc.id)))
-              : [];
-
-            const dayEvents = monthEvents.filter((ev) => String(ev.event_date || "") === date);
-
-            return `
-              <div class="monthDay ${isCurrentMonth ? "" : "muted"} ${isToday ? "today" : ""}" data-month-date="${escapeHtml(date)}">
-                <div class="monthDayTop">
-                  <div class="monthDayNum">${d.getDate()}</div>
-                  ${dayEvents.length ? `<div class="monthVisitCount">${dayEvents.length} записів</div>` : ""}
-                </div>
-
-                <div class="monthStaffList">
-                  ${
-                    activeStaff.length
-                      ? activeStaff.slice(0, 3).map((doc) => `
-                        <div class="monthStaffPill" style="border-left:4px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-                          👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}
-                        </div>
-                      `).join("")
-                      : `<div class="monthEmptyShift">Змін немає</div>`
-                  }
-                  ${activeStaff.length > 3 ? `<div class="monthMore">+${activeStaff.length - 3} ще</div>` : ""}
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      </div>
-
-      <aside class="monthShiftDrawer" id="monthShiftDrawer">
-        <div class="monthDrawerPlaceholder">
-          <div class="monthDrawerPlaceholderIcon">📅</div>
-          <div class="monthDrawerPlaceholderTitle">Обери день</div>
-          <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
-        </div>
-      </aside>
-    </div>
-  </div>
-`;
-
-$("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
-$("[data-cal-mode='week']")?.addEventListener("click", async () => { calendarMode = "week"; await renderCalendarTab(); });
-$("[data-cal-mode='schedule']")?.addEventListener("click", async () => { calendarMode = "schedule"; await renderCalendarTab(); });
-$("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
-
-$("#calPrevMonth")?.addEventListener("click", async () => {
-  const d = new Date(year, month - 1, 1, 12, 0, 0);
-  window.__calendarDate = localISO(d);
-  await renderCalendarTab();
-});
-
-$("#calNextMonth")?.addEventListener("click", async () => {
-  const d = new Date(year, month + 1, 1, 12, 0, 0);
-  window.__calendarDate = localISO(d);
-  await renderCalendarTab();
-});
-const selectedMonthDates = new Set();
-
-const paintSelectedMonthDays = () => {
-  $$("[data-month-date]").forEach((cell) => {
-    const date = cell.dataset.monthDate;
-    cell.classList.toggle("rangeSelected", selectedMonthDates.has(date));
-  });
-};
-
-const openMonthShiftDrawer = (date) => {
-  const drawer = $("#monthShiftDrawer");
-  if (!drawer) return;
-
-  const daySchedule = scheduleByDate.get(date) || [];
-  const activeIds = new Set(
-    daySchedule
-      .filter((x) => x.is_active !== false)
-      .map((x) => String(x.staff_id))
-  );
-
-  drawer.innerHTML = `
-    <div class="monthDrawerCard">
-      <div class="monthDrawerHead">
-        <div>
-          <div class="monthDrawerTitle">📅 Графік на ${escapeHtml(date)}</div>
-          <div class="hint">Обери, хто працює в цей день.</div>
-        </div>
-        <button class="ghost" id="monthDrawerClose" type="button">×</button>
-      </div>
-
-      <div class="monthDrawerQuick">
-        <button class="ghost" id="monthAllActive" type="button">Усі на зміні</button>
-        <button class="ghost" id="monthAllOff" type="button">Усім вихідний</button>
-      </div>
-      <div class="monthBulkBox">
-  <div class="monthBulkTitle">Масове призначення</div>
-
-  <label class="monthBulkField">
-    <span>Лікар</span>
-    <select id="monthBulkStaff">
-      ${staff.map((doc) => `
-        <option value="${escapeHtml(String(doc.id))}">
-          ${escapeHtml(doc.name || "Працівник")}
-        </option>
-      `).join("")}
-    </select>
-  </label>
-
-${selectedMonthDates.size > 1 ? `
-  <div class="monthSelectedBox">
-    <div class="monthBulkTitle">Виділено днів: ${selectedMonthDates.size}</div>
-
-    <label class="monthBulkField">
-      <span>Лікар для виділених днів</span>
-      <select id="monthSelectedStaff">
-        ${staff.map((doc) => `
-          <option value="${escapeHtml(String(doc.id))}">
-            ${escapeHtml(doc.name || "Працівник")}
-          </option>
-        `).join("")}
-      </select>
-    </label>
-
-    <button class="primary monthBulkApply" id="monthApplySelectedDates" type="button">
-      Застосувати на виділені дні
-    </button>
-  </div>
-` : ""}
-
-  <div class="monthBulkDates">
-    <label class="monthBulkField">
-      <span>Від</span>
-      <input id="monthBulkFrom" type="date" value="${escapeHtml(date)}">
-    </label>
-
-    <label class="monthBulkField">
-      <span>До</span>
-      <input id="monthBulkTo" type="date" value="${escapeHtml(date)}">
-    </label>
-  </div>
-
-  <div class="monthBulkDays">
-    <button type="button" class="monthBulkDay active" data-bulk-day="1">Пн</button>
-    <button type="button" class="monthBulkDay active" data-bulk-day="2">Вт</button>
-    <button type="button" class="monthBulkDay active" data-bulk-day="3">Ср</button>
-    <button type="button" class="monthBulkDay active" data-bulk-day="4">Чт</button>
-    <button type="button" class="monthBulkDay active" data-bulk-day="5">Пт</button>
-    <button type="button" class="monthBulkDay" data-bulk-day="6">Сб</button>
-    <button type="button" class="monthBulkDay" data-bulk-day="7">Нд</button>
-  </div>
-
-  <button class="primary monthBulkApply" id="monthBulkApply" type="button">
-    Застосувати графік
-  </button>
-</div>
-
-      <div class="monthDrawerStaff">
-        ${staff.map((doc) => {
-          const active = activeIds.has(String(doc.id));
-          return `
-            <button
-              class="monthShiftToggle ${active ? "active" : ""}"
-              type="button"
-              data-month-shift-staff="${escapeHtml(String(doc.id))}"
-              style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
-            >
-              <span>👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</span>
-              <b>${active ? "На зміні" : "Вихідний"}</b>
-            </button>
-          `;
-        }).join("")}
-      </div>
-
-      <div class="monthDrawerActions">
-        <button class="ghost" id="monthGoToDay" type="button">Відкрити день</button>
-        <button class="primary" id="monthSaveShift" type="button">💾 Зберегти</button>
-      </div>
-    </div>
-  `;
-
-  drawer.classList.add("open");
-
-  const setToggleState = (btn, active) => {
-    btn.classList.toggle("active", active);
-    const label = btn.querySelector("b");
-    if (label) label.textContent = active ? "На зміні" : "Вихідний";
-  };
-
-  $("#monthDrawerClose")?.addEventListener("click", () => {
-    drawer.classList.remove("open");
-    drawer.innerHTML = `
-      <div class="monthDrawerPlaceholder">
-        <div class="monthDrawerPlaceholderIcon">📅</div>
-        <div class="monthDrawerPlaceholderTitle">Обери день</div>
-        <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
-      </div>
-    `;
-  });
-
-  $$(".monthShiftToggle").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      setToggleState(btn, !btn.classList.contains("active"));
-    });
-  });
-
-  $("#monthAllActive")?.addEventListener("click", () => {
-    $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, true));
-  });
-
-  $("#monthAllOff")?.addEventListener("click", () => {
-    $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, false));
-  });
-  
-
-
-  $$(".monthBulkDay").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    btn.classList.toggle("active");
-  });
-});
-$("#monthBulkApply")?.addEventListener("click", async () => {
-  const staffId = $("#monthBulkStaff")?.value;
-  const from = $("#monthBulkFrom")?.value;
-  const to = $("#monthBulkTo")?.value;
-
-  const selectedDays = $$(".monthBulkDay.active")
-    .map((btn) => Number(btn.dataset.bulkDay));
-
-  if (!staffId || !from || !to || !selectedDays.length) {
-    alert("Оберіть лікаря, період і дні тижня.");
-    return;
-  }
-
-  const start = new Date(from + "T12:00:00");
-  const end = new Date(to + "T12:00:00");
-
-  if (start > end) {
-    alert("Дата 'від' не може бути пізніше дати 'до'.");
-    return;
-  }
-
-  const dates = [];
-  const cursor = new Date(start);
-
-  while (cursor <= end) {
-    const jsDay = cursor.getDay();
-    const normalizedDay = jsDay === 0 ? 7 : jsDay;
-
-    if (selectedDays.includes(normalizedDay)) {
-      dates.push(localISO(cursor));
-    }
-
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  if (!dates.length) {
-    alert("У вибраному періоді немає таких днів.");
-    return;
-  }
-
-  if (!confirm(`Застосувати графік для ${dates.length} днів?`)) return;
-
-  for (const workDate of dates) {
-    await saveStaffScheduleApi({
-      work_date: workDate,
-      staff_id: staffId,
-      is_active: true,
-    });
-  }
-
-  await renderCalendarTab();
-});
-$("#monthApplySelectedDates")?.addEventListener("click", async () => {
-  const staffId = $("#monthSelectedStaff")?.value;
-
-  if (!staffId || selectedMonthDates.size < 2) {
-    alert("Виділи дні та обери лікаря.");
-    return;
-  }
-
-  const dates = Array.from(selectedMonthDates).sort();
-
-  if (!confirm(`Призначити лікаря на ${dates.length} днів?`)) return;
-
-  for (const workDate of dates) {
-    await saveStaffScheduleApi({
-      work_date: workDate,
-      staff_id: staffId,
-      is_active: true,
-    });
-  }
-
-  await renderCalendarTab();
-});
-
-  $("#monthGoToDay")?.addEventListener("click", async () => {
-    window.__calendarDate = date;
-    calendarMode = "day";
-    await renderCalendarTab();
-  });
-
-  $("#monthSaveShift")?.addEventListener("click", async () => {
-    const activeStaffIds = new Set(
-      $$(".monthShiftToggle.active").map((btn) => String(btn.dataset.monthShiftStaff))
+      monthDays[0],
+      monthDays[monthDays.length - 1]
     );
 
-    for (const doc of staff) {
-  await saveStaffScheduleApi({
-    work_date: date,
-    staff_id: doc.id,
-    is_active: activeStaffIds.has(String(doc.id)),
-  });
-}
-
-    await renderCalendarTab();
-  });
-};
-
-$$("[data-month-date]").forEach((cell) => {
-  cell.addEventListener("click", () => {
-    const date = cell.dataset.monthDate;
-    if (!date) return;
-
-    $$("[data-month-date]").forEach((x) => x.classList.remove("selected"));
-    cell.classList.add("selected");
-
-    openMonthShiftDrawer(date);
-  });
-});
-
-return;
-  }
-
-  if (calendarMode === "schedule") {
-    const schedule = await loadStaffScheduleApi(today);
-    const specializations = await loadSpecializationsApi();
-    const scheduleMap = new Map(schedule.map((x) => [String(x.staff_id), x]));
+    const scheduleByDate = new Map(
+      monthDays.map((date) => [
+        date,
+        scheduleRows.filter((row) => String(row.work_date || "") === date),
+      ])
+    );
 
     page.innerHTML = `
       <div class="card calendarCard">
-        <div class="row" style="justify-content:space-between;align-items:center;">
+        <div class="calendarHeader">
           <div>
-            <h2>Ветеринари</h2>
-            <div class="hint">Співробітники клініки, ставки, спеціалізації та налаштування календаря.</div>
+            <h2>Місячний графік</h2>
+            <div class="hint">Плануй зміни ветеринарів на весь місяць.</div>
           </div>
-          <button class="primary" id="btnAddStaff">+ Додати ветеринара</button>
-        </div>
-        <div class="calendarModes">
-          <button class="ghost" data-cal-mode="day">День</button>
-          <button class="ghost" data-cal-mode="week">Тиждень</button>
-          <button class="ghost" data-cal-mode="month">Місяць</button>
-          <button class="primary" data-cal-mode="schedule">Ветеринари</button>
-          <button class="ghost" data-cal-mode="routes">Маршрути</button>
-        </div>
-        <div class="specPanel">
-          <div class="specPanelHead">
-            <div>
-              <div class="specPanelTitle">Напрями клініки</div>
-              <div class="hint">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
-            </div>
-            <button class="primary" id="btnAddSpec" type="button">+ Додати напрям</button>
-          </div>
-          <div class="specList">
-            ${specializations.length ? specializations.map((s) => `<div class="specPill" style="border-left:5px solid ${escapeHtml(s.color || "#7C5CFF")}">${escapeHtml(s.name || "Напрям")}</div>`).join("") : `<div class="hint">Напрями ще не створені.</div>`}
+
+          <div class="calendarModes">
+            <button class="ghost" data-cal-mode="day">День</button>
+            <button class="ghost" data-cal-mode="week">Тиждень</button>
+            <button class="primary" data-cal-mode="month">Місяць</button>
+            <button class="ghost" data-cal-mode="routes">Маршрути</button>
           </div>
         </div>
-        <div class="vetList">
-  ${staff.map((doc) => {
-    const row = scheduleMap.get(String(doc.id));
-    const isActive = row ? row.is_active !== false : false;
 
-    const staffColor = doc.color || "#7C5CFF";
-    const staffName = doc.name || "Працівник";
-    const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
-
-    return `
-      <div class="vetCard premiumVetCard" style="--staff-color:${escapeHtml(staffColor)};">
-        
-        <div class="vetAvatarWrap">
-          ${
-            doc.avatar
-              ? `<img class="vetAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
-              : `<div class="vetAvatarLetter">${escapeHtml(staffLetter)}</div>`
-          }
+        <div class="calendarTop">
+          <button class="ghost" id="calPrevMonth" type="button">←</button>
+          <div class="calendarDate">${monthNames[month]} ${year}</div>
+          <button class="ghost" id="calNextMonth" type="button">→</button>
         </div>
 
-        <div class="vetInfo premiumVetInfo">
-          <div class="premiumVetTop">
-            <div>
-              <div class="premiumVetName">${escapeHtml(staffName)}</div>
-              <div class="premiumVetRole">${escapeHtml(doc.role || "Ветеринарний лікар")}</div>
+        <div class="monthPlannerLayout">
+          <div class="monthPlannerMain">
+            <div class="monthWeekHead">
+              ${dayNames.map((d) => `<div>${d}</div>`).join("")}
             </div>
 
-            <button 
-              class="scheduleStatus premiumStatus ${isActive ? "active" : ""}" 
-              type="button" 
-              data-schedule-staff-id="${escapeHtml(String(doc.id))}">
-              ${isActive ? "На зміні" : "Вихідний"}
+            <div class="monthGrid">
+              ${monthDays.map((date) => {
+                const d = new Date(date);
+                const isCurrentMonth = d.getMonth() === month;
+                const isToday = date === (typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0, 10));
+
+                const daySchedule = scheduleByDate.get(date) || [];
+                const activeIds = new Set(
+                  daySchedule
+                    .filter((x) => x.is_active !== false)
+                    .map((x) => String(x.staff_id))
+                );
+
+                const activeStaff = daySchedule.length
+                  ? staff.filter((doc) => activeIds.has(String(doc.id)))
+                  : [];
+
+                const dayEvents = monthEvents.filter((ev) => String(ev.event_date || "") === date);
+
+                return `
+                  <div class="monthDay ${isCurrentMonth ? "" : "muted"} ${isToday ? "today" : ""}" data-month-date="${escapeHtml(date)}">
+                    <div class="monthDayTop">
+                      <div class="monthDayNum">${d.getDate()}</div>
+                      ${dayEvents.length ? `<div class="monthVisitCount">${dayEvents.length} записів</div>` : ""}
+                    </div>
+
+                    <div class="monthStaffList">
+                      ${
+                        activeStaff.length
+                          ? activeStaff.slice(0, 3).map((doc) => `
+                            <div class="monthStaffPill" style="border-left:4px solid ${escapeHtml(doc.color || "#7C5CFF")}">
+                              👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}
+                            </div>
+                          `).join("")
+                          : `<div class="monthEmptyShift">Змін немає</div>`
+                      }
+                      ${activeStaff.length > 3 ? `<div class="monthMore">+${activeStaff.length - 3} ще</div>` : ""}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <aside class="monthShiftDrawer" id="monthShiftDrawer">
+            <div class="monthDrawerPlaceholder">
+              <div class="monthDrawerPlaceholderIcon">📅</div>
+              <div class="monthDrawerPlaceholderTitle">Обери день</div>
+              <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    `;
+
+    $("[data-cal-mode='day']")?.addEventListener("click", async () => {
+      calendarMode = "day";
+      await renderCalendarTab();
+    });
+
+    $("[data-cal-mode='week']")?.addEventListener("click", async () => {
+      calendarMode = "week";
+      await renderCalendarTab();
+    });
+
+    $("[data-cal-mode='routes']")?.addEventListener("click", async () => {
+      calendarMode = "routes";
+      await renderCalendarTab();
+    });
+
+    $("#calPrevMonth")?.addEventListener("click", async () => {
+      const d = new Date(year, month - 1, 1, 12, 0, 0);
+      window.__calendarDate = localISO(d);
+      await renderCalendarTab();
+    });
+
+    $("#calNextMonth")?.addEventListener("click", async () => {
+      const d = new Date(year, month + 1, 1, 12, 0, 0);
+      window.__calendarDate = localISO(d);
+      await renderCalendarTab();
+    });
+
+    const selectedMonthDates = new Set();
+
+    const openMonthShiftDrawer = (date) => {
+      const drawer = $("#monthShiftDrawer");
+      if (!drawer) return;
+
+      const daySchedule = scheduleByDate.get(date) || [];
+      const activeIds = new Set(
+        daySchedule
+          .filter((x) => x.is_active !== false)
+          .map((x) => String(x.staff_id))
+      );
+
+      drawer.innerHTML = `
+        <div class="monthDrawerCard">
+          <div class="monthDrawerHead">
+            <div>
+              <div class="monthDrawerTitle">📅 Графік на ${escapeHtml(date)}</div>
+              <div class="hint">Обери, хто працює в цей день.</div>
+            </div>
+            <button class="ghost" id="monthDrawerClose" type="button">×</button>
+          </div>
+
+          <div class="monthDrawerQuick">
+            <button class="ghost" id="monthAllActive" type="button">Усі на зміні</button>
+            <button class="ghost" id="monthAllOff" type="button">Усім вихідний</button>
+          </div>
+
+          <div class="monthBulkBox">
+            <div class="monthBulkTitle">Масове призначення</div>
+
+            <label class="monthBulkField">
+              <span>Лікар</span>
+              <select id="monthBulkStaff">
+                ${staff.map((doc) => `
+                  <option value="${escapeHtml(String(doc.id))}">
+                    ${escapeHtml(doc.name || "Працівник")}
+                  </option>
+                `).join("")}
+              </select>
+            </label>
+
+            ${selectedMonthDates.size > 1 ? `
+              <div class="monthSelectedBox">
+                <div class="monthBulkTitle">Виділено днів: ${selectedMonthDates.size}</div>
+
+                <label class="monthBulkField">
+                  <span>Лікар для виділених днів</span>
+                  <select id="monthSelectedStaff">
+                    ${staff.map((doc) => `
+                      <option value="${escapeHtml(String(doc.id))}">
+                        ${escapeHtml(doc.name || "Працівник")}
+                      </option>
+                    `).join("")}
+                  </select>
+                </label>
+
+                <button class="primary monthBulkApply" id="monthApplySelectedDates" type="button">
+                  Застосувати на виділені дні
+                </button>
+              </div>
+            ` : ""}
+
+            <div class="monthBulkDates">
+              <label class="monthBulkField">
+                <span>Від</span>
+                <input id="monthBulkFrom" type="date" value="${escapeHtml(date)}">
+              </label>
+
+              <label class="monthBulkField">
+                <span>До</span>
+                <input id="monthBulkTo" type="date" value="${escapeHtml(date)}">
+              </label>
+            </div>
+
+            <div class="monthBulkDays">
+              <button type="button" class="monthBulkDay active" data-bulk-day="1">Пн</button>
+              <button type="button" class="monthBulkDay active" data-bulk-day="2">Вт</button>
+              <button type="button" class="monthBulkDay active" data-bulk-day="3">Ср</button>
+              <button type="button" class="monthBulkDay active" data-bulk-day="4">Чт</button>
+              <button type="button" class="monthBulkDay active" data-bulk-day="5">Пт</button>
+              <button type="button" class="monthBulkDay" data-bulk-day="6">Сб</button>
+              <button type="button" class="monthBulkDay" data-bulk-day="7">Нд</button>
+            </div>
+
+            <button class="primary monthBulkApply" id="monthBulkApply" type="button">
+              Застосувати графік
             </button>
           </div>
 
-          <div class="premiumVetSpecs">
-            <span class="premiumSpecTag">${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</span>
+          <div class="monthDrawerStaff">
+            ${staff.map((doc) => {
+              const active = activeIds.has(String(doc.id));
+
+              return `
+                <button
+                  class="monthShiftToggle ${active ? "active" : ""}"
+                  type="button"
+                  data-month-shift-staff="${escapeHtml(String(doc.id))}"
+                  style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
+                >
+                  <span>👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</span>
+                  <b>${active ? "На зміні" : "Вихідний"}</b>
+                </button>
+              `;
+            }).join("")}
           </div>
 
-          <div class="premiumVetMeta">
-            <div class="premiumMetaItem">
-              <span>Телефон</span>
-              <strong>${escapeHtml(doc.phone || "Не вказано")}</strong>
-            </div>
-
-            <div class="premiumMetaItem">
-              <span>Ставка</span>
-              <strong>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</strong>
-            </div>
-
-            <div class="premiumMetaItem">
-              <span>Відсоток</span>
-              <strong>${escapeHtml(String(doc.percent_rate || 0))}%</strong>
-            </div>
+          <div class="monthDrawerActions">
+            <button class="ghost" id="monthGoToDay" type="button">Відкрити день</button>
+            <button class="primary" id="monthSaveShift" type="button">💾 Зберегти</button>
           </div>
         </div>
+      `;
 
-        <div class="vetActions premiumVetActions">
-  <button class="ghost premiumProfileBtn" type="button" data-open-staff-profile="${escapeHtml(String(doc.id))}">
-    👤 Профіль
-  </button>
+      drawer.classList.add("open");
 
-  <button class="ghost premiumEditBtn" type="button" data-edit-staff="${escapeHtml(String(doc.id))}">
-    ✏️ Редагувати
-  </button>
-</div>
+      const setToggleState = (btn, active) => {
+        btn.classList.toggle("active", active);
+        const label = btn.querySelector("b");
+        if (label) label.textContent = active ? "На зміні" : "Вихідний";
+      };
 
-      </div>
-    `;
-  }).join("")}
-</div>
-      </div>
-    `;
+      $("#monthDrawerClose")?.addEventListener("click", () => {
+        drawer.classList.remove("open");
+        drawer.innerHTML = `
+          <div class="monthDrawerPlaceholder">
+            <div class="monthDrawerPlaceholderIcon">📅</div>
+            <div class="monthDrawerPlaceholderTitle">Обери день</div>
+            <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
+          </div>
+        `;
+      });
 
-    $("#btnAddStaffFromCalendar")?.addEventListener("click", () => { openCreateStaffModal(); });
-    $("#btnAddSpec")?.addEventListener("click", async () => {
-      const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
-      if (!name) return;
-      const created = await createSpecializationApi({ name, color: "#7C5CFF" });
-      if (created) await renderCalendarTab();
-    });
+      $$(".monthShiftToggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setToggleState(btn, !btn.classList.contains("active"));
+        });
+      });
 
-    $("[data-cal-mode='day']")?.addEventListener("click", async () => { calendarMode = "day"; await renderCalendarTab(); });
-    $("[data-cal-mode='week']")?.addEventListener("click", async () => { calendarMode = "week"; await renderCalendarTab(); });
-    $("[data-cal-mode='month']")?.addEventListener("click", async () => { calendarMode = "month"; await renderCalendarTab(); });
-    $("[data-cal-mode='routes']")?.addEventListener("click", async () => { calendarMode = "routes"; await renderCalendarTab(); });
+      $("#monthAllActive")?.addEventListener("click", () => {
+        $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, true));
+      });
 
-    $$(".scheduleStatus").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const staffId = btn.dataset.scheduleStaffId;
-        const isActive = !btn.classList.contains("active");
-        const saved = await saveStaffScheduleApi({ work_date: today, staff_id: staffId, is_active: isActive });
-        if (!saved) return;
-        btn.classList.toggle("active", isActive);
-        btn.textContent = isActive ? "На зміні" : "Вихідний";
+      $("#monthAllOff")?.addEventListener("click", () => {
+        $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, false));
+      });
+
+      $$(".monthBulkDay").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          btn.classList.toggle("active");
+        });
+      });
+
+      $("#monthBulkApply")?.addEventListener("click", async () => {
+        const staffId = $("#monthBulkStaff")?.value;
+        const from = $("#monthBulkFrom")?.value;
+        const to = $("#monthBulkTo")?.value;
+
+        const selectedDays = $$(".monthBulkDay.active")
+          .map((btn) => Number(btn.dataset.bulkDay));
+
+        if (!staffId || !from || !to || !selectedDays.length) {
+          alert("Оберіть лікаря, період і дні тижня.");
+          return;
+        }
+
+        const start = new Date(from + "T12:00:00");
+        const end = new Date(to + "T12:00:00");
+
+        if (start > end) {
+          alert("Дата 'від' не може бути пізніше дати 'до'.");
+          return;
+        }
+
+        const dates = [];
+        const cursor = new Date(start);
+
+        while (cursor <= end) {
+          const jsDay = cursor.getDay();
+          const normalizedDay = jsDay === 0 ? 7 : jsDay;
+
+          if (selectedDays.includes(normalizedDay)) {
+            dates.push(localISO(cursor));
+          }
+
+          cursor.setDate(cursor.getDate() + 1);
+        }
+
+        if (!dates.length) {
+          alert("У вибраному періоді немає таких днів.");
+          return;
+        }
+
+        if (!confirm(`Застосувати графік для ${dates.length} днів?`)) return;
+
+        for (const workDate of dates) {
+          await saveStaffScheduleApi({
+            work_date: workDate,
+            staff_id: staffId,
+            is_active: true,
+          });
+        }
+
+        await renderCalendarTab();
+      });
+
+      $("#monthApplySelectedDates")?.addEventListener("click", async () => {
+        const staffId = $("#monthSelectedStaff")?.value;
+
+        if (!staffId || selectedMonthDates.size < 2) {
+          alert("Виділи дні та обери лікаря.");
+          return;
+        }
+
+        const dates = Array.from(selectedMonthDates).sort();
+
+        if (!confirm(`Призначити лікаря на ${dates.length} днів?`)) return;
+
+        for (const workDate of dates) {
+          await saveStaffScheduleApi({
+            work_date: workDate,
+            staff_id: staffId,
+            is_active: true,
+          });
+        }
+
+        await renderCalendarTab();
+      });
+
+      $("#monthGoToDay")?.addEventListener("click", async () => {
+        window.__calendarDate = date;
+        calendarMode = "day";
+        await renderCalendarTab();
+      });
+
+      $("#monthSaveShift")?.addEventListener("click", async () => {
+        const activeStaffIds = new Set(
+          $$(".monthShiftToggle.active").map((btn) => String(btn.dataset.monthShiftStaff))
+        );
+
+        for (const doc of staff) {
+          await saveStaffScheduleApi({
+            work_date: date,
+            staff_id: doc.id,
+            is_active: activeStaffIds.has(String(doc.id)),
+          });
+        }
+
+        await renderCalendarTab();
+      });
+    };
+
+    $$("[data-month-date]").forEach((cell) => {
+      cell.addEventListener("click", () => {
+        const date = cell.dataset.monthDate;
+        if (!date) return;
+
+        $$("[data-month-date]").forEach((x) => x.classList.remove("selected"));
+        cell.classList.add("selected");
+
+        openMonthShiftDrawer(date);
       });
     });
 
-    $$("[data-edit-staff]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.editStaff;
-        const staffRow = staff.find((x) => String(x.id) === String(id));
-        if (!staffRow) return;
-        openEditStaffModal(staffRow);
-      });
-    });
-
-    $$("[data-open-staff-profile]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const id = btn.dataset.openStaffProfile;
-    const staffRow = staff.find((x) => String(x.id) === String(id));
-    if (!staffRow) return;
-    openStaffProfileModal(staffRow);
-  });
-});
     return;
   }
 
   const hours = [];
-  for (let h = 7; h <= 24; h++) { hours.push(String(h).padStart(2, "0") + ":00"); }
+  for (let h = 7; h <= 24; h++) {
+    hours.push(String(h).padStart(2, "0") + ":00");
+  }
 
   const staffHtml = staffOnShift.map((doc) => {
     const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
+
     const toMinutes = (t) => {
       const [h, m] = String(t || "00:00").split(":").map(Number);
       return (h || 0) * 60 + (m || 0);
@@ -5517,8 +5402,10 @@ return;
           <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
           <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
         </div>
+
         ${hours.map((hour) => {
           const hourStart = toMinutes(hour);
+
           const hourEvents = docEvents.filter((ev) => {
             const start = String(ev.start_time || "").slice(0, 5);
             return toMinutes(start) === hourStart;
@@ -5535,27 +5422,29 @@ return;
               ${
                 hourEvents.length
                   ? hourEvents.map((ev) => {
-                      const start = String(ev.start_time || "").slice(0, 5);
-                      const end = String(ev.end_time || "").slice(0, 5);
-                      const startMin = toMinutes(start);
-                      const endMin = toMinutes(end || start);
-                      const durationMinutes = Math.max(60, endMin - startMin);
-                      const slots = Math.max(1, durationMinutes / 60);
-                      const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
+                    const start = String(ev.start_time || "").slice(0, 5);
+                    const end = String(ev.end_time || "").slice(0, 5);
+                    const startMin = toMinutes(start);
+                    const endMin = toMinutes(end || start);
+                    const durationMinutes = Math.max(60, endMin - startMin);
+                    const slots = Math.max(1, durationMinutes / 60);
+                    const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
 
-                      return `
-                        <div class="calEventCard calEventLong" data-edit-calendar-event="${escapeHtml(String(ev.id))}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}; min-height:${height}px;">
-                          <div class="calEventTop">
-                            <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
-                            <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
-                          </div>
-                          <div class="calEventTime">${escapeHtml(start)}${end ? `— ${escapeHtml(end)}` : ""}</div>
-                          ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
-                          ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
+                    return `
+                      <div class="calEventCard calEventLong" data-edit-calendar-event="${escapeHtml(String(ev.id))}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}; min-height:${height}px;">
+                        <div class="calEventTop">
+                          <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
+                          <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
                         </div>
-                      `;
-                    }).join("")
-                  : isCoveredByLongEvent ? "" : `<div class="calEmptySlot" data-empty-slot="1" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}">+ Запис</div>`
+                        <div class="calEventTime">${escapeHtml(start)}${end ? `— ${escapeHtml(end)}` : ""}</div>
+                        ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
+                        ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
+                      </div>
+                    `;
+                  }).join("")
+                  : isCoveredByLongEvent
+                    ? ""
+                    : `<div class="calEmptySlot" data-empty-slot="1" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}">+ Запис</div>`
               }
             </div>
           `;
@@ -5578,27 +5467,33 @@ return;
           <h2>Календар</h2>
           <div class="hint">Перетягни ветеринара справа на потрібний час.</div>
         </div>
+
         <div class="calendarModes">
           <button class="primary" data-cal-mode="day">День</button>
           <button class="ghost" data-cal-mode="week">Тиждень</button>
           <button class="ghost" data-cal-mode="month">Місяць</button>
-          <button class="ghost" data-cal-mode="schedule">Ветеринари</button>
           <button class="ghost" data-cal-mode="routes">Маршрути</button>
         </div>
       </div>
+
       <div class="calendarTop">
         <button class="ghost" id="calPrevDay" type="button">←</button>
         <div class="calendarDate">${escapeHtml(today)}</div>
         <button class="ghost" id="calNextDay" type="button">→</button>
       </div>
+
       <div class="calendarWorkArea">
         <div class="calendarDayGrid">
           <div class="calTimeCol">
             <div class="calTimeHead">Час</div>
             ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
           </div>
-          <div class="calDoctorsGrid">${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}</div>
+
+          <div class="calDoctorsGrid">
+            ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
+          </div>
         </div>
+
         <aside class="calStaffPanel">
           <div class="calStaffPanelHead">
             <div>
@@ -5607,7 +5502,10 @@ return;
             </div>
             <button class="miniBtn" id="btnAddStaffFromCalendar" type="button">+ Додати</button>
           </div>
-          <div class="calStaffDragList">${staffPaletteHtml || `<div class="hint">Немає співробітників.</div>`}</div>
+
+          <div class="calStaffDragList">
+            ${staffPaletteHtml || `<div class="hint">Немає співробітників.</div>`}
+          </div>
         </aside>
       </div>
     </div>
@@ -5623,28 +5521,50 @@ return;
       e.dataTransfer.effectAllowed = "copy";
       card.classList.add("dragging");
     });
-    card.addEventListener("dragend", () => { card.classList.remove("dragging"); });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+    });
   });
 
   $$(".calSlot").forEach((slot) => {
     slot.addEventListener("click", (e) => {
       if (slot.classList.contains("calSlotCovered")) return;
       if (slot.querySelector(".calEventCard")) return;
+
       const target = e.target.closest("[data-empty-slot]") || slot;
       const hour = target.dataset.hour || slot.dataset.hour;
       const staffId = target.dataset.staffId || slot.dataset.staffId;
+
       if (!hour || !staffId) return;
+
       openVisitFromCalendar(hour, staffId);
     });
 
-    slot.addEventListener("dragover", (e) => { e.preventDefault(); slot.classList.add("calSlotDrop"); });
-    slot.addEventListener("dragleave", () => { slot.classList.remove("calSlotDrop"); });
-    slot.addEventListener("drop", async (e) => {
-      e.preventDefault(); slot.classList.remove("calSlotDrop");
-      let data = null;
-      try { data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}"); } catch { return; }
+    slot.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      slot.classList.add("calSlotDrop");
+    });
 
-      const staffId = data.staff_id; if (!staffId) return;
+    slot.addEventListener("dragleave", () => {
+      slot.classList.remove("calSlotDrop");
+    });
+
+    slot.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      slot.classList.remove("calSlotDrop");
+
+      let data = null;
+
+      try {
+        data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}");
+      } catch {
+        return;
+      }
+
+      const staffId = data.staff_id;
+      if (!staffId) return;
+
       const hour = slot.dataset.hour;
       const title = (prompt(`Запис на ${hour}. Назва:`, "Новий прийом") || "").trim();
       if (!title) return;
@@ -5654,35 +5574,74 @@ return;
       const endTime = addMinutesToTime(hour, duration);
       const note = (prompt("Коментар:", "") || "").trim();
 
-      const created = await createCalendarEventApi({ title, event_date: today, start_time: hour, end_time: endTime, staff_id: staffId, note });
+      const created = await createCalendarEventApi({
+        title,
+        event_date: today,
+        start_time: hour,
+        end_time: endTime,
+        staff_id: staffId,
+        note,
+      });
+
       if (created) await renderCalendarTab();
     });
   });
 
-  $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => { alert("Наступний крок: зробимо форму додавання ветеринара в Supabase."); });
-  $("#calPrevDay")?.addEventListener("click", async () => { const d = new Date(today); d.setDate(d.getDate() - 1); window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab(); });
-  $("#calNextDay")?.addEventListener("click", async () => { const d = new Date(today); d.setDate(d.getDate() + 1); window.__calendarDate = d.toISOString().slice(0, 10); await renderCalendarTab(); });
+  $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => {
+    alert("Додавання співробітників тепер знаходиться у розділі Команда.");
+  });
+
+  $("#calPrevDay")?.addEventListener("click", async () => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - 1);
+    window.__calendarDate = d.toISOString().slice(0, 10);
+    await renderCalendarTab();
+  });
+
+  $("#calNextDay")?.addEventListener("click", async () => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    window.__calendarDate = d.toISOString().slice(0, 10);
+    await renderCalendarTab();
+  });
 
   $$("[data-del-calendar-event]").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
-      e.preventDefault(); e.stopPropagation();
-      const id = btn.dataset.delCalendarEvent; if (!id) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const id = btn.dataset.delCalendarEvent;
+      if (!id) return;
+
       if (!confirm("Видалити запис з календаря?")) return;
-      const ok = await deleteCalendarEventApi(id); if (ok) await renderCalendarTab();
+
+      const ok = await deleteCalendarEventApi(id);
+      if (ok) await renderCalendarTab();
     });
   });
 
   $$("[data-edit-calendar-event]").forEach((card) => {
     card.addEventListener("click", async (e) => {
       if (e.target.closest("[data-del-calendar-event]")) return;
-      const id = card.dataset.editCalendarEvent; if (!id) return;
+
+      const id = card.dataset.editCalendarEvent;
+      if (!id) return;
+
       const ev = todayEvents.find((x) => String(x.id) === String(id));
       if (!ev) return alert("Запис не знайдено");
-      openCalendarEditModal(ev, today, async () => { await renderCalendarTab(); });
+
+      openCalendarEditModal(ev, today, async () => {
+        await renderCalendarTab();
+      });
     });
   });
 
-  $$("[data-cal-mode]").forEach((btn) => { btn.addEventListener("click", async () => { calendarMode = btn.dataset.calMode; await renderCalendarTab(); }); });
+  $$("[data-cal-mode]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      calendarMode = btn.dataset.calMode;
+      await renderCalendarTab();
+    });
+  });
 }
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ПЕРСОНАЛ, МОДАЛКИ КАЛЕНДАРЯ И КАРТОЧКИ АНАЛИЗОВ)
