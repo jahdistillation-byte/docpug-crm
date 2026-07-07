@@ -1022,6 +1022,25 @@ def api_rebuild_staff_rating():
         )
         visits = visits_res.data or []
 
+        visit_ids = [v.get("id") for v in visits if v.get("id")]
+        services_by_visit, stock_by_visit = load_visit_lines(visit_ids)
+
+        def calc_rating_total(v):
+            visit_id = v.get("id")
+            total = 0
+
+            for s in services_by_visit.get(visit_id, []):
+                qty = float(s.get("qty") or 1)
+                price = float(s.get("priceSnap") or s.get("price_snap") or 0)
+                total += qty * price
+
+            for st in stock_by_visit.get(visit_id, []):
+                qty = float(st.get("qty") or 1)
+                price = float(st.get("priceSnap") or st.get("price_snap") or 0)
+                total += qty * price
+
+            return round(total)
+
         rows = []
 
         for staff in staff_list:
@@ -1033,11 +1052,7 @@ def api_rebuild_staff_rating():
             ]
 
             visits_count = len(staff_visits)
-            revenue = round(sum(
-    calc_rating_visit_total(v)
-    for v in staff_visits
-))
-
+            revenue = round(sum(calc_rating_total(v) for v in staff_visits))
             avg_check = round(revenue / visits_count) if visits_count else 0
             xp = visits_count * 10
 
