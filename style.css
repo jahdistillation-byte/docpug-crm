@@ -8539,3 +8539,19 @@ body[data-theme="white"] .monthDayNum {
   padding: 24px;
   overflow-y: auto;
 }
+.btnDanger{
+    background:linear-gradient(180deg,#ff5d5d,#d52d2d);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding:12px 22px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 0 20px rgba(255,70,70,.35);
+    transition:.2s;
+}
+
+.btnDanger:hover{
+    transform:translateY(-1px);
+    box-shadow:0 0 28px rgba(255,70,70,.55);
+}

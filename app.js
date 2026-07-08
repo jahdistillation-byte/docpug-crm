@@ -283,7 +283,38 @@ function todayISO() {
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+// ======================================
+// Универсальное окно подтверждения удаления
+// ======================================
 
+let deleteCallback = null;
+
+function openDeleteModal(text, callback) {
+
+    $("#deleteModalText").innerHTML = text;
+
+    deleteCallback = callback;
+
+    $("#deleteModal").style.display = "flex";
+}
+
+function closeDeleteModal() {
+
+    $("#deleteModal").style.display = "none";
+
+    deleteCallback = null;
+}
+
+$("#deleteCancel")?.addEventListener("click", closeDeleteModal);
+
+$("#deleteConfirm")?.addEventListener("click", async () => {
+
+    if (deleteCallback) {
+        await deleteCallback();
+    }
+
+    closeDeleteModal();
+});
 function nowISO() {
   return new Date().toISOString();
 }
@@ -7838,14 +7869,25 @@ function initOwnersUI() {
       const id = delBtn.dataset.del;
       if (!id) return;
 
-      if (!confirm("Удалить владельца?")) return;
+      openDeleteModal(
 
-      const ok = await deleteOwner(id);
+`<b>${owner.name}</b><br><br>
+Цю дію неможливо скасувати.`,
 
-      if (!ok) {
-        alert("Не удалось удалить владельца");
+async () => {
+
+    const ok = await deleteOwner(id);
+
+    if (!ok) {
+        alert("Не вдалося видалити");
         return;
-      }
+    }
+
+    await loadOwners();
+
+}
+
+);
 
       await loadOwners();
       return;
