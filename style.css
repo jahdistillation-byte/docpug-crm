@@ -8462,3 +8462,28 @@ body[data-theme="white"] .monthDayNum {
     grid-template-columns: 1fr;
   }
 }
+/* FIX: footer кнопки в модалке визита всегда видны */
+.pugVisitModal {
+  max-height: 86vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.pugVisitBody {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding-bottom: 24px !important;
+}
+
+.pugVisitFoot {
+  flex: 0 0 auto !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 20 !important;
+  background: rgba(20, 10, 38, 0.92) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 16px 24px !important;
+}
