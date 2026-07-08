@@ -589,8 +589,49 @@ def api_create_owner():
 def api_delete_owner(owner_id):
     if not owner_id:
         return fail("owner_id required", 400)
+
     current_org = get_current_org_id()
-    supabase.table("owners").delete().eq("org_id", current_org).eq("id", owner_id).execute()
+
+    # 1. Находим всех пациентов владельца
+    pets_res = (
+        supabase.table("patients")
+        .select("id")
+        .eq("org_id", current_org)
+        .eq("owner_id", owner_id)
+        .execute()
+    )
+
+    pet_ids = [p["id"] for p in (pets_res.data or [])]
+
+    # 2. Удаляем календарные события владельца
+    supabase.table("calendar_events") \
+        .delete() \
+        .eq("org_id", current_org) \
+        .eq("owner_id", owner_id) \
+        .execute()
+
+    # 3. Удаляем визиты пациентов
+    for pet_id in pet_ids:
+        supabase.table("visits") \
+            .delete() \
+            .eq("org_id", current_org) \
+            .eq("pet_id", pet_id) \
+            .execute()
+
+    # 4. Удаляем пациентов владельца
+    supabase.table("patients") \
+        .delete() \
+        .eq("org_id", current_org) \
+        .eq("owner_id", owner_id) \
+        .execute()
+
+    # 5. Удаляем владельца
+    supabase.table("owners") \
+        .delete() \
+        .eq("org_id", current_org) \
+        .eq("id", owner_id) \
+        .execute()
+
     return ok(True)
 
 # =========================
