@@ -9674,14 +9674,17 @@ document.addEventListener("click", async (e) => {
       if (!owner?.id) throw new Error("Не вдалося створити власника");
 
       const pet = await createPatientApi({
-        owner_id: owner.id,
-        name: petName,
-        species,
-        breed,
-        age,
-        weight_kg: weight,
-        notes: "",
-      });
+  owner_id: owner.id,
+  ownerId: owner.id,
+  owner: owner.id,
+
+  name: petName,
+  species,
+  breed,
+  age,
+  weight_kg: weight,
+  notes: "",
+});
 
       if (!pet?.id) throw new Error("Не вдалося створити пацієнта");
 

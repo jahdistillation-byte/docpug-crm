@@ -306,81 +306,74 @@
         </button>
       </div>
 
-     <div id="visitNewPatientBox" class="pugQuickPatientBox" style="display:none;">
-  <div class="pugQuickPatientHead">
-    <div>
-      <div class="pugQuickPatientTitle">🐾 Новий пацієнт</div>
-      <div class="pugQuickPatientSub">Створення пацієнта прямо з календаря</div>
-    </div>
-  </div>
+      <div id="visitNewPatientBox" class="pugVisitSection pugQuickPatientBox" style="display:none;">
+        <div class="pugQuickPatientHead">
+          <div>
+            <div class="pugQuickPatientTitle">🐾 Новий пацієнт</div>
+            <div class="pugQuickPatientSub">Створення пацієнта прямо з календаря</div>
+          </div>
+        </div>
 
-  <div class="pugQuickPatientGrid">
-    <div class="pugQuickGroup">
-      <div class="pugQuickGroupTitle">👤 Власник</div>
+        <div class="pugQuickPatientGrid">
+          <div class="pugQuickGroup">
+            <div class="pugQuickGroupTitle">👤 Власник</div>
 
-      <label class="pugVisitField">
-        <span>ПІБ власника *</span>
-        <input class="pugVisitInput" id="visitNewOwnerName" placeholder="Напр. Іваненко Олена">
-      </label>
+            <label class="pugVisitField">
+              <span>ПІБ власника *</span>
+              <input class="pugVisitInput" id="visitNewOwnerName" placeholder="Напр. Іваненко Олена">
+            </label>
 
-      <label class="pugVisitField">
-        <span>Телефон *</span>
-        <input class="pugVisitInput" id="visitNewOwnerPhone" placeholder="+380...">
-      </label>
+            <label class="pugVisitField">
+              <span>Телефон *</span>
+              <input class="pugVisitInput" id="visitNewOwnerPhone" placeholder="+380...">
+            </label>
 
-      <label class="pugVisitField">
-        <span>Адреса / нотатка</span>
-        <input class="pugVisitInput" id="visitNewOwnerNote" placeholder="Район, адреса, коментар">
-      </label>
-    </div>
+            <label class="pugVisitField">
+              <span>Адреса / нотатка</span>
+              <input class="pugVisitInput" id="visitNewOwnerNote" placeholder="Район, адреса, коментар">
+            </label>
+          </div>
 
-    <div class="pugQuickGroup">
-      <div class="pugQuickGroupTitle">🐶 Пацієнт</div>
+          <div class="pugQuickGroup">
+            <div class="pugQuickGroupTitle">🐶 Пацієнт</div>
 
-      <label class="pugVisitField">
-        <span>Кличка *</span>
-        <input class="pugVisitInput" id="visitNewPetName" placeholder="Напр. Бусинка">
-      </label>
+            <label class="pugVisitField">
+              <span>Кличка *</span>
+              <input class="pugVisitInput" id="visitNewPetName" placeholder="Напр. Бусинка">
+            </label>
 
-      <label class="pugVisitField">
-        <span>Вид *</span>
-        <select class="pugVisitInput" id="visitNewPetSpecies">
-          <option value="">Оберіть вид</option>
-          <option value="dog">Собака</option>
-          <option value="cat">Кіт</option>
-          <option value="other">Інше</option>
-        </select>
-      </label>
+            <label class="pugVisitField">
+              <span>Вид *</span>
+              <select class="pugVisitInput" id="visitNewPetSpecies">
+                <option value="">Оберіть вид</option>
+                <option value="dog">Собака</option>
+                <option value="cat">Кіт</option>
+                <option value="other">Інше</option>
+              </select>
+            </label>
 
-      <label class="pugVisitField">
-        <span>Порода</span>
-        <input class="pugVisitInput" id="visitNewPetBreed" placeholder="Порода">
-      </label>
+            <label class="pugVisitField">
+              <span>Порода</span>
+              <input class="pugVisitInput" id="visitNewPetBreed" placeholder="Порода">
+            </label>
 
-      <label class="pugVisitField">
-        <span>Вік</span>
-        <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки">
-      </label>
+            <label class="pugVisitField">
+              <span>Вік</span>
+              <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки">
+            </label>
 
-      <label class="pugVisitField">
-        <span>Вага, кг</span>
-        <input class="pugVisitInput" id="visitNewPetWeight" placeholder="Напр. 7.5">
-      </label>
-    </div>
-  </div>
+            <label class="pugVisitField">
+              <span>Вага, кг</span>
+              <input class="pugVisitInput" id="visitNewPetWeight" placeholder="Напр. 7.5">
+            </label>
+          </div>
+        </div>
 
-  <div class="pugQuickPatientActions">
-    <button type="button" class="pugQuickCancel" id="visitNewPatientCancel">Скасувати</button>
-    <button type="button" class="pugQuickCreate" id="visitNewPatientCreate">Створити пацієнта</button>
-  </div>
-</div>
-
-  <input class="pugVisitInput" id="visitNewOwnerName" placeholder="ПІБ власника *">
-  <input class="pugVisitInput" id="visitNewOwnerPhone" placeholder="+380... *">
-  <input class="pugVisitInput" id="visitNewPetName" placeholder="Кличка пацієнта *">
-  <input class="pugVisitInput" id="visitNewPetSpecies" placeholder="Кіт / Собака">
-  <input class="pugVisitInput" id="visitNewPetBreed" placeholder="Порода">
-</div>
+        <div class="pugQuickPatientActions">
+          <button type="button" class="pugQuickCancel" id="visitNewPatientCancel">Скасувати</button>
+          <button type="button" class="pugQuickCreate" id="visitNewPatientCreate">Створити пацієнта</button>
+        </div>
+      </div>
 
       <div class="pugVisitSection pugVisitDetailsBlock">
         <div class="pugSectionTitle">
@@ -456,133 +449,5 @@
   </div>
 </div>
 
-    <!-- STAFF DыыRAWER -->
-    <div id="staffDrawer" class="modal-overlay" aria-hidden="true">
-        <div class="modal-window" style="max-width:520px; overflow-y:auto; max-height:90vh;">
-            <h3 style="margin:0 0 20px;color:#fff">Ветеринар</h3>
-            <input type="hidden" id="staffId">
-            <div style="display:flex;flex-direction:column;gap:14px;">
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">ПІБ *</div>
-                    <input id="staffName" class="premium-input" style="width:100%" placeholder="Іванов Іван Іванович">
-                </div>
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Роль</div>
-                    <select id="staffRole" class="premium-select" style="width:100%">
-                        <option value="vet">Ветеринар</option>
-                        <option value="assistant">Асистент</option>
-                    </select>
-                </div>
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Спеціалізація</div>
-                    <input id="staffSpecialization" class="premium-input" style="width:100%" placeholder="Хірург, терапевт...">
-                </div>
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Телефон</div>
-                    <input id="staffPhone" class="premium-input" style="width:100%" placeholder="+380...">
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                    <div>
-                        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Ставка (грн/зміна)</div>
-                        <input id="staffShiftRate" class="premium-input" style="width:100%" type="number" value="0">
-                    </div>
-                    <div>
-                        <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Відсоток %</div>
-                        <input id="staffPercentRate" class="premium-input" style="width:100%" type="number" value="0">
-                    </div>
-                </div>
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Колір</div>
-                    <input id="staffColor" type="color" value="#7C5CFF" style="width:60px;height:36px;border:none;background:none;cursor:pointer">
-                </div>
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:6px">Нотатка</div>
-                    <textarea id="staffNote" class="premium-input" style="width:100%;resize:vertical" rows="2"></textarea>
-                </div>
-                <div>
-                    <div style="font-size:0.8rem;opacity:0.5;margin-bottom:8px">Напрями</div>
-                    <div id="staffSpecsBox"></div>
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
-                <button class="premium-secondary-btn premium-neon-btn" data-close-staff style="width:auto;padding:12px 20px">Скасувати</button>
-                <button id="staffSave" class="premium-neon-btn" style="width:auto;padding:12px 24px">💾 Зберегти</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TEMPLATES -->
-    <template id="visit-timeline-item-template">
-        <div class="timeline-item">
-            <div class="timeline-node"></div>
-            <div class="glass-card visit-card-el">
-                <div class="visit-card-main">
-                    <div class="visit-card-header-row">
-                        <div class="visit-card-headings">
-                            <div class="v-date"></div>
-                            <div class="visit-dx-row">🩺 Діагноз: <span class="v-dx"></span></div>
-                        </div>
-                        <div class="visit-card-badges">
-                            <div class="v-price-badge status-pill paid"></div>
-                            <div class="status-pill type">📄 Амбулаторно</div>
-                        </div>
-                    </div>
-                    <div class="visit-section-box complaint-box">
-                        <div class="visit-box-label">Скарга / Стан пацієнта</div>
-                        <div class="v-complaint text-clamp"></div>
-                    </div>
-                    <div class="v-rx-container visit-section-box rx-box" style="display: none;">
-                        <div class="visit-box-label">Призначене лікування (Rx)</div>
-                        <div class="v-rx text-clamp code-font"></div>
-                    </div>
-                </div>
-                <div class="visit-card-controls">
-                    <button class="iconBtn v-edit-btn" title="Редагувати">✏️</button>
-                    <button class="iconBtn v-del-btn" title="Видалити візит">🗑</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="medcard-entry-template">
-        <div class="med-card-item glass-card">
-            <div class="med-card-header">
-                <div class="med-card-info">
-                    <div class="med-card-date"></div>
-                    <div class="med-card-vitals"></div>
-                </div>
-                <div class="med-card-actions">
-                    <button class="iconBtn m-edit-btn" title="Редагувати">✏️</button>
-                    <button class="iconBtn m-del-btn" title="Видалити">🗑</button>
-                </div>
-            </div>
-            <div class="med-card-vitals-grid"></div>
-            <div class="med-card-blocks">
-                <div class="m-block-condition"><div class="history-label">Загальний стан</div><div class="m-text"></div></div>
-                <div class="m-block-treatment"><div class="history-label">Проведено / призначено</div><div class="m-text text-highlight"></div></div>
-                <div class="m-block-dynamics"><div class="history-label">Динаміка</div><div class="m-text"></div></div>
-                <div class="m-block-plan"><div class="history-label">План / контроль</div><div class="m-text"></div></div>
-                <div class="m-block-note"><div class="history-label">Додаткова нотатка</div><div class="m-text text-italic"></div></div>
-            </div>
-            <div class="med-card-doctor"></div>
-        </div>
-    </template>
-    
-    <template id="medcard-mini-row-template">
-        <div class="med-mini-cell">
-            <div class="med-mini-label"></div>
-            <div class="med-mini-value"></div>
-        </div>
-    </template>
-
-    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script src="ach.js"></script>
-
-<script src="app.js"></script>
-
-</body>
-
-</html>
 </body>
 </html>
