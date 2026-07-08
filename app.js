@@ -7862,49 +7862,48 @@ function initOwnersUI() {
 
     const delBtn = e.target.closest("[data-del]");
 
-    if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
+if (delBtn) {
+  e.preventDefault();
+  e.stopPropagation();
 
-      const id = delBtn.dataset.del;
-      if (!id) return;
+  const id = delBtn.dataset.del;
+  if (!id) return;
 
-      openDeleteModal(
+  const owner = (state.owners || []).find(
+    (o) => String(o.id) === String(id)
+  );
 
-`<b>${owner.name}</b><br><br>
-Цю дію неможливо скасувати.`,
+  const ownerName = owner?.name || "цього власника";
 
-async () => {
+  openDeleteModal(
+    `<b>${escapeHtml(ownerName)}</b><br><br>Цю дію неможливо скасувати.`,
+    async () => {
+      const ok = await deleteOwner(id);
 
-    const ok = await deleteOwner(id);
-
-    if (!ok) {
+      if (!ok) {
         alert("Не вдалося видалити");
         return;
-    }
-
-    await loadOwners();
-
-}
-
-);
+      }
 
       await loadOwners();
-      return;
     }
+  );
 
-    const openZone = e.target.closest("[data-open-owner]");
+  return;
+}
 
-    if (openZone) {
-      e.preventDefault();
-      e.stopPropagation();
+const openZone = e.target.closest("[data-open-owner]");
 
-      const ownerId = openZone.dataset.openOwner;
+if (openZone) {
+  e.preventDefault();
+  e.stopPropagation();
 
-      if (ownerId) {
-        openOwner(ownerId);
-      }
-    }
+  const ownerId = openZone.dataset.openOwner;
+
+  if (ownerId) {
+    openOwner(ownerId);
+  }
+}
   });
 
   document.addEventListener("click", (e) => {
