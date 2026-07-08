@@ -310,16 +310,6 @@ function closeDeleteModal() {
     deleteCallback = null;
 }
 
-$("#deleteCancel")?.addEventListener("click", closeDeleteModal);
-
-$("#deleteConfirm")?.addEventListener("click", async () => {
-
-    if (deleteCallback) {
-        await deleteCallback();
-    }
-
-    closeDeleteModal();
-});
 function nowISO() {
   return new Date().toISOString();
 }
@@ -9864,5 +9854,27 @@ $("#ownerModalSave")?.addEventListener("click", async () => {
   } finally {
     btn.disabled = false;
     btn.textContent = oldText;
+  }
+});
+document.addEventListener("click", async (e) => {
+  const cancelBtn = e.target.closest("#deleteCancel");
+  const confirmBtn = e.target.closest("#deleteConfirm");
+
+  if (!cancelBtn && !confirmBtn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (cancelBtn) {
+    closeDeleteModal();
+    return;
+  }
+
+  if (confirmBtn) {
+    if (typeof deleteCallback === "function") {
+      await deleteCallback();
+    }
+
+    closeDeleteModal();
   }
 });
