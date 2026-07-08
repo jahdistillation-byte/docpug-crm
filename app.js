@@ -7970,9 +7970,44 @@ function initVisitsTabUI() {
 function closeVisitModal() {
   const modal = $("#visitModal");
   if (!modal) return;
+
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
+
   delete modal.dataset.visitId;
+
+  // очищаем выбранного пациента
+  state.selectedPet = null;
+  state.selectedPetId = null;
+
+  // очищаем форму выбора пациента
+  $("#visitPatientSelect").value = "";
+  $("#visitPatientSearch").value = "";
+  $("#visitModalSub").textContent = "Пацієнт: —";
+
+  // скрываем блок быстрого создания
+  $("#visitNewPatientBox").style.display = "none";
+
+  // очищаем его поля
+  [
+    "#visitNewOwnerName",
+    "#visitNewOwnerPhone",
+    "#visitNewOwnerNote",
+    "#visitNewPetName",
+    "#visitNewPetSpecies",
+    "#visitNewPetBreed",
+    "#visitNewPetAge",
+    "#visitNewPetWeight"
+  ].forEach((sel) => {
+    const el = $(sel);
+    if (!el) return;
+
+    if (el.tagName === "SELECT") {
+      el.selectedIndex = 0;
+    } else {
+      el.value = "";
+    }
+  });
 }
 
 // =========================
@@ -8081,6 +8116,22 @@ function openVisitModalForCreate(pet) {
     `;
   };
 
+  // чистим прошлый выбранный пациент при новом открытии из календаря
+
+  state.selectedPet = pet || null;
+
+  state.selectedPetId = pet?.id || null;
+
+  $("#visitPatientSelect").value = pet?.id || "";
+
+  $("#visitPatientSearch").value = "";
+
+  $("#visitModalSub").textContent = pet?.name ? `Пацієнт: ${pet.name}` : "Пацієнт: —";
+
+  const quickBox = $("#visitNewPatientBox");
+
+  if (quickBox) quickBox.style.display = "none";
+
   const fillStaffFallback = () => {
     if (!select) return;
     select.innerHTML = `
@@ -8106,22 +8157,14 @@ function openVisitModalForCreate(pet) {
   }
 
   // === ЖЕЛЕЗНАЯ ФУНКЦИЯ ЗАКРЫТИЯ ===
-  const closeVisitModal = () => {
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    
-    // Скрываем инлайново, полностью убирая видимость
-    modal.style.display = "none";
-    modal.style.opacity = "0";
-    modal.style.pointerEvents = "none";
-    
-    // Убираем слушатель Esc, чтобы не засорять память
+  const closeThisVisitModal = () => {
+    closeVisitModal();
     document.removeEventListener("keydown", handleEscClose);
   };
 
   // Закрытие по нажатию на кнопку ESC
   const handleEscClose = (e) => {
-    if (e.key === "Escape") closeVisitModal();
+    if (e.key === "Escape") closeThisVisitModal();
   };
   document.addEventListener("keydown", handleEscClose);
 
@@ -8130,7 +8173,7 @@ function openVisitModalForCreate(pet) {
   allCloseElements.forEach(btn => {
     btn.onclick = (e) => {
       e.preventDefault();
-      closeVisitModal();
+      closeThisVisitModal();
     };
   });
 
@@ -8139,7 +8182,7 @@ function openVisitModalForCreate(pet) {
     const text = e.target.innerText ? e.target.innerText.trim() : "";
     if (text === "✕" || text === "Скасувати" || e.target.classList.contains("close-modal")) {
       e.preventDefault();
-      closeVisitModal();
+      closeThisVisitModal();
     }
   };
 
@@ -8149,7 +8192,7 @@ function openVisitModalForCreate(pet) {
     form.addEventListener("submit", () => {
       // Даем 250мс на то, чтобы твой оригинальный асинхронный submit отправил данные на сервер Render
       setTimeout(() => {
-        closeVisitModal();
+        closeThisVisitModal();
         // Принудительно обновляем список визитов на экране, чтобы новый визит сразу появился
         if (state && state.selectedPetId && typeof renderVisits === "function") {
           renderVisits(state.selectedPetId);
@@ -8413,8 +8456,11 @@ $("#visitSave")?.addEventListener("click", async () => {
       const updated = await updateVisitApi(editVisitId, payload);
       if (!updated) return;
 
-      closeVisitModal();
-      if (state.selectedPetId) await renderVisits(state.selectedPetId);
+      const savedPetId = pet.id;
+
+closeVisitModal();
+
+if (savedPetId) await renderVisits(savedPetId);
       await openVisit(editVisitId);
       if (state.route === "visits") renderVisitsTab();
       return;
@@ -8462,8 +8508,11 @@ $("#visitSave")?.addEventListener("click", async () => {
       status: "planned",
     });
 
-    closeVisitModal();
-    if (state.selectedPetId) await renderVisits(state.selectedPetId);
+    const savedPetId = pet.id;
+
+closeVisitModal();
+
+if (savedPetId) await renderVisits(savedPetId);
     await openVisit(created.id);
     if (state.route === "visits") renderVisitsTab();
   } catch (e) {
@@ -8472,25 +8521,6 @@ $("#visitSave")?.addEventListener("click", async () => {
   }
 });
 
-$("#btnCreatePatientFromVisit")?.addEventListener("click", () => {
-  const box = $("#visitNewPatientBox");
-  if (!box) return alert("Блок швидкого створення пацієнта не знайдено");
-
-  const isOpen = box.style.display !== "none";
-  box.style.display = isOpen ? "none" : "block";
-
-  if (!isOpen) {
-    const select = $("#visitPatientSelect");
-    const search = $("#visitPatientSearch");
-    const results = $("#visitPatientResults");
-
-    if (select) select.value = "";
-    if (search) search.value = "";
-    if (results) results.innerHTML = "";
-
-    $("#visitNewOwnerName")?.focus();
-  }
-});
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ВЕТКАРТА, КАСКАДНЫЕ УДАЛЕНИЯ И ЖУРНАЛ СТАЦИОНАРА)
 // Часть 9
