@@ -8487,3 +8487,28 @@ body[data-theme="white"] .monthDayNum {
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 16px 24px !important;
 }
+/* FIX: footer кнопок внутри модалки визита всегда виден */
+.pugVisitModal {
+  max-height: min(88vh, 900px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pugVisitBody {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 110px;
+}
+
+.pugVisitFoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  background: rgba(22, 10, 42, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 24px;
+}
