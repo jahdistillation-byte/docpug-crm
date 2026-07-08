@@ -8666,3 +8666,32 @@ body[data-theme="white"] .monthDayNum {
     transform: translateY(0) scale(1);
   }
 }
+/* OWNER PROFILE — bigger premium card */
+[data-page="owner"] #ownerName {
+  font-size: 2rem !important;
+  line-height: 1.15;
+}
+
+[data-page="owner"] #ownerMeta {
+  font-size: 1.15rem !important;
+  line-height: 1.7;
+}
+
+[data-page="owner"] .glass-card:first-of-type,
+[data-page="owner"] .owner-profile-card,
+[data-page="owner"] .owner-card {
+  width: min(520px, 100%) !important;
+  padding: 30px !important;
+  border-radius: 26px !important;
+}
+
+[data-page="owner"] .owner-stats,
+[data-page="owner"] .ownerStats {
+  gap: 16px !important;
+}
+
+[data-page="owner"] .owner-stats > *,
+[data-page="owner"] .ownerStats > * {
+  min-height: 82px !important;
+  border-radius: 18px !important;
+}
