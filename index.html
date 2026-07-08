@@ -306,11 +306,74 @@
         </button>
       </div>
 
-      <div id="visitNewPatientBox" class="pugQuickPatientBox" style="display:none;">
-  <div class="pugSectionTitle">
-    <span>🐾</span>
-    <strong>Новий пацієнт</strong>
+     <div id="visitNewPatientBox" class="pugQuickPatientBox" style="display:none;">
+  <div class="pugQuickPatientHead">
+    <div>
+      <div class="pugQuickPatientTitle">🐾 Новий пацієнт</div>
+      <div class="pugQuickPatientSub">Створення пацієнта прямо з календаря</div>
+    </div>
   </div>
+
+  <div class="pugQuickPatientGrid">
+    <div class="pugQuickGroup">
+      <div class="pugQuickGroupTitle">👤 Власник</div>
+
+      <label class="pugVisitField">
+        <span>ПІБ власника *</span>
+        <input class="pugVisitInput" id="visitNewOwnerName" placeholder="Напр. Іваненко Олена">
+      </label>
+
+      <label class="pugVisitField">
+        <span>Телефон *</span>
+        <input class="pugVisitInput" id="visitNewOwnerPhone" placeholder="+380...">
+      </label>
+
+      <label class="pugVisitField">
+        <span>Адреса / нотатка</span>
+        <input class="pugVisitInput" id="visitNewOwnerNote" placeholder="Район, адреса, коментар">
+      </label>
+    </div>
+
+    <div class="pugQuickGroup">
+      <div class="pugQuickGroupTitle">🐶 Пацієнт</div>
+
+      <label class="pugVisitField">
+        <span>Кличка *</span>
+        <input class="pugVisitInput" id="visitNewPetName" placeholder="Напр. Бусинка">
+      </label>
+
+      <label class="pugVisitField">
+        <span>Вид *</span>
+        <select class="pugVisitInput" id="visitNewPetSpecies">
+          <option value="">Оберіть вид</option>
+          <option value="dog">Собака</option>
+          <option value="cat">Кіт</option>
+          <option value="other">Інше</option>
+        </select>
+      </label>
+
+      <label class="pugVisitField">
+        <span>Порода</span>
+        <input class="pugVisitInput" id="visitNewPetBreed" placeholder="Порода">
+      </label>
+
+      <label class="pugVisitField">
+        <span>Вік</span>
+        <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки">
+      </label>
+
+      <label class="pugVisitField">
+        <span>Вага, кг</span>
+        <input class="pugVisitInput" id="visitNewPetWeight" placeholder="Напр. 7.5">
+      </label>
+    </div>
+  </div>
+
+  <div class="pugQuickPatientActions">
+    <button type="button" class="pugQuickCancel" id="visitNewPatientCancel">Скасувати</button>
+    <button type="button" class="pugQuickCreate" id="visitNewPatientCreate">Створити пацієнта</button>
+  </div>
+</div>
 
   <input class="pugVisitInput" id="visitNewOwnerName" placeholder="ПІБ власника *">
   <input class="pugVisitInput" id="visitNewOwnerPhone" placeholder="+380... *">
