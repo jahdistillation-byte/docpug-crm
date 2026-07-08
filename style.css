@@ -8695,3 +8695,33 @@ body[data-theme="white"] .monthDayNum {
   min-height: 82px !important;
   border-radius: 18px !important;
 }
+
+.ownerHeroCard {
+  width: min(620px, 100%) !important;
+  padding: 34px !important;
+  border-radius: 28px !important;
+  margin-bottom: 42px !important;
+  background:
+    radial-gradient(circle at top left, rgba(168, 85, 247, 0.22), transparent 36%),
+    linear-gradient(135deg, rgba(76, 29, 149, 0.26), rgba(15, 23, 42, 0.48)) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 0 26px 80px rgba(0,0,0,.32);
+}
+
+.ownerHeroCard h2 {
+  font-size: 2.15rem !important;
+}
+
+.ownerHeroCard [style*="opacity: 0.7"],
+.ownerHeroCard [style*="opacity: 0.5"] {
+  font-size: 1.25rem !important;
+}
+
+.ownerHeroCard [style*="grid-template-columns"] {
+  gap: 18px !important;
+}
+
+.ownerHeroCard [style*="text-align: center"] {
+  min-height: 86px !important;
+  border-radius: 18px !important;
+}

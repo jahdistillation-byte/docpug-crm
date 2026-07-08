@@ -4095,7 +4095,7 @@ if (!owner) {
   const ownerNameEl = $("#ownerName");
   if (ownerNameEl) {
     ownerNameEl.innerHTML = `
-      <div class="glass-card" style="background: linear-gradient(135deg, rgba(76, 29, 149, 0.2), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 100%; margin-bottom: 30px;">
+      <div class="glass-card ownerHeroCard">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
             <h2 style="margin:0; font-size: 1.8rem; color: #fff;">👤 ${escapeHtml(owner.name || "Без імені")}</h2>
