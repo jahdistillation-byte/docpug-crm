@@ -84,22 +84,17 @@
       <div id="ownersList" style="display:none;"></div>
     </section>
 
-    <section class="page content-section" data-page="owner" style="display:none;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-        <div>
-          <div id="ownerName" style="font-size:1.5rem;font-weight:700;color:#fff;">Власник</div>
-          <div id="ownerMeta" style="font-size:.9rem;color:var(--text-muted);margin-top:4px;">—</div>
-        </div>
-        <button class="btn-tab" id="btnBackOwners">&larr; До списку</button>
-      </div>
+   <section class="page content-section" data-page="owner" style="display:none;">
+  <div id="ownerName">Власник</div>
+  <div id="ownerMeta" style="display:none;">—</div>
 
-      <div style="margin-top:30px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="color:#fff;font-size:1.2rem;">🐾 Пацієнти цього власника</h3>
-        <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
-      </div>
+  <div class="ownerPetsHeader">
+    <h3>🐾 Пацієнти цього власника</h3>
+    <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
+  </div>
 
-      <div class="patients-grid" id="petsList"></div>
-    </section>
+  <div class="patients-grid" id="petsList"></div>
+</section>
 
     <section class="page content-section" data-page="patient" style="display:none;">
       <button class="btn-tab" id="btnBackPatient" style="margin-bottom:20px;">&larr; Назад до профілю</button>

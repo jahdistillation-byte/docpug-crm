@@ -9152,3 +9152,16 @@ body[data-theme="white"] .monthDayNum {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.ownerPetsHeader {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ownerPetsHeader h3 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin: 0;
+}
