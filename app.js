@@ -290,12 +290,17 @@ function todayISO() {
 let deleteCallback = null;
 
 function openDeleteModal(text, callback) {
+  const modal = $("#deleteModal");
+  const textEl = $("#deleteModalText");
 
-    $("#deleteModalText").innerHTML = text;
+  if (!modal || !textEl) {
+    console.error("Не знайдено deleteModal або deleteModalText");
+    return;
+  }
 
-    deleteCallback = callback;
-
-    $("#deleteModal").style.display = "flex";
+  textEl.innerHTML = text;
+  deleteCallback = callback;
+  modal.style.display = "flex";
 }
 
 function closeDeleteModal() {

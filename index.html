@@ -652,5 +652,27 @@
 <script src="ach.js"></script>
 <script src="app.js"></script>
 
+<div id="deleteModal" class="deleteModalOverlay" style="display:none;">
+  <div class="deleteModal">
+    <div class="deleteIcon">🗑</div>
+
+    <h2>Видалити?</h2>
+
+    <p id="deleteModalText">
+      Цю дію неможливо скасувати.
+    </p>
+
+    <div class="deleteButtons">
+      <button id="deleteCancel" class="btnSecondary" type="button">
+        Скасувати
+      </button>
+
+      <button id="deleteConfirm" class="btnDanger" type="button">
+        🗑 Видалити
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
