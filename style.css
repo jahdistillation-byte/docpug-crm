@@ -8982,9 +8982,6 @@ body[data-theme="white"] .monthDayNum {
   margin: 0 auto !important;
 }
 
-[data-page="owner"] > div:first-child {
-  display: none !important;
-}
 
 .ownerHeroFull {
   width: min(1120px, 100%) !important;
@@ -9032,5 +9029,126 @@ body[data-theme="white"] .monthDayNum {
 
   .ownerHeroStatsPlus {
     grid-template-columns: 1fr 1fr !important;
+  }
+}
+.ownerDashboardHero {
+  width: min(1120px, 100%);
+  padding: 34px;
+  border-radius: 34px;
+  margin: 0 auto 42px;
+  border: 1px solid rgba(180,92,255,.22);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(180,92,255,.32), transparent 30%),
+    radial-gradient(circle at 86% 20%, rgba(124,92,255,.18), transparent 26%),
+    linear-gradient(135deg, rgba(36,14,70,.92), rgba(10,7,22,.94));
+  box-shadow: 0 34px 100px rgba(0,0,0,.42), 0 0 60px rgba(168,85,247,.12);
+}
+
+.ownerDashTop {
+  display: grid;
+  grid-template-columns: 104px 1fr auto;
+  gap: 24px;
+  align-items: start;
+}
+
+.ownerDashAvatar {
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  border-radius: 30px;
+  font-size: 3.2rem;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 0 42px rgba(180,92,255,.26);
+}
+
+.ownerDashKicker {
+  font-size: .76rem;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 8px;
+}
+
+.ownerDashName {
+  font-size: 2.65rem;
+  line-height: 1.02;
+  font-weight: 950;
+  color: #fff;
+}
+
+.ownerDashContacts {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ownerDashContacts span {
+  padding: 9px 12px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.ownerDashStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.ownerDashBadge {
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 900;
+  background: linear-gradient(135deg, #7C5CFF, #B45CFF);
+  box-shadow: 0 12px 34px rgba(124,92,255,.28);
+}
+
+.ownerDashStats {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.ownerDashStat {
+  min-height: 106px;
+  padding: 18px;
+  border-radius: 24px;
+  background: radial-gradient(circle at top left, rgba(168,85,247,.18), transparent 40%), rgba(0,0,0,.26);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.ownerDashStat span {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.46);
+}
+
+.ownerDashStat strong {
+  margin-top: 8px;
+  display: block;
+  color: #c084fc;
+  font-size: 1.55rem;
+  line-height: 1.05;
+}
+
+@media (max-width: 900px) {
+  .ownerDashTop {
+    grid-template-columns: 1fr;
+  }
+
+  .ownerDashStatus {
+    align-items: stretch;
+  }
+
+  .ownerDashStats {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

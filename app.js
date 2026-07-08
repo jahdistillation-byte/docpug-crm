@@ -4094,60 +4094,56 @@ if (!owner) {
   // 1. Рендер Hero-блока (инфо владельца и статистика)
   const ownerNameEl = $("#ownerName");
   if (ownerNameEl) {
+   const ownerStatus =
+  Number(totalPaid || 0) >= 50000
+    ? "VIP клієнт"
+    : visitsCount >= 15
+      ? "Постійний клієнт"
+      : visitsCount > 0
+        ? "Активний клієнт"
+        : "Новий клієнт";
     ownerNameEl.innerHTML = `
-  <div class="ownerHeroWide ownerHeroFull">
-    <div class="ownerHeroTop">
-      <div class="ownerAvatarBig">👤</div>
+  <div class="ownerDashboardHero">
+    <div class="ownerDashTop">
+      <div class="ownerDashAvatar">👤</div>
 
-      <div class="ownerHeroMain">
-        <div class="ownerHeroKicker">Картка власника</div>
-        <div class="ownerHeroName">${escapeHtml(owner.name || "Без імені")}</div>
+      <div class="ownerDashInfo">
+        <div class="ownerDashKicker">Картка власника</div>
+        <div class="ownerDashName">${escapeHtml(owner.name || "Без імені")}</div>
 
-        <div class="ownerHeroContacts">
+        <div class="ownerDashContacts">
           <span>📞 ${escapeHtml(owner.phone || "Телефон не вказано")}</span>
           ${owner.note ? `<span>📍 ${escapeHtml(owner.note)}</span>` : ""}
         </div>
       </div>
 
-      <div class="ownerHeroActions">
-        <button class="ownerHeroEdit" data-edit-owner="${escapeHtml(owner.id)}">
-          ✏️ Редагувати
-        </button>
-        <button class="ownerHeroBack" id="btnBackOwners">
-          ← До списку
-        </button>
+      <div class="ownerDashStatus">
+        <div class="ownerDashBadge">${ownerStatus}</div>
+        <button class="ownerHeroEdit" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
+        <button class="ownerHeroBack" id="btnBackOwners">← До списку</button>
       </div>
     </div>
 
-    <div class="ownerHeroStats ownerHeroStatsPlus">
-      <div class="ownerHeroStat">
+    <div class="ownerDashStats">
+      <div class="ownerDashStat">
         <span>Пацієнтів</span>
         <strong>${pets.length}</strong>
       </div>
-
-      <div class="ownerHeroStat">
+      <div class="ownerDashStat">
         <span>Візитів</span>
         <strong>${visitsCount}</strong>
       </div>
-
-      <div class="ownerHeroStat">
-        <span>Всього сплачено</span>
+      <div class="ownerDashStat">
+        <span>Сплачено</span>
         <strong>${totalPaid} ₴</strong>
       </div>
-
-      <div class="ownerHeroStat">
+      <div class="ownerDashStat">
         <span>Середній чек</span>
         <strong>${visitsCount ? Math.round(Number(totalPaid || 0) / visitsCount) : 0} ₴</strong>
       </div>
-
-      <div class="ownerHeroStat">
+      <div class="ownerDashStat">
         <span>Останній візит</span>
         <strong>${escapeHtml(lastVisit?.date || "—")}</strong>
-      </div>
-
-      <div class="ownerHeroStat ownerHeroStatus">
-        <span>Статус</span>
-        <strong>${visitsCount >= 10 ? "VIP" : visitsCount > 0 ? "Активний" : "Новий"}</strong>
       </div>
     </div>
   </div>
