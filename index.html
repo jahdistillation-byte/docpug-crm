@@ -278,6 +278,51 @@
   </ul>
 </nav>
 
+
+<!-- OWNER MODAL -->
+<div class="modal modal-overlay pugOwnerOverlay" id="ownerModal" aria-hidden="true" style="display:none;">
+  <div class="pugOwnerModal" role="dialog" aria-modal="true">
+    <input type="hidden" id="ownerModalId">
+
+    <div class="pugVisitHead">
+      <div class="pugVisitHeadLeft">
+        <div class="pugVisitIcon">👤</div>
+        <div>
+          <div class="pugVisitTitle" id="ownerModalTitle">Новий власник</div>
+          <div class="pugVisitSub" id="ownerModalSub">Створення картки власника тварини</div>
+        </div>
+      </div>
+      <button class="pugVisitClose" id="ownerModalClose" type="button">×</button>
+    </div>
+
+    <div class="pugOwnerBody">
+      <div class="pugQuickGroup">
+        <div class="pugQuickGroupTitle">📇 Контактні дані</div>
+
+        <label class="pugVisitField">
+          <span>ПІБ власника *</span>
+          <input class="pugVisitInput" id="ownerModalName" placeholder="Напр. Іваненко Олена">
+        </label>
+
+        <label class="pugVisitField">
+          <span>Телефон</span>
+          <input class="pugVisitInput" id="ownerModalPhone" placeholder="+380...">
+        </label>
+
+        <label class="pugVisitField">
+          <span>Адреса / нотатка</span>
+          <input class="pugVisitInput" id="ownerModalNote" placeholder="Район, адреса, коментар">
+        </label>
+      </div>
+    </div>
+
+    <div class="pugVisitFoot">
+      <button class="pugVisitCancel" id="ownerModalCancel" type="button">✕ Скасувати</button>
+      <button class="pugVisitSave" id="ownerModalSave" type="button">💾 Зберегти</button>
+    </div>
+  </div>
+</div>
+
 <!-- VISIT MODAL -->
 <div class="modal modal-overlay pugVisitOverlay" id="visitModal" aria-hidden="true" style="display:none;">
   <div class="pugVisitModal" role="dialog" aria-modal="true">

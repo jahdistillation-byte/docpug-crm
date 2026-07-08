@@ -8512,3 +8512,30 @@ body[data-theme="white"] .monthDayNum {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 18px 24px;
 }
+.pugOwnerOverlay {
+  align-items: center;
+  justify-content: center;
+}
+
+.pugOwnerOverlay.open {
+  display: flex !important;
+}
+
+.pugOwnerModal {
+  width: min(620px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(180, 92, 255, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(180, 92, 255, 0.22), transparent 34%),
+    linear-gradient(145deg, rgba(35, 17, 62, 0.96), rgba(12, 8, 24, 0.98));
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.55), 0 0 46px rgba(180, 92, 255, 0.18);
+}
+
+.pugOwnerBody {
+  padding: 24px;
+  overflow-y: auto;
+}

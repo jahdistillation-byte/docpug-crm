@@ -7791,70 +7791,84 @@ function initOwnersUI() {
   state.ownersUiBound = true;
 
   document.addEventListener("click", async (e) => {
-    const addBtn = e.target.closest("#btnAddOwner, [data-action='add-owner'], [data-action='addOwner'], .btnAddOwner");
+    const addBtn = e.target.closest(
+      "#btnAddOwner, [data-action='add-owner'], [data-action='addOwner'], .btnAddOwner"
+    );
+
     if (addBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const name = (prompt("Имя владельца:") || "").trim();
-      if (!name) return;
+      e.preventDefault();
+      e.stopPropagation();
 
-      const phone = (prompt("Телефон (необязательно):") || "").trim();
-      const note = (prompt("Заметка/город (необязательно):") || "").trim();
-
-      const created = await createOwner(name, phone, note);
-      if (!created) return;
-      await loadOwners(); return;
+      openOwnerModal();
+      return;
     }
 
-    // ✅ ВОТ ОНО: Теперь скрипт ловит клики в новом tbody
-    const ownersList = e.target.closest("#owners-table-body") || e.target.closest("#ownersList") || e.target.closest(".data-table-container");
+    const ownersList =
+      e.target.closest("#owners-table-body") ||
+      e.target.closest("#ownersList") ||
+      e.target.closest(".data-table-container");
+
     if (!ownersList) return;
 
     const editBtn = e.target.closest("[data-edit-owner]");
+
     if (editBtn) {
-      e.preventDefault(); e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
+
       const id = editBtn.dataset.editOwner;
       if (!id) return;
 
-      const owner = (state.owners || []).find((o) => String(o.id) === String(id));
+      const owner = (state.owners || []).find(
+        (o) => String(o.id) === String(id)
+      );
+
       if (!owner) return alert("Власника не знайдено");
 
-      const name = (prompt("Імʼя власника:", owner.name || "") || "").trim();
-      if (!name) return;
-
-      const phone = (prompt("Телефон:", owner.phone || "") || "").trim();
-      const note = (prompt("Нотатка / місто:", owner.note || "") || "").trim();
-
-      const updated = await updateOwner(id, { name, phone, note });
-      if (!updated) return;
-      await loadOwners();
-
-      if (state.selectedOwnerId && String(state.selectedOwnerId) === String(id)) {
-        renderOwnerPage(id);
-      }
+      openOwnerModal(owner);
       return;
     }
 
     const delBtn = e.target.closest("[data-del]");
+
     if (delBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const id = delBtn.dataset.del; if (!id) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const id = delBtn.dataset.del;
+      if (!id) return;
+
       if (!confirm("Удалить владельца?")) return;
 
       const ok = await deleteOwner(id);
-      if (!ok) return alert("Не удалось удалить владельца");
-      await loadOwners(); return;
+
+      if (!ok) {
+        alert("Не удалось удалить владельца");
+        return;
+      }
+
+      await loadOwners();
+      return;
     }
 
     const openZone = e.target.closest("[data-open-owner]");
+
     if (openZone) {
-      e.preventDefault(); e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
+
       const ownerId = openZone.dataset.openOwner;
-      if (ownerId) openOwner(ownerId);
+
+      if (ownerId) {
+        openOwner(ownerId);
+      }
     }
   });
 
   document.addEventListener("click", (e) => {
-    if (e.target.closest("#btnBackOwners")) setHash("owners");
+    if (e.target.closest("#btnBackOwners")) {
+      setHash("owners");
+    }
   });
 }
 // ==========================================================================
@@ -9731,5 +9745,78 @@ document.addEventListener("click", async (e) => {
       createBtn.disabled = false;
       createBtn.textContent = oldText;
     }
+  }
+});
+function openOwnerModal(owner = null) {
+  const modal = $("#ownerModal");
+  if (!modal) return alert("Не знайдено #ownerModal");
+
+  const isEdit = !!owner?.id;
+
+  $("#ownerModalId").value = isEdit ? owner.id : "";
+  $("#ownerModalName").value = owner?.name || "";
+  $("#ownerModalPhone").value = owner?.phone || "";
+  $("#ownerModalNote").value = owner?.note || "";
+
+  $("#ownerModalTitle").textContent = isEdit ? "Редагування власника" : "Новий власник";
+  $("#ownerModalSub").textContent = isEdit
+    ? "Оновлення контактних даних власника"
+    : "Створення картки власника тварини";
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  modal.style.display = "flex";
+
+  setTimeout(() => $("#ownerModalName")?.focus(), 50);
+}
+
+function closeOwnerModal() {
+  const modal = $("#ownerModal");
+  if (!modal) return;
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  modal.style.display = "none";
+}
+
+$("#ownerModalClose")?.addEventListener("click", closeOwnerModal);
+$("#ownerModalCancel")?.addEventListener("click", closeOwnerModal);
+
+$("#ownerModalSave")?.addEventListener("click", async () => {
+  const id = ($("#ownerModalId")?.value || "").trim();
+  const name = ($("#ownerModalName")?.value || "").trim();
+  const phone = ($("#ownerModalPhone")?.value || "").trim();
+  const note = ($("#ownerModalNote")?.value || "").trim();
+
+  if (!name) return alert("Вкажи ПІБ власника");
+
+  const btn = $("#ownerModalSave");
+  const oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = id ? "Оновлюємо..." : "Створюємо...";
+
+  try {
+    let saved = null;
+
+    if (id) {
+      saved = await updateOwner(id, { name, phone, note });
+    } else {
+      saved = await createOwner(name, phone, note);
+    }
+
+    if (!saved) return;
+
+    closeOwnerModal();
+    await loadOwners();
+
+    if (id && state.selectedOwnerId && String(state.selectedOwnerId) === String(id)) {
+      renderOwnerPage(id);
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Помилка збереження власника: " + (e?.message || e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
   }
 });
