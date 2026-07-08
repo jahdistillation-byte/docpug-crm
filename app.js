@@ -768,44 +768,34 @@ async function createPatientApi(payload) {
   }
 }
 
-async function createOwner(name, phone = "", note = "") {
+async function createOwner(name, phone, note = "") {
   try {
-    const payload = {
-      name: String(name || "").trim(),
-      phone: String(phone || "").trim(),
-      note: String(note || "").trim(),
-    };
-    Object.keys(payload).forEach((k) => {
-      if (payload[k] === "") delete payload[k];
-    });
-
     const res = await fetch("/api/owners", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", ...getOrgHeaders() },
       credentials: "include",
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        name: String(name || "").trim(),
+        phone: String(phone || "").trim(),
+        note: String(note || "").trim(),
+      }),
     });
 
-    const text = await res.text();
-    let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
+    const json = await res.json();
 
-    if (!res.ok) {
-      console.error("API /owners POST HTTP", res.status, text);
-      alert(`Помилка створення власника (HTTP ${res.status})`);
+    if (!res.ok || !json?.ok) {
+      console.error("createOwner error:", json);
+      alert(json?.error || "Не вдалося створити власника");
       return null;
     }
 
-    if (!json || !json.ok) {
-      console.error("API /owners POST bad json:", json, text);
-      alert(json?.error || "Помилка створення власника");
-      return null;
-    }
-
-    return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
+    return Array.isArray(json.data) ? json.data[0] : json.data;
   } catch (e) {
     console.error("createOwner failed:", e);
-    alert("Помилка зʼєднання з сервером");
+    alert("Помилка створення власника");
     return null;
   }
 }
