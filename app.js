@@ -4863,11 +4863,10 @@ async function renderCalendarTab() {
           </div>
 
           <div class="calendarModes">
-            <button class="ghost" data-cal-mode="day">День</button>
-            <button class="primary" data-cal-mode="week">Тиждень</button>
-            <button class="ghost" data-cal-mode="month">Місяць</button>
-            <button class="ghost" data-cal-mode="routes">Маршрути</button>
-          </div>
+  <button class="calendarModeBtn ${calendarMode === "day" ? "active" : ""}" data-mode="day">День</button>
+  <button class="calendarModeBtn ${calendarMode === "week" ? "active" : ""}" data-mode="week">Тиждень</button>
+  <button class="calendarModeBtn ${calendarMode === "month" ? "active" : ""}" data-mode="month">Місяць</button>
+</div>
         </div>
 
         <div class="calendarTop">
@@ -5015,11 +5014,10 @@ async function renderCalendarTab() {
           </div>
 
           <div class="calendarModes">
-            <button class="ghost" data-cal-mode="day">День</button>
-            <button class="ghost" data-cal-mode="week">Тиждень</button>
-            <button class="primary" data-cal-mode="month">Місяць</button>
-            <button class="ghost" data-cal-mode="routes">Маршрути</button>
-          </div>
+  <button class="calendarModeBtn ${calendarMode === "day" ? "active" : ""}" data-mode="day">День</button>
+  <button class="calendarModeBtn ${calendarMode === "week" ? "active" : ""}" data-mode="week">Тиждень</button>
+  <button class="calendarModeBtn ${calendarMode === "month" ? "active" : ""}" data-mode="month">Місяць</button>
+</div>
         </div>
 
         <div class="calendarTop">
@@ -5470,11 +5468,10 @@ async function renderCalendarTab() {
         </div>
 
         <div class="calendarModes">
-          <button class="primary" data-cal-mode="day">День</button>
-          <button class="ghost" data-cal-mode="week">Тиждень</button>
-          <button class="ghost" data-cal-mode="month">Місяць</button>
-          <button class="ghost" data-cal-mode="routes">Маршрути</button>
-        </div>
+  <button class="calendarModeBtn ${calendarMode === "day" ? "active" : ""}" data-mode="day">День</button>
+  <button class="calendarModeBtn ${calendarMode === "week" ? "active" : ""}" data-mode="week">Тиждень</button>
+  <button class="calendarModeBtn ${calendarMode === "month" ? "active" : ""}" data-mode="month">Місяць</button>
+</div>
       </div>
 
       <div class="calendarTop">
