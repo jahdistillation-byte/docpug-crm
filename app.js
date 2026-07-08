@@ -4095,36 +4095,51 @@ if (!owner) {
   const ownerNameEl = $("#ownerName");
   if (ownerNameEl) {
     ownerNameEl.innerHTML = `
-      <div class="glass-card ownerHeroCard">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <h2 style="margin:0; font-size: 1.8rem; color: #fff;">👤 ${escapeHtml(owner.name || "Без імені")}</h2>
-            <div style="margin-top:8px; opacity: 0.7;">📞 ${escapeHtml(owner.phone || "Телефон не вказано")}</div>
-            ${owner.note ? `<div style="margin-top:4px; opacity: 0.5;">📍 ${escapeHtml(owner.note)}</div>` : ""}
-          </div>
-          <button class="btn-tab" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
-        </div>
+  <div class="ownerHeroWide">
+    <div class="ownerHeroTop">
+      <div>
+        <div class="ownerHeroKicker">Картка власника</div>
+        <div class="ownerHeroName">👤 ${escapeHtml(owner.name || "Без імені")}</div>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 24px;">
-          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Пацієнтів</div>
-            <div style="font-size: 1.4rem; font-weight: 700; color: #a855f7;">${pets.length}</div>
-          </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Візитів</div>
-            <div style="font-size: 1.4rem; font-weight: 700; color: #a855f7;">${visitsCount}</div>
-          </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Всього сплачено</div>
-            <div style="font-size: 1.4rem; font-weight: 700; color: #a855f7;">${totalPaid} ₴</div>
-          </div>
-          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase;">Останній візит</div>
-            <div style="font-size: 1.1rem; font-weight: 600; margin-top: 4px;">${escapeHtml(lastVisit?.date || "—")}</div>
-          </div>
+        <div class="ownerHeroContacts">
+          <span>📞 ${escapeHtml(owner.phone || "Телефон не вказано")}</span>
+          ${owner.note ? `<span>📍 ${escapeHtml(owner.note)}</span>` : ""}
         </div>
       </div>
-    `;
+
+      <div class="ownerHeroActions">
+        <button class="ownerHeroEdit" data-edit-owner="${escapeHtml(owner.id)}">
+          ✏️ Редагувати
+        </button>
+        <button class="ownerHeroBack" id="btnBackOwners">
+          ← До списку
+        </button>
+      </div>
+    </div>
+
+    <div class="ownerHeroStats">
+      <div class="ownerHeroStat">
+        <span>Пацієнтів</span>
+        <strong>${pets.length}</strong>
+      </div>
+
+      <div class="ownerHeroStat">
+        <span>Візитів</span>
+        <strong>${visitsCount}</strong>
+      </div>
+
+      <div class="ownerHeroStat">
+        <span>Всього сплачено</span>
+        <strong>${totalPaid} ₴</strong>
+      </div>
+
+      <div class="ownerHeroStat">
+        <span>Останній візит</span>
+        <strong>${escapeHtml(lastVisit?.date || "—")}</strong>
+      </div>
+    </div>
+  </div>
+`;
   }
 
   // 2. Рендер списка животных с "рамкой"
