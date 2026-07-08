@@ -4058,12 +4058,17 @@ async function renderVisitsTab() {
 // OWNER PAGE — Рендеринг карточки владельца и его животных
 // =========================
 async function renderOwnerPage(ownerId) {
-  const owner = getOwnerById(ownerId);
-  if (!owner) {
-    alert("Власника не знайдено");
-    setHash("owners");
-    return;
-  }
+  let owner = getOwnerById(ownerId);
+
+if (!owner) {
+  await loadOwners();
+  owner = getOwnerById(ownerId);
+}
+
+if (!owner) {
+  setHash("owners");
+  return;
+}
 
   state.selectedOwnerId = String(ownerId);
 
@@ -7849,7 +7854,7 @@ function initOwnersUI() {
         (o) => String(o.id) === String(id)
       );
 
-      if (!owner) return alert("Власника не знайдено");
+      if (!owner) return;
 
       openOwnerModal(owner);
       return;
