@@ -8555,3 +8555,114 @@ body[data-theme="white"] .monthDayNum {
     transform:translateY(-1px);
     box-shadow:0 0 28px rgba(255,70,70,.55);
 }
+/* ===== Doc.PUG Premium Delete Modal ===== */
+
+.deleteModalOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px;
+  background: rgba(5, 2, 12, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.deleteModal {
+  width: min(460px, 92vw);
+  padding: 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 95, 95, 0.26);
+  background:
+    radial-gradient(circle at top, rgba(255, 80, 120, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(38, 16, 36, 0.97), rgba(12, 7, 22, 0.98));
+  box-shadow:
+    0 34px 100px rgba(0, 0, 0, 0.65),
+    0 0 46px rgba(255, 70, 110, 0.18);
+  text-align: center;
+  animation: deletePop .18s ease-out;
+}
+
+.deleteIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  font-size: 2rem;
+  background: rgba(255, 80, 100, 0.14);
+  border: 1px solid rgba(255, 120, 140, 0.24);
+  box-shadow: 0 0 34px rgba(255, 70, 110, 0.24);
+}
+
+.deleteModal h2 {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.deleteModal p {
+  margin: 0;
+  color: rgba(255,255,255,.68);
+  line-height: 1.55;
+  font-size: .96rem;
+}
+
+.deleteModal p b {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.deleteButtons {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.deleteButtons button {
+  min-width: 138px;
+  border: 0;
+  border-radius: 16px;
+  padding: 13px 18px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.deleteButtons .btnSecondary {
+  color: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.deleteButtons .btnSecondary:hover {
+  background: rgba(255,255,255,.12);
+  transform: translateY(-1px);
+}
+
+.deleteButtons .btnDanger {
+  color: #fff;
+  background: linear-gradient(135deg, #ff4d6d, #d92c45);
+  box-shadow: 0 14px 32px rgba(255, 70, 100, .30);
+}
+
+.deleteButtons .btnDanger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 42px rgba(255, 70, 100, .42);
+}
+
+@keyframes deletePop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
