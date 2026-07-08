@@ -4095,11 +4095,13 @@ if (!owner) {
   const ownerNameEl = $("#ownerName");
   if (ownerNameEl) {
     ownerNameEl.innerHTML = `
-  <div class="ownerHeroWide">
+  <div class="ownerHeroWide ownerHeroFull">
     <div class="ownerHeroTop">
-      <div>
+      <div class="ownerAvatarBig">👤</div>
+
+      <div class="ownerHeroMain">
         <div class="ownerHeroKicker">Картка власника</div>
-        <div class="ownerHeroName">👤 ${escapeHtml(owner.name || "Без імені")}</div>
+        <div class="ownerHeroName">${escapeHtml(owner.name || "Без імені")}</div>
 
         <div class="ownerHeroContacts">
           <span>📞 ${escapeHtml(owner.phone || "Телефон не вказано")}</span>
@@ -4117,7 +4119,7 @@ if (!owner) {
       </div>
     </div>
 
-    <div class="ownerHeroStats">
+    <div class="ownerHeroStats ownerHeroStatsPlus">
       <div class="ownerHeroStat">
         <span>Пацієнтів</span>
         <strong>${pets.length}</strong>
@@ -4134,8 +4136,18 @@ if (!owner) {
       </div>
 
       <div class="ownerHeroStat">
+        <span>Середній чек</span>
+        <strong>${visitsCount ? Math.round(Number(totalPaid || 0) / visitsCount) : 0} ₴</strong>
+      </div>
+
+      <div class="ownerHeroStat">
         <span>Останній візит</span>
         <strong>${escapeHtml(lastVisit?.date || "—")}</strong>
+      </div>
+
+      <div class="ownerHeroStat ownerHeroStatus">
+        <span>Статус</span>
+        <strong>${visitsCount >= 10 ? "VIP" : visitsCount > 0 ? "Активний" : "Новий"}</strong>
       </div>
     </div>
   </div>

@@ -8976,3 +8976,61 @@ body[data-theme="white"] .monthDayNum {
   background: linear-gradient(135deg, #7C5CFF, #B45CFF);
   box-shadow: 0 16px 36px rgba(124,92,255,.28);
 }
+/* OWNER PAGE — full-width dashboard hero */
+[data-page="owner"] {
+  max-width: 1220px !important;
+  margin: 0 auto !important;
+}
+
+[data-page="owner"] > div:first-child {
+  display: none !important;
+}
+
+.ownerHeroFull {
+  width: min(1120px, 100%) !important;
+  max-width: none !important;
+}
+
+.ownerHeroTop {
+  grid-template-columns: 100px 1fr auto !important;
+}
+
+.ownerHeroTop::before {
+  display: none !important;
+}
+
+.ownerAvatarBig {
+  width: 100px;
+  height: 100px;
+  display: grid;
+  place-items: center;
+  border-radius: 30px;
+  font-size: 3.2rem;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 0 42px rgba(180,92,255,.26);
+}
+
+.ownerHeroStatsPlus {
+  grid-template-columns: repeat(6, 1fr) !important;
+}
+
+.ownerHeroStatus strong {
+  color: #22c55e !important;
+}
+
+@media (max-width: 1100px) {
+  .ownerHeroStatsPlus {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .ownerHeroTop {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ownerHeroStatsPlus {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
