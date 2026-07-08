@@ -8482,6 +8482,21 @@ $("#visitSave")?.addEventListener("click", async () => {
   }
 });
 
+$("#btnCreatePatientFromVisit")?.addEventListener("click", () => {
+  const box = $("#visitNewPatientBox");
+  if (!box) return alert("Блок швидкого створення пацієнта не знайдено");
+
+  const isOpen = box.style.display !== "none";
+  box.style.display = isOpen ? "none" : "block";
+
+  if (!isOpen) {
+    $("#visitPatientSelect").value = "";
+    $("#visitPatientSearch").value = "";
+    $("#visitPatientResults").innerHTML = "";
+    $("#visitNewOwnerName")?.focus();
+  }
+});
+
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ВЕТКАРТА, КАСКАДНЫЕ УДАЛЕНИЯ И ЖУРНАЛ СТАЦИОНАРА)
 // Часть 9
