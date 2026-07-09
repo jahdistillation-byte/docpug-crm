@@ -9361,3 +9361,39 @@ body[data-theme="white"] .monthDayNum {
   background: var(--primary-neon) !important;
   box-shadow: var(--primary-glow) !important;
 }
+/* THEME VARIABLES — support body.green / body.purple / body.blue */
+
+body.green {
+  --primary-neon: #22c55e;
+  --accent-neon: #34d399;
+  --primary-glow: 0 0 18px rgba(34, 197, 94, 0.45);
+  --glass-border: rgba(52, 211, 153, 0.16);
+}
+
+body.blue {
+  --primary-neon: #3b82f6;
+  --accent-neon: #60a5fa;
+  --primary-glow: 0 0 18px rgba(59, 130, 246, 0.45);
+  --glass-border: rgba(96, 165, 250, 0.16);
+}
+
+body.purple {
+  --primary-neon: #a361ff;
+  --accent-neon: #ff61f6;
+  --primary-glow: 0 0 18px rgba(163, 97, 255, 0.48);
+  --glass-border: rgba(180, 92, 255, 0.18);
+}
+
+body.black {
+  --primary-neon: #e5e7eb;
+  --accent-neon: #94a3b8;
+  --primary-glow: 0 0 18px rgba(229, 231, 235, 0.22);
+  --glass-border: rgba(255,255,255,0.14);
+}
+
+body.white {
+  --primary-neon: #7c3aed;
+  --accent-neon: #a855f7;
+  --primary-glow: 0 0 18px rgba(124, 58, 237, 0.30);
+  --glass-border: rgba(124,58,237,0.18);
+}
