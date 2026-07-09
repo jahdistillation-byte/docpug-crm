@@ -9303,3 +9303,61 @@ body[data-theme="white"] .monthDayNum {
   border: 1px solid var(--glass-border) !important;
   box-shadow: 0 16px 40px rgba(0,0,0,.20);
 }
+/* THEME FIX — remove hardcoded purple from premium components */
+
+.ownerDashBadge,
+.ownerHeroEdit,
+#btnAddPet,
+.mac-dock .menu-item.active,
+.mac-dock .menu-item.active a,
+.dock-menu .menu-item.active,
+.dock-menu .menu-item.active a {
+  background: var(--primary-neon) !important;
+  box-shadow: var(--primary-glow) !important;
+  color: #fff !important;
+}
+
+.ownerDashboardHero,
+.ownerDashAvatar,
+.pugVisitModal,
+.pugOwnerModal,
+.deleteModal {
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.38),
+    var(--primary-glow) !important;
+}
+
+.ownerDashboardHero {
+  background:
+    radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--primary-neon) 26%, transparent), transparent 32%),
+    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--accent-neon) 14%, transparent), transparent 28%),
+    linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.24)) !important;
+}
+
+.ownerDashStat strong,
+.ownerDashName,
+.ownerPetsHeader h3 {
+  color: var(--text-main) !important;
+}
+
+.ownerDashStat strong {
+  color: var(--primary-neon) !important;
+}
+
+.ownerDashContacts span,
+.ownerDashStat,
+[data-page="owner"] .pet-card,
+.pugVisitSection,
+.pugQuickGroup {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.pugAddPatientBtn,
+.pugQuickCreate,
+.pugVisitSave,
+.ownerModalSave,
+.btn-primary {
+  background: var(--primary-neon) !important;
+  box-shadow: var(--primary-glow) !important;
+}
