@@ -9397,3 +9397,52 @@ body.white {
   --primary-glow: 0 0 18px rgba(124, 58, 237, 0.30);
   --glass-border: rgba(124,58,237,0.18);
 }
+/* OWNER DASHBOARD — theme compatible */
+
+.ownerDashBadge,
+.ownerHeroEdit,
+#btnAddPet,
+.pugVisitSave,
+.pugQuickCreate,
+.btn-primary {
+  background: var(--accent-color) !important;
+  box-shadow: 0 0 18px var(--accent-glow) !important;
+  color: #fff !important;
+}
+
+.ownerDashStat strong {
+  color: var(--accent-color) !important;
+}
+
+.ownerDashboardHero,
+.ownerDashAvatar {
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.38),
+    0 0 28px var(--accent-glow) !important;
+}
+
+.ownerDashboardHero {
+  background:
+    radial-gradient(circle at 12% 12%, var(--accent-glow), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.22)) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+.ownerDashAvatar,
+.ownerDashContacts span,
+.ownerDashStat,
+.ownerHeroBack,
+[data-page="owner"] .pet-card,
+[data-page="owner"] #petsList {
+  background: var(--card-bg) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.mac-dock .menu-item.active,
+.mac-dock .menu-item.active a,
+.dock-menu .menu-item.active,
+.dock-menu .menu-item.active a {
+  background: var(--accent-color) !important;
+  box-shadow: 0 0 18px var(--accent-glow) !important;
+  color: #fff !important;
+}
