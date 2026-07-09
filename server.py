@@ -585,6 +585,36 @@ def api_create_owner():
     row = (res.data[0] if getattr(res, "data", None) else None) or payload
     return ok(row)
 
+@app.put("/api/owners/<owner_id>")
+def api_update_owner(owner_id):
+    if not owner_id:
+        return fail("owner_id required", 400)
+
+    current_org = get_current_org_id()
+    data = request.get_json(silent=True) or {}
+
+    payload = {
+        "name": str(data.get("name") or "").strip(),
+        "phone": str(data.get("phone") or "").strip(),
+        "note": str(data.get("note") or "").strip(),
+    }
+
+    if not payload["name"]:
+        return fail("name required", 400)
+
+    res = (
+        supabase.table("owners")
+        .update(payload)
+        .eq("org_id", current_org)
+        .eq("id", owner_id)
+        .execute()
+    )
+
+    if not res.data:
+        return fail("owner not found", 404)
+
+    return ok(res.data[0])
+
 @app.delete("/api/owners/<owner_id>")
 def api_delete_owner(owner_id):
     if not owner_id:
