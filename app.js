@@ -7845,6 +7845,10 @@ function initOwnersUI() {
   state.ownersUiBound = true;
 
   document.addEventListener("click", async (e) => {
+
+    // ==========================
+    // Додати власника
+    // ==========================
     const addBtn = e.target.closest(
       "#btnAddOwner, [data-action='add-owner'], [data-action='addOwner'], .btnAddOwner"
     );
@@ -7852,18 +7856,14 @@ function initOwnersUI() {
     if (addBtn) {
       e.preventDefault();
       e.stopPropagation();
-
       openOwnerModal();
       return;
     }
 
-    const ownersList =
-      e.target.closest("#owners-table-body") ||
-      e.target.closest("#ownersList") ||
-      e.target.closest(".data-table-container");
-
-    if (!ownersList) return;
-
+    // ==========================
+    // Редагувати власника
+    // (працює і в таблиці, і в Hero)
+    // ==========================
     const editBtn = e.target.closest("[data-edit-owner]");
 
     if (editBtn) {
@@ -7883,7 +7883,60 @@ function initOwnersUI() {
       return;
     }
 
+    // ==========================
+    // Далі працюємо тільки всередині списку
+    // ==========================
+    const ownersList =
+      e.target.closest("#owners-table-body") ||
+      e.target.closest("#ownersList") ||
+      e.target.closest(".data-table-container");
+
+    if (!ownersList) return;
+
+    // ==========================
+    // Видалити власника
+    // ==========================
     const delBtn = e.target.closest("[data-del]");
+
+    if (delBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const id = delBtn.dataset.del;
+      if (!id) return;
+
+      const owner = (state.owners || []).find(
+        (o) => String(o.id) === String(id)
+      );
+
+      const ownerName = owner?.name || "цього власника";
+
+      openDeleteModal(
+        `<b>${escapeHtml(ownerName)}</b><br><br>Цю дію неможливо скасувати.`,
+        async () => {
+          const ok = await deleteOwner(id);
+
+          if (!ok) {
+            alert("Не вдалося видалити");
+            return;
+          }
+
+          await loadOwners();
+        }
+      );
+
+      return;
+    }
+
+    // ==========================================================
+    // НИЖЕ НИЧЕГО НЕ ВСТАВЛЯЙ.
+    // Оставь весь свой существующий код:
+    // const row = ...
+    // const openBtn = ...
+    // openOwner(...)
+    // и т.д.
+    // ==========================================================
+
 
 if (delBtn) {
   e.preventDefault();
