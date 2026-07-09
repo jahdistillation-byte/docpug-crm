@@ -8030,34 +8030,53 @@ function initOwnerUI() {
 
   // Клик по списку животных (Удаление / Открытие)
   $("#petsList")?.addEventListener("click", async (e) => {
-    const delBtn = e.target.closest("[data-del-pet]");
-    if (delBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const petId = delBtn.dataset.delPet;
-      if (!petId) return;
+  const delBtn = e.target.closest("[data-del-pet]");
+  if (delBtn) {
+    e.preventDefault();
+    e.stopPropagation();
 
-      if (!confirm("Видалити пацієнта назавжди?")) return;
+    const petId = delBtn.dataset.delPet;
+    if (!petId) return;
 
-      const ok = await deletePatientApi(petId);
-      if (!ok) return alert("Не вдалося видалити пацієнта.");
+    const pet = (state.patients || []).find(
+      (p) => String(p.id) === String(petId)
+    );
 
-      await loadPatientsApi();
+    const petName = pet?.name || "цього пацієнта";
 
-      if (state.selectedPetId === petId) {
-        state.selectedPetId = null;
-        state.selectedPet = null;
+    openDeleteModal(
+      `<b>${escapeHtml(petName)}</b><br><br>Цю дію неможливо скасувати.`,
+      async () => {
+
+        const ok = await deletePatientApi(petId);
+
+        if (!ok) {
+          alert("Не вдалося видалити пацієнта.");
+          return;
+        }
+
+        await loadPatientsApi();
+
+        if (state.selectedPetId === petId) {
+          state.selectedPetId = null;
+          state.selectedPet = null;
+        }
+
+        if (state.selectedOwnerId) {
+          renderOwnerPage(state.selectedOwnerId);
+        }
       }
+    );
 
-      if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
-      return;
-    }
+    return;
+  }
 
-    const openZone = e.target.closest("[data-open-pet]");
-    if (openZone) {
-      const petId = openZone.dataset.openPet;
-      if (petId) openPatient(petId);
-    }
-  });
+  const openZone = e.target.closest("[data-open-pet]");
+  if (openZone) {
+    const petId = openZone.dataset.openPet;
+    if (petId) openPatient(petId);
+  }
+});
 }
 
 // =========================
