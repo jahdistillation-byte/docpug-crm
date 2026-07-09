@@ -9165,3 +9165,141 @@ body[data-theme="white"] .monthDayNum {
   font-size: 1.2rem;
   margin: 0;
 }
+/* OWNER DASHBOARD — premium polish with theme variables */
+
+.ownerDashboardHero {
+  width: min(1080px, 100%) !important;
+  padding: 30px 32px !important;
+  border-radius: 32px !important;
+  margin: 0 auto 38px !important;
+  background:
+    radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--primary-neon) 28%, transparent), transparent 30%),
+    radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--accent-neon) 16%, transparent), transparent 26%),
+    linear-gradient(135deg, rgba(255,255,255,.045), rgba(0,0,0,.22)) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-premium), var(--primary-glow) !important;
+}
+
+.ownerDashTop {
+  grid-template-columns: 88px 1fr auto !important;
+  gap: 22px !important;
+  align-items: center !important;
+}
+
+.ownerDashAvatar {
+  width: 88px !important;
+  height: 88px !important;
+  border-radius: 26px !important;
+  font-size: 2.7rem !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--primary-glow) !important;
+}
+
+.ownerDashName {
+  font-size: 2.45rem !important;
+  letter-spacing: -0.04em;
+  color: var(--text-main) !important;
+}
+
+.ownerDashContacts {
+  margin-top: 12px !important;
+  gap: 8px !important;
+}
+
+.ownerDashContacts span,
+.ownerHeroBack,
+.ownerDashStat {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-main) !important;
+}
+
+.ownerDashContacts span {
+  font-size: 1rem !important;
+  padding: 8px 13px !important;
+}
+
+.ownerDashBadge,
+.ownerHeroEdit,
+#btnAddPet {
+  background: var(--primary-neon) !important;
+  box-shadow: var(--primary-glow) !important;
+  color: #fff !important;
+}
+
+.ownerDashBadge {
+  font-size: 1.35rem !important;
+  padding: 13px 20px !important;
+}
+
+.ownerDashStatus {
+  gap: 9px !important;
+}
+
+.ownerHeroEdit,
+.ownerHeroBack {
+  min-width: 140px;
+  text-align: center;
+  padding: 10px 14px !important;
+}
+
+.ownerDashStats {
+  margin-top: 28px !important;
+  gap: 12px !important;
+}
+
+.ownerDashStat {
+  min-height: 92px !important;
+  padding: 16px !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025)),
+    var(--glass-bg) !important;
+}
+
+.ownerDashKicker,
+.ownerDashStat span {
+  color: var(--text-muted) !important;
+}
+
+.ownerDashStat span {
+  font-size: .68rem !important;
+}
+
+.ownerDashStat strong {
+  font-size: 1.45rem !important;
+  color: var(--primary-neon) !important;
+}
+
+/* owner pets block polish */
+
+.ownerPetsHeader {
+  width: min(1080px, 100%);
+  margin: 0 auto 14px !important;
+}
+
+.ownerPetsHeader h3 {
+  color: var(--text-main) !important;
+}
+
+#petsList.pets-container,
+[data-page="owner"] #petsList {
+  width: min(1080px, 100%) !important;
+  margin: 0 auto !important;
+  min-height: 118px;
+  border-radius: 24px !important;
+  border: 1px dashed var(--glass-border) !important;
+  background: color-mix(in srgb, var(--glass-bg) 55%, transparent) !important;
+}
+
+[data-page="owner"] .pet-card {
+  width: min(360px, 100%) !important;
+  min-height: 72px;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.035)),
+    var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.20);
+}
