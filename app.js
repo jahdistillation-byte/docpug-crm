@@ -7952,6 +7952,7 @@ async function openDischargeModal(visitId) {
   await renderDischargeA4(vid);
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("medcardModalIsOpen");
 }
 
 function closeDischargeModal() {
@@ -9553,6 +9554,7 @@ function openVisitModalForCreate(pet) {
   // === ЭФФЕКТНОЕ ЦЕНТРИРОВАНИЕ И УВЕЛИЧЕНИЕ (Apple VisionOS / macOS Style) ===
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("medcardModalIsOpen");
   
   // Жестко выравниваем строго по центру экрана и увеличиваем ширину
   modal.style.position = "fixed";
@@ -10168,57 +10170,500 @@ function renderMedcardEntryCard(x) {
 
 function ensureMedcardModal() {
   let modal = document.getElementById("medcardModal");
-  if (modal) return modal;
+
+  if (modal) {
+    return modal;
+  }
 
   modal = document.createElement("div");
-  modal.className = "modal";
   modal.id = "medcardModal";
+  modal.className = "medcardModalOverlay";
   modal.setAttribute("aria-hidden", "true");
 
   modal.innerHTML = `
-    <div class="modal__backdrop" data-close-medcard-modal></div>
-    <div class="modal__panel medcardModalPanel" role="dialog" aria-modal="true">
-      <div class="modal__head">
-        <div>
-          <div class="modal__title" id="medcardModalTitle">Нова запись веткартки</div>
-          <div class="modal__sub">Стан, лікування, динаміка та план пацієнта</div>
+    <div
+      class="medcardModalBackdrop"
+      data-close-medcard-modal
+    ></div>
+
+    <section
+      class="medcardModalWindow"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="medcardModalTitle"
+    >
+      <div class="medcardModalGlow medcardModalGlowOne"></div>
+      <div class="medcardModalGlow medcardModalGlowTwo"></div>
+
+      <header class="medcardModalHeader">
+        <div class="medcardModalHeaderMain">
+          <div class="medcardModalIcon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="25"
+              height="25"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 3h6"></path>
+              <path d="M10 3v3"></path>
+              <path d="M14 3v3"></path>
+              <rect x="5" y="6" width="14" height="15" rx="3"></rect>
+              <path d="M9 11h6"></path>
+              <path d="M12 8v6"></path>
+              <path d="M8 17h8"></path>
+            </svg>
+          </div>
+
+          <div>
+            <div class="medcardModalKicker">
+              МЕДИЧНИЙ ЩОДЕННИК
+            </div>
+
+            <h2 id="medcardModalTitle">
+              Нова запись веткартки
+            </h2>
+
+            <p>
+              Зафіксуйте стан пацієнта, показники, проведене лікування
+              та подальший план спостереження.
+            </p>
+          </div>
         </div>
-        <button class="iconBtn" data-close-medcard-modal type="button">✕</button>
+
+        <button
+          class="medcardModalClose"
+          type="button"
+          data-close-medcard-modal
+          aria-label="Закрити"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
+            <path d="M6 6l12 12"></path>
+            <path d="M18 6 6 18"></path>
+          </svg>
+        </button>
+      </header>
+
+      <div class="medcardModalScroll">
+
+        <!-- 1. Дата та показники -->
+
+        <section class="medcardFormSection">
+          <div class="medcardSectionHeader">
+            <div class="medcardSectionIcon">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+                <path d="M8 3v4"></path>
+                <path d="M16 3v4"></path>
+                <path d="M3 10h18"></path>
+              </svg>
+            </div>
+
+            <div>
+              <h3>Час спостереження та показники</h3>
+              <p>Основні фізіологічні параметри пацієнта.</p>
+            </div>
+          </div>
+
+          <div class="medcardVitalsGrid">
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                Дата
+                <b>*</b>
+              </span>
+
+              <input
+                class="medcardInput"
+                id="medEntryDate"
+                type="date"
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                Час
+              </span>
+
+              <input
+                class="medcardInput"
+                id="medEntryTime"
+                type="time"
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                Вага
+                <small>кг</small>
+              </span>
+
+              <div class="medcardInputUnit">
+                <input
+                  class="medcardInput"
+                  id="medWeight"
+                  type="number"
+                  min="0"
+                  max="500"
+                  step="0.01"
+                  inputmode="decimal"
+                  placeholder="12.4"
+                >
+                <span>кг</span>
+              </div>
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                Температура
+                <small>°C</small>
+              </span>
+
+              <div class="medcardInputUnit">
+                <input
+                  class="medcardInput"
+                  id="medTemp"
+                  type="number"
+                  min="25"
+                  max="45"
+                  step="0.1"
+                  inputmode="decimal"
+                  placeholder="38.7"
+                >
+                <span>°C</span>
+              </div>
+            </label>
+
+            <label class="medcardField medcardFieldWide">
+              <span class="medcardFieldLabel">
+                Пульс / серцевий ритм
+              </span>
+
+              <input
+                class="medcardInput"
+                id="medPulse"
+                type="text"
+                maxlength="100"
+                placeholder="Наприклад: 120/хв, ритмічний"
+              >
+            </label>
+          </div>
+        </section>
+
+        <!-- 2. Поточний стан -->
+
+        <section class="medcardFormSection">
+          <div class="medcardSectionHeader">
+            <div class="medcardSectionIcon">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 12h4l2-6 4 12 2-6h6"></path>
+              </svg>
+            </div>
+
+            <div>
+              <h3>Поточний стан</h3>
+              <p>Швидка оцінка основних систем організму.</p>
+            </div>
+          </div>
+
+          <div class="medcardStateGrid">
+            <label class="medcardField">
+              <span class="medcardFieldLabel">Слизові / ясна</span>
+              <input
+                class="medcardInput"
+                id="medMucosa"
+                type="text"
+                maxlength="100"
+                placeholder="Рожеві, бліді, ціанотичні..."
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">Апетит</span>
+              <input
+                class="medcardInput"
+                id="medAppetite"
+                type="text"
+                maxlength="100"
+                placeholder="Добрий, знижений, відсутній..."
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">Вода / спрага</span>
+              <input
+                class="medcardInput"
+                id="medWater"
+                type="text"
+                maxlength="100"
+                placeholder="П’є, не п’є, полідипсія..."
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">Сечовипускання</span>
+              <input
+                class="medcardInput"
+                id="medUrine"
+                type="text"
+                maxlength="100"
+                placeholder="Норма, часте, відсутнє..."
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">Кал</span>
+              <input
+                class="medcardInput"
+                id="medStool"
+                type="text"
+                maxlength="100"
+                placeholder="Норма, діарея, запор..."
+              >
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">Дихання</span>
+              <input
+                class="medcardInput"
+                id="medBreathing"
+                type="text"
+                maxlength="100"
+                placeholder="Норма, тахіпное, утруднене..."
+              >
+            </label>
+          </div>
+
+          <label class="medcardField medcardConditionField">
+            <span class="medcardFieldLabel">Загальний стан</span>
+
+            <textarea
+              class="medcardTextarea"
+              id="medCondition"
+              rows="4"
+              maxlength="2000"
+              placeholder="Свідомість, положення тіла, активність, біль, загальне самопочуття пацієнта..."
+            ></textarea>
+          </label>
+        </section>
+
+        <!-- 3. Лікування -->
+
+        <section class="medcardFormSection medcardTreatmentSection">
+          <div class="medcardSectionHeader">
+            <div class="medcardSectionIcon">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10.5 20.5 20 11"></path>
+                <path d="m14 5 5 5"></path>
+                <path d="M4.5 16.5 13 8"></path>
+                <path d="m3 21 4-1-3-3-1 4Z"></path>
+              </svg>
+            </div>
+
+            <div>
+              <h3>Лікування та спостереження</h3>
+              <p>Що зроблено зараз і як змінився стан пацієнта.</p>
+            </div>
+          </div>
+
+          <div class="medcardTextGrid">
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                Проведено / призначено
+              </span>
+
+              <textarea
+                class="medcardTextarea medcardTextareaLarge"
+                id="medTreatment"
+                rows="7"
+                maxlength="4000"
+                placeholder="Препарати, дозування, інфузії, маніпуляції, процедури..."
+              ></textarea>
+            </label>
+
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                Динаміка
+              </span>
+
+              <textarea
+                class="medcardTextarea medcardTextareaLarge"
+                id="medDynamics"
+                rows="7"
+                maxlength="3000"
+                placeholder="Що змінилося після лікування або за період спостереження..."
+              ></textarea>
+            </label>
+          </div>
+        </section>
+
+        <!-- 4. План -->
+
+        <section class="medcardFormSection">
+          <div class="medcardSectionHeader">
+            <div class="medcardSectionIcon">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+
+            <div>
+              <h3>Подальший план</h3>
+              <p>Контроль, наступні процедури та відповідальний лікар.</p>
+            </div>
+          </div>
+
+          <div class="medcardPlanGrid">
+            <label class="medcardField">
+              <span class="medcardFieldLabel">
+                План / контроль
+              </span>
+
+              <textarea
+                class="medcardTextarea"
+                id="medPlan"
+                rows="5"
+                maxlength="3000"
+                placeholder="Повторний огляд, контроль показників, аналізи, зміна терапії..."
+              ></textarea>
+            </label>
+
+            <div class="medcardPlanSide">
+              <label class="medcardField">
+                <span class="medcardFieldLabel">
+                  Лікар
+                </span>
+
+                <input
+                  class="medcardInput"
+                  id="medDoctor"
+                  type="text"
+                  maxlength="150"
+                  placeholder="ПІБ відповідального лікаря"
+                >
+              </label>
+
+              <label class="medcardField">
+                <span class="medcardFieldLabel">
+                  Додаткова нотатка
+                </span>
+
+                <textarea
+                  class="medcardTextarea"
+                  id="medNote"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Будь-які додаткові деталі..."
+                ></textarea>
+              </label>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="modal__body medcardModalBody">
-        <div class="medFormGrid">
-          <label class="field"><div class="label">Дата</div><input class="input" id="medEntryDate" type="date"></label>
-          <label class="field"><div class="label">Час</div><input class="input" id="medEntryTime" type="time"></label>
-          <label class="field"><div class="label">Вага, кг</div><input class="input" id="medWeight" placeholder="Напр.: 12.4"></label>
-          <label class="field"><div class="label">Температура</div><input class="input" id="medTemp" placeholder="Напр.: 39.2"></label>
-          <label class="field"><div class="label">Пульс / серце</div><input class="input" id="medPulse" placeholder="Напр.: 120, ритмічний"></label>
-          <label class="field"><div class="label">Слизові / ясна</div><input class="input" id="medMucosa" placeholder="Рожеві / бліді / ціаноз"></label>
-          <label class="field"><div class="label">Апетит</div><input class="input" id="medAppetite" placeholder="Добрий / знижений / відсутній"></label>
-          <label class="field"><div class="label">Вода / спрага</div><input class="input" id="medWater" placeholder="П’є / не п’є / полідипсія"></label>
-          <label class="field"><div class="label">Сечовипускання</div><input class="input" id="medUrine" placeholder="Норма / часте / немає"></label>
-          <label class="field"><div class="label">Кал</div><input class="input" id="medStool" placeholder="Норма / діарея / запор"></label>
-          <label class="field"><div class="label">Дихання</div><input class="input" id="medBreathing" placeholder="Норма / часте / утруднене"></label>
-          <label class="field"><div class="label">Лікар</div><input class="input" id="medDoctor" placeholder="ПІБ лікаря"></label>
+
+      <footer class="medcardModalFooter">
+        <div class="medcardModalFooterHint">
+          Запис буде додано до хронології стану пацієнта.
         </div>
-        <label class="field"><div class="label">Загальний стан</div><textarea class="textarea" id="medCondition" rows="4" placeholder="Опис стану пацієнта..."></textarea></label>
-        <label class="field"><div class="label">Проведено / призначено</div><textarea class="textarea" id="medTreatment" rows="4" placeholder="Препарати, маніпуляції, інфузії, процедури..."></textarea></label>
-        <label class="field"><div class="label">Динаміка</div><textarea class="textarea" id="medDynamics" rows="3" placeholder="Що змінилось після лікування / за період спостереження..."></textarea></label>
-        <label class="field"><div class="label">План / контроль</div><textarea class="textarea" id="medPlan" rows="3" placeholder="Контроль, повторний огляд, аналізи, зміна терапії..."></textarea></label>
-        <label class="field"><div class="label">Додаткова нотатка</div><textarea class="textarea" id="medNote" rows="3" placeholder="Будь-які додаткові деталі..."></textarea></label>
-      </div>
-      <div class="modal__foot">
-        <button class="ghost" data-close-medcard-modal type="button">Скасувати</button>
-        <button class="primary" id="medcardSaveBtn" type="button">Зберегти</button>
-      </div>
-    </div>
+
+        <div class="medcardModalActions">
+          <button
+            class="medcardCancelButton"
+            type="button"
+            data-close-medcard-modal
+          >
+            Скасувати
+          </button>
+
+          <button
+            class="medcardSaveButton"
+            id="medcardSaveBtn"
+            type="button"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="17"
+              height="17"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path>
+              <path d="M17 21v-8H7v8"></path>
+              <path d="M7 3v5h8"></path>
+            </svg>
+
+            <span>Зберегти запис</span>
+          </button>
+        </div>
+      </footer>
+    </section>
   `;
 
   document.body.appendChild(modal);
-  modal.addEventListener("click", (e) => {
-    if (e.target.closest("[data-close-medcard-modal]")) {
+
+  modal.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-medcard-modal]")) {
       closeMedcardModal();
     }
   });
+
+  modal.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMedcardModal();
+    }
+  });
+
   return modal;
 }
 
@@ -10286,8 +10731,12 @@ function medcardFormRead() {
 function closeMedcardModal() {
   const modal = document.getElementById("medcardModal");
   if (!modal) return;
+
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
+
+  document.body.classList.remove("medcardModalIsOpen");
+
   delete modal.dataset.entryId;
   delete modal.dataset.patientId;
 }
@@ -10415,11 +10864,12 @@ async function renderMedcardTab(pet) {
     delete modal.dataset.entryId;
 
     const title = document.getElementById("medcardModalTitle");
-    if (title) title.textContent = "Нова запись веткартки";
+    if (title) title.textContent = "Новий запис веткартки";
 
     medcardFormSet({});
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("medcardModalIsOpen");
 
     const saveBtn = document.getElementById("medcardSaveBtn");
     if (saveBtn) {
@@ -10463,6 +10913,7 @@ async function renderMedcardTab(pet) {
       medcardFormSet(current);
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("medcardModalIsOpen");
 
       const saveBtn = document.getElementById("medcardSaveBtn");
       if (saveBtn) {
@@ -10862,6 +11313,7 @@ if (visitNewPatientBox) visitNewPatientBox.style.display = "none";
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("medcardModalIsOpen");
 }
 
 $("#visitPatientSearch")?.addEventListener("input", () => {
