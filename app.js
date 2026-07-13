@@ -7999,6 +7999,226 @@ if (openZone) {
 // =========================================================
 // DOC.PUG — Модальне вікно додавання пацієнта
 // =========================================================
+// =========================================================
+// DOC.PUG — Довідник порід для форми пацієнта
+// =========================================================
+
+const DOG_BREEDS = [
+  "Німецька вівчарка",
+  "Східноєвропейська вівчарка",
+  "Лабрадор-ретривер",
+  "Золотистий ретривер",
+  "Ротвейлер",
+  "Доберман",
+  "Кавказька вівчарка",
+  "Середньоазійська вівчарка (алабай)",
+  "Сибірський хаскі",
+  "Аляскинський маламут",
+  "Бернський зенненхунд",
+  "Німецький дог",
+  "Боксер",
+  "Різеншнауцер",
+  "Кане-корсо",
+  "Московська сторожова",
+  "Російський чорний тер’єр",
+  "Леонбергер",
+  "Ньюфаундленд",
+  "Бордоський дог",
+
+  "Бордер-колі",
+  "Австралійська вівчарка (ауссі)",
+  "Далматин",
+  "Англійський бульдог",
+  "Американський стаффордширський тер’єр",
+  "Стаффордширський бультер’єр",
+  "Бігль",
+  "Англійський кокер-спанієль",
+  "Англійський спрингер-спанієль",
+  "Шетландська вівчарка (шелті)",
+  "Західносибірська лайка",
+  "Російсько-європейська лайка",
+  "Російський гончак",
+  "Угорська вижла",
+  "Веймаранер",
+  "Курцхаар",
+  "Дратхаар",
+  "Чехословацький вовчак",
+  "Басенджі",
+  "Шарпей",
+  "Акіта-іну",
+  "Сіба-іну",
+
+  "Йоркширський тер’єр",
+  "Чихуахуа",
+  "Російський той",
+  "Такса стандартна",
+  "Такса мініатюрна",
+  "Мопс",
+  "Французький бульдог",
+  "Німецький шпіц (померанський)",
+  "Ши-тцу",
+  "Мальтезе",
+  "Пекінес",
+  "Джек-рассел-тер’єр",
+  "Вест-хайленд-вайт-тер’єр",
+  "Цвергшнауцер",
+  "Папільйон",
+  "Той-пудель",
+  "Карликовий пудель",
+  "Великий пудель",
+  "Бішон-фрізе",
+  "Бассет-гаунд",
+  "Кавалер-кінг-чарльз-спанієль",
+  "Італійський левретка",
+
+  "Англійський сетер",
+  "Ірландський сетер",
+  "Шотландський сетер (гордон)",
+  "Пойнтер",
+  "Ірландський вовкодав",
+  "Російський псовий хорт",
+  "Віпет",
+  "Грейгаунд",
+  "Афганський хорт",
+  "Салюкі",
+  "Бассет-фов-де-бретань",
+  "Гладкошерстий фокстер’єр",
+  "Жорсткошерстий фокстер’єр",
+  "Бультер’єр",
+  "Американський бульдог",
+  "Аргентинський дог",
+  "Бразильська філа",
+  "Тоса-іну",
+
+  "Піренейський гірський собака",
+  "Тибетський мастиф",
+  "Англійський мастиф",
+  "Бульмастиф",
+  "Сенбернар",
+  "Піренейський мастиф",
+  "Іспанський мастиф",
+  "Анатолійська вівчарка (кангал)",
+  "Бельгійська вівчарка малінуа",
+  "Бельгійська вівчарка тервюрен",
+  "Голландська вівчарка",
+  "Колі довгошерста",
+  "Колі короткошерста",
+
+  "Американський кокер-спанієль",
+  "Ірландський тер’єр",
+  "Ердельтер’єр",
+  "Керн-тер’єр",
+  "Метис / безпородний"
+];
+
+const CAT_BREEDS = [
+  "Британська короткошерста",
+  "Британська довгошерста",
+  "Шотландська висловуха",
+  "Шотландська прямовуха",
+  "Хайленд-фолд",
+  "Хайленд-страйт",
+  "Мейн-кун",
+  "Російська блакитна",
+  "Сибірська",
+  "Невська маскарадна",
+  "Перська",
+  "Гімалайська (колор-пойнт)",
+  "Перська шиншила",
+  "Екзотична короткошерста",
+
+  "Канадський сфінкс",
+  "Донський сфінкс",
+  "Петерболд",
+  "Український левкой",
+  "Абіссинська",
+  "Корніш-рекс",
+  "Девон-рекс",
+  "Селкірк-рекс короткошерстий",
+  "Селкірк-рекс довгошерстий",
+  "Німецький рекс",
+  "Ла-перм",
+  "Уральський рекс",
+
+  "Сомалійська",
+  "Бенгальська",
+  "Регдол",
+  "Рагамафін",
+  "Норвезька лісова",
+  "Сіамська",
+  "Тайська",
+  "Орієнтальна короткошерста",
+  "Орієнтальна довгошерста",
+  "Бурманська",
+  "Бурміла",
+  "Тонкінська",
+
+  "Манчкін короткошерстий",
+  "Манчкін довгошерстий",
+  "Наполеон (мінует)",
+  "Турецька ангора",
+  "Турецький ван",
+  "Єгипетська мау",
+  "Американська короткошерста",
+  "Американська жорсткошерста",
+  "Американський керл короткошерстий",
+  "Американський керл довгошерстий",
+  "Оцикет",
+  "Балінезійська",
+  "Яванез",
+  "Японський бобтейл короткошерстий",
+  "Японський бобтейл довгошерстий",
+  "Курильський бобтейл короткошерстий",
+  "Курильський бобтейл довгошерстий",
+  "Карельський бобтейл",
+  "Меконгський бобтейл",
+  "Піксибоб короткошерстий",
+  "Піксибоб довгошерстий",
+
+  "Той-боб",
+  "Шартрез",
+  "Азійська таббі",
+  "Азійська димчаста",
+  "Азійська однотонна",
+  "Бомбейська",
+  "Гавана браун",
+  "Корат",
+  "Сингапура",
+  "Серенгеті",
+  "Саванна",
+  "Каракет",
+
+  "Чаузі",
+  "Чіто (Cheetoh)",
+  "Менкс",
+  "Кімрик",
+  "Нібелунг",
+  "Тіффані",
+  "Скукум",
+  "Кінкалоу",
+  "Лікой",
+  "Ельф",
+  "Двельф",
+  "Бамбіно",
+  "Мінскін",
+  "Йоркська шоколадна",
+  "Хайлендер",
+  "Австралійський міст",
+  "Європейська короткошерста",
+  "Сококе",
+  "Тойгер",
+  "Сноу-шу",
+  "Кіпрська кішка (Афродіта)",
+  "Аравійська мау",
+  "Охос азулес",
+  "Каліфорнійська плямиста",
+  "Хайленд-лінкс",
+  "Американський бобтейл короткошерстий",
+  "Американський бобтейл довгошерстий",
+  "Китайська Лі Хуа",
+  "Метис / безпородна"
+];
+
 function openAddPetModal(ownerId) {
   if (!ownerId) {
     alert("Спочатку обери власника");
@@ -8012,201 +8232,263 @@ function openAddPetModal(ownerId) {
   overlay.className = "addPetModalOverlay";
 
   overlay.innerHTML = `
-    <div
-      class="addPetModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="addPetModalTitle"
-    >
-      <div class="addPetModalGlow addPetModalGlowOne"></div>
-      <div class="addPetModalGlow addPetModalGlowTwo"></div>
+  <div
+    class="addPetModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addPetModalTitle"
+  >
+    <div class="addPetModalGlow addPetModalGlowOne"></div>
+    <div class="addPetModalGlow addPetModalGlowTwo"></div>
 
-      <div class="addPetModalHeader">
-        <div>
-          <div class="addPetModalKicker">
-            НОВИЙ ПАЦІЄНТ
-          </div>
-
-          <h2 id="addPetModalTitle">
-            Додати тварину
-          </h2>
-
-          <p>
-            Створіть картку пацієнта. Дані можна буде змінити пізніше.
-          </p>
+    <div class="addPetModalHeader">
+      <div>
+        <div class="addPetModalKicker">
+          НОВИЙ ПАЦІЄНТ
         </div>
 
-        <button
-          class="addPetModalClose"
-          id="addPetModalClose"
-          type="button"
-          aria-label="Закрити"
-        >
-          ×
-        </button>
+        <h2 id="addPetModalTitle">
+          Додати тварину
+        </h2>
+
+        <p>
+          Створіть картку пацієнта. Дані можна буде змінити пізніше.
+        </p>
       </div>
 
-      <form id="addPetModalForm" class="addPetModalForm" novalidate>
-        <div class="addPetModalGrid">
+      <button
+        class="addPetModalClose"
+        id="addPetModalClose"
+        type="button"
+        aria-label="Закрити"
+      >
+        ×
+      </button>
+    </div>
 
-          <label class="addPetField addPetFieldFull">
-            <span class="addPetLabel">
-              Кличка
-              <b>*</b>
-            </span>
+    <form id="addPetModalForm" class="addPetModalForm" novalidate>
+      <div class="addPetModalGrid">
 
-            <div class="addPetInputWrap">
-              <span class="addPetInputIcon">✦</span>
+        <label class="addPetField addPetFieldFull">
+          <span class="addPetLabel">
+            Кличка
+            <b>*</b>
+          </span>
 
-              <input
-                id="addPetName"
-                class="addPetInput addPetInputWithIcon"
-                type="text"
-                maxlength="80"
-                autocomplete="off"
-                placeholder="Наприклад: Жужа"
-              >
-            </div>
-          </label>
+          <div class="addPetInputWrap">
+            <span class="addPetInputIcon">✦</span>
 
-          <div class="addPetField addPetFieldFull">
-            <span class="addPetLabel">
-              Вид пацієнта
-              <b>*</b>
-            </span>
+            <input
+              id="addPetName"
+              class="addPetInput addPetInputWithIcon"
+              type="text"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Наприклад: Жужа"
+            >
+          </div>
+        </label>
 
-            <div class="addPetSpeciesSelector">
-              <button
-                class="addPetSpeciesButton"
-                type="button"
-                data-add-pet-species="cat"
-              >
-                <span class="addPetSpeciesEmoji">🐈</span>
+        <div class="addPetField addPetFieldFull">
+          <span class="addPetLabel">
+            Вид пацієнта
+            <b>*</b>
+          </span>
 
-                <span class="addPetSpeciesInfo">
-                  <strong>Кіт</strong>
-                  <small>Кішка або кіт</small>
-                </span>
+          <div class="addPetSpeciesSelector">
 
-                <span class="addPetSpeciesCheck">✓</span>
-              </button>
+            <button
+              class="addPetSpeciesButton"
+              type="button"
+              data-add-pet-species="cat"
+            >
+              <span class="addPetSpeciesEmoji">🐈</span>
 
-              <button
-                class="addPetSpeciesButton"
-                type="button"
-                data-add-pet-species="dog"
-              >
-                <span class="addPetSpeciesEmoji">🐕</span>
+              <span class="addPetSpeciesInfo">
+                <strong>Кіт</strong>
+                <small>Кішка або кіт</small>
+              </span>
 
-                <span class="addPetSpeciesInfo">
-                  <strong>Пес</strong>
-                  <small>Собака</small>
-                </span>
+              <span class="addPetSpeciesCheck">✓</span>
+            </button>
 
-                <span class="addPetSpeciesCheck">✓</span>
-              </button>
-            </div>
+            <button
+              class="addPetSpeciesButton"
+              type="button"
+              data-add-pet-species="dog"
+            >
+              <span class="addPetSpeciesEmoji">🐕</span>
 
-            <input id="addPetSpecies" type="hidden" value="">
+              <span class="addPetSpeciesInfo">
+                <strong>Пес</strong>
+                <small>Собака</small>
+              </span>
+
+              <span class="addPetSpeciesCheck">✓</span>
+            </button>
+
+            <button
+              class="addPetSpeciesButton addPetSpeciesButtonOther"
+              type="button"
+              data-add-pet-species="other"
+            >
+              <span class="addPetSpeciesEmoji">🐾</span>
+
+              <span class="addPetSpeciesInfo">
+                <strong>Інші види</strong>
+                <small>Птахи, гризуни та інші</small>
+              </span>
+
+              <span class="addPetSpeciesCheck">✓</span>
+            </button>
+
           </div>
 
-          <label class="addPetField addPetFieldFull">
-            <span class="addPetLabel">
-              Порода
-              <small>необов’язково</small>
-            </span>
+          <input
+            id="addPetSpecies"
+            type="hidden"
+            value=""
+          >
+        </div>
 
-            <input
-              id="addPetBreed"
-              class="addPetInput"
-              type="text"
-              maxlength="100"
-              autocomplete="off"
-              placeholder="Наприклад: мопс"
-            >
-          </label>
+        <div
+          class="addPetField addPetFieldFull addPetBreedField"
+          id="addPetBreedField"
+        >
+          <span
+            class="addPetLabel"
+            id="addPetBreedLabel"
+          >
+            Порода
+            <small>необов’язково</small>
+          </span>
 
-          <label class="addPetField">
-            <span class="addPetLabel">
-              Вік
-              <small>необов’язково</small>
-            </span>
+          <div class="addPetBreedCombobox">
 
-            <input
-              id="addPetAge"
-              class="addPetInput"
-              type="text"
-              maxlength="40"
-              autocomplete="off"
-              placeholder="Наприклад: 4 роки"
-            >
-          </label>
+            <div class="addPetInputWrap">
+              <span class="addPetInputIcon">⌕</span>
 
-          <label class="addPetField">
-            <span class="addPetLabel">
-              Вага
-              <small>необов’язково</small>
-            </span>
-
-            <div class="addPetWeightWrap">
               <input
-                id="addPetWeight"
-                class="addPetInput"
-                type="number"
-                min="0"
-                max="300"
-                step="0.01"
-                inputmode="decimal"
-                placeholder="5.2"
+                id="addPetBreed"
+                class="addPetInput addPetInputWithIcon"
+                type="text"
+                maxlength="100"
+                autocomplete="off"
+                placeholder="Спочатку оберіть вид пацієнта"
+                disabled
               >
 
-              <span>кг</span>
+              <button
+                class="addPetBreedClear"
+                id="addPetBreedClear"
+                type="button"
+                aria-label="Очистити поле"
+              >
+                ×
+              </button>
             </div>
-          </label>
 
-          <label class="addPetField addPetFieldFull">
-            <span class="addPetLabel">
-              Нотатки
-              <small>необов’язково</small>
-            </span>
+            <div
+              class="addPetBreedDropdown"
+              id="addPetBreedDropdown"
+            ></div>
 
-            <textarea
-              id="addPetNotes"
-              class="addPetTextarea"
-              maxlength="500"
-              placeholder="Алергії, особливості поведінки або інша важлива інформація..."
-            ></textarea>
+          </div>
 
-            <div class="addPetNotesCounter">
-              <span id="addPetNotesCount">0</span>/500
-            </div>
-          </label>
-
+          <div
+            class="addPetBreedHint"
+            id="addPetBreedHint"
+          >
+            Після вибору виду тут з’явиться список порід.
+          </div>
         </div>
 
-        <div id="addPetModalError" class="addPetModalError"></div>
+        <label class="addPetField">
+          <span class="addPetLabel">
+            Вік
+            <small>необов’язково</small>
+          </span>
 
-        <div class="addPetModalActions">
-          <button
-            class="addPetCancelButton"
-            id="addPetCancelButton"
-            type="button"
+          <input
+            id="addPetAge"
+            class="addPetInput"
+            type="text"
+            maxlength="40"
+            autocomplete="off"
+            placeholder="Наприклад: 4 роки"
           >
-            Скасувати
-          </button>
+        </label>
 
-          <button
-            class="addPetSubmitButton"
-            id="addPetSubmitButton"
-            type="submit"
-          >
-            <span class="addPetSubmitPlus">＋</span>
-            <span>Додати тварину</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  `;
+        <label class="addPetField">
+          <span class="addPetLabel">
+            Вага
+            <small>необов’язково</small>
+          </span>
+
+          <div class="addPetWeightWrap">
+            <input
+              id="addPetWeight"
+              class="addPetInput"
+              type="number"
+              min="0"
+              max="300"
+              step="0.01"
+              inputmode="decimal"
+              placeholder="5.2"
+            >
+
+            <span>кг</span>
+          </div>
+        </label>
+
+        <label class="addPetField addPetFieldFull">
+          <span class="addPetLabel">
+            Нотатки
+            <small>необов’язково</small>
+          </span>
+
+          <textarea
+            id="addPetNotes"
+            class="addPetTextarea"
+            maxlength="500"
+            placeholder="Алергії, особливості поведінки або інша важлива інформація..."
+          ></textarea>
+
+          <div class="addPetNotesCounter">
+            <span id="addPetNotesCount">0</span>/500
+          </div>
+        </label>
+
+      </div>
+
+      <div
+        id="addPetModalError"
+        class="addPetModalError"
+      ></div>
+
+      <div class="addPetModalActions">
+
+        <button
+          class="addPetCancelButton"
+          id="addPetCancelButton"
+          type="button"
+        >
+          Скасувати
+        </button>
+
+        <button
+          class="addPetSubmitButton"
+          id="addPetSubmitButton"
+          type="submit"
+        >
+          <span class="addPetSubmitPlus">＋</span>
+          <span>Додати тварину</span>
+        </button>
+
+      </div>
+    </form>
+  </div>
+`;
 
   document.body.appendChild(overlay);
   document.body.classList.add("addPetModalOpened");
@@ -8215,6 +8497,14 @@ function openAddPetModal(ownerId) {
   const nameInput = overlay.querySelector("#addPetName");
   const speciesInput = overlay.querySelector("#addPetSpecies");
   const breedInput = overlay.querySelector("#addPetBreed");
+  const breedField = overlay.querySelector("#addPetBreedField");
+const breedLabel = overlay.querySelector("#addPetBreedLabel");
+const breedDropdown = overlay.querySelector("#addPetBreedDropdown");
+const breedHint = overlay.querySelector("#addPetBreedHint");
+const breedClear = overlay.querySelector("#addPetBreedClear");
+
+let activeBreedList = [];
+let selectedBreed = "";
   const ageInput = overlay.querySelector("#addPetAge");
   const weightInput = overlay.querySelector("#addPetWeight");
   const notesInput = overlay.querySelector("#addPetNotes");
@@ -8254,20 +8544,224 @@ function openAddPetModal(ownerId) {
     errorBox.textContent = message;
   };
 
-  overlay
-    .querySelectorAll("[data-add-pet-species]")
-    .forEach((button) => {
-      button.addEventListener("click", () => {
-        overlay
-          .querySelectorAll("[data-add-pet-species]")
-          .forEach((item) => item.classList.remove("is-active"));
+const normalizeBreedSearch = (value) => {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replaceAll("ё", "е")
+    .replaceAll("’", "'")
+    .replaceAll("`", "'");
+};
 
-        button.classList.add("is-active");
-        speciesInput.value = button.dataset.addPetSpecies || "";
+const closeBreedDropdown = () => {
+  breedDropdown.classList.remove("is-open");
+  breedDropdown.innerHTML = "";
+};
 
-        clearError();
-      });
+const renderBreedDropdown = () => {
+  if (!activeBreedList.length) {
+    closeBreedDropdown();
+    return;
+  }
+
+  const query = normalizeBreedSearch(breedInput.value);
+
+  const filtered = activeBreedList
+    .filter((breed) => {
+      if (!query) return true;
+
+      return normalizeBreedSearch(breed).includes(query);
+    })
+    .slice(0, 12);
+
+  breedDropdown.innerHTML = filtered.length
+    ? filtered.map((breed) => `
+        <button
+          class="addPetBreedOption ${
+            selectedBreed === breed ? "is-selected" : ""
+          }"
+          type="button"
+          data-select-breed="${escapeHtml(breed)}"
+        >
+          <span class="addPetBreedOptionIcon">🐾</span>
+
+          <span>${escapeHtml(breed)}</span>
+
+          ${
+            selectedBreed === breed
+              ? `<b>✓</b>`
+              : ""
+          }
+        </button>
+      `).join("")
+    : `
+        <div class="addPetBreedEmpty">
+          <span>Породу не знайдено</span>
+          <small>Назву можна залишити введеною вручну.</small>
+        </div>
+      `;
+
+  breedDropdown.classList.add("is-open");
+};
+
+const configureBreedField = (species) => {
+  selectedBreed = "";
+  breedInput.value = "";
+  closeBreedDropdown();
+
+  breedField.classList.remove("is-other-species");
+
+  if (species === "dog") {
+    activeBreedList = DOG_BREEDS;
+
+    breedInput.disabled = false;
+    breedInput.placeholder = "Почніть вводити породу собаки";
+
+    breedLabel.innerHTML = `
+      Порода собаки
+      <small>необов’язково</small>
+    `;
+
+    breedHint.textContent =
+      "Введіть кілька літер або відкрийте список популярних порід.";
+
+    return;
+  }
+
+  if (species === "cat") {
+    activeBreedList = CAT_BREEDS;
+
+    breedInput.disabled = false;
+    breedInput.placeholder = "Почніть вводити породу кота";
+
+    breedLabel.innerHTML = `
+      Порода кота
+      <small>необов’язково</small>
+    `;
+
+    breedHint.textContent =
+      "Введіть кілька літер або відкрийте список порід котів.";
+
+    return;
+  }
+
+  if (species === "other") {
+    activeBreedList = [];
+
+    breedInput.disabled = false;
+    breedInput.placeholder = "Наприклад: корела, шиншила, кролик";
+
+    breedLabel.innerHTML = `
+      Вид тварини
+      <small>необов’язково</small>
+    `;
+
+    breedHint.textContent =
+      "Вкажіть вид тварини вручну.";
+
+    breedField.classList.add("is-other-species");
+    return;
+  }
+
+  activeBreedList = [];
+
+  breedInput.disabled = true;
+  breedInput.placeholder = "Спочатку оберіть вид пацієнта";
+
+  breedLabel.innerHTML = `
+    Порода
+    <small>необов’язково</small>
+  `;
+
+  breedHint.textContent =
+    "Після вибору виду тут з’явиться список порід.";
+};
+
+ overlay
+  .querySelectorAll("[data-add-pet-species]")
+  .forEach((button) => {
+    button.addEventListener("click", () => {
+      overlay
+        .querySelectorAll("[data-add-pet-species]")
+        .forEach((item) => item.classList.remove("is-active"));
+
+      button.classList.add("is-active");
+
+      const species = button.dataset.addPetSpecies || "";
+      speciesInput.value = species;
+
+      configureBreedField(species);
+      clearError();
+
+      setTimeout(() => {
+        breedInput.focus();
+      }, 120);
     });
+  });
+
+  breedInput.addEventListener("focus", () => {
+  if (!breedInput.disabled && activeBreedList.length) {
+    renderBreedDropdown();
+  }
+});
+
+breedInput.addEventListener("input", () => {
+  selectedBreed = "";
+
+  if (activeBreedList.length) {
+    renderBreedDropdown();
+  }
+});
+
+breedInput.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeBreedDropdown();
+  }
+
+  if (event.key === "Enter" && breedDropdown.classList.contains("is-open")) {
+    const firstOption = breedDropdown.querySelector("[data-select-breed]");
+
+    if (firstOption) {
+      event.preventDefault();
+      firstOption.click();
+    }
+  }
+});
+
+breedDropdown.addEventListener("mousedown", (event) => {
+  event.preventDefault();
+});
+
+breedDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest("[data-select-breed]");
+  if (!option) return;
+
+  const breed = option.dataset.selectBreed || "";
+
+  selectedBreed = breed;
+  breedInput.value = breed;
+
+  closeBreedDropdown();
+  clearError();
+});
+
+breedClear.addEventListener("click", () => {
+  selectedBreed = "";
+  breedInput.value = "";
+
+  closeBreedDropdown();
+  breedInput.focus();
+
+  if (activeBreedList.length) {
+    renderBreedDropdown();
+  }
+});
+
+document.addEventListener("mousedown", (event) => {
+  if (!event.target.closest(".addPetBreedCombobox")) {
+    closeBreedDropdown();
+  }
+});
 
   notesInput.addEventListener("input", () => {
     notesCount.textContent = String(notesInput.value.length);
