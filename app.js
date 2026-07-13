@@ -3943,29 +3943,24 @@ function renderPatientsTab() {
   // Делегированный клик
   patientListElement.onclick = async (e) => {
     const editBtn = e.target.closest("[data-edit-pet]");
-    if (editBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const petId = editBtn.dataset.editPet;
-      const pet = (state.patients || []).find((p) => String(p.id) === String(petId));
-      if (!pet) return;
 
-      const name = (prompt("Кличка:", pet.name || "") || "").trim();
-      if (!name) return;
-      const species = askSpecies(pet.species || "dog");
-      if (!species) return;
-      
-      const updated = await updatePatientApi(petId, { 
-        name, species, 
-        breed: (prompt("Порода:", pet.breed || "") || "").trim(),
-        age: (prompt("Вік:", pet.age || "") || "").trim(),
-        weight_kg: (prompt("Вага кг:", pet.weight_kg || "") || "").trim(),
-        notes: (prompt("Нотатки:", pet.notes || "") || "").trim()
-      });
-      if (updated) {
-        await loadPatientsApi();
-        renderPatientsTab();
-      }
-      return;
+if (editBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const petId = editBtn.dataset.editPet;
+
+  const pet = (state.patients || []).find(
+    (item) => String(item.id) === String(petId)
+  );
+
+  if (!pet) {
+    alert("Пацієнта не знайдено.");
+    return;
+  }
+
+  openAddPetModal(pet.owner_id, pet);
+  return;
     }
 
     const delBtn = e.target.closest("[data-del-pet]");
@@ -8335,11 +8330,16 @@ const CAT_BREEDS = [
   "Метис / безпородна"
 ];
 
-function openAddPetModal(ownerId) {
+function openAddPetModal(ownerId, petToEdit = null) {
+  const isEditMode = Boolean(petToEdit?.id);
+  const editingPetId = isEditMode ? String(petToEdit.id) : null;
+
   if (!ownerId) {
     alert("Спочатку обери власника");
     return;
   }
+
+  // дальше твой текущий код
 
   document.querySelector("#addPetModalOverlay")?.remove();
 
@@ -8359,17 +8359,21 @@ function openAddPetModal(ownerId) {
 
     <div class="addPetModalHeader">
       <div>
-        <div class="addPetModalKicker">
-          НОВИЙ ПАЦІЄНТ
-        </div>
+       <div class="addPetModalKicker">
+  ${isEditMode ? "РЕДАГУВАННЯ ПАЦІЄНТА" : "НОВИЙ ПАЦІЄНТ"}
+</div>
 
-        <h2 id="addPetModalTitle">
-          Додати тварину
-        </h2>
+<h2 id="addPetModalTitle">
+  ${isEditMode ? "Редагувати тварину" : "Додати тварину"}
+</h2>
 
-        <p>
-          Створіть картку пацієнта. Дані можна буде змінити пізніше.
-        </p>
+<p>
+  ${
+    isEditMode
+      ? "Оновіть дані пацієнта та збережіть зміни."
+      : "Створіть картку пацієнта. Дані можна буде змінити пізніше."
+  }
+</p>
       </div>
 
       <button
@@ -8597,8 +8601,13 @@ function openAddPetModal(ownerId) {
           id="addPetSubmitButton"
           type="submit"
         >
-          <span class="addPetSubmitPlus">＋</span>
-          <span>Додати тварину</span>
+          <span class="addPetSubmitPlus">
+  ${isEditMode ? "✓" : "＋"}
+</span>
+
+<span>
+  ${isEditMode ? "Зберегти зміни" : "Додати тварину"}
+</span>
         </button>
 
       </div>
@@ -8627,6 +8636,30 @@ let selectedBreed = "";
   const notesCount = overlay.querySelector("#addPetNotesCount");
   const errorBox = overlay.querySelector("#addPetModalError");
   const submitButton = overlay.querySelector("#addPetSubmitButton");
+  const normalizeStoredSpecies = (value) => {
+    const raw = String(value || "").trim().toLowerCase();
+
+    if (
+      raw === "cat" ||
+      raw === "кіт" ||
+      raw === "кот" ||
+      raw === "кішка" ||
+      raw === "кошка"
+    ) {
+      return "cat";
+    }
+
+    if (
+      raw === "dog" ||
+      raw === "пес" ||
+      raw === "собака"
+    ) {
+      return "dog";
+    }
+
+    return raw ? "other" : "";
+  };
+
 
   let isSaving = false;
 
@@ -8954,7 +8987,7 @@ document.addEventListener("mousedown", (event) => {
       <span>Створюємо...</span>
     `;
 
-    const created = await createPatientApi({
+        const payload = {
       owner_id: ownerId,
       name,
       species,
@@ -8962,18 +8995,40 @@ document.addEventListener("mousedown", (event) => {
       age,
       weight_kg: weightRaw,
       notes,
-    });
+    };
 
-    if (!created) {
+    const savedPet = isEditMode
+      ? await updatePatientApi(editingPetId, payload)
+      : await createPatientApi(payload);
+
+    if (!savedPet) {
       isSaving = false;
       submitButton.disabled = false;
       submitButton.innerHTML = originalButtonHtml;
 
-      showError("Не вдалося створити пацієнта.");
+      showError(
+        isEditMode
+          ? "Не вдалося зберегти зміни."
+          : "Не вдалося створити пацієнта."
+      );
+
       return;
     }
 
     await loadPatientsApi();
+
+    if (
+      isEditMode &&
+      String(state.selectedPetId || "") === String(editingPetId)
+    ) {
+      const refreshedPet = (state.patients || []).find(
+        (pet) => String(pet.id) === String(editingPetId)
+      );
+
+      if (refreshedPet) {
+        state.selectedPet = refreshedPet;
+      }
+    }
 
     isSaving = false;
     overlay.classList.remove("is-open");
@@ -8981,7 +9036,30 @@ document.addEventListener("mousedown", (event) => {
     document.removeEventListener("keydown", handleKeydown);
     overlay.remove();
 
-    await renderOwnerPage(ownerId);
+        if (state.route === "patients") {
+      await renderPatientsTab();
+    }
+
+    if (
+      state.route === "patient" &&
+      String(state.selectedPetId || "") === String(editingPetId)
+    ) {
+      const refreshedPet = (state.patients || []).find(
+        (pet) => String(pet.id) === String(editingPetId)
+      );
+
+      if (refreshedPet) {
+        state.selectedPet = refreshedPet;
+        await renderPatientCard(refreshedPet);
+      }
+    }
+
+    if (
+      state.route === "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(state.selectedOwnerId);
+    }
   });
 
   requestAnimationFrame(() => {
@@ -8992,6 +9070,29 @@ document.addEventListener("mousedown", (event) => {
     }, 180);
   });
 }
+  if (isEditMode) {
+    const currentSpecies = normalizeStoredSpecies(petToEdit.species);
+
+    nameInput.value = String(petToEdit.name || "");
+    ageInput.value = String(petToEdit.age || "");
+    weightInput.value = String(petToEdit.weight_kg || "");
+    notesInput.value = String(petToEdit.notes || "");
+
+    notesCount.textContent = String(notesInput.value.length);
+
+    speciesInput.value = currentSpecies;
+
+    const currentSpeciesButton = overlay.querySelector(
+      `[data-add-pet-species="${currentSpecies}"]`
+    );
+
+    currentSpeciesButton?.classList.add("is-active");
+
+    configureBreedField(currentSpecies);
+
+    breedInput.value = String(petToEdit.breed || "");
+    selectedBreed = String(petToEdit.breed || "");
+  }
 
 function initOwnerUI() {
   // Добавление животного владельцу
