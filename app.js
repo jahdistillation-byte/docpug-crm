@@ -9839,29 +9839,62 @@ async function deletePatientApi(petId) {
 }
 
 async function deletePatientEverywhere(petId) {
-  const patients = loadPatients();
-  const pet = patients.find((p) => p.id === petId);
-  if (!pet) return;
+  const id = String(petId || "");
+  if (!id) return;
 
-  const name = pet.name || "Без імені";
-  const msg = `Видалити пацієнта "${name}"?`;
-  if (!confirm(msg)) return;
+  const patients =
+    Array.isArray(state.patients) && state.patients.length
+      ? state.patients
+      : loadPatients();
 
-  const ok = await deletePatientApi(petId);
-  if (!ok) return;
+  const pet = patients.find(
+    (item) => String(item.id) === id
+  );
 
-  await loadPatientsApi();
-
-  if (state.selectedPetId === petId) {
-    state.selectedPetId = null;
-    state.selectedPet = null;
-    state.selectedVisitId = null;
-    setHash("patients");
+  if (!pet) {
+    alert("Пацієнта не знайдено.");
+    return;
   }
 
-  if (state.route === "patients") renderPatientsTab();
-  if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
-  if (state.route === "visits") renderVisitsTab();
+  const petName = pet.name || "Без імені";
+
+  openDeleteModal(
+    `
+      <b>${escapeHtml(petName)}</b>
+      <br><br>
+      Пацієнта буде видалено назавжди разом із його карткою.
+      <br>
+      Цю дію неможливо скасувати.
+    `,
+    async () => {
+      const ok = await deletePatientApi(id);
+
+      if (!ok) {
+        alert("Не вдалося видалити пацієнта.");
+        return;
+      }
+
+      await loadPatientsApi();
+
+      if (String(state.selectedPetId || "") === id) {
+        state.selectedPetId = null;
+        state.selectedPet = null;
+        state.selectedVisitId = null;
+      }
+
+      if (state.route === "patients") {
+        renderPatientsTab();
+      }
+
+      if (state.selectedOwnerId) {
+        renderOwnerPage(state.selectedOwnerId);
+      }
+
+      if (state.route === "visits") {
+        renderVisitsTab();
+      }
+    }
+  );
 }
 
 async function deleteVisitEverywhere(visitId) {
