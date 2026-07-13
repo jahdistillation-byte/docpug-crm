@@ -6903,17 +6903,52 @@ async function renderVisits(petId) {
     }
 
     const delBtn = e.target.closest("[data-del-visit]");
-    if (delBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const visitId = delBtn.dataset.delVisit;
-      if (!visitId) return;
-      if (!confirm("Видалити цей візит?")) return;
 
+if (delBtn) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const visitId = delBtn.dataset.delVisit;
+  if (!visitId) return;
+
+  const visit = visits.find(
+    (item) => String(item.id) === String(visitId)
+  );
+
+  const visitDate = visit?.date || "без дати";
+
+  openDeleteModal(
+    `
+      <b>Візит від ${escapeHtml(visitDate)}</b>
+      <br><br>
+      Візит буде видалено назавжди разом із медичними даними та чеком.
+      <br>
+      Цю дію неможливо скасувати.
+    `,
+    async () => {
       const ok = await deleteVisitApi(visitId);
-      if (!ok) return alert("Не вдалося видалити візит.");
+
+      if (!ok) {
+        alert("Не вдалося видалити візит.");
+        return;
+      }
+
+      state.visits = (state.visits || []).filter(
+        (item) => String(item.id) !== String(visitId)
+      );
+
+      state.visitsById.delete(String(visitId));
+
       await renderVisits(petId);
-      return;
+
+      if (state.selectedPet) {
+        await renderPatientTab("visits", state.selectedPet);
+      }
     }
+  );
+
+  return;
+}
 
     const card = e.target.closest("[data-open-visit]");
     if (card) {
