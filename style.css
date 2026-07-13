@@ -10691,3 +10691,33 @@ body[data-theme="white"] .addPetBreedDropdown {
     max-height: 245px;
   }
 }
+.petDeleteBtn{
+    width:30px;
+    height:30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;
+
+    color:#a8a8b3;
+    cursor:pointer;
+
+    transition:.18s;
+}
+
+.petDeleteBtn:hover{
+    color:#ff6b81;
+    background:rgba(255,80,80,.12);
+    border-color:rgba(255,80,80,.35);
+
+    transform:scale(1.08);
+}
+
+.petDeleteBtn svg{
+    width:16px;
+    height:16px;
+}
