@@ -11207,3 +11207,553 @@ body[data-theme="white"] .visitCardDelete:hover {
 .visitCardActions .visitCardDelete {
     margin-left: auto;
 }
+/* =========================================================
+   DOC.PUG — PREMIUM PATIENT VISIT HISTORY
+   ========================================================= */
+
+.premiumVisitTimelineItem {
+  position: relative;
+  padding-left: 34px;
+  margin-bottom: 18px;
+}
+
+.premiumVisitNode {
+  position: absolute;
+  top: 28px;
+  left: 5px;
+  z-index: 3;
+
+  width: 14px;
+  height: 14px;
+
+  background:
+    radial-gradient(
+      circle,
+      var(--accent-color, #a855f7) 0 35%,
+      rgba(168, 85, 247, 0.22) 38% 100%
+    );
+
+  border: 2px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 55%,
+      white
+    );
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 6px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 10%,
+        transparent
+      ),
+    0 0 18px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 42%,
+        transparent
+      );
+}
+
+.premiumVisitCard {
+  position: relative;
+  overflow: hidden;
+
+  padding: 26px;
+
+  color: #ffffff;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 9%,
+        transparent
+      ),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(28, 19, 51, 0.88),
+      rgba(13, 10, 29, 0.94)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 22px;
+
+  box-shadow:
+    0 16px 46px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+
+.premiumVisitCard:hover {
+  transform: translateY(-3px);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 34%,
+      transparent
+    );
+
+  box-shadow:
+    0 24px 62px rgba(0, 0, 0, 0.34),
+    0 0 32px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 12%,
+        transparent
+      ),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.premiumVisitCard:focus-visible {
+  outline: none;
+
+  box-shadow:
+    0 0 0 3px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 24%,
+        transparent
+      ),
+    0 24px 62px rgba(0, 0, 0, 0.34);
+}
+
+.premiumVisitAccent {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--accent-color, #a855f7),
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 25%,
+        transparent
+      )
+    );
+
+  box-shadow:
+    0 0 18px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 40%,
+        transparent
+      );
+}
+
+.premiumVisitTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.premiumVisitHeading {
+  min-width: 0;
+  flex: 1;
+}
+
+.premiumVisitEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 10px;
+
+  color: rgba(231, 225, 244, 0.48);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.premiumVisitDateIcon {
+  display: inline-flex;
+  color: var(--accent-color, #a855f7);
+}
+
+.premiumVisitDiagnosis {
+  margin: 0;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  color: #ffffff;
+  font-size: clamp(20px, 2vw, 27px);
+  font-weight: 820;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+
+.premiumVisitDiagnosisIcon {
+  flex: 0 0 auto;
+
+  margin-top: 3px;
+
+  color: var(--accent-color, #a855f7);
+}
+
+.premiumVisitBadges {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.premiumVisitPrice,
+.premiumVisitType {
+  min-height: 34px;
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+
+  border-radius: 999px;
+}
+
+.premiumVisitPrice {
+  color: #66e89b;
+
+  background: rgba(35, 200, 107, 0.09);
+  border: 1px solid rgba(65, 221, 134, 0.19);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.premiumVisitType {
+  color: rgba(236, 230, 247, 0.61);
+
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.premiumVisitDivider {
+  height: 1px;
+  margin: 21px 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.025),
+      transparent
+    );
+}
+
+.premiumVisitContent {
+  display: grid;
+  gap: 14px;
+}
+
+.premiumVisitSection {
+  padding: 17px 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.034),
+      rgba(255, 255, 255, 0.015)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 16px;
+}
+
+.premiumVisitSectionHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 10px;
+
+  color: rgba(240, 235, 249, 0.58);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.premiumVisitSectionIcon {
+  display: inline-flex;
+  color: var(--accent-color, #a855f7);
+}
+
+.premiumVisitText {
+  color: rgba(250, 248, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.premiumVisitTreatment {
+  font-family: inherit;
+}
+
+.premiumVisitList {
+  margin: 0;
+  padding: 0;
+
+  display: grid;
+  gap: 7px;
+
+  list-style: none;
+}
+
+.premiumVisitList li {
+  position: relative;
+  padding-left: 17px;
+}
+
+.premiumVisitList li::before {
+  content: "";
+
+  position: absolute;
+  top: 0.72em;
+  left: 1px;
+
+  width: 5px;
+  height: 5px;
+
+  background: var(--accent-color, #a855f7);
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 8px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 45%,
+        transparent
+      );
+}
+
+.premiumVisitFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-top: 20px;
+  padding-top: 17px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.premiumVisitOpenHint {
+  color: rgba(222, 215, 238, 0.32);
+  font-size: 11px;
+
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.premiumVisitCard:hover .premiumVisitOpenHint {
+  color: rgba(232, 225, 246, 0.57);
+  transform: translateX(2px);
+}
+
+.visitCardActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.visitCardAction {
+  min-height: 36px;
+  padding: 0 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  color: rgba(255, 127, 145, 0.69);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+
+  background: rgba(255, 72, 100, 0.05);
+  border: 1px solid rgba(255, 82, 108, 0.13);
+  border-radius: 11px;
+
+  cursor: pointer;
+
+  opacity: 0.72;
+
+  transition:
+    color 0.18s ease,
+    opacity 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.premiumVisitCard:hover .visitCardAction {
+  opacity: 1;
+}
+
+.visitCardAction:hover {
+  color: #ff91a2;
+  background: rgba(255, 72, 100, 0.14);
+  border-color: rgba(255, 96, 120, 0.38);
+
+  box-shadow:
+    0 0 20px rgba(255, 72, 100, 0.14);
+
+  transform: translateY(-2px);
+}
+
+.visitCardAction:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.visitCardAction svg,
+.visitCardAction span {
+  pointer-events: none;
+}
+
+/* ---------- WHITE THEME ---------- */
+
+body[data-theme="white"] .premiumVisitCard {
+  color: #1d1b28;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(
+        in srgb,
+        var(--accent-color, #7557eb) 7%,
+        transparent
+      ),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(246, 245, 250, 0.98)
+    );
+
+  border-color: rgba(40, 32, 65, 0.09);
+
+  box-shadow:
+    0 16px 42px rgba(35, 27, 60, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+body[data-theme="white"] .premiumVisitDiagnosis {
+  color: #1d1b28;
+}
+
+body[data-theme="white"] .premiumVisitEyebrow {
+  color: rgba(37, 31, 55, 0.48);
+}
+
+body[data-theme="white"] .premiumVisitType {
+  color: rgba(37, 31, 55, 0.56);
+  background: rgba(40, 32, 65, 0.035);
+  border-color: rgba(40, 32, 65, 0.08);
+}
+
+body[data-theme="white"] .premiumVisitDivider {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(40, 32, 65, 0.1),
+      rgba(40, 32, 65, 0.03),
+      transparent
+    );
+}
+
+body[data-theme="white"] .premiumVisitSection {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(40, 32, 65, 0.025),
+      rgba(40, 32, 65, 0.012)
+    );
+
+  border-color: rgba(40, 32, 65, 0.07);
+}
+
+body[data-theme="white"] .premiumVisitSectionHead {
+  color: rgba(37, 31, 55, 0.5);
+}
+
+body[data-theme="white"] .premiumVisitText {
+  color: rgba(29, 27, 40, 0.84);
+}
+
+body[data-theme="white"] .premiumVisitFooter {
+  border-top-color: rgba(40, 32, 65, 0.07);
+}
+
+body[data-theme="white"] .premiumVisitOpenHint {
+  color: rgba(37, 31, 55, 0.34);
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 720px) {
+  .premiumVisitTimelineItem {
+    padding-left: 24px;
+  }
+
+  .premiumVisitNode {
+    left: 0;
+  }
+
+  .premiumVisitCard {
+    padding: 20px 17px;
+    border-radius: 19px;
+  }
+
+  .premiumVisitTop {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .premiumVisitBadges {
+    justify-content: flex-start;
+  }
+
+  .premiumVisitFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .premiumVisitOpenHint {
+    display: none;
+  }
+
+  .visitCardActions,
+  .visitCardAction {
+    width: 100%;
+  }
+}

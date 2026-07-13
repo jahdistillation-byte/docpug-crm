@@ -6804,6 +6804,65 @@ async function downloadLabPdf(pet, lab) {
 
   wrap.remove();
 }
+function formatVisitDatePremium(value) {
+  const raw = String(value || "").trim();
+
+  if (!raw) return "Дата не вказана";
+
+  const parts = raw.slice(0, 10).split("-");
+
+  if (parts.length !== 3) return raw;
+
+  const [year, month, day] = parts;
+
+  const monthNames = [
+    "січня",
+    "лютого",
+    "березня",
+    "квітня",
+    "травня",
+    "червня",
+    "липня",
+    "серпня",
+    "вересня",
+    "жовтня",
+    "листопада",
+    "грудня",
+  ];
+
+  const monthIndex = Number(month) - 1;
+  const monthName = monthNames[monthIndex];
+
+  if (!monthName) return raw;
+
+  return `${Number(day)} ${monthName} ${year}`;
+}
+
+function formatVisitTextPremium(value, fallback = "Не вказано") {
+  const text = String(value || "").trim();
+
+  if (!text) return fallback;
+
+  const lines = text
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length <= 1) {
+    return escapeHtml(text);
+  }
+
+  return `
+    <ul class="premiumVisitList">
+      ${lines
+        .map((line) => {
+          const clean = line.replace(/^[-•*]\s*/, "");
+          return `<li>${escapeHtml(clean)}</li>`;
+        })
+        .join("")}
+    </ul>
+  `;
+}
 
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
@@ -6854,39 +6913,62 @@ async function renderVisits(petId) {
 
     // Безопасно наполняем текстовые узлы внутри клона
     const cardEl = clone.querySelector(".visit-card-el");
-    cardEl.dataset.openVisit = String(v.id);
-    
-    clone.querySelector(".v-date").textContent = `📅 ${v.date || "—"}`;
-    clone.querySelector(".v-dx").textContent = dx;
-    clone.querySelector(".v-price-badge").textContent = `💰 ${grandTotal} ₴`;
-    clone.querySelector(".v-complaint").textContent = complaint;
 
-    // Блок назначений (Rx) показываем и наполняем только если в нём есть текст
-    if (v.rx && v.rx.trim()) {
-      clone.querySelector(".v-rx-container").style.display = "block";
-      clone.querySelector(".v-rx").textContent = v.rx;
-    }
+if (!cardEl) {
+  console.warn("У шаблоні немає .visit-card-el");
+  return;
+}
 
-    // Привязываем оригинальные data-аттрибуты с ID визита к кнопкам действий
-    const deleteButton = clone.querySelector(".v-del-btn");
+cardEl.dataset.openVisit = String(v.id);
+
+const dateEl = clone.querySelector(".v-date");
+const dxEl = clone.querySelector(".v-dx");
+const priceEl = clone.querySelector(".v-price-badge");
+const complaintEl = clone.querySelector(".v-complaint");
+const rxContainer = clone.querySelector(".v-rx-container");
+const rxEl = clone.querySelector(".v-rx");
+const deleteButton = clone.querySelector(".v-del-btn");
+
+if (dateEl) {
+  dateEl.textContent = formatVisitDatePremium(v.date);
+}
+
+if (dxEl) {
+  dxEl.textContent = dx;
+}
+
+if (priceEl) {
+  priceEl.textContent =
+    grandTotal > 0
+      ? `${grandTotal.toLocaleString("uk-UA")} ₴`
+      : "Без оплати";
+}
+
+if (complaintEl) {
+  complaintEl.innerHTML = formatVisitTextPremium(
+    complaint,
+    "Скарги не вказані"
+  );
+}
+
+if (v.rx && v.rx.trim()) {
+  if (rxContainer) {
+    rxContainer.style.display = "block";
+  }
+
+  if (rxEl) {
+    rxEl.innerHTML = formatVisitTextPremium(
+      v.rx,
+      "Лікування не вказано"
+    );
+  }
+}
 
 if (deleteButton) {
   deleteButton.dataset.delVisit = String(v.id);
 }
 
     // Добавляем премиальные hover-эффекты динамически через JS (чтобы не забивать стили)
-    cardEl.addEventListener("mouseenter", () => {
-      cardEl.style.background = "rgba(255, 255, 255, 0.05)";
-      cardEl.style.borderColor = "rgba(168, 85, 247, 0.3)";
-      cardEl.style.transform = "translateY(-2px)";
-      cardEl.style.boxShadow = "0 12px 40px rgba(147, 51, 234, 0.15)";
-    });
-    cardEl.addEventListener("mouseleave", () => {
-      cardEl.style.background = "rgba(255, 255, 255, 0.02)";
-      cardEl.style.borderColor = "rgba(255, 255, 255, 0.06)";
-      cardEl.style.transform = "translateY(0)";
-      cardEl.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.2)";
-    });
 
     // Пушим карточку в контейнер
     timelineContainer.appendChild(clone);
