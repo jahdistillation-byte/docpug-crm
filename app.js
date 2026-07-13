@@ -7851,10 +7851,56 @@ function renderOwners() {
         </span>
       </td>
       <td>📍 ${escapeHtml(owner.note || "—")}</td>
-      <td style="display:flex; gap:8px;">
-        <button class="iconBtn" title="Редагувати" data-edit-owner="${escapeHtml(owner.id)}" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
-        <button class="iconBtn" title="Видалити" data-del="${escapeHtml(owner.id)}" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">🗑</button>
-      </td>
+      <td class="ownerActionsCell">
+  <button
+    class="iconBtn ownerActionBtn ownerEditBtn"
+    type="button"
+    title="Редагувати власника"
+    aria-label="Редагувати власника"
+    data-edit-owner="${escapeHtml(owner.id)}"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+    </svg>
+  </button>
+
+  <button
+    class="iconBtn ownerActionBtn ownerDeleteBtn"
+    type="button"
+    title="Видалити власника"
+    aria-label="Видалити власника"
+    data-del="${escapeHtml(owner.id)}"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18"></path>
+      <path d="M8 6V4h8v2"></path>
+      <path d="M19 6l-1 14H6L5 6"></path>
+      <path d="M10 11v5"></path>
+      <path d="M14 11v5"></path>
+    </svg>
+  </button>
+</td>
     `;
 
     tbody.appendChild(tr);
