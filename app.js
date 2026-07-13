@@ -3886,10 +3886,56 @@ function renderPatientsTab() {
             ${ownerLine ? " • 👤 " + escapeHtml(ownerLine) : ""}
           </div>
         </div>
-        <div style="display:flex; gap:10px;">
-          <button class="iconBtn" title="Редагувати" data-edit-pet="${escapeHtml(p.id)}">✏️</button>
-          <button class="iconBtn" title="Видалити" data-del-pet="${escapeHtml(p.id)}">🗑</button>
-        </div>
+        <div class="patientActionsCell">
+  <button
+    class="iconBtn patientActionBtn patientEditBtn"
+    type="button"
+    title="Редагувати пацієнта"
+    aria-label="Редагувати пацієнта"
+    data-edit-pet="${escapeHtml(p.id)}"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+    </svg>
+  </button>
+
+  <button
+    class="iconBtn patientActionBtn patientDeleteBtn"
+    type="button"
+    title="Видалити пацієнта"
+    aria-label="Видалити пацієнта"
+    data-del-pet="${escapeHtml(p.id)}"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18"></path>
+      <path d="M8 6V4h8v2"></path>
+      <path d="M19 6l-1 14H6L5 6"></path>
+      <path d="M10 11v5"></path>
+      <path d="M14 11v5"></path>
+    </svg>
+  </button>
+</div>
       `;
       patientListElement.appendChild(el);
     });
