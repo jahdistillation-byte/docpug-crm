@@ -11200,3 +11200,10 @@ body[data-theme="white"] .visitCardDelete:hover {
     flex: 1;
   }
 }
+.visitCardActions {
+    justify-content: flex-end;
+}
+
+.visitCardActions .visitCardDelete {
+    margin-left: auto;
+}
