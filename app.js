@@ -6868,8 +6868,11 @@ async function renderVisits(petId) {
     }
 
     // Привязываем оригинальные data-аттрибуты с ID визита к кнопкам действий
-    clone.querySelector(".v-edit-btn").dataset.editVisit = String(v.id);
-    clone.querySelector(".v-del-btn").dataset.delVisit = String(v.id);
+    const deleteButton = clone.querySelector(".v-del-btn");
+
+if (deleteButton) {
+  deleteButton.dataset.delVisit = String(v.id);
+}
 
     // Добавляем премиальные hover-эффекты динамически через JS (чтобы не забивать стили)
     cardEl.addEventListener("mouseenter", () => {
