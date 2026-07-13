@@ -10084,3 +10084,379 @@ body.addPetModalOpened {
     width: 100%;
   }
 }
+/* =========================================================
+   DOC.PUG — ADD PET MODAL: ПОДДЕРЖКА ТЕМ
+   ВАЖНО: вставить ниже основного CSS .addPetModal...
+   ========================================================= */
+
+/* ---------- Базовые переменные: PURPLE ---------- */
+
+body,
+body[data-theme="purple"] {
+  --pet-modal-accent: #9a5cff;
+  --pet-modal-accent-2: #c064ff;
+  --pet-modal-accent-soft: rgba(145, 83, 255, 0.18);
+  --pet-modal-accent-border: rgba(171, 112, 255, 0.78);
+  --pet-modal-focus-ring: rgba(139, 80, 255, 0.13);
+
+  --pet-modal-bg-1: rgba(27, 22, 46, 0.99);
+  --pet-modal-bg-2: rgba(11, 9, 23, 0.995);
+  --pet-modal-surface: rgba(255, 255, 255, 0.045);
+  --pet-modal-surface-hover: rgba(255, 255, 255, 0.075);
+
+  --pet-modal-text: #ffffff;
+  --pet-modal-text-soft: rgba(238, 233, 250, 0.68);
+  --pet-modal-text-muted: rgba(225, 217, 240, 0.38);
+
+  --pet-modal-border: rgba(189, 170, 226, 0.14);
+  --pet-modal-strong-border: rgba(180, 148, 255, 0.23);
+
+  --pet-modal-overlay: rgba(3, 2, 11, 0.84);
+  --pet-modal-shadow: rgba(0, 0, 0, 0.72);
+}
+
+/* ---------- BLACK ---------- */
+
+body[data-theme="black"] {
+  --pet-modal-accent: #ffffff;
+  --pet-modal-accent-2: #a8a8b3;
+  --pet-modal-accent-soft: rgba(255, 255, 255, 0.09);
+  --pet-modal-accent-border: rgba(255, 255, 255, 0.42);
+  --pet-modal-focus-ring: rgba(255, 255, 255, 0.09);
+
+  --pet-modal-bg-1: rgba(18, 18, 21, 0.995);
+  --pet-modal-bg-2: rgba(5, 5, 7, 0.998);
+  --pet-modal-surface: rgba(255, 255, 255, 0.045);
+  --pet-modal-surface-hover: rgba(255, 255, 255, 0.085);
+
+  --pet-modal-text: #ffffff;
+  --pet-modal-text-soft: rgba(255, 255, 255, 0.68);
+  --pet-modal-text-muted: rgba(255, 255, 255, 0.36);
+
+  --pet-modal-border: rgba(255, 255, 255, 0.11);
+  --pet-modal-strong-border: rgba(255, 255, 255, 0.17);
+
+  --pet-modal-overlay: rgba(0, 0, 0, 0.89);
+  --pet-modal-shadow: rgba(0, 0, 0, 0.9);
+}
+
+/* ---------- BLUE ---------- */
+
+body[data-theme="blue"] {
+  --pet-modal-accent: #4285ff;
+  --pet-modal-accent-2: #42c7ff;
+  --pet-modal-accent-soft: rgba(49, 122, 255, 0.17);
+  --pet-modal-accent-border: rgba(74, 147, 255, 0.78);
+  --pet-modal-focus-ring: rgba(58, 132, 255, 0.13);
+
+  --pet-modal-bg-1: rgba(15, 28, 50, 0.99);
+  --pet-modal-bg-2: rgba(5, 12, 25, 0.998);
+  --pet-modal-surface: rgba(100, 166, 255, 0.055);
+  --pet-modal-surface-hover: rgba(100, 178, 255, 0.1);
+
+  --pet-modal-text: #f8fbff;
+  --pet-modal-text-soft: rgba(224, 238, 255, 0.7);
+  --pet-modal-text-muted: rgba(197, 220, 248, 0.4);
+
+  --pet-modal-border: rgba(127, 180, 255, 0.15);
+  --pet-modal-strong-border: rgba(95, 157, 255, 0.25);
+
+  --pet-modal-overlay: rgba(2, 7, 17, 0.86);
+  --pet-modal-shadow: rgba(0, 5, 20, 0.78);
+}
+
+/* ---------- GREEN ---------- */
+
+body[data-theme="green"] {
+  --pet-modal-accent: #28c985;
+  --pet-modal-accent-2: #66e8ab;
+  --pet-modal-accent-soft: rgba(35, 197, 129, 0.16);
+  --pet-modal-accent-border: rgba(60, 212, 149, 0.74);
+  --pet-modal-focus-ring: rgba(35, 199, 130, 0.13);
+
+  --pet-modal-bg-1: rgba(15, 38, 31, 0.99);
+  --pet-modal-bg-2: rgba(5, 18, 14, 0.998);
+  --pet-modal-surface: rgba(71, 211, 153, 0.05);
+  --pet-modal-surface-hover: rgba(73, 220, 159, 0.095);
+
+  --pet-modal-text: #f5fff9;
+  --pet-modal-text-soft: rgba(219, 246, 231, 0.69);
+  --pet-modal-text-muted: rgba(193, 229, 210, 0.39);
+
+  --pet-modal-border: rgba(105, 222, 165, 0.14);
+  --pet-modal-strong-border: rgba(74, 211, 146, 0.23);
+
+  --pet-modal-overlay: rgba(2, 12, 8, 0.87);
+  --pet-modal-shadow: rgba(0, 17, 10, 0.8);
+}
+
+/* ---------- WHITE ---------- */
+
+body[data-theme="white"] {
+  --pet-modal-accent: #7557eb;
+  --pet-modal-accent-2: #a45cf0;
+  --pet-modal-accent-soft: rgba(111, 80, 225, 0.1);
+  --pet-modal-accent-border: rgba(111, 80, 225, 0.62);
+  --pet-modal-focus-ring: rgba(111, 80, 225, 0.12);
+
+  --pet-modal-bg-1: rgba(255, 255, 255, 0.995);
+  --pet-modal-bg-2: rgba(245, 245, 251, 0.998);
+  --pet-modal-surface: rgba(34, 31, 55, 0.035);
+  --pet-modal-surface-hover: rgba(83, 65, 145, 0.065);
+
+  --pet-modal-text: #191725;
+  --pet-modal-text-soft: rgba(39, 35, 56, 0.68);
+  --pet-modal-text-muted: rgba(45, 39, 64, 0.42);
+
+  --pet-modal-border: rgba(40, 34, 64, 0.11);
+  --pet-modal-strong-border: rgba(92, 68, 173, 0.2);
+
+  --pet-modal-overlay: rgba(21, 18, 34, 0.48);
+  --pet-modal-shadow: rgba(32, 24, 56, 0.25);
+}
+
+/* =========================================================
+   ПРИМЕНЕНИЕ ПЕРЕМЕННЫХ
+   ========================================================= */
+
+.addPetModalOverlay {
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 12%,
+      var(--pet-modal-accent-soft),
+      transparent 42%
+    ),
+    var(--pet-modal-overlay);
+}
+
+.addPetModal {
+  overflow-x: hidden;
+
+  color: var(--pet-modal-text);
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--pet-modal-bg-1),
+      var(--pet-modal-bg-2)
+    );
+
+  border-color: var(--pet-modal-strong-border);
+
+  box-shadow:
+    0 40px 120px var(--pet-modal-shadow),
+    0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+    0 0 90px var(--pet-modal-accent-soft);
+}
+
+.addPetModalGlowOne {
+  background: var(--pet-modal-accent-soft);
+}
+
+.addPetModalGlowTwo {
+  background: var(--pet-modal-accent-soft);
+  opacity: 0.55;
+}
+
+.addPetModalKicker {
+  color: var(--pet-modal-accent);
+}
+
+.addPetModalHeader h2 {
+  color: var(--pet-modal-text);
+}
+
+.addPetModalHeader p {
+  color: var(--pet-modal-text-soft);
+}
+
+.addPetModalClose {
+  color: var(--pet-modal-text-soft);
+  background: var(--pet-modal-surface);
+  border-color: var(--pet-modal-border);
+}
+
+.addPetModalClose:hover {
+  color: var(--pet-modal-text);
+  background: var(--pet-modal-accent-soft);
+  border-color: var(--pet-modal-accent-border);
+}
+
+.addPetLabel {
+  color: var(--pet-modal-text);
+}
+
+.addPetLabel b {
+  color: var(--pet-modal-accent);
+}
+
+.addPetLabel small {
+  color: var(--pet-modal-text-muted);
+}
+
+.addPetInputIcon {
+  color: var(--pet-modal-accent);
+}
+
+.addPetInput,
+.addPetTextarea {
+  color: var(--pet-modal-text);
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--pet-modal-surface),
+      color-mix(in srgb, var(--pet-modal-surface) 55%, transparent)
+    );
+
+  border-color: var(--pet-modal-border);
+}
+
+.addPetInput::placeholder,
+.addPetTextarea::placeholder {
+  color: var(--pet-modal-text-muted);
+}
+
+.addPetInput:hover,
+.addPetTextarea:hover {
+  border-color: var(--pet-modal-accent-border);
+}
+
+.addPetInput:focus,
+.addPetTextarea:focus {
+  background: var(--pet-modal-accent-soft);
+  border-color: var(--pet-modal-accent);
+
+  box-shadow:
+    0 0 0 4px var(--pet-modal-focus-ring),
+    0 12px 35px rgba(0, 0, 0, 0.14);
+}
+
+.addPetSpeciesButton {
+  color: var(--pet-modal-text-soft);
+
+  background:
+    linear-gradient(
+      155deg,
+      var(--pet-modal-surface),
+      color-mix(in srgb, var(--pet-modal-surface) 45%, transparent)
+    );
+
+  border-color: var(--pet-modal-border);
+}
+
+.addPetSpeciesButton:hover {
+  color: var(--pet-modal-text);
+  background: var(--pet-modal-surface-hover);
+  border-color: var(--pet-modal-accent-border);
+}
+
+.addPetSpeciesButton.is-active {
+  color: var(--pet-modal-text);
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--pet-modal-accent-soft),
+      color-mix(in srgb, var(--pet-modal-accent-soft) 45%, transparent)
+    );
+
+  border-color: var(--pet-modal-accent);
+
+  box-shadow:
+    0 0 0 3px var(--pet-modal-focus-ring),
+    0 15px 35px rgba(0, 0, 0, 0.16);
+}
+
+.addPetSpeciesEmoji {
+  background: var(--pet-modal-surface);
+  border-color: var(--pet-modal-border);
+}
+
+.addPetSpeciesButton.is-active .addPetSpeciesEmoji {
+  background: var(--pet-modal-accent-soft);
+}
+
+.addPetSpeciesInfo strong {
+  color: inherit;
+}
+
+.addPetSpeciesInfo small {
+  color: var(--pet-modal-text-muted);
+}
+
+.addPetSpeciesCheck {
+  color: #ffffff;
+  background: var(--pet-modal-accent);
+}
+
+.addPetWeightWrap > span,
+.addPetNotesCounter {
+  color: var(--pet-modal-text-muted);
+}
+
+.addPetModalActions {
+  border-top-color: var(--pet-modal-border);
+}
+
+.addPetCancelButton {
+  color: var(--pet-modal-text-soft);
+  background: var(--pet-modal-surface);
+  border-color: var(--pet-modal-border);
+}
+
+.addPetCancelButton:hover {
+  color: var(--pet-modal-text);
+  background: var(--pet-modal-surface-hover);
+}
+
+.addPetSubmitButton {
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--pet-modal-accent),
+      var(--pet-modal-accent-2)
+    );
+
+  box-shadow:
+    0 15px 34px
+      color-mix(in srgb, var(--pet-modal-accent) 32%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.27) inset;
+}
+
+.addPetSubmitButton:hover {
+  box-shadow:
+    0 19px 42px
+      color-mix(in srgb, var(--pet-modal-accent) 44%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.32) inset;
+}
+
+.addPetModal::-webkit-scrollbar-thumb {
+  background: var(--pet-modal-accent-border);
+}
+
+/* Белая тема: более естественная тень и поля */
+
+body[data-theme="white"] .addPetModal {
+  box-shadow:
+    0 35px 100px rgba(34, 27, 58, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+body[data-theme="white"] .addPetInput,
+body[data-theme="white"] .addPetTextarea,
+body[data-theme="white"] .addPetSpeciesButton {
+  box-shadow: 0 1px 2px rgba(32, 24, 55, 0.03);
+}
+
+body[data-theme="white"] .addPetSubmitButton {
+  color: #ffffff;
+}
+
+body[data-theme="white"] .addPetModalClose {
+  box-shadow: 0 3px 12px rgba(42, 34, 70, 0.06);
+}
