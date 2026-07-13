@@ -11090,3 +11090,22 @@ document.addEventListener("click", async (e) => {
     closeDeleteModal();
   }
 });
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("#btnBackPatient");
+  if (!button) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const ownerId =
+    state.selectedPet?.owner_id ||
+    state.selectedOwnerId;
+
+  if (!ownerId) {
+    console.warn("Не вдалося визначити власника пацієнта.");
+    setHash("patients");
+    return;
+  }
+
+  openOwner(String(ownerId));
+});
