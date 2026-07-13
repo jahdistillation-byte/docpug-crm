@@ -10721,3 +10721,90 @@ body[data-theme="white"] .addPetBreedDropdown {
     width:16px;
     height:16px;
 }
+/* =========================================================
+   DOC.PUG — КНОПКА УДАЛЕНИЯ ПАЦИЕНТА
+   ========================================================= */
+
+#petsList button.iconBtn[data-del-pet],
+.pets-container button.iconBtn[data-del-pet] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 11px !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 5px 14px rgba(0, 0, 0, 0.12) !important;
+
+  cursor: pointer !important;
+
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease !important;
+}
+
+#petsList button.iconBtn[data-del-pet]:hover,
+.pets-container button.iconBtn[data-del-pet]:hover {
+  color: #ff8495 !important;
+
+  background: rgba(255, 76, 103, 0.13) !important;
+  border-color: rgba(255, 96, 120, 0.38) !important;
+
+  box-shadow:
+    0 0 18px rgba(255, 76, 103, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+
+  transform: translateY(-2px) scale(1.04) !important;
+}
+
+#petsList button.iconBtn[data-del-pet]:active,
+.pets-container button.iconBtn[data-del-pet]:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* Белая тема */
+
+body[data-theme="white"] #petsList button.iconBtn[data-del-pet],
+body[data-theme="white"] .pets-container button.iconBtn[data-del-pet] {
+  color: rgba(28, 28, 30, 0.46) !important;
+
+  background: rgba(255, 255, 255, 0.68) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+body[data-theme="white"] #petsList button.iconBtn[data-del-pet]:hover,
+body[data-theme="white"] .pets-container button.iconBtn[data-del-pet]:hover {
+  color: #e5484d !important;
+  background: rgba(255, 69, 79, 0.09) !important;
+  border-color: rgba(229, 72, 77, 0.25) !important;
+}
+#petsList button.iconBtn[data-del-pet] svg,
+.pets-container button.iconBtn[data-del-pet] svg {
+  display: block;
+  pointer-events: none;
+}
