@@ -7996,21 +7996,353 @@ if (openZone) {
 // =========================
 // OWNER UI — Управление карточкой владельца
 // =========================
-function initOwnerUI() {
-  // Добавление животного владельцу
-  $("#btnAddPet")?.addEventListener("click", async () => {
-    const ownerId = state.selectedOwnerId;
-    if (!ownerId) return alert("Спочатку обери власника");
+// =========================================================
+// DOC.PUG — Модальне вікно додавання пацієнта
+// =========================================================
+function openAddPetModal(ownerId) {
+  if (!ownerId) {
+    alert("Спочатку обери власника");
+    return;
+  }
 
-    const name = (prompt("Кличка:") || "").trim();
-    if (!name) return;
+  document.querySelector("#addPetModalOverlay")?.remove();
 
-    const species = askSpecies("dog");
-    if (!species) return;
-    const breed = (prompt("Порода (необязательно):") || "").trim();
-    const age = (prompt("Возраст (например: 3 года / 8 мес):") || "").trim();
-    const weight_kg = (prompt("Вес (кг, например 7.5):") || "").trim();
-    const notes = (prompt("Заметки (необязательно):") || "").trim();
+  const overlay = document.createElement("div");
+  overlay.id = "addPetModalOverlay";
+  overlay.className = "addPetModalOverlay";
+
+  overlay.innerHTML = `
+    <div
+      class="addPetModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="addPetModalTitle"
+    >
+      <div class="addPetModalGlow addPetModalGlowOne"></div>
+      <div class="addPetModalGlow addPetModalGlowTwo"></div>
+
+      <div class="addPetModalHeader">
+        <div>
+          <div class="addPetModalKicker">
+            НОВИЙ ПАЦІЄНТ
+          </div>
+
+          <h2 id="addPetModalTitle">
+            Додати тварину
+          </h2>
+
+          <p>
+            Створіть картку пацієнта. Дані можна буде змінити пізніше.
+          </p>
+        </div>
+
+        <button
+          class="addPetModalClose"
+          id="addPetModalClose"
+          type="button"
+          aria-label="Закрити"
+        >
+          ×
+        </button>
+      </div>
+
+      <form id="addPetModalForm" class="addPetModalForm" novalidate>
+        <div class="addPetModalGrid">
+
+          <label class="addPetField addPetFieldFull">
+            <span class="addPetLabel">
+              Кличка
+              <b>*</b>
+            </span>
+
+            <div class="addPetInputWrap">
+              <span class="addPetInputIcon">✦</span>
+
+              <input
+                id="addPetName"
+                class="addPetInput addPetInputWithIcon"
+                type="text"
+                maxlength="80"
+                autocomplete="off"
+                placeholder="Наприклад: Жужа"
+              >
+            </div>
+          </label>
+
+          <div class="addPetField addPetFieldFull">
+            <span class="addPetLabel">
+              Вид пацієнта
+              <b>*</b>
+            </span>
+
+            <div class="addPetSpeciesSelector">
+              <button
+                class="addPetSpeciesButton"
+                type="button"
+                data-add-pet-species="cat"
+              >
+                <span class="addPetSpeciesEmoji">🐈</span>
+
+                <span class="addPetSpeciesInfo">
+                  <strong>Кіт</strong>
+                  <small>Кішка або кіт</small>
+                </span>
+
+                <span class="addPetSpeciesCheck">✓</span>
+              </button>
+
+              <button
+                class="addPetSpeciesButton"
+                type="button"
+                data-add-pet-species="dog"
+              >
+                <span class="addPetSpeciesEmoji">🐕</span>
+
+                <span class="addPetSpeciesInfo">
+                  <strong>Пес</strong>
+                  <small>Собака</small>
+                </span>
+
+                <span class="addPetSpeciesCheck">✓</span>
+              </button>
+            </div>
+
+            <input id="addPetSpecies" type="hidden" value="">
+          </div>
+
+          <label class="addPetField addPetFieldFull">
+            <span class="addPetLabel">
+              Порода
+              <small>необов’язково</small>
+            </span>
+
+            <input
+              id="addPetBreed"
+              class="addPetInput"
+              type="text"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Наприклад: мопс"
+            >
+          </label>
+
+          <label class="addPetField">
+            <span class="addPetLabel">
+              Вік
+              <small>необов’язково</small>
+            </span>
+
+            <input
+              id="addPetAge"
+              class="addPetInput"
+              type="text"
+              maxlength="40"
+              autocomplete="off"
+              placeholder="Наприклад: 4 роки"
+            >
+          </label>
+
+          <label class="addPetField">
+            <span class="addPetLabel">
+              Вага
+              <small>необов’язково</small>
+            </span>
+
+            <div class="addPetWeightWrap">
+              <input
+                id="addPetWeight"
+                class="addPetInput"
+                type="number"
+                min="0"
+                max="300"
+                step="0.01"
+                inputmode="decimal"
+                placeholder="5.2"
+              >
+
+              <span>кг</span>
+            </div>
+          </label>
+
+          <label class="addPetField addPetFieldFull">
+            <span class="addPetLabel">
+              Нотатки
+              <small>необов’язково</small>
+            </span>
+
+            <textarea
+              id="addPetNotes"
+              class="addPetTextarea"
+              maxlength="500"
+              placeholder="Алергії, особливості поведінки або інша важлива інформація..."
+            ></textarea>
+
+            <div class="addPetNotesCounter">
+              <span id="addPetNotesCount">0</span>/500
+            </div>
+          </label>
+
+        </div>
+
+        <div id="addPetModalError" class="addPetModalError"></div>
+
+        <div class="addPetModalActions">
+          <button
+            class="addPetCancelButton"
+            id="addPetCancelButton"
+            type="button"
+          >
+            Скасувати
+          </button>
+
+          <button
+            class="addPetSubmitButton"
+            id="addPetSubmitButton"
+            type="submit"
+          >
+            <span class="addPetSubmitPlus">＋</span>
+            <span>Додати тварину</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.classList.add("addPetModalOpened");
+
+  const form = overlay.querySelector("#addPetModalForm");
+  const nameInput = overlay.querySelector("#addPetName");
+  const speciesInput = overlay.querySelector("#addPetSpecies");
+  const breedInput = overlay.querySelector("#addPetBreed");
+  const ageInput = overlay.querySelector("#addPetAge");
+  const weightInput = overlay.querySelector("#addPetWeight");
+  const notesInput = overlay.querySelector("#addPetNotes");
+  const notesCount = overlay.querySelector("#addPetNotesCount");
+  const errorBox = overlay.querySelector("#addPetModalError");
+  const submitButton = overlay.querySelector("#addPetSubmitButton");
+
+  let isSaving = false;
+
+  const closeModal = () => {
+    if (isSaving) return;
+
+    overlay.classList.remove("is-open");
+    document.body.classList.remove("addPetModalOpened");
+    document.removeEventListener("keydown", handleKeydown);
+
+    setTimeout(() => {
+      overlay.remove();
+    }, 220);
+  };
+
+  const handleKeydown = (event) => {
+    if (event.key === "Escape") {
+      closeModal();
+    }
+  };
+
+  const clearError = () => {
+    errorBox.textContent = "";
+
+    overlay.querySelectorAll(".is-error").forEach((element) => {
+      element.classList.remove("is-error");
+    });
+  };
+
+  const showError = (message) => {
+    errorBox.textContent = message;
+  };
+
+  overlay
+    .querySelectorAll("[data-add-pet-species]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        overlay
+          .querySelectorAll("[data-add-pet-species]")
+          .forEach((item) => item.classList.remove("is-active"));
+
+        button.classList.add("is-active");
+        speciesInput.value = button.dataset.addPetSpecies || "";
+
+        clearError();
+      });
+    });
+
+  notesInput.addEventListener("input", () => {
+    notesCount.textContent = String(notesInput.value.length);
+  });
+
+  overlay
+    .querySelector("#addPetModalClose")
+    ?.addEventListener("click", closeModal);
+
+  overlay
+    .querySelector("#addPetCancelButton")
+    ?.addEventListener("click", closeModal);
+
+  overlay.addEventListener("mousedown", (event) => {
+    if (event.target === overlay) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", handleKeydown);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (isSaving) return;
+
+    clearError();
+
+    const name = nameInput.value.trim();
+    const species = speciesInput.value.trim();
+    const breed = breedInput.value.trim();
+    const age = ageInput.value.trim();
+    const weightRaw = weightInput.value.trim();
+    const notes = notesInput.value.trim();
+
+    if (!name) {
+      nameInput.classList.add("is-error");
+      showError("Вкажіть кличку тварини.");
+      nameInput.focus();
+      return;
+    }
+
+    if (!species) {
+      overlay
+        .querySelector(".addPetSpeciesSelector")
+        ?.classList.add("is-error");
+
+      showError("Оберіть вид пацієнта.");
+      return;
+    }
+
+    if (weightRaw) {
+      const weightNumber = Number(weightRaw.replace(",", "."));
+
+      if (
+        !Number.isFinite(weightNumber) ||
+        weightNumber <= 0 ||
+        weightNumber > 300
+      ) {
+        weightInput.classList.add("is-error");
+        showError("Перевірте вагу тварини.");
+        weightInput.focus();
+        return;
+      }
+    }
+
+    isSaving = true;
+    submitButton.disabled = true;
+
+    const originalButtonHtml = submitButton.innerHTML;
+
+    submitButton.innerHTML = `
+      <span class="addPetLoader"></span>
+      <span>Створюємо...</span>
+    `;
 
     const created = await createPatientApi({
       owner_id: ownerId,
@@ -8018,14 +8350,50 @@ function initOwnerUI() {
       species,
       breed,
       age,
-      weight_kg,
+      weight_kg: weightRaw,
       notes,
     });
 
-    if (!created) return;
+    if (!created) {
+      isSaving = false;
+      submitButton.disabled = false;
+      submitButton.innerHTML = originalButtonHtml;
+
+      showError("Не вдалося створити пацієнта.");
+      return;
+    }
 
     await loadPatientsApi();
-    renderOwnerPage(ownerId);
+
+    isSaving = false;
+    overlay.classList.remove("is-open");
+    document.body.classList.remove("addPetModalOpened");
+    document.removeEventListener("keydown", handleKeydown);
+    overlay.remove();
+
+    await renderOwnerPage(ownerId);
+  });
+
+  requestAnimationFrame(() => {
+    overlay.classList.add("is-open");
+
+    setTimeout(() => {
+      nameInput.focus();
+    }, 180);
+  });
+}
+
+function initOwnerUI() {
+  // Добавление животного владельцу
+  $("#btnAddPet")?.addEventListener("click", () => {
+    const ownerId = state.selectedOwnerId;
+
+    if (!ownerId) {
+      alert("Спочатку обери власника");
+      return;
+    }
+
+    openAddPetModal(ownerId);
   });
 
   // Клик по списку животных (Удаление / Открытие)
