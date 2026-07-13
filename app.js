@@ -8825,7 +8825,29 @@ const configureBreedField = (species) => {
   breedHint.textContent =
     "Після вибору виду тут з’явиться список порід.";
 };
+if (isEditMode) {
+  const currentSpecies = normalizeStoredSpecies(petToEdit.species);
 
+  nameInput.value = String(petToEdit.name || "");
+  ageInput.value = String(petToEdit.age || "");
+  weightInput.value = String(petToEdit.weight_kg || "");
+  notesInput.value = String(petToEdit.notes || "");
+
+  notesCount.textContent = String(notesInput.value.length);
+
+  speciesInput.value = currentSpecies;
+
+  const currentSpeciesButton = overlay.querySelector(
+    `[data-add-pet-species="${currentSpecies}"]`
+  );
+
+  currentSpeciesButton?.classList.add("is-active");
+
+  configureBreedField(currentSpecies);
+
+  breedInput.value = String(petToEdit.breed || "");
+  selectedBreed = String(petToEdit.breed || "");
+}
  overlay
   .querySelectorAll("[data-add-pet-species]")
   .forEach((button) => {
@@ -9070,29 +9092,7 @@ document.addEventListener("mousedown", (event) => {
     }, 180);
   });
 }
-  if (isEditMode) {
-    const currentSpecies = normalizeStoredSpecies(petToEdit.species);
 
-    nameInput.value = String(petToEdit.name || "");
-    ageInput.value = String(petToEdit.age || "");
-    weightInput.value = String(petToEdit.weight_kg || "");
-    notesInput.value = String(petToEdit.notes || "");
-
-    notesCount.textContent = String(notesInput.value.length);
-
-    speciesInput.value = currentSpecies;
-
-    const currentSpeciesButton = overlay.querySelector(
-      `[data-add-pet-species="${currentSpecies}"]`
-    );
-
-    currentSpeciesButton?.classList.add("is-active");
-
-    configureBreedField(currentSpecies);
-
-    breedInput.value = String(petToEdit.breed || "");
-    selectedBreed = String(petToEdit.breed || "");
-  }
 
 function initOwnerUI() {
   // Добавление животного владельцу
