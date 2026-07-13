@@ -11757,3 +11757,208 @@ body[data-theme="white"] .premiumVisitOpenHint {
     width: 100%;
   }
 }
+/* =========================================================
+   DOC.PUG — PREMIUM VISIT CARDS: THEME ADAPTIVE FIX
+   Вставить в самый конец style.css
+   ========================================================= */
+
+/* PURPLE — базовая тема */
+:root,
+body[data-theme="purple"] {
+  --visit-card-bg-start: rgba(28, 19, 51, 0.92);
+  --visit-card-bg-end: rgba(13, 10, 29, 0.96);
+
+  --visit-card-section-start: rgba(255, 255, 255, 0.04);
+  --visit-card-section-end: rgba(255, 255, 255, 0.016);
+
+  --visit-card-border: rgba(255, 255, 255, 0.075);
+  --visit-card-divider: rgba(255, 255, 255, 0.055);
+  --visit-card-text: #ffffff;
+  --visit-card-text-soft: rgba(250, 248, 255, 0.88);
+  --visit-card-text-muted: rgba(231, 225, 244, 0.48);
+}
+
+/* BLACK */
+body[data-theme="black"] {
+  --visit-card-bg-start: rgba(22, 22, 25, 0.96);
+  --visit-card-bg-end: rgba(6, 6, 8, 0.985);
+
+  --visit-card-section-start: rgba(255, 255, 255, 0.038);
+  --visit-card-section-end: rgba(255, 255, 255, 0.012);
+
+  --visit-card-border: rgba(255, 255, 255, 0.09);
+  --visit-card-divider: rgba(255, 255, 255, 0.06);
+  --visit-card-text: #ffffff;
+  --visit-card-text-soft: rgba(255, 255, 255, 0.86);
+  --visit-card-text-muted: rgba(255, 255, 255, 0.46);
+}
+
+/* BLUE */
+body[data-theme="blue"] {
+  --visit-card-bg-start: rgba(8, 35, 48, 0.94);
+  --visit-card-bg-end: rgba(3, 15, 24, 0.98);
+
+  --visit-card-section-start: rgba(65, 205, 232, 0.055);
+  --visit-card-section-end: rgba(22, 117, 145, 0.018);
+
+  --visit-card-border: rgba(76, 205, 232, 0.12);
+  --visit-card-divider: rgba(90, 211, 235, 0.07);
+  --visit-card-text: #f5fdff;
+  --visit-card-text-soft: rgba(227, 248, 252, 0.88);
+  --visit-card-text-muted: rgba(199, 234, 241, 0.48);
+}
+
+/* GREEN */
+body[data-theme="green"] {
+  --visit-card-bg-start: rgba(7, 42, 33, 0.94);
+  --visit-card-bg-end: rgba(2, 19, 14, 0.985);
+
+  --visit-card-section-start: rgba(44, 211, 148, 0.055);
+  --visit-card-section-end: rgba(21, 112, 80, 0.018);
+
+  --visit-card-border: rgba(67, 221, 161, 0.12);
+  --visit-card-divider: rgba(75, 222, 165, 0.07);
+  --visit-card-text: #f3fff9;
+  --visit-card-text-soft: rgba(226, 249, 237, 0.88);
+  --visit-card-text-muted: rgba(194, 232, 211, 0.48);
+}
+
+/* WHITE */
+body[data-theme="white"] {
+  --visit-card-bg-start: rgba(255, 255, 255, 0.98);
+  --visit-card-bg-end: rgba(241, 244, 249, 0.98);
+
+  --visit-card-section-start: rgba(40, 42, 55, 0.032);
+  --visit-card-section-end: rgba(40, 42, 55, 0.012);
+
+  --visit-card-border: rgba(40, 32, 65, 0.09);
+  --visit-card-divider: rgba(40, 32, 65, 0.07);
+  --visit-card-text: #1d1b28;
+  --visit-card-text-soft: rgba(29, 27, 40, 0.84);
+  --visit-card-text-muted: rgba(37, 31, 55, 0.48);
+}
+
+/* ---------- ПРИМЕНЕНИЕ ---------- */
+
+.premiumVisitCard {
+  color: var(--visit-card-text) !important;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 11%,
+        transparent
+      ),
+      transparent 36%
+    ),
+    linear-gradient(
+      145deg,
+      var(--visit-card-bg-start),
+      var(--visit-card-bg-end)
+    ) !important;
+
+  border-color: var(--visit-card-border) !important;
+
+  box-shadow:
+    0 16px 46px rgba(0, 0, 0, 0.24),
+    0 0 34px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 6%,
+        transparent
+      ),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+.premiumVisitCard:hover {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 38%,
+      var(--visit-card-border)
+    ) !important;
+
+  box-shadow:
+    0 24px 62px rgba(0, 0, 0, 0.34),
+    0 0 34px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7) 14%,
+        transparent
+      ),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.premiumVisitDiagnosis {
+  color: var(--visit-card-text) !important;
+}
+
+.premiumVisitEyebrow,
+.premiumVisitSectionHead,
+.premiumVisitOpenHint {
+  color: var(--visit-card-text-muted) !important;
+}
+
+.premiumVisitText {
+  color: var(--visit-card-text-soft) !important;
+}
+
+.premiumVisitSection {
+  background:
+    linear-gradient(
+      145deg,
+      var(--visit-card-section-start),
+      var(--visit-card-section-end)
+    ) !important;
+
+  border-color: var(--visit-card-border) !important;
+}
+
+.premiumVisitDivider {
+  background:
+    linear-gradient(
+      90deg,
+      var(--visit-card-divider),
+      color-mix(
+        in srgb,
+        var(--visit-card-divider) 40%,
+        transparent
+      ),
+      transparent
+    ) !important;
+}
+
+.premiumVisitFooter {
+  border-top-color: var(--visit-card-divider) !important;
+}
+
+.premiumVisitType {
+  color: var(--visit-card-text-muted) !important;
+  background: var(--visit-card-section-start) !important;
+  border-color: var(--visit-card-border) !important;
+}
+
+/* Чтобы зелёная тема выглядела именно изумрудной, а не фиолетовой */
+body[data-theme="green"] .premiumVisitCard {
+  box-shadow:
+    0 18px 52px rgba(0, 16, 10, 0.34),
+    0 0 38px rgba(16, 185, 129, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+/* Синяя тема */
+body[data-theme="blue"] .premiumVisitCard {
+  box-shadow:
+    0 18px 52px rgba(0, 11, 20, 0.34),
+    0 0 38px rgba(6, 182, 212, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+/* Белая тема */
+body[data-theme="white"] .premiumVisitCard {
+  box-shadow:
+    0 16px 42px rgba(35, 27, 60, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
