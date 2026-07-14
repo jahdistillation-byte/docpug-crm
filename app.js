@@ -4528,57 +4528,721 @@ async function renderPatientTab(tab, pet) {
   }
 
   if (tab === "finance") {
-    dynamicBox.innerHTML = `<div class="hint">Формування финансової аналітики…</div>`;
-    const petVisits = Array.isArray(state.visits) ? state.visits.filter(v => String(v.pet_id) === String(pet.id)) : [];
-    const sortedVisits = petVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
-    const servicesTotal = petVisits.reduce((sum, v) => sum + calcServicesTotal(v), 0);
-    const stockTotal = petVisits.reduce((sum, v) => sum + calcStockTotal(v), 0);
-    const grandTotal = servicesTotal + stockTotal;
-    const avg = petVisits.length ? Math.round(grandTotal / petVisits.length) : 0;
+  renderPatientFinanceTab(dynamicBox, pet);
+  return;
+}
+}
+function renderPatientFinanceTab(root, pet) {
+  if (!root || !pet) return;
 
-    const checksHtml = sortedVisits.length
-      ? sortedVisits.map((v) => {
-          const s = calcServicesTotal(v); const st = calcStockTotal(v);
-          return `
-            <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.04);">
+  const petVisits = (
+    Array.isArray(state.visits)
+      ? state.visits
+      : []
+  )
+    .filter((visit) => {
+      return String(visit.pet_id) === String(pet.id);
+    })
+    .sort((a, b) => {
+      return String(b.date || b.created_at || "")
+        .localeCompare(
+          String(a.date || a.created_at || "")
+        );
+    });
+
+  const financialVisits = petVisits
+    .map((visit) => {
+      const servicesTotal =
+        calcServicesTotal(visit);
+
+      const stockTotal =
+        calcStockTotal(visit);
+
+      return {
+        ...visit,
+        servicesTotal,
+        stockTotal,
+        total:
+          Number(servicesTotal || 0) +
+          Number(stockTotal || 0),
+      };
+    });
+
+  const paidVisits = financialVisits.filter((visit) => {
+    return Number(visit.total || 0) > 0;
+  });
+
+  const totalPaid = paidVisits.reduce((sum, visit) => {
+    return sum + Number(visit.total || 0);
+  }, 0);
+
+  const servicesTotal = paidVisits.reduce((sum, visit) => {
+    return sum + Number(visit.servicesTotal || 0);
+  }, 0);
+
+  const stockTotal = paidVisits.reduce((sum, visit) => {
+    return sum + Number(visit.stockTotal || 0);
+  }, 0);
+
+  const visitsCount = petVisits.length;
+
+  const avgCheck = paidVisits.length
+    ? Math.round(totalPaid / paidVisits.length)
+    : 0;
+
+  const lastPayment =
+    paidVisits[0] || null;
+
+  const topServices =
+    buildPatientTopServices(petVisits, 5);
+
+  const servicesPercent = totalPaid
+    ? Math.round(
+        (servicesTotal / totalPaid) * 100
+      )
+    : 0;
+
+  const stockPercent = totalPaid
+    ? Math.max(0, 100 - servicesPercent)
+    : 0;
+
+  const visitInterval =
+    calculatePatientVisitInterval(petVisits);
+
+  const insight = buildPatientFinanceInsight({
+    pet,
+    visitsCount,
+    totalPaid,
+    avgCheck,
+    topServices,
+    visitInterval,
+  });
+
+  root.innerHTML = `
+    <section class="patientFinancePage">
+      <div class="patientFinanceHead">
+        <div>
+          <div class="patientFinanceKicker">
+            ФІНАНСОВА ІСТОРІЯ
+          </div>
+
+          <h2>Фінанси пацієнта</h2>
+
+          <p>
+            Коротка фінансова статистика
+            ${escapeHtml(pet.name || "пацієнта")}
+            без зайвої бухгалтерської деталізації.
+          </p>
+        </div>
+
+        <div class="patientFinanceValueBadge">
+          <span>Загальна цінність</span>
+          <strong>
+            ${formatPatientMoney(totalPaid)}
+          </strong>
+        </div>
+      </div>
+
+      <div class="patientFinanceKpis">
+        ${renderPatientFinanceKpi({
+          icon: "💳",
+          label: "Усього сплачено",
+          value: formatPatientMoney(totalPaid),
+          note: `${paidVisits.length} оплат`,
+          accent: true,
+        })}
+
+        ${renderPatientFinanceKpi({
+          icon: "📊",
+          label: "Середній чек",
+          value: formatPatientMoney(avgCheck),
+          note: "середнє за оплачений візит",
+        })}
+
+        ${renderPatientFinanceKpi({
+          icon: "🐾",
+          label: "Кількість візитів",
+          value: String(visitsCount),
+          note: getPatientVisitCountLabel(visitsCount),
+        })}
+
+        ${renderPatientFinanceKpi({
+          icon: "🧾",
+          label: "Остання оплата",
+          value: lastPayment
+            ? formatPatientMoney(lastPayment.total)
+            : "—",
+          note: lastPayment
+            ? formatPatientFinanceDate(
+                lastPayment.date ||
+                lastPayment.created_at
+              )
+            : "оплат ще немає",
+        })}
+      </div>
+
+      <div class="patientFinanceMainGrid">
+        <section class="patientFinancePanel">
+          <div class="patientFinancePanelHead">
+            <div>
+              <span class="patientFinancePanelIcon">
+                ⭐
+              </span>
+
               <div>
-                <div style="font-weight:600; color:#fff;">${escapeHtml(v.date || "—")}</div>
-                <div style="font-size:0.8rem; opacity:0.6; margin-top:2px;">Послуги: ${s} ₴ · Препарати: ${st} ₴</div>
+                <h3>Топ послуг</h3>
+                <p>
+                  Найчастіші та найцінніші послуги пацієнта.
+                </p>
               </div>
-              <div style="font-weight:700; color:#22c55e; align-self:center;">${s + st} ₴</div>
             </div>
-          `;
-        }).join("")
-      : `<div class="hint">Поки витрат немає.</div>`;
 
-    dynamicBox.innerHTML = `
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:20px;">
-        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
-          <div style="font-size:0.75rem; opacity:0.5;">УСЬОГО</div>
-          <div style="font-size:1.2rem; font-weight:700; color:#fff; margin-top:4px;">${grandTotal} ₴</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
-          <div style="font-size:0.75rem; opacity:0.5;">ПОСЛУГИ</div>
-          <div style="font-size:1.2rem; font-weight:700; color:#fff; margin-top:4px;">${servicesTotal} ₴</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
-          <div style="font-size:0.75rem; opacity:0.5;">ПРЕПАРАТИ</div>
-          <div style="font-size:1.2rem; font-weight:700; color:#fff; margin-top:4px;">${stockTotal} ₴</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.04);">
-          <div style="font-size:0.75rem; opacity:0.5;">СЕРЕДНІЙ ЧЕК</div>
-          <div style="font-size:1.2rem; font-weight:700; color:#22c55e; margin-top:4px;">${avg} ₴</div>
-        </div>
+            <span class="patientFinanceSmallBadge">
+              TOP 5
+            </span>
+          </div>
+
+          <div class="patientTopServices">
+            ${
+              topServices.length
+                ? topServices
+                    .map((service, index) => {
+                      return renderPatientTopService(
+                        service,
+                        index
+                      );
+                    })
+                    .join("")
+                : `
+                  <div class="patientFinanceEmpty">
+                    Послуги ще не додані до візитів.
+                  </div>
+                `
+            }
+          </div>
+        </section>
+
+        <section class="patientFinancePanel">
+          <div class="patientFinancePanelHead">
+            <div>
+              <span class="patientFinancePanelIcon">
+                ◔
+              </span>
+
+              <div>
+                <h3>Структура витрат</h3>
+                <p>
+                  Співвідношення послуг та препаратів.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="patientExpenseTotal">
+            <span>Загальні витрати</span>
+            <strong>
+              ${formatPatientMoney(totalPaid)}
+            </strong>
+          </div>
+
+          <div class="patientExpenseBar">
+            <i
+              class="services"
+              style="width:${servicesPercent}%"
+            ></i>
+
+            <i
+              class="stock"
+              style="width:${stockPercent}%"
+            ></i>
+          </div>
+
+          <div class="patientExpenseLegend">
+            <div>
+              <span class="services"></span>
+
+              <div>
+                <small>Послуги</small>
+                <strong>${servicesPercent}%</strong>
+              </div>
+
+              <b>
+                ${formatPatientMoney(servicesTotal)}
+              </b>
+            </div>
+
+            <div>
+              <span class="stock"></span>
+
+              <div>
+                <small>Препарати</small>
+                <strong>${stockPercent}%</strong>
+              </div>
+
+              <b>
+                ${formatPatientMoney(stockTotal)}
+              </b>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="glass-card" style="padding:20px; border-radius:16px;">
-        <h3 style="margin-top:0; color:#fff; margin-bottom:15px;">🧾 Історія витрат пацієнта</h3>
-        <div style="max-height:300px; overflow-y:auto; padding-right:6px;">${checksHtml}</div>
-      </div>
-    `;
-    return;
-  }
+
+      <section class="patientFinancePanel patientPaymentsPanel">
+        <div class="patientFinancePanelHead">
+          <div>
+            <span class="patientFinancePanelIcon">
+              🧾
+            </span>
+
+            <div>
+              <h3>Останні оплати</h3>
+              <p>
+                Візити з фактичною сумою до сплати.
+              </p>
+            </div>
+          </div>
+
+          ${
+            paidVisits.length > 5
+              ? `
+                <button
+                  class="patientPaymentsToggle"
+                  id="btnTogglePatientPayments"
+                  type="button"
+                >
+                  Показати всю історію
+                </button>
+              `
+              : ""
+          }
+        </div>
+
+        <div
+          class="patientPaymentsList"
+          id="patientPaymentsList"
+        >
+          ${
+            paidVisits.length
+              ? paidVisits
+                  .map((visit, index) => {
+                    return renderPatientPaymentRow(
+                      visit,
+                      index >= 5
+                    );
+                  })
+                  .join("")
+              : `
+                <div class="patientFinanceEmpty">
+                  Оплачених візитів поки немає.
+                </div>
+              `
+          }
+        </div>
+      </section>
+
+      <section class="patientFinanceInsight">
+        <div class="patientFinanceInsightIcon">
+          ✨
+        </div>
+
+        <div>
+          <span>CRM-висновок</span>
+          <p>${escapeHtml(insight)}</p>
+        </div>
+      </section>
+    </section>
+  `;
+
+  bindPatientFinanceActions(root);
 }
 
+
+function renderPatientFinanceKpi({
+  icon,
+  label,
+  value,
+  note,
+  accent = false,
+}) {
+  return `
+    <article class="patientFinanceKpi ${accent ? "accent" : ""}">
+      <div class="patientFinanceKpiIcon">
+        ${icon}
+      </div>
+
+      <div>
+        <span>${escapeHtml(label)}</span>
+
+        <strong>
+          ${escapeHtml(value)}
+        </strong>
+
+        <small>
+          ${escapeHtml(note || "")}
+        </small>
+      </div>
+    </article>
+  `;
+}
+
+
+function buildPatientTopServices(visits, limit = 5) {
+  const servicesMap = new Map();
+
+  (visits || []).forEach((visit) => {
+    const lines = expandServiceLines(visit);
+
+    lines.forEach((line) => {
+      const name = String(
+        line.name || "Послуга"
+      ).trim();
+
+      const key = name.toLowerCase();
+
+      const current =
+        servicesMap.get(key) || {
+          name,
+          quantity: 0,
+          total: 0,
+          visits: 0,
+        };
+
+      current.quantity +=
+        Number(line.qty || 0);
+
+      current.total +=
+        Number(line.lineTotal || 0);
+
+      current.visits += 1;
+
+      servicesMap.set(key, current);
+    });
+  });
+
+  return Array.from(servicesMap.values())
+    .sort((a, b) => {
+      if (b.total !== a.total) {
+        return b.total - a.total;
+      }
+
+      return b.quantity - a.quantity;
+    })
+    .slice(0, limit);
+}
+
+
+function renderPatientTopService(service, index) {
+  return `
+    <div class="patientTopServiceRow">
+      <div class="patientTopServiceRank">
+        ${index + 1}
+      </div>
+
+      <div class="patientTopServiceInfo">
+        <strong>
+          ${escapeHtml(service.name || "Послуга")}
+        </strong>
+
+        <span>
+          ${Number(service.quantity || 0)}
+          ${getPatientServiceCountLabel(
+            Number(service.quantity || 0)
+          )}
+        </span>
+      </div>
+
+      <b>
+        ${formatPatientMoney(service.total)}
+      </b>
+    </div>
+  `;
+}
+
+
+function renderPatientPaymentRow(
+  visit,
+  initiallyHidden = false
+) {
+  const serviceNames = expandServiceLines(visit)
+    .map((line) => line.name)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  const stockNames = expandStockLines(visit)
+    .map((line) => line.name)
+    .filter(Boolean)
+    .slice(0, 1);
+
+  const descriptionParts = [
+    ...serviceNames,
+    ...stockNames,
+  ];
+
+  const description =
+    descriptionParts.length
+      ? descriptionParts.join(", ")
+      : "Візит без деталізації";
+
+  return `
+    <article
+      class="patientPaymentRow ${
+        initiallyHidden ? "is-hidden" : ""
+      }"
+      data-patient-payment-row
+    >
+      <div class="patientPaymentDate">
+        <strong>
+          ${escapeHtml(
+            formatPatientFinanceDate(
+              visit.date ||
+              visit.created_at
+            )
+          )}
+        </strong>
+
+        <span>
+          Візит
+        </span>
+      </div>
+
+      <div class="patientPaymentDescription">
+        <strong>
+          ${escapeHtml(description)}
+        </strong>
+
+        <span>
+          Послуги:
+          ${formatPatientMoney(visit.servicesTotal)}
+          · Препарати:
+          ${formatPatientMoney(visit.stockTotal)}
+        </span>
+      </div>
+
+      <div class="patientPaymentAmount">
+        ${formatPatientMoney(visit.total)}
+      </div>
+    </article>
+  `;
+}
+
+
+function bindPatientFinanceActions(root) {
+  const button =
+    root.querySelector("#btnTogglePatientPayments");
+
+  if (!button) return;
+
+  let expanded = false;
+
+  button.addEventListener("click", () => {
+    expanded = !expanded;
+
+    root
+      .querySelectorAll(
+        "[data-patient-payment-row]"
+      )
+      .forEach((row, index) => {
+        if (index < 5) return;
+
+        row.classList.toggle(
+          "is-hidden",
+          !expanded
+        );
+      });
+
+    button.textContent = expanded
+      ? "Показати останні 5"
+      : "Показати всю історію";
+  });
+}
+
+
+function calculatePatientVisitInterval(visits) {
+  const uniqueDates = Array.from(
+    new Set(
+      (visits || [])
+        .map((visit) => {
+          return String(
+            visit.date ||
+            visit.created_at ||
+            ""
+          ).slice(0, 10);
+        })
+        .filter(Boolean)
+    )
+  )
+    .map((date) => new Date(date))
+    .filter((date) => {
+      return !Number.isNaN(date.getTime());
+    })
+    .sort((a, b) => a - b);
+
+  if (uniqueDates.length < 2) return null;
+
+  let totalDays = 0;
+
+  for (
+    let index = 1;
+    index < uniqueDates.length;
+    index += 1
+  ) {
+    const difference =
+      uniqueDates[index] -
+      uniqueDates[index - 1];
+
+    totalDays += Math.max(
+      0,
+      Math.round(
+        difference /
+        (1000 * 60 * 60 * 24)
+      )
+    );
+  }
+
+  return Math.max(
+    1,
+    Math.round(
+      totalDays /
+      (uniqueDates.length - 1)
+    )
+  );
+}
+
+
+function buildPatientFinanceInsight({
+  pet,
+  visitsCount,
+  totalPaid,
+  avgCheck,
+  topServices,
+  visitInterval,
+}) {
+  const petName =
+    pet?.name || "Пацієнт";
+
+  if (!visitsCount) {
+    return `${petName} ще не має завершених візитів із фінансовими даними.`;
+  }
+
+  const parts = [];
+
+  parts.push(
+    `${petName} відвідав клініку ${visitsCount} ${getPatientVisitCountLabel(visitsCount)}`
+  );
+
+  if (visitInterval) {
+    parts.push(
+      `у середньому раз на ${visitInterval} ${getPatientDayCountLabel(visitInterval)}`
+    );
+  }
+
+  if (topServices[0]?.name) {
+    parts.push(
+      `найцінніша послуга — ${topServices[0].name}`
+    );
+  }
+
+  if (totalPaid > 0) {
+    parts.push(
+      `загальна сума оплат становить ${formatPatientMoney(totalPaid)}, середній чек — ${formatPatientMoney(avgCheck)}`
+    );
+  }
+
+  return parts.join(". ") + ".";
+}
+
+
+function formatPatientMoney(value) {
+  return (
+    Number(value || 0).toLocaleString("uk-UA") +
+    " ₴"
+  );
+}
+
+
+function formatPatientFinanceDate(value) {
+  const raw = String(value || "").slice(0, 10);
+
+  if (!raw) return "—";
+
+  const date = new Date(`${raw}T12:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  return date.toLocaleDateString("uk-UA", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+
+function getPatientVisitCountLabel(count) {
+  const number = Math.abs(Number(count || 0));
+
+  if (number % 10 === 1 && number % 100 !== 11) {
+    return "візит";
+  }
+
+  if (
+    number % 10 >= 2 &&
+    number % 10 <= 4 &&
+    (
+      number % 100 < 12 ||
+      number % 100 > 14
+    )
+  ) {
+    return "візити";
+  }
+
+  return "візитів";
+}
+
+
+function getPatientServiceCountLabel(count) {
+  const number = Math.abs(Number(count || 0));
+
+  if (number % 10 === 1 && number % 100 !== 11) {
+    return "раз";
+  }
+
+  if (
+    number % 10 >= 2 &&
+    number % 10 <= 4 &&
+    (
+      number % 100 < 12 ||
+      number % 100 > 14
+    )
+  ) {
+    return "рази";
+  }
+
+  return "разів";
+}
+
+
+function getPatientDayCountLabel(count) {
+  const number = Math.abs(Number(count || 0));
+
+  if (number % 10 === 1 && number % 100 !== 11) {
+    return "день";
+  }
+
+  if (
+    number % 10 >= 2 &&
+    number % 10 <= 4 &&
+    (
+      number % 100 < 12 ||
+      number % 100 > 14
+    )
+  ) {
+    return "дні";
+  }
+
+  return "днів";
+}
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
 const PATIENT_FILE_CATEGORIES = {
