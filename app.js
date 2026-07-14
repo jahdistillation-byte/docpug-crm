@@ -4795,19 +4795,64 @@ function renderPatientFilesTab(pet) {
       );
 
       if (deleteButton) {
-        const fileId = deleteButton.dataset.deletePatientFile;
+  const fileId = deleteButton.dataset.deletePatientFile;
 
-        if (!confirm("Видалити файл з картки пацієнта?")) {
-          return;
-        }
+  const file = getPatientFiles(petId).find((item) => {
+    return String(item.id) === String(fileId);
+  });
 
-        const next = getPatientFiles(petId).filter((file) => {
-          return String(file.id) !== String(fileId);
-        });
+  const fileTitle =
+    file?.title ||
+    file?.name ||
+    "цей файл";
 
-        setPatientFiles(petId, next);
-        renderPatientFilesTab(pet);
-        return;
+  openDeleteModal(
+    `
+      <div style="text-align:center;">
+        <div style="
+          font-size:42px;
+          margin-bottom:12px;
+        ">
+          🗑️
+        </div>
+
+        <div style="
+          font-size:18px;
+          font-weight:800;
+          color:#fff;
+          margin-bottom:8px;
+        ">
+          Видалити файл?
+        </div>
+
+        <div style="
+          font-size:13px;
+          line-height:1.5;
+          color:rgba(255,255,255,.58);
+        ">
+          Файл
+          <strong style="color:#fff;">
+            «${escapeHtml(fileTitle)}»
+          </strong>
+          буде видалено з медичного архіву пацієнта.
+        </div>
+      </div>
+    `,
+
+    () => {
+      const next = getPatientFiles(petId).filter((item) => {
+        return String(item.id) !== String(fileId);
+      });
+
+      setPatientFiles(petId, next);
+
+      closeDeleteModal();
+      renderPatientFilesTab(pet);
+    }
+  );
+
+  return;
+
       }
 
       const editButton = event.target.closest(
