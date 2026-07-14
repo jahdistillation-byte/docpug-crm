@@ -12034,69 +12034,8 @@ if (
     currentVisit
   );
 }
-
-      // Строим новый премиальный документ в #disA4
-      await renderDischargeA4(
-        visitId
-      );
-
-      const printDocument =
-        document.getElementById(
-          "disA4"
-        );
-
-      if (!printDocument) {
-        throw new Error(
-          "Не знайдено блок #disA4"
-        );
-      }
-
-      // Даём браузеру закончить отрисовку логотипа,
-      // таблиц, подписи и печати
-      await new Promise((resolve) => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(
-            resolve
-          );
-        });
-      });
-
-      const images = Array.from(
-        printDocument.querySelectorAll(
-          "img"
-        )
-      );
-
-      await Promise.all(
-        images.map((image) => {
-          if (image.complete) {
-            return Promise.resolve();
-          }
-
-          return new Promise((resolve) => {
-            image.addEventListener(
-              "load",
-              resolve,
-              { once: true }
-            );
-
-            image.addEventListener(
-              "error",
-              resolve,
-              { once: true }
-            );
-
-            setTimeout(
-              resolve,
-              3000
-            );
-          });
-        })
-      );
-
-      const printWindow = window.open(
-  "",
-  "_blank"
+await downloadVisitDischargePdf(
+  visitId
 );
 
 if (!printWindow) {
