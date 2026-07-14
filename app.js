@@ -10917,7 +10917,30 @@ function initVisitUI() {
 
         const dx = String(document.getElementById("visitMedDx")?.value || "").trim();
         const complaint = String(document.getElementById("visitMedComplaint")?.value || "").trim();
-        const rx = String(document.getElementById("visitMedRx")?.value || "").trim();
+        const rx =
+  String(
+    document.getElementById(
+      "visitMedRx"
+    )?.value || ""
+  ).trim();
+
+const recommendation =
+  String(
+    document.getElementById(
+      "visitClientRecommendation"
+    )?.value || ""
+  ).trim();
+
+const weightValue =
+  document.getElementById(
+    "visitWeightDisplay"
+  )?.value;
+
+const weightKg =
+  weightValue === "" ||
+  weightValue == null
+    ? null
+    : Number(weightValue);
 
         const services = Array.isArray(current.services) ? current.services : [];
         const stock = Array.isArray(current.stock) ? current.stock : [];
@@ -10950,6 +10973,7 @@ function initVisitUI() {
           ...updated,
           note: payload.note,
           rx: payload.rx,
+weight_kg: payload.weight_kg,
           services,
           services_json: services,
           stock,
@@ -10959,7 +10983,12 @@ function initVisitUI() {
         state.visitsById.set(String(vid), merged);
         if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = merged;
         
-        setDischarge(vid, { complaint, dx, rx });
+        setDischarge(vid, {
+  complaint,
+  dx,
+  rx,
+  recommendation,
+});
 
         if (btn) btn.textContent = "✅ Збережено";
         if (hint) hint.textContent = "Медична частина збережена.";
@@ -11157,6 +11186,42 @@ function renderVisitPage(visit, pet) {
     meta.textContent = parts.length ? parts.join(" • ") : "—";
   }
 
+  const summaryPatientName =
+  document.getElementById("visitSummaryPatientName");
+
+if (summaryPatientName) {
+  summaryPatientName.textContent =
+    pet?.name || "Пацієнт";
+}
+
+const summaryPatientMeta =
+  document.getElementById("visitSummaryPatientMeta");
+
+if (summaryPatientMeta) {
+  const parts = [];
+
+  if (pet?.species) {
+    parts.push(pet.species);
+  }
+
+  if (pet?.breed) {
+    parts.push(pet.breed);
+  }
+
+  summaryPatientMeta.textContent =
+    parts.length
+      ? parts.join(" • ")
+      : "Дані пацієнта";
+}
+
+const weightInput =
+  document.getElementById("visitWeightDisplay");
+
+if (weightInput) {
+  weightInput.value =
+    visit?.weight_kg ?? "";
+}
+
   // 2. Безпечний розбір комбінованої нотатки (note) на Діагноз та Скарги
   const noteText = String(visit.note || "").trim();
   const parsed = parseVisitNote(noteText);
@@ -11167,8 +11232,26 @@ function renderVisitPage(visit, pet) {
   const complaintTextarea = document.getElementById("visitMedComplaint");
   if (complaintTextarea) complaintTextarea.value = parsed.complaint || "";
 
-  const rxTextarea = document.getElementById("visitMedRx");
-  if (rxTextarea) rxTextarea.value = String(visit.rx || "").trim();
+  const parsedRx = parseVisitRx(
+  String(visit.rx || "")
+);
+
+const rxTextarea =
+  document.getElementById("visitMedRx");
+
+if (rxTextarea) {
+  rxTextarea.value = parsedRx.rx;
+}
+
+const recommendationTextarea =
+  document.getElementById(
+    "visitClientRecommendation"
+  );
+
+if (recommendationTextarea) {
+  recommendationTextarea.value =
+    parsedRx.recommendation;
+}
 
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
@@ -11185,23 +11268,65 @@ function renderVisitPage(visit, pet) {
   // ВІДРИСОВКА ОНОВЛЕНИХ ФУТУРИСТИЧНИХ ПОСЛУГ
   const expandedServices = expandServiceLines(visit);
   const servicesTotal = calcServicesTotal(visit);
-  const svcContainer = document.getElementById("visitSvcListContainer");
-  if (svcContainer) {
-    svcContainer.innerHTML = expandedServices.length
-      ? expandedServices.map((x, idx) => `
-          <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); padding: 12px 18px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: inset 0 1px 1px rgba(255,255,255,0.05); transition: all 0.25s ease;">
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-              <div style="font-weight:600; color:#fff; font-size: 0.95rem; letter-spacing: 0.3px;">${escapeHtml(x.name)}</div>
-              <div style="font-size:0.8rem; color: rgba(255,255,255,0.4); font-weight: 500;">${x.qty} × <span style="color: #c084fc;">${x.price} ₴</span></div>
-            </div>
-            <div style="display:flex; gap:16px; align-items:center;">
-              <b style="color: #fff; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px;">${x.lineTotal} ₴</b>
-              <button type="button" data-svc-del="${idx}" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);" onmouseenter="this.style.background='rgba(239, 68, 68, 0.25)', this.style.boxShadow='0 0 15px rgba(239, 68, 68, 0.4)', this.style.color='#fff'" onmouseleave="this.style.background='rgba(239, 68, 68, 0.1)', this.style.boxShadow='none', this.style.color='#f87171'">✕</button>
-            </div>
-          </div>
-        `).join("")
-      : `<div class="hint" style="opacity:0.4; padding:12px; color:#fff; font-size: 0.9rem; font-style: italic;">Поки послуг немає. Додайте вище.</div>`;
-  }
+  const svcContainer =
+  document.getElementById(
+    "visitSvcListContainer"
+  );
+
+if (svcContainer) {
+  svcContainer.innerHTML =
+    expandedServices.length
+      ? expandedServices
+          .map((item, index) => {
+            const quantity =
+              Number(item.qty || 0);
+
+            const price =
+              Number(item.price || 0);
+
+            const lineTotal =
+              Number(item.lineTotal || 0);
+
+            return `
+              <article class="visitLine">
+                <div class="visitLineMain">
+                  <strong>
+                    ${escapeHtml(
+                      item.name || "Послуга"
+                    )}
+                  </strong>
+
+                  <span>
+                    ${quantity}
+                    ×
+                    ${price.toLocaleString("uk-UA")} ₴
+                  </span>
+                </div>
+
+                <div class="visitLineActions">
+                  <div class="visitLineTotal">
+                    ${lineTotal.toLocaleString("uk-UA")} ₴
+                  </div>
+
+                  <button
+                    class="visitLineDelete"
+                    type="button"
+                    title="Видалити послугу"
+                    data-svc-del="${index}"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </article>
+            `;
+          })
+          .join("")
+      : `
+        <div class="visitLinesEmpty">
+          Послуг ще немає. Знайдіть потрібну послугу та додайте її до візиту.
+        </div>
+      `;
+}
 
   // 4. Збираємо селектор товарів / складу
   ensureVisitStockShape(visit);
@@ -11218,28 +11343,127 @@ function renderVisitPage(visit, pet) {
   // ВІДРИСОВКА ОНОВЛЕНОГО ФУТУРИСТИЧНОГО СКЛАДУ
   const expandedStock = expandStockLines(visit);
   const stockTotal = calcStockTotal(visit);
-  const stkContainer = document.getElementById("visitStkListContainer");
-  if (stkContainer) {
-    stkContainer.innerHTML = expandedStock.length
-      ? expandedStock.map((x, idx) => `
-          <div class="visitLine" style="display:flex; justify-content:space-between; align-items:center; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); padding: 12px 18px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: inset 0 1px 1px rgba(255,255,255,0.05); transition: all 0.25s ease;">
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-              <div style="font-weight:600; color:#fff; font-size: 0.95rem; letter-spacing: 0.3px;">${escapeHtml(x.name)}</div>
-              <div style="font-size:0.8rem; color: rgba(255,255,255,0.4); font-weight: 500;">${x.qty} × <span style="color: #c084fc;">${x.price} ₴</span></div>
-            </div>
-            <div style="display:flex; gap:16px; align-items:center;">
-              <b style="color: #fff; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px;">${x.lineTotal} ₴</b>
-              <button type="button" data-stk-del="${idx}" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);" onmouseenter="this.style.background='rgba(239, 68, 68, 0.25)', this.style.boxShadow='0 0 15px rgba(239, 68, 68, 0.4)', this.style.color='#fff'" onmouseleave="this.style.background='rgba(239, 68, 68, 0.1)', this.style.boxShadow='none', this.style.color='#f87171'">✕</button>
-            </div>
-          </div>
-        `).join("")
-      : `<div class="hint" style="opacity:0.4; padding:12px; color:#fff; font-size: 0.9rem; font-style: italic;">Поки препаратів немає. Додайте вище.</div>`;
-  }
+  const stkContainer =
+  document.getElementById(
+    "visitStkListContainer"
+  );
+
+if (stkContainer) {
+  stkContainer.innerHTML =
+    expandedStock.length
+      ? expandedStock
+          .map((item, index) => {
+            const quantity =
+              Number(item.qty || 0);
+
+            const price =
+              Number(item.price || 0);
+
+            const lineTotal =
+              Number(item.lineTotal || 0);
+
+            return `
+              <article class="visitLine">
+                <div class="visitLineMain">
+                  <strong>
+                    ${escapeHtml(
+                      item.name || "Препарат"
+                    )}
+                  </strong>
+
+                  <span>
+                    ${quantity}
+                    ×
+                    ${price.toLocaleString("uk-UA")} ₴
+                  </span>
+                </div>
+
+                <div class="visitLineActions">
+                  <div class="visitLineTotal">
+                    ${lineTotal.toLocaleString("uk-UA")} ₴
+                  </div>
+
+                  <button
+                    class="visitLineDelete"
+                    type="button"
+                    title="Видалити препарат"
+                    data-stk-del="${index}"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </article>
+            `;
+          })
+          .join("")
+      : `
+        <div class="visitLinesEmpty">
+          Препаратів ще немає. Знайдіть позицію на складі та додайте її до візиту.
+        </div>
+      `;
+}
 
   // 5. Виводимо загальну фінансову суму
-  const grandTotal = servicesTotal + stockTotal;
-  const totalDisplay = document.getElementById("visitGrandTotal");
-  if (totalDisplay) totalDisplay.textContent = `${grandTotal} ₴`;
+  const grandTotal =
+  servicesTotal + stockTotal;
+
+const money = (value) => {
+  return (
+    Number(value || 0)
+      .toLocaleString("uk-UA") +
+    " ₴"
+  );
+};
+
+const totalDisplay =
+  document.getElementById(
+    "visitGrandTotal"
+  );
+
+if (totalDisplay) {
+  totalDisplay.textContent =
+    money(grandTotal);
+}
+
+const servicesSubtotal =
+  document.getElementById(
+    "visitServicesSubtotal"
+  );
+
+if (servicesSubtotal) {
+  servicesSubtotal.textContent =
+    money(servicesTotal);
+}
+
+const stockSubtotal =
+  document.getElementById(
+    "visitStockSubtotal"
+  );
+
+if (stockSubtotal) {
+  stockSubtotal.textContent =
+    money(stockTotal);
+}
+
+const summaryServices =
+  document.getElementById(
+    "visitSummaryServices"
+  );
+
+if (summaryServices) {
+  summaryServices.textContent =
+    money(servicesTotal);
+}
+
+const summaryStock =
+  document.getElementById(
+    "visitSummaryStock"
+  );
+
+if (summaryStock) {
+  summaryStock.textContent =
+    money(stockTotal);
+}
 
   // Відновлюємо оригінальні обробники подій кнопок та пошуку (initVisitUI)
   if (typeof initVisitUI === "function") {
@@ -11391,6 +11615,20 @@ function renderVisitPage(visit, pet) {
       printWindow.document.close();
     };
   }
+  const completeButton =
+  document.getElementById(
+    "visitCompleteButton"
+  );
+
+if (completeButton) {
+  completeButton.disabled = true;
+
+  completeButton.title =
+    "Статус завершення підключимо після додавання поля status у базу";
+
+  completeButton.style.opacity = "0.45";
+  completeButton.style.cursor = "not-allowed";
+}
 }
 
 function parseVisitNote(note) {
@@ -11406,7 +11644,57 @@ function parseVisitNote(note) {
     complaint: complaint || (!dx ? t.trim() : ""),
   };
 }
+function parseVisitRx(value) {
+  const text = String(value || "").trim();
 
+  const marker =
+    "\n\nРекомендації власнику:\n";
+
+  const markerIndex =
+    text.indexOf(marker);
+
+  if (markerIndex === -1) {
+    return {
+      rx: text,
+      recommendation: "",
+    };
+  }
+
+  return {
+    rx: text
+      .slice(0, markerIndex)
+      .replace(/^Лікування:\s*/i, "")
+      .trim(),
+
+    recommendation: text
+      .slice(markerIndex + marker.length)
+      .trim(),
+  };
+}
+
+
+function buildVisitRx(
+  rx,
+  recommendation
+) {
+  const treatment =
+    String(rx || "").trim();
+
+  const clientRecommendation =
+    String(recommendation || "").trim();
+
+  if (!clientRecommendation) {
+    return treatment;
+  }
+
+  return [
+    treatment
+      ? `Лікування:\n${treatment}`
+      : "Лікування:\n—",
+
+    `Рекомендації власнику:\n${clientRecommendation}`,
+  ].join("\n\n");
+}
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (БЛАНКИ ВЫПИСОК А4, ПЕЧАТЬ И ОБРАБОТЧИКИ КАРТОЧЕК)
 // Часть 8

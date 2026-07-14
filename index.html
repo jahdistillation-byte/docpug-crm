@@ -107,83 +107,343 @@
 
     <section class="page content-section" data-page="patients" style="display:none;"></section>
 
-    <section class="page content-section" data-page="visit" style="display:none;padding:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-        <div>
-          <h2 style="margin:0;font-size:1.6rem;color:#fff;">Протокол прийому пацієнта</h2>
-          <div style="font-size:.9rem;color:var(--text-muted);margin-top:4px;" id="visitMeta">Завантаження даних...</div>
+   <section
+  class="page content-section"
+  data-page="visit"
+  style="display:none;"
+>
+  <div class="visitWorkspace">
+
+    <!-- HEADER -->
+    <header class="visitWorkspaceHeader">
+      <div class="visitWorkspaceHeaderMain">
+        <div class="visitWorkspaceEyebrow">
+          ПРОТОКОЛ ПРИЙОМУ
         </div>
 
-        <div style="display:flex;gap:12px;align-items:center;">
-          <div class="status-pill" id="visitDatePill" style="background:rgba(255,255,255,.06);padding:8px 16px;border-radius:20px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.1);">—</div>
+        <h1>Прийом пацієнта</h1>
+
+        <div class="visitWorkspaceMeta" id="visitMeta">
+          Завантаження даних...
         </div>
       </div>
 
-      <div class="visit-premium-grid" style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start;">
-        <aside style="display:flex;flex-direction:column;gap:20px;">
-          <div class="glass-card" style="background:rgba(168,85,247,.12);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:24px;border-radius:16px;border:1px solid rgba(168,85,247,.25);text-align:center;">
-            <div style="font-size:.75rem;opacity:.6;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;color:#fff;">Разом до сплати</div>
-            <div style="font-size:2.2rem;font-weight:800;color:#c084fc;line-height:1;" id="visitGrandTotal">0 ₴</div>
-          </div>
+      <div class="visitWorkspaceHeaderActions">
+        <div class="visitWorkspaceStatus">
+          <span class="visitWorkspaceStatusDot"></span>
+          Чернетка
+        </div>
 
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <button type="button" class="btn-primary" id="visitMedSave" style="width:100%;padding:14px;border-radius:12px;font-weight:600;background:#a855f7;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(168,85,247,.3);transition:all .2s;">💾 Зберегти зміни</button>
-            <button type="button" class="btn-secondary" id="btnPrintVisitPdf" style="width:100%;padding:14px;border-radius:12px;font-weight:600;background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s;">📄 Виписка для клієнта</button>
-          </div>
-        </aside>
-
-        <main style="display:flex;flex-direction:column;gap:24px;">
-          <div id="visitNoteBox" style="display:none;"></div>
-
-          <div class="glass-card" style="background:rgba(255,255,255,.02);backdrop-filter:blur(20px);padding:24px;border-radius:16px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:8px;">Медична частина</div>
-
-            <div style="display:flex;flex-direction:column;gap:16px;">
-              <label class="field">
-                <div style="font-size:.85rem;opacity:.5;margin-bottom:6px;color:#fff;">Діагноз</div>
-                <input class="form-input" id="visitMedDx" type="text" style="width:100%;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);color:#fff;" placeholder="Вкажіть діагноз...">
-              </label>
-
-              <label class="field">
-                <div style="font-size:.85rem;opacity:.5;margin-bottom:6px;color:#fff;">Скарга / стан</div>
-                <textarea class="form-input" id="visitMedComplaint" rows="4" style="width:100%;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);color:#fff;resize:none;" placeholder="Скарги, анамнез, стан при огляді..."></textarea>
-              </label>
-
-              <label class="field">
-                <div style="font-size:.85rem;opacity:.5;margin-bottom:6px;color:#fff;">Призначення лікарняне (Rx)</div>
-                <textarea class="form-input" id="visitMedRx" rows="4" style="width:100%;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);color:#fff;resize:none;" placeholder="Схема лікування, препарати, дозування..."></textarea>
-              </label>
-            </div>
-          </div>
-
-          <div class="glass-card" style="background:rgba(255,255,255,.02);backdrop-filter:blur(20px);padding:24px;border-radius:16px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:16px;">💼 Надані послуги</div>
-
-            <div class="visitPicker" style="display:flex;gap:12px;margin-bottom:16px;">
-              <input class="form-input" id="visitSvcSearch" type="search" placeholder="Пошук послуги…" style="flex:1;background:rgba(0,0,0,.2);">
-              <select class="form-input" id="visitSvcSelect" style="flex:2;background:rgba(0,0,0,.3);color:#fff;"></select>
-              <input class="form-input" id="visitSvcQty" type="number" min="1" value="1" style="width:70px;background:rgba(0,0,0,.2);">
-              <button id="visitSvcAdd" type="button" class="btn-primary" style="padding:0 20px;height:42px;">Додати</button>
-            </div>
-
-            <div class="visitLines" id="visitSvcListContainer"></div>
-          </div>
-
-          <div class="glass-card" style="background:rgba(255,255,255,.02);backdrop-filter:blur(20px);padding:24px;border-radius:16px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:16px;">📦 Використані препарати / склад</div>
-
-            <div class="visitPicker" style="display:flex;gap:12px;margin-bottom:16px;">
-              <input class="form-input" id="visitStkSearch" type="search" placeholder="Пошук препарата…" style="flex:1;background:rgba(0,0,0,.2);">
-              <select class="form-input" id="visitStkSelect" style="flex:2;background:rgba(0,0,0,.3);color:#fff;"></select>
-              <input class="form-input" id="visitStkQty" type="number" min="1" value="1" style="width:70px;background:rgba(0,0,0,.2);">
-              <button id="visitStkAdd" type="button" class="btn-primary" style="padding:0 20px;height:42px;">Додати</button>
-            </div>
-
-            <div class="visitLines" id="visitStkListContainer"></div>
-          </div>
-        </main>
+        <div
+          class="visitWorkspaceDate"
+          id="visitDatePill"
+        >
+          —
+        </div>
       </div>
-    </section>
+    </header>
+
+    <div id="visitNoteBox" style="display:none;"></div>
+
+    <!-- MAIN GRID -->
+    <div class="visitWorkspaceGrid">
+
+      <!-- LEFT / MEDICAL -->
+      <main class="visitWorkspaceMain">
+
+        <section class="visitSectionCard">
+          <div class="visitSectionHead">
+            <div>
+              <span class="visitSectionIcon">🩺</span>
+
+              <div>
+                <h2>Медична частина</h2>
+                <p>
+                  Основна клінічна інформація поточного прийому.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="visitMedicalGrid">
+            <label class="visitField visitFieldWide">
+              <span>Скарги та анамнез</span>
+
+              <textarea
+                class="visitControl visitTextareaLarge"
+                id="visitMedComplaint"
+                rows="5"
+                placeholder="Скарги власника, історія стану, тривалість симптомів..."
+              ></textarea>
+            </label>
+
+            <label class="visitField">
+              <span>Діагноз</span>
+
+              <input
+                class="visitControl"
+                id="visitMedDx"
+                type="text"
+                placeholder="Вкажіть попередній або остаточний діагноз..."
+              >
+            </label>
+
+            <label class="visitField">
+              <span>Вага на момент прийому</span>
+
+              <div class="visitWeightControl">
+                <input
+                  class="visitControl"
+                  id="visitWeightDisplay"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="0.0"
+                >
+
+                <span>кг</span>
+              </div>
+            </label>
+
+            <label class="visitField visitFieldWide">
+              <span>Призначення лікаря</span>
+
+              <textarea
+                class="visitControl visitTextareaLarge"
+                id="visitMedRx"
+                rows="5"
+                placeholder="Препарати, дозування, тривалість лікування, контроль..."
+              ></textarea>
+            </label>
+
+            <label class="visitField visitFieldWide">
+              <span>Рекомендації для власника</span>
+
+              <textarea
+                class="visitControl"
+                id="visitClientRecommendation"
+                rows="3"
+                placeholder="Що потрібно виконувати вдома та коли звернутися повторно..."
+              ></textarea>
+            </label>
+          </div>
+        </section>
+
+        <!-- SERVICES -->
+        <section class="visitSectionCard">
+          <div class="visitSectionHead">
+            <div>
+              <span class="visitSectionIcon">💼</span>
+
+              <div>
+                <h2>Надані послуги</h2>
+                <p>
+                  Додайте проведені процедури та консультації.
+                </p>
+              </div>
+            </div>
+
+            <div class="visitSectionTotal">
+              <span>Послуги</span>
+              <strong id="visitServicesSubtotal">0 ₴</strong>
+            </div>
+          </div>
+
+          <div class="visitPickerModern">
+            <label class="visitPickerSearch">
+              <span>Пошук</span>
+
+              <input
+                class="visitControl"
+                id="visitSvcSearch"
+                type="search"
+                placeholder="Назва послуги..."
+              >
+            </label>
+
+            <label class="visitPickerSelect">
+              <span>Послуга</span>
+
+              <select
+                class="visitControl"
+                id="visitSvcSelect"
+              ></select>
+            </label>
+
+            <label class="visitPickerQty">
+              <span>К-сть</span>
+
+              <input
+                class="visitControl"
+                id="visitSvcQty"
+                type="number"
+                min="1"
+                value="1"
+              >
+            </label>
+
+            <button
+              id="visitSvcAdd"
+              type="button"
+              class="visitAddLineButton"
+            >
+              + Додати
+            </button>
+          </div>
+
+          <div
+            class="visitLinesModern"
+            id="visitSvcListContainer"
+          ></div>
+        </section>
+
+        <!-- STOCK -->
+        <section class="visitSectionCard">
+          <div class="visitSectionHead">
+            <div>
+              <span class="visitSectionIcon">📦</span>
+
+              <div>
+                <h2>Препарати та матеріали</h2>
+                <p>
+                  Списання зі складу та медикаменти, використані під час прийому.
+                </p>
+              </div>
+            </div>
+
+            <div class="visitSectionTotal">
+              <span>Препарати</span>
+              <strong id="visitStockSubtotal">0 ₴</strong>
+            </div>
+          </div>
+
+          <div class="visitPickerModern">
+            <label class="visitPickerSearch">
+              <span>Пошук</span>
+
+              <input
+                class="visitControl"
+                id="visitStkSearch"
+                type="search"
+                placeholder="Назва препарату..."
+              >
+            </label>
+
+            <label class="visitPickerSelect">
+              <span>Препарат</span>
+
+              <select
+                class="visitControl"
+                id="visitStkSelect"
+              ></select>
+            </label>
+
+            <label class="visitPickerQty">
+              <span>К-сть</span>
+
+              <input
+                class="visitControl"
+                id="visitStkQty"
+                type="number"
+                min="1"
+                value="1"
+              >
+            </label>
+
+            <button
+              id="visitStkAdd"
+              type="button"
+              class="visitAddLineButton"
+            >
+              + Додати
+            </button>
+          </div>
+
+          <div
+            class="visitLinesModern"
+            id="visitStkListContainer"
+          ></div>
+        </section>
+      </main>
+
+      <!-- RIGHT / SUMMARY -->
+      <aside class="visitWorkspaceSidebar">
+        <div class="visitSummaryCard">
+          <div class="visitSummaryHead">
+            <span>Підсумок візиту</span>
+            <b>LIVE</b>
+          </div>
+
+          <div class="visitSummaryPatient">
+            <div class="visitSummaryAvatar">
+              🐾
+            </div>
+
+            <div>
+              <strong id="visitSummaryPatientName">
+                Пацієнт
+              </strong>
+
+              <span id="visitSummaryPatientMeta">
+                Дані пацієнта
+              </span>
+            </div>
+          </div>
+
+          <div class="visitSummaryRows">
+            <div>
+              <span>Послуги</span>
+              <strong id="visitSummaryServices">0 ₴</strong>
+            </div>
+
+            <div>
+              <span>Препарати</span>
+              <strong id="visitSummaryStock">0 ₴</strong>
+            </div>
+
+            <div class="visitSummaryDivider"></div>
+
+            <div class="visitSummaryGrand">
+              <span>Разом до сплати</span>
+
+              <strong id="visitGrandTotal">
+                0 ₴
+              </strong>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="visitSavePrimary"
+            id="visitMedSave"
+          >
+            💾 Зберегти зміни
+          </button>
+
+          <button
+            type="button"
+            class="visitCompleteButton"
+            id="visitCompleteButton"
+          >
+            ✓ Завершити візит
+          </button>
+
+          <button
+            type="button"
+            class="visitPrintButton"
+            id="btnPrintVisitPdf"
+          >
+            📄 Виписка для клієнта
+          </button>
+
+          <div class="visitSummaryHint">
+            Дані виписки формуються з медичної частини, послуг і препаратів.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
 
     <section class="page content-section" data-page="visits" style="display:none;"></section>
     <section class="page content-section" data-page="services" style="display:none;"></section>
