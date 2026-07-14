@@ -12515,7 +12515,7 @@ org = org || {};
   let visitDoctor = null;
 
 if (
-  visit.staff_id &&
+  v.staff_id &&
   typeof loadStaffApi === "function"
 ) {
   const staffList =
@@ -12525,7 +12525,7 @@ if (
     (staffList || []).find((staff) => {
       return (
         String(staff.id) ===
-        String(visit.staff_id)
+        String(v.staff_id)
       );
     }) || null;
 }
