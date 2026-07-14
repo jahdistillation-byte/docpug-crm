@@ -19409,3 +19409,6 @@ select.visitControl {
     page-break-inside: avoid;
   }
 }
+.visitDischargePrintHost {
+  display: none;
+}
