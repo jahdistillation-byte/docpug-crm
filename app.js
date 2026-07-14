@@ -809,43 +809,130 @@ async function loadPatientsApi() {
   try {
     const res = await fetch("/api/patients", {
       credentials: "include",
-      headers: { Accept: "application/json", ...getOrgHeaders() },
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
     });
+
     const text = await res.text();
+
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
 
     if (!res.ok) {
-      console.error("API /patients HTTP", res.status, text);
-      alert(`Помилка завантаження пацієнтів (HTTP ${res.status})`);
+      console.error(
+        "API /patients HTTP",
+        res.status,
+        text
+      );
+
+      alert(
+        `Помилка завантаження пацієнтів (HTTP ${res.status})`
+      );
+
       state.patients = [];
-      renderPatientsTab();
-      if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
+
+      if (state.route === "patients") {
+        renderPatientsTab();
+      }
+
+      if (
+        state.route === "owner" &&
+        state.selectedOwnerId
+      ) {
+        await renderOwnerPage(
+          state.selectedOwnerId
+        );
+      }
+
       return [];
     }
 
     if (!json || !json.ok) {
-      console.error("API /patients bad json", json, text);
-      alert(json?.error || "Помилка завантаження пацієнтів");
+      console.error(
+        "API /patients bad json",
+        json,
+        text
+      );
+
+      alert(
+        json?.error ||
+        "Помилка завантаження пацієнтів"
+      );
+
       state.patients = [];
-      renderPatientsTab();
-      if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
+
+      if (state.route === "patients") {
+        renderPatientsTab();
+      }
+
+      if (
+        state.route === "owner" &&
+        state.selectedOwnerId
+      ) {
+        await renderOwnerPage(
+          state.selectedOwnerId
+        );
+      }
+
       return [];
     }
 
-    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
+    const arr = Array.isArray(json.data)
+      ? json.data
+      : json.data
+        ? [json.data]
+        : [];
+
     state.patients = arr;
+
     savePatients(arr);
 
-    renderPatientsTab();
-    if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
+    if (state.route === "patients") {
+      renderPatientsTab();
+    }
+
+    if (
+      state.route === "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(
+        state.selectedOwnerId
+      );
+    }
+
     return arr;
   } catch (e) {
-    console.error("loadPatientsApi failed:", e);
-    alert("Помилка завантаження пацієнтів (network)");
+    console.error(
+      "loadPatientsApi failed:",
+      e
+    );
+
+    alert(
+      "Помилка завантаження пацієнтів (network)"
+    );
+
     state.patients = [];
-    renderPatientsTab();
-    if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
+
+    if (state.route === "patients") {
+      renderPatientsTab();
+    }
+
+    if (
+      state.route === "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(
+        state.selectedOwnerId
+      );
+    }
+
     return [];
   }
 }
