@@ -12478,7 +12478,19 @@ async function renderDischargeA4(visitId) {
   const recs = String(dis.recs ?? dis.recommendation ?? parsedRx.recs ?? "").trim();
   const follow = String(dis.follow ?? parsedRx.follow ?? "").trim();
 
-  const org = state.organizationProfile || window.__orgProfileCache || {};
+  let org =
+  state.clinicProfile ||
+  null;
+
+if (
+  !org &&
+  typeof loadClinicProfileApi === "function"
+) {
+  org =
+    await loadClinicProfileApi();
+}
+
+org = org || {};
 
   const clinicName =
     org.name ||
@@ -12492,14 +12504,35 @@ async function renderDischargeA4(visitId) {
   const clinicPhone = org.phone || "";
   const clinicAddress = org.address || "";
   const clinicWebsite = org.website || "";
-  const clinicLogo = org.logo_url || "";
+  const clinicLogo =
+  org.logo_url ||
+  state.clinicProfile?.logo_url ||
+  "";
   const clinicFooter =
     org.document_footer ||
     "Коли важливо — ми поруч.";
 
-  const doctorName =
-    sessionStorage.getItem("pug_active_display_name") ||
-    "Ветеринарний лікар";
+  let visitDoctor = null;
+
+if (
+  visit.staff_id &&
+  typeof loadStaffApi === "function"
+) {
+  const staffList =
+    await loadStaffApi();
+
+  visitDoctor =
+    (staffList || []).find((staff) => {
+      return (
+        String(staff.id) ===
+        String(visit.staff_id)
+      );
+    }) || null;
+}
+
+const doctorName =
+  visitDoctor?.name ||
+  "Ветеринарний лікар";
 
   const doctorSignature = org.doctor_signature_url || "";
   const clinicStamp = org.clinic_stamp_url || "";
