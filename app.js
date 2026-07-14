@@ -560,6 +560,118 @@ function seedIfEmpty() {
 }
 
 // ===== API: Owners =====
+async function loadOwners() {
+  try {
+    const res = await fetch("/api/owners", {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    });
+
+    const text = await res.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (!res.ok) {
+      console.error(
+        "API /owners HTTP",
+        res.status,
+        text
+      );
+
+      alert(
+        `Помилка завантаження власників (HTTP ${res.status})`
+      );
+
+      state.owners = [];
+
+      if (state.route === "owners") {
+        renderOwners();
+      }
+
+      return [];
+    }
+
+    if (!json || !json.ok) {
+      console.error(
+        "API /owners bad json",
+        json,
+        text
+      );
+
+      alert(
+        json?.error ||
+        "Помилка завантаження власників"
+      );
+
+      state.owners = [];
+
+      if (state.route === "owners") {
+        renderOwners();
+      }
+
+      return [];
+    }
+
+    const owners = Array.isArray(json.data)
+      ? json.data
+      : json.data
+        ? [json.data]
+        : [];
+
+    state.owners = owners;
+
+    LS.set(
+      OWNERS_KEY,
+      owners
+    );
+
+    if (state.route === "owners") {
+      renderOwners();
+    }
+
+    if (
+      state.route === "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(
+        state.selectedOwnerId
+      );
+    }
+
+    return owners;
+  } catch (error) {
+    console.error(
+      "loadOwners failed:",
+      error
+    );
+
+    alert(
+      "Помилка завантаження власників (network)"
+    );
+
+    state.owners =
+      Array.isArray(state.owners)
+        ? state.owners
+        : [];
+
+    if (state.route === "owners") {
+      renderOwners();
+    }
+
+    return [];
+  }
+}
+
+// ===== API: Owners =====
 async function loadPatientsApi() {
   try {
     const res = await fetch(
