@@ -12788,3 +12788,52 @@ body[data-theme="white"] .medcardFormSection {
     width: 100%;
   }
 }
+.medcardSelect {
+  appearance: none;
+  -webkit-appearance: none;
+
+  padding-right: 42px !important;
+
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 50%,
+      var(--med-text-muted) 50%
+    ),
+    linear-gradient(
+      135deg,
+      var(--med-text-muted) 50%,
+      transparent 50%
+    );
+
+  background-position:
+    calc(100% - 19px) 19px,
+    calc(100% - 13px) 19px;
+
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+
+  cursor: pointer;
+}
+
+.medcardSelect option {
+  color: #ffffff;
+  background: #171124;
+}
+
+body[data-theme="black"] .medcardSelect option {
+  background: #0a0a0c;
+}
+
+body[data-theme="blue"] .medcardSelect option {
+  background: #061b26;
+}
+
+body[data-theme="green"] .medcardSelect option {
+  background: #05241a;
+}
+
+body[data-theme="white"] .medcardSelect option {
+  color: #1c1c1e;
+  background: #ffffff;
+}

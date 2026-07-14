@@ -10095,7 +10095,52 @@ async function updateMedcardApi(entryId, payload) {
     return null;
   }
 }
+function fillMedcardDoctorsSelect(selectedDoctor = "") {
+  const select = document.getElementById("medDoctor");
+  if (!select) return;
 
+  const staff = Array.isArray(state.staff)
+    ? state.staff
+    : [];
+
+  const doctors = staff.filter((item) => {
+    if (item.is_active === false) return false;
+
+    return item.role === "vet";
+  });
+
+  select.innerHTML = `
+    <option value="">Оберіть лікаря</option>
+
+    ${doctors
+      .map((doctor) => {
+        const name = String(doctor.name || "").trim();
+        if (!name) return "";
+
+        const specialization = String(
+          doctor.specialization || ""
+        ).trim();
+
+        const label = specialization
+          ? `${name} — ${specialization}`
+          : name;
+
+        return `
+          <option
+            value="${escapeHtml(name)}"
+            ${
+              String(selectedDoctor || "") === name
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(label)}
+          </option>
+        `;
+      })
+      .join("")}
+  `;
+}
 async function deleteMedcardApi(entryId) {
   try {
     const res = await fetch(`/api/medcard/${encodeURIComponent(entryId)}`, {
@@ -10577,18 +10622,17 @@ function ensureMedcardModal() {
 
             <div class="medcardPlanSide">
               <label class="medcardField">
-                <span class="medcardFieldLabel">
-                  Лікар
-                </span>
+  <span class="medcardFieldLabel">
+    Лікар
+  </span>
 
-                <input
-                  class="medcardInput"
-                  id="medDoctor"
-                  type="text"
-                  maxlength="150"
-                  placeholder="ПІБ відповідального лікаря"
-                >
-              </label>
+  <select
+    class="medcardInput medcardSelect"
+    id="medDoctor"
+  >
+    <option value="">Оберіть лікаря</option>
+  </select>
+</label>
 
               <label class="medcardField">
                 <span class="medcardFieldLabel">
@@ -10858,78 +10902,118 @@ async function renderMedcardTab(pet) {
   // ==========================================
   // ЖЕЛЕЗНЫЕ ОБРАБОТЧИКИ (Остаются без изменений)
   // ==========================================
-  $("#btnAddMedcardEntry")?.addEventListener("click", () => {
+  // ==========================================
+// ДОБАВЛЕНИЕ НОВОЙ ЗАПИСИ
+// ==========================================
+
+$("#btnAddMedcardEntry")?.addEventListener("click", async () => {
+  const modal = ensureMedcardModal();
+
+  if (!Array.isArray(state.staff) || !state.staff.length) {
+    await loadStaffApi();
+  }
+
+  modal.dataset.patientId = String(pet.id);
+  delete modal.dataset.entryId;
+
+  const title = document.getElementById("medcardModalTitle");
+  if (title) title.textContent = "Новий запис веткартки";
+
+  medcardFormSet({});
+  fillMedcardDoctorsSelect("");
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("medcardModalIsOpen");
+
+  const saveBtn = document.getElementById("medcardSaveBtn");
+
+  if (saveBtn) {
+    saveBtn.onclick = async () => {
+      const payload = medcardFormRead();
+      if (!payload) return;
+
+      const created = await createMedcardApi(pet.id, payload);
+      if (!created) return;
+
+      closeMedcardModal();
+      await renderMedcardTab(pet);
+    };
+  }
+});
+
+
+// ==========================================
+// РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ
+// ==========================================
+
+listElement.onclick = async (e) => {
+
+  const del = e.target.closest("[data-del-medcard]");
+
+  if (del) {
+    const id = del.dataset.delMedcard;
+    if (!id) return;
+
+    if (!confirm("Видалити запис веткартки?")) return;
+
+    const ok = await deleteMedcardApi(id);
+
+    if (ok) {
+      await renderMedcardTab(pet);
+    }
+
+    return;
+  }
+
+  const edit = e.target.closest("[data-edit-medcard]");
+
+  if (edit) {
+    const id = edit.dataset.editMedcard;
+    if (!id) return;
+
+    const current = items.find(x => String(x.id) === String(id));
+
+    if (!current) {
+      alert("Запис не знайдено");
+      return;
+    }
+
+    if (!Array.isArray(state.staff) || !state.staff.length) {
+      await loadStaffApi();
+    }
+
     const modal = ensureMedcardModal();
+
     modal.dataset.patientId = String(pet.id);
-    delete modal.dataset.entryId;
+    modal.dataset.entryId = String(id);
 
     const title = document.getElementById("medcardModalTitle");
-    if (title) title.textContent = "Новий запис веткартки";
+    if (title) title.textContent = "Редагування запису веткартки";
 
-    medcardFormSet({});
+    medcardFormSet(current);
+    fillMedcardDoctorsSelect(current.doctor || "");
+
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("medcardModalIsOpen");
 
     const saveBtn = document.getElementById("medcardSaveBtn");
+
     if (saveBtn) {
       saveBtn.onclick = async () => {
         const payload = medcardFormRead();
         if (!payload) return;
 
-        const created = await createMedcardApi(pet.id, payload);
-        if (!created) return;
+        const updated = await updateMedcardApi(id, payload);
+        if (!updated) return;
 
         closeMedcardModal();
         await renderMedcardTab(pet);
       };
     }
-  });
-
-  listElement.onclick = async (e) => {
-    const del = e.target.closest("[data-del-medcard]");
-    if (del) {
-      const id = del.dataset.delMedcard; if (!id) return;
-      if (!confirm("Видалити запис веткартки?")) return;
-
-      const ok = await deleteMedcardApi(id);
-      if (ok) await renderMedcardTab(pet);
-      return;
-    }
-
-    const edit = e.target.closest("[data-edit-medcard]");
-    if (edit) {
-      const id = edit.dataset.editMedcard; if (!id) return;
-      const current = items.find((x) => String(x.id) === String(id));
-      if (!current) return alert("Запис не знайдено");
-
-      const modal = ensureMedcardModal();
-      modal.dataset.patientId = String(pet.id);
-      modal.dataset.entryId = String(id);
-
-      const title = document.getElementById("medcardModalTitle");
-      if (title) title.textContent = "Редагування запису веткартки";
-
-      medcardFormSet(current);
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-      document.body.classList.add("medcardModalIsOpen");
-
-      const saveBtn = document.getElementById("medcardSaveBtn");
-      if (saveBtn) {
-        saveBtn.onclick = async () => {
-          const payload = medcardFormRead();
-          if (!payload) return;
-
-          const updated = await updateMedcardApi(id, payload);
-          if (!updated) return;
-
-          closeMedcardModal();
-          await renderMedcardTab(pet);
-        };
-      }
-    }
-  };
+  }
+};
 }
 
 // ==========================================
