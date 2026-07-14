@@ -19916,3 +19916,40 @@ select.visitControl {
     overflow-x: auto;
   }
 }
+.hospitalDischargeButton {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 12px;
+
+  border: 1px solid
+    rgba(255, 95, 109, 0.22);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 95, 109, 0.07);
+
+  color:
+    rgba(255, 135, 145, 0.82);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.hospitalDischargeButton:hover {
+  background:
+    rgba(255, 95, 109, 0.16);
+
+  border-color:
+    rgba(255, 95, 109, 0.4);
+
+  color: #ff9ca5;
+}
+
+.hospitalDischargeButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}

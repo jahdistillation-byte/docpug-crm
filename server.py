@@ -1966,7 +1966,613 @@ def api_delete_patient(pet_id):
     current_org = get_current_org_id()
     supabase.table("patients").delete().eq("org_id", current_org).eq("id", pet_id).execute()
     return ok(True)
+# =========================
+# API: HOSPITALIZATIONS
+# =========================
 
+HOSPITAL_ALLOWED_STATUSES = {
+    "stable",
+    "observation",
+    "critical",
+}
+
+
+def enrich_hospitalizations(rows):
+    """
+    Подтягивает к госпитализациям данные пациента,
+    владельца и лечащего врача.
+    """
+
+    rows = rows or []
+
+    if not rows:
+        return []
+
+    current_org = get_current_org_id()
+
+    patient_ids = list({
+        str(row.get("patient_id"))
+        for row in rows
+        if row.get("patient_id")
+    })
+
+    doctor_ids = list({
+        str(row.get("doctor_id"))
+        for row in rows
+        if row.get("doctor_id")
+    })
+
+    patients_map = {}
+    owners_map = {}
+    staff_map = {}
+
+    # =====================
+    # Пациенты
+    # =====================
+
+    if patient_ids:
+        patients_res = (
+            supabase
+            .table("patients")
+            .select("*")
+            .eq("org_id", current_org)
+            .in_("id", patient_ids)
+            .execute()
+        )
+
+        patients = patients_res.data or []
+
+        patients_map = {
+            str(patient.get("id")): patient
+            for patient in patients
+            if patient.get("id")
+        }
+
+        owner_ids = list({
+            str(patient.get("owner_id"))
+            for patient in patients
+            if patient.get("owner_id")
+        })
+
+        # =====================
+        # Владельцы
+        # =====================
+
+        if owner_ids:
+            owners_res = (
+                supabase
+                .table("owners")
+                .select("*")
+                .eq("org_id", current_org)
+                .in_("id", owner_ids)
+                .execute()
+            )
+
+            owners_map = {
+                str(owner.get("id")): owner
+                for owner in (owners_res.data or [])
+                if owner.get("id")
+            }
+
+    # =====================
+    # Врачи
+    # =====================
+
+    if doctor_ids:
+        staff_res = (
+            supabase
+            .table("staff")
+            .select("*")
+            .eq("org_id", current_org)
+            .in_("id", doctor_ids)
+            .execute()
+        )
+
+        staff_map = {
+            str(staff.get("id")): staff
+            for staff in (staff_res.data or [])
+            if staff.get("id")
+        }
+
+    enriched = []
+
+    for row in rows:
+        item = dict(row)
+
+        patient = patients_map.get(
+            str(item.get("patient_id"))
+        ) or {}
+
+        owner = owners_map.get(
+            str(patient.get("owner_id"))
+        ) or {}
+
+        doctor = staff_map.get(
+            str(item.get("doctor_id"))
+        ) or {}
+
+        item["patient"] = patient
+        item["owner"] = owner
+        item["doctor"] = doctor
+
+        item["patient_name"] = (
+            patient.get("name")
+            or "Пацієнт"
+        )
+
+        item["patient_species"] = (
+            patient.get("species")
+            or ""
+        )
+
+        item["patient_breed"] = (
+            patient.get("breed")
+            or ""
+        )
+
+        item["owner_name"] = (
+            owner.get("name")
+            or "Власник не вказаний"
+        )
+
+        item["owner_phone"] = (
+            owner.get("phone")
+            or ""
+        )
+
+        item["doctor_name"] = (
+            doctor.get("name")
+            or "Лікар не вказаний"
+        )
+
+        enriched.append(item)
+
+    return enriched
+
+
+@app.get("/api/hospitalizations")
+def api_get_hospitalizations():
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        active_raw = request.args.get(
+            "active"
+        )
+
+        patient_id = (
+            request.args.get("patient_id")
+            or ""
+        ).strip()
+
+        hospitalization_id = (
+            request.args.get("id")
+            or ""
+        ).strip()
+
+        query = (
+            supabase
+            .table("hospitalizations")
+            .select("*")
+            .eq("org_id", current_org)
+        )
+
+        if active_raw is not None:
+            active_value = (
+                str(active_raw).lower()
+                in ("1", "true", "yes")
+            )
+
+            query = query.eq(
+                "is_active",
+                active_value
+            )
+
+        if patient_id:
+            query = query.eq(
+                "patient_id",
+                patient_id
+            )
+
+        if hospitalization_id:
+            query = query.eq(
+                "id",
+                hospitalization_id
+            )
+
+        result = (
+            query
+            .order(
+                "admitted_at",
+                desc=True
+            )
+            .execute()
+        )
+
+        rows = enrich_hospitalizations(
+            result.data or []
+        )
+
+        return ok(rows)
+
+    except Exception as error:
+        print(
+            "❌ /api/hospitalizations GET error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot load hospitalizations: {error}",
+            500
+        )
+
+
+@app.post("/api/hospitalizations")
+def api_create_hospitalization():
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        patient_id = str(
+            data.get("patient_id")
+            or ""
+        ).strip()
+
+        doctor_id = str(
+            data.get("doctor_id")
+            or ""
+        ).strip()
+
+        status = str(
+            data.get("status")
+            or "observation"
+        ).strip()
+
+        if not patient_id:
+            return fail(
+                "patient_id required",
+                400
+            )
+
+        if status not in HOSPITAL_ALLOWED_STATUSES:
+            return fail(
+                "Invalid hospitalization status",
+                400
+            )
+
+        # Проверяем, что пациент принадлежит
+        # текущей клинике.
+
+        patient_res = (
+            supabase
+            .table("patients")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not patient_res.data:
+            return fail(
+                "Patient not found",
+                404
+            )
+
+        # Проверяем, что пациент ещё
+        # не находится в стационаре.
+
+        existing_res = (
+            supabase
+            .table("hospitalizations")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("patient_id", patient_id)
+            .eq("is_active", True)
+            .limit(1)
+            .execute()
+        )
+
+        if existing_res.data:
+            return fail(
+                "Patient is already hospitalized",
+                409
+            )
+
+        payload = {
+            "org_id": current_org,
+            "patient_id": patient_id,
+            "doctor_id": doctor_id or None,
+            "status": status,
+            "room": (
+                str(
+                    data.get("room")
+                    or ""
+                ).strip()
+                or None
+            ),
+            "diagnosis": (
+                str(
+                    data.get("diagnosis")
+                    or ""
+                ).strip()
+                or None
+            ),
+            "notes": (
+                str(
+                    data.get("notes")
+                    or ""
+                ).strip()
+                or None
+            ),
+            "admitted_at": (
+                data.get("admitted_at")
+                or datetime.now(
+                    timezone.utc
+                ).isoformat()
+            ),
+            "planned_discharge_at": (
+                data.get(
+                    "planned_discharge_at"
+                )
+                or None
+            ),
+            "is_active": True,
+            "updated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+        }
+
+        result = (
+            supabase
+            .table("hospitalizations")
+            .insert(
+                clean_payload(payload)
+            )
+            .execute()
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else payload
+        )
+
+        enriched = enrich_hospitalizations(
+            [row]
+        )
+
+        return ok(
+            enriched[0]
+            if enriched
+            else row
+        )
+
+    except Exception as error:
+        print(
+            "❌ /api/hospitalizations POST error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot create hospitalization: {error}",
+            500
+        )
+
+
+@app.put("/api/hospitalizations/<hospitalization_id>")
+def api_update_hospitalization(
+    hospitalization_id
+):
+    try:
+        current_org = get_current_org_id()
+
+        if not hospitalization_id:
+            return fail(
+                "hospitalization_id required",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        allowed_fields = [
+            "doctor_id",
+            "status",
+            "room",
+            "diagnosis",
+            "notes",
+            "planned_discharge_at",
+        ]
+
+        payload = {
+            field: data.get(field)
+            for field in allowed_fields
+            if field in data
+        }
+
+        if "status" in payload:
+            status = str(
+                payload.get("status")
+                or ""
+            ).strip()
+
+            if status not in HOSPITAL_ALLOWED_STATUSES:
+                return fail(
+                    "Invalid hospitalization status",
+                    400
+                )
+
+            payload["status"] = status
+
+        for field in [
+            "room",
+            "diagnosis",
+            "notes",
+            "doctor_id",
+        ]:
+            if field in payload:
+                value = payload.get(field)
+
+                if isinstance(value, str):
+                    value = value.strip()
+
+                payload[field] = (
+                    value
+                    if value not in ("", None)
+                    else None
+                )
+
+        if not payload:
+            return fail(
+                "Nothing to update",
+                400
+            )
+
+        payload["updated_at"] = (
+            datetime.now(
+                timezone.utc
+            ).isoformat()
+        )
+
+        result = (
+            supabase
+            .table("hospitalizations")
+            .update(payload)
+            .eq("org_id", current_org)
+            .eq("id", hospitalization_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Hospitalization not found",
+                404
+            )
+
+        enriched = enrich_hospitalizations(
+            [result.data[0]]
+        )
+
+        return ok(
+            enriched[0]
+            if enriched
+            else result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ /api/hospitalizations PUT error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot update hospitalization: {error}",
+            500
+        )
+
+
+@app.post("/api/hospitalizations/<hospitalization_id>/discharge")
+def api_discharge_hospitalization(
+    hospitalization_id
+):
+    try:
+        current_org = get_current_org_id()
+
+        if not hospitalization_id:
+            return fail(
+                "hospitalization_id required",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        discharged_at = (
+            data.get("discharged_at")
+            or datetime.now(
+                timezone.utc
+            ).isoformat()
+        )
+
+        payload = {
+            "is_active": False,
+            "discharged_at": discharged_at,
+            "updated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+        }
+
+        if "notes" in data:
+            payload["notes"] = (
+                str(
+                    data.get("notes")
+                    or ""
+                ).strip()
+                or None
+            )
+
+        result = (
+            supabase
+            .table("hospitalizations")
+            .update(payload)
+            .eq("org_id", current_org)
+            .eq("id", hospitalization_id)
+            .eq("is_active", True)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Active hospitalization not found",
+                404
+            )
+
+        enriched = enrich_hospitalizations(
+            [result.data[0]]
+        )
+
+        return ok(
+            enriched[0]
+            if enriched
+            else result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ hospitalization discharge error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot discharge hospitalization: {error}",
+            500
+        )
 # =========================
 # API: VISITS
 # =========================

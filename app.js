@@ -980,6 +980,279 @@ async function loadServicesApi() {
     return state.services;
   }
 }
+// =====================================================
+// HOSPITAL API
+// =====================================================
+
+async function loadHospitalizationsApi(
+  active = true
+) {
+  try {
+    const url =
+      `/api/hospitalizations?active=${
+        active ? "true" : "false"
+      }`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    });
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "loadHospitalizationsApi failed:",
+        response.status,
+        text
+      );
+
+      return [];
+    }
+
+    return Array.isArray(json.data)
+      ? json.data
+      : [];
+  } catch (error) {
+    console.error(
+      "loadHospitalizationsApi error:",
+      error
+    );
+
+    return [];
+  }
+}
+
+
+async function createHospitalizationApi(
+  payload
+) {
+  try {
+    const response = await fetch(
+      "/api/hospitalizations",
+      {
+        method: "POST",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body: JSON.stringify(
+          payload || {}
+        ),
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "createHospitalizationApi failed:",
+        response.status,
+        text
+      );
+
+      alert(
+        json?.error ||
+        "Не вдалося прийняти пацієнта у стаціонар."
+      );
+
+      return null;
+    }
+
+    return json.data || null;
+  } catch (error) {
+    console.error(
+      "createHospitalizationApi error:",
+      error
+    );
+
+    alert(
+      "Не вдалося з'єднатися із сервером."
+    );
+
+    return null;
+  }
+}
+
+
+async function updateHospitalizationApi(
+  hospitalizationId,
+  payload
+) {
+  try {
+    const response = await fetch(
+      `/api/hospitalizations/${
+        encodeURIComponent(
+          String(hospitalizationId)
+        )
+      }`,
+      {
+        method: "PUT",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body: JSON.stringify(
+          payload || {}
+        ),
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "updateHospitalizationApi failed:",
+        response.status,
+        text
+      );
+
+      return null;
+    }
+
+    return json.data || null;
+  } catch (error) {
+    console.error(
+      "updateHospitalizationApi error:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+async function dischargeHospitalizationApi(
+  hospitalizationId,
+  notes = ""
+) {
+  try {
+    const response = await fetch(
+      `/api/hospitalizations/${
+        encodeURIComponent(
+          String(hospitalizationId)
+        )
+      }/discharge`,
+      {
+        method: "POST",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body: JSON.stringify({
+          notes:
+            String(notes || "").trim(),
+        }),
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "dischargeHospitalizationApi failed:",
+        response.status,
+        text
+      );
+
+      alert(
+        json?.error ||
+        "Не вдалося виписати пацієнта."
+      );
+
+      return null;
+    }
+
+    return json.data || null;
+  } catch (error) {
+    console.error(
+      "dischargeHospitalizationApi error:",
+      error
+    );
+
+    return null;
+  }
+}
 
 async function createServiceApi(payload) {
   try {
@@ -4888,25 +5161,53 @@ function renderHospitalTab() {
     );
 }
 
-function renderHospitalPatientCard(patient) {
+function renderHospitalPatientCard(
+  hospitalization
+) {
   const statusLabels = {
-    stable: "Стабільний",
-    observation: "Під наглядом",
-    critical: "Критичний",
+    stable:
+      "Стабільний",
+
+    observation:
+      "Під наглядом",
+
+    critical:
+      "Критичний",
   };
 
   const statusLabel =
-    statusLabels[patient.status] ||
-    "Під наглядом";
+    statusLabels[
+      hospitalization.status
+    ] || "Під наглядом";
+
+  const admittedLabel =
+    formatHospitalDateTime(
+      hospitalization.admitted_at
+    );
+
+  const speciesBreed = [
+    hospitalization.patient_species,
+    hospitalization.patient_breed,
+  ]
+    .filter(Boolean)
+    .join(" • ");
 
   return `
     <article
-      class="hospitalPatientCard hospitalStatus-${escapeHtml(
-        patient.status
-      )}"
-      data-hospital-patient="${escapeHtml(
-        patient.id
-      )}"
+      class="
+        hospitalPatientCard
+        hospitalStatus-${
+          escapeHtml(
+            hospitalization.status ||
+            "observation"
+          )
+        }
+      "
+      data-hospitalization-id="${
+        escapeHtml(
+          hospitalization.id
+        )
+      }"
     >
       <div class="hospitalPatientTop">
         <div class="hospitalPatientAvatar">
@@ -4915,13 +5216,21 @@ function renderHospitalPatientCard(patient) {
 
         <div class="hospitalPatientIdentity">
           <h2>
-            ${escapeHtml(patient.name)}
+            ${
+              escapeHtml(
+                hospitalization.patient_name ||
+                "Пацієнт"
+              )
+            }
           </h2>
 
           <p>
-            ${escapeHtml(patient.species)}
-            •
-            ${escapeHtml(patient.breed)}
+            ${
+              escapeHtml(
+                speciesBreed ||
+                "Вид та порода не вказані"
+              )
+            }
           </p>
         </div>
 
@@ -4932,45 +5241,98 @@ function renderHospitalPatientCard(patient) {
 
       <div class="hospitalPatientBody">
         <div class="hospitalInfoRow">
-          <span>Власник</span>
+          <span>
+            Власник
+          </span>
+
           <strong>
-            ${escapeHtml(patient.owner)}
+            ${
+              escapeHtml(
+                hospitalization.owner_name ||
+                "Не вказаний"
+              )
+            }
           </strong>
         </div>
 
         <div class="hospitalInfoRow">
-          <span>Діагноз</span>
+          <span>
+            Телефон
+          </span>
+
           <strong>
-            ${escapeHtml(patient.diagnosis)}
+            ${
+              escapeHtml(
+                hospitalization.owner_phone ||
+                "—"
+              )
+            }
           </strong>
         </div>
 
         <div class="hospitalInfoRow">
-          <span>Палата</span>
+          <span>
+            Діагноз
+          </span>
+
           <strong>
-            ${escapeHtml(patient.room)}
+            ${
+              escapeHtml(
+                hospitalization.diagnosis ||
+                "Не вказаний"
+              )
+            }
           </strong>
         </div>
 
         <div class="hospitalInfoRow">
-          <span>Лікар</span>
+          <span>
+            Палата
+          </span>
+
           <strong>
-            ${escapeHtml(patient.doctor)}
+            ${
+              escapeHtml(
+                hospitalization.room ||
+                "Не вказана"
+              )
+            }
           </strong>
         </div>
 
         <div class="hospitalInfoRow">
-          <span>Надійшов</span>
+          <span>
+            Лікар
+          </span>
+
           <strong>
-            ${escapeHtml(patient.admittedAt)}
+            ${
+              escapeHtml(
+                hospitalization.doctor_name ||
+                "Не вказаний"
+              )
+            }
+          </strong>
+        </div>
+
+        <div class="hospitalInfoRow">
+          <span>
+            Надійшов
+          </span>
+
+          <strong>
+            ${escapeHtml(admittedLabel)}
           </strong>
         </div>
       </div>
 
       <div class="hospitalNextAction">
-        <span>Наступна дія</span>
+        <span>
+          Наступна дія
+        </span>
+
         <strong>
-          ${escapeHtml(patient.nextAction)}
+          Призначення ще не додані
         </strong>
       </div>
 
@@ -4978,6 +5340,11 @@ function renderHospitalPatientCard(patient) {
         <button
           type="button"
           class="hospitalGhostButton"
+          data-hospital-open-patient="${
+            escapeHtml(
+              hospitalization.patient_id
+            )
+          }"
         >
           Відкрити карту
         </button>
@@ -4985,12 +5352,56 @@ function renderHospitalPatientCard(patient) {
         <button
           type="button"
           class="hospitalPrimaryButton"
+          data-hospital-assignments="${
+            escapeHtml(
+              hospitalization.id
+            )
+          }"
         >
           Призначення
         </button>
       </div>
+
+      <button
+        type="button"
+        class="hospitalDischargeButton"
+        data-hospital-discharge="${
+          escapeHtml(
+            hospitalization.id
+          )
+        }"
+      >
+        Виписати
+      </button>
     </article>
   `;
+}
+function formatHospitalDateTime(
+  value
+) {
+  if (!value) return "—";
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return String(value);
+  }
+
+  return date.toLocaleString(
+    "uk-UA",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 }
 // =========================
 // VISITS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
