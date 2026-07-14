@@ -435,7 +435,18 @@ async function routeFromHash() {
     if (route === "services") renderServicesTab();
     if (route === "stock") renderStockTab();
     if (route === "team") renderTeamTab();
-    if (route === "calendar") renderCalendarTab();
+    if (route === "calendar") {
+  state.selectedVisitId = null;
+
+  if (
+    typeof closeVisitModal ===
+    "function"
+  ) {
+    closeVisitModal();
+  }
+
+  await renderCalendarTab();
+}
      if (route === "settings") {
        // Поскольку настройки статические, просто инициализируем их UI
        initSettingsUI();
@@ -464,22 +475,6 @@ async function routeFromHash() {
   if (route === "settings") renderSettingsTab();
 
   setHash("owners");
-}
-
-function initTabs() {
-  const tabs = $("#tabs");
-  if (!tabs) return;
-
-  tabs.addEventListener("click", (e) => {
-    const btn = e.target.closest(".tab");
-    if (!btn) return;
-    const route = btn.dataset.route;
-    if (!TAB_ROUTES.has(route)) return;
-    setHash(route);
-  });
-
-  window.addEventListener("hashchange", routeFromHash);
-  routeFromHash();
 }
 
 // ===== API /api/me =====
@@ -565,44 +560,134 @@ function seedIfEmpty() {
 }
 
 // ===== API: Owners =====
-async function loadOwners() {
+async function loadPatientsApi() {
   try {
-   const res = await fetch("/api/owners", {
-    credentials: "include",
-    headers: { Accept: "application/json", ...getOrgHeaders() },
-});
-    const text = await res.text()
+    const res = await fetch(
+      "/api/patients",
+      {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const text =
+      await res.text();
+
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
 
     if (!res.ok) {
-      console.error("API /owners HTTP", res.status, text);
-      alert(`Помилка завантаження власників (HTTP ${res.status})`);
-      state.owners = [];
-      renderOwners();
+      console.error(
+        "API /patients HTTP",
+        res.status,
+        text
+      );
+
+      alert(
+        `Помилка завантаження пацієнтів (HTTP ${res.status})`
+      );
+
+      state.patients = [];
+
+      if (state.route === "patients") {
+        renderPatientsTab();
+      }
+
       return [];
     }
 
     if (!json || !json.ok) {
-      console.error("API /owners bad json", json, text);
-      alert(json?.error || "Помилка завантаження власників");
-      state.owners = [];
-      renderOwners();
+      console.error(
+        "API /patients bad json",
+        json,
+        text
+      );
+
+      alert(
+        json?.error ||
+        "Помилка завантаження пацієнтів"
+      );
+
+      state.patients = [];
+
+      if (state.route === "patients") {
+        renderPatientsTab();
+      }
+
       return [];
     }
 
-    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
-    state.owners = arr;
-    LS.set(OWNERS_KEY, arr);
+    const patients =
+      Array.isArray(json.data)
+        ? json.data
+        : json.data
+          ? [json.data]
+          : [];
 
-    renderOwners();
-    if (state.selectedOwnerId) renderOwnerPage(state.selectedOwnerId);
-    return arr;
-  } catch (e) {
-    console.error("loadOwners failed:", e);
-    alert("Помилка завантаження власників (network)");
-    state.owners = Array.isArray(state.owners) ? state.owners : [];
-    renderOwners();
+    state.patients =
+      patients;
+
+    savePatients(
+      patients
+    );
+
+    // Важно: API-загрузчик больше не переключает страницу сам
+    if (state.route === "patients") {
+      renderPatientsTab();
+    }
+
+    if (
+      state.route === "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(
+        state.selectedOwnerId
+      );
+    }
+
+    if (
+      state.route === "patient" &&
+      state.selectedPetId
+    ) {
+      const currentPet =
+        patients.find((patient) => {
+          return (
+            String(patient.id) ===
+            String(state.selectedPetId)
+          );
+        });
+
+      if (currentPet) {
+        state.selectedPet =
+          currentPet;
+      }
+    }
+
+    return patients;
+  } catch (error) {
+    console.error(
+      "loadPatientsApi failed:",
+      error
+    );
+
+    alert(
+      "Помилка завантаження пацієнтів (network)"
+    );
+
+    state.patients = [];
+
+    if (state.route === "patients") {
+      renderPatientsTab();
+    }
+
     return [];
   }
 }
