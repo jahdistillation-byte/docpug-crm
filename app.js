@@ -4021,101 +4021,130 @@ async function downloadA4Pdf(visitId) {
     return;
   }
 
-  // Сначала полностью строим документ
   await renderDischargeA4(visitId);
 
   const host =
     document.getElementById("disA4");
 
-  if (!host) {
+  const originalDocument =
+    host?.querySelector(".disModernDoc");
+
+  if (!host || !originalDocument) {
     alert(
-      "Не знайдено блок виписки #disA4."
+      "Не вдалося сформувати документ виписки."
     );
     return;
   }
 
-  const documentNode =
-    host.querySelector(".disModernDoc") ||
-    host.firstElementChild ||
-    host;
+  const filename =
+    a4FilenameFromVisit(visitId);
 
-  if (!documentNode) {
-    alert(
-      "Документ виписки порожній."
-    );
-    return;
-  }
+  /*
+   * ВАЖНО:
+   * Не передаём в html2pdf живой элемент из CRM.
+   * Создаём отдельную чистую копию без влияния
+   * body display:flex, main-content и текущего layout.
+   */
+  const exportRoot =
+    document.createElement("div");
 
-  const oldStyle =
-    host.getAttribute("style") || "";
+  exportRoot.id =
+    "dischargePdfExportRoot";
 
-  const oldBodyOverflow =
-    document.body.style.overflow;
+  exportRoot.style.cssText = `
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 794px;
+    min-width: 794px;
+    max-width: 794px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    background: #ffffff;
+    overflow: visible;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: -999999;
+    transform: none;
+  `;
 
-  // Делаем скрытый документ видимым для html2canvas,
-  // но уносим далеко за пределы экрана
-  host.style.display = "block";
-  host.style.position = "fixed";
-host.style.left = "0";
-host.style.top = "0";
-host.style.width = "794px";
-host.style.maxWidth = "794px";
-host.style.margin = "0";
-host.style.transform = "none";
-  host.style.maxWidth = "794px";
-  host.style.height = "auto";
-  host.style.opacity = "1";
-  host.style.visibility = "visible";
-  host.style.pointerEvents = "none";
-  host.style.background = "#ffffff";
-  host.style.zIndex = "-1";
+  const exportDocument =
+    originalDocument.cloneNode(true);
 
-  documentNode.style.display = "block";
-  documentNode.style.visibility = "visible";
-  documentNode.style.opacity = "1";
-  documentNode.style.background = "#ffffff";
+  exportDocument.style.cssText += `
+    display: block !important;
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 794px !important;
+    min-width: 794px !important;
+    max-width: 794px !important;
+    margin: 0 !important;
+    padding: 32px !important;
+    box-sizing: border-box !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  `;
 
-  document.body.style.overflow = "hidden";
+  exportRoot.appendChild(
+    exportDocument
+  );
+
+  document.body.appendChild(
+    exportRoot
+  );
 
   try {
-    // Ждём завершения отрисовки
     await new Promise((resolve) => {
       requestAnimationFrame(() => {
         requestAnimationFrame(resolve);
       });
     });
 
-    // Ждём логотип, подпись и печать
     const images = Array.from(
-      documentNode.querySelectorAll("img")
+      exportDocument.querySelectorAll("img")
     );
 
     await Promise.all(
       images.map((image) => {
-        if (image.complete) {
+        if (
+          image.complete &&
+          image.naturalWidth > 0
+        ) {
           return Promise.resolve();
         }
 
         return new Promise((resolve) => {
+          const finish = () => resolve();
+
           image.addEventListener(
             "load",
-            resolve,
+            finish,
             { once: true }
           );
 
           image.addEventListener(
             "error",
-            resolve,
+            finish,
             { once: true }
           );
 
-          setTimeout(resolve, 4000);
+          setTimeout(
+            finish,
+            4000
+          );
         });
       })
     );
-
-    const filename =
-      a4FilenameFromVisit(visitId);
 
     await window
       .html2pdf()
@@ -4135,79 +4164,128 @@ host.style.transform = "none";
           allowTaint: false,
           backgroundColor: "#ffffff",
           logging: false,
-          scrollX: 0,
-scrollY: 0,
-windowWidth: 794,
-width: 794,
 
-          onclone: (clonedDocument) => {
-            const clonedHost =
+          scrollX: 0,
+          scrollY: 0,
+
+          x: 0,
+          y: 0,
+
+          width: 794,
+          windowWidth: 794,
+
+          onclone: (
+            clonedDocument
+          ) => {
+            const clonedRoot =
               clonedDocument.getElementById(
-                "disA4"
+                "dischargePdfExportRoot"
               );
 
-            if (clonedHost) {
-              clonedHost.style.display =
-                "block";
+            if (!clonedRoot) return;
 
-              clonedHost.style.position = "relative";
-clonedHost.style.left = "0";
-clonedHost.style.top = "0";
-clonedHost.style.margin = "0";
-clonedHost.style.width = "794px";
-clonedHost.style.maxWidth = "794px";
-clonedHost.style.transform = "none";
+            clonedRoot.style.position =
+              "absolute";
 
-              clonedHost.style.visibility =
-                "visible";
+            clonedRoot.style.left =
+              "0";
 
-              clonedHost.style.opacity =
-                "1";
+            clonedRoot.style.top =
+              "0";
 
-              clonedHost.style.width =
-                "794px";
+            clonedRoot.style.width =
+              "794px";
 
-              clonedHost.style.maxWidth =
-                "794px";
+            clonedRoot.style.minWidth =
+              "794px";
 
-              clonedHost.style.background =
-                "#ffffff";
+            clonedRoot.style.maxWidth =
+              "794px";
 
-              clonedHost.style.transform =
-                "none";
+            clonedRoot.style.margin =
+              "0";
 
-              clonedHost.style.boxShadow =
-                "none";
-            }
+            clonedRoot.style.padding =
+              "0";
 
-            const clonedDocumentNode =
-              clonedHost?.querySelector(
+            clonedRoot.style.display =
+              "block";
+
+            clonedRoot.style.visibility =
+              "visible";
+
+            clonedRoot.style.opacity =
+              "1";
+
+            clonedRoot.style.transform =
+              "none";
+
+            clonedRoot.style.background =
+              "#ffffff";
+
+            const clonedDoc =
+              clonedRoot.querySelector(
                 ".disModernDoc"
-              ) ||
-              clonedHost?.firstElementChild;
+              );
 
-            if (clonedDocumentNode) {
-              clonedDocumentNode.style.display =
+            if (clonedDoc) {
+              clonedDoc.style.position =
+                "relative";
+
+              clonedDoc.style.left =
+                "0";
+
+              clonedDoc.style.top =
+                "0";
+
+              clonedDoc.style.width =
+                "794px";
+
+              clonedDoc.style.minWidth =
+                "794px";
+
+              clonedDoc.style.maxWidth =
+                "794px";
+
+              clonedDoc.style.margin =
+                "0";
+
+              clonedDoc.style.padding =
+                "32px";
+
+              clonedDoc.style.display =
                 "block";
 
-              clonedDocumentNode.style.visibility =
+              clonedDoc.style.visibility =
                 "visible";
 
-              clonedDocumentNode.style.opacity =
+              clonedDoc.style.opacity =
                 "1";
 
-              clonedDocumentNode.style.background =
+              clonedDoc.style.transform =
+                "none";
+
+              clonedDoc.style.borderRadius =
+                "0";
+
+              clonedDoc.style.boxShadow =
+                "none";
+
+              clonedDoc.style.background =
                 "#ffffff";
 
-              clonedDocumentNode.style.transform =
-                "none";
+              clonedDoc.style.boxSizing =
+                "border-box";
             }
           },
         },
 
         jsPDF: {
-          unit: "mm",
-          format: "a4",
+          unit: "px",
+          format: [
+            794,
+            1123,
+          ],
           orientation: "portrait",
           compress: true,
         },
@@ -4219,6 +4297,7 @@ clonedHost.style.transform = "none";
           ],
 
           avoid: [
+            ".disModernHead",
             ".disModernCard",
             ".disModernSection",
             ".disModernSignGrid",
@@ -4226,7 +4305,7 @@ clonedHost.style.transform = "none";
           ],
         },
       })
-      .from(documentNode)
+      .from(exportRoot)
       .save();
   } catch (error) {
     console.error(
@@ -4242,13 +4321,7 @@ clonedHost.style.transform = "none";
       )
     );
   } finally {
-    host.setAttribute(
-      "style",
-      oldStyle
-    );
-
-    document.body.style.overflow =
-      oldBodyOverflow;
+    exportRoot.remove();
   }
 }
 
