@@ -11969,15 +11969,71 @@ if (btnPdf) {
     try {
       // Сохраняем актуальные значения медицинской формы
       // перед созданием выписки
-      if (
-        typeof setDischarge === "function" &&
-        typeof readDischargeForm === "function"
-      ) {
-        setDischarge(
-          visitId,
-          readDischargeForm()
-        );
-      }
+    // Берём актуальный текст прямо из медицинской части визита
+const complaint = String(
+  document.getElementById(
+    "visitMedComplaint"
+  )?.value || ""
+).trim();
+
+const dx = String(
+  document.getElementById(
+    "visitMedDx"
+  )?.value || ""
+).trim();
+
+const rx = String(
+  document.getElementById(
+    "visitMedRx"
+  )?.value || ""
+).trim();
+
+const recommendation = String(
+  document.getElementById(
+    "visitClientRecommendation"
+  )?.value || ""
+).trim();
+
+const follow = String(
+  document.getElementById(
+    "visitFollowUp"
+  )?.value || ""
+).trim();
+
+setDischarge(visitId, {
+  complaint,
+  dx,
+  rx,
+  recommendation,
+  recs: recommendation,
+  follow,
+});
+
+const currentVisit =
+  getVisitByIdSync(visitId);
+
+const weightValue =
+  document.getElementById(
+    "visitWeightDisplay"
+  )?.value;
+
+const weightKg =
+  weightValue === "" ||
+  weightValue == null
+    ? null
+    : Number(weightValue);
+
+if (
+  currentVisit &&
+  Number.isFinite(weightKg)
+) {
+  currentVisit.weight_kg = weightKg;
+
+  state.visitsById.set(
+    String(visitId),
+    currentVisit
+  );
+}
 
       // Строим новый премиальный документ в #disA4
       await renderDischargeA4(
