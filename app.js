@@ -4799,8 +4799,166 @@ const LAB_LABELS = {
 };
 
 const LAB_GROUPS = {
-  "Біохімія": ["ALT", "AST", "GGT", "ALP", "UREA", "CREA", "ALB", "TP", "GLU", "TBIL", "GLOB"],
-  "ЗАК": ["WBC", "RBC", "HGB", "PLT", "HCT", "NEU_BAND", "NEU_SEG", "LYM", "EOS", "BASO", "MONO"],
+  "Біохімія": [
+    "ALT",
+    "AST",
+    "GGT",
+    "ALP",
+    "UREA",
+    "CREA",
+    "ALB",
+    "TP",
+    "GLU",
+    "TBIL",
+    "GLOB",
+  ],
+
+  "ЗАК": [
+    "WBC",
+    "RBC",
+    "HGB",
+    "PLT",
+    "HCT",
+    "NEU_BAND",
+    "NEU_SEG",
+    "LYM",
+    "EOS",
+    "BASO",
+    "MONO",
+  ],
+
+  "Т4": [
+    "T4",
+  ],
+
+  "ТТГ": [
+    "TSH",
+  ],
+
+  "Загальний аналіз сечі": [
+    "UA_SG",
+    "UA_PH",
+    "UA_PRO",
+    "UA_GLU",
+    "UA_KET",
+    "UA_BIL",
+    "UA_BLOOD",
+    "UA_WBC",
+    "UA_RBC",
+  ],
+
+  "Коагулограма": [
+    "PT",
+    "APTT",
+    "INR",
+    "FIB",
+  ],
+
+  "Електроліти": [
+    "NA",
+    "K",
+    "CL",
+    "CA",
+    "PHOS",
+    "MG",
+  ],
+};
+Object.assign(LAB_LABELS, {
+  T4: "Тироксин загальний (Т4)",
+  TSH: "Тиреотропний гормон (ТТГ)",
+
+  UA_SG: "Відносна щільність",
+  UA_PH: "pH",
+  UA_PRO: "Білок",
+  UA_GLU: "Глюкоза",
+  UA_KET: "Кетони",
+  UA_BIL: "Білірубін",
+  UA_BLOOD: "Кров / гемоглобін",
+  UA_WBC: "Лейкоцити",
+  UA_RBC: "Еритроцити",
+
+  PT: "Протромбіновий час",
+  APTT: "АЧТЧ",
+  INR: "МНВ",
+  FIB: "Фібриноген",
+
+  NA: "Натрій",
+  K: "Калій",
+  CL: "Хлор",
+  CA: "Кальцій",
+  PHOS: "Фосфор",
+  MG: "Магній",
+});
+
+const LAB_TYPE_META = {
+  "Біохімія": {
+    short: "БХ",
+    icon: "⚗️",
+    description: "Печінка, нирки, білки та глюкоза",
+  },
+
+  "ЗАК": {
+    short: "ЗАК",
+    icon: "🩸",
+    description: "Клітини крові та лейкоформула",
+  },
+
+  "Т4": {
+    short: "Т4",
+    icon: "🦋",
+    description: "Функція щитоподібної залози",
+  },
+
+  "ТТГ": {
+    short: "ТТГ",
+    icon: "◉",
+    description: "Тиреотропний гормон",
+  },
+
+  "Загальний аналіз сечі": {
+    short: "Сеча",
+    icon: "💧",
+    description: "Фізико-хімічні показники сечі",
+  },
+
+  "Коагулограма": {
+    short: "Коаг.",
+    icon: "🧬",
+    description: "Система згортання крові",
+  },
+
+  "Електроліти": {
+    short: "Електроліти",
+    icon: "⚡",
+    description: "Натрій, калій, хлор та мінерали",
+  },
+};
+
+const LAB_DEFAULT_UNITS = {
+  T4: "нмоль/л",
+  TSH: "нг/мл",
+
+  UA_SG: "",
+  UA_PH: "",
+  UA_PRO: "г/л",
+  UA_GLU: "ммоль/л",
+  UA_KET: "ммоль/л",
+  UA_BIL: "мкмоль/л",
+  UA_BLOOD: "ер./мкл",
+  UA_WBC: "кл./п.з.",
+  UA_RBC: "кл./п.з.",
+
+  PT: "с",
+  APTT: "с",
+  INR: "",
+  FIB: "г/л",
+
+  NA: "ммоль/л",
+  K: "ммоль/л",
+  CL: "ммоль/л",
+  CA: "ммоль/л",
+  PHOS: "ммоль/л",
+  MG: "ммоль/л",
 };
 
 function getPetSpeciesKey(pet) {
@@ -6440,134 +6598,715 @@ function renderLabsTab(pet) {
   if (!box || !pet) return;
 
   const speciesKey = getPetSpeciesKey(pet);
-  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
-  const labs = getLabsByPetId(pet.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const speciesName = speciesKey === "cat" ? "кіт" : "собака";
+
+  const labs = getLabsByPetId(pet.id)
+    .slice()
+    .sort((a, b) => {
+      return String(b.date || "").localeCompare(String(a.date || ""));
+    });
 
   box.innerHTML = `
-    <div class="patientInfoBox">
-      <div class="row" style="align-items:flex-start;">
-        <div>
-          <h2>Аналізи</h2>
-          <div class="hint">Норми підтягуються автоматично: ${escapeHtml(speciesLabel)}.</div>
+    <div class="patientInfoBox premiumLabsPage">
+
+      <section class="premiumLabsHero">
+        <div class="premiumLabsHeroText">
+          <div class="premiumLabsKicker">
+            ЛАБОРАТОРНА ДІАГНОСТИКА
+          </div>
+
+          <h2>Аналізи пацієнта</h2>
+
+          <p>
+            Створюйте лабораторні дослідження, контролюйте відхилення
+            та формуйте історію показників пацієнта.
+          </p>
+
+          <div class="premiumLabsSpecies">
+            <span>Норми пацієнта:</span>
+            <strong>${escapeHtml(speciesName)}</strong>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="primary" id="btnAddBioLab">+ БХ</button>
-          <button class="primary" id="btnAddCbcLab">+ ЗАК</button>
+
+        <div class="premiumLabsHeroIcon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="34"
+            height="34"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 3h6"></path>
+            <path d="M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6A2 2 0 0 0 19 18l-5-9V3"></path>
+            <path d="M7.5 15h9"></path>
+          </svg>
         </div>
-      </div>
-      <div id="labsList" class="labsList">
-        ${
-          labs.length
-            ? labs.map((lab) => renderLabCard(lab, speciesKey)).join("")
-            : `<div class="hint">Поки аналізів немає. Натисни “+ БХ” або “+ ЗАК”.</div>`
-        }
-      </div>
+      </section>
+
+      <section class="premiumLabTypes">
+        ${Object.entries(LAB_TYPE_META)
+          .map(([type, meta]) => `
+            <button
+              class="premiumLabTypeButton"
+              type="button"
+              data-create-lab-type="${escapeHtml(type)}"
+            >
+              <span class="premiumLabTypeIcon">
+                ${meta.icon}
+              </span>
+
+              <span class="premiumLabTypeText">
+                <strong>${escapeHtml(meta.short)}</strong>
+                <small>${escapeHtml(meta.description)}</small>
+              </span>
+
+              <span class="premiumLabTypePlus">
+                +
+              </span>
+            </button>
+          `)
+          .join("")}
+      </section>
+
+      <section class="premiumLabsHistory">
+        <div class="premiumLabsHistoryHead">
+          <div>
+            <h3>Історія досліджень</h3>
+            <p>
+              ${labs.length
+                ? `Збережено досліджень: ${labs.length}`
+                : "Досліджень поки немає"}
+            </p>
+          </div>
+        </div>
+
+        <div id="labsList" class="labsList premiumLabsList">
+          ${
+            labs.length
+              ? labs
+                  .map((lab) => renderLabCard(lab, speciesKey))
+                  .join("")
+              : `
+                <div class="premiumLabsEmpty">
+                  <div class="premiumLabsEmptyIcon">🧪</div>
+                  <h3>Аналізів поки немає</h3>
+                  <p>Оберіть потрібний тип дослідження вище.</p>
+                </div>
+              `
+          }
+        </div>
+      </section>
     </div>
   `;
 
-  $("#btnAddBioLab")?.addEventListener("click", () => addLabForPet(pet, "Біохімія"));
-  $("#btnAddCbcLab")?.addEventListener("click", () => addLabForPet(pet, "ЗАК"));
+  box
+    .querySelectorAll("[data-create-lab-type]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        const type = button.dataset.createLabType;
+        if (!type) return;
 
-  $("#labsList")?.addEventListener("click", async (e) => {
-    const del = e.target.closest("[data-del-lab]");
-    if (del) {
-      const id = del.dataset.delLab;
+        openLabModal(pet, {
+          type,
+        });
+      });
+    });
+
+  $("#labsList")?.addEventListener("click", async (event) => {
+    const deleteButton = event.target.closest("[data-del-lab]");
+
+    if (deleteButton) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const id = deleteButton.dataset.delLab;
       if (!id) return;
-      if (!confirm("Видалити аналіз?")) return;
 
-      const next = loadLabs().filter((x) => String(x.id) !== String(id));
-      saveLabs(next);
-      renderLabsTab(pet);
+      const lab = loadLabs().find(
+        (item) => String(item.id) === String(id)
+      );
+
+      openDeleteModal(
+        `
+          <b>${escapeHtml(lab?.type || "Аналіз")}</b>
+          <br><br>
+          Результати дослідження будуть видалені назавжди.
+          <br>
+          Цю дію неможливо скасувати.
+        `,
+        async () => {
+          const next = loadLabs().filter(
+            (item) => String(item.id) !== String(id)
+          );
+
+          saveLabs(next);
+          renderLabsTab(pet);
+        }
+      );
+
       return;
     }
 
-    const edit = e.target.closest("[data-edit-lab]");
-    if (edit) {
-      const id = edit.dataset.editLab;
+    const editButton = event.target.closest("[data-edit-lab]");
+
+    if (editButton) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const id = editButton.dataset.editLab;
       if (!id) return;
-      if (typeof editLabForPet === "function") editLabForPet(pet, id);
+
+      const lab = loadLabs().find(
+        (item) => String(item.id) === String(id)
+      );
+
+      if (!lab) {
+        alert("Аналіз не знайдено.");
+        return;
+      }
+
+      openLabModal(pet, lab);
       return;
     }
 
-    const pdf = e.target.closest("[data-pdf-lab]");
-    if (pdf) {
-      const id = pdf.dataset.pdfLab;
+    const pdfButton = event.target.closest("[data-pdf-lab]");
+
+    if (pdfButton) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const id = pdfButton.dataset.pdfLab;
       if (!id) return;
-      const lab = loadLabs().find((x) => String(x.id) === String(id));
-      if (!lab) return alert("Аналіз не знайдено");
-      if (typeof downloadLabPdf === "function") await downloadLabPdf(pet, lab);
-      return;
+
+      const lab = loadLabs().find(
+        (item) => String(item.id) === String(id)
+      );
+
+      if (!lab) {
+        alert("Аналіз не знайдено.");
+        return;
+      }
+
+      if (typeof downloadLabPdf === "function") {
+        await downloadLabPdf(pet, lab);
+      }
     }
   });
 }
 
-function addLabForPet(pet, groupName) {
-  const date = prompt("Дата аналізу:", todayISO()) || todayISO();
-  const keys = LAB_GROUPS[groupName] || [];
-  const values = {};
-
-  keys.forEach((key) => {
-    const label = LAB_LABELS[key] || key;
-    const raw = prompt(`${label}:`, "");
-    if (raw !== null && String(raw).trim() !== "") {
-      values[key] = Number(String(raw).replace(",", "."));
-    }
-  });
-
-  const lab = {
-    id: "lab_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-    pet_id: String(pet.id),
-    type: groupName,
-    date,
-    values,
-    created_at: new Date().toISOString(),
-  };
-
-  const arr = loadLabs();
-  arr.unshift(lab);
-  saveLabs(arr);
-  renderLabsTab(pet);
-}
 
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (РЕДАКТИРОВАНИЕ ЛАБ, РЕНДЕРИНГ PDF И СЕЛЕКТОРЫ ПРИЕМА)
 // Часть 7
 // ==========================================================================
 
-function editLabForPet(pet, labId) {
-  const arr = loadLabs();
-  const idx = arr.findIndex((x) => String(x.id) === String(labId));
-  if (idx < 0) return alert("Аналіз не знайдено");
+function getLabReference(pet, lab, key) {
+  const storedRef = lab?.refs?.[key];
 
-  const lab = arr[idx];
-  const keys = LAB_GROUPS[lab.type] || Object.keys(lab.values || {});
-  const nextValues = { ...(lab.values || {}) };
+  if (storedRef) {
+    return {
+      min: storedRef.min ?? "",
+      max: storedRef.max ?? "",
+      unit: storedRef.unit ?? "",
+    };
+  }
 
-  const date = prompt("Дата аналізу:", lab.date || todayISO()) || lab.date || todayISO();
+  const speciesKey = getPetSpeciesKey(pet);
+  const defaultRef = LAB_REF?.[speciesKey]?.[key];
 
-  keys.forEach((key) => {
-    const label = LAB_LABELS[key] || key;
-    const oldVal = nextValues[key] ?? "";
-    const raw = prompt(`${label}:`, String(oldVal));
+  if (Array.isArray(defaultRef)) {
+    return {
+      min: defaultRef[0] ?? "",
+      max: defaultRef[1] ?? "",
+      unit: defaultRef[2] ?? "",
+    };
+  }
 
-    if (raw === null) return;
+  return {
+    min: "",
+    max: "",
+    unit: LAB_DEFAULT_UNITS[key] || "",
+  };
+}
 
-    if (String(raw).trim() === "") {
-      delete nextValues[key];
-    } else {
-      nextValues[key] = Number(String(raw).replace(",", "."));
+function closeLabModal() {
+  const modal = document.getElementById("premiumLabModal");
+  if (!modal) return;
+
+  modal.classList.remove("open");
+  document.body.classList.remove("premiumLabModalOpen");
+
+  setTimeout(() => {
+    modal.remove();
+  }, 180);
+}
+
+function openLabModal(pet, labData = {}) {
+  document.getElementById("premiumLabModal")?.remove();
+
+  const isEditMode = Boolean(labData?.id);
+  const selectedType =
+    labData?.type && LAB_GROUPS[labData.type]
+      ? labData.type
+      : "Біохімія";
+
+  const keys = LAB_GROUPS[selectedType] || [];
+  const values = labData?.values || {};
+
+  const modal = document.createElement("div");
+  modal.id = "premiumLabModal";
+  modal.className = "premiumLabModalOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="premiumLabModalBackdrop"
+      data-close-lab-modal
+    ></div>
+
+    <section
+      class="premiumLabModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="premiumLabModalTitle"
+    >
+      <header class="premiumLabModalHeader">
+        <div class="premiumLabModalHeaderMain">
+          <div class="premiumLabModalIcon">
+            ${LAB_TYPE_META[selectedType]?.icon || "🧪"}
+          </div>
+
+          <div>
+            <div class="premiumLabModalKicker">
+              ЛАБОРАТОРНЕ ДОСЛІДЖЕННЯ
+            </div>
+
+            <h2 id="premiumLabModalTitle">
+              ${
+                isEditMode
+                  ? "Редагувати аналіз"
+                  : "Новий аналіз"
+              }
+            </h2>
+
+            <p>
+              ${escapeHtml(selectedType)}
+              · ${escapeHtml(pet.name || "Пацієнт")}
+            </p>
+          </div>
+        </div>
+
+        <button
+          class="premiumLabModalClose"
+          type="button"
+          data-close-lab-modal
+          aria-label="Закрити"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="premiumLabModalScroll">
+        <section class="premiumLabMetaSection">
+          <label class="premiumLabField">
+            <span>Тип дослідження</span>
+
+            <select
+              id="premiumLabType"
+              ${isEditMode ? "disabled" : ""}
+            >
+              ${Object.keys(LAB_GROUPS)
+                .map((type) => `
+                  <option
+                    value="${escapeHtml(type)}"
+                    ${type === selectedType ? "selected" : ""}
+                  >
+                    ${escapeHtml(type)}
+                  </option>
+                `)
+                .join("")}
+            </select>
+          </label>
+
+          <label class="premiumLabField">
+            <span>Дата дослідження</span>
+
+            <input
+              id="premiumLabDate"
+              type="date"
+              value="${escapeHtml(labData?.date || todayISO())}"
+            >
+          </label>
+
+          <label class="premiumLabField">
+            <span>Лабораторія</span>
+
+            <input
+              id="premiumLabLaboratory"
+              type="text"
+              maxlength="150"
+              value="${escapeHtml(labData?.laboratory || "")}"
+              placeholder="Наприклад: IDEXX, BioSoft..."
+            >
+          </label>
+        </section>
+
+        <section class="premiumLabResultsSection">
+          <div class="premiumLabSectionHead">
+            <div>
+              <h3>Результати</h3>
+              <p>
+                Вкажіть значення та референс лабораторії.
+              </p>
+            </div>
+
+            <span>
+              ${keys.length} показників
+            </span>
+          </div>
+
+          <div class="premiumLabResultsGrid">
+            ${keys
+              .map((key) => {
+                const ref = getLabReference(pet, labData, key);
+                const value = values[key] ?? "";
+
+                return `
+                  <article
+                    class="premiumLabResultCard"
+                    data-lab-result-key="${escapeHtml(key)}"
+                  >
+                    <div class="premiumLabResultTop">
+                      <div>
+                        <strong>
+                          ${escapeHtml(LAB_LABELS[key] || key)}
+                        </strong>
+
+                        <small>
+                          ${escapeHtml(key)}
+                        </small>
+                      </div>
+
+                      <div
+                        class="premiumLabLiveStatus"
+                        data-lab-live-status
+                      >
+                        —
+                      </div>
+                    </div>
+
+                    <label class="premiumLabValueField">
+                      <span>Результат</span>
+
+                      <div>
+                        <input
+                          type="number"
+                          inputmode="decimal"
+                          step="any"
+                          data-lab-value
+                          value="${escapeHtml(value)}"
+                          placeholder="—"
+                        >
+
+                        <input
+                          type="text"
+                          data-lab-unit
+                          value="${escapeHtml(ref.unit)}"
+                          placeholder="од."
+                        >
+                      </div>
+                    </label>
+
+                    <div class="premiumLabReferenceGrid">
+                      <label>
+                        <span>Мін.</span>
+                        <input
+                          type="number"
+                          inputmode="decimal"
+                          step="any"
+                          data-lab-min
+                          value="${escapeHtml(ref.min)}"
+                          placeholder="—"
+                        >
+                      </label>
+
+                      <label>
+                        <span>Макс.</span>
+                        <input
+                          type="number"
+                          inputmode="decimal"
+                          step="any"
+                          data-lab-max
+                          value="${escapeHtml(ref.max)}"
+                          placeholder="—"
+                        >
+                      </label>
+                    </div>
+                  </article>
+                `;
+              })
+              .join("")}
+          </div>
+        </section>
+
+        <label class="premiumLabCommentField">
+          <span>Коментар лікаря</span>
+
+          <textarea
+            id="premiumLabComment"
+            rows="4"
+            maxlength="2000"
+            placeholder="Клінічна інтерпретація, умови забору або додаткова інформація..."
+          >${escapeHtml(labData?.comment || "")}</textarea>
+        </label>
+      </div>
+
+      <footer class="premiumLabModalFooter">
+        <button
+          class="premiumLabCancel"
+          type="button"
+          data-close-lab-modal
+        >
+          Скасувати
+        </button>
+
+        <button
+          class="premiumLabSave"
+          id="premiumLabSave"
+          type="button"
+        >
+          ${
+            isEditMode
+              ? "Зберегти зміни"
+              : "Створити аналіз"
+          }
+        </button>
+      </footer>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.classList.add("premiumLabModalOpen");
+
+  requestAnimationFrame(() => {
+    modal.classList.add("open");
+  });
+
+  const updateLiveStatus = (card) => {
+    const valueRaw =
+      card.querySelector("[data-lab-value]")?.value ?? "";
+
+    const minRaw =
+      card.querySelector("[data-lab-min]")?.value ?? "";
+
+    const maxRaw =
+      card.querySelector("[data-lab-max]")?.value ?? "";
+
+    const statusElement =
+      card.querySelector("[data-lab-live-status]");
+
+    card.classList.remove(
+      "is-normal",
+      "is-low",
+      "is-high",
+      "is-empty"
+    );
+
+    if (
+      String(valueRaw).trim() === "" ||
+      String(minRaw).trim() === "" ||
+      String(maxRaw).trim() === ""
+    ) {
+      card.classList.add("is-empty");
+
+      if (statusElement) {
+        statusElement.textContent = "—";
+      }
+
+      return;
+    }
+
+    const value = Number(valueRaw);
+    const min = Number(minRaw);
+    const max = Number(maxRaw);
+
+    const status = getLabStatus(value, min, max);
+
+    card.classList.add(`is-${status}`);
+
+    if (statusElement) {
+      statusElement.textContent =
+        status === "normal"
+          ? "Норма"
+          : status === "high"
+            ? "Вище"
+            : status === "low"
+              ? "Нижче"
+              : "—";
+    }
+  };
+
+  modal
+    .querySelectorAll("[data-lab-result-key]")
+    .forEach((card) => {
+      card
+        .querySelectorAll("input")
+        .forEach((input) => {
+          input.addEventListener("input", () => {
+            updateLiveStatus(card);
+          });
+        });
+
+      updateLiveStatus(card);
+    });
+
+  modal.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-lab-modal]")) {
+      closeLabModal();
     }
   });
 
-  arr[idx] = {
-    ...lab,
-    date,
-    values: nextValues,
-    updated_at: new Date().toISOString(),
-  };
+  modal.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeLabModal();
+    }
+  });
 
-  saveLabs(arr);
-  renderLabsTab(pet);
+  modal
+    .querySelector("#premiumLabType")
+    ?.addEventListener("change", (event) => {
+      const nextType = event.target.value;
+      closeLabModal();
+
+      setTimeout(() => {
+        openLabModal(pet, {
+          type: nextType,
+          date:
+            modal.querySelector("#premiumLabDate")?.value ||
+            todayISO(),
+        });
+      }, 190);
+    });
+
+  modal
+    .querySelector("#premiumLabSave")
+    ?.addEventListener("click", () => {
+      const type =
+        modal.querySelector("#premiumLabType")?.value ||
+        selectedType;
+
+      const date =
+        modal.querySelector("#premiumLabDate")?.value ||
+        todayISO();
+
+      const laboratory =
+        modal
+          .querySelector("#premiumLabLaboratory")
+          ?.value?.trim() || "";
+
+      const comment =
+        modal
+          .querySelector("#premiumLabComment")
+          ?.value?.trim() || "";
+
+      const nextValues = {};
+      const nextRefs = {};
+
+      modal
+        .querySelectorAll("[data-lab-result-key]")
+        .forEach((card) => {
+          const key = card.dataset.labResultKey;
+          if (!key) return;
+
+          const valueRaw =
+            card.querySelector("[data-lab-value]")?.value ?? "";
+
+          const minRaw =
+            card.querySelector("[data-lab-min]")?.value ?? "";
+
+          const maxRaw =
+            card.querySelector("[data-lab-max]")?.value ?? "";
+
+          const unit =
+            card
+              .querySelector("[data-lab-unit]")
+              ?.value?.trim() || "";
+
+          if (String(valueRaw).trim() !== "") {
+            const value = Number(valueRaw);
+
+            if (Number.isFinite(value)) {
+              nextValues[key] = value;
+            }
+          }
+
+          nextRefs[key] = {
+            min:
+              String(minRaw).trim() === ""
+                ? ""
+                : Number(minRaw),
+
+            max:
+              String(maxRaw).trim() === ""
+                ? ""
+                : Number(maxRaw),
+
+            unit,
+          };
+        });
+
+      if (!Object.keys(nextValues).length) {
+        alert("Вкажіть хоча б один результат.");
+        return;
+      }
+
+      const labs = loadLabs();
+
+      if (isEditMode) {
+        const index = labs.findIndex(
+          (item) => String(item.id) === String(labData.id)
+        );
+
+        if (index < 0) {
+          alert("Аналіз не знайдено.");
+          return;
+        }
+
+        labs[index] = {
+          ...labs[index],
+          type,
+          date,
+          laboratory,
+          comment,
+          values: nextValues,
+          refs: nextRefs,
+          updated_at: new Date().toISOString(),
+        };
+      } else {
+        labs.unshift({
+          id:
+            "lab_" +
+            Date.now().toString(36) +
+            "_" +
+            Math.random().toString(16).slice(2),
+
+          pet_id: String(pet.id),
+          type,
+          date,
+          laboratory,
+          comment,
+          values: nextValues,
+          refs: nextRefs,
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      saveLabs(labs);
+      closeLabModal();
+      renderLabsTab(pet);
+    });
 }
 
 async function downloadLabPdf(pet, labId) {
