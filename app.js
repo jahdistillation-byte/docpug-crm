@@ -4015,92 +4015,96 @@ function a4FilenameFromVisit(visitId) {
 
 async function downloadA4Pdf(visitId) {
   if (typeof window.html2pdf === "undefined") {
-    alert(
-      "html2pdf не підключений. Перевір підключення html2pdf.bundle.min.js."
-    );
+    alert("Модуль формування PDF не підключений.");
     return;
   }
 
   await renderDischargeA4(visitId);
 
-  const host =
+  const sourceHost =
     document.getElementById("disA4");
 
-  const originalDocument =
-    host?.querySelector(".disModernDoc");
+  const sourceDocument =
+    sourceHost?.querySelector(".disModernDoc");
 
-  if (!host || !originalDocument) {
-    alert(
-      "Не вдалося сформувати документ виписки."
-    );
+  if (!sourceDocument) {
+    alert("Не вдалося сформувати виписку.");
     return;
   }
 
-  const filename =
-    a4FilenameFromVisit(visitId);
-
-  /*
-   * ВАЖНО:
-   * Не передаём в html2pdf живой элемент из CRM.
-   * Создаём отдельную чистую копию без влияния
-   * body display:flex, main-content и текущего layout.
-   */
-  const exportRoot =
+  const renderHost =
     document.createElement("div");
 
-  exportRoot.id =
-    "dischargePdfExportRoot";
+  renderHost.id =
+    "visitPdfRenderHost";
 
-  exportRoot.style.cssText = `
-    position: fixed;
-left: 0;
-top: 0;
-    width: 1120px;
-min-width: 1120px;
-max-width: 1120px;
-    margin: 0;
-    padding: 0;
-    display: block;
-    visibility: visible;
-    opacity: 1;
-    background: #ffffff;
-    overflow: visible;
-    box-sizing: border-box;
-    pointer-events: none;
-    z-index: 2147483647;
-    transform: none;
-  `;
-
-  const exportDocument =
-    originalDocument.cloneNode(true);
-
-  exportDocument.style.cssText += `
-    display: block !important;
-    position: relative !important;
-    left: 0 !important;
+  renderHost.style.cssText = `
+    position: fixed !important;
     top: 0 !important;
-    width: 1120px !important;
-min-width: 1120px !important;
-max-width: 1120px !important;
+    left: 0 !important;
+
+    width: 794px !important;
+    min-width: 794px !important;
+    max-width: 794px !important;
+
     margin: 0 !important;
-    padding: 18px !important;
-    box-sizing: border-box !important;
+    padding: 0 !important;
+
+    display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: #ffffff !important;
-    color: #1f2937 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+
     overflow: visible !important;
+    background: #ffffff !important;
+
     transform: none !important;
+    zoom: 1 !important;
+
+    pointer-events: none !important;
+    z-index: 2147483647 !important;
   `;
 
-  exportRoot.appendChild(
-    exportDocument
+  const pdfDocument =
+    sourceDocument.cloneNode(true);
+
+  pdfDocument.classList.add(
+    "disModernDocPdf"
+  );
+
+  pdfDocument.style.cssText += `
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+
+    width: 794px !important;
+    min-width: 794px !important;
+    max-width: 794px !important;
+
+    margin: 0 !important;
+    padding: 20px !important;
+
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    box-sizing: border-box !important;
+    overflow: visible !important;
+
+    background: #ffffff !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    transform: none !important;
+    zoom: 1 !important;
+  `;
+
+  renderHost.appendChild(
+    pdfDocument
   );
 
   document.body.appendChild(
-    exportRoot
+    renderHost
   );
 
   try {
@@ -4110,8 +4114,12 @@ max-width: 1120px !important;
       });
     });
 
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
+
     const images = Array.from(
-      exportDocument.querySelectorAll("img")
+      pdfDocument.querySelectorAll("img")
     );
 
     await Promise.all(
@@ -4138,10 +4146,7 @@ max-width: 1120px !important;
             { once: true }
           );
 
-          setTimeout(
-            finish,
-            4000
-          );
+          setTimeout(finish, 4000);
         });
       })
     );
@@ -4149,9 +4154,15 @@ max-width: 1120px !important;
     await window
       .html2pdf()
       .set({
-        margin: 0,
+        margin: [
+          0,
+          0,
+          0,
+          0,
+        ],
 
-        filename,
+        filename:
+          a4FilenameFromVisit(visitId),
 
         image: {
           type: "jpeg",
@@ -4168,130 +4179,131 @@ max-width: 1120px !important;
           scrollX: 0,
           scrollY: 0,
 
-          x: 0,
-          y: 0,
+          width: 794,
+          windowWidth: 794,
 
-          width: 1120,
-windowWidth: 1120,
-
-          onclone: (
-            clonedDocument
-          ) => {
-            const clonedRoot =
+          onclone: (clonedDocument) => {
+            const clonedHost =
               clonedDocument.getElementById(
-                "dischargePdfExportRoot"
+                "visitPdfRenderHost"
               );
 
-            if (!clonedRoot) return;
-
-            clonedRoot.style.position =
-              "absolute";
-
-            clonedRoot.style.left =
-              "0";
-
-            clonedRoot.style.top =
-              "0";
-
-            clonedRoot.style.width = "1120px";
-clonedRoot.style.minWidth = "1120px";
-clonedRoot.style.maxWidth = "1120px";
-
-            clonedRoot.style.margin =
-              "0";
-
-            clonedRoot.style.padding =
-              "0";
-
-            clonedRoot.style.display =
-              "block";
-
-            clonedRoot.style.visibility =
-              "visible";
-
-            clonedRoot.style.opacity =
-              "1";
-
-            clonedRoot.style.transform =
-              "none";
-
-            clonedRoot.style.background =
-              "#ffffff";
-
-            const clonedDoc =
-              clonedRoot.querySelector(
-                ".disModernDoc"
+            const clonedPdf =
+              clonedHost?.querySelector(
+                ".disModernDocPdf"
               );
 
-            if (clonedDoc) {
-              clonedDoc.style.position =
-                "relative";
+            if (clonedHost) {
+              clonedHost.style.position =
+                "absolute";
 
-              clonedDoc.style.left =
-                "0";
+              clonedHost.style.top = "0";
+              clonedHost.style.left = "0";
 
-              clonedDoc.style.top =
-                "0";
+              clonedHost.style.width =
+                "794px";
 
-              clonedDoc.style.width = "1120px";
-clonedDoc.style.minWidth = "1120px";
-clonedDoc.style.maxWidth = "1120px";
+              clonedHost.style.minWidth =
+                "794px";
 
-              clonedDoc.style.margin = "0 auto";
-              clonedDoc.style.padding =
-                "32px";
+              clonedHost.style.maxWidth =
+                "794px";
 
-              clonedDoc.style.display =
+              clonedHost.style.margin = "0";
+              clonedHost.style.padding = "0";
+
+              clonedHost.style.display =
                 "block";
 
-              clonedDoc.style.visibility =
+              clonedHost.style.visibility =
                 "visible";
 
-              clonedDoc.style.opacity =
-                "1";
+              clonedHost.style.opacity = "1";
 
-              clonedDoc.style.transform =
+              clonedHost.style.transform =
                 "none";
 
-              clonedDoc.style.borderRadius =
+              clonedHost.style.zoom = "1";
+
+              clonedHost.style.background =
+                "#ffffff";
+            }
+
+            if (clonedPdf) {
+              clonedPdf.style.position =
+                "relative";
+
+              clonedPdf.style.top = "0";
+              clonedPdf.style.left = "0";
+
+              clonedPdf.style.width =
+                "794px";
+
+              clonedPdf.style.minWidth =
+                "794px";
+
+              clonedPdf.style.maxWidth =
+                "794px";
+
+              clonedPdf.style.margin = "0";
+              clonedPdf.style.padding =
+                "20px";
+
+              clonedPdf.style.display =
+                "block";
+
+              clonedPdf.style.visibility =
+                "visible";
+
+              clonedPdf.style.opacity = "1";
+
+              clonedPdf.style.boxSizing =
+                "border-box";
+
+              clonedPdf.style.overflow =
+                "visible";
+
+              clonedPdf.style.transform =
+                "none";
+
+              clonedPdf.style.zoom = "1";
+
+              clonedPdf.style.borderRadius =
                 "0";
 
-              clonedDoc.style.boxShadow =
+              clonedPdf.style.boxShadow =
                 "none";
 
-              clonedDoc.style.background =
+              clonedPdf.style.background =
                 "#ffffff";
-
-              clonedDoc.style.boxSizing =
-                "border-box";
             }
           },
         },
 
         jsPDF: {
-  unit: "mm",
-  format: "a4",
-  orientation: "portrait",
-  compress: true,
-},
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+          compress: true,
+        },
 
         pagebreak: {
-  mode: [
-    "css",
-    "legacy",
-  ],
+          mode: [
+            "css",
+            "legacy",
+          ],
 
-  avoid: [
-    ".disModernCard",
-    ".disModernSignGrid",
-    ".disModernFinanceSummary",
-    ".disModernFinanceHead",
-    ".disModernTable tr",
-  ],
-},
+          avoid: [
+            ".disModernHead",
+            ".disModernCard",
+            ".disModernSignGrid",
+            ".disModernFinanceSummary",
+            ".disModernTable tr",
+          ],
+        },
       })
-      .from(exportDocument)
-.save();
+      .from(pdfDocument)
+      .save();
   } catch (error) {
     console.error(
       "downloadA4Pdf failed:",
@@ -4300,13 +4312,10 @@ clonedDoc.style.maxWidth = "1120px";
 
     alert(
       "Не вдалося сформувати PDF: " +
-      (
-        error?.message ||
-        error
-      )
+      (error?.message || error)
     );
   } finally {
-    exportRoot.remove();
+    renderHost.remove();
   }
 }
 
