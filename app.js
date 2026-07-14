@@ -7418,56 +7418,259 @@ function renderLabPdfHtml(pet, lab) {
   `;
 }
 
+function formatLabCardDate(dateStr) {
+  if (!dateStr) return "—";
+  const parts = String(dateStr).split("-");
+  if (parts.length === 3) {
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  }
+  return dateStr;
+}
+
+function formatLabCardValue(value) {
+  if (value === null || value === undefined || value === "") return "—";
+
+  const num = Number(value);
+  if (!Number.isFinite(num)) return String(value);
+
+  return num.toLocaleString("uk-UA", {
+    maximumFractionDigits: 2,
+  });
+}
+
 function renderLabCard(lab, speciesKey) {
-  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
-  const values = lab.values || {};
-  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
+  const typeMeta = LAB_TYPE_META?.[lab.type] || {
+    short: lab.type || "Аналіз",
+    icon: "🧪",
+    description: "",
+  };
+
+  const values = lab?.values || {};
+  const refs = lab?.refs || {};
+
+  const resolveRef = (key) => {
+    const saved = refs[key];
+    if (saved) {
+      return {
+        min: saved.min ?? "",
+        max: saved.max ?? "",
+        unit: saved.unit ?? "",
+      };
+    }
+
+    const fallback = LAB_REF?.[speciesKey]?.[key];
+    if (Array.isArray(fallback)) {
+      return {
+        min: fallback[0] ?? "",
+        max: fallback[1] ?? "",
+        unit: fallback[2] ?? "",
+      };
+    }
+
+    return {
+      min: "",
+      max: "",
+      unit: LAB_DEFAULT_UNITS?.[key] || "",
+    };
+  };
+
+  const metricPriority = {
+    high: 0,
+    low: 0,
+    normal: 1,
+    empty: 2,
+    unknown: 2,
+  };
+
+  const metrics = Object.entries(values)
+    .map(([key, rawValue]) => {
+      const ref = resolveRef(key);
+
+      const value = Number(rawValue);
+      const min = Number(ref.min);
+      const max = Number(ref.max);
+
+      let status = "unknown";
+
+      if (
+        Number.isFinite(value) &&
+        Number.isFinite(min) &&
+        Number.isFinite(max)
+      ) {
+        status = getLabStatus(value, min, max);
+      }
+
+      return {
+        key,
+        label: LAB_LABELS?.[key] || key,
+        code: key,
+        value: rawValue,
+        valueText: formatLabCardValue(rawValue),
+        unit: ref.unit || "",
+        min: ref.min,
+        max: ref.max,
+        refText:
+          ref.min !== "" && ref.max !== ""
+            ? `${formatLabCardValue(ref.min)}–${formatLabCardValue(ref.max)} ${ref.unit || ""}`.trim()
+            : "Референс не вказаний",
+        status,
+        statusText:
+          status === "high"
+            ? "Вище норми"
+            : status === "low"
+              ? "Нижче норми"
+              : status === "normal"
+                ? "Норма"
+                : "Без оцінки",
+      };
+    })
+    .sort((a, b) => {
+      const pA = metricPriority[a.status] ?? 9;
+      const pB = metricPriority[b.status] ?? 9;
+      if (pA !== pB) return pA - pB;
+      return a.label.localeCompare(b.label, "uk");
+    });
+
+  const countHigh = metrics.filter((m) => m.status === "high").length;
+  const countLow = metrics.filter((m) => m.status === "low").length;
+  const countNormal = metrics.filter((m) => m.status === "normal").length;
 
   return `
-    <div class="labCard">
-      <div class="labCardHead">
-        <div>
-          <div class="labTitle">${escapeHtml(lab.type || "Аналіз")}</div>
-          <div class="labDate">${escapeHtml(lab.date || "—")}</div>
-        </div>
+    <article class="labHistoryCard">
+      <div class="labHistoryCardAccent"></div>
 
-        <div style="display:flex; gap:8px;">
-          <button class="iconBtn" title="Редагувати" data-edit-lab="${escapeHtml(lab.id)}">✏️</button>
-          <button class="iconBtn" title="PDF для клієнта" data-pdf-lab="${escapeHtml(lab.id)}">📄</button>
-          <button class="iconBtn" title="Видалити" data-del-lab="${escapeHtml(lab.id)}">🗑</button>
-        </div>
-      </div>
+      <div class="labHistoryHeader">
+        <div class="labHistoryMeta">
+          <div class="labHistoryIcon">
+            ${typeMeta.icon || "🧪"}
+          </div>
 
-      <div class="labRows">
-        ${keys.map((key) => {
-          const value = values[key];
-          const ref = ranges[key];
-          if (!ref) return "";
-
-          const [min, max, unit] = ref;
-          const status = getLabStatus(value, min, max);
-
-          return `
-            <div class="labRow">
-              <div class="labName">
-                <b>${escapeHtml(LAB_LABELS[key] || key)}</b>
-                <span>норма: ${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</span>
-              </div>
-
-              <div class="labValue lab-${status}">
-                ${value ?? "—"} ${escapeHtml(unit)}
-              </div>
-
-              <div class="labStatus lab-${status}">
-                ${labStatusLabel(status)}
-              </div>
-
-              ${renderLabScale(value, min, max)}
+          <div class="labHistoryText">
+            <div class="labHistoryKicker">
+              ЛАБОРАТОРНЕ ДОСЛІДЖЕННЯ
             </div>
-          `;
-        }).join("")}
+
+            <h3 class="labHistoryTitle">
+              ${escapeHtml(lab.type || "Аналіз")}
+            </h3>
+
+            <div class="labHistorySubtitle">
+              <span>📅 ${escapeHtml(formatLabCardDate(lab.date))}</span>
+              ${
+                lab.laboratory
+                  ? `<span>🏥 ${escapeHtml(lab.laboratory)}</span>`
+                  : ""
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="labHistoryActions">
+          <button
+            class="iconBtn labActionBtn"
+            type="button"
+            title="Редагувати"
+            data-edit-lab="${escapeHtml(String(lab.id))}"
+          >
+            ✏️
+          </button>
+
+          <button
+            class="iconBtn labActionBtn"
+            type="button"
+            title="PDF"
+            data-pdf-lab="${escapeHtml(String(lab.id))}"
+          >
+            📄
+          </button>
+
+          <button
+            class="iconBtn labActionBtn labActionBtnDanger"
+            type="button"
+            title="Видалити"
+            data-del-lab="${escapeHtml(String(lab.id))}"
+          >
+            🗑
+          </button>
+        </div>
       </div>
-    </div>
+
+      <div class="labHistoryStats">
+        <div class="labHistoryStat">
+          <span>Показників</span>
+          <strong>${metrics.length}</strong>
+        </div>
+
+        <div class="labHistoryStat labHistoryStatOk">
+          <span>Норма</span>
+          <strong>${countNormal}</strong>
+        </div>
+
+        <div class="labHistoryStat labHistoryStatHigh">
+          <span>Вище</span>
+          <strong>${countHigh}</strong>
+        </div>
+
+        <div class="labHistoryStat labHistoryStatLow">
+          <span>Нижче</span>
+          <strong>${countLow}</strong>
+        </div>
+      </div>
+
+      <div class="labMetricsGrid">
+        ${metrics
+          .map(
+            (metric) => `
+              <div class="labMetricCard is-${metric.status}">
+                <div class="labMetricHeader">
+                  <div class="labMetricNames">
+                    <div class="labMetricLabel">
+                      ${escapeHtml(metric.label)}
+                    </div>
+                    <div class="labMetricCode">
+                      ${escapeHtml(metric.code)}
+                    </div>
+                  </div>
+
+                  <div class="labMetricStatus labMetricStatus-${metric.status}">
+                    ${escapeHtml(metric.statusText)}
+                  </div>
+                </div>
+
+                <div class="labMetricMain">
+                  <div class="labMetricValue">
+                    ${escapeHtml(metric.valueText)}
+                  </div>
+
+                  ${
+                    metric.unit
+                      ? `<div class="labMetricUnit">${escapeHtml(metric.unit)}</div>`
+                      : ""
+                  }
+                </div>
+
+                <div class="labMetricRef">
+                  Референс: ${escapeHtml(metric.refText)}
+                </div>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+
+      ${
+        lab.comment && String(lab.comment).trim()
+          ? `
+            <div class="labHistoryComment">
+              <div class="labHistoryCommentLabel">Коментар лікаря</div>
+              <div class="labHistoryCommentText">
+                ${escapeHtml(lab.comment).replace(/\n/g, "<br>")}
+              </div>
+            </div>
+          `
+          : ""
+      }
+    </article>
   `;
 }
 

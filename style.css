@@ -14470,3 +14470,483 @@ body[data-theme="white"] .premiumLabModalFooter {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   PREMIUM LAB RESULT CARD
+   ========================================================= */
+
+.labHistoryCard {
+  position: relative;
+  overflow: hidden;
+
+  padding: 20px 20px 18px;
+  margin-bottom: 16px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      color-mix(in srgb, var(--accent-color, #a855f7) 10%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.015)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.labHistoryCardAccent {
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+
+  width: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-color, #a855f7) 95%, white),
+      color-mix(in srgb, var(--accent-color, #a855f7) 60%, transparent)
+    );
+
+  border-radius: 999px;
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--accent-color, #a855f7) 35%, transparent);
+}
+
+.labHistoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.labHistoryMeta {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.labHistoryIcon {
+  width: 48px;
+  height: 48px;
+
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  font-size: 22px;
+
+  color: #fff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent-color, #a855f7),
+      color-mix(in srgb, var(--accent-color, #a855f7) 65%, black)
+    );
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 14px 30px color-mix(in srgb, var(--accent-color, #a855f7) 28%, transparent);
+}
+
+.labHistoryText {
+  min-width: 0;
+}
+
+.labHistoryKicker {
+  margin-bottom: 5px;
+
+  color: var(--accent-color, #a855f7);
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.labHistoryTitle {
+  margin: 0;
+
+  color: #fff;
+
+  font-size: 24px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.labHistorySubtitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+
+  margin-top: 8px;
+
+  color: rgba(238, 232, 248, 0.55);
+
+  font-size: 12px;
+}
+
+.labHistoryActions {
+  display: flex;
+  gap: 8px;
+}
+
+.labActionBtn {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.labActionBtn:hover {
+  transform: translateY(-2px);
+
+  background:
+    color-mix(in srgb, var(--accent-color, #a855f7) 8%, rgba(255, 255, 255, 0.05)) !important;
+
+  border-color:
+    color-mix(in srgb, var(--accent-color, #a855f7) 32%, transparent) !important;
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+.labActionBtnDanger:hover {
+  background: rgba(255, 80, 80, 0.08) !important;
+  border-color: rgba(255, 80, 80, 0.26) !important;
+}
+
+.labHistoryStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+.labHistoryStat {
+  min-width: 120px;
+
+  padding: 10px 12px;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+.labHistoryStat span,
+.labHistoryStat strong {
+  display: block;
+}
+
+.labHistoryStat span {
+  margin-bottom: 4px;
+
+  color: rgba(238, 232, 248, 0.44);
+
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.labHistoryStat strong {
+  color: #fff;
+
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.labHistoryStatOk {
+  border-color: rgba(66, 211, 146, 0.16);
+  background: rgba(66, 211, 146, 0.05);
+}
+
+.labHistoryStatOk strong {
+  color: #6be6a7;
+}
+
+.labHistoryStatHigh {
+  border-color: rgba(255, 125, 86, 0.16);
+  background: rgba(255, 125, 86, 0.05);
+}
+
+.labHistoryStatHigh strong {
+  color: #ff9a74;
+}
+
+.labHistoryStatLow {
+  border-color: rgba(80, 170, 255, 0.16);
+  background: rgba(80, 170, 255, 0.05);
+}
+
+.labHistoryStatLow strong {
+  color: #7dbdff;
+}
+
+.labMetricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  margin-bottom: 16px;
+}
+
+.labMetricCard {
+  padding: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.015)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.labMetricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.labMetricCard.is-normal {
+  border-color: rgba(66, 211, 146, 0.18);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(66, 211, 146, 0.06),
+      rgba(255, 255, 255, 0.015)
+    );
+}
+
+.labMetricCard.is-high {
+  border-color: rgba(255, 125, 86, 0.18);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 125, 86, 0.06),
+      rgba(255, 255, 255, 0.015)
+    );
+}
+
+.labMetricCard.is-low {
+  border-color: rgba(80, 170, 255, 0.18);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(80, 170, 255, 0.06),
+      rgba(255, 255, 255, 0.015)
+    );
+}
+
+.labMetricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.labMetricNames {
+  min-width: 0;
+}
+
+.labMetricLabel {
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.labMetricCode {
+  margin-top: 3px;
+
+  color: rgba(238, 232, 248, 0.34);
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.labMetricStatus {
+  flex: 0 0 auto;
+
+  padding: 6px 8px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.labMetricStatus-normal {
+  color: #6be6a7;
+  background: rgba(66, 211, 146, 0.12);
+}
+
+.labMetricStatus-high {
+  color: #ff9a74;
+  background: rgba(255, 125, 86, 0.12);
+}
+
+.labMetricStatus-low {
+  color: #7dbdff;
+  background: rgba(80, 170, 255, 0.12);
+}
+
+.labMetricStatus-unknown,
+.labMetricStatus-empty {
+  color: rgba(238, 232, 248, 0.44);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.labMetricMain {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  margin-bottom: 8px;
+}
+
+.labMetricValue {
+  color: #fff;
+
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.labMetricUnit {
+  color: rgba(238, 232, 248, 0.45);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.labMetricRef {
+  color: rgba(238, 232, 248, 0.5);
+
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.labHistoryComment {
+  margin-top: 4px;
+  padding: 14px 16px;
+
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+}
+
+.labHistoryCommentLabel {
+  margin-bottom: 8px;
+
+  color: var(--accent-color, #a855f7);
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.labHistoryCommentText {
+  color: rgba(255, 255, 255, 0.82);
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* WHITE THEME */
+
+body[data-theme="white"] .labHistoryCard,
+body[data-theme="white"] .labMetricCard,
+body[data-theme="white"] .labHistoryComment,
+body[data-theme="white"] .labHistoryStat {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(243, 246, 250, 0.98)
+    );
+
+  border-color: rgba(30, 35, 50, 0.08);
+}
+
+body[data-theme="white"] .labHistoryTitle,
+body[data-theme="white"] .labMetricLabel,
+body[data-theme="white"] .labMetricValue {
+  color: #1d1b28;
+}
+
+body[data-theme="white"] .labHistorySubtitle,
+body[data-theme="white"] .labMetricRef,
+body[data-theme="white"] .labMetricUnit,
+body[data-theme="white"] .labMetricCode {
+  color: rgba(29, 27, 40, 0.52);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .labMetricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .labHistoryHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .labHistoryActions {
+    justify-content: flex-end;
+  }
+
+  .labMetricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .labHistoryStat {
+    min-width: calc(50% - 5px);
+  }
+}
