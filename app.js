@@ -4430,22 +4430,30 @@ async function renderPatientTab(tab, pet) {
         // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ВАРИАНТ С АВТО-СОЗДАНИЕМ МОДАЛКИ
         // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
-    const btnAddVisit = document.getElementById("btnAddVisit");
-    if (btnAddVisit) {
-      btnAddVisit.onclick = () => {
-        // 1. Синхронизируем состояние приложения перед открытием
-        if (typeof state === "undefined") window.state = {};
-        state.selectedPet = pet;
-        state.selectedPetId = pet ? (pet.id || pet._id) : null;
+    const btnAddVisit =
+  document.getElementById("btnAddVisit");
 
-        // 2. Вызываем оригинальную функцию создания визита
-        if (typeof openVisitModalForCreate === "function") {
-          openVisitModalForCreate(pet);
-        } else {
-          alert("Помилка: функція openVisitModalForCreate не знайдена в системі.");
-        }
-      };
+if (btnAddVisit) {
+  btnAddVisit.onclick = () => {
+    state.selectedPet = pet || null;
+
+    state.selectedPetId =
+      pet?.id ||
+      pet?._id ||
+      null;
+
+    if (
+      typeof openVisitModalForCreate ===
+      "function"
+    ) {
+      openVisitModalForCreate(pet);
+    } else {
+      alert(
+        "Помилка: функція openVisitModalForCreate не знайдена в системі."
+      );
     }
+  };
+}
 
   // Навешиваем клики на вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
@@ -13729,15 +13737,56 @@ function openVisitModalForCreate(pet) {
 
   // чистим прошлый выбранный пациент при новом открытии из календаря
 
-  state.selectedPet = pet || null;
+const openedFromPatient = Boolean(pet?.id);
 
-  state.selectedPetId = pet?.id || null;
+modal.dataset.openSource =
+  openedFromPatient
+    ? "patient"
+    : "calendar";
 
-  $("#visitPatientSelect").value = pet?.id || "";
+modal.dataset.patientId =
+  openedFromPatient
+    ? String(pet.id)
+    : "";
 
+if (openedFromPatient) {
+  state.selectedPet = pet;
+  state.selectedPetId = pet.id;
+
+  $("#visitPatientSelect").value =
+    String(pet.id);
+
+  $("#visitPatientSearch").value =
+    pet.name || "";
+
+  $("#visitModalSub").textContent =
+    `Пацієнт: ${pet.name || "—"}`;
+} else {
+  state.selectedPet = null;
+  state.selectedPetId = null;
+
+  $("#visitPatientSelect").value = "";
   $("#visitPatientSearch").value = "";
 
-  $("#visitModalSub").textContent = pet?.name ? `Пацієнт: ${pet.name}` : "Пацієнт: —";
+  $("#visitModalSub").textContent =
+    "Оберіть пацієнта";
+
+  const patientResults =
+    $("#visitPatientResults");
+
+  if (patientResults) {
+    patientResults.innerHTML = "";
+  }
+}
+const patientBlock =
+  $("#visitPatientBlock");
+
+if (patientBlock) {
+  patientBlock.style.display =
+    openedFromPatient
+      ? "none"
+      : "block";
+}
 
   const quickBox = $("#visitNewPatientBox");
 
@@ -16844,6 +16893,14 @@ async function openVisitFromCalendar(hour, staffId) {
   if (!modal) return;
 
   delete modal.dataset.visitId;
+
+  // Календарь всегда создаёт новый визит без заранее выбранного пациента
+  state.selectedPet = null;
+  state.selectedPetId = null;
+
+  modal.dataset.openSource = "calendar";
+  modal.dataset.patientId = "";
+
   const patients = await loadPatientsApi();
 
   if (!Array.isArray(state.owners) || !state.owners.length) { await loadOwners(); }
@@ -16861,6 +16918,12 @@ async function openVisitFromCalendar(hour, staffId) {
  $("#visitPatientSelect") && ($("#visitPatientSelect").value = "");
 $("#visitPatientSearch") && ($("#visitPatientSearch").value = "");
 $("#visitPatientResults") && ($("#visitPatientResults").innerHTML = "");
+
+const visitModalSub = $("#visitModalSub");
+
+if (visitModalSub) {
+  visitModalSub.textContent = "Оберіть пацієнта";
+}
 
 const visitPatientBlock = $("#visitPatientBlock");
 if (visitPatientBlock) visitPatientBlock.style.display = "block";
