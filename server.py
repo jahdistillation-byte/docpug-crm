@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import json
 import mimetypes
+import time
 from urllib.parse import parse_qsl
 
 from datetime import datetime, timezone
@@ -160,6 +161,44 @@ def clean_payload(d):
 
     return d
 
+def execute_with_retry(query_factory, attempts=3, delay=0.25):
+    """
+    Повторяет временно неудавшийся запрос к Supabase.
+
+    query_factory — функция, которая каждый раз создаёт новый query,
+    потому что повторно использовать уже выполненный builder небезопасно.
+    """
+    last_error = None
+
+    for attempt in range(attempts):
+        try:
+            return query_factory().execute()
+
+        except Exception as e:
+            last_error = e
+            message = str(e).lower()
+
+            transient_error = any(
+                marker in message
+                for marker in (
+                    "resource temporarily unavailable",
+                    "errno 11",
+                    "temporarily unavailable",
+                    "connection reset",
+                    "connection aborted",
+                    "connection refused",
+                    "timed out",
+                    "timeout",
+                    "server disconnected",
+                )
+            )
+
+            if not transient_error or attempt == attempts - 1:
+                raise
+
+            time.sleep(delay * (attempt + 1))
+
+    raise last_error
 
 def allowed_file(filename: str) -> bool:
     if not filename:
@@ -332,84 +371,121 @@ def load_visit_lines(visit_ids):
 
 
 def save_visit_lines(visit_id: str, d: dict):
-    services = _pick_services_from_payload(d)
-    stock = _pick_stock_from_payload(d)
+    services = _as_list(_pick_services_from_payload(d))
+    stock = _as_list(_pick_stock_from_payload(d))
     current_org = get_current_org_id()
 
-    # =====================
-    # delete old services
-    # =====================
-    try:
-        supabase.table("visit_services").delete() \
-            .eq("org_id", current_org) \
-            .eq("visit_id", visit_id) \
-            .execute()
-    except Exception:
-        supabase.table("visit_services").delete() \
-            .eq("visit_id", visit_id) \
-            .execute()
+    if not current_org:
+        raise RuntimeError("Organization not selected")
 
-    # =====================
-    # delete old stock
-    # =====================
-    try:
-        supabase.table("visit_stock").delete() \
-            .eq("org_id", current_org) \
-            .eq("visit_id", visit_id) \
-            .execute()
-    except Exception:
-        supabase.table("visit_stock").delete() \
-            .eq("visit_id", visit_id) \
-            .execute()
+    # =====================================================
+    # УДАЛЯЕМ СТАРЫЕ СТРОКИ
+    # =====================================================
 
-    # =====================
-    # insert new services WITH SNAPSHOT (FROM PAYLOAD)
-    # =====================
-    if isinstance(services, list) and services:
-        rows = []
+    execute_with_retry(
+        lambda: (
+            supabase
+            .table("visit_services")
+            .delete()
+            .eq("org_id", current_org)
+            .eq("visit_id", visit_id)
+        )
+    )
 
-        for x in services:
-            service_id = x.get("serviceId") or x.get("service_id")
-            qty = x.get("qty") or 1
+    execute_with_retry(
+        lambda: (
+            supabase
+            .table("visit_stock")
+            .delete()
+            .eq("org_id", current_org)
+            .eq("visit_id", visit_id)
+        )
+    )
 
-            snap_price = x.get("priceSnap") or x.get("price_snap")
-            snap_name = x.get("nameSnap") or x.get("name_snap")
+    # =====================================================
+    # СОХРАНЯЕМ УСЛУГИ
+    # =====================================================
 
-            rows.append({
-                "org_id": current_org,          
-                "visit_id": visit_id,
-                "service_id": service_id,  
-                "qty": qty,
-                "price_snap": snap_price,  
-                "name_snap": snap_name,
-            })
+    service_rows = []
 
-        insert_with_optional_fallback(
-            "visit_services",
-            rows,
-            optional_fields=["org_id", "price_snap", "name_snap"]
+    for item in services:
+        if not isinstance(item, dict):
+            continue
+
+        service_id = (
+            item.get("serviceId")
+            or item.get("service_id")
         )
 
-    # =====================
-    # insert new stock
-    # =====================
-    if isinstance(stock, list) and stock:
-        rows = []
+        if not service_id:
+            continue
 
-        for x in stock:
-            rows.append({
-                "org_id": current_org,
-                "visit_id": visit_id,
-                "stock_id": x.get("stockId") or x.get("stock_id"),
-                "qty": x.get("qty") or 1,
-                "price_snap": x.get("priceSnap") or x.get("price_snap"),
-                "name_snap": x.get("nameSnap") or x.get("name_snap"),
-            })
+        service_rows.append({
+            "org_id": current_org,
+            "visit_id": visit_id,
+            "service_id": service_id,
+            "qty": item.get("qty") or 1,
+            "price_snap": (
+                item.get("priceSnap")
+                if item.get("priceSnap") is not None
+                else item.get("price_snap")
+            ),
+            "name_snap": (
+                item.get("nameSnap")
+                or item.get("name_snap")
+            ),
+        })
 
-        insert_with_optional_fallback(
-            "visit_stock",
-            rows,
-            optional_fields=["org_id", "price_snap", "name_snap"]
+    if service_rows:
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .insert(clean_payload(service_rows))
+            )
+        )
+
+    # =====================================================
+    # СОХРАНЯЕМ ПРЕПАРАТЫ
+    # =====================================================
+
+    stock_rows = []
+
+    for item in stock:
+        if not isinstance(item, dict):
+            continue
+
+        stock_id = (
+            item.get("stockId")
+            or item.get("stock_id")
+        )
+
+        if not stock_id:
+            continue
+
+        stock_rows.append({
+            "org_id": current_org,
+            "visit_id": visit_id,
+            "stock_id": stock_id,
+            "qty": item.get("qty") or 1,
+            "price_snap": (
+                item.get("priceSnap")
+                if item.get("priceSnap") is not None
+                else item.get("price_snap")
+            ),
+            "name_snap": (
+                item.get("nameSnap")
+                or item.get("name_snap")
+            ),
+        })
+
+    if stock_rows:
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_stock")
+                .insert(clean_payload(stock_rows))
+            )
         )
 
 
@@ -1580,18 +1656,7 @@ def api_get_staff_rating():
         print("❌ /api/staff/rating error:", repr(e))
         return fail(str(e), 500)
 
-def rebuild_staff_rating_silent():
-    try:
-        with app.test_request_context(
-            headers={
-                "X-Org-ID": get_current_org_id()
-            }
-        ):
-            res = api_rebuild_staff_rating()
-            return res
-    except Exception as e:
-        print("⚠️ rating silent rebuild failed:", repr(e))
-        return None
+
     
 # API: CALENDAR
 # =========================
@@ -1698,12 +1763,6 @@ def api_update_calendar_event(event_id):
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
 
-def rebuild_staff_rating_silent():
-    try:
-        return api_rebuild_staff_rating()
-    except Exception as e:
-        print("⚠️ rating silent rebuild failed:", repr(e))
-        return None
 
 # =========================
 # API: STAFF SCHEDULE
@@ -1884,12 +1943,18 @@ def api_get_visits():
 
 
 @app.put("/api/visits")
+@app.put("/api/visits")
 def api_update_visit_query():
     visit_id = (request.args.get("id") or "").strip()
+
     if not visit_id:
         return fail("id required", 400)
 
     d = request.get_json(silent=True) or {}
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail("Organization not selected", 400)
 
     payload = {
         "staff_id": d.get("staff_id"),
@@ -1900,37 +1965,50 @@ def api_update_visit_query():
         "weight_kg": d.get("weight_kg"),
     }
 
-    res = update_with_optional_fallback("visits", visit_id, payload)
-
     try:
-        save_visit_lines(visit_id, d)
-    except Exception as e:
-        return fail(f"save_visit_lines failed: {e}", 500)
-
-    try:
-        rebuild_staff_rating_silent()
-    except Exception as e:
-        print("⚠️ rating rebuild after update visit failed:", repr(e))
-
-    current_org = get_current_org_id()
-
-    if res is not None and getattr(res, "data", None):
-        base = res.data[0]
-    else:
-        get_res = (
-            supabase.table("visits")
-            .select("*")
-            .eq("org_id", current_org)
-            .eq("id", visit_id)
-            .execute()
+        res = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .update(clean_payload(payload))
+                .eq("org_id", current_org)
+                .eq("id", visit_id)
+            )
         )
-        base = get_res.data[0] if get_res.data else {"id": visit_id, **clean_payload(payload)}
 
-    services_map, stock_map = load_visit_lines([visit_id])
-    base["services"] = services_map.get(visit_id, [])
-    base["stock"] = stock_map.get(visit_id, [])
+        if not res.data:
+            return fail("Visit not found", 404)
 
-    return ok(base)
+        save_visit_lines(visit_id, d)
+
+        base = res.data[0]
+
+        services_map, stock_map = load_visit_lines(
+            [visit_id]
+        )
+
+        base["services"] = services_map.get(
+            visit_id,
+            []
+        )
+
+        base["stock"] = stock_map.get(
+            visit_id,
+            []
+        )
+
+        return ok(base)
+
+    except Exception as e:
+        print(
+            "❌ /api/visits PUT error:",
+            repr(e)
+        )
+
+        return fail(
+            f"Cannot update visit: {e}",
+            500
+        )
 
 
 @app.post("/api/visits")
@@ -1967,10 +2045,7 @@ def api_create_visit():
     except Exception as e:
         return fail(f"save_visit_lines failed: {e}", 500)
 
-    try:
-        rebuild_staff_rating_silent()
-    except Exception as e:
-        print("⚠️ rating rebuild after create visit failed:", repr(e))
+    
 
     services_map, stock_map = load_visit_lines([visit_id])
     row["services"] = services_map.get(visit_id, [])
@@ -2001,10 +2076,7 @@ def api_delete_visit(visit_id):
 
         supabase.table("visits").delete().eq("org_id", current_org).eq("id", visit_id).execute()
 
-        try:
-            rebuild_staff_rating_silent()
-        except Exception as e:
-            print("⚠️ rating rebuild after delete visit failed:", repr(e))
+       
 
         return ok(True)
 
