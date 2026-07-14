@@ -355,6 +355,7 @@ const TAB_ROUTES = new Set([
   "owners",
   "patients",
   "visits",
+  "hospital",
   "services",
   "calendar",
   "stock",
@@ -432,7 +433,8 @@ async function routeFromHash() {
     if (route === "owners") renderOwners();
     if (route === "patients") renderPatientsTab();
     if (route === "visits") renderVisitsTab();
-    if (route === "services") renderServicesTab();
+if (route === "hospital") renderHospitalTab();
+if (route === "services") renderServicesTab();
     if (route === "stock") renderStockTab();
     if (route === "team") renderTeamTab();
     if (route === "calendar") {
@@ -4616,7 +4618,380 @@ if (editBtn) {
     }
   };
 }
+function renderHospitalTab() {
+  const page =
+    document.querySelector(
+      '.page[data-page="hospital"]'
+    );
 
+  if (!page) return;
+
+  const hospitalPatients = [
+    {
+      id: "demo-hospital-1",
+      name: "Боня",
+      species: "Собака",
+      breed: "Французький бульдог",
+      owner: "Олена Коваль",
+      diagnosis: "Гострий гастроентерит",
+      doctor: "Ветеринарний лікар",
+      room: "Палата 1",
+      admittedAt: "Сьогодні, 09:20",
+      status: "stable",
+      nextAction: "Інфузія о 22:00",
+    },
+    {
+      id: "demo-hospital-2",
+      name: "Марта",
+      species: "Кішка",
+      breed: "Британська",
+      owner: "Ігор Мельник",
+      diagnosis: "Післяопераційне спостереження",
+      doctor: "Ветеринарний лікар",
+      room: "Палата 2",
+      admittedAt: "Учора, 18:40",
+      status: "observation",
+      nextAction: "Контроль температури о 21:45",
+    },
+  ];
+
+  const stableCount =
+    hospitalPatients.filter(
+      (item) => item.status === "stable"
+    ).length;
+
+  const observationCount =
+    hospitalPatients.filter(
+      (item) => item.status === "observation"
+    ).length;
+
+  const criticalCount =
+    hospitalPatients.filter(
+      (item) => item.status === "critical"
+    ).length;
+
+  page.innerHTML = `
+    <div class="hospitalPage">
+
+      <header class="hospitalHero">
+        <div>
+          <div class="hospitalEyebrow">
+            СТАЦІОНАР КЛІНІКИ
+          </div>
+
+          <h1>Пацієнти під наглядом</h1>
+
+          <p>
+            Контроль стану, призначень, процедур та догляду
+            за тваринами, які знаходяться у клініці.
+          </p>
+        </div>
+
+        <button
+          class="hospitalAdmitButton"
+          id="hospitalAdmitPatient"
+          type="button"
+        >
+          + Прийняти у стаціонар
+        </button>
+      </header>
+
+      <section class="hospitalStats">
+        <div class="hospitalStatCard">
+          <span>У стаціонарі</span>
+          <strong>${hospitalPatients.length}</strong>
+          <small>активних пацієнтів</small>
+        </div>
+
+        <div class="hospitalStatCard hospitalStatStable">
+          <span>Стабільні</span>
+          <strong>${stableCount}</strong>
+          <small>без погіршення</small>
+        </div>
+
+        <div class="hospitalStatCard hospitalStatWatch">
+          <span>Під наглядом</span>
+          <strong>${observationCount}</strong>
+          <small>потребують контролю</small>
+        </div>
+
+        <div class="hospitalStatCard hospitalStatCritical">
+          <span>Критичні</span>
+          <strong>${criticalCount}</strong>
+          <small>термінова увага</small>
+        </div>
+      </section>
+
+      <div class="hospitalToolbar">
+        <div class="hospitalFilters">
+          <button
+            class="hospitalFilter active"
+            type="button"
+            data-hospital-filter="all"
+          >
+            Усі
+          </button>
+
+          <button
+            class="hospitalFilter"
+            type="button"
+            data-hospital-filter="stable"
+          >
+            Стабільні
+          </button>
+
+          <button
+            class="hospitalFilter"
+            type="button"
+            data-hospital-filter="observation"
+          >
+            Під наглядом
+          </button>
+
+          <button
+            class="hospitalFilter"
+            type="button"
+            data-hospital-filter="critical"
+          >
+            Критичні
+          </button>
+        </div>
+
+        <input
+          class="hospitalSearch"
+          id="hospitalSearch"
+          type="search"
+          placeholder="Пошук пацієнта або власника..."
+        >
+      </div>
+
+      <section
+        class="hospitalPatientGrid"
+        id="hospitalPatientGrid"
+      >
+        ${hospitalPatients
+          .map(renderHospitalPatientCard)
+          .join("")}
+      </section>
+    </div>
+  `;
+
+  const renderFilteredPatients = () => {
+    const activeFilter =
+      page.querySelector(
+        ".hospitalFilter.active"
+      )?.dataset.hospitalFilter || "all";
+
+    const query =
+      String(
+        page.querySelector(
+          "#hospitalSearch"
+        )?.value || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const filtered =
+      hospitalPatients.filter((patient) => {
+        const matchesStatus =
+          activeFilter === "all" ||
+          patient.status === activeFilter;
+
+        const haystack = [
+          patient.name,
+          patient.owner,
+          patient.breed,
+          patient.diagnosis,
+          patient.room,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesQuery =
+          !query ||
+          haystack.includes(query);
+
+        return (
+          matchesStatus &&
+          matchesQuery
+        );
+      });
+
+    const grid =
+      page.querySelector(
+        "#hospitalPatientGrid"
+      );
+
+    if (!grid) return;
+
+    grid.innerHTML =
+      filtered.length
+        ? filtered
+            .map(renderHospitalPatientCard)
+            .join("")
+        : `
+          <div class="hospitalEmpty">
+            <div>🏥</div>
+            <h3>Пацієнтів не знайдено</h3>
+            <p>
+              Змініть фільтр або пошуковий запит.
+            </p>
+          </div>
+        `;
+  };
+
+  page
+    .querySelectorAll(
+      "[data-hospital-filter]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          page
+            .querySelectorAll(
+              "[data-hospital-filter]"
+            )
+            .forEach((item) => {
+              item.classList.remove(
+                "active"
+              );
+            });
+
+          button.classList.add(
+            "active"
+          );
+
+          renderFilteredPatients();
+        }
+      );
+    });
+
+  page
+    .querySelector("#hospitalSearch")
+    ?.addEventListener(
+      "input",
+      renderFilteredPatients
+    );
+
+  page
+    .querySelector(
+      "#hospitalAdmitPatient"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        alert(
+          "Наступним кроком додамо форму прийняття пацієнта у стаціонар."
+        );
+      }
+    );
+}
+
+function renderHospitalPatientCard(patient) {
+  const statusLabels = {
+    stable: "Стабільний",
+    observation: "Під наглядом",
+    critical: "Критичний",
+  };
+
+  const statusLabel =
+    statusLabels[patient.status] ||
+    "Під наглядом";
+
+  return `
+    <article
+      class="hospitalPatientCard hospitalStatus-${escapeHtml(
+        patient.status
+      )}"
+      data-hospital-patient="${escapeHtml(
+        patient.id
+      )}"
+    >
+      <div class="hospitalPatientTop">
+        <div class="hospitalPatientAvatar">
+          🐾
+        </div>
+
+        <div class="hospitalPatientIdentity">
+          <h2>
+            ${escapeHtml(patient.name)}
+          </h2>
+
+          <p>
+            ${escapeHtml(patient.species)}
+            •
+            ${escapeHtml(patient.breed)}
+          </p>
+        </div>
+
+        <span class="hospitalStatusBadge">
+          ${escapeHtml(statusLabel)}
+        </span>
+      </div>
+
+      <div class="hospitalPatientBody">
+        <div class="hospitalInfoRow">
+          <span>Власник</span>
+          <strong>
+            ${escapeHtml(patient.owner)}
+          </strong>
+        </div>
+
+        <div class="hospitalInfoRow">
+          <span>Діагноз</span>
+          <strong>
+            ${escapeHtml(patient.diagnosis)}
+          </strong>
+        </div>
+
+        <div class="hospitalInfoRow">
+          <span>Палата</span>
+          <strong>
+            ${escapeHtml(patient.room)}
+          </strong>
+        </div>
+
+        <div class="hospitalInfoRow">
+          <span>Лікар</span>
+          <strong>
+            ${escapeHtml(patient.doctor)}
+          </strong>
+        </div>
+
+        <div class="hospitalInfoRow">
+          <span>Надійшов</span>
+          <strong>
+            ${escapeHtml(patient.admittedAt)}
+          </strong>
+        </div>
+      </div>
+
+      <div class="hospitalNextAction">
+        <span>Наступна дія</span>
+        <strong>
+          ${escapeHtml(patient.nextAction)}
+        </strong>
+      </div>
+
+      <div class="hospitalPatientActions">
+        <button
+          type="button"
+          class="hospitalGhostButton"
+        >
+          Відкрити карту
+        </button>
+
+        <button
+          type="button"
+          class="hospitalPrimaryButton"
+        >
+          Призначення
+        </button>
+      </div>
+    </article>
+  `;
+}
 // =========================
 // VISITS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
 // =========================
