@@ -4083,7 +4083,7 @@ top: 0;
     min-width: 794px !important;
     max-width: 794px !important;
     margin: 0 !important;
-    padding: 32px !important;
+    padding: 18px !important;
     box-sizing: border-box !important;
     visibility: visible !important;
     opacity: 1 !important;
