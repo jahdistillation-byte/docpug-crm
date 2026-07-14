@@ -11936,150 +11936,147 @@ if (summaryStock) {
 
   // Навешуємо відкриття PDF виписки на кнопку
   // === СТИЛЬНАЯ ПРЕМИУМ-ВЫПИСКА ДЛЯ КЛИЕНТА ===
-  const btnPdf = document.getElementById("btnPrintVisitPdf");
-  if (btnPdf) {
-    btnPdf.onclick = (e) => {
-      e.preventDefault();
-      
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) return alert("Будь ласка, дозвольте спливаючі вікна для цього сайту!");
+  const btnPdf =
+  document.getElementById(
+    "btnPrintVisitPdf"
+  );
 
-      // Собираем свежие строки услуг и товаров прямо из DOM для точности
-      const servicesRows = expandedServices.map(x => `
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.95rem;">${escapeHtml(x.name)}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; text-align: center; font-size: 0.95rem;">${x.qty}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #1e1b4b; text-align: right; font-weight: 600; font-size: 0.95rem;">${x.lineTotal} ₴</td>
-        </tr>
-      `).join("");
+if (btnPdf) {
+  btnPdf.onclick = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-      const stockRows = expandedStock.map(x => `
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.95rem;">${escapeHtml(x.name)}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; text-align: center; font-size: 0.95rem;">${x.qty}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #1e1b4b; text-align: right; font-weight: 600; font-size: 0.95rem;">${x.lineTotal} ₴</td>
-        </tr>
-      `).join("");
+    const visitId =
+      visit?.id ||
+      visit?._id ||
+      state.selectedVisitId ||
+      "";
 
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Виписка: ${escapeHtml(pet?.name || "Пацієнт")}</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-            body { font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; padding: 40px; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .wrapper { max-width: 800px; margin: 0 auto; }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 30px; }
-            .logo { font-size: 1.6rem; font-weight: 700; color: #1e1b4b; display: flex; align-items: center; gap: 8px; }
-            .logo span { color: #a855f7; }
-            .clinic-info { text-align: right; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
-            .section { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #f1f5f9; }
-            .section-title { font-weight: 700; font-size: 0.9rem; color: #6b21a8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            .meta-item { font-size: 0.95rem; color: #334155; }
-            .meta-item b { color: #1e293b; font-weight: 600; }
-            .text-block { font-size: 0.95rem; color: #334155; line-height: 1.6; white-space: pre-wrap; margin: 0; }
-            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-            th { background: #f1f5f9; padding: 10px 12px; font-weight: 600; font-size: 0.85rem; color: #475569; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; }
-            th:first-child { border-radius: 6px 0 0 6px; }
-            th:last-child { border-radius: 0 6px 6px 0; }
-            .grand-total-box { display: flex; justify-content: space-between; align-items: center; background: #faf5ff; border: 1px solid #f3e8ff; border-radius: 12px; padding: 18px 24px; margin-top: 30px; }
-            .grand-total-label { font-size: 1rem; font-weight: 600; color: #6b21a8; }
-            .grand-total-value { font-size: 1.6rem; font-weight: 800; color: #7e22ce; }
-            @media print {
-              body { padding: 0; }
-              .section { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; }
-              .grand-total-box { background: #faf5ff !important; border: 1px solid #e9d5ff !important; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="wrapper">
-            
-            <div class="header">
-              <div class="logo">🐾 Doc.PUG <span>CRM</span></div>
-              <div class="clinic-info">
-                <b>Ветеринарна клініка Doc.PUG</b><br>
-                Електронний медичний висновок<br>
-                Дата візиту: ${escapeHtml(visit.date || "")}
-              </div>
-            </div>
-            
-            <div class="section">
-              <div class="section-title">🐾 Пацієнт та власник</div>
-              <div class="grid-2">
-                <div class="meta-item"><b>Кличка:</b> ${escapeHtml(pet?.name || "—")}</div>
-                <div class="meta-item"><b>Вага:</b> ${escapeHtml(String(visit.weight_kg || "—"))} кг</div>
-                <div class="meta-item"><b>Вид / Порода:</b> ${escapeHtml(pet?.species || "")} ${escapeHtml(pet?.breed || "—")}</div>
-                <div class="meta-item"><b>Статус:</b> Амбулаторний прийом</div>
-              </div>
-            </div>
+    if (!visitId) {
+      alert(
+        "Не вдалося визначити візит для друку."
+      );
+      return;
+    }
 
-            <div class="section">
-              <div class="section-title">📝 Скарги та анамнез стану</div>
-              <p class="text-block">${escapeHtml(document.getElementById("visitMedComplaint")?.value || "—")}</p>
-            </div>
+    const originalText =
+      btnPdf.textContent;
 
-            <div class="section">
-              <div class="section-title">🔍 Встановлений діагноз</div>
-              <p class="text-block" style="font-weight: 600; color: #1e293b;">${escapeHtml(document.getElementById("visitMedDx")?.value || "Клінічно здоровий")}</p>
-            </div>
+    btnPdf.disabled = true;
+    btnPdf.textContent =
+      "Підготовка документа…";
 
-            <div class="section">
-              <div class="section-title">💊 Призначене лікування (Rx)</div>
-              <p class="text-block" style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">${escapeHtml(document.getElementById("visitMedRx")?.value || "Рекомендовано нагляд")}</p>
-            </div>
+    try {
+      // Сохраняем актуальные значения медицинской формы
+      // перед созданием выписки
+      if (
+        typeof setDischarge === "function" &&
+        typeof readDischargeForm === "function"
+      ) {
+        setDischarge(
+          visitId,
+          readDischargeForm()
+        );
+      }
 
-            ${servicesRows ? `
-            <div class="section" style="background: #fff; padding: 10px 0; border: none;">
-              <div class="section-title" style="padding-left: 12px;">💼 Надані клінічні послуги</div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Назва послуги</th>
-                    <th style="text-align:center; width: 80px;">К-сть</th>
-                    <th style="text-align:right; width: 120px;">Сума</th>
-                  </tr>
-                </thead>
-                <tbody>${servicesRows}</tbody>
-              </table>
-            </div>` : ""}
+      // Строим новый премиальный документ в #disA4
+      await renderDischargeA4(
+        visitId
+      );
 
-            ${stockRows ? `
-            <div class="section" style="background: #fff; padding: 10px 0; border: none;">
-              <div class="section-title" style="padding-left: 12px;">📦 Використані медикаменти та матеріали</div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Назва препарату</th>
-                    <th style="text-align:center; width: 80px;">К-сть</th>
-                    <th style="text-align:right; width: 120px;">Сума</th>
-                  </tr>
-                </thead>
-                <tbody>${stockRows}</tbody>
-              </table>
-            </div>` : ""}
+      const printDocument =
+        document.getElementById(
+          "disA4"
+        );
 
-            <div class="grand-total-box">
-              <div class="grand-total-label">Загальна вартість прийому</div>
-              <div class="grand-total-value">${grandTotal} ₴</div>
-            </div>
+      if (!printDocument) {
+        throw new Error(
+          "Не знайдено блок #disA4"
+        );
+      }
 
-          </div>
-          <script>
-            window.onload = function() { 
-              setTimeout(function() { window.print(); }, 300); 
-            };
-          </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    };
-  }
-  const completeButton =
+      // Даём браузеру закончить отрисовку логотипа,
+      // таблиц, подписи и печати
+      await new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(
+            resolve
+          );
+        });
+      });
+
+      const images = Array.from(
+        printDocument.querySelectorAll(
+          "img"
+        )
+      );
+
+      await Promise.all(
+        images.map((image) => {
+          if (image.complete) {
+            return Promise.resolve();
+          }
+
+          return new Promise((resolve) => {
+            image.addEventListener(
+              "load",
+              resolve,
+              { once: true }
+            );
+
+            image.addEventListener(
+              "error",
+              resolve,
+              { once: true }
+            );
+
+            setTimeout(
+              resolve,
+              3000
+            );
+          });
+        })
+      );
+
+      document.body.classList.add(
+        "docpug-printing"
+      );
+
+      setTimeout(() => {
+        window.print();
+
+        setTimeout(() => {
+          document.body.classList.remove(
+            "docpug-printing"
+          );
+        }, 500);
+      }, 100);
+    } catch (error) {
+      console.error(
+        "Помилка друку виписки:",
+        error
+      );
+
+      document.body.classList.remove(
+        "docpug-printing"
+      );
+
+      alert(
+        "Не вдалося підготувати виписку до друку: " +
+        (
+          error?.message ||
+          error
+        )
+      );
+    } finally {
+      btnPdf.disabled = false;
+      btnPdf.textContent =
+        originalText;
+    }
+  };
+}
+
+const completeButton =
   document.getElementById(
     "visitCompleteButton"
   );
@@ -12090,8 +12087,11 @@ if (completeButton) {
   completeButton.title =
     "Статус завершення підключимо після додавання поля status у базу";
 
-  completeButton.style.opacity = "0.45";
-  completeButton.style.cursor = "not-allowed";
+  completeButton.style.opacity =
+    "0.45";
+
+  completeButton.style.cursor =
+    "not-allowed";
 }
 }
 
