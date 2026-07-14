@@ -19530,3 +19530,20 @@ select.visitControl {
 .disModernServicesBlock {
   align-self: auto !important;
 }
+/* PDF: финансовый блок можно делить между страницами */
+.disModernFinanceSection {
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+  overflow: visible !important;
+}
+
+.disModernTableWrap {
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+  overflow: visible !important;
+}
+
+.disModernTable tr {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}

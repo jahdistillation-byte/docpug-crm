@@ -4276,19 +4276,19 @@ clonedDoc.style.maxWidth = "1120px";
 },
 
         pagebreak: {
-          mode: [
-            "css",
-            "legacy",
-          ],
+  mode: [
+    "css",
+    "legacy",
+  ],
 
-          avoid: [
-            ".disModernHead",
-            ".disModernCard",
-            ".disModernSection",
-            ".disModernSignGrid",
-            ".disModernFinanceSummary",
-          ],
-        },
+  avoid: [
+    ".disModernCard",
+    ".disModernSignGrid",
+    ".disModernFinanceSummary",
+    ".disModernFinanceHead",
+    ".disModernTable tr",
+  ],
+},
       })
       .from(exportDocument)
 .save();
