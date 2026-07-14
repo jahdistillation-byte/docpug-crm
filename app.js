@@ -4055,9 +4055,9 @@ async function downloadA4Pdf(visitId) {
     position: fixed;
 left: 0;
 top: 0;
-    width: 794px;
-    min-width: 794px;
-    max-width: 794px;
+    width: 1120px;
+min-width: 1120px;
+max-width: 1120px;
     margin: 0;
     padding: 0;
     display: block;
@@ -4079,9 +4079,9 @@ top: 0;
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
-    width: 794px !important;
-    min-width: 794px !important;
-    max-width: 794px !important;
+    width: 1120px !important;
+min-width: 1120px !important;
+max-width: 1120px !important;
     margin: 0 !important;
     padding: 18px !important;
     box-sizing: border-box !important;
@@ -4171,8 +4171,8 @@ top: 0;
           x: 0,
           y: 0,
 
-          width: 794,
-          windowWidth: 794,
+          width: 1120,
+windowWidth: 1120,
 
           onclone: (
             clonedDocument
@@ -4193,14 +4193,9 @@ top: 0;
             clonedRoot.style.top =
               "0";
 
-            clonedRoot.style.width =
-              "794px";
-
-            clonedRoot.style.minWidth =
-              "794px";
-
-            clonedRoot.style.maxWidth =
-              "794px";
+            clonedRoot.style.width = "1120px";
+clonedRoot.style.minWidth = "1120px";
+clonedRoot.style.maxWidth = "1120px";
 
             clonedRoot.style.margin =
               "0";
@@ -4238,14 +4233,9 @@ top: 0;
               clonedDoc.style.top =
                 "0";
 
-              clonedDoc.style.width =
-                "794px";
-
-              clonedDoc.style.minWidth =
-                "794px";
-
-              clonedDoc.style.maxWidth =
-                "794px";
+              clonedDoc.style.width = "1120px";
+clonedDoc.style.minWidth = "1120px";
+clonedDoc.style.maxWidth = "1120px";
 
               clonedDoc.style.margin =
                 "0";
@@ -4281,14 +4271,11 @@ top: 0;
         },
 
         jsPDF: {
-          unit: "px",
-          format: [
-            794,
-            1123,
-          ],
-          orientation: "portrait",
-          compress: true,
-        },
+  unit: "mm",
+  format: "a4",
+  orientation: "portrait",
+  compress: true,
+},
 
         pagebreak: {
           mode: [
