@@ -4019,11 +4019,21 @@ async function downloadA4Pdf(visitId) {
     return;
   }
 
-  const a4 = document.getElementById("disA4");
-  if (!a4) return alert("Не найден block A4 (#disA4).");
+  await renderDischargeA4(
+  visitId
+);
 
-  setDischarge(visitId, readDischargeForm());
-  renderDischargeA4(visitId);
+const a4 =
+  document.getElementById(
+    "disA4"
+  );
+
+if (!a4) {
+  alert(
+    "Не знайдено блок виписки #disA4."
+  );
+  return;
+}
 
   const prevOverflow = document.body.style.overflow;
   document.body.style.overflow = "hidden";
@@ -12034,9 +12044,11 @@ if (
     currentVisit
   );
 }
-await downloadVisitDischargePdf(
+await downloadA4Pdf(
   visitId
 );
+
+return;
 
 if (!printWindow) {
   throw new Error(
