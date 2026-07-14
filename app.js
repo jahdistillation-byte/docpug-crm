@@ -5501,6 +5501,865 @@ async function renderVisitsTab() {
   paint();
 }
 
+async function openHospitalAdmissionModal() {
+  document
+    .getElementById("hospitalAdmissionModal")
+    ?.remove();
+
+  const loadingModal =
+    document.createElement("div");
+
+  loadingModal.id =
+    "hospitalAdmissionModal";
+
+  loadingModal.className =
+    "hospitalAdmissionOverlay";
+
+  loadingModal.innerHTML = `
+    <section class="hospitalAdmissionModal">
+      <div class="hospitalAdmissionLoading">
+        <div class="hospitalAdmissionSpinner"></div>
+        <strong>Завантаження пацієнтів…</strong>
+      </div>
+    </section>
+  `;
+
+  document.body.appendChild(
+    loadingModal
+  );
+
+  let patients = [];
+  let owners = [];
+  let staff = [];
+
+  try {
+    const results =
+      await Promise.all([
+        loadPatientsApi(),
+        loadOwners(),
+        loadStaffApi(),
+      ]);
+
+    patients =
+      Array.isArray(results[0])
+        ? results[0]
+        : Array.isArray(state.patients)
+          ? state.patients
+          : [];
+
+    owners =
+      Array.isArray(results[1])
+        ? results[1]
+        : Array.isArray(state.owners)
+          ? state.owners
+          : [];
+
+    staff =
+      Array.isArray(results[2])
+        ? results[2]
+        : [];
+  } catch (error) {
+    console.error(
+      "Hospital admission load error:",
+      error
+    );
+  }
+
+  const activeHospitalizations =
+    Array.isArray(
+      window.__hospitalPatients
+    )
+      ? window.__hospitalPatients
+      : [];
+
+  const hospitalizedPatientIds =
+    new Set(
+      activeHospitalizations
+        .map((item) =>
+          String(
+            item.patient_id || ""
+          )
+        )
+        .filter(Boolean)
+    );
+
+  const availablePatients =
+    patients.filter((patient) => {
+      return !hospitalizedPatientIds.has(
+        String(patient.id)
+      );
+    });
+
+  const ownersMap =
+    new Map(
+      owners.map((owner) => [
+        String(owner.id),
+        owner,
+      ])
+    );
+
+  const activeStaff =
+    staff.filter((employee) => {
+      return employee.is_active !== false;
+    });
+
+  const now =
+    new Date();
+
+  const localDateTime =
+    new Date(
+      now.getTime() -
+      now.getTimezoneOffset() *
+        60000
+    )
+      .toISOString()
+      .slice(0, 16);
+
+  loadingModal.innerHTML = `
+    <div
+      class="hospitalAdmissionBackdrop"
+      data-close-hospital-admission
+    ></div>
+
+    <section
+      class="hospitalAdmissionModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      <header class="hospitalAdmissionHeader">
+        <div>
+          <div class="hospitalAdmissionEyebrow">
+            НОВА ГОСПІТАЛІЗАЦІЯ
+          </div>
+
+          <h2>
+            Прийняти у стаціонар
+          </h2>
+
+          <p>
+            Оберіть пацієнта та вкажіть
+            основні дані госпіталізації.
+          </p>
+        </div>
+
+        <button
+          class="hospitalAdmissionClose"
+          type="button"
+          data-close-hospital-admission
+        >
+          ✕
+        </button>
+      </header>
+
+      <form
+        class="hospitalAdmissionForm"
+        id="hospitalAdmissionForm"
+      >
+        <div class="hospitalAdmissionGrid">
+          <section class="hospitalAdmissionSection">
+            <div class="hospitalAdmissionSectionTitle">
+              <span>🐾</span>
+
+              <div>
+                <strong>
+                  Пацієнт
+                </strong>
+
+                <small>
+                  Оберіть із бази клініки
+                </small>
+              </div>
+            </div>
+
+            <input
+              class="hospitalAdmissionInput"
+              id="hospitalPatientSearch"
+              type="search"
+              placeholder="Пошук за ім’ям пацієнта або власника..."
+              autocomplete="off"
+            >
+
+            <div
+              class="hospitalPatientSelectList"
+              id="hospitalPatientSelectList"
+            ></div>
+
+            <input
+              id="hospitalSelectedPatientId"
+              type="hidden"
+            >
+          </section>
+
+          <section class="hospitalAdmissionSection">
+            <div class="hospitalAdmissionSectionTitle">
+              <span>🏥</span>
+
+              <div>
+                <strong>
+                  Дані стаціонару
+                </strong>
+
+                <small>
+                  Статус, палата та лікар
+                </small>
+              </div>
+            </div>
+
+            <label class="hospitalAdmissionField">
+              <span>
+                Лікуючий лікар
+              </span>
+
+              <select
+                class="hospitalAdmissionInput"
+                id="hospitalDoctorId"
+              >
+                <option value="">
+                  Оберіть лікаря
+                </option>
+
+                ${activeStaff
+                  .map((employee) => `
+                    <option
+                      value="${escapeHtml(
+                        String(
+                          employee.id
+                        )
+                      )}"
+                    >
+                      ${escapeHtml(
+                        employee.name ||
+                        "Працівник"
+                      )}
+                    </option>
+                  `)
+                  .join("")}
+              </select>
+            </label>
+
+            <div class="hospitalAdmissionFieldsRow">
+              <label class="hospitalAdmissionField">
+                <span>
+                  Палата / місце
+                </span>
+
+                <input
+                  class="hospitalAdmissionInput"
+                  id="hospitalRoom"
+                  type="text"
+                  placeholder="Наприклад, Палата 1"
+                >
+              </label>
+
+              <label class="hospitalAdmissionField">
+                <span>
+                  Статус
+                </span>
+
+                <select
+                  class="hospitalAdmissionInput"
+                  id="hospitalStatus"
+                >
+                  <option value="stable">
+                    Стабільний
+                  </option>
+
+                  <option
+                    value="observation"
+                    selected
+                  >
+                    Під наглядом
+                  </option>
+
+                  <option value="critical">
+                    Критичний
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <label class="hospitalAdmissionField">
+              <span>
+                Дата і час надходження
+              </span>
+
+              <input
+                class="hospitalAdmissionInput"
+                id="hospitalAdmittedAt"
+                type="datetime-local"
+                value="${escapeHtml(
+                  localDateTime
+                )}"
+              >
+            </label>
+
+            <label class="hospitalAdmissionField">
+              <span>
+                Планова дата виписки
+              </span>
+
+              <input
+                class="hospitalAdmissionInput"
+                id="hospitalPlannedDischarge"
+                type="datetime-local"
+              >
+            </label>
+          </section>
+        </div>
+
+        <section class="hospitalAdmissionSection hospitalAdmissionSectionFull">
+          <div class="hospitalAdmissionSectionTitle">
+            <span>🩺</span>
+
+            <div>
+              <strong>
+                Медична інформація
+              </strong>
+
+              <small>
+                Причина госпіталізації
+              </small>
+            </div>
+          </div>
+
+          <label class="hospitalAdmissionField">
+            <span>
+              Діагноз
+            </span>
+
+            <textarea
+              class="hospitalAdmissionTextarea"
+              id="hospitalDiagnosis"
+              rows="3"
+              placeholder="Основний або попередній діагноз..."
+            ></textarea>
+          </label>
+
+          <label class="hospitalAdmissionField">
+            <span>
+              Примітки
+            </span>
+
+            <textarea
+              class="hospitalAdmissionTextarea"
+              id="hospitalNotes"
+              rows="3"
+              placeholder="Особливості стану, догляду або спостереження..."
+            ></textarea>
+          </label>
+        </section>
+
+        <div
+          class="hospitalSelectedPatientPreview"
+          id="hospitalSelectedPatientPreview"
+          hidden
+        ></div>
+
+        <footer class="hospitalAdmissionFooter">
+          <button
+            class="hospitalAdmissionCancel"
+            type="button"
+            data-close-hospital-admission
+          >
+            Скасувати
+          </button>
+
+          <button
+            class="hospitalAdmissionSubmit"
+            id="hospitalAdmissionSubmit"
+            type="submit"
+          >
+            Прийняти у стаціонар
+          </button>
+        </footer>
+      </form>
+    </section>
+  `;
+
+  const closeModal = () => {
+    loadingModal.remove();
+  };
+
+  loadingModal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-hospital-admission]"
+        )
+      ) {
+        closeModal();
+      }
+    }
+  );
+
+  loadingModal.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    }
+  );
+
+  const patientList =
+    loadingModal.querySelector(
+      "#hospitalPatientSelectList"
+    );
+
+  const patientSearch =
+    loadingModal.querySelector(
+      "#hospitalPatientSearch"
+    );
+
+  const selectedPatientInput =
+    loadingModal.querySelector(
+      "#hospitalSelectedPatientId"
+    );
+
+  const selectedPreview =
+    loadingModal.querySelector(
+      "#hospitalSelectedPatientPreview"
+    );
+
+  let selectedPatientId = "";
+
+  const renderPatientList = () => {
+    const query =
+      String(
+        patientSearch?.value || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const filteredPatients =
+      availablePatients.filter(
+        (patient) => {
+          const owner =
+            ownersMap.get(
+              String(
+                patient.owner_id
+              )
+            ) || {};
+
+          const searchable = [
+            patient.name,
+            patient.species,
+            patient.breed,
+            owner.name,
+            owner.phone,
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return (
+            !query ||
+            searchable.includes(query)
+          );
+        }
+      );
+
+    if (!patientList) return;
+
+    if (!availablePatients.length) {
+      patientList.innerHTML = `
+        <div class="hospitalPatientSelectEmpty">
+          <strong>
+            Немає доступних пацієнтів
+          </strong>
+
+          <span>
+            Усі пацієнти вже знаходяться
+            у стаціонарі або база порожня.
+          </span>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (!filteredPatients.length) {
+      patientList.innerHTML = `
+        <div class="hospitalPatientSelectEmpty">
+          <strong>
+            Нічого не знайдено
+          </strong>
+
+          <span>
+            Змініть пошуковий запит.
+          </span>
+        </div>
+      `;
+
+      return;
+    }
+
+    patientList.innerHTML =
+      filteredPatients
+        .slice(0, 30)
+        .map((patient) => {
+          const owner =
+            ownersMap.get(
+              String(
+                patient.owner_id
+              )
+            ) || {};
+
+          const isSelected =
+            String(patient.id) ===
+            String(
+              selectedPatientId
+            );
+
+          const description = [
+            patient.species,
+            patient.breed,
+          ]
+            .filter(Boolean)
+            .join(" • ");
+
+          return `
+            <button
+              class="
+                hospitalPatientSelectItem
+                ${
+                  isSelected
+                    ? "selected"
+                    : ""
+                }
+              "
+              type="button"
+              data-select-hospital-patient="${
+                escapeHtml(
+                  String(patient.id)
+                )
+              }"
+            >
+              <span class="hospitalPatientSelectAvatar">
+                🐾
+              </span>
+
+              <span class="hospitalPatientSelectMain">
+                <strong>
+                  ${escapeHtml(
+                    patient.name ||
+                    "Пацієнт"
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    description ||
+                    "Вид та порода не вказані"
+                  )}
+                </small>
+              </span>
+
+              <span class="hospitalPatientSelectOwner">
+                <strong>
+                  ${escapeHtml(
+                    owner.name ||
+                    "Власник не вказаний"
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    owner.phone ||
+                    ""
+                  )}
+                </small>
+              </span>
+
+              <span class="hospitalPatientSelectCheck">
+                ${
+                  isSelected
+                    ? "✓"
+                    : ""
+                }
+              </span>
+            </button>
+          `;
+        })
+        .join("");
+  };
+
+  const renderSelectedPreview = () => {
+    const patient =
+      availablePatients.find(
+        (item) =>
+          String(item.id) ===
+          String(
+            selectedPatientId
+          )
+      );
+
+    if (
+      !patient ||
+      !selectedPreview
+    ) {
+      if (selectedPreview) {
+        selectedPreview.hidden =
+          true;
+      }
+
+      return;
+    }
+
+    const owner =
+      ownersMap.get(
+        String(patient.owner_id)
+      ) || {};
+
+    const description = [
+      patient.species,
+      patient.breed,
+    ]
+      .filter(Boolean)
+      .join(" • ");
+
+    selectedPreview.hidden =
+      false;
+
+    selectedPreview.innerHTML = `
+      <div class="hospitalSelectedPatientIcon">
+        🐾
+      </div>
+
+      <div>
+        <span>
+          Обраний пацієнт
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            patient.name ||
+            "Пацієнт"
+          )}
+        </strong>
+
+        <small>
+          ${escapeHtml(
+            description ||
+            "Дані не вказані"
+          )}
+          ·
+          ${escapeHtml(
+            owner.name ||
+            "Власник не вказаний"
+          )}
+        </small>
+      </div>
+    `;
+  };
+
+  renderPatientList();
+
+  patientSearch?.addEventListener(
+    "input",
+    renderPatientList
+  );
+
+  patientList?.addEventListener(
+    "click",
+    (event) => {
+      const button =
+        event.target.closest(
+          "[data-select-hospital-patient]"
+        );
+
+      if (!button) return;
+
+      selectedPatientId =
+        button.dataset
+          .selectHospitalPatient ||
+        "";
+
+      if (selectedPatientInput) {
+        selectedPatientInput.value =
+          selectedPatientId;
+      }
+
+      renderPatientList();
+      renderSelectedPreview();
+    }
+  );
+
+  loadingModal
+    .querySelector(
+      "#hospitalAdmissionForm"
+    )
+    ?.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const patientId =
+          String(
+            selectedPatientInput
+              ?.value || ""
+          ).trim();
+
+        const doctorId =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalDoctorId"
+              )
+              ?.value || ""
+          ).trim();
+
+        const room =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalRoom"
+              )
+              ?.value || ""
+          ).trim();
+
+        const status =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalStatus"
+              )
+              ?.value ||
+            "observation"
+          ).trim();
+
+        const admittedAt =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalAdmittedAt"
+              )
+              ?.value || ""
+          ).trim();
+
+        const plannedDischarge =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalPlannedDischarge"
+              )
+              ?.value || ""
+          ).trim();
+
+        const diagnosis =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalDiagnosis"
+              )
+              ?.value || ""
+          ).trim();
+
+        const notes =
+          String(
+            loadingModal
+              .querySelector(
+                "#hospitalNotes"
+              )
+              ?.value || ""
+          ).trim();
+
+        if (!patientId) {
+          alert(
+            "Оберіть пацієнта."
+          );
+          return;
+        }
+
+        if (!doctorId) {
+          alert(
+            "Оберіть лікуючого лікаря."
+          );
+          return;
+        }
+
+        if (!room) {
+          alert(
+            "Вкажіть палату або місце."
+          );
+          return;
+        }
+
+        if (!diagnosis) {
+          alert(
+            "Вкажіть діагноз."
+          );
+          return;
+        }
+
+        const submitButton =
+          loadingModal.querySelector(
+            "#hospitalAdmissionSubmit"
+          );
+
+        if (submitButton) {
+          submitButton.disabled =
+            true;
+
+          submitButton.textContent =
+            "Збереження…";
+        }
+
+        const payload = {
+          patient_id:
+            patientId,
+
+          doctor_id:
+            doctorId,
+
+          room,
+
+          status,
+
+          diagnosis,
+
+          notes,
+
+          admitted_at:
+            admittedAt
+              ? new Date(
+                  admittedAt
+                ).toISOString()
+              : new Date()
+                  .toISOString(),
+
+          planned_discharge_at:
+            plannedDischarge
+              ? new Date(
+                  plannedDischarge
+                ).toISOString()
+              : null,
+        };
+
+        const created =
+          await createHospitalizationApi(
+            payload
+          );
+
+        if (!created) {
+          if (submitButton) {
+            submitButton.disabled =
+              false;
+
+            submitButton.textContent =
+              "Прийняти у стаціонар";
+          }
+
+          return;
+        }
+
+        closeModal();
+
+        await renderHospitalTab();
+      }
+    );
+}
+
 // =========================
 // OWNER PAGE — Рендеринг карточки владельца и его животных
 // =========================
