@@ -51,6 +51,61 @@ def get_current_org_id():
         return org_id.strip()
     return os.getenv("ORG_ID")
 
+
+def get_current_user():
+    """
+    Возвращает текущего пользователя клиники по данным входа.
+
+    Временная схема:
+    фронтенд передает X-Clinic-Username.
+    Позже заменим это на защищенную серверную сессию.
+    """
+    username = (request.headers.get("X-Clinic-Username") or "").strip()
+
+    if not username:
+        return None
+
+    try:
+        current_org = get_current_org_id()
+
+        res = (
+            supabase.table("clinic_users")
+            .select("username, org_id, role, display_name, is_active")
+            .eq("org_id", current_org)
+            .eq("username", username)
+            .limit(1)
+            .execute()
+        )
+
+        if not res.data:
+            return None
+
+        user = res.data[0]
+
+        if user.get("is_active") is False:
+            return None
+
+        return user
+
+    except Exception as e:
+        print("⚠️ get_current_user failed:", repr(e))
+        return None
+
+
+def owner_required():
+    """
+    Проверяет, что текущий пользователь — владелец клиники.
+    Возвращает пользователя или готовый ответ с ошибкой.
+    """
+    user = get_current_user()
+
+    if not user:
+        return None, fail("Unauthorized", 401)
+
+    if user.get("role") != "owner":
+        return None, fail("Owner access required", 403)
+
+    return user, None
 # =========================
 # STATIC UPLOADS
 # =========================
