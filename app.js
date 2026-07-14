@@ -4052,9 +4052,9 @@ async function downloadA4Pdf(visitId) {
     "dischargePdfExportRoot";
 
   exportRoot.style.cssText = `
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: fixed;
+left: 0;
+top: 0;
     width: 794px;
     min-width: 794px;
     max-width: 794px;
@@ -4067,7 +4067,7 @@ async function downloadA4Pdf(visitId) {
     overflow: visible;
     box-sizing: border-box;
     pointer-events: none;
-    z-index: -999999;
+    z-index: 2147483647;
     transform: none;
   `;
 
@@ -4305,8 +4305,8 @@ async function downloadA4Pdf(visitId) {
           ],
         },
       })
-      .from(exportRoot)
-      .save();
+      .from(exportDocument)
+.save();
   } catch (error) {
     console.error(
       "downloadA4Pdf failed:",
