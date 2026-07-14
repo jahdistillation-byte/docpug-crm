@@ -4814,11 +4814,30 @@ async function loadStaffApi() {
   try {
     const res = await fetch("/api/staff");
     const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot load staff");
-    return Array.isArray(json.items) ? json.items : Array.isArray(json.data) ? json.data : [];
+
+    if (!json.ok) {
+      throw new Error(json.error || "Cannot load staff");
+    }
+
+    const items =
+      Array.isArray(json.items)
+        ? json.items
+        : Array.isArray(json.data)
+        ? json.data
+        : [];
+
+    // <<< ВОТ ЭТОГО НЕ ХВАТАЛО
+    state.staff = items;
+
+    return items;
+
   } catch (e) {
     console.error("loadStaffApi failed:", e);
+
+    state.staff = [];
+
     alert("Не вдалося завантажити ветеринарів: " + (e?.message || e));
+
     return [];
   }
 }
