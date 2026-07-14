@@ -264,8 +264,20 @@ const LS = {
 };
 
 function getOrgHeaders() {
-    const orgId = sessionStorage.getItem("pug_active_org_id");
-    return orgId ? { "X-Org-ID": orgId } : {};
+  const orgId = sessionStorage.getItem("pug_active_org_id");
+  const username = sessionStorage.getItem("pug_active_username");
+
+  const headers = {};
+
+  if (orgId) {
+    headers["X-Org-ID"] = orgId;
+  }
+
+  if (username) {
+    headers["X-Clinic-Username"] = username;
+  }
+
+  return headers;
 }
 
 
@@ -12773,9 +12785,28 @@ async function init() {
   
   // Проверяем, входил ли пользователь ранее в этой сессии
   const cachedOrg = sessionStorage.getItem("pug_active_org_id");
-  if (cachedOrg) {
-    if (authOverlay) authOverlay.style.display = "none";
+const cachedUsername = sessionStorage.getItem("pug_active_username");
+const cachedDisplayName = sessionStorage.getItem(
+  "pug_active_display_name"
+);
+const cachedRole = sessionStorage.getItem("pug_active_role");
+const cachedClinicName = sessionStorage.getItem(
+  "pug_active_clinic_name"
+);
+
+if (cachedOrg && cachedUsername) {
+  state.me = {
+    org_id: cachedOrg,
+    username: cachedUsername,
+    display_name: cachedDisplayName || cachedUsername,
+    role: cachedRole || "staff",
+    clinic_name: cachedClinicName || "Клініка",
+  };
+
+  if (authOverlay) {
+    authOverlay.style.display = "none";
   }
+}
 
   if (authForm) {
     authForm.addEventListener("submit", async (e) => {
@@ -12807,9 +12838,55 @@ async function init() {
           return;
         }
 
-        // Сохраняем активный org_id в сессию браузера
-        sessionStorage.setItem("pug_active_org_id", json.data.org_id);
-        console.log(`Успешный вход в клинику: ${json.data.clinic_name}`);
+        // Сохраняем данные активного пользователя и клиники
+sessionStorage.setItem(
+  "pug_active_org_id",
+  String(json.data.org_id || "")
+);
+
+sessionStorage.setItem(
+  "pug_active_username",
+  String(json.data.username || username || "")
+);
+
+sessionStorage.setItem(
+  "pug_active_display_name",
+  String(
+    json.data.display_name ||
+    json.data.username ||
+    username ||
+    "Користувач"
+  )
+);
+
+sessionStorage.setItem(
+  "pug_active_role",
+  String(json.data.role || "staff")
+);
+
+sessionStorage.setItem(
+  "pug_active_clinic_name",
+  String(json.data.clinic_name || "Клініка")
+);
+
+state.me = {
+  org_id: json.data.org_id,
+  username: json.data.username || username,
+  display_name:
+    json.data.display_name ||
+    json.data.username ||
+    username ||
+    "Користувач",
+  role: json.data.role || "staff",
+  clinic_name: json.data.clinic_name || "Клініка",
+};
+
+console.log(
+  "Успішний вхід:",
+  state.me.display_name,
+  state.me.role,
+  state.me.clinic_name
+);
 
         // Прячем красивый оверлей
         if (authOverlay) {
