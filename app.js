@@ -139,6 +139,7 @@ const state = {
   route: "owners",
   apiOk: null,
   me: null,
+  clinicProfile: null,
 
   owners: [],
   patients: [],
@@ -12731,36 +12732,1029 @@ listElement.onclick = async (e) => {
 // НАСТРОЙКИ СИСТЕМЫ — ЛОГИКА И ХЕНДЛЕРЫ
 // ==========================================
 // Функция инициализации настроек: темы, язык
-function initSettingsUI() {
-  const page = document.querySelector('.page[data-page="settings"]');
-  if (!page) return;
 
-  if (page.dataset.boundSettings === "1") return;
-  page.dataset.boundSettings = "1";
+const DEFAULT_CLINIC_PROFILE = {
+  id: "",
+  name: "Ветеринарна клініка",
+  subtitle: "Ветеринарна клініка",
+  logo_url: "",
+  phone: "",
+  address: "",
+  website: "",
+  document_accent_color: "#9346E8",
+  doctor_signature_url: "",
+  clinic_stamp_url: "",
+  document_footer: "Коли важливо — ми поруч.",
+};
 
-  // Слушатель тем
-  page.querySelectorAll("[data-theme-set]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const theme = btn.dataset.themeSet;
-      // Применяем тему
-      document.body.dataset.theme = theme;
-      // Сохраняем в память
-      LS.set("docpug_clinic_theme", theme);
-      
-      // Обновляем визуал кнопок
-      page.querySelectorAll("[data-theme-set]").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
+function getClinicProfile() {
+  return {
+    ...DEFAULT_CLINIC_PROFILE,
+    ...(state.clinicProfile || {}),
+  };
+}
+
+async function loadClinicProfileApi() {
+  try {
+    const response = await fetch(
+      "/api/organization/profile",
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const text = await response.text();
+
+    let json = null;
+
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = null;
+    }
+
+    if (!response.ok || !json?.ok) {
+      throw new Error(
+        json?.error ||
+        `Помилка завантаження профілю клініки HTTP ${response.status}`
+      );
+    }
+
+    const profile = {
+      ...DEFAULT_CLINIC_PROFILE,
+      ...(json.data || {}),
+    };
+
+    state.clinicProfile = profile;
+
+    return profile;
+  } catch (error) {
+    console.error("loadClinicProfileApi failed:", error);
+
+    state.clinicProfile = {
+      ...DEFAULT_CLINIC_PROFILE,
+      name:
+        state.me?.clinic_name ||
+        sessionStorage.getItem("pug_active_clinic_name") ||
+        DEFAULT_CLINIC_PROFILE.name,
+    };
+
+    return state.clinicProfile;
+  }
+}
+
+async function saveClinicProfileApi(payload = {}) {
+  try {
+    const response = await fetch(
+      "/api/organization/profile",
+      {
+        method: "PUT",
+        credentials: "include",
+
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const text = await response.text();
+
+    let json = null;
+
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = null;
+    }
+
+    if (!response.ok || !json?.ok) {
+      throw new Error(
+        json?.error ||
+        `Помилка збереження профілю клініки HTTP ${response.status}`
+      );
+    }
+
+    state.clinicProfile = {
+      ...DEFAULT_CLINIC_PROFILE,
+      ...(json.data || {}),
+    };
+
+    if (state.me) {
+      state.me.clinic_name =
+        state.clinicProfile.name ||
+        state.me.clinic_name;
+    }
+
+    sessionStorage.setItem(
+      "pug_active_clinic_name",
+      state.clinicProfile.name ||
+      "Клініка"
+    );
+
+    return state.clinicProfile;
+  } catch (error) {
+    console.error("saveClinicProfileApi failed:", error);
+
+    alert(
+      "Не вдалося зберегти налаштування клініки: " +
+      (error?.message || error)
+    );
+
+    return null;
+  }
+}
+
+async function uploadClinicBrandFile(file) {
+  if (!file) {
+    throw new Error("Файл не вибрано");
+  }
+
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      "Дозволені лише PNG, JPG або WEBP"
+    );
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error(
+      "Максимальний розмір файлу — 5 МБ"
+    );
+  }
+
+  const formData = new FormData();
+  formData.append("files", file);
+
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      ...getOrgHeaders(),
+    },
+    body: formData,
   });
 
-  // Слушатель языка
-  const langSelect = document.getElementById("systemLanguageSelect");
-  if (langSelect) {
-    langSelect.addEventListener("change", (e) => {
-      LS.set("docpug_clinic_lang", e.target.value);
-    });
-    langSelect.value = LS.get("docpug_clinic_lang", "uk");
+  const text = await response.text();
+
+  let json = null;
+
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    json = null;
   }
+
+  if (!response.ok || !json?.ok) {
+    throw new Error(
+      json?.error ||
+      `Помилка завантаження HTTP ${response.status}`
+    );
+  }
+
+  const uploaded =
+    json.files?.[0] ||
+    json.data?.[0] ||
+    json.data ||
+    null;
+
+  if (!uploaded) {
+    throw new Error(
+      "Сервер не повернув завантажений файл"
+    );
+  }
+
+  const rawUrl =
+    uploaded.url ||
+    uploaded.path ||
+    uploaded.href ||
+    uploaded.file_url ||
+    "";
+
+  if (!rawUrl) {
+    throw new Error(
+      "Сервер не повернув адресу файлу"
+    );
+  }
+
+  return new URL(
+    rawUrl,
+    window.location.origin
+  ).toString();
+}
+
+function isClinicOwner() {
+  const role =
+    state.me?.role ||
+    sessionStorage.getItem("pug_active_role") ||
+    "staff";
+
+  return role === "owner";
+}
+function bindPersonalSettingsUI(page) {
+  const savedTheme = LS.get(
+    "docpug_clinic_theme",
+    "purple"
+  );
+
+  page
+    .querySelectorAll("[data-theme-set]")
+    .forEach((button) => {
+      const theme = button.dataset.themeSet;
+
+      button.classList.toggle(
+        "active",
+        theme === savedTheme
+      );
+
+      button.addEventListener("click", () => {
+        document.body.dataset.theme = theme;
+
+        LS.set(
+          "docpug_clinic_theme",
+          theme
+        );
+
+        page
+          .querySelectorAll("[data-theme-set]")
+          .forEach((item) => {
+            item.classList.remove("active");
+          });
+
+        button.classList.add("active");
+      });
+    });
+
+  const languageSelect =
+    page.querySelector("#systemLanguageSelect");
+
+  if (languageSelect) {
+    languageSelect.value = LS.get(
+      "docpug_clinic_lang",
+      "uk"
+    );
+
+    languageSelect.addEventListener(
+      "change",
+      () => {
+        LS.set(
+          "docpug_clinic_lang",
+          languageSelect.value
+        );
+      }
+    );
+  }
+
+  page
+    .querySelector("#btnClinicLogout")
+    ?.addEventListener("click", () => {
+      if (!confirm("Вийти з акаунта?")) return;
+
+      [
+        "pug_active_org_id",
+        "pug_active_username",
+        "pug_active_display_name",
+        "pug_active_role",
+        "pug_active_clinic_name",
+      ].forEach((key) => {
+        sessionStorage.removeItem(key);
+      });
+
+      state.me = null;
+      state.clinicProfile = null;
+
+      window.location.reload();
+    });
+}
+
+function renderClinicProfileSettings(page, profile) {
+  const loading =
+    page.querySelector("#clinicSettingsLoading");
+
+  const root =
+    page.querySelector("#clinicSettingsContent");
+
+  if (!root) return;
+
+  if (loading) {
+    loading.remove();
+  }
+
+  root.hidden = false;
+
+  const clinic = {
+    ...DEFAULT_CLINIC_PROFILE,
+    ...(profile || {}),
+  };
+
+  root.innerHTML = `
+    <div class="clinicProfileLayout">
+      <form
+        class="clinicProfileForm"
+        id="clinicProfileForm"
+      >
+        <div class="clinicSettingsFormGrid">
+          <label class="clinicSettingsField">
+            <span>Назва клініки *</span>
+
+            <input
+              class="clinicSettingsInput"
+              id="clinicProfileName"
+              type="text"
+              maxlength="120"
+              required
+              value="${escapeHtml(clinic.name || "")}"
+              placeholder="Наприклад: Animal Clinic"
+            >
+          </label>
+
+          <label class="clinicSettingsField">
+            <span>Підпис під назвою</span>
+
+            <input
+              class="clinicSettingsInput"
+              id="clinicProfileSubtitle"
+              type="text"
+              maxlength="160"
+              value="${escapeHtml(
+                clinic.subtitle || ""
+              )}"
+              placeholder="Ветеринарна клініка"
+            >
+          </label>
+
+          <label class="clinicSettingsField">
+            <span>Телефон</span>
+
+            <input
+              class="clinicSettingsInput"
+              id="clinicProfilePhone"
+              type="tel"
+              maxlength="80"
+              value="${escapeHtml(clinic.phone || "")}"
+              placeholder="+380..."
+            >
+          </label>
+
+          <label class="clinicSettingsField">
+            <span>Сайт або Instagram</span>
+
+            <input
+              class="clinicSettingsInput"
+              id="clinicProfileWebsite"
+              type="text"
+              maxlength="200"
+              value="${escapeHtml(
+                clinic.website || ""
+              )}"
+              placeholder="instagram.com/clinic"
+            >
+          </label>
+
+          <label class="clinicSettingsField clinicSettingsFieldWide">
+            <span>Адреса</span>
+
+            <input
+              class="clinicSettingsInput"
+              id="clinicProfileAddress"
+              type="text"
+              maxlength="250"
+              value="${escapeHtml(
+                clinic.address || ""
+              )}"
+              placeholder="Місто, вулиця, номер будинку"
+            >
+          </label>
+
+          <label class="clinicSettingsField">
+            <span>Акцентний колір документів</span>
+
+            <div class="clinicColorField">
+              <input
+                id="clinicProfileAccentColor"
+                type="color"
+                value="${escapeHtml(
+                  clinic.document_accent_color ||
+                  "#9346E8"
+                )}"
+              >
+
+              <input
+                class="clinicSettingsInput"
+                id="clinicProfileAccentText"
+                type="text"
+                maxlength="7"
+                value="${escapeHtml(
+                  clinic.document_accent_color ||
+                  "#9346E8"
+                )}"
+              >
+            </div>
+          </label>
+
+          <label class="clinicSettingsField">
+            <span>Підпис у нижній частині документа</span>
+
+            <input
+              class="clinicSettingsInput"
+              id="clinicProfileFooter"
+              type="text"
+              maxlength="200"
+              value="${escapeHtml(
+                clinic.document_footer || ""
+              )}"
+              placeholder="Коли важливо — ми поруч."
+            >
+          </label>
+        </div>
+
+        <div class="clinicBrandUploads">
+          ${renderClinicBrandUpload({
+            type: "logo",
+            title: "Логотип клініки",
+            description:
+              "Використовується у виписках, аналізах та рахунках.",
+            value: clinic.logo_url,
+            accept:
+              "image/png,image/jpeg,image/webp",
+          })}
+
+          ${renderClinicBrandUpload({
+            type: "signature",
+            title: "Підпис лікаря",
+            description:
+              "Бажано PNG з прозорим фоном.",
+            value: clinic.doctor_signature_url,
+            accept:
+              "image/png,image/jpeg,image/webp",
+          })}
+
+          ${renderClinicBrandUpload({
+            type: "stamp",
+            title: "Печатка клініки",
+            description:
+              "Бажано PNG з прозорим фоном.",
+            value: clinic.clinic_stamp_url,
+            accept:
+              "image/png,image/jpeg,image/webp",
+          })}
+        </div>
+
+        <div class="clinicProfileActions">
+          <div
+            class="clinicProfileSaveStatus"
+            id="clinicProfileSaveStatus"
+          ></div>
+
+          <button
+            class="clinicProfileSaveButton"
+            id="btnSaveClinicProfile"
+            type="submit"
+          >
+            Зберегти зміни
+          </button>
+        </div>
+      </form>
+
+      <aside class="clinicDocumentPreview">
+        <div class="clinicPreviewKicker">
+          ПРЕДПЕРЕГЛЯД ДОКУМЕНТА
+        </div>
+
+        <div
+          class="clinicPreviewPaper"
+          id="clinicPreviewPaper"
+        ></div>
+      </aside>
+    </div>
+  `;
+
+  bindClinicProfileSettings(page, clinic);
+  updateClinicDocumentPreview(page);
+}
+
+function renderClinicBrandUpload({
+  type,
+  title,
+  description,
+  value,
+  accept,
+}) {
+  return `
+    <div
+      class="clinicBrandUpload"
+      data-brand-upload="${escapeHtml(type)}"
+    >
+      <div
+        class="clinicBrandPreview"
+        data-brand-preview="${escapeHtml(type)}"
+      >
+        ${
+          value
+            ? `
+              <img
+                src="${escapeHtml(value)}"
+                alt="${escapeHtml(title)}"
+              >
+            `
+            : `
+              <span>＋</span>
+            `
+        }
+      </div>
+
+      <div class="clinicBrandUploadText">
+        <strong>${escapeHtml(title)}</strong>
+        <p>${escapeHtml(description)}</p>
+
+        <div class="clinicBrandUploadActions">
+          <label class="clinicBrandUploadButton">
+            Завантажити
+
+            <input
+              type="file"
+              hidden
+              accept="${escapeHtml(accept)}"
+              data-brand-file="${escapeHtml(type)}"
+            >
+          </label>
+
+          <button
+            class="clinicBrandRemoveButton"
+            type="button"
+            data-brand-remove="${escapeHtml(type)}"
+          >
+            Видалити
+          </button>
+        </div>
+      </div>
+
+      <input
+        type="hidden"
+        data-brand-url="${escapeHtml(type)}"
+        value="${escapeHtml(value || "")}"
+      >
+    </div>
+  `;
+}
+
+function bindClinicProfileSettings(page, clinic) {
+  const form =
+    page.querySelector("#clinicProfileForm");
+
+  if (!form) return;
+
+  const colorPicker =
+    page.querySelector(
+      "#clinicProfileAccentColor"
+    );
+
+  const colorText =
+    page.querySelector(
+      "#clinicProfileAccentText"
+    );
+
+  colorPicker?.addEventListener("input", () => {
+    if (colorText) {
+      colorText.value =
+        colorPicker.value.toUpperCase();
+    }
+
+    updateClinicDocumentPreview(page);
+  });
+
+  colorText?.addEventListener("input", () => {
+    const value =
+      String(colorText.value || "")
+        .trim()
+        .toUpperCase();
+
+    if (/^#[0-9A-F]{6}$/.test(value)) {
+      if (colorPicker) {
+        colorPicker.value = value;
+      }
+
+      updateClinicDocumentPreview(page);
+    }
+  });
+
+  form
+    .querySelectorAll(
+      "input:not([type='file']):not([type='hidden'])"
+    )
+    .forEach((input) => {
+      input.addEventListener(
+        "input",
+        () => updateClinicDocumentPreview(page)
+      );
+    });
+
+  form
+    .querySelectorAll("[data-brand-file]")
+    .forEach((input) => {
+      input.addEventListener(
+        "change",
+        async () => {
+          const type =
+            input.dataset.brandFile;
+
+          const file =
+            input.files?.[0];
+
+          if (!type || !file) return;
+
+          const uploadBlock =
+            input.closest(".clinicBrandUpload");
+
+          uploadBlock?.classList.add(
+            "uploading"
+          );
+
+          try {
+            const url =
+              await uploadClinicBrandFile(file);
+
+            const hidden =
+              page.querySelector(
+                `[data-brand-url="${type}"]`
+              );
+
+            if (hidden) {
+              hidden.value = url;
+            }
+
+            const preview =
+              page.querySelector(
+                `[data-brand-preview="${type}"]`
+              );
+
+            if (preview) {
+              preview.innerHTML = `
+                <img
+                  src="${escapeHtml(url)}"
+                  alt=""
+                >
+              `;
+            }
+
+            updateClinicDocumentPreview(page);
+          } catch (error) {
+            alert(
+              "Не вдалося завантажити файл: " +
+              (error?.message || error)
+            );
+          } finally {
+            uploadBlock?.classList.remove(
+              "uploading"
+            );
+
+            input.value = "";
+          }
+        }
+      );
+    });
+
+  form
+    .querySelectorAll("[data-brand-remove]")
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const type =
+            button.dataset.brandRemove;
+
+          const hidden =
+            page.querySelector(
+              `[data-brand-url="${type}"]`
+            );
+
+          if (hidden) {
+            hidden.value = "";
+          }
+
+          const preview =
+            page.querySelector(
+              `[data-brand-preview="${type}"]`
+            );
+
+          if (preview) {
+            preview.innerHTML = "<span>＋</span>";
+          }
+
+          updateClinicDocumentPreview(page);
+        }
+      );
+    });
+
+  form.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
+
+      const saveButton =
+        page.querySelector(
+          "#btnSaveClinicProfile"
+        );
+
+      const status =
+        page.querySelector(
+          "#clinicProfileSaveStatus"
+        );
+
+      const payload = {
+        name:
+          page
+            .querySelector("#clinicProfileName")
+            ?.value?.trim() || "",
+
+        subtitle:
+          page
+            .querySelector(
+              "#clinicProfileSubtitle"
+            )
+            ?.value?.trim() || "",
+
+        phone:
+          page
+            .querySelector(
+              "#clinicProfilePhone"
+            )
+            ?.value?.trim() || "",
+
+        address:
+          page
+            .querySelector(
+              "#clinicProfileAddress"
+            )
+            ?.value?.trim() || "",
+
+        website:
+          page
+            .querySelector(
+              "#clinicProfileWebsite"
+            )
+            ?.value?.trim() || "",
+
+        document_accent_color:
+          page
+            .querySelector(
+              "#clinicProfileAccentText"
+            )
+            ?.value?.trim()
+            .toUpperCase() || "#9346E8",
+
+        document_footer:
+          page
+            .querySelector(
+              "#clinicProfileFooter"
+            )
+            ?.value?.trim() || "",
+
+        logo_url:
+          page
+            .querySelector(
+              '[data-brand-url="logo"]'
+            )
+            ?.value || "",
+
+        doctor_signature_url:
+          page
+            .querySelector(
+              '[data-brand-url="signature"]'
+            )
+            ?.value || "",
+
+        clinic_stamp_url:
+          page
+            .querySelector(
+              '[data-brand-url="stamp"]'
+            )
+            ?.value || "",
+      };
+
+      if (!payload.name) {
+        alert("Вкажіть назву клініки.");
+        return;
+      }
+
+      saveButton.disabled = true;
+      saveButton.textContent = "Збереження…";
+
+      if (status) {
+        status.textContent = "";
+        status.className =
+          "clinicProfileSaveStatus";
+      }
+
+      const saved =
+        await saveClinicProfileApi(payload);
+
+      saveButton.disabled = false;
+      saveButton.textContent =
+        "Зберегти зміни";
+
+      if (!saved) return;
+
+      if (status) {
+        status.textContent =
+          "Зміни успішно збережені";
+
+        status.classList.add("success");
+      }
+
+      const clinicTitle =
+        document.getElementById(
+          "clinicNameTitle"
+        ) ||
+        document.querySelector(
+          ".clinic-title"
+        );
+
+      if (clinicTitle) {
+        clinicTitle.textContent =
+          saved.name;
+      }
+
+      updateClinicDocumentPreview(page);
+    }
+  );
+}
+
+function updateClinicDocumentPreview(page) {
+  const preview =
+    page.querySelector("#clinicPreviewPaper");
+
+  if (!preview) return;
+
+  const name =
+    page
+      .querySelector("#clinicProfileName")
+      ?.value?.trim() ||
+    "Ветеринарна клініка";
+
+  const subtitle =
+    page
+      .querySelector("#clinicProfileSubtitle")
+      ?.value?.trim() ||
+    "Ветеринарна клініка";
+
+  const phone =
+    page
+      .querySelector("#clinicProfilePhone")
+      ?.value?.trim() || "";
+
+  const address =
+    page
+      .querySelector("#clinicProfileAddress")
+      ?.value?.trim() || "";
+
+  const website =
+    page
+      .querySelector("#clinicProfileWebsite")
+      ?.value?.trim() || "";
+
+  const color =
+    page
+      .querySelector("#clinicProfileAccentText")
+      ?.value?.trim() ||
+    "#9346E8";
+
+  const footer =
+    page
+      .querySelector("#clinicProfileFooter")
+      ?.value?.trim() || "";
+
+  const logo =
+    page
+      .querySelector('[data-brand-url="logo"]')
+      ?.value || "";
+
+  const signature =
+    page
+      .querySelector(
+        '[data-brand-url="signature"]'
+      )
+      ?.value || "";
+
+  const stamp =
+    page
+      .querySelector(
+        '[data-brand-url="stamp"]'
+      )
+      ?.value || "";
+
+  preview.style.setProperty(
+    "--document-accent",
+    color
+  );
+
+  preview.innerHTML = `
+    <div class="clinicPreviewHeader">
+      <div class="clinicPreviewBrand">
+        ${
+          logo
+            ? `
+              <img
+                src="${escapeHtml(logo)}"
+                alt=""
+              >
+            `
+            : `
+              <div class="clinicPreviewLogoFallback">
+                ${escapeHtml(
+                  name.charAt(0).toUpperCase()
+                )}
+              </div>
+            `
+        }
+
+        <div>
+          <strong>${escapeHtml(name)}</strong>
+          <span>${escapeHtml(subtitle)}</span>
+        </div>
+      </div>
+
+      <div class="clinicPreviewDocTitle">
+        Результати дослідження
+      </div>
+    </div>
+
+    <div class="clinicPreviewLine"></div>
+
+    <div class="clinicPreviewContacts">
+      ${phone ? `<span>${escapeHtml(phone)}</span>` : ""}
+      ${address ? `<span>${escapeHtml(address)}</span>` : ""}
+      ${website ? `<span>${escapeHtml(website)}</span>` : ""}
+    </div>
+
+    <div class="clinicPreviewPatient">
+      <div>
+        <span>Пацієнт</span>
+        <strong>Мойша</strong>
+      </div>
+
+      <div>
+        <span>Дата</span>
+        <strong>${escapeHtml(todayISO())}</strong>
+      </div>
+    </div>
+
+    <div class="clinicPreviewTable">
+      <div class="head">
+        <span>Показник</span>
+        <span>Результат</span>
+        <span>Статус</span>
+      </div>
+
+      <div>
+        <span>Глюкоза</span>
+        <strong>5.2 ммоль/л</strong>
+        <b>Норма</b>
+      </div>
+
+      <div>
+        <span>Креатинін</span>
+        <strong>132 мкмоль/л</strong>
+        <b class="high">Вище</b>
+      </div>
+    </div>
+
+    <div class="clinicPreviewSignatures">
+      <div>
+        ${
+          signature
+            ? `<img src="${escapeHtml(signature)}" alt="">`
+            : `<span>Підпис лікаря</span>`
+        }
+      </div>
+
+      <div>
+        ${
+          stamp
+            ? `<img src="${escapeHtml(stamp)}" alt="">`
+            : `<span>Печатка</span>`
+        }
+      </div>
+    </div>
+
+    <div class="clinicPreviewFooter">
+      <span>${escapeHtml(footer)}</span>
+      <small>Powered by Doc.PUG CRM</small>
+    </div>
+  `;
 }
 
 // Функция для применения темы при загрузке страницы
@@ -13234,34 +14228,7 @@ function getFinancialStats(entityId, type = 'owner') {
     lastDate: filteredVisits.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0]?.date || "—"
   };
 }
-function initSettingsUI() {
-  const page = document.querySelector('.page[data-page="settings"]');
-  if (!page) return;
 
-  // Слушатель тем
-  page.querySelectorAll("[data-theme-set]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const theme = btn.dataset.themeSet;
-      document.body.dataset.theme = theme;
-      LS.set("docpug_clinic_theme", theme);
-      
-      page.querySelectorAll("[data-theme-set]").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
-  });
-
-  // Слушатель языка
-  const langSelect = document.getElementById("systemLanguageSelect");
-  if (langSelect) {
-    langSelect.addEventListener("change", (e) => {
-      LS.set("docpug_clinic_lang", e.target.value);
-      console.log("Language changed to:", e.target.value);
-      // Тут в будущем будет вызов функции перевода интерфейса i18n
-    });
-    // Устанавливаем сохраненный язык
-    langSelect.value = LS.get("docpug_clinic_lang", "uk");
-  }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btnAddStaff');
