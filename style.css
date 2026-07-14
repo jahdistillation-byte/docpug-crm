@@ -18999,3 +18999,413 @@ select.visitControl {
     display: block !important;
   }
 }
+/* =========================================
+   MODERN DISCHARGE / ВИПИСКА
+========================================= */
+
+#disA4 {
+  background: #f5f7fb;
+  padding: 24px;
+}
+
+.disModernDoc {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+  padding: 36px 36px 28px;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.disModernHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.disModernBrand {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.disModernLogoBox,
+.disModernLogoFallback {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  flex: 0 0 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4efff;
+  border: 1px solid #e9defd;
+}
+
+.disModernLogoImg {
+  max-width: 46px;
+  max-height: 46px;
+  object-fit: contain;
+}
+
+.disModernLogoFallback {
+  color: var(--disAccent, #9346E8);
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.disModernBrandText {
+  min-width: 0;
+}
+
+.disModernClinicName {
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.disModernClinicSubtitle {
+  margin-top: 4px;
+  color: #667085;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.disModernClinicContacts {
+  margin-top: 8px;
+  color: #7b8794;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.disModernHeadRight {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.disModernDocType {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.disModernDocMeta {
+  margin-top: 6px;
+  color: var(--disAccent, #9346E8);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.disModernAccentLine {
+  height: 3px;
+  background: linear-gradient(90deg, var(--disAccent, #9346E8), rgba(148, 70, 232, 0.15));
+  border-radius: 999px;
+  margin: 24px 0 22px;
+}
+
+.disModernInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.disModernCard {
+  background: #f8fafc;
+  border: 1px solid #e8edf3;
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+}
+
+.disModernCardTitle {
+  color: var(--disAccent, #9346E8);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.disModernCardMain {
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.disModernInfoRows {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.disModernInfoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.disModernInfoRow span {
+  color: #7a8797;
+}
+
+.disModernInfoRow b {
+  color: #0f172a;
+  text-align: right;
+  font-weight: 700;
+}
+
+.disModernSection {
+  margin-top: 16px;
+  background: #ffffff;
+  border: 1px solid #e8edf3;
+  border-radius: 18px;
+  padding: 18px;
+  page-break-inside: avoid;
+}
+
+.disModernSectionTitle {
+  color: var(--disAccent, #9346E8);
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.disModernSectionSub {
+  margin-top: 4px;
+  color: #7a8797;
+  font-size: 13px;
+}
+
+.disModernText {
+  margin-top: 10px;
+  color: #253041;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.disModernTextSoft {
+  background: #f8fafc;
+  border: 1px solid #e8edf3;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.disModernFinanceSection {
+  overflow: hidden;
+}
+
+.disModernFinanceHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.disModernGrandTotalBadge {
+  background: #f4efff;
+  color: var(--disAccent, #9346E8);
+  border: 1px solid #e6d8ff;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 24px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.disModernTableWrap {
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid #e8edf3;
+  border-radius: 16px;
+}
+
+.disModernTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.disModernTable th {
+  background: #f8fafc;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e8edf3;
+}
+
+.disModernTable td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #eef2f7;
+  color: #253041;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.disModernTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.disModernEmpty {
+  text-align: center;
+  color: #94a3b8;
+  padding: 24px !important;
+}
+
+.disModernFinanceSummary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.disModernFinanceMini {
+  min-width: 170px;
+  background: #f8fafc;
+  border: 1px solid #e8edf3;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.disModernFinanceMini span {
+  display: block;
+  color: #7a8797;
+  font-size: 12px;
+}
+
+.disModernFinanceMini b {
+  display: block;
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.disModernFinanceMiniTotal {
+  background: #f4efff;
+  border-color: #e6d8ff;
+}
+
+.disModernFinanceMiniTotal b {
+  color: var(--disAccent, #9346E8);
+}
+
+.disModernSignGrid {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  page-break-inside: avoid;
+}
+
+.disModernSignBox {
+  border: 1px solid #e8edf3;
+  border-radius: 18px;
+  padding: 16px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.disModernSignTitle {
+  color: #7a8797;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.disModernSignLine {
+  border-top: 1px solid #94a3b8;
+  margin-top: 34px;
+}
+
+.disModernSignImg,
+.disModernStampImg {
+  max-height: 70px;
+  max-width: 180px;
+  object-fit: contain;
+  margin-top: auto;
+}
+
+.disModernSignName {
+  margin-top: 10px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.disModernFooter {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #e8edf3;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: #8a94a6;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .disModernHead,
+  .disModernInfoGrid,
+  .disModernSignGrid {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .disModernHeadRight {
+    text-align: left;
+  }
+
+  .disModernFinanceHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  #disA4 {
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  .disModernDoc {
+    max-width: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 18mm 14mm 14mm !important;
+  }
+
+  .disModernSection,
+  .disModernCard,
+  .disModernSignBox,
+  .disModernTableWrap {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .disModernFooter {
+    page-break-inside: avoid;
+  }
+}
