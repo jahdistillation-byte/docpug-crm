@@ -4056,9 +4056,12 @@ async function downloadA4Pdf(visitId) {
   // но уносим далеко за пределы экрана
   host.style.display = "block";
   host.style.position = "fixed";
-  host.style.left = "-100000px";
-  host.style.top = "0";
-  host.style.width = "794px";
+host.style.left = "0";
+host.style.top = "0";
+host.style.width = "794px";
+host.style.maxWidth = "794px";
+host.style.margin = "0";
+host.style.transform = "none";
   host.style.maxWidth = "794px";
   host.style.height = "auto";
   host.style.opacity = "1";
@@ -4133,8 +4136,9 @@ async function downloadA4Pdf(visitId) {
           backgroundColor: "#ffffff",
           logging: false,
           scrollX: 0,
-          scrollY: 0,
-          windowWidth: 794,
+scrollY: 0,
+windowWidth: 794,
+width: 794,
 
           onclone: (clonedDocument) => {
             const clonedHost =
@@ -4146,14 +4150,13 @@ async function downloadA4Pdf(visitId) {
               clonedHost.style.display =
                 "block";
 
-              clonedHost.style.position =
-                "static";
-
-              clonedHost.style.left =
-                "auto";
-
-              clonedHost.style.top =
-                "auto";
+              clonedHost.style.position = "relative";
+clonedHost.style.left = "0";
+clonedHost.style.top = "0";
+clonedHost.style.margin = "0";
+clonedHost.style.width = "794px";
+clonedHost.style.maxWidth = "794px";
+clonedHost.style.transform = "none";
 
               clonedHost.style.visibility =
                 "visible";
