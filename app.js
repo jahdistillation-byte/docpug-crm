@@ -12964,6 +12964,187 @@ function isClinicOwner() {
 
   return role === "owner";
 }
+
+async function initSettingsUI() {
+  const page = document.querySelector(
+    '.page[data-page="settings"]'
+  );
+
+  if (!page) return;
+
+  const ownerMode = isClinicOwner();
+
+  page.innerHTML = `
+    <div class="clinicSettingsPage">
+      <section class="clinicSettingsHero">
+        <div>
+          <div class="clinicSettingsKicker">
+            НАЛАШТУВАННЯ СИСТЕМИ
+          </div>
+
+          <h1>Налаштування</h1>
+
+          <p>
+            ${
+              ownerMode
+                ? "Керуйте брендингом клініки, документами та особистими налаштуваннями."
+                : "Налаштуйте мову та зовнішній вигляд свого робочого простору."
+            }
+          </p>
+        </div>
+
+        <div class="clinicSettingsUser">
+          <span>
+            ${escapeHtml(
+              state.me?.display_name ||
+              sessionStorage.getItem("pug_active_display_name") ||
+              "Користувач"
+            )}
+          </span>
+
+          <strong>
+            ${
+              ownerMode
+                ? "Власник клініки"
+                : escapeHtml(
+                    state.me?.role ||
+                    sessionStorage.getItem("pug_active_role") ||
+                    "Працівник"
+                  )
+            }
+          </strong>
+        </div>
+      </section>
+
+      ${
+        ownerMode
+          ? `
+            <section
+              class="clinicSettingsPanel clinicOwnerSettings"
+              id="clinicOwnerSettings"
+            >
+              <div class="clinicSettingsPanelHead">
+                <div>
+                  <div class="clinicSettingsPanelIcon">🏥</div>
+
+                  <div>
+                    <h2>Моя клініка</h2>
+                    <p>
+                      Дані, які використовуються у виписках,
+                      аналізах, рахунках та інших документах.
+                    </p>
+                  </div>
+                </div>
+
+                <span class="clinicOwnerBadge">
+                  Тільки власник
+                </span>
+              </div>
+
+              <div
+                class="clinicSettingsLoading"
+                id="clinicSettingsLoading"
+              >
+                Завантаження профілю клініки…
+              </div>
+
+              <div
+                class="clinicSettingsContent"
+                id="clinicSettingsContent"
+                hidden
+              ></div>
+            </section>
+          `
+          : ""
+      }
+
+      <section class="clinicSettingsPanel">
+        <div class="clinicSettingsPanelHead">
+          <div>
+            <div class="clinicSettingsPanelIcon">👤</div>
+
+            <div>
+              <h2>Особисті налаштування</h2>
+              <p>
+                Ці параметри застосовуються лише для вашого браузера.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="clinicPersonalGrid">
+          <div class="clinicPersonalBlock">
+            <h3>Мова інтерфейсу</h3>
+
+            <select
+              class="clinicSettingsInput"
+              id="systemLanguageSelect"
+            >
+              <option value="uk">Українська</option>
+              <option value="en">English</option>
+              <option value="pl">Polski</option>
+            </select>
+          </div>
+
+          <div class="clinicPersonalBlock">
+            <h3>Тема системи</h3>
+
+            <div class="clinicThemeGrid">
+              ${[
+                ["purple", "Фіолетова", "#9346E8"],
+                ["black", "Чорна", "#24242A"],
+                ["white", "Світла", "#F4F6FA"],
+                ["blue", "Синя", "#1687FF"],
+                ["green", "Зелена", "#10B981"],
+              ]
+                .map(
+                  ([value, label, color]) => `
+                    <button
+                      class="clinicThemeChoice"
+                      type="button"
+                      data-theme-set="${escapeHtml(value)}"
+                    >
+                      <span style="background:${escapeHtml(color)}"></span>
+                      <strong>${escapeHtml(label)}</strong>
+                    </button>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+        </div>
+
+        <div class="clinicSettingsLogoutRow">
+          <div>
+            <strong>Поточний користувач</strong>
+            <span>
+              ${escapeHtml(
+                state.me?.username ||
+                sessionStorage.getItem("pug_active_username") ||
+                "—"
+              )}
+            </span>
+          </div>
+
+          <button
+            class="clinicLogoutButton"
+            id="btnClinicLogout"
+            type="button"
+          >
+            Вийти з акаунта
+          </button>
+        </div>
+      </section>
+    </div>
+  `;
+
+  bindPersonalSettingsUI(page);
+
+  if (ownerMode) {
+    const profile = await loadClinicProfileApi();
+    renderClinicProfileSettings(page, profile);
+  }
+}
 function bindPersonalSettingsUI(page) {
   const savedTheme = LS.get(
     "docpug_clinic_theme",
