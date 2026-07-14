@@ -5130,17 +5130,15 @@ async function renderHospitalTab() {
     );
 
   page
-    .querySelector(
-      "#hospitalAdmitPatient"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        alert(
-          "Наступним кроком додамо форму прийняття пацієнта у стаціонар."
-        );
-      }
-    );
+  .querySelector(
+    "#hospitalAdmitPatient"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+      await openHospitalAdmissionModal();
+    }
+  );
 }
 
 function renderHospitalPatientCard(
