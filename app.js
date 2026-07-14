@@ -8101,19 +8101,34 @@ async function downloadLabPdf(pet, labOrId) {
 
   const renderHost = document.createElement("div");
 
-  renderHost.id = "labPdfRenderHost";
+renderHost.id = "labPdfRenderHost";
 
-  renderHost.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2147483647;
-    width: 794px;
-    min-height: 1123px;
-    opacity: 1;
-    pointer-events: none;
-    background: #FFFFFF;
-  `;
+renderHost.style.cssText = `
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+
+  min-height: 1123px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  transform: none !important;
+  translate: none !important;
+  scale: 1 !important;
+  zoom: 1 !important;
+
+  overflow: visible !important;
+
+  z-index: 2147483647;
+  opacity: 1;
+  pointer-events: none;
+  background: #FFFFFF;
+`;
 
   const pdfDocument = buildLabPdfDocument(pet, lab);
   renderHost.appendChild(pdfDocument);
@@ -8136,46 +8151,88 @@ async function downloadLabPdf(pet, labOrId) {
     await document.fonts?.ready;
 
     const worker = window
-      .html2pdf()
-      .set({
-        margin: 0,
+  .html2pdf()
+  .set({
+    margin: [0, 0, 0, 0],
 
-        filename,
+    filename,
 
-        image: {
-          type: "jpeg",
-          quality: 0.98,
-        },
+    image: {
+      type: "jpeg",
+      quality: 0.98,
+    },
 
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#FFFFFF",
-          logging: false,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 794,
-        },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#FFFFFF",
+      logging: false,
 
-        jsPDF: {
-          unit: "px",
-          format: [794, 1123],
-          orientation: "portrait",
-          compress: true,
-          hotfixes: ["px_scaling"],
-        },
+      scrollX: 0,
+      scrollY: 0,
 
-        pagebreak: {
-          mode: ["css", "legacy"],
-          avoid: [
-            "tr",
-            ".labPdfSummary",
-            ".labPdfComment",
-          ],
-        },
-      })
-      .from(pdfDocument);
+      x: 0,
+      y: 0,
+
+      width: 794,
+      windowWidth: 794,
+
+      onclone: (clonedDocument) => {
+        const host = clonedDocument.getElementById("labPdfRenderHost");
+
+        const documentElement = clonedDocument.querySelector(
+          ".docPugLabPdfDocument"
+        );
+
+        if (host) {
+          host.style.position = "absolute";
+          host.style.top = "0";
+          host.style.left = "0";
+
+          host.style.width = "794px";
+          host.style.minWidth = "794px";
+          host.style.maxWidth = "794px";
+
+          host.style.margin = "0";
+          host.style.padding = "0";
+
+          host.style.transform = "none";
+          host.style.zoom = "1";
+        }
+
+        if (documentElement) {
+          documentElement.style.width = "794px";
+          documentElement.style.minWidth = "794px";
+          documentElement.style.maxWidth = "794px";
+
+          documentElement.style.margin = "0";
+          documentElement.style.transform = "none";
+          documentElement.style.zoom = "1";
+          documentElement.style.boxSizing = "border-box";
+        }
+      },
+    },
+
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+      compress: true,
+    },
+
+    pagebreak: {
+      mode: ["css", "legacy"],
+      avoid: [
+        "tr",
+        ".labPdfSummary",
+        ".labPdfComment",
+      ],
+    },
+  })
+  .from(pdfDocument);
+
+await worker.save();
 
     await worker.save();
   } catch (error) {
