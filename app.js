@@ -5129,15 +5129,9 @@ async function renderHospitalTab() {
       renderFilteredPatients
     );
 
-  page
-  .querySelector(
-    "#hospitalAdmitPatient"
-  )
-  ?.addEventListener(
-    "click",
-    async () => {
-      await openHospitalAdmissionModal();
-    }
+   bindHospitalPageActions(
+    page,
+    hospitalPatients
   );
 }
 
@@ -6183,7 +6177,7 @@ async function openHospitalAdmissionModal() {
     }
   );
 
-  loadingModal
+    loadingModal
     .querySelector(
       "#hospitalAdmissionForm"
     )
@@ -6296,26 +6290,17 @@ async function openHospitalAdmissionModal() {
           );
 
         if (submitButton) {
-          submitButton.disabled =
-            true;
-
+          submitButton.disabled = true;
           submitButton.textContent =
             "Збереження…";
         }
 
         const payload = {
-          patient_id:
-            patientId,
-
-          doctor_id:
-            doctorId,
-
+          patient_id: patientId,
+          doctor_id: doctorId,
           room,
-
           status,
-
           diagnosis,
-
           notes,
 
           admitted_at:
@@ -6356,157 +6341,160 @@ async function openHospitalAdmissionModal() {
         await renderHospitalTab();
       }
     );
-    page.onclick = async (event) => {
-  // =========================================
-  // ПРИНЯТЬ НОВОГО ПАЦИЕНТА
-  // =========================================
+}
 
-  const admitButton =
-    event.target.closest(
-      "#hospitalAdmitPatient"
-    );
+function bindHospitalPageActions(
+  page,
+  hospitalPatients
+) {
+  if (!page) return;
 
-  if (admitButton) {
-    event.preventDefault();
-
-    await openHospitalAdmissionModal();
-    return;
-  }
-
-  // =========================================
-  // ОТКРЫТЬ КАРТОЧКУ ПАЦИЕНТА
-  // =========================================
-
-  const openPatientButton =
-    event.target.closest(
-      "[data-hospital-open-patient]"
-    );
-
-  if (openPatientButton) {
-    event.preventDefault();
-
-    const patientId =
-      openPatientButton.dataset
-        .hospitalOpenPatient;
-
-    if (!patientId) {
-      alert(
-        "Не знайдено ID пацієнта."
+  page.onclick = async (event) => {
+    const admitButton =
+      event.target.closest(
+        "#hospitalAdmitPatient"
       );
+
+    if (admitButton) {
+      event.preventDefault();
+
+      await openHospitalAdmissionModal();
       return;
     }
 
-    openPatient(patientId);
-    return;
-  }
-
-  // =========================================
-  // НАЗНАЧЕНИЯ
-  // =========================================
-
-  const assignmentsButton =
-    event.target.closest(
-      "[data-hospital-assignments]"
-    );
-
-  if (assignmentsButton) {
-    event.preventDefault();
-
-    const hospitalizationId =
-      assignmentsButton.dataset
-        .hospitalAssignments;
-
-    if (!hospitalizationId) {
-      alert(
-        "Не знайдено госпіталізацію."
+    const openPatientButton =
+      event.target.closest(
+        "[data-hospital-open-patient]"
       );
+
+    if (openPatientButton) {
+      event.preventDefault();
+
+      const patientId =
+        openPatientButton.dataset
+          .hospitalOpenPatient;
+
+      if (!patientId) {
+        alert(
+          "Не знайдено ID пацієнта."
+        );
+        return;
+      }
+
+      openPatient(patientId);
       return;
     }
 
-    const hospitalization =
-      hospitalPatients.find(
-        (item) =>
-          String(item.id) ===
-          String(hospitalizationId)
+    const assignmentsButton =
+      event.target.closest(
+        "[data-hospital-assignments]"
       );
 
-    window.__selectedHospitalization =
-      hospitalization || null;
+    if (assignmentsButton) {
+      event.preventDefault();
 
-    alert(
-      `Наступним кроком відкриємо призначення для ${
-        hospitalization?.patient_name ||
-        "пацієнта"
-      }.`
-    );
+      const hospitalizationId =
+        assignmentsButton.dataset
+          .hospitalAssignments;
 
-    return;
-  }
+      if (!hospitalizationId) {
+        alert(
+          "Не знайдено госпіталізацію."
+        );
+        return;
+      }
 
-  // =========================================
-  // ВЫПИСАТЬ ИЗ СТАЦИОНАРА
-  // =========================================
+      const hospitalization =
+        hospitalPatients.find(
+          (item) =>
+            String(item.id) ===
+            String(
+              hospitalizationId
+            )
+        );
 
-  const dischargeButton =
-    event.target.closest(
-      "[data-hospital-discharge]"
-    );
+      window.__selectedHospitalization =
+        hospitalization || null;
 
-  if (dischargeButton) {
-    event.preventDefault();
-
-    const hospitalizationId =
-      dischargeButton.dataset
-        .hospitalDischarge;
-
-    if (!hospitalizationId) {
       alert(
-        "Не знайдено госпіталізацію."
+        `Наступним кроком відкриємо призначення для ${
+          hospitalization
+            ?.patient_name ||
+          "пацієнта"
+        }.`
       );
+
       return;
     }
 
-    const hospitalization =
-      hospitalPatients.find(
-        (item) =>
-          String(item.id) ===
-          String(hospitalizationId)
+    const dischargeButton =
+      event.target.closest(
+        "[data-hospital-discharge]"
       );
 
-    const patientName =
-      hospitalization?.patient_name ||
-      "пацієнта";
+    if (dischargeButton) {
+      event.preventDefault();
 
-    const confirmed =
-      confirm(
-        `Виписати ${patientName} зі стаціонару?`
-      );
+      const hospitalizationId =
+        dischargeButton.dataset
+          .hospitalDischarge;
 
-    if (!confirmed) return;
+      if (!hospitalizationId) {
+        alert(
+          "Не знайдено госпіталізацію."
+        );
+        return;
+      }
 
-    const oldText =
-      dischargeButton.textContent;
+      const hospitalization =
+        hospitalPatients.find(
+          (item) =>
+            String(item.id) ===
+            String(
+              hospitalizationId
+            )
+        );
 
-    dischargeButton.disabled = true;
-    dischargeButton.textContent =
-      "Виписуємо…";
+      const patientName =
+        hospitalization
+          ?.patient_name ||
+        "пацієнта";
 
-    const result =
-      await dischargeHospitalizationApi(
-        hospitalizationId
-      );
+      const confirmed =
+        confirm(
+          `Виписати ${patientName} зі стаціонару?`
+        );
 
-    if (!result) {
-      dischargeButton.disabled = false;
+      if (!confirmed) return;
+
+      const oldText =
+        dischargeButton.textContent;
+
+      dischargeButton.disabled =
+        true;
+
       dischargeButton.textContent =
-        oldText || "Виписати";
+        "Виписуємо…";
 
-      return;
+      const result =
+        await dischargeHospitalizationApi(
+          hospitalizationId
+        );
+
+      if (!result) {
+        dischargeButton.disabled =
+          false;
+
+        dischargeButton.textContent =
+          oldText ||
+          "Виписати";
+
+        return;
+      }
+
+      await renderHospitalTab();
     }
-
-    await renderHospitalTab();
-  }
-};
+  };
 }
 
 // =========================
