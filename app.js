@@ -4015,115 +4015,237 @@ function a4FilenameFromVisit(visitId) {
 
 async function downloadA4Pdf(visitId) {
   if (typeof window.html2pdf === "undefined") {
-    alert("html2pdf не подключен. Проверь, что html2pdf.bundle.min.js подключён перед app.js");
+    alert(
+      "html2pdf не підключений. Перевір підключення html2pdf.bundle.min.js."
+    );
     return;
   }
 
-  await renderDischargeA4(
-  visitId
-);
+  // Сначала полностью строим документ
+  await renderDischargeA4(visitId);
 
-const a4 =
-  document.getElementById(
-    "disA4"
-  );
+  const host =
+    document.getElementById("disA4");
 
-if (!a4) {
-  alert(
-    "Не знайдено блок виписки #disA4."
-  );
-  return;
-}
+  if (!host) {
+    alert(
+      "Не знайдено блок виписки #disA4."
+    );
+    return;
+  }
 
-  const prevOverflow = document.body.style.overflow;
+  const documentNode =
+    host.querySelector(".disModernDoc") ||
+    host.firstElementChild ||
+    host;
+
+  if (!documentNode) {
+    alert(
+      "Документ виписки порожній."
+    );
+    return;
+  }
+
+  const oldStyle =
+    host.getAttribute("style") || "";
+
+  const oldBodyOverflow =
+    document.body.style.overflow;
+
+  // Делаем скрытый документ видимым для html2canvas,
+  // но уносим далеко за пределы экрана
+  host.style.display = "block";
+  host.style.position = "fixed";
+  host.style.left = "-100000px";
+  host.style.top = "0";
+  host.style.width = "794px";
+  host.style.maxWidth = "794px";
+  host.style.height = "auto";
+  host.style.opacity = "1";
+  host.style.visibility = "visible";
+  host.style.pointerEvents = "none";
+  host.style.background = "#ffffff";
+  host.style.zIndex = "-1";
+
+  documentNode.style.display = "block";
+  documentNode.style.visibility = "visible";
+  documentNode.style.opacity = "1";
+  documentNode.style.background = "#ffffff";
+
   document.body.style.overflow = "hidden";
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-  const opt = {
-    margin: 0,
-    filename: a4FilenameFromVisit(visitId),
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-      logging: false,
-      scrollX: 0,
-      scrollY: 0,
-      onclone: (doc) => {
-        const el = doc.getElementById("disA4");
-        if (el) {
-          el.style.transform = "none";
-          el.style.maxWidth = "none";
-          el.style.boxShadow = "none";
-        }
-        const pc = doc.querySelector(".printCard");
-        if (pc) pc.style.transform = "none";
-      },
-    },
-    jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-    pagebreak: { mode: ["css", "legacy"] },
-  };
 
   try {
-    const worker = window.html2pdf().set(opt).from(a4).toPdf();
-    let pdfBlob = null;
+    // Ждём завершения отрисовки
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
 
-    if (typeof worker.outputPdf === "function") {
-      pdfBlob = await worker.outputPdf("blob");
-    } else if (typeof worker.output === "function") {
-      pdfBlob = await worker.output("blob");
-    }
+    // Ждём логотип, подпись и печать
+    const images = Array.from(
+      documentNode.querySelectorAll("img")
+    );
 
-    if (!pdfBlob) throw new Error("html2pdf: не удалось получить blob");
+    await Promise.all(
+      images.map((image) => {
+        if (image.complete) {
+          return Promise.resolve();
+        }
 
-    const filename = a4FilenameFromVisit(visitId);
-    let uploadedUrl = null;
-    try {
-      const fd = new FormData();
-      fd.append("files", new File([pdfBlob], filename, { type: "application/pdf" }));
+        return new Promise((resolve) => {
+          image.addEventListener(
+            "load",
+            resolve,
+            { once: true }
+          );
 
-      const upRes = await fetch("/api/upload", { method: "POST", body: fd });
-      const upJson = await upRes.json();
+          image.addEventListener(
+            "error",
+            resolve,
+            { once: true }
+          );
 
-      if (!upJson.ok) throw new Error(upJson.error || "upload failed");
-      const f0 = upJson.files && upJson.files[0];
-      if (f0?.url) {
-        uploadedUrl = new URL(f0.url, window.location.origin).toString();
-      }
-    } catch (e) {
-      console.warn("PDF upload failed, fallback to blob:", e);
-    }
+          setTimeout(resolve, 4000);
+        });
+      })
+    );
 
-    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    const filename =
+      a4FilenameFromVisit(visitId);
 
-    if (uploadedUrl) {
-      if (tg && typeof tg.openLink === "function") {
-        tg.openLink(uploadedUrl, { try_instant_view: false });
-      } else {
-        window.location.href = uploadedUrl;
-      }
-      return;
-    }
+    await window
+      .html2pdf()
+      .set({
+        margin: 0,
 
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    try {
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = filename;
-      a.target = "_blank";
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } finally {
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
-    }
-  } catch (e) {
-    console.error(e);
-    alert("Не удалось сформировать PDF: " + (e?.message || e));
+        filename,
+
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
+
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          logging: false,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 794,
+
+          onclone: (clonedDocument) => {
+            const clonedHost =
+              clonedDocument.getElementById(
+                "disA4"
+              );
+
+            if (clonedHost) {
+              clonedHost.style.display =
+                "block";
+
+              clonedHost.style.position =
+                "static";
+
+              clonedHost.style.left =
+                "auto";
+
+              clonedHost.style.top =
+                "auto";
+
+              clonedHost.style.visibility =
+                "visible";
+
+              clonedHost.style.opacity =
+                "1";
+
+              clonedHost.style.width =
+                "794px";
+
+              clonedHost.style.maxWidth =
+                "794px";
+
+              clonedHost.style.background =
+                "#ffffff";
+
+              clonedHost.style.transform =
+                "none";
+
+              clonedHost.style.boxShadow =
+                "none";
+            }
+
+            const clonedDocumentNode =
+              clonedHost?.querySelector(
+                ".disModernDoc"
+              ) ||
+              clonedHost?.firstElementChild;
+
+            if (clonedDocumentNode) {
+              clonedDocumentNode.style.display =
+                "block";
+
+              clonedDocumentNode.style.visibility =
+                "visible";
+
+              clonedDocumentNode.style.opacity =
+                "1";
+
+              clonedDocumentNode.style.background =
+                "#ffffff";
+
+              clonedDocumentNode.style.transform =
+                "none";
+            }
+          },
+        },
+
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+          compress: true,
+        },
+
+        pagebreak: {
+          mode: [
+            "css",
+            "legacy",
+          ],
+
+          avoid: [
+            ".disModernCard",
+            ".disModernSection",
+            ".disModernSignGrid",
+            ".disModernFinanceSummary",
+          ],
+        },
+      })
+      .from(documentNode)
+      .save();
+  } catch (error) {
+    console.error(
+      "downloadA4Pdf failed:",
+      error
+    );
+
+    alert(
+      "Не вдалося сформувати PDF: " +
+      (
+        error?.message ||
+        error
+      )
+    );
   } finally {
-    document.body.style.overflow = prevOverflow;
+    host.setAttribute(
+      "style",
+      oldStyle
+    );
+
+    document.body.style.overflow =
+      oldBodyOverflow;
   }
 }
 
