@@ -13588,26 +13588,63 @@ function initVisitsTabUI() {
 
 function closeVisitModal() {
   const modal = $("#visitModal");
+
   if (!modal) return;
 
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
+  modal.style.display = "none";
 
   delete modal.dataset.visitId;
+  delete modal.dataset.openSource;
+  delete modal.dataset.patientId;
 
-  // очищаем выбранного пациента
   state.selectedPet = null;
   state.selectedPetId = null;
 
-  // очищаем форму выбора пациента
-  $("#visitPatientSelect").value = "";
-  $("#visitPatientSearch").value = "";
-  $("#visitModalSub").textContent = "Пацієнт: —";
+  const patientSelect =
+    $("#visitPatientSelect");
 
-  // скрываем блок быстрого создания
-  $("#visitNewPatientBox").style.display = "none";
+  if (patientSelect) {
+    patientSelect.value = "";
+  }
 
-  // очищаем его поля
+  const patientSearch =
+    $("#visitPatientSearch");
+
+  if (patientSearch) {
+    patientSearch.value = "";
+  }
+
+  const patientResults =
+    $("#visitPatientResults");
+
+  if (patientResults) {
+    patientResults.innerHTML = "";
+  }
+
+  const modalSub =
+    $("#visitModalSub");
+
+  if (modalSub) {
+    modalSub.textContent =
+      "Оберіть пацієнта";
+  }
+
+  const patientBlock =
+    $("#visitPatientBlock");
+
+  if (patientBlock) {
+    patientBlock.style.display = "block";
+  }
+
+  const newPatientBox =
+    $("#visitNewPatientBox");
+
+  if (newPatientBox) {
+    newPatientBox.style.display = "none";
+  }
+
   [
     "#visitNewOwnerName",
     "#visitNewOwnerPhone",
@@ -13616,17 +13653,22 @@ function closeVisitModal() {
     "#visitNewPetSpecies",
     "#visitNewPetBreed",
     "#visitNewPetAge",
-    "#visitNewPetWeight"
-  ].forEach((sel) => {
-    const el = $(sel);
-    if (!el) return;
+    "#visitNewPetWeight",
+  ].forEach((selector) => {
+    const element = $(selector);
 
-    if (el.tagName === "SELECT") {
-      el.selectedIndex = 0;
+    if (!element) return;
+
+    if (element.tagName === "SELECT") {
+      element.selectedIndex = 0;
     } else {
-      el.value = "";
+      element.value = "";
     }
   });
+
+  document.body.classList.remove(
+    "medcardModalIsOpen"
+  );
 }
 
 // =========================
@@ -13680,25 +13722,66 @@ function detachFileFromVisit(visitId, fileId) {
 // Спецификации видов животных и нормализаторы
 // =========================
 function normalizeSpecies(value) {
-  const s = String(value || "").toLowerCase().trim();
-  if (s === "dog" || s.includes("пес") || s.includes("соб") || s.includes("dog")) return "dog";
-  if (s === "cat" || s.includes("кот") || s.includes("кіт") || s.includes("cat")) return "cat";
+  const s = String(value || "")
+    .toLowerCase()
+    .trim();
+
+  if (
+    s === "dog" ||
+    s.includes("пес") ||
+    s.includes("соб") ||
+    s.includes("dog")
+  ) {
+    return "dog";
+  }
+
+  if (
+    s === "cat" ||
+    s.includes("кот") ||
+    s.includes("кіт") ||
+    s.includes("cat")
+  ) {
+    return "cat";
+  }
+
   return "dog";
 }
 
 function speciesLabel(value) {
   const key = normalizeSpecies(value);
-  if (key === "cat") return "кіт";
+
+  if (key === "cat") {
+    return "кіт";
+  }
+
   return "пес";
 }
 
 function askSpecies(current = "dog") {
   const cur = normalizeSpecies(current);
-  const raw = prompt("Вид пацієнта:\n1 — пес\n2 — кіт", cur === "cat" ? "2" : "1");
-  if (raw === null) return null;
 
-  const v = String(raw).trim().toLowerCase();
-  if (v === "2" || v === "cat" || v.includes("кот") || v.includes("кіт")) return "cat";
+  const raw = prompt(
+    "Вид пацієнта:\n1 — пес\n2 — кіт",
+    cur === "cat" ? "2" : "1"
+  );
+
+  if (raw === null) {
+    return null;
+  }
+
+  const value = String(raw)
+    .trim()
+    .toLowerCase();
+
+  if (
+    value === "2" ||
+    value === "cat" ||
+    value.includes("кот") ||
+    value.includes("кіт")
+  ) {
+    return "cat";
+  }
+
   return "dog";
 }
 
@@ -13709,187 +13792,379 @@ function getPetSpeciesKey(pet) {
 // =========================
 // Вспомогательные функции модального окна визитов
 // =========================
-function openVisitModalForCreate(pet) {
+function openVisitModalForCreate(pet = null) {
   const modal = $("#visitModal");
-  if (!modal) return alert("Не знайдено #visitModal в HTML");
+
+  if (!modal) {
+    alert("Не знайдено #visitModal в HTML");
+    return;
+  }
 
   delete modal.dataset.visitId;
 
-  $("#visitDate").value = todayISO();
-  $("#visitNote").value = "";
-  $("#visitDx").value = "";
-  $("#visitWeight").value = pet?.weight_kg || pet?.weight || "";
-  $("#visitRx").value = "";
+  const openedFromPatient = Boolean(
+    pet?.id || pet?._id
+  );
 
-  const select = $("#visitStaff");
+  const petId =
+    pet?.id ||
+    pet?._id ||
+    null;
 
-  const fillStaffSelect = (staffList) => {
-    if (!select) return;
-    select.innerHTML = `
-      <option value="">Оберіть ветеринара</option>
-      ${staffList.map((doc) => `
-        <option value="${escapeHtml(String(doc.id))}">
-          ${escapeHtml(doc.name || "Працівник")}
-        </option>
-      `).join("")}
-    `;
-  };
+  modal.dataset.openSource =
+    openedFromPatient
+      ? "patient"
+      : "calendar";
 
-  // чистим прошлый выбранный пациент при новом открытии из календаря
+  modal.dataset.patientId =
+    petId
+      ? String(petId)
+      : "";
 
-const openedFromPatient = Boolean(pet?.id);
+  // Базовые поля нового визита
+  const dateInput = $("#visitDate");
+  const noteInput = $("#visitNote");
+  const dxInput = $("#visitDx");
+  const weightInput = $("#visitWeight");
+  const rxInput = $("#visitRx");
+  const startTimeInput = $("#visitStartTime");
+  const durationInput = $("#visitDuration");
 
-modal.dataset.openSource =
-  openedFromPatient
-    ? "patient"
-    : "calendar";
+  if (dateInput) {
+    dateInput.value = todayISO();
+  }
 
-modal.dataset.patientId =
-  openedFromPatient
-    ? String(pet.id)
-    : "";
+  if (noteInput) {
+    noteInput.value = "";
+  }
 
-if (openedFromPatient) {
-  state.selectedPet = pet;
-  state.selectedPetId = pet.id;
+  if (dxInput) {
+    dxInput.value = "";
+  }
 
-  $("#visitPatientSelect").value =
-    String(pet.id);
+  if (weightInput) {
+    weightInput.value =
+      pet?.weight_kg ||
+      pet?.weight ||
+      "";
+  }
 
-  $("#visitPatientSearch").value =
-    pet.name || "";
+  if (rxInput) {
+    rxInput.value = "";
+  }
 
-  $("#visitModalSub").textContent =
-    `Пацієнт: ${pet.name || "—"}`;
-} else {
-  state.selectedPet = null;
-  state.selectedPetId = null;
+  if (startTimeInput && !startTimeInput.value) {
+    startTimeInput.value = "10:00";
+  }
 
-  $("#visitPatientSelect").value = "";
-  $("#visitPatientSearch").value = "";
+  if (durationInput && !durationInput.value) {
+    durationInput.value = "60";
+  }
 
-  $("#visitModalSub").textContent =
-    "Оберіть пацієнта";
+  // Пациент
+  const patientSelect =
+    $("#visitPatientSelect");
+
+  const patientSearch =
+    $("#visitPatientSearch");
 
   const patientResults =
     $("#visitPatientResults");
 
-  if (patientResults) {
-    patientResults.innerHTML = "";
+  const modalSub =
+    $("#visitModalSub");
+
+  const patientBlock =
+    $("#visitPatientBlock");
+
+  if (openedFromPatient) {
+    state.selectedPet = pet;
+    state.selectedPetId =
+      String(petId);
+
+    if (patientSelect) {
+      patientSelect.value =
+        String(petId);
+    }
+
+    if (patientSearch) {
+      patientSearch.value =
+        pet?.name || "";
+    }
+
+    if (patientResults) {
+      patientResults.innerHTML = "";
+    }
+
+    if (modalSub) {
+      modalSub.textContent =
+        `Пацієнт: ${pet?.name || "—"}`;
+    }
+
+    if (patientBlock) {
+      patientBlock.style.display = "none";
+    }
+  } else {
+    state.selectedPet = null;
+    state.selectedPetId = null;
+
+    if (patientSelect) {
+      patientSelect.value = "";
+    }
+
+    if (patientSearch) {
+      patientSearch.value = "";
+    }
+
+    if (patientResults) {
+      patientResults.innerHTML = "";
+    }
+
+    if (modalSub) {
+      modalSub.textContent =
+        "Оберіть пацієнта";
+    }
+
+    if (patientBlock) {
+      patientBlock.style.display = "block";
+    }
   }
-}
-const patientBlock =
-  $("#visitPatientBlock");
 
-if (patientBlock) {
-  patientBlock.style.display =
-    openedFromPatient
-      ? "none"
-      : "block";
-}
+  // Быстрое создание пациента
+  const quickBox =
+    $("#visitNewPatientBox");
 
-  const quickBox = $("#visitNewPatientBox");
+  if (quickBox) {
+    quickBox.style.display = "none";
+  }
 
-  if (quickBox) quickBox.style.display = "none";
+  const btnCreatePatientFromVisit =
+    $("#btnCreatePatientFromVisit");
 
-  const fillStaffFallback = () => {
-    if (!select) return;
-    select.innerHTML = `
-      <option value="">Оберіть ветеринара</option>
-      <option value="default_doc" selected>Черговий лікар 🩺</option>
+  if (btnCreatePatientFromVisit) {
+    btnCreatePatientFromVisit.onclick = () => {
+      const box =
+        $("#visitNewPatientBox");
+
+      if (!box) {
+        return;
+      }
+
+      box.style.display =
+        box.style.display === "none" ||
+        !box.style.display
+          ? "block"
+          : "none";
+    };
+  }
+
+  // Ветеринар
+  const staffSelect =
+    $("#visitStaff");
+
+  const fillStaffSelect = (staffList) => {
+    if (!staffSelect) {
+      return;
+    }
+
+    const safeStaffList =
+      Array.isArray(staffList)
+        ? staffList
+        : [];
+
+    staffSelect.innerHTML = `
+      <option value="">
+        Оберіть ветеринара
+      </option>
+
+      ${safeStaffList
+        .map((doctor) => {
+          return `
+            <option value="${escapeHtml(
+              String(doctor.id)
+            )}">
+              ${escapeHtml(
+                doctor.name ||
+                "Працівник"
+              )}
+            </option>
+          `;
+        })
+        .join("")}
     `;
   };
 
-  if (typeof loadStaffApi === "function") {
+  const fillStaffFallback = () => {
+    if (!staffSelect) {
+      return;
+    }
+
+    staffSelect.innerHTML = `
+      <option value="">
+        Оберіть ветеринара
+      </option>
+
+      <option
+        value="default_doc"
+        selected
+      >
+        Черговий лікар 🩺
+      </option>
+    `;
+  };
+
+  if (
+    typeof loadStaffApi === "function"
+  ) {
     loadStaffApi()
       .then((staff) => {
-        if (!staff || staff.length === 0) {
-          staff = [{ id: "default_doc", name: "Черговий лікар 🩺" }];
-        }
-        fillStaffSelect(staff);
+        const staffList =
+          Array.isArray(staff) &&
+          staff.length
+            ? staff
+            : [
+                {
+                  id: "default_doc",
+                  name: "Черговий лікар 🩺",
+                },
+              ];
+
+        fillStaffSelect(staffList);
       })
-      .catch((err) => {
-        console.warn("Бэкенд недоступен, ставим дефолтного врача:", err);
+      .catch((error) => {
+        console.warn(
+          "Бэкенд недоступен, ставим дефолтного врача:",
+          error
+        );
+
         fillStaffFallback();
       });
   } else {
     fillStaffFallback();
   }
 
-  // === ЖЕЛЕЗНАЯ ФУНКЦИЯ ЗАКРЫТИЯ ===
+  // Закрытие модального окна
   const closeThisVisitModal = () => {
+    document.removeEventListener(
+      "keydown",
+      handleEscClose
+    );
+
     closeVisitModal();
-    document.removeEventListener("keydown", handleEscClose);
   };
 
-  // Закрытие по нажатию на кнопку ESC
-  const handleEscClose = (e) => {
-    if (e.key === "Escape") closeThisVisitModal();
-  };
-  document.addEventListener("keydown", handleEscClose);
-
-  // Перехватываем клик по абсолютно любым крестикам, кнопкам закрытия или "Скасувати"
-  const allCloseElements = modal.querySelectorAll(".close, .btn-close, [data-close], .cancel-btn, #btnCancelVisit");
-  allCloseElements.forEach(btn => {
-    btn.onclick = (e) => {
-      e.preventDefault();
-      closeThisVisitModal();
-    };
-  });
-
-  // Умный поиск крестика по тексту (если в index.html это просто <span>✕</span> или кнопка без классов)
-  modal.onclick = (e) => {
-    const text = e.target.innerText ? e.target.innerText.trim() : "";
-    if (text === "✕" || text === "Скасувати" || e.target.classList.contains("close-modal")) {
-      e.preventDefault();
+  const handleEscClose = (event) => {
+    if (event.key === "Escape") {
       closeThisVisitModal();
     }
   };
 
-  // Перехватываем сохранение формы, чтобы закрывать окно и обновлять список
-  const form = modal.querySelector("form");
-  if (form) {
-    form.addEventListener("submit", () => {
-      // Даем 250мс на то, чтобы твой оригинальный асинхронный submit отправил данные на сервер Render
-      setTimeout(() => {
-        closeThisVisitModal();
-        // Принудительно обновляем список визитов на экране, чтобы новый визит сразу появился
-        if (state && state.selectedPetId && typeof renderVisits === "function") {
-          renderVisits(state.selectedPetId);
-        }
-      }, 250);
-    });
+  // На случай повторного открытия удаляем
+  // старый обработчик ESC этой модалки
+  if (
+    window.__visitModalEscHandler
+  ) {
+    document.removeEventListener(
+      "keydown",
+      window.__visitModalEscHandler
+    );
   }
 
-  // === ЭФФЕКТНОЕ ЦЕНТРИРОВАНИЕ И УВЕЛИЧЕНИЕ (Apple VisionOS / macOS Style) ===
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("medcardModalIsOpen");
-  
-  // Жестко выравниваем строго по центру экрана и увеличиваем ширину
-  modal.style.position = "fixed";
-  modal.style.top = "50%";
-  modal.style.left = "50%";
-  modal.style.transform = "translate(-50%, -50%) scale(1)";
-  
-  // Размеры панельки
-  modal.style.width = "680px"; 
-  modal.style.maxWidth = "95vw";
-  modal.style.maxHeight = "85vh";
-  modal.style.overflowY = "auto"; // Если поля не влезут, внутри появится аккуратный скролл
-  
-  // Красивые премиум-отступы и скругления
-  modal.style.padding = "32px";
-  modal.style.borderRadius = "24px";
-  modal.style.zIndex = "10000"; // Поверх всех остальных элементов CRM
-  
-  // Включаем отображение
-  modal.style.display = "block";
-  modal.style.opacity = "1";
-  modal.style.pointerEvents = "auto";
-  modal.style.transition = "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
-}
+  window.__visitModalEscHandler =
+    handleEscClose;
 
+  document.addEventListener(
+    "keydown",
+    handleEscClose
+  );
+
+  const allCloseElements =
+    modal.querySelectorAll(
+      [
+        ".close",
+        ".btn-close",
+        "[data-close]",
+        ".cancel-btn",
+        "#btnCancelVisit",
+        ".pugVisitClose",
+      ].join(", ")
+    );
+
+  allCloseElements.forEach((button) => {
+    button.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      closeThisVisitModal();
+    };
+  });
+
+  // Закрытие по клику на затемнение,
+  // но не по клику внутри формы
+  modal.onclick = (event) => {
+    if (event.target === modal) {
+      closeThisVisitModal();
+      return;
+    }
+
+    const closeTarget =
+      event.target.closest(
+        [
+          ".close-modal",
+          ".pugVisitClose",
+          "[data-close]",
+          "#btnCancelVisit",
+        ].join(", ")
+      );
+
+    if (closeTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      closeThisVisitModal();
+    }
+  };
+
+  // После сохранения не накапливаем
+  // повторные submit-обработчики
+  const openedPetId =
+    petId
+      ? String(petId)
+      : null;
+
+  const form =
+    modal.querySelector("form");
+
+  if (form) {
+    form.onsubmit = () => {
+      setTimeout(() => {
+        closeThisVisitModal();
+
+        if (
+          openedPetId &&
+          typeof renderVisits === "function"
+        ) {
+          renderVisits(openedPetId);
+        }
+      }, 250);
+    };
+  }
+
+  // Открытие модального окна
+  modal.style.cssText = "";
+  modal.style.display = "flex";
+
+  modal.classList.add("open");
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "medcardModalIsOpen"
+  );
+}
 // =========================
 // PATIENT UI — Управление карточкой животного
 // =========================
@@ -15232,9 +15507,25 @@ $("#btnAddMedcardEntry")?.addEventListener("click", async () => {
   medcardFormSet({});
   fillMedcardDoctorsSelect("");
 
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("medcardModalIsOpen");
+  modal.style.cssText = "";
+modal.style.display = "flex";
+
+modal.classList.add("open");
+modal.setAttribute("aria-hidden", "false");
+
+document.body.classList.add(
+  "medcardModalIsOpen"
+);
+
+console.log(
+  "[calendar] modal opened",
+  {
+    selectedPet: state.selectedPet,
+    selectedPetId: state.selectedPetId,
+    hiddenPatientId:
+      $("#visitPatientSelect")?.value || "",
+  }
+);
 
   const saveBtn = document.getElementById("medcardSaveBtn");
 
@@ -16995,8 +17286,29 @@ $("#visitPatientSearch")?.addEventListener("input", () => {
       const patient = patients.find((p) => String(p.id) === String(id));
 
       hidden.value = id;
-      $("#visitPatientSearch").value = patient ? `${patient.name || "Пацієнт"} · ${patient.owner_name || ""}` : id;
-      box.innerHTML = "";
+
+state.selectedPet =
+  patient || null;
+
+state.selectedPetId =
+  patient?.id || null;
+
+$("#visitPatientSearch").value =
+  patient
+    ? `${patient.name || "Пацієнт"} · ${patient.owner_name || ""}`
+    : id;
+
+const modalSub =
+  $("#visitModalSub");
+
+if (modalSub) {
+  modalSub.textContent =
+    patient
+      ? `Пацієнт: ${patient.name || "—"}`
+      : "Оберіть пацієнта";
+}
+
+box.innerHTML = "";
     });
   });
 });
