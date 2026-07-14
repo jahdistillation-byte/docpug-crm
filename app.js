@@ -4891,7 +4891,7 @@ if (editBtn) {
     }
   };
 }
-function renderHospitalTab() {
+async function renderHospitalTab() {
   const page =
     document.querySelector(
       '.page[data-page="hospital"]'
@@ -4899,48 +4899,30 @@ function renderHospitalTab() {
 
   if (!page) return;
 
-  const hospitalPatients = [
-    {
-      id: "demo-hospital-1",
-      name: "Боня",
-      species: "Собака",
-      breed: "Французький бульдог",
-      owner: "Олена Коваль",
-      diagnosis: "Гострий гастроентерит",
-      doctor: "Ветеринарний лікар",
-      room: "Палата 1",
-      admittedAt: "Сьогодні, 09:20",
-      status: "stable",
-      nextAction: "Інфузія о 22:00",
-    },
-    {
-      id: "demo-hospital-2",
-      name: "Марта",
-      species: "Кішка",
-      breed: "Британська",
-      owner: "Ігор Мельник",
-      diagnosis: "Післяопераційне спостереження",
-      doctor: "Ветеринарний лікар",
-      room: "Палата 2",
-      admittedAt: "Учора, 18:40",
-      status: "observation",
-      nextAction: "Контроль температури о 21:45",
-    },
-  ];
+  const hospitalPatients =
+    await loadHospitalizationsApi(
+      true
+    );
+
+  window.__hospitalPatients =
+    hospitalPatients;
 
   const stableCount =
     hospitalPatients.filter(
-      (item) => item.status === "stable"
+      (item) =>
+        item.status === "stable"
     ).length;
 
   const observationCount =
     hospitalPatients.filter(
-      (item) => item.status === "observation"
+      (item) =>
+        item.status === "observation"
     ).length;
 
   const criticalCount =
     hospitalPatients.filter(
-      (item) => item.status === "critical"
+      (item) =>
+        item.status === "critical"
     ).length;
 
   page.innerHTML = `
