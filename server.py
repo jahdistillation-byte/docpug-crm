@@ -467,6 +467,192 @@ def static_any(path):
     return send_from_directory(BASE_DIR, path)
 
 # =========================
+# API: ORGANIZATION PROFILE
+# =========================
+
+CLINIC_PROFILE_FIELDS = [
+    "id",
+    "name",
+    "subtitle",
+    "logo_url",
+    "phone",
+    "address",
+    "website",
+    "document_accent_color",
+    "doctor_signature_url",
+    "clinic_stamp_url",
+    "document_footer",
+    "updated_at",
+]
+
+
+@app.get("/api/organization/profile")
+def api_get_organization_profile():
+    """
+    Получить профиль текущей клиники.
+
+    Чтение доступно всем сотрудникам текущей организации,
+    потому что профиль нужен для формирования документов.
+    """
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail("Organization not selected", 400)
+
+        res = (
+            supabase.table("orgs")
+            .select(", ".join(CLINIC_PROFILE_FIELDS))
+            .eq("id", current_org)
+            .limit(1)
+            .execute()
+        )
+
+        if not res.data:
+            return fail("Organization not found", 404)
+
+        profile = res.data[0]
+
+        profile["name"] = (
+            profile.get("name")
+            or "Ветеринарна клініка"
+        )
+
+        profile["subtitle"] = (
+            profile.get("subtitle")
+            or "Ветеринарна клініка"
+        )
+
+        profile["document_accent_color"] = (
+            profile.get("document_accent_color")
+            or "#9346E8"
+        )
+
+        profile["document_footer"] = (
+            profile.get("document_footer")
+            or "Коли важливо — ми поруч."
+        )
+
+        return ok(profile)
+
+    except Exception as e:
+        print(
+            "❌ /api/organization/profile GET error:",
+            repr(e)
+        )
+
+        return fail(
+            f"Cannot load organization profile: {e}",
+            500
+        )
+
+
+@app.put("/api/organization/profile")
+def api_update_organization_profile():
+    """
+    Изменить профиль клиники может только владелец.
+    """
+    try:
+        current_user, auth_error = owner_required()
+
+        if auth_error:
+            return auth_error
+
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail("Organization not selected", 400)
+
+        data = request.get_json(silent=True) or {}
+
+        allowed_fields = [
+            "name",
+            "subtitle",
+            "logo_url",
+            "phone",
+            "address",
+            "website",
+            "document_accent_color",
+            "doctor_signature_url",
+            "clinic_stamp_url",
+            "document_footer",
+        ]
+
+        payload = {
+            key: data.get(key)
+            for key in allowed_fields
+            if key in data
+        }
+
+        # Текстовые поля очищаем от лишних пробелов.
+        for key, value in list(payload.items()):
+            if isinstance(value, str):
+                payload[key] = value.strip()
+
+        clinic_name = payload.get("name")
+
+        if clinic_name is not None and not clinic_name:
+            return fail("Clinic name required", 400)
+
+        accent_color = payload.get(
+            "document_accent_color"
+        )
+
+        if accent_color:
+            accent_color = accent_color.upper()
+
+            if (
+                len(accent_color) != 7
+                or not accent_color.startswith("#")
+            ):
+                return fail(
+                    "Invalid document accent color",
+                    400
+                )
+
+            try:
+                int(accent_color[1:], 16)
+            except ValueError:
+                return fail(
+                    "Invalid document accent color",
+                    400
+                )
+
+            payload["document_accent_color"] = (
+                accent_color
+            )
+
+        if not payload:
+            return fail("Nothing to update", 400)
+
+        payload["updated_at"] = (
+            datetime.now(timezone.utc).isoformat()
+        )
+
+        res = (
+            supabase.table("orgs")
+            .update(payload)
+            .eq("id", current_org)
+            .execute()
+        )
+
+        if not res.data:
+            return fail("Organization not found", 404)
+
+        return ok(res.data[0])
+
+    except Exception as e:
+        print(
+            "❌ /api/organization/profile PUT error:",
+            repr(e)
+        )
+
+        return fail(
+            f"Cannot update organization profile: {e}",
+            500
+        )
+
+# =========================
 # API: ME
 # =========================
 @app.get("/api/me")
