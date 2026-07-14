@@ -5033,7 +5033,6 @@ async function renderPatientTab(tab, pet) {
       <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
       <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
       <button class="patient-tab-btn" data-p-tab="finance">💎 Фінанси</button>
-      <button class="patient-tab-btn" data-p-tab="edit">✏️ Редагувати</button>
     </div>
 
     <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
