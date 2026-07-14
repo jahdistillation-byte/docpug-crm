@@ -4237,9 +4237,7 @@ clonedRoot.style.maxWidth = "1120px";
 clonedDoc.style.minWidth = "1120px";
 clonedDoc.style.maxWidth = "1120px";
 
-              clonedDoc.style.margin =
-                "0";
-
+              clonedDoc.style.margin = "0 auto";
               clonedDoc.style.padding =
                 "32px";
 

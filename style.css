@@ -19502,3 +19502,31 @@ select.visitControl {
   margin-top: 12px !important;
   padding-top: 8px !important;
 }
+/* ===== PDF-выписка: уменьшаем разрыв и центрируем ===== */
+
+.disModernDoc {
+  margin: 0 auto !important;
+}
+
+.disModernSection {
+  margin-bottom: 12px !important;
+}
+
+.disModernSection--follow,
+.disModernFollowBlock,
+.disModernControlBlock {
+  margin-bottom: 10px !important;
+}
+
+.disModernSection--finance,
+.disModernFinanceBlock,
+.disModernServicesBlock {
+  margin-top: 10px !important;
+}
+
+/* если где-то секция услуг прижимается вниз */
+.disModernSection--finance,
+.disModernFinanceBlock,
+.disModernServicesBlock {
+  align-self: auto !important;
+}
