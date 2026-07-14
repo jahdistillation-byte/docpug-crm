@@ -12038,19 +12038,199 @@ if (btnPdf) {
         })
       );
 
-      document.body.classList.add(
-        "docpug-printing"
-      );
+      const printWindow = window.open(
+  "",
+  "_blank"
+);
 
-      setTimeout(() => {
-        window.print();
+if (!printWindow) {
+  throw new Error(
+    "Браузер заблокував вікно друку"
+  );
+}
 
-        setTimeout(() => {
-          document.body.classList.remove(
-            "docpug-printing"
-          );
-        }, 500);
-      }, 100);
+const documentHtml =
+  printDocument.innerHTML;
+
+const styles = Array.from(
+  document.querySelectorAll(
+    'link[rel="stylesheet"], style'
+  )
+)
+  .map((node) => node.outerHTML)
+  .join("\n");
+
+printWindow.document.open();
+
+printWindow.document.write(`
+  <!DOCTYPE html>
+  <html lang="uk">
+    <head>
+      <meta charset="UTF-8">
+
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+      >
+
+      <title>
+        Виписка з амбулаторного прийому
+      </title>
+
+      ${styles}
+
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 12mm 12mm 14mm;
+        }
+
+        html,
+        body {
+          width: auto !important;
+          min-width: 0 !important;
+          height: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #ffffff !important;
+          overflow: visible !important;
+        }
+
+        body {
+          font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+          color: #172033;
+        }
+
+        #disA4 {
+          display: block !important;
+          position: static !important;
+          width: 100% !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          height: auto !important;
+          min-height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: visible !important;
+          transform: none !important;
+        }
+
+        .premiumDischargeDocument {
+          display: block !important;
+          width: 100% !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          height: auto !important;
+          min-height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          overflow: visible !important;
+          transform: none !important;
+          box-sizing: border-box !important;
+        }
+
+        .dischargeHeader,
+        .dischargePeopleGrid,
+        .dischargeInfoCard,
+        .dischargeMedicalSection,
+        .dischargeFinanceHeader,
+        .dischargeTotals,
+        .dischargeSignatureSection,
+        .dischargeFooter {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+
+        .dischargeFinanceSection {
+          overflow: visible !important;
+          break-inside: auto;
+          page-break-inside: auto;
+        }
+
+        .dischargeFinanceTable {
+          width: 100% !important;
+          min-width: 0 !important;
+          table-layout: fixed !important;
+          border-collapse: collapse !important;
+        }
+
+        .dischargeFinanceTable thead {
+          display: table-header-group;
+        }
+
+        .dischargeFinanceTable tbody {
+          display: table-row-group;
+        }
+
+        .dischargeFinanceTable tr,
+        .dischargeFinanceTable td,
+        .dischargeFinanceTable th {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+
+        @media print {
+          html,
+          body {
+            width: auto !important;
+            height: auto !important;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      <main id="disA4">
+        ${documentHtml}
+      </main>
+
+      <script>
+        window.addEventListener(
+          "load",
+          async () => {
+            const images = Array.from(
+              document.images
+            );
+
+            await Promise.all(
+              images.map((image) => {
+                if (image.complete) {
+                  return Promise.resolve();
+                }
+
+                return new Promise(
+                  (resolve) => {
+                    image.onload = resolve;
+                    image.onerror = resolve;
+
+                    setTimeout(
+                      resolve,
+                      3000
+                    );
+                  }
+                );
+              })
+            );
+
+            setTimeout(() => {
+              window.print();
+            }, 250);
+          }
+        );
+      <\/script>
+    </body>
+  </html>
+`);
+
+printWindow.document.close();
     } catch (error) {
       console.error(
         "Помилка друку виписки:",
