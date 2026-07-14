@@ -7449,7 +7449,50 @@ function getLabPdfStatusMeta(status) {
   return statuses[status] || statuses.unknown;
 }
 
-function buildLabPdfDocument(pet, lab) {
+function buildLabPdfDocument(
+  pet,
+  lab,
+  clinicProfile = {}
+) {
+  const clinic = {
+    ...DEFAULT_CLINIC_PROFILE,
+    ...(clinicProfile || {}),
+  };
+
+  const clinicName =
+    clinic.name ||
+    "Ветеринарна клініка";
+
+  const clinicSubtitle =
+    clinic.subtitle ||
+    "Ветеринарна клініка";
+
+  const clinicLogo =
+    clinic.logo_url || "";
+
+  const clinicPhone =
+    clinic.phone || "";
+
+  const clinicAddress =
+    clinic.address || "";
+
+  const clinicWebsite =
+    clinic.website || "";
+
+  const clinicAccent =
+    clinic.document_accent_color ||
+    "#9346E8";
+
+  const clinicFooter =
+    clinic.document_footer ||
+    "Коли важливо — ми поруч.";
+
+  const clinicSignature =
+    clinic.doctor_signature_url || "";
+
+  const clinicStamp =
+    clinic.clinic_stamp_url || "";
+
   const speciesKey = getPetSpeciesKey(pet);
 
   const speciesLabel =
@@ -7713,383 +7756,576 @@ function buildLabPdfDocument(pet, lab) {
     font-family: Arial, Helvetica, sans-serif;
   `;
 
-  documentNode.innerHTML = `
-    <header style="
+documentNode.innerHTML = `
+  <header style="
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding-bottom: 22px;
+    border-bottom: 2px solid ${escapeHtml(clinicAccent)};
+  ">
+    <div style="
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 24px;
-      padding-bottom: 22px;
-      border-bottom: 2px solid #8C43D6;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
     ">
-      <div>
+      ${
+        clinicLogo
+          ? `
+            <img
+              src="${escapeHtml(clinicLogo)}"
+              alt="${escapeHtml(clinicName)}"
+              crossorigin="anonymous"
+              style="
+                display: block;
+                width: 58px;
+                height: 58px;
+                flex: 0 0 58px;
+                object-fit: contain;
+              "
+            >
+          `
+          : `
+            <div style="
+              display: flex;
+              width: 52px;
+              height: 52px;
+              flex: 0 0 52px;
+              align-items: center;
+              justify-content: center;
+              border-radius: 12px;
+              background: ${escapeHtml(clinicAccent)};
+              box-shadow: 0 8px 18px rgba(70, 30, 110, 0.18);
+              color: #FFFFFF;
+              font-size: 23px;
+              font-weight: 900;
+            ">
+              ${escapeHtml(
+                clinicName.trim().charAt(0).toUpperCase() || "К"
+              )}
+            </div>
+          `
+      }
+
+      <div style="min-width: 0;">
         <div style="
-          color: #8C43D6;
+          max-width: 280px;
+          overflow: hidden;
+          color: ${escapeHtml(clinicAccent)};
           font-size: 23px;
           font-weight: 900;
+          line-height: 1.05;
           letter-spacing: -.03em;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         ">
-          Doc.PUG
+          ${escapeHtml(clinicName)}
         </div>
 
         <div style="
-          margin-top: 4px;
+          margin-top: 5px;
           color: #697080;
           font-size: 9px;
           font-weight: 700;
           letter-spacing: .07em;
           text-transform: uppercase;
         ">
-          Ветеринарна медицина
+          ${escapeHtml(clinicSubtitle)}
         </div>
       </div>
+    </div>
 
-      <div style="text-align: right;">
-        <div style="
-          color: #242833;
-          font-size: 16px;
-          font-weight: 900;
-        ">
-          Результати лабораторного дослідження
-        </div>
-
-        <div style="
-          margin-top: 5px;
-          color: #777E8C;
-          font-size: 10px;
-        ">
-          ${escapeHtml(lab?.type || "Аналіз")}
-        </div>
-      </div>
-    </header>
-
-    <section style="
-      display: grid;
-      grid-template-columns: 1.25fr 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
-    ">
+    <div style="text-align: right;">
       <div style="
-        padding: 13px 14px;
-        background: #F7F5FA;
-        border: 1px solid #EBE6F1;
-        border-radius: 12px;
+        color: #242833;
+        font-size: 16px;
+        font-weight: 900;
       ">
-        <div style="
-          color: #8D94A1;
-          font-size: 8px;
-          font-weight: 850;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        ">
-          Пацієнт
-        </div>
-
-        <div style="
-          margin-top: 5px;
-          color: #1D212B;
-          font-size: 15px;
-          font-weight: 900;
-        ">
-          ${escapeHtml(pet?.name || "—")}
-        </div>
-
-        <div style="
-          margin-top: 3px;
-          color: #697080;
-          font-size: 9px;
-        ">
-          ${escapeHtml(speciesLabel)}
-          ${
-            pet?.breed
-              ? ` • ${escapeHtml(pet.breed)}`
-              : ""
-          }
-        </div>
+        Результати лабораторного дослідження
       </div>
 
       <div style="
-        padding: 13px 14px;
-        background: #F7F5FA;
-        border: 1px solid #EBE6F1;
-        border-radius: 12px;
+        margin-top: 5px;
+        color: #777E8C;
+        font-size: 10px;
       ">
-        <div style="
-          color: #8D94A1;
-          font-size: 8px;
-          font-weight: 850;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        ">
-          Дата дослідження
-        </div>
-
-        <div style="
-          margin-top: 7px;
-          color: #1D212B;
-          font-size: 12px;
-          font-weight: 850;
-        ">
-          ${escapeHtml(
-            typeof formatLabCardDate === "function"
-              ? formatLabCardDate(lab?.date)
-              : lab?.date || "—"
-          )}
-        </div>
+        ${escapeHtml(lab?.type || "Аналіз")}
       </div>
+    </div>
+  </header>
 
-      <div style="
-        padding: 13px 14px;
-        background: #F7F5FA;
-        border: 1px solid #EBE6F1;
-        border-radius: 12px;
-      ">
-        <div style="
-          color: #8D94A1;
-          font-size: 8px;
-          font-weight: 850;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        ">
-          Лабораторія
-        </div>
-
-        <div style="
-          margin-top: 7px;
-          color: #1D212B;
-          font-size: 12px;
-          font-weight: 850;
-        ">
-          ${escapeHtml(lab?.laboratory || "Не вказано")}
-        </div>
-      </div>
-    </section>
-
-    <section style="
-      margin-top: 16px;
-      padding: 14px 16px;
-      background: ${summaryBackground};
-      border: 1px solid ${summaryBorder};
-      border-radius: 12px;
-      page-break-inside: avoid;
-    ">
-      <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 18px;
-      ">
-        <div>
-          <div style="
-            color: ${summaryColor};
-            font-size: 12px;
-            font-weight: 900;
-          ">
-            ${escapeHtml(summaryTitle)}
-          </div>
-
-          <div style="
-            max-width: 480px;
-            margin-top: 5px;
-            color: #555D6C;
-            font-size: 9px;
-            line-height: 1.5;
-          ">
-            ${escapeHtml(summaryText)}
-          </div>
-        </div>
-
+  ${
+    clinicPhone || clinicAddress || clinicWebsite
+      ? `
         <div style="
           display: flex;
-          gap: 7px;
           flex-wrap: wrap;
-          justify-content: flex-end;
+          gap: 6px 16px;
+          margin-top: 10px;
+          color: #777E8C;
+          font-size: 8px;
+          line-height: 1.45;
         ">
-          <div style="
-            padding: 6px 8px;
-            color: #147D4A;
-            background: #FFFFFF;
-            border: 1px solid #B9E6CD;
-            border-radius: 8px;
-            font-size: 8px;
-            font-weight: 900;
-          ">
-            ✓ Норма: ${normalCount}
-          </div>
-
-          <div style="
-            padding: 6px 8px;
-            color: #B42318;
-            background: #FFFFFF;
-            border: 1px solid #F7C5C1;
-            border-radius: 8px;
-            font-size: 8px;
-            font-weight: 900;
-          ">
-            ↑ Вище: ${highCount}
-          </div>
-
-          <div style="
-            padding: 6px 8px;
-            color: #175CD3;
-            background: #FFFFFF;
-            border: 1px solid #BDD4FF;
-            border-radius: 8px;
-            font-size: 8px;
-            font-weight: 900;
-          ">
-            ↓ Нижче: ${lowCount}
-          </div>
+          ${
+            clinicPhone
+              ? `
+                <span>
+                  ${escapeHtml(clinicPhone)}
+                </span>
+              `
+              : ""
+          }
 
           ${
-            unknownCount
+            clinicAddress
               ? `
-                <div style="
-                  padding: 6px 8px;
-                  color: #5F6673;
-                  background: #FFFFFF;
-                  border: 1px solid #DDE1E7;
-                  border-radius: 8px;
-                  font-size: 8px;
-                  font-weight: 900;
-                ">
-                  — Без оцінки: ${unknownCount}
-                </div>
+                <span>
+                  ${escapeHtml(clinicAddress)}
+                </span>
+              `
+              : ""
+          }
+
+          ${
+            clinicWebsite
+              ? `
+                <span>
+                  ${escapeHtml(clinicWebsite)}
+                </span>
               `
               : ""
           }
         </div>
-      </div>
-    </section>
+      `
+      : ""
+  }
 
-    <section style="
-      margin-top: 18px;
-      overflow: hidden;
-      border: 1px solid #E2E5EA;
-      border-radius: 13px;
-    ">
-      <table style="
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-      ">
-        <thead>
-          <tr style="background: #292333;">
-            <th style="
-              width: 34%;
-              padding: 10px 12px;
-              color: #FFFFFF;
-              font-size: 8px;
-              font-weight: 850;
-              text-align: left;
-              letter-spacing: .07em;
-              text-transform: uppercase;
-            ">
-              Показник
-            </th>
-
-            <th style="
-              width: 19%;
-              padding: 10px 12px;
-              color: #FFFFFF;
-              font-size: 8px;
-              font-weight: 850;
-              text-align: left;
-              letter-spacing: .07em;
-              text-transform: uppercase;
-            ">
-              Результат
-            </th>
-
-            <th style="
-              width: 24%;
-              padding: 10px 12px;
-              color: #FFFFFF;
-              font-size: 8px;
-              font-weight: 850;
-              text-align: left;
-              letter-spacing: .07em;
-              text-transform: uppercase;
-            ">
-              Референс
-            </th>
-
-            <th style="
-              width: 23%;
-              padding: 10px 12px;
-              color: #FFFFFF;
-              font-size: 8px;
-              font-weight: 850;
-              text-align: left;
-              letter-spacing: .07em;
-              text-transform: uppercase;
-            ">
-              Оцінка
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          ${
-            rowsHtml ||
-            `
-              <tr>
-                <td colspan="4" style="
-                  padding: 30px;
-                  color: #767D8B;
-                  font-size: 11px;
-                  text-align: center;
-                ">
-                  Результати не внесені
-                </td>
-              </tr>
-            `
-          }
-        </tbody>
-      </table>
-    </section>
-
-    ${commentHtml}
-
-    <section style="
-      margin-top: 18px;
-      padding: 12px 14px;
-      background: #FAFAFC;
-      border: 1px solid #EBEDF1;
-      border-radius: 10px;
-      page-break-inside: avoid;
+  <section style="
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  ">
+    <div style="
+      padding: 13px 14px;
+      background: #F7F5FA;
+      border: 1px solid #EBE6F1;
+      border-radius: 12px;
     ">
       <div style="
-        color: #747B88;
+        color: #8D94A1;
         font-size: 8px;
-        line-height: 1.55;
+        font-weight: 850;
+        letter-spacing: .08em;
+        text-transform: uppercase;
       ">
-        <b style="color: #454B57;">Важливо:</b>
-        референтні значення можуть відрізнятися залежно від лабораторії,
-        обладнання, віку та фізіологічного стану тварини. Цей документ не є
-        самостійним діагнозом. Результати повинен інтерпретувати ветеринарний лікар.
+        Пацієнт
       </div>
-    </section>
 
-    <footer style="
+      <div style="
+        margin-top: 5px;
+        color: #1D212B;
+        font-size: 15px;
+        font-weight: 900;
+      ">
+        ${escapeHtml(pet?.name || "—")}
+      </div>
+
+      <div style="
+        margin-top: 3px;
+        color: #697080;
+        font-size: 9px;
+      ">
+        ${escapeHtml(speciesLabel)}
+        ${
+          pet?.breed
+            ? ` • ${escapeHtml(pet.breed)}`
+            : ""
+        }
+      </div>
+    </div>
+
+    <div style="
+      padding: 13px 14px;
+      background: #F7F5FA;
+      border: 1px solid #EBE6F1;
+      border-radius: 12px;
+    ">
+      <div style="
+        color: #8D94A1;
+        font-size: 8px;
+        font-weight: 850;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      ">
+        Дата дослідження
+      </div>
+
+      <div style="
+        margin-top: 7px;
+        color: #1D212B;
+        font-size: 12px;
+        font-weight: 850;
+      ">
+        ${escapeHtml(
+          typeof formatLabCardDate === "function"
+            ? formatLabCardDate(lab?.date)
+            : lab?.date || "—"
+        )}
+      </div>
+    </div>
+
+    <div style="
+      padding: 13px 14px;
+      background: #F7F5FA;
+      border: 1px solid #EBE6F1;
+      border-radius: 12px;
+    ">
+      <div style="
+        color: #8D94A1;
+        font-size: 8px;
+        font-weight: 850;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      ">
+        Лабораторія
+      </div>
+
+      <div style="
+        margin-top: 7px;
+        color: #1D212B;
+        font-size: 12px;
+        font-weight: 850;
+      ">
+        ${escapeHtml(lab?.laboratory || "Не вказано")}
+      </div>
+    </div>
+  </section>
+
+  <section style="
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: ${summaryBackground};
+    border: 1px solid ${summaryBorder};
+    border-radius: 12px;
+    page-break-inside: avoid;
+  ">
+    <div style="
       display: flex;
       justify-content: space-between;
-      gap: 20px;
-      margin-top: 22px;
-      padding-top: 14px;
-      border-top: 1px solid #E1E4E9;
-      color: #8B929F;
-      font-size: 8px;
+      align-items: flex-start;
+      gap: 18px;
     ">
-      <span>
-        Doc.PUG • Коли важливо — ми поруч.
-      </span>
+      <div>
+        <div style="
+          color: ${summaryColor};
+          font-size: 12px;
+          font-weight: 900;
+        ">
+          ${escapeHtml(summaryTitle)}
+        </div>
 
-      <span>
-        Сформовано: ${escapeHtml(new Date().toLocaleString("uk-UA"))}
-      </span>
-    </footer>
-  `;
+        <div style="
+          max-width: 480px;
+          margin-top: 5px;
+          color: #555D6C;
+          font-size: 9px;
+          line-height: 1.5;
+        ">
+          ${escapeHtml(summaryText)}
+        </div>
+      </div>
+
+      <div style="
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      ">
+        <div style="
+          padding: 6px 8px;
+          color: #147D4A;
+          background: #FFFFFF;
+          border: 1px solid #B9E6CD;
+          border-radius: 8px;
+          font-size: 8px;
+          font-weight: 900;
+        ">
+          ✓ Норма: ${normalCount}
+        </div>
+
+        <div style="
+          padding: 6px 8px;
+          color: #B42318;
+          background: #FFFFFF;
+          border: 1px solid #F7C5C1;
+          border-radius: 8px;
+          font-size: 8px;
+          font-weight: 900;
+        ">
+          ↑ Вище: ${highCount}
+        </div>
+
+        <div style="
+          padding: 6px 8px;
+          color: #175CD3;
+          background: #FFFFFF;
+          border: 1px solid #BDD4FF;
+          border-radius: 8px;
+          font-size: 8px;
+          font-weight: 900;
+        ">
+          ↓ Нижче: ${lowCount}
+        </div>
+
+        ${
+          unknownCount
+            ? `
+              <div style="
+                padding: 6px 8px;
+                color: #5F6673;
+                background: #FFFFFF;
+                border: 1px solid #DDE1E7;
+                border-radius: 8px;
+                font-size: 8px;
+                font-weight: 900;
+              ">
+                — Без оцінки: ${unknownCount}
+              </div>
+            `
+            : ""
+        }
+      </div>
+    </div>
+  </section>
+
+  <section style="
+    margin-top: 18px;
+    overflow: hidden;
+    border: 1px solid #E2E5EA;
+    border-radius: 13px;
+  ">
+    <table style="
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    ">
+      <thead>
+        <tr style="background: #292333;">
+          <th style="
+            width: 34%;
+            padding: 10px 12px;
+            color: #FFFFFF;
+            font-size: 8px;
+            font-weight: 850;
+            text-align: left;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+          ">
+            Показник
+          </th>
+
+          <th style="
+            width: 19%;
+            padding: 10px 12px;
+            color: #FFFFFF;
+            font-size: 8px;
+            font-weight: 850;
+            text-align: left;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+          ">
+            Результат
+          </th>
+
+          <th style="
+            width: 24%;
+            padding: 10px 12px;
+            color: #FFFFFF;
+            font-size: 8px;
+            font-weight: 850;
+            text-align: left;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+          ">
+            Референс
+          </th>
+
+          <th style="
+            width: 23%;
+            padding: 10px 12px;
+            color: #FFFFFF;
+            font-size: 8px;
+            font-weight: 850;
+            text-align: left;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+          ">
+            Оцінка
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${
+          rowsHtml ||
+          `
+            <tr>
+              <td colspan="4" style="
+                padding: 30px;
+                color: #767D8B;
+                font-size: 11px;
+                text-align: center;
+              ">
+                Результати не внесені
+              </td>
+            </tr>
+          `
+        }
+      </tbody>
+    </table>
+  </section>
+
+  ${commentHtml}
+
+  <section style="
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: #FAFAFC;
+    border: 1px solid #EBEDF1;
+    border-radius: 10px;
+    page-break-inside: avoid;
+  ">
+    <div style="
+      color: #747B88;
+      font-size: 8px;
+      line-height: 1.55;
+    ">
+      <b style="color: #454B57;">
+        Важливо:
+      </b>
+
+      референтні значення можуть відрізнятися залежно від лабораторії,
+      обладнання, віку та фізіологічного стану тварини. Цей документ не є
+      самостійним діагнозом. Результати повинен інтерпретувати ветеринарний лікар.
+    </div>
+  </section>
+
+  ${
+    clinicSignature || clinicStamp
+      ? `
+        <section style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 28px;
+          margin-top: 24px;
+          page-break-inside: avoid;
+        ">
+          <div style="
+            display: flex;
+            min-height: 70px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 7px;
+            border-bottom: 1px solid #CCD0D7;
+          ">
+            ${
+              clinicSignature
+                ? `
+                  <img
+                    src="${escapeHtml(clinicSignature)}"
+                    alt="Підпис лікаря"
+                    crossorigin="anonymous"
+                    style="
+                      display: block;
+                      max-width: 150px;
+                      max-height: 60px;
+                      object-fit: contain;
+                    "
+                  >
+                `
+                : ""
+            }
+
+            <span style="
+              margin-top: 5px;
+              color: #8B929F;
+              font-size: 8px;
+            ">
+              Підпис лікаря
+            </span>
+          </div>
+
+          <div style="
+            display: flex;
+            min-height: 70px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 7px;
+            border-bottom: 1px solid #CCD0D7;
+          ">
+            ${
+              clinicStamp
+                ? `
+                  <img
+                    src="${escapeHtml(clinicStamp)}"
+                    alt="Печатка клініки"
+                    crossorigin="anonymous"
+                    style="
+                      display: block;
+                      max-width: 120px;
+                      max-height: 70px;
+                      object-fit: contain;
+                    "
+                  >
+                `
+                : ""
+            }
+
+            <span style="
+              margin-top: 5px;
+              color: #8B929F;
+              font-size: 8px;
+            ">
+              Печатка клініки
+            </span>
+          </div>
+        </section>
+      `
+      : ""
+  }
+
+  <footer style="
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid #E1E4E9;
+    color: #8B929F;
+    font-size: 8px;
+  ">
+    <span>
+      ${escapeHtml(clinicName)}
+      ${
+        clinicFooter
+          ? ` • ${escapeHtml(clinicFooter)}`
+          : ""
+      }
+    </span>
+
+    <span>
+      Сформовано:
+      ${escapeHtml(
+        new Date().toLocaleString("uk-UA")
+      )}
+    </span>
+  </footer>
+`;
 
   return documentNode;
 }
@@ -8111,6 +8347,9 @@ async function downloadLabPdf(pet, labOrId) {
     alert("Аналіз не знайдено.");
     return;
   }
+  const clinicProfile =
+  state.clinicProfile ||
+  await loadClinicProfileApi();
 
   const renderHost = document.createElement("div");
 
@@ -8143,7 +8382,11 @@ renderHost.style.cssText = `
   background: #FFFFFF;
 `;
 
-  const pdfDocument = buildLabPdfDocument(pet, lab);
+  const pdfDocument = buildLabPdfDocument(
+  pet,
+  lab,
+  clinicProfile
+);
   renderHost.appendChild(pdfDocument);
   document.body.appendChild(renderHost);
 
@@ -8245,7 +8488,6 @@ renderHost.style.cssText = `
   })
   .from(pdfDocument);
 
-await worker.save();
 
     await worker.save();
   } catch (error) {
