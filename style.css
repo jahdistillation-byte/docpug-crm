@@ -16011,3 +16011,840 @@ select.clinicSettingsInput {
     justify-content: flex-start;
   }
 }
+
+/* =========================================================
+   DOC.PUG CRM — PATIENT FILES ARCHIVE
+   ========================================================= */
+
+.patientFilesArchive {
+  width: 100%;
+  color: #fff;
+}
+
+.patientFilesArchiveHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.patientFilesKicker {
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.patientFilesArchiveHead h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.patientFilesArchiveHead p {
+  max-width: 720px;
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.patientFilesAddButton {
+  min-height: 44px;
+  padding: 0 18px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  border: 1px solid rgba(207, 158, 255, 0.28);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      135deg,
+      #a84dff,
+      #7c3fe6
+    );
+  box-shadow:
+    0 13px 30px rgba(112, 44, 198, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.patientFilesAddButton:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow:
+    0 17px 36px rgba(112, 44, 198, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.patientFilesStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.patientFilesStats > div {
+  padding: 15px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.014)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.patientFilesStats span,
+.patientFilesStats strong {
+  display: block;
+}
+
+.patientFilesStats span {
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.patientFilesStats strong {
+  font-size: 22px;
+  font-weight: 850;
+  color: #c88cff;
+}
+
+.patientFilesFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 24px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.patientFilesFilter {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  font: inherit;
+  color: rgba(255, 255, 255, 0.54);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.patientFilesFilter:hover {
+  transform: translateY(-1px);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.patientFilesFilter.active {
+  border-color: rgba(182, 101, 255, 0.35);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(147, 70, 232, 0.23),
+      rgba(147, 70, 232, 0.08)
+    );
+  box-shadow:
+    0 8px 22px rgba(61, 20, 108, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.patientFilesFilter span {
+  font-size: 14px;
+}
+
+.patientFilesFilter b {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.patientFilesFilter em {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.patientFilesGroup {
+  margin-bottom: 28px;
+}
+
+.patientFilesGroupHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.patientFilesGroupHead > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.patientFilesGroupHead h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.patientFilesGroupHead strong {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.patientFilesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.patientFileCard {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.014)
+    );
+  box-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.patientFileCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(173, 92, 255, 0.25);
+  box-shadow:
+    0 22px 46px rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(147, 70, 232, 0.05);
+}
+
+.patientFilePreview {
+  position: relative;
+  display: grid;
+  height: 164px;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(147, 70, 232, 0.1),
+      transparent 68%
+    ),
+    rgba(4, 2, 11, 0.48);
+}
+
+.patientFilePreview img,
+.patientFilePreview video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.patientFileDocumentIcon {
+  display: grid;
+  width: 74px;
+  height: 74px;
+  place-items: center;
+  border: 1px solid rgba(190, 116, 255, 0.22);
+  border-radius: 22px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(147, 70, 232, 0.24),
+      rgba(147, 70, 232, 0.07)
+    );
+  box-shadow:
+    0 16px 32px rgba(75, 26, 130, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: 31px;
+}
+
+.patientFilePlayIcon {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(6, 4, 14, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 16px;
+  color: #fff;
+}
+
+.patientFileCategory {
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  background: rgba(10, 7, 20, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.patientFileCardBody {
+  padding: 15px;
+}
+
+.patientFileCardBody h4 {
+  margin: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.patientFileMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-top: 7px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.patientFileNote {
+  min-height: 38px;
+  margin: 11px 0 0;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.patientFileCardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.patientFileOpenButton,
+.patientFileActionButton {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 10px;
+  font: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.patientFileOpenButton {
+  flex: 1;
+  padding: 0 13px;
+  border: 1px solid rgba(182, 98, 255, 0.28);
+  background: rgba(147, 70, 232, 0.14);
+  font-size: 10px;
+  font-weight: 800;
+  color: #e1c1ff;
+}
+
+.patientFileOpenButton:hover {
+  transform: translateY(-1px);
+  background: rgba(147, 70, 232, 0.21);
+}
+
+.patientFileOpenButton:disabled {
+  cursor: default;
+  opacity: 0.45;
+  transform: none;
+}
+
+.patientFileActionButton {
+  width: 36px;
+  flex: 0 0 36px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.patientFileActionButton:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.patientFileActionButton.danger {
+  border-color: rgba(255, 82, 108, 0.16);
+  background: rgba(255, 68, 96, 0.06);
+  color: #ff8296;
+}
+
+.patientFilesEmpty {
+  display: flex;
+  min-height: 320px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 34px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(147, 70, 232, 0.08),
+      transparent 65%
+    ),
+    rgba(255, 255, 255, 0.015);
+  text-align: center;
+}
+
+.patientFilesEmptyIcon {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  margin-bottom: 14px;
+  border: 1px solid rgba(181, 104, 255, 0.2);
+  border-radius: 20px;
+  background: rgba(147, 70, 232, 0.1);
+  font-size: 28px;
+}
+
+.patientFilesEmpty h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.patientFilesEmpty p {
+  max-width: 420px;
+  margin: 8px 0 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+/* =========================================================
+   PATIENT FILE MODAL
+   ========================================================= */
+
+.patientFileModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(3, 2, 9, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.patientFileModal {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(147, 70, 232, 0.15),
+      transparent 32%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(22, 14, 42, 0.98),
+      rgba(10, 7, 21, 0.98)
+    );
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.patientFileModalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  font: inherit;
+  font-size: 23px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.patientFileModalHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 48px;
+  margin-bottom: 24px;
+}
+
+.patientFileModalIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid rgba(181, 102, 255, 0.22);
+  border-radius: 15px;
+  background: rgba(147, 70, 232, 0.13);
+  font-size: 22px;
+}
+
+.patientFileModalHead h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.patientFileModalHead p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.patientFileModalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.patientFileModalField {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.patientFileModalWide {
+  grid-column: 1 / -1;
+}
+
+.patientFileModalField > span {
+  font-size: 11px;
+  font-weight: 750;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.patientFileModalField input,
+.patientFileModalField select,
+.patientFileModalField textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  border-radius: 13px;
+  background: rgba(5, 3, 13, 0.45);
+  font: inherit;
+  font-size: 13px;
+  color: #fff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.patientFileModalField input,
+.patientFileModalField select {
+  min-height: 46px;
+  padding: 0 13px;
+}
+
+.patientFileModalField textarea {
+  min-height: 96px;
+  padding: 12px 13px;
+  resize: vertical;
+}
+
+.patientFileModalField input:focus,
+.patientFileModalField select:focus,
+.patientFileModalField textarea:focus {
+  border-color: rgba(178, 91, 255, 0.75);
+  background: rgba(13, 8, 29, 0.72);
+  box-shadow: 0 0 0 4px rgba(147, 70, 232, 0.11);
+}
+
+.patientFileUploadZone {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.patientFileUploadPreview {
+  display: grid;
+  height: 150px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(147, 70, 232, 0.1),
+      transparent 68%
+    ),
+    rgba(5, 3, 13, 0.42);
+}
+
+.patientFileUploadPreview img,
+.patientFileUploadPreview video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.patientFileUploadEmpty,
+.patientFileUploadDocument {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  text-align: center;
+}
+
+.patientFileUploadEmpty > span,
+.patientFileUploadDocument {
+  font-size: 28px;
+}
+
+.patientFileUploadEmpty small,
+.patientFileUploadDocument span {
+  max-width: 150px;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.patientFileUploadInfo h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.patientFileUploadInfo p {
+  max-width: 430px;
+  margin: 7px 0 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.44);
+}
+
+.patientFileUploadChoose {
+  min-height: 38px;
+  padding: 0 14px;
+  cursor: pointer;
+  border: 1px solid rgba(180, 95, 255, 0.28);
+  border-radius: 11px;
+  background: rgba(147, 70, 232, 0.14);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  color: #dfbeff;
+}
+
+.patientFileModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+.patientFileModalCancel,
+.patientFileModalSave {
+  min-height: 42px;
+  padding: 0 17px;
+  cursor: pointer;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.patientFileModalCancel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.patientFileModalSave {
+  min-width: 150px;
+  border: 1px solid rgba(212, 163, 255, 0.27);
+  background:
+    linear-gradient(
+      135deg,
+      #a84dff,
+      #7c3fe6
+    );
+  box-shadow:
+    0 12px 28px rgba(111, 42, 196, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.patientFileModalSave:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .patientFilesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .patientFilesStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .patientFilesArchiveHead {
+    flex-direction: column;
+  }
+
+  .patientFilesAddButton {
+    width: 100%;
+  }
+
+  .patientFilesStats,
+  .patientFilesGrid,
+  .patientFileModalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .patientFileModalWide {
+    grid-column: auto;
+  }
+
+  .patientFileUploadZone {
+    grid-template-columns: 1fr;
+  }
+
+  .patientFileUploadPreview {
+    height: 190px;
+  }
+}
+
+@media (max-width: 520px) {
+  .patientFileModalOverlay {
+    padding: 10px;
+  }
+
+  .patientFileModal {
+    max-height: calc(100vh - 20px);
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .patientFilesFilters {
+    flex-direction: column;
+  }
+
+  .patientFilesFilter {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .patientFilesFilter em {
+    margin-left: auto;
+  }
+
+  .patientFileModalActions {
+    flex-direction: column-reverse;
+  }
+
+  .patientFileModalCancel,
+  .patientFileModalSave {
+    width: 100%;
+  }
+}

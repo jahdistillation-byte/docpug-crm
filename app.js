@@ -4581,6 +4581,39 @@ async function renderPatientTab(tab, pet) {
 
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
+const PATIENT_FILE_CATEGORIES = {
+  all: {
+    label: "Усі",
+    icon: "▦",
+  },
+
+  xray: {
+    label: "Рентген",
+    icon: "🩻",
+  },
+
+  ultrasound: {
+    label: "УЗД",
+    icon: "🖥️",
+  },
+
+  media: {
+    label: "Фото / відео",
+    icon: "📷",
+  },
+
+  document: {
+    label: "Документи",
+    icon: "📄",
+  },
+
+  other: {
+    label: "Інше",
+    icon: "📎",
+  },
+};
+
+let patientFilesActiveFilter = "all";
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ФАЙЛЫ, РЕФЕРЕНСЫ ЛАБОРАТОРИИ И ГРАФИКИ ВЕТЕРИНАРОВ)
 // Часть 5 (Строки 3001 — 3500)<button type="button" class="teamVisitOpenBtn" onclick="console.log(v); openVisitFromTeam('${escapeHtml(String(v.id || ""))}')">
@@ -4632,98 +4665,1203 @@ async function uploadPatientFile(file) {
 
 function renderPatientFilesTab(pet) {
   const box = $("#patientTabContent");
+
   if (!box || !pet) return;
 
   const petId = String(pet.id);
-  const files = getPatientFiles(petId);
 
-  box.innerHTML = `
-    <div class="patientInfoBox">
-      <div class="row" style="gap:10px; flex-wrap:wrap;">
-        <div style="flex:1;">
-          <h2>Файли пацієнта</h2>
-          <div class="hint">Рентген, УЗД, PDF, фото, лабораторії та інші документи.</div>
-        </div>
-        <button class="primary" id="btnAddPatientFile" type="button">+ Прикріпити файл</button>
-        <input id="patientFileInput" type="file" accept="image/*,.pdf,.doc,.docx" style="display:none;" />
-      </div>
-      <div id="patientFilesList" class="list" style="margin-top:16px;">
-        ${
-          files.length
-            ? files.map(renderPatientFileRow).join("")
-            : `<div class="hint">Поки файлів немає. Натисни “+ Прикріпити файл”.</div>`
-        }
-      </div>
-    </div>
-  `;
-
-  $("#btnAddPatientFile")?.addEventListener("click", () => {
-    $("#patientFileInput")?.click();
-  });
-
-  $("#patientFileInput")?.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const type = (prompt("Тип файлу: рентген / УЗД / PDF / фото / лабораторія", "PDF") || "Файл").trim();
-    const note = (prompt("Коментар:", "") || "").trim();
-
-    const uploaded = await uploadPatientFile(file);
-    const arr = getPatientFiles(petId);
-    arr.unshift({
-      id: "pfile_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2),
-      name: uploaded.name || file.name,
-      url: uploaded.url || uploaded.path || uploaded.href || "",
-      size: file.size,
-      mime: file.type,
-      type,
-      note,
-      date: todayISO(),
-      created_at: new Date().toISOString(),
+  const files = getPatientFiles(petId)
+    .map(normalizePatientFile)
+    .sort((a, b) => {
+      return String(b.date || b.created_at || "")
+        .localeCompare(String(a.date || a.created_at || ""));
     });
 
-    setPatientFiles(petId, arr);
-    e.target.value = "";
-    renderPatientFilesTab(pet);
-  });
+  const counts = getPatientFileCategoryCounts(files);
 
-  $("#patientFilesList")?.addEventListener("click", (e) => {
-    const del = e.target.closest("[data-del-patient-file]");
-    if (!del) return;
+  const filteredFiles =
+    patientFilesActiveFilter === "all"
+      ? files
+      : files.filter((file) => {
+          return file.category === patientFilesActiveFilter;
+        });
 
-    const id = del.dataset.delPatientFile;
-    if (!confirm("Видалити файл з картки?")) return;
+  box.innerHTML = `
+    <section class="patientFilesArchive">
+      <div class="patientFilesArchiveHead">
+        <div>
+          <div class="patientFilesKicker">
+            МЕДИЧНИЙ АРХІВ
+          </div>
 
-    const next = getPatientFiles(petId).filter((x) => String(x.id) !== String(id));
-    setPatientFiles(petId, next);
-    renderPatientFilesTab(pet);
-  });
+          <h2>Файли пацієнта</h2>
+
+          <p>
+            Рентген, УЗД, фотографії, відео та документи
+            ${escapeHtml(pet.name || "пацієнта")}.
+          </p>
+        </div>
+
+        <button
+          class="patientFilesAddButton"
+          id="btnAddPatientFile"
+          type="button"
+        >
+          + Додати файл
+        </button>
+      </div>
+
+      <div class="patientFilesStats">
+        <div>
+          <span>Усього файлів</span>
+          <strong>${files.length}</strong>
+        </div>
+
+        <div>
+          <span>Рентген</span>
+          <strong>${counts.xray}</strong>
+        </div>
+
+        <div>
+          <span>УЗД</span>
+          <strong>${counts.ultrasound}</strong>
+        </div>
+
+        <div>
+          <span>Документи</span>
+          <strong>${counts.document}</strong>
+        </div>
+      </div>
+
+      <div class="patientFilesFilters">
+        ${Object.entries(PATIENT_FILE_CATEGORIES)
+          .map(([key, meta]) => {
+            const count =
+              key === "all"
+                ? files.length
+                : counts[key] || 0;
+
+            return `
+              <button
+                class="patientFilesFilter ${
+                  patientFilesActiveFilter === key
+                    ? "active"
+                    : ""
+                }"
+                type="button"
+                data-patient-file-filter="${escapeHtml(key)}"
+              >
+                <span>${meta.icon}</span>
+                <b>${escapeHtml(meta.label)}</b>
+                <em>${count}</em>
+              </button>
+            `;
+          })
+          .join("")}
+      </div>
+
+      <div id="patientFilesArchiveContent">
+        ${
+          filteredFiles.length
+            ? renderPatientFilesArchive(filteredFiles)
+            : renderPatientFilesEmptyState(patientFilesActiveFilter)
+        }
+      </div>
+    </section>
+  `;
+
+  box
+    .querySelector("#btnAddPatientFile")
+    ?.addEventListener("click", () => {
+      openPatientFileModal(pet);
+    });
+
+  box
+    .querySelectorAll("[data-patient-file-filter]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        patientFilesActiveFilter =
+          button.dataset.patientFileFilter || "all";
+
+        renderPatientFilesTab(pet);
+      });
+    });
+
+  box
+    .querySelector("#patientFilesArchiveContent")
+    ?.addEventListener("click", (event) => {
+      const deleteButton = event.target.closest(
+        "[data-delete-patient-file]"
+      );
+
+      if (deleteButton) {
+        const fileId = deleteButton.dataset.deletePatientFile;
+
+        if (!confirm("Видалити файл з картки пацієнта?")) {
+          return;
+        }
+
+        const next = getPatientFiles(petId).filter((file) => {
+          return String(file.id) !== String(fileId);
+        });
+
+        setPatientFiles(petId, next);
+        renderPatientFilesTab(pet);
+        return;
+      }
+
+      const editButton = event.target.closest(
+        "[data-edit-patient-file]"
+      );
+
+      if (editButton) {
+        const fileId = editButton.dataset.editPatientFile;
+
+        const file = getPatientFiles(petId).find((item) => {
+          return String(item.id) === String(fileId);
+        });
+
+        if (file) {
+          openPatientFileModal(pet, file);
+        }
+      }
+    });
+}
+function normalizePatientFile(file) {
+  const originalType = String(
+    file?.category ||
+    file?.type ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  let category = "other";
+
+  if (
+    originalType.includes("рентген") ||
+    originalType.includes("xray") ||
+    originalType.includes("x-ray")
+  ) {
+    category = "xray";
+  } else if (
+    originalType.includes("узд") ||
+    originalType.includes("ультра") ||
+    originalType.includes("ultrasound")
+  ) {
+    category = "ultrasound";
+  } else if (
+    originalType.includes("фото") ||
+    originalType.includes("video") ||
+    originalType.includes("відео") ||
+    originalType.includes("image") ||
+    String(file?.mime || "").startsWith("image/") ||
+    String(file?.mime || "").startsWith("video/")
+  ) {
+    category = "media";
+  } else if (
+    originalType.includes("pdf") ||
+    originalType.includes("документ") ||
+    originalType.includes("document") ||
+    String(file?.mime || "").includes("pdf") ||
+    String(file?.mime || "").includes("word")
+  ) {
+    category = "document";
+  }
+
+  return {
+    ...file,
+    category,
+    title:
+      file?.title ||
+      file?.name ||
+      "Файл пацієнта",
+  };
 }
 
-function renderPatientFileRow(file) {
-  const rawUrl = file.url || file.path || file.href || file.fileUrl || file.file_url || "";
-  const url = rawUrl ? new URL(rawUrl, window.location.origin).toString() : "";
+function getPatientFileCategoryCounts(files) {
+  return files.reduce(
+    (acc, file) => {
+      const category =
+        file.category in PATIENT_FILE_CATEGORIES
+          ? file.category
+          : "other";
+
+      acc[category] += 1;
+
+      return acc;
+    },
+    {
+      xray: 0,
+      ultrasound: 0,
+      media: 0,
+      document: 0,
+      other: 0,
+    }
+  );
+}
+
+function renderPatientFilesArchive(files) {
+  if (patientFilesActiveFilter !== "all") {
+    return `
+      <div class="patientFilesGrid">
+        ${files
+          .map(renderPatientFileCard)
+          .join("")}
+      </div>
+    `;
+  }
+
+  const order = [
+    "xray",
+    "ultrasound",
+    "media",
+    "document",
+    "other",
+  ];
+
+  return order
+    .map((category) => {
+      const categoryFiles = files.filter((file) => {
+        return file.category === category;
+      });
+
+      if (!categoryFiles.length) return "";
+
+      const meta = PATIENT_FILE_CATEGORIES[category];
+
+      return `
+        <section class="patientFilesGroup">
+          <div class="patientFilesGroupHead">
+            <div>
+              <span>${meta.icon}</span>
+              <h3>${escapeHtml(meta.label)}</h3>
+            </div>
+
+            <strong>
+              ${categoryFiles.length}
+              ${getPatientFilesCountLabel(categoryFiles.length)}
+            </strong>
+          </div>
+
+          <div class="patientFilesGrid">
+            ${categoryFiles
+              .map(renderPatientFileCard)
+              .join("")}
+          </div>
+        </section>
+      `;
+    })
+    .join("");
+}
+
+function getPatientFilesCountLabel(count) {
+  const value = Number(count) || 0;
+
+  if (value === 1) return "файл";
+  if (value >= 2 && value <= 4) return "файли";
+
+  return "файлів";
+}
+
+function renderPatientFilesEmptyState(filter) {
+  const meta =
+    PATIENT_FILE_CATEGORIES[filter] ||
+    PATIENT_FILE_CATEGORIES.all;
 
   return `
-    <div class="item">
-      <div class="left" style="width:100%;">
-        <div class="name">📎 ${escapeHtml(file.name || "Файл")}</div>
-        <div class="meta">
-          ${escapeHtml(file.type || "Файл")} • ${escapeHtml(file.date || "—")}
-          ${file.size ? " • " + escapeHtml(formatFileSize(file.size)) : ""}
-        </div>
-        ${file.note ? `<div class="history" style="white-space:pre-wrap;">${escapeHtml(file.note)}</div>` : ""}
+    <div class="patientFilesEmpty">
+      <div class="patientFilesEmptyIcon">
+        ${meta.icon}
       </div>
-      <div class="right" style="display:flex; gap:8px;">
+
+      <h3>
         ${
-          url
-            ? `<a class="miniBtn" href="${escapeHtml(url)}" target="_blank" rel="noopener">Відкрити</a>`
-            : `<span class="hint">немає url</span>`
+          filter === "all"
+            ? "Файлів ще немає"
+            : `У категорії «${escapeHtml(meta.label)}» поки порожньо`
         }
-        <button class="iconBtn" title="Видалити" data-del-patient-file="${escapeHtml(file.id)}">🗑</button>
-      </div>
+      </h3>
+
+      <p>
+        Додайте медичне зображення або документ пацієнта.
+      </p>
+
+      <button
+        class="patientFilesAddButton"
+        type="button"
+        onclick="openPatientFileModal(state.selectedPet)"
+      >
+        + Додати перший файл
+      </button>
     </div>
   `;
+}
+function normalizePatientFile(file) {
+  const originalType = String(
+    file?.category ||
+    file?.type ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  let category = "other";
+
+  if (
+    originalType.includes("рентген") ||
+    originalType.includes("xray") ||
+    originalType.includes("x-ray")
+  ) {
+    category = "xray";
+  } else if (
+    originalType.includes("узд") ||
+    originalType.includes("ультра") ||
+    originalType.includes("ultrasound")
+  ) {
+    category = "ultrasound";
+  } else if (
+    originalType.includes("фото") ||
+    originalType.includes("video") ||
+    originalType.includes("відео") ||
+    originalType.includes("image") ||
+    String(file?.mime || "").startsWith("image/") ||
+    String(file?.mime || "").startsWith("video/")
+  ) {
+    category = "media";
+  } else if (
+    originalType.includes("pdf") ||
+    originalType.includes("документ") ||
+    originalType.includes("document") ||
+    String(file?.mime || "").includes("pdf") ||
+    String(file?.mime || "").includes("word")
+  ) {
+    category = "document";
+  }
+
+  return {
+    ...file,
+    category,
+    title:
+      file?.title ||
+      file?.name ||
+      "Файл пацієнта",
+  };
+}
+
+function getPatientFileCategoryCounts(files) {
+  return files.reduce(
+    (acc, file) => {
+      const category =
+        file.category in PATIENT_FILE_CATEGORIES
+          ? file.category
+          : "other";
+
+      acc[category] += 1;
+
+      return acc;
+    },
+    {
+      xray: 0,
+      ultrasound: 0,
+      media: 0,
+      document: 0,
+      other: 0,
+    }
+  );
+}
+
+function renderPatientFilesArchive(files) {
+  if (patientFilesActiveFilter !== "all") {
+    return `
+      <div class="patientFilesGrid">
+        ${files
+          .map(renderPatientFileCard)
+          .join("")}
+      </div>
+    `;
+  }
+
+  const order = [
+    "xray",
+    "ultrasound",
+    "media",
+    "document",
+    "other",
+  ];
+
+  return order
+    .map((category) => {
+      const categoryFiles = files.filter((file) => {
+        return file.category === category;
+      });
+
+      if (!categoryFiles.length) return "";
+
+      const meta = PATIENT_FILE_CATEGORIES[category];
+
+      return `
+        <section class="patientFilesGroup">
+          <div class="patientFilesGroupHead">
+            <div>
+              <span>${meta.icon}</span>
+              <h3>${escapeHtml(meta.label)}</h3>
+            </div>
+
+            <strong>
+              ${categoryFiles.length}
+              ${getPatientFilesCountLabel(categoryFiles.length)}
+            </strong>
+          </div>
+
+          <div class="patientFilesGrid">
+            ${categoryFiles
+              .map(renderPatientFileCard)
+              .join("")}
+          </div>
+        </section>
+      `;
+    })
+    .join("");
+}
+
+function getPatientFilesCountLabel(count) {
+  const value = Number(count) || 0;
+
+  if (value === 1) return "файл";
+  if (value >= 2 && value <= 4) return "файли";
+
+  return "файлів";
+}
+
+function renderPatientFilesEmptyState(filter) {
+  const meta =
+    PATIENT_FILE_CATEGORIES[filter] ||
+    PATIENT_FILE_CATEGORIES.all;
+
+  return `
+    <div class="patientFilesEmpty">
+      <div class="patientFilesEmptyIcon">
+        ${meta.icon}
+      </div>
+
+      <h3>
+        ${
+          filter === "all"
+            ? "Файлів ще немає"
+            : `У категорії «${escapeHtml(meta.label)}» поки порожньо`
+        }
+      </h3>
+
+      <p>
+        Додайте медичне зображення або документ пацієнта.
+      </p>
+
+      <button
+        class="patientFilesAddButton"
+        type="button"
+        onclick="openPatientFileModal(state.selectedPet)"
+      >
+        + Додати перший файл
+      </button>
+    </div>
+  `;
+}
+
+function renderPatientFileCard(file) {
+  const rawUrl =
+    file.url ||
+    file.path ||
+    file.href ||
+    file.fileUrl ||
+    file.file_url ||
+    "";
+
+  const url = rawUrl
+    ? new URL(rawUrl, window.location.origin).toString()
+    : "";
+
+  const mime = String(file.mime || file.type || "").toLowerCase();
+
+  const isImage =
+    mime.startsWith("image/") ||
+    /\.(png|jpe?g|webp|gif)$/i.test(url);
+
+  const isVideo =
+    mime.startsWith("video/") ||
+    /\.(mp4|mov|webm)$/i.test(url);
+
+  const categoryMeta =
+    PATIENT_FILE_CATEGORIES[file.category] ||
+    PATIENT_FILE_CATEGORIES.other;
+
+  return `
+    <article class="patientFileCard">
+      <div class="patientFilePreview">
+        ${
+          isImage && url
+            ? `
+              <img
+                src="${escapeHtml(url)}"
+                alt="${escapeHtml(file.title || file.name || "Файл")}"
+                loading="lazy"
+              >
+            `
+            : isVideo && url
+              ? `
+                <video
+                  src="${escapeHtml(url)}"
+                  muted
+                  preload="metadata"
+                ></video>
+
+                <div class="patientFilePlayIcon">▶</div>
+              `
+              : `
+                <div class="patientFileDocumentIcon">
+                  ${categoryMeta.icon}
+                </div>
+              `
+        }
+
+        <span class="patientFileCategory">
+          ${categoryMeta.icon}
+          ${escapeHtml(categoryMeta.label)}
+        </span>
+      </div>
+
+      <div class="patientFileCardBody">
+        <h4>
+          ${escapeHtml(file.title || file.name || "Файл")}
+        </h4>
+
+        <div class="patientFileMeta">
+          <span>
+            ${escapeHtml(file.date || "Дата не вказана")}
+          </span>
+
+          ${
+            file.size
+              ? `<span>${escapeHtml(formatFileSize(file.size))}</span>`
+              : ""
+          }
+        </div>
+
+        ${
+          file.note
+            ? `
+              <p class="patientFileNote">
+                ${escapeHtml(file.note)}
+              </p>
+            `
+            : ""
+        }
+
+        <div class="patientFileCardActions">
+          ${
+            url
+              ? `
+                <a
+                  href="${escapeHtml(url)}"
+                  target="_blank"
+                  rel="noopener"
+                  class="patientFileOpenButton"
+                >
+                  Відкрити
+                </a>
+              `
+              : `
+                <button
+                  class="patientFileOpenButton"
+                  type="button"
+                  disabled
+                >
+                  Файл недоступний
+                </button>
+              `
+          }
+
+          <button
+            class="patientFileActionButton"
+            type="button"
+            title="Редагувати"
+            data-edit-patient-file="${escapeHtml(file.id)}"
+          >
+            ✏️
+          </button>
+
+          <button
+            class="patientFileActionButton danger"
+            type="button"
+            title="Видалити"
+            data-delete-patient-file="${escapeHtml(file.id)}"
+          >
+            🗑
+          </button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+function openPatientFileModal(pet, existingFile = null) {
+  if (!pet) {
+    alert("Пацієнта не знайдено.");
+    return;
+  }
+
+  document
+    .querySelector(".patientFileModalOverlay")
+    ?.remove();
+
+  const isEdit = Boolean(existingFile);
+
+  const fileData = normalizePatientFile(
+    existingFile || {
+      category: "xray",
+      title: "",
+      date: todayISO(),
+      note: "",
+      url: "",
+      name: "",
+      size: 0,
+      mime: "",
+    }
+  );
+
+  const modal = document.createElement("div");
+  modal.className = "patientFileModalOverlay";
+
+  modal.innerHTML = `
+    <div class="patientFileModal">
+      <button
+        class="patientFileModalClose"
+        type="button"
+        aria-label="Закрити"
+      >
+        ×
+      </button>
+
+      <div class="patientFileModalHead">
+        <div class="patientFileModalIcon">
+          📁
+        </div>
+
+        <div>
+          <h2>
+            ${
+              isEdit
+                ? "Редагувати файл"
+                : "Додати файл пацієнта"
+            }
+          </h2>
+
+          <p>
+            ${escapeHtml(pet.name || "Пацієнт")}
+            · медичний архів
+          </p>
+        </div>
+      </div>
+
+      <form id="patientFileModalForm">
+        <div class="patientFileModalGrid">
+          <label class="patientFileModalField">
+            <span>Категорія *</span>
+
+            <select
+              id="patientFileCategory"
+              required
+            >
+              ${Object.entries(PATIENT_FILE_CATEGORIES)
+                .filter(([key]) => key !== "all")
+                .map(
+                  ([key, meta]) => `
+                    <option
+                      value="${escapeHtml(key)}"
+                      ${
+                        fileData.category === key
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${meta.icon} ${escapeHtml(meta.label)}
+                    </option>
+                  `
+                )
+                .join("")}
+            </select>
+          </label>
+
+          <label class="patientFileModalField">
+            <span>Дата дослідження</span>
+
+            <input
+              id="patientFileDate"
+              type="date"
+              value="${escapeHtml(
+                fileData.date || todayISO()
+              )}"
+            >
+          </label>
+
+          <label class="patientFileModalField patientFileModalWide">
+            <span>Назва *</span>
+
+            <input
+              id="patientFileTitle"
+              type="text"
+              maxlength="160"
+              required
+              value="${escapeHtml(
+                fileData.title || ""
+              )}"
+              placeholder="Наприклад: Грудна клітка, 2 проєкції"
+            >
+          </label>
+
+          <label class="patientFileModalField patientFileModalWide">
+            <span>Коментар</span>
+
+            <textarea
+              id="patientFileNote"
+              rows="4"
+              maxlength="600"
+              placeholder="Опис дослідження або важливі примітки"
+            >${escapeHtml(fileData.note || "")}</textarea>
+          </label>
+        </div>
+
+        <div class="patientFileUploadZone">
+          <input
+            id="patientFileUploadInput"
+            type="file"
+            accept="image/*,video/*,.pdf,.doc,.docx"
+            hidden
+          >
+
+          <div
+            class="patientFileUploadPreview"
+            id="patientFileUploadPreview"
+          >
+            ${renderPatientFileModalPreview(fileData)}
+          </div>
+
+          <div class="patientFileUploadInfo">
+            <h3>
+              ${
+                isEdit && fileData.url
+                  ? "Поточний файл"
+                  : "Оберіть файл"
+              }
+            </h3>
+
+            <p>
+              JPG, PNG, WEBP, MP4, PDF, DOC або DOCX.
+              Максимальний розмір — 20 МБ.
+            </p>
+
+            <button
+              class="patientFileUploadChoose"
+              id="btnChoosePatientFile"
+              type="button"
+            >
+              ${
+                isEdit && fileData.url
+                  ? "Замінити файл"
+                  : "Обрати файл"
+              }
+            </button>
+          </div>
+        </div>
+
+        <div class="patientFileModalActions">
+          <button
+            class="patientFileModalCancel"
+            id="btnCancelPatientFile"
+            type="button"
+          >
+            Скасувати
+          </button>
+
+          <button
+            class="patientFileModalSave"
+            id="btnSavePatientFile"
+            type="submit"
+          >
+            ${
+              isEdit
+                ? "Зберегти зміни"
+                : "Додати файл"
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const form =
+    modal.querySelector("#patientFileModalForm");
+
+  const fileInput =
+    modal.querySelector("#patientFileUploadInput");
+
+  const preview =
+    modal.querySelector("#patientFileUploadPreview");
+
+  let selectedFile = null;
+  let uploadedFileData = null;
+
+  const close = () => {
+    modal.remove();
+  };
+
+  modal
+    .querySelector(".patientFileModalClose")
+    ?.addEventListener("click", close);
+
+  modal
+    .querySelector("#btnCancelPatientFile")
+    ?.addEventListener("click", close);
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      close();
+    }
+  });
+
+  modal
+    .querySelector("#btnChoosePatientFile")
+    ?.addEventListener("click", () => {
+      fileInput?.click();
+    });
+
+  fileInput?.addEventListener("change", () => {
+    const file = fileInput.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      alert("Файл завеликий. Максимум 20 МБ.");
+      fileInput.value = "";
+      return;
+    }
+
+    selectedFile = file;
+    uploadedFileData = null;
+
+    if (preview) {
+      preview.innerHTML =
+        renderSelectedPatientFilePreview(file);
+    }
+
+    const titleInput =
+      modal.querySelector("#patientFileTitle");
+
+    if (
+      titleInput &&
+      !String(titleInput.value || "").trim()
+    ) {
+      titleInput.value =
+        removePatientFileExtension(file.name);
+    }
+  });
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const category =
+      modal
+        .querySelector("#patientFileCategory")
+        ?.value || "other";
+
+    const date =
+      modal
+        .querySelector("#patientFileDate")
+        ?.value || todayISO();
+
+    const title =
+      modal
+        .querySelector("#patientFileTitle")
+        ?.value?.trim() || "";
+
+    const note =
+      modal
+        .querySelector("#patientFileNote")
+        ?.value?.trim() || "";
+
+    if (!title) {
+      alert("Вкажіть назву файлу.");
+      return;
+    }
+
+    if (!isEdit && !selectedFile) {
+      alert("Оберіть файл для завантаження.");
+      return;
+    }
+
+    const saveButton =
+      modal.querySelector("#btnSavePatientFile");
+
+    if (saveButton) {
+      saveButton.disabled = true;
+      saveButton.textContent = selectedFile
+        ? "Завантаження…"
+        : "Збереження…";
+    }
+
+    try {
+      if (selectedFile) {
+        uploadedFileData =
+          await uploadPatientFile(selectedFile);
+      }
+
+      const petId = String(pet.id);
+      const files = getPatientFiles(petId);
+
+      const savedUrl =
+        uploadedFileData?.url ||
+        uploadedFileData?.path ||
+        uploadedFileData?.href ||
+        existingFile?.url ||
+        "";
+
+      const savedName =
+        uploadedFileData?.name ||
+        uploadedFileData?.original_name ||
+        selectedFile?.name ||
+        existingFile?.name ||
+        title;
+
+      const savedSize =
+        selectedFile?.size ||
+        uploadedFileData?.size ||
+        existingFile?.size ||
+        0;
+
+      const savedMime =
+        selectedFile?.type ||
+        uploadedFileData?.mime ||
+        uploadedFileData?.type ||
+        existingFile?.mime ||
+        "";
+
+      if (isEdit) {
+        const next = files.map((file) => {
+          if (
+            String(file.id) !==
+            String(existingFile.id)
+          ) {
+            return file;
+          }
+
+          return {
+            ...file,
+
+            category,
+            type:
+              PATIENT_FILE_CATEGORIES[category]
+                ?.label || "Інше",
+
+            title,
+            name: savedName,
+            url: savedUrl,
+            size: savedSize,
+            mime: savedMime,
+            note,
+            date,
+
+            updated_at:
+              new Date().toISOString(),
+          };
+        });
+
+        setPatientFiles(petId, next);
+      } else {
+        const nextFile = {
+          id:
+            "pfile_" +
+            Date.now().toString(36) +
+            "_" +
+            Math.random()
+              .toString(16)
+              .slice(2),
+
+          category,
+
+          type:
+            PATIENT_FILE_CATEGORIES[category]
+              ?.label || "Інше",
+
+          title,
+          name: savedName,
+          url: savedUrl,
+          size: savedSize,
+          mime: savedMime,
+          note,
+          date,
+
+          created_by:
+            state.me?.display_name ||
+            sessionStorage.getItem(
+              "pug_active_display_name"
+            ) ||
+            "",
+
+          created_at:
+            new Date().toISOString(),
+        };
+
+        setPatientFiles(
+          petId,
+          [nextFile, ...files]
+        );
+      }
+
+      close();
+      renderPatientFilesTab(pet);
+    } catch (error) {
+      console.error(
+        "save patient file failed:",
+        error
+      );
+
+      alert(
+        "Не вдалося зберегти файл: " +
+        (error?.message || error)
+      );
+    } finally {
+      if (saveButton) {
+        saveButton.disabled = false;
+        saveButton.textContent = isEdit
+          ? "Зберегти зміни"
+          : "Додати файл";
+      }
+    }
+  });
+
+  modal
+    .querySelector("#patientFileTitle")
+    ?.focus();
+}
+
+function renderPatientFileModalPreview(file) {
+  const rawUrl =
+    file?.url ||
+    file?.path ||
+    file?.href ||
+    "";
+
+  const url = rawUrl
+    ? new URL(
+        rawUrl,
+        window.location.origin
+      ).toString()
+    : "";
+
+  const mime =
+    String(file?.mime || "").toLowerCase();
+
+  if (
+    url &&
+    (
+      mime.startsWith("image/") ||
+      /\.(png|jpe?g|webp|gif)$/i.test(url)
+    )
+  ) {
+    return `
+      <img
+        src="${escapeHtml(url)}"
+        alt=""
+      >
+    `;
+  }
+
+  if (
+    url &&
+    (
+      mime.startsWith("video/") ||
+      /\.(mp4|mov|webm)$/i.test(url)
+    )
+  ) {
+    return `
+      <video
+        src="${escapeHtml(url)}"
+        muted
+        controls
+        preload="metadata"
+      ></video>
+    `;
+  }
+
+  if (url) {
+    return `
+      <div class="patientFileUploadDocument">
+        📄
+        <span>
+          ${escapeHtml(
+            file?.name || "Документ"
+          )}
+        </span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="patientFileUploadEmpty">
+      <span>＋</span>
+      <small>Файл ще не вибрано</small>
+    </div>
+  `;
+}
+
+function renderSelectedPatientFilePreview(file) {
+  if (!file) {
+    return renderPatientFileModalPreview(null);
+  }
+
+  const tempUrl =
+    URL.createObjectURL(file);
+
+  if (
+    String(file.type || "")
+      .startsWith("image/")
+  ) {
+    return `
+      <img
+        src="${escapeHtml(tempUrl)}"
+        alt="${escapeHtml(file.name || "")}"
+      >
+    `;
+  }
+
+  if (
+    String(file.type || "")
+      .startsWith("video/")
+  ) {
+    return `
+      <video
+        src="${escapeHtml(tempUrl)}"
+        muted
+        controls
+      ></video>
+    `;
+  }
+
+  return `
+    <div class="patientFileUploadDocument">
+      📄
+      <span>
+        ${escapeHtml(file.name || "Документ")}
+      </span>
+    </div>
+  `;
+}
+
+function removePatientFileExtension(filename) {
+  return String(filename || "")
+    .replace(/\.[^/.]+$/, "")
+    .trim();
 }
 
 function formatFileSize(bytes) {
