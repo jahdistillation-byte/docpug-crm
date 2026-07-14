@@ -259,6 +259,57 @@ def update_with_optional_fallback(table: str, row_id: str, payload: dict, option
             return supabase.table(table).update(fallback).eq("org_id", current_org).eq("id", row_id).execute()
         raise
 
+def verify_tg_init_data(init_data: str):
+    """
+    Verifies Telegram Web App init data using HMAC-SHA256.
+    Returns parsed user data or None if verification fails.
+    """
+    if not init_data or not TELEGRAM_BOT_TOKEN:
+        return None
+
+    try:
+        # Parse init_data query string
+        data_dict = dict(parse_qsl(init_data))
+        
+        # Extract and remove hash for verification
+        hash_value = data_dict.pop("hash", "")
+        if not hash_value:
+            return None
+
+        # Create data check string
+        data_check_string = "\n".join(
+            f"{k}={v}" for k, v in sorted(data_dict.items())
+        )
+
+        # Compute HMAC-SHA256
+        secret_key = hmac.new(
+            b"WebAppData",
+            TELEGRAM_BOT_TOKEN.encode(),
+            hashlib.sha256
+        ).digest()
+
+        computed_hash = hmac.new(
+            secret_key,
+            data_check_string.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        # Verify hash matches
+        if computed_hash != hash_value:
+            return None
+
+        # Parse and return user data
+        user_data = data_dict.get("user")
+        if user_data:
+            return json.loads(user_data)
+
+        return None
+
+    except Exception as e:
+        print("⚠️ verify_tg_init_data failed:", repr(e))
+        return None
+
+
 def safe_int(x, default=0):
     try:
         return int(x)
@@ -379,28 +430,72 @@ def save_visit_lines(visit_id: str, d: dict):
         raise RuntimeError("Organization not selected")
 
     # =====================================================
-    # УДАЛЯЕМ СТАРЫЕ СТРОКИ
+    # УДАЛЯЕМ СТАРЫЕ УСЛУГИ
     # =====================================================
 
-    execute_with_retry(
-        lambda: (
-            supabase
-            .table("visit_services")
-            .delete()
-            .eq("org_id", current_org)
-            .eq("visit_id", visit_id)
+    try:
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .delete()
+                .eq("org_id", current_org)
+                .eq("visit_id", visit_id)
+            )
         )
-    )
 
-    execute_with_retry(
-        lambda: (
-            supabase
-            .table("visit_stock")
-            .delete()
-            .eq("org_id", current_org)
-            .eq("visit_id", visit_id)
+    except Exception as e:
+        message = str(e).lower()
+
+        if (
+            "42703" not in message
+            and "org_id does not exist" not in message
+            and "column visit_services.org_id does not exist" not in message
+        ):
+            raise
+
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .delete()
+                .eq("visit_id", visit_id)
+            )
         )
-    )
+
+    # =====================================================
+    # УДАЛЯЕМ СТАРЫЕ ПРЕПАРАТЫ
+    # =====================================================
+
+    try:
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_stock")
+                .delete()
+                .eq("org_id", current_org)
+                .eq("visit_id", visit_id)
+            )
+        )
+
+    except Exception as e:
+        message = str(e).lower()
+
+        if (
+            "42703" not in message
+            and "org_id does not exist" not in message
+            and "column visit_stock.org_id does not exist" not in message
+        ):
+            raise
+
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_stock")
+                .delete()
+                .eq("visit_id", visit_id)
+            )
+        )
 
     # =====================================================
     # СОХРАНЯЕМ УСЛУГИ
@@ -421,20 +516,19 @@ def save_visit_lines(visit_id: str, d: dict):
             continue
 
         service_rows.append({
-            "org_id": current_org,
-            "visit_id": visit_id,
-            "service_id": service_id,
-            "qty": item.get("qty") or 1,
-            "price_snap": (
-                item.get("priceSnap")
-                if item.get("priceSnap") is not None
-                else item.get("price_snap")
-            ),
-            "name_snap": (
-                item.get("nameSnap")
-                or item.get("name_snap")
-            ),
-        })
+    "visit_id": visit_id,
+    "service_id": service_id,
+    "qty": item.get("qty") or 1,
+    "price_snap": (
+        item.get("priceSnap")
+        if item.get("priceSnap") is not None
+        else item.get("price_snap")
+    ),
+    "name_snap": (
+        item.get("nameSnap")
+        or item.get("name_snap")
+    ),
+})
 
     if service_rows:
         execute_with_retry(
@@ -464,20 +558,19 @@ def save_visit_lines(visit_id: str, d: dict):
             continue
 
         stock_rows.append({
-            "org_id": current_org,
-            "visit_id": visit_id,
-            "stock_id": stock_id,
-            "qty": item.get("qty") or 1,
-            "price_snap": (
-                item.get("priceSnap")
-                if item.get("priceSnap") is not None
-                else item.get("price_snap")
-            ),
-            "name_snap": (
-                item.get("nameSnap")
-                or item.get("name_snap")
-            ),
-        })
+    "visit_id": visit_id,
+    "stock_id": stock_id,
+    "qty": item.get("qty") or 1,
+    "price_snap": (
+        item.get("priceSnap")
+        if item.get("priceSnap") is not None
+        else item.get("price_snap")
+    ),
+    "name_snap": (
+        item.get("nameSnap")
+        or item.get("name_snap")
+    ),
+})
 
     if stock_rows:
         execute_with_retry(
@@ -487,36 +580,6 @@ def save_visit_lines(visit_id: str, d: dict):
                 .insert(clean_payload(stock_rows))
             )
         )
-
-
-# =========================
-# TELEGRAM AUTH (optional)
-# =========================
-def verify_tg_init_data(init_data: str):
-    if not init_data or not TELEGRAM_BOT_TOKEN:
-        return None
-
-    data = dict(parse_qsl(init_data))
-    hash_recv = data.pop("hash", None)
-    if not hash_recv:
-        return None
-
-    check_str = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
-
-    secret = hmac.new(
-        b"WebAppData",
-        TELEGRAM_BOT_TOKEN.encode(),
-        hashlib.sha256
-    ).digest()
-
-    hash_calc = hmac.new(secret, check_str.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(hash_calc, hash_recv):
-        return None
-
-    try:
-        return json.loads(data.get("user", "{}"))
-    except Exception:
-        return None
 
 # =========================
 # ERRORS

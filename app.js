@@ -10878,10 +10878,13 @@ function refreshVisitStockSelect() {
 }
 
 function initVisitUI() {
-  if (state.visitUiBound) return;
-  state.visitUiBound = true;
+  if (document.body.dataset.visitUiBound === "1") {
+    return;
+  }
 
-  document.addEventListener("click", (e) => {
+  document.body.dataset.visitUiBound = "1";
+
+  // дальше весь существующий код initVisitUI
     if (e.target.closest("#btnBackPatient")) {
       if (state.selectedPetId) openPatient(state.selectedPetId);
       else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
