@@ -1993,35 +1993,104 @@ def api_delete_medcard_entry(entry_id):
 @app.post("/api/login")
 def api_clinic_login():
     d = request.get_json(silent=True) or {}
+
     username = (d.get("username") or "").strip()
     password = (d.get("password") or "").strip()
+
     if not username or not password:
-        return jsonify({"ok": False, "error": "Введіть логін та пароль"}), 400
+        return jsonify({
+            "ok": False,
+            "error": "Введіть логін та пароль"
+        }), 400
+
     try:
-        res = supabase.table("clinic_users").select("org_id, password_plain").eq("username", username).execute()
+        res = (
+            supabase.table("clinic_users")
+            .select(
+                "username, password_plain, org_id, role, "
+                "display_name, is_active"
+            )
+            .eq("username", username)
+            .limit(1)
+            .execute()
+        )
+
         if not res.data:
-            return jsonify({"ok": False, "error": "Невірний логін або пароль"}), 401
+            return jsonify({
+                "ok": False,
+                "error": "Невірний логін або пароль"
+            }), 401
+
         user_data = res.data[0]
-        if user_data["password_plain"] != password:
-            return jsonify({"ok": False, "error": "Невірний логін або пароль"}), 401
-        org_id = user_data["org_id"]
+
+        if user_data.get("is_active") is False:
+            return jsonify({
+                "ok": False,
+                "error": "Обліковий запис вимкнений"
+            }), 403
+
+        if user_data.get("password_plain") != password:
+            return jsonify({
+                "ok": False,
+                "error": "Невірний логін або пароль"
+            }), 401
+
+        org_id = user_data.get("org_id")
+
+        if not org_id:
+            return jsonify({
+                "ok": False,
+                "error": "Користувач не прив’язаний до клініки"
+            }), 400
+
+        clinic_name = "Клініка"
         theme = "purple"
+
         try:
-            res_org = supabase.table("orgs").select("name").eq("id", org_id).execute()
-            clinic_name = res_org.data[0]["name"] if res_org.data else "Клініка"
-        except Exception:
-            clinic_name = "Клініка"
+            res_org = (
+                supabase.table("orgs")
+                .select("name")
+                .eq("id", org_id)
+                .limit(1)
+                .execute()
+            )
+
+            if res_org.data:
+                clinic_name = (
+                    res_org.data[0].get("name")
+                    or clinic_name
+                )
+
+        except Exception as org_error:
+            print(
+                "⚠️ clinic name load failed:",
+                repr(org_error)
+            )
+
         return jsonify({
             "ok": True,
             "data": {
                 "org_id": org_id,
+
+                "username": user_data.get("username"),
+                "display_name": (
+                    user_data.get("display_name")
+                    or user_data.get("username")
+                    or "Користувач"
+                ),
+
+                "role": user_data.get("role") or "staff",
                 "clinic_name": clinic_name,
                 "theme": theme,
-                "username": username
             }
         })
+
     except Exception as e:
-        return jsonify({"ok": False, "error": f"Ошибка сервера: {str(e)}"}), 500
-    
+        print("❌ /api/login error:", repr(e))
+
+        return jsonify({
+            "ok": False,
+            "error": f"Помилка сервера: {str(e)}"
+        }), 500
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=False)
