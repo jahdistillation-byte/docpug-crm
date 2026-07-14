@@ -12200,9 +12200,17 @@ function readDischargeForm() {
 }
 
 async function renderDischargeA4(visitId) {
-  const a4 = document.getElementById("disA4");
+  let a4 = document.getElementById("disA4");
 
-  if (!a4) return;
+  if (!a4) {
+    a4 = document.createElement("div");
+    a4.id = "disA4";
+    a4.className = "visitDischargePrintHost";
+
+    document.body.appendChild(a4);
+  }
+
+  a4.innerHTML = "";
 
   let visit = getVisitByIdSync(visitId);
 

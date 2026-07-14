@@ -18984,3 +18984,18 @@ select.visitControl {
     -webkit-print-color-adjust: exact;
   }
 }
+/* Скрытый контейнер выписки вне режима печати */
+.visitDischargePrintHost {
+  display: none;
+}
+
+/* Во время печати показываем только выписку */
+@media print {
+  body.docpug-printing .visitDischargePrintHost {
+    display: block !important;
+  }
+
+  body.docpug-printing #disA4 {
+    display: block !important;
+  }
+}
