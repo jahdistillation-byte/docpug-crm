@@ -12201,118 +12201,478 @@ function readDischargeForm() {
 
 async function renderDischargeA4(visitId) {
   const a4 = document.getElementById("disA4");
+
   if (!a4) return;
 
-  let v = getVisitByIdSync(visitId);
-  if (!v) {
-    v = await fetchVisitById(visitId);
-    if (v?.id) cacheVisits([v]);
+  let visit = getVisitByIdSync(visitId);
+
+  if (!visit) {
+    visit = await fetchVisitById(visitId);
+
+    if (visit?.id) {
+      cacheVisits([visit]);
+    }
   }
 
-  if (!v) {
-    a4.innerHTML = `<div class="hint">Візит не знайдено</div>`;
+  if (!visit) {
+    a4.innerHTML = `
+      <div class="hint">
+        Візит не знайдено
+      </div>
+    `;
+
     return;
   }
 
-  const patients = (Array.isArray(state.patients) && state.patients.length) ? state.patients : loadPatients();
-  const pet = (patients || []).find((p) => String(p.id) === String(v.pet_id)) || null;
-  const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
+  // Загружаем профиль клиники
+  let clinic = null;
 
-  const dis = getDischarge(visitId) || {};
-  const parsed = parseVisitNote(v.note || "");
+  if (
+    state.clinicProfile &&
+    state.clinicProfile.name
+  ) {
+    clinic = getClinicProfile();
+  } else if (
+    typeof loadClinicProfileApi === "function"
+  ) {
+    clinic = await loadClinicProfileApi();
+  } else {
+    clinic = {
+      name:
+        state.me?.clinic_name ||
+        sessionStorage.getItem(
+          "pug_active_clinic_name"
+        ) ||
+        "Ветеринарна клініка",
 
-  const complaint = String(dis.complaint ?? parsed.complaint ?? "").trim();
-  const dx = String(dis.dx ?? parsed.dx ?? "").trim();
+      subtitle:
+        "Ветеринарна клініка",
 
-  const parsedRx = parseRxCombined(v.rx || "");
-  const rx = String(dis.rx ?? parsedRx.rx ?? v.rx ?? "").trim();
-  const recs = String(dis.recs ?? parsedRx.recs ?? "").trim();
-  const follow = String(dis.follow ?? parsedRx.follow ?? "").trim();
+      logo_url: "",
+      phone: "",
+      address: "",
+      website: "",
+      document_accent_color:
+        "#9346E8",
 
-  let svcHtml = "—";
-  try {
-    const expanded = expandServiceLines(v);
-    const total = calcServicesTotal(v);
-    svcHtml = renderServicesProA4(expanded, total);
-  } catch {}
+      doctor_signature_url: "",
+      clinic_stamp_url: "",
 
-  let stkHtml = "—";
-  try {
-    const expandedS = expandStockLines(v);
-    const totalS = calcStockTotal(v);
+      document_footer:
+        "Коли важливо — ми поруч.",
+    };
+  }
 
-    if (!expandedS.length) {
-      stkHtml = `<div class="hint" style="opacity:.75">—</div>`;
-    } else {
-      const rows = expandedS.map((x) => `
-        <tr>
-          <td>${escapeHtml(x.name || "—")}</td>
-          <td>${escapeHtml(String(x.qty))}</td>
-          <td>${escapeHtml(String(x.price))}</td>
-          <td>${escapeHtml(String(x.lineTotal))}</td>
-        </tr>
-      `).join("");
+  const accentColor =
+    clinic?.document_accent_color ||
+    "#9346E8";
 
-      stkHtml = `
-        <div class="servicesPro">
-          <table class="servicesTable">
-            <thead><tr><th>Препарат</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr></thead>
-            <tbody>${rows}</tbody>
-            <tfoot><tr><td colspan="3">Разом</td><td>${escapeHtml(String(totalS))} грн</td></tr></tfoot>
-          </table>
+  const patients =
+    Array.isArray(state.patients) &&
+    state.patients.length
+      ? state.patients
+      : loadPatients();
+
+  const pet =
+    (patients || []).find((patient) => {
+      return (
+        String(patient.id) ===
+        String(visit.pet_id)
+      );
+    }) || null;
+
+  const owner =
+    pet?.owner_id
+      ? getOwnerById(pet.owner_id)
+      : null;
+
+  const discharge =
+    getDischarge(visitId) || {};
+
+  const parsedNote =
+    parseVisitNote(visit.note || "");
+
+  const complaint = String(
+    discharge.complaint ??
+    parsedNote.complaint ??
+    ""
+  ).trim();
+
+  const diagnosis = String(
+    discharge.dx ??
+    parsedNote.dx ??
+    ""
+  ).trim();
+
+  const parsedRx =
+    parseRxCombined(visit.rx || "");
+
+  const prescription = String(
+    discharge.rx ??
+    parsedRx.rx ??
+    visit.rx ??
+    ""
+  ).trim();
+
+  const recommendations = String(
+    discharge.recs ??
+    parsedRx.recs ??
+    ""
+  ).trim();
+
+  const followUp = String(
+    discharge.follow ??
+    parsedRx.follow ??
+    ""
+  ).trim();
+
+  const serviceLines =
+    expandServiceLines(visit);
+
+  const stockLines =
+    expandStockLines(visit);
+
+  const servicesTotal =
+    calcServicesTotal(visit) || 0;
+
+  const stockTotal =
+    calcStockTotal(visit) || 0;
+
+  const grandTotal =
+    servicesTotal + stockTotal;
+
+  const allFinanceLines = [
+    ...serviceLines.map((line) => ({
+      ...line,
+      type: "Послуга",
+    })),
+
+    ...stockLines.map((line) => ({
+      ...line,
+      type: "Препарат",
+    })),
+  ];
+
+  const logoHtml =
+    clinic?.logo_url
+      ? `
+        <img
+          class="dischargeClinicLogo"
+          src="${escapeHtml(clinic.logo_url)}"
+          alt="${escapeHtml(
+            clinic.name ||
+            "Логотип клініки"
+          )}"
+        >
+      `
+      : `
+        <div class="dischargeClinicLogoFallback">
+          🐾
         </div>
       `;
-    }
-  } catch {}
+
+  const clinicContacts = [
+    clinic?.phone,
+    clinic?.address,
+    clinic?.website,
+  ]
+    .filter(Boolean)
+    .map((item) => {
+      return escapeHtml(item);
+    })
+    .join(" · ");
+
+  const visitDate =
+    visit.date || "—";
+
+  const visitNumber =
+    String(
+      visit.id ||
+      visitId ||
+      ""
+    ).slice(0, 12);
+
+  const financeRows =
+    allFinanceLines.length
+      ? allFinanceLines
+          .map((line) => {
+            return `
+              <tr>
+                <td>
+                  ${escapeHtml(
+                    line.name || "—"
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    line.type || "—"
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    String(
+                      line.qty || 1
+                    )
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    String(
+                      line.price || 0
+                    )
+                  )}
+                  ₴
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    String(
+                      line.lineTotal || 0
+                    )
+                  )}
+                  ₴
+                </td>
+              </tr>
+            `;
+          })
+          .join("")
+      : `
+        <tr>
+          <td
+            colspan="5"
+            class="dischargeEmptyTable"
+          >
+            Послуги та препарати
+            не додані
+          </td>
+        </tr>
+      `;
+
+  const medicalSection = (
+    title,
+    value,
+    className = ""
+  ) => {
+    if (!value) return "";
+
+    return `
+      <section
+        class="dischargeMedicalSection ${className}"
+      >
+        <div class="dischargeSectionTitle">
+          ${escapeHtml(title)}
+        </div>
+
+        <div class="dischargeSectionText">
+          ${escapeHtml(value)}
+        </div>
+      </section>
+    `;
+  };
 
   a4.innerHTML = `
-  <div class="a4Doc">
-    <div class="a4Header">
-      <div>
-        <div class="a4Title">Направлення / Виписка</div>
-        <div class="a4Brand">Doc.PUG</div>
-      </div>
-      <div class="pill">${escapeHtml(String(v.date || "—"))}</div>
-    </div>
+    <article
+      class="premiumDischargeDocument"
+      style="--discharge-accent:${escapeHtml(
+        accentColor
+      )};"
+    >
+      <header class="dischargeHeader">
+        <div class="dischargeClinicIdentity">
+          ${logoHtml}
 
-    <div class="a4Divider"></div>
+          <div>
+            <div class="dischargeClinicName">
+              ${escapeHtml(
+                clinic?.name ||
+                "Ветеринарна клініка"
+              )}
+            </div>
 
-    <div class="a4PatientGrid">
-      <div>
-        <div class="history-label">Пацієнт</div>
-        <div class="a4Name">${escapeHtml(pet?.name || "—")}</div>
-        <div class="a4Meta">
-          ${escapeHtml([pet?.species, pet?.breed, pet?.age, v?.weight_kg ? `${v.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
+            <div class="dischargeClinicSubtitle">
+              ${escapeHtml(
+                clinic?.subtitle ||
+                "Ветеринарна клініка"
+              )}
+            </div>
+
+            ${
+              clinicContacts
+                ? `
+                  <div class="dischargeClinicContacts">
+                    ${clinicContacts}
+                  </div>
+                `
+                : ""
+            }
+          </div>
         </div>
-      </div>
-      <div>
-        <div class="history-label">Власник</div>
-        <div class="a4Name">${escapeHtml(owner?.name || "—")}</div>
-        <div class="a4Meta">
-          ${escapeHtml([owner?.phone, owner?.note].filter(Boolean).join(" • ") || "—")}
+
+        <div class="dischargeDocumentMeta">
+          <div class="dischargeDocumentType">
+            Виписка з амбулаторного прийому
+          </div>
+
+          <div class="dischargeDocumentNumber">
+            № ${escapeHtml(
+              visitNumber || "—"
+            )}
+          </div>
+
+          <div class="dischargeDocumentDate">
+            ${escapeHtml(visitDate)}
+          </div>
         </div>
+      </header>
+
+      <div class="dischargeAccentLine"></div>
+
+      <section class="dischargePeopleGrid">
+        <div class="dischargeInfoCard">
+          <div class="dischargeInfoLabel">
+            Пацієнт
+          </div>
+
+          <div class="dischargeInfoName">
+            ${escapeHtml(
+              pet?.name || "—"
+            )}
+          </div>
+
+          <div class="dischargeInfoRows">
+            <p>
+              <span>Вид</span>
+              <strong>
+                ${escapeHtml(
+                  pet?.species || "—"
+                )}
+              </strong>
+            </p>
+
+            <p>
+              <span>Порода</span>
+              <strong>
+                ${escapeHtml(
+                  pet?.breed || "—"
+                )}
+              </strong>
+            </p>
+
+            <p>
+              <span>Вік</span>
+              <strong>
+                ${escapeHtml(
+                  pet?.age || "—"
+                )}
+              </strong>
+            </p>
+
+            <p>
+              <span>Вага</span>
+              <strong>
+                ${escapeHtml(
+                  String(
+                    visit.weight_kg ||
+                    pet?.weight_kg ||
+                    "—"
+                  )
+                )}
+                ${
+                  visit.weight_kg ||
+                  pet?.weight_kg
+                    ? " кг"
+                    : ""
+                }
+              </strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="dischargeInfoCard">
+          <div class="dischargeInfoLabel">
+            Власник
+          </div>
+
+          <div class="dischargeInfoName">
+            ${escapeHtml(
+              owner?.name || "—"
+            )}
+          </div>
+
+          <div class="dischargeInfoRows">
+            <p>
+              <span>Телефон</span>
+              <strong>
+                ${escapeHtml(
+                  owner?.phone || "—"
+                )}
+              </strong>
+            </p>
+
+            <p>
+              <span>Адреса / примітка</span>
+              <strong>
+                ${escapeHtml(
+                  owner?.note || "—"
+                )}
+              </strong>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="dischargeMedicalGrid">
+        ${medicalSection(
+          "Скарги та анамнез",
+          complaint
+        )}
+
+        ${medicalSection(
+          "Встановлений діагноз",
+          diagnosis
+        )}
+
+        ${medicalSection(
+          "Призначене лікування",
+          prescription,
+          "dischargePrescriptionSection"
+        )}
+
+        ${medicalSection(
+          "Рекомендації",
+          recommendations
+        )}
+
+        ${medicalSection(
+          "Контроль та повторний огляд",
+          followUp
+        )}
       </div>
-    </div>
 
-    <div class="a4Block">
-      <div class="history-label">Скарги / стан</div>
-      <div class="preserveText">${escapeHtml(complaint || "—")}</div>
-    </div>
+      <section class="dischargeFinanceSection">
+        <div class="dischargeFinanceHeader">
+          <div>
+            <div class="dischargeSectionTitle">
+              Послуги та використані матеріали
+            </div>
 
-    <div class="a4Block">
-      <div class="history-label">Діагноз</div>
-      <div class="preserveText">${escapeHtml(dx || "—")}</div>
-    </div>
+            <div class="dischargeFinanceSubtitle">
+              Фінансова деталізація прийому
+            </div>
+          </div>
 
-    <div class="a4Block">
-      <div class="history-label">Призначення</div>
-      <div class="preserveText">${escapeHtml(rx || "—")}</div>
-    </div>
+          <div class="dischargeTotalBadge">
+            ${escapeHtml(
+              String(grandTotal)
+            )}
+            ₴
+          </div>
+        </div>
 
-    <div class="a4Block dischargeFinanceBlock">
-      <div class="history-label">Послуги / Препарати</div>
-      <div class="servicesPro">
-        <table class="servicesTable">
+        <table class="dischargeFinanceTable">
           <thead>
             <tr>
               <th>Назва</th>
@@ -12322,45 +12682,112 @@ async function renderDischargeA4(visitId) {
               <th>Сума</th>
             </tr>
           </thead>
+
           <tbody>
-            ${
-              [
-                ...expandServiceLines(v).map(x => ({ ...x, type: "Послуга" })),
-                ...expandStockLines(v).map(x => ({ ...x, type: "Препарат" }))
-              ]
-              .map(x => `
-                <tr>
-                  <td>${escapeHtml(x.name || "—")}</td>
-                  <td>${escapeHtml(x.type)}</td>
-                  <td>${escapeHtml(String(x.qty || 1))}</td>
-                  <td>${escapeHtml(String(x.price || 0))}</td>
-                  <td>${escapeHtml(String(x.lineTotal || 0))}</td>
-                </tr>
-              `)
-              .join("") || `<tr><td colspan="5">—</td></tr>`
-            }
+            ${financeRows}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4">Разом</td>
-              <td>${escapeHtml(String((calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0)))} грн</td>
-            </tr>
-          </tfoot>
         </table>
-      </div>
-    </div>
 
-    <div class="a4Block">
-      <div class="history-label">Рекомендації</div>
-      <div class="preserveText">${escapeHtml(recs || "—")}</div>
-    </div>
+        <div class="dischargeTotals">
+          <div>
+            <span>Послуги</span>
+            <strong>
+              ${escapeHtml(
+                String(servicesTotal)
+              )}
+              ₴
+            </strong>
+          </div>
 
-    <div class="a4Block">
-      <div class="history-label">Контроль / при погіршенні</div>
-      <div class="preserveText">${escapeHtml(follow || "—")}</div>
-    </div>
-  </div>
-`;
+          <div>
+            <span>Препарати</span>
+            <strong>
+              ${escapeHtml(
+                String(stockTotal)
+              )}
+              ₴
+            </strong>
+          </div>
+
+          <div class="grand">
+            <span>Разом до сплати</span>
+            <strong>
+              ${escapeHtml(
+                String(grandTotal)
+              )}
+              ₴
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="dischargeSignatureSection">
+        <div class="dischargeDoctorSignature">
+          <div class="dischargeSignatureLabel">
+            Лікар
+          </div>
+
+          ${
+            clinic?.doctor_signature_url
+              ? `
+                <img
+                  class="dischargeSignatureImage"
+                  src="${escapeHtml(
+                    clinic.doctor_signature_url
+                  )}"
+                  alt="Підпис лікаря"
+                >
+              `
+              : `
+                <div class="dischargeSignatureLine"></div>
+              `
+          }
+
+          <div class="dischargeSignatureName">
+            ${escapeHtml(
+              state.me?.display_name ||
+              state.me?.name ||
+              sessionStorage.getItem(
+                "pug_active_display_name"
+              ) ||
+              "Лікар клініки"
+            )}
+          </div>
+        </div>
+
+        ${
+          clinic?.clinic_stamp_url
+            ? `
+              <div class="dischargeStamp">
+                <img
+                  src="${escapeHtml(
+                    clinic.clinic_stamp_url
+                  )}"
+                  alt="Печатка клініки"
+                >
+              </div>
+            `
+            : ""
+        }
+      </section>
+
+      <footer class="dischargeFooter">
+        <div>
+          ${escapeHtml(
+            clinic?.document_footer ||
+            "Коли важливо — ми поруч."
+          )}
+        </div>
+
+        <div>
+          ${escapeHtml(
+            clinic?.name ||
+            "Ветеринарна клініка"
+          )}
+        </div>
+      </footer>
+    </article>
+  `;
 }
 
 function parseRxCombined(text) {

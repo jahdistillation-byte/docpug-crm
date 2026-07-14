@@ -18320,3 +18320,667 @@ select.visitControl {
     flex-direction: column;
   }
 }
+/* =========================================================
+   PREMIUM VISIT DISCHARGE / PRINT DOCUMENT
+   ========================================================= */
+
+#disA4 {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #172033;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.premiumDischargeDocument {
+  --discharge-accent: #9346e8;
+
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #172033;
+  padding: 42px;
+  border-radius: 24px;
+  box-shadow:
+    0 30px 80px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.dischargeHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.dischargeClinicIdentity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dischargeClinicLogo {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.dischargeClinicLogoFallback {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  font-size: 30px;
+  color: var(--discharge-accent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--discharge-accent) 14%, white),
+      #ffffff
+    );
+  border: 1px solid
+    color-mix(in srgb, var(--discharge-accent) 22%, white);
+}
+
+.dischargeClinicName {
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 850;
+  color: #111827;
+  letter-spacing: -0.03em;
+}
+
+.dischargeClinicSubtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #667085;
+}
+
+.dischargeClinicContacts {
+  margin-top: 8px;
+  max-width: 430px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #7b8497;
+}
+
+.dischargeDocumentMeta {
+  flex: 0 0 280px;
+  text-align: right;
+}
+
+.dischargeDocumentType {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+  color: #111827;
+}
+
+.dischargeDocumentNumber {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 750;
+  color: var(--discharge-accent);
+}
+
+.dischargeDocumentDate {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7b8497;
+}
+
+.dischargeAccentLine {
+  height: 3px;
+  margin: 26px 0 28px;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--discharge-accent),
+      color-mix(in srgb, var(--discharge-accent) 18%, white),
+      transparent
+    );
+}
+
+.dischargePeopleGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.dischargeInfoCard {
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid #e8ebf2;
+  background:
+    linear-gradient(
+      180deg,
+      #fbfcff,
+      #f7f8fc
+    );
+  box-sizing: border-box;
+}
+
+.dischargeInfoLabel {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--discharge-accent);
+}
+
+.dischargeInfoName {
+  margin-top: 7px;
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 850;
+  color: #111827;
+}
+
+.dischargeInfoRows {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.dischargeInfoRows p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.dischargeInfoRows span {
+  color: #7b8497;
+}
+
+.dischargeInfoRows strong {
+  max-width: 65%;
+  text-align: right;
+  color: #273044;
+  overflow-wrap: anywhere;
+}
+
+.dischargeMedicalGrid {
+  margin-top: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.dischargeMedicalSection {
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid #e8ebf2;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.dischargePrescriptionSection {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--discharge-accent) 5%, white),
+      #ffffff
+    );
+  border-color:
+    color-mix(in srgb, var(--discharge-accent) 18%, #e8ebf2);
+}
+
+.dischargeSectionTitle {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  color: var(--discharge-accent);
+}
+
+.dischargeSectionText {
+  margin-top: 9px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #2f3748;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dischargeFinanceSection {
+  margin-top: 22px;
+  border-radius: 18px;
+  border: 1px solid #e5e8ef;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.dischargeFinanceHeader {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--discharge-accent) 7%, white),
+      #ffffff
+    );
+  border-bottom: 1px solid #e5e8ef;
+}
+
+.dischargeFinanceSubtitle {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #7b8497;
+}
+
+.dischargeTotalBadge {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--discharge-accent);
+  background:
+    color-mix(
+      in srgb,
+      var(--discharge-accent) 10%,
+      white
+    );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--discharge-accent) 16%,
+      white
+    );
+}
+
+.dischargeFinanceTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.dischargeFinanceTable th,
+.dischargeFinanceTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf0f5;
+  text-align: left;
+  vertical-align: top;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+.dischargeFinanceTable th {
+  font-size: 9px;
+  line-height: 1.3;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #687386;
+  background: #f7f8fb;
+}
+
+.dischargeFinanceTable td {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #293246;
+}
+
+.dischargeFinanceTable th:nth-child(1),
+.dischargeFinanceTable td:nth-child(1) {
+  width: 40%;
+}
+
+.dischargeFinanceTable th:nth-child(2),
+.dischargeFinanceTable td:nth-child(2) {
+  width: 17%;
+}
+
+.dischargeFinanceTable th:nth-child(3),
+.dischargeFinanceTable td:nth-child(3) {
+  width: 11%;
+  text-align: center;
+}
+
+.dischargeFinanceTable th:nth-child(4),
+.dischargeFinanceTable td:nth-child(4),
+.dischargeFinanceTable th:nth-child(5),
+.dischargeFinanceTable td:nth-child(5) {
+  width: 16%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dischargeFinanceTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.dischargeEmptyTable {
+  padding: 24px !important;
+  text-align: center !important;
+  color: #8c95a5 !important;
+}
+
+.dischargeTotals {
+  padding: 16px 20px 18px;
+  margin-left: auto;
+  width: min(100%, 340px);
+  display: grid;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.dischargeTotals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 12px;
+  color: #687386;
+}
+
+.dischargeTotals strong {
+  color: #172033;
+}
+
+.dischargeTotals .grand {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #e4e8ef;
+  font-size: 14px;
+  font-weight: 850;
+  color: #172033;
+}
+
+.dischargeTotals .grand strong {
+  font-size: 17px;
+  color: var(--discharge-accent);
+}
+
+.dischargeSignatureSection {
+  margin-top: 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.dischargeDoctorSignature {
+  width: 270px;
+}
+
+.dischargeSignatureLabel {
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #7b8497;
+}
+
+.dischargeSignatureImage {
+  display: block;
+  max-width: 160px;
+  max-height: 68px;
+  margin-top: 10px;
+  object-fit: contain;
+}
+
+.dischargeSignatureLine {
+  width: 190px;
+  height: 34px;
+  margin-top: 10px;
+  border-bottom: 1px solid #9ea6b5;
+}
+
+.dischargeSignatureName {
+  margin-top: 7px;
+  font-size: 12px;
+  font-weight: 750;
+  color: #273044;
+}
+
+.dischargeStamp img {
+  display: block;
+  max-width: 105px;
+  max-height: 105px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.dischargeFooter {
+  margin-top: 30px;
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #e7eaf0;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #8a93a3;
+}
+
+/* =========================================================
+   RESPONSIVE PREVIEW
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .premiumDischargeDocument {
+    padding: 24px;
+    border-radius: 18px;
+  }
+
+  .dischargeHeader {
+    flex-direction: column;
+  }
+
+  .dischargeDocumentMeta {
+    flex: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .dischargePeopleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dischargeFinanceSection {
+    overflow-x: auto;
+  }
+
+  .dischargeFinanceTable {
+    min-width: 650px;
+  }
+
+  .dischargeSignatureSection,
+  .dischargeFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* =========================================================
+   PRINT — A4, CORRECT MULTI-PAGE BREAKS
+   ========================================================= */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 11mm 14mm;
+  }
+
+  html,
+  body {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  body.docpug-printing * {
+    visibility: hidden !important;
+  }
+
+  body.docpug-printing #disA4,
+  body.docpug-printing #disA4 * {
+    visibility: visible !important;
+  }
+
+  body.docpug-printing #disA4 {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  body.docpug-printing .premiumDischargeDocument {
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  .dischargeHeader {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeAccentLine {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .dischargePeopleGrid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeInfoCard {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeMedicalSection {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeSectionTitle {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .dischargeFinanceSection {
+    overflow: visible !important;
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .dischargeFinanceHeader {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .dischargeFinanceTable {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .dischargeFinanceTable thead {
+    display: table-header-group;
+  }
+
+  .dischargeFinanceTable tfoot {
+    display: table-footer-group;
+  }
+
+  .dischargeFinanceTable tbody {
+    display: table-row-group;
+  }
+
+  .dischargeFinanceTable tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeFinanceTable th,
+  .dischargeFinanceTable td {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeTotals {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeSignatureSection {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeFooter {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dischargeClinicLogo,
+  .dischargeSignatureImage,
+  .dischargeStamp img {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .dischargeAccentLine,
+  .dischargeInfoCard,
+  .dischargePrescriptionSection,
+  .dischargeFinanceHeader,
+  .dischargeTotalBadge,
+  .dischargeFinanceTable th {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
