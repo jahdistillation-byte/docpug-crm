@@ -4014,8 +4014,20 @@ function a4FilenameFromVisit(visitId) {
 }
 
 async function downloadA4Pdf(visitId) {
-  if (typeof window.html2pdf === "undefined") {
+  if (
+    typeof window.html2canvas === "undefined" &&
+    typeof window.html2pdf === "undefined"
+  ) {
     alert("Модуль формування PDF не підключений.");
+    return;
+  }
+
+  const JsPdfConstructor =
+    window.jspdf?.jsPDF ||
+    window.jsPDF;
+
+  if (!JsPdfConstructor) {
+    alert("Модуль jsPDF не підключений.");
     return;
   }
 
@@ -4032,6 +4044,10 @@ async function downloadA4Pdf(visitId) {
     return;
   }
 
+  /*
+   * Создаём независимую копию документа.
+   * Размер 794 px соответствует A4 при 96 dpi.
+   */
   const renderHost =
     document.createElement("div");
 
@@ -4039,64 +4055,61 @@ async function downloadA4Pdf(visitId) {
     "visitPdfRenderHost";
 
   renderHost.style.cssText = `
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: fixed;
+    left: 0;
+    top: 0;
 
-    width: 794px !important;
-    min-width: 794px !important;
-    max-width: 794px !important;
+    width: 794px;
+    min-width: 794px;
+    max-width: 794px;
 
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
 
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: block;
+    visibility: visible;
+    opacity: 1;
 
-    overflow: visible !important;
-    background: #ffffff !important;
+    background: #ffffff;
+    overflow: visible;
 
-    transform: none !important;
-    zoom: 1 !important;
+    pointer-events: none;
+    z-index: 2147483647;
 
-    pointer-events: none !important;
-    z-index: 2147483647 !important;
+    transform: none;
+    box-sizing: border-box;
   `;
 
   const pdfDocument =
     sourceDocument.cloneNode(true);
 
-  pdfDocument.classList.add(
-    "disModernDocPdf"
-  );
-
   pdfDocument.style.cssText += `
     position: relative !important;
-    top: 0 !important;
     left: 0 !important;
+    top: 0 !important;
 
     width: 794px !important;
     min-width: 794px !important;
     max-width: 794px !important;
 
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 24px !important;
 
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 
-    box-sizing: border-box !important;
-    overflow: visible !important;
-
     background: #ffffff !important;
+    color: #1f2937 !important;
+
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
 
+    overflow: visible !important;
     transform: none !important;
-    zoom: 1 !important;
+
+    box-sizing: border-box !important;
   `;
 
   renderHost.appendChild(
@@ -4108,15 +4121,15 @@ async function downloadA4Pdf(visitId) {
   );
 
   try {
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
+
     await new Promise((resolve) => {
       requestAnimationFrame(() => {
         requestAnimationFrame(resolve);
       });
     });
-
-    if (document.fonts?.ready) {
-      await document.fonts.ready;
-    }
 
     const images = Array.from(
       pdfDocument.querySelectorAll("img")
@@ -4151,25 +4164,27 @@ async function downloadA4Pdf(visitId) {
       })
     );
 
-    await window
-      .html2pdf()
-      .set({
-        margin: [
-          0,
-          0,
-          0,
-          0,
-        ],
+    /*
+     * html2pdf bundle обычно содержит html2canvas,
+     * но на всякий случай получаем его обоими способами.
+     */
+    const html2canvasFunction =
+      window.html2canvas ||
+      window.html2pdf?.Worker?.prototype
+        ?.prop?.html2canvas;
 
-        filename:
-          a4FilenameFromVisit(visitId),
+    if (
+      typeof html2canvasFunction !==
+      "function"
+    ) {
+      alert("Модуль html2canvas не підключений.");
+      return;
+    }
 
-        image: {
-          type: "jpeg",
-          quality: 0.98,
-        },
-
-        html2canvas: {
+    const canvas =
+      await html2canvasFunction(
+        pdfDocument,
+        {
           scale: 2,
           useCORS: true,
           allowTaint: false,
@@ -4182,23 +4197,20 @@ async function downloadA4Pdf(visitId) {
           width: 794,
           windowWidth: 794,
 
-          onclone: (clonedDocument) => {
+          onclone: (
+            clonedDocument
+          ) => {
             const clonedHost =
               clonedDocument.getElementById(
                 "visitPdfRenderHost"
-              );
-
-            const clonedPdf =
-              clonedHost?.querySelector(
-                ".disModernDocPdf"
               );
 
             if (clonedHost) {
               clonedHost.style.position =
                 "absolute";
 
-              clonedHost.style.top = "0";
               clonedHost.style.left = "0";
+              clonedHost.style.top = "0";
 
               clonedHost.style.width =
                 "794px";
@@ -4223,87 +4235,211 @@ async function downloadA4Pdf(visitId) {
               clonedHost.style.transform =
                 "none";
 
-              clonedHost.style.zoom = "1";
-
               clonedHost.style.background =
                 "#ffffff";
             }
 
-            if (clonedPdf) {
-              clonedPdf.style.position =
+            const clonedDocumentNode =
+              clonedHost?.querySelector(
+                ".disModernDoc"
+              );
+
+            if (clonedDocumentNode) {
+              clonedDocumentNode.style.position =
                 "relative";
 
-              clonedPdf.style.top = "0";
-              clonedPdf.style.left = "0";
-
-              clonedPdf.style.width =
-                "794px";
-
-              clonedPdf.style.minWidth =
-                "794px";
-
-              clonedPdf.style.maxWidth =
-                "794px";
-
-              clonedPdf.style.margin = "0";
-              clonedPdf.style.padding =
-                "20px";
-
-              clonedPdf.style.display =
-                "block";
-
-              clonedPdf.style.visibility =
-                "visible";
-
-              clonedPdf.style.opacity = "1";
-
-              clonedPdf.style.boxSizing =
-                "border-box";
-
-              clonedPdf.style.overflow =
-                "visible";
-
-              clonedPdf.style.transform =
-                "none";
-
-              clonedPdf.style.zoom = "1";
-
-              clonedPdf.style.borderRadius =
+              clonedDocumentNode.style.left =
                 "0";
 
-              clonedPdf.style.boxShadow =
+              clonedDocumentNode.style.top =
+                "0";
+
+              clonedDocumentNode.style.width =
+                "794px";
+
+              clonedDocumentNode.style.minWidth =
+                "794px";
+
+              clonedDocumentNode.style.maxWidth =
+                "794px";
+
+              clonedDocumentNode.style.margin =
+                "0";
+
+              clonedDocumentNode.style.padding =
+                "24px";
+
+              clonedDocumentNode.style.display =
+                "block";
+
+              clonedDocumentNode.style.visibility =
+                "visible";
+
+              clonedDocumentNode.style.opacity =
+                "1";
+
+              clonedDocumentNode.style.transform =
                 "none";
 
-              clonedPdf.style.background =
+              clonedDocumentNode.style.borderRadius =
+                "0";
+
+              clonedDocumentNode.style.boxShadow =
+                "none";
+
+              clonedDocumentNode.style.background =
                 "#ffffff";
+
+              clonedDocumentNode.style.boxSizing =
+                "border-box";
+
+              clonedDocumentNode.style.overflow =
+                "visible";
             }
           },
-        },
+        }
+      );
 
-        jsPDF: {
-          unit: "mm",
-          format: "a4",
-          orientation: "portrait",
-          compress: true,
-        },
+    if (
+      !canvas ||
+      canvas.width < 100 ||
+      canvas.height < 100
+    ) {
+      throw new Error(
+        "Документ не вдалося перетворити на зображення"
+      );
+    }
 
-        pagebreak: {
-          mode: [
-            "css",
-            "legacy",
-          ],
+    /*
+     * A4:
+     * 210 × 297 мм.
+     * Оставляем поля по 8 мм.
+     */
+    const pdf =
+      new JsPdfConstructor({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
 
-          avoid: [
-            ".disModernHead",
-            ".disModernCard",
-            ".disModernSignGrid",
-            ".disModernFinanceSummary",
-            ".disModernTable tr",
-          ],
-        },
-      })
-      .from(pdfDocument)
-      .save();
+    const pageWidthMm = 210;
+    const pageHeightMm = 297;
+
+    const marginLeftMm = 8;
+    const marginTopMm = 8;
+    const marginRightMm = 8;
+    const marginBottomMm = 8;
+
+    const contentWidthMm =
+      pageWidthMm -
+      marginLeftMm -
+      marginRightMm;
+
+    const contentHeightMm =
+      pageHeightMm -
+      marginTopMm -
+      marginBottomMm;
+
+    /*
+     * Сколько пикселей исходного canvas
+     * помещается на одной странице A4.
+     */
+    const pageSliceHeightPx =
+      Math.floor(
+        canvas.width *
+        (
+          contentHeightMm /
+          contentWidthMm
+        )
+      );
+
+    let sourceY = 0;
+    let pageIndex = 0;
+
+    while (sourceY < canvas.height) {
+      const sliceHeight =
+        Math.min(
+          pageSliceHeightPx,
+          canvas.height - sourceY
+        );
+
+      const pageCanvas =
+        document.createElement("canvas");
+
+      pageCanvas.width =
+        canvas.width;
+
+      pageCanvas.height =
+        sliceHeight;
+
+      const context =
+        pageCanvas.getContext("2d");
+
+      if (!context) {
+        throw new Error(
+          "Не вдалося створити сторінку PDF"
+        );
+      }
+
+      context.fillStyle = "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        pageCanvas.width,
+        pageCanvas.height
+      );
+
+      context.drawImage(
+        canvas,
+
+        0,
+        sourceY,
+        canvas.width,
+        sliceHeight,
+
+        0,
+        0,
+        pageCanvas.width,
+        sliceHeight
+      );
+
+      const pageImage =
+        pageCanvas.toDataURL(
+          "image/jpeg",
+          0.98
+        );
+
+      const renderedHeightMm =
+        contentWidthMm *
+        (
+          sliceHeight /
+          canvas.width
+        );
+
+      if (pageIndex > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(
+        pageImage,
+        "JPEG",
+        marginLeftMm,
+        marginTopMm,
+        contentWidthMm,
+        renderedHeightMm,
+        undefined,
+        "FAST"
+      );
+
+      sourceY += sliceHeight;
+      pageIndex += 1;
+    }
+
+    pdf.save(
+      a4FilenameFromVisit(visitId)
+    );
   } catch (error) {
     console.error(
       "downloadA4Pdf failed:",
@@ -4312,7 +4448,10 @@ async function downloadA4Pdf(visitId) {
 
     alert(
       "Не вдалося сформувати PDF: " +
-      (error?.message || error)
+      (
+        error?.message ||
+        error
+      )
     );
   } finally {
     renderHost.remove();
