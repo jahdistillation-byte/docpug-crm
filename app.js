@@ -6774,26 +6774,25 @@ function renderLabsTab(pet) {
 
     const pdfButton = event.target.closest("[data-pdf-lab]");
 
-    if (pdfButton) {
-      event.preventDefault();
-      event.stopPropagation();
+if (pdfButton) {
+  event.preventDefault();
+  event.stopPropagation();
 
-      const id = pdfButton.dataset.pdfLab;
-      if (!id) return;
+  const id = pdfButton.dataset.pdfLab;
+  if (!id) return;
 
-      const lab = loadLabs().find(
-        (item) => String(item.id) === String(id)
-      );
+  const lab = loadLabs().find(
+    (item) => String(item.id) === String(id)
+  );
 
-      if (!lab) {
-        alert("Аналіз не знайдено.");
-        return;
-      }
+  if (!lab) {
+    alert("Аналіз не знайдено.");
+    return;
+  }
 
-      if (typeof downloadLabPdf === "function") {
-        await downloadLabPdf(pet, lab);
-      }
-    }
+  await downloadLabPdf(pet, lab);
+  return;
+}
   });
 }
 
@@ -7308,114 +7307,887 @@ function openLabModal(pet, labData = {}) {
       renderLabsTab(pet);
     });
 }
+function normalizeLabPdfNumber(value) {
+  if (value === null || value === undefined || value === "") return "—";
 
-async function downloadLabPdf(pet, labId) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return String(value);
+  }
+
+  return number.toLocaleString("uk-UA", {
+    maximumFractionDigits: 2,
+  });
+}
+
+function sanitizeLabPdfFilename(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "_")
+    .replace(/\s+/g, "_")
+    .slice(0, 80);
+}
+
+function resolveLabPdfReference(pet, lab, key) {
+  const customReference =
+    lab?.refs?.[key] ||
+    lab?.references?.[key] ||
+    null;
+
+  if (customReference) {
+    return {
+      min:
+        customReference.min !== undefined
+          ? customReference.min
+          : customReference[0],
+
+      max:
+        customReference.max !== undefined
+          ? customReference.max
+          : customReference[1],
+
+      unit:
+        customReference.unit !== undefined
+          ? customReference.unit
+          : customReference[2] || "",
+    };
+  }
+
+  const speciesKey = getPetSpeciesKey(pet);
+  const defaultReference = LAB_REF?.[speciesKey]?.[key];
+
+  if (Array.isArray(defaultReference)) {
+    return {
+      min: defaultReference[0],
+      max: defaultReference[1],
+      unit: defaultReference[2] || "",
+    };
+  }
+
+  return {
+    min: "",
+    max: "",
+    unit:
+      LAB_DEFAULT_UNITS?.[key] ||
+      LAB_UNITS?.[key] ||
+      "",
+  };
+}
+
+function getLabPdfStatus(value, min, max) {
+  const numericValue = Number(value);
+  const numericMin = Number(min);
+  const numericMax = Number(max);
+
+  if (
+    !Number.isFinite(numericValue) ||
+    !Number.isFinite(numericMin) ||
+    !Number.isFinite(numericMax)
+  ) {
+    return "unknown";
+  }
+
+  if (numericValue < numericMin) return "low";
+  if (numericValue > numericMax) return "high";
+
+  return "normal";
+}
+
+function getLabPdfStatusMeta(status) {
+  const statuses = {
+    normal: {
+      label: "У межах норми",
+      shortLabel: "НОРМА",
+      symbol: "✓",
+      color: "#147D4A",
+      background: "#E8F7EF",
+      border: "#B9E6CD",
+    },
+
+    high: {
+      label: "Вище норми",
+      shortLabel: "ВИЩЕ",
+      symbol: "↑",
+      color: "#B42318",
+      background: "#FEECEB",
+      border: "#F7C5C1",
+    },
+
+    low: {
+      label: "Нижче норми",
+      shortLabel: "НИЖЧЕ",
+      symbol: "↓",
+      color: "#175CD3",
+      background: "#EAF2FF",
+      border: "#BDD4FF",
+    },
+
+    unknown: {
+      label: "Без оцінки",
+      shortLabel: "БЕЗ ОЦІНКИ",
+      symbol: "—",
+      color: "#5F6673",
+      background: "#F2F4F7",
+      border: "#DDE1E7",
+    },
+  };
+
+  return statuses[status] || statuses.unknown;
+}
+
+function buildLabPdfDocument(pet, lab) {
+  const speciesKey = getPetSpeciesKey(pet);
+
+  const speciesLabel =
+    speciesKey === "cat"
+      ? "Кіт"
+      : speciesKey === "dog"
+        ? "Собака"
+        : "Тварина";
+
+  const values = lab?.values || {};
+
+  const preferredKeys =
+    LAB_GROUPS?.[lab?.type] ||
+    Object.keys(values);
+
+  const keys = preferredKeys.filter((key) => {
+    const value = values[key];
+
+    return (
+      value !== undefined &&
+      value !== null &&
+      String(value).trim() !== ""
+    );
+  });
+
+  const metrics = keys.map((key) => {
+    const reference = resolveLabPdfReference(pet, lab, key);
+    const value = values[key];
+
+    const status = getLabPdfStatus(
+      value,
+      reference.min,
+      reference.max
+    );
+
+    return {
+      key,
+      label: LAB_LABELS?.[key] || key,
+      value,
+      min: reference.min,
+      max: reference.max,
+      unit: reference.unit || "",
+      status,
+      statusMeta: getLabPdfStatusMeta(status),
+    };
+  });
+
+  const normalCount = metrics.filter(
+    (item) => item.status === "normal"
+  ).length;
+
+  const highCount = metrics.filter(
+    (item) => item.status === "high"
+  ).length;
+
+  const lowCount = metrics.filter(
+    (item) => item.status === "low"
+  ).length;
+
+  const unknownCount = metrics.filter(
+    (item) => item.status === "unknown"
+  ).length;
+
+  const abnormalCount = highCount + lowCount;
+
+  const summaryTitle = abnormalCount
+    ? `Є відхилення: ${abnormalCount}`
+    : "Усі оцінені показники в нормі";
+
+  const summaryText = abnormalCount
+    ? "Зверніть увагу на показники, виділені червоним або синім кольором. Остаточну інтерпретацію результатів проводить ветеринарний лікар."
+    : "За вказаними референтними значеннями відхилень не виявлено. Результат необхідно оцінювати разом із клінічним станом тварини.";
+
+  const summaryColor = abnormalCount
+    ? "#B42318"
+    : "#147D4A";
+
+  const summaryBackground = abnormalCount
+    ? "#FFF1F0"
+    : "#ECFDF3";
+
+  const summaryBorder = abnormalCount
+    ? "#F7C5C1"
+    : "#B7E5C9";
+
+  const rowsHtml = metrics
+    .map((metric, index) => {
+      const referenceAvailable =
+        metric.min !== "" &&
+        metric.max !== "" &&
+        metric.min !== undefined &&
+        metric.max !== undefined;
+
+      const referenceText = referenceAvailable
+        ? `${normalizeLabPdfNumber(metric.min)}–${normalizeLabPdfNumber(metric.max)}`
+        : "Не вказано";
+
+      const unitText = metric.unit
+        ? ` ${escapeHtml(metric.unit)}`
+        : "";
+
+      const resultCellBackground =
+        metric.status === "normal"
+          ? "#F1FBF5"
+          : metric.status === "high"
+            ? "#FFF2F0"
+            : metric.status === "low"
+              ? "#EFF5FF"
+              : "#F7F8FA";
+
+      return `
+        <tr style="
+          page-break-inside: avoid;
+          break-inside: avoid;
+          background: ${index % 2 === 0 ? "#FFFFFF" : "#FAFAFC"};
+        ">
+          <td style="
+            width: 34%;
+            padding: 11px 12px;
+            border-bottom: 1px solid #E9EBF0;
+            vertical-align: middle;
+          ">
+            <div style="
+              color: #161A22;
+              font-size: 12px;
+              font-weight: 800;
+              line-height: 1.3;
+            ">
+              ${escapeHtml(metric.label)}
+            </div>
+
+            <div style="
+              margin-top: 3px;
+              color: #9298A4;
+              font-size: 8px;
+              font-weight: 700;
+              letter-spacing: .08em;
+            ">
+              ${escapeHtml(metric.key)}
+            </div>
+          </td>
+
+          <td style="
+            width: 19%;
+            padding: 11px 12px;
+            border-bottom: 1px solid #E9EBF0;
+            vertical-align: middle;
+            background: ${resultCellBackground};
+          ">
+            <div style="
+              color: ${metric.statusMeta.color};
+              font-size: 15px;
+              font-weight: 900;
+              line-height: 1.15;
+            ">
+              ${escapeHtml(normalizeLabPdfNumber(metric.value))}
+            </div>
+
+            <div style="
+              margin-top: 2px;
+              color: #777E8C;
+              font-size: 8px;
+            ">
+              ${unitText || "—"}
+            </div>
+          </td>
+
+          <td style="
+            width: 24%;
+            padding: 11px 12px;
+            border-bottom: 1px solid #E9EBF0;
+            vertical-align: middle;
+          ">
+            <div style="
+              color: #394150;
+              font-size: 10px;
+              font-weight: 750;
+            ">
+              ${escapeHtml(referenceText)}${unitText}
+            </div>
+          </td>
+
+          <td style="
+            width: 23%;
+            padding: 11px 12px;
+            border-bottom: 1px solid #E9EBF0;
+            vertical-align: middle;
+          ">
+            <div style="
+              display: inline-flex;
+              align-items: center;
+              gap: 5px;
+              padding: 6px 9px;
+              color: ${metric.statusMeta.color};
+              background: ${metric.statusMeta.background};
+              border: 1px solid ${metric.statusMeta.border};
+              border-radius: 999px;
+              font-size: 8px;
+              font-weight: 900;
+              white-space: nowrap;
+              letter-spacing: .03em;
+            ">
+              <span style="font-size: 11px;">
+                ${metric.statusMeta.symbol}
+              </span>
+
+              ${metric.statusMeta.shortLabel}
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const commentHtml =
+    lab?.comment && String(lab.comment).trim()
+      ? `
+        <section style="
+          margin-top: 18px;
+          padding: 14px 16px;
+          background: #F7F3FC;
+          border: 1px solid #E8DDF5;
+          border-left: 4px solid #8C43D6;
+          border-radius: 12px;
+          page-break-inside: avoid;
+        ">
+          <div style="
+            margin-bottom: 6px;
+            color: #7136AD;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+          ">
+            Коментар ветеринарного лікаря
+          </div>
+
+          <div style="
+            color: #333846;
+            font-size: 11px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+          ">
+            ${escapeHtml(lab.comment)}
+          </div>
+        </section>
+      `
+      : "";
+
+  const documentNode = document.createElement("div");
+
+  documentNode.className = "docPugLabPdfDocument";
+
+  documentNode.style.cssText = `
+    width: 794px;
+    min-height: 1123px;
+    padding: 38px 42px 30px;
+    box-sizing: border-box;
+    color: #171A21;
+    background: #FFFFFF;
+    font-family: Arial, Helvetica, sans-serif;
+  `;
+
+  documentNode.innerHTML = `
+    <header style="
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding-bottom: 22px;
+      border-bottom: 2px solid #8C43D6;
+    ">
+      <div>
+        <div style="
+          color: #8C43D6;
+          font-size: 23px;
+          font-weight: 900;
+          letter-spacing: -.03em;
+        ">
+          Doc.PUG
+        </div>
+
+        <div style="
+          margin-top: 4px;
+          color: #697080;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: .07em;
+          text-transform: uppercase;
+        ">
+          Ветеринарна медицина
+        </div>
+      </div>
+
+      <div style="text-align: right;">
+        <div style="
+          color: #242833;
+          font-size: 16px;
+          font-weight: 900;
+        ">
+          Результати лабораторного дослідження
+        </div>
+
+        <div style="
+          margin-top: 5px;
+          color: #777E8C;
+          font-size: 10px;
+        ">
+          ${escapeHtml(lab?.type || "Аналіз")}
+        </div>
+      </div>
+    </header>
+
+    <section style="
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    ">
+      <div style="
+        padding: 13px 14px;
+        background: #F7F5FA;
+        border: 1px solid #EBE6F1;
+        border-radius: 12px;
+      ">
+        <div style="
+          color: #8D94A1;
+          font-size: 8px;
+          font-weight: 850;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        ">
+          Пацієнт
+        </div>
+
+        <div style="
+          margin-top: 5px;
+          color: #1D212B;
+          font-size: 15px;
+          font-weight: 900;
+        ">
+          ${escapeHtml(pet?.name || "—")}
+        </div>
+
+        <div style="
+          margin-top: 3px;
+          color: #697080;
+          font-size: 9px;
+        ">
+          ${escapeHtml(speciesLabel)}
+          ${
+            pet?.breed
+              ? ` • ${escapeHtml(pet.breed)}`
+              : ""
+          }
+        </div>
+      </div>
+
+      <div style="
+        padding: 13px 14px;
+        background: #F7F5FA;
+        border: 1px solid #EBE6F1;
+        border-radius: 12px;
+      ">
+        <div style="
+          color: #8D94A1;
+          font-size: 8px;
+          font-weight: 850;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        ">
+          Дата дослідження
+        </div>
+
+        <div style="
+          margin-top: 7px;
+          color: #1D212B;
+          font-size: 12px;
+          font-weight: 850;
+        ">
+          ${escapeHtml(
+            typeof formatLabCardDate === "function"
+              ? formatLabCardDate(lab?.date)
+              : lab?.date || "—"
+          )}
+        </div>
+      </div>
+
+      <div style="
+        padding: 13px 14px;
+        background: #F7F5FA;
+        border: 1px solid #EBE6F1;
+        border-radius: 12px;
+      ">
+        <div style="
+          color: #8D94A1;
+          font-size: 8px;
+          font-weight: 850;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        ">
+          Лабораторія
+        </div>
+
+        <div style="
+          margin-top: 7px;
+          color: #1D212B;
+          font-size: 12px;
+          font-weight: 850;
+        ">
+          ${escapeHtml(lab?.laboratory || "Не вказано")}
+        </div>
+      </div>
+    </section>
+
+    <section style="
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: ${summaryBackground};
+      border: 1px solid ${summaryBorder};
+      border-radius: 12px;
+      page-break-inside: avoid;
+    ">
+      <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+      ">
+        <div>
+          <div style="
+            color: ${summaryColor};
+            font-size: 12px;
+            font-weight: 900;
+          ">
+            ${escapeHtml(summaryTitle)}
+          </div>
+
+          <div style="
+            max-width: 480px;
+            margin-top: 5px;
+            color: #555D6C;
+            font-size: 9px;
+            line-height: 1.5;
+          ">
+            ${escapeHtml(summaryText)}
+          </div>
+        </div>
+
+        <div style="
+          display: flex;
+          gap: 7px;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        ">
+          <div style="
+            padding: 6px 8px;
+            color: #147D4A;
+            background: #FFFFFF;
+            border: 1px solid #B9E6CD;
+            border-radius: 8px;
+            font-size: 8px;
+            font-weight: 900;
+          ">
+            ✓ Норма: ${normalCount}
+          </div>
+
+          <div style="
+            padding: 6px 8px;
+            color: #B42318;
+            background: #FFFFFF;
+            border: 1px solid #F7C5C1;
+            border-radius: 8px;
+            font-size: 8px;
+            font-weight: 900;
+          ">
+            ↑ Вище: ${highCount}
+          </div>
+
+          <div style="
+            padding: 6px 8px;
+            color: #175CD3;
+            background: #FFFFFF;
+            border: 1px solid #BDD4FF;
+            border-radius: 8px;
+            font-size: 8px;
+            font-weight: 900;
+          ">
+            ↓ Нижче: ${lowCount}
+          </div>
+
+          ${
+            unknownCount
+              ? `
+                <div style="
+                  padding: 6px 8px;
+                  color: #5F6673;
+                  background: #FFFFFF;
+                  border: 1px solid #DDE1E7;
+                  border-radius: 8px;
+                  font-size: 8px;
+                  font-weight: 900;
+                ">
+                  — Без оцінки: ${unknownCount}
+                </div>
+              `
+              : ""
+          }
+        </div>
+      </div>
+    </section>
+
+    <section style="
+      margin-top: 18px;
+      overflow: hidden;
+      border: 1px solid #E2E5EA;
+      border-radius: 13px;
+    ">
+      <table style="
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      ">
+        <thead>
+          <tr style="background: #292333;">
+            <th style="
+              width: 34%;
+              padding: 10px 12px;
+              color: #FFFFFF;
+              font-size: 8px;
+              font-weight: 850;
+              text-align: left;
+              letter-spacing: .07em;
+              text-transform: uppercase;
+            ">
+              Показник
+            </th>
+
+            <th style="
+              width: 19%;
+              padding: 10px 12px;
+              color: #FFFFFF;
+              font-size: 8px;
+              font-weight: 850;
+              text-align: left;
+              letter-spacing: .07em;
+              text-transform: uppercase;
+            ">
+              Результат
+            </th>
+
+            <th style="
+              width: 24%;
+              padding: 10px 12px;
+              color: #FFFFFF;
+              font-size: 8px;
+              font-weight: 850;
+              text-align: left;
+              letter-spacing: .07em;
+              text-transform: uppercase;
+            ">
+              Референс
+            </th>
+
+            <th style="
+              width: 23%;
+              padding: 10px 12px;
+              color: #FFFFFF;
+              font-size: 8px;
+              font-weight: 850;
+              text-align: left;
+              letter-spacing: .07em;
+              text-transform: uppercase;
+            ">
+              Оцінка
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${
+            rowsHtml ||
+            `
+              <tr>
+                <td colspan="4" style="
+                  padding: 30px;
+                  color: #767D8B;
+                  font-size: 11px;
+                  text-align: center;
+                ">
+                  Результати не внесені
+                </td>
+              </tr>
+            `
+          }
+        </tbody>
+      </table>
+    </section>
+
+    ${commentHtml}
+
+    <section style="
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: #FAFAFC;
+      border: 1px solid #EBEDF1;
+      border-radius: 10px;
+      page-break-inside: avoid;
+    ">
+      <div style="
+        color: #747B88;
+        font-size: 8px;
+        line-height: 1.55;
+      ">
+        <b style="color: #454B57;">Важливо:</b>
+        референтні значення можуть відрізнятися залежно від лабораторії,
+        обладнання, віку та фізіологічного стану тварини. Цей документ не є
+        самостійним діагнозом. Результати повинен інтерпретувати ветеринарний лікар.
+      </div>
+    </section>
+
+    <footer style="
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid #E1E4E9;
+      color: #8B929F;
+      font-size: 8px;
+    ">
+      <span>
+        Doc.PUG • Коли важливо — ми поруч.
+      </span>
+
+      <span>
+        Сформовано: ${escapeHtml(new Date().toLocaleString("uk-UA"))}
+      </span>
+    </footer>
+  `;
+
+  return documentNode;
+}
+
+async function downloadLabPdf(pet, labOrId) {
   if (typeof window.html2pdf === "undefined") {
-    return alert("html2pdf не подключен");
+    alert("Модуль формування PDF не підключений.");
+    return;
   }
 
-  const lab = loadLabs().find((x) => String(x.id) === String(labId));
-  if (!lab) return alert("Аналіз не знайдено");
+  const lab =
+    labOrId && typeof labOrId === "object"
+      ? labOrId
+      : loadLabs().find(
+          (item) => String(item.id) === String(labOrId)
+        );
 
-  const root = document.createElement("div");
-  root.style.position = "fixed";
-  root.style.left = "-99999px";
-  root.style.top = "0";
-  root.innerHTML = renderLabPdfHtml(pet, lab);
-  document.body.appendChild(root);
-
-  const a4 = root.querySelector(".labPdfA4");
-  if (!a4) {
-    root.remove();
-    return alert("Не вдалося створити PDF");
+  if (!lab) {
+    alert("Аналіз не знайдено.");
+    return;
   }
 
-  const filename = `DocPUG_${String(lab.type || "lab")}_${String(pet.name || "patient")}_${String(lab.date || todayISO())}.pdf`;
+  const renderHost = document.createElement("div");
+
+  renderHost.id = "labPdfRenderHost";
+
+  renderHost.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    width: 794px;
+    min-height: 1123px;
+    opacity: 1;
+    pointer-events: none;
+    background: #FFFFFF;
+  `;
+
+  const pdfDocument = buildLabPdfDocument(pet, lab);
+  renderHost.appendChild(pdfDocument);
+  document.body.appendChild(renderHost);
+
+  const filename = [
+    "DocPUG",
+    sanitizeLabPdfFilename(lab.type || "analysis"),
+    sanitizeLabPdfFilename(pet?.name || "patient"),
+    sanitizeLabPdfFilename(lab.date || todayISO()),
+  ].join("_") + ".pdf";
 
   try {
-    await window.html2pdf()
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+
+    await document.fonts?.ready;
+
+    const worker = window
+      .html2pdf()
       .set({
         margin: 0,
+
         filename,
-        image: { type: "jpeg", quality: 0.98 },
+
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
+
         html2canvas: {
           scale: 2,
           useCORS: true,
-          backgroundColor: null,
+          allowTaint: false,
+          backgroundColor: "#FFFFFF",
           logging: false,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 794,
         },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
+
+        jsPDF: {
+          unit: "px",
+          format: [794, 1123],
+          orientation: "portrait",
+          compress: true,
+          hotfixes: ["px_scaling"],
+        },
+
+        pagebreak: {
+          mode: ["css", "legacy"],
+          avoid: [
+            "tr",
+            ".labPdfSummary",
+            ".labPdfComment",
+          ],
+        },
       })
-      .from(a4)
-      .save();
-  } catch (e) {
-    console.error(e);
-    alert("Не вдалося скачати PDF: " + (e?.message || e));
+      .from(pdfDocument);
+
+    await worker.save();
+  } catch (error) {
+    console.error("downloadLabPdf failed:", error);
+
+    alert(
+      "Не вдалося сформувати PDF: " +
+      (error?.message || error)
+    );
   } finally {
-    root.remove();
+    renderHost.remove();
   }
-}
-
-function renderLabPdfHtml(pet, lab) {
-  const speciesKey = getPetSpeciesKey(pet);
-  const speciesLabel = speciesKey === "cat" ? "кіт" : "собака";
-  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
-  const values = lab.values || {};
-  const keys = LAB_GROUPS[lab.type] || Object.keys(values);
-
-  const rows = keys.map((key) => {
-    const ref = ranges[key];
-    if (!ref) return "";
-
-    const [min, max, unit] = ref;
-    const value = values[key];
-    const status = getLabStatus(value, min, max);
-
-    return `
-      <tr>
-        <td>${escapeHtml(LAB_LABELS[key] || key)}</td>
-        <td><b>${escapeHtml(value ?? "—")}</b> ${escapeHtml(unit)}</td>
-        <td>${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</td>
-        <td class="lab-${status}">${escapeHtml(labStatusLabel(status))}</td>
-      </tr>
-    `;
-  }).join("");
-
-  return `
-    <div class="labPdfA4">
-      <div class="labPdfHeader">
-        <div>
-          <div class="labPdfTitle">Аналіз / ${escapeHtml(lab.type || "—")}</div>
-          <div class="labPdfBrand">Doc.PUG</div>
-        </div>
-        <div class="pill">${escapeHtml(lab.date || "—")}</div>
-      </div>
-
-      <div class="labPdfPatient">
-        <div>
-          <div class="history-label">Пацієнт</div>
-          <div><b>${escapeHtml(pet.name || "—")}</b></div>
-          <div class="meta">${escapeHtml(speciesLabel)}</div>
-        </div>
-      </div>
-
-      <div class="labPdfBlock">
-        <table class="servicesTable">
-          <thead>
-            <tr>
-              <th>Показник</th>
-              <th>Результат</th>
-              <th>Норма</th>
-              <th>Статус</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-
-      <div class="labPdfFooter">Doc.PUG • Коли важливо — ми поруч.</div>
-    </div>
-  `;
 }
 
 function formatLabCardDate(dateStr) {
@@ -7674,97 +8446,6 @@ function renderLabCard(lab, speciesKey) {
   `;
 }
 
-async function downloadLabPdf(pet, lab) {
-  if (typeof window.html2pdf === "undefined") {
-    return alert("html2pdf не підключений");
-  }
-
-  const speciesKey = getPetSpeciesKey(pet);
-  const ranges = LAB_REF[speciesKey] || LAB_REF.dog;
-  const keys = LAB_GROUPS[lab.type] || Object.keys(lab.values || {});
-
-  const wrap = document.createElement("div");
-  wrap.className = "labPdfA4";
-
-  wrap.innerHTML = `
-    <div class="labPdfDoc">
-      <div class="labPdfHead">
-        <div>
-          <div class="labPdfTitle">Результати аналізу</div>
-          <div class="labPdfBrand">Doc.PUG</div>
-        </div>
-        <div class="pill">${escapeHtml(lab.date || "—")}</div>
-      </div>
-
-      <div class="labPdfDivider"></div>
-
-      <div class="labPdfGrid">
-        <div>
-          <div class="history-label">Пацієнт</div>
-          <div class="a4Name">${escapeHtml(pet?.name || "—")}</div>
-          <div class="a4Meta">
-            ${escapeHtml([pet?.species, pet?.breed, pet?.age, pet?.weight_kg ? `${pet.weight_kg} кг` : ""].filter(Boolean).join(" • ") || "—")}
-          </div>
-        </div>
-
-        <div>
-          <div class="history-label">Тип аналізу</div>
-          <div class="a4Name">${escapeHtml(lab.type || "Аналіз")}</div>
-          <div class="a4Meta">Норми: ${speciesKey === "cat" ? "кіт" : "собака"}</div>
-        </div>
-      </div>
-
-      <div class="labPdfTableBox">
-        <table class="servicesTable">
-          <thead>
-            <tr>
-              <th>Показник</th>
-              <th>Результат</th>
-              <th>Норма</th>
-              <th>Статус</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${keys.map((key) => {
-              const ref = ranges[key];
-              if (!ref) return "";
-
-              const [min, max, unit] = ref;
-              const value = lab.values?.[key];
-              const status = getLabStatus(value, min, max);
-
-              return `
-                <tr>
-                  <td>${escapeHtml(LAB_LABELS[key] || key)}</td>
-                  <td><b>${escapeHtml(value ?? "—")} ${escapeHtml(unit)}</b></td>
-                  <td>${escapeHtml(String(min))}–${escapeHtml(String(max))} ${escapeHtml(unit)}</td>
-                  <td>${escapeHtml(labStatusLabel(status))}</td>
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(wrap);
-
-  const filename = `DocPUG_${pet?.name || "patient"}_${lab.type || "lab"}_${lab.date || todayISO()}.pdf`;
-
-  await window.html2pdf()
-    .set({
-      margin: 0,
-      filename,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: null },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    })
-    .from(wrap)
-    .save();
-
-  wrap.remove();
-}
 function formatVisitDatePremium(value) {
   const raw = String(value || "").trim();
 
