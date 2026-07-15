@@ -25044,21 +25044,7 @@ function bindPersonalSettingsUI(page) {
 }
 
 
-function initSettingsUI() {
-  const page =
-    document.querySelector(
-      '.page[data-page="settings"]'
-    );
-
-  if (!page) return;
-
-  if (
-    page.dataset.boundSettings === "1"
-  ) {
-    return;
-  }
-
-  page.dataset.boundSettings = "1";
+function bindSettingsLogoutUI(page) {
 
   // обработчик темы
   // обработчик языка
