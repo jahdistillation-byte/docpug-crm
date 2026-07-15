@@ -7,8 +7,18 @@ import mimetypes
 import time
 from urllib.parse import parse_qsl
 
-from datetime import datetime, timezone
-from flask import Flask, request, send_from_directory, jsonify
+from datetime import (
+    datetime,
+    timezone,
+    timedelta,
+)
+from flask import (
+    Flask,
+    request,
+    send_from_directory,
+    jsonify,
+    session,
+)
 from werkzeug.utils import secure_filename
 from werkzeug.security import (
     generate_password_hash,
@@ -39,6 +49,33 @@ print("SUPABASE STORAGE READY")
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25MB
 app.config["PREFERRED_URL_SCHEME"] = "https"
+
+SESSION_SECRET_KEY = os.getenv(
+    "SESSION_SECRET_KEY"
+)
+
+if not SESSION_SECRET_KEY:
+    raise RuntimeError(
+        "Missing ENV var: SESSION_SECRET_KEY"
+    )
+
+app.config.update(
+    SECRET_KEY=SESSION_SECRET_KEY,
+
+    SESSION_COOKIE_NAME=(
+        "docpug_session"
+    ),
+
+    SESSION_COOKIE_HTTPONLY=True,
+
+    SESSION_COOKIE_SECURE=True,
+
+    SESSION_COOKIE_SAMESITE="Lax",
+
+    PERMANENT_SESSION_LIFETIME=(
+        timedelta(hours=12)
+    ),
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
@@ -3523,7 +3560,7 @@ def api_clinic_login():
             supabase
             .table("clinic_users")
             .select(
-                "id, username, password_plain, password_hash, "
+                "id, username, password_hash, "
                 "org_id, staff_id, role, display_name, is_active, "
                 "must_change_password"
             )
@@ -3550,65 +3587,24 @@ def api_clinic_login():
             user_data.get("password_hash") or ""
         ).strip()
 
-        stored_plain = str(
-            user_data.get("password_plain") or ""
-        )
+        if not stored_hash:
+            return jsonify({
+                "ok": False,
+                "error": "Пароль користувача не налаштований",
+            }), 403
 
-        password_valid = False
-        migrated_to_hash = False
-
-        # 1. Основной безопасный вариант:
-        # проверяем password_hash.
-        if stored_hash:
-            try:
-                password_valid = check_password_hash(
-                    stored_hash,
-                    password,
-                )
-            except Exception as hash_error:
-                print(
-                    "⚠️ password hash check failed:",
-                    repr(hash_error),
-                )
-
-                password_valid = False
-
-        # 2. Временный переходный вариант:
-        # если хеша ещё нет, проверяем старый пароль.
-        elif stored_plain:
-            password_valid = hmac.compare_digest(
-                stored_plain,
+        try:
+            password_valid = check_password_hash(
+                stored_hash,
                 password,
             )
+        except Exception as hash_error:
+            print(
+                "⚠️ password hash check failed:",
+                repr(hash_error),
+            )
 
-            # После успешного входа автоматически
-            # сохраняем безопасный хеш.
-            if password_valid:
-                new_hash = generate_password_hash(
-                    password
-                )
-
-                (
-                    supabase
-                    .table("clinic_users")
-                    .update({
-                        "password_hash": new_hash,
-                        "last_login_at": (
-                            datetime
-                            .now(timezone.utc)
-                            .isoformat()
-                        ),
-                        "updated_at": (
-                            datetime
-                            .now(timezone.utc)
-                            .isoformat()
-                        ),
-                    })
-                    .eq("id", user_data.get("id"))
-                    .execute()
-                )
-
-                migrated_to_hash = True
+            password_valid = False
 
         if not password_valid:
             return jsonify({
@@ -3616,27 +3612,22 @@ def api_clinic_login():
                 "error": "Невірний логін або пароль",
             }), 401
 
-        # Если пользователь уже работал через hash,
-        # просто обновляем дату последнего входа.
-        if not migrated_to_hash:
-            (
-                supabase
-                .table("clinic_users")
-                .update({
-                    "last_login_at": (
-                        datetime
-                        .now(timezone.utc)
-                        .isoformat()
-                    ),
-                    "updated_at": (
-                        datetime
-                        .now(timezone.utc)
-                        .isoformat()
-                    ),
-                })
-                .eq("id", user_data.get("id"))
-                .execute()
-            )
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        (
+            supabase
+            .table("clinic_users")
+            .update({
+                "last_login_at": now_iso,
+                "updated_at": now_iso,
+            })
+            .eq("id", user_data.get("id"))
+            .execute()
+        )
 
         org_id = user_data.get("org_id")
 
@@ -3720,5 +3711,17 @@ def api_clinic_login():
             "ok": False,
             "error": "Помилка сервера авторизації",
         }), 500
+
+
 if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=int(
+            os.getenv(
+                "PORT",
+                "8080",
+            )
+        ),
+        debug=False,
+    )
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=False)
