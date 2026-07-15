@@ -5597,60 +5597,342 @@ function renderTeamBars(labels, values, color) {
 // PREMIUM STOCK MODULE
 // =====================================================
 
-function getStockCategoryIcon(category) {
-  const value = String(category || "")
-    .trim()
-    .toLowerCase();
+// =====================================================
+// STOCK CLASSIFICATION
+// =====================================================
 
-  if (value.includes("вакцин")) return "💉";
-  if (value.includes("препарат")) return "💊";
-  if (value.includes("інфуз") || value.includes("инфуз")) return "💧";
-  if (value.includes("хірур") || value.includes("хирург")) return "🩹";
-  if (value.includes("лаборатор")) return "🧪";
-  if (value.includes("витрат") || value.includes("расход")) return "🧤";
-  if (value.includes("корм")) return "🍽️";
-  if (value.includes("господар") || value.includes("хоз")) return "🧹";
+const STOCK_CATEGORY_GROUPS = [
+  {
+    id: "medicines",
+    name: "Лікарські засоби",
+    icon: "💊",
+    categories: [
+      "Аналгетики, седативні та спазмолітики",
+      "Антибактеріальні препарати",
+      "Гормональні препарати",
+      "НПЗП",
+      "Кардіологічні препарати",
+      "Протиблювотні препарати",
+      "Протиепілептичні препарати",
+      "Протимаститні препарати",
+      "Протипаразитарні препарати",
+      "Сироватки, імуноглобуліни та імуномодулятори",
+    ],
+  },
+
+  {
+    id: "local",
+    name: "Місцеві препарати",
+    icon: "🧴",
+    categories: [
+      "Дерматологічні препарати",
+      "Для очей та вух",
+      "Спреї, мазі, гелі та олії",
+    ],
+  },
+
+  {
+    id: "prevention",
+    name: "Профілактика та діагностика",
+    icon: "🧪",
+    categories: [
+      "Вакцини",
+      "Діагностикуми та експрес-тести",
+    ],
+  },
+
+  {
+    id: "materials",
+    name: "Матеріали та обладнання",
+    icon: "🩺",
+    categories: [
+      "Витратні матеріали",
+      "Інструменти та обладнання",
+    ],
+  },
+
+  {
+    id: "other",
+    name: "Інше",
+    icon: "📦",
+    categories: [
+      "Інше",
+    ],
+  },
+];
+
+
+const STOCK_FORMS = [
+  "Таблетки",
+  "Капсули",
+  "Суспензія",
+  "Розчин",
+  "Ампула",
+  "Флакон",
+  "Мазь",
+  "Гель",
+  "Спрей",
+  "Краплі",
+  "Порошок",
+  "Паста",
+  "Супозиторії",
+  "Корм",
+  "Матеріал",
+  "Обладнання",
+  "Інше",
+];
+
+
+const STOCK_ROUTES = [
+  "Перорально",
+  "Внутрішньовенно",
+  "Внутрішньом’язово",
+  "Підшкірно",
+  "Місцево",
+  "Очні",
+  "Вушні",
+  "Ректально",
+  "Інгаляційно",
+  "Не застосовується",
+  "Інше",
+];
+
+
+const STOCK_SPECIES = [
+  "Універсальний",
+  "Собаки",
+  "Коти",
+  "Собаки та коти",
+  "Птахи",
+  "Гризуни",
+  "Коні",
+  "ВРХ",
+  "ДРХ",
+  "Свині",
+  "Екзотичні тварини",
+  "Інше",
+];
+
+
+const STOCK_PRESCRIPTION_TYPES = [
+  "Безрецептурний",
+  "Рецептурний",
+  "Контрольований",
+  "Ветеринарне призначення",
+  "Не застосовується",
+];
+
+
+function getStockGroupByCategory(
+  category
+) {
+  const value =
+    String(category || "").trim();
+
+  return (
+    STOCK_CATEGORY_GROUPS.find(
+      (group) =>
+        group.categories.includes(
+          value
+        )
+    ) ||
+    STOCK_CATEGORY_GROUPS.find(
+      (group) =>
+        group.id === "other"
+    )
+  );
+}
+
+
+function getStockGroupLabel(
+  item
+) {
+  const group =
+    STOCK_CATEGORY_GROUPS.find(
+      (entry) =>
+        entry.id ===
+        String(
+          item?.group ||
+          item?.group_id ||
+          ""
+        )
+    ) ||
+    getStockGroupByCategory(
+      item?.category
+    );
+
+  return group?.name || "Інше";
+}
+
+function getStockCategoryIcon(
+  category
+) {
+  const value =
+    String(category || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    value.includes("аналгет") ||
+    value.includes("седатив") ||
+    value.includes("спазм")
+  ) {
+    return "💤";
+  }
+
+  if (
+    value.includes("антибак")
+  ) {
+    return "🦠";
+  }
+
+  if (
+    value.includes("вакцин")
+  ) {
+    return "💉";
+  }
+
+  if (
+    value.includes("витрат")
+  ) {
+    return "🧤";
+  }
+
+  if (
+    value.includes("гормон")
+  ) {
+    return "🧬";
+  }
+
+  if (
+    value.includes("нпзп")
+  ) {
+    return "🔥";
+  }
+
+  if (
+    value.includes("дермат")
+  ) {
+    return "🧴";
+  }
+
+  if (
+    value.includes("діагност") ||
+    value.includes("експрес")
+  ) {
+    return "🧪";
+  }
+
+  if (
+    value.includes("очей") ||
+    value.includes("вух")
+  ) {
+    return "👁️";
+  }
+
+  if (
+    value.includes("інструмент") ||
+    value.includes("обладнання")
+  ) {
+    return "🩺";
+  }
+
+  if (
+    value.includes("кардіолог")
+  ) {
+    return "❤️";
+  }
+
+  if (
+    value.includes("блювот")
+  ) {
+    return "🫧";
+  }
+
+  if (
+    value.includes("епілеп")
+  ) {
+    return "🧠";
+  }
+
+  if (
+    value.includes("мастит")
+  ) {
+    return "🐄";
+  }
+
+  if (
+    value.includes("паразит")
+  ) {
+    return "🪱";
+  }
+
+  if (
+    value.includes("сироват") ||
+    value.includes("імуноглоб") ||
+    value.includes("імуномод")
+  ) {
+    return "🛡️";
+  }
+
+  if (
+    value.includes("спреї") ||
+    value.includes("мазі") ||
+    value.includes("гелі") ||
+    value.includes("олії")
+  ) {
+    return "🧴";
+  }
 
   return "📦";
 }
 
 
-function getStockCategories(items) {
-  const categories = Array.from(
+function getStockCategories(
+  items
+) {
+  const usedCategories =
     new Set(
       (items || [])
         .map((item) =>
           String(
-            item.category ||
-            item.cat ||
+            item?.category ||
+            item?.cat ||
             "Інше"
           ).trim()
         )
         .filter(Boolean)
-    )
+    );
+
+  const ordered = [];
+
+  STOCK_CATEGORY_GROUPS.forEach(
+    (group) => {
+      group.categories.forEach(
+        (category) => {
+          if (
+            usedCategories.has(
+              category
+            )
+          ) {
+            ordered.push(category);
+          }
+        }
+      );
+    }
   );
 
-  const order = [
-    "Препарати",
-    "Вакцини",
-    "Інфузійні розчини",
-    "Витратні матеріали",
-    "Хірургічні матеріали",
-    "Лабораторія",
-    "Корм",
-    "Господарські товари",
-    "Інше",
-  ];
+  usedCategories.forEach(
+    (category) => {
+      if (
+        !ordered.includes(category)
+      ) {
+        ordered.push(category);
+      }
+    }
+  );
 
-  return categories.sort((a, b) => {
-    const indexA = order.indexOf(a);
-    const indexB = order.indexOf(b);
-
-    return (
-      (indexA === -1 ? 999 : indexA) -
-      (indexB === -1 ? 999 : indexB)
-    );
-  });
+  return ordered;
 }
 
 
@@ -5706,13 +5988,26 @@ function getStockStatus(item) {
 
 
 function normalizeStockItem(item) {
+  const category =
+    String(
+      item?.category ||
+      item?.cat ||
+      "Інше"
+    );
+
+  const group =
+    getStockGroupByCategory(
+      category
+    );
+
   return {
     ...item,
 
     id:
       String(
         item?.id ||
-        `stk_${Date.now().toString(36)}`
+        `stk_${Date.now()
+          .toString(36)}`
       ),
 
     name:
@@ -5721,11 +6016,42 @@ function normalizeStockItem(item) {
         "Позиція"
       ),
 
-    category:
+    group:
       String(
-        item?.category ||
-        item?.cat ||
+        item?.group ||
+        item?.group_id ||
+        group?.id ||
+        "other"
+      ),
+
+    category,
+
+    form:
+      String(
+        item?.form ||
+        item?.dosage_form ||
         "Інше"
+      ),
+
+    route:
+      String(
+        item?.route ||
+        item?.administration_route ||
+        "Не застосовується"
+      ),
+
+    species:
+      String(
+        item?.species ||
+        item?.target_species ||
+        "Універсальний"
+      ),
+
+    prescription_type:
+      String(
+        item?.prescription_type ||
+        item?.prescription ||
+        "Безрецептурний"
       ),
 
     unit:
@@ -5860,6 +6186,26 @@ function renderStockTab() {
     String(
       state.stockCategory || "all"
     );
+    const currentGroup =
+  String(
+    state.stockGroup || "all"
+  );
+
+const currentForm =
+  String(
+    state.stockForm || "all"
+  );
+
+const currentSpecies =
+  String(
+    state.stockSpecies || "all"
+  );
+
+const currentPrescription =
+  String(
+    state.stockPrescription ||
+    "all"
+  );
 
   page.innerHTML = `
     <div class="stockPremiumPage">
@@ -6035,6 +6381,71 @@ function renderStockTab() {
         </div>
       </section>
 
+            <section class="stockPremiumGroupFilters">
+        <button
+          type="button"
+          class="${
+            currentGroup === "all"
+              ? "active"
+              : ""
+          }"
+          data-stock-group="all"
+        >
+          <span>▦</span>
+
+          Усі групи
+
+          <b>
+            ${items.length}
+          </b>
+        </button>
+
+        ${STOCK_CATEGORY_GROUPS
+          .filter((group) => {
+            return items.some(
+              (item) =>
+                String(item.group) ===
+                String(group.id)
+            );
+          })
+          .map((group) => {
+            const count =
+              items.filter(
+                (item) =>
+                  String(item.group) ===
+                  String(group.id)
+              ).length;
+
+            return `
+              <button
+                type="button"
+                class="${
+                  currentGroup ===
+                  group.id
+                    ? "active"
+                    : ""
+                }"
+                data-stock-group="${escapeHtml(
+                  group.id
+                )}"
+              >
+                <span>
+                  ${group.icon}
+                </span>
+
+                ${escapeHtml(
+                  group.name
+                )}
+
+                <b>
+                  ${count}
+                </b>
+              </button>
+            `;
+          })
+          .join("")}
+      </section>
+
       <section class="stockPremiumCategories">
         <button
           type="button"
@@ -6046,18 +6457,40 @@ function renderStockTab() {
           data-stock-category="all"
         >
           <span>▦</span>
+
           Усі категорії
-          <b>${items.length}</b>
+
+          <b>
+            ${items.length}
+          </b>
         </button>
 
         ${categories
+          .filter((category) => {
+            if (
+              currentGroup === "all"
+            ) {
+              return true;
+            }
+
+            const group =
+              getStockGroupByCategory(
+                category
+              );
+
+            return (
+              String(group?.id) ===
+              String(currentGroup)
+            );
+          })
           .map((category) => {
             const count =
               items.filter(
                 (item) =>
                   String(
                     item.category
-                  ) === category
+                  ) ===
+                  String(category)
               ).length;
 
             return `
@@ -6081,11 +6514,110 @@ function renderStockTab() {
 
                 ${escapeHtml(category)}
 
-                <b>${count}</b>
+                <b>
+                  ${count}
+                </b>
               </button>
             `;
           })
           .join("")}
+      </section>
+
+      <section class="stockAdvancedFilters">
+        <label>
+          <span>
+            Форма
+          </span>
+
+          <select
+            id="stockFilterForm"
+          >
+            <option value="all">
+              Усі форми
+            </option>
+
+            ${STOCK_FORMS
+              .map((form) => `
+                <option
+                  value="${escapeHtml(
+                    form
+                  )}"
+                  ${
+                    currentForm === form
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  ${escapeHtml(form)}
+                </option>
+              `)
+              .join("")}
+          </select>
+        </label>
+
+        <label>
+          <span>
+            Для кого
+          </span>
+
+          <select
+            id="stockFilterSpecies"
+          >
+            <option value="all">
+              Усі тварини
+            </option>
+
+            ${STOCK_SPECIES
+              .map((species) => `
+                <option
+                  value="${escapeHtml(
+                    species
+                  )}"
+                  ${
+                    currentSpecies ===
+                    species
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  ${escapeHtml(species)}
+                </option>
+              `)
+              .join("")}
+          </select>
+        </label>
+
+        <label>
+          <span>
+            Відпуск
+          </span>
+
+          <select
+            id="stockFilterPrescription"
+          >
+            <option value="all">
+              Усі типи
+            </option>
+
+            ${STOCK_PRESCRIPTION_TYPES
+              .map((type) => `
+                <option
+                  value="${escapeHtml(
+                    type
+                  )}"
+                  ${
+                    currentPrescription ===
+                    type
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  ${escapeHtml(type)}
+                </option>
+              `)
+              .join("")}
+          </select>
+        </label>
       </section>
 
       <section
@@ -6119,6 +6651,26 @@ function renderStockTab() {
       String(
         state.stockCategory || "all"
       );
+      const groupFilter =
+  String(
+    state.stockGroup || "all"
+  );
+
+const formFilter =
+  String(
+    state.stockForm || "all"
+  );
+
+const speciesFilter =
+  String(
+    state.stockSpecies || "all"
+  );
+
+const prescriptionFilter =
+  String(
+    state.stockPrescription ||
+    "all"
+  );
 
     const filtered =
       items.filter((item) => {
@@ -6128,10 +6680,15 @@ function renderStockTab() {
         const matchesQuery =
           !query ||
           [
-            item.name,
-            item.category,
-            item.unit,
-          ]
+  item.name,
+  item.category,
+  getStockGroupLabel(item),
+  item.form,
+  item.route,
+  item.species,
+  item.prescription_type,
+  item.unit,
+]
             .join(" ")
             .toLowerCase()
             .includes(query);
@@ -6140,6 +6697,29 @@ function renderStockTab() {
           categoryFilter === "all" ||
           String(item.category) ===
             categoryFilter;
+            const matchesGroup =
+  groupFilter === "all" ||
+  String(item.group) ===
+    String(groupFilter);
+
+const matchesForm =
+  formFilter === "all" ||
+  String(item.form) ===
+    String(formFilter);
+
+const matchesSpecies =
+  speciesFilter === "all" ||
+  String(item.species) ===
+    String(speciesFilter);
+
+const matchesPrescription =
+  prescriptionFilter === "all" ||
+  String(
+    item.prescription_type
+  ) ===
+    String(
+      prescriptionFilter
+    );
 
         const matchesFilter =
           filter === "all" ||
@@ -6160,10 +6740,14 @@ function renderStockTab() {
           );
 
         return (
-          matchesQuery &&
-          matchesCategory &&
-          matchesFilter
-        );
+  matchesQuery &&
+  matchesGroup &&
+  matchesCategory &&
+  matchesForm &&
+  matchesSpecies &&
+  matchesPrescription &&
+  matchesFilter
+);
       });
 
     if (!filtered.length) {
@@ -6310,169 +6894,217 @@ function renderStockTab() {
                           </label>
                         </div>
 
-                        <div class="stockPremiumCardBody">
-                          <div class="stockPremiumCardCategory">
-                            ${escapeHtml(
-                              item.category
-                            )}
-                          </div>
+                      
+                          <div class="stockPremiumCardGroup">
+  <div class="stockPremiumCardGroup">
+  ${escapeHtml(
+    getStockGroupLabel(item)
+  )}
+</div>
 
-                          <h3>
-                            ${escapeHtml(
-                              item.name
-                            )}
-                          </h3>
+<div class="stockPremiumCardCategory">
+  ${escapeHtml(
+    item.category
+  )}
+</div>
 
-                          <div class="stockPremiumPrices">
-                            <div>
-                              <span>
-                                Продаж
-                              </span>
+<h3>
+  ${escapeHtml(
+    item.name
+  )}
+</h3>
 
-                              <strong>
-                                ${salePrice.toLocaleString(
-                                  "uk-UA"
-                                )}
-                                ₴
-                              </strong>
-                            </div>
+<div class="stockPremiumProperties">
+  <span>
+    <b>Форма</b>
 
-                            <div>
-                              <span>
-                                Закупівля
-                              </span>
+    ${escapeHtml(
+      item.form ||
+      "Не вказано"
+    )}
+  </span>
 
-                              <strong>
-                                ${cost.toLocaleString(
-                                  "uk-UA"
-                                )}
-                                ₴
-                              </strong>
-                            </div>
-                          </div>
+  <span>
+    <b>Застосування</b>
 
-                          <div class="stockPremiumQuantity">
-                            <div>
-                              <span>
-                                Залишок
-                              </span>
+    ${escapeHtml(
+      item.route ||
+      "Не вказано"
+    )}
+  </span>
 
-                              <strong>
-                                ${quantity.toLocaleString(
-                                  "uk-UA"
-                                )}
-                                <small>
-                                  ${escapeHtml(
-                                    item.unit
-                                  )}
-                                </small>
-                              </strong>
-                            </div>
+  <span>
+    <b>Для кого</b>
 
-                            <div>
-                              <span>
-                                Мінімум
-                              </span>
+    ${escapeHtml(
+      item.species ||
+      "Універсальний"
+    )}
+  </span>
 
-                              <strong>
-                                ${minimum.toLocaleString(
-                                  "uk-UA"
-                                )}
-                                <small>
-                                  ${escapeHtml(
-                                    item.unit
-                                  )}
-                                </small>
-                              </strong>
-                            </div>
-                          </div>
+  <span>
+    <b>Відпуск</b>
 
-                          <div
-                            class="
-                              stockPremiumStatus
-                              ${status.key}
-                            "
-                          >
-                            <i></i>
+    ${escapeHtml(
+      item.prescription_type ||
+      "Не вказано"
+    )}
+  </span>
+</div>
 
-                            <span>
-                              ${escapeHtml(
-                                status.label
-                              )}
-                            </span>
-                          </div>
+<div class="stockPremiumPrices">
+  <div>
+    <span>
+      Продаж
+    </span>
 
-                          ${
-                            cost > 0
-                              ? `
-                                <div class="stockPremiumCardValue">
-                                  Вартість залишку:
-                                  <strong>
-                                    ${stockValue.toLocaleString(
-                                      "uk-UA"
-                                    )}
-                                    ₴
-                                  </strong>
-                                </div>
-                              `
-                              : ""
-                          }
-                        </div>
+    <strong>
+      ${salePrice.toLocaleString(
+        "uk-UA"
+      )}
+      ₴
+    </strong>
+  </div>
 
-                        <div class="stockPremiumCardActions">
-                          <button
-                            type="button"
-                            class="stockActionButton stockActionWriteoff"
-                            data-stock-adjust="${escapeHtml(
-                              item.id
-                            )}"
-                            data-stock-adjust-mode="writeoff"
-                          >
-                            − Списати
-                          </button>
+  <div>
+    <span>
+      Закупівля
+    </span>
 
-                          <button
-                            type="button"
-                            class="stockActionButton stockActionIncome"
-                            data-stock-adjust="${escapeHtml(
-                              item.id
-                            )}"
-                            data-stock-adjust-mode="income"
-                          >
-                            ＋ Поповнити
-                          </button>
-                        </div>
+    <strong>
+      ${cost.toLocaleString(
+        "uk-UA"
+      )}
+      ₴
+    </strong>
+  </div>
+</div>
 
-                        <div class="stockPremiumCardFooter">
-                          <button
-                            type="button"
-                            data-stock-edit="${escapeHtml(
-                              item.id
-                            )}"
-                          >
-                            ✎ Редагувати
-                          </button>
+<div class="stockPremiumQuantity">
+  <div>
+    <span>
+      Залишок
+    </span>
 
-                          <button
-                            type="button"
-                            class="danger"
-                            data-stock-delete="${escapeHtml(
-                              item.id
-                            )}"
-                          >
-                            Видалити
-                          </button>
-                        </div>
-                      </article>
-                    `;
-                  })
-                  .join("")}
-              </div>
-            </section>
-          `;
-        })
-        .join("");
-  };
+    <strong>
+      ${quantity.toLocaleString(
+        "uk-UA"
+      )}
+
+      <small>
+        ${escapeHtml(
+          item.unit
+        )}
+      </small>
+    </strong>
+  </div>
+
+  <div>
+    <span>
+      Мінімум
+    </span>
+
+    <strong>
+      ${minimum.toLocaleString(
+        "uk-UA"
+      )}
+
+      <small>
+        ${escapeHtml(
+          item.unit
+        )}
+      </small>
+    </strong>
+  </div>
+</div>
+
+<div
+  class="
+    stockPremiumStatus
+    ${status.key}
+  "
+>
+  <i></i>
+
+  <span>
+    ${escapeHtml(
+      status.label
+    )}
+  </span>
+</div>
+
+${
+  cost > 0
+    ? `
+      <div class="stockPremiumCardValue">
+        Вартість залишку:
+
+        <strong>
+          ${stockValue.toLocaleString(
+            "uk-UA"
+          )}
+          ₴
+        </strong>
+      </div>
+    `
+    : ""
+}
+</div>
+
+<div class="stockPremiumCardActions">
+  <button
+    type="button"
+    class="stockActionButton stockActionWriteoff"
+    data-stock-adjust="${escapeHtml(
+      item.id
+    )}"
+    data-stock-adjust-mode="writeoff"
+  >
+    − Списати
+  </button>
+
+  <button
+    type="button"
+    class="stockActionButton stockActionIncome"
+    data-stock-adjust="${escapeHtml(
+      item.id
+    )}"
+    data-stock-adjust-mode="income"
+  >
+    ＋ Поповнити
+  </button>
+</div>
+
+<div class="stockPremiumCardFooter">
+  <button
+    type="button"
+    data-stock-edit="${escapeHtml(
+      item.id
+    )}"
+  >
+    ✎ Редагувати
+  </button>
+
+  <button
+    type="button"
+    class="danger"
+    data-stock-delete="${escapeHtml(
+      item.id
+    )}"
+  >
+    Видалити
+  </button>
+</div>
+</article>
+`;
+})
+.join("")}
+</div>
+</section>
+`;
+})
+.join("");
+};
 
   renderStockCards();
 
@@ -6684,6 +7316,80 @@ function renderStockTab() {
       renderStockTab();
     }
   );
+    page
+    .querySelectorAll(
+      "[data-stock-group]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          state.stockGroup =
+            button.dataset
+              .stockGroup ||
+            "all";
+
+          state.stockCategory =
+            "all";
+
+          renderStockTab();
+        }
+      );
+    });
+
+
+  page
+    .querySelector(
+      "#stockFilterForm"
+    )
+    ?.addEventListener(
+      "change",
+      (event) => {
+        state.stockForm =
+          String(
+            event.target.value ||
+            "all"
+          );
+
+        renderStockCards();
+      }
+    );
+
+
+  page
+    .querySelector(
+      "#stockFilterSpecies"
+    )
+    ?.addEventListener(
+      "change",
+      (event) => {
+        state.stockSpecies =
+          String(
+            event.target.value ||
+            "all"
+          );
+
+        renderStockCards();
+      }
+    );
+
+
+  page
+    .querySelector(
+      "#stockFilterPrescription"
+    )
+    ?.addEventListener(
+      "change",
+      (event) => {
+        state.stockPrescription =
+          String(
+            event.target.value ||
+            "all"
+          );
+
+        renderStockCards();
+      }
+    );
 }
 
 
@@ -6708,17 +7414,22 @@ function openStockEditorModal(
       stockItem || {}
     );
 
-  const categories = [
-    "Препарати",
-    "Вакцини",
-    "Інфузійні розчини",
-    "Витратні матеріали",
-    "Хірургічні матеріали",
-    "Лабораторія",
-    "Корм",
-    "Господарські товари",
-    "Інше",
-  ];
+  const groups =
+  STOCK_CATEGORY_GROUPS;
+
+const currentGroup =
+  groups.find(
+    (group) =>
+      String(group.id) ===
+      String(item.group)
+  ) ||
+  getStockGroupByCategory(
+    item.category
+  ) ||
+  groups[0];
+
+const categories =
+  currentGroup.categories;
 
   const units = [
     "шт",
@@ -6810,63 +7521,199 @@ function openStockEditorModal(
         </label>
 
         <div class="stockEditorRow">
-          <label class="stockEditorField">
-            <span>
-              Категорія
-            </span>
+  <label class="stockEditorField">
+    <span>
+      Група
+    </span>
 
-            <select id="stockEditorCategory">
-              ${categories
-                .map(
-                  (category) => `
-                    <option
-                      value="${escapeHtml(
-                        category
-                      )}"
-                      ${
-                        item.category ===
-                        category
-                          ? "selected"
-                          : ""
-                      }
-                    >
-                      ${escapeHtml(
-                        category
-                      )}
-                    </option>
-                  `
-                )
-                .join("")}
-            </select>
-          </label>
+    <select id="stockEditorGroup">
+      ${groups
+        .map((group) => `
+          <option
+            value="${escapeHtml(
+              group.id
+            )}"
+            ${
+              String(
+                currentGroup.id
+              ) ===
+              String(group.id)
+                ? "selected"
+                : ""
+            }
+          >
+            ${group.icon}
+            ${escapeHtml(
+              group.name
+            )}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
 
-          <label class="stockEditorField">
-            <span>
-              Одиниця
-            </span>
+  <label class="stockEditorField">
+    <span>
+      Категорія
+    </span>
 
-            <select id="stockEditorUnit">
-              ${units
-                .map(
-                  (unit) => `
-                    <option
-                      value="${escapeHtml(
-                        unit
-                      )}"
-                      ${
-                        item.unit === unit
-                          ? "selected"
-                          : ""
-                      }
-                    >
-                      ${escapeHtml(unit)}
-                    </option>
-                  `
-                )
-                .join("")}
-            </select>
-          </label>
-        </div>
+    <select id="stockEditorCategory">
+      ${categories
+        .map((category) => `
+          <option
+            value="${escapeHtml(
+              category
+            )}"
+            ${
+              String(
+                item.category
+              ) ===
+              String(category)
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(
+              category
+            )}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
+</div>
+
+<div class="stockEditorRow">
+  <label class="stockEditorField">
+    <span>
+      Форма випуску
+    </span>
+
+    <select id="stockEditorFormType">
+      ${STOCK_FORMS
+        .map((form) => `
+          <option
+            value="${escapeHtml(
+              form
+            )}"
+            ${
+              item.form === form
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(form)}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
+
+  <label class="stockEditorField">
+    <span>
+      Спосіб застосування
+    </span>
+
+    <select id="stockEditorRoute">
+      ${STOCK_ROUTES
+        .map((route) => `
+          <option
+            value="${escapeHtml(
+              route
+            )}"
+            ${
+              item.route === route
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(route)}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
+</div>
+
+<div class="stockEditorRow">
+  <label class="stockEditorField">
+    <span>
+      Для яких тварин
+    </span>
+
+    <select id="stockEditorSpecies">
+      ${STOCK_SPECIES
+        .map((species) => `
+          <option
+            value="${escapeHtml(
+              species
+            )}"
+            ${
+              item.species === species
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(species)}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
+
+  <label class="stockEditorField">
+    <span>
+      Режим відпуску
+    </span>
+
+    <select id="stockEditorPrescription">
+      ${STOCK_PRESCRIPTION_TYPES
+        .map((type) => `
+          <option
+            value="${escapeHtml(
+              type
+            )}"
+            ${
+              item.prescription_type ===
+              type
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(type)}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
+</div>
+
+<div class="stockEditorRow">
+  <label class="stockEditorField">
+    <span>
+      Одиниця обліку
+    </span>
+
+    <select id="stockEditorUnit">
+      ${units
+        .map((unit) => `
+          <option
+            value="${escapeHtml(
+              unit
+            )}"
+            ${
+              item.unit === unit
+                ? "selected"
+                : ""
+            }
+          >
+            ${escapeHtml(unit)}
+          </option>
+        `)
+        .join("")}
+    </select>
+  </label>
+</div>
 
         <div class="stockEditorRow">
           <label class="stockEditorField">
@@ -7067,6 +7914,10 @@ function openStockEditorModal(
     modal.querySelector(
       "#stockEditorCategory"
     );
+    const groupInput =
+  modal.querySelector(
+    "#stockEditorGroup"
+  );
 
   const unitInput =
     modal.querySelector(
@@ -7077,7 +7928,56 @@ function openStockEditorModal(
     modal.querySelector(
       "#stockEditorQuantity"
     );
+const renderCategoryOptions = () => {
+  const selectedGroup =
+    STOCK_CATEGORY_GROUPS.find(
+      (group) =>
+        String(group.id) ===
+        String(
+          groupInput?.value
+        )
+    ) ||
+    STOCK_CATEGORY_GROUPS[
+      STOCK_CATEGORY_GROUPS.length - 1
+    ];
 
+  if (!categoryInput) return;
+
+  const previousCategory =
+    String(
+      categoryInput.value || ""
+    );
+
+  categoryInput.innerHTML =
+    selectedGroup.categories
+      .map((category) => `
+        <option
+          value="${escapeHtml(
+            category
+          )}"
+        >
+          ${escapeHtml(
+            category
+          )}
+        </option>
+      `)
+      .join("");
+
+  if (
+    selectedGroup.categories.includes(
+      previousCategory
+    )
+  ) {
+    categoryInput.value =
+      previousCategory;
+  } else {
+    categoryInput.value =
+      selectedGroup.categories[0] ||
+      "Інше";
+  }
+
+  updatePreview();
+};
   const updatePreview = () => {
     const name =
       String(
@@ -7132,6 +8032,10 @@ function openStockEditorModal(
         `${category} · ${quantity} ${unit}`;
     }
   };
+  groupInput?.addEventListener(
+  "change",
+  renderCategoryOptions
+);
 
   [
     nameInput,
@@ -7186,11 +8090,48 @@ function openStockEditorModal(
 
           name,
 
+          group:
+  String(
+    groupInput?.value ||
+    "other"
+  ),
+
           category:
             String(
               categoryInput?.value ||
               "Інше"
             ),
+            form:
+  String(
+    modal.querySelector(
+      "#stockEditorFormType"
+    )?.value ||
+    "Інше"
+  ),
+
+route:
+  String(
+    modal.querySelector(
+      "#stockEditorRoute"
+    )?.value ||
+    "Не застосовується"
+  ),
+
+species:
+  String(
+    modal.querySelector(
+      "#stockEditorSpecies"
+    )?.value ||
+    "Універсальний"
+  ),
+
+prescription_type:
+  String(
+    modal.querySelector(
+      "#stockEditorPrescription"
+    )?.value ||
+    "Безрецептурний"
+  ),
 
           unit:
             String(
