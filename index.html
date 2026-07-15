@@ -261,14 +261,36 @@
               >
             </label>
 
-            <label class="visitPickerSelect">
-              <span>Послуга</span>
+            <div class="visitPickerSelect">
+  <span>Послуга</span>
 
-              <select
-                class="visitControl"
-                id="visitSvcSelect"
-              ></select>
-            </label>
+  <button
+    class="visitServicePickerButton"
+    id="visitServicePickerButton"
+    type="button"
+  >
+    <span class="visitServicePickerIcon">💼</span>
+
+    <span class="visitServicePickerText">
+      <strong id="visitServicePickerName">
+        Оберіть послугу
+      </strong>
+
+      <small id="visitServicePickerMeta">
+        Категорія та ціна
+      </small>
+    </span>
+
+    <span class="visitServicePickerArrow">
+      ▾
+    </span>
+  </button>
+
+  <select
+    id="visitSvcSelect"
+    hidden
+  ></select>
+</div>
 
             <label class="visitPickerQty">
               <span>К-сть</span>

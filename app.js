@@ -16110,17 +16110,512 @@ if (delBtn) {
 }
 
 function refreshVisitServiceSelect() {
-  const select = document.getElementById("visitSvcSelect");
+  const select =
+    document.getElementById(
+      "visitSvcSelect"
+    );
+
   if (!select) return;
 
-  const q = String(state.visitSvcQuery || "").trim().toLowerCase();
-  const options = loadServices()
-    .filter((s) => s.active !== false)
-    .filter((s) => !q || String(s.name || "").toLowerCase().includes(q))
-    .map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(String(Number(s.price) || 0))} грн</option>`)
-    .join("");
+  const services =
+    loadServices()
+      .filter(
+        (service) =>
+          service.active !== false
+      );
 
-  select.innerHTML = options || `<option value="">Немає послуг</option>`;
+  const selectedId =
+    String(
+      select.value || ""
+    );
+
+  select.innerHTML = `
+    <option value="">
+      Оберіть послугу
+    </option>
+
+    ${services
+      .map(
+        (service) => `
+          <option
+            value="${escapeHtml(
+              String(service.id)
+            )}"
+          >
+            ${escapeHtml(
+              service.name ||
+              "Послуга"
+            )}
+          </option>
+        `
+      )
+      .join("")}
+  `;
+
+  if (
+    selectedId &&
+    services.some(
+      (service) =>
+        String(service.id) ===
+        selectedId
+    )
+  ) {
+    select.value = selectedId;
+  }
+
+  updateVisitServicePickerPreview();
+}
+function updateVisitServicePickerPreview() {
+  const select =
+    document.getElementById(
+      "visitSvcSelect"
+    );
+
+  const nameElement =
+    document.getElementById(
+      "visitServicePickerName"
+    );
+
+  const metaElement =
+    document.getElementById(
+      "visitServicePickerMeta"
+    );
+
+  const iconElement =
+    document.querySelector(
+      "#visitServicePickerButton .visitServicePickerIcon"
+    );
+
+  if (
+    !select ||
+    !nameElement ||
+    !metaElement
+  ) {
+    return;
+  }
+
+  const service =
+    loadServices().find(
+      (item) =>
+        String(item.id) ===
+        String(select.value)
+    );
+
+  if (!service) {
+    nameElement.textContent =
+      "Оберіть послугу";
+
+    metaElement.textContent =
+      "Категорія та ціна";
+
+    if (iconElement) {
+      iconElement.textContent = "💼";
+    }
+
+    return;
+  }
+
+  const category =
+    String(
+      service.cat ||
+      "Інше"
+    );
+
+  nameElement.textContent =
+    service.name ||
+    "Послуга";
+
+  metaElement.textContent =
+    `${category} · ${Number(
+      service.price || 0
+    ).toLocaleString(
+      "uk-UA"
+    )} грн`;
+
+  if (iconElement) {
+    iconElement.textContent =
+      typeof getServiceCategoryIcon ===
+      "function"
+        ? getServiceCategoryIcon(
+            category
+          )
+        : "💼";
+  }
+}
+
+
+function openVisitServicePicker() {
+  document
+    .getElementById(
+      "visitServicePickerModal"
+    )
+    ?.remove();
+
+  const services =
+    loadServices()
+      .filter(
+        (service) =>
+          service.active !== false
+      );
+
+  const modal =
+    document.createElement("div");
+
+  modal.id =
+    "visitServicePickerModal";
+
+  modal.className =
+    "visitServicePickerOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="visitServicePickerBackdrop"
+      data-close-visit-service-picker
+    ></div>
+
+    <section
+      class="visitServicePickerModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      <header class="visitServicePickerHeader">
+        <div>
+          <div class="visitServicePickerEyebrow">
+            КАТАЛОГ ПОСЛУГ
+          </div>
+
+          <h2>
+            Оберіть послугу
+          </h2>
+
+          <p>
+            Знайдіть потрібну процедуру
+            та додайте її до візиту.
+          </p>
+        </div>
+
+        <button
+          class="visitServicePickerClose"
+          type="button"
+          data-close-visit-service-picker
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="visitServicePickerSearch">
+        <span>⌕</span>
+
+        <input
+          id="visitServicePickerSearch"
+          type="search"
+          placeholder="Назва або категорія..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div
+        class="visitServicePickerCategories"
+        id="visitServicePickerCategories"
+      ></div>
+
+      <div
+        class="visitServicePickerGrid"
+        id="visitServicePickerGrid"
+      ></div>
+    </section>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  let selectedCategory = "all";
+  let searchQuery = "";
+
+  const categories =
+    typeof getServiceCategories ===
+    "function"
+      ? getServiceCategories(
+          services
+        )
+      : Array.from(
+          new Set(
+            services.map(
+              (service) =>
+                String(
+                  service.cat ||
+                  "Інше"
+                )
+            )
+          )
+        );
+
+  const categoriesElement =
+    modal.querySelector(
+      "#visitServicePickerCategories"
+    );
+
+  const grid =
+    modal.querySelector(
+      "#visitServicePickerGrid"
+    );
+
+  const renderCategories = () => {
+    if (!categoriesElement) return;
+
+    categoriesElement.innerHTML = `
+      <button
+        type="button"
+        class="${
+          selectedCategory === "all"
+            ? "active"
+            : ""
+        }"
+        data-visit-service-category="all"
+      >
+        Усі
+        <b>${services.length}</b>
+      </button>
+
+      ${categories
+        .map((category) => {
+          const count =
+            services.filter(
+              (service) =>
+                String(
+                  service.cat ||
+                  "Інше"
+                ) ===
+                category
+            ).length;
+
+          return `
+            <button
+              type="button"
+              class="${
+                selectedCategory ===
+                category
+                  ? "active"
+                  : ""
+              }"
+              data-visit-service-category="${escapeHtml(
+                category
+              )}"
+            >
+              <span>
+                ${
+                  typeof getServiceCategoryIcon ===
+                  "function"
+                    ? getServiceCategoryIcon(
+                        category
+                      )
+                    : "✨"
+                }
+              </span>
+
+              ${escapeHtml(category)}
+
+              <b>${count}</b>
+            </button>
+          `;
+        })
+        .join("")}
+    `;
+  };
+
+  const renderServices = () => {
+    if (!grid) return;
+
+    const filtered =
+      services.filter(
+        (service) => {
+          const category =
+            String(
+              service.cat ||
+              "Інше"
+            );
+
+          const matchesCategory =
+            selectedCategory === "all" ||
+            category ===
+              selectedCategory;
+
+          const matchesSearch =
+            !searchQuery ||
+            [
+              service.name,
+              category,
+              service.price,
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(
+                searchQuery
+              );
+
+          return (
+            matchesCategory &&
+            matchesSearch
+          );
+        }
+      );
+
+    if (!filtered.length) {
+      grid.innerHTML = `
+        <div class="visitServicePickerEmpty">
+          <div>🔍</div>
+
+          <strong>
+            Послуг не знайдено
+          </strong>
+
+          <span>
+            Змініть пошук або категорію.
+          </span>
+        </div>
+      `;
+
+      return;
+    }
+
+    grid.innerHTML =
+      filtered
+        .map((service) => {
+          const category =
+            String(
+              service.cat ||
+              "Інше"
+            );
+
+          const icon =
+            typeof getServiceCategoryIcon ===
+            "function"
+              ? getServiceCategoryIcon(
+                  category
+                )
+              : "✨";
+
+          return `
+            <button
+              class="visitServicePickerCard"
+              type="button"
+              data-select-visit-service="${escapeHtml(
+                String(service.id)
+              )}"
+            >
+              <div class="visitServicePickerCardIcon">
+                ${icon}
+              </div>
+
+              <div class="visitServicePickerCardMain">
+                <span>
+                  ${escapeHtml(category)}
+                </span>
+
+                <strong>
+                  ${escapeHtml(
+                    service.name ||
+                    "Послуга"
+                  )}
+                </strong>
+              </div>
+
+              <div class="visitServicePickerCardPrice">
+                <strong>
+                  ${Number(
+                    service.price || 0
+                  ).toLocaleString(
+                    "uk-UA"
+                  )}
+                </strong>
+
+                <span>грн</span>
+              </div>
+            </button>
+          `;
+        })
+        .join("");
+  };
+
+  const closeModal = () => {
+    modal.remove();
+  };
+
+  renderCategories();
+  renderServices();
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-visit-service-picker]"
+        )
+      ) {
+        closeModal();
+        return;
+      }
+
+      const categoryButton =
+        event.target.closest(
+          "[data-visit-service-category]"
+        );
+
+      if (categoryButton) {
+        selectedCategory =
+          categoryButton.dataset
+            .visitServiceCategory ||
+          "all";
+
+        renderCategories();
+        renderServices();
+        return;
+      }
+
+      const serviceButton =
+        event.target.closest(
+          "[data-select-visit-service]"
+        );
+
+      if (serviceButton) {
+        const serviceId =
+          serviceButton.dataset
+            .selectVisitService;
+
+        const select =
+          document.getElementById(
+            "visitSvcSelect"
+          );
+
+        if (select) {
+          select.value =
+            serviceId || "";
+        }
+
+        updateVisitServicePickerPreview();
+        closeModal();
+      }
+    }
+  );
+
+  modal
+    .querySelector(
+      "#visitServicePickerSearch"
+    )
+    ?.addEventListener(
+      "input",
+      (event) => {
+        searchQuery =
+          String(
+            event.target.value || ""
+          )
+            .trim()
+            .toLowerCase();
+
+        renderServices();
+      }
+    );
 }
 
 function refreshVisitStockSelect() {
@@ -16323,7 +16818,17 @@ setTimeout(() => {
 
 return;
 }
+if (
+  e.target.closest(
+    "#visitServicePickerButton"
+  )
+) {
+  e.preventDefault();
+  e.stopPropagation();
 
+  openVisitServicePicker();
+  return;
+}
 // Добавление услуги в чек
 if (e.target.closest("#visitSvcAdd")) {
   e.preventDefault();
