@@ -6191,6 +6191,7 @@ async function openHospitalTasksModal(
 function renderHospitalPatientCard(
   hospitalization
 ) {
+    const item = hospitalization;
   const statusLabels = {
     stable:
       "Стабільний",
