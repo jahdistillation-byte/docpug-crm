@@ -265,22 +265,15 @@ const LS = {
 };
 
 function getOrgHeaders() {
-  const orgId = sessionStorage.getItem("pug_active_org_id");
-  const username = sessionStorage.getItem("pug_active_username");
-
-  const headers = {};
-
-  if (orgId) {
-    headers["X-Org-ID"] = orgId;
-  }
-
-  if (username) {
-    headers["X-Clinic-Username"] = username;
-  }
-
-  return headers;
+  /*
+   * Организация и пользователь теперь определяются
+   * сервером через защищённую cookie docpug_session.
+   *
+   * Старые заголовки X-Org-ID и
+   * X-Clinic-Username больше не отправляем.
+   */
+  return {};
 }
-
 
 function escapeHtml(str) {
   return String(str ?? "")
@@ -25027,6 +25020,8 @@ function bindPersonalSettingsUI(page) {
       });
     });
 
+
+
   const languageSelect =
     page.querySelector("#systemLanguageSelect");
 
@@ -25045,6 +25040,31 @@ function bindPersonalSettingsUI(page) {
         );
       }
     );
+    function initSettingsUI() {
+  const page = document.querySelector(
+    '.page[data-page="settings"]'
+  );
+
+  if (!page) return;
+
+  if (
+    page.dataset.boundSettings === "1"
+  ) {
+    return;
+  }
+
+  page.dataset.boundSettings = "1";
+
+  // обработчик темы
+  // обработчик языка
+
+  const logoutButton =
+    document.getElementById(
+      "btn-logout"
+    );
+
+  // обработчик выхода
+}
   }
 
   page
@@ -25916,10 +25936,20 @@ async function init() {
 
       try {
         const res = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password })
-        });
+  method: "POST",
+
+  credentials: "include",
+
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+
+  body: JSON.stringify({
+    username,
+    password,
+  }),
+});
         
         const json = await res.get_json ? await res.get_json() : await res.json();
 
@@ -25933,35 +25963,40 @@ async function init() {
         }
 
         // Сохраняем данные активного пользователя и клиники
-sessionStorage.setItem(
-  "pug_active_org_id",
-  String(json.data.org_id || "")
-);
+state.me = {
+  user_id:
+    json.data.user_id || null,
 
-sessionStorage.setItem(
-  "pug_active_username",
-  String(json.data.username || username || "")
-);
+  org_id:
+    json.data.org_id || null,
 
-sessionStorage.setItem(
-  "pug_active_display_name",
-  String(
+  staff_id:
+    json.data.staff_id || null,
+
+  username:
+    json.data.username ||
+    username ||
+    "",
+
+  display_name:
     json.data.display_name ||
     json.data.username ||
     username ||
-    "Користувач"
-  )
-);
+    "Користувач",
 
-sessionStorage.setItem(
-  "pug_active_role",
-  String(json.data.role || "staff")
-);
+  role:
+    json.data.role ||
+    "staff",
 
-sessionStorage.setItem(
-  "pug_active_clinic_name",
-  String(json.data.clinic_name || "Клініка")
-);
+  clinic_name:
+    json.data.clinic_name ||
+    "Клініка",
+
+  must_change_password:
+    Boolean(
+      json.data.must_change_password
+    ),
+};
 
 state.me = {
   org_id: json.data.org_id,

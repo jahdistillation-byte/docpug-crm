@@ -88,87 +88,32 @@ ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "heic", "dcm"}
 # =========================
 def get_current_org_id():
     """
-    Возвращает ID текущей организации.
-
-    Основной источник — защищённая серверная сессия.
-    Заголовок X-Org-ID временно оставлен как резерв
-    на период перехода старого фронтенда.
+    Возвращает организацию только
+    из защищённой серверной сессии.
     """
 
-    session_org_id = session.get("org_id")
+    org_id = session.get("org_id")
 
-    if session_org_id:
-        return str(session_org_id).strip()
+    if not org_id:
+        return None
 
-    header_org_id = (
-        request.headers.get("X-Org-ID")
-        or ""
-    ).strip()
-
-    if header_org_id:
-        return header_org_id
-
-    return os.getenv("ORG_ID")
+    return str(org_id).strip()
 
 
 def get_current_user():
     """
-    Возвращает текущего пользователя клиники.
-
-    Основной источник — защищённая серверная сессия.
-    Старый заголовок X-Clinic-Username временно
-    оставлен как резерв на период перехода.
+    Возвращает текущего активного пользователя
+    только по защищённой серверной сессии.
     """
 
     try:
-        session_user_id = session.get("user_id")
-        current_org = get_current_org_id()
+        user_id = session.get("user_id")
+        org_id = session.get("org_id")
 
-        # =========================================
-        # ОСНОВНОЙ ВАРИАНТ — СЕРВЕРНАЯ СЕССИЯ
-        # =========================================
-
-        if session_user_id and current_org:
-            res = (
-                supabase
-                .table("clinic_users")
-                .select(
-                    "id, username, org_id, staff_id, "
-                    "role, display_name, is_active, "
-                    "must_change_password"
-                )
-                .eq("id", str(session_user_id))
-                .eq("org_id", str(current_org))
-                .limit(1)
-                .execute()
-            )
-
-            if not res.data:
-                return None
-
-            user = res.data[0]
-
-            if user.get("is_active") is False:
-                session.clear()
-                return None
-
-            return user
-
-        # =========================================
-        # ВРЕМЕННЫЙ РЕЗЕРВ — СТАРЫЙ ФРОНТЕНД
-        # =========================================
-
-        username = (
-            request.headers.get(
-                "X-Clinic-Username"
-            )
-            or ""
-        ).strip()
-
-        if not username or not current_org:
+        if not user_id or not org_id:
             return None
 
-        res = (
+        result = (
             supabase
             .table("clinic_users")
             .select(
@@ -176,18 +121,26 @@ def get_current_user():
                 "role, display_name, is_active, "
                 "must_change_password"
             )
-            .eq("org_id", str(current_org))
-            .ilike("username", username)
+            .eq(
+                "id",
+                str(user_id),
+            )
+            .eq(
+                "org_id",
+                str(org_id),
+            )
             .limit(1)
             .execute()
         )
 
-        if not res.data:
+        if not result.data:
+            session.clear()
             return None
 
-        user = res.data[0]
+        user = result.data[0]
 
         if user.get("is_active") is False:
+            session.clear()
             return None
 
         return user
@@ -3900,6 +3853,8 @@ def api_clinic_login():
         return jsonify({
             "ok": True,
             "data": {
+                "user_id":
+    user_data.get("id"),
                 "org_id": org_id,
 
                 "staff_id":
