@@ -5195,7 +5195,83 @@ async function loadHospitalTasksApi(
     return [];
   }
 }
+async function createHospitalTaskApi(
+  hospitalizationId,
+  payload
+) {
+  try {
+    const response = await fetch(
+      `/api/hospitalizations/${encodeURIComponent(
+        String(hospitalizationId)
+      )}/tasks`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+        body: JSON.stringify(
+          payload || {}
+        ),
+      }
+    );
 
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch (error) {
+      console.error(
+        "createHospitalTaskApi JSON error:",
+        text
+      );
+
+      alert(
+        "Сервер повернув некоректну відповідь."
+      );
+
+      return null;
+    }
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      console.error(
+        "createHospitalTaskApi failed:",
+        response.status,
+        json
+      );
+
+      alert(
+        json?.error ||
+        "Не вдалося додати призначення."
+      );
+
+      return null;
+    }
+
+    return json.data || null;
+  } catch (error) {
+    console.error(
+      "createHospitalTaskApi error:",
+      error
+    );
+
+    alert(
+      "Не вдалося з'єднатися із сервером."
+    );
+
+    return null;
+  }
+}
 async function openHospitalTasksModal(
   hospitalization
 ) {
