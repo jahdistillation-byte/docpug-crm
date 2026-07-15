@@ -5702,25 +5702,9 @@ const STOCK_SPECIES = [
   "Універсальний",
   "Собаки",
   "Коти",
-  "Собаки та коти",
-  "Птахи",
-  "Гризуни",
-  "Коні",
-  "ВРХ",
-  "ДРХ",
-  "Свині",
-  "Екзотичні тварини",
-  "Інше",
 ];
 
 
-const STOCK_PRESCRIPTION_TYPES = [
-  "Безрецептурний",
-  "Рецептурний",
-  "Контрольований",
-  "Ветеринарне призначення",
-  "Не застосовується",
-];
 
 
 function getStockGroupByCategory(
@@ -6047,13 +6031,6 @@ function normalizeStockItem(item) {
         "Універсальний"
       ),
 
-    prescription_type:
-      String(
-        item?.prescription_type ||
-        item?.prescription ||
-        "Безрецептурний"
-      ),
-
     unit:
       String(
         item?.unit ||
@@ -6201,11 +6178,6 @@ const currentSpecies =
     state.stockSpecies || "all"
   );
 
-const currentPrescription =
-  String(
-    state.stockPrescription ||
-    "all"
-  );
 
   page.innerHTML = `
     <div class="stockPremiumPage">
@@ -6524,106 +6496,83 @@ const currentPrescription =
       </section>
 
       <section class="stockAdvancedFilters">
-        <label>
-          <span>
-            Форма
-          </span>
+  <label class="stockAdvancedFilter">
+    <span>
+      Форма випуску
+    </span>
 
-          <select
-            id="stockFilterForm"
-          >
-            <option value="all">
-              Усі форми
+    <div class="stockSelectWrap">
+      <select
+        id="stockFilterForm"
+        class="stockPremiumSelect"
+      >
+        <option value="all">
+          Усі форми
+        </option>
+
+        ${STOCK_FORMS
+          .map((form) => `
+            <option
+              value="${escapeHtml(
+                form
+              )}"
+              ${
+                currentForm === form
+                  ? "selected"
+                  : ""
+              }
+            >
+              ${escapeHtml(form)}
             </option>
+          `)
+          .join("")}
+      </select>
 
-            ${STOCK_FORMS
-              .map((form) => `
-                <option
-                  value="${escapeHtml(
-                    form
-                  )}"
-                  ${
-                    currentForm === form
-                      ? "selected"
-                      : ""
-                  }
-                >
-                  ${escapeHtml(form)}
-                </option>
-              `)
-              .join("")}
-          </select>
-        </label>
+      <span class="stockSelectArrow">
+       ⌄
+      </span>
+    </div>
+  </label>
 
-        <label>
-          <span>
-            Для кого
-          </span>
+  <label class="stockAdvancedFilter">
+    <span>
+      Для кого
+    </span>
 
-          <select
-            id="stockFilterSpecies"
-          >
-            <option value="all">
-              Усі тварини
+    <div class="stockSelectWrap">
+      <select
+        id="stockFilterSpecies"
+        class="stockPremiumSelect"
+      >
+        <option value="all">
+          Усі тварини
+        </option>
+
+        ${STOCK_SPECIES
+          .map((species) => `
+            <option
+              value="${escapeHtml(
+                species
+              )}"
+              ${
+                currentSpecies ===
+                species
+                  ? "selected"
+                  : ""
+              }
+            >
+              ${escapeHtml(species)}
             </option>
+          `)
+          .join("")}
+      </select>
 
-            ${STOCK_SPECIES
-              .map((species) => `
-                <option
-                  value="${escapeHtml(
-                    species
-                  )}"
-                  ${
-                    currentSpecies ===
-                    species
-                      ? "selected"
-                      : ""
-                  }
-                >
-                  ${escapeHtml(species)}
-                </option>
-              `)
-              .join("")}
-          </select>
-        </label>
-
-        <label>
-          <span>
-            Відпуск
-          </span>
-
-          <select
-            id="stockFilterPrescription"
-          >
-            <option value="all">
-              Усі типи
-            </option>
-
-            ${STOCK_PRESCRIPTION_TYPES
-              .map((type) => `
-                <option
-                  value="${escapeHtml(
-                    type
-                  )}"
-                  ${
-                    currentPrescription ===
-                    type
-                      ? "selected"
-                      : ""
-                  }
-                >
-                  ${escapeHtml(type)}
-                </option>
-              `)
-              .join("")}
-          </select>
-        </label>
-      </section>
-
-      <section
-        class="stockPremiumGrid"
-        id="stockPremiumGrid"
-      ></section>
+      <span class="stockSelectArrow">
+       ⌄
+      </span>
+    </div>
+  </label>
+</section>
     </div>
   `;
 
@@ -6666,11 +6615,6 @@ const speciesFilter =
     state.stockSpecies || "all"
   );
 
-const prescriptionFilter =
-  String(
-    state.stockPrescription ||
-    "all"
-  );
 
     const filtered =
       items.filter((item) => {
@@ -6686,7 +6630,6 @@ const prescriptionFilter =
   item.form,
   item.route,
   item.species,
-  item.prescription_type,
   item.unit,
 ]
             .join(" ")
@@ -6712,14 +6655,6 @@ const matchesSpecies =
   String(item.species) ===
     String(speciesFilter);
 
-const matchesPrescription =
-  prescriptionFilter === "all" ||
-  String(
-    item.prescription_type
-  ) ===
-    String(
-      prescriptionFilter
-    );
 
         const matchesFilter =
           filter === "all" ||
@@ -6745,7 +6680,6 @@ const matchesPrescription =
   matchesCategory &&
   matchesForm &&
   matchesSpecies &&
-  matchesPrescription &&
   matchesFilter
 );
       });
@@ -6942,14 +6876,7 @@ const matchesPrescription =
     )}
   </span>
 
-  <span>
-    <b>Відпуск</b>
 
-    ${escapeHtml(
-      item.prescription_type ||
-      "Не вказано"
-    )}
-  </span>
 </div>
 
 <div class="stockPremiumPrices">
@@ -7374,22 +7301,7 @@ ${
     );
 
 
-  page
-    .querySelector(
-      "#stockFilterPrescription"
-    )
-    ?.addEventListener(
-      "change",
-      (event) => {
-        state.stockPrescription =
-          String(
-            event.target.value ||
-            "all"
-          );
-
-        renderStockCards();
-      }
-    );
+  
 }
 
 
@@ -7655,32 +7567,6 @@ const categories =
             }
           >
             ${escapeHtml(species)}
-          </option>
-        `)
-        .join("")}
-    </select>
-  </label>
-
-  <label class="stockEditorField">
-    <span>
-      Режим відпуску
-    </span>
-
-    <select id="stockEditorPrescription">
-      ${STOCK_PRESCRIPTION_TYPES
-        .map((type) => `
-          <option
-            value="${escapeHtml(
-              type
-            )}"
-            ${
-              item.prescription_type ===
-              type
-                ? "selected"
-                : ""
-            }
-          >
-            ${escapeHtml(type)}
           </option>
         `)
         .join("")}
@@ -8125,13 +8011,6 @@ species:
     "Універсальний"
   ),
 
-prescription_type:
-  String(
-    modal.querySelector(
-      "#stockEditorPrescription"
-    )?.value ||
-    "Безрецептурний"
-  ),
 
           unit:
             String(
