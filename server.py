@@ -2573,6 +2573,581 @@ def api_discharge_hospitalization(
             f"Cannot discharge hospitalization: {error}",
             500
         )
+    
+    # =========================
+# API: HOSPITAL TASKS
+# =========================
+
+HOSPITAL_TASK_TYPES = {
+    "medication",
+    "infusion",
+    "feeding",
+    "measurement",
+    "procedure",
+    "examination",
+    "other",
+}
+
+HOSPITAL_TASK_STATUSES = {
+    "planned",
+    "completed",
+    "cancelled",
+    "overdue",
+}
+
+
+def enrich_hospital_tasks(rows):
+    rows = rows or []
+
+    if not rows:
+        return []
+
+    current_org = get_current_org_id()
+
+    staff_ids = list({
+        str(row.get("completed_by"))
+        for row in rows
+        if row.get("completed_by")
+    })
+
+    staff_map = {}
+
+    if staff_ids:
+        staff_res = (
+            supabase
+            .table("staff")
+            .select("id, name, role, color")
+            .eq("org_id", current_org)
+            .in_("id", staff_ids)
+            .execute()
+        )
+
+        staff_map = {
+            str(item.get("id")): item
+            for item in (staff_res.data or [])
+            if item.get("id")
+        }
+
+    enriched = []
+
+    for row in rows:
+        item = dict(row)
+
+        completed_by = staff_map.get(
+            str(item.get("completed_by"))
+        ) or {}
+
+        item["completed_by_name"] = (
+            completed_by.get("name")
+            or ""
+        )
+
+        item["completed_by_staff"] = (
+            completed_by
+        )
+
+        enriched.append(item)
+
+    return enriched
+
+
+@app.get("/api/hospitalizations/<hospitalization_id>/tasks")
+def api_get_hospital_tasks(hospitalization_id):
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        if not hospitalization_id:
+            return fail(
+                "hospitalization_id required",
+                400
+            )
+
+        status = (
+            request.args.get("status")
+            or ""
+        ).strip()
+
+        date_from = (
+            request.args.get("from")
+            or ""
+        ).strip()
+
+        date_to = (
+            request.args.get("to")
+            or ""
+        ).strip()
+
+        query = (
+            supabase
+            .table("hospital_tasks")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq(
+                "hospitalization_id",
+                hospitalization_id
+            )
+        )
+
+        if status:
+            query = query.eq(
+                "status",
+                status
+            )
+
+        if date_from:
+            query = query.gte(
+                "scheduled_at",
+                date_from
+            )
+
+        if date_to:
+            query = query.lte(
+                "scheduled_at",
+                date_to
+            )
+
+        result = (
+            query
+            .order("scheduled_at")
+            .execute()
+        )
+
+        return ok(
+            enrich_hospital_tasks(
+                result.data or []
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET hospital tasks error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot load hospital tasks: {error}",
+            500
+        )
+
+
+@app.post("/api/hospitalizations/<hospitalization_id>/tasks")
+def api_create_hospital_task(
+    hospitalization_id
+):
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        if not hospitalization_id:
+            return fail(
+                "hospitalization_id required",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        task_type = str(
+            data.get("task_type")
+            or "other"
+        ).strip()
+
+        title = str(
+            data.get("title")
+            or ""
+        ).strip()
+
+        scheduled_at = (
+            data.get("scheduled_at")
+            or ""
+        )
+
+        if task_type not in HOSPITAL_TASK_TYPES:
+            return fail(
+                "Invalid hospital task type",
+                400
+            )
+
+        if not title:
+            return fail(
+                "title required",
+                400
+            )
+
+        if not scheduled_at:
+            return fail(
+                "scheduled_at required",
+                400
+            )
+
+        hospitalization_res = (
+            supabase
+            .table("hospitalizations")
+            .select("id, is_active")
+            .eq("org_id", current_org)
+            .eq("id", hospitalization_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not hospitalization_res.data:
+            return fail(
+                "Hospitalization not found",
+                404
+            )
+
+        if (
+            hospitalization_res.data[0]
+            .get("is_active")
+            is False
+        ):
+            return fail(
+                "Hospitalization is already closed",
+                409
+            )
+
+        current_user = get_current_user()
+
+        payload = {
+            "org_id": current_org,
+            "hospitalization_id":
+                hospitalization_id,
+            "task_type": task_type,
+            "title": title,
+            "instructions": (
+                str(
+                    data.get("instructions")
+                    or ""
+                ).strip()
+                or None
+            ),
+            "scheduled_at": scheduled_at,
+            "status": "planned",
+            "created_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+            "updated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+        }
+
+        if current_user:
+            creator_name = (
+                current_user.get(
+                    "display_name"
+                )
+                or current_user.get(
+                    "username"
+                )
+            )
+
+            if creator_name:
+                payload["completion_note"] = (
+                    f"Створено: {creator_name}"
+                )
+
+        result = (
+            supabase
+            .table("hospital_tasks")
+            .insert(
+                clean_payload(payload)
+            )
+            .execute()
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else payload
+        )
+
+        return ok(row)
+
+    except Exception as error:
+        print(
+            "❌ POST hospital task error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot create hospital task: {error}",
+            500
+        )
+
+
+@app.put("/api/hospital-tasks/<task_id>")
+def api_update_hospital_task(task_id):
+    try:
+        current_org = get_current_org_id()
+
+        if not task_id:
+            return fail(
+                "task_id required",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        allowed_fields = [
+            "task_type",
+            "title",
+            "instructions",
+            "scheduled_at",
+            "status",
+            "completion_note",
+        ]
+
+        payload = {
+            field: data.get(field)
+            for field in allowed_fields
+            if field in data
+        }
+
+        if "task_type" in payload:
+            task_type = str(
+                payload.get("task_type")
+                or ""
+            ).strip()
+
+            if task_type not in HOSPITAL_TASK_TYPES:
+                return fail(
+                    "Invalid hospital task type",
+                    400
+                )
+
+            payload["task_type"] = (
+                task_type
+            )
+
+        if "status" in payload:
+            status = str(
+                payload.get("status")
+                or ""
+            ).strip()
+
+            if status not in HOSPITAL_TASK_STATUSES:
+                return fail(
+                    "Invalid hospital task status",
+                    400
+                )
+
+            payload["status"] = status
+
+        for field in [
+            "title",
+            "instructions",
+            "completion_note",
+        ]:
+            if field in payload:
+                value = payload.get(field)
+
+                if isinstance(value, str):
+                    value = value.strip()
+
+                payload[field] = (
+                    value
+                    if value not in ("", None)
+                    else None
+                )
+
+        if not payload:
+            return fail(
+                "Nothing to update",
+                400
+            )
+
+        payload["updated_at"] = (
+            datetime.now(
+                timezone.utc
+            ).isoformat()
+        )
+
+        result = (
+            supabase
+            .table("hospital_tasks")
+            .update(payload)
+            .eq("org_id", current_org)
+            .eq("id", task_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Hospital task not found",
+                404
+            )
+
+        return ok(result.data[0])
+
+    except Exception as error:
+        print(
+            "❌ PUT hospital task error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot update hospital task: {error}",
+            500
+        )
+
+
+@app.post("/api/hospital-tasks/<task_id>/complete")
+def api_complete_hospital_task(task_id):
+    try:
+        current_org = get_current_org_id()
+
+        if not task_id:
+            return fail(
+                "task_id required",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        completed_by = str(
+            data.get("completed_by")
+            or ""
+        ).strip()
+
+        payload = {
+            "status": "completed",
+            "completed_at": (
+                data.get("completed_at")
+                or datetime.now(
+                    timezone.utc
+                ).isoformat()
+            ),
+            "completion_note": (
+                str(
+                    data.get(
+                        "completion_note"
+                    )
+                    or ""
+                ).strip()
+                or None
+            ),
+            "updated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+        }
+
+        if completed_by:
+            staff_res = (
+                supabase
+                .table("staff")
+                .select("id")
+                .eq("org_id", current_org)
+                .eq("id", completed_by)
+                .limit(1)
+                .execute()
+            )
+
+            if not staff_res.data:
+                return fail(
+                    "Staff member not found",
+                    404
+                )
+
+            payload["completed_by"] = (
+                completed_by
+            )
+
+        result = (
+            supabase
+            .table("hospital_tasks")
+            .update(
+                clean_payload(payload)
+            )
+            .eq("org_id", current_org)
+            .eq("id", task_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Hospital task not found",
+                404
+            )
+
+        enriched = enrich_hospital_tasks(
+            [result.data[0]]
+        )
+
+        return ok(
+            enriched[0]
+            if enriched
+            else result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ COMPLETE hospital task error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot complete hospital task: {error}",
+            500
+        )
+
+
+@app.delete("/api/hospital-tasks/<task_id>")
+def api_delete_hospital_task(task_id):
+    try:
+        current_org = get_current_org_id()
+
+        if not task_id:
+            return fail(
+                "task_id required",
+                400
+            )
+
+        result = (
+            supabase
+            .table("hospital_tasks")
+            .delete()
+            .eq("org_id", current_org)
+            .eq("id", task_id)
+            .execute()
+        )
+
+        return ok(True)
+
+    except Exception as error:
+        print(
+            "❌ DELETE hospital task error:",
+            repr(error)
+        )
+
+        return fail(
+            f"Cannot delete hospital task: {error}",
+            500
+        )
 # =========================
 # API: VISITS
 # =========================

@@ -5135,6 +5135,728 @@ async function renderHospitalTab() {
   );
 }
 
+async function openHospitalTasksModal(
+  hospitalization
+) {
+  document
+    .getElementById(
+      "hospitalTasksModal"
+    )
+    ?.remove();
+
+  if (!hospitalization?.id) {
+    alert(
+      "Не знайдено госпіталізацію."
+    );
+    return;
+  }
+
+  const modal =
+    document.createElement("div");
+
+  modal.id =
+    "hospitalTasksModal";
+
+  modal.className =
+    "hospitalTasksOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="hospitalTasksBackdrop"
+      data-close-hospital-tasks
+    ></div>
+
+    <section class="hospitalTasksModal">
+      <div class="hospitalTasksLoading">
+        Завантаження призначень…
+      </div>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeModal = () => {
+    modal.remove();
+  };
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-hospital-tasks]"
+        )
+      ) {
+        closeModal();
+      }
+    }
+  );
+
+  const [tasks, staff] =
+    await Promise.all([
+      loadHospitalTasksApi(
+        hospitalization.id
+      ),
+      loadStaffApi(),
+    ]);
+
+  let hospitalTasks =
+    Array.isArray(tasks)
+      ? tasks
+      : [];
+
+  const activeStaff =
+    Array.isArray(staff)
+      ? staff.filter(
+          (item) =>
+            item.is_active !== false
+        )
+      : [];
+
+  const now =
+    new Date();
+
+  const localNow =
+    new Date(
+      now.getTime() -
+      now.getTimezoneOffset() *
+        60000
+    )
+      .toISOString()
+      .slice(0, 16);
+
+  modal.innerHTML = `
+    <div
+      class="hospitalTasksBackdrop"
+      data-close-hospital-tasks
+    ></div>
+
+    <section
+      class="hospitalTasksModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      <header class="hospitalTasksHeader">
+        <div>
+          <div class="hospitalTasksEyebrow">
+            КАРТА СТАЦІОНАРУ
+          </div>
+
+          <h2>
+            ${escapeHtml(
+              hospitalization.patient_name ||
+              "Пацієнт"
+            )}
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              hospitalization.diagnosis ||
+              "Діагноз не вказаний"
+            )}
+            ·
+            ${escapeHtml(
+              hospitalization.room ||
+              "Палата не вказана"
+            )}
+          </p>
+        </div>
+
+        <button
+          class="hospitalTasksClose"
+          type="button"
+          data-close-hospital-tasks
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="hospitalTasksLayout">
+        <section class="hospitalTasksTimeline">
+          <div class="hospitalTasksSectionHead">
+            <div>
+              <h3>
+                Призначення
+              </h3>
+
+              <p>
+                План процедур та догляду
+              </p>
+            </div>
+
+            <span
+              class="hospitalTasksCount"
+              id="hospitalTasksCount"
+            ></span>
+          </div>
+
+          <div
+            class="hospitalTasksList"
+            id="hospitalTasksList"
+          ></div>
+        </section>
+
+        <aside class="hospitalTaskCreateCard">
+          <h3>
+            Нове призначення
+          </h3>
+
+          <form id="hospitalTaskCreateForm">
+            <label class="hospitalTaskField">
+              <span>
+                Тип
+              </span>
+
+              <select
+                id="hospitalTaskType"
+                class="hospitalTaskInput"
+              >
+                <option value="medication">
+                  Препарат
+                </option>
+
+                <option value="infusion">
+                  Інфузія
+                </option>
+
+                <option value="feeding">
+                  Годування
+                </option>
+
+                <option value="measurement">
+                  Вимірювання
+                </option>
+
+                <option value="procedure">
+                  Процедура
+                </option>
+
+                <option value="examination">
+                  Огляд
+                </option>
+
+                <option value="other">
+                  Інше
+                </option>
+              </select>
+            </label>
+
+            <label class="hospitalTaskField">
+              <span>
+                Назва
+              </span>
+
+              <input
+                id="hospitalTaskTitle"
+                class="hospitalTaskInput"
+                type="text"
+                placeholder="Наприклад, Цефтріаксон 0,5 г"
+              >
+            </label>
+
+            <label class="hospitalTaskField">
+              <span>
+                Дата і час
+              </span>
+
+              <input
+                id="hospitalTaskScheduledAt"
+                class="hospitalTaskInput"
+                type="datetime-local"
+                value="${escapeHtml(
+                  localNow
+                )}"
+              >
+            </label>
+
+            <label class="hospitalTaskField">
+              <span>
+                Інструкція
+              </span>
+
+              <textarea
+                id="hospitalTaskInstructions"
+                class="hospitalTaskTextarea"
+                rows="4"
+                placeholder="Доза, спосіб введення, тривалість..."
+              ></textarea>
+            </label>
+
+            <button
+              id="hospitalTaskCreateButton"
+              class="hospitalTaskCreateButton"
+              type="submit"
+            >
+              + Додати призначення
+            </button>
+          </form>
+        </aside>
+      </div>
+    </section>
+  `;
+
+  const taskTypeLabels = {
+    medication: "Препарат",
+    infusion: "Інфузія",
+    feeding: "Годування",
+    measurement: "Вимірювання",
+    procedure: "Процедура",
+    examination: "Огляд",
+    other: "Інше",
+  };
+
+  const taskTypeIcons = {
+    medication: "💊",
+    infusion: "💧",
+    feeding: "🍽️",
+    measurement: "🌡️",
+    procedure: "🩹",
+    examination: "🩺",
+    other: "📌",
+  };
+
+  const renderTasks = () => {
+    const list =
+      modal.querySelector(
+        "#hospitalTasksList"
+      );
+
+    const count =
+      modal.querySelector(
+        "#hospitalTasksCount"
+      );
+
+    if (!list) return;
+
+    const sortedTasks = [
+      ...hospitalTasks,
+    ].sort((a, b) => {
+      return (
+        new Date(a.scheduled_at) -
+        new Date(b.scheduled_at)
+      );
+    });
+
+    if (count) {
+      const plannedCount =
+        sortedTasks.filter(
+          (item) =>
+            item.status === "planned"
+        ).length;
+
+      count.textContent =
+        `${plannedCount} активних`;
+    }
+
+    if (!sortedTasks.length) {
+      list.innerHTML = `
+        <div class="hospitalTasksEmpty">
+          <div>📋</div>
+
+          <strong>
+            Призначень поки немає
+          </strong>
+
+          <span>
+            Додайте першу процедуру
+            або препарат.
+          </span>
+        </div>
+      `;
+
+      return;
+    }
+
+    list.innerHTML =
+      sortedTasks
+        .map((task) => {
+          const completed =
+            task.status === "completed";
+
+          const scheduledLabel =
+            formatHospitalDateTime(
+              task.scheduled_at
+            );
+
+          return `
+            <article
+              class="
+                hospitalTaskItem
+                ${
+                  completed
+                    ? "completed"
+                    : ""
+                }
+              "
+            >
+              <div class="hospitalTaskIcon">
+                ${
+                  taskTypeIcons[
+                    task.task_type
+                  ] || "📌"
+                }
+              </div>
+
+              <div class="hospitalTaskContent">
+                <div class="hospitalTaskTop">
+                  <div>
+                    <span class="hospitalTaskType">
+                      ${escapeHtml(
+                        taskTypeLabels[
+                          task.task_type
+                        ] || "Інше"
+                      )}
+                    </span>
+
+                    <h4>
+                      ${escapeHtml(
+                        task.title ||
+                        "Призначення"
+                      )}
+                    </h4>
+                  </div>
+
+                  <time>
+                    ${escapeHtml(
+                      scheduledLabel
+                    )}
+                  </time>
+                </div>
+
+                ${
+                  task.instructions
+                    ? `
+                      <p>
+                        ${escapeHtml(
+                          task.instructions
+                        )}
+                      </p>
+                    `
+                    : ""
+                }
+
+                ${
+                  completed
+                    ? `
+                      <div class="hospitalTaskCompletedInfo">
+                        Виконано
+                        ${
+                          task.completed_by_name
+                            ? `· ${escapeHtml(
+                                task.completed_by_name
+                              )}`
+                            : ""
+                        }
+                        ${
+                          task.completed_at
+                            ? `· ${escapeHtml(
+                                formatHospitalDateTime(
+                                  task.completed_at
+                                )
+                              )}`
+                            : ""
+                        }
+                      </div>
+                    `
+                    : `
+                      <div class="hospitalTaskActions">
+                        <select
+                          class="hospitalTaskStaffSelect"
+                          data-task-staff="${
+                            escapeHtml(
+                              task.id
+                            )
+                          }"
+                        >
+                          <option value="">
+                            Хто виконав
+                          </option>
+
+                          ${activeStaff
+                            .map(
+                              (employee) => `
+                                <option
+                                  value="${escapeHtml(
+                                    String(
+                                      employee.id
+                                    )
+                                  )}"
+                                >
+                                  ${escapeHtml(
+                                    employee.name ||
+                                    "Працівник"
+                                  )}
+                                </option>
+                              `
+                            )
+                            .join("")}
+                        </select>
+
+                        <button
+                          type="button"
+                          class="hospitalTaskCompleteButton"
+                          data-complete-hospital-task="${
+                            escapeHtml(
+                              task.id
+                            )
+                          }"
+                        >
+                          ✓ Виконано
+                        </button>
+
+                        <button
+                          type="button"
+                          class="hospitalTaskDeleteButton"
+                          data-delete-hospital-task="${
+                            escapeHtml(
+                              task.id
+                            )
+                          }"
+                        >
+                          Видалити
+                        </button>
+                      </div>
+                    `
+                }
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+  };
+
+  renderTasks();
+
+  modal
+    .querySelector(
+      "#hospitalTaskCreateForm"
+    )
+    ?.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const taskType =
+          String(
+            modal.querySelector(
+              "#hospitalTaskType"
+            )?.value || "other"
+          );
+
+        const title =
+          String(
+            modal.querySelector(
+              "#hospitalTaskTitle"
+            )?.value || ""
+          ).trim();
+
+        const scheduledAt =
+          String(
+            modal.querySelector(
+              "#hospitalTaskScheduledAt"
+            )?.value || ""
+          ).trim();
+
+        const instructions =
+          String(
+            modal.querySelector(
+              "#hospitalTaskInstructions"
+            )?.value || ""
+          ).trim();
+
+        if (!title) {
+          alert(
+            "Вкажіть назву призначення."
+          );
+          return;
+        }
+
+        if (!scheduledAt) {
+          alert(
+            "Вкажіть дату і час."
+          );
+          return;
+        }
+
+        const button =
+          modal.querySelector(
+            "#hospitalTaskCreateButton"
+          );
+
+        if (button) {
+          button.disabled = true;
+          button.textContent =
+            "Збереження…";
+        }
+
+        const created =
+          await createHospitalTaskApi(
+            hospitalization.id,
+            {
+              task_type: taskType,
+              title,
+              instructions,
+              scheduled_at:
+                new Date(
+                  scheduledAt
+                ).toISOString(),
+            }
+          );
+
+        if (button) {
+          button.disabled = false;
+          button.textContent =
+            "+ Додати призначення";
+        }
+
+        if (!created) return;
+
+        hospitalTasks.push(created);
+
+        const titleInput =
+          modal.querySelector(
+            "#hospitalTaskTitle"
+          );
+
+        const instructionsInput =
+          modal.querySelector(
+            "#hospitalTaskInstructions"
+          );
+
+        if (titleInput) {
+          titleInput.value = "";
+        }
+
+        if (instructionsInput) {
+          instructionsInput.value = "";
+        }
+
+        renderTasks();
+      }
+    );
+
+  modal.addEventListener(
+    "click",
+    async (event) => {
+      const completeButton =
+        event.target.closest(
+          "[data-complete-hospital-task]"
+        );
+
+      if (completeButton) {
+        const taskId =
+          completeButton.dataset
+            .completeHospitalTask;
+
+        const staffSelect =
+          modal.querySelector(
+            `[data-task-staff="${CSS.escape(
+              taskId
+            )}"]`
+          );
+
+        const completedBy =
+          String(
+            staffSelect?.value || ""
+          ).trim();
+
+        if (!completedBy) {
+          alert(
+            "Оберіть працівника, який виконав призначення."
+          );
+          return;
+        }
+
+        completeButton.disabled =
+          true;
+
+        completeButton.textContent =
+          "Збереження…";
+
+        const completed =
+          await completeHospitalTaskApi(
+            taskId,
+            {
+              completed_by:
+                completedBy,
+
+              completed_at:
+                new Date()
+                  .toISOString(),
+            }
+          );
+
+        if (!completed) {
+          completeButton.disabled =
+            false;
+
+          completeButton.textContent =
+            "✓ Виконано";
+
+          return;
+        }
+
+        hospitalTasks =
+          hospitalTasks.map(
+            (item) =>
+              String(item.id) ===
+              String(taskId)
+                ? completed
+                : item
+          );
+
+        renderTasks();
+        return;
+      }
+
+      const deleteButton =
+        event.target.closest(
+          "[data-delete-hospital-task]"
+        );
+
+      if (deleteButton) {
+        const taskId =
+          deleteButton.dataset
+            .deleteHospitalTask;
+
+        const confirmed =
+          confirm(
+            "Видалити це призначення?"
+          );
+
+        if (!confirmed) return;
+
+        deleteButton.disabled = true;
+
+        const deleted =
+          await deleteHospitalTaskApi(
+            taskId
+          );
+
+        if (!deleted) {
+          deleteButton.disabled =
+            false;
+
+          alert(
+            "Не вдалося видалити призначення."
+          );
+
+          return;
+        }
+
+        hospitalTasks =
+          hospitalTasks.filter(
+            (item) =>
+              String(item.id) !==
+              String(taskId)
+          );
+
+        renderTasks();
+      }
+    }
+  );
+}
+
 function renderHospitalPatientCard(
   hospitalization
 ) {
@@ -6416,13 +7138,16 @@ function bindHospitalPageActions(
       window.__selectedHospitalization =
         hospitalization || null;
 
-      alert(
-        `Наступним кроком відкриємо призначення для ${
-          hospitalization
-            ?.patient_name ||
-          "пацієнта"
-        }.`
-      );
+      if (!hospitalization) {
+  alert(
+    "Не знайдено дані госпіталізації."
+  );
+  return;
+}
+
+await openHospitalTasksModal(
+  hospitalization
+);
 
       return;
     }

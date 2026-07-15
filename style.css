@@ -20322,3 +20322,322 @@ select.visitControl {
     display: none;
   }
 }
+/* =====================================================
+   HOSPITAL TASKS MODAL
+===================================================== */
+
+.hospitalTasksOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.hospitalTasksBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 2, 12, 0.84);
+  backdrop-filter: blur(18px);
+}
+
+.hospitalTasksModal {
+  position: relative;
+  z-index: 1;
+  width: min(1150px, 97vw);
+  max-height: 93vh;
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 27px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(151, 71, 255, 0.16),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      #211636,
+      #120c20
+    );
+  box-shadow:
+    0 35px 100px rgba(0,0,0,0.58);
+}
+
+.hospitalTasksHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.hospitalTasksEyebrow {
+  margin-bottom: 5px;
+  color: #b668ff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.hospitalTasksHeader h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 2rem;
+}
+
+.hospitalTasksHeader p {
+  margin-top: 7px;
+  color: rgba(255,255,255,0.48);
+}
+
+.hospitalTasksClose {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+}
+
+.hospitalTasksLayout {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) 330px;
+  gap: 17px;
+}
+
+.hospitalTasksTimeline,
+.hospitalTaskCreateCard {
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.025);
+}
+
+.hospitalTasksSectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.hospitalTasksSectionHead h3,
+.hospitalTaskCreateCard h3 {
+  margin: 0;
+  color: #fff;
+}
+
+.hospitalTasksSectionHead p {
+  margin-top: 4px;
+  color: rgba(255,255,255,0.42);
+  font-size: 0.82rem;
+}
+
+.hospitalTasksCount {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(168,85,247,0.13);
+  color: #d2a5ff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.hospitalTasksList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hospitalTaskItem {
+  display: flex;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.025);
+}
+
+.hospitalTaskItem.completed {
+  opacity: 0.66;
+  background: rgba(66,233,157,0.045);
+  border-color: rgba(66,233,157,0.16);
+}
+
+.hospitalTaskIcon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(168,85,247,0.12);
+  font-size: 1.15rem;
+}
+
+.hospitalTaskContent {
+  min-width: 0;
+  flex: 1;
+}
+
+.hospitalTaskTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.hospitalTaskType {
+  color: #b979ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hospitalTaskTop h4 {
+  margin: 4px 0 0;
+  color: #fff;
+}
+
+.hospitalTaskTop time {
+  flex: 0 0 auto;
+  color: rgba(255,255,255,0.48);
+  font-size: 0.75rem;
+}
+
+.hospitalTaskContent > p {
+  margin-top: 8px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.45;
+}
+
+.hospitalTaskActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.hospitalTaskStaffSelect,
+.hospitalTaskInput,
+.hospitalTaskTextarea {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 11px;
+  outline: none;
+  background: rgba(0,0,0,0.23);
+  color: #fff;
+}
+
+.hospitalTaskStaffSelect {
+  max-width: 210px;
+}
+
+.hospitalTaskCompleteButton,
+.hospitalTaskDeleteButton {
+  padding: 9px 12px;
+  border-radius: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hospitalTaskCompleteButton {
+  border: 1px solid rgba(66,233,157,0.25);
+  background: rgba(66,233,157,0.1);
+  color: #76efb6;
+}
+
+.hospitalTaskDeleteButton {
+  border: 1px solid rgba(255,95,109,0.2);
+  background: rgba(255,95,109,0.07);
+  color: #ff939d;
+}
+
+.hospitalTaskField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.hospitalTaskField > span {
+  color: rgba(255,255,255,0.52);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.hospitalTaskTextarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.hospitalTaskCreateButton {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid rgba(193,129,255,0.45);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      135deg,
+      #8d42ff,
+      #b34cff
+    );
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hospitalTaskCompletedInfo {
+  margin-top: 10px;
+  color: #76efb6;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.hospitalTasksEmpty {
+  padding: 55px 20px;
+  text-align: center;
+  color: rgba(255,255,255,0.44);
+}
+
+.hospitalTasksEmpty > div {
+  font-size: 2rem;
+}
+
+.hospitalTasksEmpty strong,
+.hospitalTasksEmpty span {
+  display: block;
+}
+
+.hospitalTasksEmpty strong {
+  margin-top: 9px;
+  color: #fff;
+}
+
+.hospitalTasksEmpty span {
+  margin-top: 5px;
+}
+
+.hospitalTasksLoading {
+  padding: 70px;
+  text-align: center;
+  color: #fff;
+}
+
+@media (max-width: 850px) {
+  .hospitalTasksLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .hospitalTaskTop,
+  .hospitalTaskActions {
+    flex-direction: column;
+  }
+
+  .hospitalTaskStaffSelect {
+    max-width: none;
+  }
+}
