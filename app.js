@@ -26089,6 +26089,129 @@ async function renderStaffSpecsBox(selectedIds = []) {
     
     
 }
+async function openCreateStaffModal() {
+  const drawer =
+    document.getElementById(
+      "staffDrawer"
+    );
+
+  if (!drawer) {
+    console.error(
+      "staffDrawer не знайдено"
+    );
+
+    alert(
+      "Форма співробітника не знайдена в index.html."
+    );
+
+    return;
+  }
+
+  /*
+   * Очищаем ID.
+   * Пустой ID означает создание,
+   * а не редактирование.
+   */
+  const idInput =
+    document.getElementById(
+      "staffId"
+    );
+
+  if (idInput) {
+    idInput.value = "";
+  }
+
+  const nameInput =
+    document.getElementById(
+      "staffName"
+    );
+
+  if (nameInput) {
+    nameInput.value = "";
+  }
+
+  const roleInput =
+    document.getElementById(
+      "staffRole"
+    );
+
+  if (roleInput) {
+    roleInput.value = "vet";
+  }
+
+  const specializationInput =
+    document.getElementById(
+      "staffSpecialization"
+    );
+
+  if (specializationInput) {
+    specializationInput.value = "";
+  }
+
+  const phoneInput =
+    document.getElementById(
+      "staffPhone"
+    );
+
+  if (phoneInput) {
+    phoneInput.value = "";
+  }
+
+  const shiftRateInput =
+    document.getElementById(
+      "staffShiftRate"
+    );
+
+  if (shiftRateInput) {
+    shiftRateInput.value = "0";
+  }
+
+  const percentRateInput =
+    document.getElementById(
+      "staffPercentRate"
+    );
+
+  if (percentRateInput) {
+    percentRateInput.value = "0";
+  }
+
+  const colorInput =
+    document.getElementById(
+      "staffColor"
+    );
+
+  if (colorInput) {
+    colorInput.value = "#7C5CFF";
+  }
+
+  const noteInput =
+    document.getElementById(
+      "staffNote"
+    );
+
+  if (noteInput) {
+    noteInput.value = "";
+  }
+
+  /*
+   * Для нового сотрудника
+   * специализации пока не выбраны.
+   */
+  await renderStaffSpecsBox([]);
+
+  drawer.classList.add(
+    "open"
+  );
+
+  drawer.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  setTimeout(() => {
+    nameInput?.focus();
+  }, 50);
+}
 
 async function openEditStaffModal(staffRow) {
   $("#staffId").value = staffRow.id || "";
