@@ -6354,65 +6354,179 @@ function renderHospitalPatientCard(
         </div>
       </div>
 
-      <div class="hospitalNextAction">
-        <span>
-          Наступна дія
-        </span>
+            <div class="hospitalCardTasks">
+        <div class="hospitalCardTasksHead">
+          <div>
+            <span>Призначення</span>
 
-        <div class="hospitalPatientNextAction">
-  <span>
-    Наступна дія
-  </span>
+            <strong>
+              ${
+                item.active_tasks_count > 0
+                  ? `${item.active_tasks_count} активних`
+                  : item.tasks_count > 0
+                    ? "Усі виконані"
+                    : "Ще не додані"
+              }
+            </strong>
+          </div>
 
-  <strong>
-    ${
-      item.next_task
-        ? escapeHtml(
-            item.next_task.title ||
-            "Призначення"
-          )
-        : item.tasks_count > 0
-          ? "Усі призначення виконані"
-          : "Призначення ще не додані"
-    }
-  </strong>
-
-  ${
-    item.next_task
-      ? `
-        <small>
-          ${escapeHtml(
-            formatHospitalDateTime(
-              item.next_task
-                .scheduled_at
-            )
-          )}
           ${
-            item.next_task
-              .instructions
-              ? ` · ${escapeHtml(
-                  item.next_task
-                    .instructions
-                )}`
+            item.tasks_count > 3
+              ? `
+                <small>
+                  +${item.tasks_count - 3}
+                </small>
+              `
               : ""
           }
-        </small>
-      `
-      : item.completed_tasks_count > 0
-        ? `
-          <small>
-            Виконано:
-            ${escapeHtml(
-              String(
-                item
-                  .completed_tasks_count
-              )
-            )}
-          </small>
-        `
-        : ""
-  }
-</div>
+        </div>
+
+        <div class="hospitalCardTaskList">
+          ${
+            item.hospital_tasks?.length
+              ? item.hospital_tasks
+                  .slice()
+                  .sort((a, b) => {
+                    const aCompleted =
+                      a.status === "completed";
+
+                    const bCompleted =
+                      b.status === "completed";
+
+                    if (aCompleted !== bCompleted) {
+                      return aCompleted ? 1 : -1;
+                    }
+
+                    return (
+                      new Date(a.scheduled_at) -
+                      new Date(b.scheduled_at)
+                    );
+                  })
+                  .slice(0, 3)
+                  .map((task) => {
+                    const completed =
+                      task.status === "completed";
+
+                    const iconMap = {
+                      medication: "💊",
+                      infusion: "💧",
+                      feeding: "🍽️",
+                      measurement: "🌡️",
+                      procedure: "🩹",
+                      examination: "🩺",
+                      other: "📌",
+                    };
+
+                    const typeLabels = {
+                      medication: "Препарат",
+                      infusion: "Інфузія",
+                      feeding: "Годування",
+                      measurement: "Вимірювання",
+                      procedure: "Процедура",
+                      examination: "Огляд",
+                      other: "Інше",
+                    };
+
+                    return `
+                      <div
+                        class="
+                          hospitalCardTask
+                          ${
+                            completed
+                              ? "completed"
+                              : "planned"
+                          }
+                        "
+                      >
+                        <div class="hospitalCardTaskIcon">
+                          ${
+                            iconMap[
+                              task.task_type
+                            ] || "📌"
+                          }
+                        </div>
+
+                        <div class="hospitalCardTaskMain">
+                          <div class="hospitalCardTaskTop">
+                            <span>
+                              ${escapeHtml(
+                                typeLabels[
+                                  task.task_type
+                                ] || "Інше"
+                              )}
+                            </span>
+
+                            <time>
+                              ${escapeHtml(
+                                formatHospitalDateTime(
+                                  task.scheduled_at
+                                )
+                              )}
+                            </time>
+                          </div>
+
+                          <strong>
+                            ${escapeHtml(
+                              task.title ||
+                              "Призначення"
+                            )}
+                          </strong>
+
+                          ${
+                            task.instructions
+                              ? `
+                                <p>
+                                  ${escapeHtml(
+                                    task.instructions
+                                  )}
+                                </p>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            completed
+                              ? `
+                                <small class="hospitalCardTaskDone">
+                                  ✓ Виконано
+                                  ${
+                                    task.completed_by_name
+                                      ? ` · ${escapeHtml(
+                                          task.completed_by_name
+                                        )}`
+                                      : ""
+                                  }
+                                </small>
+                              `
+                              : `
+                                <small class="hospitalCardTaskPending">
+                                  Очікує виконання
+                                </small>
+                              `
+                          }
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join("")
+              : `
+                <div class="hospitalCardTasksEmpty">
+                  <span>📋</span>
+
+                  <div>
+                    <strong>
+                      Призначення ще не додані
+                    </strong>
+
+                    <small>
+                      Відкрийте карту стаціонару,
+                      щоб додати перше.
+                    </small>
+                  </div>
+                </div>
+              `
+          }
+        </div>
       </div>
 
       <div class="hospitalPatientActions">

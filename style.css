@@ -20641,3 +20641,199 @@ select.visitControl {
     max-width: none;
   }
 }
+/* =====================================================
+   HOSPITAL PATIENT CARD TASKS
+===================================================== */
+
+.hospitalCardTasks {
+  margin-top: 15px;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 17px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(168, 85, 247, 0.09),
+      rgba(255, 255, 255, 0.025)
+    );
+}
+
+.hospitalCardTasksHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.hospitalCardTasksHead > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hospitalCardTasksHead span {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.69rem;
+}
+
+.hospitalCardTasksHead strong {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.77rem;
+}
+
+.hospitalCardTasksHead > small {
+  display: grid;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  place-items: center;
+  border: 1px solid rgba(184, 104, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.13);
+  color: #d4a7ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.hospitalCardTaskList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hospitalCardTask {
+  display: flex;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.hospitalCardTask.planned {
+  border-color: rgba(184, 104, 255, 0.22);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(168, 85, 247, 0.12),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.hospitalCardTask.completed {
+  border-color: rgba(79, 225, 157, 0.16);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(79, 225, 157, 0.07),
+      rgba(255, 255, 255, 0.018)
+    );
+  opacity: 0.76;
+}
+
+.hospitalCardTaskIcon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border: 1px solid rgba(184, 104, 255, 0.16);
+  border-radius: 11px;
+  background: rgba(168, 85, 247, 0.11);
+  font-size: 0.95rem;
+}
+
+.hospitalCardTaskMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.hospitalCardTaskTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hospitalCardTaskTop span {
+  color: #ba76ff;
+  font-size: 0.59rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hospitalCardTaskTop time {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.61rem;
+  white-space: nowrap;
+}
+
+.hospitalCardTaskMain > strong {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.91);
+  font-size: 0.77rem;
+  line-height: 1.3;
+}
+
+.hospitalCardTaskMain > p {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.hospitalCardTaskDone,
+.hospitalCardTaskPending {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.63rem;
+  font-weight: 700;
+}
+
+.hospitalCardTaskDone {
+  color: #64ddb0;
+}
+
+.hospitalCardTaskPending {
+  color: #d5a2ff;
+}
+
+.hospitalCardTasksEmpty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px dashed rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.hospitalCardTasksEmpty > span {
+  font-size: 1.15rem;
+}
+
+.hospitalCardTasksEmpty strong,
+.hospitalCardTasksEmpty small {
+  display: block;
+}
+
+.hospitalCardTasksEmpty strong {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.72rem;
+}
+
+.hospitalCardTasksEmpty small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.36);
+  font-size: 0.63rem;
+}
