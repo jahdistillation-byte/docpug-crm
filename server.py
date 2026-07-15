@@ -9,8 +9,8 @@ from urllib.parse import parse_qsl
 
 from datetime import datetime, timezone
 from flask import Flask, request, send_from_directory, jsonify
-from werkzeug.utils import (
-    secure_filename,
+from werkzeug.utils import secure_filename
+from werkzeug.security import (
     generate_password_hash,
     check_password_hash,
 )
