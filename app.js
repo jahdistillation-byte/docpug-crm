@@ -5272,6 +5272,145 @@ async function createHospitalTaskApi(
     return null;
   }
 }
+
+async function completeHospitalTaskApi(
+  taskId,
+  payload = {}
+) {
+  try {
+    const response = await fetch(
+      `/api/hospital-tasks/${encodeURIComponent(
+        String(taskId)
+      )}/complete`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+        body: JSON.stringify(
+          payload || {}
+        ),
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch (error) {
+      console.error(
+        "completeHospitalTaskApi JSON error:",
+        text
+      );
+
+      alert(
+        "Сервер повернув некоректну відповідь."
+      );
+
+      return null;
+    }
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      console.error(
+        "completeHospitalTaskApi failed:",
+        response.status,
+        json
+      );
+
+      alert(
+        json?.error ||
+        "Не вдалося відмітити призначення виконаним."
+      );
+
+      return null;
+    }
+
+    return json.data || null;
+  } catch (error) {
+    console.error(
+      "completeHospitalTaskApi error:",
+      error
+    );
+
+    alert(
+      "Не вдалося з'єднатися із сервером."
+    );
+
+    return null;
+  }
+}
+
+
+async function deleteHospitalTaskApi(
+  taskId
+) {
+  try {
+    const response = await fetch(
+      `/api/hospital-tasks/${encodeURIComponent(
+        String(taskId)
+      )}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch (error) {
+      console.error(
+        "deleteHospitalTaskApi JSON error:",
+        text
+      );
+
+      return false;
+    }
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      console.error(
+        "deleteHospitalTaskApi failed:",
+        response.status,
+        json
+      );
+
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(
+      "deleteHospitalTaskApi error:",
+      error
+    );
+
+    return false;
+  }
+}
 async function openHospitalTasksModal(
   hospitalization
 ) {
