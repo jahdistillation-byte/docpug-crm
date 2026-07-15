@@ -3640,6 +3640,48 @@ def api_clinic_login():
                 ),
             }), 400
 
+        # =================================================
+        # СОЗДАЁМ ЗАЩИЩЁННУЮ СЕРВЕРНУЮ СЕССИЮ
+        # =================================================
+
+        session.clear()
+        session.permanent = True
+
+        session["user_id"] = str(
+            user_data.get("id")
+        )
+
+        session["org_id"] = str(
+            org_id
+        )
+
+        session["staff_id"] = (
+            str(user_data.get("staff_id"))
+            if user_data.get("staff_id")
+            else None
+        )
+
+        session["username"] = str(
+            user_data.get("username") or ""
+        )
+
+        session["display_name"] = str(
+            user_data.get("display_name")
+            or user_data.get("username")
+            or "Користувач"
+        )
+
+        session["role"] = str(
+            user_data.get("role")
+            or "vet"
+        )
+
+        session["must_change_password"] = bool(
+            user_data.get(
+                "must_change_password"
+            )
+        )
+
         clinic_name = "Клініка"
         theme = "purple"
 
@@ -3724,4 +3766,3 @@ if __name__ == "__main__":
         ),
         debug=False,
     )
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=False)
