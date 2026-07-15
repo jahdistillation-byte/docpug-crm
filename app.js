@@ -4899,10 +4899,65 @@ async function renderHospitalTab() {
 
   if (!page) return;
 
-  const hospitalPatients =
-    await loadHospitalizationsApi(
-      true
-    );
+  let hospitalPatients =
+  await loadHospitalizationsApi(
+    true
+  );
+
+hospitalPatients =
+  await Promise.all(
+    hospitalPatients.map(
+      async (hospitalization) => {
+        const tasks =
+          await loadHospitalTasksApi(
+            hospitalization.id
+          );
+
+        const sortedTasks = [
+          ...tasks,
+        ].sort((a, b) => {
+          return (
+            new Date(a.scheduled_at) -
+            new Date(b.scheduled_at)
+          );
+        });
+
+        const nextTask =
+          sortedTasks.find(
+            (task) =>
+              task.status === "planned"
+          ) || null;
+
+        const completedTasks =
+          sortedTasks.filter(
+            (task) =>
+              task.status === "completed"
+          );
+
+        return {
+          ...hospitalization,
+
+          hospital_tasks:
+            sortedTasks,
+
+          next_task:
+            nextTask,
+
+          tasks_count:
+            sortedTasks.length,
+
+          active_tasks_count:
+            sortedTasks.filter(
+              (task) =>
+                task.status === "planned"
+            ).length,
+
+          completed_tasks_count:
+            completedTasks.length,
+        };
+      }
+    )
+  );
 
   window.__hospitalPatients =
     hospitalPatients;
@@ -6303,9 +6358,60 @@ function renderHospitalPatientCard(
           Наступна дія
         </span>
 
-        <strong>
-          Призначення ще не додані
-        </strong>
+        <div class="hospitalPatientNextAction">
+  <span>
+    Наступна дія
+  </span>
+
+  <strong>
+    ${
+      item.next_task
+        ? escapeHtml(
+            item.next_task.title ||
+            "Призначення"
+          )
+        : item.tasks_count > 0
+          ? "Усі призначення виконані"
+          : "Призначення ще не додані"
+    }
+  </strong>
+
+  ${
+    item.next_task
+      ? `
+        <small>
+          ${escapeHtml(
+            formatHospitalDateTime(
+              item.next_task
+                .scheduled_at
+            )
+          )}
+          ${
+            item.next_task
+              .instructions
+              ? ` · ${escapeHtml(
+                  item.next_task
+                    .instructions
+                )}`
+              : ""
+          }
+        </small>
+      `
+      : item.completed_tasks_count > 0
+        ? `
+          <small>
+            Виконано:
+            ${escapeHtml(
+              String(
+                item
+                  .completed_tasks_count
+              )
+            )}
+          </small>
+        `
+        : ""
+  }
+</div>
       </div>
 
       <div class="hospitalPatientActions">
