@@ -6573,6 +6573,10 @@ const currentSpecies =
     </div>
   </label>
 </section>
+<section
+  class="stockPremiumGrid"
+  id="stockPremiumGrid"
+></section>
     </div>
   `;
 
@@ -6829,12 +6833,13 @@ const matchesSpecies =
                         </div>
 
                       
-                          <div class="stockPremiumCardGroup">
+                          <div class="stockPremiumCardBody">
+
   <div class="stockPremiumCardGroup">
-  ${escapeHtml(
-    getStockGroupLabel(item)
-  )}
-</div>
+    ${escapeHtml(
+      getStockGroupLabel(item)
+    )}
+  </div>
 
 <div class="stockPremiumCardCategory">
   ${escapeHtml(
