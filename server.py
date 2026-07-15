@@ -898,7 +898,130 @@ def api_update_organization_profile():
             f"Cannot update organization profile: {e}",
             500
         )
+# =========================
+# API: SERVER SESSION
+# =========================
 
+@app.get("/api/session")
+def api_get_session():
+    """
+    Проверяет защищённую серверную сессию
+    и возвращает данные текущего пользователя.
+    """
+
+    try:
+        user = get_current_user()
+
+        if not user:
+            session.clear()
+
+            return jsonify({
+                "ok": False,
+                "authenticated": False,
+                "error": "Unauthorized",
+            }), 401
+
+        org_id = user.get("org_id")
+        clinic_name = "Клініка"
+        theme = "purple"
+
+        if org_id:
+            try:
+                org_result = (
+                    supabase
+                    .table("orgs")
+                    .select("name")
+                    .eq("id", str(org_id))
+                    .limit(1)
+                    .execute()
+                )
+
+                if org_result.data:
+                    clinic_name = (
+                        org_result.data[0].get("name")
+                        or clinic_name
+                    )
+
+            except Exception as org_error:
+                print(
+                    "⚠️ /api/session clinic load failed:",
+                    repr(org_error),
+                )
+
+        return jsonify({
+            "ok": True,
+            "authenticated": True,
+            "data": {
+                "user_id": user.get("id"),
+
+                "org_id": org_id,
+
+                "staff_id": user.get("staff_id"),
+
+                "username": (
+                    user.get("username")
+                    or ""
+                ),
+
+                "display_name": (
+                    user.get("display_name")
+                    or user.get("username")
+                    or "Користувач"
+                ),
+
+                "role": (
+                    user.get("role")
+                    or "vet"
+                ),
+
+                "clinic_name": clinic_name,
+
+                "theme": theme,
+
+                "must_change_password": bool(
+                    user.get(
+                        "must_change_password"
+                    )
+                ),
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ /api/session error:",
+            repr(error),
+        )
+
+        return jsonify({
+            "ok": False,
+            "authenticated": False,
+            "error": "Помилка перевірки сесії",
+        }), 500
+
+
+@app.post("/api/logout")
+def api_logout():
+    """
+    Полностью уничтожает серверную сессию.
+    После ответа Flask удалит cookie docpug_session.
+    """
+
+    session.clear()
+
+    response = jsonify({
+        "ok": True,
+        "data": True,
+    })
+
+    response.delete_cookie(
+        app.config.get(
+            "SESSION_COOKIE_NAME",
+            "docpug_session",
+        ),
+        path="/",
+    )
+
+    return response
 # =========================
 # API: ME
 # =========================
