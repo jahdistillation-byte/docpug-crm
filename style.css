@@ -21104,3 +21104,955 @@ select.visitControl {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   PREMIUM SERVICES PAGE
+===================================================== */
+
+.servicesPremiumPage {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 30px 0 130px;
+}
+
+.servicesPremiumHero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 26px;
+  background:
+    radial-gradient(
+      circle at 92% 15%,
+      rgba(168,85,247,0.22),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(35,23,58,0.96),
+      rgba(24,16,42,0.97)
+    );
+  box-shadow:
+    0 25px 70px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+.servicesPremiumHeroContent {
+  position: relative;
+  z-index: 1;
+}
+
+.servicesPremiumEyebrow {
+  margin-bottom: 7px;
+  color: #bc71ff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.servicesPremiumHero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1.08;
+}
+
+.servicesPremiumHero p {
+  max-width: 590px;
+  margin: 11px 0 0;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.servicesPremiumAddButton {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 190px;
+  padding: 13px 20px;
+  border: 1px solid rgba(211,157,255,0.42);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      #8d42ff,
+      #b447ff
+    );
+  color: #fff;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow:
+    0 14px 35px rgba(168,85,247,0.28);
+}
+
+.servicesPremiumAddButton:hover {
+  transform: translateY(-1px);
+}
+
+.servicesPremiumStats {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.servicesPremiumStat {
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.045),
+      rgba(255,255,255,0.018)
+    );
+}
+
+.servicesPremiumStat span,
+.servicesPremiumStat strong,
+.servicesPremiumStat small {
+  display: block;
+}
+
+.servicesPremiumStat span {
+  color: rgba(255,255,255,0.43);
+  font-size: 0.78rem;
+}
+
+.servicesPremiumStat strong {
+  margin-top: 8px;
+  color: #fff;
+  font-size: 1.7rem;
+}
+
+.servicesPremiumStat small {
+  margin-top: 4px;
+  color: rgba(255,255,255,0.33);
+  font-size: 0.7rem;
+}
+
+.servicesPremiumStatActive strong {
+  color: #4be29c;
+}
+
+.servicesPremiumStatPrice strong {
+  color: #c287ff;
+}
+
+.servicesPremiumControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.servicesPremiumSearchWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(430px,100%);
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 14px;
+  background: rgba(8,5,18,0.42);
+}
+
+.servicesPremiumSearchWrap > span {
+  color: rgba(255,255,255,0.38);
+  font-size: 1.15rem;
+}
+
+.servicesPremiumSearchWrap input {
+  width: 100%;
+  padding: 12px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+}
+
+.servicesPremiumStatusFilter {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 13px;
+  background: rgba(255,255,255,0.025);
+}
+
+.servicesPremiumStatusFilter button {
+  padding: 8px 13px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: rgba(255,255,255,0.48);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.servicesPremiumStatusFilter button.active {
+  background: rgba(168,85,247,0.18);
+  color: #d4a4ff;
+}
+
+.servicesPremiumCategories {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+}
+
+.servicesPremiumCategory {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.025);
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+}
+
+.servicesPremiumCategory.active {
+  border-color: rgba(179,98,255,0.35);
+  background: rgba(168,85,247,0.14);
+  color: #dfbdff;
+}
+
+.servicesPremiumCategory b {
+  display: grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  font-size: 0.65rem;
+}
+
+.servicesPremiumGrid {
+  margin-top: 22px;
+}
+
+.servicesPremiumGroup {
+  margin-bottom: 28px;
+}
+
+.servicesPremiumGroupHead {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.servicesPremiumGroupTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.servicesPremiumGroupTitle > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--service-category-color) 40%,
+    transparent
+  );
+  border-radius: 12px;
+  background: color-mix(
+    in srgb,
+    var(--service-category-color) 13%,
+    transparent
+  );
+}
+
+.servicesPremiumGroupTitle h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.servicesPremiumGroupTitle p {
+  margin: 3px 0 0;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.69rem;
+}
+
+.servicesPremiumGroupLine {
+  height: 1px;
+  flex: 1;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(
+        in srgb,
+        var(--service-category-color) 25%,
+        transparent
+      ),
+      transparent
+    );
+}
+
+.servicesPremiumCards {
+  display: grid;
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
+  gap: 12px;
+}
+
+.servicesPremiumCard {
+  display: flex;
+  min-height: 190px;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.085);
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(
+        in srgb,
+        var(--service-category-color) 10%,
+        transparent
+      ),
+      transparent 45%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.045),
+      rgba(255,255,255,0.015)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.servicesPremiumCard.inactive {
+  opacity: 0.52;
+}
+
+.servicesPremiumCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.servicesPremiumCardIcon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(180,105,255,0.18);
+  border-radius: 13px;
+  background: rgba(168,85,247,0.1);
+}
+
+.servicesPremiumCardBody {
+  flex: 1;
+  padding-top: 13px;
+}
+
+.servicesPremiumCardCategory {
+  color: #b974ff;
+  font-size: 0.63rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.servicesPremiumCardBody h3 {
+  margin: 6px 0 0;
+  color: rgba(255,255,255,0.91);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.servicesPremiumCardPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 11px;
+}
+
+.servicesPremiumCardPrice strong {
+  color: #fff;
+  font-size: 1.45rem;
+}
+
+.servicesPremiumCardPrice span {
+  color: rgba(255,255,255,0.38);
+  font-size: 0.72rem;
+}
+
+.servicesPremiumCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.servicesPremiumCardStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.42);
+  font-size: 0.68rem;
+}
+
+.servicesPremiumCardStatus i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.servicesPremiumCardStatus.active i {
+  background: #4de29f;
+  box-shadow: 0 0 12px rgba(77,226,159,0.55);
+}
+
+.servicesPremiumCardStatus.inactive i {
+  background: #ff6c7d;
+}
+
+.servicesPremiumCardActions {
+  display: flex;
+  gap: 6px;
+}
+
+.servicesPremiumCardActions button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 9px;
+  background: rgba(255,255,255,0.035);
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+}
+
+.servicesPremiumCardActions button.danger {
+  color: #ff8794;
+}
+
+.servicesPremiumSwitch {
+  position: relative;
+  display: inline-flex;
+  width: 42px;
+  height: 23px;
+}
+
+.servicesPremiumSwitch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.servicesPremiumSwitch > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.11);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.servicesPremiumSwitch > span::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.72);
+  content: "";
+  transition: 0.2s;
+}
+
+.servicesPremiumSwitch input:checked + span {
+  background:
+    linear-gradient(
+      135deg,
+      #7d45ff,
+      #ba4cff
+    );
+}
+
+.servicesPremiumSwitch input:checked + span::after {
+  transform: translateX(19px);
+  background: #fff;
+}
+
+.servicesPremiumEmpty {
+  padding: 75px 20px;
+  border: 1px dashed rgba(255,255,255,0.09);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.servicesPremiumEmpty > div {
+  font-size: 2rem;
+}
+
+.servicesPremiumEmpty h3 {
+  margin: 10px 0 0;
+  color: #fff;
+}
+
+.servicesPremiumEmpty p {
+  margin: 6px 0 0;
+  color: rgba(255,255,255,0.38);
+}
+
+.servicesPremiumLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 300px;
+  color: #fff;
+}
+
+.servicesPremiumLoading > div {
+  width: 25px;
+  height: 25px;
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top-color: #a855f7;
+  border-radius: 50%;
+  animation: servicesPremiumSpin 0.8s linear infinite;
+}
+
+@keyframes servicesPremiumSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =====================================================
+   SERVICE EDITOR MODAL
+===================================================== */
+
+.serviceEditorOverlay,
+.serviceDeleteOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.serviceEditorBackdrop,
+.serviceDeleteBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3,2,10,0.86);
+  backdrop-filter: blur(18px);
+}
+
+.serviceEditorModal {
+  position: relative;
+  z-index: 1;
+  width: min(580px,95vw);
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 25px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(168,85,247,0.18),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      #211536,
+      #120b20
+    );
+  box-shadow:
+    0 35px 100px rgba(0,0,0,0.6);
+}
+
+.serviceEditorClose {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 11px;
+  background: rgba(255,255,255,0.035);
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+}
+
+.serviceEditorHeader {
+  display: flex;
+  gap: 14px;
+  padding-right: 35px;
+}
+
+.serviceEditorIcon {
+  display: grid;
+  width: 51px;
+  height: 51px;
+  flex: 0 0 51px;
+  place-items: center;
+  border: 1px solid rgba(182,103,255,0.22);
+  border-radius: 16px;
+  background: rgba(168,85,247,0.12);
+  color: #d19dff;
+  font-size: 1.2rem;
+}
+
+.serviceEditorEyebrow {
+  color: #b970ff;
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.serviceEditorHeader h2 {
+  margin: 4px 0 0;
+  color: #fff;
+}
+
+.serviceEditorHeader p {
+  margin: 6px 0 0;
+  color: rgba(255,255,255,0.43);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.serviceEditorForm {
+  margin-top: 22px;
+}
+
+.serviceEditorFieldsRow {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr;
+  gap: 12px;
+}
+
+.serviceEditorField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 13px;
+}
+
+.serviceEditorField > span {
+  color: rgba(255,255,255,0.52);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.serviceEditorField input,
+.serviceEditorField select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(0,0,0,0.2);
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.serviceEditorStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.025);
+}
+
+.serviceEditorStatus strong,
+.serviceEditorStatus span {
+  display: block;
+}
+
+.serviceEditorStatus strong {
+  color: #fff;
+  font-size: 0.82rem;
+}
+
+.serviceEditorStatus span {
+  margin-top: 3px;
+  color: rgba(255,255,255,0.37);
+  font-size: 0.68rem;
+}
+
+.serviceEditorPreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid rgba(181,103,255,0.18);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(168,85,247,0.1),
+      rgba(255,255,255,0.02)
+    );
+}
+
+.serviceEditorPreviewIcon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(168,85,247,0.12);
+}
+
+.serviceEditorPreview span,
+.serviceEditorPreview strong,
+.serviceEditorPreview small {
+  display: block;
+}
+
+.serviceEditorPreview span {
+  color: rgba(255,255,255,0.36);
+  font-size: 0.64rem;
+}
+
+.serviceEditorPreview strong {
+  margin-top: 2px;
+  color: #fff;
+  font-size: 0.86rem;
+}
+
+.serviceEditorPreview small {
+  margin-top: 3px;
+  color: rgba(255,255,255,0.45);
+}
+
+.serviceEditorPreview em {
+  font-style: normal;
+}
+
+.serviceEditorActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.serviceEditorCancel,
+.serviceEditorSubmit {
+  padding: 11px 17px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.serviceEditorCancel {
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.035);
+  color: rgba(255,255,255,0.65);
+}
+
+.serviceEditorSubmit {
+  border: 1px solid rgba(191,121,255,0.38);
+  background:
+    linear-gradient(
+      135deg,
+      #8942ff,
+      #b349ff
+    );
+  color: #fff;
+}
+
+.serviceEditorSubmit:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+
+/* =====================================================
+   SERVICE DELETE CONFIRM
+===================================================== */
+
+.serviceDeleteModal {
+  position: relative;
+  z-index: 1;
+  width: min(430px,94vw);
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(255,77,105,0.15),
+      transparent 40%
+    ),
+    linear-gradient(
+      180deg,
+      #211432,
+      #120b1c
+    );
+  box-shadow:
+    0 35px 100px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+.serviceDeleteIcon {
+  display: grid;
+  width: 61px;
+  height: 61px;
+  margin: 0 auto 14px;
+  place-items: center;
+  border: 1px solid rgba(255,93,120,0.22);
+  border-radius: 19px;
+  background: rgba(255,75,107,0.1);
+  font-size: 1.4rem;
+}
+
+.serviceDeleteEyebrow {
+  color: #ff8798;
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.serviceDeleteModal h2 {
+  margin: 6px 0 0;
+  color: #fff;
+}
+
+.serviceDeleteModal > p {
+  margin: 8px 0 17px;
+  color: rgba(255,255,255,0.43);
+  font-size: 0.81rem;
+}
+
+.serviceDeleteService {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.025);
+  text-align: left;
+}
+
+.serviceDeleteService > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(168,85,247,0.1);
+}
+
+.serviceDeleteService strong,
+.serviceDeleteService small {
+  display: block;
+}
+
+.serviceDeleteService strong {
+  color: #fff;
+}
+
+.serviceDeleteService small {
+  margin-top: 3px;
+  color: rgba(255,255,255,0.39);
+}
+
+.serviceDeleteActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.serviceDeleteCancel,
+.serviceDeleteSubmit {
+  padding: 11px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.serviceDeleteCancel {
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.035);
+  color: rgba(255,255,255,0.66);
+}
+
+.serviceDeleteSubmit {
+  border: 1px solid rgba(255,100,125,0.3);
+  background:
+    linear-gradient(
+      135deg,
+      #d73e62,
+      #ef5373
+    );
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .servicesPremiumStats {
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .servicesPremiumCards {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .servicesPremiumPage {
+    width: min(100% - 24px,1180px);
+  }
+
+  .servicesPremiumHero,
+  .servicesPremiumControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .servicesPremiumAddButton {
+    width: 100%;
+  }
+
+  .servicesPremiumCards,
+  .servicesPremiumStats,
+  .serviceEditorFieldsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .servicesPremiumStatusFilter {
+    overflow-x: auto;
+  }
+
+  .serviceEditorModal {
+    padding: 23px 17px;
+  }
+}
