@@ -26134,8 +26134,16 @@ $("#staffSave")?.addEventListener("click", async () => {
   if (!saved) return;
 
   $("#staffDrawer")?.classList.remove("open");
-  $("#staffDrawer")?.setAttribute("aria-hidden", "true");
+$("#staffDrawer")?.setAttribute(
+  "aria-hidden",
+  "true"
+);
+
+if (state.route === "team") {
+  await renderTeamTab();
+} else if (state.route === "calendar") {
   await renderCalendarTab();
+}
 });
 
 async function openVisitFromCalendar(hour, staffId) {

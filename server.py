@@ -1160,6 +1160,7 @@ def api_create_staff():
         "avatar": d.get("avatar"),
         "color": d.get("color") or "#7C5CFF",
         "phone": d.get("phone"),
+        "specialization": d.get("specialization"),
         "shift_rate": d.get("shift_rate") or 0,
         "percent_rate": d.get("percent_rate") or 0,
         "bonus_rate": d.get("bonus_rate") or 0,
