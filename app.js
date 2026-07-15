@@ -3657,97 +3657,7 @@ function openServiceDeleteConfirm(
   );
 }
 
-function initStockUI() {
-  const page = document.querySelector('.page[data-page="stock"]');
-  if (!page) return;
 
-  if (page.dataset.boundStock === "1") return;
-  page.dataset.boundStock = "1";
-
-  page.querySelector("#btnAddStock")?.addEventListener("click", async () => {
-    const name = (prompt("Назва позиції (препарат/товар):", "") || "").trim();
-    if (!name) return;
-
-    const priceRaw = (prompt("Ціна (грн) за одиницю:", "0") || "0").trim();
-    const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
-
-    const unit = (prompt("Одиниця (шт/мл/таб/фл…):", "шт") || "шт").trim() || "шт";
-    const qtyRaw = (prompt("Початковий залишок:", "0") || "0").trim();
-    const qty = Math.max(0, Number(qtyRaw.replace(",", ".")) || 0);
-
-    const id = "stk_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
-    const items = loadStock();
-    items.unshift({ id, name, price, unit, qty, active: true });
-    saveStock(items);
-
-    renderStockTab();
-    await refreshVisitUIIfOpen();
-  });
-
-  page.querySelector("#stockList")?.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-stk-action]");
-    if (!btn) return;
-
-    const action = btn.dataset.stkAction;
-    const id = btn.dataset.stkId;
-    if (!action || !id) return;
-
-    const items = loadStock();
-    const idx = items.findIndex((x) => x.id === id);
-    if (idx < 0) return;
-
-    if (action === "edit") {
-      const cur = items[idx];
-      const name = (prompt("Назва:", cur.name || "") || "").trim();
-      if (!name) return;
-
-      const priceRaw = (prompt("Ціна (грн) за одиницю:", String(cur.price ?? 0)) || "0").trim();
-      const price = Math.max(0, Number(priceRaw.replace(",", ".")) || 0);
-      const unit = (prompt("Одиниця:", String(cur.unit || "шт")) || "шт").trim() || "шт";
-
-      items[idx] = { ...cur, name, price, unit };
-      saveStock(items);
-
-      renderStockTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
-
-    if (action === "qty") {
-      const cur = items[idx];
-      const qtyRaw = (prompt("Новий залишок:", String(cur.qty ?? 0)) || "0").trim();
-      const qty = Math.max(0, Number(qtyRaw.replace(",", ".")) || 0);
-
-      items[idx] = { ...cur, qty };
-      saveStock(items);
-
-      renderStockTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
-
-    if (action === "toggle") {
-      items[idx].active = items[idx].active === false ? true : false;
-      saveStock(items);
-
-      renderStockTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
-
-    if (action === "del") {
-      const cur = items[idx];
-      if (!confirm(`Видалити позицію "${cur.name}"?`)) return;
-
-      items.splice(idx, 1);
-      saveStock(items);
-
-      renderStockTab();
-      await refreshVisitUIIfOpen();
-      return;
-    }
-  });
-}
 
 
 
@@ -5683,51 +5593,2104 @@ function renderTeamBars(labels, values, color) {
 // Часть 3 (Строки 2001 — 2500)
 // ==========================================================================
 
+// =====================================================
+// PREMIUM STOCK MODULE
+// =====================================================
+
+function getStockCategoryIcon(category) {
+  const value = String(category || "")
+    .trim()
+    .toLowerCase();
+
+  if (value.includes("вакцин")) return "💉";
+  if (value.includes("препарат")) return "💊";
+  if (value.includes("інфуз") || value.includes("инфуз")) return "💧";
+  if (value.includes("хірур") || value.includes("хирург")) return "🩹";
+  if (value.includes("лаборатор")) return "🧪";
+  if (value.includes("витрат") || value.includes("расход")) return "🧤";
+  if (value.includes("корм")) return "🍽️";
+  if (value.includes("господар") || value.includes("хоз")) return "🧹";
+
+  return "📦";
+}
+
+
+function getStockCategories(items) {
+  const categories = Array.from(
+    new Set(
+      (items || [])
+        .map((item) =>
+          String(
+            item.category ||
+            item.cat ||
+            "Інше"
+          ).trim()
+        )
+        .filter(Boolean)
+    )
+  );
+
+  const order = [
+    "Препарати",
+    "Вакцини",
+    "Інфузійні розчини",
+    "Витратні матеріали",
+    "Хірургічні матеріали",
+    "Лабораторія",
+    "Корм",
+    "Господарські товари",
+    "Інше",
+  ];
+
+  return categories.sort((a, b) => {
+    const indexA = order.indexOf(a);
+    const indexB = order.indexOf(b);
+
+    return (
+      (indexA === -1 ? 999 : indexA) -
+      (indexB === -1 ? 999 : indexB)
+    );
+  });
+}
+
+
+function getStockStatus(item) {
+  const quantity = Math.max(
+    0,
+    Number(item?.qty || 0)
+  );
+
+  const minimum = Math.max(
+    0,
+    Number(
+      item?.min_qty ??
+      item?.minimum_qty ??
+      5
+    )
+  );
+
+  if (quantity <= 0) {
+    return {
+      key: "empty",
+      label: "Немає в наявності",
+      shortLabel: "Немає",
+      icon: "○",
+    };
+  }
+
+  if (quantity <= minimum) {
+    return {
+      key: "critical",
+      label: "Критичний залишок",
+      shortLabel: "Критично",
+      icon: "!",
+    };
+  }
+
+  if (quantity <= minimum * 2) {
+    return {
+      key: "low",
+      label: "Закінчується",
+      shortLabel: "Мало",
+      icon: "↓",
+    };
+  }
+
+  return {
+    key: "good",
+    label: "Достатній запас",
+    shortLabel: "В наявності",
+    icon: "✓",
+  };
+}
+
+
+function normalizeStockItem(item) {
+  return {
+    ...item,
+
+    id:
+      String(
+        item?.id ||
+        `stk_${Date.now().toString(36)}`
+      ),
+
+    name:
+      String(
+        item?.name ||
+        "Позиція"
+      ),
+
+    category:
+      String(
+        item?.category ||
+        item?.cat ||
+        "Інше"
+      ),
+
+    unit:
+      String(
+        item?.unit ||
+        "шт"
+      ),
+
+    qty:
+      Math.max(
+        0,
+        Number(item?.qty || 0)
+      ),
+
+    price:
+      Math.max(
+        0,
+        Number(
+          item?.price ??
+          item?.sell_price ??
+          0
+        )
+      ),
+
+    cost:
+      Math.max(
+        0,
+        Number(
+          item?.cost ??
+          item?.purchase_price ??
+          0
+        )
+      ),
+
+    min_qty:
+      Math.max(
+        0,
+        Number(
+          item?.min_qty ??
+          item?.minimum_qty ??
+          5
+        )
+      ),
+
+    active:
+      item?.active !== false,
+  };
+}
+
+
+function saveNormalizedStock(items) {
+  const normalized =
+    (items || []).map(
+      normalizeStockItem
+    );
+
+  saveStock(normalized);
+
+  return normalized;
+}
+
+
 function renderStockTab() {
-  const page = document.querySelector('.page[data-page="stock"]');
+  const page =
+    document.querySelector(
+      '.page[data-page="stock"]'
+    );
+
   if (!page) return;
 
-  const items = loadStock();
-  page.dataset.boundStock = "0";
+  let items =
+    loadStock()
+      .map(normalizeStockItem);
+
+  /*
+   * Сохраняем новые поля category, cost,
+   * min_qty и active у старых позиций.
+   */
+  saveStock(items);
+
+  const categories =
+    getStockCategories(items);
+
+  const totalUnits =
+    items.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.qty || 0),
+      0
+    );
+
+  const totalCostValue =
+    items.reduce(
+      (sum, item) =>
+        sum +
+        (
+          Number(item.qty || 0) *
+          Number(item.cost || 0)
+        ),
+      0
+    );
+
+  const lowCount =
+    items.filter((item) => {
+      const status =
+        getStockStatus(item);
+
+      return (
+        status.key === "low" ||
+        status.key === "critical"
+      );
+    }).length;
+
+  const emptyCount =
+    items.filter(
+      (item) =>
+        getStockStatus(item).key ===
+        "empty"
+    ).length;
+
+  const currentQuery =
+    String(
+      state.stockQuery || ""
+    );
+
+  const currentFilter =
+    String(
+      state.stockFilter || "all"
+    );
+
+  const currentCategory =
+    String(
+      state.stockCategory || "all"
+    );
 
   page.innerHTML = `
-    <div class="card">
-      <div class="row">
-        <h2>Склад</h2>
-        <button id="btnAddStock" class="btn">+ Додати</button>
-      </div>
-      <div class="hint">Локальний склад (поки що). Залишок змінюється при додаванні/видаленні у візиті.</div>
-      <div id="stockList" class="list"></div>
+    <div class="stockPremiumPage">
+
+      <header class="stockPremiumHero">
+        <div>
+          <div class="stockPremiumEyebrow">
+            ОБЛІК КЛІНІКИ
+          </div>
+
+          <h1>
+            Склад клініки
+          </h1>
+
+          <p>
+            Контролюйте препарати,
+            матеріали, залишки та
+            вартість запасів.
+          </p>
+        </div>
+
+        <button
+          class="stockPremiumAddButton"
+          id="stockPremiumAdd"
+          type="button"
+        >
+          <span>＋</span>
+          Додати позицію
+        </button>
+      </header>
+
+      <section class="stockPremiumStats">
+        <div class="stockPremiumStat">
+          <span>
+            Позицій
+          </span>
+
+          <strong>
+            ${items.length}
+          </strong>
+
+          <small>
+            у каталозі складу
+          </small>
+        </div>
+
+        <div class="stockPremiumStat stockPremiumStatUnits">
+          <span>
+            Загальний залишок
+          </span>
+
+          <strong>
+            ${totalUnits.toLocaleString(
+              "uk-UA"
+            )}
+          </strong>
+
+          <small>
+            одиниць товару
+          </small>
+        </div>
+
+        <div class="stockPremiumStat stockPremiumStatLow">
+          <span>
+            Потребують уваги
+          </span>
+
+          <strong>
+            ${lowCount}
+          </strong>
+
+          <small>
+            закінчуються
+          </small>
+        </div>
+
+        <div class="stockPremiumStat stockPremiumStatEmpty">
+          <span>
+            Закінчилися
+          </span>
+
+          <strong>
+            ${emptyCount}
+          </strong>
+
+          <small>
+            немає в наявності
+          </small>
+        </div>
+
+        <div class="stockPremiumStat stockPremiumStatValue">
+          <span>
+            Вартість запасів
+          </span>
+
+          <strong>
+            ${Math.round(
+              totalCostValue
+            ).toLocaleString(
+              "uk-UA"
+            )}
+            ₴
+          </strong>
+
+          <small>
+            за закупівельною ціною
+          </small>
+        </div>
+      </section>
+
+      <section class="stockPremiumControls">
+        <div class="stockPremiumSearch">
+          <span>⌕</span>
+
+          <input
+            id="stockPremiumSearch"
+            type="search"
+            placeholder="Пошук препарату або матеріалу..."
+            value="${escapeHtml(
+              currentQuery
+            )}"
+          >
+        </div>
+
+        <div class="stockPremiumFilters">
+          <button
+            type="button"
+            class="${
+              currentFilter === "all"
+                ? "active"
+                : ""
+            }"
+            data-stock-filter="all"
+          >
+            Усі
+          </button>
+
+          <button
+            type="button"
+            class="${
+              currentFilter === "good"
+                ? "active"
+                : ""
+            }"
+            data-stock-filter="good"
+          >
+            В наявності
+          </button>
+
+          <button
+            type="button"
+            class="${
+              currentFilter === "attention"
+                ? "active"
+                : ""
+            }"
+            data-stock-filter="attention"
+          >
+            Закінчуються
+          </button>
+
+          <button
+            type="button"
+            class="${
+              currentFilter === "empty"
+                ? "active"
+                : ""
+            }"
+            data-stock-filter="empty"
+          >
+            Немає
+          </button>
+        </div>
+      </section>
+
+      <section class="stockPremiumCategories">
+        <button
+          type="button"
+          class="${
+            currentCategory === "all"
+              ? "active"
+              : ""
+          }"
+          data-stock-category="all"
+        >
+          <span>▦</span>
+          Усі категорії
+          <b>${items.length}</b>
+        </button>
+
+        ${categories
+          .map((category) => {
+            const count =
+              items.filter(
+                (item) =>
+                  String(
+                    item.category
+                  ) === category
+              ).length;
+
+            return `
+              <button
+                type="button"
+                class="${
+                  currentCategory ===
+                  category
+                    ? "active"
+                    : ""
+                }"
+                data-stock-category="${escapeHtml(
+                  category
+                )}"
+              >
+                <span>
+                  ${getStockCategoryIcon(
+                    category
+                  )}
+                </span>
+
+                ${escapeHtml(category)}
+
+                <b>${count}</b>
+              </button>
+            `;
+          })
+          .join("")}
+      </section>
+
+      <section
+        class="stockPremiumGrid"
+        id="stockPremiumGrid"
+      ></section>
     </div>
   `;
 
-  const list = page.querySelector("#stockList");
-  if (!list) return;
+  const grid =
+    page.querySelector(
+      "#stockPremiumGrid"
+    );
 
-  if (!items.length) {
-    list.innerHTML = `<div class="hint">Поки порожньо. Натисни “Додати”.</div>`;
-  } else {
-    list.innerHTML = items.map((it) => `
-      <div class="item">
-        <div class="left" style="width:100%">
-          <div class="name">${escapeHtml(it.name || "—")}</div>
-          <div class="meta">
-            ${escapeHtml(String(Number(it.price)||0))} грн/${escapeHtml(it.unit||"шт")}
-            • залишок: <b>${escapeHtml(String(Number(it.qty)||0))}</b>
-            • ${it.active === false ? "❌ вимкнено" : "✅ активно"}
-          </div>
-          <div class="pill">id: ${escapeHtml(it.id)}</div>
+  const renderStockCards = () => {
+    if (!grid) return;
+
+    const query =
+      String(
+        state.stockQuery || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const filter =
+      String(
+        state.stockFilter || "all"
+      );
+
+    const categoryFilter =
+      String(
+        state.stockCategory || "all"
+      );
+
+    const filtered =
+      items.filter((item) => {
+        const status =
+          getStockStatus(item);
+
+        const matchesQuery =
+          !query ||
+          [
+            item.name,
+            item.category,
+            item.unit,
+          ]
+            .join(" ")
+            .toLowerCase()
+            .includes(query);
+
+        const matchesCategory =
+          categoryFilter === "all" ||
+          String(item.category) ===
+            categoryFilter;
+
+        const matchesFilter =
+          filter === "all" ||
+          (
+            filter === "good" &&
+            status.key === "good"
+          ) ||
+          (
+            filter === "attention" &&
+            (
+              status.key === "low" ||
+              status.key === "critical"
+            )
+          ) ||
+          (
+            filter === "empty" &&
+            status.key === "empty"
+          );
+
+        return (
+          matchesQuery &&
+          matchesCategory &&
+          matchesFilter
+        );
+      });
+
+    if (!filtered.length) {
+      grid.innerHTML = `
+        <div class="stockPremiumEmpty">
+          <div>📦</div>
+
+          <h3>
+            Позицій не знайдено
+          </h3>
+
+          <p>
+            Змініть пошук або фільтр.
+          </p>
         </div>
-        <div class="right" style="display:flex; gap:6px;">
-          <button class="iconBtn" data-stk-action="edit" data-stk-id="${escapeHtml(it.id)}">✏️</button>
-          <button class="iconBtn" data-stk-action="qty" data-stk-id="${escapeHtml(it.id)}">📦</button>
-          <button class="iconBtn" data-stk-action="toggle" data-stk-id="${escapeHtml(it.id)}">⚡️</button>
-          <button class="iconBtn" data-stk-action="del" data-stk-id="${escapeHtml(it.id)}">🗑</button>
+      `;
+
+      return;
+    }
+
+    const grouped =
+      filtered.reduce(
+        (result, item) => {
+          const category =
+            item.category || "Інше";
+
+          if (!result[category]) {
+            result[category] = [];
+          }
+
+          result[category].push(item);
+
+          return result;
+        },
+        {}
+      );
+
+    const groupNames =
+      getStockCategories(filtered);
+
+    grid.innerHTML =
+      groupNames
+        .map((category) => {
+          const categoryItems =
+            grouped[category] || [];
+
+          return `
+            <section class="stockPremiumGroup">
+              <div class="stockPremiumGroupHead">
+                <div class="stockPremiumGroupTitle">
+                  <span>
+                    ${getStockCategoryIcon(
+                      category
+                    )}
+                  </span>
+
+                  <div>
+                    <h2>
+                      ${escapeHtml(category)}
+                    </h2>
+
+                    <p>
+                      ${categoryItems.length}
+                      позицій
+                    </p>
+                  </div>
+                </div>
+
+                <div></div>
+              </div>
+
+              <div class="stockPremiumCards">
+                ${categoryItems
+                  .map((item) => {
+                    const status =
+                      getStockStatus(item);
+
+                    const salePrice =
+                      Number(
+                        item.price || 0
+                      );
+
+                    const cost =
+                      Number(
+                        item.cost || 0
+                      );
+
+                    const quantity =
+                      Number(
+                        item.qty || 0
+                      );
+
+                    const minimum =
+                      Number(
+                        item.min_qty || 0
+                      );
+
+                    const stockValue =
+                      quantity * cost;
+
+                    return `
+                      <article
+                        class="
+                          stockPremiumCard
+                          stock-status-${
+                            status.key
+                          }
+                          ${
+                            item.active ===
+                            false
+                              ? "inactive"
+                              : ""
+                          }
+                        "
+                        data-stock-card="${escapeHtml(
+                          item.id
+                        )}"
+                      >
+                        <div class="stockPremiumCardTop">
+                          <div class="stockPremiumCardIcon">
+                            ${getStockCategoryIcon(
+                              item.category
+                            )}
+                          </div>
+
+                          <label
+                            class="stockPremiumSwitch"
+                            title="Активність позиції"
+                          >
+                            <input
+                              type="checkbox"
+                              ${
+                                item.active ===
+                                false
+                                  ? ""
+                                  : "checked"
+                              }
+                              data-stock-toggle="${escapeHtml(
+                                item.id
+                              )}"
+                            >
+
+                            <span></span>
+                          </label>
+                        </div>
+
+                        <div class="stockPremiumCardBody">
+                          <div class="stockPremiumCardCategory">
+                            ${escapeHtml(
+                              item.category
+                            )}
+                          </div>
+
+                          <h3>
+                            ${escapeHtml(
+                              item.name
+                            )}
+                          </h3>
+
+                          <div class="stockPremiumPrices">
+                            <div>
+                              <span>
+                                Продаж
+                              </span>
+
+                              <strong>
+                                ${salePrice.toLocaleString(
+                                  "uk-UA"
+                                )}
+                                ₴
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>
+                                Закупівля
+                              </span>
+
+                              <strong>
+                                ${cost.toLocaleString(
+                                  "uk-UA"
+                                )}
+                                ₴
+                              </strong>
+                            </div>
+                          </div>
+
+                          <div class="stockPremiumQuantity">
+                            <div>
+                              <span>
+                                Залишок
+                              </span>
+
+                              <strong>
+                                ${quantity.toLocaleString(
+                                  "uk-UA"
+                                )}
+                                <small>
+                                  ${escapeHtml(
+                                    item.unit
+                                  )}
+                                </small>
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>
+                                Мінімум
+                              </span>
+
+                              <strong>
+                                ${minimum.toLocaleString(
+                                  "uk-UA"
+                                )}
+                                <small>
+                                  ${escapeHtml(
+                                    item.unit
+                                  )}
+                                </small>
+                              </strong>
+                            </div>
+                          </div>
+
+                          <div
+                            class="
+                              stockPremiumStatus
+                              ${status.key}
+                            "
+                          >
+                            <i></i>
+
+                            <span>
+                              ${escapeHtml(
+                                status.label
+                              )}
+                            </span>
+                          </div>
+
+                          ${
+                            cost > 0
+                              ? `
+                                <div class="stockPremiumCardValue">
+                                  Вартість залишку:
+                                  <strong>
+                                    ${stockValue.toLocaleString(
+                                      "uk-UA"
+                                    )}
+                                    ₴
+                                  </strong>
+                                </div>
+                              `
+                              : ""
+                          }
+                        </div>
+
+                        <div class="stockPremiumCardActions">
+                          <button
+                            type="button"
+                            class="stockActionButton stockActionWriteoff"
+                            data-stock-adjust="${escapeHtml(
+                              item.id
+                            )}"
+                            data-stock-adjust-mode="writeoff"
+                          >
+                            − Списати
+                          </button>
+
+                          <button
+                            type="button"
+                            class="stockActionButton stockActionIncome"
+                            data-stock-adjust="${escapeHtml(
+                              item.id
+                            )}"
+                            data-stock-adjust-mode="income"
+                          >
+                            ＋ Поповнити
+                          </button>
+                        </div>
+
+                        <div class="stockPremiumCardFooter">
+                          <button
+                            type="button"
+                            data-stock-edit="${escapeHtml(
+                              item.id
+                            )}"
+                          >
+                            ✎ Редагувати
+                          </button>
+
+                          <button
+                            type="button"
+                            class="danger"
+                            data-stock-delete="${escapeHtml(
+                              item.id
+                            )}"
+                          >
+                            Видалити
+                          </button>
+                        </div>
+                      </article>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </section>
+          `;
+        })
+        .join("");
+  };
+
+  renderStockCards();
+
+  page
+    .querySelector(
+      "#stockPremiumSearch"
+    )
+    ?.addEventListener(
+      "input",
+      (event) => {
+        state.stockQuery =
+          String(
+            event.target.value || ""
+          );
+
+        renderStockCards();
+      }
+    );
+
+  page
+    .querySelectorAll(
+      "[data-stock-filter]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          state.stockFilter =
+            button.dataset.stockFilter ||
+            "all";
+
+          page
+            .querySelectorAll(
+              "[data-stock-filter]"
+            )
+            .forEach((item) =>
+              item.classList.remove(
+                "active"
+              )
+            );
+
+          button.classList.add("active");
+
+          renderStockCards();
+        }
+      );
+    });
+
+  page
+    .querySelectorAll(
+      "[data-stock-category]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          state.stockCategory =
+            button.dataset.stockCategory ||
+            "all";
+
+          page
+            .querySelectorAll(
+              "[data-stock-category]"
+            )
+            .forEach((item) =>
+              item.classList.remove(
+                "active"
+              )
+            );
+
+          button.classList.add("active");
+
+          renderStockCards();
+        }
+      );
+    });
+
+  page
+    .querySelector(
+      "#stockPremiumAdd"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openStockEditorModal();
+      }
+    );
+
+  grid?.addEventListener(
+    "click",
+    async (event) => {
+      const editButton =
+        event.target.closest(
+          "[data-stock-edit]"
+        );
+
+      if (editButton) {
+        const item =
+          items.find(
+            (row) =>
+              String(row.id) ===
+              String(
+                editButton.dataset
+                  .stockEdit
+              )
+          );
+
+        if (item) {
+          openStockEditorModal(item);
+        }
+
+        return;
+      }
+
+      const adjustButton =
+        event.target.closest(
+          "[data-stock-adjust]"
+        );
+
+      if (adjustButton) {
+        const item =
+          items.find(
+            (row) =>
+              String(row.id) ===
+              String(
+                adjustButton.dataset
+                  .stockAdjust
+              )
+          );
+
+        if (!item) return;
+
+        openStockAdjustmentModal(
+          item,
+          adjustButton.dataset
+            .stockAdjustMode ||
+            "income"
+        );
+
+        return;
+      }
+
+      const deleteButton =
+        event.target.closest(
+          "[data-stock-delete]"
+        );
+
+      if (deleteButton) {
+        const item =
+          items.find(
+            (row) =>
+              String(row.id) ===
+              String(
+                deleteButton.dataset
+                  .stockDelete
+              )
+          );
+
+        if (!item) return;
+
+        const confirmed =
+          await openStockDeleteConfirm(
+            item
+          );
+
+        if (!confirmed) return;
+
+        items =
+          items.filter(
+            (row) =>
+              String(row.id) !==
+              String(item.id)
+          );
+
+        saveStock(items);
+        renderStockTab();
+      }
+    }
+  );
+
+  grid?.addEventListener(
+    "change",
+    (event) => {
+      const toggle =
+        event.target.closest(
+          "[data-stock-toggle]"
+        );
+
+      if (!toggle) return;
+
+      const index =
+        items.findIndex(
+          (row) =>
+            String(row.id) ===
+            String(
+              toggle.dataset
+                .stockToggle
+            )
+        );
+
+      if (index < 0) return;
+
+      items[index] = {
+        ...items[index],
+        active: toggle.checked,
+      };
+
+      saveStock(items);
+      renderStockTab();
+    }
+  );
+}
+
+
+// =====================================================
+// STOCK EDITOR
+// =====================================================
+
+function openStockEditorModal(
+  stockItem = null
+) {
+  document
+    .getElementById(
+      "stockEditorModal"
+    )
+    ?.remove();
+
+  const isEdit =
+    Boolean(stockItem?.id);
+
+  const item =
+    normalizeStockItem(
+      stockItem || {}
+    );
+
+  const categories = [
+    "Препарати",
+    "Вакцини",
+    "Інфузійні розчини",
+    "Витратні матеріали",
+    "Хірургічні матеріали",
+    "Лабораторія",
+    "Корм",
+    "Господарські товари",
+    "Інше",
+  ];
+
+  const units = [
+    "шт",
+    "мл",
+    "мг",
+    "г",
+    "кг",
+    "таб",
+    "амп",
+    "фл",
+    "уп",
+    "рул",
+    "л",
+  ];
+
+  const modal =
+    document.createElement("div");
+
+  modal.id =
+    "stockEditorModal";
+
+  modal.className =
+    "stockEditorOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="stockEditorBackdrop"
+      data-close-stock-editor
+    ></div>
+
+    <section class="stockEditorModal">
+      <button
+        class="stockEditorClose"
+        type="button"
+        data-close-stock-editor
+      >
+        ✕
+      </button>
+
+      <header class="stockEditorHeader">
+        <div class="stockEditorIcon">
+          ${
+            isEdit
+              ? "✎"
+              : "＋"
+          }
+        </div>
+
+        <div>
+          <div class="stockEditorEyebrow">
+            ${
+              isEdit
+                ? "РЕДАГУВАННЯ ПОЗИЦІЇ"
+                : "НОВА ПОЗИЦІЯ"
+            }
+          </div>
+
+          <h2>
+            ${
+              isEdit
+                ? "Оновити дані"
+                : "Додати на склад"
+            }
+          </h2>
+
+          <p>
+            Вкажіть назву, категорію,
+            ціни та початковий залишок.
+          </p>
+        </div>
+      </header>
+
+      <form id="stockEditorForm">
+        <label class="stockEditorField">
+          <span>
+            Назва позиції
+          </span>
+
+          <input
+            id="stockEditorName"
+            type="text"
+            placeholder="Наприклад, Мелоксивет"
+            value="${escapeHtml(
+              isEdit
+                ? item.name
+                : ""
+            )}"
+          >
+        </label>
+
+        <div class="stockEditorRow">
+          <label class="stockEditorField">
+            <span>
+              Категорія
+            </span>
+
+            <select id="stockEditorCategory">
+              ${categories
+                .map(
+                  (category) => `
+                    <option
+                      value="${escapeHtml(
+                        category
+                      )}"
+                      ${
+                        item.category ===
+                        category
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${escapeHtml(
+                        category
+                      )}
+                    </option>
+                  `
+                )
+                .join("")}
+            </select>
+          </label>
+
+          <label class="stockEditorField">
+            <span>
+              Одиниця
+            </span>
+
+            <select id="stockEditorUnit">
+              ${units
+                .map(
+                  (unit) => `
+                    <option
+                      value="${escapeHtml(
+                        unit
+                      )}"
+                      ${
+                        item.unit === unit
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${escapeHtml(unit)}
+                    </option>
+                  `
+                )
+                .join("")}
+            </select>
+          </label>
+        </div>
+
+        <div class="stockEditorRow">
+          <label class="stockEditorField">
+            <span>
+              Ціна продажу, грн
+            </span>
+
+            <input
+              id="stockEditorPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${
+                isEdit
+                  ? escapeHtml(
+                      String(item.price)
+                    )
+                  : ""
+              }"
+              placeholder="0"
+            >
+          </label>
+
+          <label class="stockEditorField">
+            <span>
+              Закупівельна ціна
+            </span>
+
+            <input
+              id="stockEditorCost"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${
+                isEdit
+                  ? escapeHtml(
+                      String(item.cost)
+                    )
+                  : ""
+              }"
+              placeholder="0"
+            >
+          </label>
+        </div>
+
+        <div class="stockEditorRow">
+          <label class="stockEditorField">
+            <span>
+              Поточний залишок
+            </span>
+
+            <input
+              id="stockEditorQuantity"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${
+                isEdit
+                  ? escapeHtml(
+                      String(item.qty)
+                    )
+                  : "0"
+              }"
+            >
+          </label>
+
+          <label class="stockEditorField">
+            <span>
+              Мінімальний залишок
+            </span>
+
+            <input
+              id="stockEditorMinimum"
+              type="number"
+              min="0"
+              step="0.01"
+              value="${escapeHtml(
+                String(item.min_qty)
+              )}"
+            >
+          </label>
+        </div>
+
+        <label class="stockEditorStatus">
+          <div>
+            <strong>
+              Активна позиція
+            </strong>
+
+            <span>
+              Доступна для додавання
+              у візит
+            </span>
+          </div>
+
+          <label class="stockPremiumSwitch">
+            <input
+              id="stockEditorActive"
+              type="checkbox"
+              ${
+                item.active
+                  ? "checked"
+                  : ""
+              }
+            >
+
+            <span></span>
+          </label>
+        </label>
+
+        <div class="stockEditorPreview">
+          <div
+            class="stockEditorPreviewIcon"
+            id="stockEditorPreviewIcon"
+          >
+            ${getStockCategoryIcon(
+              item.category
+            )}
+          </div>
+
+          <div>
+            <span>
+              Попередній перегляд
+            </span>
+
+            <strong
+              id="stockEditorPreviewName"
+            >
+              ${
+                isEdit
+                  ? escapeHtml(item.name)
+                  : "Назва позиції"
+              }
+            </strong>
+
+            <small
+              id="stockEditorPreviewMeta"
+            >
+              ${escapeHtml(
+                item.category
+              )}
+              ·
+              ${item.qty}
+              ${escapeHtml(item.unit)}
+            </small>
+          </div>
+        </div>
+
+        <footer class="stockEditorActions">
+          <button
+            type="button"
+            class="stockEditorCancel"
+            data-close-stock-editor
+          >
+            Скасувати
+          </button>
+
+          <button
+            type="submit"
+            class="stockEditorSubmit"
+            id="stockEditorSubmit"
+          >
+            ${
+              isEdit
+                ? "Зберегти зміни"
+                : "Додати позицію"
+            }
+          </button>
+        </footer>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeModal = () =>
+    modal.remove();
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-stock-editor]"
+        )
+      ) {
+        closeModal();
+      }
+    }
+  );
+
+  const nameInput =
+    modal.querySelector(
+      "#stockEditorName"
+    );
+
+  const categoryInput =
+    modal.querySelector(
+      "#stockEditorCategory"
+    );
+
+  const unitInput =
+    modal.querySelector(
+      "#stockEditorUnit"
+    );
+
+  const quantityInput =
+    modal.querySelector(
+      "#stockEditorQuantity"
+    );
+
+  const updatePreview = () => {
+    const name =
+      String(
+        nameInput?.value || ""
+      ).trim();
+
+    const category =
+      String(
+        categoryInput?.value ||
+        "Інше"
+      );
+
+    const unit =
+      String(
+        unitInput?.value || "шт"
+      );
+
+    const quantity =
+      Number(
+        quantityInput?.value || 0
+      );
+
+    const icon =
+      modal.querySelector(
+        "#stockEditorPreviewIcon"
+      );
+
+    const previewName =
+      modal.querySelector(
+        "#stockEditorPreviewName"
+      );
+
+    const previewMeta =
+      modal.querySelector(
+        "#stockEditorPreviewMeta"
+      );
+
+    if (icon) {
+      icon.textContent =
+        getStockCategoryIcon(
+          category
+        );
+    }
+
+    if (previewName) {
+      previewName.textContent =
+        name || "Назва позиції";
+    }
+
+    if (previewMeta) {
+      previewMeta.textContent =
+        `${category} · ${quantity} ${unit}`;
+    }
+  };
+
+  [
+    nameInput,
+    categoryInput,
+    unitInput,
+    quantityInput,
+  ].forEach((element) => {
+    element?.addEventListener(
+      "input",
+      updatePreview
+    );
+
+    element?.addEventListener(
+      "change",
+      updatePreview
+    );
+  });
+
+  modal
+    .querySelector(
+      "#stockEditorForm"
+    )
+    ?.addEventListener(
+      "submit",
+      (event) => {
+        event.preventDefault();
+
+        const name =
+          String(
+            nameInput?.value || ""
+          ).trim();
+
+        if (!name) {
+          alert(
+            "Вкажіть назву позиції."
+          );
+
+          nameInput?.focus();
+          return;
+        }
+
+        const savedItem = {
+          ...item,
+
+          id:
+            isEdit
+              ? item.id
+              : `stk_${Date.now()
+                  .toString(36)}_${Math.random()
+                  .toString(16)
+                  .slice(2)}`,
+
+          name,
+
+          category:
+            String(
+              categoryInput?.value ||
+              "Інше"
+            ),
+
+          unit:
+            String(
+              unitInput?.value ||
+              "шт"
+            ),
+
+          price:
+            Math.max(
+              0,
+              Number(
+                modal.querySelector(
+                  "#stockEditorPrice"
+                )?.value || 0
+              )
+            ),
+
+          cost:
+            Math.max(
+              0,
+              Number(
+                modal.querySelector(
+                  "#stockEditorCost"
+                )?.value || 0
+              )
+            ),
+
+          qty:
+            Math.max(
+              0,
+              Number(
+                quantityInput?.value || 0
+              )
+            ),
+
+          min_qty:
+            Math.max(
+              0,
+              Number(
+                modal.querySelector(
+                  "#stockEditorMinimum"
+                )?.value || 0
+              )
+            ),
+
+          active:
+            modal.querySelector(
+              "#stockEditorActive"
+            )?.checked !== false,
+        };
+
+        let items =
+          loadStock()
+            .map(normalizeStockItem);
+
+        if (isEdit) {
+          items =
+            items.map((row) =>
+              String(row.id) ===
+              String(savedItem.id)
+                ? savedItem
+                : row
+            );
+        } else {
+          items.unshift(savedItem);
+        }
+
+        saveStock(items);
+
+        closeModal();
+        renderStockTab();
+      }
+    );
+
+  setTimeout(() => {
+    nameInput?.focus();
+  }, 50);
+}
+
+
+// =====================================================
+// STOCK QUANTITY ADJUSTMENT
+// =====================================================
+
+function openStockAdjustmentModal(
+  stockItem,
+  mode = "income"
+) {
+  document
+    .getElementById(
+      "stockAdjustmentModal"
+    )
+    ?.remove();
+
+  const item =
+    normalizeStockItem(
+      stockItem
+    );
+
+  const isIncome =
+    mode === "income";
+
+  const modal =
+    document.createElement("div");
+
+  modal.id =
+    "stockAdjustmentModal";
+
+  modal.className =
+    "stockAdjustmentOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="stockAdjustmentBackdrop"
+      data-close-stock-adjustment
+    ></div>
+
+    <section class="stockAdjustmentModal">
+      <button
+        type="button"
+        class="stockAdjustmentClose"
+        data-close-stock-adjustment
+      >
+        ✕
+      </button>
+
+      <div
+        class="
+          stockAdjustmentIcon
+          ${isIncome ? "income" : "writeoff"}
+        "
+      >
+        ${
+          isIncome
+            ? "＋"
+            : "−"
+        }
+      </div>
+
+      <div class="stockAdjustmentEyebrow">
+        ${
+          isIncome
+            ? "НАДХОДЖЕННЯ"
+            : "СПИСАННЯ"
+        }
+      </div>
+
+      <h2>
+        ${
+          isIncome
+            ? "Поповнити залишок"
+            : "Списати зі складу"
+        }
+      </h2>
+
+      <div class="stockAdjustmentItem">
+        <span>
+          ${getStockCategoryIcon(
+            item.category
+          )}
+        </span>
+
+        <div>
+          <strong>
+            ${escapeHtml(item.name)}
+          </strong>
+
+          <small>
+            Зараз:
+            ${item.qty}
+            ${escapeHtml(item.unit)}
+          </small>
         </div>
       </div>
-    `).join("");
-  }
-  initStockUI();
+
+      <label class="stockAdjustmentField">
+        <span>
+          Кількість,
+          ${escapeHtml(item.unit)}
+        </span>
+
+        <input
+          id="stockAdjustmentQuantity"
+          type="number"
+          min="0.01"
+          step="0.01"
+          placeholder="0"
+        >
+      </label>
+
+      <label class="stockAdjustmentField">
+        <span>
+          Коментар
+        </span>
+
+        <textarea
+          id="stockAdjustmentComment"
+          rows="3"
+          placeholder="${
+            isIncome
+              ? "Наприклад, нова поставка"
+              : "Наприклад, використано або прострочено"
+          }"
+        ></textarea>
+      </label>
+
+      <div class="stockAdjustmentResult">
+        <span>
+          Новий залишок
+        </span>
+
+        <strong id="stockAdjustmentResult">
+          ${item.qty}
+          ${escapeHtml(item.unit)}
+        </strong>
+      </div>
+
+      <div class="stockAdjustmentActions">
+        <button
+          type="button"
+          class="stockAdjustmentCancel"
+          data-close-stock-adjustment
+        >
+          Скасувати
+        </button>
+
+        <button
+          type="button"
+          class="
+            stockAdjustmentSubmit
+            ${isIncome ? "income" : "writeoff"}
+          "
+          id="stockAdjustmentSubmit"
+        >
+          ${
+            isIncome
+              ? "Поповнити"
+              : "Списати"
+          }
+        </button>
+      </div>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+
+  const quantityInput =
+    modal.querySelector(
+      "#stockAdjustmentQuantity"
+    );
+
+  const resultElement =
+    modal.querySelector(
+      "#stockAdjustmentResult"
+    );
+
+  const closeModal = () =>
+    modal.remove();
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-stock-adjustment]"
+        )
+      ) {
+        closeModal();
+      }
+    }
+  );
+
+  const calculateResult = () => {
+    const quantity =
+      Math.max(
+        0,
+        Number(
+          quantityInput?.value || 0
+        )
+      );
+
+    const result =
+      isIncome
+        ? item.qty + quantity
+        : Math.max(
+            0,
+            item.qty - quantity
+          );
+
+    if (resultElement) {
+      resultElement.textContent =
+        `${result} ${item.unit}`;
+    }
+  };
+
+  quantityInput?.addEventListener(
+    "input",
+    calculateResult
+  );
+
+  modal
+    .querySelector(
+      "#stockAdjustmentSubmit"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        const quantity =
+          Math.max(
+            0,
+            Number(
+              quantityInput?.value || 0
+            )
+          );
+
+        if (!quantity) {
+          alert(
+            "Вкажіть кількість."
+          );
+
+          quantityInput?.focus();
+          return;
+        }
+
+        if (
+          !isIncome &&
+          quantity > item.qty
+        ) {
+          alert(
+            `На складі лише ${item.qty} ${item.unit}.`
+          );
+
+          return;
+        }
+
+        let items =
+          loadStock()
+            .map(normalizeStockItem);
+
+        items =
+          items.map((row) => {
+            if (
+              String(row.id) !==
+              String(item.id)
+            ) {
+              return row;
+            }
+
+            return {
+              ...row,
+
+              qty:
+                isIncome
+                  ? row.qty + quantity
+                  : Math.max(
+                      0,
+                      row.qty - quantity
+                    ),
+
+              updated_at:
+                new Date().toISOString(),
+            };
+          });
+
+        saveStock(items);
+
+        closeModal();
+        renderStockTab();
+      }
+    );
+
+  setTimeout(() => {
+    quantityInput?.focus();
+  }, 50);
+}
+
+
+// =====================================================
+// STOCK DELETE CONFIRM
+// =====================================================
+
+function openStockDeleteConfirm(
+  stockItem
+) {
+  return new Promise((resolve) => {
+    document
+      .getElementById(
+        "stockDeleteModal"
+      )
+      ?.remove();
+
+    const item =
+      normalizeStockItem(
+        stockItem
+      );
+
+    const modal =
+      document.createElement("div");
+
+    modal.id =
+      "stockDeleteModal";
+
+    modal.className =
+      "stockDeleteOverlay";
+
+    modal.innerHTML = `
+      <div
+        class="stockDeleteBackdrop"
+        data-close-stock-delete
+      ></div>
+
+      <section class="stockDeleteModal">
+        <div class="stockDeleteIcon">
+          🗑
+        </div>
+
+        <div class="stockDeleteEyebrow">
+          ВИДАЛЕННЯ ПОЗИЦІЇ
+        </div>
+
+        <h2>
+          Видалити зі складу?
+        </h2>
+
+        <p>
+          Позиція буде остаточно
+          видалена з локального
+          каталогу складу.
+        </p>
+
+        <div class="stockDeleteItem">
+          <span>
+            ${getStockCategoryIcon(
+              item.category
+            )}
+          </span>
+
+          <div>
+            <strong>
+              ${escapeHtml(item.name)}
+            </strong>
+
+            <small>
+              ${item.qty}
+              ${escapeHtml(item.unit)}
+              ·
+              ${escapeHtml(item.category)}
+            </small>
+          </div>
+        </div>
+
+        <div class="stockDeleteActions">
+          <button
+            type="button"
+            class="stockDeleteCancel"
+            data-close-stock-delete
+          >
+            Скасувати
+          </button>
+
+          <button
+            type="button"
+            class="stockDeleteSubmit"
+            id="stockDeleteSubmit"
+          >
+            Видалити
+          </button>
+        </div>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+
+    const finish = (result) => {
+      modal.remove();
+      resolve(result);
+    };
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target.closest(
+            "[data-close-stock-delete]"
+          )
+        ) {
+          finish(false);
+        }
+      }
+    );
+
+    modal
+      .querySelector(
+        "#stockDeleteSubmit"
+      )
+      ?.addEventListener(
+        "click",
+        () => finish(true)
+      );
+  });
 }
 
 function a4FilenameFromVisit(visitId) {
