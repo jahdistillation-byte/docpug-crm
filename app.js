@@ -24981,10 +24981,17 @@ async function initSettingsUI() {
 
   bindPersonalSettingsUI(page);
 
-  if (ownerMode) {
-    const profile = await loadClinicProfileApi();
-    renderClinicProfileSettings(page, profile);
-  }
+if (ownerMode) {
+  const profile =
+    await loadClinicProfileApi();
+
+  renderClinicProfileSettings(
+    page,
+    profile
+  );
+}
+
+bindSettingsLogoutUI(page);
 }
 function bindPersonalSettingsUI(page) {
   const savedTheme = LS.get(
