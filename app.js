@@ -5134,6 +5134,67 @@ async function renderHospitalTab() {
     hospitalPatients
   );
 }
+async function loadHospitalTasksApi(
+  hospitalizationId
+) {
+  try {
+    const response = await fetch(
+      `/api/hospitalizations/${encodeURIComponent(
+        String(hospitalizationId)
+      )}/tasks`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch (error) {
+      console.error(
+        "loadHospitalTasksApi JSON error:",
+        text
+      );
+
+      return [];
+    }
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      console.error(
+        "loadHospitalTasksApi failed:",
+        response.status,
+        json
+      );
+
+      return [];
+    }
+
+    return Array.isArray(json.data)
+      ? json.data
+      : [];
+  } catch (error) {
+    console.error(
+      "loadHospitalTasksApi error:",
+      error
+    );
+
+    return [];
+  }
+}
 
 async function openHospitalTasksModal(
   hospitalization
