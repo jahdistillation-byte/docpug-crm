@@ -9549,7 +9549,9 @@ async function createHospitalTaskApi(
       return null;
     }
 
-    return json.data || null;
+    return Array.isArray(json.data)
+  ? json.data[0] || null
+  : json.data || null;
   } catch (error) {
     console.error(
       "createHospitalTaskApi error:",
@@ -9627,7 +9629,9 @@ async function completeHospitalTaskApi(
       return null;
     }
 
-    return json.data || null;
+    return Array.isArray(json.data)
+  ? json.data[0] || null
+  : json.data || null;
   } catch (error) {
     console.error(
       "completeHospitalTaskApi error:",
@@ -9742,9 +9746,11 @@ async function openHospitalTasksModal(
 
   document.body.appendChild(modal);
 
-  const closeModal = () => {
-    modal.remove();
-  };
+  const closeModal = async () => {
+  modal.remove();
+
+  await renderHospitalTab();
+};
 
   modal.addEventListener(
     "click",
@@ -10278,27 +10284,79 @@ async function openHospitalTasksModal(
 
         if (!created) return;
 
-        hospitalTasks.push(created);
+/*
+ * Сразу добавляем созданное назначение
+ * в локальный список модального окна.
+ */
+hospitalTasks = [
+  ...hospitalTasks,
+  created,
+].sort((a, b) => {
+  return (
+    new Date(a?.scheduled_at || 0) -
+    new Date(b?.scheduled_at || 0)
+  );
+});
 
-        const titleInput =
-          modal.querySelector(
-            "#hospitalTaskTitle"
-          );
+const titleInput =
+  modal.querySelector(
+    "#hospitalTaskTitle"
+  );
 
-        const instructionsInput =
-          modal.querySelector(
-            "#hospitalTaskInstructions"
-          );
+const instructionsInput =
+  modal.querySelector(
+    "#hospitalTaskInstructions"
+  );
 
-        if (titleInput) {
-          titleInput.value = "";
-        }
+if (titleInput) {
+  titleInput.value = "";
+  titleInput.focus();
+}
 
-        if (instructionsInput) {
-          instructionsInput.value = "";
-        }
+if (instructionsInput) {
+  instructionsInput.value = "";
+}
 
-        renderTasks();
+/*
+ * Мгновенно обновляем список внутри окна.
+ */
+renderTasks();
+
+/*
+ * Обновляем данные открытой госпитализации,
+ * чтобы карточка пациента тоже знала
+ * о новом назначении.
+ */
+hospitalization.hospital_tasks =
+  hospitalTasks;
+
+hospitalization.tasks_count =
+  hospitalTasks.length;
+
+hospitalization.active_tasks_count =
+  hospitalTasks.filter(
+    (task) =>
+      task?.status === "planned"
+  ).length;
+
+hospitalization.completed_tasks_count =
+  hospitalTasks.filter(
+    (task) =>
+      task?.status === "completed"
+  ).length;
+
+hospitalization.next_task =
+  hospitalTasks.find(
+    (task) =>
+      task?.status === "planned"
+  ) || null;
+
+/*
+ * Перерисовываем основную страницу под модалкой.
+ * Окно назначений при этом останется открытым,
+ * потому что оно находится в document.body.
+ */
+await renderHospitalTab();
       }
     );
 
@@ -16263,7 +16321,9 @@ async function createSpecializationApi(payload) {
       alert(json.error || "Не вдалося створити напрям");
       return null;
     }
-    return json.data || null;
+    return Array.isArray(json.data)
+  ? json.data[0] || null
+  : json.data || null;
   } catch (e) {
     console.error("createSpecializationApi failed:", e);
     alert("Помилка створення напряму");
