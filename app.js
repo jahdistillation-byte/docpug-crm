@@ -25805,31 +25805,102 @@ async function init() {
   // === ПРЕМИУМ ЛОГИН КЛИНИКИ ===
   const authForm = document.getElementById("authForm");
   const authOverlay = document.getElementById("authOverlay");
-  
-  // Проверяем, входил ли пользователь ранее в этой сессии
-  const cachedOrg = sessionStorage.getItem("pug_active_org_id");
-const cachedUsername = sessionStorage.getItem("pug_active_username");
-const cachedDisplayName = sessionStorage.getItem(
-  "pug_active_display_name"
-);
-const cachedRole = sessionStorage.getItem("pug_active_role");
-const cachedClinicName = sessionStorage.getItem(
-  "pug_active_clinic_name"
-);
+    // Проверяем настоящую серверную сессию
+  try {
+    const sessionResponse = await fetch(
+      "/api/session",
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
 
-if (cachedOrg && cachedUsername) {
-  state.me = {
-    org_id: cachedOrg,
-    username: cachedUsername,
-    display_name: cachedDisplayName || cachedUsername,
-    role: cachedRole || "staff",
-    clinic_name: cachedClinicName || "Клініка",
-  };
+    const sessionJson =
+      await sessionResponse.json();
 
-  if (authOverlay) {
-    authOverlay.style.display = "none";
+    if (
+      sessionResponse.ok &&
+      sessionJson?.ok === true &&
+      sessionJson?.authenticated === true &&
+      sessionJson?.data
+    ) {
+      const sessionUser =
+        sessionJson.data;
+
+      state.me = {
+        user_id:
+          sessionUser.user_id || null,
+
+        org_id:
+          sessionUser.org_id || null,
+
+        staff_id:
+          sessionUser.staff_id || null,
+
+        username:
+          sessionUser.username || "",
+
+        display_name:
+          sessionUser.display_name ||
+          sessionUser.username ||
+          "Користувач",
+
+        role:
+          sessionUser.role || "staff",
+
+        clinic_name:
+          sessionUser.clinic_name ||
+          "Клініка",
+
+        must_change_password:
+          Boolean(
+            sessionUser.must_change_password
+          ),
+      };
+
+      if (authOverlay) {
+        authOverlay.style.display =
+          "none";
+
+        authOverlay.style.opacity =
+          "1";
+      }
+
+      console.log(
+        "Серверна сесія активна:",
+        state.me.username,
+        state.me.role
+      );
+    } else {
+      state.me = null;
+
+      if (authOverlay) {
+        authOverlay.style.display =
+          "flex";
+
+        authOverlay.style.opacity =
+          "1";
+      }
+    }
+  } catch (sessionError) {
+    console.warn(
+      "Не вдалося перевірити сесію:",
+      sessionError
+    );
+
+    state.me = null;
+
+    if (authOverlay) {
+      authOverlay.style.display =
+        "flex";
+
+      authOverlay.style.opacity =
+        "1";
+    }
   }
-}
 
   if (authForm) {
     authForm.addEventListener("submit", async (e) => {
