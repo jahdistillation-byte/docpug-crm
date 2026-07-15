@@ -20837,3 +20837,270 @@ select.visitControl {
   color: rgba(255, 255, 255, 0.36);
   font-size: 0.63rem;
 }
+/* =====================================================
+   HOSPITAL DISCHARGE CONFIRM
+===================================================== */
+
+.hospitalDischargeConfirmOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.hospitalDischargeConfirmBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 2, 10, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.hospitalDischargeConfirmModal {
+  position: relative;
+  z-index: 1;
+  width: min(500px, 94vw);
+  padding: 30px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.11);
+  border-radius: 26px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(255, 76, 112, 0.15),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(154, 79, 255, 0.16),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(34, 23, 55, 0.98),
+      rgba(16, 10, 29, 0.99)
+    );
+  box-shadow:
+    0 35px 110px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.hospitalDischargeConfirmClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid
+    rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background:
+    rgba(255, 255, 255, 0.035);
+  color:
+    rgba(255, 255, 255, 0.56);
+  cursor: pointer;
+}
+
+.hospitalDischargeConfirmIcon {
+  display: grid;
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 17px;
+  place-items: center;
+  border: 1px solid
+    rgba(255, 102, 128, 0.22);
+  border-radius: 21px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 82, 112, 0.17),
+      rgba(168, 85, 247, 0.12)
+    );
+  box-shadow:
+    0 13px 34px
+      rgba(255, 75, 105, 0.11);
+  font-size: 1.7rem;
+}
+
+.hospitalDischargeConfirmEyebrow {
+  margin-bottom: 7px;
+  color: #ff8799;
+  font-size: 0.69rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.hospitalDischargeConfirmModal h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.hospitalDischargeConfirmModal > p {
+  max-width: 390px;
+  margin: 10px auto 19px;
+  color:
+    rgba(255, 255, 255, 0.48);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.hospitalDischargeConfirmPatient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    );
+  text-align: left;
+}
+
+.hospitalDischargeConfirmAvatar {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 1px solid
+    rgba(174, 92, 255, 0.2);
+  border-radius: 14px;
+  background:
+    rgba(168, 85, 247, 0.11);
+}
+
+.hospitalDischargeConfirmPatient strong,
+.hospitalDischargeConfirmPatient span {
+  display: block;
+}
+
+.hospitalDischargeConfirmPatient strong {
+  color: #fff;
+  font-size: 0.91rem;
+}
+
+.hospitalDischargeConfirmPatient span {
+  margin-top: 3px;
+  color:
+    rgba(255, 255, 255, 0.42);
+  font-size: 0.72rem;
+}
+
+.hospitalDischargeConfirmField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 15px;
+  text-align: left;
+}
+
+.hospitalDischargeConfirmField > span {
+  color:
+    rgba(255, 255, 255, 0.52);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.hospitalDischargeConfirmField textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 12px 13px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  outline: none;
+  background:
+    rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.hospitalDischargeConfirmField textarea:focus {
+  border-color:
+    rgba(255, 98, 126, 0.38);
+  box-shadow:
+    0 0 0 3px
+      rgba(255, 78, 111, 0.08);
+}
+
+.hospitalDischargeConfirmActions {
+  display: grid;
+  grid-template-columns:
+    1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hospitalDischargeConfirmCancel,
+.hospitalDischargeConfirmSubmit {
+  min-height: 46px;
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hospitalDischargeConfirmCancel {
+  border: 1px solid
+    rgba(255, 255, 255, 0.1);
+  background:
+    rgba(255, 255, 255, 0.035);
+  color:
+    rgba(255, 255, 255, 0.7);
+}
+
+.hospitalDischargeConfirmSubmit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid
+    rgba(255, 111, 135, 0.35);
+  background:
+    linear-gradient(
+      135deg,
+      #d63c63,
+      #f05275
+    );
+  color: #fff;
+  box-shadow:
+    0 13px 30px
+      rgba(227, 55, 94, 0.23);
+}
+
+.hospitalDischargeConfirmSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 16px 34px
+      rgba(227, 55, 94, 0.3);
+}
+
+.hospitalDischargeConfirmSubmit b {
+  font-size: 1rem;
+}
+
+@media (max-width: 560px) {
+  .hospitalDischargeConfirmModal {
+    padding: 25px 18px 18px;
+  }
+
+  .hospitalDischargeConfirmActions {
+    grid-template-columns: 1fr;
+  }
+}

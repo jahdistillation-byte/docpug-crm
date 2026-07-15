@@ -7561,7 +7561,201 @@ async function openHospitalAdmissionModal() {
       }
     );
 }
+function openHospitalDischargeConfirm(
+  hospitalization
+) {
+  return new Promise((resolve) => {
+    document
+      .getElementById(
+        "hospitalDischargeConfirm"
+      )
+      ?.remove();
 
+    const patientName =
+      hospitalization?.patient_name ||
+      "пацієнта";
+
+    const ownerName =
+      hospitalization?.owner_name ||
+      "Власник не вказаний";
+
+    const room =
+      hospitalization?.room ||
+      "Палата не вказана";
+
+    const modal =
+      document.createElement("div");
+
+    modal.id =
+      "hospitalDischargeConfirm";
+
+    modal.className =
+      "hospitalDischargeConfirmOverlay";
+
+    modal.innerHTML = `
+      <div
+        class="hospitalDischargeConfirmBackdrop"
+        data-discharge-cancel
+      ></div>
+
+      <section
+        class="hospitalDischargeConfirmModal"
+        role="dialog"
+        aria-modal="true"
+      >
+        <button
+          class="hospitalDischargeConfirmClose"
+          type="button"
+          data-discharge-cancel
+        >
+          ✕
+        </button>
+
+        <div class="hospitalDischargeConfirmIcon">
+          🏥
+        </div>
+
+        <div class="hospitalDischargeConfirmEyebrow">
+          ВИПИСКА ЗІ СТАЦІОНАРУ
+        </div>
+
+        <h2>
+          Виписати
+          ${escapeHtml(patientName)}?
+        </h2>
+
+        <p>
+          Госпіталізацію буде завершено,
+          а пацієнт зникне зі списку
+          активного стаціонару.
+        </p>
+
+        <div class="hospitalDischargeConfirmPatient">
+          <div class="hospitalDischargeConfirmAvatar">
+            🐾
+          </div>
+
+          <div>
+            <strong>
+              ${escapeHtml(patientName)}
+            </strong>
+
+            <span>
+              ${escapeHtml(ownerName)}
+              ·
+              ${escapeHtml(room)}
+            </span>
+          </div>
+        </div>
+
+        <label class="hospitalDischargeConfirmField">
+          <span>
+            Примітка до виписки
+          </span>
+
+          <textarea
+            id="hospitalDischargeNote"
+            rows="3"
+            placeholder="Стан на момент виписки, рекомендації або коментар..."
+          ></textarea>
+        </label>
+
+        <div class="hospitalDischargeConfirmActions">
+          <button
+            class="hospitalDischargeConfirmCancel"
+            type="button"
+            data-discharge-cancel
+          >
+            Залишити у стаціонарі
+          </button>
+
+          <button
+            class="hospitalDischargeConfirmSubmit"
+            id="hospitalDischargeConfirmSubmit"
+            type="button"
+          >
+            <span>Виписати пацієнта</span>
+            <b>→</b>
+          </button>
+        </div>
+      </section>
+    `;
+
+    document.body.appendChild(
+      modal
+    );
+
+    const finish = (
+      confirmed,
+      note = ""
+    ) => {
+      modal.remove();
+
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+
+      resolve({
+        confirmed,
+        note,
+      });
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        finish(false);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target.closest(
+            "[data-discharge-cancel]"
+          )
+        ) {
+          finish(false);
+        }
+      }
+    );
+
+    modal
+      .querySelector(
+        "#hospitalDischargeConfirmSubmit"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          const note =
+            String(
+              modal.querySelector(
+                "#hospitalDischargeNote"
+              )?.value || ""
+            ).trim();
+
+          finish(
+            true,
+            note
+          );
+        }
+      );
+
+    setTimeout(() => {
+      modal
+        .querySelector(
+          "#hospitalDischargeNote"
+        )
+        ?.focus();
+    }, 50);
+  });
+}
 function bindHospitalPageActions(
   page,
   hospitalPatients
@@ -7682,12 +7876,16 @@ await openHospitalTasksModal(
           ?.patient_name ||
         "пацієнта";
 
-      const confirmed =
-        confirm(
-          `Виписати ${patientName} зі стаціонару?`
-        );
+      const dischargeDecision =
+  await openHospitalDischargeConfirm(
+    hospitalization
+  );
 
-      if (!confirmed) return;
+if (
+  !dischargeDecision.confirmed
+) {
+  return;
+}
 
       const oldText =
         dischargeButton.textContent;
@@ -7699,9 +7897,10 @@ await openHospitalTasksModal(
         "Виписуємо…";
 
       const result =
-        await dischargeHospitalizationApi(
-          hospitalizationId
-        );
+  await dischargeHospitalizationApi(
+    hospitalizationId,
+    dischargeDecision.note
+  );
 
       if (!result) {
         dischargeButton.disabled =
