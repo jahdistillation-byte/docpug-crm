@@ -9,7 +9,11 @@ from urllib.parse import parse_qsl
 
 from datetime import datetime, timezone
 from flask import Flask, request, send_from_directory, jsonify
-from werkzeug.utils import secure_filename
+from werkzeug.utils import (
+    secure_filename,
+    generate_password_hash,
+    check_password_hash,
+)
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from supabase import create_client
@@ -3493,81 +3497,181 @@ def api_delete_medcard_entry(entry_id):
 # =========================
 # LOGIN
 # =========================
+# =========================
+# LOGIN
+# =========================
 @app.post("/api/login")
 def api_clinic_login():
-    d = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True) or {}
 
-    username = (d.get("username") or "").strip()
-    password = (d.get("password") or "").strip()
+    username = str(
+        data.get("username") or ""
+    ).strip()
+
+    password = str(
+        data.get("password") or ""
+    )
 
     if not username or not password:
         return jsonify({
             "ok": False,
-            "error": "Введіть логін та пароль"
+            "error": "Введіть логін та пароль",
         }), 400
 
     try:
-        res = (
-            supabase.table("clinic_users")
+        result = (
+            supabase
+            .table("clinic_users")
             .select(
-                "username, password_plain, org_id, role, "
-                "display_name, is_active"
+                "id, username, password_plain, password_hash, "
+                "org_id, staff_id, role, display_name, is_active, "
+                "must_change_password"
             )
-            .eq("username", username)
+            .ilike("username", username)
             .limit(1)
             .execute()
         )
 
-        if not res.data:
+        if not result.data:
             return jsonify({
                 "ok": False,
-                "error": "Невірний логін або пароль"
+                "error": "Невірний логін або пароль",
             }), 401
 
-        user_data = res.data[0]
+        user_data = result.data[0]
 
         if user_data.get("is_active") is False:
             return jsonify({
                 "ok": False,
-                "error": "Обліковий запис вимкнений"
+                "error": "Обліковий запис вимкнений",
             }), 403
 
-        if user_data.get("password_plain") != password:
+        stored_hash = str(
+            user_data.get("password_hash") or ""
+        ).strip()
+
+        stored_plain = str(
+            user_data.get("password_plain") or ""
+        )
+
+        password_valid = False
+        migrated_to_hash = False
+
+        # 1. Основной безопасный вариант:
+        # проверяем password_hash.
+        if stored_hash:
+            try:
+                password_valid = check_password_hash(
+                    stored_hash,
+                    password,
+                )
+            except Exception as hash_error:
+                print(
+                    "⚠️ password hash check failed:",
+                    repr(hash_error),
+                )
+
+                password_valid = False
+
+        # 2. Временный переходный вариант:
+        # если хеша ещё нет, проверяем старый пароль.
+        elif stored_plain:
+            password_valid = hmac.compare_digest(
+                stored_plain,
+                password,
+            )
+
+            # После успешного входа автоматически
+            # сохраняем безопасный хеш.
+            if password_valid:
+                new_hash = generate_password_hash(
+                    password
+                )
+
+                (
+                    supabase
+                    .table("clinic_users")
+                    .update({
+                        "password_hash": new_hash,
+                        "last_login_at": (
+                            datetime
+                            .now(timezone.utc)
+                            .isoformat()
+                        ),
+                        "updated_at": (
+                            datetime
+                            .now(timezone.utc)
+                            .isoformat()
+                        ),
+                    })
+                    .eq("id", user_data.get("id"))
+                    .execute()
+                )
+
+                migrated_to_hash = True
+
+        if not password_valid:
             return jsonify({
                 "ok": False,
-                "error": "Невірний логін або пароль"
+                "error": "Невірний логін або пароль",
             }), 401
+
+        # Если пользователь уже работал через hash,
+        # просто обновляем дату последнего входа.
+        if not migrated_to_hash:
+            (
+                supabase
+                .table("clinic_users")
+                .update({
+                    "last_login_at": (
+                        datetime
+                        .now(timezone.utc)
+                        .isoformat()
+                    ),
+                    "updated_at": (
+                        datetime
+                        .now(timezone.utc)
+                        .isoformat()
+                    ),
+                })
+                .eq("id", user_data.get("id"))
+                .execute()
+            )
 
         org_id = user_data.get("org_id")
 
         if not org_id:
             return jsonify({
                 "ok": False,
-                "error": "Користувач не прив’язаний до клініки"
+                "error": (
+                    "Користувач не прив’язаний "
+                    "до клініки"
+                ),
             }), 400
 
         clinic_name = "Клініка"
         theme = "purple"
 
         try:
-            res_org = (
-                supabase.table("orgs")
+            org_result = (
+                supabase
+                .table("orgs")
                 .select("name")
                 .eq("id", org_id)
                 .limit(1)
                 .execute()
             )
 
-            if res_org.data:
+            if org_result.data:
                 clinic_name = (
-                    res_org.data[0].get("name")
+                    org_result.data[0].get("name")
                     or clinic_name
                 )
 
         except Exception as org_error:
             print(
                 "⚠️ clinic name load failed:",
-                repr(org_error)
+                repr(org_error),
             )
 
         return jsonify({
@@ -3575,25 +3679,46 @@ def api_clinic_login():
             "data": {
                 "org_id": org_id,
 
-                "username": user_data.get("username"),
+                "staff_id":
+                    user_data.get("staff_id"),
+
+                "username":
+                    user_data.get("username"),
+
                 "display_name": (
                     user_data.get("display_name")
                     or user_data.get("username")
                     or "Користувач"
                 ),
 
-                "role": user_data.get("role") or "staff",
-                "clinic_name": clinic_name,
-                "theme": theme,
-            }
+                "role": (
+                    user_data.get("role")
+                    or "vet"
+                ),
+
+                "clinic_name":
+                    clinic_name,
+
+                "theme":
+                    theme,
+
+                "must_change_password": bool(
+                    user_data.get(
+                        "must_change_password"
+                    )
+                ),
+            },
         })
 
-    except Exception as e:
-        print("❌ /api/login error:", repr(e))
+    except Exception as error:
+        print(
+            "❌ /api/login error:",
+            repr(error),
+        )
 
         return jsonify({
             "ok": False,
-            "error": f"Помилка сервера: {str(e)}"
+            "error": "Помилка сервера авторизації",
         }), 500
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")), debug=False)
