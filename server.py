@@ -955,26 +955,17 @@ def api_get_session():
 @app.post("/api/logout")
 def api_logout():
     """
-    Полностью уничтожает серверную сессию.
-    После ответа Flask удалит cookie docpug_session.
+    Завершает текущую серверную сессию.
+    Flask самостоятельно удалит session-cookie
+    после session.clear().
     """
 
     session.clear()
 
-    response = jsonify({
+    return jsonify({
         "ok": True,
-        "data": True,
+        "authenticated": False,
     })
-
-    response.delete_cookie(
-        app.config.get(
-            "SESSION_COOKIE_NAME",
-            "docpug_session",
-        ),
-        path="/",
-    )
-
-    return response
 # =========================
 # API: ME
 # =========================

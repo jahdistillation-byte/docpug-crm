@@ -25025,7 +25025,7 @@ function bindPersonalSettingsUI(page) {
   const languageSelect =
     page.querySelector("#systemLanguageSelect");
 
-  if (languageSelect) {
+    if (languageSelect) {
     languageSelect.value = LS.get(
       "docpug_clinic_lang",
       "uk"
@@ -25040,10 +25040,15 @@ function bindPersonalSettingsUI(page) {
         );
       }
     );
-    function initSettingsUI() {
-  const page = document.querySelector(
-    '.page[data-page="settings"]'
-  );
+  }
+}
+
+
+function initSettingsUI() {
+  const page =
+    document.querySelector(
+      '.page[data-page="settings"]'
+    );
 
   if (!page) return;
 
@@ -25058,43 +25063,134 @@ function bindPersonalSettingsUI(page) {
   // обработчик темы
   // обработчик языка
 
-  const logoutButton =
+     const oldLogoutButton =
     document.getElementById(
       "btn-logout"
+    ) ||
+    page.querySelector(
+      "#btnClinicLogout"
     );
 
-  // обработчик выхода
-}
+  if (oldLogoutButton) {
+    const logoutButton =
+      oldLogoutButton.cloneNode(true);
+
+    oldLogoutButton.replaceWith(
+      logoutButton
+    );
+
+    logoutButton.addEventListener(
+      "click",
+      async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const confirmed =
+          confirm(
+            "Вийти з акаунта?"
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        const originalText =
+          logoutButton.textContent;
+
+        logoutButton.disabled = true;
+        logoutButton.textContent =
+          "Вихід…";
+
+        try {
+          const response =
+            await fetch(
+              "/api/logout",
+              {
+                method: "POST",
+                credentials: "include",
+                cache: "no-store",
+
+                headers: {
+                  Accept:
+                    "application/json",
+                },
+              }
+            );
+
+          const text =
+            await response.text();
+
+          let json = null;
+
+          try {
+            json = text
+              ? JSON.parse(text)
+              : null;
+          } catch {
+            json = null;
+          }
+
+          if (
+            !response.ok ||
+            json?.ok !== true
+          ) {
+            throw new Error(
+              json?.error ||
+              `Logout HTTP ${response.status}`
+            );
+          }
+
+          state.me = null;
+          state.clinicProfile = null;
+
+          [
+            "pug_active_org_id",
+            "pug_active_username",
+            "pug_active_display_name",
+            "pug_active_role",
+            "pug_active_clinic_name",
+          ].forEach((key) => {
+            sessionStorage.removeItem(
+              key
+            );
+          });
+
+          window.location.replace(
+            "/?logged_out=1"
+          );
+        } catch (error) {
+          console.error(
+            "Logout failed:",
+            error
+          );
+
+          alert(
+            "Не вдалося завершити сесію."
+          );
+
+          logoutButton.disabled = false;
+          logoutButton.textContent =
+            originalText;
+        }
+      }
+    );
   }
-
-  page
-    .querySelector("#btnClinicLogout")
-    ?.addEventListener("click", () => {
-      if (!confirm("Вийти з акаунта?")) return;
-
-      [
-        "pug_active_org_id",
-        "pug_active_username",
-        "pug_active_display_name",
-        "pug_active_role",
-        "pug_active_clinic_name",
-      ].forEach((key) => {
-        sessionStorage.removeItem(key);
-      });
-
-      state.me = null;
-      state.clinicProfile = null;
-
-      window.location.reload();
-    });
 }
 
-function renderClinicProfileSettings(page, profile) {
+
+function renderClinicProfileSettings(
+  page,
+  profile
+) {
   const loading =
-    page.querySelector("#clinicSettingsLoading");
+    page.querySelector(
+      "#clinicSettingsLoading"
+    );
 
   const root =
-    page.querySelector("#clinicSettingsContent");
+    page.querySelector(
+      "#clinicSettingsContent"
+    );
 
   if (!root) return;
 
@@ -25951,7 +26047,7 @@ async function init() {
   }),
 });
         
-        const json = await res.get_json ? await res.get_json() : await res.json();
+       const json = await res.json();
 
         if (!res.ok || !json.ok) {
           if (errorBox) {
@@ -25998,17 +26094,7 @@ state.me = {
     ),
 };
 
-state.me = {
-  org_id: json.data.org_id,
-  username: json.data.username || username,
-  display_name:
-    json.data.display_name ||
-    json.data.username ||
-    username ||
-    "Користувач",
-  role: json.data.role || "staff",
-  clinic_name: json.data.clinic_name || "Клініка",
-};
+
 
 console.log(
   "Успішний вхід:",
