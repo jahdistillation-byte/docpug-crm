@@ -25919,8 +25919,17 @@ function bootstrapClinicTheme() {
 // =========================
 async function init() {
   // === ПРЕМИУМ ЛОГИН КЛИНИКИ ===
-  const authForm = document.getElementById("authForm");
-  const authOverlay = document.getElementById("authOverlay");
+  const authForm =
+    document.getElementById(
+      "authForm"
+    );
+
+  const authOverlay =
+    document.getElementById(
+      "authOverlay"
+    );
+
+  let sessionAuthenticated = false;
     // Проверяем настоящую серверную сессию
   try {
     const sessionResponse = await fetch(
@@ -25938,13 +25947,15 @@ async function init() {
       await sessionResponse.json();
 
     if (
-      sessionResponse.ok &&
-      sessionJson?.ok === true &&
-      sessionJson?.authenticated === true &&
-      sessionJson?.data
-    ) {
-      const sessionUser =
-        sessionJson.data;
+  sessionResponse.ok &&
+  sessionJson?.ok === true &&
+  sessionJson?.authenticated === true &&
+  sessionJson?.data
+) {
+  sessionAuthenticated = true;
+
+  const sessionUser =
+    sessionJson.data;
 
       state.me = {
         user_id:
@@ -26110,10 +26121,8 @@ console.log(
           setTimeout(() => authOverlay.style.display = "none", 400);
         }
 
-        // Принудительно перезагружаем данные CRM под эту конкретную клинику
-        await loadOwners();
-        await loadPatientsApi();
-        await loadServicesApi();
+        window.location.replace("/");
+return;
 
       } catch (err) {
         if (errorBox) {
@@ -26124,7 +26133,9 @@ console.log(
       }
     });
   }
-
+  if (!sessionAuthenticated) {
+    return;
+  }
   if (typeof initTabs === "function") initTabs();
   if (typeof seedIfEmpty === "function") seedIfEmpty();
 
