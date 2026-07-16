@@ -1477,39 +1477,6 @@ def api_services_list():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
-@app.post("/api/services")
-def api_services_update():
-    user, auth_error = (
-        owner_required()
-    )
-
-    if auth_error:
-        return auth_error
-
-    try:
-        payload = request.get_json(silent=True) or {}
-        name = (payload.get("name") or "").strip()
-        price = payload.get("price") or 0
-        active = payload.get("active", True)
-
-        if not name:
-            return jsonify({"ok": False, "error": "name required"}), 400
-
-        current_org = get_current_org_id()
-        res = (
-            supabase.table("services")
-            .insert({
-                "org_id": current_org,
-                "name": name,
-                "price": price,
-                "active": bool(active),
-            })
-            .execute()
-        )
-        return jsonify({"ok": True, "data": res.data or []})
-    except Exception as e:
-        print("❌ /api/services POST error:", repr(e))
-        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.put("/api/services")
