@@ -300,6 +300,12 @@ function openDeleteModal(
   callback = null,
   mode = "delete"
 ) {
+  console.log(
+    "OPEN MODAL:",
+    mode,
+    text
+  );
+
   const modal =
     $("#deleteModal");
 
