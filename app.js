@@ -320,38 +320,48 @@ function openDeleteModal(
   const title =
     modal?.querySelector("h2");
 
-  if (!modal || !textEl) {
+  if (
+    !modal ||
+    !textEl ||
+    !confirmBtn ||
+    !cancelBtn
+  ) {
     console.error(
-      "Не знайдено deleteModal або deleteModalText"
+      "Не знайдено елементи deleteModal"
     );
 
     return;
   }
 
+  deleteCallback =
+    typeof callback === "function"
+      ? callback
+      : null;
+
   textEl.innerHTML = text;
 
- deleteCallback =
-  typeof callback === "function"
-    ? callback
-    : null;
+  confirmBtn.onclick = null;
+  cancelBtn.onclick = null;
 
-if (mode === "info") {
-  if (icon) {
-    icon.textContent = "🔒";
-  }
+  confirmBtn.classList.remove(
+    "primary",
+    "btnDanger"
+  );
 
-  if (title) {
-    title.textContent =
-      "Недостатньо прав";
-  }
+  cancelBtn.style.display = "";
 
-  if (confirmBtn) {
+  if (mode === "info") {
+    if (icon) {
+      icon.textContent = "🔒";
+    }
+
+    if (title) {
+      title.textContent =
+        "Недостатньо прав";
+    }
+
     confirmBtn.textContent =
       "Зрозуміло";
-
-    confirmBtn.classList.remove(
-      "btnDanger"
-    );
 
     confirmBtn.classList.add(
       "primary"
@@ -360,31 +370,47 @@ if (mode === "info") {
     confirmBtn.onclick = () => {
       closeDeleteModal();
     };
-  }
 
-  if (cancelBtn) {
     cancelBtn.style.display =
       "none";
-  }
 
-} else if (mode === "logout") {
-  if (icon) {
-    icon.textContent = "🚪";
-  }
+  } else if (mode === "success") {
+    if (icon) {
+      icon.textContent = "✅";
+    }
 
-  if (title) {
-    title.textContent =
-      "Вийти з акаунта?";
-  }
+    if (title) {
+      title.textContent =
+        "Акаунт створено";
+    }
 
-  if (confirmBtn) {
+    confirmBtn.textContent =
+      "Зрозуміло";
+
+    confirmBtn.classList.add(
+      "primary"
+    );
+
+    confirmBtn.onclick = () => {
+      closeDeleteModal();
+    };
+
+    cancelBtn.style.display =
+      "none";
+
+  } else if (mode === "logout") {
+    if (icon) {
+      icon.textContent = "🚪";
+    }
+
+    if (title) {
+      title.textContent =
+        "Вийти з акаунта?";
+    }
+
     confirmBtn.textContent =
       "Вийти";
 
-    confirmBtn.classList.remove(
-      "btnDanger"
-    );
-
     confirmBtn.classList.add(
       "primary"
     );
@@ -403,31 +429,20 @@ if (mode === "info") {
           await action();
         }
       };
-  }
 
-  if (cancelBtn) {
-    cancelBtn.style.display =
-      "";
-  }
+  } else {
+    if (icon) {
+      icon.textContent = "🗑";
+    }
 
-} else {
-  if (icon) {
-    icon.textContent = "🗑";
-  }
+    if (title) {
+      title.textContent =
+        "Видалити?";
+    }
 
-  if (title) {
-    title.textContent =
-      "Видалити?";
-  }
-
-  if (confirmBtn) {
     confirmBtn.textContent =
       "🗑 Видалити";
 
-    confirmBtn.classList.remove(
-      "primary"
-    );
-
     confirmBtn.classList.add(
       "btnDanger"
     );
@@ -448,14 +463,12 @@ if (mode === "info") {
       };
   }
 
-  if (cancelBtn) {
-    cancelBtn.style.display =
-      "";
-  }
-}
+  cancelBtn.onclick = () => {
+    closeDeleteModal();
+  };
 
-modal.style.display =
-  "flex";
+  modal.style.display =
+    "flex";
 }
 
 function closeDeleteModal() {
@@ -6963,57 +6976,65 @@ function bindStaffAccountPanel(
     );
 
   root
-    .querySelector(
-      "#btnResetStaffPassword"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        openStaffPasswordResetModal(
-          async (password) => {
-            if (
-              String(password).length < 8
-            ) {
-              openDeleteModal(
-                "Пароль повинен містити мінімум 8 символів.",
-                null,
-                "info"
-              );
-
-              return;
-            }
-
-            const result =
-              await resetStaffPasswordApi(
-                staffId,
-                String(password)
-              );
-
-            if (!result.ok) {
-              openDeleteModal(
-                result.error ||
-                "Не вдалося скинути пароль.",
-                null,
-                "info"
-              );
-
-              return;
-            }
-
-            await renderTeamSettingsTab(
-              root,
-              profileState
-            );
-
-            openDeleteModal(
-              "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль.",
-              null,
-              "success"
-            );
-          }
+  .querySelector(
+    "#btnResetStaffPassword"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+      const password =
+        prompt(
+          "Введіть новий тимчасовий пароль. Мінімум 8 символів:"
         );
+
+      if (password === null) {
+        return;
       }
-    );
+
+      const cleanPassword =
+        String(password).trim();
+
+      if (
+        cleanPassword.length < 8
+      ) {
+        openDeleteModal(
+          "Пароль повинен містити мінімум 8 символів.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      const result =
+        await resetStaffPasswordApi(
+          staffId,
+          cleanPassword
+        );
+
+      if (!result.ok) {
+        openDeleteModal(
+          result.error ||
+          "Не вдалося скинути пароль.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      await renderTeamSettingsTab(
+        root,
+        profileState
+      );
+
+      openDeleteModal(
+        "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль.",
+        null,
+        "success"
+      );
+    }
+  );
 }
 async function renderTeamSettingsTab(
   root,
