@@ -950,7 +950,181 @@ def api_get_session():
             "authenticated": False,
             "error": "Помилка перевірки сесії",
         }), 500
+@app.post("/api/change-password")
+def api_change_password():
+    """
+    Меняет пароль текущего авторизованного пользователя.
+    После успешной смены снимает флаг обязательной смены.
+    """
 
+    user = get_current_user()
+
+    if not user:
+        return jsonify({
+            "ok": False,
+            "error": "Сесію завершено. Увійдіть повторно.",
+        }), 401
+
+    data = request.get_json(silent=True) or {}
+
+    current_password = str(
+        data.get("current_password") or ""
+    )
+
+    new_password = str(
+        data.get("new_password") or ""
+    )
+
+    confirm_password = str(
+        data.get("confirm_password") or ""
+    )
+
+    if not current_password:
+        return jsonify({
+            "ok": False,
+            "error": "Введіть поточний пароль.",
+        }), 400
+
+    if len(new_password) < 8:
+        return jsonify({
+            "ok": False,
+            "error": (
+                "Новий пароль повинен містити "
+                "щонайменше 8 символів."
+            ),
+        }), 400
+
+    if new_password != confirm_password:
+        return jsonify({
+            "ok": False,
+            "error": "Нові паролі не збігаються.",
+        }), 400
+
+    if current_password == new_password:
+        return jsonify({
+            "ok": False,
+            "error": (
+                "Новий пароль повинен "
+                "відрізнятися від поточного."
+            ),
+        }), 400
+
+    try:
+        user_id = str(user.get("id"))
+        org_id = str(user.get("org_id"))
+
+        result = (
+            supabase
+            .table("clinic_users")
+            .select(
+                "id, password_hash, is_active"
+            )
+            .eq("id", user_id)
+            .eq("org_id", org_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not result.data:
+            session.clear()
+
+            return jsonify({
+                "ok": False,
+                "error": "Користувача не знайдено.",
+            }), 404
+
+        account = result.data[0]
+
+        if account.get("is_active") is False:
+            session.clear()
+
+            return jsonify({
+                "ok": False,
+                "error": "Обліковий запис вимкнений.",
+            }), 403
+
+        stored_hash = str(
+            account.get("password_hash") or ""
+        ).strip()
+
+        if not stored_hash:
+            return jsonify({
+                "ok": False,
+                "error": "Поточний пароль не налаштований.",
+            }), 400
+
+        try:
+            current_password_valid = (
+                check_password_hash(
+                    stored_hash,
+                    current_password,
+                )
+            )
+        except Exception as hash_error:
+            print(
+                "⚠️ change password hash check failed:",
+                repr(hash_error),
+            )
+
+            current_password_valid = False
+
+        if not current_password_valid:
+            return jsonify({
+                "ok": False,
+                "error": "Поточний пароль введено неправильно.",
+            }), 401
+
+        new_password_hash = (
+            generate_password_hash(
+                new_password
+            )
+        )
+
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        update_result = (
+            supabase
+            .table("clinic_users")
+            .update({
+                "password_hash": new_password_hash,
+                "must_change_password": False,
+                "updated_at": now_iso,
+            })
+            .eq("id", user_id)
+            .eq("org_id", org_id)
+            .execute()
+        )
+
+        if not update_result.data:
+            return jsonify({
+                "ok": False,
+                "error": "Не вдалося оновити пароль.",
+            }), 500
+
+        session["must_change_password"] = False
+        session.modified = True
+
+        return jsonify({
+            "ok": True,
+            "data": {
+                "must_change_password": False,
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ /api/change-password error:",
+            repr(error),
+        )
+
+        return jsonify({
+            "ok": False,
+            "error": "Не вдалося змінити пароль.",
+        }), 500
 
 @app.post("/api/logout")
 def api_logout():

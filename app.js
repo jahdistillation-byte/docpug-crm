@@ -25906,7 +25906,473 @@ function bootstrapClinicTheme() {
     activeBtn.classList.add("active");
   }
 }
+function openRequiredPasswordChangeModal() {
+  return new Promise((resolve) => {
+    document
+      .getElementById(
+        "requiredPasswordChangeOverlay"
+      )
+      ?.remove();
 
+    const overlay =
+      document.createElement("div");
+
+    overlay.id =
+      "requiredPasswordChangeOverlay";
+
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 2147483646;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(124, 92, 255, 0.24),
+          transparent 42%
+        ),
+        rgba(5, 8, 18, 0.94);
+      backdrop-filter: blur(18px);
+    `;
+
+    overlay.innerHTML = `
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="requiredPasswordTitle"
+        style="
+          width: min(480px, 100%);
+          padding: 30px;
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 28px;
+          background:
+            linear-gradient(
+              145deg,
+              rgba(24,28,52,.98),
+              rgba(10,13,28,.98)
+            );
+          box-shadow:
+            0 30px 100px rgba(0,0,0,.55);
+          color: #fff;
+        "
+      >
+        <div
+          style="
+            width: 58px;
+            height: 58px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 20px;
+            border-radius: 18px;
+            background:
+              linear-gradient(
+                135deg,
+                #9f67ff,
+                #6d4aff
+              );
+            font-size: 28px;
+            box-shadow:
+              0 14px 34px rgba(124,92,255,.35);
+          "
+        >
+          🔐
+        </div>
+
+        <div
+          style="
+            margin-bottom: 6px;
+            color: #b89cff;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .13em;
+          "
+        >
+          БЕЗПЕКА АКАУНТА
+        </div>
+
+        <h2
+          id="requiredPasswordTitle"
+          style="
+            margin: 0 0 10px;
+            font-size: 28px;
+            line-height: 1.15;
+          "
+        >
+          Створіть новий пароль
+        </h2>
+
+        <p
+          style="
+            margin: 0 0 24px;
+            color: rgba(255,255,255,.64);
+            line-height: 1.55;
+          "
+        >
+          Ви увійшли з тимчасовим паролем.
+          Для продовження роботи його потрібно змінити.
+        </p>
+
+        <form id="requiredPasswordForm">
+          <label
+            style="
+              display: block;
+              margin-bottom: 15px;
+            "
+          >
+            <span
+              style="
+                display: block;
+                margin-bottom: 7px;
+                color: rgba(255,255,255,.76);
+                font-size: 13px;
+                font-weight: 800;
+              "
+            >
+              Поточний пароль
+            </span>
+
+            <input
+              id="requiredCurrentPassword"
+              type="password"
+              autocomplete="current-password"
+              required
+              style="
+                width: 100%;
+                box-sizing: border-box;
+                padding: 14px 15px;
+                border: 1px solid rgba(255,255,255,.12);
+                border-radius: 14px;
+                outline: none;
+                background: rgba(255,255,255,.06);
+                color: #fff;
+                font: inherit;
+              "
+            >
+          </label>
+
+          <label
+            style="
+              display: block;
+              margin-bottom: 15px;
+            "
+          >
+            <span
+              style="
+                display: block;
+                margin-bottom: 7px;
+                color: rgba(255,255,255,.76);
+                font-size: 13px;
+                font-weight: 800;
+              "
+            >
+              Новий пароль
+            </span>
+
+            <input
+              id="requiredNewPassword"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              required
+              style="
+                width: 100%;
+                box-sizing: border-box;
+                padding: 14px 15px;
+                border: 1px solid rgba(255,255,255,.12);
+                border-radius: 14px;
+                outline: none;
+                background: rgba(255,255,255,.06);
+                color: #fff;
+                font: inherit;
+              "
+            >
+
+            <small
+              style="
+                display: block;
+                margin-top: 7px;
+                color: rgba(255,255,255,.44);
+              "
+            >
+              Мінімум 8 символів
+            </small>
+          </label>
+
+          <label
+            style="
+              display: block;
+              margin-bottom: 18px;
+            "
+          >
+            <span
+              style="
+                display: block;
+                margin-bottom: 7px;
+                color: rgba(255,255,255,.76);
+                font-size: 13px;
+                font-weight: 800;
+              "
+            >
+              Повторіть новий пароль
+            </span>
+
+            <input
+              id="requiredConfirmPassword"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              required
+              style="
+                width: 100%;
+                box-sizing: border-box;
+                padding: 14px 15px;
+                border: 1px solid rgba(255,255,255,.12);
+                border-radius: 14px;
+                outline: none;
+                background: rgba(255,255,255,.06);
+                color: #fff;
+                font: inherit;
+              "
+            >
+          </label>
+
+          <div
+            id="requiredPasswordError"
+            style="
+              display: none;
+              margin-bottom: 15px;
+              padding: 11px 13px;
+              border: 1px solid rgba(255,95,120,.28);
+              border-radius: 12px;
+              background: rgba(255,70,100,.1);
+              color: #ff9aaa;
+              font-size: 13px;
+              font-weight: 700;
+            "
+          ></div>
+
+          <button
+            id="requiredPasswordSubmit"
+            type="submit"
+            style="
+              width: 100%;
+              padding: 14px 18px;
+              border: 0;
+              border-radius: 15px;
+              cursor: pointer;
+              background:
+                linear-gradient(
+                  135deg,
+                  #9f67ff,
+                  #6f4cff
+                );
+              color: #fff;
+              font: inherit;
+              font-weight: 900;
+              box-shadow:
+                0 16px 34px rgba(124,92,255,.3);
+            "
+          >
+            Зберегти новий пароль
+          </button>
+        </form>
+      </section>
+    `;
+
+    document.body.appendChild(
+      overlay
+    );
+
+    const form =
+      overlay.querySelector(
+        "#requiredPasswordForm"
+      );
+
+    const currentInput =
+      overlay.querySelector(
+        "#requiredCurrentPassword"
+      );
+
+    const newInput =
+      overlay.querySelector(
+        "#requiredNewPassword"
+      );
+
+    const confirmInput =
+      overlay.querySelector(
+        "#requiredConfirmPassword"
+      );
+
+    const errorBox =
+      overlay.querySelector(
+        "#requiredPasswordError"
+      );
+
+    const submitButton =
+      overlay.querySelector(
+        "#requiredPasswordSubmit"
+      );
+
+    const showError = (message) => {
+      if (!errorBox) return;
+
+      errorBox.textContent =
+        message ||
+        "Не вдалося змінити пароль.";
+
+      errorBox.style.display =
+        "block";
+    };
+
+    form?.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const currentPassword =
+          String(
+            currentInput?.value || ""
+          );
+
+        const newPassword =
+          String(
+            newInput?.value || ""
+          );
+
+        const confirmPassword =
+          String(
+            confirmInput?.value || ""
+          );
+
+        if (errorBox) {
+          errorBox.style.display =
+            "none";
+        }
+
+        if (newPassword.length < 8) {
+          showError(
+            "Новий пароль повинен містити щонайменше 8 символів."
+          );
+
+          newInput?.focus();
+          return;
+        }
+
+        if (
+          newPassword !==
+          confirmPassword
+        ) {
+          showError(
+            "Нові паролі не збігаються."
+          );
+
+          confirmInput?.focus();
+          return;
+        }
+
+        if (submitButton) {
+          submitButton.disabled =
+            true;
+
+          submitButton.textContent =
+            "Збереження…";
+        }
+
+        try {
+          const response =
+            await fetch(
+              "/api/change-password",
+              {
+                method: "POST",
+                credentials: "include",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  Accept:
+                    "application/json",
+                },
+
+                body: JSON.stringify({
+                  current_password:
+                    currentPassword,
+
+                  new_password:
+                    newPassword,
+
+                  confirm_password:
+                    confirmPassword,
+                }),
+              }
+            );
+
+          const text =
+            await response.text();
+
+          let json = null;
+
+          try {
+            json = text
+              ? JSON.parse(text)
+              : null;
+          } catch {}
+
+          if (
+            !response.ok ||
+            json?.ok !== true
+          ) {
+            showError(
+              json?.error ||
+              "Не вдалося змінити пароль."
+            );
+
+            return;
+          }
+
+          if (state.me) {
+            state.me.must_change_password =
+              false;
+          }
+
+          overlay.remove();
+          resolve(true);
+
+        } catch (error) {
+          console.error(
+            "Password change failed:",
+            error
+          );
+
+          showError(
+            "Не вдалося з'єднатися із сервером."
+          );
+
+        } finally {
+          if (
+            submitButton &&
+            document.body.contains(
+              submitButton
+            )
+          ) {
+            submitButton.disabled =
+              false;
+
+            submitButton.textContent =
+              "Зберегти новий пароль";
+          }
+        }
+      }
+    );
+
+    setTimeout(() => {
+      currentInput?.focus();
+    }, 80);
+  });
+}
 // =========================
 // ГЛАВНЫЙ ИНИЦИАЛИЗАТОР ПРИЛОЖЕНИЯ (BOOTSTRAP)
 // =========================
@@ -26021,7 +26487,12 @@ async function init() {
         "1";
     }
   }
-
+  if (
+    sessionAuthenticated &&
+    state.me?.must_change_password
+  ) {
+    await openRequiredPasswordChangeModal();
+  }
   if (authForm) {
     authForm.addEventListener("submit", async (e) => {
       e.preventDefault();
