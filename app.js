@@ -6569,21 +6569,42 @@ async function renderTeamSettingsTab(
   root,
   state
 ) {
-  const account =
-  isOwner()
-    ? await loadStaffAccountApi(
-        doc.id
-      )
-    : null;
+  const accountResult =
+    isOwner()
+      ? await loadStaffAccountApi(
+          state.doc.id
+        )
+      : {
+          ok: false,
+          skipped: true,
+          data: null,
+          error: "",
+        };
 
   const career =
     buildStaffCareer(state);
-  const titles = getUnlockedCareerTitles(career);
-  const frames = getUnlockedCareerFrames(career);
-  const prefs = getStaffCareerPrefs(state.doc.id);
 
-  const profilePhoto = state.doc.avatar || "";
-  const staffLetter = (state.staffName || "?").trim().charAt(0).toUpperCase() || "?";
+  const titles =
+    getUnlockedCareerTitles(career);
+
+  const frames =
+    getUnlockedCareerFrames(career);
+
+  const prefs =
+    getStaffCareerPrefs(
+      state.doc.id
+    );
+
+  const profilePhoto =
+    state.doc.avatar || "";
+
+  const staffLetter =
+    (
+      state.staffName || "?"
+    )
+      .trim()
+      .charAt(0)
+      .toUpperCase() || "?";
 
   root.innerHTML = `
     <section class="teamSubHero">
@@ -6594,10 +6615,11 @@ async function renderTeamSettingsTab(
     </section>
 
     <section class="teamDashGrid">
-    ${renderStaffAccountPanel(
-  accountResult,
-  state
-)}
+      ${renderStaffAccountPanel(
+        accountResult,
+        state
+      )}
+
       <div class="teamDashPanel teamDashFull">
         <div class="teamDashPanelHead">
           <h3>🏆 Активний титул</h3>
