@@ -295,25 +295,143 @@ function todayISO() {
 
 let deleteCallback = null;
 
-function openDeleteModal(text, callback) {
-  const modal = $("#deleteModal");
-  const textEl = $("#deleteModalText");
+function openDeleteModal(
+  text,
+  callback = null,
+  mode = "delete"
+) {
+  const modal =
+    $("#deleteModal");
+
+  const textEl =
+    $("#deleteModalText");
+
+  const confirmBtn =
+    $("#deleteConfirm");
+
+  const cancelBtn =
+    $("#deleteCancel");
+
+  const icon =
+    modal?.querySelector(
+      ".deleteIcon"
+    );
+
+  const title =
+    modal?.querySelector("h2");
 
   if (!modal || !textEl) {
-    console.error("Не знайдено deleteModal або deleteModalText");
+    console.error(
+      "Не знайдено deleteModal або deleteModalText"
+    );
+
     return;
   }
 
   textEl.innerHTML = text;
-  deleteCallback = callback;
-  modal.style.display = "flex";
+
+  deleteCallback =
+    typeof callback === "function"
+      ? callback
+      : null;
+
+  if (mode === "info") {
+    if (icon) {
+      icon.textContent = "🔒";
+    }
+
+    if (title) {
+      title.textContent =
+        "Недостатньо прав";
+    }
+
+    if (confirmBtn) {
+      confirmBtn.textContent =
+        "Зрозуміло";
+
+      confirmBtn.classList.remove(
+        "btnDanger"
+      );
+
+      confirmBtn.classList.add(
+        "primary"
+      );
+
+      confirmBtn.onclick = () => {
+        closeDeleteModal();
+      };
+    }
+
+    if (cancelBtn) {
+      cancelBtn.style.display =
+        "none";
+    }
+  } else {
+    if (icon) {
+      icon.textContent = "🗑";
+    }
+
+    if (title) {
+      title.textContent =
+        "Видалити?";
+    }
+
+    if (confirmBtn) {
+      confirmBtn.textContent =
+        "🗑 Видалити";
+
+      confirmBtn.classList.remove(
+        "primary"
+      );
+
+      confirmBtn.classList.add(
+        "btnDanger"
+      );
+
+      confirmBtn.onclick =
+        async () => {
+          const action =
+            deleteCallback;
+
+          closeDeleteModal();
+
+          if (
+            typeof action ===
+            "function"
+          ) {
+            await action();
+          }
+        };
+    }
+
+    if (cancelBtn) {
+      cancelBtn.style.display =
+        "";
+    }
+  }
+
+  modal.style.display =
+    "flex";
 }
 
 function closeDeleteModal() {
+  const modal =
+    $("#deleteModal");
 
-    $("#deleteModal").style.display = "none";
+  const cancelBtn =
+    $("#deleteCancel");
 
-    deleteCallback = null;
+  if (modal) {
+    modal.style.display =
+      "none";
+  }
+
+  if (cancelBtn) {
+    cancelBtn.style.display =
+      "";
+  }
+
+  deleteCallback = null;
 }
 
 function nowISO() {
@@ -1818,14 +1936,124 @@ async function pushVisitStockToServer(visitId, stockArr) {
   return true;
 }
 
-async function deleteVisitApi(visitId) {
-    if (!isOwner() && !isAdmin()) {
-    alert(
-      "Видаляти візити може лише адміністратор або власник."
+async function deleteVisitApi(
+  visitId
+) {
+  if (
+    !isOwner() &&
+    !isAdmin()
+  ) {
+    openDeleteModal(
+      `
+        Видаляти візити може лише
+        адміністратор або власник клініки.
+      `,
+      null,
+      "info"
     );
 
     return false;
   }
+
+  try {
+    const response =
+      await fetch(
+        `/api/visits/${
+          encodeURIComponent(
+            String(visitId)
+          )
+        }`,
+        {
+          method: "DELETE",
+          credentials: "include",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (!response.ok) {
+      console.error(
+        "API /visits DELETE HTTP",
+        response.status,
+        text
+      );
+
+      openDeleteModal(
+        `
+          Не вдалося видалити візит.
+          Помилка сервера:
+          HTTP ${response.status}.
+        `,
+        null,
+        "info"
+      );
+
+      return false;
+    }
+
+    if (
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "API /visits DELETE bad json:",
+        json,
+        text
+      );
+
+      openDeleteModal(
+        `
+          ${
+            json?.error ||
+            "Не вдалося видалити візит."
+          }
+        `,
+        null,
+        "info"
+      );
+
+      return false;
+    }
+
+    state.visitsById.delete(
+      String(visitId)
+    );
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      "deleteVisitApi failed:",
+      error
+    );
+
+    openDeleteModal(
+      `
+        Не вдалося з'єднатися із сервером.
+      `,
+      null,
+      "info"
+    );
+
+    return false;
+  }
+}
   try {
     const res = await fetch(`/api/visits/${encodeURIComponent(String(visitId))}`, {
       method: "DELETE",
@@ -1855,7 +2083,6 @@ async function deleteVisitApi(visitId) {
     alert("Помилка зʼєднання з сервером");
     return false;
   }
-}
 
 // =========================
 // Discharges (LOCAL ONLY)
@@ -18349,11 +18576,16 @@ async function updateCalendarEventApi(eventId, payload) {
 
 async function deleteCalendarEventApi(eventId) {
     if (!isOwner() && !isAdmin()) {
-    alert(
-      "Видаляти записи з календаря може лише адміністратор або власник."
-    );
+    openDeleteModal(
+  `
+    Видаляти записи з календаря може лише
+    адміністратор або власник клініки.
+  `,
+  null,
+  "info"
+);
 
-    return false;
+return false;
   }
   try {
     const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
