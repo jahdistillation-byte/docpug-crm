@@ -5641,6 +5641,18 @@ function buildStaffCareer(state) {
 async function loadStaffAccountApi(
   staffId
 ) {
+  if (
+    typeof isOwner === "function" &&
+    !isOwner()
+  ) {
+    return {
+      ok: false,
+      skipped: true,
+      error: "",
+      data: null,
+    };
+  }
+
   try {
     const response =
       await fetch(
@@ -5650,7 +5662,9 @@ async function loadStaffAccountApi(
           )
         }/account`,
         {
+          method: "GET",
           credentials: "include",
+
           headers: {
             Accept:
               "application/json",
@@ -5658,13 +5672,25 @@ async function loadStaffAccountApi(
         }
       );
 
-    const json =
-      await response.json();
+    const text =
+      await response.text();
 
-    if (!response.ok) {
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
       console.error(
         "loadStaffAccountApi:",
-        json
+        response.status,
+        json || text
       );
 
       return {
@@ -5678,8 +5704,10 @@ async function loadStaffAccountApi(
 
     return {
       ok: true,
-      data: json?.data || null,
+      data:
+        json?.data || null,
     };
+
   } catch (error) {
     console.error(
       "loadStaffAccountApi failed:",
@@ -5700,6 +5728,18 @@ async function createStaffAccountApi(
   staffId,
   payload
 ) {
+  if (
+    typeof isOwner === "function" &&
+    !isOwner()
+  ) {
+    return {
+      ok: false,
+      error:
+        "Створювати акаунти співробітників може лише власник клініки.",
+      data: null,
+    };
+  }
+
   try {
     const response =
       await fetch(
@@ -5720,26 +5760,44 @@ async function createStaffAccountApi(
               "application/json",
           },
 
-          body: JSON.stringify(
-            payload || {}
-          ),
+          body:
+            JSON.stringify(
+              payload || {}
+            ),
         }
       );
 
-    const json =
-      await response.json();
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      return {
+        ok: false,
+        data: null,
+        error:
+          json?.error ||
+          `HTTP ${response.status}`,
+      };
+    }
 
     return {
-      ok:
-        response.ok &&
-        json?.ok === true,
-
+      ok: true,
       data:
         json?.data || null,
-
-      error:
-        json?.error || "",
+      error: "",
     };
+
   } catch (error) {
     console.error(
       "createStaffAccountApi failed:",
@@ -5748,12 +5806,12 @@ async function createStaffAccountApi(
 
     return {
       ok: false,
+      data: null,
       error:
         "Не вдалося з'єднатися із сервером",
     };
   }
 }
-
 
 async function updateStaffAccountApi(
   staffId,
