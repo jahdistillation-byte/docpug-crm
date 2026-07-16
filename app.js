@@ -24021,8 +24021,23 @@ function closeVisitModal() {
 
   if (!modal) return;
 
+  const activeElement =
+    document.activeElement;
+
+  if (
+    activeElement &&
+    modal.contains(activeElement)
+  ) {
+    activeElement.blur();
+  }
+
+  modal.inert = true;
+
   modal.classList.remove("open");
-  modal.setAttribute("aria-hidden", "true");
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
   modal.style.display = "none";
 
   delete modal.dataset.visitId;
@@ -24065,14 +24080,16 @@ function closeVisitModal() {
     $("#visitPatientBlock");
 
   if (patientBlock) {
-    patientBlock.style.display = "block";
+    patientBlock.style.display =
+      "block";
   }
 
   const newPatientBox =
     $("#visitNewPatientBox");
 
   if (newPatientBox) {
-    newPatientBox.style.display = "none";
+    newPatientBox.style.display =
+      "none";
   }
 
   [
@@ -24085,12 +24102,17 @@ function closeVisitModal() {
     "#visitNewPetAge",
     "#visitNewPetWeight",
   ].forEach((selector) => {
-    const element = $(selector);
+    const element =
+      $(selector);
 
     if (!element) return;
 
-    if (element.tagName === "SELECT") {
-      element.selectedIndex = 0;
+    if (
+      element.tagName ===
+      "SELECT"
+    ) {
+      element.selectedIndex =
+        0;
     } else {
       element.value = "";
     }
@@ -29006,9 +29028,20 @@ function openOwnerModal(owner = null) {
     ? "Оновлення контактних даних власника"
     : "Створення картки власника тварини";
 
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-  modal.style.display = "flex";
+  modal.inert = false;
+
+modal.style.display = "flex";
+
+modal.classList.add("open");
+
+modal.setAttribute(
+  "aria-hidden",
+  "false"
+);
+
+document.body.classList.add(
+  "medcardModalIsOpen"
+);
 
   setTimeout(() => $("#ownerModalName")?.focus(), 50);
 }
