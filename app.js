@@ -5025,9 +5025,886 @@ function buildStaffCareer(state) {
   };
 }
 
+async function loadStaffAccountApi(
+  staffId
+) {
+  try {
+    const response =
+      await fetch(
+        `/api/staff/${
+          encodeURIComponent(
+            String(staffId)
+          )
+        }/account`,
+        {
+          credentials: "include",
+          headers: {
+            Accept:
+              "application/json",
+          },
+        }
+      );
 
-function renderTeamSettingsTab(root, state) {
-  const career = buildStaffCareer(state);
+    const json =
+      await response.json();
+
+    if (!response.ok) {
+      console.error(
+        "loadStaffAccountApi:",
+        json
+      );
+
+      return {
+        ok: false,
+        error:
+          json?.error ||
+          "Не вдалося завантажити акаунт",
+        data: null,
+      };
+    }
+
+    return {
+      ok: true,
+      data: json?.data || null,
+    };
+  } catch (error) {
+    console.error(
+      "loadStaffAccountApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Не вдалося з'єднатися із сервером",
+      data: null,
+    };
+  }
+}
+
+
+async function createStaffAccountApi(
+  staffId,
+  payload
+) {
+  try {
+    const response =
+      await fetch(
+        `/api/staff/${
+          encodeURIComponent(
+            String(staffId)
+          )
+        }/account`,
+        {
+          method: "POST",
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+          },
+
+          body: JSON.stringify(
+            payload || {}
+          ),
+        }
+      );
+
+    const json =
+      await response.json();
+
+    return {
+      ok:
+        response.ok &&
+        json?.ok === true,
+
+      data:
+        json?.data || null,
+
+      error:
+        json?.error || "",
+    };
+  } catch (error) {
+    console.error(
+      "createStaffAccountApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Не вдалося з'єднатися із сервером",
+    };
+  }
+}
+
+
+async function updateStaffAccountApi(
+  staffId,
+  payload
+) {
+  try {
+    const response =
+      await fetch(
+        `/api/staff/${
+          encodeURIComponent(
+            String(staffId)
+          )
+        }/account`,
+        {
+          method: "PUT",
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+          },
+
+          body: JSON.stringify(
+            payload || {}
+          ),
+        }
+      );
+
+    const json =
+      await response.json();
+
+    return {
+      ok:
+        response.ok &&
+        json?.ok === true,
+
+      data:
+        json?.data || null,
+
+      error:
+        json?.error || "",
+    };
+  } catch (error) {
+    console.error(
+      "updateStaffAccountApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Не вдалося з'єднатися із сервером",
+    };
+  }
+}
+
+
+async function resetStaffPasswordApi(
+  staffId,
+  password
+) {
+  try {
+    const response =
+      await fetch(
+        `/api/staff/${
+          encodeURIComponent(
+            String(staffId)
+          )
+        }/account/reset-password`,
+        {
+          method: "POST",
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            password,
+          }),
+        }
+      );
+
+    const json =
+      await response.json();
+
+    return {
+      ok:
+        response.ok &&
+        json?.ok === true,
+
+      data:
+        json?.data || null,
+
+      error:
+        json?.error || "",
+    };
+  } catch (error) {
+    console.error(
+      "resetStaffPasswordApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Не вдалося з'єднатися із сервером",
+    };
+  }
+}
+
+
+function formatStaffLastLogin(
+  value
+) {
+  if (!value) {
+    return "Ще не входив";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return String(value);
+  }
+
+  return date.toLocaleString(
+    "uk-UA",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }
+  );
+}
+
+
+function renderStaffAccountPanel(
+  accountResult,
+  profileState
+) {
+  const account =
+    accountResult?.data || null;
+
+  const loadError =
+    accountResult?.ok === false
+      ? accountResult.error
+      : "";
+
+  if (loadError) {
+    return `
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+        "
+      >
+        <div
+          class="teamDashPanelHead"
+        >
+          <h3>
+            🔐 Доступ до CRM
+          </h3>
+        </div>
+
+        <div class="hint">
+          ${escapeHtml(
+            loadError
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  if (!account) {
+    const suggestedLogin =
+      String(
+        profileState.doc?.name ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+        .replace(
+          /[^a-zа-яіїєґ0-9]+/gi,
+          "."
+        )
+        .replace(
+          /^\.+|\.+$/g,
+          ""
+        );
+
+    return `
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+          staffAccessPanel
+        "
+      >
+        <div
+          class="teamDashPanelHead"
+        >
+          <div>
+            <h3>
+              🔐 Доступ до CRM
+            </h3>
+
+            <p class="hint">
+              Створіть окремий логін
+              для цього співробітника.
+            </p>
+          </div>
+
+          <span>
+            Акаунт не створено
+          </span>
+        </div>
+
+        <div
+          class="staffAccountForm"
+          style="
+            display:grid;
+            grid-template-columns:
+              repeat(
+                3,
+                minmax(0,1fr)
+              );
+            gap:16px;
+            margin-top:18px;
+          "
+        >
+          <label
+            class="financeAdjustField"
+          >
+            <span>
+              Логін
+            </span>
+
+            <input
+              id="staffAccountUsername"
+              type="text"
+              autocomplete="off"
+              value="${escapeHtml(
+                suggestedLogin
+              )}"
+              placeholder="doctor.anna"
+            >
+          </label>
+
+          <label
+            class="financeAdjustField"
+          >
+            <span>
+              Роль доступу
+            </span>
+
+            <select
+              id="staffAccountRole"
+            >
+              <option value="vet">
+                Ветеринар
+              </option>
+
+              <option value="assistant">
+                Асистент
+              </option>
+
+              <option value="admin">
+                Адміністратор
+              </option>
+            </select>
+          </label>
+
+          <label
+            class="financeAdjustField"
+          >
+            <span>
+              Тимчасовий пароль
+            </span>
+
+            <input
+              id="staffAccountPassword"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              placeholder="Мінімум 8 символів"
+            >
+          </label>
+        </div>
+
+        <div
+          style="
+            display:flex;
+            justify-content:flex-end;
+            margin-top:18px;
+          "
+        >
+          <button
+            id="btnCreateStaffAccount"
+            class="teamPrimaryBtn"
+            type="button"
+          >
+            ＋ Створити акаунт
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div
+      class="
+        teamDashPanel
+        teamDashFull
+        staffAccessPanel
+      "
+    >
+      <div
+        class="teamDashPanelHead"
+      >
+        <div>
+          <h3>
+            🔐 Доступ до CRM
+          </h3>
+
+          <p class="hint">
+            Обліковий запис
+            прив’язаний до цього
+            профілю співробітника.
+          </p>
+        </div>
+
+        <span>
+          ${
+            account.is_active
+              ? "● Активний"
+              : "○ Вимкнений"
+          }
+        </span>
+      </div>
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(
+              3,
+              minmax(0,1fr)
+            );
+          gap:16px;
+          margin-top:18px;
+        "
+      >
+        <label
+          class="financeAdjustField"
+        >
+          <span>
+            Логін
+          </span>
+
+          <input
+            id="staffAccountUsername"
+            type="text"
+            value="${escapeHtml(
+              account.username || ""
+            )}"
+            autocomplete="off"
+          >
+        </label>
+
+        <label
+          class="financeAdjustField"
+        >
+          <span>
+            Роль доступу
+          </span>
+
+          <select
+            id="staffAccountRole"
+          >
+            <option
+              value="vet"
+              ${
+                account.role === "vet"
+                  ? "selected"
+                  : ""
+              }
+            >
+              Ветеринар
+            </option>
+
+            <option
+              value="assistant"
+              ${
+                account.role ===
+                "assistant"
+                  ? "selected"
+                  : ""
+              }
+            >
+              Асистент
+            </option>
+
+            <option
+              value="admin"
+              ${
+                account.role ===
+                "admin"
+                  ? "selected"
+                  : ""
+              }
+            >
+              Адміністратор
+            </option>
+          </select>
+        </label>
+
+        <div
+          class="financeAdjustField"
+        >
+          <span>
+            Останній вхід
+          </span>
+
+          <div
+            style="
+              min-height:48px;
+              display:flex;
+              align-items:center;
+              padding:0 14px;
+              border:1px solid
+                rgba(255,255,255,.1);
+              border-radius:14px;
+              background:
+                rgba(255,255,255,.04);
+              color:
+                rgba(255,255,255,.78);
+            "
+          >
+            ${escapeHtml(
+              formatStaffLastLogin(
+                account.last_login_at
+              )
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="
+          display:flex;
+          flex-wrap:wrap;
+          justify-content:
+            space-between;
+          align-items:center;
+          gap:12px;
+          margin-top:18px;
+        "
+      >
+        <div class="hint">
+          ${
+            account.must_change_password
+              ? "Співробітник повинен змінити тимчасовий пароль при вході."
+              : "Постійний пароль уже встановлено."
+          }
+        </div>
+
+        <div
+          style="
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+          "
+        >
+          <button
+            id="btnResetStaffPassword"
+            class="teamGhostBtn"
+            type="button"
+          >
+            🔑 Скинути пароль
+          </button>
+
+          <button
+            id="btnToggleStaffAccount"
+            class="teamGhostBtn"
+            type="button"
+          >
+            ${
+              account.is_active
+                ? "⛔ Вимкнути доступ"
+                : "✅ Увімкнути доступ"
+            }
+          </button>
+
+          <button
+            id="btnSaveStaffAccount"
+            class="teamPrimaryBtn"
+            type="button"
+          >
+            Зберегти зміни
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function bindStaffAccountPanel(
+  root,
+  profileState,
+  accountResult
+) {
+  const staffId =
+    profileState.doc?.id;
+
+  if (!staffId) return;
+
+  const account =
+    accountResult?.data || null;
+
+  root
+    .querySelector(
+      "#btnCreateStaffAccount"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const username =
+          String(
+            root.querySelector(
+              "#staffAccountUsername"
+            )?.value || ""
+          ).trim();
+
+        const role =
+          String(
+            root.querySelector(
+              "#staffAccountRole"
+            )?.value || "vet"
+          );
+
+        const password =
+          String(
+            root.querySelector(
+              "#staffAccountPassword"
+            )?.value || ""
+          );
+
+        if (username.length < 3) {
+          alert(
+            "Логін повинен містити мінімум 3 символи."
+          );
+
+          return;
+        }
+
+        if (password.length < 8) {
+          alert(
+            "Тимчасовий пароль повинен містити мінімум 8 символів."
+          );
+
+          return;
+        }
+
+        const result =
+          await createStaffAccountApi(
+            staffId,
+            {
+              username,
+              role,
+              password,
+            }
+          );
+
+        if (!result.ok) {
+          alert(
+            result.error ||
+            "Не вдалося створити акаунт."
+          );
+
+          return;
+        }
+
+        alert(
+          "Акаунт створено. Передайте співробітнику логін і тимчасовий пароль."
+        );
+
+        await renderTeamSettingsTab(
+          root,
+          profileState
+        );
+      }
+    );
+
+  root
+    .querySelector(
+      "#btnSaveStaffAccount"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const username =
+          String(
+            root.querySelector(
+              "#staffAccountUsername"
+            )?.value || ""
+          ).trim();
+
+        const role =
+          String(
+            root.querySelector(
+              "#staffAccountRole"
+            )?.value || "vet"
+          );
+
+        const result =
+          await updateStaffAccountApi(
+            staffId,
+            {
+              username,
+              role,
+            }
+          );
+
+        if (!result.ok) {
+          alert(
+            result.error ||
+            "Не вдалося зберегти зміни."
+          );
+
+          return;
+        }
+
+        alert(
+          "Налаштування доступу збережено."
+        );
+
+        await renderTeamSettingsTab(
+          root,
+          profileState
+        );
+      }
+    );
+
+  root
+    .querySelector(
+      "#btnToggleStaffAccount"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        if (!account) return;
+
+        const nextActive =
+          !account.is_active;
+
+        const confirmed =
+          confirm(
+            nextActive
+              ? "Увімкнути доступ до CRM?"
+              : "Вимкнути доступ цього співробітника до CRM?"
+          );
+
+        if (!confirmed) return;
+
+        const result =
+          await updateStaffAccountApi(
+            staffId,
+            {
+              is_active:
+                nextActive,
+            }
+          );
+
+        if (!result.ok) {
+          alert(
+            result.error ||
+            "Не вдалося змінити доступ."
+          );
+
+          return;
+        }
+
+        await renderTeamSettingsTab(
+          root,
+          profileState
+        );
+      }
+    );
+
+  root
+    .querySelector(
+      "#btnResetStaffPassword"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const password =
+          prompt(
+            "Введіть новий тимчасовий пароль. Мінімум 8 символів:"
+          );
+
+        if (password === null) {
+          return;
+        }
+
+        if (
+          String(password).length < 8
+        ) {
+          alert(
+            "Пароль повинен містити мінімум 8 символів."
+          );
+
+          return;
+        }
+
+        const result =
+          await resetStaffPasswordApi(
+            staffId,
+            String(password)
+          );
+
+        if (!result.ok) {
+          alert(
+            result.error ||
+            "Не вдалося скинути пароль."
+          );
+
+          return;
+        }
+
+        alert(
+          "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль."
+        );
+
+        await renderTeamSettingsTab(
+          root,
+          profileState
+        );
+      }
+    );
+}
+async function renderTeamSettingsTab(
+  root,
+  state
+) {
+  const accountResult =
+    await loadStaffAccountApi(
+      state.doc.id
+    );
+
+  const career =
+    buildStaffCareer(state);
   const titles = getUnlockedCareerTitles(career);
   const frames = getUnlockedCareerFrames(career);
   const prefs = getStaffCareerPrefs(state.doc.id);
@@ -5044,6 +5921,10 @@ function renderTeamSettingsTab(root, state) {
     </section>
 
     <section class="teamDashGrid">
+    ${renderStaffAccountPanel(
+  accountResult,
+  state
+)}
       <div class="teamDashPanel teamDashFull">
         <div class="teamDashPanelHead">
           <h3>🏆 Активний титул</h3>
@@ -5200,6 +6081,11 @@ function renderTeamSettingsTab(root, state) {
       alert("Не вдалося видалити фото: " + (e.message || e));
     }
   });
+    bindStaffAccountPanel(
+    root,
+    state,
+    accountResult
+  );
 }
 
 async function loadStaffAdjustmentsApi(staffId) {

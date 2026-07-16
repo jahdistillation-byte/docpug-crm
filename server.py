@@ -3839,9 +3839,607 @@ def api_delete_medcard_entry(entry_id):
     except Exception as e:
         return fail(f"Cannot delete medcard entry: {e}", 500)
 
-# =========================
-# LOGIN
-# =========================
+# =====================================================
+# STAFF CRM ACCOUNTS
+# =====================================================
+
+STAFF_ACCOUNT_ROLES = {
+    "admin",
+    "vet",
+    "assistant",
+}
+
+
+def serialize_staff_account(row):
+    if not row:
+        return None
+
+    return {
+        "id": row.get("id"),
+        "staff_id": row.get("staff_id"),
+        "username": row.get("username"),
+        "display_name": row.get("display_name"),
+        "role": row.get("role"),
+        "is_active": row.get("is_active") is not False,
+        "must_change_password": bool(
+            row.get("must_change_password")
+        ),
+        "last_login_at": row.get("last_login_at"),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+    }
+
+
+def get_staff_for_owner(
+    org_id,
+    staff_id,
+):
+    result = (
+        supabase
+        .table("staff")
+        .select(
+            "id, name, role, is_active"
+        )
+        .eq(
+            "org_id",
+            str(org_id),
+        )
+        .eq(
+            "id",
+            str(staff_id),
+        )
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    return result.data[0]
+
+
+@app.get(
+    "/api/staff/<staff_id>/account"
+)
+def api_get_staff_account(
+    staff_id,
+):
+    user, error_response = (
+        owner_required()
+    )
+
+    if error_response:
+        return error_response
+
+    org_id = str(
+        user.get("org_id")
+    )
+
+    try:
+        staff_row = get_staff_for_owner(
+            org_id,
+            staff_id,
+        )
+
+        if not staff_row:
+            return fail(
+                "Співробітника не знайдено",
+                404,
+            )
+
+        result = (
+            supabase
+            .table("clinic_users")
+            .select(
+                "id, staff_id, username, "
+                "display_name, role, is_active, "
+                "must_change_password, "
+                "last_login_at, created_at, "
+                "updated_at"
+            )
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "staff_id",
+                str(staff_id),
+            )
+            .limit(1)
+            .execute()
+        )
+
+        account = (
+            result.data[0]
+            if result.data
+            else None
+        )
+
+        return ok(
+            serialize_staff_account(
+                account
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ get staff account:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося завантажити акаунт",
+            500,
+        )
+
+
+@app.post(
+    "/api/staff/<staff_id>/account"
+)
+def api_create_staff_account(
+    staff_id,
+):
+    user, error_response = (
+        owner_required()
+    )
+
+    if error_response:
+        return error_response
+
+    org_id = str(
+        user.get("org_id")
+    )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    username = str(
+        data.get("username")
+        or ""
+    ).strip()
+
+    password = str(
+        data.get("password")
+        or ""
+    )
+
+    role = str(
+        data.get("role")
+        or "vet"
+    ).strip().lower()
+
+    if len(username) < 3:
+        return fail(
+            "Логін повинен містити мінімум 3 символи",
+            400,
+        )
+
+    if " " in username:
+        return fail(
+            "Логін не повинен містити пробіли",
+            400,
+        )
+
+    if len(password) < 8:
+        return fail(
+            "Тимчасовий пароль повинен містити мінімум 8 символів",
+            400,
+        )
+
+    if role not in STAFF_ACCOUNT_ROLES:
+        return fail(
+            "Невірна роль доступу",
+            400,
+        )
+
+    try:
+        staff_row = get_staff_for_owner(
+            org_id,
+            staff_id,
+        )
+
+        if not staff_row:
+            return fail(
+                "Співробітника не знайдено",
+                404,
+            )
+
+        existing_staff_account = (
+            supabase
+            .table("clinic_users")
+            .select("id")
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "staff_id",
+                str(staff_id),
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if existing_staff_account.data:
+            return fail(
+                "Для цього співробітника акаунт уже створено",
+                409,
+            )
+
+        existing_username = (
+            supabase
+            .table("clinic_users")
+            .select("id")
+            .ilike(
+                "username",
+                username,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if existing_username.data:
+            return fail(
+                "Цей логін уже використовується",
+                409,
+            )
+
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        result = (
+            supabase
+            .table("clinic_users")
+            .insert({
+                "org_id": org_id,
+                "staff_id": str(
+                    staff_id
+                ),
+                "username": username,
+                "display_name": (
+                    staff_row.get("name")
+                    or username
+                ),
+                "role": role,
+                "password_hash":
+                    generate_password_hash(
+                        password
+                    ),
+                "is_active": True,
+                "must_change_password":
+                    True,
+                "created_at": now_iso,
+                "updated_at": now_iso,
+            })
+            .execute()
+        )
+
+        account = (
+            result.data[0]
+            if result.data
+            else None
+        )
+
+        if not account:
+            return fail(
+                "Не вдалося створити акаунт",
+                500,
+            )
+
+        return ok(
+            serialize_staff_account(
+                account
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ create staff account:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося створити акаунт",
+            500,
+        )
+
+
+@app.put(
+    "/api/staff/<staff_id>/account"
+)
+def api_update_staff_account(
+    staff_id,
+):
+    user, error_response = (
+        owner_required()
+    )
+
+    if error_response:
+        return error_response
+
+    org_id = str(
+        user.get("org_id")
+    )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    try:
+        result = (
+            supabase
+            .table("clinic_users")
+            .select(
+                "id, username"
+            )
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "staff_id",
+                str(staff_id),
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Акаунт співробітника не знайдено",
+                404,
+            )
+
+        current_account = (
+            result.data[0]
+        )
+
+        payload = {}
+
+        if "username" in data:
+            username = str(
+                data.get("username")
+                or ""
+            ).strip()
+
+            if len(username) < 3:
+                return fail(
+                    "Логін повинен містити мінімум 3 символи",
+                    400,
+                )
+
+            if " " in username:
+                return fail(
+                    "Логін не повинен містити пробіли",
+                    400,
+                )
+
+            duplicate_result = (
+                supabase
+                .table("clinic_users")
+                .select(
+                    "id, username"
+                )
+                .ilike(
+                    "username",
+                    username,
+                )
+                .limit(5)
+                .execute()
+            )
+
+            duplicate_exists = any(
+                str(row.get("id"))
+                != str(
+                    current_account.get("id")
+                )
+                for row in (
+                    duplicate_result.data
+                    or []
+                )
+            )
+
+            if duplicate_exists:
+                return fail(
+                    "Цей логін уже використовується",
+                    409,
+                )
+
+            payload["username"] = (
+                username
+            )
+
+        if "role" in data:
+            role = str(
+                data.get("role")
+                or ""
+            ).strip().lower()
+
+            if role not in (
+                STAFF_ACCOUNT_ROLES
+            ):
+                return fail(
+                    "Невірна роль доступу",
+                    400,
+                )
+
+            payload["role"] = role
+
+        if "is_active" in data:
+            payload["is_active"] = bool(
+                data.get("is_active")
+            )
+
+        if not payload:
+            return fail(
+                "Немає змін для збереження",
+                400,
+            )
+
+        payload["updated_at"] = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        update_result = (
+            supabase
+            .table("clinic_users")
+            .update(payload)
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "staff_id",
+                str(staff_id),
+            )
+            .execute()
+        )
+
+        account = (
+            update_result.data[0]
+            if update_result.data
+            else None
+        )
+
+        return ok(
+            serialize_staff_account(
+                account
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ update staff account:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося оновити акаунт",
+            500,
+        )
+
+
+@app.post(
+    "/api/staff/<staff_id>/account/reset-password"
+)
+def api_reset_staff_password(
+    staff_id,
+):
+    user, error_response = (
+        owner_required()
+    )
+
+    if error_response:
+        return error_response
+
+    org_id = str(
+        user.get("org_id")
+    )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    password = str(
+        data.get("password")
+        or ""
+    )
+
+    if len(password) < 8:
+        return fail(
+            "Новий тимчасовий пароль повинен містити мінімум 8 символів",
+            400,
+        )
+
+    try:
+        existing_result = (
+            supabase
+            .table("clinic_users")
+            .select("id")
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "staff_id",
+                str(staff_id),
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not existing_result.data:
+            return fail(
+                "Акаунт співробітника не знайдено",
+                404,
+            )
+
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        update_result = (
+            supabase
+            .table("clinic_users")
+            .update({
+                "password_hash":
+                    generate_password_hash(
+                        password
+                    ),
+                "must_change_password":
+                    True,
+                "updated_at": now_iso,
+            })
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "staff_id",
+                str(staff_id),
+            )
+            .execute()
+        )
+
+        account = (
+            update_result.data[0]
+            if update_result.data
+            else None
+        )
+
+        return ok(
+            serialize_staff_account(
+                account
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ reset staff password:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося скинути пароль",
+            500,
+        )
 # =========================
 # LOGIN
 # =========================
