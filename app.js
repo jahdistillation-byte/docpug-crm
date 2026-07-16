@@ -18295,12 +18295,17 @@ const staffSchedule =
       const id = btn.dataset.delCalendarEvent;
       if (!id) return;
 
-      if (!confirm("Видалити запис з календаря?")) return;
+      openDeleteModal(
+  "Видалити цей запис з календаря?",
+  async () => {
+    const ok =
+      await deleteCalendarEventApi(id);
 
-      const ok = await deleteCalendarEventApi(id);
-      if (ok) await renderCalendarTab();
-    });
-  });
+    if (ok) {
+      await renderCalendarTab();
+    }
+  }
+);
 
   $$("[data-edit-calendar-event]").forEach((card) => {
     card.addEventListener("click", async (e) => {
