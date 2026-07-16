@@ -1430,33 +1430,58 @@ async function dischargeHospitalizationApi(
   hospitalizationId,
   notes = ""
 ) {
-  try {
-    const response = await fetch(
-      `/api/hospitalizations/${
-        encodeURIComponent(
-          String(hospitalizationId)
-        )
-      }/discharge`,
-      {
-        method: "POST",
-        credentials: "include",
+  const currentRole =
+    String(
+      state.me?.role || ""
+    ).toLowerCase();
 
-        headers: {
-          "Content-Type":
-            "application/json",
-
-          Accept:
-            "application/json",
-
-          ...getOrgHeaders(),
-        },
-
-        body: JSON.stringify({
-          notes:
-            String(notes || "").trim(),
-        }),
-      }
+  if (currentRole === "assistant") {
+    openDeleteModal(
+      `
+        Виписувати пацієнтів зі стаціонару
+        можуть ветеринар, адміністратор
+        або власник клініки.
+      `,
+      null,
+      "info"
     );
+
+    return null;
+  }
+
+  try {
+    const response =
+      await fetch(
+        `/api/hospitalizations/${
+          encodeURIComponent(
+            String(
+              hospitalizationId
+            )
+          )
+        }/discharge`,
+        {
+          method: "POST",
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+
+          body:
+            JSON.stringify({
+              notes:
+                String(
+                  notes || ""
+                ).trim(),
+            }),
+        }
+      );
 
     const text =
       await response.text();
@@ -1480,19 +1505,34 @@ async function dischargeHospitalizationApi(
         text
       );
 
-      alert(
-        json?.error ||
-        "Не вдалося виписати пацієнта."
+      openDeleteModal(
+        `
+          ${
+            json?.error ||
+            "Не вдалося виписати пацієнта."
+          }
+        `,
+        null,
+        "info"
       );
 
       return null;
     }
 
     return json.data || null;
+
   } catch (error) {
     console.error(
       "dischargeHospitalizationApi error:",
       error
+    );
+
+    openDeleteModal(
+      `
+        Не вдалося з'єднатися із сервером.
+      `,
+      null,
+      "info"
     );
 
     return null;

@@ -3997,7 +3997,30 @@ def api_discharge_hospitalization(
     hospitalization_id
 ):
     try:
-        current_org = get_current_org_id()
+        current_user = (
+            get_current_user()
+        )
+
+        if not current_user:
+            return fail(
+                "Authentication required",
+                401
+            )
+
+        current_role = str(
+            current_user.get("role")
+            or ""
+        ).lower()
+
+        if current_role == "assistant":
+            return fail(
+                "Assistant cannot discharge hospitalized patients",
+                403
+            )
+
+        current_org = (
+            get_current_org_id()
+        )
 
         if not hospitalization_id:
             return fail(
@@ -4021,10 +4044,12 @@ def api_discharge_hospitalization(
 
         payload = {
             "is_active": False,
-            "discharged_at": discharged_at,
-            "updated_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
+            "discharged_at":
+                discharged_at,
+            "updated_at":
+                datetime.now(
+                    timezone.utc
+                ).isoformat(),
         }
 
         if "notes" in data:
@@ -4036,14 +4061,28 @@ def api_discharge_hospitalization(
                 or None
             )
 
-        result = (
-            supabase
-            .table("hospitalizations")
-            .update(payload)
-            .eq("org_id", current_org)
-            .eq("id", hospitalization_id)
-            .eq("is_active", True)
-            .execute()
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "hospitalizations"
+                )
+                .update(payload)
+                .eq(
+                    "org_id",
+                    current_org
+                )
+                .eq(
+                    "id",
+                    hospitalization_id
+                )
+                .eq(
+                    "is_active",
+                    True
+                )
+            ),
+            attempts=3,
+            delay=0.25,
         )
 
         if not result.data:
@@ -4052,8 +4091,10 @@ def api_discharge_hospitalization(
                 404
             )
 
-        enriched = enrich_hospitalizations(
-            [result.data[0]]
+        enriched = (
+            enrich_hospitalizations(
+                [result.data[0]]
+            )
         )
 
         return ok(
