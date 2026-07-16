@@ -24031,13 +24031,13 @@ function closeVisitModal() {
     activeElement.blur();
   }
 
-  modal.inert = true;
-
   modal.classList.remove("open");
+
   modal.setAttribute(
     "aria-hidden",
     "true"
   );
+
   modal.style.display = "none";
 
   delete modal.dataset.visitId;
@@ -24111,8 +24111,7 @@ function closeVisitModal() {
       element.tagName ===
       "SELECT"
     ) {
-      element.selectedIndex =
-        0;
+      element.selectedIndex = 0;
     } else {
       element.value = "";
     }
@@ -29028,7 +29027,7 @@ function openOwnerModal(owner = null) {
     ? "Оновлення контактних даних власника"
     : "Створення картки власника тварини";
 
-  modal.inert = false;
+
 
 modal.style.display = "flex";
 
