@@ -330,88 +330,132 @@ function openDeleteModal(
 
   textEl.innerHTML = text;
 
-  deleteCallback =
-    typeof callback === "function"
-      ? callback
-      : null;
+ deleteCallback =
+  typeof callback === "function"
+    ? callback
+    : null;
 
-  if (mode === "info") {
-    if (icon) {
-      icon.textContent = "🔒";
-    }
-
-    if (title) {
-      title.textContent =
-        "Недостатньо прав";
-    }
-
-    if (confirmBtn) {
-      confirmBtn.textContent =
-        "Зрозуміло";
-
-      confirmBtn.classList.remove(
-        "btnDanger"
-      );
-
-      confirmBtn.classList.add(
-        "primary"
-      );
-
-      confirmBtn.onclick = () => {
-        closeDeleteModal();
-      };
-    }
-
-    if (cancelBtn) {
-      cancelBtn.style.display =
-        "none";
-    }
-  } else {
-    if (icon) {
-      icon.textContent = "🗑";
-    }
-
-    if (title) {
-      title.textContent =
-        "Видалити?";
-    }
-
-    if (confirmBtn) {
-      confirmBtn.textContent =
-        "🗑 Видалити";
-
-      confirmBtn.classList.remove(
-        "primary"
-      );
-
-      confirmBtn.classList.add(
-        "btnDanger"
-      );
-
-      confirmBtn.onclick =
-        async () => {
-          const action =
-            deleteCallback;
-
-          closeDeleteModal();
-
-          if (
-            typeof action ===
-            "function"
-          ) {
-            await action();
-          }
-        };
-    }
-
-    if (cancelBtn) {
-      cancelBtn.style.display =
-        "";
-    }
+if (mode === "info") {
+  if (icon) {
+    icon.textContent = "🔒";
   }
 
-  modal.style.display =
-    "flex";
+  if (title) {
+    title.textContent =
+      "Недостатньо прав";
+  }
+
+  if (confirmBtn) {
+    confirmBtn.textContent =
+      "Зрозуміло";
+
+    confirmBtn.classList.remove(
+      "btnDanger"
+    );
+
+    confirmBtn.classList.add(
+      "primary"
+    );
+
+    confirmBtn.onclick = () => {
+      closeDeleteModal();
+    };
+  }
+
+  if (cancelBtn) {
+    cancelBtn.style.display =
+      "none";
+  }
+
+} else if (mode === "logout") {
+  if (icon) {
+    icon.textContent = "🚪";
+  }
+
+  if (title) {
+    title.textContent =
+      "Вийти з акаунта?";
+  }
+
+  if (confirmBtn) {
+    confirmBtn.textContent =
+      "Вийти";
+
+    confirmBtn.classList.remove(
+      "btnDanger"
+    );
+
+    confirmBtn.classList.add(
+      "primary"
+    );
+
+    confirmBtn.onclick =
+      async () => {
+        const action =
+          deleteCallback;
+
+        closeDeleteModal();
+
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+      };
+  }
+
+  if (cancelBtn) {
+    cancelBtn.style.display =
+      "";
+  }
+
+} else {
+  if (icon) {
+    icon.textContent = "🗑";
+  }
+
+  if (title) {
+    title.textContent =
+      "Видалити?";
+  }
+
+  if (confirmBtn) {
+    confirmBtn.textContent =
+      "🗑 Видалити";
+
+    confirmBtn.classList.remove(
+      "primary"
+    );
+
+    confirmBtn.classList.add(
+      "btnDanger"
+    );
+
+    confirmBtn.onclick =
+      async () => {
+        const action =
+          deleteCallback;
+
+        closeDeleteModal();
+
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+      };
+  }
+
+  if (cancelBtn) {
+    cancelBtn.style.display =
+      "";
+  }
+}
+
+modal.style.display =
+  "flex";
 }
 
 function closeDeleteModal() {
@@ -27388,11 +27432,7 @@ function bindPersonalSettingsUI(page) {
 
 
 function bindSettingsLogoutUI(page) {
-
-  // обработчик темы
-  // обработчик языка
-
-     const oldLogoutButton =
+  const oldLogoutButton =
     document.getElementById(
       "btn-logout"
     ) ||
@@ -27400,110 +27440,124 @@ function bindSettingsLogoutUI(page) {
       "#btnClinicLogout"
     );
 
-  if (oldLogoutButton) {
-    const logoutButton =
-      oldLogoutButton.cloneNode(true);
+  if (!oldLogoutButton) {
+    return;
+  }
 
-    oldLogoutButton.replaceWith(
-      logoutButton
-    );
+  const logoutButton =
+    oldLogoutButton.cloneNode(true);
 
-    logoutButton.addEventListener(
-      "click",
-      async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+  oldLogoutButton.replaceWith(
+    logoutButton
+  );
 
-        const confirmed =
-          confirm(
-            "Вийти з акаунта?"
-          );
+  logoutButton.addEventListener(
+    "click",
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-        if (!confirmed) {
-          return;
-        }
+      openDeleteModal(
+        `
+          Ви завершите поточну сесію
+          та повернетеся на сторінку входу.
+        `,
+        async () => {
+          const originalText =
+            logoutButton.textContent;
 
-        const originalText =
-          logoutButton.textContent;
+          logoutButton.disabled =
+            true;
 
-        logoutButton.disabled = true;
-        logoutButton.textContent =
-          "Вихід…";
-
-        try {
-          const response =
-            await fetch(
-              "/api/logout",
-              {
-                method: "POST",
-                credentials: "include",
-                cache: "no-store",
-
-                headers: {
-                  Accept:
-                    "application/json",
-                },
-              }
-            );
-
-          const text =
-            await response.text();
-
-          let json = null;
+          logoutButton.textContent =
+            "Вихід…";
 
           try {
-            json = text
-              ? JSON.parse(text)
-              : null;
-          } catch {
-            json = null;
-          }
+            const response =
+              await fetch(
+                "/api/logout",
+                {
+                  method: "POST",
+                  credentials:
+                    "include",
+                  cache: "no-store",
 
-          if (
-            !response.ok ||
-            json?.ok !== true
-          ) {
-            throw new Error(
-              json?.error ||
-              `Logout HTTP ${response.status}`
+                  headers: {
+                    Accept:
+                      "application/json",
+                  },
+                }
+              );
+
+            const text =
+              await response.text();
+
+            let json = null;
+
+            try {
+              json = text
+                ? JSON.parse(text)
+                : null;
+            } catch {
+              json = null;
+            }
+
+            if (
+              !response.ok ||
+              json?.ok !== true
+            ) {
+              throw new Error(
+                json?.error ||
+                `Logout HTTP ${response.status}`
+              );
+            }
+
+            state.me = null;
+            state.clinicProfile =
+              null;
+
+            [
+              "pug_active_org_id",
+              "pug_active_username",
+              "pug_active_display_name",
+              "pug_active_role",
+              "pug_active_clinic_name",
+            ].forEach((key) => {
+              sessionStorage.removeItem(
+                key
+              );
+            });
+
+            window.location.replace(
+              "/?logged_out=1"
             );
-          }
 
-          state.me = null;
-          state.clinicProfile = null;
-
-          [
-            "pug_active_org_id",
-            "pug_active_username",
-            "pug_active_display_name",
-            "pug_active_role",
-            "pug_active_clinic_name",
-          ].forEach((key) => {
-            sessionStorage.removeItem(
-              key
+          } catch (error) {
+            console.error(
+              "Logout failed:",
+              error
             );
-          });
 
-          window.location.replace(
-            "/?logged_out=1"
-          );
-        } catch (error) {
-          console.error(
-            "Logout failed:",
-            error
-          );
+            openDeleteModal(
+              `
+                Не вдалося завершити сесію.
+                Спробуйте ще раз.
+              `,
+              null,
+              "info"
+            );
 
-          alert(
-            "Не вдалося завершити сесію."
-          );
+            logoutButton.disabled =
+              false;
 
-          logoutButton.disabled = false;
-          logoutButton.textContent =
-            originalText;
-        }
-      }
-    );
-  }
+            logoutButton.textContent =
+              originalText;
+          }
+        },
+        "logout"
+      );
+    }
+  );
 }
 
 
