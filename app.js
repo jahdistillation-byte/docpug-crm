@@ -27570,8 +27570,17 @@ async function init() {
         }
       );
 
-    const sessionJson =
-      await sessionResponse.json();
+    let sessionJson = null;
+
+    try {
+      sessionJson =
+        await sessionResponse.json();
+    } catch (jsonError) {
+      console.warn(
+        "Сервер повернув некоректну відповідь сесії:",
+        jsonError
+      );
+    }
 
     if (
       sessionResponse.ok &&
@@ -27625,7 +27634,12 @@ async function init() {
           ),
       };
 
-      applyRoleAccessUI();
+      if (
+        typeof applyRoleAccessUI ===
+        "function"
+      ) {
+        applyRoleAccessUI();
+      }
 
       if (authOverlay) {
         authOverlay.style.display =
@@ -27640,8 +27654,8 @@ async function init() {
         state.me.username,
         state.me.role
       );
-
     } else {
+      sessionAuthenticated = false;
       state.me = null;
 
       if (authOverlay) {
@@ -27652,13 +27666,13 @@ async function init() {
           "1";
       }
     }
-
   } catch (sessionError) {
     console.warn(
       "Не вдалося перевірити сесію:",
       sessionError
     );
 
+    sessionAuthenticated = false;
     state.me = null;
 
     if (authOverlay) {
@@ -27670,198 +27684,420 @@ async function init() {
     }
   }
 
+  // Обязательная смена пароля
+  // выполняется только при активной сессии
   if (
     sessionAuthenticated &&
-    state.me?.must_change_password
+    state.me?.must_change_password &&
+    typeof openRequiredPasswordChangeModal ===
+      "function"
   ) {
     await openRequiredPasswordChangeModal();
   }
 
-
-applyRoleAccessUI();
-
-if (authOverlay) {
-  authOverlay.style.display =
-    "none";
-
-  authOverlay.style.opacity =
-    "1";
-}
-
-console.log(
-  "Серверна сесія активна:",
-  state.me.username,
-  state.me.role
-);
-  if (
-    sessionAuthenticated &&
-    state.me?.must_change_password
-  ) {
-    await openRequiredPasswordChangeModal();
-  }
+  // Обработчик формы входа
   if (authForm) {
-    authForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const username = document.getElementById("authUsername")?.value;
-      const password = document.getElementById("authPassword")?.value;
-      const errorBox = document.getElementById("authError");
-      const btnSubmit = document.getElementById("btnAuthSubmit");
+    authForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
 
-      if (errorBox) errorBox.style.display = "none";
-      if (btnSubmit) btnSubmit.textContent = "Перевірка доступу...";
+        const username =
+          String(
+            document.getElementById(
+              "authUsername"
+            )?.value || ""
+          ).trim();
 
-      try {
-        const res = await fetch("/api/login", {
-  method: "POST",
+        const password =
+          String(
+            document.getElementById(
+              "authPassword"
+            )?.value || ""
+          );
 
-  credentials: "include",
+        const errorBox =
+          document.getElementById(
+            "authError"
+          );
 
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
+        const btnSubmit =
+          document.getElementById(
+            "btnAuthSubmit"
+          );
 
-  body: JSON.stringify({
-    username,
-    password,
-  }),
-});
-        
-       const json = await res.json();
+        if (errorBox) {
+          errorBox.textContent = "";
+          errorBox.style.display =
+            "none";
+        }
 
-        if (!res.ok || !json.ok) {
+        if (!username || !password) {
           if (errorBox) {
-            errorBox.textContent = json.error || "Помилка авторизації";
-            errorBox.style.display = "block";
+            errorBox.textContent =
+              "Введіть логін і пароль.";
+
+            errorBox.style.display =
+              "block";
           }
-          if (btnSubmit) btnSubmit.textContent = "Увійти у систему →";
+
           return;
         }
 
-        // Сохраняем данные активного пользователя и клиники
-state.me = {
-  user_id:
-    json.data.user_id || null,
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
 
-  org_id:
-    json.data.org_id || null,
-
-  staff_id:
-    json.data.staff_id || null,
-
-  username:
-    json.data.username ||
-    username ||
-    "",
-
-  display_name:
-    json.data.display_name ||
-    json.data.username ||
-    username ||
-    "Користувач",
-
-  role:
-    json.data.role ||
-    "staff",
-
-  clinic_name:
-    json.data.clinic_name ||
-    "Клініка",
-
-  must_change_password:
-    Boolean(
-      json.data.must_change_password
-    ),
-};
-
-
-
-console.log(
-  "Успішний вхід:",
-  state.me.display_name,
-  state.me.role,
-  state.me.clinic_name
-);
-
-        // Прячем красивый оверлей
-        if (authOverlay) {
-          authOverlay.style.transition = "all 0.4s ease";
-          authOverlay.style.opacity = "0";
-          setTimeout(() => authOverlay.style.display = "none", 400);
+          btnSubmit.textContent =
+            "Перевірка доступу...";
         }
 
-        window.location.replace("/");
-return;
+        try {
+          const response =
+            await fetch(
+              "/api/login",
+              {
+                method: "POST",
+                credentials: "include",
 
-      } catch (err) {
-        if (errorBox) {
-          errorBox.textContent = "Не вдалося з'єднатися з сервером.";
-          errorBox.style.display = "block";
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  Accept:
+                    "application/json",
+                },
+
+                body:
+                  JSON.stringify({
+                    username,
+                    password,
+                  }),
+              }
+            );
+
+          let json = null;
+
+          try {
+            json =
+              await response.json();
+          } catch (jsonError) {
+            console.warn(
+              "Некоректна відповідь сервера при вході:",
+              jsonError
+            );
+          }
+
+          if (
+            !response.ok ||
+            json?.ok !== true ||
+            !json?.data
+          ) {
+            if (errorBox) {
+              errorBox.textContent =
+                json?.error ||
+                "Помилка авторизації";
+
+              errorBox.style.display =
+                "block";
+            }
+
+            if (btnSubmit) {
+              btnSubmit.disabled =
+                false;
+
+              btnSubmit.textContent =
+                "Увійти у систему →";
+            }
+
+            return;
+          }
+
+          const loginUser =
+            json.data;
+
+          state.me = {
+            user_id:
+              loginUser.user_id ||
+              null,
+
+            org_id:
+              loginUser.org_id ||
+              null,
+
+            staff_id:
+              loginUser.staff_id ||
+              null,
+
+            username:
+              loginUser.username ||
+              username,
+
+            display_name:
+              loginUser.display_name ||
+              loginUser.username ||
+              username ||
+              "Користувач",
+
+            role:
+              String(
+                loginUser.role ||
+                "vet"
+              )
+                .trim()
+                .toLowerCase(),
+
+            clinic_name:
+              loginUser.clinic_name ||
+              "Клініка",
+
+            must_change_password:
+              Boolean(
+                loginUser
+                  .must_change_password
+              ),
+          };
+
+          sessionAuthenticated = true;
+
+          console.log(
+            "Успішний вхід:",
+            state.me.display_name,
+            state.me.role,
+            state.me.clinic_name
+          );
+
+          if (
+            typeof applyRoleAccessUI ===
+            "function"
+          ) {
+            applyRoleAccessUI();
+          }
+
+          if (authOverlay) {
+            authOverlay.style.transition =
+              "all 0.4s ease";
+
+            authOverlay.style.opacity =
+              "0";
+
+            setTimeout(() => {
+              authOverlay.style.display =
+                "none";
+            }, 400);
+          }
+
+          window.location.replace(
+            "/"
+          );
+
+          return;
+        } catch (loginError) {
+          console.error(
+            "Помилка входу:",
+            loginError
+          );
+
+          if (errorBox) {
+            errorBox.textContent =
+              "Не вдалося з'єднатися з сервером.";
+
+            errorBox.style.display =
+              "block";
+          }
+
+          if (btnSubmit) {
+            btnSubmit.disabled =
+              false;
+
+            btnSubmit.textContent =
+              "Увійти у систему →";
+          }
         }
-        if (btnSubmit) btnSubmit.textContent = "Увійти у систему →";
       }
-    });
+    );
   }
+
+  // Если активной сессии нет —
+  // оставляем экран входа и не запускаем CRM
   if (!sessionAuthenticated) {
     return;
   }
-  if (typeof initTabs === "function") initTabs();
-  if (typeof seedIfEmpty === "function") seedIfEmpty();
 
-  if (typeof migrateLegacyVisitFilesIfNeeded === "function") {
+  if (
+    typeof initTabs ===
+    "function"
+  ) {
+    initTabs();
+  }
+
+  if (
+    typeof seedIfEmpty ===
+    "function"
+  ) {
+    seedIfEmpty();
+  }
+
+  if (
+    typeof migrateLegacyVisitFilesIfNeeded ===
+    "function"
+  ) {
     await migrateLegacyVisitFilesIfNeeded();
   }
 
-  if (typeof initOwnersUI === "function") initOwnersUI();
-  if (typeof initOwnerUI === "function") initOwnerUI();
-  if (typeof initPatientUI === "function") initPatientUI();
-  if (typeof initVisitUI === "function") initVisitUI();
-  if (typeof initDischargeModalUI === "function") initDischargeModalUI();
-  
-  // ВСТАВЛЯЕМ ВЫЗОВ ИНИЦИАЛИЗАЦИИ НАСТРОЕК ЗДЕСЬ
-  if (typeof initSettingsUI === "function") initSettingsUI();
+  if (
+    typeof initOwnersUI ===
+    "function"
+  ) {
+    initOwnersUI();
+  }
 
-  // Применяем сохраненную тему
-  if (typeof bootstrapClinicTheme === "function") bootstrapClinicTheme();
+  if (
+    typeof initOwnerUI ===
+    "function"
+  ) {
+    initOwnerUI();
+  }
 
-  $("#btnReload")?.addEventListener("click", async () => {
-    await loadMe();
-    await loadOwners();
-    await loadPatientsApi();
-    await loadServicesApi();
-  });
+  if (
+    typeof initPatientUI ===
+    "function"
+  ) {
+    initPatientUI();
+  }
+
+  if (
+    typeof initVisitUI ===
+    "function"
+  ) {
+    initVisitUI();
+  }
+
+  if (
+    typeof initDischargeModalUI ===
+    "function"
+  ) {
+    initDischargeModalUI();
+  }
+
+  if (
+    typeof initSettingsUI ===
+    "function"
+  ) {
+    initSettingsUI();
+  }
+
+  // Применяем сохранённую тему
+  if (
+    typeof bootstrapClinicTheme ===
+    "function"
+  ) {
+    bootstrapClinicTheme();
+  }
+
+  $("#btnReload")
+    ?.addEventListener(
+      "click",
+      async () => {
+        await loadMe();
+        await loadOwners();
+        await loadPatientsApi();
+        await loadServicesApi();
+      }
+    );
 
   // Глобальный живой поиск
- // Глобальный живой поиск
-  $("#globalSearch")?.addEventListener("input", () => {
-    if (state.route === "owners") renderOwners();
-    if (state.route === "patients") renderPatientsTab();
-    if (state.route === "visits") renderVisitsTab();
-  });
+  $("#globalSearch")
+    ?.addEventListener(
+      "input",
+      () => {
+        if (
+          state.route ===
+          "owners"
+        ) {
+          renderOwners();
+        }
 
-  // Загружаем профиль и динамическую тему клиники с сервера
+        if (
+          state.route ===
+          "patients"
+        ) {
+          renderPatientsTab();
+        }
+
+        if (
+          state.route ===
+          "visits"
+        ) {
+          renderVisitsTab();
+        }
+      }
+    );
+
+  // Загружаем профиль и тему клиники
   try {
-    const response = await fetch("/api/me");
-    const data = await response.json();
-    
-    if (data && data.me) {
-      // Ставим имя клиники в заголовок, если есть такой элемент
-      const clinicTitleEl = document.getElementById("clinicNameTitle") || document.querySelector(".clinic-title");
-      if (clinicTitleEl && data.me.clinic_name) {
-        clinicTitleEl.textContent = data.me.clinic_name;
+    const response =
+      await fetch(
+        "/api/me",
+        {
+          method: "GET",
+          credentials: "include",
+
+          headers: {
+            Accept:
+              "application/json",
+          },
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      response.ok &&
+      data?.me
+    ) {
+      const clinicTitleEl =
+        document.getElementById(
+          "clinicNameTitle"
+        ) ||
+        document.querySelector(
+          ".clinic-title"
+        );
+
+      if (
+        clinicTitleEl &&
+        data.me.clinic_name
+      ) {
+        clinicTitleEl.textContent =
+          data.me.clinic_name;
       }
 
-      // 🌟 МАГИЯ ПЕРЕКРАСКИ: если сервер вернул тему клиники, применяем её
       if (data.me.theme) {
-        document.body.dataset.theme = data.me.theme;
-        LS.set("docpug_clinic_theme", data.me.theme);
-        console.log(`[Bootstrap] Установлена тема клиники: ${data.me.theme}`);
+        document.body.dataset.theme =
+          data.me.theme;
+
+        LS.set(
+          "docpug_clinic_theme",
+          data.me.theme
+        );
+
+        console.log(
+          `[Bootstrap] Установлена тема клініки: ${data.me.theme}`
+        );
       }
     }
-  } catch (err) {
-    console.warn("Не удалось загрузить динамическую тему с сервера, катимся на локальной:", err);
-    if (typeof bootstrapClinicTheme === "function") bootstrapClinicTheme();
+  } catch (themeError) {
+    console.warn(
+      "Не вдалося завантажити динамічну тему з сервера, використовуємо локальну:",
+      themeError
+    );
+
+    if (
+      typeof bootstrapClinicTheme ===
+      "function"
+    ) {
+      bootstrapClinicTheme();
+    }
   }
 
   await loadOwners();
