@@ -801,7 +801,138 @@ function seedIfEmpty() {
 
 
 // ===== API: Owners =====
+// ===== API: Owners =====
+async function loadOwners() {
+  try {
+    const response =
+      await fetch(
+        "/api/owners",
+        {
+          method: "GET",
+          credentials: "include",
 
+          headers: {
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch (parseError) {
+      console.error(
+        "Не вдалося розібрати відповідь /api/owners:",
+        parseError,
+        text
+      );
+    }
+
+    if (!response.ok) {
+      console.error(
+        "API /owners HTTP:",
+        response.status,
+        text
+      );
+
+      state.owners = [];
+
+      if (
+        state.route ===
+        "owners"
+      ) {
+        renderOwners();
+      }
+
+      return [];
+    }
+
+    if (
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "API /owners повернув помилку:",
+        json,
+        text
+      );
+
+      state.owners = [];
+
+      if (
+        state.route ===
+        "owners"
+      ) {
+        renderOwners();
+      }
+
+      return [];
+    }
+
+    const owners =
+      Array.isArray(json.data)
+        ? json.data
+        : json.data
+          ? [json.data]
+          : [];
+
+    state.owners = owners;
+
+    LS.set(
+      OWNERS_KEY,
+      owners
+    );
+
+    if (
+      state.route ===
+      "owners"
+    ) {
+      renderOwners();
+    }
+
+    if (
+      state.route ===
+        "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(
+        state.selectedOwnerId
+      );
+    }
+
+    return owners;
+  } catch (error) {
+    console.error(
+      "loadOwners failed:",
+      error
+    );
+
+    state.owners =
+      Array.isArray(
+        state.owners
+      )
+        ? state.owners
+        : [];
+
+    if (
+      state.route ===
+      "owners"
+    ) {
+      renderOwners();
+    }
+
+    return [];
+  }
+}
 // ===== API: Patients =====
 async function loadPatientsApi() {
   try {
