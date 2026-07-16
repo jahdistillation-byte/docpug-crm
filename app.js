@@ -6511,10 +6511,12 @@ async function renderTeamSettingsTab(
   root,
   state
 ) {
-  const accountResult =
-    await loadStaffAccountApi(
-      state.doc.id
-    );
+  const account =
+  isOwner()
+    ? await loadStaffAccountApi(
+        doc.id
+      )
+    : null;
 
   const career =
     buildStaffCareer(state);
