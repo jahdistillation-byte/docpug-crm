@@ -26742,6 +26742,17 @@ async function uploadClinicBrandFile(file) {
   ).toString();
 }
 
+function isAdmin() {
+  const role =
+    state.me?.role ||
+    sessionStorage.getItem(
+      "pug_active_role"
+    ) ||
+    "";
+
+  return role === "admin";
+}
+
 function isClinicOwner() {
   const role =
     state.me?.role ||
