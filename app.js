@@ -28172,11 +28172,12 @@ async function init() {
   }
 
   if (
-    typeof initSettingsUI ===
+  state.route === "settings" &&
+  typeof initSettingsUI ===
     "function"
-  ) {
-    initSettingsUI();
-  }
+) {
+  await initSettingsUI();
+}
 
   // Применяем сохранённую тему
   if (
@@ -28292,9 +28293,26 @@ async function init() {
     }
   }
 
+  if (
+  state.route === "owners" ||
+  state.route === "owner"
+) {
   await loadOwners();
+}
+
+if (
+  state.route === "patients" ||
+  state.route === "patient"
+) {
   await loadPatientsApi();
+}
+
+if (
+  state.route === "services" ||
+  state.route === "visit"
+) {
   await loadServicesApi();
+}
 }
 
 

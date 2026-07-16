@@ -18,6 +18,7 @@ from flask import (
     send_from_directory,
     jsonify,
     session,
+    g,
 )
 from werkzeug.utils import secure_filename
 from werkzeug.security import (
@@ -104,33 +105,59 @@ def get_current_user():
     """
     Возвращает текущего активного пользователя
     только по защищённой серверной сессии.
+
+    Результат кэшируется в рамках одного HTTP-запроса,
+    чтобы несколько проверок доступа не создавали
+    повторные запросы к Supabase.
     """
 
+    if getattr(
+        g,
+        "current_user_loaded",
+        False,
+    ):
+        return getattr(
+            g,
+            "current_user",
+            None,
+        )
+
+    g.current_user_loaded = True
+    g.current_user = None
+
     try:
-        user_id = session.get("user_id")
-        org_id = session.get("org_id")
+        user_id = session.get(
+            "user_id"
+        )
+
+        org_id = session.get(
+            "org_id"
+        )
 
         if not user_id or not org_id:
             return None
 
-        result = (
-            supabase
-            .table("clinic_users")
-            .select(
-                "id, username, org_id, staff_id, "
-                "role, display_name, is_active, "
-                "must_change_password"
-            )
-            .eq(
-                "id",
-                str(user_id),
-            )
-            .eq(
-                "org_id",
-                str(org_id),
-            )
-            .limit(1)
-            .execute()
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("clinic_users")
+                .select(
+                    "id, username, org_id, staff_id, "
+                    "role, display_name, is_active, "
+                    "must_change_password"
+                )
+                .eq(
+                    "id",
+                    str(user_id),
+                )
+                .eq(
+                    "org_id",
+                    str(org_id),
+                )
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
         )
 
         if not result.data:
@@ -139,9 +166,14 @@ def get_current_user():
 
         user = result.data[0]
 
-        if user.get("is_active") is False:
+        if (
+            user.get("is_active")
+            is False
+        ):
             session.clear()
             return None
+
+        g.current_user = user
 
         return user
 
@@ -150,6 +182,8 @@ def get_current_user():
             "⚠️ get_current_user failed:",
             repr(error),
         )
+
+        g.current_user = None
 
         return None
 
@@ -300,25 +334,30 @@ def self_or_manager_required(
 def calendar_event_for_current_org(
     event_id,
 ):
-    current_org = get_current_org_id()
+    current_org = (
+        get_current_org_id()
+    )
 
     if not current_org:
         return None
 
-    result = (
-        supabase
-        .table("calendar_events")
-        .select("*")
-        .eq(
-            "org_id",
-            current_org,
-        )
-        .eq(
-            "id",
-            str(event_id),
-        )
-        .limit(1)
-        .execute()
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("calendar_events")
+            .select("*")
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "id",
+                str(event_id),
+            )
+            .limit(1)
+        ),
+        attempts=3,
+        delay=0.25,
     )
 
     if not result.data:
@@ -882,9 +921,6 @@ def too_large(e):
 def root():
     return send_from_directory(BASE_DIR, "index.html")
 
-@app.get("/uploads/<path:f>")
-def uploads(f):
-    return send_from_directory(UPLOAD_DIR, f)
 
 @app.get("/<path:path>")
 def static_any(path):
@@ -926,13 +962,24 @@ def api_get_organization_profile():
         if not current_org:
             return fail("Organization not selected", 400)
 
-        res = (
-            supabase.table("orgs")
-            .select(", ".join(CLINIC_PROFILE_FIELDS))
-            .eq("id", current_org)
-            .limit(1)
-            .execute()
+        res = execute_with_retry(
+    lambda: (
+        supabase
+        .table("orgs")
+        .select(
+            ", ".join(
+                CLINIC_PROFILE_FIELDS
+            )
         )
+        .eq(
+            "id",
+            current_org,
+        )
+        .limit(1)
+    ),
+    attempts=3,
+    delay=0.25,
+)
 
         if not res.data:
             return fail("Organization not found", 404)
@@ -1431,7 +1478,14 @@ def api_services_list():
 
 
 @app.post("/api/services")
-def api_services_create():
+def api_services_update():
+    user, auth_error = (
+        owner_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
         payload = request.get_json(silent=True) or {}
         name = (payload.get("name") or "").strip()
@@ -1460,7 +1514,15 @@ def api_services_create():
 
 @app.put("/api/services")
 def api_services_update():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
+        # существующий код
         payload = request.get_json(silent=True) or {}
         svc_id = (request.args.get("id") or payload.get("id") or "").strip()
         if not svc_id:
@@ -1492,8 +1554,17 @@ def api_services_update():
 
 
 @app.delete("/api/services")
+@app.delete("/api/services")
 def api_services_delete():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
+        # существующий код
         payload = request.get_json(silent=True) or {}
         svc_id = (request.args.get("id") or payload.get("id") or "").strip()
         if not svc_id:
@@ -1516,29 +1587,6 @@ def api_services_delete():
 # API: OWNERS
 # =========================
 @app.get("/api/owners")
-def api_get_owners():
-    current_org = get_current_org_id()
-    res = supabase.table("owners").select("*").eq("org_id", current_org).execute()
-    return ok(res.data or [])
-
-@app.post("/api/owners")
-def api_create_owner():
-    d = request.get_json(silent=True) or {}
-    name = (d.get("name") or "").strip()
-    if not name:
-        return fail("name required", 400)
-
-    current_org = get_current_org_id()
-    payload = {
-        "org_id": current_org,
-        "name": name,
-        "phone": d.get("phone"),
-        "note": d.get("note"),
-    }
-
-    res = insert_with_optional_fallback("owners", payload, optional_fields=["note"])
-    row = (res.data[0] if getattr(res, "data", None) else None) or payload
-    return ok(row)
 
 @app.put("/api/owners/<owner_id>")
 def api_update_owner(owner_id):
@@ -1640,7 +1688,15 @@ def api_get_specializations():
 
 @app.post("/api/specializations")
 def api_create_specialization():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
+        # существующий код
         d = request.get_json(silent=True) or {}
         name = (d.get("name") or "").strip()
         if not name:
@@ -1663,7 +1719,15 @@ def api_create_specialization():
 
 @app.put("/api/specializations/<spec_id>")
 def api_update_specialization(spec_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
+        # существующий код
         if not spec_id:
             return fail("spec_id required", 400)
 
@@ -1692,7 +1756,15 @@ def api_update_specialization(spec_id):
 
 @app.delete("/api/specializations/<spec_id>")
 def api_delete_specialization(spec_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
+        # существующий код
         if not spec_id:
             return fail("spec_id required", 400)
 
@@ -1898,249 +1970,756 @@ def api_staff_dashboard(staff_id):
             get_current_org_id()
         )
 
-        visits_res = (
-            supabase.table("visits")
-            .select("*")
-            .eq("org_id", current_org)
-            .eq("staff_id", staff_id)
-            .execute()
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        role = normalize_role(
+            user.get("role")
         )
 
-        visits = visits_res.data or []
+        visits_res = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "staff_id",
+                    staff_id,
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
 
-        now = datetime.now(timezone.utc)
-        current_month = now.strftime("%Y-%m")
-        prev_month_num = now.month - 1
+        visits = (
+            visits_res.data or []
+        )
+
+        now = datetime.now(
+            timezone.utc
+        )
+
+        current_month = (
+            now.strftime("%Y-%m")
+        )
+
+        prev_month_num = (
+            now.month - 1
+        )
+
         prev_year = now.year
 
         if prev_month_num == 0:
             prev_month_num = 12
             prev_year -= 1
 
-        prev_month = f"{prev_year}-{prev_month_num:02d}"
+        prev_month = (
+            f"{prev_year}-"
+            f"{prev_month_num:02d}"
+        )
 
         current_visits = [
-            v for v in visits
-            if str(v.get("date") or "").startswith(current_month)
+            visit
+            for visit in visits
+            if str(
+                visit.get("date") or ""
+            ).startswith(
+                current_month
+            )
         ]
 
         prev_visits = [
-            v for v in visits
-            if str(v.get("date") or "").startswith(prev_month)
+            visit
+            for visit in visits
+            if str(
+                visit.get("date") or ""
+            ).startswith(
+                prev_month
+            )
         ]
 
-        def calc_visit_total(visit_id):
+        def calc_visit_total(
+            visit_id
+        ):
             total = 0
 
             try:
                 services_res = (
-                    supabase.table("visit_services")
-                    .select("*")
-                    .eq("visit_id", visit_id)
-                    .execute()
+                    execute_with_retry(
+                        lambda: (
+                            supabase
+                            .table(
+                                "visit_services"
+                            )
+                            .select("*")
+                            .eq(
+                                "visit_id",
+                                visit_id,
+                            )
+                        ),
+                        attempts=3,
+                        delay=0.25,
+                    )
                 )
 
-                for s in services_res.data or []:
-                    qty = s.get("qty") or 1
-                    price = s.get("price_snap") or 0
+                for service in (
+                    services_res.data
+                    or []
+                ):
+                    qty = (
+                        service.get("qty")
+                        or 1
+                    )
+
+                    price = (
+                        service.get(
+                            "price_snap"
+                        )
+                        or 0
+                    )
+
                     try:
-                        total += float(qty) * float(price)
+                        total += (
+                            float(qty)
+                            * float(price)
+                        )
                     except Exception:
                         pass
+
             except Exception:
                 pass
 
             try:
                 stock_res = (
-                    supabase.table("visit_stock")
-                    .select("*")
-                    .eq("visit_id", visit_id)
-                    .execute()
+                    execute_with_retry(
+                        lambda: (
+                            supabase
+                            .table(
+                                "visit_stock"
+                            )
+                            .select("*")
+                            .eq(
+                                "visit_id",
+                                visit_id,
+                            )
+                        ),
+                        attempts=3,
+                        delay=0.25,
+                    )
                 )
 
-                for st in stock_res.data or []:
-                    qty = st.get("qty") or 1
-                    price = st.get("price_snap") or 0
+                for stock_item in (
+                    stock_res.data
+                    or []
+                ):
+                    qty = (
+                        stock_item.get(
+                            "qty"
+                        )
+                        or 1
+                    )
+
+                    price = (
+                        stock_item.get(
+                            "price_snap"
+                        )
+                        or 0
+                    )
+
                     try:
-                        total += float(qty) * float(price)
+                        total += (
+                            float(qty)
+                            * float(price)
+                        )
                     except Exception:
                         pass
+
             except Exception:
                 pass
 
             return total
 
-        current_revenue = sum(calc_visit_total(v.get("id")) for v in current_visits if v.get("id"))
-        prev_revenue = sum(calc_visit_total(v.get("id")) for v in prev_visits if v.get("id"))
+        current_revenue = sum(
+            calc_visit_total(
+                visit.get("id")
+            )
+            for visit in current_visits
+            if visit.get("id")
+        )
 
-        visits_this_month = len(current_visits)
-        closed_checks = len([v for v in current_visits if v.get("id")])
+        prev_revenue = sum(
+            calc_visit_total(
+                visit.get("id")
+            )
+            for visit in prev_visits
+            if visit.get("id")
+        )
 
-        avg_check = round(current_revenue / closed_checks) if closed_checks else 0
+        visits_this_month = len(
+            current_visits
+        )
 
-        def growth(current, previous):
+        closed_checks = len([
+            visit
+            for visit in current_visits
+            if visit.get("id")
+        ])
+
+        avg_check = (
+            round(
+                current_revenue
+                / closed_checks
+            )
+            if closed_checks
+            else 0
+        )
+
+        def growth(
+            current,
+            previous,
+        ):
             try:
-                current = float(current or 0)
-                previous = float(previous or 0)
+                current = float(
+                    current or 0
+                )
+
+                previous = float(
+                    previous or 0
+                )
+
                 if previous <= 0:
                     return 0
-                return round(((current - previous) / previous) * 100)
+
+                return round(
+                    (
+                        (
+                            current
+                            - previous
+                        )
+                        / previous
+                    )
+                    * 100
+                )
+
             except Exception:
                 return 0
 
-        visits_growth = growth(len(current_visits), len(prev_visits))
-        checks_growth = growth(len(current_visits), len(prev_visits))
-        revenue_growth = growth(current_revenue, prev_revenue)
+        visits_growth = growth(
+            len(current_visits),
+            len(prev_visits),
+        )
 
-        prev_avg = round(prev_revenue / len(prev_visits)) if prev_visits else 0
-        avg_check_growth = growth(avg_check, prev_avg)
+        checks_growth = growth(
+            len(current_visits),
+            len(prev_visits),
+        )
+
+        revenue_growth = growth(
+            current_revenue,
+            prev_revenue,
+        )
+
+        prev_avg = (
+            round(
+                prev_revenue
+                / len(prev_visits)
+            )
+            if prev_visits
+            else 0
+        )
+
+        avg_check_growth = growth(
+            avg_check,
+            prev_avg,
+        )
 
         last_visits = sorted(
             visits,
-            key=lambda x: str(x.get("date") or ""),
-            reverse=True
+            key=lambda item: str(
+                item.get("date") or ""
+            ),
+            reverse=True,
         )[:5]
 
         normalized_last_visits = []
 
-        for v in last_visits:
-            total = calc_visit_total(v.get("id")) if v.get("id") else 0
+        for visit in last_visits:
+            total = (
+                calc_visit_total(
+                    visit.get("id")
+                )
+                if visit.get("id")
+                else 0
+            )
 
-            patient_name = "Пацієнт"
+            patient_name = (
+                "Пацієнт"
+            )
+
             try:
-                pet_id = v.get("pet_id")
+                pet_id = (
+                    visit.get("pet_id")
+                )
+
                 if pet_id:
                     pet_res = (
-                        supabase.table("patients")
-                        .select("name, species, breed")
-                        .eq("org_id", current_org)
-                        .eq("id", pet_id)
-                        .execute()
+                        execute_with_retry(
+                            lambda: (
+                                supabase
+                                .table(
+                                    "patients"
+                                )
+                                .select(
+                                    "name, species, breed"
+                                )
+                                .eq(
+                                    "org_id",
+                                    current_org,
+                                )
+                                .eq(
+                                    "id",
+                                    pet_id,
+                                )
+                                .limit(1)
+                            ),
+                            attempts=3,
+                            delay=0.25,
+                        )
                     )
+
                     if pet_res.data:
-                        patient_name = pet_res.data[0].get("name") or "Пацієнт"
+                        patient_name = (
+                            pet_res.data[0]
+                            .get("name")
+                            or "Пацієнт"
+                        )
+
             except Exception:
                 pass
 
-            normalized_last_visits.append({
-                "id": v.get("id"),
-                "date": v.get("date"),
-                "patient_name": patient_name,
-                "note": v.get("note") or "",
-                "dx": v.get("dx") or "",
-                "rx": v.get("rx") or "",
-                "total": round(total),
-                "status": "Завершено"
-            })
+            visit_data = {
+                "id":
+                    visit.get("id"),
 
-        return ok({
-            "visits_this_month": visits_this_month,
-            "closed_checks": closed_checks,
-            "revenue": round(current_revenue),
-            "avg_check": avg_check,
-            "revenue_growth_percent": revenue_growth,
-            "visits_growth_percent": visits_growth,
-            "checks_growth_percent": checks_growth,
-            "avg_check_growth_percent": avg_check_growth,
-            "last_visits": normalized_last_visits,
-            "revenue_chart": [],
-            "visits_chart": [],
-            "penalties": {
-                "late": 0,
-                "absences": 0,
-                "warnings": 0,
-                "bonuses_amount": 0,
-                "penalties_amount": 0
+                "date":
+                    visit.get("date"),
+
+                "patient_name":
+                    patient_name,
+
+                "note":
+                    visit.get("note")
+                    or "",
+
+                "dx":
+                    visit.get("dx")
+                    or "",
+
+                "rx":
+                    visit.get("rx")
+                    or "",
+
+                "status":
+                    "Завершено",
             }
-        })
 
-    except Exception as e:
-        print("❌ /api/staff/<staff_id>/dashboard error:", repr(e))
-        return fail(str(e), 500)
+            if role == "owner":
+                visit_data["total"] = (
+                    round(total)
+                )
 
-@app.get("/api/staff/<staff_id>/adjustments")
-def api_get_staff_adjustments(staff_id):
-    user, auth_error = (
-        self_or_manager_required(
-            staff_id
-        )
-    )
+            normalized_last_visits.append(
+                visit_data
+            )
 
-    if auth_error:
-        return auth_error
+        response_data = {
+            "visits_this_month":
+                visits_this_month,
 
-    try:
-        current_org = (
-            get_current_org_id()
-        )
-        month = request.args.get("month") or datetime.now(timezone.utc).strftime("%Y-%m")
+            "closed_checks":
+                closed_checks,
 
-        date_from = f"{month}-01"
-        y, m = month.split("-")
-        y = int(y)
-        m = int(m)
-        if m == 12:
-            date_to = f"{y + 1}-01-01"
-        else:
-            date_to = f"{y}-{m + 1:02d}-01"
+            "visits_growth_percent":
+                visits_growth,
 
-        res = (
-            supabase.table("staff_finance_adjustments")
-            .select("*")
-            .eq("org_id", current_org)
-            .eq("staff_id", staff_id)
-            .gte("adjustment_date", date_from)
-            .lt("adjustment_date", date_to)
-            .order("created_at", desc=True)
-            .execute()
-        )
+            "last_visits":
+                normalized_last_visits,
 
-        return ok(res.data or [])
-
-    except Exception as e:
-        return fail(str(e), 500)
-
-
-@app.post("/api/staff/<staff_id>/adjustments")
-def api_create_staff_adjustment(staff_id):
-    user, auth_error = (
-        owner_or_admin_required()
-    )
-
-    if auth_error:
-        return auth_error
-
-    try:
-        current_org = (
-            get_current_org_id()
-        )
-        d = request.get_json(silent=True) or {}
-
-        adj_type = d.get("type")
-        amount = int(d.get("amount") or 0)
-        reason = (d.get("reason") or "").strip()
-
-        if adj_type not in ("bonus", "penalty"):
-            return fail("type must be bonus or penalty", 400)
-
-        if amount <= 0:
-            return fail("amount must be positive", 400)
-
-        payload = {
-            "org_id": current_org,
-            "staff_id": staff_id,
-            "type": adj_type,
-            "amount": amount,
-            "reason": reason,
-            "adjustment_date": d.get("adjustment_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "visits_chart":
+                [],
         }
 
-        res = supabase.table("staff_finance_adjustments").insert(payload).execute()
-        row = res.data[0] if getattr(res, "data", None) else payload
+        if role == "owner":
+            response_data.update({
+                "revenue":
+                    round(
+                        current_revenue
+                    ),
+
+                "avg_check":
+                    avg_check,
+
+                "revenue_growth_percent":
+                    revenue_growth,
+
+                "checks_growth_percent":
+                    checks_growth,
+
+                "avg_check_growth_percent":
+                    avg_check_growth,
+
+                "revenue_chart":
+                    [],
+
+                "penalties": {
+                    "late": 0,
+                    "absences": 0,
+                    "warnings": 0,
+                    "bonuses_amount": 0,
+                    "penalties_amount": 0,
+                },
+            })
+
+        return ok(
+            response_data
+        )
+
+    except Exception as error:
+        print(
+            "❌ /api/staff/<staff_id>/dashboard error:",
+            repr(error),
+        )
+
+        return fail(
+            "Cannot load staff dashboard",
+            500,
+        )
+
+@app.get(
+    "/api/staff/<staff_id>/adjustments"
+)
+def api_get_staff_adjustments(
+    staff_id,
+):
+    user, auth_error = (
+        owner_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        staff_id = str(
+            staff_id or ""
+        ).strip()
+
+        if not staff_id:
+            return fail(
+                "staff_id required",
+                400,
+            )
+
+        month = str(
+            request.args.get("month")
+            or datetime
+                .now(timezone.utc)
+                .strftime("%Y-%m")
+        ).strip()
+
+        try:
+            year_text, month_text = (
+                month.split("-")
+            )
+
+            year = int(
+                year_text
+            )
+
+            month_number = int(
+                month_text
+            )
+
+            if (
+                month_number < 1
+                or month_number > 12
+            ):
+                raise ValueError()
+
+        except Exception:
+            return fail(
+                "Invalid month format. Use YYYY-MM",
+                400,
+            )
+
+        date_from = (
+            f"{year:04d}-"
+            f"{month_number:02d}-01"
+        )
+
+        if month_number == 12:
+            next_year = (
+                year + 1
+            )
+
+            next_month = 1
+        else:
+            next_year = year
+
+            next_month = (
+                month_number + 1
+            )
+
+        date_to = (
+            f"{next_year:04d}-"
+            f"{next_month:02d}-01"
+        )
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "staff_finance_adjustments"
+                )
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "staff_id",
+                    staff_id,
+                )
+                .gte(
+                    "adjustment_date",
+                    date_from,
+                )
+                .lt(
+                    "adjustment_date",
+                    date_to,
+                )
+                .order(
+                    "created_at",
+                    desc=True,
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET staff adjustments:",
+            repr(error),
+        )
+
+        return fail(
+            "Cannot load staff adjustments",
+            500,
+        )
+
+
+@app.post(
+    "/api/staff/<staff_id>/adjustments"
+)
+def api_create_staff_adjustment(
+    staff_id,
+):
+    user, auth_error = (
+        owner_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        staff_id = str(
+            staff_id or ""
+        ).strip()
+
+        if not staff_id:
+            return fail(
+                "staff_id required",
+                400,
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        adjustment_type = str(
+            data.get("type")
+            or ""
+        ).strip().lower()
+
+        reason = str(
+            data.get("reason")
+            or ""
+        ).strip()
+
+        try:
+            amount = int(
+                data.get("amount")
+                or 0
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            return fail(
+                "amount must be a number",
+                400,
+            )
+
+        if adjustment_type not in {
+            "bonus",
+            "penalty",
+        }:
+            return fail(
+                "type must be bonus or penalty",
+                400,
+            )
+
+        if amount <= 0:
+            return fail(
+                "amount must be positive",
+                400,
+            )
+
+        adjustment_date = str(
+            data.get(
+                "adjustment_date"
+            )
+            or datetime
+                .now(timezone.utc)
+                .strftime("%Y-%m-%d")
+        ).strip()
+
+        try:
+            datetime.strptime(
+                adjustment_date,
+                "%Y-%m-%d",
+            )
+        except ValueError:
+            return fail(
+                "Invalid adjustment_date. Use YYYY-MM-DD",
+                400,
+            )
+
+        staff_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("staff")
+                    .select("id")
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        staff_id,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if not staff_result.data:
+            return fail(
+                "Staff member not found",
+                404,
+            )
+
+        payload = {
+            "org_id":
+                current_org,
+
+            "staff_id":
+                staff_id,
+
+            "type":
+                adjustment_type,
+
+            "amount":
+                amount,
+
+            "reason":
+                reason or None,
+
+            "adjustment_date":
+                adjustment_date,
+        }
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "staff_finance_adjustments"
+                )
+                .insert(
+                    clean_payload(
+                        payload
+                    )
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else payload
+        )
+
         return ok(row)
 
-    except Exception as e:
-        return fail(str(e), 500)
+    except Exception as error:
+        print(
+            "❌ CREATE staff adjustment:",
+            repr(error),
+        )
+
+        return fail(
+            "Cannot create staff adjustment",
+            500,
+        )
 
 
 @app.delete("/api/staff/adjustments/<adjustment_id>")
@@ -2453,18 +3032,46 @@ def api_get_staff_rating():
 @app.get("/api/calendar")
 def api_calendar():
     try:
-        current_org = get_current_org_id()
-        res = (
-            supabase.table("calendar_events")
-            .select("*")
-            .eq("org_id", current_org)
-            .order("event_date")
-            .order("start_time")
-            .execute()
+        current_org = (
+            get_current_org_id()
         )
-        return ok(res.data or [])
-    except Exception as e:
-        return fail(str(e))
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("calendar_events")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .order("event_date")
+                .order("start_time")
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET /api/calendar error:",
+            repr(error),
+        )
+
+        return fail(
+            f"Cannot load calendar: {error}",
+            500,
+        )
     
 @app.post("/api/calendar")
 def api_create_calendar_event():
@@ -2736,16 +3343,63 @@ def api_update_calendar_event(event_id):
 # =========================
 @app.get("/api/staff-schedule")
 def api_get_staff_schedule():
-    work_date = request.args.get("date")
-    current_org = get_current_org_id()
     try:
-        q = supabase.table("staff_schedule").select("*").eq("org_id", current_org)
-        if work_date:
-            q = q.eq("work_date", work_date)
-        res = q.order("work_date").execute()
-        return ok(res.data or [])
-    except Exception as e:
-        return fail(str(e))
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        work_date = str(
+            request.args.get("date")
+            or ""
+        ).strip()
+
+        def build_query():
+            query = (
+                supabase
+                .table("staff_schedule")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+            )
+
+            if work_date:
+                query = query.eq(
+                    "work_date",
+                    work_date,
+                )
+
+            return query.order(
+                "work_date"
+            )
+
+        result = execute_with_retry(
+            build_query,
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET /api/staff-schedule error:",
+            repr(error),
+        )
+
+        return fail(
+            f"Cannot load staff schedule: {error}",
+            500,
+        )
 
 @app.get("/api/staff-schedule-range")
 def api_get_staff_schedule_range():
