@@ -6798,16 +6798,20 @@ function bindStaffAccountPanel(
           );
 
         if (username.length < 3) {
-          alert(
-            "Логін повинен містити мінімум 3 символи."
+          openDeleteModal(
+            "Логін повинен містити мінімум 3 символи.",
+            null,
+            "info"
           );
 
           return;
         }
 
         if (password.length < 8) {
-          alert(
-            "Тимчасовий пароль повинен містити мінімум 8 символів."
+          openDeleteModal(
+            "Тимчасовий пароль повинен містити мінімум 8 символів.",
+            null,
+            "info"
           );
 
           return;
@@ -6824,21 +6828,25 @@ function bindStaffAccountPanel(
           );
 
         if (!result.ok) {
-          alert(
+          openDeleteModal(
             result.error ||
-            "Не вдалося створити акаунт."
+            "Не вдалося створити акаунт.",
+            null,
+            "info"
           );
 
           return;
         }
 
-        alert(
-          "Акаунт створено. Передайте співробітнику логін і тимчасовий пароль."
-        );
-
         await renderTeamSettingsTab(
           root,
           profileState
+        );
+
+        openDeleteModal(
+          "Передайте співробітнику логін і тимчасовий пароль.",
+          null,
+          "success"
         );
       }
     );
@@ -6874,21 +6882,25 @@ function bindStaffAccountPanel(
           );
 
         if (!result.ok) {
-          alert(
+          openDeleteModal(
             result.error ||
-            "Не вдалося зберегти зміни."
+            "Не вдалося зберегти зміни.",
+            null,
+            "info"
           );
 
           return;
         }
 
-        alert(
-          "Налаштування доступу збережено."
-        );
-
         await renderTeamSettingsTab(
           root,
           profileState
+        );
+
+        openDeleteModal(
+          "Налаштування доступу успішно збережено.",
+          null,
+          "success"
         );
       }
     );
@@ -6899,42 +6911,53 @@ function bindStaffAccountPanel(
     )
     ?.addEventListener(
       "click",
-      async () => {
+      () => {
         if (!account) return;
 
         const nextActive =
           !account.is_active;
 
-        const confirmed =
-          confirm(
-            nextActive
-              ? "Увімкнути доступ до CRM?"
-              : "Вимкнути доступ цього співробітника до CRM?"
-          );
+        openDeleteModal(
+          nextActive
+            ? "Відновити цьому співробітнику доступ до CRM?"
+            : "Співробітник більше не зможе увійти до CRM.",
+          async () => {
+            const result =
+              await updateStaffAccountApi(
+                staffId,
+                {
+                  is_active:
+                    nextActive,
+                }
+              );
 
-        if (!confirmed) return;
+            if (!result.ok) {
+              openDeleteModal(
+                result.error ||
+                "Не вдалося змінити доступ.",
+                null,
+                "info"
+              );
 
-        const result =
-          await updateStaffAccountApi(
-            staffId,
-            {
-              is_active:
-                nextActive,
+              return;
             }
-          );
 
-        if (!result.ok) {
-          alert(
-            result.error ||
-            "Не вдалося змінити доступ."
-          );
+            await renderTeamSettingsTab(
+              root,
+              profileState
+            );
 
-          return;
-        }
-
-        await renderTeamSettingsTab(
-          root,
-          profileState
+            openDeleteModal(
+              nextActive
+                ? "Доступ до CRM увімкнено."
+                : "Доступ до CRM вимкнено.",
+              null,
+              "success"
+            );
+          },
+          nextActive
+            ? "activate"
+            : "deactivate"
         );
       }
     );
@@ -6945,48 +6968,49 @@ function bindStaffAccountPanel(
     )
     ?.addEventListener(
       "click",
-      async () => {
-        const password =
-          prompt(
-            "Введіть новий тимчасовий пароль. Мінімум 8 символів:"
-          );
+      () => {
+        openStaffPasswordResetModal(
+          async (password) => {
+            if (
+              String(password).length < 8
+            ) {
+              openDeleteModal(
+                "Пароль повинен містити мінімум 8 символів.",
+                null,
+                "info"
+              );
 
-        if (password === null) {
-          return;
-        }
+              return;
+            }
 
-        if (
-          String(password).length < 8
-        ) {
-          alert(
-            "Пароль повинен містити мінімум 8 символів."
-          );
+            const result =
+              await resetStaffPasswordApi(
+                staffId,
+                String(password)
+              );
 
-          return;
-        }
+            if (!result.ok) {
+              openDeleteModal(
+                result.error ||
+                "Не вдалося скинути пароль.",
+                null,
+                "info"
+              );
 
-        const result =
-          await resetStaffPasswordApi(
-            staffId,
-            String(password)
-          );
+              return;
+            }
 
-        if (!result.ok) {
-          alert(
-            result.error ||
-            "Не вдалося скинути пароль."
-          );
+            await renderTeamSettingsTab(
+              root,
+              profileState
+            );
 
-          return;
-        }
-
-        alert(
-          "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль."
-        );
-
-        await renderTeamSettingsTab(
-          root,
-          profileState
+            openDeleteModal(
+              "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль.",
+              null,
+              "success"
+            );
+          }
         );
       }
     );
