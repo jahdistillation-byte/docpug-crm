@@ -3419,52 +3419,195 @@ def api_delete_staff_schedule():
 # =========================
 @app.get("/api/patients")
 def api_get_patients():
-    try:
-        owner_id = request.args.get("owner_id")
-        current_org = get_current_org_id()
+    user, auth_error = auth_required()
 
-        q = supabase.table("patients").select("*").eq("org_id", current_org)
+    if auth_error:
+        return auth_error
+
+    try:
+        owner_id = request.args.get(
+            "owner_id"
+        )
+
+        current_org = (
+            get_current_org_id()
+        )
+
+        query = (
+            supabase
+            .table("patients")
+            .select("*")
+            .eq("org_id", current_org)
+        )
 
         if owner_id:
-            q = q.eq("owner_id", owner_id)
+            query = query.eq(
+                "owner_id",
+                owner_id
+            )
 
-        res = q.execute()
-        return ok(res.data or [])
+        result = query.execute()
 
-    except Exception as e:
-        print("❌ /api/patients GET error:", repr(e))
-        return fail("Не вдалося завантажити пацієнтів. Спробуйте ще раз.", 500)
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET /api/patients:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося завантажити пацієнтів.",
+            500
+        )
+
 
 @app.post("/api/patients")
 def api_create_patient():
-    d = request.get_json(silent=True) or {}
-    owner_id = (d.get("owner_id") or "").strip()
-    name = (d.get("name") or "").strip()
-    if not owner_id or not name:
-        return fail("owner_id & name required", 400)
+    user, auth_error = auth_required()
 
-    current_org = get_current_org_id()
-    payload = {
-        "org_id": current_org,
-        "owner_id": owner_id,
-        "name": name,
-        "species": d.get("species"),
-        "breed": d.get("breed"),
-        "age": d.get("age"),
-        "weight_kg": d.get("weight_kg"),
-        "notes": d.get("notes") or d.get("note"),
-    }
-    res = insert_with_optional_fallback("patients", payload, optional_fields=["notes"])
-    row = (res.data[0] if getattr(res, "data", None) else None) or payload
-    return ok(row)
+    if auth_error:
+        return auth_error
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    owner_id = str(
+        data.get("owner_id") or ""
+    ).strip()
+
+    name = str(
+        data.get("name") or ""
+    ).strip()
+
+    if not owner_id or not name:
+        return fail(
+            "owner_id and name required",
+            400
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    try:
+        owner_result = (
+            supabase
+            .table("owners")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", owner_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not owner_result.data:
+            return fail(
+                "Власника не знайдено у цій клініці.",
+                404
+            )
+
+        payload = {
+            "org_id": current_org,
+            "owner_id": owner_id,
+            "name": name,
+            "species": data.get("species"),
+            "breed": data.get("breed"),
+            "age": data.get("age"),
+            "weight_kg": data.get(
+                "weight_kg"
+            ),
+            "notes": (
+                data.get("notes")
+                or data.get("note")
+            ),
+        }
+
+        result = (
+            insert_with_optional_fallback(
+                "patients",
+                payload,
+                optional_fields=["notes"]
+            )
+        )
+
+        row = (
+            result.data[0]
+            if getattr(
+                result,
+                "data",
+                None
+            )
+            else payload
+        )
+
+        return ok(row)
+
+    except Exception as error:
+        print(
+            "❌ POST /api/patients:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося створити пацієнта.",
+            500
+        )
+
 
 @app.delete("/api/patients/<pet_id>")
 def api_delete_patient(pet_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     if not pet_id:
-        return fail("pet_id required", 400)
-    current_org = get_current_org_id()
-    supabase.table("patients").delete().eq("org_id", current_org).eq("id", pet_id).execute()
-    return ok(True)
+        return fail(
+            "pet_id required",
+            400
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    try:
+        result = (
+            supabase
+            .table("patients")
+            .delete()
+            .eq("org_id", current_org)
+            .eq("id", pet_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404
+            )
+
+        return ok(True)
+
+    except Exception as error:
+        print(
+            "❌ DELETE /api/patients:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося видалити пацієнта.",
+            500
+        )
 # =========================
 # API: HOSPITALIZATIONS
 # =========================
