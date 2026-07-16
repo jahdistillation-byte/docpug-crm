@@ -16319,13 +16319,52 @@ async function loadCalendarApi() {
 
 async function loadStaffScheduleApi(date) {
   try {
-    const res = await fetch(`/api/staff-schedule?date=${encodeURIComponent(date)}`);
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot load staff schedule");
-    return Array.isArray(json.items) ? json.items : Array.isArray(json.data) ? json.data : [];
-  } catch (e) {
-    console.error("loadStaffScheduleApi failed:", e);
-    alert("Не вдалося завантажити графік змін: " + (e?.message || e));
+    const response =
+      await fetch(
+        `/api/staff-schedule?date=${encodeURIComponent(date)}`,
+        {
+          method: "GET",
+          credentials: "include",
+
+          headers: {
+            Accept: "application/json",
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      throw new Error(
+        json?.error ||
+        `HTTP ${response.status}`
+      );
+    }
+
+    return Array.isArray(json.data)
+      ? json.data
+      : Array.isArray(json.items)
+        ? json.items
+        : [];
+  } catch (error) {
+    console.error(
+      "loadStaffScheduleApi failed:",
+      error
+    );
+
     return [];
   }
 }
@@ -16413,9 +16452,26 @@ async function renderCalendarTab() {
     </div>
   `;
 
-  const staff = await loadStaffApi();
-  const events = await loadCalendarApi();
-  const staffSchedule = await loadStaffScheduleApi(today);
+  const staff =
+  await loadStaffApi();
+
+await new Promise(
+  (resolve) =>
+    setTimeout(resolve, 150)
+);
+
+const events =
+  await loadCalendarApi();
+
+await new Promise(
+  (resolve) =>
+    setTimeout(resolve, 150)
+);
+
+const staffSchedule =
+  await loadStaffScheduleApi(
+    today
+  );
 
   const activeStaffIds = new Set(
     staffSchedule
