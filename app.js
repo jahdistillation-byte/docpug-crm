@@ -18288,24 +18288,28 @@ const staffSchedule =
   });
 
   $$("[data-del-calendar-event]").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-      const id = btn.dataset.delCalendarEvent;
-      if (!id) return;
+    const id =
+      btn.dataset.delCalendarEvent;
 
-      openDeleteModal(
-  "Видалити цей запис з календаря?",
-  async () => {
-    const ok =
-      await deleteCalendarEventApi(id);
+    if (!id) return;
 
-    if (ok) {
-      await renderCalendarTab();
-    }
-  }
-);
+    openDeleteModal(
+      "Видалити цей запис з календаря?",
+      async () => {
+        const ok =
+          await deleteCalendarEventApi(id);
+
+        if (ok) {
+          await renderCalendarTab();
+        }
+      }
+    );
+  });
+});
 
   $$("[data-edit-calendar-event]").forEach((card) => {
     card.addEventListener("click", async (e) => {
