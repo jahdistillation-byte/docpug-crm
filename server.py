@@ -4995,6 +4995,10 @@ def api_update_visit():
 
 @app.delete("/api/visits/<visit_id>")
 def api_delete_visit(visit_id):
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error    
     if not visit_id:
         return fail("visit_id required", 400)
 

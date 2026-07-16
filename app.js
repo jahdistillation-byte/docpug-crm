@@ -1819,6 +1819,13 @@ async function pushVisitStockToServer(visitId, stockArr) {
 }
 
 async function deleteVisitApi(visitId) {
+    if (!isOwner() && !isAdmin()) {
+    alert(
+      "Видаляти візити може лише адміністратор або власник."
+    );
+
+    return false;
+  }
   try {
     const res = await fetch(`/api/visits/${encodeURIComponent(String(visitId))}`, {
       method: "DELETE",
@@ -18341,6 +18348,13 @@ async function updateCalendarEventApi(eventId, payload) {
 }
 
 async function deleteCalendarEventApi(eventId) {
+    if (!isOwner() && !isAdmin()) {
+    alert(
+      "Видаляти записи з календаря може лише адміністратор або власник."
+    );
+
+    return false;
+  }
   try {
     const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
       method: "DELETE",
