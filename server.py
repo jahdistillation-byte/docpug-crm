@@ -4839,6 +4839,159 @@ def api_create_visit():
 
     return ok(row)
 
+@app.put("/api/visits")
+def api_update_visit():
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        visit_id = str(
+            request.args.get("id")
+            or data.get("id")
+            or ""
+        ).strip()
+
+        if not visit_id:
+            return fail(
+                "visit id required",
+                400,
+            )
+
+        existing_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    visit_id,
+                )
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not existing_result.data:
+            return fail(
+                "Visit not found",
+                404,
+            )
+
+        allowed_fields = [
+            "pet_id",
+            "staff_id",
+            "date",
+            "note",
+            "dx",
+            "rx",
+            "weight_kg",
+        ]
+
+        payload = {
+            field: data.get(field)
+            for field in allowed_fields
+            if field in data
+        }
+
+        payload = {
+            key: value
+            for key, value in payload.items()
+            if value is not None
+        }
+
+        if payload:
+            update_result = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visits")
+                    .update(payload)
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        visit_id,
+                    )
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+
+            if not update_result.data:
+                return fail(
+                    "Visit not found",
+                    404,
+                )
+
+            row = update_result.data[0]
+
+        else:
+            row = existing_result.data[0]
+
+        if (
+            "services" in data
+            or "services_json" in data
+            or "stock" in data
+            or "stock_json" in data
+        ):
+            save_visit_lines(
+                visit_id,
+                data,
+            )
+
+        services_map, stock_map = (
+            load_visit_lines([
+                visit_id
+            ])
+        )
+
+        row["services"] = (
+            services_map.get(
+                visit_id,
+                []
+            )
+        )
+
+        row["stock"] = (
+            stock_map.get(
+                visit_id,
+                []
+            )
+        )
+
+        return ok(row)
+
+    except Exception as error:
+        print(
+            "❌ PUT /api/visits error:",
+            repr(error),
+        )
+
+        return fail(
+            f"Cannot update visit: {error}",
+            500,
+        )
+
 
 @app.delete("/api/visits/<visit_id>")
 def api_delete_visit(visit_id):
