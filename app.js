@@ -10632,60 +10632,65 @@ async function renderHospitalTab() {
     true
   );
 
+const hospitalPatientsWithTasks = [];
+
+for (
+  const hospitalization
+  of hospitalPatients
+) {
+  const tasks =
+    await loadHospitalTasksApi(
+      hospitalization.id
+    );
+
+  const sortedTasks = [
+    ...(Array.isArray(tasks)
+      ? tasks
+      : []),
+  ].sort((a, b) => {
+    return (
+      new Date(a.scheduled_at) -
+      new Date(b.scheduled_at)
+    );
+  });
+
+  const nextTask =
+    sortedTasks.find(
+      (task) =>
+        task.status === "planned"
+    ) || null;
+
+  const completedTasks =
+    sortedTasks.filter(
+      (task) =>
+        task.status === "completed"
+    );
+
+  hospitalPatientsWithTasks.push({
+    ...hospitalization,
+
+    hospital_tasks:
+      sortedTasks,
+
+    next_task:
+      nextTask,
+
+    tasks_count:
+      sortedTasks.length,
+
+    active_tasks_count:
+      sortedTasks.filter(
+        (task) =>
+          task.status === "planned"
+      ).length,
+
+    completed_tasks_count:
+      completedTasks.length,
+  });
+}
+
 hospitalPatients =
-  await Promise.all(
-    hospitalPatients.map(
-      async (hospitalization) => {
-        const tasks =
-          await loadHospitalTasksApi(
-            hospitalization.id
-          );
-
-        const sortedTasks = [
-          ...tasks,
-        ].sort((a, b) => {
-          return (
-            new Date(a.scheduled_at) -
-            new Date(b.scheduled_at)
-          );
-        });
-
-        const nextTask =
-          sortedTasks.find(
-            (task) =>
-              task.status === "planned"
-          ) || null;
-
-        const completedTasks =
-          sortedTasks.filter(
-            (task) =>
-              task.status === "completed"
-          );
-
-        return {
-          ...hospitalization,
-
-          hospital_tasks:
-            sortedTasks,
-
-          next_task:
-            nextTask,
-
-          tasks_count:
-            sortedTasks.length,
-
-          active_tasks_count:
-            sortedTasks.filter(
-              (task) =>
-                task.status === "planned"
-            ).length,
-
-          completed_tasks_count:
-            completedTasks.length,
-        };
-      }
-    )
-  );
+  hospitalPatientsWithTasks;
 
   window.__hospitalPatients =
     hospitalPatients;

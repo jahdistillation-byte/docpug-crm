@@ -3567,88 +3567,125 @@ def enrich_hospital_tasks(rows):
     return enriched
 
 
-@app.get("/api/hospitalizations/<hospitalization_id>/tasks")
-def api_get_hospital_tasks(hospitalization_id):
+@app.get(
+    "/api/hospitalizations/"
+    "<hospitalization_id>/tasks"
+)
+def api_get_hospital_tasks(
+    hospitalization_id
+):
     try:
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
 
         if not current_org:
             return fail(
                 "Organization not selected",
-                400
+                400,
             )
+
+        hospitalization_id = str(
+            hospitalization_id or ""
+        ).strip()
 
         if not hospitalization_id:
             return fail(
                 "hospitalization_id required",
-                400
+                400,
             )
 
-        status = (
-            request.args.get("status")
-            or ""
+        status = str(
+            request.args.get(
+                "status"
+            ) or ""
         ).strip()
 
-        date_from = (
-            request.args.get("from")
-            or ""
+        date_from = str(
+            request.args.get(
+                "from"
+            ) or ""
         ).strip()
 
-        date_to = (
-            request.args.get("to")
-            or ""
+        date_to = str(
+            request.args.get(
+                "to"
+            ) or ""
         ).strip()
 
-        query = (
-            supabase
-            .table("hospital_tasks")
-            .select("*")
-            .eq("org_id", current_org)
-            .eq(
-                "hospitalization_id",
-                hospitalization_id
+        def build_query():
+            query = (
+                supabase
+                .table(
+                    "hospital_tasks"
+                )
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "hospitalization_id",
+                    hospitalization_id,
+                )
             )
+
+            if status:
+                query = query.eq(
+                    "status",
+                    status,
+                )
+
+            if date_from:
+                query = query.gte(
+                    "scheduled_at",
+                    date_from,
+                )
+
+            if date_to:
+                query = query.lte(
+                    "scheduled_at",
+                    date_to,
+                )
+
+            return query.order(
+                "scheduled_at"
+            )
+
+        result = execute_with_retry(
+            build_query,
+            attempts=3,
+            delay=0.35,
         )
 
-        if status:
-            query = query.eq(
-                "status",
-                status
+        rows = result.data or []
+
+        try:
+            rows = (
+                enrich_hospital_tasks(
+                    rows
+                )
+            )
+        except Exception as enrich_error:
+            print(
+                "⚠️ enrich hospital "
+                "tasks error:",
+                repr(enrich_error),
             )
 
-        if date_from:
-            query = query.gte(
-                "scheduled_at",
-                date_from
-            )
-
-        if date_to:
-            query = query.lte(
-                "scheduled_at",
-                date_to
-            )
-
-        result = (
-            query
-            .order("scheduled_at")
-            .execute()
-        )
-
-        return ok(
-            enrich_hospital_tasks(
-                result.data or []
-            )
-        )
+        return ok(rows)
 
     except Exception as error:
         print(
-            "❌ GET hospital tasks error:",
-            repr(error)
+            "❌ GET hospital tasks "
+            "error:",
+            repr(error),
         )
 
         return fail(
-            f"Cannot load hospital tasks: {error}",
-            500
+            "Cannot load hospital "
+            f"tasks: {error}",
+            500,
         )
 
 
