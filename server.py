@@ -168,6 +168,198 @@ def owner_required():
         return None, fail("Owner access required", 403)
 
     return user, None
+
+# =====================================================
+# ROLE-BASED ACCESS CONTROL
+# =====================================================
+
+CRM_ROLES = {
+    "owner",
+    "admin",
+    "vet",
+    "assistant",
+}
+
+
+def normalize_role(value):
+    role = str(value or "").strip().lower()
+
+    if role not in CRM_ROLES:
+        return "vet"
+
+    return role
+
+
+def get_current_role():
+    user = get_current_user()
+
+    if not user:
+        return None
+
+    return normalize_role(
+        user.get("role")
+    )
+
+
+def auth_required():
+    """
+    Проверяет наличие активной серверной сессии.
+    """
+
+    user = get_current_user()
+
+    if not user:
+        return None, fail(
+            "Unauthorized",
+            401,
+        )
+
+    return user, None
+
+
+def roles_required(*allowed_roles):
+    """
+    Проверяет, что пользователь имеет одну
+    из разрешённых ролей.
+    """
+
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return None, auth_error
+
+    role = normalize_role(
+        user.get("role")
+    )
+
+    allowed = {
+        normalize_role(item)
+        for item in allowed_roles
+    }
+
+    if role not in allowed:
+        return None, fail(
+            "Access denied",
+            403,
+        )
+
+    return user, None
+
+
+def owner_or_admin_required():
+    return roles_required(
+        "owner",
+        "admin",
+    )
+
+
+def self_or_manager_required(
+    staff_id,
+):
+    """
+    Owner/admin могут работать с любым профилем.
+    Vet/assistant — только со своим staff_id.
+    """
+
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return None, auth_error
+
+    role = normalize_role(
+        user.get("role")
+    )
+
+    if role in {
+        "owner",
+        "admin",
+    }:
+        return user, None
+
+    current_staff_id = str(
+        user.get("staff_id") or ""
+    ).strip()
+
+    requested_staff_id = str(
+        staff_id or ""
+    ).strip()
+
+    if (
+        not current_staff_id
+        or current_staff_id
+        != requested_staff_id
+    ):
+        return None, fail(
+            "You can access only your own staff profile",
+            403,
+        )
+
+    return user, None
+
+
+def calendar_event_for_current_org(
+    event_id,
+):
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return None
+
+    result = (
+        supabase
+        .table("calendar_events")
+        .select("*")
+        .eq(
+            "org_id",
+            current_org,
+        )
+        .eq(
+            "id",
+            str(event_id),
+        )
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    return result.data[0]
+
+
+def can_manage_calendar_staff(
+    user,
+    staff_id,
+):
+    """
+    Owner/admin/assistant управляют календарём клиники.
+    Vet управляет только своими записями.
+    """
+
+    role = normalize_role(
+        user.get("role")
+    )
+
+    if role in {
+        "owner",
+        "admin",
+        "assistant",
+    }:
+        return True
+
+    current_staff_id = str(
+        user.get("staff_id") or ""
+    ).strip()
+
+    target_staff_id = str(
+        staff_id or ""
+    ).strip()
+
+    return bool(
+        current_staff_id
+        and current_staff_id
+        == target_staff_id
+    )
 # =========================
 # STATIC UPLOADS
 # =========================
@@ -641,6 +833,40 @@ def save_visit_lines(visit_id: str, d: dict):
                 .insert(clean_payload(stock_rows))
             )
         )
+
+@app.before_request
+def protect_api_routes():
+    """
+    Все API, кроме входа и проверки сессии,
+    требуют активную серверную сессию.
+    """
+
+    path = str(
+        request.path or ""
+    )
+
+    if not path.startswith("/api/"):
+        return None
+
+    public_api_paths = {
+        "/api/login",
+        "/api/session",
+        "/api/logout",
+        "/api/me",
+    }
+
+    if path in public_api_paths:
+        return None
+
+    user = get_current_user()
+
+    if not user:
+        return fail(
+            "Unauthorized",
+            401,
+        )
+
+    return None
 
 # =========================
 # ERRORS
@@ -1482,26 +1708,92 @@ def api_delete_specialization(spec_id):
 @app.get("/api/staff")
 def api_staff():
     try:
+        user, auth_error = (
+            auth_required()
+        )
+
+        if auth_error:
+            return auth_error
+
         current_org = get_current_org_id()
-        res = (
-            supabase.table("staff")
+
+        query = (
+            supabase
+            .table("staff")
             .select("*")
-            .eq("org_id", current_org)
+            .eq(
+                "org_id",
+                current_org,
+            )
+        )
+
+        role = normalize_role(
+            user.get("role")
+        )
+
+        if role not in {
+            "owner",
+            "admin",
+        }:
+            staff_id = str(
+                user.get("staff_id")
+                or ""
+            ).strip()
+
+            if not staff_id:
+                return ok([])
+
+            query = query.eq(
+                "id",
+                staff_id,
+            )
+
+        result = (
+            query
             .order("name")
             .execute()
         )
-        return ok(res.data or [])
-    except Exception as e:
-        return fail(str(e))
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ /api/staff GET:",
+            repr(error),
+        )
+
+        return fail(
+            "Cannot load staff",
+            500,
+        )
 
 @app.post("/api/staff")
 def api_create_staff():
-    d = request.get_json(silent=True) or {}
-    name = (d.get("name") or "").strip()
-    if not name:
-        return fail("name required", 400)
+    user, auth_error = (
+        owner_or_admin_required()
+    )
 
-    current_org = get_current_org_id()
+    if auth_error:
+        return auth_error
+
+    d = request.get_json(silent=True) or {}
+
+    name = (
+        d.get("name") or ""
+    ).strip()
+
+    if not name:
+        return fail(
+            "name required",
+            400,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
     payload = {
         "org_id": current_org,
         "name": name,
@@ -1517,16 +1809,38 @@ def api_create_staff():
         "is_active": True,
     }
 
-    res = supabase.table("staff").insert(payload).execute()
-    row = res.data[0] if getattr(res, "data", None) else payload
+    res = (
+        supabase
+        .table("staff")
+        .insert(payload)
+        .execute()
+    )
+
+    row = (
+        res.data[0]
+        if getattr(res, "data", None)
+        else payload
+    )
+
     return ok(row)
 
 @app.put("/api/staff/<staff_id>")
 def api_update_staff(staff_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     if not staff_id:
-        return fail("staff_id required", 400)
+        return fail(
+            "staff_id required",
+            400,
+        )
 
     d = request.get_json(silent=True) or {}
+
     payload = {
         "name": d.get("name"),
         "role": d.get("role"),
@@ -1541,22 +1855,48 @@ def api_update_staff(staff_id):
         "is_active": d.get("is_active"),
         "skills": d.get("skills"),
     }
-    payload = {k: v for k, v in payload.items() if v is not None}
 
-    current_org = get_current_org_id()
+    payload = {
+        key: value
+        for key, value in payload.items()
+        if value is not None
+    }
+
+    current_org = (
+        get_current_org_id()
+    )
+
     res = (
-        supabase.table("staff")
+        supabase
+        .table("staff")
         .update(payload)
         .eq("org_id", current_org)
         .eq("id", staff_id)
         .execute()
     )
-    row = res.data[0] if getattr(res, "data", None) else payload
+
+    row = (
+        res.data[0]
+        if getattr(res, "data", None)
+        else payload
+    )
+
     return ok(row)
 @app.get("/api/staff/<staff_id>/dashboard")
 def api_staff_dashboard(staff_id):
+    user, auth_error = (
+        self_or_manager_required(
+            staff_id
+        )
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
 
         visits_res = (
             supabase.table("visits")
@@ -1720,8 +2060,19 @@ def api_staff_dashboard(staff_id):
 
 @app.get("/api/staff/<staff_id>/adjustments")
 def api_get_staff_adjustments(staff_id):
+    user, auth_error = (
+        self_or_manager_required(
+            staff_id
+        )
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
         month = request.args.get("month") or datetime.now(timezone.utc).strftime("%Y-%m")
 
         date_from = f"{month}-01"
@@ -1752,8 +2103,17 @@ def api_get_staff_adjustments(staff_id):
 
 @app.post("/api/staff/<staff_id>/adjustments")
 def api_create_staff_adjustment(staff_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
         d = request.get_json(silent=True) or {}
 
         adj_type = d.get("type")
@@ -1784,9 +2144,20 @@ def api_create_staff_adjustment(staff_id):
 
 
 @app.delete("/api/staff/adjustments/<adjustment_id>")
-def api_delete_staff_adjustment(adjustment_id):
+def api_delete_staff_adjustment(
+    adjustment_id,
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
     try:
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
 
         supabase.table("staff_finance_adjustments") \
             .delete() \
@@ -1885,7 +2256,13 @@ def calc_rating_visit_total(visit):
 
 @app.post("/api/staff/rating/rebuild")
 def api_rebuild_staff_rating():
-    try:
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error    
+    try:    
         current_org = get_current_org_id()
         season_key = get_current_season_key()
 
@@ -2091,13 +2468,45 @@ def api_calendar():
     
 @app.post("/api/calendar")
 def api_create_calendar_event():
-    d = request.get_json(silent=True) or {}
+    user, auth_error = (
+        auth_required()
+    )
 
-    title = (d.get("title") or "").strip()
-    event_date = (d.get("event_date") or "").strip()
-    start_time = (d.get("start_time") or "").strip()
-    end_time = (d.get("end_time") or "").strip()
-    staff_id = d.get("staff_id")
+    if auth_error:
+        return auth_error
+
+    d = request.get_json(
+        silent=True
+    ) or {}
+
+    title = (
+        d.get("title") or ""
+    ).strip()
+
+    event_date = (
+        d.get("event_date") or ""
+    ).strip()
+
+    start_time = (
+        d.get("start_time") or ""
+    ).strip()
+
+    end_time = (
+        d.get("end_time") or ""
+    ).strip()
+
+    staff_id = d.get(
+        "staff_id"
+    )
+
+    if not can_manage_calendar_staff(
+        user,
+        staff_id,
+    ):
+        return fail(
+            "You can create calendar events only for yourself",
+            403,
+        ) 
 
     if not title or not event_date or not start_time or not end_time or not staff_id:
         return fail("missing required fields", 400)
@@ -2137,44 +2546,189 @@ def api_create_calendar_event():
     row = res.data[0] if getattr(res, "data", None) else payload
     return ok(row)
 
-@app.delete("/api/calendar/<event_id>")
-def api_delete_calendar_event(event_id):
-    if not event_id:
-        return fail("event_id required", 400)
+@app.delete(
+    "/api/calendar/<event_id>"
+)
+def api_delete_calendar_event(
+    event_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
 
-    current_org = get_current_org_id()
-    supabase.table("calendar_events").delete().eq("org_id", current_org).eq("id", event_id).execute()
+    if auth_error:
+        return auth_error
+
+    if not event_id:
+        return fail(
+            "event_id required",
+            400,
+        )
+
+    event = (
+        calendar_event_for_current_org(
+            event_id
+        )
+    )
+
+    if not event:
+        return fail(
+            "Calendar event not found",
+            404,
+        )
+
+    if not can_manage_calendar_staff(
+        user,
+        event.get("staff_id"),
+    ):
+        return fail(
+            "You cannot delete this calendar event",
+            403,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    (
+        supabase
+        .table("calendar_events")
+        .delete()
+        .eq(
+            "org_id",
+            current_org,
+        )
+        .eq(
+            "id",
+            event_id,
+        )
+        .execute()
+    )
+
     return ok(True)
 
 @app.put("/api/calendar/<event_id>")
 def api_update_calendar_event(event_id):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
     if not event_id:
-        return fail("event_id required", 400)
+        return fail(
+            "event_id required",
+            400,
+        )
 
-    d = request.get_json(silent=True) or {}
+    current_event = (
+        calendar_event_for_current_org(
+            event_id
+        )
+    )
+
+    if not current_event:
+        return fail(
+            "Calendar event not found",
+            404,
+        )
+
+    if not can_manage_calendar_staff(
+        user,
+        current_event.get("staff_id"),
+    ):
+        return fail(
+            "You cannot update this calendar event",
+            403,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
     payload = {
-        "title": d.get("title"),
-        "event_date": d.get("event_date"),
-        "start_time": d.get("start_time"),
-        "end_time": d.get("end_time"),
-        "staff_id": d.get("staff_id"),
-        "location": d.get("location"),
-        "status": d.get("status"),
-        "note": d.get("note"),
+        "title": data.get("title"),
+        "event_date": data.get(
+            "event_date"
+        ),
+        "start_time": data.get(
+            "start_time"
+        ),
+        "end_time": data.get(
+            "end_time"
+        ),
+        "staff_id": data.get(
+            "staff_id"
+        ),
+        "location": data.get(
+            "location"
+        ),
+        "status": data.get(
+            "status"
+        ),
+        "note": data.get(
+            "note"
+        ),
     }
-    payload = {k: v for k, v in payload.items() if v not in ("", None)}
-    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
 
-    current_org = get_current_org_id()
-    res = (
-        supabase.table("calendar_events")
+    payload = {
+        key: value
+        for key, value in payload.items()
+        if value not in ("", None)
+    }
+
+    target_staff_id = (
+        payload.get("staff_id")
+        or current_event.get(
+            "staff_id"
+        )
+    )
+
+    if not can_manage_calendar_staff(
+        user,
+        target_staff_id,
+    ):
+        return fail(
+            "You cannot move this event to another employee",
+            403,
+        )
+
+    payload["updated_at"] = (
+        datetime
+        .now(timezone.utc)
+        .isoformat()
+    )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    result = (
+        supabase
+        .table("calendar_events")
         .update(payload)
-        .eq("org_id", current_org)
-        .eq("id", event_id)
+        .eq(
+            "org_id",
+            current_org,
+        )
+        .eq(
+            "id",
+            event_id,
+        )
         .execute()
     )
-    row = res.data[0] if getattr(res, "data", None) else payload
-    return ok(row)
+
+    if not result.data:
+        return fail(
+            "Calendar event not found",
+            404,
+        )
+
+    return ok(
+        result.data[0]
+    )
 
 
 # =========================
@@ -2221,6 +2775,12 @@ def api_get_staff_schedule_range():
 
 @app.post("/api/staff-schedule")
 def api_upsert_staff_schedule():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error    
     d = request.get_json(silent=True) or {}
     work_date = d.get("work_date")
     staff_id = d.get("staff_id")
@@ -2251,6 +2811,12 @@ def api_upsert_staff_schedule():
 
 @app.delete("/api/staff-schedule")
 def api_delete_staff_schedule():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error    
     d = request.get_json(silent=True) or {}
     work_date = d.get("work_date")
     staff_id = d.get("staff_id")    

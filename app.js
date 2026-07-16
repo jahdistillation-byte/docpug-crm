@@ -344,6 +344,208 @@ function setMeLine(text) {
 }
 
 // ===== Router =====
+// =====================================================
+// CRM ROLE ACCESS
+// =====================================================
+
+const CRM_ROLE_ACCESS = {
+  owner: {
+    routes: ["*"],
+  },
+
+  admin: {
+    routes: [
+      "owners",
+      "patients",
+      "visits",
+      "hospital",
+      "services",
+      "calendar",
+      "stock",
+      "team",
+      "settings",
+    ],
+  },
+
+  vet: {
+    routes: [
+      "owners",
+      "patients",
+      "visits",
+      "hospital",
+      "calendar",
+      "team",
+      "settings",
+    ],
+  },
+
+  assistant: {
+    routes: [
+      "owners",
+      "patients",
+      "visits",
+      "hospital",
+      "calendar",
+      "team",
+      "settings",
+    ],
+  },
+};
+
+
+function getCurrentCrmRole() {
+  const role =
+    String(
+      state.me?.role || "vet"
+    )
+      .trim()
+      .toLowerCase();
+
+  return CRM_ROLE_ACCESS[role]
+    ? role
+    : "vet";
+}
+
+
+function getCurrentStaffId() {
+  return String(
+    state.me?.staff_id || ""
+  ).trim();
+}
+
+
+function isOwner() {
+  return (
+    getCurrentCrmRole() ===
+    "owner"
+  );
+}
+
+
+function isOwnerOrAdmin() {
+  return [
+    "owner",
+    "admin",
+  ].includes(
+    getCurrentCrmRole()
+  );
+}
+
+
+function canAccessRoute(
+  route
+) {
+  const cleanRoute =
+    String(route || "")
+      .trim()
+      .toLowerCase();
+
+  const role =
+    getCurrentCrmRole();
+
+  const allowedRoutes =
+    CRM_ROLE_ACCESS[role]
+      ?.routes || [];
+
+  return (
+    allowedRoutes.includes("*") ||
+    allowedRoutes.includes(
+      cleanRoute
+    )
+  );
+}
+
+
+function canManageAllCalendar() {
+  return [
+    "owner",
+    "admin",
+    "assistant",
+  ].includes(
+    getCurrentCrmRole()
+  );
+}
+
+
+function canManageCalendarStaff(
+  staffId
+) {
+  if (canManageAllCalendar()) {
+    return true;
+  }
+
+  const currentStaffId =
+    getCurrentStaffId();
+
+  return Boolean(
+    currentStaffId &&
+    String(staffId || "") ===
+      currentStaffId
+  );
+}
+
+
+function canOpenStaffProfile(
+  staffId
+) {
+  if (isOwnerOrAdmin()) {
+    return true;
+  }
+
+  const currentStaffId =
+    getCurrentStaffId();
+
+  return Boolean(
+    currentStaffId &&
+    String(staffId || "") ===
+      currentStaffId
+  );
+}
+
+
+function getDefaultAllowedRoute() {
+  const preferred = [
+    "calendar",
+    "owners",
+    "patients",
+    "visits",
+  ];
+
+  return (
+    preferred.find(
+      canAccessRoute
+    ) ||
+    "owners"
+  );
+}
+
+
+function applyRoleAccessUI() {
+  document
+    .querySelectorAll(
+      "#tabs [data-target], " +
+      "#tabs [data-route]"
+    )
+    .forEach((button) => {
+      const route =
+        button.dataset.target ||
+        button.dataset.route ||
+        "";
+
+      const allowed =
+        canAccessRoute(route);
+
+      button.hidden =
+        !allowed;
+
+      button.style.display =
+        allowed ? "" : "none";
+    });
+
+  document.body.dataset.crmRole =
+    getCurrentCrmRole();
+}
+
 const TAB_ROUTES = new Set([
   "owners",
   "patients",
@@ -368,6 +570,32 @@ function parseHash() {
 
 function setHash(route, id = null) {
   const r = String(route || "owners").trim() || "owners";
+    if (
+    TAB_ROUTES.has(r) &&
+    !canAccessRoute(r)
+  ) {
+    const fallback =
+      getDefaultAllowedRoute();
+
+    showCrmNotice({
+      icon: "🔒",
+      title: "Доступ обмежено",
+      text:
+        "Ваша роль не має доступу до цього розділу.",
+    });
+
+    if (
+      location.hash.replace(
+        "#",
+        ""
+      ) !== fallback
+    ) {
+      location.hash =
+        fallback;
+    }
+
+    return;
+  }
   const next = id ? `${r}:${id}` : r;
   if (location.hash.replace("#", "") !== next) location.hash = next;
 }
@@ -420,7 +648,23 @@ function initTabs() {
 
 async function routeFromHash() {
   const { route, id } = parseHash();
+  if (
+    TAB_ROUTES.has(route) &&
+    !canAccessRoute(route)
+  ) {
+    const fallback =
+      getDefaultAllowedRoute();
 
+    showCrmNotice({
+      icon: "🔒",
+      title: "Доступ обмежено",
+      text:
+        "Цей розділ недоступний для вашої ролі.",
+    });
+
+    setHash(fallback);
+    return;
+  }
   if (TAB_ROUTES.has(route)) {
     setRoute(route);
     if (route === "owners") renderOwners();
@@ -554,250 +798,9 @@ function seedIfEmpty() {
   }
 }
 
-// ===== API: Owners =====
-async function loadOwners() {
-  try {
-    const res = await fetch("/api/owners", {
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        ...getOrgHeaders(),
-      },
-    });
 
-    const text = await res.text();
-
-    let json = null;
-
-    try {
-      json = text
-        ? JSON.parse(text)
-        : null;
-    } catch {}
-
-    if (!res.ok) {
-      console.error(
-        "API /owners HTTP",
-        res.status,
-        text
-      );
-
-      alert(
-        `Помилка завантаження власників (HTTP ${res.status})`
-      );
-
-      state.owners = [];
-
-      if (state.route === "owners") {
-        renderOwners();
-      }
-
-      return [];
-    }
-
-    if (!json || !json.ok) {
-      console.error(
-        "API /owners bad json",
-        json,
-        text
-      );
-
-      alert(
-        json?.error ||
-        "Помилка завантаження власників"
-      );
-
-      state.owners = [];
-
-      if (state.route === "owners") {
-        renderOwners();
-      }
-
-      return [];
-    }
-
-    const owners = Array.isArray(json.data)
-      ? json.data
-      : json.data
-        ? [json.data]
-        : [];
-
-    state.owners = owners;
-
-    LS.set(
-      OWNERS_KEY,
-      owners
-    );
-
-    if (state.route === "owners") {
-      renderOwners();
-    }
-
-    if (
-      state.route === "owner" &&
-      state.selectedOwnerId
-    ) {
-      await renderOwnerPage(
-        state.selectedOwnerId
-      );
-    }
-
-    return owners;
-  } catch (error) {
-    console.error(
-      "loadOwners failed:",
-      error
-    );
-
-    alert(
-      "Помилка завантаження власників (network)"
-    );
-
-    state.owners =
-      Array.isArray(state.owners)
-        ? state.owners
-        : [];
-
-    if (state.route === "owners") {
-      renderOwners();
-    }
-
-    return [];
-  }
-}
 
 // ===== API: Owners =====
-async function loadPatientsApi() {
-  try {
-    const res = await fetch(
-      "/api/patients",
-      {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          ...getOrgHeaders(),
-        },
-      }
-    );
-
-    const text =
-      await res.text();
-
-    let json = null;
-
-    try {
-      json = text
-        ? JSON.parse(text)
-        : null;
-    } catch {}
-
-    if (!res.ok) {
-      console.error(
-        "API /patients HTTP",
-        res.status,
-        text
-      );
-
-      alert(
-        `Помилка завантаження пацієнтів (HTTP ${res.status})`
-      );
-
-      state.patients = [];
-
-      if (state.route === "patients") {
-        renderPatientsTab();
-      }
-
-      return [];
-    }
-
-    if (!json || !json.ok) {
-      console.error(
-        "API /patients bad json",
-        json,
-        text
-      );
-
-      alert(
-        json?.error ||
-        "Помилка завантаження пацієнтів"
-      );
-
-      state.patients = [];
-
-      if (state.route === "patients") {
-        renderPatientsTab();
-      }
-
-      return [];
-    }
-
-    const patients =
-      Array.isArray(json.data)
-        ? json.data
-        : json.data
-          ? [json.data]
-          : [];
-
-    state.patients =
-      patients;
-
-    savePatients(
-      patients
-    );
-
-    // Важно: API-загрузчик больше не переключает страницу сам
-    if (state.route === "patients") {
-      renderPatientsTab();
-    }
-
-    if (
-      state.route === "owner" &&
-      state.selectedOwnerId
-    ) {
-      await renderOwnerPage(
-        state.selectedOwnerId
-      );
-    }
-
-    if (
-      state.route === "patient" &&
-      state.selectedPetId
-    ) {
-      const currentPet =
-        patients.find((patient) => {
-          return (
-            String(patient.id) ===
-            String(state.selectedPetId)
-          );
-        });
-
-      if (currentPet) {
-        state.selectedPet =
-          currentPet;
-      }
-    }
-
-    return patients;
-  } catch (error) {
-    console.error(
-      "loadPatientsApi failed:",
-      error
-    );
-
-    alert(
-      "Помилка завантаження пацієнтів (network)"
-    );
-
-    state.patients = [];
-
-    if (state.route === "patients") {
-      renderPatientsTab();
-    }
-
-    return [];
-  }
-}
 
 // ===== API: Patients =====
 async function loadPatientsApi() {
@@ -3655,196 +3658,633 @@ function openServiceDeleteConfirm(
 
 
 async function renderTeamTab() {
-  const page = document.querySelector('.page[data-page="team"]');
+  const page =
+    document.querySelector(
+      '.page[data-page="team"]'
+    );
+
   if (!page) return;
 
-  const today = typeof todayISO === "function"
-    ? todayISO()
-    : new Date().toISOString().slice(0, 10);
+  const teamManager =
+    isOwnerOrAdmin();
+
+  const currentStaffId =
+    getCurrentStaffId();
+
+  const today =
+    typeof todayISO === "function"
+      ? todayISO()
+      : new Date()
+          .toISOString()
+          .slice(0, 10);
 
   page.innerHTML = `
     <div class="card">
-      <div class="hint">Завантаження команди…</div>
+      <div class="hint">
+        Завантаження команди…
+      </div>
     </div>
   `;
 
-  const staff = await loadStaffApi();
-  const specializations = await loadSpecializationsApi();
-  const schedule = await loadStaffScheduleApi(today);
+  const staff =
+    await loadStaffApi();
 
-  const scheduleMap = new Map(schedule.map((x) => [String(x.staff_id), x]));
+  const specializations =
+    await loadSpecializationsApi();
+
+  const schedule =
+    await loadStaffScheduleApi(
+      today
+    );
+
+  const visibleStaff =
+    teamManager
+      ? staff
+      : staff.filter(
+          (employee) =>
+            String(employee.id) ===
+            String(currentStaffId)
+        );
+
+  const scheduleMap =
+    new Map(
+      schedule.map(
+        (item) => [
+          String(item.staff_id),
+          item,
+        ]
+      )
+    );
 
   page.innerHTML = `
     <div class="card teamPageCard">
-      <div class="row" style="justify-content:space-between;align-items:center;">
+      <div
+        class="row"
+        style="
+          justify-content:
+            space-between;
+          align-items:center;
+        "
+      >
         <div>
-          <h2>Команда</h2>
-          <div class="hint">Співробітники клініки, ставки, спеціалізації та профілі.</div>
-        </div>
-        <button class="primary" id="btnAddStaffTeam" type="button">+ Додати співробітника</button>
-      </div>
+          <h2>
+            Команда
+          </h2>
 
-      <div class="specPanel">
-        <div class="specPanelHead">
-          <div>
-            <div class="specPanelTitle">Напрями клініки</div>
-            <div class="hint">Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...</div>
+          <div class="hint">
+            ${
+              teamManager
+                ? "Співробітники клініки, ставки, спеціалізації та профілі."
+                : "Ваш особистий профіль, показники та досягнення."
+            }
           </div>
-          <button class="primary" id="btnAddSpecTeam" type="button">+ Додати напрям</button>
         </div>
 
-        <div class="specList">
-          ${
-            specializations.length
-              ? specializations.map((s) => `
-                <div class="specPill" style="border-left:5px solid ${escapeHtml(s.color || "#7C5CFF")}">
-                  ${escapeHtml(s.name || "Напрям")}
-                </div>
-              `).join("")
-              : `<div class="hint">Напрями ще не створені.</div>`
-          }
-        </div>
+        ${
+          teamManager
+            ? `
+              <button
+                class="primary"
+                id="btnAddStaffTeam"
+                type="button"
+              >
+                + Додати співробітника
+              </button>
+            `
+            : ""
+        }
       </div>
+
+      ${
+        teamManager
+          ? `
+            <div class="specPanel">
+              <div class="specPanelHead">
+                <div>
+                  <div class="specPanelTitle">
+                    Напрями клініки
+                  </div>
+
+                  <div class="hint">
+                    Створюй власні фільтри:
+                    хірург, дерматолог,
+                    екзовет, УЗД...
+                  </div>
+                </div>
+
+                <button
+                  class="primary"
+                  id="btnAddSpecTeam"
+                  type="button"
+                >
+                  + Додати напрям
+                </button>
+              </div>
+
+              <div class="specList">
+                ${
+                  specializations.length
+                    ? specializations
+                        .map(
+                          (specialization) => `
+                            <div
+                              class="specPill"
+                              style="
+                                border-left:
+                                  5px solid
+                                  ${escapeHtml(
+                                    specialization.color ||
+                                    "#7C5CFF"
+                                  )};
+                              "
+                            >
+                              ${escapeHtml(
+                                specialization.name ||
+                                "Напрям"
+                              )}
+                            </div>
+                          `
+                        )
+                        .join("")
+                    : `
+                      <div class="hint">
+                        Напрями ще не створені.
+                      </div>
+                    `
+                }
+              </div>
+            </div>
+          `
+          : ""
+      }
 
       <div class="vetList">
         ${
-          staff.length
-            ? staff.map((doc) => {
-                const row = scheduleMap.get(String(doc.id));
-                const isActive = row ? row.is_active !== false : false;
+          visibleStaff.length
+            ? visibleStaff
+                .map((doc) => {
+                  const scheduleRow =
+                    scheduleMap.get(
+                      String(doc.id)
+                    );
 
-                const staffColor = doc.color || "#7C5CFF";
-                const staffName = doc.name || "Працівник";
-                const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
+                  const isActive =
+                    scheduleRow
+                      ? scheduleRow
+                          .is_active !== false
+                      : false;
 
-                return `
-                  <div class="vetCard premiumVetCard" style="--staff-color:${escapeHtml(staffColor)};">
-                    <div class="vetAvatarWrap">
-                      ${
-                        doc.avatar
-                          ? `<img class="vetAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
-                          : `<div class="vetAvatarLetter">${escapeHtml(staffLetter)}</div>`
-                      }
-                    </div>
+                  const staffColor =
+                    doc.color ||
+                    "#7C5CFF";
 
-                    <div class="vetInfo premiumVetInfo">
-                      <div class="premiumVetTop">
-                        <div>
-                          <div class="premiumVetName">${escapeHtml(staffName)}</div>
-                          <div class="premiumVetRole">${escapeHtml(doc.role || "Ветеринарний лікар")}</div>
+                  const staffName =
+                    doc.name ||
+                    "Працівник";
+
+                  const staffLetter =
+                    staffName
+                      .trim()
+                      .charAt(0)
+                      .toUpperCase() ||
+                    "?";
+
+                  const roleLabel =
+                    doc.role ===
+                    "assistant"
+                      ? "Асистент"
+                      : doc.role ===
+                        "admin"
+                        ? "Адміністратор"
+                        : "Ветеринарний лікар";
+
+                  return `
+                    <div
+                      class="
+                        vetCard
+                        premiumVetCard
+                      "
+                      style="
+                        --staff-color:
+                          ${escapeHtml(
+                            staffColor
+                          )};
+                      "
+                    >
+                      <div class="vetAvatarWrap">
+                        ${
+                          doc.avatar
+                            ? `
+                              <img
+                                class="vetAvatarImg"
+                                src="${escapeHtml(
+                                  doc.avatar
+                                )}"
+                                alt="${escapeHtml(
+                                  staffName
+                                )}"
+                              >
+                            `
+                            : `
+                              <div class="vetAvatarLetter">
+                                ${escapeHtml(
+                                  staffLetter
+                                )}
+                              </div>
+                            `
+                        }
+                      </div>
+
+                      <div
+                        class="
+                          vetInfo
+                          premiumVetInfo
+                        "
+                      >
+                        <div class="premiumVetTop">
+                          <div>
+                            <div class="premiumVetName">
+                              ${escapeHtml(
+                                staffName
+                              )}
+                            </div>
+
+                            <div class="premiumVetRole">
+                              ${escapeHtml(
+                                roleLabel
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            class="
+                              scheduleStatus
+                              premiumStatus
+                              ${
+                                isActive
+                                  ? "active"
+                                  : ""
+                              }
+                            "
+                            type="button"
+                            ${
+                              teamManager
+                                ? ""
+                                : "disabled"
+                            }
+                            data-team-schedule-staff-id="${escapeHtml(
+                              String(
+                                doc.id
+                              )
+                            )}"
+                          >
+                            ${
+                              isActive
+                                ? "На зміні"
+                                : "Вихідний"
+                            }
+                          </button>
                         </div>
 
-                        <button 
-                          class="scheduleStatus premiumStatus ${isActive ? "active" : ""}" 
-                          type="button" 
-                          data-team-schedule-staff-id="${escapeHtml(String(doc.id))}">
-                          ${isActive ? "На зміні" : "Вихідний"}
+                        <div class="premiumVetSpecs">
+                          <span class="premiumSpecTag">
+                            ${escapeHtml(
+                              doc.specialization ||
+                              "Спеціалізація не вказана"
+                            )}
+                          </span>
+                        </div>
+
+                        <div class="premiumVetMeta">
+                          <div class="premiumMetaItem">
+                            <span>
+                              Телефон
+                            </span>
+
+                            <strong>
+                              ${escapeHtml(
+                                doc.phone ||
+                                "Не вказано"
+                              )}
+                            </strong>
+                          </div>
+
+                          ${
+                            teamManager
+                              ? `
+                                <div class="premiumMetaItem">
+                                  <span>
+                                    Ставка
+                                  </span>
+
+                                  <strong>
+                                    ${escapeHtml(
+                                      String(
+                                        doc.shift_rate ||
+                                        0
+                                      )
+                                    )}
+                                    грн / зміна
+                                  </strong>
+                                </div>
+
+                                <div class="premiumMetaItem">
+                                  <span>
+                                    Відсоток
+                                  </span>
+
+                                  <strong>
+                                    ${escapeHtml(
+                                      String(
+                                        doc.percent_rate ||
+                                        0
+                                      )
+                                    )}%
+                                  </strong>
+                                </div>
+                              `
+                              : ""
+                          }
+                        </div>
+                      </div>
+
+                      <div
+                        class="
+                          vetActions
+                          premiumVetActions
+                        "
+                      >
+                        <button
+                          class="
+                            ghost
+                            premiumProfileBtn
+                          "
+                          type="button"
+                          data-open-team-profile="${escapeHtml(
+                            String(
+                              doc.id
+                            )
+                          )}"
+                        >
+                          👤 Профіль
                         </button>
-                      </div>
 
-                      <div class="premiumVetSpecs">
-                        <span class="premiumSpecTag">${escapeHtml(doc.specialization || "Спеціалізація не вказана")}</span>
-                      </div>
-
-                      <div class="premiumVetMeta">
-                        <div class="premiumMetaItem">
-                          <span>Телефон</span>
-                          <strong>${escapeHtml(doc.phone || "Не вказано")}</strong>
-                        </div>
-
-                        <div class="premiumMetaItem">
-                          <span>Ставка</span>
-                          <strong>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</strong>
-                        </div>
-
-                        <div class="premiumMetaItem">
-                          <span>Відсоток</span>
-                          <strong>${escapeHtml(String(doc.percent_rate || 0))}%</strong>
-                        </div>
+                        ${
+                          teamManager
+                            ? `
+                              <button
+                                class="
+                                  ghost
+                                  premiumEditBtn
+                                "
+                                type="button"
+                                data-edit-team-staff="${escapeHtml(
+                                  String(
+                                    doc.id
+                                  )
+                                )}"
+                              >
+                                ✏️ Редагувати
+                              </button>
+                            `
+                            : ""
+                        }
                       </div>
                     </div>
-
-                    <div class="vetActions premiumVetActions">
-                      <button class="ghost premiumProfileBtn" type="button" data-open-team-profile="${escapeHtml(String(doc.id))}">
-                        👤 Профіль
-                      </button>
-
-                      <button class="ghost premiumEditBtn" type="button" data-edit-team-staff="${escapeHtml(String(doc.id))}">
-                        ✏️ Редагувати
-                      </button>
-                    </div>
-                  </div>
-                `;
-              }).join("")
-            : `<div class="hint">Співробітників ще немає.</div>`
+                  `;
+                })
+                .join("")
+            : `
+              <div class="hint">
+                ${
+                  teamManager
+                    ? "Співробітників ще немає."
+                    : "Ваш профіль співробітника не знайдено. Перевірте прив’язку staff_id до акаунта."
+                }
+              </div>
+            `
         }
       </div>
     </div>
   `;
 
-  document.getElementById("btnAddStaffTeam")?.addEventListener("click", () => {
-  if (typeof openCreateStaffModal === "function") {
-    openCreateStaffModal();
-  } else {
-    console.warn("openCreateStaffModal не знайдена");
-    alert("Форма додавання співробітника не підключена.");
-  }
-});
+  page
+    .querySelector(
+      "#btnAddStaffTeam"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        if (!teamManager) {
+          return;
+        }
 
-  document.getElementById("btnAddSpecTeam")?.addEventListener("click", async () => {
-    const name = (prompt("Назва напряму: хірург, дерматолог, екзовет...") || "").trim();
-    if (!name) return;
+        if (
+          typeof openCreateStaffModal ===
+          "function"
+        ) {
+          openCreateStaffModal();
+          return;
+        }
 
-    const created = await createSpecializationApi({
-      name,
-      color: "#7C5CFF",
+        console.warn(
+          "openCreateStaffModal не знайдена"
+        );
+
+        showCrmNotice({
+          icon: "⚠️",
+          title: "Форма недоступна",
+          text:
+            "Форма додавання співробітника не підключена.",
+        });
+      }
+    );
+
+  page
+    .querySelector(
+      "#btnAddSpecTeam"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        if (!teamManager) {
+          return;
+        }
+
+        const name =
+          String(
+            prompt(
+              "Назва напряму: хірург, дерматолог, екзовет..."
+            ) || ""
+          ).trim();
+
+        if (!name) return;
+
+        const created =
+          await createSpecializationApi({
+            name,
+            color: "#7C5CFF",
+          });
+
+        if (created) {
+          await renderTeamTab();
+        }
+      }
+    );
+
+  page
+    .querySelectorAll(
+      "[data-team-schedule-staff-id]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        async () => {
+          if (!teamManager) {
+            showCrmNotice({
+              icon: "🔒",
+              title:
+                "Доступ обмежено",
+              text:
+                "Змінювати графік співробітників може лише керівництво клініки.",
+            });
+
+            return;
+          }
+
+          const staffId =
+            button.dataset
+              .teamScheduleStaffId;
+
+          const isActive =
+            !button.classList.contains(
+              "active"
+            );
+
+          const saved =
+            await saveStaffScheduleApi({
+              work_date: today,
+              staff_id: staffId,
+              is_active: isActive,
+            });
+
+          if (!saved) return;
+
+          button.classList.toggle(
+            "active",
+            isActive
+          );
+
+          button.textContent =
+            isActive
+              ? "На зміні"
+              : "Вихідний";
+        }
+      );
     });
 
-    if (created) await renderTeamTab();
-  });
+  page
+    .querySelectorAll(
+      "[data-edit-team-staff]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          if (!teamManager) {
+            return;
+          }
 
-  document.querySelectorAll("[data-team-schedule-staff-id]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const staffId = btn.dataset.teamScheduleStaffId;
-      const isActive = !btn.classList.contains("active");
+          const id =
+            button.dataset
+              .editTeamStaff;
 
-      const saved = await saveStaffScheduleApi({
-        work_date: today,
-        staff_id: staffId,
-        is_active: isActive,
-      });
+          const staffRow =
+            staff.find(
+              (employee) =>
+                String(employee.id) ===
+                String(id)
+            );
 
-      if (!saved) return;
+          if (!staffRow) return;
 
-      btn.classList.toggle("active", isActive);
-      btn.textContent = isActive ? "На зміні" : "Вихідний";
+          openEditStaffModal(
+            staffRow
+          );
+        }
+      );
     });
-  });
 
-  document.querySelectorAll("[data-edit-team-staff]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.editTeamStaff;
-      const staffRow = staff.find((x) => String(x.id) === String(id));
-      if (!staffRow) return;
+  page
+    .querySelectorAll(
+      "[data-open-team-profile]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const id =
+            button.dataset
+              .openTeamProfile;
 
-      openEditStaffModal(staffRow);
+          if (
+            !canOpenStaffProfile(id)
+          ) {
+            showCrmNotice({
+              icon: "🔒",
+              title:
+                "Доступ обмежено",
+              text:
+                "Ви можете відкривати лише власний профіль співробітника.",
+            });
+
+            return;
+          }
+
+          const staffRow =
+            visibleStaff.find(
+              (employee) =>
+                String(employee.id) ===
+                String(id)
+            );
+
+          if (!staffRow) {
+            showCrmNotice({
+              icon: "⚠️",
+              title:
+                "Профіль не знайдено",
+              text:
+                "Не вдалося завантажити профіль співробітника.",
+            });
+
+            return;
+          }
+
+          renderTeamProfilePage(
+            staffRow
+          );
+        }
+      );
     });
-  });
-
-  document.querySelectorAll("[data-open-team-profile]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const id = btn.dataset.openTeamProfile;
-    const staffRow = staff.find((x) => String(x.id) === String(id));
-    if (!staffRow) return;
-
-    renderTeamProfilePage(staffRow);
-  });
-});
 }
-
 async function renderTeamProfilePage(doc) {
   const page = document.querySelector('.page[data-page="team"]');
   if (!page) return;
+    if (
+    !canOpenStaffProfile(
+      doc?.id
+    )
+  ) {
+    showCrmNotice({
+      icon: "🔒",
+      title: "Доступ обмежено",
+      text:
+        "Ви можете відкривати лише власний профіль.",
+    });
+
+    await renderTeamTab();
+    return;
+  }
 
   const staffName = doc.name || "Працівник";
   const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
@@ -3927,7 +4367,18 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
   <button class="active" type="button" data-profile-tab="overview">▦ Огляд</button>
   <button type="button" data-profile-tab="analytics">📈 Аналітика</button>
   <button type="button" data-profile-tab="visits">🩺 Прийоми</button>
-  <button type="button" data-profile-tab="finance">💰 Фінанси</button>
+  ${
+  isOwnerOrAdmin()
+    ? `
+      <button
+        type="button"
+        data-profile-tab="finance"
+      >
+        💰 Фінанси
+      </button>
+    `
+    : ""
+}
   <button type="button" data-profile-tab="achievements">🏆 Досягнення</button>
   <button type="button" data-profile-tab="settings">⚙ Налаштування</button>
 </div>
@@ -3949,7 +4400,19 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
 
     <div class="teamDashActions">
       <button class="teamGhostBtn" type="button">⬇ Експорт</button>
-      <button class="teamPrimaryBtn" id="btnEditStaffFromFullProfile" type="button">✏️ Редагувати профіль</button>
+      ${
+  isOwnerOrAdmin()
+    ? `
+      <button
+        class="teamPrimaryBtn"
+        id="btnEditStaffFromFullProfile"
+        type="button"
+      >
+        ✏️ Редагувати профіль
+      </button>
+    `
+    : ""
+}
     </div>
   </div>
 
@@ -4021,6 +4484,25 @@ function renderTeamProfileTab(tab, state) {
 
   if (tab === "visits") {
     renderTeamVisitsTab(root, state);
+    return;
+  }
+
+  if (
+    tab === "finance" &&
+    !isOwnerOrAdmin()
+  ) {
+    showCrmNotice({
+      icon: "🔒",
+      title: "Фінанси приховано",
+      text:
+        "Доступ до фінансових нарахувань має лише керівництво клініки.",
+    });
+
+    renderTeamOverviewTab(
+      root,
+      state
+    );
+
     return;
   }
 
@@ -14696,176 +15178,12 @@ function renderPatientFilesEmptyState(filter) {
     </div>
   `;
 }
-function normalizePatientFile(file) {
-  const originalType = String(
-    file?.category ||
-    file?.type ||
-    ""
-  )
-    .trim()
-    .toLowerCase();
 
-  let category = "other";
 
-  if (
-    originalType.includes("рентген") ||
-    originalType.includes("xray") ||
-    originalType.includes("x-ray")
-  ) {
-    category = "xray";
-  } else if (
-    originalType.includes("узд") ||
-    originalType.includes("ультра") ||
-    originalType.includes("ultrasound")
-  ) {
-    category = "ultrasound";
-  } else if (
-    originalType.includes("фото") ||
-    originalType.includes("video") ||
-    originalType.includes("відео") ||
-    originalType.includes("image") ||
-    String(file?.mime || "").startsWith("image/") ||
-    String(file?.mime || "").startsWith("video/")
-  ) {
-    category = "media";
-  } else if (
-    originalType.includes("pdf") ||
-    originalType.includes("документ") ||
-    originalType.includes("document") ||
-    String(file?.mime || "").includes("pdf") ||
-    String(file?.mime || "").includes("word")
-  ) {
-    category = "document";
-  }
 
-  return {
-    ...file,
-    category,
-    title:
-      file?.title ||
-      file?.name ||
-      "Файл пацієнта",
-  };
-}
 
-function getPatientFileCategoryCounts(files) {
-  return files.reduce(
-    (acc, file) => {
-      const category =
-        file.category in PATIENT_FILE_CATEGORIES
-          ? file.category
-          : "other";
 
-      acc[category] += 1;
 
-      return acc;
-    },
-    {
-      xray: 0,
-      ultrasound: 0,
-      media: 0,
-      document: 0,
-      other: 0,
-    }
-  );
-}
-
-function renderPatientFilesArchive(files) {
-  if (patientFilesActiveFilter !== "all") {
-    return `
-      <div class="patientFilesGrid">
-        ${files
-          .map(renderPatientFileCard)
-          .join("")}
-      </div>
-    `;
-  }
-
-  const order = [
-    "xray",
-    "ultrasound",
-    "media",
-    "document",
-    "other",
-  ];
-
-  return order
-    .map((category) => {
-      const categoryFiles = files.filter((file) => {
-        return file.category === category;
-      });
-
-      if (!categoryFiles.length) return "";
-
-      const meta = PATIENT_FILE_CATEGORIES[category];
-
-      return `
-        <section class="patientFilesGroup">
-          <div class="patientFilesGroupHead">
-            <div>
-              <span>${meta.icon}</span>
-              <h3>${escapeHtml(meta.label)}</h3>
-            </div>
-
-            <strong>
-              ${categoryFiles.length}
-              ${getPatientFilesCountLabel(categoryFiles.length)}
-            </strong>
-          </div>
-
-          <div class="patientFilesGrid">
-            ${categoryFiles
-              .map(renderPatientFileCard)
-              .join("")}
-          </div>
-        </section>
-      `;
-    })
-    .join("");
-}
-
-function getPatientFilesCountLabel(count) {
-  const value = Number(count) || 0;
-
-  if (value === 1) return "файл";
-  if (value >= 2 && value <= 4) return "файли";
-
-  return "файлів";
-}
-
-function renderPatientFilesEmptyState(filter) {
-  const meta =
-    PATIENT_FILE_CATEGORIES[filter] ||
-    PATIENT_FILE_CATEGORIES.all;
-
-  return `
-    <div class="patientFilesEmpty">
-      <div class="patientFilesEmptyIcon">
-        ${meta.icon}
-      </div>
-
-      <h3>
-        ${
-          filter === "all"
-            ? "Файлів ще немає"
-            : `У категорії «${escapeHtml(meta.label)}» поки порожньо`
-        }
-      </h3>
-
-      <p>
-        Додайте медичне зображення або документ пацієнта.
-      </p>
-
-      <button
-        class="patientFilesAddButton"
-        type="button"
-        onclick="openPatientFileModal(state.selectedPet)"
-      >
-        + Додати перший файл
-      </button>
-    </div>
-  `;
-}
 
 function renderPatientFileCard(file) {
   const rawUrl =
@@ -23512,49 +23830,12 @@ function closeVisitModal() {
 // =========================
 // VISIT_FILES (Управление связями в LocalStorage)
 // =========================
-function loadVisitFilesLinks() {
-  const arr = LS.get(VISIT_FILES_KEY, []);
-  return Array.isArray(arr) ? arr : [];
-}
 
-function saveVisitFilesLinks(arr) {
-  LS.set(VISIT_FILES_KEY, Array.isArray(arr) ? arr : []);
-}
 
-function getFileIdsForVisit(visitId) {
-  const vid = String(visitId || "");
-  if (!vid) return [];
-  return loadVisitFilesLinks()
-    .filter((x) => String(x.visit_id) === vid)
-    .map((x) => String(x.file_id))
-    .filter(Boolean);
-}
 
-function linkFilesToVisit(visitId, fileIds) {
-  const vid = String(visitId || "");
-  if (!vid) return;
 
-  const ids = (Array.isArray(fileIds) ? fileIds : []).map((x) => String(x || "")).filter(Boolean);
-  if (!ids.length) return;
 
-  const links = loadVisitFilesLinks();
-  for (const fid of ids) {
-    const exists = links.some((r) => String(r.visit_id) === vid && String(r.file_id) === String(fid));
-    if (!exists) {
-      links.push({ visit_id: vid, file_id: String(fid), created_at: nowISO() });
-    }
-  }
-  saveVisitFilesLinks(links);
-}
 
-function detachFileFromVisit(visitId, fileId) {
-  const vid = String(visitId || "");
-  const fid = String(fileId || "");
-  if (!vid || !fid) return;
-
-  const next = loadVisitFilesLinks().filter((r) => !(String(r.visit_id) === vid && String(r.file_id) === fid));
-  saveVisitFilesLinks(next);
-}
 
 // =========================
 // Спецификации видов животных и нормализаторы
@@ -23623,9 +23904,6 @@ function askSpecies(current = "dog") {
   return "dog";
 }
 
-function getPetSpeciesKey(pet) {
-  return normalizeSpecies(pet?.species);
-}
 
 // =========================
 // Вспомогательные функции модального окна визитов
@@ -27275,45 +27553,53 @@ async function init() {
     );
 
   let sessionAuthenticated = false;
-    // Проверяем настоящую серверную сессию
+
+  // Проверяем настоящую серверную сессию
   try {
-    const sessionResponse = await fetch(
-      "/api/session",
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      }
-    );
+    const sessionResponse =
+      await fetch(
+        "/api/session",
+        {
+          method: "GET",
+          credentials: "include",
+
+          headers: {
+            Accept:
+              "application/json",
+          },
+        }
+      );
 
     const sessionJson =
       await sessionResponse.json();
 
     if (
-  sessionResponse.ok &&
-  sessionJson?.ok === true &&
-  sessionJson?.authenticated === true &&
-  sessionJson?.data
-) {
-  sessionAuthenticated = true;
+      sessionResponse.ok &&
+      sessionJson?.ok === true &&
+      sessionJson?.authenticated === true &&
+      sessionJson?.data
+    ) {
+      sessionAuthenticated = true;
 
-  const sessionUser =
-    sessionJson.data;
+      const sessionUser =
+        sessionJson.data;
 
       state.me = {
         user_id:
-          sessionUser.user_id || null,
+          sessionUser.user_id ||
+          null,
 
         org_id:
-          sessionUser.org_id || null,
+          sessionUser.org_id ||
+          null,
 
         staff_id:
-          sessionUser.staff_id || null,
+          sessionUser.staff_id ||
+          null,
 
         username:
-          sessionUser.username || "",
+          sessionUser.username ||
+          "",
 
         display_name:
           sessionUser.display_name ||
@@ -27321,7 +27607,12 @@ async function init() {
           "Користувач",
 
         role:
-          sessionUser.role || "staff",
+          String(
+            sessionUser.role ||
+            "vet"
+          )
+            .trim()
+            .toLowerCase(),
 
         clinic_name:
           sessionUser.clinic_name ||
@@ -27329,9 +27620,12 @@ async function init() {
 
         must_change_password:
           Boolean(
-            sessionUser.must_change_password
+            sessionUser
+              .must_change_password
           ),
       };
+
+      applyRoleAccessUI();
 
       if (authOverlay) {
         authOverlay.style.display =
@@ -27346,6 +27640,7 @@ async function init() {
         state.me.username,
         state.me.role
       );
+
     } else {
       state.me = null;
 
@@ -27357,6 +27652,7 @@ async function init() {
           "1";
       }
     }
+
   } catch (sessionError) {
     console.warn(
       "Не вдалося перевірити сесію:",
@@ -27373,6 +27669,30 @@ async function init() {
         "1";
     }
   }
+
+  if (
+    sessionAuthenticated &&
+    state.me?.must_change_password
+  ) {
+    await openRequiredPasswordChangeModal();
+  }
+
+
+applyRoleAccessUI();
+
+if (authOverlay) {
+  authOverlay.style.display =
+    "none";
+
+  authOverlay.style.opacity =
+    "1";
+}
+
+console.log(
+  "Серверна сесія активна:",
+  state.me.username,
+  state.me.role
+);
   if (
     sessionAuthenticated &&
     state.me?.must_change_password
