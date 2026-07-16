@@ -1554,85 +1554,47 @@ def api_services_delete():
 # API: OWNERS
 # =========================
 @app.get("/api/owners")
+def api_get_owners():
+    try:
+        current_org = (
+            get_current_org_id()
+        )
 
-@app.put("/api/owners/<owner_id>")
-def api_update_owner(owner_id):
-    if not owner_id:
-        return fail("owner_id required", 400)
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
 
-    current_org = get_current_org_id()
-    data = request.get_json(silent=True) or {}
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("owners")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .order("name")
+            ),
+            attempts=3,
+            delay=0.25,
+        )
 
-    payload = {
-        "name": str(data.get("name") or "").strip(),
-        "phone": str(data.get("phone") or "").strip(),
-        "note": str(data.get("note") or "").strip(),
-    }
+        return ok(
+            result.data or []
+        )
 
-    if not payload["name"]:
-        return fail("name required", 400)
+    except Exception as error:
+        print(
+            "❌ GET /api/owners error:",
+            repr(error),
+        )
 
-    res = (
-        supabase.table("owners")
-        .update(payload)
-        .eq("org_id", current_org)
-        .eq("id", owner_id)
-        .execute()
-    )
-
-    if not res.data:
-        return fail("owner not found", 404)
-
-    return ok(res.data[0])
-
-@app.delete("/api/owners/<owner_id>")
-def api_delete_owner(owner_id):
-    if not owner_id:
-        return fail("owner_id required", 400)
-
-    current_org = get_current_org_id()
-
-    # 1. Находим всех пациентов владельца
-    pets_res = (
-        supabase.table("patients")
-        .select("id")
-        .eq("org_id", current_org)
-        .eq("owner_id", owner_id)
-        .execute()
-    )
-
-    pet_ids = [p["id"] for p in (pets_res.data or [])]
-
-    # 2. Удаляем календарные события владельца
-    supabase.table("calendar_events") \
-        .delete() \
-        .eq("org_id", current_org) \
-        .eq("owner_id", owner_id) \
-        .execute()
-
-    # 3. Удаляем визиты пациентов
-    for pet_id in pet_ids:
-        supabase.table("visits") \
-            .delete() \
-            .eq("org_id", current_org) \
-            .eq("pet_id", pet_id) \
-            .execute()
-
-    # 4. Удаляем пациентов владельца
-    supabase.table("patients") \
-        .delete() \
-        .eq("org_id", current_org) \
-        .eq("owner_id", owner_id) \
-        .execute()
-
-    # 5. Удаляем владельца
-    supabase.table("owners") \
-        .delete() \
-        .eq("org_id", current_org) \
-        .eq("id", owner_id) \
-        .execute()
-
-    return ok(True)
+        return fail(
+            f"Cannot load owners: {error}",
+            500,
+        )
 
 # =========================
 # API: SPECIALIZATIONS
