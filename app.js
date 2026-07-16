@@ -1798,69 +1798,206 @@ async function createVisitApi(payload) {
   }
 }
 
-async function updateVisitApi(visitId, payload) {
+async function updateVisitApi(
+  visitId,
+  payload
+) {
   try {
-    const url = `/api/visits?id=${encodeURIComponent(String(visitId || "").trim())}`;
-    const res = await fetch(url, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
+    const cleanVisitId =
+      String(
+        visitId || ""
+      ).trim();
 
-    const text = await res.text();
+    if (!cleanVisitId) {
+      console.error(
+        "updateVisitApi: visitId is required"
+      );
+
+      return null;
+    }
+
+    const url =
+      `/api/visits?id=${encodeURIComponent(
+        cleanVisitId
+      )}`;
+
+    const response =
+      await fetch(
+        url,
+        {
+          method: "PUT",
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+
+          body:
+            JSON.stringify(
+              payload || {}
+            ),
+        }
+      );
+
+    const text =
+      await response.text();
+
     let json = null;
-    try { json = JSON.parse(text); } catch (_) { json = null; }
 
-    if (!res.ok) {
-      console.error("updateVisitApi HTTP error:", res.status, text);
-      alert(`API error ${res.status}`);
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {
+      json = null;
+    }
+
+    if (!response.ok) {
+      console.error(
+        "updateVisitApi HTTP error:",
+        response.status,
+        text
+      );
+
+      alert(
+        json?.error ||
+        `API error ${response.status}`
+      );
+
       return null;
     }
 
-    if (!json || typeof json !== "object") {
-      console.error("updateVisitApi: server returned non-JSON:", text);
-      alert("Сервер повернув не JSON (перевір /api/visits PUT)");
+    if (
+      !json ||
+      typeof json !== "object"
+    ) {
+      console.error(
+        "updateVisitApi: server returned non-JSON:",
+        text
+      );
+
+      alert(
+        "Сервер повернув некоректну відповідь."
+      );
+
       return null;
     }
 
-    if (!json.ok) {
-      console.error("updateVisitApi: json.ok=false:", json);
-      alert(json.error || "update failed");
+    if (json.ok !== true) {
+      console.error(
+        "updateVisitApi: json.ok=false:",
+        json
+      );
+
+      alert(
+        json.error ||
+        "Не вдалося оновити візит."
+      );
+
       return null;
     }
 
-    const raw = Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
-    let updated = normalizeVisitFromServer(raw);
+    const raw =
+      Array.isArray(json.data)
+        ? json.data[0] || null
+        : json.data || null;
 
-    if (!updated || updated.id == null) {
-      console.warn("updateVisitApi: updated visit has no id:", updated, json);
+    let updated =
+      normalizeVisitFromServer(
+        raw
+      );
+
+    if (
+      !updated ||
+      updated.id == null
+    ) {
+      console.warn(
+        "updateVisitApi: updated visit has no id:",
+        updated,
+        json
+      );
+
       return updated || null;
     }
 
-    const vid = String(updated.id);
-    const prev = state.visitsById.get(vid) || null;
-    if (prev) {
-      const prevServices = Array.isArray(prev.services) ? prev.services : [];
-      const prevStock = Array.isArray(prev.stock) ? prev.stock : [];
-      const updHasServices = Array.isArray(updated.services) && updated.services.length > 0;
-      const updHasStock = Array.isArray(updated.stock) && updated.stock.length > 0;
+    const normalizedVisitId =
+      String(updated.id);
 
-      if (!updHasServices && prevServices.length) {
-        updated.services = prevServices;
-        updated.services_json = prevServices;
+    const previousVisit =
+      state.visitsById.get(
+        normalizedVisitId
+      ) || null;
+
+    if (previousVisit) {
+      const previousServices =
+        Array.isArray(
+          previousVisit.services
+        )
+          ? previousVisit.services
+          : [];
+
+      const previousStock =
+        Array.isArray(
+          previousVisit.stock
+        )
+          ? previousVisit.stock
+          : [];
+
+      const updatedHasServices =
+        Array.isArray(
+          updated.services
+        );
+
+      const updatedHasStock =
+        Array.isArray(
+          updated.stock
+        );
+
+      if (
+        !updatedHasServices &&
+        previousServices.length
+      ) {
+        updated.services =
+          previousServices;
+
+        updated.services_json =
+          previousServices;
       }
-      if (!updHasStock && prevStock.length) {
-        updated.stock = prevStock;
-        updated.stock_json = prevStock;
+
+      if (
+        !updatedHasStock &&
+        previousStock.length
+      ) {
+        updated.stock =
+          previousStock;
+
+        updated.stock_json =
+          previousStock;
       }
     }
 
-    cacheVisits([updated]);
+    cacheVisits([
+      updated,
+    ]);
+
     return updated;
-  } catch (e) {
-    console.error("updateVisitApi failed:", e);
-    alert("Помилка зʼєднання з сервером");
+
+  } catch (error) {
+    console.error(
+      "updateVisitApi failed:",
+      error
+    );
+
+    alert(
+      "Помилка зʼєднання з сервером."
+    );
+
     return null;
   }
 }
@@ -2054,35 +2191,6 @@ async function deleteVisitApi(
     return false;
   }
 }
-  try {
-    const res = await fetch(`/api/visits/${encodeURIComponent(String(visitId))}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: { Accept: "application/json", ...getOrgHeaders() },
-    });
-    const text = await res.text();
-    let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
-
-    if (!res.ok) {
-      console.error("API /visits DELETE HTTP", res.status, text);
-      alert(`Помилка сервера при видаленні візиту (HTTP ${res.status})`);
-      return false;
-    }
-
-    if (!json || !json.ok) {
-      console.error("API /visits DELETE bad json:", json, text);
-      alert(json?.error || "Помилка видалення візиту");
-      return false;
-    }
-
-    state.visitsById.delete(String(visitId));
-    return true;
-  } catch (e) {
-    console.error("deleteVisitApi failed:", e);
-    alert("Помилка зʼєднання з сервером");
-    return false;
-  }
 
 // =========================
 // Discharges (LOCAL ONLY)
