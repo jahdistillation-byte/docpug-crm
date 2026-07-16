@@ -4072,101 +4072,107 @@ def api_delete_hospital_task(task_id):
 # =========================
 @app.get("/api/visits")
 def api_get_visits():
-    visit_id = request.args.get("id")
-    pet_id = request.args.get("pet_id")
-
-    if visit_id:
-        visit_id = visit_id.strip()
-        if len(visit_id) < 10:
-            return fail("invalid visit id", 400)
-
-    current_org = get_current_org_id()
-    q = supabase.table("visits").select("*").eq("org_id", current_org)
-
-    if visit_id:
-        q = q.eq("id", visit_id)
-    if pet_id:
-        q = q.eq("pet_id", pet_id)
-
-    res = q.execute()
-    rows = res.data or []
-
-    ids = [r.get("id") for r in rows if r.get("id")]
-    services_by_visit, stock_by_visit = load_visit_lines(ids)
-
-    for r in rows:
-        vid = r.get("id")
-        r["services"] = services_by_visit.get(vid, [])
-        r["stock"] = stock_by_visit.get(vid, [])
-
-    return ok(rows)
-
-
-@app.put("/api/visits")
-@app.put("/api/visits")
-def api_update_visit_query():
-    visit_id = (request.args.get("id") or "").strip()
-
-    if not visit_id:
-        return fail("id required", 400)
-
-    d = request.get_json(silent=True) or {}
-    current_org = get_current_org_id()
-
-    if not current_org:
-        return fail("Organization not selected", 400)
-
-    payload = {
-        "staff_id": d.get("staff_id"),
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),
-        "rx": d.get("rx"),
-        "weight_kg": d.get("weight_kg"),
-    }
-
     try:
-        res = execute_with_retry(
-            lambda: (
-                supabase
-                .table("visits")
-                .update(clean_payload(payload))
-                .eq("org_id", current_org)
-                .eq("id", visit_id)
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
             )
+
+        visit_id = str(
+            request.args.get("id") or ""
+        ).strip()
+
+        pet_id = str(
+            request.args.get("pet_id") or ""
+        ).strip()
+
+        if visit_id and len(visit_id) < 10:
+            return fail(
+                "invalid visit id",
+                400
+            )
+
+        query = (
+            supabase
+            .table("visits")
+            .select("*")
+            .eq("org_id", current_org)
         )
 
-        if not res.data:
-            return fail("Visit not found", 404)
+        if visit_id:
+            query = query.eq(
+                "id",
+                visit_id
+            )
 
-        save_visit_lines(visit_id, d)
+        if pet_id:
+            query = query.eq(
+                "pet_id",
+                pet_id
+            )
 
-        base = res.data[0]
+        result = query.execute()
+        rows = result.data or []
 
-        services_map, stock_map = load_visit_lines(
-            [visit_id]
-        )
+        visit_ids = [
+            row.get("id")
+            for row in rows
+            if row.get("id")
+        ]
 
-        base["services"] = services_map.get(
-            visit_id,
-            []
-        )
+        services_by_visit = {}
+        stock_by_visit = {}
 
-        base["stock"] = stock_map.get(
-            visit_id,
-            []
-        )
+        if visit_ids:
+            try:
+                (
+                    services_by_visit,
+                    stock_by_visit,
+                ) = load_visit_lines(
+                    visit_ids
+                )
 
-        return ok(base)
+            except Exception as lines_error:
+                print(
+                    "⚠️ load_visit_lines error:",
+                    repr(lines_error)
+                )
 
-    except Exception as e:
+                services_by_visit = {}
+                stock_by_visit = {}
+
+        for row in rows:
+            current_visit_id = (
+                row.get("id")
+            )
+
+            row["services"] = (
+                services_by_visit.get(
+                    current_visit_id,
+                    []
+                )
+            )
+
+            row["stock"] = (
+                stock_by_visit.get(
+                    current_visit_id,
+                    []
+                )
+            )
+
+        return ok(rows)
+
+    except Exception as error:
         print(
-            "❌ /api/visits PUT error:",
-            repr(e)
+            "❌ GET /api/visits error:",
+            repr(error)
         )
 
         return fail(
-            f"Cannot update visit: {e}",
+            f"Cannot load visits: {error}",
             500
         )
 
