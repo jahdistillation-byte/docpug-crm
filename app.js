@@ -16844,256 +16844,728 @@ const staffSchedule =
 
     const selectedMonthDates = new Set();
 
-    const openMonthShiftDrawer = (date) => {
-      const drawer = $("#monthShiftDrawer");
-      if (!drawer) return;
+    const openMonthShiftDrawer = (
+  date
+) => {
+  const canManageSchedule =
+    isOwner() || isAdmin();
 
-      const daySchedule = scheduleByDate.get(date) || [];
-      const activeIds = new Set(
-        daySchedule
-          .filter((x) => x.is_active !== false)
-          .map((x) => String(x.staff_id))
-      );
+  const drawer =
+    $("#monthShiftDrawer");
 
-      drawer.innerHTML = `
-        <div class="monthDrawerCard">
-          <div class="monthDrawerHead">
-            <div>
-              <div class="monthDrawerTitle">📅 Графік на ${escapeHtml(date)}</div>
-              <div class="hint">Обери, хто працює в цей день.</div>
-            </div>
-            <button class="ghost" id="monthDrawerClose" type="button">×</button>
+  if (!drawer) return;
+
+  const daySchedule =
+    scheduleByDate.get(date) || [];
+
+  const activeIds =
+    new Set(
+      daySchedule
+        .filter(
+          (row) =>
+            row.is_active !== false
+        )
+        .map(
+          (row) =>
+            String(row.staff_id)
+        )
+    );
+
+  drawer.innerHTML = `
+    <div class="monthDrawerCard">
+      <div class="monthDrawerHead">
+        <div>
+          <div class="monthDrawerTitle">
+            📅 Графік на ${escapeHtml(date)}
           </div>
 
-          <div class="monthDrawerQuick">
-            <button class="ghost" id="monthAllActive" type="button">Усі на зміні</button>
-            <button class="ghost" id="monthAllOff" type="button">Усім вихідний</button>
-          </div>
-
-          <div class="monthBulkBox">
-            <div class="monthBulkTitle">Масове призначення</div>
-
-            <label class="monthBulkField">
-              <span>Лікар</span>
-              <select id="monthBulkStaff">
-                ${staff.map((doc) => `
-                  <option value="${escapeHtml(String(doc.id))}">
-                    ${escapeHtml(doc.name || "Працівник")}
-                  </option>
-                `).join("")}
-              </select>
-            </label>
-
-            ${selectedMonthDates.size > 1 ? `
-              <div class="monthSelectedBox">
-                <div class="monthBulkTitle">Виділено днів: ${selectedMonthDates.size}</div>
-
-                <label class="monthBulkField">
-                  <span>Лікар для виділених днів</span>
-                  <select id="monthSelectedStaff">
-                    ${staff.map((doc) => `
-                      <option value="${escapeHtml(String(doc.id))}">
-                        ${escapeHtml(doc.name || "Працівник")}
-                      </option>
-                    `).join("")}
-                  </select>
-                </label>
-
-                <button class="primary monthBulkApply" id="monthApplySelectedDates" type="button">
-                  Застосувати на виділені дні
-                </button>
-              </div>
-            ` : ""}
-
-            <div class="monthBulkDates">
-              <label class="monthBulkField">
-                <span>Від</span>
-                <input id="monthBulkFrom" type="date" value="${escapeHtml(date)}">
-              </label>
-
-              <label class="monthBulkField">
-                <span>До</span>
-                <input id="monthBulkTo" type="date" value="${escapeHtml(date)}">
-              </label>
-            </div>
-
-            <div class="monthBulkDays">
-              <button type="button" class="monthBulkDay active" data-bulk-day="1">Пн</button>
-              <button type="button" class="monthBulkDay active" data-bulk-day="2">Вт</button>
-              <button type="button" class="monthBulkDay active" data-bulk-day="3">Ср</button>
-              <button type="button" class="monthBulkDay active" data-bulk-day="4">Чт</button>
-              <button type="button" class="monthBulkDay active" data-bulk-day="5">Пт</button>
-              <button type="button" class="monthBulkDay" data-bulk-day="6">Сб</button>
-              <button type="button" class="monthBulkDay" data-bulk-day="7">Нд</button>
-            </div>
-
-            <button class="primary monthBulkApply" id="monthBulkApply" type="button">
-              Застосувати графік
-            </button>
-          </div>
-
-          <div class="monthDrawerStaff">
-            ${staff.map((doc) => {
-              const active = activeIds.has(String(doc.id));
-
-              return `
-                <button
-                  class="monthShiftToggle ${active ? "active" : ""}"
-                  type="button"
-                  data-month-shift-staff="${escapeHtml(String(doc.id))}"
-                  style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}"
-                >
-                  <span>👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</span>
-                  <b>${active ? "На зміні" : "Вихідний"}</b>
-                </button>
-              `;
-            }).join("")}
-          </div>
-
-          <div class="monthDrawerActions">
-            <button class="ghost" id="monthGoToDay" type="button">Відкрити день</button>
-            <button class="primary" id="monthSaveShift" type="button">💾 Зберегти</button>
+          <div class="hint">
+            ${
+              canManageSchedule
+                ? "Обери, хто працює в цей день."
+                : "Перегляд графіка роботи на цей день."
+            }
           </div>
         </div>
-      `;
 
-      drawer.classList.add("open");
+        <button
+          class="ghost"
+          id="monthDrawerClose"
+          type="button"
+        >
+          ×
+        </button>
+      </div>
 
-      const setToggleState = (btn, active) => {
-        btn.classList.toggle("active", active);
-        const label = btn.querySelector("b");
-        if (label) label.textContent = active ? "На зміні" : "Вихідний";
-      };
+      ${
+        canManageSchedule
+          ? `
+            <div class="monthDrawerQuick">
+              <button
+                class="ghost"
+                id="monthAllActive"
+                type="button"
+              >
+                Усі на зміні
+              </button>
 
-      $("#monthDrawerClose")?.addEventListener("click", () => {
-        drawer.classList.remove("open");
+              <button
+                class="ghost"
+                id="monthAllOff"
+                type="button"
+              >
+                Усім вихідний
+              </button>
+            </div>
+
+            <div class="monthBulkBox">
+              <div class="monthBulkTitle">
+                Масове призначення
+              </div>
+
+              <label class="monthBulkField">
+                <span>Працівник</span>
+
+                <select id="monthBulkStaff">
+                  ${staff
+                    .map(
+                      (doc) => `
+                        <option
+                          value="${escapeHtml(
+                            String(doc.id)
+                          )}"
+                        >
+                          ${escapeHtml(
+                            doc.name ||
+                              "Працівник"
+                          )}
+                        </option>
+                      `
+                    )
+                    .join("")}
+                </select>
+              </label>
+
+              ${
+                selectedMonthDates.size >
+                1
+                  ? `
+                    <div class="monthSelectedBox">
+                      <div class="monthBulkTitle">
+                        Виділено днів:
+                        ${selectedMonthDates.size}
+                      </div>
+
+                      <label class="monthBulkField">
+                        <span>
+                          Працівник для виділених днів
+                        </span>
+
+                        <select id="monthSelectedStaff">
+                          ${staff
+                            .map(
+                              (doc) => `
+                                <option
+                                  value="${escapeHtml(
+                                    String(
+                                      doc.id
+                                    )
+                                  )}"
+                                >
+                                  ${escapeHtml(
+                                    doc.name ||
+                                      "Працівник"
+                                  )}
+                                </option>
+                              `
+                            )
+                            .join("")}
+                        </select>
+                      </label>
+
+                      <button
+                        class="primary monthBulkApply"
+                        id="monthApplySelectedDates"
+                        type="button"
+                      >
+                        Застосувати на виділені дні
+                      </button>
+                    </div>
+                  `
+                  : ""
+              }
+
+              <div class="monthBulkDates">
+                <label class="monthBulkField">
+                  <span>Від</span>
+
+                  <input
+                    id="monthBulkFrom"
+                    type="date"
+                    value="${escapeHtml(date)}"
+                  >
+                </label>
+
+                <label class="monthBulkField">
+                  <span>До</span>
+
+                  <input
+                    id="monthBulkTo"
+                    type="date"
+                    value="${escapeHtml(date)}"
+                  >
+                </label>
+              </div>
+
+              <div class="monthBulkDays">
+                <button
+                  type="button"
+                  class="monthBulkDay active"
+                  data-bulk-day="1"
+                >
+                  Пн
+                </button>
+
+                <button
+                  type="button"
+                  class="monthBulkDay active"
+                  data-bulk-day="2"
+                >
+                  Вт
+                </button>
+
+                <button
+                  type="button"
+                  class="monthBulkDay active"
+                  data-bulk-day="3"
+                >
+                  Ср
+                </button>
+
+                <button
+                  type="button"
+                  class="monthBulkDay active"
+                  data-bulk-day="4"
+                >
+                  Чт
+                </button>
+
+                <button
+                  type="button"
+                  class="monthBulkDay active"
+                  data-bulk-day="5"
+                >
+                  Пт
+                </button>
+
+                <button
+                  type="button"
+                  class="monthBulkDay"
+                  data-bulk-day="6"
+                >
+                  Сб
+                </button>
+
+                <button
+                  type="button"
+                  class="monthBulkDay"
+                  data-bulk-day="7"
+                >
+                  Нд
+                </button>
+              </div>
+
+              <button
+                class="primary monthBulkApply"
+                id="monthBulkApply"
+                type="button"
+              >
+                Застосувати графік
+              </button>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="monthDrawerStaff">
+        ${staff
+          .map((doc) => {
+            const active =
+              activeIds.has(
+                String(doc.id)
+              );
+
+            if (!canManageSchedule) {
+              return `
+                <div
+                  class="monthShiftToggle ${
+                    active
+                      ? "active"
+                      : ""
+                  }"
+                  style="
+                    border-left:5px solid
+                    ${escapeHtml(
+                      doc.color ||
+                        "#7C5CFF"
+                    )}
+                  "
+                >
+                  <span>
+                    👨‍⚕️
+                    ${escapeHtml(
+                      doc.name ||
+                        "Працівник"
+                    )}
+                  </span>
+
+                  <b>
+                    ${
+                      active
+                        ? "На зміні"
+                        : "Вихідний"
+                    }
+                  </b>
+                </div>
+              `;
+            }
+
+            return `
+              <button
+                class="monthShiftToggle ${
+                  active
+                    ? "active"
+                    : ""
+                }"
+                type="button"
+                data-month-shift-staff="${escapeHtml(
+                  String(doc.id)
+                )}"
+                style="
+                  border-left:5px solid
+                  ${escapeHtml(
+                    doc.color ||
+                      "#7C5CFF"
+                  )}
+                "
+              >
+                <span>
+                  👨‍⚕️
+                  ${escapeHtml(
+                    doc.name ||
+                      "Працівник"
+                  )}
+                </span>
+
+                <b>
+                  ${
+                    active
+                      ? "На зміні"
+                      : "Вихідний"
+                  }
+                </b>
+              </button>
+            `;
+          })
+          .join("")}
+      </div>
+
+      <div class="monthDrawerActions">
+        <button
+          class="ghost"
+          id="monthGoToDay"
+          type="button"
+        >
+          Відкрити день
+        </button>
+
+        ${
+          canManageSchedule
+            ? `
+              <button
+                class="primary"
+                id="monthSaveShift"
+                type="button"
+              >
+                💾 Зберегти
+              </button>
+            `
+            : ""
+        }
+      </div>
+    </div>
+  `;
+
+  drawer.classList.add("open");
+
+  const setToggleState = (
+    button,
+    active
+  ) => {
+    button.classList.toggle(
+      "active",
+      active
+    );
+
+    const label =
+      button.querySelector("b");
+
+    if (label) {
+      label.textContent =
+        active
+          ? "На зміні"
+          : "Вихідний";
+    }
+  };
+
+  drawer
+    .querySelector(
+      "#monthDrawerClose"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        drawer.classList.remove(
+          "open"
+        );
+
         drawer.innerHTML = `
           <div class="monthDrawerPlaceholder">
-            <div class="monthDrawerPlaceholderIcon">📅</div>
-            <div class="monthDrawerPlaceholderTitle">Обери день</div>
-            <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
+            <div class="monthDrawerPlaceholderIcon">
+              📅
+            </div>
+
+            <div class="monthDrawerPlaceholderTitle">
+              Обери день
+            </div>
+
+            <div class="hint">
+              Натисни на дату в календарі,
+              щоб переглянути графік зміни.
+            </div>
           </div>
         `;
-      });
+      }
+    );
 
-      $$(".monthShiftToggle").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          setToggleState(btn, !btn.classList.contains("active"));
-        });
-      });
+  drawer
+    .querySelector(
+      "#monthGoToDay"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        window.__calendarDate =
+          date;
 
-      $("#monthAllActive")?.addEventListener("click", () => {
-        $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, true));
-      });
+        calendarMode = "day";
 
-      $("#monthAllOff")?.addEventListener("click", () => {
-        $$(".monthShiftToggle").forEach((btn) => setToggleState(btn, false));
-      });
+        await renderCalendarTab();
+      }
+    );
 
-      $$(".monthBulkDay").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          btn.classList.toggle("active");
-        });
-      });
+  if (!canManageSchedule) {
+    return;
+  }
 
-      $("#monthBulkApply")?.addEventListener("click", async () => {
-        const staffId = $("#monthBulkStaff")?.value;
-        const from = $("#monthBulkFrom")?.value;
-        const to = $("#monthBulkTo")?.value;
+  drawer
+    .querySelectorAll(
+      ".monthShiftToggle"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          setToggleState(
+            button,
+            !button.classList.contains(
+              "active"
+            )
+          );
+        }
+      );
+    });
 
-        const selectedDays = $$(".monthBulkDay.active")
-          .map((btn) => Number(btn.dataset.bulkDay));
+  drawer
+    .querySelector(
+      "#monthAllActive"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        drawer
+          .querySelectorAll(
+            ".monthShiftToggle"
+          )
+          .forEach((button) => {
+            setToggleState(
+              button,
+              true
+            );
+          });
+      }
+    );
 
-        if (!staffId || !from || !to || !selectedDays.length) {
-          alert("Оберіть лікаря, період і дні тижня.");
+  drawer
+    .querySelector(
+      "#monthAllOff"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        drawer
+          .querySelectorAll(
+            ".monthShiftToggle"
+          )
+          .forEach((button) => {
+            setToggleState(
+              button,
+              false
+            );
+          });
+      }
+    );
+
+  drawer
+    .querySelectorAll(
+      ".monthBulkDay"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          button.classList.toggle(
+            "active"
+          );
+        }
+      );
+    });
+
+  drawer
+    .querySelector(
+      "#monthBulkApply"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const staffId =
+          drawer.querySelector(
+            "#monthBulkStaff"
+          )?.value;
+
+        const from =
+          drawer.querySelector(
+            "#monthBulkFrom"
+          )?.value;
+
+        const to =
+          drawer.querySelector(
+            "#monthBulkTo"
+          )?.value;
+
+        const selectedDays =
+          Array.from(
+            drawer.querySelectorAll(
+              ".monthBulkDay.active"
+            )
+          ).map((button) =>
+            Number(
+              button.dataset.bulkDay
+            )
+          );
+
+        if (
+          !staffId ||
+          !from ||
+          !to ||
+          !selectedDays.length
+        ) {
+          alert(
+            "Оберіть працівника, період і дні тижня."
+          );
+
           return;
         }
 
-        const start = new Date(from + "T12:00:00");
-        const end = new Date(to + "T12:00:00");
+        const start =
+          new Date(
+            `${from}T12:00:00`
+          );
+
+        const end =
+          new Date(
+            `${to}T12:00:00`
+          );
 
         if (start > end) {
-          alert("Дата 'від' не може бути пізніше дати 'до'.");
+          alert(
+            "Дата 'від' не може бути пізніше дати 'до'."
+          );
+
           return;
         }
 
         const dates = [];
-        const cursor = new Date(start);
+        const cursor =
+          new Date(start);
 
         while (cursor <= end) {
-          const jsDay = cursor.getDay();
-          const normalizedDay = jsDay === 0 ? 7 : jsDay;
+          const jsDay =
+            cursor.getDay();
 
-          if (selectedDays.includes(normalizedDay)) {
-            dates.push(localISO(cursor));
+          const normalizedDay =
+            jsDay === 0
+              ? 7
+              : jsDay;
+
+          if (
+            selectedDays.includes(
+              normalizedDay
+            )
+          ) {
+            dates.push(
+              localISO(cursor)
+            );
           }
 
-          cursor.setDate(cursor.getDate() + 1);
+          cursor.setDate(
+            cursor.getDate() + 1
+          );
         }
 
         if (!dates.length) {
-          alert("У вибраному періоді немає таких днів.");
+          alert(
+            "У вибраному періоді немає таких днів."
+          );
+
           return;
         }
 
-        if (!confirm(`Застосувати графік для ${dates.length} днів?`)) return;
+        const confirmed =
+          confirm(
+            `Застосувати графік для ${dates.length} днів?`
+          );
 
-        for (const workDate of dates) {
-          await saveStaffScheduleApi({
-            work_date: workDate,
-            staff_id: staffId,
-            is_active: true,
-          });
+        if (!confirmed) return;
+
+        for (
+          const workDate of dates
+        ) {
+          await saveStaffScheduleApi(
+            {
+              work_date:
+                workDate,
+
+              staff_id:
+                staffId,
+
+              is_active:
+                true,
+            }
+          );
         }
 
         await renderCalendarTab();
-      });
+      }
+    );
 
-      $("#monthApplySelectedDates")?.addEventListener("click", async () => {
-        const staffId = $("#monthSelectedStaff")?.value;
+  drawer
+    .querySelector(
+      "#monthApplySelectedDates"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const staffId =
+          drawer.querySelector(
+            "#monthSelectedStaff"
+          )?.value;
 
-        if (!staffId || selectedMonthDates.size < 2) {
-          alert("Виділи дні та обери лікаря.");
+        if (
+          !staffId ||
+          selectedMonthDates.size < 2
+        ) {
+          alert(
+            "Виділи дні та обери працівника."
+          );
+
           return;
         }
 
-        const dates = Array.from(selectedMonthDates).sort();
+        const dates =
+          Array.from(
+            selectedMonthDates
+          ).sort();
 
-        if (!confirm(`Призначити лікаря на ${dates.length} днів?`)) return;
+        const confirmed =
+          confirm(
+            `Призначити працівника на ${dates.length} днів?`
+          );
 
-        for (const workDate of dates) {
-          await saveStaffScheduleApi({
-            work_date: workDate,
-            staff_id: staffId,
-            is_active: true,
-          });
+        if (!confirmed) return;
+
+        for (
+          const workDate of dates
+        ) {
+          await saveStaffScheduleApi(
+            {
+              work_date:
+                workDate,
+
+              staff_id:
+                staffId,
+
+              is_active:
+                true,
+            }
+          );
         }
 
         await renderCalendarTab();
-      });
+      }
+    );
 
-      $("#monthGoToDay")?.addEventListener("click", async () => {
-        window.__calendarDate = date;
-        calendarMode = "day";
-        await renderCalendarTab();
-      });
-
-      $("#monthSaveShift")?.addEventListener("click", async () => {
-        const activeStaffIds = new Set(
-          $$(".monthShiftToggle.active").map((btn) => String(btn.dataset.monthShiftStaff))
-        );
+  drawer
+    .querySelector(
+      "#monthSaveShift"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const activeStaffIds =
+          new Set(
+            Array.from(
+              drawer.querySelectorAll(
+                ".monthShiftToggle.active"
+              )
+            ).map((button) =>
+              String(
+                button.dataset
+                  .monthShiftStaff
+              )
+            )
+          );
 
         for (const doc of staff) {
-          await saveStaffScheduleApi({
-            work_date: date,
-            staff_id: doc.id,
-            is_active: activeStaffIds.has(String(doc.id)),
-          });
+          await saveStaffScheduleApi(
+            {
+              work_date: date,
+
+              staff_id:
+                doc.id,
+
+              is_active:
+                activeStaffIds.has(
+                  String(doc.id)
+                ),
+            }
+          );
         }
 
         await renderCalendarTab();
-      });
-    };
+      }
+    );
+};
 
     $$("[data-month-date]").forEach((cell) => {
       cell.addEventListener("click", () => {
