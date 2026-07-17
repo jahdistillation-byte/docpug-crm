@@ -2319,7 +2319,7 @@ def api_add_stock_to_visit(
                         user.get("id")
                     ),
                     "movement_type":
-                        "visit_writeoff",
+    "writeoff",
                     "quantity": quantity,
                     "quantity_before":
                         quantity_before,
