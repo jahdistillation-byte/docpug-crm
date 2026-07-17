@@ -2406,7 +2406,8 @@ def api_add_stock_to_visit(
     except Exception as error:
         print(
             "❌ Add stock to visit:",
-            repr(error)
+            repr(error),
+            flush=True,
         )
 
         return fail(
