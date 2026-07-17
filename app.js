@@ -10388,76 +10388,100 @@ function openStockAdjustmentModal(
     calculateResult
   );
 
-  modal
-    .querySelector(
-      "#stockAdjustmentSubmit"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        const quantity =
-          Math.max(
-            0,
-            Number(
-              quantityInput?.value || 0
-            )
-          );
+  const submitButton =
+  modal.querySelector(
+    "#stockAdjustmentSubmit"
+  );
 
-        if (!quantity) {
-          alert(
-            "Вкажіть кількість."
-          );
+submitButton?.addEventListener(
+  "click",
+  async () => {
+    const quantity =
+      Math.max(
+        0,
+        Number(
+          quantityInput?.value || 0
+        )
+      );
 
-          quantityInput?.focus();
-          return;
+    if (!quantity) {
+      alert(
+        "Вкажіть кількість."
+      );
+
+      quantityInput?.focus();
+      return;
+    }
+
+    if (
+      !isIncome &&
+      quantity > item.qty
+    ) {
+      alert(
+        `На складі лише ${item.qty} ${item.unit}.`
+      );
+
+      return;
+    }
+
+    const comment =
+      modal
+        .querySelector(
+          "#stockAdjustmentComment"
+        )
+        ?.value
+        ?.trim() || "";
+
+    const originalButtonText =
+      submitButton.textContent;
+
+    submitButton.disabled = true;
+    submitButton.textContent =
+      "Збереження…";
+
+    try {
+      await adjustStockItemApi(
+        item.id,
+        {
+          mode:
+            isIncome
+              ? "income"
+              : "writeoff",
+
+          quantity,
+          comment,
         }
+      );
 
-        if (
-          !isIncome &&
-          quantity > item.qty
-        ) {
-          alert(
-            `На складі лише ${item.qty} ${item.unit}.`
-          );
+      closeModal();
+      renderStockTab();
 
-          return;
-        }
+    } catch (error) {
+      console.error(
+        "Stock adjustment failed:",
+        error
+      );
 
-        let items =
-          loadStock()
-            .map(normalizeStockItem);
+      alert(
+        error?.message ||
+        "Не вдалося змінити залишок."
+      );
 
-        items =
-          items.map((row) => {
-            if (
-              String(row.id) !==
-              String(item.id)
-            ) {
-              return row;
-            }
+    } finally {
+      if (
+        document.body.contains(
+          submitButton
+        )
+      ) {
+        submitButton.disabled =
+          false;
 
-            return {
-              ...row,
-
-              qty:
-                isIncome
-                  ? row.qty + quantity
-                  : Math.max(
-                      0,
-                      row.qty - quantity
-                    ),
-
-              updated_at:
-                new Date().toISOString(),
-            };
-          });
-
-        saveStock(items);
-
-        closeModal();
-        renderStockTab();
+        submitButton.textContent =
+          originalButtonText;
       }
-    );
+    }
+  }
+);
 
   setTimeout(() => {
     quantityInput?.focus();
@@ -26193,6 +26217,61 @@ async function updateStockItemApi(
         body: JSON.stringify(
           payload || {}
         ),
+      }
+    );
+
+  const updatedItem =
+    normalizeStockItem(data);
+
+  state.stock =
+    loadStock().map((item) =>
+      String(item.id) ===
+      String(stockId)
+        ? updatedItem
+        : item
+    );
+
+  state.stockLoaded = true;
+
+  return updatedItem;
+}
+async function adjustStockItemApi(
+  stockId,
+  {
+    mode,
+    quantity,
+    comment = "",
+  }
+) {
+  const movementType =
+    mode === "income"
+      ? "income"
+      : "writeoff";
+
+  const data =
+    await stockApiRequest(
+      `/api/stock/${encodeURIComponent(
+        stockId
+      )}/adjust`,
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          movement_type:
+            movementType,
+
+          type:
+            movementType,
+
+          mode:
+            movementType,
+
+          quantity:
+            Number(quantity),
+
+          comment:
+            String(comment || ""),
+        }),
       }
     );
 
