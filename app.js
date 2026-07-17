@@ -2624,29 +2624,119 @@ async function addStockLineToVisit(
 // Часть 2 (Строки 1501 — 2000) ыфв
 // ==========================================================================
 
-async function removeStockLineFromVisit(visitId, index, { restore = true } = {}) {
-  if (!visitId) return false;
-  const vid = String(visitId);
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return false;
+async function removeStockLineFromVisit(
+  visitId,
+  index
+) {
+  if (!visitId) {
+    return false;
+  }
 
-  ensureVisitStockShape(current);
-  const idx = Number(index);
-  if (!Number.isFinite(idx) || idx < 0 || idx >= current.stock.length) return false;
+  const vid =
+    String(visitId);
 
-  const nextStock = current.stock.slice();
-  nextStock.splice(idx, 1);
+  const current =
+    getVisitByIdSync(vid) ||
+    await fetchVisitById(vid);
 
-  current.stock = nextStock;
-  current.stock_json = nextStock;
+  if (!current) {
+    throw new Error(
+      "Візит не знайдено."
+    );
+  }
 
-  state.visitsById.set(vid, current);
-  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+  ensureVisitStockShape(
+    current
+  );
 
-  pushVisitStockToServer(vid, nextStock).catch((e) => {
-    console.error("Background stock remove failed:", e);
-    alert("Препарат прибрався на екрані, але не зберігся на сервері. Натисни Оновити.");
-  });
+  const itemIndex =
+    Number(index);
+
+  if (
+    !Number.isFinite(
+      itemIndex
+    ) ||
+    itemIndex < 0 ||
+    itemIndex >=
+      current.stock.length
+  ) {
+    return false;
+  }
+
+  const line =
+    current.stock[
+      itemIndex
+    ];
+
+  const lineId =
+    String(
+      line?.id || ""
+    ).trim();
+
+  if (!lineId) {
+    throw new Error(
+      "Оновіть сторінку та повторіть видалення."
+    );
+  }
+
+  const data =
+    await stockApiRequest(
+      `/api/visits/${encodeURIComponent(
+        vid
+      )}/stock/${encodeURIComponent(
+        lineId
+      )}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+  const nextStock =
+    current.stock.slice();
+
+  nextStock.splice(
+    itemIndex,
+    1
+  );
+
+  current.stock =
+    nextStock;
+
+  current.stock_json =
+    nextStock;
+
+  state.visitsById.set(
+    vid,
+    current
+  );
+
+  if (
+    String(
+      state.selectedVisitId
+    ) === vid
+  ) {
+    state.selectedVisit =
+      current;
+  }
+
+  if (data?.stock) {
+    const updatedStock =
+      normalizeStockItem(
+        data.stock
+      );
+
+    state.stock =
+      loadStock().map(
+        (item) =>
+          String(item.id) ===
+          String(updatedStock.id)
+            ? updatedStock
+            : item
+      );
+
+    state.stockLoaded = true;
+  }
+
   return true;
 }
 
