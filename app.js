@@ -9258,106 +9258,85 @@ ${
 
         if (!confirmed) return;
 
-        items =
-          items.filter(
-            (row) =>
-              String(row.id) !==
-              String(item.id)
-          );
+        try {
+  await deleteStockItemApi(
+    item.id
+  );
 
-        saveStock(items);
-        renderStockTab();
+  items =
+    loadStock()
+      .map(normalizeStockItem);
+
+  renderStockTab();
+
+} catch (error) {
+  console.error(
+    "Stock delete failed:",
+    error
+  );
+
+  alert(
+    error?.message ||
+    "Не вдалося видалити позицію."
+  );
+}
       }
     }
   );
 
   grid?.addEventListener(
-    "change",
-    (event) => {
-      const toggle =
-        event.target.closest(
-          "[data-stock-toggle]"
-        );
+  "change",
+  async (event) => {
+    const toggle =
+      event.target.closest(
+        "[data-stock-toggle]"
+      );
 
-      if (!toggle) return;
+    if (!toggle) return;
 
-      const index =
-        items.findIndex(
-          (row) =>
-            String(row.id) ===
-            String(
-              toggle.dataset
-                .stockToggle
-            )
-        );
+    const stockId =
+      toggle.dataset.stockToggle;
 
-      if (index < 0) return;
+    if (!stockId) return;
 
-      items[index] = {
-        ...items[index],
-        active: toggle.checked,
-      };
+    const newActiveValue =
+      Boolean(toggle.checked);
 
-      saveStock(items);
-      renderStockTab();
-    }
-  );
-    page
-    .querySelectorAll(
-      "[data-stock-group]"
-    )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          state.stockGroup =
-            button.dataset
-              .stockGroup ||
-            "all";
+    toggle.disabled = true;
 
-          state.stockCategory =
-            "all";
-
-          renderStockTab();
+    try {
+      await updateStockItemApi(
+        stockId,
+        {
+          active:
+            newActiveValue,
         }
       );
-    });
 
+      items =
+        loadStock()
+          .map(normalizeStockItem);
 
-  page
-    .querySelector(
-      "#stockFilterForm"
-    )
-    ?.addEventListener(
-      "change",
-      (event) => {
-        state.stockForm =
-          String(
-            event.target.value ||
-            "all"
-          );
+      renderStockTab();
 
-        renderStockCards();
-      }
-    );
+    } catch (error) {
+      console.error(
+        "Stock toggle failed:",
+        error
+      );
 
+      toggle.checked =
+        !newActiveValue;
 
-  page
-    .querySelector(
-      "#stockFilterSpecies"
-    )
-    ?.addEventListener(
-      "change",
-      (event) => {
-        state.stockSpecies =
-          String(
-            event.target.value ||
-            "all"
-          );
+      toggle.disabled = false;
 
-        renderStockCards();
-      }
-    );
+      alert(
+        error?.message ||
+        "Не вдалося змінити статус позиції."
+      );
+    }
+  }
+);
 
 
   
@@ -26289,6 +26268,29 @@ async function adjustStockItemApi(
   state.stockLoaded = true;
 
   return updatedItem;
+}
+async function deleteStockItemApi(
+  stockId
+) {
+  await stockApiRequest(
+    `/api/stock/${encodeURIComponent(
+      stockId
+    )}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  state.stock =
+    loadStock().filter(
+      (item) =>
+        String(item.id) !==
+        String(stockId)
+    );
+
+  state.stockLoaded = true;
+
+  return true;
 }
 
 // =========================
