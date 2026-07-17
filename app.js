@@ -2498,43 +2498,124 @@ function ensureVisitStockShape(visit) {
   if (!Array.isArray(visit.stock)) visit.stock = [];
 }
 
-async function addStockLineToVisit(visitId, stockId, qty = 1, { snap = true, decrement = false } = {}) {
-  if (!visitId || !stockId) return false;
+async function addStockLineToVisit(
+  visitId,
+  stockId,
+  qty = 1
+) {
+  if (
+    !visitId ||
+    !stockId
+  ) {
+    return false;
+  }
 
-  const vid = String(visitId);
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return false;
+  const vid =
+    String(visitId);
 
-  ensureVisitStockShape(current);
-  const it = getStockById(stockId);
-  if (!it || it.active === false) return false;
+  const current =
+    getVisitByIdSync(vid) ||
+    await fetchVisitById(vid);
 
-  const q = Math.max(1, Number(qty) || 1);
-  const price = Number(it.price ?? it.price_uah ?? it.sell_price ?? it.sale_price ?? it.cost ?? 0) || 0;
+  if (!current) {
+    throw new Error(
+      "Візит не знайдено."
+    );
+  }
 
-  const line = {
-    stockId: String(stockId),
-    stock_id: String(stockId),
-    qty: q,
-    quantity: q,
-    priceSnap: price,
-    price_snap: price,
-    nameSnap: String(it.name || "").trim(),
-    name_snap: String(it.name || "").trim(),
-    unitSnap: String(it.unit || "шт").trim(),
-    unit_snap: String(it.unit || "шт").trim(),
-  };
+  ensureVisitStockShape(
+    current
+  );
 
-  current.stock = [...current.stock, line];
-  current.stock_json = current.stock;
+  const stockItem =
+    getStockById(stockId);
 
-  state.visitsById.set(vid, current);
-  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+  if (
+    !stockItem ||
+    stockItem.active === false
+  ) {
+    throw new Error(
+      "Препарат не знайдено або він неактивний."
+    );
+  }
 
-  pushVisitStockToServer(vid, current.stock).catch((e) => {
-    console.error("Background stock save failed:", e);
-    alert("Препарат додався на екрані, але не зберігся на сервері. Натисни Оновити.");
-  });
+  const quantity =
+    Math.max(
+      1,
+      Number(qty) || 1
+    );
+
+  const data =
+    await stockApiRequest(
+      `/api/visits/${encodeURIComponent(
+        vid
+      )}/stock`,
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          stock_id:
+            String(stockId),
+
+          quantity,
+
+          price_snap:
+            Number(
+              stockItem.price || 0
+            ),
+        }),
+      }
+    );
+
+  const line =
+    data?.line;
+
+  if (!line?.id) {
+    throw new Error(
+      "Сервер не повернув рядок препарату."
+    );
+  }
+
+  current.stock = [
+    ...current.stock,
+    line,
+  ];
+
+  current.stock_json =
+    current.stock;
+
+  state.visitsById.set(
+    vid,
+    current
+  );
+
+  if (
+    String(
+      state.selectedVisitId
+    ) === vid
+  ) {
+    state.selectedVisit =
+      current;
+  }
+
+  if (data?.stock) {
+    const updatedStock =
+      normalizeStockItem(
+        data.stock
+      );
+
+    state.stock =
+      loadStock().map(
+        (item) =>
+          String(item.id) ===
+          String(updatedStock.id)
+            ? updatedStock
+            : item
+      );
+
+    state.stockLoaded = true;
+  }
+
   return true;
 }
 
