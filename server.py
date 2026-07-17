@@ -1456,6 +1456,635 @@ def api_me():
             "theme": theme
         }
     })
+# =========================
+# STOCK API
+# =========================
+
+def stock_number(value, default=0):
+    try:
+        return max(
+            0,
+            float(
+                value
+                if value is not None
+                else default
+            )
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return float(default)
+
+
+def serialize_stock_item(row):
+    if not row:
+        return None
+
+    return {
+        "id": str(row.get("id") or ""),
+        "name": row.get("name") or "Позиція",
+
+        "group": (
+            row.get("group_id")
+            or "other"
+        ),
+
+        "category": (
+            row.get("category")
+            or "Інше"
+        ),
+
+        "form": (
+            row.get("dosage_form")
+            or "Інше"
+        ),
+
+        "route": (
+            row.get("administration_route")
+            or "Не застосовується"
+        ),
+
+        "species": (
+            row.get("target_species")
+            or "Універсальний"
+        ),
+
+        "unit": row.get("unit") or "шт",
+
+        "price": stock_number(
+            row.get("price")
+        ),
+
+        "cost": stock_number(
+            row.get("purchase_price")
+        ),
+
+        "qty": stock_number(
+            row.get("qty")
+        ),
+
+        "min_qty": stock_number(
+            row.get("minimum_qty"),
+            5
+        ),
+
+        "active": (
+            row.get("active")
+            is not False
+        ),
+
+        "created_at": row.get(
+            "created_at"
+        ),
+
+        "updated_at": row.get(
+            "updated_at"
+        ),
+    }
+
+
+@app.get("/api/stock")
+def api_get_stock():
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        result = (
+            supabase
+            .table("stock")
+            .select("*")
+            .eq("org_id", current_org)
+            .order("name")
+            .execute()
+        )
+
+        items = [
+            serialize_stock_item(row)
+            for row in (
+                result.data or []
+            )
+        ]
+
+        return ok(items)
+
+    except Exception as error:
+        print(
+            "❌ GET /api/stock:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося завантажити склад.",
+            500
+        )
+
+
+@app.post("/api/stock")
+def api_create_stock_item():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    name = str(
+        data.get("name") or ""
+    ).strip()
+
+    if not name:
+        return fail(
+            "Вкажіть назву позиції.",
+            400
+        )
+
+    current_org = get_current_org_id()
+
+    payload = {
+        "org_id": current_org,
+        "name": name,
+
+        "group_id": (
+            str(
+                data.get("group")
+                or data.get("group_id")
+                or "other"
+            )
+        ),
+
+        "category": (
+            str(
+                data.get("category")
+                or "Інше"
+            )
+        ),
+
+        "dosage_form": (
+            str(
+                data.get("form")
+                or data.get("dosage_form")
+                or "Інше"
+            )
+        ),
+
+        "administration_route": (
+            str(
+                data.get("route")
+                or data.get(
+                    "administration_route"
+                )
+                or "Не застосовується"
+            )
+        ),
+
+        "target_species": (
+            str(
+                data.get("species")
+                or data.get(
+                    "target_species"
+                )
+                or "Універсальний"
+            )
+        ),
+
+        "unit": str(
+            data.get("unit") or "шт"
+        ),
+
+        "price": stock_number(
+            data.get("price")
+        ),
+
+        "purchase_price": stock_number(
+            data.get("cost")
+            if data.get("cost") is not None
+            else data.get(
+                "purchase_price"
+            )
+        ),
+
+        "qty": stock_number(
+            data.get("qty")
+        ),
+
+        "minimum_qty": stock_number(
+            data.get("min_qty")
+            if data.get("min_qty")
+            is not None
+            else data.get(
+                "minimum_qty"
+            ),
+            5
+        ),
+
+        "active": (
+            data.get("active")
+            is not False
+        ),
+
+        "updated_at": (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        ),
+    }
+
+    try:
+        result = (
+            supabase
+            .table("stock")
+            .insert(payload)
+            .execute()
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else payload
+        )
+
+        return ok(
+            serialize_stock_item(row)
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST /api/stock:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося додати позицію.",
+            500
+        )
+
+
+@app.put("/api/stock/<stock_id>")
+def api_update_stock_item(stock_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    if not stock_id:
+        return fail(
+            "stock_id required",
+            400
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    field_map = {
+        "name": "name",
+        "group": "group_id",
+        "group_id": "group_id",
+        "category": "category",
+        "form": "dosage_form",
+        "dosage_form": "dosage_form",
+        "route": "administration_route",
+        "administration_route":
+            "administration_route",
+        "species": "target_species",
+        "target_species":
+            "target_species",
+        "unit": "unit",
+        "price": "price",
+        "cost": "purchase_price",
+        "purchase_price":
+            "purchase_price",
+        "qty": "qty",
+        "min_qty": "minimum_qty",
+        "minimum_qty":
+            "minimum_qty",
+        "active": "active",
+    }
+
+    numeric_fields = {
+        "price",
+        "purchase_price",
+        "qty",
+        "minimum_qty",
+    }
+
+    payload = {}
+
+    for source_field, db_field in (
+        field_map.items()
+    ):
+        if source_field not in data:
+            continue
+
+        value = data.get(
+            source_field
+        )
+
+        if db_field in numeric_fields:
+            value = stock_number(value)
+
+        elif db_field == "active":
+            value = value is not False
+
+        elif value is not None:
+            value = str(value).strip()
+
+        payload[db_field] = value
+
+    if "name" in payload:
+        if not payload["name"]:
+            return fail(
+                "Вкажіть назву позиції.",
+                400
+            )
+
+    if not payload:
+        return fail(
+            "Немає змін для збереження.",
+            400
+        )
+
+    payload["updated_at"] = (
+        datetime
+        .now(timezone.utc)
+        .isoformat()
+    )
+
+    current_org = get_current_org_id()
+
+    try:
+        result = (
+            supabase
+            .table("stock")
+            .update(payload)
+            .eq("org_id", current_org)
+            .eq("id", stock_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Позицію не знайдено.",
+                404
+            )
+
+        return ok(
+            serialize_stock_item(
+                result.data[0]
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUT /api/stock:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося оновити позицію.",
+            500
+        )
+
+
+@app.delete("/api/stock/<stock_id>")
+def api_delete_stock_item(stock_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    if not stock_id:
+        return fail(
+            "stock_id required",
+            400
+        )
+
+    current_org = get_current_org_id()
+
+    try:
+        result = (
+            supabase
+            .table("stock")
+            .delete()
+            .eq("org_id", current_org)
+            .eq("id", stock_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Позицію не знайдено.",
+                404
+            )
+
+        return ok(True)
+
+    except Exception as error:
+        print(
+            "❌ DELETE /api/stock:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося видалити позицію.",
+            500
+        )
+
+
+@app.post("/api/stock/<stock_id>/adjust")
+def api_adjust_stock_item(stock_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    movement_type = str(
+        data.get("movement_type")
+        or data.get("mode")
+        or ""
+    ).strip().lower()
+
+    if movement_type not in {
+        "income",
+        "writeoff",
+    }:
+        return fail(
+            "Невірний тип руху.",
+            400
+        )
+
+    quantity = stock_number(
+        data.get("quantity")
+        if data.get("quantity")
+        is not None
+        else data.get("qty")
+    )
+
+    if quantity <= 0:
+        return fail(
+            "Кількість повинна бути більшою за нуль.",
+            400
+        )
+
+    current_org = get_current_org_id()
+
+    try:
+        item_result = (
+            supabase
+            .table("stock")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("id", stock_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not item_result.data:
+            return fail(
+                "Позицію не знайдено.",
+                404
+            )
+
+        item = item_result.data[0]
+
+        quantity_before = stock_number(
+            item.get("qty")
+        )
+
+        if (
+            movement_type == "writeoff"
+            and quantity > quantity_before
+        ):
+            return fail(
+                "Недостатньо товару на складі.",
+                409
+            )
+
+        if movement_type == "income":
+            quantity_after = (
+                quantity_before + quantity
+            )
+        else:
+            quantity_after = (
+                quantity_before - quantity
+            )
+
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        update_result = (
+            supabase
+            .table("stock")
+            .update({
+                "qty": quantity_after,
+                "updated_at": now_iso,
+            })
+            .eq("org_id", current_org)
+            .eq("id", stock_id)
+            .execute()
+        )
+
+        if not update_result.data:
+            return fail(
+                "Не вдалося оновити залишок.",
+                500
+            )
+
+        try:
+            (
+                supabase
+                .table("stock_movements")
+                .insert({
+                    "org_id": current_org,
+                    "stock_id": stock_id,
+                    "created_by": (
+                        user.get("id")
+                    ),
+                    "movement_type":
+                        movement_type,
+                    "quantity": quantity,
+                    "quantity_before":
+                        quantity_before,
+                    "quantity_after":
+                        quantity_after,
+                    "unit_cost":
+                        stock_number(
+                            item.get(
+                                "purchase_price"
+                            )
+                        ),
+                    "name_snap":
+                        item.get("name"),
+                    "comment": str(
+                        data.get("comment")
+                        or ""
+                    ).strip(),
+                })
+                .execute()
+            )
+
+        except Exception:
+            (
+                supabase
+                .table("stock")
+                .update({
+                    "qty": quantity_before,
+                    "updated_at": now_iso,
+                })
+                .eq("org_id", current_org)
+                .eq("id", stock_id)
+                .execute()
+            )
+
+            raise
+
+        return ok(
+            serialize_stock_item(
+                update_result.data[0]
+            )
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST /api/stock adjust:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося змінити залишок.",
+            500
+        )
 
 # =========================
 # SERVICES API
