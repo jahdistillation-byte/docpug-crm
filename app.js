@@ -142,9 +142,12 @@ const state = {
   clinicProfile: null,
 
   owners: [],
-  patients: [],
-  visits: [],
-  services: [],
+patients: [],
+visits: [],
+services: [],
+
+stock: [],
+stockLoaded: false,
 
   selectedOwnerId: null,
   selectedPetId: null,
@@ -26003,11 +26006,131 @@ async function deleteVisitEverywhere(visitId) {
   return true;
 }
 
-function loadStock() { return LS.get(STOCK_KEY, []); }
-function saveStock(items) { LS.set(STOCK_KEY, items); }
+function loadStock() {
+  return Array.isArray(state.stock)
+    ? state.stock
+    : [];
+}
+
+
+function saveStock(items) {
+  state.stock = Array.isArray(items)
+    ? items.map(normalizeStockItem)
+    : [];
+
+  state.stockLoaded = true;
+
+  return state.stock;
+}
+
+
 function getStockById(id) {
-  const sid = String(id || "");
-  return loadStock().find((x) => String(x.id) === sid) || null;
+  const stockId =
+    String(id || "");
+
+  return (
+    loadStock().find(
+      (item) =>
+        String(item.id) === stockId
+    ) || null
+  );
+}
+
+
+async function stockApiRequest(
+  url,
+  options = {}
+) {
+  const response =
+    await fetch(
+      url,
+      {
+        credentials: "include",
+
+        ...options,
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...(options.body
+            ? {
+                "Content-Type":
+                  "application/json",
+              }
+            : {}),
+
+          ...(options.headers || {}),
+        },
+      }
+    );
+
+  const text =
+    await response.text();
+
+  let json = null;
+
+  try {
+    json = text
+      ? JSON.parse(text)
+      : null;
+  } catch {}
+
+  if (
+    !response.ok ||
+    json?.ok !== true
+  ) {
+    throw new Error(
+      json?.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  return json.data;
+}
+
+
+async function loadStockApi(
+  force = false
+) {
+  if (
+    state.stockLoaded &&
+    !force
+  ) {
+    return loadStock();
+  }
+
+  try {
+    const data =
+      await stockApiRequest(
+        "/api/stock",
+        {
+          method: "GET",
+        }
+      );
+
+    state.stock =
+      Array.isArray(data)
+        ? data.map(
+            normalizeStockItem
+          )
+        : [];
+
+    state.stockLoaded = true;
+
+    return state.stock;
+
+  } catch (error) {
+    console.error(
+      "loadStockApi failed:",
+      error
+    );
+
+    state.stock = [];
+    state.stockLoaded = false;
+
+    return [];
+  }
 }
 
 // =========================
@@ -29206,15 +29329,22 @@ async function init() {
   // Если активной сессии нет —
   // оставляем экран входа и не запускаем CRM
   if (!sessionAuthenticated) {
-    return;
-  }
+  return;
+}
 
-  if (
-    typeof initTabs ===
-    "function"
-  ) {
-    initTabs();
-  }
+if (
+  typeof loadStockApi ===
+  "function"
+) {
+  await loadStockApi(true);
+}
+
+if (
+  typeof initTabs ===
+  "function"
+) {
+  initTabs();
+}
 
   if (
     typeof seedIfEmpty ===
