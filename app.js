@@ -10004,8 +10004,8 @@ const renderCategoryOptions = () => {
       "#stockEditorForm"
     )
     ?.addEventListener(
-      "submit",
-      (event) => {
+  "submit",
+  async (event) => {
         event.preventDefault();
 
         const name =
@@ -10022,125 +10022,143 @@ const renderCategoryOptions = () => {
           return;
         }
 
-        const savedItem = {
-          ...item,
+        const payload = {
+  name,
 
-          id:
-            isEdit
-              ? item.id
-              : `stk_${Date.now()
-                  .toString(36)}_${Math.random()
-                  .toString(16)
-                  .slice(2)}`,
-
-          name,
-
-          group:
-  String(
+  group: String(
     groupInput?.value ||
     "other"
   ),
 
-          category:
-            String(
-              categoryInput?.value ||
-              "Інше"
-            ),
-            form:
-  String(
+  category: String(
+    categoryInput?.value ||
+    "Інше"
+  ),
+
+  form: String(
     modal.querySelector(
       "#stockEditorFormType"
     )?.value ||
     "Інше"
   ),
 
-route:
-  String(
+  route: String(
     modal.querySelector(
       "#stockEditorRoute"
     )?.value ||
     "Не застосовується"
   ),
 
-species:
-  String(
+  species: String(
     modal.querySelector(
       "#stockEditorSpecies"
     )?.value ||
     "Універсальний"
   ),
 
+  unit: String(
+    unitInput?.value ||
+    "шт"
+  ),
 
-          unit:
-            String(
-              unitInput?.value ||
-              "шт"
-            ),
+  price: Math.max(
+    0,
+    Number(
+      modal.querySelector(
+        "#stockEditorPrice"
+      )?.value || 0
+    )
+  ),
 
-          price:
-            Math.max(
-              0,
-              Number(
-                modal.querySelector(
-                  "#stockEditorPrice"
-                )?.value || 0
-              )
-            ),
+  cost: Math.max(
+    0,
+    Number(
+      modal.querySelector(
+        "#stockEditorCost"
+      )?.value || 0
+    )
+  ),
 
-          cost:
-            Math.max(
-              0,
-              Number(
-                modal.querySelector(
-                  "#stockEditorCost"
-                )?.value || 0
-              )
-            ),
+  qty: Math.max(
+    0,
+    Number(
+      quantityInput?.value || 0
+    )
+  ),
 
-          qty:
-            Math.max(
-              0,
-              Number(
-                quantityInput?.value || 0
-              )
-            ),
+  min_qty: Math.max(
+    0,
+    Number(
+      modal.querySelector(
+        "#stockEditorMinimum"
+      )?.value || 0
+    )
+  ),
 
-          min_qty:
-            Math.max(
-              0,
-              Number(
-                modal.querySelector(
-                  "#stockEditorMinimum"
-                )?.value || 0
-              )
-            ),
+  active:
+    modal.querySelector(
+      "#stockEditorActive"
+    )?.checked !== false,
+};
 
-          active:
-            modal.querySelector(
-              "#stockEditorActive"
-            )?.checked !== false,
-        };
+const submitButton =
+  modal.querySelector(
+    "#stockEditorSubmit"
+  );
 
-        let items =
-          loadStock()
-            .map(normalizeStockItem);
+const originalButtonText =
+  submitButton?.textContent ||
+  "Зберегти";
 
-        if (isEdit) {
-          items =
-            items.map((row) =>
-              String(row.id) ===
-              String(savedItem.id)
-                ? savedItem
-                : row
-            );
-        } else {
-          items.unshift(savedItem);
-        }
+if (submitButton) {
+  submitButton.disabled = true;
+  submitButton.textContent =
+    "Збереження…";
+}
 
-        saveStock(items);
+try {
+  const savedItem =
+    isEdit
+      ? await updateStockItemApi(
+          item.id,
+          payload
+        )
+      : await createStockItemApi(
+          payload
+        );
 
-        closeModal();
-        renderStockTab();
+  if (!savedItem?.id) {
+    throw new Error(
+      "Сервер не повернув позицію."
+    );
+  }
+
+  closeModal();
+  renderStockTab();
+
+} catch (error) {
+  console.error(
+    "Stock save failed:",
+    error
+  );
+
+  alert(
+    error?.message ||
+    "Не вдалося зберегти позицію."
+  );
+
+} finally {
+  if (
+    submitButton &&
+    document.body.contains(
+      submitButton
+    )
+  ) {
+    submitButton.disabled = false;
+    submitButton.textContent =
+      originalButtonText;
+  }
+}
       }
     );
 
@@ -26131,6 +26149,67 @@ async function loadStockApi(
 
     return [];
   }
+}
+
+async function createStockItemApi(
+  payload
+) {
+  const data =
+    await stockApiRequest(
+      "/api/stock",
+      {
+        method: "POST",
+        body: JSON.stringify(
+          payload || {}
+        ),
+      }
+    );
+
+  const item =
+    normalizeStockItem(data);
+
+  state.stock = [
+    item,
+    ...loadStock(),
+  ];
+
+  state.stockLoaded = true;
+
+  return item;
+}
+
+
+async function updateStockItemApi(
+  stockId,
+  payload
+) {
+  const data =
+    await stockApiRequest(
+      `/api/stock/${encodeURIComponent(
+        stockId
+      )}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(
+          payload || {}
+        ),
+      }
+    );
+
+  const updatedItem =
+    normalizeStockItem(data);
+
+  state.stock =
+    loadStock().map((item) =>
+      String(item.id) ===
+      String(stockId)
+        ? updatedItem
+        : item
+    );
+
+  state.stockLoaded = true;
+
+  return updatedItem;
 }
 
 // =========================
