@@ -2275,10 +2275,17 @@ async function deleteVisitApi(
     }
 
     state.visitsById.delete(
-      String(visitId)
-    );
+  String(visitId)
+);
 
-    return true;
+if (
+  typeof loadStockApi ===
+  "function"
+) {
+  await loadStockApi(true);
+}
+
+return true;
 
   } catch (error) {
     console.error(

@@ -6524,37 +6524,94 @@ def api_update_visit():
 
 
 @app.delete("/api/visits/<visit_id>")
-def api_delete_visit(visit_id):
-    user, auth_error = owner_or_admin_required()
+def api_delete_visit(
+    visit_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
 
     if auth_error:
-        return auth_error    
-    if not visit_id:
-        return fail("visit_id required", 400)
+        return auth_error
 
-    current_org = get_current_org_id()
+    if not visit_id:
+        return fail(
+            "visit_id required",
+            400
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    current_user_id = (
+        user.get("id")
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400
+        )
+
+    if not current_user_id:
+        return fail(
+            "User not found",
+            401
+        )
 
     try:
-        supabase.table("calendar_events").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
+        result = (
+            supabase
+            .rpc(
+                "delete_visit_with_stock_restore",
+                {
+                    "p_org_id":
+                        current_org,
 
-        try:
-            supabase.table("visit_services").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
-        except Exception:
-            pass
+                    "p_visit_id":
+                        visit_id,
 
-        try:
-            supabase.table("visit_stock").delete().eq("org_id", current_org).eq("visit_id", visit_id).execute()
-        except Exception:
-            pass
+                    "p_user_id":
+                        current_user_id,
+                },
+            )
+            .execute()
+        )
 
-        supabase.table("visits").delete().eq("org_id", current_org).eq("id", visit_id).execute()
+        data = (
+            result.data
+            if result.data
+            is not None
+            else {
+                "deleted": True,
+                "restored_positions": 0,
+                "restored_quantity": 0,
+            }
+        )
 
-       
+        if (
+            isinstance(data, list)
+            and data
+        ):
+            data = data[0]
 
-        return ok(True)
+        return ok(data)
 
-    except Exception as e:
-        return fail(str(e), 500)
+    except Exception as error:
+        print(
+            "❌ Delete visit with stock restore:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            (
+                "Не вдалося видалити візит "
+                "та повернути препарати на склад."
+            ),
+            500
+        )
 
 # =========================
 # API: UPLOAD FILES
