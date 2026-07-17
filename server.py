@@ -701,13 +701,43 @@ def load_visit_lines(visit_ids):
             vid = r.get("visit_id")
             if not vid:
                 continue
-            stock_by_visit.setdefault(vid, []).append({
-                "id": r.get("id"),
-                "stockId": r.get("stock_id") or r.get("stockId"),
-                "qty": r.get("qty") or 1,
-                "priceSnap": r.get("price_snap") or r.get("priceSnap"),
-                "nameSnap": r.get("name_snap") or r.get("nameSnap"),
-            })
+            stock_by_visit.setdefault(
+    vid,
+    []
+).append({
+    "id": r.get("id"),
+
+    "stockId": (
+        r.get("stock_id")
+        or r.get("stockId")
+    ),
+
+    "qty": (
+        r.get("qty")
+        or 1
+    ),
+
+    "priceSnap": (
+        r.get("price_snap")
+        or r.get("priceSnap")
+    ),
+
+    "nameSnap": (
+        r.get("name_snap")
+        or r.get("nameSnap")
+    ),
+
+    "inventorySynced": (
+        r.get("inventory_synced")
+        is True
+    ),
+
+    "inventory_synced": (
+        r.get("inventory_synced")
+        is True
+    ),
+})
+            
     except Exception:
         pass
 
@@ -852,16 +882,32 @@ def save_visit_lines(visit_id: str, d: dict):
 
         stock_rows.append({
     "visit_id": visit_id,
+
     "stock_id": stock_id,
-    "qty": item.get("qty") or 1,
+
+    "qty": (
+        item.get("qty")
+        or item.get("quantity")
+        or 1
+    ),
+
     "price_snap": (
         item.get("priceSnap")
-        if item.get("priceSnap") is not None
+        if item.get("priceSnap")
+        is not None
         else item.get("price_snap")
     ),
+
     "name_snap": (
         item.get("nameSnap")
         or item.get("name_snap")
+    ),
+
+    "inventory_synced": (
+        item.get("inventorySynced")
+        is True
+        or item.get("inventory_synced")
+        is True
     ),
 })
 
@@ -2240,6 +2286,7 @@ def api_add_stock_to_visit(
                 "qty": quantity,
                 "price_snap": price_snap,
                 "name_snap": name_snap,
+                "inventory_synced": True,
             })
             .execute()
         )
@@ -2380,28 +2427,36 @@ def api_add_stock_to_visit(
             raise
 
         return ok({
-            "line": {
-                "id": line_id,
-                "stockId": stock_id,
-                "stock_id": stock_id,
-                "qty": quantity,
-                "quantity": quantity,
-                "priceSnap": price_snap,
-                "price_snap": price_snap,
-                "nameSnap": name_snap,
-                "name_snap": name_snap,
-                "unitSnap": (
-                    stock_item.get("unit")
-                    or "шт"
-                ),
-            },
+    "line": {
+        "id": line_id,
 
-            "stock": (
-                serialize_stock_item(
-                    update_result.data[0]
-                )
-            ),
-        })
+        "stockId": stock_id,
+        "stock_id": stock_id,
+
+        "qty": quantity,
+        "quantity": quantity,
+
+        "priceSnap": price_snap,
+        "price_snap": price_snap,
+
+        "nameSnap": name_snap,
+        "name_snap": name_snap,
+
+        "unitSnap": (
+            stock_item.get("unit")
+            or "шт"
+        ),
+
+        "inventorySynced": True,
+        "inventory_synced": True,
+    },
+
+    "stock": (
+        serialize_stock_item(
+            update_result.data[0]
+        )
+    ),
+})
 
     except Exception as error:
         print(
@@ -2414,6 +2469,340 @@ def api_add_stock_to_visit(
             "Не вдалося списати препарат у візит.",
             500
         )
+    
+@app.delete(
+    "/api/visits/<visit_id>/stock/<line_id>"
+)
+def api_remove_stock_from_visit(
+    visit_id,
+    line_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    line_row = None
+    line_deleted = False
+    stock_updated = False
+
+    quantity_before = None
+    quantity_after = None
+    stock_id = None
+    now_iso = None
+
+    try:
+        visit_result = (
+            supabase
+            .table("visits")
+            .select("id")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                visit_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not visit_result.data:
+            return fail(
+                "Візит не знайдено.",
+                404
+            )
+
+        line_result = (
+            supabase
+            .table("visit_stock")
+            .select("*")
+            .eq(
+                "visit_id",
+                visit_id
+            )
+            .eq(
+                "id",
+                line_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not line_result.data:
+            return fail(
+                "Препарат у візиті не знайдено.",
+                404
+            )
+
+        line_row = (
+            line_result.data[0]
+        )
+
+        inventory_synced = (
+            line_row.get(
+                "inventory_synced"
+            )
+            is True
+        )
+
+        # Стара строка не списывала склад.
+        # Просто удаляем её без возврата.
+        if not inventory_synced:
+            delete_result = (
+                supabase
+                .table("visit_stock")
+                .delete()
+                .eq(
+                    "visit_id",
+                    visit_id
+                )
+                .eq(
+                    "id",
+                    line_id
+                )
+                .execute()
+            )
+
+            if not delete_result.data:
+                return fail(
+                    "Не вдалося видалити препарат.",
+                    500
+                )
+
+            return ok({
+                "restored": False,
+                "stock": None,
+            })
+
+        stock_id = str(
+            line_row.get("stock_id")
+            or ""
+        ).strip()
+
+        quantity = stock_number(
+            line_row.get("qty")
+        )
+
+        if (
+            not stock_id
+            or quantity <= 0
+        ):
+            return fail(
+                "Некоректний рядок препарату.",
+                409
+            )
+
+        stock_result = (
+            supabase
+            .table("stock")
+            .select("*")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                stock_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not stock_result.data:
+            return fail(
+                "Позицію складу не знайдено.",
+                404
+            )
+
+        stock_item = (
+            stock_result.data[0]
+        )
+
+        quantity_before = (
+            stock_number(
+                stock_item.get("qty")
+            )
+        )
+
+        quantity_after = (
+            quantity_before
+            + quantity
+        )
+
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        delete_result = (
+            supabase
+            .table("visit_stock")
+            .delete()
+            .eq(
+                "visit_id",
+                visit_id
+            )
+            .eq(
+                "id",
+                line_id
+            )
+            .execute()
+        )
+
+        if not delete_result.data:
+            return fail(
+                "Не вдалося видалити препарат.",
+                500
+            )
+
+        line_deleted = True
+
+        update_result = (
+            supabase
+            .table("stock")
+            .update({
+                "qty": quantity_after,
+                "updated_at": now_iso,
+            })
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                stock_id
+            )
+            .eq(
+                "qty",
+                quantity_before
+            )
+            .execute()
+        )
+
+        if not update_result.data:
+            raise RuntimeError(
+                "Stock quantity changed"
+            )
+
+        stock_updated = True
+
+        (
+            supabase
+            .table("stock_movements")
+            .insert({
+                "org_id": current_org,
+                "stock_id": stock_id,
+                "visit_id": visit_id,
+                "created_by": (
+                    user.get("id")
+                ),
+                "movement_type":
+                    "income",
+                "quantity": quantity,
+                "quantity_before":
+                    quantity_before,
+                "quantity_after":
+                    quantity_after,
+                "unit_cost":
+                    stock_number(
+                        stock_item.get(
+                            "purchase_price"
+                        )
+                    ),
+                "name_snap": (
+                    line_row.get(
+                        "name_snap"
+                    )
+                    or stock_item.get(
+                        "name"
+                    )
+                ),
+                "comment":
+                    "Повернено після видалення з візиту",
+            })
+            .execute()
+        )
+
+        return ok({
+            "restored": True,
+
+            "stock":
+                serialize_stock_item(
+                    update_result.data[0]
+                ),
+        })
+
+    except Exception as error:
+        # Если возврат сорвался,
+        # возвращаем состояние обратно.
+        if (
+            stock_updated
+            and stock_id
+            and quantity_before
+            is not None
+        ):
+            try:
+                (
+                    supabase
+                    .table("stock")
+                    .update({
+                        "qty":
+                            quantity_before,
+                        "updated_at":
+                            now_iso,
+                    })
+                    .eq(
+                        "org_id",
+                        current_org
+                    )
+                    .eq(
+                        "id",
+                        stock_id
+                    )
+                    .eq(
+                        "qty",
+                        quantity_after
+                    )
+                    .execute()
+                )
+            except Exception:
+                pass
+
+        if (
+            line_deleted
+            and line_row
+        ):
+            try:
+                (
+                    supabase
+                    .table("visit_stock")
+                    .insert(
+                        line_row
+                    )
+                    .execute()
+                )
+            except Exception:
+                pass
+
+        print(
+            "❌ Remove stock from visit:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося повернути препарат на склад.",
+            500
+        )    
 # =========================
 # SERVICES API
 # =========================
