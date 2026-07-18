@@ -2578,6 +2578,704 @@ async function refreshVisitFinanceSummary(
   }
 }
 
+async function openVisitPaymentModal(
+  visitId
+) {
+  if (
+    !isOwner() &&
+    !isAdmin()
+  ) {
+    openDeleteModal(
+      "Приймати оплату може лише адміністратор або власник клініки.",
+      null,
+      "info"
+    );
+
+    return;
+  }
+
+  document
+    .getElementById(
+      "visitPaymentModal"
+    )
+    ?.remove();
+
+  const modal =
+    document.createElement("div");
+
+  modal.id =
+    "visitPaymentModal";
+
+  modal.className =
+    "visitPaymentOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="visitPaymentBackdrop"
+      data-close-payment-modal
+    ></div>
+
+    <section
+      class="visitPaymentModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="visitPaymentLoading">
+        <div class="visitPaymentSpinner"></div>
+
+        <strong>
+          Завантажуємо касу…
+        </strong>
+      </div>
+    </section>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  document.body.classList.add(
+    "visitPaymentModalOpen"
+  );
+
+  const methods = {
+    cash: {
+      icon: "💵",
+      label: "Готівка",
+    },
+
+    card: {
+      icon: "💳",
+      label: "Картка",
+    },
+
+    terminal: {
+      icon: "▣",
+      label: "Термінал",
+    },
+
+    transfer: {
+      icon: "↗",
+      label: "Переказ",
+    },
+  };
+
+  let finance = null;
+  let selectedMethod = "cash";
+  let submitting = false;
+
+  const close = () => {
+    if (submitting) return;
+
+    modal.remove();
+
+    document.body.classList.remove(
+      "visitPaymentModalOpen"
+    );
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key ===
+      "Escape"
+    ) {
+      close();
+    }
+  };
+
+  const transactionHtml = (
+    transaction
+  ) => {
+    const method =
+      methods[
+        transaction.payment_method
+      ] || {
+        icon: "•",
+
+        label:
+          transaction.payment_method ||
+          "Інше",
+      };
+
+    const date =
+      new Date(
+        transaction.occurred_at ||
+        transaction.created_at
+      )
+        .toLocaleString(
+          "uk-UA",
+          {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }
+        );
+
+    return `
+      <article class="visitPaymentHistoryItem">
+        <div class="visitPaymentHistoryIcon">
+          ${method.icon}
+        </div>
+
+        <div class="visitPaymentHistoryMain">
+          <strong>
+            ${escapeHtml(
+              method.label
+            )}
+          </strong>
+
+          <span>
+            ${escapeHtml(
+              date
+            )}
+          </span>
+        </div>
+
+        <div class="visitPaymentHistoryAmount">
+          <strong>
+            +${formatVisitFinanceMoney(
+              transaction.amount
+            )}
+          </strong>
+
+          <span>
+            ${
+              transaction.status ===
+              "completed"
+                ? "Проведено"
+                : escapeHtml(
+                    transaction.status ||
+                    ""
+                  )
+            }
+          </span>
+        </div>
+      </article>
+    `;
+  };
+
+  const render = () => {
+    const panel =
+      modal.querySelector(
+        ".visitPaymentModal"
+      );
+
+    if (
+      !panel ||
+      !finance
+    ) {
+      return;
+    }
+
+    const remaining =
+      Number(
+        finance.remaining || 0
+      );
+
+    const transactions =
+      Array.isArray(
+        finance.transactions
+      )
+        ? finance.transactions
+        : [];
+
+    const status =
+      getVisitFinanceStatusMeta(
+        finance.financial_status
+      );
+
+    panel.innerHTML = `
+      <header class="visitPaymentHeader">
+        <div class="visitPaymentHeaderIcon">
+          💳
+        </div>
+
+        <div>
+          <span class="visitPaymentEyebrow">
+            КАСА ВІЗИТУ
+          </span>
+
+          <h2>
+            Прийняти оплату
+          </h2>
+
+          <p>
+            Часткова або повна оплата
+            з фіксацією транзакції.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="visitPaymentClose"
+          data-close-payment-modal
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="visitPaymentContent">
+        <section class="visitPaymentOverview">
+          <div>
+            <span>До сплати</span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                finance.total
+              )}
+            </strong>
+          </div>
+
+          <div>
+            <span>Вже сплачено</span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                finance.paid
+              )}
+            </strong>
+          </div>
+
+          <div class="visitPaymentRemainingCard">
+            <span>Залишок</span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                remaining
+              )}
+            </strong>
+          </div>
+
+          <b
+            class="
+              visitPaymentStatus
+              ${status.className}
+            "
+          >
+            ${status.label}
+          </b>
+        </section>
+
+        ${
+          remaining <= 0
+            ? `
+              <section class="visitPaymentSuccess">
+                <div>✓</div>
+
+                <strong>
+                  Візит повністю оплачено
+                </strong>
+
+                <span>
+                  Нові платежі для цього
+                  візиту не потрібні.
+                </span>
+              </section>
+            `
+            : `
+              <form
+                class="visitPaymentForm"
+                id="visitPaymentForm"
+              >
+                <label class="visitPaymentAmountField">
+                  <span>
+                    Сума платежу
+                  </span>
+
+                  <div>
+                    <input
+                      id="visitPaymentAmount"
+                      type="number"
+                      min="0.01"
+                      max="${remaining}"
+                      step="0.01"
+                      value="${remaining}"
+                      required
+                    >
+
+                    <b>₴</b>
+                  </div>
+                </label>
+
+                <div class="visitPaymentQuickAmounts">
+                  <button
+                    type="button"
+                    data-payment-amount="${remaining}"
+                  >
+                    Весь залишок
+                  </button>
+
+                  ${
+                    remaining > 2
+                      ? `
+                        <button
+                          type="button"
+                          data-payment-amount="${
+                            Math.round(
+                              remaining *
+                              50
+                            ) /
+                            100
+                          }"
+                        >
+                          50%
+                        </button>
+                      `
+                      : ""
+                  }
+                </div>
+
+                <div class="visitPaymentMethodsLabel">
+                  Спосіб оплати
+                </div>
+
+                <div class="visitPaymentMethods">
+                  ${
+                    Object
+                      .entries(
+                        methods
+                      )
+                      .map(
+                        ([
+                          key,
+                          method,
+                        ]) => `
+                          <button
+                            type="button"
+                            class="${
+                              selectedMethod ===
+                              key
+                                ? "active"
+                                : ""
+                            }"
+                            data-payment-method="${key}"
+                          >
+                            <span>
+                              ${method.icon}
+                            </span>
+
+                            <b>
+                              ${method.label}
+                            </b>
+                          </button>
+                        `
+                      )
+                      .join("")
+                  }
+                </div>
+
+                <button
+                  class="visitPaymentSubmit"
+                  type="submit"
+                >
+                  <span>
+                    Провести оплату
+                  </span>
+
+                  <strong>
+                    ${formatVisitFinanceMoney(
+                      remaining
+                    )}
+                  </strong>
+                </button>
+              </form>
+            `
+        }
+
+        <section class="visitPaymentHistory">
+          <div class="visitPaymentHistoryHead">
+            <div>
+              <span>ІСТОРІЯ</span>
+
+              <strong>
+                Транзакції візиту
+              </strong>
+            </div>
+
+            <b>
+              ${transactions.length}
+            </b>
+          </div>
+
+          <div class="visitPaymentHistoryList">
+            ${
+              transactions.length
+                ? transactions
+                    .map(
+                      transactionHtml
+                    )
+                    .join("")
+                : `
+                  <div class="visitPaymentHistoryEmpty">
+                    Платежів за цим
+                    візитом ще немає.
+                  </div>
+                `
+            }
+          </div>
+        </section>
+      </div>
+    `;
+
+    panel
+      .querySelector(
+        "#visitPaymentAmount"
+      )
+      ?.focus();
+  };
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-payment-modal]"
+        )
+      ) {
+        close();
+        return;
+      }
+
+      const methodButton =
+        event.target.closest(
+          "[data-payment-method]"
+        );
+
+      if (
+        methodButton &&
+        !submitting
+      ) {
+        selectedMethod =
+          methodButton.dataset
+            .paymentMethod ||
+          "cash";
+
+        modal
+          .querySelectorAll(
+            "[data-payment-method]"
+          )
+          .forEach(
+            (button) => {
+              button.classList.toggle(
+                "active",
+
+                button.dataset
+                  .paymentMethod ===
+                  selectedMethod
+              );
+            }
+          );
+
+        return;
+      }
+
+      const amountButton =
+        event.target.closest(
+          "[data-payment-amount]"
+        );
+
+      if (
+        amountButton &&
+        !submitting
+      ) {
+        const input =
+          modal.querySelector(
+            "#visitPaymentAmount"
+          );
+
+        if (input) {
+          input.value =
+            amountButton.dataset
+              .paymentAmount ||
+            "";
+        }
+      }
+    }
+  );
+
+  modal.addEventListener(
+    "input",
+    (event) => {
+      if (
+        event.target.id !==
+        "visitPaymentAmount"
+      ) {
+        return;
+      }
+
+      const amount =
+        Number(
+          event.target.value || 0
+        );
+
+      const amountElement =
+        modal.querySelector(
+          ".visitPaymentSubmit strong"
+        );
+
+      if (amountElement) {
+        amountElement.textContent =
+          formatVisitFinanceMoney(
+            amount
+          );
+      }
+    }
+  );
+
+  modal.addEventListener(
+    "submit",
+    async (event) => {
+      if (
+        event.target.id !==
+        "visitPaymentForm"
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (
+        submitting ||
+        !finance
+      ) {
+        return;
+      }
+
+      const amount =
+        Number(
+          modal.querySelector(
+            "#visitPaymentAmount"
+          )?.value ||
+          0
+        );
+
+      const remaining =
+        Number(
+          finance.remaining || 0
+        );
+
+      if (
+        !Number.isFinite(
+          amount
+        ) ||
+        amount <= 0
+      ) {
+        alert(
+          "Вкажіть коректну суму платежу."
+        );
+
+        return;
+      }
+
+      if (
+        amount >
+        remaining
+      ) {
+        alert(
+          "Сума платежу не може перевищувати залишок."
+        );
+
+        return;
+      }
+
+      const submitButton =
+        modal.querySelector(
+          ".visitPaymentSubmit"
+        );
+
+      submitting = true;
+
+      if (submitButton) {
+        submitButton.disabled =
+          true;
+
+        submitButton.innerHTML = `
+          <span>
+            Проводимо оплату…
+          </span>
+        `;
+      }
+
+      try {
+        await registerVisitPaymentApi(
+          visitId,
+          {
+            amount,
+
+            method:
+              selectedMethod,
+
+            idempotencyKey:
+              crypto.randomUUID(),
+          }
+        );
+
+        finance =
+          await loadVisitFinanceApi(
+            visitId
+          );
+
+        await refreshVisitFinanceSummary(
+          visitId
+        );
+
+        submitting = false;
+
+        render();
+      } catch (error) {
+        submitting = false;
+
+        console.error(
+          "registerVisitPaymentApi failed:",
+          error
+        );
+
+        alert(
+          error?.message ||
+          "Не вдалося провести оплату."
+        );
+
+        render();
+      }
+    }
+  );
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+
+  try {
+    finance =
+      await loadVisitFinanceApi(
+        visitId
+      );
+
+    render();
+  } catch (error) {
+    console.error(
+      "openVisitPaymentModal failed:",
+      error
+    );
+
+    close();
+
+    alert(
+      error?.message ||
+      "Не вдалося відкрити касу візиту."
+    );
+  }
+}
+
 // =========================
 // Discharges (LOCAL ONLY)
 // =========================
