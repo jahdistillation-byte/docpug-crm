@@ -23680,3 +23680,977 @@ select.visitControl {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   VISIT PAYMENT STATUS
+   ========================================================= */
+
+.visitPaymentState[hidden],
+.visitPaymentButton[hidden] {
+  display: none !important;
+}
+
+.visitPaymentState {
+  position: relative;
+  z-index: 1;
+
+  padding: 12px;
+  margin: 3px 0 8px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.07);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+.visitPaymentStateTop,
+.visitPaymentStateMoney {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.visitPaymentStateTop {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+
+  border-bottom: 1px solid
+    rgba(255, 255, 255, 0.06);
+}
+
+.visitPaymentStateTop > span,
+.visitPaymentStateMoney span {
+  display: block;
+
+  font-size: 8px;
+
+  color:
+    rgba(255, 255, 255, 0.38);
+}
+
+.visitPaymentStateTop b,
+.visitPaymentStatus {
+  padding: 5px 8px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.visitPaymentStateMoney > div:last-child {
+  text-align: right;
+}
+
+.visitPaymentStateMoney strong {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 11px;
+
+  color: #ffffff;
+}
+
+.visitPaymentStateMoney
+> div:last-child
+strong {
+  color: #cf91ff;
+}
+
+
+/* Статусы оплаты */
+
+.is-unpaid {
+  border-color:
+    rgba(255, 105, 128, 0.2)
+    !important;
+
+  background:
+    rgba(255, 75, 105, 0.08)
+    !important;
+
+  color: #ff8b9d
+    !important;
+}
+
+.is-partial {
+  border-color:
+    rgba(255, 194, 73, 0.22)
+    !important;
+
+  background:
+    rgba(255, 181, 45, 0.08)
+    !important;
+
+  color: #ffd06b
+    !important;
+}
+
+.is-paid {
+  border-color:
+    rgba(78, 224, 145, 0.22)
+    !important;
+
+  background:
+    rgba(48, 206, 118, 0.08)
+    !important;
+
+  color: #72e6a7
+    !important;
+}
+
+.is-refunded,
+.is-cancelled {
+  border-color:
+    rgba(255, 255, 255, 0.1)
+    !important;
+
+  background:
+    rgba(255, 255, 255, 0.04)
+    !important;
+
+  color:
+    rgba(255, 255, 255, 0.6)
+    !important;
+}
+
+
+/* Кнопка оплаты */
+
+.visitPaymentButton {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+
+  width: 100%;
+  min-height: 48px;
+
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin: 9px 0 3px;
+
+  cursor: pointer;
+
+  border: 1px solid
+    rgba(99, 229, 165, 0.3);
+
+  border-radius: 13px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(105, 255, 184, 0.13),
+      transparent 45%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(37, 178, 108, 0.18),
+      rgba(20, 93, 68, 0.16)
+    );
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.08);
+
+  color: #83f0b5;
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.visitPaymentButton:hover {
+  transform:
+    translateY(-2px);
+
+  filter:
+    brightness(1.08);
+
+  box-shadow:
+    0 14px 28px
+    rgba(29, 175, 102, 0.15);
+}
+
+.visitPaymentButton.is-paid {
+  cursor: default;
+
+  border-color:
+    rgba(78, 224, 145, 0.18);
+
+  background:
+    rgba(48, 206, 118, 0.07);
+
+  box-shadow: none;
+}
+/* =========================================================
+   VISIT PAYMENT MODAL
+   ========================================================= */
+
+.visitPaymentModalOpen {
+  overflow: hidden;
+}
+
+.visitPaymentOverlay {
+  position: fixed;
+  z-index: 10050;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+}
+
+.visitPaymentBackdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    rgba(4, 2, 10, 0.78);
+
+  backdrop-filter:
+    blur(16px);
+
+  -webkit-backdrop-filter:
+    blur(16px);
+}
+
+.visitPaymentModal {
+  position: relative;
+
+  width: min(
+    760px,
+    100%
+  );
+
+  max-height: min(
+    860px,
+    calc(100vh - 48px)
+  );
+
+  overflow: auto;
+
+  border: 1px solid
+    rgba(190, 111, 255, 0.22);
+
+  border-radius: 26px;
+
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(156, 74, 238, 0.2),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(24, 15, 43, 0.99),
+      rgba(8, 6, 18, 0.99)
+    );
+
+  box-shadow:
+    0 42px 110px
+    rgba(0, 0, 0, 0.65),
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.06);
+
+  color: #ffffff;
+}
+
+
+/* Заголовок */
+
+.visitPaymentHeader {
+  display: grid;
+
+  grid-template-columns:
+    48px
+    1fr
+    38px;
+
+  gap: 14px;
+
+  align-items: center;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.visitPaymentHeaderIcon {
+  display: grid;
+
+  width: 48px;
+  height: 48px;
+
+  place-items: center;
+
+  border: 1px solid
+    rgba(190, 111, 255, 0.2);
+
+  border-radius: 15px;
+
+  background:
+    rgba(147, 70, 232, 0.1);
+
+  font-size: 20px;
+}
+
+.visitPaymentEyebrow {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+
+  color: #bd78ff;
+}
+
+.visitPaymentHeader h2 {
+  margin: 0;
+
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.visitPaymentHeader p {
+  margin: 5px 0 0;
+
+  font-size: 9px;
+
+  color:
+    rgba(255, 255, 255, 0.4);
+}
+
+.visitPaymentClose {
+  display: grid;
+
+  width: 36px;
+  height: 36px;
+
+  cursor: pointer;
+
+  place-items: center;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  color:
+    rgba(255, 255, 255, 0.58);
+}
+
+.visitPaymentClose:hover {
+  background:
+    rgba(255, 255, 255, 0.07);
+
+  color: #ffffff;
+}
+
+.visitPaymentContent {
+  padding: 22px 24px 24px;
+}
+
+
+/* Финансовая сводка */
+
+.visitPaymentOverview {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+.visitPaymentOverview > div {
+  padding: 14px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.065);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+.visitPaymentOverview span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  color:
+    rgba(255, 255, 255, 0.4);
+}
+
+.visitPaymentOverview strong {
+  font-size: 16px;
+}
+
+.visitPaymentRemainingCard {
+  border-color:
+    rgba(190, 111, 255, 0.16)
+    !important;
+
+  background:
+    rgba(147, 70, 232, 0.07)
+    !important;
+}
+
+.visitPaymentRemainingCard strong {
+  color: #ce8dff;
+}
+
+.visitPaymentStatus {
+  position: absolute;
+
+  top: -8px;
+  right: -8px;
+}
+
+
+/* Форма оплаты */
+
+.visitPaymentForm,
+.visitPaymentHistory,
+.visitPaymentSuccess {
+  padding: 17px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.07);
+
+  border-radius: 18px;
+
+  background:
+    rgba(255, 255, 255, 0.022);
+}
+
+.visitPaymentAmountField > span,
+.visitPaymentMethodsLabel {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  color:
+    rgba(255, 255, 255, 0.4);
+}
+
+.visitPaymentAmountField > div {
+  display: flex;
+  align-items: center;
+
+  border: 1px solid
+    rgba(188, 104, 255, 0.2);
+
+  border-radius: 14px;
+
+  background:
+    rgba(8, 5, 16, 0.48);
+}
+
+.visitPaymentAmountField input {
+  width: 100%;
+
+  padding: 14px;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  font: inherit;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.visitPaymentAmountField b {
+  padding-right: 15px;
+
+  color: #c98cff;
+}
+
+
+/* Быстрые суммы */
+
+.visitPaymentQuickAmounts {
+  display: flex;
+
+  gap: 8px;
+
+  margin: 9px 0 16px;
+}
+
+.visitPaymentQuickAmounts button {
+  padding: 7px 10px;
+
+  cursor: pointer;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+
+  border-radius: 9px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  color:
+    rgba(255, 255, 255, 0.62);
+
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.visitPaymentQuickAmounts button:hover {
+  border-color:
+    rgba(190, 111, 255, 0.22);
+
+  background:
+    rgba(147, 70, 232, 0.09);
+
+  color: #deb2ff;
+}
+
+
+/* Способы оплаты */
+
+.visitPaymentMethods {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+.visitPaymentMethods button {
+  display: flex;
+
+  min-height: 70px;
+
+  cursor: pointer;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.07);
+
+  border-radius: 13px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  color:
+    rgba(255, 255, 255, 0.58);
+
+  font: inherit;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.visitPaymentMethods button:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(190, 111, 255, 0.2);
+}
+
+.visitPaymentMethods button span {
+  font-size: 17px;
+}
+
+.visitPaymentMethods button b {
+  font-size: 8px;
+}
+
+.visitPaymentMethods button.active {
+  border-color:
+    rgba(190, 111, 255, 0.34);
+
+  background:
+    rgba(147, 70, 232, 0.12);
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(190, 111, 255, 0.08);
+
+  color: #e1b9ff;
+}
+
+
+/* Провести оплату */
+
+.visitPaymentSubmit {
+  display: flex;
+
+  width: 100%;
+  min-height: 50px;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 14px;
+  padding: 0 17px;
+
+  cursor: pointer;
+
+  border: 1px solid
+    rgba(220, 175, 255, 0.25);
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #a94dff,
+      #7139db
+    );
+
+  box-shadow:
+    0 15px 32px
+    rgba(111, 44, 190, 0.28),
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.16);
+
+  color: #ffffff;
+
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.visitPaymentSubmit:hover {
+  transform:
+    translateY(-2px);
+
+  filter:
+    brightness(1.08);
+}
+
+.visitPaymentSubmit:disabled {
+  cursor: wait;
+
+  opacity: 0.68;
+
+  transform: none;
+}
+
+
+/* История транзакций */
+
+.visitPaymentHistory {
+  margin-top: 14px;
+}
+
+.visitPaymentHistoryHead {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 11px;
+}
+
+.visitPaymentHistoryHead span,
+.visitPaymentHistoryHead strong {
+  display: block;
+}
+
+.visitPaymentHistoryHead span {
+  margin-bottom: 4px;
+
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+
+  color: #b66dff;
+}
+
+.visitPaymentHistoryHead strong {
+  font-size: 11px;
+}
+
+.visitPaymentHistoryHead > b {
+  display: grid;
+
+  width: 26px;
+  height: 26px;
+
+  place-items: center;
+
+  border-radius: 8px;
+
+  background:
+    rgba(147, 70, 232, 0.1);
+
+  font-size: 9px;
+
+  color: #c989ff;
+}
+
+.visitPaymentHistoryList {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.visitPaymentHistoryItem {
+  display: grid;
+
+  grid-template-columns:
+    34px
+    1fr
+    auto;
+
+  gap: 10px;
+
+  align-items: center;
+
+  padding: 10px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.055);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+.visitPaymentHistoryIcon {
+  display: grid;
+
+  width: 34px;
+  height: 34px;
+
+  place-items: center;
+
+  border-radius: 10px;
+
+  background:
+    rgba(147, 70, 232, 0.09);
+
+  font-size: 14px;
+}
+
+.visitPaymentHistoryMain strong,
+.visitPaymentHistoryMain span,
+.visitPaymentHistoryAmount strong,
+.visitPaymentHistoryAmount span {
+  display: block;
+}
+
+.visitPaymentHistoryMain strong,
+.visitPaymentHistoryAmount strong {
+  font-size: 9px;
+}
+
+.visitPaymentHistoryMain span,
+.visitPaymentHistoryAmount span {
+  margin-top: 4px;
+
+  font-size: 7px;
+
+  color:
+    rgba(255, 255, 255, 0.35);
+}
+
+.visitPaymentHistoryAmount {
+  text-align: right;
+}
+
+.visitPaymentHistoryAmount strong {
+  color: #74e9a9;
+}
+
+.visitPaymentHistoryEmpty {
+  padding: 18px;
+
+  text-align: center;
+
+  font-size: 9px;
+
+  color:
+    rgba(255, 255, 255, 0.34);
+}
+
+
+/* Полностью оплачено */
+
+.visitPaymentSuccess {
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
+
+  margin-bottom: 14px;
+  padding: 24px;
+
+  text-align: center;
+}
+
+.visitPaymentSuccess div {
+  display: grid;
+
+  width: 48px;
+  height: 48px;
+
+  margin-bottom: 11px;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background:
+    rgba(48, 206, 118, 0.12);
+
+  color: #72e6a7;
+
+  font-size: 20px;
+}
+
+.visitPaymentSuccess strong {
+  font-size: 13px;
+}
+
+.visitPaymentSuccess span {
+  margin-top: 6px;
+
+  font-size: 9px;
+
+  color:
+    rgba(255, 255, 255, 0.4);
+}
+
+
+/* Загрузка */
+
+.visitPaymentLoading {
+  display: flex;
+
+  min-height: 260px;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 13px;
+
+  color:
+    rgba(255, 255, 255, 0.64);
+
+  font-size: 11px;
+}
+
+.visitPaymentSpinner {
+  width: 30px;
+  height: 30px;
+
+  border: 3px solid
+    rgba(255, 255, 255, 0.08);
+
+  border-top-color:
+    #b760ff;
+
+  border-radius: 50%;
+
+  animation:
+    visitPaymentSpin
+    0.8s
+    linear
+    infinite;
+}
+
+@keyframes visitPaymentSpin {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+
+/* Адаптация */
+
+@media (
+  max-width: 650px
+) {
+  .visitPaymentOverlay {
+    padding: 10px;
+  }
+
+  .visitPaymentModal {
+    max-height:
+      calc(100vh - 20px);
+
+    border-radius: 20px;
+  }
+
+  .visitPaymentHeader,
+  .visitPaymentContent {
+    padding: 17px;
+  }
+
+  .visitPaymentOverview {
+    grid-template-columns: 1fr;
+  }
+
+  .visitPaymentMethods {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+}

@@ -2304,6 +2304,279 @@ return true;
     return false;
   }
 }
+// =========================
+// Visit finance and payments
+// =========================
+
+function formatVisitFinanceMoney(
+  value
+) {
+  return (
+    Number(value || 0)
+      .toLocaleString("uk-UA") +
+    " ₴"
+  );
+}
+
+function getVisitFinanceStatusMeta(
+  status
+) {
+  const statuses = {
+    unpaid: {
+      label: "Не оплачено",
+      className: "is-unpaid",
+    },
+
+    partial: {
+      label: "Частково",
+      className: "is-partial",
+    },
+
+    paid: {
+      label: "Оплачено",
+      className: "is-paid",
+    },
+
+    refunded: {
+      label: "Повернено",
+      className: "is-refunded",
+    },
+
+    cancelled: {
+      label: "Скасовано",
+      className: "is-cancelled",
+    },
+  };
+
+  return (
+    statuses[status] ||
+    statuses.unpaid
+  );
+}
+
+async function loadVisitFinanceApi(
+  visitId
+) {
+  const response =
+    await fetch(
+      `/api/visits/${
+        encodeURIComponent(
+          String(visitId)
+        )
+      }/finance`,
+      {
+        credentials: "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok ||
+    !result?.data
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити оплату (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+async function registerVisitPaymentApi(
+  visitId,
+  {
+    amount,
+    method,
+    idempotencyKey,
+  }
+) {
+  const response =
+    await fetch(
+      `/api/visits/${
+        encodeURIComponent(
+          String(visitId)
+        )
+      }/payments`,
+      {
+        method: "POST",
+
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body: JSON.stringify({
+          amount,
+          method,
+
+          idempotency_key:
+            idempotencyKey,
+        }),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося провести оплату (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+async function refreshVisitFinanceSummary(
+  visitId
+) {
+  const stateElement =
+    document.getElementById(
+      "visitPaymentState"
+    );
+
+  const button =
+    document.getElementById(
+      "visitPaymentButton"
+    );
+
+  const canManagePayments =
+    isOwner() ||
+    isAdmin();
+
+  if (stateElement) {
+    stateElement.hidden =
+      !canManagePayments;
+  }
+
+  if (button) {
+    button.hidden =
+      !canManagePayments;
+  }
+
+  if (
+    !canManagePayments ||
+    !visitId
+  ) {
+    return;
+  }
+
+  try {
+    const finance =
+      await loadVisitFinanceApi(
+        visitId
+      );
+
+    if (
+      String(
+        state.selectedVisitId || ""
+      ) !==
+      String(visitId)
+    ) {
+      return;
+    }
+
+    const statusMeta =
+      getVisitFinanceStatusMeta(
+        finance.financial_status
+      );
+
+    const statusElement =
+      document.getElementById(
+        "visitPaymentStatus"
+      );
+
+    const paidElement =
+      document.getElementById(
+        "visitPaymentPaid"
+      );
+
+    const remainingElement =
+      document.getElementById(
+        "visitPaymentRemaining"
+      );
+
+    if (statusElement) {
+      statusElement.textContent =
+        statusMeta.label;
+
+      statusElement.className =
+        statusMeta.className;
+    }
+
+    if (paidElement) {
+      paidElement.textContent =
+        formatVisitFinanceMoney(
+          finance.paid
+        );
+    }
+
+    if (remainingElement) {
+      remainingElement.textContent =
+        formatVisitFinanceMoney(
+          finance.remaining
+        );
+    }
+
+    if (button) {
+      const isPaid =
+        Number(
+          finance.remaining || 0
+        ) <= 0;
+
+      button.classList.toggle(
+        "is-paid",
+        isPaid
+      );
+
+      button.innerHTML =
+        isPaid
+          ? `
+            <span>✓</span>
+            <span>Оплату завершено</span>
+          `
+          : `
+            <span>💳</span>
+            <span>Прийняти оплату</span>
+          `;
+    }
+  } catch (error) {
+    console.error(
+      "refreshVisitFinanceSummary failed:",
+      error
+    );
+
+    if (stateElement) {
+      stateElement.hidden = true;
+    }
+  }
+}
 
 // =========================
 // Discharges (LOCAL ONLY)
@@ -22897,6 +23170,31 @@ if (summaryStock) {
   summaryStock.textContent =
     money(stockTotal);
 }
+const paymentButton =
+  document.getElementById(
+    "visitPaymentButton"
+  );
+
+if (paymentButton) {
+  paymentButton.onclick = () => {
+    const visitId =
+      visit?.id ||
+      visit?._id ||
+      state.selectedVisitId;
+
+    if (visitId) {
+      openVisitPaymentModal(
+        visitId
+      );
+    }
+  };
+}
+
+refreshVisitFinanceSummary(
+  visit?.id ||
+  visit?._id ||
+  state.selectedVisitId
+);
 
   // Відновлюємо оригінальні обробники подій кнопок та пошуку (initVisitUI)
   if (typeof initVisitUI === "function") {

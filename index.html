@@ -433,7 +433,48 @@
               </strong>
             </div>
           </div>
+          <div
+            class="visitPaymentState"
+            id="visitPaymentState"
+            hidden
+          >
+            <div class="visitPaymentStateTop">
+              <span>Статус оплати</span>
 
+              <b id="visitPaymentStatus">
+                Не оплачено
+              </b>
+            </div>
+
+            <div class="visitPaymentStateMoney">
+              <div>
+                <span>Сплачено</span>
+
+                <strong id="visitPaymentPaid">
+                  0 ₴
+                </strong>
+              </div>
+
+              <div>
+                <span>Залишилось</span>
+
+                <strong id="visitPaymentRemaining">
+                  0 ₴
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="visitPaymentButton"
+            id="visitPaymentButton"
+            hidden
+          >
+            <span>💳</span>
+            <span>Прийняти оплату</span>
+          </button>
+          
           <button
             type="button"
             class="visitSavePrimary"

@@ -2926,7 +2926,7 @@ def api_get_visit_finance(
     visit_id
 ):
     user, auth_error = (
-        auth_required()
+    owner_or_admin_required()
     )
 
     if auth_error:
