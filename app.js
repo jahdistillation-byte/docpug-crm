@@ -2646,12 +2646,7 @@ async function openVisitPaymentModal(
 
     card: {
       icon: "💳",
-      label: "Картка",
-    },
-
-    terminal: {
-      icon: "▣",
-      label: "Термінал",
+      label: "Картка / термінал",
     },
 
     transfer: {
