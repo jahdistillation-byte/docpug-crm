@@ -2803,6 +2803,567 @@ def api_remove_stock_from_visit(
             "Не вдалося повернути препарат на склад.",
             500
         )    
+    
+# =====================================================
+# FINANCE API
+# =====================================================
+
+def finance_number(
+    value,
+    default=0
+):
+    try:
+        return round(
+            float(
+                value
+                if value is not None
+                else default
+            ),
+            2
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return round(
+            float(default),
+            2
+        )
+
+
+def serialize_finance_transaction(
+    row
+):
+    if not row:
+        return None
+
+    return {
+        "id": str(
+            row.get("id")
+            or ""
+        ),
+
+        "visit_id": (
+            str(row.get("visit_id"))
+            if row.get("visit_id")
+            else None
+        ),
+
+        "cash_shift_id": (
+            str(
+                row.get(
+                    "cash_shift_id"
+                )
+            )
+            if row.get(
+                "cash_shift_id"
+            )
+            else None
+        ),
+
+        "created_by": (
+            str(
+                row.get("created_by")
+            )
+            if row.get("created_by")
+            else None
+        ),
+
+        "transaction_type":
+            row.get(
+                "transaction_type"
+            ),
+
+        "payment_method":
+            row.get(
+                "payment_method"
+            ),
+
+        "status":
+            row.get("status"),
+
+        "source":
+            row.get("source"),
+
+        "category":
+            row.get("category"),
+
+        "amount":
+            finance_number(
+                row.get("amount")
+            ),
+
+        "currency":
+            row.get("currency")
+            or "UAH",
+
+        "description":
+            row.get("description")
+            or "",
+
+        "external_provider":
+            row.get(
+                "external_provider"
+            ),
+
+        "external_reference":
+            row.get(
+                "external_reference"
+            ),
+
+        "occurred_at":
+            row.get("occurred_at"),
+
+        "created_at":
+            row.get("created_at"),
+    }
+
+
+@app.get(
+    "/api/visits/<visit_id>/finance"
+)
+def api_get_visit_finance(
+    visit_id
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    try:
+        visit_result = (
+            supabase
+            .table("visits")
+            .select("*")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                visit_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not visit_result.data:
+            return fail(
+                "Візит не знайдено.",
+                404
+            )
+
+        visit = (
+            visit_result.data[0]
+        )
+
+        services_result = (
+            supabase
+            .table("visit_services")
+            .select(
+                "qty,price_snap"
+            )
+            .eq(
+                "visit_id",
+                visit_id
+            )
+            .execute()
+        )
+
+        stock_result = (
+            supabase
+            .table("visit_stock")
+            .select(
+                "qty,price_snap"
+            )
+            .eq(
+                "visit_id",
+                visit_id
+            )
+            .execute()
+        )
+
+        transactions_result = (
+            supabase
+            .table(
+                "finance_transactions"
+            )
+            .select("*")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "visit_id",
+                visit_id
+            )
+            .order(
+                "occurred_at",
+                desc=True
+            )
+            .execute()
+        )
+
+        service_total = sum(
+            finance_number(
+                row.get("qty")
+            )
+            * finance_number(
+                row.get("price_snap")
+            )
+            for row in (
+                services_result.data
+                or []
+            )
+        )
+
+        stock_total = sum(
+            finance_number(
+                row.get("qty")
+            )
+            * finance_number(
+                row.get("price_snap")
+            )
+            for row in (
+                stock_result.data
+                or []
+            )
+        )
+
+        subtotal = (
+            service_total
+            + stock_total
+        )
+
+        discount = max(
+            0,
+            finance_number(
+                visit.get(
+                    "discount_amount"
+                )
+            )
+        )
+
+        total = max(
+            0,
+            subtotal - discount
+        )
+
+        transactions = (
+            transactions_result.data
+            or []
+        )
+
+        paid = 0
+
+        for row in transactions:
+            if (
+                row.get("status")
+                != "completed"
+            ):
+                continue
+
+            amount = finance_number(
+                row.get("amount")
+            )
+
+            if (
+                row.get(
+                    "transaction_type"
+                )
+                == "payment"
+            ):
+                paid += amount
+
+            elif (
+                row.get(
+                    "transaction_type"
+                )
+                == "refund"
+            ):
+                paid -= amount
+
+        paid = max(
+            0,
+            finance_number(paid)
+        )
+
+        remaining = max(
+            0,
+            finance_number(
+                total - paid
+            )
+        )
+
+        stored_status = str(
+            visit.get(
+                "financial_status"
+            )
+            or ""
+        )
+
+        if stored_status in {
+            "refunded",
+            "cancelled",
+        }:
+            financial_status = (
+                stored_status
+            )
+
+        elif total > 0 and remaining <= 0:
+            financial_status = (
+                "paid"
+            )
+
+        elif paid > 0:
+            financial_status = (
+                "partial"
+            )
+
+        else:
+            financial_status = (
+                "unpaid"
+            )
+
+        return ok({
+            "visit_id":
+                visit_id,
+
+            "service_total":
+                finance_number(
+                    service_total
+                ),
+
+            "stock_total":
+                finance_number(
+                    stock_total
+                ),
+
+            "subtotal":
+                finance_number(
+                    subtotal
+                ),
+
+            "discount":
+                finance_number(
+                    discount
+                ),
+
+            "total":
+                finance_number(
+                    total
+                ),
+
+            "paid":
+                finance_number(
+                    paid
+                ),
+
+            "remaining":
+                finance_number(
+                    remaining
+                ),
+
+            "financial_status":
+                financial_status,
+
+            "transactions": [
+                serialize_finance_transaction(
+                    row
+                )
+                for row in transactions
+            ],
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET visit finance:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити фінанси візиту.",
+            500
+        )
+
+
+@app.post(
+    "/api/visits/<visit_id>/payments"
+)
+def api_create_visit_payment(
+    visit_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    amount = finance_number(
+        data.get("amount")
+    )
+
+    payment_method = str(
+        data.get(
+            "payment_method"
+        )
+        or data.get("method")
+        or ""
+    ).strip().lower()
+
+    allowed_methods = {
+        "cash",
+        "card",
+        "transfer",
+        "terminal",
+        "other",
+    }
+
+    if amount <= 0:
+        return fail(
+            "Вкажіть суму оплати.",
+            400
+        )
+
+    if (
+        payment_method
+        not in allowed_methods
+    ):
+        return fail(
+            "Оберіть спосіб оплати.",
+            400
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    idempotency_key = str(
+        data.get(
+            "idempotency_key"
+        )
+        or uuid.uuid4()
+    ).strip()
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "register_visit_payment",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_visit_id":
+                        visit_id,
+
+                    "p_user_id":
+                        user.get("id"),
+
+                    "p_amount":
+                        amount,
+
+                    "p_method":
+                        payment_method,
+
+                    "p_idempotency_key":
+                        idempotency_key,
+                },
+            )
+            .execute()
+        )
+
+        response_data = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                response_data,
+                list
+            )
+            and response_data
+        ):
+            response_data = (
+                response_data[0]
+            )
+
+        return ok(
+            response_data
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        )
+
+        print(
+            "❌ POST visit payment:",
+            repr(error),
+            flush=True,
+        )
+
+        lowered_error = (
+            error_text.lower()
+        )
+
+        if (
+            "already paid"
+            in lowered_error
+            or "exceeds remaining"
+            in lowered_error
+            or "already processed"
+            in lowered_error
+        ):
+            return fail(
+                error_text,
+                409
+            )
+
+        if (
+            "total is zero"
+            in lowered_error
+            or "amount must"
+            in lowered_error
+            or "invalid payment"
+            in lowered_error
+        ):
+            return fail(
+                error_text,
+                400
+            )
+
+        if (
+            "visit not found"
+            in lowered_error
+        ):
+            return fail(
+                "Візит не знайдено.",
+                404
+            )
+
+        return fail(
+            "Не вдалося провести оплату.",
+            500
+        )    
 # =========================
 # SERVICES API
 # =========================
