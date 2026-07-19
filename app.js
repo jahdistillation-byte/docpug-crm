@@ -9442,116 +9442,375 @@ function buildFinanceTrendChart(
   }
 
   const width = 820;
-  const height = 220;
-  const padX = 22;
-  const padY = 22;
+  const height = 250;
 
-  const values =
+  const padLeft = 62;
+  const padRight = 24;
+  const padTop = 20;
+  const padBottom = 42;
+
+  const plotWidth =
+    width -
+    padLeft -
+    padRight;
+
+  const plotHeight =
+    height -
+    padTop -
+    padBottom;
+
+  const normalized =
     data.map(
-      (row) =>
-        Number(
-          row.net || 0
-        )
-    );
+      (row) => {
+        const payments =
+          Number(
+            row.payments || 0
+          );
 
-  const maxValue =
-    Math.max(
-      ...values,
-      1
-    );
+        const expenses =
+          Number(
+            row.expenses || 0
+          );
 
-  const points =
-    data.map(
-      (
-        row,
-        index
-      ) => {
-        const x =
-          data.length === 1
-            ? width / 2
-            : (
-                padX +
-                index *
-                (
-                  (
-                    width -
-                    padX * 2
-                  ) /
-                  (
-                    data.length -
-                    1
-                  )
-                )
-              );
-
-        const y =
-          height -
-          padY -
-          (
-            Number(
-              row.net || 0
-            ) /
-            maxValue
-          ) *
-          (
-            height -
-            padY * 2
+        const refunds =
+          Number(
+            row.refunds || 0
           );
 
         return {
-          x,
-          y,
-          row,
+          ...row,
+
+          payments,
+
+          expenses,
+
+          refunds,
+
+          outcome:
+            expenses +
+            refunds,
+
+          net:
+            Number(
+              row.net || 0
+            ),
         };
       }
     );
 
-  let linePath =
+  const maxValue =
+    Math.max(
+      1,
+
+      ...normalized.map(
+        (row) =>
+          Math.max(
+            row.payments,
+            row.net,
+            0
+          )
+      )
+    );
+
+  const minValue =
+    Math.min(
+      0,
+
+      ...normalized.map(
+        (row) =>
+          Math.min(
+            -row.outcome,
+            row.net,
+            0
+          )
+      )
+    );
+
+  const valueRange =
+    Math.max(
+      maxValue -
+      minValue,
+      1
+    );
+
+  const yForValue =
+    (value) => {
+      return (
+        padTop +
+        (
+          (
+            maxValue -
+            Number(value || 0)
+          ) /
+          valueRange
+        ) *
+        plotHeight
+      );
+    };
+
+  const zeroY =
+    yForValue(0);
+
+  const groupStep =
+    plotWidth /
+    normalized.length;
+
+  const barWidth =
+    Math.min(
+      26,
+      Math.max(
+        10,
+        groupStep * 0.22
+      )
+    );
+
+  const points =
+    normalized.map(
+      (
+        row,
+        index
+      ) => {
+        return {
+          x:
+            padLeft +
+            groupStep *
+            (
+              index +
+              0.5
+            ),
+
+          y:
+            yForValue(
+              row.net
+            ),
+
+          row,
+          index,
+        };
+      }
+    );
+
+  const linePath =
+    points.length > 1
+      ? points
+          .map(
+            (
+              point,
+              index
+            ) => {
+              return (
+                `${
+                  index === 0
+                    ? "M"
+                    : "L"
+                } ` +
+                `${point.x.toFixed(2)} ` +
+                `${point.y.toFixed(2)}`
+              );
+            }
+          )
+          .join(" ")
+      : "";
+
+  const grid =
+    Array
+      .from({
+        length: 5,
+      })
+      .map(
+        (
+          _,
+          index
+        ) => {
+          const value =
+            maxValue -
+            (
+              valueRange *
+              index /
+              4
+            );
+
+          const y =
+            yForValue(
+              value
+            );
+
+          return `
+            <line
+              class="financeCashflowGrid"
+              x1="${padLeft}"
+              y1="${y}"
+              x2="${width - padRight}"
+              y2="${y}"
+            ></line>
+
+            <text
+              class="financeCashflowAxisLabel"
+              x="${padLeft - 10}"
+              y="${y + 3}"
+              text-anchor="end"
+            >
+              ${Math.round(value).toLocaleString("uk-UA")}
+            </text>
+          `;
+        }
+      )
+      .join("");
+
+  const bars =
+    points
+      .map(
+        (point) => {
+          const {
+            row,
+            x,
+          } = point;
+
+          const incomeY =
+            yForValue(
+              row.payments
+            );
+
+          const outcomeY =
+            yForValue(
+              -row.outcome
+            );
+
+          const incomeHeight =
+            Math.max(
+              0,
+              zeroY -
+              incomeY
+            );
+
+          const outcomeHeight =
+            Math.max(
+              0,
+              outcomeY -
+              zeroY
+            );
+
+          return `
+            <g class="financeCashflowBars">
+              <rect
+                class="financeIncomeBar"
+                x="${
+                  x -
+                  barWidth -
+                  3
+                }"
+                y="${incomeY}"
+                width="${barWidth}"
+                height="${incomeHeight}"
+                rx="5"
+              >
+                <title>
+                  Надходження:
+                  ${formatVisitFinanceMoney(
+                    row.payments
+                  )}
+                </title>
+              </rect>
+
+              ${
+                row.outcome > 0
+                  ? `
+                    <rect
+                      class="financeOutcomeBar"
+                      x="${x + 3}"
+                      y="${zeroY}"
+                      width="${barWidth}"
+                      height="${outcomeHeight}"
+                      rx="5"
+                    >
+                      <title>
+                        Витрати та повернення:
+                        ${formatVisitFinanceMoney(
+                          row.outcome
+                        )}
+                      </title>
+                    </rect>
+                  `
+                  : ""
+              }
+            </g>
+          `;
+        }
+      )
+      .join("");
+
+  const labelStep =
+    Math.max(
+      1,
+      Math.ceil(
+        normalized.length /
+        6
+      )
+    );
+
+  const dateLabels =
     points
       .map(
         (
           point,
           index
         ) => {
-          return (
-            `${
-              index === 0
-                ? "M"
-                : "L"
-            } ` +
-            `${point.x.toFixed(2)} ` +
-            `${point.y.toFixed(2)}`
-          );
+          if (
+            index %
+              labelStep !==
+              0 &&
+            index !==
+              points.length - 1
+          ) {
+            return "";
+          }
+
+          const rawDate =
+            String(
+              point.row.date ||
+              ""
+            );
+
+          let label =
+            rawDate;
+
+          try {
+            label =
+              new Date(
+                `${rawDate}T00:00:00`
+              )
+                .toLocaleDateString(
+                  "uk-UA",
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                  }
+                );
+          } catch {
+            label =
+              rawDate;
+          }
+
+          return `
+            <text
+              class="financeCashflowDateLabel"
+              x="${point.x}"
+              y="${height - 13}"
+              text-anchor="middle"
+            >
+              ${escapeHtml(label)}
+            </text>
+          `;
         }
       )
-      .join(" ");
+      .join("");
 
-  if (
-    points.length === 1
-  ) {
-    linePath =
-      `M ${padX} ${points[0].y.toFixed(2)} ` +
-      `L ${width - padX} ${points[0].y.toFixed(2)}`;
-  }
-
-  const firstPoint =
-    points[0];
-
-  const lastPoint =
-    points[
-      points.length - 1
-    ];
-
-  const areaPath =
-    `${linePath} ` +
-    `L ${lastPoint.x.toFixed(2)} ${height - padY} ` +
-    `L ${firstPoint.x.toFixed(2)} ${height - padY} Z`;
-
-  const circles =
+  const netPoints =
     points
       .map(
         (point) => `
           <circle
+            class="financeNetPoint"
             cx="${point.x}"
             cy="${point.y}"
             r="5"
@@ -9559,9 +9818,12 @@ function buildFinanceTrendChart(
             <title>
               ${escapeHtml(
                 String(
-                  point.row.date
+                  point.row.date ||
+                  ""
                 )
-              )}:
+              )}
+
+              Чистий потік:
               ${formatVisitFinanceMoney(
                 point.row.net
               )}
@@ -9573,88 +9835,59 @@ function buildFinanceTrendChart(
 
   return `
     <div class="financeChartCanvas">
+      <div class="financeCashflowLegend">
+        <span>
+          <i class="is-income"></i>
+          Надходження
+        </span>
+
+        <span>
+          <i class="is-outcome"></i>
+          Витрати
+        </span>
+
+        <span>
+          <i class="is-net"></i>
+          Чистий потік
+        </span>
+      </div>
+
       <svg
         viewBox="0 0 ${width} ${height}"
         role="img"
-        aria-label="Динаміка чистого доходу"
+        aria-label="Рух коштів клініки"
       >
-        <defs>
-          <linearGradient
-            id="financeAreaGradient"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop
-              offset="0%"
-              stop-color="#b45cff"
-              stop-opacity="0.42"
-            ></stop>
-
-            <stop
-              offset="100%"
-              stop-color="#b45cff"
-              stop-opacity="0"
-            ></stop>
-          </linearGradient>
-        </defs>
+        ${grid}
 
         <line
-          x1="${padX}"
-          y1="${height * 0.25}"
-          x2="${width - padX}"
-          y2="${height * 0.25}"
+          class="financeCashflowZeroLine"
+          x1="${padLeft}"
+          y1="${zeroY}"
+          x2="${width - padRight}"
+          y2="${zeroY}"
         ></line>
 
-        <line
-          x1="${padX}"
-          y1="${height * 0.5}"
-          x2="${width - padX}"
-          y2="${height * 0.5}"
-        ></line>
+        ${bars}
 
-        <line
-          x1="${padX}"
-          y1="${height * 0.75}"
-          x2="${width - padX}"
-          y2="${height * 0.75}"
-        ></line>
+        ${
+          linePath
+            ? `
+              <path
+                class="financeNetLine"
+                d="${linePath}"
+              ></path>
+            `
+            : ""
+        }
 
-        <path
-          class="financeChartArea"
-          d="${areaPath}"
-        ></path>
+        <g>
+          ${netPoints}
+        </g>
 
-        <path
-          class="financeChartLine"
-          d="${linePath}"
-        ></path>
-
-        <g class="financeChartPoints">
-          ${circles}
+        <g>
+          ${dateLabels}
         </g>
       </svg>
-
-      <div class="financeChartLabels">
-        <span>
-          ${escapeHtml(
-            String(
-              data[0]?.date || ""
-            )
-          )}
-        </span>
-
-        <span>
-          ${escapeHtml(
-            String(
-              data[
-                data.length - 1
-              ]?.date || ""
-            )
-          )}
-        </span>
-      </div>
     </div>
   `;
 }

@@ -25449,3 +25449,96 @@ strong {
     text-align: left;
   }
 }
+/* FINANCE CASHFLOW CHART */
+
+.financeCashflowLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0 0 8px 6px;
+}
+
+.financeCashflowLegend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.financeCashflowLegend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.financeCashflowLegend i.is-income {
+  background: #63e1a0;
+  box-shadow: 0 0 10px rgba(99, 225, 160, 0.35);
+}
+
+.financeCashflowLegend i.is-outcome {
+  background: #ff738c;
+  box-shadow: 0 0 10px rgba(255, 115, 140, 0.3);
+}
+
+.financeCashflowLegend i.is-net {
+  background: #bd70ff;
+  box-shadow: 0 0 10px rgba(189, 112, 255, 0.35);
+}
+
+.financeCashflowGrid {
+  stroke: rgba(255, 255, 255, 0.055);
+  stroke-width: 1;
+  stroke-dasharray: 5 7;
+}
+
+.financeCashflowZeroLine {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1.5;
+}
+
+.financeCashflowAxisLabel,
+.financeCashflowDateLabel {
+  fill: rgba(255, 255, 255, 0.28);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.financeIncomeBar {
+  fill: url("#financeIncomeGradient");
+  fill: #63e1a0;
+  opacity: 0.86;
+  filter: drop-shadow(
+    0 6px 9px rgba(61, 213, 132, 0.2)
+  );
+}
+
+.financeOutcomeBar {
+  fill: #ff738c;
+  opacity: 0.82;
+  filter: drop-shadow(
+    0 6px 9px rgba(255, 91, 119, 0.18)
+  );
+}
+
+.financeNetLine {
+  fill: none;
+  stroke: #bd70ff;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(
+    0 5px 8px rgba(189, 112, 255, 0.32)
+  );
+}
+
+.financeNetPoint {
+  fill: #100a1d;
+  stroke: #d49bff;
+  stroke-width: 3;
+  filter: drop-shadow(
+    0 4px 7px rgba(189, 112, 255, 0.35)
+  );
+}
