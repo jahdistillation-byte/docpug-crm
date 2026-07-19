@@ -26076,3 +26076,15 @@ input[type="number"]::-webkit-outer-spin-button {
   box-shadow: 0 0 34px rgba(70, 224, 146, 0.2);
   color: #72e6a7;
 }
+.financeCashflowValueLabel {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.financeCashflowValueLabel.is-income {
+  fill: #72e6a7;
+}
+
+.financeCashflowValueLabel.is-outcome {
+  fill: #ff8ba0;
+}

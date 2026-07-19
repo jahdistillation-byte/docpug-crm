@@ -9466,7 +9466,7 @@ function buildFinanceTrendChart(
 
         <p>
           Графік зʼявиться після першої
-          проведеної оплати.
+          фінансової операції.
         </p>
       </div>
     `;
@@ -9477,7 +9477,7 @@ function buildFinanceTrendChart(
 
   const padLeft = 62;
   const padRight = 24;
-  const padTop = 20;
+  const padTop = 28;
   const padBottom = 42;
 
   const plotWidth =
@@ -9513,18 +9513,9 @@ function buildFinanceTrendChart(
 
           payments,
 
-          expenses,
-
-          refunds,
-
           outcome:
             expenses +
             refunds,
-
-          net:
-            Number(
-              row.net || 0
-            ),
         };
       }
     );
@@ -9537,31 +9528,9 @@ function buildFinanceTrendChart(
         (row) =>
           Math.max(
             row.payments,
-            row.net,
-            0
+            row.outcome
           )
       )
-    );
-
-  const minValue =
-    Math.min(
-      0,
-
-      ...normalized.map(
-        (row) =>
-          Math.min(
-            -row.outcome,
-            row.net,
-            0
-          )
-      )
-    );
-
-  const valueRange =
-    Math.max(
-      maxValue -
-      minValue,
-      1
     );
 
   const yForValue =
@@ -9569,18 +9538,17 @@ function buildFinanceTrendChart(
       return (
         padTop +
         (
-          (
-            maxValue -
-            Number(value || 0)
-          ) /
-          valueRange
+          1 -
+          Number(value || 0) /
+          maxValue
         ) *
         plotHeight
       );
     };
 
-  const zeroY =
-    yForValue(0);
+  const baselineY =
+    padTop +
+    plotHeight;
 
   const groupStep =
     plotWidth /
@@ -9588,60 +9556,15 @@ function buildFinanceTrendChart(
 
   const barWidth =
     Math.min(
-      26,
+      30,
       Math.max(
         10,
         groupStep * 0.22
       )
     );
 
-  const points =
-    normalized.map(
-      (
-        row,
-        index
-      ) => {
-        return {
-          x:
-            padLeft +
-            groupStep *
-            (
-              index +
-              0.5
-            ),
-
-          y:
-            yForValue(
-              row.net
-            ),
-
-          row,
-          index,
-        };
-      }
-    );
-
-  const linePath =
-    points.length > 1
-      ? points
-          .map(
-            (
-              point,
-              index
-            ) => {
-              return (
-                `${
-                  index === 0
-                    ? "M"
-                    : "L"
-                } ` +
-                `${point.x.toFixed(2)} ` +
-                `${point.y.toFixed(2)}`
-              );
-            }
-          )
-          .join(" ")
-      : "";
+  const showValues =
+    normalized.length <= 8;
 
   const grid =
     Array
@@ -9654,11 +9577,10 @@ function buildFinanceTrendChart(
           index
         ) => {
           const value =
-            maxValue -
+            maxValue *
             (
-              valueRange *
-              index /
-              4
+              1 -
+              index / 4
             );
 
           const y =
@@ -9681,21 +9603,31 @@ function buildFinanceTrendChart(
               y="${y + 3}"
               text-anchor="end"
             >
-              ${Math.round(value).toLocaleString("uk-UA")}
+              ${Math.round(
+                value
+              ).toLocaleString(
+                "uk-UA"
+              )}
             </text>
           `;
         }
       )
       .join("");
 
-  const bars =
-    points
+  const groups =
+    normalized
       .map(
-        (point) => {
-          const {
-            row,
-            x,
-          } = point;
+        (
+          row,
+          index
+        ) => {
+          const x =
+            padLeft +
+            groupStep *
+            (
+              index +
+              0.5
+            );
 
           const incomeY =
             yForValue(
@@ -9704,109 +9636,33 @@ function buildFinanceTrendChart(
 
           const outcomeY =
             yForValue(
-              -row.outcome
+              row.outcome
             );
 
           const incomeHeight =
             Math.max(
               0,
-              zeroY -
+              baselineY -
               incomeY
             );
 
           const outcomeHeight =
             Math.max(
               0,
-              outcomeY -
-              zeroY
+              baselineY -
+              outcomeY
             );
-
-          return `
-            <g class="financeCashflowBars">
-              <rect
-                class="financeIncomeBar"
-                x="${
-                  x -
-                  barWidth -
-                  3
-                }"
-                y="${incomeY}"
-                width="${barWidth}"
-                height="${incomeHeight}"
-                rx="5"
-              >
-                <title>
-                  Надходження:
-                  ${formatVisitFinanceMoney(
-                    row.payments
-                  )}
-                </title>
-              </rect>
-
-              ${
-                row.outcome > 0
-                  ? `
-                    <rect
-                      class="financeOutcomeBar"
-                      x="${x + 3}"
-                      y="${zeroY}"
-                      width="${barWidth}"
-                      height="${outcomeHeight}"
-                      rx="5"
-                    >
-                      <title>
-                        Витрати та повернення:
-                        ${formatVisitFinanceMoney(
-                          row.outcome
-                        )}
-                      </title>
-                    </rect>
-                  `
-                  : ""
-              }
-            </g>
-          `;
-        }
-      )
-      .join("");
-
-  const labelStep =
-    Math.max(
-      1,
-      Math.ceil(
-        normalized.length /
-        6
-      )
-    );
-
-  const dateLabels =
-    points
-      .map(
-        (
-          point,
-          index
-        ) => {
-          if (
-            index %
-              labelStep !==
-              0 &&
-            index !==
-              points.length - 1
-          ) {
-            return "";
-          }
 
           const rawDate =
             String(
-              point.row.date ||
-              ""
+              row.date || ""
             );
 
-          let label =
+          let dateLabel =
             rawDate;
 
           try {
-            label =
+            dateLabel =
               new Date(
                 `${rawDate}T00:00:00`
               )
@@ -9818,49 +9674,155 @@ function buildFinanceTrendChart(
                   }
                 );
           } catch {
-            label =
+            dateLabel =
               rawDate;
           }
 
+          const labelStep =
+            Math.max(
+              1,
+              Math.ceil(
+                normalized.length /
+                6
+              )
+            );
+
+          const showDate =
+            index %
+              labelStep ===
+              0 ||
+            index ===
+              normalized.length - 1;
+
           return `
-            <text
-              class="financeCashflowDateLabel"
-              x="${point.x}"
-              y="${height - 13}"
-              text-anchor="middle"
-            >
-              ${escapeHtml(label)}
-            </text>
+            <g class="financeCashflowGroup">
+              ${
+                row.payments > 0
+                  ? `
+                    <rect
+                      class="financeIncomeBar"
+                      x="${
+                        x -
+                        barWidth -
+                        3
+                      }"
+                      y="${incomeY}"
+                      width="${barWidth}"
+                      height="${incomeHeight}"
+                      rx="6"
+                    >
+                      <title>
+                        ${escapeHtml(rawDate)}
+
+                        Надходження:
+                        ${formatVisitFinanceMoney(
+                          row.payments
+                        )}
+                      </title>
+                    </rect>
+
+                    ${
+                      showValues
+                        ? `
+                          <text
+                            class="financeCashflowValueLabel is-income"
+                            x="${
+                              x -
+                              barWidth / 2 -
+                              3
+                            }"
+                            y="${
+                              Math.max(
+                                padTop + 9,
+                                incomeY - 8
+                              )
+                            }"
+                            text-anchor="middle"
+                          >
+                            ${Math.round(
+                              row.payments
+                            ).toLocaleString(
+                              "uk-UA"
+                            )}
+                          </text>
+                        `
+                        : ""
+                    }
+                  `
+                  : ""
+              }
+
+              ${
+                row.outcome > 0
+                  ? `
+                    <rect
+                      class="financeOutcomeBar"
+                      x="${x + 3}"
+                      y="${outcomeY}"
+                      width="${barWidth}"
+                      height="${outcomeHeight}"
+                      rx="6"
+                    >
+                      <title>
+                        ${escapeHtml(rawDate)}
+
+                        Витрати:
+                        ${formatVisitFinanceMoney(
+                          row.outcome
+                        )}
+                      </title>
+                    </rect>
+
+                    ${
+                      showValues
+                        ? `
+                          <text
+                            class="financeCashflowValueLabel is-outcome"
+                            x="${
+                              x +
+                              barWidth / 2 +
+                              3
+                            }"
+                            y="${
+                              Math.max(
+                                padTop + 9,
+                                outcomeY - 8
+                              )
+                            }"
+                            text-anchor="middle"
+                          >
+                            ${Math.round(
+                              row.outcome
+                            ).toLocaleString(
+                              "uk-UA"
+                            )}
+                          </text>
+                        `
+                        : ""
+                    }
+                  `
+                  : ""
+              }
+
+              ${
+                showDate
+                  ? `
+                    <text
+                      class="financeCashflowDateLabel"
+                      x="${x}"
+                      y="${height - 13}"
+                      text-anchor="middle"
+                    >
+                      ${escapeHtml(
+                        dateLabel
+                      )}
+                    </text>
+                  `
+                  : ""
+              }
+            </g>
           `;
         }
-      )
-      .join("");
-
-  const netPoints =
-    points
-      .map(
-        (point) => `
-          <circle
-            class="financeNetPoint"
-            cx="${point.x}"
-            cy="${point.y}"
-            r="5"
-          >
-            <title>
-              ${escapeHtml(
-                String(
-                  point.row.date ||
-                  ""
-                )
-              )}
-
-              Чистий потік:
-              ${formatVisitFinanceMoney(
-                point.row.net
-              )}
-            </title>
-          </circle>
-        `
       )
       .join("");
 
@@ -9876,48 +9838,24 @@ function buildFinanceTrendChart(
           <i class="is-outcome"></i>
           Витрати
         </span>
-
-        <span>
-          <i class="is-net"></i>
-          Чистий потік
-        </span>
       </div>
 
       <svg
         viewBox="0 0 ${width} ${height}"
         role="img"
-        aria-label="Рух коштів клініки"
+        aria-label="Надходження та витрати клініки"
       >
         ${grid}
 
         <line
           class="financeCashflowZeroLine"
           x1="${padLeft}"
-          y1="${zeroY}"
+          y1="${baselineY}"
           x2="${width - padRight}"
-          y2="${zeroY}"
+          y2="${baselineY}"
         ></line>
 
-        ${bars}
-
-        ${
-          linePath
-            ? `
-              <path
-                class="financeNetLine"
-                d="${linePath}"
-              ></path>
-            `
-            : ""
-        }
-
-        <g>
-          ${netPoints}
-        </g>
-
-        <g>
-          ${dateLabels}
-        </g>
+        ${groups}
       </svg>
     </div>
   `;
