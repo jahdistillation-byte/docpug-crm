@@ -9475,7 +9475,7 @@ function buildFinanceSectionNavigation() {
       key: "expenses",
       icon: "−",
       label: "Витрати",
-      enabled: false,
+      enabled: true,
     },
 
     {
@@ -9730,6 +9730,54 @@ async function loadFinanceTransactionsApi(
     result.data || {
       items: [],
       pagination: {},
+    }
+  );
+}
+async function loadFinanceExpensesOverviewApi(
+  dateFrom,
+  dateTo
+) {
+  const params =
+    new URLSearchParams({
+      date_from:
+        dateFrom,
+
+      date_to:
+        dateTo,
+    });
+
+  const response =
+    await fetch(
+      `/api/finance/expenses/overview?${params.toString()}`,
+      {
+        credentials: "include",
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити витрати (HTTP ${response.status}).`
+    );
+  }
+
+  return (
+    result.data || {
+      period: {},
+      summary: {},
+      categories: [],
+      daily: [],
+      counterparties: [],
     }
   );
 }
@@ -11730,6 +11778,1032 @@ async function renderFinanceOperationsTab(
       );
   }
 }
+function getFinanceExpenseCategoryMeta(
+  category
+) {
+  const categories = {
+    "Закупівля препаратів": {
+      icon: "💊",
+      color: "#a970ff",
+    },
+
+    "Витратні матеріали": {
+      icon: "📦",
+      color: "#56b8ff",
+    },
+
+    "Оренда": {
+      icon: "🏢",
+      color: "#ffb85c",
+    },
+
+    "Комунальні послуги": {
+      icon: "⚡",
+      color: "#5ee7d1",
+    },
+
+    "Зарплата": {
+      icon: "👥",
+      color: "#ff75b5",
+    },
+
+    "Податки": {
+      icon: "🏛️",
+      color: "#ff7b72",
+    },
+
+    "Маркетинг": {
+      icon: "📣",
+      color: "#6f9cff",
+    },
+
+    "Обслуговування обладнання": {
+      icon: "🛠️",
+      color: "#a7b0c4",
+    },
+
+    "Транспорт": {
+      icon: "🚗",
+      color: "#62d68b",
+    },
+
+    "Інше": {
+      icon: "◇",
+      color: "#a98bbf",
+    },
+
+    "Без категорії": {
+      icon: "?",
+      color: "#8b8196",
+    },
+  };
+
+  return (
+    categories[category] || {
+      icon: "◇",
+      color: "#a98bbf",
+    }
+  );
+}
+
+function buildFinanceExpensesTrendChart(
+  rows
+) {
+  const data =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+  const hasExpenses =
+    data.some(
+      (row) =>
+        Number(
+          row.amount || 0
+        ) > 0
+    );
+
+  if (
+    !data.length ||
+    !hasExpenses
+  ) {
+    return `
+      <div class="financeChartEmpty">
+        <span>−</span>
+
+        <strong>
+          За цей період витрат немає
+        </strong>
+
+        <p>
+          Графік зʼявиться після
+          проведення першої витрати.
+        </p>
+      </div>
+    `;
+  }
+
+  const width = 860;
+  const height = 260;
+
+  const padLeft = 58;
+  const padRight = 20;
+  const padTop = 24;
+  const padBottom = 42;
+
+  const chartWidth =
+    width -
+    padLeft -
+    padRight;
+
+  const chartHeight =
+    height -
+    padTop -
+    padBottom;
+
+  const amounts =
+    data.map(
+      (row) =>
+        Math.max(
+          0,
+          Number(
+            row.amount || 0
+          )
+        )
+    );
+
+  const maxAmount =
+    Math.max(
+      ...amounts,
+      1
+    );
+
+  const step =
+    chartWidth /
+    Math.max(
+      data.length,
+      1
+    );
+
+  const barWidth =
+    Math.max(
+      3,
+      Math.min(
+        24,
+        step * 0.58
+      )
+    );
+
+  const gridLines =
+    [0, 0.25, 0.5, 0.75, 1]
+      .map(
+        (ratio) => {
+          const y =
+            padTop +
+            chartHeight -
+            chartHeight *
+            ratio;
+
+          const value =
+            maxAmount *
+            ratio;
+
+          return `
+            <line
+              x1="${padLeft}"
+              y1="${y}"
+              x2="${width - padRight}"
+              y2="${y}"
+              class="financeExpenseGridLine"
+            ></line>
+
+            <text
+              x="${padLeft - 10}"
+              y="${y + 4}"
+              text-anchor="end"
+              class="financeExpenseGridLabel"
+            >
+              ${Math.round(value)
+                .toLocaleString(
+                  "uk-UA"
+                )}
+            </text>
+          `;
+        }
+      )
+      .join("");
+
+  const labelStep =
+    Math.max(
+      1,
+      Math.ceil(
+        data.length / 7
+      )
+    );
+
+  const bars =
+    data.map(
+      (
+        row,
+        index
+      ) => {
+        const amount =
+          amounts[index];
+
+        const barHeight =
+          amount > 0
+            ? Math.max(
+                3,
+                (
+                  amount /
+                  maxAmount
+                ) *
+                chartHeight
+              )
+            : 0;
+
+        const x =
+          padLeft +
+          index * step +
+          (
+            step -
+            barWidth
+          ) /
+          2;
+
+        const y =
+          padTop +
+          chartHeight -
+          barHeight;
+
+        const shouldShowLabel =
+          index === 0 ||
+          index ===
+            data.length - 1 ||
+          index %
+            labelStep ===
+            0;
+
+        const date =
+          new Date(
+            `${row.date}T00:00:00`
+          );
+
+        const dateLabel =
+          Number.isNaN(
+            date.getTime()
+          )
+            ? String(
+                row.date || ""
+              )
+            : date
+                .toLocaleDateString(
+                  "uk-UA",
+                  {
+                    day:
+                      "2-digit",
+
+                    month:
+                      "2-digit",
+                  }
+                );
+
+        return `
+          <g class="financeExpenseBarGroup">
+            ${
+              amount > 0
+                ? `
+                  <rect
+                    x="${x}"
+                    y="${y}"
+                    width="${barWidth}"
+                    height="${barHeight}"
+                    rx="${Math.min(
+                      6,
+                      barWidth / 2
+                    )}"
+                    class="financeExpenseBar"
+                  >
+                    <title>
+                      ${escapeHtml(
+                        dateLabel
+                      )}: ${escapeHtml(
+                        formatVisitFinanceMoney(
+                          amount
+                        )
+                      )}
+                    </title>
+                  </rect>
+
+                  <circle
+                    cx="${
+                      x +
+                      barWidth / 2
+                    }"
+                    cy="${y}"
+                    r="3"
+                    class="financeExpenseBarPoint"
+                  ></circle>
+                `
+                : ""
+            }
+
+            ${
+              shouldShowLabel
+                ? `
+                  <text
+                    x="${
+                      x +
+                      barWidth / 2
+                    }"
+                    y="${
+                      height - 14
+                    }"
+                    text-anchor="middle"
+                    class="financeExpenseDateLabel"
+                  >
+                    ${escapeHtml(
+                      dateLabel
+                    )}
+                  </text>
+                `
+                : ""
+            }
+          </g>
+        `;
+      }
+    )
+      .join("");
+
+  return `
+    <div class="financeExpenseTrendChart">
+      <svg
+        viewBox="0 0 ${width} ${height}"
+        role="img"
+        aria-label="Динаміка витрат"
+      >
+        ${gridLines}
+        ${bars}
+      </svg>
+    </div>
+  `;
+}
+
+async function renderFinanceExpensesTab(
+  page
+) {
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+
+      <strong>
+        Аналізуємо витрати клініки…
+      </strong>
+    </div>
+  `;
+
+  try {
+    const overview =
+      await loadFinanceExpensesOverviewApi(
+        financeDashboardState
+          .dateFrom,
+
+        financeDashboardState
+          .dateTo
+      );
+
+    const summary =
+      overview.summary || {};
+
+    const categories =
+      Array.isArray(
+        overview.categories
+      )
+        ? overview.categories
+        : [];
+
+    const counterparties =
+      Array.isArray(
+        overview.counterparties
+      )
+        ? overview.counterparties
+        : [];
+
+    const totalExpenses =
+      Number(
+        summary.total_expenses ||
+        0
+      );
+
+    page.innerHTML = `
+      <div class="financeDashboard financeExpensesDashboard">
+        ${buildFinanceSectionNavigation()}
+
+        <header class="financeHero financeExpensesHero">
+          <div>
+            <span class="financeEyebrow">
+              КОНТРОЛЬ ВИТРАТ
+            </span>
+
+            <h1>
+              Витрати клініки
+            </h1>
+
+            <p>
+              Закупівлі, зарплати,
+              постійні витрати та
+              контрагенти в одному просторі.
+            </p>
+          </div>
+
+          <div class="financeHeroActions">
+            <button
+              type="button"
+              class="financeExpensesJournalButton"
+              id="financeExpensesJournalButton"
+            >
+              ↕ Журнал витрат
+            </button>
+
+            <button
+              type="button"
+              class="financeAddExpenseButton"
+              id="financeExpensesAddButton"
+            >
+              <span>−</span>
+              Додати витрату
+            </button>
+          </div>
+        </header>
+
+        <section class="financeDateRange">
+          <label>
+            <span>
+              Початок періоду
+            </span>
+
+            <input
+              type="date"
+              id="financeExpensesDateFrom"
+              value="${
+                financeDashboardState
+                  .dateFrom
+              }"
+            >
+          </label>
+
+          <label>
+            <span>
+              Кінець періоду
+            </span>
+
+            <input
+              type="date"
+              id="financeExpensesDateTo"
+              value="${
+                financeDashboardState
+                  .dateTo
+              }"
+            >
+          </label>
+
+          <button
+            type="button"
+            id="financeExpensesApplyPeriod"
+          >
+            Застосувати період
+          </button>
+        </section>
+
+        <section class="financeExpenseKpiGrid">
+          <article class="financeExpenseKpi is-total">
+            <div class="financeExpenseKpiIcon">
+              −
+            </div>
+
+            <span>
+              Усього витрат
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.total_expenses
+              )}
+            </strong>
+
+            <small>
+              ${Number(
+                summary
+                  .transactions_count ||
+                0
+              )}
+              проведених операцій
+            </small>
+          </article>
+
+          <article class="financeExpenseKpi is-purchases">
+            <div class="financeExpenseKpiIcon">
+              📦
+            </div>
+
+            <span>
+              Закупівлі
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.purchases_total
+              )}
+            </strong>
+
+            <small>
+              Препарати та матеріали
+            </small>
+          </article>
+
+          <article class="financeExpenseKpi is-salary">
+            <div class="financeExpenseKpiIcon">
+              👥
+            </div>
+
+            <span>
+              Зарплатний фонд
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.salary_total
+              )}
+            </strong>
+
+            <small>
+              ${
+                isOwner()
+                  ? "Персональні дані доступні власнику"
+                  : "Лише загальна сума без ставок"
+              }
+            </small>
+          </article>
+
+          <article class="financeExpenseKpi is-fixed">
+            <div class="financeExpenseKpiIcon">
+              ◫
+            </div>
+
+            <span>
+              Постійні витрати
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary
+                  .fixed_expenses_total
+              )}
+            </strong>
+
+            <small>
+              Оренда та комунальні
+            </small>
+          </article>
+
+          <article class="financeExpenseKpi is-average">
+            <div class="financeExpenseKpiIcon">
+              ◇
+            </div>
+
+            <span>
+              У середньому за день
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.average_daily
+              )}
+            </strong>
+
+            <small>
+              За обраний період
+            </small>
+          </article>
+        </section>
+
+        <section class="financeExpensesMainGrid">
+          <article class="financePanel financeExpensesTrendPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  ДИНАМІКА
+                </span>
+
+                <h2>
+                  Витрати за днями
+                </h2>
+              </div>
+
+              <strong class="financeExpenseTotalValue">
+                ${formatVisitFinanceMoney(
+                  totalExpenses
+                )}
+              </strong>
+            </div>
+
+            ${buildFinanceExpensesTrendChart(
+              overview.daily
+            )}
+          </article>
+
+          <article class="financePanel financeExpenseCategoriesPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  СТРУКТУРА
+                </span>
+
+                <h2>
+                  Категорії витрат
+                </h2>
+              </div>
+
+              <b>
+                ${categories.length}
+              </b>
+            </div>
+
+            <div class="financeExpenseCategories">
+              ${
+                categories.length
+                  ? categories
+                      .map(
+                        (item) => {
+                          const meta =
+                            getFinanceExpenseCategoryMeta(
+                              item.category
+                            );
+
+                          const share =
+                            Math.max(
+                              0,
+                              Math.min(
+                                100,
+                                Number(
+                                  item.share_percent ||
+                                  0
+                                )
+                              )
+                            );
+
+                          return `
+                            <article class="financeExpenseCategory">
+                              <div
+                                class="financeExpenseCategoryIcon"
+                                style="
+                                  --category-color:
+                                    ${meta.color};
+                                "
+                              >
+                                ${meta.icon}
+                              </div>
+
+                              <div class="financeExpenseCategoryMain">
+                                <div>
+                                  <strong>
+                                    ${escapeHtml(
+                                      item.category
+                                    )}
+                                  </strong>
+
+                                  <span>
+                                    ${Number(
+                                      item.operations_count ||
+                                      0
+                                    )}
+                                    операцій
+                                  </span>
+                                </div>
+
+                                <div class="financeExpenseCategoryProgress">
+                                  <i
+                                    style="
+                                      width:${share}%;
+                                      --category-color:
+                                        ${meta.color};
+                                    "
+                                  ></i>
+                                </div>
+                              </div>
+
+                              <div class="financeExpenseCategoryAmount">
+                                <strong>
+                                  ${formatVisitFinanceMoney(
+                                    item.amount
+                                  )}
+                                </strong>
+
+                                <span>
+                                  ${share.toFixed(1)}%
+                                </span>
+                              </div>
+                            </article>
+                          `;
+                        }
+                      )
+                      .join("")
+                  : `
+                    <div class="financeTransactionsEmpty">
+                      <strong>
+                        Категорій ще немає
+                      </strong>
+
+                      <span>
+                        Додайте першу витрату.
+                      </span>
+                    </div>
+                  `
+              }
+            </div>
+          </article>
+        </section>
+
+        <section class="financeExpensesSecondaryGrid">
+          <article class="financePanel financeExpenseControlPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  КОНТРОЛЬ
+                </span>
+
+                <h2>
+                  Закупівлі та зарплати
+                </h2>
+              </div>
+            </div>
+
+            <div class="financeExpenseControlCards">
+              <article class="is-purchase">
+                <div>
+                  <span>
+                    📦
+                  </span>
+
+                  <div>
+                    <small>
+                      ЗАКУПІВЛІ
+                    </small>
+
+                    <h3>
+                      Препарати й матеріали
+                    </h3>
+                  </div>
+                </div>
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    summary.purchases_total
+                  )}
+                </strong>
+
+                <p>
+                  Наступним етапом тут
+                  зʼявляться постачальники,
+                  накладні та звʼязок
+                  із приходом на склад.
+                </p>
+              </article>
+
+              <article class="is-salary">
+                <div>
+                  <span>
+                    👥
+                  </span>
+
+                  <div>
+                    <small>
+                      ЗАРПЛАТИ
+                    </small>
+
+                    <h3>
+                      Фонд оплати праці
+                    </h3>
+                  </div>
+                </div>
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    summary.salary_total
+                  )}
+                </strong>
+
+                <p>
+                  ${
+                    isOwner()
+                      ? (
+                          "Розрахунок ставок, відсотків, бонусів і штрафів буде доступний лише власнику."
+                        )
+                      : (
+                          "Адміністратору доступна лише загальна сума без персональних нарахувань."
+                        )
+                  }
+                </p>
+              </article>
+            </div>
+          </article>
+
+          <article class="financePanel financeExpenseCounterpartiesPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  КОНТРАГЕНТИ
+                </span>
+
+                <h2>
+                  Кому сплачували
+                </h2>
+              </div>
+
+              <b>
+                ${Number(
+                  summary
+                    .counterparties_count ||
+                  0
+                )}
+              </b>
+            </div>
+
+            <div class="financeExpenseCounterparties">
+              ${
+                counterparties.length
+                  ? counterparties
+                      .map(
+                        (
+                          item,
+                          index
+                        ) => {
+                          const date =
+                            item.last_operation_at
+                              ? new Date(
+                                  item.last_operation_at
+                                )
+                                  .toLocaleDateString(
+                                    "uk-UA"
+                                  )
+                              : "—";
+
+                          return `
+                            <article class="financeExpenseCounterparty">
+                              <span>
+                                ${index + 1}
+                              </span>
+
+                              <div>
+                                <strong>
+                                  ${escapeHtml(
+                                    item.counterparty ||
+                                    "Без назви"
+                                  )}
+                                </strong>
+
+                                <small>
+                                  ${Number(
+                                    item.operations_count ||
+                                    0
+                                  )}
+                                  операцій
+                                  ·
+                                  остання
+                                  ${escapeHtml(
+                                    date
+                                  )}
+                                </small>
+                              </div>
+
+                              <b>
+                                ${formatVisitFinanceMoney(
+                                  item.amount
+                                )}
+                              </b>
+                            </article>
+                          `;
+                        }
+                      )
+                      .join("")
+                  : `
+                    <div class="financeTransactionsEmpty">
+                      <strong>
+                        Контрагентів ще немає
+                      </strong>
+
+                      <span>
+                        Вкажіть отримувача
+                        під час додавання витрати.
+                      </span>
+                    </div>
+                  `
+              }
+            </div>
+          </article>
+        </section>
+      </div>
+    `;
+
+    bindFinanceSectionNavigation(
+      page
+    );
+
+    page
+      .querySelector(
+        "#financeExpensesAddButton"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          openFinanceExpenseModal();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeExpensesJournalButton"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          financeDashboardState.section =
+            "transactions";
+
+          financeDashboardState
+            .transactionType =
+              "expense";
+
+          financeDashboardState
+            .transactionOffset = 0;
+
+          renderFinanceTab();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeExpensesApplyPeriod"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          const dateFrom =
+            page.querySelector(
+              "#financeExpensesDateFrom"
+            )?.value || "";
+
+          const dateTo =
+            page.querySelector(
+              "#financeExpensesDateTo"
+            )?.value || "";
+
+          if (
+            !dateFrom ||
+            !dateTo ||
+            dateFrom > dateTo
+          ) {
+            alert(
+              "Оберіть коректний період."
+            );
+
+            return;
+          }
+
+          financeDashboardState.preset =
+            "custom";
+
+          financeDashboardState.dateFrom =
+            dateFrom;
+
+          financeDashboardState.dateTo =
+            dateTo;
+
+          renderFinanceTab();
+        }
+      );
+
+  } catch (error) {
+    console.error(
+      "renderFinanceExpensesTab failed:",
+      error
+    );
+
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+
+        <h2>
+          Не вдалося завантажити витрати
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error?.message ||
+            "Невідома помилка"
+          )}
+        </p>
+
+        <button
+          type="button"
+          id="financeExpensesRetry"
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    `;
+
+    page
+      .querySelector(
+        "#financeExpensesRetry"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+  }
+}
 
 async function renderFinanceTab(
   options = {}
@@ -11793,6 +12867,17 @@ async function renderFinanceTab(
 
     return;
   }
+  if (
+  financeDashboardState
+    .section ===
+  "expenses"
+) {
+  await renderFinanceExpensesTab(
+    page
+  );
+
+  return;
+}
 
   page.innerHTML = `
     <div class="financePageLoading">

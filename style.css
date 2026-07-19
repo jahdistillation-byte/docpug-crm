@@ -27038,3 +27038,849 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 100%;
   }
 }
+/* =========================================
+   FINANCE — EXPENSES
+   ========================================= */
+
+.financeExpensesDashboard {
+  padding-bottom: 130px;
+}
+
+
+/* =========================================
+   EXPENSES HERO
+   ========================================= */
+
+.financeExpensesHero {
+  position: relative;
+  overflow: hidden;
+}
+
+.financeExpensesHero::after {
+  content: "−";
+
+  position: absolute;
+  right: 55px;
+  bottom: -105px;
+
+  color:
+    color-mix(
+      in srgb,
+      #ff6485 10%,
+      transparent
+    );
+
+  font-size: 260px;
+  font-weight: 900;
+  line-height: 1;
+
+  pointer-events: none;
+}
+
+.financeExpensesHero > * {
+  position: relative;
+  z-index: 2;
+}
+
+.financeExpensesJournalButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 48px;
+  padding: 0 18px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.11);
+  border-radius: 15px;
+
+  color: rgba(255, 255, 255, 0.75);
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.financeExpensesJournalButton:hover {
+  color: #fff;
+
+  border-color:
+    var(--accent-color, #a855f7);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      12%,
+      rgba(255, 255, 255, 0.04)
+    );
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================
+   EXPENSE KPI CARDS
+   ========================================= */
+
+.financeExpenseKpiGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.financeExpenseKpi {
+  position: relative;
+
+  min-width: 0;
+  min-height: 168px;
+  padding: 20px;
+
+  overflow: hidden;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.085);
+  border-radius: 23px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(31, 20, 50, 0.94),
+      rgba(11, 9, 25, 0.96)
+    );
+
+  box-shadow:
+    0 18px 50px
+      rgba(0, 0, 0, 0.2),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.035);
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.financeExpenseKpi::after {
+  content: "";
+
+  position: absolute;
+  right: -45px;
+  bottom: -55px;
+
+  width: 130px;
+  height: 130px;
+
+  border-radius: 50%;
+
+  background:
+    var(
+      --expense-kpi-glow,
+      rgba(168, 85, 247, 0.16)
+    );
+
+  filter: blur(28px);
+  pointer-events: none;
+}
+
+.financeExpenseKpi:hover {
+  border-color:
+    rgba(255, 255, 255, 0.14);
+
+  transform: translateY(-2px);
+}
+
+.financeExpenseKpi.is-total {
+  --expense-kpi-color:
+    #ff708d;
+
+  --expense-kpi-glow:
+    rgba(255, 112, 141, 0.2);
+}
+
+.financeExpenseKpi.is-purchases {
+  --expense-kpi-color:
+    #a970ff;
+
+  --expense-kpi-glow:
+    rgba(169, 112, 255, 0.2);
+}
+
+.financeExpenseKpi.is-salary {
+  --expense-kpi-color:
+    #ff75b5;
+
+  --expense-kpi-glow:
+    rgba(255, 117, 181, 0.18);
+}
+
+.financeExpenseKpi.is-fixed {
+  --expense-kpi-color:
+    #ffb85c;
+
+  --expense-kpi-glow:
+    rgba(255, 184, 92, 0.18);
+}
+
+.financeExpenseKpi.is-average {
+  --expense-kpi-color:
+    #56b8ff;
+
+  --expense-kpi-glow:
+    rgba(86, 184, 255, 0.18);
+}
+
+.financeExpenseKpiIcon {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+  margin-bottom: 18px;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--expense-kpi-color)
+      38%,
+      rgba(255, 255, 255, 0.08)
+    );
+  border-radius: 13px;
+
+  color:
+    var(--expense-kpi-color);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--expense-kpi-color)
+      11%,
+      rgba(255, 255, 255, 0.025)
+    );
+
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.financeExpenseKpi > span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: rgba(255, 255, 255, 0.48);
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.financeExpenseKpi > strong {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  overflow: hidden;
+
+  color:
+    var(--expense-kpi-color);
+
+  font-size: clamp(
+    21px,
+    2vw,
+    31px
+  );
+  font-weight: 900;
+  line-height: 1.05;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseKpi > small {
+  display: block;
+
+  margin-top: 10px;
+
+  color: rgba(255, 255, 255, 0.32);
+
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+
+/* =========================================
+   EXPENSE MAIN GRID
+   ========================================= */
+
+.financeExpensesMainGrid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.55fr)
+    minmax(330px, 0.85fr);
+
+  gap: 16px;
+}
+
+.financeExpenseTotalValue {
+  color: #ff708d !important;
+}
+
+
+/* =========================================
+   EXPENSE TREND CHART
+   ========================================= */
+
+.financeExpenseTrendChart {
+  width: 100%;
+  min-height: 280px;
+  margin-top: 10px;
+
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(255, 255, 255, 0.12)
+    transparent;
+}
+
+.financeExpenseTrendChart svg {
+  display: block;
+
+  width: 100%;
+  min-width: 650px;
+  height: auto;
+}
+
+.financeExpenseGridLine {
+  stroke:
+    rgba(255, 255, 255, 0.07);
+  stroke-width: 1;
+  stroke-dasharray: 4 7;
+}
+
+.financeExpenseGridLabel,
+.financeExpenseDateLabel {
+  fill:
+    rgba(255, 255, 255, 0.32);
+
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.financeExpenseBar {
+  fill: url("#financeExpenseGradient");
+  fill: #ff6485;
+
+  opacity: 0.82;
+
+  filter:
+    drop-shadow(
+      0 5px 9px
+      rgba(255, 100, 133, 0.16)
+    );
+
+  transition:
+    opacity 0.2s ease;
+}
+
+.financeExpenseBarGroup:hover
+.financeExpenseBar {
+  opacity: 1;
+}
+
+.financeExpenseBarPoint {
+  fill: #ffd1dc;
+  stroke: #ff6485;
+  stroke-width: 2;
+}
+
+
+/* =========================================
+   EXPENSE CATEGORIES
+   ========================================= */
+
+.financeExpenseCategories {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  margin-top: 18px;
+}
+
+.financeExpenseCategory {
+  display: grid;
+  grid-template-columns:
+    40px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+  gap: 12px;
+
+  padding: 11px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.065);
+  border-radius: 15px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.financeExpenseCategory:hover {
+  border-color:
+    rgba(255, 255, 255, 0.12);
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  transform: translateX(2px);
+}
+
+.financeExpenseCategoryIcon {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--category-color)
+      32%,
+      rgba(255, 255, 255, 0.07)
+    );
+  border-radius: 13px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--category-color)
+      10%,
+      rgba(255, 255, 255, 0.02)
+    );
+
+  font-size: 15px;
+}
+
+.financeExpenseCategoryMain {
+  min-width: 0;
+}
+
+.financeExpenseCategoryMain > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+
+  margin-bottom: 8px;
+}
+
+.financeExpenseCategoryMain strong {
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.81);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseCategoryMain span {
+  flex: 0 0 auto;
+
+  color: rgba(255, 255, 255, 0.3);
+
+  font-size: 8px;
+}
+
+.financeExpenseCategoryProgress {
+  height: 4px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.055);
+}
+
+.financeExpenseCategoryProgress i {
+  display: block;
+
+  height: 100%;
+  border-radius: inherit;
+
+  background:
+    var(--category-color);
+
+  box-shadow:
+    0 0 12px
+      color-mix(
+        in srgb,
+        var(--category-color)
+        45%,
+        transparent
+      );
+}
+
+.financeExpenseCategoryAmount {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 4px;
+
+  min-width: 82px;
+}
+
+.financeExpenseCategoryAmount strong {
+  color: rgba(255, 255, 255, 0.88);
+
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.financeExpenseCategoryAmount span {
+  color: rgba(255, 255, 255, 0.35);
+
+  font-size: 9px;
+}
+
+
+/* =========================================
+   PURCHASES / SALARIES / COUNTERPARTIES
+   ========================================= */
+
+.financeExpensesSecondaryGrid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.25fr)
+    minmax(330px, 0.75fr);
+
+  gap: 16px;
+}
+
+.financeExpenseControlCards {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+
+  margin-top: 18px;
+}
+
+.financeExpenseControlCards > article {
+  position: relative;
+
+  min-width: 0;
+  min-height: 205px;
+  padding: 18px;
+
+  overflow: hidden;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.financeExpenseControlCards > article::after {
+  content: "";
+
+  position: absolute;
+  right: -45px;
+  bottom: -55px;
+
+  width: 130px;
+  height: 130px;
+
+  border-radius: 50%;
+
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.financeExpenseControlCards
+.is-purchase::after {
+  background:
+    rgba(169, 112, 255, 0.18);
+}
+
+.financeExpenseControlCards
+.is-salary::after {
+  background:
+    rgba(255, 117, 181, 0.16);
+}
+
+.financeExpenseControlCards
+> article
+> div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.financeExpenseControlCards
+> article
+> div:first-child
+> span {
+  display: grid;
+  place-items: center;
+
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  font-size: 17px;
+}
+
+.financeExpenseControlCards small {
+  color:
+    var(--accent-color, #a855f7);
+
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.financeExpenseControlCards h3 {
+  margin: 4px 0 0;
+
+  color: rgba(255, 255, 255, 0.84);
+
+  font-size: 12px;
+}
+
+.financeExpenseControlCards
+> article
+> strong {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  margin-top: 23px;
+
+  color: rgba(255, 255, 255, 0.94);
+
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.financeExpenseControlCards p {
+  position: relative;
+  z-index: 2;
+
+  margin: 12px 0 0;
+
+  color: rgba(255, 255, 255, 0.36);
+
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.financeExpenseCounterparties {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  margin-top: 18px;
+}
+
+.financeExpenseCounterparty {
+  display: grid;
+  grid-template-columns:
+    29px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+  gap: 11px;
+
+  padding: 11px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.065);
+  border-radius: 14px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+.financeExpenseCounterparty
+> span {
+  display: grid;
+  place-items: center;
+
+  width: 29px;
+  height: 29px;
+
+  border-radius: 9px;
+
+  color:
+    var(--accent-color, #a855f7);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      11%,
+      rgba(255, 255, 255, 0.025)
+    );
+
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.financeExpenseCounterparty div {
+  min-width: 0;
+}
+
+.financeExpenseCounterparty
+div strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.8);
+
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseCounterparty
+div small {
+  display: block;
+
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.3);
+
+  font-size: 8px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseCounterparty
+> b {
+  color: #ff8099;
+
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+
+/* =========================================
+   EXPENSES — RESPONSIVE
+   ========================================= */
+
+@media (max-width: 1280px) {
+  .financeExpenseKpiGrid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .financeExpensesMainGrid,
+  .financeExpensesSecondaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .financeExpenseKpiGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .financeExpenseControlCards {
+    grid-template-columns: 1fr;
+  }
+
+  .financeExpensesHero::after {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .financeExpenseKpiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .financeExpenseKpi {
+    min-height: 150px;
+  }
+
+  .financeExpenseCategory {
+    grid-template-columns:
+      38px
+      minmax(0, 1fr);
+  }
+
+  .financeExpenseCategoryAmount {
+    grid-column: 2;
+
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+
+    width: 100%;
+    min-width: 0;
+
+    padding-top: 7px;
+  }
+
+  .financeExpenseCounterparty {
+    grid-template-columns:
+      29px
+      minmax(0, 1fr);
+  }
+
+  .financeExpenseCounterparty
+  > b {
+    grid-column: 2;
+  }
+
+  .financeExpensesJournalButton,
+  #financeExpensesAddButton {
+    width: 100%;
+  }
+}
