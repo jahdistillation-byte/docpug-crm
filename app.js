@@ -10836,6 +10836,37 @@ function openFinanceExpenseModal() {
     50
   );
 }
+function getSafeFinanceDocumentUrl(
+  value
+) {
+  const raw =
+    String(value || "").trim();
+
+  if (!raw) return "";
+
+  try {
+    const url =
+      new URL(
+        raw,
+        window.location.origin
+      );
+
+    if (
+      ![
+        "http:",
+        "https:",
+      ].includes(url.protocol)
+    ) {
+      return "";
+    }
+
+    return url.href;
+
+  } catch {
+    return "";
+  }
+}
+
 async function renderFinanceOperationsTab(
   page
 ) {
@@ -11160,6 +11191,10 @@ async function renderFinanceOperationsTab(
                           getFinanceTransactionMeta(
                             transaction
                           );
+                          const documentUrl =
+  getSafeFinanceDocumentUrl(
+    transaction.document_url
+  );
 
                         const date =
                           new Date(
@@ -11276,17 +11311,45 @@ async function renderFinanceOperationsTab(
                               }
 
                               ${
-                                transaction.visit_id
-                                  ? `
-                                    <small>
-                                      Візит:
-                                      ${escapeHtml(
-                                        transaction.visit_id
-                                      )}
-                                    </small>
-                                  `
-                                  : ""
-                              }
+  transaction.visit_id ||
+  documentUrl
+    ? `
+      <div class="financeOperationActions">
+        ${
+          transaction.visit_id
+            ? `
+              <button
+                type="button"
+                class="financeOperationVisitButton"
+                data-finance-open-visit="${escapeHtml(
+                  transaction.visit_id
+                )}"
+              >
+                🩺 Відкрити візит
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          documentUrl
+            ? `
+              <button
+                type="button"
+                class="financeOperationDocumentButton"
+                data-finance-open-document="${escapeHtml(
+                  documentUrl
+                )}"
+              >
+                🧾 Відкрити чек
+              </button>
+            `
+            : ""
+        }
+      </div>
+    `
+    : ""
+}
                             </div>
 
                             <div
@@ -11377,6 +11440,80 @@ async function renderFinanceOperationsTab(
     bindFinanceSectionNavigation(
       page
     );
+
+    page
+  .querySelector(
+    ".financeOperationsList"
+  )
+  ?.addEventListener(
+    "click",
+    async (event) => {
+      const visitButton =
+        event.target.closest(
+          "[data-finance-open-visit]"
+        );
+
+      if (visitButton) {
+        const visitId =
+          String(
+            visitButton.dataset
+              .financeOpenVisit ||
+            ""
+          ).trim();
+
+        if (!visitId) return;
+
+        visitButton.disabled = true;
+
+        try {
+          await openVisit(
+            visitId
+          );
+
+        } catch (error) {
+          console.error(
+            "Open finance visit failed:",
+            error
+          );
+
+          alert(
+            "Не вдалося відкрити візит."
+          );
+
+          visitButton.disabled = false;
+        }
+
+        return;
+      }
+
+      const documentButton =
+        event.target.closest(
+          "[data-finance-open-document]"
+        );
+
+      if (documentButton) {
+        const documentUrl =
+          getSafeFinanceDocumentUrl(
+            documentButton.dataset
+              .financeOpenDocument
+          );
+
+        if (!documentUrl) {
+          alert(
+            "Посилання на чек недоступне."
+          );
+
+          return;
+        }
+
+        window.open(
+          documentUrl,
+          "_blank",
+          "noopener,noreferrer"
+        );
+      }
+    }
+  );
 
     page
       .querySelector(
@@ -12327,7 +12464,7 @@ async function renderFinanceTab(
     bindFinanceSectionNavigation(
       page
     );
-    
+
     page
   .querySelector(
     "#financeAddExpenseButton"
