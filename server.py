@@ -3505,6 +3505,499 @@ def api_finance_overview():
             "Не вдалося завантажити фінансову аналітику.",
             500
         )      
+    
+@app.post(
+    "/api/finance/transactions"
+)
+def api_finance_transaction_create():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    transaction_type = str(
+        data.get(
+            "transaction_type"
+        )
+        or ""
+    ).strip().lower()
+
+    allowed_types = {
+        "expense":
+            "Витрата",
+
+        "deposit":
+            "Внесення",
+
+        "withdrawal":
+            "Вилучення",
+    }
+
+    if (
+        transaction_type
+        not in allowed_types
+    ):
+        return fail(
+            (
+                "Дозволено створювати лише "
+                "витрату, внесення або вилучення."
+            ),
+            400,
+        )
+
+    payment_method = str(
+        data.get(
+            "payment_method"
+        )
+        or "cash"
+    ).strip().lower()
+
+    allowed_methods = {
+        "cash",
+        "card",
+        "terminal",
+        "transfer",
+        "other",
+    }
+
+    if (
+        payment_method
+        not in allowed_methods
+    ):
+        return fail(
+            "Невірний спосіб оплати.",
+            400,
+        )
+
+    try:
+        amount = round(
+            float(
+                data.get(
+                    "amount"
+                )
+            ),
+            2,
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return fail(
+            "Вкажіть коректну суму.",
+            400,
+        )
+
+    if (
+        amount != amount
+        or amount in {
+            float("inf"),
+            float("-inf"),
+        }
+        or amount <= 0
+    ):
+        return fail(
+            "Сума повинна бути більшою за нуль.",
+            400,
+        )
+
+    if amount > 1_000_000_000:
+        return fail(
+            "Сума операції перевищує допустиме значення.",
+            400,
+        )
+
+    category = str(
+        data.get(
+            "category"
+        )
+        or ""
+    ).strip()
+
+    if (
+        transaction_type
+        == "expense"
+        and not category
+    ):
+        return fail(
+            "Оберіть категорію витрати.",
+            400,
+        )
+
+    if not category:
+        category = {
+            "deposit":
+                "Внесення в касу",
+
+            "withdrawal":
+                "Вилучення з каси",
+        }.get(
+            transaction_type,
+            allowed_types[
+                transaction_type
+            ],
+        )
+
+    description = str(
+        data.get(
+            "description"
+        )
+        or ""
+    ).strip()
+
+    counterparty = str(
+        data.get(
+            "counterparty"
+        )
+        or ""
+    ).strip()
+
+    document_url = str(
+        data.get(
+            "document_url"
+        )
+        or ""
+    ).strip()
+
+    if len(category) > 150:
+        return fail(
+            "Назва категорії надто довга.",
+            400,
+        )
+
+    if len(description) > 2000:
+        return fail(
+            "Опис надто довгий.",
+            400,
+        )
+
+    if len(counterparty) > 300:
+        return fail(
+            "Назва контрагента надто довга.",
+            400,
+        )
+
+    if len(document_url) > 2000:
+        return fail(
+            "Посилання на документ надто довге.",
+            400,
+        )
+
+    metadata = (
+        data.get(
+            "metadata"
+        )
+        or {}
+    )
+
+    if not isinstance(
+        metadata,
+        dict,
+    ):
+        return fail(
+            "metadata повинно бути об’єктом.",
+            400,
+        )
+
+    idempotency_key = str(
+        data.get(
+            "idempotency_key"
+        )
+        or uuid.uuid4()
+    ).strip()
+
+    try:
+        uuid.UUID(
+            idempotency_key
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+        return fail(
+            "Некоректний ключ операції.",
+            400,
+        )
+
+    raw_occurred_at = str(
+        data.get(
+            "occurred_at"
+        )
+        or ""
+    ).strip()
+
+    if raw_occurred_at:
+        try:
+            occurred_datetime = (
+                datetime.fromisoformat(
+                    raw_occurred_at.replace(
+                        "Z",
+                        "+00:00",
+                    )
+                )
+            )
+
+            if (
+                occurred_datetime
+                .tzinfo
+                is None
+            ):
+                occurred_datetime = (
+                    occurred_datetime
+                    .replace(
+                        tzinfo=ZoneInfo(
+                            "Europe/Kyiv"
+                        )
+                    )
+                )
+
+            occurred_at = (
+                occurred_datetime
+                .astimezone(
+                    timezone.utc
+                )
+                .isoformat()
+            )
+
+        except ValueError:
+            return fail(
+                "Некоректна дата операції.",
+                400,
+            )
+
+    else:
+        occurred_at = (
+            datetime
+            .now(
+                timezone.utc
+            )
+            .isoformat()
+        )
+
+    try:
+        existing_result = (
+            supabase
+            .table(
+                "finance_transactions"
+            )
+            .select(
+                "id, org_id, "
+                "transaction_type, "
+                "amount, currency, "
+                "payment_method, "
+                "category, description, "
+                "counterparty, document_url, "
+                "source, status, "
+                "cash_shift_id, visit_id, "
+                "created_by, occurred_at, "
+                "created_at, metadata"
+            )
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "external_provider",
+                "pugcrm",
+            )
+            .eq(
+                "external_reference",
+                idempotency_key,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if existing_result.data:
+            return ok({
+                "transaction":
+                    existing_result
+                    .data[0],
+
+                "idempotent_replay":
+                    True,
+            })
+
+        payload = {
+            "org_id":
+                current_org,
+
+            "created_by":
+                user.get("id"),
+
+            "transaction_type":
+                transaction_type,
+
+            "amount":
+                amount,
+
+            "currency":
+                "UAH",
+
+            "payment_method":
+                payment_method,
+
+            "category":
+                category,
+
+            "description":
+                (
+                    description
+                    or allowed_types[
+                        transaction_type
+                    ]
+                ),
+
+            "counterparty":
+                counterparty
+                or None,
+
+            "document_url":
+                document_url
+                or None,
+
+            "source":
+                "manual",
+
+            "status":
+                "completed",
+
+            "cash_shift_id":
+                None,
+
+            "visit_id":
+                None,
+
+            "external_provider":
+                "pugcrm",
+
+            "external_reference":
+                idempotency_key,
+
+            "occurred_at":
+                occurred_at,
+
+            "metadata": {
+                **metadata,
+
+                "created_via":
+                    "finance_dashboard",
+            },
+        }
+
+        insert_result = (
+            supabase
+            .table(
+                "finance_transactions"
+            )
+            .insert(
+                payload
+            )
+            .execute()
+        )
+
+        if not insert_result.data:
+            raise RuntimeError(
+                "Transaction was not returned after insert."
+            )
+
+        return jsonify({
+            "ok": True,
+
+            "data": {
+                "transaction":
+                    insert_result
+                    .data[0],
+
+                "idempotent_replay":
+                    False,
+            },
+        }), 201
+
+    except Exception as error:
+        error_text = str(
+            error
+        ).lower()
+
+        print(
+            "❌ POST finance transaction:",
+            repr(error),
+            flush=True,
+        )
+
+        if (
+            "duplicate"
+            in error_text
+            or "23505"
+            in error_text
+        ):
+            try:
+                duplicate_result = (
+                    supabase
+                    .table(
+                        "finance_transactions"
+                    )
+                    .select("*")
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "external_provider",
+                        "pugcrm",
+                    )
+                    .eq(
+                        "external_reference",
+                        idempotency_key,
+                    )
+                    .limit(1)
+                    .execute()
+                )
+
+                if duplicate_result.data:
+                    return ok({
+                        "transaction":
+                            duplicate_result
+                            .data[0],
+
+                        "idempotent_replay":
+                            True,
+                    })
+
+            except Exception as duplicate_error:
+                print(
+                    "⚠️ finance duplicate lookup:",
+                    repr(
+                        duplicate_error
+                    ),
+                    flush=True,
+                )
+
+        return fail(
+            "Не вдалося створити фінансову операцію.",
+            500,
+        )    
 # =========================
 # SERVICES API
 # =========================
