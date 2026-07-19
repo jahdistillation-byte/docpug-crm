@@ -4382,6 +4382,153 @@ def api_finance_transactions_list():
             "Не вдалося завантажити фінансові операції.",
             500,
         )    
+    
+@app.get(
+    "/api/finance/expenses/overview"
+)
+def api_finance_expenses_overview():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    kyiv_today = (
+        datetime.now(
+            ZoneInfo(
+                "Europe/Kyiv"
+            )
+        )
+        .date()
+    )
+
+    default_date_from = (
+        kyiv_today.replace(
+            day=1
+        )
+    )
+
+    raw_date_from = str(
+        request.args.get(
+            "date_from"
+        )
+        or default_date_from
+    ).strip()
+
+    raw_date_to = str(
+        request.args.get(
+            "date_to"
+        )
+        or kyiv_today
+    ).strip()
+
+    try:
+        date_from = (
+            datetime.strptime(
+                raw_date_from,
+                "%Y-%m-%d",
+            )
+            .date()
+        )
+
+        date_to = (
+            datetime.strptime(
+                raw_date_to,
+                "%Y-%m-%d",
+            )
+            .date()
+        )
+
+    except ValueError:
+        return fail(
+            "Invalid date format. Use YYYY-MM-DD.",
+            400,
+        )
+
+    if date_from > date_to:
+        return fail(
+            "date_from cannot be later than date_to.",
+            400,
+        )
+
+    if (
+        date_to -
+        date_from
+    ).days > 366:
+        return fail(
+            "Finance period cannot exceed 366 days.",
+            400,
+        )
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "get_finance_expenses_overview",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_date_from":
+                        date_from.isoformat(),
+
+                    "p_date_to":
+                        date_to.isoformat(),
+                }
+            )
+            .execute()
+        )
+
+        overview = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                overview,
+                list
+            )
+            and overview
+        ):
+            overview = (
+                overview[0]
+            )
+
+        if not isinstance(
+            overview,
+            dict,
+        ):
+            overview = {}
+
+        return ok(
+            overview
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET finance expenses overview:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити аналітику витрат.",
+            500,
+        )    
 # =========================
 # SERVICES API
 # =========================
