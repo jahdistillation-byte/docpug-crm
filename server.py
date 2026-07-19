@@ -3998,6 +3998,390 @@ def api_finance_transaction_create():
             "Не вдалося створити фінансову операцію.",
             500,
         )    
+    
+@app.get(
+    "/api/finance/transactions"
+)
+def api_finance_transactions_list():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    allowed_types = {
+        "payment",
+        "refund",
+        "expense",
+        "deposit",
+        "withdrawal",
+    }
+
+    allowed_methods = {
+        "cash",
+        "card",
+        "terminal",
+        "transfer",
+        "other",
+    }
+
+    allowed_statuses = {
+        "pending",
+        "completed",
+        "cancelled",
+        "failed",
+    }
+
+    transaction_type = str(
+        request.args.get(
+            "transaction_type"
+        )
+        or ""
+    ).strip().lower()
+
+    payment_method = str(
+        request.args.get(
+            "payment_method"
+        )
+        or ""
+    ).strip().lower()
+
+    status = str(
+        request.args.get(
+            "status"
+        )
+        or ""
+    ).strip().lower()
+
+    raw_date_from = str(
+        request.args.get(
+            "date_from"
+        )
+        or ""
+    ).strip()
+
+    raw_date_to = str(
+        request.args.get(
+            "date_to"
+        )
+        or ""
+    ).strip()
+
+    raw_search = str(
+        request.args.get(
+            "search"
+        )
+        or ""
+    ).strip()
+
+    if (
+        transaction_type
+        and transaction_type
+        not in allowed_types
+    ):
+        return fail(
+            "Невірний тип фінансової операції.",
+            400,
+        )
+
+    if (
+        payment_method
+        and payment_method
+        not in allowed_methods
+    ):
+        return fail(
+            "Невірний спосіб оплати.",
+            400,
+        )
+
+    if (
+        status
+        and status
+        not in allowed_statuses
+    ):
+        return fail(
+            "Невірний статус операції.",
+            400,
+        )
+
+    try:
+        limit = int(
+            request.args.get(
+                "limit"
+            )
+            or 50
+        )
+
+        offset = int(
+            request.args.get(
+                "offset"
+            )
+            or 0
+        )
+
+    except ValueError:
+        return fail(
+            "Некоректні параметри пагінації.",
+            400,
+        )
+
+    limit = min(
+        max(
+            limit,
+            1,
+        ),
+        200,
+    )
+
+    offset = max(
+        offset,
+        0,
+    )
+
+    kyiv_zone = ZoneInfo(
+        "Europe/Kyiv"
+    )
+
+    date_from = None
+    date_to = None
+
+    try:
+        if raw_date_from:
+            date_from = (
+                datetime.strptime(
+                    raw_date_from,
+                    "%Y-%m-%d",
+                )
+                .date()
+            )
+
+        if raw_date_to:
+            date_to = (
+                datetime.strptime(
+                    raw_date_to,
+                    "%Y-%m-%d",
+                )
+                .date()
+            )
+
+    except ValueError:
+        return fail(
+            "Invalid date format. Use YYYY-MM-DD.",
+            400,
+        )
+
+    if (
+        date_from
+        and date_to
+        and date_from > date_to
+    ):
+        return fail(
+            "date_from cannot be later than date_to.",
+            400,
+        )
+
+    if (
+        date_from
+        and date_to
+        and (
+            date_to -
+            date_from
+        ).days > 366
+    ):
+        return fail(
+            "Finance period cannot exceed 366 days.",
+            400,
+        )
+
+    try:
+        query = (
+            supabase
+            .table(
+                "finance_transactions"
+            )
+            .select(
+                "id, org_id, "
+                "transaction_type, "
+                "amount, currency, "
+                "payment_method, "
+                "category, description, "
+                "counterparty, document_url, "
+                "source, status, "
+                "cash_shift_id, visit_id, "
+                "created_by, occurred_at, "
+                "created_at, updated_at, "
+                "metadata"
+            )
+            .eq(
+                "org_id",
+                current_org,
+            )
+        )
+
+        if transaction_type:
+            query = query.eq(
+                "transaction_type",
+                transaction_type,
+            )
+
+        if payment_method:
+            query = query.eq(
+                "payment_method",
+                payment_method,
+            )
+
+        if status:
+            query = query.eq(
+                "status",
+                status,
+            )
+
+        if date_from:
+            start_at = datetime(
+                date_from.year,
+                date_from.month,
+                date_from.day,
+                tzinfo=kyiv_zone,
+            )
+
+            query = query.gte(
+                "occurred_at",
+                start_at
+                .astimezone(
+                    timezone.utc
+                )
+                .isoformat(),
+            )
+
+        if date_to:
+            next_date = (
+                date_to +
+                timedelta(
+                    days=1
+                )
+            )
+
+            end_at = datetime(
+                next_date.year,
+                next_date.month,
+                next_date.day,
+                tzinfo=kyiv_zone,
+            )
+
+            query = query.lt(
+                "occurred_at",
+                end_at
+                .astimezone(
+                    timezone.utc
+                )
+                .isoformat(),
+            )
+
+        if raw_search:
+            safe_search = "".join(
+                character
+                for character
+                in raw_search[:100]
+                if (
+                    character.isalnum()
+                    or character
+                    in {
+                        " ",
+                        "-",
+                        "_",
+                    }
+                )
+            ).strip()
+
+            if safe_search:
+                query = query.or_(
+                    (
+                        "category.ilike.%"
+                        f"{safe_search}"
+                        "%,"
+                        "description.ilike.%"
+                        f"{safe_search}"
+                        "%,"
+                        "counterparty.ilike.%"
+                        f"{safe_search}"
+                        "%"
+                    )
+                )
+
+        result = (
+            query
+            .order(
+                "occurred_at",
+                desc=True,
+            )
+            .range(
+                offset,
+                offset + limit,
+            )
+            .execute()
+        )
+
+        rows = (
+            result.data
+            or []
+        )
+
+        has_more = (
+            len(rows) >
+            limit
+        )
+
+        items = rows[:limit]
+
+        return ok({
+            "items":
+                items,
+
+            "pagination": {
+                "limit":
+                    limit,
+
+                "offset":
+                    offset,
+
+                "returned":
+                    len(items),
+
+                "has_more":
+                    has_more,
+
+                "next_offset":
+                    (
+                        offset +
+                        len(items)
+                        if has_more
+                        else None
+                    ),
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET finance transactions:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити фінансові операції.",
+            500,
+        )    
 # =========================
 # SERVICES API
 # =========================
