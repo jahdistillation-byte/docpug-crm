@@ -9973,6 +9973,613 @@ function getFinanceTransactionMeta(
       },
   };
 }
+async function createFinanceTransactionApi(
+  payload
+) {
+  const response =
+    await fetch(
+      "/api/finance/transactions",
+      {
+        method: "POST",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          ),
+      }
+    );
+
+  let result = null;
+
+  try {
+    result =
+      await response.json();
+
+  } catch {
+    result = null;
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      (
+        "Не вдалося створити " +
+        "фінансову операцію."
+      )
+    );
+  }
+
+  return result.data;
+}
+
+
+function openFinanceExpenseModal() {
+  if (
+    !isOwnerOrAdmin()
+  ) {
+    openDeleteModal(
+      (
+        "Додавати витрати може лише " +
+        "адміністратор або власник клініки."
+      ),
+      null,
+      "info"
+    );
+
+    return;
+  }
+
+  document
+    .getElementById(
+      "financeExpenseModal"
+    )
+    ?.remove();
+
+  const now =
+    new Date();
+
+  const localDateTime =
+    new Date(
+      now.getTime() -
+      now.getTimezoneOffset() *
+      60_000
+    )
+      .toISOString()
+      .slice(
+        0,
+        16
+      );
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.id =
+    "financeExpenseModal";
+
+  modal.className =
+    "financeExpenseOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="financeExpenseBackdrop"
+      data-close-finance-expense
+    ></div>
+
+    <section
+      class="financeExpenseModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="financeExpenseTitle"
+    >
+      <header class="financeExpenseHeader">
+        <div class="financeExpenseHeaderIcon">
+          −
+        </div>
+
+        <div>
+          <span>
+            ФІНАНСОВА ОПЕРАЦІЯ
+          </span>
+
+          <h2 id="financeExpenseTitle">
+            Додати витрату
+          </h2>
+
+          <p>
+            Витрата одразу потрапить
+            до аналітики та журналу.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="financeExpenseClose"
+          data-close-finance-expense
+          aria-label="Закрити"
+        >
+          ✕
+        </button>
+      </header>
+
+      <form
+        class="financeExpenseForm"
+        id="financeExpenseForm"
+      >
+        <div
+          class="financeExpenseError"
+          id="financeExpenseError"
+          hidden
+        ></div>
+
+        <div class="financeExpenseAmountBlock">
+          <label>
+            <span>
+              Сума витрати
+            </span>
+
+            <div class="financeExpenseAmountInput">
+              <input
+                type="number"
+                name="amount"
+                min="0.01"
+                max="1000000000"
+                step="0.01"
+                placeholder="0"
+                inputmode="decimal"
+                required
+                autofocus
+              >
+
+              <b>₴</b>
+            </div>
+          </label>
+        </div>
+
+        <div class="financeExpenseGrid">
+          <label class="financeExpenseField">
+            <span>
+              Категорія
+            </span>
+
+            <select
+              name="category"
+              required
+            >
+              <option value="">
+                Оберіть категорію
+              </option>
+
+              <option value="Закупівля препаратів">
+                Закупівля препаратів
+              </option>
+
+              <option value="Витратні матеріали">
+                Витратні матеріали
+              </option>
+
+              <option value="Оренда">
+                Оренда
+              </option>
+
+              <option value="Комунальні послуги">
+                Комунальні послуги
+              </option>
+
+              <option value="Зарплата">
+                Зарплата
+              </option>
+
+              <option value="Податки">
+                Податки
+              </option>
+
+              <option value="Маркетинг">
+                Маркетинг
+              </option>
+
+              <option value="Обслуговування обладнання">
+                Обслуговування обладнання
+              </option>
+
+              <option value="Транспорт">
+                Транспорт
+              </option>
+
+              <option value="Інше">
+                Інше
+              </option>
+            </select>
+          </label>
+
+          <label class="financeExpenseField">
+            <span>
+              Спосіб оплати
+            </span>
+
+            <select
+              name="payment_method"
+              required
+            >
+              <option value="cash">
+                Готівка
+              </option>
+
+              <option value="card">
+                Картка / термінал
+              </option>
+
+              <option value="transfer">
+                Банківський переказ
+              </option>
+
+              <option value="other">
+                Інше
+              </option>
+            </select>
+          </label>
+
+          <label class="financeExpenseField">
+            <span>
+              Дата та час
+            </span>
+
+            <input
+              type="datetime-local"
+              name="occurred_at"
+              value="${localDateTime}"
+              required
+            >
+          </label>
+
+          <label class="financeExpenseField">
+            <span>
+              Постачальник / отримувач
+            </span>
+
+            <input
+              type="text"
+              name="counterparty"
+              maxlength="300"
+              placeholder="Наприклад, постачальник"
+            >
+          </label>
+        </div>
+
+        <label class="financeExpenseField financeExpenseWide">
+          <span>
+            Опис
+          </span>
+
+          <textarea
+            name="description"
+            maxlength="2000"
+            rows="3"
+            placeholder="За що сплачено та додаткові деталі…"
+          ></textarea>
+        </label>
+
+        <label class="financeExpenseField financeExpenseWide">
+          <span>
+            Посилання на чек або документ
+          </span>
+
+          <input
+            type="url"
+            name="document_url"
+            maxlength="2000"
+            placeholder="https://…"
+          >
+        </label>
+
+        <div class="financeExpenseHint">
+          <span>i</span>
+
+          <p>
+            Операція буде зафіксована
+            від імені поточного користувача.
+            Після проведення вона вплине
+            на грошовий потік і прибуток.
+          </p>
+        </div>
+
+        <footer class="financeExpenseFooter">
+          <button
+            type="button"
+            class="financeExpenseCancel"
+            data-close-finance-expense
+          >
+            Скасувати
+          </button>
+
+          <button
+            type="submit"
+            class="financeExpenseSubmit"
+            id="financeExpenseSubmit"
+          >
+            <span>
+              Провести витрату
+            </span>
+
+            <strong>
+              →
+            </strong>
+          </button>
+        </footer>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  document.body.classList.add(
+    "financeExpenseModalOpen"
+  );
+
+  const form =
+    modal.querySelector(
+      "#financeExpenseForm"
+    );
+
+  const submitButton =
+    modal.querySelector(
+      "#financeExpenseSubmit"
+    );
+
+  const errorElement =
+    modal.querySelector(
+      "#financeExpenseError"
+    );
+
+  let submitting = false;
+
+  const close = () => {
+    if (submitting) return;
+
+    modal.remove();
+
+    document.body.classList.remove(
+      "financeExpenseModalOpen"
+    );
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key ===
+      "Escape"
+    ) {
+      close();
+    }
+  };
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+
+  modal.addEventListener(
+    "click",
+    (
+      event
+    ) => {
+      if (
+        event.target.closest(
+          "[data-close-finance-expense]"
+        )
+      ) {
+        close();
+      }
+    }
+  );
+
+  form?.addEventListener(
+    "submit",
+    async (
+      event
+    ) => {
+      event.preventDefault();
+
+      if (submitting) return;
+
+      const formData =
+        new FormData(
+          form
+        );
+
+      const amount =
+        Number(
+          formData.get(
+            "amount"
+          )
+        );
+
+      const category =
+        String(
+          formData.get(
+            "category"
+          )
+          || ""
+        ).trim();
+
+      if (
+        !Number.isFinite(
+          amount
+        )
+        || amount <= 0
+      ) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          "Вкажіть коректну суму витрати.";
+
+        return;
+      }
+
+      if (!category) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          "Оберіть категорію витрати.";
+
+        return;
+      }
+
+      submitting = true;
+
+      errorElement.hidden =
+        true;
+
+      submitButton.disabled =
+        true;
+
+      submitButton.innerHTML = `
+        <span>
+          Проводимо операцію…
+        </span>
+
+        <div class="visitPaymentSpinner"></div>
+      `;
+
+      try {
+        await createFinanceTransactionApi({
+          transaction_type:
+            "expense",
+
+          amount,
+
+          category,
+
+          payment_method:
+            String(
+              formData.get(
+                "payment_method"
+              )
+              || "cash"
+            ),
+
+          occurred_at:
+            String(
+              formData.get(
+                "occurred_at"
+              )
+              || ""
+            ),
+
+          counterparty:
+            String(
+              formData.get(
+                "counterparty"
+              )
+              || ""
+            ).trim(),
+
+          description:
+            String(
+              formData.get(
+                "description"
+              )
+              || ""
+            ).trim(),
+
+          document_url:
+            String(
+              formData.get(
+                "document_url"
+              )
+              || ""
+            ).trim(),
+
+          idempotency_key:
+            crypto.randomUUID(),
+
+          metadata: {
+            expense_form_version:
+              1,
+          },
+        });
+
+        modal.remove();
+
+        document.body.classList.remove(
+          "financeExpenseModalOpen"
+        );
+
+        document.removeEventListener(
+          "keydown",
+          onKeydown
+        );
+
+        await renderFinanceTab();
+
+        openDeleteModal(
+          "Витрату успішно додано до фінансового журналу.",
+          null,
+          "info"
+        );
+
+      } catch (error) {
+        console.error(
+          "create finance expense failed:",
+          error
+        );
+
+        submitting = false;
+
+        submitButton.disabled =
+          false;
+
+        submitButton.innerHTML = `
+          <span>
+            Провести витрату
+          </span>
+
+          <strong>
+            →
+          </strong>
+        `;
+
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          error?.message ||
+          "Не вдалося додати витрату.";
+      }
+    }
+  );
+
+  window.setTimeout(
+    () => {
+      modal
+        .querySelector(
+          'input[name="amount"]'
+        )
+        ?.focus();
+    },
+    50
+  );
+}
 
 async function renderFinanceTab(
   options = {}
@@ -10112,7 +10719,16 @@ async function renderFinanceTab(
           </div>
 
           <div class="financeHeroActions">
-            <div class="financePresetSwitch">
+  <button
+    type="button"
+    class="financeAddExpenseButton"
+    id="financeAddExpenseButton"
+  >
+    <span>−</span>
+    Додати витрату
+  </button>
+
+  <div class="financePresetSwitch">
               ${
                 [
                   [
@@ -10210,7 +10826,7 @@ async function renderFinanceTab(
             </div>
 
             <span>
-              Чиста виручка
+              Надходження
             </span>
 
             <strong>
@@ -10220,13 +10836,14 @@ async function renderFinanceTab(
             </strong>
 
             <small>
-              ${Number(
-                summary
-                  .paid_visits_count ||
-                0
-              )}
-              оплачених візитів
-            </small>
+  Оплати за
+  ${Number(
+    summary
+      .paid_visits_count ||
+    0
+  )}
+  візитів
+</small>
           </article>
 
           <article class="financeKpiCard is-profit">
@@ -10682,6 +11299,17 @@ async function renderFinanceTab(
       </div>
     `;
 
+    page
+  .querySelector(
+    "#financeAddExpenseButton"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+      openFinanceExpenseModal();
+    }
+  );
+  
     page
       .querySelectorAll(
         "[data-finance-preset]"
