@@ -383,6 +383,37 @@ function openDeleteModal(
     cancelBtn.style.display =
       "none";
 
+} else if (
+  mode ===
+  "operation-success"
+) {
+  modal.classList.add(
+    "is-success"
+  );
+
+  if (icon) {
+    icon.textContent = "✓";
+  }
+
+  if (title) {
+    title.textContent =
+      "Операцію проведено";
+  }
+
+  confirmBtn.textContent =
+    "Готово";
+
+  confirmBtn.classList.add(
+    "primary"
+  );
+
+  confirmBtn.onclick = () => {
+    closeDeleteModal();
+  };
+
+  cancelBtn.style.display =
+    "none";
+
   } else if (mode === "success") {
     if (icon) {
       icon.textContent = "✅";
@@ -10533,10 +10564,10 @@ function openFinanceExpenseModal() {
         await renderFinanceTab();
 
         openDeleteModal(
-          "Витрату успішно додано до фінансового журналу.",
-          null,
-          "info"
-        );
+  "Витрату успішно додано до фінансового журналу.",
+  null,
+  "operation-success"
+);
 
       } catch (error) {
         console.error(
@@ -11309,7 +11340,7 @@ async function renderFinanceTab(
       openFinanceExpenseModal();
     }
   );
-  
+
     page
       .querySelectorAll(
         "[data-finance-preset]"

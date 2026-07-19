@@ -26036,3 +26036,43 @@ body.financeExpenseModalOpen {
     width: 100%;
   }
 }
+.financeExpenseAmountInput
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.financeExpenseAmountInput
+input[type="number"]::-webkit-inner-spin-button,
+.financeExpenseAmountInput
+input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.deleteModalOverlay.is-success
+.deleteModal {
+  border-color: rgba(91, 232, 158, 0.28);
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(66, 222, 142, 0.16),
+      transparent 36%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(20, 48, 39, 0.98),
+      rgba(9, 18, 19, 0.99)
+    );
+  box-shadow:
+    0 34px 100px rgba(0, 0, 0, 0.65),
+    0 0 46px rgba(70, 224, 146, 0.16);
+}
+
+.deleteModalOverlay.is-success
+.deleteIcon {
+  border-color: rgba(103, 239, 170, 0.3);
+  background: rgba(71, 222, 145, 0.12);
+  box-shadow: 0 0 34px rgba(70, 224, 146, 0.2);
+  color: #72e6a7;
+}
