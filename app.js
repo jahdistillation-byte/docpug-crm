@@ -546,6 +546,7 @@ const CRM_ROLE_ACCESS = {
       "services",
       "calendar",
       "stock",
+      "finance",
       "team",
       "settings",
     ],
@@ -738,6 +739,7 @@ const TAB_ROUTES = new Set([
   "services",
   "calendar",
   "stock",
+  "finance",
   "team",
   "settings",
 ]);
@@ -857,6 +859,11 @@ async function routeFromHash() {
 if (route === "hospital") renderHospitalTab();
 if (route === "services") renderServicesTab();
     if (route === "stock") renderStockTab();
+    if (
+  route === "finance"
+) {
+  await renderFinanceTab();
+}
     if (route === "team") renderTeamTab();
     if (route === "calendar") {
   state.selectedVisitId = null;
@@ -9288,6 +9295,1288 @@ function saveNormalizedStock(items) {
   return normalized;
 }
 
+const financeDashboardState = {
+  preset: "month",
+  dateFrom: "",
+  dateTo: "",
+};
+
+function financeDateToIso(
+  date
+) {
+  const year =
+    date.getFullYear();
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+  const day =
+    String(
+      date.getDate()
+    ).padStart(2, "0");
+
+  return (
+    `${year}-${month}-${day}`
+  );
+}
+
+function getFinancePresetDates(
+  preset = "month"
+) {
+  const today =
+    new Date();
+
+  const dateTo =
+    new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+  let dateFrom =
+    new Date(dateTo);
+
+  if (
+    preset === "week"
+  ) {
+    dateFrom.setDate(
+      dateFrom.getDate() - 6
+    );
+  } else if (
+    preset === "month"
+  ) {
+    dateFrom =
+      new Date(
+        dateTo.getFullYear(),
+        dateTo.getMonth(),
+        1
+      );
+  }
+
+  return {
+    dateFrom:
+      financeDateToIso(
+        dateFrom
+      ),
+
+    dateTo:
+      financeDateToIso(
+        dateTo
+      ),
+  };
+}
+
+async function loadFinanceOverviewApi(
+  dateFrom,
+  dateTo
+) {
+  const params =
+    new URLSearchParams({
+      date_from:
+        dateFrom,
+
+      date_to:
+        dateTo,
+    });
+
+  const response =
+    await fetch(
+      `/api/finance/overview?${params.toString()}`,
+      {
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok ||
+    !result?.data
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити фінанси (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+function buildFinanceTrendChart(
+  rows
+) {
+  const data =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+  if (!data.length) {
+    return `
+      <div class="financeChartEmpty">
+        <span>⌁</span>
+
+        <strong>
+          За цей період ще немає операцій
+        </strong>
+
+        <p>
+          Графік зʼявиться після першої
+          проведеної оплати.
+        </p>
+      </div>
+    `;
+  }
+
+  const width = 820;
+  const height = 220;
+  const padX = 22;
+  const padY = 22;
+
+  const values =
+    data.map(
+      (row) =>
+        Number(
+          row.net || 0
+        )
+    );
+
+  const maxValue =
+    Math.max(
+      ...values,
+      1
+    );
+
+  const points =
+    data.map(
+      (
+        row,
+        index
+      ) => {
+        const x =
+          data.length === 1
+            ? width / 2
+            : (
+                padX +
+                index *
+                (
+                  (
+                    width -
+                    padX * 2
+                  ) /
+                  (
+                    data.length -
+                    1
+                  )
+                )
+              );
+
+        const y =
+          height -
+          padY -
+          (
+            Number(
+              row.net || 0
+            ) /
+            maxValue
+          ) *
+          (
+            height -
+            padY * 2
+          );
+
+        return {
+          x,
+          y,
+          row,
+        };
+      }
+    );
+
+  let linePath =
+    points
+      .map(
+        (
+          point,
+          index
+        ) => {
+          return (
+            `${
+              index === 0
+                ? "M"
+                : "L"
+            } ` +
+            `${point.x.toFixed(2)} ` +
+            `${point.y.toFixed(2)}`
+          );
+        }
+      )
+      .join(" ");
+
+  if (
+    points.length === 1
+  ) {
+    linePath =
+      `M ${padX} ${points[0].y.toFixed(2)} ` +
+      `L ${width - padX} ${points[0].y.toFixed(2)}`;
+  }
+
+  const firstPoint =
+    points[0];
+
+  const lastPoint =
+    points[
+      points.length - 1
+    ];
+
+  const areaPath =
+    `${linePath} ` +
+    `L ${lastPoint.x.toFixed(2)} ${height - padY} ` +
+    `L ${firstPoint.x.toFixed(2)} ${height - padY} Z`;
+
+  const circles =
+    points
+      .map(
+        (point) => `
+          <circle
+            cx="${point.x}"
+            cy="${point.y}"
+            r="5"
+          >
+            <title>
+              ${escapeHtml(
+                String(
+                  point.row.date
+                )
+              )}:
+              ${formatVisitFinanceMoney(
+                point.row.net
+              )}
+            </title>
+          </circle>
+        `
+      )
+      .join("");
+
+  return `
+    <div class="financeChartCanvas">
+      <svg
+        viewBox="0 0 ${width} ${height}"
+        role="img"
+        aria-label="Динаміка чистого доходу"
+      >
+        <defs>
+          <linearGradient
+            id="financeAreaGradient"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="0%"
+              stop-color="#b45cff"
+              stop-opacity="0.42"
+            ></stop>
+
+            <stop
+              offset="100%"
+              stop-color="#b45cff"
+              stop-opacity="0"
+            ></stop>
+          </linearGradient>
+        </defs>
+
+        <line
+          x1="${padX}"
+          y1="${height * 0.25}"
+          x2="${width - padX}"
+          y2="${height * 0.25}"
+        ></line>
+
+        <line
+          x1="${padX}"
+          y1="${height * 0.5}"
+          x2="${width - padX}"
+          y2="${height * 0.5}"
+        ></line>
+
+        <line
+          x1="${padX}"
+          y1="${height * 0.75}"
+          x2="${width - padX}"
+          y2="${height * 0.75}"
+        ></line>
+
+        <path
+          class="financeChartArea"
+          d="${areaPath}"
+        ></path>
+
+        <path
+          class="financeChartLine"
+          d="${linePath}"
+        ></path>
+
+        <g class="financeChartPoints">
+          ${circles}
+        </g>
+      </svg>
+
+      <div class="financeChartLabels">
+        <span>
+          ${escapeHtml(
+            String(
+              data[0]?.date || ""
+            )
+          )}
+        </span>
+
+        <span>
+          ${escapeHtml(
+            String(
+              data[
+                data.length - 1
+              ]?.date || ""
+            )
+          )}
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+function getFinanceTransactionMeta(
+  transaction
+) {
+  const methods = {
+    cash:
+      "Готівка",
+
+    card:
+      "Картка / термінал",
+
+    terminal:
+      "Картка / термінал",
+
+    transfer:
+      "Переказ",
+
+    other:
+      "Інше",
+  };
+
+  const types = {
+    payment: {
+      icon: "↗",
+      label: "Оплата",
+      className:
+        "is-income",
+    },
+
+    refund: {
+      icon: "↙",
+      label: "Повернення",
+      className:
+        "is-outcome",
+    },
+
+    expense: {
+      icon: "−",
+      label: "Витрата",
+      className:
+        "is-outcome",
+    },
+
+    deposit: {
+      icon: "+",
+      label: "Внесення",
+      className:
+        "is-income",
+    },
+
+    withdrawal: {
+      icon: "−",
+      label: "Вилучення",
+      className:
+        "is-outcome",
+    },
+  };
+
+  return {
+    method:
+      methods[
+        transaction
+          .payment_method
+      ] ||
+      "Інше",
+
+    type:
+      types[
+        transaction
+          .transaction_type
+      ] || {
+        icon: "•",
+
+        label:
+          transaction
+            .transaction_type ||
+          "Операція",
+
+        className: "",
+      },
+  };
+}
+
+async function renderFinanceTab(
+  options = {}
+) {
+  const page =
+    document.querySelector(
+      '.page[data-page="finance"]'
+    );
+
+  if (!page) return;
+
+  if (
+    !isOwnerOrAdmin()
+  ) {
+    setHash(
+      getDefaultAllowedRoute()
+    );
+
+    return;
+  }
+
+  if (options.preset) {
+    financeDashboardState.preset =
+      options.preset;
+  }
+
+  if (
+    !financeDashboardState.dateFrom ||
+    !financeDashboardState.dateTo
+  ) {
+    const initial =
+      getFinancePresetDates(
+        financeDashboardState
+          .preset
+      );
+
+    financeDashboardState.dateFrom =
+      initial.dateFrom;
+
+    financeDashboardState.dateTo =
+      initial.dateTo;
+  }
+
+  if (options.dateFrom) {
+    financeDashboardState.dateFrom =
+      options.dateFrom;
+  }
+
+  if (options.dateTo) {
+    financeDashboardState.dateTo =
+      options.dateTo;
+  }
+
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+
+      <strong>
+        Формуємо фінансову аналітику…
+      </strong>
+    </div>
+  `;
+
+  try {
+    const overview =
+      await loadFinanceOverviewApi(
+        financeDashboardState
+          .dateFrom,
+
+        financeDashboardState
+          .dateTo
+      );
+
+    const summary =
+      overview.summary ||
+      {};
+
+    const paymentMethods =
+      overview.payment_methods ||
+      {};
+
+    const transactions =
+      Array.isArray(
+        overview
+          .recent_transactions
+      )
+        ? overview
+            .recent_transactions
+        : [];
+
+    const paymentTotal =
+      Number(
+        summary.payments || 0
+      );
+
+    const cashPercent =
+      paymentTotal > 0
+        ? (
+            Number(
+              paymentMethods.cash ||
+              0
+            ) /
+            paymentTotal
+          ) *
+          100
+        : 0;
+
+    const cardPercent =
+      paymentTotal > 0
+        ? (
+            Number(
+              paymentMethods.card ||
+              0
+            ) /
+            paymentTotal
+          ) *
+          100
+        : 0;
+
+    page.innerHTML = `
+      <div class="financeDashboard">
+        <header class="financeHero">
+          <div>
+            <span class="financeEyebrow">
+              ФІНАНСОВИЙ ЦЕНТР
+            </span>
+
+            <h1>
+              Фінанси клініки
+            </h1>
+
+            <p>
+              Гроші, прибуток, борги
+              та операційна ефективність
+              в одному просторі.
+            </p>
+          </div>
+
+          <div class="financeHeroActions">
+            <div class="financePresetSwitch">
+              ${
+                [
+                  [
+                    "today",
+                    "Сьогодні",
+                  ],
+
+                  [
+                    "week",
+                    "7 днів",
+                  ],
+
+                  [
+                    "month",
+                    "Місяць",
+                  ],
+                ]
+                  .map(
+                    ([
+                      key,
+                      label,
+                    ]) => `
+                      <button
+                        type="button"
+                        class="${
+                          financeDashboardState
+                            .preset ===
+                          key
+                            ? "active"
+                            : ""
+                        }"
+                        data-finance-preset="${key}"
+                      >
+                        ${label}
+                      </button>
+                    `
+                  )
+                  .join("")
+              }
+            </div>
+
+            <button
+              class="financeRefreshButton"
+              type="button"
+              id="financeRefreshButton"
+            >
+              ↻ Оновити
+            </button>
+          </div>
+        </header>
+
+        <section class="financeDateRange">
+          <label>
+            <span>
+              Початок періоду
+            </span>
+
+            <input
+              type="date"
+              id="financeDateFrom"
+              value="${
+                financeDashboardState
+                  .dateFrom
+              }"
+            >
+          </label>
+
+          <label>
+            <span>
+              Кінець періоду
+            </span>
+
+            <input
+              type="date"
+              id="financeDateTo"
+              value="${
+                financeDashboardState
+                  .dateTo
+              }"
+            >
+          </label>
+
+          <button
+            type="button"
+            id="financeApplyPeriod"
+          >
+            Застосувати період
+          </button>
+        </section>
+
+        <section class="financeKpiGrid">
+          <article class="financeKpiCard is-revenue">
+            <div class="financeKpiIcon">
+              ₴
+            </div>
+
+            <span>
+              Чиста виручка
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.net_revenue
+              )}
+            </strong>
+
+            <small>
+              ${Number(
+                summary
+                  .paid_visits_count ||
+                0
+              )}
+              оплачених візитів
+            </small>
+          </article>
+
+          <article class="financeKpiCard is-profit">
+            <div class="financeKpiIcon">
+              ↗
+            </div>
+
+            <span>
+              Орієнтовний прибуток
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary
+                  .estimated_profit
+              )}
+            </strong>
+
+            <small>
+              Після витрат і
+              собівартості складу
+            </small>
+          </article>
+
+          <article class="financeKpiCard is-check">
+            <div class="financeKpiIcon">
+              ◇
+            </div>
+
+            <span>
+              Середній чек
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.average_check
+              )}
+            </strong>
+
+            <small>
+              За оплаченими візитами
+            </small>
+          </article>
+
+          <article class="financeKpiCard is-debt">
+            <div class="financeKpiIcon">
+              !
+            </div>
+
+            <span>
+              Заборгованість
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.outstanding
+              )}
+            </strong>
+
+            <small>
+              ${Number(
+                summary
+                  .debt_visits_count ||
+                0
+              )}
+              візитів із боргом
+            </small>
+          </article>
+        </section>
+
+        <section class="financeMainGrid">
+          <article class="financePanel financeTrendPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  ДИНАМІКА
+                </span>
+
+                <h2>
+                  Грошовий потік
+                </h2>
+              </div>
+
+              <strong>
+                ${formatVisitFinanceMoney(
+                  summary.net_cash_flow
+                )}
+              </strong>
+            </div>
+
+            ${buildFinanceTrendChart(
+              overview.daily
+            )}
+          </article>
+
+          <article class="financePanel financeMethodsPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  СТРУКТУРА
+                </span>
+
+                <h2>
+                  Способи оплати
+                </h2>
+              </div>
+            </div>
+
+            <div class="financeMethodsVisual">
+              <div
+                class="financeDonut"
+                style="
+                  --cash:${cashPercent}%;
+                  --card:${
+                    cashPercent +
+                    cardPercent
+                  }%;
+                "
+              >
+                <div>
+                  <strong>
+                    ${formatVisitFinanceMoney(
+                      paymentTotal
+                    )}
+                  </strong>
+
+                  <span>
+                    отримано
+                  </span>
+                </div>
+              </div>
+
+              <div class="financeMethodsLegend">
+                <div>
+                  <i class="cash"></i>
+
+                  <span>
+                    Готівка
+                  </span>
+
+                  <strong>
+                    ${formatVisitFinanceMoney(
+                      paymentMethods.cash
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <i class="card"></i>
+
+                  <span>
+                    Картка
+                  </span>
+
+                  <strong>
+                    ${formatVisitFinanceMoney(
+                      paymentMethods.card
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <i class="transfer"></i>
+
+                  <span>
+                    Переказ
+                  </span>
+
+                  <strong>
+                    ${formatVisitFinanceMoney(
+                      paymentMethods
+                        .transfer
+                    )}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="financeSecondaryGrid">
+          <article class="financePanel financeDebtPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  ДЕБІТОРКА
+                </span>
+
+                <h2>
+                  Стан оплат
+                </h2>
+              </div>
+            </div>
+
+            <div class="financeDebtNumbers">
+              <div>
+                <span>
+                  Нараховано
+                </span>
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    summary.billed
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Отримано
+                </span>
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    summary.payments
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Залишилось
+                </span>
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    summary.outstanding
+                  )}
+                </strong>
+              </div>
+            </div>
+
+            <div class="financeProgress">
+              <i
+                style="
+                  width:${
+                    Number(
+                      summary.billed ||
+                      0
+                    ) > 0
+                      ? Math.min(
+                          100,
+
+                          Number(
+                            summary
+                              .payments ||
+                            0
+                          ) /
+                          Number(
+                            summary
+                              .billed ||
+                            1
+                          ) *
+                          100
+                        )
+                      : 0
+                  }%
+                "
+              ></i>
+            </div>
+          </article>
+
+          <article class="financePanel financeInsightPanel">
+            <div class="financeInsightIcon">
+              ✦
+            </div>
+
+            <div>
+              <span>
+                PUG AI ПОМІТИВ
+              </span>
+
+              <h2>
+                ${
+                  Number(
+                    summary
+                      .outstanding ||
+                    0
+                  ) >
+                  Number(
+                    summary
+                      .net_revenue ||
+                    0
+                  )
+                    ? "Борги перевищують отриману виручку"
+                    : "Фінансовий потік виглядає стабільно"
+                }
+              </h2>
+
+              <p>
+                ${
+                  Number(
+                    summary
+                      .outstanding ||
+                    0
+                  ) >
+                  Number(
+                    summary
+                      .net_revenue ||
+                    0
+                  )
+                    ? (
+                        "Клініці ще мають сплатити " +
+                        formatVisitFinanceMoney(
+                          summary
+                            .outstanding
+                        ) +
+                        ". Варто перевірити незакриті рахунки."
+                      )
+                    : (
+                        "Критичних відхилень за обраний період не виявлено."
+                      )
+                }
+              </p>
+            </div>
+          </article>
+        </section>
+
+        <section class="financePanel financeTransactionsPanel">
+          <div class="financePanelHead">
+            <div>
+              <span>
+                ЖУРНАЛ
+              </span>
+
+              <h2>
+                Останні операції
+              </h2>
+            </div>
+
+            <b>
+              ${transactions.length}
+            </b>
+          </div>
+
+          <div class="financeTransactionsList">
+            ${
+              transactions.length
+                ? transactions
+                    .map(
+                      (
+                        transaction
+                      ) => {
+                        const meta =
+                          getFinanceTransactionMeta(
+                            transaction
+                          );
+
+                        const date =
+                          new Date(
+                            transaction
+                              .occurred_at
+                          )
+                            .toLocaleString(
+                              "uk-UA",
+                              {
+                                day:
+                                  "2-digit",
+
+                                month:
+                                  "2-digit",
+
+                                year:
+                                  "numeric",
+
+                                hour:
+                                  "2-digit",
+
+                                minute:
+                                  "2-digit",
+                              }
+                            );
+
+                        const sign =
+                          meta.type
+                            .className ===
+                          "is-outcome"
+                            ? "−"
+                            : "+";
+
+                        return `
+                          <article class="financeTransactionRow">
+                            <div
+                              class="
+                                financeTransactionIcon
+                                ${meta.type.className}
+                              "
+                            >
+                              ${meta.type.icon}
+                            </div>
+
+                            <div class="financeTransactionMain">
+                              <strong>
+                                ${escapeHtml(
+                                  transaction.category ||
+                                  meta.type.label
+                                )}
+                              </strong>
+
+                              <span>
+                                ${escapeHtml(
+                                  meta.type.label
+                                )}
+                                ·
+                                ${escapeHtml(
+                                  meta.method
+                                )}
+                                ·
+                                ${escapeHtml(
+                                  date
+                                )}
+                              </span>
+                            </div>
+
+                            <div
+                              class="
+                                financeTransactionAmount
+                                ${meta.type.className}
+                              "
+                            >
+                              <strong>
+                                ${sign}${formatVisitFinanceMoney(
+                                  transaction.amount
+                                )}
+                              </strong>
+
+                              <span>
+                                ${
+                                  transaction.status ===
+                                  "completed"
+                                    ? "Проведено"
+                                    : escapeHtml(
+                                        transaction.status ||
+                                        ""
+                                      )
+                                }
+                              </span>
+                            </div>
+                          </article>
+                        `;
+                      }
+                    )
+                    .join("")
+                : `
+                  <div class="financeTransactionsEmpty">
+                    За обраний період
+                    операцій немає.
+                  </div>
+                `
+            }
+          </div>
+        </section>
+      </div>
+    `;
+
+    page
+      .querySelectorAll(
+        "[data-finance-preset]"
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            () => {
+              const preset =
+                button.dataset
+                  .financePreset ||
+                "month";
+
+              const dates =
+                getFinancePresetDates(
+                  preset
+                );
+
+              financeDashboardState.preset =
+                preset;
+
+              financeDashboardState.dateFrom =
+                dates.dateFrom;
+
+              financeDashboardState.dateTo =
+                dates.dateTo;
+
+              renderFinanceTab();
+            }
+          );
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeApplyPeriod"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          const dateFrom =
+            page.querySelector(
+              "#financeDateFrom"
+            )?.value ||
+            "";
+
+          const dateTo =
+            page.querySelector(
+              "#financeDateTo"
+            )?.value ||
+            "";
+
+          if (
+            !dateFrom ||
+            !dateTo ||
+            dateFrom > dateTo
+          ) {
+            alert(
+              "Оберіть коректний фінансовий період."
+            );
+
+            return;
+          }
+
+          financeDashboardState.preset =
+            "custom";
+
+          renderFinanceTab({
+            dateFrom,
+            dateTo,
+          });
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeRefreshButton"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+
+  } catch (error) {
+    console.error(
+      "renderFinanceTab failed:",
+      error
+    );
+
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+
+        <h2>
+          Не вдалося завантажити фінанси
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error?.message ||
+            "Невідома помилка"
+          )}
+        </p>
+
+        <button
+          type="button"
+          id="financeRetryButton"
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    `;
+
+    page
+      .querySelector(
+        "#financeRetryButton"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+  }
+}
 
 function renderStockTab() {
   const page =
