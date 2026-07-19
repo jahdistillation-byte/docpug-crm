@@ -9327,9 +9327,18 @@ function saveNormalizedStock(items) {
 }
 
 const financeDashboardState = {
+  section: "overview",
+
   preset: "month",
   dateFrom: "",
   dateTo: "",
+
+  transactionType: "",
+  paymentMethod: "",
+  transactionSearch: "",
+
+  transactionOffset: 0,
+  transactionLimit: 20,
 };
 
 function financeDateToIso(
@@ -9445,6 +9454,284 @@ async function loadFinanceOverviewApi(
   }
 
   return result.data;
+}
+function buildFinanceSectionNavigation() {
+  const sections = [
+    {
+      key: "overview",
+      icon: "◇",
+      label: "Огляд",
+      enabled: true,
+    },
+
+    {
+      key: "transactions",
+      icon: "↕",
+      label: "Операції",
+      enabled: true,
+    },
+
+    {
+      key: "expenses",
+      icon: "−",
+      label: "Витрати",
+      enabled: false,
+    },
+
+    {
+      key: "cash",
+      icon: "▣",
+      label: "Каса",
+      enabled: false,
+    },
+
+    {
+      key: "debts",
+      icon: "!",
+      label: "Борги",
+      enabled: false,
+    },
+
+    {
+      key: "reports",
+      icon: "▥",
+      label: "Звіти",
+      enabled: false,
+    },
+
+    {
+      key: "salaries",
+      icon: "₴",
+      label: "Зарплати",
+      enabled: false,
+      ownerOnly: true,
+    },
+  ];
+
+  return `
+    <nav class="financeSectionNavigation">
+      ${
+        sections
+          .filter(
+            (section) =>
+              !section.ownerOnly ||
+              isOwner()
+          )
+          .map(
+            (section) => `
+              <button
+                type="button"
+                class="
+                  financeSectionButton
+                  ${
+                    financeDashboardState
+                      .section ===
+                    section.key
+                      ? "active"
+                      : ""
+                  }
+                  ${
+                    section.enabled
+                      ? ""
+                      : "is-disabled"
+                  }
+                "
+                data-finance-section="${
+                  section.key
+                }"
+                ${
+                  section.enabled
+                    ? ""
+                    : "disabled"
+                }
+              >
+                <span>
+                  ${section.icon}
+                </span>
+
+                <strong>
+                  ${section.label}
+                </strong>
+
+                ${
+                  section.enabled
+                    ? ""
+                    : `
+                      <small>
+                        скоро
+                      </small>
+                    `
+                }
+              </button>
+            `
+          )
+          .join("")
+      }
+    </nav>
+  `;
+}
+
+function bindFinanceSectionNavigation(
+  page
+) {
+  page
+    .querySelectorAll(
+      "[data-finance-section]:not(:disabled)"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const section =
+              button.dataset
+                .financeSection ||
+              "overview";
+
+            if (
+              section ===
+              financeDashboardState
+                .section
+            ) {
+              return;
+            }
+
+            financeDashboardState.section =
+              section;
+
+            financeDashboardState
+              .transactionOffset = 0;
+
+            renderFinanceTab();
+          }
+        );
+      }
+    );
+}
+
+async function loadFinanceTransactionsApi(
+  options = {}
+) {
+  const params =
+    new URLSearchParams();
+
+  const dateFrom =
+    options.dateFrom ||
+    financeDashboardState
+      .dateFrom;
+
+  const dateTo =
+    options.dateTo ||
+    financeDashboardState
+      .dateTo;
+
+  const transactionType =
+    options.transactionType ??
+    financeDashboardState
+      .transactionType;
+
+  const paymentMethod =
+    options.paymentMethod ??
+    financeDashboardState
+      .paymentMethod;
+
+  const search =
+    options.search ??
+    financeDashboardState
+      .transactionSearch;
+
+  const limit =
+    Number(
+      options.limit ??
+      financeDashboardState
+        .transactionLimit ??
+      20
+    );
+
+  const offset =
+    Number(
+      options.offset ??
+      financeDashboardState
+        .transactionOffset ??
+      0
+    );
+
+  if (dateFrom) {
+    params.set(
+      "date_from",
+      dateFrom
+    );
+  }
+
+  if (dateTo) {
+    params.set(
+      "date_to",
+      dateTo
+    );
+  }
+
+  if (transactionType) {
+    params.set(
+      "transaction_type",
+      transactionType
+    );
+  }
+
+  if (paymentMethod) {
+    params.set(
+      "payment_method",
+      paymentMethod
+    );
+  }
+
+  if (search) {
+    params.set(
+      "search",
+      search
+    );
+  }
+
+  params.set(
+    "limit",
+    String(limit)
+  );
+
+  params.set(
+    "offset",
+    String(offset)
+  );
+
+  const response =
+    await fetch(
+      `/api/finance/transactions?${params.toString()}`,
+      {
+        credentials: "include",
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити операції (HTTP ${response.status}).`
+    );
+  }
+
+  return (
+    result.data || {
+      items: [],
+      pagination: {},
+    }
+  );
 }
 
 function buildFinanceTrendChart(
@@ -10549,6 +10836,763 @@ function openFinanceExpenseModal() {
     50
   );
 }
+async function renderFinanceOperationsTab(
+  page
+) {
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+
+      <strong>
+        Завантажуємо фінансовий журнал…
+      </strong>
+    </div>
+  `;
+
+  try {
+    const result =
+      await loadFinanceTransactionsApi();
+
+    const items =
+      Array.isArray(
+        result.items
+      )
+        ? result.items
+        : [];
+
+    const pagination =
+      result.pagination || {};
+
+    page.innerHTML = `
+      <div class="financeDashboard">
+        ${buildFinanceSectionNavigation()}
+
+        <header class="financeHero financeOperationsHero">
+          <div>
+            <span class="financeEyebrow">
+              ФІНАНСОВИЙ ЖУРНАЛ
+            </span>
+
+            <h1>
+              Операції
+            </h1>
+
+            <p>
+              Оплати, витрати, повернення,
+              внесення та вилучення коштів
+              в одному журналі.
+            </p>
+          </div>
+
+          <div class="financeHeroActions">
+            <button
+              type="button"
+              class="financeAddExpenseButton"
+              id="financeOperationsAddExpense"
+            >
+              <span>−</span>
+              Додати витрату
+            </button>
+
+            <button
+              type="button"
+              class="financeRefreshButton"
+              id="financeOperationsRefresh"
+            >
+              ↻ Оновити
+            </button>
+          </div>
+        </header>
+
+        <form
+          class="financeOperationsFilters"
+          id="financeOperationsFilters"
+        >
+          <label class="financeOperationsSearch">
+            <span>
+              Пошук
+            </span>
+
+            <input
+              type="search"
+              name="search"
+              placeholder="Категорія, опис або контрагент…"
+              value="${escapeHtml(
+                financeDashboardState
+                  .transactionSearch
+              )}"
+            >
+          </label>
+
+          <label>
+            <span>
+              Тип операції
+            </span>
+
+            <select
+              name="transaction_type"
+            >
+              <option value="">
+                Усі операції
+              </option>
+
+              <option
+                value="payment"
+                ${
+                  financeDashboardState
+                    .transactionType ===
+                  "payment"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Оплати
+              </option>
+
+              <option
+                value="expense"
+                ${
+                  financeDashboardState
+                    .transactionType ===
+                  "expense"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Витрати
+              </option>
+
+              <option
+                value="refund"
+                ${
+                  financeDashboardState
+                    .transactionType ===
+                  "refund"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Повернення
+              </option>
+
+              <option
+                value="deposit"
+                ${
+                  financeDashboardState
+                    .transactionType ===
+                  "deposit"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Внесення
+              </option>
+
+              <option
+                value="withdrawal"
+                ${
+                  financeDashboardState
+                    .transactionType ===
+                  "withdrawal"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Вилучення
+              </option>
+            </select>
+          </label>
+
+          <label>
+            <span>
+              Спосіб оплати
+            </span>
+
+            <select
+              name="payment_method"
+            >
+              <option value="">
+                Усі способи
+              </option>
+
+              <option
+                value="cash"
+                ${
+                  financeDashboardState
+                    .paymentMethod ===
+                  "cash"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Готівка
+              </option>
+
+              <option
+                value="card"
+                ${
+                  financeDashboardState
+                    .paymentMethod ===
+                  "card"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Картка
+              </option>
+
+              <option
+                value="terminal"
+                ${
+                  financeDashboardState
+                    .paymentMethod ===
+                  "terminal"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Термінал
+              </option>
+
+              <option
+                value="transfer"
+                ${
+                  financeDashboardState
+                    .paymentMethod ===
+                  "transfer"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Переказ
+              </option>
+
+              <option
+                value="other"
+                ${
+                  financeDashboardState
+                    .paymentMethod ===
+                  "other"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Інше
+              </option>
+            </select>
+          </label>
+
+          <label>
+            <span>
+              Від
+            </span>
+
+            <input
+              type="date"
+              name="date_from"
+              value="${
+                financeDashboardState
+                  .dateFrom
+              }"
+            >
+          </label>
+
+          <label>
+            <span>
+              До
+            </span>
+
+            <input
+              type="date"
+              name="date_to"
+              value="${
+                financeDashboardState
+                  .dateTo
+              }"
+            >
+          </label>
+
+          <div class="financeOperationsFilterActions">
+            <button
+              type="submit"
+              class="financeOperationsApply"
+            >
+              Застосувати
+            </button>
+
+            <button
+              type="button"
+              class="financeOperationsReset"
+              id="financeOperationsReset"
+            >
+              Скинути
+            </button>
+          </div>
+        </form>
+
+        <section class="financePanel financeOperationsPanel">
+          <div class="financePanelHead">
+            <div>
+              <span>
+                ЖУРНАЛ
+              </span>
+
+              <h2>
+                Фінансові операції
+              </h2>
+            </div>
+
+            <b>
+              ${Number(
+                pagination.returned ||
+                items.length
+              )}
+            </b>
+          </div>
+
+          <div class="financeOperationsList">
+            ${
+              items.length
+                ? items
+                    .map(
+                      (transaction) => {
+                        const meta =
+                          getFinanceTransactionMeta(
+                            transaction
+                          );
+
+                        const date =
+                          new Date(
+                            transaction
+                              .occurred_at
+                          )
+                            .toLocaleString(
+                              "uk-UA",
+                              {
+                                day:
+                                  "2-digit",
+
+                                month:
+                                  "2-digit",
+
+                                year:
+                                  "numeric",
+
+                                hour:
+                                  "2-digit",
+
+                                minute:
+                                  "2-digit",
+                              }
+                            );
+
+                        const isOutcome =
+                          meta.type
+                            .className ===
+                          "is-outcome";
+
+                        const sign =
+                          isOutcome
+                            ? "−"
+                            : "+";
+
+                        const statusLabel = {
+                          completed:
+                            "Проведено",
+
+                          pending:
+                            "Очікується",
+
+                          cancelled:
+                            "Скасовано",
+
+                          failed:
+                            "Помилка",
+                        }[
+                          transaction.status
+                        ] || transaction.status || "";
+
+                        const details = [
+                          meta.type.label,
+                          meta.method,
+                          date,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ");
+
+                        return `
+                          <article class="financeOperationCard">
+                            <div
+                              class="
+                                financeTransactionIcon
+                                ${meta.type.className}
+                              "
+                            >
+                              ${meta.type.icon}
+                            </div>
+
+                            <div class="financeOperationContent">
+                              <div class="financeOperationTitle">
+                                <strong>
+                                  ${escapeHtml(
+                                    transaction.category ||
+                                    meta.type.label
+                                  )}
+                                </strong>
+
+                                <span>
+                                  ${escapeHtml(
+                                    details
+                                  )}
+                                </span>
+                              </div>
+
+                              ${
+                                transaction.counterparty
+                                  ? `
+                                    <p>
+                                      <b>
+                                        Контрагент:
+                                      </b>
+
+                                      ${escapeHtml(
+                                        transaction.counterparty
+                                      )}
+                                    </p>
+                                  `
+                                  : ""
+                              }
+
+                              ${
+                                transaction.description
+                                  ? `
+                                    <p>
+                                      ${escapeHtml(
+                                        transaction.description
+                                      )}
+                                    </p>
+                                  `
+                                  : ""
+                              }
+
+                              ${
+                                transaction.visit_id
+                                  ? `
+                                    <small>
+                                      Візит:
+                                      ${escapeHtml(
+                                        transaction.visit_id
+                                      )}
+                                    </small>
+                                  `
+                                  : ""
+                              }
+                            </div>
+
+                            <div
+                              class="
+                                financeOperationAmount
+                                ${meta.type.className}
+                              "
+                            >
+                              <strong>
+                                ${sign}${formatVisitFinanceMoney(
+                                  transaction.amount
+                                )}
+                              </strong>
+
+                              <span
+                                class="
+                                  financeOperationStatus
+                                  is-${
+                                    transaction.status ||
+                                    "unknown"
+                                  }
+                                "
+                              >
+                                ${escapeHtml(
+                                  statusLabel
+                                )}
+                              </span>
+                            </div>
+                          </article>
+                        `;
+                      }
+                    )
+                    .join("")
+                : `
+                  <div class="financeTransactionsEmpty">
+                    <strong>
+                      Операцій не знайдено
+                    </strong>
+
+                    <span>
+                      Змініть фільтри або
+                      оберіть інший період.
+                    </span>
+                  </div>
+                `
+            }
+          </div>
+
+          <footer class="financeOperationsPagination">
+            <span>
+              Показано
+              ${items.length}
+              операцій
+            </span>
+
+            <div>
+              <button
+                type="button"
+                id="financeOperationsPrevious"
+                ${
+                  Number(
+                    pagination.offset || 0
+                  ) <= 0
+                    ? "disabled"
+                    : ""
+                }
+              >
+                ← Назад
+              </button>
+
+              <button
+                type="button"
+                id="financeOperationsNext"
+                ${
+                  pagination.has_more
+                    ? ""
+                    : "disabled"
+                }
+              >
+                Далі →
+              </button>
+            </div>
+          </footer>
+        </section>
+      </div>
+    `;
+
+    bindFinanceSectionNavigation(
+      page
+    );
+
+    page
+      .querySelector(
+        "#financeOperationsAddExpense"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          openFinanceExpenseModal();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeOperationsRefresh"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeOperationsFilters"
+      )
+      ?.addEventListener(
+        "submit",
+        (event) => {
+          event.preventDefault();
+
+          const form =
+            event.currentTarget;
+
+          const formData =
+            new FormData(form);
+
+          const dateFrom =
+            String(
+              formData.get(
+                "date_from"
+              ) || ""
+            );
+
+          const dateTo =
+            String(
+              formData.get(
+                "date_to"
+              ) || ""
+            );
+
+          if (
+            !dateFrom ||
+            !dateTo ||
+            dateFrom > dateTo
+          ) {
+            alert(
+              "Оберіть коректний період."
+            );
+
+            return;
+          }
+
+          financeDashboardState
+            .transactionSearch =
+              String(
+                formData.get(
+                  "search"
+                ) || ""
+              ).trim();
+
+          financeDashboardState
+            .transactionType =
+              String(
+                formData.get(
+                  "transaction_type"
+                ) || ""
+              );
+
+          financeDashboardState
+            .paymentMethod =
+              String(
+                formData.get(
+                  "payment_method"
+                ) || ""
+              );
+
+          financeDashboardState.dateFrom =
+            dateFrom;
+
+          financeDashboardState.dateTo =
+            dateTo;
+
+          financeDashboardState
+            .transactionOffset = 0;
+
+          renderFinanceTab();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeOperationsReset"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          financeDashboardState
+            .transactionSearch = "";
+
+          financeDashboardState
+            .transactionType = "";
+
+          financeDashboardState
+            .paymentMethod = "";
+
+          financeDashboardState
+            .transactionOffset = 0;
+
+          renderFinanceTab();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeOperationsPrevious"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          financeDashboardState
+            .transactionOffset =
+              Math.max(
+                0,
+
+                Number(
+                  pagination.offset ||
+                  0
+                ) -
+                Number(
+                  pagination.limit ||
+                  20
+                )
+              );
+
+          renderFinanceTab();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financeOperationsNext"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          if (
+            !pagination.has_more
+          ) {
+            return;
+          }
+
+          financeDashboardState
+            .transactionOffset =
+              Number(
+                pagination.next_offset ||
+                0
+              );
+
+          renderFinanceTab();
+        }
+      );
+
+  } catch (error) {
+    console.error(
+      "renderFinanceOperationsTab failed:",
+      error
+    );
+
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+
+        <h2>
+          Не вдалося завантажити операції
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error?.message ||
+            "Невідома помилка"
+          )}
+        </p>
+
+        <button
+          type="button"
+          id="financeOperationsRetry"
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    `;
+
+    page
+      .querySelector(
+        "#financeOperationsRetry"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+  }
+}
 
 async function renderFinanceTab(
   options = {}
@@ -10600,6 +11644,17 @@ async function renderFinanceTab(
   if (options.dateTo) {
     financeDashboardState.dateTo =
       options.dateTo;
+  }
+    if (
+    financeDashboardState
+      .section ===
+    "transactions"
+  ) {
+    await renderFinanceOperationsTab(
+      page
+    );
+
+    return;
   }
 
   page.innerHTML = `
@@ -10669,7 +11724,9 @@ async function renderFinanceTab(
         : 0;
 
     page.innerHTML = `
-      <div class="financeDashboard">
+            <div class="financeDashboard">
+        ${buildFinanceSectionNavigation()}
+
         <header class="financeHero">
           <div>
             <span class="financeEyebrow">
@@ -10892,7 +11949,7 @@ async function renderFinanceTab(
                 </span>
 
                 <h2>
-                  Грошовий потік
+                  Надходження та витрати
                 </h2>
               </div>
 
@@ -11267,7 +12324,10 @@ async function renderFinanceTab(
         </section>
       </div>
     `;
-
+    bindFinanceSectionNavigation(
+      page
+    );
+    
     page
   .querySelector(
     "#financeAddExpenseButton"

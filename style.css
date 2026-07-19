@@ -26088,3 +26088,870 @@ input[type="number"]::-webkit-outer-spin-button {
 .financeCashflowValueLabel.is-outcome {
   fill: #ff8ba0;
 }
+/* =========================================
+   FINANCE — INTERNAL NAVIGATION
+   ========================================= */
+
+.financeSectionNavigation {
+  position: relative;
+  z-index: 4;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  padding: 8px;
+
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(35, 20, 58, 0.88),
+      rgba(12, 9, 27, 0.92)
+    );
+
+  box-shadow:
+    0 18px 55px
+      rgba(0, 0, 0, 0.22),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.04);
+
+  backdrop-filter: blur(24px);
+}
+
+.financeSectionNavigation::-webkit-scrollbar {
+  display: none;
+}
+
+.financeSectionButton {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-width: max-content;
+  min-height: 48px;
+
+  padding: 0 18px;
+
+  border: 1px solid transparent;
+  border-radius: 16px;
+
+  color: rgba(255, 255, 255, 0.58);
+  background: transparent;
+
+  font: inherit;
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.financeSectionButton span {
+  display: grid;
+  place-items: center;
+
+  width: 25px;
+  height: 25px;
+
+  border-radius: 9px;
+
+  color: rgba(255, 255, 255, 0.7);
+  background:
+    rgba(255, 255, 255, 0.055);
+
+  font-size: 14px;
+}
+
+.financeSectionButton strong {
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.financeSectionButton small {
+  padding: 3px 6px;
+
+  border-radius: 999px;
+
+  color: rgba(255, 255, 255, 0.38);
+  background:
+    rgba(255, 255, 255, 0.055);
+
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.financeSectionButton:not(:disabled):hover {
+  color: #fff;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      35%,
+      rgba(255, 255, 255, 0.09)
+    );
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      10%,
+      rgba(255, 255, 255, 0.035)
+    );
+
+  transform: translateY(-1px);
+}
+
+.financeSectionButton.active {
+  color: #fff;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      62%,
+      rgba(255, 255, 255, 0.12)
+    );
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7)
+        32%,
+        rgba(255, 255, 255, 0.06)
+      ),
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7)
+        14%,
+        rgba(15, 10, 29, 0.75)
+      )
+    );
+
+  box-shadow:
+    0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7)
+        18%,
+        transparent
+      ),
+    0 12px 30px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7)
+        20%,
+        transparent
+      );
+}
+
+.financeSectionButton.active span {
+  color: #fff;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      40%,
+      rgba(255, 255, 255, 0.1)
+    );
+
+  box-shadow:
+    0 0 18px
+      var(
+        --accent-glow,
+        rgba(168, 85, 247, 0.35)
+      );
+}
+
+.financeSectionButton.is-disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+
+/* =========================================
+   FINANCE — OPERATIONS HERO
+   ========================================= */
+
+.financeOperationsHero {
+  overflow: hidden;
+}
+
+.financeOperationsHero::after {
+  content: "↕";
+
+  position: absolute;
+  right: 55px;
+  bottom: -70px;
+
+  color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      10%,
+      transparent
+    );
+
+  font-size: 210px;
+  font-weight: 900;
+  line-height: 1;
+
+  pointer-events: none;
+}
+
+
+/* =========================================
+   FINANCE — OPERATIONS FILTERS
+   ========================================= */
+
+.financeOperationsFilters {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.5fr)
+    minmax(160px, 0.8fr)
+    minmax(160px, 0.8fr)
+    minmax(145px, 0.65fr)
+    minmax(145px, 0.65fr);
+
+  gap: 14px;
+
+  padding: 20px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(26, 16, 46, 0.9),
+      rgba(10, 8, 23, 0.94)
+    );
+
+  box-shadow:
+    0 20px 60px
+      rgba(0, 0, 0, 0.2),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.035);
+
+  backdrop-filter: blur(22px);
+}
+
+.financeOperationsFilters label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  min-width: 0;
+}
+
+.financeOperationsFilters label > span {
+  padding-left: 3px;
+
+  color: rgba(255, 255, 255, 0.48);
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.financeOperationsFilters input,
+.financeOperationsFilters select {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+
+  padding: 0 14px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  outline: none;
+
+  color: rgba(255, 255, 255, 0.9);
+  background:
+    rgba(6, 5, 17, 0.62);
+
+  font: inherit;
+  font-size: 13px;
+
+  color-scheme: dark;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.financeOperationsFilters input::placeholder {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.financeOperationsFilters input:focus,
+.financeOperationsFilters select:focus {
+  border-color:
+    var(--accent-color, #a855f7);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      7%,
+      rgba(6, 5, 17, 0.72)
+    );
+
+  box-shadow:
+    0 0 0 3px
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7)
+        14%,
+        transparent
+      );
+}
+
+.financeOperationsFilterActions {
+  grid-column: 1 / -1;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding-top: 4px;
+}
+
+.financeOperationsFilterActions button {
+  min-height: 42px;
+  padding: 0 20px;
+
+  border-radius: 13px;
+
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.financeOperationsApply {
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      70%,
+      white
+    );
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent-color, #a855f7),
+      color-mix(
+        in srgb,
+        var(--accent-color, #a855f7)
+        70%,
+        #5011a5
+      )
+    );
+
+  box-shadow:
+    0 10px 25px
+      var(
+        --accent-glow,
+        rgba(168, 85, 247, 0.25)
+      );
+}
+
+.financeOperationsReset {
+  border: 1px solid
+    rgba(255, 255, 255, 0.1);
+
+  background:
+    rgba(255, 255, 255, 0.045);
+}
+
+.financeOperationsFilterActions button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+
+/* =========================================
+   FINANCE — OPERATIONS JOURNAL
+   ========================================= */
+
+.financeOperationsPanel {
+  overflow: hidden;
+}
+
+.financeOperationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-top: 18px;
+}
+
+.financeOperationCard {
+  position: relative;
+
+  display: grid;
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+  gap: 15px;
+
+  min-height: 82px;
+  padding: 15px 18px;
+
+  overflow: hidden;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.018)
+    );
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.financeOperationCard::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+
+  width: 2px;
+  border-radius: 999px;
+
+  background:
+    var(--accent-color, #a855f7);
+
+  opacity: 0.45;
+}
+
+.financeOperationCard:hover {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      28%,
+      rgba(255, 255, 255, 0.1)
+    );
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      5%,
+      rgba(255, 255, 255, 0.035)
+    );
+
+  transform: translateY(-1px);
+}
+
+.financeOperationContent {
+  min-width: 0;
+}
+
+.financeOperationTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.financeOperationTitle strong {
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.94);
+
+  font-size: 14px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeOperationTitle span {
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.43);
+
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeOperationContent p {
+  margin: 7px 0 0;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.57);
+
+  font-size: 11px;
+  line-height: 1.45;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeOperationContent p b {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.financeOperationContent small {
+  display: block;
+
+  margin-top: 7px;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.29);
+
+  font-size: 9px;
+  letter-spacing: 0.03em;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeOperationAmount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+
+  min-width: 115px;
+}
+
+.financeOperationAmount strong {
+  color: rgba(255, 255, 255, 0.9);
+
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.financeOperationAmount.is-income strong {
+  color: #63e6a3;
+
+  text-shadow:
+    0 0 18px
+      rgba(99, 230, 163, 0.18);
+}
+
+.financeOperationAmount.is-outcome strong {
+  color: #ff708d;
+
+  text-shadow:
+    0 0 18px
+      rgba(255, 112, 141, 0.16);
+}
+
+.financeOperationStatus {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 23px;
+  padding: 0 9px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+
+  color: rgba(255, 255, 255, 0.48);
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.financeOperationStatus.is-completed {
+  color: #63e6a3;
+  border-color:
+    rgba(99, 230, 163, 0.2);
+  background:
+    rgba(99, 230, 163, 0.07);
+}
+
+.financeOperationStatus.is-pending {
+  color: #ffc85c;
+  border-color:
+    rgba(255, 200, 92, 0.22);
+  background:
+    rgba(255, 200, 92, 0.07);
+}
+
+.financeOperationStatus.is-cancelled,
+.financeOperationStatus.is-failed {
+  color: #ff708d;
+  border-color:
+    rgba(255, 112, 141, 0.22);
+  background:
+    rgba(255, 112, 141, 0.07);
+}
+
+.financeOperationsPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  margin-top: 18px;
+  padding-top: 18px;
+
+  border-top: 1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.financeOperationsPagination > span {
+  color: rgba(255, 255, 255, 0.4);
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.financeOperationsPagination > div {
+  display: flex;
+  gap: 9px;
+}
+
+.financeOperationsPagination button {
+  min-height: 39px;
+  padding: 0 15px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+
+  color: rgba(255, 255, 255, 0.76);
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.financeOperationsPagination button:not(:disabled):hover {
+  border-color:
+    var(--accent-color, #a855f7);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7)
+      12%,
+      rgba(255, 255, 255, 0.04)
+    );
+
+  transform: translateY(-1px);
+}
+
+.financeOperationsPagination button:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.financeTransactionsEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 180px;
+
+  border: 1px dashed
+    rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+
+  color: rgba(255, 255, 255, 0.4);
+  background:
+    rgba(255, 255, 255, 0.018);
+
+  text-align: center;
+}
+
+.financeTransactionsEmpty strong {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 14px;
+}
+
+.financeTransactionsEmpty span {
+  font-size: 11px;
+}
+
+
+/* =========================================
+   FINANCE OPERATIONS — TABLET
+   ========================================= */
+
+@media (max-width: 1180px) {
+  .financeOperationsFilters {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .financeOperationsSearch {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* =========================================
+   FINANCE OPERATIONS — MOBILE
+   ========================================= */
+
+@media (max-width: 720px) {
+  .financeSectionNavigation {
+    gap: 6px;
+
+    padding: 6px;
+
+    border-radius: 18px;
+  }
+
+  .financeSectionButton {
+    min-height: 43px;
+    padding: 0 13px;
+
+    border-radius: 13px;
+  }
+
+  .financeSectionButton strong {
+    font-size: 11px;
+  }
+
+  .financeSectionButton small {
+    display: none;
+  }
+
+  .financeOperationsHero::after {
+    display: none;
+  }
+
+  .financeOperationsFilters {
+    grid-template-columns: 1fr;
+
+    gap: 12px;
+    padding: 15px;
+
+    border-radius: 19px;
+  }
+
+  .financeOperationsSearch {
+    grid-column: auto;
+  }
+
+  .financeOperationsFilterActions {
+    grid-column: auto;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .financeOperationsFilterActions button {
+    width: 100%;
+    padding: 0 12px;
+  }
+
+  .financeOperationCard {
+    grid-template-columns:
+      42px
+      minmax(0, 1fr);
+
+    gap: 11px;
+    padding: 14px;
+
+    border-radius: 16px;
+  }
+
+  .financeOperationAmount {
+    grid-column: 2;
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    min-width: 0;
+
+    padding-top: 8px;
+
+    border-top: 1px solid
+      rgba(255, 255, 255, 0.06);
+  }
+
+  .financeOperationAmount strong {
+    font-size: 14px;
+  }
+
+  .financeOperationContent p {
+    white-space: normal;
+  }
+
+  .financeOperationsPagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .financeOperationsPagination > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .financeOperationsPagination button {
+    width: 100%;
+  }
+}
