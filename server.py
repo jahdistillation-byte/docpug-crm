@@ -6160,6 +6160,290 @@ def api_finance_purchase_create():
             500,
         )
         
+@app.post(
+    "/api/finance/purchases/<purchase_id>/receive"
+)
+def api_finance_purchase_receive(
+    purchase_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    purchase_id = str(
+        purchase_id or ""
+    ).strip()
+
+    try:
+        uuid.UUID(
+            purchase_id
+        )
+    except ValueError:
+        return fail(
+            "Некоректний ID закупівлі.",
+            400,
+        )
+
+    user_id = str(
+        user.get("id")
+        or ""
+    ).strip()
+
+    if not user_id:
+        return fail(
+            "Не вдалося визначити користувача.",
+            401,
+        )
+
+    payload = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    raw_items = payload.get(
+        "items"
+    )
+
+    if not isinstance(
+        raw_items,
+        list,
+    ):
+        return fail(
+            "Позиції приймання повинні бути списком.",
+            400,
+        )
+
+    if not raw_items:
+        return fail(
+            "Додайте хоча б одну позицію для приймання.",
+            400,
+        )
+
+    if len(raw_items) > 100:
+        return fail(
+            "За один раз можна прийняти не більше 100 позицій.",
+            400,
+        )
+
+    clean_items = []
+    seen_item_ids = set()
+
+    for (
+        index,
+        raw_item,
+    ) in enumerate(
+        raw_items,
+        start=1,
+    ):
+        if not isinstance(
+            raw_item,
+            dict,
+        ):
+            return fail(
+                f"Некоректна позиція №{index}.",
+                400,
+            )
+
+        item_id = str(
+            raw_item.get(
+                "item_id"
+            )
+            or ""
+        ).strip()
+
+        if not item_id:
+            return fail(
+                f"Не вказано ID позиції №{index}.",
+                400,
+            )
+
+        try:
+            uuid.UUID(
+                item_id
+            )
+        except ValueError:
+            return fail(
+                f"Некоректний ID позиції №{index}.",
+                400,
+            )
+
+        if item_id in seen_item_ids:
+            return fail(
+                f"Позиція №{index} дублюється.",
+                400,
+            )
+
+        seen_item_ids.add(
+            item_id
+        )
+
+        try:
+            quantity = float(
+                str(
+                    raw_item.get(
+                        "quantity"
+                    )
+                    or 0
+                )
+                .replace(
+                    ",",
+                    ".",
+                )
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            return fail(
+                f"Некоректна кількість у позиції №{index}.",
+                400,
+            )
+
+        if (
+            quantity <= 0
+            or quantity >
+            100000000
+        ):
+            return fail(
+                f"Кількість у позиції №{index} повинна бути більшою за нуль.",
+                400,
+            )
+
+        clean_items.append({
+            "item_id":
+                item_id,
+
+            "quantity":
+                quantity,
+        })
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "receive_stock_purchase",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_purchase_id":
+                        purchase_id,
+
+                    "p_user_id":
+                        user_id,
+
+                    "p_items":
+                        clean_items,
+                },
+            )
+            .execute()
+        )
+
+        response_data = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                response_data,
+                list,
+            )
+            and response_data
+        ):
+            response_data = (
+                response_data[0]
+            )
+
+        return ok(
+            response_data
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        )
+
+        print(
+            "❌ POST finance purchase receive:",
+            repr(error),
+            flush=True,
+        )
+
+        normalized_error = (
+            error_text.lower()
+        )
+
+        if (
+            "purchase not found"
+            in normalized_error
+        ):
+            return fail(
+                "Закупівлю не знайдено.",
+                404,
+            )
+
+        conflict_messages = (
+            "cancelled purchase",
+            "already fully received",
+            "exceeds remaining",
+        )
+
+        if any(
+            message
+            in normalized_error
+            for message
+            in conflict_messages
+        ):
+            return fail(
+                error_text,
+                409,
+            )
+
+        validation_messages = (
+            "organization is required",
+            "purchase is required",
+            "user is required",
+            "add at least one",
+            "invalid received item",
+            "item id is required",
+            "quantity must be greater",
+            "purchase item",
+            "stock item",
+        )
+
+        if any(
+            message
+            in normalized_error
+            for message
+            in validation_messages
+        ):
+            return fail(
+                error_text,
+                400,
+            )
+
+        return fail(
+            "Не вдалося прийняти поставку.",
+            500,
+        )        
 # =========================
 # SERVICES API
 # =========================
