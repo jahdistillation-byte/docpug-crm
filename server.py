@@ -5147,7 +5147,491 @@ def api_finance_supplier_deactivate(
             500,
         )
 
-    
+@app.post(
+    "/api/finance/purchases"
+)
+def api_finance_purchase_create():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    if not isinstance(
+        payload,
+        dict,
+    ):
+        return fail(
+            "Некоректне тіло запиту.",
+            400,
+        )
+
+    supplier_id = str(
+        payload.get(
+            "supplier_id"
+        )
+        or ""
+    ).strip()
+
+    if not supplier_id:
+        return fail(
+            "Оберіть постачальника.",
+            400,
+        )
+
+    try:
+        uuid.UUID(
+            supplier_id
+        )
+    except ValueError:
+        return fail(
+            "Некоректний ID постачальника.",
+            400,
+        )
+
+    kyiv_today = (
+        datetime.now(
+            ZoneInfo(
+                "Europe/Kyiv"
+            )
+        )
+        .date()
+    )
+
+    raw_order_date = str(
+        payload.get(
+            "order_date"
+        )
+        or kyiv_today.isoformat()
+    ).strip()
+
+    raw_expected_date = str(
+        payload.get(
+            "expected_date"
+        )
+        or ""
+    ).strip()
+
+    try:
+        order_date = (
+            datetime.strptime(
+                raw_order_date,
+                "%Y-%m-%d",
+            )
+            .date()
+        )
+    except ValueError:
+        return fail(
+            "Некоректна дата замовлення.",
+            400,
+        )
+
+    expected_date = None
+
+    if raw_expected_date:
+        try:
+            expected_date = (
+                datetime.strptime(
+                    raw_expected_date,
+                    "%Y-%m-%d",
+                )
+                .date()
+            )
+        except ValueError:
+            return fail(
+                "Некоректна очікувана дата.",
+                400,
+            )
+
+        if (
+            expected_date <
+            order_date
+        ):
+            return fail(
+                "Очікувана дата не може бути раніше дати замовлення.",
+                400,
+            )
+
+    currency = str(
+        payload.get(
+            "currency"
+        )
+        or "UAH"
+    ).strip().upper()
+
+    if currency not in {
+        "UAH",
+        "USD",
+        "EUR",
+        "PLN",
+    }:
+        return fail(
+            "Непідтримувана валюта.",
+            400,
+        )
+
+    try:
+        discount_amount = float(
+            str(
+                payload.get(
+                    "discount_amount"
+                )
+                or 0
+            )
+            .replace(
+                ",",
+                ".",
+            )
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return fail(
+            "Некоректна сума знижки.",
+            400,
+        )
+
+    if (
+        discount_amount < 0
+        or discount_amount > 100000000
+    ):
+        return fail(
+            "Некоректна сума знижки.",
+            400,
+        )
+
+    invoice_number = str(
+        payload.get(
+            "invoice_number"
+        )
+        or ""
+    ).strip()[:150]
+
+    document_url = str(
+        payload.get(
+            "document_url"
+        )
+        or ""
+    ).strip()[:1000]
+
+    if (
+        document_url
+        and not document_url.startswith(
+            (
+                "https://",
+                "http://",
+            )
+        )
+    ):
+        return fail(
+            "Посилання на документ повинно починатися з http:// або https://.",
+            400,
+        )
+
+    note = str(
+        payload.get(
+            "note"
+        )
+        or ""
+    ).strip()[:2000]
+
+    raw_items = payload.get(
+        "items"
+    )
+
+    if not isinstance(
+        raw_items,
+        list,
+    ):
+        return fail(
+            "Позиції закупівлі повинні бути списком.",
+            400,
+        )
+
+    if not raw_items:
+        return fail(
+            "Додайте хоча б одну позицію закупівлі.",
+            400,
+        )
+
+    if len(
+        raw_items
+    ) > 100:
+        return fail(
+            "В одній закупівлі може бути не більше 100 позицій.",
+            400,
+        )
+
+    clean_items = []
+
+    for index, raw_item in enumerate(
+        raw_items,
+        start=1,
+    ):
+        if not isinstance(
+            raw_item,
+            dict,
+        ):
+            return fail(
+                f"Некоректна позиція №{index}.",
+                400,
+            )
+
+        stock_id = str(
+            raw_item.get(
+                "stock_id"
+            )
+            or ""
+        ).strip()
+
+        if stock_id:
+            try:
+                uuid.UUID(
+                    stock_id
+                )
+            except ValueError:
+                return fail(
+                    f"Некоректний товар у позиції №{index}.",
+                    400,
+                )
+
+        name_snap = str(
+            raw_item.get(
+                "name_snap"
+            )
+            or ""
+        ).strip()[:250]
+
+        unit_snap = str(
+            raw_item.get(
+                "unit_snap"
+            )
+            or "шт"
+        ).strip()[:50]
+
+        if (
+            not stock_id
+            and not name_snap
+        ):
+            return fail(
+                f"Вкажіть назву товару в позиції №{index}.",
+                400,
+            )
+
+        try:
+            ordered_qty = float(
+                str(
+                    raw_item.get(
+                        "ordered_qty"
+                    )
+                    or 0
+                )
+                .replace(
+                    ",",
+                    ".",
+                )
+            )
+
+            purchase_price = float(
+                str(
+                    raw_item.get(
+                        "purchase_price"
+                    )
+                    or 0
+                )
+                .replace(
+                    ",",
+                    ".",
+                )
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+            return fail(
+                f"Некоректна кількість або ціна в позиції №{index}.",
+                400,
+            )
+
+        if (
+            ordered_qty <= 0
+            or ordered_qty > 100000000
+        ):
+            return fail(
+                f"Кількість у позиції №{index} повинна бути більшою за нуль.",
+                400,
+            )
+
+        if (
+            purchase_price < 0
+            or purchase_price > 100000000
+        ):
+            return fail(
+                f"Некоректна закупівельна ціна в позиції №{index}.",
+                400,
+            )
+
+        clean_items.append({
+            "stock_id":
+                stock_id or None,
+
+            "name_snap":
+                name_snap or None,
+
+            "unit_snap":
+                unit_snap or "шт",
+
+            "ordered_qty":
+                ordered_qty,
+
+            "purchase_price":
+                purchase_price,
+
+            "note":
+                str(
+                    raw_item.get(
+                        "note"
+                    )
+                    or ""
+                ).strip()[:500]
+                or None,
+        })
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "create_stock_purchase",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_supplier_id":
+                        supplier_id,
+
+                    "p_user_id":
+                        user.get(
+                            "id"
+                        ),
+
+                    "p_order_date":
+                        order_date.isoformat(),
+
+                    "p_expected_date":
+                        (
+                            expected_date.isoformat()
+                            if expected_date
+                            else None
+                        ),
+
+                    "p_invoice_number":
+                        invoice_number
+                        or None,
+
+                    "p_discount_amount":
+                        discount_amount,
+
+                    "p_currency":
+                        currency,
+
+                    "p_document_url":
+                        document_url
+                        or None,
+
+                    "p_note":
+                        note
+                        or None,
+
+                    "p_items":
+                        clean_items,
+                },
+            )
+            .execute()
+        )
+
+        purchase = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                purchase,
+                list,
+            )
+            and purchase
+        ):
+            purchase = (
+                purchase[0]
+            )
+
+        return (
+            ok(
+                purchase
+            ),
+            201,
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        )
+
+        print(
+            "❌ POST finance purchase:",
+            repr(error),
+            flush=True,
+        )
+
+        known_validation_errors = (
+            "Supplier not found",
+            "Supplier is inactive",
+            "Purchase must contain",
+            "Invalid purchase item",
+            "Stock item not found",
+            "Discount cannot exceed",
+            "Expected date",
+            "Unsupported currency",
+        )
+
+        if any(
+            message.lower()
+            in error_text.lower()
+            for message
+            in known_validation_errors
+        ):
+            return fail(
+                error_text,
+                400,
+            )
+
+        return fail(
+            "Не вдалося створити закупівлю.",
+            500,
+        )
+        
 # =========================
 # SERVICES API
 # =========================
