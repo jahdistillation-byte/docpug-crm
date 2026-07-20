@@ -14546,6 +14546,45 @@ function openFinancePurchaseDetailsModal(
     onKeydown
   );
 }
+async function loadFinanceWithRetry(
+  loader,
+  attempts = 3
+) {
+  let lastError = null;
+
+  for (
+    let attempt = 0;
+    attempt < attempts;
+    attempt += 1
+  ) {
+    try {
+      return await loader();
+    } catch (error) {
+      lastError = error;
+
+      if (
+        attempt >=
+        attempts - 1
+      ) {
+        break;
+      }
+
+      await new Promise(
+        (resolve) => {
+          setTimeout(
+            resolve,
+            300 *
+              (
+                attempt + 1
+              )
+          );
+        }
+      );
+    }
+  }
+
+  throw lastError;
+}
 
 async function renderFinanceExpensesTab(
   page
@@ -14561,18 +14600,21 @@ async function renderFinanceExpensesTab(
   `;
 
   try {
-        const [
-      overview,
-      purchasesResult,
-    ] = await Promise.all([
+        const overview =
+  await loadFinanceWithRetry(
+    () =>
       loadFinanceExpensesOverviewApi(
         financeDashboardState
           .dateFrom,
 
         financeDashboardState
           .dateTo
-      ),
+      )
+  );
 
+const purchasesResult =
+  await loadFinanceWithRetry(
+    () =>
       loadFinancePurchasesApi({
         dateFrom:
           financeDashboardState
@@ -14589,8 +14631,8 @@ async function renderFinanceExpensesTab(
         offset:
           financeDashboardState
             .purchaseOffset,
-      }),
-    ]);
+      })
+  );
 
     const summary =
       overview.summary || {};
