@@ -9959,6 +9959,49 @@ async function loadFinanceSuppliersApi(
     ? result.data
     : [];
 }
+async function createFinanceSupplierApi(
+  payload
+) {
+  const response = await fetch(
+    "/api/finance/suppliers",
+    {
+      method: "POST",
+      credentials: "include",
+
+      headers: {
+        Accept:
+          "application/json",
+
+        "Content-Type":
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+
+      body: JSON.stringify(
+        payload
+      ),
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(
+      () => ({})
+    );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося створити постачальника (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
 
 async function createFinancePurchaseApi(
   payload
@@ -12446,6 +12489,369 @@ function formatFinancePurchaseDate(
     "uk-UA"
   );
 }
+function openFinanceSupplierCreateModal(
+  onCreated
+) {
+  document
+    .querySelector(
+      ".financeSupplierCreateOverlay"
+    )
+    ?.remove();
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "financeSupplierCreateOverlay";
+
+  overlay.innerHTML = `
+    <form
+      class="financeSupplierCreateModal"
+      id="financeSupplierCreateForm"
+    >
+      <header class="financeSupplierCreateHeader">
+        <div class="financeSupplierCreateIcon">
+          🏢
+        </div>
+
+        <div>
+          <span>
+            НОВИЙ КОНТРАГЕНТ
+          </span>
+
+          <h2>
+            Додати постачальника
+          </h2>
+
+          <p>
+            Контактні дані для закупівель
+            і документів.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="financeSupplierCreateClose"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="financeSupplierCreateBody">
+        <div class="financeSupplierCreateGrid">
+          <label class="is-wide">
+            <span>
+              Назва постачальника *
+            </span>
+
+            <input
+              type="text"
+              name="name"
+              maxlength="200"
+              placeholder="Наприклад, ВетМаркет"
+              required
+              autofocus
+            >
+          </label>
+
+          <label>
+            <span>
+              ЄДРПОУ
+            </span>
+
+            <input
+              type="text"
+              name="edrpou"
+              maxlength="30"
+              placeholder="12345678"
+            >
+          </label>
+
+          <label>
+            <span>
+              Контактна особа
+            </span>
+
+            <input
+              type="text"
+              name="contact_person"
+              maxlength="150"
+              placeholder="Імʼя менеджера"
+            >
+          </label>
+
+          <label>
+            <span>
+              Телефон
+            </span>
+
+            <input
+              type="tel"
+              name="phone"
+              maxlength="50"
+              placeholder="+380..."
+            >
+          </label>
+
+          <label>
+            <span>
+              Email
+            </span>
+
+            <input
+              type="email"
+              name="email"
+              maxlength="200"
+              placeholder="manager@example.com"
+            >
+          </label>
+
+          <label class="is-wide">
+            <span>
+              Адреса
+            </span>
+
+            <input
+              type="text"
+              name="address"
+              maxlength="500"
+              placeholder="Місто, вулиця, склад"
+            >
+          </label>
+
+          <label class="is-wide">
+            <span>
+              Примітка
+            </span>
+
+            <textarea
+              name="note"
+              maxlength="2000"
+              placeholder="Умови оплати, доставки або додаткові контакти…"
+            ></textarea>
+          </label>
+        </div>
+
+        <div
+          class="financeSupplierCreateError"
+          hidden
+        ></div>
+      </div>
+
+      <footer class="financeSupplierCreateFooter">
+        <button
+          type="button"
+          class="financeSupplierCreateCancel"
+        >
+          Скасувати
+        </button>
+
+        <button
+          type="submit"
+          class="financeSupplierCreateSubmit"
+        >
+          Додати постачальника →
+        </button>
+      </footer>
+    </form>
+  `;
+
+  document.body.appendChild(
+    overlay
+  );
+
+  const form =
+    overlay.querySelector(
+      "#financeSupplierCreateForm"
+    );
+
+  const errorElement =
+    overlay.querySelector(
+      ".financeSupplierCreateError"
+    );
+
+  const submitButton =
+    overlay.querySelector(
+      ".financeSupplierCreateSubmit"
+    );
+
+  let closed = false;
+  let submitting = false;
+
+  const close = () => {
+    if (closed) return;
+
+    closed = true;
+    overlay.remove();
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key === "Escape"
+    ) {
+      close();
+    }
+  };
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === overlay
+      ) {
+        close();
+      }
+    }
+  );
+
+  overlay
+    .querySelector(
+      ".financeSupplierCreateClose"
+    )
+    .addEventListener(
+      "click",
+      close
+    );
+
+  overlay
+    .querySelector(
+      ".financeSupplierCreateCancel"
+    )
+    .addEventListener(
+      "click",
+      close
+    );
+
+  form.addEventListener(
+    "submit",
+    async (
+      event
+    ) => {
+      event.preventDefault();
+
+      if (submitting) return;
+
+      errorElement.hidden =
+        true;
+
+      const formData =
+        new FormData(
+          form
+        );
+
+      const value = (
+        field
+      ) => {
+        return (
+          String(
+            formData.get(
+              field
+            ) ||
+            ""
+          ).trim() ||
+          null
+        );
+      };
+
+      const name =
+        value("name");
+
+      if (!name) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          "Вкажіть назву постачальника.";
+
+        return;
+      }
+
+      submitting = true;
+      submitButton.disabled = true;
+
+      submitButton.textContent =
+        "Додаємо…";
+
+      try {
+        const supplier =
+          await createFinanceSupplierApi({
+            name,
+            edrpou:
+              value("edrpou"),
+
+            contact_person:
+              value(
+                "contact_person"
+              ),
+
+            phone:
+              value("phone"),
+
+            email:
+              value("email"),
+
+            address:
+              value("address"),
+
+            note:
+              value("note"),
+          });
+
+        close();
+
+        if (
+          typeof onCreated ===
+          "function"
+        ) {
+          await onCreated(
+            supplier
+          );
+        }
+      } catch (error) {
+        console.error(
+          "create finance supplier failed:",
+          error
+        );
+
+        submitting = false;
+        submitButton.disabled = false;
+
+        submitButton.textContent =
+          "Додати постачальника →";
+
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          error?.message ||
+          "Не вдалося створити постачальника.";
+      }
+    }
+  );
+
+  setTimeout(
+    () => {
+      form.elements
+        .name
+        ?.focus();
+    },
+    50
+  );
+}
 
 async function openFinancePurchaseModal() {
   document
@@ -12600,7 +13006,12 @@ async function openFinancePurchaseModal() {
                 </h3>
               </div>
             </div>
-
+<button
+  type="button"
+  id="financePurchaseAddSupplier"
+>
+  + Новий постачальник
+</button>
             <div class="financePurchaseGeneralGrid">
               <label class="is-wide">
                 <span>
@@ -12861,7 +13272,59 @@ async function openFinancePurchaseModal() {
       overlay.querySelector(
         ".financePurchaseCreateSubmit"
       );
+const supplierSelect =
+  form.elements
+    .supplier_id;
 
+const addSupplierButton =
+  overlay.querySelector(
+    "#financePurchaseAddSupplier"
+  );
+
+addSupplierButton.addEventListener(
+  "click",
+  () => {
+    openFinanceSupplierCreateModal(
+      async (
+        supplier
+      ) => {
+        if (
+          !supplier?.id
+        ) {
+          return;
+        }
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          supplier.id;
+
+        option.textContent =
+          supplier.name ||
+          "Новий постачальник";
+
+        supplierSelect.appendChild(
+          option
+        );
+
+        supplierSelect.value =
+          supplier.id;
+
+        submitButton.disabled =
+          false;
+
+        overlay
+          .querySelector(
+            ".financePurchaseNoSuppliers"
+          )
+          ?.remove();
+      }
+    );
+  }
+);
     let rowCounter = 0;
     let submitting = false;
 
