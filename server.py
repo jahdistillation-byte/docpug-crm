@@ -5147,6 +5147,534 @@ def api_finance_supplier_deactivate(
             500,
         )
 
+@app.get(
+    "/api/finance/purchases"
+)
+def api_finance_purchases_list():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    allowed_statuses = {
+        "draft",
+        "ordered",
+        "partially_received",
+        "received",
+        "cancelled",
+    }
+
+    allowed_payment_statuses = {
+        "unpaid",
+        "partial",
+        "paid",
+    }
+
+    status = str(
+        request.args.get(
+            "status"
+        )
+        or ""
+    ).strip().lower()
+
+    payment_status = str(
+        request.args.get(
+            "payment_status"
+        )
+        or ""
+    ).strip().lower()
+
+    supplier_id = str(
+        request.args.get(
+            "supplier_id"
+        )
+        or ""
+    ).strip()
+
+    raw_date_from = str(
+        request.args.get(
+            "date_from"
+        )
+        or ""
+    ).strip()
+
+    raw_date_to = str(
+        request.args.get(
+            "date_to"
+        )
+        or ""
+    ).strip()
+
+    if (
+        status
+        and status not in
+        allowed_statuses
+    ):
+        return fail(
+            "Некоректний статус закупівлі.",
+            400,
+        )
+
+    if (
+        payment_status
+        and payment_status not in
+        allowed_payment_statuses
+    ):
+        return fail(
+            "Некоректний статус оплати.",
+            400,
+        )
+
+    if supplier_id:
+        try:
+            uuid.UUID(
+                supplier_id
+            )
+        except ValueError:
+            return fail(
+                "Некоректний ID постачальника.",
+                400,
+            )
+
+    date_from = None
+    date_to = None
+
+    if raw_date_from:
+        try:
+            date_from = (
+                datetime.strptime(
+                    raw_date_from,
+                    "%Y-%m-%d",
+                )
+                .date()
+            )
+        except ValueError:
+            return fail(
+                "Некоректна початкова дата.",
+                400,
+            )
+
+    if raw_date_to:
+        try:
+            date_to = (
+                datetime.strptime(
+                    raw_date_to,
+                    "%Y-%m-%d",
+                )
+                .date()
+            )
+        except ValueError:
+            return fail(
+                "Некоректна кінцева дата.",
+                400,
+            )
+
+    if (
+        date_from
+        and date_to
+        and date_from > date_to
+    ):
+        return fail(
+            "Початкова дата не може бути пізніше кінцевої.",
+            400,
+        )
+
+    try:
+        limit = int(
+            request.args.get(
+                "limit"
+            )
+            or 20
+        )
+
+        offset = int(
+            request.args.get(
+                "offset"
+            )
+            or 0
+        )
+    except ValueError:
+        return fail(
+            "Некоректна пагінація.",
+            400,
+        )
+
+    limit = max(
+        1,
+        min(
+            limit,
+            100,
+        ),
+    )
+
+    offset = max(
+        0,
+        offset,
+    )
+
+    try:
+        query = (
+            supabase
+            .table(
+                "stock_purchases"
+            )
+            .select(
+                "id, org_id, supplier_id, "
+                "purchase_number, invoice_number, "
+                "status, payment_status, "
+                "order_date, expected_date, "
+                "received_at, subtotal, "
+                "discount_amount, total_amount, "
+                "paid_amount, currency, "
+                "document_url, note, "
+                "created_by, received_by, "
+                "created_at, updated_at"
+            )
+            .eq(
+                "org_id",
+                current_org,
+            )
+        )
+
+        if status:
+            query = query.eq(
+                "status",
+                status,
+            )
+
+        if payment_status:
+            query = query.eq(
+                "payment_status",
+                payment_status,
+            )
+
+        if supplier_id:
+            query = query.eq(
+                "supplier_id",
+                supplier_id,
+            )
+
+        if date_from:
+            query = query.gte(
+                "order_date",
+                date_from.isoformat(),
+            )
+
+        if date_to:
+            query = query.lte(
+                "order_date",
+                date_to.isoformat(),
+            )
+
+        purchases_result = (
+            query
+            .order(
+                "order_date",
+                desc=True,
+            )
+            .order(
+                "created_at",
+                desc=True,
+            )
+            .range(
+                offset,
+                offset + limit,
+            )
+            .execute()
+        )
+
+        raw_purchases = (
+            purchases_result.data
+            or []
+        )
+
+        has_more = (
+            len(raw_purchases)
+            > limit
+        )
+
+        purchases = (
+            raw_purchases[:limit]
+        )
+
+        if not purchases:
+            return ok({
+                "items": [],
+                "pagination": {
+                    "limit":
+                        limit,
+
+                    "offset":
+                        offset,
+
+                    "returned":
+                        0,
+
+                    "has_more":
+                        False,
+
+                    "next_offset":
+                        None,
+                },
+            })
+
+        purchase_ids = [
+            str(
+                purchase.get(
+                    "id"
+                )
+            )
+            for purchase in purchases
+            if purchase.get(
+                "id"
+            )
+        ]
+
+        supplier_ids = list({
+            str(
+                purchase.get(
+                    "supplier_id"
+                )
+            )
+            for purchase in purchases
+            if purchase.get(
+                "supplier_id"
+            )
+        })
+
+        suppliers_by_id = {}
+
+        if supplier_ids:
+            suppliers_result = (
+                supabase
+                .table(
+                    "suppliers"
+                )
+                .select(
+                    "id, name, edrpou, "
+                    "contact_person, phone, "
+                    "email, address, active"
+                )
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .in_(
+                    "id",
+                    supplier_ids,
+                )
+                .execute()
+            )
+
+            suppliers_by_id = {
+                str(
+                    supplier.get(
+                        "id"
+                    )
+                ):
+                    supplier
+
+                for supplier in (
+                    suppliers_result.data
+                    or []
+                )
+            }
+
+        items_by_purchase = {
+            purchase_id: []
+            for purchase_id
+            in purchase_ids
+        }
+
+        if purchase_ids:
+            items_result = (
+                supabase
+                .table(
+                    "stock_purchase_items"
+                )
+                .select(
+                    "id, purchase_id, stock_id, "
+                    "name_snap, unit_snap, "
+                    "ordered_qty, received_qty, "
+                    "purchase_price, line_total, "
+                    "note, created_at, updated_at"
+                )
+                .in_(
+                    "purchase_id",
+                    purchase_ids,
+                )
+                .order(
+                    "created_at"
+                )
+                .execute()
+            )
+
+            for item in (
+                items_result.data
+                or []
+            ):
+                item_purchase_id = str(
+                    item.get(
+                        "purchase_id"
+                    )
+                    or ""
+                )
+
+                if (
+                    item_purchase_id
+                    in items_by_purchase
+                ):
+                    items_by_purchase[
+                        item_purchase_id
+                    ].append(
+                        item
+                    )
+
+        response_items = []
+
+        for purchase in purchases:
+            purchase_id = str(
+                purchase.get(
+                    "id"
+                )
+                or ""
+            )
+
+            purchase_supplier_id = str(
+                purchase.get(
+                    "supplier_id"
+                )
+                or ""
+            )
+
+            purchase_items = (
+                items_by_purchase.get(
+                    purchase_id,
+                    [],
+                )
+            )
+
+            ordered_units = sum(
+                float(
+                    item.get(
+                        "ordered_qty"
+                    )
+                    or 0
+                )
+                for item in
+                purchase_items
+            )
+
+            received_units = sum(
+                float(
+                    item.get(
+                        "received_qty"
+                    )
+                    or 0
+                )
+                for item in
+                purchase_items
+            )
+
+            total_amount = float(
+                purchase.get(
+                    "total_amount"
+                )
+                or 0
+            )
+
+            paid_amount = float(
+                purchase.get(
+                    "paid_amount"
+                )
+                or 0
+            )
+
+            response_items.append({
+                **purchase,
+
+                "supplier":
+                    suppliers_by_id.get(
+                        purchase_supplier_id
+                    ),
+
+                "items":
+                    purchase_items,
+
+                "items_count":
+                    len(
+                        purchase_items
+                    ),
+
+                "ordered_units":
+                    ordered_units,
+
+                "received_units":
+                    received_units,
+
+                "remaining_amount":
+                    max(
+                        0,
+                        round(
+                            total_amount -
+                            paid_amount,
+                            2,
+                        ),
+                    ),
+            })
+
+        return ok({
+            "items":
+                response_items,
+
+            "pagination": {
+                "limit":
+                    limit,
+
+                "offset":
+                    offset,
+
+                "returned":
+                    len(
+                        response_items
+                    ),
+
+                "has_more":
+                    has_more,
+
+                "next_offset":
+                    (
+                        offset + limit
+                        if has_more
+                        else None
+                    ),
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET finance purchases:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити закупівлі.",
+            500,
+        )
+
 @app.post(
     "/api/finance/purchases"
 )
