@@ -9337,8 +9337,13 @@ const financeDashboardState = {
   paymentMethod: "",
   transactionSearch: "",
 
-  transactionOffset: 0,
+    transactionOffset: 0,
   transactionLimit: 20,
+
+  purchaseStatus: "",
+  purchasePaymentStatus: "",
+  purchaseOffset: 0,
+  purchaseLimit: 10,
 };
 
 function financeDateToIso(
@@ -9780,6 +9785,223 @@ async function loadFinanceExpensesOverviewApi(
       counterparties: [],
     }
   );
+}
+async function loadFinancePurchasesApi(
+  options = {}
+) {
+  const params =
+    new URLSearchParams();
+
+  const dateFrom =
+    options.dateFrom ||
+    financeDashboardState.dateFrom;
+
+  const dateTo =
+    options.dateTo ||
+    financeDashboardState.dateTo;
+
+  const status =
+    options.status ??
+    financeDashboardState
+      .purchaseStatus;
+
+  const paymentStatus =
+    options.paymentStatus ??
+    financeDashboardState
+      .purchasePaymentStatus;
+
+  const supplierId =
+    options.supplierId || "";
+
+  const limit = Number(
+    options.limit ??
+    financeDashboardState
+      .purchaseLimit ??
+    10
+  );
+
+  const offset = Number(
+    options.offset ??
+    financeDashboardState
+      .purchaseOffset ??
+    0
+  );
+
+  if (dateFrom) {
+    params.set(
+      "date_from",
+      dateFrom
+    );
+  }
+
+  if (dateTo) {
+    params.set(
+      "date_to",
+      dateTo
+    );
+  }
+
+  if (status) {
+    params.set(
+      "status",
+      status
+    );
+  }
+
+  if (paymentStatus) {
+    params.set(
+      "payment_status",
+      paymentStatus
+    );
+  }
+
+  if (supplierId) {
+    params.set(
+      "supplier_id",
+      supplierId
+    );
+  }
+
+  params.set(
+    "limit",
+    String(limit)
+  );
+
+  params.set(
+    "offset",
+    String(offset)
+  );
+
+  const response = await fetch(
+    `/api/finance/purchases?${params.toString()}`,
+    {
+      credentials: "include",
+
+      headers: {
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(
+      () => ({})
+    );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити закупівлі (HTTP ${response.status}).`
+    );
+  }
+
+  return (
+    result.data || {
+      items: [],
+      pagination: {},
+    }
+  );
+}
+
+async function loadFinanceSuppliersApi(
+  search = ""
+) {
+  const params =
+    new URLSearchParams();
+
+  if (search) {
+    params.set(
+      "search",
+      search
+    );
+  }
+
+  const response = await fetch(
+    `/api/finance/suppliers?${params.toString()}`,
+    {
+      credentials: "include",
+
+      headers: {
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(
+      () => ({})
+    );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити постачальників (HTTP ${response.status}).`
+    );
+  }
+
+  return Array.isArray(
+    result.data
+  )
+    ? result.data
+    : [];
+}
+
+async function createFinancePurchaseApi(
+  payload
+) {
+  const response = await fetch(
+    "/api/finance/purchases",
+    {
+      method: "POST",
+      credentials: "include",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+
+      body: JSON.stringify(
+        payload
+      ),
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(
+      () => ({})
+    );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося створити закупівлю (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
 }
 
 function buildFinanceTrendChart(
@@ -12127,6 +12349,1740 @@ function buildFinanceExpensesTrendChart(
     </div>
   `;
 }
+function getFinancePurchaseStatusMeta(
+  status
+) {
+  const statuses = {
+    draft: {
+      label: "Чернетка",
+      icon: "◇",
+      className: "is-draft",
+    },
+
+    ordered: {
+      label: "Замовлено",
+      icon: "↗",
+      className: "is-ordered",
+    },
+
+    partially_received: {
+      label: "Отримано частково",
+      icon: "◐",
+      className:
+        "is-partially-received",
+    },
+
+    received: {
+      label: "Отримано",
+      icon: "✓",
+      className: "is-received",
+    },
+
+    cancelled: {
+      label: "Скасовано",
+      icon: "×",
+      className: "is-cancelled",
+    },
+  };
+
+  return (
+    statuses[
+      String(
+        status || ""
+      ).toLowerCase()
+    ] ||
+    statuses.draft
+  );
+}
+
+function getFinancePurchasePaymentMeta(
+  status
+) {
+  const statuses = {
+    unpaid: {
+      label: "Не оплачено",
+      className: "is-unpaid",
+    },
+
+    partial: {
+      label: "Оплачено частково",
+      className: "is-partial",
+    },
+
+    paid: {
+      label: "Оплачено",
+      className: "is-paid",
+    },
+  };
+
+  return (
+    statuses[
+      String(
+        status || ""
+      ).toLowerCase()
+    ] ||
+    statuses.unpaid
+  );
+}
+
+function formatFinancePurchaseDate(
+  value
+) {
+  if (!value) return "—";
+
+  const date = new Date(
+    `${value}T12:00:00`
+  );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return value;
+  }
+
+  return date.toLocaleDateString(
+    "uk-UA"
+  );
+}
+
+async function openFinancePurchaseModal() {
+  document
+    .querySelector(
+      ".financePurchaseCreateOverlay"
+    )
+    ?.remove();
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "financePurchaseCreateOverlay";
+
+  overlay.innerHTML = `
+    <div class="financePurchaseCreateModal">
+      <div class="financePageLoading">
+        <div class="visitPaymentSpinner"></div>
+
+        <strong>
+          Готуємо нову закупівлю…
+        </strong>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(
+    overlay
+  );
+
+  document.body.classList.add(
+    "financePurchaseModalOpen"
+  );
+
+  let closed = false;
+
+  const close = () => {
+    if (closed) return;
+
+    closed = true;
+    overlay.remove();
+
+    document.body.classList.remove(
+      "financePurchaseModalOpen"
+    );
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key === "Escape"
+    ) {
+      close();
+    }
+  };
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === overlay
+      ) {
+        close();
+      }
+    }
+  );
+
+  try {
+    const [
+      suppliers,
+      stockItems,
+    ] = await Promise.all([
+      loadFinanceSuppliersApi(),
+      loadStockApi(),
+    ]);
+
+    if (closed) return;
+
+    const activeSuppliers =
+      suppliers.filter(
+        (item) =>
+          item.active !== false
+      );
+
+    const activeStock =
+      stockItems.filter(
+        (item) =>
+          item.active !== false
+      );
+
+    const today =
+      financeDateToIso(
+        new Date()
+      );
+
+    overlay.innerHTML = `
+      <form
+        class="financePurchaseCreateModal"
+        id="financePurchaseCreateForm"
+      >
+        <header class="financePurchaseCreateHeader">
+          <div class="financePurchaseCreateHeaderIcon">
+            📦
+          </div>
+
+          <div>
+            <span>
+              НОВЕ ПОСТАЧАННЯ
+            </span>
+
+            <h2>
+              Створити закупівлю
+            </h2>
+
+            <p>
+              Сформуйте замовлення
+              постачальнику.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="financePurchaseCreateClose"
+          >
+            ×
+          </button>
+        </header>
+
+        <div class="financePurchaseCreateBody">
+          <section class="financePurchaseCreateGeneral">
+            <div class="financePurchaseCreateSectionHead">
+              <div>
+                <span>
+                  ОСНОВНІ ДАНІ
+                </span>
+
+                <h3>
+                  Постачальник і документ
+                </h3>
+              </div>
+            </div>
+
+            <div class="financePurchaseGeneralGrid">
+              <label class="is-wide">
+                <span>
+                  Постачальник
+                </span>
+
+                <select
+                  name="supplier_id"
+                  required
+                >
+                  <option value="">
+                    Оберіть постачальника
+                  </option>
+
+                  ${
+                    activeSuppliers
+                      .map(
+                        (supplier) => `
+                          <option
+                            value="${escapeHtml(
+                              supplier.id
+                            )}"
+                          >
+                            ${escapeHtml(
+                              supplier.name
+                            )}
+                          </option>
+                        `
+                      )
+                      .join("")
+                  }
+                </select>
+
+                ${
+                  activeSuppliers.length
+                    ? ""
+                    : `
+                      <small class="financePurchaseNoSuppliers">
+                        Активних постачальників немає.
+                      </small>
+                    `
+                }
+              </label>
+
+              <label>
+                <span>
+                  Дата замовлення
+                </span>
+
+                <input
+                  type="date"
+                  name="order_date"
+                  value="${today}"
+                  required
+                >
+              </label>
+
+              <label>
+                <span>
+                  Очікувана дата
+                </span>
+
+                <input
+                  type="date"
+                  name="expected_date"
+                  min="${today}"
+                >
+              </label>
+
+              <label>
+                <span>
+                  Номер накладної
+                </span>
+
+                <input
+                  type="text"
+                  name="invoice_number"
+                  maxlength="150"
+                  placeholder="Наприклад, НК-2048"
+                >
+              </label>
+
+              <label>
+                <span>
+                  Валюта
+                </span>
+
+                <select name="currency">
+                  <option value="UAH">
+                    UAH — гривня
+                  </option>
+
+                  <option value="USD">
+                    USD — долар
+                  </option>
+
+                  <option value="EUR">
+                    EUR — євро
+                  </option>
+
+                  <option value="PLN">
+                    PLN — злотий
+                  </option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="financePurchaseCreateItems">
+            <div class="financePurchaseCreateSectionHead">
+              <div>
+                <span>
+                  СКЛАД ЗАМОВЛЕННЯ
+                </span>
+
+                <h3>
+                  Позиції закупівлі
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                id="financePurchaseAddItem"
+              >
+                + Додати позицію
+              </button>
+            </div>
+
+            <div
+              class="financePurchaseCreateItemsList"
+              id="financePurchaseCreateItemsList"
+            ></div>
+          </section>
+
+          <section class="financePurchaseCreateAdditional">
+            <div class="financePurchaseGeneralGrid">
+              <label>
+                <span>
+                  Знижка
+                </span>
+
+                <input
+                  type="number"
+                  name="discount_amount"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                >
+              </label>
+
+              <label class="is-wide">
+                <span>
+                  Посилання на накладну
+                </span>
+
+                <input
+                  type="url"
+                  name="document_url"
+                  maxlength="1000"
+                  placeholder="https://..."
+                >
+              </label>
+
+              <label class="is-full">
+                <span>
+                  Примітка
+                </span>
+
+                <textarea
+                  name="note"
+                  maxlength="2000"
+                  placeholder="Умови постачання або коментар…"
+                ></textarea>
+              </label>
+            </div>
+          </section>
+
+          <div
+            class="financePurchaseCreateError"
+            id="financePurchaseCreateError"
+            hidden
+          ></div>
+        </div>
+
+        <footer class="financePurchaseCreateFooter">
+          <div class="financePurchaseCreateTotals">
+            <div>
+              <span>
+                Підсумок
+              </span>
+
+              <strong id="financePurchaseCreateSubtotal">
+                0 ₴
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Знижка
+              </span>
+
+              <strong id="financePurchaseCreateDiscount">
+                0 ₴
+              </strong>
+            </div>
+
+            <div class="is-total">
+              <span>
+                Разом
+              </span>
+
+              <strong id="financePurchaseCreateTotal">
+                0 ₴
+              </strong>
+            </div>
+          </div>
+
+          <div class="financePurchaseCreateActions">
+            <button
+              type="button"
+              class="financePurchaseCreateCancel"
+            >
+              Скасувати
+            </button>
+
+            <button
+              type="submit"
+              class="financePurchaseCreateSubmit"
+              ${
+                activeSuppliers.length
+                  ? ""
+                  : "disabled"
+              }
+            >
+              Створити закупівлю →
+            </button>
+          </div>
+        </footer>
+      </form>
+    `;
+
+    const form =
+      overlay.querySelector(
+        "#financePurchaseCreateForm"
+      );
+
+    const itemsList =
+      overlay.querySelector(
+        "#financePurchaseCreateItemsList"
+      );
+
+    const errorElement =
+      overlay.querySelector(
+        "#financePurchaseCreateError"
+      );
+
+    const submitButton =
+      overlay.querySelector(
+        ".financePurchaseCreateSubmit"
+      );
+
+    let rowCounter = 0;
+    let submitting = false;
+
+    const updateTotals = () => {
+      const rows = [
+        ...itemsList.querySelectorAll(
+          ".financePurchaseCreateItem"
+        ),
+      ];
+
+      const subtotal =
+        rows.reduce(
+          (
+            total,
+            row
+          ) => {
+            const quantity =
+              Math.max(
+                0,
+                Number(
+                  row.querySelector(
+                    '[name="ordered_qty"]'
+                  )?.value ||
+                  0
+                )
+              );
+
+            const price =
+              Math.max(
+                0,
+                Number(
+                  row.querySelector(
+                    '[name="purchase_price"]'
+                  )?.value ||
+                  0
+                )
+              );
+
+            const lineTotal =
+              quantity * price;
+
+            const lineElement =
+              row.querySelector(
+                ".financePurchaseItemLineTotal"
+              );
+
+            if (lineElement) {
+              lineElement.textContent =
+                formatVisitFinanceMoney(
+                  lineTotal
+                );
+            }
+
+            return (
+              total +
+              lineTotal
+            );
+          },
+          0
+        );
+
+      const discount =
+        Math.max(
+          0,
+          Number(
+            form.elements
+              .discount_amount
+              ?.value ||
+            0
+          )
+        );
+
+      const total =
+        Math.max(
+          0,
+          subtotal -
+          discount
+        );
+
+      overlay.querySelector(
+        "#financePurchaseCreateSubtotal"
+      ).textContent =
+        formatVisitFinanceMoney(
+          subtotal
+        );
+
+      overlay.querySelector(
+        "#financePurchaseCreateDiscount"
+      ).textContent =
+        formatVisitFinanceMoney(
+          discount
+        );
+
+      overlay.querySelector(
+        "#financePurchaseCreateTotal"
+      ).textContent =
+        formatVisitFinanceMoney(
+          total
+        );
+    };
+
+    const addItemRow = () => {
+      rowCounter += 1;
+
+      const row =
+        document.createElement(
+          "article"
+        );
+
+      row.className =
+        "financePurchaseCreateItem";
+
+      row.innerHTML = `
+        <div class="financePurchaseCreateItemNumber">
+          ${rowCounter}
+        </div>
+
+        <label class="financePurchaseStockSelect">
+          <span>
+            Позиція складу
+          </span>
+
+          <select name="stock_id">
+            <option value="">
+              + Нова позиція
+            </option>
+
+            ${
+              activeStock
+                .map(
+                  (item) => `
+                    <option
+                      value="${escapeHtml(
+                        item.id
+                      )}"
+                    >
+                      ${escapeHtml(
+                        item.name
+                      )}
+                      ·
+                      ${Number(
+                        item.qty || 0
+                      )}
+                      ${escapeHtml(
+                        item.unit ||
+                        "шт"
+                      )}
+                    </option>
+                  `
+                )
+                .join("")
+            }
+          </select>
+        </label>
+
+        <label class="financePurchaseItemNameInput">
+          <span>
+            Назва
+          </span>
+
+          <input
+            type="text"
+            name="name_snap"
+            maxlength="250"
+            placeholder="Назва позиції"
+            required
+          >
+        </label>
+
+        <label>
+          <span>
+            Од.
+          </span>
+
+          <input
+            type="text"
+            name="unit_snap"
+            maxlength="50"
+            value="шт"
+            required
+          >
+        </label>
+
+        <label>
+          <span>
+            Кількість
+          </span>
+
+          <input
+            type="number"
+            name="ordered_qty"
+            min="0.001"
+            step="0.001"
+            value="1"
+            required
+          >
+        </label>
+
+        <label>
+          <span>
+            Закупівельна ціна
+          </span>
+
+          <input
+            type="number"
+            name="purchase_price"
+            min="0"
+            step="0.01"
+            value="0"
+            required
+          >
+        </label>
+
+        <div class="financePurchaseItemLine">
+          <span>
+            Сума
+          </span>
+
+          <strong class="financePurchaseItemLineTotal">
+            0 ₴
+          </strong>
+        </div>
+
+        <button
+          type="button"
+          class="financePurchaseItemRemove"
+        >
+          ×
+        </button>
+      `;
+
+      itemsList.appendChild(
+        row
+      );
+
+      const stockSelect =
+        row.querySelector(
+          '[name="stock_id"]'
+        );
+
+      stockSelect.addEventListener(
+        "change",
+        () => {
+          const stockItem =
+            activeStock.find(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                String(
+                  stockSelect.value
+                )
+            );
+
+          const nameInput =
+            row.querySelector(
+              '[name="name_snap"]'
+            );
+
+          const unitInput =
+            row.querySelector(
+              '[name="unit_snap"]'
+            );
+
+          const priceInput =
+            row.querySelector(
+              '[name="purchase_price"]'
+            );
+
+          if (stockItem) {
+            nameInput.value =
+              stockItem.name || "";
+
+            unitInput.value =
+              stockItem.unit || "шт";
+
+            priceInput.value =
+              Number(
+                stockItem.cost || 0
+              );
+
+            nameInput.readOnly = true;
+            unitInput.readOnly = true;
+          } else {
+            nameInput.value = "";
+            unitInput.value = "шт";
+            priceInput.value = 0;
+
+            nameInput.readOnly = false;
+            unitInput.readOnly = false;
+
+            nameInput.focus();
+          }
+
+          updateTotals();
+        }
+      );
+
+      row
+        .querySelectorAll(
+          "input"
+        )
+        .forEach(
+          (input) => {
+            input.addEventListener(
+              "input",
+              updateTotals
+            );
+          }
+        );
+
+      row
+        .querySelector(
+          ".financePurchaseItemRemove"
+        )
+        .addEventListener(
+          "click",
+          () => {
+            const rows =
+              itemsList.querySelectorAll(
+                ".financePurchaseCreateItem"
+              );
+
+            if (
+              rows.length <= 1
+            ) {
+              errorElement.hidden =
+                false;
+
+              errorElement.textContent =
+                "У закупівлі повинна залишитися хоча б одна позиція.";
+
+              return;
+            }
+
+            row.remove();
+            updateTotals();
+          }
+        );
+
+      updateTotals();
+    };
+
+    addItemRow();
+
+    overlay
+      .querySelector(
+        "#financePurchaseAddItem"
+      )
+      .addEventListener(
+        "click",
+        () => {
+          errorElement.hidden =
+            true;
+
+          addItemRow();
+        }
+      );
+
+    form.elements
+      .discount_amount
+      .addEventListener(
+        "input",
+        updateTotals
+      );
+
+    form.elements
+      .order_date
+      .addEventListener(
+        "change",
+        () => {
+          form.elements
+            .expected_date
+            .min =
+              form.elements
+                .order_date
+                .value ||
+              today;
+        }
+      );
+
+    overlay
+      .querySelector(
+        ".financePurchaseCreateClose"
+      )
+      .addEventListener(
+        "click",
+        close
+      );
+
+    overlay
+      .querySelector(
+        ".financePurchaseCreateCancel"
+      )
+      .addEventListener(
+        "click",
+        close
+      );
+
+    form.addEventListener(
+      "submit",
+      async (
+        event
+      ) => {
+        event.preventDefault();
+
+        if (submitting) return;
+
+        errorElement.hidden =
+          true;
+
+        const formData =
+          new FormData(
+            form
+          );
+
+        const rows = [
+          ...itemsList.querySelectorAll(
+            ".financePurchaseCreateItem"
+          ),
+        ];
+
+        const items =
+          rows.map(
+            (row) => ({
+              stock_id:
+                row.querySelector(
+                  '[name="stock_id"]'
+                ).value ||
+                null,
+
+              name_snap:
+                row.querySelector(
+                  '[name="name_snap"]'
+                ).value.trim(),
+
+              unit_snap:
+                row.querySelector(
+                  '[name="unit_snap"]'
+                ).value.trim(),
+
+              ordered_qty:
+                Number(
+                  row.querySelector(
+                    '[name="ordered_qty"]'
+                  ).value
+                ),
+
+              purchase_price:
+                Number(
+                  row.querySelector(
+                    '[name="purchase_price"]'
+                  ).value
+                ),
+
+              note: null,
+            })
+          );
+
+        const invalidItem =
+          items.find(
+            (item) =>
+              !item.name_snap ||
+              !item.unit_snap ||
+              !Number.isFinite(
+                item.ordered_qty
+              ) ||
+              item.ordered_qty <= 0 ||
+              !Number.isFinite(
+                item.purchase_price
+              ) ||
+              item.purchase_price < 0
+          );
+
+        if (invalidItem) {
+          errorElement.hidden =
+            false;
+
+          errorElement.textContent =
+            "Перевірте всі позиції закупівлі.";
+
+          return;
+        }
+
+        const orderDate =
+          String(
+            formData.get(
+              "order_date"
+            ) ||
+            ""
+          );
+
+        const expectedDate =
+          String(
+            formData.get(
+              "expected_date"
+            ) ||
+            ""
+          );
+
+        if (
+          expectedDate &&
+          expectedDate < orderDate
+        ) {
+          errorElement.hidden =
+            false;
+
+          errorElement.textContent =
+            "Очікувана дата не може бути раніше дати замовлення.";
+
+          return;
+        }
+
+        const subtotal =
+          items.reduce(
+            (
+              total,
+              item
+            ) =>
+              total +
+              item.ordered_qty *
+              item.purchase_price,
+            0
+          );
+
+        const discount =
+          Math.max(
+            0,
+            Number(
+              formData.get(
+                "discount_amount"
+              ) ||
+              0
+            )
+          );
+
+        if (
+          discount > subtotal
+        ) {
+          errorElement.hidden =
+            false;
+
+          errorElement.textContent =
+            "Знижка не може перевищувати підсумок.";
+
+          return;
+        }
+
+        submitting = true;
+        submitButton.disabled = true;
+
+        submitButton.textContent =
+          "Створюємо…";
+
+        try {
+          const purchase =
+            await createFinancePurchaseApi({
+              supplier_id:
+                String(
+                  formData.get(
+                    "supplier_id"
+                  ) ||
+                  ""
+                ),
+
+              order_date:
+                orderDate,
+
+              expected_date:
+                expectedDate ||
+                null,
+
+              invoice_number:
+                String(
+                  formData.get(
+                    "invoice_number"
+                  ) ||
+                  ""
+                ).trim() ||
+                null,
+
+              discount_amount:
+                discount,
+
+              currency:
+                String(
+                  formData.get(
+                    "currency"
+                  ) ||
+                  "UAH"
+                ),
+
+              document_url:
+                String(
+                  formData.get(
+                    "document_url"
+                  ) ||
+                  ""
+                ).trim() ||
+                null,
+
+              note:
+                String(
+                  formData.get(
+                    "note"
+                  ) ||
+                  ""
+                ).trim() ||
+                null,
+
+              items,
+            });
+
+          close();
+
+          financeDashboardState
+            .purchaseOffset = 0;
+
+          await renderFinanceTab();
+
+          openDeleteModal(
+            `Закупівлю ${
+              purchase
+                ?.purchase_number ||
+              ""
+            } успішно створено.`,
+            null,
+            "operation-success"
+          );
+
+        } catch (error) {
+          console.error(
+            "create finance purchase failed:",
+            error
+          );
+
+          submitting = false;
+          submitButton.disabled = false;
+
+          submitButton.textContent =
+            "Створити закупівлю →";
+
+          errorElement.hidden =
+            false;
+
+          errorElement.textContent =
+            error?.message ||
+            "Не вдалося створити закупівлю.";
+        }
+      }
+    );
+
+  } catch (error) {
+    console.error(
+      "openFinancePurchaseModal failed:",
+      error
+    );
+
+    if (closed) return;
+
+    overlay.innerHTML = `
+      <div class="financePurchaseCreateModal financePurchaseLoadError">
+        <span>!</span>
+
+        <h2>
+          Не вдалося відкрити закупівлю
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error?.message ||
+            "Невідома помилка"
+          )}
+        </p>
+
+        <button
+          type="button"
+          class="financePurchaseCreateCancel"
+        >
+          Закрити
+        </button>
+      </div>
+    `;
+
+    overlay
+      .querySelector(
+        ".financePurchaseCreateCancel"
+      )
+      .addEventListener(
+        "click",
+        close
+      );
+  }
+}
+
+function openFinancePurchaseDetailsModal(
+  purchase
+) {
+  document
+    .querySelector(
+      ".financePurchaseDetailsOverlay"
+    )
+    ?.remove();
+
+  const statusMeta =
+    getFinancePurchaseStatusMeta(
+      purchase.status
+    );
+
+  const paymentMeta =
+    getFinancePurchasePaymentMeta(
+      purchase.payment_status
+    );
+
+  const supplier =
+    purchase.supplier || {};
+
+  const items =
+    Array.isArray(
+      purchase.items
+    )
+      ? purchase.items
+      : [];
+
+  const documentUrl =
+    getSafeFinanceDocumentUrl(
+      purchase.document_url
+    );
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "financePurchaseDetailsOverlay";
+
+  overlay.innerHTML = `
+    <div
+      class="financePurchaseDetailsModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      <header class="financePurchaseDetailsHeader">
+        <div class="financePurchaseDetailsHeaderIcon">
+          ${statusMeta.icon}
+        </div>
+
+        <div>
+          <span>
+            ДОКУМЕНТ ЗАКУПІВЛІ
+          </span>
+
+          <h2>
+            ${escapeHtml(
+              purchase.purchase_number ||
+              "Закупівля"
+            )}
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              supplier.name ||
+              "Постачальник не вказаний"
+            )}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="financePurchaseDetailsClose"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="financePurchaseDetailsBody">
+        <section class="financePurchaseDetailsStatuses">
+          <div
+            class="${
+              statusMeta.className
+            }"
+          >
+            <span>
+              Статус постачання
+            </span>
+
+            <strong>
+              ${statusMeta.label}
+            </strong>
+          </div>
+
+          <div
+            class="${
+              paymentMeta.className
+            }"
+          >
+            <span>
+              Статус оплати
+            </span>
+
+            <strong>
+              ${paymentMeta.label}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Дата замовлення
+            </span>
+
+            <strong>
+              ${formatFinancePurchaseDate(
+                purchase.order_date
+              )}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Очікується
+            </span>
+
+            <strong>
+              ${formatFinancePurchaseDate(
+                purchase.expected_date
+              )}
+            </strong>
+          </div>
+        </section>
+
+        <section class="financePurchaseDetailsSupplier">
+          <div class="financePurchaseDetailsSectionHead">
+            <div>
+              <span>
+                ПОСТАЧАЛЬНИК
+              </span>
+
+              <h3>
+                ${escapeHtml(
+                  supplier.name ||
+                  "Без назви"
+                )}
+              </h3>
+            </div>
+          </div>
+
+          <div class="financePurchaseSupplierGrid">
+            <div>
+              <span>
+                Контакт
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  supplier.contact_person ||
+                  "—"
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Телефон
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  supplier.phone ||
+                  "—"
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Email
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  supplier.email ||
+                  "—"
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Накладна
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  purchase.invoice_number ||
+                  "Не вказано"
+                )}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="financePurchaseDetailsItems">
+          <div class="financePurchaseDetailsSectionHead">
+            <div>
+              <span>
+                СКЛАД ЗАМОВЛЕННЯ
+              </span>
+
+              <h3>
+                Позиції
+              </h3>
+            </div>
+
+            <b>
+              ${items.length}
+            </b>
+          </div>
+
+          <div class="financePurchaseDetailsItemsList">
+            ${
+              items.length
+                ? items
+                    .map(
+                      (
+                        item,
+                        index
+                      ) => {
+                        const quantity =
+                          Number(
+                            item.ordered_qty ||
+                            0
+                          );
+
+                        const received =
+                          Number(
+                            item.received_qty ||
+                            0
+                          );
+
+                        const price =
+                          Number(
+                            item.purchase_price ||
+                            0
+                          );
+
+                        const lineTotal =
+                          Number(
+                            item.line_total ??
+                            quantity * price
+                          );
+
+                        return `
+                          <article class="financePurchaseDetailsItem">
+                            <span class="financePurchaseItemNumber">
+                              ${index + 1}
+                            </span>
+
+                            <div class="financePurchaseItemName">
+                              <strong>
+                                ${escapeHtml(
+                                  item.name_snap ||
+                                  "Без назви"
+                                )}
+                              </strong>
+
+                              <small>
+                                ${
+                                  item.stock_id
+                                    ? "Повʼязано зі складом"
+                                    : "Нова позиція"
+                                }
+                              </small>
+                            </div>
+
+                            <div>
+                              <span>
+                                Замовлено
+                              </span>
+
+                              <strong>
+                                ${quantity}
+                                ${escapeHtml(
+                                  item.unit_snap ||
+                                  "шт"
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>
+                                Отримано
+                              </span>
+
+                              <strong>
+                                ${received}
+                                ${escapeHtml(
+                                  item.unit_snap ||
+                                  "шт"
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>
+                                Ціна
+                              </span>
+
+                              <strong>
+                                ${formatVisitFinanceMoney(
+                                  price
+                                )}
+                              </strong>
+                            </div>
+
+                            <div class="financePurchaseItemTotal">
+                              <span>
+                                Сума
+                              </span>
+
+                              <strong>
+                                ${formatVisitFinanceMoney(
+                                  lineTotal
+                                )}
+                              </strong>
+                            </div>
+                          </article>
+                        `;
+                      }
+                    )
+                    .join("")
+                : `
+                  <div class="financePurchasesEmpty">
+                    Позицій немає
+                  </div>
+                `
+            }
+          </div>
+        </section>
+
+        <section class="financePurchaseDetailsFooterGrid">
+          <div class="financePurchaseDetailsInformation">
+            <div>
+              <span>
+                Примітка
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  purchase.note ||
+                  "Без примітки"
+                )}
+              </strong>
+            </div>
+
+            ${
+              documentUrl
+                ? `
+                  <a
+                    href="${escapeHtml(
+                      documentUrl
+                    )}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ↗ Відкрити накладну
+                  </a>
+                `
+                : `
+                  <span class="financePurchaseNoDocument">
+                    Накладну не додано
+                  </span>
+                `
+            }
+          </div>
+
+          <div class="financePurchaseDetailsTotals">
+            <div>
+              <span>
+                Підсумок
+              </span>
+
+              <strong>
+                ${formatVisitFinanceMoney(
+                  purchase.subtotal
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Знижка
+              </span>
+
+              <strong>
+                −${formatVisitFinanceMoney(
+                  purchase.discount_amount
+                )}
+              </strong>
+            </div>
+
+            <div class="is-total">
+              <span>
+                Разом
+              </span>
+
+              <strong>
+                ${formatVisitFinanceMoney(
+                  purchase.total_amount
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Сплачено
+              </span>
+
+              <strong>
+                ${formatVisitFinanceMoney(
+                  purchase.paid_amount
+                )}
+              </strong>
+            </div>
+
+            <div class="is-remaining">
+              <span>
+                Залишок
+              </span>
+
+              <strong>
+                ${formatVisitFinanceMoney(
+                  purchase.remaining_amount
+                )}
+              </strong>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="financePurchaseDetailsActions">
+        <span>
+          Приймання та оплата будуть
+          підключені наступним етапом.
+        </span>
+
+        <button
+          type="button"
+          class="financePurchaseDetailsDone"
+        >
+          Закрити
+        </button>
+      </footer>
+    </div>
+  `;
+
+  document.body.appendChild(
+    overlay
+  );
+
+  document.body.classList.add(
+    "financePurchaseModalOpen"
+  );
+
+  const close = () => {
+    overlay.remove();
+
+    document.body.classList.remove(
+      "financePurchaseModalOpen"
+    );
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key === "Escape"
+    ) {
+      close();
+    }
+  };
+
+  overlay
+    .querySelector(
+      ".financePurchaseDetailsClose"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
+
+  overlay
+    .querySelector(
+      ".financePurchaseDetailsDone"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === overlay
+      ) {
+        close();
+      }
+    }
+  );
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+}
 
 async function renderFinanceExpensesTab(
   page
@@ -12142,17 +14098,64 @@ async function renderFinanceExpensesTab(
   `;
 
   try {
-    const overview =
-      await loadFinanceExpensesOverviewApi(
+        const [
+      overview,
+      purchasesResult,
+    ] = await Promise.all([
+      loadFinanceExpensesOverviewApi(
         financeDashboardState
           .dateFrom,
 
         financeDashboardState
           .dateTo
-      );
+      ),
+
+      loadFinancePurchasesApi({
+        dateFrom:
+          financeDashboardState
+            .dateFrom,
+
+        dateTo:
+          financeDashboardState
+            .dateTo,
+
+        limit:
+          financeDashboardState
+            .purchaseLimit,
+
+        offset:
+          financeDashboardState
+            .purchaseOffset,
+      }),
+    ]);
 
     const summary =
       overview.summary || {};
+
+    const purchases =
+      Array.isArray(
+        purchasesResult.items
+      )
+        ? purchasesResult.items
+        : [];
+
+    const purchasePagination =
+      purchasesResult.pagination
+      || {};
+
+    const purchaseDocumentsTotal =
+      purchases.reduce(
+        (
+          total,
+          purchase
+        ) =>
+          total +
+          Number(
+            purchase.total_amount
+            || 0
+          ),
+        0
+      );
 
     const categories =
       Array.isArray(
@@ -12504,88 +14507,297 @@ async function renderFinanceExpensesTab(
         </section>
 
         <section class="financeExpensesSecondaryGrid">
-          <article class="financePanel financeExpenseControlPanel">
-            <div class="financePanelHead">
+                    <article class="financePanel financePurchasesPanel">
+            <div class="financePanelHead financePurchasesPanelHead">
               <div>
                 <span>
-                  КОНТРОЛЬ
+                  ПОСТАЧАННЯ
                 </span>
 
                 <h2>
-                  Закупівлі та зарплати
+                  Закупівлі
                 </h2>
+              </div>
+
+              <div class="financePurchasesPanelActions">
+                <b>
+                  ${purchases.length}
+                </b>
+
+                <button
+                  type="button"
+                  id="financePurchaseCreateButton"
+                >
+                  + Нова закупівля
+                </button>
               </div>
             </div>
 
-            <div class="financeExpenseControlCards">
-              <article class="is-purchase">
-                <div>
-                  <span>
-                    📦
-                  </span>
+            <div class="financePurchasesSummary">
+              <div>
+                <span>
+                  Документів
+                </span>
 
-                  <div>
-                    <small>
-                      ЗАКУПІВЛІ
-                    </small>
+                <strong>
+                  ${purchases.length}
+                </strong>
+              </div>
 
-                    <h3>
-                      Препарати й матеріали
-                    </h3>
-                  </div>
-                </div>
+              <div>
+                <span>
+                  Сума документів
+                </span>
 
                 <strong>
                   ${formatVisitFinanceMoney(
-                    summary.purchases_total
+                    purchaseDocumentsTotal
                   )}
                 </strong>
+              </div>
 
-                <p>
-                  Наступним етапом тут
-                  зʼявляться постачальники,
-                  накладні та звʼязок
-                  із приходом на склад.
-                </p>
-              </article>
-
-              <article class="is-salary">
-                <div>
-                  <span>
-                    👥
-                  </span>
-
-                  <div>
-                    <small>
-                      ЗАРПЛАТИ
-                    </small>
-
-                    <h3>
-                      Фонд оплати праці
-                    </h3>
-                  </div>
-                </div>
+              <div>
+                <span>
+                  Очікують оплати
+                </span>
 
                 <strong>
-                  ${formatVisitFinanceMoney(
-                    summary.salary_total
-                  )}
-                </strong>
-
-                <p>
                   ${
-                    isOwner()
-                      ? (
-                          "Розрахунок ставок, відсотків, бонусів і штрафів буде доступний лише власнику."
-                        )
-                      : (
-                          "Адміністратору доступна лише загальна сума без персональних нарахувань."
-                        )
+                    purchases.filter(
+                      (purchase) =>
+                        purchase
+                          .payment_status !==
+                        "paid"
+                    ).length
                   }
-                </p>
-              </article>
+                </strong>
+              </div>
             </div>
+
+            <div class="financePurchasesList">
+              ${
+                purchases.length
+                  ? purchases
+                      .map(
+                        (purchase) => {
+                          const statusMeta =
+                            getFinancePurchaseStatusMeta(
+                              purchase.status
+                            );
+
+                          const paymentMeta =
+                            getFinancePurchasePaymentMeta(
+                              purchase
+                                .payment_status
+                            );
+
+                          const orderedUnits =
+                            Number(
+                              purchase
+                                .ordered_units ||
+                              0
+                            );
+
+                          const receivedUnits =
+                            Number(
+                              purchase
+                                .received_units ||
+                              0
+                            );
+
+                          const receiveProgress =
+                            orderedUnits > 0
+                              ? Math.min(
+                                  100,
+                                  Math.max(
+                                    0,
+                                    (
+                                      receivedUnits /
+                                      orderedUnits
+                                    ) * 100
+                                  )
+                                )
+                              : 0;
+
+                          return `
+                            <button
+                              type="button"
+                              class="financePurchaseCard"
+                              data-finance-purchase-id="${
+                                purchase.id
+                              }"
+                            >
+                              <div class="financePurchaseCardIcon">
+                                ${statusMeta.icon}
+                              </div>
+
+                              <div class="financePurchaseCardMain">
+                                <div class="financePurchaseCardTitle">
+                                  <div>
+                                    <strong>
+                                      ${escapeHtml(
+                                        purchase
+                                          .purchase_number ||
+                                        "Закупівля"
+                                      )}
+                                    </strong>
+
+                                    <span>
+                                      ${escapeHtml(
+                                        purchase
+                                          .supplier
+                                          ?.name ||
+                                        "Постачальник не вказаний"
+                                      )}
+                                    </span>
+                                  </div>
+
+                                  <div class="financePurchaseBadges">
+                                    <span
+                                      class="financePurchaseStatus ${
+                                        statusMeta
+                                          .className
+                                      }"
+                                    >
+                                      ${statusMeta.label}
+                                    </span>
+
+                                    <span
+                                      class="financePurchasePaymentStatus ${
+                                        paymentMeta
+                                          .className
+                                      }"
+                                    >
+                                      ${paymentMeta.label}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div class="financePurchaseCardMeta">
+                                  <span>
+                                    ${formatFinancePurchaseDate(
+                                      purchase
+                                        .order_date
+                                    )}
+                                  </span>
+
+                                  <span>
+                                    ${
+                                      Number(
+                                        purchase
+                                          .items_count ||
+                                        0
+                                      )
+                                    }
+                                    позицій
+                                  </span>
+
+                                  <span>
+                                    Отримано:
+                                    ${receivedUnits}
+                                    із
+                                    ${orderedUnits}
+                                  </span>
+                                </div>
+
+                                <div class="financePurchaseProgress">
+                                  <i
+                                    style="
+                                      width:
+                                        ${receiveProgress}%;
+                                    "
+                                  ></i>
+                                </div>
+                              </div>
+
+                              <div class="financePurchaseCardAmount">
+                                <strong>
+                                  ${formatVisitFinanceMoney(
+                                    purchase
+                                      .total_amount
+                                  )}
+                                </strong>
+
+                                <span>
+                                  Залишок:
+                                  ${formatVisitFinanceMoney(
+                                    purchase
+                                      .remaining_amount
+                                  )}
+                                </span>
+                              </div>
+
+                              <span class="financePurchaseCardArrow">
+                                →
+                              </span>
+                            </button>
+                          `;
+                        }
+                      )
+                      .join("")
+                  : `
+                    <div class="financePurchasesEmpty">
+                      <span>
+                        📦
+                      </span>
+
+                      <strong>
+                        Закупівель за цей період немає
+                      </strong>
+
+                      <p>
+                        Створіть перше замовлення
+                        постачальнику.
+                      </p>
+                    </div>
+                  `
+              }
+            </div>
+
+            ${
+              purchasePagination
+                .has_more ||
+              Number(
+                purchasePagination
+                  .offset ||
+                0
+              ) > 0
+                ? `
+                  <div class="financePurchasesPagination">
+                    <button
+                      type="button"
+                      id="financePurchasesPrevious"
+                      ${
+                        Number(
+                          purchasePagination
+                            .offset ||
+                          0
+                        ) <= 0
+                          ? "disabled"
+                          : ""
+                      }
+                    >
+                      ← Назад
+                    </button>
+
+                    <button
+                      type="button"
+                      id="financePurchasesNext"
+                      ${
+                        purchasePagination
+                          .has_more
+                          ? ""
+                          : "disabled"
+                      }
+                    >
+                      Далі →
+                    </button>
+                  </div>
+                `
+                : ""
+            }
           </article>
+
 
           <article class="financePanel financeExpenseCounterpartiesPanel">
             <div class="financePanelHead">
@@ -12720,43 +14932,114 @@ async function renderFinanceExpensesTab(
         }
       );
 
-    page
+        page
       .querySelector(
-        "#financeExpensesApplyPeriod"
+        "#financePurchaseCreateButton"
       )
       ?.addEventListener(
         "click",
         () => {
-          const dateFrom =
-            page.querySelector(
-              "#financeExpensesDateFrom"
-            )?.value || "";
+          openFinancePurchaseModal();
+        }
+      );
 
-          const dateTo =
-            page.querySelector(
-              "#financeExpensesDateTo"
-            )?.value || "";
+    page
+      .querySelectorAll(
+        "[data-finance-purchase-id]"
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            () => {
+              const purchaseId =
+                button.dataset
+                  .financePurchaseId;
 
+              const purchase =
+                purchases.find(
+                  (item) =>
+                    String(
+                      item.id
+                    ) ===
+                    String(
+                      purchaseId
+                    )
+                );
+
+              if (!purchase) {
+                return;
+              }
+
+              openFinancePurchaseDetailsModal(
+                purchase
+              );
+            }
+          );
+        }
+      );
+
+    page
+      .querySelector(
+        "#financePurchasesPrevious"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          const limit = Number(
+            financeDashboardState
+              .purchaseLimit ||
+            10
+          );
+
+          financeDashboardState
+            .purchaseOffset =
+              Math.max(
+                0,
+                Number(
+                  financeDashboardState
+                    .purchaseOffset ||
+                  0
+                ) -
+                limit
+              );
+
+          renderFinanceTab();
+        }
+      );
+
+    page
+      .querySelector(
+        "#financePurchasesNext"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
           if (
-            !dateFrom ||
-            !dateTo ||
-            dateFrom > dateTo
+            !purchasePagination
+              .has_more
           ) {
-            alert(
-              "Оберіть коректний період."
-            );
-
             return;
           }
 
-          financeDashboardState.preset =
-            "custom";
-
-          financeDashboardState.dateFrom =
-            dateFrom;
-
-          financeDashboardState.dateTo =
-            dateTo;
+          financeDashboardState
+            .purchaseOffset =
+              Number(
+                purchasePagination
+                  .next_offset
+              ) ||
+              (
+                Number(
+                  financeDashboardState
+                    .purchaseOffset ||
+                  0
+                ) +
+                Number(
+                  financeDashboardState
+                    .purchaseLimit ||
+                  10
+                )
+              );
 
           renderFinanceTab();
         }

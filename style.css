@@ -27884,3 +27884,1056 @@ div small {
     width: 100%;
   }
 }
+/* =========================================================
+   FINANCE — PURCHASES
+   ========================================================= */
+
+.financePurchasesPanel {
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 26px;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(168, 85, 247, 0.12),
+      transparent 36%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(31, 20, 54, 0.94),
+      rgba(12, 11, 30, 0.97)
+    );
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.financePurchasesPanelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.financePurchasesPanelHead h3 {
+  margin: 5px 0 7px;
+  font-size: clamp(21px, 2vw, 28px);
+  color: var(--text-primary, #ffffff);
+}
+
+.financePurchasesPanelHead p {
+  margin: 0;
+  color: var(--text-secondary, #9993ab);
+  line-height: 1.55;
+}
+
+.financePurchasesPanelActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.financePurchasesSummary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-secondary, #aaa4b9);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#financePurchaseCreateButton {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(192, 132, 252, 0.5);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent-color, #a855f7),
+      #d946ef
+    );
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(168, 85, 247, 0.24);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+#financePurchaseCreateButton:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 14px 34px rgba(168, 85, 247, 0.32);
+}
+
+.financePurchasesList {
+  display: grid;
+  gap: 12px;
+}
+
+.financePurchaseCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 17px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.018)
+    );
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.financePurchaseCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(192, 132, 252, 0.35);
+  background: rgba(168, 85, 247, 0.075);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
+}
+
+.financePurchaseCardIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(192, 132, 252, 0.28);
+  border-radius: 15px;
+  background: rgba(168, 85, 247, 0.11);
+  font-size: 21px;
+}
+
+.financePurchaseCardMain {
+  min-width: 0;
+}
+
+.financePurchaseCardTitle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.financePurchaseCardTitle strong {
+  overflow: hidden;
+  color: var(--text-primary, #fff);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financePurchaseCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 13px;
+  color: var(--text-secondary, #918ba0);
+  font-size: 12px;
+}
+
+.financePurchaseCardAmount {
+  min-width: 125px;
+  text-align: right;
+}
+
+.financePurchaseCardAmount strong {
+  display: block;
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.financePurchaseCardAmount span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary, #8c8599);
+  font-size: 11px;
+}
+
+.financePurchaseCardArrow {
+  color: var(--accent-color, #b267ff);
+  font-size: 20px;
+  opacity: 0.65;
+  transition: transform 0.18s ease;
+}
+
+.financePurchaseCard:hover .financePurchaseCardArrow {
+  transform: translateX(3px);
+  opacity: 1;
+}
+
+.financePurchaseStatus,
+.financePurchasePaymentStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.financePurchaseStatus.is-draft {
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+}
+
+.financePurchaseStatus.is-ordered,
+.financePurchasePaymentStatus.is-partial {
+  border-color: rgba(250, 204, 21, 0.3);
+  background: rgba(250, 204, 21, 0.08);
+  color: #facc15;
+}
+
+.financePurchaseStatus.is-received,
+.financePurchasePaymentStatus.is-paid {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.08);
+  color: #5ee9ad;
+}
+
+.financePurchaseStatus.is-cancelled,
+.financePurchasePaymentStatus.is-unpaid {
+  border-color: rgba(251, 113, 133, 0.28);
+  background: rgba(251, 113, 133, 0.07);
+  color: #fb8ba0;
+}
+
+.financePurchaseProgress {
+  width: 100%;
+  height: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.financePurchaseProgress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent-color, #a855f7),
+      #d946ef
+    );
+}
+
+.financePurchasesEmpty {
+  padding: 38px 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  color: var(--text-secondary, #9790a5);
+  text-align: center;
+}
+
+.financePurchasesPagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.financePurchasesPagination button {
+  min-height: 38px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #fff);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.financePurchasesPagination button:hover:not(:disabled) {
+  border-color: rgba(192, 132, 252, 0.38);
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.financePurchasesPagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+/* =========================================================
+   PURCHASE MODALS — SHARED
+   ========================================================= */
+
+body.financePurchaseModalOpen {
+  overflow: hidden;
+}
+
+.financePurchaseCreateOverlay,
+.financePurchaseDetailsOverlay {
+  position: fixed;
+  z-index: 10020;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  overflow-y: auto;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(168, 85, 247, 0.16),
+      transparent 42%
+    ),
+    rgba(3, 2, 12, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  animation: financePurchaseOverlayIn 0.18s ease both;
+}
+
+.financePurchaseCreateModal,
+.financePurchaseDetailsModal {
+  position: relative;
+  width: min(940px, 100%);
+  max-height: calc(100vh - 44px);
+  overflow: hidden;
+  border: 1px solid rgba(192, 132, 252, 0.26);
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(168, 85, 247, 0.19),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(28, 17, 48, 0.985),
+      rgba(9, 8, 24, 0.99)
+    );
+  box-shadow:
+    0 38px 100px rgba(0, 0, 0, 0.58),
+    0 0 45px rgba(168, 85, 247, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: financePurchaseModalIn 0.22s ease both;
+}
+
+.financePurchaseDetailsModal {
+  width: min(860px, 100%);
+}
+
+.financePurchaseCreateHeader,
+.financePurchaseDetailsHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 22px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.financePurchaseCreateHeaderIcon,
+.financePurchaseDetailsHeaderIcon {
+  display: grid;
+  place-items: center;
+  width: 51px;
+  height: 51px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(192, 132, 252, 0.32);
+  border-radius: 16px;
+  background: rgba(168, 85, 247, 0.12);
+  font-size: 23px;
+  box-shadow: inset 0 0 22px rgba(168, 85, 247, 0.08);
+}
+
+.financePurchaseCreateHeader h2,
+.financePurchaseDetailsHeader h2 {
+  margin: 3px 0 4px;
+  color: var(--text-primary, #fff);
+  font-size: clamp(21px, 3vw, 28px);
+}
+
+.financePurchaseCreateHeader p,
+.financePurchaseDetailsHeader p {
+  margin: 0;
+  color: var(--text-secondary, #938c9f);
+  font-size: 13px;
+}
+
+.financePurchaseCreateClose,
+.financePurchaseDetailsClose {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  margin-left: auto;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #aaa4b6;
+  font: inherit;
+  font-size: 20px;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.financePurchaseCreateClose:hover,
+.financePurchaseDetailsClose:hover {
+  transform: rotate(3deg);
+  background: rgba(251, 113, 133, 0.1);
+  color: #fb7185;
+}
+
+.financePurchaseCreateBody,
+.financePurchaseDetailsBody {
+  max-height: calc(100vh - 220px);
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.financePurchaseCreateBody::-webkit-scrollbar,
+.financePurchaseDetailsBody::-webkit-scrollbar {
+  width: 7px;
+}
+
+.financePurchaseCreateBody::-webkit-scrollbar-thumb,
+.financePurchaseDetailsBody::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.34);
+}
+
+/* =========================================================
+   CREATE PURCHASE
+   ========================================================= */
+
+.financePurchaseCreateGeneral,
+.financePurchaseCreateAdditional,
+.financePurchaseCreateItems,
+.financePurchaseCreateTotals,
+.financePurchaseDetailsSupplier {
+  padding: 19px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 19px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.financePurchaseCreateAdditional,
+.financePurchaseCreateItems,
+.financePurchaseCreateTotals {
+  margin-top: 14px;
+}
+
+.financePurchaseCreateSectionHead,
+.financePurchaseDetailsSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 15px;
+}
+
+.financePurchaseCreateSectionHead h3,
+.financePurchaseDetailsSectionHead h3 {
+  margin: 0;
+  color: var(--text-primary, #fff);
+  font-size: 16px;
+}
+
+.financePurchaseCreateSectionHead span,
+.financePurchaseDetailsSectionHead span {
+  color: var(--text-secondary, #8f899b);
+  font-size: 12px;
+}
+
+.financePurchaseGeneralGrid,
+.financePurchaseSupplierGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.financePurchaseCreateModal label,
+.financePurchaseDetailsModal label {
+  display: grid;
+  gap: 7px;
+  color: var(--text-secondary, #a59eae);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.financePurchaseCreateModal input,
+.financePurchaseCreateModal select,
+.financePurchaseCreateModal textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  border-radius: 13px;
+  outline: none;
+  background: rgba(5, 4, 17, 0.62);
+  color: var(--text-primary, #fff);
+  font: inherit;
+  font-size: 14px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.financePurchaseCreateModal input,
+.financePurchaseCreateModal select {
+  padding: 0 13px;
+}
+
+.financePurchaseCreateModal textarea {
+  min-height: 88px;
+  padding: 13px;
+  resize: vertical;
+}
+
+.financePurchaseCreateModal input:focus,
+.financePurchaseCreateModal select:focus,
+.financePurchaseCreateModal textarea:focus {
+  border-color: rgba(192, 132, 252, 0.62);
+  background: rgba(14, 8, 29, 0.86);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.11);
+}
+
+.financePurchaseCreateModal input::placeholder,
+.financePurchaseCreateModal textarea::placeholder {
+  color: rgba(200, 195, 210, 0.38);
+}
+
+.financePurchaseGeneralGrid .is-wide,
+.financePurchaseSupplierGrid .is-wide {
+  grid-column: 1 / -1;
+}
+
+.financePurchaseNoSuppliers {
+  padding: 14px;
+  border: 1px solid rgba(250, 204, 21, 0.18);
+  border-radius: 13px;
+  background: rgba(250, 204, 21, 0.055);
+  color: #dcc86c;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.financePurchaseCreateItemsList {
+  display: grid;
+  gap: 11px;
+}
+
+.financePurchaseItemLine {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    34px
+    minmax(210px, 1.8fr)
+    minmax(92px, 0.55fr)
+    minmax(110px, 0.7fr)
+    minmax(110px, 0.7fr)
+    38px;
+  align-items: end;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.financePurchaseCreateItemNumber {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  align-self: center;
+  border-radius: 10px;
+  background: rgba(168, 85, 247, 0.12);
+  color: #c88cff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.financePurchaseStockSelect,
+.financePurchaseItemNameInput {
+  min-width: 0;
+}
+
+.financePurchaseItemLineTotal {
+  display: grid;
+  align-content: center;
+  min-height: 46px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #d8a6ff;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.financePurchaseItemRemove {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  align-self: center;
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  border-radius: 11px;
+  background: rgba(251, 113, 133, 0.065);
+  color: #fb7185;
+  font: inherit;
+  cursor: pointer;
+}
+
+.financePurchaseItemRemove:hover {
+  background: rgba(251, 113, 133, 0.14);
+}
+
+.financePurchaseCreateSectionHead button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid rgba(192, 132, 252, 0.28);
+  border-radius: 11px;
+  background: rgba(168, 85, 247, 0.09);
+  color: #c999ff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.financePurchaseCreateTotals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.financePurchaseCreateTotals > div {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.financePurchaseCreateTotals span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--text-secondary, #948c9e);
+  font-size: 11px;
+}
+
+.financePurchaseCreateTotals strong {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.financePurchaseCreateTotals .is-total {
+  border-color: rgba(192, 132, 252, 0.26);
+  background: rgba(168, 85, 247, 0.085);
+}
+
+.financePurchaseCreateTotals .is-total strong {
+  color: #ce8cff;
+  font-size: 21px;
+}
+
+.financePurchaseCreateError {
+  display: none;
+  margin-top: 14px;
+  padding: 13px 15px;
+  border: 1px solid rgba(251, 113, 133, 0.24);
+  border-radius: 13px;
+  background: rgba(251, 113, 133, 0.07);
+  color: #fda4af;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.financePurchaseCreateError:not(:empty) {
+  display: block;
+}
+
+.financePurchaseCreateFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 11px;
+  padding: 18px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(5, 4, 16, 0.34);
+}
+
+.financePurchaseCreateActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.financePurchaseCreateCancel,
+.financePurchaseCreateSubmit {
+  min-height: 45px;
+  padding: 0 20px;
+  border-radius: 13px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.financePurchaseCreateCancel {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-secondary, #aaa4b6);
+}
+
+.financePurchaseCreateSubmit {
+  min-width: 190px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent-color, #a855f7),
+      #d946ef
+    );
+  color: #fff;
+  box-shadow: 0 11px 28px rgba(168, 85, 247, 0.22);
+}
+
+.financePurchaseCreateSubmit:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.financePurchaseCreateSubmit:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.financePurchaseCreateModal.financePurchaseLoadError {
+  width: min(520px, 100%);
+}
+
+/* =========================================================
+   PURCHASE DETAILS
+   ========================================================= */
+
+.financePurchaseDetailsStatuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.financePurchaseDetailsSupplier {
+  margin-bottom: 14px;
+}
+
+.financePurchaseDetailsSupplier strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary, #fff);
+  font-size: 17px;
+}
+
+.financePurchaseDetailsSupplier p {
+  margin: 4px 0 0;
+  color: var(--text-secondary, #958e9f);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.financePurchaseDetailsItems {
+  display: grid;
+  gap: 9px;
+}
+
+.financePurchaseDetailsItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.024);
+}
+
+.financePurchaseDetailsItem strong {
+  color: var(--text-primary, #fff);
+  font-size: 14px;
+}
+
+.financePurchaseDetailsItem span {
+  color: var(--text-secondary, #91899b);
+  font-size: 12px;
+}
+
+.financePurchaseDetailsItemAmount {
+  color: #cc91ff;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.financePurchaseDetailsTotals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.financePurchaseDetailsTotals > div {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.financePurchaseDetailsTotals span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary, #91899b);
+  font-size: 11px;
+}
+
+.financePurchaseDetailsTotals strong {
+  color: #fff;
+  font-size: 18px;
+}
+
+.financePurchaseDetailsTotals .is-total {
+  border-color: rgba(192, 132, 252, 0.25);
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.financePurchaseDetailsTotals .is-total strong {
+  color: #cd8eff;
+}
+
+.financePurchaseDetailsActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.financePurchaseDetailsActions button,
+.financePurchaseDetailsActions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(192, 132, 252, 0.24);
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.08);
+  color: #c996ff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.financePageLoading {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  color: var(--text-secondary, #9b94a5);
+  text-align: center;
+}
+
+.financePurchaseCreateModal .visitPaymentSpinner,
+.financePurchaseDetailsModal .visitPaymentSpinner {
+  margin: 40px auto;
+}
+
+/* =========================================================
+   ANIMATION + RESPONSIVE
+   ========================================================= */
+
+@keyframes financePurchaseOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes financePurchaseModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.975);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .financePurchaseItemLine {
+    grid-template-columns:
+      32px
+      minmax(0, 1fr)
+      minmax(90px, 0.45fr)
+      38px;
+  }
+
+  .financePurchaseItemLineTotal {
+    grid-column: 2 / -1;
+  }
+
+  .financePurchaseCard {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .financePurchaseCardAmount {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .financePurchaseCardArrow {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .financePurchasesPanel {
+    padding: 17px;
+    border-radius: 21px;
+  }
+
+  .financePurchasesPanelHead {
+    flex-direction: column;
+  }
+
+  .financePurchasesPanelActions {
+    width: 100%;
+  }
+
+  #financePurchaseCreateButton {
+    flex: 1;
+  }
+
+  .financePurchaseCreateOverlay,
+  .financePurchaseDetailsOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .financePurchaseCreateModal,
+  .financePurchaseDetailsModal {
+    width: 100%;
+    max-height: 94vh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .financePurchaseCreateHeader,
+  .financePurchaseDetailsHeader {
+    padding: 18px;
+  }
+
+  .financePurchaseCreateBody,
+  .financePurchaseDetailsBody {
+    max-height: calc(94vh - 190px);
+    padding: 17px;
+  }
+
+  .financePurchaseGeneralGrid,
+  .financePurchaseSupplierGrid,
+  .financePurchaseCreateTotals,
+  .financePurchaseDetailsTotals {
+    grid-template-columns: 1fr;
+  }
+
+  .financePurchaseItemLine {
+    grid-template-columns: 32px minmax(0, 1fr) 38px;
+    align-items: center;
+  }
+
+  .financePurchaseItemLine > label {
+    grid-column: 1 / -1;
+  }
+
+  .financePurchaseCreateItemNumber {
+    grid-column: 1;
+  }
+
+  .financePurchaseItemRemove {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .financePurchaseItemLineTotal {
+    grid-column: 1 / -1;
+  }
+
+  .financePurchaseCreateFooter {
+    padding: 14px 17px;
+  }
+
+  .financePurchaseCreateActions {
+    width: 100%;
+  }
+
+  .financePurchaseCreateCancel,
+  .financePurchaseCreateSubmit {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .financePurchaseCard {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .financePurchaseCardIcon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .financePurchaseCardAmount {
+    grid-column: 2;
+  }
+
+  .financePurchaseCardArrow {
+    display: none;
+  }
+}
