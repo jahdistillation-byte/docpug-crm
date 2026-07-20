@@ -4650,6 +4650,203 @@ def api_finance_supplier_create():
     user, auth_error = (
         owner_or_admin_required()
     )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    name = str(
+        payload.get("name")
+        or ""
+    ).strip()
+
+    optional_fields = {
+        "edrpou":
+            30,
+
+        "contact_person":
+            150,
+
+        "phone":
+            50,
+
+        "email":
+            200,
+
+        "address":
+            500,
+
+        "note":
+            2000,
+    }
+
+    if not name:
+        return fail(
+            "Вкажіть назву постачальника.",
+            400,
+        )
+
+    if len(name) > 200:
+        return fail(
+            "Назва постачальника надто довга.",
+            400,
+        )
+
+    cleaned = {}
+
+    for (
+        field,
+        max_length,
+    ) in optional_fields.items():
+        value = str(
+            payload.get(field)
+            or ""
+        ).strip()
+
+        if len(value) > max_length:
+            return fail(
+                f"Поле {field} надто довге.",
+                400,
+            )
+
+        cleaned[field] = (
+            value
+            if value
+            else None
+        )
+
+    email = (
+        cleaned.get("email")
+    )
+
+    if (
+        email
+        and (
+            "@" not in email
+            or "." not in email
+        )
+    ):
+        return fail(
+            "Вкажіть коректний email.",
+            400,
+        )
+
+    insert_payload = {
+        "org_id":
+            current_org,
+
+        "name":
+            name,
+
+        "edrpou":
+            cleaned.get(
+                "edrpou"
+            ),
+
+        "contact_person":
+            cleaned.get(
+                "contact_person"
+            ),
+
+        "phone":
+            cleaned.get(
+                "phone"
+            ),
+
+        "email":
+            cleaned.get(
+                "email"
+            ),
+
+        "address":
+            cleaned.get(
+                "address"
+            ),
+
+        "note":
+            cleaned.get(
+                "note"
+            ),
+
+        "active":
+            True,
+
+        "created_by":
+            user.get("id"),
+    }
+
+    try:
+        result = (
+            supabase
+            .table(
+                "suppliers"
+            )
+            .insert(
+                insert_payload
+            )
+            .execute()
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else insert_payload
+        )
+
+        return (
+            jsonify({
+                "ok":
+                    True,
+
+                "data":
+                    row,
+            }),
+            201,
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        ).lower()
+
+        print(
+            "❌ POST finance supplier:",
+            repr(error),
+            flush=True,
+        )
+
+        if (
+            "23505" in error_text
+            or "duplicate" in error_text
+            or "unique" in error_text
+        ):
+            return fail(
+                "Постачальник з такою назвою вже існує.",
+                409,
+            )
+
+        return fail(
+            "Не вдалося створити постачальника.",
+            500,
+        )
+
+
 @app.put(
     "/api/finance/suppliers/<supplier_id>"
 )
@@ -4949,221 +5146,8 @@ def api_finance_supplier_deactivate(
             "Не вдалося вимкнути постачальника.",
             500,
         )
-    if auth_error:
-        return auth_error
 
-    current_org = (
-        get_current_org_id()
-    )
-
-    if not current_org:
-        return fail(
-            "Organization not selected",
-            400,
-        )
-
-    payload = (
-        request.get_json(
-            silent=True
-        )
-        or {}
-    )
-
-    name = str(
-        payload.get(
-            "name"
-        )
-        or ""
-    ).strip()
-
-    edrpou = str(
-        payload.get(
-            "edrpou"
-        )
-        or ""
-    ).strip()
-
-    contact_person = str(
-        payload.get(
-            "contact_person"
-        )
-        or ""
-    ).strip()
-
-    phone = str(
-        payload.get(
-            "phone"
-        )
-        or ""
-    ).strip()
-
-    email = str(
-        payload.get(
-            "email"
-        )
-        or ""
-    ).strip()
-
-    address = str(
-        payload.get(
-            "address"
-        )
-        or ""
-    ).strip()
-
-    note = str(
-        payload.get(
-            "note"
-        )
-        or ""
-    ).strip()
-
-    if not name:
-        return fail(
-            "Вкажіть назву постачальника.",
-            400,
-        )
-
-    if len(name) > 200:
-        return fail(
-            "Назва постачальника надто довга.",
-            400,
-        )
-
-    if len(edrpou) > 30:
-        return fail(
-            "ЄДРПОУ надто довгий.",
-            400,
-        )
-
-    if len(contact_person) > 150:
-        return fail(
-            "Імʼя контактної особи надто довге.",
-            400,
-        )
-
-    if len(phone) > 50:
-        return fail(
-            "Номер телефону надто довгий.",
-            400,
-        )
-
-    if len(email) > 200:
-        return fail(
-            "Email надто довгий.",
-            400,
-        )
-
-    if (
-        email
-        and (
-            "@" not in email
-            or "." not in email
-        )
-    ):
-        return fail(
-            "Вкажіть коректний email.",
-            400,
-        )
-
-    if len(address) > 500:
-        return fail(
-            "Адреса надто довга.",
-            400,
-        )
-
-    if len(note) > 2000:
-        return fail(
-            "Примітка надто довга.",
-            400,
-        )
-
-    insert_payload = {
-        "org_id":
-            current_org,
-
-        "name":
-            name,
-
-        "edrpou":
-            edrpou or None,
-
-        "contact_person":
-            contact_person or None,
-
-        "phone":
-            phone or None,
-
-        "email":
-            email or None,
-
-        "address":
-            address or None,
-
-        "note":
-            note or None,
-
-        "active":
-            True,
-
-        "created_by":
-            user.get("id"),
-    }
-
-    try:
-        result = (
-            supabase
-            .table(
-                "suppliers"
-            )
-            .insert(
-                insert_payload
-            )
-            .execute()
-        )
-
-        row = (
-            result.data[0]
-            if result.data
-            else insert_payload
-        )
-
-        return (
-            jsonify({
-                "ok":
-                    True,
-
-                "data":
-                    row,
-            }),
-            201,
-        )
-
-    except Exception as error:
-        error_text = str(
-            error
-        ).lower()
-
-        print(
-            "❌ POST finance supplier:",
-            repr(error),
-            flush=True,
-        )
-
-        if (
-            "23505" in error_text
-            or "duplicate" in error_text
-            or "unique" in error_text
-        ):
-            return fail(
-                "Постачальник з такою назвою вже існує.",
-                409,
-            )
-
-        return fail(
-            "Не вдалося створити постачальника.",
-            500,
-        )    
+    
 # =========================
 # SERVICES API
 # =========================
