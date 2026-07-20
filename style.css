@@ -29281,3 +29281,145 @@ body.financePurchaseModalOpen {
     padding: 0 12px;
   }
 }
+/* =========================================================
+   FINANCE — PURCHASE RECEIVING
+   ========================================================= */
+
+.financePurchaseReceiveModal {
+  width: min(760px, 100%);
+}
+
+.financePurchaseReceiveHint {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(96, 225, 164, 0.2);
+  border-radius: 14px;
+  background: rgba(96, 225, 164, 0.07);
+  color: #9ee8c4;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.financePurchaseReceiveItem {
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.financePurchaseReceiveItem > span {
+  color: var(--text-primary, #fff);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.financePurchaseReceiveItem > small {
+  display: block;
+  color: var(--text-secondary, #938c9f);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.financePurchaseReceiveItem input {
+  margin-top: 3px;
+  border-color: rgba(96, 225, 164, 0.22);
+}
+
+.financePurchaseReceiveItem input:focus {
+  border-color: rgba(96, 225, 164, 0.6);
+  box-shadow: 0 0 0 3px rgba(96, 225, 164, 0.1);
+}
+
+.financePurchaseReceiveModal .financeSupplierCreateFooter {
+  flex-wrap: wrap;
+}
+
+.financePurchaseReceiveSubmit {
+  background:
+    linear-gradient(
+      135deg,
+      #27b978,
+      #55d99c
+    );
+  border-color: rgba(96, 225, 164, 0.42);
+  box-shadow: 0 11px 28px rgba(39, 185, 120, 0.2);
+}
+
+.financePurchaseReceiveAll {
+  border-color: rgba(96, 225, 164, 0.22);
+  color: #79dbae;
+}
+
+.financePurchaseReceiveZero {
+  margin-right: auto;
+}
+
+.financePurchaseDetailsActionButtons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.financePurchaseDetailsReceive {
+  min-height: 43px;
+  padding: 0 17px;
+  border: 1px solid rgba(96, 225, 164, 0.32);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(39, 185, 120, 0.17),
+      rgba(85, 217, 156, 0.1)
+    );
+  color: #79e0b0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.financePurchaseDetailsReceive:hover {
+  transform: translateY(-1px);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(39, 185, 120, 0.28),
+      rgba(85, 217, 156, 0.16)
+    );
+  box-shadow: 0 10px 25px rgba(39, 185, 120, 0.14);
+}
+
+@media (max-width: 680px) {
+  .financePurchaseDetailsActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .financePurchaseDetailsActionButtons {
+    width: 100%;
+  }
+
+  .financePurchaseDetailsActionButtons button {
+    flex: 1;
+  }
+
+  .financePurchaseReceiveModal
+    .financeSupplierCreateFooter {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .financePurchaseReceiveZero {
+    margin-right: 0;
+  }
+
+  .financePurchaseReceiveSubmit {
+    grid-column: 1 / -1;
+  }
+}

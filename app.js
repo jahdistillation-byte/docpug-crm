@@ -10002,7 +10002,50 @@ async function createFinanceSupplierApi(
 
   return result.data;
 }
+async function receiveFinancePurchaseApi(
+  purchaseId,
+  items
+) {
+  const response = await fetch(
+    `/api/finance/purchases/${purchaseId}/receive`,
+    {
+      method: "POST",
+      credentials: "include",
 
+      headers: {
+        Accept:
+          "application/json",
+
+        "Content-Type":
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+
+      body: JSON.stringify({
+        items,
+      }),
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(
+      () => ({})
+    );
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося прийняти поставку (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
 async function createFinancePurchaseApi(
   payload
 ) {
@@ -14019,7 +14062,467 @@ addSupplierButton.addEventListener(
       );
   }
 }
+function openFinancePurchaseReceiveModal(
+  purchase,
+  onSuccess
+) {
+  document
+    .querySelector(
+      ".financePurchaseReceiveOverlay"
+    )
+    ?.remove();
 
+  const items =
+    (
+      Array.isArray(
+        purchase?.items
+      )
+        ? purchase.items
+        : []
+    )
+    .map(
+      (item) => {
+        const ordered =
+          Number(
+            item.ordered_qty ||
+            0
+          );
+
+        const received =
+          Number(
+            item.received_qty ||
+            0
+          );
+
+        return {
+          ...item,
+
+          ordered,
+
+          received,
+
+          remaining:
+            Math.max(
+              0,
+              ordered -
+              received
+            ),
+        };
+      }
+    )
+    .filter(
+      (item) =>
+        item.remaining > 0
+    );
+
+  if (!items.length) {
+    openDeleteModal(
+      "Усі позиції цієї закупівлі вже прийнято.",
+      null,
+      "operation-success"
+    );
+
+    return;
+  }
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "financeSupplierCreateOverlay financePurchaseReceiveOverlay";
+
+  overlay.innerHTML = `
+    <form
+      class="financeSupplierCreateModal financePurchaseReceiveModal"
+      id="financePurchaseReceiveForm"
+    >
+      <header class="financeSupplierCreateHeader">
+        <div class="financeSupplierCreateIcon">
+          📥
+        </div>
+
+        <div>
+          <span>
+            ПРИЙМАННЯ ПОСТАВКИ
+          </span>
+
+          <h2>
+            Прийняти товар
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              purchase.purchase_number ||
+              "Закупівля"
+            )}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="financeSupplierCreateClose"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="financeSupplierCreateBody">
+        <div class="financePurchaseReceiveHint">
+          Вкажіть фактично отриману кількість.
+          Можна прийняти всю поставку або лише її частину.
+        </div>
+
+        <div class="financeSupplierCreateGrid">
+          ${
+            items
+              .map(
+                (
+                  item,
+                  index
+                ) => `
+                  <label
+                    class="is-wide financePurchaseReceiveItem"
+                    data-purchase-item-id="${escapeHtml(
+                      item.id
+                    )}"
+                    data-remaining="${item.remaining}"
+                  >
+                    <span>
+                      ${index + 1}.
+                      ${escapeHtml(
+                        item.name_snap ||
+                        "Без назви"
+                      )}
+                    </span>
+
+                    <small>
+                      Замовлено:
+                      ${item.ordered}
+                      ${escapeHtml(
+                        item.unit_snap ||
+                        "шт"
+                      )}
+                      ·
+                      вже прийнято:
+                      ${item.received}
+                      ·
+                      залишилось:
+                      ${item.remaining}
+                    </small>
+
+                    <input
+                      type="number"
+                      name="receive_quantity"
+                      min="0"
+                      max="${item.remaining}"
+                      step="0.001"
+                      value="${item.remaining}"
+                    >
+                  </label>
+                `
+              )
+              .join("")
+          }
+        </div>
+
+        <div
+          class="financeSupplierCreateError"
+          hidden
+        ></div>
+      </div>
+
+      <footer class="financeSupplierCreateFooter">
+        <button
+          type="button"
+          class="financeSupplierCreateCancel financePurchaseReceiveZero"
+        >
+          Очистити
+        </button>
+
+        <button
+          type="button"
+          class="financeSupplierCreateCancel financePurchaseReceiveAll"
+        >
+          Прийняти все
+        </button>
+
+        <button
+          type="button"
+          class="financeSupplierCreateCancel financePurchaseReceiveCancel"
+        >
+          Скасувати
+        </button>
+
+        <button
+          type="submit"
+          class="financeSupplierCreateSubmit financePurchaseReceiveSubmit"
+        >
+          Провести приймання →
+        </button>
+      </footer>
+    </form>
+  `;
+
+  document.body.appendChild(
+    overlay
+  );
+
+  const form =
+    overlay.querySelector(
+      "#financePurchaseReceiveForm"
+    );
+
+  const errorElement =
+    overlay.querySelector(
+      ".financeSupplierCreateError"
+    );
+
+  const submitButton =
+    overlay.querySelector(
+      ".financePurchaseReceiveSubmit"
+    );
+
+  let submitting = false;
+  let closed = false;
+
+  const close = () => {
+    if (closed) return;
+
+    closed = true;
+    overlay.remove();
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key === "Escape"
+    ) {
+      close();
+    }
+  };
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === overlay
+      ) {
+        close();
+      }
+    }
+  );
+
+  overlay
+    .querySelector(
+      ".financeSupplierCreateClose"
+    )
+    .addEventListener(
+      "click",
+      close
+    );
+
+  overlay
+    .querySelector(
+      ".financePurchaseReceiveCancel"
+    )
+    .addEventListener(
+      "click",
+      close
+    );
+
+  overlay
+    .querySelector(
+      ".financePurchaseReceiveZero"
+    )
+    .addEventListener(
+      "click",
+      () => {
+        form
+          .querySelectorAll(
+            '[name="receive_quantity"]'
+          )
+          .forEach(
+            (input) => {
+              input.value = 0;
+            }
+          );
+      }
+    );
+
+  overlay
+    .querySelector(
+      ".financePurchaseReceiveAll"
+    )
+    .addEventListener(
+      "click",
+      () => {
+        form
+          .querySelectorAll(
+            ".financePurchaseReceiveItem"
+          )
+          .forEach(
+            (row) => {
+              const input =
+                row.querySelector(
+                  '[name="receive_quantity"]'
+                );
+
+              input.value =
+                row.dataset
+                  .remaining ||
+                0;
+            }
+          );
+      }
+    );
+
+  form.addEventListener(
+    "submit",
+    async (
+      event
+    ) => {
+      event.preventDefault();
+
+      if (submitting) return;
+
+      errorElement.hidden =
+        true;
+
+      const receiveItems = [
+        ...form.querySelectorAll(
+          ".financePurchaseReceiveItem"
+        ),
+      ]
+        .map(
+          (row) => {
+            return {
+              item_id:
+                row.dataset
+                  .purchaseItemId,
+
+              quantity:
+                Number(
+                  row.querySelector(
+                    '[name="receive_quantity"]'
+                  ).value ||
+                  0
+                ),
+
+              remaining:
+                Number(
+                  row.dataset
+                    .remaining ||
+                  0
+                ),
+            };
+          }
+        );
+
+      const invalidItem =
+        receiveItems.find(
+          (item) =>
+            !Number.isFinite(
+              item.quantity
+            ) ||
+            item.quantity < 0 ||
+            item.quantity >
+              item.remaining
+        );
+
+      if (invalidItem) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          "Кількість не може бути меншою за нуль або більшою за залишок.";
+
+        return;
+      }
+
+      const cleanItems =
+        receiveItems
+          .filter(
+            (item) =>
+              item.quantity > 0
+          )
+          .map(
+            (item) => ({
+              item_id:
+                item.item_id,
+
+              quantity:
+                item.quantity,
+            })
+          );
+
+      if (!cleanItems.length) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          "Вкажіть кількість хоча б для однієї позиції.";
+
+        return;
+      }
+
+      submitting = true;
+      submitButton.disabled = true;
+
+      submitButton.textContent =
+        "Приймаємо…";
+
+      try {
+        const result =
+          await receiveFinancePurchaseApi(
+            purchase.id,
+            cleanItems
+          );
+
+        close();
+
+        if (
+          typeof onSuccess ===
+          "function"
+        ) {
+          await onSuccess(
+            result
+          );
+        }
+      } catch (error) {
+        console.error(
+          "receive finance purchase failed:",
+          error
+        );
+
+        submitting = false;
+        submitButton.disabled = false;
+
+        submitButton.textContent =
+          "Провести приймання →";
+
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          error?.message ||
+          "Не вдалося прийняти поставку.";
+      }
+    }
+  );
+}
 function openFinancePurchaseDetailsModal(
   purchase
 ) {
@@ -14043,16 +14546,33 @@ function openFinancePurchaseDetailsModal(
     purchase.supplier || {};
 
   const items =
-    Array.isArray(
-      purchase.items
-    )
-      ? purchase.items
-      : [];
+  Array.isArray(
+    purchase.items
+  )
+    ? purchase.items
+    : [];
 
-  const documentUrl =
-    getSafeFinanceDocumentUrl(
-      purchase.document_url
-    );
+const canReceive =
+  purchase.status !==
+    "received" &&
+  purchase.status !==
+    "cancelled" &&
+  items.some(
+    (item) =>
+      Number(
+        item.ordered_qty ||
+        0
+      ) >
+      Number(
+        item.received_qty ||
+        0
+      )
+  );
+
+const documentUrl =
+  getSafeFinanceDocumentUrl(
+    purchase.document_url
+  );
 
   const overlay =
     document.createElement(
@@ -14466,18 +14986,39 @@ function openFinancePurchaseDetailsModal(
       </div>
 
       <footer class="financePurchaseDetailsActions">
-        <span>
-          Приймання та оплата будуть
-          підключені наступним етапом.
-        </span>
+  <span>
+    ${
+      canReceive
+        ? "У закупівлі залишилися неприйняті позиції."
+        : purchase.status ===
+            "received"
+          ? "Поставку прийнято повністю."
+          : "Приймання для цієї закупівлі недоступне."
+    }
+  </span>
 
-        <button
-          type="button"
-          class="financePurchaseDetailsDone"
-        >
-          Закрити
-        </button>
-      </footer>
+  <div class="financePurchaseDetailsActionButtons">
+    ${
+      canReceive
+        ? `
+          <button
+            type="button"
+            class="financePurchaseDetailsReceive"
+          >
+            📥 Прийняти поставку
+          </button>
+        `
+        : ""
+    }
+
+    <button
+      type="button"
+      class="financePurchaseDetailsDone"
+    >
+      Закрити
+    </button>
+  </div>
+</footer>
     </div>
   `;
 
@@ -14529,6 +15070,37 @@ function openFinancePurchaseDetailsModal(
       "click",
       close
     );
+
+    overlay
+  .querySelector(
+    ".financePurchaseDetailsReceive"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+      openFinancePurchaseReceiveModal(
+        purchase,
+        async (
+          result
+        ) => {
+          close();
+
+          financeDashboardState
+            .purchaseOffset = 0;
+
+          await renderFinanceTab();
+
+          openDeleteModal(
+            result?.fully_received
+              ? "Поставку повністю прийнято. Залишки складу оновлено."
+              : "Частину поставки прийнято. Залишки складу оновлено.",
+            null,
+            "operation-success"
+          );
+        }
+      );
+    }
+  );
 
   overlay.addEventListener(
     "click",
