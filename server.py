@@ -6215,6 +6215,15 @@ def api_finance_purchase_receive(
         or {}
     )
 
+    if not isinstance(
+        payload,
+        dict,
+    ):
+        return fail(
+            "Некоректне тіло запиту.",
+            400,
+        )
+
     raw_items = payload.get(
         "items"
     )
@@ -6400,20 +6409,30 @@ def api_finance_purchase_receive(
                 404,
             )
 
-        conflict_messages = (
-            "cancelled purchase",
-            "already fully received",
-            "exceeds remaining",
-        )
-
-        if any(
-            message
+        if (
+            "cancelled purchase"
             in normalized_error
-            for message
-            in conflict_messages
         ):
             return fail(
-                error_text,
+                "Скасовану закупівлю не можна приймати.",
+                409,
+            )
+
+        if (
+            "already fully received"
+            in normalized_error
+        ):
+            return fail(
+                "Поставку вже повністю прийнято.",
+                409,
+            )
+
+        if (
+            "exceeds remaining"
+            in normalized_error
+        ):
+            return fail(
+                "Кількість перевищує неприйнятий залишок. Оновіть закупівлю та повторіть спробу.",
                 409,
             )
 
@@ -6436,7 +6455,7 @@ def api_finance_purchase_receive(
             in validation_messages
         ):
             return fail(
-                error_text,
+                "Не вдалося перевірити позиції приймання. Оновіть закупівлю та перевірте кількість.",
                 400,
             )
 

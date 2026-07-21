@@ -14137,6 +14137,7 @@ function openFinancePurchaseReceiveModal(
     <form
       class="financeSupplierCreateModal financePurchaseReceiveModal"
       id="financePurchaseReceiveForm"
+      novalidate
     >
       <header class="financeSupplierCreateHeader">
         <div class="financeSupplierCreateIcon">
@@ -14229,6 +14230,8 @@ function openFinancePurchaseReceiveModal(
 
         <div
           class="financeSupplierCreateError"
+          role="alert"
+          aria-live="polite"
           hidden
         ></div>
       </div>
@@ -14284,18 +14287,95 @@ function openFinancePurchaseReceiveModal(
       ".financePurchaseReceiveSubmit"
     );
 
+  const formControls = [
+    ...form.querySelectorAll(
+      "button, input"
+    ),
+  ];
+
   let submitting = false;
   let closed = false;
 
-  const close = () => {
+  const setSubmitting = (
+    value
+  ) => {
+    submitting = value;
+
+    form.setAttribute(
+      "aria-busy",
+      String(value)
+    );
+
+    formControls.forEach(
+      (control) => {
+        control.disabled = value;
+      }
+    );
+
+    submitButton.textContent =
+      value
+        ? "Приймаємо…"
+        : "Провести приймання →";
+  };
+
+  const showError = (
+    message,
+    row = null
+  ) => {
+    form
+      .querySelectorAll(
+        ".financePurchaseReceiveItem.is-invalid"
+      )
+      .forEach(
+        (item) => {
+          item.classList.remove(
+            "is-invalid"
+          );
+        }
+      );
+
+    row?.classList.add(
+      "is-invalid"
+    );
+
+    errorElement.hidden = false;
+    errorElement.textContent =
+      message;
+  };
+
+  const clearError = () => {
+    errorElement.hidden = true;
+    errorElement.textContent = "";
+
+    form
+      .querySelectorAll(
+        ".financePurchaseReceiveItem.is-invalid"
+      )
+      .forEach(
+        (item) => {
+          item.classList.remove(
+            "is-invalid"
+          );
+        }
+      );
+  };
+
+  const close = (
+    force = false
+  ) => {
     if (closed) return;
+    if (
+      submitting &&
+      force !== true
+    ) return;
 
     closed = true;
     overlay.remove();
 
     document.removeEventListener(
       "keydown",
-      onKeydown
+      onKeydown,
+      true
     );
   };
 
@@ -14305,13 +14385,15 @@ function openFinancePurchaseReceiveModal(
     if (
       event.key === "Escape"
     ) {
+      event.stopImmediatePropagation();
       close();
     }
   };
 
   document.addEventListener(
     "keydown",
-    onKeydown
+    onKeydown,
+    true
   );
 
   overlay.addEventListener(
@@ -14331,7 +14413,7 @@ function openFinancePurchaseReceiveModal(
     )
     .addEventListener(
       "click",
-      close
+      () => close()
     );
 
   overlay
@@ -14340,7 +14422,20 @@ function openFinancePurchaseReceiveModal(
     )
     .addEventListener(
       "click",
-      close
+      () => close()
+    );
+
+  form
+    .querySelectorAll(
+      '[name="receive_quantity"]'
+    )
+    .forEach(
+      (input) => {
+        input.addEventListener(
+          "input",
+          clearError
+        );
+      }
     );
 
   overlay
@@ -14350,6 +14445,8 @@ function openFinancePurchaseReceiveModal(
     .addEventListener(
       "click",
       () => {
+        clearError();
+
         form
           .querySelectorAll(
             '[name="receive_quantity"]'
@@ -14369,6 +14466,8 @@ function openFinancePurchaseReceiveModal(
     .addEventListener(
       "click",
       () => {
+        clearError();
+
         form
           .querySelectorAll(
             ".financePurchaseReceiveItem"
@@ -14398,8 +14497,7 @@ function openFinancePurchaseReceiveModal(
 
       if (submitting) return;
 
-      errorElement.hidden =
-        true;
+      clearError();
 
       const receiveItems = [
         ...form.querySelectorAll(
@@ -14409,6 +14507,8 @@ function openFinancePurchaseReceiveModal(
         .map(
           (row) => {
             return {
+              row,
+
               item_id:
                 row.dataset
                   .purchaseItemId,
@@ -14439,15 +14539,23 @@ function openFinancePurchaseReceiveModal(
             ) ||
             item.quantity < 0 ||
             item.quantity >
+              item.remaining ||
+            !Number.isFinite(
               item.remaining
+            )
         );
 
       if (invalidItem) {
-        errorElement.hidden =
-          false;
+        showError(
+          "Кількість не може бути меншою за нуль або більшою за залишок.",
+          invalidItem.row
+        );
 
-        errorElement.textContent =
-          "Кількість не може бути меншою за нуль або більшою за залишок.";
+        invalidItem.row
+          .querySelector(
+            '[name="receive_quantity"]'
+          )
+          ?.focus();
 
         return;
       }
@@ -14469,60 +14577,174 @@ function openFinancePurchaseReceiveModal(
           );
 
       if (!cleanItems.length) {
-        errorElement.hidden =
-          false;
-
-        errorElement.textContent =
-          "Вкажіть кількість хоча б для однієї позиції.";
+        showError(
+          "Вкажіть кількість хоча б для однієї позиції."
+        );
 
         return;
       }
 
-      submitting = true;
-      submitButton.disabled = true;
+      setSubmitting(true);
 
-      submitButton.textContent =
-        "Приймаємо…";
+      let result;
 
       try {
-        const result =
+        result =
           await receiveFinancePurchaseApi(
             purchase.id,
             cleanItems
           );
-
-        close();
-
-        if (
-          typeof onSuccess ===
-          "function"
-        ) {
-          await onSuccess(
-            result
-          );
-        }
       } catch (error) {
         console.error(
           "receive finance purchase failed:",
           error
         );
 
-        submitting = false;
-        submitButton.disabled = false;
+        setSubmitting(false);
 
-        submitButton.textContent =
-          "Провести приймання →";
-
-        errorElement.hidden =
-          false;
-
-        errorElement.textContent =
+        showError(
           error?.message ||
-          "Не вдалося прийняти поставку.";
+          "Не вдалося прийняти поставку."
+        );
+
+        return;
+      }
+
+      close(true);
+
+      if (
+        typeof onSuccess ===
+        "function"
+      ) {
+        try {
+          await onSuccess(
+            result,
+            cleanItems
+          );
+        } catch (error) {
+          console.error(
+            "refresh finance after purchase receipt failed:",
+            error
+          );
+
+          openDeleteModal(
+            "Поставку прийнято, але сторінку не вдалося оновити. Оновіть фінансовий розділ вручну.",
+            null,
+            "operation-success"
+          );
+        }
       }
     }
   );
 }
+
+function applyFinancePurchaseReceipt(
+  purchase,
+  receivedItems,
+  result = {}
+) {
+  const receivedByItemId =
+    new Map(
+      (receivedItems || []).map(
+        (item) => [
+          String(item.item_id),
+          Number(item.quantity) || 0,
+        ]
+      )
+    );
+
+  const items = (
+    Array.isArray(purchase?.items)
+      ? purchase.items
+      : []
+  ).map(
+    (item) => {
+      const ordered =
+        Number(
+          item.ordered_qty
+        ) || 0;
+
+      const received =
+        Number(
+          item.received_qty
+        ) || 0;
+
+      const increment =
+        receivedByItemId.get(
+          String(item.id)
+        ) || 0;
+
+      return {
+        ...item,
+
+        received_qty:
+          Math.min(
+            ordered,
+            received + increment
+          ),
+      };
+    }
+  );
+
+  const orderedUnits =
+    items.reduce(
+      (total, item) =>
+        total +
+        (Number(
+          item.ordered_qty
+        ) || 0),
+      0
+    );
+
+  const receivedUnits =
+    items.reduce(
+      (total, item) =>
+        total +
+        (Number(
+          item.received_qty
+        ) || 0),
+      0
+    );
+
+  const fullyReceived =
+    result?.fully_received ===
+      true ||
+    items.every(
+      (item) =>
+        (Number(
+          item.received_qty
+        ) || 0) >=
+        (Number(
+          item.ordered_qty
+        ) || 0)
+    );
+
+  return {
+    ...purchase,
+
+    items,
+
+    ordered_units:
+      orderedUnits,
+
+    received_units:
+      receivedUnits,
+
+    status:
+      fullyReceived
+        ? "received"
+        : "partially_received",
+
+    received_at:
+      result?.received_at ||
+      purchase.received_at,
+
+    received_by:
+      result?.received_by ||
+      purchase.received_by,
+  };
+}
+
 function openFinancePurchaseDetailsModal(
   purchase
 ) {
@@ -15081,8 +15303,16 @@ const documentUrl =
       openFinancePurchaseReceiveModal(
         purchase,
         async (
-          result
+          result,
+          receivedItems
         ) => {
+          const updatedPurchase =
+            applyFinancePurchaseReceipt(
+              purchase,
+              receivedItems,
+              result
+            );
+
           close();
 
           financeDashboardState
@@ -15090,8 +15320,13 @@ const documentUrl =
 
           await renderFinanceTab();
 
+          openFinancePurchaseDetailsModal(
+            updatedPurchase
+          );
+
           openDeleteModal(
-            result?.fully_received
+            updatedPurchase.status ===
+              "received"
               ? "Поставку повністю прийнято. Залишки складу оновлено."
               : "Частину поставки прийнято. Залишки складу оновлено.",
             null,

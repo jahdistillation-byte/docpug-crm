@@ -29331,6 +29331,26 @@ body.financePurchaseModalOpen {
   box-shadow: 0 0 0 3px rgba(96, 225, 164, 0.1);
 }
 
+.financePurchaseReceiveItem.is-invalid {
+  border-color: rgba(251, 113, 133, 0.42);
+  background: rgba(251, 113, 133, 0.055);
+}
+
+.financePurchaseReceiveItem.is-invalid input {
+  border-color: rgba(251, 113, 133, 0.58);
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.08);
+}
+
+.financePurchaseReceiveModal[aria-busy="true"] {
+  cursor: wait;
+}
+
+.financePurchaseReceiveModal[aria-busy="true"] button,
+.financePurchaseReceiveModal[aria-busy="true"] input {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .financePurchaseReceiveModal .financeSupplierCreateFooter {
   flex-wrap: wrap;
 }
@@ -29413,6 +29433,20 @@ body.financePurchaseModalOpen {
     .financeSupplierCreateFooter {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    padding-bottom:
+      max(14px, env(safe-area-inset-bottom));
+  }
+
+  .financePurchaseReceiveModal {
+    max-height: 94dvh;
+  }
+
+  .financePurchaseReceiveItem {
+    padding: 13px;
+  }
+
+  .financePurchaseReceiveItem input {
+    min-height: 48px;
   }
 
   .financePurchaseReceiveZero {
