@@ -29457,3 +29457,1401 @@ body.financePurchaseModalOpen {
     grid-column: 1 / -1;
   }
 }
+
+/* =========================================================
+   FINANCE STAGE 1.1 — EXPENSE DOCUMENT WORKSPACE
+   ========================================================= */
+
+.financeExpenseWorkspace,
+.financeExpenseDocumentOverlay,
+.financeExpenseDetailsOverlay,
+.financeExpenseActionOverlay {
+  --expense-surface: rgba(20, 15, 38, 0.94);
+  --expense-surface-soft: rgba(255, 255, 255, 0.035);
+  --expense-surface-strong: rgba(8, 6, 22, 0.82);
+  --expense-border: rgba(255, 255, 255, 0.09);
+  --expense-border-strong: rgba(192, 132, 252, 0.28);
+  --expense-text: rgba(255, 255, 255, 0.94);
+  --expense-muted: rgba(255, 255, 255, 0.5);
+  --expense-subtle: rgba(255, 255, 255, 0.3);
+  --expense-input: rgba(6, 4, 18, 0.68);
+  --expense-shadow: 0 22px 65px rgba(0, 0, 0, 0.28);
+}
+
+.financeExpenseWorkspaceContent {
+  display: grid;
+  gap: 18px;
+}
+
+.financeExpenseWorkspaceTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--expense-border);
+  border-radius: 20px;
+  background: var(--expense-surface-soft);
+  overflow: hidden;
+}
+
+.financeExpenseWorkspaceTabs button {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  min-height: 62px;
+  padding: 11px 14px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--expense-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.financeExpenseWorkspaceTabs button:hover {
+  transform: translateY(-1px);
+  border-color: var(--expense-border);
+  color: var(--expense-text);
+}
+
+.financeExpenseWorkspaceTabs button.active {
+  border-color: var(--expense-border-strong);
+  color: var(--expense-text);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent-color, #a855f7) 17%, transparent),
+      var(--expense-surface-soft)
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.financeExpenseWorkspaceTabs strong,
+.financeExpenseWorkspaceTabs small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseWorkspaceTabs strong {
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.financeExpenseWorkspaceTabs small {
+  color: var(--expense-subtle);
+  font-size: 9px;
+}
+
+.financeExpenseDocumentFilters {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.5fr)
+    repeat(4, minmax(130px, 0.72fr))
+    auto;
+  align-items: end;
+  gap: 11px;
+  padding: 16px;
+  border: 1px solid var(--expense-border);
+  border-radius: 20px;
+  background: var(--expense-surface-soft);
+  box-shadow: var(--expense-shadow);
+}
+
+.financeExpenseDocumentFilters label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.financeExpenseDocumentFilters label > span {
+  color: var(--expense-muted);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.financeExpenseDocumentFilters input,
+.financeExpenseDocumentFilters select,
+.financeExpenseActionModal input,
+.financeExpenseActionModal select,
+.financeExpenseActionModal textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--expense-border);
+  border-radius: 12px;
+  outline: none;
+  background: var(--expense-input);
+  color: var(--expense-text);
+  font: inherit;
+  font-size: 12px;
+  color-scheme: dark;
+}
+
+.financeExpenseActionModal textarea {
+  min-height: 96px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.financeExpenseDocumentFilters input:focus,
+.financeExpenseDocumentFilters select:focus,
+.financeExpenseActionModal input:focus,
+.financeExpenseActionModal select:focus,
+.financeExpenseActionModal textarea:focus {
+  border-color: rgba(192, 132, 252, 0.58);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.financeExpenseFilterActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.financeExpenseFilterActions button,
+.financeRecurringIntro button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--expense-border);
+  border-radius: 12px;
+  background: var(--expense-surface-soft);
+  color: var(--expense-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.financeExpenseFilterActions button.is-primary,
+.financeRecurringIntro button {
+  border-color: rgba(192, 132, 252, 0.34);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(168, 85, 247, 0.25),
+      rgba(217, 70, 239, 0.13)
+    );
+  color: #dfb6ff;
+}
+
+.financeExpenseFilterError {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  border-radius: 11px;
+  background: rgba(251, 113, 133, 0.07);
+  color: #fda4af;
+  font-size: 12px;
+}
+
+.financeExpenseDocumentKpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.financeExpenseDocumentKpis article {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--expense-border);
+  border-radius: 19px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in srgb, var(--kpi-color, #a855f7) 15%, transparent),
+      transparent 42%
+    ),
+    var(--expense-surface-soft);
+  box-shadow: var(--expense-shadow);
+}
+
+.financeExpenseDocumentKpis article.is-paid {
+  --kpi-color: #55d99c;
+}
+
+.financeExpenseDocumentKpis article.is-planned {
+  --kpi-color: #f5c768;
+}
+
+.financeExpenseDocumentKpis article.is-reversed {
+  --kpi-color: #fb7185;
+}
+
+.financeExpenseDocumentKpis article.is-count {
+  --kpi-color: #8ebcff;
+}
+
+.financeExpenseDocumentKpis span,
+.financeExpenseDocumentKpis strong,
+.financeExpenseDocumentKpis small {
+  display: block;
+}
+
+.financeExpenseDocumentKpis span {
+  color: var(--expense-muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.financeExpenseDocumentKpis strong {
+  margin-top: 9px;
+  overflow: hidden;
+  color: var(--kpi-color);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseDocumentKpis small {
+  margin-top: 9px;
+  color: var(--expense-subtle);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.financeExpenseDocumentKpis small.is-up {
+  color: #f5a4b5;
+}
+
+.financeExpenseDocumentKpis small.is-down {
+  color: #72dba7;
+}
+
+.financeExpenseMarketingKpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid rgba(111, 156, 255, 0.18);
+  border-radius: 19px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(111, 156, 255, 0.08),
+      var(--expense-surface-soft)
+    );
+}
+
+.financeExpenseMarketingKpis > div {
+  padding: 12px;
+  border-radius: 13px;
+  background: var(--expense-surface-soft);
+}
+
+.financeExpenseMarketingKpis span,
+.financeExpenseMarketingKpis strong {
+  display: block;
+}
+
+.financeExpenseMarketingKpis span {
+  color: var(--expense-muted);
+  font-size: 9px;
+}
+
+.financeExpenseMarketingKpis strong {
+  margin-top: 6px;
+  color: #94b8ff;
+  font-size: 17px;
+}
+
+.financeExpenseMarketingKpis p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--expense-subtle);
+  font-size: 9px;
+}
+
+.financeExpenseDocumentsPanel,
+.financeSupplierWorkspacePanel,
+.financePurchaseWorkspacePanel {
+  padding: 22px;
+}
+
+.financeExpenseDocumentsList,
+.financeSupplierWorkspaceList {
+  display: grid;
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.financeExpenseDocumentCard {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--expense-border);
+  border-radius: 16px;
+  background: var(--expense-surface-soft);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.financeExpenseDocumentCard:hover {
+  transform: translateY(-1px);
+  border-color: var(--expense-border-strong);
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 7%,
+      var(--expense-surface-soft)
+    );
+}
+
+.financeExpenseDocumentIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--expense-document-color) 35%,
+      var(--expense-border)
+    );
+  border-radius: 14px;
+  background:
+    color-mix(
+      in srgb,
+      var(--expense-document-color) 10%,
+      transparent
+    );
+}
+
+.financeExpenseDocumentMain {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.financeExpenseDocumentTitle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.financeExpenseDocumentTitle strong {
+  overflow: hidden;
+  color: var(--expense-text);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseDocumentMain > small,
+.financeExpenseDocumentMain > p {
+  overflow: hidden;
+  color: var(--expense-muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeExpenseDocumentMain > p {
+  margin: 0;
+  color: var(--expense-subtle);
+}
+
+.financeExpenseDocumentStatus {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: var(--expense-surface-soft);
+  color: var(--expense-muted);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.financeExpenseDocumentStatus.is-paid {
+  background: rgba(85, 217, 156, 0.1);
+  color: #69dca4;
+}
+
+.financeExpenseDocumentStatus.is-planned {
+  background: rgba(245, 199, 104, 0.1);
+  color: #e6c16e;
+}
+
+.financeExpenseDocumentStatus.is-cancelled,
+.financeExpenseDocumentStatus.is-reversed {
+  background: rgba(251, 113, 133, 0.1);
+  color: #f58da0;
+}
+
+.financeExpenseDocumentAmount {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+}
+
+.financeExpenseDocumentAmount strong {
+  color: #ff8ca5;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.financeExpenseDocumentAmount small {
+  color: var(--expense-subtle);
+  font-size: 8px;
+}
+
+.financeExpensesPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--expense-border);
+}
+
+.financeExpensesPagination > span {
+  color: var(--expense-muted);
+  font-size: 10px;
+}
+
+.financeExpensesPagination > div {
+  display: flex;
+  gap: 8px;
+}
+
+.financeExpensesPagination button {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--expense-border);
+  border-radius: 11px;
+  background: var(--expense-surface-soft);
+  color: var(--expense-muted);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.financeExpensesPagination button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+/* Expense document form */
+
+.financeExpenseDocumentModal {
+  width: min(820px, 100%);
+}
+
+.financeExpenseLifecycleChoice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 15px;
+  padding: 0;
+  border: 0;
+}
+
+.financeExpenseLifecycleChoice legend {
+  margin-bottom: 8px;
+  color: var(--expense-muted);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.financeExpenseLifecycleChoice label {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.financeExpenseLifecycleChoice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.financeExpenseLifecycleChoice label > span {
+  display: grid;
+  gap: 4px;
+  min-height: 70px;
+  padding: 13px;
+  border: 1px solid var(--expense-border);
+  border-radius: 14px;
+  background: var(--expense-surface-soft);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.financeExpenseLifecycleChoice input:checked + span {
+  border-color: rgba(192, 132, 252, 0.48);
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.financeExpenseLifecycleChoice b {
+  color: var(--expense-text);
+  font-size: 12px;
+}
+
+.financeExpenseLifecycleChoice small {
+  color: var(--expense-muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.financeExpensePaymentFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(85, 217, 156, 0.17);
+  border-radius: 15px;
+  background: rgba(85, 217, 156, 0.045);
+}
+
+.financeExpensePaymentFields[hidden],
+.financeExpenseMarketingFields[hidden] {
+  display: none;
+}
+
+.financeExpenseMarketingFields {
+  margin: 14px 0;
+  padding: 15px;
+  border: 1px solid rgba(111, 156, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(111, 156, 255, 0.045);
+}
+
+.financeExpenseSubsectionHead {
+  margin-bottom: 12px;
+}
+
+.financeExpenseSubsectionHead strong,
+.financeExpenseSubsectionHead span {
+  display: block;
+}
+
+.financeExpenseSubsectionHead strong {
+  color: var(--expense-text);
+  font-size: 13px;
+}
+
+.financeExpenseSubsectionHead span {
+  margin-top: 4px;
+  color: var(--expense-muted);
+  font-size: 9px;
+}
+
+.financeExpenseDocumentFields {
+  margin-top: 12px;
+}
+
+.financeExpenseFileField input[type="file"] {
+  min-height: 46px;
+  padding: 9px;
+}
+
+.financeExpenseFileField small {
+  color: var(--expense-subtle);
+  font-size: 8px;
+}
+
+.financeExpenseDocumentModal input[readonly],
+.financeExpenseDocumentModal select:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+/* Details and lifecycle modals */
+
+.financeExpenseDetailsOverlay,
+.financeExpenseActionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10080;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(5, 3, 14, 0.74);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.financeExpenseActionOverlay {
+  z-index: 10090;
+}
+
+.financeExpenseDetailsModal,
+.financeExpenseActionModal {
+  width: min(760px, 100%);
+  max-height: calc(100dvh - 44px);
+  overflow: hidden auto;
+  border: 1px solid var(--expense-border-strong);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      rgba(168, 85, 247, 0.14),
+      transparent 35%
+    ),
+    var(--expense-surface);
+  box-shadow: 0 38px 110px rgba(0, 0, 0, 0.55);
+}
+
+.financeExpenseActionModal {
+  width: min(590px, 100%);
+}
+
+.financeRecurringTemplateModal {
+  width: min(720px, 100%);
+}
+
+.financeExpenseDetailsHeader,
+.financeExpenseActionModal > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  border-bottom: 1px solid var(--expense-border);
+}
+
+.financeExpenseDetailsTitle,
+.financeExpenseActionModal > header > div {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.financeExpenseDetailsTitle > span,
+.financeExpenseActionModal > header > div > span {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border: 1px solid var(--expense-border-strong);
+  border-radius: 14px;
+  background: rgba(168, 85, 247, 0.1);
+  color: #ce93ff;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.financeExpenseDetailsTitle small {
+  color: #bb83eb;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.financeExpenseDetailsTitle h2,
+.financeExpenseActionModal h2 {
+  margin: 3px 0;
+  color: var(--expense-text);
+  font-size: clamp(18px, 3vw, 24px);
+}
+
+.financeExpenseDetailsTitle p,
+.financeExpenseActionModal header p {
+  margin: 0;
+  color: var(--expense-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.financeExpenseDetailsHeader > button,
+.financeExpenseActionModal > header > button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid var(--expense-border);
+  border-radius: 12px;
+  background: var(--expense-surface-soft);
+  color: var(--expense-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.financeExpenseDetailsBody,
+.financeExpenseActionModal > form {
+  padding: 20px;
+}
+
+.financeExpenseDetailsSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.financeExpenseDetailsSummary > div {
+  padding: 14px;
+  border: 1px solid var(--expense-border);
+  border-radius: 14px;
+  background: var(--expense-surface-soft);
+}
+
+.financeExpenseDetailsSummary span,
+.financeExpenseDetailsSummary strong {
+  display: block;
+}
+
+.financeExpenseDetailsSummary span {
+  color: var(--expense-muted);
+  font-size: 9px;
+}
+
+.financeExpenseDetailsSummary strong {
+  margin-top: 7px;
+  color: var(--expense-text);
+  font-size: 15px;
+}
+
+.financeExpenseDetailsSummary strong.is-paid {
+  color: #69dca4;
+}
+
+.financeExpenseDetailsSummary strong.is-planned {
+  color: #e7c36f;
+}
+
+.financeExpenseDetailsSummary strong.is-cancelled,
+.financeExpenseDetailsSummary strong.is-reversed {
+  color: #f58da0;
+}
+
+.financeExpenseDetailsFields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.financeExpenseDetailsFields > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--expense-border);
+  border-radius: 13px;
+  background: var(--expense-surface-soft);
+}
+
+.financeExpenseDetailsFields > div.is-wide {
+  grid-column: 1 / -1;
+}
+
+.financeExpenseDetailsFields dt {
+  color: var(--expense-subtle);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.financeExpenseDetailsFields dd {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--expense-text);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.financeExpenseDetailsMarketing,
+.financeExpenseDetailsAttachments,
+.financeExpenseAudit {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--expense-border);
+  border-radius: 14px;
+  background: var(--expense-surface-soft);
+}
+
+.financeExpenseDetailsMarketing h3,
+.financeExpenseDetailsAttachments h3 {
+  margin: 0 0 10px;
+  color: var(--expense-text);
+  font-size: 12px;
+}
+
+.financeExpenseDetailsMarketing > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.financeExpenseDetailsMarketing span {
+  padding: 7px 9px;
+  border-radius: 9px;
+  background: rgba(111, 156, 255, 0.08);
+  color: var(--expense-muted);
+  font-size: 9px;
+}
+
+.financeExpenseDetailsMarketing b {
+  color: #96b9ff;
+}
+
+.financeExpenseDetailsAttachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.financeExpenseDetailsAttachments h3 {
+  width: 100%;
+}
+
+.financeExpenseDetailsAttachments button,
+.financeExpenseDetailsAttachments a {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(111, 156, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(111, 156, 255, 0.07);
+  color: #9fbdff;
+  font: inherit;
+  font-size: 9px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.financeExpenseAudit summary {
+  color: var(--expense-muted);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.financeExpenseAudit p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 9px 0 0;
+  color: var(--expense-muted);
+  font-size: 9px;
+}
+
+.financeExpenseDetailsActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.financeExpenseDetailsActions button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--expense-border);
+  border-radius: 11px;
+  background: var(--expense-surface-soft);
+  color: var(--expense-muted);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.financeExpenseDetailsActions button.is-primary {
+  border-color: rgba(85, 217, 156, 0.28);
+  background: rgba(85, 217, 156, 0.08);
+  color: #72dba8;
+}
+
+.financeExpenseDetailsActions button.is-danger,
+.financeExpenseSubmit.is-danger {
+  border-color: rgba(251, 113, 133, 0.28);
+  background: rgba(251, 113, 133, 0.08);
+  color: #f69aab;
+  box-shadow: none;
+}
+
+.financeExpenseActionModal footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin: 16px -20px -20px;
+  padding: 15px 20px;
+  border-top: 1px solid var(--expense-border);
+}
+
+.financeRecurringActiveField {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--expense-border);
+  border-radius: 13px;
+  background: var(--expense-surface-soft);
+}
+
+.financeRecurringActiveField input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.financeRecurringActiveField span,
+.financeRecurringActiveField small {
+  display: block;
+}
+
+.financeRecurringActiveField span {
+  color: var(--expense-text);
+  font-size: 11px;
+}
+
+.financeRecurringActiveField small {
+  margin-top: 3px;
+  color: var(--expense-muted);
+  font-size: 8px;
+}
+
+/* Supplier and recurring workspaces */
+
+.financeSupplierWorkspaceFilters {
+  grid-template-columns: minmax(240px, 1fr) auto;
+}
+
+.financeSupplierWorkspaceCard {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid var(--expense-border);
+  border-radius: 15px;
+  background: var(--expense-surface-soft);
+}
+
+.financeSupplierWorkspaceCard.is-inactive {
+  opacity: 0.58;
+}
+
+.financeSupplierWorkspaceIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(168, 85, 247, 0.1);
+  color: #cb91ff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.financeSupplierWorkspaceCard > div {
+  min-width: 0;
+}
+
+.financeSupplierWorkspaceCard strong,
+.financeSupplierWorkspaceCard p,
+.financeSupplierWorkspaceCard small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeSupplierWorkspaceCard strong {
+  color: var(--expense-text);
+  font-size: 12px;
+}
+
+.financeSupplierWorkspaceCard p {
+  margin: 5px 0 0;
+  color: var(--expense-muted);
+  font-size: 9px;
+}
+
+.financeSupplierWorkspaceCard small {
+  margin-top: 4px;
+  color: var(--expense-subtle);
+  font-size: 8px;
+}
+
+.financeSupplierWorkspaceState {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.financeSupplierWorkspaceState.is-on {
+  background: rgba(85, 217, 156, 0.1);
+  color: #72dba8;
+}
+
+.financeSupplierWorkspaceState.is-off {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--expense-muted);
+}
+
+.financeRecurringIntro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 19px;
+  border: 1px solid rgba(245, 199, 104, 0.18);
+  border-radius: 19px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(245, 199, 104, 0.07),
+      var(--expense-surface-soft)
+    );
+}
+
+.financeRecurringIntro span {
+  color: #dcc27c;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.financeRecurringIntro h2 {
+  margin: 5px 0;
+  color: var(--expense-text);
+  font-size: 18px;
+}
+
+.financeRecurringIntro p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--expense-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.financeRecurringTemplateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.financeRecurringTemplateCard {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid var(--expense-border);
+  border-radius: 18px;
+  background: var(--expense-surface-soft);
+  box-shadow: var(--expense-shadow);
+}
+
+.financeRecurringTemplateCard.is-inactive {
+  opacity: 0.62;
+}
+
+.financeRecurringTemplateCard header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.financeRecurringTemplateCard header > span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: rgba(245, 199, 104, 0.08);
+  color: #dfc275;
+}
+
+.financeRecurringTemplateCard header i {
+  color: var(--expense-muted);
+  font-size: 8px;
+  font-style: normal;
+}
+
+.financeRecurringTemplateCard h3 {
+  margin: 14px 0 0;
+  overflow: hidden;
+  color: var(--expense-text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeRecurringTemplateCard > strong {
+  margin-top: 9px;
+  color: #e3c878;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.financeRecurringTemplateCard > p,
+.financeRecurringTemplateCard > small {
+  margin: 8px 0 0;
+  color: var(--expense-muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.financeRecurringTemplateCard footer {
+  display: flex;
+  gap: 7px;
+  margin-top: 17px;
+}
+
+.financeRecurringTemplateCard footer button {
+  flex: 1;
+  min-height: 38px;
+  border: 1px solid var(--expense-border);
+  border-radius: 10px;
+  background: var(--expense-surface-soft);
+  color: var(--expense-muted);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.financeRecurringTemplateCard footer button.is-primary {
+  border-color: rgba(245, 199, 104, 0.22);
+  background: rgba(245, 199, 104, 0.07);
+  color: #dec478;
+}
+
+.financeRecurringTemplateCard footer button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.financeRecurringEmpty {
+  grid-column: 1 / -1;
+}
+
+/* White theme */
+
+body[data-theme="white"] .financeExpenseWorkspace,
+body[data-theme="white"] .financeExpenseDocumentOverlay,
+body[data-theme="white"] .financeExpenseDetailsOverlay,
+body[data-theme="white"] .financeExpenseActionOverlay {
+  --expense-surface: rgba(255, 255, 255, 0.98);
+  --expense-surface-soft: rgba(44, 34, 66, 0.035);
+  --expense-surface-strong: rgba(247, 245, 251, 0.98);
+  --expense-border: rgba(40, 28, 58, 0.11);
+  --expense-border-strong: rgba(124, 58, 237, 0.25);
+  --expense-text: #24202a;
+  --expense-muted: #77717e;
+  --expense-subtle: #9b95a1;
+  --expense-input: #ffffff;
+  --expense-shadow: 0 18px 45px rgba(45, 33, 62, 0.08);
+}
+
+body[data-theme="white"] .financeExpenseDetailsOverlay,
+body[data-theme="white"] .financeExpenseActionOverlay {
+  background: rgba(48, 37, 61, 0.3);
+}
+
+body[data-theme="white"] .financeExpenseDocumentFilters input,
+body[data-theme="white"] .financeExpenseDocumentFilters select,
+body[data-theme="white"] .financeExpenseActionModal input,
+body[data-theme="white"] .financeExpenseActionModal select,
+body[data-theme="white"] .financeExpenseActionModal textarea {
+  color-scheme: light;
+}
+
+body[data-theme="white"] .financeExpenseDocumentModal {
+  background: #fff;
+}
+
+body[data-theme="white"] .financeExpenseDocumentModal input,
+body[data-theme="white"] .financeExpenseDocumentModal select,
+body[data-theme="white"] .financeExpenseDocumentModal textarea {
+  border-color: rgba(40, 28, 58, 0.13);
+  background: #fff;
+  color: #24202a;
+  color-scheme: light;
+}
+
+body[data-theme="white"] .financeExpenseDocumentModal .financeExpenseHeader,
+body[data-theme="white"] .financeExpenseDocumentModal .financeExpenseFooter {
+  background: #faf8fc;
+}
+
+body[data-theme="white"] .financeExpenseDocumentModal .financeExpenseHeader h2,
+body[data-theme="white"] .financeExpenseDocumentModal .financeExpenseAmountInput input,
+body[data-theme="white"] .financeExpenseLifecycleChoice b,
+body[data-theme="white"] .financeExpenseSubsectionHead strong {
+  color: #24202a;
+}
+
+body[data-theme="white"] .financeExpenseDocumentModal .financeExpenseField > span,
+body[data-theme="white"] .financeExpenseDocumentModal .financeExpenseHeader p,
+body[data-theme="white"] .financeExpenseLifecycleChoice small,
+body[data-theme="white"] .financeExpenseFileField small {
+  color: #77717e;
+}
+
+/* Responsive */
+
+@media (max-width: 1180px) {
+  .financeExpenseDocumentFilters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .financeExpenseDocumentFilters .is-search {
+    grid-column: span 2;
+  }
+
+  .financeExpenseDocumentKpis,
+  .financeExpenseMarketingKpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .financeRecurringTemplateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .financeExpenseWorkspaceTabs {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+
+  .financeExpenseWorkspaceTabs button {
+    min-width: 178px;
+    scroll-snap-align: start;
+  }
+
+  .financeExpenseDocumentFilters,
+  .financeSupplierWorkspaceFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .financeExpenseDocumentFilters .is-search {
+    grid-column: 1 / -1;
+  }
+
+  .financeExpenseFilterActions {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+
+  .financeExpenseDetailsFields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .financeRecurringIntro {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .financeExpenseDocumentFilters,
+  .financeSupplierWorkspaceFilters,
+  .financeExpenseDocumentKpis,
+  .financeExpenseMarketingKpis,
+  .financeExpensePaymentFields,
+  .financeExpenseLifecycleChoice,
+  .financeExpenseDetailsSummary,
+  .financeExpenseDetailsFields,
+  .financeRecurringTemplateGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .financeExpenseDocumentFilters .is-search,
+  .financeExpenseDetailsFields > div.is-wide {
+    grid-column: auto;
+  }
+
+  .financeExpenseFilterActions button {
+    flex: 1;
+  }
+
+  .financeExpenseMarketingKpis p {
+    grid-column: auto;
+  }
+
+  .financeExpenseDocumentCard {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .financeExpenseDocumentIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .financeExpenseDocumentAmount {
+    grid-column: 2;
+    justify-items: start;
+  }
+
+  .financeExpensesPagination,
+  .financeExpenseDetailsActions,
+  .financeExpenseActionModal footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .financeExpensesPagination > div,
+  .financeExpenseDetailsActions button,
+  .financeExpenseActionModal footer button {
+    width: 100%;
+  }
+
+  .financeExpenseDetailsOverlay,
+  .financeExpenseActionOverlay,
+  .financeExpenseDocumentOverlay {
+    align-items: end;
+    padding: 0;
+  }
+
+  .financeExpenseDetailsModal,
+  .financeExpenseActionModal,
+  .financeExpenseDocumentModal {
+    width: 100%;
+    max-height: 94dvh;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .financeExpenseDetailsHeader,
+  .financeExpenseActionModal > header {
+    padding: 16px;
+  }
+
+  .financeExpenseDetailsBody,
+  .financeExpenseActionModal > form {
+    padding: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .financeSupplierWorkspaceCard {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .financeSupplierWorkspaceState {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

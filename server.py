@@ -5,6 +5,11 @@ import hashlib
 import json
 import mimetypes
 import time
+from decimal import (
+    Decimal,
+    InvalidOperation,
+    ROUND_HALF_UP,
+)
 from urllib.parse import parse_qsl
 
 from datetime import (
@@ -84,6 +89,33 @@ UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "heic", "dcm"}
+
+PUBLIC_ASSET_FILES = frozenset({
+    "index.html",
+    "app.js",
+    "style.css",
+    "ach.js",
+    "manifest.json",
+})
+
+STAFF_COMPENSATION_INPUT_FIELDS = frozenset({
+    "shift_rate",
+    "percent_rate",
+    "bonus_rate",
+    "visit_percent",
+})
+
+STAFF_COMPENSATION_FIELDS = frozenset({
+    *STAFF_COMPENSATION_INPUT_FIELDS,
+    "salary",
+    "salary_rate",
+    "base_salary",
+    "payroll",
+    "payroll_data",
+    "adjustments",
+    "finance_adjustments",
+    "staff_finance_adjustments",
+})
 
 # =========================
 # ДИНАМИЧЕСКИЙ ORG_ID (ИЗОЛЯЦИЯ КЛИНИК)
@@ -223,6 +255,61 @@ def normalize_role(value):
         return "vet"
 
     return role
+
+
+def is_staff_compensation_field(field):
+    """Return True for fields that must never leave the owner boundary."""
+
+    normalized = str(
+        field or ""
+    ).strip().lower()
+
+    return (
+        normalized
+        in STAFF_COMPENSATION_FIELDS
+        or normalized.endswith(
+            "_rate"
+        )
+        or "salary" in normalized
+        or "payroll" in normalized
+        or "adjustment" in normalized
+    )
+
+
+def serialize_staff_for_role(
+    row,
+    role,
+):
+    """Hide compensation data from every role except the clinic owner."""
+
+    if not row:
+        return row
+
+    if normalize_role(role) == "owner":
+        return dict(row)
+
+    return {
+        key: value
+        for key, value in dict(row).items()
+        if not is_staff_compensation_field(
+            key
+        )
+    }
+
+
+def requested_staff_compensation_fields(
+    payload,
+):
+    if not isinstance(payload, dict):
+        return []
+
+    return sorted(
+        str(key)
+        for key in payload
+        if is_staff_compensation_field(
+            key
+        )
+    )
 
 
 def get_current_role():
@@ -971,9 +1058,10 @@ def root():
 
 
 @app.get("/<path:path>")
-def static_any(path):
-    if path.startswith("api/") or path.startswith("uploads/"):
+def static_public_asset(path):
+    if path not in PUBLIC_ASSET_FILES:
         return fail("Not found", 404)
+
     return send_from_directory(BASE_DIR, path)
 
 # =========================
@@ -2809,27 +2897,1892 @@ def api_remove_stock_from_visit(
 # FINANCE API
 # =====================================================
 
-def finance_number(
+FINANCE_MONEY_QUANTUM = Decimal("0.01")
+FINANCE_RATIO_QUANTUM = Decimal("0.01")
+FINANCE_MAX_AMOUNT = Decimal("1000000000.00")
+
+FINANCE_PAYMENT_METHODS = frozenset({
+    "cash",
+    "card",
+    "terminal",
+    "transfer",
+    "other",
+})
+
+EXPENSE_DOCUMENT_STATUSES = frozenset({
+    "planned",
+    "paid",
+    "cancelled",
+    "reversed",
+})
+
+EXPENSE_RESERVED_CATEGORIES = frozenset({
+    "purchase",
+    "purchases",
+    "procurement",
+    "supplier expense",
+    "supplier payment",
+    "supplier payments",
+    "payroll",
+    "payroll payment",
+    "salary",
+    "закупівля",
+    "закупівлі",
+    "закупка",
+    "закупівля препаратів",
+    "оплата постачальнику",
+    "оплата постачальникам",
+    "зарплата",
+    "заробітна плата",
+    "заробітна плата персоналу",
+    "виплата зарплати",
+    "виплата заробітної плати",
+})
+
+RECURRING_EXPENSE_FREQUENCIES = frozenset({
+    "monthly",
+    "quarterly",
+    "yearly",
+})
+
+FINANCE_DOCUMENT_BUCKET = "finance-documents"
+FINANCE_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024
+FINANCE_DOCUMENT_MIME_BY_EXTENSION = {
+    "pdf": "application/pdf",
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "webp": "image/webp",
+    "heic": "image/heic",
+    "heif": "image/heif",
+}
+
+FINANCE_MONEY_RESPONSE_FIELDS = frozenset({
+    "amount",
+    "total",
+    "total_expenses",
+    "opening_balance",
+    "current_balance",
+    "planned",
+    "planned_total",
+    "paid",
+    "paid_total",
+    "reversed",
+    "reversed_total",
+    "cancelled",
+    "cancelled_total",
+    "net_paid",
+    "net_total",
+    "spend",
+    "revenue",
+    "marketing_revenue",
+    "transaction_amount",
+    "current_period",
+    "previous_period_amount",
+})
+
+FINANCE_RATIO_RESPONSE_FIELDS = frozenset({
+    "cpl",
+    "cac",
+    "roas",
+})
+
+FINANCE_INTEGER_RESPONSE_FIELDS = frozenset({
+    "count",
+    "leads",
+    "new_clients",
+    "marketing_leads",
+    "marketing_new_clients",
+    "version",
+})
+
+
+class FinanceValidationError(ValueError):
+    """A client-safe validation failure for finance payloads."""
+
+
+def parse_finance_decimal_string(
     value,
-    default=0
+    *,
+    field_name="Сума",
+    allow_zero=False,
+    maximum=FINANCE_MAX_AMOUNT,
 ):
+    """
+    Parse an API money value without ever constructing a binary float.
+
+    Finance write APIs intentionally require JSON strings. Scientific
+    notation, comma separators, signs and values with more than two decimal
+    places are rejected instead of rounded silently.
+    """
+
+    if not isinstance(value, str):
+        raise FinanceValidationError(
+            f"{field_name} має бути decimal-рядком."
+        )
+
+    raw_value = value.strip()
+
+    if (
+        not raw_value
+        or raw_value.startswith(("+", "-"))
+        or "e" in raw_value.lower()
+        or "," in raw_value
+        or raw_value.count(".") > 1
+        or any(
+            not character.isdigit()
+            and character != "."
+            for character in raw_value
+        )
+    ):
+        raise FinanceValidationError(
+            f"Некоректне значення поля «{field_name}»."
+        )
+
+    integer_part, separator, decimal_part = (
+        raw_value.partition(".")
+    )
+
+    if (
+        not integer_part
+        or (
+            separator
+            and not decimal_part
+        )
+        or len(decimal_part) > 2
+    ):
+        raise FinanceValidationError(
+            f"Поле «{field_name}» повинно мати не більше двох знаків після крапки."
+        )
+
     try:
-        return round(
-            float(
-                value
-                if value is not None
-                else default
+        decimal_value = Decimal(
+            raw_value
+        )
+    except InvalidOperation as error:
+        raise FinanceValidationError(
+            f"Некоректне значення поля «{field_name}»."
+        ) from error
+
+    if not decimal_value.is_finite():
+        raise FinanceValidationError(
+            f"Некоректне значення поля «{field_name}»."
+        )
+
+    if (
+        decimal_value < 0
+        or (
+            not allow_zero
+            and decimal_value == 0
+        )
+    ):
+        qualifier = (
+            "не меншою за нуль"
+            if allow_zero
+            else "більшою за нуль"
+        )
+        raise FinanceValidationError(
+            f"Поле «{field_name}» повинно бути {qualifier}."
+        )
+
+    if decimal_value > maximum:
+        raise FinanceValidationError(
+            f"Поле «{field_name}» перевищує допустиме значення."
+        )
+
+    return decimal_value.quantize(
+        FINANCE_MONEY_QUANTUM,
+        rounding=ROUND_HALF_UP,
+    )
+
+
+def finance_decimal_string(
+    value,
+    *,
+    default="0.00",
+    quantum=FINANCE_MONEY_QUANTUM,
+):
+    """Serialize a database numeric as a fixed decimal JSON string."""
+
+    if value is None or value == "":
+        return default
+
+    try:
+        decimal_value = Decimal(
+            str(value)
+        )
+    except (
+        InvalidOperation,
+        TypeError,
+        ValueError,
+    ):
+        return default
+
+    if not decimal_value.is_finite():
+        return default
+
+    return format(
+        decimal_value.quantize(
+            quantum,
+            rounding=ROUND_HALF_UP,
+        ),
+        "f",
+    )
+
+
+def finance_database_decimal(
+    value,
+    *,
+    default=Decimal("0"),
+):
+    """Read PostgreSQL numeric output without introducing binary floats."""
+
+    if value is None or value == "":
+        return default
+
+    try:
+        decimal_value = Decimal(str(value))
+    except (
+        InvalidOperation,
+        TypeError,
+        ValueError,
+    ):
+        return default
+
+    if not decimal_value.is_finite():
+        return default
+
+    return decimal_value
+
+
+def normalize_finance_response(
+    value,
+    field_name=None,
+):
+    """Recursively keep monetary API output free of binary floats."""
+
+    if isinstance(value, dict):
+        return {
+            key: normalize_finance_response(
+                item,
+                str(key),
+            )
+            for key, item in value.items()
+        }
+
+    if isinstance(value, list):
+        return [
+            normalize_finance_response(
+                item,
+                field_name,
+            )
+            for item in value
+        ]
+
+    if field_name in FINANCE_INTEGER_RESPONSE_FIELDS:
+        try:
+            return int(value)
+        except (
+            TypeError,
+            ValueError,
+        ):
+            return 0
+
+    if field_name in FINANCE_RATIO_RESPONSE_FIELDS:
+        return finance_decimal_string(
+            value,
+            default=None,
+            quantum=FINANCE_RATIO_QUANTUM,
+        )
+
+    money_suffixes = (
+        "_amount",
+        "_total",
+        "_balance",
+        "_revenue",
+        "_spend",
+        "_cost",
+    )
+
+    money_prefixes = (
+        "amount_",
+        "total_",
+        "average_",
+    )
+
+    if (
+        field_name in FINANCE_MONEY_RESPONSE_FIELDS
+        or (
+            field_name
+            and (
+                field_name.endswith(
+                    money_suffixes
+                )
+                or field_name.startswith(
+                    money_prefixes
+                )
+            )
+        )
+    ):
+        return finance_decimal_string(
+            value
+        )
+
+    if isinstance(value, Decimal):
+        return format(value, "f")
+
+    # A numeric emitted by PostgREST must not leak into a new finance API as a
+    # Python float. Known counts are handled above; any remaining float is
+    # serialized losslessly from its JSON representation.
+    if isinstance(value, float):
+        return format(
+            Decimal(str(value)),
+            "f",
+        )
+
+    return value
+
+
+def parse_finance_uuid(
+    value,
+    *,
+    field_name="ID",
+    required=True,
+):
+    raw_value = str(
+        value or ""
+    ).strip()
+
+    if not raw_value and not required:
+        return None
+
+    try:
+        return str(
+            uuid.UUID(raw_value)
+        )
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ) as error:
+        raise FinanceValidationError(
+            f"Некоректне поле «{field_name}»."
+        ) from error
+
+
+def parse_finance_date(
+    value,
+    *,
+    field_name="Дата",
+    required=True,
+):
+    raw_value = str(
+        value or ""
+    ).strip()
+
+    if not raw_value and not required:
+        return None
+
+    try:
+        return datetime.strptime(
+            raw_value,
+            "%Y-%m-%d",
+        ).date()
+    except ValueError as error:
+        raise FinanceValidationError(
+            f"Некоректне поле «{field_name}». Використовуйте YYYY-MM-DD."
+        ) from error
+
+
+def parse_finance_datetime(
+    value,
+    *,
+    field_name="Дата й час",
+):
+    raw_value = str(
+        value or ""
+    ).strip()
+
+    if not raw_value:
+        raw_value = kyiv_today().isoformat()
+
+    try:
+        if "T" not in raw_value:
+            date_value = datetime.strptime(
+                raw_value,
+                "%Y-%m-%d",
+            ).date()
+            datetime_value = datetime(
+                date_value.year,
+                date_value.month,
+                date_value.day,
+                tzinfo=ZoneInfo(
+                    "Europe/Kyiv"
+                ),
+            )
+        else:
+            datetime_value = datetime.fromisoformat(
+                raw_value.replace(
+                    "Z",
+                    "+00:00",
+                )
+            )
+
+            if datetime_value.tzinfo is None:
+                datetime_value = (
+                    datetime_value.replace(
+                        tzinfo=ZoneInfo(
+                            "Europe/Kyiv"
+                        )
+                    )
+                )
+
+        return datetime_value.astimezone(
+            timezone.utc
+        )
+
+    except ValueError as error:
+        raise FinanceValidationError(
+            f"Некоректне поле «{field_name}»."
+        ) from error
+
+
+def parse_finance_version(value):
+    try:
+        version = int(value)
+    except (
+        TypeError,
+        ValueError,
+    ) as error:
+        raise FinanceValidationError(
+            "Некоректна версія документа."
+        ) from error
+
+    if version < 1:
+        raise FinanceValidationError(
+            "Некоректна версія документа."
+        )
+
+    return version
+
+
+def normalize_expense_category(value):
+    return " ".join(
+        str(value or "")
+        .strip()
+        .casefold()
+        .split()
+    )
+
+
+def validate_operating_expense_category(value):
+    category = str(
+        value or ""
+    ).strip()
+
+    if not category:
+        raise FinanceValidationError(
+            "Оберіть категорію витрати."
+        )
+
+    if len(category) > 150:
+        raise FinanceValidationError(
+            "Назва категорії надто довга."
+        )
+
+    if (
+        normalize_expense_category(
+            category
+        )
+        in EXPENSE_RESERVED_CATEGORIES
+    ):
+        raise FinanceValidationError(
+            "Закупівлі постачальників і зарплата проводяться у власних фінансових розділах."
+        )
+
+    return category
+
+
+def parse_non_negative_integer(
+    value,
+    *,
+    field_name,
+    maximum=100000000,
+):
+    if isinstance(value, bool):
+        raise FinanceValidationError(
+            f"Некоректне поле «{field_name}»."
+        )
+
+    raw_value = str(
+        0 if value is None else value
+    ).strip()
+
+    if (
+        not raw_value.isdigit()
+        or len(raw_value) > 12
+    ):
+        raise FinanceValidationError(
+            f"Некоректне поле «{field_name}»."
+        )
+
+    integer_value = int(raw_value)
+
+    if integer_value > maximum:
+        raise FinanceValidationError(
+            f"Поле «{field_name}» перевищує допустиме значення."
+        )
+
+    return integer_value
+
+
+def clean_finance_text(
+    value,
+    *,
+    field_name,
+    maximum,
+    required=False,
+):
+    text_value = str(
+        value or ""
+    ).strip()
+
+    if required and not text_value:
+        raise FinanceValidationError(
+            f"Заповніть поле «{field_name}»."
+        )
+
+    if len(text_value) > maximum:
+        raise FinanceValidationError(
+            f"Поле «{field_name}» надто довге."
+        )
+
+    return text_value or None
+
+
+def parse_expense_marketing(
+    payload,
+    category,
+):
+    marketing = payload.get(
+        "marketing"
+    )
+
+    if marketing is None:
+        marketing = {}
+
+    if not isinstance(marketing, dict):
+        raise FinanceValidationError(
+            "Поле «marketing» повинно бути об’єктом."
+        )
+
+    unsupported_marketing_fields = (
+        set(marketing) - {
+            "campaign",
+            "channel",
+            "leads",
+            "new_clients",
+            "revenue",
+        }
+    )
+
+    if unsupported_marketing_fields:
+        raise FinanceValidationError(
+            "Непідтримувані маркетингові поля: "
+            + ", ".join(
+                sorted(
+                    unsupported_marketing_fields
+                )
+            )
+        )
+
+    if any(
+        isinstance(value, (dict, list))
+        for value in marketing.values()
+    ):
+        raise FinanceValidationError(
+            "Маркетингові поля повинні містити прості значення."
+        )
+
+    empty_marketing_values = (
+        None,
+        "",
+        0,
+        "0",
+        "0.00",
+    )
+
+    has_marketing_values = any(
+        not any(
+            value == empty_value
+            for empty_value
+            in empty_marketing_values
+        )
+        for value in marketing.values()
+    )
+
+    if (
+        has_marketing_values
+        and normalize_expense_category(
+            category
+        ) not in {
+            "маркетинг",
+            "marketing",
+        }
+    ):
+        raise FinanceValidationError(
+            "Маркетингові показники доступні лише для категорії «Маркетинг»."
+        )
+
+    leads = parse_non_negative_integer(
+        marketing.get("leads"),
+        field_name="Ліди",
+    )
+
+    new_clients = parse_non_negative_integer(
+        marketing.get("new_clients"),
+        field_name="Нові клієнти",
+    )
+
+    if new_clients > leads:
+        raise FinanceValidationError(
+            "Кількість нових клієнтів не може перевищувати кількість лідів."
+        )
+
+    revenue = parse_finance_decimal_string(
+        marketing.get(
+            "revenue",
+            "0.00",
+        ),
+        field_name="Маркетингова виручка",
+        allow_zero=True,
+    )
+
+    return {
+        "campaign": clean_finance_text(
+            marketing.get("campaign"),
+            field_name="Кампанія",
+            maximum=200,
+        ),
+        "channel": clean_finance_text(
+            marketing.get("channel"),
+            field_name="Канал",
+            maximum=100,
+        ),
+        "leads": leads,
+        "new_clients": new_clients,
+        "revenue": format(revenue, "f"),
+    }
+
+
+def serialize_expense_document(row):
+    if not row:
+        return None
+
+    document = dict(row)
+    attachment_rows = document.pop(
+        "attachment_rows",
+        None,
+    )
+
+    if isinstance(attachment_rows, list):
+        document["attachments_count"] = sum(
+            1
+            for attachment in attachment_rows
+            if (
+                isinstance(attachment, dict)
+                and attachment.get("deleted_at")
+                is None
+            )
+        )
+
+    if "marketing" not in document:
+        marketing = {
+            "campaign": document.get(
+                "marketing_campaign"
             ),
-            2
+            "channel": document.get(
+                "marketing_channel"
+            ),
+            "leads": document.get(
+                "marketing_leads"
+            ) or 0,
+            "new_clients": document.get(
+                "marketing_new_clients"
+            ) or 0,
+            "revenue": document.get(
+                "marketing_revenue"
+            ) or "0.00",
+        }
+    else:
+        marketing = dict(
+            document.get("marketing")
+            or {}
+        )
+
+    try:
+        leads = int(
+            marketing.get("leads") or 0
         )
     except (
         TypeError,
         ValueError,
     ):
-        return round(
-            float(default),
-            2
+        leads = 0
+
+    try:
+        new_clients = int(
+            marketing.get("new_clients")
+            or 0
         )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        new_clients = 0
+
+    spend = finance_database_decimal(
+        document.get("amount")
+    )
+    revenue = finance_database_decimal(
+        marketing.get("revenue")
+    )
+    is_marketing = (
+        normalize_expense_category(
+            document.get("category")
+        ) in {
+            "маркетинг",
+            "marketing",
+        }
+        or bool(marketing.get("campaign"))
+        or bool(marketing.get("channel"))
+        or leads > 0
+        or new_clients > 0
+        or revenue > 0
+    )
+
+    marketing.update({
+        "leads": max(leads, 0),
+        "new_clients": max(
+            new_clients,
+            0,
+        ),
+        "revenue": finance_decimal_string(
+            revenue
+        ),
+        "cpl": (
+            finance_decimal_string(
+                spend / leads,
+                default=None,
+                quantum=(
+                    FINANCE_RATIO_QUANTUM
+                ),
+            )
+            if is_marketing and leads > 0
+            else None
+        ),
+        "cac": (
+            finance_decimal_string(
+                spend / new_clients,
+                default=None,
+                quantum=(
+                    FINANCE_RATIO_QUANTUM
+                ),
+            )
+            if (
+                is_marketing
+                and new_clients > 0
+            )
+            else None
+        ),
+        "roas": (
+            finance_decimal_string(
+                revenue / spend,
+                default=None,
+                quantum=(
+                    FINANCE_RATIO_QUANTUM
+                ),
+            )
+            if is_marketing and spend > 0
+            else None
+        ),
+    })
+    document["marketing"] = marketing
+
+    return normalize_finance_response(
+        document
+    )
+
+
+def serialize_recurring_expense_template(row):
+    if not row:
+        return None
+
+    template = dict(row)
+    template["marketing"] = {
+        "campaign": template.get(
+            "marketing_campaign"
+        ),
+        "channel": template.get(
+            "marketing_channel"
+        ),
+        "leads": template.get(
+            "marketing_leads"
+        ) or 0,
+        "new_clients": template.get(
+            "marketing_new_clients"
+        ) or 0,
+        "revenue": template.get(
+            "marketing_revenue"
+        ) or "0.00",
+    }
+
+    return normalize_finance_response(
+        template
+    )
+
+
+def serialize_finance_document(row):
+    if not row:
+        return None
+
+    return {
+        "id": str(row.get("id") or ""),
+        "expense_document_id": str(
+            row.get(
+                "expense_document_id"
+            )
+            or ""
+        ),
+        "original_name": (
+            row.get("original_name")
+            or ""
+        ),
+        "mime_type": row.get("mime_type"),
+        "size_bytes": int(
+            row.get("size_bytes") or 0
+        ),
+        "created_at": row.get("created_at"),
+        "uploaded_by": (
+            str(row.get("uploaded_by"))
+            if row.get("uploaded_by")
+            else None
+        ),
+    }
+
+
+def validate_finance_document_upload(
+    uploaded_file,
+):
+    if (
+        not uploaded_file
+        or not uploaded_file.filename
+    ):
+        raise FinanceValidationError(
+            "Оберіть файл документа."
+        )
+
+    original_name = os.path.basename(
+        str(uploaded_file.filename)
+    ).strip()
+
+    if (
+        not original_name
+        or len(original_name) > 255
+        or "\x00" in original_name
+    ):
+        raise FinanceValidationError(
+            "Некоректна назва файла."
+        )
+
+    extension = (
+        original_name.rsplit(".", 1)[-1]
+        .lower()
+        if "." in original_name
+        else ""
+    )
+    expected_mime = (
+        FINANCE_DOCUMENT_MIME_BY_EXTENSION
+        .get(extension)
+    )
+    claimed_mime = str(
+        uploaded_file.mimetype or ""
+    ).strip().lower()
+
+    if (
+        not expected_mime
+        or claimed_mime != expected_mime
+    ):
+        raise FinanceValidationError(
+            "Дозволені лише PDF, JPEG, PNG, WebP, HEIC або HEIF."
+        )
+
+    file_bytes = uploaded_file.read(
+        FINANCE_DOCUMENT_MAX_BYTES + 1
+    )
+
+    if not file_bytes:
+        raise FinanceValidationError(
+            "Файл порожній."
+        )
+
+    if len(file_bytes) > (
+        FINANCE_DOCUMENT_MAX_BYTES
+    ):
+        raise FinanceValidationError(
+            "Розмір файла не може перевищувати 10 MiB."
+        )
+
+    valid_magic = False
+
+    if extension == "pdf":
+        valid_magic = file_bytes.startswith(
+            b"%PDF-"
+        )
+    elif extension in {"jpg", "jpeg"}:
+        valid_magic = file_bytes.startswith(
+            b"\xff\xd8\xff"
+        )
+    elif extension == "png":
+        valid_magic = file_bytes.startswith(
+            b"\x89PNG\r\n\x1a\n"
+        )
+    elif extension == "webp":
+        valid_magic = (
+            len(file_bytes) >= 12
+            and file_bytes[:4] == b"RIFF"
+            and file_bytes[8:12] == b"WEBP"
+        )
+    elif extension in {"heic", "heif"}:
+        valid_magic = (
+            len(file_bytes) >= 12
+            and file_bytes[4:8] == b"ftyp"
+            and file_bytes[8:12] in {
+                b"heic",
+                b"heix",
+                b"hevc",
+                b"hevx",
+                b"mif1",
+                b"msf1",
+            }
+        )
+
+    if not valid_magic:
+        raise FinanceValidationError(
+            "Вміст файла не відповідає його типу."
+        )
+
+    safe_name = secure_filename(
+        original_name
+    )
+
+    if not safe_name:
+        safe_name = f"document.{extension}"
+
+    return {
+        "original_name": original_name,
+        "safe_name": safe_name,
+        "extension": extension,
+        "mime_type": expected_mime,
+        "file_bytes": file_bytes,
+        "size_bytes": len(file_bytes),
+        "checksum_sha256": hashlib.sha256(
+            file_bytes
+        ).hexdigest(),
+    }
+
+
+def expense_rpc_response(result):
+    response_data = (
+        result.data
+        if result.data is not None
+        else {}
+    )
+
+    if (
+        isinstance(response_data, list)
+        and response_data
+    ):
+        response_data = response_data[0]
+
+    if isinstance(response_data, dict):
+        response_data = dict(
+            response_data
+        )
+
+        for document_key in (
+            "document",
+            "reversal_document",
+            "original_document",
+        ):
+            if isinstance(
+                response_data.get(
+                    document_key
+                ),
+                dict,
+            ):
+                response_data[
+                    document_key
+                ] = serialize_expense_document(
+                    response_data[
+                        document_key
+                    ]
+                )
+
+        if isinstance(
+            response_data.get("template"),
+            dict,
+        ):
+            response_data["template"] = (
+                serialize_recurring_expense_template(
+                    response_data["template"]
+                )
+            )
+
+    return normalize_finance_response(
+        response_data
+    )
+
+
+def expense_rpc_error_response(
+    error,
+    default_message,
+):
+    normalized_error = str(
+        error
+    ).casefold()
+
+    error_mappings = (
+        (
+            ("expense document not found",),
+            "Документ витрати не знайдено.",
+            404,
+        ),
+        (
+            ("recurring template not found",),
+            "Шаблон регулярної витрати не знайдено.",
+            404,
+        ),
+        (
+            (
+                "version conflict",
+                "stale version",
+                "concurrent",
+            ),
+            "Документ уже змінено. Оновіть дані та повторіть дію.",
+            409,
+        ),
+        (
+            (
+                "already reversed",
+                "already cancelled",
+                "already paid",
+                "planned only",
+                "paid only",
+                "only planned expense",
+                "only paid expense",
+                "immutable expense document",
+                "recurring template is inactive",
+                "invalid status",
+                "cannot reverse",
+                "cannot cancel",
+            ),
+            "Дія недоступна для поточного статусу документа.",
+            409,
+        ),
+        (
+            (
+                "account not found",
+                "inactive account",
+                "not found or inactive",
+                "invalid payment",
+                "reserved category",
+                "amount must",
+            ),
+            "Перевірте фінансовий рахунок і дані витрати.",
+            400,
+        ),
+        (
+            (
+                "idempotency key belongs",
+                "duplicate key",
+                "unique constraint",
+            ),
+            "Ключ операції вже використано або номер документа дублюється.",
+            409,
+        ),
+    )
+
+    for (
+        markers,
+        message,
+        status_code,
+    ) in error_mappings:
+        if any(
+            marker in normalized_error
+            for marker in markers
+        ):
+            return fail(
+                message,
+                status_code,
+            )
+
+    return fail(
+        default_message,
+        500,
+    )
+
+
+def kyiv_today():
+    return datetime.now(
+        ZoneInfo("Europe/Kyiv")
+    ).date()
+
+
+def expense_document_for_org(
+    document_id,
+    org_id,
+):
+    result = (
+        supabase
+        .table("expense_documents")
+        .select(
+            "*,financial_account:financial_accounts!expense_documents_account_fk(name,account_type)"
+        )
+        .eq("org_id", org_id)
+        .eq("id", document_id)
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    return result.data[0]
+
+
+def parse_expense_document_create_payload(
+    payload,
+):
+    if not isinstance(payload, dict):
+        raise FinanceValidationError(
+            "Некоректне тіло запиту."
+        )
+
+    status = str(
+        payload.get("status")
+        or "planned"
+    ).strip().lower()
+
+    if status not in {
+        "planned",
+        "paid",
+    }:
+        raise FinanceValidationError(
+            "Новий документ може мати статус planned або paid."
+        )
+
+    if str(
+        payload.get("currency")
+        or "UAH"
+    ).strip().upper() != "UAH":
+        raise FinanceValidationError(
+            "У MVP підтримується лише валюта UAH."
+        )
+
+    amount = parse_finance_decimal_string(
+        payload.get("amount"),
+        field_name="Сума",
+    )
+
+    category = validate_operating_expense_category(
+        payload.get("category")
+    )
+
+    expense_date = parse_finance_date(
+        payload.get("expense_date")
+        or kyiv_today().isoformat(),
+        field_name="Дата витрати",
+    )
+
+    due_date = parse_finance_date(
+        payload.get("due_date"),
+        field_name="Строк оплати",
+        required=False,
+    )
+
+    if due_date and due_date < expense_date:
+        raise FinanceValidationError(
+            "Строк оплати не може бути раніше дати витрати."
+        )
+
+    payment_method = str(
+        payload.get("payment_method")
+        or ""
+    ).strip().lower()
+
+    account_id = parse_finance_uuid(
+        payload.get("financial_account_id"),
+        field_name="Фінансовий рахунок",
+        required=(status == "paid"),
+    )
+
+    if status == "paid":
+        if payment_method not in FINANCE_PAYMENT_METHODS:
+            raise FinanceValidationError(
+                "Оберіть спосіб оплати."
+            )
+    elif (
+        payment_method
+        and payment_method
+        not in FINANCE_PAYMENT_METHODS
+    ):
+        raise FinanceValidationError(
+            "Некоректний спосіб оплати."
+        )
+
+    idempotency_key = parse_finance_uuid(
+        payload.get("idempotency_key"),
+        field_name="Ключ ідемпотентності",
+    )
+
+    document_url = clean_finance_text(
+        payload.get("document_url"),
+        field_name="Посилання на документ",
+        maximum=2000,
+    )
+
+    if (
+        document_url
+        and not document_url.startswith(
+            ("https://", "http://")
+        )
+    ):
+        raise FinanceValidationError(
+            "Посилання на документ повинно починатися з http:// або https://."
+        )
+
+    return {
+        "idempotency_key": idempotency_key,
+        "status": status,
+        "amount": format(amount, "f"),
+        "currency": "UAH",
+        "category": category,
+        "subcategory": clean_finance_text(
+            payload.get("subcategory"),
+            field_name="Підкатегорія",
+            maximum=150,
+        ),
+        "description": clean_finance_text(
+            payload.get("description"),
+            field_name="Опис",
+            maximum=2000,
+        ),
+        "counterparty": clean_finance_text(
+            payload.get("counterparty"),
+            field_name="Контрагент",
+            maximum=300,
+        ),
+        "document_number": clean_finance_text(
+            payload.get("document_number"),
+            field_name="Номер документа",
+            maximum=150,
+        ),
+        "document_url": document_url,
+        "expense_date": expense_date.isoformat(),
+        "due_date": (
+            due_date.isoformat()
+            if due_date
+            else None
+        ),
+        "payment_method": (
+            payment_method or None
+        ),
+        "financial_account_id": account_id,
+        "marketing": parse_expense_marketing(
+            payload,
+            category,
+        ),
+    }
+
+
+def parse_expense_document_patch(
+    payload,
+    existing,
+):
+    if not isinstance(payload, dict):
+        raise FinanceValidationError(
+            "Некоректне тіло запиту."
+        )
+
+    version = parse_finance_version(
+        payload.get("version")
+    )
+
+    status = str(
+        existing.get("status")
+        or ""
+    ).strip().lower()
+
+    if status not in {
+        "planned",
+        "paid",
+    }:
+        raise FinanceValidationError(
+            "Скасований або сторнований документ не можна редагувати."
+        )
+
+    planned_fields = {
+        "amount",
+        "category",
+        "subcategory",
+        "description",
+        "counterparty",
+        "document_number",
+        "document_url",
+        "expense_date",
+        "due_date",
+        "payment_method",
+        "financial_account_id",
+        "marketing",
+    }
+
+    paid_fields = {
+        "description",
+        "counterparty",
+        "document_number",
+        "document_url",
+        "marketing",
+    }
+
+    allowed_fields = (
+        planned_fields
+        if status == "planned"
+        else paid_fields
+    )
+
+    supplied_fields = (
+        set(payload) - {"version"}
+    )
+
+    forbidden_fields = (
+        supplied_fields - allowed_fields
+    )
+
+    if forbidden_fields:
+        raise FinanceValidationError(
+            "Ці поля не можна змінювати для поточного статусу документа: "
+            + ", ".join(
+                sorted(forbidden_fields)
+            )
+        )
+
+    if not supplied_fields:
+        raise FinanceValidationError(
+            "Немає полів для оновлення."
+        )
+
+    patch_payload = {}
+
+    if "amount" in payload:
+        patch_payload["amount"] = format(
+            parse_finance_decimal_string(
+                payload.get("amount"),
+                field_name="Сума",
+            ),
+            "f",
+        )
+
+    category = str(
+        payload.get("category")
+        if "category" in payload
+        else existing.get("category")
+        or ""
+    ).strip()
+
+    if "category" in payload:
+        patch_payload["category"] = (
+            validate_operating_expense_category(
+                category
+            )
+        )
+
+    text_fields = {
+        "subcategory": ("Підкатегорія", 150),
+        "description": ("Опис", 2000),
+        "counterparty": ("Контрагент", 300),
+        "document_number": ("Номер документа", 150),
+        "document_url": ("Посилання на документ", 2000),
+    }
+
+    for field_name, (
+        label,
+        maximum,
+    ) in text_fields.items():
+        if field_name in payload:
+            patch_payload[field_name] = (
+                clean_finance_text(
+                    payload.get(field_name),
+                    field_name=label,
+                    maximum=maximum,
+                    required=(
+                        field_name
+                        == "document_number"
+                    ),
+                )
+            )
+
+    if (
+        patch_payload.get("document_url")
+        and not patch_payload[
+            "document_url"
+        ].startswith(("https://", "http://"))
+    ):
+        raise FinanceValidationError(
+            "Посилання на документ повинно починатися з http:// або https://."
+        )
+
+    expense_date = None
+
+    if "expense_date" in payload:
+        expense_date = parse_finance_date(
+            payload.get("expense_date"),
+            field_name="Дата витрати",
+        )
+        patch_payload[
+            "expense_date"
+        ] = expense_date.isoformat()
+
+    if "due_date" in payload:
+        due_date = parse_finance_date(
+            payload.get("due_date"),
+            field_name="Строк оплати",
+            required=False,
+        )
+
+        effective_expense_date = (
+            expense_date
+            or parse_finance_date(
+                existing.get(
+                    "expense_date"
+                ),
+                field_name="Дата витрати",
+            )
+        )
+
+        if (
+            due_date
+            and due_date <
+            effective_expense_date
+        ):
+            raise FinanceValidationError(
+                "Строк оплати не може бути раніше дати витрати."
+            )
+
+        patch_payload["due_date"] = (
+            due_date.isoformat()
+            if due_date
+            else None
+        )
+
+    elif expense_date and existing.get(
+        "due_date"
+    ):
+        existing_due_date = parse_finance_date(
+            existing.get("due_date"),
+            field_name="Строк оплати",
+        )
+
+        if existing_due_date < expense_date:
+            raise FinanceValidationError(
+                "Строк оплати не може бути раніше дати витрати."
+            )
+
+    if "payment_method" in payload:
+        payment_method = str(
+            payload.get("payment_method")
+            or ""
+        ).strip().lower()
+
+        if (
+            payment_method
+            and payment_method
+            not in FINANCE_PAYMENT_METHODS
+        ):
+            raise FinanceValidationError(
+                "Некоректний спосіб оплати."
+            )
+
+        patch_payload[
+            "payment_method"
+        ] = payment_method or None
+
+    if "financial_account_id" in payload:
+        patch_payload[
+            "financial_account_id"
+        ] = parse_finance_uuid(
+            payload.get(
+                "financial_account_id"
+            ),
+            field_name="Фінансовий рахунок",
+            required=False,
+        )
+
+    if "marketing" in payload:
+        marketing = parse_expense_marketing(
+            payload,
+            category,
+        )
+        patch_payload.update({
+            "marketing_campaign": (
+                marketing["campaign"]
+            ),
+            "marketing_channel": (
+                marketing["channel"]
+            ),
+            "marketing_leads": (
+                marketing["leads"]
+            ),
+            "marketing_new_clients": (
+                marketing["new_clients"]
+            ),
+            "marketing_revenue": (
+                marketing["revenue"]
+            ),
+        })
+
+    return version, patch_payload
+
+
+def safe_finance_search(value):
+    return "".join(
+        character
+        for character in str(
+            value or ""
+        ).strip()[:100]
+        if (
+            character.isalnum()
+            or character in {
+                " ",
+                "-",
+                "_",
+                ".",
+            }
+        )
+    ).strip()
+
+
+def recurring_template_for_org(
+    template_id,
+    org_id,
+):
+    result = (
+        supabase
+        .table(
+            "recurring_expense_templates"
+        )
+        .select("*")
+        .eq("org_id", org_id)
+        .eq("id", template_id)
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    return result.data[0]
+
+
+def parse_recurring_template_payload(
+    payload,
+    *,
+    partial=False,
+    existing=None,
+):
+    if not isinstance(payload, dict):
+        raise FinanceValidationError(
+            "Некоректне тіло запиту."
+        )
+
+    allowed_fields = {
+        "name",
+        "amount",
+        "currency",
+        "category",
+        "subcategory",
+        "description",
+        "counterparty",
+        "document_number",
+        "document_url",
+        "frequency",
+        "cadence",
+        "interval_months",
+        "day_of_month",
+        "next_due_date",
+        "payment_method",
+        "financial_account_id",
+        "marketing",
+        "is_active",
+    }
+
+    supplied_fields = set(payload)
+
+    if partial:
+        supplied_fields.discard("version")
+
+    forbidden_fields = (
+        supplied_fields - allowed_fields
+    )
+
+    if forbidden_fields:
+        raise FinanceValidationError(
+            "Непідтримувані поля шаблону: "
+            + ", ".join(
+                sorted(forbidden_fields)
+            )
+        )
+
+    if partial and not supplied_fields:
+        raise FinanceValidationError(
+            "Немає полів для оновлення."
+        )
+
+    result = {}
+
+    if not partial or "name" in payload:
+        result["name"] = clean_finance_text(
+            payload.get("name"),
+            field_name="Назва шаблону",
+            maximum=150,
+            required=True,
+        )
+
+    if not partial or "amount" in payload:
+        result["amount"] = format(
+            parse_finance_decimal_string(
+                payload.get("amount"),
+                field_name="Сума",
+            ),
+            "f",
+        )
+
+    if (
+        "currency" in payload
+        and str(
+            payload.get("currency")
+            or "UAH"
+        ).strip().upper() != "UAH"
+    ):
+        raise FinanceValidationError(
+            "У MVP підтримується лише валюта UAH."
+        )
+
+    if not partial:
+        result["currency"] = "UAH"
+
+    effective_category = str(
+        payload.get("category")
+        if "category" in payload
+        else (
+            (existing or {}).get("category")
+        )
+        or ""
+    ).strip()
+
+    if not partial or "category" in payload:
+        result["category"] = (
+            validate_operating_expense_category(
+                effective_category
+            )
+        )
+
+    text_fields = {
+        "subcategory": ("Підкатегорія", 150),
+        "description": ("Опис", 2000),
+        "counterparty": ("Контрагент", 300),
+        "document_number": ("Номер документа", 150),
+        "document_url": ("Посилання на документ", 2000),
+    }
+
+    for field_name, (
+        label,
+        maximum,
+    ) in text_fields.items():
+        if not partial or field_name in payload:
+            result[field_name] = (
+                clean_finance_text(
+                    payload.get(field_name),
+                    field_name=label,
+                    maximum=maximum,
+                )
+            )
+
+    if (
+        result.get("document_url")
+        and not result[
+            "document_url"
+        ].startswith(("https://", "http://"))
+    ):
+        raise FinanceValidationError(
+            "Посилання на документ повинно починатися з http:// або https://."
+        )
+
+    if (
+        not partial
+        or "frequency" in payload
+        or "cadence" in payload
+        or "interval_months" in payload
+    ):
+        frequency = str(
+            payload.get("frequency")
+            or payload.get("cadence")
+            or (existing or {}).get(
+                "frequency"
+            )
+            or "monthly"
+        ).strip().lower()
+
+        if frequency not in (
+            RECURRING_EXPENSE_FREQUENCIES
+        ):
+            raise FinanceValidationError(
+                "Періодичність має бути monthly, quarterly або yearly."
+            )
+
+        result["frequency"] = frequency
+        interval_months = {
+            "monthly": 1,
+            "quarterly": 3,
+            "yearly": 12,
+        }[frequency]
+
+        if (
+            "interval_months" in payload
+            and str(
+                payload.get(
+                    "interval_months"
+                )
+            ) != str(interval_months)
+        ):
+            raise FinanceValidationError(
+                "interval_months не відповідає вибраній періодичності."
+            )
+
+        result[
+            "interval_months"
+        ] = interval_months
+
+    if (
+        not partial
+        or "next_due_date" in payload
+        or "day_of_month" in payload
+    ):
+        next_due_date = parse_finance_date(
+            payload.get("next_due_date")
+            or (existing or {}).get(
+                "next_due_date"
+            ),
+            field_name="Наступна дата",
+        )
+        result[
+            "next_due_date"
+        ] = next_due_date.isoformat()
+
+        raw_day_of_month = payload.get(
+            "day_of_month"
+        )
+
+        if raw_day_of_month is None:
+            day_of_month = next_due_date.day
+        else:
+            day_of_month = (
+                parse_non_negative_integer(
+                    raw_day_of_month,
+                    field_name="День місяця",
+                    maximum=31,
+                )
+            )
+
+            if day_of_month < 1:
+                raise FinanceValidationError(
+                    "День місяця повинен бути від 1 до 31."
+                )
+
+        result["day_of_month"] = (
+            day_of_month
+        )
+
+    if not partial or "payment_method" in payload:
+        payment_method = str(
+            payload.get("payment_method")
+            or ""
+        ).strip().lower()
+
+        if (
+            payment_method
+            and payment_method
+            not in FINANCE_PAYMENT_METHODS
+        ):
+            raise FinanceValidationError(
+                "Некоректний спосіб оплати."
+            )
+
+        result[
+            "payment_method"
+        ] = payment_method or None
+
+    if (
+        not partial
+        or "financial_account_id" in payload
+    ):
+        result[
+            "financial_account_id"
+        ] = parse_finance_uuid(
+            payload.get(
+                "financial_account_id"
+            ),
+            field_name="Фінансовий рахунок",
+            required=False,
+        )
+
+    if not partial or "marketing" in payload:
+        marketing = parse_expense_marketing(
+            payload,
+            effective_category,
+        )
+        result.update({
+            "marketing_campaign": (
+                marketing["campaign"]
+            ),
+            "marketing_channel": (
+                marketing["channel"]
+            ),
+            "marketing_leads": (
+                marketing["leads"]
+            ),
+            "marketing_new_clients": (
+                marketing["new_clients"]
+            ),
+            "marketing_revenue": (
+                marketing["revenue"]
+            ),
+        })
+
+    if not partial or "is_active" in payload:
+        is_active = payload.get(
+            "is_active",
+            True,
+        )
+
+        if not isinstance(is_active, bool):
+            raise FinanceValidationError(
+                "Поле «Активний» повинно бути boolean."
+            )
+
+        result["is_active"] = is_active
+
+    return result
 
 
 def serialize_finance_transaction(
@@ -2847,6 +4800,30 @@ def serialize_finance_transaction(
         "visit_id": (
             str(row.get("visit_id"))
             if row.get("visit_id")
+            else None
+        ),
+
+        "financial_account_id": (
+            str(
+                row.get(
+                    "financial_account_id"
+                )
+            )
+            if row.get(
+                "financial_account_id"
+            )
+            else None
+        ),
+
+        "expense_document_id": (
+            str(
+                row.get(
+                    "expense_document_id"
+                )
+            )
+            if row.get(
+                "expense_document_id"
+            )
             else None
         ),
 
@@ -2875,6 +4852,23 @@ def serialize_finance_transaction(
                 "transaction_type"
             ),
 
+        "accounting_kind":
+            row.get(
+                "accounting_kind"
+            ),
+
+        "reverses_transaction_id": (
+            str(
+                row.get(
+                    "reverses_transaction_id"
+                )
+            )
+            if row.get(
+                "reverses_transaction_id"
+            )
+            else None
+        ),
+
         "payment_method":
             row.get(
                 "payment_method"
@@ -2890,7 +4884,7 @@ def serialize_finance_transaction(
             row.get("category"),
 
         "amount":
-            finance_number(
+            finance_decimal_string(
                 row.get("amount")
             ),
 
@@ -3012,10 +5006,10 @@ def api_get_visit_finance(
         )
 
         service_total = sum(
-            finance_number(
+            finance_database_decimal(
                 row.get("qty")
             )
-            * finance_number(
+            * finance_database_decimal(
                 row.get("price_snap")
             )
             for row in (
@@ -3025,10 +5019,10 @@ def api_get_visit_finance(
         )
 
         stock_total = sum(
-            finance_number(
+            finance_database_decimal(
                 row.get("qty")
             )
-            * finance_number(
+            * finance_database_decimal(
                 row.get("price_snap")
             )
             for row in (
@@ -3043,8 +5037,8 @@ def api_get_visit_finance(
         )
 
         discount = max(
-            0,
-            finance_number(
+            Decimal("0"),
+            finance_database_decimal(
                 visit.get(
                     "discount_amount"
                 )
@@ -3052,7 +5046,7 @@ def api_get_visit_finance(
         )
 
         total = max(
-            0,
+            Decimal("0"),
             subtotal - discount
         )
 
@@ -3061,7 +5055,7 @@ def api_get_visit_finance(
             or []
         )
 
-        paid = 0
+        paid = Decimal("0")
 
         for row in transactions:
             if (
@@ -3070,7 +5064,7 @@ def api_get_visit_finance(
             ):
                 continue
 
-            amount = finance_number(
+            amount = finance_database_decimal(
                 row.get("amount")
             )
 
@@ -3091,15 +5085,13 @@ def api_get_visit_finance(
                 paid -= amount
 
         paid = max(
-            0,
-            finance_number(paid)
+            Decimal("0"),
+            paid,
         )
 
         remaining = max(
-            0,
-            finance_number(
-                total - paid
-            )
+            Decimal("0"),
+            total - paid,
         )
 
         stored_status = str(
@@ -3117,12 +5109,15 @@ def api_get_visit_finance(
                 stored_status
             )
 
-        elif total > 0 and remaining <= 0:
+        elif (
+            total > Decimal("0")
+            and remaining <= Decimal("0")
+        ):
             financial_status = (
                 "paid"
             )
 
-        elif paid > 0:
+        elif paid > Decimal("0"):
             financial_status = (
                 "partial"
             )
@@ -3137,37 +5132,37 @@ def api_get_visit_finance(
                 visit_id,
 
             "service_total":
-                finance_number(
+                finance_decimal_string(
                     service_total
                 ),
 
             "stock_total":
-                finance_number(
+                finance_decimal_string(
                     stock_total
                 ),
 
             "subtotal":
-                finance_number(
+                finance_decimal_string(
                     subtotal
                 ),
 
             "discount":
-                finance_number(
+                finance_decimal_string(
                     discount
                 ),
 
             "total":
-                finance_number(
+                finance_decimal_string(
                     total
                 ),
 
             "paid":
-                finance_number(
+                finance_decimal_string(
                     paid
                 ),
 
             "remaining":
-                finance_number(
+                finance_decimal_string(
                     remaining
                 ),
 
@@ -3215,9 +5210,16 @@ def api_create_visit_payment(
         or {}
     )
 
-    amount = finance_number(
-        data.get("amount")
-    )
+    try:
+        amount = format(
+            parse_finance_decimal_string(
+                data.get("amount"),
+                field_name="Сума оплати",
+            ),
+            "f",
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
 
     payment_method = str(
         data.get(
@@ -3227,23 +5229,9 @@ def api_create_visit_payment(
         or ""
     ).strip().lower()
 
-    allowed_methods = {
-        "cash",
-        "card",
-        "transfer",
-        "terminal",
-        "other",
-    }
-
-    if amount <= 0:
-        return fail(
-            "Вкажіть суму оплати.",
-            400
-        )
-
     if (
         payment_method
-        not in allowed_methods
+        not in FINANCE_PAYMENT_METHODS
     ):
         return fail(
             "Оберіть спосіб оплати.",
@@ -3308,7 +5296,9 @@ def api_create_visit_payment(
             )
 
         return ok(
-            response_data
+            normalize_finance_response(
+                response_data
+            )
         )
 
     except Exception as error:
@@ -3329,26 +5319,54 @@ def api_create_visit_payment(
         if (
             "already paid"
             in lowered_error
-            or "exceeds remaining"
-            in lowered_error
-            or "already processed"
+        ):
+            return fail(
+                "Візит уже повністю оплачено.",
+                409
+            )
+
+        if (
+            "exceeds remaining"
             in lowered_error
         ):
             return fail(
-                error_text,
+                "Сума оплати перевищує неоплачений залишок.",
+                409
+            )
+
+        if (
+            "already processed"
+            in lowered_error
+        ):
+            return fail(
+                "Операцію з цим ключем уже оброблено.",
                 409
             )
 
         if (
             "total is zero"
             in lowered_error
-            or "amount must"
-            in lowered_error
-            or "invalid payment"
+        ):
+            return fail(
+                "Сума візиту дорівнює нулю.",
+                400
+            )
+
+        if (
+            "amount must"
             in lowered_error
         ):
             return fail(
-                error_text,
+                "Сума оплати має бути більшою за нуль.",
+                400
+            )
+
+        if (
+            "invalid payment"
+            in lowered_error
+        ):
+            return fail(
+                "Некоректний спосіб оплати.",
                 400
             )
 
@@ -3364,7 +5382,7 @@ def api_create_visit_payment(
         return fail(
             "Не вдалося провести оплату.",
             500
-        )  
+        )
 
 @app.get(
     "/api/finance/overview"
@@ -3491,7 +5509,9 @@ def api_finance_overview():
             )
 
         return ok(
-            overview
+            normalize_finance_response(
+                overview
+            )
         )
 
     except Exception as error:
@@ -3504,8 +5524,8 @@ def api_finance_overview():
         return fail(
             "Не вдалося завантажити фінансову аналітику.",
             500
-        )      
-    
+        )
+
 @app.post(
     "/api/finance/transactions"
 )
@@ -3542,15 +5562,18 @@ def api_finance_transaction_create():
     ).strip().lower()
 
     allowed_types = {
-        "expense":
-            "Витрата",
-
         "deposit":
             "Внесення",
 
         "withdrawal":
             "Вилучення",
     }
+
+    if transaction_type == "expense":
+        return fail(
+            "Створюйте операційну витрату через документ витрати.",
+            409,
+        )
 
     if (
         transaction_type
@@ -3559,7 +5582,7 @@ def api_finance_transaction_create():
         return fail(
             (
                 "Дозволено створювати лише "
-                "витрату, внесення або вилучення."
+                "внесення або вилучення."
             ),
             400,
         )
@@ -3571,60 +5594,44 @@ def api_finance_transaction_create():
         or "cash"
     ).strip().lower()
 
-    allowed_methods = {
-        "cash",
-        "card",
-        "terminal",
-        "transfer",
-        "other",
-    }
-
     if (
         payment_method
-        not in allowed_methods
+        not in FINANCE_PAYMENT_METHODS
     ):
         return fail(
             "Невірний спосіб оплати.",
             400,
         )
 
+    if payment_method != "cash":
+        return fail(
+            "Внесення та вилучення виконуються лише через готівковий рахунок.",
+            400,
+        )
+
     try:
-        amount = round(
-            float(
+        requested_account_id = (
+            parse_finance_uuid(
                 data.get(
-                    "amount"
-                )
+                    "financial_account_id"
+                ),
+                field_name="Фінансовий рахунок",
+                required=False,
+            )
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        amount = format(
+            parse_finance_decimal_string(
+                data.get("amount"),
+                field_name="Сума",
             ),
-            2,
+            "f",
         )
-
-    except (
-        TypeError,
-        ValueError,
-    ):
-        return fail(
-            "Вкажіть коректну суму.",
-            400,
-        )
-
-    if (
-        amount != amount
-        or amount in {
-            float("inf"),
-            float("-inf"),
-        }
-        or amount <= 0
-    ):
-        return fail(
-            "Сума повинна бути більшою за нуль.",
-            400,
-        )
-
-    if amount > 1_000_000_000:
-        return fail(
-            "Сума операції перевищує допустиме значення.",
-            400,
-        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
 
     category = str(
         data.get(
@@ -3796,6 +5803,42 @@ def api_finance_transaction_create():
         )
 
     try:
+        account_query = (
+            supabase
+            .table("financial_accounts")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("account_type", "cash")
+            .eq("is_active", True)
+        )
+
+        if requested_account_id:
+            account_query = account_query.eq(
+                "id",
+                requested_account_id,
+            )
+        else:
+            account_query = account_query.eq(
+                "is_default",
+                True,
+            )
+
+        account_result = (
+            account_query
+            .limit(1)
+            .execute()
+        )
+
+        if not account_result.data:
+            return fail(
+                "Активний готівковий рахунок не знайдено.",
+                400,
+            )
+
+        financial_account_id = str(
+            account_result.data[0]["id"]
+        )
+
         existing_result = (
             supabase
             .table(
@@ -3804,12 +5847,16 @@ def api_finance_transaction_create():
             .select(
                 "id, org_id, "
                 "transaction_type, "
+                "accounting_kind, "
                 "amount, currency, "
                 "payment_method, "
                 "category, description, "
                 "counterparty, document_url, "
                 "source, status, "
                 "cash_shift_id, visit_id, "
+                "financial_account_id, "
+                "expense_document_id, "
+                "reverses_transaction_id, "
                 "created_by, occurred_at, "
                 "created_at, metadata"
             )
@@ -3832,8 +5879,10 @@ def api_finance_transaction_create():
         if existing_result.data:
             return ok({
                 "transaction":
-                    existing_result
-                    .data[0],
+                    normalize_finance_response(
+                        existing_result
+                        .data[0]
+                    ),
 
                 "idempotent_replay":
                     True,
@@ -3851,6 +5900,17 @@ def api_finance_transaction_create():
 
             "amount":
                 amount,
+
+            "accounting_kind": (
+                "cash_deposit"
+                if transaction_type
+                == "deposit"
+                else "cash_withdrawal"
+            ),
+
+            "financial_account_id": (
+                financial_account_id
+            ),
 
             "currency":
                 "UAH",
@@ -3927,8 +5987,10 @@ def api_finance_transaction_create():
 
             "data": {
                 "transaction":
-                    insert_result
-                    .data[0],
+                    normalize_finance_response(
+                        insert_result
+                        .data[0]
+                    ),
 
                 "idempotent_replay":
                     False,
@@ -3978,8 +6040,10 @@ def api_finance_transaction_create():
                 if duplicate_result.data:
                     return ok({
                         "transaction":
-                            duplicate_result
-                            .data[0],
+                            normalize_finance_response(
+                                duplicate_result
+                                .data[0]
+                            ),
 
                         "idempotent_replay":
                             True,
@@ -3997,8 +6061,8 @@ def api_finance_transaction_create():
         return fail(
             "Не вдалося створити фінансову операцію.",
             500,
-        )    
-    
+        )
+
 @app.get(
     "/api/finance/transactions"
 )
@@ -4213,12 +6277,16 @@ def api_finance_transactions_list():
             .select(
                 "id, org_id, "
                 "transaction_type, "
+                "accounting_kind, "
                 "amount, currency, "
                 "payment_method, "
                 "category, description, "
                 "counterparty, document_url, "
                 "source, status, "
                 "cash_shift_id, visit_id, "
+                "financial_account_id, "
+                "expense_document_id, "
+                "reverses_transaction_id, "
                 "created_by, occurred_at, "
                 "created_at, updated_at, "
                 "metadata"
@@ -4242,10 +6310,29 @@ def api_finance_transactions_list():
             )
 
         if status:
-            query = query.eq(
-                "status",
-                status,
-            )
+            if status == "paid":
+                query = (
+                    query
+                    .eq("status", "paid")
+                    .eq(
+                        "document_kind",
+                        "expense",
+                    )
+                )
+            elif status == "reversed":
+                query = query.or_(
+                    "status.eq.reversed,"
+                    "document_kind.eq.reversal"
+                )
+            else:
+                query = (
+                    query
+                    .eq("status", status)
+                    .eq(
+                        "document_kind",
+                        "expense",
+                    )
+                )
 
         if date_from:
             start_at = datetime(
@@ -4346,7 +6433,9 @@ def api_finance_transactions_list():
 
         return ok({
             "items":
-                items,
+                normalize_finance_response(
+                    items
+                ),
 
             "pagination": {
                 "limit":
@@ -4381,8 +6470,8 @@ def api_finance_transactions_list():
         return fail(
             "Не вдалося завантажити фінансові операції.",
             500,
-        )    
-    
+        )
+
 @app.get(
     "/api/finance/expenses/overview"
 )
@@ -4515,7 +6604,9 @@ def api_finance_expenses_overview():
             overview = {}
 
         return ok(
-            overview
+            normalize_finance_response(
+                overview
+            )
         )
 
     except Exception as error:
@@ -4528,7 +6619,1682 @@ def api_finance_expenses_overview():
         return fail(
             "Не вдалося завантажити аналітику витрат.",
             500,
-        )    
+        )
+
+
+@app.get(
+    "/api/finance/financial-accounts"
+)
+def api_financial_accounts_list():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    include_inactive = str(
+        request.args.get(
+            "include_inactive"
+        )
+        or ""
+    ).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+    try:
+        query = (
+            supabase
+            .table("financial_accounts")
+            .select("*")
+            .eq("org_id", current_org)
+        )
+
+        if not include_inactive:
+            query = query.eq(
+                "is_active",
+                True,
+            )
+
+        result = (
+            query
+            .order("is_default", desc=True)
+            .order("name")
+            .execute()
+        )
+
+        return ok({
+            "items": normalize_finance_response(
+                result.data or []
+            ),
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET financial accounts:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити фінансові рахунки.",
+            500,
+        )
+
+
+@app.get(
+    "/api/finance/expense-documents"
+)
+def api_expense_documents_list():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    today = kyiv_today()
+
+    try:
+        date_from = parse_finance_date(
+            request.args.get("date_from")
+            or today.replace(day=1).isoformat(),
+            field_name="Дата від",
+        )
+        date_to = parse_finance_date(
+            request.args.get("date_to")
+            or today.isoformat(),
+            field_name="Дата до",
+        )
+
+        if date_from > date_to:
+            raise FinanceValidationError(
+                "Дата від не може бути пізніше дати до."
+            )
+
+        if (
+            date_to - date_from
+        ).days > 366:
+            raise FinanceValidationError(
+                "Фінансовий період не може перевищувати 366 днів."
+            )
+
+        status = str(
+            request.args.get("status")
+            or ""
+        ).strip().lower()
+
+        if (
+            status
+            and status not in
+            EXPENSE_DOCUMENT_STATUSES
+        ):
+            raise FinanceValidationError(
+                "Некоректний статус документа витрати."
+            )
+
+        category = clean_finance_text(
+            request.args.get("category"),
+            field_name="Категорія",
+            maximum=150,
+        )
+
+        search = safe_finance_search(
+            request.args.get("search")
+        )
+
+        try:
+            limit = int(
+                request.args.get("limit")
+                or 50
+            )
+            offset = int(
+                request.args.get("offset")
+                or 0
+            )
+        except ValueError as error:
+            raise FinanceValidationError(
+                "Некоректні параметри пагінації."
+            ) from error
+
+        limit = min(max(limit, 1), 200)
+        offset = max(offset, 0)
+
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        query = (
+            supabase
+            .table("expense_documents")
+            .select(
+                "*,attachment_rows:finance_documents!finance_documents_expense_fk(id,deleted_at)"
+            )
+            .eq("org_id", current_org)
+            .gte(
+                "expense_date",
+                date_from.isoformat(),
+            )
+            .lte(
+                "expense_date",
+                date_to.isoformat(),
+            )
+        )
+
+        if status:
+            query = query.eq(
+                "status",
+                status,
+            )
+
+        if category:
+            query = query.eq(
+                "category",
+                category,
+            )
+
+        if search:
+            query = query.or_(
+                "category.ilike.%"
+                f"{search}"
+                "%,subcategory.ilike.%"
+                f"{search}"
+                "%,description.ilike.%"
+                f"{search}"
+                "%,counterparty.ilike.%"
+                f"{search}"
+                "%,document_number.ilike.%"
+                f"{search}%"
+            )
+
+        documents_result = (
+            query
+            .order("expense_date", desc=True)
+            .order("created_at", desc=True)
+            .range(
+                offset,
+                offset + limit,
+            )
+            .execute()
+        )
+
+        overview_result = (
+            supabase
+            .rpc(
+                "get_expense_documents_overview",
+                {
+                    "p_org_id": current_org,
+                    "p_date_from": (
+                        date_from.isoformat()
+                    ),
+                    "p_date_to": (
+                        date_to.isoformat()
+                    ),
+                    "p_status": status or None,
+                    "p_category": category,
+                    "p_search": search or None,
+                },
+            )
+            .execute()
+        )
+
+        rows = documents_result.data or []
+        has_more = len(rows) > limit
+        items = rows[:limit]
+        overview = expense_rpc_response(
+            overview_result
+        )
+
+        if not isinstance(overview, dict):
+            overview = {}
+
+        response_data = {
+            "items": [
+                serialize_expense_document(row)
+                for row in items
+            ],
+            "pagination": {
+                "limit": limit,
+                "offset": offset,
+                "returned": len(items),
+                "has_more": has_more,
+                "next_offset": (
+                    offset + len(items)
+                    if has_more
+                    else None
+                ),
+            },
+            "period": {
+                "date_from": date_from.isoformat(),
+                "date_to": date_to.isoformat(),
+            },
+            **overview,
+        }
+
+        return ok(response_data)
+
+    except Exception as error:
+        print(
+            "❌ GET expense documents:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити документи витрат.",
+            500,
+        )
+
+
+@app.get(
+    "/api/finance/expense-documents/<document_id>"
+)
+def api_expense_document_get(document_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        document = expense_document_for_org(
+            document_id,
+            current_org,
+        )
+
+        if not document:
+            return fail(
+                "Документ витрати не знайдено.",
+                404,
+            )
+
+        attachments_result = (
+            supabase
+            .table("finance_documents")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq(
+                "expense_document_id",
+                document_id,
+            )
+            .is_("deleted_at", "null")
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        audit_result = (
+            supabase
+            .table("finance_audit_log")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("entity_type", "expense_document")
+            .eq("entity_id", document_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        return ok({
+            "document": serialize_expense_document(
+                document
+            ),
+            "attachments": (
+                [
+                    serialize_finance_document(
+                        row
+                    )
+                    for row in (
+                        attachments_result.data
+                        or []
+                    )
+                ]
+            ),
+            "audit": normalize_finance_response(
+                audit_result.data or []
+            ),
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET expense document:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити документ витрати.",
+            500,
+        )
+
+
+@app.post(
+    "/api/finance/expense-documents"
+)
+def api_expense_document_create():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        payload = (
+            request.get_json(silent=True)
+            or {}
+        )
+        expense = (
+            parse_expense_document_create_payload(
+                payload
+            )
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "create_expense_document",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_idempotency_key": (
+                        expense[
+                            "idempotency_key"
+                        ]
+                    ),
+                    "p_status": expense["status"],
+                    "p_amount": expense["amount"],
+                    "p_category": (
+                        expense["category"]
+                    ),
+                    "p_subcategory": (
+                        expense["subcategory"]
+                    ),
+                    "p_description": (
+                        expense["description"]
+                    ),
+                    "p_counterparty": (
+                        expense["counterparty"]
+                    ),
+                    "p_document_number": (
+                        expense["document_number"]
+                    ),
+                    "p_document_url": (
+                        expense["document_url"]
+                    ),
+                    "p_expense_date": (
+                        expense["expense_date"]
+                    ),
+                    "p_due_date": (
+                        expense["due_date"]
+                    ),
+                    "p_payment_method": (
+                        expense["payment_method"]
+                    ),
+                    "p_financial_account_id": (
+                        expense[
+                            "financial_account_id"
+                        ]
+                    ),
+                    "p_marketing": (
+                        expense["marketing"]
+                    ),
+                    "p_attachment_ids": [],
+                },
+            )
+            .execute()
+        )
+
+        response_data = expense_rpc_response(
+            result
+        )
+
+        status_code = (
+            200
+            if (
+                isinstance(response_data, dict)
+                and response_data.get(
+                    "idempotent_replay"
+                )
+            )
+            else 201
+        )
+
+        return ok(response_data), status_code
+
+    except Exception as error:
+        print(
+            "❌ POST expense document:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося створити документ витрати.",
+        )
+
+
+@app.patch(
+    "/api/finance/expense-documents/<document_id>"
+)
+def api_expense_document_update(document_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+        payload = (
+            request.get_json(silent=True)
+            or {}
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        existing = expense_document_for_org(
+            document_id,
+            current_org,
+        )
+
+        if not existing:
+            return fail(
+                "Документ витрати не знайдено.",
+                404,
+            )
+
+        try:
+            version, patch_payload = (
+                parse_expense_document_patch(
+                    payload,
+                    existing,
+                )
+            )
+        except FinanceValidationError as error:
+            return fail(str(error), 400)
+
+        result = (
+            supabase
+            .rpc(
+                "update_expense_document",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_document_id": document_id,
+                    "p_version": version,
+                    "p_patch": patch_payload,
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ PATCH expense document:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося оновити документ витрати.",
+        )
+
+
+@app.post(
+    "/api/finance/expense-documents/<document_id>/pay"
+)
+def api_expense_document_pay(document_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+        version = parse_finance_version(
+            payload.get("version")
+        )
+        idempotency_key = parse_finance_uuid(
+            payload.get("idempotency_key"),
+            field_name="Ключ ідемпотентності",
+        )
+        paid_at = parse_finance_datetime(
+            payload.get("paid_at")
+            or payload.get("paid_date")
+            or payload.get("expense_date")
+            or kyiv_today().isoformat(),
+            field_name="Дата оплати",
+        )
+        payment_method = str(
+            payload.get("payment_method")
+            or ""
+        ).strip().lower()
+
+        if payment_method not in FINANCE_PAYMENT_METHODS:
+            raise FinanceValidationError(
+                "Оберіть спосіб оплати."
+            )
+
+        financial_account_id = (
+            parse_finance_uuid(
+                payload.get(
+                    "financial_account_id"
+                ),
+                field_name="Фінансовий рахунок",
+            )
+        )
+
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "pay_expense_document",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_document_id": document_id,
+                    "p_idempotency_key": (
+                        idempotency_key
+                    ),
+                    "p_paid_at": (
+                        paid_at.isoformat()
+                    ),
+                    "p_payment_method": (
+                        payment_method
+                    ),
+                    "p_financial_account_id": (
+                        financial_account_id
+                    ),
+                    "p_version": version,
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST pay expense document:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося оплатити документ витрати.",
+        )
+
+
+@app.post(
+    "/api/finance/expense-documents/<document_id>/cancel"
+)
+def api_expense_document_cancel(document_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+        version = parse_finance_version(
+            payload.get("version")
+        )
+        reason = clean_finance_text(
+            payload.get("reason"),
+            field_name="Причина скасування",
+            maximum=1000,
+            required=True,
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "cancel_expense_document",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_document_id": document_id,
+                    "p_reason": reason,
+                    "p_version": version,
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST cancel expense document:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося скасувати документ витрати.",
+        )
+
+
+@app.post(
+    "/api/finance/expense-documents/<document_id>/reverse"
+)
+def api_expense_document_reverse(document_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+        version = parse_finance_version(
+            payload.get("version")
+        )
+        idempotency_key = parse_finance_uuid(
+            payload.get("idempotency_key"),
+            field_name="Ключ ідемпотентності",
+        )
+        reason = clean_finance_text(
+            payload.get("reason"),
+            field_name="Причина сторно",
+            maximum=1000,
+            required=True,
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "reverse_expense_document",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_document_id": document_id,
+                    "p_idempotency_key": (
+                        idempotency_key
+                    ),
+                    "p_reason": reason,
+                    "p_version": version,
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST reverse expense document:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося сторнувати документ витрати.",
+        )
+
+
+@app.post(
+    "/api/finance/expense-documents/<document_id>/attachments"
+)
+def api_expense_document_attachment_upload(
+    document_id,
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+        upload = validate_finance_document_upload(
+            request.files.get("file")
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    attachment_id = str(uuid.uuid4())
+    storage_path = None
+    storage_uploaded = False
+    storage_cleanup_safe = False
+
+    try:
+        document = expense_document_for_org(
+            document_id,
+            current_org,
+        )
+
+        if not document:
+            return fail(
+                "Документ витрати не знайдено.",
+                404,
+            )
+
+        if str(
+            document.get("status")
+            or ""
+        ).lower() not in {
+            "planned",
+            "paid",
+        }:
+            return fail(
+                "До скасованого або сторнованого документа не можна додавати файли.",
+                409,
+            )
+
+        stored_name = (
+            f"{attachment_id}-"
+            f"{upload['safe_name']}"
+        )
+        storage_path = (
+            f"{current_org}/"
+            f"{document_id}/"
+            f"{stored_name}"
+        )
+
+        (
+            supabase.storage
+            .from_(
+                FINANCE_DOCUMENT_BUCKET
+            )
+            .upload(
+                storage_path,
+                upload["file_bytes"],
+                {
+                    "content-type": (
+                        upload["mime_type"]
+                    ),
+                    "upsert": "false",
+                },
+            )
+        )
+        storage_uploaded = True
+
+        metadata_payload = {
+            "id": attachment_id,
+            "org_id": current_org,
+            "expense_document_id": (
+                document_id
+            ),
+            "storage_bucket": (
+                FINANCE_DOCUMENT_BUCKET
+            ),
+            "storage_path": storage_path,
+            "original_name": (
+                upload["original_name"]
+            ),
+            "mime_type": (
+                upload["mime_type"]
+            ),
+            "size_bytes": (
+                upload["size_bytes"]
+            ),
+            "checksum_sha256": (
+                upload["checksum_sha256"]
+            ),
+            "uploaded_by": user.get("id"),
+        }
+
+        try:
+            metadata_result = (
+                supabase
+                .table("finance_documents")
+                .insert(metadata_payload)
+                .execute()
+            )
+
+            if not metadata_result.data:
+                raise RuntimeError(
+                    "Finance document metadata was not returned."
+                )
+
+            metadata_row = (
+                metadata_result.data[0]
+            )
+
+        except Exception as metadata_error:
+            # POST/PATCH calls are not retried automatically. If the database
+            # committed but its response was lost, deleting the object here
+            # would leave a valid metadata row pointing to a missing file.
+            try:
+                recovery_result = (
+                    supabase
+                    .table("finance_documents")
+                    .select("*")
+                    .eq("org_id", current_org)
+                    .eq(
+                        "expense_document_id",
+                        document_id,
+                    )
+                    .eq("id", attachment_id)
+                    .limit(1)
+                    .execute()
+                )
+            except Exception as recovery_error:
+                print(
+                    "⚠️ expense attachment commit check:",
+                    repr(recovery_error),
+                    flush=True,
+                )
+                raise metadata_error
+
+            if recovery_result.data:
+                metadata_row = (
+                    recovery_result.data[0]
+                )
+            else:
+                storage_cleanup_safe = True
+                raise metadata_error
+
+        return ok({
+            "attachment": (
+                serialize_finance_document(
+                    metadata_row
+                )
+            ),
+        }), 201
+
+    except Exception as error:
+        print(
+            "❌ POST expense attachment:",
+            repr(error),
+            flush=True,
+        )
+
+        if (
+            storage_path
+            and storage_uploaded
+            and storage_cleanup_safe
+        ):
+            try:
+                (
+                    supabase.storage
+                    .from_(
+                        FINANCE_DOCUMENT_BUCKET
+                    )
+                    .remove([storage_path])
+                )
+            except Exception as cleanup_error:
+                print(
+                    "⚠️ expense attachment cleanup:",
+                    repr(cleanup_error),
+                    flush=True,
+                )
+
+        return fail(
+            "Не вдалося зберегти фінансовий документ.",
+            500,
+        )
+
+
+@app.get(
+    "/api/finance/expense-documents/<document_id>/attachments/<attachment_id>/download"
+)
+def api_expense_document_attachment_download(
+    document_id,
+    attachment_id,
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        document_id = parse_finance_uuid(
+            document_id,
+            field_name="ID документа",
+        )
+        attachment_id = parse_finance_uuid(
+            attachment_id,
+            field_name="ID файла",
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        attachment_result = (
+            supabase
+            .table("finance_documents")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq(
+                "expense_document_id",
+                document_id,
+            )
+            .eq("id", attachment_id)
+            .is_("deleted_at", "null")
+            .limit(1)
+            .execute()
+        )
+
+        if not attachment_result.data:
+            return fail(
+                "Файл не знайдено.",
+                404,
+            )
+
+        attachment = attachment_result.data[0]
+        bucket_name = str(
+            attachment.get("storage_bucket")
+            or ""
+        )
+        storage_path = str(
+            attachment.get("storage_path")
+            or ""
+        )
+
+        if (
+            bucket_name
+            != FINANCE_DOCUMENT_BUCKET
+            or not storage_path.startswith(
+                f"{current_org}/{document_id}/"
+            )
+        ):
+            return fail(
+                "Файл не знайдено.",
+                404,
+            )
+
+        expires_in = 300
+        signed_result = (
+            supabase.storage
+            .from_(
+                FINANCE_DOCUMENT_BUCKET
+            )
+            .create_signed_url(
+                storage_path,
+                expires_in,
+            )
+        )
+
+        signed_url = None
+
+        if isinstance(signed_result, dict):
+            signed_url = (
+                signed_result.get("signedURL")
+                or signed_result.get("signedUrl")
+                or signed_result.get(
+                    "signed_url"
+                )
+            )
+
+        if not signed_url:
+            raise RuntimeError(
+                "Signed URL was not returned."
+            )
+
+        return ok({
+            "url": signed_url,
+            "expires_in": expires_in,
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET expense attachment download:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося підготувати захищене посилання на файл.",
+            500,
+        )
+
+
+@app.get(
+    "/api/finance/recurring-expense-templates"
+)
+def api_recurring_expense_templates_list():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    include_inactive = str(
+        request.args.get(
+            "include_inactive"
+        )
+        or ""
+    ).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    search = safe_finance_search(
+        request.args.get("search")
+    )
+
+    try:
+        query = (
+            supabase
+            .table(
+                "recurring_expense_templates"
+            )
+            .select("*")
+            .eq("org_id", current_org)
+        )
+
+        if not include_inactive:
+            query = query.eq(
+                "is_active",
+                True,
+            )
+
+        if search:
+            query = query.or_(
+                "name.ilike.%"
+                f"{search}"
+                "%,category.ilike.%"
+                f"{search}"
+                "%,counterparty.ilike.%"
+                f"{search}%"
+            )
+
+        result = (
+            query
+            .order("next_due_date")
+            .order("name")
+            .execute()
+        )
+
+        return ok({
+            "items": [
+                serialize_recurring_expense_template(
+                    row
+                )
+                for row in (
+                    result.data or []
+                )
+            ],
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET recurring expense templates:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити регулярні витрати.",
+            500,
+        )
+
+
+@app.get(
+    "/api/finance/recurring-expense-templates/<template_id>"
+)
+def api_recurring_expense_template_get(template_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        template_id = parse_finance_uuid(
+            template_id,
+            field_name="ID шаблону",
+        )
+        template = recurring_template_for_org(
+            template_id,
+            current_org,
+        )
+
+        if not template:
+            return fail(
+                "Шаблон регулярної витрати не знайдено.",
+                404,
+            )
+
+        return ok({
+            "template": (
+                serialize_recurring_expense_template(
+                    template
+                )
+            ),
+        })
+
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    except Exception as error:
+        print(
+            "❌ GET recurring expense template:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити шаблон регулярної витрати.",
+            500,
+        )
+
+
+@app.post(
+    "/api/finance/recurring-expense-templates"
+)
+def api_recurring_expense_template_create():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        idempotency_key = parse_finance_uuid(
+            payload.get("idempotency_key"),
+            field_name="Ключ ідемпотентності",
+        )
+        template_payload = dict(payload)
+        template_payload.pop(
+            "idempotency_key",
+            None,
+        )
+        template_payload = (
+            parse_recurring_template_payload(
+                template_payload
+            )
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "create_recurring_expense_template",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_idempotency_key": (
+                        idempotency_key
+                    ),
+                    "p_template": template_payload,
+                },
+            )
+            .execute()
+        )
+        response_data = expense_rpc_response(
+            result
+        )
+        status_code = (
+            200
+            if (
+                isinstance(response_data, dict)
+                and response_data.get(
+                    "idempotent_replay"
+                )
+            )
+            else 201
+        )
+
+        return ok(response_data), status_code
+
+    except Exception as error:
+        print(
+            "❌ POST recurring expense template:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося створити шаблон регулярної витрати.",
+        )
+
+
+@app.patch(
+    "/api/finance/recurring-expense-templates/<template_id>"
+)
+def api_recurring_expense_template_update(template_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        template_id = parse_finance_uuid(
+            template_id,
+            field_name="ID шаблону",
+        )
+        version = parse_finance_version(
+            payload.get("version")
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        existing = recurring_template_for_org(
+            template_id,
+            current_org,
+        )
+
+        if not existing:
+            return fail(
+                "Шаблон регулярної витрати не знайдено.",
+                404,
+            )
+
+        patch_payload = dict(payload)
+        patch_payload.pop("version", None)
+
+        try:
+            patch_payload = (
+                parse_recurring_template_payload(
+                    patch_payload,
+                    partial=True,
+                    existing=existing,
+                )
+            )
+        except FinanceValidationError as error:
+            return fail(str(error), 400)
+
+        result = (
+            supabase
+            .rpc(
+                "update_recurring_expense_template",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_template_id": template_id,
+                    "p_version": version,
+                    "p_patch": patch_payload,
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ PATCH recurring expense template:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося оновити шаблон регулярної витрати.",
+        )
+
+
+@app.delete(
+    "/api/finance/recurring-expense-templates/<template_id>"
+)
+def api_recurring_expense_template_deactivate(template_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        template_id = parse_finance_uuid(
+            template_id,
+            field_name="ID шаблону",
+        )
+        version = parse_finance_version(
+            payload.get("version")
+        )
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "update_recurring_expense_template",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_template_id": template_id,
+                    "p_version": version,
+                    "p_patch": {
+                        "is_active": False,
+                    },
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ DELETE recurring expense template:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося деактивувати шаблон регулярної витрати.",
+        )
+
+
+@app.post(
+    "/api/finance/recurring-expense-templates/<template_id>/confirm"
+)
+def api_recurring_expense_template_confirm(template_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    payload = (
+        request.get_json(silent=True)
+        or {}
+    )
+
+    try:
+        template_id = parse_finance_uuid(
+            template_id,
+            field_name="ID шаблону",
+        )
+        idempotency_key = parse_finance_uuid(
+            payload.get("idempotency_key"),
+            field_name="Ключ ідемпотентності",
+        )
+        expense_date = parse_finance_date(
+            payload.get("expense_date"),
+            field_name="Дата витрати",
+            required=False,
+        )
+        due_date = parse_finance_date(
+            payload.get("due_date"),
+            field_name="Строк оплати",
+            required=False,
+        )
+
+        if (
+            expense_date
+            and due_date
+            and due_date < expense_date
+        ):
+            raise FinanceValidationError(
+                "Строк оплати не може бути раніше дати витрати."
+            )
+
+    except FinanceValidationError as error:
+        return fail(str(error), 400)
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "confirm_recurring_expense_template",
+                {
+                    "p_org_id": current_org,
+                    "p_user_id": user.get("id"),
+                    "p_template_id": template_id,
+                    "p_idempotency_key": (
+                        idempotency_key
+                    ),
+                    "p_expense_date": (
+                        expense_date.isoformat()
+                        if expense_date
+                        else None
+                    ),
+                    "p_due_date": (
+                        due_date.isoformat()
+                        if due_date
+                        else None
+                    ),
+                },
+            )
+            .execute()
+        )
+
+        return ok(
+            expense_rpc_response(result)
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST confirm recurring expense template:",
+            repr(error),
+            flush=True,
+        )
+
+        return expense_rpc_error_response(
+            error,
+            "Не вдалося підтвердити регулярну витрату.",
+        )
     
 @app.get(
     "/api/finance/suppliers"
@@ -6133,27 +9899,53 @@ def api_finance_purchase_create():
             flush=True,
         )
 
-        known_validation_errors = (
-            "Supplier not found",
-            "Supplier is inactive",
-            "Purchase must contain",
-            "Invalid purchase item",
-            "Stock item not found",
-            "Discount cannot exceed",
-            "Expected date",
-            "Unsupported currency",
+        safe_validation_errors = (
+            (
+                "supplier not found",
+                "Постачальника не знайдено.",
+            ),
+            (
+                "supplier is inactive",
+                "Неактивного постачальника не можна вибрати для закупівлі.",
+            ),
+            (
+                "purchase must contain",
+                "Додайте хоча б одну позицію закупівлі.",
+            ),
+            (
+                "invalid purchase item",
+                "Перевірте позиції закупівлі.",
+            ),
+            (
+                "stock item not found",
+                "Один із товарів не знайдено на складі.",
+            ),
+            (
+                "discount cannot exceed",
+                "Знижка не може перевищувати суму закупівлі.",
+            ),
+            (
+                "expected date",
+                "Перевірте очікувану дату поставки.",
+            ),
+            (
+                "unsupported currency",
+                "Непідтримувана валюта закупівлі.",
+            ),
         )
 
-        if any(
-            message.lower()
-            in error_text.lower()
-            for message
-            in known_validation_errors
-        ):
-            return fail(
-                error_text,
-                400,
-            )
+        for (
+            error_marker,
+            safe_message,
+        ) in safe_validation_errors:
+            if (
+                error_marker
+                in error_text.lower()
+            ):
+                return fail(
+                    safe_message,
+                    400,
+                )
 
         return fail(
             "Не вдалося створити закупівлю.",
@@ -6527,7 +10319,6 @@ def api_services_update():
 
 
 @app.delete("/api/services")
-@app.delete("/api/services")
 def api_services_delete():
     user, auth_error = (
         owner_or_admin_required()
@@ -6761,8 +10552,18 @@ def api_staff():
             .execute()
         )
 
+        rows = [
+            serialize_staff_for_role(
+                row,
+                role,
+            )
+            for row in (
+                result.data or []
+            )
+        ]
+
         return ok(
-            result.data or []
+            rows
         )
 
     except Exception as error:
@@ -6787,6 +10588,21 @@ def api_create_staff():
 
     d = request.get_json(silent=True) or {}
 
+    role = normalize_role(
+        user.get("role")
+    )
+
+    if (
+        role != "owner"
+        and requested_staff_compensation_fields(
+            d
+        )
+    ):
+        return fail(
+            "Only the clinic owner can manage compensation fields",
+            403,
+        )
+
     name = (
         d.get("name") or ""
     ).strip()
@@ -6809,12 +10625,28 @@ def api_create_staff():
         "color": d.get("color") or "#7C5CFF",
         "phone": d.get("phone"),
         "specialization": d.get("specialization"),
-        "shift_rate": d.get("shift_rate") or 0,
-        "percent_rate": d.get("percent_rate") or 0,
-        "bonus_rate": d.get("bonus_rate") or 0,
         "note": d.get("note"),
         "is_active": True,
     }
+
+    if role == "owner":
+        payload.update({
+            "shift_rate":
+                d.get("shift_rate")
+                or 0,
+
+            "percent_rate":
+                d.get("percent_rate")
+                or 0,
+
+            "bonus_rate":
+                d.get("bonus_rate")
+                or 0,
+
+            "visit_percent":
+                d.get("visit_percent")
+                or 0,
+        })
 
     res = (
         supabase
@@ -6829,7 +10661,12 @@ def api_create_staff():
         else payload
     )
 
-    return ok(row)
+    return ok(
+        serialize_staff_for_role(
+            row,
+            role,
+        )
+    )
 
 @app.put("/api/staff/<staff_id>")
 def api_update_staff(staff_id):
@@ -6848,6 +10685,21 @@ def api_update_staff(staff_id):
 
     d = request.get_json(silent=True) or {}
 
+    role = normalize_role(
+        user.get("role")
+    )
+
+    if (
+        role != "owner"
+        and requested_staff_compensation_fields(
+            d
+        )
+    ):
+        return fail(
+            "Only the clinic owner can manage compensation fields",
+            403,
+        )
+
     payload = {
         "name": d.get("name"),
         "role": d.get("role"),
@@ -6855,13 +10707,19 @@ def api_update_staff(staff_id):
         "color": d.get("color"),
         "phone": d.get("phone"),
         "specialization": d.get("specialization"),
-        "shift_rate": d.get("shift_rate"),
-        "percent_rate": d.get("percent_rate"),
-        "bonus_rate": d.get("bonus_rate"),
         "note": d.get("note"),
         "is_active": d.get("is_active"),
         "skills": d.get("skills"),
     }
+
+    if role == "owner":
+        for field in (
+            STAFF_COMPENSATION_INPUT_FIELDS
+        ):
+            if field in d:
+                payload[field] = (
+                    d.get(field)
+                )
 
     payload = {
         key: value
@@ -6888,7 +10746,12 @@ def api_update_staff(staff_id):
         else payload
     )
 
-    return ok(row)
+    return ok(
+        serialize_staff_for_role(
+            row,
+            role,
+        )
+    )
 @app.get("/api/staff/<staff_id>/dashboard")
 def api_staff_dashboard(staff_id):
     user, auth_error = (
@@ -7662,7 +11525,7 @@ def api_delete_staff_adjustment(
     adjustment_id,
 ):
     user, auth_error = (
-        owner_or_admin_required()
+        owner_required()
     )
 
     if auth_error:
@@ -7681,8 +11544,17 @@ def api_delete_staff_adjustment(
 
         return ok(True)
 
-    except Exception as e:
-        return fail(str(e), 500)
+    except Exception as error:
+        print(
+            "❌ DELETE staff adjustment:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Cannot delete staff adjustment",
+            500,
+        )
 
 def get_current_season_key():
     now = datetime.now(timezone.utc)
@@ -8710,7 +12582,9 @@ def enrich_hospitalizations(rows):
         staff_res = (
             supabase
             .table("staff")
-            .select("*")
+            .select(
+                "id, name, role, color"
+            )
             .eq("org_id", current_org)
             .in_("id", doctor_ids)
             .execute()
