@@ -31635,6 +31635,151 @@ body :is(
     0 0 20px var(--module-accent-glow) !important;
 }
 
+#staffDrawer .staffSpecializationSelect {
+  position: relative;
+  width: 100%;
+}
+
+#staffDrawer .staffSpecializationToggle {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--module-border);
+  border-radius: 12px;
+  background: var(--module-input);
+  color: var(--module-text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+#staffDrawer .staffSpecializationSelect.open .staffSpecializationToggle {
+  border-color: var(--module-accent);
+  box-shadow:
+    0 0 0 3px var(--module-accent-soft),
+    0 0 20px var(--module-accent-glow);
+}
+
+#staffDrawer .staffSpecializationSummary {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+#staffDrawer .staffSpecializationPlaceholder {
+  color: var(--module-text-muted);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+#staffDrawer .staffSpecializationChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--specialization-color) 48%, transparent);
+  background: color-mix(in srgb, var(--specialization-color) 16%, transparent);
+  color: var(--module-text);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+#staffDrawer .staffSpecializationChevron {
+  flex: 0 0 auto;
+  color: var(--module-text-muted);
+  transition: transform 0.18s ease;
+}
+
+#staffDrawer .staffSpecializationSelect.open .staffSpecializationChevron {
+  transform: rotate(180deg);
+}
+
+#staffDrawer .staffSpecializationMenu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 230px;
+  padding: 8px;
+  overflow-y: auto;
+  border: 1px solid var(--module-border-strong);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 100% 0, var(--module-accent-soft), transparent 45%),
+    var(--module-surface-1);
+  box-shadow:
+    0 22px 55px var(--module-shadow),
+    0 0 24px var(--module-accent-glow);
+  backdrop-filter: blur(22px);
+}
+
+#staffDrawer .staffSpecializationOption {
+  min-height: 42px;
+  padding: 9px 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--module-text-soft);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+#staffDrawer .staffSpecializationOption:hover,
+#staffDrawer .staffSpecializationOption:has(input:checked) {
+  border-color: var(--module-border);
+  background: var(--module-accent-soft);
+}
+
+#staffDrawer .staffSpecializationOption input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#staffDrawer .staffSpecDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px currentColor;
+}
+
+#staffDrawer .staffSpecializationOptionName {
+  font-size: 14px;
+  font-weight: 780;
+}
+
+#staffDrawer .staffSpecializationCheckmark {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--module-border);
+  border-radius: 7px;
+  color: transparent;
+  background: var(--module-input);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+#staffDrawer .staffSpecializationOption input:checked ~ .staffSpecializationCheckmark {
+  border-color: var(--module-accent);
+  background: var(--module-accent);
+  color: #fff;
+  box-shadow: 0 0 14px var(--module-accent-glow);
+}
+
 body :is(
   .pugVisitIcon,
   .hospitalAdmissionSectionTitle > span,

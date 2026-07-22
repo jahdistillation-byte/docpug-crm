@@ -874,7 +874,38 @@
 
       <div>
         <div style="font-size:.8rem;opacity:.5;margin-bottom:6px">Спеціалізація</div>
-        <input id="staffSpecialization" class="premium-input" style="width:100%" placeholder="Хірург, терапевт...">
+        <div
+          class="staffSpecializationSelect"
+          id="staffSpecializationSelect"
+        >
+          <button
+            class="staffSpecializationToggle"
+            id="staffSpecializationToggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="staffSpecsBox"
+          >
+            <span
+              class="staffSpecializationSummary"
+              id="staffSpecializationSummary"
+            >
+              Оберіть напрями
+            </span>
+            <span
+              class="staffSpecializationChevron"
+              aria-hidden="true"
+            >
+              ▾
+            </span>
+          </button>
+
+          <div
+            class="staffSpecializationMenu"
+            id="staffSpecsBox"
+            aria-hidden="true"
+            hidden
+          ></div>
+        </div>
       </div>
 
       <div>
@@ -904,10 +935,6 @@
         <textarea id="staffNote" class="premium-input" style="width:100%;resize:vertical" rows="2"></textarea>
       </div>
 
-      <div>
-        <div style="font-size:.8rem;opacity:.5;margin-bottom:8px">Напрями</div>
-        <div id="staffSpecsBox"></div>
-      </div>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">

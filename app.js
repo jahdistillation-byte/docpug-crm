@@ -38657,15 +38657,87 @@ async function renderStaffSpecsBox(selectedIds = []) {
 
   box.innerHTML = specs.length
     ? specs.map((s) => `
-      <label class="staffSpecCheck">
+      <label class="staffSpecializationOption">
         <input type="checkbox" data-staff-spec value="${escapeHtml(String(s.id))}" ${selected.has(String(s.id)) ? "checked" : ""}>
         <span class="staffSpecDot" style="background:${escapeHtml(s.color || "#7C5CFF")}"></span>
-        <span>${escapeHtml(s.name || "Напрям")}</span>
+        <span class="staffSpecializationOptionName">${escapeHtml(s.name || "Напрям")}</span>
+        <span class="staffSpecializationCheckmark">✓</span>
       </label>
     `).join("")
     : `<div class="hint">Спочатку додай напрями клініки вище.</div>`;
-    
-    
+
+  const toggle = $("#staffSpecializationToggle");
+  const select = $("#staffSpecializationSelect");
+
+  const updateSummary = () => {
+    const summary = $("#staffSpecializationSummary");
+    if (!summary) return;
+
+    const checked = Array.from(
+      box.querySelectorAll(
+        "[data-staff-spec]:checked"
+      )
+    );
+
+    summary.innerHTML = checked.length
+      ? checked
+          .map((input) => {
+            const option = input.closest(
+              ".staffSpecializationOption"
+            );
+
+            const name =
+              option?.querySelector(
+                ".staffSpecializationOptionName"
+              )?.textContent?.trim() ||
+              "Напрям";
+
+            const color =
+              option?.querySelector(
+                ".staffSpecDot"
+              )?.style?.background ||
+              "#7C5CFF";
+
+            return `
+              <span
+                class="staffSpecializationChip"
+                style="--specialization-color:${escapeHtml(
+                  color
+                )}"
+              >
+                ${escapeHtml(name)}
+              </span>
+            `;
+          })
+          .join("")
+      : `<span class="staffSpecializationPlaceholder">Оберіть напрями</span>`;
+  };
+
+  const setOpen = (isOpen) => {
+    box.hidden = !isOpen;
+    box.setAttribute(
+      "aria-hidden",
+      String(!isOpen)
+    );
+    toggle?.setAttribute(
+      "aria-expanded",
+      String(isOpen)
+    );
+    select?.classList.toggle(
+      "open",
+      isOpen
+    );
+  };
+
+  if (toggle) {
+    toggle.onclick = () =>
+      setOpen(box.hidden);
+  }
+
+  box.onchange = updateSummary;
+
+  setOpen(false);
+  updateSummary();
 }
 async function openCreateStaffModal() {
   const drawer =
@@ -38715,15 +38787,6 @@ async function openCreateStaffModal() {
 
   if (roleInput) {
     roleInput.value = "vet";
-  }
-
-  const specializationInput =
-    document.getElementById(
-      "staffSpecialization"
-    );
-
-  if (specializationInput) {
-    specializationInput.value = "";
   }
 
   const phoneInput =
@@ -38795,7 +38858,6 @@ async function openEditStaffModal(staffRow) {
   $("#staffId").value = staffRow.id || "";
   $("#staffName").value = staffRow.name || "";
   $("#staffRole").value = staffRow.role || "vet";
-  $("#staffSpecialization").value = staffRow.specialization || "";
   $("#staffPhone").value = staffRow.phone || "";
   $("#staffShiftRate").value = staffRow.shift_rate || 0;
   $("#staffPercentRate").value = staffRow.percent_rate || 0;
@@ -38816,12 +38878,26 @@ $$("[data-close-staff]").forEach((btn) => {
 
 $("#staffSave")?.addEventListener("click", async () => {
   const staffId = ($("#staffId").value || "").trim();
-  const specializationIds = $$("[data-staff-spec]:checked").map((el) => el.value);
+  const selectedSpecializations = $$("[data-staff-spec]:checked");
+  const specializationIds = selectedSpecializations.map((el) => el.value);
+  const specializationNames = selectedSpecializations
+    .map(
+      (input) =>
+        input
+          .closest(
+            ".staffSpecializationOption"
+          )
+          ?.querySelector(
+            ".staffSpecializationOptionName"
+          )
+          ?.textContent?.trim() || ""
+    )
+    .filter(Boolean);
 
   const payload = {
     name: $("#staffName").value.trim(),
     role: $("#staffRole").value,
-    specialization: $("#staffSpecialization").value.trim(),
+    specialization: specializationNames.join(", "),
     specialization_ids: specializationIds,
     phone: $("#staffPhone").value.trim(),
     shift_rate: Number($("#staffShiftRate").value || 0),
