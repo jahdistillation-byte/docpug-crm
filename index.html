@@ -755,9 +755,20 @@
             </label>
 
             <label class="pugVisitField">
-              <span>Порода</span>
-              <input class="pugVisitInput" id="visitNewPetBreed" placeholder="Порода">
-            </label>
+  <span id="visitNewPetBreedLabel">Порода</span>
+
+  <input
+    class="pugVisitInput"
+    id="visitNewPetBreed"
+    type="text"
+    list="visitNewPetBreedList"
+    placeholder="Спочатку оберіть вид"
+    autocomplete="off"
+    disabled
+  >
+
+  <datalist id="visitNewPetBreedList"></datalist>
+</label>
 
             <label class="pugVisitField">
               <span>Вік</span>
