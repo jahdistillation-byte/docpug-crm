@@ -36,6 +36,118 @@
     --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
+/* =========================================================
+   FINANCE — THEME BRIDGE
+   Keeps every finance workspace in sync with the clinic theme.
+   ========================================================= */
+
+:root,
+body[data-theme="purple"] {
+  --finance-accent: #a855f7;
+  --finance-accent-2: #c888ff;
+  --finance-accent-soft: rgba(168, 85, 247, 0.16);
+  --finance-accent-glow: rgba(168, 85, 247, 0.28);
+  --finance-surface-1: rgba(34, 20, 58, 0.97);
+  --finance-surface-2: rgba(13, 8, 26, 0.98);
+  --finance-surface-soft: rgba(255, 255, 255, 0.025);
+  --finance-surface-hover: rgba(255, 255, 255, 0.045);
+  --finance-input: rgba(7, 4, 15, 0.62);
+  --finance-border: rgba(255, 255, 255, 0.085);
+  --finance-border-strong: rgba(184, 101, 255, 0.24);
+  --finance-text: #ffffff;
+  --finance-text-soft: rgba(255, 255, 255, 0.7);
+  --finance-text-muted: rgba(255, 255, 255, 0.44);
+  --finance-text-faint: rgba(255, 255, 255, 0.28);
+  --finance-overlay: rgba(3, 2, 10, 0.84);
+  --finance-shadow: rgba(0, 0, 0, 0.34);
+  --finance-color-scheme: dark;
+}
+
+body[data-theme="black"] {
+  --finance-accent: #f43f5e;
+  --finance-accent-2: #fb7185;
+  --finance-accent-soft: rgba(244, 63, 94, 0.14);
+  --finance-accent-glow: rgba(244, 63, 94, 0.25);
+  --finance-surface-1: rgba(19, 19, 22, 0.98);
+  --finance-surface-2: rgba(5, 5, 7, 0.99);
+  --finance-surface-soft: rgba(255, 255, 255, 0.025);
+  --finance-surface-hover: rgba(255, 255, 255, 0.05);
+  --finance-input: rgba(0, 0, 0, 0.66);
+  --finance-border: rgba(255, 255, 255, 0.1);
+  --finance-border-strong: rgba(244, 63, 94, 0.27);
+  --finance-text: #f8f8fa;
+  --finance-text-soft: rgba(255, 255, 255, 0.72);
+  --finance-text-muted: rgba(255, 255, 255, 0.45);
+  --finance-text-faint: rgba(255, 255, 255, 0.28);
+  --finance-overlay: rgba(0, 0, 0, 0.88);
+  --finance-shadow: rgba(0, 0, 0, 0.56);
+  --finance-color-scheme: dark;
+}
+
+body[data-theme="blue"] {
+  --finance-accent: #06b6d4;
+  --finance-accent-2: #38d4ed;
+  --finance-accent-soft: rgba(6, 182, 212, 0.15);
+  --finance-accent-glow: rgba(6, 182, 212, 0.26);
+  --finance-surface-1: rgba(7, 36, 56, 0.97);
+  --finance-surface-2: rgba(2, 13, 24, 0.99);
+  --finance-surface-soft: rgba(88, 203, 232, 0.035);
+  --finance-surface-hover: rgba(88, 203, 232, 0.065);
+  --finance-input: rgba(2, 14, 26, 0.68);
+  --finance-border: rgba(108, 207, 232, 0.13);
+  --finance-border-strong: rgba(6, 182, 212, 0.3);
+  --finance-text: #f4fcff;
+  --finance-text-soft: rgba(226, 247, 255, 0.73);
+  --finance-text-muted: rgba(201, 232, 242, 0.47);
+  --finance-text-faint: rgba(185, 221, 233, 0.3);
+  --finance-overlay: rgba(1, 9, 17, 0.87);
+  --finance-shadow: rgba(0, 9, 20, 0.48);
+  --finance-color-scheme: dark;
+}
+
+body[data-theme="green"] {
+  --finance-accent: #10b981;
+  --finance-accent-2: #4adea7;
+  --finance-accent-soft: rgba(16, 185, 129, 0.14);
+  --finance-accent-glow: rgba(16, 185, 129, 0.25);
+  --finance-surface-1: rgba(7, 38, 29, 0.97);
+  --finance-surface-2: rgba(2, 15, 11, 0.99);
+  --finance-surface-soft: rgba(82, 214, 160, 0.032);
+  --finance-surface-hover: rgba(82, 214, 160, 0.06);
+  --finance-input: rgba(2, 17, 12, 0.68);
+  --finance-border: rgba(111, 218, 173, 0.13);
+  --finance-border-strong: rgba(16, 185, 129, 0.3);
+  --finance-text: #f3fff9;
+  --finance-text-soft: rgba(226, 250, 238, 0.73);
+  --finance-text-muted: rgba(202, 237, 220, 0.47);
+  --finance-text-faint: rgba(188, 225, 207, 0.3);
+  --finance-overlay: rgba(1, 11, 7, 0.87);
+  --finance-shadow: rgba(0, 18, 10, 0.46);
+  --finance-color-scheme: dark;
+}
+
+body[data-theme="white"] {
+  --finance-accent: #5856d6;
+  --finance-accent-2: #7c6ee6;
+  --finance-accent-soft: rgba(88, 86, 214, 0.1);
+  --finance-accent-glow: rgba(88, 86, 214, 0.17);
+  --finance-surface-1: rgba(255, 255, 255, 0.97);
+  --finance-surface-2: rgba(244, 245, 251, 0.98);
+  --finance-surface-soft: rgba(41, 38, 62, 0.035);
+  --finance-surface-hover: rgba(88, 86, 214, 0.065);
+  --finance-input: rgba(255, 255, 255, 0.88);
+  --finance-border: rgba(38, 34, 61, 0.11);
+  --finance-border-strong: rgba(88, 86, 214, 0.24);
+  --finance-text: #1c1c1e;
+  --finance-text-soft: rgba(35, 33, 48, 0.72);
+  --finance-text-muted: rgba(49, 46, 65, 0.5);
+  --finance-text-faint: rgba(58, 54, 75, 0.35);
+  --finance-overlay: rgba(27, 25, 40, 0.48);
+  --finance-shadow: rgba(48, 43, 74, 0.14);
+  --finance-color-scheme: light;
+}
+
+
 /* --- 2. БАЗОВЫЕ СТИЛИ И СБРОС --- */
 * {
     margin: 0;
@@ -30889,4 +31001,285 @@ body[data-theme="white"] .financeExpenseFileField small {
     grid-column: 2;
     justify-self: start;
   }
+}
+
+/* Finance theme bridge: late-cascade application rules. */
+body .financeDashboard,
+body .financeExpenseModal,
+body .financeExpenseDetailsModal,
+body .financeExpenseActionModal,
+body .financeExpenseDocumentModal,
+body .financeRecurringTemplateModal,
+body .financePurchaseCreateModal,
+body .financePurchaseDetailsModal,
+body .financePurchaseReceiveModal,
+body .financeSupplierCreateModal {
+  color: var(--finance-text);
+}
+
+body .financeHero,
+body .financeExpensesHero,
+body .financeKpiCard,
+body .financePanel,
+body .financeInsightPanel,
+body .financeSectionNavigation,
+body .financeOperationsFilters,
+body .financeExpenseWorkspaceTabs,
+body .financeExpenseKpi,
+body .financeExpenseCategory,
+body .financeExpenseCounterparty,
+body .financeExpenseDocumentCard,
+body .financeRecurringTemplateCard,
+body .financeSupplierWorkspaceCard,
+body .financePurchaseCard,
+body .financePurchaseWorkspacePanel {
+  border-color: var(--finance-border);
+  background:
+    radial-gradient(circle at 100% 0, var(--finance-accent-soft), transparent 44%),
+    linear-gradient(145deg, var(--finance-surface-1), var(--finance-surface-2));
+  box-shadow:
+    0 20px 55px var(--finance-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+body .financeHero,
+body .financeExpensesHero {
+  border-color: var(--finance-border-strong);
+  background:
+    radial-gradient(circle at 82% 10%, var(--finance-accent-soft), transparent 36%),
+    radial-gradient(circle at 5% 100%, var(--finance-accent-soft), transparent 42%),
+    linear-gradient(140deg, var(--finance-surface-1), var(--finance-surface-2));
+}
+
+body :is(
+  .financeEyebrow,
+  .financePanelHead span,
+  .financeInsightPanel > div:last-child > span,
+  .financeExpenseHeader > div:nth-child(2) > span,
+  .financeExpenseSubsectionHead > span
+) {
+  color: var(--finance-accent);
+}
+
+body :is(
+  .financePanelHead > strong,
+  .financeChartEmpty > span,
+  .financeExpenseTotalValue
+) {
+  color: var(--finance-accent-2);
+}
+
+body .financePanelHead > b,
+body .financeInsightIcon,
+body .financeExpenseKpiIcon,
+body .financeExpenseCategoryIcon,
+body .financeSupplierWorkspaceIcon,
+body .financePurchaseCardIcon {
+  border-color: var(--finance-border-strong);
+  background: var(--finance-accent-soft);
+  color: var(--finance-accent-2);
+}
+
+body .financePresetSwitch,
+body .financeDateRange,
+body .financeDebtNumbers > div,
+body .financeTransactionRow,
+body .financeOperationCard,
+body .financeTransactionsEmpty,
+body .financeExpenseDetailsSummary,
+body .financePurchaseDetailsItem,
+body .financePurchaseReceiveItem {
+  border-color: var(--finance-border);
+  background: var(--finance-surface-soft);
+}
+
+body .financeTransactionRow:hover,
+body .financeOperationCard:hover,
+body .financePurchaseCard:hover,
+body .financeExpenseDocumentCard:hover {
+  background: var(--finance-surface-hover);
+}
+
+body .financePresetSwitch button.active,
+body .financeSectionButton.active,
+body .financeOperationsApply,
+body .financeExpenseWorkspaceTabs button.active,
+body .financeExpensesJournalButton,
+body .financePurchaseCreateSubmit,
+body .financePurchaseReceiveSubmit,
+body .financeSupplierCreateSubmit {
+  border-color: color-mix(in srgb, var(--finance-accent) 62%, white);
+  background: linear-gradient(
+    135deg,
+    var(--finance-accent),
+    color-mix(in srgb, var(--finance-accent) 72%, var(--finance-surface-2))
+  );
+  box-shadow: 0 10px 28px var(--finance-accent-glow);
+  color: #fff;
+}
+
+body .financeSectionButton,
+body .financeSectionButton span,
+body .financeSectionButton small,
+body .financePresetSwitch button {
+  color: var(--finance-text-muted);
+}
+
+body .financeSectionButton span,
+body .financeSectionButton small {
+  background: var(--finance-surface-soft);
+}
+
+body .financeDateRange input,
+body .financeOperationsFilters input,
+body .financeOperationsFilters select,
+body .financeExpenseField input,
+body .financeExpenseField select,
+body .financeExpenseField textarea,
+body .financeExpenseDocumentFilters input,
+body .financeExpenseDocumentFilters select,
+body .financeExpenseDetailsFields input,
+body .financeExpenseDetailsFields select,
+body .financeExpenseDetailsFields textarea,
+body .financePurchaseCreateModal input,
+body .financePurchaseCreateModal select,
+body .financePurchaseCreateModal textarea,
+body .financePurchaseReceiveModal input,
+body .financeSupplierCreateModal input,
+body .financeSupplierCreateModal select,
+body .financeSupplierCreateModal textarea {
+  border-color: var(--finance-border);
+  background: var(--finance-input);
+  color: var(--finance-text-soft);
+  color-scheme: var(--finance-color-scheme);
+}
+
+body .financeDateRange button {
+  border-color: var(--finance-border-strong);
+  background: var(--finance-accent-soft);
+  color: var(--finance-accent-2);
+}
+
+body .financeChartLine,
+body .financeNetLine {
+  stroke: var(--finance-accent);
+  filter: drop-shadow(0 6px 9px var(--finance-accent-glow));
+}
+
+body .financeChartPoints circle,
+body .financeNetPoint {
+  fill: var(--finance-surface-2);
+  stroke: var(--finance-accent-2);
+}
+
+body .financeCashflowLegend i.is-net,
+body .financeMethodsLegend i.card {
+  background: var(--finance-accent);
+  box-shadow: 0 0 10px var(--finance-accent-glow);
+}
+
+body .financeDonut {
+  background: conic-gradient(
+    #63e1a0 0 var(--cash),
+    var(--finance-accent) var(--cash) var(--card),
+    #55b9ff var(--card) 100%
+  );
+}
+
+body .financeDonut::before {
+  background: var(--finance-surface-2);
+}
+
+body .financeProgress i,
+body .financeExpenseCategoryProgress i,
+body .financePurchaseProgress i {
+  background: linear-gradient(90deg, #6fe5a6, var(--finance-accent));
+}
+
+body .financeExpenseBackdrop,
+body .financeExpenseDetailsOverlay,
+body .financeExpenseActionOverlay,
+body .financeExpenseDocumentOverlay,
+body .financePurchaseCreateOverlay,
+body .financePurchaseDetailsOverlay,
+body .financeSupplierCreateOverlay {
+  background:
+    radial-gradient(circle at 50% 20%, var(--finance-accent-soft), transparent 40%),
+    var(--finance-overlay);
+}
+
+body .financeExpenseModal,
+body .financeExpenseDetailsModal,
+body .financeExpenseActionModal,
+body .financeExpenseDocumentModal,
+body .financeRecurringTemplateModal,
+body .financePurchaseCreateModal,
+body .financePurchaseDetailsModal,
+body .financePurchaseReceiveModal,
+body .financeSupplierCreateModal {
+  border-color: var(--finance-border-strong);
+  background:
+    radial-gradient(circle at 0 0, var(--finance-accent-soft), transparent 36%),
+    linear-gradient(145deg, var(--finance-surface-1), var(--finance-surface-2));
+  box-shadow: 0 40px 105px var(--finance-shadow);
+}
+
+body :is(
+  .financeHero p,
+  .financeChartEmpty p,
+  .financeInsightPanel p,
+  .financeExpenseHeader p,
+  .financeExpenseHint p,
+  .financeOperationTitle span,
+  .financeOperationContent p,
+  .financeOperationContent small,
+  .financeExpensesPagination > span,
+  .financePurchasesPagination > span
+) {
+  color: var(--finance-text-muted);
+}
+
+body :is(
+  .financeKpiCard > span,
+  .financeKpiCard > small,
+  .financeChartLabels,
+  .financeCashflowLegend span,
+  .financeCashflowAxisLabel,
+  .financeCashflowDateLabel,
+  .financeMethodsLegend span,
+  .financeDebtNumbers span,
+  .financeTransactionMain span,
+  .financeTransactionAmount span,
+  .financeOperationsFilters label > span,
+  .financeOperationsPagination > span
+) {
+  color: var(--finance-text-faint);
+  fill: var(--finance-text-faint);
+}
+
+body[data-theme="white"] .financeDashboard :is(h1, h2, h3),
+body[data-theme="white"] .financeTransactionMain strong,
+body[data-theme="white"] .financeOperationTitle strong,
+body[data-theme="white"] .financeOperationContent p b,
+body[data-theme="white"] .financeOperationAmount > strong,
+body[data-theme="white"] .financeTransactionsEmpty strong,
+body[data-theme="white"] :is(
+  .financeExpenseModal,
+  .financeExpenseDetailsModal,
+  .financeExpenseActionModal,
+  .financeExpenseDocumentModal,
+  .financePurchaseCreateModal,
+  .financePurchaseDetailsModal,
+  .financePurchaseReceiveModal,
+  .financeSupplierCreateModal
+) :is(h1, h2, h3, strong) {
+  color: var(--finance-text);
+}
+
+body[data-theme="white"] .financeKpiCard.is-profit,
+body[data-theme="blue"] .financeKpiCard.is-profit,
+body[data-theme="green"] .financeKpiCard.is-profit,
+body[data-theme="black"] .financeKpiCard.is-profit {
+  --finance-kpi-color: var(--finance-accent-2);
+  --finance-kpi-glow: var(--finance-accent-soft);
 }
