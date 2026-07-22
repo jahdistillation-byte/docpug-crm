@@ -6467,7 +6467,71 @@ def api_delete_specialization(spec_id):
         return ok(True)
     except Exception as e:
         return fail(str(e), 500)
-    
+
+
+def validate_staff_specialization_ids(
+    raw_ids,
+    org_id,
+):
+    if raw_ids is None:
+        return []
+
+    if not isinstance(raw_ids, list):
+        raise ValueError(
+            "Напрями мають бути списком"
+        )
+
+    clean_ids = []
+
+    for raw_id in raw_ids:
+        item_id = str(
+            raw_id or ""
+        ).strip()
+
+        if not item_id:
+            continue
+
+        try:
+            item_id = str(
+                uuid.UUID(item_id)
+            )
+        except (ValueError, TypeError):
+            raise ValueError(
+                "Некоректний ID напряму"
+            )
+
+        if item_id not in clean_ids:
+            clean_ids.append(item_id)
+
+    if not clean_ids:
+        return []
+
+    result = (
+        supabase
+        .table("specializations")
+        .select("id")
+        .eq("org_id", org_id)
+        .eq("is_active", True)
+        .in_("id", clean_ids)
+        .execute()
+    )
+
+    allowed_ids = {
+        str(item.get("id"))
+        for item in (result.data or [])
+        if item.get("id")
+    }
+
+    if any(
+        item_id not in allowed_ids
+        for item_id in clean_ids
+    ):
+        raise ValueError(
+            "Один або кілька напрямів недоступні для цієї клініки"
+        )
+
+    return clean_ids
+
 
 @app.get("/api/staff")
 def api_staff():
@@ -6518,9 +6582,65 @@ def api_staff():
             .execute()
         )
 
-        return ok(
-            result.data or []
+        rows = result.data or []
+
+        specializations_result = (
+            supabase
+            .table("specializations")
+            .select("id,name,color")
+            .eq("org_id", current_org)
+            .eq("is_active", True)
+            .order("name")
+            .execute()
         )
+
+        specializations_by_id = {
+            str(item.get("id")): item
+            for item in (
+                specializations_result.data
+                or []
+            )
+            if item.get("id")
+        }
+
+        for row in rows:
+            ids = row.get(
+                "specialization_ids"
+            )
+
+            if not isinstance(ids, list):
+                ids = []
+
+            clean_ids = []
+            linked = []
+
+            for item in ids:
+                item_id = str(
+                    item or ""
+                ).strip()
+
+                specialization = (
+                    specializations_by_id.get(
+                        item_id
+                    )
+                )
+
+                if (
+                    not item_id
+                    or not specialization
+                    or item_id in clean_ids
+                ):
+                    continue
+
+                clean_ids.append(item_id)
+                linked.append(specialization)
+
+            row["specialization_ids"] = (
+                clean_ids
+            )
+            row["specializations"] = linked
+
+        return ok(rows)
 
     except Exception as error:
         print(
@@ -6558,6 +6678,19 @@ def api_create_staff():
         get_current_org_id()
     )
 
+    try:
+        specialization_ids = (
+            validate_staff_specialization_ids(
+                d.get(
+                    "specialization_ids",
+                    [],
+                ),
+                current_org,
+            )
+        )
+    except ValueError as error:
+        return fail(str(error), 400)
+
     payload = {
         "org_id": current_org,
         "name": name,
@@ -6566,6 +6699,7 @@ def api_create_staff():
         "color": d.get("color") or "#7C5CFF",
         "phone": d.get("phone"),
         "specialization": d.get("specialization"),
+        "specialization_ids": specialization_ids,
         "shift_rate": d.get("shift_rate") or 0,
         "percent_rate": d.get("percent_rate") or 0,
         "bonus_rate": d.get("bonus_rate") or 0,
@@ -6620,15 +6754,28 @@ def api_update_staff(staff_id):
         "skills": d.get("skills"),
     }
 
+    current_org = (
+        get_current_org_id()
+    )
+
+    if "specialization_ids" in d:
+        try:
+            payload["specialization_ids"] = (
+                validate_staff_specialization_ids(
+                    d.get(
+                        "specialization_ids"
+                    ),
+                    current_org,
+                )
+            )
+        except ValueError as error:
+            return fail(str(error), 400)
+
     payload = {
         key: value
         for key, value in payload.items()
         if value is not None
     }
-
-    current_org = (
-        get_current_org_id()
-    )
 
     res = (
         supabase

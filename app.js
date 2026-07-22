@@ -5619,6 +5619,56 @@ function openSpecializationCreateModal() {
   });
 }
 
+function getStaffSpecializations(staffRow) {
+  return Array.isArray(
+    staffRow?.specializations
+  )
+    ? staffRow.specializations.filter(
+        (item) => item?.id && item?.name
+      )
+    : [];
+}
+
+function renderStaffSpecializationTags(
+  staffRow,
+  className = "premiumSpecTag"
+) {
+  const specializations =
+    getStaffSpecializations(staffRow);
+
+  if (specializations.length) {
+    return specializations
+      .map(
+        (specialization) => `
+          <span
+            class="${escapeHtml(className)}"
+            style="
+              --specialization-color:
+                ${escapeHtml(
+                  specialization.color ||
+                  "#7C5CFF"
+                )};
+            "
+          >
+            ${escapeHtml(
+              specialization.name
+            )}
+          </span>
+        `
+      )
+      .join("");
+  }
+
+  return `
+    <span class="${escapeHtml(className)} is-empty">
+      ${escapeHtml(
+        staffRow?.specialization ||
+        "Напрям не вказано"
+      )}
+    </span>
+  `;
+}
+
 async function renderTeamTab() {
   const page =
     document.querySelector(
@@ -5667,6 +5717,51 @@ async function renderTeamTab() {
             String(employee.id) ===
             String(currentStaffId)
         );
+
+  const groupedVisibleStaffEntries =
+    teamManager
+      ? [
+          ...specializations.flatMap(
+            (specialization) =>
+              visibleStaff
+                .filter((employee) =>
+                  getStaffSpecializations(
+                    employee
+                  ).some(
+                    (item) =>
+                      String(item.id) ===
+                      String(
+                        specialization.id
+                      )
+                  )
+                )
+                .map((employee) => ({
+                  employee,
+                  groupName:
+                    specialization.name ||
+                    "Напрям",
+                }))
+          ),
+          ...visibleStaff
+            .filter(
+              (employee) =>
+                !getStaffSpecializations(
+                  employee
+                ).length
+            )
+            .map((employee) => ({
+              employee,
+              groupName: "Без напряму",
+            })),
+        ]
+      : visibleStaff.map((employee) => ({
+          employee,
+          groupName:
+            getStaffSpecializations(employee)
+              .map((item) => item.name)
+              .join(" · ") ||
+            "Без напряму",
+        }));
 
   const scheduleMap =
     new Map(
@@ -5806,9 +5901,11 @@ async function renderTeamTab() {
 
       <div class="vetList">
         ${
-          visibleStaff.length
-            ? visibleStaff
-                .map((doc) => {
+          groupedVisibleStaffEntries.length
+            ? groupedVisibleStaffEntries
+                .map((entry, index, rows) => {
+                  const doc = entry.employee;
+
                   const scheduleRow =
                     scheduleMap.get(
                       String(doc.id)
@@ -5844,7 +5941,38 @@ async function renderTeamTab() {
                         ? "Адміністратор"
                         : "Ветеринарний лікар";
 
+                  const groupName =
+                    entry.groupName;
+
+                  const previousGroup =
+                    index > 0
+                      ? rows[index - 1]
+                          .groupName
+                      : "";
+
+                  const groupHeader =
+                    groupName !==
+                    previousGroup
+                      ? `
+                        <div class="staffGroupHeader">
+                          <span>
+                            ${escapeHtml(
+                              groupName
+                            )}
+                          </span>
+                          <small>
+                            ${rows.filter(
+                              (item) =>
+                                item.groupName ===
+                                groupName
+                            ).length}
+                          </small>
+                        </div>
+                      `
+                      : "";
+
                   return `
+                    ${groupHeader}
                     <div
                       class="
                         vetCard
@@ -5933,12 +6061,9 @@ async function renderTeamTab() {
                         </div>
 
                         <div class="premiumVetSpecs">
-                          <span class="premiumSpecTag">
-                            ${escapeHtml(
-                              doc.specialization ||
-                              "Спеціалізація не вказана"
-                            )}
-                          </span>
+                          ${renderStaffSpecializationTags(
+                            doc
+                          )}
                         </div>
 
                         <div class="premiumVetMeta">
@@ -6201,15 +6326,30 @@ async function renderTeamTab() {
 
           if (!saved) return;
 
-          button.classList.toggle(
-            "active",
-            isActive
-          );
+          page
+            .querySelectorAll(
+              "[data-team-schedule-staff-id]"
+            )
+            .forEach((statusButton) => {
+              if (
+                String(
+                  statusButton.dataset
+                    .teamScheduleStaffId
+                ) !== String(staffId)
+              ) {
+                return;
+              }
 
-          button.textContent =
-            isActive
-              ? "На зміні"
-              : "Вихідний";
+              statusButton.classList.toggle(
+                "active",
+                isActive
+              );
+
+              statusButton.textContent =
+                isActive
+                  ? "На зміні"
+                  : "Вихідний";
+            });
         }
       );
     });
@@ -26662,6 +26802,12 @@ const staffSchedule =
         <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
           <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
           <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
+          <div class="calStaffSpecializations">
+            ${renderStaffSpecializationTags(
+              doc,
+              "calStaffSpecialization"
+            )}
+          </div>
         </div>
 
         ${hours.map((hour) => {
@@ -26718,6 +26864,12 @@ const staffSchedule =
     <div class="calStaffDrag" draggable="true" data-drag-staff-id="${escapeHtml(doc.id)}" data-drag-staff-name="${escapeHtml(doc.name || "")}" data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
       <div class="calStaffDragName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
       <div class="calStaffDragRole">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
+      <div class="calStaffSpecializations">
+        ${renderStaffSpecializationTags(
+          doc,
+          "calStaffSpecialization"
+        )}
+      </div>
     </div>
   `).join("");
 
@@ -27050,7 +27202,13 @@ modal.className = "staffProfileOverlay";
           <div>
             <div class="staffProfileBreadcrumb">Команда / Профіль співробітника</div>
             <h2>${escapeHtml(staffName)}</h2>
-            <div class="staffProfileSubtitle">${escapeHtml(roleLabel)} · ${escapeHtml(doc.specialization || "Напрями не вказані")}</div>
+            <div class="staffProfileSubtitle">${escapeHtml(roleLabel)}</div>
+            <div class="staffProfileSpecializations">
+              ${renderStaffSpecializationTags(
+                doc,
+                "staffProfileSpecialization"
+              )}
+            </div>
           </div>
 
           <button class="ghost staffProfileEditInside" type="button" data-edit-staff-from-profile="${escapeHtml(String(doc.id))}">

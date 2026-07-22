@@ -2388,7 +2388,7 @@ button.ghost:hover,
 }
 
 .calTimeHead {
-  height: 70px;
+  height: 84px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -2406,7 +2406,7 @@ button.ghost:hover,
 }
 
 .calDoctorHead {
-  height: 70px;
+  height: 84px;
   padding: 12px 14px;
   margin-bottom: 10px;
   border-radius: 18px;
@@ -2427,6 +2427,35 @@ button.ghost:hover,
   margin-top: 4px;
   color: var(--text-muted, rgba(255,255,255,0.55));
   font-size: 0.82rem;
+}
+
+.calStaffSpecializations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.calStaffSpecialization {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 19px;
+  padding: 2px 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--specialization-color, var(--accent-color, #a855f7)) 45%, transparent);
+  background: color-mix(in srgb, var(--specialization-color, var(--accent-color, #a855f7)) 14%, transparent);
+  color: var(--text-main, #fff);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calStaffSpecialization.is-empty {
+  opacity: 0.65;
 }
 
 .calSlot {
@@ -2668,6 +2697,29 @@ button.ghost:hover,
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.staffGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 2px 2px;
+  color: var(--text-main, #fff);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.staffGroupHeader small {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--module-accent, var(--accent-color, #a855f7));
+  background: var(--module-accent-soft, rgba(168,85,247,0.13));
+  border: 1px solid var(--module-border, rgba(255,255,255,0.1));
 }
 
 .vetCard {
@@ -4530,11 +4582,15 @@ body[data-theme="white"] .monthDayNum {
   align-items: center;
   padding: 7px 10px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--staff-color) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--staff-color) 28%, transparent);
+  background: color-mix(in srgb, var(--specialization-color, var(--staff-color)) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--specialization-color, var(--staff-color)) 38%, transparent);
   color: var(--text);
   font-size: 12px;
   font-weight: 800;
+}
+
+.premiumSpecTag.is-empty {
+  opacity: 0.7;
 }
 
 .premiumVetMeta {
@@ -4918,6 +4974,30 @@ body[data-theme="white"] .monthDayNum {
   margin-top: 5px;
   color: var(--muted);
   font-weight: 800;
+}
+
+.staffProfileSpecializations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.staffProfileSpecialization {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--specialization-color, var(--staff-color)) 48%, transparent);
+  background: color-mix(in srgb, var(--specialization-color, var(--staff-color)) 16%, transparent);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--specialization-color, var(--staff-color)) 10%, transparent);
+}
+
+.staffProfileSpecialization.is-empty {
+  opacity: 0.65;
 }
 
 .staffProfileKpis {
