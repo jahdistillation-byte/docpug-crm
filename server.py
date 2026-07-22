@@ -6672,14 +6672,12 @@ def api_staff():
         current_org = get_current_org_id()
 
         query = (
-            supabase
-            .table("staff")
-            .select("*")
-            .eq(
-                "org_id",
-                current_org,
-            )
-        )
+    supabase
+    .table("staff")
+    .select("*")
+    .eq("org_id", current_org)
+    .eq("is_active", True)
+)
 
         role = normalize_role(
             user.get("role")
@@ -6919,6 +6917,105 @@ def api_update_staff(staff_id):
     )
 
     return ok(row)
+
+@app.delete("/api/staff/<staff_id>")
+def api_deactivate_staff(staff_id):
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    target_staff_id = str(staff_id or "").strip()
+
+    if not target_staff_id:
+        return fail("staff_id required", 400)
+
+    current_staff_id = str(
+        user.get("staff_id") or ""
+    ).strip()
+
+    if (
+        current_staff_id
+        and current_staff_id == target_staff_id
+    ):
+        return fail(
+            "Не можна звільнити власний профіль",
+            409,
+        )
+
+    current_org = str(
+        get_current_org_id() or ""
+    ).strip()
+
+    try:
+        target_result = (
+            supabase
+            .table("staff")
+            .select("id,name,role,is_active")
+            .eq("org_id", current_org)
+            .eq("id", target_staff_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not target_result.data:
+            return fail(
+                "Співробітника не знайдено",
+                404,
+            )
+
+        target = target_result.data[0]
+
+        if target.get("is_active") is False:
+            return ok({
+                "id": target_staff_id,
+                "is_active": False,
+            })
+
+        # Блокуємо обліковий запис, але не видаляємо історію.
+        (
+            supabase
+            .table("clinic_users")
+            .update({
+                "is_active": False,
+            })
+            .eq("org_id", current_org)
+            .eq("staff_id", target_staff_id)
+            .execute()
+        )
+
+        result = (
+            supabase
+            .table("staff")
+            .update({
+                "is_active": False,
+            })
+            .eq("org_id", current_org)
+            .eq("id", target_staff_id)
+            .execute()
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else {
+                "id": target_staff_id,
+                "is_active": False,
+            }
+        )
+
+        return ok(row)
+
+    except Exception as error:
+        print(
+            "❌ /api/staff DELETE:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося звільнити співробітника",
+            500,
+        )
 @app.get("/api/staff/<staff_id>/dashboard")
 def api_staff_dashboard(staff_id):
     user, auth_error = (

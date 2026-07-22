@@ -6177,6 +6177,21 @@ async function renderTeamTab() {
                               >
                                 ✏️ Редагувати
                               </button>
+                              <button
+  class="
+    ghost
+    premiumDeleteBtn
+  "
+  type="button"
+  data-deactivate-team-staff="${escapeHtml(
+    String(doc.id)
+  )}"
+  data-deactivate-team-staff-name="${escapeHtml(
+    staffName
+  )}"
+>
+  🗑 Звільнити
+</button>
                             `
                             : ""
                         }
@@ -6308,6 +6323,8 @@ async function renderTeamTab() {
       );
     });
 
+    
+
   page
     .querySelectorAll(
       "[data-team-schedule-staff-id]"
@@ -6405,7 +6422,74 @@ async function renderTeamTab() {
         }
       );
     });
+page
+  .querySelectorAll(
+    "[data-deactivate-team-staff]"
+  )
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        if (!teamManager) return;
 
+        const staffId =
+          button.dataset
+            .deactivateTeamStaff;
+
+        const staffName =
+          button.dataset
+            .deactivateTeamStaffName ||
+          "цього співробітника";
+
+        if (
+          String(staffId) ===
+          String(currentStaffId)
+        ) {
+          openDeleteModal(
+            "Не можна звільнити власний профіль.",
+            null,
+            "info"
+          );
+
+          return;
+        }
+
+        openDeleteModal(
+          `Звільнити <b>${escapeHtml(
+            staffName
+          )}</b>?<br><br>
+          Вхід співробітника буде заблоковано,
+          а профіль зникне з активної команди.
+          Історія візитів і фінансів збережеться.`,
+          async () => {
+            button.disabled = true;
+
+            const result =
+              await deactivateStaffApi(
+                staffId
+              );
+
+            if (!result.ok) {
+              button.disabled = false;
+
+              openDeleteModal(
+                escapeHtml(
+                  result.error ||
+                  "Не вдалося звільнити співробітника."
+                ),
+                null,
+                "info"
+              );
+
+              return;
+            }
+
+            await renderTeamTab();
+          }
+        );
+      }
+    );
+  });
   page
     .querySelectorAll(
       "[data-open-team-profile]"
@@ -38665,6 +38749,61 @@ async function updateStaffApi(staffId, payload) {
     return json.data || null;
   } catch (e) {
     console.error(e); alert("Помилка оновлення ветеринара"); return null;
+  }
+}
+
+async function deactivateStaffApi(staffId) {
+  try {
+    const response = await fetch(
+      `/api/staff/${encodeURIComponent(staffId)}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const text = await response.text();
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {
+      json = null;
+    }
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      return {
+        ok: false,
+        error:
+          json?.error ||
+          `HTTP ${response.status}`,
+      };
+    }
+
+    return {
+      ok: true,
+      data: json.data || null,
+    };
+  } catch (error) {
+    console.error(
+      "deactivateStaffApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Помилка з'єднання під час звільнення співробітника.",
+    };
   }
 }
 
