@@ -15815,6 +15815,41 @@ select.clinicSettingsInput {
   color: #fff;
 }
 
+.clinicThemeSaveRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.clinicThemeSaveButton {
+  min-height: 40px;
+  padding: 0 16px;
+  cursor: pointer;
+  border: 1px solid rgba(179, 93, 255, 0.64);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c5cff, #b45cff);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(124, 92, 255, 0.22);
+}
+
+.clinicThemeSaveButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+#clinicThemeSaveStatus {
+  font-size: 12px;
+  color: #6ee7b7;
+}
+
+#clinicThemeSaveStatus.error {
+  color: #ff8ca0;
+}
+
 .clinicSettingsLogoutRow {
   position: relative;
   z-index: 1;

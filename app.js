@@ -35991,6 +35991,23 @@ async function initSettingsUI() {
                 )
                 .join("")}
             </div>
+
+            ${
+              ownerMode
+                ? `
+                  <div class="clinicThemeSaveRow">
+                    <button
+                      class="clinicThemeSaveButton"
+                      id="saveClinicThemeButton"
+                      type="button"
+                    >
+                      Зберегти тему
+                    </button>
+                    <span id="clinicThemeSaveStatus" role="status"></span>
+                  </div>
+                `
+                : ""
+            }
           </div>
         </div>
 
@@ -36037,6 +36054,9 @@ function bindPersonalSettingsUI(page) {
     "docpug_clinic_theme",
     "purple"
   );
+  let selectedTheme =
+    document.body.dataset.theme ||
+    savedTheme;
 
   page
     .querySelectorAll("[data-theme-set]")
@@ -36045,16 +36065,12 @@ function bindPersonalSettingsUI(page) {
 
       button.classList.toggle(
         "active",
-        theme === savedTheme
+        theme === selectedTheme
       );
 
       button.addEventListener("click", () => {
+        selectedTheme = theme;
         document.body.dataset.theme = theme;
-
-        LS.set(
-          "docpug_clinic_theme",
-          theme
-        );
 
         page
           .querySelectorAll("[data-theme-set]")
@@ -36065,6 +36081,76 @@ function bindPersonalSettingsUI(page) {
         button.classList.add("active");
       });
     });
+
+  const saveThemeButton =
+    page.querySelector("#saveClinicThemeButton");
+  const saveThemeStatus =
+    page.querySelector("#clinicThemeSaveStatus");
+
+  saveThemeButton?.addEventListener(
+    "click",
+    async () => {
+      saveThemeButton.disabled = true;
+      saveThemeButton.textContent = "Зберігаємо…";
+
+      if (saveThemeStatus) {
+        saveThemeStatus.textContent = "";
+        saveThemeStatus.classList.remove("error");
+      }
+
+      try {
+        const response = await fetch(
+          "/api/organization/theme",
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              theme: selectedTheme,
+            }),
+          }
+        );
+        const payload = await response.json();
+
+        if (!response.ok || !payload?.ok) {
+          throw new Error(
+            payload?.error ||
+            "Не вдалося зберегти тему"
+          );
+        }
+
+        const persistedTheme =
+          payload.data?.theme ||
+          selectedTheme;
+
+        document.body.dataset.theme =
+          persistedTheme;
+        LS.set(
+          "docpug_clinic_theme",
+          persistedTheme
+        );
+
+        if (saveThemeStatus) {
+          saveThemeStatus.textContent =
+            "Тему збережено для клініки";
+        }
+      } catch (error) {
+        if (saveThemeStatus) {
+          saveThemeStatus.textContent =
+            error.message ||
+            "Не вдалося зберегти тему";
+          saveThemeStatus.classList.add("error");
+        }
+      } finally {
+        saveThemeButton.disabled = false;
+        saveThemeButton.textContent =
+          "Зберегти тему";
+      }
+    }
+  );
 
 
 

@@ -983,6 +983,7 @@ def static_any(path):
 CLINIC_PROFILE_FIELDS = [
     "id",
     "name",
+    "theme",
     "subtitle",
     "logo_url",
     "phone",
@@ -994,6 +995,14 @@ CLINIC_PROFILE_FIELDS = [
     "document_footer",
     "updated_at",
 ]
+
+CLINIC_THEMES = {
+    "purple",
+    "black",
+    "white",
+    "blue",
+    "green",
+}
 
 
 @app.get("/api/organization/profile")
@@ -1172,6 +1181,51 @@ def api_update_organization_profile():
             f"Cannot update organization profile: {e}",
             500
         )
+
+
+@app.put("/api/organization/theme")
+def api_update_organization_theme():
+    """Save the visual theme for the current clinic."""
+    try:
+        _current_user, auth_error = owner_required()
+
+        if auth_error:
+            return auth_error
+
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail("Organization not selected", 400)
+
+        data = request.get_json(silent=True) or {}
+        theme = str(data.get("theme") or "").strip().lower()
+
+        if theme not in CLINIC_THEMES:
+            return fail("Invalid clinic theme", 400)
+
+        result = (
+            supabase
+            .table("orgs")
+            .update({
+                "theme": theme,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            })
+            .eq("id", current_org)
+            .execute()
+        )
+
+        if not result.data:
+            return fail("Organization not found", 404)
+
+        return ok({"theme": theme})
+
+    except Exception as error:
+        print(
+            "❌ /api/organization/theme PUT error:",
+            repr(error),
+        )
+
+        return fail("Cannot update clinic theme", 500)
 # =========================
 # API: SERVER SESSION
 # =========================
@@ -1204,7 +1258,7 @@ def api_get_session():
                 org_result = (
                     supabase
                     .table("orgs")
-                    .select("name")
+                    .select("name, theme")
                     .eq("id", str(org_id))
                     .limit(1)
                     .execute()
@@ -1214,6 +1268,10 @@ def api_get_session():
                     clinic_name = (
                         org_result.data[0].get("name")
                         or clinic_name
+                    )
+                    theme = (
+                        org_result.data[0].get("theme")
+                        or theme
                     )
 
             except Exception as org_error:
@@ -1478,9 +1536,10 @@ def api_me():
     current_org = get_current_org_id()
     
     try:
-        res_org = supabase.table("orgs").select("name").eq("id", current_org).execute()
+        res_org = supabase.table("orgs").select("name, theme").eq("id", current_org).execute()
         if res_org.data:
             clinic_name = res_org.data[0].get("name", clinic_name)
+            theme = res_org.data[0].get("theme") or theme
     except Exception as e:
         print("⚠️ Не удалось подтянуть тему организации из БД:", repr(e))
 
@@ -10888,7 +10947,7 @@ def api_clinic_login():
             org_result = (
                 supabase
                 .table("orgs")
-                .select("name")
+                .select("name, theme")
                 .eq("id", org_id)
                 .limit(1)
                 .execute()
@@ -10898,6 +10957,10 @@ def api_clinic_login():
                 clinic_name = (
                     org_result.data[0].get("name")
                     or clinic_name
+                )
+                theme = (
+                    org_result.data[0].get("theme")
+                    or theme
                 )
 
         except Exception as org_error:
