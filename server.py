@@ -6358,6 +6358,74 @@ def api_get_owners():
             500,
         )
 
+
+@app.post("/api/owners")
+def api_create_owner():
+    _user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        data = request.get_json(
+            silent=True
+        ) or {}
+
+        name = str(
+            data.get("name") or ""
+        ).strip()
+
+        if not name:
+            return fail(
+                "Вкажіть ПІБ власника",
+                400,
+            )
+
+        payload = {
+            "org_id": current_org,
+            "name": name,
+            "phone": str(
+                data.get("phone") or ""
+            ).strip() or None,
+            "note": str(
+                data.get("note") or ""
+            ).strip() or None,
+        }
+
+        result = (
+            supabase
+            .table("owners")
+            .insert(payload)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося створити власника",
+                500,
+            )
+
+        return ok(result.data[0])
+
+    except Exception as error:
+        print(
+            "❌ POST /api/owners error:",
+            repr(error),
+        )
+
+        return fail(
+            f"Cannot create owner: {error}",
+            500,
+        )
+
 # =========================
 # API: SPECIALIZATIONS
 # =========================

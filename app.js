@@ -1763,6 +1763,7 @@ async function createOwner(name, phone, note = "") {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        ...getOrgHeaders(),
       },
       body: JSON.stringify({
         name: String(name || "").trim(),
@@ -1771,11 +1772,30 @@ async function createOwner(name, phone, note = "") {
       }),
     });
 
-    const json = await res.json();
+    const text = await res.text();
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {
+      json = null;
+    }
 
     if (!res.ok || !json?.ok) {
-      console.error("createOwner error:", json);
-      alert(json?.error || "Не вдалося створити власника");
+      console.error(
+        "createOwner error:",
+        res.status,
+        json,
+        text
+      );
+
+      alert(
+        json?.error ||
+        `Не вдалося створити власника (HTTP ${res.status})`
+      );
+
       return null;
     }
 
