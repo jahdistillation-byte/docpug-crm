@@ -6239,7 +6239,65 @@ def api_services_list():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.post("/api/services")
+def api_services_create():
+    user, auth_error = owner_or_admin_required()
 
+    if auth_error:
+        return auth_error
+
+    try:
+        payload = request.get_json(silent=True) or {}
+
+        name = str(payload.get("name") or "").strip()
+
+        if not name:
+            return jsonify({
+                "ok": False,
+                "error": "Вкажіть назву послуги."
+            }), 400
+
+        try:
+            price = float(payload.get("price") or 0)
+        except (TypeError, ValueError):
+            return jsonify({
+                "ok": False,
+                "error": "Вкажіть коректну вартість послуги."
+            }), 400
+
+        if price < 0:
+            return jsonify({
+                "ok": False,
+                "error": "Вартість не може бути від’ємною."
+            }), 400
+
+        current_org = get_current_org_id()
+
+        service_data = {
+            "org_id": current_org,
+            "name": name,
+            "price": price,
+            "active": bool(payload.get("active", True)),
+        }
+
+        res = (
+            supabase.table("services")
+            .insert(service_data)
+            .execute()
+        )
+
+        return jsonify({
+            "ok": True,
+            "data": res.data or []
+        }), 201
+
+    except Exception as e:
+        print("❌ /api/services POST error:", repr(e))
+
+        return jsonify({
+            "ok": False,
+            "error": "Не вдалося створити послугу."
+        }), 500
 
 @app.put("/api/services")
 def api_services_update():
