@@ -31655,3 +31655,249 @@ body[data-theme="white"] :is(
 ) {
   box-shadow: 0 28px 80px var(--module-shadow) !important;
 }
+
+/* Hospital, services and stock page headers and controls. */
+body :is(
+  .hospitalHero,
+  .servicesPremiumHero,
+  .stockPremiumHero
+) {
+  border-color: var(--module-border-strong) !important;
+  background:
+    radial-gradient(circle at 92% 10%, var(--module-accent-soft), transparent 38%),
+    linear-gradient(145deg, var(--module-surface-1), var(--module-surface-2)) !important;
+  box-shadow: 0 25px 70px var(--module-shadow) !important;
+}
+
+body :is(
+  .hospitalEyebrow,
+  .servicesPremiumEyebrow,
+  .stockPremiumEyebrow
+) {
+  color: var(--module-accent-2) !important;
+}
+
+body :is(
+  .hospitalHero h1,
+  .servicesPremiumHero h1,
+  .stockPremiumHero h1
+) {
+  color: var(--module-text) !important;
+}
+
+body :is(
+  .hospitalHero p,
+  .servicesPremiumHero p,
+  .stockPremiumHero p
+) {
+  color: var(--module-text-muted) !important;
+}
+
+body :is(
+  .hospitalAdmitButton,
+  .servicesPremiumAddButton,
+  .stockPremiumAddButton
+) {
+  border-color: color-mix(in srgb, var(--module-accent) 58%, white) !important;
+  background: linear-gradient(
+    135deg,
+    var(--module-accent),
+    color-mix(in srgb, var(--module-accent) 72%, var(--module-surface-2))
+  ) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 35px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .hospitalStatCard,
+  .servicesPremiumStat,
+  .stockPremiumStat,
+  .hospitalPatientCard,
+  .servicesPremiumCard,
+  .stockPremiumCard,
+  .hospitalFilters,
+  .servicesPremiumStatusFilter,
+  .stockPremiumFilters,
+  .stockAdvancedFilters
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+}
+
+body :is(
+  .hospitalStatCard strong,
+  .servicesPremiumStat strong,
+  .stockPremiumStat strong,
+  .hospitalPatientIdentity h2,
+  .servicesPremiumGroupTitle h2,
+  .servicesPremiumCardBody h3,
+  .servicesPremiumCardPrice strong,
+  .stockPremiumGroupTitle h2,
+  .stockPremiumCardBody h3,
+  .stockPremiumPrices strong,
+  .stockPremiumQuantity strong
+) {
+  color: var(--module-text);
+}
+
+body :is(
+  .hospitalStatCard span,
+  .hospitalStatCard small,
+  .hospitalPatientIdentity p,
+  .hospitalInfoRow span,
+  .servicesPremiumStat span,
+  .servicesPremiumStat small,
+  .servicesPremiumGroupTitle p,
+  .servicesPremiumCardPrice span,
+  .servicesPremiumCardStatus,
+  .stockPremiumStat span,
+  .stockPremiumStat small,
+  .stockPremiumGroupTitle p,
+  .stockPremiumPrices span,
+  .stockPremiumQuantity span,
+  .stockPremiumQuantity small,
+  .stockPremiumCardValue,
+  .stockAdvancedFilter > span
+) {
+  color: var(--module-text-muted);
+}
+
+body .servicesPremiumStatPrice strong,
+body .stockPremiumStatUnits strong {
+  color: var(--module-accent-2) !important;
+}
+
+body :is(
+  .hospitalSearch,
+  .servicesPremiumSearchWrap,
+  .stockPremiumSearch,
+  .stockPremiumSelect
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-input) !important;
+  color: var(--module-text) !important;
+  color-scheme: var(--module-color-scheme);
+}
+
+body :is(
+  .servicesPremiumSearchWrap input,
+  .stockPremiumSearch input
+) {
+  color: var(--module-text) !important;
+}
+
+body :is(
+  .hospitalSearch,
+  .servicesPremiumSearchWrap input,
+  .stockPremiumSearch input,
+  .stockPremiumSelect
+)::placeholder {
+  color: var(--module-text-faint) !important;
+}
+
+body .stockPremiumSelect option {
+  background: var(--module-surface-2);
+  color: var(--module-text);
+}
+
+body :is(
+  .hospitalSearch,
+  .servicesPremiumSearchWrap,
+  .stockPremiumSearch,
+  .stockPremiumSelect
+):focus,
+body :is(
+  .servicesPremiumSearchWrap,
+  .stockPremiumSearch
+):focus-within {
+  border-color: var(--module-accent) !important;
+  box-shadow: 0 0 0 3px var(--module-accent-soft) !important;
+}
+
+body :is(
+  .hospitalFilter,
+  .servicesPremiumStatusFilter button,
+  .servicesPremiumCategory,
+  .stockPremiumFilters button,
+  .stockPremiumGroupFilters button,
+  .stockPremiumCategories button
+) {
+  color: var(--module-text-muted) !important;
+}
+
+body :is(
+  .servicesPremiumCategory,
+  .stockPremiumGroupFilters button,
+  .stockPremiumCategories button
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+}
+
+body :is(
+  .hospitalFilter.active,
+  .servicesPremiumStatusFilter button.active,
+  .servicesPremiumCategory.active,
+  .stockPremiumFilters button.active,
+  .stockPremiumGroupFilters button.active,
+  .stockPremiumCategories button.active
+) {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  color: var(--module-accent-2) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--module-border-strong),
+    0 7px 18px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .hospitalPatientAvatar,
+  .servicesPremiumCardIcon,
+  .stockPremiumGroupTitle > span,
+  .stockPremiumCardIcon
+) {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+}
+
+body :is(
+  .servicesPremiumCardCategory,
+  .stockPremiumCardCategory,
+  .stockSelectArrow
+) {
+  color: var(--module-accent-2) !important;
+}
+
+body .stockPremiumGroupHead > div:last-child {
+  background: linear-gradient(90deg, var(--module-border-strong), transparent);
+}
+
+body :is(
+  .hospitalNextAction,
+  .hospitalPrimaryButton
+) {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  color: var(--module-accent-2) !important;
+}
+
+body .hospitalNextAction strong {
+  color: var(--module-accent-2) !important;
+}
+
+body :is(
+  .hospitalGhostButton,
+  .servicesPremiumCardActions button
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+  color: var(--module-text-soft) !important;
+}
+
+body[data-theme="white"] :is(
+  .hospitalHero,
+  .servicesPremiumHero,
+  .stockPremiumHero
+) {
+  box-shadow: 0 25px 65px var(--module-shadow) !important;
+}
