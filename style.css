@@ -31901,3 +31901,193 @@ body[data-theme="white"] :is(
 ) {
   box-shadow: 0 25px 65px var(--module-shadow) !important;
 }
+
+/* Settings page and global header theme bridge. */
+body .top-logo,
+body .user-profile-badge > div:first-child {
+  color: var(--module-text) !important;
+}
+
+body .user-profile-badge > div:last-child {
+  color: var(--module-text-muted) !important;
+}
+
+body .user-profile-badge {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+}
+
+body .clinicSettingsPage {
+  color: var(--module-text);
+}
+
+body :is(
+  .clinicSettingsUser,
+  .clinicSettingsPanel
+) {
+  border-color: var(--module-border-strong) !important;
+  background:
+    radial-gradient(circle at 0 0, var(--module-accent-soft), transparent 36%),
+    linear-gradient(145deg, var(--module-surface-1), var(--module-surface-2)) !important;
+  box-shadow: 0 24px 70px var(--module-shadow) !important;
+}
+
+body .clinicSettingsPanel::before {
+  background: linear-gradient(120deg, var(--module-surface-soft), transparent 32%);
+}
+
+body :is(
+  .clinicSettingsHero h1,
+  .clinicSettingsUser span,
+  .clinicSettingsPanelHead h2,
+  .clinicBrandUploadText strong,
+  .clinicPersonalBlock h3,
+  .clinicSettingsLogoutRow strong
+) {
+  color: var(--module-text) !important;
+}
+
+body :is(
+  .clinicSettingsKicker,
+  .clinicPreviewKicker,
+  .clinicSettingsHero p,
+  .clinicSettingsPanelHead p,
+  .clinicSettingsLoading,
+  .clinicSettingsField > span,
+  .clinicBrandUploadText p,
+  .clinicProfileSaveStatus,
+  .clinicPersonalBlock p,
+  .clinicSettingsLogoutRow span
+) {
+  color: var(--module-text-muted) !important;
+}
+
+body :is(
+  .clinicSettingsUser strong,
+  .clinicOwnerBadge
+) {
+  color: var(--module-accent-2) !important;
+}
+
+body :is(
+  .clinicSettingsPanelIcon,
+  .clinicOwnerBadge
+) {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  box-shadow: 0 10px 26px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .clinicSettingsInput,
+  .clinicColorField input[type="color"]
+) {
+  border-color: var(--module-border) !important;
+  background-color: var(--module-input) !important;
+  color: var(--module-text) !important;
+  color-scheme: var(--module-color-scheme);
+}
+
+body .clinicSettingsInput::placeholder {
+  color: var(--module-text-faint) !important;
+}
+
+body .clinicSettingsInput:focus {
+  border-color: var(--module-accent) !important;
+  background-color: var(--module-input) !important;
+  box-shadow:
+    0 0 0 4px var(--module-accent-soft),
+    0 12px 30px var(--module-shadow) !important;
+}
+
+body select.clinicSettingsInput {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--module-text-muted) 50%),
+    linear-gradient(135deg, var(--module-text-muted) 50%, transparent 50%);
+}
+
+body :is(
+  .clinicBrandUpload,
+  .clinicPersonalBlock,
+  .clinicThemeChoice,
+  .clinicSettingsLogoutRow
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+}
+
+body .clinicBrandPreview {
+  border-color: var(--module-border) !important;
+  background:
+    radial-gradient(circle at center, var(--module-accent-soft), transparent 68%),
+    var(--module-input) !important;
+}
+
+body .clinicBrandPreview span {
+  color: var(--module-text-faint) !important;
+}
+
+body .clinicBrandUpload:hover,
+body .clinicThemeChoice:hover {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-surface-hover) !important;
+}
+
+body .clinicBrandUploadButton {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  color: var(--module-accent-2) !important;
+}
+
+body .clinicThemeChoice {
+  color: var(--module-text-soft) !important;
+}
+
+body .clinicThemeChoice.active {
+  border-color: var(--module-accent) !important;
+  background: var(--module-accent-soft) !important;
+  box-shadow:
+    0 0 0 3px var(--module-accent-soft),
+    0 12px 30px var(--module-accent-glow) !important;
+  color: var(--module-text) !important;
+}
+
+body :is(
+  .clinicProfileSaveButton,
+  .clinicThemeSaveButton
+) {
+  border-color: color-mix(in srgb, var(--module-accent) 58%, white) !important;
+  background: linear-gradient(
+    135deg,
+    var(--module-accent),
+    color-mix(in srgb, var(--module-accent) 72%, var(--module-surface-2))
+  ) !important;
+  color: #fff !important;
+  box-shadow: 0 12px 30px var(--module-accent-glow) !important;
+}
+
+body .clinicProfileActions {
+  border-color: var(--module-border) !important;
+}
+
+/* The white theme needs dark header text and a soft active dock item. */
+body[data-theme="white"] .mac-dock .menu-item.active,
+body[data-theme="white"] .dock-menu .menu-item.active {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  box-shadow: 0 6px 18px var(--module-accent-glow) !important;
+}
+
+body[data-theme="white"] .mac-dock .menu-item.active a,
+body[data-theme="white"] .dock-menu .menu-item.active a {
+  background: transparent !important;
+  color: var(--module-accent) !important;
+  box-shadow: none !important;
+}
+
+body[data-theme="white"] :is(
+  .clinicSettingsUser,
+  .clinicSettingsPanel
+) {
+  box-shadow: 0 20px 55px var(--module-shadow) !important;
+}
