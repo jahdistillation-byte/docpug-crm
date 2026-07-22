@@ -31283,3 +31283,405 @@ body[data-theme="black"] .financeKpiCard.is-profit {
   --finance-kpi-color: var(--finance-accent-2);
   --finance-kpi-glow: var(--finance-accent-soft);
 }
+
+/* =========================================================
+   SHARED MODULE THEME BRIDGE
+   Calendar and editor dialogs follow the saved clinic theme.
+   ========================================================= */
+
+:root,
+body {
+  --module-accent: var(--finance-accent);
+  --module-accent-2: var(--finance-accent-2);
+  --module-accent-soft: var(--finance-accent-soft);
+  --module-accent-glow: var(--finance-accent-glow);
+  --module-surface-1: var(--finance-surface-1);
+  --module-surface-2: var(--finance-surface-2);
+  --module-surface-soft: var(--finance-surface-soft);
+  --module-surface-hover: var(--finance-surface-hover);
+  --module-input: var(--finance-input);
+  --module-border: var(--finance-border);
+  --module-border-strong: var(--finance-border-strong);
+  --module-text: var(--finance-text);
+  --module-text-soft: var(--finance-text-soft);
+  --module-text-muted: var(--finance-text-muted);
+  --module-text-faint: var(--finance-text-faint);
+  --module-overlay: var(--finance-overlay);
+  --module-shadow: var(--finance-shadow);
+  --module-color-scheme: var(--finance-color-scheme);
+}
+
+/* Calendar: day, week and month surfaces. */
+body .calendarCard {
+  color: var(--module-text);
+  border-color: var(--module-border-strong);
+  background:
+    radial-gradient(circle at 100% 0, var(--module-accent-soft), transparent 40%),
+    linear-gradient(145deg, var(--module-surface-1), var(--module-surface-2));
+  box-shadow: 0 28px 80px var(--module-shadow);
+}
+
+body :is(
+  .calendarModes,
+  .calendarDate,
+  .calDoctorHead,
+  .calStaffPanel,
+  .weekDayCol,
+  .weekDayHead,
+  .monthDay,
+  .monthDrawerCard,
+  .monthDrawerPlaceholder,
+  .monthBulkBox,
+  .specPanel
+) {
+  border-color: var(--module-border);
+  background: var(--module-surface-soft);
+}
+
+body :is(
+  .calSlot,
+  .calEventCard,
+  .calStaffDrag,
+  .weekEventCard,
+  .monthStaffPill,
+  .monthEmptyShift,
+  .monthShiftToggle
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+}
+
+body :is(
+  .calendarCard button.ghost,
+  .calendarCard .miniBtn,
+  .monthBulkDay,
+  .monthBulkField input,
+  .monthBulkField select
+) {
+  border-color: var(--module-border);
+  background: var(--module-input);
+  color: var(--module-text-soft);
+  color-scheme: var(--module-color-scheme);
+}
+
+body :is(
+  .calendarCard button.primary,
+  .monthBulkApply,
+  .monthShiftToggle.active
+) {
+  border-color: color-mix(in srgb, var(--module-accent) 58%, white) !important;
+  background: linear-gradient(
+    135deg,
+    var(--module-accent),
+    color-mix(in srgb, var(--module-accent) 72%, var(--module-surface-2))
+  ) !important;
+  box-shadow: 0 10px 28px var(--module-accent-glow) !important;
+  color: #fff !important;
+}
+
+body #btnAddStaffFromCalendar {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  color: var(--module-accent-2) !important;
+}
+
+body #btnAddStaffFromCalendar:hover {
+  background: var(--module-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .calSlot:hover,
+  .calSlotDrop,
+  .monthDay:hover,
+  .monthDay.selected,
+  .monthDay.rangeSelected,
+  .monthShiftToggle.active,
+  .monthBulkDay.active
+) {
+  border-color: var(--module-accent) !important;
+  background: var(--module-accent-soft) !important;
+  box-shadow: 0 0 18px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .calendarHeader h2,
+  .calendarDate,
+  .calDoctorName,
+  .calStaffPanelTitle,
+  .calStaffDragName,
+  .weekDayName,
+  .weekEventTitle,
+  .monthDayNum,
+  .monthStaffPill,
+  .monthDrawerTitle,
+  .monthDrawerPlaceholderTitle,
+  .monthBulkTitle
+) {
+  color: var(--module-text) !important;
+}
+
+body :is(
+  .calendarCard .hint,
+  .calTimeHead,
+  .calTime,
+  .calDoctorMeta,
+  .calEventTime,
+  .calEventMeta,
+  .calStaffPanelSub,
+  .calStaffDragRole,
+  .weekDayDate,
+  .weekEventVet,
+  .weekEventMeta,
+  .weekEmpty,
+  .monthWeekHead div,
+  .monthEmptyShift,
+  .monthBulkField span
+) {
+  color: var(--module-text-muted) !important;
+}
+
+body :is(
+  .weekEventTime,
+  .monthVisitCount,
+  .monthMore,
+  .monthShiftToggle.active b,
+  .monthBulkDay.active,
+  .calEmptySlot:hover
+) {
+  color: var(--module-accent-2) !important;
+}
+
+body .calendar-top-scrollbar-container::-webkit-scrollbar-track {
+  background: var(--module-surface-soft);
+}
+
+body .calendar-top-scrollbar-container::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--module-accent) 42%, transparent);
+}
+
+body .calendar-top-scrollbar-container::-webkit-scrollbar-thumb:hover {
+  background: var(--module-accent);
+}
+
+/* Shared themed backdrops and modal shells. */
+body :is(
+  .pugOwnerOverlay,
+  .hospitalAdmissionBackdrop,
+  .serviceEditorBackdrop,
+  .stockEditorBackdrop,
+  #staffDrawer
+) {
+  background:
+    radial-gradient(circle at 50% 22%, var(--module-accent-soft), transparent 42%),
+    var(--module-overlay) !important;
+}
+
+body :is(
+  .pugOwnerModal,
+  .hospitalAdmissionModal,
+  .serviceEditorModal,
+  .stockEditorModal,
+  #staffDrawer .modal-window
+) {
+  color: var(--module-text);
+  border-color: var(--module-border-strong) !important;
+  background:
+    radial-gradient(circle at 100% 0, var(--module-accent-soft), transparent 38%),
+    linear-gradient(145deg, var(--module-surface-1), var(--module-surface-2)) !important;
+  box-shadow:
+    0 38px 105px var(--module-shadow),
+    0 0 38px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .pugQuickGroup,
+  .hospitalAdmissionSection,
+  .hospitalPatientSelectItem,
+  .hospitalPatientSelectEmpty,
+  .serviceEditorStatus,
+  .serviceEditorPreview,
+  .stockEditorStatus,
+  .stockEditorPreview
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+}
+
+body :is(
+  .pugVisitInput,
+  .hospitalAdmissionInput,
+  .hospitalAdmissionTextarea,
+  .serviceEditorField input,
+  .serviceEditorField select,
+  .stockEditorField input,
+  .stockEditorField select,
+  #staffDrawer .premium-input,
+  #staffDrawer .premium-select
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-input) !important;
+  color: var(--module-text) !important;
+  color-scheme: var(--module-color-scheme);
+}
+
+body :is(
+  .pugVisitInput,
+  .hospitalAdmissionInput,
+  .hospitalAdmissionTextarea,
+  .serviceEditorField input,
+  .serviceEditorField select,
+  .stockEditorField input,
+  .stockEditorField select,
+  #staffDrawer .premium-input,
+  #staffDrawer .premium-select
+):focus {
+  border-color: var(--module-accent) !important;
+  box-shadow:
+    0 0 0 3px var(--module-accent-soft),
+    0 0 20px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .pugVisitIcon,
+  .hospitalAdmissionSectionTitle > span,
+  .hospitalPatientSelectAvatar,
+  .serviceEditorIcon,
+  .serviceEditorPreviewIcon,
+  .stockEditorIcon,
+  .stockEditorPreviewIcon
+) {
+  border-color: var(--module-border-strong) !important;
+  background: var(--module-accent-soft) !important;
+  color: var(--module-accent-2) !important;
+  box-shadow: 0 0 24px var(--module-accent-glow) !important;
+}
+
+body :is(
+  .hospitalAdmissionEyebrow,
+  .hospitalPatientSelectCheck,
+  .serviceEditorEyebrow,
+  .stockEditorEyebrow,
+  .pugQuickGroupTitle
+) {
+  color: var(--module-accent-2) !important;
+}
+
+body :is(
+  .pugVisitTitle,
+  .pugQuickGroupTitle,
+  .hospitalAdmissionHeader h2,
+  .hospitalAdmissionSectionTitle strong,
+  .hospitalPatientSelectItem strong,
+  .hospitalPatientSelectEmpty strong,
+  .hospitalSelectedPatientPreview strong,
+  .serviceEditorHeader h2,
+  .serviceEditorStatus strong,
+  .serviceEditorPreview strong,
+  .stockEditorHeader h2,
+  .stockEditorStatus strong,
+  .stockEditorPreview strong,
+  #staffDrawer h3
+) {
+  color: var(--module-text) !important;
+}
+
+body :is(
+  .pugVisitSub,
+  .pugVisitField > span,
+  .hospitalAdmissionHeader p,
+  .hospitalAdmissionSectionTitle small,
+  .hospitalAdmissionField > span,
+  .hospitalPatientSelectItem small,
+  .hospitalPatientSelectEmpty span,
+  .hospitalSelectedPatientPreview span,
+  .hospitalSelectedPatientPreview small,
+  .serviceEditorHeader p,
+  .serviceEditorField > span,
+  .serviceEditorStatus span,
+  .serviceEditorPreview span,
+  .serviceEditorPreview small,
+  .stockEditorHeader p,
+  .stockEditorField > span,
+  .stockEditorStatus span,
+  .stockEditorPreview span,
+  .stockEditorPreview small,
+  #staffDrawer .modal-window > div
+) {
+  color: var(--module-text-muted) !important;
+}
+
+body :is(
+  .pugVisitClose,
+  .hospitalAdmissionClose,
+  .serviceEditorClose,
+  .stockEditorClose,
+  .pugVisitCancel,
+  .hospitalAdmissionCancel,
+  .serviceEditorCancel,
+  .stockEditorCancel,
+  #staffDrawer .premium-secondary-btn
+) {
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+  color: var(--module-text-soft) !important;
+  box-shadow: none !important;
+}
+
+body :is(
+  .pugVisitSave,
+  .hospitalAdmissionSubmit,
+  .serviceEditorSubmit,
+  .stockEditorSubmit,
+  #staffDrawer #staffSave
+) {
+  border-color: color-mix(in srgb, var(--module-accent) 58%, white) !important;
+  background: linear-gradient(
+    135deg,
+    var(--module-accent),
+    color-mix(in srgb, var(--module-accent) 72%, var(--module-surface-2))
+  ) !important;
+  color: #fff !important;
+  box-shadow:
+    0 12px 30px var(--module-accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+
+body :is(
+  .servicesPremiumSwitch,
+  .stockPremiumSwitch
+) input:checked + span {
+  background: linear-gradient(
+    135deg,
+    var(--module-accent),
+    var(--module-accent-2)
+  ) !important;
+  box-shadow: 0 0 16px var(--module-accent-glow);
+}
+
+body .pugVisitFoot {
+  border-color: var(--module-border) !important;
+  background: color-mix(in srgb, var(--module-surface-2) 90%, transparent) !important;
+}
+
+body .hospitalPatientSelectItem:hover,
+body .hospitalPatientSelectItem.selected {
+  border-color: var(--module-accent) !important;
+  background: var(--module-accent-soft) !important;
+}
+
+body .hospitalAdmissionSpinner {
+  border-top-color: var(--module-accent);
+}
+
+body[data-theme="white"] :is(
+  .calendarCard,
+  .pugOwnerModal,
+  .hospitalAdmissionModal,
+  .serviceEditorModal,
+  .stockEditorModal,
+  #staffDrawer .modal-window
+) {
+  box-shadow: 0 28px 80px var(--module-shadow) !important;
+}
