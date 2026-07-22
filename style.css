@@ -608,24 +608,6 @@ aside[style*="width: 240px"] {
     padding: 20px !important;
 }
 
-/* Умная кнопка додавання */
-#btnAddStaffFromCalendar {
-    background: rgba(163, 97, 255, 0.1) !important;
-    border: 1px solid rgba(163, 97, 255, 0.3) !important;
-    color: var(--primary-neon) !important;
-    padding: 6px 14px !important;
-    border-radius: 20px !important;
-    font-size: 0.75rem !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: none !important;
-}
-#btnAddStaffFromCalendar:hover {
-    background: var(--primary-neon) !important;
-    color: #fff !important;
-    box-shadow: var(--primary-glow) !important;
-}
-
 /* Сверхтонкие стеклянные плашки перетаскивания */
 .calStaffDrag {
     background: rgba(255, 255, 255, 0.02) !important;
@@ -31377,18 +31359,6 @@ body :is(
   ) !important;
   box-shadow: 0 10px 28px var(--module-accent-glow) !important;
   color: #fff !important;
-}
-
-body #btnAddStaffFromCalendar {
-  border-color: var(--module-border-strong) !important;
-  background: var(--module-accent-soft) !important;
-  color: var(--module-accent-2) !important;
-}
-
-body #btnAddStaffFromCalendar:hover {
-  background: var(--module-accent) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 24px var(--module-accent-glow) !important;
 }
 
 body :is(

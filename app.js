@@ -26496,7 +26496,6 @@ const staffSchedule =
               <div class="calStaffPanelTitle">Ветеринари</div>
               <div class="calStaffPanelSub">Перетягни в слот</div>
             </div>
-            <button class="miniBtn" id="btnAddStaffFromCalendar" type="button">+ Додати</button>
           </div>
 
           <div class="calStaffDragList">
@@ -26582,10 +26581,6 @@ const staffSchedule =
 
       if (created) await renderCalendarTab();
     });
-  });
-
-  $("#btnAddStaffFromCalendar")?.addEventListener("click", async () => {
-    alert("Додавання співробітників тепер знаходиться у розділі Команда.");
   });
 
   $("#calPrevDay")?.addEventListener("click", async () => {
