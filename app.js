@@ -5418,6 +5418,207 @@ function openServiceDeleteConfirm(
 
 
 
+function openSpecializationCreateModal() {
+  return new Promise((resolve) => {
+    const themeColors = {
+      purple: "#A855F7",
+      black: "#F43F5E",
+      white: "#5856D6",
+      blue: "#06B6D4",
+      green: "#10B981",
+    };
+
+    const activeTheme =
+      document.body.dataset.theme ||
+      "purple";
+
+    const modal =
+      document.createElement("div");
+
+    modal.className =
+      "specializationEditorOverlay";
+
+    modal.innerHTML = `
+      <button
+        class="specializationEditorBackdrop"
+        type="button"
+        aria-label="Закрити"
+        data-specialization-cancel
+      ></button>
+
+      <section
+        class="specializationEditorModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="specializationEditorTitle"
+      >
+        <button
+          class="specializationEditorClose"
+          type="button"
+          aria-label="Закрити"
+          data-specialization-cancel
+        >
+          ×
+        </button>
+
+        <div class="specializationEditorHeader">
+          <div class="specializationEditorIcon">✦</div>
+
+          <div>
+            <div class="specializationEditorEyebrow">
+              НОВИЙ НАПРЯМ
+            </div>
+
+            <h2 id="specializationEditorTitle">
+              Додати напрям
+            </h2>
+
+            <p>
+              Створіть напрям клініки для фільтрації
+              співробітників і спеціалізацій.
+            </p>
+          </div>
+        </div>
+
+        <form class="specializationEditorForm">
+          <label class="specializationEditorField">
+            <span>Назва напряму</span>
+            <input
+              id="specializationEditorName"
+              type="text"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Наприклад, Хірургія"
+              required
+            >
+          </label>
+
+          <label class="specializationEditorColorField">
+            <span>
+              <strong>Колір напряму</strong>
+              <small>Використовується у списках і профілях</small>
+            </span>
+
+            <input
+              id="specializationEditorColor"
+              type="color"
+              value="${themeColors[activeTheme] || themeColors.purple}"
+            >
+          </label>
+
+          <div
+            class="specializationEditorError"
+            role="alert"
+            aria-live="polite"
+          ></div>
+
+          <div class="specializationEditorActions">
+            <button
+              class="specializationEditorCancel"
+              type="button"
+              data-specialization-cancel
+            >
+              Скасувати
+            </button>
+
+            <button
+              class="specializationEditorSubmit"
+              type="submit"
+            >
+              Додати напрям
+            </button>
+          </div>
+        </form>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+
+    const input = modal.querySelector(
+      "#specializationEditorName"
+    );
+
+    const colorInput = modal.querySelector(
+      "#specializationEditorColor"
+    );
+
+    const errorBox = modal.querySelector(
+      ".specializationEditorError"
+    );
+
+    let finished = false;
+
+    const finish = (result) => {
+      if (finished) return;
+      finished = true;
+      document.removeEventListener(
+        "keydown",
+        handleKeydown
+      );
+      modal.remove();
+      resolve(result);
+    };
+
+    const handleKeydown = (event) => {
+      if (event.key === "Escape") {
+        finish(null);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleKeydown
+    );
+
+    modal
+      .querySelectorAll(
+        "[data-specialization-cancel]"
+      )
+      .forEach((button) => {
+        button.addEventListener(
+          "click",
+          () => finish(null)
+        );
+      });
+
+    modal
+      .querySelector(
+        ".specializationEditorForm"
+      )
+      ?.addEventListener(
+        "submit",
+        (event) => {
+          event.preventDefault();
+
+          const name = String(
+            input?.value || ""
+          ).trim();
+
+          if (!name) {
+            if (errorBox) {
+              errorBox.textContent =
+                "Вкажіть назву напряму.";
+            }
+
+            input?.focus();
+            return;
+          }
+
+          finish({
+            name,
+            color:
+              colorInput?.value ||
+              themeColors.purple,
+          });
+        }
+      );
+
+    requestAnimationFrame(() => {
+      input?.focus();
+    });
+  });
+}
+
 async function renderTeamTab() {
   const page =
     document.querySelector(
@@ -5872,19 +6073,15 @@ async function renderTeamTab() {
           return;
         }
 
-        const name =
-          String(
-            prompt(
-              "Назва напряму: хірург, дерматолог, екзовет..."
-            ) || ""
-          ).trim();
+        const specialization =
+          await openSpecializationCreateModal();
 
-        if (!name) return;
+        if (!specialization) return;
 
         const created =
           await createSpecializationApi({
-            name,
-            color: "#7C5CFF",
+            name: specialization.name,
+            color: specialization.color,
           });
 
         if (created) {
