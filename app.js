@@ -5760,10 +5760,34 @@ async function renderTeamTab() {
                                   )};
                               "
                             >
-                              ${escapeHtml(
-                                specialization.name ||
-                                "Напрям"
-                              )}
+                              <span>
+                                ${escapeHtml(
+                                  specialization.name ||
+                                  "Напрям"
+                                )}
+                              </span>
+
+                              <button
+                                class="specPillDelete"
+                                type="button"
+                                aria-label="Видалити напрям ${escapeHtml(
+                                  specialization.name ||
+                                  "Напрям"
+                                )}"
+                                title="Видалити напрям"
+                                data-delete-specialization-id="${escapeHtml(
+                                  String(
+                                    specialization.id ||
+                                    ""
+                                  )
+                                )}"
+                                data-delete-specialization-name="${escapeHtml(
+                                  specialization.name ||
+                                  "Напрям"
+                                )}"
+                              >
+                                ×
+                              </button>
                             </div>
                           `
                         )
@@ -6089,6 +6113,55 @@ async function renderTeamTab() {
         }
       }
     );
+
+  page
+    .querySelectorAll(
+      "[data-delete-specialization-id]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          if (!teamManager) return;
+
+          const specializationId =
+            button.dataset
+              .deleteSpecializationId;
+
+          const specializationName =
+            button.dataset
+              .deleteSpecializationName ||
+            "цей напрям";
+
+          openDeleteModal(
+            `Видалити напрям <b>${escapeHtml(
+              specializationName
+            )}</b>? Він зникне зі списку доступних напрямів.`,
+            async () => {
+              const result =
+                await deleteSpecializationApi(
+                  specializationId
+                );
+
+              if (!result.ok) {
+                openDeleteModal(
+                  escapeHtml(
+                    result.error ||
+                    "Не вдалося видалити напрям."
+                  ),
+                  null,
+                  "info"
+                );
+
+                return;
+              }
+
+              await renderTeamTab();
+            }
+          );
+        }
+      );
+    });
 
   page
     .querySelectorAll(
@@ -27264,6 +27337,56 @@ async function createSpecializationApi(payload) {
     console.error("createSpecializationApi failed:", e);
     alert("Помилка створення напряму");
     return null;
+  }
+}
+
+async function deleteSpecializationApi(specializationId) {
+  const cleanId = String(
+    specializationId || ""
+  ).trim();
+
+  if (!cleanId) {
+    return {
+      ok: false,
+      error: "Не вказано напрям.",
+    };
+  }
+
+  try {
+    const response = await fetch(
+      `/api/specializations/${encodeURIComponent(cleanId)}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const json = await response.json();
+
+    if (!response.ok || !json?.ok) {
+      return {
+        ok: false,
+        error:
+          json?.error ||
+          "Не вдалося видалити напрям.",
+      };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    console.error(
+      "deleteSpecializationApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Помилка з'єднання під час видалення напряму.",
+    };
   }
 }
 

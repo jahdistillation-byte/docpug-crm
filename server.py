@@ -6369,6 +6369,7 @@ def api_get_specializations():
             supabase.table("specializations")
             .select("*")
             .eq("org_id", current_org)
+            .eq("is_active", True)
             .order("name")
             .execute()
         )

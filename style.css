@@ -16141,6 +16141,48 @@ select.clinicSettingsInput {
   }
 }
 
+/* Deletable clinic specialization chips. */
+body .specPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px 7px 14px;
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-soft) !important;
+  color: var(--module-text) !important;
+}
+
+.specPillDelete {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 99, 119, 0.2);
+  border-radius: 9px;
+  background: rgba(255, 77, 103, 0.07);
+  color: #ff8295;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.specPillDelete:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 99, 119, 0.42);
+  background: rgba(255, 77, 103, 0.16);
+}
+
+.specPillDelete:focus-visible {
+  outline: 3px solid rgba(255, 99, 119, 0.2);
+  outline-offset: 2px;
+}
+
 /* =========================================================
    DOC.PUG CRM — PATIENT FILES ARCHIVE
    ========================================================= */
