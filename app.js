@@ -33037,6 +33037,114 @@ const CAT_BREEDS = [
   "Метис / безпородна"
 ];
 
+function initVisitNewPatientBreedPicker() {
+  const speciesSelect =
+    document.querySelector(
+      "#visitNewPetSpecies"
+    );
+
+  const breedInput =
+    document.querySelector(
+      "#visitNewPetBreed"
+    );
+
+  const breedList =
+    document.querySelector(
+      "#visitNewPetBreedList"
+    );
+
+  const breedLabel =
+    document.querySelector(
+      "#visitNewPetBreedLabel"
+    );
+
+  if (
+    !speciesSelect ||
+    !breedInput ||
+    !breedList
+  ) {
+    return;
+  }
+
+  const renderBreedOptions = () => {
+    const species =
+      String(
+        speciesSelect.value || ""
+      ).trim();
+
+    let breeds = [];
+
+    breedInput.value = "";
+    breedList.innerHTML = "";
+
+    if (species === "dog") {
+      breeds = DOG_BREEDS;
+
+      breedInput.disabled = false;
+
+      breedInput.placeholder =
+        "Почніть вводити породу собаки";
+
+      if (breedLabel) {
+        breedLabel.textContent =
+          "Порода собаки";
+      }
+    } else if (species === "cat") {
+      breeds = CAT_BREEDS;
+
+      breedInput.disabled = false;
+
+      breedInput.placeholder =
+        "Почніть вводити породу кота";
+
+      if (breedLabel) {
+        breedLabel.textContent =
+          "Порода кота";
+      }
+    } else if (species === "other") {
+      breedInput.disabled = false;
+
+      breedInput.placeholder =
+        "Напр. корела, кролик, шиншила";
+
+      if (breedLabel) {
+        breedLabel.textContent =
+          "Вид або порода";
+      }
+    } else {
+      breedInput.disabled = true;
+
+      breedInput.placeholder =
+        "Спочатку оберіть вид";
+
+      if (breedLabel) {
+        breedLabel.textContent =
+          "Порода";
+      }
+    }
+
+    breedList.innerHTML =
+      breeds
+        .map(
+          (breed) => `
+            <option
+              value="${escapeHtml(breed)}"
+            ></option>
+          `
+        )
+        .join("");
+  };
+
+  speciesSelect.addEventListener(
+    "change",
+    renderBreedOptions
+  );
+
+  renderBreedOptions();
+}
+
+initVisitNewPatientBreedPicker();
+
 function openAddPetModal(ownerId, petToEdit = null) {
   const isEditMode = Boolean(petToEdit?.id);
   const editingPetId = isEditMode ? String(petToEdit.id) : null;
