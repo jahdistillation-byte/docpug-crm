@@ -39395,153 +39395,89 @@ async function loadStaffScheduleRangeApi(from, to) {
   }
 }
 async function loadStaffRatingApi() {
+  const emptyRating = {
+    season_key: "—",
+    rows: [],
+  };
+
   try {
-    const res = await fetch("/api/staff/rating");
-    const json = await res.json();
+    const headers = {
+      Accept: "application/json",
+      ...getOrgHeaders(),
+    };
 
-    if (!json.ok) {
-      console.warn("Rating load error:", json.error);
-      return { season_key: "—", rows: [] };
+    // Сначала пробуем получить готовый рейтинг сезона.
+    const ratingResponse = await fetch(
+      "/api/staff/rating",
+      {
+        method: "GET",
+        credentials: "include",
+        headers,
+      }
+    );
+
+    const ratingJson =
+      await ratingResponse.json();
+
+    if (
+      !ratingResponse.ok ||
+      ratingJson?.ok !== true
+    ) {
+      throw new Error(
+        ratingJson?.error ||
+        "Не вдалося завантажити рейтинг."
+      );
     }
 
-    return json.data || { season_key: "—", rows: [] };
-  } catch (e) {
-    console.error(e);
-    return { season_key: "—", rows: [] };
-  }
-}
-document.addEventListener("click", async (e) => {
-  const openBtn = e.target.closest("#btnCreatePatientFromVisit");
-  const cancelBtn = e.target.closest("#visitNewPatientCancel");
-  const createBtn = e.target.closest("#visitNewPatientCreate");
+    const rating =
+      ratingJson.data || emptyRating;
 
-  if (!openBtn && !cancelBtn && !createBtn) return;
-
-  e.preventDefault();
-
-  const box = document.querySelector("#visitNewPatientBox");
-
-  if (!box) return alert("Блок швидкого створення пацієнта не знайдено");
-
-  if (openBtn) {
-    box.style.display = "block";
-
-    const select = document.querySelector("#visitPatientSelect");
-    const search = document.querySelector("#visitPatientSearch");
-    const results = document.querySelector("#visitPatientResults");
-
-    if (select) select.value = "";
-    if (search) search.value = "";
-    if (results) results.innerHTML = "";
-
-    state.selectedPet = null;
-    state.selectedPetId = null;
-
-    document.querySelector("#visitNewOwnerName")?.focus();
-    return;
-  }
-
-  if (cancelBtn) {
-    box.style.display = "none";
-    return;
-  }
-
-  if (createBtn) {
-    const ownerName = (document.querySelector("#visitNewOwnerName")?.value || "").trim();
-    const ownerPhone = (document.querySelector("#visitNewOwnerPhone")?.value || "").trim();
-    const ownerNote = (document.querySelector("#visitNewOwnerNote")?.value || "").trim();
-
-    const petName = (document.querySelector("#visitNewPetName")?.value || "").trim();
-    const species = (document.querySelector("#visitNewPetSpecies")?.value || "").trim();
-    const breed = (document.querySelector("#visitNewPetBreed")?.value || "").trim();
-    const age = (document.querySelector("#visitNewPetAge")?.value || "").trim();
-    const weight = (document.querySelector("#visitNewPetWeight")?.value || "").trim();
-
-    if (!ownerName) return alert("Вкажи ПІБ власника");
-    if (!ownerPhone) return alert("Вкажи телефон власника");
-    if (!petName) return alert("Вкажи кличку пацієнта");
-    if (!species) return alert("Оберіть вид пацієнта");
-
-    const oldText = createBtn.textContent;
-    createBtn.disabled = true;
-    createBtn.textContent = "Створюємо...";
-
-    try {
-      const owner = await createOwner(ownerName, ownerPhone, ownerNote);
-      if (!owner?.id) throw new Error("Не вдалося створити власника");
-
-      const pet = await createPatientApi({
-  owner_id: owner.id,
-  ownerId: owner.id,
-  owner: owner.id,
-
-  name: petName,
-  species,
-  breed,
-  age,
-  weight_kg: weight,
-  notes: "",
-});
-
-      if (!pet?.id) throw new Error("Не вдалося створити пацієнта");
-
-      state.selectedPet = pet;
-      state.selectedPetId = pet.id;
-
-      const hidden = document.querySelector("#visitPatientSelect");
-      const search = document.querySelector("#visitPatientSearch");
-      const sub = document.querySelector("#visitModalSub");
-
-      if (hidden) hidden.value = pet.id;
-      if (search) search.value = `${pet.name} — ${owner.name}`;
-      if (sub) sub.textContent = `Пацієнт: ${pet.name}`;
-
-      window.__visitPatientList = await loadPatientsApi();
-
-      box.style.display = "none";
-
-      alert(`Пацієнта ${pet.name} створено і обрано для візиту`);
-    } catch (err) {
-      console.error(err);
-      alert("Помилка створення пацієнта: " + (err?.message || err));
-    } finally {
-      createBtn.disabled = false;
-      createBtn.textContent = oldText;
+    if (
+      Array.isArray(rating.rows) &&
+      rating.rows.length > 0
+    ) {
+      return rating;
     }
+
+    // Якщо сезон ще порожній —
+    // автоматично створюємо рейтинг.
+    const rebuildResponse = await fetch(
+      "/api/staff/rating/rebuild",
+      {
+        method: "POST",
+        credentials: "include",
+        headers,
+      }
+    );
+
+    const rebuildJson =
+      await rebuildResponse.json();
+
+    if (
+      !rebuildResponse.ok ||
+      rebuildJson?.ok !== true
+    ) {
+      throw new Error(
+        rebuildJson?.error ||
+        "Не вдалося розрахувати рейтинг."
+      );
+    }
+
+    return (
+      rebuildJson.data || {
+        season_key:
+          rating.season_key || "—",
+        rows: [],
+      }
+    );
+  } catch (error) {
+    console.error(
+      "loadStaffRatingApi failed:",
+      error
+    );
+
+    return emptyRating;
   }
-});
-function openOwnerModal(owner = null) {
-  const modal = $("#ownerModal");
-  if (!modal) return alert("Не знайдено #ownerModal");
-
-  const isEdit = !!owner?.id;
-
-  $("#ownerModalId").value = isEdit ? owner.id : "";
-  $("#ownerModalName").value = owner?.name || "";
-  $("#ownerModalPhone").value = owner?.phone || "";
-  $("#ownerModalNote").value = owner?.note || "";
-
-  $("#ownerModalTitle").textContent = isEdit ? "Редагування власника" : "Новий власник";
-  $("#ownerModalSub").textContent = isEdit
-    ? "Оновлення контактних даних власника"
-    : "Створення картки власника тварини";
-
-
-
-modal.style.display = "flex";
-
-modal.classList.add("open");
-
-modal.setAttribute(
-  "aria-hidden",
-  "false"
-);
-
-document.body.classList.add(
-  "medcardModalIsOpen"
-);
-
-  setTimeout(() => $("#ownerModalName")?.focus(), 50);
 }
 
 function closeOwnerModal() {
