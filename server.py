@@ -6219,6 +6219,328 @@ def api_finance_purchase_create():
             500,
         )
         
+# =====================================================
+# FINANCE: RECEIVE STOCK PURCHASE
+# =====================================================
+
+@app.post(
+    "/api/finance/purchases/<purchase_id>/receive"
+)
+def api_receive_stock_purchase(
+    purchase_id,
+):
+    """
+    Принимает поставку по закупке.
+
+    - увеличивает received_qty;
+    - пополняет склад;
+    - создаёт stock_movements;
+    - обновляет статус закупки;
+    - защищает от повторного запроса.
+    """
+
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    clean_purchase_id = str(
+        purchase_id or ""
+    ).strip()
+
+    if not clean_purchase_id:
+        return fail(
+            "purchase_id required",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    items = data.get(
+        "items"
+    )
+
+    if (
+        not isinstance(items, list)
+        or not items
+    ):
+        return fail(
+            "Додайте хоча б одну позицію приймання.",
+            400,
+        )
+
+    clean_items = []
+
+    for index, item in enumerate(
+        items
+    ):
+        if not isinstance(
+            item,
+            dict,
+        ):
+            return fail(
+                (
+                    "Некоректна позиція "
+                    f"№{index + 1}."
+                ),
+                400,
+            )
+
+        item_id = str(
+            item.get("item_id")
+            or item.get(
+                "purchase_item_id"
+            )
+            or ""
+        ).strip()
+
+        try:
+            quantity = float(
+                item.get("quantity")
+                if item.get("quantity")
+                is not None
+                else item.get("qty")
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+            quantity = 0
+
+        if not item_id:
+            return fail(
+                (
+                    "Не вказано позицію "
+                    f"№{index + 1}."
+                ),
+                400,
+            )
+
+        if quantity <= 0:
+            return fail(
+                (
+                    "Кількість у позиції "
+                    f"№{index + 1} "
+                    "повинна бути більшою за нуль."
+                ),
+                400,
+            )
+
+        clean_items.append({
+            "item_id": item_id,
+            "quantity": quantity,
+        })
+
+    idempotency_key = str(
+        data.get(
+            "idempotency_key"
+        )
+        or ""
+    ).strip()
+
+    if not idempotency_key:
+        return fail(
+            "idempotency_key required",
+            400,
+        )
+
+    note = str(
+        data.get("note")
+        or ""
+    ).strip()
+
+    try:
+        rpc_result = (
+            supabase
+            .rpc(
+                "receive_stock_purchase",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_purchase_id":
+                        clean_purchase_id,
+
+                    "p_user_id":
+                        str(
+                            user.get("id")
+                        ),
+
+                    "p_idempotency_key":
+                        idempotency_key,
+
+                    "p_items":
+                        clean_items,
+
+                    "p_note":
+                        note or None,
+                },
+            )
+            .execute()
+        )
+
+        rpc_data = (
+            rpc_result.data
+        )
+
+        if isinstance(
+            rpc_data,
+            list,
+        ):
+            rpc_data = (
+                rpc_data[0]
+                if rpc_data
+                else None
+            )
+
+        if not isinstance(
+            rpc_data,
+            dict,
+        ):
+            return fail(
+                (
+                    "Сервер не повернув "
+                    "результат приймання."
+                ),
+                500,
+            )
+
+        purchase_result = (
+            supabase
+            .table(
+                "stock_purchases"
+            )
+            .select(
+                (
+                    "*, "
+                    "suppliers("
+                    "id, name, phone, email"
+                    "), "
+                    "stock_purchase_items("
+                    "*"
+                    ")"
+                )
+            )
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "id",
+                clean_purchase_id,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        purchase = (
+            purchase_result.data[0]
+            if purchase_result.data
+            else None
+        )
+
+        return ok({
+            "receipt":
+                rpc_data,
+
+            "purchase":
+                purchase,
+        })
+
+    except Exception as error:
+        print(
+            "❌ RECEIVE PURCHASE:",
+            repr(error),
+            flush=True,
+        )
+
+        message = str(
+            error
+        )
+
+        readable_errors = {
+            "Purchase not found":
+                "Закупівлю не знайдено.",
+
+            "Cancelled purchase cannot be received":
+                (
+                    "Скасовану закупівлю "
+                    "не можна прийняти."
+                ),
+
+            "Purchase is already fully received":
+                (
+                    "Закупівлю вже повністю "
+                    "прийнято."
+                ),
+
+            "Receipt quantity must be greater than zero":
+                (
+                    "Кількість повинна бути "
+                    "більшою за нуль."
+                ),
+        }
+
+        for marker, readable in (
+            readable_errors.items()
+        ):
+            if marker in message:
+                return fail(
+                    readable,
+                    409,
+                )
+
+        if (
+            "Remaining quantity"
+            in message
+            or "already fully received"
+            in message
+        ):
+            return fail(
+                (
+                    "Вказана кількість перевищує "
+                    "залишок до приймання."
+                ),
+                409,
+            )
+
+        if (
+            "is not linked to stock"
+            in message
+        ):
+            return fail(
+                (
+                    "Одна з позицій закупівлі "
+                    "не прив’язана до складу."
+                ),
+                409,
+            )
+
+        return fail(
+            (
+                "Не вдалося прийняти "
+                "поставку."
+            ),
+            500,
+        )        
 # =========================
 # SERVICES API
 # =========================
