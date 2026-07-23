@@ -6483,7 +6483,120 @@ def api_create_owner():
             f"Cannot create owner: {error}",
             500,
         )
+@app.delete("/api/owners/<owner_id>")
+def api_delete_owner(owner_id):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
 
+    if auth_error:
+        return auth_error
+
+    owner_id = str(
+        owner_id or ""
+    ).strip()
+
+    if not owner_id:
+        return fail(
+            "owner_id required",
+            400,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        owner_result = (
+            supabase
+            .table("owners")
+            .select("id, name")
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "id",
+                owner_id,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not owner_result.data:
+            return fail(
+                "Власника не знайдено.",
+                404,
+            )
+
+        patients_result = (
+            supabase
+            .table("patients")
+            .select("id")
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "owner_id",
+                owner_id,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if patients_result.data:
+            return fail(
+                (
+                    "Неможливо видалити власника, "
+                    "поки до нього прив’язані пацієнти."
+                ),
+                409,
+            )
+
+        delete_result = (
+            supabase
+            .table("owners")
+            .delete()
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "id",
+                owner_id,
+            )
+            .execute()
+        )
+
+        if not delete_result.data:
+            return fail(
+                "Власника не знайдено.",
+                404,
+            )
+
+        return ok({
+            "id": owner_id,
+            "deleted": True,
+        })
+
+    except Exception as error:
+        print(
+            "❌ DELETE /api/owners:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося видалити власника.",
+            500,
+        )
 # =========================
 # API: SPECIALIZATIONS
 # =========================
