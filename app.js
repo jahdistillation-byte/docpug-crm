@@ -32658,6 +32658,80 @@ function renderOwners() {
 // =========================
 // UI ВЛАДЕЛЬЦЕВ — Адаптировано под новую таблицу
 // =========================
+function openOwnerModal(owner = null) {
+  const modal = document.querySelector("#ownerModal");
+
+  if (!modal) {
+    console.error("Не знайдено модальне вікно #ownerModal");
+    return;
+  }
+
+  const isEdit = Boolean(owner);
+
+  const title = modal.querySelector(
+    "#ownerModalTitle, [data-owner-modal-title], h2"
+  );
+
+  const nameInput = modal.querySelector(
+    "#ownerName, [name='name']"
+  );
+
+  const phoneInput = modal.querySelector(
+    "#ownerPhone, [name='phone']"
+  );
+
+  const emailInput = modal.querySelector(
+    "#ownerEmail, [name='email']"
+  );
+
+  const addressInput = modal.querySelector(
+    "#ownerAddress, [name='address']"
+  );
+
+  const noteInput = modal.querySelector(
+    "#ownerNote, [name='note']"
+  );
+
+  if (title) {
+    title.textContent = isEdit
+      ? "Редагувати власника"
+      : "Новий власник";
+  }
+
+  if (nameInput) {
+    nameInput.value = owner?.name || "";
+  }
+
+  if (phoneInput) {
+    phoneInput.value = owner?.phone || "";
+  }
+
+  if (emailInput) {
+    emailInput.value = owner?.email || "";
+  }
+
+  if (addressInput) {
+    addressInput.value = owner?.address || "";
+  }
+
+  if (noteInput) {
+    noteInput.value = owner?.note || "";
+  }
+
+  modal.dataset.ownerId = owner?.id
+    ? String(owner.id)
+    : "";
+
+  modal.classList.add("show");
+  modal.classList.add("open");
+  modal.removeAttribute("hidden");
+
+  modal.style.display = "flex";
+
+  setTimeout(() => {
+    nameInput?.focus();
+  }, 50);
+}
 function initOwnersUI() {
   if (state.ownersUiBound) return;
   state.ownersUiBound = true;
