@@ -10561,6 +10561,214 @@ async function createFinancePurchaseApi(
   return result.data;
 }
 
+// =====================================================
+// FINANCE PURCHASES: RECEIVE DELIVERY
+// =====================================================
+
+async function receiveFinancePurchaseApi(
+  purchaseId,
+  items,
+  note = ""
+) {
+  const cleanPurchaseId =
+    String(
+      purchaseId || ""
+    ).trim();
+
+  if (!cleanPurchaseId) {
+    throw new Error(
+      "Не вказано закупівлю."
+    );
+  }
+
+  if (
+    !Array.isArray(items) ||
+    !items.length
+  ) {
+    throw new Error(
+      "Додайте хоча б одну позицію приймання."
+    );
+  }
+
+  const cleanItems =
+    items
+      .map((item) => {
+        const itemId =
+          String(
+            item?.item_id ||
+            item?.purchase_item_id ||
+            item?.id ||
+            ""
+          ).trim();
+
+        const quantity =
+          Number(
+            item?.quantity ??
+            item?.qty ??
+            0
+          );
+
+        return {
+          item_id: itemId,
+          quantity,
+        };
+      })
+      .filter(
+        (item) =>
+          item.item_id &&
+          Number.isFinite(
+            item.quantity
+          ) &&
+          item.quantity > 0
+      );
+
+  if (!cleanItems.length) {
+    throw new Error(
+      "Не вказано коректну кількість для приймання."
+    );
+  }
+
+  const idempotencyKey =
+    typeof crypto
+      ?.randomUUID ===
+      "function"
+      ? crypto.randomUUID()
+      : [
+          "purchase-receipt",
+          cleanPurchaseId,
+          Date.now(),
+          Math.random()
+            .toString(16)
+            .slice(2),
+        ].join("-");
+
+  const response =
+    await fetch(
+      `/api/finance/purchases/${
+        encodeURIComponent(
+          cleanPurchaseId
+        )
+      }/receive`,
+      {
+        method: "POST",
+
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body: JSON.stringify({
+          items:
+            cleanItems,
+
+          note:
+            String(
+              note || ""
+            ).trim(),
+
+          idempotency_key:
+            idempotencyKey,
+        }),
+      }
+    );
+
+  const text =
+    await response.text();
+
+  let result = null;
+
+  try {
+    result = text
+      ? JSON.parse(text)
+      : null;
+  } catch {
+    result = null;
+  }
+
+  if (
+    !response.ok ||
+    !result ||
+    result.ok !== true
+  ) {
+    console.error(
+      "receiveFinancePurchaseApi failed:",
+      response.status,
+      result,
+      text
+    );
+
+    throw new Error(
+      result?.error ||
+      `Не вдалося прийняти поставку (HTTP ${response.status}).`
+    );
+  }
+
+  const data =
+    result.data || {};
+
+  if (
+    data.purchase &&
+    typeof data.purchase ===
+      "object"
+  ) {
+    const currentPurchases =
+      Array.isArray(
+        state.financePurchases
+      )
+        ? state.financePurchases
+        : [];
+
+    const updatedPurchase =
+      data.purchase;
+
+    const purchaseExists =
+      currentPurchases.some(
+        (purchase) =>
+          String(
+            purchase?.id || ""
+          ) ===
+          cleanPurchaseId
+      );
+
+    state.financePurchases =
+      purchaseExists
+        ? currentPurchases.map(
+            (purchase) =>
+              String(
+                purchase?.id || ""
+              ) ===
+              cleanPurchaseId
+                ? {
+                    ...purchase,
+                    ...updatedPurchase,
+                  }
+                : purchase
+          )
+        : [
+            updatedPurchase,
+            ...currentPurchases,
+          ];
+  }
+
+  if (
+    typeof loadStockApi ===
+    "function"
+  ) {
+    await loadStockApi(
+      true
+    );
+  }
+
+  return data;
+}
+
 function buildFinanceTrendChart(
   rows
 ) {
