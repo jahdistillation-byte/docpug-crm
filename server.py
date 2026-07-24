@@ -6900,7 +6900,93 @@ def api_create_owner():
         return fail(
             f"Cannot create owner: {error}",
             500,
+        )   
+
+@app.put("/api/owners/<owner_id>")
+def api_update_owner(owner_id):
+    _user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = get_current_org_id()
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+        data = request.get_json(
+            silent=True
+        ) or {}
+
+        name = str(
+            data.get("name") or ""
+        ).strip()
+
+        if not name:
+            return fail(
+                "Вкажіть ПІБ власника",
+                400,
+            )
+
+        phone = normalize_ua_phone(
+            data.get("phone")
         )
+
+        if not phone:
+            return fail(
+                "Телефон повинен бути у форматі +380 XX XXX XX XX",
+                400,
+            )
+
+        update_payload = {
+            "name": name,
+            "phone": phone,
+            "note": str(
+                data.get("note") or ""
+            ).strip() or None,
+        }
+
+        result = (
+            supabase
+            .table("owners")
+            .update(
+                update_payload
+            )
+            .eq(
+                "id",
+                owner_id
+            )
+            .eq(
+                "org_id",
+                current_org
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Власника не знайдено",
+                404,
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as e:
+        print(
+            "api_update_owner error:",
+            e
+        )
+
+        return fail(
+            str(e),
+            500,
+        )    
 @app.delete("/api/owners/<owner_id>")
 def api_delete_owner(owner_id):
     user, auth_error = (
