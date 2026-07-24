@@ -1987,35 +1987,82 @@ async function createPatientApi(payload) {
   }
 }
 
-async function createOwner(name, phone, note = "") {
+async function createOwner(
+  payload = {}
+) {
   try {
-    const res = await fetch("/api/owners", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        ...getOrgHeaders(),
-      },
-      body: JSON.stringify({
-        name: String(name || "").trim(),
-        phone: String(phone || "").trim(),
-        note: String(note || "").trim(),
-      }),
-    });
+    const body = {
+      name:
+        String(
+          payload.name || ""
+        ).trim(),
 
-    const text = await res.text();
+      phone:
+        String(
+          payload.phone || ""
+        ).trim(),
+
+      email:
+        String(
+          payload.email || ""
+        ).trim(),
+
+      telegram:
+        String(
+          payload.telegram || ""
+        ).trim(),
+
+      note:
+        String(
+          payload.note || ""
+        ).trim(),
+    };
+
+    const res =
+      await fetch(
+        "/api/owners",
+        {
+          method:
+            "POST",
+
+          credentials:
+            "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+
+          body:
+            JSON.stringify(
+              body
+            ),
+        }
+      );
+
+    const text =
+      await res.text();
+
     let json = null;
 
     try {
-      json = text
-        ? JSON.parse(text)
-        : null;
+      json =
+        text
+          ? JSON.parse(text)
+          : null;
     } catch {
       json = null;
     }
 
-    if (!res.ok || !json?.ok) {
+    if (
+      !res.ok ||
+      !json?.ok
+    ) {
       console.error(
         "createOwner error:",
         res.status,
@@ -2031,10 +2078,22 @@ async function createOwner(name, phone, note = "") {
       return null;
     }
 
-    return Array.isArray(json.data) ? json.data[0] : json.data;
-  } catch (e) {
-    console.error("createOwner failed:", e);
-    alert("Помилка створення власника");
+    return Array.isArray(
+      json.data
+    )
+      ? json.data[0]
+      : json.data;
+
+  } catch (error) {
+    console.error(
+      "createOwner failed:",
+      error
+    );
+
+    alert(
+      "Помилка створення власника"
+    );
+
     return null;
   }
 }
@@ -2042,14 +2101,44 @@ async function createOwner(name, phone, note = "") {
 async function updateOwner(id, payload = {}) {
   try {
     const bodyObj = {
-      name: String(payload.name || "").trim(),
-      phone: String(payload.phone || "").trim(),
-      note: String(payload.note || "").trim(),
-    };
+  name:
+    String(
+      payload.name || ""
+    ).trim(),
 
-    Object.keys(bodyObj).forEach((k) => {
-      if (bodyObj[k] === "") delete bodyObj[k];
-    });
+  phone:
+    String(
+      payload.phone || ""
+    ).trim(),
+
+  email:
+    String(
+      payload.email || ""
+    ).trim(),
+
+  telegram:
+    String(
+      payload.telegram || ""
+    ).trim(),
+
+  note:
+    String(
+      payload.note || ""
+    ).trim(),
+};
+
+    Object.keys(
+  bodyObj
+).forEach(
+  (key) => {
+    if (
+      bodyObj[key] ==
+      null
+    ) {
+      delete bodyObj[key];
+    }
+  }
+);
 
     const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
       method: "PUT",
@@ -33141,6 +33230,15 @@ function openOwnerModal(
     modal.querySelector(
       "#ownerModalPhone"
     );
+const emailInput =
+  modal.querySelector(
+    "#ownerModalEmail"
+  );
+
+const telegramInput =
+  modal.querySelector(
+    "#ownerModalTelegram"
+  );
 
   const noteInput =
     modal.querySelector(
@@ -33190,6 +33288,16 @@ function openOwnerModal(
       phoneInput
     );
   }
+if (emailInput) {
+  emailInput.value =
+    owner?.email || "";
+}
+
+if (telegramInput) {
+  telegramInput.value =
+    owner?.telegram || "";
+}
+
 
   if (noteInput) {
     noteInput.value =
@@ -35328,13 +35436,24 @@ if (!petName) {
 }
 
       const owner =
-  await createOwner(
-    ownerName,
-    formatUaPhone(
-      ownerPhone
-    ),
-    ""
-  );
+  await createOwner({
+    name:
+      ownerName,
+
+    phone:
+      formatUaPhone(
+        ownerPhone
+      ),
+
+    email:
+      "",
+
+    telegram:
+      "",
+
+    note:
+      ownerNote,
+  });
       if (!owner?.id) return alert("Не вдалося створити власника");
 
       const createdPet = await createPatientApi({
@@ -40203,6 +40322,36 @@ $("#ownerModalSave")
           ""
         ).trim();
 
+        const email =
+  (
+    $("#ownerModalEmail")
+      ?.value ||
+    ""
+  ).trim();
+
+const telegramRaw =
+  (
+    $("#ownerModalTelegram")
+      ?.value ||
+    ""
+  ).trim();
+
+  if (
+  email &&
+  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    email
+  )
+) {
+  alert(
+    "Вкажіть коректну електронну адресу"
+  );
+
+  $("#ownerModalEmail")
+    ?.focus();
+
+  return;
+}
+
       const note =
         (
           $("#ownerModalNote")
@@ -40251,7 +40400,14 @@ $("#ownerModalSave")
         formatUaPhone(
           phone
         );
-
+const normalizedTelegram =
+  telegramRaw
+    ? (
+        telegramRaw.startsWith("@")
+          ? telegramRaw
+          : `@${telegramRaw}`
+      )
+    : "";
       const btn =
         $("#ownerModalSave");
 
@@ -40275,22 +40431,31 @@ $("#ownerModalSave")
 
         if (id) {
           saved =
-            await updateOwner(
-              id,
-              {
-                name,
-                phone:
-                  normalizedPhone,
-                note,
-              }
-            );
+  await updateOwner(
+    id,
+    {
+      name,
+      phone:
+        normalizedPhone,
+      email,
+      telegram:
+        normalizedTelegram,
+      note,
+    }
+  );
         } else {
           saved =
-            await createOwner(
-              name,
-              normalizedPhone,
-              note
-            );
+  await createOwner(
+    {
+      name,
+      phone:
+        normalizedPhone,
+      email,
+      telegram:
+        normalizedTelegram,
+      note,
+    }
+  );
         }
 
         if (!saved) {
