@@ -290,29 +290,28 @@ function escapeHtml(str) {
 // Український номер телефону
 // =========================
 
-function normalizeUaPhone(value) {
+function getUaPhoneDigits(
+  value
+) {
   let digits =
     String(value || "")
       .replace(/\D/g, "");
 
   if (
-    digits.startsWith("00")
+    digits.startsWith("380")
   ) {
-    digits =
-      digits.slice(2);
+    return digits.slice(
+      0,
+      12
+    );
   }
 
-  // 0501234567 -> 380501234567
   if (
     digits.startsWith("0")
   ) {
     digits =
       `38${digits}`;
-  }
-
-  // 501234567 -> 380501234567
-  if (
-    !digits.startsWith("380") &&
+  } else if (
     digits.length <= 9
   ) {
     digits =
@@ -326,60 +325,57 @@ function normalizeUaPhone(value) {
 }
 
 
-function formatUaPhone(value) {
+function formatUaPhone(
+  value
+) {
   const digits =
-    normalizeUaPhone(value);
+    getUaPhoneDigits(
+      value
+    );
 
   if (!digits) {
     return "";
   }
 
-  const country =
+  let result = "+";
+
+  result +=
     digits.slice(0, 3);
 
-  const operator =
-    digits.slice(3, 5);
-
-  const first =
-    digits.slice(5, 8);
-
-  const second =
-    digits.slice(8, 10);
-
-  const third =
-    digits.slice(10, 12);
-
-  let result =
-    `+${country}`;
-
-  if (operator) {
+  if (digits.length > 3) {
     result +=
-      ` ${operator}`;
+      ` ${digits.slice(3, 5)}`;
   }
 
-  if (first) {
+  if (digits.length > 5) {
     result +=
-      ` ${first}`;
+      ` ${digits.slice(5, 8)}`;
   }
 
-  if (second) {
+  if (digits.length > 8) {
     result +=
-      ` ${second}`;
+      ` ${digits.slice(8, 10)}`;
   }
 
-  if (third) {
+  if (digits.length > 10) {
     result +=
-      ` ${third}`;
+      ` ${digits.slice(10, 12)}`;
   }
 
   return result;
 }
 
 
-function isValidUaPhone(value) {
+function isValidUaPhone(
+  value
+) {
+  const digits =
+    String(value || "")
+      .replace(/\D/g, "");
+
   return (
-    normalizeUaPhone(value)
-      .length === 12
+    digits.length === 12 &&
+    digits.startsWith("380")
   );
 }
 
@@ -397,6 +393,80 @@ function bindUaPhoneInput(
 
   input.dataset.phoneMaskBound =
     "1";
+
+  input.setAttribute(
+    "maxlength",
+    "17"
+  );
+
+  input.setAttribute(
+    "inputmode",
+    "numeric"
+  );
+
+  input.addEventListener(
+    "keydown",
+    (event) => {
+      const allowedKeys = [
+        "Backspace",
+        "Delete",
+        "ArrowLeft",
+        "ArrowRight",
+        "Tab",
+        "Home",
+        "End",
+      ];
+
+      if (
+        allowedKeys.includes(
+          event.key
+        )
+      ) {
+        return;
+      }
+
+      if (
+        event.ctrlKey ||
+        event.metaKey
+      ) {
+        return;
+      }
+
+      if (
+        !/^\d$/.test(
+          event.key
+        )
+      ) {
+        event.preventDefault();
+      }
+    }
+  );
+
+  input.addEventListener(
+    "paste",
+    (event) => {
+      event.preventDefault();
+
+      const pasted =
+        event.clipboardData
+          ?.getData("text") ||
+        "";
+
+      input.value =
+        formatUaPhone(
+          pasted
+        );
+
+      input.dispatchEvent(
+        new Event(
+          "input",
+          {
+            bubbles: true,
+          }
+        )
+      );
+    }
+  );
 
   input.addEventListener(
     "input",
@@ -422,7 +492,7 @@ function bindUaPhoneInput(
         )
       ) {
         input.setCustomValidity(
-          "Вкажіть номер у форматі +380 XX XXX XX XX"
+          "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX"
         );
       } else {
         input.setCustomValidity(
@@ -33038,7 +33108,7 @@ function openOwnerModal(
 
   if (!modal) {
     console.error(
-      "Не знайдено модальне вікно #ownerModal"
+      "Не знайдено #ownerModal"
     );
 
     return;
@@ -33046,6 +33116,11 @@ function openOwnerModal(
 
   const isEdit =
     Boolean(owner?.id);
+
+  const idInput =
+    modal.querySelector(
+      "#ownerModalId"
+    );
 
   const title =
     modal.querySelector(
@@ -33055,11 +33130,6 @@ function openOwnerModal(
   const subTitle =
     modal.querySelector(
       "#ownerModalSub"
-    );
-
-  const idInput =
-    modal.querySelector(
-      "#ownerModalId"
     );
 
   const nameInput =
@@ -33077,6 +33147,18 @@ function openOwnerModal(
       "#ownerModalNote"
     );
 
+  if (idInput) {
+    idInput.value =
+      isEdit
+        ? String(owner.id)
+        : "";
+  }
+
+  modal.dataset.ownerId =
+    isEdit
+      ? String(owner.id)
+      : "";
+
   if (title) {
     title.textContent =
       isEdit
@@ -33087,15 +33169,8 @@ function openOwnerModal(
   if (subTitle) {
     subTitle.textContent =
       isEdit
-        ? "Оновлення контактних даних власника"
+        ? "Оновлення даних власника"
         : "Створення картки власника тварини";
-  }
-
-  if (idInput) {
-    idInput.value =
-      owner?.id
-        ? String(owner.id)
-        : "";
   }
 
   if (nameInput) {
@@ -33120,11 +33195,6 @@ function openOwnerModal(
     noteInput.value =
       owner?.note || "";
   }
-
-  modal.dataset.ownerId =
-    owner?.id
-      ? String(owner.id)
-      : "";
 
   modal.classList.add(
     "show",
@@ -40095,97 +40165,177 @@ function closeOwnerModal() {
 
 $("#ownerModalClose")?.addEventListener("click", closeOwnerModal);
 $("#ownerModalCancel")?.addEventListener("click", closeOwnerModal);
+bindUaPhoneInput(
+  document.querySelector(
+    "#ownerModalPhone"
+  )
+);
+
+bindUaPhoneInput(
+  document.querySelector(
+    "#visitNewOwnerPhone"
+  )
+);
 initPhoneInputs();
 
-$("#ownerModalSave")?.addEventListener("click", async () => {
- const id =
-  (
-    $("#ownerModalId")
-      ?.value || ""
-  ).trim();
+$("#ownerModalSave")
+  ?.addEventListener(
+    "click",
+    async () => {
+      const id =
+        (
+          $("#ownerModalId")
+            ?.value ||
+          ""
+        ).trim();
 
-const name =
-  (
-    $("#ownerModalName")
-      ?.value || ""
-  ).trim();
+      const name =
+        (
+          $("#ownerModalName")
+            ?.value ||
+          ""
+        ).trim();
 
-const phone =
-  (
-    $("#ownerModalPhone")
-      ?.value || ""
-  ).trim();
+      const phone =
+        (
+          $("#ownerModalPhone")
+            ?.value ||
+          ""
+        ).trim();
 
-const note =
-  (
-    $("#ownerModalNote")
-      ?.value || ""
-  ).trim();
+      const note =
+        (
+          $("#ownerModalNote")
+            ?.value ||
+          ""
+        ).trim();
 
-if (!name) {
-  return alert(
-    "Вкажи ПІБ власника"
-  );
-}
+      if (!name) {
+        alert(
+          "Вкажіть ПІБ власника"
+        );
 
-if (
-  phone &&
-  !isValidUaPhone(phone)
-) {
-  return alert(
-    "Вкажіть телефон у форматі +380 XX XXX XX XX"
-  );
-}
+        $("#ownerModalName")
+          ?.focus();
 
-const normalizedPhone =
-  phone
-    ? formatUaPhone(phone)
-    : "";
-
-  const btn = $("#ownerModalSave");
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = id ? "Оновлюємо..." : "Створюємо...";
-
-  try {
-    let saved = null;
-
-    if (id) {
-  saved =
-    await updateOwner(
-      id,
-      {
-        name,
-        phone:
-          normalizedPhone,
-        note,
+        return;
       }
-    );
-} else {
-  saved =
-    await createOwner(
-      name,
-      normalizedPhone,
-      note
-    );
-}
 
-    if (!saved) return;
+      if (!phone) {
+        alert(
+          "Вкажіть телефон власника"
+        );
 
-    closeOwnerModal();
-    await loadOwners();
+        $("#ownerModalPhone")
+          ?.focus();
 
-    if (id && state.selectedOwnerId && String(state.selectedOwnerId) === String(id)) {
-      renderOwnerPage(id);
+        return;
+      }
+
+      if (
+        !isValidUaPhone(
+          phone
+        )
+      ) {
+        alert(
+          "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX"
+        );
+
+        $("#ownerModalPhone")
+          ?.focus();
+
+        return;
+      }
+
+      const normalizedPhone =
+        formatUaPhone(
+          phone
+        );
+
+      const btn =
+        $("#ownerModalSave");
+
+      const oldText =
+        btn?.textContent ||
+        "Зберегти";
+
+      if (btn) {
+        btn.disabled =
+          true;
+
+        btn.textContent =
+          id
+            ? "Оновлюємо..."
+            : "Створюємо...";
+      }
+
+      try {
+        let saved =
+          null;
+
+        if (id) {
+          saved =
+            await updateOwner(
+              id,
+              {
+                name,
+                phone:
+                  normalizedPhone,
+                note,
+              }
+            );
+        } else {
+          saved =
+            await createOwner(
+              name,
+              normalizedPhone,
+              note
+            );
+        }
+
+        if (!saved) {
+          return;
+        }
+
+        closeOwnerModal();
+
+        await loadOwners();
+
+        if (
+          id &&
+          state.selectedOwnerId &&
+          String(
+            state.selectedOwnerId
+          ) === String(id)
+        ) {
+          await renderOwnerPage(
+            id
+          );
+        }
+      } catch (e) {
+        console.error(
+          "Помилка збереження власника:",
+          e
+        );
+
+        alert(
+          "Помилка збереження власника: " +
+          (
+            e?.message ||
+            e
+          )
+        );
+      } finally {
+        if (btn) {
+          btn.disabled =
+            false;
+
+          btn.textContent =
+            oldText;
+        }
+      }
     }
-  } catch (e) {
-    console.error(e);
-    alert("Помилка збереження власника: " + (e?.message || e));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = oldText;
-  }
-});
+  );
 document.addEventListener("click", async (e) => {
   const cancelBtn = e.target.closest("#deleteCancel");
   const confirmBtn = e.target.closest("#deleteConfirm");
