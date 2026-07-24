@@ -2,6 +2,7 @@ import os
 import uuid
 import hmac
 import hashlib
+import re
 import json
 import mimetypes
 import time
@@ -6809,7 +6810,62 @@ def api_create_owner():
                 "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX",
                 400,
             )
+        email = str(
+            data.get("email") or ""
+        ).strip().lower()
 
+        telegram = str(
+            data.get("telegram") or ""
+        ).strip()
+
+        if email:
+            email_pattern = (
+                r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
+            )
+
+            if not re.match(
+                email_pattern,
+                email,
+            ):
+                return fail(
+                    "Вкажіть коректну електронну адресу",
+                    400,
+                )
+
+        if telegram:
+            telegram = telegram.replace(
+                "https://t.me/",
+                "",
+            )
+
+            telegram = telegram.replace(
+                "http://t.me/",
+                "",
+            )
+
+            telegram = telegram.strip()
+
+            if telegram.startswith("@"):
+                telegram = telegram[1:]
+
+            telegram = re.sub(
+                r"[^a-zA-Z0-9_]",
+                "",
+                telegram,
+            )
+
+            if (
+                len(telegram) < 5
+                or len(telegram) > 32
+            ):
+                return fail(
+                    "Telegram username повинен містити від 5 до 32 символів",
+                    400,
+                )
+
+            telegram = (
+                f"@{telegram}"
+            )
         payload = {
             "org_id": current_org,
             "name": name,
@@ -6817,6 +6873,8 @@ def api_create_owner():
             "note": str(
                 data.get("note") or ""
             ).strip() or None,
+            "email": email or None,
+            "telegram": telegram or None,
         }
         result = (
             supabase

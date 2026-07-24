@@ -33123,10 +33123,50 @@ function renderOwners() {
       <td style="font-weight: 600;">👤 ${escapeHtml(owner.name || "Без імені")}</td>
       <td>📞 ${escapeHtml(owner.phone || "Не вказано")}</td>
       <td>
-        <span style="background: rgba(147, 51, 234, 0.2); color: #c084fc; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;">
-          🐾 ${petsCount} пацієнтів
+  ${
+    owner.email
+      ? `
+        <div>
+          ✉️ ${escapeHtml(
+            owner.email
+          )}
+        </div>
+      `
+      : ""
+  }
+
+  ${
+    owner.telegram
+      ? `
+        <div
+          style="
+            margin-top:4px;
+            opacity:.75;
+          "
+        >
+          ✈️ ${escapeHtml(
+            owner.telegram
+          )}
+        </div>
+      `
+      : ""
+  }
+
+  ${
+    !owner.email &&
+    !owner.telegram
+      ? `
+        <span
+          style="
+            opacity:.45;
+          "
+        >
+          Контакт не вказано
         </span>
-      </td>
+      `
+      : ""
+  }
+</td>
       <td>📍 ${escapeHtml(owner.note || "—")}</td>
       <td class="ownerActionsCell">
   <button
