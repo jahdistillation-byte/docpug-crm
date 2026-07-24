@@ -6738,7 +6738,38 @@ def api_get_owners():
             500,
         )
 
+import re
 
+
+def normalize_ua_phone(value):
+    digits = re.sub(
+        r"\D",
+        "",
+        str(value or ""),
+    )
+
+    if digits.startswith("0"):
+        digits = "38" + digits
+
+    if (
+        len(digits) == 9
+        and not digits.startswith("380")
+    ):
+        digits = "380" + digits
+
+    if (
+        len(digits) != 12
+        or not digits.startswith("380")
+    ):
+        return None
+
+    return (
+        f"+{digits[:3]} "
+        f"{digits[3:5]} "
+        f"{digits[5:8]} "
+        f"{digits[8:10]} "
+        f"{digits[10:12]}"
+    )
 @app.post("/api/owners")
 def api_create_owner():
     _user, auth_error = auth_required()
@@ -6769,17 +6800,24 @@ def api_create_owner():
                 400,
             )
 
+        phone = normalize_ua_phone(
+            data.get("phone")
+        )
+
+        if not phone:
+            return fail(
+                "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX",
+                400,
+            )
+
         payload = {
             "org_id": current_org,
             "name": name,
-            "phone": str(
-                data.get("phone") or ""
-            ).strip() or None,
+            "phone": phone,
             "note": str(
                 data.get("note") or ""
             ).strip() or None,
         }
-
         result = (
             supabase
             .table("owners")
