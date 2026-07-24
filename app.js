@@ -286,7 +286,169 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+// =========================
+// Український номер телефону
+// =========================
 
+function normalizeUaPhone(value) {
+  let digits =
+    String(value || "")
+      .replace(/\D/g, "");
+
+  if (
+    digits.startsWith("00")
+  ) {
+    digits =
+      digits.slice(2);
+  }
+
+  // 0501234567 -> 380501234567
+  if (
+    digits.startsWith("0")
+  ) {
+    digits =
+      `38${digits}`;
+  }
+
+  // 501234567 -> 380501234567
+  if (
+    !digits.startsWith("380") &&
+    digits.length <= 9
+  ) {
+    digits =
+      `380${digits}`;
+  }
+
+  return digits.slice(
+    0,
+    12
+  );
+}
+
+
+function formatUaPhone(value) {
+  const digits =
+    normalizeUaPhone(value);
+
+  if (!digits) {
+    return "";
+  }
+
+  const country =
+    digits.slice(0, 3);
+
+  const operator =
+    digits.slice(3, 5);
+
+  const first =
+    digits.slice(5, 8);
+
+  const second =
+    digits.slice(8, 10);
+
+  const third =
+    digits.slice(10, 12);
+
+  let result =
+    `+${country}`;
+
+  if (operator) {
+    result +=
+      ` ${operator}`;
+  }
+
+  if (first) {
+    result +=
+      ` ${first}`;
+  }
+
+  if (second) {
+    result +=
+      ` ${second}`;
+  }
+
+  if (third) {
+    result +=
+      ` ${third}`;
+  }
+
+  return result;
+}
+
+
+function isValidUaPhone(value) {
+  return (
+    normalizeUaPhone(value)
+      .length === 12
+  );
+}
+
+
+function bindUaPhoneInput(
+  input
+) {
+  if (
+    !input ||
+    input.dataset
+      .phoneMaskBound === "1"
+  ) {
+    return;
+  }
+
+  input.dataset.phoneMaskBound =
+    "1";
+
+  input.addEventListener(
+    "input",
+    () => {
+      input.value =
+        formatUaPhone(
+          input.value
+        );
+
+      input.setCustomValidity(
+        ""
+      );
+    }
+  );
+
+  input.addEventListener(
+    "blur",
+    () => {
+      if (
+        input.value &&
+        !isValidUaPhone(
+          input.value
+        )
+      ) {
+        input.setCustomValidity(
+          "Вкажіть номер у форматі +380 XX XXX XX XX"
+        );
+      } else {
+        input.setCustomValidity(
+          ""
+        );
+      }
+    }
+  );
+}
+
+
+function initPhoneInputs() {
+  [
+    "#ownerModalPhone",
+    "#visitNewOwnerPhone",
+    "#staffPhone",
+  ].forEach(
+    (selector) => {
+      bindUaPhoneInput(
+        document.querySelector(
+          selector
+        )
+      );
+    }
+  );
+}
 function todayISO() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -32866,79 +33028,127 @@ function renderOwners() {
 // =========================
 // UI ВЛАДЕЛЬЦЕВ — Адаптировано под новую таблицу
 // =========================
-function openOwnerModal(owner = null) {
-  const modal = document.querySelector("#ownerModal");
+function openOwnerModal(
+  owner = null
+) {
+  const modal =
+    document.querySelector(
+      "#ownerModal"
+    );
 
   if (!modal) {
-    console.error("Не знайдено модальне вікно #ownerModal");
+    console.error(
+      "Не знайдено модальне вікно #ownerModal"
+    );
+
     return;
   }
 
-  const isEdit = Boolean(owner);
+  const isEdit =
+    Boolean(owner?.id);
 
-  const title = modal.querySelector(
-    "#ownerModalTitle, [data-owner-modal-title], h2"
-  );
+  const title =
+    modal.querySelector(
+      "#ownerModalTitle"
+    );
 
-  const nameInput = modal.querySelector(
-    "#ownerName, [name='name']"
-  );
+  const subTitle =
+    modal.querySelector(
+      "#ownerModalSub"
+    );
 
-  const phoneInput = modal.querySelector(
-    "#ownerPhone, [name='phone']"
-  );
+  const idInput =
+    modal.querySelector(
+      "#ownerModalId"
+    );
 
-  const emailInput = modal.querySelector(
-    "#ownerEmail, [name='email']"
-  );
+  const nameInput =
+    modal.querySelector(
+      "#ownerModalName"
+    );
 
-  const addressInput = modal.querySelector(
-    "#ownerAddress, [name='address']"
-  );
+  const phoneInput =
+    modal.querySelector(
+      "#ownerModalPhone"
+    );
 
-  const noteInput = modal.querySelector(
-    "#ownerNote, [name='note']"
-  );
+  const noteInput =
+    modal.querySelector(
+      "#ownerModalNote"
+    );
 
   if (title) {
-    title.textContent = isEdit
-      ? "Редагувати власника"
-      : "Новий власник";
+    title.textContent =
+      isEdit
+        ? "Редагувати власника"
+        : "Новий власник";
+  }
+
+  if (subTitle) {
+    subTitle.textContent =
+      isEdit
+        ? "Оновлення контактних даних власника"
+        : "Створення картки власника тварини";
+  }
+
+  if (idInput) {
+    idInput.value =
+      owner?.id
+        ? String(owner.id)
+        : "";
   }
 
   if (nameInput) {
-    nameInput.value = owner?.name || "";
+    nameInput.value =
+      owner?.name || "";
   }
 
   if (phoneInput) {
-    phoneInput.value = owner?.phone || "";
-  }
+    phoneInput.value =
+      owner?.phone
+        ? formatUaPhone(
+            owner.phone
+          )
+        : "";
 
-  if (emailInput) {
-    emailInput.value = owner?.email || "";
-  }
-
-  if (addressInput) {
-    addressInput.value = owner?.address || "";
+    bindUaPhoneInput(
+      phoneInput
+    );
   }
 
   if (noteInput) {
-    noteInput.value = owner?.note || "";
+    noteInput.value =
+      owner?.note || "";
   }
 
-  modal.dataset.ownerId = owner?.id
-    ? String(owner.id)
-    : "";
+  modal.dataset.ownerId =
+    owner?.id
+      ? String(owner.id)
+      : "";
 
-  modal.classList.add("show");
-  modal.classList.add("open");
-  modal.removeAttribute("hidden");
+  modal.classList.add(
+    "show",
+    "open"
+  );
 
-  modal.style.display = "flex";
+  modal.removeAttribute(
+    "hidden"
+  );
 
-  setTimeout(() => {
-    nameInput?.focus();
-  }, 50);
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  modal.style.display =
+    "flex";
+
+  setTimeout(
+    () => {
+      nameInput?.focus();
+    },
+    50
+  );
 }
 function initOwnersUI() {
   if (state.ownersUiBound) return;
@@ -34985,9 +35195,17 @@ function initVisitFilesUI() {
 // =========================
 $("#visitCancel")?.addEventListener("click", closeVisitModal);
 $("#visitClose")?.addEventListener("click", closeVisitModal);
-$("#visitModal")?.addEventListener("click", (e) => {
-  if (e.target.closest("[data-close]")) closeVisitModal();
-});
+$("#visitModal")
+  ?.addEventListener(
+    "click",
+    (event) => {
+      // Модалка закрывается только
+      // кнопками Скасувати и ×.
+      // Клик по затемнённому фону
+      // не удаляет введённые данные.
+      event.stopPropagation();
+    }
+  );
 
 // Сохранение приёма (Создание или Редактирование) с проверкой коллизий
 $("#visitSave")?.addEventListener("click", async () => {
@@ -35011,11 +35229,42 @@ $("#visitSave")?.addEventListener("click", async () => {
       const species = ($("#visitNewPetSpecies")?.value || "").trim();
       const breed = ($("#visitNewPetBreed")?.value || "").trim();
 
-      if (!ownerName) return alert("Вкажи власника");
-      if (!ownerPhone) return alert("Вкажи телефон власника");
-      if (!petName) return alert("Вкажи кличку пацієнта");
+      if (!ownerName) {
+  return alert(
+    "Вкажи власника"
+  );
+}
 
-      const owner = await createOwner(ownerName, ownerPhone, "");
+if (!ownerPhone) {
+  return alert(
+    "Вкажи телефон власника"
+  );
+}
+
+if (
+  !isValidUaPhone(
+    ownerPhone
+  )
+) {
+  return alert(
+    "Вкажіть телефон у форматі +380 XX XXX XX XX"
+  );
+}
+
+if (!petName) {
+  return alert(
+    "Вкажи кличку пацієнта"
+  );
+}
+
+      const owner =
+  await createOwner(
+    ownerName,
+    formatUaPhone(
+      ownerPhone
+    ),
+    ""
+  );
       if (!owner?.id) return alert("Не вдалося створити власника");
 
       const createdPet = await createPatientApi({
@@ -35037,32 +35286,82 @@ $("#visitSave")?.addEventListener("click", async () => {
 
     if (!pet) return alert("Пацієнт не обраний");
 
-    const date = ($("#visitDate")?.value || todayISO()).trim();
-    const notePlain = ($("#visitNote")?.value || "").trim();
-    const dx = ($("#visitDx")?.value || "").trim();
-    const weight = ($("#visitWeight")?.value || "").trim();
-    const rx = ($("#visitRx")?.value || "").trim();
+    const date =
+  (
+    $("#visitDate")?.value ||
+    todayISO()
+  ).trim();
 
-    const startTime = ($("#visitStartTime")?.value || "10:00").trim();
-    const duration = Number($("#visitDuration")?.value || 60);
-    const staffId = ($("#visitStaff")?.value || "").trim();
-    const endTime = addMinutesToTime(startTime, duration);
+const notePlain =
+  (
+    $("#visitNote")?.value ||
+    ""
+  ).trim();
 
-    if (!notePlain && !dx && !rx) return alert("Заповни хоча б щось");
+const startTime =
+  (
+    $("#visitStartTime")
+      ?.value ||
+    "10:00"
+  ).trim();
+
+const duration =
+  Number(
+    $("#visitDuration")
+      ?.value ||
+    60
+  );
+
+const staffId =
+  (
+    $("#visitStaff")
+      ?.value ||
+    ""
+  ).trim();
+
+const endTime =
+  addMinutesToTime(
+    startTime,
+    duration
+  );
+
+if (!notePlain) {
+  return alert(
+    "Вкажіть причину запису"
+  );
+}
     if (!staffId) return alert("Оберіть ветеринара");
     if (!startTime) return alert("Оберіть час початку");
 
     const payload = {
-  pet_id: pet.id,
-  staff_id: staffId,
+  pet_id:
+    pet.id,
+
+  staff_id:
+    staffId,
+
   date,
-  note: buildVisitNote(dx, notePlain),
-  rx,
-  weight_kg: weight,
-  services: [],
-  services_json: [],
-  stock: [],
-  stock_json: [],
+
+  note:
+    notePlain,
+
+  rx:
+    "",
+
+  weight_kg:
+    "",
+
+  services:
+    [],
+
+  services_json:
+    [],
+
+  stock:
+    [],
+
+  stock_json:
+    [],
 };
 
     // =========================
@@ -39763,24 +40062,85 @@ async function loadStaffRatingApi() {
 }
 
 function closeOwnerModal() {
-  const modal = $("#ownerModal");
-  if (!modal) return;
+  const modal =
+    $("#ownerModal");
 
-  modal.classList.remove("open");
-  modal.setAttribute("aria-hidden", "true");
-  modal.style.display = "none";
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.remove(
+    "open",
+    "show"
+  );
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  modal.style.display =
+    "none";
+
+  modal.dataset.ownerId =
+    "";
+
+  const idInput =
+    $("#ownerModalId");
+
+  if (idInput) {
+    idInput.value = "";
+  }
 }
 
 $("#ownerModalClose")?.addEventListener("click", closeOwnerModal);
 $("#ownerModalCancel")?.addEventListener("click", closeOwnerModal);
+initPhoneInputs();
 
 $("#ownerModalSave")?.addEventListener("click", async () => {
-  const id = ($("#ownerModalId")?.value || "").trim();
-  const name = ($("#ownerModalName")?.value || "").trim();
-  const phone = ($("#ownerModalPhone")?.value || "").trim();
-  const note = ($("#ownerModalNote")?.value || "").trim();
+ const id =
+  (
+    $("#ownerModalId")
+      ?.value || ""
+  ).trim();
 
-  if (!name) return alert("Вкажи ПІБ власника");
+const name =
+  (
+    $("#ownerModalName")
+      ?.value || ""
+  ).trim();
+
+const phone =
+  (
+    $("#ownerModalPhone")
+      ?.value || ""
+  ).trim();
+
+const note =
+  (
+    $("#ownerModalNote")
+      ?.value || ""
+  ).trim();
+
+if (!name) {
+  return alert(
+    "Вкажи ПІБ власника"
+  );
+}
+
+if (
+  phone &&
+  !isValidUaPhone(phone)
+) {
+  return alert(
+    "Вкажіть телефон у форматі +380 XX XXX XX XX"
+  );
+}
+
+const normalizedPhone =
+  phone
+    ? formatUaPhone(phone)
+    : "";
 
   const btn = $("#ownerModalSave");
   const oldText = btn.textContent;
@@ -39791,10 +40151,24 @@ $("#ownerModalSave")?.addEventListener("click", async () => {
     let saved = null;
 
     if (id) {
-      saved = await updateOwner(id, { name, phone, note });
-    } else {
-      saved = await createOwner(name, phone, note);
-    }
+  saved =
+    await updateOwner(
+      id,
+      {
+        name,
+        phone:
+          normalizedPhone,
+        note,
+      }
+    );
+} else {
+  saved =
+    await createOwner(
+      name,
+      normalizedPhone,
+      note
+    );
+}
 
     if (!saved) return;
 

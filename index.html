@@ -89,7 +89,7 @@
   <div id="ownerMeta" style="display:none;">—</div>
 
   <div class="ownerPetsHeader">
-    <h3>🐾 Пацієнти цього власника</h3>
+    <h3>🐾 Улюбленці власника</h3>
     <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
   </div>
 
@@ -648,9 +648,18 @@
         </label>
 
         <label class="pugVisitField">
-          <span>Телефон</span>
-          <input class="pugVisitInput" id="ownerModalPhone" placeholder="+380...">
-        </label>
+  <span>Телефон</span>
+
+  <input
+    class="pugVisitInput"
+    id="ownerModalPhone"
+    type="tel"
+    inputmode="tel"
+    maxlength="17"
+    autocomplete="tel"
+    placeholder="+380 XX XXX XX XX"
+  >
+</label>
 
         <label class="pugVisitField">
           <span>Адреса / нотатка</span>
@@ -726,9 +735,18 @@
             </label>
 
             <label class="pugVisitField">
-              <span>Телефон *</span>
-              <input class="pugVisitInput" id="visitNewOwnerPhone" placeholder="+380...">
-            </label>
+  <span>Телефон *</span>
+
+  <input
+    class="pugVisitInput"
+    id="visitNewOwnerPhone"
+    type="tel"
+    inputmode="tel"
+    maxlength="17"
+    autocomplete="tel"
+    placeholder="+380 XX XXX XX XX"
+  >
+</label>
 
             <label class="pugVisitField">
               <span>Адреса / нотатка</span>
@@ -824,10 +842,38 @@
       </div>
 
       <div class="pugVisitSection pugVisitMedicalBlock">
-        <div class="pugSectionTitle">
-          <span>🩺</span>
-          <strong>3. Медична інформація</strong>
-        </div>
+  <div class="pugSectionTitle">
+    <span>📝</span>
+
+    <strong>
+      3. Причина звернення
+    </strong>
+  </div>
+
+  <div class="pugVisitMedicalGrid">
+    <label
+      class="
+        pugVisitField
+        pugFieldWide
+      "
+    >
+      <span>
+        Причина запису /
+        коментар адміністратора
+      </span>
+
+      <textarea
+        class="
+          pugVisitInput
+          pugVisitTextarea
+        "
+        id="visitNote"
+        rows="4"
+        placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
+      ></textarea>
+    </label>
+  </div>
+</div>
 
         <div class="pugVisitMedicalGrid">
           <label class="pugVisitField pugFieldWide">
