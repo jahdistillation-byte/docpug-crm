@@ -528,48 +528,170 @@ function todayISO() {
 // Универсальное окно подтверждения удаления
 // ======================================
 
-let deleteCallback = null;
+let deleteCallback =
+  null;
 
-if (mode === "unsaved") {
-  if (icon) {
-    icon.textContent =
-      "✎";
+function openDeleteModal(
+  text,
+  callback = null,
+  mode = "delete"
+) {
+  const modal =
+    $("#deleteModal");
+
+  const textEl =
+    $("#deleteModalText");
+
+  const confirmBtn =
+    $("#deleteConfirm");
+
+  const cancelBtn =
+    $("#deleteCancel");
+
+  const icon =
+    modal?.querySelector(
+      ".deleteIcon"
+    );
+
+  const title =
+    modal?.querySelector(
+      "h2"
+    );
+
+  if (
+    !modal ||
+    !textEl ||
+    !confirmBtn ||
+    !cancelBtn
+  ) {
+    console.error(
+      "Не знайдено елементи deleteModal"
+    );
+
+    return;
   }
 
-  if (title) {
-    title.textContent =
-      "Є незбережені зміни";
-  }
+  console.log(
+    "OPEN MODAL:",
+    mode,
+    text
+  );
 
-  confirmBtn.textContent =
-    "Вийти без збереження";
+  deleteCallback =
+    callback;
 
-  confirmBtn.classList.add(
+  textEl.innerHTML =
+    text;
+
+  confirmBtn.classList.remove(
+    "primary",
     "btnDanger"
   );
 
+  cancelBtn.style.display =
+    "";
+
   cancelBtn.textContent =
-    "Продовжити редагування";
+    "Скасувати";
 
-  confirmBtn.onclick =
-    async () => {
-      const action =
-        deleteCallback;
+  if (mode === "unsaved") {
+    if (icon) {
+      icon.textContent =
+        "✎";
+    }
 
+    if (title) {
+      title.textContent =
+        "Є незбережені зміни";
+    }
+
+    confirmBtn.textContent =
+      "Вийти без збереження";
+
+    confirmBtn.classList.add(
+      "btnDanger"
+    );
+
+    cancelBtn.textContent =
+      "Продовжити редагування";
+
+    confirmBtn.onclick =
+      async () => {
+        const action =
+          deleteCallback;
+
+        closeDeleteModal();
+
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+      };
+  } else if (mode === "info") {
+    if (icon) {
+      icon.textContent =
+        "ℹ";
+    }
+
+    if (title) {
+      title.textContent =
+        "Повідомлення";
+    }
+
+    confirmBtn.textContent =
+      "Добре";
+
+    confirmBtn.classList.add(
+      "primary"
+    );
+
+    cancelBtn.style.display =
+      "none";
+
+    confirmBtn.onclick =
+      () => {
+        closeDeleteModal();
+      };
+  } else {
+    if (icon) {
+      icon.textContent =
+        "!";
+    }
+
+    if (title) {
+      title.textContent =
+        "Підтвердження";
+    }
+
+    confirmBtn.textContent =
+      "Видалити";
+
+    confirmBtn.classList.add(
+      "btnDanger"
+    );
+
+    confirmBtn.onclick =
+      async () => {
+        const action =
+          deleteCallback;
+
+        closeDeleteModal();
+
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+      };
+  }
+
+  cancelBtn.onclick =
+    () => {
       closeDeleteModal();
-
-      if (
-        typeof action ===
-        "function"
-      ) {
-        await action();
-      }
     };
-} else if (mode === "info") {
-
-  cancelBtn.onclick = () => {
-    closeDeleteModal();
-  };
 
   modal.style.display =
     "flex";
@@ -586,15 +708,17 @@ function closeDeleteModal() {
     modal.style.display =
       "none";
   }
-cancelBtn.textContent =
-  "Скасувати";
-  
+
   if (cancelBtn) {
     cancelBtn.style.display =
       "";
+
+    cancelBtn.textContent =
+      "Скасувати";
   }
 
-  deleteCallback = null;
+  deleteCallback =
+    null;
 }
 
 function nowISO() {
