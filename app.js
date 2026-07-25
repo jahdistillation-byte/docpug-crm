@@ -34107,7 +34107,64 @@ function openAddPetModal(ownerId, petToEdit = null) {
             placeholder="Наприклад: 4 роки"
           >
         </label>
+<div class="addPetFieldsRow">
+  <label class="addPetField">
+    <span>Стать</span>
 
+    <select id="addPetSex">
+      <option value="">
+        Не вказано
+      </option>
+
+      <option value="male">
+        Самець
+      </option>
+
+      <option value="female">
+        Самка
+      </option>
+    </select>
+  </label>
+
+  <label class="addPetField">
+    <span>
+      Кастрований /
+      стерилізована
+    </span>
+
+    <select id="addPetNeutered">
+      <option value="">
+        Не вказано
+      </option>
+
+      <option value="true">
+        Так
+      </option>
+
+      <option value="false">
+        Ні
+      </option>
+    </select>
+  </label>
+</div>
+
+<label class="addPetField">
+  <span>Вакцинація</span>
+
+  <select id="addPetVaccination">
+    <option value="unknown">
+      Невідомо
+    </option>
+
+    <option value="vaccinated">
+      Вакцинована
+    </option>
+
+    <option value="not_vaccinated">
+      Не вакцинована
+    </option>
+  </select>
+</label>
         <label class="addPetField">
           <span class="addPetLabel">
             Вага
@@ -34201,6 +34258,20 @@ let activeBreedList = [];
 let selectedBreed = "";
   const ageInput = overlay.querySelector("#addPetAge");
   const weightInput = overlay.querySelector("#addPetWeight");
+  const sexInput =
+  overlay.querySelector(
+    "#addPetSex"
+  );
+
+const neuteredInput =
+  overlay.querySelector(
+    "#addPetNeutered"
+  );
+
+const vaccinationInput =
+  overlay.querySelector(
+    "#addPetVaccination"
+  );
   const notesInput = overlay.querySelector("#addPetNotes");
   const notesCount = overlay.querySelector("#addPetNotesCount");
   const errorBox = overlay.querySelector("#addPetModalError");
@@ -34395,82 +34466,190 @@ const configureBreedField = (species) => {
     "Після вибору виду тут з’явиться список порід.";
 };
 if (isEditMode) {
-  const currentSpecies = normalizeStoredSpecies(petToEdit.species);
+  const currentSpecies =
+    normalizeStoredSpecies(
+      petToEdit.species
+    );
 
-  nameInput.value = String(petToEdit.name || "");
-  ageInput.value = String(petToEdit.age || "");
-  weightInput.value = String(petToEdit.weight_kg || "");
-  notesInput.value = String(petToEdit.notes || "");
+  nameInput.value =
+    String(
+      petToEdit.name || ""
+    );
 
-  notesCount.textContent = String(notesInput.value.length);
+  ageInput.value =
+    String(
+      petToEdit.age || ""
+    );
 
-  speciesInput.value = currentSpecies;
+  weightInput.value =
+    String(
+      petToEdit.weight_kg || ""
+    );
 
-  const currentSpeciesButton = overlay.querySelector(
-    `[data-add-pet-species="${currentSpecies}"]`
+  if (sexInput) {
+    sexInput.value =
+      String(
+        petToEdit.sex || ""
+      );
+  }
+
+  if (neuteredInput) {
+    neuteredInput.value =
+      typeof petToEdit.neutered ===
+      "boolean"
+        ? String(
+            petToEdit.neutered
+          )
+        : "";
+  }
+
+  if (vaccinationInput) {
+    vaccinationInput.value =
+      String(
+        petToEdit
+          .vaccination_status ||
+        "unknown"
+      );
+  }
+
+  notesInput.value =
+    String(
+      petToEdit.notes || ""
+    );
+
+  notesCount.textContent =
+    String(
+      notesInput.value.length
+    );
+
+  speciesInput.value =
+    currentSpecies;
+
+  const currentSpeciesButton =
+    overlay.querySelector(
+      `[data-add-pet-species="${currentSpecies}"]`
+    );
+
+  currentSpeciesButton
+    ?.classList.add(
+      "is-active"
+    );
+
+  configureBreedField(
+    currentSpecies
   );
 
-  currentSpeciesButton?.classList.add("is-active");
+  breedInput.value =
+    String(
+      petToEdit.breed || ""
+    );
 
-  configureBreedField(currentSpecies);
-
-  breedInput.value = String(petToEdit.breed || "");
-  selectedBreed = String(petToEdit.breed || "");
+  selectedBreed =
+    String(
+      petToEdit.breed || ""
+    );
 }
- overlay
-  .querySelectorAll("[data-add-pet-species]")
+
+overlay
+  .querySelectorAll(
+    "[data-add-pet-species]"
+  )
   .forEach((button) => {
-    button.addEventListener("click", () => {
-      overlay
-        .querySelectorAll("[data-add-pet-species]")
-        .forEach((item) => item.classList.remove("is-active"));
+    button.addEventListener(
+      "click",
+      () => {
+        overlay
+          .querySelectorAll(
+            "[data-add-pet-species]"
+          )
+          .forEach((item) => {
+            item.classList.remove(
+              "is-active"
+            );
+          });
 
-      button.classList.add("is-active");
+        button.classList.add(
+          "is-active"
+        );
 
-      const species = button.dataset.addPetSpecies || "";
-      speciesInput.value = species;
+        const species =
+          button.dataset
+            .addPetSpecies || "";
 
-      configureBreedField(species);
-      clearError();
+        speciesInput.value =
+          species;
 
-      setTimeout(() => {
-        breedInput.focus();
-      }, 120);
-    });
+        configureBreedField(
+          species
+        );
+
+        clearError();
+
+        setTimeout(() => {
+          breedInput.focus();
+        }, 120);
+      }
+    );
   });
 
-  breedInput.addEventListener("focus", () => {
-  if (!breedInput.disabled && activeBreedList.length) {
-    renderBreedDropdown();
-  }
-});
-
-breedInput.addEventListener("input", () => {
-  selectedBreed = "";
-
-  if (activeBreedList.length) {
-    renderBreedDropdown();
-  }
-});
-
-breedInput.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeBreedDropdown();
-  }
-
-  if (event.key === "Enter" && breedDropdown.classList.contains("is-open")) {
-    const firstOption = breedDropdown.querySelector("[data-select-breed]");
-
-    if (firstOption) {
-      event.preventDefault();
-      firstOption.click();
+breedInput.addEventListener(
+  "focus",
+  () => {
+    if (
+      !breedInput.disabled &&
+      activeBreedList.length
+    ) {
+      renderBreedDropdown();
     }
   }
-});
+);
 
-breedDropdown.addEventListener("mousedown", (event) => {
-  event.preventDefault();
-});
+breedInput.addEventListener(
+  "input",
+  () => {
+    selectedBreed = "";
+
+    if (
+      activeBreedList.length
+    ) {
+      renderBreedDropdown();
+    }
+  }
+);
+
+breedInput.addEventListener(
+  "keydown",
+  (event) => {
+    if (
+      event.key === "Escape"
+    ) {
+      closeBreedDropdown();
+    }
+
+    if (
+      event.key === "Enter" &&
+      breedDropdown.classList
+        .contains("is-open")
+    ) {
+      const firstOption =
+        breedDropdown.querySelector(
+          "[data-select-breed]"
+        );
+
+      if (firstOption) {
+        event.preventDefault();
+        firstOption.click();
+      }
+    }
+  }
+);
+
+breedDropdown.addEventListener(
+  "mousedown",
+  (event) => {
+    event.preventDefault();
+  }
+);
 
 breedDropdown.addEventListener("click", (event) => {
   const option = event.target.closest("[data-select-breed]");
@@ -34535,6 +34714,26 @@ document.addEventListener("mousedown", (event) => {
     const breed = breedInput.value.trim();
     const age = ageInput.value.trim();
     const weightRaw = weightInput.value.trim();
+    const sex =
+  String(
+    sexInput?.value || ""
+  ).trim();
+
+const neuteredRaw =
+  String(
+    neuteredInput?.value || ""
+  ).trim();
+
+const vaccinationStatus =
+  String(
+    vaccinationInput?.value ||
+    "unknown"
+  ).trim();
+
+const neutered =
+  neuteredRaw === ""
+    ? null
+    : neuteredRaw === "true";
     const notes = notesInput.value.trim();
 
     if (!name) {
@@ -34579,14 +34778,29 @@ document.addEventListener("mousedown", (event) => {
     `;
 
         const payload = {
-      owner_id: ownerId,
-      name,
-      species,
-      breed,
-      age,
-      weight_kg: weightRaw,
-      notes,
-    };
+  owner_id:
+    ownerId,
+
+  name,
+
+  species,
+
+  breed,
+
+  age,
+
+  weight_kg:
+    weightRaw,
+
+  sex,
+
+  neutered,
+
+  vaccination_status:
+    vaccinationStatus,
+
+  notes,
+};
 
     const savedPet = isEditMode
       ? await updatePatientApi(editingPetId, payload)
