@@ -34856,25 +34856,130 @@ const vaccinationInput =
 
 
   let isSaving = false;
+const getPetModalState =
+  () => {
+    return {
+      name:
+        String(
+          nameInput?.value || ""
+        ).trim(),
+
+      species:
+        String(
+          speciesInput?.value || ""
+        ).trim(),
+
+      breed:
+        String(
+          breedInput?.value || ""
+        ).trim(),
+
+      age:
+        String(
+          ageInput?.value || ""
+        ).trim(),
+
+      weight:
+        String(
+          weightInput?.value || ""
+        ).trim(),
+
+      sex:
+        String(
+          sexInput?.value || ""
+        ).trim(),
+
+      neutered:
+        String(
+          neuteredInput?.value || ""
+        ).trim(),
+
+      vaccination:
+        String(
+          vaccinationInput?.value ||
+          "unknown"
+        ).trim(),
+
+      notes:
+        String(
+          notesInput?.value || ""
+        ).trim(),
+    };
+  };
+
+let initialPetModalState =
+  "";
 
   const closeModal = () => {
-    if (isSaving) return;
+  if (isSaving) {
+    return;
+  }
 
-    overlay.classList.remove("is-open");
-    document.body.classList.remove("addPetModalOpened");
-    document.removeEventListener("keydown", handleKeydown);
+  overlay.classList.remove(
+    "is-open"
+  );
 
-    setTimeout(() => {
+  document.body.classList.remove(
+    "addPetModalOpened"
+  );
+
+  document.removeEventListener(
+    "keydown",
+    handleKeydown
+  );
+
+  setTimeout(
+    () => {
       overlay.remove();
-    }, 220);
+    },
+    220
+  );
+};
+
+const petModalHasChanges =
+  () => {
+    return (
+      JSON.stringify(
+        getPetModalState()
+      ) !==
+      initialPetModalState
+    );
   };
 
-  const handleKeydown = (event) => {
-    if (event.key === "Escape") {
+const requestCloseModal =
+  () => {
+    if (isSaving) {
+      return;
+    }
+
+    if (
+      !petModalHasChanges()
+    ) {
       closeModal();
+      return;
+    }
+
+    openDeleteModal(
+      (
+        "Внесені дані пацієнта " +
+        "ще не збережені."
+      ),
+      () => {
+        closeModal();
+      },
+      "unsaved"
+    );
+  };
+
+  const handleKeydown =
+  (event) => {
+    if (
+      event.key ===
+      "Escape"
+    ) {
+      requestCloseModal();
     }
   };
-
   const clearError = () => {
     errorBox.textContent = "";
 
@@ -35238,7 +35343,7 @@ if (isEditMode) {
   if (neuteredInput) {
     neuteredInput.value =
       typeof petToEdit.neutered ===
-      "boolean"
+        "boolean"
         ? String(
             petToEdit.neutered
           )
@@ -35292,6 +35397,11 @@ if (isEditMode) {
     );
 }
 
+initialPetModalState =
+  JSON.stringify(
+    getPetModalState()
+  );
+
 overlay
   .querySelectorAll(
     "[data-add-pet-species]"
@@ -35327,9 +35437,12 @@ overlay
 
         clearError();
 
-        setTimeout(() => {
-          breedInput.focus();
-        }, 120);
+        setTimeout(
+          () => {
+            breedInput.focus();
+          },
+          120
+        );
       }
     );
   });
@@ -35349,7 +35462,8 @@ breedInput.addEventListener(
 breedInput.addEventListener(
   "input",
   () => {
-    selectedBreed = "";
+    selectedBreed =
+      "";
 
     if (
       activeBreedList.length
@@ -35363,13 +35477,15 @@ breedInput.addEventListener(
   "keydown",
   (event) => {
     if (
-      event.key === "Escape"
+      event.key ===
+      "Escape"
     ) {
       closeBreedDropdown();
     }
 
     if (
-      event.key === "Enter" &&
+      event.key ===
+        "Enter" &&
       breedDropdown.classList
         .contains("is-open")
     ) {
@@ -35483,18 +35599,33 @@ document.addEventListener("mousedown", (event) => {
   });
 
   overlay
-    .querySelector("#addPetModalClose")
-    ?.addEventListener("click", closeModal);
+  .querySelector(
+    "#addPetModalClose"
+  )
+  ?.addEventListener(
+    "click",
+    requestCloseModal
+  );
 
-  overlay
-    .querySelector("#addPetCancelButton")
-    ?.addEventListener("click", closeModal);
+overlay
+  .querySelector(
+    "#addPetCancelButton"
+  )
+  ?.addEventListener(
+    "click",
+    requestCloseModal
+  );
 
-  overlay.addEventListener("mousedown", (event) => {
-    if (event.target === overlay) {
-      closeModal();
+overlay.addEventListener(
+  "mousedown",
+  (event) => {
+    if (
+      event.target === overlay
+    ) {
+      requestCloseModal();
     }
-  });
+  }
+);
 
   document.addEventListener("keydown", handleKeydown);
 
