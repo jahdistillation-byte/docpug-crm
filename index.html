@@ -867,59 +867,36 @@
         </div>
       </div>
 
-      <div class="pugVisitSection pugVisitMedicalBlock">
-  <div class="pugSectionTitle">
-    <span>📝</span>
+            <div class="pugVisitSection pugVisitMedicalBlock">
+        <div class="pugSectionTitle">
+          <span>📝</span>
 
-    <strong>
-      3. Причина звернення
-    </strong>
-  </div>
-
-  <div class="pugVisitMedicalGrid">
-    <label
-      class="
-        pugVisitField
-        pugFieldWide
-      "
-    >
-      <span>
-        Причина запису /
-        коментар адміністратора
-      </span>
-
-      <textarea
-        class="
-          pugVisitInput
-          pugVisitTextarea
-        "
-        id="visitNote"
-        rows="4"
-        placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
-      ></textarea>
-    </label>
-  </div>
-</div>
+          <strong>
+            3. Причина звернення
+          </strong>
+        </div>
 
         <div class="pugVisitMedicalGrid">
-          <label class="pugVisitField pugFieldWide">
-            <span>Скарги / анамнез</span>
-            <textarea class="pugVisitInput pugVisitTextarea" id="visitNote" rows="4" placeholder="Опишіть симптоми, стан, історію хвороби..."></textarea>
-          </label>
+          <label
+            class="
+              pugVisitField
+              pugFieldWide
+            "
+          >
+            <span>
+              Причина запису /
+              коментар адміністратора
+            </span>
 
-          <label class="pugVisitField">
-            <span>Діагноз</span>
-            <input class="pugVisitInput" id="visitDx" placeholder="Введіть діагноз...">
-          </label>
-
-          <label class="pugVisitField">
-            <span>Вага (кг)</span>
-            <input class="pugVisitInput" id="visitWeight" placeholder="Напр. 4.5">
-          </label>
-
-          <label class="pugVisitField pugFieldWideRight">
-            <span>Призначення лікаря</span>
-            <textarea class="pugVisitInput pugVisitTextarea" id="visitRx" rows="3" placeholder="Препарат, доза, рекомендації..."></textarea>
+            <textarea
+              class="
+                pugVisitInput
+                pugVisitTextarea
+              "
+              id="visitNote"
+              rows="4"
+              placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
+            ></textarea>
           </label>
         </div>
       </div>
@@ -927,6 +904,22 @@
     </div>
 
     <div class="pugVisitFoot">
+      <button
+        class="pugVisitCancel"
+        id="visitCancel"
+        type="button"
+      >
+        ✕ Скасувати
+      </button>
+
+      <button
+        class="pugVisitSave"
+        id="visitSave"
+        type="button"
+      >
+        💾 Зберегти візит
+      </button>
+    </div>
       <button class="pugVisitCancel" id="visitCancel" type="button">✕ Скасувати</button>
       <button class="pugVisitSave" id="visitSave" type="button">💾 Зберегти візит</button>
     </div>
