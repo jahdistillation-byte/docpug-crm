@@ -530,210 +530,42 @@ function todayISO() {
 
 let deleteCallback = null;
 
-function openDeleteModal(
-  text,
-  callback = null,
-  mode = "delete"
-) {
-  console.log(
-    "OPEN MODAL:",
-    mode,
-    text
-  );
-
-  const modal =
-    $("#deleteModal");
-
-  const textEl =
-    $("#deleteModalText");
-
-  const confirmBtn =
-    $("#deleteConfirm");
-
-  const cancelBtn =
-    $("#deleteCancel");
-
-  const icon =
-    modal?.querySelector(
-      ".deleteIcon"
-    );
-
-  const title =
-    modal?.querySelector("h2");
-
-  if (
-    !modal ||
-    !textEl ||
-    !confirmBtn ||
-    !cancelBtn
-  ) {
-    console.error(
-      "Не знайдено елементи deleteModal"
-    );
-
-    return;
-  }
-
-  deleteCallback =
-    typeof callback === "function"
-      ? callback
-      : null;
-
-  textEl.innerHTML = text;
-
-  confirmBtn.onclick = null;
-  cancelBtn.onclick = null;
-
-  confirmBtn.classList.remove(
-    "primary",
-    "btnDanger"
-  );
-
-  cancelBtn.style.display = "";
-
-  if (mode === "info") {
-    if (icon) {
-      icon.textContent = "🔒";
-    }
-
-    if (title) {
-      title.textContent =
-        "Недостатньо прав";
-    }
-
-    confirmBtn.textContent =
-      "Зрозуміло";
-
-    confirmBtn.classList.add(
-      "primary"
-    );
-
-    confirmBtn.onclick = () => {
-      closeDeleteModal();
-    };
-
-    cancelBtn.style.display =
-      "none";
-
-} else if (
-  mode ===
-  "operation-success"
-) {
-  modal.classList.add(
-    "is-success"
-  );
-
+if (mode === "unsaved") {
   if (icon) {
-    icon.textContent = "✓";
+    icon.textContent =
+      "✎";
   }
 
   if (title) {
     title.textContent =
-      "Операцію проведено";
+      "Є незбережені зміни";
   }
 
   confirmBtn.textContent =
-    "Готово";
+    "Вийти без збереження";
 
   confirmBtn.classList.add(
-    "primary"
+    "btnDanger"
   );
 
-  confirmBtn.onclick = () => {
-    closeDeleteModal();
-  };
+  cancelBtn.textContent =
+    "Продовжити редагування";
 
-  cancelBtn.style.display =
-    "none";
+  confirmBtn.onclick =
+    async () => {
+      const action =
+        deleteCallback;
 
-  } else if (mode === "success") {
-    if (icon) {
-      icon.textContent = "✅";
-    }
-
-    if (title) {
-      title.textContent =
-        "Акаунт створено";
-    }
-
-    confirmBtn.textContent =
-      "Зрозуміло";
-
-    confirmBtn.classList.add(
-      "primary"
-    );
-
-    confirmBtn.onclick = () => {
       closeDeleteModal();
+
+      if (
+        typeof action ===
+        "function"
+      ) {
+        await action();
+      }
     };
-
-    cancelBtn.style.display =
-      "none";
-
-  } else if (mode === "logout") {
-    if (icon) {
-      icon.textContent = "🚪";
-    }
-
-    if (title) {
-      title.textContent =
-        "Вийти з акаунта?";
-    }
-
-    confirmBtn.textContent =
-      "Вийти";
-
-    confirmBtn.classList.add(
-      "primary"
-    );
-
-    confirmBtn.onclick =
-      async () => {
-        const action =
-          deleteCallback;
-
-        closeDeleteModal();
-
-        if (
-          typeof action ===
-          "function"
-        ) {
-          await action();
-        }
-      };
-
-  } else {
-    if (icon) {
-      icon.textContent = "🗑";
-    }
-
-    if (title) {
-      title.textContent =
-        "Видалити?";
-    }
-
-    confirmBtn.textContent =
-      "🗑 Видалити";
-
-    confirmBtn.classList.add(
-      "btnDanger"
-    );
-
-    confirmBtn.onclick =
-      async () => {
-        const action =
-          deleteCallback;
-
-        closeDeleteModal();
-
-        if (
-          typeof action ===
-          "function"
-        ) {
-          await action();
-        }
-      };
-  }
+} else if (mode === "info") {
 
   cancelBtn.onclick = () => {
     closeDeleteModal();
@@ -754,7 +586,9 @@ function closeDeleteModal() {
     modal.style.display =
       "none";
   }
-
+cancelBtn.textContent =
+  "Скасувати";
+  
   if (cancelBtn) {
     cancelBtn.style.display =
       "";
@@ -33854,7 +33688,23 @@ if (telegramInput) {
 
   modal.style.display =
     "flex";
+modal.dataset.initialState =
+  JSON.stringify({
+    name:
+      nameInput?.value || "",
 
+    phone:
+      phoneInput?.value || "",
+
+    email:
+      emailInput?.value || "",
+
+    telegram:
+      telegramInput?.value || "",
+
+    note:
+      noteInput?.value || "",
+  });
   setTimeout(
     () => {
       nameInput?.focus();
@@ -42113,7 +41963,98 @@ async function loadStaffRatingApi() {
     return emptyRating;
   }
 }
+function getOwnerModalState() {
+  return {
+    name:
+      (
+        $("#ownerModalName")
+          ?.value ||
+        ""
+      ).trim(),
 
+    phone:
+      (
+        $("#ownerModalPhone")
+          ?.value ||
+        ""
+      ).trim(),
+
+    email:
+      (
+        $("#ownerModalEmail")
+          ?.value ||
+        ""
+      ).trim(),
+
+    telegram:
+      (
+        $("#ownerModalTelegram")
+          ?.value ||
+        ""
+      ).trim(),
+
+    note:
+      (
+        $("#ownerModalNote")
+          ?.value ||
+        ""
+      ).trim(),
+  };
+}
+
+function ownerModalHasChanges() {
+  const modal =
+    $("#ownerModal");
+
+  if (!modal) {
+    return false;
+  }
+
+  let initialState = {};
+
+  try {
+    initialState =
+      JSON.parse(
+        modal.dataset
+          .initialState ||
+        "{}"
+      );
+  } catch {
+    initialState = {};
+  }
+
+  const currentState =
+    getOwnerModalState();
+
+  return (
+    JSON.stringify(
+      currentState
+    ) !==
+    JSON.stringify(
+      initialState
+    )
+  );
+}
+
+function requestCloseOwnerModal() {
+  if (
+    !ownerModalHasChanges()
+  ) {
+    closeOwnerModal();
+    return;
+  }
+
+  openDeleteModal(
+    (
+      "Внесені дані власника " +
+      "ще не збережені."
+    ),
+    () => {
+      closeOwnerModal();
+    },
+    "unsaved"
+  );
+}
 function closeOwnerModal() {
   const modal =
     $("#ownerModal");
@@ -42138,6 +42079,9 @@ function closeOwnerModal() {
   modal.dataset.ownerId =
     "";
 
+    modal.dataset.initialState =
+  "";
+
   const idInput =
     $("#ownerModalId");
 
@@ -42146,8 +42090,17 @@ function closeOwnerModal() {
   }
 }
 
-$("#ownerModalClose")?.addEventListener("click", closeOwnerModal);
-$("#ownerModalCancel")?.addEventListener("click", closeOwnerModal);
+$("#ownerModalClose")
+  ?.addEventListener(
+    "click",
+    requestCloseOwnerModal
+  );
+
+$("#ownerModalCancel")
+  ?.addEventListener(
+    "click",
+    requestCloseOwnerModal
+  );
 bindUaPhoneInput(
   document.querySelector(
     "#ownerModalPhone"
