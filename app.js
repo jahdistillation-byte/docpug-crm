@@ -34241,6 +34241,130 @@ const CAT_BREEDS = [
   "Метис / безпородна"
 ];
 
+const OTHER_SPECIES_GROUPS = [
+  {
+    id: "birds",
+    title: "Птахи",
+    icon: "🦜",
+    items: [
+      "Хвилястий папуга",
+      "Корела",
+      "Жако",
+      "Какаду",
+      "Нерозлучник",
+      "Канарка",
+      "Амадина",
+      "Голуб",
+      "Курка",
+      "Півень",
+      "Качка",
+      "Гуска",
+      "Індик",
+      "Перепілка",
+      "Інший птах",
+    ],
+  },
+  {
+    id: "rodents",
+    title: "Гризуни",
+    icon: "🐹",
+    items: [
+      "Хом’як",
+      "Щур",
+      "Миша",
+      "Морська свинка",
+      "Шиншила",
+      "Дегу",
+      "Піщанка",
+      "Бурундук",
+      "Інший гризун",
+    ],
+  },
+  {
+    id: "rabbits",
+    title: "Кролики та зайцеподібні",
+    icon: "🐇",
+    items: [
+      "Декоративний кролик",
+      "Карликовий кролик",
+      "Висловухий кролик",
+      "Звичайний кролик",
+      "Заєць",
+      "Інший зайцеподібний",
+    ],
+  },
+  {
+    id: "reptiles",
+    title: "Рептилії",
+    icon: "🦎",
+    items: [
+      "Сухопутна черепаха",
+      "Водна черепаха",
+      "Гекон",
+      "Ігуана",
+      "Хамелеон",
+      "Агама",
+      "Змія",
+      "Пітон",
+      "Полоз",
+      "Інша рептилія",
+    ],
+  },
+  {
+    id: "ferrets",
+    title: "Тхори та дрібні хижаки",
+    icon: "🦦",
+    items: [
+      "Тхір",
+      "Фретка",
+      "Їжак",
+      "Єнот",
+      "Інший дрібний хижак",
+    ],
+  },
+  {
+    id: "farm",
+    title: "Сільськогосподарські",
+    icon: "🐐",
+    items: [
+      "Коза",
+      "Вівця",
+      "Свиня",
+      "Мініпіг",
+      "Корова",
+      "Теля",
+      "Кінь",
+      "Поні",
+      "Осел",
+      "Лама",
+      "Альпака",
+      "Інша сільськогосподарська тварина",
+    ],
+  },
+  {
+    id: "exotic",
+    title: "Екзотичні та інші",
+    icon: "🐾",
+    items: [
+      "Мавпа",
+      "Лисиця",
+      "Білка",
+      "Кажан",
+      "Акваріумна риба",
+      "Інша риба",
+      "Амфібія",
+      "Павук",
+      "Комаха",
+      "Інший вид",
+    ],
+  },
+];
+
+const OTHER_SPECIES_LIST =
+  OTHER_SPECIES_GROUPS.flatMap(
+    (group) => group.items
+  );
+
 function initVisitNewPatientBreedPicker() {
   const speciesSelect =
     document.querySelector(
@@ -34706,6 +34830,8 @@ const breedClear = overlay.querySelector("#addPetBreedClear");
 
 let activeBreedList = [];
 let selectedBreed = "";
+let activeOtherGroupId =
+  "";
   const ageInput = overlay.querySelector("#addPetAge");
   const weightInput = overlay.querySelector("#addPetWeight");
   const sexInput =
@@ -34797,54 +34923,235 @@ const closeBreedDropdown = () => {
   breedDropdown.innerHTML = "";
 };
 
-const renderBreedDropdown = () => {
-  if (!activeBreedList.length) {
-    closeBreedDropdown();
-    return;
-  }
+const renderBreedDropdown =
+  () => {
+    const query =
+      normalizeBreedSearch(
+        breedInput.value
+      );
 
-  const query = normalizeBreedSearch(breedInput.value);
+    const isOtherSpecies =
+      speciesInput.value ===
+      "other";
 
-  const filtered = activeBreedList
-    .filter((breed) => {
-      if (!query) return true;
+    if (
+      isOtherSpecies &&
+      !query &&
+      !activeOtherGroupId
+    ) {
+      breedDropdown.innerHTML =
+        `
+          <div
+            class="addPetBreedEmpty"
+          >
+            <span>
+              Оберіть категорію
+            </span>
 
-      return normalizeBreedSearch(breed).includes(query);
-    })
-    .slice(0, 12);
+            <small>
+              Після цього відкриється
+              список конкретних видів.
+            </small>
+          </div>
 
-  breedDropdown.innerHTML = filtered.length
-    ? filtered.map((breed) => `
-        <button
-          class="addPetBreedOption ${
-            selectedBreed === breed ? "is-selected" : ""
-          }"
-          type="button"
-          data-select-breed="${escapeHtml(breed)}"
-        >
-          <span class="addPetBreedOptionIcon">🐾</span>
+          ${OTHER_SPECIES_GROUPS
+            .map(
+              (group) => `
+                <button
+                  class="addPetBreedOption"
+                  type="button"
+                  data-other-species-group="${
+                    escapeHtml(
+                      group.id
+                    )
+                  }"
+                >
+                  <span
+                    class="addPetBreedOptionIcon"
+                  >
+                    ${
+                      escapeHtml(
+                        group.icon
+                      )
+                    }
+                  </span>
 
-          <span>${escapeHtml(breed)}</span>
+                  <span>
+                    ${
+                      escapeHtml(
+                        group.title
+                      )
+                    }
+                  </span>
 
-          ${
-            selectedBreed === breed
-              ? `<b>✓</b>`
-              : ""
+                  <b>›</b>
+                </button>
+              `
+            )
+            .join("")}
+        `;
+
+      breedDropdown.classList.add(
+        "is-open"
+      );
+
+      return;
+    }
+
+    const activeGroup =
+      isOtherSpecies &&
+      activeOtherGroupId
+        ? OTHER_SPECIES_GROUPS
+            .find(
+              (group) =>
+                group.id ===
+                activeOtherGroupId
+            )
+        : null;
+
+    const sourceList =
+      activeGroup
+        ? activeGroup.items
+        : activeBreedList;
+
+    const filtered =
+      sourceList
+        .filter((item) => {
+          if (!query) {
+            return true;
           }
-        </button>
-      `).join("")
-    : `
-        <div class="addPetBreedEmpty">
-          <span>Породу не знайдено</span>
-          <small>Назву можна залишити введеною вручну.</small>
-        </div>
-      `;
 
-  breedDropdown.classList.add("is-open");
-};
+          return normalizeBreedSearch(
+            item
+          ).includes(query);
+        })
+        .slice(0, 20);
+
+    const backButton =
+      activeGroup &&
+      !query
+        ? `
+            <button
+              class="addPetBreedOption"
+              type="button"
+              data-other-species-back="1"
+            >
+              <span
+                class="addPetBreedOptionIcon"
+              >
+                ←
+              </span>
+
+              <span>
+                Усі категорії
+              </span>
+            </button>
+
+            <div
+              class="addPetBreedEmpty"
+            >
+              <span>
+                ${
+                  escapeHtml(
+                    activeGroup.icon
+                  )
+                }
+                ${
+                  escapeHtml(
+                    activeGroup.title
+                  )
+                }
+              </span>
+
+              <small>
+                Оберіть конкретний вид
+                тварини.
+              </small>
+            </div>
+          `
+        : "";
+
+    breedDropdown.innerHTML =
+      filtered.length
+        ? `
+            ${backButton}
+
+            ${filtered
+              .map(
+                (item) => `
+                  <button
+                    class="addPetBreedOption ${
+                      selectedBreed ===
+                      item
+                        ? "is-selected"
+                        : ""
+                    }"
+                    type="button"
+                    data-select-breed="${
+                      escapeHtml(
+                        item
+                      )
+                    }"
+                  >
+                    <span
+                      class="addPetBreedOptionIcon"
+                    >
+                      ${
+                        activeGroup
+                          ? escapeHtml(
+                              activeGroup
+                                .icon
+                            )
+                          : "🐾"
+                      }
+                    </span>
+
+                    <span>
+                      ${
+                        escapeHtml(
+                          item
+                        )
+                      }
+                    </span>
+
+                    ${
+                      selectedBreed ===
+                      item
+                        ? "<b>✓</b>"
+                        : ""
+                    }
+                  </button>
+                `
+              )
+              .join("")}
+          `
+        : `
+            ${backButton}
+
+            <div
+              class="addPetBreedEmpty"
+            >
+              <span>
+                Нічого не знайдено
+              </span>
+
+              <small>
+                Ви можете залишити
+                введений варіант
+                вручну.
+              </small>
+            </div>
+          `;
+
+    breedDropdown.classList.add(
+      "is-open"
+    );
+  };
 
 const configureBreedField = (species) => {
   selectedBreed = "";
+  activeOtherGroupId =
+  "";
   breedInput.value = "";
   closeBreedDropdown();
 
@@ -34885,22 +35192,29 @@ const configureBreedField = (species) => {
   }
 
   if (species === "other") {
-    activeBreedList = [];
+  activeBreedList =
+    OTHER_SPECIES_LIST;
 
-    breedInput.disabled = false;
-    breedInput.placeholder = "Наприклад: корела, шиншила, кролик";
+  breedInput.disabled =
+    false;
 
-    breedLabel.innerHTML = `
-      Вид тварини
-      <small>необов’язково</small>
-    `;
+  breedInput.placeholder =
+    "Оберіть або почніть вводити вид тварини";
 
-    breedHint.textContent =
-      "Вкажіть вид тварини вручну.";
+  breedLabel.innerHTML = `
+    Вид тварини
+    <small>обов’язково</small>
+  `;
 
-    breedField.classList.add("is-other-species");
-    return;
-  }
+  breedHint.textContent =
+    "Оберіть вид зі списку або введіть власний варіант.";
+
+  breedField.classList.add(
+    "is-other-species"
+  );
+
+  return;
+}
 
   activeBreedList = [];
 
@@ -35101,18 +35415,72 @@ breedDropdown.addEventListener(
   }
 );
 
-breedDropdown.addEventListener("click", (event) => {
-  const option = event.target.closest("[data-select-breed]");
-  if (!option) return;
+breedDropdown.addEventListener(
+  "click",
+  (event) => {
+    const groupButton =
+      event.target.closest(
+        "[data-other-species-group]"
+      );
 
-  const breed = option.dataset.selectBreed || "";
+    if (groupButton) {
+      activeOtherGroupId =
+        String(
+          groupButton.dataset
+            .otherSpeciesGroup ||
+          ""
+        );
 
-  selectedBreed = breed;
-  breedInput.value = breed;
+      breedInput.value =
+        "";
 
-  closeBreedDropdown();
-  clearError();
-});
+      renderBreedDropdown();
+
+      return;
+    }
+
+    const backButton =
+      event.target.closest(
+        "[data-other-species-back]"
+      );
+
+    if (backButton) {
+      activeOtherGroupId =
+        "";
+
+      breedInput.value =
+        "";
+
+      renderBreedDropdown();
+
+      return;
+    }
+
+    const option =
+      event.target.closest(
+        "[data-select-breed]"
+      );
+
+    if (!option) {
+      return;
+    }
+
+    const breed =
+      option.dataset
+        .selectBreed ||
+      "";
+
+    selectedBreed =
+      breed;
+
+    breedInput.value =
+      breed;
+
+    closeBreedDropdown();
+
+    clearError();
+  }
+);
 
 breedClear.addEventListener("click", () => {
   selectedBreed = "";
