@@ -34430,16 +34430,20 @@ function initVisitNewPatientBreedPicker() {
           "Порода кота";
       }
     } else if (species === "other") {
-      breedInput.disabled = false;
+  breeds =
+    OTHER_SPECIES_LIST;
 
-      breedInput.placeholder =
-        "Напр. корела, кролик, шиншила";
+  breedInput.disabled =
+    false;
 
-      if (breedLabel) {
-        breedLabel.textContent =
-          "Вид або порода";
-      }
-    } else {
+  breedInput.placeholder =
+    "Оберіть або почніть вводити вид тварини";
+
+  if (breedLabel) {
+    breedLabel.textContent =
+      "Вид тварини";
+  }
+} else {
       breedInput.disabled = true;
 
       breedInput.placeholder =
