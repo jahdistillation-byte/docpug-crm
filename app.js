@@ -37410,7 +37410,7 @@ if (savedPetId) await renderVisits(savedPetId);
     if (!created?.id) return;
 
     await createCalendarEventApi({
-      title: `${pet.name || "Пацієнт"} — ${dx || notePlain || "Візит"}`,
+      title: `${pet.name || "Пацієнт"} — ${notePlain || "Візит"}`,
       event_date: date,
       start_time: startTime,
       end_time: endTime,
@@ -37418,7 +37418,7 @@ if (savedPetId) await renderVisits(savedPetId);
       patient_id: pet.id,
       owner_id: pet.owner_id,
       visit_id: created.id,
-      note: notePlain || dx || "",
+      note: notePlain || "",
       status: "planned",
     });
 
