@@ -23964,33 +23964,75 @@ if (!owner) {
              • ${petVisits.length} візитів
           </div>
         </div>
-        <div style="padding-left: 15px;">
-          <button
-  class="iconBtn"
-  type="button"
-  title="Видалити пацієнта"
-  aria-label="Видалити пацієнта"
-  data-del-pet="${escapeHtml(String(pet.id))}"
+        <div
+  style="
+    padding-left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  "
 >
-  <svg
-    viewBox="0 0 24 24"
-    width="16"
-    height="16"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.8"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    aria-hidden="true"
+  <button
+    class="iconBtn"
+    type="button"
+    title="Редагувати пацієнта"
+    aria-label="Редагувати пацієнта"
+    data-edit-owner-pet="${escapeHtml(
+      String(pet.id)
+    )}"
   >
-    <path d="M3 6h18"></path>
-    <path d="M8 6V4h8v2"></path>
-    <path d="M19 6l-1 14H6L5 6"></path>
-    <path d="M10 11v5"></path>
-    <path d="M14 11v5"></path>
-  </svg>
-</button>
-        </div>
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9"></path>
+      <path
+        d="
+          M16.5 3.5
+          a2.1 2.1 0 0 1 3 3
+          L8 18
+          l-4 1
+          1-4Z
+        "
+      ></path>
+    </svg>
+  </button>
+
+  <button
+    class="iconBtn"
+    type="button"
+    title="Видалити пацієнта"
+    aria-label="Видалити пацієнта"
+    data-del-pet="${escapeHtml(
+      String(pet.id)
+    )}"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18"></path>
+      <path d="M8 6V4h8v2"></path>
+      <path d="M19 6l-1 14H6L5 6"></path>
+      <path d="M10 11v5"></path>
+      <path d="M14 11v5"></path>
+    </svg>
+  </button>
+</div>
       `;
       list.appendChild(el);
     });
@@ -35818,56 +35860,155 @@ function initOwnerUI() {
   });
 
   // Клик по списку животных (Удаление / Открытие)
-  $("#petsList")?.addEventListener("click", async (e) => {
-  const delBtn = e.target.closest("[data-del-pet]");
-  if (delBtn) {
-    e.preventDefault();
-    e.stopPropagation();
+  $("#petsList")?.addEventListener(
+  "click",
+  async (e) => {
+    const editBtn =
+      e.target.closest(
+        "[data-edit-owner-pet]"
+      );
 
-    const petId = delBtn.dataset.delPet;
-    if (!petId) return;
+    if (editBtn) {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const pet = (state.patients || []).find(
-      (p) => String(p.id) === String(petId)
-    );
+      const petId =
+        editBtn.dataset
+          .editOwnerPet;
 
-    const petName = pet?.name || "цього пацієнта";
-
-    openDeleteModal(
-      `<b>${escapeHtml(petName)}</b><br><br>Цю дію неможливо скасувати.`,
-      async () => {
-
-        const ok = await deletePatientApi(petId);
-
-        if (!ok) {
-          alert("Не вдалося видалити пацієнта.");
-          return;
-        }
-
-        await loadPatientsApi();
-
-        if (state.selectedPetId === petId) {
-          state.selectedPetId = null;
-          state.selectedPet = null;
-        }
-
-        if (state.selectedOwnerId) {
-          renderOwnerPage(state.selectedOwnerId);
-        }
+      if (!petId) {
+        return;
       }
-    );
 
-    return;
-  }
+      const pet =
+        (
+          state.patients || []
+        ).find(
+          (item) =>
+            String(item.id) ===
+            String(petId)
+        );
 
-  const openZone = e.target.closest("[data-open-pet]");
-  if (openZone) {
-    const petId = openZone.dataset.openPet;
-    if (petId) openPatient(petId);
+      if (!pet) {
+        openDeleteModal(
+          "Пацієнта не знайдено.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      openAddPetModal(
+        pet.owner_id,
+        pet
+      );
+
+      return;
+    }
+
+    const delBtn =
+      e.target.closest(
+        "[data-del-pet]"
+      );
+
+    if (delBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const petId =
+        delBtn.dataset
+          .delPet;
+
+      if (!petId) {
+        return;
+      }
+
+      const pet =
+        (
+          state.patients || []
+        ).find(
+          (item) =>
+            String(item.id) ===
+            String(petId)
+        );
+
+      const petName =
+        pet?.name ||
+        "цього пацієнта";
+
+      openDeleteModal(
+        `
+          <b>
+            ${escapeHtml(petName)}
+          </b>
+          <br><br>
+          Цю дію неможливо скасувати.
+        `,
+        async () => {
+          const ok =
+            await deletePatientApi(
+              petId
+            );
+
+          if (!ok) {
+            openDeleteModal(
+              "Не вдалося видалити пацієнта.",
+              null,
+              "info"
+            );
+
+            return;
+          }
+
+          await loadPatientsApi();
+
+          if (
+            String(
+              state.selectedPetId ||
+              ""
+            ) ===
+            String(petId)
+          ) {
+            state.selectedPetId =
+              null;
+
+            state.selectedPet =
+              null;
+          }
+
+          if (
+            state.selectedOwnerId
+          ) {
+            await renderOwnerPage(
+              state.selectedOwnerId
+            );
+          }
+        }
+      );
+
+      return;
+    }
+
+    const openZone =
+      e.target.closest(
+        "[data-open-pet]"
+      );
+
+    if (openZone) {
+      const petId =
+        openZone.dataset
+          .openPet;
+
+      if (petId) {
+        openPatient(
+          petId
+        );
+      }
+    }
   }
-});
+);
 }
-
 // =========================
 // VISITS TAB UI — Глобальный журнал визитов
 // =========================
