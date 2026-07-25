@@ -1935,14 +1935,58 @@ async function deleteServiceApi(id) {
 async function createPatientApi(payload) {
   try {
     const bodyObj = {
-      owner_id: payload?.owner_id,
-      name: (payload?.name || "").trim(),
-      species: (payload?.species || "").trim(),
-      breed: (payload?.breed || "").trim(),
-      age: (payload?.age || "").trim(),
-      weight_kg: (payload?.weight_kg || "").trim(),
-      notes: (payload?.notes || payload?.note || "").trim(),
-    };
+  owner_id:
+    payload?.owner_id,
+
+  name:
+    String(
+      payload?.name || ""
+    ).trim(),
+
+  species:
+    String(
+      payload?.species || ""
+    ).trim(),
+
+  breed:
+    String(
+      payload?.breed || ""
+    ).trim(),
+
+  age:
+    String(
+      payload?.age || ""
+    ).trim(),
+
+  weight_kg:
+    String(
+      payload?.weight_kg || ""
+    ).trim(),
+
+  sex:
+    String(
+      payload?.sex || ""
+    ).trim(),
+
+  neutered:
+    typeof payload?.neutered ===
+      "boolean"
+      ? payload.neutered
+      : null,
+
+  vaccination_status:
+    String(
+      payload?.vaccination_status ||
+      "unknown"
+    ).trim(),
+
+  notes:
+    String(
+      payload?.notes ||
+      payload?.note ||
+      ""
+    ).trim(),
+};
 
     Object.keys(bodyObj).forEach((k) => {
       if (bodyObj[k] === "" || bodyObj[k] == null) delete bodyObj[k];
@@ -35108,28 +35152,28 @@ function openVisitModalForCreate(pet = null) {
         event.stopPropagation();
 
         const ownerName =
-          String(
-            $("#visitNewOwnerName")
-              ?.value || ""
-          ).trim();
+  String(
+    $("#visitNewOwnerName")
+      ?.value || ""
+  ).trim();
 
-        const ownerPhone =
-          String(
-            $("#visitNewOwnerPhone")
-              ?.value || ""
-          ).trim();
+const ownerPhone =
+  String(
+    $("#visitNewOwnerPhone")
+      ?.value || ""
+  ).trim();
 
-        const ownerNote =
-          String(
-            $("#visitNewOwnerNote")
-              ?.value || ""
-          ).trim();
+const ownerNote =
+  String(
+    $("#visitNewOwnerNote")
+      ?.value || ""
+  ).trim();
 
-        const petName =
-          String(
-            $("#visitNewPetName")
-              ?.value || ""
-          ).trim();
+const petName =
+  String(
+    $("#visitNewPetName")
+      ?.value || ""
+  ).trim();
 
         const species =
           String(
@@ -35253,25 +35297,32 @@ function openVisitModalForCreate(pet = null) {
           }
 
           const patient =
-            await createPatientApi({
-              owner_id:
-                owner.id,
+  await createPatientApi({
+    owner_id:
+      owner.id,
 
-              name:
-                petName,
+    name:
+      petName,
 
-              species,
+    species,
 
-              breed,
+    breed,
 
-              age,
+    age,
 
-              weight_kg:
-                weight,
+    weight_kg:
+      weight,
 
-              notes:
-                "",
-            });
+    sex,
+
+    neutered,
+
+    vaccination_status:
+      vaccinationStatus,
+
+    notes:
+      "",
+  });
 
           if (!patient?.id) {
             throw new Error(
@@ -40416,12 +40467,24 @@ if (visitNewPatientCreate) {
           $("#visitNewOwnerPhone")
             ?.value || ""
         ).trim();
+const ownerEmail =
+  String(
+    $("#visitNewOwnerEmail")
+      ?.value || ""
+  ).trim();
 
-      const ownerNote =
-        String(
-          $("#visitNewOwnerNote")
-            ?.value || ""
-        ).trim();
+const ownerTelegram =
+  String(
+    $("#visitNewOwnerTelegram")
+      ?.value || ""
+  ).trim();
+
+const ownerNote =
+  String(
+    $("#visitNewOwnerNote")
+      ?.value || ""
+  ).trim();
+  
 
       const petName =
         String(
@@ -40452,7 +40515,28 @@ if (visitNewPatientCreate) {
           $("#visitNewPetWeight")
             ?.value || ""
         ).trim();
+const sex =
+  String(
+    $("#visitNewPetSex")
+      ?.value || ""
+  ).trim();
 
+const neuteredRaw =
+  String(
+    $("#visitNewPetNeutered")
+      ?.value || ""
+  ).trim();
+
+const vaccinationStatus =
+  String(
+    $("#visitNewPetVaccination")
+      ?.value || "unknown"
+  ).trim();
+
+const neutered =
+  neuteredRaw === ""
+    ? null
+    : neuteredRaw === "true";
       if (!ownerName) {
         alert(
           "Вкажіть ПІБ власника."
@@ -40539,10 +40623,10 @@ if (visitNewPatientCreate) {
                 : ownerPhone,
 
             email:
-              "",
+  ownerEmail,
 
-            telegram:
-              "",
+telegram:
+  ownerTelegram,
 
             note:
               ownerNote,
@@ -40555,25 +40639,32 @@ if (visitNewPatientCreate) {
         }
 
         const patient =
-          await createPatientApi({
-            owner_id:
-              owner.id,
+  await createPatientApi({
+    owner_id:
+      owner.id,
 
-            name:
-              petName,
+    name:
+      petName,
 
-            species,
+    species,
 
-            breed,
+    breed,
 
-            age,
+    age,
 
-            weight_kg:
-              weight,
+    weight_kg:
+      weight,
 
-            notes:
-              "",
-          });
+    sex,
+
+    neutered,
+
+    vaccination_status:
+      vaccinationStatus,
+
+    notes:
+      "",
+  });
 
         if (!patient?.id) {
           throw new Error(

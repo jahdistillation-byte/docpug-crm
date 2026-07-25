@@ -773,6 +773,31 @@
     placeholder="+380 XX XXX XX XX"
   >
 </label>
+<label class="pugVisitField">
+  <span>Email</span>
+
+  <input
+    class="pugVisitInput"
+    id="visitNewOwnerEmail"
+    type="email"
+    maxlength="200"
+    autocomplete="email"
+    placeholder="client@example.com"
+  >
+</label>
+
+<label class="pugVisitField">
+  <span>Telegram</span>
+
+  <input
+    class="pugVisitInput"
+    id="visitNewOwnerTelegram"
+    type="text"
+    maxlength="64"
+    autocomplete="off"
+    placeholder="@username"
+  >
+</label>
 
             <label class="pugVisitField">
               <span>Адреса / нотатка</span>
@@ -814,6 +839,69 @@
   <datalist id="visitNewPetBreedList"></datalist>
 </label>
 
+
+<label class="pugVisitField">
+  <span>Стать</span>
+
+  <select
+    class="pugVisitInput"
+    id="visitNewPetSex"
+  >
+    <option value="">
+      Не вказано
+    </option>
+
+    <option value="male">
+      Самець
+    </option>
+
+    <option value="female">
+      Самка
+    </option>
+  </select>
+</label>
+
+<label class="pugVisitField">
+  <span>Кастрований / стерилізована</span>
+
+  <select
+    class="pugVisitInput"
+    id="visitNewPetNeutered"
+  >
+    <option value="">
+      Не вказано
+    </option>
+
+    <option value="true">
+      Так
+    </option>
+
+    <option value="false">
+      Ні
+    </option>
+  </select>
+</label>
+
+<label class="pugVisitField">
+  <span>Вакцинація</span>
+
+  <select
+    class="pugVisitInput"
+    id="visitNewPetVaccination"
+  >
+    <option value="unknown">
+      Невідомо
+    </option>
+
+    <option value="vaccinated">
+      Вакцинована
+    </option>
+
+    <option value="not_vaccinated">
+      Не вакцинована
+    </option>
+  </select>
+</label>
             <label class="pugVisitField">
               <span>Вік</span>
               <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки">
