@@ -24044,24 +24044,262 @@ if (btnAddVisit) {
 
   // Шаг 2: Контент табов
   if (tab === "overview") {
-    dynamicBox.innerHTML = `
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-        <div class="glass-card" style="background: rgba(255,255,255,0.02); padding:20px; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
-          <h3 style="margin-top:0; color:#fff; font-size:1.2rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom:10px;">📋 Паспорт пацієнта</h3>
-          <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px; font-size:0.95rem;">
-            <div><span style="opacity:0.5;">Кличка:</span> <b style="color:#fff; margin-left:6px;">${escapeHtml(pet.name || "—")}</b></div>
-            <div><span style="opacity:0.5;">Вид:</span> <span style="color:#fff; margin-left:6px;">${escapeHtml(pet.species || "—")}</span></div>
-            <div><span style="opacity:0.5;">Порода:</span> <span style="color:#fff; margin-left:6px;">${escapeHtml(pet.breed || "—")}</span></div>
-            <div><span style="opacity:0.5;">Вік:</span> <span style="color:#fff; margin-left:6px;">${escapeHtml(pet.age || "—")}</span></div>
-          </div>
+    const sexLabel = {
+  male: "Самець",
+  female: "Самка",
+}[String(pet.sex || "")] || "Не вказано";
+
+const neuteredLabel =
+  typeof pet.neutered === "boolean"
+    ? pet.neutered
+      ? "Так"
+      : "Ні"
+    : "Не вказано";
+
+const vaccinationLabel = {
+  vaccinated: "Вакцинована",
+  not_vaccinated:
+    "Не вакцинована",
+  unknown: "Невідомо",
+}[
+  String(
+    pet.vaccination_status ||
+    "unknown"
+  )
+] || "Невідомо";
+
+dynamicBox.innerHTML = `
+  <div
+    style="
+      display:grid;
+      grid-template-columns:
+        1fr 1fr;
+      gap:20px;
+    "
+  >
+    <div
+      class="glass-card"
+      style="
+        background:
+          rgba(255,255,255,0.02);
+        padding:20px;
+        border-radius:16px;
+        border:
+          1px solid
+          rgba(255,255,255,0.05);
+      "
+    >
+      <h3
+        style="
+          margin-top:0;
+          color:#fff;
+          font-size:1.2rem;
+          border-bottom:
+            1px solid
+            rgba(255,255,255,0.08);
+          padding-bottom:10px;
+        "
+      >
+        📋 Паспорт пацієнта
+      </h3>
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            1fr 1fr;
+          gap:12px 20px;
+          margin-top:15px;
+          font-size:0.95rem;
+        "
+      >
+        <div>
+          <span style="opacity:0.5;">
+            Кличка:
+          </span>
+
+          <b
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              pet.name || "—"
+            )}
+          </b>
         </div>
-        
-        <div class="glass-card" style="background: rgba(255,255,255,0.02); padding:20px; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
-          <h3 style="margin-top:0; color:#fff; font-size:1.2rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom:10px;">📝 Нотатки лікаря</h3>
-          <div style="margin-top:15px; color: rgba(255,255,255,0.85); white-space:pre-wrap; line-height:1.5; font-size:0.95rem;">${escapeHtml(pet.notes || "Поки нотаток немає.")}</div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Вид:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              pet.species || "—"
+            )}
+          </span>
+        </div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Порода:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              pet.breed || "—"
+            )}
+          </span>
+        </div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Вік:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              pet.age || "—"
+            )}
+          </span>
+        </div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Вага:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${
+              pet.weight_kg
+                ? `${escapeHtml(
+                    pet.weight_kg
+                  )} кг`
+                : "—"
+            }
+          </span>
+        </div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Стать:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              sexLabel
+            )}
+          </span>
+        </div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Кастрований /
+            стерилізована:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              neuteredLabel
+            )}
+          </span>
+        </div>
+
+        <div>
+          <span style="opacity:0.5;">
+            Вакцинація:
+          </span>
+
+          <span
+            style="
+              color:#fff;
+              margin-left:6px;
+            "
+          >
+            ${escapeHtml(
+              vaccinationLabel
+            )}
+          </span>
         </div>
       </div>
-    `;
+    </div>
+
+    <div
+      class="glass-card"
+      style="
+        background:
+          rgba(255,255,255,0.02);
+        padding:20px;
+        border-radius:16px;
+        border:
+          1px solid
+          rgba(255,255,255,0.05);
+      "
+    >
+      <h3
+        style="
+          margin-top:0;
+          color:#fff;
+          font-size:1.2rem;
+          border-bottom:
+            1px solid
+            rgba(255,255,255,0.08);
+          padding-bottom:10px;
+        "
+      >
+        📝 Нотатки лікаря
+      </h3>
+
+      <div
+        style="
+          margin-top:15px;
+          color:
+            rgba(255,255,255,0.85);
+          white-space:pre-wrap;
+          line-height:1.5;
+          font-size:0.95rem;
+        "
+      >
+        ${escapeHtml(
+          pet.notes ||
+          "Поки нотаток немає."
+        )}
+      </div>
+    </div>
+  </div>
+`;
     return;
   }
 
