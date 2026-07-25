@@ -2405,10 +2405,45 @@ async function deleteOwner(id) {
     try { json = text ? JSON.parse(text) : null; } catch {}
 
     if (!res.ok) {
-      console.error("API /owners DELETE HTTP", res.status, text);
-      alert(`Помилка видалення власника (HTTP ${res.status})`);
-      return false;
-    }
+  console.error(
+    "API /owners DELETE HTTP",
+    res.status,
+    text
+  );
+
+  if (res.status === 409) {
+    openDeleteModal(
+      `
+        <b>Власника неможливо видалити</b>
+        <br><br>
+        ${
+          escapeHtml(
+            json?.error ||
+            "До цього власника прив’язані пацієнти."
+          )
+        }
+        <br><br>
+        Спочатку перенесіть або видаліть
+        усіх його пацієнтів.
+      `,
+      null,
+      "info"
+    );
+
+    return false;
+  }
+
+  openDeleteModal(
+    escapeHtml(
+      json?.error ||
+      `Помилка видалення власника (HTTP ${res.status})`
+    ),
+    null,
+    "info"
+  );
+
+  return false;
+}
 
     if (!json || !json.ok) {
       console.error("API /owners DELETE bad json:", json, text);
