@@ -35815,11 +35815,88 @@ $("#visitSave")?.addEventListener("click", async () => {
 
     // Автоматическое создание владельца и животного на лету из календаря
     if (!pet && $("#visitNewPatientBox")?.style.display !== "none") {
-      const ownerName = ($("#visitNewOwnerName")?.value || "").trim();
-      const ownerPhone = ($("#visitNewOwnerPhone")?.value || "").trim();
-      const petName = ($("#visitNewPetName")?.value || "").trim();
-      const species = ($("#visitNewPetSpecies")?.value || "").trim();
-      const breed = ($("#visitNewPetBreed")?.value || "").trim();
+      const ownerName =
+  String(
+    $("#visitNewOwnerName")
+      ?.value || ""
+  ).trim();
+
+const ownerPhone =
+  String(
+    $("#visitNewOwnerPhone")
+      ?.value || ""
+  ).trim();
+
+const ownerEmail =
+  String(
+    $("#visitNewOwnerEmail")
+      ?.value || ""
+  ).trim();
+
+const ownerTelegram =
+  String(
+    $("#visitNewOwnerTelegram")
+      ?.value || ""
+  ).trim();
+
+const ownerNote =
+  String(
+    $("#visitNewOwnerNote")
+      ?.value || ""
+  ).trim();
+
+const petName =
+  String(
+    $("#visitNewPetName")
+      ?.value || ""
+  ).trim();
+
+const species =
+  String(
+    $("#visitNewPetSpecies")
+      ?.value || ""
+  ).trim();
+
+const breed =
+  String(
+    $("#visitNewPetBreed")
+      ?.value || ""
+  ).trim();
+
+const age =
+  String(
+    $("#visitNewPetAge")
+      ?.value || ""
+  ).trim();
+
+const weight =
+  String(
+    $("#visitNewPetWeight")
+      ?.value || ""
+  ).trim();
+
+const sex =
+  String(
+    $("#visitNewPetSex")
+      ?.value || ""
+  ).trim();
+
+const neuteredRaw =
+  String(
+    $("#visitNewPetNeutered")
+      ?.value || ""
+  ).trim();
+
+const vaccinationStatus =
+  String(
+    $("#visitNewPetVaccination")
+      ?.value || "unknown"
+  ).trim();
+
+const neutered =
+  neuteredRaw === ""
+    ? null
+    : neuteredRaw === "true";
 
       if (!ownerName) {
   return alert(
@@ -35860,22 +35937,43 @@ if (!petName) {
       ),
 
     email:
-      "",
+  ownerEmail,
 
-    telegram:
-      "",
+telegram:
+  ownerTelegram,
 
     note:
       ownerNote,
   });
       if (!owner?.id) return alert("Не вдалося створити власника");
 
-      const createdPet = await createPatientApi({
-        owner_id: owner.id,
-        name: petName,
-        species,
-        breed,
-      });
+      const createdPet =
+  await createPatientApi({
+    owner_id:
+      owner.id,
+
+    name:
+      petName,
+
+    species,
+
+    breed,
+
+    age,
+
+    weight_kg:
+      weight,
+
+    sex,
+
+    neutered,
+
+    vaccination_status:
+      vaccinationStatus,
+
+    notes:
+      "",
+  });
 
       if (!createdPet?.id) return alert("Не вдалося створити пацієнта");
 
