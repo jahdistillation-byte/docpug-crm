@@ -33121,3 +33121,26 @@ body[data-theme="white"] :is(
     width: 100%;
   }
 }
+#ownerExistsModal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
+
+#ownerExistsModal
+.pugOwnerExistsBackdrop {
+  pointer-events: auto !important;
+}
+
+#ownerExistsModal
+.pugOwnerExistsDialog {
+  position: relative !important;
+  z-index: 2 !important;
+  pointer-events: auto !important;
+}
+
+#ownerExistsModal
+button {
+  pointer-events: auto !important;
+}
