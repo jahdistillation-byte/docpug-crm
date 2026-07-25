@@ -33144,3 +33144,26 @@ body[data-theme="white"] :is(
 button {
   pointer-events: auto !important;
 }
+/* Попередження поверх усіх CRM-модалок */
+#deleteModal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
+
+#deleteModal .modalBackdrop,
+#deleteModal .deleteBackdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+#deleteModal .modalContent,
+#deleteModal .deleteModalContent,
+#deleteModal .deleteDialog {
+  position: relative !important;
+  z-index: 2 !important;
+  pointer-events: auto !important;
+}
