@@ -33726,3 +33726,74 @@ body[data-theme="white"]
       10px;
   }
 }
+/* =====================================================
+   КАЛЕНДАРЬ — СТРОГАЯ КНОПКА "НОВИЙ ПАЦІЄНТ"
+===================================================== */
+
+#visitModal .pugAddPatientBtn {
+  width: 100%;
+  min-height: 44px;
+
+  margin-top: 12px;
+  padding: 0 16px;
+
+  border-radius: 12px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 11%,
+      rgba(255, 255, 255, 0.025)
+    ) !important;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color) 30%,
+      rgba(255, 255, 255, 0.08)
+    ) !important;
+
+  color: rgba(255, 255, 255, 0.82) !important;
+
+  font-size: 0.88rem;
+  font-weight: 750;
+  letter-spacing: 0;
+
+  box-shadow: none !important;
+  text-shadow: none !important;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+#visitModal .pugAddPatientBtn:hover {
+  transform: translateY(-1px);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 17%,
+      rgba(255, 255, 255, 0.035)
+    ) !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color) 44%,
+      rgba(255, 255, 255, 0.1)
+    ) !important;
+
+  color: #ffffff !important;
+
+  box-shadow: none !important;
+}
+
+#visitModal .pugAddPatientBtn:active {
+  transform: translateY(0);
+}
