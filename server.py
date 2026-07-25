@@ -6779,7 +6779,9 @@ def api_create_owner():
         return auth_error
 
     try:
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
 
         if not current_org:
             return fail(
@@ -6787,12 +6789,16 @@ def api_create_owner():
                 400,
             )
 
-        data = request.get_json(
-            silent=True
-        ) or {}
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
 
         name = str(
-            data.get("name") or ""
+            data.get("name")
+            or ""
         ).strip()
 
         if not name:
@@ -6807,15 +6813,68 @@ def api_create_owner():
 
         if not phone:
             return fail(
-                "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX",
+                (
+                    "Телефон повинен містити "
+                    "рівно 12 цифр у форматі "
+                    "+380 XX XXX XX XX"
+                ),
                 400,
             )
+
+        existing_owner_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("owners")
+                    .select(
+                        (
+                            "id, name, phone, "
+                            "email, telegram, note"
+                        )
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "phone",
+                        phone,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if existing_owner_result.data:
+            existing_owner = (
+                existing_owner_result
+                .data[0]
+            )
+
+            return jsonify({
+                "ok": False,
+                "error":
+                    "OWNER_PHONE_EXISTS",
+                "message": (
+                    "Власник із таким номером "
+                    "вже є в базі."
+                ),
+                "data": {
+                    "owner":
+                        existing_owner,
+                },
+            }), 409
+
         email = str(
-            data.get("email") or ""
+            data.get("email")
+            or ""
         ).strip().lower()
 
         telegram = str(
-            data.get("telegram") or ""
+            data.get("telegram")
+            or ""
         ).strip()
 
         if email:
@@ -6828,7 +6887,10 @@ def api_create_owner():
                 email,
             ):
                 return fail(
-                    "Вкажіть коректну електронну адресу",
+                    (
+                        "Вкажіть коректну "
+                        "електронну адресу"
+                    ),
                     400,
                 )
 
@@ -6843,10 +6905,14 @@ def api_create_owner():
                 "",
             )
 
-            telegram = telegram.strip()
+            telegram = (
+                telegram.strip()
+            )
 
             if telegram.startswith("@"):
-                telegram = telegram[1:]
+                telegram = (
+                    telegram[1:]
+                )
 
             telegram = re.sub(
                 r"[^a-zA-Z0-9_]",
@@ -6859,23 +6925,44 @@ def api_create_owner():
                 or len(telegram) > 32
             ):
                 return fail(
-                    "Telegram username повинен містити від 5 до 32 символів",
+                    (
+                        "Telegram username "
+                        "повинен містити від "
+                        "5 до 32 символів"
+                    ),
                     400,
                 )
 
             telegram = (
                 f"@{telegram}"
             )
+
         payload = {
-            "org_id": current_org,
-            "name": name,
-            "phone": phone,
-            "note": str(
-                data.get("note") or ""
-            ).strip() or None,
-            "email": email or None,
-            "telegram": telegram or None,
+            "org_id":
+                current_org,
+
+            "name":
+                name,
+
+            "phone":
+                phone,
+
+            "note":
+                str(
+                    data.get("note")
+                    or ""
+                ).strip()
+                or None,
+
+            "email":
+                email
+                or None,
+
+            "telegram":
+                telegram
+                or None,
         }
+
         result = (
             supabase
             .table("owners")
@@ -6885,22 +6972,34 @@ def api_create_owner():
 
         if not result.data:
             return fail(
-                "Не вдалося створити власника",
+                (
+                    "Не вдалося створити "
+                    "власника"
+                ),
                 500,
             )
 
-        return ok(result.data[0])
+        return ok(
+            result.data[0]
+        )
 
     except Exception as error:
         print(
-            "❌ POST /api/owners error:",
+            (
+                "❌ POST "
+                "/api/owners error:"
+            ),
             repr(error),
         )
 
         return fail(
-            f"Cannot create owner: {error}",
+            (
+                "Cannot create owner: "
+                f"{error}"
+            ),
             500,
-        )   
+        )
+
 
 @app.put("/api/owners/<owner_id>")
 def api_update_owner(owner_id):

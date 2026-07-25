@@ -2104,23 +2104,79 @@ async function createOwner(
     }
 
     if (
-      !res.ok ||
-      !json?.ok
-    ) {
-      console.error(
-        "createOwner error:",
-        res.status,
-        json,
-        text
-      );
+  res.status === 409 &&
+  json?.error ===
+    "OWNER_PHONE_EXISTS"
+) {
+  const existingOwner =
+    json?.data?.owner ||
+    null;
 
-      alert(
-        json?.error ||
-        `Не вдалося створити власника (HTTP ${res.status})`
-      );
+  if (!existingOwner?.id) {
+    alert(
+      json?.message ||
+      "Власник із таким номером уже є в базі."
+    );
 
-      return null;
-    }
+    return null;
+  }
+
+  const existingName =
+    String(
+      existingOwner.name ||
+      "Власник"
+    ).trim();
+
+  const existingPhone =
+    String(
+      existingOwner.phone ||
+      body.phone ||
+      ""
+    ).trim();
+
+  const useExisting =
+    window.confirm(
+      (
+        "Власник із таким номером " +
+        "уже є в базі:\n\n" +
+        `${existingName}\n` +
+        `${existingPhone}\n\n` +
+        "Використати існуючого " +
+        "власника?"
+      )
+    );
+
+  if (!useExisting) {
+    return null;
+  }
+
+  return {
+    ...existingOwner,
+
+    _existingPhoneMatch:
+      true,
+  };
+}
+
+if (
+  !res.ok ||
+  !json?.ok
+) {
+  console.error(
+    "createOwner error:",
+    res.status,
+    json,
+    text
+  );
+
+  alert(
+    json?.message ||
+    json?.error ||
+    `Не вдалося створити власника (HTTP ${res.status})`
+  );
+
+  return null;
+}
 
     return Array.isArray(
       json.data
@@ -35878,8 +35934,16 @@ const petName =
           }
 
           alert(
-            "Пацієнта створено. Тепер заповніть деталі запису та збережіть візит."
-          );
+  owner._existingPhoneMatch
+    ? (
+        "Номер уже був у базі. " +
+        "Пацієнта додано до існуючого власника."
+      )
+    : (
+        "Власника та пацієнта створено. " +
+        "Тепер заповніть деталі запису та збережіть візит."
+      )
+);
         } catch (error) {
           console.error(
             "Помилка швидкого створення пацієнта:",
