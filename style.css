@@ -32861,3 +32861,263 @@ body[data-theme="white"] :is(
       ) !important;
   }
 }
+/* =========================
+   OWNER EXISTS MODAL
+========================= */
+
+.pugOwnerExistsModal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.pugOwnerExistsModal.is-open {
+  display: flex !important;
+}
+
+.pugOwnerExistsBackdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    rgba(2, 8, 20, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.pugOwnerExistsDialog {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 24px;
+  padding: 26px 24px 22px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12, 24, 46, 0.96) 0%,
+      rgba(8, 18, 36, 0.98) 100%
+    );
+  border: 1px solid
+    rgba(103, 201, 255, 0.20);
+  box-shadow:
+    0 22px 70px
+      rgba(0, 0, 0, 0.45),
+    0 0 0 1px
+      rgba(255,255,255,0.03) inset,
+    0 0 32px
+      rgba(130, 84, 255, 0.16);
+  color: #fff;
+  overflow: hidden;
+}
+
+.pugOwnerExistsDialog::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background:
+    linear-gradient(
+      90deg,
+      #7b5cff 0%,
+      #48d8ff 100%
+    );
+  opacity: 0.95;
+}
+
+.pugOwnerExistsClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #d9e8ff;
+  font-size: 24px;
+  line-height: 1;
+  background:
+    rgba(255,255,255,0.06);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.pugOwnerExistsClose:hover {
+  background:
+    rgba(255,255,255,0.12);
+  transform: scale(1.04);
+}
+
+.pugOwnerExistsHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.pugOwnerExistsIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(123, 92, 255, 0.24),
+      rgba(72, 216, 255, 0.18)
+    );
+  border: 1px solid
+    rgba(255,255,255,0.10);
+  box-shadow:
+    0 10px 24px
+      rgba(72, 216, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.pugOwnerExistsHead h3 {
+  margin: 0 0 6px;
+  font-size: 1.28rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.pugOwnerExistsHead p {
+  margin: 0;
+  color: rgba(218, 231, 255, 0.72);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.pugOwnerExistsCard {
+  margin-top: 6px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background:
+    rgba(255,255,255,0.04);
+  border: 1px solid
+    rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pugOwnerExistsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pugOwnerExistsRow span {
+  color: rgba(208, 223, 255, 0.64);
+  font-size: 0.92rem;
+}
+
+.pugOwnerExistsRow b {
+  color: #ffffff;
+  font-size: 0.98rem;
+  text-align: right;
+}
+
+.pugOwnerExistsHint {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background:
+    rgba(72, 216, 255, 0.07);
+  border: 1px solid
+    rgba(72, 216, 255, 0.14);
+  color: rgba(224, 239, 255, 0.80);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.pugOwnerExistsActions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pugOwnerExistsBtn {
+  min-width: 160px;
+  height: 46px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.pugOwnerExistsBtn:hover {
+  transform: translateY(-1px);
+}
+
+.pugOwnerExistsBtn.ghost {
+  color: #dbe8ff;
+  background:
+    rgba(255,255,255,0.07);
+  border: 1px solid
+    rgba(255,255,255,0.08);
+}
+
+.pugOwnerExistsBtn.ghost:hover {
+  background:
+    rgba(255,255,255,0.12);
+}
+
+.pugOwnerExistsBtn.primary {
+  color: #fff;
+  background:
+    linear-gradient(
+      135deg,
+      #39c8ff 0%,
+      #5a8cff 100%
+    );
+  box-shadow:
+    0 12px 30px
+      rgba(57, 200, 255, 0.20);
+}
+
+.pugOwnerExistsBtn.primary:hover {
+  box-shadow:
+    0 16px 36px
+      rgba(57, 200, 255, 0.26);
+}
+
+@media (max-width: 640px) {
+  .pugOwnerExistsDialog {
+    padding: 22px 18px 18px;
+    border-radius: 20px;
+  }
+
+  .pugOwnerExistsRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pugOwnerExistsRow b {
+    text-align: left;
+  }
+
+  .pugOwnerExistsActions {
+    flex-direction: column;
+  }
+
+  .pugOwnerExistsBtn {
+    width: 100%;
+  }
+}

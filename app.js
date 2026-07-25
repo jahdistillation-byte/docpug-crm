@@ -2030,7 +2030,131 @@ async function createPatientApi(payload) {
     return null;
   }
 }
+function openOwnerExistsModal(
+  owner = {}
+) {
+  return new Promise(
+    (resolve) => {
+      const modal =
+        $("#ownerExistsModal");
 
+      const nameEl =
+        $("#ownerExistsName");
+
+      const phoneEl =
+        $("#ownerExistsPhone");
+
+      const confirmBtn =
+        $("#ownerExistsConfirm");
+
+      const cancelBtn =
+        $("#ownerExistsCancel");
+
+      const closeBtn =
+        $("#ownerExistsClose");
+
+      const backdrop =
+        modal?.querySelector(
+          ".pugOwnerExistsBackdrop"
+        );
+
+      if (
+        !modal ||
+        !nameEl ||
+        !phoneEl ||
+        !confirmBtn ||
+        !cancelBtn ||
+        !closeBtn
+      ) {
+        resolve(false);
+        return;
+      }
+
+      nameEl.textContent =
+        String(
+          owner?.name ||
+          "Власник"
+        );
+
+      phoneEl.textContent =
+        String(
+          owner?.phone ||
+          "—"
+        );
+
+      modal.style.display =
+        "flex";
+
+      modal.classList.add(
+        "is-open"
+      );
+
+      const cleanup = () => {
+        modal.classList.remove(
+          "is-open"
+        );
+
+        modal.style.display =
+          "none";
+
+        confirmBtn.onclick =
+          null;
+
+        cancelBtn.onclick =
+          null;
+
+        closeBtn.onclick =
+          null;
+
+        if (backdrop) {
+          backdrop.onclick =
+            null;
+        }
+
+        document.removeEventListener(
+          "keydown",
+          handleEsc
+        );
+      };
+
+      const finish = (
+        value
+      ) => {
+        cleanup();
+        resolve(value);
+      };
+
+      const handleEsc = (
+        event
+      ) => {
+        if (
+          event.key === "Escape"
+        ) {
+          finish(false);
+        }
+      };
+
+      confirmBtn.onclick =
+        () => finish(true);
+
+      cancelBtn.onclick =
+        () => finish(false);
+
+      closeBtn.onclick =
+        () => finish(false);
+
+      if (backdrop) {
+        backdrop.onclick =
+          () => finish(false);
+      }
+
+      document.addEventListener(
+        "keydown",
+        handleEsc
+      );
+    }
+  );
+}
 async function createOwner(
   payload = {}
 ) {
@@ -2135,20 +2259,17 @@ async function createOwner(
     ).trim();
 
   const useExisting =
-    window.confirm(
-      (
-        "Власник із таким номером " +
-        "уже є в базі:\n\n" +
-        `${existingName}\n` +
-        `${existingPhone}\n\n` +
-        "Використати існуючого " +
-        "власника?"
-      )
-    );
+  await openOwnerExistsModal({
+    name:
+      existingName,
 
-  if (!useExisting) {
-    return null;
-  }
+    phone:
+      existingPhone,
+  });
+
+if (!useExisting) {
+  return null;
+}
 
   return {
     ...existingOwner,

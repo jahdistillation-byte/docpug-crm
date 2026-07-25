@@ -1536,6 +1536,77 @@
     </div>
   </div>
 </div>
+<div
+  id="ownerExistsModal"
+  class="pugOwnerExistsModal"
+  style="display:none;"
+>
+  <div class="pugOwnerExistsBackdrop"></div>
 
+  <div class="pugOwnerExistsDialog">
+    <button
+      type="button"
+      class="pugOwnerExistsClose"
+      id="ownerExistsClose"
+      aria-label="Закрити"
+    >
+      ×
+    </button>
+
+    <div class="pugOwnerExistsHead">
+      <div class="pugOwnerExistsIcon">
+        👤
+      </div>
+
+      <div>
+        <h3>
+          Власник уже існує
+        </h3>
+
+        <p>
+          У базі вже знайдено
+          власника з таким
+          номером телефону
+        </p>
+      </div>
+    </div>
+
+    <div class="pugOwnerExistsCard">
+      <div class="pugOwnerExistsRow">
+        <span>ПІБ</span>
+        <b id="ownerExistsName">—</b>
+      </div>
+
+      <div class="pugOwnerExistsRow">
+        <span>Телефон</span>
+        <b id="ownerExistsPhone">—</b>
+      </div>
+    </div>
+
+    <div class="pugOwnerExistsHint">
+      Ви можете використати
+      вже існуючого власника,
+      щоб не створювати дубль.
+    </div>
+
+    <div class="pugOwnerExistsActions">
+      <button
+        type="button"
+        class="pugOwnerExistsBtn ghost"
+        id="ownerExistsCancel"
+      >
+        Скасувати
+      </button>
+
+      <button
+        type="button"
+        class="pugOwnerExistsBtn primary"
+        id="ownerExistsConfirm"
+      >
+        Використати власника
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
