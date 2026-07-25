@@ -35047,31 +35047,354 @@ function openVisitModalForCreate(pet = null) {
   }
 
   // Быстрое создание пациента
-  const quickBox =
+    const quickBox =
     $("#visitNewPatientBox");
 
   if (quickBox) {
-    quickBox.style.display = "none";
+    quickBox.style.display =
+      "none";
   }
 
   const btnCreatePatientFromVisit =
     $("#btnCreatePatientFromVisit");
 
   if (btnCreatePatientFromVisit) {
-    btnCreatePatientFromVisit.onclick = () => {
-      const box =
-        $("#visitNewPatientBox");
+    btnCreatePatientFromVisit.onclick =
+      () => {
+        const box =
+          $("#visitNewPatientBox");
 
-      if (!box) {
-        return;
-      }
+        if (!box) {
+          console.error(
+            "Не знайдено #visitNewPatientBox"
+          );
 
-      box.style.display =
-        box.style.display === "none" ||
-        !box.style.display
-          ? "block"
-          : "none";
-    };
+          return;
+        }
+
+        const isHidden =
+          box.style.display ===
+            "none" ||
+          !box.style.display;
+
+        box.style.display =
+          isHidden
+            ? "block"
+            : "none";
+
+        if (isHidden) {
+          bindUaPhoneInput(
+            $("#visitNewOwnerPhone")
+          );
+
+          setTimeout(
+            () => {
+              $("#visitNewOwnerName")
+                ?.focus();
+            },
+            50
+          );
+        }
+      };
+  }
+
+  const visitNewPatientSave =
+  $("#visitNewPatientCreate");
+
+  if (visitNewPatientSave) {
+    visitNewPatientSave.onclick =
+      async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const ownerName =
+          String(
+            $("#visitNewOwnerName")
+              ?.value || ""
+          ).trim();
+
+        const ownerPhone =
+          String(
+            $("#visitNewOwnerPhone")
+              ?.value || ""
+          ).trim();
+
+        const ownerNote =
+          String(
+            $("#visitNewOwnerNote")
+              ?.value || ""
+          ).trim();
+
+        const petName =
+          String(
+            $("#visitNewPetName")
+              ?.value || ""
+          ).trim();
+
+        const species =
+          String(
+            $("#visitNewPetSpecies")
+              ?.value || ""
+          ).trim();
+
+        const breed =
+          String(
+            $("#visitNewPetBreed")
+              ?.value || ""
+          ).trim();
+
+        const age =
+          String(
+            $("#visitNewPetAge")
+              ?.value || ""
+          ).trim();
+
+        const weight =
+          String(
+            $("#visitNewPetWeight")
+              ?.value || ""
+          ).trim();
+
+        if (!ownerName) {
+          alert(
+            "Вкажіть ПІБ власника."
+          );
+
+          $("#visitNewOwnerName")
+            ?.focus();
+
+          return;
+        }
+
+        if (!ownerPhone) {
+          alert(
+            "Вкажіть телефон власника."
+          );
+
+          $("#visitNewOwnerPhone")
+            ?.focus();
+
+          return;
+        }
+
+        if (
+          !isValidUaPhone(
+            ownerPhone
+          )
+        ) {
+          alert(
+            "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX"
+          );
+
+          $("#visitNewOwnerPhone")
+            ?.focus();
+
+          return;
+        }
+
+        if (!petName) {
+          alert(
+            "Вкажіть кличку пацієнта."
+          );
+
+          $("#visitNewPetName")
+            ?.focus();
+
+          return;
+        }
+
+        if (!species) {
+          alert(
+            "Оберіть вид тварини."
+          );
+
+          $("#visitNewPetSpecies")
+            ?.focus();
+
+          return;
+        }
+
+        const oldText =
+          visitNewPatientSave
+            .textContent ||
+          "Створити пацієнта";
+
+        visitNewPatientSave.disabled =
+          true;
+
+        visitNewPatientSave.textContent =
+          "Створюємо...";
+
+        try {
+          const owner =
+            await createOwner({
+              name:
+                ownerName,
+
+              phone:
+                formatUaPhone(
+                  ownerPhone
+                ),
+
+              email:
+                "",
+
+              telegram:
+                "",
+
+              note:
+                ownerNote,
+            });
+
+          if (!owner?.id) {
+            throw new Error(
+              "Власника не створено."
+            );
+          }
+
+          const patient =
+            await createPatientApi({
+              owner_id:
+                owner.id,
+
+              name:
+                petName,
+
+              species,
+
+              breed,
+
+              age,
+
+              weight_kg:
+                weight,
+
+              notes:
+                "",
+            });
+
+          if (!patient?.id) {
+            throw new Error(
+              "Пацієнта не створено."
+            );
+          }
+
+          state.selectedPet =
+            patient;
+
+          state.selectedPetId =
+            String(
+              patient.id
+            );
+
+          const patientSelect =
+            $("#visitPatientSelect");
+
+          if (patientSelect) {
+            let option =
+              patientSelect.querySelector(
+                `option[value="${CSS.escape(
+                  String(patient.id)
+                )}"]`
+              );
+
+            if (!option) {
+              option =
+                document.createElement(
+                  "option"
+                );
+
+              option.value =
+                String(patient.id);
+
+              option.textContent =
+                `${patient.name} · ${owner.name}`;
+
+              patientSelect.appendChild(
+                option
+              );
+            }
+
+            patientSelect.value =
+              String(patient.id);
+          }
+
+          const searchInput =
+            $("#visitPatientSearch");
+
+          if (searchInput) {
+            searchInput.value =
+              `${patient.name} · ${owner.name}`;
+          }
+
+          const modalSub =
+            $("#visitModalSub");
+
+          if (modalSub) {
+            modalSub.textContent =
+              `Пацієнт: ${patient.name}`;
+          }
+
+          await loadOwners();
+          await loadPatientsApi();
+
+          const box =
+            $("#visitNewPatientBox");
+
+          if (box) {
+            box.style.display =
+              "none";
+          }
+
+          [
+            "#visitNewOwnerName",
+            "#visitNewOwnerPhone",
+            "#visitNewOwnerNote",
+            "#visitNewPetName",
+            "#visitNewPetBreed",
+            "#visitNewPetAge",
+            "#visitNewPetWeight",
+          ].forEach(
+            (selector) => {
+              const input =
+                $(selector);
+
+              if (input) {
+                input.value =
+                  "";
+              }
+            }
+          );
+
+          const speciesInput =
+            $("#visitNewPetSpecies");
+
+          if (speciesInput) {
+            speciesInput.value =
+              "";
+          }
+
+          alert(
+            "Пацієнта створено. Тепер заповніть деталі запису та збережіть візит."
+          );
+        } catch (error) {
+          console.error(
+            "Помилка швидкого створення пацієнта:",
+            error
+          );
+
+          alert(
+            error?.message ||
+            "Не вдалося створити пацієнта."
+          );
+        } finally {
+          visitNewPatientSave.disabled =
+            false;
+
+          visitNewPatientSave.textContent =
+            oldText;
+        }
+      };
   }
 
   // Ветеринар
