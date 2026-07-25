@@ -41915,13 +41915,43 @@ const normalizedTelegram =
   );
         }
 
-        if (!saved) {
+                if (!saved) {
           return;
         }
+
+        const usedExistingOwner =
+          saved
+            ._existingPhoneMatch ===
+          true;
 
         closeOwnerModal();
 
         await loadOwners();
+
+        if (
+          usedExistingOwner &&
+          saved.id
+        ) {
+          showCrmNotice({
+            icon: "👤",
+
+            title:
+              "Власник уже в базі",
+
+            text:
+              (
+                "Відкриваємо картку " +
+                "існуючого власника. " +
+                "Новий дубль не створено."
+              ),
+          });
+
+          openOwner(
+            String(saved.id)
+          );
+
+          return;
+        }
 
         if (
           id &&
