@@ -32611,3 +32611,253 @@ body[data-theme="white"] :is(
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   PUGCRM — CALENDAR FULL WIDTH DESKTOP
+   Большой рабочий календарь + компактная панель справа
+========================================================= */
+
+/* Только на странице календаря расширяем общий рабочий холст */
+.main-content:has(
+  .page[data-page="calendar"].active
+) {
+  width: calc(100vw - 32px) !important;
+  max-width: none !important;
+
+  margin-left: 16px !important;
+  margin-right: 16px !important;
+
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Сама страница календаря занимает всю доступную ширину */
+.page[data-page="calendar"] {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/* Контейнер, в который JS вставляет календарь */
+.page[data-page="calendar"]
+#calendar-grid-target {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/* Главная карточка календаря */
+.page[data-page="calendar"]
+.calendarCard {
+  width: 100% !important;
+  max-width: none !important;
+
+  padding: 24px !important;
+  border-radius: 26px !important;
+}
+
+/* Календарь слева, ветеринары узкой колонкой справа */
+.page[data-page="calendar"]
+.calendarWorkArea {
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    220px !important;
+
+  gap: 14px !important;
+  align-items: start !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Левая рабочая часть должна уметь занимать всё свободное место */
+.page[data-page="calendar"]
+.calendarMainArea {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Основной скролл календаря */
+.page[data-page="calendar"]
+.calendarDayGrid {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  grid-template-columns:
+    62px
+    minmax(0, 1fr) !important;
+
+  gap: 10px !important;
+
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+/* Колонки врачей чуть компактнее:
+   на большом экране больше врачей видно сразу */
+.page[data-page="calendar"]
+.calDoctorsGrid {
+  grid-auto-columns:
+    minmax(220px, 1fr) !important;
+
+  gap: 10px !important;
+}
+
+/* Убираем старое минимальное ограничение 250px */
+.page[data-page="calendar"]
+.calDoctorCol {
+  min-width: 220px !important;
+}
+
+/* Чуть уменьшаем внутренние отступы заголовков врачей */
+.page[data-page="calendar"]
+.calDoctorHead {
+  padding: 10px 12px !important;
+  border-radius: 16px !important;
+}
+
+/* Правая панель у самого края */
+.page[data-page="calendar"]
+.calStaffPanel {
+  width: 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+
+  position: sticky !important;
+  top: 18px !important;
+
+  padding: 12px !important;
+  border-radius: 18px !important;
+
+  max-height:
+    calc(100vh - 180px) !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Компактнее заголовок панели */
+.page[data-page="calendar"]
+.calStaffPanelHead {
+  margin-bottom: 10px !important;
+}
+
+/* Компактные карточки ветеринаров */
+.page[data-page="calendar"]
+.calStaffDragList {
+  gap: 8px !important;
+}
+
+.page[data-page="calendar"]
+.calStaffDrag {
+  min-height: 0 !important;
+
+  padding:
+    9px 10px !important;
+
+  margin-bottom: 0 !important;
+
+  border-radius: 13px !important;
+}
+
+.page[data-page="calendar"]
+.calStaffDragName {
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
+}
+
+.page[data-page="calendar"]
+.calStaffDragRole {
+  font-size: 0.67rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Немного больше полезной высоты ячеек */
+.page[data-page="calendar"]
+.calSlot {
+  min-height: 82px !important;
+  margin-bottom: 7px !important;
+}
+
+/* Верхняя полоса прокрутки тоже занимает весь календарь */
+.page[data-page="calendar"]
+.calTopScroll {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* На средних ноутбуках панель всё ещё справа */
+@media (
+  min-width: 1101px
+) and (
+  max-width: 1350px
+) {
+  .page[data-page="calendar"]
+  .calendarWorkArea {
+    grid-template-columns:
+      minmax(0, 1fr)
+      200px !important;
+  }
+
+  .page[data-page="calendar"]
+  .calStaffPanel {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+  }
+
+  .page[data-page="calendar"]
+  .calDoctorsGrid {
+    grid-auto-columns:
+      minmax(210px, 1fr) !important;
+  }
+
+  .page[data-page="calendar"]
+  .calDoctorCol {
+    min-width: 210px !important;
+  }
+}
+
+/* На планшете панель переносится вниз */
+@media (
+  max-width: 1100px
+) {
+  .main-content:has(
+    .page[data-page="calendar"].active
+  ) {
+    width: 100% !important;
+    margin: 0 !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .page[data-page="calendar"]
+  .calendarWorkArea {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .page[data-page="calendar"]
+  .calStaffPanel {
+    position: static !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+
+    max-height: none !important;
+  }
+
+  .page[data-page="calendar"]
+  .calStaffDragList {
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(
+        auto-fill,
+        minmax(180px, 1fr)
+      ) !important;
+  }
+}

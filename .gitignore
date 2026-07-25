@@ -1,0 +1,12 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Local tooling
+.DS_Store
+node_modules/
