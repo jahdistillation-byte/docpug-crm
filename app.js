@@ -36151,6 +36151,8 @@ function closeVisitModal() {
   document.body.classList.remove(
     "medcardModalIsOpen"
   );
+  delete modal.dataset
+  .initialState;
 }
 
 // =========================
@@ -37073,21 +37075,245 @@ function initVisitFilesUI() {
 }
 
 // =========================
-// VISIT MODAL — Управление окном записи и сохранения
+// VISIT MODAL — защита незбережених змін
 // =========================
-$("#visitCancel")?.addEventListener("click", closeVisitModal);
-$("#visitClose")?.addEventListener("click", closeVisitModal);
+
+function getVisitModalState() {
+  const newPatientBox =
+    $("#visitNewPatientBox");
+
+  return {
+    patientId:
+      String(
+        $("#visitPatientSelect")
+          ?.value || ""
+      ).trim(),
+
+    patientSearch:
+      String(
+        $("#visitPatientSearch")
+          ?.value || ""
+      ).trim(),
+
+    date:
+      String(
+        $("#visitDate")
+          ?.value || ""
+      ).trim(),
+
+    startTime:
+      String(
+        $("#visitStartTime")
+          ?.value || ""
+      ).trim(),
+
+    duration:
+      String(
+        $("#visitDuration")
+          ?.value || ""
+      ).trim(),
+
+    staffId:
+      String(
+        $("#visitStaff")
+          ?.value || ""
+      ).trim(),
+
+    note:
+      String(
+        $("#visitNote")
+          ?.value || ""
+      ).trim(),
+
+    newPatientOpen:
+      Boolean(
+        newPatientBox &&
+        newPatientBox.style.display !==
+          "none"
+      ),
+
+    ownerName:
+      String(
+        $("#visitNewOwnerName")
+          ?.value || ""
+      ).trim(),
+
+    ownerPhone:
+      String(
+        $("#visitNewOwnerPhone")
+          ?.value || ""
+      ).trim(),
+
+    ownerEmail:
+      String(
+        $("#visitNewOwnerEmail")
+          ?.value || ""
+      ).trim(),
+
+    ownerTelegram:
+      String(
+        $("#visitNewOwnerTelegram")
+          ?.value || ""
+      ).trim(),
+
+    ownerNote:
+      String(
+        $("#visitNewOwnerNote")
+          ?.value || ""
+      ).trim(),
+
+    petName:
+      String(
+        $("#visitNewPetName")
+          ?.value || ""
+      ).trim(),
+
+    petSpecies:
+      String(
+        $("#visitNewPetSpecies")
+          ?.value || ""
+      ).trim(),
+
+    petBreed:
+      String(
+        $("#visitNewPetBreed")
+          ?.value || ""
+      ).trim(),
+
+    petAge:
+      String(
+        $("#visitNewPetAge")
+          ?.value || ""
+      ).trim(),
+
+    petWeight:
+      String(
+        $("#visitNewPetWeight")
+          ?.value || ""
+      ).trim(),
+
+    petSex:
+      String(
+        $("#visitNewPetSex")
+          ?.value || ""
+      ).trim(),
+
+    petNeutered:
+      String(
+        $("#visitNewPetNeutered")
+          ?.value || ""
+      ).trim(),
+
+    petVaccination:
+      String(
+        $("#visitNewPetVaccination")
+          ?.value || ""
+      ).trim(),
+  };
+}
+
+function visitModalHasChanges() {
+  const modal =
+    $("#visitModal");
+
+  if (!modal) {
+    return false;
+  }
+
+  const initialState =
+    modal.dataset.initialState ||
+    "";
+
+  return (
+    JSON.stringify(
+      getVisitModalState()
+    ) !==
+    initialState
+  );
+}
+
+function requestCloseVisitModal() {
+  const modal =
+    $("#visitModal");
+
+  if (
+    !modal ||
+    !modal.classList.contains(
+      "open"
+    )
+  ) {
+    return;
+  }
+
+  if (
+    !visitModalHasChanges()
+  ) {
+    closeVisitModal();
+    return;
+  }
+
+  openDeleteModal(
+    (
+      "Внесені дані запису " +
+      "ще не збережені."
+    ),
+    () => {
+      closeVisitModal();
+    },
+    "unsaved"
+  );
+}
+
+$("#visitCancel")
+  ?.addEventListener(
+    "click",
+    requestCloseVisitModal
+  );
+
+$("#visitClose")
+  ?.addEventListener(
+    "click",
+    requestCloseVisitModal
+  );
+
 $("#visitModal")
   ?.addEventListener(
     "click",
     (event) => {
-      // Модалка закрывается только
-      // кнопками Скасувати и ×.
-      // Клик по затемнённому фону
-      // не удаляет введённые данные.
-      event.stopPropagation();
+      const modal =
+        $("#visitModal");
+
+      if (
+        modal &&
+        event.target === modal
+      ) {
+        requestCloseVisitModal();
+      }
     }
   );
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+    const modal =
+      $("#visitModal");
+
+    if (
+      event.key !== "Escape" ||
+      !modal?.classList.contains(
+        "open"
+      )
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    requestCloseVisitModal();
+  },
+  true
+);
 
 // Сохранение приёма (Создание или Редактирование) с проверкой коллизий
 $("#visitSave")?.addEventListener("click", async () => {
@@ -42140,9 +42366,23 @@ telegram:
       }
     };
 }
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("medcardModalIsOpen");
+  modal.dataset.initialState =
+  JSON.stringify(
+    getVisitModalState()
+  );
+
+modal.classList.add(
+  "open"
+);
+
+modal.setAttribute(
+  "aria-hidden",
+  "false"
+);
+
+document.body.classList.add(
+  "medcardModalIsOpen"
+);
 }
 
 $("#visitPatientSearch")?.addEventListener("input", () => {
