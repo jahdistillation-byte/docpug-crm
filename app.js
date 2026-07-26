@@ -3058,8 +3058,20 @@ async function refreshVisitFinanceSummary(
     document.getElementById(
       "visitPaymentButton"
     );
+if (button) {
+  button.disabled =
+    false;
 
-  const canManagePayments =
+  button.classList.remove(
+    "is-paid",
+    "is-waiting"
+  );
+
+  button.innerHTML = `
+    <span>◷</span>
+    <span>Перевіряємо оплату…</span>
+  `;
+}gePayments =
     isOwner() ||
     isAdmin();
 
@@ -3138,27 +3150,62 @@ async function refreshVisitFinanceSummary(
     }
 
     if (button) {
-      const isPaid =
-        Number(
-          finance.remaining || 0
-        ) <= 0;
+  const total =
+    Number(
+      finance.total || 0
+    );
 
-      button.classList.toggle(
-        "is-paid",
-        isPaid
-      );
+  const paid =
+    Number(
+      finance.paid || 0
+    );
 
-      button.innerHTML =
-        isPaid
-          ? `
-            <span>✓</span>
-            <span>Оплату завершено</span>
-          `
-          : `
-            <span>💳</span>
-            <span>Прийняти оплату</span>
-          `;
-    }
+  const remaining =
+    Math.max(
+      0,
+      Number(
+        finance.remaining || 0
+      )
+    );
+
+  const isPaid =
+    total > 0 &&
+    remaining <= 0;
+
+  const isPartial =
+    paid > 0 &&
+    remaining > 0;
+
+  button.classList.toggle(
+    "is-paid",
+    isPaid
+  );
+
+  button.classList.toggle(
+    "is-waiting",
+    !isPaid
+  );
+
+  button.disabled =
+    isPaid;
+
+  if (isPaid) {
+    button.innerHTML = `
+      <span>✓</span>
+      <span>Оплату завершено</span>
+    `;
+  } else if (isPartial) {
+    button.innerHTML = `
+      <span>◷</span>
+      <span>Чекаємо доплату</span>
+    `;
+  } else {
+    button.innerHTML = `
+      <span>◷</span>
+      <span>Чекаємо оплату</span>
+    `;
+  }
+}
   } catch (error) {
     console.error(
       "refreshVisitFinanceSummary failed:",
