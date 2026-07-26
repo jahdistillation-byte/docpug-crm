@@ -30426,43 +30426,53 @@ function ensureCalendarModal() {
     modal
   );
 
-  const getState = () => ({
-    title:
-      String(
-        $("#calEditTitle")
-          ?.value || ""
-      ).trim(),
+ const getState = () => ({
+  title:
+    String(
+      $("#calEditTitle")
+        ?.value || ""
+    ).trim(),
 
-    date:
-      String(
-        $("#calEditDate")
-          ?.value || ""
-      ).trim(),
+  date:
+    String(
+      $("#calEditDate")
+        ?.value || ""
+    ).trim(),
 
-    start:
-      String(
-        $("#calEditStart")
-          ?.value || ""
-      ).trim(),
+  start:
+    String(
+      $("#calEditStart")
+        ?.value || ""
+    ).trim(),
 
-    duration:
-      String(
-        $("#calEditDuration")
-          ?.value || ""
-      ).trim(),
+  duration:
+    String(
+      $("#calEditDuration")
+        ?.value || ""
+    ).trim(),
 
-    staffId:
-      String(
-        $("#calEditStaff")
-          ?.value || ""
-      ).trim(),
+  staffId:
+    String(
+      $("#calEditStaff")
+        ?.value || ""
+    ).trim(),
 
-    note:
-      String(
-        $("#calEditNote")
-          ?.value || ""
-      ).trim(),
-  });
+  status:
+    String(
+      $("#calEditStatus")
+        ?.value ||
+      ev.status ||
+      "planned"
+    )
+      .trim()
+      .toLowerCase(),
+
+  note:
+    String(
+      $("#calEditNote")
+        ?.value || ""
+    ).trim(),
+});
 
   const closeModal =
     () => {
