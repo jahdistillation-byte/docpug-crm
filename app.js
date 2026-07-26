@@ -29189,6 +29189,43 @@ function ensureCalendarModal() {
 
   return modal;
 }
+function getCalendarEventVisualStatus(event) {
+  const rawStatus = String(event?.status || "")
+    .trim()
+    .toLowerCase();
+
+  if (
+    rawStatus === "completed" ||
+    rawStatus === "done" ||
+    rawStatus === "finished"
+  ) {
+    return {
+      key: "completed",
+      cardClass: "calendarCardCompleted",
+      badgeClass: "calendarStatusCompleted",
+      label: "Завершено",
+    };
+  }
+
+  if (
+    rawStatus === "in_progress" ||
+    rawStatus === "active"
+  ) {
+    return {
+      key: "in_progress",
+      cardClass: "calendarCardInProgress",
+      badgeClass: "calendarStatusInProgress",
+      label: "Прийом триває",
+    };
+  }
+
+  return {
+    key: "planned",
+    cardClass: "calendarCardPlanned",
+    badgeClass: "calendarStatusPlanned",
+    label: "Заплановано",
+  };
+}
 
 async function openCalendarEditModal(
   ev,
@@ -33301,6 +33338,75 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 // =========================
 // Отрисовка страницы приёма и медицинских блоков
 // =========================
+async function syncCalendarEventStatusByVisitId(
+  visitId,
+  nextStatus
+) {
+  const cleanVisitId =
+    String(visitId || "").trim();
+
+  if (!cleanVisitId) {
+    return null;
+  }
+
+  const calendarEvents =
+    await loadCalendarApi();
+
+  const linkedEvent =
+    (calendarEvents || []).find(
+      (event) =>
+        String(
+          event.visit_id || ""
+        ) === cleanVisitId
+    );
+
+  if (!linkedEvent?.id) {
+    console.warn(
+      "Не знайдено календарний запис для візиту:",
+      cleanVisitId
+    );
+
+    return null;
+  }
+
+  return await updateCalendarEventApi(
+    linkedEvent.id,
+    {
+      title:
+        linkedEvent.title ||
+        "Прийом",
+
+      event_date:
+        linkedEvent.event_date,
+
+      start_time:
+        linkedEvent.start_time,
+
+      end_time:
+        linkedEvent.end_time,
+
+      staff_id:
+        linkedEvent.staff_id,
+
+      patient_id:
+        linkedEvent.patient_id ||
+        null,
+
+      owner_id:
+        linkedEvent.owner_id ||
+        null,
+
+      visit_id:
+        cleanVisitId,
+
+      note:
+        linkedEvent.note || "",
+
+      status:
+        nextStatus,
+    }
+  );
+}
 function renderVisitPage(visit, pet) {
   // 1. Оновлюємо заголовки та мета-інформацію
   const pill = document.getElementById("visitDatePill");
@@ -33950,16 +34056,244 @@ const completeButton =
   );
 
 if (completeButton) {
-  completeButton.disabled = true;
+  completeButton.disabled =
+    false;
 
   completeButton.title =
-    "Статус завершення підключимо після додавання поля status у базу";
+    "Зберегти дані та завершити прийом";
 
   completeButton.style.opacity =
-    "0.45";
+    "";
 
   completeButton.style.cursor =
-    "not-allowed";
+    "";
+
+  completeButton.textContent =
+    "✓ Завершити візит";
+
+  completeButton.onclick =
+    () => {
+      const visitId =
+        String(
+          visit?.id ||
+          state.selectedVisitId ||
+          ""
+        ).trim();
+
+      if (!visitId) {
+        openDeleteModal(
+          "Не вдалося визначити візит.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      openDeleteModal(
+        `
+          <b>Завершити цей візит?</b>
+          <br><br>
+          Медичні дані будуть збережені,
+          а запис у календарі отримає
+          статус «Завершено».
+        `,
+        async () => {
+          const current =
+            getVisitByIdSync(
+              visitId
+            ) ||
+            await fetchVisitById(
+              visitId
+            );
+
+          if (!current) {
+            openDeleteModal(
+              "Візит не знайдено.",
+              null,
+              "info"
+            );
+
+            return;
+          }
+
+          const diagnosis =
+            String(
+              document
+                .getElementById(
+                  "visitMedDx"
+                )
+                ?.value || ""
+            ).trim();
+
+          const complaint =
+            String(
+              document
+                .getElementById(
+                  "visitMedComplaint"
+                )
+                ?.value || ""
+            ).trim();
+
+          const treatment =
+            String(
+              document
+                .getElementById(
+                  "visitMedRx"
+                )
+                ?.value || ""
+            ).trim();
+
+          const recommendation =
+            String(
+              document
+                .getElementById(
+                  "visitClientRecommendation"
+                )
+                ?.value || ""
+            ).trim();
+
+          const weightRaw =
+            document
+              .getElementById(
+                "visitWeightDisplay"
+              )
+              ?.value;
+
+          const weight =
+            weightRaw === "" ||
+            weightRaw == null
+              ? null
+              : Number(weightRaw);
+
+          const services =
+            Array.isArray(
+              current.services
+            )
+              ? current.services
+              : [];
+
+          const stock =
+            Array.isArray(
+              current.stock
+            )
+              ? current.stock
+              : [];
+
+          completeButton.disabled =
+            true;
+
+          completeButton.textContent =
+            "Завершення…";
+
+          try {
+            const updatedVisit =
+              await updateVisitApi(
+                visitId,
+                {
+                  pet_id:
+                    current.pet_id,
+
+                  date:
+                    current.date,
+
+                  weight_kg:
+                    Number.isFinite(
+                      weight
+                    )
+                      ? weight
+                      : current.weight_kg,
+
+                  note:
+                    buildVisitNote(
+                      diagnosis,
+                      complaint
+                    ),
+
+                  rx:
+                    buildVisitRx(
+                      treatment,
+                      recommendation
+                    ),
+
+                  services,
+                  services_json:
+                    services,
+
+                  stock,
+                  stock_json:
+                    stock,
+                }
+              );
+
+            if (!updatedVisit) {
+              throw new Error(
+                "Не вдалося зберегти медичні дані."
+              );
+            }
+
+            const updatedEvent =
+              await syncCalendarEventStatusByVisitId(
+                visitId,
+                "completed"
+              );
+
+            if (!updatedEvent) {
+              throw new Error(
+                "Візит збережено, але не вдалося оновити календар."
+              );
+            }
+
+            const mergedVisit = {
+              ...current,
+              ...updatedVisit,
+            };
+
+            cacheVisits([
+              mergedVisit,
+            ]);
+
+            completeButton.textContent =
+              "✓ Візит завершено";
+
+            completeButton.classList.add(
+              "is-completed"
+            );
+
+            openDeleteModal(
+              `
+                <b>Візит завершено</b>
+                <br><br>
+                Медичні дані збережені,
+                а календар оновлено.
+              `,
+              null,
+              "info"
+            );
+          } catch (error) {
+            console.error(
+              "complete visit failed:",
+              error
+            );
+
+            completeButton.disabled =
+              false;
+
+            completeButton.textContent =
+              "✓ Завершити візит";
+
+            openDeleteModal(
+              escapeHtml(
+                error?.message ||
+                "Не вдалося завершити візит."
+              ),
+              null,
+              "info"
+            );
+          }
+        }
+      );
+    };
 }
 }
 
