@@ -40851,12 +40851,16 @@ if (savedPetId) await renderVisits(savedPetId);
       });
 
     if (isBusy) {
-      alert(
-        "Цей час уже зайнятий у цього ветеринара. Оберіть інший час."
-      );
+  const allowOverlap =
+    window.confirm(
+      "У цього ветеринара вже є запис на вибраний час.\n\n" +
+      "Створити ще один запис паралельно?"
+    );
 
-      return;
-    }
+  if (!allowOverlap) {
+    return;
+  }
+}
 
     if (
       window.__calendarCreatePending
