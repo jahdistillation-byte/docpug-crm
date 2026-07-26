@@ -30723,42 +30723,50 @@ async function startMedicalVisitFromCalendarEvent(
     );
   }
 
-  const updatedEvent =
-    await updateCalendarEventApi(
-      calendarEvent.id,
-      {
-        title:
-          calendarEvent.title ||
-          "Прийом",
+  const updated =
+  await updateCalendarEventApi(
+    ev.id,
+    {
+      title,
 
-        event_date:
-          eventDate,
+      event_date:
+        eventDate,
 
-        start_time:
-          startTime,
+      start_time:
+        startTimeValue,
 
-        end_time:
-          endTime,
+      end_time:
+        endTimeValue,
 
-        staff_id:
-          staffId,
+      staff_id:
+        staffId,
 
-        patient_id:
-          patientId,
+      patient_id:
+        ev.patient_id ||
+        null,
 
-        owner_id:
-          calendarEvent.owner_id ||
-          null,
+      owner_id:
+        ev.owner_id ||
+        null,
 
-        visit_id:
-          createdVisit.id,
+      visit_id:
+        ev.visit_id ||
+        null,
 
-        note,
+      note,
 
-        status:
-          "in_progress",
-      }
-    );
+      status:
+        String(
+          document.querySelector(
+            "#calEditStatus"
+          )?.value ||
+          ev.status ||
+          "planned"
+        )
+          .trim()
+          .toLowerCase(),
+    }
+  );
 
   if (!updatedEvent) {
     throw new Error(
