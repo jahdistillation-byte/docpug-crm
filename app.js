@@ -665,6 +665,71 @@ function openDeleteModal(
       }
     };  
     } else if (
+  mode === "calendar_off_shift"
+) {
+  if (icon) {
+    icon.textContent =
+      "◷";
+  }
+
+  if (title) {
+    title.textContent =
+      "Лікар не на зміні";
+  }
+
+  confirmBtn.textContent =
+    "Створити все одно";
+
+  confirmBtn.classList.add(
+    "primary"
+  );
+
+  cancelBtn.style.display =
+    "";
+
+  cancelBtn.textContent =
+    "Обрати інший час";
+
+  confirmBtn.onclick =
+    async () => {
+      const action =
+        deleteCallback;
+
+      confirmBtn.disabled =
+        true;
+
+      cancelBtn.disabled =
+        true;
+
+      confirmBtn.textContent =
+        "Створюємо…";
+
+      try {
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+
+        closeDeleteModal();
+      } catch (error) {
+        console.error(
+          "calendar off shift confirm failed:",
+          error
+        );
+
+        confirmBtn.disabled =
+          false;
+
+        cancelBtn.disabled =
+          false;
+
+        confirmBtn.textContent =
+          "Створити все одно";
+      }
+    };
+    } else if (
   mode === "calendar_overlap"
 ) {
   if (icon) {
@@ -41057,7 +41122,49 @@ if (savedPetId) await renderVisits(savedPetId);
           endTime > evStart
         );
       });
+const staffSchedule =
+  await loadStaffScheduleApi(
+    date
+  );
 
+const scheduleRow =
+  staffSchedule.find(
+    (item) =>
+      String(item.staff_id) ===
+      String(staffId)
+  ) || null;
+
+const shiftStart =
+  String(
+    scheduleRow?.start_time ||
+    ""
+  ).slice(0, 5);
+
+const shiftEnd =
+  String(
+    scheduleRow?.end_time ||
+    ""
+  ).slice(0, 5);
+
+const isDoctorOnShift =
+  Boolean(
+    scheduleRow &&
+    scheduleRow.is_active !==
+      false
+  );
+
+const isInsideWorkingHours =
+  Boolean(
+    isDoctorOnShift &&
+    shiftStart &&
+    shiftEnd &&
+    startTime >= shiftStart &&
+    endTime <= shiftEnd
+  );
+
+const isOutsideShift =
+  !isDoctorOnShift ||
+  !isInsideWorkingHours;
     const createCalendarAppointment =
   async (
     allowOverlap = false
@@ -41139,28 +41246,68 @@ if (savedPetId) await renderVisits(savedPetId);
     }
   };
 
-if (isBusy) {
+const continueCalendarCreation =
+  async () => {
+    if (isBusy) {
+      openDeleteModal(
+        `
+          <b>Час уже зайнятий</b>
+          <br><br>
+          У цього ветеринара вже є запис
+          на вибраний час.
+          <br><br>
+          Створити ще один запис паралельно?
+        `,
+        async () => {
+          await createCalendarAppointment(
+            true
+          );
+        },
+        "calendar_overlap"
+      );
+
+      return;
+    }
+
+    await createCalendarAppointment();
+  };
+
+if (isOutsideShift) {
+  const shiftDescription =
+    isDoctorOnShift &&
+    shiftStart &&
+    shiftEnd
+      ? `
+          Робочий час лікаря:
+          <b>${escapeHtml(
+            shiftStart
+          )}–${escapeHtml(
+            shiftEnd
+          )}</b>.
+        `
+      : `
+          На вибрану дату лікар
+          не знаходиться на зміні.
+        `;
+
   openDeleteModal(
     `
-      <b>Час уже зайнятий</b>
+      <b>Лікар не працює у вибраний час</b>
       <br><br>
-      У цього ветеринара вже є запис
-      на вибраний час.
+      ${shiftDescription}
       <br><br>
-      Створити ще один запис паралельно?
+      Все одно створити запис?
     `,
     async () => {
-      await createCalendarAppointment(
-  true
-);
+      await continueCalendarCreation();
     },
-    "calendar_overlap"
+    "calendar_off_shift"
   );
 
   return;
 }
 
-await createCalendarAppointment();
+await continueCalendarCreation();
   } catch (e) {
     console.error(e);
 
