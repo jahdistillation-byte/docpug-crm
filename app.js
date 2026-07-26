@@ -40915,25 +40915,8 @@ if (savedPetId) await renderVisits(savedPetId);
         );
       });
 
-    if (isBusy) {
-  openDeleteModal(
-    `
-      <b>Час уже зайнятий</b>
-      <br><br>
-      У цього ветеринара вже є запис
-      на вибраний час.
-      <br><br>
-      Створити ще один запис паралельно?
-    `,
-    async () => {
-      await createCalendarAppointment();
-    },
-    "calendar_overlap"
-  );
-
-  return;
-}
-
+    const createCalendarAppointment =
+  async () => {
     if (
       window.__calendarCreatePending
     ) {
@@ -41006,6 +40989,28 @@ if (savedPetId) await renderVisits(savedPetId);
       window.__calendarCreatePending =
         false;
     }
+  };
+
+if (isBusy) {
+  openDeleteModal(
+    `
+      <b>Час уже зайнятий</b>
+      <br><br>
+      У цього ветеринара вже є запис
+      на вибраний час.
+      <br><br>
+      Створити ще один запис паралельно?
+    `,
+    async () => {
+      await createCalendarAppointment();
+    },
+    "calendar_overlap"
+  );
+
+  return;
+}
+
+await createCalendarAppointment();
   } catch (e) {
     console.error(e);
 
