@@ -35731,16 +35731,19 @@ const completeButton =
 
 if (completeButton) {
   const visitIsCompleted =
-    Boolean(
-      visit?.completed_at ||
-      visit?.closed_by ||
-      String(
-        visit?.status || ""
-      )
-        .trim()
-        .toLowerCase() ===
-        "completed"
-    );
+  [
+    "completed",
+    "done",
+    "finished",
+  ].includes(
+    String(
+      visit?.calendar_status ||
+      visit?.status ||
+      ""
+    )
+      .trim()
+      .toLowerCase()
+  );
 
   if (visitIsCompleted) {
     completeButton.disabled =
@@ -35818,17 +35821,61 @@ if (completeButton) {
 
             return;
           }
+          const calendarEvents =
+  await loadCalendarApi();
 
-          if (
-            current.completed_at ||
-            current.closed_by ||
-            String(
-              current.status || ""
-            )
-              .trim()
-              .toLowerCase() ===
-              "completed"
-          ) {
+const linkedCalendarEvent =
+  (
+    Array.isArray(
+      calendarEvents
+    )
+      ? calendarEvents
+      : []
+  ).find(
+    (event) =>
+      String(
+        event?.visit_id || ""
+      ).trim() ===
+      String(
+        visitId || ""
+      ).trim()
+  ) || null;
+
+current.calendar_event_id =
+  linkedCalendarEvent?.id ||
+  current.calendar_event_id ||
+  null;
+
+current.calendar_status =
+  String(
+    linkedCalendarEvent?.status ||
+    current.calendar_status ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+cacheVisits([
+  current,
+]);
+
+          const currentCalendarStatus =
+  String(
+    current.calendar_status ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+if (
+  [
+    "completed",
+    "done",
+    "finished",
+  ].includes(
+    currentCalendarStatus
+  )
+) {
             completeButton.disabled =
               true;
 
