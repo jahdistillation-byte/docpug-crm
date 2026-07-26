@@ -34882,6 +34882,21 @@ async function syncCalendarEventStatusByVisitId(
   );
 }
 function renderVisitPage(visit, pet) {
+    const visitId =
+    String(
+      visit?.id ||
+      state.selectedVisitId ||
+      ""
+    ).trim();
+
+  if (!visitId) {
+    console.error(
+      "renderVisitPage: visitId is missing",
+      visit
+    );
+
+    return;
+  }
   // 1. Оновлюємо заголовки та мета-інформацію
   const pill = document.getElementById("visitDatePill");
   if (pill) pill.textContent = visit.date || "—";
