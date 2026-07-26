@@ -34593,26 +34593,30 @@ org = org || {};
     org.document_footer ||
     "Коли важливо — ми поруч.";
 
-  let visitDoctor = null;
+  let visitDoctor =
+  null;
 
-if (
-  v.staff_id &&
-  typeof loadStaffApi === "function"
-) {
-  const staffList =
-    await loadStaffApi();
+const cachedStaff =
+  Array.isArray(state.staff)
+    ? state.staff
+    : [];
 
+if (v.staff_id) {
   visitDoctor =
-    (staffList || []).find((staff) => {
-      return (
-        String(staff.id) ===
-        String(v.staff_id)
-      );
-    }) || null;
+    cachedStaff.find(
+      (staff) =>
+        String(
+          staff?.id || ""
+        ) ===
+        String(
+          v.staff_id
+        )
+    ) || null;
 }
 
 const doctorName =
   visitDoctor?.name ||
+  v.staff_name ||
   "Ветеринарний лікар";
 
   const doctorSignature = org.doctor_signature_url || "";
