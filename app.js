@@ -28833,93 +28833,811 @@ function renderLabScale(value, min, max) {
 }
 
 function ensureCalendarModal() {
-  let modal = document.getElementById("calendarEventModal");
-  if (modal) return modal;
+  let modal =
+    document.getElementById(
+      "calendarEventModal"
+    );
 
-  modal = document.createElement("div");
-  modal.className = "modal";
-  modal.id = "calendarEventModal";
+  if (modal) {
+    return modal;
+  }
+
+  modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.id =
+    "calendarEventModal";
+
+  modal.className =
+    "calEditOverlay";
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
   modal.innerHTML = `
-    <div class="modal__backdrop" data-close-calendar-modal></div>
-    <div class="modal__panel calEditPanel">
-      <div class="modal__head">
+    <div
+      class="calEditBackdrop"
+      data-close-calendar-modal
+    ></div>
+
+    <section
+      class="calEditModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="calEditModalTitle"
+    >
+      <header class="calEditHeader">
+        <div class="calEditHeaderMain">
+          <div class="calEditHeaderIcon">
+            📅
+          </div>
+
+          <div>
+            <div
+              class="calEditTitle"
+              id="calEditModalTitle"
+            >
+              Редагування запису
+            </div>
+
+            <div class="calEditSubtitle">
+              Змініть дату, час або ветеринара
+            </div>
+          </div>
+        </div>
+
+        <button
+          class="calEditClose"
+          type="button"
+          data-close-calendar-modal
+          aria-label="Закрити"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="calEditPatient">
+        <div class="calEditPatientIcon">
+          🐾
+        </div>
+
         <div>
-          <div class="modal__title">Редагування запису</div>
-          <div class="modal__sub">Час, лікар, коментар</div>
+          <span>Пацієнт і запис</span>
+
+          <strong id="calEditPatientName">
+            —
+          </strong>
         </div>
-        <button class="iconBtn" data-close-calendar-modal type="button">✕</button>
       </div>
-      <div class="modal__body">
-        <label class="field">
-          <div class="label">Назва</div>
-          <input class="input" id="calEditTitle">
-        </label>
-        <div class="medFormGrid">
-          <label class="field">
-            <div class="label">Початок</div>
-            <input class="input" id="calEditStart" type="time">
+
+      <div class="calEditBody">
+        <div class="calEditGrid">
+          <label class="calEditField calEditFieldWide">
+            <span>Назва запису</span>
+
+            <input
+              class="calEditInput"
+              id="calEditTitle"
+              type="text"
+              autocomplete="off"
+              placeholder="Назва запису"
+            >
           </label>
-          <label class="field">
-            <div class="label">Кінець</div>
-            <input class="input" id="calEditEnd" type="time">
+
+          <label class="calEditField">
+            <span>Дата</span>
+
+            <input
+              class="calEditInput"
+              id="calEditDate"
+              type="date"
+            >
+          </label>
+
+          <label class="calEditField">
+            <span>Час початку</span>
+
+            <input
+              class="calEditInput"
+              id="calEditStart"
+              type="time"
+            >
+          </label>
+
+          <label class="calEditField">
+            <span>Тривалість</span>
+
+            <select
+              class="calEditInput"
+              id="calEditDuration"
+            >
+              <option value="15">
+                15 хв
+              </option>
+
+              <option value="30">
+                30 хв
+              </option>
+
+              <option value="45">
+                45 хв
+              </option>
+
+              <option value="60">
+                60 хв
+              </option>
+
+              <option value="90">
+                90 хв
+              </option>
+
+              <option value="120">
+                120 хв
+              </option>
+
+              <option value="180">
+                180 хв
+              </option>
+            </select>
+          </label>
+
+          <label class="calEditField">
+            <span>Ветеринар</span>
+
+            <select
+              class="calEditInput"
+              id="calEditStaff"
+            >
+              <option value="">
+                Оберіть ветеринара
+              </option>
+            </select>
+          </label>
+
+          <label class="calEditField calEditFieldWide">
+            <span>
+              Причина звернення / коментар
+            </span>
+
+            <textarea
+              class="calEditTextarea"
+              id="calEditNote"
+              rows="4"
+              placeholder="Причина запису або коментар адміністратора"
+            ></textarea>
           </label>
         </div>
-        <label class="field">
-          <div class="label">Коментар</div>
-          <textarea class="textarea" id="calEditNote" rows="4"></textarea>
-        </label>
       </div>
-      <div class="modal__foot">
-        <button class="ghost" data-close-calendar-modal type="button">Скасувати</button>
-        <button class="primary" id="calEditSaveBtn" type="button">Зберегти</button>
-      </div>
-    </div>
+
+      <footer class="calEditFooter">
+        <button
+          class="calEditCancel"
+          type="button"
+          data-close-calendar-modal
+        >
+          Скасувати
+        </button>
+
+        <button
+          class="calEditSave"
+          id="calEditSaveBtn"
+          type="button"
+        >
+          Зберегти зміни
+        </button>
+      </footer>
+    </section>
   `;
 
-  document.body.appendChild(modal);
-  modal.addEventListener("click", (e) => {
-    if (e.target.closest("[data-close-calendar-modal]")) {
-      modal.classList.remove("open");
-    }
+  document.body.appendChild(
+    modal
+  );
+
+  const getState = () => ({
+    title:
+      String(
+        $("#calEditTitle")
+          ?.value || ""
+      ).trim(),
+
+    date:
+      String(
+        $("#calEditDate")
+          ?.value || ""
+      ).trim(),
+
+    start:
+      String(
+        $("#calEditStart")
+          ?.value || ""
+      ).trim(),
+
+    duration:
+      String(
+        $("#calEditDuration")
+          ?.value || ""
+      ).trim(),
+
+    staffId:
+      String(
+        $("#calEditStaff")
+          ?.value || ""
+      ).trim(),
+
+    note:
+      String(
+        $("#calEditNote")
+          ?.value || ""
+      ).trim(),
   });
+
+  const closeModal =
+    () => {
+      modal.classList.remove(
+        "open"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      delete modal.dataset
+        .initialState;
+
+      document.body.classList.remove(
+        "calendarEditModalOpen"
+      );
+    };
+
+  const hasChanges =
+    () => {
+      const initialState =
+        modal.dataset
+          .initialState || "";
+
+      return (
+        JSON.stringify(
+          getState()
+        ) !==
+        initialState
+      );
+    };
+
+  const requestClose =
+    () => {
+      if (
+        !modal.classList.contains(
+          "open"
+        )
+      ) {
+        return;
+      }
+
+      if (!hasChanges()) {
+        closeModal();
+        return;
+      }
+
+      openDeleteModal(
+        (
+          "Внесені зміни запису " +
+          "ще не збережені."
+        ),
+        () => {
+          closeModal();
+        },
+        "unsaved"
+      );
+    };
+
+  modal._getCalendarEditState =
+    getState;
+
+  modal._closeCalendarEditModal =
+    closeModal;
+
+  modal._requestCloseCalendarEditModal =
+    requestClose;
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-calendar-modal]"
+        )
+      ) {
+        requestClose();
+      }
+    }
+  );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key !== "Escape" ||
+        !modal.classList.contains(
+          "open"
+        )
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      requestClose();
+    },
+    true
+  );
+
   return modal;
 }
 
-function openCalendarEditModal(ev, today, onSaved) {
-  const modal = ensureCalendarModal();
+async function openCalendarEditModal(
+  ev,
+  today,
+  onSaved
+) {
+  const modal =
+    ensureCalendarModal();
 
-  $("#calEditTitle").value = ev.title || "";
-  $("#calEditStart").value = String(ev.start_time || "").slice(0, 5);
-  $("#calEditEnd").value = String(ev.end_time || "").slice(0, 5);
-  $("#calEditNote").value = ev.note || "";
+  if (
+    !Array.isArray(
+      state.staff
+    ) ||
+    !state.staff.length
+  ) {
+    await loadStaffApi();
+  }
 
-  modal.classList.add("open");
+  const startTime =
+    String(
+      ev.start_time || ""
+    ).slice(0, 5);
 
-  $("#calEditSaveBtn").onclick = async () => {
-    const title = ($("#calEditTitle").value || "").trim();
-    const start_time = ($("#calEditStart").value || "").trim();
-    const end_time = ($("#calEditEnd").value || "").trim();
-    const note = ($("#calEditNote").value || "").trim();
+  const endTime =
+    String(
+      ev.end_time || ""
+    ).slice(0, 5);
 
-    if (!title || !start_time || !end_time) {
-      alert("Заповни назву, початок і кінець");
-      return;
+  const timeToMinutes =
+    (value) => {
+      const parts =
+        String(value || "")
+          .split(":");
+
+      const hours =
+        Number(parts[0] || 0);
+
+      const minutes =
+        Number(parts[1] || 0);
+
+      return (
+        hours * 60 +
+        minutes
+      );
+    };
+
+  let duration =
+    timeToMinutes(endTime) -
+    timeToMinutes(startTime);
+
+  if (
+    !Number.isFinite(
+      duration
+    ) ||
+    duration <= 0
+  ) {
+    duration = 60;
+  }
+
+  const allowedDurations =
+    [
+      15,
+      30,
+      45,
+      60,
+      90,
+      120,
+      180,
+    ];
+
+  if (
+    !allowedDurations.includes(
+      duration
+    )
+  ) {
+    const durationSelect =
+      $("#calEditDuration");
+
+    if (
+      durationSelect &&
+      !durationSelect.querySelector(
+        `option[value="${duration}"]`
+      )
+    ) {
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        String(duration);
+
+      option.textContent =
+        `${duration} хв`;
+
+      durationSelect.appendChild(
+        option
+      );
     }
+  }
 
-    const updated = await updateCalendarEventApi(ev.id, {
-      title,
-      event_date: ev.event_date || today,
-      start_time,
-      end_time,
-      staff_id: ev.staff_id,
-      note,
-    });
+  const staffSelect =
+    $("#calEditStaff");
 
-    if (updated) {
-      modal.classList.remove("open");
-      if (typeof onSaved === "function") await onSaved();
-    }
-  };
+  if (staffSelect) {
+    const staffItems =
+      (
+        state.staff || []
+      ).filter(
+        (item) =>
+          item &&
+          item.is_active !== false
+      );
+
+    staffSelect.innerHTML = `
+      <option value="">
+        Оберіть ветеринара
+      </option>
+
+      ${staffItems
+        .map(
+          (item) => `
+            <option
+              value="${escapeHtml(
+                String(
+                  item.id || ""
+                )
+              )}"
+            >
+              ${escapeHtml(
+                item.name ||
+                item.full_name ||
+                "Без імені"
+              )}
+            </option>
+          `
+        )
+        .join("")}
+    `;
+  }
+
+  const patient =
+    (
+      state.patients || []
+    ).find(
+      (item) =>
+        String(item.id) ===
+        String(
+          ev.patient_id || ""
+        )
+    );
+
+  const owner =
+    (
+      state.owners || []
+    ).find(
+      (item) =>
+        String(item.id) ===
+        String(
+          ev.owner_id ||
+          patient?.owner_id ||
+          ""
+        )
+    );
+
+  const patientName =
+    patient?.name ||
+    String(
+      ev.title || "Запис"
+    ).split("—")[0].trim() ||
+    "Пацієнт";
+
+  const ownerName =
+    owner?.name || "";
+
+  const patientLabel =
+    ownerName
+      ? `${patientName} · ${ownerName}`
+      : patientName;
+
+  $("#calEditPatientName")
+    .textContent =
+      patientLabel;
+
+  $("#calEditTitle").value =
+    ev.title || "";
+
+  $("#calEditDate").value =
+    ev.event_date ||
+    today ||
+    todayISO();
+
+  $("#calEditStart").value =
+    startTime;
+
+  $("#calEditDuration").value =
+    String(duration);
+
+  $("#calEditStaff").value =
+    String(
+      ev.staff_id || ""
+    );
+
+  $("#calEditNote").value =
+    ev.note || "";
+
+  modal.dataset.initialState =
+    JSON.stringify(
+      modal._getCalendarEditState()
+    );
+
+  modal.classList.add(
+    "open"
+  );
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "calendarEditModalOpen"
+  );
+
+  const saveButton =
+    $("#calEditSaveBtn");
+
+  saveButton.onclick =
+    async () => {
+      const title =
+        String(
+          $("#calEditTitle")
+            ?.value || ""
+        ).trim();
+
+      const eventDate =
+        String(
+          $("#calEditDate")
+            ?.value || ""
+        ).trim();
+
+      const startTimeValue =
+        String(
+          $("#calEditStart")
+            ?.value || ""
+        ).trim();
+
+      const durationValue =
+        Number(
+          $("#calEditDuration")
+            ?.value || 60
+        );
+
+      const staffId =
+        String(
+          $("#calEditStaff")
+            ?.value || ""
+        ).trim();
+
+      const note =
+        String(
+          $("#calEditNote")
+            ?.value || ""
+        ).trim();
+
+      if (!title) {
+        alert(
+          "Вкажіть назву запису."
+        );
+
+        return;
+      }
+
+      if (!eventDate) {
+        alert(
+          "Оберіть дату."
+        );
+
+        return;
+      }
+
+      if (!startTimeValue) {
+        alert(
+          "Оберіть час початку."
+        );
+
+        return;
+      }
+
+      if (
+        !Number.isFinite(
+          durationValue
+        ) ||
+        durationValue < 15
+      ) {
+        alert(
+          "Оберіть тривалість прийому."
+        );
+
+        return;
+      }
+
+      if (!staffId) {
+        alert(
+          "Оберіть ветеринара."
+        );
+
+        return;
+      }
+
+      if (!note) {
+        alert(
+          "Вкажіть причину звернення."
+        );
+
+        return;
+      }
+
+      const endTimeValue =
+        addMinutesToTime(
+          startTimeValue,
+          durationValue
+        );
+
+      const calendarEvents =
+        await loadCalendarApi();
+
+      const isBusy =
+        calendarEvents.some(
+          (item) => {
+            if (
+              String(item.id) ===
+              String(ev.id)
+            ) {
+              return false;
+            }
+
+            if (
+              String(
+                item.staff_id
+              ) !==
+              String(staffId)
+            ) {
+              return false;
+            }
+
+            if (
+              String(
+                item.event_date
+              ) !==
+              String(eventDate)
+            ) {
+              return false;
+            }
+
+            const itemStart =
+              String(
+                item.start_time ||
+                ""
+              ).slice(0, 5);
+
+            const itemEnd =
+              String(
+                item.end_time ||
+                ""
+              ).slice(0, 5);
+
+            return (
+              startTimeValue <
+                itemEnd &&
+              endTimeValue >
+                itemStart
+            );
+          }
+        );
+
+      if (isBusy) {
+        alert(
+          (
+            "Цей час уже зайнятий " +
+            "у вибраного ветеринара."
+          )
+        );
+
+        return;
+      }
+
+      saveButton.disabled =
+        true;
+
+      saveButton.textContent =
+        "Збереження...";
+
+      try {
+        const updated =
+          await updateCalendarEventApi(
+            ev.id,
+            {
+              title,
+              event_date:
+                eventDate,
+
+              start_time:
+                startTimeValue,
+
+              end_time:
+                endTimeValue,
+
+              staff_id:
+                staffId,
+
+              patient_id:
+                ev.patient_id ||
+                null,
+
+              owner_id:
+                ev.owner_id ||
+                patient?.owner_id ||
+                null,
+
+              visit_id:
+                ev.visit_id ||
+                null,
+
+              note,
+
+              status:
+                ev.status ||
+                "planned",
+            }
+          );
+
+        if (!updated) {
+          return;
+        }
+
+        modal.dataset.initialState =
+          JSON.stringify(
+            modal
+              ._getCalendarEditState()
+          );
+
+        modal
+          ._closeCalendarEditModal();
+
+        if (
+          typeof onSaved ===
+          "function"
+        ) {
+          await onSaved();
+        }
+      } finally {
+        saveButton.disabled =
+          false;
+
+        saveButton.textContent =
+          "Зберегти зміни";
+      }
+    };
 }
 
 function renderLabsTab(pet) {

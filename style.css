@@ -33797,3 +33797,479 @@ body[data-theme="white"]
 #visitModal .pugAddPatientBtn:active {
   transform: translateY(0);
 }
+/* =====================================================
+   PUGCRM — CALENDAR EVENT EDIT MODAL
+===================================================== */
+
+.calEditOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.calEditOverlay.open {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.calEditBackdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    rgba(3, 5, 12, 0.78);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
+}
+
+.calEditModal {
+  position: relative;
+  z-index: 2;
+
+  width:
+    min(720px, 96vw);
+
+  max-height:
+    min(780px, 92vh);
+
+  overflow: auto;
+
+  border-radius: 26px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(24, 27, 39, 0.98),
+      rgba(10, 12, 19, 0.99)
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color) 26%,
+      rgba(255, 255, 255, 0.08)
+    );
+
+  box-shadow:
+    0 36px 100px
+      rgba(0, 0, 0, 0.58),
+    0 0 50px
+      color-mix(
+        in srgb,
+        var(--accent-color) 12%,
+        transparent
+      ),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+
+  color: #ffffff;
+
+  animation:
+    calEditModalAppear
+    0.2s ease both;
+}
+
+@keyframes calEditModalAppear {
+  from {
+    opacity: 0;
+    transform:
+      translateY(12px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+.calEditHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding:
+    24px 24px 18px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.calEditHeaderMain {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.calEditHeaderIcon {
+  width: 48px;
+  height: 48px;
+
+  flex:
+    0 0 48px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 15px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 18%,
+      rgba(255, 255, 255, 0.035)
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color) 34%,
+      rgba(255, 255, 255, 0.08)
+    );
+}
+
+.calEditTitle {
+  font-size: 1.35rem;
+  font-weight: 850;
+  letter-spacing: -0.025em;
+}
+
+.calEditSubtitle {
+  margin-top: 4px;
+
+  color:
+    rgba(255, 255, 255, 0.48);
+
+  font-size: 0.86rem;
+}
+
+.calEditClose {
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border-radius: 13px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  color:
+    rgba(255, 255, 255, 0.72);
+
+  font-size: 1.55rem;
+  cursor: pointer;
+}
+
+.calEditClose:hover {
+  color: #ffffff;
+
+  background:
+    rgba(255, 255, 255, 0.075);
+}
+
+.calEditPatient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin:
+    18px 24px 0;
+
+  padding:
+    14px 16px;
+
+  border-radius: 16px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 8%,
+      rgba(255, 255, 255, 0.025)
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color) 20%,
+      rgba(255, 255, 255, 0.07)
+    );
+}
+
+.calEditPatientIcon {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.05);
+}
+
+.calEditPatient span {
+  display: block;
+
+  color:
+    rgba(255, 255, 255, 0.42);
+
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+}
+
+.calEditPatient strong {
+  display: block;
+  margin-top: 3px;
+
+  color: #ffffff;
+  font-size: 0.98rem;
+}
+
+.calEditBody {
+  padding: 20px 24px 24px;
+}
+
+.calEditGrid {
+  display: grid;
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 16px;
+}
+
+.calEditField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calEditFieldWide {
+  grid-column: 1 / -1;
+}
+
+.calEditField > span {
+  color:
+    rgba(255, 255, 255, 0.58);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.calEditInput,
+.calEditTextarea {
+  width: 100%;
+
+  border-radius: 13px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.09);
+
+  background:
+    rgba(0, 0, 0, 0.25);
+
+  color: #ffffff;
+
+  font: inherit;
+  font-size: 0.92rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.calEditInput {
+  min-height: 46px;
+  padding: 0 13px;
+}
+
+.calEditTextarea {
+  min-height: 110px;
+  padding: 13px;
+
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.calEditInput:focus,
+.calEditTextarea:focus {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color) 65%,
+      white
+    );
+
+  background:
+    rgba(0, 0, 0, 0.34);
+
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--accent-color) 12%,
+      transparent
+    );
+}
+
+.calEditInput option {
+  background: #15161d;
+  color: #ffffff;
+}
+
+.calEditFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  padding:
+    18px 24px 24px;
+
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.calEditCancel,
+.calEditSave {
+  min-height: 46px;
+
+  padding:
+    0 20px;
+
+  border-radius: 13px;
+
+  font-size: 0.88rem;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.calEditCancel {
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.09);
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  color:
+    rgba(255, 255, 255, 0.72);
+}
+
+.calEditCancel:hover {
+  color: #ffffff;
+
+  background:
+    rgba(255, 255, 255, 0.075);
+}
+
+.calEditSave {
+  min-width: 190px;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color) 54%,
+      rgba(255, 255, 255, 0.1)
+    );
+
+  background:
+    var(--accent-color);
+
+  color: #ffffff;
+
+  box-shadow:
+    0 10px 26px
+    color-mix(
+      in srgb,
+      var(--accent-color) 22%,
+      transparent
+    );
+}
+
+.calEditSave:hover {
+  transform:
+    translateY(-1px);
+}
+
+.calEditSave:disabled {
+  opacity: 0.58;
+  cursor: wait;
+  transform: none;
+}
+
+body.calendarEditModalOpen {
+  overflow: hidden;
+}
+
+@media (max-width: 650px) {
+  .calEditOverlay {
+    padding: 10px;
+  }
+
+  .calEditModal {
+    width: 100%;
+    border-radius: 22px;
+  }
+
+  .calEditGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .calEditFieldWide {
+    grid-column: auto;
+  }
+
+  .calEditFooter {
+    flex-direction: column-reverse;
+  }
+
+  .calEditCancel,
+  .calEditSave {
+    width: 100%;
+  }
+}
