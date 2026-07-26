@@ -34429,3 +34429,43 @@ body.calendarEditModalOpen {
 .premiumVisitCardPlanned .premiumVisitOpenHint {
   color: rgba(226, 214, 245, 0.60);
 }
+.page[data-page="calendar"]
+.calSlot {
+  position: relative;
+  overflow: visible !important;
+}
+
+.page[data-page="calendar"]
+.calDoctorCol {
+  position: relative;
+}
+
+.page[data-page="calendar"]
+.calEventCard {
+  box-sizing: border-box;
+}
+
+.page[data-page="calendar"]
+.calSlotCovered {
+  opacity: 1;
+}
+
+.page[data-page="calendar"]
+.calSlotCovered::after {
+  content: "Зайнято до завершення прийому";
+
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  padding: 8px;
+
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 10px;
+  font-weight: 700;
+
+  pointer-events: none;
+}

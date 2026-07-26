@@ -28202,9 +28202,13 @@ const staffSchedule =
     startMin - hourStart
   );
 
+const calendarHourHeight =
+  89;
+
 const topOffset =
   Math.round(
-    minuteOffset / 60 * 86
+    minuteOffset / 60 *
+    calendarHourHeight
   );
                     const durationMinutes =
   Math.max(
@@ -28216,7 +28220,8 @@ const height =
   Math.max(
     54,
     Math.round(
-      durationMinutes / 60 * 86
+      durationMinutes / 60 *
+      calendarHourHeight
     )
   );
 
@@ -28227,12 +28232,17 @@ const height =
     String(ev.id)
   )}"
   style="
-    border-left:5px solid ${escapeHtml(
-      doc.color || "#7C5CFF"
-    )};
-    min-height:${height}px;
-    margin-top:${topOffset}px;
-  "
+  border-left:5px solid ${escapeHtml(
+    doc.color || "#7C5CFF"
+  )};
+  position:absolute;
+  top:${topOffset}px;
+  left:6px;
+  right:6px;
+  height:${height}px;
+  min-height:54px;
+  z-index:6;
+"
 >
                         <div class="calEventTop">
                           <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
