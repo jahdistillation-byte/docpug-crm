@@ -9034,29 +9034,51 @@ def api_update_calendar_event(event_id):
     )
 
     payload = {
-        "title": data.get("title"),
-        "event_date": data.get(
-            "event_date"
-        ),
-        "start_time": data.get(
-            "start_time"
-        ),
-        "end_time": data.get(
-            "end_time"
-        ),
-        "staff_id": data.get(
-            "staff_id"
-        ),
-        "location": data.get(
-            "location"
-        ),
-        "status": data.get(
-            "status"
-        ),
-        "note": data.get(
-            "note"
-        ),
-    }
+    "title": data.get(
+        "title"
+    ),
+
+    "event_date": data.get(
+        "event_date"
+    ),
+
+    "start_time": data.get(
+        "start_time"
+    ),
+
+    "end_time": data.get(
+        "end_time"
+    ),
+
+    "staff_id": data.get(
+        "staff_id"
+    ),
+
+    "patient_id": data.get(
+        "patient_id"
+    ),
+
+    "owner_id": data.get(
+        "owner_id"
+    ),
+
+    "visit_id": data.get(
+        "visit_id"
+    ),
+
+    "location": data.get(
+        "location"
+    ),
+
+    "status": data.get(
+        "status"
+    ),
+
+    "note": data.get(
+        "note"
+    ),
+}
+    
 
     payload = {
         key: value
