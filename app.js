@@ -35977,6 +35977,23 @@ if (completeButton) {
     visitId,
     "completed"
   );
+  console.log(
+  "[complete-visit] calendar sync result:",
+  {
+    visitId,
+
+    updatedEvent,
+
+    status:
+      updatedEvent?.status,
+
+    eventId:
+      updatedEvent?.id,
+
+    linkedVisitId:
+      updatedEvent?.visit_id,
+  }
+);
 
 if (
   !updatedEvent?.id ||
