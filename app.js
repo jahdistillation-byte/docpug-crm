@@ -3058,37 +3058,67 @@ async function refreshVisitFinanceSummary(
     document.getElementById(
       "visitPaymentButton"
     );
-if (button) {
-  button.disabled =
-    false;
 
-  button.classList.remove(
-    "is-paid",
-    "is-waiting"
-  );
-
-  button.innerHTML = `
-    <span>◷</span>
-    <span>Перевіряємо оплату…</span>
-  `;
-}gePayments =
+  const canManagePayments =
     isOwner() ||
     isAdmin();
 
-  if (stateElement) {
-    stateElement.hidden =
-      !canManagePayments;
+  if (!canManagePayments) {
+    if (stateElement) {
+      stateElement.hidden =
+        true;
+    }
+
+    if (button) {
+      button.hidden =
+        true;
+
+      button.style.display =
+        "none";
+    }
+
+    return;
   }
 
   if (button) {
     button.hidden =
-      !canManagePayments;
+      false;
+
+    button.style.display =
+      "flex";
+
+    button.disabled =
+      false;
+
+    button.classList.remove(
+      "is-paid",
+      "is-waiting",
+      "is-partial"
+    );
+
+    button.classList.add(
+      "is-waiting"
+    );
+
+    button.innerHTML = `
+      <span>◷</span>
+      <span>Перевіряємо оплату…</span>
+    `;
   }
 
-  if (
-    !canManagePayments ||
-    !visitId
-  ) {
+  if (stateElement) {
+    stateElement.hidden =
+      false;
+  }
+
+  if (!visitId) {
+    if (button) {
+      button.innerHTML = `
+        <span>◷</span>
+        <span>Чекаємо оплату</span>
+      `;
+    }
+
     return;
   }
 
@@ -3150,62 +3180,74 @@ if (button) {
     }
 
     if (button) {
-  const total =
-    Number(
-      finance.total || 0
-    );
+      const total =
+        Number(
+          finance.total || 0
+        );
 
-  const paid =
-    Number(
-      finance.paid || 0
-    );
+      const paid =
+        Number(
+          finance.paid || 0
+        );
 
-  const remaining =
-    Math.max(
-      0,
-      Number(
-        finance.remaining || 0
-      )
-    );
+      const remaining =
+        Math.max(
+          0,
+          Number(
+            finance.remaining || 0
+          )
+        );
 
-  const isPaid =
-    total > 0 &&
-    remaining <= 0;
+      const isPaid =
+        total > 0 &&
+        remaining <= 0;
 
-  const isPartial =
-    paid > 0 &&
-    remaining > 0;
+      const isPartial =
+        paid > 0 &&
+        remaining > 0;
 
-  button.classList.toggle(
-    "is-paid",
-    isPaid
-  );
+      button.hidden =
+        false;
 
-  button.classList.toggle(
-    "is-waiting",
-    !isPaid
-  );
+      button.style.display =
+        "flex";
 
-  button.disabled =
-    isPaid;
+      button.disabled =
+        false;
 
-  if (isPaid) {
-    button.innerHTML = `
-      <span>✓</span>
-      <span>Оплату завершено</span>
-    `;
-  } else if (isPartial) {
-    button.innerHTML = `
-      <span>◷</span>
-      <span>Чекаємо доплату</span>
-    `;
-  } else {
-    button.innerHTML = `
-      <span>◷</span>
-      <span>Чекаємо оплату</span>
-    `;
-  }
-}
+      button.classList.toggle(
+        "is-paid",
+        isPaid
+      );
+
+      button.classList.toggle(
+        "is-partial",
+        isPartial
+      );
+
+      button.classList.toggle(
+        "is-waiting",
+        !isPaid &&
+        !isPartial
+      );
+
+      if (isPaid) {
+        button.innerHTML = `
+          <span>✓</span>
+          <span>Оплату завершено</span>
+        `;
+      } else if (isPartial) {
+        button.innerHTML = `
+          <span>◷</span>
+          <span>Чекаємо доплату</span>
+        `;
+      } else {
+        button.innerHTML = `
+          <span>◷</span>
+          <span>Чекаємо оплату</span>
+        `;
+      }
+    }
   } catch (error) {
     console.error(
       "refreshVisitFinanceSummary failed:",
@@ -3213,7 +3255,33 @@ if (button) {
     );
 
     if (stateElement) {
-      stateElement.hidden = true;
+      stateElement.hidden =
+        true;
+    }
+
+    if (button) {
+      button.hidden =
+        false;
+
+      button.style.display =
+        "flex";
+
+      button.disabled =
+        false;
+
+      button.classList.remove(
+        "is-paid",
+        "is-partial"
+      );
+
+      button.classList.add(
+        "is-waiting"
+      );
+
+      button.innerHTML = `
+        <span>◷</span>
+        <span>Чекаємо оплату</span>
+      `;
     }
   }
 }
