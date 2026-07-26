@@ -664,6 +664,77 @@ function openDeleteModal(
         await action();
       }
     };    
+    } else if (
+  mode === "visit_created"
+) {
+  if (icon) {
+    icon.textContent =
+      "✓";
+  }
+
+  if (title) {
+    title.textContent =
+      "Запис створено";
+  }
+
+  confirmBtn.textContent =
+    "▶ Почати прийом";
+
+  confirmBtn.classList.add(
+    "primary"
+  );
+
+  cancelBtn.style.display =
+    "";
+
+  cancelBtn.textContent =
+    "Залишити в календарі";
+
+  confirmBtn.onclick =
+    async () => {
+      const action =
+        deleteCallback;
+
+      confirmBtn.disabled =
+        true;
+
+      cancelBtn.disabled =
+        true;
+
+      confirmBtn.textContent =
+        "Створення прийому…";
+
+      try {
+        closeDeleteModal();
+
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+      } catch (error) {
+        console.error(
+          "start visit after creation failed:",
+          error
+        );
+
+        openDeleteModal(
+          escapeHtml(
+            error?.message ||
+            "Не вдалося почати прийом."
+          ),
+          null,
+          "info"
+        );
+      } finally {
+        confirmBtn.disabled =
+          false;
+
+        cancelBtn.disabled =
+          false;
+      }
+    };
   } else if (mode === "info") {
     if (icon) {
       icon.textContent =
@@ -29378,7 +29449,186 @@ function getCalendarEventVisualStatus(event) {
     label: "Заплановано",
   };
 }
+async function startMedicalVisitFromCalendarEvent(
+  calendarEvent
+) {
+  if (!calendarEvent?.id) {
+    throw new Error(
+      "Календарний запис не знайдено."
+    );
+  }
 
+  const existingVisitId =
+    String(
+      calendarEvent.visit_id || ""
+    ).trim();
+
+  if (existingVisitId) {
+    await openVisit(
+      existingVisitId
+    );
+
+    return existingVisitId;
+  }
+
+  const patientId =
+    String(
+      calendarEvent.patient_id || ""
+    ).trim();
+
+  const staffId =
+    String(
+      calendarEvent.staff_id || ""
+    ).trim();
+
+  const eventDate =
+    String(
+      calendarEvent.event_date || ""
+    ).trim();
+
+  const startTime =
+    String(
+      calendarEvent.start_time || ""
+    ).slice(0, 5);
+
+  const endTime =
+    String(
+      calendarEvent.end_time || ""
+    ).slice(0, 5);
+
+  const note =
+    String(
+      calendarEvent.note || ""
+    ).trim();
+
+  if (!patientId) {
+    throw new Error(
+      "До запису не прив’язаний пацієнт."
+    );
+  }
+
+  if (!staffId) {
+    throw new Error(
+      "До запису не прив’язаний ветеринар."
+    );
+  }
+
+  if (!eventDate) {
+    throw new Error(
+      "У записі не вказана дата."
+    );
+  }
+
+  const createdVisit =
+    await createVisitApi({
+      pet_id:
+        patientId,
+
+      staff_id:
+        staffId,
+
+      date:
+        eventDate,
+
+      note,
+
+      rx:
+        "",
+
+      weight_kg:
+        "",
+
+      services:
+        [],
+
+      services_json:
+        [],
+
+      stock:
+        [],
+
+      stock_json:
+        [],
+    });
+
+  if (!createdVisit?.id) {
+    throw new Error(
+      "Не вдалося створити медичний візит."
+    );
+  }
+
+  const updatedEvent =
+    await updateCalendarEventApi(
+      calendarEvent.id,
+      {
+        title:
+          calendarEvent.title ||
+          "Прийом",
+
+        event_date:
+          eventDate,
+
+        start_time:
+          startTime,
+
+        end_time:
+          endTime,
+
+        staff_id:
+          staffId,
+
+        patient_id:
+          patientId,
+
+        owner_id:
+          calendarEvent.owner_id ||
+          null,
+
+        visit_id:
+          createdVisit.id,
+
+        note,
+
+        status:
+          "in_progress",
+      }
+    );
+
+  if (!updatedEvent) {
+    throw new Error(
+      (
+        "Медичний візит створено, " +
+        "але не вдалося прив’язати " +
+        "його до календаря."
+      )
+    );
+  }
+
+  calendarEvent.visit_id =
+    createdVisit.id;
+
+  calendarEvent.status =
+    "in_progress";
+
+  cacheVisits([
+    {
+      ...createdVisit,
+
+      calendar_event_id:
+        updatedEvent.id ||
+        calendarEvent.id,
+
+      calendar_status:
+        "in_progress",
+    },
+  ]);
+
+  await openVisit(
+    createdVisit.id
+  );
+
+  return createdVisit.id;
+}
 async function openCalendarEditModal(
   ev,
   today,
@@ -39463,12 +39713,17 @@ openDeleteModal(
   `
     <b>Запис успішно створено</b>
     <br><br>
-    Медичний візит буде створено,
-    коли лікар натисне
-    «Почати прийом».
+    Запис додано до календаря.
+    Ви можете залишити його
+    запланованим або почати
+    медичний прийом зараз.
   `,
-  null,
-  "info"
+  async () => {
+    await startMedicalVisitFromCalendarEvent(
+      createdEvent
+    );
+  },
+  "visit_created"
 );
   } catch (e) {
     console.error(e);
