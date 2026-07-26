@@ -28407,11 +28407,134 @@ const staffHtml =
                   second.start_time
                 )
             );
+const positionedEvents = [];
 
+let currentGroup = [];
+let currentGroupEnd = -1;
+
+const finishOverlapGroup = () => {
+  if (!currentGroup.length) {
+    return;
+  }
+
+  const laneEndTimes = [];
+
+  currentGroup.forEach(
+    (event) => {
+      const startMinutes =
+        toMinutes(
+          String(
+            event.start_time || ""
+          ).slice(0, 5)
+        );
+
+      const endMinutes =
+        toMinutes(
+          String(
+            event.end_time ||
+            event.start_time ||
+            ""
+          ).slice(0, 5)
+        );
+
+      let laneIndex =
+        laneEndTimes.findIndex(
+          (laneEnd) =>
+            laneEnd <=
+            startMinutes
+        );
+
+      if (laneIndex === -1) {
+        laneIndex =
+          laneEndTimes.length;
+
+        laneEndTimes.push(
+          endMinutes
+        );
+      } else {
+        laneEndTimes[
+          laneIndex
+        ] = endMinutes;
+      }
+
+      positionedEvents.push({
+        event,
+        laneIndex,
+        overlapGroup:
+          currentGroup,
+      });
+    }
+  );
+
+  const laneCount =
+    Math.max(
+      1,
+      laneEndTimes.length
+    );
+
+  positionedEvents
+    .slice(
+      positionedEvents.length -
+      currentGroup.length
+    )
+    .forEach(
+      (item) => {
+        item.laneCount =
+          laneCount;
+      }
+    );
+
+  currentGroup = [];
+  currentGroupEnd = -1;
+};
+
+docEvents.forEach(
+  (event) => {
+    const startMinutes =
+      toMinutes(
+        String(
+          event.start_time || ""
+        ).slice(0, 5)
+      );
+
+    const endMinutes =
+      toMinutes(
+        String(
+          event.end_time ||
+          event.start_time ||
+          ""
+        ).slice(0, 5)
+      );
+
+    if (
+      currentGroup.length &&
+      startMinutes >=
+        currentGroupEnd
+    ) {
+      finishOverlapGroup();
+    }
+
+    currentGroup.push(
+      event
+    );
+
+    currentGroupEnd =
+      Math.max(
+        currentGroupEnd,
+        endMinutes
+      );
+  }
+);
+
+finishOverlapGroup();
         const eventsHtml =
-          docEvents
-            .map(
-              (event) => {
+  positionedEvents
+    .map(
+      ({
+        event,
+        laneIndex,
+        laneCount,
+      }) => {
                 const layout =
                   getEventLayout(
                     event
@@ -28465,7 +28588,27 @@ const staffHtml =
                         "#7C5CFF"
                       )};
                       top:${layout.top}px;
-                      height:${layout.height}px;
+height:${layout.height}px;
+
+left:calc(
+  ${
+    (
+      laneIndex /
+      laneCount
+    ) * 100
+  }% + 3px
+);
+
+width:calc(
+  ${
+    100 /
+    laneCount
+  }% - 6px
+);
+
+z-index:${
+  20 + laneIndex
+};
                     "
                   >
                     <div
