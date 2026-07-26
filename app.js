@@ -40794,93 +40794,152 @@ if (savedPetId) await renderVisits(savedPetId);
       return;
     }
 
-    // =========================
+        // =========================
     // РЕЖИМ СОЗДАНИЯ НОВОГО ВИЗИТА
     // =========================
-    payload.services = Array.isArray(payload.services) ? payload.services : [];
-    payload.services_json = payload.services;
-    payload.stock = Array.isArray(payload.stock) ? payload.stock : [];
-    payload.stock_json = payload.stock;
-    
-    const existingEvents = await loadCalendarApi();
 
-    // Проверка коллизий по времени в расписании врача
-    const isBusy = existingEvents.some((ev) => {
-      if (String(ev.staff_id) !== String(staffId)) return false;
-      if (String(ev.event_date) !== String(date)) return false;
+    payload.services =
+      Array.isArray(payload.services)
+        ? payload.services
+        : [];
 
-      const evStart = String(ev.start_time || "").slice(0, 5);
-      const evEnd = String(ev.end_time || "").slice(0, 5);
+    payload.services_json =
+      payload.services;
 
-      return startTime < evEnd && endTime > evStart;
-    });
+    payload.stock =
+      Array.isArray(payload.stock)
+        ? payload.stock
+        : [];
+
+    payload.stock_json =
+      payload.stock;
+
+    const existingEvents =
+      await loadCalendarApi();
+
+    // Проверка коллизий по времени
+    const isBusy =
+      existingEvents.some((ev) => {
+        if (
+          String(ev.staff_id) !==
+          String(staffId)
+        ) {
+          return false;
+        }
+
+        if (
+          String(ev.event_date) !==
+          String(date)
+        ) {
+          return false;
+        }
+
+        const evStart =
+          String(
+            ev.start_time || ""
+          ).slice(0, 5);
+
+        const evEnd =
+          String(
+            ev.end_time || ""
+          ).slice(0, 5);
+
+        return (
+          startTime < evEnd &&
+          endTime > evStart
+        );
+      });
 
     if (isBusy) {
-      alert("Цей час уже зайнятий у цього ветеринара. Оберіть інший час.");
+      alert(
+        "Цей час уже зайнятий у цього ветеринара. Оберіть інший час."
+      );
+
       return;
     }
 
-    const createdEvent =
-  await createCalendarEventApi({
-    title:
-      `${pet.name || "Пацієнт"} — ` +
-      `${notePlain || "Запис"}`,
+    if (
+      window.__calendarCreatePending
+    ) {
+      return;
+    }
 
-    event_date:
-      date,
+    window.__calendarCreatePending =
+      true;
 
-    start_time:
-      startTime,
+    try {
+      const createdEvent =
+        await createCalendarEventApi({
+          title:
+            `${pet.name || "Пацієнт"} — ` +
+            `${notePlain || "Запис"}`,
 
-    end_time:
-      endTime,
+          event_date:
+            date,
 
-    staff_id:
-      staffId,
+          start_time:
+            startTime,
 
-    patient_id:
-      pet.id,
+          end_time:
+            endTime,
 
-    owner_id:
-      pet.owner_id,
+          staff_id:
+            staffId,
 
-    visit_id:
-      null,
+          patient_id:
+            pet.id,
 
-    note:
-      notePlain || "",
+          owner_id:
+            pet.owner_id,
 
-    status:
-      "planned",
-  });
+          visit_id:
+            null,
 
-if (!createdEvent?.id) {
-  return;
-}
+          note:
+            notePlain || "",
 
-closeVisitModal();
+          status:
+            "planned",
+        });
 
-await renderCalendarTab();
+      if (!createdEvent?.id) {
+        return;
+      }
 
-openDeleteModal(
-  `
-    <b>Запис успішно створено</b>
-    <br><br>
-    Запис додано до календаря.
-    Ви можете залишити його
-    запланованим або почати
-    медичний прийом зараз.
-  `,
-  async () => {
-    await startMedicalVisitFromCalendarEvent(
-      createdEvent
-    );
-  },
-  "visit_created"
-);
+      closeVisitModal();
+
+      await renderCalendarTab();
+
+      openDeleteModal(
+        `
+          <b>Запис успішно створено</b>
+          <br><br>
+          Запис додано до календаря.
+          Ви можете залишити його
+          запланованим або почати
+          медичний прийом зараз.
+        `,
+        async () => {
+          await startMedicalVisitFromCalendarEvent(
+            createdEvent
+          );
+        },
+        "visit_created"
+      );
+    } finally {
+      window.__calendarCreatePending =
+        false;
+    }
   } catch (e) {
     console.error(e);
-    alert("Помилка: " + (e?.message || e));
+
+    alert(
+      "Помилка: " +
+      (
+        e?.message ||
+        e
+      )
+    );
   }
 });
 
