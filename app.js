@@ -34747,25 +34747,38 @@ try {
 
   const linkedCalendarEvent =
     (
-      calendarEvents || []
+      Array.isArray(
+        calendarEvents
+      )
+        ? calendarEvents
+        : []
     ).find(
       (event) =>
         String(
           event?.visit_id || ""
-        ) === vid
-    );
+        ).trim() ===
+        String(
+          vid || ""
+        ).trim()
+    ) || null;
 
   visit.calendar_event_id =
     linkedCalendarEvent?.id ||
+    visit.calendar_event_id ||
     null;
 
   visit.calendar_status =
     String(
       linkedCalendarEvent?.status ||
+      visit.calendar_status ||
       ""
     )
       .trim()
       .toLowerCase();
+
+  cacheVisits([
+    visit,
+  ]);
 } catch (error) {
   console.warn(
     "Не вдалося визначити статус календарного запису:",
@@ -34783,11 +34796,12 @@ try {
     )
       .trim()
       .toLowerCase();
+
+  cacheVisits([
+    visit,
+  ]);
 }
 
-cacheVisits([
-  visit,
-]);
 
 state.selectedVisitId =
   vid;
