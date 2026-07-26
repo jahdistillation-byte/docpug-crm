@@ -38350,29 +38350,59 @@ if (savedPetId) await renderVisits(savedPetId);
       return;
     }
 
-    const created = await createVisitApi(payload);
-    if (!created?.id) return;
+    const createdEvent =
+  await createCalendarEventApi({
+    title:
+      `${pet.name || "Пацієнт"} — ` +
+      `${notePlain || "Запис"}`,
 
-    await createCalendarEventApi({
-      title: `${pet.name || "Пацієнт"} — ${notePlain || "Візит"}`,
-      event_date: date,
-      start_time: startTime,
-      end_time: endTime,
-      staff_id: staffId,
-      patient_id: pet.id,
-      owner_id: pet.owner_id,
-      visit_id: created.id,
-      note: notePlain || "",
-      status: "planned",
-    });
+    event_date:
+      date,
 
-    const savedPetId = pet.id;
+    start_time:
+      startTime,
+
+    end_time:
+      endTime,
+
+    staff_id:
+      staffId,
+
+    patient_id:
+      pet.id,
+
+    owner_id:
+      pet.owner_id,
+
+    visit_id:
+      null,
+
+    note:
+      notePlain || "",
+
+    status:
+      "planned",
+  });
+
+if (!createdEvent?.id) {
+  return;
+}
 
 closeVisitModal();
 
-if (savedPetId) await renderVisits(savedPetId);
-    await openVisit(created.id);
-    if (state.route === "visits") renderVisitsTab();
+await renderCalendarTab();
+
+openDeleteModal(
+  `
+    <b>Запис успішно створено</b>
+    <br><br>
+    Медичний візит буде створено,
+    коли лікар натисне
+    «Почати прийом».
+  `,
+  null,
+  "info"
+);
   } catch (e) {
     console.error(e);
     alert("Помилка: " + (e?.message || e));
