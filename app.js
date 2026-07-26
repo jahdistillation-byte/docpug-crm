@@ -33465,10 +33465,64 @@ async function openVisit(visitId, opts = { pushHash: true }) {
     return;
   }
 
-  ensureVisitServicesShape(visit);
-  ensureVisitStockShape(visit);
+  ensureVisitServicesShape(
+  visit
+);
 
-  state.selectedVisitId = vid;
+ensureVisitStockShape(
+  visit
+);
+
+try {
+  const calendarEvents =
+    await loadCalendarApi();
+
+  const linkedCalendarEvent =
+    (
+      calendarEvents || []
+    ).find(
+      (event) =>
+        String(
+          event?.visit_id || ""
+        ) === vid
+    );
+
+  visit.calendar_event_id =
+    linkedCalendarEvent?.id ||
+    null;
+
+  visit.calendar_status =
+    String(
+      linkedCalendarEvent?.status ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+} catch (error) {
+  console.warn(
+    "Не вдалося визначити статус календарного запису:",
+    error
+  );
+
+  visit.calendar_event_id =
+    visit.calendar_event_id ||
+    null;
+
+  visit.calendar_status =
+    String(
+      visit.calendar_status ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+}
+
+cacheVisits([
+  visit,
+]);
+
+state.selectedVisitId =
+  vid;
 
   const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
   const pet = (patients || []).find((p) => String(p.id) === String(visit.pet_id)) || null;
@@ -34208,245 +34262,335 @@ const completeButton =
   );
 
 if (completeButton) {
+  const visitIsCompleted =
+    Boolean(
+      visit?.completed_at ||
+      visit?.closed_by ||
+      String(
+        visit?.status || ""
+      )
+        .trim()
+        .toLowerCase() ===
+        "completed"
+    );
+
+  if (visitIsCompleted) {
+    completeButton.disabled =
+      true;
+
+    completeButton.onclick =
+      null;
+
+    completeButton.textContent =
+      "✓ Візит завершено";
+
+    completeButton.title =
+      visit?.completed_at
+        ? (
+            "Візит завершено " +
+            new Date(
+              visit.completed_at
+            ).toLocaleString(
+              "uk-UA"
+            )
+          )
+        : "Цей візит уже завершено";
+
+    completeButton.classList.add(
+      "is-completed"
+    );
+
+    completeButton.style.cursor =
+      "default";
+
+    return;
+  }
+
   completeButton.disabled =
     false;
-
-  completeButton.title =
-    "Зберегти дані та завершити прийом";
-
-  completeButton.style.opacity =
-    "";
-
-  completeButton.style.cursor =
-    "";
 
   completeButton.textContent =
     "✓ Завершити візит";
 
+  completeButton.title =
+    "Зберегти дані та завершити прийом";
+
+  completeButton.classList.remove(
+    "is-completed"
+  );
+
+  completeButton.style.cursor =
+    "";
+
   completeButton.onclick =
     () => {
-      const visitId =
-        String(
-          visit?.id ||
-          state.selectedVisitId ||
-          ""
-        ).trim();
-
-      if (!visitId) {
-        openDeleteModal(
-          "Не вдалося визначити візит.",
-          null,
-          "info"
-        );
-
-        return;
-      }
-
-      openDeleteModal(
-  `
-    <b>Завершити цей візит?</b>
-    <br><br>
-    Медичні дані будуть збережені,
-    а запис у календарі отримає
-    статус «Завершено».
-  `,
-  async () => {
-    const current =
-      getVisitByIdSync(
-        visitId
-      ) ||
-      await fetchVisitById(
-        visitId
-      );
-
-    if (!current) {
-      openDeleteModal(
-        "Візит не знайдено.",
-        null,
-        "info"
-      );
-
-      return;
-    }
-
-    const diagnosis =
-      String(
-        document
-          .getElementById(
-            "visitMedDx"
-          )
-          ?.value || ""
-      ).trim();
-
-    const complaint =
-      String(
-        document
-          .getElementById(
-            "visitMedComplaint"
-          )
-          ?.value || ""
-      ).trim();
-
-    const treatment =
-      String(
-        document
-          .getElementById(
-            "visitMedRx"
-          )
-          ?.value || ""
-      ).trim();
-
-    const recommendation =
-      String(
-        document
-          .getElementById(
-            "visitClientRecommendation"
-          )
-          ?.value || ""
-      ).trim();
-
-    const weightRaw =
-      document
-        .getElementById(
-          "visitWeightDisplay"
-        )
-        ?.value;
-
-    const weight =
-      weightRaw === "" ||
-      weightRaw == null
-        ? null
-        : Number(weightRaw);
-
-    const services =
-      Array.isArray(
-        current.services
-      )
-        ? current.services
-        : [];
-
-    const stock =
-      Array.isArray(
-        current.stock
-      )
-        ? current.stock
-        : [];
-
-    completeButton.disabled =
-      true;
-
-    completeButton.textContent =
-      "Завершення…";
-
-    try {
-      const updatedVisit =
-        await updateVisitApi(
-          visitId,
-          {
-            pet_id:
-              current.pet_id,
-
-            date:
-              current.date,
-
-            weight_kg:
-              Number.isFinite(
-                weight
-              )
-                ? weight
-                : current.weight_kg,
-
-            note:
-              buildVisitNote(
-                diagnosis,
-                complaint
-              ),
-
-            rx:
-              buildVisitRx(
-                treatment,
-                recommendation
-              ),
-
-            services,
-            services_json:
-              services,
-
-            stock,
-            stock_json:
-              stock,
-          }
-        );
-
-      if (!updatedVisit) {
-        throw new Error(
-          "Не вдалося зберегти медичні дані."
-        );
-      }
-
-      const updatedEvent =
-        await syncCalendarEventStatusByVisitId(
-          visitId,
-          "completed"
-        );
-
-      if (!updatedEvent) {
-        throw new Error(
-          "Візит збережено, але не вдалося оновити календар."
-        );
-      }
-
-      const mergedVisit = {
-        ...current,
-        ...updatedVisit,
-      };
-
-      cacheVisits([
-        mergedVisit,
-      ]);
-
-      completeButton.textContent =
-        "✓ Візит завершено";
-
-      completeButton.classList.add(
-        "is-completed"
-      );
-
       openDeleteModal(
         `
-          <b>Візит завершено</b>
+          <b>Завершити цей візит?</b>
           <br><br>
-          Медичні дані збережені,
-          а календар оновлено.
+          Медичні дані будуть збережені,
+          а запис у календарі отримає
+          статус «Завершено».
         `,
-        null,
-        "info"
-      );
-    } catch (error) {
-      console.error(
-        "complete visit failed:",
-        error
-      );
+        async () => {
+          const current =
+            getVisitByIdSync(
+              visitId
+            ) ||
+            await fetchVisitById(
+              visitId
+            );
 
-      completeButton.disabled =
-        false;
+          if (!current) {
+            openDeleteModal(
+              "Візит не знайдено.",
+              null,
+              "info"
+            );
 
-      completeButton.textContent =
-        "✓ Завершити візит";
+            return;
+          }
+
+          if (
+            current.completed_at ||
+            current.closed_by ||
+            String(
+              current.status || ""
+            )
+              .trim()
+              .toLowerCase() ===
+              "completed"
+          ) {
+            completeButton.disabled =
+              true;
+
+            completeButton.onclick =
+              null;
+
+            completeButton.textContent =
+              "✓ Візит завершено";
+
+            completeButton.classList.add(
+              "is-completed"
+            );
 
             openDeleteModal(
-        escapeHtml(
-          error?.message ||
-          "Не вдалося завершити візит."
-        ),
-        null,
-        "info"
+              `
+                <b>Візит уже завершено</b>
+                <br><br>
+                Повторне завершення не потрібне.
+              `,
+              null,
+              "info"
+            );
+
+            return;
+          }
+
+          const diagnosis =
+            String(
+              document
+                .getElementById(
+                  "visitMedDx"
+                )
+                ?.value || ""
+            ).trim();
+
+          const complaint =
+            String(
+              document
+                .getElementById(
+                  "visitMedComplaint"
+                )
+                ?.value || ""
+            ).trim();
+
+          const treatment =
+            String(
+              document
+                .getElementById(
+                  "visitMedRx"
+                )
+                ?.value || ""
+            ).trim();
+
+          const recommendation =
+            String(
+              document
+                .getElementById(
+                  "visitClientRecommendation"
+                )
+                ?.value || ""
+            ).trim();
+
+          const weightRaw =
+            document
+              .getElementById(
+                "visitWeightDisplay"
+              )
+              ?.value;
+
+          const weight =
+            weightRaw === "" ||
+            weightRaw == null
+              ? null
+              : Number(
+                  weightRaw
+                );
+
+          const services =
+            Array.isArray(
+              current.services
+            )
+              ? current.services
+              : [];
+
+          const stock =
+            Array.isArray(
+              current.stock
+            )
+              ? current.stock
+              : [];
+
+          completeButton.disabled =
+            true;
+
+          completeButton.textContent =
+            "Завершення…";
+
+          try {
+            const updatedVisit =
+              await updateVisitApi(
+                visitId,
+                {
+                  pet_id:
+                    current.pet_id,
+
+                  date:
+                    current.date,
+
+                  weight_kg:
+                    Number.isFinite(
+                      weight
+                    )
+                      ? weight
+                      : current.weight_kg,
+
+                  note:
+                    buildVisitNote(
+                      diagnosis,
+                      complaint
+                    ),
+
+                  rx:
+                    buildVisitRx(
+                      treatment,
+                      recommendation
+                    ),
+
+                  services,
+                  services_json:
+                    services,
+
+                  stock,
+                  stock_json:
+                    stock,
+                }
+              );
+
+            if (!updatedVisit) {
+              throw new Error(
+                "Не вдалося зберегти медичні дані."
+              );
+            }
+
+            const updatedEvent =
+              await syncCalendarEventStatusByVisitId(
+                visitId,
+                "completed"
+              );
+
+            const refreshedVisit =
+              await fetchVisitById(
+                visitId
+              );
+
+            const mergedVisit = {
+              ...current,
+              ...updatedVisit,
+              ...refreshedVisit,
+
+              calendar_status:
+                updatedEvent?.status ||
+                "completed",
+
+              calendar_event_id:
+                updatedEvent?.id ||
+                current.calendar_event_id ||
+                null,
+            };
+
+            cacheVisits([
+              mergedVisit,
+            ]);
+
+            completeButton.disabled =
+              true;
+
+            completeButton.onclick =
+              null;
+
+            completeButton.textContent =
+              "✓ Візит завершено";
+
+            completeButton.title =
+              "Цей візит уже завершено";
+
+            completeButton.classList.add(
+              "is-completed"
+            );
+
+            completeButton.style.cursor =
+              "default";
+
+            openDeleteModal(
+              `
+                <b>Візит завершено</b>
+                <br><br>
+                Медичні дані збережені,
+                а календар оновлено.
+              `,
+              null,
+              "info"
+            );
+          } catch (error) {
+            console.error(
+              "complete visit failed:",
+              error
+            );
+
+            completeButton.disabled =
+              false;
+
+            completeButton.textContent =
+              "✓ Завершити візит";
+
+            completeButton.title =
+              "Зберегти дані та завершити прийом";
+
+            openDeleteModal(
+              escapeHtml(
+                error?.message ||
+                "Не вдалося завершити візит."
+              ),
+              null,
+              "info"
+            );
+          }
+        },
+        "complete"
       );
-    }
-  },
-  "complete"
-);
-  };
+    };
 }
 }
 
