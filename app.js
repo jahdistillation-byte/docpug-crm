@@ -30355,7 +30355,28 @@ function ensureCalendarModal() {
               </option>
             </select>
           </label>
+<label class="calEditField calEditFieldWide">
+  <span>
+    Статус запису
+  </span>
 
+  <select
+    class="calEditInput"
+    id="calEditStatus"
+  >
+    <option value="planned">
+      Заплановано
+    </option>
+
+    <option value="cancelled">
+      Скасовано
+    </option>
+
+    <option value="no_show">
+      Не з’явився
+    </option>
+  </select>
+</label>
           <label class="calEditField calEditFieldWide">
             <span>
               Причина звернення / коментар
