@@ -663,7 +663,72 @@ function openDeleteModal(
       ) {
         await action();
       }
-    };    
+    };  
+    } else if (
+  mode === "calendar_overlap"
+) {
+  if (icon) {
+    icon.textContent =
+      "⚠";
+  }
+
+  if (title) {
+    title.textContent =
+      "Перетин записів";
+  }
+
+  confirmBtn.textContent =
+    "Створити паралельно";
+
+  confirmBtn.classList.add(
+    "primary"
+  );
+
+  cancelBtn.style.display =
+    "";
+
+  cancelBtn.textContent =
+    "Обрати інший час";
+
+  confirmBtn.onclick =
+    async () => {
+      const action =
+        deleteCallback;
+
+      confirmBtn.disabled =
+        true;
+
+      cancelBtn.disabled =
+        true;
+
+      confirmBtn.textContent =
+        "Створюємо…";
+
+      try {
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
+
+        closeDeleteModal();
+      } catch (error) {
+        console.error(
+          "calendar overlap confirm failed:",
+          error
+        );
+
+        confirmBtn.disabled =
+          false;
+
+        cancelBtn.disabled =
+          false;
+
+        confirmBtn.textContent =
+          "Створити паралельно";
+      }
+    };  
     } else if (
   mode === "visit_created"
 ) {
@@ -40851,15 +40916,22 @@ if (savedPetId) await renderVisits(savedPetId);
       });
 
     if (isBusy) {
-  const allowOverlap =
-    window.confirm(
-      "У цього ветеринара вже є запис на вибраний час.\n\n" +
-      "Створити ще один запис паралельно?"
-    );
+  openDeleteModal(
+    `
+      <b>Час уже зайнятий</b>
+      <br><br>
+      У цього ветеринара вже є запис
+      на вибраний час.
+      <br><br>
+      Створити ще один запис паралельно?
+    `,
+    async () => {
+      await createCalendarAppointment();
+    },
+    "calendar_overlap"
+  );
 
-  if (!allowOverlap) {
-    return;
-  }
+  return;
 }
 
     if (
