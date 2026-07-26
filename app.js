@@ -31090,6 +31090,16 @@ if (startVisitButton) {
             ?.value || ""
         ).trim();
 
+        const status =
+  String(
+    $("#calEditStatus")
+      ?.value ||
+    ev.status ||
+    "planned"
+  )
+    .trim()
+    .toLowerCase();
+
       const title =
         String(
           $("#calEditTitle")
@@ -31487,15 +31497,16 @@ if (startVisitButton) {
 
               note,
 
-              status:
-                ev.status ||
-                "planned",
+              status,
             }
           );
 
         if (!updated) {
           return;
         }
+        ev.status =
+  updated.status ||
+  status;
 
         modal.dataset.initialState =
           JSON.stringify(
