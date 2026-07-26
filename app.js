@@ -28216,13 +28216,17 @@ const topOffset =
     endMin - startMin
   );
 
+const eventVisualGap =
+  6;
+
 const height =
   Math.max(
-    54,
+    48,
     Math.round(
       durationMinutes / 60 *
       calendarHourHeight
-    )
+    ) -
+    eventVisualGap
   );
 
                     return `
@@ -28240,7 +28244,7 @@ const height =
   left:6px;
   right:6px;
   height:${height}px;
-  min-height:54px;
+  min-height:48px;
   z-index:6;
 "
 >

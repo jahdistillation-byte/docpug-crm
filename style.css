@@ -34469,3 +34469,22 @@ body.calendarEditModalOpen {
 
   pointer-events: none;
 }
+.page[data-page="calendar"]
+.calEventCard {
+  box-sizing: border-box;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.page[data-page="calendar"]
+.calEventCard:hover {
+  z-index: 12 !important;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(255, 255, 255, 0.04);
+}
