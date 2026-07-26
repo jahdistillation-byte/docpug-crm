@@ -28163,10 +28163,23 @@ const staffSchedule =
         ${hours.map((hour) => {
           const hourStart = toMinutes(hour);
 
-          const hourEvents = docEvents.filter((ev) => {
-            const start = String(ev.start_time || "").slice(0, 5);
-            return toMinutes(start) === hourStart;
-          });
+          const hourEvents =
+  docEvents.filter((ev) => {
+    const start =
+      String(
+        ev.start_time || ""
+      ).slice(0, 5);
+
+    const startMinutes =
+      toMinutes(start);
+
+    return (
+      startMinutes >=
+        hourStart &&
+      startMinutes <
+        hourStart + 60
+    );
+  });
 
           const isCoveredByLongEvent = docEvents.some((ev) => {
             const start = toMinutes(String(ev.start_time || "").slice(0, 5));
@@ -28183,12 +28196,44 @@ const staffSchedule =
                     const end = String(ev.end_time || "").slice(0, 5);
                     const startMin = toMinutes(start);
                     const endMin = toMinutes(end || start);
-                    const durationMinutes = Math.max(60, endMin - startMin);
-                    const slots = Math.max(1, durationMinutes / 60);
-                    const height = Math.round(slots * 86 + (slots - 1) * 8 - 16);
+                    const minuteOffset =
+  Math.max(
+    0,
+    startMin - hourStart
+  );
+
+const topOffset =
+  Math.round(
+    minuteOffset / 60 * 86
+  );
+                    const durationMinutes =
+  Math.max(
+    15,
+    endMin - startMin
+  );
+
+const height =
+  Math.max(
+    54,
+    Math.round(
+      durationMinutes / 60 * 86
+    )
+  );
 
                     return `
-                      <div class="calEventCard calEventLong" data-edit-calendar-event="${escapeHtml(String(ev.id))}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}; min-height:${height}px;">
+                      <div
+  class="calEventCard calEventLong"
+  data-edit-calendar-event="${escapeHtml(
+    String(ev.id)
+  )}"
+  style="
+    border-left:5px solid ${escapeHtml(
+      doc.color || "#7C5CFF"
+    )};
+    min-height:${height}px;
+    margin-top:${topOffset}px;
+  "
+>
                         <div class="calEventTop">
                           <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
                           <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
