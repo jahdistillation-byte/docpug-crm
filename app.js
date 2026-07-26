@@ -40916,7 +40916,9 @@ if (savedPetId) await renderVisits(savedPetId);
       });
 
     const createCalendarAppointment =
-  async () => {
+  async (
+    allowOverlap = false
+  ) => {
     if (
       window.__calendarCreatePending
     ) {
@@ -40959,6 +40961,9 @@ if (savedPetId) await renderVisits(savedPetId);
 
           status:
             "planned",
+
+            allow_overlap:
+  allowOverlap,
         });
 
       if (!createdEvent?.id) {
@@ -41002,7 +41007,9 @@ if (isBusy) {
       Створити ще один запис паралельно?
     `,
     async () => {
-      await createCalendarAppointment();
+      await createCalendarAppointment(
+  true
+);
     },
     "calendar_overlap"
   );

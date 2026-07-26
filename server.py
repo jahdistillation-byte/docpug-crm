@@ -8864,24 +8864,28 @@ def api_create_calendar_event():
         silent=True
     ) or {}
 
-    title = (
+    title = str(
         d.get("title") or ""
     ).strip()
 
-    event_date = (
+    event_date = str(
         d.get("event_date") or ""
     ).strip()
 
-    start_time = (
+    start_time = str(
         d.get("start_time") or ""
-    ).strip()
+    ).strip()[:5]
 
-    end_time = (
+    end_time = str(
         d.get("end_time") or ""
-    ).strip()
+    ).strip()[:5]
 
     staff_id = d.get(
         "staff_id"
+    )
+
+    allow_overlap = bool(
+        d.get("allow_overlap")
     )
 
     if not can_manage_calendar_staff(
@@ -8891,44 +8895,132 @@ def api_create_calendar_event():
         return fail(
             "You can create calendar events only for yourself",
             403,
-        ) 
+        )
 
-    if not title or not event_date or not start_time or not end_time or not staff_id:
-        return fail("missing required fields", 400)
+    if (
+        not title
+        or not event_date
+        or not start_time
+        or not end_time
+        or not staff_id
+    ):
+        return fail(
+            "missing required fields",
+            400,
+        )
 
-    current_org = get_current_org_id()
+    if start_time >= end_time:
+        return fail(
+            "end_time must be later than start_time",
+            400,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
     existing = (
-        supabase.table("calendar_events")
+        supabase
+        .table("calendar_events")
         .select("*")
-        .eq("org_id", current_org)
-        .eq("staff_id", staff_id)
-        .eq("event_date", event_date)
+        .eq(
+            "org_id",
+            current_org,
+        )
+        .eq(
+            "staff_id",
+            staff_id,
+        )
+        .eq(
+            "event_date",
+            event_date,
+        )
         .execute()
     )
 
     for ev in existing.data or []:
-        ev_start = str(ev.get("start_time") or "")[:5]
-        ev_end = str(ev.get("end_time") or "")[:5]
-        if start_time < ev_end and end_time > ev_start:
-            return fail("time slot busy", 409)
+        ev_start = str(
+            ev.get("start_time") or ""
+        )[:5]
+
+        ev_end = str(
+            ev.get("end_time") or ""
+        )[:5]
+
+        is_overlap = (
+            start_time < ev_end
+            and end_time > ev_start
+        )
+
+        if (
+            is_overlap
+            and not allow_overlap
+        ):
+            return fail(
+                "time slot busy",
+                409,
+            )
 
     payload = {
-        "org_id": current_org,
-        "event_type": d.get("event_type") or "appointment",
-        "title": title,
-        "event_date": event_date,
-        "start_time": start_time,
-        "end_time": end_time,
-        "staff_id": staff_id,
-        "patient_id": d.get("patient_id"),
-        "owner_id": d.get("owner_id"),
-        "visit_id": d.get("visit_id"),
-        "location": d.get("location"),
-        "status": d.get("status") or "planned",
-        "note": d.get("note"),
+        "org_id":
+            current_org,
+
+        "event_type":
+            d.get("event_type")
+            or "appointment",
+
+        "title":
+            title,
+
+        "event_date":
+            event_date,
+
+        "start_time":
+            start_time,
+
+        "end_time":
+            end_time,
+
+        "staff_id":
+            staff_id,
+
+        "patient_id":
+            d.get("patient_id"),
+
+        "owner_id":
+            d.get("owner_id"),
+
+        "visit_id":
+            d.get("visit_id"),
+
+        "location":
+            d.get("location"),
+
+        "status":
+            d.get("status")
+            or "planned",
+
+        "note":
+            d.get("note"),
     }
-    res = supabase.table("calendar_events").insert(payload).execute()
-    row = res.data[0] if getattr(res, "data", None) else payload
+
+    result = (
+        supabase
+        .table("calendar_events")
+        .insert(payload)
+        .execute()
+    )
+
+    row = (
+        result.data[0]
+        if getattr(
+            result,
+            "data",
+            None,
+        )
+        else payload
+    )
+
     return ok(row)
 
 @app.delete(
