@@ -34831,69 +34831,240 @@ async function syncCalendarEventStatusByVisitId(
   nextStatus
 ) {
   const cleanVisitId =
-    String(visitId || "").trim();
+    String(
+      visitId || ""
+    ).trim();
+
+  const cleanStatus =
+    String(
+      nextStatus || ""
+    )
+      .trim()
+      .toLowerCase();
 
   if (!cleanVisitId) {
-    return null;
+    throw new Error(
+      "Не вказано ID медичного візиту."
+    );
+  }
+
+  if (!cleanStatus) {
+    throw new Error(
+      "Не вказано новий статус календаря."
+    );
   }
 
   const calendarEvents =
     await loadCalendarApi();
 
-  const linkedEvent =
-    (calendarEvents || []).find(
-      (event) =>
-        String(
-          event.visit_id || ""
-        ) === cleanVisitId
-    );
+  const allEvents =
+    Array.isArray(
+      calendarEvents
+    )
+      ? calendarEvents
+      : [];
 
-  if (!linkedEvent?.id) {
-    console.warn(
-      "Не знайдено календарний запис для візиту:",
+  const cachedVisit =
+    getVisitByIdSync(
       cleanVisitId
     );
 
-    return null;
+  const cachedCalendarEventId =
+    String(
+      cachedVisit
+        ?.calendar_event_id ||
+      ""
+    ).trim();
+
+  let linkedEvents =
+    allEvents.filter(
+      (event) =>
+        String(
+          event?.visit_id || ""
+        ).trim() ===
+        cleanVisitId
+    );
+
+  if (
+    !linkedEvents.length &&
+    cachedCalendarEventId
+  ) {
+    linkedEvents =
+      allEvents.filter(
+        (event) =>
+          String(
+            event?.id || ""
+          ).trim() ===
+          cachedCalendarEventId
+      );
   }
 
-  return await updateCalendarEventApi(
-    linkedEvent.id,
+  if (!linkedEvents.length) {
+    console.error(
+      "Не знайдено календарний запис для візиту:",
+      {
+        visitId:
+          cleanVisitId,
+
+        cachedCalendarEventId,
+
+        calendarEvents:
+          allEvents,
+      }
+    );
+
+    throw new Error(
+      (
+        "Медичні дані збережено, " +
+        "але календарний запис, " +
+        "пов’язаний із візитом, " +
+        "не знайдено."
+      )
+    );
+  }
+
+  const updatedEvents =
+    [];
+
+  for (
+    const linkedEvent
+    of linkedEvents
+  ) {
+    const updated =
+      await updateCalendarEventApi(
+        linkedEvent.id,
+        {
+          title:
+            linkedEvent.title ||
+            "Прийом",
+
+          event_date:
+            linkedEvent.event_date,
+
+          start_time:
+            linkedEvent.start_time,
+
+          end_time:
+            linkedEvent.end_time,
+
+          staff_id:
+            linkedEvent.staff_id,
+
+          patient_id:
+            linkedEvent.patient_id ||
+            null,
+
+          owner_id:
+            linkedEvent.owner_id ||
+            null,
+
+          visit_id:
+            cleanVisitId,
+
+          location:
+            linkedEvent.location ||
+            "",
+
+          note:
+            linkedEvent.note ||
+            "",
+
+          status:
+            cleanStatus,
+        }
+      );
+
+    if (!updated?.id) {
+      throw new Error(
+        (
+          "Сервер не підтвердив " +
+          "оновлення календарного запису."
+        )
+      );
+    }
+
+    const returnedStatus =
+      String(
+        updated.status || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if (
+      returnedStatus !==
+      cleanStatus
+    ) {
+      console.error(
+        "Calendar status was not saved:",
+        {
+          expected:
+            cleanStatus,
+
+          returned:
+            returnedStatus,
+
+          event:
+            updated,
+        }
+      );
+
+      throw new Error(
+        (
+          "Сервер повернув календарний запис, " +
+          "але не зберіг статус «Завершено»."
+        )
+      );
+    }
+
+    updatedEvents.push(
+      updated
+    );
+  }
+
+  const primaryEvent =
+    updatedEvents.find(
+      (event) =>
+        String(
+          event.id || ""
+        ) ===
+        cachedCalendarEventId
+    ) ||
+    updatedEvents[0];
+
+  const mergedVisit = {
+    ...(cachedVisit || {}),
+
+    calendar_event_id:
+      primaryEvent?.id ||
+      cachedCalendarEventId ||
+      null,
+
+    calendar_status:
+      cleanStatus,
+  };
+
+  cacheVisits([
+    mergedVisit,
+  ]);
+
+  console.log(
+    "Календарні записи синхронізовано:",
     {
-      title:
-        linkedEvent.title ||
-        "Прийом",
-
-      event_date:
-        linkedEvent.event_date,
-
-      start_time:
-        linkedEvent.start_time,
-
-      end_time:
-        linkedEvent.end_time,
-
-      staff_id:
-        linkedEvent.staff_id,
-
-      patient_id:
-        linkedEvent.patient_id ||
-        null,
-
-      owner_id:
-        linkedEvent.owner_id ||
-        null,
-
-      visit_id:
+      visitId:
         cleanVisitId,
 
-      note:
-        linkedEvent.note || "",
-
       status:
-        nextStatus,
+        cleanStatus,
+
+      updatedEventIds:
+        updatedEvents.map(
+          (event) =>
+            event.id
+        ),
     }
   );
+
+  return primaryEvent;
 }
 function renderVisitPage(visit, pet) {
     const visitId =
@@ -35802,30 +35973,57 @@ if (completeButton) {
             }
 
             const updatedEvent =
-              await syncCalendarEventStatusByVisitId(
-                visitId,
-                "completed"
-              );
+  await syncCalendarEventStatusByVisitId(
+    visitId,
+    "completed"
+  );
 
-            const refreshedVisit =
-              await fetchVisitById(
-                visitId
-              );
+if (
+  !updatedEvent?.id ||
+  String(
+    updatedEvent.status || ""
+  )
+    .trim()
+    .toLowerCase() !==
+    "completed"
+) {
+  throw new Error(
+    (
+      "Медичні дані збережено, " +
+      "але календар не підтвердив " +
+      "завершення прийому."
+    )
+  );
+}
+
+const refreshedVisit =
+  await fetchVisitById(
+    visitId
+  );
 
             const mergedVisit = {
-              ...current,
-              ...updatedVisit,
-              ...refreshedVisit,
+  ...current,
+  ...updatedVisit,
+  ...refreshedVisit,
 
-              calendar_status:
-                updatedEvent?.status ||
-                "completed",
+  status:
+    refreshedVisit?.status ||
+    updatedVisit?.status ||
+    current.status ||
+    "completed",
 
-              calendar_event_id:
-                updatedEvent?.id ||
-                current.calendar_event_id ||
-                null,
-            };
+  calendar_status:
+    "completed",
+
+  calendar_event_id:
+    updatedEvent.id,
+
+  completed_at:
+    refreshedVisit?.completed_at ||
+    updatedVisit?.completed_at ||
+    current.completed_at ||
+    new Date().toISOString(),
+};
 
             cacheVisits([
               mergedVisit,
