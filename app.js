@@ -32306,7 +32306,80 @@ function formatVisitTextPremium(value, fallback = "Не вказано") {
     </ul>
   `;
 }
+function getPatientVisitVisualStatus(
+  visit,
+  linkedEvent = null
+) {
+  const visitStatus =
+    String(
+      visit?.status || ""
+    )
+      .trim()
+      .toLowerCase();
 
+  const eventStatus =
+    String(
+      linkedEvent?.status ||
+      visit?.calendar_status ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const isCompleted =
+    Boolean(
+      visit?.completed_at ||
+      visit?.closed_by
+    ) ||
+    [
+      "completed",
+      "done",
+      "finished",
+    ].includes(visitStatus) ||
+    [
+      "completed",
+      "done",
+      "finished",
+    ].includes(eventStatus);
+
+  if (isCompleted) {
+    return {
+      key: "completed",
+      label: "Завершено",
+      cardClass:
+        "premiumVisitCardCompleted",
+      badgeClass:
+        "premiumVisitStatusCompleted",
+    };
+  }
+
+  const isInProgress =
+    [
+      "in_progress",
+      "active",
+      "started",
+    ].includes(eventStatus);
+
+  if (isInProgress) {
+    return {
+      key: "in_progress",
+      label: "У процесі",
+      cardClass:
+        "premiumVisitCardInProgress",
+      badgeClass:
+        "premiumVisitStatusInProgress",
+    };
+  }
+
+  return {
+    key: "planned",
+    label: "Заплановано",
+    cardClass:
+      "premiumVisitCardPlanned",
+    badgeClass:
+      "premiumVisitStatusPlanned",
+  };
+}
 async function renderVisits(petId) {
   const box = $("#patientTabContent");
   if (!box) return;
@@ -32315,6 +32388,43 @@ async function renderVisits(petId) {
 
   const visits = await getVisitsByPetId(petId);
   cacheVisits(visits);
+
+    let calendarEvents = [];
+
+  try {
+    calendarEvents =
+      typeof loadCalendarApi ===
+      "function"
+        ? await loadCalendarApi()
+        : [];
+  } catch (error) {
+    console.warn(
+      "Не вдалося завантажити календарні події для статусів візитів:",
+      error
+    );
+    calendarEvents = [];
+  }
+
+  const eventByVisitId =
+    new Map();
+
+  (calendarEvents || []).forEach(
+    (event) => {
+      const linkedVisitId =
+        String(
+          event?.visit_id || ""
+        ).trim();
+
+      if (!linkedVisitId) {
+        return;
+      }
+
+      eventByVisitId.set(
+        linkedVisitId,
+        event
+      );
+    }
+  );
 
   if (!visits.length) {
     box.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки візитів немає. Натисніть "+ Новий візит".</div>`;
@@ -32364,13 +32474,52 @@ if (!cardEl) {
 
 cardEl.dataset.openVisit = String(v.id);
 
-const dateEl = clone.querySelector(".v-date");
-const dxEl = clone.querySelector(".v-dx");
-const priceEl = clone.querySelector(".v-price-badge");
-const complaintEl = clone.querySelector(".v-complaint");
-const rxContainer = clone.querySelector(".v-rx-container");
-const rxEl = clone.querySelector(".v-rx");
-const deleteButton = clone.querySelector(".v-del-btn");
+const linkedEvent =
+  eventByVisitId.get(
+    String(v.id)
+  ) || null;
+
+const visitVisualStatus =
+  getPatientVisitVisualStatus(
+    v,
+    linkedEvent
+  );
+
+cardEl.classList.add(
+  visitVisualStatus.cardClass
+);
+
+const dateEl =
+  clone.querySelector(".v-date");
+
+const dxEl =
+  clone.querySelector(".v-dx");
+
+const statusBadgeEl =
+  clone.querySelector(
+    ".v-status-badge"
+  );
+
+const priceEl =
+  clone.querySelector(
+    ".v-price-badge"
+  );
+
+const complaintEl =
+  clone.querySelector(
+    ".v-complaint"
+  );
+
+const rxContainer =
+  clone.querySelector(
+    ".v-rx-container"
+  );
+
+const rxEl =
+  clone.querySelector(".v-rx");
+
+const deleteButton =
+  clone.querySelector(".v-del-btn");
 
 if (dateEl) {
   dateEl.textContent = formatVisitDatePremium(v.date);
@@ -32385,6 +32534,13 @@ if (priceEl) {
     grandTotal > 0
       ? `${grandTotal.toLocaleString("uk-UA")} ₴`
       : "Без оплати";
+}
+if (statusBadgeEl) {
+  statusBadgeEl.textContent =
+    visitVisualStatus.label;
+
+  statusBadgeEl.className =
+    `v-status-badge premiumVisitStatus ${visitVisualStatus.badgeClass}`;
 }
 
 if (complaintEl) {
