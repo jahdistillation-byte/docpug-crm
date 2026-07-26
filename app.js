@@ -41163,8 +41163,7 @@ const isInsideWorkingHours =
   );
 
 const isOutsideShift =
-  !isDoctorOnShift ||
-  !isInsideWorkingHours;
+  !isDoctorOnShift;
     const createCalendarAppointment =
   async (
     allowOverlap = false
