@@ -30989,6 +30989,27 @@ async function openCalendarEditModal(
 
   $("#calEditNote").value =
     ev.note || "";
+const statusSelect =
+  $("#calEditStatus");
+
+if (statusSelect) {
+  const currentStatus =
+    String(
+      event.status ||
+      "planned"
+    ).trim();
+
+  statusSelect.value =
+    [
+      "planned",
+      "cancelled",
+      "no_show",
+    ].includes(
+      currentStatus
+    )
+      ? currentStatus
+      : "planned";
+}
 
   modal.dataset.initialState =
     JSON.stringify(
