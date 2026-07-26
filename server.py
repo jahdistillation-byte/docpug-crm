@@ -11102,19 +11102,62 @@ def api_delete_visit(
         return ok(data)
 
     except Exception as error:
-        print(
-            "❌ Delete visit with stock restore:",
-            repr(error),
-            flush=True,
-        )
+        error_text = str(error)
 
-        return fail(
+    error_details = getattr(
+        error,
+        "details",
+        None,
+    )
+
+    error_message = getattr(
+        error,
+        "message",
+        None,
+    )
+
+    error_code = getattr(
+        error,
+        "code",
+        None,
+    )
+
+    print(
+        "❌ Delete visit with stock restore",
+        {
+            "visit_id": visit_id,
+            "org_id": current_org,
+            "user_id": current_user_id,
+            "error": repr(error),
+            "message": error_message,
+            "details": error_details,
+            "code": error_code,
+        },
+        flush=True,
+    )
+
+    return jsonify({
+        "ok": False,
+
+        "error":
             (
                 "Не вдалося видалити візит "
                 "та повернути препарати на склад."
             ),
-            500
-        )
+
+        "debug": {
+            "message":
+                error_message or
+                error_text,
+
+            "details":
+                error_details,
+
+            "code":
+                error_code,
+        },
+    }), 500
+        
 
 # =========================
 # API: UPLOAD FILES

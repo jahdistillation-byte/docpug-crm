@@ -2859,24 +2859,26 @@ async function deleteVisitApi(
     } catch {}
 
     if (!response.ok) {
-      console.error(
-        "API /visits DELETE HTTP",
-        response.status,
-        text
-      );
+  console.error(
+    "API /visits DELETE HTTP",
+    response.status,
+    text
+  );
 
-      openDeleteModal(
-        `
-          Не вдалося видалити візит.
-          Помилка сервера:
-          HTTP ${response.status}.
-        `,
-        null,
-        "info"
-      );
+  openDeleteModal(
+    escapeHtml(
+      json?.error ||
+      (
+        "Не вдалося видалити візит. " +
+        `HTTP ${response.status}.`
+      )
+    ),
+    null,
+    "info"
+  );
 
-      return false;
-    }
+  return false;
+}
 
     if (
       !json ||
@@ -37486,38 +37488,48 @@ function initOwnerUI() {
 // VISITS TAB UI — Глобальный журнал визитов
 // =========================
 function initVisitsTabUI() {
-  const page = $(`.page[data-page="visits"]`);
-  if (!page) return;
+  const page =
+    document.querySelector(
+      '.page[data-page="visits"]'
+    );
 
-  page.addEventListener("click", async (e) => {
-    const del = e.target.closest("[data-del-visit]");
-    if (del) {
-      e.preventDefault(); e.stopPropagation();
-      const visitId = del.dataset.delVisit;
-      if (!visitId) return;
+  if (
+    !page ||
+    page.dataset
+      .visitsUiBound === "1"
+  ) {
+    return;
+  }
 
-      if (!confirm("Видалити візит назавжди?")) return;
+  page.dataset.visitsUiBound =
+    "1";
 
-      const ok = await deleteVisitApi(visitId);
-      if (!ok) return alert("Не вдалося видалити візит.");
+  page.addEventListener(
+    "click",
+    async (event) => {
+      const openButton =
+        event.target.closest(
+          "[data-open-visit]"
+        );
 
-      try {
-        const arr = await loadVisitsApi();
-        state.visits = arr;
-        cacheVisits(arr);
-      } catch {}
+      if (!openButton) {
+        return;
+      }
 
-      renderVisitsTab();
-      return;
+      event.preventDefault();
+      event.stopPropagation();
+
+      const visitId =
+        openButton.dataset
+          .openVisit;
+
+      if (visitId) {
+        openVisit(
+          visitId
+        );
+      }
     }
-
-    const btn = e.target.closest("[data-open-visit]");
-    if (btn) {
-      e.preventDefault(); e.stopPropagation();
-      const visitId = btn.dataset.openVisit;
-      if (visitId) openVisit(visitId);
-    }
-  });
+  );
 }
 
 function closeVisitModal() {
