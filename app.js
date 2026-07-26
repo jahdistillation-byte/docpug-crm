@@ -29014,22 +29014,32 @@ function ensureCalendarModal() {
       </div>
 
       <footer class="calEditFooter">
-        <button
-          class="calEditCancel"
-          type="button"
-          data-close-calendar-modal
-        >
-          Скасувати
-        </button>
+  <button
+    class="calEditCancel"
+    type="button"
+    data-close-calendar-modal
+  >
+    Скасувати
+  </button>
 
-        <button
-          class="calEditSave"
-          id="calEditSaveBtn"
-          type="button"
-        >
-          Зберегти зміни
-        </button>
-      </footer>
+  <div class="calEditFooterActions">
+    <button
+      class="calEditStart"
+      id="calEditStartVisitBtn"
+      type="button"
+    >
+      ▶ Почати прийом
+    </button>
+
+    <button
+      class="calEditSave"
+      id="calEditSaveBtn"
+      type="button"
+    >
+      Зберегти зміни
+    </button>
+  </div>
+</footer>
     </section>
   `;
 
@@ -29402,7 +29412,263 @@ async function openCalendarEditModal(
   document.body.classList.add(
     "calendarEditModalOpen"
   );
+const startVisitButton =
+  $("#calEditStartVisitBtn");
 
+if (startVisitButton) {
+  const existingVisitId =
+    String(
+      ev.visit_id || ""
+    ).trim();
+
+  startVisitButton.textContent =
+    existingVisitId
+      ? "↗ Відкрити прийом"
+      : "▶ Почати прийом";
+
+  startVisitButton.onclick =
+    async () => {
+      if (
+        startVisitButton.disabled
+      ) {
+        return;
+      }
+
+      if (ev.visit_id) {
+        modal.dataset.initialState =
+          JSON.stringify(
+            modal
+              ._getCalendarEditState()
+          );
+
+        modal
+          ._closeCalendarEditModal();
+
+        await openVisit(
+          ev.visit_id
+        );
+
+        return;
+      }
+
+      const patientId =
+        String(
+          ev.patient_id || ""
+        ).trim();
+
+      const staffId =
+        String(
+          $("#calEditStaff")
+            ?.value || ""
+        ).trim();
+
+      const eventDate =
+        String(
+          $("#calEditDate")
+            ?.value || ""
+        ).trim();
+
+      const note =
+        String(
+          $("#calEditNote")
+            ?.value || ""
+        ).trim();
+
+      const title =
+        String(
+          $("#calEditTitle")
+            ?.value || ""
+        ).trim();
+
+      const startTime =
+        String(
+          $("#calEditStart")
+            ?.value || ""
+        ).trim();
+
+      const duration =
+        Number(
+          $("#calEditDuration")
+            ?.value || 60
+        );
+
+      if (!patientId) {
+        openDeleteModal(
+          "До запису не прив’язаний пацієнт.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      if (!staffId) {
+        openDeleteModal(
+          "Оберіть ветеринара.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      if (!eventDate) {
+        openDeleteModal(
+          "Оберіть дату прийому.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      if (!note) {
+        openDeleteModal(
+          "Вкажіть причину звернення.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      const endTime =
+        addMinutesToTime(
+          startTime,
+          duration
+        );
+
+      startVisitButton.disabled =
+        true;
+
+      startVisitButton.textContent =
+        "Створення прийому…";
+
+      try {
+        const createdVisit =
+          await createVisitApi({
+            pet_id:
+              patientId,
+
+            staff_id:
+              staffId,
+
+            date:
+              eventDate,
+
+            note,
+
+            rx:
+              "",
+
+            weight_kg:
+              "",
+
+            services:
+              [],
+
+            services_json:
+              [],
+
+            stock:
+              [],
+
+            stock_json:
+              [],
+          });
+
+        if (!createdVisit?.id) {
+          return;
+        }
+
+        const updatedEvent =
+          await updateCalendarEventApi(
+            ev.id,
+            {
+              title:
+                title ||
+                ev.title ||
+                "Прийом",
+
+              event_date:
+                eventDate,
+
+              start_time:
+                startTime,
+
+              end_time:
+                endTime,
+
+              staff_id:
+                staffId,
+
+              patient_id:
+                patientId,
+
+              owner_id:
+                ev.owner_id ||
+                null,
+
+              visit_id:
+                createdVisit.id,
+
+              note,
+
+              status:
+                "in_progress",
+            }
+          );
+
+        if (!updatedEvent) {
+          openDeleteModal(
+            `
+              Медичний візит створено,
+              але не вдалося прив’язати
+              його до календаря.
+            `,
+            null,
+            "info"
+          );
+
+          return;
+        }
+
+        ev.visit_id =
+          createdVisit.id;
+
+        ev.status =
+          "in_progress";
+
+        modal.dataset.initialState =
+          JSON.stringify(
+            modal
+              ._getCalendarEditState()
+          );
+
+        modal
+          ._closeCalendarEditModal();
+
+        if (
+          typeof onSaved ===
+          "function"
+        ) {
+          await onSaved();
+        }
+
+        await openVisit(
+          createdVisit.id
+        );
+      } finally {
+        startVisitButton.disabled =
+          false;
+
+        startVisitButton.textContent =
+          ev.visit_id
+            ? "↗ Відкрити прийом"
+            : "▶ Почати прийом";
+      }
+    };
+}
   const saveButton =
     $("#calEditSaveBtn");
 
