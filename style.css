@@ -34488,3 +34488,705 @@ body.calendarEditModalOpen {
     0 12px 30px rgba(0, 0, 0, 0.28),
     0 0 18px rgba(255, 255, 255, 0.04);
 }
+/* ==========================================================
+   PUGCRM — CONTINUOUS DAY TIMELINE
+   ========================================================== */
+
+.page[data-page="calendar"]
+.calendarDayGrid {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 0;
+
+  padding: 0;
+  overflow: auto;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 20px;
+
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeColumn {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+
+  min-width: 68px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12, 10, 20, 0.93),
+      rgba(12, 10, 20, 0.86)
+    );
+
+  border-right:
+    1px solid
+    rgba(255, 255, 255, 0.075);
+
+  backdrop-filter: blur(18px);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeHead {
+  height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeBody {
+  position: relative;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeLabel {
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  transform: translateY(-7px);
+
+  padding-right: 11px;
+
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  line-height: 14px;
+
+  pointer-events: none;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorsTimelineGrid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(245px, 1fr);
+
+  min-width: max-content;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineColumn {
+  min-width: 245px;
+
+  border-right:
+    1px solid
+    rgba(255, 255, 255, 0.06);
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineColumn:last-child {
+  border-right: 0;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  height: 82px;
+  padding: 13px 15px;
+
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-content: center;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.018)
+    );
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.page[data-page="calendar"]
+.calendarDoctorAvatar {
+  grid-row: 1 / 3;
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 850;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--doctor-color) 20%,
+      rgba(255, 255, 255, 0.035)
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--doctor-color) 42%,
+      transparent
+    );
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.07);
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity {
+  min-width: 0;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity strong {
+  display: block;
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.91);
+  font-size: 13px;
+  font-weight: 780;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity span {
+  display: block;
+  margin-top: 3px;
+
+  color: rgba(255, 255, 255, 0.37);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorSpecializations {
+  grid-column: 2;
+  min-width: 0;
+  margin-top: 5px;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimeline {
+  position: relative;
+
+  cursor: crosshair;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012),
+      transparent 50%,
+      rgba(255, 255, 255, 0.012)
+    );
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimeline:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018),
+      rgba(255, 255, 255, 0.006),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimeline.is-drag-over {
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 6%,
+      transparent
+    );
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHourLine,
+.page[data-page="calendar"]
+.calendarTimelineHalfLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  pointer-events: none;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHourLine {
+  height: 1px;
+
+  background:
+    rgba(255, 255, 255, 0.065);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHalfLine {
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 50%,
+      transparent 50%
+    );
+
+  background-size:
+    8px 1px;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHover {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  z-index: 3;
+
+  height: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  transform:
+    translateY(-13px);
+
+  color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 78%,
+      white
+    );
+
+  font-size: 10px;
+  font-weight: 800;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 9%,
+      transparent
+    );
+
+  border:
+    1px dashed
+    color-mix(
+      in srgb,
+      var(--accent-color, #a855f7) 35%,
+      transparent
+    );
+
+  border-radius: 8px;
+
+  pointer-events: none;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHover[hidden] {
+  display: none;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHover span {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  z-index: 7;
+
+  min-height: 42px;
+  padding: 9px 30px 9px 12px;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.88);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.07),
+      rgba(255, 255, 255, 0.035)
+    );
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.095);
+
+  border-radius: 11px;
+
+  box-shadow:
+    0 8px 20px
+      rgba(0, 0, 0, 0.17),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.045);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent:hover {
+  z-index: 14;
+
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(255, 255, 255, 0.16);
+
+  box-shadow:
+    0 12px 26px
+      rgba(0, 0, 0, 0.24),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.065);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventAccent {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 5px;
+
+  width: 3px;
+
+  border-radius: 99px;
+
+  background:
+    var(
+      --doctor-color,
+      var(--accent-color, #a855f7)
+    );
+
+  opacity: 0.82;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventContent {
+  padding-left: 4px;
+  min-width: 0;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventHead {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTime {
+  min-width: 0;
+  flex: 1;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.43);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.015em;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTitle {
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.25;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventNote {
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 9px;
+  font-weight: 550;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineStatus {
+  min-height: 18px;
+  padding: 0 6px;
+
+  display: inline-flex;
+  align-items: center;
+
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarStatusPlanned {
+  color: rgba(223, 211, 247, 0.75);
+
+  background:
+    rgba(168, 85, 247, 0.08);
+
+  border:
+    1px solid
+    rgba(168, 85, 247, 0.15);
+}
+
+.page[data-page="calendar"]
+.calendarStatusInProgress {
+  color: #f4d074;
+
+  background:
+    rgba(245, 158, 11, 0.08);
+
+  border:
+    1px solid
+    rgba(245, 158, 11, 0.18);
+}
+
+.page[data-page="calendar"]
+.calendarStatusCompleted {
+  color: #73dda2;
+
+  background:
+    rgba(34, 197, 94, 0.075);
+
+  border:
+    1px solid
+    rgba(34, 197, 94, 0.16);
+}
+
+.page[data-page="calendar"]
+.calendarCardInProgress {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(245, 158, 11, 0.075),
+      rgba(255, 255, 255, 0.032)
+    );
+
+  border-color:
+    rgba(245, 158, 11, 0.16);
+}
+
+.page[data-page="calendar"]
+.calendarCardCompleted {
+  opacity: 0.72;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 197, 94, 0.055),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  border-color:
+    rgba(34, 197, 94, 0.13);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventMenu {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+
+  width: 21px;
+  height: 21px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: -1px;
+
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+
+  opacity: 0;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent:hover
+.calendarTimelineEventMenu {
+  opacity: 1;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventMenu:hover {
+  color: #ff8f99;
+  background:
+    rgba(255, 75, 90, 0.1);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-compact {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-compact
+.calendarTimelineEventNote {
+  display: none;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineStatus {
+  display: none;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineEventTitle {
+  margin-top: 1px;
+  font-size: 10px;
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineTimeColumn {
+  background:
+    rgba(242, 245, 250, 0.92);
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  background:
+    rgba(255, 255, 255, 0.52);
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarDoctorTimeline {
+  background:
+    rgba(255, 255, 255, 0.19);
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineHourLine {
+  background:
+    rgba(26, 29, 38, 0.075);
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineHalfLine {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(26, 29, 38, 0.035) 50%,
+      transparent 50%
+    );
+
+  background-size:
+    8px 1px;
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineTimeLabel {
+  color:
+    rgba(26, 29, 38, 0.42);
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineEvent {
+  color: #1c1c1e;
+
+  background:
+    rgba(255, 255, 255, 0.8);
+
+  border-color:
+    rgba(26, 29, 38, 0.09);
+
+  box-shadow:
+    0 5px 16px
+      rgba(43, 47, 58, 0.09),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.95);
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineEventTitle {
+  color: #25252b;
+}
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineEventTime,
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineEventNote {
+  color:
+    rgba(37, 37, 43, 0.48);
+}

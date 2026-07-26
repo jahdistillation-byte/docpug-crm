@@ -28119,39 +28119,570 @@ const staffSchedule =
     );
 };
 
-    $$("[data-month-date]").forEach((cell) => {
-      cell.addEventListener("click", () => {
-        const date = cell.dataset.monthDate;
-        if (!date) return;
+    $$("[data-month-date]").forEach(
+  (cell) => {
+    cell.addEventListener(
+      "click",
+      () => {
+        const date =
+          cell.dataset.monthDate;
 
-        $$("[data-month-date]").forEach((x) => x.classList.remove("selected"));
-        cell.classList.add("selected");
+        if (!date) {
+          return;
+        }
 
-        openMonthShiftDrawer(date);
-      });
-    });
+        $$(
+          "[data-month-date]"
+        ).forEach(
+          (item) => {
+            item.classList.remove(
+              "selected"
+            );
+          }
+        );
 
-    return;
+        cell.classList.add(
+          "selected"
+        );
+
+        openMonthShiftDrawer(
+          date
+        );
+      }
+    );
   }
+);
 
-  const hours = [];
-  for (let h = 7; h <= 24; h++) {
-    hours.push(String(h).padStart(2, "0") + ":00");
-  }
+return;
+}
 
-  const staffHtml = staffOnShift.map((doc) => {
-    const docEvents = todayEvents.filter((e) => String(e.staff_id || "") === String(doc.id));
+const calendarDayStartHour =
+  7;
 
-    const toMinutes = (t) => {
-      const [h, m] = String(t || "00:00").split(":").map(Number);
-      return (h || 0) * 60 + (m || 0);
-    };
+const calendarDayEndHour =
+  24;
 
-    return `
-      <div class="calDoctorCol">
-        <div class="calDoctorHead" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-          <div class="calDoctorName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-          <div class="calDoctorMeta">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")} · ${docEvents.length} записів</div>
+const calendarHourHeight =
+  72;
+
+const calendarDayStartMinutes =
+  calendarDayStartHour * 60;
+
+const calendarDayEndMinutes =
+  calendarDayEndHour * 60;
+
+const calendarTimelineHeight =
+  (
+    calendarDayEndHour -
+    calendarDayStartHour
+  ) *
+  calendarHourHeight;
+
+const hours = [];
+
+for (
+  let hour =
+    calendarDayStartHour;
+  hour <=
+    calendarDayEndHour;
+  hour += 1
+) {
+  hours.push(
+    String(hour)
+      .padStart(
+        2,
+        "0"
+      ) +
+    ":00"
+  );
+}
+
+const toMinutes = (
+  value
+) => {
+  const [
+    hoursValue,
+    minutesValue,
+  ] =
+    String(
+      value || "00:00"
+    )
+      .split(":")
+      .map(Number);
+
+  return (
+    (
+      Number(
+        hoursValue
+      ) ||
+      0
+    ) *
+      60 +
+    (
+      Number(
+        minutesValue
+      ) ||
+      0
+    )
+  );
+};
+
+const getEventLayout = (
+  event
+) => {
+  const startText =
+    String(
+      event?.start_time ||
+      ""
+    ).slice(
+      0,
+      5
+    );
+
+  const endText =
+    String(
+      event?.end_time ||
+      event?.start_time ||
+      ""
+    ).slice(
+      0,
+      5
+    );
+
+  const rawStart =
+    toMinutes(
+      startText
+    );
+
+  const rawEnd =
+    toMinutes(
+      endText
+    );
+
+  const startMinutes =
+    Math.max(
+      calendarDayStartMinutes,
+      Math.min(
+        rawStart,
+        calendarDayEndMinutes
+      )
+    );
+
+  const endMinutes =
+    Math.max(
+      startMinutes + 15,
+      Math.min(
+        rawEnd,
+        calendarDayEndMinutes
+      )
+    );
+
+  const top =
+    (
+      startMinutes -
+      calendarDayStartMinutes
+    ) /
+      60 *
+    calendarHourHeight;
+
+  const naturalHeight =
+    (
+      endMinutes -
+      startMinutes
+    ) /
+      60 *
+    calendarHourHeight;
+
+  const visualGap =
+    5;
+
+  const height =
+    Math.max(
+      42,
+      naturalHeight -
+      visualGap
+    );
+
+  return {
+    startText,
+    endText,
+    startMinutes,
+    endMinutes,
+    top,
+    height,
+  };
+};
+
+const staffHtml =
+  staffOnShift
+    .map(
+      (doc) => {
+        const docEvents =
+          todayEvents
+            .filter(
+              (event) =>
+                String(
+                  event.staff_id ||
+                  ""
+                ) ===
+                String(
+                  doc.id
+                )
+            )
+            .slice()
+            .sort(
+              (
+                first,
+                second
+              ) =>
+                toMinutes(
+                  first.start_time
+                ) -
+                toMinutes(
+                  second.start_time
+                )
+            );
+
+        const eventsHtml =
+          docEvents
+            .map(
+              (event) => {
+                const layout =
+                  getEventLayout(
+                    event
+                  );
+
+                const visualStatus =
+                  getCalendarEventVisualStatus(
+                    event
+                  );
+
+                const title =
+                  String(
+                    event.title ||
+                    "Прийом"
+                  );
+
+                const note =
+                  String(
+                    event.note ||
+                    ""
+                  ).trim();
+
+                const compactClass =
+                  layout.height <
+                  64
+                    ? "is-compact"
+                    : "";
+
+                const tinyClass =
+                  layout.height <
+                  50
+                    ? "is-tiny"
+                    : "";
+
+                return `
+                  <article
+                    class="
+                      calendarTimelineEvent
+                      ${visualStatus.cardClass}
+                      ${compactClass}
+                      ${tinyClass}
+                    "
+                    data-edit-calendar-event="${escapeHtml(
+                      String(
+                        event.id
+                      )
+                    )}"
+                    style="
+                      --doctor-color:${escapeHtml(
+                        doc.color ||
+                        "#7C5CFF"
+                      )};
+                      top:${layout.top}px;
+                      height:${layout.height}px;
+                    "
+                  >
+                    <div
+                      class="calendarTimelineEventAccent"
+                    ></div>
+
+                    <div
+                      class="calendarTimelineEventContent"
+                    >
+                      <div
+                        class="calendarTimelineEventHead"
+                      >
+                        <div
+                          class="calendarTimelineEventTime"
+                        >
+                          ${escapeHtml(
+                            layout.startText
+                          )}
+                          —
+                          ${escapeHtml(
+                            layout.endText
+                          )}
+                        </div>
+
+                        <span
+                          class="
+                            calendarTimelineStatus
+                            ${visualStatus.badgeClass}
+                          "
+                        >
+                          ${escapeHtml(
+                            visualStatus.label
+                          )}
+                        </span>
+                      </div>
+
+                      <div
+                        class="calendarTimelineEventTitle"
+                      >
+                        ${escapeHtml(
+                          title
+                        )}
+                      </div>
+
+                      ${
+                        note
+                          ? `
+                            <div
+                              class="calendarTimelineEventNote"
+                            >
+                              ${escapeHtml(
+                                note
+                              )}
+                            </div>
+                          `
+                          : ""
+                      }
+                    </div>
+
+                    <button
+                      type="button"
+                      class="calendarTimelineEventMenu"
+                      data-del-calendar-event="${escapeHtml(
+                        String(
+                          event.id
+                        )
+                      )}"
+                      title="Видалити запис"
+                      aria-label="Видалити запис"
+                    >
+                      ···
+                    </button>
+                  </article>
+                `;
+              }
+            )
+            .join("");
+
+        const hourLines =
+          Array.from(
+            {
+              length:
+                calendarDayEndHour -
+                calendarDayStartHour +
+                1,
+            },
+            (
+              _,
+              index
+            ) => {
+              const top =
+                index *
+                calendarHourHeight;
+
+              return `
+                <div
+                  class="calendarTimelineHourLine"
+                  style="top:${top}px"
+                ></div>
+              `;
+            }
+          ).join("");
+
+        const halfHourLines =
+          Array.from(
+            {
+              length:
+                calendarDayEndHour -
+                calendarDayStartHour,
+            },
+            (
+              _,
+              index
+            ) => {
+              const top =
+                index *
+                  calendarHourHeight +
+                calendarHourHeight /
+                  2;
+
+              return `
+                <div
+                  class="calendarTimelineHalfLine"
+                  style="top:${top}px"
+                ></div>
+              `;
+            }
+          ).join("");
+
+        return `
+          <section
+            class="calendarDoctorTimelineColumn"
+            data-calendar-doctor-column
+            data-staff-id="${escapeHtml(
+              String(
+                doc.id
+              )
+            )}"
+            data-staff-name="${escapeHtml(
+              doc.name ||
+              ""
+            )}"
+          >
+            <header
+              class="calendarDoctorTimelineHead"
+            >
+              <div
+                class="calendarDoctorAvatar"
+                style="
+                  --doctor-color:${escapeHtml(
+                    doc.color ||
+                    "#7C5CFF"
+                  )}
+                "
+              >
+                ${escapeHtml(
+                  String(
+                    doc.name ||
+                    "В"
+                  )
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase() ||
+                  "В"
+                )}
+              </div>
+
+              <div
+                class="calendarDoctorTimelineIdentity"
+              >
+                <strong>
+                  ${escapeHtml(
+                    doc.name ||
+                    "Працівник"
+                  )}
+                </strong>
+
+                <span>
+                  ${escapeHtml(
+                    doc.role ===
+                    "assistant"
+                      ? "Асистент"
+                      : "Ветеринар"
+                  )}
+                  ·
+                  ${docEvents.length}
+                  ${
+                    docEvents.length ===
+                    1
+                      ? "запис"
+                      : "записів"
+                  }
+                </span>
+              </div>
+
+              <div
+                class="calendarDoctorSpecializations"
+              >
+                ${renderStaffSpecializationTags(
+                  doc,
+                  "calStaffSpecialization"
+                )}
+              </div>
+            </header>
+
+            <div
+              class="calendarDoctorTimeline"
+              data-calendar-timeline
+              data-staff-id="${escapeHtml(
+                String(
+                  doc.id
+                )
+              )}"
+              style="
+                height:${calendarTimelineHeight}px
+              "
+            >
+              ${hourLines}
+              ${halfHourLines}
+
+              <div
+                class="calendarTimelineHover"
+                hidden
+              >
+                <span>＋</span>
+                <b></b>
+              </div>
+
+              ${eventsHtml}
+            </div>
+          </section>
+        `;
+      }
+    )
+    .join("");
+
+const staffPaletteHtml =
+  staffOnShift
+    .map(
+      (doc) => `
+        <div
+          class="calStaffDrag"
+          draggable="true"
+          data-drag-staff-id="${escapeHtml(
+            String(
+              doc.id
+            )
+          )}"
+          data-drag-staff-name="${escapeHtml(
+            doc.name ||
+            ""
+          )}"
+          data-drag-staff-color="${escapeHtml(
+            doc.color ||
+            "#7C5CFF"
+          )}"
+          style="
+            border-left:
+              5px solid
+              ${escapeHtml(
+                doc.color ||
+                "#7C5CFF"
+              )}
+          "
+        >
+          <div class="calStaffDragName">
+            👨‍⚕️
+            ${escapeHtml(
+              doc.name ||
+              "Працівник"
+            )}
+          </div>
+
+          <div class="calStaffDragRole">
+            ${escapeHtml(
+              doc.role ===
+              "assistant"
+                ? "Асистент"
+                : "Ветеринар"
+            )}
+          </div>
+
           <div class="calStaffSpecializations">
             ${renderStaffSpecializationTags(
               doc,
@@ -28159,185 +28690,176 @@ const staffSchedule =
             )}
           </div>
         </div>
+      `
+    )
+    .join("");
 
-        ${hours.map((hour) => {
-          const hourStart = toMinutes(hour);
+page.innerHTML = `
+  <div class="card calendarCard">
+    <div class="calendarHeader">
+      <div>
+        <h2>
+          Календар
+        </h2>
 
-          const hourEvents =
-  docEvents.filter((ev) => {
-    const start =
-      String(
-        ev.start_time || ""
-      ).slice(0, 5);
-
-    const startMinutes =
-      toMinutes(start);
-
-    return (
-      startMinutes >=
-        hourStart &&
-      startMinutes <
-        hourStart + 60
-    );
-  });
-
-          const isCoveredByLongEvent = docEvents.some((ev) => {
-            const start = toMinutes(String(ev.start_time || "").slice(0, 5));
-            const end = toMinutes(String(ev.end_time || "").slice(0, 5));
-            return start < hourStart && end > hourStart;
-          });
-
-          return `
-            <div class="calSlot ${isCoveredByLongEvent ? "calSlotCovered" : ""}" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}" data-staff-name="${escapeHtml(doc.name || "")}">
-              ${
-                hourEvents.length
-                  ? hourEvents.map((ev) => {
-                    const start = String(ev.start_time || "").slice(0, 5);
-                    const end = String(ev.end_time || "").slice(0, 5);
-                    const startMin = toMinutes(start);
-                    const endMin = toMinutes(end || start);
-                    const minuteOffset =
-  Math.max(
-    0,
-    startMin - hourStart
-  );
-
-const calendarHourHeight =
-  89;
-
-const topOffset =
-  Math.round(
-    minuteOffset / 60 *
-    calendarHourHeight
-  );
-                    const durationMinutes =
-  Math.max(
-    15,
-    endMin - startMin
-  );
-
-const eventVisualGap =
-  6;
-
-const height =
-  Math.max(
-    48,
-    Math.round(
-      durationMinutes / 60 *
-      calendarHourHeight
-    ) -
-    eventVisualGap
-  );
-
-                    return `
-                      <div
-  class="calEventCard calEventLong"
-  data-edit-calendar-event="${escapeHtml(
-    String(ev.id)
-  )}"
-  style="
-  border-left:5px solid ${escapeHtml(
-    doc.color || "#7C5CFF"
-  )};
-  position:absolute;
-  top:${topOffset}px;
-  left:6px;
-  right:6px;
-  height:${height}px;
-  min-height:48px;
-  z-index:6;
-"
->
-                        <div class="calEventTop">
-                          <div class="calEventTitle">${escapeHtml(ev.title || "Запис")}</div>
-                          <button class="calEventDelete" data-del-calendar-event="${escapeHtml(String(ev.id))}" type="button">×</button>
-                        </div>
-                        <div class="calEventTime">${escapeHtml(start)}${end ? `— ${escapeHtml(end)}` : ""}</div>
-                        ${ev.note ? `<div class="calEventMeta">📝 ${escapeHtml(ev.note)}</div>` : ""}
-                        ${ev.location ? `<div class="calEventMeta">📍 ${escapeHtml(ev.location)}</div>` : ""}
-                      </div>
-                    `;
-                  }).join("")
-                  : isCoveredByLongEvent
-                    ? ""
-                    : `<div class="calEmptySlot" data-empty-slot="1" data-hour="${escapeHtml(hour)}" data-staff-id="${escapeHtml(String(doc.id))}">+ Запис</div>`
-              }
-            </div>
-          `;
-        }).join("")}
+        <div class="hint">
+          Натисніть на потрібний час
+          або перетягніть ветеринара
+          на часову шкалу.
+        </div>
       </div>
-    `;
-  }).join("");
 
-  const staffPaletteHtml = staffOnShift.map((doc) => `
-    <div class="calStaffDrag" draggable="true" data-drag-staff-id="${escapeHtml(doc.id)}" data-drag-staff-name="${escapeHtml(doc.name || "")}" data-drag-staff-color="${escapeHtml(doc.color || "#7C5CFF")}" style="border-left:5px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-      <div class="calStaffDragName">👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}</div>
-      <div class="calStaffDragRole">${escapeHtml(doc.role === "assistant" ? "Асистент" : "Ветеринар")}</div>
-      <div class="calStaffSpecializations">
-        ${renderStaffSpecializationTags(
-          doc,
-          "calStaffSpecialization"
+      <div class="calendarModes">
+        <button
+          class="primary"
+          data-cal-mode="day"
+          type="button"
+        >
+          День
+        </button>
+
+        <button
+          class="ghost"
+          data-cal-mode="week"
+          type="button"
+        >
+          Тиждень
+        </button>
+
+        <button
+          class="ghost"
+          data-cal-mode="month"
+          type="button"
+        >
+          Місяць
+        </button>
+      </div>
+    </div>
+
+    <div class="calendarTop">
+      <button
+        class="ghost"
+        id="calPrevDay"
+        type="button"
+      >
+        ←
+      </button>
+
+      <div class="calendarDate">
+        ${escapeHtml(
+          today
         )}
       </div>
-    </div>
-  `).join("");
 
-  page.innerHTML = `
-    <div class="card calendarCard">
-      <div class="calendarHeader">
-        <div>
-          <h2>Календар</h2>
-          <div class="hint">Перетягни ветеринара справа на потрібний час.</div>
-        </div>
-
-        <div class="calendarModes">
-          <button class="primary" data-cal-mode="day">День</button>
-          <button class="ghost" data-cal-mode="week">Тиждень</button>
-          <button class="ghost" data-cal-mode="month">Місяць</button>
-        </div>
-      </div>
-
-      <div class="calendarTop">
-        <button class="ghost" id="calPrevDay" type="button">←</button>
-        <div class="calendarDate">${escapeHtml(today)}</div>
-        <button class="ghost" id="calNextDay" type="button">→</button>
-      </div>
-
-      <div class="calendarWorkArea">
-  <div class="calendarMainArea">
-    <div class="calTopScroll" id="calTopScroll">
-      <div class="calTopScrollInner" id="calTopScrollInner"></div>
+      <button
+        class="ghost"
+        id="calNextDay"
+        type="button"
+      >
+        →
+      </button>
     </div>
 
-    <div class="calendarDayGrid" id="calendarDayGrid">
-          <div class="calTimeCol">
-            <div class="calTimeHead">Час</div>
-            ${hours.map((h) => `<div class="calTime">${escapeHtml(h)}</div>`).join("")}
+    <div class="calendarWorkArea">
+      <div class="calendarMainArea">
+        <div
+          class="calTopScroll"
+          id="calTopScroll"
+        >
+          <div
+            class="calTopScrollInner"
+            id="calTopScrollInner"
+          ></div>
+        </div>
+
+        <div
+          class="calendarDayGrid"
+          id="calendarDayGrid"
+        >
+          <div
+            class="calendarTimelineTimeColumn"
+          >
+            <div
+              class="calendarTimelineTimeHead"
+            >
+              Час
+            </div>
+
+            <div
+              class="calendarTimelineTimeBody"
+              style="
+                height:${calendarTimelineHeight}px
+              "
+            >
+              ${hours
+                .map(
+                  (
+                    hour,
+                    index
+                  ) => `
+                    <div
+                      class="calendarTimelineTimeLabel"
+                      style="
+                        top:${
+                          index *
+                          calendarHourHeight
+                        }px
+                      "
+                    >
+                      ${escapeHtml(
+                        hour
+                      )}
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
           </div>
 
-          <div class="calDoctorsGrid">
-            ${staffHtml || `<div class="hint">Ветеринарів поки немає.</div>`}
-          </div>
+          <div
+            class="calendarDoctorsTimelineGrid"
+          >
+            ${
+              staffHtml ||
+              `
+                <div class="hint">
+                  Ветеринарів поки немає.
                 </div>
+              `
+            }
+          </div>
+        </div>
       </div>
 
       <aside class="calStaffPanel">
-          <div class="calStaffPanelHead">
-            <div>
-              <div class="calStaffPanelTitle">Ветеринари</div>
-              <div class="calStaffPanelSub">Перетягни в слот</div>
+        <div class="calStaffPanelHead">
+          <div>
+            <div class="calStaffPanelTitle">
+              Ветеринари
+            </div>
+
+            <div class="calStaffPanelSub">
+              Перетягніть на часову шкалу
             </div>
           </div>
+        </div>
 
-          <div class="calStaffDragList">
-            ${staffPaletteHtml || `<div class="hint">Немає співробітників.</div>`}
-          </div>
-        </aside>
-      </div>
+        <div class="calStaffDragList">
+          ${
+            staffPaletteHtml ||
+            `
+              <div class="hint">
+                Немає співробітників.
+              </div>
+            `
+          }
+        </div>
+      </aside>
     </div>
-  `;
-  initCalendarTopScroll();
+  </div>
+`;
 
+initCalendarTopScroll();
   $$(".calStaffDrag").forEach((card) => {
     card.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", JSON.stringify({
@@ -28354,65 +28876,346 @@ const height =
     });
   });
 
-  $$(".calSlot").forEach((slot) => {
-    slot.addEventListener("click", (e) => {
-      if (slot.classList.contains("calSlotCovered")) return;
-      if (slot.querySelector(".calEventCard")) return;
+  $$("[data-calendar-timeline]")
+  .forEach(
+    (timeline) => {
+      const hover =
+        timeline.querySelector(
+          ".calendarTimelineHover"
+        );
 
-      const target = e.target.closest("[data-empty-slot]") || slot;
-      const hour = target.dataset.hour || slot.dataset.hour;
-      const staffId = target.dataset.staffId || slot.dataset.staffId;
+      const hoverTime =
+        hover?.querySelector("b");
 
-      if (!hour || !staffId) return;
+      const staffId =
+        String(
+          timeline.dataset
+            .staffId ||
+          ""
+        );
 
-      openVisitFromCalendar(hour, staffId);
-    });
+      const getTimeFromPointer = (
+        event
+      ) => {
+        const rect =
+          timeline
+            .getBoundingClientRect();
 
-    slot.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      slot.classList.add("calSlotDrop");
-    });
+        const localY =
+          Math.max(
+            0,
+            Math.min(
+              event.clientY -
+                rect.top,
+              rect.height
+            )
+          );
 
-    slot.addEventListener("dragleave", () => {
-      slot.classList.remove("calSlotDrop");
-    });
+        const rawMinutes =
+          calendarDayStartMinutes +
+          localY /
+            calendarHourHeight *
+            60;
 
-    slot.addEventListener("drop", async (e) => {
-      e.preventDefault();
-      slot.classList.remove("calSlotDrop");
+        const roundedMinutes =
+          Math.round(
+            rawMinutes / 15
+          ) * 15;
 
-      let data = null;
+        const safeMinutes =
+          Math.max(
+            calendarDayStartMinutes,
+            Math.min(
+              roundedMinutes,
+              calendarDayEndMinutes -
+                15
+            )
+          );
 
-      try {
-        data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}");
-      } catch {
-        return;
-      }
+        const hoursValue =
+          Math.floor(
+            safeMinutes / 60
+          );
 
-      const staffId = data.staff_id;
-      if (!staffId) return;
+        const minutesValue =
+          safeMinutes % 60;
 
-      const hour = slot.dataset.hour;
-      const title = (prompt(`Запис на ${hour}. Назва:`, "Новий прийом") || "").trim();
-      if (!title) return;
+        return {
+          minutes:
+            safeMinutes,
 
-      const durationRaw = prompt("Тривалість у хвилинах:", "60") || "60";
-      const duration = Math.max(15, Number(durationRaw) || 60);
-      const endTime = addMinutesToTime(hour, duration);
-      const note = (prompt("Коментар:", "") || "").trim();
+          time:
+            `${String(
+              hoursValue
+            ).padStart(
+              2,
+              "0"
+            )}:${String(
+              minutesValue
+            ).padStart(
+              2,
+              "0"
+            )}`,
 
-      const created = await createCalendarEventApi({
-        title,
-        event_date: today,
-        start_time: hour,
-        end_time: endTime,
-        staff_id: staffId,
-        note,
-      });
+          top:
+            (
+              safeMinutes -
+              calendarDayStartMinutes
+            ) /
+            60 *
+            calendarHourHeight,
+        };
+      };
 
-      if (created) await renderCalendarTab();
-    });
-  });
+      timeline.addEventListener(
+        "mousemove",
+        (event) => {
+          if (
+            event.target.closest(
+              "[data-edit-calendar-event]"
+            )
+          ) {
+            if (hover) {
+              hover.hidden =
+                true;
+            }
+
+            return;
+          }
+
+          const pointerTime =
+            getTimeFromPointer(
+              event
+            );
+
+          if (hover) {
+            hover.hidden =
+              false;
+
+            hover.style.top =
+              `${pointerTime.top}px`;
+          }
+
+          if (hoverTime) {
+            hoverTime.textContent =
+              pointerTime.time;
+          }
+        }
+      );
+
+      timeline.addEventListener(
+        "mouseleave",
+        () => {
+          if (hover) {
+            hover.hidden =
+              true;
+          }
+        }
+      );
+
+      timeline.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target.closest(
+              "[data-edit-calendar-event]"
+            ) ||
+            event.target.closest(
+              "[data-del-calendar-event]"
+            )
+          ) {
+            return;
+          }
+
+          const pointerTime =
+            getTimeFromPointer(
+              event
+            );
+
+          if (
+            !staffId ||
+            !pointerTime.time
+          ) {
+            return;
+          }
+
+          openVisitFromCalendar(
+            pointerTime.time,
+            staffId
+          );
+        }
+      );
+
+      timeline.addEventListener(
+        "dragover",
+        (event) => {
+          event.preventDefault();
+
+          timeline.classList.add(
+            "is-drag-over"
+          );
+
+          const pointerTime =
+            getTimeFromPointer(
+              event
+            );
+
+          if (hover) {
+            hover.hidden =
+              false;
+
+            hover.style.top =
+              `${pointerTime.top}px`;
+          }
+
+          if (hoverTime) {
+            hoverTime.textContent =
+              pointerTime.time;
+          }
+        }
+      );
+
+      timeline.addEventListener(
+        "dragleave",
+        (event) => {
+          if (
+            timeline.contains(
+              event.relatedTarget
+            )
+          ) {
+            return;
+          }
+
+          timeline.classList.remove(
+            "is-drag-over"
+          );
+
+          if (hover) {
+            hover.hidden =
+              true;
+          }
+        }
+      );
+
+      timeline.addEventListener(
+        "drop",
+        async (event) => {
+          event.preventDefault();
+
+          timeline.classList.remove(
+            "is-drag-over"
+          );
+
+          if (hover) {
+            hover.hidden =
+              true;
+          }
+
+          let dragData =
+            null;
+
+          try {
+            dragData =
+              JSON.parse(
+                event.dataTransfer
+                  .getData(
+                    "text/plain"
+                  ) ||
+                "{}"
+              );
+          } catch {
+            return;
+          }
+
+          const droppedStaffId =
+            String(
+              dragData?.staff_id ||
+              staffId ||
+              ""
+            );
+
+          if (!droppedStaffId) {
+            return;
+          }
+
+          const pointerTime =
+            getTimeFromPointer(
+              event
+            );
+
+          const title =
+            (
+              prompt(
+                `Запис на ${pointerTime.time}. Назва:`,
+                "Новий прийом"
+              ) ||
+              ""
+            ).trim();
+
+          if (!title) {
+            return;
+          }
+
+          const durationRaw =
+            prompt(
+              "Тривалість у хвилинах:",
+              "60"
+            ) ||
+            "60";
+
+          const duration =
+            Math.max(
+              15,
+              Number(
+                durationRaw
+              ) ||
+              60
+            );
+
+          const endTime =
+            addMinutesToTime(
+              pointerTime.time,
+              duration
+            );
+
+          const note =
+            (
+              prompt(
+                "Коментар:",
+                ""
+              ) ||
+              ""
+            ).trim();
+
+          const created =
+            await createCalendarEventApi({
+              title,
+
+              event_date:
+                today,
+
+              start_time:
+                pointerTime.time,
+
+              end_time:
+                endTime,
+
+              staff_id:
+                droppedStaffId,
+
+              note,
+
+              status:
+                "planned",
+            });
+
+          if (created) {
+            await renderCalendarTab();
+          }
+        }
+      );
+    }
+  );
 
   $("#calPrevDay")?.addEventListener("click", async () => {
     const d = new Date(today);
