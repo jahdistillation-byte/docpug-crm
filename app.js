@@ -27037,35 +27037,123 @@ function getPetSpeciesKey(pet) {
 }
 
 async function loadStaffApi() {
-  try {
-    const res = await fetch("/api/staff");
-    const json = await res.json();
+  const maxAttempts = 3;
 
-    if (!json.ok) {
-      throw new Error(json.error || "Cannot load staff");
+  const delays = [
+    0,
+    700,
+    1500,
+  ];
+
+  let lastError = null;
+
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt++
+  ) {
+    if (delays[attempt - 1]) {
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            delays[attempt - 1]
+          )
+      );
     }
 
-    const items =
-      Array.isArray(json.items)
-        ? json.items
-        : Array.isArray(json.data)
-        ? json.data
-        : [];
+    try {
+      const response =
+        await fetch(
+          "/api/staff",
+          {
+            method: "GET",
 
-    // <<< ВОТ ЭТОГО НЕ ХВАТАЛО
-    state.staff = items;
+            credentials:
+              "include",
 
-    return items;
+            cache:
+              "no-store",
 
-  } catch (e) {
-    console.error("loadStaffApi failed:", e);
+            headers: {
+              Accept:
+                "application/json",
 
-    state.staff = [];
+              ...getOrgHeaders(),
+            },
+          }
+        );
 
-    alert("Не вдалося завантажити ветеринарів: " + (e?.message || e));
+      const text =
+        await response.text();
 
-    return [];
+      let json = null;
+
+      try {
+        json =
+          text
+            ? JSON.parse(text)
+            : null;
+      } catch {
+        json = null;
+      }
+
+      if (
+        !response.ok ||
+        json?.ok !== true
+      ) {
+        throw new Error(
+          json?.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      const items =
+        Array.isArray(
+          json.items
+        )
+          ? json.items
+          : Array.isArray(
+              json.data
+            )
+            ? json.data
+            : [];
+
+      state.staff =
+        items;
+
+      if (attempt > 1) {
+        console.info(
+          `loadStaffApi restored on attempt ${attempt}`
+        );
+      }
+
+      return items;
+
+    } catch (error) {
+      lastError =
+        error;
+
+      console.warn(
+        `loadStaffApi attempt ${attempt}/${maxAttempts} failed:`,
+        error
+      );
+    }
   }
+
+  console.error(
+    "loadStaffApi failed after retries:",
+    lastError
+  );
+
+  const cachedStaff =
+    Array.isArray(
+      state.staff
+    )
+      ? state.staff
+      : [];
+
+  return cachedStaff;
 }
 
 async function loadCalendarApi() {
@@ -31107,6 +31195,8 @@ if (startVisitButton) {
           $("#calEditNote")
             ?.value || ""
         ).trim();
+
+        
 
         const status =
   String(
