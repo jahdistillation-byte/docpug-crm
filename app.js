@@ -27304,26 +27304,18 @@ async function renderCalendarTab() {
     </div>
   `;
 
-  const staff =
-  await loadStaffApi();
-
-await new Promise(
-  (resolve) =>
-    setTimeout(resolve, 150)
-);
-
-const events =
-  await loadCalendarApi();
-
-await new Promise(
-  (resolve) =>
-    setTimeout(resolve, 150)
-);
-
-const staffSchedule =
-  await loadStaffScheduleApi(
-    today
-  );
+  const [
+  staff,
+  events,
+  staffSchedule,
+] =
+  await Promise.all([
+    loadStaffApi(),
+    loadCalendarApi(),
+    loadStaffScheduleApi(
+      today
+    ),
+  ]);
 
   const activeStaffIds = new Set(
     staffSchedule
