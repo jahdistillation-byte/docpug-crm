@@ -28186,9 +28186,30 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: translateY(-1px);
 }
 
+.financeOperationCancelButton:hover {
+  color: #ff8aa1;
+
+  border-color:
+    rgba(255, 112, 141, 0.38);
+
+  background:
+    rgba(255, 112, 141, 0.09);
+
+  transform: translateY(-1px);
+}
+
 .financeOperationActions button:disabled {
   opacity: 0.45;
   cursor: wait;
+}
+
+.deleteModalOverlay.is-payment-cancel
+  .deleteIcon {
+  color: #ff8aa1;
+  border-color:
+    rgba(255, 112, 141, 0.28);
+  background:
+    rgba(255, 112, 141, 0.1);
 }
 
 @media (max-width: 720px) {

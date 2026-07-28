@@ -5161,6 +5161,152 @@ def api_finance_transactions_list():
             "Не вдалося завантажити фінансові операції.",
             500,
         )    
+
+
+@app.post(
+    "/api/finance/transactions/<transaction_id>/cancel"
+)
+def api_finance_transaction_cancel(
+    transaction_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        uuid.UUID(
+            str(transaction_id)
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+        return fail(
+            "Некоректний платіж.",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    reason = str(
+        data.get("reason")
+        or ""
+    ).strip()
+
+    if len(reason) > 500:
+        return fail(
+            "Причина скасування надто довга.",
+            400,
+        )
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "cancel_visit_payment",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_transaction_id":
+                        transaction_id,
+
+                    "p_user_id":
+                        user.get("id"),
+
+                    "p_reason":
+                        (
+                            reason
+                            or None
+                        ),
+                },
+            )
+            .execute()
+        )
+
+        response_data = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                response_data,
+                list,
+            )
+            and response_data
+        ):
+            response_data = (
+                response_data[0]
+            )
+
+        return ok(
+            response_data
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        )
+
+        lowered_error = (
+            error_text.lower()
+        )
+
+        print(
+            "❌ POST cancel visit payment:",
+            repr(error),
+            flush=True,
+        )
+
+        if (
+            "not found"
+            in lowered_error
+        ):
+            return fail(
+                "Платіж не знайдено.",
+                404,
+            )
+
+        if (
+            "already cancelled"
+            in lowered_error
+            or "only completed"
+            in lowered_error
+            or "only visit payments"
+            in lowered_error
+        ):
+            return fail(
+                "Цей платіж вже не можна скасувати.",
+                409,
+            )
+
+        return fail(
+            "Не вдалося скасувати платіж.",
+            500,
+        )
     
 @app.get(
     "/api/finance/expenses/overview"

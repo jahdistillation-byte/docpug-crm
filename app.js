@@ -578,7 +578,8 @@ function openDeleteModal(
   );
 
   modal.classList.remove(
-    "is-success"
+    "is-success",
+    "is-payment-cancel"
   );
 
   confirmBtn.disabled =
@@ -906,6 +907,76 @@ function openDeleteModal(
       () => {
         closeDeleteModal();
       };
+  } else if (
+    mode === "payment-cancel"
+  ) {
+    modal.classList.add(
+      "is-payment-cancel"
+    );
+
+    if (icon) {
+      icon.textContent =
+        "↩";
+    }
+
+    if (title) {
+      title.textContent =
+        "Скасування платежу";
+    }
+
+    confirmBtn.textContent =
+      "Скасувати платіж";
+
+    confirmBtn.classList.add(
+      "btnDanger"
+    );
+
+    cancelBtn.textContent =
+      "Залишити платіж";
+
+    confirmBtn.onclick =
+      async () => {
+        const action =
+          deleteCallback;
+
+        confirmBtn.disabled =
+          true;
+
+        cancelBtn.disabled =
+          true;
+
+        confirmBtn.textContent =
+          "Скасовуємо…";
+
+        try {
+          if (
+            typeof action ===
+            "function"
+          ) {
+            await action();
+          }
+
+          closeDeleteModal();
+        } catch (error) {
+          console.error(
+            "cancel payment failed:",
+            error
+          );
+
+          textEl.textContent =
+            error?.message ||
+            "Не вдалося скасувати платіж.";
+
+          confirmBtn.disabled =
+            false;
+
+          cancelBtn.disabled =
+            false;
+
+          confirmBtn.textContent =
+            "Скасувати платіж";
+        }
+      };
   } else if (mode === "info") {
     if (icon) {
       icon.textContent =
@@ -986,7 +1057,8 @@ function closeDeleteModal() {
       "none";
 
     modal.classList.remove(
-      "is-success"
+      "is-success",
+      "is-payment-cancel"
     );
   }
 
@@ -12638,6 +12710,58 @@ async function createFinanceTransactionApi(
   return result.data;
 }
 
+async function cancelFinancePaymentApi(
+  transactionId
+) {
+  const response =
+    await fetch(
+      (
+        "/api/finance/transactions/" +
+        encodeURIComponent(
+          transactionId
+        ) +
+        "/cancel"
+      ),
+      {
+        method: "POST",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify({
+            reason:
+              "Скасовано з фінансового журналу",
+          }),
+      }
+    );
+
+  let result = null;
+
+  try {
+    result =
+      await response.json();
+
+  } catch {
+    result = null;
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося скасувати платіж."
+    );
+  }
+
+  return result.data;
+}
+
 
 function openFinanceExpenseModal() {
   if (
@@ -13637,6 +13761,16 @@ async function renderFinanceOperationsTab(
                             .className ===
                           "is-outcome";
 
+                        const canCancelPayment =
+                          transaction
+                            .transaction_type ===
+                            "payment" &&
+                          transaction.status ===
+                            "completed" &&
+                          Boolean(
+                            transaction.visit_id
+                          );
+
                         const sign =
                           isOutcome
                             ? "−"
@@ -13723,7 +13857,8 @@ async function renderFinanceOperationsTab(
 
                               ${
   transaction.visit_id ||
-  documentUrl
+  documentUrl ||
+  canCancelPayment
     ? `
       <div class="financeOperationActions">
         ${
@@ -13753,6 +13888,25 @@ async function renderFinanceOperationsTab(
                 )}"
               >
                 🧾 Відкрити чек
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          canCancelPayment
+            ? `
+              <button
+                type="button"
+                class="financeOperationCancelButton"
+                data-finance-cancel-payment="${escapeHtml(
+                  transaction.id
+                )}"
+                data-finance-cancel-amount="${escapeHtml(
+                  transaction.amount
+                )}"
+              >
+                ↩ Скасувати платіж
               </button>
             `
             : ""
@@ -13863,6 +14017,56 @@ async function renderFinanceOperationsTab(
         event.target.closest(
           "[data-finance-open-visit]"
         );
+
+      const cancelButton =
+        event.target.closest(
+          "[data-finance-cancel-payment]"
+        );
+
+      if (cancelButton) {
+        const transactionId =
+          String(
+            cancelButton.dataset
+              .financeCancelPayment ||
+            ""
+          ).trim();
+
+        const amount =
+          Number(
+            cancelButton.dataset
+              .financeCancelAmount ||
+            0
+          );
+
+        if (!transactionId) {
+          return;
+        }
+
+        openDeleteModal(
+          (
+            "Платіж на суму <strong>" +
+            escapeHtml(
+              formatVisitFinanceMoney(
+                amount
+              )
+            ) +
+            "</strong> буде скасовано. " +
+            "Баланс клієнта та каси " +
+            "перерахуються автоматично. " +
+            "Запис залишиться у журналі."
+          ),
+          async () => {
+            await cancelFinancePaymentApi(
+              transactionId
+            );
+
+            await renderFinanceTab();
+          },
+          "payment-cancel"
+        );
+
+        return;
+      }
 
       if (visitButton) {
         const visitId =
