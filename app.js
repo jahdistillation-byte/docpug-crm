@@ -4681,6 +4681,144 @@ function calcStockTotal(visit) {
   return expandStockLines(visit).reduce((sum, x) => sum + (Number(x?.lineTotal) || 0), 0);
 }
 
+function captureVisitMedicalDraft(
+  visitId =
+    state.selectedVisitId
+) {
+  const complaint =
+    document.getElementById(
+      "visitMedComplaint"
+    );
+
+  const diagnosis =
+    document.getElementById(
+      "visitMedDx"
+    );
+
+  const treatment =
+    document.getElementById(
+      "visitMedRx"
+    );
+
+  const recommendation =
+    document.getElementById(
+      "visitClientRecommendation"
+    );
+
+  const weight =
+    document.getElementById(
+      "visitWeightDisplay"
+    );
+
+  if (
+    !complaint &&
+    !diagnosis &&
+    !treatment &&
+    !recommendation &&
+    !weight
+  ) {
+    return null;
+  }
+
+  return {
+    visitId:
+      String(visitId || ""),
+
+    complaint:
+      complaint?.value ?? "",
+
+    diagnosis:
+      diagnosis?.value ?? "",
+
+    treatment:
+      treatment?.value ?? "",
+
+    recommendation:
+      recommendation?.value ?? "",
+
+    weight:
+      weight?.value ?? "",
+  };
+}
+
+function restoreVisitMedicalDraft(
+  draft,
+  visitId =
+    state.selectedVisitId
+) {
+  if (
+    !draft ||
+    String(draft.visitId || "") !==
+      String(visitId || "")
+  ) {
+    return;
+  }
+
+  const fields = [
+    [
+      "visitMedComplaint",
+      draft.complaint,
+    ],
+    [
+      "visitMedDx",
+      draft.diagnosis,
+    ],
+    [
+      "visitMedRx",
+      draft.treatment,
+    ],
+    [
+      "visitClientRecommendation",
+      draft.recommendation,
+    ],
+    [
+      "visitWeightDisplay",
+      draft.weight,
+    ],
+  ];
+
+  fields.forEach(
+    ([fieldId, value]) => {
+      const field =
+        document.getElementById(
+          fieldId
+        );
+
+      if (field) {
+        field.value =
+          value ?? "";
+      }
+    }
+  );
+}
+
+function renderVisitPagePreservingMedicalDraft(
+  visit,
+  pet
+) {
+  const visitId =
+    String(
+      visit?.id ||
+      state.selectedVisitId ||
+      ""
+    );
+
+  const draft =
+    captureVisitMedicalDraft(
+      visitId
+    );
+
+  renderVisitPage(
+    visit,
+    pet
+  );
+
+  restoreVisitMedicalDraft(
+    draft,
+    visitId
+  );
+}
+
 async function refreshVisitUIIfOpen() {
   if (state.route !== "visit" || !state.selectedVisitId) return;
 
@@ -4689,7 +4827,10 @@ async function refreshVisitUIIfOpen() {
   if (!v) return;
 
   const pet = state.selectedPet || loadPatients().find((p) => p.id === v.pet_id) || null;
-  renderVisitPage(v, pet);
+  renderVisitPagePreservingMedicalDraft(
+    v,
+    pet
+  );
   renderDischargeA4(state.selectedVisitId);
 }
 
@@ -36480,7 +36621,7 @@ if (e.target.closest("#visitSvcAdd")) {
 
   if (!visit) return;
 
-  renderVisitPage(
+  renderVisitPagePreservingMedicalDraft(
     visit,
     state.selectedPet
   );
@@ -36536,7 +36677,7 @@ if (svcDel) {
     getVisitByIdSync(vid);
 
   if (fresh) {
-    renderVisitPage(
+    renderVisitPagePreservingMedicalDraft(
       fresh,
       state.selectedPet
     );
@@ -36602,7 +36743,7 @@ if (e.target.closest("#visitStkAdd")) {
     getVisitByIdSync(vid);
 
   if (fresh) {
-    renderVisitPage(
+    renderVisitPagePreservingMedicalDraft(
       fresh,
       state.selectedPet
     );
@@ -36637,7 +36778,10 @@ if (e.target.closest("#visitStkAdd")) {
 
         const fresh = getVisitByIdSync(vid);
         if (fresh) {
-          renderVisitPage(fresh, state.selectedPet);
+          renderVisitPagePreservingMedicalDraft(
+            fresh,
+            state.selectedPet
+          );
           if (typeof renderDischargeA4 === "function") renderDischargeA4(vid);
         }
         return;
