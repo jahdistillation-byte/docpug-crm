@@ -63,6 +63,50 @@ class TransientReadSupabase:
         )
 
 
+class TransientRpcQuery:
+    def __init__(
+        self,
+        client,
+        rpc_name,
+        arguments,
+    ):
+        self.client = client
+        self.rpc_name = rpc_name
+        self.arguments = arguments
+
+    def execute(self):
+        self.client.attempts += 1
+
+        if self.client.attempts < 3:
+            raise OSError(
+                11,
+                "Resource temporarily unavailable",
+            )
+
+        self.client.rpc_name = self.rpc_name
+        self.client.arguments = self.arguments
+        self.data = {
+            "summary": {
+                "payments": 0,
+            },
+        }
+        return self
+
+
+class TransientRpcSupabase:
+    def __init__(self):
+        self.attempts = 0
+        self.rpc_name = None
+        self.arguments = None
+
+    def rpc(self, rpc_name, arguments):
+        return TransientRpcQuery(
+            self,
+            rpc_name,
+            arguments,
+        )
+
+
 class TransientReadRetryTests(unittest.TestCase):
     def setUp(self):
         self.client = server.app.test_client()
@@ -136,6 +180,60 @@ class TransientReadRetryTests(unittest.TestCase):
         self.assertIn(
             ("patient_id", "pet-1"),
             fake.filters,
+        )
+        self.assertEqual(
+            sleep_mock.call_count,
+            2,
+        )
+
+    def test_finance_overview_recovers_after_errno_11(self):
+        fake = TransientRpcSupabase()
+
+        with (
+            patch.object(
+                server,
+                "get_current_user",
+                return_value={
+                    "id": "user-1",
+                    "org_id": "org-1",
+                    "role": "owner",
+                    "is_active": True,
+                },
+            ),
+            patch.object(
+                server,
+                "get_current_org_id",
+                return_value="org-1",
+            ),
+            patch.object(
+                server,
+                "supabase",
+                fake,
+            ),
+            patch.object(
+                server.time,
+                "sleep",
+            ) as sleep_mock,
+        ):
+            response = self.client.get(
+                "/api/finance/overview"
+                "?date_from=2026-07-28"
+                "&date_to=2026-07-28"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(fake.attempts, 3)
+        self.assertEqual(
+            fake.rpc_name,
+            "get_finance_overview",
+        )
+        self.assertEqual(
+            fake.arguments["p_date_from"],
+            "2026-07-28",
+        )
+        self.assertEqual(
+            fake.arguments["p_date_to"],
+            "2026-07-28",
         )
         self.assertEqual(
             sleep_mock.call_count,

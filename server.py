@@ -3584,22 +3584,25 @@ def api_finance_overview():
                 400
             )
 
-        result = (
-            supabase
-            .rpc(
-                "get_finance_overview",
-                {
-                    "p_org_id":
-                        current_org,
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .rpc(
+                    "get_finance_overview",
+                    {
+                        "p_org_id":
+                            current_org,
 
-                    "p_date_from":
-                        date_from.isoformat(),
+                        "p_date_from":
+                            date_from.isoformat(),
 
-                    "p_date_to":
-                        date_to.isoformat(),
-                }
-            )
-            .execute()
+                        "p_date_to":
+                            date_to.isoformat(),
+                    }
+                )
+            ),
+            attempts=4,
+            delay=0.35,
         )
 
         overview = (
@@ -5125,22 +5128,25 @@ def api_finance_expenses_overview():
         )
 
     try:
-        result = (
-            supabase
-            .rpc(
-                "get_finance_expenses_overview",
-                {
-                    "p_org_id":
-                        current_org,
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .rpc(
+                    "get_finance_expenses_overview",
+                    {
+                        "p_org_id":
+                            current_org,
 
-                    "p_date_from":
-                        date_from.isoformat(),
+                        "p_date_from":
+                            date_from.isoformat(),
 
-                    "p_date_to":
-                        date_to.isoformat(),
-                }
-            )
-            .execute()
+                        "p_date_to":
+                            date_to.isoformat(),
+                    }
+                )
+            ),
+            attempts=4,
+            delay=0.35,
         )
 
         overview = (
