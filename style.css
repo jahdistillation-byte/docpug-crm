@@ -37970,3 +37970,164 @@ html body .hospitalTaskCreateButton {
   box-shadow:
     0 12px 28px var(--module-accent-glow) !important;
 }
+
+/* =========================================================
+   DARK THEMES — LIQUID GLASS DOCK
+   Purple and marble-white keep their established treatment.
+   ========================================================= */
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .mac-dock {
+  overflow: hidden;
+  isolation: isolate;
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--finance-accent) 24%,
+      rgba(255, 255, 255, 0.14)
+    ) !important;
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, 0.32),
+    0 2px 8px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.035) !important;
+  backdrop-filter:
+    blur(34px)
+    saturate(138%) !important;
+  -webkit-backdrop-filter:
+    blur(34px)
+    saturate(138%) !important;
+}
+
+body[data-theme="black"] .mac-dock {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.095),
+      rgba(255, 255, 255, 0.025)
+    ),
+    rgba(30, 31, 29, 0.58) !important;
+}
+
+body[data-theme="blue"] .mac-dock {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.022)
+    ),
+    rgba(14, 31, 45, 0.58) !important;
+}
+
+body[data-theme="green"] .mac-dock {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.022)
+    ),
+    rgba(14, 33, 26, 0.58) !important;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .mac-dock::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      ellipse at 18% 0%,
+      rgba(255, 255, 255, 0.11),
+      transparent 34%
+    ),
+    linear-gradient(
+      105deg,
+      transparent 0 34%,
+      rgba(255, 255, 255, 0.045) 48%,
+      transparent 62%
+    );
+  opacity: 0.82;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .mac-dock .dock-menu {
+  position: relative;
+  z-index: 1;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .dock-menu .menu-item {
+  border: 1px solid transparent;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .dock-menu .menu-item:hover {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .dock-menu .menu-item:hover a {
+  color: var(--finance-text) !important;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .dock-menu .menu-item.active {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--finance-accent) 28%,
+        rgba(255, 255, 255, 0.055)
+      ),
+      color-mix(
+        in srgb,
+        var(--finance-accent) 13%,
+        transparent
+      )
+    ) !important;
+  border-color:
+    color-mix(
+      in srgb,
+      var(--finance-accent) 48%,
+      rgba(255, 255, 255, 0.1)
+    ) !important;
+  box-shadow:
+    0 9px 24px var(--finance-accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+body:is(
+  [data-theme="black"],
+  [data-theme="blue"],
+  [data-theme="green"]
+) .dock-menu .menu-item.active a {
+  color: var(--finance-text) !important;
+  text-shadow: 0 1px 12px var(--finance-accent-glow);
+}
