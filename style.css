@@ -37566,3 +37566,191 @@ body[data-theme="white"] .teamBarTrack i.purple {
       rgba(52, 120, 168, 0.38)
     ) !important;
 }
+
+/* =========================================================
+   HOSPITAL — MARBLE BLUE CONTRAST FIX
+   Explicit colors override legacy hard-coded dark surfaces.
+   ========================================================= */
+
+html body[data-theme="white"] .hospitalPatientCard {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  background-image:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(239, 247, 251, 0.96)
+    ) !important;
+  border-color: #ccdee9 !important;
+  box-shadow:
+    0 18px 44px rgba(47, 83, 107, 0.11),
+    inset 0 1px 0 #ffffff !important;
+}
+
+html body[data-theme="white"] .hospitalPatientIdentity h2 {
+  color: #172b3a !important;
+}
+
+html body[data-theme="white"] .hospitalPatientIdentity p {
+  color: #667987 !important;
+}
+
+html body[data-theme="white"] .hospitalStatusBadge {
+  background: #e9f5ef !important;
+  border-color: #badaca !important;
+  color: #31705c !important;
+}
+
+html body[data-theme="white"] .hospitalInfoRow span {
+  color: #718491 !important;
+}
+
+html body[data-theme="white"] .hospitalInfoRow strong {
+  color: #203847 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTasks {
+  background-color: #f3f8fb !important;
+  background-image: none !important;
+  border-color: #d5e4ec !important;
+}
+
+html body[data-theme="white"] .hospitalCardTasksHead span {
+  color: #718491 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTasksHead strong {
+  color: #294656 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTasksHead > small {
+  background: #e5f2fa !important;
+  border-color: #bdd7e8 !important;
+  color: #286f9f !important;
+}
+
+html body[data-theme="white"] .hospitalCardTask {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #d8e5ed !important;
+  box-shadow: inset 0 1px 0 #ffffff !important;
+}
+
+html body[data-theme="white"] .hospitalCardTask.planned {
+  background-color: #edf6fc !important;
+  background-image: none !important;
+  border-color: #bed9e9 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTask.completed {
+  background-color: #eef8f3 !important;
+  background-image: none !important;
+  border-color: #c6e1d4 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTaskIcon {
+  background: #e4f1f9 !important;
+  border-color: #bfd8e8 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTaskTop span {
+  color: #3478a8 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTaskTop time {
+  color: #7b8e9a !important;
+}
+
+html body[data-theme="white"] .hospitalCardTaskMain > strong {
+  color: #203847 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTaskMain > p {
+  color: #667987 !important;
+}
+
+html body[data-theme="white"] .hospitalCardTaskPending {
+  color: #3478a8 !important;
+}
+
+html body[data-theme="white"] .hospitalGhostButton {
+  background: #ffffff !important;
+  border-color: #cfdee7 !important;
+  color: #385567 !important;
+}
+
+html body[data-theme="white"] .hospitalPrimaryButton {
+  background: #e7f3fa !important;
+  border-color: #b9d5e6 !important;
+  color: #286f9f !important;
+}
+
+html body[data-theme="white"] .hospitalDischargeButton {
+  background: #fff3f4 !important;
+  border-color: #efc8ce !important;
+  color: #b24e5c !important;
+}
+
+html body[data-theme="white"] .hospitalTasksBackdrop {
+  background-color: rgba(23, 43, 58, 0.36) !important;
+  background-image: none !important;
+}
+
+html body[data-theme="white"] .hospitalTasksModal {
+  background-color: #f7fbfd !important;
+  background-image: none !important;
+  border-color: #c8dce8 !important;
+  color: #172b3a !important;
+  box-shadow:
+    0 34px 90px rgba(23, 43, 58, 0.26),
+    inset 0 1px 0 #ffffff !important;
+}
+
+html body[data-theme="white"] .hospitalTasksTimeline,
+html body[data-theme="white"] .hospitalTaskCreateCard {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #d4e3eb !important;
+}
+
+html body[data-theme="white"] .hospitalTaskItem {
+  background-color: #f4f8fb !important;
+  background-image: none !important;
+  border-color: #d8e5ed !important;
+}
+
+html body[data-theme="white"] .hospitalTaskItem.completed {
+  background-color: #edf8f3 !important;
+  background-image: none !important;
+}
+
+html body[data-theme="white"] .hospitalTasksHeader h2,
+html body[data-theme="white"] .hospitalTasksSectionHead h3,
+html body[data-theme="white"] .hospitalTaskCreateCard h3,
+html body[data-theme="white"] .hospitalTaskTop h4 {
+  color: #172b3a !important;
+}
+
+html body[data-theme="white"] .hospitalTasksHeader p,
+html body[data-theme="white"] .hospitalTasksSectionHead p,
+html body[data-theme="white"] .hospitalTaskTop time,
+html body[data-theme="white"] .hospitalTaskContent > p,
+html body[data-theme="white"] .hospitalTaskField > span {
+  color: #667987 !important;
+}
+
+html body[data-theme="white"] .hospitalTaskStaffSelect,
+html body[data-theme="white"] .hospitalTaskInput,
+html body[data-theme="white"] .hospitalTaskTextarea {
+  background-color: #f8fbfd !important;
+  background-image: none !important;
+  border-color: #cbdde7 !important;
+  color: #172b3a !important;
+  color-scheme: light !important;
+}
+
+html body[data-theme="white"] .hospitalTaskCreateButton {
+  background-color: #3478a8 !important;
+  background-image: none !important;
+  border-color: #3478a8 !important;
+  color: #ffffff !important;
+}
