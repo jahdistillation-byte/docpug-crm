@@ -4161,6 +4161,78 @@ def api_finance_client_balances():
             "Не вдалося завантажити розрахунки з клієнтами.",
             500,
         )
+
+
+@app.get(
+    "/api/finance/accounts"
+)
+def api_finance_accounts():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .rpc(
+                    "get_financial_account_balances",
+                    {
+                        "p_org_id":
+                            current_org,
+                    },
+                )
+            ),
+            attempts=4,
+            delay=0.35,
+        )
+
+        balances = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                balances,
+                list,
+            )
+            and balances
+        ):
+            balances = (
+                balances[0]
+            )
+
+        return ok(
+            balances
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET finance accounts:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити залишки на рахунках.",
+            500,
+        )
     
 @app.post(
     "/api/finance/transactions"
@@ -4713,6 +4785,13 @@ def api_finance_transactions_list():
         or ""
     ).strip().lower()
 
+    financial_account_id = str(
+        request.args.get(
+            "financial_account_id"
+        )
+        or ""
+    ).strip()
+
     status = str(
         request.args.get(
             "status"
@@ -4760,6 +4839,22 @@ def api_finance_transactions_list():
             "Невірний спосіб оплати.",
             400,
         )
+
+    if financial_account_id:
+        try:
+            uuid.UUID(
+                financial_account_id
+            )
+
+        except (
+            ValueError,
+            TypeError,
+            AttributeError,
+        ):
+            return fail(
+                "Некоректний фінансовий рахунок.",
+                400,
+            )
 
     if (
         status
@@ -4875,6 +4970,7 @@ def api_finance_transactions_list():
                 "counterparty, document_url, "
                 "source, status, "
                 "cash_shift_id, visit_id, "
+                "financial_account_id, "
                 "created_by, occurred_at, "
                 "created_at, updated_at, "
                 "metadata"
@@ -4895,6 +4991,12 @@ def api_finance_transactions_list():
             query = query.eq(
                 "payment_method",
                 payment_method,
+            )
+
+        if financial_account_id:
+            query = query.eq(
+                "financial_account_id",
+                financial_account_id,
             )
 
         if status:

@@ -240,6 +240,63 @@ class TransientReadRetryTests(unittest.TestCase):
             2,
         )
 
+    def test_finance_accounts_recovers_after_errno_11(self):
+        fake = TransientRpcSupabase()
+
+        with (
+            patch.object(
+                server,
+                "get_current_user",
+                return_value={
+                    "id": "user-1",
+                    "org_id": "org-1",
+                    "role": "owner",
+                    "is_active": True,
+                },
+            ),
+            patch.object(
+                server,
+                "get_current_org_id",
+                return_value="org-1",
+            ),
+            patch.object(
+                server,
+                "supabase",
+                fake,
+            ),
+            patch.object(
+                server.time,
+                "sleep",
+            ) as sleep_mock,
+        ):
+            response = self.client.get(
+                "/api/finance/accounts"
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(
+            fake.attempts,
+            3,
+        )
+        self.assertEqual(
+            fake.rpc_name,
+            "get_financial_account_balances",
+        )
+        self.assertEqual(
+            fake.arguments,
+            {
+                "p_org_id":
+                    "org-1",
+            },
+        )
+        self.assertEqual(
+            sleep_mock.call_count,
+            2,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

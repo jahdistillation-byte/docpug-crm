@@ -11069,6 +11069,7 @@ const financeDashboardState = {
 
   transactionType: "",
   paymentMethod: "",
+  financialAccountId: "",
   transactionSearch: "",
 
     transactionOffset: 0,
@@ -11234,6 +11235,42 @@ async function loadFinanceClientBalancesApi() {
   return result.data;
 }
 
+async function loadFinanceAccountsApi() {
+  const response =
+    await fetch(
+      "/api/finance/accounts",
+      {
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok ||
+    !result?.data
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити рахунки (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
 function buildFinanceSectionNavigation() {
   const sections = [
     {
@@ -11363,6 +11400,11 @@ async function loadFinanceTransactionsApi(
     financeDashboardState
       .paymentMethod;
 
+  const financialAccountId =
+    options.financialAccountId ??
+    financeDashboardState
+      .financialAccountId;
+
   const search =
     options.search ??
     financeDashboardState
@@ -11409,6 +11451,13 @@ async function loadFinanceTransactionsApi(
     params.set(
       "payment_method",
       paymentMethod
+    );
+  }
+
+  if (financialAccountId) {
+    params.set(
+      "financial_account_id",
+      financialAccountId
     );
   }
 
@@ -13125,8 +13174,13 @@ async function renderFinanceOperationsTab(
   `;
 
   try {
-    const result =
-      await loadFinanceTransactionsApi();
+    const [
+      result,
+      accountsData,
+    ] = await Promise.all([
+      loadFinanceTransactionsApi(),
+      loadFinanceAccountsApi(),
+    ]);
 
     const items =
       Array.isArray(
@@ -13137,6 +13191,13 @@ async function renderFinanceOperationsTab(
 
     const pagination =
       result.pagination || {};
+
+    const financialAccounts =
+      Array.isArray(
+        accountsData.accounts
+      )
+        ? accountsData.accounts
+        : [];
 
     page.innerHTML = `
       <div class="financeDashboard">
@@ -13354,6 +13415,43 @@ async function renderFinanceOperationsTab(
               >
                 Інше
               </option>
+            </select>
+          </label>
+
+          <label>
+            <span>
+              Рахунок
+            </span>
+
+            <select
+              name="financial_account_id"
+            >
+              <option value="">
+                Усі рахунки
+              </option>
+
+              ${financialAccounts
+                .map(
+                  (account) => `
+                    <option
+                      value="${escapeHtml(
+                        account.id
+                      )}"
+                      ${
+                        financeDashboardState
+                          .financialAccountId ===
+                        account.id
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${escapeHtml(
+                        account.name
+                      )}
+                    </option>
+                  `
+                )
+                .join("")}
             </select>
           </label>
 
@@ -13846,6 +13944,14 @@ async function renderFinanceOperationsTab(
                 ) || ""
               );
 
+          financeDashboardState
+            .financialAccountId =
+              String(
+                formData.get(
+                  "financial_account_id"
+                ) || ""
+              );
+
           financeDashboardState.dateFrom =
             dateFrom;
 
@@ -13874,6 +13980,9 @@ async function renderFinanceOperationsTab(
 
           financeDashboardState
             .paymentMethod = "";
+
+          financeDashboardState
+            .financialAccountId = "";
 
           financeDashboardState
             .transactionOffset = 0;
@@ -17554,6 +17663,13 @@ function bindFinanceWorkspaceActions(
               ""
             ).trim();
 
+          const financialAccountId =
+            String(
+              button.dataset
+                .financeAccountId ||
+              ""
+            ).trim();
+
           if (
             button.dataset
               .financeTransactionType !==
@@ -17572,6 +17688,16 @@ function bindFinanceWorkspaceActions(
             financeDashboardState
               .paymentMethod =
                 paymentMethod;
+          }
+
+          if (
+            button.dataset
+              .financeAccountId !==
+            undefined
+          ) {
+            financeDashboardState
+              .financialAccountId =
+                financialAccountId;
           }
 
           if (date) {
@@ -17716,6 +17842,7 @@ async function renderFinanceTodayTab(
       overviewResult,
       balancesResult,
       stockResult,
+      accountsResult,
     ] = await Promise.allSettled([
       loadFinanceOverviewApi(
         today,
@@ -17725,6 +17852,8 @@ async function renderFinanceTodayTab(
       loadFinanceClientBalancesApi(),
 
       loadStockApi(),
+
+      loadFinanceAccountsApi(),
     ]);
 
     const overviewAvailable =
@@ -17739,10 +17868,15 @@ async function renderFinanceTodayTab(
       stockResult.status ===
       "fulfilled";
 
+    const accountsAvailable =
+      accountsResult.status ===
+      "fulfilled";
+
     if (
       !overviewAvailable &&
       !balancesAvailable &&
-      !stockAvailable
+      !stockAvailable &&
+      !accountsAvailable
     ) {
       throw new Error(
         "Фінансові дані тимчасово недоступні. Спробуйте оновити сторінку."
@@ -17764,6 +17898,18 @@ async function renderFinanceTodayTab(
         ? stockResult.value
         : [];
 
+    const accountsData =
+      accountsAvailable
+        ? accountsResult.value
+        : {};
+
+    const financialAccounts =
+      Array.isArray(
+        accountsData.accounts
+      )
+        ? accountsData.accounts
+        : [];
+
     const unavailableSections = [
       !overviewAvailable
         ? "операції та підсумки"
@@ -17775,6 +17921,10 @@ async function renderFinanceTodayTab(
 
       !stockAvailable
         ? "складські сигнали"
+        : "",
+
+      !accountsAvailable
+        ? "залишки на рахунках"
         : "",
     ].filter(Boolean);
 
@@ -17936,6 +18086,7 @@ async function renderFinanceTodayTab(
             data-finance-go="transactions"
             data-finance-transaction-type="payment"
             data-finance-payment-method=""
+            data-finance-account-id=""
             data-finance-date="${today}"
           >
             <span>
@@ -18009,6 +18160,7 @@ async function renderFinanceTodayTab(
             data-finance-go="transactions"
             data-finance-transaction-type="payment"
             data-finance-payment-method="cash"
+            data-finance-account-id=""
             data-finance-date="${today}"
           >
             <span>
@@ -18061,6 +18213,110 @@ async function renderFinanceTodayTab(
               }
             </small>
           </button>
+        </section>
+
+        <section class="financeAccountsPanel">
+          <div class="financeAccountsHeading">
+            <div>
+              <span>
+                ГРОШІ КЛІНІКИ
+              </span>
+
+              <h2>
+                Залишки на рахунках
+              </h2>
+
+              <p>
+                За всіма проведеними фінансовими операціями.
+              </p>
+            </div>
+
+            <div class="financeAccountsTotal">
+              <span>
+                Доступно разом
+              </span>
+
+              <strong>
+                ${
+                  accountsAvailable
+                    ? formatVisitFinanceMoney(
+                        accountsData
+                          .total_balance
+                      )
+                    : "—"
+                }
+              </strong>
+            </div>
+          </div>
+
+          ${
+            accountsAvailable
+              ? `
+                <div class="financeAccountsGrid">
+                  ${financialAccounts
+                    .map((account) => {
+                      const key =
+                        String(
+                          account.system_key ||
+                          ""
+                        );
+
+                      const icon =
+                        key === "cash"
+                          ? "₴"
+                          : key === "bank"
+                            ? "▣"
+                            : "◇";
+
+                      return `
+                        <button
+                          type="button"
+                          class="financeAccountCard is-${escapeHtml(
+                            key
+                          )}"
+                          data-finance-go="transactions"
+                          data-finance-account-id="${escapeHtml(
+                            account.id
+                          )}"
+                          data-finance-payment-method=""
+                        >
+                          <span class="financeAccountIcon">
+                            ${icon}
+                          </span>
+
+                          <span class="financeAccountName">
+                            ${escapeHtml(
+                              account.name
+                            )}
+                          </span>
+
+                          <strong>
+                            ${formatVisitFinanceMoney(
+                              account.balance
+                            )}
+                          </strong>
+
+                          <small>
+                            ${Number(
+                              account
+                                .operations_count ||
+                              0
+                            )}
+                            операцій · переглянути
+                          </small>
+                        </button>
+                      `;
+                    })
+                    .join("")}
+                </div>
+              `
+              : `
+                <div class="financeInlineUnavailable">
+                  Не вдалося завантажити залишки на рахунках.
+                  Інші фінансові блоки продовжують працювати.
+                </div>
+              `
+          }
         </section>
 
         <section class="financeTodayLayout">
