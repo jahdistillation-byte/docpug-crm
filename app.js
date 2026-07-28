@@ -20666,6 +20666,129 @@ function a4FilenameFromVisit(visitId) {
   return `DocPUG_${date}_visit_${String(visitId)}.pdf`;
 }
 
+function collectPatientDocumentBreakRanges(
+  documentNode,
+  canvasWidth
+) {
+  const documentRect =
+    documentNode?.getBoundingClientRect();
+
+  if (
+    !documentRect ||
+    !documentRect.width ||
+    !canvasWidth
+  ) {
+    return [];
+  }
+
+  const scale =
+    canvasWidth / documentRect.width;
+
+  const selectors = [
+    ".disModernHead",
+    ".disModernInfoGrid",
+    ".disModernSection",
+    ".disModernTextLine",
+    ".disModernFinanceHead",
+    ".disModernFinanceSummary",
+    ".disModernTable tr",
+    ".disModernSignGrid",
+    ".disModernFooter",
+  ].join(",");
+
+  return Array.from(
+    documentNode.querySelectorAll(
+      selectors
+    )
+  )
+    .map((element) => {
+      const rect =
+        element.getBoundingClientRect();
+
+      return {
+        top: Math.max(
+          0,
+          Math.round(
+            (
+              rect.top -
+              documentRect.top
+            ) * scale
+          )
+        ),
+        bottom: Math.max(
+          0,
+          Math.round(
+            (
+              rect.bottom -
+              documentRect.top
+            ) * scale
+          )
+        ),
+      };
+    })
+    .filter(
+      (range) =>
+        range.bottom >
+        range.top
+    );
+}
+
+function choosePatientDocumentSliceHeight({
+  sourceY,
+  idealSliceHeight,
+  canvasHeight,
+  breakRanges,
+}) {
+  const idealEnd =
+    Math.min(
+      sourceY + idealSliceHeight,
+      canvasHeight
+    );
+
+  if (idealEnd >= canvasHeight) {
+    return canvasHeight - sourceY;
+  }
+
+  const minimumFill =
+    idealSliceHeight * 0.42;
+
+  const candidate =
+    (breakRanges || [])
+      .filter((range) => {
+        const height =
+          range.bottom - range.top;
+
+        return (
+          range.top >
+            sourceY +
+            minimumFill &&
+          range.top <
+            idealEnd - 4 &&
+          range.bottom >
+            idealEnd + 2 &&
+          height <
+            idealSliceHeight * 0.92
+        );
+      })
+      .sort((a, b) => {
+        const heightA =
+          a.bottom - a.top;
+        const heightB =
+          b.bottom - b.top;
+
+        return heightB - heightA;
+      })[0];
+
+  if (!candidate) {
+    return idealEnd - sourceY;
+  }
+
+  return Math.max(
+    1,
+    candidate.top - sourceY
+  );
+}
+
 async function downloadA4Pdf(
   visitId,
   options = {}
@@ -21012,15 +21135,25 @@ async function downloadA4Pdf(
         )
       );
 
+    const breakRanges =
+      collectPatientDocumentBreakRanges(
+        pdfDocument,
+        canvas.width
+      );
+
     let sourceY = 0;
     let pageIndex = 0;
 
     while (sourceY < canvas.height) {
       const sliceHeight =
-        Math.min(
-          pageSliceHeightPx,
-          canvas.height - sourceY
-        );
+        choosePatientDocumentSliceHeight({
+          sourceY,
+          idealSliceHeight:
+            pageSliceHeightPx,
+          canvasHeight:
+            canvas.height,
+          breakRanges,
+        });
 
       const pageCanvas =
         document.createElement("canvas");
@@ -25833,6 +25966,55 @@ function renderPatientDocumentSection(
   value,
   soft = false
 ) {
+  const normalizedValue =
+    String(value || "").trim() ||
+    "—";
+
+  let separated = false;
+
+  const content =
+    normalizedValue
+      .split(/\r?\n/)
+      .map((line) => {
+        const text =
+          String(line || "").trim();
+
+        if (!text) {
+          separated = true;
+          return "";
+        }
+
+        const bulletMatch =
+          text.match(
+            /^(?:•|●|▪|-)\s*(.+)$/
+          );
+
+        const spacingClass =
+          separated
+            ? " is-spaced"
+            : "";
+
+        separated = false;
+
+        if (bulletMatch) {
+          return `
+            <div class="disModernTextLine disModernTextBullet${spacingClass}">
+              <span aria-hidden="true">•</span>
+              <span>${escapeHtml(
+                bulletMatch[1]
+              )}</span>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="disModernTextLine${spacingClass}">
+            ${escapeHtml(text)}
+          </div>
+        `;
+      })
+      .join("");
+
   return `
     <div class="disModernSection">
       <div class="disModernSectionTitle">
@@ -25844,10 +26026,7 @@ function renderPatientDocumentSection(
           ? "disModernTextSoft"
           : ""
       }">
-        ${escapeHtml(
-          String(value || "").trim() ||
-          "—"
-        )}
+        ${content}
       </div>
     </div>
   `;
