@@ -36787,3 +36787,353 @@ body:is(
   background: #7c9c8a;
   box-shadow: none;
 }
+
+/* =========================================================
+   WHITE THEME — MARBLE BLUE
+   Светлая современная основа с холодным синим акцентом.
+   ========================================================= */
+
+body[data-theme="white"] {
+  --accent-color: #3478a8;
+  --accent-glow: rgba(52, 120, 168, 0.14);
+  --primary-neon: #3478a8;
+  --primary-glow: 0 8px 22px rgba(44, 103, 145, 0.16);
+
+  --bg-gradient:
+    radial-gradient(
+      ellipse at 12% 8%,
+      rgba(137, 190, 226, 0.2) 0%,
+      rgba(137, 190, 226, 0.05) 24%,
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 86% 18%,
+      rgba(185, 214, 234, 0.22) 0%,
+      transparent 37%
+    ),
+    linear-gradient(
+      117deg,
+      transparent 0 27%,
+      rgba(79, 132, 166, 0.035) 27.2%,
+      transparent 27.7% 63%,
+      rgba(79, 132, 166, 0.028) 63.2%,
+      transparent 63.8%
+    ),
+    linear-gradient(
+      142deg,
+      #f9fcfe 0%,
+      #edf4f8 46%,
+      #f8fbfd 100%
+    );
+
+  --card-bg: rgba(255, 255, 255, 0.91);
+  --glass-bg: rgba(255, 255, 255, 0.87);
+  --glass-border: rgba(47, 86, 112, 0.12);
+  --text-main: #172b3a;
+  --text-muted: #687b89;
+  --input-bg: rgba(255, 255, 255, 0.94);
+
+  --finance-accent: #3478a8;
+  --finance-accent-2: #5c91b6;
+  --finance-accent-soft: rgba(52, 120, 168, 0.09);
+  --finance-accent-glow: rgba(52, 120, 168, 0.14);
+  --finance-surface-1: rgba(255, 255, 255, 0.98);
+  --finance-surface-2: rgba(243, 248, 251, 0.98);
+  --finance-surface-soft: rgba(52, 120, 168, 0.04);
+  --finance-surface-hover: rgba(52, 120, 168, 0.07);
+  --finance-input: rgba(255, 255, 255, 0.96);
+  --finance-border: rgba(47, 86, 112, 0.12);
+  --finance-border-strong: rgba(52, 120, 168, 0.28);
+  --finance-text: #172b3a;
+  --finance-text-soft: rgba(23, 43, 58, 0.76);
+  --finance-text-muted: rgba(44, 68, 84, 0.58);
+  --finance-text-faint: rgba(53, 78, 94, 0.4);
+  --finance-shadow: rgba(43, 79, 103, 0.1);
+
+  --pet-modal-accent: #3478a8;
+  --pet-modal-accent-2: #5c91b6;
+  --pet-modal-accent-soft: rgba(52, 120, 168, 0.09);
+  --pet-modal-accent-border: rgba(52, 120, 168, 0.34);
+  --pet-modal-focus-ring: rgba(52, 120, 168, 0.12);
+
+  --med-accent: #3478a8;
+  --med-accent-soft: rgba(52, 120, 168, 0.09);
+  --med-accent-border: rgba(52, 120, 168, 0.24);
+
+  background: var(--bg-gradient) !important;
+  color: #172b3a !important;
+}
+
+body[data-theme="white"] .glass-card,
+body[data-theme="white"] .glass-panel,
+body[data-theme="white"] .data-table-container,
+body[data-theme="white"] .calendar-container,
+body[data-theme="white"] .patient-premium-card,
+body[data-theme="white"] .patient-hero,
+body[data-theme="white"] .owner-hero {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(47, 86, 112, 0.115) !important;
+  box-shadow:
+    0 22px 58px rgba(47, 83, 107, 0.085),
+    0 2px 7px rgba(47, 83, 107, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-theme="white"] :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  .text-main,
+  .section-card-title,
+  .current-date-title
+) {
+  color: #172b3a !important;
+}
+
+body[data-theme="white"] :is(
+  .text-muted,
+  .hint,
+  .field-title
+) {
+  color: #687b89 !important;
+}
+
+body[data-theme="white"] .search-bar input,
+body[data-theme="white"] .user-profile-badge {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(47, 86, 112, 0.12) !important;
+  color: #172b3a !important;
+  box-shadow:
+    0 10px 28px rgba(47, 83, 107, 0.075),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-theme="white"] .search-bar input:focus {
+  border-color: rgba(52, 120, 168, 0.52) !important;
+  box-shadow:
+    0 0 0 3px rgba(52, 120, 168, 0.1),
+    0 12px 28px rgba(47, 83, 107, 0.08) !important;
+}
+
+body[data-theme="white"] .mac-dock {
+  background: rgba(255, 255, 255, 0.93) !important;
+  border-color: rgba(47, 86, 112, 0.13) !important;
+  box-shadow:
+    0 18px 42px rgba(47, 83, 107, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item a {
+  color: #667987 !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item:hover {
+  background: rgba(52, 120, 168, 0.065) !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item:hover a {
+  color: #245f89 !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item.active {
+  background: #edf6fc !important;
+  border-color: #bdd7e8 !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item.active a {
+  color: #286f9f !important;
+}
+
+body[data-theme="white"] .color-dot.white {
+  background: #3478a8;
+}
+
+body[data-theme="white"] :is(
+  .btn-primary,
+  .premium-neon-btn,
+  button.primary
+) {
+  background: #3478a8 !important;
+  border-color: #3478a8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(44, 103, 145, 0.2) !important;
+}
+
+body[data-theme="white"] :is(
+  .btn-primary,
+  .premium-neon-btn,
+  button.primary
+):hover {
+  background: #286b9a !important;
+  border-color: #286b9a !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calendarCard {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(47, 86, 112, 0.12) !important;
+  box-shadow:
+    0 26px 68px rgba(47, 83, 107, 0.095),
+    0 2px 8px rgba(47, 83, 107, 0.04) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calendarModes {
+  background: #edf4f8 !important;
+  border-color: #d8e5ed !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  button.ghost,
+  .miniBtn,
+  .calendarDate
+) {
+  background: #ffffff !important;
+  border-color: #d8e4eb !important;
+  color: #526b7b !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  button.ghost,
+  .miniBtn
+):hover {
+  background: #f0f7fb !important;
+  border-color: #b9d3e4 !important;
+  color: #245f89 !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calendarModes button.primary {
+  background: #3478a8 !important;
+  border-color: #3478a8 !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calDoctorHead,
+  .calendarDoctorTimelineHead,
+  .calTimeHead
+) {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(247, 251, 254, 0.99),
+      rgba(236, 244, 249, 0.98)
+    ) !important;
+  border-color: #d8e5ed !important;
+  box-shadow: 0 5px 14px rgba(47, 83, 107, 0.055) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calDoctorName,
+  .calendarDoctorTimelineIdentity strong
+) {
+  color: #172b3a !important;
+  opacity: 1 !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calDoctorMeta,
+  .calendarDoctorTimelineIdentity span,
+  .calTime,
+  .calendarTimelineTimeLabel
+) {
+  color: #607786 !important;
+  opacity: 1 !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calendarDoctorAvatar {
+  color: #24475e !important;
+  background:
+    color-mix(
+      in srgb,
+      var(--doctor-color) 16%,
+      #ffffff
+    ) !important;
+  border-color:
+    color-mix(
+      in srgb,
+      var(--doctor-color) 38%,
+      #d5e3ec
+    ) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calStaffSpecialization {
+  background:
+    color-mix(
+      in srgb,
+      var(--specialization-color, #3478a8) 9%,
+      #ffffff
+    ) !important;
+  border-color:
+    color-mix(
+      in srgb,
+      var(--specialization-color, #3478a8) 28%,
+      #d8e5ed
+    ) !important;
+  color: #3d5667 !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calendarDayGrid,
+  .calendarDoctorTimeline,
+  .calendarTimelineTimeColumn
+) {
+  background: rgba(251, 253, 254, 0.96) !important;
+  border-color: #dde8ee !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calendarDoctorTimelineColumn {
+  border-right-color: rgba(47, 86, 112, 0.1) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calSlot {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(47, 86, 112, 0.1) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calSlot:hover {
+  background: #eff7fc !important;
+  border-color: rgba(52, 120, 168, 0.38) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calStaffPanel {
+  background: rgba(246, 250, 252, 0.97) !important;
+  border-color: #dbe7ee !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .vetCard {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: #dce7ed !important;
+  box-shadow: 0 4px 11px rgba(47, 83, 107, 0.055) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calTopScroll,
+  .calendarDayGrid
+)::-webkit-scrollbar-track {
+  background: #e8f0f5 !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calTopScroll,
+  .calendarDayGrid
+)::-webkit-scrollbar-thumb {
+  background: #6f9eba !important;
+  border-color: #f5f9fc !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calendarTimelineHourLine,
+  .time-grid-line
+) {
+  background: rgba(47, 86, 112, 0.1) !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] .calendarTimelineHalfLine {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(47, 86, 112, 0.05) 50%,
+      transparent 50%
+    ) !important;
+  background-size: 8px 1px !important;
+}
