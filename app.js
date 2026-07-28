@@ -17533,6 +17533,58 @@ function bindFinanceWorkspaceActions(
       button.addEventListener(
         "click",
         () => {
+          const transactionType =
+            String(
+              button.dataset
+                .financeTransactionType ||
+              ""
+            ).trim();
+
+          const paymentMethod =
+            String(
+              button.dataset
+                .financePaymentMethod ||
+              ""
+            ).trim();
+
+          const date =
+            String(
+              button.dataset
+                .financeDate ||
+              ""
+            ).trim();
+
+          if (
+            button.dataset
+              .financeTransactionType !==
+            undefined
+          ) {
+            financeDashboardState
+              .transactionType =
+                transactionType;
+          }
+
+          if (
+            button.dataset
+              .financePaymentMethod !==
+            undefined
+          ) {
+            financeDashboardState
+              .paymentMethod =
+                paymentMethod;
+          }
+
+          if (date) {
+            financeDashboardState
+              .dateFrom = date;
+
+            financeDashboardState
+              .dateTo = date;
+          }
+
+          financeDashboardState
+            .transactionOffset = 0;
+
           financeDashboardState.section =
             button.dataset.financeGo ||
             "today";
@@ -17661,10 +17713,10 @@ async function renderFinanceTodayTab(
       );
 
     const [
-      overview,
-      balances,
-      stockItems,
-    ] = await Promise.all([
+      overviewResult,
+      balancesResult,
+      stockResult,
+    ] = await Promise.allSettled([
       loadFinanceOverviewApi(
         today,
         today
@@ -17674,6 +17726,60 @@ async function renderFinanceTodayTab(
 
       loadStockApi(),
     ]);
+
+    const overviewAvailable =
+      overviewResult.status ===
+      "fulfilled";
+
+    const balancesAvailable =
+      balancesResult.status ===
+      "fulfilled";
+
+    const stockAvailable =
+      stockResult.status ===
+      "fulfilled";
+
+    if (
+      !overviewAvailable &&
+      !balancesAvailable &&
+      !stockAvailable
+    ) {
+      throw new Error(
+        "Фінансові дані тимчасово недоступні. Спробуйте оновити сторінку."
+      );
+    }
+
+    const overview =
+      overviewAvailable
+        ? overviewResult.value
+        : {};
+
+    const balances =
+      balancesAvailable
+        ? balancesResult.value
+        : {};
+
+    const stockItems =
+      stockAvailable
+        ? stockResult.value
+        : [];
+
+    const unavailableSections = [
+      !overviewAvailable
+        ? "операції та підсумки"
+        : "",
+
+      !balancesAvailable
+        ? "розрахунки з клієнтами"
+        : "",
+
+      !stockAvailable
+        ? "складські сигнали"
+        : "",
+    ].filter(Boolean);
+
+    const hasPartialData =
+      unavailableSections.length > 0;
 
     const summary =
       overview.summary || {};
@@ -17743,6 +17849,42 @@ async function renderFinanceTodayTab(
       <div class="financeDashboard financeWorkspaceV2">
         ${buildFinanceSectionNavigation()}
 
+        ${
+          hasPartialData
+            ? `
+              <div
+                class="financePartialDataNotice"
+                role="status"
+              >
+                <span>!</span>
+
+                <p>
+                  <strong>
+                    Частина даних не завантажилась
+                  </strong>
+
+                  <small>
+                    Тимчасово недоступні:
+                    ${escapeHtml(
+                      unavailableSections.join(
+                        ", "
+                      )
+                    )}.
+                    Інші блоки можна використовувати.
+                  </small>
+                </p>
+
+                <button
+                  type="button"
+                  id="financeTodayPartialRetry"
+                >
+                  Оновити
+                </button>
+              </div>
+            `
+            : ""
+        }
+
         <header class="financeControlHero">
           <div class="financeControlHeroMain">
             <span class="financeEyebrow">
@@ -17788,83 +17930,137 @@ async function renderFinanceTodayTab(
         </header>
 
         <section class="financeTodayKpis">
-          <article>
+          <button
+            type="button"
+            class="financeKpiCard"
+            data-finance-go="transactions"
+            data-finance-transaction-type="payment"
+            data-finance-payment-method=""
+            data-finance-date="${today}"
+          >
             <span>
               Отримано сьогодні
             </span>
 
             <strong>
-              ${formatVisitFinanceMoney(
-                summary.net_revenue
-              )}
+              ${
+                overviewAvailable
+                  ? formatVisitFinanceMoney(
+                      summary.net_revenue
+                    )
+                  : "—"
+              }
             </strong>
 
             <small>
-              ${
-                Number(
-                  summary
-                    .paid_visits_count ||
-                  0
-                )
+              ${overviewAvailable
+                ? `
+                  ${Number(
+                    summary
+                      .paid_visits_count ||
+                    0
+                  )}
+                  оплачених візитів ·
+                  переглянути
+                `
+                : "Тимчасово недоступно"
               }
-              оплачених візитів
             </small>
-          </article>
+          </button>
 
-          <article>
+          <button
+            type="button"
+            class="financeKpiCard"
+            data-finance-go="clients"
+          >
             <span>
               Очікуємо від клієнтів
             </span>
 
             <strong>
-              ${formatVisitFinanceMoney(
-                balanceSummary.outstanding
-              )}
+              ${
+                balancesAvailable
+                  ? formatVisitFinanceMoney(
+                      balanceSummary.outstanding
+                    )
+                  : "—"
+              }
             </strong>
 
             <small>
-              ${
-                Number(
-                  balanceSummary
-                    .debt_clients_count ||
-                  0
-                )
+              ${balancesAvailable
+                ? `
+                  ${Number(
+                    balanceSummary
+                      .debt_clients_count ||
+                    0
+                  )}
+                  клієнтів із залишком ·
+                  переглянути
+                `
+                : "Тимчасово недоступно"
               }
-              клієнтів із залишком
             </small>
-          </article>
+          </button>
 
-          <article>
+          <button
+            type="button"
+            class="financeKpiCard"
+            data-finance-go="transactions"
+            data-finance-transaction-type="payment"
+            data-finance-payment-method="cash"
+            data-finance-date="${today}"
+          >
             <span>
               Готівка сьогодні
             </span>
 
             <strong>
-              ${formatVisitFinanceMoney(
-                cashToday
-              )}
+              ${
+                overviewAvailable
+                  ? formatVisitFinanceMoney(
+                      cashToday
+                    )
+                  : "—"
+              }
             </strong>
 
             <small>
-              За проведеними оплатами
+              ${
+                overviewAvailable
+                  ? "За проведеними оплатами · переглянути"
+                  : "Тимчасово недоступно"
+              }
             </small>
-          </article>
+          </button>
 
-          <article>
+          <button
+            type="button"
+            class="financeKpiCard"
+            data-finance-go="analytics"
+          >
             <span>
               Орієнтовний результат
             </span>
 
             <strong>
-              ${formatVisitFinanceMoney(
-                summary.estimated_profit
-              )}
+              ${
+                overviewAvailable
+                  ? formatVisitFinanceMoney(
+                      summary.estimated_profit
+                    )
+                  : "—"
+              }
             </strong>
 
             <small>
-              Після витрат і собівартості
+              ${
+                overviewAvailable
+                  ? "Після витрат і собівартості · пояснення"
+                  : "Тимчасово недоступно"
+              }
             </small>
-          </article>
+          </button>
         </section>
 
         <section class="financeTodayLayout">
@@ -17890,7 +18086,14 @@ async function renderFinanceTodayTab(
 
             <div class="financeAttentionList">
               ${
-                debtClients.length
+                !balancesAvailable
+                  ? `
+                    <div class="financeInlineUnavailable">
+                      Не вдалося завантажити розрахунки з клієнтами.
+                      Спробуйте оновити екран.
+                    </div>
+                  `
+                  : debtClients.length
                   ? debtClients
                       .map(
                         (client) => {
@@ -18010,58 +18213,74 @@ async function renderFinanceTodayTab(
             </div>
 
             <div class="financeSignalGrid">
-              <button
-                type="button"
-                class="financeSignalCard ${
-                  lowStock.length
-                    ? "is-warning"
-                    : "is-good"
-                }"
-                data-finance-open-stock
-              >
-                <span class="financeSignalIcon">
-                  ${lowStock.length ? "↓" : "✓"}
-                </span>
+              ${
+                stockAvailable
+                  ? `
+                    <button
+                      type="button"
+                      class="financeSignalCard ${
+                        lowStock.length
+                          ? "is-warning"
+                          : "is-good"
+                      }"
+                      data-finance-open-stock
+                    >
+                      <span class="financeSignalIcon">
+                        ${lowStock.length ? "↓" : "✓"}
+                      </span>
 
-                <div>
-                  <strong>
-                    ${lowStock.length}
-                  </strong>
+                      <div>
+                        <strong>
+                          ${lowStock.length}
+                        </strong>
 
-                  <span>
-                    позицій закінчуються
-                  </span>
-                </div>
-              </button>
+                        <span>
+                          позицій закінчуються
+                        </span>
+                      </div>
+                    </button>
 
-              <button
-                type="button"
-                class="financeSignalCard ${
-                  marginRisks.length
-                    ? "is-danger"
-                    : "is-good"
-                }"
-                data-finance-open-stock
-              >
-                <span class="financeSignalIcon">
-                  ${marginRisks.length ? "!" : "✓"}
-                </span>
+                    <button
+                      type="button"
+                      class="financeSignalCard ${
+                        marginRisks.length
+                          ? "is-danger"
+                          : "is-good"
+                      }"
+                      data-finance-open-stock
+                    >
+                      <span class="financeSignalIcon">
+                        ${marginRisks.length ? "!" : "✓"}
+                      </span>
 
-                <div>
-                  <strong>
-                    ${marginRisks.length}
-                  </strong>
+                      <div>
+                        <strong>
+                          ${marginRisks.length}
+                        </strong>
 
-                  <span>
-                    позицій без маржі
-                  </span>
-                </div>
-              </button>
+                        <span>
+                          позицій без маржі
+                        </span>
+                      </div>
+                    </button>
+                  `
+                  : `
+                    <div class="financeInlineUnavailable">
+                      Складські показники не завантажились.
+                    </div>
+                  `
+              }
             </div>
 
             <div class="financeSignalDetails">
               ${
-                lowStock
+                !stockAvailable
+                  ? `
+                    <div class="financeInlineUnavailable">
+                      Складські дані тимчасово недоступні.
+                    </div>
+                  `
+                  : lowStock
                   .slice(0, 2)
                   .map(
                     (item) => `
@@ -18122,6 +18341,7 @@ async function renderFinanceTodayTab(
               }
 
               ${
+                stockAvailable &&
                 !lowStock.length &&
                 !marginRisks.length
                   ? `
@@ -18162,7 +18382,13 @@ async function renderFinanceTodayTab(
 
             <div class="financeCompactOperations">
               ${
-                transactions.length
+                !overviewAvailable
+                  ? `
+                    <div class="financeInlineUnavailable">
+                      Журнал операцій тимчасово недоступний.
+                    </div>
+                  `
+                  : transactions.length
                   ? transactions
                       .slice(0, 5)
                       .map(
@@ -18217,6 +18443,7 @@ async function renderFinanceTodayTab(
           </article>
 
           <article class="financeDayBrief ${
+            hasPartialData ||
             hasAttention
               ? "has-attention"
               : "is-calm"
@@ -18230,7 +18457,9 @@ async function renderFinanceTodayTab(
 
               <h2>
                 ${
-                  hasAttention
+                  hasPartialData
+                    ? "Дані фінансового дня завантажені не повністю"
+                    : hasAttention
                     ? "Є кілька дій до завершення зміни"
                     : "Фінансовий день під контролем"
                 }
@@ -18238,7 +18467,12 @@ async function renderFinanceTodayTab(
 
               <p>
                 ${
-                  hasAttention
+                  hasPartialData
+                    ? `
+                      Оновіть недоступні блоки перед закриттям
+                      фінансового дня.
+                    `
+                    : hasAttention
                     ? `
                       ${
                         debtClients.length
@@ -18274,6 +18508,19 @@ async function renderFinanceTodayTab(
     bindFinanceWorkspaceActions(
       page
     );
+
+    page
+      .querySelector(
+        "#financeTodayPartialRetry"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTodayTab(
+            page
+          );
+        }
+      );
 
     page
       .querySelector(
