@@ -13197,13 +13197,14 @@ async function renderFinanceOperationsTab(
   `;
 
   try {
-    const [
-      result,
-      accountsData,
-    ] = await Promise.all([
-      loadFinanceTransactionsApi(),
-      loadFinanceAccountsApi(),
-    ]);
+    // Both requests use the same clinic session and server-side database
+    // client. Keep them sequential to avoid intermittent connection failures
+    // when opening an account with no operations, such as the safe.
+    const result =
+      await loadFinanceTransactionsApi();
+
+    const accountsData =
+      await loadFinanceAccountsApi();
 
     const items =
       Array.isArray(

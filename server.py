@@ -4963,71 +4963,22 @@ def api_finance_transactions_list():
         )
 
     try:
-        query = (
-            supabase
-            .table(
-                "finance_transactions"
-            )
-            .select(
-                "id, org_id, "
-                "transaction_type, "
-                "amount, currency, "
-                "payment_method, "
-                "category, description, "
-                "counterparty, document_url, "
-                "source, status, "
-                "cash_shift_id, visit_id, "
-                "financial_account_id, "
-                "created_by, occurred_at, "
-                "created_at, updated_at, "
-                "metadata"
-            )
-            .eq(
-                "org_id",
-                current_org,
-            )
-        )
-
-        if transaction_type:
-            query = query.eq(
-                "transaction_type",
-                transaction_type,
-            )
-
-        if payment_method:
-            query = query.eq(
-                "payment_method",
-                payment_method,
-            )
-
-        if financial_account_id:
-            query = query.eq(
-                "financial_account_id",
-                financial_account_id,
-            )
-
-        if status:
-            query = query.eq(
-                "status",
-                status,
-            )
-
-        if date_from:
-            start_at = datetime(
+        start_at = (
+            datetime(
                 date_from.year,
                 date_from.month,
                 date_from.day,
                 tzinfo=kyiv_zone,
             )
-
-            query = query.gte(
-                "occurred_at",
-                start_at
-                .astimezone(
-                    timezone.utc
-                )
-                .isoformat(),
+            .astimezone(
+                timezone.utc
             )
+            .isoformat()
+            if date_from
+            else None
+        )
+
+        end_at = None
 
         if date_to:
             next_date = (
@@ -5037,37 +4988,95 @@ def api_finance_transactions_list():
                 )
             )
 
-            end_at = datetime(
-                next_date.year,
-                next_date.month,
-                next_date.day,
-                tzinfo=kyiv_zone,
-            )
-
-            query = query.lt(
-                "occurred_at",
-                end_at
+            end_at = (
+                datetime(
+                    next_date.year,
+                    next_date.month,
+                    next_date.day,
+                    tzinfo=kyiv_zone,
+                )
                 .astimezone(
                     timezone.utc
                 )
-                .isoformat(),
+                .isoformat()
             )
 
-        if raw_search:
-            safe_search = "".join(
-                character
-                for character
-                in raw_search[:100]
-                if (
-                    character.isalnum()
-                    or character
-                    in {
-                        " ",
-                        "-",
-                        "_",
-                    }
+        safe_search = "".join(
+            character
+            for character
+            in raw_search[:100]
+            if (
+                character.isalnum()
+                or character
+                in {
+                    " ",
+                    "-",
+                    "_",
+                }
+            )
+        ).strip()
+
+        def build_transactions_query():
+            query = (
+                supabase
+                .table(
+                    "finance_transactions"
                 )
-            ).strip()
+                .select(
+                    "id, org_id, "
+                    "transaction_type, "
+                    "amount, currency, "
+                    "payment_method, "
+                    "category, description, "
+                    "counterparty, document_url, "
+                    "source, status, "
+                    "cash_shift_id, visit_id, "
+                    "financial_account_id, "
+                    "created_by, occurred_at, "
+                    "created_at, updated_at, "
+                    "metadata"
+                )
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+            )
+
+            if transaction_type:
+                query = query.eq(
+                    "transaction_type",
+                    transaction_type,
+                )
+
+            if payment_method:
+                query = query.eq(
+                    "payment_method",
+                    payment_method,
+                )
+
+            if financial_account_id:
+                query = query.eq(
+                    "financial_account_id",
+                    financial_account_id,
+                )
+
+            if status:
+                query = query.eq(
+                    "status",
+                    status,
+                )
+
+            if start_at:
+                query = query.gte(
+                    "occurred_at",
+                    start_at,
+                )
+
+            if end_at:
+                query = query.lt(
+                    "occurred_at",
+                    end_at,
+                )
 
             if safe_search:
                 query = query.or_(
@@ -5084,17 +5093,22 @@ def api_finance_transactions_list():
                     )
                 )
 
-        result = (
-            query
-            .order(
-                "occurred_at",
-                desc=True,
+            return (
+                query
+                .order(
+                    "occurred_at",
+                    desc=True,
+                )
+                .range(
+                    offset,
+                    offset + limit,
+                )
             )
-            .range(
-                offset,
-                offset + limit,
-            )
-            .execute()
+
+        result = execute_with_retry(
+            build_transactions_query,
+            attempts=4,
+            delay=0.3,
         )
 
         rows = (

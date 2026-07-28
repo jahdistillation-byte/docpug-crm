@@ -35,6 +35,18 @@ class TransientReadQuery:
     def order(self, *_args, **_kwargs):
         return self
 
+    def gte(self, *_args, **_kwargs):
+        return self
+
+    def lt(self, *_args, **_kwargs):
+        return self
+
+    def or_(self, *_args, **_kwargs):
+        return self
+
+    def range(self, *_args, **_kwargs):
+        return self
+
     def execute(self):
         self.client.attempts += 1
 
@@ -291,6 +303,41 @@ class TransientReadRetryTests(unittest.TestCase):
                 "p_org_id":
                     "org-1",
             },
+        )
+        self.assertEqual(
+            sleep_mock.call_count,
+            2,
+        )
+
+    def test_finance_transactions_recovers_after_errno_11(self):
+        response, fake, sleep_mock = (
+            self.request_with_transient_client(
+                "/api/finance/transactions"
+                "?date_from=2026-07-01"
+                "&date_to=2026-07-28"
+                "&financial_account_id="
+                "22222222-2222-4222-8222-222222222222"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(
+            fake.attempts,
+            3,
+        )
+        self.assertEqual(
+            fake.table_name,
+            "finance_transactions",
+        )
+        self.assertIn(
+            (
+                "financial_account_id",
+                "22222222-2222-4222-8222-222222222222",
+            ),
+            fake.filters,
         )
         self.assertEqual(
             sleep_mock.call_count,
