@@ -17103,6 +17103,297 @@ body .specPill {
    DOC.PUG CRM — PATIENT FINANCE
    ========================================================= */
 
+/* =========================================================
+   DOC.PUG CRM — PATIENT DOCUMENTS
+   ========================================================= */
+
+.patientDocumentsPage {
+  width: 100%;
+  color: var(--text-main, #fff);
+}
+
+.patientDocumentsLoading {
+  padding: 42px 24px;
+  border: 1px dashed var(--glass-border, rgba(255,255,255,.1));
+  border-radius: 20px;
+  text-align: center;
+  color: var(--text-muted, rgba(255,255,255,.55));
+}
+
+.patientDocumentsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.patientDocumentsKicker {
+  margin-bottom: 7px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .12em;
+  color: var(--text-muted, rgba(255,255,255,.44));
+}
+
+.patientDocumentsHead h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -.03em;
+  color: var(--text-main, #fff);
+}
+
+.patientDocumentsHead p {
+  max-width: 680px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted, rgba(255,255,255,.5));
+}
+
+.patientDocumentsSummary {
+  min-width: 220px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--primary-neon, #9346e8) 28%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--primary-neon, #9346e8) 15%, transparent),
+      rgba(255,255,255,.025)
+    );
+}
+
+.patientDocumentsSummary span,
+.patientDocumentsSummary strong,
+.patientDocumentsSummary small {
+  display: block;
+}
+
+.patientDocumentsSummary span {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted, rgba(255,255,255,.45));
+}
+
+.patientDocumentsSummary strong {
+  margin-top: 3px;
+  font-size: 25px;
+  color: var(--primary-neon, #c98dff);
+}
+
+.patientDocumentsSummary small {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-muted, rgba(255,255,255,.42));
+}
+
+.patientDocumentsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.patientDocumentCard {
+  position: relative;
+  display: flex;
+  min-height: 300px;
+  flex-direction: column;
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.08));
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--primary-neon, #9346e8) 12%, transparent),
+      transparent 38%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.012)
+    ),
+    var(--glass-bg, rgba(10,7,22,.72));
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.patientDocumentCard::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary-neon, #9346e8) 8%, transparent);
+  pointer-events: none;
+}
+
+.patientDocumentCard.is-disabled {
+  min-height: 235px;
+  opacity: .68;
+}
+
+.patientDocumentCardTop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.patientDocumentIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary-neon, #9346e8) 26%, transparent);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--primary-neon, #9346e8) 11%, transparent);
+  font-size: 21px;
+}
+
+.patientDocumentBadge {
+  padding: 6px 9px;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.08));
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  color: var(--text-muted, rgba(255,255,255,.55));
+  background: rgba(255,255,255,.035);
+}
+
+.patientDocumentCard h3 {
+  position: relative;
+  z-index: 1;
+  margin: 18px 0 7px;
+  font-size: 18px;
+  color: var(--text-main, #fff);
+}
+
+.patientDocumentCard > p {
+  position: relative;
+  z-index: 1;
+  min-height: 58px;
+  margin: 0 0 17px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-muted, rgba(255,255,255,.48));
+}
+
+.patientDocumentSelectLabel {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: auto;
+}
+
+.patientDocumentSelectLabel > span {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 9px;
+  font-weight: 750;
+  color: var(--text-muted, rgba(255,255,255,.48));
+}
+
+.patientDocumentSelect {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.1));
+  border-radius: 12px;
+  outline: none;
+  color: var(--text-main, #fff);
+  background: rgba(0,0,0,.24);
+}
+
+.patientDocumentCreate {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  min-height: 43px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 11px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  color: #fff;
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary-neon, #7c5cff),
+      var(--accent-neon, #b45cff)
+    );
+  box-shadow: var(--primary-glow, 0 12px 30px rgba(124,92,255,.24));
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+.patientDocumentCreate:hover {
+  transform: translateY(-1px);
+}
+
+.patientDocumentCreate:disabled {
+  cursor: wait;
+  opacity: .62;
+  transform: none;
+}
+
+.patientDocumentEmpty,
+.patientDocumentNotice {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: 14px;
+  border: 1px dashed var(--glass-border, rgba(255,255,255,.1));
+  border-radius: 12px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-muted, rgba(255,255,255,.46));
+  background: rgba(255,255,255,.02);
+}
+
+.patientDocumentsHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.08));
+  border-radius: 15px;
+  font-size: 10px;
+  line-height: 1.55;
+  color: var(--text-muted, rgba(255,255,255,.48));
+  background: rgba(255,255,255,.025);
+}
+
+@media (max-width: 820px) {
+  .patientDocumentsHead {
+    flex-direction: column;
+  }
+
+  .patientDocumentsSummary {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .patientDocumentsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .patientFinancePage {
   width: 100%;
   color: #fff;

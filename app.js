@@ -20500,7 +20500,10 @@ function a4FilenameFromVisit(visitId) {
   return `DocPUG_${date}_visit_${String(visitId)}.pdf`;
 }
 
-async function downloadA4Pdf(visitId) {
+async function downloadA4Pdf(
+  visitId,
+  options = {}
+) {
   if (
     typeof window.html2canvas === "undefined" &&
     typeof window.html2pdf === "undefined"
@@ -20518,7 +20521,9 @@ async function downloadA4Pdf(visitId) {
     return;
   }
 
-  await renderDischargeA4(visitId);
+  if (options.render !== false) {
+    await renderDischargeA4(visitId);
+  }
 
   const sourceHost =
     document.getElementById("disA4");
@@ -20925,6 +20930,7 @@ async function downloadA4Pdf(visitId) {
     }
 
     pdf.save(
+      options.filename ||
       a4FilenameFromVisit(visitId)
     );
   } catch (error) {
@@ -24455,7 +24461,7 @@ async function renderPatientCard(pet) {
       <button class="patientTab" data-patient-tab="medcard">Веткартка</button>
       <button class="patientTab" data-patient-tab="labs">Анализы</button>
       <button class="patientTab" data-patient-tab="files">Файлы</button>
-      <button class="patientTab" data-patient-tab="finance">Финансы</button>
+      <button class="patientTab" data-patient-tab="documents">Документи</button>
     </div>
     <div id="patientTabContent"></div>
   `;
@@ -24534,7 +24540,7 @@ async function renderPatientTab(tab, pet) {
       <button class="patient-tab-btn" data-p-tab="medcard">🩺 Веткарта</button>
       <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
       <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
-      <button class="patient-tab-btn" data-p-tab="finance">💎 Фінанси</button>
+      <button class="patient-tab-btn" data-p-tab="documents">📄 Документи</button>
     </div>
 
     <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
@@ -24899,11 +24905,1533 @@ dynamicBox.innerHTML = `
     return;
   }
 
-  if (tab === "finance") {
-  renderPatientFinanceTab(dynamicBox, pet);
-  return;
+  if (tab === "documents") {
+    await renderPatientDocumentsTab(
+      dynamicBox,
+      pet
+    );
+    return;
+  }
 }
+
+function formatPatientDocumentDate(
+  value,
+  includeTime = false
+) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString(
+    "uk-UA",
+    includeTime
+      ? {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      : {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }
+  );
 }
+
+function sanitizePatientDocumentFilename(
+  value
+) {
+  return String(value || "document")
+    .trim()
+    .replace(/[^\p{L}\p{N}._-]+/gu, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80) || "document";
+}
+
+function getPatientDocumentVisitLabel(
+  visit
+) {
+  const parsed =
+    typeof parseVisitNote === "function"
+      ? parseVisitNote(visit?.note || "")
+      : { dx: "" };
+
+  const diagnosis =
+    String(
+      visit?.dx ||
+      parsed.dx ||
+      ""
+    ).trim();
+
+  const serviceNames =
+    typeof expandServiceLines === "function"
+      ? expandServiceLines(visit)
+          .slice(0, 2)
+          .map((line) => line.name)
+          .filter(Boolean)
+      : [];
+
+  const description =
+    diagnosis ||
+    serviceNames.join(", ") ||
+    "Прийом";
+
+  return [
+    formatPatientDocumentDate(
+      visit?.date ||
+      visit?.created_at
+    ),
+    description,
+  ].join(" — ");
+}
+
+async function loadPatientHospitalizationsApi(
+  patientId
+) {
+  try {
+    const response = await fetch(
+      `/api/hospitalizations?patient_id=${encodeURIComponent(
+        String(patientId)
+      )}`,
+      {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const result =
+      await response
+        .json()
+        .catch(() => null);
+
+    if (
+      !response.ok ||
+      !result?.ok
+    ) {
+      return [];
+    }
+
+    return Array.isArray(result.data)
+      ? result.data
+      : [];
+  } catch (error) {
+    console.error(
+      "loadPatientHospitalizationsApi failed:",
+      error
+    );
+
+    return [];
+  }
+}
+
+function renderPatientDocumentCard({
+  type,
+  icon,
+  title,
+  description,
+  badge,
+  options,
+  selectLabel,
+  emptyText,
+  disabled = false,
+}) {
+  const available =
+    Array.isArray(options) &&
+    options.length > 0;
+
+  return `
+    <article
+      class="patientDocumentCard ${
+        disabled
+          ? "is-disabled"
+          : ""
+      }"
+    >
+      <div class="patientDocumentCardTop">
+        <span class="patientDocumentIcon">
+          ${icon}
+        </span>
+
+        <span class="patientDocumentBadge">
+          ${escapeHtml(badge)}
+        </span>
+      </div>
+
+      <h3>${escapeHtml(title)}</h3>
+
+      <p>${escapeHtml(description)}</p>
+
+      ${
+        disabled
+          ? `
+            <div class="patientDocumentNotice">
+              Потрібно спочатку затвердити
+              шаблони та тексти згоди клініки.
+            </div>
+          `
+          : available
+            ? `
+              <label class="patientDocumentSelectLabel">
+                <span>
+                  ${escapeHtml(selectLabel)}
+                </span>
+
+                <select
+                  class="patientDocumentSelect"
+                  data-patient-document-source="${escapeHtml(type)}"
+                >
+                  ${options
+                    .map(
+                      (option) => `
+                        <option
+                          value="${escapeHtml(
+                            String(option.value)
+                          )}"
+                        >
+                          ${escapeHtml(
+                            option.label
+                          )}
+                        </option>
+                      `
+                    )
+                    .join("")}
+                </select>
+              </label>
+
+              <button
+                type="button"
+                class="patientDocumentCreate"
+                data-create-patient-document="${escapeHtml(type)}"
+              >
+                <span>↓</span>
+                Сформувати PDF
+              </button>
+            `
+            : `
+              <div class="patientDocumentEmpty">
+                ${escapeHtml(emptyText)}
+              </div>
+            `
+      }
+    </article>
+  `;
+}
+
+async function renderPatientDocumentsTab(
+  root,
+  pet
+) {
+  if (!root || !pet) return;
+
+  root.innerHTML = `
+    <div class="patientDocumentsLoading">
+      Підготовка документів…
+    </div>
+  `;
+
+  const [visits, hospitalizations] =
+    await Promise.all([
+      loadVisitsApi({
+        pet_id: pet.id,
+      }),
+      loadPatientHospitalizationsApi(
+        pet.id
+      ),
+    ]);
+
+  const patientVisits =
+    (Array.isArray(visits)
+      ? visits
+      : []
+    ).sort((a, b) =>
+      String(
+        b.date ||
+        b.created_at ||
+        ""
+      ).localeCompare(
+        String(
+          a.date ||
+          a.created_at ||
+          ""
+        )
+      )
+    );
+
+  const completedHospitalizations =
+    (Array.isArray(hospitalizations)
+      ? hospitalizations
+      : []
+    )
+      .filter(
+        (item) =>
+          item?.is_active === false ||
+          Boolean(item?.discharged_at)
+      )
+      .sort((a, b) =>
+        String(
+          b.discharged_at ||
+          b.admitted_at ||
+          ""
+        ).localeCompare(
+          String(
+            a.discharged_at ||
+            a.admitted_at ||
+            ""
+          )
+        )
+      );
+
+  const visitOptions =
+    patientVisits.map((visit) => ({
+      value: visit.id,
+      label:
+        getPatientDocumentVisitLabel(
+          visit
+        ),
+    }));
+
+  const hospitalOptions =
+    completedHospitalizations.map(
+      (item) => ({
+        value: item.id,
+        label: [
+          formatPatientDocumentDate(
+            item.admitted_at
+          ),
+          "—",
+          formatPatientDocumentDate(
+            item.discharged_at
+          ),
+          item.diagnosis
+            ? `· ${item.diagnosis}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
+      })
+    );
+
+  root.innerHTML = `
+    <section class="patientDocumentsPage">
+      <header class="patientDocumentsHead">
+        <div>
+          <div class="patientDocumentsKicker">
+            ДОКУМЕНТИ ПАЦІЄНТА
+          </div>
+
+          <h2>
+            Медичні та фінансові документи
+          </h2>
+
+          <p>
+            Оберіть джерело — CRM автоматично
+            сформує окремий PDF без повторного
+            введення даних.
+          </p>
+        </div>
+
+        <div class="patientDocumentsSummary">
+          <span>Доступно джерел</span>
+          <strong>
+            ${
+              patientVisits.length +
+              completedHospitalizations.length
+            }
+          </strong>
+          <small>
+            ${patientVisits.length} візитів ·
+            ${completedHospitalizations.length}
+            виписок зі стаціонару
+          </small>
+        </div>
+      </header>
+
+      <div class="patientDocumentsGrid">
+        ${renderPatientDocumentCard({
+          type: "visit",
+          icon: "🩺",
+          title:
+            "Виписка за візитом",
+          description:
+            "Медичний підсумок прийому: скарги, діагноз, проведені процедури та рекомендації — без цін.",
+          badge: "МЕДИЧНИЙ",
+          options: visitOptions,
+          selectLabel: "Оберіть візит",
+          emptyText:
+            "У пацієнта ще немає візитів.",
+        })}
+
+        ${renderPatientDocumentCard({
+          type: "hospital",
+          icon: "🏥",
+          title:
+            "Виписка зі стаціонару",
+          description:
+            "Період госпіталізації, діагноз, стан, виконані процедури й призначення та стан на момент виписки.",
+          badge: "СТАЦІОНАР",
+          options: hospitalOptions,
+          selectLabel:
+            "Оберіть госпіталізацію",
+          emptyText:
+            "Немає завершених госпіталізацій.",
+        })}
+
+        ${renderPatientDocumentCard({
+          type: "prescriptions",
+          icon: "💊",
+          title:
+            "Лист призначень",
+          description:
+            "Окремий зрозумілий документ з лікуванням, рекомендаціями власнику та планом контролю.",
+          badge: "ДЛЯ ВЛАСНИКА",
+          options: visitOptions,
+          selectLabel: "Оберіть візит",
+          emptyText:
+            "Спочатку створіть візит.",
+        })}
+
+        ${renderPatientDocumentCard({
+          type: "finance",
+          icon: "🧾",
+          title:
+            "Фінансова виписка",
+          description:
+            "Деталізація наданих послуг, використаних препаратів, знижки, оплат і залишку.",
+          badge: "ФІНАНСОВИЙ",
+          options: visitOptions,
+          selectLabel: "Оберіть візит",
+          emptyText:
+            "Немає візитів для деталізації.",
+        })}
+
+        ${renderPatientDocumentCard({
+          type: "consent",
+          icon: "✍️",
+          title:
+            "Інформована згода",
+          description:
+            "Згода на операцію, анестезію, госпіталізацію або діагностичні процедури.",
+          badge: "ШАБЛОН",
+          options: [],
+          selectLabel: "",
+          emptyText: "",
+          disabled: true,
+        })}
+      </div>
+
+      <div class="patientDocumentsHint">
+        <span>ⓘ</span>
+        Документи формуються з актуальних
+        даних CRM. Завантажена копія не
+        змінює медичну карту пацієнта.
+      </div>
+    </section>
+  `;
+
+  root
+    .querySelectorAll(
+      "[data-create-patient-document]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        async () => {
+          const type =
+            button.dataset
+              .createPatientDocument;
+
+          const select =
+            root.querySelector(
+              `[data-patient-document-source="${type}"]`
+            );
+
+          const sourceId =
+            select?.value || "";
+
+          if (!sourceId) return;
+
+          const original =
+            button.innerHTML;
+
+          button.disabled = true;
+          button.textContent =
+            "Формування…";
+
+          try {
+            await createPatientDocumentPdf({
+              type,
+              sourceId,
+              pet,
+              visits: patientVisits,
+              hospitalizations:
+                completedHospitalizations,
+            });
+          } catch (error) {
+            console.error(
+              "createPatientDocumentPdf failed:",
+              error
+            );
+
+            alert(
+              error?.message ||
+              "Не вдалося сформувати документ."
+            );
+          } finally {
+            button.disabled = false;
+            button.innerHTML = original;
+          }
+        }
+      );
+    });
+}
+
+async function getPatientDocumentClinic() {
+  let org =
+    state.clinicProfile ||
+    null;
+
+  if (
+    !org &&
+    typeof loadClinicProfileApi ===
+      "function"
+  ) {
+    org =
+      await loadClinicProfileApi();
+  }
+
+  return org || {};
+}
+
+function renderPatientDocumentShell({
+  title,
+  number,
+  dateLabel,
+  pet,
+  owner,
+  doctorName,
+  clinic,
+  body,
+}) {
+  const clinicName =
+    clinic?.name ||
+    sessionStorage.getItem(
+      "pug_active_clinic_name"
+    ) ||
+    "Doc.PUG";
+
+  const contacts = [
+    clinic?.phone,
+    clinic?.address,
+    clinic?.website,
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
+  const accent =
+    String(
+      clinic?.document_accent_color ||
+      "#9346E8"
+    ).trim();
+
+  return `
+    <div
+      class="disModernDoc"
+      style="--disAccent:${escapeHtml(
+        accent
+      )};"
+    >
+      <div class="disModernHead">
+        <div class="disModernBrand">
+          ${
+            clinic?.logo_url
+              ? `
+                <div class="disModernLogoBox">
+                  <img
+                    src="${escapeHtml(
+                      clinic.logo_url
+                    )}"
+                    alt="logo"
+                    class="disModernLogoImg"
+                  >
+                </div>
+              `
+              : `
+                <div class="disModernLogoFallback">
+                  ${escapeHtml(
+                    clinicName.charAt(0)
+                  )}
+                </div>
+              `
+          }
+
+          <div class="disModernBrandText">
+            <div class="disModernClinicName">
+              ${escapeHtml(clinicName)}
+            </div>
+
+            <div class="disModernClinicSubtitle">
+              ${escapeHtml(
+                clinic?.subtitle ||
+                "Ветеринарна клініка"
+              )}
+            </div>
+
+            <div class="disModernClinicContacts">
+              ${escapeHtml(contacts || "—")}
+            </div>
+          </div>
+        </div>
+
+        <div class="disModernHeadRight">
+          <div class="disModernDocType">
+            ${escapeHtml(title)}
+          </div>
+
+          <div class="disModernDocMeta">
+            № ${escapeHtml(number || "—")}
+          </div>
+
+          <div class="disModernDocMeta">
+            ${escapeHtml(dateLabel)}
+          </div>
+        </div>
+      </div>
+
+      <div class="disModernAccentLine"></div>
+
+      <div class="disModernInfoGrid">
+        <div class="disModernCard">
+          <div class="disModernCardTitle">
+            Пацієнт
+          </div>
+
+          <div class="disModernCardMain">
+            ${escapeHtml(pet?.name || "—")}
+          </div>
+
+          <div class="disModernInfoRows">
+            <div class="disModernInfoRow">
+              <span>Вид</span>
+              <b>${escapeHtml(
+                pet?.species || "—"
+              )}</b>
+            </div>
+
+            <div class="disModernInfoRow">
+              <span>Порода</span>
+              <b>${escapeHtml(
+                pet?.breed || "—"
+              )}</b>
+            </div>
+
+            <div class="disModernInfoRow">
+              <span>Вік</span>
+              <b>${escapeHtml(
+                pet?.age || "—"
+              )}</b>
+            </div>
+
+            <div class="disModernInfoRow">
+              <span>Вага</span>
+              <b>
+                ${escapeHtml(
+                  pet?.weight_kg ||
+                  pet?.weight ||
+                  "—"
+                )}
+                ${
+                  pet?.weight_kg ||
+                  pet?.weight
+                    ? "кг"
+                    : ""
+                }
+              </b>
+            </div>
+          </div>
+        </div>
+
+        <div class="disModernCard">
+          <div class="disModernCardTitle">
+            Власник
+          </div>
+
+          <div class="disModernCardMain">
+            ${escapeHtml(
+              owner?.name ||
+              "—"
+            )}
+          </div>
+
+          <div class="disModernInfoRows">
+            <div class="disModernInfoRow">
+              <span>Телефон</span>
+              <b>${escapeHtml(
+                owner?.phone || "—"
+              )}</b>
+            </div>
+
+            <div class="disModernInfoRow">
+              <span>Лікар</span>
+              <b>${escapeHtml(
+                doctorName ||
+                "Ветеринарний лікар"
+              )}</b>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${body}
+
+      <div class="disModernSignGrid">
+        <div class="disModernSignBox">
+          <div class="disModernSignTitle">
+            Лікар
+          </div>
+
+          ${
+            clinic?.doctor_signature_url
+              ? `
+                <img
+                  src="${escapeHtml(
+                    clinic.doctor_signature_url
+                  )}"
+                  alt="Підпис лікаря"
+                  class="disModernSignImg"
+                >
+              `
+              : `
+                <div class="disModernSignLine"></div>
+              `
+          }
+
+          <div class="disModernSignName">
+            ${escapeHtml(
+              doctorName ||
+              "Ветеринарний лікар"
+            )}
+          </div>
+        </div>
+
+        <div class="disModernSignBox">
+          <div class="disModernSignTitle">
+            Печатка клініки
+          </div>
+
+          ${
+            clinic?.clinic_stamp_url
+              ? `
+                <img
+                  src="${escapeHtml(
+                    clinic.clinic_stamp_url
+                  )}"
+                  alt="Печатка клініки"
+                  class="disModernStampImg"
+                >
+              `
+              : `
+                <div class="disModernSignLine"></div>
+              `
+          }
+
+          <div class="disModernSignName">
+            ${escapeHtml(clinicName)}
+          </div>
+        </div>
+      </div>
+
+      <div class="disModernFooter">
+        <span>
+          ${escapeHtml(
+            clinic?.document_footer ||
+            "Коли важливо — ми поруч."
+          )}
+        </span>
+        <span>${escapeHtml(clinicName)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderPatientDocumentSection(
+  title,
+  value,
+  soft = false
+) {
+  return `
+    <div class="disModernSection">
+      <div class="disModernSectionTitle">
+        ${escapeHtml(title)}
+      </div>
+
+      <div class="disModernText ${
+        soft
+          ? "disModernTextSoft"
+          : ""
+      }">
+        ${escapeHtml(
+          String(value || "").trim() ||
+          "—"
+        )}
+      </div>
+    </div>
+  `;
+}
+
+function getPatientDocumentDoctorName(
+  visit
+) {
+  const staff =
+    (Array.isArray(state.staff)
+      ? state.staff
+      : []
+    ).find(
+      (item) =>
+        String(item?.id || "") ===
+        String(
+          visit?.staff_id ||
+          visit?.doctor_id ||
+          ""
+        )
+    );
+
+  return (
+    visit?.doctor_name ||
+    visit?.staff_name ||
+    staff?.name ||
+    "Ветеринарний лікар"
+  );
+}
+
+async function createVisitBasedDocumentHtml({
+  type,
+  visit,
+  pet,
+  owner,
+  clinic,
+}) {
+  const parsedNote =
+    parseVisitNote(
+      visit?.note || ""
+    );
+
+  const parsedTreatment =
+    parseVisitRx(
+      visit?.rx || ""
+    );
+
+  const parsedLegacyTreatment =
+    typeof parseRxCombined ===
+      "function"
+      ? parseRxCombined(
+          visit?.rx || ""
+        )
+      : {
+          rx: "",
+          recs: "",
+          follow: "",
+        };
+
+  const diagnosis =
+    visit?.dx ||
+    parsedNote.dx ||
+    "";
+
+  const complaint =
+    parsedNote.complaint ||
+    visit?.note ||
+    "";
+
+  const hasModernTreatmentFormat =
+    String(
+      visit?.rx || ""
+    ).includes(
+      "\n\nРекомендації власнику:\n"
+    );
+
+  const treatment =
+    (
+      hasModernTreatmentFormat
+        ? parsedTreatment.rx
+        : parsedLegacyTreatment.rx
+    ) ||
+    visit?.rx ||
+    "";
+
+  const recommendation =
+    parsedTreatment.recommendation ||
+    parsedLegacyTreatment.recs ||
+    "";
+
+  const follow =
+    parsedLegacyTreatment.follow ||
+    "";
+
+  const services =
+    expandServiceLines(visit);
+
+  const stock =
+    expandStockLines(visit);
+
+  const doctorName =
+    getPatientDocumentDoctorName(
+      visit
+    );
+
+  let title =
+    "Виписка за візитом";
+
+  let body = "";
+
+  if (type === "visit") {
+    const procedures =
+      services.length
+        ? services
+            .map(
+              (line) =>
+                `• ${line.name}${
+                  Number(line.qty || 1) > 1
+                    ? ` — ${line.qty}`
+                    : ""
+                }`
+            )
+            .join("\n")
+        : "—";
+
+    const materials =
+      stock.length
+        ? stock
+            .map(
+              (line) =>
+                `• ${line.name} — ${
+                  line.qty
+                } ${line.unit || "шт"}`
+            )
+            .join("\n")
+        : "—";
+
+    body = [
+      renderPatientDocumentSection(
+        "Скарги та анамнез",
+        complaint
+      ),
+      renderPatientDocumentSection(
+        "Встановлений діагноз",
+        diagnosis
+      ),
+      renderPatientDocumentSection(
+        "Проведені процедури",
+        procedures
+      ),
+      renderPatientDocumentSection(
+        "Використані препарати та матеріали",
+        materials
+      ),
+      renderPatientDocumentSection(
+        "Призначення лікаря",
+        treatment,
+        true
+      ),
+      renderPatientDocumentSection(
+        "Рекомендації власнику",
+        recommendation
+      ),
+      renderPatientDocumentSection(
+        "Контроль та повторний огляд",
+        follow
+      ),
+    ].join("");
+  } else if (
+    type === "prescriptions"
+  ) {
+    title =
+      "Лист призначень і рекомендацій";
+
+    body = [
+      renderPatientDocumentSection(
+        "Діагноз",
+        diagnosis
+      ),
+      renderPatientDocumentSection(
+        "Призначене лікування",
+        treatment,
+        true
+      ),
+      renderPatientDocumentSection(
+        "Рекомендації з догляду",
+        recommendation
+      ),
+      renderPatientDocumentSection(
+        "Контроль та повторний огляд",
+        follow
+      ),
+    ].join("");
+  } else if (type === "finance") {
+    title =
+      "Фінансова виписка";
+
+    let finance = null;
+
+    try {
+      finance =
+        await loadVisitFinanceApi(
+          visit.id
+        );
+    } catch (error) {
+      console.warn(
+        "Finance document fallback:",
+        error
+      );
+    }
+
+    const rows = [
+      ...services.map((line) => ({
+        name: line.name || "Послуга",
+        type: "Послуга",
+        qty: line.qty || 1,
+        unit: "",
+        price: line.price || 0,
+        total: line.lineTotal || 0,
+      })),
+      ...stock.map((line) => ({
+        name:
+          line.name ||
+          "Препарат",
+        type:
+          "Препарат / матеріал",
+        qty: line.qty || 1,
+        unit: line.unit || "шт",
+        price: line.price || 0,
+        total: line.lineTotal || 0,
+      })),
+    ];
+
+    const subtotal =
+      Number(
+        finance?.subtotal ??
+        rows.reduce(
+          (sum, row) =>
+            sum +
+            Number(row.total || 0),
+          0
+        )
+      ) || 0;
+
+    const discount =
+      Number(
+        finance?.discount || 0
+      ) || 0;
+
+    const total =
+      Number(
+        finance?.total ??
+        Math.max(
+          0,
+          subtotal - discount
+        )
+      ) || 0;
+
+    const paid =
+      Number(
+        finance?.paid || 0
+      ) || 0;
+
+    const remaining =
+      Number(
+        finance?.remaining ??
+        Math.max(0, total - paid)
+      ) || 0;
+
+    const financeAvailable =
+      Boolean(finance);
+
+    const statusLabels = {
+      unpaid: "Не оплачено",
+      partial:
+        "Оплачено частково",
+      paid: "Оплачено",
+      refunded: "Повернено",
+      cancelled: "Скасовано",
+    };
+
+    const methodLabels = {
+      cash: "Готівка",
+      card: "Картка",
+      terminal: "Термінал",
+      transfer: "Переказ",
+      other: "Інше",
+    };
+
+    const paymentMethods =
+      Array.from(
+        new Set(
+          (finance?.transactions || [])
+            .filter(
+              (transaction) =>
+                transaction?.status ===
+                "completed"
+            )
+            .map(
+              (transaction) =>
+                methodLabels[
+                  transaction
+                    ?.payment_method
+                ] ||
+                transaction
+                  ?.payment_method
+            )
+            .filter(Boolean)
+        )
+      ).join(", ") || "—";
+
+    const rowsHtml =
+      rows.length
+        ? rows
+            .map(
+              (row) => `
+                <tr>
+                  <td>${escapeHtml(
+                    row.name
+                  )}</td>
+                  <td>${escapeHtml(
+                    row.type
+                  )}</td>
+                  <td>
+                    ${escapeHtml(
+                      String(row.qty)
+                    )}
+                    ${escapeHtml(
+                      row.unit
+                    )}
+                  </td>
+                  <td>
+                    ${formatPatientMoney(
+                      row.price
+                    )}
+                  </td>
+                  <td>
+                    ${formatPatientMoney(
+                      row.total
+                    )}
+                  </td>
+                </tr>
+              `
+            )
+            .join("")
+        : `
+          <tr>
+            <td
+              colspan="5"
+              class="disModernEmpty"
+            >
+              Послуги та препарати
+              не додані
+            </td>
+          </tr>
+        `;
+
+    body = `
+      <div class="disModernSection disModernFinanceSection">
+        <div class="disModernFinanceHead">
+          <div>
+            <div class="disModernSectionTitle">
+              Надані послуги та використані препарати
+            </div>
+            <div class="disModernSectionSub">
+              Деталізація візиту без медичних нотаток
+            </div>
+          </div>
+
+          <div class="disModernGrandTotalBadge">
+            ${formatPatientMoney(total)}
+          </div>
+        </div>
+
+        <div class="disModernTableWrap">
+          <table class="disModernTable">
+            <thead>
+              <tr>
+                <th>Назва</th>
+                <th>Тип</th>
+                <th>К-сть</th>
+                <th>Ціна</th>
+                <th>Сума</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+
+        <div class="disModernFinanceSummary">
+          <div class="disModernFinanceMini">
+            <span>Підсумок</span>
+            <b>${formatPatientMoney(
+              subtotal
+            )}</b>
+          </div>
+
+          <div class="disModernFinanceMini">
+            <span>Знижка</span>
+            <b>${formatPatientMoney(
+              discount
+            )}</b>
+          </div>
+
+          <div class="disModernFinanceMini disModernFinanceMiniTotal">
+            <span>До сплати</span>
+            <b>${formatPatientMoney(
+              total
+            )}</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="disModernInfoGrid">
+        <div class="disModernCard">
+          <div class="disModernCardTitle">
+            Стан оплати
+          </div>
+          <div class="disModernCardMain">
+            ${escapeHtml(
+              statusLabels[
+                finance
+                  ?.financial_status
+              ] ||
+              finance
+                ?.financial_status ||
+              (
+                financeAvailable
+                  ? "Не оплачено"
+                  : "Статус недоступний"
+              )
+            )}
+          </div>
+          <div class="disModernInfoRows">
+            <div class="disModernInfoRow">
+              <span>Оплачено</span>
+              <b>${formatPatientMoney(
+                paid
+              )}</b>
+            </div>
+            <div class="disModernInfoRow">
+              <span>Залишок</span>
+              <b>${formatPatientMoney(
+                remaining
+              )}</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="disModernCard">
+          <div class="disModernCardTitle">
+            Оплата
+          </div>
+          <div class="disModernCardMain">
+            ${escapeHtml(
+              financeAvailable
+                ? paymentMethods
+                : "Недоступно для поточної ролі"
+            )}
+          </div>
+          <div class="disModernInfoRows">
+            <div class="disModernInfoRow">
+              <span>Операцій</span>
+              <b>${
+                (
+                  finance
+                    ?.transactions ||
+                  []
+                ).length
+              }</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return renderPatientDocumentShell({
+    title,
+    number: String(
+      visit?.id || ""
+    )
+      .slice(0, 8)
+      .toUpperCase(),
+    dateLabel:
+      `Дата візиту: ${
+        formatPatientDocumentDate(
+          visit?.date ||
+          visit?.created_at
+        )
+      }`,
+    pet: {
+      ...pet,
+      weight_kg:
+        visit?.weight_kg ||
+        pet?.weight_kg,
+    },
+    owner,
+    doctorName,
+    clinic,
+    body,
+  });
+}
+
+async function createHospitalDocumentHtml({
+  hospitalization,
+  pet,
+  owner,
+  clinic,
+}) {
+  const tasks =
+    await loadHospitalTasksApi(
+      hospitalization.id
+    );
+
+  const completedTasks =
+    (tasks || []).filter(
+      (task) =>
+        task?.status ===
+        "completed"
+    );
+
+  const taskText =
+    completedTasks.length
+      ? completedTasks
+          .map((task) => {
+            const parts = [
+              `• ${
+                task.title ||
+                "Призначення"
+              }`,
+            ];
+
+            if (task.instructions) {
+              parts.push(
+                task.instructions
+              );
+            }
+
+            if (task.completed_at) {
+              parts.push(
+                `виконано ${
+                  formatPatientDocumentDate(
+                    task.completed_at,
+                    true
+                  )
+                }`
+              );
+            }
+
+            return parts.join(" — ");
+          })
+          .join("\n")
+      : "Виконані призначення не зафіксовані.";
+
+  const body = [
+    renderPatientDocumentSection(
+      "Період госпіталізації",
+      `${
+        formatPatientDocumentDate(
+          hospitalization.admitted_at,
+          true
+        )
+      } — ${
+        formatPatientDocumentDate(
+          hospitalization.discharged_at,
+          true
+        )
+      }`
+    ),
+    renderPatientDocumentSection(
+      "Діагноз",
+      hospitalization.diagnosis
+    ),
+    renderPatientDocumentSection(
+      "Виконані процедури та призначення",
+      taskText,
+      true
+    ),
+    renderPatientDocumentSection(
+      "Стан та примітка до виписки",
+      hospitalization.notes
+    ),
+    renderPatientDocumentSection(
+      "Рекомендації власнику",
+      hospitalization.recommendations
+    ),
+  ].join("");
+
+  return renderPatientDocumentShell({
+    title:
+      "Виписка зі стаціонару",
+    number: String(
+      hospitalization?.id || ""
+    )
+      .slice(0, 8)
+      .toUpperCase(),
+    dateLabel:
+      `Дата виписки: ${
+        formatPatientDocumentDate(
+          hospitalization
+            ?.discharged_at
+        )
+      }`,
+    pet:
+      hospitalization?.patient ||
+      pet,
+    owner:
+      hospitalization?.owner ||
+      owner,
+    doctorName:
+      hospitalization
+        ?.doctor_name ||
+      getPatientDocumentDoctorName(
+        hospitalization
+      ),
+    clinic,
+    body,
+  });
+}
+
+async function createPatientDocumentPdf({
+  type,
+  sourceId,
+  pet,
+  visits,
+  hospitalizations,
+}) {
+  const owner =
+    pet?.owner_id
+      ? getOwnerById(
+          pet.owner_id
+        )
+      : null;
+
+  const clinic =
+    await getPatientDocumentClinic();
+
+  let html = "";
+  let sourceDate = todayISO();
+
+  if (type === "hospital") {
+    const hospitalization =
+      hospitalizations.find(
+        (item) =>
+          String(item.id) ===
+          String(sourceId)
+      );
+
+    if (!hospitalization) {
+      throw new Error(
+        "Госпіталізацію не знайдено."
+      );
+    }
+
+    sourceDate =
+      hospitalization.discharged_at ||
+      hospitalization.admitted_at ||
+      sourceDate;
+
+    html =
+      await createHospitalDocumentHtml({
+        hospitalization,
+        pet,
+        owner,
+        clinic,
+      });
+  } else {
+    const visit =
+      visits.find(
+        (item) =>
+          String(item.id) ===
+          String(sourceId)
+      );
+
+    if (!visit) {
+      throw new Error(
+        "Візит не знайдено."
+      );
+    }
+
+    sourceDate =
+      visit.date ||
+      visit.created_at ||
+      sourceDate;
+
+    html =
+      await createVisitBasedDocumentHtml({
+        type,
+        visit,
+        pet,
+        owner,
+        clinic,
+      });
+  }
+
+  let host =
+    document.getElementById(
+      "disA4"
+    );
+
+  if (!host) {
+    host =
+      document.createElement(
+        "div"
+      );
+    host.id = "disA4";
+    host.className =
+      "visitDischargePrintHost";
+    document.body.appendChild(
+      host
+    );
+  }
+
+  host.innerHTML = html;
+
+  const typeNames = {
+    visit: "visit_discharge",
+    hospital:
+      "hospital_discharge",
+    prescriptions:
+      "prescriptions",
+    finance:
+      "financial_statement",
+  };
+
+  const datePart =
+    String(sourceDate)
+      .slice(0, 10);
+
+  const filename = [
+    "DocPUG",
+    sanitizePatientDocumentFilename(
+      pet?.name ||
+      "patient"
+    ),
+    typeNames[type] ||
+      "document",
+    datePart,
+  ].join("_") + ".pdf";
+
+  await downloadA4Pdf(
+    null,
+    {
+      render: false,
+      filename,
+    }
+  );
+}
+
 function renderPatientFinanceTab(root, pet) {
   if (!root || !pet) return;
 
