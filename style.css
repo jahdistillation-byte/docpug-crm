@@ -38471,3 +38471,303 @@ html body .staffSkillPresets button {
   border-color: var(--module-border) !important;
   color: var(--module-text-soft) !important;
 }
+
+/* =========================================================
+   TEAM DIRECTORY — MARBLE WHITE ONLY
+   Compact hierarchy for the staff list; other themes unchanged.
+   ========================================================= */
+
+body[data-theme="white"] .teamPageCard {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding-top: 4px !important;
+}
+
+body[data-theme="white"] .teamPageCard > .row:first-child {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 20px !important;
+}
+
+body[data-theme="white"] .teamPageCard > .row:first-child > button {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+body[data-theme="white"] .teamPageCard > .row:first-child h2 {
+  color: #172b3a !important;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+body[data-theme="white"] .teamPageCard > .row:first-child .hint {
+  color: #687b89 !important;
+}
+
+body[data-theme="white"] .teamPageCard > .row:first-child .primary,
+body[data-theme="white"] .specPanel .primary {
+  background: #3478a8 !important;
+  border-color: #3478a8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 9px 22px rgba(44, 103, 145, 0.18) !important;
+}
+
+body[data-theme="white"] .teamPageCard .specPanel {
+  padding: 16px 18px !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.94),
+      rgba(242, 248, 251, 0.91)
+    ) !important;
+  border: 1px solid #d4e3eb !important;
+  box-shadow:
+    0 12px 30px rgba(47, 83, 107, 0.07),
+    inset 0 1px 0 #ffffff !important;
+}
+
+body[data-theme="white"] .teamPageCard .specPanelHead {
+  margin-bottom: 12px;
+}
+
+body[data-theme="white"] .teamPageCard .specPanelTitle {
+  color: #203847 !important;
+  font-size: 16px;
+}
+
+body[data-theme="white"] .teamPageCard .specPanel .hint {
+  color: #718491 !important;
+}
+
+body[data-theme="white"] .teamPageCard .specPill {
+  min-height: 38px;
+  padding: 5px 7px 5px 12px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d7e4eb !important;
+  color: #294656 !important;
+  box-shadow:
+    0 3px 10px rgba(47, 83, 107, 0.045),
+    inset 0 1px 0 #ffffff !important;
+}
+
+body[data-theme="white"] .teamPageCard .specPillDelete {
+  background: #fff4f5 !important;
+  border-color: #f2d2d7 !important;
+  color: #c55b6a !important;
+}
+
+body[data-theme="white"] .teamPageCard .vetList {
+  gap: 10px;
+  margin-top: 20px;
+}
+
+body[data-theme="white"] .teamPageCard .staffGroupHeader {
+  display: grid;
+  grid-template-columns: auto auto minmax(30px, 1fr);
+  gap: 9px;
+  margin: 18px 2px 4px;
+  color: #294656 !important;
+  font-size: 14px;
+}
+
+body[data-theme="white"] .teamPageCard .staffGroupHeader::after {
+  content: "";
+  align-self: center;
+  height: 1px;
+  margin-left: 4px;
+  background:
+    linear-gradient(
+      90deg,
+      #cddfe9,
+      transparent
+    );
+}
+
+body[data-theme="white"] .teamPageCard .staffGroupHeader small {
+  min-width: 22px;
+  height: 22px;
+  background: #e6f2fa !important;
+  border-color: #c5dce9 !important;
+  color: #3478a8 !important;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetCard {
+  grid-template-columns:
+    64px
+    minmax(0, 1fr)
+    126px;
+  gap: 15px;
+  align-items: center;
+  min-height: 0;
+  padding: 16px 17px !important;
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      color-mix(
+        in srgb,
+        var(--staff-color) 10%,
+        transparent
+      ),
+      transparent 27%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.97),
+      rgba(244, 249, 252, 0.94)
+    ) !important;
+  border: 1px solid #d4e3eb !important;
+  border-left:
+    4px solid
+    var(--staff-color) !important;
+  border-radius: 20px;
+  box-shadow:
+    0 12px 32px rgba(47, 83, 107, 0.09),
+    inset 0 1px 0 #ffffff !important;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetCard:hover {
+  transform: translateY(-1px);
+  border-color:
+    color-mix(
+      in srgb,
+      var(--staff-color) 28%,
+      #d4e3eb
+    ) !important;
+  box-shadow:
+    0 16px 38px rgba(47, 83, 107, 0.12),
+    inset 0 1px 0 #ffffff !important;
+}
+
+body[data-theme="white"] .teamPageCard :is(
+  .vetAvatarLetter,
+  .vetAvatarImg
+) {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  box-shadow:
+    0 9px 22px
+    color-mix(
+      in srgb,
+      var(--staff-color) 19%,
+      transparent
+    );
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetTop {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetName {
+  color: #172b3a !important;
+  font-size: 18px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetRole {
+  color: #667987 !important;
+  font-size: 12px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumStatus {
+  margin-left: 12px;
+  padding: 6px 10px;
+  background: #f2f6f8 !important;
+  border-color: #d5e2e9 !important;
+  color: #6c7f8c !important;
+  font-size: 11px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumStatus.active {
+  background: #e9f6ef !important;
+  border-color: #bddfce !important;
+  color: #31705c !important;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetSpecs {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumSpecTag {
+  padding: 5px 9px;
+  color: #385567 !important;
+  font-size: 10px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetMeta {
+  grid-template-columns:
+    repeat(3, minmax(115px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumMetaItem {
+  padding: 8px 10px;
+  background: rgba(235, 244, 249, 0.72) !important;
+  border: 1px solid #dbe7ee !important;
+  border-radius: 12px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumMetaItem span {
+  color: #78909e !important;
+  font-size: 9px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumMetaItem strong {
+  margin-top: 3px;
+  color: #294656 !important;
+  font-size: 12px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetActions {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+}
+
+body[data-theme="white"] .teamPageCard .premiumVetActions button {
+  width: 126px;
+  min-width: 0;
+  min-height: 34px;
+  justify-content: center;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  box-shadow: none !important;
+}
+
+body[data-theme="white"] .teamPageCard .premiumProfileBtn {
+  background: #e8f3fa !important;
+  border-color: #bfd8e8 !important;
+  color: #286f9f !important;
+}
+
+body[data-theme="white"] .teamPageCard .premiumEditBtn {
+  background: #ffffff !important;
+  border-color: #d4e2ea !important;
+  color: #526b7b !important;
+}
+
+body[data-theme="white"] .teamPageCard .premiumDeleteBtn {
+  background: #fff4f5 !important;
+  border-color: #f0d0d5 !important;
+  color: #b85160 !important;
+}
+
+@media (max-width: 900px) {
+  body[data-theme="white"] .teamPageCard .premiumVetCard {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  body[data-theme="white"] .teamPageCard .premiumVetActions {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  body[data-theme="white"] .teamPageCard .premiumVetActions button {
+    width: auto;
+  }
+}
