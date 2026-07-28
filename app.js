@@ -11081,6 +11081,282 @@ function getStockStatus(item) {
 }
 
 
+function parseStockDate(value) {
+  const match =
+    String(value || "")
+      .match(
+        /^(\d{4})-(\d{2})-(\d{2})$/
+      );
+
+  if (!match) return null;
+
+  const parsed =
+    new Date(
+      Number(match[1]),
+      Number(match[2]) - 1,
+      Number(match[3])
+    );
+
+  return Number.isNaN(
+    parsed.getTime()
+  )
+    ? null
+    : parsed;
+}
+
+
+function formatStockDate(value) {
+  const parsed =
+    parseStockDate(value);
+
+  return parsed
+    ? parsed.toLocaleDateString(
+        "uk-UA"
+      )
+    : "";
+}
+
+
+function getStockExpiryMeta(
+  item,
+  now = new Date()
+) {
+  const expiryDate =
+    parseStockDate(
+      item?.expiry_date
+    );
+
+  if (!expiryDate) {
+    return {
+      key: "none",
+      days: null,
+      label: "",
+    };
+  }
+
+  const today =
+    new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+  const days =
+    Math.ceil(
+      (
+        expiryDate.getTime()
+        - today.getTime()
+      )
+      / 86400000
+    );
+
+  if (days < 0) {
+    return {
+      key: "expired",
+      days,
+      label: "Термін минув",
+    };
+  }
+
+  if (days <= 30) {
+    return {
+      key: "critical",
+      days,
+      label:
+        days === 0
+          ? "Останній день"
+          : `${days} дн. до завершення`,
+    };
+  }
+
+  if (days <= 90) {
+    return {
+      key: "warning",
+      days,
+      label:
+        `${days} дн. до завершення`,
+    };
+  }
+
+  return {
+    key: "good",
+    days,
+    label:
+      `Придатний до ${formatStockDate(
+        item.expiry_date
+      )}`,
+  };
+}
+
+
+function buildStockPugInsights(items) {
+  const signals = [];
+  const attentionItemIds =
+    new Set();
+  let expiryRiskCount = 0;
+  let forecastRiskCount = 0;
+  let valueAtRisk = 0;
+
+  (items || [])
+    .filter(
+      (item) =>
+        item?.active !== false
+    )
+    .forEach((item) => {
+      const itemId =
+        String(item.id || "");
+      const quantity =
+        Math.max(
+          0,
+          Number(item.qty || 0)
+        );
+      const minimum =
+        Math.max(
+          0,
+          Number(item.min_qty || 0)
+        );
+      const cost =
+        Math.max(
+          0,
+          Number(item.cost || 0)
+        );
+      const expiry =
+        getStockExpiryMeta(item);
+      const estimatedDaysLeft =
+        item.estimated_days_left ==
+        null
+          ? null
+          : Math.max(
+              0,
+              Number(
+                item.estimated_days_left
+              )
+            );
+
+      if (
+        expiry.key === "expired" ||
+        expiry.key === "critical"
+      ) {
+        expiryRiskCount += 1;
+        attentionItemIds.add(itemId);
+        valueAtRisk +=
+          quantity * cost;
+
+        signals.push({
+          priority:
+            expiry.key === "expired"
+              ? 0
+              : 1,
+          tone:
+            expiry.key === "expired"
+              ? "danger"
+              : "warning",
+          icon:
+            expiry.key === "expired"
+              ? "!"
+              : "◷",
+          itemId,
+          title:
+            expiry.key === "expired"
+              ? `${item.name}: термін придатності минув`
+              : `${item.name}: ${expiry.label.toLowerCase()}`,
+          description:
+            quantity > 0
+              ? `Під ризиком ${quantity.toLocaleString(
+                  "uk-UA"
+                )} ${item.unit}.`
+              : "Перевірте позицію перед використанням.",
+        });
+      }
+
+      if (quantity <= 0) {
+        attentionItemIds.add(itemId);
+
+        signals.push({
+          priority: 0,
+          tone: "danger",
+          icon: "0",
+          itemId,
+          title:
+            `${item.name} закінчився`,
+          description:
+            minimum > 0
+              ? `Рекомендований мінімум — ${minimum.toLocaleString(
+                  "uk-UA"
+                )} ${item.unit}.`
+              : "Позиція недоступна для використання.",
+        });
+      } else if (
+        quantity <= minimum
+      ) {
+        attentionItemIds.add(itemId);
+
+        signals.push({
+          priority: 1,
+          tone: "warning",
+          icon: "↓",
+          itemId,
+          title:
+            `${item.name}: критичний залишок`,
+          description:
+            `Залишилось ${quantity.toLocaleString(
+              "uk-UA"
+            )} ${item.unit}, мінімум — ${minimum.toLocaleString(
+              "uk-UA"
+            )}.`,
+        });
+      }
+
+      if (
+        estimatedDaysLeft != null &&
+        estimatedDaysLeft > 0 &&
+        estimatedDaysLeft <= 14 &&
+        quantity > minimum
+      ) {
+        forecastRiskCount += 1;
+        attentionItemIds.add(itemId);
+
+        signals.push({
+          priority:
+            estimatedDaysLeft <= 7
+              ? 1
+              : 2,
+          tone:
+            estimatedDaysLeft <= 7
+              ? "warning"
+              : "info",
+          icon: "↘",
+          itemId,
+          title:
+            `${item.name} вистачить приблизно на ${Math.max(
+              1,
+              Math.round(
+                estimatedDaysLeft
+              )
+            )} дн.`,
+          description:
+            "Прогноз за списаннями останніх 30 днів.",
+        });
+      }
+    });
+
+  signals.sort(
+    (left, right) =>
+      left.priority -
+      right.priority
+  );
+
+  return {
+    signals,
+    attentionCount:
+      attentionItemIds.size,
+    expiryRiskCount,
+    forecastRiskCount,
+    valueAtRisk,
+  };
+}
+
+
 function normalizeStockItem(item) {
   const category =
     String(
@@ -11182,6 +11458,43 @@ function normalizeStockItem(item) {
           5
         )
       ),
+
+    expiry_date:
+      String(
+        item?.expiry_date || ""
+      ).trim() || null,
+
+    batch_number:
+      String(
+        item?.batch_number || ""
+      ).trim() || null,
+
+    usage_30d:
+      Math.max(
+        0,
+        Number(
+          item?.usage_30d || 0
+        )
+      ),
+
+    avg_daily_usage:
+      Math.max(
+        0,
+        Number(
+          item?.avg_daily_usage || 0
+        )
+      ),
+
+    estimated_days_left:
+      item?.estimated_days_left ==
+      null
+        ? null
+        : Math.max(
+            0,
+            Number(
+              item.estimated_days_left
+            )
+          ),
 
     active:
       item?.active !== false,
@@ -21650,6 +21963,9 @@ function renderStockTab() {
         "empty"
     ).length;
 
+  const stockPugInsights =
+    buildStockPugInsights(items);
+
   const currentQuery =
     String(
       state.stockQuery || ""
@@ -21786,6 +22102,126 @@ const currentSpecies =
           <small>
             за закупівельною ціною
           </small>
+        </div>
+      </section>
+
+      <section class="stockPugBrief">
+        <header class="stockPugBriefHeader">
+          <div class="stockPugBriefIdentity">
+            <span class="stockPugBriefIcon">
+              ✦
+            </span>
+
+            <div>
+              <div class="stockPugBriefEyebrow">
+                PUG КОРОТКО · АВТОМАТИЧНИЙ КОНТРОЛЬ
+              </div>
+
+              <h2>
+                ${
+                  stockPugInsights
+                    .attentionCount
+                    ? `${stockPugInsights.attentionCount} позицій потребують уваги`
+                    : "На складі все спокійно"
+                }
+              </h2>
+
+              <p>
+                Перевіряємо залишки,
+                терміни придатності та
+                темп використання.
+              </p>
+            </div>
+          </div>
+
+          <div class="stockPugBriefMetrics">
+            <div>
+              <span>Терміни</span>
+              <strong>
+                ${stockPugInsights.expiryRiskCount}
+              </strong>
+            </div>
+
+            <div>
+              <span>Прогноз</span>
+              <strong>
+                ${stockPugInsights.forecastRiskCount}
+              </strong>
+            </div>
+
+            <div>
+              <span>Під ризиком</span>
+              <strong>
+                ${Math.round(
+                  stockPugInsights.valueAtRisk
+                ).toLocaleString(
+                  "uk-UA"
+                )} ₴
+              </strong>
+            </div>
+          </div>
+        </header>
+
+        <div class="stockPugBriefSignals">
+          ${
+            stockPugInsights
+              .signals.length
+              ? stockPugInsights
+                  .signals
+                  .slice(0, 5)
+                  .map(
+                    (signal) => `
+                      <button
+                        type="button"
+                        class="stockPugSignal ${signal.tone}"
+                        data-stock-pug-item="${escapeHtml(
+                          signal.itemId
+                        )}"
+                      >
+                        <span class="stockPugSignalIcon">
+                          ${escapeHtml(
+                            signal.icon
+                          )}
+                        </span>
+
+                        <span class="stockPugSignalCopy">
+                          <strong>
+                            ${escapeHtml(
+                              signal.title
+                            )}
+                          </strong>
+
+                          <small>
+                            ${escapeHtml(
+                              signal.description
+                            )}
+                          </small>
+                        </span>
+
+                        <span class="stockPugSignalAction">
+                          Переглянути →
+                        </span>
+                      </button>
+                    `
+                  )
+                  .join("")
+              : `
+                <div class="stockPugBriefHealthy">
+                  <span>✓</span>
+
+                  <div>
+                    <strong>
+                      Критичних сигналів немає
+                    </strong>
+
+                    <small>
+                      PUG продовжує стежити за
+                      змінами автоматично.
+                    </small>
+                  </div>
+                </div>
+              `
+          }
         </div>
       </section>
 
@@ -22287,6 +22723,19 @@ const matchesSpecies =
                     const stockValue =
                       quantity * cost;
 
+                    const expiry =
+                      getStockExpiryMeta(
+                        item
+                      );
+
+                    const estimatedDaysLeft =
+                      item.estimated_days_left ==
+                      null
+                        ? null
+                        : Number(
+                            item.estimated_days_left
+                          );
+
                     return `
                       <article
                         class="
@@ -22384,6 +22833,67 @@ const matchesSpecies =
 
 
 </div>
+
+${
+  item.expiry_date ||
+  item.batch_number ||
+  (
+    estimatedDaysLeft != null &&
+    Number.isFinite(
+      estimatedDaysLeft
+    )
+  )
+    ? `
+      <div class="stockPremiumTraceability">
+        ${
+          item.expiry_date
+            ? `
+              <span class="stockPremiumExpiry ${expiry.key}">
+                <b>◷</b>
+                ${escapeHtml(
+                  expiry.label
+                )}
+              </span>
+            `
+            : ""
+        }
+
+        ${
+          item.batch_number
+            ? `
+              <span>
+                <b>№</b>
+                Партія ${escapeHtml(
+                  item.batch_number
+                )}
+              </span>
+            `
+            : ""
+        }
+
+        ${
+          estimatedDaysLeft != null &&
+          Number.isFinite(
+            estimatedDaysLeft
+          ) &&
+          estimatedDaysLeft > 0
+            ? `
+              <span>
+                <b>↘</b>
+                Прогноз ≈ ${Math.max(
+                  1,
+                  Math.round(
+                    estimatedDaysLeft
+                  )
+                )} дн.
+              </span>
+            `
+            : ""
+        }
+      </div>
+    `
+    : ""
+}
 
 <div class="stockPremiumPrices">
   <div>
@@ -22540,6 +23050,57 @@ ${
 };
 
   renderStockCards();
+
+  page
+    .querySelectorAll(
+      "[data-stock-pug-item]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const itemId =
+            String(
+              button.dataset
+                .stockPugItem || ""
+            );
+          const item =
+            items.find(
+              (candidate) =>
+                String(
+                  candidate.id
+                ) === itemId
+            );
+
+          if (!item) return;
+
+          state.stockQuery =
+            String(item.name || "");
+          state.stockFilter = "all";
+          state.stockCategory = "all";
+          state.stockGroup = "all";
+          state.stockForm = "all";
+          state.stockSpecies = "all";
+
+          renderStockTab();
+
+          requestAnimationFrame(
+            () => {
+              document
+                .querySelector(
+                  `[data-stock-card="${CSS.escape(
+                    itemId
+                  )}"]`
+                )
+                ?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+            }
+          );
+        }
+      );
+    });
 
   page
     .querySelector(
@@ -23168,6 +23729,81 @@ const categories =
           </label>
         </div>
 
+        <label class="stockEditorStatus stockEditorTraceabilityToggle">
+          <div>
+            <strong>
+              Контроль терміну й партії
+            </strong>
+
+            <span>
+              Необов’язково. Увімкніть для
+              вакцин і важливих препаратів.
+            </span>
+          </div>
+
+          <label class="stockPremiumSwitch">
+            <input
+              id="stockEditorTraceability"
+              type="checkbox"
+              ${
+                item.expiry_date ||
+                item.batch_number
+                  ? "checked"
+                  : ""
+              }
+            >
+
+            <span></span>
+          </label>
+        </label>
+
+        <div
+          class="stockEditorTraceabilityPanel ${
+            item.expiry_date ||
+            item.batch_number
+              ? ""
+              : "hidden"
+          }"
+          id="stockEditorTraceabilityPanel"
+        >
+          <div class="stockEditorRow">
+            <label class="stockEditorField">
+              <span>
+                Придатний до
+              </span>
+
+              <input
+                id="stockEditorExpiryDate"
+                type="date"
+                value="${escapeHtml(
+                  item.expiry_date || ""
+                )}"
+              >
+            </label>
+
+            <label class="stockEditorField">
+              <span>
+                Номер партії
+              </span>
+
+              <input
+                id="stockEditorBatchNumber"
+                type="text"
+                maxlength="120"
+                placeholder="Необов’язково"
+                value="${escapeHtml(
+                  item.batch_number || ""
+                )}"
+              >
+            </label>
+          </div>
+
+          <p>
+            PUG використає ці дані лише для
+            попереджень і складських звітів.
+          </p>
+        </div>
+
         <label class="stockEditorStatus">
           <div>
             <strong>
@@ -23299,6 +23935,32 @@ const categories =
     modal.querySelector(
       "#stockEditorQuantity"
     );
+
+  const traceabilityInput =
+    modal.querySelector(
+      "#stockEditorTraceability"
+    );
+
+  const traceabilityPanel =
+    modal.querySelector(
+      "#stockEditorTraceabilityPanel"
+    );
+
+  const syncTraceabilityPanel =
+    () => {
+      traceabilityPanel
+        ?.classList.toggle(
+          "hidden",
+          !traceabilityInput?.checked
+        );
+    };
+
+  traceabilityInput
+    ?.addEventListener(
+      "change",
+      syncTraceabilityPanel
+    );
+
 const renderCategoryOptions = () => {
   const selectedGroup =
     STOCK_CATEGORY_GROUPS.find(
@@ -23520,6 +24182,28 @@ const renderCategoryOptions = () => {
       )?.value || 0
     )
   ),
+
+  expiry_date:
+    traceabilityInput?.checked
+      ? (
+          String(
+            modal.querySelector(
+              "#stockEditorExpiryDate"
+            )?.value || ""
+          ).trim() || null
+        )
+      : null,
+
+  batch_number:
+    traceabilityInput?.checked
+      ? (
+          String(
+            modal.querySelector(
+              "#stockEditorBatchNumber"
+            )?.value || ""
+          ).trim() || null
+        )
+      : null,
 
   active:
     modal.querySelector(
@@ -48031,6 +48715,9 @@ async function updateStockItemApi(
   stockId,
   payload
 ) {
+  const previousItem =
+    getStockById(stockId);
+
   const data =
     await stockApiRequest(
       `/api/stock/${encodeURIComponent(
@@ -48045,7 +48732,10 @@ async function updateStockItemApi(
     );
 
   const updatedItem =
-    normalizeStockItem(data);
+    normalizeStockItem({
+      ...previousItem,
+      ...data,
+    });
 
   state.stock =
     loadStock().map((item) =>
@@ -48067,6 +48757,9 @@ async function adjustStockItemApi(
     comment = "",
   }
 ) {
+  const previousItem =
+    getStockById(stockId);
+
   const movementType =
     mode === "income"
       ? "income"
@@ -48099,8 +48792,47 @@ async function adjustStockItemApi(
       }
     );
 
+  const movementQuantity =
+    Math.max(
+      0,
+      Number(quantity) || 0
+    );
+
+  const usage30d =
+    Math.max(
+      0,
+      Number(
+        previousItem?.usage_30d
+      ) || 0
+    ) +
+    (
+      movementType === "writeoff"
+        ? movementQuantity
+        : 0
+    );
+
+  const avgDailyUsage =
+    usage30d / 30;
+
+  const updatedQty =
+    Math.max(
+      0,
+      Number(data?.qty) || 0
+    );
+
   const updatedItem =
-    normalizeStockItem(data);
+    normalizeStockItem({
+      ...previousItem,
+      ...data,
+      usage_30d: usage30d,
+      avg_daily_usage:
+        avgDailyUsage,
+      estimated_days_left:
+        avgDailyUsage > 0
+          ? updatedQty /
+            avgDailyUsage
+          : null,
+    });
 
   state.stock =
     loadStock().map((item) =>

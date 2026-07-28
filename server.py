@@ -1596,6 +1596,30 @@ def stock_number(value, default=0):
         return float(default)
 
 
+def stock_optional_date(value):
+    text = str(
+        value or ""
+    ).strip()
+
+    if not text:
+        return None
+
+    try:
+        return (
+            datetime
+            .strptime(
+                text,
+                "%Y-%m-%d",
+            )
+            .date()
+            .isoformat()
+        )
+    except ValueError as error:
+        raise ValueError(
+            "Невірна дата придатності."
+        ) from error
+
+
 def serialize_stock_item(row):
     if not row:
         return None
@@ -1648,6 +1672,41 @@ def serialize_stock_item(row):
             5
         ),
 
+        "expiry_date": (
+            str(row.get("expiry_date"))
+            if row.get("expiry_date")
+            else None
+        ),
+
+        "batch_number": (
+            str(row.get("batch_number")).strip()
+            if row.get("batch_number")
+            else None
+        ),
+
+        "usage_30d": stock_number(
+            row.get("usage_30d")
+        ),
+
+        "avg_daily_usage": stock_number(
+            row.get("avg_daily_usage")
+        ),
+
+        "estimated_days_left": (
+            round(
+                float(
+                    row.get(
+                        "estimated_days_left"
+                    )
+                ),
+                1,
+            )
+            if row.get(
+                "estimated_days_left"
+            ) is not None
+            else None
+        ),
+
         "active": (
             row.get("active")
             is not False
@@ -1682,11 +1741,108 @@ def api_get_stock():
             .execute()
         )
 
+        rows = list(
+            result.data or []
+        )
+
+        usage_by_stock = {}
+
+        try:
+            usage_result = (
+                supabase
+                .table("stock_movements")
+                .select(
+                    "stock_id, quantity"
+                )
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "movement_type",
+                    "writeoff",
+                )
+                .gte(
+                    "created_at",
+                    (
+                        datetime
+                        .now(timezone.utc)
+                        - timedelta(days=30)
+                    ).isoformat(),
+                )
+                .execute()
+            )
+
+            for movement in (
+                usage_result.data or []
+            ):
+                stock_id = str(
+                    movement.get(
+                        "stock_id"
+                    )
+                    or ""
+                )
+
+                if not stock_id:
+                    continue
+
+                usage_by_stock[
+                    stock_id
+                ] = (
+                    usage_by_stock.get(
+                        stock_id,
+                        0,
+                    )
+                    + stock_number(
+                        movement.get(
+                            "quantity"
+                        )
+                    )
+                )
+
+        except Exception as usage_error:
+            print(
+                "⚠️ Stock usage metrics:",
+                repr(usage_error),
+            )
+
+        for row in rows:
+            stock_id = str(
+                row.get("id") or ""
+            )
+            usage_30d = stock_number(
+                usage_by_stock.get(
+                    stock_id,
+                    0,
+                )
+            )
+            avg_daily_usage = (
+                usage_30d / 30
+                if usage_30d > 0
+                else 0
+            )
+            quantity = stock_number(
+                row.get("qty")
+            )
+
+            row["usage_30d"] = (
+                usage_30d
+            )
+            row["avg_daily_usage"] = (
+                avg_daily_usage
+            )
+            row[
+                "estimated_days_left"
+            ] = (
+                quantity
+                / avg_daily_usage
+                if avg_daily_usage > 0
+                else None
+            )
+
         items = [
             serialize_stock_item(row)
-            for row in (
-                result.data or []
-            )
+            for row in rows
         ]
 
         return ok(items)
@@ -1730,6 +1886,18 @@ def api_create_stock_item():
         )
 
     current_org = get_current_org_id()
+
+    try:
+        expiry_date = (
+            stock_optional_date(
+                data.get("expiry_date")
+            )
+        )
+    except ValueError as error:
+        return fail(
+            str(error),
+            400,
+        )
 
     payload = {
         "org_id": current_org,
@@ -1806,6 +1974,18 @@ def api_create_stock_item():
                 "minimum_qty"
             ),
             5
+        ),
+
+        "expiry_date": expiry_date,
+
+        "batch_number": (
+            str(
+                data.get(
+                    "batch_number"
+                )
+                or ""
+            ).strip()
+            or None
         ),
 
         "active": (
@@ -1894,6 +2074,8 @@ def api_update_stock_item(stock_id):
         "min_qty": "minimum_qty",
         "minimum_qty":
             "minimum_qty",
+        "expiry_date": "expiry_date",
+        "batch_number": "batch_number",
         "active": "active",
     }
 
@@ -1922,10 +2104,34 @@ def api_update_stock_item(stock_id):
         elif db_field == "active":
             value = value is not False
 
+        elif db_field in {
+            "batch_number",
+        }:
+            value = (
+                str(value).strip()
+                if value is not None
+                else ""
+            ) or None
+
         elif value is not None:
             value = str(value).strip()
 
         payload[db_field] = value
+
+    if "expiry_date" in data:
+        try:
+            payload[
+                "expiry_date"
+            ] = stock_optional_date(
+                data.get(
+                    "expiry_date"
+                )
+            )
+        except ValueError as error:
+            return fail(
+                str(error),
+                400,
+            )
 
     if "name" in payload:
         if not payload["name"]:

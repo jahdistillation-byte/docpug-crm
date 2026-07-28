@@ -23681,6 +23681,230 @@ select.visitControl {
   color: #55dfa2;
 }
 
+.stockPugBrief {
+  margin-top: 16px;
+  padding: 22px;
+  border: 1px solid var(--module-border-strong);
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      var(--module-accent-soft),
+      transparent 44%
+    ),
+    linear-gradient(
+      145deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    );
+  box-shadow:
+    0 20px 55px var(--module-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.stockPugBriefHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+}
+
+.stockPugBriefIdentity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.stockPugBriefIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid var(--module-border-strong);
+  border-radius: 15px;
+  background: var(--module-accent-soft);
+  color: var(--module-accent-2);
+  font-size: 20px;
+  box-shadow: 0 0 22px var(--module-accent-glow);
+}
+
+.stockPugBriefEyebrow {
+  color: var(--module-accent-2);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.stockPugBrief h2 {
+  margin: 5px 0 0;
+  color: var(--module-text);
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.stockPugBriefIdentity p {
+  margin: 5px 0 0;
+  color: var(--module-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.stockPugBriefMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(86px, auto));
+  gap: 8px;
+}
+
+.stockPugBriefMetrics > div {
+  min-width: 92px;
+  padding: 10px 12px;
+  border: 1px solid var(--module-border);
+  border-radius: 13px;
+  background: var(--module-surface-soft);
+}
+
+.stockPugBriefMetrics span,
+.stockPugBriefMetrics strong {
+  display: block;
+}
+
+.stockPugBriefMetrics span {
+  color: var(--module-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.stockPugBriefMetrics strong {
+  margin-top: 4px;
+  color: var(--module-text);
+  font-size: 16px;
+}
+
+.stockPugBriefSignals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.stockPugSignal {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--module-border);
+  border-radius: 14px;
+  background: var(--module-surface-soft);
+  color: var(--module-text);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.stockPugSignal:hover {
+  transform: translateY(-1px);
+  border-color: var(--module-border-strong);
+  background: var(--module-accent-soft);
+}
+
+.stockPugSignalIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--module-accent-soft);
+  color: var(--module-accent-2);
+  font-weight: 900;
+}
+
+.stockPugSignal.danger .stockPugSignalIcon {
+  background: rgba(255, 83, 111, 0.12);
+  color: #ff647d;
+}
+
+.stockPugSignal.warning .stockPugSignalIcon {
+  background: rgba(244, 183, 64, 0.13);
+  color: #e5a629;
+}
+
+.stockPugSignalCopy {
+  min-width: 0;
+}
+
+.stockPugSignalCopy strong,
+.stockPugSignalCopy small {
+  display: block;
+}
+
+.stockPugSignalCopy strong {
+  overflow: hidden;
+  color: var(--module-text);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stockPugSignalCopy small {
+  margin-top: 3px;
+  color: var(--module-text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.stockPugSignalAction {
+  color: var(--module-accent-2);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.stockPugBriefHealthy {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid rgba(71, 207, 143, 0.2);
+  border-radius: 14px;
+  background: rgba(71, 207, 143, 0.07);
+}
+
+.stockPugBriefHealthy > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(71, 207, 143, 0.12);
+  color: #45cf8f;
+  font-weight: 900;
+}
+
+.stockPugBriefHealthy strong,
+.stockPugBriefHealthy small {
+  display: block;
+}
+
+.stockPugBriefHealthy strong {
+  color: var(--module-text);
+  font-size: 13px;
+}
+
+.stockPugBriefHealthy small {
+  margin-top: 2px;
+  color: var(--module-text-muted);
+  font-size: 11px;
+}
+
 .stockPremiumControls {
   display: flex;
   align-items: center;
@@ -23900,6 +24124,48 @@ select.visitControl {
   color: rgba(255,255,255,.92);
   font-size: .98rem;
   line-height: 1.35;
+}
+
+.stockPremiumTraceability {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.stockPremiumTraceability > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  padding: 4px 8px;
+  border: 1px solid var(--module-border);
+  border-radius: 999px;
+  background: var(--module-surface-soft);
+  color: var(--module-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.stockPremiumTraceability b {
+  color: var(--module-accent-2);
+}
+
+.stockPremiumExpiry.expired {
+  border-color: rgba(255, 84, 111, 0.25);
+  background: rgba(255, 84, 111, 0.08);
+  color: #ff647d;
+}
+
+.stockPremiumExpiry.critical {
+  border-color: rgba(244, 183, 64, 0.28);
+  background: rgba(244, 183, 64, 0.09);
+  color: #d99b20;
+}
+
+.stockPremiumExpiry.warning {
+  border-color: rgba(244, 183, 64, 0.2);
+  color: #d3a342;
 }
 
 .stockPremiumPrices,
@@ -24270,6 +24536,37 @@ select.visitControl {
   display: block;
 }
 
+.stockEditorTraceabilityToggle {
+  margin-bottom: 12px;
+}
+
+.stockEditorTraceabilityPanel {
+  margin-bottom: 13px;
+  padding: 14px;
+  border: 1px solid var(--module-border);
+  border-radius: 14px;
+  background: var(--module-surface-soft);
+}
+
+.stockEditorTraceabilityPanel.hidden {
+  display: none;
+}
+
+.stockEditorTraceabilityPanel .stockEditorRow {
+  margin: 0;
+}
+
+.stockEditorTraceabilityPanel .stockEditorField {
+  margin-bottom: 0;
+}
+
+.stockEditorTraceabilityPanel > p {
+  margin: 10px 0 0;
+  color: var(--module-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .stockEditorStatus strong {
   color: #fff;
   font-size: .82rem;
@@ -24497,6 +24794,14 @@ select.visitControl {
   .stockPremiumCards {
     grid-template-columns: repeat(2,minmax(0,1fr));
   }
+
+  .stockPugBriefHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .stockPugBriefMetrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 700px) {
@@ -24526,6 +24831,27 @@ select.visitControl {
 
   .stockEditorModal {
     padding: 23px 17px;
+  }
+
+  .stockPugBrief {
+    padding: 17px;
+  }
+
+  .stockPugBriefIdentity {
+    align-items: flex-start;
+  }
+
+  .stockPugBriefMetrics,
+  .stockPugBriefSignals {
+    grid-template-columns: 1fr;
+  }
+
+  .stockPugSignal {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .stockPugSignalAction {
+    grid-column: 2;
   }
 }
 /* =====================================================
