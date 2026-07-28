@@ -20577,15 +20577,16 @@ select.visitControl {
 }
 
 .disConsentSection {
+  /*
+   * html2canvas 1.x не умеет разбирать вычисленный
+   * цвет из color-mix()/color(). Для PDF оставляем
+   * такой же лёгкий фон в обычном sRGB.
+   */
   background:
     linear-gradient(
       135deg,
-      color-mix(
-        in srgb,
-        var(--disAccent, #9346e8) 4%,
-        white
-      ),
-      #fff
+      rgba(72, 199, 213, .045),
+      #ffffff
     ) !important;
 }
 
@@ -20619,11 +20620,7 @@ select.visitControl {
 
 .disConsentDataSection {
   border-left: 3px solid
-    color-mix(
-      in srgb,
-      var(--disAccent, #9346e8) 55%,
-      white
-    ) !important;
+    var(--disAccent, #9346e8) !important;
   background: #fbfcfe !important;
 }
 
@@ -20655,12 +20652,7 @@ select.visitControl {
   flex: 0 0 13px;
   place-items: center;
   border-radius: 4px;
-  background:
-    color-mix(
-      in srgb,
-      var(--disAccent, #9346e8) 13%,
-      white
-    );
+  background: #eaf8fa;
   color: var(--disAccent, #9346e8);
   font-size: 8px;
   font-weight: 900;
