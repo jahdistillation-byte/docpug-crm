@@ -12762,6 +12762,58 @@ async function cancelFinancePaymentApi(
   return result.data;
 }
 
+async function refundFinancePaymentApi(
+  transactionId,
+  payload
+) {
+  const response =
+    await fetch(
+      (
+        "/api/finance/transactions/" +
+        encodeURIComponent(
+          transactionId
+        ) +
+        "/refund"
+      ),
+      {
+        method: "POST",
+        credentials: "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          ),
+      }
+    );
+
+  let result = null;
+
+  try {
+    result =
+      await response.json();
+
+  } catch {
+    result = null;
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося оформити повернення."
+    );
+  }
+
+  return result.data;
+}
+
 async function updateFinanceExpenseApi(
   transactionId,
   payload
@@ -12812,6 +12864,483 @@ async function updateFinanceExpenseApi(
   }
 
   return result.data;
+}
+
+
+function openFinancePaymentRefundModal(
+  transaction
+) {
+  if (
+    !isOwnerOrAdmin()
+  ) {
+    openDeleteModal(
+      (
+        "Оформлювати повернення може лише " +
+        "адміністратор або власник клініки."
+      ),
+      null,
+      "info"
+    );
+
+    return;
+  }
+
+  if (
+    !transaction ||
+    transaction.transaction_type !==
+      "payment" ||
+    transaction.status !==
+      "completed"
+  ) {
+    return;
+  }
+
+  const originalAmount =
+    Number(
+      transaction.amount || 0
+    );
+
+  const refundedAmount =
+    Math.max(
+      0,
+      Number(
+        transaction.metadata
+          ?.refunded_amount ||
+        0
+      )
+    );
+
+  const refundableAmount =
+    Math.max(
+      0,
+      Math.min(
+        originalAmount,
+        Number(
+          transaction.metadata
+            ?.refundable_amount ??
+          (
+            originalAmount -
+            refundedAmount
+          )
+        )
+      )
+    );
+
+  if (
+    !Number.isFinite(
+      refundableAmount
+    ) ||
+    refundableAmount <= 0
+  ) {
+    openDeleteModal(
+      "Цей платіж уже повернено повністю.",
+      null,
+      "info"
+    );
+
+    return;
+  }
+
+  document
+    .getElementById(
+      "financePaymentRefundModal"
+    )
+    ?.remove();
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.id =
+    "financePaymentRefundModal";
+
+  modal.className =
+    "financeExpenseOverlay financeRefundOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="financeExpenseBackdrop"
+      data-close-finance-refund
+    ></div>
+
+    <section
+      class="financeExpenseModal financeRefundModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="financeRefundTitle"
+    >
+      <header class="financeExpenseHeader">
+        <div class="financeExpenseHeaderIcon">
+          ↙
+        </div>
+
+        <div>
+          <span>
+            ПОВЕРНЕННЯ КЛІЄНТУ
+          </span>
+
+          <h2 id="financeRefundTitle">
+            Повернути платіж
+          </h2>
+
+          <p>
+            Повернення стане окремою операцією.
+            Початковий платіж залишиться в журналі.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="financeExpenseClose"
+          data-close-finance-refund
+          aria-label="Закрити"
+        >
+          ✕
+        </button>
+      </header>
+
+      <form
+        class="financeExpenseForm"
+        id="financeRefundForm"
+      >
+        <div
+          class="financeExpenseError"
+          id="financeRefundError"
+          hidden
+        ></div>
+
+        <div class="financeRefundSummary">
+          <div>
+            <span>
+              Початковий платіж
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                originalAmount
+              )}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Доступно повернути
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                refundableAmount
+              )}
+            </strong>
+          </div>
+        </div>
+
+        <div class="financeExpenseAmountBlock">
+          <label>
+            <span>
+              Сума повернення
+            </span>
+
+            <div class="financeExpenseAmountInput">
+              <input
+                type="number"
+                name="amount"
+                min="0.01"
+                max="${refundableAmount}"
+                step="0.01"
+                value="${refundableAmount}"
+                inputmode="decimal"
+                required
+                autofocus
+              >
+
+              <b>₴</b>
+            </div>
+          </label>
+        </div>
+
+        <label class="financeExpenseField financeExpenseWide">
+          <span>
+            Причина повернення
+          </span>
+
+          <textarea
+            name="reason"
+            maxlength="500"
+            rows="3"
+            placeholder="Наприклад, послугу скасовано або клієнт переплатив…"
+            required
+          ></textarea>
+        </label>
+
+        <div class="financeExpenseHint">
+          <span>i</span>
+
+          <p>
+            Баланс візиту, клієнта та фінансового
+            рахунку перерахуються автоматично.
+            Часткове повернення можна продовжити
+            пізніше в межах залишку платежу.
+          </p>
+        </div>
+
+        <footer class="financeExpenseFooter">
+          <button
+            type="button"
+            class="financeExpenseCancel"
+            data-close-finance-refund
+          >
+            Залишити платіж
+          </button>
+
+          <button
+            type="submit"
+            class="financeExpenseSubmit"
+            id="financeRefundSubmit"
+          >
+            <span>
+              Оформити повернення
+            </span>
+
+            <strong>
+              ↙
+            </strong>
+          </button>
+        </footer>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  document.body.classList.add(
+    "financeExpenseModalOpen"
+  );
+
+  const form =
+    modal.querySelector(
+      "#financeRefundForm"
+    );
+
+  const submitButton =
+    modal.querySelector(
+      "#financeRefundSubmit"
+    );
+
+  const errorElement =
+    modal.querySelector(
+      "#financeRefundError"
+    );
+
+  let submitting = false;
+
+  const close = () => {
+    if (submitting) return;
+
+    modal.remove();
+
+    document.body.classList.remove(
+      "financeExpenseModalOpen"
+    );
+
+    document.removeEventListener(
+      "keydown",
+      onKeydown
+    );
+  };
+
+  const onKeydown = (
+    event
+  ) => {
+    if (
+      event.key ===
+      "Escape"
+    ) {
+      close();
+    }
+  };
+
+  document.addEventListener(
+    "keydown",
+    onKeydown
+  );
+
+  modal.addEventListener(
+    "click",
+    (
+      event
+    ) => {
+      if (
+        event.target.closest(
+          "[data-close-finance-refund]"
+        )
+      ) {
+        close();
+      }
+    }
+  );
+
+  form?.addEventListener(
+    "submit",
+    async (
+      event
+    ) => {
+      event.preventDefault();
+
+      if (submitting) return;
+
+      const formData =
+        new FormData(
+          form
+        );
+
+      const amount =
+        Number(
+          formData.get(
+            "amount"
+          )
+        );
+
+      const reason =
+        String(
+          formData.get(
+            "reason"
+          )
+          || ""
+        ).trim();
+
+      if (
+        !Number.isFinite(
+          amount
+        ) ||
+        amount <= 0 ||
+        amount >
+          refundableAmount
+      ) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          (
+            "Вкажіть суму від 0,01 до " +
+            formatVisitFinanceMoney(
+              refundableAmount
+            ) +
+            "."
+          );
+
+        return;
+      }
+
+      if (!reason) {
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          "Вкажіть причину повернення.";
+
+        return;
+      }
+
+      submitting = true;
+
+      errorElement.hidden =
+        true;
+
+      submitButton.disabled =
+        true;
+
+      submitButton.innerHTML = `
+        <span>
+          Оформлюємо повернення…
+        </span>
+
+        <div class="visitPaymentSpinner"></div>
+      `;
+
+      try {
+        await refundFinancePaymentApi(
+          transaction.id,
+          {
+            amount,
+            reason,
+
+            idempotency_key:
+              crypto.randomUUID(),
+          }
+        );
+
+        modal.remove();
+
+        document.body.classList.remove(
+          "financeExpenseModalOpen"
+        );
+
+        document.removeEventListener(
+          "keydown",
+          onKeydown
+        );
+
+        await renderFinanceTab();
+
+        openDeleteModal(
+          (
+            "Повернення на суму <strong>" +
+            escapeHtml(
+              formatVisitFinanceMoney(
+                amount
+              )
+            ) +
+            "</strong> успішно проведено."
+          ),
+          null,
+          "operation-success"
+        );
+
+      } catch (error) {
+        console.error(
+          "refund finance payment failed:",
+          error
+        );
+
+        submitting = false;
+
+        submitButton.disabled =
+          false;
+
+        submitButton.innerHTML = `
+          <span>
+            Оформити повернення
+          </span>
+
+          <strong>
+            ↙
+          </strong>
+        `;
+
+        errorElement.hidden =
+          false;
+
+        errorElement.textContent =
+          error?.message ||
+          "Не вдалося оформити повернення.";
+      }
+    }
+  );
+
+  window.setTimeout(
+    () => {
+      modal
+        .querySelector(
+          'textarea[name="reason"]'
+        )
+        ?.focus();
+    },
+    50
+  );
 }
 
 
@@ -13957,7 +14486,39 @@ async function renderFinanceOperationsTab(
                             .className ===
                           "is-outcome";
 
-                        const canCancelPayment =
+                        const paymentAmount =
+                          Number(
+                            transaction.amount ||
+                            0
+                          );
+
+                        const refundedAmount =
+                          Math.max(
+                            0,
+                            Number(
+                              transaction.metadata
+                                ?.refunded_amount ||
+                              0
+                            )
+                          );
+
+                        const refundableAmount =
+                          Math.max(
+                            0,
+                            Math.min(
+                              paymentAmount,
+                              Number(
+                                transaction.metadata
+                                  ?.refundable_amount ??
+                                (
+                                  paymentAmount -
+                                  refundedAmount
+                                )
+                              )
+                            )
+                          );
+
+                        const isCompletedPayment =
                           transaction
                             .transaction_type ===
                             "payment" &&
@@ -13966,6 +14527,18 @@ async function renderFinanceOperationsTab(
                           Boolean(
                             transaction.visit_id
                           );
+
+                        const hasPaymentRefunds =
+                          isCompletedPayment &&
+                          refundedAmount > 0;
+
+                        const canRefundPayment =
+                          isCompletedPayment &&
+                          refundableAmount > 0;
+
+                        const canCancelPayment =
+                          isCompletedPayment &&
+                          refundedAmount <= 0;
 
                         const canEditExpense =
                           transaction
@@ -14064,6 +14637,8 @@ async function renderFinanceOperationsTab(
                               ${
   transaction.visit_id ||
   documentUrl ||
+  hasPaymentRefunds ||
+  canRefundPayment ||
   canCancelPayment ||
   canEditExpense
     ? `
@@ -14095,6 +14670,43 @@ async function renderFinanceOperationsTab(
                 )}"
               >
                 🧾 Відкрити чек
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          hasPaymentRefunds
+            ? `
+              <span class="financeOperationRefundState">
+                ${
+                  refundableAmount <= 0
+                    ? "Повернено повністю"
+                    : (
+                        "Повернено " +
+                        escapeHtml(
+                          formatVisitFinanceMoney(
+                            refundedAmount
+                          )
+                        )
+                      )
+                }
+              </span>
+            `
+            : ""
+        }
+
+        ${
+          canRefundPayment
+            ? `
+              <button
+                type="button"
+                class="financeOperationRefundButton"
+                data-finance-refund-payment="${escapeHtml(
+                  transaction.id
+                )}"
+              >
+                ↙ Повернути платіж
               </button>
             `
             : ""
@@ -14246,6 +14858,11 @@ async function renderFinanceOperationsTab(
           "[data-finance-cancel-payment]"
         );
 
+      const refundButton =
+        event.target.closest(
+          "[data-finance-refund-payment]"
+        );
+
       const editExpenseButton =
         event.target.closest(
           "[data-finance-edit-expense]"
@@ -14268,6 +14885,30 @@ async function renderFinanceOperationsTab(
 
         if (transaction) {
           openFinanceExpenseModal(
+            transaction
+          );
+        }
+
+        return;
+      }
+
+      if (refundButton) {
+        const transactionId =
+          String(
+            refundButton.dataset
+              .financeRefundPayment ||
+            ""
+          ).trim();
+
+        const transaction =
+          items.find(
+            (item) =>
+              String(item.id) ===
+              transactionId
+          );
+
+        if (transaction) {
+          openFinancePaymentRefundModal(
             transaction
           );
         }

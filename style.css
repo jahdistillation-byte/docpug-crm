@@ -26805,6 +26805,41 @@ body.financeExpenseModalOpen {
     0.22s ease-out;
 }
 
+.financeRefundModal {
+  width: min(620px, 100%);
+}
+
+.financeRefundSummary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.financeRefundSummary > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background:
+    rgba(255, 255, 255, 0.035);
+}
+
+.financeRefundSummary span {
+  color:
+    rgba(255, 255, 255, 0.48);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.financeRefundSummary strong {
+  color: #fff;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
 @keyframes financeExpenseAppear {
   from {
     transform: translateY(18px) scale(0.975);
@@ -27167,6 +27202,10 @@ body.financeExpenseModalOpen {
   }
 
   .financeExpenseGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .financeRefundSummary {
     grid-template-columns: 1fr;
   }
 
@@ -28213,6 +28252,56 @@ input[type="number"]::-webkit-outer-spin-button {
 .financeOperationActions button:disabled {
   opacity: 0.45;
   cursor: wait;
+}
+
+.financeOperationRefundState {
+  display: inline-flex;
+  align-items: center;
+  min-height: 31px;
+  padding: 0 11px;
+  border: 1px solid
+    rgba(244, 175, 84, 0.22);
+  border-radius: 10px;
+  color: #e4a34d;
+  background:
+    rgba(244, 175, 84, 0.09);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.financeOperationRefundButton {
+  color: #e4a34d !important;
+  border-color:
+    rgba(244, 175, 84, 0.25) !important;
+  background:
+    rgba(244, 175, 84, 0.08) !important;
+}
+
+.financeOperationRefundButton:hover {
+  color: #ffd18f !important;
+  border-color:
+    rgba(244, 175, 84, 0.44) !important;
+  background:
+    rgba(244, 175, 84, 0.16) !important;
+  transform: translateY(-1px);
+}
+
+body[data-theme="white"]
+  .financeOperationRefundState {
+  color: #93570c;
+  border-color:
+    rgba(157, 94, 16, 0.2);
+  background:
+    rgba(157, 94, 16, 0.07);
+}
+
+body[data-theme="white"]
+  .financeOperationRefundButton {
+  color: #86500d !important;
+  border-color:
+    rgba(157, 94, 16, 0.22) !important;
+  background:
+    rgba(157, 94, 16, 0.07) !important;
 }
 
 .deleteModalOverlay.is-payment-cancel
@@ -32064,6 +32153,19 @@ body .financePurchaseCreateModal,
 body .financePurchaseDetailsModal,
 body .financePurchaseReceiveModal,
 body .financeSupplierCreateModal {
+  color: var(--finance-text);
+}
+
+body .financeRefundSummary > div {
+  border-color: var(--finance-border);
+  background: var(--finance-surface-soft);
+}
+
+body .financeRefundSummary span {
+  color: var(--finance-text-muted);
+}
+
+body .financeRefundSummary strong {
   color: var(--finance-text);
 }
 

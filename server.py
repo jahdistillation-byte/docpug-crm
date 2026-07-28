@@ -5032,6 +5032,7 @@ def api_finance_transactions_list():
                     "source, status, "
                     "cash_shift_id, visit_id, "
                     "financial_account_id, "
+                    "reverses_transaction_id, "
                     "created_by, occurred_at, "
                     "created_at, updated_at, "
                     "metadata"
@@ -5305,6 +5306,224 @@ def api_finance_transaction_cancel(
 
         return fail(
             "Не вдалося скасувати платіж.",
+            500,
+        )
+
+
+@app.post(
+    "/api/finance/transactions/<transaction_id>/refund"
+)
+def api_finance_transaction_refund(
+    transaction_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        uuid.UUID(
+            str(transaction_id)
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+        return fail(
+            "Некоректний платіж.",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    try:
+        amount = round(
+            float(
+                data.get("amount")
+            ),
+            2,
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return fail(
+            "Вкажіть коректну суму повернення.",
+            400,
+        )
+
+    if (
+        amount != amount
+        or amount in {
+            float("inf"),
+            float("-inf"),
+        }
+        or amount <= 0
+    ):
+        return fail(
+            "Сума повернення повинна бути більшою за нуль.",
+            400,
+        )
+
+    reason = str(
+        data.get("reason")
+        or ""
+    ).strip()
+
+    if not reason:
+        return fail(
+            "Вкажіть причину повернення.",
+            400,
+        )
+
+    if len(reason) > 500:
+        return fail(
+            "Причина повернення надто довга.",
+            400,
+        )
+
+    idempotency_key = str(
+        data.get(
+            "idempotency_key"
+        )
+        or uuid.uuid4()
+    ).strip()
+
+    try:
+        uuid.UUID(
+            idempotency_key
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+        return fail(
+            "Некоректний ключ повернення.",
+            400,
+        )
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "refund_visit_payment",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_transaction_id":
+                        transaction_id,
+
+                    "p_user_id":
+                        user.get("id"),
+
+                    "p_amount":
+                        amount,
+
+                    "p_reason":
+                        reason,
+
+                    "p_idempotency_key":
+                        idempotency_key,
+                },
+            )
+            .execute()
+        )
+
+        response_data = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                response_data,
+                list,
+            )
+            and response_data
+        ):
+            response_data = (
+                response_data[0]
+            )
+
+        return ok(
+            response_data
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        )
+
+        lowered_error = (
+            error_text.lower()
+        )
+
+        print(
+            "❌ POST refund visit payment:",
+            repr(error),
+            flush=True,
+        )
+
+        if (
+            "not found"
+            in lowered_error
+        ):
+            return fail(
+                "Платіж не знайдено.",
+                404,
+            )
+
+        if (
+            "exceeds refundable"
+            in lowered_error
+            or "fully refunded"
+            in lowered_error
+        ):
+            return fail(
+                "Сума перевищує доступний залишок платежу.",
+                409,
+            )
+
+        if (
+            "only completed"
+            in lowered_error
+            or "only visit payments"
+            in lowered_error
+            or "cancelled payment"
+            in lowered_error
+        ):
+            return fail(
+                "Цей платіж вже не можна повернути.",
+                409,
+            )
+
+        return fail(
+            "Не вдалося оформити повернення.",
             500,
         )
 
