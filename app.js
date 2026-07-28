@@ -20693,6 +20693,11 @@ function collectPatientDocumentBreakRanges(
     ".disModernFinanceSummary",
     ".disModernTable tr",
     ".disModernSignGrid",
+    ".disConsentRepresentative",
+    ".disConsentClause",
+    ".disConsentDataSection",
+    ".disConsentAcknowledgements",
+    ".disConsentSignGrid",
     ".disModernFooter",
   ].join(",");
 
@@ -25253,6 +25258,61 @@ function sanitizePatientDocumentFilename(
     .slice(0, 80) || "document";
 }
 
+const PATIENT_CONSENT_TYPES = {
+  diagnostics: {
+    code: "DIA",
+    title:
+      "Згода на проведення діагностики та лікування",
+    shortTitle:
+      "Діагностика та лікування",
+    subjectLabel:
+      "Заплановані дослідження та лікування",
+    subjectPlaceholder:
+      "Наприклад: огляд, аналізи крові, УЗД, медикаментозне лікування",
+    detailsLabel:
+      "Попередній діагноз або клінічне обґрунтування",
+  },
+  anesthesia: {
+    code: "ANES",
+    title:
+      "Згода на анестезію та оперативне втручання",
+    shortTitle:
+      "Анестезія та операція",
+    subjectLabel:
+      "Назва запланованої операції",
+    subjectPlaceholder:
+      "Наприклад: оваріогістеректомія",
+    detailsLabel:
+      "Діагноз та показання до операції",
+  },
+  hospitalization: {
+    code: "HOSP",
+    title:
+      "Згода на госпіталізацію та стаціонарне лікування",
+    shortTitle:
+      "Госпіталізація",
+    subjectLabel:
+      "Мета госпіталізації та план лікування",
+    subjectPlaceholder:
+      "Наприклад: стабілізація стану, інфузійна терапія та спостереження",
+    detailsLabel:
+      "Діагноз або причина госпіталізації",
+  },
+  surgery_refusal: {
+    code: "REF",
+    title:
+      "Відмова від рекомендованої операції",
+    shortTitle:
+      "Відмова від операції",
+    subjectLabel:
+      "Рекомендована операція",
+    subjectPlaceholder:
+      "Вкажіть операцію, від якої відмовляється власник",
+    detailsLabel:
+      "Діагноз та медичні показання",
+  },
+};
+
 function getPatientDocumentVisitLabel(
   visit
 ) {
@@ -25519,6 +25579,14 @@ async function renderPatientDocumentsTab(
       })
     );
 
+  const consentOptions =
+    Object.entries(
+      PATIENT_CONSENT_TYPES
+    ).map(([value, config]) => ({
+      value,
+      label: config.shortTitle,
+    }));
+
   root.innerHTML = `
     <section class="patientDocumentsPage">
       <header class="patientDocumentsHead">
@@ -25618,12 +25686,13 @@ async function renderPatientDocumentsTab(
           title:
             "Інформована згода",
           description:
-            "Згода на операцію, анестезію, госпіталізацію або діагностичні процедури.",
-          badge: "ШАБЛОН",
-          options: [],
-          selectLabel: "",
-          emptyText: "",
-          disabled: true,
+            "Чотири окремі шаблони: лікування, операція й анестезія, госпіталізація та відмова від операції.",
+          badge: "4 ШАБЛОНИ",
+          options: consentOptions,
+          selectLabel:
+            "Оберіть тип документа",
+          emptyText:
+            "Шаблони недоступні.",
         })}
       </div>
 
@@ -25666,6 +25735,21 @@ async function renderPatientDocumentsTab(
             "Формування…";
 
           try {
+            let consentData = null;
+
+            if (type === "consent") {
+              consentData =
+                await openPatientConsentModal({
+                  consentType: sourceId,
+                  pet,
+                  visits: patientVisits,
+                });
+
+              if (!consentData) {
+                return;
+              }
+            }
+
             await createPatientDocumentPdf({
               type,
               sourceId,
@@ -25673,6 +25757,7 @@ async function renderPatientDocumentsTab(
               visits: patientVisits,
               hospitalizations:
                 completedHospitalizations,
+              consentData,
             });
           } catch (error) {
             console.error(
@@ -25710,6 +25795,528 @@ async function getPatientDocumentClinic() {
   return org || {};
 }
 
+function patientConsentLocalDateTime(
+  value = new Date()
+) {
+  const date =
+    value instanceof Date
+      ? value
+      : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const offset =
+    date.getTimezoneOffset() *
+    60000;
+
+  return new Date(
+    date.getTime() - offset
+  )
+    .toISOString()
+    .slice(0, 16);
+}
+
+function getPatientConsentVisitDefaults(
+  visit
+) {
+  if (!visit) {
+    return {
+      diagnosis: "",
+      subject: "",
+      notes: "",
+    };
+  }
+
+  const parsedNote =
+    typeof parseVisitNote ===
+      "function"
+      ? parseVisitNote(
+          visit.note || ""
+        )
+      : {};
+
+  const services =
+    typeof expandServiceLines ===
+      "function"
+      ? expandServiceLines(visit)
+      : [];
+
+  return {
+    diagnosis:
+      String(
+        visit.dx ||
+        parsedNote.dx ||
+        ""
+      ).trim(),
+    subject:
+      services
+        .map((line) => line.name)
+        .filter(Boolean)
+        .join(", "),
+    notes: "",
+  };
+}
+
+function openPatientConsentModal({
+  consentType,
+  pet,
+  visits,
+}) {
+  const config =
+    PATIENT_CONSENT_TYPES[
+      consentType
+    ];
+
+  if (!config) {
+    return Promise.reject(
+      new Error(
+        "Невідомий тип згоди."
+      )
+    );
+  }
+
+  const visitRows =
+    Array.isArray(visits)
+      ? visits
+      : [];
+
+  const owner =
+    pet?.owner_id
+      ? getOwnerById(
+          pet.owner_id
+        )
+      : null;
+
+  const initialVisit =
+    visitRows[0] || null;
+
+  const initialDefaults =
+    getPatientConsentVisitDefaults(
+      initialVisit
+    );
+
+  return new Promise((resolve) => {
+    document
+      .getElementById(
+        "patientConsentModal"
+      )
+      ?.remove();
+
+    const modal =
+      document.createElement("div");
+
+    modal.id =
+      "patientConsentModal";
+
+    modal.className =
+      "patientConsentOverlay";
+
+    modal.innerHTML = `
+      <div
+        class="patientConsentBackdrop"
+        data-close-patient-consent
+      ></div>
+
+      <section
+        class="patientConsentModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="patientConsentTitle"
+      >
+        <header class="patientConsentModalHead">
+          <div>
+            <span>ЮРИДИЧНИЙ ДОКУМЕНТ</span>
+            <h2 id="patientConsentTitle">
+              ${escapeHtml(
+                config.title
+              )}
+            </h2>
+            <p>
+              Заповніть індивідуальні умови.
+              Після створення документ
+              підписується власником і лікарем.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="patientConsentClose"
+            data-close-patient-consent
+            aria-label="Закрити"
+          >
+            ×
+          </button>
+        </header>
+
+        <form class="patientConsentForm">
+          <div class="patientConsentNotice">
+            Робочий шаблон клініки.
+            Перед постійним використанням
+            затвердьте редакцію з юристом.
+          </div>
+
+          <div class="patientConsentGrid">
+            <label class="patientConsentField">
+              <span>Дата і час документа</span>
+              <input
+                name="signed_at"
+                type="datetime-local"
+                value="${escapeHtml(
+                  patientConsentLocalDateTime()
+                )}"
+                required
+              >
+            </label>
+
+            <label class="patientConsentField">
+              <span>Пов’язаний візит</span>
+              <select name="visit_id">
+                <option value="">
+                  Без прив’язки до візиту
+                </option>
+                ${visitRows
+                  .map(
+                    (visit) => `
+                      <option
+                        value="${escapeHtml(
+                          String(visit.id)
+                        )}"
+                        ${
+                          initialVisit &&
+                          String(
+                            visit.id
+                          ) ===
+                            String(
+                              initialVisit.id
+                            )
+                            ? "selected"
+                            : ""
+                        }
+                      >
+                        ${escapeHtml(
+                          getPatientDocumentVisitLabel(
+                            visit
+                          )
+                        )}
+                      </option>
+                    `
+                  )
+                  .join("")}
+              </select>
+            </label>
+
+            <label class="patientConsentField">
+              <span>ПІБ власника / представника</span>
+              <input
+                name="representative_name"
+                type="text"
+                value="${escapeHtml(
+                  owner?.name || ""
+                )}"
+                required
+              >
+            </label>
+
+            <label class="patientConsentField">
+              <span>Телефон представника</span>
+              <input
+                name="representative_phone"
+                type="text"
+                value="${escapeHtml(
+                  owner?.phone || ""
+                )}"
+              >
+            </label>
+
+            <label class="patientConsentField patientConsentFieldWide">
+              <span>Статус представника</span>
+              <select name="representative_role">
+                <option value="Власник тварини">
+                  Власник тварини
+                </option>
+                <option value="Уповноважений представник власника">
+                  Уповноважений представник власника
+                </option>
+                <option value="Утримувач тварини">
+                  Утримувач тварини
+                </option>
+              </select>
+            </label>
+
+            <label class="patientConsentField patientConsentFieldWide">
+              <span>${escapeHtml(
+                config.subjectLabel
+              )}</span>
+              <textarea
+                name="subject"
+                rows="3"
+                placeholder="${escapeHtml(
+                  config.subjectPlaceholder
+                )}"
+                required
+              >${escapeHtml(
+                initialDefaults.subject
+              )}</textarea>
+            </label>
+
+            <label class="patientConsentField patientConsentFieldWide">
+              <span>${escapeHtml(
+                config.detailsLabel
+              )}</span>
+              <textarea
+                name="diagnosis"
+                rows="3"
+                placeholder="Вкажіть клінічні дані, які були пояснені власнику"
+              >${escapeHtml(
+                initialDefaults.diagnosis
+              )}</textarea>
+            </label>
+
+            <label class="patientConsentField patientConsentFieldWide">
+              <span>
+                Індивідуальні ризики, альтернативи
+                або додаткові умови
+              </span>
+              <textarea
+                name="notes"
+                rows="3"
+                placeholder="Особливості стану пацієнта, додаткові ризики, погоджені обмеження…"
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="patientConsentChecks">
+            <label>
+              <input
+                name="authority_confirmed"
+                type="checkbox"
+                required
+              >
+              <span>
+                Представник підтвердив,
+                що має право приймати рішення
+                щодо лікування цієї тварини.
+              </span>
+            </label>
+
+            <label>
+              <input
+                name="information_confirmed"
+                type="checkbox"
+                required
+              >
+              <span>
+                Лікар надав пояснення зрозумілою
+                мовою, а представник мав
+                можливість поставити запитання.
+              </span>
+            </label>
+
+            <label>
+              <input
+                name="personal_data_confirmed"
+                type="checkbox"
+                required
+              >
+              <span>
+                Представник погодився на обробку
+                контактних даних для оформлення
+                документа, ведення медичної
+                історії та зв’язку щодо лікування.
+              </span>
+            </label>
+          </div>
+
+          <footer class="patientConsentActions">
+            <button
+              type="button"
+              class="patientConsentCancel"
+              data-close-patient-consent
+            >
+              Скасувати
+            </button>
+
+            <button
+              type="submit"
+              class="patientConsentSubmit"
+            >
+              Сформувати PDF
+            </button>
+          </footer>
+        </form>
+      </section>
+    `;
+
+    document.body.appendChild(
+      modal
+    );
+
+    document.body.classList.add(
+      "patientConsentModalOpen"
+    );
+
+    const finish = (result) => {
+      document.removeEventListener(
+        "keydown",
+        onKeyDown
+      );
+
+      document.body.classList.remove(
+        "patientConsentModalOpen"
+      );
+
+      modal.remove();
+      resolve(result);
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        finish(null);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      onKeyDown
+    );
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target.closest(
+            "[data-close-patient-consent]"
+          )
+        ) {
+          finish(null);
+        }
+      }
+    );
+
+    const form =
+      modal.querySelector(
+        ".patientConsentForm"
+      );
+
+    const visitSelect =
+      form?.elements?.visit_id;
+
+    visitSelect?.addEventListener(
+      "change",
+      () => {
+        const visit =
+          visitRows.find(
+            (item) =>
+              String(item.id) ===
+              String(
+                visitSelect.value
+              )
+          );
+
+        if (!visit) return;
+
+        const defaults =
+          getPatientConsentVisitDefaults(
+            visit
+          );
+
+        if (
+          !String(
+            form.elements
+              .diagnosis.value ||
+            ""
+          ).trim()
+        ) {
+          form.elements
+            .diagnosis.value =
+              defaults.diagnosis;
+        }
+
+        if (
+          !String(
+            form.elements
+              .subject.value ||
+            ""
+          ).trim()
+        ) {
+          form.elements
+            .subject.value =
+              defaults.subject;
+        }
+      }
+    );
+
+    form?.addEventListener(
+      "submit",
+      (event) => {
+        event.preventDefault();
+
+        if (!form.reportValidity()) {
+          return;
+        }
+
+        const data =
+          new FormData(form);
+
+        finish({
+          consentType,
+          signedAt:
+            String(
+              data.get("signed_at") ||
+              ""
+            ),
+          visitId:
+            String(
+              data.get("visit_id") ||
+              ""
+            ),
+          representativeName:
+            String(
+              data.get(
+                "representative_name"
+              ) || ""
+            ).trim(),
+          representativePhone:
+            String(
+              data.get(
+                "representative_phone"
+              ) || ""
+            ).trim(),
+          representativeRole:
+            String(
+              data.get(
+                "representative_role"
+              ) || ""
+            ).trim(),
+          subject:
+            String(
+              data.get("subject") ||
+              ""
+            ).trim(),
+          diagnosis:
+            String(
+              data.get("diagnosis") ||
+              ""
+            ).trim(),
+          notes:
+            String(
+              data.get("notes") ||
+              ""
+            ).trim(),
+        });
+      }
+    );
+
+    form
+      ?.querySelector(
+        '[name="subject"]'
+      )
+      ?.focus();
+  });
+}
+
 function renderPatientDocumentShell({
   title,
   number,
@@ -25719,6 +26326,7 @@ function renderPatientDocumentShell({
   doctorName,
   clinic,
   body,
+  signaturesHtml = "",
 }) {
   const clinicName =
     clinic?.name ||
@@ -25891,6 +26499,9 @@ function renderPatientDocumentShell({
 
       ${body}
 
+      ${
+        signaturesHtml ||
+        `
       <div class="disModernSignGrid">
         <div class="disModernSignBox">
           <div class="disModernSignTitle">
@@ -25947,6 +26558,8 @@ function renderPatientDocumentShell({
           </div>
         </div>
       </div>
+        `
+      }
 
       <div class="disModernFooter">
         <span>
@@ -26648,12 +27261,322 @@ async function createHospitalDocumentHtml({
   });
 }
 
+function getPatientConsentClauses(
+  consentType,
+  subject
+) {
+  const subjectText =
+    subject || "зазначеного плану";
+
+  const clauses = {
+    diagnostics: [
+      `Мені зрозуміло пояснено мету, характер та очікувану користь запланованих заходів: ${subjectText}.`,
+      "Я погоджуюся на клінічний огляд, забір біологічного матеріалу, лабораторні та інструментальні дослідження, маніпуляції і застосування ветеринарних препаратів у межах погодженого плану.",
+      "Мені повідомлено про можливі ризики, побічні реакції, обмеження методів, доступні альтернативи та можливі наслідки відмови або зволікання.",
+      "Я розумію, що результат лікування залежить від стану тварини та її індивідуальної реакції, тому клініка не може гарантувати конкретний результат.",
+      "Зміна плану, яка не є невідкладною, погоджується зі мною додатково. Якщо зволікання створює безпосередню загрозу життю тварини, я дозволяю необхідні дії для стабілізації стану з подальшим інформуванням.",
+      "Мені повідомлено, що фактичний обсяг і вартість допомоги можуть змінитися після отримання результатів діагностики; додаткові планові витрати погоджуються окремо.",
+    ],
+    anesthesia: [
+      `Я погоджуюся на проведення втручання: ${subjectText}, а також на вид анестезії, який лікар обере з урахуванням стану пацієнта та результатів обстежень.`,
+      "Мені пояснено мету операції, її основні етапи, очікувану користь, альтернативи та можливі наслідки відмови або перенесення.",
+      "Я поінформований/поінформована про ризики анестезії й операції, зокрема алергічні реакції, порушення дихання або роботи серця, кровотечу, інфекційні ускладнення, потребу в повторному втручанні та ризик смерті.",
+      "Я розумію, що передопераційні обстеження зменшують, але не усувають усі ризики, а конкретний результат операції не може бути гарантований.",
+      "Якщо під час операції виявляться непередбачені обставини, я дозволяю змінити обсяг втручання лише настільки, наскільки це необхідно для усунення безпосередньої загрози життю або стабілізації стану. Інші зміни погоджуються зі мною.",
+      "Мені пояснено правила підготовки, післяопераційного догляду, контролю болю та необхідність виконувати призначення лікаря.",
+    ],
+    hospitalization: [
+      `Я погоджуюся на госпіталізацію тварини з такою метою: ${subjectText}.`,
+      "Мені повідомлено про запланований режим спостереження, діагностики, лікування, годування та догляду відповідно до умов роботи клініки.",
+      "Я погоджуюся на виконання процедур, досліджень і застосування препаратів у межах погодженого плану стаціонарного лікування.",
+      "У разі істотної зміни стану клініка зв’язується зі мною за вказаним телефоном. Якщо зволікання створює безпосередню загрозу життю тварини, я дозволяю необхідні дії для стабілізації з подальшим інформуванням.",
+      "Я зобов’язуюся залишатися доступним/доступною для зв’язку, повідомляти про відомі особливості здоров’я тварини та забрати її у погоджений час після виписки.",
+      "Мені повідомлено, що строк госпіталізації, обсяг допомоги та вартість можуть змінитися залежно від динаміки стану; планові зміни погоджуються додатково.",
+    ],
+    surgery_refusal: [
+      `Мені рекомендовано оперативне втручання: ${subjectText}. Лікар пояснив його мету, очікувану користь та причини рекомендації.`,
+      "Мені зрозуміло повідомлено про можливі наслідки відмови або зволікання, зокрема прогресування захворювання, посилення болю, розвиток ускладнень, погіршення прогнозу та можливу загрозу життю тварини.",
+      "Мені пояснено доступні альтернативи, їхні обмеження, а також ознаки погіршення, за яких потрібне невідкладне повторне звернення.",
+      "Я мав/мала можливість поставити запитання та отримав/отримала зрозумілі відповіді.",
+      "Попри надані пояснення, я добровільно відмовляюся від рекомендованої операції на момент підписання цього документа і розумію, що можу повторно звернутися та переглянути своє рішення.",
+      "Ця відмова фіксує моє рішення та отримані роз’яснення, але не звільняє клініку від відповідальності за якість фактично наданої ветеринарної допомоги.",
+    ],
+  };
+
+  return clauses[consentType] || [];
+}
+
+function renderPatientConsentSignatures({
+  representativeName,
+  doctorName,
+  clinic,
+  signedAt,
+}) {
+  return `
+    <div class="disConsentSignGrid">
+      <div class="disConsentSignBox">
+        <div class="disModernSignTitle">
+          Власник / представник
+        </div>
+        <div class="disModernSignLine"></div>
+        <div class="disModernSignName">
+          ${escapeHtml(
+            representativeName ||
+            "ПІБ"
+          )}
+        </div>
+        <div class="disConsentSignDate">
+          Підпис · ${escapeHtml(
+            formatPatientDocumentDate(
+              signedAt,
+              true
+            )
+          )}
+        </div>
+      </div>
+
+      <div class="disConsentSignBox">
+        <div class="disModernSignTitle">
+          Ветеринарний лікар
+        </div>
+        ${
+          clinic?.doctor_signature_url
+            ? `
+              <img
+                src="${escapeHtml(
+                  clinic.doctor_signature_url
+                )}"
+                alt="Підпис лікаря"
+                class="disModernSignImg"
+              >
+            `
+            : `
+              <div class="disModernSignLine"></div>
+            `
+        }
+        <div class="disModernSignName">
+          ${escapeHtml(
+            doctorName ||
+            "Ветеринарний лікар"
+          )}
+        </div>
+        <div class="disConsentSignDate">
+          Підпис · дата і час
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function createPatientConsentDocumentHtml({
+  consentData,
+  pet,
+  owner,
+  clinic,
+  visits,
+}) {
+  const config =
+    PATIENT_CONSENT_TYPES[
+      consentData?.consentType
+    ];
+
+  if (!config) {
+    throw new Error(
+      "Невідомий тип згоди."
+    );
+  }
+
+  const visit =
+    (visits || []).find(
+      (item) =>
+        String(item.id) ===
+        String(
+          consentData.visitId ||
+          ""
+        )
+    ) || null;
+
+  const doctorName =
+    getPatientDocumentDoctorName(
+      visit || {}
+    );
+
+  const representativeName =
+    consentData
+      .representativeName ||
+    owner?.name ||
+    "—";
+
+  const representativePhone =
+    consentData
+      .representativePhone ||
+    owner?.phone ||
+    "—";
+
+  const clauses =
+    getPatientConsentClauses(
+      consentData.consentType,
+      consentData.subject
+    );
+
+  const documentSeed =
+    String(
+      consentData.signedAt ||
+      Date.now()
+    )
+      .replace(/\D/g, "")
+      .slice(-10);
+
+  const clauseHtml =
+    clauses
+      .map(
+        (clause) => `
+          <li class="disConsentClause">
+            ${escapeHtml(clause)}
+          </li>
+        `
+      )
+      .join("");
+
+  const body = `
+    <div class="disConsentRepresentative">
+      <div>
+        <span>ПРЕДСТАВНИК</span>
+        <strong>${escapeHtml(
+          representativeName
+        )}</strong>
+      </div>
+      <div>
+        <span>СТАТУС</span>
+        <strong>${escapeHtml(
+          consentData
+            .representativeRole ||
+          "Власник тварини"
+        )}</strong>
+      </div>
+      <div>
+        <span>ТЕЛЕФОН</span>
+        <strong>${escapeHtml(
+          representativePhone
+        )}</strong>
+      </div>
+    </div>
+
+    ${renderPatientDocumentSection(
+      config.subjectLabel,
+      consentData.subject,
+      true
+    )}
+
+    ${renderPatientDocumentSection(
+      config.detailsLabel,
+      consentData.diagnosis
+    )}
+
+    ${
+      consentData.notes
+        ? renderPatientDocumentSection(
+            "Індивідуальні ризики та додаткові умови",
+            consentData.notes
+          )
+        : ""
+    }
+
+    <div class="disModernSection disConsentSection">
+      <div class="disModernSectionTitle">
+        Підтвердження поінформованого рішення
+      </div>
+
+      <p class="disConsentLead">
+        Я, ${escapeHtml(
+          representativeName
+        )}, підтверджую, що маю право
+        приймати рішення щодо ветеринарної
+        допомоги пацієнту
+        ${escapeHtml(pet?.name || "—")}.
+        Інформацію надано зрозумілою мовою,
+        я мав/мала можливість поставити
+        запитання та отримати відповіді.
+      </p>
+
+      <ol class="disConsentClauses">
+        ${clauseHtml}
+      </ol>
+    </div>
+
+    <div class="disModernSection disConsentDataSection">
+      <div class="disModernSectionTitle">
+        Обробка персональних даних
+      </div>
+
+      <p class="disConsentLead">
+        Надаю добровільну документовану згоду
+        на обробку зазначених у цьому документі
+        контактних та ідентифікаційних даних
+        виключно для оформлення цієї згоди,
+        ведення медичної і фінансової історії
+        пацієнта та зв’язку щодо лікування.
+        Мене повідомлено про право звернутися
+        для доступу, уточнення або виправлення
+        даних та відкликати згоду в межах,
+        установлених законодавством.
+      </p>
+    </div>
+
+    <div class="disConsentAcknowledgements">
+      <div>
+        <span>✓</span>
+        Повноваження представника підтверджено
+      </div>
+      <div>
+        <span>✓</span>
+        Пояснення лікаря отримано
+      </div>
+      <div>
+        <span>✓</span>
+        Згоду на обробку даних надано
+      </div>
+    </div>
+  `;
+
+  return renderPatientDocumentShell({
+    title: config.title,
+    number:
+      `${config.code}-${documentSeed || "DOC"}`,
+    dateLabel:
+      `Дата: ${
+        formatPatientDocumentDate(
+          consentData.signedAt,
+          true
+        )
+      }`,
+    pet,
+    owner: {
+      ...(owner || {}),
+      name: representativeName,
+      phone: representativePhone,
+    },
+    doctorName,
+    clinic,
+    body,
+    signaturesHtml:
+      renderPatientConsentSignatures({
+        representativeName,
+        doctorName,
+        clinic,
+        signedAt:
+          consentData.signedAt,
+      }),
+  });
+}
+
 async function createPatientDocumentPdf({
   type,
   sourceId,
   pet,
   visits,
   hospitalizations,
+  consentData = null,
 }) {
   const owner =
     pet?.owner_id
@@ -26668,7 +27591,26 @@ async function createPatientDocumentPdf({
   let html = "";
   let sourceDate = todayISO();
 
-  if (type === "hospital") {
+  if (type === "consent") {
+    if (!consentData) {
+      throw new Error(
+        "Дані згоди не заповнені."
+      );
+    }
+
+    sourceDate =
+      consentData.signedAt ||
+      sourceDate;
+
+    html =
+      createPatientConsentDocumentHtml({
+        consentData,
+        pet,
+        owner,
+        clinic,
+        visits,
+      });
+  } else if (type === "hospital") {
     const hospitalization =
       hospitalizations.find(
         (item) =>
@@ -26751,6 +27693,12 @@ async function createPatientDocumentPdf({
       "prescriptions",
     finance:
       "financial_statement",
+    consent:
+      `consent_${
+        consentData
+          ?.consentType ||
+        "document"
+      }`,
   };
 
   const datePart =

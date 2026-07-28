@@ -17401,6 +17401,274 @@ body .specPill {
   }
 }
 
+/* =========================================================
+   PATIENT CONSENT MODAL
+   ========================================================= */
+
+.patientConsentModalOpen {
+  overflow: hidden;
+}
+
+.patientConsentOverlay {
+  position: fixed;
+  z-index: 12000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.patientConsentBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 8, 7, .78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.patientConsentModal {
+  position: relative;
+  width: min(880px, 100%);
+  max-height: min(900px, calc(100vh - 48px));
+  overflow: auto;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.1));
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--primary-neon, #9346e8) 13%, transparent),
+      transparent 34%
+    ),
+    var(--bg-secondary, #071c16);
+  box-shadow: 0 32px 90px rgba(0,0,0,.42);
+  color: var(--text-main, #fff);
+}
+
+.patientConsentModalHead {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--glass-border, rgba(255,255,255,.08));
+  background:
+    color-mix(
+      in srgb,
+      var(--bg-secondary, #071c16) 92%,
+      transparent
+    );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.patientConsentModalHead span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--primary-neon, #65e4ab);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .11em;
+}
+
+.patientConsentModalHead h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--text-main, #fff);
+}
+
+.patientConsentModalHead p {
+  max-width: 650px;
+  margin: 7px 0 0;
+  color: var(--text-muted, rgba(255,255,255,.5));
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.patientConsentClose {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  cursor: pointer;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.1));
+  border-radius: 11px;
+  background: var(--glass-bg, rgba(255,255,255,.035));
+  color: var(--text-main, #fff);
+  font: inherit;
+  font-size: 22px;
+}
+
+.patientConsentForm {
+  padding: 20px 24px 24px;
+}
+
+.patientConsentNotice {
+  margin-bottom: 16px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, #f0b84b 30%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, #f0b84b 8%, transparent);
+  color: color-mix(in srgb, #f0b84b 72%, var(--text-main, #fff));
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.patientConsentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.patientConsentField {
+  display: block;
+  min-width: 0;
+}
+
+.patientConsentFieldWide {
+  grid-column: 1 / -1;
+}
+
+.patientConsentField > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-muted, rgba(255,255,255,.55));
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.patientConsentField input,
+.patientConsentField select,
+.patientConsentField textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.1));
+  border-radius: 11px;
+  outline: none;
+  background: color-mix(in srgb, var(--glass-bg, #08130f) 80%, #000 20%);
+  color: var(--text-main, #fff);
+  font: inherit;
+  font-size: 11px;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.patientConsentField input,
+.patientConsentField select {
+  min-height: 41px;
+  padding: 0 11px;
+}
+
+.patientConsentField textarea {
+  min-height: 76px;
+  padding: 10px 11px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.patientConsentField input:focus,
+.patientConsentField select:focus,
+.patientConsentField textarea:focus {
+  border-color: color-mix(in srgb, var(--primary-neon, #65e4ab) 58%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-neon, #65e4ab) 12%, transparent);
+}
+
+.patientConsentChecks {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.patientConsentChecks label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 12px;
+  cursor: pointer;
+  border: 1px solid var(--glass-border, rgba(255,255,255,.08));
+  border-radius: 11px;
+  background: var(--glass-bg, rgba(255,255,255,.025));
+  color: var(--text-muted, rgba(255,255,255,.62));
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.patientConsentChecks input {
+  width: 15px;
+  height: 15px;
+  margin: 1px 0 0;
+  flex: 0 0 15px;
+  accent-color: var(--primary-neon, #65e4ab);
+}
+
+.patientConsentActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.patientConsentCancel,
+.patientConsentSubmit {
+  min-height: 42px;
+  padding: 0 18px;
+  cursor: pointer;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.patientConsentCancel {
+  border: 1px solid var(--glass-border, rgba(255,255,255,.1));
+  background: var(--glass-bg, rgba(255,255,255,.03));
+  color: var(--text-muted, rgba(255,255,255,.7));
+}
+
+.patientConsentSubmit {
+  border: 0;
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary-neon, #4adea7),
+      var(--accent-neon, #10b981)
+    );
+  color: #fff;
+  box-shadow: var(--primary-glow, 0 12px 28px rgba(16,185,129,.25));
+}
+
+@media (max-width: 680px) {
+  .patientConsentOverlay {
+    padding: 0;
+  }
+
+  .patientConsentModal {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .patientConsentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .patientConsentFieldWide {
+    grid-column: auto;
+  }
+
+  .patientConsentActions {
+    flex-direction: column-reverse;
+  }
+
+  .patientConsentCancel,
+  .patientConsentSubmit {
+    width: 100%;
+  }
+}
+
 .patientFinancePage {
   width: 100%;
   color: #fff;
@@ -20268,6 +20536,167 @@ select.visitControl {
 .disModernTable tr {
   break-inside: avoid !important;
   page-break-inside: avoid !important;
+}
+
+/* =========================================================
+   INFORMED CONSENT PDF
+   ========================================================= */
+
+.disConsentRepresentative {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(0, 1fr)
+    minmax(0, .8fr);
+  gap: 8px;
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.disConsentRepresentative span,
+.disConsentRepresentative strong {
+  display: block;
+}
+
+.disConsentRepresentative span {
+  color: var(--disAccent, #9346e8);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: .07em;
+}
+
+.disConsentRepresentative strong {
+  margin-top: 3px;
+  color: #273044;
+  font-size: 9px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.disConsentSection {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--disAccent, #9346e8) 4%,
+        white
+      ),
+      #fff
+    ) !important;
+}
+
+.disConsentLead {
+  margin: 6px 0 0;
+  color: #344054;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.disConsentClauses {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: #344054;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.disConsentClause {
+  padding-left: 3px;
+}
+
+.disConsentClause + .disConsentClause {
+  margin-top: 5px;
+}
+
+.disConsentClause::marker {
+  color: var(--disAccent, #9346e8);
+  font-weight: 850;
+}
+
+.disConsentDataSection {
+  border-left: 3px solid
+    color-mix(
+      in srgb,
+      var(--disAccent, #9346e8) 55%,
+      white
+    ) !important;
+  background: #fbfcfe !important;
+}
+
+.disConsentAcknowledgements {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.disConsentAcknowledgements > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 9px;
+  border: 1px solid #e8edf3;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #536071;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.disConsentAcknowledgements span {
+  display: grid;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  place-items: center;
+  border-radius: 4px;
+  background:
+    color-mix(
+      in srgb,
+      var(--disAccent, #9346e8) 13%,
+      white
+    );
+  color: var(--disAccent, #9346e8);
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.disConsentSignGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.disConsentSignBox {
+  min-height: 82px;
+  padding: 10px 12px;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.disConsentSignDate {
+  margin-top: 3px;
+  color: #8a94a6;
+  font-size: 7px;
+}
+
+@media print {
+  .disConsentRepresentative,
+  .disConsentClause,
+  .disConsentDataSection,
+  .disConsentAcknowledgements,
+  .disConsentSignGrid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
 
 /* =====================================================
