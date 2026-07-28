@@ -7385,61 +7385,119 @@ def api_staff():
         if auth_error:
             return auth_error
 
-        current_org = get_current_org_id()
+        current_org = (
+            get_current_org_id()
+        )
 
-        query = (
-    supabase
-    .table("staff")
-    .select("*")
-    .eq("org_id", current_org)
-    .eq("is_active", True)
-)
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
 
         role = normalize_role(
             user.get("role")
         )
 
-        if role not in {
-            "owner",
-            "admin",
-        }:
-            staff_id = str(
-                user.get("staff_id")
-                or ""
-            ).strip()
+        staff_id = str(
+            user.get("staff_id")
+            or ""
+        ).strip()
 
-            if not staff_id:
-                return ok([])
+        if (
+            role not in {
+                "owner",
+                "admin",
+            }
+            and not staff_id
+        ):
+            return ok([])
 
-            query = query.eq(
-                "id",
-                staff_id,
+        def build_staff_query():
+            query = (
+                supabase
+                .table("staff")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "is_active",
+                    True,
+                )
             )
 
-        result = (
-            query
-            .order("name")
-            .execute()
+            if role not in {
+                "owner",
+                "admin",
+            }:
+                query = query.eq(
+                    "id",
+                    staff_id,
+                )
+
+            return query.order(
+                "name"
+            )
+
+        result = execute_with_retry(
+            build_staff_query,
+            attempts=3,
+            delay=0.25,
         )
 
-        rows = result.data or []
-
-        specializations_result = (
-            supabase
-            .table("specializations")
-            .select("id,name,color")
-            .eq("org_id", current_org)
-            .eq("is_active", True)
-            .order("name")
-            .execute()
+        rows = (
+            result.data
+            or []
         )
 
-        specializations_by_id = {
-            str(item.get("id")): item
-            for item in (
+        try:
+            specializations_result = (
+                execute_with_retry(
+                    lambda: (
+                        supabase
+                        .table(
+                            "specializations"
+                        )
+                        .select(
+                            "id,name,color"
+                        )
+                        .eq(
+                            "org_id",
+                            current_org,
+                        )
+                        .eq(
+                            "is_active",
+                            True,
+                        )
+                        .order(
+                            "name"
+                        )
+                    ),
+                    attempts=3,
+                    delay=0.25,
+                )
+            )
+
+            specializations_rows = (
                 specializations_result.data
                 or []
             )
+
+        except Exception as error:
+            print(
+                "⚠️ /api/staff specializations fallback:",
+                repr(error),
+            )
+
+            specializations_rows = []
+
+        specializations_by_id = {
+            str(
+                item.get("id")
+            ): item
+            for item in specializations_rows
             if item.get("id")
         }
 
@@ -7448,7 +7506,10 @@ def api_staff():
                 "specialization_ids"
             )
 
-            if not isinstance(ids, list):
+            if not isinstance(
+                ids,
+                list,
+            ):
                 ids = []
 
             clean_ids = []
@@ -7459,26 +7520,36 @@ def api_staff():
                     item or ""
                 ).strip()
 
+                if (
+                    not item_id
+                    or item_id in clean_ids
+                ):
+                    continue
+
                 specialization = (
                     specializations_by_id.get(
                         item_id
                     )
                 )
 
-                if (
-                    not item_id
-                    or not specialization
-                    or item_id in clean_ids
-                ):
+                if not specialization:
                     continue
 
-                clean_ids.append(item_id)
-                linked.append(specialization)
+                clean_ids.append(
+                    item_id
+                )
 
-            row["specialization_ids"] = (
-                clean_ids
-            )
-            row["specializations"] = linked
+                linked.append(
+                    specialization
+                )
+
+            row[
+                "specialization_ids"
+            ] = clean_ids
+
+            row[
+                "specializations"
+            ] = linked
 
         return ok(rows)
 
@@ -7492,7 +7563,6 @@ def api_staff():
             "Cannot load staff",
             500,
         )
-
 @app.post("/api/staff")
 def api_create_staff():
     user, auth_error = (
