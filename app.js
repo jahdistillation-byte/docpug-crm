@@ -6743,6 +6743,102 @@ function renderStaffSpecializationTags(
   `;
 }
 
+function getStaffContrastColor(color) {
+  const value = String(
+    color || ""
+  ).trim();
+
+  let red = 124;
+  let green = 92;
+  let blue = 255;
+
+  const shortHex =
+    value.match(
+      /^#([0-9a-f]{3})$/i
+    );
+  const fullHex =
+    value.match(
+      /^#([0-9a-f]{6})$/i
+    );
+  const rgbColor =
+    value.match(
+      /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i
+    );
+
+  if (shortHex) {
+    red = parseInt(
+      shortHex[1][0] +
+      shortHex[1][0],
+      16
+    );
+    green = parseInt(
+      shortHex[1][1] +
+      shortHex[1][1],
+      16
+    );
+    blue = parseInt(
+      shortHex[1][2] +
+      shortHex[1][2],
+      16
+    );
+  } else if (fullHex) {
+    red = parseInt(
+      fullHex[1].slice(0, 2),
+      16
+    );
+    green = parseInt(
+      fullHex[1].slice(2, 4),
+      16
+    );
+    blue = parseInt(
+      fullHex[1].slice(4, 6),
+      16
+    );
+  } else if (rgbColor) {
+    red = Number(rgbColor[1]);
+    green = Number(rgbColor[2]);
+    blue = Number(rgbColor[3]);
+  } else {
+    return "#6f91ad";
+  }
+
+  const luminance =
+    (
+      red * 0.2126 +
+      green * 0.7152 +
+      blue * 0.0722
+    ) / 255;
+  const chroma =
+    Math.max(red, green, blue) -
+    Math.min(red, green, blue);
+
+  if (
+    luminance > 0.82 &&
+    chroma < 28
+  ) {
+    return "#6f91ad";
+  }
+
+  if (luminance > 0.7) {
+    const darken = (channel) =>
+      Math.max(
+        0,
+        Math.min(
+          255,
+          Math.round(
+            channel * 0.62
+          )
+        )
+      )
+        .toString(16)
+        .padStart(2, "0");
+
+    return `#${darken(red)}${darken(green)}${darken(blue)}`;
+  }
+
+  return value;
+}
+
 async function renderTeamTab() {
   const page =
     document.querySelector(
@@ -6994,6 +7090,10 @@ async function renderTeamTab() {
                   const staffColor =
                     doc.color ||
                     "#7C5CFF";
+                  const staffContrastColor =
+                    getStaffContrastColor(
+                      staffColor
+                    );
 
                   const staffName =
                     doc.name ||
@@ -7056,6 +7156,10 @@ async function renderTeamTab() {
                         --staff-color:
                           ${escapeHtml(
                             staffColor
+                          )};
+                        --staff-color-contrast:
+                          ${escapeHtml(
+                            staffContrastColor
                           )};
                       "
                     >

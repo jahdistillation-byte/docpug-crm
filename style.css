@@ -38607,7 +38607,10 @@ body[data-theme="white"] .teamPageCard .premiumVetCard {
       circle at 0% 0%,
       color-mix(
         in srgb,
-        var(--staff-color) 10%,
+        var(
+          --staff-color-contrast,
+          var(--staff-color)
+        ) 10%,
         transparent
       ),
       transparent 27%
@@ -38620,7 +38623,10 @@ body[data-theme="white"] .teamPageCard .premiumVetCard {
   border: 1px solid #d4e3eb !important;
   border-left:
     4px solid
-    var(--staff-color) !important;
+    var(
+      --staff-color-contrast,
+      var(--staff-color)
+    ) !important;
   border-radius: 20px;
   box-shadow:
     0 12px 32px rgba(47, 83, 107, 0.09),
@@ -38632,7 +38638,10 @@ body[data-theme="white"] .teamPageCard .premiumVetCard:hover {
   border-color:
     color-mix(
       in srgb,
-      var(--staff-color) 28%,
+      var(
+        --staff-color-contrast,
+        var(--staff-color)
+      ) 28%,
       #d4e3eb
     ) !important;
   box-shadow:
@@ -38651,9 +38660,40 @@ body[data-theme="white"] .teamPageCard :is(
     0 9px 22px
     color-mix(
       in srgb,
-      var(--staff-color) 19%,
+      var(
+        --staff-color-contrast,
+        var(--staff-color)
+      ) 19%,
       transparent
     );
+}
+
+body[data-theme="white"] .teamPageCard .vetAvatarLetter {
+  background:
+    linear-gradient(
+      135deg,
+      var(--staff-color) 0%,
+      color-mix(
+        in srgb,
+        var(
+          --staff-color-contrast,
+          var(--staff-color)
+        ) 82%,
+        #ffffff
+      ) 100%
+    ) !important;
+  border-color:
+    color-mix(
+      in srgb,
+      var(
+        --staff-color-contrast,
+        var(--staff-color)
+      ) 56%,
+      #d3e2eb
+    ) !important;
+  color: #ffffff !important;
+  text-shadow:
+    0 1px 3px rgba(20, 38, 49, 0.42);
 }
 
 body[data-theme="white"] .teamPageCard .premiumVetTop {
