@@ -38131,3 +38131,343 @@ body:is(
   color: var(--finance-text) !important;
   text-shadow: 0 1px 12px var(--finance-accent-glow);
 }
+
+/* =========================================================
+   VETERINARIAN PROFILE — ALL CLINIC THEMES
+   Personal staff color stays in the avatar; UI follows theme.
+   ========================================================= */
+
+html body .teamDashProfile {
+  color: var(--module-text) !important;
+}
+
+html body .teamDashSidebar {
+  background:
+    radial-gradient(
+      circle at 50% 10%,
+      color-mix(
+        in srgb,
+        var(--staff-color) 16%,
+        transparent
+      ),
+      transparent 31%
+    ),
+    linear-gradient(
+      180deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+  box-shadow:
+    0 24px 70px var(--module-shadow),
+    inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--module-text) 8%,
+        transparent
+      ) !important;
+}
+
+html body .teamBackBtn,
+html body .teamGhostBtn {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-soft) !important;
+}
+
+html body .teamBackBtn:hover,
+html body .teamGhostBtn:hover {
+  background: var(--module-surface-hover) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-text) !important;
+}
+
+html body .teamDashName,
+html body .teamDashTop h1,
+html body .teamKpiCard strong,
+html body .teamDashPanelHead h3,
+html body .teamDashRows b,
+html body .teamDashIdBox b,
+html body .teamVisitTitle,
+html body .teamVisitRight b,
+html body .teamFinanceRow b,
+html body .teamCareerTitle,
+html body .achievementTop b,
+html body .achievementReward b,
+html body .staffSkillCard b {
+  color: var(--module-text) !important;
+}
+
+html body .teamDashRole,
+html body .teamDashTop p,
+html body .teamKpiCard span,
+html body .teamDashRows span,
+html body .teamDashXp p,
+html body .teamDashIdBox span,
+html body .teamSubHero p,
+html body .teamVisitMeta,
+html body .teamVisitOwner,
+html body .teamFinanceRow span,
+html body .teamCareerSub,
+html body .teamCareerProgress div,
+html body .achievementTop span,
+html body .achievementBody p,
+html body .achievementProgress div,
+html body .achievementReward small,
+html body .staffSkillCard span,
+html body .panelMutedTitle {
+  color: var(--module-text-muted) !important;
+}
+
+html body .teamDashContact,
+html body .teamDashIdBox,
+html body .teamFinanceRow,
+html body .achievementReward {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-soft) !important;
+}
+
+html body .teamDashNav button {
+  color: var(--module-text-muted) !important;
+}
+
+html body .teamDashNav button:hover,
+html body .teamDashNav button.active {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--module-accent) 26%,
+        var(--module-surface-soft)
+      ),
+      var(--module-accent-soft)
+    ) !important;
+  color: var(--module-text) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--module-border-strong),
+    0 9px 24px var(--module-accent-glow) !important;
+}
+
+html body .teamPrimaryBtn {
+  background:
+    linear-gradient(
+      135deg,
+      var(--module-accent),
+      var(--module-accent-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 14px 32px var(--module-accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+html body .teamKpiCard,
+html body .teamDashPanel,
+html body .teamDashInsight,
+html body .teamSubHero,
+html body .teamVisitCard,
+html body .teamCareerLevel,
+html body .teamCareerProgress,
+html body .achievementCard,
+html body .staffSkillCard {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      var(--module-accent-soft),
+      transparent 40%
+    ),
+    linear-gradient(
+      145deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    ) !important;
+  border-color: var(--module-border) !important;
+  box-shadow:
+    0 17px 46px var(--module-shadow),
+    inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--module-text) 7%,
+        transparent
+      ) !important;
+}
+
+html body .teamKpiIcon,
+html body .teamInsightIcon,
+html body .teamVisitIcon,
+html body .teamCareerBadge,
+html body .staffSkillIcon {
+  background: var(--module-accent-soft) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-accent-2) !important;
+}
+
+html body .teamDashInsight {
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      color-mix(
+        in srgb,
+        var(--module-accent) 24%,
+        transparent
+      ),
+      transparent 38%
+    ),
+    linear-gradient(
+      135deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+}
+
+html body .teamDashInsight b,
+html body .teamDashInsight p,
+html body .teamAnalyticsInsight p {
+  color: var(--module-text-soft) !important;
+}
+
+html body .teamDashInsight strong,
+html body .teamAnalyticsInsight b,
+html body .teamVisitOpenBtn {
+  color: var(--module-accent-2) !important;
+}
+
+html body .teamDashPanelHead > span {
+  background: var(--module-surface-soft) !important;
+  color: var(--module-text-muted) !important;
+}
+
+html body .teamDashRows p {
+  border-bottom-color: var(--module-border) !important;
+}
+
+html body .teamDashXp i,
+html body .teamBarTrack,
+html body .teamCareerProgress i,
+html body .achievementProgress i {
+  background: var(--module-surface-hover) !important;
+}
+
+html body .teamDashXp em,
+html body .teamBarTrack i.purple,
+html body .teamCareerProgress em,
+html body .achievementProgress em {
+  background:
+    linear-gradient(
+      90deg,
+      var(--module-accent),
+      var(--module-accent-2)
+    ) !important;
+}
+
+html body .teamChartRange button,
+html body .teamVisitFilters button {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-muted) !important;
+}
+
+html body .teamChartRange button:hover,
+html body .teamVisitFilters button:hover {
+  background: var(--module-surface-hover) !important;
+  color: var(--module-text) !important;
+}
+
+html body .teamChartRange button.active,
+html body .teamVisitFilters button.active {
+  background:
+    linear-gradient(
+      135deg,
+      var(--module-accent),
+      var(--module-accent-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 12px 28px var(--module-accent-glow) !important;
+}
+
+html body .teamVisitStatus,
+html body .teamDashStatus {
+  color: #65c59e !important;
+  background: rgba(66, 154, 124, 0.11) !important;
+  border-color: rgba(66, 154, 124, 0.27) !important;
+}
+
+html body .achievementIcon {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+}
+
+html body .achievementXp {
+  color: var(--module-accent-2) !important;
+}
+
+html body .staffSkillRemove {
+  background: var(--module-surface-hover) !important;
+  color: var(--module-text-soft) !important;
+}
+
+html body .staffSkillModalOverlay,
+html body .financeAdjustModalOverlay {
+  background:
+    radial-gradient(
+      circle at 50% 24%,
+      var(--module-accent-soft),
+      transparent 44%
+    ),
+    var(--module-overlay) !important;
+}
+
+html body .staffSkillModal,
+html body .financeAdjustModal {
+  background:
+    radial-gradient(
+      circle at top left,
+      var(--module-accent-soft),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-text) !important;
+  box-shadow:
+    0 30px 90px var(--module-shadow),
+    0 0 30px var(--module-accent-glow) !important;
+}
+
+html body .staffSkillModalHead h2 {
+  color: var(--module-text) !important;
+}
+
+html body .staffSkillModalHead p,
+html body .staffSkillField span,
+html body .staffSkillPresets > span {
+  color: var(--module-text-muted) !important;
+}
+
+html body .staffSkillModalIcon {
+  background: var(--module-accent-soft) !important;
+  border-color: var(--module-border-strong) !important;
+}
+
+html body .staffSkillField input {
+  background: var(--module-input) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-text) !important;
+  box-shadow:
+    0 0 0 3px var(--module-accent-soft) !important;
+}
+
+html body .staffSkillPresets button {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-soft) !important;
+}

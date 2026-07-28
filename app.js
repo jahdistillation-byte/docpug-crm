@@ -10161,8 +10161,43 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
 
   const revenueCanvas = document.getElementById("staffRevenueChart");
   const visitsCanvas = document.getElementById("staffVisitsChart");
-  const isWhiteTheme =
-    document.body.dataset.theme === "white";
+  const activeTheme =
+    document.body.dataset.theme || "purple";
+  const chartPalettes = {
+    purple: {
+      revenueTop: "rgba(54, 224, 127, 0.95)",
+      revenueBottom: "rgba(54, 224, 127, 0.18)",
+      visitsTop: "rgba(180, 92, 255, 0.95)",
+      visitsBottom: "rgba(124, 92, 255, 0.18)",
+    },
+    black: {
+      revenueTop: "rgba(183, 154, 114, 0.94)",
+      revenueBottom: "rgba(183, 154, 114, 0.16)",
+      visitsTop: "rgba(126, 154, 166, 0.92)",
+      visitsBottom: "rgba(126, 154, 166, 0.16)",
+    },
+    white: {
+      revenueTop: "rgba(54, 142, 119, 0.92)",
+      revenueBottom: "rgba(54, 142, 119, 0.16)",
+      visitsTop: "rgba(52, 120, 168, 0.94)",
+      visitsBottom: "rgba(52, 120, 168, 0.16)",
+    },
+    blue: {
+      revenueTop: "rgba(95, 150, 188, 0.94)",
+      revenueBottom: "rgba(95, 150, 188, 0.16)",
+      visitsTop: "rgba(126, 174, 207, 0.92)",
+      visitsBottom: "rgba(126, 174, 207, 0.15)",
+    },
+    green: {
+      revenueTop: "rgba(124, 156, 138, 0.94)",
+      revenueBottom: "rgba(124, 156, 138, 0.16)",
+      visitsTop: "rgba(160, 185, 170, 0.92)",
+      visitsBottom: "rgba(160, 185, 170, 0.15)",
+    },
+  };
+  const chartPalette =
+    chartPalettes[activeTheme] ||
+    chartPalettes.purple;
 
   if (staffRevenueChartInstance) staffRevenueChartInstance.destroy();
   if (staffVisitsChartInstance) staffVisitsChartInstance.destroy();
@@ -10173,15 +10208,11 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
     const gradient = ctx.createLinearGradient(0, 0, 0, 220);
     gradient.addColorStop(
       0,
-      isWhiteTheme
-        ? "rgba(54, 142, 119, 0.92)"
-        : "rgba(54, 224, 127, 0.95)"
+      chartPalette.revenueTop
     );
     gradient.addColorStop(
       1,
-      isWhiteTheme
-        ? "rgba(54, 142, 119, 0.16)"
-        : "rgba(54, 224, 127, 0.18)"
+      chartPalette.revenueBottom
     );
 
     staffRevenueChartInstance = new Chart(ctx, {
@@ -10206,15 +10237,11 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
     const gradient = ctx.createLinearGradient(0, 0, 0, 220);
     gradient.addColorStop(
       0,
-      isWhiteTheme
-        ? "rgba(52, 120, 168, 0.94)"
-        : "rgba(180, 92, 255, 0.95)"
+      chartPalette.visitsTop
     );
     gradient.addColorStop(
       1,
-      isWhiteTheme
-        ? "rgba(52, 120, 168, 0.16)"
-        : "rgba(124, 92, 255, 0.18)"
+      chartPalette.visitsBottom
     );
 
     staffVisitsChartInstance = new Chart(ctx, {
