@@ -3550,7 +3550,10 @@ async function refreshVisitFinanceSummary(
 }
 
 async function openVisitPaymentModal(
-  visitId
+  visitId,
+  {
+    onPaymentRecorded = null,
+  } = {}
 ) {
   if (
     !isOwner() &&
@@ -4197,6 +4200,26 @@ async function openVisitPaymentModal(
         submitting = false;
 
         render();
+
+        if (
+          typeof onPaymentRecorded ===
+          "function"
+        ) {
+          try {
+            await onPaymentRecorded({
+              visitId,
+              finance,
+            });
+          } catch (refreshError) {
+            // The payment is already recorded at this point. A secondary
+            // dashboard refresh must never turn a successful payment into an
+            // error message or encourage the user to submit it again.
+            console.error(
+              "refresh finance workspace after payment failed:",
+              refreshError
+            );
+          }
+        }
       } catch (error) {
         submitting = false;
 
@@ -17738,7 +17761,13 @@ function bindFinanceWorkspaceActions(
           if (!visitId) return;
 
           await openVisitPaymentModal(
-            visitId
+            visitId,
+            {
+              onPaymentRecorded:
+                async () => {
+                  await renderFinanceTab();
+                },
+            }
           );
         }
       );
