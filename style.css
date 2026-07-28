@@ -11536,7 +11536,7 @@ body[data-theme="white"] .visitCardDelete:hover {
 .premiumVisitTop {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 24px;
 }
 
@@ -11577,6 +11577,11 @@ body[data-theme="white"] .visitCardDelete:hover {
   letter-spacing: -0.025em;
 }
 
+.premiumVisitDiagnosis .v-dx {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .premiumVisitDiagnosisIcon {
   flex: 0 0 auto;
 
@@ -11587,6 +11592,8 @@ body[data-theme="white"] .visitCardDelete:hover {
 
 .premiumVisitBadges {
   display: flex;
+  max-width: 46%;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
@@ -18019,6 +18026,35 @@ body .specPill {
   min-width: 0;
 }
 
+.visitBackPatientButton {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  margin: 0 0 14px;
+  cursor: pointer;
+  border: 1px solid var(--finance-border);
+  border-radius: 999px;
+  background: var(--finance-surface-soft);
+  color: var(--finance-text-soft);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.visitBackPatientButton:hover {
+  transform: translateY(-1px);
+  border-color: var(--finance-border-strong);
+  background: var(--finance-surface-hover);
+  color: var(--finance-accent-2);
+}
+
 .visitWorkspaceEyebrow {
   margin-bottom: 6px;
   font-size: 11px;
@@ -18508,21 +18544,21 @@ select.visitControl {
   position: relative;
   padding: 20px;
   overflow: hidden;
-  border: 1px solid rgba(179, 96, 255, 0.18);
+  border: 1px solid var(--finance-border-strong);
   border-radius: 22px;
   background:
     radial-gradient(
       circle at top left,
-      rgba(147, 70, 232, 0.16),
+      var(--finance-accent-soft),
       transparent 36%
     ),
     linear-gradient(
       150deg,
-      rgba(27, 17, 48, 0.96),
-      rgba(11, 7, 22, 0.96)
+      var(--finance-surface-1),
+      var(--finance-surface-2)
     );
   box-shadow:
-    0 26px 70px rgba(0, 0, 0, 0.34),
+    0 26px 70px var(--finance-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -18537,7 +18573,7 @@ select.visitControl {
   height: 210px;
   pointer-events: none;
   border-radius: 50%;
-  background: rgba(147, 70, 232, 0.15);
+  background: var(--finance-accent-glow);
   filter: blur(40px);
 }
 
@@ -18554,7 +18590,7 @@ select.visitControl {
 .visitSummaryHead span {
   font-size: 13px;
   font-weight: 850;
-  color: #fff;
+  color: var(--finance-text);
 }
 
 .visitSummaryHead b {
@@ -18576,9 +18612,9 @@ select.visitControl {
   gap: 11px;
   padding: 12px;
   margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.065);
+  border: 1px solid var(--finance-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--finance-surface-soft);
 }
 
 .visitSummaryAvatar {
@@ -18587,9 +18623,9 @@ select.visitControl {
   height: 40px;
   flex: 0 0 40px;
   place-items: center;
-  border: 1px solid rgba(182, 101, 255, 0.18);
+  border: 1px solid var(--finance-border-strong);
   border-radius: 12px;
-  background: rgba(147, 70, 232, 0.08);
+  background: var(--finance-accent-soft);
   font-size: 17px;
 }
 
@@ -18604,7 +18640,7 @@ select.visitControl {
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #fff;
+  color: var(--finance-text);
 }
 
 .visitSummaryPatient span {
@@ -18613,7 +18649,7 @@ select.visitControl {
   font-size: 9px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--finance-text-muted);
 }
 
 .visitSummaryRows {
@@ -18634,18 +18670,18 @@ select.visitControl {
 
 .visitSummaryRows span {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.46);
+  color: var(--finance-text-muted);
 }
 
 .visitSummaryRows strong {
   font-size: 12px;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--finance-text);
 }
 
 .visitSummaryDivider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.075);
+  background: var(--finance-border);
 }
 
 .visitSummaryGrand {
@@ -18655,7 +18691,7 @@ select.visitControl {
 .visitSummaryGrand span {
   font-size: 11px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.64);
+  color: var(--finance-text-soft);
 }
 
 .visitSummaryGrand strong {
@@ -18663,7 +18699,7 @@ select.visitControl {
   line-height: 1;
   font-weight: 900;
   letter-spacing: -0.03em;
-  color: #c98cff;
+  color: var(--finance-accent-2);
 }
 
 .visitSavePrimary,
@@ -18688,15 +18724,15 @@ select.visitControl {
 }
 
 .visitSavePrimary {
-  border: 1px solid rgba(214, 166, 255, 0.28);
+  border: 1px solid var(--finance-border-strong);
   background:
     linear-gradient(
       135deg,
-      #aa4eff,
-      #7d40e8
+      var(--finance-accent-2),
+      var(--finance-accent)
     );
   box-shadow:
-    0 14px 32px rgba(112, 42, 198, 0.3),
+    0 14px 32px var(--finance-accent-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   color: #fff;
 }
@@ -18708,9 +18744,9 @@ select.visitControl {
 }
 
 .visitPrintButton {
-  border: 1px solid rgba(255, 255, 255, 0.085);
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--finance-border);
+  background: var(--finance-surface-soft);
+  color: var(--finance-text-soft);
 }
 
 .visitSavePrimary:hover,
@@ -18722,7 +18758,7 @@ select.visitControl {
 .visitSavePrimary:hover {
   filter: brightness(1.08);
   box-shadow:
-    0 18px 38px rgba(112, 42, 198, 0.4),
+    0 18px 38px var(--finance-accent-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -18732,7 +18768,7 @@ select.visitControl {
 }
 
 .visitPrintButton:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--finance-surface-hover);
 }
 
 .visitSummaryHint {
@@ -18740,10 +18776,10 @@ select.visitControl {
   z-index: 1;
   margin-top: 14px;
   padding-top: 13px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid var(--finance-border);
   font-size: 8px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--finance-text-faint);
 }
 
 /* =========================================================
@@ -24282,12 +24318,12 @@ select.visitControl {
   margin: 3px 0 8px;
 
   border: 1px solid
-    rgba(255, 255, 255, 0.07);
+    var(--finance-border);
 
   border-radius: 14px;
 
   background:
-    rgba(255, 255, 255, 0.025);
+    var(--finance-surface-soft);
 }
 
 .visitPaymentStateTop,
@@ -24303,7 +24339,7 @@ select.visitControl {
   margin-bottom: 10px;
 
   border-bottom: 1px solid
-    rgba(255, 255, 255, 0.06);
+    var(--finance-border);
 }
 
 .visitPaymentStateTop > span,
@@ -24313,7 +24349,7 @@ select.visitControl {
   font-size: 8px;
 
   color:
-    rgba(255, 255, 255, 0.38);
+    var(--finance-text-muted);
 }
 
 .visitPaymentStateTop b,
@@ -24338,13 +24374,13 @@ select.visitControl {
 
   font-size: 11px;
 
-  color: #ffffff;
+  color: var(--finance-text);
 }
 
 .visitPaymentStateMoney
 > div:last-child
 strong {
-  color: #cf91ff;
+  color: var(--finance-accent-2);
 }
 
 

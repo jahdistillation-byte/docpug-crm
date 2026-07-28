@@ -36382,6 +36382,22 @@ function initVisitUI() {
   state.visitUiBound = true;
 
   document.addEventListener("click", (e) => {
+    if (e.target.closest("#btnBackVisitPatient")) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const visit = getVisitByIdSync(state.selectedVisitId);
+      const patientId =
+        state.selectedPetId ||
+        state.selectedPet?.id ||
+        visit?.pet_id;
+
+      if (patientId) openPatient(String(patientId));
+      else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
+      else setHash("patients");
+      return;
+    }
+
     if (e.target.closest("#btnBackPatient")) {
       if (state.selectedPetId) openPatient(state.selectedPetId);
       else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
