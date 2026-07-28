@@ -37754,3 +37754,219 @@ html body[data-theme="white"] .hospitalTaskCreateButton {
   border-color: #3478a8 !important;
   color: #ffffff !important;
 }
+
+/* =========================================================
+   HOSPITAL — ALL CLINIC THEMES
+   Every hospital surface follows the active theme palette.
+   ========================================================= */
+
+html body .hospitalPatientCard {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      var(--module-accent-soft),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    ) !important;
+  border-color: var(--module-border) !important;
+  box-shadow:
+    0 18px 46px var(--module-shadow),
+    inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--module-text) 7%,
+        transparent
+      ) !important;
+}
+
+html body .hospitalPatientIdentity h2,
+html body .hospitalInfoRow strong,
+html body .hospitalCardTasksHead strong,
+html body .hospitalCardTaskMain > strong,
+html body .hospitalCardTasksEmpty strong {
+  color: var(--module-text) !important;
+}
+
+html body .hospitalPatientIdentity p,
+html body .hospitalInfoRow span,
+html body .hospitalCardTasksHead span,
+html body .hospitalCardTaskTop time,
+html body .hospitalCardTaskMain > p,
+html body .hospitalCardTasksEmpty small {
+  color: var(--module-text-muted) !important;
+}
+
+html body .hospitalStatusBadge {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-soft) !important;
+}
+
+html body .hospitalCardTasks {
+  background:
+    linear-gradient(
+      145deg,
+      var(--module-accent-soft),
+      var(--module-surface-soft)
+    ) !important;
+  border-color: var(--module-border) !important;
+}
+
+html body .hospitalCardTasksHead > small {
+  background: var(--module-accent-soft) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-accent-2) !important;
+}
+
+html body .hospitalCardTask,
+html body .hospitalCardTasksEmpty {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+}
+
+html body .hospitalCardTask.planned {
+  background:
+    linear-gradient(
+      145deg,
+      var(--module-accent-soft),
+      var(--module-surface-soft)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+}
+
+html body .hospitalCardTask.completed {
+  background: rgba(66, 154, 124, 0.08) !important;
+  border-color: rgba(66, 154, 124, 0.24) !important;
+}
+
+html body .hospitalCardTaskIcon {
+  background: var(--module-accent-soft) !important;
+  border-color: var(--module-border-strong) !important;
+}
+
+html body .hospitalCardTaskTop span,
+html body .hospitalCardTaskPending {
+  color: var(--module-accent-2) !important;
+}
+
+html body .hospitalGhostButton {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-soft) !important;
+}
+
+html body .hospitalPrimaryButton {
+  background: var(--module-accent-soft) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-accent-2) !important;
+}
+
+html body .hospitalTasksBackdrop {
+  background:
+    radial-gradient(
+      circle at 50% 26%,
+      var(--module-accent-soft),
+      transparent 45%
+    ),
+    var(--module-overlay) !important;
+}
+
+html body .hospitalTasksModal {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      var(--module-accent-soft),
+      transparent 36%
+    ),
+    linear-gradient(
+      155deg,
+      var(--module-surface-1),
+      var(--module-surface-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-text) !important;
+  box-shadow:
+    0 34px 96px var(--module-shadow),
+    0 0 34px var(--module-accent-glow) !important;
+}
+
+html body .hospitalTasksEyebrow,
+html body .hospitalTaskType {
+  color: var(--module-accent-2) !important;
+}
+
+html body .hospitalTasksHeader h2,
+html body .hospitalTasksSectionHead h3,
+html body .hospitalTaskCreateCard h3,
+html body .hospitalTaskTop h4,
+html body .hospitalTasksEmpty strong {
+  color: var(--module-text) !important;
+}
+
+html body .hospitalTasksHeader p,
+html body .hospitalTasksSectionHead p,
+html body .hospitalTaskTop time,
+html body .hospitalTaskContent > p,
+html body .hospitalTaskField > span,
+html body .hospitalTasksEmpty {
+  color: var(--module-text-muted) !important;
+}
+
+html body .hospitalTasksClose {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text-soft) !important;
+}
+
+html body .hospitalTasksTimeline,
+html body .hospitalTaskCreateCard,
+html body .hospitalTaskItem {
+  background: var(--module-surface-soft) !important;
+  border-color: var(--module-border) !important;
+}
+
+html body .hospitalTaskItem.completed {
+  background: rgba(66, 154, 124, 0.08) !important;
+  border-color: rgba(66, 154, 124, 0.24) !important;
+}
+
+html body .hospitalTasksCount,
+html body .hospitalTaskIcon {
+  background: var(--module-accent-soft) !important;
+  border-color: var(--module-border-strong) !important;
+  color: var(--module-accent-2) !important;
+}
+
+html body .hospitalTaskStaffSelect,
+html body .hospitalTaskInput,
+html body .hospitalTaskTextarea {
+  background: var(--module-input) !important;
+  border-color: var(--module-border) !important;
+  color: var(--module-text) !important;
+  color-scheme: var(--module-color-scheme);
+}
+
+html body .hospitalTaskStaffSelect:focus,
+html body .hospitalTaskInput:focus,
+html body .hospitalTaskTextarea:focus {
+  border-color: var(--module-accent) !important;
+  box-shadow:
+    0 0 0 3px var(--module-accent-soft) !important;
+}
+
+html body .hospitalTaskCreateButton {
+  background:
+    linear-gradient(
+      135deg,
+      var(--module-accent),
+      var(--module-accent-2)
+    ) !important;
+  border-color: var(--module-border-strong) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 12px 28px var(--module-accent-glow) !important;
+}
