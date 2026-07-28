@@ -9513,20 +9513,27 @@ def api_get_patients():
             get_current_org_id()
         )
 
-        query = (
-            supabase
-            .table("patients")
-            .select("*")
-            .eq("org_id", current_org)
-        )
-
-        if owner_id:
-            query = query.eq(
-                "owner_id",
-                owner_id
+        def build_query():
+            query = (
+                supabase
+                .table("patients")
+                .select("*")
+                .eq("org_id", current_org)
             )
 
-        result = query.execute()
+            if owner_id:
+                query = query.eq(
+                    "owner_id",
+                    owner_id
+                )
+
+            return query
+
+        result = execute_with_retry(
+            build_query,
+            attempts=3,
+            delay=0.25,
+        )
 
         return ok(
             result.data or []

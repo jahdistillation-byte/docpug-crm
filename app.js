@@ -1582,7 +1582,29 @@ async function loadOwners() {
   }
 }
 // ===== API: Patients =====
+let patientsApiInFlight = null;
+
 async function loadPatientsApi() {
+  if (patientsApiInFlight) {
+    return patientsApiInFlight;
+  }
+
+  patientsApiInFlight =
+    loadPatientsApiRequest();
+
+  try {
+    return await patientsApiInFlight;
+  } finally {
+    patientsApiInFlight = null;
+  }
+}
+
+async function loadPatientsApiRequest() {
+  const cachedPatients =
+    Array.isArray(state.patients)
+      ? state.patients
+      : [];
+
   try {
     const res = await fetch("/api/patients", {
       credentials: "include",
@@ -1613,7 +1635,8 @@ async function loadPatientsApi() {
         `Помилка завантаження пацієнтів (HTTP ${res.status})`
       );
 
-      state.patients = [];
+      state.patients =
+        cachedPatients;
 
       if (state.route === "patients") {
         renderPatientsTab();
@@ -1628,7 +1651,7 @@ async function loadPatientsApi() {
         );
       }
 
-      return [];
+      return cachedPatients;
     }
 
     if (!json || !json.ok) {
@@ -1643,7 +1666,8 @@ async function loadPatientsApi() {
         "Помилка завантаження пацієнтів"
       );
 
-      state.patients = [];
+      state.patients =
+        cachedPatients;
 
       if (state.route === "patients") {
         renderPatientsTab();
@@ -1658,7 +1682,7 @@ async function loadPatientsApi() {
         );
       }
 
-      return [];
+      return cachedPatients;
     }
 
     const arr = Array.isArray(json.data)
@@ -1695,7 +1719,8 @@ async function loadPatientsApi() {
       "Помилка завантаження пацієнтів (network)"
     );
 
-    state.patients = [];
+    state.patients =
+      cachedPatients;
 
     if (state.route === "patients") {
       renderPatientsTab();
@@ -1710,7 +1735,7 @@ async function loadPatientsApi() {
       );
     }
 
-    return [];
+    return cachedPatients;
   }
 }
 
