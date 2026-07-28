@@ -46112,10 +46112,10 @@ async function initSettingsUI() {
             <div class="clinicThemeGrid">
               ${[
                 ["purple", "Фіолетова", "#9346E8"],
-                ["black", "Чорна", "#24242A"],
+                ["black", "Графіт", "#B79A72"],
                 ["white", "Світла", "#F4F6FA"],
-                ["blue", "Синя", "#1687FF"],
-                ["green", "Зелена", "#10B981"],
+                ["blue", "Глибокий синій", "#6F91AD"],
+                ["green", "Темний евкаліпт", "#7C9C8A"],
               ]
                 .map(
                   ([value, label, color]) => `
