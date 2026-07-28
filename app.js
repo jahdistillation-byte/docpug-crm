@@ -10161,6 +10161,8 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
 
   const revenueCanvas = document.getElementById("staffRevenueChart");
   const visitsCanvas = document.getElementById("staffVisitsChart");
+  const isWhiteTheme =
+    document.body.dataset.theme === "white";
 
   if (staffRevenueChartInstance) staffRevenueChartInstance.destroy();
   if (staffVisitsChartInstance) staffVisitsChartInstance.destroy();
@@ -10169,8 +10171,18 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
     const ctx = revenueCanvas.getContext("2d");
 
     const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-    gradient.addColorStop(0, "rgba(54, 224, 127, 0.95)");
-    gradient.addColorStop(1, "rgba(54, 224, 127, 0.18)");
+    gradient.addColorStop(
+      0,
+      isWhiteTheme
+        ? "rgba(54, 142, 119, 0.92)"
+        : "rgba(54, 224, 127, 0.95)"
+    );
+    gradient.addColorStop(
+      1,
+      isWhiteTheme
+        ? "rgba(54, 142, 119, 0.16)"
+        : "rgba(54, 224, 127, 0.18)"
+    );
 
     staffRevenueChartInstance = new Chart(ctx, {
       type: "bar",
@@ -10192,8 +10204,18 @@ function renderStaffProfileCharts(dashboard, monthsCount = 6) {
     const ctx = visitsCanvas.getContext("2d");
 
     const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-    gradient.addColorStop(0, "rgba(180, 92, 255, 0.95)");
-    gradient.addColorStop(1, "rgba(124, 92, 255, 0.18)");
+    gradient.addColorStop(
+      0,
+      isWhiteTheme
+        ? "rgba(52, 120, 168, 0.94)"
+        : "rgba(180, 92, 255, 0.95)"
+    );
+    gradient.addColorStop(
+      1,
+      isWhiteTheme
+        ? "rgba(52, 120, 168, 0.16)"
+        : "rgba(124, 92, 255, 0.18)"
+    );
 
     staffVisitsChartInstance = new Chart(ctx, {
       type: "bar",
@@ -10288,6 +10310,9 @@ async function buildStaffLiveStats(staffId) {
 }
 
 function buildTeamChartOptions(unitLabel) {
+  const isWhiteTheme =
+    document.body.dataset.theme === "white";
+
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -10300,10 +10325,14 @@ function buildTeamChartOptions(unitLabel) {
         display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(10, 16, 34, 0.96)",
+        backgroundColor: isWhiteTheme
+          ? "rgba(23, 43, 58, 0.96)"
+          : "rgba(10, 16, 34, 0.96)",
         titleColor: "#fff",
         bodyColor: "#fff",
-        borderColor: "rgba(255,255,255,0.12)",
+        borderColor: isWhiteTheme
+          ? "rgba(160, 198, 223, 0.35)"
+          : "rgba(255,255,255,0.12)",
         borderWidth: 1,
         padding: 12,
         displayColors: false,
@@ -10326,7 +10355,9 @@ function buildTeamChartOptions(unitLabel) {
           display: false,
         },
         ticks: {
-  color: "rgba(255,255,255,0.72)",
+  color: isWhiteTheme
+    ? "rgba(38, 65, 82, 0.72)"
+    : "rgba(255,255,255,0.72)",
   autoSkip: false,
   maxRotation: 0,
   minRotation: 0,
@@ -10342,10 +10373,14 @@ function buildTeamChartOptions(unitLabel) {
       y: {
         beginAtZero: true,
         grid: {
-          color: "rgba(255,255,255,0.06)",
+          color: isWhiteTheme
+            ? "rgba(47, 86, 112, 0.1)"
+            : "rgba(255,255,255,0.06)",
         },
         ticks: {
-          color: "rgba(255,255,255,0.48)",
+          color: isWhiteTheme
+            ? "rgba(55, 81, 97, 0.58)"
+            : "rgba(255,255,255,0.48)",
           callback: function(value) {
             if (unitLabel === "грн") {
               return Number(value).toLocaleString("uk-UA");
@@ -24805,11 +24840,11 @@ async function renderPatientTab(tab, pet) {
       </button>
     </div>
 
-    <div class="glass-card" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
+    <div class="glass-card patientRecordSummary" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
       <div style="display:flex; justify-content:space-between; align-items:start;">
         <div>
           <div style="font-size:0.75rem; text-transform:uppercase; opacity:0.5; letter-spacing:1px; margin-bottom:4px;">Медична карта пацієнта</div>
-          <h2 style="margin:0; font-size: 2.2rem; color: #fff;">🐾 ${escapeHtml(pet.name || "Без імені")}</h2>
+          <h2 class="patientRecordTitle" style="margin:0; font-size: 2.2rem; color: #fff;">🐾 ${escapeHtml(pet.name || "Без імені")}</h2>
           <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
             ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
             ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
@@ -24818,20 +24853,20 @@ async function renderPatientTab(tab, pet) {
         <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4); border:none; padding: 12px 20px; border-radius: 12px; font-weight:600; cursor:pointer;">+ Новий візит</button>
       </div>
 
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
-        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+      <div class="patientRecordStats" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
+        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
           <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Візитів</div>
           <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${stats.count}</div>
         </div>
-        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
           <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Вага</div>
           <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${escapeHtml(pet.weight_kg || "—")} кг</div>
         </div>
-        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
           <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Останній візит</div>
           <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 4px;">${escapeHtml(stats.lastDate || "—")}</div>
         </div>
-        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
+        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
           <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Всього сплачено</div>
           <div style="font-size: 1.4rem; font-weight: 700; color: #22c55e;">${stats.total} ₴</div>
         </div>
@@ -24903,6 +24938,9 @@ if (btnAddVisit) {
   if (!dynamicBox) return;
 
   // Красим вкладки
+  const isWhitePatientTheme =
+    document.body.dataset.theme === "white";
+
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     const isActive = btn.dataset.pTab === tab;
     btn.style.padding = "10px 18px";
@@ -24911,9 +24949,15 @@ if (btnAddVisit) {
     btn.style.cursor = "pointer";
     btn.style.fontSize = "14px";
     btn.style.fontWeight = isActive ? "600" : "500";
-    btn.style.color = isActive ? "#fff" : "rgba(255, 255, 255, 0.6)";
-    btn.style.background = isActive ? "rgba(255, 255, 255, 0.15)" : "transparent";
-    btn.style.boxShadow = isActive ? "0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)" : "none";
+    btn.style.color = isWhitePatientTheme
+      ? (isActive ? "#245f89" : "#667987")
+      : (isActive ? "#fff" : "rgba(255, 255, 255, 0.6)");
+    btn.style.background = isWhitePatientTheme
+      ? (isActive ? "#e8f3fa" : "transparent")
+      : (isActive ? "rgba(255, 255, 255, 0.15)" : "transparent");
+    btn.style.boxShadow = isWhitePatientTheme
+      ? (isActive ? "inset 0 0 0 1px #bdd7e8" : "none")
+      : (isActive ? "0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)" : "none");
     btn.style.transition = "all 0.2s ease";
   });
 
@@ -46211,6 +46255,10 @@ function bindPersonalSettingsUI(page) {
       button.addEventListener("click", () => {
         selectedTheme = theme;
         document.body.dataset.theme = theme;
+        LS.set(
+          "docpug_clinic_theme",
+          theme
+        );
 
         page
           .querySelectorAll("[data-theme-set]")
