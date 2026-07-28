@@ -28198,6 +28198,18 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: translateY(-1px);
 }
 
+.financeOperationEditButton:hover {
+  color: #ffd48b;
+
+  border-color:
+    rgba(255, 212, 139, 0.36);
+
+  background:
+    rgba(255, 212, 139, 0.08);
+
+  transform: translateY(-1px);
+}
+
 .financeOperationActions button:disabled {
   opacity: 0.45;
   cursor: wait;

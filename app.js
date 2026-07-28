@@ -12762,8 +12762,62 @@ async function cancelFinancePaymentApi(
   return result.data;
 }
 
+async function updateFinanceExpenseApi(
+  transactionId,
+  payload
+) {
+  const response =
+    await fetch(
+      (
+        "/api/finance/transactions/" +
+        encodeURIComponent(
+          transactionId
+        ) +
+        "/expense"
+      ),
+      {
+        method: "PATCH",
+        credentials: "include",
 
-function openFinanceExpenseModal() {
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          ),
+      }
+    );
+
+  let result = null;
+
+  try {
+    result =
+      await response.json();
+
+  } catch {
+    result = null;
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося зберегти зміни витрати."
+    );
+  }
+
+  return result.data;
+}
+
+
+function openFinanceExpenseModal(
+  transaction = null
+) {
   if (
     !isOwnerOrAdmin()
   ) {
@@ -12779,6 +12833,24 @@ function openFinanceExpenseModal() {
     return;
   }
 
+  const editingTransaction =
+    (
+      transaction &&
+      transaction.transaction_type ===
+        "expense" &&
+      transaction.source ===
+        "manual" &&
+      transaction.status ===
+        "completed"
+    )
+      ? transaction
+      : null;
+
+  const isEditing =
+    Boolean(
+      editingTransaction
+    );
+
   document
     .getElementById(
       "financeExpenseModal"
@@ -12786,7 +12858,12 @@ function openFinanceExpenseModal() {
     ?.remove();
 
   const now =
-    new Date();
+    isEditing
+      ? new Date(
+          editingTransaction
+            .occurred_at
+        )
+      : new Date();
 
   const localDateTime =
     new Date(
@@ -12834,12 +12911,25 @@ function openFinanceExpenseModal() {
           </span>
 
           <h2 id="financeExpenseTitle">
-            Додати витрату
+            ${
+              isEditing
+                ? "Редагувати витрату"
+                : "Додати витрату"
+            }
           </h2>
 
           <p>
-            Витрата одразу потрапить
-            до аналітики та журналу.
+            ${
+              isEditing
+                ? (
+                    "Зміни одразу оновлять " +
+                    "журнал, рахунок та аналітику."
+                  )
+                : (
+                    "Витрата одразу потрапить " +
+                    "до аналітики та журналу."
+                  )
+            }
           </p>
         </div>
 
@@ -12957,7 +13047,11 @@ function openFinanceExpenseModal() {
               </option>
 
               <option value="card">
-                Картка / термінал
+                Картка
+              </option>
+
+              <option value="terminal">
+                Термінал
               </option>
 
               <option value="transfer">
@@ -13049,7 +13143,11 @@ function openFinanceExpenseModal() {
             id="financeExpenseSubmit"
           >
             <span>
-              Провести витрату
+              ${
+                isEditing
+                  ? "Зберегти зміни"
+                  : "Провести витрату"
+              }
             </span>
 
             <strong>
@@ -13083,6 +13181,72 @@ function openFinanceExpenseModal() {
     modal.querySelector(
       "#financeExpenseError"
     );
+
+  if (
+    form &&
+    editingTransaction
+  ) {
+    const categorySelect =
+      form.elements.category;
+
+    const category =
+      String(
+        editingTransaction.category ||
+        ""
+      );
+
+    if (
+      category &&
+      !Array.from(
+        categorySelect.options
+      ).some(
+        (option) =>
+          option.value === category
+      )
+    ) {
+      categorySelect.add(
+        new Option(
+          category,
+          category
+        )
+      );
+    }
+
+    form.elements.amount.value =
+      editingTransaction.amount ??
+      "";
+
+    categorySelect.value =
+      category;
+
+    form.elements
+      .payment_method.value =
+        editingTransaction
+          .payment_method ||
+        "cash";
+
+    form.elements
+      .occurred_at.value =
+        localDateTime;
+
+    form.elements
+      .counterparty.value =
+        editingTransaction
+          .counterparty ||
+        "";
+
+    form.elements
+      .description.value =
+        editingTransaction
+          .description ||
+        "";
+
+    form.elements
+      .document_url.value =
+        editingTransaction
+          .document_url ||
+        "";
+  }
 
   let submitting = false;
 
@@ -13196,14 +13360,18 @@ function openFinanceExpenseModal() {
 
       submitButton.innerHTML = `
         <span>
-          Проводимо операцію…
+          ${
+            isEditing
+              ? "Зберігаємо зміни…"
+              : "Проводимо операцію…"
+          }
         </span>
 
         <div class="visitPaymentSpinner"></div>
       `;
 
       try {
-        await createFinanceTransactionApi({
+        const expensePayload = {
           transaction_type:
             "expense",
 
@@ -13258,7 +13426,19 @@ function openFinanceExpenseModal() {
             expense_form_version:
               1,
           },
-        });
+        };
+
+        if (isEditing) {
+          await updateFinanceExpenseApi(
+            editingTransaction.id,
+            expensePayload
+          );
+
+        } else {
+          await createFinanceTransactionApi(
+            expensePayload
+          );
+        }
 
         modal.remove();
 
@@ -13274,14 +13454,22 @@ function openFinanceExpenseModal() {
         await renderFinanceTab();
 
         openDeleteModal(
-  "Витрату успішно додано до фінансового журналу.",
+  (
+    isEditing
+      ? "Зміни витрати успішно збережено."
+      : "Витрату успішно додано до фінансового журналу."
+  ),
   null,
   "operation-success"
 );
 
       } catch (error) {
         console.error(
-          "create finance expense failed:",
+          (
+            isEditing
+              ? "update finance expense failed:"
+              : "create finance expense failed:"
+          ),
           error
         );
 
@@ -13292,7 +13480,11 @@ function openFinanceExpenseModal() {
 
         submitButton.innerHTML = `
           <span>
-            Провести витрату
+            ${
+              isEditing
+                ? "Зберегти зміни"
+                : "Провести витрату"
+            }
           </span>
 
           <strong>
@@ -13305,7 +13497,11 @@ function openFinanceExpenseModal() {
 
         errorElement.textContent =
           error?.message ||
-          "Не вдалося додати витрату.";
+          (
+            isEditing
+              ? "Не вдалося зберегти зміни витрати."
+              : "Не вдалося додати витрату."
+          );
       }
     }
   );
@@ -13771,6 +13967,16 @@ async function renderFinanceOperationsTab(
                             transaction.visit_id
                           );
 
+                        const canEditExpense =
+                          transaction
+                            .transaction_type ===
+                            "expense" &&
+                          transaction.source ===
+                            "manual" &&
+                          transaction.status ===
+                            "completed" &&
+                          !transaction.visit_id;
+
                         const sign =
                           isOutcome
                             ? "−"
@@ -13858,7 +14064,8 @@ async function renderFinanceOperationsTab(
                               ${
   transaction.visit_id ||
   documentUrl ||
-  canCancelPayment
+  canCancelPayment ||
+  canEditExpense
     ? `
       <div class="financeOperationActions">
         ${
@@ -13907,6 +14114,22 @@ async function renderFinanceOperationsTab(
                 )}"
               >
                 ↩ Скасувати платіж
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          canEditExpense
+            ? `
+              <button
+                type="button"
+                class="financeOperationEditButton"
+                data-finance-edit-expense="${escapeHtml(
+                  transaction.id
+                )}"
+              >
+                ✎ Редагувати
               </button>
             `
             : ""
@@ -14022,6 +14245,35 @@ async function renderFinanceOperationsTab(
         event.target.closest(
           "[data-finance-cancel-payment]"
         );
+
+      const editExpenseButton =
+        event.target.closest(
+          "[data-finance-edit-expense]"
+        );
+
+      if (editExpenseButton) {
+        const transactionId =
+          String(
+            editExpenseButton.dataset
+              .financeEditExpense ||
+            ""
+          ).trim();
+
+        const transaction =
+          items.find(
+            (item) =>
+              String(item.id) ===
+              transactionId
+          );
+
+        if (transaction) {
+          openFinanceExpenseModal(
+            transaction
+          );
+        }
+
+        return;
+      }
 
       if (cancelButton) {
         const transactionId =

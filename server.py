@@ -5307,6 +5307,310 @@ def api_finance_transaction_cancel(
             "Не вдалося скасувати платіж.",
             500,
         )
+
+
+@app.patch(
+    "/api/finance/transactions/<transaction_id>/expense"
+)
+def api_finance_expense_update(
+    transaction_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        uuid.UUID(
+            str(transaction_id)
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+        return fail(
+            "Некоректна витрата.",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    try:
+        amount = round(
+            float(
+                data.get("amount")
+            ),
+            2,
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return fail(
+            "Вкажіть коректну суму.",
+            400,
+        )
+
+    if (
+        amount != amount
+        or amount in {
+            float("inf"),
+            float("-inf"),
+        }
+        or amount <= 0
+        or amount > 1_000_000_000
+    ):
+        return fail(
+            "Вкажіть коректну суму.",
+            400,
+        )
+
+    category = str(
+        data.get("category")
+        or ""
+    ).strip()
+
+    payment_method = str(
+        data.get("payment_method")
+        or ""
+    ).strip().lower()
+
+    counterparty = str(
+        data.get("counterparty")
+        or ""
+    ).strip()
+
+    description = str(
+        data.get("description")
+        or ""
+    ).strip()
+
+    document_url = str(
+        data.get("document_url")
+        or ""
+    ).strip()
+
+    if (
+        not category
+        or len(category) > 150
+    ):
+        return fail(
+            "Оберіть коректну категорію витрати.",
+            400,
+        )
+
+    if payment_method not in {
+        "cash",
+        "card",
+        "terminal",
+        "transfer",
+        "other",
+    }:
+        return fail(
+            "Оберіть спосіб оплати.",
+            400,
+        )
+
+    if len(counterparty) > 300:
+        return fail(
+            "Назва контрагента надто довга.",
+            400,
+        )
+
+    if len(description) > 2000:
+        return fail(
+            "Опис надто довгий.",
+            400,
+        )
+
+    if len(document_url) > 2000:
+        return fail(
+            "Посилання на документ надто довге.",
+            400,
+        )
+
+    raw_occurred_at = str(
+        data.get("occurred_at")
+        or ""
+    ).strip()
+
+    try:
+        occurred_datetime = (
+            datetime.fromisoformat(
+                raw_occurred_at.replace(
+                    "Z",
+                    "+00:00",
+                )
+            )
+        )
+
+        if (
+            occurred_datetime
+            .tzinfo
+            is None
+        ):
+            occurred_datetime = (
+                occurred_datetime
+                .replace(
+                    tzinfo=ZoneInfo(
+                        "Europe/Kyiv"
+                    )
+                )
+            )
+
+        occurred_at = (
+            occurred_datetime
+            .astimezone(
+                timezone.utc
+            )
+            .isoformat()
+        )
+
+    except ValueError:
+        return fail(
+            "Некоректна дата операції.",
+            400,
+        )
+
+    try:
+        result = (
+            supabase
+            .rpc(
+                "edit_manual_expense",
+                {
+                    "p_org_id":
+                        current_org,
+
+                    "p_transaction_id":
+                        transaction_id,
+
+                    "p_user_id":
+                        user.get("id"),
+
+                    "p_amount":
+                        amount,
+
+                    "p_category":
+                        category,
+
+                    "p_payment_method":
+                        payment_method,
+
+                    "p_occurred_at":
+                        occurred_at,
+
+                    "p_counterparty":
+                        (
+                            counterparty
+                            or None
+                        ),
+
+                    "p_description":
+                        (
+                            description
+                            or None
+                        ),
+
+                    "p_document_url":
+                        (
+                            document_url
+                            or None
+                        ),
+                },
+            )
+            .execute()
+        )
+
+        response_data = (
+            result.data
+            if result.data
+            is not None
+            else {}
+        )
+
+        if (
+            isinstance(
+                response_data,
+                list,
+            )
+            and response_data
+        ):
+            response_data = (
+                response_data[0]
+            )
+
+        return ok(
+            response_data
+        )
+
+    except Exception as error:
+        error_text = str(
+            error
+        )
+
+        lowered_error = (
+            error_text.lower()
+        )
+
+        print(
+            "❌ PATCH manual expense:",
+            repr(error),
+            flush=True,
+        )
+
+        if "not found" in lowered_error:
+            return fail(
+                "Витрату не знайдено.",
+                404,
+            )
+
+        if (
+            "only completed manual"
+            in lowered_error
+        ):
+            return fail(
+                (
+                    "Цю витрату не можна редагувати вручну. "
+                    "Змініть пов’язаний документ."
+                ),
+                409,
+            )
+
+        if (
+            "invalid"
+            in lowered_error
+            or "too long"
+            in lowered_error
+        ):
+            return fail(
+                "Перевірте дані витрати.",
+                400,
+            )
+
+        return fail(
+            "Не вдалося зберегти зміни витрати.",
+            500,
+        )
     
 @app.get(
     "/api/finance/expenses/overview"
