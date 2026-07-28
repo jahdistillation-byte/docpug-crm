@@ -577,6 +577,16 @@ function openDeleteModal(
     text
   );
 
+  modal.classList.remove(
+    "is-success"
+  );
+
+  confirmBtn.disabled =
+    false;
+
+  cancelBtn.disabled =
+    false;
+
   deleteCallback =
     callback;
 
@@ -865,6 +875,37 @@ function openDeleteModal(
           false;
       }
     };
+  } else if (
+    mode === "operation-success"
+  ) {
+    modal.classList.add(
+      "is-success"
+    );
+
+    if (icon) {
+      icon.textContent =
+        "✓";
+    }
+
+    if (title) {
+      title.textContent =
+        "Готово";
+    }
+
+    confirmBtn.textContent =
+      "Закрити";
+
+    confirmBtn.classList.add(
+      "primary"
+    );
+
+    cancelBtn.style.display =
+      "none";
+
+    confirmBtn.onclick =
+      () => {
+        closeDeleteModal();
+      };
   } else if (mode === "info") {
     if (icon) {
       icon.textContent =
@@ -943,6 +984,10 @@ function closeDeleteModal() {
   if (modal) {
     modal.style.display =
       "none";
+
+    modal.classList.remove(
+      "is-success"
+    );
   }
 
   if (cancelBtn) {
