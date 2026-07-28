@@ -481,6 +481,10 @@ def execute_with_retry(query_factory, attempts=3, delay=0.25):
                     "connection reset",
                     "connection aborted",
                     "connection refused",
+                    "network is unreachable",
+                    "name or service not known",
+                    "nodename nor servname provided",
+                    "try again",
                     "timed out",
                     "timeout",
                     "server disconnected",
@@ -9740,13 +9744,16 @@ def enrich_hospitalizations(rows):
     # =====================
 
     if patient_ids:
-        patients_res = (
-            supabase
-            .table("patients")
-            .select("*")
-            .eq("org_id", current_org)
-            .in_("id", patient_ids)
-            .execute()
+        patients_res = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patients")
+                .select("*")
+                .eq("org_id", current_org)
+                .in_("id", patient_ids)
+            ),
+            attempts=4,
+            delay=0.4,
         )
 
         patients = patients_res.data or []
@@ -9768,13 +9775,16 @@ def enrich_hospitalizations(rows):
         # =====================
 
         if owner_ids:
-            owners_res = (
-                supabase
-                .table("owners")
-                .select("*")
-                .eq("org_id", current_org)
-                .in_("id", owner_ids)
-                .execute()
+            owners_res = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("owners")
+                    .select("*")
+                    .eq("org_id", current_org)
+                    .in_("id", owner_ids)
+                ),
+                attempts=4,
+                delay=0.4,
             )
 
             owners_map = {
@@ -9788,13 +9798,16 @@ def enrich_hospitalizations(rows):
     # =====================
 
     if doctor_ids:
-        staff_res = (
-            supabase
-            .table("staff")
-            .select("*")
-            .eq("org_id", current_org)
-            .in_("id", doctor_ids)
-            .execute()
+        staff_res = execute_with_retry(
+            lambda: (
+                supabase
+                .table("staff")
+                .select("*")
+                .eq("org_id", current_org)
+                .in_("id", doctor_ids)
+            ),
+            attempts=4,
+            delay=0.4,
         )
 
         staff_map = {
@@ -9884,43 +9897,48 @@ def api_get_hospitalizations():
             or ""
         ).strip()
 
-        query = (
-            supabase
-            .table("hospitalizations")
-            .select("*")
-            .eq("org_id", current_org)
+        active_value = (
+            str(active_raw).lower()
+            in ("1", "true", "yes")
+            if active_raw is not None
+            else None
         )
 
-        if active_raw is not None:
-            active_value = (
-                str(active_raw).lower()
-                in ("1", "true", "yes")
+        def build_hospitalizations_query():
+            query = (
+                supabase
+                .table("hospitalizations")
+                .select("*")
+                .eq("org_id", current_org)
             )
 
-            query = query.eq(
-                "is_active",
-                active_value
-            )
+            if active_value is not None:
+                query = query.eq(
+                    "is_active",
+                    active_value
+                )
 
-        if patient_id:
-            query = query.eq(
-                "patient_id",
-                patient_id
-            )
+            if patient_id:
+                query = query.eq(
+                    "patient_id",
+                    patient_id
+                )
 
-        if hospitalization_id:
-            query = query.eq(
-                "id",
-                hospitalization_id
-            )
+            if hospitalization_id:
+                query = query.eq(
+                    "id",
+                    hospitalization_id
+                )
 
-        result = (
-            query
-            .order(
+            return query.order(
                 "admitted_at",
                 desc=True
             )
-            .execute()
+
+        result = execute_with_retry(
+            build_hospitalizations_query,
+            attempts=4,
+            delay=0.4,
         )
 
         rows = enrich_hospitalizations(
@@ -10986,26 +11004,33 @@ def api_get_visits():
                 400
             )
 
-        query = (
-            supabase
-            .table("visits")
-            .select("*")
-            .eq("org_id", current_org)
+        def build_visits_query():
+            query = (
+                supabase
+                .table("visits")
+                .select("*")
+                .eq("org_id", current_org)
+            )
+
+            if visit_id:
+                query = query.eq(
+                    "id",
+                    visit_id
+                )
+
+            if pet_id:
+                query = query.eq(
+                    "pet_id",
+                    pet_id
+                )
+
+            return query
+
+        result = execute_with_retry(
+            build_visits_query,
+            attempts=4,
+            delay=0.4,
         )
-
-        if visit_id:
-            query = query.eq(
-                "id",
-                visit_id
-            )
-
-        if pet_id:
-            query = query.eq(
-                "pet_id",
-                pet_id
-            )
-
-        result = query.execute()
         rows = result.data or []
 
         visit_ids = [

@@ -25497,15 +25497,20 @@ async function renderPatientDocumentsTab(
     </div>
   `;
 
-  const [visits, hospitalizations] =
-    await Promise.all([
-      loadVisitsApi({
-        pet_id: pet.id,
-      }),
-      loadPatientHospitalizationsApi(
-        pet.id
-      ),
-    ]);
+  /*
+   * Не запускаем два тяжёлых Supabase-чтения одновременно.
+   * На небольшом серверном инстансе параллельный старт мог
+   * временно исчерпать сетевые ресурсы и вернуть Errno 11.
+   */
+  const visits =
+    await loadVisitsApi({
+      pet_id: pet.id,
+    });
+
+  const hospitalizations =
+    await loadPatientHospitalizationsApi(
+      pet.id
+    );
 
   const patientVisits =
     (Array.isArray(visits)
