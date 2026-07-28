@@ -663,20 +663,23 @@ def load_visit_lines(visit_ids):
     if not visit_ids:
         return services_by_visit, stock_by_visit
 
-    current_org = get_current_org_id()
-
     # =====================
     # services
     # =====================
     try:
-        q = supabase.table("visit_services").select("*").in_("visit_id", visit_ids)
-
-        # пробуем с org_id, еслиционной колонки нет — упадет и мы повторим без org_id
-        try:
-            q = q.eq("org_id", current_org)
-            res = q.execute()
-        except Exception:
-            res = supabase.table("visit_services").select("*").in_("visit_id", visit_ids).execute()
+        # visit_services is scoped through visit_id and has no org_id column in
+        # the production schema. The previous probe intentionally queried that
+        # missing column first, producing a noisy 400 on every finance refresh.
+        res = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .select("*")
+                .in_("visit_id", visit_ids)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
 
         for r in (res.data or []):
             vid = r.get("visit_id")
@@ -695,13 +698,17 @@ def load_visit_lines(visit_ids):
     # stock
     # =====================
     try:
-        q = supabase.table("visit_stock").select("*").in_("visit_id", visit_ids)
-
-        try:
-            q = q.eq("org_id", current_org)
-            res = q.execute()
-        except Exception:
-            res = supabase.table("visit_stock").select("*").in_("visit_id", visit_ids).execute()
+        # visit_stock follows the same visit-scoped schema as visit_services.
+        res = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_stock")
+                .select("*")
+                .in_("visit_id", visit_ids)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
 
         for r in (res.data or []):
             vid = r.get("visit_id")

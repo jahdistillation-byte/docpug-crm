@@ -17838,23 +17838,47 @@ async function renderFinanceTodayTab(
         new Date()
       );
 
-    const [
-      overviewResult,
-      balancesResult,
-      stockResult,
-      accountsResult,
-    ] = await Promise.allSettled([
-      loadFinanceOverviewApi(
-        today,
-        today
-      ),
+    const settleFinanceTodayLoad =
+      async (loader) => {
+        try {
+          return {
+            status: "fulfilled",
+            value: await loader(),
+          };
+        } catch (reason) {
+          return {
+            status: "rejected",
+            reason,
+          };
+        }
+      };
 
-      loadFinanceClientBalancesApi(),
+    // These blocks all use the same clinic session and database client.
+    // Loading four heavy registers at once can exhaust the small production
+    // connection pool and surface intermittent HTTP 500 responses. Keep the
+    // page resilient, but collect the blocks one by one.
+    const overviewResult =
+      await settleFinanceTodayLoad(
+        () => loadFinanceOverviewApi(
+          today,
+          today
+        )
+      );
 
-      loadStockApi(),
+    const accountsResult =
+      await settleFinanceTodayLoad(
+        () => loadFinanceAccountsApi()
+      );
 
-      loadFinanceAccountsApi(),
-    ]);
+    const balancesResult =
+      await settleFinanceTodayLoad(
+        () => loadFinanceClientBalancesApi()
+      );
+
+    const stockResult =
+      await settleFinanceTodayLoad(
+        () => loadStockApi()
+      );
 
     const overviewAvailable =
       overviewResult.status ===
