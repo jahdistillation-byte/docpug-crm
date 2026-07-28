@@ -9365,29 +9365,76 @@ def api_get_staff_schedule():
 
 @app.get("/api/staff-schedule-range")
 def api_get_staff_schedule_range():
-    current_org = get_current_org_id()
-
-    date_from = request.args.get("from")
-    date_to = request.args.get("to")
-
-    if not date_from or not date_to:
-        return fail("from and to required", 400)
-
     try:
-        res = (
-            supabase.table("staff_schedule")
-            .select("*")
-            .eq("org_id", current_org)
-            .gte("work_date", date_from)
-            .lte("work_date", date_to)
-            .order("work_date")
-            .execute()
+        current_org = (
+            get_current_org_id()
         )
 
-        return ok(res.data or [])
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
 
-    except Exception as e:
-        return fail(str(e))   
+        date_from = str(
+            request.args.get("from")
+            or ""
+        ).strip()
+
+        date_to = str(
+            request.args.get("to")
+            or ""
+        ).strip()
+
+        if (
+            not date_from
+            or not date_to
+        ):
+            return fail(
+                "from and to required",
+                400,
+            )
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("staff_schedule")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .gte(
+                    "work_date",
+                    date_from,
+                )
+                .lte(
+                    "work_date",
+                    date_to,
+                )
+                .order(
+                    "work_date"
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET /api/staff-schedule-range:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Cannot load staff schedule range",
+            500,
+        )
 
 @app.post("/api/staff-schedule")
 def api_upsert_staff_schedule():

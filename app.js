@@ -46302,29 +46302,117 @@ document.addEventListener('click', function(event) {
     }
 });
 
-async function loadStaffScheduleRangeApi(from, to) {
-  try {
-    const headers = {};
+async function loadStaffScheduleRangeApi(
+  from,
+  to
+) {
+  const maxAttempts = 3;
 
-    const orgId = LS?.get?.("docpug_org_id");
-    if (orgId) headers["X-Org-ID"] = orgId;
+  const delays = [
+    0,
+    500,
+    1000,
+  ];
 
-    const res = await fetch(
-      `/api/staff-schedule-range?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-      { headers }
-    );
+  let lastError = null;
 
-    const json = await res.json();
-
-    if (!json.ok) {
-      throw new Error(json.error || "range load failed");
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt++
+  ) {
+    if (delays[attempt - 1]) {
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            delays[attempt - 1]
+          )
+      );
     }
 
-    return json.data || [];
-  } catch (e) {
-    console.error("loadStaffScheduleRangeApi failed:", e);
-    return [];
+    try {
+      const response =
+        await fetch(
+          `/api/staff-schedule-range?from=${
+            encodeURIComponent(from)
+          }&to=${
+            encodeURIComponent(to)
+          }`,
+          {
+            method: "GET",
+
+            credentials:
+              "include",
+
+            cache:
+              "no-store",
+
+            headers: {
+              Accept:
+                "application/json",
+
+              ...getOrgHeaders(),
+            },
+          }
+        );
+
+      const text =
+        await response.text();
+
+      let json = null;
+
+      try {
+        json =
+          text
+            ? JSON.parse(text)
+            : null;
+      } catch {
+        json = null;
+      }
+
+      if (
+        !response.ok ||
+        json?.ok !== true
+      ) {
+        throw new Error(
+          json?.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      const rows =
+        Array.isArray(
+          json.data
+        )
+          ? json.data
+          : [];
+
+      if (attempt > 1) {
+        console.info(
+          `loadStaffScheduleRangeApi restored on attempt ${attempt}`
+        );
+      }
+
+      return rows;
+
+    } catch (error) {
+      lastError =
+        error;
+
+      console.warn(
+        `loadStaffScheduleRangeApi attempt ${attempt}/${maxAttempts} failed:`,
+        error
+      );
+    }
   }
+
+  console.error(
+    "loadStaffScheduleRangeApi failed after retries:",
+    lastError
+  );
+
+  return [];
 }
 async function loadStaffRatingApi() {
   const emptyRating = {
