@@ -2896,6 +2896,72 @@ def finance_number(
         )
 
 
+def load_finance_org_rows(
+    table_name,
+    *,
+    order_by=None,
+    desc=False,
+    page_size=1000,
+):
+    """
+    Load a complete organization-scoped register without silently losing rows
+    to PostgREST's default response limit.
+    """
+    current_org = (
+        get_current_org_id()
+    )
+
+    rows = []
+    offset = 0
+
+    while True:
+        def build_query(
+            page_offset=offset
+        ):
+            query = (
+                supabase
+                .table(table_name)
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+            )
+
+            if order_by:
+                query = query.order(
+                    order_by,
+                    desc=desc,
+                )
+
+            return query.range(
+                page_offset,
+                page_offset
+                + page_size
+                - 1,
+            )
+
+        result = execute_with_retry(
+            build_query,
+            attempts=4,
+            delay=0.3,
+        )
+
+        page = (
+            result.data
+            or []
+        )
+
+        rows.extend(page)
+
+        if len(page) < page_size:
+            break
+
+        offset += page_size
+
+    return rows
+
+
 def serialize_finance_transaction(
     row
 ):
@@ -3569,6 +3635,529 @@ def api_finance_overview():
             "Не вдалося завантажити фінансову аналітику.",
             500
         )      
+
+
+@app.get(
+    "/api/finance/client-balances"
+)
+def api_finance_client_balances():
+    """
+    Read-only client settlement register.
+
+    The endpoint deliberately derives balances from the same visit lines and
+    completed payments as the visit payment modal. This keeps the finance
+    workspace useful without introducing a second accounting truth.
+    """
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        owners = (
+            load_finance_org_rows(
+                "owners",
+                order_by="name",
+            )
+        )
+
+        patients = (
+            load_finance_org_rows(
+                "patients"
+            )
+        )
+
+        visits = (
+            load_finance_org_rows(
+                "visits",
+                order_by="date",
+                desc=True,
+            )
+        )
+
+        owners_by_id = {
+            str(owner.get("id")):
+                owner
+            for owner in owners
+            if owner.get("id")
+        }
+
+        patients_by_id = {
+            str(patient.get("id")):
+                patient
+            for patient in patients
+            if patient.get("id")
+        }
+
+        visit_ids = [
+            str(visit.get("id"))
+            for visit in visits
+            if visit.get("id")
+        ]
+
+        services_by_visit = {
+            visit_id: []
+            for visit_id in visit_ids
+        }
+
+        stock_by_visit = {
+            visit_id: []
+            for visit_id in visit_ids
+        }
+
+        transactions_by_visit = {
+            visit_id: []
+            for visit_id in visit_ids
+        }
+
+        # Keep the PostgREST URL and the in-filter reasonably small for clinics
+        # with a long history.
+        for chunk_start in range(
+            0,
+            len(visit_ids),
+            150,
+        ):
+            visit_id_chunk = (
+                visit_ids[
+                    chunk_start:
+                    chunk_start + 150
+                ]
+            )
+
+            if not visit_id_chunk:
+                continue
+
+            (
+                chunk_services,
+                chunk_stock,
+            ) = load_visit_lines(
+                visit_id_chunk
+            )
+
+            services_by_visit.update(
+                chunk_services
+            )
+
+            stock_by_visit.update(
+                chunk_stock
+            )
+
+            transactions_result = (
+                execute_with_retry(
+                    lambda ids=visit_id_chunk: (
+                        supabase
+                        .table(
+                            "finance_transactions"
+                        )
+                        .select(
+                            "visit_id, "
+                            "transaction_type, "
+                            "status, amount, "
+                            "occurred_at"
+                        )
+                        .eq(
+                            "org_id",
+                            current_org,
+                        )
+                        .in_(
+                            "visit_id",
+                            ids,
+                        )
+                    ),
+                    attempts=3,
+                    delay=0.25,
+                )
+            )
+
+            for transaction in (
+                transactions_result.data
+                or []
+            ):
+                transaction_visit_id = str(
+                    transaction.get(
+                        "visit_id"
+                    )
+                    or ""
+                )
+
+                if not transaction_visit_id:
+                    continue
+
+                transactions_by_visit.setdefault(
+                    transaction_visit_id,
+                    [],
+                ).append(
+                    transaction
+                )
+
+        clients_by_owner = {}
+
+        summary = {
+            "billed": 0,
+            "paid": 0,
+            "outstanding": 0,
+            "clients_count": 0,
+            "debt_clients_count": 0,
+            "debt_visits_count": 0,
+            "collection_rate": 0,
+        }
+
+        for visit in visits:
+            visit_id = str(
+                visit.get("id")
+                or ""
+            )
+
+            patient_id = str(
+                visit.get("pet_id")
+                or ""
+            )
+
+            patient = (
+                patients_by_id.get(
+                    patient_id
+                )
+            )
+
+            if (
+                not visit_id
+                or not patient
+            ):
+                continue
+
+            owner_id = str(
+                patient.get("owner_id")
+                or ""
+            )
+
+            owner = (
+                owners_by_id.get(
+                    owner_id
+                )
+                or {}
+            )
+
+            service_total = sum(
+                finance_number(
+                    line.get("qty")
+                )
+                * finance_number(
+                    line.get(
+                        "priceSnap"
+                    )
+                )
+                for line in (
+                    services_by_visit.get(
+                        visit_id,
+                        [],
+                    )
+                )
+            )
+
+            stock_total = sum(
+                finance_number(
+                    line.get("qty")
+                )
+                * finance_number(
+                    line.get(
+                        "priceSnap"
+                    )
+                )
+                for line in (
+                    stock_by_visit.get(
+                        visit_id,
+                        [],
+                    )
+                )
+            )
+
+            discount = max(
+                0,
+                finance_number(
+                    visit.get(
+                        "discount_amount"
+                    )
+                ),
+            )
+
+            total = max(
+                0,
+                finance_number(
+                    service_total
+                    + stock_total
+                    - discount
+                ),
+            )
+
+            paid = 0
+
+            for transaction in (
+                transactions_by_visit.get(
+                    visit_id,
+                    [],
+                )
+            ):
+                if (
+                    transaction.get("status")
+                    != "completed"
+                ):
+                    continue
+
+                amount = finance_number(
+                    transaction.get("amount")
+                )
+
+                if (
+                    transaction.get(
+                        "transaction_type"
+                    )
+                    == "payment"
+                ):
+                    paid += amount
+
+                elif (
+                    transaction.get(
+                        "transaction_type"
+                    )
+                    == "refund"
+                ):
+                    paid -= amount
+
+            paid = max(
+                0,
+                finance_number(paid),
+            )
+
+            stored_status = str(
+                visit.get(
+                    "financial_status"
+                )
+                or ""
+            ).lower()
+
+            if stored_status in {
+                "cancelled",
+                "refunded",
+            }:
+                total = 0
+                paid = 0
+
+            remaining = max(
+                0,
+                finance_number(
+                    total - paid
+                ),
+            )
+
+            if total <= 0 and paid <= 0:
+                continue
+
+            if remaining <= 0:
+                financial_status = "paid"
+            elif paid > 0:
+                financial_status = "partial"
+            else:
+                financial_status = "unpaid"
+
+            owner_name = (
+                owner.get("name")
+                or "Власник не вказаний"
+            )
+
+            client = (
+                clients_by_owner.setdefault(
+                    owner_id
+                    or f"unknown:{patient_id}",
+                    {
+                        "owner_id":
+                            owner_id
+                            or None,
+
+                        "owner_name":
+                            owner_name,
+
+                        "phone":
+                            owner.get("phone")
+                            or "",
+
+                        "billed": 0,
+                        "paid": 0,
+                        "remaining": 0,
+                        "visits": [],
+                    },
+                )
+            )
+
+            client["billed"] += total
+            client["paid"] += paid
+            client["remaining"] += (
+                remaining
+            )
+
+            client["visits"].append({
+                "visit_id":
+                    visit_id,
+
+                "patient_id":
+                    patient_id,
+
+                "patient_name":
+                    patient.get("name")
+                    or "Пацієнт",
+
+                "species":
+                    patient.get("species")
+                    or "",
+
+                "date":
+                    visit.get("date"),
+
+                "diagnosis":
+                    visit.get("dx")
+                    or "",
+
+                "total":
+                    finance_number(total),
+
+                "paid":
+                    finance_number(paid),
+
+                "remaining":
+                    finance_number(
+                        remaining
+                    ),
+
+                "financial_status":
+                    financial_status,
+            })
+
+            summary["billed"] += total
+            summary["paid"] += paid
+            summary["outstanding"] += (
+                remaining
+            )
+
+            if remaining > 0:
+                summary[
+                    "debt_visits_count"
+                ] += 1
+
+        clients = []
+
+        for client in (
+            clients_by_owner.values()
+        ):
+            client["billed"] = (
+                finance_number(
+                    client["billed"]
+                )
+            )
+
+            client["paid"] = (
+                finance_number(
+                    client["paid"]
+                )
+            )
+
+            client["remaining"] = (
+                finance_number(
+                    client["remaining"]
+                )
+            )
+
+            client["status"] = (
+                "debt"
+                if client["remaining"] > 0
+                else "paid"
+            )
+
+            client["visits"].sort(
+                key=lambda item: str(
+                    item.get("date")
+                    or ""
+                ),
+                reverse=True,
+            )
+
+            clients.append(client)
+
+        clients.sort(
+            key=lambda client: (
+                client.get("remaining", 0),
+                client.get("billed", 0),
+            ),
+            reverse=True,
+        )
+
+        summary["clients_count"] = (
+            len(clients)
+        )
+
+        summary["debt_clients_count"] = sum(
+            1
+            for client in clients
+            if client.get("remaining", 0) > 0
+        )
+
+        summary["billed"] = (
+            finance_number(
+                summary["billed"]
+            )
+        )
+
+        summary["paid"] = (
+            finance_number(
+                summary["paid"]
+            )
+        )
+
+        summary["outstanding"] = (
+            finance_number(
+                summary["outstanding"]
+            )
+        )
+
+        summary["collection_rate"] = (
+            round(
+                (
+                    summary["paid"]
+                    / summary["billed"]
+                    * 100
+                ),
+                1,
+            )
+            if summary["billed"] > 0
+            else 0
+        )
+
+        return ok({
+            "summary": summary,
+            "items": clients,
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET finance client balances:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити розрахунки з клієнтами.",
+            500,
+        )
     
 @app.post(
     "/api/finance/transactions"

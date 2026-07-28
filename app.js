@@ -11061,7 +11061,7 @@ function saveNormalizedStock(items) {
 }
 
 const financeDashboardState = {
-  section: "overview",
+  section: "today",
 
   preset: "month",
   dateFrom: "",
@@ -11078,6 +11078,9 @@ const financeDashboardState = {
   purchasePaymentStatus: "",
   purchaseOffset: 0,
   purchaseLimit: 10,
+
+  clientFilter: "debt",
+  clientSearch: "",
 };
 
 function financeDateToIso(
@@ -11194,56 +11197,67 @@ async function loadFinanceOverviewApi(
 
   return result.data;
 }
+
+async function loadFinanceClientBalancesApi() {
+  const response =
+    await fetch(
+      "/api/finance/client-balances",
+      {
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok ||
+    !result?.data
+  ) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити розрахунки з клієнтами (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
 function buildFinanceSectionNavigation() {
   const sections = [
     {
-      key: "overview",
-      icon: "◇",
-      label: "Огляд",
-      enabled: true,
+      key: "today",
+      icon: "⌁",
+      label: "Сьогодні",
     },
 
     {
       key: "transactions",
       icon: "↕",
       label: "Операції",
-      enabled: true,
     },
 
     {
-      key: "expenses",
-      icon: "−",
-      label: "Витрати",
-      enabled: true,
+      key: "clients",
+      icon: "◎",
+      label: "Клієнти",
     },
 
     {
-      key: "cash",
-      icon: "▣",
-      label: "Каса",
-      enabled: false,
-    },
-
-    {
-      key: "debts",
-      icon: "!",
-      label: "Борги",
-      enabled: false,
-    },
-
-    {
-      key: "reports",
-      icon: "▥",
-      label: "Звіти",
-      enabled: false,
-    },
-
-    {
-      key: "salaries",
-      icon: "₴",
-      label: "Зарплати",
-      enabled: false,
-      ownerOnly: true,
+      key: "analytics",
+      icon: "⌁",
+      label: "Аналітика",
     },
   ];
 
@@ -11251,11 +11265,6 @@ function buildFinanceSectionNavigation() {
     <nav class="financeSectionNavigation">
       ${
         sections
-          .filter(
-            (section) =>
-              !section.ownerOnly ||
-              isOwner()
-          )
           .map(
             (section) => `
               <button
@@ -11269,20 +11278,10 @@ function buildFinanceSectionNavigation() {
                       ? "active"
                       : ""
                   }
-                  ${
-                    section.enabled
-                      ? ""
-                      : "is-disabled"
-                  }
                 "
                 data-finance-section="${
                   section.key
                 }"
-                ${
-                  section.enabled
-                    ? ""
-                    : "disabled"
-                }
               >
                 <span>
                   ${section.icon}
@@ -11291,16 +11290,6 @@ function buildFinanceSectionNavigation() {
                 <strong>
                   ${section.label}
                 </strong>
-
-                ${
-                  section.enabled
-                    ? ""
-                    : `
-                      <small>
-                        скоро
-                      </small>
-                    `
-                }
               </button>
             `
           )
@@ -11325,7 +11314,7 @@ function bindFinanceSectionNavigation(
             const section =
               button.dataset
                 .financeSection ||
-              "overview";
+              "today";
 
             if (
               section ===
@@ -16606,6 +16595,14 @@ async function renderFinanceExpensesTab(
           <div class="financeHeroActions">
             <button
               type="button"
+              class="financeRefreshButton"
+              data-finance-go="today"
+            >
+              ← До сьогодні
+            </button>
+
+            <button
+              type="button"
               class="financeExpensesJournalButton"
               id="financeExpensesJournalButton"
             >
@@ -17301,7 +17298,7 @@ async function renderFinanceExpensesTab(
       </div>
     `;
 
-    bindFinanceSectionNavigation(
+    bindFinanceWorkspaceActions(
       page
     );
 
@@ -17493,6 +17490,1492 @@ async function renderFinanceExpensesTab(
   }
 }
 
+function getFinanceSettlementMeta(
+  status
+) {
+  const normalized =
+    String(status || "")
+      .trim()
+      .toLowerCase();
+
+  if (normalized === "paid") {
+    return {
+      key: "paid",
+      label: "Сплачено",
+    };
+  }
+
+  if (normalized === "partial") {
+    return {
+      key: "partial",
+      label: "Частково",
+    };
+  }
+
+  return {
+    key: "unpaid",
+    label: "Очікує оплати",
+  };
+}
+
+function bindFinanceWorkspaceActions(
+  page
+) {
+  bindFinanceSectionNavigation(
+    page
+  );
+
+  page
+    .querySelectorAll(
+      "[data-finance-go]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          financeDashboardState.section =
+            button.dataset.financeGo ||
+            "today";
+
+          renderFinanceTab();
+        }
+      );
+    });
+
+  page
+    .querySelectorAll(
+      "[data-finance-pay-visit]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        async () => {
+          const visitId =
+            String(
+              button.dataset
+                .financePayVisit ||
+              ""
+            ).trim();
+
+          if (!visitId) return;
+
+          await openVisitPaymentModal(
+            visitId
+          );
+        }
+      );
+    });
+
+  page
+    .querySelectorAll(
+      "[data-finance-open-visit]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        async () => {
+          const visitId =
+            String(
+              button.dataset
+                .financeOpenVisit ||
+              ""
+            ).trim();
+
+          if (!visitId) return;
+
+          button.disabled = true;
+
+          try {
+            await openVisit(
+              visitId
+            );
+          } catch (error) {
+            console.error(
+              "Open finance visit failed:",
+              error
+            );
+
+            alert(
+              "Не вдалося відкрити візит."
+            );
+
+            button.disabled = false;
+          }
+        }
+      );
+    });
+
+  page
+    .querySelectorAll(
+      "[data-finance-open-owner]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const ownerId =
+            String(
+              button.dataset
+                .financeOpenOwner ||
+              ""
+            ).trim();
+
+          if (ownerId) {
+            openOwner(ownerId);
+          }
+        }
+      );
+    });
+
+  page
+    .querySelectorAll(
+      "[data-finance-open-stock]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          setHash("stock");
+        }
+      );
+    });
+}
+
+async function renderFinanceTodayTab(
+  page
+) {
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+
+      <strong>
+        Збираємо фінансовий день клініки…
+      </strong>
+    </div>
+  `;
+
+  try {
+    const today =
+      financeDateToIso(
+        new Date()
+      );
+
+    const [
+      overview,
+      balances,
+      stockItems,
+    ] = await Promise.all([
+      loadFinanceOverviewApi(
+        today,
+        today
+      ),
+
+      loadFinanceClientBalancesApi(),
+
+      loadStockApi(),
+    ]);
+
+    const summary =
+      overview.summary || {};
+
+    const balanceSummary =
+      balances.summary || {};
+
+    const clients =
+      Array.isArray(balances.items)
+        ? balances.items
+        : [];
+
+    const transactions =
+      Array.isArray(
+        overview.recent_transactions
+      )
+        ? overview.recent_transactions
+        : [];
+
+    const normalizedStock =
+      (stockItems || [])
+        .map(normalizeStockItem)
+        .filter(
+          (item) =>
+            item.active !== false
+        );
+
+    const lowStock =
+      normalizedStock.filter(
+        (item) =>
+          getStockStatus(item).key
+          !== "good"
+      );
+
+    const marginRisks =
+      normalizedStock.filter(
+        (item) =>
+          Number(item.cost || 0) > 0 &&
+          Number(item.price || 0) <=
+            Number(item.cost || 0)
+      );
+
+    const debtClients =
+      clients
+        .filter(
+          (client) =>
+            Number(
+              client.remaining || 0
+            ) > 0
+        )
+        .slice(0, 4);
+
+    const paymentMethods =
+      overview.payment_methods || {};
+
+    const cashToday =
+      Number(
+        paymentMethods.cash || 0
+      );
+
+    const hasAttention =
+      debtClients.length ||
+      lowStock.length ||
+      marginRisks.length;
+
+    page.innerHTML = `
+      <div class="financeDashboard financeWorkspaceV2">
+        ${buildFinanceSectionNavigation()}
+
+        <header class="financeControlHero">
+          <div class="financeControlHeroMain">
+            <span class="financeEyebrow">
+              ФІНАНСОВИЙ ДЕНЬ
+            </span>
+
+            <h1>
+              Сьогодні у клініці
+            </h1>
+
+            <p>
+              Не звіт заради звіту, а короткий список грошей
+              і дій, які варто закрити до кінця зміни.
+            </p>
+          </div>
+
+          <div class="financeControlHeroActions">
+            <button
+              type="button"
+              class="financePrimaryAction"
+              data-finance-go="clients"
+            >
+              <span>＋</span>
+              Прийняти оплату
+            </button>
+
+            <button
+              type="button"
+              class="financeQuietAction"
+              id="financeTodayAddExpense"
+            >
+              Додати витрату
+            </button>
+
+            <button
+              type="button"
+              class="financeQuietAction"
+              data-finance-go="expenses"
+            >
+              Витрати й закупівлі
+            </button>
+          </div>
+        </header>
+
+        <section class="financeTodayKpis">
+          <article>
+            <span>
+              Отримано сьогодні
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.net_revenue
+              )}
+            </strong>
+
+            <small>
+              ${
+                Number(
+                  summary
+                    .paid_visits_count ||
+                  0
+                )
+              }
+              оплачених візитів
+            </small>
+          </article>
+
+          <article>
+            <span>
+              Очікуємо від клієнтів
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                balanceSummary.outstanding
+              )}
+            </strong>
+
+            <small>
+              ${
+                Number(
+                  balanceSummary
+                    .debt_clients_count ||
+                  0
+                )
+              }
+              клієнтів із залишком
+            </small>
+          </article>
+
+          <article>
+            <span>
+              Готівка сьогодні
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                cashToday
+              )}
+            </strong>
+
+            <small>
+              За проведеними оплатами
+            </small>
+          </article>
+
+          <article>
+            <span>
+              Орієнтовний результат
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.estimated_profit
+              )}
+            </strong>
+
+            <small>
+              Після витрат і собівартості
+            </small>
+          </article>
+        </section>
+
+        <section class="financeTodayLayout">
+          <article class="financeActionPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  ПОТРЕБУЄ УВАГИ
+                </span>
+
+                <h2>
+                  Розрахунки з клієнтами
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                data-finance-go="clients"
+              >
+                Усі клієнти →
+              </button>
+            </div>
+
+            <div class="financeAttentionList">
+              ${
+                debtClients.length
+                  ? debtClients
+                      .map(
+                        (client) => {
+                          const visit =
+                            (client.visits || [])
+                              .find(
+                                (item) =>
+                                  Number(
+                                    item.remaining ||
+                                    0
+                                  ) > 0
+                              );
+
+                          return `
+                            <div class="financeAttentionRow">
+                              <div class="financeAttentionAvatar">
+                                ${escapeHtml(
+                                  String(
+                                    client.owner_name ||
+                                    "К"
+                                  )
+                                    .trim()
+                                    .charAt(0)
+                                    .toUpperCase()
+                                )}
+                              </div>
+
+                              <div class="financeAttentionMain">
+                                <strong>
+                                  ${escapeHtml(
+                                    client.owner_name ||
+                                    "Власник"
+                                  )}
+                                </strong>
+
+                                <span>
+                                  ${escapeHtml(
+                                    visit?.patient_name ||
+                                    "Пацієнт"
+                                  )}
+                                  ${
+                                    visit?.date
+                                      ? `· ${escapeHtml(
+                                          formatFinancePurchaseDate(
+                                            visit.date
+                                          )
+                                        )}`
+                                      : ""
+                                  }
+                                </span>
+                              </div>
+
+                              <div class="financeAttentionAmount">
+                                <strong>
+                                  ${formatVisitFinanceMoney(
+                                    client.remaining
+                                  )}
+                                </strong>
+
+                                ${
+                                  visit?.visit_id
+                                    ? `
+                                      <button
+                                        type="button"
+                                        data-finance-pay-visit="${escapeHtml(
+                                          visit.visit_id
+                                        )}"
+                                      >
+                                        Прийняти
+                                      </button>
+                                    `
+                                    : ""
+                                }
+                              </div>
+                            </div>
+                          `;
+                        }
+                      )
+                      .join("")
+                  : `
+                    <div class="financePositiveEmpty">
+                      <span>✓</span>
+
+                      <div>
+                        <strong>
+                          Незакритих оплат немає
+                        </strong>
+
+                        <p>
+                          Усі поточні розрахунки з клієнтами закриті.
+                        </p>
+                      </div>
+                    </div>
+                  `
+              }
+            </div>
+          </article>
+
+          <article class="financeActionPanel">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  СКЛАД І МАРЖА
+                </span>
+
+                <h2>
+                  Ризики, що впливають на гроші
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                data-finance-open-stock
+              >
+                Відкрити склад →
+              </button>
+            </div>
+
+            <div class="financeSignalGrid">
+              <button
+                type="button"
+                class="financeSignalCard ${
+                  lowStock.length
+                    ? "is-warning"
+                    : "is-good"
+                }"
+                data-finance-open-stock
+              >
+                <span class="financeSignalIcon">
+                  ${lowStock.length ? "↓" : "✓"}
+                </span>
+
+                <div>
+                  <strong>
+                    ${lowStock.length}
+                  </strong>
+
+                  <span>
+                    позицій закінчуються
+                  </span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                class="financeSignalCard ${
+                  marginRisks.length
+                    ? "is-danger"
+                    : "is-good"
+                }"
+                data-finance-open-stock
+              >
+                <span class="financeSignalIcon">
+                  ${marginRisks.length ? "!" : "✓"}
+                </span>
+
+                <div>
+                  <strong>
+                    ${marginRisks.length}
+                  </strong>
+
+                  <span>
+                    позицій без маржі
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            <div class="financeSignalDetails">
+              ${
+                lowStock
+                  .slice(0, 2)
+                  .map(
+                    (item) => `
+                      <div>
+                        <span>
+                          ${escapeHtml(
+                            getStockStatus(item)
+                              .shortLabel
+                          )}
+                        </span>
+
+                        <strong>
+                          ${escapeHtml(
+                            item.name
+                          )}
+                        </strong>
+
+                        <small>
+                          ${escapeHtml(
+                            String(item.qty)
+                          )}
+                          ${escapeHtml(
+                            item.unit
+                          )}
+                        </small>
+                      </div>
+                    `
+                  )
+                  .join("")
+              }
+
+              ${
+                marginRisks
+                  .slice(0, 2)
+                  .map(
+                    (item) => `
+                      <div>
+                        <span>
+                          Маржа
+                        </span>
+
+                        <strong>
+                          ${escapeHtml(
+                            item.name
+                          )}
+                        </strong>
+
+                        <small>
+                          ${formatVisitFinanceMoney(
+                            Number(item.price || 0) -
+                            Number(item.cost || 0)
+                          )}
+                        </small>
+                      </div>
+                    `
+                  )
+                  .join("")
+              }
+
+              ${
+                !lowStock.length &&
+                !marginRisks.length
+                  ? `
+                    <div class="is-calm">
+                      <span>Стан</span>
+
+                      <strong>
+                        Запаси й ціни без критичних сигналів
+                      </strong>
+                    </div>
+                  `
+                  : ""
+              }
+            </div>
+          </article>
+        </section>
+
+        <section class="financeTodayBottom">
+          <article class="financeActionPanel financeTodayOperations">
+            <div class="financePanelHead">
+              <div>
+                <span>
+                  СЬОГОДНІ
+                </span>
+
+                <h2>
+                  Останні операції
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                data-finance-go="transactions"
+              >
+                Весь журнал →
+              </button>
+            </div>
+
+            <div class="financeCompactOperations">
+              ${
+                transactions.length
+                  ? transactions
+                      .slice(0, 5)
+                      .map(
+                        (transaction) => {
+                          const meta =
+                            getFinanceTransactionMeta(
+                              transaction
+                            );
+
+                          const isOutcome =
+                            meta.type.className ===
+                            "is-outcome";
+
+                          return `
+                            <div>
+                              <span class="${meta.type.className}">
+                                ${meta.type.icon}
+                              </span>
+
+                              <p>
+                                <strong>
+                                  ${escapeHtml(
+                                    transaction.category ||
+                                    meta.type.label
+                                  )}
+                                </strong>
+
+                                <small>
+                                  ${escapeHtml(
+                                    meta.method
+                                  )}
+                                </small>
+                              </p>
+
+                              <b class="${meta.type.className}">
+                                ${isOutcome ? "−" : "+"}${formatVisitFinanceMoney(
+                                  transaction.amount
+                                )}
+                              </b>
+                            </div>
+                          `;
+                        }
+                      )
+                      .join("")
+                  : `
+                    <div class="financeCompactEmpty">
+                      Сьогодні проведених операцій ще немає.
+                    </div>
+                  `
+              }
+            </div>
+          </article>
+
+          <article class="financeDayBrief ${
+            hasAttention
+              ? "has-attention"
+              : "is-calm"
+          }">
+            <span>✦</span>
+
+            <div>
+              <small>
+                PUG КОРОТКО
+              </small>
+
+              <h2>
+                ${
+                  hasAttention
+                    ? "Є кілька дій до завершення зміни"
+                    : "Фінансовий день під контролем"
+                }
+              </h2>
+
+              <p>
+                ${
+                  hasAttention
+                    ? `
+                      ${
+                        debtClients.length
+                          ? `${debtClients.length} клієнтських оплат`
+                          : ""
+                      }
+                      ${
+                        debtClients.length &&
+                        (
+                          lowStock.length ||
+                          marginRisks.length
+                        )
+                          ? " та "
+                          : ""
+                      }
+                      ${
+                        lowStock.length ||
+                        marginRisks.length
+                          ? `${lowStock.length + marginRisks.length} складських сигналів`
+                          : ""
+                      }
+                      потребують уваги.
+                    `
+                    : "Незакритих оплат і критичних складських сигналів немає."
+                }
+              </p>
+            </div>
+          </article>
+        </section>
+      </div>
+    `;
+
+    bindFinanceWorkspaceActions(
+      page
+    );
+
+    page
+      .querySelector(
+        "#financeTodayAddExpense"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          openFinanceExpenseModal();
+        }
+      );
+
+  } catch (error) {
+    console.error(
+      "renderFinanceTodayTab failed:",
+      error
+    );
+
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+
+        <h2>
+          Не вдалося зібрати фінансовий день
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error?.message ||
+            "Невідома помилка"
+          )}
+        </p>
+
+        <button
+          type="button"
+          id="financeTodayRetry"
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    `;
+
+    page
+      .querySelector(
+        "#financeTodayRetry"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+  }
+}
+
+function applyFinanceClientFilters(
+  page
+) {
+  const search =
+    String(
+      financeDashboardState
+        .clientSearch || ""
+    )
+      .trim()
+      .toLocaleLowerCase(
+        "uk-UA"
+      );
+
+  const filter =
+    financeDashboardState
+      .clientFilter || "debt";
+
+  let visible = 0;
+
+  page
+    .querySelectorAll(
+      "[data-finance-client-card]"
+    )
+    .forEach((card) => {
+      const matchesSearch =
+        !search ||
+        String(
+          card.dataset
+            .financeClientSearch ||
+          ""
+        ).includes(search);
+
+      const matchesFilter =
+        filter === "all" ||
+        card.dataset
+          .financeClientStatus ===
+          filter;
+
+      const show =
+        matchesSearch &&
+        matchesFilter;
+
+      card.hidden = !show;
+
+      if (show) {
+        visible += 1;
+      }
+    });
+
+  const count =
+    page.querySelector(
+      "#financeClientsVisibleCount"
+    );
+
+  if (count) {
+    count.textContent =
+      String(visible);
+  }
+
+  const empty =
+    page.querySelector(
+      "#financeClientsFilteredEmpty"
+    );
+
+  if (empty) {
+    empty.hidden =
+      visible > 0;
+  }
+
+  page
+    .querySelectorAll(
+      "[data-finance-client-filter]"
+    )
+    .forEach((button) => {
+      button.classList.toggle(
+        "active",
+        button.dataset
+          .financeClientFilter ===
+          filter
+      );
+    });
+}
+
+async function renderFinanceClientsTab(
+  page
+) {
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+
+      <strong>
+        Збираємо розрахунки з клієнтами…
+      </strong>
+    </div>
+  `;
+
+  try {
+    const balances =
+      await loadFinanceClientBalancesApi();
+
+    const summary =
+      balances.summary || {};
+
+    const clients =
+      Array.isArray(balances.items)
+        ? balances.items
+        : [];
+
+    page.innerHTML = `
+      <div class="financeDashboard financeWorkspaceV2">
+        ${buildFinanceSectionNavigation()}
+
+        <header class="financeControlHero financeClientsHero">
+          <div class="financeControlHeroMain">
+            <span class="financeEyebrow">
+              РОЗРАХУНКИ
+            </span>
+
+            <h1>
+              Клієнти та оплати
+            </h1>
+
+            <p>
+              Один список для адміністратора: хто вже сплатив,
+              який візит залишився відкритим і де прийняти оплату.
+            </p>
+          </div>
+
+          <div class="financeCollectionScore">
+            <span>
+              Зібрано
+            </span>
+
+            <strong>
+              ${Number(
+                summary.collection_rate ||
+                0
+              ).toLocaleString(
+                "uk-UA",
+                {
+                  maximumFractionDigits: 1,
+                }
+              )}%
+            </strong>
+
+            <small>
+              від нарахованої суми
+            </small>
+          </div>
+        </header>
+
+        <section class="financeClientKpis">
+          <article>
+            <span>
+              Нараховано
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.billed
+              )}
+            </strong>
+          </article>
+
+          <article>
+            <span>
+              Отримано
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.paid
+              )}
+            </strong>
+          </article>
+
+          <article class="is-debt">
+            <span>
+              До сплати
+            </span>
+
+            <strong>
+              ${formatVisitFinanceMoney(
+                summary.outstanding
+              )}
+            </strong>
+          </article>
+
+          <article>
+            <span>
+              Відкриті візити
+            </span>
+
+            <strong>
+              ${Number(
+                summary.debt_visits_count ||
+                0
+              )}
+            </strong>
+          </article>
+        </section>
+
+        <section class="financeClientsToolbar">
+          <div class="financeClientFilters">
+            <button
+              type="button"
+              data-finance-client-filter="debt"
+              class="${
+                financeDashboardState
+                  .clientFilter ===
+                "debt"
+                  ? "active"
+                  : ""
+              }"
+            >
+              Очікують оплату
+            </button>
+
+            <button
+              type="button"
+              data-finance-client-filter="paid"
+              class="${
+                financeDashboardState
+                  .clientFilter ===
+                "paid"
+                  ? "active"
+                  : ""
+              }"
+            >
+              Сплачено
+            </button>
+
+            <button
+              type="button"
+              data-finance-client-filter="all"
+              class="${
+                financeDashboardState
+                  .clientFilter ===
+                "all"
+                  ? "active"
+                  : ""
+              }"
+            >
+              Усі
+            </button>
+          </div>
+
+          <label class="financeClientSearch">
+            <span>⌕</span>
+
+            <input
+              type="search"
+              id="financeClientSearch"
+              value="${escapeHtml(
+                financeDashboardState
+                  .clientSearch || ""
+              )}"
+              placeholder="Власник, телефон або пацієнт"
+            >
+          </label>
+
+          <span class="financeClientsCount">
+            Показано:
+            <strong id="financeClientsVisibleCount">
+              ${clients.length}
+            </strong>
+          </span>
+        </section>
+
+        <section class="financeClientsList">
+          ${
+            clients
+              .map(
+                (client) => {
+                  const hasDebt =
+                    Number(
+                      client.remaining || 0
+                    ) > 0;
+
+                  const searchable =
+                    [
+                      client.owner_name,
+                      client.phone,
+                      ...(client.visits || [])
+                        .map(
+                          (visit) =>
+                            visit.patient_name
+                        ),
+                    ]
+                      .filter(Boolean)
+                      .join(" ")
+                      .toLocaleLowerCase(
+                        "uk-UA"
+                      );
+
+                  const visibleVisits =
+                    (client.visits || [])
+                      .filter(
+                        (visit) =>
+                          hasDebt
+                            ? Number(
+                                visit.remaining ||
+                                0
+                              ) > 0
+                            : true
+                      )
+                      .slice(0, 4);
+
+                  return `
+                    <article
+                      class="financeClientCard ${
+                        hasDebt
+                          ? "has-debt"
+                          : "is-paid"
+                      }"
+                      data-finance-client-card
+                      data-finance-client-status="${
+                        hasDebt
+                          ? "debt"
+                          : "paid"
+                      }"
+                      data-finance-client-search="${escapeHtml(
+                        searchable
+                      )}"
+                    >
+                      <header>
+                        <div class="financeClientIdentity">
+                          <div class="financeClientAvatar">
+                            ${escapeHtml(
+                              String(
+                                client.owner_name ||
+                                "К"
+                              )
+                                .trim()
+                                .charAt(0)
+                                .toUpperCase()
+                            )}
+                          </div>
+
+                          <div>
+                            <h2>
+                              ${escapeHtml(
+                                client.owner_name ||
+                                "Власник"
+                              )}
+                            </h2>
+
+                            <p>
+                              ${
+                                client.phone
+                                  ? escapeHtml(
+                                      client.phone
+                                    )
+                                  : "Телефон не вказано"
+                              }
+                              ·
+                              ${
+                                new Set(
+                                  (client.visits || [])
+                                    .map(
+                                      (visit) =>
+                                        visit.patient_id
+                                    )
+                                ).size
+                              }
+                              пацієнтів
+                            </p>
+                          </div>
+                        </div>
+
+                        <div class="financeClientBalance">
+                          <span>
+                            ${
+                              hasDebt
+                                ? "До сплати"
+                                : "Баланс"
+                            }
+                          </span>
+
+                          <strong>
+                            ${formatVisitFinanceMoney(
+                              client.remaining
+                            )}
+                          </strong>
+
+                          <small class="${
+                            hasDebt
+                              ? "is-unpaid"
+                              : "is-paid"
+                          }">
+                            ${
+                              hasDebt
+                                ? "Є відкриті розрахунки"
+                                : "Розрахунки закриті"
+                            }
+                          </small>
+                        </div>
+                      </header>
+
+                      <div class="financeClientVisitList">
+                        ${
+                          visibleVisits.length
+                            ? visibleVisits
+                                .map(
+                                  (visit) => {
+                                    const meta =
+                                      getFinanceSettlementMeta(
+                                        visit.financial_status
+                                      );
+
+                                    return `
+                                      <div class="financeClientVisit">
+                                        <div>
+                                          <strong>
+                                            ${escapeHtml(
+                                              visit.patient_name ||
+                                              "Пацієнт"
+                                            )}
+                                          </strong>
+
+                                          <span>
+                                            ${
+                                              visit.date
+                                                ? escapeHtml(
+                                                    formatFinancePurchaseDate(
+                                                      visit.date
+                                                    )
+                                                  )
+                                                : "Без дати"
+                                            }
+                                            ${
+                                              visit.diagnosis
+                                                ? `· ${escapeHtml(
+                                                    visit.diagnosis
+                                                  )}`
+                                                : ""
+                                            }
+                                          </span>
+                                        </div>
+
+                                        <div class="financeClientVisitAmounts">
+                                          <span>
+                                            ${
+                                              meta.label
+                                            }
+                                          </span>
+
+                                          <strong>
+                                            ${formatVisitFinanceMoney(
+                                              visit.remaining
+                                            )}
+                                          </strong>
+                                        </div>
+
+                                        <div class="financeClientVisitActions">
+                                          <button
+                                            type="button"
+                                            class="financeVisitOpenButton"
+                                            data-finance-open-visit="${escapeHtml(
+                                              visit.visit_id
+                                            )}"
+                                          >
+                                            Візит
+                                          </button>
+
+                                          ${
+                                            Number(
+                                              visit.remaining ||
+                                              0
+                                            ) > 0
+                                              ? `
+                                                <button
+                                                  type="button"
+                                                  class="financeVisitPayButton"
+                                                  data-finance-pay-visit="${escapeHtml(
+                                                    visit.visit_id
+                                                  )}"
+                                                >
+                                                  Прийняти оплату
+                                                </button>
+                                              `
+                                              : ""
+                                          }
+                                        </div>
+                                      </div>
+                                    `;
+                                  }
+                                )
+                                .join("")
+                            : `
+                              <div class="financeClientVisitsEmpty">
+                                Немає відкритих візитів.
+                              </div>
+                            `
+                        }
+                      </div>
+
+                      <footer>
+                        <div>
+                          Нараховано
+                          <strong>
+                            ${formatVisitFinanceMoney(
+                              client.billed
+                            )}
+                          </strong>
+                        </div>
+
+                        <div>
+                          Отримано
+                          <strong>
+                            ${formatVisitFinanceMoney(
+                              client.paid
+                            )}
+                          </strong>
+                        </div>
+
+                        ${
+                          client.owner_id
+                            ? `
+                              <button
+                                type="button"
+                                data-finance-open-owner="${escapeHtml(
+                                  client.owner_id
+                                )}"
+                              >
+                                Відкрити картку клієнта →
+                              </button>
+                            `
+                            : ""
+                        }
+                      </footer>
+                    </article>
+                  `;
+                }
+              )
+              .join("")
+          }
+
+          <div
+            class="financeClientsFilteredEmpty"
+            id="financeClientsFilteredEmpty"
+            hidden
+          >
+            <span>⌕</span>
+
+            <strong>
+              За цими умовами клієнтів не знайдено
+            </strong>
+
+            <p>
+              Змініть фільтр або пошуковий запит.
+            </p>
+          </div>
+        </section>
+      </div>
+    `;
+
+    bindFinanceWorkspaceActions(
+      page
+    );
+
+    page
+      .querySelectorAll(
+        "[data-finance-client-filter]"
+      )
+      .forEach((button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            financeDashboardState
+              .clientFilter =
+                button.dataset
+                  .financeClientFilter ||
+                "debt";
+
+            applyFinanceClientFilters(
+              page
+            );
+          }
+        );
+      });
+
+    page
+      .querySelector(
+        "#financeClientSearch"
+      )
+      ?.addEventListener(
+        "input",
+        (event) => {
+          financeDashboardState
+            .clientSearch =
+              event.currentTarget
+                .value || "";
+
+          applyFinanceClientFilters(
+            page
+          );
+        }
+      );
+
+    applyFinanceClientFilters(
+      page
+    );
+
+  } catch (error) {
+    console.error(
+      "renderFinanceClientsTab failed:",
+      error
+    );
+
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+
+        <h2>
+          Не вдалося завантажити клієнтські розрахунки
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error?.message ||
+            "Невідома помилка"
+          )}
+        </p>
+
+        <button
+          type="button"
+          id="financeClientsRetry"
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    `;
+
+    page
+      .querySelector(
+        "#financeClientsRetry"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          renderFinanceTab();
+        }
+      );
+  }
+}
+
 async function renderFinanceTab(
   options = {}
 ) {
@@ -17544,6 +19027,19 @@ async function renderFinanceTab(
     financeDashboardState.dateTo =
       options.dateTo;
   }
+
+  if (
+    financeDashboardState
+      .section ===
+    "today"
+  ) {
+    await renderFinanceTodayTab(
+      page
+    );
+
+    return;
+  }
+
     if (
     financeDashboardState
       .section ===
@@ -17566,6 +19062,18 @@ async function renderFinanceTab(
 
   return;
 }
+
+  if (
+    financeDashboardState
+      .section ===
+    "clients"
+  ) {
+    await renderFinanceClientsTab(
+      page
+    );
+
+    return;
+  }
 
   page.innerHTML = `
     <div class="financePageLoading">
@@ -17640,21 +19148,28 @@ async function renderFinanceTab(
         <header class="financeHero">
           <div>
             <span class="financeEyebrow">
-              ФІНАНСОВИЙ ЦЕНТР
+              АНАЛІТИКА
             </span>
 
             <h1>
-              Фінанси клініки
+              Фінансова аналітика
             </h1>
 
             <p>
-              Гроші, прибуток, борги
-              та операційна ефективність
-              в одному просторі.
+              Динаміка надходжень, витрат,
+              оплат і результату за обраний період.
             </p>
           </div>
 
           <div class="financeHeroActions">
+  <button
+    type="button"
+    class="financeRefreshButton"
+    data-finance-go="expenses"
+  >
+    Витрати й закупівлі
+  </button>
+
   <button
     type="button"
     class="financeAddExpenseButton"
@@ -18234,7 +19749,7 @@ async function renderFinanceTab(
         </section>
       </div>
     `;
-    bindFinanceSectionNavigation(
+    bindFinanceWorkspaceActions(
       page
     );
 
