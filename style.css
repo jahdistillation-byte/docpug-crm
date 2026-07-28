@@ -38811,3 +38811,139 @@ body[data-theme="white"] .teamPageCard .premiumDeleteBtn {
     width: auto;
   }
 }
+
+/* =========================================================
+   CALENDAR — READABLE WORK SCALE
+   Увеличиваем рабочую информацию без масштабирования страницы.
+   ========================================================= */
+
+.page[data-page="calendar"] .calendarTimelineTimeHead {
+  font-size: 11px;
+}
+
+.page[data-page="calendar"] .calendarTimelineTimeLabel {
+  transform: translateY(-8px);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 16px;
+}
+
+.page[data-page="calendar"] .calendarDoctorsTimelineGrid {
+  grid-auto-columns: minmax(260px, 1fr);
+}
+
+.page[data-page="calendar"] .calendarDoctorTimelineColumn {
+  min-width: 260px;
+}
+
+.page[data-page="calendar"] .calendarDoctorTimelineHead {
+  grid-template-columns: 42px minmax(0, 1fr);
+  column-gap: 11px;
+  padding: 13px 16px;
+}
+
+.page[data-page="calendar"] .calendarDoctorAvatar {
+  width: 42px;
+  height: 42px;
+  font-size: 15px;
+}
+
+.page[data-page="calendar"] .calendarDoctorTimelineIdentity strong {
+  font-size: 14px;
+}
+
+.page[data-page="calendar"] .calendarDoctorTimelineIdentity span {
+  font-size: 11px;
+}
+
+.page[data-page="calendar"] .calendarTimelineHover {
+  height: 30px;
+  transform: translateY(-15px);
+  font-size: 11px;
+}
+
+.page[data-page="calendar"] .calendarTimelineEvent {
+  min-height: 46px;
+  padding: 10px 32px 10px 13px;
+}
+
+.page[data-page="calendar"] .calendarTimelineEventTime {
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.page[data-page="calendar"] .calendarTimelineEventTitle {
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 1.28;
+}
+
+.page[data-page="calendar"] .calendarTimelineEventNote {
+  margin-top: 4px;
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.page[data-page="calendar"] .calendarTimelineStatus {
+  min-height: 20px;
+  padding: 0 7px;
+  font-size: 9px;
+}
+
+.page[data-page="calendar"] .calendarTimelineEvent.is-tiny
+.calendarTimelineEventTitle {
+  font-size: 12px;
+}
+
+.page[data-page="calendar"] .calStaffPanel {
+  width: 232px !important;
+  min-width: 232px !important;
+  max-width: 232px !important;
+  padding: 14px !important;
+}
+
+.page[data-page="calendar"] .calStaffPanelTitle {
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+}
+
+.page[data-page="calendar"] .calStaffPanelSub {
+  margin-top: 3px;
+  font-size: 0.74rem !important;
+  line-height: 1.3 !important;
+}
+
+.page[data-page="calendar"] .calStaffDrag {
+  padding: 11px 12px !important;
+}
+
+.page[data-page="calendar"] .calStaffDragName {
+  font-size: 0.88rem !important;
+  line-height: 1.25 !important;
+}
+
+.page[data-page="calendar"] .calStaffDragRole {
+  margin-top: 2px;
+  font-size: 0.74rem !important;
+  line-height: 1.25 !important;
+}
+
+.page[data-page="calendar"] .calStaffDrag .specTag {
+  font-size: 0.68rem !important;
+}
+
+@media (max-width: 1100px) {
+  .page[data-page="calendar"] .calendarDoctorsTimelineGrid {
+    grid-auto-columns: minmax(245px, 1fr);
+  }
+
+  .page[data-page="calendar"] .calendarDoctorTimelineColumn {
+    min-width: 245px;
+  }
+
+  .page[data-page="calendar"] .calStaffPanel {
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
+}
