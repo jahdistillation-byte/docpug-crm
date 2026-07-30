@@ -417,6 +417,308 @@ def ok(data=None):
 def fail(error, code=400):
     return jsonify({"ok": False, "error": error}), code
 
+# =====================================================
+# AUDIT EVENTS
+# =====================================================
+
+def write_audit_event(
+    *,
+    action,
+    entity_type,
+    entity_id=None,
+    entity_label=None,
+    summary=None,
+    before_data=None,
+    after_data=None,
+    metadata=None,
+):
+    """
+    Записывает действие пользователя
+    в единый журнал событий клиники.
+
+    Ошибка журнала не должна ломать
+    основную бизнес-операцию.
+    """
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        current_user = (
+            get_current_user()
+        )
+
+        if not current_org:
+            print(
+                "⚠️ Audit skipped: "
+                "organization not selected",
+                flush=True,
+            )
+
+            return None
+
+        clean_action = str(
+            action or ""
+        ).strip()
+
+        clean_entity_type = str(
+            entity_type or ""
+        ).strip()
+
+        if not clean_action:
+            print(
+                "⚠️ Audit skipped: "
+                "action is empty",
+                flush=True,
+            )
+
+            return None
+
+        if not clean_entity_type:
+            print(
+                "⚠️ Audit skipped: "
+                "entity_type is empty",
+                flush=True,
+            )
+
+            return None
+
+        forwarded_for = str(
+            request.headers.get(
+                "X-Forwarded-For"
+            )
+            or ""
+        ).strip()
+
+        ip_address = (
+            forwarded_for
+            .split(",")[0]
+            .strip()
+            if forwarded_for
+            else str(
+                request.remote_addr
+                or ""
+            ).strip()
+        )
+
+        actor_name = (
+            current_user.get(
+                "display_name"
+            )
+            or current_user.get(
+                "username"
+            )
+            or "Користувач"
+            if current_user
+            else "Система"
+        )
+
+        actor_role = (
+            normalize_role(
+                current_user.get(
+                    "role"
+                )
+            )
+            if current_user
+            else "system"
+        )
+
+        payload = {
+            "org_id":
+                str(current_org),
+
+            "actor_user_id":
+                (
+                    str(
+                        current_user.get(
+                            "id"
+                        )
+                    )
+                    if current_user
+                    and current_user.get(
+                        "id"
+                    )
+                    else None
+                ),
+
+            "actor_staff_id":
+                (
+                    str(
+                        current_user.get(
+                            "staff_id"
+                        )
+                    )
+                    if current_user
+                    and current_user.get(
+                        "staff_id"
+                    )
+                    else None
+                ),
+
+            "actor_name":
+                str(actor_name),
+
+            "actor_role":
+                str(actor_role),
+
+            "action":
+                clean_action,
+
+            "entity_type":
+                clean_entity_type,
+
+            "entity_id":
+                (
+                    str(entity_id)
+                    if entity_id
+                    is not None
+                    else None
+                ),
+
+            "entity_label":
+                (
+                    str(
+                        entity_label
+                    ).strip()
+                    if entity_label
+                    else None
+                ),
+
+            "summary":
+                (
+                    str(
+                        summary
+                    ).strip()
+                    if summary
+                    else None
+                ),
+
+            "before_data":
+                (
+                    before_data
+                    if isinstance(
+                        before_data,
+                        (
+                            dict,
+                            list,
+                        )
+                    )
+                    else None
+                ),
+
+            "after_data":
+                (
+                    after_data
+                    if isinstance(
+                        after_data,
+                        (
+                            dict,
+                            list,
+                        )
+                    )
+                    else None
+                ),
+
+            "metadata":
+                (
+                    metadata
+                    if isinstance(
+                        metadata,
+                        (
+                            dict,
+                            list,
+                        )
+                    )
+                    else None
+                ),
+
+            "ip_address":
+                ip_address
+                or None,
+
+            "user_agent":
+                (
+                    str(
+                        request.headers.get(
+                            "User-Agent"
+                        )
+                        or ""
+                    )[:500]
+                    or None
+                ),
+
+            "created_at":
+                (
+                    datetime
+                    .now(timezone.utc)
+                    .isoformat()
+                ),
+        }
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "audit_events"
+                )
+                .insert(
+                    clean_payload(
+                        payload
+                    )
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else None
+        )
+
+        print(
+            "🧾 Audit event:",
+            {
+                "action":
+                    clean_action,
+
+                "entity_type":
+                    clean_entity_type,
+
+                "entity_id":
+                    entity_id,
+
+                "actor":
+                    actor_name,
+            },
+            flush=True,
+        )
+
+        return row
+
+    except Exception as error:
+        print(
+            "⚠️ write_audit_event failed:",
+            {
+                "action":
+                    action,
+
+                "entity_type":
+                    entity_type,
+
+                "entity_id":
+                    entity_id,
+
+                "error":
+                    repr(error),
+            },
+            flush=True,
+        )
+
+        return None
+
 def clean_payload(d):
     """
     Удаляем пустые строки и None.
@@ -12881,7 +13183,353 @@ def api_update_visit():
             500,
         )
 
+@app.post(
+    "/api/visits/<visit_id>/complete"
+)
+def api_complete_visit(
+    visit_id
+):
+    user, auth_error = (
+        auth_required()
+    )
 
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    clean_visit_id = str(
+        visit_id or ""
+    ).strip()
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    if not clean_visit_id:
+        return fail(
+            "visit_id required",
+            400,
+        )
+
+    try:
+        existing_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visits")
+                    .select("*")
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        clean_visit_id,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if not existing_result.data:
+            return fail(
+                "Візит не знайдено.",
+                404,
+            )
+
+        existing_visit = (
+            existing_result.data[0]
+        )
+
+        if (
+            existing_visit.get(
+                "completed_at"
+            )
+            or existing_visit.get(
+                "closed_by"
+            )
+            or str(
+                existing_visit.get(
+                    "status"
+                )
+                or ""
+            )
+                .strip()
+                .lower()
+            == "completed"
+        ):
+            return fail(
+                "Візит уже завершено.",
+                409,
+            )
+
+        completed_at = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+        update_payload = {
+            "status":
+                "completed",
+
+            "completed_at":
+                completed_at,
+
+            "closed_by":
+                user.get("id"),
+
+            "updated_at":
+                completed_at,
+        }
+
+        update_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visits")
+                    .update(
+                        update_payload
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        clean_visit_id,
+                    )
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if not update_result.data:
+            return fail(
+                "Не вдалося завершити візит.",
+                500,
+            )
+
+        updated_visit = (
+            update_result.data[0]
+        )
+
+        calendar_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "calendar_events"
+                    )
+                    .update({
+                        "status":
+                            "completed",
+
+                        "updated_at":
+                            completed_at,
+                    })
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "visit_id",
+                        clean_visit_id,
+                    )
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        calendar_event = (
+            calendar_result.data[0]
+            if calendar_result.data
+            else None
+        )
+
+        patient_name = (
+            "Пацієнт"
+        )
+
+        pet_id = (
+            updated_visit.get(
+                "pet_id"
+            )
+        )
+
+        if pet_id:
+            try:
+                patient_result = (
+                    supabase
+                    .table("patients")
+                    .select(
+                        "id, name"
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        pet_id,
+                    )
+                    .limit(1)
+                    .execute()
+                )
+
+                if patient_result.data:
+                    patient_name = (
+                        patient_result
+                        .data[0]
+                        .get("name")
+                        or patient_name
+                    )
+
+            except Exception as error:
+                print(
+                    "⚠️ Complete visit patient load:",
+                    repr(error),
+                    flush=True,
+                )
+
+        write_audit_event(
+            action=
+                "visit.completed",
+
+            entity_type=
+                "visit",
+
+            entity_id=
+                clean_visit_id,
+
+            entity_label=
+                (
+                    f"Візит пацієнта "
+                    f"{patient_name}"
+                ),
+
+            summary=
+                "Візит завершено",
+
+            before_data={
+                "status":
+                    existing_visit.get(
+                        "status"
+                    ),
+
+                "completed_at":
+                    existing_visit.get(
+                        "completed_at"
+                    ),
+
+                "closed_by":
+                    existing_visit.get(
+                        "closed_by"
+                    ),
+            },
+
+            after_data={
+                "status":
+                    updated_visit.get(
+                        "status"
+                    ),
+
+                "completed_at":
+                    updated_visit.get(
+                        "completed_at"
+                    ),
+
+                "closed_by":
+                    updated_visit.get(
+                        "closed_by"
+                    ),
+            },
+
+            metadata={
+                "patient_id":
+                    pet_id,
+
+                "patient_name":
+                    patient_name,
+
+                "visit_date":
+                    updated_visit.get(
+                        "date"
+                    ),
+
+                "calendar_event_id":
+                    (
+                        calendar_event.get(
+                            "id"
+                        )
+                        if calendar_event
+                        else None
+                    ),
+            },
+        )
+
+        services_map, stock_map = (
+            load_visit_lines([
+                clean_visit_id
+            ])
+        )
+
+        updated_visit[
+            "services"
+        ] = (
+            services_map.get(
+                clean_visit_id,
+                []
+            )
+        )
+
+        updated_visit[
+            "stock"
+        ] = (
+            stock_map.get(
+                clean_visit_id,
+                []
+            )
+        )
+
+        updated_visit[
+            "calendar_event"
+        ] = calendar_event
+
+        return ok(
+            updated_visit
+        )
+
+    except Exception as error:
+        print(
+            "❌ Complete visit:",
+            {
+                "visit_id":
+                    clean_visit_id,
+
+                "org_id":
+                    current_org,
+
+                "error":
+                    repr(error),
+            },
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завершити візит.",
+            500,
+        )
+        
 @app.delete("/api/visits/<visit_id>")
 def api_delete_visit(
     visit_id

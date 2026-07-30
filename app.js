@@ -3078,7 +3078,108 @@ async function updateVisitApi(
     return null;
   }
 }
+async function completeVisitApi(
+  visitId
+) {
+  const cleanVisitId =
+    String(
+      visitId || ""
+    ).trim();
 
+  if (!cleanVisitId) {
+    throw new Error(
+      "Не вказано ID візиту."
+    );
+  }
+
+  const response =
+    await fetch(
+      `/api/visits/${
+        encodeURIComponent(
+          cleanVisitId
+        )
+      }/complete`,
+      {
+        method: "POST",
+
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const text =
+    await response.text();
+
+  let json = null;
+
+  try {
+    json = text
+      ? JSON.parse(text)
+      : null;
+  } catch {
+    json = null;
+  }
+
+  if (
+    response.status === 409
+  ) {
+    throw new Error(
+      json?.error ||
+      "Візит уже завершено."
+    );
+  }
+
+  if (
+    !response.ok ||
+    !json ||
+    json.ok !== true
+  ) {
+    console.error(
+      "completeVisitApi failed:",
+      response.status,
+      text
+    );
+
+    throw new Error(
+      json?.error ||
+      (
+        "Не вдалося завершити візит. " +
+        `HTTP ${response.status}.`
+      )
+    );
+  }
+
+  const completedVisit =
+    Array.isArray(
+      json.data
+    )
+      ? json.data[0] || null
+      : json.data || null;
+
+  if (!completedVisit?.id) {
+    throw new Error(
+      "Сервер не повернув завершений візит."
+    );
+  }
+
+  const normalizedVisit =
+    normalizeVisitFromServer(
+      completedVisit
+    );
+
+  cacheVisits([
+    normalizedVisit,
+  ]);
+
+  return normalizedVisit;
+}
 // =========================
 // Push helpers (services/stock)
 // =========================
@@ -43363,153 +43464,156 @@ if (
               );
             }
 
-            const updatedEvent =
-  await syncCalendarEventStatusByVisitId(
-    visitId,
-    "completed"
-  );
-  console.log(
-  "[complete-visit] calendar sync result:",
-  {
-    visitId,
 
-    updatedEvent,
-
-    status:
-      updatedEvent?.status,
-
-    eventId:
-      updatedEvent?.id,
-
-    linkedVisitId:
-      updatedEvent?.visit_id,
-  }
-);
-
-if (
-  !updatedEvent?.id ||
-  String(
-    updatedEvent.status || ""
-  )
-    .trim()
-    .toLowerCase() !==
-    "completed"
-) {
-  throw new Error(
-    (
-      "Медичні дані збережено, " +
-      "але календар не підтвердив " +
-      "завершення прийому."
-    )
-  );
-}
-
-const refreshedVisit =
-  await fetchVisitById(
+const completedVisit =
+  await completeVisitApi(
     visitId
   );
 
-            const mergedVisit = {
+const mergedVisit = {
   ...current,
   ...updatedVisit,
-  ...refreshedVisit,
+  ...completedVisit,
 
   status:
-    refreshedVisit?.status ||
+    completedVisit?.status ||
     updatedVisit?.status ||
-    current.status ||
+    current?.status ||
     "completed",
 
   calendar_status:
     "completed",
 
-  calendar_event_id:
-    updatedEvent.id,
-
   completed_at:
-    refreshedVisit?.completed_at ||
+    completedVisit?.completed_at ||
     updatedVisit?.completed_at ||
-    current.completed_at ||
+    current?.completed_at ||
     new Date().toISOString(),
+
+  closed_by:
+    completedVisit?.closed_by ||
+    updatedVisit?.closed_by ||
+    current?.closed_by ||
+    null,
+
+  calendar_event:
+    completedVisit?.calendar_event ||
+    null,
+
+  calendar_event_id:
+    completedVisit
+      ?.calendar_event
+      ?.id ||
+    current
+      ?.calendar_event_id ||
+    null,
 };
 
-            cacheVisits([
-              mergedVisit,
-            ]);
+cacheVisits([
+  mergedVisit,
+]);
 
-            completeButton.disabled =
-              true;
+completeButton.disabled =
+  true;
 
-            completeButton.onclick =
-              null;
+completeButton.onclick =
+  null;
 
-            completeButton.textContent =
-              "✓ Візит завершено";
+completeButton.textContent =
+  "✓ Візит завершено";
 
-            completeButton.title =
-              "Цей візит уже завершено";
+completeButton.title =
+  "Цей візит уже завершено";
 
-            completeButton.classList.add(
-              "is-completed"
-            );
+completeButton.classList.add(
+  "is-completed"
+);
 
-            completeButton.style.cursor =
-              "default";
+completeButton.style.cursor =
+  "default";
 
-            openDeleteModal(
-              `
-                <b>Візит завершено</b>
-                <br><br>
-                Медичні дані збережені,
-                а календар оновлено.
-              `,
-              null,
-              "info"
-            );
-          } catch (error) {
-            console.error(
-              "complete visit failed:",
-              error
-            );
+openDeleteModal(
+  `
+    <b>Візит завершено</b>
+    <br><br>
+    Медичні дані збережені,
+    а календар оновлено.
+  `,
+  null,
+  "info"
+);
+} catch (error) {
+  console.error(
+    "complete visit failed:",
+    error
+  );
 
-            completeButton.disabled =
-              false;
+  completeButton.disabled =
+    false;
 
-            completeButton.textContent =
-              "✓ Завершити візит";
+  completeButton.textContent =
+    "✓ Завершити візит";
 
-            completeButton.title =
-              "Зберегти дані та завершити прийом";
+  completeButton.title =
+    "Зберегти дані та завершити прийом";
 
-            openDeleteModal(
-              escapeHtml(
-                error?.message ||
-                "Не вдалося завершити візит."
-              ),
-              null,
-              "info"
-            );
-          }
-        },
-        "complete"
-      );
-    };
+  openDeleteModal(
+    escapeHtml(
+      error?.message ||
+      "Не вдалося завершити візит."
+    ),
+    null,
+    "info"
+  );
+}
+},
+"complete"
+);
+};
 }
 }
 
 function parseVisitNote(note) {
-  const t = String(note || "");
-  const dxMatch = t.match(/Діагноз:\s*(.*?)(\n|$)/i);
-  const dx = (dxMatch?.[1] || "").trim();
+  const t =
+    String(
+      note || ""
+    );
 
-  const compMatch = t.match(/Скарги\/анамнез:\s*([\s\S]*)/i);
-  const complaint = (compMatch?.[1] || "").trim();
+  const dxMatch =
+    t.match(
+      /Діагноз:\s*(.*?)(\n|$)/i
+    );
+
+  const dx =
+    (
+      dxMatch?.[1] || ""
+    ).trim();
+
+  const compMatch =
+    t.match(
+      /Скарги\/анамнез:\s*([\s\S]*)/i
+    );
+
+  const complaint =
+    (
+      compMatch?.[1] || ""
+    ).trim();
 
   return {
-    dx: dx || "",
-    complaint: complaint || (!dx ? t.trim() : ""),
+    dx:
+      dx || "",
+
+    complaint:
+      complaint ||
+      (
+        !dx
+          ? t.trim()
+          : ""
+      ),
   };
 }
+
+
 function parseVisitRx(value) {
   const text = String(value || "").trim();
 
