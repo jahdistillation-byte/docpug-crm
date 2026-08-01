@@ -37803,52 +37803,44 @@ async function startMedicalVisitFromCalendarEvent(
     );
   }
 
-  const updated =
-  await updateCalendarEventApi(
-    ev.id,
-    {
-      title,
+  const updatedEvent =
+    await updateCalendarEventApi(
+      calendarEvent.id,
+      {
+        title:
+          calendarEvent.title ||
+          "Прийом пацієнта",
 
-      event_date:
-        eventDate,
+        event_date:
+          eventDate,
 
-      start_time:
-        startTimeValue,
+        start_time:
+          startTime,
 
-      end_time:
-        endTimeValue,
+        end_time:
+          endTime,
 
-      staff_id:
-        staffId,
+        staff_id:
+          staffId,
 
-      patient_id:
-        ev.patient_id ||
-        null,
+        patient_id:
+          patientId,
 
-      owner_id:
-        ev.owner_id ||
-        null,
+        owner_id:
+          calendarEvent.owner_id ||
+          null,
 
-      visit_id:
-        ev.visit_id ||
-        null,
+        visit_id:
+          createdVisit.id,
 
-      note,
+        note,
 
-      status:
-        String(
-          document.querySelector(
-            "#calEditStatus"
-          )?.value ||
-          ev.status ||
-          "planned"
-        )
-          .trim()
-          .toLowerCase(),
-    }
-  );
+        status:
+          "in_progress",
+      }
+    );
 
-  if (!updatedEvent) {
+  if (!updatedEvent?.id) {
     throw new Error(
       (
         "Медичний візит створено, " +
@@ -37869,11 +37861,13 @@ async function startMedicalVisitFromCalendarEvent(
       ...createdVisit,
 
       calendar_event_id:
-        updatedEvent.id ||
-        calendarEvent.id,
+        updatedEvent.id,
 
       calendar_status:
         "in_progress",
+
+      calendar_event:
+        updatedEvent,
     },
   ]);
 
