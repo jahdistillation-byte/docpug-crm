@@ -166,7 +166,57 @@ stockLoaded: false,
 
   visitsById: new Map(),
 };
+const visitMutationQueues =
+  new Map();
 
+
+function enqueueVisitMutation(
+  visitId,
+  operation
+) {
+  const cleanVisitId =
+    String(
+      visitId || ""
+    ).trim();
+
+  if (!cleanVisitId) {
+    return Promise.reject(
+      new Error(
+        "Не вказано ID візиту."
+      )
+    );
+  }
+
+  const previous =
+    visitMutationQueues.get(
+      cleanVisitId
+    ) ||
+    Promise.resolve();
+
+  const next =
+    previous
+      .catch(() => null)
+      .then(() =>
+        operation()
+      );
+
+  visitMutationQueues.set(
+    cleanVisitId,
+    next
+  );
+
+  return next.finally(() => {
+    if (
+      visitMutationQueues.get(
+        cleanVisitId
+      ) === next
+    ) {
+      visitMutationQueues.delete(
+        cleanVisitId
+      );
+    }
+  });
+}
 // ===== Visits cache helpers (server) =====
 function cacheVisits(arr) {
   (arr || []).forEach((v) => {
@@ -4548,69 +4598,282 @@ function ensureVisitServicesShape(visit) {
 // =========================
 // SERVICES in VISIT
 // =========================
-async function addServiceLineToVisit(visitId, serviceId, qty) {
-  if (!visitId || !serviceId) return false;
+async function addServiceLineToVisit(
+  visitId,
+  serviceId,
+  qty
+) {
+  if (
+    !visitId ||
+    !serviceId
+  ) {
+    return false;
+  }
 
-  const vid = String(visitId);
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return false;
+  const vid =
+    String(
+      visitId
+    );
 
-  ensureVisitServicesShape(current);
-  const svc = getServiceById(serviceId);
-  if (!svc || svc.active === false) return false;
+  const current =
+    getVisitByIdSync(
+      vid
+    ) ||
+    await fetchVisitById(
+      vid
+    );
 
-  const q = Math.max(1, Number(qty) || 1);
-  const price = Number(svc.price) || 0;
+  if (!current) {
+    return false;
+  }
+
+  ensureVisitServicesShape(
+    current
+  );
+
+  const service =
+    getServiceById(
+      serviceId
+    );
+
+  if (
+    !service ||
+    service.active === false
+  ) {
+    return false;
+  }
+
+  const quantity =
+    Math.max(
+      1,
+      Number(qty) || 1
+    );
+
+  const price =
+    Number(
+      service.price || 0
+    );
 
   const line = {
-    serviceId: String(serviceId),
-    service_id: String(serviceId),
-    qty: q,
-    quantity: q,
-    priceSnap: price,
-    price_snap: price,
-    nameSnap: String(svc.name || "").trim(),
-    name_snap: String(svc.name || "").trim(),
+    serviceId:
+      String(
+        serviceId
+      ),
+
+    service_id:
+      String(
+        serviceId
+      ),
+
+    qty:
+      quantity,
+
+    quantity:
+      quantity,
+
+    priceSnap:
+      price,
+
+    price_snap:
+      price,
+
+    nameSnap:
+      String(
+        service.name || ""
+      ).trim(),
+
+    name_snap:
+      String(
+        service.name || ""
+      ).trim(),
   };
 
-  current.services = [...current.services, line];
-  current.services_json = current.services;
+  current.services = [
+    ...current.services,
+    line,
+  ];
 
-  state.visitsById.set(vid, current);
-  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+  current.services_json =
+    current.services;
 
-  pushVisitServicesToServer(vid, current.services).catch((e) => {
-    console.error("Background service save failed:", e);
-    alert("Послуга додалась на екрані, але не збереглась на сервері. Натисни Оновити.");
+  state.visitsById.set(
+    vid,
+    current
+  );
+
+  if (
+    String(
+      state.selectedVisitId
+    ) === vid
+  ) {
+    state.selectedVisit =
+      current;
+  }
+
+  const servicesSnapshot =
+    current.services.map(
+      (item) => ({
+        ...item,
+      })
+    );
+
+  enqueueVisitMutation(
+    vid,
+    async () => {
+      const saved =
+        await pushVisitServicesToServer(
+          vid,
+          servicesSnapshot
+        );
+
+      if (!saved) {
+        throw new Error(
+          "Не вдалося зберегти послуги візиту."
+        );
+      }
+
+      return true;
+    }
+  ).catch((error) => {
+    console.error(
+      "Background service save failed:",
+      error
+    );
+
+    openDeleteModal(
+      escapeHtml(
+        error?.message ||
+        (
+          "Послуга додалась на екрані, " +
+          "але не збереглась на сервері."
+        )
+      ),
+      null,
+      "info"
+    );
   });
+
   return true;
 }
 
-async function removeServiceLineFromVisit(visitId, index) {
-  if (!visitId) return false;
+async function removeServiceLineFromVisit(
+  visitId,
+  index
+) {
+  if (!visitId) {
+    return false;
+  }
 
-  const vid = String(visitId);
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return false;
+  const vid =
+    String(
+      visitId
+    );
 
-  ensureVisitServicesShape(current);
-  const idx = Number(index);
-  if (!Number.isFinite(idx) || idx < 0 || idx >= current.services.length) return false;
+  const current =
+    getVisitByIdSync(
+      vid
+    ) ||
+    await fetchVisitById(
+      vid
+    );
 
-  const nextServices = current.services.slice();
-  nextServices.splice(idx, 1);
+  if (!current) {
+    return false;
+  }
 
-  current.services = nextServices;
-  current.services_json = nextServices;
+  ensureVisitServicesShape(
+    current
+  );
 
-  state.visitsById.set(vid, current);
-  if (String(state.selectedVisitId) === vid) state.selectedVisit = current;
+  const itemIndex =
+    Number(
+      index
+    );
 
-  pushVisitServicesToServer(vid, nextServices).catch((e) => {
-    console.error("Background service remove failed:", e);
-    alert("Послуга прибралась на екрані, але не збереглась на сервері. Натисни Оновити.");
+  if (
+    !Number.isFinite(
+      itemIndex
+    ) ||
+    itemIndex < 0 ||
+    itemIndex >=
+      current.services.length
+  ) {
+    return false;
+  }
+
+  const nextServices =
+    current.services.slice();
+
+  nextServices.splice(
+    itemIndex,
+    1
+  );
+
+  current.services =
+    nextServices;
+
+  current.services_json =
+    nextServices;
+
+  state.visitsById.set(
+    vid,
+    current
+  );
+
+  if (
+    String(
+      state.selectedVisitId
+    ) === vid
+  ) {
+    state.selectedVisit =
+      current;
+  }
+
+  const servicesSnapshot =
+    nextServices.map(
+      (item) => ({
+        ...item,
+      })
+    );
+
+  enqueueVisitMutation(
+    vid,
+    async () => {
+      const saved =
+        await pushVisitServicesToServer(
+          vid,
+          servicesSnapshot
+        );
+
+      if (!saved) {
+        throw new Error(
+          "Не вдалося зберегти зміни послуг."
+        );
+      }
+
+      return true;
+    }
+  ).catch((error) => {
+    console.error(
+      "Background service remove failed:",
+      error
+    );
+
+    openDeleteModal(
+      escapeHtml(
+        error?.message ||
+        (
+          "Послуга прибралась на екрані, " +
+          "але зміни не збереглись."
+        )
+      ),
+      null,
+      "info"
+    );
   });
+
   return true;
+
 }
 
 // =========================
