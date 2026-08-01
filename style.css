@@ -41086,3 +41086,365 @@ body[data-theme="white"]
     margin-left: 0;
   }
 }
+/* =====================================================
+   OWNER AUDIT EVENTS
+   ===================================================== */
+
+.auditEventsPage {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  padding: 24px 18px 110px;
+}
+
+.auditEventsHero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(147, 70, 232, 0.2), transparent 40%),
+    rgba(14, 14, 18, 0.8);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.auditEventsHero span {
+  color: var(--accent, #a970ee);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.auditEventsHero h1 {
+  margin: 7px 0 8px;
+  color: #fff;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.auditEventsHero p {
+  max-width: 650px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.55;
+}
+
+.auditOwnerBadge {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 1px solid rgba(169, 112, 238, 0.35);
+  border-radius: 999px;
+  background: rgba(147, 70, 232, 0.12);
+  color: #d9bfff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.auditEventsPanel {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  background: rgba(14, 14, 18, 0.78);
+}
+
+.auditEventsFilters {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 0.8fr 0.8fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auditEventsFilters label {
+  display: grid;
+  gap: 7px;
+}
+
+.auditEventsFilters label > span {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.auditEventsFilters input,
+.auditEventsFilters select {
+  min-height: 42px;
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.24);
+  color: #fff;
+}
+
+.auditEventsFilters input:focus,
+.auditEventsFilters select:focus {
+  border-color: rgba(169, 112, 238, 0.8);
+  box-shadow: 0 0 0 3px rgba(147, 70, 232, 0.13);
+}
+
+.auditEventsFilterActions {
+  display: flex;
+  gap: 8px;
+}
+
+.auditEventsFilterActions button,
+.auditEventsPagination button {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auditEventsFilterActions button[type="submit"] {
+  border-color: rgba(147, 70, 232, 0.6);
+  background: linear-gradient(135deg, #9346e8, #6e2dbc);
+}
+
+.auditEventsFilterActions button:hover,
+.auditEventsPagination button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(169, 112, 238, 0.7);
+}
+
+.auditEventsPagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.auditEventsTableWrap {
+  overflow-x: auto;
+}
+
+.auditEventsTable {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.auditEventsTable th,
+.auditEventsTable td {
+  padding: 15px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  text-align: left;
+  vertical-align: top;
+}
+
+.auditEventsTable th {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.auditEventsTable td {
+  font-size: 13px;
+}
+
+.auditEventsTable td strong,
+.auditEventsTable td small {
+  display: block;
+}
+
+.auditEventsTable td small {
+  max-width: 290px;
+  margin-top: 4px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auditActionBadge {
+  display: inline-flex;
+  padding: 6px 9px;
+  border: 1px solid rgba(169, 112, 238, 0.28);
+  border-radius: 999px;
+  background: rgba(147, 70, 232, 0.12);
+  color: #d9bfff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.auditEventDetails {
+  position: relative;
+}
+
+.auditEventDetails summary {
+  color: #d9bfff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auditEventDetails > div {
+  min-width: min(480px, 75vw);
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: #111116;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.auditEventDetails p {
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.auditEventDetails label {
+  display: block;
+  margin: 10px 0 5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.auditEventDetails pre {
+  overflow: auto;
+  max-height: 220px;
+  margin: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #d8d8e3;
+  font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.auditEventDetails footer {
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 10px;
+}
+
+.auditEventsPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 12px;
+}
+
+.auditEventsPagination > div {
+  display: flex;
+  gap: 8px;
+}
+
+.auditEventsLoading,
+.auditEventsError,
+.auditEventsEmpty,
+.auditEventsDenied {
+  padding: 54px 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.auditEventsEmpty span,
+.auditEventsDenied span {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 38px;
+}
+
+.auditEventsEmpty strong,
+.auditEventsDenied h2 {
+  display: block;
+  margin: 0 0 7px;
+  color: #fff;
+}
+
+.auditEventsEmpty p,
+.auditEventsDenied p {
+  margin: 0;
+}
+
+.auditEventsError {
+  color: #ffaaa6;
+}
+
+@media (max-width: 1080px) {
+  .auditEventsFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .auditEventsFilterActions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .auditEventsPage {
+    padding-inline: 10px;
+  }
+
+  .auditEventsHero {
+    display: grid;
+    padding: 20px;
+  }
+
+  .auditOwnerBadge {
+    width: fit-content;
+  }
+
+  .auditEventsFilters {
+    grid-template-columns: 1fr;
+  }
+
+  .auditEventsFilterActions {
+    grid-column: auto;
+  }
+
+  .auditEventsTable,
+  .auditEventsTable tbody,
+  .auditEventsTable tr,
+  .auditEventsTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .auditEventsTable thead {
+    display: none;
+  }
+
+  .auditEventsTable tr {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .auditEventsTable td {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 0;
+    border: 0;
+  }
+
+  .auditEventsTable td::before {
+    content: attr(data-label);
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .auditEventsPagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
