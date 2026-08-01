@@ -43176,14 +43176,18 @@ const completeButton =
 
 if (completeButton) {
   const visitIsCompleted =
+  Boolean(
+    visit?.completed_at ||
+    visit?.closed_by
+  ) ||
   [
     "completed",
     "done",
     "finished",
   ].includes(
     String(
-      visit?.calendar_status ||
       visit?.status ||
+      visit?.calendar_status ||
       ""
     )
       .trim()
