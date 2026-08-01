@@ -988,6 +988,7 @@ def load_visit_lines(visit_ids):
             if not vid:
                 continue
             services_by_visit.setdefault(vid, []).append({
+                "id": r.get("id"),
                 "serviceId": r.get("service_id") or r.get("serviceId"),
                 "qty": r.get("qty") or 1,
                 "priceSnap": r.get("price_snap") or r.get("priceSnap"),
@@ -2712,6 +2713,198 @@ def api_adjust_stock_item(stock_id):
             "Не вдалося змінити залишок.",
             500
         )
+
+@app.post("/api/visits/<visit_id>/services")
+def api_add_service_to_visit(visit_id):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+    data = request.get_json(silent=True) or {}
+
+    service_id = str(
+        data.get("service_id")
+        or data.get("serviceId")
+        or ""
+    ).strip()
+
+    try:
+        quantity = max(
+            1,
+            int(
+                data.get("quantity")
+                if data.get("quantity") is not None
+                else data.get("qty") or 1
+            ),
+        )
+    except (TypeError, ValueError):
+        return fail("Некоректна кількість послуги.", 400)
+
+    if not current_org:
+        return fail("Organization not selected", 400)
+
+    if not service_id:
+        return fail("Оберіть послугу.", 400)
+
+    try:
+        visit_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("id")
+                .eq("org_id", current_org)
+                .eq("id", visit_id)
+                .limit(1)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not visit_result.data:
+            return fail("Візит не знайдено.", 404)
+
+        service_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("services")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("id", service_id)
+                .limit(1)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not service_result.data:
+            return fail("Послугу не знайдено.", 404)
+
+        service = service_result.data[0]
+
+        if service.get("active") is False:
+            return fail("Ця послуга неактивна.", 409)
+
+        price_snap = service.get("price") or 0
+        name_snap = str(service.get("name") or "Послуга").strip()
+
+        line_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .insert({
+                    "visit_id": visit_id,
+                    "service_id": service_id,
+                    "qty": quantity,
+                    "price_snap": price_snap,
+                    "name_snap": name_snap,
+                })
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not line_result.data:
+            return fail("Не вдалося додати послугу у візит.", 500)
+
+        line = line_result.data[0]
+
+        return ok({
+            "line": {
+                "id": line.get("id"),
+                "serviceId": service_id,
+                "service_id": service_id,
+                "qty": quantity,
+                "quantity": quantity,
+                "priceSnap": price_snap,
+                "price_snap": price_snap,
+                "nameSnap": name_snap,
+                "name_snap": name_snap,
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ Add service to visit:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail("Не вдалося додати послугу у візит.", 500)
+
+
+@app.delete("/api/visits/<visit_id>/services/<line_id>")
+def api_remove_service_from_visit(visit_id, line_id):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail("Organization not selected", 400)
+
+    try:
+        visit_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("id")
+                .eq("org_id", current_org)
+                .eq("id", visit_id)
+                .limit(1)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not visit_result.data:
+            return fail("Візит не знайдено.", 404)
+
+        line_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .select("id")
+                .eq("visit_id", visit_id)
+                .eq("id", line_id)
+                .limit(1)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not line_result.data:
+            return fail("Послугу у візиті не знайдено.", 404)
+
+        delete_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visit_services")
+                .delete()
+                .eq("visit_id", visit_id)
+                .eq("id", line_id)
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not delete_result.data:
+            return fail("Не вдалося видалити послугу.", 500)
+
+        return ok({"line_id": line_id})
+
+    except Exception as error:
+        print(
+            "❌ Remove service from visit:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail("Не вдалося видалити послугу.", 500)
+
 
 @app.post("/api/visits/<visit_id>/stock")
 def api_add_stock_to_visit(
@@ -13050,10 +13243,16 @@ def api_create_visit():
 
     visit_id = row["id"]
 
-    try:
-        save_visit_lines(visit_id, d)
-    except Exception as e:
-        return fail(f"save_visit_lines failed: {e}", 500)
+    if (
+        "services" in d
+        or "services_json" in d
+        or "stock" in d
+        or "stock_json" in d
+    ):
+        try:
+            save_visit_lines(visit_id, d)
+        except Exception as e:
+            return fail(f"save_visit_lines failed: {e}", 500)
 
     
 
@@ -13171,17 +13370,6 @@ def api_update_visit():
 
         else:
             row = existing_result.data[0]
-
-        if (
-            "services" in data
-            or "services_json" in data
-            or "stock" in data
-            or "stock_json" in data
-        ):
-            save_visit_lines(
-                visit_id,
-                data,
-            )
 
         services_map, stock_map = (
             load_visit_lines([
@@ -13340,8 +13528,6 @@ def api_complete_visit(
                 "closed_by":
                     user.get("id"),
 
-                "updated_at":
-                    completed_at,
             }
 
             update_result = (
@@ -13460,8 +13646,37 @@ def api_complete_visit(
                     flush=True,
                 )
 
-        if not visit_already_completed:
-            write_audit_event(
+        audit_recorded = False
+
+        try:
+            audit_result = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("audit_events")
+                    .select("id")
+                    .eq("org_id", current_org)
+                    .eq("action", "visit.completed")
+                    .eq("entity_type", "visit")
+                    .eq("entity_id", clean_visit_id)
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+
+            audit_recorded = bool(
+                audit_result.data
+            )
+
+        except Exception as error:
+            print(
+                "⚠️ Complete visit audit lookup:",
+                repr(error),
+                flush=True,
+            )
+
+        if not audit_recorded:
+            audit_row = write_audit_event(
                 action=
                     "visit.completed",
 
@@ -13537,6 +13752,8 @@ def api_complete_visit(
                 },
             )
 
+            audit_recorded = bool(audit_row)
+
         services_map, stock_map = (
             load_visit_lines([
                 clean_visit_id
@@ -13564,6 +13781,10 @@ def api_complete_visit(
         updated_visit[
             "calendar_event"
         ] = calendar_event
+
+        updated_visit[
+            "audit_recorded"
+        ] = audit_recorded
 
         return ok(
             updated_visit

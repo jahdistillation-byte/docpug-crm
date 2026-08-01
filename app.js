@@ -217,6 +217,25 @@ function enqueueVisitMutation(
     }
   });
 }
+
+
+async function waitForVisitMutations(
+  visitId
+) {
+  const cleanVisitId =
+    String(visitId || "").trim();
+
+  if (!cleanVisitId) return;
+
+  const pending =
+    visitMutationQueues.get(
+      cleanVisitId
+    );
+
+  if (pending) {
+    await pending;
+  }
+}
 // ===== Visits cache helpers (server) =====
 function cacheVisits(arr) {
   (arr || []).forEach((v) => {
@@ -3230,77 +3249,6 @@ async function completeVisitApi(
 
   return normalizedVisit;
 }
-// =========================
-// Push helpers (services/stock)
-// =========================
-async function pushVisitServicesToServer(visitId, servicesArr) {
-  const vid = String(visitId);
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return false;
-
-  const services = Array.isArray(servicesArr) ? servicesArr : [];
-  const stock = Array.isArray(current.stock) ? current.stock : [];
-
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    note: current.note,
-    rx: current.rx,
-    weight_kg: current.weight_kg,
-    services,
-    services_json: services,
-    stock,
-    stock_json: stock,
-  };
-
-  const updated = await updateVisitApi(vid, payload);
-  if (!updated) return false;
-
-  const cached = state.visitsById.get(vid) || current;
-  cached.services = services;
-  cached.services_json = services;
-  cached.stock = stock;
-  cached.stock_json = stock;
-
-  state.visitsById.set(vid, cached);
-  if (String(state.selectedVisitId) === vid) state.selectedVisit = cached;
-  return true;
-}
-
-async function pushVisitStockToServer(visitId, stockArr) {
-  const vid = String(visitId);
-  const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-  if (!current) return false;
-
-  const stock = Array.isArray(stockArr) ? stockArr : [];
-  const services = Array.isArray(current.services) ? current.services : [];
-
-  const payload = {
-    pet_id: current.pet_id,
-    date: current.date,
-    note: current.note,
-    rx: current.rx,
-    weight_kg: current.weight_kg,
-    services,
-    services_json: services,
-    stock,
-    stock_json: stock,
-  };
-
-  const updated = await updateVisitApi(vid, payload);
-  if (!updated) return false;
-
-  const cached = state.visitsById.get(vid) || current;
-  cached.services = services;
-  cached.services_json = services;
-  cached.stock = stock;
-  cached.stock_json = stock;
-
-  state.visitsById.set(vid, cached);
-  if (String(state.selectedVisitId) === vid) state.selectedVisit = cached;
-  return true;
-}
-
 async function deleteVisitApi(
   visitId
 ) {
@@ -4615,22 +4563,6 @@ async function addServiceLineToVisit(
       visitId
     );
 
-  const current =
-    getVisitByIdSync(
-      vid
-    ) ||
-    await fetchVisitById(
-      vid
-    );
-
-  if (!current) {
-    return false;
-  }
-
-  ensureVisitServicesShape(
-    current
-  );
-
   const service =
     getServiceById(
       serviceId
@@ -4649,87 +4581,58 @@ async function addServiceLineToVisit(
       Number(qty) || 1
     );
 
-  const price =
-    Number(
-      service.price || 0
-    );
-
-  const line = {
-    serviceId:
-      String(
-        serviceId
-      ),
-
-    service_id:
-      String(
-        serviceId
-      ),
-
-    qty:
-      quantity,
-
-    quantity:
-      quantity,
-
-    priceSnap:
-      price,
-
-    price_snap:
-      price,
-
-    nameSnap:
-      String(
-        service.name || ""
-      ).trim(),
-
-    name_snap:
-      String(
-        service.name || ""
-      ).trim(),
-  };
-
-  current.services = [
-    ...current.services,
-    line,
-  ];
-
-  current.services_json =
-    current.services;
-
-  state.visitsById.set(
-    vid,
-    current
-  );
-
-  if (
-    String(
-      state.selectedVisitId
-    ) === vid
-  ) {
-    state.selectedVisit =
-      current;
-  }
-
-  const servicesSnapshot =
-    current.services.map(
-      (item) => ({
-        ...item,
-      })
-    );
-
-  enqueueVisitMutation(
+  return enqueueVisitMutation(
     vid,
     async () => {
-      const saved =
-        await pushVisitServicesToServer(
-          vid,
-          servicesSnapshot
+      const current =
+        getVisitByIdSync(vid) ||
+        await fetchVisitById(vid);
+
+      if (!current) {
+        throw new Error(
+          "Візит не знайдено."
+        );
+      }
+
+      ensureVisitServicesShape(current);
+
+      const data =
+        await stockApiRequest(
+          `/api/visits/${encodeURIComponent(
+            vid
+          )}/services`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              service_id:
+                String(serviceId),
+              quantity,
+            }),
+          }
         );
 
-      if (!saved) {
+      const line = data?.line;
+
+      if (!line?.id) {
         throw new Error(
-          "Не вдалося зберегти послуги візиту."
+          "Сервер не повернув рядок послуги."
         );
+      }
+
+      current.services = [
+        ...current.services,
+        line,
+      ];
+
+      current.services_json =
+        current.services;
+
+      state.visitsById.set(vid, current);
+
+      if (
+        String(state.selectedVisitId) === vid
+      ) {
+        state.selectedVisit = current;
       }
 
       return true;
@@ -4751,9 +4654,8 @@ async function addServiceLineToVisit(
       null,
       "info"
     );
+    return false;
   });
-
-  return true;
 }
 
 async function removeServiceLineFromVisit(
@@ -4801,54 +4703,53 @@ async function removeServiceLineFromVisit(
     return false;
   }
 
-  const nextServices =
-    current.services.slice();
-
-  nextServices.splice(
-    itemIndex,
-    1
-  );
-
-  current.services =
-    nextServices;
-
-  current.services_json =
-    nextServices;
-
-  state.visitsById.set(
-    vid,
-    current
-  );
-
-  if (
+  const lineId =
     String(
-      state.selectedVisitId
-    ) === vid
-  ) {
-    state.selectedVisit =
-      current;
+      current.services[itemIndex]?.id || ""
+    ).trim();
+
+  if (!lineId) {
+    await fetchVisitById(vid);
+
+    throw new Error(
+      "Оновіть сторінку та повторіть видалення."
+    );
   }
 
-  const servicesSnapshot =
-    nextServices.map(
-      (item) => ({
-        ...item,
-      })
-    );
-
-  enqueueVisitMutation(
+  return enqueueVisitMutation(
     vid,
     async () => {
-      const saved =
-        await pushVisitServicesToServer(
-          vid,
-          servicesSnapshot
+      const latest =
+        getVisitByIdSync(vid) || current;
+
+      ensureVisitServicesShape(latest);
+
+      await stockApiRequest(
+        `/api/visits/${encodeURIComponent(
+          vid
+        )}/services/${encodeURIComponent(
+          lineId
+        )}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      latest.services =
+        latest.services.filter(
+          (item) =>
+            String(item?.id || "") !== lineId
         );
 
-      if (!saved) {
-        throw new Error(
-          "Не вдалося зберегти зміни послуг."
-        );
+      latest.services_json =
+        latest.services;
+
+      state.visitsById.set(vid, latest);
+
+      if (
+        String(state.selectedVisitId) === vid
+      ) {
+        state.selectedVisit = latest;
       }
 
       return true;
@@ -4870,9 +4771,8 @@ async function removeServiceLineFromVisit(
       null,
       "info"
     );
+    return false;
   });
-
-  return true;
 
 }
 
@@ -4947,6 +4847,22 @@ function ensureVisitStockShape(visit) {
 }
 
 async function addStockLineToVisit(
+  visitId,
+  stockId,
+  qty = 1
+) {
+  return enqueueVisitMutation(
+    visitId,
+    () => addStockLineToVisitNow(
+      visitId,
+      stockId,
+      qty
+    )
+  );
+}
+
+
+async function addStockLineToVisitNow(
   visitId,
   stockId,
   qty = 1
@@ -5073,6 +4989,20 @@ async function addStockLineToVisit(
 // ==========================================================================
 
 async function removeStockLineFromVisit(
+  visitId,
+  index
+) {
+  return enqueueVisitMutation(
+    visitId,
+    () => removeStockLineFromVisitNow(
+      visitId,
+      index
+    )
+  );
+}
+
+
+async function removeStockLineFromVisitNow(
   visitId,
   index
 ) {
@@ -38046,18 +37976,6 @@ async function startMedicalVisitFromCalendarEvent(
 
       weight_kg:
         "",
-
-      services:
-        [],
-
-      services_json:
-        [],
-
-      stock:
-        [],
-
-      stock_json:
-        [],
     });
 
   if (!createdVisit?.id) {
@@ -38546,18 +38464,6 @@ if (startVisitButton) {
 
             weight_kg:
               "",
-
-            services:
-              [],
-
-            services_json:
-              [],
-
-            stock:
-              [],
-
-            stock_json:
-              [],
           });
 
         if (!createdVisit?.id) {
@@ -42069,12 +41975,6 @@ const payload = {
     rx,
     recommendation
   ),
-
-  services,
-  services_json: services,
-
-  stock,
-  stock_json: stock,
 };
 
 const btn =
@@ -42397,7 +42297,6 @@ if (e.target.closest("#visitStkAdd")) {
   };
 
   document.addEventListener("click", handler, true);
-  document.addEventListener("touchstart", handler, { passive: false, capture: true });
 
   // Делегированный инпут поиска услуг и товаров (чтобы не слетал фокус ввода при перерисовках)
   document.addEventListener("input", (e) => {
@@ -43659,20 +43558,6 @@ if (
                   weightRaw
                 );
 
-          const services =
-            Array.isArray(
-              current.services
-            )
-              ? current.services
-              : [];
-
-          const stock =
-            Array.isArray(
-              current.stock
-            )
-              ? current.stock
-              : [];
-
           completeButton.disabled =
             true;
 
@@ -43680,6 +43565,10 @@ if (
             "Завершення…";
 
           try {
+            await waitForVisitMutations(
+              visitId
+            );
+
             const updatedVisit =
               await updateVisitApi(
                 visitId,
@@ -43708,14 +43597,6 @@ if (
                       treatment,
                       recommendation
                     ),
-
-                  services,
-                  services_json:
-                    services,
-
-                  stock,
-                  stock_json:
-                    stock,
                 }
               );
 
@@ -44457,19 +44338,12 @@ function initDischargeModalUI() {
       const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
       if (!current) return alert("Візит не знайдено");
 
-      const services = safeVisitArray(current.services, current.services_json);
-      const stock    = safeVisitArray(current.stock, current.stock_json);
-
       const payload = {
         pet_id: current.pet_id,
         date: current.date,
         weight_kg: current.weight_kg,
         note: buildVisitNote(form.dx, form.complaint),
         rx: typeof buildRxCombined === "function" ? buildRxCombined(form.rx, form.recs, form.follow) : `${form.rx}\n\nРекомендації:\n${form.recs}\n\nКонтроль / при погіршенні:\n${form.follow}`,
-        services,
-        services_json: services,
-        stock,
-        stock_json: stock,
       };
 
       const updated = await updateVisitApi(vid, payload);
@@ -48550,18 +48424,6 @@ if (!notePlain) {
 
   weight_kg:
     "",
-
-  services:
-    [],
-
-  services_json:
-    [],
-
-  stock:
-    [],
-
-  stock_json:
-    [],
 };
 
     // =========================
@@ -48570,11 +48432,6 @@ if (!notePlain) {
     if (editVisitId) {
       const current = await fetchVisitById(editVisitId);
       if (!current) return alert("Візит не знайдено");
-
-      payload.services = safeVisitArray(current.services, current.services_json);
-      payload.services_json = payload.services;
-      payload.stock = safeVisitArray(current.stock, current.stock_json);
-      payload.stock_json = payload.stock;
 
       const updated = await updateVisitApi(editVisitId, payload);
       if (!updated) return;
@@ -48592,22 +48449,6 @@ if (savedPetId) await renderVisits(savedPetId);
         // =========================
     // РЕЖИМ СОЗДАНИЯ НОВОГО ВИЗИТА
     // =========================
-
-    payload.services =
-      Array.isArray(payload.services)
-        ? payload.services
-        : [];
-
-    payload.services_json =
-      payload.services;
-
-    payload.stock =
-      Array.isArray(payload.stock)
-        ? payload.stock
-        : [];
-
-    payload.stock_json =
-      payload.stock;
 
     const existingEvents =
       await loadCalendarApi();
