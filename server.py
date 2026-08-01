@@ -2940,6 +2940,26 @@ def api_add_service_to_visit(visit_id):
 
         line = line_result.data[0]
 
+        write_audit_event(
+            action="service.added",
+            entity_type="visit_service",
+            entity_id=line.get("id"),
+            entity_label=name_snap,
+            summary="Послугу додано до візиту",
+            after_data={
+                "line_id": line.get("id"),
+                "visit_id": visit_id,
+                "service_id": service_id,
+                "qty": quantity,
+                "price_snap": price_snap,
+                "name_snap": name_snap,
+            },
+            metadata={
+                "visit_id": visit_id,
+                "service_id": service_id,
+            },
+        )
+
         return ok({
             "line": {
                 "id": line.get("id"),
@@ -2997,7 +3017,7 @@ def api_remove_service_from_visit(visit_id, line_id):
             lambda: (
                 supabase
                 .table("visit_services")
-                .select("id")
+                .select("*")
                 .eq("visit_id", visit_id)
                 .eq("id", line_id)
                 .limit(1)
@@ -3008,6 +3028,8 @@ def api_remove_service_from_visit(visit_id, line_id):
 
         if not line_result.data:
             return fail("Послугу у візиті не знайдено.", 404)
+
+        line = line_result.data[0]
 
         delete_result = execute_with_retry(
             lambda: (
@@ -3023,6 +3045,29 @@ def api_remove_service_from_visit(visit_id, line_id):
 
         if not delete_result.data:
             return fail("Не вдалося видалити послугу.", 500)
+
+        write_audit_event(
+            action="service.removed",
+            entity_type="visit_service",
+            entity_id=line_id,
+            entity_label=(
+                line.get("name_snap")
+                or "Послуга"
+            ),
+            summary="Послугу видалено з візиту",
+            before_data={
+                "line_id": line_id,
+                "visit_id": visit_id,
+                "service_id": line.get("service_id"),
+                "qty": line.get("qty"),
+                "price_snap": line.get("price_snap"),
+                "name_snap": line.get("name_snap"),
+            },
+            metadata={
+                "visit_id": visit_id,
+                "service_id": line.get("service_id"),
+            },
+        )
 
         return ok({"line_id": line_id})
 
@@ -3329,6 +3374,30 @@ def api_add_stock_to_visit(
 
             raise
 
+        write_audit_event(
+            action="stock.added",
+            entity_type="visit_stock",
+            entity_id=line_id,
+            entity_label=name_snap,
+            summary="Препарат списано у візит",
+            before_data={
+                "stock_qty": quantity_before,
+            },
+            after_data={
+                "stock_qty": quantity_after,
+                "line_id": line_id,
+                "visit_id": visit_id,
+                "stock_id": stock_id,
+                "qty": quantity,
+                "name_snap": name_snap,
+            },
+            metadata={
+                "visit_id": visit_id,
+                "stock_id": stock_id,
+                "unit": stock_item.get("unit") or "шт",
+            },
+        )
+
         return ok({
     "line": {
         "id": line_id,
@@ -3479,6 +3548,30 @@ def api_remove_stock_from_visit(
                     "Не вдалося видалити препарат.",
                     500
                 )
+
+            write_audit_event(
+                action="stock.removed",
+                entity_type="visit_stock",
+                entity_id=line_id,
+                entity_label=(
+                    line_row.get("name_snap")
+                    or "Препарат"
+                ),
+                summary="Препарат видалено з візиту",
+                before_data={
+                    "line_id": line_id,
+                    "visit_id": visit_id,
+                    "stock_id": line_row.get("stock_id"),
+                    "qty": line_row.get("qty"),
+                    "name_snap": line_row.get("name_snap"),
+                    "inventory_synced": False,
+                },
+                metadata={
+                    "visit_id": visit_id,
+                    "stock_id": line_row.get("stock_id"),
+                    "restored": False,
+                },
+            )
 
             return ok({
                 "restored": False,
@@ -3633,6 +3726,36 @@ def api_remove_stock_from_visit(
                     "Повернено після видалення з візиту",
             })
             .execute()
+        )
+
+        write_audit_event(
+            action="stock.removed",
+            entity_type="visit_stock",
+            entity_id=line_id,
+            entity_label=(
+                line_row.get("name_snap")
+                or stock_item.get("name")
+                or "Препарат"
+            ),
+            summary="Препарат видалено з візиту та повернено на склад",
+            before_data={
+                "stock_qty": quantity_before,
+                "line_id": line_id,
+                "visit_id": visit_id,
+                "stock_id": stock_id,
+                "qty": quantity,
+                "name_snap": line_row.get("name_snap"),
+                "inventory_synced": True,
+            },
+            after_data={
+                "stock_qty": quantity_after,
+            },
+            metadata={
+                "visit_id": visit_id,
+                "stock_id": stock_id,
+                "restored": True,
+                "unit": stock_item.get("unit") or "шт",
+            },
         )
 
         return ok({
