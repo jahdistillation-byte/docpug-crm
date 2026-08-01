@@ -3572,7 +3572,7 @@ def api_get_visit_finance(
     visit_id
 ):
     user, auth_error = (
-    owner_or_admin_required()
+        owner_or_admin_required()
     )
 
     if auth_error:
@@ -3584,19 +3584,24 @@ def api_get_visit_finance(
 
     try:
         visit_result = (
-            supabase
-            .table("visits")
-            .select("*")
-            .eq(
-                "org_id",
-                current_org
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visits")
+                    .select("*")
+                    .eq(
+                        "org_id",
+                        current_org
+                    )
+                    .eq(
+                        "id",
+                        visit_id
+                    )
+                    .limit(1)
+                ),
+                attempts=4,
+                delay=0.3,
             )
-            .eq(
-                "id",
-                visit_id
-            )
-            .limit(1)
-            .execute()
         )
 
         if not visit_result.data:
@@ -3610,50 +3615,69 @@ def api_get_visit_finance(
         )
 
         services_result = (
-            supabase
-            .table("visit_services")
-            .select(
-                "qty,price_snap"
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "visit_services"
+                    )
+                    .select(
+                        "qty,price_snap"
+                    )
+                    .eq(
+                        "visit_id",
+                        visit_id
+                    )
+                ),
+                attempts=4,
+                delay=0.3,
             )
-            .eq(
-                "visit_id",
-                visit_id
-            )
-            .execute()
         )
 
         stock_result = (
-            supabase
-            .table("visit_stock")
-            .select(
-                "qty,price_snap"
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "visit_stock"
+                    )
+                    .select(
+                        "qty,price_snap"
+                    )
+                    .eq(
+                        "visit_id",
+                        visit_id
+                    )
+                ),
+                attempts=4,
+                delay=0.3,
             )
-            .eq(
-                "visit_id",
-                visit_id
-            )
-            .execute()
         )
 
         transactions_result = (
-            supabase
-            .table(
-                "finance_transactions"
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "finance_transactions"
+                    )
+                    .select("*")
+                    .eq(
+                        "org_id",
+                        current_org
+                    )
+                    .eq(
+                        "visit_id",
+                        visit_id
+                    )
+                    .order(
+                        "occurred_at",
+                        desc=True
+                    )
+                ),
+                attempts=4,
+                delay=0.3,
             )
-            .select("*")
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "visit_id",
-                visit_id
-            )
-            .order(
-                "occurred_at",
-                desc=True
-            )
-            .execute()
         )
 
         service_total = sum(
@@ -3661,7 +3685,9 @@ def api_get_visit_finance(
                 row.get("qty")
             )
             * finance_number(
-                row.get("price_snap")
+                row.get(
+                    "price_snap"
+                )
             )
             for row in (
                 services_result.data
@@ -3674,7 +3700,9 @@ def api_get_visit_finance(
                 row.get("qty")
             )
             * finance_number(
-                row.get("price_snap")
+                row.get(
+                    "price_snap"
+                )
             )
             for row in (
                 stock_result.data
@@ -3737,7 +3765,9 @@ def api_get_visit_finance(
 
         paid = max(
             0,
-            finance_number(paid)
+            finance_number(
+                paid
+            )
         )
 
         remaining = max(
@@ -3762,7 +3792,10 @@ def api_get_visit_finance(
                 stored_status
             )
 
-        elif total > 0 and remaining <= 0:
+        elif (
+            total > 0
+            and remaining <= 0
+        ):
             financial_status = (
                 "paid"
             )
@@ -13529,7 +13562,7 @@ def api_complete_visit(
             "Не вдалося завершити візит.",
             500,
         )
-        
+    
 @app.delete("/api/visits/<visit_id>")
 def api_delete_visit(
     visit_id
