@@ -719,6 +719,136 @@ def write_audit_event(
 
         return None
 
+
+@app.get("/api/audit-events")
+def api_get_audit_events():
+    user, auth_error = owner_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail("Organization not selected", 400)
+
+    action = str(
+        request.args.get("action") or ""
+    ).strip()
+
+    actor_name = str(
+        request.args.get("actor_name") or ""
+    ).strip()
+
+    date_from = str(
+        request.args.get("date_from") or ""
+    ).strip()
+
+    date_to = str(
+        request.args.get("date_to") or ""
+    ).strip()
+
+    try:
+        limit = min(
+            100,
+            max(
+                1,
+                int(
+                    request.args.get("limit")
+                    or 50
+                ),
+            ),
+        )
+
+        offset = max(
+            0,
+            int(
+                request.args.get("offset")
+                or 0
+            ),
+        )
+
+    except (TypeError, ValueError):
+        return fail("Некоректна пагінація.", 400)
+
+    def build_query():
+        query = (
+            supabase
+            .table("audit_events")
+            .select("*", count="exact")
+            .eq("org_id", current_org)
+        )
+
+        if action:
+            query = query.eq(
+                "action",
+                action,
+            )
+
+        if actor_name:
+            query = query.ilike(
+                "actor_name",
+                f"%{actor_name}%",
+            )
+
+        if date_from:
+            query = query.gte(
+                "created_at",
+                f"{date_from}T00:00:00+00:00",
+            )
+
+        if date_to:
+            query = query.lte(
+                "created_at",
+                f"{date_to}T23:59:59.999999+00:00",
+            )
+
+        return (
+            query
+            .order("created_at", desc=True)
+            .range(
+                offset,
+                offset + limit - 1,
+            )
+        )
+
+    try:
+        result = execute_with_retry(
+            build_query,
+            attempts=4,
+            delay=0.3,
+        )
+
+        rows = result.data or []
+        total = getattr(
+            result,
+            "count",
+            None,
+        )
+
+        if total is None:
+            total = offset + len(rows)
+
+        return ok({
+            "events": rows,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET /api/audit-events:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити журнал дій.",
+            500,
+        )
+
+
 def clean_payload(d):
     """
     Удаляем пустые строки и None.

@@ -1384,6 +1384,7 @@ const TAB_ROUTES = new Set([
   "stock",
   "finance",
   "team",
+  "audit",
   "settings",
 ]);
 
@@ -1508,6 +1509,9 @@ if (route === "services") renderServicesTab();
   await renderFinanceTab();
 }
     if (route === "team") renderTeamTab();
+    if (route === "audit") {
+      await renderAuditTab();
+    }
     if (route === "calendar") {
   state.selectedVisitId = null;
 
@@ -46876,8 +46880,7 @@ function initVisitsTabUI() {
   page.dataset.visitsUiBound =
     "1";
 
-  page.addEventListener(
-    "click",
+  page.onclick =
     async (event) => {
       const openButton =
         event.target.closest(
@@ -46900,8 +46903,7 @@ function initVisitsTabUI() {
           visitId
         );
       }
-    }
-  );
+    };
 }
 
 function closeVisitModal() {
@@ -50377,6 +50379,576 @@ async function uploadClinicBrandFile(file) {
     window.location.origin
   ).toString();
 }
+
+const AUDIT_EVENTS_PAGE_SIZE = 50;
+
+const auditViewState = {
+  offset: 0,
+};
+
+
+function getAuditActionLabel(action) {
+  const labels = {
+    "visit.completed":
+      "Візит завершено",
+    "service.added":
+      "Послугу додано",
+    "service.removed":
+      "Послугу видалено",
+    "stock.added":
+      "Препарат списано",
+    "stock.removed":
+      "Препарат повернено",
+  };
+
+  const cleanAction =
+    String(action || "").trim();
+
+  return labels[cleanAction] ||
+    cleanAction ||
+    "Подія";
+}
+
+
+function formatAuditDate(value) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString(
+    "uk-UA",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }
+  );
+}
+
+
+function renderAuditJson(value) {
+  if (
+    value == null ||
+    (
+      typeof value === "object" &&
+      Object.keys(value).length === 0
+    )
+  ) {
+    return "—";
+  }
+
+  try {
+    return escapeHtml(
+      JSON.stringify(
+        value,
+        null,
+        2
+      )
+    );
+  } catch {
+    return escapeHtml(
+      String(value)
+    );
+  }
+}
+
+
+async function loadAuditEventsApi(
+  filters = {}
+) {
+  const params =
+    new URLSearchParams();
+
+  params.set(
+    "limit",
+    String(AUDIT_EVENTS_PAGE_SIZE)
+  );
+
+  params.set(
+    "offset",
+    String(
+      Math.max(
+        0,
+        Number(filters.offset) || 0
+      )
+    )
+  );
+
+  [
+    "action",
+    "actor_name",
+    "date_from",
+    "date_to",
+  ].forEach((key) => {
+    const value =
+      String(filters[key] || "").trim();
+
+    if (value) {
+      params.set(key, value);
+    }
+  });
+
+  const response = await fetch(
+    `/api/audit-events?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const text = await response.text();
+  let json = null;
+
+  try {
+    json = text
+      ? JSON.parse(text)
+      : null;
+  } catch {}
+
+  if (
+    !response.ok ||
+    json?.ok !== true
+  ) {
+    throw new Error(
+      json?.error ||
+      "Не вдалося завантажити журнал дій."
+    );
+  }
+
+  return json.data || {
+    events: [],
+    total: 0,
+    limit: AUDIT_EVENTS_PAGE_SIZE,
+    offset: 0,
+  };
+}
+
+
+function renderAuditEventsResult(
+  page,
+  data
+) {
+  const results =
+    page.querySelector(
+      "#auditEventsResult"
+    );
+
+  const pagination =
+    page.querySelector(
+      "#auditEventsPagination"
+    );
+
+  if (!results || !pagination) {
+    return;
+  }
+
+  const events =
+    Array.isArray(data?.events)
+      ? data.events
+      : [];
+
+  const total =
+    Math.max(
+      0,
+      Number(data?.total) || 0
+    );
+
+  const offset =
+    Math.max(
+      0,
+      Number(data?.offset) || 0
+    );
+
+  const limit =
+    Math.max(
+      1,
+      Number(data?.limit) ||
+        AUDIT_EVENTS_PAGE_SIZE
+    );
+
+  if (!events.length) {
+    results.innerHTML = `
+      <div class="auditEventsEmpty">
+        <span>🛡️</span>
+        <strong>Подій не знайдено</strong>
+        <p>
+          Спробуйте змінити фільтри або
+          виконайте нову дію у CRM.
+        </p>
+      </div>
+    `;
+  } else {
+    results.innerHTML = `
+      <div class="auditEventsTableWrap">
+        <table class="auditEventsTable">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Користувач</th>
+              <th>Дія</th>
+              <th>Обʼєкт</th>
+              <th>Деталі</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${events.map((event) => `
+              <tr>
+                <td data-label="Дата">
+                  <time>
+                    ${escapeHtml(
+                      formatAuditDate(
+                        event.created_at
+                      )
+                    )}
+                  </time>
+                </td>
+                <td data-label="Користувач">
+                  <strong>
+                    ${escapeHtml(
+                      event.actor_name ||
+                      "Система"
+                    )}
+                  </strong>
+                  <small>
+                    ${escapeHtml(
+                      event.actor_role ||
+                      "system"
+                    )}
+                  </small>
+                </td>
+                <td data-label="Дія">
+                  <span class="auditActionBadge">
+                    ${escapeHtml(
+                      getAuditActionLabel(
+                        event.action
+                      )
+                    )}
+                  </span>
+                  <small>
+                    ${escapeHtml(
+                      event.action || "—"
+                    )}
+                  </small>
+                </td>
+                <td data-label="Обʼєкт">
+                  <strong>
+                    ${escapeHtml(
+                      event.entity_label ||
+                      event.entity_type ||
+                      "—"
+                    )}
+                  </strong>
+                  <small>
+                    ${escapeHtml(
+                      event.entity_id || "—"
+                    )}
+                  </small>
+                </td>
+                <td data-label="Деталі">
+                  <details class="auditEventDetails">
+                    <summary>Переглянути</summary>
+                    <div>
+                      <p>
+                        ${escapeHtml(
+                          event.summary ||
+                          "Без опису"
+                        )}
+                      </p>
+
+                      <label>До</label>
+                      <pre>${renderAuditJson(
+                        event.before_data
+                      )}</pre>
+
+                      <label>Після</label>
+                      <pre>${renderAuditJson(
+                        event.after_data
+                      )}</pre>
+
+                      <label>Метадані</label>
+                      <pre>${renderAuditJson(
+                        event.metadata
+                      )}</pre>
+
+                      <footer>
+                        IP: ${escapeHtml(
+                          event.ip_address || "—"
+                        )}
+                      </footer>
+                    </div>
+                  </details>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  const start =
+    total && events.length
+      ? offset + 1
+      : 0;
+
+  const end =
+    offset + events.length;
+
+  pagination.innerHTML = `
+    <span>
+      Показано ${start}–${end} із ${total}
+    </span>
+
+    <div>
+      <button
+        type="button"
+        id="auditEventsPrevious"
+        ${offset <= 0 ? "disabled" : ""}
+      >
+        ← Назад
+      </button>
+
+      <button
+        type="button"
+        id="auditEventsNext"
+        ${
+          offset + limit >= total
+            ? "disabled"
+            : ""
+        }
+      >
+        Далі →
+      </button>
+    </div>
+  `;
+}
+
+
+async function refreshAuditEvents(
+  page,
+  { reset = false } = {}
+) {
+  if (reset) {
+    auditViewState.offset = 0;
+  }
+
+  const results =
+    page.querySelector(
+      "#auditEventsResult"
+    );
+
+  if (!results) return;
+
+  results.innerHTML = `
+    <div class="auditEventsLoading">
+      Завантажуємо журнал дій…
+    </div>
+  `;
+
+  const filters = {
+    offset: auditViewState.offset,
+    action:
+      page.querySelector(
+        "#auditActionFilter"
+      )?.value || "",
+    actor_name:
+      page.querySelector(
+        "#auditActorFilter"
+      )?.value || "",
+    date_from:
+      page.querySelector(
+        "#auditDateFrom"
+      )?.value || "",
+    date_to:
+      page.querySelector(
+        "#auditDateTo"
+      )?.value || "",
+  };
+
+  try {
+    const data =
+      await loadAuditEventsApi(
+        filters
+      );
+
+    auditViewState.offset =
+      Number(data?.offset) || 0;
+
+    renderAuditEventsResult(
+      page,
+      data
+    );
+
+  } catch (error) {
+    results.innerHTML = `
+      <div class="auditEventsError">
+        ${escapeHtml(
+          error?.message ||
+          "Не вдалося завантажити журнал."
+        )}
+      </div>
+    `;
+  }
+}
+
+
+async function renderAuditTab() {
+  const page = document.querySelector(
+    '.page[data-page="audit"]'
+  );
+
+  if (!page) return;
+
+  if (!isOwner()) {
+    page.innerHTML = `
+      <div class="auditEventsDenied">
+        <span>🔒</span>
+        <h2>Доступ лише для власника</h2>
+        <p>
+          Журнал дій містить конфіденційні
+          дані про роботу клініки.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  auditViewState.offset = 0;
+
+  page.innerHTML = `
+    <div class="auditEventsPage">
+      <section class="auditEventsHero">
+        <div>
+          <span>БЕЗПЕКА ТА КОНТРОЛЬ</span>
+          <h1>Журнал дій</h1>
+          <p>
+            Переглядайте, хто і коли виконував
+            важливі дії у CRM.
+          </p>
+        </div>
+
+        <div class="auditOwnerBadge">
+          🛡️ Тільки власник
+        </div>
+      </section>
+
+      <section class="auditEventsPanel">
+        <form class="auditEventsFilters" id="auditEventsFilters">
+          <label>
+            <span>Дія</span>
+            <select id="auditActionFilter">
+              <option value="">Усі дії</option>
+              <option value="visit.completed">Завершення візиту</option>
+              <option value="service.added">Додавання послуги</option>
+              <option value="service.removed">Видалення послуги</option>
+              <option value="stock.added">Списання препарату</option>
+              <option value="stock.removed">Повернення препарату</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Користувач</span>
+            <input
+              id="auditActorFilter"
+              type="search"
+              placeholder="Імʼя працівника"
+            >
+          </label>
+
+          <label>
+            <span>Від дати</span>
+            <input id="auditDateFrom" type="date">
+          </label>
+
+          <label>
+            <span>До дати</span>
+            <input id="auditDateTo" type="date">
+          </label>
+
+          <div class="auditEventsFilterActions">
+            <button type="submit">Застосувати</button>
+            <button type="button" id="auditEventsReset">Скинути</button>
+          </div>
+        </form>
+
+        <div id="auditEventsResult"></div>
+        <div id="auditEventsPagination" class="auditEventsPagination"></div>
+      </section>
+    </div>
+  `;
+
+  page
+    .querySelector("#auditEventsFilters")
+    ?.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+        await refreshAuditEvents(
+          page,
+          { reset: true }
+        );
+      }
+    );
+
+  page
+    .querySelector("#auditEventsReset")
+    ?.addEventListener(
+      "click",
+      async () => {
+        page
+          .querySelector(
+            "#auditEventsFilters"
+          )
+          ?.reset();
+
+        await refreshAuditEvents(
+          page,
+          { reset: true }
+        );
+      }
+    );
+
+  page.addEventListener(
+    "click",
+    async (event) => {
+      if (
+        event.target.closest(
+          "#auditEventsPrevious"
+        )
+      ) {
+        auditViewState.offset =
+          Math.max(
+            0,
+            auditViewState.offset -
+              AUDIT_EVENTS_PAGE_SIZE
+          );
+
+        await refreshAuditEvents(page);
+      }
+
+      if (
+        event.target.closest(
+          "#auditEventsNext"
+        )
+      ) {
+        auditViewState.offset +=
+          AUDIT_EVENTS_PAGE_SIZE;
+
+        await refreshAuditEvents(page);
+      }
+    }
+  );
+
+  await refreshAuditEvents(page);
+}
+
 
 function isAdmin() {
   const role =
