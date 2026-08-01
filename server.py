@@ -13281,127 +13281,150 @@ def api_complete_visit(
             existing_result.data[0]
         )
 
-        if (
-            existing_visit.get(
-                "completed_at"
-            )
-            or existing_visit.get(
-                "closed_by"
-            )
-            or str(
-                existing_visit.get(
-                    "status"
-                )
-                or ""
-            )
-                .strip()
-                .lower()
-            == "completed"
-        ):
-            return fail(
-                "Візит уже завершено.",
-                409,
-            )
+        visit_already_completed = (
+    bool(
+        existing_visit.get(
+            "completed_at"
+        )
+    )
+    or bool(
+        existing_visit.get(
+            "closed_by"
+        )
+    )
+    or str(
+        existing_visit.get(
+            "status"
+        )
+        or ""
+    )
+        .strip()
+        .lower()
+    == "completed"
+)
 
         completed_at = (
-            datetime
-            .now(timezone.utc)
-            .isoformat()
+    existing_visit.get(
+        "completed_at"
+    )
+    or datetime
+        .now(timezone.utc)
+        .isoformat()
+)
+
+if visit_already_completed:
+    updated_visit = {
+        **existing_visit,
+
+        "status":
+            "completed",
+
+        "completed_at":
+            completed_at,
+
+        "closed_by":
+            existing_visit.get(
+                "closed_by"
+            )
+            or user.get("id"),
+    }
+
+else:
+    update_payload = {
+        "status":
+            "completed",
+
+        "completed_at":
+            completed_at,
+
+        "closed_by":
+            user.get("id"),
+
+        "updated_at":
+            completed_at,
+    }
+
+    update_result = (
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .update(
+                    update_payload
+                )
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    clean_visit_id,
+                )
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+    )
+
+    if not update_result.data:
+        return fail(
+            "Не вдалося завершити візит.",
+            500,
         )
 
-        update_payload = {
-            "status":
-                "completed",
+    updated_visit = (
+        update_result.data[0]
+    )
 
-            "completed_at":
-                completed_at,
+calendar_result = (
+    execute_with_retry(
+        lambda: (
+            supabase
+            .table(
+                "calendar_events"
+            )
+            .update({
+                "status":
+                    "completed",
 
-            "closed_by":
-                user.get("id"),
+                "updated_at":
+                    completed_at,
+            })
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "visit_id",
+                clean_visit_id,
+            )
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+)
 
-            "updated_at":
-                completed_at,
-        }
+calendar_event = (
+    calendar_result.data[0]
+    if calendar_result.data
+    else None
+)
 
-        update_result = (
+patient_name = (
+    "Пацієнт"
+)
+
+pet_id = (
+    updated_visit.get(
+        "pet_id"
+    )
+)
+
+if pet_id:
+    try:
+        patient_result = (
             execute_with_retry(
                 lambda: (
-                    supabase
-                    .table("visits")
-                    .update(
-                        update_payload
-                    )
-                    .eq(
-                        "org_id",
-                        current_org,
-                    )
-                    .eq(
-                        "id",
-                        clean_visit_id,
-                    )
-                ),
-                attempts=3,
-                delay=0.25,
-            )
-        )
-
-        if not update_result.data:
-            return fail(
-                "Не вдалося завершити візит.",
-                500,
-            )
-
-        updated_visit = (
-            update_result.data[0]
-        )
-
-        calendar_result = (
-            execute_with_retry(
-                lambda: (
-                    supabase
-                    .table(
-                        "calendar_events"
-                    )
-                    .update({
-                        "status":
-                            "completed",
-
-                        "updated_at":
-                            completed_at,
-                    })
-                    .eq(
-                        "org_id",
-                        current_org,
-                    )
-                    .eq(
-                        "visit_id",
-                        clean_visit_id,
-                    )
-                ),
-                attempts=3,
-                delay=0.25,
-            )
-        )
-
-        calendar_event = (
-            calendar_result.data[0]
-            if calendar_result.data
-            else None
-        )
-
-        patient_name = (
-            "Пацієнт"
-        )
-
-        pet_id = (
-            updated_visit.get(
-                "pet_id"
-            )
-        )
-
-        if pet_id:
-            try:
-                patient_result = (
                     supabase
                     .table("patients")
                     .select(
@@ -13416,131 +13439,135 @@ def api_complete_visit(
                         pet_id,
                     )
                     .limit(1)
-                    .execute()
-                )
+                ),
+                attempts=4,
+                delay=0.3,
+            )
+        )
 
-                if patient_result.data:
-                    patient_name = (
-                        patient_result
-                        .data[0]
-                        .get("name")
-                        or patient_name
-                    )
+        if patient_result.data:
+            patient_name = (
+                patient_result
+                .data[0]
+                .get("name")
+                or patient_name
+            )
 
-            except Exception as error:
-                print(
-                    "⚠️ Complete visit patient load:",
-                    repr(error),
-                    flush=True,
-                )
+    except Exception as error:
+        print(
+            "⚠️ Complete visit patient load:",
+            repr(error),
+            flush=True,
+        )
 
-        write_audit_event(
-            action=
-                "visit.completed",
+if not visit_already_completed:
+    write_audit_event(
+        action=
+            "visit.completed",
 
-            entity_type=
-                "visit",
+        entity_type=
+            "visit",
 
-            entity_id=
-                clean_visit_id,
+        entity_id=
+            clean_visit_id,
 
-            entity_label=
-                (
-                    f"Візит пацієнта "
-                    f"{patient_name}"
+        entity_label=
+            (
+                f"Візит пацієнта "
+                f"{patient_name}"
+            ),
+
+        summary=
+            "Візит завершено",
+
+        before_data={
+            "status":
+                existing_visit.get(
+                    "status"
                 ),
 
-            summary=
-                "Візит завершено",
+            "completed_at":
+                existing_visit.get(
+                    "completed_at"
+                ),
 
-            before_data={
-                "status":
-                    existing_visit.get(
-                        "status"
-                    ),
+            "closed_by":
+                existing_visit.get(
+                    "closed_by"
+                ),
+        },
 
-                "completed_at":
-                    existing_visit.get(
-                        "completed_at"
-                    ),
+        after_data={
+            "status":
+                updated_visit.get(
+                    "status"
+                ),
 
-                "closed_by":
-                    existing_visit.get(
-                        "closed_by"
-                    ),
-            },
+            "completed_at":
+                updated_visit.get(
+                    "completed_at"
+                ),
 
-            after_data={
-                "status":
-                    updated_visit.get(
-                        "status"
-                    ),
+            "closed_by":
+                updated_visit.get(
+                    "closed_by"
+                ),
+        },
 
-                "completed_at":
-                    updated_visit.get(
-                        "completed_at"
-                    ),
+        metadata={
+            "patient_id":
+                pet_id,
 
-                "closed_by":
-                    updated_visit.get(
-                        "closed_by"
-                    ),
-            },
+            "patient_name":
+                patient_name,
 
-            metadata={
-                "patient_id":
-                    pet_id,
+            "visit_date":
+                updated_visit.get(
+                    "date"
+                ),
 
-                "patient_name":
-                    patient_name,
+            "calendar_event_id":
+                (
+                    calendar_event.get(
+                        "id"
+                    )
+                    if calendar_event
+                    else None
+                ),
+        },
+    )
 
-                "visit_date":
-                    updated_visit.get(
-                        "date"
-                    ),
+services_map, stock_map = (
+    load_visit_lines([
+        clean_visit_id
+    ])
+)
 
-                "calendar_event_id":
-                    (
-                        calendar_event.get(
-                            "id"
-                        )
-                        if calendar_event
-                        else None
-                    ),
-            },
-        )
+updated_visit[
+    "services"
+] = (
+    services_map.get(
+        clean_visit_id,
+        []
+    )
+)
 
-        services_map, stock_map = (
-            load_visit_lines([
-                clean_visit_id
-            ])
-        )
+updated_visit[
+    "stock"
+] = (
+    stock_map.get(
+        clean_visit_id,
+        []
+    )
+)
 
-        updated_visit[
-            "services"
-        ] = (
-            services_map.get(
-                clean_visit_id,
-                []
-            )
-        )
+updated_visit[
+    "calendar_event"
+] = calendar_event
 
-        updated_visit[
-            "stock"
-        ] = (
-            stock_map.get(
-                clean_visit_id,
-                []
-            )
-        )
-
-        updated_visit[
-            "calendar_event"
-        ] = calendar_event
-
-        return ok(
-            updated_visit
-        )
+return ok(
+    updated_visit
+)
 
     except Exception as error:
         print(
