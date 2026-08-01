@@ -43809,18 +43809,104 @@ openDeleteModal(
     error
   );
 
-  completeButton.disabled =
-    false;
+  const errorMessage =
+    String(
+      error?.message || ""
+    ).trim();
 
-  completeButton.textContent =
-    "✓ Завершити візит";
+  const alreadyCompleted =
+    errorMessage
+      .toLowerCase()
+      .includes(
+        "візит уже завершено"
+      );
 
-  completeButton.title =
-    "Зберегти дані та завершити прийом";
+  if (alreadyCompleted) {
+    const refreshedVisit =
+      await fetchVisitById(
+        visitId
+      );
+
+    const completedVisit = {
+      ...current,
+      ...refreshedVisit,
+
+      status:
+        refreshedVisit?.status ||
+        "completed",
+
+      calendar_status:
+        "completed",
+
+      completed_at:
+        refreshedVisit?.completed_at ||
+        current?.completed_at ||
+        new Date().toISOString(),
+
+      closed_by:
+        refreshedVisit?.closed_by ||
+        current?.closed_by ||
+        null,
+    };
+
+    cacheVisits([
+      completedVisit,
+    ]);
+
+    state.visits =
+      (
+        Array.isArray(
+          state.visits
+        )
+          ? state.visits
+          : []
+      ).map(
+        (visit) =>
+          String(visit?.id) ===
+          String(visitId)
+            ? completedVisit
+            : visit
+      );
+
+    completeButton.disabled =
+      true;
+
+    completeButton.onclick =
+      null;
+
+    completeButton.textContent =
+      "✓ Візит завершено";
+
+    completeButton.title =
+      "Цей візит уже завершено";
+
+    completeButton.classList.add(
+      "is-completed"
+    );
+
+    completeButton.style.cursor =
+      "default";
+  } else {
+    completeButton.disabled =
+      false;
+
+    completeButton.textContent =
+      "✓ Завершити візит";
+
+    completeButton.title =
+      "Зберегти дані та завершити прийом";
+
+    completeButton.classList.remove(
+      "is-completed"
+    );
+
+    completeButton.style.cursor =
+      "";
+  }
 
   openDeleteModal(
     escapeHtml(
-      error?.message ||
+      errorMessage ||
       "Не вдалося завершити візит."
     ),
     null,
