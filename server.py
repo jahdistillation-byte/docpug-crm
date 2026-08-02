@@ -17407,6 +17407,12 @@ def api_clinic_login():
                         "must_change_password"
                     )
                 ),
+
+                "is_platform_admin": (
+                    is_platform_admin(
+                        user_data
+                    )
+                ),
             },
         })
 

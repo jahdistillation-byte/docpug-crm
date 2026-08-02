@@ -53822,6 +53822,10 @@ async function init() {
             sessionUser
               .must_change_password
           ),
+
+        is_platform_admin:
+          sessionUser
+            .is_platform_admin === true,
       };
 
       if (
@@ -54045,6 +54049,10 @@ async function init() {
                 loginUser
                   .must_change_password
               ),
+
+            is_platform_admin:
+              loginUser
+                .is_platform_admin === true,
           };
 
           sessionAuthenticated = true;
