@@ -50391,6 +50391,8 @@ function getAuditActionLabel(action) {
   const labels = {
     "visit.completed":
       "Візит завершено",
+    "visit.medical_updated":
+      "Медичні дані змінено",
     "service.added":
       "Послугу додано",
     "service.removed":
@@ -50846,6 +50848,7 @@ async function renderAuditTab() {
             <select id="auditActionFilter">
               <option value="">Усі дії</option>
               <option value="visit.completed">Завершення візиту</option>
+              <option value="visit.medical_updated">Зміна медичних даних</option>
               <option value="service.added">Додавання послуги</option>
               <option value="service.removed">Видалення послуги</option>
               <option value="stock.added">Списання препарату</option>

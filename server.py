@@ -720,6 +720,188 @@ def write_audit_event(
         return None
 
 
+def visit_medical_audit_snapshot(
+    visit
+):
+    """
+    Converts the compact visit storage fields into a stable,
+    human-readable snapshot for the audit log.
+    """
+
+    source = (
+        visit
+        if isinstance(visit, dict)
+        else {}
+    )
+
+    note = str(
+        source.get("note")
+        or ""
+    ).strip()
+
+    diagnosis = str(
+        source.get("dx")
+        or ""
+    ).strip()
+
+    complaints = ""
+
+    diagnosis_match = re.search(
+        r"\u0414\u0456\u0430\u0433\u043d\u043e\u0437:\s*(.*?)(?:\n|$)",
+        note,
+        flags=re.IGNORECASE,
+    )
+
+    if diagnosis_match:
+        diagnosis = (
+            diagnosis_match
+            .group(1)
+            .strip()
+        )
+
+    complaints_match = re.search(
+        r"\u0421\u043a\u0430\u0440\u0433\u0438/\u0430\u043d\u0430\u043c\u043d\u0435\u0437:\s*([\s\S]*)",
+        note,
+        flags=re.IGNORECASE,
+    )
+
+    if complaints_match:
+        complaints = (
+            complaints_match
+            .group(1)
+            .strip()
+        )
+    elif not diagnosis_match:
+        complaints = note
+
+    treatment_text = str(
+        source.get("rx")
+        or ""
+    ).strip()
+
+    treatment = treatment_text
+    recommendations = ""
+    follow_up = ""
+
+    recommendation_markers = [
+        "\n\n\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0430\u0446\u0456\u0457 \u0432\u043b\u0430\u0441\u043d\u0438\u043a\u0443:\n",
+        "\n\n\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0430\u0446\u0456\u0457:\n",
+    ]
+
+    recommendation_index = -1
+    recommendation_marker = ""
+
+    for marker in recommendation_markers:
+        marker_index = (
+            treatment_text.find(marker)
+        )
+
+        if (
+            marker_index >= 0
+            and (
+                recommendation_index < 0
+                or marker_index
+                < recommendation_index
+            )
+        ):
+            recommendation_index = (
+                marker_index
+            )
+            recommendation_marker = marker
+
+    if recommendation_index >= 0:
+        treatment = (
+            treatment_text[
+                :recommendation_index
+            ]
+            .strip()
+        )
+
+        recommendations = (
+            treatment_text[
+                recommendation_index
+                + len(
+                    recommendation_marker
+                ):
+            ]
+            .strip()
+        )
+
+    follow_marker = (
+        "\n\n\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044c / "
+        "\u043f\u0440\u0438 \u043f\u043e\u0433\u0456\u0440\u0448\u0435\u043d\u043d\u0456:\n"
+    )
+
+    follow_index = (
+        recommendations.find(
+            follow_marker
+        )
+    )
+
+    if follow_index >= 0:
+        follow_up = (
+            recommendations[
+                follow_index
+                + len(follow_marker):
+            ]
+            .strip()
+        )
+
+        recommendations = (
+            recommendations[
+                :follow_index
+            ]
+            .strip()
+        )
+
+    treatment = re.sub(
+        r"^\u041b\u0456\u043a\u0443\u0432\u0430\u043d\u043d\u044f:\s*",
+        "",
+        treatment,
+        flags=re.IGNORECASE,
+    ).strip()
+
+    if treatment == "\u2014":
+        treatment = ""
+
+    weight_value = source.get(
+        "weight_kg"
+    )
+
+    if weight_value in (
+        "",
+        None,
+    ):
+        weight_kg = None
+    else:
+        try:
+            weight_kg = float(
+                weight_value
+            )
+
+            if weight_kg.is_integer():
+                weight_kg = int(
+                    weight_kg
+                )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+            weight_kg = str(
+                weight_value
+            ).strip()
+
+    return {
+        "diagnosis": diagnosis,
+        "complaints": complaints,
+        "treatment": treatment,
+        "recommendations": recommendations,
+        "follow_up": follow_up,
+        "weight_kg": weight_kg,
+    }
+
+
 @app.get("/api/audit-events")
 def api_get_audit_events():
     user, auth_error = owner_required()
@@ -13572,6 +13754,16 @@ def api_update_visit():
                 404,
             )
 
+        existing_visit = (
+            existing_result.data[0]
+        )
+
+        medical_before = (
+            visit_medical_audit_snapshot(
+                existing_visit
+            )
+        )
+
         allowed_fields = [
             "pet_id",
             "staff_id",
@@ -13622,7 +13814,111 @@ def api_update_visit():
             row = update_result.data[0]
 
         else:
-            row = existing_result.data[0]
+            row = existing_visit
+
+        medical_after = (
+            visit_medical_audit_snapshot({
+                **existing_visit,
+                **row,
+            })
+        )
+
+        changed_medical_fields = [
+            field
+            for field in medical_after
+            if medical_before.get(field)
+            != medical_after.get(field)
+        ]
+
+        if changed_medical_fields:
+            patient_name = "\u041f\u0430цієнт"
+            pet_id = (
+                row.get("pet_id")
+                or existing_visit.get(
+                    "pet_id"
+                )
+            )
+
+            if pet_id:
+                try:
+                    patient_result = (
+                        execute_with_retry(
+                            lambda: (
+                                supabase
+                                .table("patients")
+                                .select("id, name")
+                                .eq(
+                                    "org_id",
+                                    current_org,
+                                )
+                                .eq(
+                                    "id",
+                                    pet_id,
+                                )
+                                .limit(1)
+                            ),
+                            attempts=3,
+                            delay=0.25,
+                        )
+                    )
+
+                    if patient_result.data:
+                        patient_name = (
+                            patient_result
+                            .data[0]
+                            .get("name")
+                            or patient_name
+                        )
+
+                except Exception as error:
+                    print(
+                        "\u26a0\ufe0f Visit medical audit patient load:",
+                        repr(error),
+                        flush=True,
+                    )
+
+            write_audit_event(
+                action=
+                    "visit.medical_updated",
+                entity_type="visit",
+                entity_id=visit_id,
+                entity_label=(
+                    f"\u0412ізит пацієнта "
+                    f"{patient_name}"
+                ),
+                summary=(
+                    "Медичні дані "
+                    "візиту оновлено"
+                ),
+                before_data={
+                    field:
+                        medical_before.get(
+                            field
+                        )
+                    for field
+                    in changed_medical_fields
+                },
+                after_data={
+                    field:
+                        medical_after.get(
+                            field
+                        )
+                    for field
+                    in changed_medical_fields
+                },
+                metadata={
+                    "patient_id": pet_id,
+                    "patient_name": patient_name,
+                    "visit_date": (
+                        row.get("date")
+                        or existing_visit.get(
+                            "date"
+                        )
+                    ),
+                    "changed_fields":
+                        changed_medical_fields,
+                },
+            )
 
         services_map, stock_map = (
             load_visit_lines([
