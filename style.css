@@ -41894,3 +41894,308 @@ body[data-theme="white"]
     grid-column: auto;
   }
 }
+
+/* =========================================================
+   REPORT + AUDIT — CLINIC THEME BRIDGE
+   New owner workspaces inherit all five saved clinic themes.
+   ========================================================= */
+
+body .ownerReportDashboard {
+  --report-purple: var(--finance-accent);
+  --report-cyan: var(--finance-accent-2);
+  --report-green: #59dca1;
+  color: var(--finance-text);
+}
+
+body :is(
+  .ownerReportHero,
+  .ownerReportMetric,
+  .ownerReportPanel,
+  .ownerReportTelegram,
+  .auditEventsHero,
+  .auditEventsPanel
+) {
+  border-color: var(--finance-border);
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      var(--finance-accent-soft),
+      transparent 43%
+    ),
+    linear-gradient(
+      145deg,
+      var(--finance-surface-1),
+      var(--finance-surface-2)
+    );
+  box-shadow:
+    0 20px 55px var(--finance-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, .045);
+}
+
+body :is(
+  .ownerReportHero,
+  .ownerReportTelegram,
+  .auditEventsHero
+) {
+  border-color: var(--finance-border-strong);
+  background:
+    radial-gradient(
+      circle at 84% 12%,
+      var(--finance-accent-soft),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 4% 100%,
+      var(--finance-accent-soft),
+      transparent 44%
+    ),
+    linear-gradient(
+      140deg,
+      var(--finance-surface-1),
+      var(--finance-surface-2)
+    );
+}
+
+body :is(
+  .ownerReportHeroActions input,
+  .ownerReportHeroActions button,
+  .ownerReportTelegramControls input,
+  .ownerReportTelegramControls button,
+  .auditEventsFilters input,
+  .auditEventsFilters select,
+  .auditEventsFilterActions button,
+  .auditEventsPagination button
+) {
+  border-color: var(--finance-border);
+  background: var(--finance-input);
+  color: var(--finance-text-soft);
+  color-scheme: var(--finance-color-scheme);
+}
+
+body :is(
+  .ownerReportHeroActions input,
+  .ownerReportTelegramControls input,
+  .auditEventsFilters input,
+  .auditEventsFilters select
+):focus {
+  border-color: var(--finance-accent);
+  box-shadow: 0 0 0 3px var(--finance-accent-soft);
+  outline: none;
+}
+
+body :is(
+  .ownerReportHeroActions label span,
+  .ownerReportMetric > span,
+  .ownerReportMetric small,
+  .ownerReportRows p,
+  .ownerReportServiceList small,
+  .ownerReportEmpty,
+  .ownerReportTelegramCopy p,
+  .ownerReportAutoToggle small,
+  .ownerReportTelegramStatus,
+  .auditEventsHero p,
+  .auditEventsFilters label > span,
+  .auditEventsTable th,
+  .auditEventsTable td small,
+  .auditEventDetails label,
+  .auditEventDetails footer,
+  .auditEventsPagination,
+  .auditEventsLoading,
+  .auditEventsEmpty,
+  .auditEventsDenied
+) {
+  color: var(--finance-text-muted);
+}
+
+body :is(
+  .ownerReportMetric > strong,
+  .ownerReportPanelHead h2,
+  .ownerReportPanelHead > strong,
+  .ownerReportRows b,
+  .ownerReportServiceList b,
+  .ownerReportServiceList strong,
+  .ownerReportTelegram h2,
+  .ownerReportAutoToggle,
+  .auditEventsHero h1,
+  .auditEventsTable,
+  .auditEventsTable td strong,
+  .auditEventDetails p,
+  .auditEventsEmpty strong,
+  .auditEventsDenied h2
+) {
+  color: var(--finance-text);
+}
+
+body :is(
+  .ownerReportPanelHead span,
+  .ownerReportTelegramCopy > span,
+  .auditEventsHero span,
+  .auditEventDetails summary
+) {
+  color: var(--finance-accent-2);
+}
+
+body .ownerReportMetric::after {
+  background: var(--finance-accent-soft);
+}
+
+body :is(
+  .ownerReportMetricIcon,
+  .ownerReportServiceList i,
+  .auditOwnerBadge,
+  .auditActionBadge
+) {
+  border-color: var(--finance-border-strong);
+  background: var(--finance-accent-soft);
+  color: var(--finance-accent-2);
+}
+
+body .ownerReportProgress {
+  background: var(--finance-surface-soft);
+}
+
+body .ownerReportProgress i {
+  background: linear-gradient(
+    90deg,
+    var(--finance-accent),
+    var(--finance-accent-2)
+  );
+  box-shadow: 0 0 14px var(--finance-accent-glow);
+}
+
+body :is(
+  .ownerReportRows p,
+  .ownerReportServiceList > div:not(.ownerReportEmpty),
+  .auditEventsFilters,
+  .auditEventsTable th,
+  .auditEventsTable td
+) {
+  border-color: var(--finance-border);
+}
+
+body .ownerReportAttention li {
+  color: var(--finance-text-soft);
+  background: var(--finance-surface-soft);
+}
+
+body .ownerReportTelegramIcon {
+  background: linear-gradient(
+    145deg,
+    var(--finance-accent-2),
+    color-mix(
+      in srgb,
+      var(--finance-accent) 72%,
+      var(--finance-surface-2)
+    )
+  );
+  box-shadow: 0 12px 30px var(--finance-accent-glow);
+}
+
+body .ownerReportAutoToggle {
+  border-color: var(--finance-border);
+  background: var(--finance-surface-soft);
+}
+
+body .ownerReportAutoToggle:hover {
+  border-color: var(--finance-border-strong);
+  background: var(--finance-surface-hover);
+}
+
+body .ownerReportAutoToggle input {
+  accent-color: var(--finance-accent);
+}
+
+body :is(
+  .ownerReportTelegramControls .is-primary,
+  .auditEventsFilterActions button[type="submit"]
+) {
+  border-color: color-mix(
+    in srgb,
+    var(--finance-accent) 62%,
+    white
+  );
+  background: linear-gradient(
+    135deg,
+    var(--finance-accent),
+    color-mix(
+      in srgb,
+      var(--finance-accent) 72%,
+      var(--finance-surface-2)
+    )
+  );
+  box-shadow: 0 10px 28px var(--finance-accent-glow);
+  color: #fff;
+}
+
+body :is(
+  .ownerReportHeroActions button,
+  .ownerReportTelegramControls button:not(.is-primary),
+  .auditEventsPagination button
+):hover:not(:disabled) {
+  border-color: var(--finance-border-strong);
+  background: var(--finance-surface-hover);
+  color: var(--finance-accent-2);
+}
+
+body .auditEventsPanel {
+  overflow: hidden;
+}
+
+body .auditEventsTable tr:hover td {
+  background: var(--finance-surface-hover);
+}
+
+body .auditEventDetails > div {
+  border-color: var(--finance-border-strong);
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      var(--finance-accent-soft),
+      transparent 42%
+    ),
+    var(--finance-surface-2);
+  box-shadow: 0 18px 40px var(--finance-shadow);
+}
+
+body .auditEventDetails pre {
+  background: var(--finance-input);
+  color: var(--finance-text-soft);
+  color-scheme: var(--finance-color-scheme);
+}
+
+body .auditEventsError {
+  color: #ef777e;
+}
+
+body[data-theme="white"] :is(
+  .ownerReportMetric,
+  .ownerReportPanel,
+  .ownerReportTelegram,
+  .ownerReportHero,
+  .auditEventsHero,
+  .auditEventsPanel
+) {
+  box-shadow:
+    0 18px 52px rgba(46, 61, 74, .1),
+    inset 0 1px 0 rgba(255, 255, 255, .92);
+}
+
+body[data-theme="white"] .ownerReportTelegramIcon {
+  color: #fff;
+}
+
+body[data-theme="white"] .ownerReportDelta.is-neutral {
+  color: var(--finance-text-muted);
+  background: var(--finance-surface-soft);
+}
+
+@media (max-width: 720px) {
+  body .auditEventsTable tr {
+    border-color: var(--finance-border);
+    background: var(--finance-surface-soft);
+  }
+
+  body .auditEventsTable td::before {
+    color: var(--finance-text-faint);
+  }
+}
