@@ -51065,6 +51065,14 @@ function getAuditActionLabel(action) {
       "Автоматичний звіт відправлено",
     "organization.created":
       "Клініку створено",
+    "subscription.extend":
+      "Підписку продовжено",
+    "subscription.set_period":
+      "Період підписки змінено",
+    "subscription.pause":
+      "Підписку призупинено",
+    "subscription.resume":
+      "Підписку відновлено",
   };
 
   const cleanAction =
@@ -51527,6 +51535,10 @@ async function renderAuditTab() {
               <option value="report.telegram_sent">Відправлення звіту в Telegram</option>
               <option value="report.telegram_auto_sent">Автоматичне відправлення звіту</option>
               <option value="organization.created">Створення клініки</option>
+              <option value="subscription.extend">Продовження підписки</option>
+              <option value="subscription.set_period">Зміна періоду підписки</option>
+              <option value="subscription.pause">Призупинення підписки</option>
+              <option value="subscription.resume">Відновлення підписки</option>
             </select>
           </label>
 
@@ -51702,6 +51714,38 @@ function renderPlatformClinicsList(
 
   container.innerHTML = clinics
     .map((clinic) => {
+      const subscription =
+        clinic.subscription || {};
+      const subscriptionLabels = {
+        active: "Активна",
+        expiring: "Закінчується",
+        expired: "Термін минув",
+        paused: "Призупинена",
+        trial: "Тестовий період",
+        unconfigured: "Не налаштована",
+      };
+      const subscriptionStatus =
+        subscription.status ||
+        "unconfigured";
+      const subscriptionLabel =
+        subscriptionLabels[
+          subscriptionStatus
+        ] || "Не налаштована";
+      const accessLabel =
+        subscription.last_access_day
+          ? new Intl.DateTimeFormat(
+              "uk-UA",
+              {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }
+            ).format(
+              new Date(
+                `${subscription.last_access_day}T12:00:00`
+              )
+            )
+          : "—";
       const createdAt = clinic.created_at
         ? new Intl.DateTimeFormat(
             "uk-UA",
@@ -51753,10 +51797,309 @@ function renderPlatformClinicsList(
               }
             </span>
           </div>
+
+          <div class="platformSubscriptionRow">
+            <div>
+              <span class="platformSubscriptionBadge ${escapeHtml(
+                subscriptionStatus
+              )}">
+                ${escapeHtml(subscriptionLabel)}
+              </span>
+              <strong>
+                ${
+                  subscription.last_access_day
+                    ? `Доступ до ${escapeHtml(accessLabel)}`
+                    : "Період ще не задано"
+                }
+              </strong>
+              <small>
+                ${
+                  subscription.days_remaining != null
+                    ? `${escapeHtml(subscription.days_remaining)} дн. залишилось`
+                    : "Ручне керування"
+                }
+              </small>
+            </div>
+
+            <div class="platformSubscriptionActions">
+              <button
+                type="button"
+                data-subscription-extend="${escapeHtml(clinic.id)}"
+                data-clinic-name="${escapeHtml(clinic.name || "Клініка")}"
+              >+1 місяць</button>
+              <button
+                type="button"
+                data-subscription-edit="${escapeHtml(clinic.id)}"
+              >Керувати</button>
+            </div>
+          </div>
+
+          <form
+            class="platformSubscriptionEditor"
+            data-subscription-editor="${escapeHtml(clinic.id)}"
+            hidden
+          >
+            <label>
+              <span>Початок</span>
+              <input type="date" name="access_starts_on" value="${escapeHtml(
+                subscription.access_starts_on || ""
+              )}" required>
+            </label>
+            <label>
+              <span>Кінець періоду</span>
+              <input type="date" name="access_ends_on" value="${escapeHtml(
+                subscription.access_ends_on || ""
+              )}" required>
+            </label>
+            <label>
+              <span>Ціна за місяць, ₴</span>
+              <input type="number" min="0" step="0.01" name="monthly_price" value="${escapeHtml(
+                subscription.monthly_price ?? ""
+              )}" placeholder="0">
+            </label>
+            <label>
+              <span>Отримано, ₴</span>
+              <input type="number" min="0" step="0.01" name="amount" placeholder="Необов’язково">
+            </label>
+            <label class="wide">
+              <span>Коментар</span>
+              <input type="text" maxlength="500" name="note" value="${escapeHtml(
+                subscription.note || ""
+              )}" placeholder="Наприклад, оплата готівкою">
+            </label>
+            <p>
+              Кінцева дата не включається: період до 01.09 діє по 31.08 включно.
+            </p>
+            <div class="platformSubscriptionEditorActions">
+              <button type="submit">Зберегти період</button>
+              <button
+                type="button"
+                data-subscription-state="${escapeHtml(clinic.id)}"
+                data-next-action="${
+                  subscription.stored_status === "paused"
+                    ? "resume"
+                    : "pause"
+                }"
+              >
+                ${
+                  subscription.stored_status === "paused"
+                    ? "Відновити"
+                    : "Призупинити"
+                }
+              </button>
+              <button
+                type="button"
+                data-subscription-history="${escapeHtml(clinic.id)}"
+              >Історія</button>
+            </div>
+            <div
+              class="platformSubscriptionHistory"
+              data-subscription-history-box="${escapeHtml(clinic.id)}"
+              hidden
+            ></div>
+          </form>
         </article>
       `;
     })
     .join("");
+}
+
+async function bindPlatformSubscriptionControls(
+  list,
+  refreshList
+) {
+  list
+    .querySelectorAll("[data-subscription-edit]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        const editor = list.querySelector(
+          `[data-subscription-editor="${CSS.escape(
+            button.dataset.subscriptionEdit
+          )}"]`
+        );
+
+        if (editor) {
+          editor.hidden = !editor.hidden;
+        }
+      });
+    });
+
+  list
+    .querySelectorAll("[data-subscription-extend]")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        const clinicName =
+          button.dataset.clinicName || "клініки";
+
+        if (!window.confirm(
+          `Додати один місяць доступу для «${clinicName}»?`
+        )) return;
+
+        button.disabled = true;
+        button.textContent = "Додаємо…";
+
+        try {
+          await platformClinicsRequest(
+            `/${encodeURIComponent(
+              button.dataset.subscriptionExtend
+            )}/subscription`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                action: "extend",
+                months: 1,
+              }),
+            }
+          );
+
+          await refreshList();
+        } catch (error) {
+          window.alert(
+            error.message ||
+            "Не вдалося продовжити підписку"
+          );
+          button.disabled = false;
+          button.textContent = "+1 місяць";
+        }
+      });
+    });
+
+  list
+    .querySelectorAll(".platformSubscriptionEditor")
+    .forEach((form) => {
+      const orgId =
+        form.dataset.subscriptionEditor;
+
+      form.addEventListener(
+        "submit",
+        async (event) => {
+          event.preventDefault();
+          const submit = form.querySelector(
+            'button[type="submit"]'
+          );
+          const data = new FormData(form);
+
+          submit.disabled = true;
+          submit.textContent = "Зберігаємо…";
+
+          try {
+            await platformClinicsRequest(
+              `/${encodeURIComponent(orgId)}/subscription`,
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  action: "set_period",
+                  access_starts_on:
+                    data.get("access_starts_on"),
+                  access_ends_on:
+                    data.get("access_ends_on"),
+                  monthly_price:
+                    data.get("monthly_price"),
+                  amount: data.get("amount"),
+                  note: data.get("note"),
+                }),
+              }
+            );
+
+            await refreshList();
+          } catch (error) {
+            window.alert(
+              error.message ||
+              "Не вдалося зберегти період"
+            );
+            submit.disabled = false;
+            submit.textContent = "Зберегти період";
+          }
+        }
+      );
+    });
+
+  list
+    .querySelectorAll("[data-subscription-state]")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        const action = button.dataset.nextAction;
+
+        if (!window.confirm(
+          action === "pause"
+            ? "Призупинити підписку? CRM поки не буде заблокована."
+            : "Відновити підписку?"
+        )) return;
+
+        button.disabled = true;
+
+        try {
+          await platformClinicsRequest(
+            `/${encodeURIComponent(
+              button.dataset.subscriptionState
+            )}/subscription`,
+            {
+              method: "POST",
+              body: JSON.stringify({ action }),
+            }
+          );
+
+          await refreshList();
+        } catch (error) {
+          window.alert(error.message);
+          button.disabled = false;
+        }
+      });
+    });
+
+  list
+    .querySelectorAll("[data-subscription-history]")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        const orgId = button.dataset.subscriptionHistory;
+        const box = list.querySelector(
+          `[data-subscription-history-box="${CSS.escape(orgId)}"]`
+        );
+
+        if (!box) return;
+
+        if (!box.hidden) {
+          box.hidden = true;
+          return;
+        }
+
+        box.hidden = false;
+        box.textContent = "Завантажуємо історію…";
+
+        try {
+          const data = await platformClinicsRequest(
+            `/${encodeURIComponent(orgId)}/subscription/history`
+          );
+          const labels = {
+            extended: "Продовжено",
+            period_set: "Період змінено",
+            paused: "Призупинено",
+            resumed: "Відновлено",
+          };
+
+          box.innerHTML = (data.events || []).length
+            ? data.events.map((item) => `
+                <div>
+                  <strong>${escapeHtml(labels[item.action] || item.action)}</strong>
+                  <span>${escapeHtml(
+                    new Intl.DateTimeFormat("uk-UA", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(new Date(item.created_at))
+                  )}</span>
+                  <small>${
+                    item.amount != null
+                      ? `${escapeHtml(item.amount)} ₴`
+                      : escapeHtml(item.note || "Без коментаря")
+                  }</small>
+                </div>
+              `).join("")
+            : "Історія ще порожня.";
+        } catch (error) {
+          box.textContent = error.message;
+        }
+      });
+    });
 }
 
 async function bindPlatformClinicUI(page) {
@@ -51786,6 +52129,10 @@ async function bindPlatformClinicUI(page) {
       const data = await platformClinicsRequest();
       const clinics = data.clinics || [];
       renderPlatformClinicsList(list, clinics);
+      await bindPlatformSubscriptionControls(
+        list,
+        refreshList
+      );
 
       if (counter) {
         counter.textContent = String(
@@ -51941,6 +52288,86 @@ async function bindPlatformClinicUI(page) {
   );
 
   await refreshList();
+}
+
+async function renderOwnerSubscriptionStatus(page) {
+  const container = page.querySelector(
+    "#ownerSubscriptionStatus"
+  );
+
+  if (!container) return;
+
+  try {
+    const response = await fetch(
+      "/api/subscription",
+      {
+        credentials: "include",
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+      }
+    );
+    const payload = await response.json();
+
+    if (!response.ok || payload?.ok !== true) {
+      throw new Error(
+        payload?.error ||
+        "Не вдалося завантажити підписку"
+      );
+    }
+
+    const subscription = payload.data || {};
+    const labels = {
+      active: "Підписка активна",
+      expiring: "Підписка скоро завершується",
+      expired: "Термін підписки минув",
+      paused: "Підписку призупинено",
+      trial: "Тестовий період",
+      unconfigured: "Період ще не налаштовано",
+    };
+    const status = subscription.status || "unconfigured";
+    const lastDay = subscription.last_access_day
+      ? new Intl.DateTimeFormat("uk-UA", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }).format(
+          new Date(
+            `${subscription.last_access_day}T12:00:00`
+          )
+        )
+      : null;
+
+    container.className =
+      `ownerSubscriptionStatus ${status}`;
+    container.innerHTML = `
+      <div class="ownerSubscriptionIcon">🗓️</div>
+      <div>
+        <span>ДОСТУП ДО DOC.PUG CRM</span>
+        <strong>${escapeHtml(labels[status] || labels.unconfigured)}</strong>
+        <p>
+          ${
+            lastDay
+              ? `Доступ оплачено до ${escapeHtml(lastDay)} включно.`
+              : "Власник платформи ще не вказав оплачений період. CRM продовжує працювати."
+          }
+        </p>
+      </div>
+      <div class="ownerSubscriptionDays">
+        <strong>${
+          subscription.days_remaining != null
+            ? escapeHtml(subscription.days_remaining)
+            : "—"
+        }</strong>
+        <span>днів залишилось</span>
+      </div>
+    `;
+  } catch (error) {
+    container.className =
+      "ownerSubscriptionStatus unconfigured";
+    container.textContent =
+      error.message ||
+      "Не вдалося завантажити підписку";
+  }
 }
 
 async function initSettingsUI() {
@@ -52111,6 +52538,13 @@ async function initSettingsUI() {
         ownerMode
           ? `
             <section
+              class="ownerSubscriptionStatus unconfigured"
+              id="ownerSubscriptionStatus"
+            >
+              Завантажуємо дані підписки…
+            </section>
+
+            <section
               class="clinicSettingsPanel clinicOwnerSettings"
               id="clinicOwnerSettings"
             >
@@ -52253,6 +52687,8 @@ if (platformMode) {
 }
 
 if (ownerMode) {
+  await renderOwnerSubscriptionStatus(page);
+
   const profile =
     await loadClinicProfileApi();
 

@@ -1699,6 +1699,115 @@ def static_any(path):
 # API: ORGANIZATION PROFILE
 # =========================
 
+def serialize_clinic_subscription(row):
+    source = row if isinstance(row, dict) else {}
+    stored_status = str(
+        source.get("status") or "unconfigured"
+    ).strip().lower()
+    starts_on = source.get("access_starts_on")
+    ends_on = source.get("access_ends_on")
+    today = datetime.now(
+        ZoneInfo("Europe/Kyiv")
+    ).date()
+    end_date = None
+
+    if ends_on:
+        try:
+            end_date = datetime.strptime(
+                str(ends_on),
+                "%Y-%m-%d",
+            ).date()
+        except ValueError:
+            end_date = None
+
+    raw_days_remaining = (
+        (end_date - today).days
+        if end_date
+        else None
+    )
+
+    if stored_status == "paused":
+        display_status = "paused"
+    elif not end_date:
+        display_status = "unconfigured"
+    elif raw_days_remaining <= 0:
+        display_status = "expired"
+    elif raw_days_remaining <= 7:
+        display_status = "expiring"
+    elif stored_status == "trial":
+        display_status = "trial"
+    else:
+        display_status = "active"
+
+    last_access_day = (
+        (end_date - timedelta(days=1)).isoformat()
+        if end_date
+        else None
+    )
+
+    return {
+        "org_id": source.get("org_id"),
+        "plan_name": source.get("plan_name") or "ЗБТ",
+        "stored_status": stored_status,
+        "status": display_status,
+        "access_starts_on": starts_on,
+        "access_ends_on": ends_on,
+        "last_access_day": last_access_day,
+        "days_remaining": (
+            max(0, raw_days_remaining)
+            if raw_days_remaining is not None
+            else None
+        ),
+        "monthly_price": source.get("monthly_price"),
+        "currency": source.get("currency") or "UAH",
+        "note": source.get("note"),
+        "updated_at": source.get("updated_at"),
+    }
+
+
+@app.get("/api/subscription")
+def api_get_current_subscription():
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("clinic_subscriptions")
+                .select("*")
+                .eq("org_id", current_org)
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        row = (
+            result.data[0]
+            if result.data
+            else {"org_id": current_org}
+        )
+
+        return ok(
+            serialize_clinic_subscription(row)
+        )
+
+    except Exception as error:
+        print(
+            "❌ /api/subscription GET error:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося завантажити дані підписки.",
+            500,
+        )
+
 @app.get("/api/platform/clinics")
 def api_list_platform_clinics():
     user, access_error = (
@@ -1740,7 +1849,27 @@ def api_list_platform_clinics():
             delay=0.25,
         )
 
+        subscription_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("clinic_subscriptions")
+                .select("*")
+                .limit(1000)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
         owners_by_org = {}
+        subscriptions_by_org = {
+            str(item.get("org_id")): (
+                serialize_clinic_subscription(item)
+            )
+            for item in (
+                subscription_result.data or []
+            )
+            if item.get("org_id")
+        }
 
         for owner in (owner_result.data or []):
             owner_org_id = str(
@@ -1779,6 +1908,12 @@ def api_list_platform_clinics():
                 "theme": org.get("theme") or "purple",
                 "created_at": org.get("created_at"),
                 "owner": owners_by_org.get(org_id),
+                "subscription": subscriptions_by_org.get(
+                    org_id,
+                    serialize_clinic_subscription({
+                        "org_id": org_id,
+                    }),
+                ),
             })
 
         return ok({
@@ -1794,6 +1929,204 @@ def api_list_platform_clinics():
 
         return fail(
             "Cannot load platform clinics",
+            500,
+        )
+
+
+@app.get(
+    "/api/platform/clinics/<org_id>/subscription/history"
+)
+def api_get_platform_subscription_history(org_id):
+    user, access_error = platform_admin_required()
+
+    if access_error:
+        return access_error
+
+    try:
+        clean_org_id = str(uuid.UUID(str(org_id)))
+    except (ValueError, TypeError, AttributeError):
+        return fail("Невірний ID клініки.", 400)
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("clinic_subscription_events")
+                .select(
+                    "id,action,amount,currency,period_starts_on,"
+                    "period_ends_on,note,created_at"
+                )
+                .eq("org_id", clean_org_id)
+                .order("created_at", desc=True)
+                .limit(25)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok({
+            "events": result.data or [],
+        })
+
+    except Exception as error:
+        print(
+            "❌ subscription history error:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося завантажити історію підписки.",
+            500,
+        )
+
+
+@app.post(
+    "/api/platform/clinics/<org_id>/subscription"
+)
+def api_manage_platform_subscription(org_id):
+    user, access_error = platform_admin_required()
+
+    if access_error:
+        return access_error
+
+    try:
+        clean_org_id = str(uuid.UUID(str(org_id)))
+    except (ValueError, TypeError, AttributeError):
+        return fail("Невірний ID клініки.", 400)
+
+    data = request.get_json(silent=True) or {}
+    action = str(data.get("action") or "").strip().lower()
+
+    if action not in {
+        "extend",
+        "set_period",
+        "pause",
+        "resume",
+    }:
+        return fail("Невідома дія підписки.", 400)
+
+    def optional_decimal(value, field_name):
+        if value in (None, ""):
+            return None
+
+        try:
+            number = float(value)
+        except (ValueError, TypeError):
+            raise ValueError(field_name)
+
+        if number < 0 or number > 100000000:
+            raise ValueError(field_name)
+
+        return round(number, 2)
+
+    try:
+        months = int(data.get("months") or 1)
+        monthly_price = optional_decimal(
+            data.get("monthly_price"),
+            "monthly_price",
+        )
+        amount = optional_decimal(
+            data.get("amount"),
+            "amount",
+        )
+    except (ValueError, TypeError):
+        return fail(
+            "Перевірте кількість місяців і суму.",
+            400,
+        )
+
+    if months < 1 or months > 24:
+        return fail("Можна додати від 1 до 24 місяців.", 400)
+
+    starts_on = str(
+        data.get("access_starts_on") or ""
+    ).strip() or None
+    ends_on = str(
+        data.get("access_ends_on") or ""
+    ).strip() or None
+
+    if action == "set_period":
+        try:
+            start_date = datetime.strptime(
+                starts_on,
+                "%Y-%m-%d",
+            ).date()
+            end_date = datetime.strptime(
+                ends_on,
+                "%Y-%m-%d",
+            ).date()
+        except (ValueError, TypeError):
+            return fail("Вкажіть коректний період.", 400)
+
+        if end_date <= start_date:
+            return fail(
+                "Дата завершення має бути пізніше дати початку.",
+                400,
+            )
+
+    note = str(data.get("note") or "").strip()[:500] or None
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase.rpc(
+                    "manage_clinic_subscription",
+                    {
+                        "p_org_id": clean_org_id,
+                        "p_action": action,
+                        "p_actor_user_id": user.get("id"),
+                        "p_months": months,
+                        "p_access_starts_on": starts_on,
+                        "p_access_ends_on": ends_on,
+                        "p_monthly_price": monthly_price,
+                        "p_amount": amount,
+                        "p_note": note,
+                    },
+                )
+            ),
+            attempts=2,
+            delay=0.3,
+        )
+
+        subscription = serialize_clinic_subscription(
+            result.data or {"org_id": clean_org_id}
+        )
+
+        audit_labels = {
+            "extend": "Підписку продовжено",
+            "set_period": "Період підписки змінено",
+            "pause": "Підписку призупинено",
+            "resume": "Підписку відновлено",
+        }
+
+        write_audit_event(
+            action=f"subscription.{action}",
+            entity_type="organization",
+            entity_id=clean_org_id,
+            entity_label="Підписка клініки",
+            summary=audit_labels[action],
+            after_data=subscription,
+            metadata={
+                "amount": amount,
+                "months": months if action == "extend" else None,
+            },
+        )
+
+        return ok(subscription)
+
+    except Exception as error:
+        message = str(error)
+
+        if "CLINIC_NOT_FOUND" in message:
+            return fail("Клініку не знайдено.", 404)
+
+        print(
+            "❌ manage subscription error:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося оновити підписку. Зміни не збережені.",
             500,
         )
 
