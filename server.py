@@ -4193,6 +4193,100 @@ def serialize_finance_transaction(
     }
 
 
+def finance_audit_snapshot(
+    row
+):
+    source = (
+        row
+        if isinstance(row, dict)
+        else {}
+    )
+
+    return {
+        "transaction_type":
+            source.get(
+                "transaction_type"
+            ),
+        "amount": finance_number(
+            source.get("amount")
+        ),
+        "currency": (
+            source.get("currency")
+            or "UAH"
+        ),
+        "payment_method":
+            source.get(
+                "payment_method"
+            ),
+        "status":
+            source.get("status"),
+        "category":
+            source.get("category"),
+        "counterparty":
+            source.get(
+                "counterparty"
+            ),
+        "description":
+            source.get(
+                "description"
+            ),
+        "document_url":
+            source.get(
+                "document_url"
+            ),
+        "occurred_at":
+            source.get(
+                "occurred_at"
+            ),
+        "visit_id":
+            source.get("visit_id"),
+    }
+
+
+def load_finance_transaction_for_audit(
+    transaction_id,
+    current_org,
+):
+    """
+    Best-effort read for before/after audit details.
+    It must never block the financial operation.
+    """
+
+    try:
+        result = (
+            supabase
+            .table(
+                "finance_transactions"
+            )
+            .select("*")
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .eq(
+                "id",
+                transaction_id,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        return (
+            result.data[0]
+            if result.data
+            else None
+        )
+
+    except Exception as error:
+        print(
+            "⚠️ Finance audit source load:",
+            repr(error),
+            flush=True,
+        )
+
+        return None
+
+
 @app.get(
     "/api/visits/<visit_id>/finance"
 )
@@ -4611,6 +4705,81 @@ def api_create_visit_payment(
         ):
             response_data = (
                 response_data[0]
+            )
+
+        response_payload = (
+            response_data
+            if isinstance(
+                response_data,
+                dict,
+            )
+            else {}
+        )
+
+        payment_transaction = (
+            response_payload.get(
+                "transaction"
+            )
+            if isinstance(
+                response_payload.get(
+                    "transaction"
+                ),
+                dict,
+            )
+            else {}
+        )
+
+        if not response_payload.get(
+            "idempotent_replay"
+        ):
+            write_audit_event(
+                action="payment.created",
+                entity_type=
+                    "finance_transaction",
+                entity_id=(
+                    payment_transaction.get(
+                        "id"
+                    )
+                    or response_payload.get(
+                        "transaction_id"
+                    )
+                ),
+                entity_label=
+                    "Оплата візиту",
+                summary=(
+                    f"Оплату {amount:g} UAH "
+                    "проведено"
+                ),
+                after_data={
+                    "visit_id": visit_id,
+                    "amount": amount,
+                    "currency": "UAH",
+                    "payment_method":
+                        payment_method,
+                    "status": (
+                        payment_transaction.get(
+                            "status"
+                        )
+                        or "completed"
+                    ),
+                    "paid_after":
+                        response_payload.get(
+                            "paid_after"
+                        ),
+                    "remaining":
+                        response_payload.get(
+                            "remaining"
+                        ),
+                    "financial_status":
+                        response_payload.get(
+                            "financial_status"
+                        ),
+                },
+                metadata={
+                    "visit_id": visit_id,
+                    "idempotency_key":
+                        idempotency_key,
+                },
             )
 
         return ok(
@@ -5826,6 +5995,52 @@ def api_finance_transaction_create():
                 "Transaction was not returned after insert."
             )
 
+        created_transaction = (
+            insert_result.data[0]
+        )
+
+        audit_actions = {
+            "expense":
+                "expense.created",
+            "deposit":
+                "cash.deposit_created",
+            "withdrawal":
+                "cash.withdrawal_created",
+        }
+
+        write_audit_event(
+            action=audit_actions[
+                transaction_type
+            ],
+            entity_type=
+                "finance_transaction",
+            entity_id=
+                created_transaction.get(
+                    "id"
+                ),
+            entity_label=(
+                category
+                or allowed_types[
+                    transaction_type
+                ]
+            ),
+            summary=(
+                f"{allowed_types[transaction_type]}: "
+                f"{amount:g} UAH"
+            ),
+            after_data=(
+                finance_audit_snapshot(
+                    created_transaction
+                )
+            ),
+            metadata={
+                "idempotency_key":
+                    idempotency_key,
+                "created_via":
+                    "finance_dashboard",
+            },
+        )
+
         return jsonify({
             "ok": True,
 
@@ -6389,6 +6604,13 @@ def api_finance_transaction_cancel(
             400,
         )
 
+    original_transaction = (
+        load_finance_transaction_for_audit(
+            transaction_id,
+            current_org,
+        )
+    )
+
     try:
         result = (
             supabase
@@ -6431,6 +6653,67 @@ def api_finance_transaction_cancel(
             response_data = (
                 response_data[0]
             )
+
+        response_payload = (
+            response_data
+            if isinstance(
+                response_data,
+                dict,
+            )
+            else {}
+        )
+
+        write_audit_event(
+            action="payment.cancelled",
+            entity_type=
+                "finance_transaction",
+            entity_id=transaction_id,
+            entity_label=
+                "Скасування оплати",
+            summary=(
+                "Оплату скасовано"
+            ),
+            before_data=(
+                finance_audit_snapshot(
+                    original_transaction
+                )
+                if original_transaction
+                else {
+                    "status":
+                        "completed",
+                }
+            ),
+            after_data={
+                "status": "cancelled",
+                "cancelled_amount":
+                    response_payload.get(
+                        "cancelled_amount"
+                    ),
+                "reason": reason or None,
+                "paid_after":
+                    response_payload.get(
+                        "paid_after"
+                    ),
+                "remaining":
+                    response_payload.get(
+                        "remaining"
+                    ),
+                "financial_status":
+                    response_payload.get(
+                        "financial_status"
+                    ),
+            },
+            metadata={
+                "visit_id":
+                    response_payload.get(
+                        "visit_id"
+                    )
+                    or (
+                        original_transaction
+                        or {}
+                    ).get("visit_id"),
+            },
+        )
 
         return ok(
             response_data
@@ -6593,6 +6876,13 @@ def api_finance_transaction_refund(
             400,
         )
 
+    original_transaction = (
+        load_finance_transaction_for_audit(
+            transaction_id,
+            current_org,
+        )
+    )
+
     try:
         result = (
             supabase
@@ -6637,6 +6927,104 @@ def api_finance_transaction_refund(
         ):
             response_data = (
                 response_data[0]
+            )
+
+        response_payload = (
+            response_data
+            if isinstance(
+                response_data,
+                dict,
+            )
+            else {}
+        )
+
+        refund_transaction = (
+            response_payload.get(
+                "transaction"
+            )
+            if isinstance(
+                response_payload.get(
+                    "transaction"
+                ),
+                dict,
+            )
+            else {}
+        )
+
+        if not response_payload.get(
+            "idempotent_replay"
+        ):
+            write_audit_event(
+                action="payment.refunded",
+                entity_type=
+                    "finance_transaction",
+                entity_id=(
+                    refund_transaction.get(
+                        "id"
+                    )
+                    or transaction_id
+                ),
+                entity_label=
+                    "Повернення оплати",
+                summary=(
+                    f"Повернено {amount:g} UAH"
+                ),
+                before_data=(
+                    finance_audit_snapshot(
+                        original_transaction
+                    )
+                    if original_transaction
+                    else {
+                        "payment_id":
+                            transaction_id,
+                    }
+                ),
+                after_data={
+                    "refund_id":
+                        refund_transaction.get(
+                            "id"
+                        ),
+                    "refund_amount":
+                        response_payload.get(
+                            "refund_amount"
+                        )
+                        or amount,
+                    "reason": reason,
+                    "refunded_total":
+                        response_payload.get(
+                            "refunded_total"
+                        ),
+                    "refundable_after":
+                        response_payload.get(
+                            "refundable_after"
+                        ),
+                    "paid_after":
+                        response_payload.get(
+                            "paid_after"
+                        ),
+                    "remaining":
+                        response_payload.get(
+                            "remaining"
+                        ),
+                    "financial_status":
+                        response_payload.get(
+                            "financial_status"
+                        ),
+                },
+                metadata={
+                    "payment_id":
+                        transaction_id,
+                    "visit_id":
+                        response_payload.get(
+                            "visit_id"
+                        )
+                        or (
+                            original_transaction
+                            or {}
+                        ).get("visit_id"),
+                    "idempotency_key":
+                        idempotency_key,
+                },
             )
 
         return ok(
@@ -6880,6 +7268,13 @@ def api_finance_expense_update(
             400,
         )
 
+    original_transaction = (
+        load_finance_transaction_for_audit(
+            transaction_id,
+            current_org,
+        )
+    )
+
     try:
         result = (
             supabase
@@ -6945,6 +7340,122 @@ def api_finance_expense_update(
         ):
             response_data = (
                 response_data[0]
+            )
+
+        response_payload = (
+            response_data
+            if isinstance(
+                response_data,
+                dict,
+            )
+            else {}
+        )
+
+        updated_transaction = (
+            response_payload.get(
+                "transaction"
+            )
+            if isinstance(
+                response_payload.get(
+                    "transaction"
+                ),
+                dict,
+            )
+            else {
+                "id": transaction_id,
+                "transaction_type":
+                    "expense",
+                "amount": amount,
+                "currency": "UAH",
+                "payment_method":
+                    payment_method,
+                "status": "completed",
+                "category": category,
+                "counterparty":
+                    counterparty or None,
+                "description":
+                    description or "Витрата",
+                "document_url":
+                    document_url or None,
+                "occurred_at":
+                    occurred_at,
+            }
+        )
+
+        before_snapshot = (
+            finance_audit_snapshot(
+                original_transaction
+            )
+            if original_transaction
+            else {
+                "amount":
+                    response_payload.get(
+                        "previous_amount"
+                    ),
+                "payment_method":
+                    response_payload.get(
+                        "previous_payment_method"
+                    ),
+            }
+        )
+
+        after_snapshot = (
+            finance_audit_snapshot(
+                updated_transaction
+            )
+        )
+
+        changed_fields = [
+            field
+            for field in after_snapshot
+            if (
+                field not in before_snapshot
+                or before_snapshot.get(
+                    field
+                )
+                != after_snapshot.get(
+                    field
+                )
+            )
+        ]
+
+        if changed_fields:
+            write_audit_event(
+                action="expense.updated",
+                entity_type=
+                    "finance_transaction",
+                entity_id=transaction_id,
+                entity_label=(
+                    updated_transaction.get(
+                        "category"
+                    )
+                    or category
+                    or "Витрата"
+                ),
+                summary=
+                    "Витрату змінено",
+                before_data={
+                    field:
+                        before_snapshot.get(
+                            field
+                        )
+                    for field
+                    in changed_fields
+                    if field
+                    in before_snapshot
+                },
+                after_data={
+                    field:
+                        after_snapshot.get(
+                            field
+                        )
+                    for field
+                    in changed_fields
+                },
+                metadata={
+                    "changed_fields":
+                        changed_fields,
+                },
             )
 
         return ok(

@@ -50393,6 +50393,20 @@ function getAuditActionLabel(action) {
       "Візит завершено",
     "visit.medical_updated":
       "Медичні дані змінено",
+    "payment.created":
+      "Оплату проведено",
+    "payment.cancelled":
+      "Оплату скасовано",
+    "payment.refunded":
+      "Оплату повернено",
+    "expense.created":
+      "Витрату створено",
+    "expense.updated":
+      "Витрату змінено",
+    "cash.deposit_created":
+      "Внесення в касу",
+    "cash.withdrawal_created":
+      "Вилучення з каси",
     "service.added":
       "Послугу додано",
     "service.removed":
@@ -50849,6 +50863,13 @@ async function renderAuditTab() {
               <option value="">Усі дії</option>
               <option value="visit.completed">Завершення візиту</option>
               <option value="visit.medical_updated">Зміна медичних даних</option>
+              <option value="payment.created">Проведення оплати</option>
+              <option value="payment.cancelled">Скасування оплати</option>
+              <option value="payment.refunded">Повернення оплати</option>
+              <option value="expense.created">Створення витрати</option>
+              <option value="expense.updated">Зміна витрати</option>
+              <option value="cash.deposit_created">Внесення в касу</option>
+              <option value="cash.withdrawal_created">Вилучення з каси</option>
               <option value="service.added">Додавання послуги</option>
               <option value="service.removed">Видалення послуги</option>
               <option value="stock.added">Списання препарату</option>
