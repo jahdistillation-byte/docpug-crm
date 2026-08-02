@@ -1143,6 +1143,47 @@ function closeDeleteModal() {
     null;
 }
 
+
+function showCrmNotice({
+  icon = "ℹ",
+  title = "Повідомлення",
+  text = "",
+} = {}) {
+  openDeleteModal(
+    escapeHtml(text),
+    null,
+    "info"
+  );
+
+  const modal =
+    document.querySelector(
+      "#deleteModal"
+    );
+
+  const iconElement =
+    modal?.querySelector(
+      ".deleteIcon"
+    );
+
+  const titleElement =
+    modal?.querySelector(
+      "h2"
+    );
+
+  if (iconElement) {
+    iconElement.textContent =
+      String(icon || "ℹ");
+  }
+
+  if (titleElement) {
+    titleElement.textContent =
+      String(
+        title ||
+        "Повідомлення"
+      );
+  }
+}
+
 function nowISO() {
   return new Date().toISOString();
 }
