@@ -12047,6 +12047,14 @@ function buildFinanceSectionNavigation() {
       icon: "⌁",
       label: "Аналітика",
     },
+
+    ...(isOwner()
+      ? [{
+          key: "report",
+          icon: "✦",
+          label: "Звіт власника",
+        }]
+      : []),
   ];
 
   return `
@@ -21286,6 +21294,510 @@ async function renderFinanceClientsTab(
   }
 }
 
+async function loadOwnerDailyReportApi(
+  reportDate
+) {
+  const params =
+    new URLSearchParams({
+      date: reportDate,
+    });
+
+  const response = await fetch(
+    `/api/reports/daily?${params.toString()}`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok || !result?.data) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося сформувати звіт (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+
+async function loadOwnerReportSettingsApi() {
+  const response = await fetch(
+    "/api/reports/settings",
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok || !result?.data) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося завантажити Telegram-налаштування (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+
+async function saveOwnerReportSettingsApi(
+  telegramChatId
+) {
+  const response = await fetch(
+    "/api/reports/settings",
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        telegram_chat_id:
+          String(telegramChatId || "").trim(),
+      }),
+    }
+  );
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося зберегти налаштування (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data || {};
+}
+
+
+async function sendOwnerDailyReportApi(
+  reportDate
+) {
+  const response = await fetch(
+    "/api/reports/daily/send",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        date: reportDate,
+      }),
+    }
+  );
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося відправити звіт (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data || {};
+}
+
+
+function ownerReportDelta(
+  value,
+  suffix = ""
+) {
+  const number = Number(value || 0);
+  const sign = number > 0 ? "+" : "";
+  const className =
+    number > 0
+      ? "is-positive"
+      : number < 0
+        ? "is-negative"
+        : "is-neutral";
+
+  return `
+    <span class="ownerReportDelta ${className}">
+      ${sign}${number.toLocaleString("uk-UA")}${suffix}
+      до вчора
+    </span>
+  `;
+}
+
+
+function ownerReportMetricCard({
+  icon,
+  label,
+  value,
+  note,
+  delta,
+}) {
+  return `
+    <article class="ownerReportMetric">
+      <div class="ownerReportMetricIcon">${icon}</div>
+      <span>${escapeHtml(label)}</span>
+      <strong>${value}</strong>
+      ${delta || `<small>${escapeHtml(note || "")}</small>`}
+    </article>
+  `;
+}
+
+
+async function renderFinanceOwnerReportTab(
+  page
+) {
+  if (!isOwner()) {
+    financeDashboardState.section = "today";
+    await renderFinanceTab();
+    return;
+  }
+
+  const reportDate =
+    financeDashboardState.reportDate ||
+    financeDateToIso(new Date());
+
+  financeDashboardState.reportDate = reportDate;
+
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+      <strong>Збираємо підсумки клініки…</strong>
+    </div>
+  `;
+
+  try {
+    const [report, settings] = await Promise.all([
+      loadOwnerDailyReportApi(reportDate),
+      loadOwnerReportSettingsApi(),
+    ]);
+    const visits = report.visits || {};
+    const clients = report.clients || {};
+    const finance = report.finance || {};
+    const comparison = report.comparison || {};
+    const stock = report.stock || {};
+    const hospital = report.hospital || {};
+    const topServices = Array.isArray(report.services?.top)
+      ? report.services.top
+      : [];
+    const lowStock = Array.isArray(stock.low_stock)
+      ? stock.low_stock
+      : [];
+    const attention = Array.isArray(report.attention)
+      ? report.attention
+      : [];
+
+    page.innerHTML = `
+      <div class="financeDashboard ownerReportDashboard">
+        ${buildFinanceSectionNavigation()}
+
+        <header class="financeHero ownerReportHero">
+          <div>
+            <span class="financeEyebrow">ЩОДЕННИЙ КОНТРОЛЬ</span>
+            <h1>Звіт власника</h1>
+            <p>
+              Головні цифри клініки, ризики та точки уваги
+              в одному зрозумілому підсумку.
+            </p>
+          </div>
+
+          <div class="ownerReportHeroActions">
+            <label>
+              <span>Дата звіту</span>
+              <input
+                type="date"
+                id="ownerReportDate"
+                value="${escapeHtml(report.date)}"
+                max="${financeDateToIso(new Date())}"
+              >
+            </label>
+            <button type="button" id="ownerReportRefresh">
+              ↻ Оновити
+            </button>
+          </div>
+        </header>
+
+        <section class="ownerReportMetricGrid">
+          ${ownerReportMetricCard({
+            icon: "✓",
+            label: "Завершено візитів",
+            value: Number(visits.completed || 0).toLocaleString("uk-UA"),
+            delta: ownerReportDelta(comparison.completed_delta),
+          })}
+          ${ownerReportMetricCard({
+            icon: "₴",
+            label: "Надходження",
+            value: formatVisitFinanceMoney(finance.revenue),
+            delta: ownerReportDelta(comparison.revenue_delta, " грн"),
+          })}
+          ${ownerReportMetricCard({
+            icon: "↗",
+            label: "Результат дня",
+            value: formatVisitFinanceMoney(finance.result),
+            note: "Після повернень і витрат",
+          })}
+          ${ownerReportMetricCard({
+            icon: "◇",
+            label: "Середній чек",
+            value: formatVisitFinanceMoney(finance.average_check),
+            note: "За оплаченими візитами",
+          })}
+        </section>
+
+        <section class="ownerReportMainGrid">
+          <article class="ownerReportPanel ownerReportVisitsPanel">
+            <div class="ownerReportPanelHead">
+              <div>
+                <span>РОБОТА КЛІНІКИ</span>
+                <h2>Прийоми та клієнти</h2>
+              </div>
+              <strong>${Number(visits.completion_rate || 0).toLocaleString("uk-UA")}%</strong>
+            </div>
+
+            <div class="ownerReportProgress">
+              <i style="width:${Math.min(100, Math.max(0, Number(visits.completion_rate || 0)))}%"></i>
+            </div>
+
+            <div class="ownerReportRows">
+              <p><span>Заплановано</span><b>${Number(visits.scheduled || 0)}</b></p>
+              <p><span>Завершено</span><b>${Number(visits.completed || 0)}</b></p>
+              <p><span>Зараз у роботі</span><b>${Number(visits.in_progress || 0)}</b></p>
+              <p><span>Скасовано</span><b>${Number(visits.cancelled || 0)}</b></p>
+              <p><span>Нових власників</span><b>${Number(clients.new_owners || 0)}</b></p>
+              <p><span>Нових пацієнтів</span><b>${Number(clients.new_patients || 0)}</b></p>
+            </div>
+          </article>
+
+          <article class="ownerReportPanel">
+            <div class="ownerReportPanelHead">
+              <div>
+                <span>ПОПИТ</span>
+                <h2>Топ послуг дня</h2>
+              </div>
+            </div>
+
+            <div class="ownerReportServiceList">
+              ${
+                topServices.length
+                  ? topServices.map((service, index) => `
+                      <div>
+                        <i>${index + 1}</i>
+                        <span>
+                          <b>${escapeHtml(service.name || "Послуга")}</b>
+                          <small>${Number(service.qty || 0).toLocaleString("uk-UA")} виконано</small>
+                        </span>
+                        <strong>${formatVisitFinanceMoney(service.revenue)}</strong>
+                      </div>
+                    `).join("")
+                  : `
+                    <div class="ownerReportEmpty">
+                      За цю дату послуги ще не додавалися.
+                    </div>
+                  `
+              }
+            </div>
+          </article>
+        </section>
+
+        <section class="ownerReportSecondaryGrid">
+          <article class="ownerReportPanel">
+            <div class="ownerReportPanelHead">
+              <div>
+                <span>КОНТРОЛЬ ЗАПАСІВ</span>
+                <h2>Склад</h2>
+              </div>
+              <strong>${Number(stock.low_stock_count || 0)}</strong>
+            </div>
+            <div class="ownerReportRows">
+              <p><span>Позицій нижче мінімуму</span><b>${Number(stock.low_stock_count || 0)}</b></p>
+              <p><span>Списань за день</span><b>${Number(stock.writeoffs_count || 0)}</b></p>
+              <p><span>Собівартість списань</span><b>${formatVisitFinanceMoney(stock.writeoffs_cost)}</b></p>
+            </div>
+            <div class="ownerReportChips">
+              ${lowStock.slice(0, 4).map((item) => `
+                <span>
+                  ${escapeHtml(item.name)} ·
+                  ${Number(item.qty || 0).toLocaleString("uk-UA")}
+                  ${escapeHtml(item.unit || "шт")}
+                </span>
+              `).join("")}
+            </div>
+          </article>
+
+          <article class="ownerReportPanel">
+            <div class="ownerReportPanelHead">
+              <div>
+                <span>СТАЦІОНАР</span>
+                <h2>Пацієнти та задачі</h2>
+              </div>
+              <strong>${Number(hospital.active || 0)}</strong>
+            </div>
+            <div class="ownerReportRows">
+              <p><span>У стаціонарі</span><b>${Number(hospital.active || 0)}</b></p>
+              <p><span>Критичний стан</span><b>${Number(hospital.critical || 0)}</b></p>
+              <p><span>Відкритих задач</span><b>${Number(hospital.open_tasks || 0)}</b></p>
+              <p><span>Прострочених задач</span><b>${Number(hospital.overdue_tasks || 0)}</b></p>
+            </div>
+          </article>
+
+          <article class="ownerReportPanel ownerReportAttention">
+            <div class="ownerReportPanelHead">
+              <div>
+                <span>ФОКУС ВЛАСНИКА</span>
+                <h2>Потребує уваги</h2>
+              </div>
+            </div>
+            <ul>
+              ${attention.map((item) => `
+                <li>${escapeHtml(item)}</li>
+              `).join("")}
+            </ul>
+          </article>
+        </section>
+
+        <section class="ownerReportTelegram">
+          <div class="ownerReportTelegramIcon">✈</div>
+          <div class="ownerReportTelegramCopy">
+            <span>TELEGRAM ВЛАСНИКА</span>
+            <h2>Відправити готовий підсумок</h2>
+            <p>
+              Вкажіть числовий chat ID, натисніть «Зберегти»,
+              а потім надішліть тестовий звіт. Бот має бути
+              попередньо запущений командою /start.
+            </p>
+          </div>
+          <div class="ownerReportTelegramControls">
+            <input
+              type="text"
+              id="ownerReportTelegramChatId"
+              inputmode="numeric"
+              placeholder="Наприклад, 123456789"
+              value="${escapeHtml(settings.telegram_chat_id || "")}"
+            >
+            <button type="button" id="ownerReportSaveTelegram">
+              Зберегти ID
+            </button>
+            <button
+              type="button"
+              class="is-primary"
+              id="ownerReportSendTelegram"
+              ${settings.bot_configured ? "" : "disabled"}
+            >
+              Надіслати в Telegram
+            </button>
+          </div>
+          <small class="ownerReportTelegramStatus">
+            ${
+              settings.telegram_configured
+                ? "● Telegram-чат підключено"
+                : "○ Telegram-чат ще не підключено"
+            }
+            ${
+              settings.bot_configured
+                ? ""
+                : " · на сервері відсутній TELEGRAM_BOT_TOKEN"
+            }
+          </small>
+        </section>
+      </div>
+    `;
+
+    bindFinanceSectionNavigation(page);
+
+    page.querySelector("#ownerReportRefresh")
+      ?.addEventListener("click", () => {
+        const dateInput = page.querySelector("#ownerReportDate");
+        financeDashboardState.reportDate = dateInput?.value || reportDate;
+        renderFinanceTab();
+      });
+
+    page.querySelector("#ownerReportDate")
+      ?.addEventListener("change", (event) => {
+        financeDashboardState.reportDate = event.currentTarget.value || reportDate;
+      });
+
+    page.querySelector("#ownerReportSaveTelegram")
+      ?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        const input = page.querySelector("#ownerReportTelegramChatId");
+        button.disabled = true;
+        button.textContent = "Зберігаємо…";
+
+        try {
+          await saveOwnerReportSettingsApi(input?.value || "");
+          showCrmNotice({
+            icon: "✓",
+            title: "Telegram збережено",
+            text: "Тепер можна відправити тестовий звіт власнику.",
+          });
+          await renderFinanceTab();
+        } catch (error) {
+          showCrmNotice({
+            icon: "!",
+            title: "Не вдалося зберегти",
+            text: error?.message || "Перевірте Telegram chat ID.",
+          });
+          button.disabled = false;
+          button.textContent = "Зберегти ID";
+        }
+      });
+
+    page.querySelector("#ownerReportSendTelegram")
+      ?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "Відправляємо…";
+
+        try {
+          await sendOwnerDailyReportApi(report.date);
+          showCrmNotice({
+            icon: "✈",
+            title: "Звіт відправлено",
+            text: `Підсумок за ${report.date} уже в Telegram власника.`,
+          });
+          button.textContent = "Відправлено ✓";
+        } catch (error) {
+          showCrmNotice({
+            icon: "!",
+            title: "Telegram не прийняв звіт",
+            text: error?.message || "Перевірте chat ID та налаштування бота.",
+          });
+          button.disabled = false;
+          button.textContent = "Надіслати в Telegram";
+        }
+      });
+  } catch (error) {
+    console.error("renderFinanceOwnerReportTab failed:", error);
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+        <h2>Не вдалося сформувати звіт власника</h2>
+        <p>${escapeHtml(error?.message || "Невідома помилка")}</p>
+        <button type="button" id="ownerReportRetry">Спробувати ще раз</button>
+      </div>
+    `;
+    page.querySelector("#ownerReportRetry")
+      ?.addEventListener("click", () => renderFinanceTab());
+  }
+}
+
+
 async function renderFinanceTab(
   options = {}
 ) {
@@ -21379,6 +21891,18 @@ async function renderFinanceTab(
     "clients"
   ) {
     await renderFinanceClientsTab(
+      page
+    );
+
+    return;
+  }
+
+  if (
+    financeDashboardState
+      .section ===
+    "report"
+  ) {
+    await renderFinanceOwnerReportTab(
       page
     );
 
@@ -50415,6 +50939,8 @@ function getAuditActionLabel(action) {
       "Препарат списано",
     "stock.removed":
       "Препарат повернено",
+    "report.telegram_sent":
+      "Звіт відправлено в Telegram",
   };
 
   const cleanAction =
@@ -50874,6 +51400,7 @@ async function renderAuditTab() {
               <option value="service.removed">Видалення послуги</option>
               <option value="stock.added">Списання препарату</option>
               <option value="stock.removed">Повернення препарату</option>
+              <option value="report.telegram_sent">Відправлення звіту в Telegram</option>
             </select>
           </label>
 

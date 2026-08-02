@@ -4,9 +4,11 @@ import hmac
 import hashlib
 import re
 import json
+import html
 import mimetypes
 import time
 from urllib.parse import parse_qsl
+from urllib.request import Request, urlopen
 
 from datetime import (
     datetime,
@@ -4840,6 +4842,669 @@ def api_create_visit_payment(
             "Не вдалося провести оплату.",
             500
         )  
+
+# =====================================================
+# OWNER DAILY REPORTS
+# =====================================================
+
+REPORT_TIMEZONE = ZoneInfo("Europe/Kyiv")
+
+
+def report_number(value, default=0.0):
+    try:
+        return float(value if value is not None else default)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def report_int(value, default=0):
+    try:
+        return int(value if value is not None else default)
+    except (TypeError, ValueError):
+        return int(default)
+
+
+def report_date(value=None):
+    raw_value = str(value or "").strip()
+
+    if not raw_value:
+        return datetime.now(REPORT_TIMEZONE).date()
+
+    try:
+        parsed = datetime.strptime(raw_value, "%Y-%m-%d").date()
+    except ValueError as error:
+        raise ValueError("Invalid date format. Use YYYY-MM-DD.") from error
+
+    today = datetime.now(REPORT_TIMEZONE).date()
+
+    if parsed > today:
+        raise ValueError("Report date cannot be in the future.")
+
+    if parsed < today - timedelta(days=366):
+        raise ValueError("Report date is outside the available period.")
+
+    return parsed
+
+
+def report_utc_range(day):
+    start_local = datetime.combine(
+        day,
+        datetime.min.time(),
+        tzinfo=REPORT_TIMEZONE,
+    )
+    end_local = start_local + timedelta(days=1)
+
+    return (
+        start_local.astimezone(timezone.utc).isoformat(),
+        end_local.astimezone(timezone.utc).isoformat(),
+    )
+
+
+def report_rows(query_factory):
+    result = execute_with_retry(
+        query_factory,
+        attempts=4,
+        delay=0.3,
+    )
+
+    return result.data if isinstance(result.data, list) else []
+
+
+def report_finance_overview(org_id, day):
+    result = execute_with_retry(
+        lambda: supabase.rpc(
+            "get_finance_overview",
+            {
+                "p_org_id": org_id,
+                "p_date_from": day.isoformat(),
+                "p_date_to": day.isoformat(),
+            },
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    data = result.data or {}
+
+    if isinstance(data, list):
+        data = data[0] if data else {}
+
+    return data if isinstance(data, dict) else {}
+
+
+def report_status_count(rows, *statuses):
+    allowed = {
+        str(status or "").strip().lower()
+        for status in statuses
+    }
+
+    return sum(
+        1
+        for row in rows
+        if str(row.get("status") or "").strip().lower() in allowed
+    )
+
+
+def build_owner_daily_report(org_id, day):
+    day_iso = day.isoformat()
+    previous_day = day - timedelta(days=1)
+    previous_iso = previous_day.isoformat()
+    start_utc, end_utc = report_utc_range(day)
+    previous_start_utc, previous_end_utc = report_utc_range(previous_day)
+
+    org_rows = report_rows(
+        lambda: supabase.table("orgs")
+        .select("id,name")
+        .eq("id", org_id)
+        .limit(1)
+    )
+    clinic_name = (
+        str(org_rows[0].get("name") or "Клініка").strip()
+        if org_rows
+        else "Клініка"
+    )
+
+    visits = report_rows(
+        lambda: supabase.table("visits")
+        .select(
+            "id,status,total_amount,paid_amount,financial_status,completed_at"
+        )
+        .eq("org_id", org_id)
+        .eq("date", day_iso)
+    )
+    previous_visits = report_rows(
+        lambda: supabase.table("visits")
+        .select("id,status")
+        .eq("org_id", org_id)
+        .eq("date", previous_iso)
+    )
+    events = report_rows(
+        lambda: supabase.table("calendar_events")
+        .select("id,status,visit_id")
+        .eq("org_id", org_id)
+        .eq("event_date", day_iso)
+    )
+    previous_events = report_rows(
+        lambda: supabase.table("calendar_events")
+        .select("id,status")
+        .eq("org_id", org_id)
+        .eq("event_date", previous_iso)
+    )
+    new_owners = report_rows(
+        lambda: supabase.table("owners")
+        .select("id")
+        .eq("org_id", org_id)
+        .gte("created_at", start_utc)
+        .lt("created_at", end_utc)
+    )
+    previous_owners = report_rows(
+        lambda: supabase.table("owners")
+        .select("id")
+        .eq("org_id", org_id)
+        .gte("created_at", previous_start_utc)
+        .lt("created_at", previous_end_utc)
+    )
+    new_patients = report_rows(
+        lambda: supabase.table("patients")
+        .select("id")
+        .eq("org_id", org_id)
+        .gte("created_at", start_utc)
+        .lt("created_at", end_utc)
+    )
+    previous_patients = report_rows(
+        lambda: supabase.table("patients")
+        .select("id")
+        .eq("org_id", org_id)
+        .gte("created_at", previous_start_utc)
+        .lt("created_at", previous_end_utc)
+    )
+
+    finance = report_finance_overview(org_id, day)
+    previous_finance = report_finance_overview(org_id, previous_day)
+    finance_summary = finance.get("summary") or {}
+    previous_finance_summary = previous_finance.get("summary") or {}
+
+    visit_ids = [
+        str(row.get("id"))
+        for row in visits
+        if row.get("id")
+    ]
+    service_lines = []
+
+    if visit_ids:
+        service_lines = report_rows(
+            lambda: supabase.table("visit_services")
+            .select("visit_id,name_snap,qty,price_snap")
+            .in_("visit_id", visit_ids)
+        )
+
+    services_by_name = {}
+
+    for line in service_lines:
+        name = str(line.get("name_snap") or "Послуга").strip() or "Послуга"
+        qty = max(report_number(line.get("qty")), 0)
+        revenue = qty * max(report_number(line.get("price_snap")), 0)
+        bucket = services_by_name.setdefault(
+            name,
+            {"name": name, "qty": 0.0, "revenue": 0.0},
+        )
+        bucket["qty"] += qty
+        bucket["revenue"] += revenue
+
+    top_services = sorted(
+        services_by_name.values(),
+        key=lambda item: (item["revenue"], item["qty"]),
+        reverse=True,
+    )[:5]
+
+    for item in top_services:
+        item["qty"] = round(item["qty"], 2)
+        item["revenue"] = round(item["revenue"], 2)
+
+    stock_rows = report_rows(
+        lambda: supabase.table("stock")
+        .select("id,name,unit,qty,minimum_qty,active")
+        .eq("org_id", org_id)
+        .eq("active", True)
+    )
+    low_stock = []
+
+    for item in stock_rows:
+        quantity = report_number(item.get("qty"))
+        minimum = report_number(item.get("minimum_qty"))
+
+        if minimum > 0 and quantity <= minimum:
+            low_stock.append({
+                "name": str(item.get("name") or "Препарат"),
+                "qty": round(quantity, 2),
+                "minimum_qty": round(minimum, 2),
+                "unit": str(item.get("unit") or "шт"),
+            })
+
+    low_stock.sort(key=lambda item: (item["qty"] - item["minimum_qty"], item["name"]))
+
+    stock_movements = report_rows(
+        lambda: supabase.table("stock_movements")
+        .select("movement_type,quantity,unit_cost,name_snap")
+        .eq("org_id", org_id)
+        .eq("movement_type", "writeoff")
+        .gte("created_at", start_utc)
+        .lt("created_at", end_utc)
+    )
+    writeoff_quantity = sum(
+        abs(report_number(row.get("quantity")))
+        for row in stock_movements
+    )
+    writeoff_cost = sum(
+        abs(report_number(row.get("quantity")))
+        * max(report_number(row.get("unit_cost")), 0)
+        for row in stock_movements
+    )
+
+    hospitalizations = report_rows(
+        lambda: supabase.table("hospitalizations")
+        .select("id,status")
+        .eq("org_id", org_id)
+        .eq("is_active", True)
+    )
+    open_tasks = report_rows(
+        lambda: supabase.table("hospital_tasks")
+        .select("id,status,scheduled_at")
+        .eq("org_id", org_id)
+        .neq("status", "completed")
+    )
+    now_utc = datetime.now(timezone.utc)
+    overdue_tasks = 0
+
+    for task in open_tasks:
+        raw_scheduled = str(task.get("scheduled_at") or "").strip()
+
+        if not raw_scheduled:
+            continue
+
+        try:
+            scheduled = datetime.fromisoformat(raw_scheduled.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+
+        if scheduled.astimezone(timezone.utc) < now_utc:
+            overdue_tasks += 1
+
+    scheduled_count = len(events)
+    completed_count = report_status_count(visits, "completed")
+    in_progress_count = report_status_count(visits, "in_progress")
+    cancelled_count = report_status_count(events, "cancelled", "canceled")
+    previous_completed = report_status_count(previous_visits, "completed")
+    previous_scheduled = len(previous_events)
+
+    payments = report_number(finance_summary.get("payments"))
+    refunds = report_number(finance_summary.get("refunds"))
+    expenses = report_number(finance_summary.get("expenses"))
+    net_revenue = report_number(
+        finance_summary.get("net_revenue"),
+        payments - refunds,
+    )
+    result_amount = report_number(
+        finance_summary.get("estimated_profit"),
+        payments - refunds - expenses,
+    )
+    previous_revenue = report_number(
+        previous_finance_summary.get("net_revenue"),
+        report_number(previous_finance_summary.get("payments"))
+        - report_number(previous_finance_summary.get("refunds")),
+    )
+
+    attention = []
+
+    if low_stock:
+        attention.append(f"{len(low_stock)} позицій складу нижче мінімуму")
+
+    if overdue_tasks:
+        attention.append(f"{overdue_tasks} прострочених завдань стаціонару")
+
+    debt = report_number(finance_summary.get("outstanding"))
+
+    if debt > 0:
+        attention.append(f"Заборгованість клієнтів: {debt:.2f} грн")
+
+    if not attention:
+        attention.append("Критичних відхилень не виявлено")
+
+    report = {
+        "date": day_iso,
+        "clinic_name": clinic_name,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "visits": {
+            "scheduled": scheduled_count,
+            "completed": completed_count,
+            "in_progress": in_progress_count,
+            "cancelled": cancelled_count,
+            "completion_rate": round(
+                completed_count / scheduled_count * 100,
+                1,
+            ) if scheduled_count else 0,
+        },
+        "clients": {
+            "new_owners": len(new_owners),
+            "new_patients": len(new_patients),
+        },
+        "finance": {
+            "payments": round(payments, 2),
+            "refunds": round(refunds, 2),
+            "expenses": round(expenses, 2),
+            "revenue": round(net_revenue, 2),
+            "result": round(result_amount, 2),
+            "average_check": round(
+                report_number(finance_summary.get("average_check")),
+                2,
+            ),
+            "outstanding": round(debt, 2),
+        },
+        "comparison": {
+            "scheduled_delta": scheduled_count - previous_scheduled,
+            "completed_delta": completed_count - previous_completed,
+            "new_owners_delta": len(new_owners) - len(previous_owners),
+            "new_patients_delta": len(new_patients) - len(previous_patients),
+            "revenue_delta": round(net_revenue - previous_revenue, 2),
+        },
+        "services": {
+            "top": top_services,
+        },
+        "stock": {
+            "writeoffs_count": len(stock_movements),
+            "writeoffs_qty": round(writeoff_quantity, 2),
+            "writeoffs_cost": round(writeoff_cost, 2),
+            "low_stock_count": len(low_stock),
+            "low_stock": low_stock[:8],
+        },
+        "hospital": {
+            "active": len(hospitalizations),
+            "critical": report_status_count(hospitalizations, "critical"),
+            "open_tasks": len(open_tasks),
+            "overdue_tasks": overdue_tasks,
+        },
+        "attention": attention,
+    }
+
+    report["telegram_message"] = build_owner_report_telegram_message(report)
+
+    return report
+
+
+def report_money(value):
+    amount = report_number(value)
+    return f"{amount:,.2f}".replace(",", " ")
+
+
+def build_owner_report_telegram_message(report):
+    visits = report.get("visits") or {}
+    clients = report.get("clients") or {}
+    finance = report.get("finance") or {}
+    stock = report.get("stock") or {}
+    hospital = report.get("hospital") or {}
+    services = report.get("services") or {}
+    comparison = report.get("comparison") or {}
+    safe_clinic = html.escape(str(report.get("clinic_name") or "Клініка"))
+    safe_date = html.escape(str(report.get("date") or ""))
+
+    lines = [
+        f"<b>🐾 {safe_clinic} · підсумок дня</b>",
+        f"<i>{safe_date}</i>",
+        "",
+        "<b>📅 Прийоми</b>",
+        f"Заплановано: <b>{report_int(visits.get('scheduled'))}</b>",
+        f"Завершено: <b>{report_int(visits.get('completed'))}</b> "
+        f"({report_number(visits.get('completion_rate')):.1f}%)",
+        f"У роботі: <b>{report_int(visits.get('in_progress'))}</b> · "
+        f"скасовано: <b>{report_int(visits.get('cancelled'))}</b>",
+        "",
+        "<b>💰 Фінанси</b>",
+        f"Надходження: <b>{report_money(finance.get('revenue'))} грн</b>",
+        f"Витрати: <b>{report_money(finance.get('expenses'))} грн</b>",
+        f"Результат: <b>{report_money(finance.get('result'))} грн</b>",
+        f"Середній чек: {report_money(finance.get('average_check'))} грн",
+        "",
+        "<b>👥 Нові клієнти</b>",
+        f"Власники: <b>{report_int(clients.get('new_owners'))}</b> · "
+        f"пацієнти: <b>{report_int(clients.get('new_patients'))}</b>",
+    ]
+
+    top_services = services.get("top") or []
+
+    if top_services:
+        lines.extend(["", "<b>⭐ Топ послуг</b>"])
+
+        for index, service in enumerate(top_services[:3], start=1):
+            name = html.escape(str(service.get("name") or "Послуга"))
+            lines.append(
+                f"{index}. {name} — {report_number(service.get('qty')):g} шт."
+            )
+
+    lines.extend([
+        "",
+        "<b>📦 Склад і стаціонар</b>",
+        f"Нижче мінімуму: <b>{report_int(stock.get('low_stock_count'))}</b>",
+        f"Списань за день: <b>{report_int(stock.get('writeoffs_count'))}</b>",
+        f"У стаціонарі: <b>{report_int(hospital.get('active'))}</b> · "
+        f"прострочених задач: <b>{report_int(hospital.get('overdue_tasks'))}</b>",
+        "",
+        "<b>⚡ Порівняно з учора</b>",
+        f"Завершених візитів: {report_int(comparison.get('completed_delta')):+d}",
+        f"Надходження: {report_money(comparison.get('revenue_delta'))} грн",
+        "",
+        "<b>🔎 Потребує уваги</b>",
+    ])
+
+    for item in report.get("attention") or []:
+        lines.append(f"• {html.escape(str(item))}")
+
+    return "\n".join(lines)
+
+
+def get_report_settings(org_id):
+    rows = report_rows(
+        lambda: supabase.table("clinic_report_settings")
+        .select(
+            "org_id,telegram_chat_id,daily_enabled,daily_time,timezone,updated_at"
+        )
+        .eq("org_id", org_id)
+        .limit(1)
+    )
+
+    row = rows[0] if rows else {}
+
+    return {
+        "telegram_configured": bool(str(row.get("telegram_chat_id") or "").strip()),
+        "telegram_chat_id": str(row.get("telegram_chat_id") or "").strip(),
+        "daily_enabled": bool(row.get("daily_enabled")),
+        "daily_time": str(row.get("daily_time") or "21:00")[:5],
+        "timezone": str(row.get("timezone") or "Europe/Kyiv"),
+        "updated_at": row.get("updated_at"),
+    }
+
+
+def send_telegram_report(chat_id, message):
+    if not TELEGRAM_BOT_TOKEN:
+        raise RuntimeError("Telegram bot is not configured on the server.")
+
+    safe_chat_id = str(chat_id or "").strip()
+
+    if not re.fullmatch(r"-?\d{5,20}", safe_chat_id):
+        raise ValueError("Telegram chat ID is invalid.")
+
+    endpoint = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = json.dumps({
+        "chat_id": safe_chat_id,
+        "text": str(message or ""),
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True,
+    }).encode("utf-8")
+    telegram_request = Request(
+        endpoint,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    with urlopen(telegram_request, timeout=12) as response:
+        response_data = json.loads(response.read().decode("utf-8"))
+
+    if not response_data.get("ok"):
+        raise RuntimeError("Telegram rejected the message.")
+
+    return response_data.get("result") or {}
+
+
+@app.get("/api/reports/daily")
+def api_owner_daily_report():
+    user, auth_error = owner_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail("Organization not selected", 400)
+
+    try:
+        day = report_date(request.args.get("date"))
+        report = build_owner_daily_report(current_org, day)
+        settings = get_report_settings(current_org)
+        report["telegram"] = {
+            "configured": settings["telegram_configured"],
+            "daily_enabled": settings["daily_enabled"],
+            "daily_time": settings["daily_time"],
+            "timezone": settings["timezone"],
+        }
+
+        return ok(report)
+
+    except ValueError as error:
+        return fail(str(error), 400)
+    except Exception as error:
+        print("❌ GET owner daily report:", repr(error), flush=True)
+        return fail("Не вдалося сформувати звіт власника.", 500)
+
+
+@app.get("/api/reports/settings")
+def api_owner_report_settings():
+    user, auth_error = owner_required()
+
+    if auth_error:
+        return auth_error
+
+    try:
+        settings = get_report_settings(get_current_org_id())
+        settings["telegram_chat_id"] = (
+            settings["telegram_chat_id"]
+            if settings["telegram_configured"]
+            else ""
+        )
+        settings["bot_configured"] = bool(TELEGRAM_BOT_TOKEN)
+        return ok(settings)
+    except Exception as error:
+        print("❌ GET report settings:", repr(error), flush=True)
+        return fail("Не вдалося завантажити налаштування звіту.", 500)
+
+
+@app.put("/api/reports/settings")
+def api_owner_report_settings_update():
+    user, auth_error = owner_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+    data = request.get_json(silent=True) or {}
+    chat_id = str(data.get("telegram_chat_id") or "").strip()
+
+    if chat_id and not re.fullmatch(r"-?\d{5,20}", chat_id):
+        return fail("Telegram chat ID має містити лише цифри.", 400)
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    payload = {
+        "org_id": current_org,
+        "telegram_chat_id": chat_id or None,
+        "daily_enabled": False,
+        "daily_time": "21:00:00",
+        "timezone": "Europe/Kyiv",
+        "updated_at": now_iso,
+        "updated_by": user.get("id"),
+    }
+
+    try:
+        result = execute_with_retry(
+            lambda: supabase.table("clinic_report_settings")
+            .upsert(payload, on_conflict="org_id"),
+            attempts=4,
+            delay=0.3,
+        )
+        row = result.data[0] if result.data else payload
+
+        return ok({
+            "telegram_configured": bool(chat_id),
+            "telegram_chat_id": chat_id,
+            "daily_enabled": bool(row.get("daily_enabled")),
+            "daily_time": str(row.get("daily_time") or "21:00")[:5],
+            "timezone": str(row.get("timezone") or "Europe/Kyiv"),
+        })
+    except Exception as error:
+        print("❌ PUT report settings:", repr(error), flush=True)
+        return fail("Не вдалося зберегти Telegram-налаштування.", 500)
+
+
+@app.post("/api/reports/daily/send")
+def api_owner_daily_report_send():
+    user, auth_error = owner_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+    data = request.get_json(silent=True) or {}
+
+    try:
+        day = report_date(data.get("date"))
+        settings = get_report_settings(current_org)
+        chat_id = settings.get("telegram_chat_id")
+
+        if not chat_id:
+            return fail("Спочатку вкажіть Telegram chat ID власника.", 409)
+
+        report = build_owner_daily_report(current_org, day)
+        telegram_result = send_telegram_report(
+            chat_id,
+            report["telegram_message"],
+        )
+
+        write_audit_event(
+            action="report.telegram_sent",
+            entity_type="daily_report",
+            entity_id=day.isoformat(),
+            entity_label=f"Звіт за {day.isoformat()}",
+            summary="Щоденний звіт відправлено власнику в Telegram",
+            metadata={
+                "report_date": day.isoformat(),
+                "telegram_message_id": telegram_result.get("message_id"),
+            },
+        )
+
+        return ok({
+            "sent": True,
+            "report_date": day.isoformat(),
+            "message_id": telegram_result.get("message_id"),
+        })
+
+    except ValueError as error:
+        return fail(str(error), 400)
+    except Exception as error:
+        print("❌ POST owner daily report send:", repr(error), flush=True)
+        return fail(
+            "Telegram не прийняв повідомлення. Перевірте chat ID та запустіть бота командою /start.",
+            502,
+        )
+
 
 @app.get(
     "/api/finance/overview"
