@@ -2,6 +2,7 @@ import os
 import uuid
 import hmac
 import hashlib
+import secrets
 import re
 import json
 import html
@@ -206,6 +207,93 @@ def owner_required():
         return None, fail("Owner access required", 403)
 
     return user, None
+
+
+def is_platform_admin(user=None):
+    """
+    Закрытый доступ владельца платформы.
+    Список логинов хранится только в переменных окружения сервера.
+    """
+    current_user = user or get_current_user()
+
+    if not current_user:
+        return False
+
+    current_username = str(
+        current_user.get("username") or ""
+    ).strip().lower()
+
+    configured_usernames = [
+        item.strip().lower()
+        for item in str(
+            os.getenv(
+                "PLATFORM_ADMIN_USERNAMES",
+                "",
+            )
+        ).split(",")
+        if item.strip()
+    ]
+
+    return bool(
+        current_username
+        and any(
+            hmac.compare_digest(
+                current_username,
+                allowed_username,
+            )
+            for allowed_username in configured_usernames
+        )
+    )
+
+
+def platform_admin_required():
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return None, auth_error
+
+    if not is_platform_admin(user):
+        return None, fail(
+            "Platform administrator access required",
+            403,
+        )
+
+    return user, None
+
+
+def generate_temporary_password(length=14):
+    """Генерирует читаемый одноразовый пароль без неоднозначных символов."""
+    safe_lower = "abcdefghjkmnpqrstuvwxyz"
+    safe_upper = "ABCDEFGHJKMNPQRSTUVWXYZ"
+    safe_digits = "23456789"
+    safe_symbols = "-_"
+    alphabet = (
+        safe_lower
+        + safe_upper
+        + safe_digits
+        + safe_symbols
+    )
+
+    password_chars = [
+        secrets.choice(safe_lower),
+        secrets.choice(safe_upper),
+        secrets.choice(safe_digits),
+        secrets.choice(safe_symbols),
+    ]
+
+    password_chars.extend(
+        secrets.choice(alphabet)
+        for _ in range(
+            max(12, int(length))
+            - len(password_chars)
+        )
+    )
+
+    secrets.SystemRandom().shuffle(
+        password_chars
+    )
+
+    return "".join(password_chars)
 
 # =====================================================
 # ROLE-BASED ACCESS CONTROL
@@ -1611,6 +1699,251 @@ def static_any(path):
 # API: ORGANIZATION PROFILE
 # =========================
 
+@app.get("/api/platform/clinics")
+def api_list_platform_clinics():
+    user, access_error = (
+        platform_admin_required()
+    )
+
+    if access_error:
+        return access_error
+
+    try:
+        org_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("orgs")
+                .select(
+                    "id,name,subtitle,phone,address,website,"
+                    "theme,created_at"
+                )
+                .order("created_at", desc=True)
+                .limit(250)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        owner_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("clinic_users")
+                .select(
+                    "id,org_id,username,display_name,is_active,"
+                    "must_change_password,created_at"
+                )
+                .eq("role", "owner")
+                .order("created_at", desc=False)
+                .limit(1000)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        owners_by_org = {}
+
+        for owner in (owner_result.data or []):
+            owner_org_id = str(
+                owner.get("org_id") or ""
+            ).strip()
+
+            if (
+                owner_org_id
+                and owner_org_id
+                not in owners_by_org
+            ):
+                owners_by_org[owner_org_id] = {
+                    "id": owner.get("id"),
+                    "username": owner.get("username"),
+                    "display_name": owner.get("display_name"),
+                    "is_active": owner.get("is_active") is not False,
+                    "must_change_password": bool(
+                        owner.get("must_change_password")
+                    ),
+                }
+
+        clinics = []
+
+        for org in (org_result.data or []):
+            org_id = str(
+                org.get("id") or ""
+            ).strip()
+
+            clinics.append({
+                "id": org_id,
+                "name": org.get("name"),
+                "subtitle": org.get("subtitle"),
+                "phone": org.get("phone"),
+                "address": org.get("address"),
+                "website": org.get("website"),
+                "theme": org.get("theme") or "purple",
+                "created_at": org.get("created_at"),
+                "owner": owners_by_org.get(org_id),
+            })
+
+        return ok({
+            "clinics": clinics,
+            "total": len(clinics),
+        })
+
+    except Exception as error:
+        print(
+            "❌ /api/platform/clinics GET error:",
+            repr(error),
+        )
+
+        return fail(
+            "Cannot load platform clinics",
+            500,
+        )
+
+
+@app.post("/api/platform/clinics")
+def api_create_platform_clinic():
+    user, access_error = (
+        platform_admin_required()
+    )
+
+    if access_error:
+        return access_error
+
+    data = request.get_json(silent=True) or {}
+
+    clinic_name = str(
+        data.get("name") or ""
+    ).strip()
+    owner_name = str(
+        data.get("owner_display_name") or ""
+    ).strip()
+    owner_username = str(
+        data.get("owner_username") or ""
+    ).strip().lower()
+    theme = str(
+        data.get("theme") or "purple"
+    ).strip().lower()
+
+    if not clinic_name or len(clinic_name) > 160:
+        return fail(
+            "Вкажіть назву клініки до 160 символів.",
+            400,
+        )
+
+    if not owner_name or len(owner_name) > 160:
+        return fail(
+            "Вкажіть ім’я власника до 160 символів.",
+            400,
+        )
+
+    if not re.fullmatch(
+        r"[a-z0-9][a-z0-9._-]{2,79}",
+        owner_username,
+    ):
+        return fail(
+            "Логін: 3–80 латинських літер, цифр, крапок, дефісів або підкреслень.",
+            400,
+        )
+
+    if theme not in CLINIC_THEMES:
+        return fail(
+            "Невідома тема клініки.",
+            400,
+        )
+
+    temporary_password = (
+        generate_temporary_password()
+    )
+    password_hash = generate_password_hash(
+        temporary_password
+    )
+
+    rpc_payload = {
+        "p_name": clinic_name,
+        "p_subtitle": str(
+            data.get("subtitle") or ""
+        ).strip()[:240],
+        "p_phone": str(
+            data.get("phone") or ""
+        ).strip()[:80],
+        "p_address": str(
+            data.get("address") or ""
+        ).strip()[:300],
+        "p_website": str(
+            data.get("website") or ""
+        ).strip()[:300],
+        "p_theme": theme,
+        "p_owner_username": owner_username,
+        "p_owner_display_name": owner_name,
+        "p_password_hash": password_hash,
+    }
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .rpc(
+                    "provision_clinic",
+                    rpc_payload,
+                )
+            ),
+            attempts=2,
+            delay=0.3,
+        )
+
+        created = result.data or {}
+
+        if not isinstance(created, dict):
+            raise RuntimeError(
+                "Unexpected provisioning response"
+            )
+
+        write_audit_event(
+            action="organization.created",
+            entity_type="organization",
+            entity_id=created.get("org_id"),
+            entity_label=clinic_name,
+            summary="Створено нову клініку",
+            after_data={
+                "clinic_name": clinic_name,
+                "owner_username": owner_username,
+                "theme": theme,
+            },
+            metadata={
+                "created_owner_user_id": created.get(
+                    "owner_user_id"
+                ),
+                "financial_accounts_created": created.get(
+                    "financial_accounts_created"
+                ),
+            },
+        )
+
+        return ok({
+            **created,
+            "temporary_password": temporary_password,
+        })
+
+    except Exception as error:
+        message = str(error)
+
+        if (
+            "OWNER_USERNAME_EXISTS" in message
+            or "clinic_users_username_key" in message
+        ):
+            return fail(
+                "Цей логін уже зайнятий. Вкажіть інший.",
+                409,
+            )
+
+        print(
+            "❌ /api/platform/clinics POST error:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося створити клініку. Дані не були збережені.",
+            500,
+        )
+
 CLINIC_PROFILE_FIELDS = [
     "id",
     "name",
@@ -1945,6 +2278,10 @@ def api_get_session():
                     user.get(
                         "must_change_password"
                     )
+                ),
+
+                "is_platform_admin": (
+                    is_platform_admin(user)
                 ),
             },
         })

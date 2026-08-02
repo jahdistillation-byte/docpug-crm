@@ -51063,6 +51063,8 @@ function getAuditActionLabel(action) {
       "Звіт відправлено в Telegram",
     "report.telegram_auto_sent":
       "Автоматичний звіт відправлено",
+    "organization.created":
+      "Клініку створено",
   };
 
   const cleanAction =
@@ -51524,6 +51526,7 @@ async function renderAuditTab() {
               <option value="stock.removed">Повернення препарату</option>
               <option value="report.telegram_sent">Відправлення звіту в Telegram</option>
               <option value="report.telegram_auto_sent">Автоматичне відправлення звіту</option>
+              <option value="organization.created">Створення клініки</option>
             </select>
           </label>
 
@@ -51644,6 +51647,302 @@ function isClinicOwner() {
   return role === "owner";
 }
 
+function isPlatformAdmin() {
+  return state.me?.is_platform_admin === true;
+}
+
+async function platformClinicsRequest(
+  path = "",
+  options = {}
+) {
+  const response = await fetch(
+    `/api/platform/clinics${path}`,
+    {
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+        ...(options.body
+          ? { "Content-Type": "application/json" }
+          : {}),
+        ...(options.headers || {}),
+      },
+      ...options,
+    }
+  );
+
+  const payload = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || payload?.ok !== true) {
+    throw new Error(
+      payload?.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  return payload.data || {};
+}
+
+function renderPlatformClinicsList(
+  container,
+  clinics = []
+) {
+  if (!container) return;
+
+  if (!clinics.length) {
+    container.innerHTML = `
+      <div class="platformClinicEmpty">
+        Клінік ще немає.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = clinics
+    .map((clinic) => {
+      const createdAt = clinic.created_at
+        ? new Intl.DateTimeFormat(
+            "uk-UA",
+            {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            }
+          ).format(
+            new Date(clinic.created_at)
+          )
+        : "—";
+
+      return `
+        <article class="platformClinicItem">
+          <div class="platformClinicMark" data-clinic-theme="${escapeHtml(
+            clinic.theme || "purple"
+          )}">
+            🏥
+          </div>
+
+          <div class="platformClinicMeta">
+            <strong>${escapeHtml(clinic.name || "Клініка")}</strong>
+            <span>
+              ${
+                clinic.owner
+                  ? `${escapeHtml(
+                      clinic.owner.display_name ||
+                      "Власник"
+                    )} · ${escapeHtml(
+                      clinic.owner.username || "—"
+                    )}`
+                  : "Власника не знайдено"
+              }
+            </span>
+          </div>
+
+          <div class="platformClinicState">
+            <strong>${escapeHtml(createdAt)}</strong>
+            <span class="${
+              clinic.owner?.is_active === false
+                ? "inactive"
+                : ""
+            }">
+              ${
+                clinic.owner?.is_active === false
+                  ? "Доступ вимкнено"
+                  : "Активна"
+              }
+            </span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function bindPlatformClinicUI(page) {
+  const form = page.querySelector(
+    "#platformClinicCreateForm"
+  );
+  const list = page.querySelector(
+    "#platformClinicsList"
+  );
+  const counter = page.querySelector(
+    "#platformClinicsCounter"
+  );
+  const resultCard = page.querySelector(
+    "#platformClinicCredentials"
+  );
+
+  if (!form || !list) return;
+
+  const refreshList = async () => {
+    list.innerHTML = `
+      <div class="platformClinicEmpty">
+        Завантажуємо клініки…
+      </div>
+    `;
+
+    try {
+      const data = await platformClinicsRequest();
+      const clinics = data.clinics || [];
+      renderPlatformClinicsList(list, clinics);
+
+      if (counter) {
+        counter.textContent = String(
+          data.total ?? clinics.length
+        );
+      }
+    } catch (error) {
+      list.innerHTML = `
+        <div class="platformClinicEmpty error">
+          ${escapeHtml(
+            error.message ||
+            "Не вдалося завантажити клініки"
+          )}
+        </div>
+      `;
+    }
+  };
+
+  form.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
+
+      const submitButton = form.querySelector(
+        'button[type="submit"]'
+      );
+      const status = form.querySelector(
+        "#platformClinicCreateStatus"
+      );
+      const formData = new FormData(form);
+
+      const ownerUsername = String(
+        formData.get("owner_username") || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      if (status) {
+        status.textContent = "";
+        status.classList.remove("error");
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Створюємо клініку…";
+
+      try {
+        const created = await platformClinicsRequest(
+          "",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              name: formData.get("name"),
+              subtitle: formData.get("subtitle"),
+              phone: formData.get("phone"),
+              address: formData.get("address"),
+              website: formData.get("website"),
+              theme: formData.get("theme"),
+              owner_display_name:
+                formData.get("owner_display_name"),
+              owner_username: ownerUsername,
+            }),
+          }
+        );
+
+        if (resultCard) {
+          resultCard.hidden = false;
+          resultCard.dataset.copyText = [
+            `Клініка: ${created.clinic_name || ""}`,
+            `Логін: ${created.owner_username || ownerUsername}`,
+            `Тимчасовий пароль: ${created.temporary_password || ""}`,
+          ].join("\n");
+
+          resultCard.innerHTML = `
+            <div>
+              <span>Доступ готовий</span>
+              <strong>${escapeHtml(
+                created.clinic_name || "Клініка"
+              )}</strong>
+              <p>
+                Пароль показується лише зараз. Власник змінить
+                його під час першого входу.
+              </p>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Логін</dt>
+                <dd>${escapeHtml(
+                  created.owner_username || ownerUsername
+                )}</dd>
+              </div>
+              <div>
+                <dt>Тимчасовий пароль</dt>
+                <dd>${escapeHtml(
+                  created.temporary_password || "—"
+                )}</dd>
+              </div>
+            </dl>
+
+            <button
+              class="platformCopyCredentialsButton"
+              type="button"
+            >
+              Скопіювати доступ
+            </button>
+          `;
+
+          resultCard
+            .querySelector(
+              ".platformCopyCredentialsButton"
+            )
+            ?.addEventListener(
+              "click",
+              async (copyEvent) => {
+                const button = copyEvent.currentTarget;
+
+                await navigator.clipboard.writeText(
+                  resultCard.dataset.copyText || ""
+                );
+
+                button.textContent = "Скопійовано ✓";
+              }
+            );
+
+          resultCard.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        }
+
+        form.reset();
+        form.querySelector('[name="theme"]').value =
+          "purple";
+
+        if (status) {
+          status.textContent =
+            "Клініку створено повністю";
+        }
+
+        await refreshList();
+      } catch (error) {
+        if (status) {
+          status.textContent =
+            error.message ||
+            "Не вдалося створити клініку";
+          status.classList.add("error");
+        }
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Створити клініку";
+      }
+    }
+  );
+
+  await refreshList();
+}
+
 async function initSettingsUI() {
   const page = document.querySelector(
     '.page[data-page="settings"]'
@@ -51652,6 +51951,7 @@ async function initSettingsUI() {
   if (!page) return;
 
   const ownerMode = isClinicOwner();
+  const platformMode = isPlatformAdmin();
 
   page.innerHTML = `
     <div class="clinicSettingsPage">
@@ -51694,6 +51994,118 @@ async function initSettingsUI() {
           </strong>
         </div>
       </section>
+
+      ${
+        platformMode
+          ? `
+            <section
+              class="clinicSettingsPanel platformClinicPanel"
+              id="platformClinicPanel"
+            >
+              <div class="clinicSettingsPanelHead">
+                <div>
+                  <div class="clinicSettingsPanelIcon">✨</div>
+
+                  <div>
+                    <h2>Клініки платформи</h2>
+                    <p>
+                      Створіть готову клініку та одразу передайте
+                      власнику логін і тимчасовий пароль.
+                    </p>
+                  </div>
+                </div>
+
+                <span class="clinicOwnerBadge">
+                  Всього: <b id="platformClinicsCounter">…</b>
+                </span>
+              </div>
+
+              <div class="platformClinicLayout">
+                <form
+                  class="platformClinicForm"
+                  id="platformClinicCreateForm"
+                >
+                  <div class="platformClinicFormTitle">
+                    <strong>Нова клініка</strong>
+                    <span>Усе необхідне створиться автоматично</span>
+                  </div>
+
+                  <div class="clinicSettingsFormGrid">
+                    <label class="clinicSettingsField clinicSettingsFieldWide">
+                      <span>Назва клініки *</span>
+                      <input class="clinicSettingsInput" name="name" required maxlength="160" placeholder="Наприклад, Animal Clinic Lviv">
+                    </label>
+
+                    <label class="clinicSettingsField">
+                      <span>Ім’я власника *</span>
+                      <input class="clinicSettingsInput" name="owner_display_name" required maxlength="160" placeholder="Олена Коваль">
+                    </label>
+
+                    <label class="clinicSettingsField">
+                      <span>Логін власника *</span>
+                      <input class="clinicSettingsInput" name="owner_username" required minlength="3" maxlength="80" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,79}" autocomplete="off" placeholder="animal.lviv">
+                    </label>
+
+                    <label class="clinicSettingsField">
+                      <span>Телефон</span>
+                      <input class="clinicSettingsInput" name="phone" maxlength="80" placeholder="+380…">
+                    </label>
+
+                    <label class="clinicSettingsField">
+                      <span>Тема</span>
+                      <select class="clinicSettingsInput" name="theme">
+                        <option value="purple">Фіолетова</option>
+                        <option value="black">Графіт</option>
+                        <option value="white">Мармурова біла</option>
+                        <option value="blue">Глибокий синій</option>
+                        <option value="green">Темний евкаліпт</option>
+                      </select>
+                    </label>
+
+                    <label class="clinicSettingsField clinicSettingsFieldWide">
+                      <span>Підпис клініки</span>
+                      <input class="clinicSettingsInput" name="subtitle" maxlength="240" placeholder="Ветеринарна клініка турботи">
+                    </label>
+
+                    <label class="clinicSettingsField clinicSettingsFieldWide">
+                      <span>Адреса</span>
+                      <input class="clinicSettingsInput" name="address" maxlength="300" placeholder="Місто, вулиця, будинок">
+                    </label>
+
+                    <label class="clinicSettingsField clinicSettingsFieldWide">
+                      <span>Сайт</span>
+                      <input class="clinicSettingsInput" name="website" maxlength="300" placeholder="https://…">
+                    </label>
+                  </div>
+
+                  <div class="platformClinicFormActions">
+                    <span id="platformClinicCreateStatus" role="status"></span>
+                    <button type="submit">Створити клініку</button>
+                  </div>
+                </form>
+
+                <div class="platformClinicsColumn">
+                  <div class="platformClinicFormTitle">
+                    <strong>Створені клініки</strong>
+                    <span>Останні підключення</span>
+                  </div>
+
+                  <div
+                    class="platformClinicsList"
+                    id="platformClinicsList"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                class="platformClinicCredentials"
+                id="platformClinicCredentials"
+                hidden
+              ></div>
+            </section>
+          `
+          : ""
+      }
 
       ${
         ownerMode
@@ -51835,6 +52247,10 @@ async function initSettingsUI() {
   `;
 
   bindPersonalSettingsUI(page);
+
+if (platformMode) {
+  await bindPlatformClinicUI(page);
+}
 
 if (ownerMode) {
   const profile =
