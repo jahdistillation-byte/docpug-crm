@@ -1814,10 +1814,18 @@ async function loadOwners() {
 }
 // ===== API: Patients =====
 let patientsApiInFlight = null;
+let patientsApiLoading = false;
+let patientsApiLoaded = false;
 
 async function loadPatientsApi() {
   if (patientsApiInFlight) {
     return patientsApiInFlight;
+  }
+
+  patientsApiLoading = true;
+
+  if (state.route === "patients") {
+    renderPatientsTab();
   }
 
   patientsApiInFlight =
@@ -1826,7 +1834,13 @@ async function loadPatientsApi() {
   try {
     return await patientsApiInFlight;
   } finally {
+    patientsApiLoaded = true;
+    patientsApiLoading = false;
     patientsApiInFlight = null;
+
+    if (state.route === "patients") {
+      renderPatientsTab();
+    }
   }
 }
 
@@ -21786,7 +21800,11 @@ async function renderFinanceOwnerReportTab(
               type="button"
               class="is-primary"
               id="ownerReportSendTelegram"
-              ${settings.bot_configured ? "" : "disabled"}
+              ${
+                settings.bot_configured && settings.telegram_configured
+                  ? ""
+                  : "disabled"
+              }
             >
               Надіслати в Telegram
             </button>
@@ -21830,16 +21848,18 @@ async function renderFinanceOwnerReportTab(
         button.textContent = "Зберігаємо…";
 
         try {
-          await saveOwnerReportSettingsApi(
+          const savedSettings = await saveOwnerReportSettingsApi(
             input?.value || "",
             dailyEnabled?.checked === true
           );
           showCrmNotice({
             icon: "✓",
             title: "Налаштування збережено",
-            text: dailyEnabled?.checked
+            text: savedSettings.daily_enabled
               ? "Автоматичний звіт увімкнено на 21:00 за Києвом."
-              : "Telegram ID збережено. Автоматичний звіт вимкнено.",
+              : savedSettings.telegram_configured
+                ? "Telegram ID збережено. Автоматичний звіт вимкнено."
+                : "Telegram ID не вказано. Автоматичний звіт вимкнено.",
           });
           await renderFinanceTab();
         } catch (error) {
@@ -21852,6 +21872,29 @@ async function renderFinanceOwnerReportTab(
           button.textContent = "Зберегти";
         }
       });
+
+    const telegramInput = page.querySelector(
+      "#ownerReportTelegramChatId"
+    );
+    const sendTelegramButton = page.querySelector(
+      "#ownerReportSendTelegram"
+    );
+    const savedTelegramChatId = String(
+      settings.telegram_chat_id || ""
+    ).trim();
+
+    telegramInput?.addEventListener("input", () => {
+      const inputMatchesSaved =
+        String(telegramInput.value || "").trim() ===
+        savedTelegramChatId;
+
+      if (sendTelegramButton) {
+        sendTelegramButton.disabled =
+          !settings.bot_configured ||
+          !savedTelegramChatId ||
+          !inputMatchesSaved;
+      }
+    });
 
     page.querySelector("#ownerReportSetupBot")
       ?.addEventListener("click", async (event) => {
@@ -21885,13 +21928,20 @@ async function renderFinanceOwnerReportTab(
         button.textContent = "Відправляємо…";
 
         try {
-          await sendOwnerDailyReportApi(report.date);
+          const sendResult = await sendOwnerDailyReportApi(report.date);
+          const alreadySent = sendResult.already_sent === true;
           showCrmNotice({
-            icon: "✈",
-            title: "Звіт відправлено",
-            text: `Підсумок за ${report.date} уже в Telegram власника.`,
+            icon: alreadySent ? "✓" : "✈",
+            title: alreadySent
+              ? "Звіт уже надсилали"
+              : "Звіт відправлено",
+            text: alreadySent
+              ? `Підсумок за ${report.date} вже є в Telegram власника.`
+              : `Підсумок за ${report.date} відправлено в Telegram власника.`,
           });
-          button.textContent = "Відправлено ✓";
+          button.textContent = alreadySent
+            ? "Уже надіслано ✓"
+            : "Відправлено ✓";
         } catch (error) {
           showCrmNotice({
             icon: "!",
@@ -26297,6 +26347,23 @@ function renderPatientsTab() {
   const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
   const owners = Array.isArray(state.owners) && state.owners.length ? state.owners : LS.get(OWNERS_KEY, []);
   const ownerById = new Map((owners || []).map((o) => [o.id, o]));
+
+  if (
+    !patients.length &&
+    (patientsApiLoading || !patientsApiLoaded)
+  ) {
+    patientListElement.innerHTML = `
+      <div class="patientsTabLoading" role="status" aria-live="polite">
+        <div class="patientsTabLoadingIcon" aria-hidden="true">🐾</div>
+        <strong>Завантажуємо пацієнтів</strong>
+        <span>Отримуємо актуальні дані клініки…</span>
+        <div class="patientsTabLoadingDots" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   if (!patients.length) {
     patientListElement.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки пацієнтів немає.</div>`;

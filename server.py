@@ -6311,6 +6311,84 @@ def api_telegram_webhook():
     return ok({"handled": True})
 
 
+def find_report_sent_audit(org_id, day_iso):
+    try:
+        rows = report_rows(
+            lambda: supabase.table("audit_events")
+            .select("action,metadata,created_at")
+            .eq("org_id", org_id)
+            .eq("entity_type", "daily_report")
+            .eq("entity_id", day_iso)
+            .limit(10)
+        )
+    except Exception as error:
+        print(
+            "⚠️ Report delivery audit lookup failed:",
+            repr(error),
+            flush=True,
+        )
+        return None
+
+    return next(
+        (
+            row
+            for row in rows
+            if row.get("action") in {
+                "report.telegram_sent",
+                "report.telegram_auto_sent",
+            }
+        ),
+        None,
+    )
+
+
+def backfill_report_delivery_from_audit(org_id, day_iso, audit_row):
+    metadata = audit_row.get("metadata") or {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+    message_id = metadata.get("telegram_message_id")
+    sent_at = (
+        audit_row.get("created_at")
+        or datetime.now(timezone.utc).isoformat()
+    )
+
+    try:
+        result = supabase.table("clinic_report_deliveries").insert({
+            "org_id": org_id,
+            "report_date": day_iso,
+            "channel": "telegram",
+            "status": "sent",
+            "attempt_count": 1,
+            "telegram_message_id": (
+                str(message_id)
+                if message_id is not None
+                else None
+            ),
+            "sent_at": sent_at,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }).execute()
+
+        return result.data[0] if result.data else None
+    except Exception:
+        try:
+            rows = report_rows(
+                lambda: supabase.table("clinic_report_deliveries")
+                .select("id,status,telegram_message_id")
+                .eq("org_id", org_id)
+                .eq("report_date", day_iso)
+                .eq("channel", "telegram")
+                .limit(1)
+            )
+            return rows[0] if rows else None
+        except Exception as error:
+            print(
+                "⚠️ Report delivery audit backfill failed:",
+                repr(error),
+                flush=True,
+            )
+            return None
+
+
 @app.post("/api/reports/daily/send")
 def api_owner_daily_report_send():
     user, auth_error = owner_required()
@@ -6323,34 +6401,184 @@ def api_owner_daily_report_send():
 
     try:
         day = report_date(data.get("date"))
+        day_iso = day.isoformat()
         settings = get_report_settings(current_org)
         chat_id = settings.get("telegram_chat_id")
 
         if not chat_id:
             return fail("Спочатку вкажіть Telegram chat ID власника.", 409)
 
-        report = build_owner_daily_report(current_org, day)
-        telegram_result = send_telegram_report(
-            chat_id,
-            report["telegram_message"],
+        delivery_rows = report_rows(
+            lambda: supabase.table("clinic_report_deliveries")
+            .select(
+                "id,status,attempt_count,telegram_message_id,updated_at"
+            )
+            .eq("org_id", current_org)
+            .eq("report_date", day_iso)
+            .eq("channel", "telegram")
+            .limit(1)
         )
+        delivery = delivery_rows[0] if delivery_rows else None
+
+        if not delivery:
+            previous_audit = find_report_sent_audit(
+                current_org,
+                day_iso,
+            )
+
+            if previous_audit:
+                delivery = backfill_report_delivery_from_audit(
+                    current_org,
+                    day_iso,
+                    previous_audit,
+                )
+
+                return ok({
+                    "sent": False,
+                    "already_sent": True,
+                    "report_date": day_iso,
+                    "message_id": (
+                        delivery.get("telegram_message_id")
+                        if delivery
+                        else None
+                    ),
+                })
+
+        if delivery and delivery.get("status") == "sent":
+            return ok({
+                "sent": False,
+                "already_sent": True,
+                "report_date": day_iso,
+                "message_id": delivery.get("telegram_message_id"),
+            })
+
+        if delivery and delivery.get("status") == "processing":
+            raw_updated = str(delivery.get("updated_at") or "").strip()
+
+            try:
+                updated_at = datetime.fromisoformat(
+                    raw_updated.replace("Z", "+00:00")
+                )
+            except ValueError:
+                updated_at = None
+
+            if (
+                updated_at
+                and datetime.now(timezone.utc) - updated_at
+                < timedelta(minutes=15)
+            ):
+                return fail(
+                    "Звіт уже відправляється. Зачекайте кілька секунд.",
+                    409,
+                )
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        delivery_id = ""
+
+        if delivery:
+            delivery_id = str(delivery.get("id") or "")
+            next_attempt = min(
+                max(report_int(delivery.get("attempt_count")) + 1, 1),
+                3,
+            )
+
+            supabase.table("clinic_report_deliveries").update({
+                "status": "processing",
+                "attempt_count": next_attempt,
+                "error_message": None,
+                "updated_at": now_iso,
+            }).eq("id", delivery_id).execute()
+        else:
+            try:
+                delivery_result = supabase.table(
+                    "clinic_report_deliveries"
+                ).insert({
+                    "org_id": current_org,
+                    "report_date": day_iso,
+                    "channel": "telegram",
+                    "status": "processing",
+                    "attempt_count": 1,
+                    "updated_at": now_iso,
+                }).execute()
+                delivery_id = str(
+                    delivery_result.data[0].get("id")
+                    if delivery_result.data
+                    else ""
+                )
+            except Exception:
+                raced_rows = report_rows(
+                    lambda: supabase.table("clinic_report_deliveries")
+                    .select("id,status,telegram_message_id")
+                    .eq("org_id", current_org)
+                    .eq("report_date", day_iso)
+                    .eq("channel", "telegram")
+                    .limit(1)
+                )
+                raced_delivery = raced_rows[0] if raced_rows else None
+
+                if raced_delivery and raced_delivery.get("status") == "sent":
+                    return ok({
+                        "sent": False,
+                        "already_sent": True,
+                        "report_date": day_iso,
+                        "message_id": raced_delivery.get(
+                            "telegram_message_id"
+                        ),
+                    })
+
+                return fail(
+                    "Звіт уже відправляється. Зачекайте кілька секунд.",
+                    409,
+                )
+
+        if not delivery_id:
+            return fail("Не вдалося підготувати відправлення звіту.", 500)
+
+        try:
+            report = build_owner_daily_report(current_org, day)
+            telegram_result = send_telegram_report(
+                chat_id,
+                report["telegram_message"],
+            )
+        except Exception as telegram_error:
+            supabase.table("clinic_report_deliveries").update({
+                "status": "failed",
+                "error_message": type(telegram_error).__name__,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", delivery_id).execute()
+            raise
+
+        message_id = telegram_result.get("message_id")
+
+        supabase.table("clinic_report_deliveries").update({
+            "status": "sent",
+            "telegram_message_id": (
+                str(message_id)
+                if message_id is not None
+                else None
+            ),
+            "error_message": None,
+            "sent_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }).eq("id", delivery_id).execute()
 
         write_audit_event(
             action="report.telegram_sent",
             entity_type="daily_report",
-            entity_id=day.isoformat(),
-            entity_label=f"Звіт за {day.isoformat()}",
+            entity_id=day_iso,
+            entity_label=f"Звіт за {day_iso}",
             summary="Щоденний звіт відправлено власнику в Telegram",
             metadata={
-                "report_date": day.isoformat(),
-                "telegram_message_id": telegram_result.get("message_id"),
+                "report_date": day_iso,
+                "telegram_message_id": message_id,
             },
         )
 
         return ok({
             "sent": True,
-            "report_date": day.isoformat(),
-            "message_id": telegram_result.get("message_id"),
+            "already_sent": False,
+            "report_date": day_iso,
+            "message_id": message_id,
         })
 
     except ValueError as error:
@@ -6477,6 +6705,21 @@ def api_internal_daily_report_dispatch():
                 .limit(1)
             )
             existing = existing_rows[0] if existing_rows else None
+
+            if not existing:
+                previous_audit = find_report_sent_audit(
+                    org_id,
+                    report_day.isoformat(),
+                )
+
+                if previous_audit:
+                    backfill_report_delivery_from_audit(
+                        org_id,
+                        report_day.isoformat(),
+                        previous_audit,
+                    )
+                    skipped_count += 1
+                    continue
 
             if existing and existing.get("status") == "sent":
                 skipped_count += 1
