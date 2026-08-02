@@ -21395,7 +21395,8 @@ async function loadOwnerReportSettingsApi() {
 
 
 async function saveOwnerReportSettingsApi(
-  telegramChatId
+  telegramChatId,
+  dailyEnabled = false
 ) {
   const response = await fetch(
     "/api/reports/settings",
@@ -21410,6 +21411,8 @@ async function saveOwnerReportSettingsApi(
       body: JSON.stringify({
         telegram_chat_id:
           String(telegramChatId || "").trim(),
+        daily_enabled:
+          Boolean(dailyEnabled),
       }),
     }
   );
@@ -21421,6 +21424,33 @@ async function saveOwnerReportSettingsApi(
     throw new Error(
       result?.error ||
       `Не вдалося зберегти налаштування (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data || {};
+}
+
+
+async function setupOwnerReportTelegramBotApi() {
+  const response = await fetch(
+    "/api/reports/telegram/setup",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося оновити Telegram-бота (HTTP ${response.status}).`
     );
   }
 
@@ -21718,9 +21748,9 @@ async function renderFinanceOwnerReportTab(
             <span>TELEGRAM ВЛАСНИКА</span>
             <h2>Відправити готовий підсумок</h2>
             <p>
-              Вкажіть числовий chat ID, натисніть «Зберегти»,
-              а потім надішліть тестовий звіт. Бот має бути
-              попередньо запущений командою /start.
+              У боті залишиться одна кнопка «Отримати ID».
+              Після підключення можна ввімкнути автоматичний
+              звіт щодня о 21:00 за Києвом.
             </p>
           </div>
           <div class="ownerReportTelegramControls">
@@ -21732,7 +21762,25 @@ async function renderFinanceOwnerReportTab(
               value="${escapeHtml(settings.telegram_chat_id || "")}"
             >
             <button type="button" id="ownerReportSaveTelegram">
-              Зберегти ID
+              Зберегти
+            </button>
+            <label class="ownerReportAutoToggle">
+              <input
+                type="checkbox"
+                id="ownerReportDailyEnabled"
+                ${settings.daily_enabled ? "checked" : ""}
+              >
+              <span>
+                <b>Автоматичний звіт</b>
+                <small>Щодня о 21:00 · Europe/Kyiv</small>
+              </span>
+            </label>
+            <button
+              type="button"
+              id="ownerReportSetupBot"
+              ${settings.bot_configured ? "" : "disabled"}
+            >
+              Оновити меню бота
             </button>
             <button
               type="button"
@@ -21777,15 +21825,21 @@ async function renderFinanceOwnerReportTab(
       ?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
         const input = page.querySelector("#ownerReportTelegramChatId");
+        const dailyEnabled = page.querySelector("#ownerReportDailyEnabled");
         button.disabled = true;
         button.textContent = "Зберігаємо…";
 
         try {
-          await saveOwnerReportSettingsApi(input?.value || "");
+          await saveOwnerReportSettingsApi(
+            input?.value || "",
+            dailyEnabled?.checked === true
+          );
           showCrmNotice({
             icon: "✓",
-            title: "Telegram збережено",
-            text: "Тепер можна відправити тестовий звіт власнику.",
+            title: "Налаштування збережено",
+            text: dailyEnabled?.checked
+              ? "Автоматичний звіт увімкнено на 21:00 за Києвом."
+              : "Telegram ID збережено. Автоматичний звіт вимкнено.",
           });
           await renderFinanceTab();
         } catch (error) {
@@ -21795,7 +21849,32 @@ async function renderFinanceOwnerReportTab(
             text: error?.message || "Перевірте Telegram chat ID.",
           });
           button.disabled = false;
-          button.textContent = "Зберегти ID";
+          button.textContent = "Зберегти";
+        }
+      });
+
+    page.querySelector("#ownerReportSetupBot")
+      ?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "Оновлюємо…";
+
+        try {
+          await setupOwnerReportTelegramBotApi();
+          showCrmNotice({
+            icon: "🆔",
+            title: "Меню бота оновлено",
+            text: "Старі CRM-кнопки прибрано. У Telegram залишилася кнопка «Отримати ID».",
+          });
+          button.textContent = "Меню оновлено ✓";
+        } catch (error) {
+          showCrmNotice({
+            icon: "!",
+            title: "Не вдалося оновити бота",
+            text: error?.message || "Перевірте налаштування Telegram-бота.",
+          });
+          button.disabled = false;
+          button.textContent = "Оновити меню бота";
         }
       });
 
@@ -50982,6 +51061,8 @@ function getAuditActionLabel(action) {
       "Препарат повернено",
     "report.telegram_sent":
       "Звіт відправлено в Telegram",
+    "report.telegram_auto_sent":
+      "Автоматичний звіт відправлено",
   };
 
   const cleanAction =
@@ -51442,6 +51523,7 @@ async function renderAuditTab() {
               <option value="stock.added">Списання препарату</option>
               <option value="stock.removed">Повернення препарату</option>
               <option value="report.telegram_sent">Відправлення звіту в Telegram</option>
+              <option value="report.telegram_auto_sent">Автоматичне відправлення звіту</option>
             </select>
           </label>
 

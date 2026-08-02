@@ -1569,6 +1569,8 @@ def protect_api_routes():
         "/api/session",
         "/api/logout",
         "/api/me",
+        "/api/telegram/webhook",
+        "/api/internal/reports/daily-dispatch",
     }
 
     if path in public_api_paths:
@@ -5324,24 +5326,35 @@ def get_report_settings(org_id):
 
 
 def send_telegram_report(chat_id, message):
-    if not TELEGRAM_BOT_TOKEN:
-        raise RuntimeError("Telegram bot is not configured on the server.")
-
     safe_chat_id = str(chat_id or "").strip()
 
     if not re.fullmatch(r"-?\d{5,20}", safe_chat_id):
         raise ValueError("Telegram chat ID is invalid.")
 
-    endpoint = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = json.dumps({
+    return telegram_api_call("sendMessage", {
         "chat_id": safe_chat_id,
         "text": str(message or ""),
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
-    }).encode("utf-8")
+    })
+
+
+def telegram_api_call(method, payload=None):
+    if not TELEGRAM_BOT_TOKEN:
+        raise RuntimeError("Telegram bot is not configured on the server.")
+
+    clean_method = str(method or "").strip()
+
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9]+", clean_method):
+        raise ValueError("Telegram API method is invalid.")
+
+    endpoint = (
+        f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/{clean_method}"
+    )
+    encoded_payload = json.dumps(payload or {}).encode("utf-8")
     telegram_request = Request(
         endpoint,
-        data=payload,
+        data=encoded_payload,
         headers={"Content-Type": "application/json"},
         method="POST",
     )
@@ -5353,6 +5366,87 @@ def send_telegram_report(chat_id, message):
         raise RuntimeError("Telegram rejected the message.")
 
     return response_data.get("result") or {}
+
+
+def telegram_id_keyboard():
+    return {
+        "keyboard": [[{
+            "text": "🆔 Отримати ID",
+        }]],
+        "resize_keyboard": True,
+        "is_persistent": True,
+        "input_field_placeholder": "Натисніть кнопку, щоб отримати свій ID",
+    }
+
+
+def telegram_webhook_secret():
+    source = (
+        f"{TELEGRAM_BOT_TOKEN or ''}:"
+        f"{SESSION_SECRET_KEY}:owner-report-webhook"
+    )
+
+    return hashlib.sha256(
+        source.encode("utf-8")
+    ).hexdigest()
+
+
+def configure_owner_report_bot(public_base_url, chat_id=None):
+    base_url = str(public_base_url or "").strip().rstrip("/")
+
+    if not base_url.startswith("https://"):
+        raise ValueError("Public HTTPS URL is required for Telegram webhook.")
+
+    telegram_api_call("deleteMyCommands", {})
+    telegram_api_call("setChatMenuButton", {
+        "menu_button": {
+            "type": "commands",
+        },
+    })
+    telegram_api_call("setWebhook", {
+        "url": f"{base_url}/api/telegram/webhook",
+        "secret_token": telegram_webhook_secret(),
+        "allowed_updates": ["message"],
+        "drop_pending_updates": True,
+    })
+
+    safe_chat_id = str(chat_id or "").strip()
+
+    if safe_chat_id:
+        telegram_api_call("sendMessage", {
+            "chat_id": safe_chat_id,
+            "text": (
+                "✅ Бота оновлено.\n\n"
+                "Старе CRM-меню прибрано. "
+                "Залишилася лише кнопка для отримання Telegram ID."
+            ),
+            "reply_markup": telegram_id_keyboard(),
+        })
+
+    bot = telegram_api_call("getMe", {})
+
+    return {
+        "configured": True,
+        "username": bot.get("username"),
+    }
+
+
+def public_app_base_url():
+    configured = str(
+        os.getenv("PUBLIC_BASE_URL") or ""
+    ).strip().rstrip("/")
+
+    if configured:
+        return configured
+
+    forwarded_scheme = str(
+        request.headers.get("X-Forwarded-Proto") or ""
+    ).split(",", 1)[0].strip().lower()
+    scheme = forwarded_scheme or request.scheme or "https"
+
+    if request.host.endswith(".onrender.com"):
+        scheme = "https"
+
+    return f"{scheme}://{request.host}"
 
 
 @app.get("/api/reports/daily")
@@ -5418,6 +5512,7 @@ def api_owner_report_settings_update():
     current_org = get_current_org_id()
     data = request.get_json(silent=True) or {}
     chat_id = str(data.get("telegram_chat_id") or "").strip()
+    daily_enabled = bool(data.get("daily_enabled"))
 
     if chat_id and not re.fullmatch(r"-?\d{5,20}", chat_id):
         return fail("Telegram chat ID має містити лише цифри.", 400)
@@ -5426,7 +5521,9 @@ def api_owner_report_settings_update():
     payload = {
         "org_id": current_org,
         "telegram_chat_id": chat_id or None,
-        "daily_enabled": False,
+        "daily_enabled": bool(
+            daily_enabled and chat_id
+        ),
         "daily_time": "21:00:00",
         "timezone": "Europe/Kyiv",
         "updated_at": now_iso,
@@ -5445,13 +5542,103 @@ def api_owner_report_settings_update():
         return ok({
             "telegram_configured": bool(chat_id),
             "telegram_chat_id": chat_id,
-            "daily_enabled": bool(row.get("daily_enabled")),
+            "daily_enabled": bool(
+                row.get("daily_enabled")
+            ),
             "daily_time": str(row.get("daily_time") or "21:00")[:5],
             "timezone": str(row.get("timezone") or "Europe/Kyiv"),
         })
     except Exception as error:
         print("❌ PUT report settings:", repr(error), flush=True)
         return fail("Не вдалося зберегти Telegram-налаштування.", 500)
+
+
+@app.post("/api/reports/telegram/setup")
+def api_owner_report_telegram_setup():
+    user, auth_error = owner_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        settings = get_report_settings(current_org)
+        configured = configure_owner_report_bot(
+            public_app_base_url(),
+            settings.get("telegram_chat_id"),
+        )
+
+        return ok(configured)
+
+    except Exception as error:
+        print("❌ POST Telegram bot setup:", repr(error), flush=True)
+        return fail(
+            "Не вдалося оновити Telegram-бота. Перевірте TELEGRAM_BOT_TOKEN.",
+            502,
+        )
+
+
+@app.post("/api/telegram/webhook")
+def api_telegram_webhook():
+    received_secret = str(
+        request.headers.get(
+            "X-Telegram-Bot-Api-Secret-Token"
+        ) or ""
+    )
+
+    if not hmac.compare_digest(
+        received_secret,
+        telegram_webhook_secret(),
+    ):
+        return fail("Unauthorized", 401)
+
+    update = request.get_json(silent=True) or {}
+    message = update.get("message") or {}
+    chat = message.get("chat") or {}
+    chat_id = str(chat.get("id") or "").strip()
+    chat_type = str(chat.get("type") or "").strip().lower()
+    text_value = str(message.get("text") or "").strip()
+    normalized_text = text_value.lower().split("@", 1)[0]
+
+    if not chat_id or chat_type != "private":
+        return ok({"handled": False})
+
+    wants_id = (
+        normalized_text in {
+            "/start",
+            "/id",
+            "🆔 отримати id",
+            "отримати id",
+        }
+        or "отримати id" in normalized_text
+    )
+
+    try:
+        if wants_id:
+            response_text = (
+                "<b>Ваш Telegram ID:</b>\n"
+                f"<code>{html.escape(chat_id)}</code>\n\n"
+                "Скопіюйте лише цифри та вставте їх "
+                "у розділі «Фінанси → Звіт власника»."
+            )
+        else:
+            response_text = (
+                "Цей бот надсилає щоденні звіти клініки.\n\n"
+                "Натисніть кнопку нижче, щоб отримати свій Telegram ID."
+            )
+
+        telegram_api_call("sendMessage", {
+            "chat_id": chat_id,
+            "text": response_text,
+            "parse_mode": "HTML",
+            "reply_markup": telegram_id_keyboard(),
+        })
+
+    except Exception as error:
+        print("⚠️ Telegram webhook reply failed:", repr(error), flush=True)
+
+    return ok({"handled": True})
 
 
 @app.post("/api/reports/daily/send")
@@ -5504,6 +5691,245 @@ def api_owner_daily_report_send():
             "Telegram не прийняв повідомлення. Перевірте chat ID та запустіть бота командою /start.",
             502,
         )
+
+
+def report_dispatch_authorized():
+    authorization = str(
+        request.headers.get("Authorization") or ""
+    ).strip()
+
+    if not authorization.lower().startswith("bearer "):
+        return False
+
+    token = authorization[7:].strip()
+
+    if len(token) < 32:
+        return False
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    try:
+        rows = report_rows(
+            lambda: supabase.table(
+                "clinic_report_dispatch_auth"
+            )
+            .select("token_hash")
+            .eq("singleton", True)
+            .limit(1)
+        )
+    except Exception as error:
+        print("⚠️ Report dispatcher auth failed:", repr(error), flush=True)
+        return False
+
+    stored_hash = str(
+        rows[0].get("token_hash")
+        if rows
+        else ""
+    ).strip()
+
+    return bool(
+        stored_hash
+        and hmac.compare_digest(
+            token_hash,
+            stored_hash,
+        )
+    )
+
+
+def write_automatic_report_audit(org_id, day, message_id):
+    try:
+        supabase.table("audit_events").insert({
+            "org_id": org_id,
+            "actor_name": "Автоматичний звіт",
+            "actor_role": "system",
+            "action": "report.telegram_auto_sent",
+            "entity_type": "daily_report",
+            "entity_id": day.isoformat(),
+            "entity_label": f"Звіт за {day.isoformat()}",
+            "summary": "Щоденний звіт автоматично відправлено в Telegram",
+            "metadata": {
+                "report_date": day.isoformat(),
+                "telegram_message_id": message_id,
+                "schedule": "21:00 Europe/Kyiv",
+            },
+        }).execute()
+    except Exception as error:
+        print("⚠️ Automatic report audit failed:", repr(error), flush=True)
+
+
+@app.post("/api/internal/reports/daily-dispatch")
+def api_internal_daily_report_dispatch():
+    if not report_dispatch_authorized():
+        return fail("Unauthorized", 401)
+
+    now_kyiv = datetime.now(REPORT_TIMEZONE)
+
+    if now_kyiv.hour != 21:
+        return ok({
+            "checked": True,
+            "sent": 0,
+            "skipped": "outside_delivery_hour",
+            "local_time": now_kyiv.strftime("%H:%M"),
+        })
+
+    report_day = now_kyiv.date()
+    sent_count = 0
+    skipped_count = 0
+    failed_count = 0
+
+    try:
+        settings_rows = report_rows(
+            lambda: supabase.table("clinic_report_settings")
+            .select(
+                "org_id,telegram_chat_id,daily_enabled,daily_time,timezone"
+            )
+            .eq("daily_enabled", True)
+        )
+
+        for settings in settings_rows:
+            org_id = str(settings.get("org_id") or "").strip()
+            chat_id = str(settings.get("telegram_chat_id") or "").strip()
+
+            if not org_id or not chat_id:
+                skipped_count += 1
+                continue
+
+            existing_rows = report_rows(
+                lambda org_id=org_id: supabase.table(
+                    "clinic_report_deliveries"
+                )
+                .select("id,status,attempt_count,updated_at")
+                .eq("org_id", org_id)
+                .eq("report_date", report_day.isoformat())
+                .eq("channel", "telegram")
+                .limit(1)
+            )
+            existing = existing_rows[0] if existing_rows else None
+
+            if existing and existing.get("status") == "sent":
+                skipped_count += 1
+                continue
+
+            attempts = report_int(
+                existing.get("attempt_count")
+                if existing
+                else 0
+            )
+
+            if existing and attempts >= 3:
+                skipped_count += 1
+                continue
+
+            if existing and existing.get("status") == "processing":
+                raw_updated = str(existing.get("updated_at") or "").strip()
+
+                try:
+                    updated_at = datetime.fromisoformat(
+                        raw_updated.replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    updated_at = None
+
+                if (
+                    updated_at
+                    and datetime.now(timezone.utc) - updated_at
+                    < timedelta(minutes=15)
+                ):
+                    skipped_count += 1
+                    continue
+
+            now_iso = datetime.now(timezone.utc).isoformat()
+
+            if existing:
+                delivery_id = str(existing.get("id"))
+                attempts += 1
+                supabase.table("clinic_report_deliveries").update({
+                    "status": "processing",
+                    "attempt_count": attempts,
+                    "error_message": None,
+                    "updated_at": now_iso,
+                }).eq("id", delivery_id).execute()
+            else:
+                delivery_result = supabase.table(
+                    "clinic_report_deliveries"
+                ).insert({
+                    "org_id": org_id,
+                    "report_date": report_day.isoformat(),
+                    "channel": "telegram",
+                    "status": "processing",
+                    "attempt_count": 1,
+                    "updated_at": now_iso,
+                }).execute()
+                delivery_id = str(
+                    delivery_result.data[0].get("id")
+                    if delivery_result.data
+                    else ""
+                )
+                attempts = 1
+
+            if not delivery_id:
+                failed_count += 1
+                continue
+
+            try:
+                report = build_owner_daily_report(
+                    org_id,
+                    report_day,
+                )
+                telegram_result = send_telegram_report(
+                    chat_id,
+                    report["telegram_message"],
+                )
+                message_id = telegram_result.get("message_id")
+
+                supabase.table("clinic_report_deliveries").update({
+                    "status": "sent",
+                    "telegram_message_id": (
+                        str(message_id)
+                        if message_id is not None
+                        else None
+                    ),
+                    "error_message": None,
+                    "sent_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                }).eq("id", delivery_id).execute()
+
+                write_automatic_report_audit(
+                    org_id,
+                    report_day,
+                    message_id,
+                )
+                sent_count += 1
+
+            except Exception as delivery_error:
+                safe_error = type(delivery_error).__name__
+                supabase.table("clinic_report_deliveries").update({
+                    "status": "failed",
+                    "error_message": safe_error,
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                }).eq("id", delivery_id).execute()
+                failed_count += 1
+                print(
+                    "⚠️ Automatic report delivery failed:",
+                    org_id,
+                    safe_error,
+                    flush=True,
+                )
+
+        return ok({
+            "checked": True,
+            "organizations": len(settings_rows),
+            "sent": sent_count,
+            "skipped": skipped_count,
+            "failed": failed_count,
+            "report_date": report_day.isoformat(),
+        })
+
+    except Exception as error:
+        print("❌ Automatic report dispatcher failed:", repr(error), flush=True)
+        return fail("Automatic report dispatch failed", 500)
 
 
 @app.get(
