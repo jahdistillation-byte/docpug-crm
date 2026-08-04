@@ -45222,133 +45222,289 @@ function renderOwners() {
   }
 
   filteredOwners.forEach((owner) => {
-    const tr = document.createElement("tr");
-    
-    // При клике на строку открываем страницу владельца
-    tr.style.cursor = "pointer";
-    tr.dataset.openOwner = String(owner.id);
+  const tr =
+    document.createElement("tr");
 
-    const petsCount = (state.patients || []).filter(
-      p => String(p.owner_id) === String(owner.id)
-    ).length;
+  tr.style.cursor =
+    "pointer";
 
-    tr.innerHTML = `
-  <td style="font-weight:600;">
-    👤 ${escapeHtml(
-      owner.name ||
-      "Без імені"
-    )}
-  </td>
+  tr.dataset.openOwner =
+    String(owner.id);
 
-  <td>
-    ${petsHtml}
-  </td>
+  const ownerPets =
+    (state.patients || [])
+      .filter(
+        (patient) =>
+          String(patient.owner_id) ===
+          String(owner.id)
+      );
 
-  <td>
-    📞 ${escapeHtml(
-      owner.phone ||
-      "Не вказано"
-    )}
-  </td>
-  ${
-    owner.email
-      ? `
-        <div>
-          ✉️ ${escapeHtml(
-            owner.email
-          )}
-        </div>
-      `
-      : ""
-  }
+  const visiblePets =
+    ownerPets.slice(0, 2);
 
-  ${
-    owner.telegram
+  const hiddenPetsCount =
+    Math.max(
+      0,
+      ownerPets.length -
+      visiblePets.length
+    );
+
+  const allPetsTitle =
+    ownerPets
+      .map((patient) => {
+        const petName =
+          String(
+            patient.name ||
+            "Без клички"
+          ).trim();
+
+        const petBreed =
+          String(
+            patient.breed ||
+            patient.species ||
+            ""
+          ).trim();
+
+        return petBreed
+          ? `${petName} · ${petBreed}`
+          : petName;
+      })
+      .join(", ");
+
+  const petsHtml =
+    ownerPets.length
       ? `
         <div
+          title="${escapeHtml(
+            allPetsTitle
+          )}"
           style="
-            margin-top:4px;
-            opacity:.75;
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            gap:5px;
+            max-width:230px;
           "
         >
-          ✈️ ${escapeHtml(
-            owner.telegram
-          )}
+          ${visiblePets
+            .map((patient) => {
+              const petName =
+                String(
+                  patient.name ||
+                  "Без клички"
+                ).trim();
+
+              const petBreed =
+                String(
+                  patient.breed ||
+                  patient.species ||
+                  ""
+                ).trim();
+
+              return `
+                <span
+                  style="
+                    display:inline-flex;
+                    align-items:center;
+                    gap:4px;
+                    padding:4px 8px;
+                    border-radius:999px;
+                    background:rgba(168,85,247,.12);
+                    border:1px solid rgba(168,85,247,.22);
+                    font-size:.78rem;
+                    white-space:nowrap;
+                  "
+                >
+                  🐾
+
+                  <b>
+                    ${escapeHtml(
+                      petName
+                    )}
+                  </b>
+
+                  ${
+                    petBreed
+                      ? `
+                        <span
+                          style="
+                            opacity:.55;
+                            font-weight:400;
+                          "
+                        >
+                          ${escapeHtml(
+                            petBreed
+                          )}
+                        </span>
+                      `
+                      : ""
+                  }
+                </span>
+              `;
+            })
+            .join("")}
+
+          ${
+            hiddenPetsCount > 0
+              ? `
+                <span
+                  style="
+                    padding:4px 7px;
+                    border-radius:999px;
+                    background:rgba(255,255,255,.07);
+                    font-size:.76rem;
+                    opacity:.8;
+                    white-space:nowrap;
+                  "
+                >
+                  +${hiddenPetsCount}
+                </span>
+              `
+              : ""
+          }
         </div>
       `
-      : ""
-  }
-
-  ${
-    !owner.email &&
-    !owner.telegram
-      ? `
+      : `
         <span
           style="
-            opacity:.45;
+            opacity:.38;
+            font-size:.82rem;
           "
         >
-          Контакт не вказано
+          Не додано
         </span>
-      `
-      : ""
-  }
-</td>
-      <td>📍 ${escapeHtml(owner.note || "—")}</td>
-      <td class="ownerActionsCell">
-  <button
-    class="iconBtn ownerActionBtn ownerEditBtn"
-    type="button"
-    title="Редагувати власника"
-    aria-label="Редагувати власника"
-    data-edit-owner="${escapeHtml(owner.id)}"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 20h9"></path>
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
-    </svg>
-  </button>
+      `;
 
-  <button
-    class="iconBtn ownerActionBtn ownerDeleteBtn"
-    type="button"
-    title="Видалити власника"
-    aria-label="Видалити власника"
-    data-del="${escapeHtml(owner.id)}"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M3 6h18"></path>
-      <path d="M8 6V4h8v2"></path>
-      <path d="M19 6l-1 14H6L5 6"></path>
-      <path d="M10 11v5"></path>
-      <path d="M14 11v5"></path>
-    </svg>
-  </button>
-</td>
-    `;
+  tr.innerHTML = `
+    <td style="font-weight:600;">
+      👤 ${escapeHtml(
+        owner.name ||
+        "Без імені"
+      )}
+    </td>
 
-    tbody.appendChild(tr);
-  });
+    <td>
+      ${petsHtml}
+    </td>
+
+    <td>
+      📞 ${escapeHtml(
+        owner.phone ||
+        "Не вказано"
+      )}
+    </td>
+
+    <td>
+      ${
+        owner.email
+          ? `
+            <div>
+              ✉️ ${escapeHtml(
+                owner.email
+              )}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        owner.telegram
+          ? `
+            <div
+              style="
+                margin-top:4px;
+                opacity:.75;
+              "
+            >
+              ✈️ ${escapeHtml(
+                owner.telegram
+              )}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        !owner.email &&
+        !owner.telegram
+          ? `
+            <span
+              style="
+                opacity:.45;
+              "
+            >
+              Контакт не вказано
+            </span>
+          `
+          : ""
+      }
+    </td>
+
+    <td>
+      📍 ${escapeHtml(
+        owner.note ||
+        "—"
+      )}
+    </td>
+
+    <td class="ownerActionsCell">
+      <button
+        class="iconBtn ownerActionBtn ownerEditBtn"
+        type="button"
+        title="Редагувати власника"
+        aria-label="Редагувати власника"
+        data-edit-owner="${escapeHtml(
+          owner.id
+        )}"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+        </svg>
+      </button>
+
+      <button
+        class="iconBtn ownerActionBtn ownerDeleteBtn"
+        type="button"
+        title="Видалити власника"
+        aria-label="Видалити власника"
+        data-delete-owner="${escapeHtml(
+          owner.id
+        )}"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 6h18"></path>
+          <path d="M8 6V4h8v2"></path>
+          <path d="M19 6l-1 14H6L5 6"></path>
+          <path d="M10 11v5"></path>
+          <path d="M14 11v5"></path>
+        </svg>
+      </button>
+    </td>
+  `;
+
+  tbody.appendChild(tr);
+});
 }
 
 // =========================
