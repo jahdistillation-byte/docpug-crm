@@ -45149,18 +45149,75 @@ function renderOwners() {
   const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
 
     const filteredOwners = ownersRaw.filter((owner) => {
-    if (!q) return true;
-    
-    // Безопасное приведение к строке и нижнему регистру
-    const name = (owner.name || "").toString().toLowerCase();
-    const phone = (owner.phone || "").toString().toLowerCase();
-    const note = (owner.note || "").toString().toLowerCase();
-    
-    return name.includes(q) || phone.includes(q) || note.includes(q);
-  });
+  if (!q) return true;
+
+  const name =
+    String(owner.name || "")
+      .toLowerCase();
+
+  const phone =
+    String(owner.phone || "")
+      .toLowerCase();
+
+  const note =
+    String(owner.note || "")
+      .toLowerCase();
+
+  const email =
+    String(owner.email || "")
+      .toLowerCase();
+
+  const telegram =
+    String(owner.telegram || "")
+      .toLowerCase();
+
+  const ownerPets =
+    (state.patients || [])
+      .filter(
+        (patient) =>
+          String(patient.owner_id) ===
+          String(owner.id)
+      );
+
+  const petsSearchText =
+    ownerPets
+      .map(
+        (patient) => [
+          patient.name,
+          patient.breed,
+          patient.species,
+        ]
+          .filter(Boolean)
+          .join(" ")
+      )
+      .join(" ")
+      .toLowerCase();
+
+  return (
+    name.includes(q) ||
+    phone.includes(q) ||
+    note.includes(q) ||
+    email.includes(q) ||
+    telegram.includes(q) ||
+    petsSearchText.includes(q)
+  );
+});
 
   if (!filteredOwners.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; opacity: 0.5;">Нічого не знайдено.</td></tr>`;
+    tbody.innerHTML = `
+  <tr>
+    <td
+      colspan="6"
+      style="
+        text-align:center;
+        padding:20px;
+        opacity:.5;
+      "
+    >
+      Нічого не знайдено.
+    </td>
+  </tr>
+`;
     return;
   }
 
@@ -45176,9 +45233,23 @@ function renderOwners() {
     ).length;
 
     tr.innerHTML = `
-      <td style="font-weight: 600;">👤 ${escapeHtml(owner.name || "Без імені")}</td>
-      <td>📞 ${escapeHtml(owner.phone || "Не вказано")}</td>
-      <td>
+  <td style="font-weight:600;">
+    👤 ${escapeHtml(
+      owner.name ||
+      "Без імені"
+    )}
+  </td>
+
+  <td>
+    ${petsHtml}
+  </td>
+
+  <td>
+    📞 ${escapeHtml(
+      owner.phone ||
+      "Не вказано"
+    )}
+  </td>
   ${
     owner.email
       ? `
