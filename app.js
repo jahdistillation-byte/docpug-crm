@@ -37317,166 +37317,105 @@ initCalendarTopScroll();
           );
 
           const pointerTime =
-            getTimeFromPointer(
-              event
-            );
-
-          if (hover) {
-            hover.hidden =
-              false;
-
-            hover.style.top =
-              `${pointerTime.top}px`;
-          }
-
-          if (hoverTime) {
-            hoverTime.textContent =
-              pointerTime.time;
-          }
-        }
-      );
-
-      timeline.addEventListener(
-        "dragleave",
-        (event) => {
-          if (
-            timeline.contains(
-              event.relatedTarget
-            )
-          ) {
-            return;
-          }
-
-          timeline.classList.remove(
-            "is-drag-over"
-          );
-
-          if (hover) {
-            hover.hidden =
-              true;
-          }
-        }
-      );
-
-      timeline.addEventListener(
-        "drop",
-        async (event) => {
-          event.preventDefault();
-
-          timeline.classList.remove(
-            "is-drag-over"
-          );
-
-          if (hover) {
-            hover.hidden =
-              true;
-          }
-
-          let dragData =
-            null;
-
-          try {
-            dragData =
-              JSON.parse(
-                event.dataTransfer
-                  .getData(
-                    "text/plain"
-                  ) ||
-                "{}"
-              );
-          } catch {
-            return;
-          }
-
-          const droppedStaffId =
-            String(
-              dragData?.staff_id ||
-              staffId ||
-              ""
-            );
-
-          if (!droppedStaffId) {
-            return;
-          }
-
-          const pointerTime =
-            getTimeFromPointer(
-              event
-            );
-
-          const title =
-            (
-              prompt(
-                `Запис на ${pointerTime.time}. Назва:`,
-                "Новий прийом"
-              ) ||
-              ""
-            ).trim();
-
-          if (!title) {
-            return;
-          }
-
-          const durationRaw =
-            prompt(
-              "Тривалість у хвилинах:",
-              "60"
-            ) ||
-            "60";
-
-          const duration =
-            Math.max(
-              15,
-              Number(
-                durationRaw
-              ) ||
-              60
-            );
-
-          const endTime =
-            addMinutesToTime(
-              pointerTime.time,
-              duration
-            );
-
-          const note =
-            (
-              prompt(
-                "Коментар:",
-                ""
-              ) ||
-              ""
-            ).trim();
-
-          const created =
-            await createCalendarEventApi({
-              title,
-
-              event_date:
-                today,
-
-              start_time:
-                pointerTime.time,
-
-              end_time:
-                endTime,
-
-              staff_id:
-                droppedStaffId,
-
-              note,
-
-              status:
-                "planned",
-            });
-
-          if (created) {
-            await renderCalendarTab();
-          }
-        }
-      );
-    }
+  getTimeFromPointer(
+    event
   );
+
+if (hover) {
+  hover.hidden =
+    false;
+
+  hover.style.top =
+    `${pointerTime.top}px`;
+}
+
+if (hoverTime) {
+  hoverTime.textContent =
+    pointerTime.time;
+}
+}
+);
+
+timeline.addEventListener(
+  "dragleave",
+  (event) => {
+    if (
+      timeline.contains(
+        event.relatedTarget
+      )
+    ) {
+      return;
+    }
+
+    timeline.classList.remove(
+      "is-drag-over"
+    );
+
+    if (hover) {
+      hover.hidden =
+        true;
+    }
+  }
+);
+
+timeline.addEventListener(
+  "drop",
+  (event) => {
+    event.preventDefault();
+
+    timeline.classList.remove(
+      "is-drag-over"
+    );
+
+    if (hover) {
+      hover.hidden =
+        true;
+    }
+
+    let dragData =
+      null;
+
+    try {
+      dragData =
+        JSON.parse(
+          event.dataTransfer
+            .getData(
+              "text/plain"
+            ) ||
+          "{}"
+        );
+    } catch {
+      return;
+    }
+
+    const droppedStaffId =
+      String(
+        dragData?.staff_id ||
+        staffId ||
+        ""
+      );
+
+    if (!droppedStaffId) {
+      return;
+    }
+
+    const pointerTime =
+      getTimeFromPointer(
+        event
+      );
+
+    if (!pointerTime.time) {
+      return;
+    }
+
+    openVisitFromCalendar(
+      pointerTime.time,
+      droppedStaffId
+    );
+  }
+);
+}
+);
 
   $("#calPrevDay")?.addEventListener("click", async () => {
     const d = new Date(today);
