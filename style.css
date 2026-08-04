@@ -42995,3 +42995,229 @@ h3 {
     min-width: 850px;
   }
 }
+/* =====================================================
+   PUG CRM — CALENDAR READABILITY FINAL FIX
+   Крупный читаемый календарь без мелкого текста
+===================================================== */
+
+.page[data-page="calendar"] {
+  font-size: 16px !important;
+}
+
+/* Основная карточка календаря */
+.page[data-page="calendar"] .calendarCard {
+  padding: 26px !important;
+}
+
+/* Заголовок календаря */
+.page[data-page="calendar"] .calendarHeader h2 {
+  font-size: 26px !important;
+  line-height: 1.2 !important;
+}
+
+.page[data-page="calendar"] .calendarCard .hint {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  opacity: 0.78 !important;
+}
+
+/* Кнопки День / Неделя / Месяц */
+.page[data-page="calendar"] .calendarModes button,
+.page[data-page="calendar"] button.primary,
+.page[data-page="calendar"] button.ghost,
+.page[data-page="calendar"] .miniBtn {
+  min-height: 42px !important;
+  padding: 10px 16px !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+}
+
+/* Навигация по дате */
+.page[data-page="calendar"] .calendarDate {
+  min-width: 170px !important;
+  min-height: 44px !important;
+  padding: 11px 16px !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+}
+
+/* Часы слева */
+.page[data-page="calendar"] .calTimeHead {
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+
+.page[data-page="calendar"] .calTime {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+}
+
+/* Делаем колонку времени немного шире */
+.page[data-page="calendar"] .calendarDayGrid {
+  grid-template-columns: 82px minmax(0, 1fr) !important;
+}
+
+/* Колонки врачей больше не ужимаются */
+.page[data-page="calendar"] .calDoctorsGrid {
+  grid-auto-columns: minmax(285px, 1fr) !important;
+}
+
+.page[data-page="calendar"] .calDoctorCol {
+  min-width: 285px !important;
+}
+
+/* Шапка врача */
+.page[data-page="calendar"] .calDoctorHead {
+  min-height: 92px !important;
+  height: auto !important;
+  padding: 14px 16px !important;
+}
+
+.page[data-page="calendar"] .calDoctorName {
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+  font-weight: 850 !important;
+}
+
+.page[data-page="calendar"] .calDoctorMeta {
+  margin-top: 5px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+/* Специализации врачей */
+.page[data-page="calendar"] .calStaffSpecialization,
+.page[data-page="calendar"] .specTag {
+  min-height: 23px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
+/* Слоты календаря */
+.page[data-page="calendar"] .calSlot {
+  min-height: 92px !important;
+}
+
+.page[data-page="calendar"] .calEmptySlot {
+  font-size: 14px !important;
+}
+
+/* Карточки записей */
+.page[data-page="calendar"] .calEventCard {
+  padding: 13px 14px !important;
+}
+
+.page[data-page="calendar"] .calEventTitle {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+}
+
+.page[data-page="calendar"] .calEventTime,
+.page[data-page="calendar"] .calEventMeta {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+/* Правая панель врачей */
+.page[data-page="calendar"] .calStaffPanel {
+  width: 290px !important;
+  padding: 18px !important;
+}
+
+.page[data-page="calendar"] .calendarWorkArea {
+  grid-template-columns:
+    minmax(0, 1fr)
+    290px !important;
+}
+
+.page[data-page="calendar"] .calStaffPanelTitle {
+  font-size: 17px !important;
+  line-height: 1.25 !important;
+}
+
+.page[data-page="calendar"] .calStaffPanelSub {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+/* Перетаскиваемые карточки врачей */
+.page[data-page="calendar"] .calStaffDrag {
+  min-height: 66px !important;
+  padding: 12px 14px !important;
+  border-radius: 15px !important;
+}
+
+.page[data-page="calendar"] .calStaffDragName {
+  font-size: 15px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+}
+
+.page[data-page="calendar"] .calStaffDragRole {
+  margin-top: 3px !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+}
+
+/* Нижняя навигация */
+.mac-dock {
+  max-width: calc(100vw - 32px) !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.dock-menu .menu-item a {
+  min-height: 48px !important;
+  padding: 11px 16px !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+}
+
+.dock-menu .menu-item a .dock-icon {
+  font-size: 19px !important;
+}
+
+/* Экраны ноутбуков */
+@media (max-width: 1366px) {
+  .page[data-page="calendar"] .calendarWorkArea {
+    grid-template-columns:
+      minmax(0, 1fr)
+      260px !important;
+  }
+
+  .page[data-page="calendar"] .calStaffPanel {
+    width: 260px !important;
+  }
+
+  .page[data-page="calendar"] .calDoctorsGrid {
+    grid-auto-columns: 280px !important;
+  }
+
+  .page[data-page="calendar"] .calDoctorCol {
+    min-width: 280px !important;
+  }
+
+  .dock-menu .menu-item a {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+}
+
+/* На узких экранах панель врачей уходит вниз */
+@media (max-width: 1050px) {
+  .page[data-page="calendar"] .calendarWorkArea {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page[data-page="calendar"] .calStaffPanel {
+    position: static !important;
+    width: 100% !important;
+  }
+
+  .page[data-page="calendar"] .calStaffDragList {
+    display: grid !important;
+    grid-template-columns:
+      repeat(auto-fit, minmax(190px, 1fr)) !important;
+  }
+}
