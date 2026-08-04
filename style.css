@@ -42857,3 +42857,141 @@ body[data-theme="white"] .ownerReportDelta.is-neutral {
     color: var(--finance-text-faint);
   }
 }
+/* =====================================================
+   PUG CRM — READABILITY / ACCESSIBILITY
+   Покращена читабельність на ноутбуках і малих екранах
+===================================================== */
+
+html {
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Основний текст */
+p,
+td,
+label,
+input,
+select,
+textarea,
+button {
+  font-size: max(0.88rem, 14px);
+}
+
+/* Поля вводу не повинні бути дрібними */
+input,
+select,
+textarea {
+  min-height: 42px;
+  line-height: 1.35;
+}
+
+/* Підказки й другорядний текст */
+.hint,
+small,
+[class*="hint"],
+[class*="Hint"],
+[class*="sub"],
+[class*="Sub"],
+[class*="meta"],
+[class*="Meta"],
+[class*="eyebrow"],
+[class*="Eyebrow"] {
+  font-size: max(0.78rem, 13px);
+  line-height: 1.4;
+}
+
+/* Таблиці */
+.data-table {
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  font-size: max(0.78rem, 13px);
+  line-height: 1.3;
+}
+
+.data-table td {
+  font-size: max(0.86rem, 14px);
+  line-height: 1.45;
+}
+
+/* Кнопки */
+button,
+.btn-primary,
+.primary,
+.ghost {
+  font-size: max(0.86rem, 14px);
+}
+
+/* Заголовки */
+h1 {
+  font-size: clamp(1.65rem, 2.2vw, 2.35rem);
+  line-height: 1.15;
+}
+
+h2 {
+  font-size: clamp(1.3rem, 1.8vw, 1.75rem);
+  line-height: 1.2;
+}
+
+h3 {
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+  line-height: 1.25;
+}
+
+/* Таблиця може прокручуватись, а не стискати текст */
+.data-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  min-width: 920px;
+}
+
+/* Невеликі ноутбуки */
+@media (max-width: 1280px) {
+  html {
+    font-size: 16px;
+  }
+
+  .main-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .data-table td,
+  .data-table th {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* Планшети та вузькі екрани */
+@media (max-width: 900px) {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    line-height: 1.55;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+
+  .data-table {
+    min-width: 850px;
+  }
+}
