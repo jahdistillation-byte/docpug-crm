@@ -43221,3 +43221,79 @@ h3 {
       repeat(auto-fit, minmax(190px, 1fr)) !important;
   }
 }
+/* =====================================================
+   CALENDAR — CONTRAST FIX
+   Убираем слишком бледный текст
+===================================================== */
+
+.page[data-page="calendar"] .calendarHeader .hint {
+  color: rgba(255, 255, 255, 0.82) !important;
+  opacity: 1 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Вторичный текст в календаре */
+.page[data-page="calendar"] :is(
+  .calDoctorMeta,
+  .calStaffPanelSub,
+  .calStaffDragRole,
+  .calEventTime,
+  .calEventMeta,
+  .calendarTimelineTimeLabel,
+  .calendarTimelineTimeHead
+) {
+  color: rgba(255, 255, 255, 0.68) !important;
+  opacity: 1 !important;
+}
+
+/* Самый важный текст */
+.page[data-page="calendar"] :is(
+  .calDoctorName,
+  .calStaffDragName,
+  .calStaffPanelTitle,
+  .calendarDate,
+  .calendarHeader h2
+) {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Часы слева */
+.page[data-page="calendar"] .calendarTimelineTimeLabel {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+/* Подписи врачей */
+.page[data-page="calendar"] .calDoctorMeta,
+.page[data-page="calendar"] .calStaffDragRole {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Правая подсказка */
+.page[data-page="calendar"] .calStaffPanelSub {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Белая тема */
+body[data-theme="white"] .page[data-page="calendar"] .calendarHeader .hint {
+  color: rgba(28, 28, 30, 0.78) !important;
+  text-shadow: none !important;
+}
+
+body[data-theme="white"] .page[data-page="calendar"] :is(
+  .calDoctorMeta,
+  .calStaffPanelSub,
+  .calStaffDragRole,
+  .calEventTime,
+  .calEventMeta,
+  .calendarTimelineTimeLabel,
+  .calendarTimelineTimeHead
+) {
+  color: rgba(28, 28, 30, 0.62) !important;
+}
