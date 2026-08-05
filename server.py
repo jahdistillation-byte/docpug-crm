@@ -14518,32 +14518,181 @@ def api_upsert_staff_schedule():
     )
 
     if auth_error:
-        return auth_error    
-    d = request.get_json(silent=True) or {}
-    work_date = d.get("work_date")
-    staff_id = d.get("staff_id")
-    if not work_date or not staff_id:
-        return fail("work_date and staff_id required", 400)
+        return auth_error
 
-    current_org = get_current_org_id()
-    payload = {
-        "org_id": current_org,
-        "work_date": work_date,
-        "staff_id": staff_id,
-        "is_active": d.get("is_active", True),
-        "start_time": d.get("start_time") or "09:00",
-        "end_time": d.get("end_time") or "18:00",
-    }
-    try:
-        res = (
-            supabase.table("staff_schedule")
-            .upsert(payload, on_conflict="work_date,staff_id")
-            .execute()
+    data = (
+        request.get_json(
+            silent=True
         )
-        row = res.data[0] if getattr(res, "data", None) else payload
+        or {}
+    )
+
+    work_date = str(
+        data.get("work_date")
+        or ""
+    ).strip()
+
+    staff_id = str(
+        data.get("staff_id")
+        or ""
+    ).strip()
+
+    if (
+        not work_date
+        or not staff_id
+    ):
+        return fail(
+            "work_date and staff_id required",
+            400,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        datetime.strptime(
+            work_date,
+            "%Y-%m-%d",
+        )
+    except ValueError:
+        return fail(
+            "Invalid work_date",
+            400,
+        )
+
+    start_time = str(
+        data.get("start_time")
+        or "09:00"
+    ).strip()
+
+    end_time = str(
+        data.get("end_time")
+        or "18:00"
+    ).strip()
+
+    try:
+        datetime.strptime(
+            start_time,
+            "%H:%M",
+        )
+
+        datetime.strptime(
+            end_time,
+            "%H:%M",
+        )
+
+    except ValueError:
+        return fail(
+            "Invalid schedule time",
+            400,
+        )
+
+    payload = {
+        "org_id":
+            current_org,
+
+        "work_date":
+            work_date,
+
+        "staff_id":
+            staff_id,
+
+        "is_active":
+            data.get(
+                "is_active",
+                True,
+            )
+            is not False,
+
+        "start_time":
+            start_time,
+
+        "end_time":
+            end_time,
+    }
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "staff_schedule"
+                )
+                .upsert(
+                    payload,
+                    on_conflict=(
+                        "work_date,staff_id"
+                    ),
+                )
+            ),
+            attempts=5,
+            delay=0.4,
+        )
+
+        row = (
+            result.data[0]
+            if getattr(
+                result,
+                "data",
+                None,
+            )
+            else payload
+        )
+
         return ok(row)
-    except Exception as e:
-        return fail(str(e))
+
+    except Exception as error:
+        error_text = str(
+            error or ""
+        )
+
+        error_lower = (
+            error_text.lower()
+        )
+
+        print(
+            "❌ POST /api/staff-schedule:",
+            repr(error),
+            flush=True,
+        )
+
+        temporary_error = any(
+            marker in error_lower
+            for marker in (
+                "resource temporarily unavailable",
+                "errno 11",
+                "temporarily unavailable",
+                "connection reset",
+                "connection aborted",
+                "connection refused",
+                "network is unreachable",
+                "try again",
+                "timed out",
+                "timeout",
+                "server disconnected",
+            )
+        )
+
+        if temporary_error:
+            return fail(
+                (
+                    "Сервер тимчасово не відповідає. "
+                    "Спробуйте ще раз."
+                ),
+                503,
+            )
+
+        return fail(
+            "Не вдалося зберегти графік.",
+            500,
+        )
     
     
 
@@ -14554,19 +14703,111 @@ def api_delete_staff_schedule():
     )
 
     if auth_error:
-        return auth_error    
-    d = request.get_json(silent=True) or {}
-    work_date = d.get("work_date")
-    staff_id = d.get("staff_id")    
-    if not work_date or not staff_id:
-        return fail("work_date and staff_id required", 400)
+        return auth_error
 
-    current_org = get_current_org_id()
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    work_date = str(
+        data.get("work_date")
+        or ""
+    ).strip()
+
+    staff_id = str(
+        data.get("staff_id")
+        or ""
+    ).strip()
+
+    if (
+        not work_date
+        or not staff_id
+    ):
+        return fail(
+            "work_date and staff_id required",
+            400,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
     try:
-        supabase.table("staff_schedule").delete().eq("org_id", current_org).eq("work_date", work_date).eq("staff_id", staff_id).execute()
+        execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "staff_schedule"
+                )
+                .delete()
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "work_date",
+                    work_date,
+                )
+                .eq(
+                    "staff_id",
+                    staff_id,
+                )
+            ),
+            attempts=5,
+            delay=0.4,
+        )
+
         return ok(True)
-    except Exception as e:
-        return fail(str(e))
+
+    except Exception as error:
+        print(
+            "❌ DELETE /api/staff-schedule:",
+            repr(error),
+            flush=True,
+        )
+
+        error_lower = str(
+            error or ""
+        ).lower()
+
+        temporary_error = any(
+            marker in error_lower
+            for marker in (
+                "resource temporarily unavailable",
+                "errno 11",
+                "temporarily unavailable",
+                "connection reset",
+                "connection aborted",
+                "connection refused",
+                "try again",
+                "timed out",
+                "timeout",
+                "server disconnected",
+            )
+        )
+
+        if temporary_error:
+            return fail(
+                (
+                    "Сервер тимчасово не відповідає. "
+                    "Спробуйте ще раз."
+                ),
+                503,
+            )
+
+        return fail(
+            "Не вдалося видалити зміну.",
+            500,
+        )
 
 
 # =========================

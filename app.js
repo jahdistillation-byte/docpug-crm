@@ -35129,21 +35129,174 @@ async function loadStaffScheduleApi(date) {
   }
 }
 
-async function saveStaffScheduleApi(payload) {
-  try {
-    const res = await fetch("/api/staff-schedule", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot save staff schedule");
-    return json.data || json.item || null;
-  } catch (e) {
-    console.error("saveStaffScheduleApi failed:", e);
-    alert("Не вдалося зберегти зміну: " + (e?.message || e));
-    return null;
+async function saveStaffScheduleApi(
+  payload
+) {
+  const maxAttempts = 3;
+
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt += 1
+  ) {
+    try {
+      const response =
+        await fetch(
+          "/api/staff-schedule",
+          {
+            method: "POST",
+
+            credentials:
+              "include",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Accept:
+                "application/json",
+
+              ...getOrgHeaders(),
+            },
+
+            body:
+              JSON.stringify(
+                payload || {}
+              ),
+          }
+        );
+
+      const text =
+        await response.text();
+
+      let json = null;
+
+      try {
+        json = text
+          ? JSON.parse(text)
+          : null;
+      } catch {
+        json = null;
+      }
+
+      if (
+        response.ok &&
+        json?.ok === true
+      ) {
+        return (
+          json.data ||
+          json.item ||
+          null
+        );
+      }
+
+      const errorMessage =
+        json?.error ||
+        (
+          text &&
+          !text.trim().startsWith("<")
+            ? text
+            : ""
+        ) ||
+        `HTTP ${response.status}`;
+
+      const retryable =
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 504 ||
+        String(
+          errorMessage
+        )
+          .toLowerCase()
+          .includes(
+            "temporarily unavailable"
+          ) ||
+        String(
+          errorMessage
+        )
+          .toLowerCase()
+          .includes(
+            "errno 11"
+          );
+
+      if (
+        retryable &&
+        attempt < maxAttempts
+      ) {
+        await new Promise(
+          (resolve) =>
+            setTimeout(
+              resolve,
+              attempt * 500
+            )
+        );
+
+        continue;
+      }
+
+      throw new Error(
+        errorMessage
+      );
+
+    } catch (error) {
+      const errorMessage =
+        String(
+          error?.message ||
+          error ||
+          ""
+        );
+
+      const retryable =
+        errorMessage
+          .toLowerCase()
+          .includes(
+            "temporarily unavailable"
+          ) ||
+        errorMessage
+          .toLowerCase()
+          .includes(
+            "errno 11"
+          ) ||
+        errorMessage
+          .toLowerCase()
+          .includes(
+            "failed to fetch"
+          ) ||
+        error instanceof TypeError;
+
+      if (
+        retryable &&
+        attempt < maxAttempts
+      ) {
+        await new Promise(
+          (resolve) =>
+            setTimeout(
+              resolve,
+              attempt * 500
+            )
+        );
+
+        continue;
+      }
+
+      console.error(
+        "saveStaffScheduleApi failed:",
+        error
+      );
+
+      alert(
+        "Не вдалося зберегти зміну: " +
+        (
+          error?.message ||
+          error
+        )
+      );
+
+      return null;
+    }
   }
+
+  return null;
 }
 
 async function loadStaffDashboardApi(staffId) {
