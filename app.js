@@ -45826,16 +45826,57 @@ const qDigits =
           String(owner.id)
       );
 
-  const visiblePets =
-    ownerPets.slice(0, 2);
+  const matchingPets =
+  q
+    ? ownerPets.filter(
+        (patient) => {
+          const patientSearchText = [
+            patient.name,
+            patient.breed,
+            patient.species,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-  const hiddenPetsCount =
-    Math.max(
-      0,
-      ownerPets.length -
-      visiblePets.length
-    );
+          return patientSearchText.includes(
+            q
+          );
+        }
+      )
+    : [];
 
+const otherPets =
+  ownerPets.filter(
+    (patient) =>
+      !matchingPets.some(
+        (matchingPatient) =>
+          String(
+            matchingPatient.id
+          ) ===
+          String(
+            patient.id
+          )
+      )
+  );
+
+const orderedPets =
+  q && matchingPets.length
+    ? [
+        ...matchingPets,
+        ...otherPets,
+      ]
+    : ownerPets;
+
+const visiblePets =
+  orderedPets.slice(0, 2);
+
+const hiddenPetsCount =
+  Math.max(
+    0,
+    ownerPets.length -
+    visiblePets.length
+  );
   const allPetsTitle =
     ownerPets
       .map((patient) => {
