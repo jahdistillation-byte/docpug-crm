@@ -1946,14 +1946,27 @@ async function loadPatientsApi() {
   try {
     return await patientsApiInFlight;
   } finally {
-    patientsApiLoaded = true;
-    patientsApiLoading = false;
-    patientsApiInFlight = null;
+  patientsApiLoaded = true;
+  patientsApiLoading = false;
+  patientsApiInFlight = null;
 
-    if (state.route === "patients") {
-      renderPatientsTab();
-    }
+  if (state.route === "patients") {
+    renderPatientsTab();
   }
+
+  if (state.route === "owners") {
+    renderOwners();
+  }
+
+  if (
+    state.route === "owner" &&
+    state.selectedOwnerId
+  ) {
+    await renderOwnerPage(
+      state.selectedOwnerId
+    );
+  }
+}
 }
 
 async function loadPatientsApiRequest() {
