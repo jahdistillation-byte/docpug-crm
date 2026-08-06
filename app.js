@@ -35851,31 +35851,70 @@ async function renderCalendarTab() {
       ${
         canManageSchedule
           ? `
-            <div class="monthDrawerQuick">
-              <button
-                class="ghost"
-                id="monthAllActive"
-                type="button"
-              >
-                Усі на зміні
-              </button>
+            <<section class="monthScheduleSection">
+  <div class="monthScheduleSectionHead">
+    <span class="monthScheduleStep">
+      1
+    </span>
 
-              <button
-                class="ghost"
-                id="monthAllOff"
-                type="button"
-              >
-                Усім вихідний
-              </button>
-            </div>
+    <div>
+      <strong>
+        Хто працює цього дня
+      </strong>
 
+      <small>
+        Швидко призначте всіх або зробіть день вихідним.
+      </small>
+    </div>
+  </div>
+
+  <div class="monthDrawerQuick">
+    <button
+      class="monthScheduleQuickButton is-active"
+      id="monthAllActive"
+      type="button"
+    >
+      <span>👥</span>
+
+      <div>
+        <strong>Усі на зміні</strong>
+        <small>Призначити всю команду</small>
+      </div>
+    </button>
+
+    <button
+      class="monthScheduleQuickButton is-off"
+      id="monthAllOff"
+      type="button"
+    >
+      <span>☕</span>
+
+      <div>
+        <strong>Усім вихідний</strong>
+        <small>Прибрати всі зміни</small>
+      </div>
+    </button>
+  </div>
+</section>
             <div class="monthBulkBox">
-              <div class="monthBulkTitle">
-                Масове призначення
-              </div>
+              <div class="monthScheduleSectionHead">
+  <span class="monthScheduleStep">
+    2
+  </span>
+
+  <div>
+    <strong>
+      Повторюваний графік
+    </strong>
+
+    <small>
+      Оберіть працівника, період і потрібні дні тижня.
+    </small>
+  </div>
+</div>
 
               <label class="monthBulkField">
-                <span>Працівник</span>
+                <span>Кого поставити на зміну</span>
 
                 <select id="monthBulkStaff">
                   ${staff
