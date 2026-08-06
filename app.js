@@ -35736,11 +35736,38 @@ async function renderCalendarTab() {
             <div class="hint">Тижневий розклад записів клініки.</div>
           </div>
 
-          <div class="calendarModes">
-            <button class="ghost" data-cal-mode="day">День</button>
-            <button class="primary" data-cal-mode="week">Тиждень</button>
-            <button class="ghost" data-cal-mode="month">Місяць</button>
-          </div>
+          <div class="calendarViewSwitcher">
+  <div class="calendarViewGroup">
+    <span class="calendarViewGroupLabel">
+      Записи
+    </span>
+
+    <button
+      class="ghost"
+      data-cal-mode="day"
+      type="button"
+    >
+      День
+    </button>
+
+    <button
+      class="primary"
+      data-cal-mode="week"
+      type="button"
+    >
+      Тиждень
+    </button>
+  </div>
+
+  <button
+    class="ghost calendarScheduleButton"
+    data-cal-mode="month"
+    type="button"
+  >
+    <span>👥</span>
+    Графік команди
+  </button>
+</div>
         </div>
 
         <div class="calendarTop">
@@ -35926,15 +35953,35 @@ $$("[data-week-create-date]")
       <div class="card calendarCard">
         <div class="calendarHeader">
           <div>
-            <h2>Місячний графік</h2>
-            <div class="hint">Плануй зміни ветеринарів на весь місяць.</div>
+            <h2>Графік роботи команди</h2>
+            <div class="hint">
+  Налаштовуйте робочі зміни співробітників окремо від записів пацієнтів.
+</div>
           </div>
 
-          <div class="calendarModes">
-            <button class="ghost" data-cal-mode="day">День</button>
-            <button class="ghost" data-cal-mode="week">Тиждень</button>
-            <button class="primary" data-cal-mode="month">Місяць</button>
-          </div>
+          <div class="calendarViewSwitcher">
+  <button
+    class="ghost calendarBackToVisits"
+    data-cal-mode="day"
+    type="button"
+  >
+    ← До записів
+  </button>
+
+  <div class="calendarScheduleActive">
+    <span>👥</span>
+
+    <div>
+      <strong>
+        Графік команди
+      </strong>
+
+      <small>
+        Зміни співробітників
+      </small>
+    </div>
+  </div>
+</div>
         </div>
 
         <div class="calendarTop">
@@ -37537,7 +37584,12 @@ page.innerHTML = `
     ＋ Створити запис
   </button>
 
-  <div class="calendarModes">
+  <div class="calendarViewSwitcher">
+  <div class="calendarViewGroup">
+    <span class="calendarViewGroupLabel">
+      Записи
+    </span>
+
     <button
       class="primary"
       data-cal-mode="day"
@@ -37553,15 +37605,17 @@ page.innerHTML = `
     >
       Тиждень
     </button>
-
-    <button
-      class="ghost"
-      data-cal-mode="month"
-      type="button"
-    >
-      Місяць
-    </button>
   </div>
+
+  <button
+    class="ghost calendarScheduleButton"
+    data-cal-mode="month"
+    type="button"
+  >
+    <span>👥</span>
+    Графік команди
+  </button>
+</div>
 </div>
     </div>
 

@@ -44373,3 +44373,147 @@ body[data-theme="white"]
     min-height: 50px;
   }
 }
+/* ======================================================
+   CALENDAR — VISITS AND TEAM SCHEDULE SEPARATION
+====================================================== */
+
+.calendarViewSwitcher {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendarViewGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.calendarViewGroupLabel {
+  padding: 0 8px;
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.5)
+  );
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.calendarScheduleButton {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color) 30%,
+      rgba(255, 255, 255, 0.08)
+    ) !important;
+}
+
+.calendarScheduleButton:hover {
+  border-color:
+    var(--accent-color) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 12%,
+      transparent
+    ) !important;
+}
+
+.calendarScheduleActive {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--accent-color);
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 18%,
+      rgba(255, 255, 255, 0.03)
+    );
+  box-shadow:
+    0 0 20px
+    color-mix(
+      in srgb,
+      var(--accent-color) 18%,
+      transparent
+    );
+}
+
+.calendarScheduleActive > span {
+  font-size: 20px;
+}
+
+.calendarScheduleActive strong,
+.calendarScheduleActive small {
+  display: block;
+}
+
+.calendarScheduleActive strong {
+  color: var(--text-main, #fff);
+  font-size: 13px;
+}
+
+.calendarScheduleActive small {
+  margin-top: 2px;
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.55)
+  );
+  font-size: 10px;
+}
+
+.calendarBackToVisits {
+  min-height: 46px !important;
+}
+
+body[data-theme="white"]
+.calendarViewGroup {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="white"]
+.calendarScheduleActive {
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 10%,
+      #ffffff
+    );
+}
+
+@media (max-width: 850px) {
+  .calendarViewSwitcher {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .calendarViewGroup {
+    width: 100%;
+  }
+
+  .calendarViewGroup button {
+    flex: 1;
+  }
+
+  .calendarScheduleButton,
+  .calendarBackToVisits,
+  .calendarScheduleActive {
+    width: 100%;
+    justify-content: center;
+  }
+}
