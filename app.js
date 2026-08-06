@@ -588,6 +588,118 @@ function initPhoneInputs() {
     }
   );
 }
+function normalizeTelegramUsername(value) {
+  let telegram =
+    String(value || "")
+      .trim();
+
+  telegram =
+    telegram.replace(
+      /^https?:\/\/t\.me\//i,
+      ""
+    );
+
+  telegram =
+    telegram.replace(
+      /^@/,
+      ""
+    );
+
+  telegram =
+    telegram.replace(
+      /[^a-zA-Z0-9_]/g,
+      ""
+    );
+
+  return telegram
+    ? `@${telegram.slice(0, 32)}`
+    : "";
+}
+
+
+function isValidTelegramUsername(value) {
+  const telegram =
+    normalizeTelegramUsername(
+      value
+    );
+
+  if (!telegram) {
+    return true;
+  }
+
+  return /^@[a-zA-Z0-9_]{5,32}$/.test(
+    telegram
+  );
+}
+
+
+function bindTelegramInput(input) {
+  if (
+    !input ||
+    input.dataset
+      .telegramBound === "1"
+  ) {
+    return;
+  }
+
+  input.dataset.telegramBound =
+    "1";
+
+  input.setAttribute(
+    "maxlength",
+    "33"
+  );
+
+  input.addEventListener(
+    "input",
+    () => {
+      input.setCustomValidity(
+        ""
+      );
+    }
+  );
+
+  input.addEventListener(
+    "blur",
+    () => {
+      input.value =
+        normalizeTelegramUsername(
+          input.value
+        );
+
+      if (
+        input.value &&
+        !isValidTelegramUsername(
+          input.value
+        )
+      ) {
+        input.setCustomValidity(
+          "Telegram username повинен містити від 5 до 32 символів після @"
+        );
+      } else {
+        input.setCustomValidity(
+          ""
+        );
+      }
+    }
+  );
+}
+
+
+function initTelegramInputs() {
+  [
+    "#ownerModalTelegram",
+    "#visitNewOwnerTelegram",
+  ].forEach(
+    (selector) => {
+      bindTelegramInput(
+        document.querySelector(
+          selector
+        )
+      );
+    }
+  );
+}
 function todayISO() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -56411,6 +56523,7 @@ bindUaPhoneInput(
   )
 );
 initPhoneInputs();
+initTelegramInputs();
 
 $("#ownerModalSave")
   ?.addEventListener(
