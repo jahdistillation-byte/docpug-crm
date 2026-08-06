@@ -16550,6 +16550,811 @@ def api_delete_hospital_task(task_id):
             f"Cannot delete hospital task: {error}",
             500
         )
+    # =====================================================
+# API: VISIT TASKS
+# =====================================================
+
+VISIT_TASK_STATUSES = {
+    "open",
+    "completed",
+}
+
+VISIT_TASK_PRIORITIES = {
+    "low",
+    "normal",
+    "high",
+}
+
+
+def get_visit_for_task(
+    visit_id,
+    current_org,
+):
+    visit_id = str(
+        visit_id or ""
+    ).strip()
+
+    if not visit_id:
+        return None
+
+    result = (
+        supabase
+        .table("visits")
+        .select(
+            "id,pet_id,staff_id"
+        )
+        .eq(
+            "org_id",
+            current_org
+        )
+        .eq(
+            "id",
+            visit_id
+        )
+        .limit(1)
+        .execute()
+    )
+
+    return (
+        result.data[0]
+        if result.data
+        else None
+    )
+
+
+@app.get(
+    "/api/visits/<visit_id>/tasks"
+)
+def api_get_visit_tasks(
+    visit_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        visit = get_visit_for_task(
+            visit_id,
+            current_org,
+        )
+
+        if not visit:
+            return fail(
+                "Візит не знайдено.",
+                404
+            )
+
+        status = str(
+            request.args.get(
+                "status"
+            )
+            or ""
+        ).strip()
+
+        query = (
+            supabase
+            .table("visit_tasks")
+            .select("*")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "visit_id",
+                visit_id
+            )
+        )
+
+        if (
+            status in
+            VISIT_TASK_STATUSES
+        ):
+            query = query.eq(
+                "status",
+                status
+            )
+
+        result = (
+            query
+            .order(
+                "created_at",
+                desc=False
+            )
+            .execute()
+        )
+
+        rows = (
+            result.data or []
+        )
+
+        rows.sort(
+            key=lambda row: (
+                row.get("status")
+                == "completed",
+
+                str(
+                    row.get("due_date")
+                    or "9999-12-31"
+                ),
+
+                str(
+                    row.get("due_time")
+                    or "23:59:59"
+                ),
+
+                str(
+                    row.get("created_at")
+                    or ""
+                ),
+            )
+        )
+
+        return ok(rows)
+
+    except Exception as error:
+        print(
+            "❌ GET visit tasks:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося завантажити задачі візиту.",
+            500
+        )
+
+
+@app.post(
+    "/api/visits/<visit_id>/tasks"
+)
+def api_create_visit_task(
+    visit_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        visit = get_visit_for_task(
+            visit_id,
+            current_org,
+        )
+
+        if not visit:
+            return fail(
+                "Візит не знайдено.",
+                404
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        title = str(
+            data.get("title")
+            or ""
+        ).strip()
+
+        if not title:
+            return fail(
+                "Вкажіть текст задачі.",
+                400
+            )
+
+        if len(title) > 240:
+            return fail(
+                "Текст задачі занадто довгий.",
+                400
+            )
+
+        due_date = str(
+            data.get("due_date")
+            or ""
+        ).strip()
+
+        due_time = str(
+            data.get("due_time")
+            or ""
+        ).strip()
+
+        priority = str(
+            data.get("priority")
+            or "normal"
+        ).strip().lower()
+
+        if (
+            priority not in
+            VISIT_TASK_PRIORITIES
+        ):
+            priority = "normal"
+
+        staff_id = str(
+            data.get("staff_id")
+            or visit.get("staff_id")
+            or user.get("staff_id")
+            or ""
+        ).strip()
+
+        patient_id = str(
+            data.get("patient_id")
+            or visit.get("pet_id")
+            or ""
+        ).strip()
+
+        if staff_id:
+            staff_result = (
+                supabase
+                .table("staff")
+                .select("id")
+                .eq(
+                    "org_id",
+                    current_org
+                )
+                .eq(
+                    "id",
+                    staff_id
+                )
+                .limit(1)
+                .execute()
+            )
+
+            if not staff_result.data:
+                return fail(
+                    "Співробітника не знайдено.",
+                    404
+                )
+
+        payload = {
+            "org_id":
+                current_org,
+
+            "visit_id":
+                visit_id,
+
+            "patient_id":
+                patient_id
+                or None,
+
+            "staff_id":
+                staff_id
+                or None,
+
+            "title":
+                title,
+
+            "due_date":
+                due_date
+                or None,
+
+            "due_time":
+                due_time
+                or None,
+
+            "status":
+                "open",
+
+            "priority":
+                priority,
+
+            "completed_at":
+                None,
+
+            "updated_at":
+                datetime.now(
+                    timezone.utc
+                ).isoformat(),
+        }
+
+        result = (
+            supabase
+            .table("visit_tasks")
+            .insert(
+                payload
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося створити задачу.",
+                500
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST visit task:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося створити задачу візиту.",
+            500
+        )
+
+
+@app.put(
+    "/api/visit-tasks/<task_id>"
+)
+def api_update_visit_task(
+    task_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+        existing_result = (
+            supabase
+            .table("visit_tasks")
+            .select("*")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                task_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not existing_result.data:
+            return fail(
+                "Задачу не знайдено.",
+                404
+            )
+
+        existing = (
+            existing_result.data[0]
+        )
+
+        payload = {}
+
+        if "title" in data:
+            title = str(
+                data.get("title")
+                or ""
+            ).strip()
+
+            if not title:
+                return fail(
+                    "Текст задачі не може бути порожнім.",
+                    400
+                )
+
+            if len(title) > 240:
+                return fail(
+                    "Текст задачі занадто довгий.",
+                    400
+                )
+
+            payload["title"] = (
+                title
+            )
+
+        if "due_date" in data:
+            payload["due_date"] = (
+                str(
+                    data.get(
+                        "due_date"
+                    )
+                    or ""
+                ).strip()
+                or None
+            )
+
+        if "due_time" in data:
+            payload["due_time"] = (
+                str(
+                    data.get(
+                        "due_time"
+                    )
+                    or ""
+                ).strip()
+                or None
+            )
+
+        if "priority" in data:
+            priority = str(
+                data.get("priority")
+                or "normal"
+            ).strip().lower()
+
+            if (
+                priority not in
+                VISIT_TASK_PRIORITIES
+            ):
+                return fail(
+                    "Некоректний пріоритет задачі.",
+                    400
+                )
+
+            payload["priority"] = (
+                priority
+            )
+
+        if "staff_id" in data:
+            staff_id = str(
+                data.get("staff_id")
+                or ""
+            ).strip()
+
+            if staff_id:
+                staff_result = (
+                    supabase
+                    .table("staff")
+                    .select("id")
+                    .eq(
+                        "org_id",
+                        current_org
+                    )
+                    .eq(
+                        "id",
+                        staff_id
+                    )
+                    .limit(1)
+                    .execute()
+                )
+
+                if not staff_result.data:
+                    return fail(
+                        "Співробітника не знайдено.",
+                        404
+                    )
+
+            payload["staff_id"] = (
+                staff_id
+                or None
+            )
+
+        if "status" in data:
+            status = str(
+                data.get("status")
+                or ""
+            ).strip().lower()
+
+            if (
+                status not in
+                VISIT_TASK_STATUSES
+            ):
+                return fail(
+                    "Некоректний статус задачі.",
+                    400
+                )
+
+            payload["status"] = (
+                status
+            )
+
+            if status == "completed":
+                payload["completed_at"] = (
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat()
+                )
+            else:
+                payload["completed_at"] = (
+                    None
+                )
+
+        if not payload:
+            return ok(existing)
+
+        payload["updated_at"] = (
+            datetime.now(
+                timezone.utc
+            ).isoformat()
+        )
+
+        result = (
+            supabase
+            .table("visit_tasks")
+            .update(payload)
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                task_id
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Задачу не знайдено.",
+                404
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUT visit task:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося оновити задачу.",
+            500
+        )
+
+
+@app.post(
+    "/api/visit-tasks/<task_id>/complete"
+)
+def api_complete_visit_task(
+    task_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        result = (
+            supabase
+            .table("visit_tasks")
+            .update({
+                "status":
+                    "completed",
+
+                "completed_at":
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+
+                "updated_at":
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+            })
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                task_id
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Задачу не знайдено.",
+                404
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ COMPLETE visit task:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося завершити задачу.",
+            500
+        )
+
+
+@app.post(
+    "/api/visit-tasks/<task_id>/reopen"
+)
+def api_reopen_visit_task(
+    task_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        result = (
+            supabase
+            .table("visit_tasks")
+            .update({
+                "status":
+                    "open",
+
+                "completed_at":
+                    None,
+
+                "updated_at":
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+            })
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                task_id
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Задачу не знайдено.",
+                404
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ REOPEN visit task:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося повернути задачу.",
+            500
+        )
+
+
+@app.delete(
+    "/api/visit-tasks/<task_id>"
+)
+def api_delete_visit_task(
+    task_id,
+):
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400
+            )
+
+        existing_result = (
+            supabase
+            .table("visit_tasks")
+            .select("id")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                task_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not existing_result.data:
+            return fail(
+                "Задачу не знайдено.",
+                404
+            )
+
+        (
+            supabase
+            .table("visit_tasks")
+            .delete()
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                task_id
+            )
+            .execute()
+        )
+
+        return ok(True)
+
+    except Exception as error:
+        print(
+            "❌ DELETE visit task:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося видалити задачу.",
+            500
+        )
 # =========================
 # API: VISITS
 # =========================
