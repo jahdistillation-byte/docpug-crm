@@ -55365,7 +55365,15 @@ async function renderStaffSpecsBox(selectedIds = []) {
       setOpen(box.hidden);
   }
 
-  box.onchange = updateSummary;
+  box.onchange = () => {
+  updateSummary();
+
+  setOpen(false);
+
+  if (toggle) {
+    toggle.focus();
+  }
+};
 
   setOpen(false);
   updateSummary();
