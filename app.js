@@ -35563,9 +35563,25 @@ async function renderCalendarTab() {
             return `
               <div class="weekDayCol">
                 <div class="weekDayHead">
-                  <div class="weekDayName">${dayNames[i]}</div>
-                  <div class="weekDayDate">${escapeHtml(date)}</div>
-                </div>
+  <div>
+    <div class="weekDayName">
+      ${dayNames[i]}
+    </div>
+
+    <div class="weekDayDate">
+      ${escapeHtml(date)}
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="weekCreateVisitButton"
+    data-week-create-date="${escapeHtml(date)}"
+    title="Створити запис"
+  >
+    ＋
+  </button>
+</div>
 
                 <div class="weekDayBody" data-week-date="${escapeHtml(date)}">
                   ${
@@ -35620,7 +35636,34 @@ async function renderCalendarTab() {
       window.__calendarDate = d.toISOString().slice(0, 10);
       await renderCalendarTab();
     });
+$$("[data-week-create-date]")
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
+        const date =
+          String(
+            button.dataset
+              .weekCreateDate || ""
+          ).trim();
+
+        if (!date) {
+          return;
+        }
+
+        window.__calendarDate =
+          date;
+
+        openVisitFromCalendar(
+          "10:00",
+          ""
+        );
+      }
+    );
+  });
     $$("[data-cal-event-id]").forEach((card) => {
       card.addEventListener("click", () => {
         const id = card.dataset.calEventId;
