@@ -9265,9 +9265,73 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
       <div class="teamDashStatus">На зміні</div>
 
       <div class="teamDashContact">
-        <div>📞 ${escapeHtml(doc.phone || "Телефон не вказано")}</div>
-        <div>✉ Email не вказано</div>
-      </div>
+  <div>
+    📞
+    ${escapeHtml(
+      doc.phone ||
+      "Телефон не вказано"
+    )}
+  </div>
+
+  <div>
+    ✉ Email не вказано
+  </div>
+
+  ${
+    doc.emergency_contact_name ||
+    doc.emergency_contact_phone
+      ? `
+        <div class="teamDashEmergencyContact">
+          <span>
+            ☎ Екстрений контакт
+          </span>
+
+          <strong>
+            ${escapeHtml(
+              doc.emergency_contact_name ||
+              "Контактна особа"
+            )}
+          </strong>
+
+          ${
+            doc.emergency_contact_relation
+              ? `
+                <small>
+                  ${escapeHtml(
+                    doc.emergency_contact_relation
+                  )}
+                </small>
+              `
+              : ""
+          }
+
+          ${
+            doc.emergency_contact_phone
+              ? `
+                <a
+                  href="tel:${escapeHtml(
+                    String(
+                      doc.emergency_contact_phone
+                    ).replace(
+                      /\s/g,
+                      ""
+                    )
+                  )}"
+                >
+                  ${escapeHtml(
+                    formatUaPhone(
+                      doc.emergency_contact_phone
+                    )
+                  )}
+                </a>
+              `
+              : ""
+          }
+        </div>
+      `
+      : ""
+  }
+</div>
 
       <div class="teamDashNav" id="teamProfileNav">
   <button class="active" type="button" data-profile-tab="overview">▦ Огляд</button>
@@ -57068,6 +57132,125 @@ async function renderStaffSpecsBox(selectedIds = []) {
   setOpen(false);
   updateSummary();
 }
+function ensureStaffEmergencyContactFields() {
+  const drawer =
+    document.getElementById(
+      "staffDrawer"
+    );
+
+  if (
+    !drawer ||
+    document.getElementById(
+      "staffEmergencyContactBlock"
+    )
+  ) {
+    return;
+  }
+
+  const noteInput =
+    document.getElementById(
+      "staffNote"
+    );
+
+  const noteField =
+    noteInput?.closest(
+      "label"
+    ) ||
+    noteInput?.parentElement;
+
+  if (!noteField) {
+    console.warn(
+      "Не знайдено місце для блоку екстреного контакту"
+    );
+
+    return;
+  }
+
+  const block =
+    document.createElement(
+      "section"
+    );
+
+  block.id =
+    "staffEmergencyContactBlock";
+
+  block.className =
+    "staffEmergencyContactBlock";
+
+  block.innerHTML = `
+    <div class="staffEmergencyContactHead">
+      <div class="staffEmergencyContactIcon">
+        ☎
+      </div>
+
+      <div>
+        <strong>
+          Екстрений контакт
+        </strong>
+
+        <span>
+          Контакт близької людини на випадок
+          надзвичайної ситуації.
+        </span>
+      </div>
+    </div>
+
+    <div class="staffEmergencyContactGrid">
+      <label>
+        <span>
+          Ім’я контактної особи
+        </span>
+
+        <input
+          id="staffEmergencyContactName"
+          type="text"
+          maxlength="120"
+          autocomplete="off"
+          placeholder="Наприклад: Олена Коваль"
+        >
+      </label>
+
+      <label>
+        <span>
+          Ким доводиться
+        </span>
+
+        <input
+          id="staffEmergencyContactRelation"
+          type="text"
+          maxlength="80"
+          autocomplete="off"
+          placeholder="Наприклад: дружина, брат, мати"
+        >
+      </label>
+
+      <label class="staffEmergencyContactPhoneField">
+        <span>
+          Телефон
+        </span>
+
+        <input
+          id="staffEmergencyContactPhone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="+380 XX XXX XX XX"
+        >
+      </label>
+    </div>
+  `;
+
+  noteField.insertAdjacentElement(
+    "beforebegin",
+    block
+  );
+
+  bindUaPhoneInput(
+    document.getElementById(
+      "staffEmergencyContactPhone"
+    )
+  );
+}
+
 async function openCreateStaffModal() {
   const drawer =
     document.getElementById(
@@ -57078,6 +57261,7 @@ async function openCreateStaffModal() {
     console.error(
       "staffDrawer не знайдено"
     );
+    ensureStaffEmergencyContactFields();
 
     alert(
       "Форма співробітника не знайдена в index.html."
@@ -57162,6 +57346,35 @@ async function openCreateStaffModal() {
   if (noteInput) {
     noteInput.value = "";
   }
+  const emergencyNameInput =
+  document.getElementById(
+    "staffEmergencyContactName"
+  );
+
+const emergencyPhoneInput =
+  document.getElementById(
+    "staffEmergencyContactPhone"
+  );
+
+const emergencyRelationInput =
+  document.getElementById(
+    "staffEmergencyContactRelation"
+  );
+
+if (emergencyNameInput) {
+  emergencyNameInput.value =
+    "";
+}
+
+if (emergencyPhoneInput) {
+  emergencyPhoneInput.value =
+    "";
+}
+
+if (emergencyRelationInput) {
+  emergencyRelationInput.value =
+    "";
+}
 
   /*
    * Для нового сотрудника
@@ -57183,19 +57396,90 @@ async function openCreateStaffModal() {
   }, 50);
 }
 
-async function openEditStaffModal(staffRow) {
-  $("#staffId").value = staffRow.id || "";
-  $("#staffName").value = staffRow.name || "";
-  $("#staffRole").value = staffRow.role || "vet";
-  $("#staffPhone").value = staffRow.phone || "";
-  $("#staffShiftRate").value = staffRow.shift_rate || 0;
-  $("#staffPercentRate").value = staffRow.percent_rate || 0;
-  $("#staffColor").value = staffRow.color || "#7C5CFF";
-  $("#staffNote").value = staffRow.note || "";
+async function openEditStaffModal(
+  staffRow
+) {
+  ensureStaffEmergencyContactFields();
 
-  await renderStaffSpecsBox(staffRow.specialization_ids || []);
-  $("#staffDrawer").classList.add("open");
-  $("#staffDrawer").setAttribute("aria-hidden", "false");
+  $("#staffId").value =
+    staffRow.id || "";
+
+  $("#staffName").value =
+    staffRow.name || "";
+
+  $("#staffRole").value =
+    staffRow.role || "vet";
+
+  $("#staffPhone").value =
+    staffRow.phone || "";
+
+  $("#staffShiftRate").value =
+    staffRow.shift_rate || 0;
+
+  $("#staffPercentRate").value =
+    staffRow.percent_rate || 0;
+
+  $("#staffColor").value =
+    staffRow.color ||
+    "#7C5CFF";
+
+  $("#staffNote").value =
+    staffRow.note || "";
+
+  const emergencyNameInput =
+    document.getElementById(
+      "staffEmergencyContactName"
+    );
+
+  const emergencyPhoneInput =
+    document.getElementById(
+      "staffEmergencyContactPhone"
+    );
+
+  const emergencyRelationInput =
+    document.getElementById(
+      "staffEmergencyContactRelation"
+    );
+
+  if (emergencyNameInput) {
+    emergencyNameInput.value =
+      staffRow
+        .emergency_contact_name ||
+      "";
+  }
+
+  if (emergencyPhoneInput) {
+    emergencyPhoneInput.value =
+      formatUaPhone(
+        staffRow
+          .emergency_contact_phone ||
+        ""
+      );
+  }
+
+  if (emergencyRelationInput) {
+    emergencyRelationInput.value =
+      staffRow
+        .emergency_contact_relation ||
+      "";
+  }
+
+  await renderStaffSpecsBox(
+    staffRow
+      .specialization_ids ||
+    []
+  );
+
+  $("#staffDrawer")
+    .classList.add(
+      "open"
+    );
+
+  $("#staffDrawer")
+    .setAttribute(
+      "aria-hidden",
+      "false"
+    );
 }
 
 $$("[data-close-staff]").forEach((btn) => {
@@ -57223,17 +57507,90 @@ $("#staffSave")?.addEventListener("click", async () => {
     )
     .filter(Boolean);
 
-  const payload = {
-    name: $("#staffName").value.trim(),
-    role: $("#staffRole").value,
-    specialization: specializationNames.join(", "),
-    specialization_ids: specializationIds,
-    phone: $("#staffPhone").value.trim(),
-    shift_rate: Number($("#staffShiftRate").value || 0),
-    percent_rate: Number($("#staffPercentRate").value || 0),
-    color: $("#staffColor").value,
-    note: $("#staffNote").value.trim(),
-  };
+  const emergencyPhone =
+  String(
+    $(
+      "#staffEmergencyContactPhone"
+    )?.value || ""
+  ).trim();
+
+if (
+  emergencyPhone &&
+  !isValidUaPhone(
+    emergencyPhone
+  )
+) {
+  alert(
+    "Телефон екстреного контакту повинен бути у форматі +380 XX XXX XX XX"
+  );
+
+  $(
+    "#staffEmergencyContactPhone"
+  )?.focus();
+
+  return;
+}
+
+const payload = {
+  name:
+    $("#staffName")
+      .value
+      .trim(),
+
+  role:
+    $("#staffRole")
+      .value,
+
+  specialization:
+    specializationNames
+      .join(", "),
+
+  specialization_ids:
+    specializationIds,
+
+  phone:
+    $("#staffPhone")
+      .value
+      .trim(),
+
+  shift_rate:
+    Number(
+      $("#staffShiftRate")
+        .value || 0
+    ),
+
+  percent_rate:
+    Number(
+      $("#staffPercentRate")
+        .value || 0
+    ),
+
+  color:
+    $("#staffColor")
+      .value,
+
+  note:
+    $("#staffNote")
+      .value
+      .trim(),
+
+  emergency_contact_name:
+    String(
+      $(
+        "#staffEmergencyContactName"
+      )?.value || ""
+    ).trim(),
+
+  emergency_contact_phone:
+    emergencyPhone,
+
+  emergency_contact_relation:
+    String(
+      $(
+        "#staffEmergencyContactRelation"
+      )?.value || ""
+    ).trim(),
+};
 
   if (!payload.name) { alert("Вкажи ПІБ співробітника"); return; }
   let saved = staffId ? await updateStaffApi(staffId, payload) : await createStaffApi(payload);
