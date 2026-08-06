@@ -16706,14 +16706,18 @@ def api_get_visit_tasks(
 
     except Exception as error:
         print(
-            "❌ GET visit tasks:",
-            repr(error)
-        )
+        "❌ GET visit tasks:",
+        repr(error),
+        flush=True,
+    )
 
-        return fail(
-            "Не вдалося завантажити задачі візиту.",
-            500
-        )
+    return fail(
+        (
+            "Не вдалося завантажити задачі візиту: "
+            + str(error)
+        ),
+        500
+    )
 
 
 @app.post(
