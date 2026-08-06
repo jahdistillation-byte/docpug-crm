@@ -45117,3 +45117,284 @@ body[data-theme="white"]
     font-size: 14px;
   }
 }
+/* =====================================================
+   STAFF MODAL — WIDE PREMIUM WINDOW
+===================================================== */
+
+#staffDrawer {
+  padding: 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+#staffDrawer .modal-window {
+  width: min(
+    760px,
+    calc(100vw - 48px)
+  ) !important;
+
+  max-width: 760px !important;
+  max-height: min(
+    860px,
+    calc(100vh - 48px)
+  ) !important;
+
+  padding: 28px !important;
+  box-sizing: border-box;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  border-radius: 24px !important;
+  border: 1px solid
+    var(
+      --module-border-strong,
+      rgba(168, 85, 247, 0.45)
+    ) !important;
+
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(168, 85, 247, 0.18),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(31, 17, 51, 0.98),
+      rgba(15, 8, 28, 0.98)
+    ) !important;
+
+  box-shadow:
+    0 40px 120px
+      rgba(0, 0, 0, 0.65),
+    0 0 55px
+      rgba(168, 85, 247, 0.22) !important;
+}
+
+/* Заголовок */
+
+#staffDrawer .modal-window > h3 {
+  margin: 0 0 24px;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Все подписи */
+
+#staffDrawer .modal-window label {
+  min-width: 0;
+}
+
+#staffDrawer .modal-window label > span,
+#staffDrawer .modal-window label > div:first-child {
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+/* Поля */
+
+#staffDrawer .modal-window input:not(
+  [type="color"]
+):not(
+  [type="checkbox"]
+),
+#staffDrawer .modal-window select,
+#staffDrawer .modal-window textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border-radius: 12px;
+}
+
+#staffDrawer .modal-window input:not(
+  [type="color"]
+):not(
+  [type="checkbox"]
+),
+#staffDrawer .modal-window select {
+  min-height: 46px;
+  padding: 0 13px;
+}
+
+#staffDrawer .modal-window textarea {
+  min-height: 92px;
+  padding: 12px 13px;
+  resize: vertical;
+}
+
+/* Экстренный контакт */
+
+#staffDrawer
+  .staffEmergencyContactBlock {
+  margin-top: 22px;
+  padding: 20px;
+  border-radius: 18px;
+
+  border: 1px solid
+    rgba(168, 85, 247, 0.38);
+
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(168, 85, 247, 0.16),
+      transparent 45%
+    ),
+    rgba(8, 4, 18, 0.44);
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.04);
+}
+
+#staffDrawer
+  .staffEmergencyContactHead {
+  margin-bottom: 16px;
+}
+
+#staffDrawer
+  .staffEmergencyContactHead strong {
+  font-size: 15px;
+}
+
+#staffDrawer
+  .staffEmergencyContactHead span {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+/* На широкой модалке три поля в линию */
+
+#staffDrawer
+  .staffEmergencyContactBlock {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#staffDrawer
+  .staffEmergencyContactHead {
+  grid-column: 1 / -1;
+}
+
+#staffDrawer
+  .staffEmergencyContactBlock > label {
+  margin: 0;
+  gap: 7px;
+}
+
+/* Кнопки снизу */
+
+#staffDrawer
+  .modal-window
+  button {
+  min-height: 44px;
+  border-radius: 12px;
+}
+
+#staffDrawer
+  #staffSave {
+  min-width: 150px;
+  padding: 0 22px;
+  font-weight: 800;
+}
+
+/* Аккуратный скролл */
+
+#staffDrawer
+  .modal-window::-webkit-scrollbar {
+  width: 8px;
+}
+
+#staffDrawer
+  .modal-window::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#staffDrawer
+  .modal-window::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background:
+    rgba(168, 85, 247, 0.42);
+  background-clip:
+    padding-box;
+}
+
+/* Планшет */
+
+@media (
+  max-width: 820px
+) {
+  #staffDrawer {
+    padding: 16px;
+  }
+
+  #staffDrawer .modal-window {
+    width:
+      calc(100vw - 32px)
+      !important;
+
+    max-height:
+      calc(100vh - 32px)
+      !important;
+
+    padding: 22px !important;
+  }
+
+  #staffDrawer
+    .staffEmergencyContactBlock {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  #staffDrawer
+    .staffEmergencyContactBlock
+    > label:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Телефон */
+
+@media (
+  max-width: 560px
+) {
+  #staffDrawer {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  #staffDrawer .modal-window {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 94vh !important;
+
+    padding: 20px 16px
+      calc(
+        20px +
+        env(
+          safe-area-inset-bottom
+        )
+      )
+      !important;
+
+    border-radius:
+      24px 24px 0 0
+      !important;
+  }
+
+  #staffDrawer
+    .staffEmergencyContactBlock {
+    grid-template-columns: 1fr;
+  }
+
+  #staffDrawer
+    .staffEmergencyContactBlock
+    > label:last-child {
+    grid-column: auto;
+  }
+}
