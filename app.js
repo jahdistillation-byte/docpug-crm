@@ -57253,7 +57253,6 @@ async function openCreateStaffModal() {
   }
 
   ensureStaffEmergencyContactFields();
-  }
 
   /*
    * Очищаем ID.
@@ -57331,35 +57330,36 @@ async function openCreateStaffModal() {
   if (noteInput) {
     noteInput.value = "";
   }
+
   const emergencyNameInput =
-  document.getElementById(
-    "staffEmergencyContactName"
-  );
+    document.getElementById(
+      "staffEmergencyContactName"
+    );
 
-const emergencyPhoneInput =
-  document.getElementById(
-    "staffEmergencyContactPhone"
-  );
+  const emergencyPhoneInput =
+    document.getElementById(
+      "staffEmergencyContactPhone"
+    );
 
-const emergencyRelationInput =
-  document.getElementById(
-    "staffEmergencyContactRelation"
-  );
+  const emergencyRelationInput =
+    document.getElementById(
+      "staffEmergencyContactRelation"
+    );
 
-if (emergencyNameInput) {
-  emergencyNameInput.value =
-    "";
-}
+  if (emergencyNameInput) {
+    emergencyNameInput.value =
+      "";
+  }
 
-if (emergencyPhoneInput) {
-  emergencyPhoneInput.value =
-    "";
-}
+  if (emergencyPhoneInput) {
+    emergencyPhoneInput.value =
+      "";
+  }
 
-if (emergencyRelationInput) {
-  emergencyRelationInput.value =
-    "";
-}
+  if (emergencyRelationInput) {
+    emergencyRelationInput.value =
+      "";
+  }
 
   /*
    * Для нового сотрудника
@@ -57379,7 +57379,7 @@ if (emergencyRelationInput) {
   setTimeout(() => {
     nameInput?.focus();
   }, 50);
-
+}
 
 async function openEditStaffModal(
   staffRow
