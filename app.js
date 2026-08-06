@@ -57132,6 +57132,7 @@ async function renderStaffSpecsBox(selectedIds = []) {
   setOpen(false);
   updateSummary();
 }
+
 function ensureStaffEmergencyContactFields() {
   const drawer =
     document.getElementById(
@@ -57147,20 +57148,17 @@ function ensureStaffEmergencyContactFields() {
     return;
   }
 
-  const noteInput =
+  const saveButton =
     document.getElementById(
-      "staffNote"
+      "staffSave"
     );
 
-  const noteField =
-    noteInput?.closest(
-      "label"
-    ) ||
-    noteInput?.parentElement;
+  const actions =
+    saveButton?.parentElement;
 
-  if (!noteField) {
+  if (!actions) {
     console.warn(
-      "Не знайдено місце для блоку екстреного контакту"
+      "Не знайдено кнопки форми співробітника"
     );
 
     return;
@@ -57168,7 +57166,7 @@ function ensureStaffEmergencyContactFields() {
 
   const block =
     document.createElement(
-      "section"
+      "div"
     );
 
   block.id =
@@ -57179,67 +57177,53 @@ function ensureStaffEmergencyContactFields() {
 
   block.innerHTML = `
     <div class="staffEmergencyContactHead">
-      <div class="staffEmergencyContactIcon">
-        ☎
-      </div>
+      <strong>
+        ☎ Екстрений контакт
+      </strong>
 
-      <div>
-        <strong>
-          Екстрений контакт
-        </strong>
-
-        <span>
-          Контакт близької людини на випадок
-          надзвичайної ситуації.
-        </span>
-      </div>
+      <span>
+        Контакт близької людини
+      </span>
     </div>
 
-    <div class="staffEmergencyContactGrid">
-      <label>
-        <span>
-          Ім’я контактної особи
-        </span>
+    <label>
+      <span>
+        Ім’я контактної особи
+      </span>
 
-        <input
-          id="staffEmergencyContactName"
-          type="text"
-          maxlength="120"
-          autocomplete="off"
-          placeholder="Наприклад: Олена Коваль"
-        >
-      </label>
+      <input
+        id="staffEmergencyContactName"
+        type="text"
+        placeholder="Олена Коваль"
+      >
+    </label>
 
-      <label>
-        <span>
-          Ким доводиться
-        </span>
+    <label>
+      <span>
+        Ким доводиться
+      </span>
 
-        <input
-          id="staffEmergencyContactRelation"
-          type="text"
-          maxlength="80"
-          autocomplete="off"
-          placeholder="Наприклад: дружина, брат, мати"
-        >
-      </label>
+      <input
+        id="staffEmergencyContactRelation"
+        type="text"
+        placeholder="Дружина, брат, мати"
+      >
+    </label>
 
-      <label class="staffEmergencyContactPhoneField">
-        <span>
-          Телефон
-        </span>
+    <label>
+      <span>
+        Телефон
+      </span>
 
-        <input
-          id="staffEmergencyContactPhone"
-          type="tel"
-          autocomplete="tel"
-          placeholder="+380 XX XXX XX XX"
-        >
-      </label>
-    </div>
+      <input
+        id="staffEmergencyContactPhone"
+        type="tel"
+        placeholder="+380 XX XXX XX XX"
+      >
+    </label>
   `;
 
-  noteField.insertAdjacentElement(
+  actions.insertAdjacentElement(
     "beforebegin",
     block
   );
@@ -57250,7 +57234,6 @@ function ensureStaffEmergencyContactFields() {
     )
   );
 }
-
 async function openCreateStaffModal() {
   const drawer =
     document.getElementById(
@@ -57261,13 +57244,15 @@ async function openCreateStaffModal() {
     console.error(
       "staffDrawer не знайдено"
     );
-    ensureStaffEmergencyContactFields();
 
     alert(
       "Форма співробітника не знайдена в index.html."
     );
 
     return;
+  }
+
+  ensureStaffEmergencyContactFields();
   }
 
   /*
@@ -57394,7 +57379,7 @@ if (emergencyRelationInput) {
   setTimeout(() => {
     nameInput?.focus();
   }, 50);
-}
+
 
 async function openEditStaffModal(
   staffRow
