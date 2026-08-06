@@ -3596,6 +3596,825 @@ return true;
     return false;
   }
 }
+
+// =====================================================
+// VISIT TASKS API
+// =====================================================
+
+async function visitTaskApiRequest(
+  url,
+  options = {}
+) {
+  const response =
+    await fetch(
+      url,
+      {
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...(
+            options.body
+              ? {
+                  "Content-Type":
+                    "application/json",
+                }
+              : {}
+          ),
+
+          ...getOrgHeaders(),
+          ...(options.headers || {}),
+        },
+
+        ...options,
+      }
+    );
+
+  const text =
+    await response.text();
+
+  let json = null;
+
+  try {
+    json = text
+      ? JSON.parse(text)
+      : null;
+  } catch {
+    json = null;
+  }
+
+  if (
+    !response.ok ||
+    json?.ok !== true
+  ) {
+    console.error(
+      "visitTaskApiRequest failed:",
+      response.status,
+      text
+    );
+
+    throw new Error(
+      json?.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  return json.data;
+}
+
+
+async function loadVisitTasksApi(
+  visitId
+) {
+  try {
+    const data =
+      await visitTaskApiRequest(
+        `/api/visits/${
+          encodeURIComponent(
+            String(visitId)
+          )
+        }/tasks`
+      );
+
+    return Array.isArray(data)
+      ? data
+      : [];
+  } catch (error) {
+    console.error(
+      "loadVisitTasksApi failed:",
+      error
+    );
+
+    return [];
+  }
+}
+
+
+async function createVisitTaskApi(
+  visitId,
+  payload
+) {
+  return await visitTaskApiRequest(
+    `/api/visits/${
+      encodeURIComponent(
+        String(visitId)
+      )
+    }/tasks`,
+    {
+      method: "POST",
+
+      body:
+        JSON.stringify(
+          payload || {}
+        ),
+    }
+  );
+}
+
+
+async function updateVisitTaskApi(
+  taskId,
+  payload
+) {
+  return await visitTaskApiRequest(
+    `/api/visit-tasks/${
+      encodeURIComponent(
+        String(taskId)
+      )
+    }`,
+    {
+      method: "PUT",
+
+      body:
+        JSON.stringify(
+          payload || {}
+        ),
+    }
+  );
+}
+
+
+async function deleteVisitTaskApi(
+  taskId
+) {
+  await visitTaskApiRequest(
+    `/api/visit-tasks/${
+      encodeURIComponent(
+        String(taskId)
+      )
+    }`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  return true;
+}
+function formatVisitTaskDate(
+  task
+) {
+  const dueDate =
+    String(
+      task?.due_date || ""
+    ).slice(0, 10);
+
+  const dueTime =
+    String(
+      task?.due_time || ""
+    ).slice(0, 5);
+
+  if (!dueDate) {
+    return "Без дати";
+  }
+
+  const dateLabel =
+    new Date(
+      `${dueDate}T00:00:00`
+    ).toLocaleDateString(
+      "uk-UA",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }
+    );
+
+  return dueTime
+    ? `${dateLabel} · ${dueTime}`
+    : dateLabel;
+}
+
+
+function getVisitTaskPriorityMeta(
+  priority
+) {
+  const priorities = {
+    low: {
+      label: "Низький",
+      icon: "↓",
+    },
+
+    normal: {
+      label: "Звичайний",
+      icon: "•",
+    },
+
+    high: {
+      label: "Важливо",
+      icon: "!",
+    },
+  };
+
+  return (
+    priorities[priority] ||
+    priorities.normal
+  );
+}
+
+
+async function renderVisitTasksBlock(
+  visitId
+) {
+  const cleanVisitId =
+    String(
+      visitId || ""
+    ).trim();
+
+  if (!cleanVisitId) {
+    return;
+  }
+
+  const workspaceMain =
+    document.querySelector(
+      ".visitWorkspaceMain"
+    );
+
+  if (!workspaceMain) {
+    return;
+  }
+
+  let section =
+    document.getElementById(
+      "visitTasksSection"
+    );
+
+  if (!section) {
+    section =
+      document.createElement(
+        "section"
+      );
+
+    section.id =
+      "visitTasksSection";
+
+    section.className =
+      "visitSectionCard visitTasksSection";
+
+    const medicalSection =
+      workspaceMain
+        .querySelector(
+          ".visitSectionCard"
+        );
+
+    if (medicalSection) {
+      medicalSection.insertAdjacentElement(
+        "afterend",
+        section
+      );
+    } else {
+      workspaceMain.prepend(
+        section
+      );
+    }
+  }
+
+  section.dataset.visitId =
+    cleanVisitId;
+
+  section.innerHTML = `
+    <div class="visitSectionHead">
+      <div>
+        <span class="visitSectionIcon">
+          ✅
+        </span>
+
+        <div>
+          <h2>
+            Задачі та нагадування
+          </h2>
+
+          <p>
+            Контрольні дії після прийому,
+            дзвінки та повторні огляди.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="visitTasksCounter"
+        id="visitTasksCounter"
+      >
+        Завантаження…
+      </div>
+    </div>
+
+    <form
+      class="visitTaskCreateForm"
+      id="visitTaskCreateForm"
+    >
+      <label class="visitTaskTitleField">
+        <span>
+          Нова задача
+        </span>
+
+        <input
+          class="visitControl"
+          id="visitTaskTitle"
+          type="text"
+          maxlength="240"
+          autocomplete="off"
+          placeholder="Наприклад: зателефонувати власнику після аналізів"
+          required
+        >
+      </label>
+
+      <label>
+        <span>
+          Дата
+        </span>
+
+        <input
+          class="visitControl"
+          id="visitTaskDate"
+          type="date"
+        >
+      </label>
+
+      <label>
+        <span>
+          Час
+        </span>
+
+        <input
+          class="visitControl"
+          id="visitTaskTime"
+          type="time"
+        >
+      </label>
+
+      <label>
+        <span>
+          Пріоритет
+        </span>
+
+        <select
+          class="visitControl"
+          id="visitTaskPriority"
+        >
+          <option value="normal">
+            Звичайний
+          </option>
+
+          <option value="high">
+            Важливо
+          </option>
+
+          <option value="low">
+            Низький
+          </option>
+        </select>
+      </label>
+
+      <button
+        class="visitAddLineButton"
+        id="visitTaskCreateButton"
+        type="submit"
+      >
+        + Додати
+      </button>
+    </form>
+
+    <div
+      class="visitTasksList"
+      id="visitTasksList"
+    >
+      <div class="visitTasksLoading">
+        Завантажуємо задачі…
+      </div>
+    </div>
+  `;
+
+  let tasks =
+    await loadVisitTasksApi(
+      cleanVisitId
+    );
+
+  if (
+    section.dataset.visitId !==
+    cleanVisitId
+  ) {
+    return;
+  }
+
+  const list =
+    section.querySelector(
+      "#visitTasksList"
+    );
+
+  const counter =
+    section.querySelector(
+      "#visitTasksCounter"
+    );
+
+  const renderTasks = () => {
+    const openTasks =
+      tasks.filter(
+        (task) =>
+          task.status !==
+          "completed"
+      );
+
+    const completedTasks =
+      tasks.filter(
+        (task) =>
+          task.status ===
+          "completed"
+      );
+
+    if (counter) {
+      counter.textContent =
+        openTasks.length
+          ? `${openTasks.length} активних`
+          : "Усе виконано";
+    }
+
+    if (!list) {
+      return;
+    }
+
+    if (!tasks.length) {
+      list.innerHTML = `
+        <div class="visitTasksEmpty">
+          <div>✓</div>
+
+          <strong>
+            Задач поки немає
+          </strong>
+
+          <span>
+            Додайте контрольний дзвінок,
+            повторний огляд або нагадування.
+          </span>
+        </div>
+      `;
+
+      return;
+    }
+
+    const orderedTasks = [
+      ...openTasks,
+      ...completedTasks,
+    ];
+
+    list.innerHTML =
+      orderedTasks
+        .map((task) => {
+          const completed =
+            task.status ===
+            "completed";
+
+          const priority =
+            getVisitTaskPriorityMeta(
+              task.priority
+            );
+
+          const dueDate =
+            String(
+              task.due_date || ""
+            ).slice(0, 10);
+
+          const overdue =
+            !completed &&
+            dueDate &&
+            dueDate <
+              todayISO();
+
+          return `
+            <article
+              class="
+                visitTaskItem
+                ${
+                  completed
+                    ? "is-completed"
+                    : ""
+                }
+                ${
+                  overdue
+                    ? "is-overdue"
+                    : ""
+                }
+                priority-${
+                  escapeHtml(
+                    task.priority ||
+                    "normal"
+                  )
+                }
+              "
+            >
+              <button
+                type="button"
+                class="visitTaskCheck"
+                data-toggle-visit-task="${escapeHtml(
+                  String(task.id)
+                )}"
+                title="${
+                  completed
+                    ? "Повернути задачу"
+                    : "Позначити виконаною"
+                }"
+              >
+                ${
+                  completed
+                    ? "✓"
+                    : ""
+                }
+              </button>
+
+              <div class="visitTaskMain">
+                <strong>
+                  ${escapeHtml(
+                    task.title ||
+                    "Задача"
+                  )}
+                </strong>
+
+                <div class="visitTaskMeta">
+                  <span>
+                    📅
+                    ${escapeHtml(
+                      formatVisitTaskDate(
+                        task
+                      )
+                    )}
+                  </span>
+
+                  <span
+                    class="visitTaskPriority"
+                  >
+                    ${priority.icon}
+                    ${escapeHtml(
+                      priority.label
+                    )}
+                  </span>
+
+                  ${
+                    overdue
+                      ? `
+                        <span class="visitTaskOverdue">
+                          Прострочено
+                        </span>
+                      `
+                      : ""
+                  }
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="visitTaskDelete"
+                data-delete-visit-task="${escapeHtml(
+                  String(task.id)
+                )}"
+                title="Видалити задачу"
+              >
+                ×
+              </button>
+            </article>
+          `;
+        })
+        .join("");
+  };
+
+  renderTasks();
+
+  section
+    .querySelector(
+      "#visitTaskCreateForm"
+    )
+    ?.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const titleInput =
+          section.querySelector(
+            "#visitTaskTitle"
+          );
+
+        const dateInput =
+          section.querySelector(
+            "#visitTaskDate"
+          );
+
+        const timeInput =
+          section.querySelector(
+            "#visitTaskTime"
+          );
+
+        const priorityInput =
+          section.querySelector(
+            "#visitTaskPriority"
+          );
+
+        const button =
+          section.querySelector(
+            "#visitTaskCreateButton"
+          );
+
+        const title =
+          String(
+            titleInput?.value ||
+            ""
+          ).trim();
+
+        if (!title) {
+          titleInput?.focus();
+          return;
+        }
+
+        if (button) {
+          button.disabled = true;
+          button.textContent =
+            "Збереження…";
+        }
+
+        try {
+          const created =
+            await createVisitTaskApi(
+              cleanVisitId,
+              {
+                title,
+
+                due_date:
+                  String(
+                    dateInput?.value ||
+                    ""
+                  ).trim(),
+
+                due_time:
+                  String(
+                    timeInput?.value ||
+                    ""
+                  ).trim(),
+
+                priority:
+                  String(
+                    priorityInput?.value ||
+                    "normal"
+                  ),
+              }
+            );
+
+          tasks = [
+            ...tasks,
+            created,
+          ];
+
+          if (titleInput) {
+            titleInput.value = "";
+            titleInput.focus();
+          }
+
+          if (dateInput) {
+            dateInput.value = "";
+          }
+
+          if (timeInput) {
+            timeInput.value = "";
+          }
+
+          if (priorityInput) {
+            priorityInput.value =
+              "normal";
+          }
+
+          renderTasks();
+
+        } catch (error) {
+          openDeleteModal(
+            escapeHtml(
+              error?.message ||
+              "Не вдалося створити задачу."
+            ),
+            null,
+            "info"
+          );
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent =
+              "+ Додати";
+          }
+        }
+      }
+    );
+
+  list?.addEventListener(
+    "click",
+    async (event) => {
+      const toggleButton =
+        event.target.closest(
+          "[data-toggle-visit-task]"
+        );
+
+      if (toggleButton) {
+        const taskId =
+          toggleButton.dataset
+            .toggleVisitTask;
+
+        const task =
+          tasks.find(
+            (item) =>
+              String(item.id) ===
+              String(taskId)
+          );
+
+        if (!task) {
+          return;
+        }
+
+        toggleButton.disabled =
+          true;
+
+        try {
+          const updated =
+            await updateVisitTaskApi(
+              taskId,
+              {
+                status:
+                  task.status ===
+                  "completed"
+                    ? "open"
+                    : "completed",
+              }
+            );
+
+          tasks =
+            tasks.map(
+              (item) =>
+                String(item.id) ===
+                String(taskId)
+                  ? updated
+                  : item
+            );
+
+          renderTasks();
+
+        } catch (error) {
+          toggleButton.disabled =
+            false;
+
+          openDeleteModal(
+            escapeHtml(
+              error?.message ||
+              "Не вдалося оновити задачу."
+            ),
+            null,
+            "info"
+          );
+        }
+
+        return;
+      }
+
+      const deleteButton =
+        event.target.closest(
+          "[data-delete-visit-task]"
+        );
+
+      if (!deleteButton) {
+        return;
+      }
+
+      const taskId =
+        deleteButton.dataset
+          .deleteVisitTask;
+
+      openDeleteModal(
+        "Видалити цю задачу?",
+        async () => {
+          try {
+            await deleteVisitTaskApi(
+              taskId
+            );
+
+            tasks =
+              tasks.filter(
+                (item) =>
+                  String(item.id) !==
+                  String(taskId)
+              );
+
+            renderTasks();
+
+          } catch (error) {
+            openDeleteModal(
+              escapeHtml(
+                error?.message ||
+                "Не вдалося видалити задачу."
+              ),
+              null,
+              "info"
+            );
+          }
+        }
+      );
+    }
+  );
+}
 // =========================
 // Visit finance and payments
 // =========================
@@ -45128,6 +45947,9 @@ openDeleteModal(
 );
 };
 }
+renderVisitTasksBlock(
+  visitId
+);
 }
 
 function parseVisitNote(note) {

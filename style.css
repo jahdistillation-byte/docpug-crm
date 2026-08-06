@@ -44517,3 +44517,510 @@ body[data-theme="white"]
     justify-content: center;
   }
 }
+/* ======================================================
+   VISIT TASKS
+====================================================== */
+
+.visitTasksSection {
+  margin-top: 18px;
+}
+
+.visitTasksCounter {
+  flex: 0 0 auto;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color) 28%,
+      rgba(255, 255, 255, 0.08)
+    );
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 10%,
+      rgba(255, 255, 255, 0.03)
+    );
+  color: var(--text-main, #fff);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.visitTaskCreateForm {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1fr)
+    150px
+    120px
+    150px
+    auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.07);
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+.visitTaskCreateForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.visitTaskCreateForm label > span {
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.58)
+  );
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.visitTaskCreateForm .visitControl {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 13px;
+  border-radius: 13px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.09);
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 6%,
+      rgba(12, 8, 24, 0.96)
+    );
+  color: var(--text-main, #fff);
+  outline: none;
+}
+
+.visitTaskCreateForm select.visitControl {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 38px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23CFA8FF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 14px;
+}
+
+.visitTaskCreateForm .visitControl:focus {
+  border-color:
+    var(--accent-color);
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--accent-color) 14%,
+      transparent
+    );
+}
+
+.visitTaskCreateForm
+.visitAddLineButton {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid
+    var(--accent-color);
+  border-radius: 13px;
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 82%,
+      #ffffff 0%
+    );
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.visitTaskCreateForm
+.visitAddLineButton:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.visitTaskCreateForm
+.visitAddLineButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.visitTasksList {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.visitTasksLoading {
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.55)
+  );
+  font-size: 13px;
+}
+
+.visitTasksEmpty {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  padding: 24px;
+  text-align: center;
+  border: 1px dashed
+    rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.55)
+  );
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+.visitTasksEmpty > div {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 12%,
+      transparent
+    );
+  color: var(--accent-color);
+  font-size: 20px;
+}
+
+.visitTasksEmpty strong {
+  color: var(--text-main, #fff);
+  font-size: 15px;
+}
+
+.visitTasksEmpty span {
+  max-width: 420px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.visitTaskItem {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    34px
+    minmax(0, 1fr)
+    34px;
+  gap: 12px;
+  align-items: center;
+  min-height: 72px;
+  padding: 12px 13px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background:
+    rgba(255, 255, 255, 0.03);
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease;
+}
+
+.visitTaskItem:hover {
+  transform: translateY(-1px);
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color) 38%,
+      rgba(255, 255, 255, 0.08)
+    );
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 6%,
+      rgba(255, 255, 255, 0.03)
+    );
+}
+
+.visitTaskItem.priority-high {
+  border-left: 4px solid
+    #ef4444;
+}
+
+.visitTaskItem.priority-low {
+  border-left: 4px solid
+    #38bdf8;
+}
+
+.visitTaskItem.is-overdue {
+  border-color:
+    rgba(239, 68, 68, 0.28);
+  background:
+    rgba(239, 68, 68, 0.055);
+}
+
+.visitTaskItem.is-completed {
+  opacity: 0.62;
+}
+
+.visitTaskItem.is-completed
+.visitTaskMain strong {
+  text-decoration: line-through;
+}
+
+.visitTaskCheck {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 11px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.12);
+  background:
+    rgba(255, 255, 255, 0.035);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.visitTaskCheck:hover {
+  border-color:
+    var(--accent-color);
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color) 16%,
+      transparent
+    );
+}
+
+.visitTaskItem.is-completed
+.visitTaskCheck {
+  border-color:
+    rgba(34, 197, 94, 0.32);
+  background:
+    rgba(34, 197, 94, 0.15);
+  color: #6ee7a8;
+}
+
+.visitTaskMain {
+  min-width: 0;
+}
+
+.visitTaskMain > strong {
+  display: block;
+  color: var(--text-main, #fff);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.visitTaskMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.visitTaskMeta > span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background:
+    rgba(255, 255, 255, 0.045);
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.58)
+  );
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.visitTaskPriority {
+  border: 1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.visitTaskItem.priority-high
+.visitTaskPriority {
+  color: #fca5a5;
+  background:
+    rgba(239, 68, 68, 0.1);
+  border-color:
+    rgba(239, 68, 68, 0.2);
+}
+
+.visitTaskItem.priority-low
+.visitTaskPriority {
+  color: #7dd3fc;
+  background:
+    rgba(56, 189, 248, 0.1);
+  border-color:
+    rgba(56, 189, 248, 0.2);
+}
+
+.visitTaskOverdue {
+  color: #fca5a5 !important;
+  background:
+    rgba(239, 68, 68, 0.12) !important;
+}
+
+.visitTaskDelete {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+  background:
+    rgba(255, 255, 255, 0.025);
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.55)
+  );
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.visitTaskDelete:hover {
+  border-color:
+    rgba(239, 68, 68, 0.3);
+  background:
+    rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+/* Белая тема */
+
+body[data-theme="white"]
+.visitTaskCreateForm,
+body[data-theme="white"]
+.visitTaskItem,
+body[data-theme="white"]
+.visitTasksEmpty {
+  background:
+    rgba(255, 255, 255, 0.68);
+  border-color:
+    rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="white"]
+.visitTaskCreateForm
+.visitControl {
+  background: #fff;
+  border-color:
+    rgba(0, 0, 0, 0.09);
+  color: #1c1c1e;
+}
+
+body[data-theme="white"]
+.visitTaskMain > strong,
+body[data-theme="white"]
+.visitTasksEmpty strong {
+  color: #1c1c1e;
+}
+
+body[data-theme="white"]
+.visitTaskMeta > span {
+  background:
+    rgba(0, 0, 0, 0.035);
+  color: #6e6e73;
+}
+
+body[data-theme="white"]
+.visitTaskCheck,
+body[data-theme="white"]
+.visitTaskDelete {
+  background:
+    rgba(0, 0, 0, 0.025);
+  border-color:
+    rgba(0, 0, 0, 0.08);
+  color: #636366;
+}
+
+/* Планшеты */
+
+@media (max-width: 1180px) {
+  .visitTaskCreateForm {
+    grid-template-columns:
+      minmax(220px, 1fr)
+      140px
+      120px;
+  }
+
+  .visitTaskCreateForm
+  label:nth-of-type(4) {
+    grid-column: 1 / 2;
+  }
+
+  .visitTaskCreateForm
+  .visitAddLineButton {
+    grid-column: 2 / 4;
+  }
+}
+
+/* Телефоны */
+
+@media (max-width: 700px) {
+  .visitTaskCreateForm {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .visitTaskCreateForm
+  label:nth-of-type(4),
+  .visitTaskCreateForm
+  .visitAddLineButton {
+    grid-column: auto;
+  }
+
+  .visitTaskCreateForm
+  .visitAddLineButton {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .visitTaskItem {
+    grid-template-columns:
+      38px
+      minmax(0, 1fr)
+      34px;
+    gap: 10px;
+  }
+
+  .visitTaskCheck {
+    width: 38px;
+    height: 38px;
+  }
+
+  .visitTaskMeta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .visitTaskMeta > span {
+    width: fit-content;
+  }
+}
