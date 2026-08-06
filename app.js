@@ -29933,6 +29933,44 @@ async function renderPatientCard(pet) {
   if (!root) return;
 
   const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
+  const vaccinationStatus =
+  String(
+    pet?.vaccination_status ||
+    "unknown"
+  );
+
+const vaccinationStatusText =
+  vaccinationStatus === "vaccinated"
+    ? "Вакцинована"
+    : vaccinationStatus ===
+        "not_vaccinated"
+      ? "Не вакцинована"
+      : "Статус невідомий";
+
+const vaccinationStatusClass =
+  vaccinationStatus === "vaccinated"
+    ? "is-vaccinated"
+    : vaccinationStatus ===
+        "not_vaccinated"
+      ? "is-not-vaccinated"
+      : "is-unknown";
+
+const vaccinationDate =
+  String(
+    pet?.vaccination_date || ""
+  ).slice(0, 10);
+
+const vaccinationName =
+  String(
+    pet?.vaccination_name || ""
+  ).trim();
+
+const vaccinationDateText =
+  vaccinationDate
+    ? new Date(
+        `${vaccinationDate}T00:00:00`
+      ).toLocaleDateString("uk-UA")
+    : "Не вказано";
 
   root.innerHTML = `
     <div class="patientHero">
@@ -29950,6 +29988,53 @@ async function renderPatientCard(pet) {
           👤 ${escapeHtml(owner?.name || "Власник не указан")}
           ${owner?.phone ? " • 📞 " + escapeHtml(owner.phone) : ""}
         </div>
+        <div class="patientVaccinationCard ${vaccinationStatusClass}">
+  <div class="patientVaccinationIcon">
+    💉
+  </div>
+
+  <div class="patientVaccinationMain">
+    <span>
+      Вакцинація
+    </span>
+
+    <strong>
+      ${escapeHtml(
+        vaccinationStatusText
+      )}
+    </strong>
+  </div>
+
+  ${
+    vaccinationStatus ===
+    "vaccinated"
+      ? `
+        <div class="patientVaccinationDetails">
+          <div>
+            <span>Дата</span>
+
+            <strong>
+              ${escapeHtml(
+                vaccinationDateText
+              )}
+            </strong>
+          </div>
+
+          <div>
+            <span>Вакцина</span>
+
+            <strong>
+              ${escapeHtml(
+                vaccinationName ||
+                "Не вказано"
+              )}
+            </strong>
+          </div>
+        </div>
+      `
+      : ""
+  }
+</div>
       </div>
       <div class="patientActions">
         <button class="ghost" data-edit-pet="${escapeHtml(String(pet.id))}">✏️ Редагувати</button>
@@ -29971,6 +30056,7 @@ async function renderPatientCard(pet) {
   bindPatientCardButtons();
   await renderPatientTab("overview", pet);
 }
+
 
 function bindPatientCardButtons() {
   $("#btnBackOwner")?.addEventListener("click", () => {

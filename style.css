@@ -43989,3 +43989,114 @@ body[data-theme="white"] [role="dialog"] select option {
   background: #ffffff !important;
   color: #1c1c1e !important;
 }
+/* ===== PATIENT VACCINATION CARD ===== */
+
+.patientVaccinationCard {
+  display: grid;
+  grid-template-columns:
+    44px
+    minmax(120px, auto)
+    minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.patientVaccinationIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 20px;
+  background: rgba(168, 85, 247, 0.14);
+  border: 1px solid rgba(168, 85, 247, 0.24);
+}
+
+.patientVaccinationMain span,
+.patientVaccinationDetails span {
+  display: block;
+  color: var(
+    --text-muted,
+    rgba(255, 255, 255, 0.55)
+  );
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.patientVaccinationMain strong,
+.patientVaccinationDetails strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-main, #fff);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.patientVaccinationDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding-left: 16px;
+  border-left: 1px solid
+    rgba(255, 255, 255, 0.08);
+}
+
+.patientVaccinationCard.is-vaccinated {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.patientVaccinationCard.is-vaccinated
+.patientVaccinationIcon {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+.patientVaccinationCard.is-not-vaccinated {
+  border-color: rgba(239, 68, 68, 0.26);
+  background: rgba(239, 68, 68, 0.065);
+}
+
+.patientVaccinationCard.is-unknown {
+  opacity: 0.78;
+}
+
+body[data-theme="white"]
+.patientVaccinationCard {
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="white"]
+.patientVaccinationMain strong,
+body[data-theme="white"]
+.patientVaccinationDetails strong {
+  color: #1c1c1e;
+}
+
+body[data-theme="white"]
+.patientVaccinationDetails {
+  border-left-color: rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 700px) {
+  .patientVaccinationCard {
+    grid-template-columns: 44px 1fr;
+  }
+
+  .patientVaccinationDetails {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    padding: 14px 0 0;
+    border-left: 0;
+    border-top: 1px solid
+      rgba(255, 255, 255, 0.08);
+  }
+}
