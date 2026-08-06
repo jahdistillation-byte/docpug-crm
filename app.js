@@ -37372,13 +37372,32 @@ page.innerHTML = `
             class="calendarDoctorsTimelineGrid"
           >
             ${
-              staffHtml ||
-              `
-                <div class="hint">
-                  Ветеринарів поки немає.
-                </div>
-              `
-            }
+  staffHtml ||
+  `
+    <div class="calendarEmptyShift">
+      <div class="calendarEmptyShiftIcon">
+        📅
+      </div>
+
+      <h3>
+        На цей день змін немає
+      </h3>
+
+      <p>
+        Додайте співробітників у графік роботи,
+        щоб вони з’явилися в календарі записів.
+      </p>
+
+      <button
+        type="button"
+        class="primary"
+        id="calendarOpenTeamButton"
+      >
+        Відкрити команду
+      </button>
+    </div>
+  `
+}
           </div>
         </div>
       </div>
@@ -37412,6 +37431,13 @@ page.innerHTML = `
 `;
 
 initCalendarTopScroll();
+$("#calendarOpenTeamButton")
+  ?.addEventListener(
+    "click",
+    () => {
+      setHash("team");
+    }
+  );
   $$(".calStaffDrag").forEach((card) => {
     card.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", JSON.stringify({
