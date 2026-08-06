@@ -37393,7 +37393,7 @@ page.innerHTML = `
         class="primary"
         id="calendarOpenTeamButton"
       >
-        Відкрити команду
+        Налаштувати графік
       </button>
     </div>
   `
@@ -37434,8 +37434,10 @@ initCalendarTopScroll();
 $("#calendarOpenTeamButton")
   ?.addEventListener(
     "click",
-    () => {
-      setHash("team");
+    async () => {
+      calendarMode = "month";
+
+      await renderCalendarTab();
     }
   );
   $$(".calStaffDrag").forEach((card) => {
