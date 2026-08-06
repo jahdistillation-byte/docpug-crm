@@ -30236,6 +30236,27 @@ const vaccinationLabel = {
   )
 ] || "Невідомо";
 
+const vaccinationDate =
+  String(
+    pet.vaccination_date ||
+    ""
+  ).slice(0, 10);
+
+const vaccinationDateLabel =
+  vaccinationDate
+    ? new Date(
+        `${vaccinationDate}T00:00:00`
+      ).toLocaleDateString(
+        "uk-UA"
+      )
+    : "Не вказано";
+
+const vaccinationName =
+  String(
+    pet.vaccination_name ||
+    ""
+  ).trim();
+
 dynamicBox.innerHTML = `
   <div
     style="
@@ -30405,22 +30426,74 @@ dynamicBox.innerHTML = `
           </span>
         </div>
 
-        <div>
-          <span style="opacity:0.5;">
-            Вакцинація:
-          </span>
+       <div
+  class="patientPassportVaccination"
+>
+  <span style="opacity:0.5;">
+    Вакцинація:
+  </span>
 
-          <span
-            style="
-              color:#fff;
-              margin-left:6px;
-            "
-          >
-            ${escapeHtml(
-              vaccinationLabel
-            )}
-          </span>
-        </div>
+  <span
+    class="
+      patientVaccinationBadge
+      ${
+        pet.vaccination_status ===
+        "vaccinated"
+          ? "is-vaccinated"
+          : pet.vaccination_status ===
+            "not_vaccinated"
+            ? "is-not-vaccinated"
+            : "is-unknown"
+      }
+    "
+  >
+    ${escapeHtml(
+      vaccinationLabel
+    )}
+  </span>
+</div>
+
+${
+  pet.vaccination_status ===
+  "vaccinated"
+    ? `
+      <div>
+        <span style="opacity:0.5;">
+          Дата щеплення:
+        </span>
+
+        <span
+          style="
+            color:#fff;
+            margin-left:6px;
+          "
+        >
+          ${escapeHtml(
+            vaccinationDateLabel
+          )}
+        </span>
+      </div>
+
+      <div>
+        <span style="opacity:0.5;">
+          Назва вакцини:
+        </span>
+
+        <span
+          style="
+            color:#fff;
+            margin-left:6px;
+          "
+        >
+          ${escapeHtml(
+            vaccinationName ||
+            "Не вказано"
+          )}
+        </span>
+      </div>
+    `
+    : ""
+}
       </div>
     </div>
 
