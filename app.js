@@ -1590,6 +1590,42 @@ function setRoute(route) {
 
   state.route = finalRoute;
 
+  document.body.dataset.currentRoute =
+  finalRoute;
+
+const ownersSearchInput =
+  document.getElementById(
+    "globalSearch"
+  );
+
+const ownersSearchWrap =
+  ownersSearchInput
+    ?.parentElement;
+
+if (ownersSearchWrap) {
+  ownersSearchWrap.classList.add(
+    "ownersGlobalSearchWrap"
+  );
+
+  ownersSearchWrap.hidden =
+    finalRoute !== "owners";
+
+  ownersSearchWrap.style.display =
+    finalRoute === "owners"
+      ? ""
+      : "none";
+}
+
+if (ownersSearchInput) {
+  ownersSearchInput.placeholder =
+    "Власник, телефон, улюбленець, порода...";
+
+  ownersSearchInput.setAttribute(
+    "aria-label",
+    "Пошук власників та улюбленців"
+  );
+}
+
   // Переключаем секции (в новом HTML они скрыты через display: none)
   Array.from(document.querySelectorAll(".page")).forEach((p) => {
     p.classList.toggle("active", p.dataset.page === finalRoute);
@@ -45669,7 +45705,22 @@ function renderOwners() {
 
   tbody.innerHTML = "";
 
-  const q = String(document.getElementById("globalSearch")?.value || "").trim().toLowerCase();
+  const q =
+  String(
+    document
+      .getElementById(
+        "globalSearch"
+      )
+      ?.value || ""
+  )
+    .trim()
+    .toLowerCase();
+
+const qDigits =
+  q.replace(
+    /\D/g,
+    ""
+  );
   const ownersRaw = Array.isArray(state.owners) ? state.owners : [];
 
     const filteredOwners = ownersRaw.filter((owner) => {
@@ -45682,6 +45733,12 @@ function renderOwners() {
   const phone =
     String(owner.phone || "")
       .toLowerCase();
+
+  const phoneDigits =
+  phone.replace(
+    /\D/g,
+    ""
+  );
 
   const note =
     String(owner.note || "")
@@ -45720,6 +45777,12 @@ function renderOwners() {
   return (
     name.includes(q) ||
     phone.includes(q) ||
+(
+  qDigits.length >= 3 &&
+  phoneDigits.includes(
+    qDigits
+  )
+) ||
     note.includes(q) ||
     email.includes(q) ||
     telegram.includes(q) ||
@@ -55659,33 +55722,116 @@ if (
       }
     );
 
-  // Глобальный живой поиск
-  $("#globalSearch")
-    ?.addEventListener(
-      "input",
-      () => {
-        if (
-          state.route ===
-          "owners"
-        ) {
-          renderOwners();
-        }
+  const ownersGlobalSearch =
+  document.getElementById(
+    "globalSearch"
+  );
 
-        if (
-          state.route ===
-          "patients"
-        ) {
-          renderPatientsTab();
-        }
-
-        if (
-          state.route ===
-          "visits"
-        ) {
-          renderVisitsTab();
-        }
+ownersGlobalSearch
+  ?.addEventListener(
+    "input",
+    () => {
+      if (
+        state.route ===
+        "owners"
+      ) {
+        renderOwners();
       }
+    }
+  );
+
+ownersGlobalSearch
+  ?.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key !==
+        "Escape"
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      ownersGlobalSearch.value =
+        "";
+
+      renderOwners();
+
+      ownersGlobalSearch.blur();
+    }
+  );
+  if (
+  ownersGlobalSearch &&
+  ownersGlobalSearch.parentElement &&
+  !document.getElementById(
+    "ownersGlobalSearchClear"
+  )
+) {
+  const searchWrap =
+    ownersGlobalSearch
+      .parentElement;
+
+  searchWrap.classList.add(
+    "ownersGlobalSearchWrap"
+  );
+
+  const clearButton =
+    document.createElement(
+      "button"
     );
+
+  clearButton.id =
+    "ownersGlobalSearchClear";
+
+  clearButton.className =
+    "ownersGlobalSearchClear";
+
+  clearButton.type =
+    "button";
+
+  clearButton.title =
+    "Очистити пошук";
+
+  clearButton.setAttribute(
+    "aria-label",
+    "Очистити пошук"
+  );
+
+  clearButton.textContent =
+    "×";
+
+  searchWrap.appendChild(
+    clearButton
+  );
+
+  const syncClearButton =
+    () => {
+      clearButton.hidden =
+        !ownersGlobalSearch
+          .value.trim();
+  };
+
+  ownersGlobalSearch
+    .addEventListener(
+      "input",
+      syncClearButton
+    );
+
+  clearButton.addEventListener(
+    "click",
+    () => {
+      ownersGlobalSearch.value =
+        "";
+
+      syncClearButton();
+      renderOwners();
+      ownersGlobalSearch.focus();
+    }
+  );
+
+  syncClearButton();
+}
 
   // Загружаем профиль и тему клиники
   try {
