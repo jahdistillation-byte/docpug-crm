@@ -49996,17 +49996,64 @@ await continueCalendarCreation();
 async function updatePatientApi(petId, payload = {}) {
   try {
     const bodyObj = {
-      name: String(payload.name || "").trim(),
-      species: String(payload.species || "").trim(),
-      breed: String(payload.breed || "").trim(),
-      age: String(payload.age || "").trim(),
-      weight_kg: String(payload.weight_kg || "").trim(),
-      notes: String(payload.notes || "").trim(),
-    };
+  name:
+    String(
+      payload.name || ""
+    ).trim(),
 
-    Object.keys(bodyObj).forEach((k) => {
-      if (bodyObj[k] === "") delete bodyObj[k];
-    });
+  species:
+    String(
+      payload.species || ""
+    ).trim(),
+
+  breed:
+    String(
+      payload.breed || ""
+    ).trim(),
+
+  age:
+    String(
+      payload.age || ""
+    ).trim(),
+
+  weight_kg:
+    String(
+      payload.weight_kg || ""
+    ).trim(),
+
+  sex:
+    String(
+      payload.sex || ""
+    ).trim(),
+
+  neutered:
+    typeof payload.neutered ===
+      "boolean"
+      ? payload.neutered
+      : null,
+
+  vaccination_status:
+    String(
+      payload.vaccination_status ||
+      "unknown"
+    ).trim(),
+
+  notes:
+    String(
+      payload.notes || ""
+    ).trim(),
+};
+
+    Object.keys(
+  bodyObj
+).forEach((key) => {
+  if (
+    bodyObj[key] === "" ||
+    bodyObj[key] === null
+  ) {
+    delete bodyObj[key];
+  }
+});
 
     const res = await fetch(`/api/patients/${encodeURIComponent(petId)}`, {
       method: "PUT",
