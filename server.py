@@ -14917,28 +14917,132 @@ def api_create_patient():
             )
 
         payload = {
-            "org_id": current_org,
-            "owner_id": owner_id,
-            "name": name,
-            "species": data.get("species"),
-            "breed": data.get("breed"),
-            "age": data.get("age"),
-            "weight_kg": data.get(
+    "org_id":
+        current_org,
+
+    "owner_id":
+        owner_id,
+
+    "name":
+        name,
+
+    "species":
+        (
+            str(
+                data.get("species")
+                or ""
+            ).strip()
+            or None
+        ),
+
+    "breed":
+        (
+            str(
+                data.get("breed")
+                or ""
+            ).strip()
+            or None
+        ),
+
+    "age":
+        (
+            str(
+                data.get("age")
+                or ""
+            ).strip()
+            or None
+        ),
+
+    "weight_kg":
+        (
+            data.get(
                 "weight_kg"
-            ),
-            "notes": (
+            )
+            if data.get(
+                "weight_kg"
+            ) not in (
+                "",
+                None,
+            )
+            else None
+        ),
+
+    "sex":
+        (
+            str(
+                data.get("sex")
+                or ""
+            ).strip()
+            or None
+        ),
+
+    "neutered":
+        (
+            data.get("neutered")
+            if isinstance(
+                data.get("neutered"),
+                bool,
+            )
+            else None
+        ),
+
+    "vaccination_status":
+        (
+            str(
+                data.get(
+                    "vaccination_status"
+                )
+                or "unknown"
+            ).strip()
+        ),
+
+    "vaccination_date":
+        (
+            str(
+                data.get(
+                    "vaccination_date"
+                )
+                or ""
+            ).strip()
+            or None
+        ),
+
+    "vaccination_name":
+        (
+            str(
+                data.get(
+                    "vaccination_name"
+                )
+                or ""
+            ).strip()
+            or None
+        ),
+
+    "notes":
+        (
+            str(
                 data.get("notes")
                 or data.get("note")
-            ),
-        }
+                or ""
+            ).strip()
+            or None
+        ),
+}
 
         result = (
-            insert_with_optional_fallback(
-                "patients",
-                payload,
-                optional_fields=["notes"]
-            )
-        )
+    insert_with_optional_fallback(
+        "patients",
+        payload,
+        optional_fields=[
+            "notes",
+            "sex",
+            "neutered",
+            "vaccination_status",
+            "vaccination_date",
+            "vaccination_name",
+        ]
+    )
+)
 
         row = (
             result.data[0]
@@ -14963,7 +15067,168 @@ def api_create_patient():
             500
         )
 
+@app.put("/api/patients")
+@app.put("/api/patients/<pet_id>")
+def api_update_patient(
+    pet_id=None
+):
+    user, auth_error = auth_required()
 
+    if auth_error:
+        return auth_error
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    pet_id = str(
+    pet_id
+    or request.args.get("id")
+    or data.get("id")
+    or ""
+).strip()
+
+    if not pet_id:
+        return fail(
+            "patient id required",
+            400
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    allowed_fields = [
+        "name",
+        "species",
+        "breed",
+        "age",
+        "weight_kg",
+        "sex",
+        "neutered",
+        "vaccination_status",
+        "vaccination_date",
+        "vaccination_name",
+        "notes",
+    ]
+
+    payload = {
+        field: data.get(field)
+        for field in allowed_fields
+        if field in data
+    }
+
+    for field in [
+        "name",
+        "species",
+        "breed",
+        "age",
+        "sex",
+        "vaccination_status",
+        "vaccination_date",
+        "vaccination_name",
+        "notes",
+    ]:
+        if field not in payload:
+            continue
+
+        value = payload.get(field)
+
+        if isinstance(value, str):
+            value = value.strip()
+
+        payload[field] = (
+            value
+            if value not in (
+                "",
+                None,
+            )
+            else None
+        )
+
+    if "neutered" in payload:
+        value = payload.get(
+            "neutered"
+        )
+
+        payload["neutered"] = (
+            value
+            if isinstance(
+                value,
+                bool,
+            )
+            else None
+        )
+
+    if "weight_kg" in payload:
+        value = payload.get(
+            "weight_kg"
+        )
+
+        payload["weight_kg"] = (
+            value
+            if value not in (
+                "",
+                None,
+            )
+            else None
+        )
+
+    if (
+        payload.get(
+            "vaccination_status"
+        )
+        != "vaccinated"
+    ):
+        payload["vaccination_date"] = None
+        payload["vaccination_name"] = None
+
+    if not payload:
+        return fail(
+            "Nothing to update",
+            400
+        )
+
+    try:
+        result = (
+            supabase
+            .table("patients")
+            .update(payload)
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                pet_id
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUT /api/patients:",
+            repr(error)
+        )
+
+        return fail(
+            "Не вдалося оновити пацієнта.",
+            500
+        )
+    
 @app.delete("/api/patients/<pet_id>")
 def api_delete_patient(pet_id):
     user, auth_error = (
