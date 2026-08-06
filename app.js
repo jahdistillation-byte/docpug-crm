@@ -35509,9 +35509,12 @@ async function renderCalendarTab() {
       .map((x) => String(x.staff_id))
   );
 
-  const staffOnShift = staffSchedule.length
-    ? staff.filter((doc) => activeStaffIds.has(String(doc.id)))
-    : staff;
+  const staffOnShift =
+  staff.filter((doc) =>
+    activeStaffIds.has(
+      String(doc.id)
+    )
+  );
 
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
