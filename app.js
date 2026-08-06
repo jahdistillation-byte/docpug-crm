@@ -37248,31 +37248,41 @@ page.innerHTML = `
         </div>
       </div>
 
-      <div class="calendarModes">
-        <button
-          class="primary"
-          data-cal-mode="day"
-          type="button"
-        >
-          День
-        </button>
+      <div class="calendarHeaderActions">
+  <button
+    class="primary"
+    id="calendarCreateVisitButton"
+    type="button"
+  >
+    ＋ Створити запис
+  </button>
 
-        <button
-          class="ghost"
-          data-cal-mode="week"
-          type="button"
-        >
-          Тиждень
-        </button>
+  <div class="calendarModes">
+    <button
+      class="primary"
+      data-cal-mode="day"
+      type="button"
+    >
+      День
+    </button>
 
-        <button
-          class="ghost"
-          data-cal-mode="month"
-          type="button"
-        >
-          Місяць
-        </button>
-      </div>
+    <button
+      class="ghost"
+      data-cal-mode="week"
+      type="button"
+    >
+      Тиждень
+    </button>
+
+    <button
+      class="ghost"
+      data-cal-mode="month"
+      type="button"
+    >
+      Місяць
+    </button>
+  </div>
+</div>
     </div>
 
     <div class="calendarTop">
@@ -37695,6 +37705,31 @@ timeline.addEventListener(
 }
 );
 
+$("#calendarCreateVisitButton")
+  ?.addEventListener(
+    "click",
+    () => {
+      const defaultStaffId =
+        staffOnShift[0]?.id ||
+        staff[0]?.id ||
+        "";
+
+      if (!defaultStaffId) {
+        openDeleteModal(
+          "Спочатку додайте хоча б одного співробітника.",
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      openVisitFromCalendar(
+        "10:00",
+        defaultStaffId
+      );
+    }
+  );
   $("#calPrevDay")?.addEventListener("click", async () => {
     const d = new Date(today);
     d.setDate(d.getDate() - 1);
