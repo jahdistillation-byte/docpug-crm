@@ -12677,20 +12677,82 @@ def api_create_staff():
         return fail(str(error), 400)
 
     payload = {
-        "org_id": current_org,
-        "name": name,
-        "role": d.get("role") or "vet",
-        "avatar": d.get("avatar"),
-        "color": d.get("color") or "#7C5CFF",
-        "phone": d.get("phone"),
-        "specialization": d.get("specialization"),
-        "specialization_ids": specialization_ids,
-        "shift_rate": d.get("shift_rate") or 0,
-        "percent_rate": d.get("percent_rate") or 0,
-        "bonus_rate": d.get("bonus_rate") or 0,
-        "note": d.get("note"),
-        "is_active": True,
-    }
+    "org_id":
+        current_org,
+
+    "name":
+        name,
+
+    "role":
+        d.get("role")
+        or "vet",
+
+    "avatar":
+        d.get("avatar"),
+
+    "color":
+        d.get("color")
+        or "#7C5CFF",
+
+    "phone":
+        str(
+            d.get("phone")
+            or ""
+        ).strip()
+        or None,
+
+    "specialization":
+        d.get("specialization"),
+
+    "shift_rate":
+        d.get("shift_rate")
+        or 0,
+
+    "percent_rate":
+        d.get("percent_rate")
+        or 0,
+
+    "bonus_rate":
+        d.get("bonus_rate")
+        or 0,
+
+    "note":
+        str(
+            d.get("note")
+            or ""
+        ).strip()
+        or None,
+
+    "emergency_contact_name":
+        str(
+            d.get(
+                "emergency_contact_name"
+            )
+            or ""
+        ).strip()
+        or None,
+
+    "emergency_contact_phone":
+        str(
+            d.get(
+                "emergency_contact_phone"
+            )
+            or ""
+        ).strip()
+        or None,
+
+    "emergency_contact_relation":
+        str(
+            d.get(
+                "emergency_contact_relation"
+            )
+            or ""
+        ).strip()
+        or None,
+
+    "is_active":
+        True,
+}
 
     res = (
         supabase
@@ -12722,30 +12784,79 @@ def api_update_staff(staff_id):
             400,
         )
 
-    d = request.get_json(silent=True) or {}
-
-    payload = {
-        "name": d.get("name"),
-        "role": d.get("role"),
-        "avatar": d.get("avatar"),
-        "color": d.get("color"),
-        "phone": d.get("phone"),
-        "specialization": d.get("specialization"),
-        "shift_rate": d.get("shift_rate"),
-        "percent_rate": d.get("percent_rate"),
-        "bonus_rate": d.get("bonus_rate"),
-        "note": d.get("note"),
-        "is_active": d.get("is_active"),
-        "skills": d.get("skills"),
-    }
+    d = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
 
     current_org = (
         get_current_org_id()
     )
 
+    payload = {
+        "name":
+            d.get("name"),
+
+        "role":
+            d.get("role"),
+
+        "avatar":
+            d.get("avatar"),
+
+        "color":
+            d.get("color"),
+
+        "phone":
+            d.get("phone"),
+
+        "specialization":
+            d.get(
+                "specialization"
+            ),
+
+        "shift_rate":
+            d.get("shift_rate"),
+
+        "percent_rate":
+            d.get(
+                "percent_rate"
+            ),
+
+        "bonus_rate":
+            d.get("bonus_rate"),
+
+        "note":
+            d.get("note"),
+
+        "is_active":
+            d.get("is_active"),
+
+        "skills":
+            d.get("skills"),
+
+        "emergency_contact_name":
+            d.get(
+                "emergency_contact_name"
+            ),
+
+        "emergency_contact_phone":
+            d.get(
+                "emergency_contact_phone"
+            ),
+
+        "emergency_contact_relation":
+            d.get(
+                "emergency_contact_relation"
+            ),
+    }
+
     if "specialization_ids" in d:
         try:
-            payload["specialization_ids"] = (
+            payload[
+                "specialization_ids"
+            ] = (
                 validate_staff_specialization_ids(
                     d.get(
                         "specialization_ids"
@@ -12754,26 +12865,82 @@ def api_update_staff(staff_id):
                 )
             )
         except ValueError as error:
-            return fail(str(error), 400)
+            return fail(
+                str(error),
+                400,
+            )
+
+    text_fields = [
+        "name",
+        "phone",
+        "specialization",
+        "note",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "emergency_contact_relation",
+    ]
+
+    for field in text_fields:
+        if field not in d:
+            continue
+
+        value = payload.get(
+            field
+        )
+
+        if isinstance(
+            value,
+            str,
+        ):
+            value = (
+                value.strip()
+            )
+
+        payload[field] = (
+            value
+            if value != ""
+            else None
+        )
 
     payload = {
         key: value
-        for key, value in payload.items()
-        if value is not None
+        for key, value
+        in payload.items()
+        if (
+            key in d
+            or key ==
+                "specialization_ids"
+        )
     }
+
+    if not payload:
+        return fail(
+            "Nothing to update",
+            400,
+        )
 
     res = (
         supabase
         .table("staff")
         .update(payload)
-        .eq("org_id", current_org)
-        .eq("id", staff_id)
+        .eq(
+            "org_id",
+            current_org
+        )
+        .eq(
+            "id",
+            staff_id
+        )
         .execute()
     )
 
     row = (
         res.data[0]
-        if getattr(res, "data", None)
+        if getattr(
+            res,
+            "data",
+            None,
+        )
         else payload
     )
 
