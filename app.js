@@ -55244,6 +55244,7 @@ if (
   state.route === "owners" ||
   state.route === "owner"
 ) {
+  await loadPatientsApi();
   await loadOwners();
 }
 
