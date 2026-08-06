@@ -46913,6 +46913,41 @@ function openAddPetModal(ownerId, petToEdit = null) {
     </option>
   </select>
 </label>
+
+<div
+  class="addPetVaccinationDetails addPetFieldFull"
+  id="addPetVaccinationDetails"
+  hidden
+>
+  <label class="addPetField">
+    <span class="addPetLabel">
+      Дата щеплення
+      <small>необов’язково</small>
+    </span>
+
+    <input
+      id="addPetVaccinationDate"
+      class="addPetInput"
+      type="date"
+    >
+  </label>
+
+  <label class="addPetField">
+    <span class="addPetLabel">
+      Назва вакцини
+      <small>необов’язково</small>
+    </span>
+
+    <input
+      id="addPetVaccinationName"
+      class="addPetInput"
+      type="text"
+      maxlength="120"
+      autocomplete="off"
+      placeholder="Наприклад: Nobivac DHPPi"
+    >
+  </label>
+</div>
         <label class="addPetField">
           <span class="addPetLabel">
             Вага
@@ -47022,6 +47057,49 @@ const vaccinationInput =
   overlay.querySelector(
     "#addPetVaccination"
   );
+  const vaccinationDetails =
+  overlay.querySelector(
+    "#addPetVaccinationDetails"
+  );
+
+const vaccinationDateInput =
+  overlay.querySelector(
+    "#addPetVaccinationDate"
+  );
+
+const vaccinationNameInput =
+  overlay.querySelector(
+    "#addPetVaccinationName"
+  );
+
+  const syncVaccinationDetails = () => {
+  const isVaccinated =
+    vaccinationInput?.value ===
+    "vaccinated";
+
+  if (vaccinationDetails) {
+    vaccinationDetails.hidden =
+      !isVaccinated;
+  }
+
+  if (!isVaccinated) {
+    if (vaccinationDateInput) {
+      vaccinationDateInput.value =
+        "";
+    }
+
+    if (vaccinationNameInput) {
+      vaccinationNameInput.value =
+        "";
+    }
+  }
+};
+
+vaccinationInput
+  ?.addEventListener(
+    "change",
+    syncVaccinationDetails
+  );
   const notesInput = overlay.querySelector("#addPetNotes");
   const notesCount = overlay.querySelector("#addPetNotesCount");
   const errorBox = overlay.querySelector("#addPetModalError");
@@ -47091,12 +47169,24 @@ const getPetModalState =
         ).trim(),
 
       vaccination:
-        String(
-          vaccinationInput?.value ||
-          "unknown"
-        ).trim(),
+  String(
+    vaccinationInput?.value ||
+    "unknown"
+  ).trim(),
 
-      notes:
+vaccinationDate:
+  String(
+    vaccinationDateInput?.value ||
+    ""
+  ).trim(),
+
+vaccinationName:
+  String(
+    vaccinationNameInput?.value ||
+    ""
+  ).trim(),
+
+notes:
         String(
           notesInput?.value || ""
         ).trim(),
@@ -47547,13 +47637,33 @@ if (isEditMode) {
   }
 
   if (vaccinationInput) {
-    vaccinationInput.value =
-      String(
-        petToEdit
-          .vaccination_status ||
-        "unknown"
-      );
-  }
+  vaccinationInput.value =
+    String(
+      petToEdit
+        .vaccination_status ||
+      "unknown"
+    );
+}
+
+if (vaccinationDateInput) {
+  vaccinationDateInput.value =
+    String(
+      petToEdit
+        .vaccination_date ||
+      ""
+    ).slice(0, 10);
+}
+
+if (vaccinationNameInput) {
+  vaccinationNameInput.value =
+    String(
+      petToEdit
+        .vaccination_name ||
+      ""
+    );
+}
+
+syncVaccinationDetails();
 
   notesInput.value =
     String(
@@ -47592,6 +47702,7 @@ if (isEditMode) {
       petToEdit.breed || ""
     );
 }
+syncVaccinationDetails();
 
 initialPetModalState =
   JSON.stringify(
@@ -47853,6 +47964,24 @@ const vaccinationStatus =
     "unknown"
   ).trim();
 
+  const vaccinationDate =
+  vaccinationStatus ===
+    "vaccinated"
+    ? String(
+        vaccinationDateInput
+          ?.value || ""
+      ).trim()
+    : "";
+
+const vaccinationName =
+  vaccinationStatus ===
+    "vaccinated"
+    ? String(
+        vaccinationNameInput
+          ?.value || ""
+      ).trim()
+    : "";
+
 const neutered =
   neuteredRaw === ""
     ? null
@@ -47920,9 +48049,15 @@ const neutered =
   neutered,
 
   vaccination_status:
-    vaccinationStatus,
+  vaccinationStatus,
 
-  notes,
+vaccination_date:
+  vaccinationDate,
+
+vaccination_name:
+  vaccinationName,
+
+notes,
 };
 
     const savedPet = isEditMode
@@ -50033,12 +50168,24 @@ async function updatePatientApi(petId, payload = {}) {
       : null,
 
   vaccination_status:
-    String(
-      payload.vaccination_status ||
-      "unknown"
-    ).trim(),
+  String(
+    payload.vaccination_status ||
+    "unknown"
+  ).trim(),
 
-  notes:
+vaccination_date:
+  String(
+    payload.vaccination_date ||
+    ""
+  ).trim(),
+
+vaccination_name:
+  String(
+    payload.vaccination_name ||
+    ""
+  ).trim(),
+
+notes:
     String(
       payload.notes || ""
     ).trim(),
