@@ -56629,13 +56629,25 @@ const telegramRaw =
           phone
         );
 const normalizedTelegram =
-  telegramRaw
-    ? (
-        telegramRaw.startsWith("@")
-          ? telegramRaw
-          : `@${telegramRaw}`
-      )
-    : "";
+  normalizeTelegramUsername(
+    telegramRaw
+  );
+
+if (
+  normalizedTelegram &&
+  !isValidTelegramUsername(
+    normalizedTelegram
+  )
+) {
+  alert(
+    "Telegram username повинен містити від 5 до 32 символів після @"
+  );
+
+  $("#ownerModalTelegram")
+    ?.focus();
+
+  return;
+}
       const btn =
         $("#ownerModalSave");
 
