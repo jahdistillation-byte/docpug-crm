@@ -47166,3 +47166,41 @@ body[data-theme="white"]
   position: relative;
   z-index: 2;
 }
+/* =====================================================
+   TEMPLATE EDITOR — SHOW VISIT MODAL UNDER IT
+===================================================== */
+
+.appointmentTemplateEditorOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+}
+
+.appointmentTemplateEditorBackdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    rgba(3, 7, 18, .42) !important;
+
+  backdrop-filter:
+    blur(2px) !important;
+
+  -webkit-backdrop-filter:
+    blur(2px) !important;
+}
+
+.appointmentTemplateEditorModal {
+  position: relative !important;
+  z-index: 2 !important;
+
+  box-shadow:
+    0 30px 100px
+    rgba(0, 0, 0, .65) !important;
+}
