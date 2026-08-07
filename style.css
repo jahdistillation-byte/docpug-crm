@@ -47627,3 +47627,285 @@ body[data-theme="white"]
       20px !important;
   }
 }
+/* =====================================================
+   VISIT MODAL — WIDE DESKTOP REWORK
+===================================================== */
+
+.pugVisitModal {
+  width: min(
+    1380px,
+    calc(100vw - 40px)
+  ) !important;
+
+  max-width: 1380px !important;
+
+  max-height:
+    calc(100vh - 36px) !important;
+}
+
+
+/* HEADER */
+
+.pugVisitHead {
+  padding:
+    18px
+    24px !important;
+}
+
+.pugVisitTitle {
+  font-size:
+    23px !important;
+}
+
+.pugVisitSub {
+  font-size:
+    12px !important;
+}
+
+
+/* BODY — WIDE TWO COLUMN */
+
+.pugVisitBody {
+  display: grid !important;
+
+  grid-template-columns:
+    380px
+    minmax(0, 1fr) !important;
+
+  grid-template-areas:
+    "patient details"
+    "reason reason"
+    "footer footer";
+
+  gap:
+    14px !important;
+
+  padding:
+    14px 20px 18px !important;
+
+  align-items:
+    stretch;
+}
+
+
+/* =====================================================
+   LEFT PATIENT BLOCK
+===================================================== */
+
+.pugVisitPatientBlock {
+  grid-area:
+    patient;
+
+  min-height:
+    270px !important;
+
+  height:
+    auto !important;
+
+  padding:
+    18px !important;
+}
+
+
+/* =====================================================
+   RIGHT DETAILS BLOCK
+===================================================== */
+
+.pugVisitDetailsBlock {
+  grid-area:
+    details;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(300px, .9fr)
+    minmax(0, 1.25fr) !important;
+
+  grid-template-areas:
+    "title title"
+    "template fields";
+
+  gap:
+    14px 18px !important;
+
+  align-items:
+    start;
+
+  padding:
+    18px !important;
+}
+
+.pugVisitDetailsBlock > .pugSectionTitle {
+  grid-area:
+    title;
+
+  margin:
+    0 !important;
+}
+
+
+/* =====================================================
+   TEMPLATE — LEFT SIDE INSIDE DETAILS
+===================================================== */
+
+.appointmentTemplatePicker {
+  grid-area:
+    template;
+
+  display:
+    grid !important;
+
+  grid-template-columns:
+    1fr !important;
+
+  gap:
+    10px !important;
+
+  margin:
+    0 !important;
+}
+
+.appointmentTemplateSelector {
+  min-height:
+    82px !important;
+
+  width:
+    100% !important;
+
+  padding:
+    14px 16px !important;
+
+  grid-template-columns:
+    50px
+    minmax(0,1fr)
+    30px !important;
+}
+
+.appointmentTemplateSelectorIcon {
+  width:
+    50px !important;
+
+  height:
+    50px !important;
+
+  font-size:
+    23px !important;
+}
+
+#appointmentTemplateSelectorName {
+  font-size:
+    16px !important;
+}
+
+#appointmentTemplateSelectorMeta {
+  font-size:
+    12px !important;
+}
+
+.appointmentTemplateAddQuick {
+  width:
+    100% !important;
+
+  min-width:
+    0 !important;
+
+  min-height:
+    46px !important;
+
+  font-size:
+    12px !important;
+}
+
+
+/* =====================================================
+   DATE / TIME / DURATION / VET — RIGHT SIDE
+===================================================== */
+
+.pugVisitFieldsGrid {
+  grid-area:
+    fields;
+
+  display:
+    grid !important;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0,1fr)
+    ) !important;
+
+  gap:
+    12px 14px !important;
+
+  align-content:
+    start;
+}
+
+.pugVisitField > span {
+  font-size:
+    12px !important;
+}
+
+.pugVisitInput {
+  min-height:
+    46px !important;
+
+  font-size:
+    14px !important;
+}
+
+
+/* =====================================================
+   REASON
+===================================================== */
+
+.pugVisitMedicalBlock {
+  grid-area:
+    reason;
+
+  padding:
+    16px 18px !important;
+
+  margin:
+    0 !important;
+}
+
+.pugVisitTextarea {
+  min-height:
+    96px !important;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.pugVisitFoot {
+  grid-area:
+    footer;
+
+  margin:
+    0 !important;
+
+  padding:
+    12px 18px !important;
+}
+
+
+/* =====================================================
+   KEEP IT TIGHT ON DESKTOP
+===================================================== */
+
+@media (min-width: 1100px) {
+  .pugVisitBody {
+    grid-template-columns:
+      400px
+      minmax(0,1fr) !important;
+  }
+
+  .pugVisitDetailsBlock {
+    grid-template-columns:
+      minmax(320px,.85fr)
+      minmax(460px,1.15fr) !important;
+  }
+}
