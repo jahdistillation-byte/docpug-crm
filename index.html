@@ -945,7 +945,45 @@
           <span>📅</span>
           <strong>2. Деталі прийому</strong>
         </div>
+<div
+  class="appointmentTemplatePicker"
+  id="appointmentTemplatePicker"
+>
+  <div class="appointmentTemplatePickerHead">
+    <div>
+      <strong>Шаблон запису</strong>
 
+      <span>
+        Оберіть тип прийому —
+        тривалість встановиться автоматично
+      </span>
+    </div>
+
+    <button
+      type="button"
+      class="appointmentTemplateClear"
+      id="appointmentTemplateClear"
+      hidden
+    >
+      Скинути
+    </button>
+  </div>
+
+  <div
+    class="appointmentTemplateList"
+    id="appointmentTemplateList"
+  >
+    <div class="appointmentTemplateLoading">
+      Завантаження шаблонів…
+    </div>
+  </div>
+
+  <input
+    type="hidden"
+    id="visitTemplateId"
+    value=""
+  >
+</div>
         <div class="pugVisitFieldsGrid">
           <label class="pugVisitField">
             <span>Дата</span>
