@@ -2753,9 +2753,8 @@ function bindAppointmentTemplateDrawer() {
   }
 
   const openDrawer = () => {
-    console.log(
-      "OPEN APPOINTMENT TEMPLATE DRAWER"
-    );
+    drawer.style.display =
+      "flex";
 
     drawer.classList.add(
       "is-open"
@@ -2766,8 +2765,8 @@ function bindAppointmentTemplateDrawer() {
       "false"
     );
 
-    document.body.classList.add(
-      "appointmentTemplateDrawerOpen"
+    console.log(
+      "template drawer opened"
     );
   };
 
@@ -2781,9 +2780,8 @@ function bindAppointmentTemplateDrawer() {
       "true"
     );
 
-    document.body.classList.remove(
-      "appointmentTemplateDrawerOpen"
-    );
+    drawer.style.display =
+      "none";
   };
 
   if (selector) {
@@ -2799,13 +2797,11 @@ function bindAppointmentTemplateDrawer() {
   }
 
   if (drawerAdd) {
-  drawerAdd.onclick =
-    () => {
-      closeDrawer();
-
-      openAppointmentTemplateEditor();
-    };
-}
+    drawerAdd.onclick =
+      () => {
+        openAppointmentTemplateEditor();
+      };
+  }
 
   if (closeButton) {
     closeButton.onclick =
@@ -2830,7 +2826,7 @@ function bindAppointmentTemplateDrawer() {
 
       setTimeout(
         closeDrawer,
-        80
+        100
       );
     };
 }

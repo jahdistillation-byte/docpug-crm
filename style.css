@@ -46174,7 +46174,7 @@ body[data-theme="white"]
 .appointmentTemplateDrawer {
   position: fixed;
   inset: 0;
-  z-index: 12000;
+  z-index: 90000 !important;
 
   display: none;
 
