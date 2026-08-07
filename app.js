@@ -1786,16 +1786,34 @@ function seedIfEmpty() {
     ]);
   }
 
-  if (!LS.get(SERVICES_KEY, null)) {
-    LS.set(SERVICES_KEY, [
-      { id: "svc_exam",       name: "Огляд",            price: 500,  active: true, cat: "Терапія" },
-      { id: "svc_trip",       name: "Виїзд",            price: 1500, active: true, cat: "Виїзд" },
-      { id: "svc_vax",        name: "Вакцинація",       price: 800,  active: true, cat: "Терапія" },
-      { id: "svc_consult",    name: "Консультація",     price: 500,  active: true, cat: "Терапія" },
-      { id: "svc_cat_castr",  name: "Кастрація кота",   price: 2500, active: true, cat: "Хірургія" },
-      { id: "svc_dog_castr",  name: "Кастрація пса",    price: 3500, active: true, cat: "Хірургія" },
-    ]);
-  }
+  if (
+  location.protocol ===
+    "file:" &&
+  !LS.get(
+    SERVICES_KEY,
+    null
+  )
+) {
+  LS.set(
+    SERVICES_KEY,
+    [
+      {
+        id: "svc_exam",
+        name: "Огляд",
+        price: 500,
+        active: true,
+        cat: "Терапія",
+      },
+      {
+        id: "svc_vax",
+        name: "Вакцинація",
+        price: 800,
+        active: true,
+        cat: "Терапія",
+      },
+    ]
+  );
+}
 
   if (location.protocol !== "file:") return;
 
@@ -2158,12 +2176,21 @@ async function loadServicesApi() {
     let json = null;
     try { json = text ? JSON.parse(text) : null; } catch {}
 
-    if (!res.ok || !json || !json.ok) {
-      console.warn("loadServicesApi failed:", res.status, text);
-      const cached = LS.get(SERVICES_KEY, []);
-      state.services = Array.isArray(cached) ? cached : [];
-      return state.services;
-    }
+    if (
+  !res.ok ||
+  !json ||
+  !json.ok
+) {
+  console.warn(
+    "loadServicesApi failed:",
+    res.status,
+    text
+  );
+
+  state.services = [];
+
+  return [];
+}
 
     const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
     const catMap = loadServicesCatMap();
@@ -2180,11 +2207,15 @@ async function loadServicesApi() {
     LS.set(SERVICES_KEY, merged);
     return merged;
   } catch (e) {
-    console.warn("loadServicesApi network fail:", e);
-    const cached = LS.get(SERVICES_KEY, []);
-    state.services = Array.isArray(cached) ? cached : [];
-    return state.services;
-  }
+  console.warn(
+    "loadServicesApi network fail:",
+    e
+  );
+
+  state.services = [];
+
+  return [];
+}
 }
 // =====================================================
 // HOSPITAL API
@@ -5561,8 +5592,32 @@ function getPetsByOwnerId(ownerId) {
 // SERVICES registry
 // =========================
 function loadServices() {
-  const arr = Array.isArray(state.services) && state.services.length ? state.services : LS.get(SERVICES_KEY, []);
-  return arr || [];
+  if (
+    Array.isArray(
+      state.services
+    )
+  ) {
+    return state.services;
+  }
+
+  if (
+    location.protocol ===
+    "file:"
+  ) {
+    const cached =
+      LS.get(
+        SERVICES_KEY,
+        []
+      );
+
+    return Array.isArray(
+      cached
+    )
+      ? cached
+      : [];
+  }
+
+  return [];
 }
 
 function getServiceById(id) { return loadServices().find((s) => String(s.id) === String(id)) || null; }
@@ -30998,7 +31053,57 @@ async function renderPatientTab(tab, pet) {
   const root = $("#patientCardRoot");
   if (!root || !pet) return;
 
-  const stats = getFinancialStats(pet.id, 'patient');
+  const patientVisits =
+  await loadVisitsApi({
+    pet_id: pet.id,
+  });
+
+const sortedPatientVisits =
+  [...patientVisits].sort(
+    (a, b) =>
+      String(
+        b.date ||
+        b.event_date ||
+        b.created_at ||
+        ""
+      ).localeCompare(
+        String(
+          a.date ||
+          a.event_date ||
+          a.created_at ||
+          ""
+        )
+      )
+  );
+
+const stats = {
+  count:
+    patientVisits.length,
+
+  total:
+    patientVisits.reduce(
+      (sum, visit) =>
+        sum +
+        (
+          calcServicesTotal(
+            visit
+          ) || 0
+        ) +
+        (
+          calcStockTotal(
+            visit
+          ) || 0
+        ),
+      0
+    ),
+
+  lastDate:
+    sortedPatientVisits[0]
+      ?.date ||
+    sortedPatientVisits[0]
+      ?.event_date ||
+    "—",
+};
 
   // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
   root.innerHTML = `
