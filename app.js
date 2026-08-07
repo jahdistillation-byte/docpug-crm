@@ -37868,8 +37868,7 @@ const calendarDayEndHour =
   24;
 
 const calendarHourHeight =
-  72;
-
+  48;
 const calendarDayStartMinutes =
   calendarDayStartHour * 60;
 

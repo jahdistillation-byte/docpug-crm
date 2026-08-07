@@ -45398,3 +45398,123 @@ body[data-theme="white"]
     grid-column: auto;
   }
 }
+/* =====================================================
+   PUGCRM — COMPACT DAY CALENDAR
+   More working hours visible on one screen
+===================================================== */
+
+.page[data-page="calendar"]
+.calendarCard {
+  padding: 18px !important;
+}
+
+.page[data-page="calendar"]
+.calendarHeader {
+  margin-bottom: 12px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTop {
+  margin-bottom: 12px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeHead,
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  min-height: 54px !important;
+  height: 54px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  padding: 7px 12px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorAvatar {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 12px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity strong {
+  font-size: 13px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity span {
+  font-size: 10px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeLabel {
+  font-size: 11px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent {
+  min-height: 30px !important;
+  padding:
+    5px 27px 5px 9px !important;
+
+  border-radius: 9px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTime {
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTitle {
+  margin-top: 2px !important;
+  font-size: 11px !important;
+  line-height: 1.12 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventNote {
+  display: none !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineStatus {
+  min-height: 16px !important;
+  padding: 0 5px !important;
+  font-size: 8px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHover {
+  height: 22px !important;
+  transform:
+    translateY(-11px) !important;
+
+  font-size: 9px !important;
+}
+
+/* Правая панель тоже компактнее */
+
+.page[data-page="calendar"]
+.calStaffPanel {
+  padding: 10px !important;
+}
+
+.page[data-page="calendar"]
+.calStaffDrag {
+  min-height: 48px !important;
+  padding: 8px 10px !important;
+}
+
+.page[data-page="calendar"]
+.calStaffDragName {
+  font-size: 13px !important;
+}
+
+.page[data-page="calendar"]
+.calStaffDragRole {
+  font-size: 10px !important;
+}
