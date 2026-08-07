@@ -3601,12 +3601,6 @@ async function deleteVisitApi(
   String(visitId)
 );
 
-if (
-  typeof loadStockApi ===
-  "function"
-) {
-  await loadStockApi(true);
-}
 
 return true;
 
@@ -56919,72 +56913,40 @@ ownersGlobalSearch
   syncClearButton();
 }
 
-  // Загружаем профиль и тему клиники
-  try {
-    const response =
-      await fetch(
-        "/api/me",
-        {
-          method: "GET",
-          credentials: "include",
+  const clinicTitleEl =
+  document.getElementById(
+    "clinicNameTitle"
+  ) ||
+  document.querySelector(
+    ".clinic-title"
+  );
 
-          headers: {
-            Accept:
-              "application/json",
-          },
-        }
-      );
+if (
+  clinicTitleEl &&
+  state.me?.clinic_name
+) {
+  clinicTitleEl.textContent =
+    state.me.clinic_name;
+}
 
-    const data =
-      await response.json();
+if (state.me?.theme) {
+  document.body.dataset.theme =
+    state.me.theme;
 
-    if (
-      response.ok &&
-      data?.me
-    ) {
-      const clinicTitleEl =
-        document.getElementById(
-          "clinicNameTitle"
-        ) ||
-        document.querySelector(
-          ".clinic-title"
-        );
+  LS.set(
+    "docpug_clinic_theme",
+    state.me.theme
+  );
 
-      if (
-        clinicTitleEl &&
-        data.me.clinic_name
-      ) {
-        clinicTitleEl.textContent =
-          data.me.clinic_name;
-      }
-
-      if (data.me.theme) {
-        document.body.dataset.theme =
-          data.me.theme;
-
-        LS.set(
-          "docpug_clinic_theme",
-          data.me.theme
-        );
-
-        console.log(
-          `[Bootstrap] Установлена тема клініки: ${data.me.theme}`
-        );
-      }
-    }
-  } catch (themeError) {
-    console.warn(
-      "Не вдалося завантажити динамічну тему з сервера, використовуємо локальну:",
-      themeError
-    );
-
-    if (
-      typeof bootstrapClinicTheme ===
-      "function"
-    ) {
-      bootstrapClinicTheme();
-    }
-  }
+  console.log(
+    `[Bootstrap] Установлена тема клініки: ${state.me.theme}`
+  );
+} else if (
+  typeof bootstrapClinicTheme ===
+  "function"
+) {
+  bootstrapClinicTheme();
+}
 
   if (
   state.route === "owners" ||
