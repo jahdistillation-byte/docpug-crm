@@ -2529,15 +2529,25 @@ def api_update_organization_theme():
 
 @app.get("/api/session")
 def api_get_session():
-    """
-    Проверяет защищённую серверную сессию
-    и возвращает данные текущего пользователя.
-    """
-
     try:
-        user = get_current_user()
+        user_id = str(
+            session.get(
+                "user_id"
+            )
+            or ""
+        ).strip()
 
-        if not user:
+        org_id = str(
+            session.get(
+                "org_id"
+            )
+            or ""
+        ).strip()
+
+        if (
+            not user_id
+            or not org_id
+        ):
             session.clear()
 
             return jsonify({
@@ -2546,76 +2556,139 @@ def api_get_session():
                 "error": "Unauthorized",
             }), 401
 
-        org_id = user.get("org_id")
+        username = str(
+            session.get(
+                "username"
+            )
+            or ""
+        ).strip()
+
+        display_name = str(
+            session.get(
+                "display_name"
+            )
+            or username
+            or "Користувач"
+        ).strip()
+
+        role = str(
+            session.get(
+                "role"
+            )
+            or "vet"
+        ).strip().lower()
+
+        staff_id = (
+            str(
+                session.get(
+                    "staff_id"
+                )
+            )
+            if session.get(
+                "staff_id"
+            )
+            else None
+        )
+
+        must_change_password = bool(
+            session.get(
+                "must_change_password"
+            )
+        )
+
         clinic_name = "Клініка"
         theme = "purple"
 
-        if org_id:
-            try:
-                org_result = (
-                    supabase
-                    .table("orgs")
-                    .select("name, theme")
-                    .eq("id", str(org_id))
-                    .limit(1)
-                    .execute()
+        try:
+            org_result = (
+                supabase
+                .table("orgs")
+                .select(
+                    "name, theme"
+                )
+                .eq(
+                    "id",
+                    org_id
+                )
+                .limit(1)
+                .execute()
+            )
+
+            if org_result.data:
+                clinic_name = (
+                    org_result.data[0]
+                    .get("name")
+                    or clinic_name
                 )
 
-                if org_result.data:
-                    clinic_name = (
-                        org_result.data[0].get("name")
-                        or clinic_name
-                    )
-                    theme = (
-                        org_result.data[0].get("theme")
-                        or theme
-                    )
-
-            except Exception as org_error:
-                print(
-                    "⚠️ /api/session clinic load failed:",
-                    repr(org_error),
+                theme = (
+                    org_result.data[0]
+                    .get("theme")
+                    or theme
                 )
+
+        except Exception as org_error:
+            print(
+                "⚠️ /api/session clinic load failed:",
+                repr(org_error),
+            )
+
+        session_user = {
+            "id":
+                user_id,
+
+            "username":
+                username,
+
+            "org_id":
+                org_id,
+
+            "staff_id":
+                staff_id,
+
+            "role":
+                role,
+
+            "display_name":
+                display_name,
+        }
 
         return jsonify({
             "ok": True,
             "authenticated": True,
+
             "data": {
-                "user_id": user.get("id"),
+                "user_id":
+                    user_id,
 
-                "org_id": org_id,
+                "org_id":
+                    org_id,
 
-                "staff_id": user.get("staff_id"),
+                "staff_id":
+                    staff_id,
 
-                "username": (
-                    user.get("username")
-                    or ""
-                ),
+                "username":
+                    username,
 
-                "display_name": (
-                    user.get("display_name")
-                    or user.get("username")
-                    or "Користувач"
-                ),
+                "display_name":
+                    display_name,
 
-                "role": (
-                    user.get("role")
-                    or "vet"
-                ),
+                "role":
+                    role,
 
-                "clinic_name": clinic_name,
+                "clinic_name":
+                    clinic_name,
 
-                "theme": theme,
+                "theme":
+                    theme,
 
-                "must_change_password": bool(
-                    user.get(
-                        "must_change_password"
-                    )
-                ),
+                "must_change_password":
+                    must_change_password,
 
-                "is_platform_admin": (
-                    is_platform_admin(user)
-                ),
+                "is_platform_admin":
+                    is_platform_admin(
+                        session_user
+                    ),
             },
         })
 
@@ -2628,7 +2701,8 @@ def api_get_session():
         return jsonify({
             "ok": False,
             "authenticated": False,
-            "error": "Помилка перевірки сесії",
+            "error":
+                "Помилка перевірки сесії",
         }), 500
 @app.post("/api/change-password")
 def api_change_password():
