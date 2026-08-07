@@ -146,9 +146,11 @@ patients: [],
 visits: [],
 services: [],
 
+appointmentTemplates: [],
+appointmentTemplatesLoaded: false,
+
 stock: [],
 stockLoaded: false,
-
   selectedOwnerId: null,
   selectedPetId: null,
   selectedPet: null,
@@ -2216,6 +2218,318 @@ async function loadServicesApi() {
 
   return [];
 }
+}
+async function loadAppointmentTemplatesApi(
+  force = false
+) {
+  if (
+    state.appointmentTemplatesLoaded &&
+    !force
+  ) {
+    return state.appointmentTemplates;
+  }
+
+  try {
+    const response =
+      await fetch(
+        "/api/appointment-templates",
+        {
+          credentials: "include",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json =
+        text
+          ? JSON.parse(text)
+          : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "loadAppointmentTemplatesApi failed:",
+        response.status,
+        text
+      );
+
+      return [];
+    }
+
+    const templates =
+      Array.isArray(json.data)
+        ? json.data
+        : [];
+
+    state.appointmentTemplates =
+      templates;
+
+    state.appointmentTemplatesLoaded =
+      true;
+
+    return templates;
+
+  } catch (error) {
+    console.error(
+      "loadAppointmentTemplatesApi error:",
+      error
+    );
+
+    return [];
+  }
+}
+function renderAppointmentTemplatePicker() {
+  const list =
+    document.getElementById(
+      "appointmentTemplateList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+  const templates =
+    Array.isArray(
+      state.appointmentTemplates
+    )
+      ? state.appointmentTemplates
+          .filter(
+            (template) =>
+              template.active !== false
+          )
+      : [];
+
+  if (!templates.length) {
+    list.innerHTML = `
+      <div class="appointmentTemplateEmpty">
+        Шаблонів поки немає
+      </div>
+    `;
+
+    return;
+  }
+
+  const selectedId =
+    String(
+      document.getElementById(
+        "visitTemplateId"
+      )?.value || ""
+    );
+
+  list.innerHTML =
+    templates
+      .map((template) => {
+        const id =
+          String(
+            template.id || ""
+          );
+
+        const selected =
+          id === selectedId;
+
+        return `
+          <button
+            type="button"
+            class="
+              appointmentTemplateCard
+              ${
+                selected
+                  ? "active"
+                  : ""
+              }
+            "
+            data-appointment-template-id="${escapeHtml(
+              id
+            )}"
+            style="
+              --template-color:
+              ${escapeHtml(
+                template.color ||
+                "#7C5CFF"
+              )};
+            "
+          >
+            <span class="appointmentTemplateIcon">
+              ${escapeHtml(
+                template.icon ||
+                "📅"
+              )}
+            </span>
+
+            <span class="appointmentTemplateText">
+              <strong>
+                ${escapeHtml(
+                  template.name ||
+                  "Прийом"
+                )}
+              </strong>
+
+              <small>
+                ${Number(
+                  template.duration_min ||
+                  30
+                )} хв
+              </small>
+            </span>
+          </button>
+        `;
+      })
+      .join("");
+}
+function bindAppointmentTemplatePicker() {
+  const list =
+    document.getElementById(
+      "appointmentTemplateList"
+    );
+
+  if (
+    !list ||
+    list.dataset.bound === "1"
+  ) {
+    return;
+  }
+
+  list.dataset.bound =
+    "1";
+
+  list.addEventListener(
+    "click",
+    (event) => {
+      const button =
+        event.target.closest(
+          "[data-appointment-template-id]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const templateId =
+        String(
+          button.dataset
+            .appointmentTemplateId ||
+          ""
+        );
+
+      const template =
+        state.appointmentTemplates
+          .find(
+            (item) =>
+              String(item.id) ===
+              templateId
+          );
+
+      if (!template) {
+        return;
+      }
+
+      const templateInput =
+        document.getElementById(
+          "visitTemplateId"
+        );
+
+      const durationInput =
+        document.getElementById(
+          "visitDuration"
+        );
+
+      const noteInput =
+        document.getElementById(
+          "visitNote"
+        );
+
+      const clearButton =
+        document.getElementById(
+          "appointmentTemplateClear"
+        );
+
+      if (templateInput) {
+        templateInput.value =
+          templateId;
+      }
+
+      if (durationInput) {
+        const duration =
+          String(
+            template.duration_min ||
+            30
+          );
+
+        let option =
+          Array.from(
+            durationInput.options
+          ).find(
+            (item) =>
+              item.value ===
+              duration
+          );
+
+        if (!option) {
+          option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            duration;
+
+          option.textContent =
+            `${duration} хв`;
+
+          durationInput.appendChild(
+            option
+          );
+        }
+
+        durationInput.value =
+          duration;
+      }
+
+      if (noteInput) {
+        const currentNote =
+          String(
+            noteInput.value || ""
+          ).trim();
+
+        const defaultNote =
+          String(
+            template.default_note ||
+            template.name ||
+            ""
+          ).trim();
+
+        if (
+          !currentNote &&
+          defaultNote
+        ) {
+          noteInput.value =
+            defaultNote;
+        }
+      }
+
+      if (clearButton) {
+        clearButton.hidden =
+          false;
+      }
+
+      renderAppointmentTemplatePicker();
+    }
+  );
 }
 // =====================================================
 // HOSPITAL API
@@ -57615,6 +57929,32 @@ if (state.route === "team") {
 async function openVisitFromCalendar(hour, staffId) {
   const modal = $("#visitModal");
   if (!modal) return;
+
+  await loadAppointmentTemplatesApi();
+
+const visitTemplateInput =
+  document.getElementById(
+    "visitTemplateId"
+  );
+
+if (visitTemplateInput) {
+  visitTemplateInput.value =
+    "";
+}
+
+const templateClearButton =
+  document.getElementById(
+    "appointmentTemplateClear"
+  );
+
+if (templateClearButton) {
+  templateClearButton.hidden =
+    true;
+}
+
+renderAppointmentTemplatePicker();
+
+bindAppointmentTemplatePicker();
 
   delete modal.dataset.visitId;
 
