@@ -186,11 +186,107 @@ def get_current_user():
         print(
             "⚠️ get_current_user failed:",
             repr(error),
+            flush=True,
         )
 
-        g.current_user = None
+    error_text = str(
+        error or ""
+    ).lower()
 
-        return None
+    transient_error = any(
+        marker in error_text
+        for marker in (
+            "resource temporarily unavailable",
+            "errno 11",
+            "temporarily unavailable",
+
+            "connection reset",
+            "connection aborted",
+            "connection refused",
+            "connection terminated",
+            "connectionterminated",
+
+            "network is unreachable",
+            "server disconnected",
+
+            "http2",
+            "last_stream_id",
+            "error_code:1",
+
+            "try again",
+            "timed out",
+            "timeout",
+        )
+    )
+
+    if (
+        transient_error
+        and user_id
+        and org_id
+    ):
+        fallback_user = {
+            "id":
+                str(user_id),
+
+            "org_id":
+                str(org_id),
+
+            "staff_id":
+                session.get(
+                    "staff_id"
+                ),
+
+            "username":
+                str(
+                    session.get(
+                        "username"
+                    )
+                    or ""
+                ),
+
+            "display_name":
+                str(
+                    session.get(
+                        "display_name"
+                    )
+                    or session.get(
+                        "username"
+                    )
+                    or "Користувач"
+                ),
+
+            "role":
+                str(
+                    session.get(
+                        "role"
+                    )
+                    or "vet"
+                ),
+
+            "is_active":
+                True,
+
+            "must_change_password":
+                bool(
+                    session.get(
+                        "must_change_password"
+                    )
+                ),
+        }
+
+        print(
+            "⚠️ Using signed session fallback "
+            "after temporary Supabase error",
+            flush=True,
+        )
+
+        g.current_user = fallback_user
+
+        return fallback_user
+
+    g.current_user = None
+
+    return None
 
 
 def owner_required():
@@ -1179,20 +1275,30 @@ def execute_with_retry(query_factory, attempts=3, delay=0.25):
             transient_error = any(
                 marker in message
                 for marker in (
-                    "resource temporarily unavailable",
-                    "errno 11",
-                    "temporarily unavailable",
-                    "connection reset",
-                    "connection aborted",
-                    "connection refused",
-                    "network is unreachable",
-                    "name or service not known",
-                    "nodename nor servname provided",
-                    "try again",
-                    "timed out",
-                    "timeout",
-                    "server disconnected",
-                )
+    "resource temporarily unavailable",
+    "errno 11",
+    "temporarily unavailable",
+
+    "connection reset",
+    "connection aborted",
+    "connection refused",
+    "connection terminated",
+    "connectionterminated",
+
+    "network is unreachable",
+    "name or service not known",
+    "nodename nor servname provided",
+
+    "server disconnected",
+
+    "http2",
+    "last_stream_id",
+    "error_code:1",
+
+    "try again",
+    "timed out",
+    "timeout",
+)
             )
 
             if not transient_error or attempt == attempts - 1:
@@ -14659,11 +14765,10 @@ def api_get_staff_schedule():
             )
 
         result = execute_with_retry(
-            build_query,
-            attempts=3,
-            delay=0.25,
-        )
-
+    build_query,
+    attempts=5,
+    delay=0.35,
+)
         return ok(
             result.data or []
         )
