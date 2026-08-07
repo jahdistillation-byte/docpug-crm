@@ -945,109 +945,257 @@
           <span>📅</span>
           <strong>2. Деталі прийому</strong>
         </div>
-<div
-  class="appointmentTemplatePicker"
-  id="appointmentTemplatePicker"
->
-  <div class="appointmentTemplatePickerHead">
-    <div>
-      <strong>Шаблон запису</strong>
-
-      <span>
-        Оберіть тип прийому —
-        тривалість встановиться автоматично
-      </span>
-    </div>
-
-    <button
-      type="button"
-      class="appointmentTemplateClear"
-      id="appointmentTemplateClear"
-      hidden
-    >
-      Скинути
-    </button>
+<div class="pugVisitSection pugVisitDetailsBlock">
+  <div class="pugSectionTitle">
+    <span>📅</span>
+    <strong>2. Деталі прийому</strong>
   </div>
 
   <div
-    class="appointmentTemplateList"
-    id="appointmentTemplateList"
+    class="appointmentTemplatePicker"
+    id="appointmentTemplatePicker"
   >
-    <div class="appointmentTemplateLoading">
-      Завантаження шаблонів…
-    </div>
+    <button
+      type="button"
+      class="appointmentTemplateSelector"
+      id="appointmentTemplateSelector"
+    >
+      <span
+        class="appointmentTemplateSelectorIcon"
+        id="appointmentTemplateSelectorIcon"
+      >
+        🩺
+      </span>
+
+      <span class="appointmentTemplateSelectorMain">
+        <span class="appointmentTemplateSelectorLabel">
+          Шаблон прийому
+        </span>
+
+        <strong
+          id="appointmentTemplateSelectorName"
+        >
+          Обрати шаблон
+        </strong>
+
+        <small
+          id="appointmentTemplateSelectorMeta"
+        >
+          Тривалість і тип прийому
+        </small>
+      </span>
+
+      <span class="appointmentTemplateSelectorArrow">
+        →
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="appointmentTemplateAddQuick"
+      id="appointmentTemplateAddQuick"
+    >
+      ＋ Додати шаблон
+    </button>
+
+    <input
+      type="hidden"
+      id="visitTemplateId"
+      value=""
+    >
   </div>
 
-  <input
-    type="hidden"
-    id="visitTemplateId"
-    value=""
+  <div
+    class="appointmentTemplateDrawer"
+    id="appointmentTemplateDrawer"
+    aria-hidden="true"
   >
+    <button
+      type="button"
+      class="appointmentTemplateDrawerBackdrop"
+      id="appointmentTemplateDrawerBackdrop"
+      aria-label="Закрити"
+    ></button>
+
+    <section
+      class="appointmentTemplateDrawerPanel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="appointmentTemplateDrawerTitle"
+    >
+      <header class="appointmentTemplateDrawerHeader">
+        <div>
+          <span class="appointmentTemplateDrawerEyebrow">
+            ШВИДКИЙ ЗАПИС
+          </span>
+
+          <h3 id="appointmentTemplateDrawerTitle">
+            Оберіть шаблон прийому
+          </h3>
+
+          <p>
+            Шаблон автоматично встановить
+            тривалість і стандартний коментар.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="appointmentTemplateDrawerClose"
+          id="appointmentTemplateDrawerClose"
+          aria-label="Закрити"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="appointmentTemplateDrawerActions">
+        <button
+          type="button"
+          class="appointmentTemplateDrawerAdd"
+          id="appointmentTemplateDrawerAdd"
+        >
+          <span>＋</span>
+
+          <span>
+            <strong>
+              Додати шаблон
+            </strong>
+
+            <small>
+              Створити власний тип прийому
+            </small>
+          </span>
+        </button>
+      </div>
+
+      <div
+        class="appointmentTemplateDrawerList"
+        id="appointmentTemplateList"
+      >
+        <div class="appointmentTemplateLoading">
+          Завантаження шаблонів…
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="appointmentTemplateDrawerClear"
+        id="appointmentTemplateClear"
+        hidden
+      >
+        Скинути вибраний шаблон
+      </button>
+    </section>
+  </div>
+
+  <div class="pugVisitFieldsGrid">
+    <label class="pugVisitField">
+      <span>Дата</span>
+
+      <input
+        class="pugVisitInput"
+        id="visitDate"
+        type="date"
+      >
+    </label>
+
+    <label class="pugVisitField">
+      <span>Час початку</span>
+
+      <input
+        class="pugVisitInput"
+        id="visitStartTime"
+        type="time"
+        value="10:00"
+      >
+    </label>
+
+    <label class="pugVisitField">
+      <span>Тривалість</span>
+
+      <select
+        class="pugVisitInput"
+        id="visitDuration"
+      >
+        <option value="15">
+          15 хв
+        </option>
+
+        <option value="30">
+          30 хв
+        </option>
+
+        <option value="45">
+          45 хв
+        </option>
+
+        <option value="60" selected>
+          60 хв
+        </option>
+
+        <option value="90">
+          90 хв
+        </option>
+
+        <option value="120">
+          120 хв
+        </option>
+
+        <option value="180">
+          180 хв
+        </option>
+      </select>
+    </label>
+
+    <label class="pugVisitField">
+      <span>Ветеринар</span>
+
+      <select
+        class="pugVisitInput"
+        id="visitStaff"
+      >
+        <option value="">
+          Оберіть ветеринара
+        </option>
+      </select>
+    </label>
+  </div>
 </div>
-        <div class="pugVisitFieldsGrid">
-          <label class="pugVisitField">
-            <span>Дата</span>
-            <input class="pugVisitInput" id="visitDate" type="date">
-          </label>
 
-          <label class="pugVisitField">
-            <span>Час початку</span>
-            <input class="pugVisitInput" id="visitStartTime" type="time" value="10:00">
-          </label>
+<div class="pugVisitSection pugVisitMedicalBlock">
+  <div class="pugSectionTitle">
+    <span>📝</span>
 
-          <label class="pugVisitField">
-            <span>Тривалість</span>
-            <select class="pugVisitInput" id="visitDuration">
-              <option value="30">30 хв</option>
-              <option value="60" selected>60 хв</option>
-              <option value="90">90 хв</option>
-            </select>
-          </label>
+    <strong>
+      3. Причина звернення
+    </strong>
+  </div>
 
-          <label class="pugVisitField">
-            <span>Ветеринар</span>
-            <select class="pugVisitInput" id="visitStaff">
-              <option value="">Оберіть ветеринара</option>
-            </select>
-          </label>
-        </div>
-      </div>
+  <div class="pugVisitMedicalGrid">
+    <label
+      class="
+        pugVisitField
+        pugFieldWide
+      "
+    >
+      <span>
+        Причина запису /
+        коментар адміністратора
+      </span>
 
-            <div class="pugVisitSection pugVisitMedicalBlock">
-        <div class="pugSectionTitle">
-          <span>📝</span>
-
-          <strong>
-            3. Причина звернення
-          </strong>
-        </div>
-
-        <div class="pugVisitMedicalGrid">
-          <label
-            class="
-              pugVisitField
-              pugFieldWide
-            "
-          >
-            <span>
-              Причина запису /
-              коментар адміністратора
-            </span>
-
-            <textarea
-              class="
-                pugVisitInput
-                pugVisitTextarea
-              "
-              id="visitNote"
-              rows="4"
-              placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
-            ></textarea>
-          </label>
-        </div>
-      </div>
-
-    </div>
+      <textarea
+        class="
+          pugVisitInput
+          pugVisitTextarea
+        "
+        id="visitNote"
+        rows="4"
+        placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
+      ></textarea>
+    </label>
+  </div>
+</div>
 
     <div class="pugVisitFoot">
       <button

@@ -46017,3 +46017,1132 @@ body[data-theme="white"]
   color:
     rgba(255,255,255,.4);
 }
+/* =====================================================
+   APPOINTMENT TEMPLATE DRAWER
+===================================================== */
+
+.appointmentTemplatePicker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+
+.appointmentTemplateSelector {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 66px;
+  padding: 12px 14px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  color: #fff;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    transform .18s ease;
+}
+
+.appointmentTemplateSelector:hover {
+  transform: translateY(-1px);
+
+  background:
+    rgba(255,255,255,.055);
+
+  border-color:
+    rgba(255,255,255,.18);
+}
+
+.appointmentTemplateSelectorIcon {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background:
+    rgba(124,92,255,.15);
+
+  font-size: 22px;
+}
+
+.appointmentTemplateSelectorMain {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.appointmentTemplateSelectorLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color:
+    rgba(255,255,255,.46);
+
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+#appointmentTemplateSelectorName {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 750;
+
+  color:
+    rgba(255,255,255,.95);
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#appointmentTemplateSelectorMeta {
+  font-size: 12px;
+  line-height: 1.35;
+
+  color:
+    rgba(255,255,255,.52);
+}
+
+.appointmentTemplateSelectorArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 8px;
+
+  background:
+    rgba(255,255,255,.05);
+
+  font-size: 16px;
+  color:
+    rgba(255,255,255,.6);
+}
+
+.appointmentTemplateAddQuick {
+  min-width: 150px;
+  padding: 0 16px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.88);
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.appointmentTemplateAddQuick:hover {
+  background:
+    rgba(255,255,255,.055);
+}
+
+
+/* DRAWER OVERLAY */
+
+.appointmentTemplateDrawer {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+
+  display: none;
+
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.appointmentTemplateDrawer.is-open {
+  display: flex;
+}
+
+.appointmentTemplateDrawerBackdrop {
+  position: absolute;
+  inset: 0;
+
+  border: 0;
+
+  background:
+    rgba(2,7,15,.68);
+
+  backdrop-filter:
+    blur(6px);
+
+  cursor: pointer;
+}
+
+.appointmentTemplateDrawerPanel {
+  position: relative;
+  z-index: 1;
+
+  width: min(
+    460px,
+    calc(100vw - 24px)
+  );
+
+  height: 100%;
+
+  padding: 24px;
+
+  overflow-y: auto;
+
+  border-left:
+    1px solid
+    rgba(255,255,255,.10);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20,25,45,.99),
+      rgba(9,14,28,.99)
+    );
+
+  box-shadow:
+    -24px 0 80px
+    rgba(0,0,0,.42);
+}
+
+.appointmentTemplateDrawerHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    42px;
+
+  gap: 16px;
+
+  align-items: start;
+
+  padding-bottom: 20px;
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.08);
+}
+
+.appointmentTemplateDrawerEyebrow {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: .08em;
+
+  color:
+    rgba(255,255,255,.42);
+}
+
+.appointmentTemplateDrawerHeader h3 {
+  margin: 0;
+
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 800;
+
+  color: #fff;
+}
+
+.appointmentTemplateDrawerHeader p {
+  margin: 8px 0 0;
+
+  max-width: 330px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  color:
+    rgba(255,255,255,.52);
+}
+
+.appointmentTemplateDrawerClose {
+  width: 42px;
+  height: 42px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.09);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  color: #fff;
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+.appointmentTemplateDrawerActions {
+  margin: 18px 0;
+}
+
+.appointmentTemplateDrawerAdd {
+  display: grid;
+  grid-template-columns:
+    42px
+    minmax(0, 1fr);
+
+  gap: 12px;
+
+  align-items: center;
+
+  width: 100%;
+  padding: 13px 14px;
+
+  border:
+    1px dashed
+    rgba(124,92,255,.45);
+
+  border-radius: 14px;
+
+  background:
+    rgba(124,92,255,.07);
+
+  color: #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.appointmentTemplateDrawerAdd > span:first-child {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background:
+    rgba(124,92,255,.16);
+
+  font-size: 22px;
+}
+
+.appointmentTemplateDrawerAdd > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.appointmentTemplateDrawerAdd strong {
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.appointmentTemplateDrawerAdd small {
+  font-size: 12px;
+
+  color:
+    rgba(255,255,255,.5);
+}
+
+
+/* TEMPLATE LIST */
+
+.appointmentTemplateDrawerList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appointmentTemplateCard {
+  --template-color: #7C5CFF;
+
+  position: relative;
+
+  display: grid;
+  grid-template-columns:
+    48px
+    minmax(0, 1fr);
+
+  align-items: center;
+  gap: 12px;
+
+  min-height: 70px;
+  padding: 12px 14px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,.028);
+
+  color: #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    transform .15s ease;
+}
+
+.appointmentTemplateCard::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+
+  width: 4px;
+
+  border-radius: 4px;
+
+  background:
+    var(--template-color);
+}
+
+.appointmentTemplateCard:hover {
+  transform:
+    translateX(-2px);
+
+  background:
+    rgba(255,255,255,.05);
+
+  border-color:
+    rgba(255,255,255,.14);
+}
+
+.appointmentTemplateCard.active {
+  border-color:
+    var(--template-color);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 14%,
+      rgba(255,255,255,.02)
+    );
+}
+
+.appointmentTemplateIcon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 17%,
+      transparent
+    );
+
+  font-size: 22px;
+}
+
+.appointmentTemplateText {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointmentTemplateText strong {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 750;
+
+  color:
+    rgba(255,255,255,.95);
+}
+
+.appointmentTemplateText small {
+  font-size: 12px;
+  line-height: 1.35;
+
+  color:
+    rgba(255,255,255,.5);
+}
+
+.appointmentTemplateDrawerClear {
+  width: 100%;
+
+  margin-top: 18px;
+  padding: 11px 14px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-radius: 12px;
+
+  background:
+    transparent;
+
+  color:
+    rgba(255,255,255,.55);
+
+  font-size: 12px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.appointmentTemplateLoading,
+.appointmentTemplateEmpty {
+  padding: 18px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color:
+    rgba(255,255,255,.5);
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 760px) {
+  .appointmentTemplatePicker {
+    grid-template-columns: 1fr;
+  }
+
+  .appointmentTemplateAddQuick {
+    min-height: 44px;
+  }
+
+  .appointmentTemplateDrawerPanel {
+    width: 100%;
+    padding: 18px;
+  }
+}
+.appointmentTemplateSelector.has-template {
+  border-color:
+    var(--template-color);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 10%,
+      rgba(255,255,255,.025)
+    );
+}
+
+.appointmentTemplateSelector.has-template
+.appointmentTemplateSelectorIcon {
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 20%,
+      transparent
+    );
+
+  box-shadow:
+    0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--template-color) 25%,
+      transparent
+    );
+}
+
+.appointmentTemplateSelector.has-template
+.appointmentTemplateSelectorArrow {
+  color:
+    var(--template-color);
+}
+/* =====================================================
+   APPOINTMENT TEMPLATE EDITOR
+===================================================== */
+
+.appointmentTemplateEditorOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 13000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+}
+
+.appointmentTemplateEditorBackdrop {
+  position: absolute;
+  inset: 0;
+
+  background:
+    rgba(2, 7, 15, .72);
+
+  backdrop-filter:
+    blur(8px);
+}
+
+.appointmentTemplateEditorModal {
+  position: relative;
+  z-index: 1;
+
+  width: min(
+    620px,
+    calc(100vw - 32px)
+  );
+
+  max-height: calc(100vh - 48px);
+
+  overflow-y: auto;
+
+  padding: 24px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(24, 30, 52, .99),
+      rgba(10, 15, 30, .99)
+    );
+
+  box-shadow:
+    0 24px 80px
+    rgba(0,0,0,.48);
+}
+
+.appointmentTemplateEditorClose {
+  position: absolute;
+
+  top: 16px;
+  right: 16px;
+
+  width: 42px;
+  height: 42px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  color: #fff;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.appointmentTemplateEditorClose:hover {
+  background:
+    rgba(255,255,255,.07);
+}
+
+
+/* HEADER */
+
+.appointmentTemplateEditorHeader {
+  display: grid;
+
+  grid-template-columns:
+    52px
+    minmax(0, 1fr);
+
+  gap: 14px;
+
+  align-items: start;
+
+  padding-right: 52px;
+  padding-bottom: 20px;
+
+  margin-bottom: 20px;
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.08);
+}
+
+.appointmentTemplateEditorHeaderIcon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background:
+    rgba(124,92,255,.16);
+
+  color: #fff;
+
+  font-size: 26px;
+}
+
+.appointmentTemplateEditorHeader > div:last-child > span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: .08em;
+
+  color:
+    rgba(255,255,255,.42);
+}
+
+.appointmentTemplateEditorHeader h2 {
+  margin: 0;
+
+  font-size: 23px;
+  line-height: 1.2;
+  font-weight: 800;
+
+  color: #fff;
+}
+
+.appointmentTemplateEditorHeader p {
+  margin:
+    8px
+    0
+    0;
+
+  max-width: 430px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  color:
+    rgba(255,255,255,.52);
+}
+
+
+/* FORM */
+
+.appointmentTemplateEditorForm {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.appointmentTemplateEditorGrid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 2fr)
+    minmax(130px, 1fr)
+    100px
+    110px;
+
+  gap: 12px;
+}
+
+.appointmentTemplateEditorField {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.appointmentTemplateEditorField > span {
+  font-size: 12px;
+  font-weight: 700;
+
+  color:
+    rgba(255,255,255,.68);
+}
+
+.appointmentTemplateEditorField input,
+.appointmentTemplateEditorField textarea {
+  width: 100%;
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  color: #fff;
+
+  font: inherit;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease;
+}
+
+.appointmentTemplateEditorField input {
+  min-height: 46px;
+
+  padding:
+    0
+    13px;
+}
+
+.appointmentTemplateEditorField textarea {
+  min-height: 96px;
+
+  padding: 12px 13px;
+
+  resize: vertical;
+
+  line-height: 1.45;
+}
+
+.appointmentTemplateEditorField input::placeholder,
+.appointmentTemplateEditorField textarea::placeholder {
+  color:
+    rgba(255,255,255,.28);
+}
+
+.appointmentTemplateEditorField input:focus,
+.appointmentTemplateEditorField textarea:focus {
+  border-color:
+    rgba(124,92,255,.78);
+
+  background:
+    rgba(255,255,255,.05);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(124,92,255,.10);
+}
+
+
+/* DURATION */
+
+.appointmentTemplateDurationInput {
+  position: relative;
+}
+
+.appointmentTemplateDurationInput input {
+  padding-right: 42px;
+}
+
+.appointmentTemplateDurationInput b {
+  position: absolute;
+
+  top: 50%;
+  right: 12px;
+
+  transform:
+    translateY(-50%);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  color:
+    rgba(255,255,255,.42);
+
+  pointer-events: none;
+}
+
+
+/* COLOR INPUT */
+
+#appointmentTemplateEditorColor {
+  min-height: 46px;
+
+  padding: 5px;
+
+  cursor: pointer;
+}
+
+
+/* PREVIEW */
+
+.appointmentTemplateEditorPreview {
+  display: grid;
+
+  grid-template-columns:
+    52px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,.025);
+}
+
+.appointmentTemplateEditorPreviewIcon {
+  --template-color: #7C5CFF;
+
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 18%,
+      transparent
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--template-color) 28%,
+      transparent
+    );
+
+  font-size: 24px;
+}
+
+.appointmentTemplateEditorPreview > div:last-child {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.appointmentTemplateEditorPreview span {
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: .04em;
+
+  color:
+    rgba(255,255,255,.40);
+}
+
+.appointmentTemplateEditorPreview strong {
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 750;
+
+  color:
+    rgba(255,255,255,.96);
+}
+
+.appointmentTemplateEditorPreview small {
+  font-size: 12px;
+
+  color:
+    rgba(255,255,255,.48);
+}
+
+
+/* ERROR */
+
+.appointmentTemplateEditorError {
+  min-height: 18px;
+
+  font-size: 12px;
+  line-height: 1.4;
+
+  color:
+    #ff7b92;
+}
+
+
+/* ACTIONS */
+
+.appointmentTemplateEditorActions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding-top: 4px;
+}
+
+.appointmentTemplateEditorCancel,
+.appointmentTemplateEditorSave {
+  min-height: 44px;
+
+  padding:
+    0
+    18px;
+
+  border-radius: 12px;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+.appointmentTemplateEditorCancel {
+  border:
+    1px solid
+    rgba(255,255,255,.09);
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:
+    rgba(255,255,255,.72);
+}
+
+.appointmentTemplateEditorCancel:hover {
+  background:
+    rgba(255,255,255,.05);
+}
+
+.appointmentTemplateEditorSave {
+  border:
+    1px solid
+    rgba(124,92,255,.60);
+
+  background:
+    linear-gradient(
+      135deg,
+      #7C5CFF,
+      #9C6BFF
+    );
+
+  color: #fff;
+
+  box-shadow:
+    0 10px 28px
+    rgba(124,92,255,.22);
+}
+
+.appointmentTemplateEditorSave:hover {
+  transform:
+    translateY(-1px);
+}
+
+.appointmentTemplateEditorSave:disabled {
+  opacity: .55;
+  cursor: wait;
+  transform: none;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 760px) {
+  .appointmentTemplateEditorOverlay {
+    padding: 10px;
+  }
+
+  .appointmentTemplateEditorModal {
+    width: 100%;
+    max-height:
+      calc(100vh - 20px);
+
+    padding: 18px;
+
+    border-radius: 16px;
+  }
+
+  .appointmentTemplateEditorGrid {
+    grid-template-columns:
+      1fr
+      1fr;
+  }
+
+  .appointmentTemplateEditorField.templateNameField {
+    grid-column:
+      1 / -1;
+  }
+
+  .appointmentTemplateEditorHeader h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .appointmentTemplateEditorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .appointmentTemplateEditorField.templateNameField {
+    grid-column: auto;
+  }
+
+  .appointmentTemplateEditorActions {
+    flex-direction: column-reverse;
+  }
+
+  .appointmentTemplateEditorCancel,
+  .appointmentTemplateEditorSave {
+    width: 100%;
+  }
+}

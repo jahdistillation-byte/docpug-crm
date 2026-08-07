@@ -2293,6 +2293,80 @@ async function loadAppointmentTemplatesApi(
     return [];
   }
 }
+
+async function createAppointmentTemplateApi(
+  payload
+) {
+  try {
+    const response =
+      await fetch(
+        "/api/appointment-templates",
+        {
+          method: "POST",
+
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+
+          body:
+            JSON.stringify(
+              payload || {}
+            ),
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json =
+        text
+          ? JSON.parse(text)
+          : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "createAppointmentTemplateApi failed:",
+        response.status,
+        text
+      );
+
+      throw new Error(
+        json?.error ||
+        "Не вдалося створити шаблон."
+      );
+    }
+
+    return Array.isArray(
+      json.data
+    )
+      ? json.data[0] || null
+      : json.data || null;
+
+  } catch (error) {
+    console.error(
+      "createAppointmentTemplateApi error:",
+      error
+    );
+
+    throw error;
+  }
+}
 function renderAppointmentTemplatePicker() {
   const list =
     document.getElementById(
@@ -2391,6 +2465,112 @@ function renderAppointmentTemplatePicker() {
       })
       .join("");
 }
+function updateAppointmentTemplateSelector() {
+  const templateId =
+    String(
+      document.getElementById(
+        "visitTemplateId"
+      )?.value || ""
+    ).trim();
+
+  const iconElement =
+    document.getElementById(
+      "appointmentTemplateSelectorIcon"
+    );
+
+  const nameElement =
+    document.getElementById(
+      "appointmentTemplateSelectorName"
+    );
+
+  const metaElement =
+    document.getElementById(
+      "appointmentTemplateSelectorMeta"
+    );
+
+  const selector =
+    document.getElementById(
+      "appointmentTemplateSelector"
+    );
+
+  const template =
+    (
+      state.appointmentTemplates ||
+      []
+    ).find(
+      (item) =>
+        String(item.id) ===
+        templateId
+    );
+
+  if (!template) {
+    if (iconElement) {
+      iconElement.textContent =
+        "🩺";
+    }
+
+    if (nameElement) {
+      nameElement.textContent =
+        "Обрати шаблон";
+    }
+
+    if (metaElement) {
+      metaElement.textContent =
+        "Тривалість і тип прийому";
+    }
+
+    if (selector) {
+      selector.style.removeProperty(
+        "--template-color"
+      );
+
+      selector.classList.remove(
+        "has-template"
+      );
+    }
+
+    return;
+  }
+
+  if (iconElement) {
+    iconElement.textContent =
+      String(
+        template.icon ||
+        "📅"
+      );
+  }
+
+  if (nameElement) {
+    nameElement.textContent =
+      String(
+        template.name ||
+        "Прийом"
+      );
+  }
+
+  if (metaElement) {
+    metaElement.textContent =
+      `${Number(
+        template.duration_min ||
+        30
+      )} хв · шаблон вибрано`;
+  }
+
+  if (selector) {
+    selector.style.setProperty(
+      "--template-color",
+      String(
+        template.color ||
+        "#7C5CFF"
+      )
+    );
+
+    selector.classList.add(
+      "has-template"
+    );
+  }
+}
+
 function bindAppointmentTemplatePicker() {
   const list =
     document.getElementById(
@@ -2523,12 +2703,621 @@ function bindAppointmentTemplatePicker() {
       }
 
       if (clearButton) {
-        clearButton.hidden =
-          false;
-      }
+  clearButton.hidden =
+    false;
+}
 
-      renderAppointmentTemplatePicker();
+renderAppointmentTemplatePicker();
+
+updateAppointmentTemplateSelector();
     }
+  );
+}
+function bindAppointmentTemplateDrawer() {
+  const drawer =
+    document.getElementById(
+      "appointmentTemplateDrawer"
+    );
+
+  const selector =
+    document.getElementById(
+      "appointmentTemplateSelector"
+    );
+
+  const quickAdd =
+    document.getElementById(
+      "appointmentTemplateAddQuick"
+    );
+const drawerAdd =
+  document.getElementById(
+    "appointmentTemplateDrawerAdd"
+  );
+
+  const closeButton =
+    document.getElementById(
+      "appointmentTemplateDrawerClose"
+    );
+
+  const backdrop =
+    document.getElementById(
+      "appointmentTemplateDrawerBackdrop"
+    );
+
+  if (
+    !drawer ||
+    drawer.dataset.bound === "1"
+  ) {
+    return;
+  }
+
+  drawer.dataset.bound = "1";
+
+  const openDrawer = () => {
+    drawer.classList.add(
+      "is-open"
+    );
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    document.body.classList.add(
+      "appointmentTemplateDrawerOpen"
+    );
+  };
+
+  const closeDrawer = () => {
+    drawer.classList.remove(
+      "is-open"
+    );
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    document.body.classList.remove(
+      "appointmentTemplateDrawerOpen"
+    );
+  };
+
+  selector?.addEventListener(
+    "click",
+    openDrawer
+  );
+
+  quickAdd?.addEventListener(
+  "click",
+  () => {
+    openAppointmentTemplateEditor();
+  }
+);
+
+drawerAdd?.addEventListener(
+  "click",
+  () => {
+    openAppointmentTemplateEditor();
+  }
+);
+
+  closeButton?.addEventListener(
+    "click",
+    closeDrawer
+  );
+
+  backdrop?.addEventListener(
+    "click",
+    closeDrawer
+  );
+
+  drawer.addEventListener(
+    "click",
+    (event) => {
+      const templateButton =
+        event.target.closest(
+          "[data-appointment-template-id]"
+        );
+
+      if (templateButton) {
+        setTimeout(
+          closeDrawer,
+          80
+        );
+      }
+    }
+  );
+}
+function openAppointmentTemplateEditor() {
+  document
+    .getElementById(
+      "appointmentTemplateEditor"
+    )
+    ?.remove();
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.id =
+    "appointmentTemplateEditor";
+
+  modal.className =
+    "appointmentTemplateEditorOverlay";
+
+  modal.innerHTML = `
+    <div
+      class="appointmentTemplateEditorBackdrop"
+      data-close-template-editor
+    ></div>
+
+    <section
+      class="appointmentTemplateEditorModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      <button
+        type="button"
+        class="appointmentTemplateEditorClose"
+        data-close-template-editor
+        aria-label="Закрити"
+      >
+        ×
+      </button>
+
+      <header
+        class="appointmentTemplateEditorHeader"
+      >
+        <div
+          class="appointmentTemplateEditorHeaderIcon"
+        >
+          ＋
+        </div>
+
+        <div>
+          <span>
+            НОВИЙ ШАБЛОН
+          </span>
+
+          <h2>
+            Додати шаблон прийому
+          </h2>
+
+          <p>
+            Створіть власний тип запису
+            для швидкої роботи календаря.
+          </p>
+        </div>
+      </header>
+
+      <form
+        class="appointmentTemplateEditorForm"
+        id="appointmentTemplateEditorForm"
+      >
+        <div
+          class="appointmentTemplateEditorGrid"
+        >
+          <label
+            class="appointmentTemplateEditorField templateNameField"
+          >
+            <span>
+              Назва шаблону
+            </span>
+
+            <input
+              id="appointmentTemplateEditorName"
+              type="text"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Наприклад: Повторний огляд"
+              required
+            >
+          </label>
+
+          <label
+            class="appointmentTemplateEditorField"
+          >
+            <span>
+              Тривалість
+            </span>
+
+            <div
+              class="appointmentTemplateDurationInput"
+            >
+              <input
+                id="appointmentTemplateEditorDuration"
+                type="number"
+                min="5"
+                max="480"
+                step="5"
+                value="30"
+                required
+              >
+
+              <b>
+                хв
+              </b>
+            </div>
+          </label>
+
+          <label
+            class="appointmentTemplateEditorField"
+          >
+            <span>
+              Іконка
+            </span>
+
+            <input
+              id="appointmentTemplateEditorIcon"
+              type="text"
+              maxlength="8"
+              value="📅"
+              autocomplete="off"
+            >
+          </label>
+
+          <label
+            class="appointmentTemplateEditorField"
+          >
+            <span>
+              Колір
+            </span>
+
+            <input
+              id="appointmentTemplateEditorColor"
+              type="color"
+              value="#7C5CFF"
+            >
+          </label>
+        </div>
+
+        <label
+          class="appointmentTemplateEditorField"
+        >
+          <span>
+            Стандартний коментар
+          </span>
+
+          <textarea
+            id="appointmentTemplateEditorNote"
+            rows="3"
+            maxlength="1000"
+            placeholder="Необов'язково. Наприклад: контрольний огляд після лікування..."
+          ></textarea>
+        </label>
+
+        <div
+          class="appointmentTemplateEditorPreview"
+        >
+          <div
+            class="appointmentTemplateEditorPreviewIcon"
+            id="appointmentTemplateEditorPreviewIcon"
+          >
+            📅
+          </div>
+
+          <div>
+            <span>
+              Попередній перегляд
+            </span>
+
+            <strong
+              id="appointmentTemplateEditorPreviewName"
+            >
+              Новий шаблон
+            </strong>
+
+            <small
+              id="appointmentTemplateEditorPreviewMeta"
+            >
+              30 хв
+            </small>
+          </div>
+        </div>
+
+        <div
+          class="appointmentTemplateEditorError"
+          id="appointmentTemplateEditorError"
+        ></div>
+
+        <footer
+          class="appointmentTemplateEditorActions"
+        >
+          <button
+            type="button"
+            class="appointmentTemplateEditorCancel"
+            data-close-template-editor
+          >
+            Скасувати
+          </button>
+
+          <button
+            type="submit"
+            class="appointmentTemplateEditorSave"
+            id="appointmentTemplateEditorSave"
+          >
+            Створити шаблон
+          </button>
+        </footer>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  const nameInput =
+    modal.querySelector(
+      "#appointmentTemplateEditorName"
+    );
+
+  const durationInput =
+    modal.querySelector(
+      "#appointmentTemplateEditorDuration"
+    );
+
+  const iconInput =
+    modal.querySelector(
+      "#appointmentTemplateEditorIcon"
+    );
+
+  const colorInput =
+    modal.querySelector(
+      "#appointmentTemplateEditorColor"
+    );
+
+  const noteInput =
+    modal.querySelector(
+      "#appointmentTemplateEditorNote"
+    );
+
+  const errorBox =
+    modal.querySelector(
+      "#appointmentTemplateEditorError"
+    );
+
+  const close = () => {
+    modal.remove();
+  };
+
+  modal
+    .querySelectorAll(
+      "[data-close-template-editor]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          close
+        );
+      }
+    );
+
+  const updatePreview = () => {
+    const name =
+      String(
+        nameInput?.value || ""
+      ).trim();
+
+    const duration =
+      Math.max(
+        5,
+        Number(
+          durationInput?.value ||
+          30
+        )
+      );
+
+    const icon =
+      String(
+        iconInput?.value ||
+        "📅"
+      ).trim();
+
+    const color =
+      String(
+        colorInput?.value ||
+        "#7C5CFF"
+      );
+
+    const previewIcon =
+      modal.querySelector(
+        "#appointmentTemplateEditorPreviewIcon"
+      );
+
+    const previewName =
+      modal.querySelector(
+        "#appointmentTemplateEditorPreviewName"
+      );
+
+    const previewMeta =
+      modal.querySelector(
+        "#appointmentTemplateEditorPreviewMeta"
+      );
+
+    if (previewIcon) {
+      previewIcon.textContent =
+        icon || "📅";
+
+      previewIcon.style.setProperty(
+        "--template-color",
+        color
+      );
+    }
+
+    if (previewName) {
+      previewName.textContent =
+        name ||
+        "Новий шаблон";
+    }
+
+    if (previewMeta) {
+      previewMeta.textContent =
+        `${duration} хв`;
+    }
+  };
+
+  [
+    nameInput,
+    durationInput,
+    iconInput,
+    colorInput,
+  ].forEach(
+    (input) => {
+      input?.addEventListener(
+        "input",
+        updatePreview
+      );
+    }
+  );
+
+  modal
+    .querySelector(
+      "#appointmentTemplateEditorForm"
+    )
+    ?.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const name =
+          String(
+            nameInput?.value || ""
+          ).trim();
+
+        const duration =
+          Number(
+            durationInput?.value ||
+            30
+          );
+
+        const icon =
+          String(
+            iconInput?.value ||
+            "📅"
+          ).trim() ||
+          "📅";
+
+        const color =
+          String(
+            colorInput?.value ||
+            "#7C5CFF"
+          );
+
+        const defaultNote =
+          String(
+            noteInput?.value || ""
+          ).trim();
+
+        if (!name) {
+          if (errorBox) {
+            errorBox.textContent =
+              "Вкажіть назву шаблону.";
+          }
+
+          nameInput?.focus();
+
+          return;
+        }
+
+        if (
+          !Number.isFinite(
+            duration
+          ) ||
+          duration < 5 ||
+          duration > 480
+        ) {
+          if (errorBox) {
+            errorBox.textContent =
+              "Тривалість має бути від 5 до 480 хвилин.";
+          }
+
+          durationInput?.focus();
+
+          return;
+        }
+
+        const saveButton =
+          modal.querySelector(
+            "#appointmentTemplateEditorSave"
+          );
+
+        if (saveButton) {
+          saveButton.disabled =
+            true;
+
+          saveButton.textContent =
+            "Створюємо…";
+        }
+
+        if (errorBox) {
+          errorBox.textContent =
+            "";
+        }
+
+        try {
+          const created =
+            await createAppointmentTemplateApi({
+              name,
+
+              duration_min:
+                duration,
+
+              icon,
+
+              color,
+
+              default_note:
+                defaultNote,
+
+              active:
+                true,
+
+              sort_order:
+                100,
+            });
+
+          if (!created?.id) {
+            throw new Error(
+              "Сервер не повернув створений шаблон."
+            );
+          }
+
+          await loadAppointmentTemplatesApi(
+            true
+          );
+
+          renderAppointmentTemplatePicker();
+
+          close();
+
+        } catch (error) {
+          if (errorBox) {
+            errorBox.textContent =
+              error?.message ||
+              "Не вдалося створити шаблон.";
+          }
+
+          if (saveButton) {
+            saveButton.disabled =
+              false;
+
+            saveButton.textContent =
+              "Створити шаблон";
+          }
+        }
+      }
+    );
+
+  updatePreview();
+
+  setTimeout(
+    () => {
+      nameInput?.focus();
+    },
+    50
   );
 }
 // =====================================================
@@ -57954,7 +58743,11 @@ if (templateClearButton) {
 
 renderAppointmentTemplatePicker();
 
+updateAppointmentTemplateSelector();
+
 bindAppointmentTemplatePicker();
+
+bindAppointmentTemplateDrawer();
 
   delete modal.dataset.visitId;
 
