@@ -2728,10 +2728,11 @@ function bindAppointmentTemplateDrawer() {
     document.getElementById(
       "appointmentTemplateAddQuick"
     );
-const drawerAdd =
-  document.getElementById(
-    "appointmentTemplateDrawerAdd"
-  );
+
+  const drawerAdd =
+    document.getElementById(
+      "appointmentTemplateDrawerAdd"
+    );
 
   const closeButton =
     document.getElementById(
@@ -2743,16 +2744,19 @@ const drawerAdd =
       "appointmentTemplateDrawerBackdrop"
     );
 
-  if (
-    !drawer ||
-    drawer.dataset.bound === "1"
-  ) {
+  if (!drawer) {
+    console.error(
+      "appointmentTemplateDrawer not found"
+    );
+
     return;
   }
 
-  drawer.dataset.bound = "1";
-
   const openDrawer = () => {
+    console.log(
+      "OPEN APPOINTMENT TEMPLATE DRAWER"
+    );
+
     drawer.classList.add(
       "is-open"
     );
@@ -2782,51 +2786,51 @@ const drawerAdd =
     );
   };
 
-  selector?.addEventListener(
-    "click",
-    openDrawer
-  );
-
-  quickAdd?.addEventListener(
-  "click",
-  () => {
-    openAppointmentTemplateEditor();
+  if (selector) {
+    selector.onclick =
+      openDrawer;
   }
-);
 
-drawerAdd?.addEventListener(
-  "click",
-  () => {
-    openAppointmentTemplateEditor();
+  if (quickAdd) {
+    quickAdd.onclick =
+      () => {
+        openAppointmentTemplateEditor();
+      };
   }
-);
 
-  closeButton?.addEventListener(
-    "click",
-    closeDrawer
-  );
+  if (drawerAdd) {
+    drawerAdd.onclick =
+      () => {
+        openAppointmentTemplateEditor();
+      };
+  }
 
-  backdrop?.addEventListener(
-    "click",
-    closeDrawer
-  );
+  if (closeButton) {
+    closeButton.onclick =
+      closeDrawer;
+  }
 
-  drawer.addEventListener(
-    "click",
+  if (backdrop) {
+    backdrop.onclick =
+      closeDrawer;
+  }
+
+  drawer.onclick =
     (event) => {
       const templateButton =
         event.target.closest(
           "[data-appointment-template-id]"
         );
 
-      if (templateButton) {
-        setTimeout(
-          closeDrawer,
-          80
-        );
+      if (!templateButton) {
+        return;
       }
-    }
-  );
+
+      setTimeout(
+        closeDrawer,
+        80
+      );
+    };
 }
 function openAppointmentTemplateEditor() {
   document
