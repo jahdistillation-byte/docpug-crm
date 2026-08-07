@@ -14295,7 +14295,559 @@ def api_get_staff_rating():
         print("❌ /api/staff/rating error:", repr(e))
         return fail(str(e), 500)
 
+# =====================================================
+# APPOINTMENT TEMPLATES
+# =====================================================
 
+DEFAULT_APPOINTMENT_TEMPLATES = [
+    {
+        "name": "Огляд",
+        "duration_min": 45,
+        "icon": "🩺",
+        "color": "#3B82F6",
+        "sort_order": 10,
+    },
+    {
+        "name": "УЗД",
+        "duration_min": 15,
+        "icon": "📡",
+        "color": "#06B6D4",
+        "sort_order": 20,
+    },
+    {
+        "name": "Маніпуляційний візит",
+        "duration_min": 15,
+        "icon": "💉",
+        "color": "#10B981",
+        "sort_order": 30,
+    },
+    {
+        "name": "Кастрація",
+        "duration_min": 60,
+        "icon": "✂️",
+        "color": "#F59E0B",
+        "sort_order": 40,
+    },
+    {
+        "name": "Базова хірургія",
+        "duration_min": 120,
+        "icon": "🏥",
+        "color": "#EF4444",
+        "sort_order": 50,
+    },
+]
+
+
+def normalize_appointment_template_payload(
+    data,
+    *,
+    partial=False,
+):
+    source = (
+        data
+        if isinstance(data, dict)
+        else {}
+    )
+
+    payload = {}
+
+    if (
+        not partial
+        or "name" in source
+    ):
+        name = str(
+            source.get("name")
+            or ""
+        ).strip()
+
+        if not name:
+            raise ValueError(
+                "Вкажіть назву шаблону."
+            )
+
+        if len(name) > 100:
+            raise ValueError(
+                "Назва шаблону занадто довга."
+            )
+
+        payload["name"] = name
+
+    if (
+        not partial
+        or "duration_min" in source
+    ):
+        try:
+            duration_min = int(
+                source.get(
+                    "duration_min"
+                )
+                or 30
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            raise ValueError(
+                "Некоректна тривалість."
+            )
+
+        if (
+            duration_min < 5
+            or duration_min > 480
+        ):
+            raise ValueError(
+                "Тривалість має бути від 5 до 480 хвилин."
+            )
+
+        payload[
+            "duration_min"
+        ] = duration_min
+
+    if (
+        not partial
+        or "icon" in source
+    ):
+        icon = str(
+            source.get("icon")
+            or "📅"
+        ).strip()[:12]
+
+        payload["icon"] = (
+            icon or "📅"
+        )
+
+    if (
+        not partial
+        or "color" in source
+    ):
+        color = str(
+            source.get("color")
+            or "#7C5CFF"
+        ).strip().upper()
+
+        if not re.fullmatch(
+            r"#[0-9A-F]{6}",
+            color,
+        ):
+            raise ValueError(
+                "Некоректний колір."
+            )
+
+        payload["color"] = color
+
+    if (
+        not partial
+        or "default_note" in source
+    ):
+        payload[
+            "default_note"
+        ] = (
+            str(
+                source.get(
+                    "default_note"
+                )
+                or ""
+            ).strip()[:500]
+            or None
+        )
+
+    if "active" in source:
+        payload["active"] = bool(
+            source.get("active")
+        )
+
+    if (
+        not partial
+        or "sort_order" in source
+    ):
+        try:
+            sort_order = int(
+                source.get(
+                    "sort_order"
+                )
+                or 100
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            sort_order = 100
+
+        payload[
+            "sort_order"
+        ] = max(
+            0,
+            min(
+                10000,
+                sort_order,
+            ),
+        )
+
+    return payload
+
+
+def ensure_default_appointment_templates(
+    current_org,
+):
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table(
+                "appointment_templates"
+            )
+            .select(
+                "id"
+            )
+            .eq(
+                "org_id",
+                current_org,
+            )
+            .limit(1)
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+    if result.data:
+        return
+
+    rows = [
+        {
+            **template,
+            "org_id":
+                current_org,
+            "active":
+                True,
+        }
+        for template
+        in DEFAULT_APPOINTMENT_TEMPLATES
+    ]
+
+    execute_with_retry(
+        lambda: (
+            supabase
+            .table(
+                "appointment_templates"
+            )
+            .insert(rows)
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+
+@app.get(
+    "/api/appointment-templates"
+)
+def api_get_appointment_templates():
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    try:
+        ensure_default_appointment_templates(
+            current_org
+        )
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "appointment_templates"
+                )
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .order(
+                    "sort_order"
+                )
+                .order(
+                    "name"
+                )
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET appointment templates:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити шаблони записів.",
+            500,
+        )
+
+
+@app.post(
+    "/api/appointment-templates"
+)
+def api_create_appointment_template():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    try:
+        payload = (
+            normalize_appointment_template_payload(
+                data
+            )
+        )
+
+        payload["org_id"] = (
+            current_org
+        )
+
+        payload["updated_at"] = (
+            datetime
+            .now(
+                timezone.utc
+            )
+            .isoformat()
+        )
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "appointment_templates"
+                )
+                .insert(payload)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося створити шаблон.",
+                500,
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except ValueError as error:
+        return fail(
+            str(error),
+            400,
+        )
+
+    except Exception as error:
+        message = str(
+            error
+        ).lower()
+
+        if (
+            "duplicate" in message
+            or "unique" in message
+        ):
+            return fail(
+                "Шаблон з такою назвою вже існує.",
+                409,
+            )
+
+        print(
+            "❌ POST appointment template:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося створити шаблон.",
+            500,
+        )
+
+
+@app.put(
+    "/api/appointment-templates/<template_id>"
+)
+def api_update_appointment_template(
+    template_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    try:
+        payload = (
+            normalize_appointment_template_payload(
+                data,
+                partial=True,
+            )
+        )
+
+        if not payload:
+            return fail(
+                "Немає змін для збереження.",
+                400,
+            )
+
+        payload["updated_at"] = (
+            datetime
+            .now(
+                timezone.utc
+            )
+            .isoformat()
+        )
+
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "appointment_templates"
+                )
+                .update(payload)
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    template_id,
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not result.data:
+            return fail(
+                "Шаблон не знайдено.",
+                404,
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except ValueError as error:
+        return fail(
+            str(error),
+            400,
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUT appointment template:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося оновити шаблон.",
+            500,
+        )
+
+
+@app.delete(
+    "/api/appointment-templates/<template_id>"
+)
+def api_delete_appointment_template(
+    template_id
+):
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "appointment_templates"
+                )
+                .delete()
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    template_id,
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not result.data:
+            return fail(
+                "Шаблон не знайдено.",
+                404,
+            )
+
+        return ok(True)
+
+    except Exception as error:
+        print(
+            "❌ DELETE appointment template:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося видалити шаблон.",
+            500,
+        )
     
 # API: CALENDAR
 # =========================
