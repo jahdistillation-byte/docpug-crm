@@ -45422,13 +45422,15 @@ body[data-theme="white"]
 .calendarTimelineTimeHead,
 .page[data-page="calendar"]
 .calendarDoctorTimelineHead {
-  min-height: 54px !important;
-  height: 54px !important;
+  min-height: 64px !important;
+  height: 64px !important;
 }
 
 .page[data-page="calendar"]
 .calendarDoctorTimelineHead {
-  padding: 7px 12px !important;
+  padding: 8px 12px !important;
+  align-content: center !important;
+  overflow: hidden;
 }
 
 .page[data-page="calendar"]
@@ -45517,4 +45519,19 @@ body[data-theme="white"]
 .page[data-page="calendar"]
 .calStaffDragRole {
   font-size: 10px !important;
+}
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity {
+  min-width: 0;
+  align-self: center;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity strong,
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity span {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
