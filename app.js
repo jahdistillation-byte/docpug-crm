@@ -38002,7 +38002,7 @@ const getEventLayout = (
 
   const height =
     Math.max(
-      42,
+      30,
       naturalHeight -
       visualGap
     );
@@ -38551,8 +38551,8 @@ page.innerHTML = `
 
         <div class="hint">
           Натисніть на потрібний час
-          або перетягніть ветеринара
-          на часову шкалу.
+у колонці ветеринара,
+щоб створити запис.
         </div>
       </div>
 
@@ -38714,60 +38714,12 @@ page.innerHTML = `
         </div>
       </div>
 
-      <aside class="calStaffPanel">
-        <div class="calStaffPanelHead">
-          <div>
-            <div class="calStaffPanelTitle">
-              Ветеринари
-            </div>
-
-            <div class="calStaffPanelSub">
-              Перетягніть на часову шкалу
-            </div>
-          </div>
-        </div>
-
-        <div class="calStaffDragList">
-          ${
-            staffPaletteHtml ||
-            `
-              <div class="hint">
-                Немає співробітників.
-              </div>
-            `
-          }
-        </div>
-      </aside>
+      
     </div>
   </div>
 `;
 
 initCalendarTopScroll();
-$("#calendarOpenTeamButton")
-  ?.addEventListener(
-    "click",
-    async () => {
-      calendarMode = "month";
-
-      await renderCalendarTab();
-    }
-  );
-  $$(".calStaffDrag").forEach((card) => {
-    card.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", JSON.stringify({
-        staff_id: card.dataset.dragStaffId,
-        staff_name: card.dataset.dragStaffName,
-        color: card.dataset.dragStaffColor,
-      }));
-      e.dataTransfer.effectAllowed = "copy";
-      card.classList.add("dragging");
-    });
-
-    card.addEventListener("dragend", () => {
-      card.classList.remove("dragging");
-    });
-  });
-
   $$("[data-calendar-timeline]")
   .forEach(
     (timeline) => {

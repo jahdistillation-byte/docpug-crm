@@ -45535,3 +45535,291 @@ body[data-theme="white"]
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+/* =====================================================
+   PUGCRM — CALENDAR DAY V2
+   Clean full-width clinical schedule
+===================================================== */
+
+.page[data-page="calendar"]
+.calendarWorkArea {
+  display: block !important;
+  width: 100% !important;
+}
+
+.page[data-page="calendar"]
+.calendarMainArea {
+  width: 100% !important;
+  max-width: none !important;
+  overflow: hidden !important;
+}
+
+.page[data-page="calendar"]
+.calStaffPanel {
+  display: none !important;
+}
+
+.page[data-page="calendar"]
+.calendarDayGrid {
+  display: grid !important;
+
+  grid-template-columns:
+    68px
+    minmax(0, 1fr) !important;
+
+  gap: 0 !important;
+
+  width: 100% !important;
+  overflow-x: auto !important;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+
+  border-radius: 18px;
+  background:
+    rgba(2, 9, 18, 0.2);
+}
+
+.page[data-page="calendar"]
+.calendarDoctorsTimelineGrid {
+  display: grid !important;
+  grid-auto-flow: column !important;
+
+  grid-auto-columns:
+    minmax(260px, 1fr) !important;
+
+  width: 100%;
+  min-width: 100%;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineColumn {
+  min-width: 260px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeHead,
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  height: 58px !important;
+  min-height: 58px !important;
+}
+
+/* Левая колонка ЧАС */
+
+.page[data-page="calendar"]
+.calendarTimelineTimeHead {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 !important;
+
+  color:
+    rgba(255,255,255,.38);
+
+  font-size: 10px !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+
+  background:
+    rgba(0, 0, 0, 0.18);
+
+  border-right:
+    1px solid
+    rgba(255,255,255,.06);
+}
+
+/* Новая шапка врача */
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  display: grid !important;
+
+  grid-template-columns:
+    34px
+    minmax(0, 1fr)
+    auto !important;
+
+  grid-template-rows:
+    1fr !important;
+
+  align-items: center !important;
+  align-content: center !important;
+
+  column-gap: 10px !important;
+
+  padding:
+    8px 12px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.015)
+    );
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.07);
+}
+
+.page[data-page="calendar"]
+.calendarDoctorAvatar {
+  grid-row: auto !important;
+
+  width: 34px !important;
+  height: 34px !important;
+
+  border-radius: 10px !important;
+
+  font-size: 12px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity {
+  min-width: 0;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity strong {
+  display: block;
+
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  font-weight: 750 !important;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity span {
+  margin-top: 2px !important;
+
+  font-size: 9px !important;
+  line-height: 1.2 !important;
+
+  color:
+    rgba(255,255,255,.38);
+}
+
+/* Специализации теперь справа */
+
+.page[data-page="calendar"]
+.calendarDoctorSpecializations {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 4px;
+
+  min-width: 0;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorSpecializations
+.calStaffSpecialization {
+  margin: 0 !important;
+  padding:
+    3px 6px !important;
+
+  font-size: 8px !important;
+  line-height: 1 !important;
+
+  white-space: nowrap;
+}
+
+/* Временная шкала */
+
+.page[data-page="calendar"]
+.calendarTimelineTimeBody {
+  background:
+    rgba(0,0,0,.12);
+
+  border-right:
+    1px solid
+    rgba(255,255,255,.06);
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeLabel {
+  padding-right: 8px !important;
+
+  font-size: 10px !important;
+  font-weight: 650 !important;
+
+  color:
+    rgba(255,255,255,.44);
+}
+
+/* Вертикальные колонки */
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineColumn {
+  border-right:
+    1px solid
+    rgba(255,255,255,.055) !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimeline {
+  background:
+    rgba(255,255,255,.005);
+}
+
+/* События */
+
+.page[data-page="calendar"]
+.calendarTimelineEvent {
+  min-height: 28px !important;
+
+  padding:
+    4px 8px !important;
+
+  border-radius:
+    7px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTime {
+  font-size: 8px !important;
+  opacity: .65;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTitle {
+  margin-top: 2px !important;
+
+  font-size: 10px !important;
+  line-height: 1.15 !important;
+
+  font-weight: 700 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineStatus {
+  min-height: 14px !important;
+
+  padding:
+    1px 4px !important;
+
+  font-size: 7px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventNote {
+  display: none !important;
+}
