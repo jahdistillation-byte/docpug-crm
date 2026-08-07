@@ -47146,3 +47146,23 @@ body[data-theme="white"]
     width: 100%;
   }
 }
+/* =====================================================
+   FIX MODAL LAYERS
+===================================================== */
+
+.appointmentTemplateDrawer {
+  z-index: 90000 !important;
+}
+
+.appointmentTemplateEditorOverlay {
+  z-index: 100000 !important;
+}
+
+.appointmentTemplateEditorBackdrop {
+  z-index: 0;
+}
+
+.appointmentTemplateEditorModal {
+  position: relative;
+  z-index: 2;
+}

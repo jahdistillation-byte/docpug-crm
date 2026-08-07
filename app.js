@@ -2799,11 +2799,13 @@ function bindAppointmentTemplateDrawer() {
   }
 
   if (drawerAdd) {
-    drawerAdd.onclick =
-      () => {
-        openAppointmentTemplateEditor();
-      };
-  }
+  drawerAdd.onclick =
+    () => {
+      closeDrawer();
+
+      openAppointmentTemplateEditor();
+    };
+}
 
   if (closeButton) {
     closeButton.onclick =
