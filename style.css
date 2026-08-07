@@ -45823,3 +45823,197 @@ body[data-theme="white"]
 .calendarTimelineEventNote {
   display: none !important;
 }
+/* =====================================================
+   APPOINTMENT TEMPLATE PICKER
+===================================================== */
+
+.appointmentTemplatePicker {
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.appointmentTemplatePickerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.appointmentTemplatePickerHead > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.appointmentTemplatePickerHead strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,.92);
+}
+
+.appointmentTemplatePickerHead span {
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(255,255,255,.42);
+}
+
+.appointmentTemplateClear {
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.5);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.appointmentTemplateList {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(125px, 1fr)
+  );
+  gap: 7px;
+}
+
+.appointmentTemplateCard {
+  --template-color: #7C5CFF;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  min-width: 0;
+  min-height: 42px;
+
+  padding: 8px 10px;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.035);
+  color: #fff;
+
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+.appointmentTemplateCard::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+
+  width: 3px;
+
+  border-radius: 3px;
+
+  background:
+    var(--template-color);
+}
+
+.appointmentTemplateCard:hover {
+  transform: translateY(-1px);
+
+  background:
+    rgba(255,255,255,.06);
+
+  border-color:
+    rgba(255,255,255,.16);
+}
+
+.appointmentTemplateCard.active {
+  border-color:
+    var(--template-color);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 15%,
+      rgba(255,255,255,.02)
+    );
+
+  box-shadow:
+    inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--template-color) 20%,
+      transparent
+    );
+}
+
+.appointmentTemplateIcon {
+  width: 28px;
+  height: 28px;
+
+  flex: 0 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--template-color) 16%,
+      transparent
+    );
+
+  font-size: 14px;
+}
+
+.appointmentTemplateText {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appointmentTemplateText strong {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.appointmentTemplateText small {
+  font-size: 9px;
+
+  color:
+    rgba(255,255,255,.42);
+}
+
+.appointmentTemplateEmpty,
+.appointmentTemplateLoading {
+  padding: 10px;
+
+  border-radius: 9px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  font-size: 10px;
+
+  color:
+    rgba(255,255,255,.4);
+}
