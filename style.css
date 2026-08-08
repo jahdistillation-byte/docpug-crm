@@ -47909,3 +47909,48 @@ body[data-theme="white"]
       minmax(460px,1.15fr) !important;
   }
 }
+/* =========================================
+   CALENDAR — PATIENT WAITING STATUS
+   ========================================= */
+
+.calendarCardWaiting {
+  border-color: rgba(245, 183, 45, 0.55) !important;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(245, 183, 45, 0.16),
+      rgba(245, 183, 45, 0.06)
+    ) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(245, 183, 45, 0.95),
+    0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.calendarStatusWaiting {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 4px 9px;
+  border-radius: 999px;
+
+  background: rgba(245, 183, 45, 0.16);
+  border: 1px solid rgba(245, 183, 45, 0.38);
+
+  color: #d99a10;
+  font-weight: 700;
+}
+
+.calendarStatusWaiting::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #f5b72d;
+
+  box-shadow:
+    0 0 0 4px rgba(245, 183, 45, 0.13);
+}

@@ -41000,22 +41000,34 @@ function ensureCalendarModal() {
     Статус запису
   </span>
 
-  <select
-    class="calEditInput"
-    id="calEditStatus"
-  >
-    <option value="planned">
-      Заплановано
-    </option>
+ <select
+  class="calEditInput"
+  id="calEditStatus"
+>
+  <option value="planned">
+    Заплановано
+  </option>
 
-    <option value="cancelled">
-      Скасовано
-    </option>
+  <option value="waiting">
+    🟡 У клініці · очікує
+  </option>
 
-    <option value="no_show">
-      Не з’явився
-    </option>
-  </select>
+  <option value="in_progress">
+    🩺 На прийомі
+  </option>
+
+  <option value="completed">
+    ✓ Завершено
+  </option>
+
+  <option value="cancelled">
+    Скасовано
+  </option>
+
+  <option value="no_show">
+    Не з’явився
+  </option>
+</select>
 </label>
           <label class="calEditField calEditFieldWide">
             <span>
@@ -41042,6 +41054,15 @@ function ensureCalendarModal() {
   </button>
 
   <div class="calEditFooterActions">
+
+    <button
+      class="calEditArrival"
+      id="calEditArrivalBtn"
+      type="button"
+    >
+      🟡 Пацієнт прибув
+    </button>
+
     <button
       class="calEditStart"
       id="calEditStartVisitBtn"
@@ -41057,6 +41078,7 @@ function ensureCalendarModal() {
     >
       Зберегти зміни
     </button>
+
   </div>
 </footer>
     </section>
@@ -41219,9 +41241,12 @@ function ensureCalendarModal() {
   return modal;
 }
 function getCalendarEventVisualStatus(event) {
-  const rawStatus = String(event?.status || "")
-    .trim()
-    .toLowerCase();
+  const rawStatus =
+    String(
+      event?.status || ""
+    )
+      .trim()
+      .toLowerCase();
 
   if (
     rawStatus === "completed" ||
@@ -41230,9 +41255,12 @@ function getCalendarEventVisualStatus(event) {
   ) {
     return {
       key: "completed",
-      cardClass: "calendarCardCompleted",
-      badgeClass: "calendarStatusCompleted",
-      label: "Завершено",
+      cardClass:
+        "calendarCardCompleted",
+      badgeClass:
+        "calendarStatusCompleted",
+      label:
+        "Завершено",
     };
   }
 
@@ -41242,17 +41270,65 @@ function getCalendarEventVisualStatus(event) {
   ) {
     return {
       key: "in_progress",
-      cardClass: "calendarCardInProgress",
-      badgeClass: "calendarStatusInProgress",
-      label: "Прийом триває",
+      cardClass:
+        "calendarCardInProgress",
+      badgeClass:
+        "calendarStatusInProgress",
+      label:
+        "Прийом триває",
+    };
+  }
+
+  if (
+    rawStatus === "waiting"
+  ) {
+    return {
+      key: "waiting",
+      cardClass:
+        "calendarCardWaiting",
+      badgeClass:
+        "calendarStatusWaiting",
+      label:
+        "Очікує",
+    };
+  }
+
+  if (
+    rawStatus === "cancelled"
+  ) {
+    return {
+      key: "cancelled",
+      cardClass:
+        "calendarCardCancelled",
+      badgeClass:
+        "calendarStatusCancelled",
+      label:
+        "Скасовано",
+    };
+  }
+
+  if (
+    rawStatus === "no_show"
+  ) {
+    return {
+      key: "no_show",
+      cardClass:
+        "calendarCardNoShow",
+      badgeClass:
+        "calendarStatusNoShow",
+      label:
+        "Не з’явився",
     };
   }
 
   return {
     key: "planned",
-    cardClass: "calendarCardPlanned",
-    badgeClass: "calendarStatusPlanned",
-    label: "Заплановано",
+    cardClass:
+      "calendarCardPlanned",
+    badgeClass:
+      "calendarStatusPlanned",
+    label:
+      "Заплановано",
   };
 }
 async function startMedicalVisitFromCalendarEvent(
@@ -41635,13 +41711,18 @@ const statusSelect =
 if (statusSelect) {
   const currentStatus =
     String(
-      event.status ||
+      ev.status ||
       "planned"
-    ).trim();
+    )
+      .trim()
+      .toLowerCase();
 
   statusSelect.value =
     [
       "planned",
+      "waiting",
+      "in_progress",
+      "completed",
       "cancelled",
       "no_show",
     ].includes(
@@ -41649,8 +41730,7 @@ if (statusSelect) {
     )
       ? currentStatus
       : "planned";
-}
-
+}5
   modal.dataset.initialState =
     JSON.stringify(
       modal._getCalendarEditState()
@@ -41925,6 +42005,79 @@ if (startVisitButton) {
       }
     };
 }
+
+const arrivalButton =
+  $("#calEditArrivalBtn");
+
+if (arrivalButton) {
+  arrivalButton.onclick =
+    async () => {
+      if (
+        String(
+          ev.status || ""
+        ).toLowerCase() ===
+        "waiting"
+      ) {
+        return;
+      }
+
+      arrivalButton.disabled =
+        true;
+
+      arrivalButton.textContent =
+        "Позначаємо…";
+
+      try {
+        const updated =
+          await updateCalendarEventApi(
+            ev.id,
+            {
+              status:
+                "waiting",
+            }
+          );
+
+        if (!updated) {
+          return;
+        }
+
+        ev.status =
+          updated.status ||
+          "waiting";
+
+        const statusSelect =
+          $("#calEditStatus");
+
+        if (statusSelect) {
+          statusSelect.value =
+            "waiting";
+        }
+
+        modal.dataset.initialState =
+          JSON.stringify(
+            modal
+              ._getCalendarEditState()
+          );
+
+        modal
+          ._closeCalendarEditModal();
+
+        if (
+          typeof onSaved ===
+          "function"
+        ) {
+          await onSaved();
+        }
+
+      } finally {
+        arrivalButton.disabled =
+          false;
+
+        arrivalButton.textContent =
+          "🟡 Пацієнт прибув";
+      }
+    };
+}
   const saveButton =
     $("#calEditSaveBtn");
 
@@ -41965,6 +42118,16 @@ if (startVisitButton) {
           $("#calEditNote")
             ?.value || ""
         ).trim();
+
+        const status =
+  String(
+    $("#calEditStatus")
+      ?.value ||
+    ev.status ||
+    "planned"
+  )
+    .trim()
+    .toLowerCase();
 
       if (!title) {
         alert(
@@ -42095,72 +42258,76 @@ if (startVisitButton) {
         "Збереження...";
 
       try {
-        const updated =
-          await updateCalendarEventApi(
-            ev.id,
-            {
-              title,
-              event_date:
-                eventDate,
+  const updated =
+    await updateCalendarEventApi(
+      ev.id,
+      {
+        title,
 
-              start_time:
-                startTimeValue,
+        event_date:
+          eventDate,
 
-              end_time:
-                endTimeValue,
+        start_time:
+          startTimeValue,
 
-              staff_id:
-                staffId,
+        end_time:
+          endTimeValue,
 
-              patient_id:
-                ev.patient_id ||
-                null,
+        staff_id:
+          staffId,
 
-              owner_id:
-                ev.owner_id ||
-                patient?.owner_id ||
-                null,
+        patient_id:
+          ev.patient_id ||
+          null,
 
-              visit_id:
-                ev.visit_id ||
-                null,
+        owner_id:
+          ev.owner_id ||
+          patient?.owner_id ||
+          null,
 
-              note,
+        visit_id:
+          ev.visit_id ||
+          null,
 
-              status,
-            }
-          );
+        note,
 
-        if (!updated) {
-          return;
-        }
-        ev.status =
-  updated.status ||
-  status;
-
-        modal.dataset.initialState =
-          JSON.stringify(
-            modal
-              ._getCalendarEditState()
-          );
-
-        modal
-          ._closeCalendarEditModal();
-
-        if (
-          typeof onSaved ===
-          "function"
-        ) {
-          await onSaved();
-        }
-      } finally {
-        saveButton.disabled =
-          false;
-
-        saveButton.textContent =
-          "Зберегти зміни";
+        status:
+          status,
       }
-    };
+    );
+
+  if (!updated) {
+    return;
+  }
+
+  ev.status =
+    updated.status ||
+    status;
+
+  modal.dataset.initialState =
+    JSON.stringify(
+      modal
+        ._getCalendarEditState()
+    );
+
+  modal
+    ._closeCalendarEditModal();
+
+  if (
+    typeof onSaved ===
+    "function"
+  ) {
+    await onSaved();
+  }
+
+} finally {
+  saveButton.disabled =
+    false;
+
+  saveButton.textContent =
+    "Зберегти зміни";
+}
+};
 }
 
 function renderLabsTab(pet) {
