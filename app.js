@@ -1656,7 +1656,12 @@ async function checkCurrentVetWaitingPatients() {
         }
       }
     );
-
+if (
+  state.route ===
+  "calendar"
+) {
+  await renderCalendarTab();
+}
   } catch (error) {
     console.warn(
       "checkCurrentVetWaitingPatients failed:",
