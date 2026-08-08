@@ -1358,6 +1358,87 @@ function showWaitingPatientToast(
     8000
   );
 }
+function renderWaitingPatientAlert(
+  waitingEvents = []
+) {
+  document
+    .getElementById(
+      "waitingPatientAlert"
+    )
+    ?.remove();
+
+  const events =
+    Array.isArray(
+      waitingEvents
+    )
+      ? waitingEvents
+      : [];
+
+  if (!events.length) {
+    return;
+  }
+
+  const event =
+    events[0];
+
+  const title =
+    String(
+      event?.title ||
+      "Пацієнт"
+    ).trim();
+
+  const startTime =
+    String(
+      event?.start_time ||
+      ""
+    ).slice(0, 5);
+
+  const alert =
+    document.createElement(
+      "div"
+    );
+
+  alert.id =
+    "waitingPatientAlert";
+
+  alert.className =
+    "waitingPatientAlert";
+
+  alert.innerHTML = `
+    <div class="waitingPatientAlertIcon">
+      🟡
+    </div>
+
+    <div class="waitingPatientAlertContent">
+      <strong>
+        Пацієнт очікує
+      </strong>
+
+      <span>
+        ${escapeHtml(title)}
+        ${
+          startTime
+            ? ` · ${escapeHtml(startTime)}`
+            : ""
+        }
+      </span>
+    </div>
+
+    ${
+      events.length > 1
+        ? `
+          <div class="waitingPatientAlertCount">
+            +${events.length - 1}
+          </div>
+        `
+        : ""
+    }
+  `;
+
+  document.body.appendChild(
+    alert
+  );
+}
 function showCrmNotice({
   icon = "ℹ",
   title = "Повідомлення",
@@ -1542,31 +1623,10 @@ async function checkCurrentVetWaitingPatients() {
       getCurrentVetWaitingEvents(
         events
       );
+      renderWaitingPatientAlert(
+  waitingEvents
+);
 
-    waitingEvents.forEach(
-      (event) => {
-        const notificationKey =
-          `waiting_notice_${event.id}`;
-
-        const alreadyShown =
-          sessionStorage.getItem(
-            notificationKey
-          );
-
-        if (alreadyShown) {
-          return;
-        }
-
-        showWaitingPatientToast(
-          event
-        );
-
-        sessionStorage.setItem(
-          notificationKey,
-          "1"
-        );
-      }
-    );
 
     events.forEach(
       (event) => {
