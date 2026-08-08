@@ -1533,6 +1533,98 @@ function getCurrentVetWaitingEvents(
   );
 }
 
+async function checkCurrentVetWaitingPatients() {
+  try {
+    const events =
+      await loadCalendarApi();
+
+    const waitingEvents =
+      getCurrentVetWaitingEvents(
+        events
+      );
+
+    waitingEvents.forEach(
+      (event) => {
+        const notificationKey =
+          `waiting_notice_${event.id}`;
+
+        const alreadyShown =
+          sessionStorage.getItem(
+            notificationKey
+          );
+
+        if (alreadyShown) {
+          return;
+        }
+
+        showWaitingPatientToast(
+          event
+        );
+
+        sessionStorage.setItem(
+          notificationKey,
+          "1"
+        );
+      }
+    );
+
+    events.forEach(
+      (event) => {
+        const eventId =
+          String(
+            event?.id || ""
+          ).trim();
+
+        if (!eventId) {
+          return;
+        }
+
+        const eventStatus =
+          String(
+            event?.status || ""
+          )
+            .trim()
+            .toLowerCase();
+
+        if (
+          eventStatus !==
+          "waiting"
+        ) {
+          sessionStorage.removeItem(
+            `waiting_notice_${eventId}`
+          );
+        }
+      }
+    );
+
+  } catch (error) {
+    console.warn(
+      "checkCurrentVetWaitingPatients failed:",
+      error
+    );
+  }
+}
+let waitingPatientsPollStarted =
+  false;
+
+function startWaitingPatientsPoll() {
+  if (
+    waitingPatientsPollStarted
+  ) {
+    return;
+  }
+
+  waitingPatientsPollStarted =
+    true;
+
+  setInterval(
+    () => {
+      checkCurrentVetWaitingPatients();
+    },
+    30000
+  );
+}
+
 function isOwner() {
   return (
     getCurrentCrmRole() ===
@@ -37926,6 +38018,8 @@ async function renderCalendarTab() {
     events
   );
 
+  startWaitingPatientsPoll();
+
 console.log(
   "WAITING FOR CURRENT VET:",
   waitingForCurrentVet
@@ -37933,10 +38027,56 @@ console.log(
 if (
   waitingForCurrentVet.length
 ) {
-  showWaitingPatientToast(
-    waitingForCurrentVet[0]
-  );
+  const waitingEvent =
+    waitingForCurrentVet[0];
+
+  const notificationKey =
+    `waiting_notice_${waitingEvent.id}`;
+
+  const alreadyShown =
+    sessionStorage.getItem(
+      notificationKey
+    );
+
+  if (!alreadyShown) {
+    showWaitingPatientToast(
+      waitingEvent
+    );
+
+    sessionStorage.setItem(
+      notificationKey,
+      "1"
+    );
+  }
 }
+events.forEach(
+  (event) => {
+    const eventId =
+      String(
+        event?.id || ""
+      ).trim();
+
+    if (!eventId) {
+      return;
+    }
+
+    const eventStatus =
+      String(
+        event?.status || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if (
+      eventStatus !==
+      "waiting"
+    ) {
+      sessionStorage.removeItem(
+        `waiting_notice_${eventId}`
+      );
+    }
+  }
+);
 
   const activeStaffIds = new Set(
     staffSchedule
