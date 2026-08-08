@@ -1395,7 +1395,43 @@ function getCurrentStaffId() {
     state.me?.staff_id || ""
   ).trim();
 }
+function getCurrentVetWaitingEvents(
+  events = []
+) {
+  const currentStaffId =
+    getCurrentStaffId();
 
+  if (!currentStaffId) {
+    return [];
+  }
+
+  return (
+    Array.isArray(events)
+      ? events
+      : []
+  ).filter(
+    (event) => {
+      const eventStaffId =
+        String(
+          event?.staff_id || ""
+        ).trim();
+
+      const eventStatus =
+        String(
+          event?.status || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      return (
+        eventStaffId ===
+          currentStaffId &&
+        eventStatus ===
+          "waiting"
+      );
+    }
+  );
+}
 
 function isOwner() {
   return (
@@ -37784,6 +37820,16 @@ async function renderCalendarTab() {
       today
     ),
   ]);
+
+  const waitingForCurrentVet =
+  getCurrentVetWaitingEvents(
+    events
+  );
+
+console.log(
+  "WAITING FOR CURRENT VET:",
+  waitingForCurrentVet
+);
 
   const activeStaffIds = new Set(
     staffSchedule
