@@ -42418,28 +42418,59 @@ const arrivalButton =
   $("#calEditArrivalBtn");
 
 if (arrivalButton) {
+  const currentStatus =
+    String(
+      ev.status || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const visitAlreadyStarted =
+    Boolean(
+      String(
+        ev.visit_id || ""
+      ).trim()
+    );
+
+  if (
+    visitAlreadyStarted ||
+    [
+      "in_progress",
+      "completed",
+      "cancelled",
+      "no_show",
+    ].includes(currentStatus)
+  ) {
+    arrivalButton.disabled =
+      true;
+
+    arrivalButton.hidden =
+      true;
+  }
+
   arrivalButton.onclick =
     async () => {
-    const currentStatus =
-  String(
-    ev.status || ""
-  )
-    .trim()
-    .toLowerCase();
+      const latestStatus =
+        String(
+          ev.status || ""
+        )
+          .trim()
+          .toLowerCase();
 
-if (
-  [
-    "waiting",
-    "in_progress",
-    "completed",
-    "cancelled",
-    "no_show",
-  ].includes(
-    currentStatus
-  )
-) {
-  return;
-}
+      const hasVisit =
+        Boolean(
+          String(
+            ev.visit_id || ""
+          ).trim()
+        );
+
+      if (
+        hasVisit ||
+        latestStatus !==
+        "planned"
+      ) {
+        return;
+      }
 
       arrivalButton.disabled =
         true;
