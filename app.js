@@ -1257,7 +1257,107 @@ function closeDeleteModal() {
     null;
 }
 
+function showWaitingPatientToast(
+  event = {}
+) {
+  document
+    .getElementById(
+      "waitingPatientToast"
+    )
+    ?.remove();
 
+  const toast =
+    document.createElement(
+      "div"
+    );
+
+  toast.id =
+    "waitingPatientToast";
+
+  toast.className =
+    "waitingPatientToast";
+
+  const title =
+    String(
+      event.title ||
+      "Пацієнт"
+    ).trim();
+
+  const startTime =
+    String(
+      event.start_time ||
+      ""
+    ).slice(0, 5);
+
+  toast.innerHTML = `
+    <div class="waitingPatientToastIcon">
+      🟡
+    </div>
+
+    <div class="waitingPatientToastContent">
+      <strong>
+        Пацієнт очікує
+      </strong>
+
+      <span>
+        ${escapeHtml(title)}
+        ${
+          startTime
+            ? ` · ${escapeHtml(startTime)}`
+            : ""
+        }
+      </span>
+    </div>
+
+    <button
+      type="button"
+      class="waitingPatientToastClose"
+      aria-label="Закрити"
+    >
+      ×
+    </button>
+  `;
+
+  document.body.appendChild(
+    toast
+  );
+
+  toast
+    .querySelector(
+      ".waitingPatientToastClose"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        toast.remove();
+      }
+    );
+
+  setTimeout(
+    () => {
+      toast.classList.add(
+        "is-visible"
+      );
+    },
+    50
+  );
+
+  setTimeout(
+    () => {
+      toast.classList.remove(
+        "is-visible"
+      );
+
+      setTimeout(
+        () => {
+          toast.remove();
+        },
+        250
+      );
+    },
+    8000
+  );
+}
 function showCrmNotice({
   icon = "ℹ",
   title = "Повідомлення",
@@ -37830,6 +37930,13 @@ console.log(
   "WAITING FOR CURRENT VET:",
   waitingForCurrentVet
 );
+if (
+  waitingForCurrentVet.length
+) {
+  showWaitingPatientToast(
+    waitingForCurrentVet[0]
+  );
+}
 
   const activeStaffIds = new Set(
     staffSchedule
