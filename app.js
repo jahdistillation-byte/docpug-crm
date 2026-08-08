@@ -37701,13 +37701,53 @@ async function loadStaffApi() {
 
 async function loadCalendarApi() {
   try {
-    const res = await fetch("/api/calendar");
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot load calendar");
-    return Array.isArray(json.items) ? json.items : Array.isArray(json.data) ? json.data : [];
+    const res =
+      await fetch(
+        `/api/calendar?_=${Date.now()}`,
+        {
+          method: "GET",
+
+          credentials:
+            "include",
+
+          cache:
+            "no-store",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+    const json =
+      await res.json();
+
+    if (!json.ok) {
+      throw new Error(
+        json.error ||
+        "Cannot load calendar"
+      );
+    }
+
+    return Array.isArray(
+      json.items
+    )
+      ? json.items
+      : Array.isArray(
+          json.data
+        )
+        ? json.data
+        : [];
+
   } catch (e) {
-    console.error("loadCalendarApi failed:", e);
-    alert("Не вдалося завантажити календар: " + (e?.message || e));
+    console.error(
+      "loadCalendarApi failed:",
+      e
+    );
+
     return [];
   }
 }
