@@ -41101,7 +41101,33 @@ async function createStaffApi(payload) {
     return null;
   }
 }
+function getCalendarCreateErrorMessage(
+  errorText = ""
+) {
+  const raw =
+    String(errorText || "")
+      .trim()
+      .toLowerCase();
 
+  if (
+    raw === "time slot busy"
+  ) {
+    return "Цей час вже зайнятий у вибраного лікаря.";
+  }
+
+  if (
+    raw ===
+    "end_time must be later than start_time"
+  ) {
+    return "Час завершення прийому має бути пізніше за час початку. Оберіть коректний час або іншу тривалість.";
+  }
+
+  return (
+    String(errorText || "")
+      .trim() ||
+    "Не вдалося створити запис."
+  );
+}
 async function createCalendarEventApi(payload) {
   try {
     const res = await fetch("/api/calendar", {
@@ -41112,16 +41138,26 @@ async function createCalendarEventApi(payload) {
     const json = await res.json();
 
     if (!json.ok) {
-      alert(json.error === "time slot busy"
-        ? "Цей час вже зайнятий у цього лікаря"
-        : "Не вдалося створити запис: " + (json.error || "unknown error")
-      );
-      return null;
-    }
+  showCrmNotice({
+    icon: "⚠",
+    title: "Не вдалося створити запис",
+    text: getCalendarCreateErrorMessage(
+      json.error
+    ),
+  });
+
+  return null;
+}
     return json.data || json.item || null;
   } catch (e) {
     console.error("createCalendarEventApi failed:", e);
-    alert("Помилка створення запису: " + (e?.message || e));
+    showCrmNotice({
+  icon: "⚠",
+  title: "Помилка створення запису",
+  text:
+    "Сталася помилка під час створення запису. " +
+    (e?.message || e || ""),
+});
     return null;
   }
 }
