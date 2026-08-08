@@ -1617,9 +1617,19 @@ function startWaitingPatientsPoll() {
   waitingPatientsPollStarted =
     true;
 
+  console.log(
+    "[WAITING POLL] started"
+  );
+
   setInterval(
-    () => {
-      checkCurrentVetWaitingPatients();
+    async () => {
+      console.log(
+        "[WAITING POLL] tick",
+        new Date()
+          .toLocaleTimeString()
+      );
+
+      await checkCurrentVetWaitingPatients();
     },
     30000
   );
