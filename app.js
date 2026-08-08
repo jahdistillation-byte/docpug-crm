@@ -42329,6 +42329,31 @@ if (startVisitButton) {
           startTime,
           duration
         );
+        const startMinutes =
+  Number(
+    startTime.split(":")[0]
+  ) * 60 +
+  Number(
+    startTime.split(":")[1]
+  );
+
+const endMinutes =
+  startMinutes +
+  duration;
+
+if (
+  endMinutes >
+  24 * 60
+) {
+  showCrmNotice({
+    icon: "🌙",
+    title: "Прийом виходить за межі дня",
+    text:
+      "Обрана тривалість переносить завершення прийому після 24:00. Оберіть раніший час або меншу тривалість.",
+  });
+
+  return;
+}
 
       startVisitButton.disabled =
         true;
