@@ -42433,20 +42433,18 @@ if (arrivalButton) {
     );
 
   if (
-    visitAlreadyStarted ||
-    [
-      "in_progress",
-      "completed",
-      "cancelled",
-      "no_show",
-    ].includes(currentStatus)
-  ) {
-    arrivalButton.disabled =
-      true;
-
-    arrivalButton.hidden =
-      true;
-  }
+  visitAlreadyStarted ||
+  [
+    "waiting",
+    "in_progress",
+    "completed",
+    "cancelled",
+    "no_show",
+  ].includes(currentStatus)
+) {
+  arrivalButton.disabled =
+    true;
+}
 
   arrivalButton.onclick =
     async () => {
