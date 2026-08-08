@@ -42420,14 +42420,26 @@ const arrivalButton =
 if (arrivalButton) {
   arrivalButton.onclick =
     async () => {
-      if (
-        String(
-          ev.status || ""
-        ).toLowerCase() ===
-        "waiting"
-      ) {
-        return;
-      }
+    const currentStatus =
+  String(
+    ev.status || ""
+  )
+    .trim()
+    .toLowerCase();
+
+if (
+  [
+    "waiting",
+    "in_progress",
+    "completed",
+    "cancelled",
+    "no_show",
+  ].includes(
+    currentStatus
+  )
+) {
+  return;
+}
 
       arrivalButton.disabled =
         true;
