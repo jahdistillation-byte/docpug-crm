@@ -52957,24 +52957,7 @@ const isOutsideShift =
 
       closeVisitModal();
 
-      await renderCalendarTab();
-
-      openDeleteModal(
-        `
-          <b>Запис успішно створено</b>
-          <br><br>
-          Запис додано до календаря.
-          Ви можете залишити його
-          запланованим або почати
-          медичний прийом зараз.
-        `,
-        async () => {
-          await startMedicalVisitFromCalendarEvent(
-            createdEvent
-          );
-        },
-        "visit_created"
-      );
+await renderCalendarTab();
     } finally {
       window.__calendarCreatePending =
         false;
