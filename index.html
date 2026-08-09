@@ -1809,11 +1809,19 @@
         class="pugOwnerExistsBtn primary"
         id="ownerExistsConfirm"
       >
+             <button
+        type="button"
+        class="pugOwnerExistsBtn primary"
+        id="ownerExistsConfirm"
+      >
         Використати власника
       </button>
     </div>
   </div>
 </div>
+
+
+<!-- APP PROMPT MODAL -->
 <div
   id="appPromptModal"
   class="appPromptModal"
@@ -1821,6 +1829,7 @@
   aria-hidden="true"
 >
   <div class="appPromptModalCard">
+
     <button
       type="button"
       class="appPromptModalClose"
@@ -1830,15 +1839,24 @@
       ×
     </button>
 
-    <div class="appPromptModalBadge" id="appPromptModalBadge">
+    <div
+      class="appPromptModalBadge"
+      id="appPromptModalBadge"
+    >
       !
     </div>
 
-    <div class="appPromptModalTitle" id="appPromptModalTitle">
+    <div
+      class="appPromptModalTitle"
+      id="appPromptModalTitle"
+    >
       Підтвердіть дію
     </div>
 
-    <div class="appPromptModalText" id="appPromptModalText">
+    <div
+      class="appPromptModalText"
+      id="appPromptModalText"
+    >
       Введіть значення нижче.
     </div>
 
@@ -1856,7 +1874,7 @@
       type="text"
       maxlength="250"
       placeholder="Введіть текст..."
-    />
+    >
 
     <div
       class="appPromptModalError"
@@ -1865,6 +1883,7 @@
     ></div>
 
     <div class="appPromptModalActions">
+
       <button
         type="button"
         class="appPromptModalBtn appPromptModalBtnSecondary"
@@ -1880,8 +1899,31 @@
       >
         OK
       </button>
+
     </div>
   </div>
 </div>
+
+
+<!-- SAFETY: MODAL MUST BE DIRECT CHILD OF BODY -->
+<script>
+  (() => {
+    const modal =
+      document.getElementById(
+        "appPromptModal"
+      );
+
+    if (
+      modal &&
+      modal.parentElement !==
+        document.body
+    ) {
+      document.body.appendChild(
+        modal
+      );
+    }
+  })();
+</script>
+
 </body>
 </html>
