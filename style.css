@@ -49780,3 +49780,68 @@ body[data-theme="white"]
 .calendarShiftUnavailableAfter {
   border-bottom: 0;
 }
+/* =========================================
+   CALENDAR — OUTSIDE DOCTOR SHIFT
+   ========================================= */
+
+.calendarDoctorTimeline {
+  position: relative;
+}
+
+.calendarShiftUnavailable {
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  z-index: 5;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+
+  padding: 10px;
+
+  box-sizing: border-box;
+  overflow: hidden;
+
+  background:
+    rgba(105, 115, 130, 0.18);
+
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.025) 0,
+      rgba(255, 255, 255, 0.025) 8px,
+      transparent 8px,
+      transparent 16px
+    );
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.05);
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.05);
+
+  pointer-events: none;
+}
+
+.calendarShiftUnavailable span {
+  color:
+    rgba(255, 255, 255, 0.25);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+
+  user-select: none;
+}
+
+.calendarShiftUnavailableBefore {
+  border-top: 0;
+}
+
+.calendarShiftUnavailableAfter {
+  border-bottom: 0;
+}
