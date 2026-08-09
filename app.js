@@ -1478,7 +1478,135 @@ function showCrmNotice({
       );
   }
 }
+function openAppPrompt({
+  title = "Підтвердіть дію",
+  text = "",
+  label = "Введіть значення",
+  placeholder = "",
+  defaultValue = "",
+  confirmText = "OK",
+  cancelText = "Скасувати",
+  required = false,
+} = {}) {
+  return new Promise((resolve) => {
+    const modal =
+      document.getElementById("appPromptModal");
 
+    const titleEl =
+      document.getElementById("appPromptModalTitle");
+
+    const textEl =
+      document.getElementById("appPromptModalText");
+
+    const labelEl =
+      document.getElementById("appPromptModalLabel");
+
+    const inputEl =
+      document.getElementById("appPromptModalInput");
+
+    const errorEl =
+      document.getElementById("appPromptModalError");
+
+    const confirmBtn =
+      document.getElementById("appPromptModalConfirm");
+
+    const cancelBtn =
+      document.getElementById("appPromptModalCancel");
+
+    const closeBtn =
+      document.getElementById("appPromptModalClose");
+
+    if (!modal) {
+      resolve(null);
+      return;
+    }
+
+    titleEl.textContent = title;
+    textEl.textContent = text;
+    labelEl.textContent = label;
+    inputEl.value = defaultValue || "";
+    inputEl.placeholder = placeholder || "";
+    confirmBtn.textContent = confirmText;
+    cancelBtn.textContent = cancelText;
+    errorEl.hidden = true;
+    errorEl.textContent = "";
+
+    function cleanup(result) {
+      modal.hidden = true;
+      modal.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+      document.removeEventListener(
+        "keydown",
+        onKeyDown
+      );
+      confirmBtn.onclick = null;
+      cancelBtn.onclick = null;
+      closeBtn.onclick = null;
+      modal.onclick = null;
+      resolve(result);
+    }
+
+    function showError(message) {
+      errorEl.hidden = false;
+      errorEl.textContent = message;
+    }
+
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        cleanup(null);
+      }
+
+      if (event.key === "Enter") {
+        confirmBtn.click();
+      }
+    }
+
+    confirmBtn.onclick = () => {
+      const value =
+        String(inputEl.value || "").trim();
+
+      if (required && !value) {
+        showError("Будь ласка, заповніть поле.");
+        inputEl.focus();
+        return;
+      }
+
+      cleanup(value);
+    };
+
+    cancelBtn.onclick = () => {
+      cleanup(null);
+    };
+
+    closeBtn.onclick = () => {
+      cleanup(null);
+    };
+
+    modal.onclick = (event) => {
+      if (event.target === modal) {
+        cleanup(null);
+      }
+    };
+
+    modal.hidden = false;
+    modal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    document.addEventListener(
+      "keydown",
+      onKeyDown
+    );
+
+    setTimeout(() => {
+      inputEl.focus();
+      inputEl.select();
+    }, 10);
+  });
+}
 function nowISO() {
   return new Date().toISOString();
 }

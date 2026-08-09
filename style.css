@@ -50632,3 +50632,232 @@ body[data-theme="white"] .patientDiagnosisFormActions .is-primary {
     padding: 16px;
   }
 }
+.appPromptModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 8, 18, 0.66);
+  backdrop-filter: blur(10px);
+}
+
+.appPromptModal[hidden] {
+  display: none !important;
+}
+
+.appPromptModalCard {
+  position: relative;
+  width: min(100%, 460px);
+  border-radius: 24px;
+  padding: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.03)
+    ),
+    var(--app-modal-surface, #131b2b);
+  border: 1px solid var(--app-modal-border, rgba(147, 70, 232, 0.38));
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  color: var(--app-modal-text, #f5f7ff);
+}
+
+.appPromptModalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--app-modal-border, rgba(147, 70, 232, 0.38));
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--app-modal-text, #f5f7ff);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.appPromptModalClose:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.appPromptModalBadge {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  font-size: 26px;
+  font-weight: 800;
+  background: var(--app-modal-accent-soft, rgba(147, 70, 232, 0.14));
+  color: var(--app-modal-accent, #9346e8);
+  border: 1px solid var(--app-modal-border, rgba(147, 70, 232, 0.38));
+  box-shadow: 0 0 30px var(--app-modal-accent-glow, rgba(147, 70, 232, 0.18));
+}
+
+.appPromptModalTitle {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.appPromptModalText {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--app-modal-muted, rgba(235, 240, 255, 0.72));
+  margin-bottom: 18px;
+}
+
+.appPromptModalLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-modal-muted, rgba(235, 240, 255, 0.72));
+}
+
+.appPromptModalInput {
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  border: 1px solid var(--app-modal-border, rgba(147, 70, 232, 0.38));
+  background: rgba(7, 12, 24, 0.72);
+  color: var(--app-modal-text, #f5f7ff);
+  padding: 0 16px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.appPromptModalInput:focus {
+  border-color: var(--app-modal-accent, #9346e8);
+  box-shadow: 0 0 0 4px var(--app-modal-accent-soft, rgba(147, 70, 232, 0.14));
+}
+
+.appPromptModalError {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  background: rgba(255, 90, 90, 0.12);
+  border: 1px solid rgba(255, 90, 90, 0.24);
+  color: #ffb1b1;
+}
+
+.appPromptModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.appPromptModalBtn {
+  min-width: 128px;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+}
+
+.appPromptModalBtn:hover {
+  transform: translateY(-1px);
+}
+
+.appPromptModalBtnSecondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--app-modal-text, #f5f7ff);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.appPromptModalBtnPrimary {
+  background: linear-gradient(
+    135deg,
+    var(--app-modal-accent, #9346e8),
+    var(--app-modal-accent-2, #7c5cff)
+  );
+  color: #fff;
+  box-shadow: 0 14px 34px var(--app-modal-accent-glow, rgba(147, 70, 232, 0.22));
+}
+
+.appPromptModalBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- ТЕМЫ ---------- */
+
+body[data-theme="purple"] {
+  --app-modal-surface: #151b2d;
+  --app-modal-border: rgba(147, 70, 232, 0.34);
+  --app-modal-text: #f4f1ff;
+  --app-modal-muted: rgba(238, 232, 255, 0.72);
+  --app-modal-accent: #a259ff;
+  --app-modal-accent-2: #7b5cff;
+  --app-modal-accent-soft: rgba(162, 89, 255, 0.14);
+  --app-modal-accent-glow: rgba(162, 89, 255, 0.24);
+}
+
+body[data-theme="blue"] {
+  --app-modal-surface: #121c2c;
+  --app-modal-border: rgba(99, 171, 255, 0.34);
+  --app-modal-text: #eef6ff;
+  --app-modal-muted: rgba(214, 230, 255, 0.72);
+  --app-modal-accent: #63abff;
+  --app-modal-accent-2: #3a86ff;
+  --app-modal-accent-soft: rgba(99, 171, 255, 0.14);
+  --app-modal-accent-glow: rgba(99, 171, 255, 0.24);
+}
+
+body[data-theme="green"] {
+  --app-modal-surface: #13251d;
+  --app-modal-border: rgba(69, 214, 140, 0.34);
+  --app-modal-text: #effff6;
+  --app-modal-muted: rgba(214, 245, 227, 0.72);
+  --app-modal-accent: #45d68c;
+  --app-modal-accent-2: #24b66a;
+  --app-modal-accent-soft: rgba(69, 214, 140, 0.14);
+  --app-modal-accent-glow: rgba(69, 214, 140, 0.22);
+}
+
+body[data-theme="black"] {
+  --app-modal-surface: #111317;
+  --app-modal-border: rgba(255, 255, 255, 0.12);
+  --app-modal-text: #ffffff;
+  --app-modal-muted: rgba(255, 255, 255, 0.68);
+  --app-modal-accent: #d8dde8;
+  --app-modal-accent-2: #9ca8bc;
+  --app-modal-accent-soft: rgba(216, 221, 232, 0.12);
+  --app-modal-accent-glow: rgba(216, 221, 232, 0.16);
+}
+
+body[data-theme="white"] {
+  --app-modal-surface: #f7fbff;
+  --app-modal-border: rgba(48, 84, 125, 0.16);
+  --app-modal-text: #182435;
+  --app-modal-muted: rgba(24, 36, 53, 0.66);
+  --app-modal-accent: #4a7dff;
+  --app-modal-accent-2: #6f5cff;
+  --app-modal-accent-soft: rgba(74, 125, 255, 0.12);
+  --app-modal-accent-glow: rgba(74, 125, 255, 0.16);
+}
+
+body[data-theme="white"] .appPromptModalInput {
+  background: rgba(255, 255, 255, 0.88);
+  color: #182435;
+}
+
+body[data-theme="white"] .appPromptModalBtnSecondary {
+  background: rgba(24, 36, 53, 0.06);
+  color: #182435;
+}

@@ -1811,5 +1811,74 @@
     </div>
   </div>
 </div>
+<div
+  id="appPromptModal"
+  class="appPromptModal"
+  hidden
+  aria-hidden="true"
+>
+  <div class="appPromptModalCard">
+    <button
+      type="button"
+      class="appPromptModalClose"
+      id="appPromptModalClose"
+      aria-label="Закрити"
+    >
+      ×
+    </button>
+
+    <div class="appPromptModalBadge" id="appPromptModalBadge">
+      !
+    </div>
+
+    <div class="appPromptModalTitle" id="appPromptModalTitle">
+      Підтвердіть дію
+    </div>
+
+    <div class="appPromptModalText" id="appPromptModalText">
+      Введіть значення нижче.
+    </div>
+
+    <label
+      class="appPromptModalLabel"
+      id="appPromptModalLabel"
+      for="appPromptModalInput"
+    >
+      Причина
+    </label>
+
+    <input
+      id="appPromptModalInput"
+      class="appPromptModalInput"
+      type="text"
+      maxlength="250"
+      placeholder="Введіть текст..."
+    />
+
+    <div
+      class="appPromptModalError"
+      id="appPromptModalError"
+      hidden
+    ></div>
+
+    <div class="appPromptModalActions">
+      <button
+        type="button"
+        class="appPromptModalBtn appPromptModalBtnSecondary"
+        id="appPromptModalCancel"
+      >
+        Скасувати
+      </button>
+
+      <button
+        type="button"
+        class="appPromptModalBtn appPromptModalBtnPrimary"
+        id="appPromptModalConfirm"
+      >
+        OK
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
