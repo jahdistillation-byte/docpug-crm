@@ -16524,15 +16524,16 @@ def api_create_patient_diagnosis(
         )
 
     except Exception as error:
-        print(
-            "❌ POST patient diagnosis:",
-            repr(error),
-        )
+     print(
+        "❌ POST patient diagnosis:",
+        repr(error),
+        flush=True,
+    )
 
-        return fail(
-            "Не вдалося створити діагноз.",
-            500,
-        )
+    return fail(
+        f"Не вдалося створити діагноз: {error}",
+        500,
+    )
 
 
 @app.put(
