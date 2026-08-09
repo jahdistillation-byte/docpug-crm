@@ -4222,6 +4222,104 @@ async function createPatientApi(payload) {
     return null;
   }
 }
+async function loadPatientWeightsApi(
+  patientId
+) {
+  const response =
+    await fetch(
+      `/api/patients/${
+        encodeURIComponent(
+          String(patientId)
+        )
+      }/weights`,
+      {
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося завантажити історію ваги."
+    );
+  }
+
+  return Array.isArray(
+    result.data
+  )
+    ? result.data
+    : [];
+}
+
+
+async function createPatientWeightApi(
+  patientId,
+  payload
+) {
+  const response =
+    await fetch(
+      `/api/patients/${
+        encodeURIComponent(
+          String(patientId)
+        )
+      }/weights`,
+      {
+        method:
+          "POST",
+
+        credentials:
+          "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body:
+          JSON.stringify(
+            payload || {}
+          ),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося зберегти вагу."
+    );
+  }
+
+  return result.data;
+}
 function openOwnerExistsModal(
   owner = {}
 ) {
@@ -32579,7 +32677,12 @@ const activeDiagnoses =
         "active"
       )
     : [];
-
+const weightHistory =
+  tab === "overview"
+    ? await loadPatientWeightsApi(
+        pet.id
+      )
+    : [];
   // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
   root.innerHTML = `
     <div style="margin-bottom: 16px;">
@@ -32761,6 +32864,10 @@ dynamicBox.innerHTML = `
     pet,
     activeDiagnoses
   )}
+  ${renderPatientWeightPanel(
+  pet,
+  weightHistory
+)}
 
   <div
     style="
@@ -33484,7 +33591,224 @@ function renderPatientDiagnosisCard(
     </article>
   `;
 }
+function renderPatientWeightPanel(
+  pet,
+  history = []
+) {
+  const rows =
+    Array.isArray(history)
+      ? [...history]
+      : [];
 
+  const sorted =
+    rows.sort(
+      (a, b) =>
+        String(
+          b.measured_at ||
+          b.created_at ||
+          ""
+        ).localeCompare(
+          String(
+            a.measured_at ||
+            a.created_at ||
+            ""
+          )
+        )
+    );
+
+  const latest =
+    sorted[0] || null;
+
+  const currentWeight =
+    Number(
+      latest?.weight_kg ??
+      pet?.weight_kg ??
+      0
+    );
+
+  const previousWeight =
+    Number(
+      sorted[1]?.weight_kg ||
+      0
+    );
+
+  let difference = null;
+
+  if (
+    currentWeight > 0 &&
+    previousWeight > 0
+  ) {
+    difference =
+      currentWeight -
+      previousWeight;
+  }
+
+  const recent =
+    sorted.slice(
+      0,
+      4
+    );
+
+  return `
+    <section class="patientWeightPanel">
+
+      <header class="patientWeightHeader">
+        <div>
+          <h3>
+            Динаміка ваги
+          </h3>
+
+          <p>
+            Історія вимірювань маси тіла пацієнта.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="patientWeightAdd"
+          data-add-patient-weight
+        >
+          + Додати вагу
+        </button>
+      </header>
+
+      <div class="patientWeightBody">
+
+        <div class="patientWeightCurrent">
+
+          <span>
+            Поточна вага
+          </span>
+
+          <strong>
+            ${
+              currentWeight > 0
+                ? `${currentWeight.toLocaleString(
+                    "uk-UA",
+                    {
+                      maximumFractionDigits:
+                        3,
+                    }
+                  )} кг`
+                : "—"
+            }
+          </strong>
+
+          ${
+            difference !== null
+              ? `
+                <small
+                  class="${
+                    difference > 0
+                      ? "is-up"
+                      : difference < 0
+                        ? "is-down"
+                        : "is-stable"
+                  }"
+                >
+                  ${
+                    difference > 0
+                      ? "↑"
+                      : difference < 0
+                        ? "↓"
+                        : "•"
+                  }
+
+                  ${Math.abs(
+                    difference
+                  ).toLocaleString(
+                    "uk-UA",
+                    {
+                      maximumFractionDigits:
+                        3,
+                    }
+                  )} кг
+
+                  від попереднього
+                  вимірювання
+                </small>
+              `
+              : `
+                <small>
+                  Немає попереднього
+                  вимірювання
+                </small>
+              `
+          }
+
+        </div>
+
+        <div class="patientWeightHistory">
+
+          ${
+            recent.length
+              ? recent
+                  .map(
+                    (item) => {
+                      const date =
+                        item.measured_at ||
+                        item.created_at ||
+                        "";
+
+                      const dateLabel =
+                        date
+                          ? new Date(
+                              date
+                            ).toLocaleDateString(
+                              "uk-UA",
+                              {
+                                day:
+                                  "2-digit",
+                                month:
+                                  "2-digit",
+                                year:
+                                  "numeric",
+                              }
+                            )
+                          : "—";
+
+                      return `
+                        <div class="patientWeightRow">
+
+                          <span>
+                            ${escapeHtml(
+                              dateLabel
+                            )}
+                          </span>
+
+                          <strong>
+                            ${Number(
+                              item.weight_kg ||
+                              0
+                            ).toLocaleString(
+                              "uk-UA",
+                              {
+                                maximumFractionDigits:
+                                  3,
+                              }
+                            )}
+                            кг
+                          </strong>
+
+                        </div>
+                      `;
+                    }
+                  )
+                  .join("")
+              : `
+                <div class="patientWeightEmpty">
+                  Історії ваги поки немає.
+                </div>
+              `
+          }
+
+        </div>
+
+      </div>
+
+    </section>
+  `;
+}
 function renderPatientDiagnosesPanel(
   pet,
   diagnoses

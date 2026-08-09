@@ -16175,7 +16175,231 @@ def api_delete_patient(pet_id):
             500
         )
 
+# =========================
+# API: PATIENT WEIGHT HISTORY
+# =========================
 
+@app.get(
+    "/api/patients/<patient_id>/weights"
+)
+def api_get_patient_weights(
+    patient_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        patient_result = (
+            supabase
+            .table("patients")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        result = (
+            supabase
+            .table(
+                "patient_weight_history"
+            )
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("patient_id", patient_id)
+            .order(
+                "measured_at",
+                desc=True,
+            )
+            .execute()
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET patient weights:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити історію ваги.",
+            500,
+        )
+
+
+@app.post(
+    "/api/patients/<patient_id>/weights"
+)
+def api_create_patient_weight(
+    patient_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+        weight_kg = float(
+            data.get("weight_kg")
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return fail(
+            "Вкажіть коректну вагу.",
+            400,
+        )
+
+    if (
+        weight_kg <= 0
+        or weight_kg > 500
+    ):
+        return fail(
+            "Некоректна вага пацієнта.",
+            400,
+        )
+
+    measured_at = str(
+        data.get("measured_at")
+        or ""
+    ).strip()
+
+    if not measured_at:
+        measured_at = (
+            datetime.now(
+                timezone.utc
+            ).isoformat()
+        )
+
+    source = str(
+        data.get("source")
+        or "manual"
+    ).strip()
+
+    source_visit_id = str(
+        data.get("source_visit_id")
+        or ""
+    ).strip() or None
+
+    note = str(
+        data.get("note")
+        or ""
+    ).strip() or None
+
+    try:
+        patient_result = (
+            supabase
+            .table("patients")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        payload = {
+            "org_id":
+                current_org,
+
+            "patient_id":
+                patient_id,
+
+            "weight_kg":
+                weight_kg,
+
+            "measured_at":
+                measured_at,
+
+            "source":
+                source,
+
+            "source_visit_id":
+                source_visit_id,
+
+            "note":
+                note,
+
+            "created_by":
+                user.get("id"),
+        }
+
+        result = (
+            supabase
+            .table(
+                "patient_weight_history"
+            )
+            .insert(
+                clean_payload(
+                    payload
+                )
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося зберегти вагу.",
+                500,
+            )
+
+        (
+            supabase
+            .table("patients")
+            .update({
+                "weight_kg":
+                    weight_kg,
+            })
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .execute()
+        )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST patient weight:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося зберегти вагу пацієнта.",
+            500,
+        )
 # =========================
 # API: PATIENT DIAGNOSES
 # =========================
