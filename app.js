@@ -39174,6 +39174,21 @@ repeatTab?.addEventListener(
   }
 );
 
+overlay
+  .querySelectorAll(
+    "[data-repeat-weekday]"
+  )
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        button.classList.toggle(
+          "active"
+        );
+      }
+    );
+  });
+
   overlay
     .querySelectorAll(
       "[data-schedule-editor-status]"
