@@ -38987,21 +38987,162 @@ const openMonthScheduleEditor = (
     );
 
   overlay
-    .querySelector(
-      "#monthScheduleEditorSave"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        showCrmNotice({
-          icon: "💾",
-          title:
-            "Редактор працює",
-          text:
-            "Наступним кроком підключимо збереження змін до графіка.",
-        });
+  .querySelector(
+    "#monthScheduleEditorSave"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+      const saveButton =
+        overlay.querySelector(
+          "#monthScheduleEditorSave"
+        );
+
+      if (
+        !saveButton ||
+        saveButton.disabled
+      ) {
+        return;
       }
-    );
+
+      saveButton.disabled =
+        true;
+
+      saveButton.textContent =
+        "Зберігаємо…";
+
+      try {
+        for (
+          const doc of staff
+        ) {
+          const staffId =
+            String(
+              doc.id || ""
+            );
+
+          const statusButton =
+            overlay.querySelector(
+              `[data-schedule-editor-status="${staffId}"]`
+            );
+
+          const startInput =
+            overlay.querySelector(
+              `[data-schedule-editor-start="${staffId}"]`
+            );
+
+          const endInput =
+            overlay.querySelector(
+              `[data-schedule-editor-end="${staffId}"]`
+            );
+
+          const isActive =
+            Boolean(
+              statusButton
+                ?.classList
+                .contains(
+                  "active"
+                )
+            );
+
+          const startTime =
+            String(
+              startInput?.value ||
+              "09:00"
+            ).trim();
+
+          const endTime =
+            String(
+              endInput?.value ||
+              "18:00"
+            ).trim();
+
+          if (
+            isActive &&
+            startTime >= endTime
+          ) {
+            showCrmNotice({
+              icon:
+                "⚠",
+
+              title:
+                "Перевірте час зміни",
+
+              text:
+                `${
+                  doc.name ||
+                  "Працівник"
+                }: час завершення зміни має бути пізніше за час початку.`,
+            });
+
+            return;
+          }
+
+          await saveStaffScheduleApi({
+            work_date:
+              date,
+
+            staff_id:
+              doc.id,
+
+            is_active:
+              isActive,
+
+            start_time:
+              startTime,
+
+            end_time:
+              endTime,
+          });
+        }
+
+        closeEditor();
+
+        await renderCalendarTab();
+
+        showCrmNotice({
+          icon:
+            "✓",
+
+          title:
+            "Графік збережено",
+
+          text:
+            `Зміни команди на ${date} успішно оновлено.`,
+        });
+
+      } catch (error) {
+        console.error(
+          "schedule editor save failed:",
+          error
+        );
+
+        showCrmNotice({
+          icon:
+            "⚠",
+
+          title:
+            "Не вдалося зберегти графік",
+
+          text:
+            error?.message ||
+            "Спробуйте ще раз.",
+        });
+
+      } finally {
+        if (
+          document.body.contains(
+            saveButton
+          )
+        ) {
+          saveButton.disabled =
+            false;
+
+          saveButton.textContent =
+            "💾 Зберегти день";
+        }
+      }
+    }
+  );
 };
     const openMonthShiftDrawer = (
   date
