@@ -39728,134 +39728,138 @@ const staffHtml =
                   second.start_time
                 )
             );
-const positionedEvents = [];
 
-let currentGroup = [];
-let currentGroupEnd = -1;
+        const positionedEvents = [];
 
-const finishOverlapGroup = () => {
-  if (!currentGroup.length) {
-    return;
-  }
+        let currentGroup = [];
+        let currentGroupEnd = -1;
 
-  const laneEndTimes = [];
+        const finishOverlapGroup = () => {
+          if (!currentGroup.length) {
+            return;
+          }
 
-  currentGroup.forEach(
-    (event) => {
-      const startMinutes =
-        toMinutes(
-          String(
-            event.start_time || ""
-          ).slice(0, 5)
+          const laneEndTimes = [];
+
+          currentGroup.forEach(
+            (event) => {
+              const startMinutes =
+                toMinutes(
+                  String(
+                    event.start_time ||
+                    ""
+                  ).slice(0, 5)
+                );
+
+              const endMinutes =
+                toMinutes(
+                  String(
+                    event.end_time ||
+                    event.start_time ||
+                    ""
+                  ).slice(0, 5)
+                );
+
+              let laneIndex =
+                laneEndTimes.findIndex(
+                  (laneEnd) =>
+                    laneEnd <=
+                    startMinutes
+                );
+
+              if (laneIndex === -1) {
+                laneIndex =
+                  laneEndTimes.length;
+
+                laneEndTimes.push(
+                  endMinutes
+                );
+              } else {
+                laneEndTimes[
+                  laneIndex
+                ] = endMinutes;
+              }
+
+              positionedEvents.push({
+                event,
+                laneIndex,
+                overlapGroup:
+                  currentGroup,
+              });
+            }
+          );
+
+          const laneCount =
+            Math.max(
+              1,
+              laneEndTimes.length
+            );
+
+          positionedEvents
+            .slice(
+              positionedEvents.length -
+                currentGroup.length
+            )
+            .forEach(
+              (item) => {
+                item.laneCount =
+                  laneCount;
+              }
+            );
+
+          currentGroup = [];
+          currentGroupEnd = -1;
+        };
+
+        docEvents.forEach(
+          (event) => {
+            const startMinutes =
+              toMinutes(
+                String(
+                  event.start_time ||
+                  ""
+                ).slice(0, 5)
+              );
+
+            const endMinutes =
+              toMinutes(
+                String(
+                  event.end_time ||
+                  event.start_time ||
+                  ""
+                ).slice(0, 5)
+              );
+
+            if (
+              currentGroup.length &&
+              startMinutes >=
+                currentGroupEnd
+            ) {
+              finishOverlapGroup();
+            }
+
+            currentGroup.push(
+              event
+            );
+
+            currentGroupEnd =
+              Math.max(
+                currentGroupEnd,
+                endMinutes
+              );
+          }
         );
 
-      const endMinutes =
-        toMinutes(
-          String(
-            event.end_time ||
-            event.start_time ||
-            ""
-          ).slice(0, 5)
-        );
+        finishOverlapGroup();
 
-      let laneIndex =
-        laneEndTimes.findIndex(
-          (laneEnd) =>
-            laneEnd <=
-            startMinutes
-        );
-
-      if (laneIndex === -1) {
-        laneIndex =
-          laneEndTimes.length;
-
-        laneEndTimes.push(
-          endMinutes
-        );
-      } else {
-        laneEndTimes[
-          laneIndex
-        ] = endMinutes;
-      }
-
-      positionedEvents.push({
-        event,
-        laneIndex,
-        overlapGroup:
-          currentGroup,
-      });
-    }
-  );
-
-  const laneCount =
-    Math.max(
-      1,
-      laneEndTimes.length
-    );
-
-  positionedEvents
-    .slice(
-      positionedEvents.length -
-      currentGroup.length
-    )
-    .forEach(
-      (item) => {
-        item.laneCount =
-          laneCount;
-      }
-    );
-
-  currentGroup = [];
-  currentGroupEnd = -1;
-};
-
-docEvents.forEach(
-  (event) => {
-    const startMinutes =
-      toMinutes(
-        String(
-          event.start_time || ""
-        ).slice(0, 5)
-      );
-
-    const endMinutes =
-      toMinutes(
-        String(
-          event.end_time ||
-          event.start_time ||
-          ""
-        ).slice(0, 5)
-      );
-
-    if (
-      currentGroup.length &&
-      startMinutes >=
-        currentGroupEnd
-    ) {
-      finishOverlapGroup();
-    }
-
-    currentGroup.push(
-      event
-    );
-
-    currentGroupEnd =
-      Math.max(
-        currentGroupEnd,
-        endMinutes
-      );
-  }
-);
-
-finishOverlapGroup();
         const eventsHtml =
-  positionedEvents
-    .map(
-      ({
-        event,
-        laneIndex,
-        laneCount,
-      }) => {
+          positionedEvents
+            .map(
+              ({
+                event,
+                laneIndex,
+                laneCount,
+              }) => {
                 const layout =
                   getEventLayout(
                     event
@@ -39908,28 +39912,29 @@ finishOverlapGroup();
                         doc.color ||
                         "#7C5CFF"
                       )};
+
                       top:${layout.top}px;
-height:${layout.height}px;
+                      height:${layout.height}px;
 
-left:calc(
-  ${
-    (
-      laneIndex /
-      laneCount
-    ) * 100
-  }% + 3px
-);
+                      left:calc(
+                        ${
+                          (
+                            laneIndex /
+                            laneCount
+                          ) * 100
+                        }% + 3px
+                      );
 
-width:calc(
-  ${
-    100 /
-    laneCount
-  }% - 6px
-);
+                      width:calc(
+                        ${
+                          100 /
+                          laneCount
+                        }% - 6px
+                      );
 
-z-index:${
-  20 + laneIndex
-};
+                      z-index:${
+                        20 + laneIndex
+                      };
                     "
                   >
                     <div
@@ -40059,6 +40064,78 @@ z-index:${
             }
           ).join("");
 
+        const currentScheduleRow =
+          staffSchedule.find(
+            (item) =>
+              String(
+                item.staff_id
+              ) ===
+              String(
+                doc.id
+              )
+          ) || null;
+
+        const currentShiftStart =
+          String(
+            currentScheduleRow?.start_time ||
+            ""
+          ).slice(0, 5);
+
+        const currentShiftEnd =
+          String(
+            currentScheduleRow?.end_time ||
+            ""
+          ).slice(0, 5);
+
+        const currentShiftStartMinutes =
+          currentShiftStart
+            ? toMinutes(
+                currentShiftStart
+              )
+            : calendarDayStartMinutes;
+
+        const currentShiftEndMinutes =
+          currentShiftEnd
+            ? toMinutes(
+                currentShiftEnd
+              )
+            : calendarDayEndMinutes;
+
+        const shiftBeforeHeight =
+          Math.max(
+            0,
+            Math.min(
+              calendarTimelineHeight,
+              (
+                currentShiftStartMinutes -
+                calendarDayStartMinutes
+              ) /
+                60 *
+                calendarHourHeight
+            )
+          );
+
+        const shiftAfterTop =
+          Math.max(
+            0,
+            Math.min(
+              calendarTimelineHeight,
+              (
+                currentShiftEndMinutes -
+                calendarDayStartMinutes
+              ) /
+                60 *
+                calendarHourHeight
+            )
+          );
+
+        const shiftAfterHeight =
+          Math.max(
+            0,
+            calendarTimelineHeight -
+              shiftAfterTop
+          );
+
         return `
           <section
             class="calendarDoctorTimelineColumn"
@@ -40108,63 +40185,34 @@ z-index:${
                 </strong>
 
                 <span>
-  ${escapeHtml(
-    doc.role ===
-    "assistant"
-      ? "Асистент"
-      : "Ветеринар"
-  )}
-  ·
-  ${docEvents.length}
-  ${
-    docEvents.length ===
-    1
-      ? "запис"
-      : "записів"
-  }
+                  ${escapeHtml(
+                    doc.role ===
+                    "assistant"
+                      ? "Асистент"
+                      : "Ветеринар"
+                  )}
+                  ·
+                  ${docEvents.length}
+                  ${
+                    docEvents.length ===
+                    1
+                      ? "запис"
+                      : "записів"
+                  }
 
-  ${
-    (() => {
-      const scheduleRow =
-        staffSchedule.find(
-          (item) =>
-            String(
-              item.staff_id
-            ) ===
-            String(
-              doc.id
-            )
-        );
-
-      const shiftStart =
-        String(
-          scheduleRow?.start_time ||
-          ""
-        ).slice(0, 5);
-
-      const shiftEnd =
-        String(
-          scheduleRow?.end_time ||
-          ""
-        ).slice(0, 5);
-
-      if (
-        !shiftStart ||
-        !shiftEnd
-      ) {
-        return "";
-      }
-
-      return `
-        · ${escapeHtml(
-          shiftStart
-        )}–${escapeHtml(
-          shiftEnd
-        )}
-      `;
-    })()
-  }
-</span>
+                  ${
+                    currentShiftStart &&
+                    currentShiftEnd
+                      ? `
+                        · ${escapeHtml(
+                          currentShiftStart
+                        )}–${escapeHtml(
+                          currentShiftEnd
+                        )}
+                      `
+                      : ""
+                  }
+                </span>
               </div>
 
               <div
@@ -40185,12 +40233,60 @@ z-index:${
                   doc.id
                 )
               )}"
+              data-shift-start="${escapeHtml(
+                currentShiftStart
+              )}"
+              data-shift-end="${escapeHtml(
+                currentShiftEnd
+              )}"
               style="
                 height:${calendarTimelineHeight}px
               "
             >
               ${hourLines}
               ${halfHourLines}
+
+              ${
+                shiftBeforeHeight > 0
+                  ? `
+                    <div
+                      class="
+                        calendarShiftUnavailable
+                        calendarShiftUnavailableBefore
+                      "
+                      style="
+                        top:0;
+                        height:${shiftBeforeHeight}px;
+                      "
+                    >
+                      <span>
+                        Поза зміною
+                      </span>
+                    </div>
+                  `
+                  : ""
+              }
+
+              ${
+                shiftAfterHeight > 0
+                  ? `
+                    <div
+                      class="
+                        calendarShiftUnavailable
+                        calendarShiftUnavailableAfter
+                      "
+                      style="
+                        top:${shiftAfterTop}px;
+                        height:${shiftAfterHeight}px;
+                      "
+                    >
+                      <span>
+                        Поза зміною
+                      </span>
+                    </div>
+                  `
+                  : ""
+              }
 
               <div
                 class="calendarTimelineHover"
@@ -40264,1227 +40360,7 @@ const staffPaletteHtml =
       `
     )
     .join("");
-
-page.innerHTML = `
-  <div class="card calendarCard">
-    <div class="calendarHeader">
-      <div>
-        <h2>
-          Календар
-        </h2>
-
-        <div class="hint">
-          Натисніть на потрібний час
-у колонці ветеринара,
-щоб створити запис.
-        </div>
-      </div>
-
-      <div class="calendarHeaderActions">
-  <button
-    class="primary"
-    id="calendarCreateVisitButton"
-    type="button"
-  >
-    ＋ Створити запис
-  </button>
-
-  <div class="calendarViewSwitcher">
-  <div class="calendarViewGroup">
-    <span class="calendarViewGroupLabel">
-      Записи
-    </span>
-
-    <button
-      class="primary"
-      data-cal-mode="day"
-      type="button"
-    >
-      День
-    </button>
-
-    <button
-      class="ghost"
-      data-cal-mode="week"
-      type="button"
-    >
-      Тиждень
-    </button>
-  </div>
-
-  <button
-    class="ghost calendarScheduleButton"
-    data-cal-mode="month"
-    type="button"
-  >
-    <span>👥</span>
-    Графік команди
-  </button>
-</div>
-</div>
-    </div>
-
-    <div class="calendarTop">
-      <button
-        class="ghost"
-        id="calPrevDay"
-        type="button"
-      >
-        ←
-      </button>
-
-      <div class="calendarDate">
-        ${escapeHtml(
-          today
-        )}
-      </div>
-
-      <button
-        class="ghost"
-        id="calNextDay"
-        type="button"
-      >
-        →
-      </button>
-    </div>
-
-    <div class="calendarWorkArea">
-      <div class="calendarMainArea">
-        <div
-          class="calTopScroll"
-          id="calTopScroll"
-        >
-          <div
-            class="calTopScrollInner"
-            id="calTopScrollInner"
-          ></div>
-        </div>
-
-        <div
-          class="calendarDayGrid"
-          id="calendarDayGrid"
-        >
-          <div
-            class="calendarTimelineTimeColumn"
-          >
-            <div
-              class="calendarTimelineTimeHead"
-            >
-              Час
-            </div>
-
-            <div
-              class="calendarTimelineTimeBody"
-              style="
-                height:${calendarTimelineHeight}px
-              "
-            >
-              ${hours
-                .map(
-                  (
-                    hour,
-                    index
-                  ) => `
-                    <div
-                      class="calendarTimelineTimeLabel"
-                      style="
-                        top:${
-                          index *
-                          calendarHourHeight
-                        }px
-                      "
-                    >
-                      ${escapeHtml(
-                        hour
-                      )}
-                    </div>
-                  `
-                )
-                .join("")}
-            </div>
-          </div>
-
-          <div
-            class="calendarDoctorsTimelineGrid"
-          >
-            ${
-  staffHtml ||
-  `
-    <div class="calendarEmptyShift">
-      <div class="calendarEmptyShiftIcon">
-        📅
-      </div>
-
-      <h3>
-        На цей день змін немає
-      </h3>
-
-      <p>
-        Додайте співробітників у графік роботи,
-        щоб вони з’явилися в календарі записів.
-      </p>
-
-      <button
-        type="button"
-        class="primary"
-        id="calendarOpenTeamButton"
-      >
-        Налаштувати графік
-      </button>
-    </div>
-  `
 }
-          </div>
-        </div>
-      </div>
-
-      
-    </div>
-  </div>
-`;
-
-initCalendarTopScroll();
-  $$("[data-calendar-timeline]")
-  .forEach(
-    (timeline) => {
-      const hover =
-        timeline.querySelector(
-          ".calendarTimelineHover"
-        );
-
-      const hoverTime =
-        hover?.querySelector("b");
-
-      const staffId =
-        String(
-          timeline.dataset
-            .staffId ||
-          ""
-        );
-
-      const getTimeFromPointer = (
-        event
-      ) => {
-        const rect =
-          timeline
-            .getBoundingClientRect();
-
-        const localY =
-          Math.max(
-            0,
-            Math.min(
-              event.clientY -
-                rect.top,
-              rect.height
-            )
-          );
-
-        const rawMinutes =
-          calendarDayStartMinutes +
-          localY /
-            calendarHourHeight *
-            60;
-
-        const roundedMinutes =
-          Math.round(
-            rawMinutes / 15
-          ) * 15;
-
-        const safeMinutes =
-          Math.max(
-            calendarDayStartMinutes,
-            Math.min(
-              roundedMinutes,
-              calendarDayEndMinutes -
-                15
-            )
-          );
-
-        const hoursValue =
-          Math.floor(
-            safeMinutes / 60
-          );
-
-        const minutesValue =
-          safeMinutes % 60;
-
-        return {
-          minutes:
-            safeMinutes,
-
-          time:
-            `${String(
-              hoursValue
-            ).padStart(
-              2,
-              "0"
-            )}:${String(
-              minutesValue
-            ).padStart(
-              2,
-              "0"
-            )}`,
-
-          top:
-            (
-              safeMinutes -
-              calendarDayStartMinutes
-            ) /
-            60 *
-            calendarHourHeight,
-        };
-      };
-
-      timeline.addEventListener(
-        "mousemove",
-        (event) => {
-          if (
-            event.target.closest(
-              "[data-edit-calendar-event]"
-            )
-          ) {
-            if (hover) {
-              hover.hidden =
-                true;
-            }
-
-            return;
-          }
-
-          const pointerTime =
-            getTimeFromPointer(
-              event
-            );
-
-          if (hover) {
-            hover.hidden =
-              false;
-
-            hover.style.top =
-              `${pointerTime.top}px`;
-          }
-
-          if (hoverTime) {
-            hoverTime.textContent =
-              pointerTime.time;
-          }
-        }
-      );
-
-      timeline.addEventListener(
-        "mouseleave",
-        () => {
-          if (hover) {
-            hover.hidden =
-              true;
-          }
-        }
-      );
-
-      timeline.addEventListener(
-        "click",
-        (event) => {
-          if (
-            event.target.closest(
-              "[data-edit-calendar-event]"
-            ) ||
-            event.target.closest(
-              "[data-del-calendar-event]"
-            )
-          ) {
-            return;
-          }
-
-          const pointerTime =
-            getTimeFromPointer(
-              event
-            );
-
-          if (
-            !staffId ||
-            !pointerTime.time
-          ) {
-            return;
-          }
-
-          openVisitFromCalendar(
-            pointerTime.time,
-            staffId
-          );
-        }
-      );
-
-      timeline.addEventListener(
-        "dragover",
-        (event) => {
-          event.preventDefault();
-
-          timeline.classList.add(
-            "is-drag-over"
-          );
-
-          const pointerTime =
-  getTimeFromPointer(
-    event
-  );
-
-if (hover) {
-  hover.hidden =
-    false;
-
-  hover.style.top =
-    `${pointerTime.top}px`;
-}
-
-if (hoverTime) {
-  hoverTime.textContent =
-    pointerTime.time;
-}
-}
-);
-
-timeline.addEventListener(
-  "dragleave",
-  (event) => {
-    if (
-      timeline.contains(
-        event.relatedTarget
-      )
-    ) {
-      return;
-    }
-
-    timeline.classList.remove(
-      "is-drag-over"
-    );
-
-    if (hover) {
-      hover.hidden =
-        true;
-    }
-  }
-);
-
-timeline.addEventListener(
-  "drop",
-  (event) => {
-    event.preventDefault();
-
-    timeline.classList.remove(
-      "is-drag-over"
-    );
-
-    if (hover) {
-      hover.hidden =
-        true;
-    }
-
-    let dragData =
-      null;
-
-    try {
-      dragData =
-        JSON.parse(
-          event.dataTransfer
-            .getData(
-              "text/plain"
-            ) ||
-          "{}"
-        );
-    } catch {
-      return;
-    }
-
-    const droppedStaffId =
-      String(
-        dragData?.staff_id ||
-        staffId ||
-        ""
-      );
-
-    if (!droppedStaffId) {
-      return;
-    }
-
-    const pointerTime =
-      getTimeFromPointer(
-        event
-      );
-
-    if (!pointerTime.time) {
-      return;
-    }
-
-    openVisitFromCalendar(
-      pointerTime.time,
-      droppedStaffId
-    );
-  }
-);
-}
-);
-
-$("#calendarCreateVisitButton")
-  ?.addEventListener(
-    "click",
-    () => {
-      const defaultStaffId =
-        staffOnShift[0]?.id ||
-        staff[0]?.id ||
-        "";
-
-      if (!defaultStaffId) {
-        openDeleteModal(
-          "Спочатку додайте хоча б одного співробітника.",
-          null,
-          "info"
-        );
-
-        return;
-      }
-
-      openVisitFromCalendar(
-        "10:00",
-        defaultStaffId
-      );
-    }
-  );
-  $("#calPrevDay")?.addEventListener("click", async () => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - 1);
-    window.__calendarDate = d.toISOString().slice(0, 10);
-    await renderCalendarTab();
-  });
-
-  $("#calNextDay")?.addEventListener("click", async () => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + 1);
-    window.__calendarDate = d.toISOString().slice(0, 10);
-    await renderCalendarTab();
-  });
-
-  $$("[data-del-calendar-event]").forEach((btn) => {
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const id =
-      btn.dataset.delCalendarEvent;
-
-    if (!id) return;
-
-    openDeleteModal(
-      "Видалити цей запис з календаря?",
-      async () => {
-        const ok =
-          await deleteCalendarEventApi(id);
-
-        if (ok) {
-          await renderCalendarTab();
-        }
-      }
-    );
-  });
-});
-
-  $$("[data-edit-calendar-event]").forEach((card) => {
-    card.addEventListener("click", async (e) => {
-      if (e.target.closest("[data-del-calendar-event]")) return;
-
-      const id = card.dataset.editCalendarEvent;
-      if (!id) return;
-
-      const ev = todayEvents.find((x) => String(x.id) === String(id));
-      if (!ev) return alert("Запис не знайдено");
-
-      openCalendarEditModal(ev, today, async () => {
-        await renderCalendarTab();
-      });
-    });
-  });
-
-  $$("[data-cal-mode]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      calendarMode = btn.dataset.calMode;
-      await renderCalendarTab();
-    });
-  });
-  function initCalendarTopScroll() {
-  const topScroll = document.getElementById("calTopScroll");
-  const topInner = document.getElementById("calTopScrollInner");
-  const grid = document.getElementById("calendarDayGrid");
-
-  if (!topScroll || !topInner || !grid) return;
-
-  requestAnimationFrame(() => {
-    topInner.style.width = `${grid.scrollWidth}px`;
-
-    topScroll.onscroll = () => {
-      grid.scrollLeft = topScroll.scrollLeft;
-    };
-
-    grid.onscroll = () => {
-      topScroll.scrollLeft = grid.scrollLeft;
-    };
-  });
-}
-}
-
-// ==========================================================================
-// Doc.PUG CRM Mini — app.js (ПЕРСОНАЛ, МОДАЛКИ КАЛЕНДАРЯ И КАРТОЧКИ АНАЛИЗОВ)
-// Часть 5
-// ==========================================================================
-
-async function openStaffProfileModal(doc) {
-
-  const staffColor = doc.color || "#7C5CFF";
-
-  const staffName = doc.name || "Працівник";
-
-  const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
-
-  const roleLabel =
-
-    doc.role === "assistant" ? "Асистент" :
-
-    doc.role === "admin" ? "Адміністратор" :
-
-    "Ветеринарний лікар";
-
-  // ====== ЗАГРУЖАЕМ DASHBOARD ======
-
-  const dashboard = await loadStaffDashboardApi(doc.id);
-
-  const demoRevenue = Number(dashboard.revenue || 0);
-
-  const demoVisits = Number(dashboard.visits_this_month || 0);
-
-  const demoChecks = Number(dashboard.closed_checks || 0);
-
-  const demoAvgCheck = Number(dashboard.avg_check || 0);
-
-  const revenueGrowth = Number(dashboard.revenue_growth_percent || 0);
-
-  const visitsGrowth = Number(dashboard.visits_growth_percent || 0);
-
-  const checksGrowth = Number(dashboard.checks_growth_percent || 0);
-
-  const avgCheckGrowth = Number(dashboard.avg_check_growth_percent || 0);
-
-  // ====== ДОБАВИТЬ ВОТ СЮДА ======
-
-  const lastVisits = Array.isArray(dashboard.last_visits)
-
-    ? dashboard.last_visits
-
-    : [];
-
-  const hasLastVisits = lastVisits.length > 0;
-
-const hasRating = Number(dashboard.rating_count || 0) > 0;
-
-const skills = Array.isArray(dashboard.skills)
-  ? dashboard.skills
-  : [];
-
-const achievements = Array.isArray(dashboard.achievements)
-  ? dashboard.achievements
-  : [];
-
-const xp = Number(dashboard.xp || 0);
-const level = Number(dashboard.level || 1);
-const nextLevelXp = Number(dashboard.next_level_xp || 100);
-const xpPercent = nextLevelXp > 0
-  ? Math.min(100, Math.round((xp / nextLevelXp) * 100))
-  : 0;
-
-// ====== ПОТОМ СОЗДАЕМ MODAL ======
-
-const modal = document.createElement("div");
-modal.className = "staffProfileOverlay";
-
-  modal.innerHTML = `
-    <div class="staffProfileModal staffProfilePro" style="--staff-color:${escapeHtml(staffColor)};">
-      <button class="staffProfileClose" type="button">×</button>
-
-      <aside class="staffProfileSidebar">
-        <div class="staffProfileSideTop">
-          ${
-            doc.avatar
-              ? `<img class="staffProfileAvatarImg" src="${escapeHtml(doc.avatar)}" alt="${escapeHtml(staffName)}">`
-              : `<div class="staffProfileAvatarLetter">${escapeHtml(staffLetter)}</div>`
-          }
-
-          <div class="staffProfileSideName">${escapeHtml(staffName)}</div>
-          <div class="staffProfileSideRole">${escapeHtml(roleLabel)}</div>
-          <div class="staffProfileSideStatus">На зміні</div>
-        </div>
-
-        <nav class="staffProfileNav">
-          <button class="active" type="button">▦ Огляд</button>
-         <button type="button">🩺 Прийоми</button>
-          <button type="button">💰 Фінанси</button>
-          
-          <button type="button">📈 Графіки</button>
-          <button type="button">⚖ Штрафи та бонуси</button>
-          <button type="button">🎓 Навички</button>
-          <button type="button">📄 Документи</button>
-          <button type="button">⚙ Налаштування</button>
-        </nav>
-
-        <div class="staffProfileContactCard">
-          <h4>Контакти</h4>
-          <div>📞 ${escapeHtml(doc.phone || "Не вказано")}</div>
-          <div>✉ Email не вказано</div>
-          <div>👥 Працює з —</div>
-          <div>ID #STF-${escapeHtml(String(doc.id || "0000")).padStart(4, "0")}</div>
-        </div>
-      </aside>
-
-      <main class="staffProfileMain">
-        <header class="staffProfileHeaderPro">
-          <div>
-            <div class="staffProfileBreadcrumb">Команда / Профіль співробітника</div>
-            <h2>${escapeHtml(staffName)}</h2>
-            <div class="staffProfileSubtitle">${escapeHtml(roleLabel)}</div>
-            <div class="staffProfileSpecializations">
-              ${renderStaffSpecializationTags(
-                doc,
-                "staffProfileSpecialization"
-              )}
-            </div>
-          </div>
-
-          <button class="ghost staffProfileEditInside" type="button" data-edit-staff-from-profile="${escapeHtml(String(doc.id))}">
-            ✏️ Редагувати
-          </button>
-        </header>
-<section class="staffInsightCard">
-  <div class="staffInsightIcon">✨</div>
-  <div>
-    <div class="staffInsightTitle">Що варто знати сьогодні</div>
-    <div class="staffInsightText">
-      ${escapeHtml(staffName)} працює стабільно: виручка змінилась на <b>${revenueGrowth}%</b>, кількість візитів — на <b>${visitsGrowth}%</b>.
-      Скарг не зафіксовано. До плану місяця залишилось <b>13 570 грн</b>.
-    </div>
-  </div>
-</section>
-
-        <section class="staffProfileKpis">
-          <div class="staffKpiCard">
-            <div class="staffKpiIcon">📅</div>
-            <div>
-              <span>Візити цього місяця</span>
-              <strong>${demoVisits}</strong>
-              <small>↑ ${visitsGrowth}% до минулого місяця</small>
-            </div>
-          </div>
-
-          <div class="staffKpiCard">
-            <div class="staffKpiIcon">✅</div>
-            <div>
-              <span>Закрито чеків</span>
-              <strong>${demoChecks}</strong>
-              <small>↑ ${checksGrowth}% до минулого місяця</small>
-            </div>
-          </div>
-
-          <div class="staffKpiCard">
-            <div class="staffKpiIcon">💳</div>
-            <div>
-              <span>Виручка</span>
-              <strong>${demoRevenue.toLocaleString("uk-UA")} грн</strong>
-              <small>↑ ${revenueGrowth}% до минулого місяця</small>
-            </div>
-          </div>
-
-          <div class="staffKpiCard">
-            <div class="staffKpiIcon">📊</div>
-            <div>
-              <span>Середній чек</span>
-              <strong>${demoAvgCheck.toLocaleString("uk-UA")} грн</strong>
-              <small>↑ ${avgCheckGrowth}% до минулого місяця</small>
-            </div>
-          </div>
-        </section>
-
-        <section class="staffProfileDashboardGrid">
-          <div class="staffPanel staffChartPanel">
-            <div class="staffPanelHead">
-              <h3>Виручка</h3>
-              <span>грн</span>
-            </div>
-            <div class="staffFakeLineChart">
-              <span style="height:35%"></span>
-              <span style="height:48%"></span>
-              <span style="height:62%"></span>
-              <span style="height:76%"></span>
-              <span style="height:80%"></span>
-              <span style="height:92%"></span>
-            </div>
-            <div class="staffChartLabels">
-              <span>Січ</span><span>Лют</span><span>Бер</span><span>Кві</span><span>Тра</span><span>Чер</span>
-            </div>
-          </div>
-
-          <div class="staffPanel staffChartPanel">
-            <div class="staffPanelHead">
-              <h3>Кількість візитів</h3>
-              <span>візити</span>
-            </div>
-            <div class="staffFakeBarChart">
-              <span style="height:62%"></span>
-              <span style="height:58%"></span>
-              <span style="height:68%"></span>
-              <span style="height:86%"></span>
-              <span style="height:78%"></span>
-              <span style="height:82%"></span>
-            </div>
-            <div class="staffChartLabels">
-              <span>Січ</span><span>Лют</span><span>Бер</span><span>Кві</span><span>Тра</span><span>Чер</span>
-            </div>
-          </div>
-
-          <div class="staffPanel staffCareerPanel">
-  <div class="staffPanelHead">
-    <h3>🏆 Карʼєра</h3>
-    <span>Level ${level}</span>
-  </div>
-
-  <div class="staffLevelBox">
-    <div class="staffLevelTop">
-      <strong>Рівень ${level}</strong>
-      <span>${xp} / ${nextLevelXp} XP</span>
-    </div>
-
-    <div class="staffXpBar">
-      <div style="width:${xpPercent}%"></div>
-    </div>
-
-    <p>До наступного рівня залишилось ${Math.max(0, nextLevelXp - xp)} XP</p>
-  </div>
-
-  ${
-    achievements.length
-      ? `
-        <div class="staffAchievementList">
-          ${achievements.map((a) => `
-            <div class="staffAchievementItem">
-              <div>${escapeHtml(a.icon || "🏅")}</div>
-              <div>
-                <b>${escapeHtml(a.title || "Досягнення")}</b>
-                <span>${escapeHtml(a.description || "")}</span>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `
-      : `
-        <div class="staffEmptyState">
-          <div class="staffEmptyIcon">🏅</div>
-          <b>Досягнень ще немає</b>
-          <span>Коли співробітник буде проводити прийоми, отримувати оцінки та виконувати цілі — тут зʼявляться його досягнення.</span>
-        </div>
-      `
-  }
-</div>
-
-          <div class="staffPanel staffRatingPanel">
-  <h3>⭐ Рейтинг та оцінки</h3>
-
-  ${
-    hasRating
-      ? `
-        <div class="staffRatingBig">${Number(dashboard.rating_avg || 0).toFixed(1)} <span>★★★★★</span></div>
-        <p>на основі ${Number(dashboard.rating_count || 0)} оцінок</p>
-      `
-      : `
-        <div class="staffEmptyState">
-          <div class="staffEmptyIcon">⭐</div>
-          <b>Оцінок ще немає</b>
-          <span>Після завершення прийому адміністратор зможе поставити оцінку лікарю.</span>
-        </div>
-      `
-  }
-</div>
-
-          <div class="staffPanel staffCallsPanel">
-  <h3>Останні прийоми</h3>
-
-  ${
-    hasLastVisits
-      ? lastVisits.map((v) => `
-        <button class="staffVisitRow" type="button" data-open-visit-id="${escapeHtml(String(v.id || ""))}">
-          <div>
-            <b>${escapeHtml(v.date || "—")}</b>
-            <span>${escapeHtml(v.status || "Прийом")}</span>
-          </div>
-
-          <div>
-            <strong>${escapeHtml(v.patient_name || "Пацієнт")}</strong>
-            <span>${escapeHtml(v.dx || v.note || "Без опису")}</span>
-          </div>
-
-          <div>
-            <b>${Number(v.total || 0).toLocaleString("uk-UA")} грн</b>
-            <span class="done">Відкрити →</span>
-          </div>
-        </button>
-      `).join("")
-      : `
-        <div class="staffEmptyState">
-          <div class="staffEmptyIcon">🩺</div>
-          <b>Прийомів ще немає</b>
-          <span>Коли прийоми будуть прив’язані до цього лікаря, вони з’являться тут автоматично.</span>
-        </div>
-      `
-  }
-</div>
-
-          <div class="staffPanel">
-            <h3>Фінансова інформація</h3>
-            <div class="staffFinanceRows">
-              <div><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></div>
-              <div><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></div>
-              <div><span>Виплачено цього місяця</span><b>0 грн</b></div>
-              <div><span>Бонуси цього місяця</span><b>0 грн</b></div>
-              <div><span>Штрафи цього місяця</span><b>0 грн</b></div>
-            </div>
-          </div>
-
-          <div class="staffPanel">
-            <h3>Штрафи та бонуси</h3>
-            <div class="staffFinanceRows">
-              <div><span>Запізнення</span><b>0</b></div>
-              <div><span>Прогули</span><b>0</b></div>
-              <div><span>Попередження</span><b>0</b></div>
-              <div><span>Бонуси</span><b>0 грн</b></div>
-              <div><span>Штрафи</span><b>0 грн</b></div>
-            </div>
-          </div>
-
-         <div class="staffPanel staffSkillsPanel">
-  <h3>Навички та сертифікації</h3>
-
-  ${
-    skills.length
-      ? `
-        <div class="staffSkillList">
-          ${skills.map((s) => `<span>${escapeHtml(s.name || s)}</span>`).join("")}
-          <button type="button">+ Додати навичку</button>
-        </div>
-      `
-      : `
-        <div class="staffEmptyState">
-          <div class="staffEmptyIcon">🎓</div>
-          <b>Навички ще не додані</b>
-          <span>Додамо реальні навички, сертифікати та спеціалізації співробітника.</span>
-        </div>
-      `
-  }
-</div>
-
-          <div class="staffPanel">
-            <h3>Нотатка</h3>
-            <div class="hint">${escapeHtml(doc.note || "Нотатка не додана.")}</div>
-          </div>
-        </section>
-      </main>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  modal.querySelector(".staffProfileClose")?.addEventListener("click", () => modal.remove());
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.remove();
-  });
-
-  modal.querySelector("[data-edit-staff-from-profile]")?.addEventListener("click", () => {
-    modal.remove();
-    openEditStaffModal(doc);
-  });
-}
-
-async function loadSpecializationsApi() {
-  try {
-    const res = await fetch("/api/specializations");
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot load specializations");
-    return Array.isArray(json.data) ? json.data : [];
-  } catch (e) {
-    console.error("loadSpecializationsApi failed:", e);
-    return [];
-  }
-}
-
-async function createSpecializationApi(payload) {
-  try {
-    const res = await fetch("/api/specializations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert(json.error || "Не вдалося створити напрям");
-      return null;
-    }
-    return Array.isArray(json.data)
-  ? json.data[0] || null
-  : json.data || null;
-  } catch (e) {
-    console.error("createSpecializationApi failed:", e);
-    alert("Помилка створення напряму");
-    return null;
-  }
-}
-
-async function deleteSpecializationApi(specializationId) {
-  const cleanId = String(
-    specializationId || ""
-  ).trim();
-
-  if (!cleanId) {
-    return {
-      ok: false,
-      error: "Не вказано напрям.",
-    };
-  }
-
-  try {
-    const response = await fetch(
-      `/api/specializations/${encodeURIComponent(cleanId)}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      }
-    );
-
-    const json = await response.json();
-
-    if (!response.ok || !json?.ok) {
-      return {
-        ok: false,
-        error:
-          json?.error ||
-          "Не вдалося видалити напрям.",
-      };
-    }
-
-    return { ok: true };
-  } catch (error) {
-    console.error(
-      "deleteSpecializationApi failed:",
-      error
-    );
-
-    return {
-      ok: false,
-      error:
-        "Помилка з'єднання під час видалення напряму.",
-    };
-  }
-}
-
-async function createStaffApi(payload) {
-  try {
-    const res = await fetch("/api/staff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert(json.error || "Помилка створення ветеринара");
-      return null;
-    }
-    return json.data || null;
-  } catch (e) {
-    console.error(e);
-    alert("Помилка створення ветеринара");
-    return null;
-  }
-}
-function getCalendarCreateErrorMessage(
-  errorText = ""
-) {
-  const raw =
-    String(errorText || "")
-      .trim()
-      .toLowerCase();
-
-  if (
-    raw === "time slot busy"
-  ) {
-    return "Цей час вже зайнятий у вибраного лікаря.";
-  }
-
-  if (
-  raw ===
-  "end_time must be later than start_time"
-) {
-  return "Зміна лікаря на сьогодні вже завершена. Оберіть раніший час прийому або перенесіть запис на наступний день.";
-}
-
-  return (
-    String(errorText || "")
-      .trim() ||
-    "Не вдалося створити запис."
-  );
-}
-async function createCalendarEventApi(payload) {
-  try {
-    const res = await fetch("/api/calendar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-    const json = await res.json();
-
-    if (!json.ok) {
-  showCrmNotice({
-    icon: "⚠",
-    title: "Не вдалося створити запис",
-    text: getCalendarCreateErrorMessage(
-      json.error
-    ),
-  });
-
-  return null;
-}
-    return json.data || json.item || null;
-  } catch (e) {
-    console.error("createCalendarEventApi failed:", e);
-    showCrmNotice({
-  icon: "⚠",
-  title: "Помилка створення запису",
-  text:
-    "Сталася помилка під час створення запису. " +
-    (e?.message || e || ""),
-});
-    return null;
-  }
-}
-
-async function updateCalendarEventApi(eventId, payload) {
-  try {
-    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert("Не вдалося оновити запис: " + (json.error || "unknown error"));
-      return null;
-    }
-    return json.data || json.item || null;
-  } catch (e) {
-    console.error("updateCalendarEventApi failed:", e);
-    alert("Помилка оновлення запису: " + (e?.message || e));
-    return null;
-  }
-}
-
-async function deleteCalendarEventApi(eventId) {
-    if (!isOwner() && !isAdmin()) {
-    openDeleteModal(
-  `
-    Видаляти записи з календаря може лише
-    адміністратор або власник клініки.
-  `,
-  null,
-  "info"
-);
-
-return false;
-  }
-  try {
-    const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, {
-      method: "DELETE",
-    });
-    const json = await res.json();
-
-    if (!json.ok) {
-      alert("Не вдалося видалити запис: " + (json.error || "unknown error"));
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error("deleteCalendarEventApi failed:", e);
-    alert("Помилка видалення запису: " + (e?.message || e));
-    return false;
-  }
-}
-
-function addMinutesToTime(time, minutes) {
-  const [h, m] = String(time || "00:00").split(":").map(Number);
-  const d = new Date();
-  d.setHours(h || 0, m || 0, 0, 0);
-  d.setMinutes(d.getMinutes() + Number(minutes || 60));
-  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-}
-
-function loadLabs() {
-  const arr = LS.get(LABS_KEY, []);
-  return Array.isArray(arr) ? arr : [];
-}
-
-function saveLabs(arr) {
-  LS.set(LABS_KEY, Array.isArray(arr) ? arr : []);
-}
-
-function getLabsByPetId(petId) {
-  return loadLabs().filter((x) => String(x.pet_id) === String(petId));
-}
-
-function getLabStatus(value, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "empty";
-  if (n < min) return "low";
-  if (n > max) return "high";
-  return "normal";
-}
-
-function labStatusLabel(status) {
-  if (status === "low") return "↓ нижче";
-  if (status === "high") return "↑ вище";
-  if (status === "normal") return "норма";
-  return "—";
-}
-
-function labScalePercent(value, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 50;
-
-  const span = max - min;
-  const visualMin = min - span * 0.6;
-  const visualMax = max + span * 0.6;
-
-  const pct = ((n - visualMin) / (visualMax - visualMin)) * 100;
-  return Math.max(3, Math.min(97, pct));
-}
-
-function renderLabScale(value, min, max) {
-  const status = getLabStatus(value, min, max);
-  const pct = labScalePercent(value, min, max);
-
-  return `
-    <div class="labScale">
-      <div class="labScaleNorm"></div>
-      <div class="labScaleDot lab-${status}" style="left:${pct}%"></div>
-    </div>
-  `;
-}
-
 function ensureCalendarModal() {
   let modal =
     document.getElementById(
@@ -53278,7 +52154,7 @@ const isInsideWorkingHours =
   );
 
 const isOutsideShift =
-  !isDoctorOnShift;
+  !isInsideWorkingHours;
     const createCalendarAppointment =
   async (
     allowOverlap = false
