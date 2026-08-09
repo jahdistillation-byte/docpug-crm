@@ -4223,48 +4223,70 @@ async function createPatientApi(payload) {
   }
 }
 async function loadPatientWeightsApi(
-  patientId
+  patientId,
+  retry = true
 ) {
-  const response =
-    await fetch(
-      `/api/patients/${
-        encodeURIComponent(
-          String(patientId)
-        )
-      }/weights`,
-      {
-        credentials:
-          "include",
+  try {
+    const response =
+      await fetch(
+        `/api/patients/${
+          encodeURIComponent(
+            String(patientId)
+          )
+        }/weights`,
+        {
+          credentials:
+            "include",
 
-        headers: {
-          Accept:
-            "application/json",
+          headers: {
+            Accept:
+              "application/json",
 
-          ...getOrgHeaders(),
-        },
-      }
-    );
+            ...getOrgHeaders(),
+          },
+        }
+      );
 
-  const result =
-    await response
-      .json()
-      .catch(() => null);
+    const result =
+      await response
+        .json()
+        .catch(() => null);
 
-  if (
-    !response.ok ||
-    !result?.ok
-  ) {
-    throw new Error(
-      result?.error ||
-      "Не вдалося завантажити історію ваги."
-    );
+    if (
+      !response.ok ||
+      !result?.ok
+    ) {
+      throw new Error(
+        result?.error ||
+        "Не вдалося завантажити історію ваги."
+      );
+    }
+
+    return Array.isArray(
+      result.data
+    )
+      ? result.data
+      : [];
+
+  } catch (error) {
+
+    if (retry) {
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            350
+          )
+      );
+
+      return loadPatientWeightsApi(
+        patientId,
+        false
+      );
+    }
+
+    throw error;
   }
-
-  return Array.isArray(
-    result.data
-  )
-    ? result.data
-    : [];
 }
 
 
@@ -33809,6 +33831,7 @@ function renderPatientWeightPanel(
     </section>
   `;
 }
+
 function renderPatientDiagnosesPanel(
   pet,
   diagnoses
