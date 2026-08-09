@@ -39329,17 +39329,183 @@ const dateTo =
       "#monthScheduleRepeatDateTo"
     )?.value || ""
   );
-  console.log(
-  "REPEAT SCHEDULE:",
-  {
-    staffId,
-    selectedWeekdays,
-    shiftStart,
-    shiftEnd,
-    dateFrom,
-    dateTo,
+  if (
+  !staffId ||
+  !selectedWeekdays.length ||
+  !shiftStart ||
+  !shiftEnd ||
+  !dateFrom ||
+  !dateTo
+) {
+  showCrmNotice({
+    icon: "⚠",
+    title: "Не всі дані заповнені",
+    text:
+      "Оберіть працівника, дні тижня, години зміни та період.",
+  });
+
+  return;
+}
+
+if (
+  shiftEnd <= shiftStart
+) {
+  showCrmNotice({
+    icon: "⚠",
+    title: "Некоректний час",
+    text:
+      "Кінець зміни має бути пізніше за початок.",
+  });
+
+  return;
+}
+
+if (
+  dateTo < dateFrom
+) {
+  showCrmNotice({
+    icon: "⚠",
+    title: "Некоректний період",
+    text:
+      "Дата завершення не може бути раніше дати початку.",
+  });
+
+  return;
+}
+
+const datesToSave = [];
+
+const cursor =
+  new Date(
+    `${dateFrom}T12:00:00`
+  );
+
+const endDate =
+  new Date(
+    `${dateTo}T12:00:00`
+  );
+
+while (
+  cursor <= endDate
+) {
+  if (
+    selectedWeekdays.includes(
+      cursor.getDay()
+    )
+  ) {
+    const year =
+      cursor.getFullYear();
+
+    const month =
+      String(
+        cursor.getMonth() + 1
+      ).padStart(
+        2,
+        "0"
+      );
+
+    const day =
+      String(
+        cursor.getDate()
+      ).padStart(
+        2,
+        "0"
+      );
+
+    datesToSave.push(
+      `${year}-${month}-${day}`
+    );
   }
-);
+
+  cursor.setDate(
+    cursor.getDate() + 1
+  );
+}
+
+if (!datesToSave.length) {
+  showCrmNotice({
+    icon: "ℹ",
+    title: "Немає змін",
+    text:
+      "У вибраному періоді немає відповідних днів тижня.",
+  });
+
+  return;
+}
+
+const saveButton =
+  overlay.querySelector(
+    "#monthScheduleEditorSave"
+  );
+
+if (saveButton) {
+  saveButton.disabled = true;
+
+  saveButton.textContent =
+    `Збереження… 0/${datesToSave.length}`;
+}
+
+let savedCount = 0;
+
+for (
+  const workDate
+  of datesToSave
+) {
+  const saved =
+    await saveStaffScheduleApi({
+      work_date:
+        workDate,
+
+      staff_id:
+        staffId,
+
+      is_active:
+        true,
+
+      start_time:
+        shiftStart,
+
+      end_time:
+        shiftEnd,
+    });
+
+  if (!saved) {
+    if (saveButton) {
+      saveButton.disabled =
+        false;
+
+      saveButton.textContent =
+        "↻ Застосувати графік";
+    }
+
+    showCrmNotice({
+      icon: "⚠",
+      title: "Не вдалося зберегти графік",
+      text:
+        `Збережено ${savedCount} із ${datesToSave.length} змін.`,
+    });
+
+    return;
+  }
+
+  savedCount += 1;
+
+  if (saveButton) {
+    saveButton.textContent =
+      `Збереження… ${savedCount}/${datesToSave.length}`;
+  }
+}
+
+closeEditor();
+
+await renderCalendarTab();
+
+showCrmNotice({
+  icon: "✓",
+  title: "Графік застосовано",
+  text:
+    `Створено ${savedCount} повторюваних змін.`,
+});
 
 return;
 }
