@@ -34295,27 +34295,49 @@ function bindPatientDiagnosisPanel(
     )
   );
 
-  root.querySelectorAll(
-    "[data-edit-diagnosis]"
-  ).forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        const diagnosis =
-          findPatientDiagnosisById(
-            diagnoses,
-            button.dataset.editDiagnosis
-          );
+  root.addEventListener(
+  "click",
+  async (event) => {
+    const button =
+      event.target.closest(
+        "[data-diagnosis-status]"
+      );
 
-        if (diagnosis) {
-          openPatientDiagnosisEditor(
-            pet,
-            diagnosis
-          );
-        }
-      }
+    if (!button) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log(
+      "STATUS BUTTON CLICK:",
+      button.dataset.diagnosisStatus,
+      button.dataset.diagnosisId
     );
-  });
+
+    const diagnosis =
+      findPatientDiagnosisById(
+        diagnoses,
+        button.dataset.diagnosisId
+      );
+
+    if (!diagnosis) {
+      console.error(
+        "Diagnosis not found:",
+        button.dataset.diagnosisId
+      );
+
+      return;
+    }
+
+    await changePatientDiagnosisStatus(
+      pet,
+      diagnosis,
+      button.dataset.diagnosisStatus
+    );
+  }
+);
 
   root.querySelectorAll(
     "[data-diagnosis-status]"
