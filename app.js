@@ -33174,6 +33174,106 @@ ${
     </div>
   </div>
 `;
+const addWeightBtn =
+  dynamicBox.querySelector(
+    "[data-add-patient-weight]"
+  );
+
+if (addWeightBtn) {
+  addWeightBtn.addEventListener(
+    "click",
+    async () => {
+      const result =
+        await openAppPrompt({
+          title:
+            "Додати вагу",
+
+          text:
+            `Пацієнт: ${
+              pet?.name ||
+              "—"
+            }`,
+
+          label:
+            "Вага, кг",
+
+          placeholder:
+            "Наприклад: 21.4",
+
+          confirmText:
+            "Зберегти",
+
+          cancelText:
+            "Скасувати",
+
+          required:
+            true,
+        });
+
+      if (result === null) {
+        return;
+      }
+
+      const normalized =
+        String(result)
+          .trim()
+          .replace(",", ".");
+
+      const weight =
+        Number(normalized);
+
+      if (
+        !Number.isFinite(weight) ||
+        weight <= 0 ||
+        weight > 500
+      ) {
+        showCrmNotice({
+          icon: "!",
+          title:
+            "Некоректна вага",
+
+          text:
+            "Вкажіть вагу числом, наприклад 21.4 кг.",
+        });
+
+        return;
+      }
+
+      try {
+        await createPatientWeightApi(
+          pet.id,
+          {
+            weight_kg:
+              weight,
+
+            source:
+              "manual",
+          }
+        );
+
+        await renderPatientTab(
+          "overview",
+          {
+            ...pet,
+            weight_kg:
+              weight,
+          }
+        );
+
+      } catch (error) {
+        showCrmNotice({
+          icon: "!",
+          title:
+            "Не вдалося зберегти вагу",
+
+          text:
+            error?.message ||
+            "Сталася помилка під час збереження ваги.",
+        });
+      }
+    }
+  );
+}
     bindPatientDiagnosisPanel(
       dynamicBox,
       pet,
