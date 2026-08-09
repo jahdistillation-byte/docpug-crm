@@ -16841,6 +16841,13 @@ def api_get_patient_diagnosis_events(
         print(
             "❌ GET diagnosis events:",
             repr(error),
+            flush=True,
+        )
+
+        print(
+            "❌ GET diagnosis events details:",
+            str(error),
+            flush=True,
         )
 
         return fail(
