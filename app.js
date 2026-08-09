@@ -38574,7 +38574,435 @@ $$("[data-week-create-date]")
     });
 
     const selectedMonthDates = new Set();
+const openMonthScheduleEditor = (
+  date
+) => {
+  document
+    .getElementById(
+      "monthScheduleEditorOverlay"
+    )
+    ?.remove();
 
+  const daySchedule =
+    scheduleByDate.get(date) || [];
+
+  const rowsHtml =
+    staff
+      .map(
+        (doc) => {
+          const staffId =
+            String(
+              doc.id || ""
+            );
+
+          const scheduleRow =
+            daySchedule.find(
+              (item) =>
+                String(
+                  item.staff_id
+                ) ===
+                staffId
+            ) || null;
+
+          const active =
+            Boolean(
+              scheduleRow &&
+              scheduleRow.is_active !== false
+            );
+
+          const startTime =
+            String(
+              scheduleRow?.start_time ||
+              "09:00"
+            ).slice(0, 5);
+
+          const endTime =
+            String(
+              scheduleRow?.end_time ||
+              "18:00"
+            ).slice(0, 5);
+
+          return `
+            <div
+              class="
+                monthScheduleEditorRow
+                ${
+                  active
+                    ? "is-active"
+                    : "is-off"
+                }
+              "
+              data-schedule-editor-row="${escapeHtml(
+                staffId
+              )}"
+            >
+              <div
+                class="monthScheduleEditorPerson"
+              >
+                <span
+                  class="monthScheduleEditorColor"
+                  style="
+                    background:
+                      ${escapeHtml(
+                        doc.color ||
+                        "#7C5CFF"
+                      )};
+                  "
+                ></span>
+
+                <div
+                  class="monthScheduleEditorAvatar"
+                >
+                  👨‍⚕️
+                </div>
+
+                <div
+                  class="monthScheduleEditorIdentity"
+                >
+                  <strong>
+                    ${escapeHtml(
+                      doc.name ||
+                      "Працівник"
+                    )}
+                  </strong>
+
+                  <span>
+                    ${
+                      doc.role ===
+                      "assistant"
+                        ? "Асистент"
+                        : "Ветеринар"
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="
+                  monthScheduleEditorStatus
+                  ${
+                    active
+                      ? "active"
+                      : ""
+                  }
+                "
+                data-schedule-editor-status="${escapeHtml(
+                  staffId
+                )}"
+              >
+                <span></span>
+
+                <b>
+                  ${
+                    active
+                      ? "На зміні"
+                      : "Вихідний"
+                  }
+                </b>
+              </button>
+
+              <label
+                class="monthScheduleEditorTime"
+              >
+                <span>
+                  Початок
+                </span>
+
+                <input
+                  type="time"
+                  value="${escapeHtml(
+                    startTime
+                  )}"
+                  data-schedule-editor-start="${escapeHtml(
+                    staffId
+                  )}"
+                  ${
+                    active
+                      ? ""
+                      : "disabled"
+                  }
+                >
+              </label>
+
+              <label
+                class="monthScheduleEditorTime"
+              >
+                <span>
+                  Кінець
+                </span>
+
+                <input
+                  type="time"
+                  value="${escapeHtml(
+                    endTime
+                  )}"
+                  data-schedule-editor-end="${escapeHtml(
+                    staffId
+                  )}"
+                  ${
+                    active
+                      ? ""
+                      : "disabled"
+                  }
+                >
+              </label>
+            </div>
+          `;
+        }
+      )
+      .join("");
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.id =
+    "monthScheduleEditorOverlay";
+
+  overlay.className =
+    "monthScheduleEditorOverlay";
+
+  overlay.innerHTML = `
+    <section
+      class="monthScheduleEditorModal"
+    >
+      <header
+        class="monthScheduleEditorHead"
+      >
+        <div>
+          <span>
+            ГРАФІК КОМАНДИ
+          </span>
+
+          <h2>
+            📅 ${escapeHtml(
+              date
+            )}
+          </h2>
+
+          <p>
+            Налаштуйте статус
+            та години роботи
+            кожного співробітника.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="monthScheduleEditorClose"
+          id="monthScheduleEditorClose"
+        >
+          ×
+        </button>
+      </header>
+
+      <div
+        class="monthScheduleEditorTabs"
+      >
+        <button
+          type="button"
+          class="active"
+        >
+          Один день
+        </button>
+
+        <button
+          type="button"
+          id="monthScheduleRepeatTab"
+        >
+          Повторюваний графік
+        </button>
+      </div>
+
+      <div
+        class="monthScheduleEditorColumns"
+      >
+        <span>
+          Працівник
+        </span>
+
+        <span>
+          Статус
+        </span>
+
+        <span>
+          Початок
+        </span>
+
+        <span>
+          Кінець
+        </span>
+      </div>
+
+      <div
+        class="monthScheduleEditorRows"
+      >
+        ${rowsHtml}
+      </div>
+
+      <footer
+        class="monthScheduleEditorFooter"
+      >
+        <button
+          type="button"
+          class="ghost"
+          id="monthScheduleEditorCancel"
+        >
+          Скасувати
+        </button>
+
+        <button
+          type="button"
+          class="primary"
+          id="monthScheduleEditorSave"
+        >
+          💾 Зберегти день
+        </button>
+      </footer>
+    </section>
+  `;
+
+  document.body.appendChild(
+    overlay
+  );
+
+  document.body.classList.add(
+    "monthScheduleEditorOpen"
+  );
+
+  const closeEditor = () => {
+    overlay.remove();
+
+    document.body.classList.remove(
+      "monthScheduleEditorOpen"
+    );
+  };
+
+  overlay
+    .querySelector(
+      "#monthScheduleEditorClose"
+    )
+    ?.addEventListener(
+      "click",
+      closeEditor
+    );
+
+  overlay
+    .querySelector(
+      "#monthScheduleEditorCancel"
+    )
+    ?.addEventListener(
+      "click",
+      closeEditor
+    );
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === overlay
+      ) {
+        closeEditor();
+      }
+    }
+  );
+
+  overlay
+    .querySelectorAll(
+      "[data-schedule-editor-status]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const staffId =
+              String(
+                button.dataset
+                  .scheduleEditorStatus ||
+                ""
+              );
+
+            const row =
+              overlay.querySelector(
+                `[data-schedule-editor-row="${staffId}"]`
+              );
+
+            const startInput =
+              overlay.querySelector(
+                `[data-schedule-editor-start="${staffId}"]`
+              );
+
+            const endInput =
+              overlay.querySelector(
+                `[data-schedule-editor-end="${staffId}"]`
+              );
+
+            const nextActive =
+              !button.classList.contains(
+                "active"
+              );
+
+            button.classList.toggle(
+              "active",
+              nextActive
+            );
+
+            row?.classList.toggle(
+              "is-active",
+              nextActive
+            );
+
+            row?.classList.toggle(
+              "is-off",
+              !nextActive
+            );
+
+            const label =
+              button.querySelector(
+                "b"
+              );
+
+            if (label) {
+              label.textContent =
+                nextActive
+                  ? "На зміні"
+                  : "Вихідний";
+            }
+
+            if (startInput) {
+              startInput.disabled =
+                !nextActive;
+            }
+
+            if (endInput) {
+              endInput.disabled =
+                !nextActive;
+            }
+          }
+        );
+      }
+    );
+
+  overlay
+    .querySelector(
+      "#monthScheduleEditorSave"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        showCrmNotice({
+          icon: "💾",
+          title:
+            "Редактор працює",
+          text:
+            "Наступним кроком підключимо збереження змін до графіка.",
+        });
+      }
+    );
+};
     const openMonthShiftDrawer = (
   date
 ) => {
@@ -38924,24 +39352,17 @@ $$("[data-week-create-date]")
     );
 
   drawer
-    .querySelector(
-      "#monthOpenScheduleEditor"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        showCrmNotice({
-          icon:
-            "⚙",
-
-          title:
-            "Редактор графіка",
-
-          text:
-            "Наступним кроком відкриємо тут окреме велике вікно редагування графіка.",
-        });
-      }
-    );
+  .querySelector(
+    "#monthOpenScheduleEditor"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+      openMonthScheduleEditor(
+        date
+      );
+    }
+  );
 };
 
     $$("[data-month-date]").forEach(
