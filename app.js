@@ -34301,7 +34301,6 @@ function bindPatientDiagnosisPanel(
     }
   );
 
-  // Редагування
   root.querySelectorAll(
     "[data-edit-diagnosis]"
   ).forEach(
@@ -34329,7 +34328,6 @@ function bindPatientDiagnosisPanel(
     }
   );
 
-  // Зміна статусу
   root.querySelectorAll(
     "[data-diagnosis-status]"
   ).forEach(
@@ -34359,7 +34357,6 @@ function bindPatientDiagnosisPanel(
     }
   );
 
-  // Історія конкретного діагнозу
   root.querySelectorAll(
     "[data-diagnosis-events]"
   ).forEach(
