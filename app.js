@@ -38860,6 +38860,16 @@ $$("[data-week-create-date]")
       <div class="monthDrawerStaff">
         ${staff
           .map((doc) => {
+            const scheduleRow =
+  daySchedule.find(
+    (item) =>
+      String(
+        item.staff_id
+      ) ===
+      String(
+        doc.id
+      )
+  ) || null;
             const active =
               activeIds.has(
                 String(doc.id)
@@ -38901,41 +38911,100 @@ $$("[data-week-create-date]")
             }
 
             return `
-              <button
-                class="monthShiftToggle ${
-                  active
-                    ? "active"
-                    : ""
-                }"
-                type="button"
-                data-month-shift-staff="${escapeHtml(
-                  String(doc.id)
-                )}"
-                style="
-                  border-left:5px solid
-                  ${escapeHtml(
-                    doc.color ||
-                      "#7C5CFF"
-                  )}
-                "
-              >
-                <span>
-                  👨‍⚕️
-                  ${escapeHtml(
-                    doc.name ||
-                      "Працівник"
-                  )}
-                </span>
+  <div
+    class="monthShiftRow"
+    data-month-shift-row="${escapeHtml(
+      String(doc.id)
+    )}"
+    style="
+      border-left:5px solid
+      ${escapeHtml(
+        doc.color ||
+          "#7C5CFF"
+      )}
+    "
+  >
+    <button
+      class="monthShiftToggle ${
+        active
+          ? "active"
+          : ""
+      }"
+      type="button"
+      data-month-shift-staff="${escapeHtml(
+        String(doc.id)
+      )}"
+    >
+      <span>
+        👨‍⚕️
+        ${escapeHtml(
+          doc.name ||
+            "Працівник"
+        )}
+      </span>
 
-                <b>
-                  ${
-                    active
-                      ? "На зміні"
-                      : "Вихідний"
-                  }
-                </b>
-              </button>
-            `;
+      <b>
+        ${
+          active
+            ? "На зміні"
+            : "Вихідний"
+        }
+      </b>
+    </button>
+
+    <div class="monthShiftTimeControls">
+      <label>
+        <span>Початок</span>
+
+        <input
+          type="time"
+          class="monthShiftStart"
+          data-month-shift-start="${escapeHtml(
+            String(doc.id)
+          )}"
+          value="${escapeHtml(
+            String(
+              scheduleRow?.start_time ||
+              "09:00"
+            ).slice(0, 5)
+          )}"
+          ${
+            active
+              ? ""
+              : "disabled"
+          }
+        >
+      </label>
+
+      <span class="monthShiftTimeDash">
+        —
+      </span>
+
+      <label>
+        <span>Кінець</span>
+
+        <input
+          type="time"
+          class="monthShiftEnd"
+          data-month-shift-end="${escapeHtml(
+            String(doc.id)
+          )}"
+          value="${escapeHtml(
+            String(
+              scheduleRow?.end_time ||
+              "18:00"
+            ).slice(0, 5)
+          )}"
+          ${
+            active
+              ? ""
+              : "disabled"
+          }
+        >
+      </label>
+    </div>
+  </div>
+`;
           })
           .join("")}
       </div>
@@ -39317,20 +39386,57 @@ $$("[data-week-create-date]")
           );
 
         for (const doc of staff) {
-          await saveStaffScheduleApi(
-            {
-              work_date: date,
+  const staffId =
+    String(
+      doc.id
+    );
 
-              staff_id:
-                doc.id,
+  const isActive =
+    activeStaffIds.has(
+      staffId
+    );
 
-              is_active:
-                activeStaffIds.has(
-                  String(doc.id)
-                ),
-            }
-          );
-        }
+  const startInput =
+    drawer.querySelector(
+      `[data-month-shift-start="${staffId}"]`
+    );
+
+  const endInput =
+    drawer.querySelector(
+      `[data-month-shift-end="${staffId}"]`
+    );
+
+  const startTime =
+    String(
+      startInput?.value ||
+      "09:00"
+    ).trim();
+
+  const endTime =
+    String(
+      endInput?.value ||
+      "18:00"
+    ).trim();
+
+  await saveStaffScheduleApi(
+    {
+      work_date:
+        date,
+
+      staff_id:
+        doc.id,
+
+      is_active:
+        isActive,
+
+      start_time:
+        startTime,
+
+      end_time:
+        endTime,
+    }
+  );
+}
 
         await renderCalendarTab();
       }
@@ -39939,21 +40045,63 @@ z-index:${
                 </strong>
 
                 <span>
-                  ${escapeHtml(
-                    doc.role ===
-                    "assistant"
-                      ? "Асистент"
-                      : "Ветеринар"
-                  )}
-                  ·
-                  ${docEvents.length}
-                  ${
-                    docEvents.length ===
-                    1
-                      ? "запис"
-                      : "записів"
-                  }
-                </span>
+  ${escapeHtml(
+    doc.role ===
+    "assistant"
+      ? "Асистент"
+      : "Ветеринар"
+  )}
+  ·
+  ${docEvents.length}
+  ${
+    docEvents.length ===
+    1
+      ? "запис"
+      : "записів"
+  }
+
+  ${
+    (() => {
+      const scheduleRow =
+        staffSchedule.find(
+          (item) =>
+            String(
+              item.staff_id
+            ) ===
+            String(
+              doc.id
+            )
+        );
+
+      const shiftStart =
+        String(
+          scheduleRow?.start_time ||
+          ""
+        ).slice(0, 5);
+
+      const shiftEnd =
+        String(
+          scheduleRow?.end_time ||
+          ""
+        ).slice(0, 5);
+
+      if (
+        !shiftStart ||
+        !shiftEnd
+      ) {
+        return "";
+      }
+
+      return `
+        · ${escapeHtml(
+          shiftStart
+        )}–${escapeHtml(
+          shiftEnd
+        )}
+      `;
+    })()
+  }
+</span>
               </div>
 
               <div
@@ -41116,11 +41264,11 @@ function getCalendarCreateErrorMessage(
   }
 
   if (
-    raw ===
-    "end_time must be later than start_time"
-  ) {
-    return "Час завершення прийому має бути пізніше за час початку. Оберіть коректний час або іншу тривалість.";
-  }
+  raw ===
+  "end_time must be later than start_time"
+) {
+  return "Зміна лікаря на сьогодні вже завершена. Оберіть раніший час прийому або перенесіть запис на наступний день.";
+}
 
   return (
     String(errorText || "")
