@@ -38802,11 +38802,12 @@ const openMonthScheduleEditor = (
         class="monthScheduleEditorTabs"
       >
         <button
-          type="button"
-          class="active"
-        >
-          Один день
-        </button>
+  type="button"
+  class="active"
+  id="monthScheduleSingleTab"
+>
+  Один день
+</button>
 
         <button
           type="button"
@@ -38837,12 +38838,186 @@ const openMonthScheduleEditor = (
       </div>
 
       <div
-        class="monthScheduleEditorRows"
-      >
-        ${rowsHtml}
-      </div>
+  class="monthScheduleEditorRows"
+  id="monthScheduleSingleContent"
+>
+  ${rowsHtml}
+</div>
 
-      <footer
+<div
+  class="monthScheduleRepeatContent"
+  id="monthScheduleRepeatContent"
+  hidden
+>
+  <div class="monthScheduleRepeatIntro">
+    <div>
+      <span>
+        ↻
+      </span>
+
+      <div>
+        <strong>
+          Повторюваний графік
+        </strong>
+
+        <small>
+          Налаштуйте регулярні зміни
+          на декілька тижнів вперед.
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <div class="monthScheduleRepeatGrid">
+
+    <label class="monthScheduleRepeatField">
+      <span>
+        Працівник
+      </span>
+
+      <select
+        id="monthScheduleRepeatStaff"
+      >
+        ${staff
+          .map(
+            (doc) => `
+              <option
+                value="${escapeHtml(
+                  String(
+                    doc.id || ""
+                  )
+                )}"
+              >
+                ${escapeHtml(
+                  doc.name ||
+                  "Працівник"
+                )}
+              </option>
+            `
+          )
+          .join("")}
+      </select>
+    </label>
+
+    <div class="monthScheduleRepeatField monthScheduleRepeatDaysField">
+      <span>
+        Дні тижня
+      </span>
+
+      <div class="monthScheduleRepeatDays">
+        <button
+          type="button"
+          data-repeat-weekday="1"
+        >
+          Пн
+        </button>
+
+        <button
+          type="button"
+          data-repeat-weekday="2"
+        >
+          Вт
+        </button>
+
+        <button
+          type="button"
+          data-repeat-weekday="3"
+        >
+          Ср
+        </button>
+
+        <button
+          type="button"
+          data-repeat-weekday="4"
+        >
+          Чт
+        </button>
+
+        <button
+          type="button"
+          data-repeat-weekday="5"
+        >
+          Пт
+        </button>
+
+        <button
+          type="button"
+          data-repeat-weekday="6"
+        >
+          Сб
+        </button>
+
+        <button
+          type="button"
+          data-repeat-weekday="0"
+        >
+          Нд
+        </button>
+      </div>
+    </div>
+
+    <label class="monthScheduleRepeatField">
+      <span>
+        Початок зміни
+      </span>
+
+      <input
+        type="time"
+        id="monthScheduleRepeatStart"
+        value="09:00"
+      >
+    </label>
+
+    <label class="monthScheduleRepeatField">
+      <span>
+        Кінець зміни
+      </span>
+
+      <input
+        type="time"
+        id="monthScheduleRepeatEnd"
+        value="18:00"
+      >
+    </label>
+
+    <label class="monthScheduleRepeatField">
+      <span>
+        Починаючи з
+      </span>
+
+      <input
+        type="date"
+        id="monthScheduleRepeatDateFrom"
+        value="${escapeHtml(
+          date
+        )}"
+      >
+    </label>
+
+    <label class="monthScheduleRepeatField">
+      <span>
+        До дати
+      </span>
+
+      <input
+        type="date"
+        id="monthScheduleRepeatDateTo"
+        value="${escapeHtml(
+          date
+        )}"
+      >
+    </label>
+
+  </div>
+
+  <div class="monthScheduleRepeatHint">
+    Наприклад:
+    Пн · Ср · Пт,
+    09:00–18:00.
+  </div>
+</div>
+
+<footer
         class="monthScheduleEditorFooter"
       >
         <button
@@ -38908,6 +39083,96 @@ const openMonthScheduleEditor = (
       }
     }
   );
+
+  const singleTab =
+  overlay.querySelector(
+    "#monthScheduleSingleTab"
+  );
+
+const repeatTab =
+  overlay.querySelector(
+    "#monthScheduleRepeatTab"
+  );
+
+const singleContent =
+  overlay.querySelector(
+    "#monthScheduleSingleContent"
+  );
+
+const repeatContent =
+  overlay.querySelector(
+    "#monthScheduleRepeatContent"
+  );
+
+const columns =
+  overlay.querySelector(
+    ".monthScheduleEditorColumns"
+  );
+
+const saveButton =
+  overlay.querySelector(
+    "#monthScheduleEditorSave"
+  );
+
+
+const setScheduleEditorMode = (
+  mode
+) => {
+  const repeatMode =
+    mode === "repeat";
+
+  singleTab?.classList.toggle(
+    "active",
+    !repeatMode
+  );
+
+  repeatTab?.classList.toggle(
+    "active",
+    repeatMode
+  );
+
+  if (singleContent) {
+    singleContent.hidden =
+      repeatMode;
+  }
+
+  if (repeatContent) {
+    repeatContent.hidden =
+      !repeatMode;
+  }
+
+  if (columns) {
+    columns.hidden =
+      repeatMode;
+  }
+
+  if (saveButton) {
+    saveButton.textContent =
+      repeatMode
+        ? "↻ Застосувати графік"
+        : "💾 Зберегти день";
+  }
+};
+
+
+singleTab?.addEventListener(
+  "click",
+  () => {
+    setScheduleEditorMode(
+      "single"
+    );
+  }
+);
+
+
+repeatTab?.addEventListener(
+  "click",
+  () => {
+    setScheduleEditorMode(
+      "repeat"
+    );
+  }
+);
 
   overlay
     .querySelectorAll(
@@ -40816,6 +41081,21 @@ openVisitFromCalendar(
   getTimeFromPointer(
     event
   );
+if (
+  !isTimelineTimeInsideShift(
+    pointerTime.time
+  )
+) {
+  timeline.classList.remove(
+    "is-drag-over"
+  );
+
+  if (hover) {
+    hover.hidden = true;
+  }
+
+  return;
+}  
 
 if (hover) {
   hover.hidden =
@@ -40896,18 +41176,26 @@ timeline.addEventListener(
     }
 
     const pointerTime =
-      getTimeFromPointer(
-        event
-      );
+  getTimeFromPointer(
+    event
+  );
 
-    if (!pointerTime.time) {
-      return;
-    }
+if (!pointerTime.time) {
+  return;
+}
 
-    openVisitFromCalendar(
-      pointerTime.time,
-      droppedStaffId
-    );
+if (
+  !isTimelineTimeInsideShift(
+    pointerTime.time
+  )
+) {
+  return;
+}
+
+openVisitFromCalendar(
+  pointerTime.time,
+  droppedStaffId
+);
   }
 );
 }
