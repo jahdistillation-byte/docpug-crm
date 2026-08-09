@@ -32477,88 +32477,25 @@ const vaccinationDateText =
     : "Не вказано";
 
   root.innerHTML = `
-    <div class="patientHero">
-      <div>
-        <button class="ghost" id="btnBackOwner">← Назад</button>
-        <div class="patientLabel">Медична карта пацієнта</div>
-        <div class="patientName">🐾 ${escapeHtml(pet.name || "Пацієнт")}</div>
-        <div class="patientMetaLine">
-          ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)}
-          ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-          ${pet.age ? " • " + escapeHtml(pet.age) : ""}
-          ${pet.weight_kg ? " • " + escapeHtml(String(pet.weight_kg)) + " кг" : ""}
-        </div>
-        <div class="patientOwnerLine">
-          👤 ${escapeHtml(owner?.name || "Власник не указан")}
-          ${owner?.phone ? " • 📞 " + escapeHtml(owner.phone) : ""}
-        </div>
-        <div class="patientVaccinationCard ${vaccinationStatusClass}">
-  <div class="patientVaccinationIcon">
-    💉
+  <div
+    class="patientPageLoading"
+    style="
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 14px;
+    "
+  >
+    Завантаження картки пацієнта…
   </div>
+`;
 
-  <div class="patientVaccinationMain">
-    <span>
-      Вакцинація
-    </span>
-
-    <strong>
-      ${escapeHtml(
-        vaccinationStatusText
-      )}
-    </strong>
-  </div>
-
-  ${
-    vaccinationStatus ===
-    "vaccinated"
-      ? `
-        <div class="patientVaccinationDetails">
-          <div>
-            <span>Дата</span>
-
-            <strong>
-              ${escapeHtml(
-                vaccinationDateText
-              )}
-            </strong>
-          </div>
-
-          <div>
-            <span>Вакцина</span>
-
-            <strong>
-              ${escapeHtml(
-                vaccinationName ||
-                "Не вказано"
-              )}
-            </strong>
-          </div>
-        </div>
-      `
-      : ""
-  }
-</div>
-      </div>
-      <div class="patientActions">
-        <button class="ghost" data-edit-pet="${escapeHtml(String(pet.id))}">✏️ Редагувати</button>
-        <button class="primary" id="btnAddVisit">+ Візит</button>
-      </div>
-    </div>
-
-    <div class="patientTabs">
-      <button class="patientTab active" data-patient-tab="overview">Обзор</button>
-      <button class="patientTab" data-patient-tab="visits">Визиты</button>
-      <button class="patientTab" data-patient-tab="medcard">Веткартка</button>
-      <button class="patientTab" data-patient-tab="labs">Анализы</button>
-      <button class="patientTab" data-patient-tab="files">Файлы</button>
-      <button class="patientTab" data-patient-tab="documents">Документи</button>
-    </div>
-    <div id="patientTabContent"></div>
-  `;
-
-  bindPatientCardButtons();
-  await renderPatientTab("overview", pet);
+await renderPatientTab(
+  "overview",
+  pet
+);
 }
 
 
