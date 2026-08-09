@@ -33984,6 +33984,12 @@ async function changePatientDiagnosisStatus(
   diagnosis,
   nextStatus
 ) {
+  console.log(
+    "DIAGNOSIS STATUS CLICK:",
+    nextStatus,
+    diagnosis
+  );
+
   const currentStatus =
     String(
       diagnosis?.status ||
@@ -33999,8 +34005,6 @@ async function changePatientDiagnosisStatus(
       .trim()
       .toLowerCase();
 
-  // Ничего не делаем, если статус
-  // уже установлен.
   if (
     !cleanNextStatus ||
     currentStatus ===
@@ -34009,123 +34013,51 @@ async function changePatientDiagnosisStatus(
     return;
   }
 
-  let reason = "";
+  const result =
+    await openAppPrompt({
+      title:
+        cleanNextStatus === "remission"
+          ? "Перевести у ремісію"
+          : cleanNextStatus === "resolved"
+            ? "Завершити діагноз"
+            : cleanNextStatus === "entered_in_error"
+              ? "Помилковий діагноз"
+              : "Повернути в активні",
 
-  if (
-    cleanNextStatus ===
-    "entered_in_error"
-  ) {
-    const result =
-      await openAppPrompt({
-        title:
-          "Помилковий діагноз",
+      text:
+        cleanNextStatus === "entered_in_error"
+          ? "Вкажіть причину, чому діагноз є помилковим."
+          : "За потреби вкажіть причину зміни статусу.",
 
-        text:
-          "Діагноз буде позначено як помилковий та прибрано з активного клінічного контексту.",
+      label:
+        cleanNextStatus === "entered_in_error"
+          ? "Причина *"
+          : "Причина зміни статусу",
 
-        label:
-          "Причина *",
+      placeholder:
+        cleanNextStatus === "entered_in_error"
+          ? "Наприклад: діагноз не підтвердився"
+          : "Необов’язково",
 
-        placeholder:
-          "Наприклад: діагноз не підтвердився після обстеження",
+      confirmText:
+        cleanNextStatus === "remission"
+          ? "У ремісію"
+          : cleanNextStatus === "resolved"
+            ? "Завершити"
+            : cleanNextStatus === "entered_in_error"
+              ? "Позначити помилковим"
+              : "Повернути в активні",
 
-        confirmText:
-          "Позначити помилковим",
+      cancelText:
+        "Скасувати",
 
-        cancelText:
-          "Скасувати",
+      required:
+        cleanNextStatus ===
+        "entered_in_error",
+    });
 
-        required:
-          true,
-      });
-
-    if (result === null) {
-      return;
-    }
-
-    reason =
-      String(
-        result || ""
-      ).trim();
-
-    if (!reason) {
-      return;
-    }
-
-  } else if (
-    [
-      "remission",
-      "resolved",
-      "active",
-    ].includes(
-      cleanNextStatus
-    )
-  ) {
-    const titles = {
-      remission:
-        "Перевести у ремісію",
-
-      resolved:
-        "Завершити діагноз",
-
-      active:
-        "Повернути в активні",
-    };
-
-    const descriptions = {
-      remission:
-        "Діагноз залишиться в історії пацієнта зі статусом ремісії.",
-
-      resolved:
-        "Діагноз буде завершено та прибрано зі списку активних.",
-
-      active:
-        "Діагноз знову буде враховуватися як активний клінічний стан.",
-    };
-
-    const result =
-      await openAppPrompt({
-        title:
-          titles[
-            cleanNextStatus
-          ] ||
-          "Змінити статус",
-
-        text:
-          descriptions[
-            cleanNextStatus
-          ] || "",
-
-        label:
-          "Причина зміни статусу",
-
-        placeholder:
-          "Необов’язково",
-
-        confirmText:
-          cleanNextStatus ===
-            "active"
-            ? "Повернути в активні"
-            : cleanNextStatus ===
-                "remission"
-              ? "У ремісію"
-              : "Завершити",
-
-        cancelText:
-          "Скасувати",
-
-        required:
-          false,
-      });
-
-    if (result === null) {
-      return;
-    }
-
-    reason =
-      String(
-        result || ""
-      ).trim();
+  if (result === null) {
+    return;
   }
 
   try {
@@ -34139,14 +34071,11 @@ async function changePatientDiagnosisStatus(
           cleanNextStatus,
 
         status_reason:
-          reason || null,
+          String(
+            result || ""
+          ).trim() || null,
       }
     );
-
-    // Закрываем историю/модалку,
-    // чтобы там не оставались
-    // старые кнопки и старый version.
-    closePatientDiagnosisModal();
 
     await renderPatientTab(
       "overview",
