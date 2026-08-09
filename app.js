@@ -38851,45 +38851,45 @@ $$("[data-week-create-date]")
         ${staffRows}
       </div>
 
-      ${
-        canManageSchedule
-          ? `
-            <button
-              type="button"
-              class="monthRepeatScheduleButton"
-              id="monthRepeatScheduleButton"
-            >
-              ⚙ Налаштувати повторюваний графік
-            </button>
-          `
-          : ""
-      }
-
-      <div
-        class="monthDrawerActions"
-      >
+      <div class="monthDrawerFooter">
+  ${
+    canManageSchedule
+      ? `
         <button
-          class="ghost"
-          id="monthGoToDay"
           type="button"
+          class="monthRepeatScheduleButton"
+          id="monthRepeatScheduleButton"
         >
-          Відкрити день
+          ⚙ Повторюваний графік
         </button>
+      `
+      : ""
+  }
 
-        ${
-          canManageSchedule
-            ? `
-              <button
-                class="primary"
-                id="monthSaveShift"
-                type="button"
-              >
-                💾 Зберегти день
-              </button>
-            `
-            : ""
-        }
-      </div>
+  <div class="monthDrawerActions">
+    <button
+      class="ghost"
+      id="monthGoToDay"
+      type="button"
+    >
+      Відкрити день
+    </button>
+
+    ${
+      canManageSchedule
+        ? `
+          <button
+            class="primary"
+            id="monthSaveShift"
+            type="button"
+          >
+            💾 Зберегти день
+          </button>
+        `
+        : ""
+    }
+  </div>
+</div>
     </div>
   `;
 

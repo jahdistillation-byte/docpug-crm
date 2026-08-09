@@ -48595,3 +48595,174 @@ body[data-theme="white"]
 
   border-radius: 12px;
 }
+/* =========================================
+   MONTH SHIFT — COMPACT + FIXED FOOTER
+   ========================================= */
+
+.monthDrawerCard {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  max-height: calc(100vh - 32px);
+
+  overflow: hidden;
+}
+
+.monthDrawerHead {
+  flex: 0 0 auto;
+
+  padding-bottom: 12px;
+}
+
+.monthShiftDayList {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 4px;
+
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  gap: 8px;
+}
+
+/* компактнее карточки врача */
+
+.monthShiftDayRow {
+  padding:
+    10px
+    10px
+    10px
+    14px;
+
+  border-radius: 13px;
+}
+
+.monthShiftDayMain {
+  gap: 8px;
+}
+
+.monthShiftDayAvatar {
+  width: 30px;
+  height: 30px;
+
+  flex-basis: 30px;
+
+  border-radius: 9px;
+
+  font-size: 14px;
+}
+
+.monthShiftDayPerson strong {
+  font-size: 12px;
+}
+
+.monthShiftDayPerson span {
+  font-size: 9px;
+}
+
+.monthShiftDayStatus {
+  min-width: 82px;
+
+  padding: 6px 9px;
+
+  font-size: 10px;
+}
+
+.monthShiftDayTimes {
+  margin-top: 8px;
+
+  gap: 6px;
+}
+
+.monthShiftDayTimes label {
+  gap: 4px;
+}
+
+.monthShiftDayTimes label > span {
+  font-size: 8px;
+}
+
+.monthShiftDayTimes input {
+  height: 32px;
+
+  padding: 0 8px;
+
+  border-radius: 9px;
+
+  font-size: 11px;
+}
+
+.monthShiftDayTimesArrow {
+  padding-bottom: 8px;
+
+  font-size: 11px;
+}
+
+/* отдельный постоянно видимый footer */
+
+.monthDrawerFooter {
+  flex: 0 0 auto;
+
+  position: relative;
+
+  margin:
+    0
+    -4px
+    -4px;
+
+  padding:
+    12px
+    4px
+    4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 22, 34, 0),
+      rgba(10, 22, 34, 0.96) 22%,
+      rgba(10, 22, 34, 1)
+    );
+
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.07);
+
+  z-index: 5;
+}
+
+.monthRepeatScheduleButton {
+  margin-top: 0;
+  margin-bottom: 9px;
+
+  min-height: 38px;
+
+  padding: 9px 12px;
+}
+
+.monthDrawerActions {
+  display: grid;
+
+  grid-template-columns:
+    0.8fr
+    1.35fr;
+
+  gap: 8px;
+
+  margin-top: 0;
+}
+
+.monthDrawerActions button {
+  min-height: 46px;
+
+  font-weight: 700;
+}
+
+#monthSaveShift {
+  font-size: 12px;
+}
