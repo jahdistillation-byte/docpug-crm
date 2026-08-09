@@ -40864,9 +40864,16 @@ initCalendarTopScroll();
         );
 
       const hoverTime =
-        hover?.querySelector("b");
+  hover?.querySelector("b");
 
-      const timelineScheduleRow =
+const staffId =
+  String(
+    timeline.dataset
+      .staffId ||
+    ""
+  );
+
+const timelineScheduleRow =
   staffSchedule.find(
     (item) =>
       String(
