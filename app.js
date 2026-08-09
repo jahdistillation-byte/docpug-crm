@@ -39295,13 +39295,53 @@ if (repeatMode) {
             .repeatWeekday
         )
     );
-
-  console.log(
-    "REPEAT WEEKDAYS:",
-    selectedWeekdays
+const staffId =
+  String(
+    overlay.querySelector(
+      "#monthScheduleRepeatStaff"
+    )?.value || ""
   );
 
-  return;
+const shiftStart =
+  String(
+    overlay.querySelector(
+      "#monthScheduleRepeatStart"
+    )?.value || ""
+  );
+
+const shiftEnd =
+  String(
+    overlay.querySelector(
+      "#monthScheduleRepeatEnd"
+    )?.value || ""
+  );
+
+const dateFrom =
+  String(
+    overlay.querySelector(
+      "#monthScheduleRepeatDateFrom"
+    )?.value || ""
+  );
+
+const dateTo =
+  String(
+    overlay.querySelector(
+      "#monthScheduleRepeatDateTo"
+    )?.value || ""
+  );
+  console.log(
+  "REPEAT SCHEDULE:",
+  {
+    staffId,
+    selectedWeekdays,
+    shiftStart,
+    shiftEnd,
+    dateFrom,
+    dateTo,
+  }
+);
+
+return;
 }
       const saveButton =
         overlay.querySelector(
