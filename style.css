@@ -48289,3 +48289,309 @@ body[data-theme="white"]
 .calEditArrival[hidden] {
   display: none !important;
 }
+/* =========================================
+   MONTH SHIFT — CLEAN DAY DRAWER
+   ========================================= */
+
+.monthShiftDayList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.monthShiftDayRow {
+  position: relative;
+
+  padding: 14px 14px 14px 18px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+
+  border-radius: 16px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  overflow: hidden;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.monthShiftDayRow.is-active {
+  border-color:
+    rgba(124, 92, 255, 0.28);
+
+  background:
+    rgba(124, 92, 255, 0.07);
+}
+
+.monthShiftDayRow.is-off {
+  opacity: 0.62;
+}
+
+.monthShiftDayAccent {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 4px;
+  height: 100%;
+}
+
+.monthShiftDayMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.monthShiftDayPerson {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+.monthShiftDayAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, 0.06);
+
+  font-size: 17px;
+}
+
+.monthShiftDayPerson > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.monthShiftDayPerson strong {
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.monthShiftDayPerson span {
+  color:
+    rgba(255, 255, 255, 0.48);
+
+  font-size: 11px;
+}
+
+.monthShiftDayStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-width: 98px;
+
+  padding: 8px 11px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  color:
+    rgba(255, 255, 255, 0.58);
+
+  font-size: 11px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.monthShiftDayStatus.active {
+  border-color:
+    rgba(64, 211, 140, 0.42);
+
+  background:
+    rgba(64, 211, 140, 0.11);
+
+  color:
+    #9ff0c8;
+}
+
+.monthShiftDayStatusDot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.28);
+}
+
+.monthShiftDayStatus.active
+.monthShiftDayStatusDot {
+  background:
+    #49d795;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(73, 215, 149, 0.1);
+}
+
+.monthShiftDayTimes {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  align-items: end;
+
+  gap: 8px;
+
+  margin-top: 13px;
+}
+
+.monthShiftDayTimes label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.monthShiftDayTimes label > span {
+  color:
+    rgba(255, 255, 255, 0.43);
+
+  font-size: 10px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.monthShiftDayTimes input {
+  width: 100%;
+  height: 38px;
+
+  box-sizing: border-box;
+
+  padding: 0 10px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 11px;
+
+  background:
+    rgba(0, 0, 0, 0.22);
+
+  color: #fff;
+
+  font-size: 12px;
+
+  outline: none;
+}
+
+.monthShiftDayTimes input:focus {
+  border-color:
+    rgba(124, 92, 255, 0.55);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(124, 92, 255, 0.1);
+}
+
+.monthShiftDayTimesArrow {
+  padding-bottom: 11px;
+
+  color:
+    rgba(255, 255, 255, 0.3);
+
+  font-size: 14px;
+}
+
+.monthShiftDayTimes.is-disabled {
+  opacity: 0.38;
+}
+
+.monthShiftDayTimes input:disabled {
+  cursor: not-allowed;
+}
+
+.monthRepeatScheduleButton {
+  width: 100%;
+
+  margin-top: 16px;
+  padding: 12px 14px;
+
+  border:
+    1px dashed rgba(124, 92, 255, 0.3);
+
+  border-radius: 14px;
+
+  background:
+    rgba(124, 92, 255, 0.06);
+
+  color:
+    rgba(255, 255, 255, 0.76);
+
+  font-size: 12px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.monthRepeatScheduleButton:hover {
+  border-color:
+    rgba(124, 92, 255, 0.55);
+
+  background:
+    rgba(124, 92, 255, 0.11);
+}
+
+.monthDrawerActions {
+  display: grid;
+  grid-template-columns:
+    1fr 1.35fr;
+
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+.monthDrawerActions button {
+  min-height: 42px;
+
+  border-radius: 12px;
+}

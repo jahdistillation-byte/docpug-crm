@@ -38584,36 +38584,253 @@ $$("[data-week-create-date]")
   const drawer =
     $("#monthShiftDrawer");
 
-  if (!drawer) return;
+  if (!drawer) {
+    return;
+  }
 
   const daySchedule =
     scheduleByDate.get(date) || [];
 
-  const activeIds =
-    new Set(
-      daySchedule
-        .filter(
-          (row) =>
-            row.is_active !== false
-        )
-        .map(
-          (row) =>
-            String(row.staff_id)
-        )
-    );
+  const staffRows =
+    staff
+      .map(
+        (doc) => {
+          const staffId =
+            String(
+              doc.id || ""
+            );
+
+          const scheduleRow =
+            daySchedule.find(
+              (item) =>
+                String(
+                  item.staff_id
+                ) ===
+                staffId
+            ) || null;
+
+          const active =
+            Boolean(
+              scheduleRow &&
+              scheduleRow.is_active !== false
+            );
+
+          const startTime =
+            String(
+              scheduleRow?.start_time ||
+              "09:00"
+            ).slice(
+              0,
+              5
+            );
+
+          const endTime =
+            String(
+              scheduleRow?.end_time ||
+              "18:00"
+            ).slice(
+              0,
+              5
+            );
+
+          return `
+            <div
+              class="
+                monthShiftDayRow
+                ${
+                  active
+                    ? "is-active"
+                    : "is-off"
+                }
+              "
+              data-month-shift-row="${escapeHtml(
+                staffId
+              )}"
+            >
+              <div
+                class="monthShiftDayAccent"
+                style="
+                  background:
+                    ${escapeHtml(
+                      doc.color ||
+                      "#7C5CFF"
+                    )};
+                "
+              ></div>
+
+              <div
+                class="monthShiftDayMain"
+              >
+                <div
+                  class="monthShiftDayPerson"
+                >
+                  <div
+                    class="monthShiftDayAvatar"
+                  >
+                    👨‍⚕️
+                  </div>
+
+                  <div>
+                    <strong>
+                      ${escapeHtml(
+                        doc.name ||
+                        "Працівник"
+                      )}
+                    </strong>
+
+                    <span>
+                      ${
+                        doc.role ===
+                        "assistant"
+                          ? "Асистент"
+                          : "Ветеринар"
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                ${
+                  canManageSchedule
+                    ? `
+                      <button
+                        type="button"
+                        class="
+                          monthShiftDayStatus
+                          ${
+                            active
+                              ? "active"
+                              : ""
+                          }
+                        "
+                        data-month-shift-staff="${escapeHtml(
+                          staffId
+                        )}"
+                      >
+                        <span
+                          class="monthShiftDayStatusDot"
+                        ></span>
+
+                        <b>
+                          ${
+                            active
+                              ? "На зміні"
+                              : "Вихідний"
+                          }
+                        </b>
+                      </button>
+                    `
+                    : `
+                      <div
+                        class="
+                          monthShiftDayStatus
+                          ${
+                            active
+                              ? "active"
+                              : ""
+                          }
+                        "
+                      >
+                        <span
+                          class="monthShiftDayStatusDot"
+                        ></span>
+
+                        <b>
+                          ${
+                            active
+                              ? "На зміні"
+                              : "Вихідний"
+                          }
+                        </b>
+                      </div>
+                    `
+                }
+              </div>
+
+              <div
+                class="
+                  monthShiftDayTimes
+                  ${
+                    active
+                      ? ""
+                      : "is-disabled"
+                  }
+                "
+              >
+                <label>
+                  <span>
+                    Початок
+                  </span>
+
+                  <input
+                    type="time"
+                    data-month-shift-start="${escapeHtml(
+                      staffId
+                    )}"
+                    value="${escapeHtml(
+                      startTime
+                    )}"
+                    ${
+                      active
+                        ? ""
+                        : "disabled"
+                    }
+                  >
+                </label>
+
+                <span
+                  class="monthShiftDayTimesArrow"
+                >
+                  →
+                </span>
+
+                <label>
+                  <span>
+                    Кінець
+                  </span>
+
+                  <input
+                    type="time"
+                    data-month-shift-end="${escapeHtml(
+                      staffId
+                    )}"
+                    value="${escapeHtml(
+                      endTime
+                    )}"
+                    ${
+                      active
+                        ? ""
+                        : "disabled"
+                    }
+                  >
+                </label>
+              </div>
+            </div>
+          `;
+        }
+      )
+      .join("");
 
   drawer.innerHTML = `
-    <div class="monthDrawerCard">
-      <div class="monthDrawerHead">
+    <div
+      class="monthDrawerCard"
+    >
+      <div
+        class="monthDrawerHead"
+      >
         <div>
-          <div class="monthDrawerTitle">
-            📅 Графік на ${escapeHtml(date)}
+          <div
+            class="monthDrawerTitle"
+          >
+            📅 Графік на
+            ${escapeHtml(date)}
           </div>
 
-          <div class="hint">
+          <div
+            class="hint"
+          >
             ${
               canManageSchedule
-                ? "Обери, хто працює в цей день."
+                ? "Налаштуйте зміну кожного працівника на цей день."
                 : "Перегляд графіка роботи на цей день."
             }
           </div>
@@ -38628,388 +38845,29 @@ $$("[data-week-create-date]")
         </button>
       </div>
 
+      <div
+        class="monthShiftDayList"
+      >
+        ${staffRows}
+      </div>
+
       ${
         canManageSchedule
           ? `
-            <<section class="monthScheduleSection">
-  <div class="monthScheduleSectionHead">
-    <span class="monthScheduleStep">
-      1
-    </span>
-
-    <div>
-      <strong>
-        Хто працює цього дня
-      </strong>
-
-      <small>
-        Швидко призначте всіх або зробіть день вихідним.
-      </small>
-    </div>
-  </div>
-
-  <div class="monthDrawerQuick">
-    <button
-      class="monthScheduleQuickButton is-active"
-      id="monthAllActive"
-      type="button"
-    >
-      <span>👥</span>
-
-      <div>
-        <strong>Усі на зміні</strong>
-        <small>Призначити всю команду</small>
-      </div>
-    </button>
-
-    <button
-      class="monthScheduleQuickButton is-off"
-      id="monthAllOff"
-      type="button"
-    >
-      <span>☕</span>
-
-      <div>
-        <strong>Усім вихідний</strong>
-        <small>Прибрати всі зміни</small>
-      </div>
-    </button>
-  </div>
-</section>
-            <div class="monthBulkBox">
-              <div class="monthScheduleSectionHead">
-  <span class="monthScheduleStep">
-    2
-  </span>
-
-  <div>
-    <strong>
-      Повторюваний графік
-    </strong>
-
-    <small>
-      Оберіть працівника, період і потрібні дні тижня.
-    </small>
-  </div>
-</div>
-
-              <label class="monthBulkField">
-                <span>Кого поставити на зміну</span>
-
-                <select id="monthBulkStaff">
-                  ${staff
-                    .map(
-                      (doc) => `
-                        <option
-                          value="${escapeHtml(
-                            String(doc.id)
-                          )}"
-                        >
-                          ${escapeHtml(
-                            doc.name ||
-                              "Працівник"
-                          )}
-                        </option>
-                      `
-                    )
-                    .join("")}
-                </select>
-              </label>
-
-              ${
-                selectedMonthDates.size >
-                1
-                  ? `
-                    <div class="monthSelectedBox">
-                      <div class="monthBulkTitle">
-                        Виділено днів:
-                        ${selectedMonthDates.size}
-                      </div>
-
-                      <label class="monthBulkField">
-                        <span>
-                          Працівник для виділених днів
-                        </span>
-
-                        <select id="monthSelectedStaff">
-                          ${staff
-                            .map(
-                              (doc) => `
-                                <option
-                                  value="${escapeHtml(
-                                    String(
-                                      doc.id
-                                    )
-                                  )}"
-                                >
-                                  ${escapeHtml(
-                                    doc.name ||
-                                      "Працівник"
-                                  )}
-                                </option>
-                              `
-                            )
-                            .join("")}
-                        </select>
-                      </label>
-
-                      <button
-                        class="primary monthBulkApply"
-                        id="monthApplySelectedDates"
-                        type="button"
-                      >
-                        Застосувати на виділені дні
-                      </button>
-                    </div>
-                  `
-                  : ""
-              }
-
-              <div class="monthBulkDates">
-                <label class="monthBulkField">
-                  <span>Від</span>
-
-                  <input
-                    id="monthBulkFrom"
-                    type="date"
-                    value="${escapeHtml(date)}"
-                  >
-                </label>
-
-                <label class="monthBulkField">
-                  <span>До</span>
-
-                  <input
-                    id="monthBulkTo"
-                    type="date"
-                    value="${escapeHtml(date)}"
-                  >
-                </label>
-              </div>
-
-              <div class="monthBulkDays">
-                <button
-                  type="button"
-                  class="monthBulkDay active"
-                  data-bulk-day="1"
-                >
-                  Пн
-                </button>
-
-                <button
-                  type="button"
-                  class="monthBulkDay active"
-                  data-bulk-day="2"
-                >
-                  Вт
-                </button>
-
-                <button
-                  type="button"
-                  class="monthBulkDay active"
-                  data-bulk-day="3"
-                >
-                  Ср
-                </button>
-
-                <button
-                  type="button"
-                  class="monthBulkDay active"
-                  data-bulk-day="4"
-                >
-                  Чт
-                </button>
-
-                <button
-                  type="button"
-                  class="monthBulkDay active"
-                  data-bulk-day="5"
-                >
-                  Пт
-                </button>
-
-                <button
-                  type="button"
-                  class="monthBulkDay"
-                  data-bulk-day="6"
-                >
-                  Сб
-                </button>
-
-                <button
-                  type="button"
-                  class="monthBulkDay"
-                  data-bulk-day="7"
-                >
-                  Нд
-                </button>
-              </div>
-
-              <button
-                class="primary monthBulkApply"
-                id="monthBulkApply"
-                type="button"
-              >
-                Застосувати графік
-              </button>
-            </div>
+            <button
+              type="button"
+              class="monthRepeatScheduleButton"
+              id="monthRepeatScheduleButton"
+            >
+              ⚙ Налаштувати повторюваний графік
+            </button>
           `
           : ""
       }
 
-      <div class="monthDrawerStaff">
-        ${staff
-          .map((doc) => {
-            const scheduleRow =
-  daySchedule.find(
-    (item) =>
-      String(
-        item.staff_id
-      ) ===
-      String(
-        doc.id
-      )
-  ) || null;
-            const active =
-              activeIds.has(
-                String(doc.id)
-              );
-
-            if (!canManageSchedule) {
-              return `
-                <div
-                  class="monthShiftToggle ${
-                    active
-                      ? "active"
-                      : ""
-                  }"
-                  style="
-                    border-left:5px solid
-                    ${escapeHtml(
-                      doc.color ||
-                        "#7C5CFF"
-                    )}
-                  "
-                >
-                  <span>
-                    👨‍⚕️
-                    ${escapeHtml(
-                      doc.name ||
-                        "Працівник"
-                    )}
-                  </span>
-
-                  <b>
-                    ${
-                      active
-                        ? "На зміні"
-                        : "Вихідний"
-                    }
-                  </b>
-                </div>
-              `;
-            }
-
-            return `
-  <div
-    class="monthShiftRow"
-    data-month-shift-row="${escapeHtml(
-      String(doc.id)
-    )}"
-    style="
-      border-left:5px solid
-      ${escapeHtml(
-        doc.color ||
-          "#7C5CFF"
-      )}
-    "
-  >
-    <button
-      class="monthShiftToggle ${
-        active
-          ? "active"
-          : ""
-      }"
-      type="button"
-      data-month-shift-staff="${escapeHtml(
-        String(doc.id)
-      )}"
-    >
-      <span>
-        👨‍⚕️
-        ${escapeHtml(
-          doc.name ||
-            "Працівник"
-        )}
-      </span>
-
-      <b>
-        ${
-          active
-            ? "На зміні"
-            : "Вихідний"
-        }
-      </b>
-    </button>
-
-    <div class="monthShiftTimeControls">
-      <label>
-        <span>Початок</span>
-
-        <input
-          type="time"
-          class="monthShiftStart"
-          data-month-shift-start="${escapeHtml(
-            String(doc.id)
-          )}"
-          value="${escapeHtml(
-            String(
-              scheduleRow?.start_time ||
-              "09:00"
-            ).slice(0, 5)
-          )}"
-          ${
-            active
-              ? ""
-              : "disabled"
-          }
-        >
-      </label>
-
-      <span class="monthShiftTimeDash">
-        —
-      </span>
-
-      <label>
-        <span>Кінець</span>
-
-        <input
-          type="time"
-          class="monthShiftEnd"
-          data-month-shift-end="${escapeHtml(
-            String(doc.id)
-          )}"
-          value="${escapeHtml(
-            String(
-              scheduleRow?.end_time ||
-              "18:00"
-            ).slice(0, 5)
-          )}"
-          ${
-            active
-              ? ""
-              : "disabled"
-          }
-        >
-      </label>
-    </div>
-  </div>
-`;
-          })
-          .join("")}
-      </div>
-
-      <div class="monthDrawerActions">
+      <div
+        class="monthDrawerActions"
+      >
         <button
           class="ghost"
           id="monthGoToDay"
@@ -39026,7 +38884,7 @@ $$("[data-week-create-date]")
                 id="monthSaveShift"
                 type="button"
               >
-                💾 Зберегти
+                💾 Зберегти день
               </button>
             `
             : ""
@@ -39035,27 +38893,9 @@ $$("[data-week-create-date]")
     </div>
   `;
 
-  drawer.classList.add("open");
-
-  const setToggleState = (
-    button,
-    active
-  ) => {
-    button.classList.toggle(
-      "active",
-      active
-    );
-
-    const label =
-      button.querySelector("b");
-
-    if (label) {
-      label.textContent =
-        active
-          ? "На зміні"
-          : "Вихідний";
-    }
-  };
+  drawer.classList.add(
+    "open"
+  );
 
   drawer
     .querySelector(
@@ -39069,16 +38909,24 @@ $$("[data-week-create-date]")
         );
 
         drawer.innerHTML = `
-          <div class="monthDrawerPlaceholder">
-            <div class="monthDrawerPlaceholderIcon">
+          <div
+            class="monthDrawerPlaceholder"
+          >
+            <div
+              class="monthDrawerPlaceholderIcon"
+            >
               📅
             </div>
 
-            <div class="monthDrawerPlaceholderTitle">
+            <div
+              class="monthDrawerPlaceholderTitle"
+            >
               Обери день
             </div>
 
-            <div class="hint">
+            <div
+              class="hint"
+            >
               Натисни на дату в календарі,
               щоб переглянути графік зміни.
             </div>
@@ -39097,7 +38945,8 @@ $$("[data-week-create-date]")
         window.__calendarDate =
           date;
 
-        calendarMode = "day";
+        calendarMode =
+          "day";
 
         await renderCalendarTab();
       }
@@ -39109,258 +38958,90 @@ $$("[data-week-create-date]")
 
   drawer
     .querySelectorAll(
-      ".monthShiftToggle"
+      "[data-month-shift-staff]"
     )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          setToggleState(
-            button,
-            !button.classList.contains(
-              "active"
-            )
-          );
-        }
-      );
-    });
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const staffId =
+              String(
+                button.dataset
+                  .monthShiftStaff ||
+                ""
+              );
 
-  drawer
-    .querySelector(
-      "#monthAllActive"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        drawer
-          .querySelectorAll(
-            ".monthShiftToggle"
-          )
-          .forEach((button) => {
-            setToggleState(
-              button,
-              true
+            const row =
+              drawer.querySelector(
+                `[data-month-shift-row="${staffId}"]`
+              );
+
+            const startInput =
+              drawer.querySelector(
+                `[data-month-shift-start="${staffId}"]`
+              );
+
+            const endInput =
+              drawer.querySelector(
+                `[data-month-shift-end="${staffId}"]`
+              );
+
+            const times =
+              row?.querySelector(
+                ".monthShiftDayTimes"
+              );
+
+            const nextActive =
+              !button
+                .classList
+                .contains(
+                  "active"
+                );
+
+            button.classList.toggle(
+              "active",
+              nextActive
             );
-          });
-      }
-    );
 
-  drawer
-    .querySelector(
-      "#monthAllOff"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        drawer
-          .querySelectorAll(
-            ".monthShiftToggle"
-          )
-          .forEach((button) => {
-            setToggleState(
-              button,
-              false
+            row?.classList.toggle(
+              "is-active",
+              nextActive
             );
-          });
-      }
-    );
 
-  drawer
-    .querySelectorAll(
-      ".monthBulkDay"
-    )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          button.classList.toggle(
-            "active"
-          );
-        }
-      );
-    });
+            row?.classList.toggle(
+              "is-off",
+              !nextActive
+            );
 
-  drawer
-    .querySelector(
-      "#monthBulkApply"
-    )
-    ?.addEventListener(
-      "click",
-      async () => {
-        const staffId =
-          drawer.querySelector(
-            "#monthBulkStaff"
-          )?.value;
+            const label =
+              button.querySelector(
+                "b"
+              );
 
-        const from =
-          drawer.querySelector(
-            "#monthBulkFrom"
-          )?.value;
+            if (label) {
+              label.textContent =
+                nextActive
+                  ? "На зміні"
+                  : "Вихідний";
+            }
 
-        const to =
-          drawer.querySelector(
-            "#monthBulkTo"
-          )?.value;
+            if (startInput) {
+              startInput.disabled =
+                !nextActive;
+            }
 
-        const selectedDays =
-          Array.from(
-            drawer.querySelectorAll(
-              ".monthBulkDay.active"
-            )
-          ).map((button) =>
-            Number(
-              button.dataset.bulkDay
-            )
-          );
+            if (endInput) {
+              endInput.disabled =
+                !nextActive;
+            }
 
-        if (
-          !staffId ||
-          !from ||
-          !to ||
-          !selectedDays.length
-        ) {
-          alert(
-            "Оберіть працівника, період і дні тижня."
-          );
-
-          return;
-        }
-
-        const start =
-          new Date(
-            `${from}T12:00:00`
-          );
-
-        const end =
-          new Date(
-            `${to}T12:00:00`
-          );
-
-        if (start > end) {
-          alert(
-            "Дата 'від' не може бути пізніше дати 'до'."
-          );
-
-          return;
-        }
-
-        const dates = [];
-        const cursor =
-          new Date(start);
-
-        while (cursor <= end) {
-          const jsDay =
-            cursor.getDay();
-
-          const normalizedDay =
-            jsDay === 0
-              ? 7
-              : jsDay;
-
-          if (
-            selectedDays.includes(
-              normalizedDay
-            )
-          ) {
-            dates.push(
-              localISO(cursor)
+            times?.classList.toggle(
+              "is-disabled",
+              !nextActive
             );
           }
-
-          cursor.setDate(
-            cursor.getDate() + 1
-          );
-        }
-
-        if (!dates.length) {
-          alert(
-            "У вибраному періоді немає таких днів."
-          );
-
-          return;
-        }
-
-        const confirmed =
-          confirm(
-            `Застосувати графік для ${dates.length} днів?`
-          );
-
-        if (!confirmed) return;
-
-        for (
-          const workDate of dates
-        ) {
-          await saveStaffScheduleApi(
-            {
-              work_date:
-                workDate,
-
-              staff_id:
-                staffId,
-
-              is_active:
-                true,
-            }
-          );
-        }
-
-        await renderCalendarTab();
-      }
-    );
-
-  drawer
-    .querySelector(
-      "#monthApplySelectedDates"
-    )
-    ?.addEventListener(
-      "click",
-      async () => {
-        const staffId =
-          drawer.querySelector(
-            "#monthSelectedStaff"
-          )?.value;
-
-        if (
-          !staffId ||
-          selectedMonthDates.size < 2
-        ) {
-          alert(
-            "Виділи дні та обери працівника."
-          );
-
-          return;
-        }
-
-        const dates =
-          Array.from(
-            selectedMonthDates
-          ).sort();
-
-        const confirmed =
-          confirm(
-            `Призначити працівника на ${dates.length} днів?`
-          );
-
-        if (!confirmed) return;
-
-        for (
-          const workDate of dates
-        ) {
-          await saveStaffScheduleApi(
-            {
-              work_date:
-                workDate,
-
-              staff_id:
-                staffId,
-
-              is_active:
-                true,
-            }
-          );
-        }
-
-        await renderCalendarTab();
+        );
       }
     );
 
@@ -39371,74 +39052,146 @@ $$("[data-week-create-date]")
     ?.addEventListener(
       "click",
       async () => {
-        const activeStaffIds =
-          new Set(
-            Array.from(
-              drawer.querySelectorAll(
-                ".monthShiftToggle.active"
-              )
-            ).map((button) =>
-              String(
-                button.dataset
-                  .monthShiftStaff
-              )
-            )
+        const saveButton =
+          drawer.querySelector(
+            "#monthSaveShift"
           );
 
-        for (const doc of staff) {
-  const staffId =
-    String(
-      doc.id
+        if (saveButton) {
+          saveButton.disabled =
+            true;
+
+          saveButton.textContent =
+            "Зберігаємо…";
+        }
+
+        try {
+          for (
+            const doc of staff
+          ) {
+            const staffId =
+              String(
+                doc.id || ""
+              );
+
+            const statusButton =
+              drawer.querySelector(
+                `[data-month-shift-staff="${staffId}"]`
+              );
+
+            const startInput =
+              drawer.querySelector(
+                `[data-month-shift-start="${staffId}"]`
+              );
+
+            const endInput =
+              drawer.querySelector(
+                `[data-month-shift-end="${staffId}"]`
+              );
+
+            const isActive =
+              Boolean(
+                statusButton
+                  ?.classList
+                  .contains(
+                    "active"
+                  )
+              );
+
+            const startTime =
+              String(
+                startInput?.value ||
+                "09:00"
+              ).trim();
+
+            const endTime =
+              String(
+                endInput?.value ||
+                "18:00"
+              ).trim();
+
+            if (
+              isActive &&
+              startTime >= endTime
+            ) {
+              showCrmNotice({
+                icon:
+                  "⚠",
+                title:
+                  "Перевірте час зміни",
+                text:
+                  `${
+                    doc.name ||
+                    "Працівник"
+                  }: час завершення зміни має бути пізніше за час початку.`,
+              });
+
+              return;
+            }
+
+            await saveStaffScheduleApi({
+              work_date:
+                date,
+
+              staff_id:
+                doc.id,
+
+              is_active:
+                isActive,
+
+              start_time:
+                startTime,
+
+              end_time:
+                endTime,
+            });
+          }
+
+          await renderCalendarTab();
+
+        } catch (error) {
+          console.error(
+            "month schedule save failed:",
+            error
+          );
+
+          showCrmNotice({
+            icon:
+              "⚠",
+            title:
+              "Не вдалося зберегти графік",
+            text:
+              error?.message ||
+              "Спробуйте ще раз.",
+          });
+
+        } finally {
+          if (saveButton) {
+            saveButton.disabled =
+              false;
+
+            saveButton.textContent =
+              "💾 Зберегти день";
+          }
+        }
+      }
     );
 
-  const isActive =
-    activeStaffIds.has(
-      staffId
-    );
-
-  const startInput =
-    drawer.querySelector(
-      `[data-month-shift-start="${staffId}"]`
-    );
-
-  const endInput =
-    drawer.querySelector(
-      `[data-month-shift-end="${staffId}"]`
-    );
-
-  const startTime =
-    String(
-      startInput?.value ||
-      "09:00"
-    ).trim();
-
-  const endTime =
-    String(
-      endInput?.value ||
-      "18:00"
-    ).trim();
-
-  await saveStaffScheduleApi(
-    {
-      work_date:
-        date,
-
-      staff_id:
-        doc.id,
-
-      is_active:
-        isActive,
-
-      start_time:
-        startTime,
-
-      end_time:
-        endTime,
-    }
-  );
-}
-
-        await renderCalendarTab();
+  drawer
+    .querySelector(
+      "#monthRepeatScheduleButton"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        showCrmNotice({
+          icon:
+            "⚙",
+          title:
+            "Повторюваний графік",
+          text:
+            "Повторюваний графік винесемо в окреме вікно, щоб не перевантажувати налаштування одного дня.",
+        });
       }
     );
 };
