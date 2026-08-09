@@ -42160,6 +42160,14 @@ if (statusSelect) {
     )
       .trim()
       .toLowerCase();
+Array.from(
+  statusSelect.options
+).forEach(
+  (option) => {
+    option.disabled =
+      false;
+  }
+);
 
   statusSelect.value =
     [
@@ -42174,24 +42182,57 @@ if (statusSelect) {
     )
       ? currentStatus
       : "planned";
-}5
-  modal.dataset.initialState =
-    JSON.stringify(
-      modal._getCalendarEditState()
+
+  const lockedStatus =
+    Boolean(
+      String(
+        ev.visit_id || ""
+      ).trim()
+    ) ||
+    [
+      "in_progress",
+      "completed",
+    ].includes(
+      currentStatus
     );
 
-  modal.classList.add(
-    "open"
+  if (lockedStatus) {
+    Array.from(
+      statusSelect.options
+    ).forEach(
+      (option) => {
+        if (
+          option.value ===
+            "planned" ||
+          option.value ===
+            "waiting"
+        ) {
+          option.disabled =
+            true;
+        }
+      }
+    );
+  }
+}
+
+modal.dataset.initialState =
+  JSON.stringify(
+    modal._getCalendarEditState()
   );
 
-  modal.setAttribute(
-    "aria-hidden",
-    "false"
-  );
+modal.classList.add(
+  "open"
+);
 
-  document.body.classList.add(
-    "calendarEditModalOpen"
-  );
+modal.setAttribute(
+  "aria-hidden",
+  "false"
+);
+
+document.body.classList.add(
+  "calendarEditModalOpen"
+);
+
 const startVisitButton =
   $("#calEditStartVisitBtn");
 
@@ -52873,7 +52914,32 @@ const endTime =
     startTime,
     duration
   );
+const startMinutes =
+  Number(
+    startTime.split(":")[0]
+  ) * 60 +
+  Number(
+    startTime.split(":")[1]
+  );
 
+const endMinutes =
+  startMinutes +
+  duration;
+
+if (
+  endMinutes >
+  24 * 60
+) {
+  showCrmNotice({
+    icon: "🌙",
+    title:
+      "Прийом виходить за межі дня",
+    text:
+      "Обрана тривалість переносить завершення прийому після 24:00. Оберіть раніший час або меншу тривалість.",
+  });
+
+  return;
+}
 if (!notePlain) {
   return alert(
     "Вкажіть причину запису"
