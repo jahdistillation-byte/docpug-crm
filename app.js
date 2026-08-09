@@ -39273,6 +39273,36 @@ overlay
   ?.addEventListener(
     "click",
     async () => {
+      const repeatMode =
+  overlay
+    .querySelector(
+      "#monthScheduleRepeatTab"
+    )
+    ?.classList.contains(
+      "active"
+    ) === true;
+
+if (repeatMode) {
+  const selectedWeekdays =
+    Array.from(
+      overlay.querySelectorAll(
+        "[data-repeat-weekday].active"
+      )
+    ).map(
+      (button) =>
+        Number(
+          button.dataset
+            .repeatWeekday
+        )
+    );
+
+  console.log(
+    "REPEAT WEEKDAYS:",
+    selectedWeekdays
+  );
+
+  return;
+}
       const saveButton =
         overlay.querySelector(
           "#monthScheduleEditorSave"
