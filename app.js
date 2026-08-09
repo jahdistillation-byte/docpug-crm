@@ -33500,15 +33500,16 @@ function renderPatientDiagnosesPanel(
   return `
     <section class="patientDiagnosesPanel">
       <header class="patientDiagnosesHeader">
-        <div>
-          <span class="patientDiagnosesKicker">
-            MEDICAL CORE
-          </span>
-          <h3>Активні діагнози</h3>
-          <p>
-            Поточний клінічний контекст пацієнта,
-            незалежний від окремого візиту.
-          </p>
+  <div>
+    <h3>
+      Активні діагнози
+    </h3>
+
+    <p>
+      Поточний клінічний контекст пацієнта,
+      незалежний від окремого візиту.
+    </p>
+  </div>
         </div>
 
         <div class="patientDiagnosesHeaderActions">
@@ -33667,15 +33668,14 @@ function openPatientDiagnosisEditor(
   const overlay =
     createPatientDiagnosisModalShell(`
       <header class="patientDiagnosisModalHeader">
-        <div>
-          <span>MEDICAL CORE</span>
-          <h3>
-            ${
-              editing
-                ? "Редагувати діагноз"
-                : "Новий активний діагноз"
-            }
-          </h3>
+  <div>
+    <h3>
+      ${
+        editing
+          ? "Редагувати діагноз"
+          : "Додати діагноз"
+      }
+    </h3>
           <p>
             ${escapeHtml(
               pet?.name || "Пацієнт"
@@ -34135,15 +34135,18 @@ async function openPatientDiagnosisHistory(
   const overlay =
     createPatientDiagnosisModalShell(`
       <header class="patientDiagnosisModalHeader">
-        <div>
-          <span>MEDICAL CORE</span>
-          <h3>Історія діагнозів</h3>
-          <p>
-            ${escapeHtml(
-              pet?.name || "Пацієнт"
-            )}
-          </p>
-        </div>
+  <div>
+    <h3>
+      Історія діагнозів
+    </h3>
+
+    <p>
+      ${escapeHtml(
+        pet?.name ||
+        "Пацієнт"
+      )}
+    </p>
+  </div>
         <button
           type="button"
           data-close-diagnosis-modal
