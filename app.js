@@ -33984,43 +33984,185 @@ async function changePatientDiagnosisStatus(
   diagnosis,
   nextStatus
 ) {
+  const currentStatus =
+    String(
+      diagnosis?.status ||
+      "active"
+    )
+      .trim()
+      .toLowerCase();
+
+  const cleanNextStatus =
+    String(
+      nextStatus || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  // Ничего не делаем, если статус
+  // уже установлен.
+  if (
+    !cleanNextStatus ||
+    currentStatus ===
+      cleanNextStatus
+  ) {
+    return;
+  }
+
   let reason = "";
 
-  if (nextStatus === "entered_in_error") {
-    reason = window.prompt(
-      "Вкажіть причину, чому запис є помилковим:"
-    ) || "";
-
-    if (!reason.trim()) return;
-  } else if (
-    ["remission", "resolved", "active"]
-      .includes(nextStatus)
+  if (
+    cleanNextStatus ===
+    "entered_in_error"
   ) {
-    reason = window.prompt(
-      "Причина зміни статусу (необов'язково):"
-    ) || "";
+    const result =
+      await openAppPrompt({
+        title:
+          "Помилковий діагноз",
+
+        text:
+          "Діагноз буде позначено як помилковий та прибрано з активного клінічного контексту.",
+
+        label:
+          "Причина *",
+
+        placeholder:
+          "Наприклад: діагноз не підтвердився після обстеження",
+
+        confirmText:
+          "Позначити помилковим",
+
+        cancelText:
+          "Скасувати",
+
+        required:
+          true,
+      });
+
+    if (result === null) {
+      return;
+    }
+
+    reason =
+      String(
+        result || ""
+      ).trim();
+
+    if (!reason) {
+      return;
+    }
+
+  } else if (
+    [
+      "remission",
+      "resolved",
+      "active",
+    ].includes(
+      cleanNextStatus
+    )
+  ) {
+    const titles = {
+      remission:
+        "Перевести у ремісію",
+
+      resolved:
+        "Завершити діагноз",
+
+      active:
+        "Повернути в активні",
+    };
+
+    const descriptions = {
+      remission:
+        "Діагноз залишиться в історії пацієнта зі статусом ремісії.",
+
+      resolved:
+        "Діагноз буде завершено та прибрано зі списку активних.",
+
+      active:
+        "Діагноз знову буде враховуватися як активний клінічний стан.",
+    };
+
+    const result =
+      await openAppPrompt({
+        title:
+          titles[
+            cleanNextStatus
+          ] ||
+          "Змінити статус",
+
+        text:
+          descriptions[
+            cleanNextStatus
+          ] || "",
+
+        label:
+          "Причина зміни статусу",
+
+        placeholder:
+          "Необов’язково",
+
+        confirmText:
+          cleanNextStatus ===
+            "active"
+            ? "Повернути в активні"
+            : cleanNextStatus ===
+                "remission"
+              ? "У ремісію"
+              : "Завершити",
+
+        cancelText:
+          "Скасувати",
+
+        required:
+          false,
+      });
+
+    if (result === null) {
+      return;
+    }
+
+    reason =
+      String(
+        result || ""
+      ).trim();
   }
 
   try {
     await updatePatientDiagnosisApi(
       diagnosis.id,
       {
-        version: diagnosis.version,
-        status: nextStatus,
+        version:
+          diagnosis.version,
+
+        status:
+          cleanNextStatus,
+
         status_reason:
-          reason.trim() || null,
+          reason || null,
       }
     );
+
+    // Закрываем историю/модалку,
+    // чтобы там не оставались
+    // старые кнопки и старый version.
+    closePatientDiagnosisModal();
 
     await renderPatientTab(
       "overview",
       pet
     );
+
   } catch (error) {
-    alert(
-      error.message ||
-      "Не вдалося змінити статус діагнозу."
-    );
+    showCrmNotice({
+      icon: "!",
+      title:
+        "Не вдалося змінити статус",
+
+      text:
+        error?.message ||
+        "Не вдалося змінити статус діагнозу.",
+    });
   }
 }
 
