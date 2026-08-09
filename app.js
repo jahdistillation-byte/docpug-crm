@@ -38591,305 +38591,280 @@ $$("[data-week-create-date]")
   const daySchedule =
     scheduleByDate.get(date) || [];
 
-  const staffRows =
-    staff
-      .map(
-        (doc) => {
-          const staffId =
+  const activeRows =
+    daySchedule.filter(
+      (row) =>
+        row.is_active !== false
+    );
+
+  const offRows =
+    daySchedule.filter(
+      (row) =>
+        row.is_active === false
+    );
+
+  const activeStaff =
+    activeRows
+      .map((row) => {
+        const doc =
+          staff.find(
+            (item) =>
+              String(
+                item.id
+              ) ===
+              String(
+                row.staff_id
+              )
+          );
+
+        if (!doc) {
+          return null;
+        }
+
+        return {
+          ...doc,
+
+          start_time:
             String(
-              doc.id || ""
-            );
-
-          const scheduleRow =
-            daySchedule.find(
-              (item) =>
-                String(
-                  item.staff_id
-                ) ===
-                staffId
-            ) || null;
-
-          const active =
-            Boolean(
-              scheduleRow &&
-              scheduleRow.is_active !== false
-            );
-
-          const startTime =
-            String(
-              scheduleRow?.start_time ||
+              row.start_time ||
               "09:00"
             ).slice(
               0,
               5
-            );
+            ),
 
-          const endTime =
+          end_time:
             String(
-              scheduleRow?.end_time ||
+              row.end_time ||
               "18:00"
             ).slice(
               0,
               5
-            );
+            ),
+        };
+      })
+      .filter(Boolean);
 
-          return `
-            <div
-              class="
-                monthShiftDayRow
-                ${
-                  active
-                    ? "is-active"
-                    : "is-off"
-                }
-              "
-              data-month-shift-row="${escapeHtml(
-                staffId
-              )}"
-            >
-              <div
-                class="monthShiftDayAccent"
-                style="
-                  background:
-                    ${escapeHtml(
-                      doc.color ||
-                      "#7C5CFF"
-                    )};
-                "
-              ></div>
+  const totalStaff =
+    Array.isArray(staff)
+      ? staff.length
+      : 0;
 
-              <div
-                class="monthShiftDayMain"
-              >
-                <div
-                  class="monthShiftDayPerson"
-                >
-                  <div
-                    class="monthShiftDayAvatar"
-                  >
-                    👨‍⚕️
-                  </div>
+  const activeCount =
+    activeStaff.length;
 
-                  <div>
-                    <strong>
-                      ${escapeHtml(
-                        doc.name ||
-                        "Працівник"
-                      )}
-                    </strong>
+  const offCount =
+    Math.max(
+      0,
+      totalStaff -
+      activeCount
+    );
 
-                    <span>
-                      ${
-                        doc.role ===
-                        "assistant"
-                          ? "Асистент"
-                          : "Ветеринар"
-                      }
-                    </span>
-                  </div>
-                </div>
+  const previewStaff =
+    activeStaff.slice(
+      0,
+      4
+    );
 
-                ${
-                  canManageSchedule
-                    ? `
-                      <button
-                        type="button"
-                        class="
-                          monthShiftDayStatus
-                          ${
-                            active
-                              ? "active"
-                              : ""
-                          }
-                        "
-                        data-month-shift-staff="${escapeHtml(
-                          staffId
-                        )}"
-                      >
-                        <span
-                          class="monthShiftDayStatusDot"
-                        ></span>
-
-                        <b>
-                          ${
-                            active
-                              ? "На зміні"
-                              : "Вихідний"
-                          }
-                        </b>
-                      </button>
-                    `
-                    : `
-                      <div
-                        class="
-                          monthShiftDayStatus
-                          ${
-                            active
-                              ? "active"
-                              : ""
-                          }
-                        "
-                      >
-                        <span
-                          class="monthShiftDayStatusDot"
-                        ></span>
-
-                        <b>
-                          ${
-                            active
-                              ? "На зміні"
-                              : "Вихідний"
-                          }
-                        </b>
-                      </div>
-                    `
-                }
-              </div>
-
-              <div
-                class="
-                  monthShiftDayTimes
-                  ${
-                    active
-                      ? ""
-                      : "is-disabled"
-                  }
-                "
-              >
-                <label>
-                  <span>
-                    Початок
-                  </span>
-
-                  <input
-                    type="time"
-                    data-month-shift-start="${escapeHtml(
-                      staffId
-                    )}"
-                    value="${escapeHtml(
-                      startTime
-                    )}"
-                    ${
-                      active
-                        ? ""
-                        : "disabled"
-                    }
-                  >
-                </label>
-
-                <span
-                  class="monthShiftDayTimesArrow"
-                >
-                  →
-                </span>
-
-                <label>
-                  <span>
-                    Кінець
-                  </span>
-
-                  <input
-                    type="time"
-                    data-month-shift-end="${escapeHtml(
-                      staffId
-                    )}"
-                    value="${escapeHtml(
-                      endTime
-                    )}"
-                    ${
-                      active
-                        ? ""
-                        : "disabled"
-                    }
-                  >
-                </label>
-              </div>
-            </div>
-          `;
-        }
-      )
-      .join("");
+  const moreCount =
+    Math.max(
+      0,
+      activeCount -
+      previewStaff.length
+    );
 
   drawer.innerHTML = `
     <div
-      class="monthDrawerCard"
+      class="monthDaySummary"
     >
       <div
-        class="monthDrawerHead"
+        class="monthDaySummaryHead"
       >
         <div>
-          <div
-            class="monthDrawerTitle"
+          <span
+            class="monthDaySummaryEyebrow"
           >
-            📅 Графік на
-            ${escapeHtml(date)}
-          </div>
+            ОБРАНИЙ ДЕНЬ
+          </span>
 
-          <div
-            class="hint"
-          >
-            ${
-              canManageSchedule
-                ? "Налаштуйте зміну кожного працівника на цей день."
-                : "Перегляд графіка роботи на цей день."
-            }
-          </div>
+          <h3>
+            📅 ${escapeHtml(
+              date
+            )}
+          </h3>
         </div>
 
         <button
-          class="ghost"
-          id="monthDrawerClose"
           type="button"
+          class="monthDaySummaryClose"
+          id="monthDrawerClose"
+          aria-label="Закрити"
         >
           ×
         </button>
       </div>
 
       <div
-        class="monthShiftDayList"
+        class="monthDaySummaryStats"
       >
-        ${staffRows}
+        <div
+          class="monthDaySummaryStat"
+        >
+          <span>
+            На зміні
+          </span>
+
+          <strong>
+            ${activeCount}
+          </strong>
+        </div>
+
+        <div
+          class="monthDaySummaryStat"
+        >
+          <span>
+            Вихідні
+          </span>
+
+          <strong>
+            ${offCount}
+          </strong>
+        </div>
       </div>
 
-      <div class="monthDrawerFooter">
-  ${
-    canManageSchedule
-      ? `
-        <button
-          type="button"
-          class="monthRepeatScheduleButton"
-          id="monthRepeatScheduleButton"
-        >
-          ⚙ Повторюваний графік
-        </button>
-      `
-      : ""
-  }
+      <div
+        class="monthDaySummaryList"
+      >
+        ${
+          previewStaff.length
+            ? previewStaff
+                .map(
+                  (doc) => `
+                    <div
+                      class="monthDaySummaryPerson"
+                    >
+                      <span
+                        class="monthDaySummaryPersonColor"
+                        style="
+                          background:
+                            ${escapeHtml(
+                              doc.color ||
+                              "#7C5CFF"
+                            )};
+                        "
+                      ></span>
 
-  <div class="monthDrawerActions">
-    <button
-      class="ghost"
-      id="monthGoToDay"
-      type="button"
-    >
-      Відкрити день
-    </button>
+                      <div
+                        class="monthDaySummaryPersonMain"
+                      >
+                        <strong>
+                          ${escapeHtml(
+                            doc.name ||
+                            "Працівник"
+                          )}
+                        </strong>
 
-    ${
-      canManageSchedule
-        ? `
-          <button
-            class="primary"
-            id="monthSaveShift"
-            type="button"
-          >
-            💾 Зберегти день
-          </button>
-        `
-        : ""
-    }
-  </div>
-</div>
+                        <small>
+                          ${
+                            doc.role ===
+                            "assistant"
+                              ? "Асистент"
+                              : "Ветеринар"
+                          }
+                        </small>
+                      </div>
+
+                      <b>
+                        ${escapeHtml(
+                          doc.start_time
+                        )}
+                        –
+                        ${escapeHtml(
+                          doc.end_time
+                        )}
+                      </b>
+                    </div>
+                  `
+                )
+                .join("")
+            : `
+              <div
+                class="monthDaySummaryEmpty"
+              >
+                <span>
+                  ☕
+                </span>
+
+                <div>
+                  <strong>
+                    Змін немає
+                  </strong>
+
+                  <small>
+                    На цей день
+                    працівників ще
+                    не призначено.
+                  </small>
+                </div>
+              </div>
+            `
+        }
+
+        ${
+          moreCount > 0
+            ? `
+              <div
+                class="monthDaySummaryMore"
+              >
+                +${moreCount}
+                ${
+                  moreCount === 1
+                    ? "працівник"
+                    : "працівники"
+                }
+              </div>
+            `
+            : ""
+        }
+      </div>
+
+      ${
+        canManageSchedule
+          ? `
+            <button
+              type="button"
+              class="monthDaySummaryManage"
+              id="monthOpenScheduleEditor"
+            >
+              <span>
+                ⚙
+              </span>
+
+              <span>
+                <strong>
+                  Налаштувати графік
+                </strong>
+
+                <small>
+                  Статуси та години роботи
+                </small>
+              </span>
+
+              <b>
+                →
+              </b>
+            </button>
+          `
+          : ""
+      }
+
+      <button
+        type="button"
+        class="monthDaySummaryOpenDay"
+        id="monthGoToDay"
+      >
+        Відкрити календар дня
+      </button>
     </div>
   `;
 
@@ -38927,13 +38902,51 @@ $$("[data-week-create-date]")
             <div
               class="hint"
             >
-              Натисни на дату в календарі,
-              щоб переглянути графік зміни.
+              Натисни на дату
+              в календарі,
+              щоб переглянути
+              графік зміни.
             </div>
           </div>
         `;
       }
     );
+
+  drawer
+    .querySelector(
+      "#monthGoToDay"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        window.__calendarDate =
+          date;
+
+        calendarMode =
+          "day";
+
+        await renderCalendarTab();
+      }
+    );
+
+  drawer
+    .querySelector(
+      "#monthOpenScheduleEditor"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        showCrmNotice({
+          icon:
+            "⚙",
+          title:
+            "Редактор графіка",
+          text:
+            "Наступним кроком відкриємо тут окреме велике вікно редагування графіка.",
+        });
+      }
+    );
+};
 
   drawer
     .querySelector(
