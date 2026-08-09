@@ -34077,10 +34077,12 @@ async function changePatientDiagnosisStatus(
       }
     );
 
-    await renderPatientTab(
-      "overview",
-      pet
-    );
+   closePatientDiagnosisModal();
+
+await renderPatientTab(
+  "overview",
+  pet
+);
 
   } catch (error) {
     showCrmNotice({
