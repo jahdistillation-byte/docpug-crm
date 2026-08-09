@@ -16174,6 +16174,678 @@ def api_delete_patient(pet_id):
             "Не вдалося видалити пацієнта.",
             500
         )
+
+
+# =========================
+# API: PATIENT DIAGNOSES
+# =========================
+
+DIAGNOSIS_CERTAINTIES = {
+    "provisional",
+    "confirmed",
+}
+
+DIAGNOSIS_SEVERITIES = {
+    "mild",
+    "moderate",
+    "severe",
+    "critical",
+}
+
+DIAGNOSIS_STATUSES = {
+    "active",
+    "remission",
+    "resolved",
+    "entered_in_error",
+}
+
+DIAGNOSIS_STATUS_TRANSITIONS = {
+    "active": {
+        "remission",
+        "resolved",
+        "entered_in_error",
+    },
+    "remission": {
+        "active",
+        "resolved",
+        "entered_in_error",
+    },
+    "resolved": {
+        "active",
+        "entered_in_error",
+    },
+    "entered_in_error": set(),
+}
+
+
+def normalize_diagnosis_text(
+    value,
+    *,
+    max_length,
+    required=False,
+):
+    if value is None:
+        return None
+
+    normalized = str(value).strip()
+
+    if required and not normalized:
+        raise ValueError(
+            "diagnosis_name required"
+        )
+
+    if not normalized:
+        return None
+
+    if len(normalized) > max_length:
+        raise ValueError(
+            "Diagnosis field is too long"
+        )
+
+    return normalized
+
+
+def load_patient_for_diagnosis(
+    org_id,
+    patient_id,
+):
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("patients")
+            .select("id, name")
+            .eq("org_id", org_id)
+            .eq("id", patient_id)
+            .limit(1)
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+    if not result.data:
+        return None
+
+    return result.data[0]
+
+
+def validate_diagnosis_source_visit(
+    org_id,
+    patient_id,
+    visit_id,
+):
+    if not visit_id:
+        return True
+
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visits")
+            .select("id")
+            .eq("org_id", org_id)
+            .eq("id", visit_id)
+            .eq("pet_id", patient_id)
+            .limit(1)
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+    return bool(result.data)
+
+
+@app.get(
+    "/api/patients/<patient_id>/diagnoses"
+)
+def api_get_patient_diagnoses(
+    patient_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+    scope = str(
+        request.args.get("scope")
+        or "active"
+    ).strip().lower()
+
+    if scope not in {
+        "active",
+        "history",
+    }:
+        return fail(
+            "Invalid diagnosis scope",
+            400,
+        )
+
+    try:
+        if not load_patient_for_diagnosis(
+            current_org,
+            patient_id,
+        ):
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        def build_query():
+            query = (
+                supabase
+                .table("patient_diagnoses")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("patient_id", patient_id)
+            )
+
+            if scope == "active":
+                query = query.eq(
+                    "status",
+                    "active",
+                )
+
+            return query.order(
+                "diagnosed_at",
+                desc=True,
+            )
+
+        result = execute_with_retry(
+            build_query,
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET patient diagnoses:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося завантажити діагнози.",
+            500,
+        )
+
+
+@app.post(
+    "/api/patients/<patient_id>/diagnoses"
+)
+def api_create_patient_diagnosis(
+    patient_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
+
+    if auth_error:
+        return auth_error
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+    current_org = get_current_org_id()
+
+    try:
+        diagnosis_name = (
+            normalize_diagnosis_text(
+                data.get("diagnosis_name"),
+                max_length=300,
+                required=True,
+            )
+        )
+
+        diagnosis_code = (
+            normalize_diagnosis_text(
+                data.get("diagnosis_code"),
+                max_length=100,
+            )
+        )
+
+        clinical_note = (
+            normalize_diagnosis_text(
+                data.get("clinical_note"),
+                max_length=4000,
+            )
+        )
+
+    except ValueError as error:
+        return fail(
+            str(error),
+            400,
+        )
+
+    certainty = str(
+        data.get("certainty")
+        or "confirmed"
+    ).strip().lower()
+    severity_value = data.get(
+        "severity"
+    )
+    severity = (
+        str(severity_value).strip().lower()
+        if severity_value not in (None, "")
+        else None
+    )
+    source_visit_id = str(
+        data.get("source_visit_id")
+        or ""
+    ).strip() or None
+
+    if certainty not in DIAGNOSIS_CERTAINTIES:
+        return fail(
+            "Invalid diagnosis certainty",
+            400,
+        )
+
+    if (
+        severity is not None
+        and severity not in DIAGNOSIS_SEVERITIES
+    ):
+        return fail(
+            "Invalid diagnosis severity",
+            400,
+        )
+
+    try:
+        if not load_patient_for_diagnosis(
+            current_org,
+            patient_id,
+        ):
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        if not validate_diagnosis_source_visit(
+            current_org,
+            patient_id,
+            source_visit_id,
+        ):
+            return fail(
+                "Візит не належить цьому пацієнту.",
+                400,
+            )
+
+        payload = {
+            "org_id": current_org,
+            "patient_id": patient_id,
+            "source_visit_id": (
+                source_visit_id
+            ),
+            "diagnosis_code": (
+                diagnosis_code
+            ),
+            "diagnosis_name": (
+                diagnosis_name
+            ),
+            "clinical_note": (
+                clinical_note
+            ),
+            "certainty": certainty,
+            "severity": severity,
+            "status": "active",
+            "onset_at": (
+                data.get("onset_at")
+                or None
+            ),
+            "diagnosed_at": (
+                data.get("diagnosed_at")
+                or datetime.now(
+                    timezone.utc
+                ).isoformat()
+            ),
+            "created_by": user.get("id"),
+            "updated_by": user.get("id"),
+        }
+
+        result = (
+            supabase
+            .table("patient_diagnoses")
+            .insert(
+                clean_payload(payload)
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося створити діагноз.",
+                500,
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST patient diagnosis:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося створити діагноз.",
+            500,
+        )
+
+
+@app.put(
+    "/api/patient-diagnoses/<diagnosis_id>"
+)
+def api_update_patient_diagnosis(
+    diagnosis_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
+
+    if auth_error:
+        return auth_error
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+    current_org = get_current_org_id()
+
+    try:
+        expected_version = int(
+            data.get("version")
+        )
+    except (TypeError, ValueError):
+        return fail(
+            "Diagnosis version required",
+            400,
+        )
+
+    if expected_version < 1:
+        return fail(
+            "Invalid diagnosis version",
+            400,
+        )
+
+    try:
+        existing_result = (
+            supabase
+            .table("patient_diagnoses")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("id", diagnosis_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not existing_result.data:
+            return fail(
+                "Діагноз не знайдено.",
+                404,
+            )
+
+        existing = existing_result.data[0]
+
+        if (
+            existing.get("status")
+            == "entered_in_error"
+        ):
+            return fail(
+                "Помилковий діагноз не можна змінювати.",
+                400,
+            )
+
+        if int(
+            existing.get("version")
+            or 1
+        ) != expected_version:
+            return fail(
+                "Діагноз уже змінено іншим користувачем.",
+                409,
+            )
+
+        payload = {}
+
+        if "diagnosis_name" in data:
+            try:
+                payload["diagnosis_name"] = (
+                    normalize_diagnosis_text(
+                        data.get(
+                            "diagnosis_name"
+                        ),
+                        max_length=300,
+                        required=True,
+                    )
+                )
+            except ValueError as error:
+                return fail(
+                    str(error),
+                    400,
+                )
+
+        for field, max_length in (
+            ("diagnosis_code", 100),
+            ("clinical_note", 4000),
+        ):
+            if field not in data:
+                continue
+
+            try:
+                payload[field] = (
+                    normalize_diagnosis_text(
+                        data.get(field),
+                        max_length=max_length,
+                    )
+                )
+            except ValueError as error:
+                return fail(
+                    str(error),
+                    400,
+                )
+
+        if "certainty" in data:
+            certainty = str(
+                data.get("certainty")
+                or ""
+            ).strip().lower()
+
+            if certainty not in DIAGNOSIS_CERTAINTIES:
+                return fail(
+                    "Invalid diagnosis certainty",
+                    400,
+                )
+
+            payload["certainty"] = certainty
+
+        if "severity" in data:
+            severity_value = data.get(
+                "severity"
+            )
+            severity = (
+                str(severity_value)
+                .strip()
+                .lower()
+                if severity_value
+                not in (None, "")
+                else None
+            )
+
+            if (
+                severity is not None
+                and severity
+                not in DIAGNOSIS_SEVERITIES
+            ):
+                return fail(
+                    "Invalid diagnosis severity",
+                    400,
+                )
+
+            payload["severity"] = severity
+
+        for field in (
+            "onset_at",
+            "diagnosed_at",
+        ):
+            if field in data:
+                payload[field] = (
+                    data.get(field)
+                    or None
+                )
+
+        if "status" in data:
+            new_status = str(
+                data.get("status")
+                or ""
+            ).strip().lower()
+            old_status = str(
+                existing.get("status")
+                or "active"
+            ).strip().lower()
+
+            if new_status not in DIAGNOSIS_STATUSES:
+                return fail(
+                    "Invalid diagnosis status",
+                    400,
+                )
+
+            if (
+                new_status != old_status
+                and new_status
+                not in DIAGNOSIS_STATUS_TRANSITIONS.get(
+                    old_status,
+                    set(),
+                )
+            ):
+                return fail(
+                    "Invalid diagnosis status transition",
+                    400,
+                )
+
+            status_reason = str(
+                data.get("status_reason")
+                or ""
+            ).strip()
+
+            if (
+                new_status == "entered_in_error"
+                and not status_reason
+            ):
+                return fail(
+                    "Причина помилкового діагнозу обов'язкова.",
+                    400,
+                )
+
+            if len(status_reason) > 1000:
+                return fail(
+                    "Diagnosis status reason is too long",
+                    400,
+                )
+
+            payload["status"] = new_status
+            payload["status_reason"] = (
+                status_reason or None
+            )
+
+        if not payload:
+            return fail(
+                "Nothing to update",
+                400,
+            )
+
+        payload["updated_by"] = (
+            user.get("id")
+        )
+
+        update_result = (
+            supabase
+            .table("patient_diagnoses")
+            .update(payload)
+            .eq("org_id", current_org)
+            .eq("id", diagnosis_id)
+            .eq("version", expected_version)
+            .execute()
+        )
+
+        if not update_result.data:
+            return fail(
+                "Діагноз уже змінено іншим користувачем.",
+                409,
+            )
+
+        return ok(
+            update_result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUT patient diagnosis:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося оновити діагноз.",
+            500,
+        )
+
+
+@app.get(
+    "/api/patient-diagnoses/<diagnosis_id>/events"
+)
+def api_get_patient_diagnosis_events(
+    diagnosis_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        diagnosis_result = (
+            supabase
+            .table("patient_diagnoses")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", diagnosis_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not diagnosis_result.data:
+            return fail(
+                "Діагноз не знайдено.",
+                404,
+            )
+
+        events_result = (
+            supabase
+            .table("patient_diagnosis_events")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("diagnosis_id", diagnosis_id)
+            .order("occurred_at", desc=True)
+            .execute()
+        )
+
+        return ok(
+            events_result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET diagnosis events:",
+            repr(error),
+        )
+
+        return fail(
+            "Не вдалося завантажити історію діагнозу.",
+            500,
+        )
 # =========================
 # API: HOSPITALIZATIONS
 # =========================

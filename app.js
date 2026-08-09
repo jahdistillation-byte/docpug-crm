@@ -32507,6 +32507,14 @@ const stats = {
     "—",
 };
 
+const activeDiagnoses =
+  tab === "overview"
+    ? await loadPatientDiagnosesApi(
+        pet.id,
+        "active"
+      )
+    : [];
+
   // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
   root.innerHTML = `
     <div style="margin-bottom: 16px;">
@@ -32684,6 +32692,11 @@ const vaccinationName =
   ).trim();
 
 dynamicBox.innerHTML = `
+  ${renderPatientDiagnosesPanel(
+    pet,
+    activeDiagnoses
+  )}
+
   <div
     style="
       display:grid;
@@ -32967,6 +32980,11 @@ ${
     </div>
   </div>
 `;
+    bindPatientDiagnosisPanel(
+      dynamicBox,
+      pet,
+      activeDiagnoses
+    );
     return;
   }
 
@@ -33008,6 +33026,1141 @@ ${
     );
     return;
   }
+}
+
+const PATIENT_DIAGNOSIS_STATUS_LABELS = {
+  active: "Активний",
+  remission: "Ремісія",
+  resolved: "Завершений",
+  entered_in_error: "Помилковий запис",
+};
+
+const PATIENT_DIAGNOSIS_CERTAINTY_LABELS = {
+  provisional: "Попередній",
+  confirmed: "Підтверджений",
+};
+
+const PATIENT_DIAGNOSIS_SEVERITY_LABELS = {
+  mild: "Легкий",
+  moderate: "Середній",
+  severe: "Тяжкий",
+  critical: "Критичний",
+};
+
+function canEditPatientDiagnoses() {
+  return [
+    "owner",
+    "admin",
+    "vet",
+  ].includes(
+    String(
+      state.me?.role || ""
+    ).trim().toLowerCase()
+  );
+}
+
+async function patientDiagnosisRequest(
+  url,
+  options = {}
+) {
+  const response = await fetch(url, {
+    credentials: "include",
+    ...options,
+    headers: {
+      Accept: "application/json",
+      ...getOrgHeaders(),
+      ...(options.body
+        ? {
+            "Content-Type":
+              "application/json",
+          }
+        : {}),
+      ...(options.headers || {}),
+    },
+  });
+
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok) {
+    const error = new Error(
+      result?.error ||
+      "Не вдалося виконати медичну дію."
+    );
+    error.status = response.status;
+    throw error;
+  }
+
+  return result.data;
+}
+
+async function loadPatientDiagnosesApi(
+  patientId,
+  scope = "active"
+) {
+  try {
+    const data =
+      await patientDiagnosisRequest(
+        `/api/patients/${encodeURIComponent(
+          String(patientId)
+        )}/diagnoses?scope=${encodeURIComponent(
+          scope
+        )}`
+      );
+
+    return Array.isArray(data)
+      ? data
+      : [];
+  } catch (error) {
+    console.error(
+      "loadPatientDiagnosesApi failed:",
+      error
+    );
+    return null;
+  }
+}
+
+async function createPatientDiagnosisApi(
+  patientId,
+  payload
+) {
+  return patientDiagnosisRequest(
+    `/api/patients/${encodeURIComponent(
+      String(patientId)
+    )}/diagnoses`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+async function updatePatientDiagnosisApi(
+  diagnosisId,
+  payload
+) {
+  return patientDiagnosisRequest(
+    `/api/patient-diagnoses/${encodeURIComponent(
+      String(diagnosisId)
+    )}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+async function loadPatientDiagnosisEventsApi(
+  diagnosisId
+) {
+  const data =
+    await patientDiagnosisRequest(
+      `/api/patient-diagnoses/${encodeURIComponent(
+        String(diagnosisId)
+      )}/events`
+    );
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
+function sortPatientDiagnoses(
+  diagnoses
+) {
+  const severityOrder = {
+    critical: 0,
+    severe: 1,
+    moderate: 2,
+    mild: 3,
+  };
+
+  return [...(
+    Array.isArray(diagnoses)
+      ? diagnoses
+      : []
+  )].sort((left, right) => {
+    const severityDifference =
+      (
+        severityOrder[left?.severity] ?? 4
+      ) -
+      (
+        severityOrder[right?.severity] ?? 4
+      );
+
+    if (severityDifference) {
+      return severityDifference;
+    }
+
+    return String(
+      right?.diagnosed_at || ""
+    ).localeCompare(
+      String(
+        left?.diagnosed_at || ""
+      )
+    );
+  });
+}
+
+function formatPatientDiagnosisDate(
+  value
+) {
+  if (!value) return "Дата не вказана";
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return escapeHtml(
+      String(value).slice(0, 10)
+    );
+  }
+
+  return parsed.toLocaleDateString(
+    "uk-UA",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
+}
+
+function renderPatientDiagnosisCard(
+  diagnosis,
+  {
+    history = false,
+  } = {}
+) {
+  const canEdit =
+    canEditPatientDiagnoses();
+  const status = String(
+    diagnosis?.status || "active"
+  );
+  const severity = String(
+    diagnosis?.severity || "none"
+  );
+  const certainty = String(
+    diagnosis?.certainty || "confirmed"
+  );
+  const diagnosisId = escapeHtml(
+    String(diagnosis?.id || "")
+  );
+
+  return `
+    <article
+      class="patientDiagnosisCard severity-${escapeHtml(
+        severity
+      )} status-${escapeHtml(status)}"
+      data-diagnosis-id="${diagnosisId}"
+    >
+      <div class="patientDiagnosisCardMain">
+        <div class="patientDiagnosisCardTitleRow">
+          <h4>
+            ${escapeHtml(
+              diagnosis?.diagnosis_name ||
+              "Без назви"
+            )}
+          </h4>
+
+          ${
+            diagnosis?.diagnosis_code
+              ? `
+                <span class="patientDiagnosisCode">
+                  ${escapeHtml(
+                    diagnosis.diagnosis_code
+                  )}
+                </span>
+              `
+              : ""
+          }
+        </div>
+
+        <div class="patientDiagnosisMeta">
+          <span
+            class="patientDiagnosisStatus status-${escapeHtml(
+              status
+            )}"
+          >
+            ${escapeHtml(
+              PATIENT_DIAGNOSIS_STATUS_LABELS[
+                status
+              ] || status
+            )}
+          </span>
+
+          <span>
+            ${escapeHtml(
+              PATIENT_DIAGNOSIS_CERTAINTY_LABELS[
+                certainty
+              ] || certainty
+            )}
+          </span>
+
+          ${
+            diagnosis?.severity
+              ? `
+                <span
+                  class="patientDiagnosisSeverity severity-${escapeHtml(
+                    severity
+                  )}"
+                >
+                  ${
+                    severity === "critical"
+                      ? "⚠️ "
+                      : ""
+                  }${escapeHtml(
+                    PATIENT_DIAGNOSIS_SEVERITY_LABELS[
+                      severity
+                    ] || severity
+                  )}
+                </span>
+              `
+              : ""
+          }
+
+          <span>
+            ${escapeHtml(
+              formatPatientDiagnosisDate(
+                diagnosis?.diagnosed_at
+              )
+            )}
+          </span>
+        </div>
+
+        ${
+          diagnosis?.clinical_note
+            ? `
+              <p class="patientDiagnosisNote">
+                ${escapeHtml(
+                  diagnosis.clinical_note
+                )}
+              </p>
+            `
+            : ""
+        }
+      </div>
+
+      <div class="patientDiagnosisActions">
+        <button
+          type="button"
+          data-diagnosis-events="${diagnosisId}"
+        >
+          Історія
+        </button>
+
+        ${
+          canEdit && status !== "entered_in_error"
+            ? `
+              <button
+                type="button"
+                data-edit-diagnosis="${diagnosisId}"
+              >
+                Редагувати
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          canEdit && status === "active"
+            ? `
+              <button
+                type="button"
+                data-diagnosis-status="remission"
+                data-diagnosis-id="${diagnosisId}"
+              >
+                У ремісію
+              </button>
+
+              <button
+                type="button"
+                data-diagnosis-status="resolved"
+                data-diagnosis-id="${diagnosisId}"
+              >
+                Завершити
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          canEdit &&
+          ["remission", "resolved"].includes(
+            status
+          )
+            ? `
+              <button
+                type="button"
+                data-diagnosis-status="active"
+                data-diagnosis-id="${diagnosisId}"
+              >
+                Повернути в активні
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          canEdit && status !== "entered_in_error"
+            ? `
+              <button
+                type="button"
+                class="is-danger"
+                data-diagnosis-status="entered_in_error"
+                data-diagnosis-id="${diagnosisId}"
+              >
+                Помилковий
+              </button>
+            `
+            : ""
+        }
+      </div>
+    </article>
+  `;
+}
+
+function renderPatientDiagnosesPanel(
+  pet,
+  diagnoses
+) {
+  const loadFailed =
+    !Array.isArray(diagnoses);
+  const sorted = sortPatientDiagnoses(
+    diagnoses
+  );
+  const canEdit =
+    canEditPatientDiagnoses();
+
+  return `
+    <section class="patientDiagnosesPanel">
+      <header class="patientDiagnosesHeader">
+        <div>
+          <span class="patientDiagnosesKicker">
+            MEDICAL CORE
+          </span>
+          <h3>Активні діагнози</h3>
+          <p>
+            Поточний клінічний контекст пацієнта,
+            незалежний від окремого візиту.
+          </p>
+        </div>
+
+        <div class="patientDiagnosesHeaderActions">
+          <button
+            type="button"
+            data-show-diagnosis-history
+          >
+            Повна історія
+          </button>
+
+          ${
+            canEdit
+              ? `
+                <button
+                  type="button"
+                  class="is-primary"
+                  data-add-patient-diagnosis
+                >
+                  + Додати діагноз
+                </button>
+              `
+              : ""
+          }
+        </div>
+      </header>
+
+      <div class="patientDiagnosesList">
+        ${
+          loadFailed
+            ? `
+              <div class="patientDiagnosesEmpty is-error">
+                <span>!</span>
+                <div>
+                  <strong>
+                    Не вдалося завантажити діагнози
+                  </strong>
+                  <p>
+                    Медичний контекст не приховується
+                    під виглядом порожнього списку.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  data-retry-patient-diagnoses
+                >
+                  Повторити
+                </button>
+              </div>
+            `
+            : sorted.length
+            ? sorted
+                .map((diagnosis) =>
+                  renderPatientDiagnosisCard(
+                    diagnosis
+                  )
+                )
+                .join("")
+            : `
+              <div class="patientDiagnosesEmpty">
+                <span>✓</span>
+                <div>
+                  <strong>
+                    Активні діагнози не зафіксовані
+                  </strong>
+                  <p>
+                    Це означає відсутність записів,
+                    а не медичний висновок про здоров'я.
+                  </p>
+                </div>
+              </div>
+            `
+        }
+      </div>
+    </section>
+  `;
+}
+
+function findPatientDiagnosisById(
+  diagnoses,
+  diagnosisId
+) {
+  return (
+    Array.isArray(diagnoses)
+      ? diagnoses
+      : []
+  ).find(
+    (item) =>
+      String(item?.id) ===
+      String(diagnosisId)
+  ) || null;
+}
+
+function closePatientDiagnosisModal() {
+  document
+    .querySelector(
+      ".patientDiagnosisModalOverlay"
+    )
+    ?.remove();
+}
+
+function createPatientDiagnosisModalShell(
+  content
+) {
+  closePatientDiagnosisModal();
+
+  const overlay =
+    document.createElement("div");
+  overlay.className =
+    "patientDiagnosisModalOverlay";
+  overlay.innerHTML = `
+    <div
+      class="patientDiagnosisModal"
+      role="dialog"
+      aria-modal="true"
+    >
+      ${content}
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === overlay ||
+        event.target.closest(
+          "[data-close-diagnosis-modal]"
+        )
+      ) {
+        closePatientDiagnosisModal();
+      }
+    }
+  );
+
+  const firstField =
+    overlay.querySelector(
+      "input, select, textarea, button"
+    );
+  firstField?.focus();
+
+  return overlay;
+}
+
+function openPatientDiagnosisEditor(
+  pet,
+  diagnosis = null
+) {
+  const editing = Boolean(diagnosis);
+  const dateValue = String(
+    diagnosis?.diagnosed_at || ""
+  ).slice(0, 10);
+  const today = new Date()
+    .toISOString()
+    .slice(0, 10);
+  const overlay =
+    createPatientDiagnosisModalShell(`
+      <header class="patientDiagnosisModalHeader">
+        <div>
+          <span>MEDICAL CORE</span>
+          <h3>
+            ${
+              editing
+                ? "Редагувати діагноз"
+                : "Новий активний діагноз"
+            }
+          </h3>
+          <p>
+            ${escapeHtml(
+              pet?.name || "Пацієнт"
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          data-close-diagnosis-modal
+          aria-label="Закрити"
+        >
+          ×
+        </button>
+      </header>
+
+      <form class="patientDiagnosisForm">
+        <label class="is-wide">
+          <span>Діагноз *</span>
+          <input
+            name="diagnosis_name"
+            required
+            maxlength="300"
+            autocomplete="off"
+            value="${escapeHtml(
+              diagnosis?.diagnosis_name || ""
+            )}"
+            placeholder="Наприклад: атопічний дерматит"
+          >
+        </label>
+
+        <label>
+          <span>Код</span>
+          <input
+            name="diagnosis_code"
+            maxlength="100"
+            value="${escapeHtml(
+              diagnosis?.diagnosis_code || ""
+            )}"
+            placeholder="Необов'язково"
+          >
+        </label>
+
+        <label>
+          <span>Дата постановки</span>
+          <input
+            type="date"
+            name="diagnosed_at"
+            value="${escapeHtml(
+              dateValue || today
+            )}"
+          >
+        </label>
+
+        <label>
+          <span>Підтвердження</span>
+          <select name="certainty">
+            <option
+              value="confirmed"
+              ${
+                diagnosis?.certainty !==
+                "provisional"
+                  ? "selected"
+                  : ""
+              }
+            >
+              Підтверджений
+            </option>
+            <option
+              value="provisional"
+              ${
+                diagnosis?.certainty ===
+                "provisional"
+                  ? "selected"
+                  : ""
+              }
+            >
+              Попередній
+            </option>
+          </select>
+        </label>
+
+        <label>
+          <span>Тяжкість</span>
+          <select name="severity">
+            <option value="">Не вказана</option>
+            ${Object.entries(
+              PATIENT_DIAGNOSIS_SEVERITY_LABELS
+            )
+              .map(
+                ([value, label]) => `
+                  <option
+                    value="${escapeHtml(value)}"
+                    ${
+                      diagnosis?.severity === value
+                        ? "selected"
+                        : ""
+                    }
+                  >
+                    ${escapeHtml(label)}
+                  </option>
+                `
+              )
+              .join("")}
+          </select>
+        </label>
+
+        <label>
+          <span>Початок стану</span>
+          <input
+            type="date"
+            name="onset_at"
+            value="${escapeHtml(
+              String(
+                diagnosis?.onset_at || ""
+              ).slice(0, 10)
+            )}"
+          >
+        </label>
+
+        <label class="is-wide">
+          <span>Клінічна примітка</span>
+          <textarea
+            name="clinical_note"
+            maxlength="4000"
+            rows="4"
+            placeholder="Короткий контекст, не повний запис візиту"
+          >${escapeHtml(
+            diagnosis?.clinical_note || ""
+          )}</textarea>
+        </label>
+
+        <div
+          class="patientDiagnosisFormError"
+          role="alert"
+        ></div>
+
+        <footer class="patientDiagnosisFormActions">
+          <button
+            type="button"
+            data-close-diagnosis-modal
+          >
+            Скасувати
+          </button>
+          <button
+            type="submit"
+            class="is-primary"
+          >
+            ${editing ? "Зберегти" : "Додати"}
+          </button>
+        </footer>
+      </form>
+    `);
+
+  const form = overlay.querySelector(
+    ".patientDiagnosisForm"
+  );
+  const errorBox = overlay.querySelector(
+    ".patientDiagnosisFormError"
+  );
+
+  form?.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
+      errorBox.textContent = "";
+
+      const submitButton =
+        form.querySelector(
+          "button[type='submit']"
+        );
+      const data = new FormData(form);
+      const payload = {
+        diagnosis_name: String(
+          data.get("diagnosis_name") || ""
+        ).trim(),
+        diagnosis_code: String(
+          data.get("diagnosis_code") || ""
+        ).trim() || null,
+        diagnosed_at: String(
+          data.get("diagnosed_at") || ""
+        ).trim() || null,
+        certainty: String(
+          data.get("certainty") ||
+          "confirmed"
+        ),
+        severity: String(
+          data.get("severity") || ""
+        ) || null,
+        onset_at: String(
+          data.get("onset_at") || ""
+        ).trim() || null,
+        clinical_note: String(
+          data.get("clinical_note") || ""
+        ).trim() || null,
+      };
+
+      if (!payload.diagnosis_name) {
+        errorBox.textContent =
+          "Вкажіть назву діагнозу.";
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent =
+        "Збереження…";
+
+      try {
+        if (editing) {
+          await updatePatientDiagnosisApi(
+            diagnosis.id,
+            {
+              ...payload,
+              version:
+                diagnosis.version,
+            }
+          );
+        } else {
+          await createPatientDiagnosisApi(
+            pet.id,
+            payload
+          );
+        }
+
+        closePatientDiagnosisModal();
+        await renderPatientTab(
+          "overview",
+          pet
+        );
+      } catch (error) {
+        errorBox.textContent =
+          error.message ||
+          "Не вдалося зберегти діагноз.";
+        submitButton.disabled = false;
+        submitButton.textContent =
+          editing ? "Зберегти" : "Додати";
+      }
+    }
+  );
+}
+
+async function changePatientDiagnosisStatus(
+  pet,
+  diagnosis,
+  nextStatus
+) {
+  let reason = "";
+
+  if (nextStatus === "entered_in_error") {
+    reason = window.prompt(
+      "Вкажіть причину, чому запис є помилковим:"
+    ) || "";
+
+    if (!reason.trim()) return;
+  } else if (
+    ["remission", "resolved", "active"]
+      .includes(nextStatus)
+  ) {
+    reason = window.prompt(
+      "Причина зміни статусу (необов'язково):"
+    ) || "";
+  }
+
+  try {
+    await updatePatientDiagnosisApi(
+      diagnosis.id,
+      {
+        version: diagnosis.version,
+        status: nextStatus,
+        status_reason:
+          reason.trim() || null,
+      }
+    );
+
+    await renderPatientTab(
+      "overview",
+      pet
+    );
+  } catch (error) {
+    alert(
+      error.message ||
+      "Не вдалося змінити статус діагнозу."
+    );
+  }
+}
+
+async function openPatientDiagnosisEvents(
+  diagnosis
+) {
+  const overlay =
+    createPatientDiagnosisModalShell(`
+      <header class="patientDiagnosisModalHeader">
+        <div>
+          <span>ІСТОРІЯ ЗМІН</span>
+          <h3>
+            ${escapeHtml(
+              diagnosis?.diagnosis_name ||
+              "Діагноз"
+            )}
+          </h3>
+        </div>
+        <button
+          type="button"
+          data-close-diagnosis-modal
+          aria-label="Закрити"
+        >×</button>
+      </header>
+      <div class="patientDiagnosisTimeline">
+        <div class="patientDiagnosisModalLoading">
+          Завантаження історії…
+        </div>
+      </div>
+    `);
+
+  const timeline = overlay.querySelector(
+    ".patientDiagnosisTimeline"
+  );
+
+  try {
+    const events =
+      await loadPatientDiagnosisEventsApi(
+        diagnosis.id
+      );
+
+    timeline.innerHTML = events.length
+      ? events
+          .map((item) => {
+            const eventLabel = {
+              created: "Діагноз створено",
+              updated: "Дані оновлено",
+              status_changed:
+                "Статус змінено",
+            }[item.event_type] ||
+              item.event_type;
+
+            return `
+              <article class="patientDiagnosisTimelineItem">
+                <span></span>
+                <div>
+                  <strong>
+                    ${escapeHtml(eventLabel)}
+                  </strong>
+                  <time>
+                    ${escapeHtml(
+                      formatPatientDocumentDate(
+                        item.occurred_at,
+                        true
+                      )
+                    )}
+                  </time>
+                  ${
+                    item.reason
+                      ? `
+                        <p>
+                          ${escapeHtml(item.reason)}
+                        </p>
+                      `
+                      : ""
+                  }
+                </div>
+              </article>
+            `;
+          })
+          .join("")
+      : `
+          <div class="patientDiagnosesEmpty">
+            Історія змін порожня.
+          </div>
+        `;
+  } catch (error) {
+    timeline.innerHTML = `
+      <div class="patientDiagnosisFormError">
+        ${escapeHtml(
+          error.message ||
+          "Не вдалося завантажити історію."
+        )}
+      </div>
+    `;
+  }
+}
+
+async function openPatientDiagnosisHistory(
+  pet
+) {
+  const overlay =
+    createPatientDiagnosisModalShell(`
+      <header class="patientDiagnosisModalHeader">
+        <div>
+          <span>MEDICAL CORE</span>
+          <h3>Історія діагнозів</h3>
+          <p>
+            ${escapeHtml(
+              pet?.name || "Пацієнт"
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          data-close-diagnosis-modal
+          aria-label="Закрити"
+        >×</button>
+      </header>
+      <div class="patientDiagnosisHistoryList">
+        <div class="patientDiagnosisModalLoading">
+          Завантаження історії…
+        </div>
+      </div>
+    `);
+
+  const list = overlay.querySelector(
+    ".patientDiagnosisHistoryList"
+  );
+  const diagnoses =
+    await loadPatientDiagnosesApi(
+      pet.id,
+      "history"
+    );
+
+  if (!Array.isArray(diagnoses)) {
+    list.innerHTML = `
+      <div class="patientDiagnosisFormError">
+        Не вдалося завантажити історію діагнозів.
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = diagnoses.length
+    ? sortPatientDiagnoses(diagnoses)
+        .map((item) =>
+          renderPatientDiagnosisCard(
+            item,
+            {
+              history: true,
+            }
+          )
+        )
+        .join("")
+    : `
+        <div class="patientDiagnosesEmpty">
+          Діагнози ще не зафіксовані.
+        </div>
+      `;
+
+  bindPatientDiagnosisPanel(
+    list,
+    pet,
+    diagnoses
+  );
+}
+
+function bindPatientDiagnosisPanel(
+  root,
+  pet,
+  diagnoses
+) {
+  if (!root) return;
+
+  root.querySelector(
+    "[data-add-patient-diagnosis]"
+  )?.addEventListener(
+    "click",
+    () => openPatientDiagnosisEditor(
+      pet
+    )
+  );
+
+  root.querySelector(
+    "[data-show-diagnosis-history]"
+  )?.addEventListener(
+    "click",
+    () => openPatientDiagnosisHistory(
+      pet
+    )
+  );
+
+  root.querySelector(
+    "[data-retry-patient-diagnoses]"
+  )?.addEventListener(
+    "click",
+    () => renderPatientTab(
+      "overview",
+      pet
+    )
+  );
+
+  root.querySelectorAll(
+    "[data-edit-diagnosis]"
+  ).forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const diagnosis =
+          findPatientDiagnosisById(
+            diagnoses,
+            button.dataset.editDiagnosis
+          );
+
+        if (diagnosis) {
+          openPatientDiagnosisEditor(
+            pet,
+            diagnosis
+          );
+        }
+      }
+    );
+  });
+
+  root.querySelectorAll(
+    "[data-diagnosis-status]"
+  ).forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const diagnosis =
+          findPatientDiagnosisById(
+            diagnoses,
+            button.dataset.diagnosisId
+          );
+
+        if (diagnosis) {
+          changePatientDiagnosisStatus(
+            pet,
+            diagnosis,
+            button.dataset.diagnosisStatus
+          );
+        }
+      }
+    );
+  });
+
+  root.querySelectorAll(
+    "[data-diagnosis-events]"
+  ).forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const diagnosis =
+          findPatientDiagnosisById(
+            diagnoses,
+            button.dataset.diagnosisEvents
+          );
+
+        if (diagnosis) {
+          openPatientDiagnosisEvents(
+            diagnosis
+          );
+        }
+      }
+    );
+  });
 }
 
 function formatPatientDocumentDate(
