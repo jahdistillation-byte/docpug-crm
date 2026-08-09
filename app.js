@@ -34310,11 +34310,49 @@ function bindPatientDiagnosisPanel(
     event.preventDefault();
     event.stopPropagation();
 
+    root.addEventListener(
+  "click",
+  async (event) => {
+    const button =
+      event.target.closest(
+        "[data-diagnosis-status]"
+      );
+
+    if (!button) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
     console.log(
       "STATUS BUTTON CLICK:",
       button.dataset.diagnosisStatus,
       button.dataset.diagnosisId
     );
+
+    const diagnosis =
+      findPatientDiagnosisById(
+        diagnoses,
+        button.dataset.diagnosisId
+      );
+
+    if (!diagnosis) {
+      console.error(
+        "Diagnosis not found:",
+        button.dataset.diagnosisId
+      );
+
+      return;
+    }
+
+    await changePatientDiagnosisStatus(
+      pet,
+      diagnosis,
+      button.dataset.diagnosisStatus
+    );
+  }
+);
 
     const diagnosis =
       findPatientDiagnosisById(
