@@ -34271,155 +34271,120 @@ function bindPatientDiagnosisPanel(
     "[data-add-patient-diagnosis]"
   )?.addEventListener(
     "click",
-    () => openPatientDiagnosisEditor(
-      pet
-    )
+    () => {
+      openPatientDiagnosisEditor(
+        pet
+      );
+    }
   );
 
   root.querySelector(
     "[data-show-diagnosis-history]"
   )?.addEventListener(
     "click",
-    () => openPatientDiagnosisHistory(
-      pet
-    )
+    () => {
+      openPatientDiagnosisHistory(
+        pet
+      );
+    }
   );
 
   root.querySelector(
     "[data-retry-patient-diagnoses]"
   )?.addEventListener(
     "click",
-    () => renderPatientTab(
-      "overview",
-      pet
-    )
+    () => {
+      renderPatientTab(
+        "overview",
+        pet
+      );
+    }
   );
 
-  root.addEventListener(
-  "click",
-  async (event) => {
-    const button =
-      event.target.closest(
-        "[data-diagnosis-status]"
-      );
-
-    if (!button) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    root.addEventListener(
-  "click",
-  async (event) => {
-    const button =
-      event.target.closest(
-        "[data-diagnosis-status]"
-      );
-
-    if (!button) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    console.log(
-      "STATUS BUTTON CLICK:",
-      button.dataset.diagnosisStatus,
-      button.dataset.diagnosisId
-    );
-
-    const diagnosis =
-      findPatientDiagnosisById(
-        diagnoses,
-        button.dataset.diagnosisId
-      );
-
-    if (!diagnosis) {
-      console.error(
-        "Diagnosis not found:",
-        button.dataset.diagnosisId
-      );
-
-      return;
-    }
-
-    await changePatientDiagnosisStatus(
-      pet,
-      diagnosis,
-      button.dataset.diagnosisStatus
-    );
-  }
-);
-
-    const diagnosis =
-      findPatientDiagnosisById(
-        diagnoses,
-        button.dataset.diagnosisId
-      );
-
-    if (!diagnosis) {
-      console.error(
-        "Diagnosis not found:",
-        button.dataset.diagnosisId
-      );
-
-      return;
-    }
-
-    await changePatientDiagnosisStatus(
-      pet,
-      diagnosis,
-      button.dataset.diagnosisStatus
-    );
-  }
-);
-
+  // Редагування
   root.querySelectorAll(
-    "[data-diagnosis-status]"
-  ).forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        const diagnosis =
-          findPatientDiagnosisById(
-            diagnoses,
-            button.dataset.diagnosisId
-          );
+    "[data-edit-diagnosis]"
+  ).forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const diagnosis =
+            findPatientDiagnosisById(
+              diagnoses,
+              button.dataset
+                .editDiagnosis
+            );
 
-        if (diagnosis) {
-          changePatientDiagnosisStatus(
+          if (!diagnosis) {
+            return;
+          }
+
+          openPatientDiagnosisEditor(
             pet,
-            diagnosis,
-            button.dataset.diagnosisStatus
+            diagnosis
           );
         }
-      }
-    );
-  });
+      );
+    }
+  );
 
+  // Зміна статусу
+  root.querySelectorAll(
+    "[data-diagnosis-status]"
+  ).forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        async () => {
+          const diagnosis =
+            findPatientDiagnosisById(
+              diagnoses,
+              button.dataset
+                .diagnosisId
+            );
+
+          if (!diagnosis) {
+            return;
+          }
+
+          await changePatientDiagnosisStatus(
+            pet,
+            diagnosis,
+            button.dataset
+              .diagnosisStatus
+          );
+        }
+      );
+    }
+  );
+
+  // Історія конкретного діагнозу
   root.querySelectorAll(
     "[data-diagnosis-events]"
-  ).forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        const diagnosis =
-          findPatientDiagnosisById(
-            diagnoses,
-            button.dataset.diagnosisEvents
-          );
+  ).forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const diagnosis =
+            findPatientDiagnosisById(
+              diagnoses,
+              button.dataset
+                .diagnosisEvents
+            );
 
-        if (diagnosis) {
+          if (!diagnosis) {
+            return;
+          }
+
           openPatientDiagnosisEvents(
             diagnosis
           );
         }
-      }
-    );
-  });
+      );
+    }
+  );
 }
 
 function formatPatientDocumentDate(
