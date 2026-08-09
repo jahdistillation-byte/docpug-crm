@@ -40586,12 +40586,49 @@ initCalendarTopScroll();
       const hoverTime =
         hover?.querySelector("b");
 
-      const staffId =
-        String(
-          timeline.dataset
-            .staffId ||
-          ""
-        );
+      const timelineScheduleRow =
+  staffSchedule.find(
+    (item) =>
+      String(
+        item.staff_id
+      ) ===
+      String(
+        staffId
+      )
+  ) || null;
+
+const timelineShiftStart =
+  String(
+    timelineScheduleRow?.start_time ||
+    ""
+  ).slice(0, 5);
+
+const timelineShiftEnd =
+  String(
+    timelineScheduleRow?.end_time ||
+    ""
+  ).slice(0, 5);
+
+const isTimelineTimeInsideShift = (
+  time
+) => {
+  const cleanTime =
+    String(
+      time || ""
+    ).slice(0, 5);
+
+  return Boolean(
+    timelineScheduleRow &&
+    timelineScheduleRow
+      .is_active !== false &&
+    timelineShiftStart &&
+    timelineShiftEnd &&
+    cleanTime >=
+      timelineShiftStart &&
+    cleanTime <
+      timelineShiftEnd
+  );
+};
 
       const getTimeFromPointer = (
         event
@@ -40683,24 +40720,37 @@ initCalendarTopScroll();
           }
 
           const pointerTime =
-            getTimeFromPointer(
-              event
-            );
+  getTimeFromPointer(
+    event
+  );
 
-          if (hover) {
-            hover.hidden =
-              false;
+if (
+  !isTimelineTimeInsideShift(
+    pointerTime.time
+  )
+) {
+  if (hover) {
+    hover.hidden =
+      true;
+  }
 
-            hover.style.top =
-              `${pointerTime.top}px`;
-          }
+  return;
+}
 
-          if (hoverTime) {
-            hoverTime.textContent =
-              pointerTime.time;
-          }
-        }
-      );
+if (hover) {
+  hover.hidden =
+    false;
+
+  hover.style.top =
+    `${pointerTime.top}px`;
+}
+
+if (hoverTime) {
+  hoverTime.textContent =
+    pointerTime.time;
+}
+}
+);
 
       timeline.addEventListener(
         "mouseleave",
@@ -40727,21 +40777,29 @@ initCalendarTopScroll();
           }
 
           const pointerTime =
-            getTimeFromPointer(
-              event
-            );
+  getTimeFromPointer(
+    event
+  );
 
-          if (
-            !staffId ||
-            !pointerTime.time
-          ) {
-            return;
-          }
+if (
+  !staffId ||
+  !pointerTime.time
+) {
+  return;
+}
 
-          openVisitFromCalendar(
-            pointerTime.time,
-            staffId
-          );
+if (
+  !isTimelineTimeInsideShift(
+    pointerTime.time
+  )
+) {
+  return;
+}
+
+openVisitFromCalendar(
+  pointerTime.time,
+  staffId
+);
         }
       );
 
