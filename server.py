@@ -16777,8 +16777,61 @@ def api_update_patient_diagnosis(
                 409,
             )
 
-        return ok(
+        updated_diagnosis = (
             update_result.data[0]
+        )
+
+        if (
+            "status" in data
+            and new_status != old_status
+        ):
+            event_payload = {
+                "org_id":
+                    current_org,
+
+                "patient_id":
+                    existing.get(
+                        "patient_id"
+                    ),
+
+                "diagnosis_id":
+                    diagnosis_id,
+
+                "event_type":
+                    "status_changed",
+
+                "from_status":
+                    old_status,
+
+                "to_status":
+                    new_status,
+
+                "reason":
+                    status_reason
+                    or None,
+
+                "created_by":
+                    user.get("id"),
+
+                "occurred_at":
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+            }
+
+            supabase \
+                .table(
+                    "patient_diagnosis_events"
+                ) \
+                .insert(
+                    clean_payload(
+                        event_payload
+                    )
+                ) \
+                .execute()
+
+        return ok(
+            updated_diagnosis
         )
 
     except Exception as error:
