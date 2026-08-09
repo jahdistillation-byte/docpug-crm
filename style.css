@@ -50861,3 +50861,128 @@ body[data-theme="white"] .appPromptModalBtnSecondary {
   background: rgba(24, 36, 53, 0.06);
   color: #182435;
 }
+/* =====================================================
+   APP PROMPT MODAL — HARD FIX
+   ===================================================== */
+
+#appPromptModal.appPromptModal {
+  position: fixed !important;
+
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+
+  z-index: 999999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 24px !important;
+
+  box-sizing: border-box !important;
+
+  background: rgba(
+    3,
+    8,
+    18,
+    0.66
+  ) !important;
+
+  backdrop-filter:
+    blur(10px);
+
+  pointer-events: auto !important;
+}
+
+#appPromptModal.appPromptModal[hidden] {
+  display: none !important;
+}
+
+#appPromptModal
+.appPromptModalCard {
+  position: relative !important;
+
+  display: block !important;
+
+  width: 460px !important;
+  max-width: calc(
+    100vw - 48px
+  ) !important;
+
+  min-width: 0 !important;
+  min-height: 280px !important;
+
+  flex: 0 0 auto !important;
+
+  box-sizing: border-box !important;
+
+  padding: 26px !important;
+
+  border-radius: 24px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      ),
+      rgba(
+        255,
+        255,
+        255,
+        0.03
+      )
+    ),
+    var(
+      --app-modal-surface,
+      #131b2b
+    ) !important;
+
+  border:
+    1px solid
+    var(
+      --app-modal-border,
+      rgba(
+        147,
+        70,
+        232,
+        0.38
+      )
+    ) !important;
+
+  color:
+    var(
+      --app-modal-text,
+      #f5f7ff
+    ) !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  pointer-events: auto !important;
+
+  box-shadow:
+    0 30px 80px
+      rgba(
+        0,
+        0,
+        0,
+        0.45
+      ),
+    0 0 0 1px
+      rgba(
+        255,
+        255,
+        255,
+        0.04
+      )
+      inset !important;
+}
