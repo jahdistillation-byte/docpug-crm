@@ -49112,3 +49112,147 @@ body[data-theme="white"]
   background: rgba(255,255,255,.07);
   color: #fff;
 }
+/* =========================================
+   MONTH DAY SUMMARY — READABILITY BOOST
+   ========================================= */
+
+.monthDaySummary {
+  gap: 18px;
+  padding: 20px;
+}
+
+.monthDaySummaryEyebrow {
+  margin-bottom: 7px;
+
+  font-size: 12px;
+  letter-spacing: .07em;
+}
+
+.monthDaySummaryHead h3 {
+  font-size: 22px;
+}
+
+.monthDaySummaryClose {
+  width: 38px;
+  height: 38px;
+
+  font-size: 22px;
+}
+
+
+/* STATS */
+
+.monthDaySummaryStats {
+  gap: 10px;
+}
+
+.monthDaySummaryStat {
+  padding: 14px 15px;
+}
+
+.monthDaySummaryStat span {
+  font-size: 12px;
+}
+
+.monthDaySummaryStat strong {
+  margin-top: 2px;
+
+  font-size: 26px;
+}
+
+
+/* STAFF */
+
+.monthDaySummaryList {
+  gap: 9px;
+}
+
+.monthDaySummaryPerson {
+  grid-template-columns:
+    5px
+    minmax(0, 1fr)
+    auto;
+
+  min-height: 62px;
+
+  gap: 12px;
+
+  padding: 10px 12px;
+
+  border-radius: 14px;
+}
+
+.monthDaySummaryPersonColor {
+  width: 5px;
+  height: 36px;
+}
+
+.monthDaySummaryPersonMain strong {
+  font-size: 14px;
+}
+
+.monthDaySummaryPersonMain small {
+  margin-top: 4px;
+
+  font-size: 11px;
+}
+
+.monthDaySummaryPerson > b {
+  font-size: 12px;
+}
+
+.monthDaySummaryMore {
+  padding: 9px;
+
+  font-size: 12px;
+}
+
+
+/* MAIN ACTION */
+
+.monthDaySummaryManage {
+  grid-template-columns:
+    40px
+    minmax(0, 1fr)
+    auto;
+
+  gap: 12px;
+
+  padding: 15px;
+
+  border-radius: 16px;
+}
+
+.monthDaySummaryManage > span:first-child {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 12px;
+
+  font-size: 17px;
+}
+
+.monthDaySummaryManage strong {
+  font-size: 14px;
+}
+
+.monthDaySummaryManage small {
+  margin-top: 3px;
+
+  font-size: 11px;
+}
+
+.monthDaySummaryManage > b {
+  font-size: 20px;
+}
+
+
+/* OPEN DAY */
+
+.monthDaySummaryOpenDay {
+  padding: 13px 14px;
+
+  border-radius: 14px;
+
+  font-size: 12px;
+}
