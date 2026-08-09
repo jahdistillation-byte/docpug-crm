@@ -51425,3 +51425,89 @@ body[data-theme="white"] .patientDiagnosisForm textarea {
   border-radius: 12px;
   font-size: 10px;
 }
+/* =========================================================
+   PATIENT WEIGHT — BALANCED COMPACT
+   ========================================================= */
+
+.patientWeightPanel {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+}
+
+.patientWeightHeader {
+  margin-bottom: 12px;
+  gap: 14px;
+}
+
+.patientWeightHeader h3 {
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.patientWeightHeader p {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.patientWeightAdd {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 11px;
+  font-size: 11px;
+}
+
+.patientWeightBody {
+  grid-template-columns:
+    minmax(175px, 0.62fr)
+    minmax(0, 1.38fr);
+
+  gap: 10px;
+}
+
+.patientWeightCurrent {
+  min-height: 96px;
+  padding: 14px 15px;
+  border-radius: 15px;
+}
+
+.patientWeightCurrent > span {
+  font-size: 10px;
+}
+
+.patientWeightCurrent > strong {
+  margin-top: 5px;
+  font-size: 26px;
+}
+
+.patientWeightCurrent small {
+  margin-top: 7px;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.patientWeightHistory {
+  min-height: 96px;
+  gap: 6px;
+}
+
+.patientWeightRow {
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 11px;
+}
+
+.patientWeightRow span {
+  font-size: 11px;
+}
+
+.patientWeightRow strong {
+  font-size: 12px;
+}
+
+.patientWeightEmpty {
+  min-height: 96px;
+  border-radius: 14px;
+  font-size: 11px;
+}
