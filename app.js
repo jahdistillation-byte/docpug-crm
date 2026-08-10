@@ -32770,7 +32770,48 @@ const weightHistory =
       <div style="display:flex; justify-content:space-between; align-items:start;">
         <div>
           <div style="font-size:0.75rem; text-transform:uppercase; opacity:0.5; letter-spacing:1px; margin-bottom:4px;">Медична карта пацієнта</div>
-          <h2 class="patientRecordTitle" style="margin:0; font-size: 2.2rem; color: #fff;">🐾 ${escapeHtml(pet.name || "Без імені")}</h2>
+          <div
+  style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  "
+>
+  <h2
+    class="patientRecordTitle"
+    style="
+      margin:0;
+      font-size:2.2rem;
+      color:#fff;
+    "
+  >
+    🐾 ${escapeHtml(
+      pet.name || "Без імені"
+    )}
+  </h2>
+
+  <div
+    class="
+      patientStatusBadge
+      ${
+        pet?.patient_status === "deceased"
+          ? "is-deceased"
+          : pet?.patient_status === "archived"
+            ? "is-archived"
+            : "is-active"
+      }
+    "
+  >
+    ${
+      pet?.patient_status === "deceased"
+        ? "† Помер"
+        : pet?.patient_status === "archived"
+          ? "Архів"
+          : "● Активний"
+    }
+  </div>
+</div>
           <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
             ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
             ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
