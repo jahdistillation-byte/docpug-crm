@@ -4342,6 +4342,59 @@ async function createPatientWeightApi(
 
   return result.data;
 }
+
+async function updatePatientStatusApi(
+  patientId,
+  payload
+) {
+  const response =
+    await fetch(
+      `/api/patients/${
+        encodeURIComponent(
+          String(patientId)
+        )
+      }/status`,
+      {
+        method:
+          "PUT",
+
+        credentials:
+          "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body:
+          JSON.stringify(
+            payload || {}
+          ),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося оновити статус пацієнта."
+    );
+  }
+
+  return result.data;
+}
 function openOwnerExistsModal(
   owner = {}
 ) {
@@ -10516,7 +10569,7 @@ async function renderTeamTab() {
                               <button
   class="
     ghost
-    premiumDeleteBtn
+    premiumDeleteBtnф
   "
   type="button"
   data-deactivate-team-staff="${escapeHtml(
@@ -33058,7 +33111,44 @@ dynamicBox.innerHTML = `
             )}
           </span>
         </div>
+<div
+  class="
+    patientStatusBadge
+    ${
+      pet?.patient_status ===
+      "deceased"
+        ? "is-deceased"
+        : pet?.patient_status ===
+          "archived"
+          ? "is-archived"
+          : "is-active"
+    }
+  "
+>
+  ${
+    pet?.patient_status ===
+    "deceased"
+      ? "† Помер"
+      : pet?.patient_status ===
+        "archived"
+        ? "Архів"
+        : "● Активний"
+  }
 
+  ${
+    pet?.patient_status ===
+      "deceased" &&
+    pet?.deceased_at
+      ? ` · ${new Date(
+          `${String(
+            pet.deceased_at
+          ).slice(0, 10)}T00:00:00`
+        ).toLocaleDateString(
+          "uk-UA"
+        )}`
+      : ""
+  }
+</div>
        <div
   class="patientPassportVaccination"
 >

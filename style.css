@@ -51612,3 +51612,64 @@ body[data-theme="white"] .patientWeightEmpty {
   border-color:
     rgba(0, 0, 0, 0.08);
 }
+/* =========================================================
+   PATIENT STATUS BADGE
+   ========================================================= */
+
+.patientStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  width: fit-content;
+
+  margin-top: 10px;
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+
+  border: 1px solid transparent;
+}
+
+.patientStatusBadge.is-active {
+  color: #58d68d;
+
+  background:
+    rgba(46, 204, 113, 0.10);
+
+  border-color:
+    rgba(46, 204, 113, 0.22);
+}
+
+.patientStatusBadge.is-deceased {
+  color: #ff7b7b;
+
+  background:
+    rgba(255, 90, 90, 0.10);
+
+  border-color:
+    rgba(255, 90, 90, 0.22);
+}
+
+.patientStatusBadge.is-archived {
+  color: var(--text-muted);
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  border-color:
+    rgba(255, 255, 255, 0.08);
+}
+
+body[data-theme="white"]
+.patientStatusBadge.is-archived {
+  background:
+    rgba(0, 0, 0, 0.035);
+
+  border-color:
+    rgba(0, 0, 0, 0.08);
+}
