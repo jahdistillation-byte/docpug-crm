@@ -16516,7 +16516,114 @@ def validate_diagnosis_source_visit(
 
     return bool(result.data)
 
+@app.put(
+    "/api/patients/<patient_id>/status"
+)
+def api_update_patient_status(
+    patient_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
 
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    status = str(
+        data.get("patient_status")
+        or ""
+    ).strip()
+
+    deceased_at = str(
+        data.get("deceased_at")
+        or ""
+    ).strip() or None
+
+    if status not in [
+        "active",
+        "deceased",
+        "archived",
+    ]:
+        return fail(
+            "Некоректний статус пацієнта.",
+            400,
+        )
+
+    if (
+        status == "deceased"
+        and not deceased_at
+    ):
+        return fail(
+            "Вкажіть дату смерті.",
+            400,
+        )
+
+    if (
+        status != "deceased"
+    ):
+        deceased_at = None
+
+    try:
+        patient_result = (
+            supabase
+            .table("patients")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        result = (
+            supabase
+            .table("patients")
+            .update({
+                "patient_status":
+                    status,
+
+                "deceased_at":
+                    deceased_at,
+            })
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося оновити статус пацієнта.",
+                500,
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUT patient status:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося оновити статус пацієнта.",
+            500,
+        )
 @app.get(
     "/api/patients/<patient_id>/diagnoses"
 )
