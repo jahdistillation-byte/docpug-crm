@@ -32792,17 +32792,18 @@ const weightHistory =
   </h2>
 
   <div
-    class="
-      patientStatusBadge
-      ${
-        pet?.patient_status === "deceased"
-          ? "is-deceased"
-          : pet?.patient_status === "archived"
-            ? "is-archived"
-            : "is-active"
-      }
-    "
-  >
+  data-patient-status-toggle
+  class="
+    patientStatusBadge
+    ${
+      pet?.patient_status === "deceased"
+        ? "is-deceased"
+        : pet?.patient_status === "archived"
+          ? "is-archived"
+          : "is-active"
+    }
+  "
+>
     ${
       pet?.patient_status === "deceased"
         ? "† Помер"
@@ -33190,32 +33191,7 @@ dynamicBox.innerHTML = `
       : ""
   }
 </div>
-       <div
-  class="patientPassportVaccination"
->
-  <span style="opacity:0.5;">
-    Вакцинація:
-  </span>
-
-  <span
-    class="
-      patientVaccinationBadge
-      ${
-        pet.vaccination_status ===
-        "vaccinated"
-          ? "is-vaccinated"
-          : pet.vaccination_status ===
-            "not_vaccinated"
-            ? "is-not-vaccinated"
-            : "is-unknown"
-      }
-    "
-  >
-    ${escapeHtml(
-      vaccinationLabel
-    )}
-  </span>
-</div>
+       
 
 ${
   pet.vaccination_status ===
@@ -33309,7 +33285,11 @@ const addWeightBtn =
   dynamicBox.querySelector(
     "[data-add-patient-weight]"
   );
-
+const statusButton =
+  dynamicBox.querySelector(
+    "[data-patient-status-toggle]"
+  );
+  
 if (addWeightBtn) {
   addWeightBtn.addEventListener(
     "click",

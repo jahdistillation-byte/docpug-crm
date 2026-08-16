@@ -51734,3 +51734,21 @@ body[data-theme="white"]
   border-color:
     rgba(0, 0, 0, 0.08);
 }
+.patientStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  width: fit-content;
+
+  margin-top: 3px;
+  padding: 8px 13px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1;
+
+  border: 1px solid transparent;
+}
