@@ -16345,6 +16345,52 @@ def api_create_patient_vaccination(
         or ""
     ).strip() or None
 
+
+    raw_coverage_tags = (
+        data.get("coverage_tags")
+        or []
+    )
+
+    if not isinstance(
+        raw_coverage_tags,
+        list,
+    ):
+        return fail(
+            "Некоректні теги вакцинації.",
+            400,
+        )
+
+
+    allowed_coverage_tags = {
+        "general",
+        "rabies",
+        "lepto",
+        "respiratory",
+        "felv",
+        "lyme",
+        "civ",
+    }
+
+
+    coverage_tags = []
+
+    for item in raw_coverage_tags:
+        tag = str(
+            item or ""
+        ).strip().lower()
+
+        if (
+            tag
+            and tag
+            in allowed_coverage_tags
+            and tag
+            not in coverage_tags
+        ):
+            coverage_tags.append(
+                tag
+            )
+
+
     if not vaccination_date:
         return fail(
             "Вкажіть дату вакцинації.",
@@ -16356,6 +16402,7 @@ def api_create_patient_vaccination(
             "Вкажіть назву вакцини.",
             400,
         )
+
 
     try:
         patient_result = (
@@ -16374,6 +16421,7 @@ def api_create_patient_vaccination(
                 404,
             )
 
+
         insert_data = {
             "org_id":
                 current_org,
@@ -16390,6 +16438,9 @@ def api_create_patient_vaccination(
             "vaccine_type":
                 vaccine_type,
 
+            "coverage_tags":
+                coverage_tags,
+
             "batch_number":
                 batch_number,
 
@@ -16403,14 +16454,18 @@ def api_create_patient_vaccination(
                 note,
         }
 
+
         result = (
             supabase
-            .table("patient_vaccinations")
+            .table(
+                "patient_vaccinations"
+            )
             .insert(
                 insert_data
             )
             .execute()
         )
+
 
         if not result.data:
             return fail(
@@ -16418,9 +16473,11 @@ def api_create_patient_vaccination(
                 500,
             )
 
+
         return ok(
             result.data[0]
         )
+
 
     except Exception as error:
         print(

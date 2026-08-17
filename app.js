@@ -637,6 +637,163 @@ function getVaccineBrandsForPatient(
       )
   );
 }
+// =====================================================
+// VACCINE COVERAGE TAGS
+// =====================================================
+
+function getVaccineCoverageTags(
+  brand,
+  vaccine
+) {
+  const brandName =
+    String(
+      brand?.brand || ""
+    ).trim();
+
+  const vaccineName =
+    String(
+      vaccine?.name || ""
+    ).trim();
+
+  const category =
+    String(
+      vaccine?.category || ""
+    ).trim();
+
+  const key =
+    `${brandName}|${vaccineName}`;
+
+
+  // Специальные комбинированные
+  // препараты, которые закрывают
+  // сразу несколько направлений.
+
+  const overrides = {
+    "Nobivac|RL": [
+      "rabies",
+      "lepto",
+    ],
+
+    "Biocan|Novel DHPPi/L4": [
+      "general",
+      "lepto",
+    ],
+
+    "Biocan|Novel DHPPi/L4R": [
+      "general",
+      "lepto",
+      "rabies",
+    ],
+
+    "Vanguard|Plus 5/L": [
+      "general",
+      "lepto",
+    ],
+
+    "Vanguard|Plus 5/CVL": [
+      "general",
+      "lepto",
+    ],
+
+    "Vanguard|DAPP/L4": [
+      "general",
+      "lepto",
+    ],
+
+    "Canigen|DHPPi/L": [
+      "general",
+      "lepto",
+    ],
+
+    "Versican Plus|DHPPi/L4": [
+      "general",
+      "lepto",
+    ],
+
+    "Versican Plus|DHPPi/L4R": [
+      "general",
+      "lepto",
+      "rabies",
+    ],
+
+    "Purevax|RCPCh": [
+      "general",
+    ],
+
+    "Purevax|RCP FeLV": [
+      "general",
+      "felv",
+    ],
+
+    "Biofel|PCHR": [
+      "general",
+      "rabies",
+    ],
+
+    "TruFel|HCP + FeLV": [
+      "general",
+      "felv",
+    ],
+  };
+
+
+  if (overrides[key]) {
+    return [
+      ...overrides[key]
+    ];
+  }
+
+
+  // Обычные категории.
+
+  if (
+    category === "viral"
+  ) {
+    return [
+      "general"
+    ];
+  }
+
+  if (
+    category === "rabies"
+  ) {
+    return [
+      "rabies"
+    ];
+  }
+
+  if (
+    category === "lepto"
+  ) {
+    return [
+      "lepto"
+    ];
+  }
+
+  if (
+    category ===
+    "respiratory"
+  ) {
+    return [
+      "respiratory"
+    ];
+  }
+
+  if (
+    category === "felv"
+  ) {
+    return [
+      "felv"
+    ];
+  }
+
+
+  // Неизвестную вакцину лучше
+  // не классифицировать автоматически.
+
+  return [];
+}
+
 // ===== State =====
 const state = {
   route: "owners",
@@ -34032,10 +34189,16 @@ function openPatientVaccinationPicker(
                           fullName,
 
                         vaccine_type:
-                          category,
+  category,
 
-                        batch_number:
-                          batchNumber,
+coverage_tags:
+  getVaccineCoverageTags(
+    brand,
+    vaccine
+  ),
+
+batch_number:
+  batchNumber,
 
                         next_vaccination_date:
                           nextDate,
