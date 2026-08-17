@@ -33368,7 +33368,75 @@ if (statusButton) {
             "PATIENT STATUS SELECTED:",
             nextStatus
           );
+if (
+  nextStatus === "deceased"
+) {
+  const deceasedDate =
+    await openAppPrompt({
+      title:
+        "Дата смерті",
 
+      text:
+        "Вкажіть дату смерті пацієнта.",
+
+      label:
+        "Дата",
+
+      placeholder:
+        "2026-08-17",
+
+      defaultValue:
+        todayISO(),
+
+      confirmText:
+        "Підтвердити",
+
+      cancelText:
+        "Скасувати",
+
+      required:
+        true,
+    });
+
+  if (!deceasedDate) {
+    menu.remove();
+    return;
+  }
+
+  try {
+    const updatedPatient =
+      await updatePatientStatusApi(
+        pet.id,
+        {
+          patient_status:
+            "deceased",
+
+          deceased_at:
+            deceasedDate,
+        }
+      );
+
+    pet.patient_status =
+      updatedPatient.patient_status;
+
+    pet.deceased_at =
+      updatedPatient.deceased_at ||
+      deceasedDate;
+
+    await renderPatientTab(
+      "overview",
+      pet
+    );
+  } catch (error) {
+    console.error(
+      "PATIENT DECEASED UPDATE FAILED:",
+      error
+    );
+  }
+
+  menu.remove();
+  return;
+}
           if (
             nextStatus === "active" ||
             nextStatus === "archived"
