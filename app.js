@@ -33288,7 +33288,7 @@ const addWeightBtn =
     "[data-add-patient-weight]"
   );
 const statusButton =
-  dynamicBox.querySelector(
+  root.querySelector(
     "[data-patient-status-toggle]"
   );
   console.log(
