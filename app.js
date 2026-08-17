@@ -33287,88 +33287,126 @@ const addWeightBtn =
   dynamicBox.querySelector(
     "[data-add-patient-weight]"
   );
+
 const statusButton =
   root.querySelector(
     "[data-patient-status-toggle]"
   );
-  console.log(
+
+console.log(
   "STATUS BUTTON FOUND:",
   statusButton
 );
 
-  if (statusButton) {
+if (statusButton) {
   statusButton.style.cursor =
     "pointer";
 
   statusButton.addEventListener(
-  "click",
-  () => {
-    document
-      .querySelector(
-        ".patientStatusMenu"
-      )
-      ?.remove();
+    "click",
+    () => {
+      document
+        .querySelector(
+          ".patientStatusMenu"
+        )
+        ?.remove();
 
-    const menu =
-      document.createElement(
-        "div"
-      );
-
-    menu.className =
-      "patientStatusMenu";
-
-    menu.innerHTML = `
-      <button
-        type="button"
-        data-patient-status-value="active"
-      >
-        ● Активний
-      </button>
-
-      <button
-        type="button"
-        data-patient-status-value="archived"
-      >
-        📦 Архів
-      </button>
-
-      <button
-        type="button"
-        data-patient-status-value="deceased"
-      >
-        † Помер
-      </button>
-    `;
-
-    statusButton
-      .insertAdjacentElement(
-        "afterend",
-        menu
-      );
-
-    menu.addEventListener(
-      "click",
-      (event) => {
-        const button =
-          event.target.closest(
-            "[data-patient-status-value]"
-          );
-
-        if (!button) {
-          return;
-        }
-
-        console.log(
-          "PATIENT STATUS SELECTED:",
-          button.dataset
-            .patientStatusValue
+      const menu =
+        document.createElement(
+          "div"
         );
 
-        menu.remove();
-      }
-    );
-  }
-);
+      menu.className =
+        "patientStatusMenu";
+
+      menu.innerHTML = `
+        <button
+          type="button"
+          data-patient-status-value="active"
+        >
+          ● Активний
+        </button>
+
+        <button
+          type="button"
+          data-patient-status-value="archived"
+        >
+          📦 Архів
+        </button>
+
+        <button
+          type="button"
+          data-patient-status-value="deceased"
+        >
+          † Помер
+        </button>
+      `;
+
+      statusButton
+        .insertAdjacentElement(
+          "afterend",
+          menu
+        );
+
+      menu.addEventListener(
+        "click",
+        async (event) => {
+          const button =
+            event.target.closest(
+              "[data-patient-status-value]"
+            );
+
+          if (!button) {
+            return;
+          }
+
+          const nextStatus =
+            button.dataset
+              .patientStatusValue;
+
+          console.log(
+            "PATIENT STATUS SELECTED:",
+            nextStatus
+          );
+
+          if (
+            nextStatus === "active" ||
+            nextStatus === "archived"
+          ) {
+            try {
+              const updatedPatient =
+                await updatePatientStatusApi(
+                  pet.id,
+                  {
+                    patient_status:
+                      nextStatus,
+                  }
+                );
+
+              pet.patient_status =
+                updatedPatient.patient_status;
+
+              pet.deceased_at =
+                updatedPatient.deceased_at ||
+                null;
+
+              await renderPatientTab(
+                "overview",
+                pet
+              );
+            } catch (error) {
+              console.error(
+                "PATIENT STATUS UPDATE FAILED:",
+                error
+              );
+            }
+          }
+
+          menu.remove();
+        }
+      );
+    }
+  );
 }
   
 if (addWeightBtn) {
