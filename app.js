@@ -33291,6 +33291,11 @@ const statusButton =
   dynamicBox.querySelector(
     "[data-patient-status-toggle]"
   );
+  console.log(
+  "STATUS BUTTON FOUND:",
+  statusButton
+);
+
   if (statusButton) {
   statusButton.style.cursor =
     "pointer";
