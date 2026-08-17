@@ -33559,6 +33559,213 @@ const addWeightBtn =
   dynamicBox.querySelector(
     "[data-add-patient-weight]"
   );
+const addVaccinationBtn =
+  dynamicBox.querySelector(
+    "[data-add-patient-vaccination]"
+  );
+
+if (addVaccinationBtn) {
+  addVaccinationBtn.addEventListener(
+    "click",
+    async () => {
+      const vaccinationDate =
+        await openAppPrompt({
+          title:
+            "Нова вакцинація",
+
+          text:
+            "Вкажіть дату проведення вакцинації.",
+
+          label:
+            "Дата вакцинації",
+
+          placeholder:
+            "2026-08-17",
+
+          defaultValue:
+            todayISO(),
+
+          confirmText:
+            "Далі",
+
+          cancelText:
+            "Скасувати",
+
+          required:
+            true,
+        });
+
+      if (!vaccinationDate) {
+        return;
+      }
+
+      const vaccineName =
+        await openAppPrompt({
+          title:
+            "Нова вакцинація",
+
+          text:
+            "Вкажіть назву препарату або вакцини.",
+
+          label:
+            "Назва вакцини",
+
+          placeholder:
+            "Наприклад: Nobivac DHPPi",
+
+          confirmText:
+            "Далі",
+
+          cancelText:
+            "Скасувати",
+
+          required:
+            true,
+        });
+
+      if (!vaccineName) {
+        return;
+      }
+
+      const vaccineType =
+        await openAppPrompt({
+          title:
+            "Тип вакцинації",
+
+          text:
+            "Наприклад: комплексна, сказ, лептоспіроз.",
+
+          label:
+            "Тип",
+
+          placeholder:
+            "Комплексна",
+
+          confirmText:
+            "Далі",
+
+          cancelText:
+            "Пропустити",
+
+          required:
+            false,
+        });
+
+      const batchNumber =
+        await openAppPrompt({
+          title:
+            "Серія вакцини",
+
+          text:
+            "За наявності вкажіть номер серії препарату.",
+
+          label:
+            "Серія / партія",
+
+          placeholder:
+            "Наприклад: A12345",
+
+          confirmText:
+            "Далі",
+
+          cancelText:
+            "Пропустити",
+
+          required:
+            false,
+        });
+
+      const nextVaccinationDate =
+        await openAppPrompt({
+          title:
+            "Наступна вакцинація",
+
+          text:
+            "За потреби вкажіть дату наступної вакцинації.",
+
+          label:
+            "Наступна дата",
+
+          placeholder:
+            "2027-08-17",
+
+          confirmText:
+            "Зберегти",
+
+          cancelText:
+            "Пропустити",
+
+          required:
+            false,
+        });
+
+      addVaccinationBtn.disabled =
+        true;
+
+      try {
+        const created =
+          await createPatientVaccinationApi(
+            pet.id,
+            {
+              vaccination_date:
+                vaccinationDate,
+
+              vaccine_name:
+                vaccineName,
+
+              vaccine_type:
+                vaccineType || "",
+
+              batch_number:
+                batchNumber || "",
+
+              next_vaccination_date:
+                nextVaccinationDate || "",
+            }
+          );
+
+        if (!created) {
+          throw new Error(
+            "Сервер не повернув вакцинацію."
+          );
+        }
+
+        pet.vaccination_status =
+          "vaccinated";
+
+        pet.vaccination_date =
+          vaccinationDate;
+
+        pet.vaccination_name =
+          vaccineName;
+
+        await renderPatientTab(
+          "overview",
+          pet
+        );
+
+      } catch (error) {
+        console.error(
+          "CREATE PATIENT VACCINATION FAILED:",
+          error
+        );
+
+        openDeleteModal(
+          escapeHtml(
+            error?.message ||
+            "Не вдалося додати вакцинацію."
+          ),
+          null,
+          "info"
+        );
+
+      } finally {
+        addVaccinationBtn.disabled =
+          false;
+      }
+    }
+  );
+}
 
 const statusButton =
   root.querySelector(
