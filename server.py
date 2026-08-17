@@ -16178,7 +16178,199 @@ def api_delete_patient(pet_id):
 # =========================
 # API: PATIENT WEIGHT HISTORY
 # =========================
+@app.get(
+    "/api/patients/<patient_id>/vaccinations"
+)
+def api_get_patient_vaccinations(
+    patient_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+        "assistant",
+    )
 
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        result = (
+            supabase
+            .table("patient_vaccinations")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("patient_id", patient_id)
+            .order(
+                "vaccination_date",
+                desc=True,
+            )
+            .execute()
+        )
+
+        return ok(
+            result.data or []
+        )
+
+    except Exception as error:
+        print(
+            "❌ GET patient vaccinations:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити вакцинації.",
+            500,
+        )
+
+@app.post(
+    "/api/patients/<patient_id>/vaccinations"
+)
+def api_create_patient_vaccination(
+    patient_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    vaccination_date = str(
+        data.get("vaccination_date")
+        or ""
+    ).strip()
+
+    vaccine_name = str(
+        data.get("vaccine_name")
+        or ""
+    ).strip()
+
+    vaccine_type = str(
+        data.get("vaccine_type")
+        or ""
+    ).strip() or None
+
+    batch_number = str(
+        data.get("batch_number")
+        or ""
+    ).strip() or None
+
+    next_vaccination_date = str(
+        data.get("next_vaccination_date")
+        or ""
+    ).strip() or None
+
+    source_visit_id = str(
+        data.get("source_visit_id")
+        or ""
+    ).strip() or None
+
+    note = str(
+        data.get("note")
+        or ""
+    ).strip() or None
+
+    if not vaccination_date:
+        return fail(
+            "Вкажіть дату вакцинації.",
+            400,
+        )
+
+    if not vaccine_name:
+        return fail(
+            "Вкажіть назву вакцини.",
+            400,
+        )
+
+    try:
+        patient_result = (
+            supabase
+            .table("patients")
+            .select("id")
+            .eq("org_id", current_org)
+            .eq("id", patient_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        insert_data = {
+            "org_id":
+                current_org,
+
+            "patient_id":
+                patient_id,
+
+            "vaccination_date":
+                vaccination_date,
+
+            "vaccine_name":
+                vaccine_name,
+
+            "vaccine_type":
+                vaccine_type,
+
+            "batch_number":
+                batch_number,
+
+            "next_vaccination_date":
+                next_vaccination_date,
+
+            "source_visit_id":
+                source_visit_id,
+
+            "note":
+                note,
+        }
+
+        result = (
+            supabase
+            .table("patient_vaccinations")
+            .insert(
+                insert_data
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return fail(
+                "Не вдалося зберегти вакцинацію.",
+                500,
+            )
+
+        return ok(
+            result.data[0]
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST patient vaccination:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося зберегти вакцинацію.",
+            500,
+        )
+       
 @app.get(
     "/api/patients/<patient_id>/weights"
 )

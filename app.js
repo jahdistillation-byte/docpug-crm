@@ -4395,6 +4395,108 @@ async function updatePatientStatusApi(
 
   return result.data;
 }
+async function loadPatientVaccinationsApi(
+  patientId
+) {
+  const response =
+    await fetch(
+      `/api/patients/${
+        encodeURIComponent(
+          String(patientId)
+        )
+      }/vaccinations`,
+      {
+        method:
+          "GET",
+
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося завантажити вакцинації."
+    );
+  }
+
+  return Array.isArray(
+    result.data
+  )
+    ? result.data
+    : [];
+}
+
+
+async function createPatientVaccinationApi(
+  patientId,
+  payload
+) {
+  const response =
+    await fetch(
+      `/api/patients/${
+        encodeURIComponent(
+          String(patientId)
+        )
+      }/vaccinations`,
+      {
+        method:
+          "POST",
+
+        credentials:
+          "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body:
+          JSON.stringify(
+            payload || {}
+          ),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося зберегти вакцинацію."
+    );
+  }
+
+  return result.data;
+}
+
 function openOwnerExistsModal(
   owner = {}
 ) {
@@ -32687,6 +32789,148 @@ function bindPatientCardButtons() {
     });
   });
 }
+function renderPatientVaccinationsPanel(
+  pet,
+  vaccinations = []
+) {
+  const list =
+    Array.isArray(vaccinations)
+      ? vaccinations
+      : [];
+
+  const items =
+    list.length
+      ? list
+          .map((item) => {
+            const date =
+              String(
+                item.vaccination_date ||
+                ""
+              ).slice(0, 10);
+
+            const dateLabel =
+              date
+                ? new Date(
+                    `${date}T00:00:00`
+                  ).toLocaleDateString(
+                    "uk-UA"
+                  )
+                : "—";
+
+            const nextDate =
+              String(
+                item.next_vaccination_date ||
+                ""
+              ).slice(0, 10);
+
+            const nextDateLabel =
+              nextDate
+                ? new Date(
+                    `${nextDate}T00:00:00`
+                  ).toLocaleDateString(
+                    "uk-UA"
+                  )
+                : "";
+
+            return `
+              <div class="patientVaccinationItem">
+                <div class="patientVaccinationIcon">
+                  💉
+                </div>
+
+                <div class="patientVaccinationMain">
+                  <strong>
+                    ${escapeHtml(
+                      item.vaccine_name ||
+                      "Вакцина"
+                    )}
+                  </strong>
+
+                  <span>
+                    ${escapeHtml(
+                      dateLabel
+                    )}
+                  </span>
+
+                  ${
+                    item.vaccine_type
+                      ? `
+                        <small>
+                          ${escapeHtml(
+                            item.vaccine_type
+                          )}
+                        </small>
+                      `
+                      : ""
+                  }
+                </div>
+
+                ${
+                  nextDateLabel
+                    ? `
+                      <div class="patientVaccinationNext">
+                        <span>
+                          Наступна
+                        </span>
+
+                        <strong>
+                          ${escapeHtml(
+                            nextDateLabel
+                          )}
+                        </strong>
+                      </div>
+                    `
+                    : ""
+                }
+              </div>
+            `;
+          })
+          .join("")
+      : `
+        <div class="patientVaccinationsEmpty">
+          <span>💉</span>
+
+          <div>
+            <strong>
+              Вакцинацій ще немає
+            </strong>
+
+            <small>
+              Додайте першу вакцинацію
+              пацієнта.
+            </small>
+          </div>
+        </div>
+      `;
+
+  return `
+    <section class="patientVaccinationsPanel">
+      <div class="patientVaccinationsHead">
+        <div>
+          <span class="patientVaccinationsEyebrow">
+            ПРОФІЛАКТИКА
+          </span>
+
+          <h3>
+            💉 Вакцинації
+          </h3>
+        </div>
+
+        <button
+          type="button"
+          class="patientVaccinationAddButton"
+          data-add-patient-vaccination
+        >
+          + Додати вакцинацію
+        </button>
+      </div>
+
+      <div class="patientVaccinationsList">
+        ${items}
+      </div>
+    </section>
+  `;
+}
 
 async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
@@ -32758,6 +33002,18 @@ const weightHistory =
         pet.id
       )
     : [];
+
+ const vaccinationHistory =
+  tab === "overview"
+    ? await loadPatientVaccinationsApi(
+        pet.id
+      )
+    : [];
+
+console.log(
+  "PATIENT VACCINATIONS:",
+  vaccinationHistory
+);  
   // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
   root.innerHTML = `
     <div style="margin-bottom: 16px;">
@@ -32993,10 +33249,16 @@ dynamicBox.innerHTML = `
     pet,
     activeDiagnoses
   )}
+
   ${renderPatientWeightPanel(
-  pet,
-  weightHistory
-)}
+    pet,
+    weightHistory
+  )}
+
+  ${renderPatientVaccinationsPanel(
+    pet,
+    vaccinationHistory
+  )}
 
   <div
     style="
