@@ -134,6 +134,509 @@ function normalizeServiceRow(s) {
 // ✅ Stock registry
 const STOCK_KEY = "docpug_stock_v1";
 
+// =====================================================
+// VACCINE CATALOG
+// =====================================================
+
+const VACCINE_CATALOG = [
+  // ===================================================
+  // DOGS
+  // ===================================================
+
+  {
+    brand: "Nobivac",
+    manufacturer: "MSD / Merck",
+    flag: "🇺🇸",
+    species: ["dog"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "DHPPi",
+        category: "viral",
+        description:
+          "Чума · аденовірус · парвовірус · парагрип",
+      },
+
+      {
+        name: "DP Plus",
+        category: "viral",
+        description:
+          "Чума · парвовірус",
+      },
+
+      {
+        name: "Rabies",
+        category: "rabies",
+        description:
+          "Сказ",
+      },
+
+      {
+        name: "RL",
+        category: "combined",
+        description:
+          "Сказ · лептоспіроз",
+      },
+
+      {
+        name: "L4",
+        category: "lepto",
+        description:
+          "Лептоспіроз",
+      },
+
+      {
+        name: "KC",
+        category: "respiratory",
+        description:
+          "Bordetella · парагрип",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Biocan",
+    manufacturer: "Bioveta",
+    flag: "🇨🇿",
+    species: ["dog"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "Novel DHPPi",
+        category: "viral",
+        description:
+          "Чума · аденовірус · парвовірус · парагрип",
+      },
+
+      {
+        name: "Novel DHPPi/L4",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз",
+      },
+
+      {
+        name: "Novel DHPPi/L4R",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз · сказ",
+      },
+
+      {
+        name: "Puppy",
+        category: "viral",
+        description:
+          "Для цуценят",
+      },
+
+      {
+        name: "R",
+        category: "rabies",
+        description:
+          "Сказ",
+      },
+
+      {
+        name: "Respi",
+        category: "respiratory",
+        description:
+          "Респіраторний комплекс",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Vanguard",
+    manufacturer: "Zoetis",
+    flag: "🇺🇸",
+    species: ["dog"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "Plus 5/L",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз",
+      },
+
+      {
+        name: "Plus 5/CVL",
+        category: "combined",
+        description:
+          "Комплексна вакцина",
+      },
+
+      {
+        name: "DAPP",
+        category: "viral",
+        description:
+          "Чума · аденовірус · парвовірус · парагрип",
+      },
+
+      {
+        name: "DAPP/L4",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз",
+      },
+
+      {
+        name: "L4",
+        category: "lepto",
+        description:
+          "Лептоспіроз",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Canigen",
+    manufacturer: "Virbac",
+    flag: "🇫🇷",
+    species: ["dog"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "DHPPi/L",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз",
+      },
+
+      {
+        name: "DHP",
+        category: "viral",
+        description:
+          "Чума · аденовірус · парвовірус",
+      },
+
+      {
+        name: "DHPPi",
+        category: "viral",
+        description:
+          "Комплексна вірусна",
+      },
+
+      {
+        name: "L4",
+        category: "lepto",
+        description:
+          "Лептоспіроз",
+      },
+
+      {
+        name: "KC",
+        category: "respiratory",
+        description:
+          "Респіраторна вакцина",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Versican Plus",
+    manufacturer: "Zoetis",
+    flag: "🇺🇸",
+    species: ["dog"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "DHPPi",
+        category: "viral",
+        description:
+          "Комплексна вірусна",
+      },
+
+      {
+        name: "DHPPi/L4",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз",
+      },
+
+      {
+        name: "DHPPi/L4R",
+        category: "combined",
+        description:
+          "Комплексна · лептоспіроз · сказ",
+      },
+
+      {
+        name: "L4",
+        category: "lepto",
+        description:
+          "Лептоспіроз",
+      },
+    ],
+  },
+
+
+  // ===================================================
+  // CATS
+  // ===================================================
+
+  {
+    brand: "Purevax",
+    manufacturer:
+      "Boehringer Ingelheim",
+    flag: "🇫🇷",
+    species: ["cat"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "RCP",
+        category: "viral",
+        description:
+          "Панлейкопенія · герпесвірус · каліцивірус",
+      },
+
+      {
+        name: "RCPCh",
+        category: "combined",
+        description:
+          "RCP · хламідіоз",
+      },
+
+      {
+        name: "FeLV",
+        category: "felv",
+        description:
+          "Вірусна лейкемія котів",
+      },
+
+      {
+        name: "RCP FeLV",
+        category: "combined",
+        description:
+          "Комплексна · FeLV",
+      },
+
+      {
+        name: "Rabies",
+        category: "rabies",
+        description:
+          "Сказ",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Nobivac",
+    manufacturer: "MSD / Merck",
+    flag: "🇺🇸",
+    species: ["cat"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "Tricat Trio",
+        category: "viral",
+        description:
+          "Панлейкопенія · герпесвірус · каліцивірус",
+      },
+
+      {
+        name: "Rabies",
+        category: "rabies",
+        description:
+          "Сказ",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Biofel",
+    manufacturer: "Bioveta",
+    flag: "🇨🇿",
+    species: ["cat"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "PCH",
+        category: "viral",
+        description:
+          "Комплексна вакцина для котів",
+      },
+
+      {
+        name: "PCHR",
+        category: "combined",
+        description:
+          "Комплексна · сказ",
+      },
+    ],
+  },
+
+
+  {
+    brand: "Feligen",
+    manufacturer: "Virbac",
+    flag: "🇫🇷",
+    species: ["cat"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "CRP",
+        category: "viral",
+        description:
+          "Каліцивірус · ринотрахеїт · панлейкопенія",
+      },
+    ],
+  },
+
+
+  {
+    brand: "TruFel",
+    manufacturer: "Elanco",
+    flag: "🇺🇸",
+    species: ["cat"],
+    popular: true,
+
+    vaccines: [
+      {
+        name: "HCP",
+        category: "viral",
+        description:
+          "Комплексна вакцина для котів",
+      },
+
+      {
+        name: "HCP + FeLV",
+        category: "combined",
+        description:
+          "Комплексна · FeLV",
+      },
+    ],
+  },
+];
+
+
+// =====================================================
+// VACCINE CATEGORIES
+// =====================================================
+
+const VACCINE_CATEGORY_LABELS = {
+  viral: {
+    icon: "🦠",
+    dog:
+      "Комплексні / вірусні",
+    cat:
+      "RCP / комплексні",
+  },
+
+  rabies: {
+    icon: "🛡️",
+    dog:
+      "Сказ",
+    cat:
+      "Сказ",
+  },
+
+  lepto: {
+    icon: "🧫",
+    dog:
+      "Лептоспіроз",
+    cat:
+      "Лептоспіроз",
+  },
+
+  respiratory: {
+    icon: "🫁",
+    dog:
+      "Респіраторні",
+    cat:
+      "Респіраторні",
+  },
+
+  felv: {
+    icon: "🐈",
+    dog:
+      "FeLV",
+    cat:
+      "FeLV",
+  },
+
+  combined: {
+    icon: "💉",
+    dog:
+      "Комбіновані",
+    cat:
+      "Комбіновані",
+  },
+};
+
+
+// =====================================================
+// NORMALIZE PATIENT SPECIES
+// =====================================================
+
+function normalizeVaccineSpecies(
+  value
+) {
+  const raw =
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    [
+      "dog",
+      "собака",
+      "пес",
+    ].includes(raw)
+  ) {
+    return "dog";
+  }
+
+  if (
+    [
+      "cat",
+      "кіт",
+      "кішка",
+      "кот",
+      "кошка",
+    ].includes(raw)
+  ) {
+    return "cat";
+  }
+
+  return "other";
+}
+
+
+// =====================================================
+// GET VACCINE BRANDS FOR PATIENT
+// =====================================================
+
+function getVaccineBrandsForPatient(
+  pet
+) {
+  const species =
+    normalizeVaccineSpecies(
+      pet?.species
+    );
+
+  return VACCINE_CATALOG.filter(
+    (brand) =>
+      brand.species.includes(
+        species
+      )
+  );
+}
 // ===== State =====
 const state = {
   route: "owners",
