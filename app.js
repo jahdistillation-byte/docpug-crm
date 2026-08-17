@@ -32805,12 +32805,22 @@ const weightHistory =
   "
 >
   ${
-    pet?.patient_status === "deceased"
-      ? "† Помер"
-      : pet?.patient_status === "archived"
-        ? "Архів"
-        : "● Активний"
-  }
+  pet?.patient_status === "deceased"
+    ? `† Помер${
+        pet?.deceased_at
+          ? ` · ${new Date(
+              `${String(
+                pet.deceased_at
+              ).slice(0, 10)}T00:00:00`
+            ).toLocaleDateString(
+              "uk-UA"
+            )}`
+          : ""
+      }`
+    : pet?.patient_status === "archived"
+      ? "Архів"
+      : "● Активний"
+}
 </div>  
 
   
