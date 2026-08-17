@@ -33434,6 +33434,350 @@ function renderPatientVaccinationsPanel(
     </section>
   `;
 }
+function openPatientVaccinationPicker(
+  pet
+) {
+  document
+    .querySelector(
+      ".patientVaccinePickerOverlay"
+    )
+    ?.remove();
+
+  const species =
+    normalizeVaccineSpecies(
+      pet?.species
+    );
+
+  const brands =
+    getVaccineBrandsForPatient(
+      pet
+    );
+
+  if (!brands.length) {
+    showCrmNotice({
+      icon: "💉",
+      title:
+        "Немає готового каталогу",
+      text:
+        "Для цього виду тварини поки немає готового каталогу вакцинацій.",
+    });
+
+    return;
+  }
+
+  const speciesLabel =
+    species === "dog"
+      ? "Собака"
+      : species === "cat"
+        ? "Кіт"
+        : "Пацієнт";
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.className =
+    "patientVaccinePickerOverlay";
+
+  overlay.innerHTML = `
+    <div class="patientVaccinePicker">
+      <div class="patientVaccinePickerHead">
+        <div>
+          <span class="patientVaccinePickerEyebrow">
+            ВАКЦИНАЦІЯ
+          </span>
+
+          <h2>
+            💉 Додати вакцинацію
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              pet?.name ||
+              "Пацієнт"
+            )}
+            ·
+            ${escapeHtml(
+              speciesLabel
+            )}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="patientVaccinePickerClose"
+          data-close-vaccine-picker
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="patientVaccinePickerSection">
+        <div class="patientVaccinePickerTitle">
+          Популярні бренди
+        </div>
+
+        <div class="patientVaccineBrandGrid">
+          ${brands
+            .map(
+              (
+                brand,
+                index
+              ) => `
+                <button
+                  type="button"
+                  class="patientVaccineBrandCard"
+                  data-vaccine-brand="${index}"
+                >
+                  <span class="patientVaccineBrandFlag">
+                    ${escapeHtml(
+                      brand.flag ||
+                      "💉"
+                    )}
+                  </span>
+
+                  <strong>
+                    ${escapeHtml(
+                      brand.brand
+                    )}
+                  </strong>
+
+                  <small>
+                    ${escapeHtml(
+                      brand.manufacturer ||
+                      ""
+                    )}
+                  </small>
+                </button>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+
+      <div
+        class="patientVaccineProducts"
+        data-vaccine-products
+      >
+        <div class="patientVaccineChooseHint">
+          ↑ Оберіть бренд вакцини
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(
+    overlay
+  );
+
+  const productsBox =
+    overlay.querySelector(
+      "[data-vaccine-products]"
+    );
+
+  const closePicker =
+    () => {
+      overlay.remove();
+    };
+
+  overlay
+    .querySelector(
+      "[data-close-vaccine-picker]"
+    )
+    ?.addEventListener(
+      "click",
+      closePicker
+    );
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (event.target === overlay) {
+        closePicker();
+      }
+    }
+  );
+
+  overlay
+    .querySelectorAll(
+      "[data-vaccine-brand]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            overlay
+              .querySelectorAll(
+                "[data-vaccine-brand]"
+              )
+              .forEach(
+                (item) => {
+                  item.classList.remove(
+                    "is-active"
+                  );
+                }
+              );
+
+            button.classList.add(
+              "is-active"
+            );
+
+            const brand =
+              brands[
+                Number(
+                  button.dataset
+                    .vaccineBrand
+                )
+              ];
+
+            if (!brand) {
+              return;
+            }
+
+            const groups = {};
+
+            (
+              brand.vaccines ||
+              []
+            ).forEach(
+              (vaccine) => {
+                const category =
+                  vaccine.category ||
+                  "combined";
+
+                if (
+                  !groups[
+                    category
+                  ]
+                ) {
+                  groups[
+                    category
+                  ] = [];
+                }
+
+                groups[
+                  category
+                ].push(
+                  vaccine
+                );
+              }
+            );
+
+            productsBox.innerHTML = `
+              <div class="patientVaccineSelectedBrand">
+                <span>
+                  ${escapeHtml(
+                    brand.flag ||
+                    "💉"
+                  )}
+                </span>
+
+                <div>
+                  <strong>
+                    ${escapeHtml(
+                      brand.brand
+                    )}
+                  </strong>
+
+                  <small>
+                    ${escapeHtml(
+                      brand.manufacturer ||
+                      ""
+                    )}
+                  </small>
+                </div>
+              </div>
+
+              ${Object.entries(
+                groups
+              )
+                .map(
+                  (
+                    [
+                      category,
+                      vaccines,
+                    ]
+                  ) => {
+                    const meta =
+                      VACCINE_CATEGORY_LABELS[
+                        category
+                      ] ||
+                      {
+                        icon:
+                          "💉",
+
+                        dog:
+                          "Інші",
+
+                        cat:
+                          "Інші",
+                      };
+
+                    const title =
+                      meta[
+                        species
+                      ] ||
+                      category;
+
+                    return `
+                      <div class="patientVaccineCategory">
+                        <div class="patientVaccineCategoryTitle">
+                          <span>
+                            ${escapeHtml(
+                              meta.icon
+                            )}
+                          </span>
+
+                          ${escapeHtml(
+                            title
+                          )}
+                        </div>
+
+                        <div class="patientVaccineProductGrid">
+                          ${vaccines
+                            .map(
+                              (
+                                vaccine,
+                                vaccineIndex
+                              ) => `
+                                <button
+                                  type="button"
+                                  class="patientVaccineProductCard"
+                                  data-vaccine-product="${vaccineIndex}"
+                                  data-vaccine-category="${escapeHtml(
+                                    category
+                                  )}"
+                                >
+                                  <strong>
+                                    ${escapeHtml(
+                                      vaccine.name
+                                    )}
+                                  </strong>
+
+                                  <small>
+                                    ${escapeHtml(
+                                      vaccine.description ||
+                                      ""
+                                    )}
+                                  </small>
+                                </button>
+                              `
+                            )
+                            .join("")}
+                        </div>
+                      </div>
+                    `;
+                  }
+                )
+                .join("")}
+            `;
+          }
+        );
+      }
+    );
+}
 
 async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
@@ -34062,6 +34406,8 @@ const addWeightBtn =
   dynamicBox.querySelector(
     "[data-add-patient-weight]"
   );
+
+  
 const addVaccinationBtn =
   dynamicBox.querySelector(
     "[data-add-patient-vaccination]"
@@ -34070,202 +34416,10 @@ const addVaccinationBtn =
 if (addVaccinationBtn) {
   addVaccinationBtn.addEventListener(
     "click",
-    async () => {
-      const vaccinationDate =
-        await openAppPrompt({
-          title:
-            "Нова вакцинація",
-
-          text:
-            "Вкажіть дату проведення вакцинації.",
-
-          label:
-            "Дата вакцинації",
-
-          placeholder:
-            "2026-08-17",
-
-          defaultValue:
-            todayISO(),
-
-          confirmText:
-            "Далі",
-
-          cancelText:
-            "Скасувати",
-
-          required:
-            true,
-        });
-
-      if (!vaccinationDate) {
-        return;
-      }
-
-      const vaccineName =
-        await openAppPrompt({
-          title:
-            "Нова вакцинація",
-
-          text:
-            "Вкажіть назву препарату або вакцини.",
-
-          label:
-            "Назва вакцини",
-
-          placeholder:
-            "Наприклад: Nobivac DHPPi",
-
-          confirmText:
-            "Далі",
-
-          cancelText:
-            "Скасувати",
-
-          required:
-            true,
-        });
-
-      if (!vaccineName) {
-        return;
-      }
-
-      const vaccineType =
-        await openAppPrompt({
-          title:
-            "Тип вакцинації",
-
-          text:
-            "Наприклад: комплексна, сказ, лептоспіроз.",
-
-          label:
-            "Тип",
-
-          placeholder:
-            "Комплексна",
-
-          confirmText:
-            "Далі",
-
-          cancelText:
-            "Пропустити",
-
-          required:
-            false,
-        });
-
-      const batchNumber =
-        await openAppPrompt({
-          title:
-            "Серія вакцини",
-
-          text:
-            "За наявності вкажіть номер серії препарату.",
-
-          label:
-            "Серія / партія",
-
-          placeholder:
-            "Наприклад: A12345",
-
-          confirmText:
-            "Далі",
-
-          cancelText:
-            "Пропустити",
-
-          required:
-            false,
-        });
-
-      const nextVaccinationDate =
-        await openAppPrompt({
-          title:
-            "Наступна вакцинація",
-
-          text:
-            "За потреби вкажіть дату наступної вакцинації.",
-
-          label:
-            "Наступна дата",
-
-          placeholder:
-            "2027-08-17",
-
-          confirmText:
-            "Зберегти",
-
-          cancelText:
-            "Пропустити",
-
-          required:
-            false,
-        });
-
-      addVaccinationBtn.disabled =
-        true;
-
-      try {
-        const created =
-          await createPatientVaccinationApi(
-            pet.id,
-            {
-              vaccination_date:
-                vaccinationDate,
-
-              vaccine_name:
-                vaccineName,
-
-              vaccine_type:
-                vaccineType || "",
-
-              batch_number:
-                batchNumber || "",
-
-              next_vaccination_date:
-                nextVaccinationDate || "",
-            }
-          );
-
-        if (!created) {
-          throw new Error(
-            "Сервер не повернув вакцинацію."
-          );
-        }
-
-        pet.vaccination_status =
-          "vaccinated";
-
-        pet.vaccination_date =
-          vaccinationDate;
-
-        pet.vaccination_name =
-          vaccineName;
-
-        await renderPatientTab(
-          "overview",
-          pet
-        );
-
-      } catch (error) {
-        console.error(
-          "CREATE PATIENT VACCINATION FAILED:",
-          error
-        );
-
-        openDeleteModal(
-          escapeHtml(
-            error?.message ||
-            "Не вдалося додати вакцинацію."
-          ),
-          null,
-          "info"
-        );
-
-      } finally {
-        addVaccinationBtn.disabled =
-          false;
-      }
+    () => {
+      openPatientVaccinationPicker(
+        pet
+      );
     }
   );
 }
