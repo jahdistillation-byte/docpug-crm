@@ -52266,3 +52266,365 @@ button[data-patient-status-value="deceased"]:hover {
   color:
     var(--text-muted);
 }
+/* =====================================================
+   PATIENT VACCINE PICKER
+   ===================================================== */
+
+.patientVaccinePickerOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 32px !important;
+
+  background: rgba(5, 6, 10, 0.78) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+
+.patientVaccinePicker {
+  position: relative !important;
+
+  width: min(920px, 92vw) !important;
+  max-height: 86vh !important;
+
+  overflow-y: auto !important;
+
+  padding: 26px !important;
+
+  border-radius: 24px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30, 29, 34, 0.99),
+      rgba(18, 18, 22, 0.99)
+    ) !important;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.12) !important;
+
+  box-shadow:
+    0 30px 100px
+    rgba(0, 0, 0, 0.65) !important;
+
+  color: #f5f5f7 !important;
+}
+
+
+.patientVaccinePickerHead {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+
+  gap: 20px !important;
+
+  margin-bottom: 26px !important;
+}
+
+
+.patientVaccinePickerEyebrow {
+  display: block !important;
+
+  margin-bottom: 6px !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+
+  letter-spacing: 0.14em !important;
+
+  opacity: 0.55 !important;
+}
+
+
+.patientVaccinePickerHead h2 {
+  margin: 0 !important;
+
+  font-size: 24px !important;
+  font-weight: 850 !important;
+
+  color: #fff !important;
+}
+
+
+.patientVaccinePickerHead p {
+  margin: 7px 0 0 !important;
+
+  font-size: 13px !important;
+
+  opacity: 0.6 !important;
+}
+
+
+.patientVaccinePickerClose {
+  width: 40px !important;
+  height: 40px !important;
+
+  flex: 0 0 40px !important;
+
+  border: 0 !important;
+  border-radius: 12px !important;
+
+  background:
+    rgba(255, 255, 255, 0.07) !important;
+
+  color: #fff !important;
+
+  font-size: 24px !important;
+
+  cursor: pointer !important;
+}
+
+
+.patientVaccinePickerTitle {
+  margin-bottom: 12px !important;
+
+  font-size: 11px !important;
+  font-weight: 850 !important;
+
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+
+  opacity: 0.55 !important;
+}
+
+
+.patientVaccineBrandGrid {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr)) !important;
+
+  gap: 10px !important;
+}
+
+
+.patientVaccineBrandCard {
+  appearance: none !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+
+  min-width: 0 !important;
+  min-height: 110px !important;
+
+  padding: 15px !important;
+
+  border-radius: 16px !important;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.09) !important;
+
+  background:
+    rgba(255, 255, 255, 0.035) !important;
+
+  color: #fff !important;
+
+  text-align: left !important;
+
+  cursor: pointer !important;
+}
+
+
+.patientVaccineBrandCard:hover,
+.patientVaccineBrandCard.is-active {
+  border-color:
+    rgba(180, 118, 255, 0.7) !important;
+
+  background:
+    rgba(151, 71, 255, 0.16) !important;
+
+  transform:
+    translateY(-2px) !important;
+}
+
+
+.patientVaccineBrandFlag {
+  display: block !important;
+
+  margin-bottom: 10px !important;
+
+  font-size: 22px !important;
+}
+
+
+.patientVaccineBrandCard strong {
+  display: block !important;
+
+  font-size: 14px !important;
+  font-weight: 850 !important;
+
+  color: #fff !important;
+}
+
+
+.patientVaccineBrandCard small {
+  display: block !important;
+
+  margin-top: 4px !important;
+
+  font-size: 10px !important;
+
+  color:
+    rgba(255, 255, 255, 0.5) !important;
+}
+
+
+.patientVaccineProducts {
+  margin-top: 24px !important;
+}
+
+
+.patientVaccineChooseHint {
+  padding: 26px !important;
+
+  border:
+    1px dashed
+    rgba(255, 255, 255, 0.12) !important;
+
+  border-radius: 16px !important;
+
+  text-align: center !important;
+
+  color:
+    rgba(255, 255, 255, 0.5) !important;
+}
+
+
+.patientVaccineSelectedBrand {
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 12px !important;
+
+  margin-bottom: 20px !important;
+}
+
+
+.patientVaccineSelectedBrand > span {
+  font-size: 26px !important;
+}
+
+
+.patientVaccineSelectedBrand div {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+
+.patientVaccineSelectedBrand strong {
+  font-size: 15px !important;
+}
+
+
+.patientVaccineSelectedBrand small {
+  margin-top: 3px !important;
+
+  font-size: 11px !important;
+
+  opacity: 0.5 !important;
+}
+
+
+.patientVaccineCategory {
+  margin-top: 20px !important;
+}
+
+
+.patientVaccineCategoryTitle {
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 7px !important;
+
+  margin-bottom: 9px !important;
+
+  font-size: 12px !important;
+  font-weight: 800 !important;
+
+  opacity: 0.7 !important;
+}
+
+
+.patientVaccineProductGrid {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 10px !important;
+}
+
+
+.patientVaccineProductCard {
+  appearance: none !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+
+  min-height: 86px !important;
+
+  padding: 14px !important;
+
+  border-radius: 14px !important;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.08) !important;
+
+  background:
+    rgba(255, 255, 255, 0.03) !important;
+
+  color: #fff !important;
+
+  text-align: left !important;
+
+  cursor: pointer !important;
+}
+
+
+.patientVaccineProductCard:hover {
+  border-color:
+    rgba(180, 118, 255, 0.6) !important;
+
+  background:
+    rgba(151, 71, 255, 0.12) !important;
+}
+
+
+.patientVaccineProductCard strong {
+  font-size: 13px !important;
+  font-weight: 850 !important;
+}
+
+
+.patientVaccineProductCard small {
+  margin-top: 6px !important;
+
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+
+  color:
+    rgba(255, 255, 255, 0.52) !important;
+}
+
+
+@media (max-width: 900px) {
+  .patientVaccineBrandGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .patientVaccineProductGrid {
+    grid-template-columns:
+      1fr !important;
+  }
+}
