@@ -52628,3 +52628,255 @@ button[data-patient-status-value="deceased"]:hover {
       1fr !important;
   }
 }
+.patientVaccineProductCard.is-active {
+  border-color:
+    rgba(
+      177,
+      104,
+      255,
+      0.85
+    ) !important;
+
+  background:
+    rgba(
+      151,
+      71,
+      255,
+      0.18
+    ) !important;
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(
+      177,
+      104,
+      255,
+      0.15
+    );
+}
+
+
+.patientVaccineSaveBox {
+  margin-top: 24px;
+
+  padding: 20px;
+
+  border-radius: 18px;
+
+  border:
+    1px solid
+    rgba(
+      177,
+      104,
+      255,
+      0.28
+    );
+
+  background:
+    rgba(
+      151,
+      71,
+      255,
+      0.07
+    );
+}
+
+
+.patientVaccineSaveHead {
+  margin-bottom: 18px;
+}
+
+
+.patientVaccineSaveHead > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+
+.patientVaccineSaveHead span {
+  font-size: 9px;
+  font-weight: 850;
+
+  letter-spacing:
+    0.12em;
+
+  opacity: 0.5;
+}
+
+
+.patientVaccineSaveHead strong {
+  font-size: 17px;
+}
+
+
+.patientVaccineSaveHead small {
+  font-size: 11px;
+
+  opacity: 0.55;
+}
+
+
+.patientVaccineFormGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 12px;
+}
+
+
+.patientVaccineFormGrid label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.patientVaccineFormGrid label > span {
+  font-size: 10px;
+  font-weight: 750;
+
+  opacity: 0.62;
+}
+
+
+.patientVaccineFormGrid input {
+  width: 100%;
+
+  min-height: 42px;
+
+  box-sizing: border-box;
+
+  padding:
+    0 12px;
+
+  border-radius: 11px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.1
+    );
+
+  outline: none;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.045
+    );
+
+  color: inherit;
+
+  font-family: inherit;
+}
+
+
+.patientVaccineFormGrid input:focus {
+  border-color:
+    rgba(
+      177,
+      104,
+      255,
+      0.65
+    );
+}
+
+
+.patientVaccineSaveActions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 9px;
+
+  margin-top: 18px;
+}
+
+
+.patientVaccineSaveCancel,
+.patientVaccineSaveButton {
+  min-height: 40px;
+
+  padding:
+    0 15px;
+
+  border-radius: 11px;
+
+  font-family: inherit;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.patientVaccineSaveCancel {
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.1
+    );
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.04
+    );
+
+  color: inherit;
+}
+
+
+.patientVaccineSaveButton {
+  border: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      #9346e8,
+      #b45cff
+    );
+
+  color: #fff;
+
+  box-shadow:
+    0 8px 24px
+    rgba(
+      147,
+      70,
+      232,
+      0.25
+    );
+}
+
+
+.patientVaccineSaveButton:disabled {
+  opacity: 0.55;
+
+  cursor: wait;
+}
+
+
+@media (
+  max-width: 760px
+) {
+  .patientVaccineFormGrid {
+    grid-template-columns:
+      1fr;
+  }
+}

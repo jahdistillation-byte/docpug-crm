@@ -33773,6 +33773,338 @@ function openPatientVaccinationPicker(
                 )
                 .join("")}
             `;
+            productsBox
+  .querySelectorAll(
+    "[data-vaccine-product]"
+  )
+  .forEach(
+    (productButton) => {
+      productButton.addEventListener(
+        "click",
+        () => {
+          productsBox
+            .querySelectorAll(
+              "[data-vaccine-product]"
+            )
+            .forEach(
+              (item) => {
+                item.classList.remove(
+                  "is-active"
+                );
+              }
+            );
+
+          productButton.classList.add(
+            "is-active"
+          );
+
+          const category =
+            productButton.dataset
+              .vaccineCategory;
+
+          const vaccineIndex =
+            Number(
+              productButton.dataset
+                .vaccineProduct
+            );
+
+          const vaccine =
+            groups[
+              category
+            ]?.[
+              vaccineIndex
+            ];
+
+          if (!vaccine) {
+            return;
+          }
+
+          productsBox
+            .querySelector(
+              "[data-vaccine-save-box]"
+            )
+            ?.remove();
+
+          const saveBox =
+            document.createElement(
+              "div"
+            );
+
+          saveBox.className =
+            "patientVaccineSaveBox";
+
+          saveBox.dataset
+            .vaccineSaveBox =
+              "true";
+
+          saveBox.innerHTML = `
+            <div class="patientVaccineSaveHead">
+              <div>
+                <span>
+                  ОБРАНА ВАКЦИНА
+                </span>
+
+                <strong>
+                  ${escapeHtml(
+                    brand.brand
+                  )}
+                  ${escapeHtml(
+                    vaccine.name
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    vaccine.description ||
+                    ""
+                  )}
+                </small>
+              </div>
+            </div>
+
+            <div class="patientVaccineFormGrid">
+
+              <label>
+                <span>
+                  Дата вакцинації
+                </span>
+
+                <input
+                  type="date"
+                  data-vaccine-date
+                  value="${escapeHtml(
+                    todayISO()
+                  )}"
+                >
+              </label>
+
+
+              <label>
+                <span>
+                  Серія / партія
+                </span>
+
+                <input
+                  type="text"
+                  data-vaccine-batch
+                  placeholder="Наприклад: A12345"
+                  autocomplete="off"
+                >
+              </label>
+
+
+              <label>
+                <span>
+                  Наступна вакцинація
+                </span>
+
+                <input
+                  type="date"
+                  data-vaccine-next-date
+                >
+              </label>
+
+            </div>
+
+            <div class="patientVaccineSaveActions">
+              <button
+                type="button"
+                class="patientVaccineSaveCancel"
+                data-cancel-vaccine-selection
+              >
+                Обрати іншу
+              </button>
+
+              <button
+                type="button"
+                class="patientVaccineSaveButton"
+                data-save-patient-vaccine
+              >
+                Зберегти вакцинацію
+              </button>
+            </div>
+          `;
+
+          productsBox.appendChild(
+            saveBox
+          );
+
+          saveBox.scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "nearest",
+          });
+
+
+          saveBox
+            .querySelector(
+              "[data-cancel-vaccine-selection]"
+            )
+            ?.addEventListener(
+              "click",
+              () => {
+                productButton.classList.remove(
+                  "is-active"
+                );
+
+                saveBox.remove();
+              }
+            );
+
+
+          const saveButton =
+            saveBox.querySelector(
+              "[data-save-patient-vaccine]"
+            );
+
+          saveButton
+            ?.addEventListener(
+              "click",
+              async () => {
+                const vaccinationDate =
+                  String(
+                    saveBox
+                      .querySelector(
+                        "[data-vaccine-date]"
+                      )
+                      ?.value ||
+                    ""
+                  ).trim();
+
+                const batchNumber =
+                  String(
+                    saveBox
+                      .querySelector(
+                        "[data-vaccine-batch]"
+                      )
+                      ?.value ||
+                    ""
+                  ).trim();
+
+                const nextDate =
+                  String(
+                    saveBox
+                      .querySelector(
+                        "[data-vaccine-next-date]"
+                      )
+                      ?.value ||
+                    ""
+                  ).trim();
+
+                if (
+                  !vaccinationDate
+                ) {
+                  showCrmNotice({
+                    icon:
+                      "💉",
+
+                    title:
+                      "Вкажіть дату вакцинації",
+
+                    text:
+                      "Дата проведення вакцинації є обов’язковою.",
+                  });
+
+                  return;
+                }
+
+                saveButton.disabled =
+                  true;
+
+                saveButton.textContent =
+                  "Зберігаємо…";
+
+                try {
+                  const fullName =
+                    `${brand.brand} ${vaccine.name}`
+                      .trim();
+
+                  const created =
+                    await createPatientVaccinationApi(
+                      pet.id,
+                      {
+                        vaccination_date:
+                          vaccinationDate,
+
+                        vaccine_name:
+                          fullName,
+
+                        vaccine_type:
+                          category,
+
+                        batch_number:
+                          batchNumber,
+
+                        next_vaccination_date:
+                          nextDate,
+                      }
+                    );
+
+                  if (!created) {
+                    throw new Error(
+                      "Сервер не повернув вакцинацію."
+                    );
+                  }
+
+                  pet.vaccination_status =
+                    "vaccinated";
+
+                  pet.vaccination_date =
+                    vaccinationDate;
+
+                  pet.vaccination_name =
+                    fullName;
+
+                  closePicker();
+
+                  await renderPatientTab(
+                    "overview",
+                    pet
+                  );
+
+                  showCrmNotice({
+                    icon:
+                      "💉",
+
+                    title:
+                      "Вакцинацію збережено",
+
+                    text:
+                      fullName,
+                  });
+
+                } catch (error) {
+                  console.error(
+                    "CREATE PATIENT VACCINATION:",
+                    error
+                  );
+
+                  showCrmNotice({
+                    icon:
+                      "⚠️",
+
+                    title:
+                      "Не вдалося зберегти вакцинацію",
+
+                    text:
+                      error?.message ||
+                      "Спробуйте ще раз.",
+                  });
+
+                  saveButton.disabled =
+                    false;
+
+                  saveButton.textContent =
+                    "Зберегти вакцинацію";
+                }
+              }
+            );
+        }
+      );
+    }
+  );
           }
         );
       }
