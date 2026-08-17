@@ -32791,27 +32791,7 @@ const weightHistory =
     )}
   </h2>
 
-  <div
-  data-patient-status-toggle
-  class="
-    patientStatusBadge
-    ${
-      pet?.patient_status === "deceased"
-        ? "is-deceased"
-        : pet?.patient_status === "archived"
-          ? "is-archived"
-          : "is-active"
-    }
-  "
->
-    ${
-      pet?.patient_status === "deceased"
-        ? "† Помер"
-        : pet?.patient_status === "archived"
-          ? "Архів"
-          : "● Активний"
-    }
-  </div>
+  
 </div>
           <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
             ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
@@ -33289,6 +33269,53 @@ const statusButton =
   dynamicBox.querySelector(
     "[data-patient-status-toggle]"
   );
+  if (statusButton) {
+  statusButton.style.cursor =
+    "pointer";
+
+  statusButton.addEventListener(
+    "click",
+    async () => {
+      const selectedStatus =
+        await openAppPrompt({
+          title:
+            "Статус пацієнта",
+
+          text:
+            "Вкажіть один зі статусів: Активний, Помер або Архів.",
+
+          label:
+            "Новий статус",
+
+          placeholder:
+            "Активний / Помер / Архів",
+
+          defaultValue:
+            pet?.patient_status ===
+            "deceased"
+              ? "Помер"
+              : pet?.patient_status ===
+                "archived"
+                ? "Архів"
+                : "Активний",
+
+          confirmText:
+            "Продовжити",
+
+          cancelText:
+            "Скасувати",
+
+          required:
+            true,
+        });
+
+      console.log(
+        "PATIENT STATUS SELECTED:",
+        selectedStatus
+      );
+    }
+  );
+}
   
 if (addWeightBtn) {
   addWeightBtn.addEventListener(
