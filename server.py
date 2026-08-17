@@ -15815,132 +15815,132 @@ def api_create_patient():
             )
 
         payload = {
-    "org_id":
-        current_org,
+            "org_id":
+                current_org,
 
-    "owner_id":
-        owner_id,
+            "owner_id":
+                owner_id,
 
-    "name":
-        name,
+            "name":
+                name,
 
-    "species":
-        (
-            str(
-                data.get("species")
-                or ""
-            ).strip()
-            or None
-        ),
+            "species":
+                (
+                    str(
+                        data.get("species")
+                        or ""
+                    ).strip()
+                    or None
+                ),
 
-    "breed":
-        (
-            str(
-                data.get("breed")
-                or ""
-            ).strip()
-            or None
-        ),
+            "breed":
+                (
+                    str(
+                        data.get("breed")
+                        or ""
+                    ).strip()
+                    or None
+                ),
 
-    "age":
-        (
-            str(
-                data.get("age")
-                or ""
-            ).strip()
-            or None
-        ),
+            "age":
+                (
+                    str(
+                        data.get("age")
+                        or ""
+                    ).strip()
+                    or None
+                ),
 
-    "weight_kg":
-        (
-            data.get(
-                "weight_kg"
-            )
-            if data.get(
-                "weight_kg"
-            ) not in (
-                "",
-                None,
-            )
-            else None
-        ),
+            "weight_kg":
+                (
+                    data.get(
+                        "weight_kg"
+                    )
+                    if data.get(
+                        "weight_kg"
+                    ) not in (
+                        "",
+                        None,
+                    )
+                    else None
+                ),
 
-    "sex":
-        (
-            str(
-                data.get("sex")
-                or ""
-            ).strip()
-            or None
-        ),
+            "sex":
+                (
+                    str(
+                        data.get("sex")
+                        or ""
+                    ).strip()
+                    or None
+                ),
 
-    "neutered":
-        (
-            data.get("neutered")
-            if isinstance(
-                data.get("neutered"),
-                bool,
-            )
-            else None
-        ),
+            "neutered":
+                (
+                    data.get("neutered")
+                    if isinstance(
+                        data.get("neutered"),
+                        bool,
+                    )
+                    else None
+                ),
 
-    "vaccination_status":
-        (
-            str(
-                data.get(
-                    "vaccination_status"
-                )
-                or "unknown"
-            ).strip()
-        ),
+            "vaccination_status":
+                (
+                    str(
+                        data.get(
+                            "vaccination_status"
+                        )
+                        or "unknown"
+                    ).strip()
+                ),
 
-    "vaccination_date":
-        (
-            str(
-                data.get(
-                    "vaccination_date"
-                )
-                or ""
-            ).strip()
-            or None
-        ),
+            "vaccination_date":
+                (
+                    str(
+                        data.get(
+                            "vaccination_date"
+                        )
+                        or ""
+                    ).strip()
+                    or None
+                ),
 
-    "vaccination_name":
-        (
-            str(
-                data.get(
-                    "vaccination_name"
-                )
-                or ""
-            ).strip()
-            or None
-        ),
+            "vaccination_name":
+                (
+                    str(
+                        data.get(
+                            "vaccination_name"
+                        )
+                        or ""
+                    ).strip()
+                    or None
+                ),
 
-    "notes":
-        (
-            str(
-                data.get("notes")
-                or data.get("note")
-                or ""
-            ).strip()
-            or None
-        ),
-}
+            "notes":
+                (
+                    str(
+                        data.get("notes")
+                        or data.get("note")
+                        or ""
+                    ).strip()
+                    or None
+                ),
+        }
 
         result = (
-    insert_with_optional_fallback(
-        "patients",
-        payload,
-        optional_fields=[
-            "notes",
-            "sex",
-            "neutered",
-            "vaccination_status",
-            "vaccination_date",
-            "vaccination_name",
-        ]
-    )
-)
+            insert_with_optional_fallback(
+                "patients",
+                payload,
+                optional_fields=[
+                    "notes",
+                    "sex",
+                    "neutered",
+                    "vaccination_status",
+                    "vaccination_date",
+                    "vaccination_name",
+                ]
+            )
+        )
 
         row = (
             result.data[0]
@@ -15951,6 +15951,69 @@ def api_create_patient():
             )
             else payload
         )
+
+        if (
+            row
+            and row.get("id")
+            and payload.get(
+                "vaccination_status"
+            ) == "vaccinated"
+            and payload.get(
+                "vaccination_date"
+            )
+            and payload.get(
+                "vaccination_name"
+            )
+        ):
+            try:
+                (
+                    supabase
+                    .table(
+                        "patient_vaccinations"
+                    )
+                    .insert({
+                        "org_id":
+                            current_org,
+
+                        "patient_id":
+                            row.get("id"),
+
+                        "vaccination_date":
+                            payload.get(
+                                "vaccination_date"
+                            ),
+
+                        "vaccine_name":
+                            payload.get(
+                                "vaccination_name"
+                            ),
+
+                        "vaccine_type":
+                            None,
+
+                        "batch_number":
+                            None,
+
+                        "next_vaccination_date":
+                            None,
+
+                        "source_visit_id":
+                            None,
+
+                        "note":
+                            "Додано під час створення пацієнта",
+                    })
+                    .execute()
+                )
+
+            except Exception as vaccination_error:
+                print(
+                    "⚠️ INITIAL PATIENT VACCINATION:",
+                    repr(
+                        vaccination_error
+                    ),
+                    flush=True,
+                )
 
         return ok(row)
 
