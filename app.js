@@ -2779,7 +2779,13 @@ async function routeFromHash() {
   }
   if (TAB_ROUTES.has(route)) {
     setRoute(route);
-    if (route === "owners") renderOwners();
+    if (
+  route === "owners"
+) {
+  renderOwners();
+
+  await loadOwners();
+}
     if (route === "patients") renderPatientsTab();
     if (route === "visits") renderVisitsTab();
 if (route === "hospital") renderHospitalTab();
@@ -2940,135 +2946,229 @@ function seedIfEmpty() {
 
 // ===== API: Owners =====
 // ===== API: Owners =====
-async function loadOwners() {
-  try {
-    const response =
-      await fetch(
-        "/api/owners",
-        {
-          method: "GET",
-          credentials: "include",
+let ownersApiInFlight =
+  null;
 
-          headers: {
-            Accept:
-              "application/json",
 
-            ...getOrgHeaders(),
-          },
+async function loadOwners(
+  force = false
+) {
+  if (
+    ownersApiInFlight &&
+    !force
+  ) {
+    return ownersApiInFlight;
+  }
+
+
+  const cachedOwners =
+    Array.isArray(
+      state.owners
+    ) &&
+    state.owners.length
+      ? state.owners
+      : (
+          Array.isArray(
+            LS.get(
+              OWNERS_KEY,
+              []
+            )
+          )
+            ? LS.get(
+                OWNERS_KEY,
+                []
+              )
+            : []
+        );
+
+
+  ownersApiInFlight =
+    (async () => {
+      const attempts = 3;
+
+      const delays = [
+        0,
+        350,
+        900,
+      ];
+
+
+      for (
+        let attempt = 0;
+        attempt < attempts;
+        attempt++
+      ) {
+        if (
+          delays[attempt]
+        ) {
+          await new Promise(
+            (resolve) =>
+              setTimeout(
+                resolve,
+                delays[attempt]
+              )
+          );
         }
-      );
 
-    const text =
-      await response.text();
 
-    let json = null;
+        try {
+          const response =
+            await fetch(
+              "/api/owners",
+              {
+                method:
+                  "GET",
 
-    try {
-      json = text
-        ? JSON.parse(text)
-        : null;
-    } catch (parseError) {
-      console.error(
-        "Не вдалося розібрати відповідь /api/owners:",
-        parseError,
-        text
-      );
-    }
+                credentials:
+                  "include",
 
-    if (!response.ok) {
-      console.error(
-        "API /owners HTTP:",
-        response.status,
-        text
-      );
+                cache:
+                  "no-store",
 
-      state.owners = [];
+                headers: {
+                  Accept:
+                    "application/json",
 
-      if (
-        state.route ===
-        "owners"
-      ) {
-        renderOwners();
+                  ...getOrgHeaders(),
+                },
+              }
+            );
+
+
+          const text =
+            await response.text();
+
+
+          let json = null;
+
+          try {
+            json =
+              text
+                ? JSON.parse(
+                    text
+                  )
+                : null;
+
+          } catch (
+            parseError
+          ) {
+            throw new Error(
+              "Сервер повернув некоректну відповідь."
+            );
+          }
+
+
+          if (
+            !response.ok ||
+            !json ||
+            json.ok !== true
+          ) {
+            throw new Error(
+              json?.error ||
+              `HTTP ${response.status}`
+            );
+          }
+
+
+          const owners =
+            Array.isArray(
+              json.data
+            )
+              ? json.data
+              : json.data
+                ? [
+                    json.data
+                  ]
+                : [];
+
+
+          state.owners =
+            owners;
+
+
+          LS.set(
+            OWNERS_KEY,
+            owners
+          );
+
+
+          if (
+            state.route ===
+            "owners"
+          ) {
+            renderOwners();
+          }
+
+
+          if (
+            state.route ===
+              "owner" &&
+            state.selectedOwnerId
+          ) {
+            await renderOwnerPage(
+              state.selectedOwnerId
+            );
+          }
+
+
+          return owners;
+
+        } catch (error) {
+          console.warn(
+            `loadOwners attempt ${
+              attempt + 1
+            }/${attempts} failed:`,
+            error
+          );
+
+
+          if (
+            attempt <
+            attempts - 1
+          ) {
+            continue;
+          }
+
+
+          console.error(
+            "loadOwners failed after retries:",
+            error
+          );
+
+
+          /*
+           * ВАЖНО:
+           * при временной ошибке
+           * НЕ очищаем владельцев.
+           */
+
+          state.owners =
+            cachedOwners;
+
+
+          if (
+            state.route ===
+            "owners"
+          ) {
+            renderOwners();
+          }
+
+
+          return cachedOwners;
+        }
       }
 
-      return [];
-    }
 
-    if (
-      !json ||
-      json.ok !== true
-    ) {
-      console.error(
-        "API /owners повернув помилку:",
-        json,
-        text
-      );
+      return cachedOwners;
+    })();
 
-      state.owners = [];
 
-      if (
-        state.route ===
-        "owners"
-      ) {
-        renderOwners();
-      }
+  try {
+    return await ownersApiInFlight;
 
-      return [];
-    }
-
-    const owners =
-      Array.isArray(json.data)
-        ? json.data
-        : json.data
-          ? [json.data]
-          : [];
-
-    state.owners = owners;
-
-    LS.set(
-      OWNERS_KEY,
-      owners
-    );
-
-    if (
-      state.route ===
-      "owners"
-    ) {
-      renderOwners();
-    }
-
-    if (
-      state.route ===
-        "owner" &&
-      state.selectedOwnerId
-    ) {
-      await renderOwnerPage(
-        state.selectedOwnerId
-      );
-    }
-
-    return owners;
-  } catch (error) {
-    console.error(
-      "loadOwners failed:",
-      error
-    );
-
-    state.owners =
-      Array.isArray(
-        state.owners
-      )
-        ? state.owners
-        : [];
-
-    if (
-      state.route ===
-      "owners"
-    ) {
-      renderOwners();
-    }
-
-    return [];
+  } finally {
+    ownersApiInFlight =
+      null;
   }
 }
 // ===== API: Patients =====
