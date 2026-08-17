@@ -33288,7 +33288,7 @@ const addWeightBtn =
     "[data-add-patient-weight]"
   );
 const statusButton =
-  root.querySelector(
+  dynamicBox.querySelector(
     "[data-patient-status-toggle]"
   );
   console.log(
@@ -33301,47 +33301,74 @@ const statusButton =
     "pointer";
 
   statusButton.addEventListener(
-    "click",
-    async () => {
-      const selectedStatus =
-        await openAppPrompt({
-          title:
-            "Статус пацієнта",
+  "click",
+  () => {
+    document
+      .querySelector(
+        ".patientStatusMenu"
+      )
+      ?.remove();
 
-          text:
-            "Вкажіть один зі статусів: Активний, Помер або Архів.",
-
-          label:
-            "Новий статус",
-
-          placeholder:
-            "Активний / Помер / Архів",
-
-          defaultValue:
-            pet?.patient_status ===
-            "deceased"
-              ? "Помер"
-              : pet?.patient_status ===
-                "archived"
-                ? "Архів"
-                : "Активний",
-
-          confirmText:
-            "Продовжити",
-
-          cancelText:
-            "Скасувати",
-
-          required:
-            true,
-        });
-
-      console.log(
-        "PATIENT STATUS SELECTED:",
-        selectedStatus
+    const menu =
+      document.createElement(
+        "div"
       );
-    }
-  );
+
+    menu.className =
+      "patientStatusMenu";
+
+    menu.innerHTML = `
+      <button
+        type="button"
+        data-patient-status-value="active"
+      >
+        ● Активний
+      </button>
+
+      <button
+        type="button"
+        data-patient-status-value="archived"
+      >
+        📦 Архів
+      </button>
+
+      <button
+        type="button"
+        data-patient-status-value="deceased"
+      >
+        † Помер
+      </button>
+    `;
+
+    statusButton
+      .insertAdjacentElement(
+        "afterend",
+        menu
+      );
+
+    menu.addEventListener(
+      "click",
+      (event) => {
+        const button =
+          event.target.closest(
+            "[data-patient-status-value]"
+          );
+
+        if (!button) {
+          return;
+        }
+
+        console.log(
+          "PATIENT STATUS SELECTED:",
+          button.dataset
+            .patientStatusValue
+        );
+
+        menu.remove();
+      }
+    );
+  }
+);
 }
   
 if (addWeightBtn) {
