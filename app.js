@@ -146,7 +146,7 @@ const VACCINE_CATALOG = [
   {
     brand: "Nobivac",
     manufacturer: "MSD / Merck",
-    flag: "🇺🇸",
+    flag: "🇳🇱",
     species: ["dog"],
     popular: true,
 
@@ -171,6 +171,27 @@ const VACCINE_CATALOG = [
         description:
           "Сказ",
       },
+
+      {
+  name: "1-Rabies",
+  category: "rabies",
+  description:
+    "Сказ · 1-річна вакцина",
+},
+
+{
+  name: "3-Rabies",
+  category: "rabies",
+  description:
+    "Сказ · 3-річна вакцина",
+},
+
+{
+  name: "DHPPi+RL",
+  category: "combined",
+  description:
+    "Комплексна · лептоспіроз · сказ",
+},
 
       {
         name: "RL",
@@ -224,6 +245,13 @@ const VACCINE_CATALOG = [
         description:
           "Комплексна · лептоспіроз · сказ",
       },
+
+      {
+  name: "DHPPi+L(R)",
+  category: "combined",
+  description:
+    "Комплексна · лептоспіроз · сказ",
+},
 
       {
         name: "Puppy",
@@ -330,6 +358,12 @@ const VACCINE_CATALOG = [
         description:
           "Лептоспіроз",
       },
+      {
+  name: "DHA2PPi/LR",
+  category: "combined",
+  description:
+    "Комплексна · лептоспіроз · сказ",
+},
 
       {
         name: "KC",
@@ -378,7 +412,172 @@ const VACCINE_CATALOG = [
       },
     ],
   },
+{
+  brand: "Rabisin",
+  manufacturer:
+    "Boehringer Ingelheim / Merial",
+  flag: "🇫🇷",
+  species: ["dog"],
+  popular: true,
 
+  vaccines: [
+    {
+      name: "Rabisin",
+      category: "rabies",
+      description:
+        "Моновалентна вакцина проти сказу",
+    },
+  ],
+},
+
+
+{
+  brand: "Rabigen",
+  manufacturer: "Virbac",
+  flag: "🇫🇷",
+  species: ["dog"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Mono",
+      category: "rabies",
+      description:
+        "Моновалентна вакцина проти сказу",
+    },
+  ],
+},
+
+
+{
+  brand: "Defensor",
+  manufacturer: "Zoetis",
+  flag: "🇺🇸",
+  species: ["dog"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Defensor 1",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу",
+    },
+
+    {
+      name: "Defensor 3",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 3-річна",
+    },
+  ],
+},
+
+
+{
+  brand: "Eurican",
+  manufacturer: "Boehringer Ingelheim",
+  flag: "🇫🇷",
+  species: ["dog"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "DHPPi2-LR",
+      category: "combined",
+      description:
+        "Комплексна · лептоспіроз · сказ",
+    },
+  ],
+},
+
+
+{
+  brand: "Rabicell",
+  manufacturer: "",
+  flag: "🇪🇺",
+  species: ["dog"],
+  popular: false,
+
+  vaccines: [
+    {
+      name: "Rabicell",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу",
+    },
+  ],
+},
+
+
+{
+  brand: "Canvac",
+  manufacturer: "",
+  flag: "🇪🇺",
+  species: ["dog"],
+  popular: false,
+
+  vaccines: [
+    {
+      name: "R",
+      category: "rabies",
+      description:
+        "Моновалентна вакцина проти сказу",
+    },
+  ],
+},
+
+
+{
+  brand: "Imrab",
+  manufacturer:
+    "Boehringer Ingelheim",
+  flag: "🇺🇸",
+  species: ["dog"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Imrab 1",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 1-річна",
+    },
+
+    {
+      name: "Imrab 3",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 3-річна",
+    },
+  ],
+},
+
+
+{
+  brand: "Rabvac",
+  manufacturer:
+    "Boehringer Ingelheim",
+  flag: "🇺🇸",
+  species: ["dog"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Rabvac 1",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 1-річна",
+    },
+
+    {
+      name: "Rabvac 3",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 3-річна",
+    },
+  ],
+},
 
   // ===================================================
   // CATS
@@ -429,12 +628,139 @@ const VACCINE_CATALOG = [
       },
     ],
   },
+{
+  brand: "Rabisin",
+  manufacturer:
+    "Boehringer Ingelheim / Merial",
+  flag: "🇫🇷",
+  species: ["cat"],
+  popular: true,
 
+  vaccines: [
+    {
+      name: "Rabisin",
+      category: "rabies",
+      description:
+        "Моновалентна вакцина проти сказу",
+    },
+  ],
+},
+
+
+{
+  brand: "Rabigen",
+  manufacturer: "Virbac",
+  flag: "🇫🇷",
+  species: ["cat"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Mono",
+      category: "rabies",
+      description:
+        "Моновалентна вакцина проти сказу",
+    },
+  ],
+},
+
+
+{
+  brand: "Defensor",
+  manufacturer: "Zoetis",
+  flag: "🇺🇸",
+  species: ["cat"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Defensor 1",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу",
+    },
+
+    {
+      name: "Defensor 3",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 3-річна",
+    },
+  ],
+},
+
+
+{
+  brand: "Imrab",
+  manufacturer:
+    "Boehringer Ingelheim",
+  flag: "🇺🇸",
+  species: ["cat"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Imrab 1",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 1-річна",
+    },
+
+    {
+      name: "Imrab 3",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 3-річна",
+    },
+  ],
+},
+
+
+{
+  brand: "Rabvac",
+  manufacturer:
+    "Boehringer Ingelheim",
+  flag: "🇺🇸",
+  species: ["cat"],
+  popular: true,
+
+  vaccines: [
+    {
+      name: "Rabvac 1",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 1-річна",
+    },
+
+    {
+      name: "Rabvac 3",
+      category: "rabies",
+      description:
+        "Вакцина проти сказу · 3-річна",
+    },
+  ],
+},
+{
+  brand: "Felocell / Felovax",
+  manufacturer: "",
+  flag: "🇺🇸",
+  species: ["cat"],
+  popular: false,
+
+  vaccines: [
+    {
+      name: "Rabies combination",
+      category: "combined",
+      description:
+        "Панлейкопенія · каліцивіроз · ринотрахеїт · сказ",
+    },
+  ],
+},
 
   {
     brand: "Nobivac",
     manufacturer: "MSD / Merck",
-    flag: "🇺🇸",
+    flag: "🇳🇱",
     species: ["cat"],
     popular: true,
 
@@ -669,6 +995,34 @@ function getVaccineCoverageTags(
   // сразу несколько направлений.
 
   const overrides = {
+    "Nobivac|DHPPi+RL": [
+  "general",
+  "lepto",
+  "rabies",
+],
+
+"Biocan|DHPPi+L(R)": [
+  "general",
+  "lepto",
+  "rabies",
+],
+
+"Eurican|DHPPi2-LR": [
+  "general",
+  "lepto",
+  "rabies",
+],
+
+"Canigen|DHA2PPi/LR": [
+  "general",
+  "lepto",
+  "rabies",
+],
+
+"Felocell / Felovax|Rabies combination": [
+  "general",
+  "rabies",
+],
     "Nobivac|RL": [
       "rabies",
       "lepto",
