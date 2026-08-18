@@ -5287,6 +5287,109 @@ async function createPatientVaccinationApi(
 
   return result.data;
 }
+async function updatePatientVaccinationApi(
+  vaccinationId,
+  payload
+) {
+  const response =
+    await fetch(
+      `/api/patient-vaccinations/${
+        encodeURIComponent(
+          String(vaccinationId)
+        )
+      }`,
+      {
+        method:
+          "PUT",
+
+        credentials:
+          "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body:
+          JSON.stringify(
+            payload || {}
+          ),
+      }
+    );
+
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося оновити вакцинацію."
+    );
+  }
+
+
+  return result.data;
+}
+
+
+async function deletePatientVaccinationApi(
+  vaccinationId
+) {
+  const response =
+    await fetch(
+      `/api/patient-vaccinations/${
+        encodeURIComponent(
+          String(vaccinationId)
+        )
+      }`,
+      {
+        method:
+          "DELETE",
+
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+
+  const result =
+    await response
+      .json()
+      .catch(() => null);
+
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося видалити вакцинацію."
+    );
+  }
+
+
+  return true;
+}
 
 function openOwnerExistsModal(
   owner = {}
@@ -33585,19 +33688,46 @@ function renderPatientVaccinationsPanel(
   vaccinations = []
 ) {
   const list =
-    Array.isArray(vaccinations)
+    Array.isArray(
+      vaccinations
+    )
       ? vaccinations
       : [];
+
+
+  const currentRole =
+    getCurrentCrmRole();
+
+
+  const canManageVaccinations =
+    [
+      "owner",
+      "admin",
+      "vet",
+    ].includes(
+      currentRole
+    );
+
 
   const items =
     list.length
       ? list
           .map((item) => {
+            const vaccinationId =
+              String(
+                item.id || ""
+              ).trim();
+
+
             const date =
               String(
                 item.vaccination_date ||
                 ""
-              ).slice(0, 10);
+              ).slice(
+                0,
+                10
+              );
+
 
             const dateLabel =
               date
@@ -33608,11 +33738,16 @@ function renderPatientVaccinationsPanel(
                   )
                 : "—";
 
+
             const nextDate =
               String(
                 item.next_vaccination_date ||
                 ""
-              ).slice(0, 10);
+              ).slice(
+                0,
+                10
+              );
+
 
             const nextDateLabel =
               nextDate
@@ -33623,13 +33758,31 @@ function renderPatientVaccinationsPanel(
                   )
                 : "";
 
+
+            const batchNumber =
+              String(
+                item.batch_number ||
+                ""
+              ).trim();
+
+
             return `
-              <div class="patientVaccinationItem">
-                <div class="patientVaccinationIcon">
+              <div
+                class="patientVaccinationItem"
+                data-patient-vaccination-item="${escapeHtml(
+                  vaccinationId
+                )}"
+              >
+                <div
+                  class="patientVaccinationIcon"
+                >
                   💉
                 </div>
 
-                <div class="patientVaccinationMain">
+
+                <div
+                  class="patientVaccinationMain"
+                >
                   <strong>
                     ${escapeHtml(
                       item.vaccine_name ||
@@ -33637,11 +33790,13 @@ function renderPatientVaccinationsPanel(
                     )}
                   </strong>
 
+
                   <span>
                     ${escapeHtml(
                       dateLabel
                     )}
                   </span>
+
 
                   ${
                     item.vaccine_type
@@ -33654,12 +33809,29 @@ function renderPatientVaccinationsPanel(
                       `
                       : ""
                   }
+
+
+                  ${
+                    batchNumber
+                      ? `
+                        <small>
+                          Серія:
+                          ${escapeHtml(
+                            batchNumber
+                          )}
+                        </small>
+                      `
+                      : ""
+                  }
                 </div>
+
 
                 ${
                   nextDateLabel
                     ? `
-                      <div class="patientVaccinationNext">
+                      <div
+                        class="patientVaccinationNext"
+                      >
                         <span>
                           Наступна
                         </span>
@@ -33673,13 +33845,57 @@ function renderPatientVaccinationsPanel(
                     `
                     : ""
                 }
+
+
+                ${
+                  canManageVaccinations &&
+                  vaccinationId
+                    ? `
+                      <div
+                        class="patientVaccinationActions"
+                      >
+                        <button
+                          type="button"
+                          class="patientVaccinationActionButton"
+                          data-edit-patient-vaccination="${escapeHtml(
+                            vaccinationId
+                          )}"
+                          title="Редагувати вакцинацію"
+                          aria-label="Редагувати вакцинацію"
+                        >
+                          ✎
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="
+                            patientVaccinationActionButton
+                            patientVaccinationDeleteButton
+                          "
+                          data-delete-patient-vaccination="${escapeHtml(
+                            vaccinationId
+                          )}"
+                          title="Видалити вакцинацію"
+                          aria-label="Видалити вакцинацію"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    `
+                    : ""
+                }
               </div>
             `;
           })
           .join("")
       : `
-        <div class="patientVaccinationsEmpty">
-          <span>💉</span>
+        <div
+          class="patientVaccinationsEmpty"
+        >
+          <span>
+            💉
+          </span>
 
           <div>
             <strong>
@@ -33694,11 +33910,18 @@ function renderPatientVaccinationsPanel(
         </div>
       `;
 
+
   return `
-    <section class="patientVaccinationsPanel">
-      <div class="patientVaccinationsHead">
+    <section
+      class="patientVaccinationsPanel"
+    >
+      <div
+        class="patientVaccinationsHead"
+      >
         <div>
-          <span class="patientVaccinationsEyebrow">
+          <span
+            class="patientVaccinationsEyebrow"
+          >
             ПРОФІЛАКТИКА
           </span>
 
@@ -33707,16 +33930,26 @@ function renderPatientVaccinationsPanel(
           </h3>
         </div>
 
-        <button
-          type="button"
-          class="patientVaccinationAddButton"
-          data-add-patient-vaccination
-        >
-          + Додати вакцинацію
-        </button>
+
+        ${
+          canManageVaccinations
+            ? `
+              <button
+                type="button"
+                class="patientVaccinationAddButton"
+                data-add-patient-vaccination
+              >
+                + Додати вакцинацію
+              </button>
+            `
+            : ""
+        }
       </div>
 
-      <div class="patientVaccinationsList">
+
+      <div
+        class="patientVaccinationsList"
+      >
         ${items}
       </div>
     </section>
@@ -34900,44 +35133,6 @@ dynamicBox.innerHTML = `
             )}
           </span>
         </div>
-<div
-  class="
-    patientStatusBadge
-    ${
-      pet?.patient_status ===
-      "deceased"
-        ? "is-deceased"
-        : pet?.patient_status ===
-          "archived"
-          ? "is-archived"
-          : "is-active"
-    }
-  "
->
-  ${
-    pet?.patient_status ===
-    "deceased"
-      ? "† Помер"
-      : pet?.patient_status ===
-        "archived"
-        ? "Архів"
-        : "● Активний"
-  }
-
-  ${
-    pet?.patient_status ===
-      "deceased" &&
-    pet?.deceased_at
-      ? ` · ${new Date(
-          `${String(
-            pet.deceased_at
-          ).slice(0, 10)}T00:00:00`
-        ).toLocaleDateString(
-          "uk-UA"
-        )}`
-      : ""
-  }
-</div>
        
 
 ${
@@ -34985,49 +35180,271 @@ ${
     </div>
 
     <div
-      class="glass-card"
+  class="glass-card patientDoctorNotesCard"
+  style="
+    background:
+      rgba(255,255,255,0.02);
+    padding:20px;
+    border-radius:16px;
+    border:
+      1px solid
+      rgba(255,255,255,0.05);
+  "
+>
+  <div
+    style="
+      display:flex;
+      align-items:center;
+      justify-content:
+        space-between;
+      gap:12px;
+      border-bottom:
+        1px solid
+        rgba(255,255,255,0.08);
+      padding-bottom:10px;
+    "
+  >
+    <h3
       style="
-        background:
-          rgba(255,255,255,0.02);
-        padding:20px;
-        border-radius:16px;
-        border:
-          1px solid
-          rgba(255,255,255,0.05);
+        margin:0;
+        color:#fff;
+        font-size:1.2rem;
       "
     >
-      <h3
-        style="
-          margin-top:0;
-          color:#fff;
-          font-size:1.2rem;
-          border-bottom:
-            1px solid
-            rgba(255,255,255,0.08);
-          padding-bottom:10px;
-        "
-      >
-        📝 Нотатки лікаря
-      </h3>
+      📝 Нотатки лікаря
+    </h3>
 
-      <div
-        style="
-          margin-top:15px;
-          color:
-            rgba(255,255,255,0.85);
-          white-space:pre-wrap;
-          line-height:1.5;
-          font-size:0.95rem;
-        "
-      >
-        ${escapeHtml(
-          pet.notes ||
-          "Поки нотаток немає."
-        )}
-      </div>
-    </div>
+    <span
+      data-patient-notes-state
+      style="
+        opacity:.45;
+        font-size:.78rem;
+      "
+    >
+    </span>
+  </div>
+
+
+  <textarea
+    data-patient-doctor-notes
+    maxlength="3000"
+    placeholder="Алергії, поведінка, особливості лікування, важливі примітки..."
+    style="
+      width:100%;
+      min-height:110px;
+      margin-top:15px;
+      padding:12px 14px;
+
+      box-sizing:border-box;
+      resize:vertical;
+
+      color:#fff;
+
+      background:
+        rgba(255,255,255,.025);
+
+      border:
+        1px solid
+        rgba(255,255,255,.08);
+
+      border-radius:12px;
+
+      font:inherit;
+      line-height:1.5;
+
+      outline:none;
+    "
+  >${escapeHtml(
+    pet.notes || ""
+  )}</textarea>
+
+
+  <div
+    style="
+      display:flex;
+      justify-content:flex-end;
+      margin-top:12px;
+    "
+  >
+    <button
+      type="button"
+      class="ghost"
+      data-save-patient-notes
+    >
+      💾 Зберегти нотатку
+    </button>
+  </div>
+</div>
   </div>
 `;
+const patientNotesInput =
+  dynamicBox.querySelector(
+    "[data-patient-doctor-notes]"
+  );
+
+
+const patientNotesSaveButton =
+  dynamicBox.querySelector(
+    "[data-save-patient-notes]"
+  );
+
+
+const patientNotesState =
+  dynamicBox.querySelector(
+    "[data-patient-notes-state]"
+  );
+
+
+if (
+  patientNotesSaveButton &&
+  patientNotesInput
+) {
+  patientNotesSaveButton
+    .addEventListener(
+      "click",
+      async () => {
+        const notes =
+          String(
+            patientNotesInput.value ||
+            ""
+          ).trim();
+
+
+        patientNotesSaveButton.disabled =
+          true;
+
+        patientNotesSaveButton.textContent =
+          "Збереження…";
+
+
+        if (patientNotesState) {
+          patientNotesState.textContent =
+            "";
+        }
+
+
+        try {
+          const updatedPet =
+            await savePatientNotesApi(
+              pet.id,
+              notes
+            );
+
+
+          if (!updatedPet) {
+            throw new Error(
+              "Сервер не повернув пацієнта."
+            );
+          }
+
+
+          pet.notes =
+            updatedPet.notes ||
+            "";
+
+
+          state.selectedPet = {
+            ...(state.selectedPet || pet),
+
+            notes:
+              pet.notes,
+          };
+
+
+          state.patients =
+            (
+              Array.isArray(
+                state.patients
+              )
+                ? state.patients
+                : []
+            ).map(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                String(
+                  pet.id
+                )
+                  ? {
+                      ...item,
+
+                      notes:
+                        pet.notes,
+                    }
+                  : item
+            );
+
+
+          savePatients(
+            state.patients
+          );
+
+
+          if (
+            patientNotesState
+          ) {
+            patientNotesState.textContent =
+              "✓ Збережено";
+          }
+
+
+          patientNotesSaveButton.textContent =
+            "✓ Збережено";
+
+
+          setTimeout(
+            () => {
+              if (
+                patientNotesSaveButton
+                  .isConnected
+              ) {
+                patientNotesSaveButton.textContent =
+                  "💾 Зберегти нотатку";
+              }
+
+
+              if (
+                patientNotesState
+                  ?.isConnected
+              ) {
+                patientNotesState.textContent =
+                  "";
+              }
+            },
+            1600
+          );
+
+        } catch (error) {
+          console.error(
+            "save patient notes:",
+            error
+          );
+
+
+          showCrmNotice({
+            icon:
+              "!",
+
+            title:
+              "Не вдалося зберегти",
+
+            text:
+              error?.message ||
+              "Сталася помилка під час збереження нотатки.",
+          });
+
+
+          patientNotesSaveButton.textContent =
+            "💾 Зберегти нотатку";
+
+        } finally {
+          patientNotesSaveButton.disabled =
+            false;
+        }
+      }
+    );
+}
 const addWeightBtn =
   dynamicBox.querySelector(
     "[data-add-patient-weight]"
@@ -58726,7 +59143,80 @@ notes:
     return null;
   }
 }
+async function savePatientNotesApi(
+  patientId,
+  notes
+) {
+  const response =
+    await fetch(
+      `/api/patients/${
+        encodeURIComponent(
+          String(patientId)
+        )
+      }`,
+      {
+        method: "PUT",
 
+        credentials:
+          "include",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+
+        body:
+          JSON.stringify({
+            notes:
+              String(
+                notes || ""
+              ).trim(),
+          }),
+      }
+    );
+
+
+  const text =
+    await response.text();
+
+
+  let json = null;
+
+  try {
+    json =
+      text
+        ? JSON.parse(
+            text
+          )
+        : null;
+  } catch {
+    json = null;
+  }
+
+
+  if (
+    !response.ok ||
+    !json ||
+    json.ok !== true
+  ) {
+    throw new Error(
+      json?.error ||
+      "Не вдалося зберегти нотатки."
+    );
+  }
+
+
+  return Array.isArray(
+    json.data
+  )
+    ? json.data[0] || null
+    : json.data || null;
+}
 // =========================
 // DELETE — server-first (patients + visits)
 // =========================

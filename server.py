@@ -16367,8 +16367,13 @@ def api_get_patient_vaccinations(
             .execute()
         )
 
+        sync_patient_vaccination_statuses(
+        patient_id
+        )
+
+
         return ok(
-            result.data or []
+            result.data[0]
         )
 
     except Exception as error:
@@ -16584,7 +16589,604 @@ def api_create_patient_vaccination(
             "Не вдалося зберегти вакцинацію.",
             500,
         )
-       
+# =====================================================
+# PATIENT VACCINATION STATUS SYNC
+# =====================================================
+
+def sync_patient_vaccination_statuses(
+    patient_id,
+):
+    current_org = (
+        get_current_org_id()
+    )
+
+    if (
+        not current_org
+        or not patient_id
+    ):
+        return
+
+
+    try:
+        vaccination_result = (
+            supabase
+            .table(
+                "patient_vaccinations"
+            )
+            .select(
+                "coverage_tags"
+            )
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "patient_id",
+                patient_id
+            )
+            .execute()
+        )
+
+
+        rows = (
+            vaccination_result.data
+            or []
+        )
+
+
+        has_rabies = False
+        has_general = False
+
+
+        for row in rows:
+            tags = (
+                row.get(
+                    "coverage_tags"
+                )
+                or []
+            )
+
+
+            if not isinstance(
+                tags,
+                list,
+            ):
+                continue
+
+
+            if (
+                "rabies"
+                in tags
+            ):
+                has_rabies = True
+
+
+            if (
+                "general"
+                in tags
+            ):
+                has_general = True
+
+
+        patient_result = (
+            supabase
+            .table(
+                "patients"
+            )
+            .select(
+                "id,"
+                "rabies_status,"
+                "general_vaccination_status"
+            )
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                patient_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+
+        if not patient_result.data:
+            return
+
+
+        patient = (
+            patient_result.data[0]
+        )
+
+
+        current_rabies_status = str(
+            patient.get(
+                "rabies_status"
+            )
+            or "unknown"
+        ).strip().lower()
+
+
+        current_general_status = str(
+            patient.get(
+                "general_vaccination_status"
+            )
+            or "unknown"
+        ).strip().lower()
+
+
+        if has_rabies:
+            next_rabies_status = (
+                "vaccinated"
+            )
+        elif (
+            current_rabies_status
+            == "vaccinated"
+        ):
+            next_rabies_status = (
+                "unknown"
+            )
+        else:
+            next_rabies_status = (
+                current_rabies_status
+            )
+
+
+        if has_general:
+            next_general_status = (
+                "vaccinated"
+            )
+        elif (
+            current_general_status
+            == "vaccinated"
+        ):
+            next_general_status = (
+                "unknown"
+            )
+        else:
+            next_general_status = (
+                current_general_status
+            )
+
+
+        (
+            supabase
+            .table(
+                "patients"
+            )
+            .update({
+                "rabies_status":
+                    next_rabies_status,
+
+                "general_vaccination_status":
+                    next_general_status,
+            })
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                patient_id
+            )
+            .execute()
+        )
+
+
+    except Exception as error:
+        print(
+            "⚠️ SYNC PATIENT VACCINATION STATUS:",
+            repr(
+                error
+            ),
+            flush=True,
+        )
+
+
+# =====================================================
+# UPDATE PATIENT VACCINATION
+# =====================================================
+
+@app.put(
+    "/api/patient-vaccinations/<vaccination_id>"
+)
+def api_update_patient_vaccination(
+    vaccination_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
+
+    if auth_error:
+        return auth_error
+
+
+    current_org = (
+        get_current_org_id()
+    )
+
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+
+    try:
+        existing_result = (
+            supabase
+            .table(
+                "patient_vaccinations"
+            )
+            .select("*")
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                vaccination_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+
+        if not existing_result.data:
+            return fail(
+                "Вакцинацію не знайдено.",
+                404,
+            )
+
+
+        existing = (
+            existing_result.data[0]
+        )
+
+
+        patient_id = str(
+            existing.get(
+                "patient_id"
+            )
+            or ""
+        ).strip()
+
+
+        vaccination_date = str(
+            data.get(
+                "vaccination_date",
+                existing.get(
+                    "vaccination_date"
+                ),
+            )
+            or ""
+        ).strip()
+
+
+        vaccine_name = str(
+            data.get(
+                "vaccine_name",
+                existing.get(
+                    "vaccine_name"
+                ),
+            )
+            or ""
+        ).strip()
+
+
+        vaccine_type = str(
+            data.get(
+                "vaccine_type",
+                existing.get(
+                    "vaccine_type"
+                ),
+            )
+            or ""
+        ).strip() or None
+
+
+        batch_number = str(
+            data.get(
+                "batch_number",
+                existing.get(
+                    "batch_number"
+                ),
+            )
+            or ""
+        ).strip() or None
+
+
+        next_vaccination_date = str(
+            data.get(
+                "next_vaccination_date",
+                existing.get(
+                    "next_vaccination_date"
+                ),
+            )
+            or ""
+        ).strip() or None
+
+
+        note = str(
+            data.get(
+                "note",
+                existing.get(
+                    "note"
+                ),
+            )
+            or ""
+        ).strip() or None
+
+
+        raw_coverage_tags = (
+            data.get(
+                "coverage_tags",
+                existing.get(
+                    "coverage_tags"
+                )
+                or [],
+            )
+            or []
+        )
+
+
+        if not isinstance(
+            raw_coverage_tags,
+            list,
+        ):
+            return fail(
+                "Некоректні теги вакцинації.",
+                400,
+            )
+
+
+        allowed_coverage_tags = {
+            "general",
+            "rabies",
+            "lepto",
+            "respiratory",
+            "felv",
+            "lyme",
+            "civ",
+        }
+
+
+        coverage_tags = []
+
+
+        for item in raw_coverage_tags:
+            tag = str(
+                item or ""
+            ).strip().lower()
+
+
+            if (
+                tag
+                and tag
+                in allowed_coverage_tags
+                and tag
+                not in coverage_tags
+            ):
+                coverage_tags.append(
+                    tag
+                )
+
+
+        if not vaccination_date:
+            return fail(
+                "Вкажіть дату вакцинації.",
+                400,
+            )
+
+
+        if not vaccine_name:
+            return fail(
+                "Вкажіть назву вакцини.",
+                400,
+            )
+
+
+        update_data = {
+            "vaccination_date":
+                vaccination_date,
+
+            "vaccine_name":
+                vaccine_name,
+
+            "vaccine_type":
+                vaccine_type,
+
+            "coverage_tags":
+                coverage_tags,
+
+            "batch_number":
+                batch_number,
+
+            "next_vaccination_date":
+                next_vaccination_date,
+
+            "note":
+                note,
+        }
+
+
+        result = (
+            supabase
+            .table(
+                "patient_vaccinations"
+            )
+            .update(
+                update_data
+            )
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                vaccination_id
+            )
+            .execute()
+        )
+
+
+        if not result.data:
+            return fail(
+                "Не вдалося оновити вакцинацію.",
+                500,
+            )
+
+
+        sync_patient_vaccination_statuses(
+            patient_id
+        )
+
+
+        return ok(
+            result.data[0]
+        )
+
+
+    except Exception as error:
+        print(
+            "❌ PUT patient vaccination:",
+            repr(
+                error
+            ),
+            flush=True,
+        )
+
+
+        return fail(
+            "Не вдалося оновити вакцинацію.",
+            500,
+        )
+
+
+# =====================================================
+# DELETE PATIENT VACCINATION
+# =====================================================
+
+@app.delete(
+    "/api/patient-vaccinations/<vaccination_id>"
+)
+def api_delete_patient_vaccination(
+    vaccination_id,
+):
+    user, auth_error = roles_required(
+        "owner",
+        "admin",
+        "vet",
+    )
+
+    if auth_error:
+        return auth_error
+
+
+    current_org = (
+        get_current_org_id()
+    )
+
+
+    try:
+        existing_result = (
+            supabase
+            .table(
+                "patient_vaccinations"
+            )
+            .select(
+                "id,"
+                "patient_id,"
+                "vaccine_name"
+            )
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                vaccination_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+
+        if not existing_result.data:
+            return fail(
+                "Вакцинацію не знайдено.",
+                404,
+            )
+
+
+        existing = (
+            existing_result.data[0]
+        )
+
+
+        patient_id = str(
+            existing.get(
+                "patient_id"
+            )
+            or ""
+        ).strip()
+
+
+        result = (
+            supabase
+            .table(
+                "patient_vaccinations"
+            )
+            .delete()
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                vaccination_id
+            )
+            .execute()
+        )
+
+
+        if not result.data:
+            return fail(
+                "Не вдалося видалити вакцинацію.",
+                500,
+            )
+
+
+        sync_patient_vaccination_statuses(
+            patient_id
+        )
+
+
+        return ok(
+            True
+        )
+
+
+    except Exception as error:
+        print(
+            "❌ DELETE patient vaccination:",
+            repr(
+                error
+            ),
+            flush=True,
+        )
+
+
+        return fail(
+            "Не вдалося видалити вакцинацію.",
+            500,
+        )
+           
 @app.get(
     "/api/patients/<patient_id>/weights"
 )
