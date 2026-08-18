@@ -67162,7 +67162,7 @@ if (
 refreshVisitVaccines();
 
 syncVisitVaccinationUi();
- 
+
 const visitNewPatientCreate =
   $("#visitNewPatientCreate");
 
@@ -67247,11 +67247,20 @@ const neuteredRaw =
       ?.value || ""
   ).trim();
 
-const vaccinationStatus =
+const rabiesStatus =
   String(
-    $("#visitNewPetVaccination")
-      ?.value || "unknown"
+    visitRabiesStatus?.value ||
+    "unknown"
   ).trim();
+
+
+const generalVaccinationStatus =
+  String(
+    visitGeneralVaccinationStatus
+      ?.value ||
+    "unknown"
+  ).trim();
+
 
 const neutered =
   neuteredRaw === ""
@@ -67317,7 +67326,242 @@ const neutered =
 
         return;
       }
+// =====================================================
+// CALENDAR QUICK PATIENT — INITIAL VACCINATIONS
+// =====================================================
 
+const resolveVisitVaccine =
+  (
+    select
+  ) => {
+    const rawValue =
+      String(
+        select?.value || ""
+      ).trim();
+
+    if (!rawValue) {
+      return null;
+    }
+
+
+    const [
+      brandName,
+      vaccineName,
+    ] =
+      rawValue.split(
+        "|||"
+      );
+
+
+    const brands =
+      getVaccineBrandsForPatient({
+        species,
+      });
+
+
+    const brand =
+      brands.find(
+        (item) =>
+          String(
+            item.brand || ""
+          ) ===
+          brandName
+      );
+
+
+    const vaccine =
+      brand?.vaccines?.find(
+        (item) =>
+          String(
+            item.name || ""
+          ) ===
+          vaccineName
+      );
+
+
+    if (
+      !brand ||
+      !vaccine
+    ) {
+      return null;
+    }
+
+
+    return {
+      brand,
+      vaccine,
+    };
+  };
+
+
+const initialVaccinations =
+  [];
+
+
+const collectVaccination =
+  ({
+    status,
+    dateInput,
+    vaccineInput,
+    coverageTag,
+    label,
+  }) => {
+    if (
+      status !==
+      "vaccinated"
+    ) {
+      return true;
+    }
+
+
+    const vaccinationDate =
+      String(
+        dateInput?.value || ""
+      ).trim();
+
+
+    if (!vaccinationDate) {
+      alert(
+        `Вкажіть дату: ${label}.`
+      );
+
+      dateInput?.focus();
+
+      return false;
+    }
+
+
+    const selected =
+      resolveVisitVaccine(
+        vaccineInput
+      );
+
+
+    if (!selected) {
+      alert(
+        `Оберіть вакцину: ${label}.`
+      );
+
+      vaccineInput?.focus();
+
+      return false;
+    }
+
+
+    const {
+      brand,
+      vaccine,
+    } = selected;
+
+
+    const coverageTags =
+      getVaccineCoverageTags(
+        brand,
+        vaccine
+      );
+
+
+    if (
+      !coverageTags.includes(
+        coverageTag
+      )
+    ) {
+      alert(
+        `Обрана вакцина не відповідає категорії "${label}".`
+      );
+
+      return false;
+    }
+
+
+    const fullName =
+      `${brand.brand} ${vaccine.name}`
+        .trim();
+
+
+    const duplicate =
+      initialVaccinations.some(
+        (item) =>
+          item.vaccination_date ===
+            vaccinationDate &&
+          item.vaccine_name ===
+            fullName
+      );
+
+
+    if (!duplicate) {
+      initialVaccinations.push({
+        vaccination_date:
+          vaccinationDate,
+
+        vaccine_name:
+          fullName,
+
+        vaccine_type:
+          vaccine.category ||
+          null,
+
+        coverage_tags:
+          coverageTags,
+
+        batch_number:
+          "",
+
+        next_vaccination_date:
+          "",
+
+        note:
+          "Додано під час створення пацієнта з календаря",
+      });
+    }
+
+
+    return true;
+  };
+
+
+if (
+  !collectVaccination({
+    status:
+      rabiesStatus,
+
+    dateInput:
+      visitRabiesDate,
+
+    vaccineInput:
+      visitRabiesVaccine,
+
+    coverageTag:
+      "rabies",
+
+    label:
+      "вакцинація від сказу",
+  })
+) {
+  return;
+}
+
+
+if (
+  !collectVaccination({
+    status:
+      generalVaccinationStatus,
+
+    dateInput:
+      visitGeneralVaccinationDate,
+
+    vaccineInput:
+      visitGeneralVaccine,
+
+    coverageTag:
+      "general",
+
+    label:
+      "загальна вакцинація",
+  })
+) {
+  return;
+}
       const originalText =
         visitNewPatientCreate
           .textContent;
@@ -67379,8 +67623,11 @@ telegram:
 
     neutered,
 
-    vaccination_status:
-      vaccinationStatus,
+    rabies_status:
+      rabiesStatus,
+
+    general_vaccination_status:
+      generalVaccinationStatus,
 
     notes:
       "",
@@ -67391,7 +67638,35 @@ telegram:
             "Не вдалося створити пацієнта."
           );
         }
+// =====================================================
+// SAVE CALENDAR PATIENT VACCINATIONS
+// =====================================================
 
+if (
+  initialVaccinations.length
+) {
+  try {
+    for (
+      const vaccination
+      of initialVaccinations
+    ) {
+      await createPatientVaccinationApi(
+        patient.id,
+        vaccination
+      );
+    }
+
+  } catch (vaccinationError) {
+    console.error(
+      "CALENDAR INITIAL VACCINATIONS:",
+      vaccinationError
+    );
+
+    throw new Error(
+      "Пацієнта створено, але вакцинації не вдалося зберегти."
+    );
+  }
+}
         state.selectedPet =
           patient;
 
