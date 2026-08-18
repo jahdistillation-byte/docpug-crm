@@ -53661,3 +53661,7 @@ button[data-patient-status-value="deceased"]:hover {
   border-color:
     rgba(255,70,90,.25);
 }
+#visitNewPetRabiesDetails[hidden],
+#visitNewPetGeneralVaccinationDetails[hidden] {
+  display: none !important;
+}

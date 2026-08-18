@@ -905,26 +905,162 @@
   </select>
 </label>
 
-<label class="pugVisitField">
-  <span>Вакцинація</span>
+<div
+  class="pugQuickVaccinationBlock"
+  style="
+    display:grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap:12px;
+  "
+>
 
-  <select
-    class="pugVisitInput"
-    id="visitNewPetVaccination"
+  <!-- ============================= -->
+  <!-- СКАЗ -->
+  <!-- ============================= -->
+
+  <label class="pugVisitField">
+    <span>
+      🛡 Сказ
+    </span>
+
+    <select
+      class="pugVisitInput"
+      id="visitNewPetRabiesStatus"
+    >
+      <option value="unknown">
+        Невідомо
+      </option>
+
+      <option value="vaccinated">
+        Вакцинований
+      </option>
+
+      <option value="not_vaccinated">
+        Не вакцинований
+      </option>
+    </select>
+  </label>
+
+
+  <!-- ============================= -->
+  <!-- ОБЩАЯ ВАКЦИНА -->
+  <!-- ============================= -->
+
+  <label class="pugVisitField">
+    <span>
+      💉 Загальна вакцина
+    </span>
+
+    <select
+      class="pugVisitInput"
+      id="visitNewPetGeneralVaccinationStatus"
+    >
+      <option value="unknown">
+        Невідомо
+      </option>
+
+      <option value="vaccinated">
+        Вакцинований
+      </option>
+
+      <option value="not_vaccinated">
+        Не вакцинований
+      </option>
+    </select>
+  </label>
+
+
+  <!-- ============================= -->
+  <!-- ДЕТАЛИ СКАЗА -->
+  <!-- ============================= -->
+
+  <div
+    id="visitNewPetRabiesDetails"
+    hidden
+    style="
+      grid-column:1/-1;
+      display:grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap:12px;
+    "
   >
-    <option value="unknown">
-      Невідомо
-    </option>
+    <label class="pugVisitField">
+      <span>
+        Дата вакцинації від сказу
+      </span>
 
-    <option value="vaccinated">
-      Вакцинована
-    </option>
+      <input
+        class="pugVisitInput"
+        id="visitNewPetRabiesDate"
+        type="date"
+      >
+    </label>
 
-    <option value="not_vaccinated">
-      Не вакцинована
-    </option>
-  </select>
-</label>
+
+    <label class="pugVisitField">
+      <span>
+        Вакцина від сказу
+      </span>
+
+      <select
+        class="pugVisitInput"
+        id="visitNewPetRabiesVaccine"
+      >
+        <option value="">
+          Спочатку оберіть вид
+        </option>
+      </select>
+    </label>
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- ДЕТАЛИ ОБЩЕЙ ВАКЦИНАЦИИ -->
+  <!-- ============================= -->
+
+  <div
+    id="visitNewPetGeneralVaccinationDetails"
+    hidden
+    style="
+      grid-column:1/-1;
+      display:grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap:12px;
+    "
+  >
+    <label class="pugVisitField">
+      <span>
+        Дата загальної вакцинації
+      </span>
+
+      <input
+        class="pugVisitInput"
+        id="visitNewPetGeneralVaccinationDate"
+        type="date"
+      >
+    </label>
+
+
+    <label class="pugVisitField">
+      <span>
+        Загальна вакцина
+      </span>
+
+      <select
+        class="pugVisitInput"
+        id="visitNewPetGeneralVaccine"
+      >
+        <option value="">
+          Спочатку оберіть вид
+        </option>
+      </select>
+    </label>
+  </div>
+
+</div>
             <label class="pugVisitField">
               <span>Вік</span>
               <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки">
