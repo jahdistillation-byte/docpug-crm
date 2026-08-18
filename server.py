@@ -19651,19 +19651,47 @@ def api_get_visit_tasks(
         if not current_org:
             return fail(
                 "Organization not selected",
-                400
+                400,
             )
 
-        visit = get_visit_for_task(
-            visit_id,
-            current_org,
+
+        visit_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visits")
+                    .select(
+                        "id,pet_id,staff_id"
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        visit_id,
+                    )
+                    .limit(1)
+                ),
+                attempts=4,
+                delay=0.25,
+            )
         )
+
+
+        visit = (
+            visit_result.data[0]
+            if visit_result.data
+            else None
+        )
+
 
         if not visit:
             return fail(
                 "Візит не знайдено.",
-                404
+                404,
             )
+
 
         status = str(
             request.args.get(
@@ -19672,41 +19700,53 @@ def api_get_visit_tasks(
             or ""
         ).strip()
 
-        query = (
-            supabase
-            .table("visit_tasks")
-            .select("*")
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "visit_id",
-                visit_id
-            )
-        )
 
-        if (
-            status in
-            VISIT_TASK_STATUSES
-        ):
-            query = query.eq(
-                "status",
-                status
+        def build_tasks_query():
+            query = (
+                supabase
+                .table("visit_tasks")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "visit_id",
+                    visit_id,
+                )
             )
+
+            if (
+                status in
+                VISIT_TASK_STATUSES
+            ):
+                query = query.eq(
+                    "status",
+                    status,
+                )
+
+            return (
+                query
+                .order(
+                    "created_at",
+                    desc=False,
+                )
+            )
+
 
         result = (
-            query
-            .order(
-                "created_at",
-                desc=False
+            execute_with_retry(
+                build_tasks_query,
+                attempts=4,
+                delay=0.25,
             )
-            .execute()
         )
+
 
         rows = (
             result.data or []
         )
+
 
         rows.sort(
             key=lambda row: (
@@ -19730,22 +19770,26 @@ def api_get_visit_tasks(
             )
         )
 
-        return ok(rows)
+
+        return ok(
+            rows
+        )
+
 
     except Exception as error:
         print(
-        "❌ GET visit tasks:",
-        repr(error),
-        flush=True,
-    )
+            "❌ GET visit tasks:",
+            repr(error),
+            flush=True,
+        )
 
-    return fail(
-        (
-            "Не вдалося завантажити задачі візиту: "
-            + str(error)
-        ),
-        500
-    )
+        return fail(
+            (
+                "Не вдалося завантажити "
+                "задачі візиту."
+            ),
+            500,
+        )
 
 
 @app.post(
