@@ -5582,9 +5582,13 @@ async function loadPatientVaccinationsApi(
   }
 
   return Array.isArray(
-    result.data
-  )
-    ? result.data
+  result.data
+)
+  ? result.data
+  : result.data
+    ? [
+        result.data
+      ]
     : [];
 }
 
