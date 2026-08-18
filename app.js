@@ -1736,6 +1736,16 @@ function openDeleteModal(
   const modal =
     $("#deleteModal");
 
+    if (
+    modal &&
+    modal.parentElement !==
+      document.body
+  ) {
+    document.body.appendChild(
+      modal
+    );
+  }
+
   const textEl =
     $("#deleteModalText");
 
