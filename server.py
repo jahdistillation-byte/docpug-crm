@@ -19982,7 +19982,479 @@ def api_get_tasks():
             "Не вдалося завантажити задачі.",
             500,
         )
+# =====================================================
+# CREATE GLOBAL TASK
+# =====================================================
 
+@app.post("/api/tasks")
+def api_create_task():
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
+
+
+        # ---------------------------------------------
+        # TITLE
+        # ---------------------------------------------
+
+        title = str(
+            data.get("title")
+            or ""
+        ).strip()
+
+        if not title:
+            return fail(
+                "Вкажіть текст задачі.",
+                400,
+            )
+
+        if len(title) > 240:
+            return fail(
+                "Текст задачі занадто довгий.",
+                400,
+            )
+
+
+        description = str(
+            data.get("description")
+            or ""
+        ).strip()
+
+        if len(description) > 4000:
+            return fail(
+                "Опис задачі занадто довгий.",
+                400,
+            )
+
+
+        # ---------------------------------------------
+        # TYPE / SOURCE
+        # ---------------------------------------------
+
+        task_kind = str(
+            data.get("task_kind")
+            or "task"
+        ).strip().lower()
+
+        if task_kind not in TASK_KINDS:
+            return fail(
+                "Некоректний тип задачі.",
+                400,
+            )
+
+
+        source = str(
+            data.get("source")
+            or "manual"
+        ).strip().lower()
+
+        if source not in TASK_SOURCES:
+            return fail(
+                "Некоректне джерело задачі.",
+                400,
+            )
+
+
+        # ---------------------------------------------
+        # PRIORITY
+        # ---------------------------------------------
+
+        priority = str(
+            data.get("priority")
+            or "normal"
+        ).strip().lower()
+
+        if (
+            priority not in
+            VISIT_TASK_PRIORITIES
+        ):
+            priority = "normal"
+
+
+        # ---------------------------------------------
+        # DATE / TIME
+        # ---------------------------------------------
+
+        due_date = str(
+            data.get("due_date")
+            or ""
+        ).strip()
+
+        due_time = str(
+            data.get("due_time")
+            or ""
+        ).strip()
+
+
+        if due_date:
+            try:
+                datetime.strptime(
+                    due_date,
+                    "%Y-%m-%d",
+                )
+            except Exception:
+                return fail(
+                    "Некоректна дата задачі.",
+                    400,
+                )
+
+
+        if due_time:
+            try:
+                datetime.strptime(
+                    due_time[:5],
+                    "%H:%M",
+                )
+
+                due_time = (
+                    due_time[:5]
+                )
+
+            except Exception:
+                return fail(
+                    "Некоректний час задачі.",
+                    400,
+                )
+
+
+        remind_at = str(
+            data.get("remind_at")
+            or ""
+        ).strip()
+
+        if remind_at:
+            try:
+                datetime.fromisoformat(
+                    remind_at.replace(
+                        "Z",
+                        "+00:00",
+                    )
+                )
+            except Exception:
+                return fail(
+                    "Некоректний час нагадування.",
+                    400,
+                )
+
+
+        # ---------------------------------------------
+        # RELATIONS
+        # ---------------------------------------------
+
+        patient_id = str(
+            data.get("patient_id")
+            or ""
+        ).strip()
+
+        staff_id = str(
+            data.get("staff_id")
+            or ""
+        ).strip()
+
+        visit_id = str(
+            data.get("visit_id")
+            or ""
+        ).strip()
+
+        source_entity_id = str(
+            data.get("source_entity_id")
+            or ""
+        ).strip()
+
+
+        # ---------------------------------------------
+        # PATIENT CHECK
+        # ---------------------------------------------
+
+        if patient_id:
+            patient_result = (
+                execute_with_retry(
+                    lambda: (
+                        supabase
+                        .table("patients")
+                        .select("id")
+                        .eq(
+                            "org_id",
+                            current_org,
+                        )
+                        .eq(
+                            "id",
+                            patient_id,
+                        )
+                        .limit(1)
+                    ),
+                    attempts=4,
+                    delay=0.25,
+                )
+            )
+
+            if not patient_result.data:
+                return fail(
+                    "Пацієнта не знайдено.",
+                    404,
+                )
+
+
+        # ---------------------------------------------
+        # VISIT CHECK
+        # ---------------------------------------------
+
+        if visit_id:
+            visit_result = (
+                execute_with_retry(
+                    lambda: (
+                        supabase
+                        .table("visits")
+                        .select(
+                            "id,pet_id,staff_id"
+                        )
+                        .eq(
+                            "org_id",
+                            current_org,
+                        )
+                        .eq(
+                            "id",
+                            visit_id,
+                        )
+                        .limit(1)
+                    ),
+                    attempts=4,
+                    delay=0.25,
+                )
+            )
+
+            if not visit_result.data:
+                return fail(
+                    "Візит не знайдено.",
+                    404,
+                )
+
+
+        # ---------------------------------------------
+        # STAFF ACCESS
+        # ---------------------------------------------
+
+        role = normalize_role(
+            user.get("role")
+        )
+
+        current_staff_id = str(
+            user.get("staff_id")
+            or ""
+        ).strip()
+
+
+        # Ветеринар может назначить
+        # глобальную задачу только себе.
+        if role == "vet":
+            if (
+                staff_id
+                and staff_id !=
+                current_staff_id
+            ):
+                return fail(
+                    (
+                        "Ветеринар може "
+                        "призначати задачі "
+                        "лише собі."
+                    ),
+                    403,
+                )
+
+            staff_id = (
+                current_staff_id
+            )
+
+
+        if staff_id:
+            staff_result = (
+                execute_with_retry(
+                    lambda: (
+                        supabase
+                        .table("staff")
+                        .select("id")
+                        .eq(
+                            "org_id",
+                            current_org,
+                        )
+                        .eq(
+                            "id",
+                            staff_id,
+                        )
+                        .limit(1)
+                    ),
+                    attempts=4,
+                    delay=0.25,
+                )
+            )
+
+            if not staff_result.data:
+                return fail(
+                    "Співробітника не знайдено.",
+                    404,
+                )
+
+
+        # ---------------------------------------------
+        # SOURCE ENTITY UUID
+        # ---------------------------------------------
+
+        if source_entity_id:
+            try:
+                uuid.UUID(
+                    source_entity_id
+                )
+            except Exception:
+                return fail(
+                    (
+                        "Некоректний "
+                        "source_entity_id."
+                    ),
+                    400,
+                )
+
+
+        # ---------------------------------------------
+        # CREATE
+        # ---------------------------------------------
+
+        now_iso = (
+            datetime
+            .now(timezone.utc)
+            .isoformat()
+        )
+
+
+        payload = {
+            "org_id":
+                current_org,
+
+            "visit_id":
+                visit_id or None,
+
+            "patient_id":
+                patient_id or None,
+
+            "staff_id":
+                staff_id or None,
+
+            "title":
+                title,
+
+            "description":
+                description or None,
+
+            "task_kind":
+                task_kind,
+
+            "source":
+                source,
+
+            "priority":
+                priority,
+
+            "status":
+                "open",
+
+            "due_date":
+                due_date or None,
+
+            "due_time":
+                due_time or None,
+
+            "remind_at":
+                remind_at or None,
+
+            "source_entity_id":
+                source_entity_id
+                or None,
+
+            "created_by":
+                user.get("id")
+                or None,
+
+            "completed_at":
+                None,
+
+            "updated_at":
+                now_iso,
+        }
+
+
+        result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visit_tasks")
+                    .insert(payload)
+                ),
+                attempts=4,
+                delay=0.25,
+            )
+        )
+
+
+        if not result.data:
+            return fail(
+                "Не вдалося створити задачу.",
+                500,
+            )
+
+
+        task = (
+            result.data[0]
+        )
+
+
+        write_audit_event(
+            action="create",
+            entity_type="task",
+            entity_id=task.get("id"),
+            entity_label=title,
+            summary=(
+                "Створено задачу"
+            ),
+            after_data=task,
+        )
+
+
+        return ok(task)
+
+
+    except Exception as error:
+        print(
+            "❌ POST global task:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося створити задачу.",
+            500,
+        )
+        
 def get_visit_for_task(
     visit_id,
     current_org,
