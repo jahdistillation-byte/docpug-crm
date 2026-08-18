@@ -66875,6 +66875,294 @@ if (visitNewPatientBox) visitNewPatientBox.style.display = "none";
       box.style.display = box.style.display === "none" ? "block" : "none";
     };
   }
+ // =====================================================
+// CALENDAR QUICK PATIENT — VACCINATION UI
+// =====================================================
+
+const visitRabiesStatus =
+  $("#visitNewPetRabiesStatus");
+
+const visitGeneralVaccinationStatus =
+  $("#visitNewPetGeneralVaccinationStatus");
+
+const visitRabiesDetails =
+  $("#visitNewPetRabiesDetails");
+
+const visitGeneralVaccinationDetails =
+  $("#visitNewPetGeneralVaccinationDetails");
+
+const visitRabiesDate =
+  $("#visitNewPetRabiesDate");
+
+const visitGeneralVaccinationDate =
+  $("#visitNewPetGeneralVaccinationDate");
+
+const visitRabiesVaccine =
+  $("#visitNewPetRabiesVaccine");
+
+const visitGeneralVaccine =
+  $("#visitNewPetGeneralVaccine");
+
+const visitSpeciesInput =
+  $("#visitNewPetSpecies");
+
+
+// =====================================================
+// FILL VACCINE SELECT
+// =====================================================
+
+const fillVisitVaccineSelect =
+  (
+    select,
+    coverageTag
+  ) => {
+    if (!select) {
+      return;
+    }
+
+    const previousValue =
+      String(
+        select.value || ""
+      );
+
+    const species =
+      String(
+        visitSpeciesInput?.value ||
+        ""
+      ).trim();
+
+    const brands =
+      getVaccineBrandsForPatient({
+        species,
+      });
+
+    const vaccines = [];
+
+    brands.forEach(
+      (brand) => {
+        (
+          Array.isArray(
+            brand.vaccines
+          )
+            ? brand.vaccines
+            : []
+        ).forEach(
+          (vaccine) => {
+            const coverage =
+              getVaccineCoverageTags(
+                brand,
+                vaccine
+              );
+
+            if (
+              !coverage.includes(
+                coverageTag
+              )
+            ) {
+              return;
+            }
+
+            vaccines.push({
+              brand,
+              vaccine,
+            });
+          }
+        );
+      }
+    );
+
+    select.innerHTML = `
+      <option value="">
+        ${
+          species
+            ? "Оберіть вакцину"
+            : "Спочатку оберіть вид"
+        }
+      </option>
+
+      ${
+        vaccines
+          .map(
+            ({
+              brand,
+              vaccine,
+            }) => {
+              const value =
+                `${brand.brand}|||${vaccine.name}`;
+
+              const label =
+                [
+                  brand.flag || "",
+                  brand.brand || "",
+                  vaccine.name || "",
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+
+              return `
+                <option
+                  value="${escapeHtml(
+                    value
+                  )}"
+                >
+                  ${escapeHtml(
+                    label
+                  )}
+                </option>
+              `;
+            }
+          )
+          .join("")
+      }
+    `;
+
+    select.disabled =
+      !species ||
+      vaccines.length === 0;
+
+    if (
+      previousValue &&
+      Array.from(
+        select.options
+      ).some(
+        (option) =>
+          option.value ===
+          previousValue
+      )
+    ) {
+      select.value =
+        previousValue;
+    }
+  };
+
+
+// =====================================================
+// REFRESH VACCINE CATALOG
+// =====================================================
+
+const refreshVisitVaccines =
+  () => {
+    fillVisitVaccineSelect(
+      visitRabiesVaccine,
+      "rabies"
+    );
+
+    fillVisitVaccineSelect(
+      visitGeneralVaccine,
+      "general"
+    );
+  };
+
+
+// =====================================================
+// SHOW / HIDE DETAILS
+// =====================================================
+
+const syncVisitVaccinationUi =
+  () => {
+    const rabiesVaccinated =
+      visitRabiesStatus?.value ===
+      "vaccinated";
+
+    const generalVaccinated =
+      visitGeneralVaccinationStatus
+        ?.value ===
+      "vaccinated";
+
+
+    if (visitRabiesDetails) {
+      visitRabiesDetails.hidden =
+        !rabiesVaccinated;
+    }
+
+    if (
+      visitGeneralVaccinationDetails
+    ) {
+      visitGeneralVaccinationDetails.hidden =
+        !generalVaccinated;
+    }
+
+
+    if (
+      rabiesVaccinated &&
+      visitRabiesDate &&
+      !visitRabiesDate.value
+    ) {
+      visitRabiesDate.value =
+        todayISO();
+    }
+
+    if (
+      generalVaccinated &&
+      visitGeneralVaccinationDate &&
+      !visitGeneralVaccinationDate
+        .value
+    ) {
+      visitGeneralVaccinationDate.value =
+        todayISO();
+    }
+
+
+    if (visitRabiesDate) {
+      visitRabiesDate.required =
+        rabiesVaccinated;
+    }
+
+    if (visitRabiesVaccine) {
+      visitRabiesVaccine.required =
+        rabiesVaccinated;
+    }
+
+    if (
+      visitGeneralVaccinationDate
+    ) {
+      visitGeneralVaccinationDate.required =
+        generalVaccinated;
+    }
+
+    if (visitGeneralVaccine) {
+      visitGeneralVaccine.required =
+        generalVaccinated;
+    }
+  };
+
+
+// =====================================================
+// EVENTS
+// =====================================================
+
+if (visitSpeciesInput) {
+  visitSpeciesInput.onchange =
+    () => {
+      refreshVisitVaccines();
+    };
+}
+
+
+if (visitRabiesStatus) {
+  visitRabiesStatus.onchange =
+    () => {
+      syncVisitVaccinationUi();
+    };
+}
+
+
+if (
+  visitGeneralVaccinationStatus
+) {
+  visitGeneralVaccinationStatus.onchange =
+    () => {
+      syncVisitVaccinationUi();
+    };
+}
+
+
+// Первичная инициализация
+
+refreshVisitVaccines();
+
+syncVisitVaccinationUi();
+ 
 const visitNewPatientCreate =
   $("#visitNewPatientCreate");
 
