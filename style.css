@@ -53403,3 +53403,185 @@ button[data-patient-status-value="deceased"]:hover {
   background:
     var(--finance-accent);
 }
+/* =====================================================
+   ADD PATIENT MODAL — WIDE DESKTOP VERSION
+   ===================================================== */
+
+.addPetModal {
+  width: min(1040px, calc(100vw - 48px)) !important;
+  max-width: 1040px !important;
+
+  max-height: calc(100vh - 40px) !important;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 28px 30px 24px;
+}
+
+
+/* Основная сетка формы */
+
+.addPetModalGrid {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr)) !important;
+
+  column-gap: 22px !important;
+  row-gap: 16px !important;
+
+  align-items: start;
+}
+
+
+/* Поля, которым действительно нужна
+   вся ширина окна */
+
+.addPetFieldFull {
+  grid-column: 1 / -1;
+}
+
+
+/* Кличка */
+
+.addPetModalGrid
+  > .addPetFieldFull:first-child {
+  grid-column: 1 / -1;
+}
+
+
+/* Вид пациента */
+
+.addPetSpeciesSelector {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+
+/* Сказ + общая вакцина —
+   всегда рядом */
+
+.addPetVaccinationStatusRow {
+  grid-column: 1 / -1;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 22px;
+}
+
+
+/* Раскрытые данные вакцинации */
+
+.addPetVaccinationDetails {
+  grid-column: 1 / -1;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 22px;
+
+  padding: 16px 18px;
+
+  border-radius: 14px;
+}
+
+
+/* hidden должен реально скрывать блок */
+
+.addPetVaccinationDetails[hidden] {
+  display: none !important;
+}
+
+
+/* Чтобы select/input не раздували колонки */
+
+.addPetModal input,
+.addPetModal select,
+.addPetModal textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+/* Нотатки не должны делать
+   форму гигантской */
+
+.addPetTextarea {
+  min-height: 82px !important;
+  max-height: 120px !important;
+  resize: vertical;
+}
+
+
+/* Нижняя панель */
+
+.addPetModalActions {
+  position: sticky;
+
+  bottom: 0;
+
+  z-index: 5;
+
+  margin-top: 18px;
+
+  padding-top: 14px;
+  padding-bottom: 4px;
+}
+
+
+/* =====================================================
+   TABLET
+   ===================================================== */
+
+@media (max-width: 900px) {
+  .addPetModal {
+    width:
+      min(
+        760px,
+        calc(100vw - 32px)
+      ) !important;
+  }
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 640px) {
+  .addPetModal {
+    width:
+      calc(100vw - 20px) !important;
+
+    max-height:
+      calc(100vh - 20px) !important;
+
+    padding:
+      20px 16px;
+  }
+
+
+  .addPetModalGrid,
+  .addPetVaccinationStatusRow,
+  .addPetVaccinationDetails {
+    grid-template-columns:
+      1fr !important;
+  }
+
+
+  .addPetSpeciesSelector {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}
