@@ -16351,29 +16351,55 @@ def api_get_patient_vaccinations(
     if auth_error:
         return auth_error
 
-    current_org = get_current_org_id()
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
 
     try:
-        result = (
-            supabase
-            .table("patient_vaccinations")
-            .select("*")
-            .eq("org_id", current_org)
-            .eq("patient_id", patient_id)
-            .order(
-                "vaccination_date",
-                desc=True,
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table(
+                    "patient_vaccinations"
+                )
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "patient_id",
+                    patient_id,
+                )
+                .order(
+                    "vaccination_date",
+                    desc=True,
+                )
+            ),
+            attempts=4,
+            delay=0.25,
+        )
+
+        vaccinations = (
+            result.data
+            if (
+                result
+                and isinstance(
+                    result.data,
+                    list,
+                )
             )
-            .execute()
+            else []
         )
-
-        sync_patient_vaccination_statuses(
-        patient_id
-        )
-
 
         return ok(
-            result.data[0]
+            vaccinations
         )
 
     except Exception as error:
