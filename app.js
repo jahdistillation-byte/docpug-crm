@@ -2677,6 +2677,7 @@ const CRM_ROLE_ACCESS = {
       "services",
       "calendar",
       "stock",
+      "tasks",
       "finance",
       "team",
       "settings",
@@ -2688,6 +2689,7 @@ const CRM_ROLE_ACCESS = {
       "owners",
       "patients",
       "visits",
+      "tasks",
       "hospital",
       "calendar",
       "team",
@@ -2701,6 +2703,7 @@ const CRM_ROLE_ACCESS = {
       "patients",
       "visits",
       "hospital",
+      "tasks",
       "calendar",
       "team",
       "settings",
@@ -2991,6 +2994,7 @@ const TAB_ROUTES = new Set([
   "hospital",
   "services",
   "calendar",
+  "tasks",
   "stock",
   "finance",
   "team",
@@ -3161,6 +3165,9 @@ if (route === "services") renderServicesTab();
   await renderFinanceTab();
 }
     if (route === "team") renderTeamTab();
+    if (route === "tasks") {
+  await renderTasksTab();
+}
     if (route === "audit") {
       await renderAuditTab();
     }
@@ -11433,7 +11440,71 @@ function getStaffContrastColor(color) {
 
   return value;
 }
+async function renderTasksTab() {
+  const page =
+    document.querySelector(
+      '[data-page="tasks"]'
+    );
 
+  if (!page) {
+    return;
+  }
+
+  page.innerHTML = `
+    <div
+      style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:20px;
+        margin-bottom:24px;
+      "
+    >
+      <div>
+        <h2
+          style="
+            margin:0;
+          "
+        >
+          ✅ Задачі
+        </h2>
+
+        <div
+          style="
+            margin-top:6px;
+            color:rgba(255,255,255,.5);
+          "
+        >
+          Задачі, нагадування
+          та follow-up пацієнтів
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-primary"
+        id="tasksCreateButton"
+      >
+        + Нова задача
+      </button>
+    </div>
+
+    <div
+      style="
+        padding:40px;
+        text-align:center;
+        border:
+          1px solid
+          rgba(255,255,255,.08);
+        border-radius:20px;
+        color:
+          rgba(255,255,255,.5);
+      "
+    >
+      Task Center loading…
+    </div>
+  `;
+}
 async function renderTeamTab() {
   const page =
     document.querySelector(
