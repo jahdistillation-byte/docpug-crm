@@ -17224,17 +17224,38 @@ def api_get_patient_weights(
     if auth_error:
         return auth_error
 
-    current_org = get_current_org_id()
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
 
     try:
         patient_result = (
-            supabase
-            .table("patients")
-            .select("id")
-            .eq("org_id", current_org)
-            .eq("id", patient_id)
-            .limit(1)
-            .execute()
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "patients"
+                    )
+                    .select("id")
+                    .eq(
+                        "org_id",
+                        current_org
+                    )
+                    .eq(
+                        "id",
+                        patient_id
+                    )
+                    .limit(1)
+                ),
+                attempts=4,
+                delay=0.25,
+            )
         )
 
         if not patient_result.data:
@@ -17244,18 +17265,29 @@ def api_get_patient_weights(
             )
 
         result = (
-            supabase
-            .table(
-                "patient_weight_history"
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "patient_weight_history"
+                    )
+                    .select("*")
+                    .eq(
+                        "org_id",
+                        current_org
+                    )
+                    .eq(
+                        "patient_id",
+                        patient_id
+                    )
+                    .order(
+                        "measured_at",
+                        desc=True,
+                    )
+                ),
+                attempts=4,
+                delay=0.25,
             )
-            .select("*")
-            .eq("org_id", current_org)
-            .eq("patient_id", patient_id)
-            .order(
-                "measured_at",
-                desc=True,
-            )
-            .execute()
         )
 
         return ok(
