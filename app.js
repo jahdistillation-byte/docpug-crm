@@ -35683,6 +35683,88 @@ console.log(
   "PATIENT VACCINATIONS:",
   vaccinationHistory
 );  
+// =====================================================
+// PASSPORT VACCINATION SUMMARY
+// =====================================================
+
+const getLatestVaccinationByCoverage =
+  (
+    coverageTag
+  ) => {
+    return (
+      [...vaccinationHistory]
+        .filter(
+          (item) =>
+            Array.isArray(
+              item?.coverage_tags
+            ) &&
+            item.coverage_tags.includes(
+              coverageTag
+            )
+        )
+        .sort(
+          (a, b) =>
+            String(
+              b.vaccination_date || ""
+            ).localeCompare(
+              String(
+                a.vaccination_date || ""
+              )
+            )
+        )[0] ||
+      null
+    );
+  };
+
+
+const latestRabiesVaccination =
+  getLatestVaccinationByCoverage(
+    "rabies"
+  );
+
+
+const latestGeneralVaccination =
+  getLatestVaccinationByCoverage(
+    "general"
+  );
+
+
+const formatPassportVaccinationDate =
+  (
+    value
+  ) => {
+    const cleanDate =
+      String(
+        value || ""
+      ).slice(
+        0,
+        10
+      );
+
+    if (!cleanDate) {
+      return "";
+    }
+
+    return new Date(
+      `${cleanDate}T00:00:00`
+    ).toLocaleDateString(
+      "uk-UA"
+    );
+  };
+
+
+const rabiesStatus =
+  String(
+    pet.rabies_status ||
+    "unknown"
+  );
+
+
+const generalVaccinationStatus =
+  String(
+    pet.general_vaccination_status ||
+    "unknown"
+  );
   // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
   root.innerHTML = `
     <div style="margin-bottom: 16px;">
@@ -36096,7 +36178,209 @@ dynamicBox.innerHTML = `
             )}
           </span>
         </div>
-       
+ <div
+  style="
+    grid-column:1/-1;
+    margin-top:4px;
+    padding-top:12px;
+    border-top:
+      1px solid
+      rgba(255,255,255,.06);
+  "
+>
+  <span
+    style="
+      opacity:.5;
+    "
+  >
+    🛡 Сказ:
+  </span>
+
+  ${
+    latestRabiesVaccination
+      ? `
+        <span
+          style="
+            color:#fff;
+            margin-left:6px;
+          "
+        >
+          <b>
+            ${escapeHtml(
+              latestRabiesVaccination
+                .vaccine_name ||
+              "Вакцинований"
+            )}
+          </b>
+
+          ·
+
+          ${escapeHtml(
+            formatPassportVaccinationDate(
+              latestRabiesVaccination
+                .vaccination_date
+            )
+          )}
+
+          ${
+            latestRabiesVaccination
+              .next_vaccination_date
+              ? `
+                <span
+                  style="
+                    opacity:.55;
+                    margin-left:5px;
+                  "
+                >
+                  → наступна
+                  ${escapeHtml(
+                    formatPassportVaccinationDate(
+                      latestRabiesVaccination
+                        .next_vaccination_date
+                    )
+                  )}
+                </span>
+              `
+              : ""
+          }
+        </span>
+      `
+      : rabiesStatus ===
+        "not_vaccinated"
+        ? `
+          <span
+            style="
+              color:#ff8a8a;
+              margin-left:6px;
+            "
+          >
+            Не вакцинований
+          </span>
+        `
+        : rabiesStatus ===
+          "vaccinated"
+          ? `
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              Вакцинований
+            </span>
+          `
+          : `
+            <span
+              style="
+                opacity:.6;
+                margin-left:6px;
+              "
+            >
+              Невідомо
+            </span>
+          `
+  }
+</div>
+
+
+<div
+  style="
+    grid-column:1/-1;
+  "
+>
+  <span
+    style="
+      opacity:.5;
+    "
+  >
+    💉 Загальна вакцина:
+  </span>
+
+  ${
+    latestGeneralVaccination
+      ? `
+        <span
+          style="
+            color:#fff;
+            margin-left:6px;
+          "
+        >
+          <b>
+            ${escapeHtml(
+              latestGeneralVaccination
+                .vaccine_name ||
+              "Вакцинований"
+            )}
+          </b>
+
+          ·
+
+          ${escapeHtml(
+            formatPassportVaccinationDate(
+              latestGeneralVaccination
+                .vaccination_date
+            )
+          )}
+
+          ${
+            latestGeneralVaccination
+              .next_vaccination_date
+              ? `
+                <span
+                  style="
+                    opacity:.55;
+                    margin-left:5px;
+                  "
+                >
+                  → наступна
+                  ${escapeHtml(
+                    formatPassportVaccinationDate(
+                      latestGeneralVaccination
+                        .next_vaccination_date
+                    )
+                  )}
+                </span>
+              `
+              : ""
+          }
+        </span>
+      `
+      : generalVaccinationStatus ===
+        "not_vaccinated"
+        ? `
+          <span
+            style="
+              color:#ff8a8a;
+              margin-left:6px;
+            "
+          >
+            Не вакцинований
+          </span>
+        `
+        : generalVaccinationStatus ===
+          "vaccinated"
+          ? `
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              Вакцинований
+            </span>
+          `
+          : `
+            <span
+              style="
+                opacity:.6;
+                margin-left:6px;
+              "
+            >
+              Невідомо
+            </span>
+          `
+  }
+</div>      
 
 ${
   pet.vaccination_status ===
