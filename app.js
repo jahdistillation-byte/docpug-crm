@@ -34323,6 +34323,601 @@ function renderPatientVaccinationsPanel(
     </section>
   `;
 }
+function openPatientVaccinationEditor(
+  pet,
+  vaccination
+) {
+  document
+    .querySelector(
+      ".patientVaccinationEditOverlay"
+    )
+    ?.remove();
+
+
+  if (
+    !pet ||
+    !vaccination?.id
+  ) {
+    return;
+  }
+
+
+  const brands =
+    getVaccineBrandsForPatient(
+      pet
+    );
+
+
+  const vaccineOptions = [];
+
+
+  brands.forEach(
+    (brand) => {
+      (
+        Array.isArray(
+          brand.vaccines
+        )
+          ? brand.vaccines
+          : []
+      ).forEach(
+        (vaccine) => {
+          vaccineOptions.push({
+            brand,
+            vaccine,
+
+            value:
+              `${brand.brand}|||${vaccine.name}`,
+
+            fullName:
+              `${brand.brand} ${vaccine.name}`
+                .trim(),
+          });
+        }
+      );
+    }
+  );
+
+
+  const currentName =
+    String(
+      vaccination.vaccine_name ||
+      ""
+    ).trim();
+
+
+  const currentOption =
+    vaccineOptions.find(
+      (item) =>
+        item.fullName ===
+        currentName
+    );
+
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+
+  overlay.className =
+    "patientVaccinePickerOverlay patientVaccinationEditOverlay";
+
+
+  overlay.innerHTML = `
+    <div
+      class="patientVaccinePicker"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="patientVaccinePickerHead"
+      >
+        <div>
+          <span
+            class="patientVaccinePickerEyebrow"
+          >
+            РЕДАГУВАННЯ
+          </span>
+
+          <h2>
+            ✎ Редагувати вакцинацію
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              pet.name ||
+              "Пацієнт"
+            )}
+          </p>
+        </div>
+
+
+        <button
+          type="button"
+          class="patientVaccinePickerClose"
+          data-close-vaccination-editor
+        >
+          ×
+        </button>
+      </div>
+
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(2,minmax(0,1fr));
+          gap:16px;
+          padding:20px;
+        "
+      >
+
+        <label
+          style="
+            grid-column:1/-1;
+          "
+        >
+          <span>
+            Вакцина
+          </span>
+
+          <select
+            data-edit-vaccine-product
+            style="
+              width:100%;
+              margin-top:7px;
+            "
+          >
+            ${
+              !currentOption &&
+              currentName
+                ? `
+                  <option
+                    value="__current__"
+                    selected
+                  >
+                    ${escapeHtml(
+                      currentName
+                    )}
+                  </option>
+                `
+                : ""
+            }
+
+            ${
+              vaccineOptions
+                .map(
+                  (item) => `
+                    <option
+                      value="${escapeHtml(
+                        item.value
+                      )}"
+                      ${
+                        currentOption &&
+                        item.value ===
+                          currentOption.value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${escapeHtml(
+                        [
+                          item.brand.flag ||
+                            "",
+                          item.fullName,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")
+                      )}
+                    </option>
+                  `
+                )
+                .join("")
+            }
+          </select>
+        </label>
+
+
+        <label>
+          <span>
+            Дата вакцинації
+          </span>
+
+          <input
+            type="date"
+            data-edit-vaccine-date
+            value="${escapeHtml(
+              String(
+                vaccination
+                  .vaccination_date ||
+                ""
+              ).slice(0, 10)
+            )}"
+            style="
+              width:100%;
+              margin-top:7px;
+            "
+          >
+        </label>
+
+
+        <label>
+          <span>
+            Серія / партія
+          </span>
+
+          <input
+            type="text"
+            data-edit-vaccine-batch
+            value="${escapeHtml(
+              vaccination
+                .batch_number ||
+              ""
+            )}"
+            placeholder="Необов'язково"
+            style="
+              width:100%;
+              margin-top:7px;
+            "
+          >
+        </label>
+
+
+        <label
+          style="
+            grid-column:1/-1;
+          "
+        >
+          <span>
+            Наступна вакцинація
+          </span>
+
+          <input
+            type="date"
+            data-edit-vaccine-next-date
+            value="${escapeHtml(
+              String(
+                vaccination
+                  .next_vaccination_date ||
+                ""
+              ).slice(0, 10)
+            )}"
+            style="
+              width:100%;
+              margin-top:7px;
+            "
+          >
+        </label>
+
+      </div>
+
+
+      <div
+        style="
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+          padding:0 20px 20px;
+        "
+      >
+        <button
+          type="button"
+          class="ghost"
+          data-close-vaccination-editor
+        >
+          Скасувати
+        </button>
+
+
+        <button
+          type="button"
+          class="primary"
+          data-save-vaccination-editor
+        >
+          ✓ Зберегти зміни
+        </button>
+      </div>
+    </div>
+  `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  const closeEditor =
+    () => {
+      overlay.remove();
+    };
+
+
+  overlay
+    .querySelectorAll(
+      "[data-close-vaccination-editor]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          closeEditor
+        );
+      }
+    );
+
+
+  overlay
+    .querySelector(
+      "[data-save-vaccination-editor]"
+    )
+    ?.addEventListener(
+      "click",
+      async (event) => {
+        const saveButton =
+          event.currentTarget;
+
+
+        const productValue =
+          String(
+            overlay
+              .querySelector(
+                "[data-edit-vaccine-product]"
+              )
+              ?.value ||
+            ""
+          ).trim();
+
+
+        const vaccinationDate =
+          String(
+            overlay
+              .querySelector(
+                "[data-edit-vaccine-date]"
+              )
+              ?.value ||
+            ""
+          ).trim();
+
+
+        const batchNumber =
+          String(
+            overlay
+              .querySelector(
+                "[data-edit-vaccine-batch]"
+              )
+              ?.value ||
+            ""
+          ).trim();
+
+
+        const nextDate =
+          String(
+            overlay
+              .querySelector(
+                "[data-edit-vaccine-next-date]"
+              )
+              ?.value ||
+            ""
+          ).trim();
+
+
+        if (!vaccinationDate) {
+          showCrmNotice({
+            icon:
+              "💉",
+
+            title:
+              "Вкажіть дату",
+
+            text:
+              "Дата вакцинації є обов'язковою.",
+          });
+
+          return;
+        }
+
+
+        let vaccineName =
+          currentName;
+
+        let vaccineType =
+          vaccination.vaccine_type ||
+          null;
+
+        let coverageTags =
+          Array.isArray(
+            vaccination.coverage_tags
+          )
+            ? vaccination.coverage_tags
+            : [];
+
+
+        if (
+          productValue &&
+          productValue !==
+            "__current__"
+        ) {
+          const [
+            brandName,
+            productName,
+          ] =
+            productValue.split(
+              "|||"
+            );
+
+
+          const brand =
+            brands.find(
+              (item) =>
+                String(
+                  item.brand
+                ) ===
+                brandName
+            );
+
+
+          const vaccine =
+            brand?.vaccines?.find(
+              (item) =>
+                String(
+                  item.name
+                ) ===
+                productName
+            );
+
+
+          if (
+            !brand ||
+            !vaccine
+          ) {
+            showCrmNotice({
+              icon:
+                "⚠️",
+
+              title:
+                "Вакцину не знайдено",
+
+              text:
+                "Оберіть препарат ще раз.",
+            });
+
+            return;
+          }
+
+
+          vaccineName =
+            `${brand.brand} ${vaccine.name}`
+              .trim();
+
+
+          vaccineType =
+            vaccine.category ||
+            null;
+
+
+          coverageTags =
+            getVaccineCoverageTags(
+              brand,
+              vaccine
+            );
+        }
+
+
+        saveButton.disabled =
+          true;
+
+        saveButton.textContent =
+          "Зберігаємо…";
+
+
+        try {
+          const updated =
+            await updatePatientVaccinationApi(
+              vaccination.id,
+              {
+                vaccination_date:
+                  vaccinationDate,
+
+                vaccine_name:
+                  vaccineName,
+
+                vaccine_type:
+                  vaccineType,
+
+                coverage_tags:
+                  coverageTags,
+
+                batch_number:
+                  batchNumber,
+
+                next_vaccination_date:
+                  nextDate,
+
+                note:
+                  vaccination.note ||
+                  "",
+              }
+            );
+
+
+          if (!updated) {
+            throw new Error(
+              "Сервер не повернув вакцинацію."
+            );
+          }
+
+
+          closeEditor();
+
+
+          await loadPatientsApi();
+
+
+          const freshPet =
+            (
+              state.patients || []
+            ).find(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                String(
+                  pet.id
+                )
+            ) ||
+            pet;
+
+
+          state.selectedPet =
+            freshPet;
+
+
+          await renderPatientTab(
+            "overview",
+            freshPet
+          );
+
+
+          showCrmNotice({
+            icon:
+              "✓",
+
+            title:
+              "Вакцинацію оновлено",
+
+            text:
+              vaccineName,
+          });
+
+        } catch (error) {
+          console.error(
+            "UPDATE PATIENT VACCINATION:",
+            error
+          );
+
+
+          showCrmNotice({
+            icon:
+              "⚠️",
+
+            title:
+              "Не вдалося оновити",
+
+            text:
+              error?.message ||
+              "Спробуйте ще раз.",
+          });
+
+
+          saveButton.disabled =
+            false;
+
+          saveButton.textContent =
+            "✓ Зберегти зміни";
+        }
+      }
+    );
+}
 function openPatientVaccinationPicker(
   pet
 ) {
@@ -35834,6 +36429,66 @@ if (addVaccinationBtn) {
     }
   );
 }
+// =====================================================
+// EDIT PATIENT VACCINATION
+// =====================================================
+
+dynamicBox
+  .querySelectorAll(
+    "[data-edit-patient-vaccination]"
+  )
+  .forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const vaccinationId =
+            String(
+              button.dataset
+                .editPatientVaccination ||
+              ""
+            ).trim();
+
+
+          if (!vaccinationId) {
+            return;
+          }
+
+
+          const vaccination =
+            vaccinationHistory.find(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                vaccinationId
+            );
+
+
+          if (!vaccination) {
+            showCrmNotice({
+              icon:
+                "⚠️",
+
+              title:
+                "Запис не знайдено",
+
+              text:
+                "Оновіть сторінку та спробуйте ще раз.",
+            });
+
+            return;
+          }
+
+
+          openPatientVaccinationEditor(
+            pet,
+            vaccination
+          );
+        }
+      );
+    }
+  );
 // =====================================================
 // DELETE PATIENT VACCINATION
 // =====================================================
