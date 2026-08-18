@@ -35820,6 +35820,135 @@ if (addVaccinationBtn) {
     }
   );
 }
+// =====================================================
+// DELETE PATIENT VACCINATION
+// =====================================================
+
+dynamicBox
+  .querySelectorAll(
+    "[data-delete-patient-vaccination]"
+  )
+  .forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const vaccinationId =
+            String(
+              button.dataset
+                .deletePatientVaccination ||
+              ""
+            ).trim();
+
+
+          if (!vaccinationId) {
+            return;
+          }
+
+
+          const vaccination =
+            vaccinationHistory.find(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                vaccinationId
+            );
+
+
+          const vaccineName =
+            String(
+              vaccination?.vaccine_name ||
+              "цю вакцинацію"
+            );
+
+
+          openDeleteModal(
+            `
+              Видалити вакцинацію
+              <b>${escapeHtml(
+                vaccineName
+              )}</b>?
+              <br><br>
+              Цю дію неможливо буде
+              скасувати.
+            `,
+
+            async () => {
+              try {
+                await deletePatientVaccinationApi(
+                  vaccinationId
+                );
+
+
+                // Подтягиваем свежего пациента,
+                // потому что сервер также
+                // пересчитывает vaccination statuses.
+
+                await loadPatientsApi();
+
+
+                const freshPet =
+                  (
+                    state.patients || []
+                  ).find(
+                    (item) =>
+                      String(
+                        item.id
+                      ) ===
+                      String(
+                        pet.id
+                      )
+                  ) ||
+                  pet;
+
+
+                state.selectedPet =
+                  freshPet;
+
+
+                await renderPatientTab(
+                  "overview",
+                  freshPet
+                );
+
+
+                showCrmNotice({
+                  icon:
+                    "🗑",
+
+                  title:
+                    "Вакцинацію видалено",
+
+                  text:
+                    vaccineName,
+                });
+
+              } catch (error) {
+                console.error(
+                  "DELETE PATIENT VACCINATION:",
+                  error
+                );
+
+
+                showCrmNotice({
+                  icon:
+                    "⚠️",
+
+                  title:
+                    "Не вдалося видалити",
+
+                  text:
+                    error?.message ||
+                    "Спробуйте ще раз.",
+                });
+              }
+            }
+          );
+        }
+      );
+    }
+  );
 
 const statusButton =
   root.querySelector(
