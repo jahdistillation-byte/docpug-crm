@@ -19592,7 +19592,396 @@ VISIT_TASK_PRIORITIES = {
     "normal",
     "high",
 }
+# =====================================================
+# API: GLOBAL TASK CENTER
+# =====================================================
 
+TASK_KINDS = {
+    "task",
+    "reminder",
+    "follow_up",
+}
+
+TASK_SOURCES = {
+    "manual",
+    "visit",
+    "vaccination",
+    "ai",
+    "system",
+}
+
+
+@app.get("/api/tasks")
+def api_get_tasks():
+    user, auth_error = (
+        auth_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    try:
+        current_org = (
+            get_current_org_id()
+        )
+
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
+            )
+
+
+        # ---------------------------------------------
+        # FILTERS
+        # ---------------------------------------------
+
+        scope = str(
+            request.args.get("scope")
+            or "all"
+        ).strip().lower()
+
+        if scope not in {
+            "all",
+            "mine",
+            "today",
+            "overdue",
+        }:
+            scope = "all"
+
+
+        status = str(
+            request.args.get("status")
+            or ""
+        ).strip().lower()
+
+        if (
+            status not in
+            VISIT_TASK_STATUSES
+        ):
+            status = ""
+
+
+        task_kind = str(
+            request.args.get("kind")
+            or ""
+        ).strip().lower()
+
+        if (
+            task_kind not in
+            TASK_KINDS
+        ):
+            task_kind = ""
+
+
+        patient_id = str(
+            request.args.get("patient_id")
+            or ""
+        ).strip()
+
+
+        requested_staff_id = str(
+            request.args.get("staff_id")
+            or ""
+        ).strip()
+
+
+        # Дату и время будет передавать frontend
+        # в локальном времени клиники.
+        today_value = str(
+            request.args.get("date")
+            or ""
+        ).strip()
+
+        now_time_value = str(
+            request.args.get("time")
+            or ""
+        ).strip()
+
+
+        if not today_value:
+            today_value = (
+                datetime.now(
+                    timezone.utc
+                )
+                .date()
+                .isoformat()
+            )
+
+
+        if not now_time_value:
+            now_time_value = (
+                datetime.now(
+                    timezone.utc
+                )
+                .strftime("%H:%M")
+            )
+
+
+        try:
+            datetime.strptime(
+                today_value,
+                "%Y-%m-%d",
+            )
+        except Exception:
+            return fail(
+                "Invalid date format.",
+                400,
+            )
+
+
+        try:
+            datetime.strptime(
+                now_time_value,
+                "%H:%M",
+            )
+        except Exception:
+            return fail(
+                "Invalid time format.",
+                400,
+            )
+
+
+        # ---------------------------------------------
+        # ROLE / ACCESS
+        # ---------------------------------------------
+
+        role = normalize_role(
+            user.get("role")
+        )
+
+        current_staff_id = str(
+            user.get("staff_id")
+            or ""
+        ).strip()
+
+
+        # Врач видит только задачи,
+        # назначенные ему.
+        if role == "vet":
+            requested_staff_id = (
+                current_staff_id
+            )
+
+
+        # Мои задачи.
+        if scope == "mine":
+            requested_staff_id = (
+                current_staff_id
+            )
+
+            if not requested_staff_id:
+                return ok([])
+
+
+        # ---------------------------------------------
+        # DATABASE QUERY
+        # ---------------------------------------------
+
+        def build_query():
+            query = (
+                supabase
+                .table("visit_tasks")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+            )
+
+
+            if status:
+                query = query.eq(
+                    "status",
+                    status,
+                )
+
+
+            if task_kind:
+                query = query.eq(
+                    "task_kind",
+                    task_kind,
+                )
+
+
+            if patient_id:
+                query = query.eq(
+                    "patient_id",
+                    patient_id,
+                )
+
+
+            if requested_staff_id:
+                query = query.eq(
+                    "staff_id",
+                    requested_staff_id,
+                )
+
+
+            return query.order(
+                "created_at",
+                desc=False,
+            )
+
+
+        result = (
+            execute_with_retry(
+                build_query,
+                attempts=4,
+                delay=0.25,
+            )
+        )
+
+
+        rows = (
+            result.data or []
+        )
+
+
+        # ---------------------------------------------
+        # SCOPE FILTERING
+        # ---------------------------------------------
+
+        def task_is_overdue(task):
+            if (
+                task.get("status")
+                == "completed"
+            ):
+                return False
+
+
+            due_date = str(
+                task.get("due_date")
+                or ""
+            ).strip()
+
+            due_time = str(
+                task.get("due_time")
+                or ""
+            ).strip()[:5]
+
+
+            if not due_date:
+                return False
+
+
+            if due_date < today_value:
+                return True
+
+
+            if (
+                due_date == today_value
+                and due_time
+                and due_time < now_time_value
+            ):
+                return True
+
+
+            return False
+
+
+        if scope == "today":
+            rows = [
+                task
+                for task in rows
+                if (
+                    str(
+                        task.get("due_date")
+                        or ""
+                    ).strip()
+                    == today_value
+                )
+            ]
+
+
+        elif scope == "overdue":
+            rows = [
+                task
+                for task in rows
+                if task_is_overdue(task)
+            ]
+
+
+        # ---------------------------------------------
+        # ADD COMPUTED FLAGS
+        # ---------------------------------------------
+
+        prepared_rows = []
+
+        for task in rows:
+            item = dict(task)
+
+            item["is_overdue"] = (
+                task_is_overdue(task)
+            )
+
+            item["is_today"] = (
+                str(
+                    task.get("due_date")
+                    or ""
+                ).strip()
+                == today_value
+            )
+
+            prepared_rows.append(
+                item
+            )
+
+
+        # ---------------------------------------------
+        # SORT
+        # ---------------------------------------------
+
+        prepared_rows.sort(
+            key=lambda task: (
+                # Выполненные вниз
+                task.get("status")
+                == "completed",
+
+                # Просроченные вверх
+                not task.get(
+                    "is_overdue"
+                ),
+
+                # Сначала имеющие дату
+                not bool(
+                    task.get("due_date")
+                ),
+
+                str(
+                    task.get("due_date")
+                    or "9999-12-31"
+                ),
+
+                str(
+                    task.get("due_time")
+                    or "23:59"
+                ),
+
+                str(
+                    task.get("created_at")
+                    or ""
+                ),
+            )
+        )
+
+
+        return ok(
+            prepared_rows
+        )
+
+
+    except Exception as error:
+        print(
+            "❌ GET global tasks:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити задачі.",
+            500,
+        )
 
 def get_visit_for_task(
     visit_id,
