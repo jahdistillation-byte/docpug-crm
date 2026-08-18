@@ -4921,18 +4921,49 @@ async function createPatientApi(payload) {
     ).trim(),
 
   neutered:
-    typeof payload?.neutered ===
-      "boolean"
-      ? payload.neutered
-      : null,
+  typeof payload?.neutered ===
+    "boolean"
+    ? payload.neutered
+    : null,
 
-  vaccination_status:
-    String(
-      payload?.vaccination_status ||
-      "unknown"
-    ).trim(),
 
-  notes:
+rabies_status:
+  String(
+    payload?.rabies_status ||
+    "unknown"
+  ).trim(),
+
+
+general_vaccination_status:
+  String(
+    payload?.general_vaccination_status ||
+    "unknown"
+  ).trim(),
+
+
+// Старые поля пока оставляем
+// до полного перехода форм.
+
+vaccination_status:
+  String(
+    payload?.vaccination_status ||
+    "unknown"
+  ).trim(),
+
+vaccination_date:
+  String(
+    payload?.vaccination_date ||
+    ""
+  ).trim(),
+
+vaccination_name:
+  String(
+    payload?.vaccination_name ||
+    ""
+  ).trim(),
+
+
+notes:
     String(
       payload?.notes ||
       payload?.note ||
@@ -54694,148 +54725,234 @@ function openAddPetModal(ownerId, petToEdit = null) {
       стерилізована
     </span>
 
-    <select id="addPetNeutered">
-      <option value="">
-        Не вказано
+    <div
+  class="
+    addPetFieldsRow
+    addPetVaccinationStatusRow
+  "
+>
+  <label class="addPetField">
+    <span class="addPetLabel">
+      🛡 Сказ
+    </span>
+
+    <select id="addPetRabiesStatus">
+      <option value="unknown">
+        Невідомо
       </option>
 
-      <option value="true">
-        Так
+      <option value="vaccinated">
+        Вакцинований
       </option>
 
-      <option value="false">
-        Ні
+      <option value="not_vaccinated">
+        Не вакцинований
+      </option>
+    </select>
+  </label>
+
+
+  <label class="addPetField">
+    <span class="addPetLabel">
+      💉 Загальна вакцина
+    </span>
+
+    <select
+      id="addPetGeneralVaccinationStatus"
+    >
+      <option value="unknown">
+        Невідомо
+      </option>
+
+      <option value="vaccinated">
+        Вакцинований
+      </option>
+
+      <option value="not_vaccinated">
+        Не вакцинований
       </option>
     </select>
   </label>
 </div>
 
-<label class="addPetField">
-  <span>Вакцинація</span>
-
-  <select id="addPetVaccination">
-    <option value="unknown">
-      Невідомо
-    </option>
-
-    <option value="vaccinated">
-      Вакцинована
-    </option>
-
-    <option value="not_vaccinated">
-      Не вакцинована
-    </option>
-  </select>
-</label>
 
 <div
-  class="addPetVaccinationDetails addPetFieldFull"
-  id="addPetVaccinationDetails"
+  class="
+    addPetVaccinationDetails
+    addPetFieldFull
+  "
+  id="addPetRabiesDetails"
   hidden
 >
   <label class="addPetField">
     <span class="addPetLabel">
-      Дата щеплення
-      <small>необов’язково</small>
+      Дата вакцинації від сказу
     </span>
 
     <input
-      id="addPetVaccinationDate"
+      id="addPetRabiesDate"
       class="addPetInput"
       type="date"
     >
   </label>
 
+
   <label class="addPetField">
     <span class="addPetLabel">
-      Назва вакцини
-      <small>необов’язково</small>
+      Вакцина від сказу
+    </span>
+
+    <select
+      id="addPetRabiesVaccine"
+      class="addPetInput"
+    >
+      <option value="">
+        Оберіть вакцину
+      </option>
+    </select>
+  </label>
+</div>
+
+
+<div
+  class="
+    addPetVaccinationDetails
+    addPetFieldFull
+  "
+  id="addPetGeneralVaccinationDetails"
+  hidden
+>
+  <label class="addPetField">
+    <span class="addPetLabel">
+      Дата загальної вакцинації
     </span>
 
     <input
-      id="addPetVaccinationName"
+      id="addPetGeneralVaccinationDate"
       class="addPetInput"
-      type="text"
-      maxlength="120"
-      autocomplete="off"
-      placeholder="Наприклад: Nobivac DHPPi"
+      type="date"
     >
   </label>
+
+
+  <label class="addPetField">
+    <span class="addPetLabel">
+      Загальна вакцина
+    </span>
+
+    <select
+      id="addPetGeneralVaccine"
+      class="addPetInput"
+    >
+      <option value="">
+        Оберіть вакцину
+      </option>
+    </select>
+  </label>
 </div>
-        <label class="addPetField">
-          <span class="addPetLabel">
-            Вага
-            <small>необов’язково</small>
-          </span>
 
-          <div class="addPetWeightWrap">
-            <input
-              id="addPetWeight"
-              class="addPetInput"
-              type="number"
-              min="0"
-              max="300"
-              step="0.01"
-              inputmode="decimal"
-              placeholder="5.2"
-            >
 
-            <span>кг</span>
-          </div>
-        </label>
+<label class="addPetField">
+  <span class="addPetLabel">
+    Вага
+    <small>
+      необов’язково
+    </small>
+  </span>
 
-        <label class="addPetField addPetFieldFull">
-          <span class="addPetLabel">
-            Нотатки
-            <small>необов’язково</small>
-          </span>
+  <div class="addPetWeightWrap">
+    <input
+      id="addPetWeight"
+      class="addPetInput"
+      type="number"
+      min="0"
+      max="300"
+      step="0.01"
+      inputmode="decimal"
+      placeholder="5.2"
+    >
 
-          <textarea
-            id="addPetNotes"
-            class="addPetTextarea"
-            maxlength="500"
-            placeholder="Алергії, особливості поведінки або інша важлива інформація..."
-          ></textarea>
-
-          <div class="addPetNotesCounter">
-            <span id="addPetNotesCount">0</span>/500
-          </div>
-        </label>
-
-      </div>
-
-      <div
-        id="addPetModalError"
-        class="addPetModalError"
-      ></div>
-
-      <div class="addPetModalActions">
-
-        <button
-          class="addPetCancelButton"
-          id="addPetCancelButton"
-          type="button"
-        >
-          Скасувати
-        </button>
-
-        <button
-          class="addPetSubmitButton"
-          id="addPetSubmitButton"
-          type="submit"
-        >
-          <span class="addPetSubmitPlus">
-  ${isEditMode ? "✓" : "＋"}
-</span>
-
-<span>
-  ${isEditMode ? "Зберегти зміни" : "Додати тварину"}
-</span>
-        </button>
-
-      </div>
-    </form>
+    <span>
+      кг
+    </span>
   </div>
+</label>
+
+
+<label
+  class="
+    addPetField
+    addPetFieldFull
+  "
+>
+  <span class="addPetLabel">
+    Нотатки
+
+    <small>
+      необов’язково
+    </small>
+  </span>
+
+  <textarea
+    id="addPetNotes"
+    class="addPetTextarea"
+    maxlength="500"
+    placeholder="Алергії, особливості поведінки або інша важлива інформація..."
+  ></textarea>
+
+  <div class="addPetNotesCounter">
+    <span id="addPetNotesCount">
+      0
+    </span>/500
+  </div>
+</label>
+
+</div>
+
+
+<div
+  id="addPetModalError"
+  class="addPetModalError"
+></div>
+
+
+<div class="addPetModalActions">
+
+  <button
+    class="addPetCancelButton"
+    id="addPetCancelButton"
+    type="button"
+  >
+    Скасувати
+  </button>
+
+
+  <button
+    class="addPetSubmitButton"
+    id="addPetSubmitButton"
+    type="submit"
+  >
+    <span class="addPetSubmitPlus">
+      ${
+        isEditMode
+          ? "✓"
+          : "＋"
+      }
+    </span>
+
+    <span>
+      ${
+        isEditMode
+          ? "Зберегти зміни"
+          : "Додати тварину"
+      }
+    </span>
+  </button>
+
+</div>
+
+</form>
+</div>
 `;
 
   document.body.appendChild(overlay);
@@ -54867,54 +54984,316 @@ const neuteredInput =
     "#addPetNeutered"
   );
 
-const vaccinationInput =
+const rabiesStatusInput =
   overlay.querySelector(
-    "#addPetVaccination"
-  );
-  const vaccinationDetails =
-  overlay.querySelector(
-    "#addPetVaccinationDetails"
+    "#addPetRabiesStatus"
   );
 
-const vaccinationDateInput =
+
+const generalVaccinationStatusInput =
   overlay.querySelector(
-    "#addPetVaccinationDate"
+    "#addPetGeneralVaccinationStatus"
   );
 
-const vaccinationNameInput =
+
+const rabiesDetails =
   overlay.querySelector(
-    "#addPetVaccinationName"
+    "#addPetRabiesDetails"
   );
 
-  const syncVaccinationDetails = () => {
-  const isVaccinated =
-    vaccinationInput?.value ===
-    "vaccinated";
 
-  if (vaccinationDetails) {
-    vaccinationDetails.hidden =
-      !isVaccinated;
-  }
+const rabiesDateInput =
+  overlay.querySelector(
+    "#addPetRabiesDate"
+  );
 
-  if (!isVaccinated) {
-    if (vaccinationDateInput) {
-      vaccinationDateInput.value =
-        "";
+
+const rabiesVaccineInput =
+  overlay.querySelector(
+    "#addPetRabiesVaccine"
+  );
+
+
+const generalVaccinationDetails =
+  overlay.querySelector(
+    "#addPetGeneralVaccinationDetails"
+  );
+
+
+const generalVaccinationDateInput =
+  overlay.querySelector(
+    "#addPetGeneralVaccinationDate"
+  );
+
+
+const generalVaccineInput =
+  overlay.querySelector(
+    "#addPetGeneralVaccine"
+  );
+
+
+// =====================================================
+// REGISTRATION VACCINE SELECTS
+// =====================================================
+
+const fillRegistrationVaccineSelect =
+  (
+    select,
+    coverageTag
+  ) => {
+    if (!select) {
+      return;
     }
 
-    if (vaccinationNameInput) {
-      vaccinationNameInput.value =
-        "";
-    }
-  }
-};
 
-vaccinationInput
+    const previousValue =
+      String(
+        select.value || ""
+      );
+
+
+    const species =
+      String(
+        speciesInput?.value || ""
+      ).trim();
+
+
+    const brands =
+      getVaccineBrandsForPatient({
+        species,
+      });
+
+
+    const vaccines = [];
+
+
+    brands.forEach(
+      (brand) => {
+        (
+          Array.isArray(
+            brand.vaccines
+          )
+            ? brand.vaccines
+            : []
+        ).forEach(
+          (vaccine) => {
+            const coverage =
+              getVaccineCoverageTags(
+                brand,
+                vaccine
+              );
+
+
+            if (
+              !coverage.includes(
+                coverageTag
+              )
+            ) {
+              return;
+            }
+
+
+            vaccines.push({
+              brand,
+              vaccine,
+            });
+          }
+        );
+      }
+    );
+
+
+    select.innerHTML = `
+      <option value="">
+        ${
+          species
+            ? "Оберіть вакцину"
+            : "Спочатку оберіть вид"
+        }
+      </option>
+
+      ${
+        vaccines
+          .map(
+            ({
+              brand,
+              vaccine,
+            }) => {
+              const value =
+                `${brand.brand}|||${vaccine.name}`;
+
+              const label = [
+                brand.flag || "",
+                brand.brand || "",
+                vaccine.name || "",
+              ]
+                .filter(Boolean)
+                .join(" ");
+
+              return `
+                <option
+                  value="${escapeHtml(
+                    value
+                  )}"
+                >
+                  ${escapeHtml(
+                    label
+                  )}
+                </option>
+              `;
+            }
+          )
+          .join("")
+      }
+    `;
+
+
+    select.disabled =
+      !species ||
+      vaccines.length === 0;
+
+
+    if (
+      previousValue &&
+      Array.from(
+        select.options
+      ).some(
+        (option) =>
+          option.value ===
+          previousValue
+      )
+    ) {
+      select.value =
+        previousValue;
+    }
+  };
+
+
+// =====================================================
+// REFRESH BOTH VACCINE LISTS
+// =====================================================
+
+const refreshRegistrationVaccineSelects =
+  () => {
+    fillRegistrationVaccineSelect(
+      rabiesVaccineInput,
+      "rabies"
+    );
+
+
+    fillRegistrationVaccineSelect(
+      generalVaccineInput,
+      "general"
+    );
+  };
+
+
+// =====================================================
+// SHOW / HIDE VACCINATION DETAILS
+// =====================================================
+
+const syncRegistrationVaccination =
+  () => {
+    const rabiesVaccinated =
+      rabiesStatusInput?.value ===
+      "vaccinated";
+
+
+    const generalVaccinated =
+      generalVaccinationStatusInput
+        ?.value ===
+      "vaccinated";
+
+
+    if (rabiesDetails) {
+      rabiesDetails.hidden =
+        !rabiesVaccinated;
+    }
+
+
+    if (
+      generalVaccinationDetails
+    ) {
+      generalVaccinationDetails.hidden =
+        !generalVaccinated;
+    }
+
+
+    if (
+      rabiesVaccinated &&
+      rabiesDateInput &&
+      !rabiesDateInput.value
+    ) {
+      rabiesDateInput.value =
+        todayISO();
+    }
+
+
+    if (
+      generalVaccinated &&
+      generalVaccinationDateInput &&
+      !generalVaccinationDateInput
+        .value
+    ) {
+      generalVaccinationDateInput.value =
+        todayISO();
+    }
+
+
+    if (rabiesDateInput) {
+      rabiesDateInput.required =
+        rabiesVaccinated;
+    }
+
+
+    if (rabiesVaccineInput) {
+      rabiesVaccineInput.required =
+        rabiesVaccinated;
+    }
+
+
+    if (
+      generalVaccinationDateInput
+    ) {
+      generalVaccinationDateInput.required =
+        generalVaccinated;
+    }
+
+
+    if (generalVaccineInput) {
+      generalVaccineInput.required =
+        generalVaccinated;
+    }
+  };
+
+
+// =====================================================
+// STATUS EVENTS
+// =====================================================
+
+rabiesStatusInput
   ?.addEventListener(
     "change",
-    syncVaccinationDetails
+    () => {
+      syncRegistrationVaccination();
+    }
   );
-  const notesInput = overlay.querySelector("#addPetNotes");
+
+
+generalVaccinationStatusInput
+  ?.addEventListener(
+    "change",
+    () => {
+      syncRegistrationVaccination();
+    }
+  );
+
+
+const notesInput =
+  overlay.querySelector(
+    "#addPetNotes"
+  );
+
   const notesCount = overlay.querySelector("#addPetNotesCount");
   const errorBox = overlay.querySelector("#addPetModalError");
   const submitButton = overlay.querySelector("#addPetSubmitButton");
@@ -54982,22 +55361,17 @@ const getPetModalState =
           neuteredInput?.value || ""
         ).trim(),
 
-      vaccination:
+      rabiesStatus:
   String(
-    vaccinationInput?.value ||
+    rabiesStatusInput?.value ||
     "unknown"
   ).trim(),
 
-vaccinationDate:
+generalVaccinationStatus:
   String(
-    vaccinationDateInput?.value ||
-    ""
-  ).trim(),
-
-vaccinationName:
-  String(
-    vaccinationNameInput?.value ||
-    ""
+    generalVaccinationStatusInput
+      ?.value ||
+    "unknown"
   ).trim(),
 
 notes:
@@ -55450,34 +55824,26 @@ if (isEditMode) {
         : "";
   }
 
-  if (vaccinationInput) {
-  vaccinationInput.value =
+  if (rabiesStatusInput) {
+  rabiesStatusInput.value =
     String(
       petToEdit
-        .vaccination_status ||
+        .rabies_status ||
       "unknown"
     );
 }
 
-if (vaccinationDateInput) {
-  vaccinationDateInput.value =
-    String(
-      petToEdit
-        .vaccination_date ||
-      ""
-    ).slice(0, 10);
-}
 
-if (vaccinationNameInput) {
-  vaccinationNameInput.value =
+if (
+  generalVaccinationStatusInput
+) {
+  generalVaccinationStatusInput.value =
     String(
       petToEdit
-        .vaccination_name ||
-      ""
+        .general_vaccination_status ||
+      "unknown"
     );
 }
-
-syncVaccinationDetails();
 
   notesInput.value =
     String(
@@ -55516,7 +55882,10 @@ syncVaccinationDetails();
       petToEdit.breed || ""
     );
 }
-syncVaccinationDetails();
+
+refreshRegistrationVaccineSelects();
+
+syncRegistrationVaccination();
 
 initialPetModalState =
   JSON.stringify(
@@ -55550,13 +55919,20 @@ overlay
             .addPetSpecies || "";
 
         speciesInput.value =
-          species;
+  species;
 
-        configureBreedField(
-          species
-        );
+configureBreedField(
+  species
+);
 
-        clearError();
+
+// Обновляем каталог вакцин
+// под выбранный вид пациента.
+
+refreshRegistrationVaccineSelects();
+
+
+clearError();
 
         setTimeout(
           () => {
@@ -55772,29 +56148,287 @@ const neuteredRaw =
     neuteredInput?.value || ""
   ).trim();
 
-const vaccinationStatus =
+const rabiesStatus =
   String(
-    vaccinationInput?.value ||
+    rabiesStatusInput?.value ||
     "unknown"
   ).trim();
 
-  const vaccinationDate =
-  vaccinationStatus ===
-    "vaccinated"
-    ? String(
-        vaccinationDateInput
-          ?.value || ""
-      ).trim()
-    : "";
 
-const vaccinationName =
-  vaccinationStatus ===
-    "vaccinated"
-    ? String(
-        vaccinationNameInput
-          ?.value || ""
-      ).trim()
-    : "";
+const generalVaccinationStatus =
+  String(
+    generalVaccinationStatusInput
+      ?.value ||
+    "unknown"
+  ).trim();
+
+// =====================================================
+// INITIAL VACCINATIONS
+// =====================================================
+
+const getRegistrationVaccine =
+  (
+    select
+  ) => {
+    const rawValue =
+      String(
+        select?.value || ""
+      ).trim();
+
+    if (!rawValue) {
+      return null;
+    }
+
+
+    const [
+      brandName,
+      vaccineName,
+    ] =
+      rawValue.split(
+        "|||"
+      );
+
+
+    if (
+      !brandName ||
+      !vaccineName
+    ) {
+      return null;
+    }
+
+
+    const brands =
+      getVaccineBrandsForPatient({
+        species,
+      });
+
+
+    const brand =
+      brands.find(
+        (item) =>
+          String(
+            item.brand || ""
+          ) ===
+          String(
+            brandName
+          )
+      );
+
+
+    if (!brand) {
+      return null;
+    }
+
+
+    const vaccine =
+      (
+        brand.vaccines || []
+      ).find(
+        (item) =>
+          String(
+            item.name || ""
+          ) ===
+          String(
+            vaccineName
+          )
+      );
+
+
+    if (!vaccine) {
+      return null;
+    }
+
+
+    return {
+      brand,
+      vaccine,
+    };
+  };
+
+
+const initialVaccinations = [];
+
+
+const addInitialVaccination =
+  ({
+    status,
+    dateInput,
+    vaccineInput,
+    coverageTag,
+    label,
+  }) => {
+    if (
+      status !==
+      "vaccinated"
+    ) {
+      return true;
+    }
+
+
+    const vaccinationDate =
+      String(
+        dateInput?.value || ""
+      ).trim();
+
+
+    if (!vaccinationDate) {
+      showError(
+        `Вкажіть дату: ${label}.`
+      );
+
+      dateInput?.focus();
+
+      return false;
+    }
+
+
+    const selected =
+      getRegistrationVaccine(
+        vaccineInput
+      );
+
+
+    if (!selected) {
+      showError(
+        `Оберіть вакцину: ${label}.`
+      );
+
+      vaccineInput?.focus();
+
+      return false;
+    }
+
+
+    const {
+      brand,
+      vaccine,
+    } = selected;
+
+
+    const coverageTags =
+      getVaccineCoverageTags(
+        brand,
+        vaccine
+      );
+
+
+    if (
+      !coverageTags.includes(
+        coverageTag
+      )
+    ) {
+      showError(
+        `Обрана вакцина не відповідає категорії "${label}".`
+      );
+
+      vaccineInput?.focus();
+
+      return false;
+    }
+
+
+    const fullName =
+      `${brand.brand} ${vaccine.name}`
+        .trim();
+
+
+    // Если одна комбинированная
+    // вакцина выбрана одновременно
+    // для сказа и общей вакцинации,
+    // создаём только одну запись.
+
+    const duplicate =
+      initialVaccinations.some(
+        (item) =>
+          item.vaccination_date ===
+            vaccinationDate &&
+          item.vaccine_name ===
+            fullName
+      );
+
+
+    if (!duplicate) {
+      initialVaccinations.push({
+        vaccination_date:
+          vaccinationDate,
+
+        vaccine_name:
+          fullName,
+
+        vaccine_type:
+          String(
+            vaccine.category || ""
+          ),
+
+        coverage_tags:
+          coverageTags,
+
+        batch_number:
+          "",
+
+        next_vaccination_date:
+          "",
+
+        note:
+          "Додано під час створення пацієнта",
+      });
+    }
+
+
+    return true;
+  };
+
+
+const rabiesVaccinationValid =
+  addInitialVaccination({
+    status:
+      rabiesStatus,
+
+    dateInput:
+      rabiesDateInput,
+
+    vaccineInput:
+      rabiesVaccineInput,
+
+    coverageTag:
+      "rabies",
+
+    label:
+      "вакцинація від сказу",
+  });
+
+
+if (
+  !rabiesVaccinationValid
+) {
+  return;
+}
+
+
+const generalVaccinationValid =
+  addInitialVaccination({
+    status:
+      generalVaccinationStatus,
+
+    dateInput:
+      generalVaccinationDateInput,
+
+    vaccineInput:
+      generalVaccineInput,
+
+    coverageTag:
+      "general",
+
+    label:
+      "загальна вакцинація",
+  });
+
+
+if (
+  !generalVaccinationValid
+) {
+  return;
+}
 
 const neutered =
   neuteredRaw === ""
@@ -55862,14 +56496,11 @@ const neutered =
 
   neutered,
 
-  vaccination_status:
-  vaccinationStatus,
+  rabies_status:
+  rabiesStatus,
 
-vaccination_date:
-  vaccinationDate,
-
-vaccination_name:
-  vaccinationName,
+general_vaccination_status:
+  generalVaccinationStatus,
 
 notes,
 };
@@ -55891,6 +56522,44 @@ notes,
 
       return;
     }
+// =====================================================
+// SAVE INITIAL VACCINATION HISTORY
+// =====================================================
+
+if (
+  !isEditMode &&
+  savedPet?.id &&
+  initialVaccinations.length
+) {
+  try {
+    for (
+      const vaccination
+      of initialVaccinations
+    ) {
+      await createPatientVaccinationApi(
+        savedPet.id,
+        vaccination
+      );
+    }
+
+  } catch (error) {
+    console.error(
+      "INITIAL PATIENT VACCINATIONS:",
+      error
+    );
+
+    showCrmNotice({
+      icon:
+        "⚠️",
+
+      title:
+        "Пацієнта створено",
+
+      text:
+        "Пацієнта збережено, але не всі дані вакцинації вдалося записати. Перевірте паспорт пацієнта.",
+    });
+  }
+}
 
     await loadPatientsApi();
 

@@ -15797,13 +15797,67 @@ def api_create_patient():
         get_current_org_id()
     )
 
+
+    # =====================================================
+    # VACCINATION STATUSES
+    # =====================================================
+
+    allowed_vaccination_statuses = {
+        "unknown",
+        "vaccinated",
+        "not_vaccinated",
+    }
+
+
+    rabies_status = str(
+        data.get(
+            "rabies_status"
+        )
+        or "unknown"
+    ).strip().lower()
+
+
+    general_vaccination_status = str(
+        data.get(
+            "general_vaccination_status"
+        )
+        or "unknown"
+    ).strip().lower()
+
+
+    if (
+        rabies_status
+        not in allowed_vaccination_statuses
+    ):
+        return fail(
+            "Некоректний статус вакцинації від сказу.",
+            400,
+        )
+
+
+    if (
+        general_vaccination_status
+        not in allowed_vaccination_statuses
+    ):
+        return fail(
+            "Некоректний статус загальної вакцинації.",
+            400,
+        )
+
+
     try:
         owner_result = (
             supabase
             .table("owners")
             .select("id")
-            .eq("org_id", current_org)
-            .eq("id", owner_id)
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                owner_id
+            )
             .limit(1)
             .execute()
         )
@@ -15813,6 +15867,7 @@ def api_create_patient():
                 "Власника не знайдено у цій клініці.",
                 404
             )
+
 
         payload = {
             "org_id":
@@ -15884,6 +15939,23 @@ def api_create_patient():
                     else None
                 ),
 
+
+            # =================================================
+            # NEW VACCINATION STATUS SYSTEM
+            # =================================================
+
+            "rabies_status":
+                rabies_status,
+
+            "general_vaccination_status":
+                general_vaccination_status,
+
+
+            # =================================================
+            # LEGACY VACCINATION FIELDS
+            # Пока оставляем для совместимости.
+            # =================================================
+
             "vaccination_status":
                 (
                     str(
@@ -15927,6 +15999,7 @@ def api_create_patient():
                 ),
         }
 
+
         result = (
             insert_with_optional_fallback(
                 "patients",
@@ -15935,12 +16008,17 @@ def api_create_patient():
                     "notes",
                     "sex",
                     "neutered",
+
+                    "rabies_status",
+                    "general_vaccination_status",
+
                     "vaccination_status",
                     "vaccination_date",
                     "vaccination_name",
                 ]
             )
         )
+
 
         row = (
             result.data[0]
@@ -15951,6 +16029,14 @@ def api_create_patient():
             )
             else payload
         )
+
+
+        # =====================================================
+        # LEGACY INITIAL VACCINATION MIGRATION
+        #
+        # Пока оставляем, чтобы старая форма регистрации
+        # пациента продолжала работать до её замены.
+        # =====================================================
 
         if (
             row
@@ -15991,6 +16077,9 @@ def api_create_patient():
                         "vaccine_type":
                             None,
 
+                        "coverage_tags":
+                            [],
+
                         "batch_number":
                             None,
 
@@ -16015,12 +16104,17 @@ def api_create_patient():
                     flush=True,
                 )
 
-        return ok(row)
+
+        return ok(
+            row
+        )
+
 
     except Exception as error:
         print(
             "❌ POST /api/patients:",
-            repr(error)
+            repr(error),
+            flush=True,
         )
 
         return fail(
