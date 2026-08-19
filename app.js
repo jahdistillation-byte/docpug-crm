@@ -12608,7 +12608,79 @@ if (createTaskButton) {
       )
         ? result.data
         : [];
+// =====================================================
+// TASK RELATIONS
+// =====================================================
 
+if (
+  !Array.isArray(state.patients) ||
+  !state.patients.length
+) {
+  await loadPatientsApi();
+}
+
+
+let taskStaffList =
+  Array.isArray(state.staff)
+    ? state.staff
+    : [];
+
+
+if (!taskStaffList.length) {
+  taskStaffList =
+    await loadStaffApi();
+}
+
+
+const taskPatientMap =
+  new Map(
+    (
+      Array.isArray(state.patients)
+        ? state.patients
+        : []
+    ).map(
+      (patient) => [
+        String(patient.id),
+        patient,
+      ]
+    )
+  );
+
+
+const taskStaffMap =
+  new Map(
+    (
+      Array.isArray(taskStaffList)
+        ? taskStaffList
+        : []
+    ).map(
+      (employee) => [
+        String(employee.id),
+        employee,
+      ]
+    )
+  );
+
+
+const taskRoleLabels = {
+  owner:
+    "Власник",
+
+  admin:
+    "Адміністратор",
+
+  vet:
+    "Ветеринар",
+
+  assistant:
+    "Асистент",
+
+  reception:
+    "Рецепція",
+
+  manager:
+    "Менеджер",
+};
 
     // ========================================
     // EMPTY STATE
@@ -12794,6 +12866,41 @@ if (createTaskButton) {
                   task.priority
                 );
 
+                const patient =
+  task.patient_id
+    ? taskPatientMap.get(
+        String(
+          task.patient_id
+        )
+      )
+    : null;
+
+
+const employee =
+  task.staff_id
+    ? taskStaffMap.get(
+        String(
+          task.staff_id
+        )
+      )
+    : null;
+
+
+const employeeRole =
+  String(
+    employee?.role || ""
+  )
+    .trim()
+    .toLowerCase();
+
+
+const employeeRoleLabel =
+  taskRoleLabels[
+    employeeRole
+  ] ||
+  employee?.specialization ||
+  "";
+
               const completed =
                 task.status ===
                 "completed";
@@ -12927,6 +13034,136 @@ if (createTaskButton) {
                         `
                         : ""
                     }
+
+                    ${
+  patient ||
+  employee
+    ? `
+      <div
+        style="
+          display:flex;
+          flex-wrap:wrap;
+          gap:7px;
+          margin-top:9px;
+        "
+      >
+
+        ${
+          patient
+            ? `
+              <span
+                style="
+                  display:inline-flex;
+                  align-items:center;
+                  gap:5px;
+                  padding:5px 8px;
+                  border-radius:8px;
+                  background:
+                    rgba(255,255,255,.045);
+                  border:
+                    1px solid
+                    rgba(255,255,255,.06);
+                  font-size:10px;
+                  color:
+                    rgba(255,255,255,.68);
+                "
+              >
+                🐾
+
+                <b
+                  style="
+                    color:
+                      rgba(255,255,255,.86);
+                  "
+                >
+                  ${escapeHtml(
+                    patient.name ||
+                    "Пацієнт"
+                  )}
+                </b>
+
+                ${
+                  patient.breed
+                    ? `
+                      <span
+                        style="
+                          opacity:.55;
+                        "
+                      >
+                        ·
+                        ${escapeHtml(
+                          patient.breed
+                        )}
+                      </span>
+                    `
+                    : ""
+                }
+              </span>
+            `
+            : ""
+        }
+
+
+        ${
+          employee
+            ? `
+              <span
+                style="
+                  display:inline-flex;
+                  align-items:center;
+                  gap:5px;
+                  padding:5px 8px;
+                  border-radius:8px;
+                  background:
+                    rgba(255,255,255,.045);
+                  border:
+                    1px solid
+                    rgba(255,255,255,.06);
+                  font-size:10px;
+                  color:
+                    rgba(255,255,255,.68);
+                "
+              >
+                👤
+
+                <b
+                  style="
+                    color:
+                      rgba(255,255,255,.86);
+                  "
+                >
+                  ${escapeHtml(
+                    employee.name ||
+                    employee.full_name ||
+                    "Співробітник"
+                  )}
+                </b>
+
+                ${
+                  employeeRoleLabel
+                    ? `
+                      <span
+                        style="
+                          opacity:.55;
+                        "
+                      >
+                        ·
+                        ${escapeHtml(
+                          employeeRoleLabel
+                        )}
+                      </span>
+                    `
+                    : ""
+                }
+              </span>
+            `
+            : ""
+        }
+
+      </div>
+    `
+    : ""
+}
 
 
                     <div
