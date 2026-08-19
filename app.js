@@ -11440,6 +11440,669 @@ function getStaffContrastColor(color) {
 
   return value;
 }
+function openTaskCreateModal(
+  activeScope = "all"
+) {
+  document
+    .querySelector(
+      ".taskCreateOverlay"
+    )
+    ?.remove();
+
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+
+  overlay.className =
+    "taskCreateOverlay";
+
+
+  overlay.style.cssText = `
+    position:fixed;
+    inset:0;
+    z-index:2147483647;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(5,7,7,.76);
+    backdrop-filter:blur(12px);
+  `;
+
+
+  const today =
+    typeof todayISO ===
+    "function"
+      ? todayISO()
+      : new Date()
+          .toISOString()
+          .slice(0, 10);
+
+
+  overlay.innerHTML = `
+    <div
+      style="
+        width:min(680px, 100%);
+        max-height:calc(100vh - 48px);
+        overflow:auto;
+        border-radius:22px;
+        border:
+          1px solid
+          rgba(255,255,255,.10);
+        background:
+          rgba(20,22,21,.98);
+        box-shadow:
+          0 30px 100px
+          rgba(0,0,0,.55);
+      "
+    >
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:flex-start;
+          gap:20px;
+          padding:22px 24px 18px;
+          border-bottom:
+            1px solid
+            rgba(255,255,255,.07);
+        "
+      >
+        <div>
+          <div
+            style="
+              font-size:10px;
+              font-weight:700;
+              letter-spacing:.12em;
+              color:#d9b57c;
+            "
+          >
+            TASK CENTER
+          </div>
+
+          <h2
+            style="
+              margin:7px 0 0;
+              font-size:22px;
+            "
+          >
+            + Нова задача
+          </h2>
+
+          <div
+            style="
+              margin-top:5px;
+              font-size:12px;
+              color:
+                rgba(255,255,255,.45);
+            "
+          >
+            Створіть задачу,
+            нагадування або follow-up
+          </div>
+        </div>
+
+
+        <button
+          type="button"
+          data-close-task-modal
+          style="
+            width:36px;
+            height:36px;
+            border-radius:11px;
+            border:
+              1px solid
+              rgba(255,255,255,.08);
+            background:
+              rgba(255,255,255,.04);
+            color:#fff;
+            cursor:pointer;
+            font-size:20px;
+          "
+        >
+          ×
+        </button>
+      </div>
+
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(2,minmax(0,1fr));
+          gap:16px;
+          padding:22px 24px;
+        "
+      >
+
+        <label
+          style="
+            grid-column:1/-1;
+          "
+        >
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            Назва задачі *
+          </div>
+
+          <input
+            id="taskCreateTitle"
+            type="text"
+            maxlength="240"
+            autocomplete="off"
+            placeholder="Наприклад: передзвонити власнику"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:
+                rgba(255,255,255,.035);
+              color:#fff;
+              outline:none;
+            "
+          >
+        </label>
+
+
+        <label>
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            Тип
+          </div>
+
+          <select
+            id="taskCreateKind"
+            style="
+              width:100%;
+              padding:12px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:#1a1c1b;
+              color:#fff;
+            "
+          >
+            <option value="task">
+              ✓ Задача
+            </option>
+
+            <option value="reminder">
+              🔔 Нагадування
+            </option>
+
+            <option value="follow_up">
+              ↻ Follow-up
+            </option>
+          </select>
+        </label>
+
+
+        <label>
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            Пріоритет
+          </div>
+
+          <select
+            id="taskCreatePriority"
+            style="
+              width:100%;
+              padding:12px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:#1a1c1b;
+              color:#fff;
+            "
+          >
+            <option value="low">
+              Низький
+            </option>
+
+            <option
+              value="normal"
+              selected
+            >
+              Звичайний
+            </option>
+
+            <option value="high">
+              Високий
+            </option>
+          </select>
+        </label>
+
+
+        <label>
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            Дата
+          </div>
+
+          <input
+            id="taskCreateDate"
+            type="date"
+            value="${escapeHtml(
+              today
+            )}"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:11px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:
+                rgba(255,255,255,.035);
+              color:#fff;
+            "
+          >
+        </label>
+
+
+        <label>
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            Час
+          </div>
+
+          <input
+            id="taskCreateTime"
+            type="time"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:11px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:
+                rgba(255,255,255,.035);
+              color:#fff;
+            "
+          >
+        </label>
+
+
+        <label
+          style="
+            grid-column:1/-1;
+          "
+        >
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            Опис
+          </div>
+
+          <textarea
+            id="taskCreateDescription"
+            rows="4"
+            maxlength="4000"
+            placeholder="Додаткова інформація..."
+            style="
+              width:100%;
+              box-sizing:border-box;
+              resize:vertical;
+              padding:12px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:
+                rgba(255,255,255,.035);
+              color:#fff;
+              outline:none;
+              font-family:inherit;
+            "
+          ></textarea>
+        </label>
+
+      </div>
+
+
+      <div
+        style="
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+          padding:0 24px 22px;
+        "
+      >
+        <button
+          type="button"
+          data-close-task-modal
+          style="
+            padding:11px 16px;
+            border-radius:11px;
+            border:
+              1px solid
+              rgba(255,255,255,.09);
+            background:
+              rgba(255,255,255,.035);
+            color:
+              rgba(255,255,255,.75);
+            cursor:pointer;
+          "
+        >
+          Скасувати
+        </button>
+
+
+        <button
+          type="button"
+          id="taskCreateSave"
+          class="btn-primary"
+        >
+          Створити задачу
+        </button>
+      </div>
+
+    </div>
+  `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  const closeModal =
+    () => {
+      overlay.remove();
+    };
+
+
+  overlay
+    .querySelectorAll(
+      "[data-close-task-modal]"
+    )
+    .forEach(
+      (button) => {
+        button.onclick =
+          closeModal;
+      }
+    );
+
+
+  overlay.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target ===
+        overlay
+      ) {
+        closeModal();
+      }
+    }
+  );
+
+
+  const titleInput =
+    overlay.querySelector(
+      "#taskCreateTitle"
+    );
+
+
+  setTimeout(
+    () => {
+      titleInput?.focus();
+    },
+    0
+  );
+
+
+  overlay
+    .querySelector(
+      "#taskCreateSave"
+    )
+    ?.addEventListener(
+      "click",
+      async (event) => {
+        const saveButton =
+          event.currentTarget;
+
+
+        const title =
+          String(
+            titleInput?.value ||
+            ""
+          ).trim();
+
+
+        if (!title) {
+          showCrmNotice({
+            icon: "⚠️",
+            title:
+              "Вкажіть задачу",
+            text:
+              "Назва задачі є обов'язковою.",
+          });
+
+          titleInput?.focus();
+
+          return;
+        }
+
+
+        const taskKind =
+          String(
+            overlay.querySelector(
+              "#taskCreateKind"
+            )?.value ||
+            "task"
+          );
+
+
+        const priority =
+          String(
+            overlay.querySelector(
+              "#taskCreatePriority"
+            )?.value ||
+            "normal"
+          );
+
+
+        const dueDate =
+          String(
+            overlay.querySelector(
+              "#taskCreateDate"
+            )?.value ||
+            ""
+          ).trim();
+
+
+        const dueTime =
+          String(
+            overlay.querySelector(
+              "#taskCreateTime"
+            )?.value ||
+            ""
+          ).trim();
+
+
+        const description =
+          String(
+            overlay.querySelector(
+              "#taskCreateDescription"
+            )?.value ||
+            ""
+          ).trim();
+
+
+        saveButton.disabled =
+          true;
+
+        saveButton.textContent =
+          "Створюємо…";
+
+
+        try {
+          const response =
+            await fetch(
+              "/api/tasks",
+              {
+                method:
+                  "POST",
+
+                credentials:
+                  "include",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  Accept:
+                    "application/json",
+
+                  ...getOrgHeaders(),
+                },
+
+                body:
+                  JSON.stringify({
+                    title,
+
+                    description,
+
+                    task_kind:
+                      taskKind,
+
+                    source:
+                      "manual",
+
+                    priority,
+
+                    due_date:
+                      dueDate,
+
+                    due_time:
+                      dueTime,
+                  }),
+              }
+            );
+
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => null
+              );
+
+
+          if (
+            !response.ok ||
+            !result?.ok
+          ) {
+            throw new Error(
+              result?.error ||
+              "Не вдалося створити задачу."
+            );
+          }
+
+
+          closeModal();
+
+
+          showCrmNotice({
+            icon:
+              taskKind ===
+              "reminder"
+                ? "🔔"
+                : taskKind ===
+                  "follow_up"
+                  ? "↻"
+                  : "✓",
+
+            title:
+              "Задачу створено",
+
+            text:
+              title,
+          });
+
+
+          await renderTasksTab(
+            activeScope
+          );
+
+
+        } catch (error) {
+          console.error(
+            "CREATE GLOBAL TASK:",
+            error
+          );
+
+
+          showCrmNotice({
+            icon:
+              "⚠️",
+
+            title:
+              "Не вдалося створити",
+
+            text:
+              error?.message ||
+              "Спробуйте ще раз.",
+          });
+
+
+          saveButton.disabled =
+            false;
+
+          saveButton.textContent =
+            "Створити задачу";
+        }
+      }
+    );
+}
 async function renderTasksTab(
   activeScope = "all"
 ) {
@@ -11669,7 +12332,19 @@ async function renderTasksTab(
       }
     );
 
+const createTaskButton =
+  page.querySelector(
+    "#tasksCreateButton"
+  );
 
+if (createTaskButton) {
+  createTaskButton.onclick =
+    () => {
+      openTaskCreateModal(
+        activeScope
+      );
+    };
+}
   const content =
     page.querySelector(
       "#taskCenterContent"
