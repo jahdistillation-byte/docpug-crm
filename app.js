@@ -13311,62 +13311,61 @@ const employeeRoleLabel =
             : ""
         }
 
+${
+  employee
+    ? `
+      <span
+        style="
+          display:inline-flex;
+          align-items:center;
+          gap:5px;
+          padding:5px 8px;
+          border-radius:8px;
+          background:
+            rgba(255,255,255,.045);
+          border:
+            1px solid
+            rgba(255,255,255,.06);
+          font-size:10px;
+          color:
+            rgba(255,255,255,.68);
+        "
+      >
+        👤
+
+        <b
+          style="
+            color:
+              rgba(255,255,255,.86);
+          "
+        >
+          ${escapeHtml(
+            employee.name ||
+            employee.full_name ||
+            "Співробітник"
+          )}
+        </b>
 
         ${
-          employee
+          employeeRoleLabel
             ? `
               <span
                 style="
-                  display:inline-flex;
-                  align-items:center;
-                  gap:5px;
-                  padding:5px 8px;
-                  border-radius:8px;
-                  background:
-                    rgba(255,255,255,.045);
-                  border:
-                    1px solid
-                    rgba(255,255,255,.06);
-                  font-size:10px;
-                  color:
-                    rgba(255,255,255,.68);
+                  opacity:.55;
                 "
               >
-                👤
-
-                <b
-                  style="
-                    color:
-                      rgba(255,255,255,.86);
-                  "
-                >
-                  ${escapeHtml(
-                    employee.name ||
-                    employee.full_name ||
-                    "Співробітник"
-                  )}
-                </b>
-
-                ${
+                ·
+                ${escapeHtml(
                   employeeRoleLabel
-                    ? `
-                      <span
-                        style="
-                          opacity:.55;
-                        "
-                      >
-                        ·
-                        ${escapeHtml(
-                          employeeRoleLabel
-                        )}
-                      </span>
-                    `
-                    : ""
-                }
+                )}
               </span>
             `
             : ""
         }
+      </span>
+    `
+    : ""
+}
 
       </div>
     `
@@ -13374,167 +13373,181 @@ const employeeRoleLabel =
 }
 
 
-                    <div
-                      style="
-                        display:flex;
-                        flex-wrap:wrap;
-                        align-items:center;
-                        gap:10px;
-                        margin-top:9px;
-                        font-size:10px;
-                        color:
-                          rgba(255,255,255,.38);
-                      "
-                    >
-                      <span>
-                        ${kind.label}
-                      </span>
+<div
+  style="
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin-top:9px;
+    font-size:10px;
+    color:
+      rgba(255,255,255,.38);
+  "
+>
+  <span>
+    ${kind.label}
+  </span>
 
-                      <span
-                        style="
-                          color:
-                            ${priority.color};
-                        "
-                      >
-                        ●
-                        ${priority.label}
-                      </span>
+  <span
+    style="
+      color:
+        ${priority.color};
+    "
+  >
+    ●
+    ${priority.label}
+  </span>
 
-                      ${
-                        task.source ===
-                        "ai"
-                          ? `
-                            <span>
-                              ✦ PUG AI
-                            </span>
-                          `
-                          : ""
-                      }
-                    </div>
-                  </div>
+  ${
+    task.source ===
+    "ai"
+      ? `
+        <span>
+          ✦ PUG AI
+        </span>
+      `
+      : ""
+  }
+</div>
+
+</div>
 
 
-                  <div
-                    style="
-                      text-align:right;
-                      white-space:nowrap;
-                    "
-                  >
-                    ${
-                      task.due_date
-                        ? `
-                          <div
-                            style="
-                              font-size:12px;
-                              font-weight:700;
-                              color:
-                                ${
-                                  overdue
-                                    ? "#ff9187"
-                                    : "rgba(255,255,255,.72)"
-                                };
-                            "
-                          >
-                            ${escapeHtml(
-                              formatTaskDate(
-                                task.due_date
-                              )
-                            )}
-                          </div>
-                        `
-                        : ""
-                    }
-<button
-                      type="button"
-                                          <button
-                      type="button"
-                      data-edit-global-task="${escapeHtml(
-                        String(
-                          task.id || ""
-                        )
-                      )}"
-                      title="Редагувати задачу"
-                      style="
-                        margin-top:9px;
-                        margin-right:5px;
-                        width:26px;
-                        height:26px;
-                        border-radius:8px;
-                        border:
-                          1px solid
-                          rgba(255,255,255,.09);
-                        background:
-                          rgba(255,255,255,.035);
-                        color:
-                          rgba(255,255,255,.65);
-                        cursor:pointer;
-                        font-size:12px;
-                      "
-                    >
-                      ✎
-                    </button>
-                      data-delete-global-task="${escapeHtml(
-                        String(
-                          task.id || ""
-                        )
-                      )}"
-                      title="Видалити задачу"
-                      style="
-                        margin-top:9px;
-                        width:26px;
-                        height:26px;
-                        border-radius:8px;
-                        border:
-                          1px solid
-                          rgba(255,100,100,.12);
-                        background:
-                          rgba(255,80,80,.04);
-                        color:
-                          rgba(255,130,130,.62);
-                        cursor:pointer;
-                        font-size:12px;
-                      "
-                    >
-                      ×
-                    </button>
+<div
+  style="
+    text-align:right;
+    white-space:nowrap;
+    min-width:92px;
+  "
+>
+  ${
+    task.due_date
+      ? `
+        <div
+          style="
+            font-size:12px;
+            font-weight:700;
+            color:
+              ${
+                overdue
+                  ? "#ff9187"
+                  : "rgba(255,255,255,.72)"
+              };
+          "
+        >
+          ${escapeHtml(
+            formatTaskDate(
+              task.due_date
+            )
+          )}
+        </div>
+      `
+      : ""
+  }
 
-                  </div>
 
-                </article>
-                    ${
-                      task.due_time
-                        ? `
-                          <div
-                            style="
-                              margin-top:3px;
-                              font-size:11px;
-                              color:
-                                rgba(255,255,255,.40);
-                            "
-                          >
-                            ${escapeHtml(
-                              String(
-                                task.due_time
-                              ).slice(
-                                0,
-                                5
-                              )
-                            )}
-                          </div>
-                        `
-                        : ""
-                    }
-                  </div>
+  ${
+    task.due_time
+      ? `
+        <div
+          style="
+            margin-top:3px;
+            font-size:11px;
+            color:
+              rgba(255,255,255,.40);
+          "
+        >
+          ${escapeHtml(
+            String(
+              task.due_time
+            ).slice(
+              0,
+              5
+            )
+          )}
+        </div>
+      `
+      : ""
+  }
 
-                </article>
-              `;
-            }
-          )
-          .join("")}
 
-        
-      </div>
-    `;
+  <div
+    style="
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:5px;
+      margin-top:9px;
+    "
+  >
+
+    <button
+      type="button"
+      data-edit-global-task="${escapeHtml(
+        String(
+          task.id || ""
+        )
+      )}"
+      title="Редагувати задачу"
+      style="
+        width:26px;
+        height:26px;
+        border-radius:8px;
+        border:
+          1px solid
+          rgba(255,255,255,.09);
+        background:
+          rgba(255,255,255,.035);
+        color:
+          rgba(255,255,255,.65);
+        cursor:pointer;
+        font-size:12px;
+      "
+    >
+      ✎
+    </button>
+
+
+    <button
+      type="button"
+      data-delete-global-task="${escapeHtml(
+        String(
+          task.id || ""
+        )
+      )}"
+      title="Видалити задачу"
+      style="
+        width:26px;
+        height:26px;
+        border-radius:8px;
+        border:
+          1px solid
+          rgba(255,100,100,.12);
+        background:
+          rgba(255,80,80,.04);
+        color:
+          rgba(255,130,130,.62);
+        cursor:pointer;
+        font-size:12px;
+      "
+    >
+      ×
+    </button>
+
+  </div>
+
+</div>
+
+</article>
+`;
+    }
+  )
+  .join("")}
+
+</div>
+`;
+       
 
 content.addEventListener(
   "click",
