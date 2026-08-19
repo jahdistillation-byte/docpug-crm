@@ -13299,6 +13299,31 @@ const employeeRoleLabel =
             }
           )
           .join("")}
+
+        <button
+  type="button"
+  data-delete-global-task="${escapeHtml(
+    String(task.id || "")
+  )}"
+  title="Видалити задачу"
+  style="
+    margin-top:9px;
+    width:26px;
+    height:26px;
+    border-radius:8px;
+    border:
+      1px solid
+      rgba(255,100,100,.12);
+    background:
+      rgba(255,80,80,.04);
+    color:
+      rgba(255,130,130,.62);
+    cursor:pointer;
+    font-size:12px;
+  "
+>
+  ×
+</button>
       </div>
     `;
 
@@ -13384,6 +13409,89 @@ content.addEventListener(
           "Спробуйте ще раз.",
       });
     }
+  }
+);
+content.addEventListener(
+  "click",
+  (event) => {
+    const deleteButton =
+      event.target.closest(
+        "[data-delete-global-task]"
+      );
+
+    if (!deleteButton) {
+      return;
+    }
+
+
+    const taskId =
+      String(
+        deleteButton.dataset
+          .deleteGlobalTask ||
+        ""
+      ).trim();
+
+
+    if (!taskId) {
+      return;
+    }
+
+
+    const task =
+      tasks.find(
+        (item) =>
+          String(item.id) ===
+          taskId
+      );
+
+
+    if (!task) {
+      return;
+    }
+
+
+    openDeleteModal(
+      `
+        Видалити задачу
+        <b>${escapeHtml(
+          task.title ||
+          "Без назви"
+        )}</b>?
+        <br><br>
+        Цю дію не можна скасувати.
+      `,
+
+      async () => {
+        try {
+          await deleteVisitTaskApi(
+            taskId
+          );
+
+
+          await renderTasksTab(
+            activeScope
+          );
+
+        } catch (error) {
+          console.error(
+            "DELETE GLOBAL TASK:",
+            error
+          );
+
+
+          showCrmNotice({
+            icon: "⚠️",
+
+            title:
+              "Не вдалося видалити задачу",
+
+            text:
+              error?.message ||
+              "Спробуйте ще раз.",
+          });
+        }
+      }
+    );
   }
 );
   } catch (error) {
