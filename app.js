@@ -2854,6 +2854,214 @@ function startWaitingPatientsPoll() {
     30000
   );
 }
+// =====================================================
+// TASKS MENU BADGE
+// =====================================================
+
+let tasksBadgePollStarted =
+  false;
+
+let tasksBadgeLoading =
+  false;
+
+
+async function refreshMyTasksBadge() {
+  if (tasksBadgeLoading) {
+    return;
+  }
+
+
+  const taskMenuItem =
+    document.querySelector(
+      '#tabs [data-target="tasks"], ' +
+      '#tabs [data-route="tasks"]'
+    );
+
+
+  if (!taskMenuItem) {
+    return;
+  }
+
+
+  const taskMenuLink =
+    taskMenuItem.querySelector(
+      "a"
+    ) ||
+    taskMenuItem;
+
+
+  let badge =
+    taskMenuItem.querySelector(
+      ".taskMenuBadge"
+    );
+
+
+  if (!badge) {
+    badge =
+      document.createElement(
+        "span"
+      );
+
+    badge.className =
+      "taskMenuBadge";
+
+    badge.style.cssText = `
+      display:none;
+      align-items:center;
+      justify-content:center;
+      min-width:20px;
+      height:20px;
+      padding:0 6px;
+      margin-left:6px;
+      border-radius:999px;
+      background:#ff625c;
+      color:#fff;
+      font-size:11px;
+      font-weight:800;
+      line-height:1;
+      box-shadow:
+        0 4px 14px
+        rgba(255,98,92,.35);
+    `;
+
+    taskMenuLink.appendChild(
+      badge
+    );
+  }
+
+
+  tasksBadgeLoading =
+    true;
+
+
+  try {
+    const params =
+      new URLSearchParams({
+        scope:
+          "mine",
+
+        status:
+          "open",
+      });
+
+
+    const response =
+      await fetch(
+        `/api/tasks?${params.toString()}`,
+        {
+          method:
+            "GET",
+
+          credentials:
+            "include",
+
+          cache:
+            "no-store",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+
+    const result =
+      await response
+        .json()
+        .catch(
+          () => null
+        );
+
+
+    if (
+      !response.ok ||
+      !result?.ok
+    ) {
+      throw new Error(
+        result?.error ||
+        "Не вдалося завантажити задачі."
+      );
+    }
+
+
+    const tasks =
+      Array.isArray(
+        result.data
+      )
+        ? result.data
+        : [];
+
+
+    const openTasks =
+      tasks.filter(
+        (task) =>
+          String(
+            task?.status ||
+            "open"
+          )
+            .trim()
+            .toLowerCase() !==
+          "completed"
+      );
+
+
+    const count =
+      openTasks.length;
+
+
+    if (count > 0) {
+      badge.textContent =
+        count > 99
+          ? "99+"
+          : String(count);
+
+      badge.style.display =
+        "inline-flex";
+
+    } else {
+      badge.textContent =
+        "";
+
+      badge.style.display =
+        "none";
+    }
+
+  } catch (error) {
+    console.warn(
+      "refreshMyTasksBadge failed:",
+      error
+    );
+
+  } finally {
+    tasksBadgeLoading =
+      false;
+  }
+}
+
+
+function startTasksBadgePoll() {
+  if (tasksBadgePollStarted) {
+    return;
+  }
+
+
+  tasksBadgePollStarted =
+    true;
+
+
+  refreshMyTasksBadge();
+
+
+  setInterval(
+    () => {
+      refreshMyTasksBadge();
+    },
+    30000
+  );
+}
 
 function isOwner() {
   return (
@@ -3128,6 +3336,8 @@ function initTabs() {
 
 async function routeFromHash() {
   const { route, id } = parseHash();
+
+  startTasksBadgePoll();
   if (
     TAB_ROUTES.has(route) &&
     !canAccessRoute(route)
@@ -12771,6 +12981,7 @@ if (createTaskButton) {
       )
         ? result.data
         : [];
+refreshMyTasksBadge();
 // =====================================================
 // TASK RELATIONS
 // =====================================================
