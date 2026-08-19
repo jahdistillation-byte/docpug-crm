@@ -20454,7 +20454,7 @@ def api_create_task():
             "Не вдалося створити задачу.",
             500,
         )
-        
+    
 def get_visit_for_task(
     visit_id,
     current_org,
@@ -20921,7 +20921,101 @@ def api_update_visit_task(
             payload["title"] = (
                 title
             )
+        if "description" in data:
+            description = str(
+                data.get(
+                    "description"
+                )
+                or ""
+            ).strip()
 
+            if (
+                len(description) >
+                4000
+            ):
+                return fail(
+                    "Опис задачі занадто довгий.",
+                    400
+                )
+
+            payload[
+                "description"
+            ] = (
+                description
+                or None
+            )
+
+
+        if "task_kind" in data:
+            task_kind = str(
+                data.get(
+                    "task_kind"
+                )
+                or "task"
+            ).strip().lower()
+
+            if (
+                task_kind not in
+                TASK_KINDS
+            ):
+                return fail(
+                    "Некоректний тип задачі.",
+                    400
+                )
+
+            payload[
+                "task_kind"
+            ] = (
+                task_kind
+            )
+
+
+        if "patient_id" in data:
+            patient_id = str(
+                data.get(
+                    "patient_id"
+                )
+                or ""
+            ).strip()
+
+            if patient_id:
+                patient_result = (
+                    execute_with_retry(
+                        lambda: (
+                            supabase
+                            .table(
+                                "patients"
+                            )
+                            .select("id")
+                            .eq(
+                                "org_id",
+                                current_org
+                            )
+                            .eq(
+                                "id",
+                                patient_id
+                            )
+                            .limit(1)
+                        ),
+                        attempts=4,
+                        delay=0.25,
+                    )
+                )
+
+                if (
+                    not patient_result.data
+                ):
+                    return fail(
+                        "Пацієнта не знайдено.",
+                        404
+                    )
+
+            payload[
+                "patient_id"
+            ] = (
+                patient_id
+                or None
+            )
         if "due_date" in data:
             payload["due_date"] = (
                 str(
