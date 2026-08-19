@@ -11713,7 +11713,127 @@ console.log(
           </select>
         </label>
 
+        <label>
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            🐾 Пацієнт
+          </div>
 
+          <select
+            id="taskCreatePatient"
+            style="
+              width:100%;
+              padding:12px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:#1a1c1b;
+              color:#fff;
+            "
+          >
+            <option value="">
+              Без прив'язки до пацієнта
+            </option>
+
+            ${
+              taskPatients
+                .map(
+                  (patient) => `
+                    <option
+                      value="${escapeHtml(
+                        String(
+                          patient.id
+                        )
+                      )}"
+                    >
+                      ${escapeHtml(
+                        [
+                          patient.name ||
+                            "Пацієнт",
+
+                          patient.breed
+                            ? `· ${patient.breed}`
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")
+                      )}
+                    </option>
+                  `
+                )
+                .join("")
+            }
+          </select>
+        </label>
+
+
+        <label>
+          <div
+            style="
+              margin-bottom:7px;
+              font-size:11px;
+              color:
+                rgba(255,255,255,.55);
+            "
+          >
+            👤 Виконавець
+          </div>
+
+          <select
+            id="taskCreateStaff"
+            style="
+              width:100%;
+              padding:12px 13px;
+              border-radius:11px;
+              border:
+                1px solid
+                rgba(255,255,255,.10);
+              background:#1a1c1b;
+              color:#fff;
+            "
+          >
+            <option value="">
+              Без виконавця
+            </option>
+
+            ${
+              taskStaff
+                .map(
+                  (employee) => `
+                    <option
+                      value="${escapeHtml(
+                        String(
+                          employee.id
+                        )
+                      )}"
+                    >
+                      ${escapeHtml(
+                        [
+                          employee.name ||
+                            employee.full_name ||
+                            "Співробітник",
+
+                          employee.role
+                            ? `· ${employee.role}`
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")
+                      )}
+                    </option>
+                  `
+                )
+                .join("")
+            }
+          </select>
+        </label>
         <label>
           <div
             style="
@@ -11996,7 +12116,22 @@ console.log(
             "task"
           );
 
+        const patientId =
+          String(
+            overlay.querySelector(
+              "#taskCreatePatient"
+            )?.value ||
+            ""
+          ).trim();
 
+
+        const staffId =
+          String(
+            overlay.querySelector(
+              "#taskCreateStaff"
+            )?.value ||
+            ""
+          ).trim();
         const priority =
           String(
             overlay.querySelector(
@@ -12061,7 +12196,7 @@ console.log(
                   ...getOrgHeaders(),
                 },
 
-                body:
+                                body:
                   JSON.stringify({
                     title,
 
@@ -12072,6 +12207,12 @@ console.log(
 
                     source:
                       "manual",
+
+                    patient_id:
+                      patientId,
+
+                    staff_id:
+                      staffId,
 
                     priority,
 
