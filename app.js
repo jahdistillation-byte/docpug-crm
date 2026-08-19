@@ -13268,7 +13268,36 @@ const employeeRoleLabel =
                         `
                         : ""
                     }
+<button
+                      type="button"
+                      data-delete-global-task="${escapeHtml(
+                        String(
+                          task.id || ""
+                        )
+                      )}"
+                      title="Видалити задачу"
+                      style="
+                        margin-top:9px;
+                        width:26px;
+                        height:26px;
+                        border-radius:8px;
+                        border:
+                          1px solid
+                          rgba(255,100,100,.12);
+                        background:
+                          rgba(255,80,80,.04);
+                        color:
+                          rgba(255,130,130,.62);
+                        cursor:pointer;
+                        font-size:12px;
+                      "
+                    >
+                      ×
+                    </button>
 
+                  </div>
+
+                </article>
                     ${
                       task.due_time
                         ? `
@@ -13300,30 +13329,7 @@ const employeeRoleLabel =
           )
           .join("")}
 
-        <button
-  type="button"
-  data-delete-global-task="${escapeHtml(
-    String(task.id || "")
-  )}"
-  title="Видалити задачу"
-  style="
-    margin-top:9px;
-    width:26px;
-    height:26px;
-    border-radius:8px;
-    border:
-      1px solid
-      rgba(255,100,100,.12);
-    background:
-      rgba(255,80,80,.04);
-    color:
-      rgba(255,130,130,.62);
-    cursor:pointer;
-    font-size:12px;
-  "
->
-  ×
-</button>
+        
       </div>
     `;
 
