@@ -12205,64 +12205,51 @@ console.log(
     );
 
 
-  overlay.addEventListener(
-    "click",
-    (event) => {
-      if (
-        event.target ===
-        overlay
-      ) {
-        closeModal();
-      }
-    }
-  );
-
-
   const titleInput =
-    overlay.querySelector(
-      "#taskCreateTitle"
-    );
-
-
-  setTimeout(
-    () => {
-      titleInput?.focus();
-    },
-    0
+  overlay.querySelector(
+    "#taskCreateTitle"
   );
 
 
-  overlay
-    .querySelector(
-      "#taskCreateSave"
-    )
-    ?.addEventListener(
-      "click",
-      async (event) => {
-        const saveButton =
-          event.currentTarget;
+setTimeout(
+  () => {
+    titleInput?.focus();
+  },
+  0
+);
 
 
-        const title =
-          String(
-            titleInput?.value ||
-            ""
-          ).trim();
+overlay
+  .querySelector(
+    "#taskCreateSave"
+  )
+  ?.addEventListener(
+    "click",
+    async (event) => {
+      const saveButton =
+        event.currentTarget;
 
 
-        if (!title) {
-          showCrmNotice({
-            icon: "⚠️",
-            title:
-              "Вкажіть задачу",
-            text:
-              "Назва задачі є обов'язковою.",
-          });
+      const title =
+        String(
+          titleInput?.value ||
+          ""
+        ).trim();
 
-          titleInput?.focus();
 
-          return;
-        }
+      if (!title) {
+        showCrmNotice({
+          icon: "⚠️",
+          title:
+            "Вкажіть задачу",
+          text:
+            "Назва задачі є обов'язковою.",
+        });
+
+        titleInput?.focus();
+
+        return;
+      }
 
 
         const taskKind =
