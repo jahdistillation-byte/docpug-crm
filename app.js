@@ -3188,11 +3188,6 @@ function showAssignedTaskToast(
     }
   );
 
-
-  setTimeout(
-    closeToast,
-    9000
-  );
 }  
 
 let tasksBadgeLoading =
