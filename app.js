@@ -12554,7 +12554,56 @@ console.log(
             "
           >
         </label>
+<label
+  id="taskCreateReminderWrap"
+  style="
+    grid-column:1/-1;
+    display:none;
+  "
+>
+  <div
+    style="
+      margin-bottom:7px;
+      font-size:11px;
+      color:
+        rgba(255,255,255,.55);
+    "
+  >
+    🔔 Коли нагадати
+  </div>
 
+  <input
+    id="taskCreateRemindAt"
+    type="datetime-local"
+    style="
+      width:100%;
+      box-sizing:border-box;
+      padding:11px 13px;
+      border-radius:11px;
+      border:
+        1px solid
+        rgba(217,181,124,.22);
+      background:
+        rgba(217,181,124,.055);
+      color:#fff;
+      outline:none;
+    "
+  >
+
+  <div
+    style="
+      margin-top:6px;
+      font-size:10px;
+      line-height:1.4;
+      color:
+        rgba(255,255,255,.34);
+    "
+  >
+    У цей момент PUG покаже
+    нагадування відповідальному
+    співробітнику.
+  </div>
+</label>
 
         <label
           style="
@@ -12652,11 +12701,48 @@ console.log(
       overlay.querySelector(
         "#taskCreateTitle"
       );
+  const kindInput =
+  overlay.querySelector(
+    "#taskCreateKind"
+  );
 
-    const kindInput =
-      overlay.querySelector(
-        "#taskCreateKind"
-      );
+
+const reminderWrap =
+  overlay.querySelector(
+    "#taskCreateReminderWrap"
+  );
+
+
+const updateReminderVisibility =
+  () => {
+    if (!reminderWrap) {
+      return;
+    }
+
+
+    const isReminder =
+      String(
+        kindInput?.value ||
+        ""
+      ) ===
+      "reminder";
+
+
+    reminderWrap.style.display =
+      isReminder
+        ? "block"
+        : "none";
+  };
+
+
+kindInput?.addEventListener(
+  "change",
+  updateReminderVisibility
+);
+
+
+updateReminderVisibility();    
+
 
     const patientInput =
       overlay.querySelector(
