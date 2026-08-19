@@ -2860,6 +2860,340 @@ function startWaitingPatientsPoll() {
 
 let tasksBadgePollStarted =
   false;
+let taskNotificationsReady =
+  false;
+
+const knownMyTaskIds =
+  new Set();
+
+
+function showAssignedTaskToast(
+  task,
+  additionalCount = 0
+) {
+  document
+    .getElementById(
+      "assignedTaskToast"
+    )
+    ?.remove();
+
+
+  const toast =
+    document.createElement(
+      "div"
+    );
+
+
+  toast.id =
+    "assignedTaskToast";
+
+
+  const taskTitle =
+    String(
+      task?.title ||
+      "Нова задача"
+    ).trim();
+
+
+  const dueDate =
+    String(
+      task?.due_date ||
+      ""
+    ).slice(
+      0,
+      10
+    );
+
+
+  const dueTime =
+    String(
+      task?.due_time ||
+      ""
+    ).slice(
+      0,
+      5
+    );
+
+
+  let dueLabel =
+    "";
+
+
+  if (dueDate) {
+    const date =
+      new Date(
+        `${dueDate}T00:00:00`
+      );
+
+
+    dueLabel =
+      date.toLocaleDateString(
+        "uk-UA",
+        {
+          day:
+            "2-digit",
+
+          month:
+            "2-digit",
+
+          year:
+            "numeric",
+        }
+      );
+
+
+    if (dueTime) {
+      dueLabel +=
+        ` · ${dueTime}`;
+    }
+  }
+
+
+  toast.style.cssText = `
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    z-index:2147483646;
+    width:min(380px, calc(100vw - 32px));
+    padding:16px;
+    border-radius:18px;
+    border:
+      1px solid
+      rgba(255,255,255,.10);
+    background:
+      rgba(21,23,22,.97);
+    box-shadow:
+      0 24px 70px
+      rgba(0,0,0,.48);
+    backdrop-filter:
+      blur(16px);
+    transform:
+      translateY(20px);
+    opacity:0;
+    transition:
+      opacity .22s ease,
+      transform .22s ease;
+  `;
+
+
+  toast.innerHTML = `
+    <div
+      style="
+        display:flex;
+        gap:12px;
+        align-items:flex-start;
+      "
+    >
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          flex:0 0 38px;
+          width:38px;
+          height:38px;
+          border-radius:12px;
+          background:
+            rgba(217,181,124,.12);
+          color:#d9b57c;
+          font-size:18px;
+        "
+      >
+        🔔
+      </div>
+
+
+      <div
+        style="
+          flex:1;
+          min-width:0;
+        "
+      >
+
+        <div
+          style="
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:.12em;
+            color:#d9b57c;
+          "
+        >
+          НОВА ЗАДАЧА
+        </div>
+
+
+        <div
+          style="
+            margin-top:5px;
+            font-size:14px;
+            font-weight:750;
+            line-height:1.35;
+            color:#fff;
+          "
+        >
+          ${escapeHtml(
+            taskTitle
+          )}
+        </div>
+
+
+        ${
+          dueLabel
+            ? `
+              <div
+                style="
+                  margin-top:6px;
+                  font-size:11px;
+                  color:
+                    rgba(255,255,255,.48);
+                "
+              >
+                📅
+                ${escapeHtml(
+                  dueLabel
+                )}
+              </div>
+            `
+            : ""
+        }
+
+
+        ${
+          additionalCount > 0
+            ? `
+              <div
+                style="
+                  margin-top:5px;
+                  font-size:11px;
+                  color:
+                    rgba(255,255,255,.45);
+                "
+              >
+                + ще
+                ${additionalCount}
+                ${
+                  additionalCount === 1
+                    ? "нова задача"
+                    : "нові задачі"
+                }
+              </div>
+            `
+            : ""
+        }
+
+
+        <button
+          type="button"
+          data-open-assigned-task
+          style="
+            margin-top:11px;
+            padding:7px 11px;
+            border-radius:9px;
+            border:
+              1px solid
+              rgba(217,181,124,.20);
+            background:
+              rgba(217,181,124,.09);
+            color:#e5c595;
+            cursor:pointer;
+            font-size:11px;
+            font-weight:700;
+          "
+        >
+          Відкрити задачі →
+        </button>
+
+      </div>
+
+
+      <button
+        type="button"
+        data-close-assigned-task-toast
+        aria-label="Закрити"
+        style="
+          flex:0 0 28px;
+          width:28px;
+          height:28px;
+          border:0;
+          background:transparent;
+          color:
+            rgba(255,255,255,.42);
+          cursor:pointer;
+          font-size:17px;
+        "
+      >
+        ×
+      </button>
+
+    </div>
+  `;
+
+
+  document.body.appendChild(
+    toast
+  );
+
+
+  const closeToast =
+    () => {
+      toast.style.opacity =
+        "0";
+
+      toast.style.transform =
+        "translateY(20px)";
+
+      setTimeout(
+        () => {
+          toast.remove();
+        },
+        230
+      );
+    };
+
+
+  toast
+    .querySelector(
+      "[data-close-assigned-task-toast]"
+    )
+    ?.addEventListener(
+      "click",
+      closeToast
+    );
+
+
+  toast
+    .querySelector(
+      "[data-open-assigned-task]"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        closeToast();
+
+        setHash(
+          "tasks"
+        );
+      }
+    );
+
+
+  requestAnimationFrame(
+    () => {
+      toast.style.opacity =
+        "1";
+
+      toast.style.transform =
+        "translateY(0)";
+    }
+  );
+
+
+  setTimeout(
+    closeToast,
+    9000
+  );
+}  
 
 let tasksBadgeLoading =
   false;
@@ -2993,7 +3327,71 @@ async function refreshMyTasksBadge() {
       )
         ? result.data
         : [];
+const currentTaskIds =
+  tasks
+    .map(
+      (task) =>
+        String(
+          task?.id || ""
+        ).trim()
+    )
+    .filter(
+      Boolean
+    );
 
+
+if (!taskNotificationsReady) {
+  currentTaskIds.forEach(
+    (taskId) => {
+      knownMyTaskIds.add(
+        taskId
+      );
+    }
+  );
+
+  taskNotificationsReady =
+    true;
+
+} else {
+  const newTasks =
+    tasks.filter(
+      (task) => {
+        const taskId =
+          String(
+            task?.id || ""
+          ).trim();
+
+        return (
+          taskId &&
+          !knownMyTaskIds.has(
+            taskId
+          )
+        );
+      }
+    );
+
+
+  currentTaskIds.forEach(
+    (taskId) => {
+      knownMyTaskIds.add(
+        taskId
+      );
+    }
+  );
+
+
+  if (
+    newTasks.length
+  ) {
+    showAssignedTaskToast(
+      newTasks[0],
+      Math.max(
+        0,
+        newTasks.length - 1
+      )
+    );
+  }
+}
 
     const openTasks =
       tasks.filter(
