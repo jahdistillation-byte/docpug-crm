@@ -12946,21 +12946,53 @@ const employeeRoleLabel =
                   "
                 >
 
-                  <div
-                    style="
-                      width:38px;
-                      height:38px;
-                      border-radius:12px;
-                      display:flex;
-                      align-items:center;
-                      justify-content:center;
-                      background:
-                        rgba(255,255,255,.05);
-                      font-size:17px;
-                    "
-                  >
-                    ${kind.icon}
-                  </div>
+                  <button
+  type="button"
+  data-toggle-global-task="${escapeHtml(
+    String(task.id || "")
+  )}"
+  title="${
+    completed
+      ? "Повернути задачу"
+      : "Позначити виконаною"
+  }"
+  style="
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:
+      1px solid
+      ${
+        completed
+          ? "rgba(95,210,145,.30)"
+          : "rgba(255,255,255,.06)"
+      };
+    background:
+      ${
+        completed
+          ? "rgba(70,180,120,.12)"
+          : "rgba(255,255,255,.05)"
+      };
+    color:
+      ${
+        completed
+          ? "#84e0ad"
+          : "#fff"
+      };
+    font-size:17px;
+    cursor:pointer;
+    flex-shrink:0;
+  "
+>
+  ${
+    completed
+      ? "✓"
+      : kind.icon
+  }
+</button>
 
 
                   <div
@@ -13270,7 +13302,90 @@ const employeeRoleLabel =
       </div>
     `;
 
+content.addEventListener(
+  "click",
+  async (event) => {
+    const toggleButton =
+      event.target.closest(
+        "[data-toggle-global-task]"
+      );
 
+    if (!toggleButton) {
+      return;
+    }
+
+
+    const taskId =
+      String(
+        toggleButton.dataset
+          .toggleGlobalTask ||
+        ""
+      ).trim();
+
+
+    if (!taskId) {
+      return;
+    }
+
+
+    const task =
+      tasks.find(
+        (item) =>
+          String(item.id) ===
+          taskId
+      );
+
+
+    if (!task) {
+      return;
+    }
+
+
+    toggleButton.disabled =
+      true;
+
+
+    try {
+      await updateVisitTaskApi(
+        taskId,
+        {
+          status:
+            task.status ===
+            "completed"
+              ? "open"
+              : "completed",
+        }
+      );
+
+
+      await renderTasksTab(
+        activeScope
+      );
+
+    } catch (error) {
+      console.error(
+        "TOGGLE GLOBAL TASK:",
+        error
+      );
+
+
+      toggleButton.disabled =
+        false;
+
+
+      showCrmNotice({
+        icon: "⚠️",
+
+        title:
+          "Не вдалося оновити задачу",
+
+        text:
+          error?.message ||
+          "Спробуйте ще раз.",
+      });
+    }
+  }
+);
   } catch (error) {
     console.error(
       "TASK CENTER LOAD:",
