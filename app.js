@@ -11441,8 +11441,19 @@ function getStaffContrastColor(color) {
   return value;
 }
 async function openTaskCreateModal(
-  activeScope = "all"
+  activeScope = "all",
+  taskToEdit = null
 ) {
+    const editingTask =
+    taskToEdit?.id
+      ? taskToEdit
+      : null;
+
+
+  const isEdit =
+    Boolean(
+      editingTask
+    );
   document
     .querySelector(
       ".taskCreateOverlay"
@@ -12029,6 +12040,152 @@ console.log(
     overlay
   );
 
+    // ==========================================
+  // EDIT MODE
+  // ==========================================
+
+  if (isEdit) {
+    const titleInput =
+      overlay.querySelector(
+        "#taskCreateTitle"
+      );
+
+    const kindInput =
+      overlay.querySelector(
+        "#taskCreateKind"
+      );
+
+    const patientInput =
+      overlay.querySelector(
+        "#taskCreatePatient"
+      );
+
+    const staffInput =
+      overlay.querySelector(
+        "#taskCreateStaff"
+      );
+
+    const priorityInput =
+      overlay.querySelector(
+        "#taskCreatePriority"
+      );
+
+    const dateInput =
+      overlay.querySelector(
+        "#taskCreateDate"
+      );
+
+    const timeInput =
+      overlay.querySelector(
+        "#taskCreateTime"
+      );
+
+    const descriptionInput =
+      overlay.querySelector(
+        "#taskCreateDescription"
+      );
+
+    const heading =
+      overlay.querySelector(
+        "h2"
+      );
+
+    const saveButton =
+      overlay.querySelector(
+        "#taskCreateSave"
+      );
+
+
+    if (titleInput) {
+      titleInput.value =
+        String(
+          editingTask.title ||
+          ""
+        );
+    }
+
+
+    if (kindInput) {
+      kindInput.value =
+        String(
+          editingTask.task_kind ||
+          "task"
+        );
+    }
+
+
+    if (patientInput) {
+      patientInput.value =
+        String(
+          editingTask.patient_id ||
+          ""
+        );
+    }
+
+
+    if (staffInput) {
+      staffInput.value =
+        String(
+          editingTask.staff_id ||
+          ""
+        );
+    }
+
+
+    if (priorityInput) {
+      priorityInput.value =
+        String(
+          editingTask.priority ||
+          "normal"
+        );
+    }
+
+
+    if (dateInput) {
+      dateInput.value =
+        String(
+          editingTask.due_date ||
+          ""
+        ).slice(
+          0,
+          10
+        );
+    }
+
+
+    if (timeInput) {
+      timeInput.value =
+        String(
+          editingTask.due_time ||
+          ""
+        ).slice(
+          0,
+          5
+        );
+    }
+
+
+    if (descriptionInput) {
+      descriptionInput.value =
+        String(
+          editingTask.description ||
+          ""
+        );
+    }
+
+
+    if (heading) {
+      heading.textContent =
+        "✎ Редагувати задачу";
+    }
+
+
+    if (saveButton) {
+      saveButton.textContent =
+        "Зберегти зміни";
+    }
+  }
+
 
   const closeModal =
     () => {
@@ -12168,87 +12325,102 @@ console.log(
           ).trim();
 
 
-        saveButton.disabled =
+                saveButton.disabled =
           true;
 
+
         saveButton.textContent =
-          "Створюємо…";
+          isEdit
+            ? "Зберігаємо…"
+            : "Створюємо…";
 
 
         try {
-          const response =
-            await fetch(
-              "/api/tasks",
-              {
-                method:
-                  "POST",
+          const taskPayload = {
+            title,
 
-                credentials:
-                  "include",
+            description,
 
-                headers: {
-                  "Content-Type":
-                    "application/json",
+            task_kind:
+              taskKind,
 
-                  Accept:
-                    "application/json",
+            patient_id:
+              patientId,
 
-                  ...getOrgHeaders(),
-                },
+            staff_id:
+              staffId,
 
-                                body:
-                  JSON.stringify({
-                    title,
+            priority,
 
-                    description,
+            due_date:
+              dueDate,
 
-                    task_kind:
-                      taskKind,
+            due_time:
+              dueTime,
+          };
 
-                    source:
-                      "manual",
 
-                    patient_id:
-                      patientId,
-
-                    staff_id:
-                      staffId,
-
-                    priority,
-
-                    due_date:
-                      dueDate,
-
-                    due_time:
-                      dueTime,
-                  }),
-              }
+          if (isEdit) {
+            await updateVisitTaskApi(
+              editingTask.id,
+              taskPayload
             );
 
+          } else {
+            const response =
+              await fetch(
+                "/api/tasks",
+                {
+                  method:
+                    "POST",
 
-          const result =
-            await response
-              .json()
-              .catch(
-                () => null
+                  credentials:
+                    "include",
+
+                  headers: {
+                    "Content-Type":
+                      "application/json",
+
+                    Accept:
+                      "application/json",
+
+                    ...getOrgHeaders(),
+                  },
+
+                  body:
+                    JSON.stringify({
+                      ...taskPayload,
+
+                      source:
+                        "manual",
+                    }),
+                }
               );
 
 
-          if (
-            !response.ok ||
-            !result?.ok
-          ) {
-            throw new Error(
-              result?.error ||
-              "Не вдалося створити задачу."
-            );
-          }
+            const result =
+              await response
+                .json()
+                .catch(
+                  () => null
+                );
 
+
+            if (
+              !response.ok ||
+              !result?.ok
+            ) {
+              throw new Error(
+                result?.error ||
+                "Не вдалося створити задачу."
+              );
+            }
+          }
 
           closeModal();
 
 
-          showCrmNotice({
+                    showCrmNotice({
             icon:
               taskKind ===
               "reminder"
@@ -12259,7 +12431,9 @@ console.log(
                   : "✓",
 
             title:
-              "Задачу створено",
+              isEdit
+                ? "Зміни збережено"
+                : "Задачу створено",
 
             text:
               title,
@@ -12295,7 +12469,9 @@ console.log(
             false;
 
           saveButton.textContent =
-            "Створити задачу";
+            isEdit
+              ? "Зберегти зміни"
+              : "Створити задачу";
         }
       }
     );
@@ -13270,6 +13446,33 @@ const employeeRoleLabel =
                     }
 <button
                       type="button"
+                                          <button
+                      type="button"
+                      data-edit-global-task="${escapeHtml(
+                        String(
+                          task.id || ""
+                        )
+                      )}"
+                      title="Редагувати задачу"
+                      style="
+                        margin-top:9px;
+                        margin-right:5px;
+                        width:26px;
+                        height:26px;
+                        border-radius:8px;
+                        border:
+                          1px solid
+                          rgba(255,255,255,.09);
+                        background:
+                          rgba(255,255,255,.035);
+                        color:
+                          rgba(255,255,255,.65);
+                        cursor:pointer;
+                        font-size:12px;
+                      "
+                    >
+                      ✎
+                    </button>
                       data-delete-global-task="${escapeHtml(
                         String(
                           task.id || ""
@@ -13415,6 +13618,52 @@ content.addEventListener(
           "Спробуйте ще раз.",
       });
     }
+  }
+);
+content.addEventListener(
+  "click",
+  (event) => {
+    const editButton =
+      event.target.closest(
+        "[data-edit-global-task]"
+      );
+
+
+    if (!editButton) {
+      return;
+    }
+
+
+    const taskId =
+      String(
+        editButton.dataset
+          .editGlobalTask ||
+        ""
+      ).trim();
+
+
+    if (!taskId) {
+      return;
+    }
+
+
+    const task =
+      tasks.find(
+        (item) =>
+          String(item.id) ===
+          taskId
+      );
+
+
+    if (!task) {
+      return;
+    }
+
+
+    openTaskCreateModal(
+      activeScope,
+      task
+    );
   }
 );
 content.addEventListener(
