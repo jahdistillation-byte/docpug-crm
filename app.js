@@ -11440,7 +11440,7 @@ function getStaffContrastColor(color) {
 
   return value;
 }
-function openTaskCreateModal(
+async function openTaskCreateModal(
   activeScope = "all"
 ) {
   document
@@ -11480,7 +11480,63 @@ function openTaskCreateModal(
       : new Date()
           .toISOString()
           .slice(0, 10);
+// =====================================================
+// TASK MODAL DATA
+// =====================================================
 
+if (
+  !Array.isArray(
+    state.patients
+  ) ||
+  !state.patients.length
+) {
+  await loadPatientsApi();
+}
+
+
+const taskPatients =
+  (
+    Array.isArray(
+      state.patients
+    )
+      ? state.patients
+      : []
+  ).filter(
+    (patient) =>
+      patient &&
+      patient.id
+  );
+
+
+const loadedStaff =
+  await loadStaffApi();
+
+
+const taskStaff =
+  (
+    Array.isArray(
+      loadedStaff
+    )
+      ? loadedStaff
+      : []
+  ).filter(
+    (employee) =>
+      employee &&
+      employee.id &&
+      employee.is_active !== false
+  );
+
+
+console.log(
+  "TASK MODAL DATA:",
+  {
+    patients:
+      taskPatients.length,
+
+    staff:
+      taskStaff.length,
+  }
+);
 
   overlay.innerHTML = `
     <div
