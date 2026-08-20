@@ -18512,18 +18512,182 @@ def extract_openai_output_text(response_data):
     return None
 
 
+def compact_ai_value(value):
+    """Removes empty values without changing evidence fields or facts."""
+    if isinstance(value, dict):
+        compacted = {}
+
+        for key, item in value.items():
+            compacted_item = compact_ai_value(item)
+
+            if compacted_item in (None, "", [], {}):
+                continue
+
+            compacted[key] = compacted_item
+
+        return compacted
+
+    if isinstance(value, list):
+        compacted = [
+            compact_ai_value(item)
+            for item in value
+        ]
+
+        return [
+            item
+            for item in compacted
+            if item not in (None, "", [], {})
+        ]
+
+    return value
+
+
+def collect_ai_text_values(value):
+    values = []
+
+    if isinstance(value, dict):
+        for item in value.values():
+            values.extend(
+                collect_ai_text_values(item)
+            )
+    elif isinstance(value, list):
+        for item in value:
+            values.extend(
+                collect_ai_text_values(item)
+            )
+    elif isinstance(value, str):
+        text = value.strip()
+        if text:
+            values.append(text)
+
+    return values
+
+
+def is_ai_placeholder_text(value):
+    text = str(value or "").strip().lower()
+
+    if not text:
+        return True
+
+    compact = re.sub(
+        r"[^0-9a-zа-яіїєґ]+",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    if not compact:
+        return True
+
+    # Short real clinical labels must not be removed.
+    if compact in {
+        "узд",
+        "усг",
+        "кт",
+        "мрт",
+        "екг",
+        "кастрація",
+        "стерилізація",
+        "вакцинація",
+    }:
+        return False
+
+    if len(compact) <= 2:
+        return True
+
+    if len(compact) <= 12 and len(set(compact)) <= 2:
+        return True
+
+    if compact in {
+        "фыв",
+        "ывфыв",
+        "ыыыы",
+        "тест",
+        "test",
+    }:
+        return True
+
+    return False
+
+
+def is_ai_placeholder_event(event):
+    clinical_data = event.get("clinical_data") or {}
+    text_values = [event.get("title") or ""]
+    text_values.extend(
+        collect_ai_text_values(clinical_data)
+    )
+
+    return bool(text_values) and all(
+        is_ai_placeholder_text(value)
+        for value in text_values
+    )
+
+
+def build_compact_ai_summary_context(context):
+    normalized = context.get("normalized") or {}
+    original_events = (
+        normalized.get("clinical_timeline") or []
+    )
+    original_weights = (
+        normalized.get("weight_timeline") or []
+    )
+
+    events = []
+    for event in original_events:
+        if is_ai_placeholder_event(event):
+            continue
+
+        events.append(
+            compact_ai_value(event)
+        )
+
+    weights = []
+    seen_weights = set()
+
+    for weight in original_weights:
+        source = weight.get("source") or {}
+        identity = (
+            weight.get("date"),
+            weight.get("weight_kg"),
+            source.get("source_type"),
+            source.get("source_id"),
+        )
+
+        if identity in seen_weights:
+            continue
+
+        seen_weights.add(identity)
+        weights.append(
+            compact_ai_value(weight)
+        )
+
+    model_context = compact_ai_value({
+        "patient": context.get("patient") or {},
+        "demographics": normalized.get("demographics") or {},
+        "weight_timeline": weights[:30],
+        "clinical_timeline": events[:60],
+        "normalization_version": (
+            (context.get("meta") or {}).get(
+                "normalization_version"
+            )
+        ),
+    })
+
+    stats = {
+        "clinical_events_original": len(original_events),
+        "clinical_events_sent": len(events[:60]),
+        "weight_points_original": len(original_weights),
+        "weight_points_sent": len(weights[:30]),
+    }
+
+    return model_context, stats
+
+
 def call_openai_patient_summary(context, language):
     language_name = AI_SUMMARY_LANGUAGES[language]
-    model_context = {
-        "patient": context.get("patient") or {},
-        "normalized": context.get("normalized") or {},
-        "context_meta": {
-            "generated_at": (context.get("meta") or {}).get("generated_at"),
-            "normalization_version": (
-                (context.get("meta") or {}).get("normalization_version")
-            ),
-        },
-    }
+    model_context, context_stats = (
+        build_compact_ai_summary_context(context)
+    )
     instructions = f"""
 You create a concise veterinary patient record summary for a clinician.
 Write all user-facing text in {language_name}.
@@ -18552,8 +18716,13 @@ Safety and evidence rules:
             model_context,
             ensure_ascii=False,
             default=str,
+            separators=(",", ":"),
         ),
-        "max_output_tokens": 2500,
+        "reasoning": {
+            "effort": "low",
+            "mode": "standard",
+        },
+        "max_output_tokens": 1900,
         "text": {
             "format": {
                 "type": "json_schema",
@@ -18585,7 +18754,11 @@ Safety and evidence rules:
     if not output_text:
         raise ValueError("OpenAI response contains no output_text")
 
-    return json.loads(output_text), response_data
+    return (
+        json.loads(output_text),
+        response_data,
+        context_stats,
+    )
 
 
 @app.post("/api/patients/<patient_id>/ai-summary")
@@ -18603,6 +18776,8 @@ def api_create_patient_ai_summary(patient_id):
     if language not in AI_SUMMARY_LANGUAGES:
         return fail("Unsupported summary language", 400)
 
+    started_at = time.monotonic()
+
     try:
         # Reuse the already tested, org-isolated read-only context endpoint.
         context_response = api_get_patient_ai_context(patient_id)
@@ -18614,7 +18789,11 @@ def api_create_patient_ai_summary(patient_id):
             return context_response
 
         context = context_payload.get("data") or {}
-        summary, provider_response = call_openai_patient_summary(
+        (
+            summary,
+            provider_response,
+            context_stats,
+        ) = call_openai_patient_summary(
             context,
             language,
         )
@@ -18625,11 +18804,16 @@ def api_create_patient_ai_summary(patient_id):
                 "read_only": True,
                 "stored_in_crm": False,
                 "provider_store": False,
-                "summary_version": "1",
+                "summary_version": "2",
+                "reasoning_effort": "low",
                 "language": language,
                 "model": provider_response.get("model") or PUG_AI_MODEL,
                 "response_id": provider_response.get("id"),
                 "usage": provider_response.get("usage") or {},
+                "context_stats": context_stats,
+                "duration_ms": round(
+                    (time.monotonic() - started_at) * 1000
+                ),
                 "generated_at": datetime.now(timezone.utc).isoformat(),
             },
         })
