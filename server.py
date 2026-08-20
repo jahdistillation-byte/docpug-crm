@@ -17521,6 +17521,413 @@ def api_create_patient_weight(
             "Не вдалося зберегти вагу пацієнта.",
             500,
         )
+
+
+# =========================
+# API: PUG AI PATIENT CONTEXT
+# =========================
+
+AI_CONTEXT_LIMITS = {
+    "weights": 200,
+    "diagnoses": 200,
+    "vaccinations": 100,
+    "visits": 100,
+    "medcard_entries": 200,
+}
+
+
+def add_ai_source(
+    row,
+    source_type,
+    *date_fields,
+):
+    """
+    Adds a stable reference to the original CRM row.
+
+    PUG AI can later cite this reference in every summary claim
+    without copying owner contact data into the AI context.
+    """
+    item = dict(row or {})
+    recorded_at = None
+
+    for field in date_fields:
+        value = item.get(field)
+
+        if value not in (None, ""):
+            recorded_at = value
+            break
+
+    item["_source"] = {
+        "source_type": source_type,
+        "source_id": item.get("id"),
+        "recorded_at": recorded_at,
+    }
+
+    return item
+
+
+def select_ai_fields(
+    row,
+    allowed_fields,
+):
+    """Returns only fields approved for the clinical AI context."""
+    row = row or {}
+
+    return {
+        field: row.get(field)
+        for field in allowed_fields
+        if field in row
+    }
+
+
+@app.get(
+    "/api/patients/<patient_id>/ai-context"
+)
+def api_get_patient_ai_context(
+    patient_id,
+):
+    """
+    Returns a read-only, evidence-ready clinical context for PUG AI.
+
+    This endpoint does not call an AI model and does not write data.
+    """
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    patient_id = str(
+        patient_id or ""
+    ).strip()
+
+    if not patient_id:
+        return fail(
+            "patient_id required",
+            400,
+        )
+
+    try:
+        patient_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patients")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("id", patient_id)
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        patient_row = patient_result.data[0]
+
+        # Only clinical patient fields are exposed here.
+        # owner_id and owner contact details are intentionally excluded.
+        patient_fields = (
+            "id",
+            "name",
+            "species",
+            "breed",
+            "age",
+            "birth_date",
+            "date_of_birth",
+            "weight_kg",
+            "sex",
+            "neutered",
+            "rabies_status",
+            "general_vaccination_status",
+            "vaccination_status",
+            "vaccination_date",
+            "vaccination_name",
+            "notes",
+            "patient_status",
+            "deceased_at",
+            "created_at",
+            "updated_at",
+        )
+
+        patient = {
+            field: patient_row.get(field)
+            for field in patient_fields
+            if field in patient_row
+        }
+
+        patient = add_ai_source(
+            patient,
+            "patient",
+            "updated_at",
+            "created_at",
+        )
+
+        weights_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_weight_history")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("patient_id", patient_id)
+                .order("measured_at", desc=True)
+                .limit(AI_CONTEXT_LIMITS["weights"])
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        diagnoses_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_diagnoses")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("patient_id", patient_id)
+                .order("diagnosed_at", desc=True)
+                .limit(AI_CONTEXT_LIMITS["diagnoses"])
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        vaccinations_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_vaccinations")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("patient_id", patient_id)
+                .order("vaccination_date", desc=True)
+                .limit(AI_CONTEXT_LIMITS["vaccinations"])
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        visits_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("pet_id", patient_id)
+                .order("date", desc=True)
+                .limit(AI_CONTEXT_LIMITS["visits"])
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        medcard_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_medcard_entries")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("patient_id", patient_id)
+                .order("entry_date", desc=True)
+                .order("entry_time", desc=True)
+                .limit(AI_CONTEXT_LIMITS["medcard_entries"])
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        weight_fields = (
+            "id",
+            "patient_id",
+            "weight_kg",
+            "measured_at",
+            "source",
+            "source_visit_id",
+            "note",
+            "created_at",
+        )
+
+        diagnosis_fields = (
+            "id",
+            "patient_id",
+            "source_visit_id",
+            "diagnosis_code",
+            "diagnosis_name",
+            "clinical_note",
+            "certainty",
+            "severity",
+            "status",
+            "onset_at",
+            "diagnosed_at",
+            "resolved_at",
+            "resolution_note",
+            "created_at",
+            "updated_at",
+        )
+
+        vaccination_fields = (
+            "id",
+            "patient_id",
+            "vaccination_date",
+            "vaccine_name",
+            "vaccine_type",
+            "coverage_tags",
+            "batch_number",
+            "next_vaccination_date",
+            "source_visit_id",
+            "note",
+            "created_at",
+            "updated_at",
+        )
+
+        visit_fields = (
+            "id",
+            "pet_id",
+            "date",
+            "note",
+            "dx",
+            "rx",
+            "weight_kg",
+            "created_at",
+            "updated_at",
+        )
+
+        medcard_fields = (
+            "id",
+            "patient_id",
+            "entry_date",
+            "entry_time",
+            "weight_kg",
+            "temperature",
+            "appetite",
+            "water",
+            "urine",
+            "stool",
+            "mucosa",
+            "breathing",
+            "pulse",
+            "condition",
+            "treatment",
+            "dynamics",
+            "plan",
+            "doctor",
+            "note",
+            "created_at",
+            "updated_at",
+        )
+
+        weights = [
+            add_ai_source(
+                select_ai_fields(
+                    row,
+                    weight_fields,
+                ),
+                "weight_record",
+                "measured_at",
+                "created_at",
+            )
+            for row in (weights_result.data or [])
+        ]
+
+        diagnoses = [
+            add_ai_source(
+                select_ai_fields(
+                    row,
+                    diagnosis_fields,
+                ),
+                "diagnosis",
+                "diagnosed_at",
+                "onset_at",
+                "created_at",
+            )
+            for row in (diagnoses_result.data or [])
+        ]
+
+        vaccinations = [
+            add_ai_source(
+                select_ai_fields(
+                    row,
+                    vaccination_fields,
+                ),
+                "vaccination",
+                "vaccination_date",
+                "created_at",
+            )
+            for row in (vaccinations_result.data or [])
+        ]
+
+        visits = [
+            add_ai_source(
+                select_ai_fields(
+                    row,
+                    visit_fields,
+                ),
+                "visit",
+                "date",
+                "created_at",
+            )
+            for row in (visits_result.data or [])
+        ]
+
+        medcard_entries = [
+            add_ai_source(
+                select_ai_fields(
+                    row,
+                    medcard_fields,
+                ),
+                "medcard_entry",
+                "entry_date",
+                "created_at",
+            )
+            for row in (medcard_result.data or [])
+        ]
+
+        return ok({
+            "patient": patient,
+            "history": {
+                "weights": weights,
+                "diagnoses": diagnoses,
+                "vaccinations": vaccinations,
+                "visits": visits,
+                "medcard_entries": medcard_entries,
+            },
+            "meta": {
+                "read_only": True,
+                "generated_at": datetime.now(
+                    timezone.utc
+                ).isoformat(),
+                "limits": AI_CONTEXT_LIMITS,
+                "source_count": (
+                    1
+                    + len(weights)
+                    + len(diagnoses)
+                    + len(vaccinations)
+                    + len(visits)
+                    + len(medcard_entries)
+                ),
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET patient AI context:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося зібрати AI-контекст пацієнта.",
+            500,
+        )
 # =========================
 # API: PATIENT DIAGNOSES
 # =========================
