@@ -14962,6 +14962,61 @@ def api_create_calendar_event():
     current_org = (
         get_current_org_id()
     )
+    patient_id = str(
+        d.get("patient_id")
+        or ""
+    ).strip()
+
+    if patient_id:
+        patient_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("patients")
+                    .select(
+                        "id, patient_status, deceased_at"
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        patient_id,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        patient = (
+            patient_result.data[0]
+        )
+
+        if (
+            str(
+                patient.get(
+                    "patient_status"
+                )
+                or "active"
+            )
+            .strip()
+            .lower()
+            == "deceased"
+        ):
+            return fail(
+                "Неможливо створити запис: "
+                "пацієнт позначений як померлий.",
+                409,
+            )
 
     existing = (
         supabase
