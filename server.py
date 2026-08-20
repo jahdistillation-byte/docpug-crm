@@ -14962,9 +14962,7 @@ def api_create_calendar_event():
     current_org = (
         get_current_org_id()
     )
-    
-    
-    
+
     existing = (
         supabase
         .table("calendar_events")
@@ -16724,8 +16722,8 @@ def sync_patient_vaccination_statuses(
 
 
         patient = (
-                patient_result.data[0]
-            )
+            patient_result.data[0]
+        )
 
 
         current_rabies_status = str(
@@ -16871,7 +16869,7 @@ def api_update_patient_vaccination(
                 404,
             )
 
-        
+
         existing = (
             existing_result.data[0]
         )
