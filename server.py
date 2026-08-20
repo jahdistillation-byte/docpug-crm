@@ -17580,6 +17580,442 @@ def select_ai_fields(
     }
 
 
+def parse_ai_date(value):
+    """Parses legacy and ISO dates without guessing ambiguous formats."""
+    text = str(value or "").strip()
+
+    if not text:
+        return None
+
+    try:
+        return datetime.fromisoformat(
+            text.replace("Z", "+00:00")
+        ).date()
+
+    except ValueError:
+        pass
+
+    for date_format in (
+        "%d.%m.%Y",
+        "%Y-%m-%d",
+        "%d/%m/%Y",
+    ):
+        try:
+            return datetime.strptime(
+                text,
+                date_format,
+            ).date()
+
+        except ValueError:
+            continue
+
+    return None
+
+
+def build_ai_demographics(patient):
+    """Normalizes birth date and calculates age while preserving raw data."""
+    today = datetime.now(
+        timezone.utc
+    ).date()
+
+    for field in (
+        "birth_date",
+        "date_of_birth",
+        "age",
+    ):
+        raw_value = patient.get(field)
+        birth_date = parse_ai_date(
+            raw_value
+        )
+
+        if (
+            not birth_date
+            or birth_date > today
+        ):
+            continue
+
+        age_months = (
+            (today.year - birth_date.year) * 12
+            + today.month
+            - birth_date.month
+            - (
+                1
+                if today.day < birth_date.day
+                else 0
+            )
+        )
+
+        age_months = max(
+            age_months,
+            0,
+        )
+
+        return {
+            "birth_date": birth_date.isoformat(),
+            "age_years": age_months // 12,
+            "age_months_total": age_months,
+            "age_months_remainder": age_months % 12,
+            "derived_from_field": field,
+            "raw_value": raw_value,
+            "calculated_at": today.isoformat(),
+        }
+
+    return {
+        "birth_date": None,
+        "age_years": None,
+        "age_months_total": None,
+        "age_months_remainder": None,
+        "derived_from_field": None,
+        "raw_value": patient.get("age"),
+        "calculated_at": today.isoformat(),
+    }
+
+
+def normalize_ai_weight(value):
+    """Returns a safe numeric veterinary weight or None."""
+    if value in (None, ""):
+        return None
+
+    try:
+        weight = float(value)
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return None
+
+    if (
+        weight <= 0
+        or weight > 500
+    ):
+        return None
+
+    return round(weight, 3)
+
+
+def build_ai_weight_timeline(
+    patient,
+    weights,
+    visits,
+    medcard_entries,
+):
+    """Combines weight measurements from every existing CRM source."""
+    points = []
+    seen = set()
+
+    def add_point(
+        value,
+        recorded_at,
+        source,
+    ):
+        weight_kg = normalize_ai_weight(
+            value
+        )
+
+        if weight_kg is None:
+            return
+
+        parsed_date = parse_ai_date(
+            recorded_at
+        )
+        date_value = (
+            parsed_date.isoformat()
+            if parsed_date
+            else str(recorded_at or "").strip()
+        )
+
+        source = dict(source or {})
+        identity = (
+            date_value,
+            weight_kg,
+            source.get("source_type"),
+            source.get("source_id"),
+        )
+
+        if identity in seen:
+            return
+
+        seen.add(identity)
+        points.append({
+            "date": date_value or None,
+            "weight_kg": weight_kg,
+            "source": source,
+            "_sort_key": (
+                parsed_date.isoformat()
+                if parsed_date
+                else ""
+            ),
+        })
+
+    for row in weights:
+        add_point(
+            row.get("weight_kg"),
+            row.get("measured_at")
+            or row.get("created_at"),
+            row.get("_source"),
+        )
+
+    for row in visits:
+        add_point(
+            row.get("weight_kg"),
+            row.get("date")
+            or row.get("created_at"),
+            row.get("_source"),
+        )
+
+    for row in medcard_entries:
+        add_point(
+            row.get("weight_kg"),
+            row.get("entry_date")
+            or row.get("created_at"),
+            row.get("_source"),
+        )
+
+    add_point(
+        patient.get("weight_kg"),
+        patient.get("_source", {}).get(
+            "recorded_at"
+        ),
+        patient.get("_source"),
+    )
+
+    points.sort(
+        key=lambda item: item.get(
+            "_sort_key",
+            "",
+        ),
+        reverse=True,
+    )
+
+    for point in points:
+        point.pop(
+            "_sort_key",
+            None,
+        )
+
+    return points
+
+
+def build_ai_clinical_timeline(
+    diagnoses,
+    vaccinations,
+    visits,
+    medcard_entries,
+):
+    """Builds one evidence-linked timeline without changing source rows."""
+    events = []
+
+    def add_event(
+        *,
+        event_type,
+        recorded_at,
+        title,
+        clinical_data,
+        source,
+        quality_flags=None,
+        event_time=None,
+    ):
+        parsed_date = parse_ai_date(
+            recorded_at
+        )
+        date_value = (
+            parsed_date.isoformat()
+            if parsed_date
+            else str(recorded_at or "").strip()
+        )
+
+        events.append({
+            "date": date_value or None,
+            "time": event_time or None,
+            "event_type": event_type,
+            "title": str(
+                title or ""
+            ).strip(),
+            "clinical_data": clinical_data,
+            "source": dict(source or {}),
+            "quality_flags": quality_flags or [],
+            "_sort_key": (
+                f"{parsed_date.isoformat()}T"
+                f"{event_time or '00:00:00'}"
+                if parsed_date
+                else ""
+            ),
+        })
+
+    for row in diagnoses:
+        add_event(
+            event_type="diagnosis",
+            recorded_at=(
+                row.get("diagnosed_at")
+                or row.get("onset_at")
+            ),
+            title=(
+                row.get("diagnosis_name")
+                or "Діагноз"
+            ),
+            clinical_data={
+                "diagnosis_code": row.get(
+                    "diagnosis_code"
+                ),
+                "diagnosis_name": row.get(
+                    "diagnosis_name"
+                ),
+                "clinical_note": row.get(
+                    "clinical_note"
+                ),
+                "certainty": row.get(
+                    "certainty"
+                ),
+                "severity": row.get(
+                    "severity"
+                ),
+                "status": row.get("status"),
+                "resolved_at": row.get(
+                    "resolved_at"
+                ),
+                "resolution_note": row.get(
+                    "resolution_note"
+                ),
+            },
+            source=row.get("_source"),
+        )
+
+    for row in vaccinations:
+        add_event(
+            event_type="vaccination",
+            recorded_at=row.get(
+                "vaccination_date"
+            ),
+            title=(
+                row.get("vaccine_name")
+                or "Вакцинація"
+            ),
+            clinical_data={
+                "vaccine_name": row.get(
+                    "vaccine_name"
+                ),
+                "vaccine_type": row.get(
+                    "vaccine_type"
+                ),
+                "coverage_tags": row.get(
+                    "coverage_tags"
+                ) or [],
+                "batch_number": row.get(
+                    "batch_number"
+                ),
+                "next_vaccination_date": row.get(
+                    "next_vaccination_date"
+                ),
+                "note": row.get("note"),
+            },
+            source=row.get("_source"),
+        )
+
+    for row in visits:
+        snapshot = visit_medical_audit_snapshot(
+            row
+        )
+        quality_flags = []
+
+        if (
+            snapshot.get("diagnosis")
+            and not str(
+                row.get("dx") or ""
+            ).strip()
+        ):
+            quality_flags.append(
+                "diagnosis_extracted_from_legacy_note"
+            )
+
+        if not any(
+            snapshot.get(field)
+            for field in (
+                "diagnosis",
+                "complaints",
+                "treatment",
+                "recommendations",
+                "follow_up",
+                "weight_kg",
+            )
+        ):
+            quality_flags.append(
+                "limited_clinical_data"
+            )
+
+        title = (
+            snapshot.get("diagnosis")
+            or snapshot.get("complaints")
+            or "Візит"
+        )
+
+        title = str(title).splitlines()[0][
+            :160
+        ]
+
+        add_event(
+            event_type="visit",
+            recorded_at=row.get("date"),
+            title=title,
+            clinical_data=snapshot,
+            source=row.get("_source"),
+            quality_flags=quality_flags,
+        )
+
+    for row in medcard_entries:
+        add_event(
+            event_type="medcard_entry",
+            recorded_at=row.get(
+                "entry_date"
+            ),
+            event_time=row.get(
+                "entry_time"
+            ),
+            title=(
+                row.get("condition")
+                or row.get("treatment")
+                or "Запис медичної карти"
+            ),
+            clinical_data={
+                field: row.get(field)
+                for field in (
+                    "weight_kg",
+                    "temperature",
+                    "appetite",
+                    "water",
+                    "urine",
+                    "stool",
+                    "mucosa",
+                    "breathing",
+                    "pulse",
+                    "condition",
+                    "treatment",
+                    "dynamics",
+                    "plan",
+                    "doctor",
+                    "note",
+                )
+            },
+            source=row.get("_source"),
+        )
+
+    events.sort(
+        key=lambda item: item.get(
+            "_sort_key",
+            "",
+        ),
+        reverse=True,
+    )
+
+    for event in events:
+        event.pop(
+            "_sort_key",
+            None,
+        )
+
+    return events
+
+
 @app.get(
     "/api/patients/<patient_id>/ai-context"
 )
@@ -17891,6 +18327,28 @@ def api_get_patient_ai_context(
             for row in (medcard_result.data or [])
         ]
 
+        demographics = build_ai_demographics(
+            patient
+        )
+
+        weight_timeline = (
+            build_ai_weight_timeline(
+                patient,
+                weights,
+                visits,
+                medcard_entries,
+            )
+        )
+
+        clinical_timeline = (
+            build_ai_clinical_timeline(
+                diagnoses,
+                vaccinations,
+                visits,
+                medcard_entries,
+            )
+        )
+
         return ok({
             "patient": patient,
             "history": {
@@ -17900,8 +18358,14 @@ def api_get_patient_ai_context(
                 "visits": visits,
                 "medcard_entries": medcard_entries,
             },
+            "normalized": {
+                "demographics": demographics,
+                "weight_timeline": weight_timeline,
+                "clinical_timeline": clinical_timeline,
+            },
             "meta": {
                 "read_only": True,
+                "normalization_version": "1",
                 "generated_at": datetime.now(
                     timezone.utc
                 ).isoformat(),
