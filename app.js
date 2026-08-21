@@ -39034,7 +39034,7 @@ if (btnAddVisit) {
   };
 }
 
-  // Навешиваем клики на вкладки
+  // Навешиваем клики ніа вкладки
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
     btn.onclick = () => {
       const targetTab = btn.dataset.pTab;
@@ -39905,6 +39905,54 @@ if (patientAiButton && patientAiResult) {
       }
     }
   );
+}
+if (patientAiButton && patientAiResult) {
+  patientAiButton.disabled = true;
+  patientAiButton.textContent =
+    "Завантажуємо AI-підсумок…";
+
+  fetch(
+    `/api/patients/${encodeURIComponent(
+      String(pet.id)
+    )}/ai-summary?language=uk`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        ...getOrgHeaders(),
+      },
+    }
+  )
+    .then((response) =>
+      response.json()
+    )
+    .then((result) => {
+      patientAiButton.disabled = false;
+
+      const cacheHit =
+        result?.ok &&
+        result.data?.summary &&
+        result.data?.meta
+          ?.cache_status === "hit";
+
+      if (cacheHit) {
+        patientAiButton.click();
+        return;
+      }
+
+      patientAiButton.textContent =
+        "✦ Створити AI-підсумок";
+    })
+    .catch((error) => {
+      console.error(
+        "PUG AI cache load:",
+        error
+      );
+
+      patientAiButton.disabled = false;
+      patientAiButton.textContent =
+        "✦ Створити AI-підсумок";
+    });
 }
 
 const patientNotesInput =
