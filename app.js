@@ -38689,13 +38689,24 @@ function renderPatientAiEvidence(
             ).slice(0, 10);
 
           return `
-            <span
+                        <button
+              type="button"
+              data-patient-ai-source
+              data-source-type="${escapeHtml(
+                String(source?.source_type || "")
+              )}"
+              data-source-id="${escapeHtml(
+                String(source?.source_id || "")
+              )}"
               style="
                 padding:4px 8px;
                 border-radius:7px;
+                border:1px solid rgba(255,255,255,.07);
                 background:rgba(255,255,255,.06);
+                color:inherit;
                 font-size:11px;
-                opacity:.7;
+                opacity:.75;
+                cursor:pointer;
               "
             >
               ${sourceType}${
@@ -38703,7 +38714,7 @@ function renderPatientAiEvidence(
                   ? ` · ${escapeHtml(sourceDate)}`
                   : ""
               }
-            </span>
+            </button>
           `;
         })
         .join("")}
@@ -39757,10 +39768,7 @@ if (patientAiButton && patientAiResult) {
                 opacity:.78;
               "
             >
-              ${escapeHtml(
-                summary.patient_overview ||
-                "Огляд відсутній."
-              )}
+                            )}
             </p>
                         ${
               Array.isArray(
@@ -39848,6 +39856,44 @@ if (patientAiButton && patientAiResult) {
             }
           </div>
         `;
+                patientAiResult
+          .querySelectorAll(
+            "[data-patient-ai-source]"
+          )
+          .forEach((button) => {
+            button.addEventListener(
+              "click",
+              async () => {
+                const sourceType =
+                  String(
+                    button.dataset
+                      .sourceType || ""
+                  );
+
+                const sourceId =
+                  String(
+                    button.dataset
+                      .sourceId || ""
+                  );
+
+                if (
+                  sourceType !== "visit" ||
+                  !sourceId
+                ) {
+                  return;
+                }
+
+                if (
+                  typeof openVisit ===
+                  "function"
+                ) {
+                  await openVisit(
+                    sourceId
+                  );
+                }
+              }
+            );
+          });
       } catch (error) {
         patientAiResult.textContent =
           error?.message ||
