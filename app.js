@@ -38657,6 +38657,59 @@ batch_number:
       }
     );
 }
+function renderPatientAiEvidence(
+  evidence
+) {
+  if (
+    !Array.isArray(evidence) ||
+    !evidence.length
+  ) {
+    return "";
+  }
+
+  return `
+    <div
+      style="
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px;
+        margin-top:8px;
+      "
+    >
+      ${evidence
+        .map((source) => {
+          const sourceType =
+            source?.source_type === "visit"
+              ? "Візит"
+              : "Джерело";
+
+          const sourceDate =
+            String(
+              source?.recorded_at || ""
+            ).slice(0, 10);
+
+          return `
+            <span
+              style="
+                padding:4px 8px;
+                border-radius:7px;
+                background:rgba(255,255,255,.06);
+                font-size:11px;
+                opacity:.7;
+              "
+            >
+              ${sourceType}${
+                sourceDate
+                  ? ` · ${escapeHtml(sourceDate)}`
+                  : ""
+              }
+            </span>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
 
 async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
@@ -39678,14 +39731,122 @@ if (patientAiButton && patientAiResult) {
           result
         );
 
+                const summary =
+          result.data?.summary || {};
+
         patientAiResult.innerHTML = `
-          <strong>
-            ${escapeHtml(
-              result.data?.summary
-                ?.summary_title ||
-              "AI-підсумок створено"
-            )}
-          </strong>
+          <div
+            style="
+              padding:16px;
+              border-radius:13px;
+              background:rgba(0,0,0,.18);
+              border:1px solid rgba(255,255,255,.08);
+            "
+          >
+            <strong style="color:#fff;">
+              ${escapeHtml(
+                summary.summary_title ||
+                "AI-підсумок створено"
+              )}
+            </strong>
+
+            <p
+              style="
+                margin:9px 0 0;
+                line-height:1.55;
+                opacity:.78;
+              "
+            >
+              ${escapeHtml(
+                summary.patient_overview ||
+                "Огляд відсутній."
+              )}
+            </p>
+                        ${
+              Array.isArray(
+                summary.attention_today
+              ) &&
+              summary.attention_today.length
+                ? `
+                  <div
+                    style="
+                      margin-top:16px;
+                      padding-top:14px;
+                      border-top:1px solid rgba(255,255,255,.08);
+                    "
+                  >
+                    <h4 style="margin:0 0 10px;color:#fff;">
+                      Важливо сьогодні
+                    </h4>
+
+                    ${summary.attention_today
+                      .map(
+                        (item) => `
+                          <div
+                            style="
+                              margin-top:8px;
+                              padding:10px 12px;
+                              border-radius:10px;
+                              background:rgba(245,158,11,.09);
+                            "
+                          >
+                            ${escapeHtml(
+                              item?.statement || ""
+                            )}
+                                                        ${renderPatientAiEvidence(
+                              item?.evidence
+                            )}
+                          </div>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                `
+                : ""
+            }
+                        ${
+              Array.isArray(
+                summary.important_points
+              ) &&
+              summary.important_points.length
+                ? `
+                  <div
+                    style="
+                      margin-top:16px;
+                      padding-top:14px;
+                      border-top:1px solid rgba(255,255,255,.08);
+                    "
+                  >
+                    <h4 style="margin:0 0 10px;color:#fff;">
+                      Ключові факти
+                    </h4>
+
+                    ${summary.important_points
+                      .map(
+                        (item) => `
+                          <div
+                            style="
+                              margin-top:8px;
+                              padding:10px 12px;
+                              border-radius:10px;
+                              background:rgba(147,70,232,.10);
+                            "
+                          >
+                            ${escapeHtml(
+                              item?.statement || ""
+                            )}
+                            ${renderPatientAiEvidence(
+                              item?.evidence
+                            )}
+                          </div>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                `
+                : ""
+            }
+          </div>
         `;
       } catch (error) {
         patientAiResult.textContent =
