@@ -19188,7 +19188,7 @@ def api_create_patient_ai_summary(patient_id):
         return fail("Не вдалося створити AI-резюме пацієнта.", 500)
 # =========================
 # API: PATIENT DIAGNOSES
-# =========================
+# =================і========
 
 DIAGNOSIS_CERTAINTIES = {
     "provisional",
