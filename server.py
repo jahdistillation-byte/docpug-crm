@@ -18892,6 +18892,110 @@ Safety and evidence rules:
         context_stats,
     )
 
+@app.get("/api/patients/<patient_id>/ai-summary")
+def api_get_cached_patient_ai_summary(
+    patient_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    language = str(
+        request.args.get("language") or "uk"
+    ).strip().lower()
+
+    if language not in AI_SUMMARY_LANGUAGES:
+        return fail(
+            "Unsupported summary language",
+            400,
+        )
+
+    started_at = time.monotonic()
+
+    try:
+        context_response = (
+            api_get_patient_ai_context(
+                patient_id
+            )
+        )
+
+        if isinstance(
+            context_response,
+            tuple,
+        ):
+            return context_response
+
+        context_payload = (
+            context_response.get_json()
+        )
+
+        if not context_payload.get("ok"):
+            return context_response
+
+        context = (
+            context_payload.get("data") or {}
+        )
+
+        context_hash, context_stats = (
+            build_ai_summary_context_hash(
+                context,
+                language,
+            )
+        )
+
+        cached = (
+            load_cached_patient_ai_summary(
+                get_current_org_id(),
+                patient_id,
+                language,
+                context_hash,
+            )
+        )
+
+        if not cached:
+            return ok({
+                "summary": None,
+                "meta": {
+                    "cached": False,
+                    "cache_status": "miss",
+                },
+            })
+
+        cached_meta = {
+            **(cached.get("meta") or {}),
+            "cached": True,
+            "cache_status": "hit",
+            "stored_in_cache": True,
+            "context_hash": context_hash,
+            "context_stats": context_stats,
+            "duration_ms": round(
+                (
+                    time.monotonic() -
+                    started_at
+                ) * 1000
+            ),
+        }
+
+        return ok({
+            "summary":
+                cached.get("summary") or {},
+            "meta":
+                cached_meta,
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET cached AI summary:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити кеш AI.",
+            500,
+        )
+
 
 @app.post("/api/patients/<patient_id>/ai-summary")
 def api_create_patient_ai_summary(patient_id):
