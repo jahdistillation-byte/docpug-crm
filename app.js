@@ -39053,6 +39053,27 @@ const vaccinationName =
   ).trim();
 
 dynamicBox.innerHTML = `
+  <section
+    style="
+      margin-bottom:20px;
+      padding:20px;
+      border-radius:18px;
+      border:1px solid rgba(147,70,232,.55);
+      background:linear-gradient(135deg,rgba(147,70,232,.18),rgba(20,15,35,.75));
+    "
+  >
+    <div style="font-size:11px;letter-spacing:1.4px;color:#c084fc;">
+      PUG AI · EVIDENCE FIRST
+    </div>
+
+    <h3 style="margin:7px 0 5px;color:#fff;">
+      AI-підсумок пацієнта
+    </h3>
+
+    <p style="margin:0;opacity:.65;">
+      Короткий клінічний огляд із посиланнями на записи пацієнта.
+    </p>
+  </section>
   ${renderPatientDiagnosesPanel(
     pet,
     activeDiagnoses
