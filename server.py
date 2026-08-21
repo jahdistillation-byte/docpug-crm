@@ -18397,7 +18397,7 @@ def api_get_patient_ai_context(
             500,
         )
 
-
+PUG_AI_SUMMARY_VERSION = "2"
 AI_SUMMARY_LANGUAGES = {
     "uk": "Ukrainian",
     "en": "English",
@@ -18682,7 +18682,139 @@ def build_compact_ai_summary_context(context):
 
     return model_context, stats
 
+def build_ai_summary_context_hash(
+    context,
+    language,
+):
+    model_context, context_stats = (
+        build_compact_ai_summary_context(
+            context
+        )
+    )
 
+    serialized = json.dumps(
+        {
+            "language": language,
+            "summary_version":
+                PUG_AI_SUMMARY_VERSION,
+            "context": model_context,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        default=str,
+        separators=(",", ":"),
+    )
+
+    context_hash = hashlib.sha256(
+        serialized.encode("utf-8")
+    ).hexdigest()
+
+    return context_hash, context_stats
+
+def load_cached_patient_ai_summary(
+    org_id,
+    patient_id,
+    language,
+    context_hash,
+):
+    try:
+        response = (
+            supabase
+            .table(
+                "patient_ai_summary_cache"
+            )
+            .select(
+                "summary,meta,updated_at"
+            )
+            .eq("org_id", org_id)
+            .eq("patient_id", patient_id)
+            .eq("language", language)
+            .eq(
+                "summary_version",
+                PUG_AI_SUMMARY_VERSION,
+            )
+            .eq(
+                "context_hash",
+                context_hash,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        rows = response.data or []
+
+        return (
+            rows[0]
+            if rows
+            else None
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUG AI cache read:",
+            repr(error),
+            flush=True,
+        )
+
+        return None
+
+def save_cached_patient_ai_summary(
+    org_id,
+    patient_id,
+    language,
+    context_hash,
+    summary,
+    meta,
+):
+    try:
+        payload = {
+            "org_id": org_id,
+            "patient_id": patient_id,
+            "language": language,
+            "summary_version":
+                PUG_AI_SUMMARY_VERSION,
+            "context_hash": context_hash,
+            "summary": summary,
+            "meta": meta,
+            "updated_at":
+                datetime.now(
+                    timezone.utc
+                ).isoformat(),
+        }
+
+        response = (
+            supabase
+            .table(
+                "patient_ai_summary_cache"
+            )
+            .upsert(
+                payload,
+                on_conflict=(
+                    "org_id,patient_id,"
+                    "language,summary_version"
+                ),
+            )
+            .execute()
+        )
+
+        rows = response.data or []
+
+        return (
+            rows[0]
+            if rows
+            else payload
+        )
+
+    except Exception as error:
+        print(
+            "❌ PUG AI cache write:",
+            repr(error),
+            flush=True,
+        )
+
+        return None
+
+        
 def call_openai_patient_summary(context, language):
     language_name = AI_SUMMARY_LANGUAGES[language]
     model_context, context_stats = (
@@ -18779,16 +18911,78 @@ def api_create_patient_ai_summary(patient_id):
     started_at = time.monotonic()
 
     try:
-        # Reuse the already tested, org-isolated read-only context endpoint.
-        context_response = api_get_patient_ai_context(patient_id)
-        if isinstance(context_response, tuple):
+        # Reuse the already tested,
+        # org-isolated read-only context endpoint.
+        context_response = (
+            api_get_patient_ai_context(
+                patient_id
+            )
+        )
+
+        if isinstance(
+            context_response,
+            tuple,
+        ):
             return context_response
 
-        context_payload = context_response.get_json()
+        context_payload = (
+            context_response.get_json()
+        )
+
         if not context_payload.get("ok"):
             return context_response
 
-        context = context_payload.get("data") or {}
+        context = (
+            context_payload.get("data") or {}
+        )
+
+        context_hash, cached_context_stats = (
+            build_ai_summary_context_hash(
+                context,
+                language,
+            )
+        )
+
+        current_org = (
+            get_current_org_id()
+        )
+
+        cached = (
+            load_cached_patient_ai_summary(
+                current_org,
+                patient_id,
+                language,
+                context_hash,
+            )
+        )
+
+        if cached:
+            cached_meta = {
+                **(
+                    cached.get("meta") or {}
+                ),
+                "cached": True,
+                "cache_status": "hit",
+                "stored_in_cache": True,
+                "context_hash":
+                    context_hash,
+                "context_stats":
+                    cached_context_stats,
+                "duration_ms": round(
+                    (
+                        time.monotonic() -
+                        started_at
+                    ) * 1000
+                ),
+            }
+
+            return ok({
+                "summary":
+                    cached.get("summary") or {},
+                "meta":
+                    cached_meta,
+            })
+
         (
             summary,
             provider_response,
@@ -18798,24 +18992,62 @@ def api_create_patient_ai_summary(patient_id):
             language,
         )
 
+        response_meta = {
+            "read_only": True,
+            "stored_in_crm": False,
+            "provider_store": False,
+            "summary_version":
+                PUG_AI_SUMMARY_VERSION,
+            "reasoning_effort": "low",
+            "language": language,
+            "model":
+                provider_response.get(
+                    "model"
+                ) or PUG_AI_MODEL,
+            "response_id":
+                provider_response.get(
+                    "id"
+                ),
+            "usage":
+                provider_response.get(
+                    "usage"
+                ) or {},
+            "context_stats":
+                context_stats,
+            "context_hash":
+                context_hash,
+            "cached": False,
+            "cache_status": "miss",
+            "duration_ms": round(
+                (
+                    time.monotonic() -
+                    started_at
+                ) * 1000
+            ),
+            "generated_at":
+                datetime.now(
+                    timezone.utc
+                ).isoformat(),
+        }
+
+        cache_row = (
+            save_cached_patient_ai_summary(
+                current_org,
+                patient_id,
+                language,
+                context_hash,
+                summary,
+                response_meta,
+            )
+        )
+
+        response_meta[
+            "stored_in_cache"
+        ] = bool(cache_row)
+
         return ok({
             "summary": summary,
-            "meta": {
-                "read_only": True,
-                "stored_in_crm": False,
-                "provider_store": False,
-                "summary_version": "2",
-                "reasoning_effort": "low",
-                "language": language,
-                "model": provider_response.get("model") or PUG_AI_MODEL,
-                "response_id": provider_response.get("id"),
-                "usage": provider_response.get("usage") or {},
-                "context_stats": context_stats,
-                "duration_ms": round(
-                    (time.monotonic() - started_at) * 1000
-                ),
-                "generated_at": datetime.now(timezone.utc).isoformat(),
-            },
+            "meta": response_meta,
         })
 
     except HTTPError as error:
