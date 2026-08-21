@@ -39073,7 +39073,28 @@ dynamicBox.innerHTML = `
     <p style="margin:0;opacity:.65;">
       Короткий клінічний огляд із посиланнями на записи пацієнта.
     </p>
+        <button
+      type="button"
+      data-patient-ai-generate
+      style="
+        margin-top:16px;
+        padding:10px 16px;
+        border:0;
+        border-radius:11px;
+        background:#9346e8;
+        color:#fff;
+        font-weight:600;
+        cursor:pointer;
+      "
+    >
+      ✦ Створити AI-підсумок
+    </button>
+    <div
+      data-patient-ai-result
+      style="margin-top:16px;"
+    ></div>
   </section>
+
   ${renderPatientDiagnosesPanel(
     pet,
     activeDiagnoses
@@ -39602,6 +39623,83 @@ ${
 </div>
   </div>
 `;
+const patientAiButton =
+  dynamicBox.querySelector(
+    "[data-patient-ai-generate]"
+  );
+
+const patientAiResult =
+  dynamicBox.querySelector(
+    "[data-patient-ai-result]"
+  );
+
+if (patientAiButton && patientAiResult) {
+  patientAiButton.addEventListener(
+    "click",
+    async () => {
+      patientAiButton.disabled = true;
+      patientAiButton.textContent =
+        "Створюємо підсумок…";
+
+      patientAiResult.innerHTML =
+        "PUG AI аналізує картку пацієнта…";
+
+      try {
+        const response = await fetch(
+          `/api/patients/${encodeURIComponent(
+            String(pet.id)
+          )}/ai-summary`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type":
+                "application/json",
+              ...getOrgHeaders(),
+            },
+            body: JSON.stringify({
+              language: "uk",
+            }),
+          }
+        );
+
+        const result =
+          await response.json();
+
+        if (!response.ok || !result?.ok) {
+          throw new Error(
+            result?.error ||
+            "Не вдалося створити підсумок."
+          );
+        }
+
+        console.log(
+          "PUG AI SUMMARY UI:",
+          result
+        );
+
+        patientAiResult.innerHTML = `
+          <strong>
+            ${escapeHtml(
+              result.data?.summary
+                ?.summary_title ||
+              "AI-підсумок створено"
+            )}
+          </strong>
+        `;
+      } catch (error) {
+        patientAiResult.textContent =
+          error?.message ||
+          "Сталася помилка.";
+      } finally {
+        patientAiButton.disabled = false;
+        patientAiButton.textContent =
+          "↻ Оновити AI-підсумок";
+      }
+    }
+  );
+}
+
 const patientNotesInput =
   dynamicBox.querySelector(
     "[data-patient-doctor-notes]"
