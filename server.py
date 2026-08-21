@@ -18722,7 +18722,7 @@ Safety and evidence rules:
             "effort": "low",
             "mode": "standard",
         },
-        "max_output_tokens": 1900,
+        "max_output_tokens": 3000,
         "text": {
             "format": {
                 "type": "json_schema",
