@@ -19328,6 +19328,146 @@ Safety and evidence rules:
         response_data,
         context_stats,
     )
+def call_openai_audio_transcription(
+    audio_bytes,
+    filename,
+    content_type,
+    audio_language="",
+):
+    """
+    Sends an in-memory audio recording for transcription.
+    The audio file is not stored in PUGCRM.
+    """
+    if not isinstance(
+        audio_bytes,
+        bytes,
+    ) or not audio_bytes:
+        raise ValueError(
+            "Audio data is empty"
+        )
+
+    safe_filename = (
+        secure_filename(
+            filename or "visit.webm"
+        )
+        or "visit.webm"
+    )
+
+    safe_content_type = str(
+        content_type or ""
+    ).split(";")[0].strip()
+
+    if not safe_content_type:
+        safe_content_type = (
+            "application/octet-stream"
+        )
+
+    boundary = (
+        "----PUGAIBoundary"
+        + uuid.uuid4().hex
+    )
+
+    boundary_bytes = (
+        boundary.encode("utf-8")
+    )
+
+    multipart_parts = []
+
+    def add_text_field(
+        field_name,
+        field_value,
+    ):
+        multipart_parts.extend([
+            b"--" + boundary_bytes + b"\r\n",
+            (
+                "Content-Disposition: "
+                f'form-data; name="{field_name}"'
+                "\r\n\r\n"
+            ).encode("utf-8"),
+            str(field_value).encode("utf-8"),
+            b"\r\n",
+        ])
+
+    add_text_field(
+        "model",
+        PUG_AI_TRANSCRIBE_MODEL,
+    )
+
+    add_text_field(
+        "response_format",
+        "json",
+    )
+
+    normalized_audio_language = str(
+        audio_language or ""
+    ).strip().lower()
+
+    if normalized_audio_language:
+        add_text_field(
+            "language",
+            normalized_audio_language,
+        )
+
+    multipart_parts.extend([
+        b"--" + boundary_bytes + b"\r\n",
+        (
+            "Content-Disposition: "
+            'form-data; name="file"; '
+            f'filename="{safe_filename}"'
+            "\r\n"
+            f"Content-Type: {safe_content_type}"
+            "\r\n\r\n"
+        ).encode("utf-8"),
+        audio_bytes,
+        b"\r\n",
+        b"--" + boundary_bytes + b"--\r\n",
+    ])
+
+    request_body = b"".join(
+        multipart_parts
+    )
+
+    openai_request = Request(
+        OPENAI_TRANSCRIPTIONS_URL,
+        data=request_body,
+        headers={
+            "Authorization":
+                f"Bearer {OPENAI_API_KEY}",
+            "Content-Type":
+                (
+                    "multipart/form-data; "
+                    f"boundary={boundary}"
+                ),
+            "Accept":
+                "application/json",
+        },
+        method="POST",
+    )
+
+    with urlopen(
+        openai_request,
+        timeout=90,
+    ) as openai_response:
+        response_data = json.loads(
+            openai_response
+            .read()
+            .decode("utf-8")
+        )
+
+    transcript = str(
+        response_data.get("text") or ""
+    ).strip()
+
+    if not transcript:
+        raise ValueError(
+            "OpenAI transcription "
+            "contains no text"
+        )
+
+    return (
+        transcript,
+        response_data,
+    )
 
 def call_openai_intake_structure(
     doctor_draft,
@@ -19739,6 +19879,255 @@ def api_create_patient_ai_summary(patient_id):
             flush=True,
         )
         return fail("Не вдалося створити AI-резюме пацієнта.", 500)
+@app.post(
+    "/api/visits/<visit_id>/ai-transcribe"
+)
+def api_transcribe_visit_audio(
+    visit_id,
+):
+    """
+    Transcribes an in-memory voice note.
+    Does not store the original audio.
+    """
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    if not OPENAI_API_KEY:
+        return fail(
+            "PUG AI не налаштовано "
+            "на сервері.",
+            503,
+        )
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    visit_id = str(
+        visit_id or ""
+    ).strip()
+
+    if not visit_id:
+        return fail(
+            "visit_id required",
+            400,
+        )
+
+    audio_file = (
+        request.files.get("audio")
+    )
+
+    if not audio_file:
+        return fail(
+            "Аудіозапис не отримано.",
+            400,
+        )
+
+    filename = (
+        secure_filename(
+            audio_file.filename
+            or "visit.webm"
+        )
+        or "visit.webm"
+    )
+
+    content_type = str(
+        audio_file.mimetype or ""
+    ).split(";")[0].strip().lower()
+
+    allowed_content_types = {
+        "audio/webm",
+        "video/webm",
+        "audio/mp4",
+        "video/mp4",
+        "audio/mpeg",
+        "audio/mp3",
+        "audio/wav",
+        "audio/x-wav",
+        "audio/m4a",
+        "audio/x-m4a",
+        "application/octet-stream",
+    }
+
+    if (
+        content_type
+        not in allowed_content_types
+    ):
+        return fail(
+            "Формат аудіозапису "
+            "не підтримується.",
+            400,
+        )
+
+    audio_bytes = audio_file.read()
+
+    if not audio_bytes:
+        return fail(
+            "Аудіозапис порожній.",
+            400,
+        )
+
+    max_audio_size = (
+        15 * 1024 * 1024
+    )
+
+    if len(audio_bytes) > max_audio_size:
+        return fail(
+            "Аудіозапис перевищує "
+            "15 МБ.",
+            413,
+        )
+
+    audio_language = str(
+        request.form.get(
+            "audio_language"
+        ) or ""
+    ).strip().lower()
+
+    if (
+        audio_language
+        and not re.fullmatch(
+            r"[a-z]{2}",
+            audio_language,
+        )
+    ):
+        return fail(
+            "Некоректна мова аудіо.",
+            400,
+        )
+
+    started_at = time.monotonic()
+
+    try:
+        visit_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("id")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    visit_id,
+                )
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not visit_result.data:
+            return fail(
+                "Візит не знайдено.",
+                404,
+            )
+
+        (
+            transcript,
+            provider_response,
+        ) = call_openai_audio_transcription(
+            audio_bytes,
+            filename,
+            content_type,
+            audio_language,
+        )
+
+        return ok({
+            "transcript": transcript,
+            "meta": {
+                "stored_in_crm": False,
+                "audio_stored": False,
+                "provider_store": False,
+                "transcription_version": "1",
+                "visit_id": visit_id,
+                "model":
+                    provider_response.get(
+                        "model"
+                    )
+                    or
+                    PUG_AI_TRANSCRIBE_MODEL,
+                "duration_ms": round(
+                    (
+                        time.monotonic()
+                        - started_at
+                    ) * 1000
+                ),
+                "audio_bytes":
+                    len(audio_bytes),
+                "generated_at":
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+            },
+        })
+
+    except HTTPError as error:
+        provider_body = ""
+
+        try:
+            provider_body = (
+                error.read().decode(
+                    "utf-8"
+                )
+            )
+        except Exception:
+            provider_body = ""
+
+        print(
+            "❌ OpenAI transcription HTTP:",
+            error.code,
+            provider_body[:1000],
+            flush=True,
+        )
+
+        if error.code == 429:
+            return fail(
+                "Ліміт PUG AI "
+                "тимчасово вичерпано.",
+                429,
+            )
+
+        return fail(
+            "Не вдалося розпізнати голос.",
+            502,
+        )
+
+    except (
+        URLError,
+        TimeoutError,
+    ) as error:
+        print(
+            "❌ OpenAI transcription network:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Сервіс розпізнавання "
+            "не відповідає.",
+            503,
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST AI transcription:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося обробити "
+            "аудіозапис.",
+            500,
+        )
 
 @app.post(
     "/api/visits/<visit_id>/ai-structure"

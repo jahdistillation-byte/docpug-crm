@@ -57149,7 +57149,105 @@ if (
           Чернетка
         </span>
       </div>
+    <div
+  style="
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:15px;
+    flex-wrap:wrap;
+  "
+>
+  <button
+    type="button"
+    id="visitAiRecordButton"
+    disabled
+    style="
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-width:190px;
+      border:0;
+      border-radius:12px;
+      padding:12px 16px;
+      background:
+        rgba(239,68,68,.18);
+      color:
+        rgba(255,255,255,.58);
+      font-weight:750;
+      cursor:not-allowed;
+    "
+  >
+    <span
+      id="visitAiRecordIcon"
+    >
+      🎙
+    </span>
 
+    <span
+      id="visitAiRecordText"
+    >
+      Надиктувати прийом
+    </span>
+  </button>
+
+  <div>
+    <div
+      id="visitAiRecordStatus"
+      style="
+        color:
+          rgba(255,255,255,.62);
+        font-size:12px;
+        line-height:1.4;
+      "
+    >
+      Мікрофон готується
+    </div>
+
+    <div
+      id="visitAiRecordTimer"
+      style="
+        margin-top:2px;
+        color:#fca5a5;
+        font-size:12px;
+        font-weight:750;
+      "
+    ></div>
+  </div>
+</div>
+
+<div
+  style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:13px 0 0;
+    color:
+      rgba(255,255,255,.38);
+    font-size:11px;
+  "
+>
+  <span
+    style="
+      flex:1;
+      height:1px;
+      background:
+        rgba(255,255,255,.07);
+    "
+  ></span>
+
+  або введіть короткі тези
+
+  <span
+    style="
+      flex:1;
+      height:1px;
+      background:
+        rgba(255,255,255,.07);
+    "
+  ></span>
+</div>
       <textarea
         id="visitAiIntakeInput"
         maxlength="8000"
