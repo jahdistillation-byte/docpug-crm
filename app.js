@@ -57243,6 +57243,357 @@ if (visitAiIntakePanel) {
   visitAiIntakePanel.dataset
     .visitId = visitId;
 }
+
+const visitAiIntakeInput =
+  document.getElementById(
+    "visitAiIntakeInput"
+  );
+
+const visitAiStructureButton =
+  document.getElementById(
+    "visitAiStructureButton"
+  );
+
+const visitAiStructureResult =
+  document.getElementById(
+    "visitAiStructureResult"
+  );
+
+if (
+  visitAiIntakeInput &&
+  visitAiStructureButton &&
+  visitAiStructureResult
+) {
+  const updateAiStructureButton =
+    () => {
+      const hasEnoughText =
+        String(
+          visitAiIntakeInput
+            .value || ""
+        ).trim().length >= 10;
+
+      visitAiStructureButton.disabled =
+        !hasEnoughText;
+
+      visitAiStructureButton.style
+        .cursor =
+          hasEnoughText
+            ? "pointer"
+            : "not-allowed";
+
+      visitAiStructureButton.style
+        .color =
+          hasEnoughText
+            ? "#fff"
+            : "rgba(255,255,255,.58)";
+
+      visitAiStructureButton.style
+        .background =
+          hasEnoughText
+            ? (
+              "linear-gradient("
+              + "135deg,"
+              + "#7c3aed,"
+              + "#9333ea"
+              + ")"
+            )
+            : "rgba(139,92,246,.35)";
+    };
+
+  visitAiIntakeInput.oninput =
+    updateAiStructureButton;
+
+  updateAiStructureButton();
+
+  visitAiStructureButton.onclick =
+    async () => {
+      const doctorDraft =
+        String(
+          visitAiIntakeInput
+            .value || ""
+        ).trim();
+
+      const currentVisitId =
+        String(
+          visitAiIntakePanel
+            ?.dataset
+            ?.visitId ||
+          visitId ||
+          ""
+        ).trim();
+
+      if (doctorDraft.length < 10) {
+        alert(
+          "Опишіть прийом детальніше."
+        );
+        return;
+      }
+
+      const originalButtonText =
+        visitAiStructureButton
+          .textContent;
+
+      visitAiStructureButton.disabled =
+        true;
+
+      visitAiStructureButton.textContent =
+        "PUG AI оформлює…";
+
+      visitAiStructureResult.style
+        .display = "block";
+
+      visitAiStructureResult.innerHTML = `
+        <div
+          style="
+            padding:14px;
+            border-radius:12px;
+            background:
+              rgba(0,0,0,.18);
+            color:
+              rgba(255,255,255,.68);
+            font-size:13px;
+          "
+        >
+          Аналізуємо текст лікаря
+          та готуємо медичні поля…
+        </div>
+      `;
+
+      try {
+        const result =
+          await requestVisitAiStructure(
+            currentVisitId,
+            doctorDraft,
+            {
+              language: "uk",
+            }
+          );
+
+        const structured =
+          result?.structured || {};
+
+        visitAiIntakePanel
+          .structuredDraft =
+            structured;
+
+        const fields = [
+          {
+            label:
+              "Скарги та анамнез",
+            value:
+              structured
+                .complaints_anamnesis,
+          },
+          {
+            label:
+              "Діагноз",
+            value:
+              structured.diagnosis,
+          },
+          {
+            label:
+              "Призначення лікаря",
+            value:
+              structured.treatment,
+          },
+          {
+            label:
+              "Рекомендації власнику",
+            value:
+              structured
+                .owner_recommendations,
+          },
+          {
+            label:
+              "Вага",
+            value:
+              structured.weight_kg
+                != null
+                ? (
+                  `${structured.weight_kg} кг`
+                )
+                : "",
+          },
+        ].filter(
+          (field) =>
+            String(
+              field.value || ""
+            ).trim()
+        );
+
+        const reviewItems =
+          Array.isArray(
+            structured.needs_review
+          )
+            ? structured.needs_review
+            : [];
+
+        visitAiStructureResult.innerHTML = `
+          <div
+            style="
+              padding:15px;
+              border-radius:13px;
+              background:
+                rgba(0,0,0,.20);
+              border:
+                1px solid
+                rgba(255,255,255,.08);
+            "
+          >
+            <div
+              style="
+                color:#fff;
+                font-size:15px;
+                font-weight:750;
+              "
+            >
+              Чернетку підготовлено
+            </div>
+
+            ${fields
+              .map(
+                (field) => `
+                  <div
+                    style="
+                      margin-top:13px;
+                      padding-top:12px;
+                      border-top:
+                        1px solid
+                        rgba(255,255,255,.07);
+                    "
+                  >
+                    <div
+                      style="
+                        color:#c4b5fd;
+                        font-size:12px;
+                        font-weight:750;
+                      "
+                    >
+                      ${escapeHtml(
+                        field.label
+                      )}
+                    </div>
+
+                    <div
+                      style="
+                        margin-top:6px;
+                        color:
+                          rgba(255,255,255,.76);
+                        font-size:13px;
+                        line-height:1.55;
+                        white-space:pre-wrap;
+                      "
+                    >${escapeHtml(
+                      field.value
+                    )}</div>
+                  </div>
+                `
+              )
+              .join("")}
+
+            ${
+              reviewItems.length
+                ? `
+                  <div
+                    style="
+                      margin-top:14px;
+                      padding:12px;
+                      border-radius:11px;
+                      background:
+                        rgba(245,158,11,.10);
+                      border:
+                        1px solid
+                        rgba(245,158,11,.20);
+                      color:#fde68a;
+                      font-size:13px;
+                      line-height:1.5;
+                    "
+                  >
+                    <strong>
+                      Потрібно перевірити:
+                    </strong>
+
+                    ${reviewItems
+                      .map(
+                        (item) => `
+                          <div
+                            style="
+                              margin-top:6px;
+                            "
+                          >
+                            • ${escapeHtml(
+                              item
+                            )}
+                          </div>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                `
+                : ""
+            }
+
+            <div
+              style="
+                display:flex;
+                justify-content:flex-end;
+                margin-top:15px;
+              "
+            >
+              <button
+                type="button"
+                id="visitAiApplyButton"
+                disabled
+                style="
+                  border:0;
+                  border-radius:10px;
+                  padding:10px 14px;
+                  background:
+                    rgba(34,197,94,.24);
+                  color:
+                    rgba(255,255,255,.55);
+                  font-weight:750;
+                  cursor:not-allowed;
+                "
+              >
+                Застосувати до полів
+              </button>
+            </div>
+          </div>
+        `;
+
+        console.log(
+          "PUG AI INTAKE UI:",
+          result
+        );
+      } catch (error) {
+        visitAiStructureResult.innerHTML = `
+          <div
+            style="
+              padding:13px;
+              border-radius:11px;
+              background:
+                rgba(239,68,68,.10);
+              border:
+                1px solid
+                rgba(239,68,68,.22);
+              color:#fecaca;
+            "
+          >
+            ${escapeHtml(
+              error?.message ||
+              "Сталася помилка."
+            )}
+          </div>
+        `;
+      } finally {
+        visitAiStructureButton.textContent =
+          originalButtonText;
+
+        updateAiStructureButton();
+      }
+    };
+}
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
