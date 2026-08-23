@@ -18675,29 +18675,30 @@ def pug_ai_intake_structure_schema():
                     "type": "string",
                 },
             },
-        "patient_match": {
-    "type": "string",
-    "enum": [
-        "match",
-        "mismatch",
-        "not_mentioned",
-    ],
-},
-"patient_match_note": {
-    "type": "string",
-},    
+            "patient_match": {
+                "type": "string",
+                "enum": [
+                    "match",
+                    "mismatch",
+                    "not_mentioned",
+                ],
+            },
+            "patient_match_note": {
+                "type": "string",
+            },
         },
         "required": [
-    "complaints_anamnesis",
-    "diagnosis",
-    "treatment",
-    "owner_recommendations",
-    "weight_kg",
-    "needs_review",
-    "patient_match",
-    "patient_match_note",
-],
+            "complaints_anamnesis",
+            "diagnosis",
+            "treatment",
+            "owner_recommendations",
+            "weight_kg",
+            "needs_review",
+            "patient_match",
+            "patient_match_note",
+        ],
     }
+
 
 def extract_openai_output_text(response_data):
     for output_item in response_data.get("output") or []:
