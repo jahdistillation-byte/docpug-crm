@@ -56972,38 +56972,51 @@ if (recommendationTextarea) {
   recommendationTextarea.value =
     parsedRx.recommendation;
 }
-let visitAiDocumentsPanel =
+const legacyAiDocumentsPanel =
   document.getElementById(
     "visitAiDocumentsPanel"
   );
 
+if (legacyAiDocumentsPanel) {
+  legacyAiDocumentsPanel.remove();
+}
+
+
+let visitAiIntakePanel =
+  document.getElementById(
+    "visitAiIntakePanel"
+  );
+
 if (
-  !visitAiDocumentsPanel &&
-  recommendationTextarea
+  !visitAiIntakePanel &&
+  complaintTextarea
 ) {
-  visitAiDocumentsPanel =
+  visitAiIntakePanel =
     document.createElement(
       "section"
     );
 
-  visitAiDocumentsPanel.id =
-    "visitAiDocumentsPanel";
+  visitAiIntakePanel.id =
+    "visitAiIntakePanel";
 
-  visitAiDocumentsPanel.innerHTML = `
+  visitAiIntakePanel.innerHTML = `
     <div
       style="
-        margin-top:16px;
+        margin-bottom:18px;
         padding:18px;
         border-radius:16px;
         border:
           1px solid
-          rgba(167,139,250,.28);
+          rgba(167,139,250,.30);
         background:
           linear-gradient(
             135deg,
-            rgba(126,34,206,.15),
-            rgba(15,23,42,.34)
+            rgba(126,34,206,.16),
+            rgba(15,23,42,.36)
           );
+        box-shadow:
+          0 16px 40px
+          rgba(0,0,0,.14);
       "
     >
       <div
@@ -57024,7 +57037,7 @@ if (
               font-weight:750;
             "
           >
-            ✦ PUG AI
+            ✦ PUG AI · Оформлення прийому
           </div>
 
           <div
@@ -57033,309 +57046,122 @@ if (
               color:
                 rgba(255,255,255,.62);
               font-size:13px;
-              line-height:1.45;
+              line-height:1.5;
             "
           >
-            Направлення та рекомендації
-            на основі цього візиту
+            Опишіть прийом своїми словами.
+            PUG AI підготує медичну картку.
           </div>
         </div>
 
+        <span
+          style="
+            padding:5px 9px;
+            border-radius:999px;
+            background:
+              rgba(139,92,246,.18);
+            color:#c4b5fd;
+            font-size:11px;
+            font-weight:700;
+          "
+        >
+          Чернетка
+        </span>
+      </div>
+
+      <textarea
+        id="visitAiIntakeInput"
+        maxlength="8000"
+        placeholder="Наприклад: зі слів власника блювання третій день, апетит знижений. Температура 39,4 °C. При пальпації живіт напружений. Підозрюю гастроентерит..."
+        style="
+          width:100%;
+          min-height:120px;
+          margin-top:15px;
+          padding:13px 14px;
+          box-sizing:border-box;
+          resize:vertical;
+          border-radius:12px;
+          border:
+            1px solid
+            rgba(255,255,255,.10);
+          background:
+            rgba(0,0,0,.22);
+          color:#fff;
+          font:inherit;
+          line-height:1.55;
+          outline:none;
+        "
+      ></textarea>
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:
+            space-between;
+          gap:12px;
+          margin-top:12px;
+          flex-wrap:wrap;
+        "
+      >
+        <span
+          style="
+            color:
+              rgba(255,255,255,.46);
+            font-size:12px;
+          "
+        >
+          AI нічого не збереже
+          без підтвердження лікаря
+        </span>
+
         <button
           type="button"
-          id="visitAiDocumentsButton"
+          id="visitAiStructureButton"
           disabled
           style="
             border:0;
             border-radius:11px;
-            padding:10px 14px;
+            padding:10px 15px;
             background:
               rgba(139,92,246,.35);
             color:
-              rgba(255,255,255,.6);
-            font-weight:700;
+              rgba(255,255,255,.58);
+            font-weight:750;
             cursor:not-allowed;
           "
         >
-          ✦ Створити документи
+          ✦ Розподілити по полях
         </button>
       </div>
 
       <div
-        id="visitAiDocumentsResult"
+        id="visitAiStructureResult"
         style="
           display:none;
-          margin-top:16px;
+          margin-top:15px;
         "
       ></div>
     </div>
   `;
 
   const insertionTarget =
-    recommendationTextarea
+    complaintTextarea
       .parentElement;
 
   if (insertionTarget) {
     insertionTarget
       .insertAdjacentElement(
-        "afterend",
-        visitAiDocumentsPanel
+        "beforebegin",
+        visitAiIntakePanel
       );
   }
 }
 
-if (visitAiDocumentsPanel) {
-  visitAiDocumentsPanel.dataset
+if (visitAiIntakePanel) {
+  visitAiIntakePanel.dataset
     .visitId = visitId;
 }
-
-const visitAiDocumentsButton =
-  document.getElementById(
-    "visitAiDocumentsButton"
-  );
-
-const visitAiDocumentsResult =
-  document.getElementById(
-    "visitAiDocumentsResult"
-  );
-
-if (
-  visitAiDocumentsButton &&
-  visitAiDocumentsResult
-) {
-  visitAiDocumentsButton.disabled =
-    false;
-
-  visitAiDocumentsButton.style
-    .cursor = "pointer";
-
-  visitAiDocumentsButton.style
-    .color = "#fff";
-
-  visitAiDocumentsButton.style
-    .background =
-      "linear-gradient("
-      + "135deg,"
-      + "#7c3aed,"
-      + "#9333ea"
-      + ")";
-
-  visitAiDocumentsButton.onclick =
-    async () => {
-      const currentVisitId =
-        String(
-          visitAiDocumentsPanel
-            ?.dataset
-            ?.visitId ||
-          visitId ||
-          ""
-        ).trim();
-
-      if (!currentVisitId) {
-        alert(
-          "Не вдалося визначити візит."
-        );
-        return;
-      }
-
-      const originalButtonText =
-        visitAiDocumentsButton
-          .textContent;
-
-      visitAiDocumentsButton.disabled =
-        true;
-
-      visitAiDocumentsButton.textContent =
-        "PUG AI працює…";
-
-      visitAiDocumentsResult.style
-        .display = "block";
-
-      visitAiDocumentsResult.innerHTML = `
-        <div
-          style="
-            padding:14px;
-            border-radius:12px;
-            background:
-              rgba(0,0,0,.18);
-            color:
-              rgba(255,255,255,.68);
-            font-size:13px;
-            line-height:1.5;
-          "
-        >
-          Аналізуємо збережені дані
-          візиту та історію пацієнта…
-        </div>
-      `;
-
-      try {
-        const result =
-          await requestVisitAiDocuments(
-            currentVisitId,
-            {
-              language: "uk",
-              referralDestination: "",
-            }
-          );
-
-        const documents =
-          result?.documents || {};
-
-        const referral =
-          documents.referral || {};
-
-        const ownerRecommendations =
-          documents
-            .owner_recommendations || {};
-
-        visitAiDocumentsResult.innerHTML = `
-          <div
-            style="
-              padding:15px;
-              border-radius:13px;
-              background:
-                rgba(0,0,0,.20);
-              border:
-                1px solid
-                rgba(255,255,255,.08);
-            "
-          >
-            <div
-              style="
-                color:#fff;
-                font-size:15px;
-                font-weight:750;
-              "
-            >
-              ${escapeHtml(
-                documents.document_title ||
-                "AI-документи створено"
-              )}
-            </div>
-
-            <div
-              style="
-                margin-top:9px;
-                color:
-                  rgba(255,255,255,.72);
-                font-size:13px;
-                line-height:1.55;
-              "
-            >
-              ${escapeHtml(
-                documents.visit_summary ||
-                "Документи підготовлено."
-              )}
-            </div>
-
-            ${
-              referral.ready
-                ? `
-                  <div
-                    style="
-                      margin-top:14px;
-                      padding-top:12px;
-                      border-top:
-                        1px solid
-                        rgba(255,255,255,.08);
-                    "
-                  >
-                    <strong
-                      style="color:#c4b5fd;"
-                    >
-                      Направлення
-                    </strong>
-
-                    <div
-                      style="
-                        margin-top:6px;
-                        color:
-                          rgba(255,255,255,.72);
-                        line-height:1.5;
-                      "
-                    >
-                      ${escapeHtml(
-                        referral.reason || ""
-                      )}
-                    </div>
-                  </div>
-                `
-                : ""
-            }
-
-            <div
-              style="
-                margin-top:14px;
-                padding-top:12px;
-                border-top:
-                  1px solid
-                  rgba(255,255,255,.08);
-              "
-            >
-              <strong
-                style="color:#c4b5fd;"
-              >
-                Рекомендації власнику
-              </strong>
-
-              <div
-                style="
-                  margin-top:6px;
-                  color:
-                    rgba(255,255,255,.72);
-                  line-height:1.5;
-                "
-              >
-                ${escapeHtml(
-                  ownerRecommendations
-                    .summary ||
-                  "Рекомендації підготовлено."
-                )}
-              </div>
-            </div>
-          </div>
-        `;
-
-        console.log(
-          "PUG AI VISIT UI:",
-          result
-        );
-      } catch (error) {
-        console.error(
-          "PUG AI visit documents:",
-          error
-        );
-
-        visitAiDocumentsResult.innerHTML = `
-          <div
-            style="
-              padding:13px;
-              border-radius:11px;
-              background:
-                rgba(239,68,68,.10);
-              border:
-                1px solid
-                rgba(239,68,68,.22);
-              color:#fecaca;
-            "
-          >
-            ${escapeHtml(
-              error?.message ||
-              "Сталася помилка."
-            )}
-          </div>
-        `;
-      } finally {
-        visitAiDocumentsButton.disabled =
-          false;
-
-        visitAiDocumentsButton.textContent =
-          originalButtonText;
-      }
-    };
-}
-
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
