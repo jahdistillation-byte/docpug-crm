@@ -1362,6 +1362,87 @@ function getOrgHeaders() {
    */
   return {};
 }
+async function requestVisitAiStructure(
+  visitId,
+  doctorDraft,
+  {
+    language = "uk",
+  } = {}
+) {
+  const normalizedVisitId =
+    String(visitId || "").trim();
+
+  const normalizedDraft =
+    String(doctorDraft || "").trim();
+
+  if (!normalizedVisitId) {
+    throw new Error(
+      "Не вказано візит."
+    );
+  }
+
+  if (
+    normalizedDraft.length < 10
+  ) {
+    throw new Error(
+      "Опишіть прийом детальніше."
+    );
+  }
+
+  const response = await fetch(
+    `/api/visits/${
+      encodeURIComponent(
+        normalizedVisitId
+      )
+    }/ai-structure`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type":
+          "application/json",
+        Accept:
+          "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        language:
+          String(language || "uk"),
+        doctor_draft:
+          normalizedDraft,
+      }),
+    }
+  );
+
+  const responseText =
+    await response.text();
+
+  let result = null;
+
+  try {
+    result = responseText
+      ? JSON.parse(responseText)
+      : null;
+  } catch {
+    throw new Error(
+      "Сервер повернув "
+      + "некоректну відповідь."
+    );
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося оформити "
+      + "чернетку прийому."
+    );
+  }
+
+  return result.data;
+}
 async function requestVisitAiDocuments(
   visitId,
   {
