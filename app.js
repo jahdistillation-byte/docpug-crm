@@ -57089,6 +57089,253 @@ if (visitAiDocumentsPanel) {
     .visitId = visitId;
 }
 
+const visitAiDocumentsButton =
+  document.getElementById(
+    "visitAiDocumentsButton"
+  );
+
+const visitAiDocumentsResult =
+  document.getElementById(
+    "visitAiDocumentsResult"
+  );
+
+if (
+  visitAiDocumentsButton &&
+  visitAiDocumentsResult
+) {
+  visitAiDocumentsButton.disabled =
+    false;
+
+  visitAiDocumentsButton.style
+    .cursor = "pointer";
+
+  visitAiDocumentsButton.style
+    .color = "#fff";
+
+  visitAiDocumentsButton.style
+    .background =
+      "linear-gradient("
+      + "135deg,"
+      + "#7c3aed,"
+      + "#9333ea"
+      + ")";
+
+  visitAiDocumentsButton.onclick =
+    async () => {
+      const currentVisitId =
+        String(
+          visitAiDocumentsPanel
+            ?.dataset
+            ?.visitId ||
+          visitId ||
+          ""
+        ).trim();
+
+      if (!currentVisitId) {
+        alert(
+          "Не вдалося визначити візит."
+        );
+        return;
+      }
+
+      const originalButtonText =
+        visitAiDocumentsButton
+          .textContent;
+
+      visitAiDocumentsButton.disabled =
+        true;
+
+      visitAiDocumentsButton.textContent =
+        "PUG AI працює…";
+
+      visitAiDocumentsResult.style
+        .display = "block";
+
+      visitAiDocumentsResult.innerHTML = `
+        <div
+          style="
+            padding:14px;
+            border-radius:12px;
+            background:
+              rgba(0,0,0,.18);
+            color:
+              rgba(255,255,255,.68);
+            font-size:13px;
+            line-height:1.5;
+          "
+        >
+          Аналізуємо збережені дані
+          візиту та історію пацієнта…
+        </div>
+      `;
+
+      try {
+        const result =
+          await requestVisitAiDocuments(
+            currentVisitId,
+            {
+              language: "uk",
+              referralDestination: "",
+            }
+          );
+
+        const documents =
+          result?.documents || {};
+
+        const referral =
+          documents.referral || {};
+
+        const ownerRecommendations =
+          documents
+            .owner_recommendations || {};
+
+        visitAiDocumentsResult.innerHTML = `
+          <div
+            style="
+              padding:15px;
+              border-radius:13px;
+              background:
+                rgba(0,0,0,.20);
+              border:
+                1px solid
+                rgba(255,255,255,.08);
+            "
+          >
+            <div
+              style="
+                color:#fff;
+                font-size:15px;
+                font-weight:750;
+              "
+            >
+              ${escapeHtml(
+                documents.document_title ||
+                "AI-документи створено"
+              )}
+            </div>
+
+            <div
+              style="
+                margin-top:9px;
+                color:
+                  rgba(255,255,255,.72);
+                font-size:13px;
+                line-height:1.55;
+              "
+            >
+              ${escapeHtml(
+                documents.visit_summary ||
+                "Документи підготовлено."
+              )}
+            </div>
+
+            ${
+              referral.ready
+                ? `
+                  <div
+                    style="
+                      margin-top:14px;
+                      padding-top:12px;
+                      border-top:
+                        1px solid
+                        rgba(255,255,255,.08);
+                    "
+                  >
+                    <strong
+                      style="color:#c4b5fd;"
+                    >
+                      Направлення
+                    </strong>
+
+                    <div
+                      style="
+                        margin-top:6px;
+                        color:
+                          rgba(255,255,255,.72);
+                        line-height:1.5;
+                      "
+                    >
+                      ${escapeHtml(
+                        referral.reason || ""
+                      )}
+                    </div>
+                  </div>
+                `
+                : ""
+            }
+
+            <div
+              style="
+                margin-top:14px;
+                padding-top:12px;
+                border-top:
+                  1px solid
+                  rgba(255,255,255,.08);
+              "
+            >
+              <strong
+                style="color:#c4b5fd;"
+              >
+                Рекомендації власнику
+              </strong>
+
+              <div
+                style="
+                  margin-top:6px;
+                  color:
+                    rgba(255,255,255,.72);
+                  line-height:1.5;
+                "
+              >
+                ${escapeHtml(
+                  ownerRecommendations
+                    .summary ||
+                  "Рекомендації підготовлено."
+                )}
+              </div>
+            </div>
+          </div>
+        `;
+
+        console.log(
+          "PUG AI VISIT UI:",
+          result
+        );
+      } catch (error) {
+        console.error(
+          "PUG AI visit documents:",
+          error
+        );
+
+        visitAiDocumentsResult.innerHTML = `
+          <div
+            style="
+              padding:13px;
+              border-radius:11px;
+              background:
+                rgba(239,68,68,.10);
+              border:
+                1px solid
+                rgba(239,68,68,.22);
+              color:#fecaca;
+            "
+          >
+            ${escapeHtml(
+              error?.message ||
+              "Сталася помилка."
+            )}
+          </div>
+        `;
+      } finally {
+        visitAiDocumentsButton.disabled =
+          false;
+
+        visitAiDocumentsButton.textContent =
+          originalButtonText;
+      }
+    };
+}
+
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
