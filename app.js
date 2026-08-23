@@ -58108,13 +58108,40 @@ if (
                   );
 
                 visitAiRecordStatus
-                  .textContent =
-                    "Голос розпізнано. "
-                    + "Перевірте текст.";
+  .textContent =
+    "Голос розпізнано. "
+    + "PUG AI оформлює картку…";
 
-                visitAiRecordText
-                  .textContent =
-                    "Записати ще";
+visitAiRecordText
+  .textContent =
+    "Записати ще";
+
+visitAiIntakePanel
+  .structuredDraft = null;
+
+if (
+  typeof
+    visitAiStructureButton
+      ?.onclick === "function"
+) {
+  await visitAiStructureButton
+    .onclick();
+}
+
+if (
+  visitAiIntakePanel
+    .structuredDraft
+) {
+  visitAiRecordStatus
+    .textContent =
+      "Чернетку підготовлено. "
+      + "Перевірте результат.";
+} else {
+  visitAiRecordStatus
+    .textContent =
+      "Голос розпізнано, "
+      + "але чернетку не створено.";
+}
               } catch (error) {
                 console.error(
                   "PUG AI transcription:",
