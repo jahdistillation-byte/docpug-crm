@@ -18628,6 +18628,45 @@ def pug_ai_visit_documents_schema():
             "limitations",
         ],
     }
+def pug_ai_intake_structure_schema():
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "complaints_anamnesis": {
+                "type": "string",
+            },
+            "diagnosis": {
+                "type": "string",
+            },
+            "treatment": {
+                "type": "string",
+            },
+            "owner_recommendations": {
+                "type": "string",
+            },
+            "weight_kg": {
+                "type": [
+                    "number",
+                    "null",
+                ],
+            },
+            "needs_review": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                },
+            },
+        },
+        "required": [
+            "complaints_anamnesis",
+            "diagnosis",
+            "treatment",
+            "owner_recommendations",
+            "weight_kg",
+            "needs_review",
+        ],
+    }
 
 def extract_openai_output_text(response_data):
     for output_item in response_data.get("output") or []:
