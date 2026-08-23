@@ -44,8 +44,26 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-PUG_AI_MODEL = os.getenv("PUG_AI_MODEL") or "gpt-5.6-terra"
-OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
+PUG_AI_MODEL = (
+    os.getenv("PUG_AI_MODEL")
+    or "gpt-5.6-terra"
+)
+
+PUG_AI_TRANSCRIBE_MODEL = (
+    os.getenv(
+        "PUG_AI_TRANSCRIBE_MODEL"
+    )
+    or "gpt-4o-mini-transcribe"
+)
+
+OPENAI_RESPONSES_URL = (
+    "https://api.openai.com/v1/responses"
+)
+
+OPENAI_TRANSCRIPTIONS_URL = (
+    "https://api.openai.com/"
+    "v1/audio/transcriptions"
+)
 
 if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
     raise RuntimeError("Missing ENV vars: SUPABASE_URL / SUPABASE_SERVICE_KEY")
