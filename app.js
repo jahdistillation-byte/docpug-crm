@@ -1362,6 +1362,102 @@ function getOrgHeaders() {
    */
   return {};
 }
+async function requestVisitAiTranscription(
+  visitId,
+  audioBlob
+) {
+  const normalizedVisitId =
+    String(visitId || "").trim();
+
+  if (!normalizedVisitId) {
+    throw new Error(
+      "Не вказано візит."
+    );
+  }
+
+  if (
+    !audioBlob ||
+    !audioBlob.size
+  ) {
+    throw new Error(
+      "Аудіозапис порожній."
+    );
+  }
+
+  const mimeType =
+    String(
+      audioBlob.type || ""
+    ).toLowerCase();
+
+  let fileExtension = "webm";
+
+  if (mimeType.includes("mp4")) {
+    fileExtension = "mp4";
+  } else if (
+    mimeType.includes("mpeg") ||
+    mimeType.includes("mp3")
+  ) {
+    fileExtension = "mp3";
+  } else if (
+    mimeType.includes("wav")
+  ) {
+    fileExtension = "wav";
+  }
+
+  const formData = new FormData();
+
+  formData.append(
+    "audio",
+    audioBlob,
+    `visit-dictation.${fileExtension}`
+  );
+
+  const response = await fetch(
+    `/api/visits/${
+      encodeURIComponent(
+        normalizedVisitId
+      )
+    }/ai-transcribe`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept:
+          "application/json",
+        ...getOrgHeaders(),
+      },
+      body: formData,
+    }
+  );
+
+  const responseText =
+    await response.text();
+
+  let result = null;
+
+  try {
+    result = responseText
+      ? JSON.parse(responseText)
+      : null;
+  } catch {
+    throw new Error(
+      "Сервер повернув "
+      + "некоректну відповідь."
+    );
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося розпізнати голос."
+    );
+  }
+
+  return result.data;
+}
 async function requestVisitAiStructure(
   visitId,
   doctorDraft,
