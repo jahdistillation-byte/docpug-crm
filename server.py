@@ -19723,6 +19723,210 @@ def api_create_patient_ai_summary(patient_id):
         return fail("Не вдалося створити AI-резюме пацієнта.", 500)
 
 @app.post(
+    "/api/visits/<visit_id>/ai-structure"
+)
+def api_structure_visit_intake(
+    visit_id,
+):
+    """
+    Structures a veterinarian's raw note.
+    Does not save changes to the visit.
+    """
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    if not OPENAI_API_KEY:
+        return fail(
+            "PUG AI не налаштовано "
+            "на сервері.",
+            503,
+        )
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    visit_id = str(
+        visit_id or ""
+    ).strip()
+
+    if not visit_id:
+        return fail(
+            "visit_id required",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        ) or {}
+    )
+
+    doctor_draft = str(
+        data.get("doctor_draft") or ""
+    ).strip()
+
+    if len(doctor_draft) < 10:
+        return fail(
+            "Опишіть прийом детальніше.",
+            400,
+        )
+
+    if len(doctor_draft) > 8000:
+        return fail(
+            "Чернетка перевищує "
+            "8000 символів.",
+            400,
+        )
+
+    language = str(
+        data.get("language") or "uk"
+    ).strip().lower()
+
+    if language not in AI_SUMMARY_LANGUAGES:
+        return fail(
+            "Unsupported language",
+            400,
+        )
+
+    started_at = time.monotonic()
+
+    try:
+        visit_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("visits")
+                .select("id,pet_id")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    visit_id,
+                )
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not visit_result.data:
+            return fail(
+                "Візит не знайдено.",
+                404,
+            )
+
+        (
+            structured,
+            provider_response,
+        ) = call_openai_intake_structure(
+            doctor_draft,
+            language,
+        )
+
+        return ok({
+            "structured": structured,
+            "meta": {
+                "read_only": True,
+                "stored_in_crm": False,
+                "provider_store": False,
+                "structure_version": "1",
+                "reasoning_effort": "low",
+                "language": language,
+                "visit_id": visit_id,
+                "model":
+                    provider_response.get(
+                        "model"
+                    ) or PUG_AI_MODEL,
+                "response_id":
+                    provider_response.get(
+                        "id"
+                    ),
+                "usage":
+                    provider_response.get(
+                        "usage"
+                    ) or {},
+                "duration_ms": round(
+                    (
+                        time.monotonic()
+                        - started_at
+                    ) * 1000
+                ),
+                "generated_at":
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+            },
+        })
+
+    except HTTPError as error:
+        provider_body = ""
+
+        try:
+            provider_body = (
+                error.read().decode(
+                    "utf-8"
+                )
+            )
+        except Exception:
+            provider_body = ""
+
+        print(
+            "❌ OpenAI intake structure HTTP:",
+            error.code,
+            provider_body[:1000],
+            flush=True,
+        )
+
+        if error.code == 429:
+            return fail(
+                "Ліміт PUG AI "
+                "тимчасово вичерпано.",
+                429,
+            )
+
+        return fail(
+            "Сервіс PUG AI "
+            "тимчасово недоступний.",
+            502,
+        )
+
+    except (
+        URLError,
+        TimeoutError,
+    ) as error:
+        print(
+            "❌ OpenAI intake structure network:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Сервіс PUG AI "
+            "не відповідає.",
+            503,
+        )
+
+    except Exception as error:
+        print(
+            "❌ POST AI intake structure:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося оформити "
+            "чернетку прийому.",
+            500,
+        )
+@app.post(
     "/api/visits/<visit_id>/ai-documents"
 )
 def api_create_visit_ai_documents(
