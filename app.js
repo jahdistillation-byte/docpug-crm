@@ -56972,6 +56972,122 @@ if (recommendationTextarea) {
   recommendationTextarea.value =
     parsedRx.recommendation;
 }
+let visitAiDocumentsPanel =
+  document.getElementById(
+    "visitAiDocumentsPanel"
+  );
+
+if (
+  !visitAiDocumentsPanel &&
+  recommendationTextarea
+) {
+  visitAiDocumentsPanel =
+    document.createElement(
+      "section"
+    );
+
+  visitAiDocumentsPanel.id =
+    "visitAiDocumentsPanel";
+
+  visitAiDocumentsPanel.innerHTML = `
+    <div
+      style="
+        margin-top:16px;
+        padding:18px;
+        border-radius:16px;
+        border:
+          1px solid
+          rgba(167,139,250,.28);
+        background:
+          linear-gradient(
+            135deg,
+            rgba(126,34,206,.15),
+            rgba(15,23,42,.34)
+          );
+      "
+    >
+      <div
+        style="
+          display:flex;
+          align-items:flex-start;
+          justify-content:
+            space-between;
+          gap:14px;
+          flex-wrap:wrap;
+        "
+      >
+        <div>
+          <div
+            style="
+              color:#fff;
+              font-size:16px;
+              font-weight:750;
+            "
+          >
+            ✦ PUG AI
+          </div>
+
+          <div
+            style="
+              margin-top:5px;
+              color:
+                rgba(255,255,255,.62);
+              font-size:13px;
+              line-height:1.45;
+            "
+          >
+            Направлення та рекомендації
+            на основі цього візиту
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="visitAiDocumentsButton"
+          disabled
+          style="
+            border:0;
+            border-radius:11px;
+            padding:10px 14px;
+            background:
+              rgba(139,92,246,.35);
+            color:
+              rgba(255,255,255,.6);
+            font-weight:700;
+            cursor:not-allowed;
+          "
+        >
+          ✦ Створити документи
+        </button>
+      </div>
+
+      <div
+        id="visitAiDocumentsResult"
+        style="
+          display:none;
+          margin-top:16px;
+        "
+      ></div>
+    </div>
+  `;
+
+  const insertionTarget =
+    recommendationTextarea
+      .parentElement;
+
+  if (insertionTarget) {
+    insertionTarget
+      .insertAdjacentElement(
+        "afterend",
+        visitAiDocumentsPanel
+      );
+  }
+}
+
+if (visitAiDocumentsPanel) {
+  visitAiDocumentsPanel.dataset
+    .visitId = visitId;
+}
 
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
