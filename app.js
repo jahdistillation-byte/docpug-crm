@@ -1362,7 +1362,78 @@ function getOrgHeaders() {
    */
   return {};
 }
+async function requestVisitAiDocuments(
+  visitId,
+  {
+    language = "uk",
+    referralDestination = "",
+  } = {}
+) {
+  const normalizedVisitId =
+    String(visitId || "").trim();
 
+  if (!normalizedVisitId) {
+    throw new Error(
+      "Не вказано візит."
+    );
+  }
+
+  const response = await fetch(
+    `/api/visits/${
+      encodeURIComponent(
+        normalizedVisitId
+      )
+    }/ai-documents`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type":
+          "application/json",
+        Accept:
+          "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        language:
+          String(language || "uk"),
+        referral_destination:
+          String(
+            referralDestination || ""
+          ).trim(),
+      }),
+    }
+  );
+
+  const responseText =
+    await response.text();
+
+  let result = null;
+
+  try {
+    result = responseText
+      ? JSON.parse(responseText)
+      : null;
+  } catch {
+    throw new Error(
+      "Сервер повернув "
+      + "некоректну відповідь."
+    );
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося створити "
+      + "AI-документи."
+    );
+  }
+
+  return result.data;
+}
 function escapeHtml(str) {
   return String(str ?? "")
     .replaceAll("&", "&amp;")
