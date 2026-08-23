@@ -1539,6 +1539,123 @@ async function requestVisitAiStructure(
 
   return result.data;
 }
+async function requestVisitAiConsult(
+  visitId,
+  question,
+  {
+    language = "uk",
+    currentVisit = {},
+  } = {}
+) {
+  const normalizedVisitId =
+    String(visitId || "").trim();
+
+  const normalizedQuestion =
+    String(question || "").trim();
+
+  if (!normalizedVisitId) {
+    throw new Error(
+      "Не вказано візит."
+    );
+  }
+
+  if (
+    normalizedQuestion.length < 3
+  ) {
+    throw new Error(
+      "Напишіть запитання "
+      + "для PUG AI."
+    );
+  }
+
+  const response = await fetch(
+    `/api/visits/${
+      encodeURIComponent(
+        normalizedVisitId
+      )
+    }/ai-consult`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type":
+          "application/json",
+        Accept:
+          "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        language,
+        question:
+          normalizedQuestion,
+        current_visit: {
+          complaints_anamnesis:
+            String(
+              currentVisit
+                ?.complaints_anamnesis
+              || ""
+            ).trim(),
+
+          diagnosis:
+            String(
+              currentVisit
+                ?.diagnosis
+              || ""
+            ).trim(),
+
+          treatment:
+            String(
+              currentVisit
+                ?.treatment
+              || ""
+            ).trim(),
+
+          owner_recommendations:
+            String(
+              currentVisit
+                ?.owner_recommendations
+              || ""
+            ).trim(),
+
+          weight_kg:
+            currentVisit
+              ?.weight_kg ?? null,
+        },
+      }),
+    }
+  );
+
+  const responseText =
+    await response.text();
+
+  let result = null;
+
+  try {
+    result = responseText
+      ? JSON.parse(responseText)
+      : null;
+  } catch {
+    throw new Error(
+      "Сервер повернув "
+      + "некоректну відповідь."
+    );
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      "Не вдалося отримати "
+      + "відповідь консультанта."
+    );
+  }
+
+  return result.data;
+}
+
+
 async function requestVisitAiDocuments(
   visitId,
   {
@@ -57053,6 +57170,416 @@ async function syncCalendarEventStatusByVisitId(
 
   return primaryEvent;
 }
+function ensureVisitAiConsultStyles() {
+  if (
+    document.getElementById(
+      "visitAiConsultStyles"
+    )
+  ) {
+    return;
+  }
+
+  const style =
+    document.createElement("style");
+
+  style.id =
+    "visitAiConsultStyles";
+
+  style.textContent = `
+        .visitAiConsultPanel {
+      --ai-consult-accent:
+        var(
+          --med-accent,
+          var(--accent-color, #a855f7)
+        );
+      --ai-consult-accent-strong:
+        var(
+          --med-accent,
+          var(--accent-color, #7c3aed)
+        );
+      --ai-consult-surface:
+        var(
+          --med-accent-soft,
+          rgba(168,85,247,.13)
+        );
+      --ai-consult-surface-strong:
+        var(
+          --med-window-end,
+          rgba(10,8,23,.96)
+        );
+      --ai-consult-border:
+        var(
+          --med-accent-border,
+          rgba(181,119,255,.30)
+        );
+      --ai-consult-text:
+        var(
+          --med-text,
+          #ffffff
+        );
+      --ai-consult-muted:
+        var(
+          --med-text-soft,
+          rgba(255,255,255,.60)
+        );
+      --ai-consult-button-text:
+        #ffffff;
+
+      margin-top:18px;
+      padding:18px;
+      border-radius:16px;
+      border:
+        1px solid
+        var(--ai-consult-border);
+      background:
+        linear-gradient(
+          135deg,
+          var(--ai-consult-surface),
+          var(--ai-consult-surface-strong)
+        );
+      color:
+        var(--ai-consult-text);
+      box-shadow:
+        0 16px 40px
+        rgba(0,0,0,.14);
+    }
+
+    body[data-theme="black"]
+    .visitAiConsultPanel {
+      --ai-consult-accent:#b79a72;
+      --ai-consult-accent-strong:#8f7450;
+      --ai-consult-surface:rgba(183,154,114,.11);
+      --ai-consult-surface-strong:rgba(20,19,17,.90);
+      --ai-consult-border:rgba(183,154,114,.28);
+    }
+
+    body[data-theme="white"]
+    .visitAiConsultPanel {
+      --ai-consult-accent:#7455c7;
+      --ai-consult-accent-strong:#5d3fb1;
+      --ai-consult-surface:rgba(116,85,199,.08);
+      --ai-consult-surface-strong:rgba(255,255,255,.94);
+      --ai-consult-border:rgba(116,85,199,.22);
+      --ai-consult-text:#202030;
+      --ai-consult-muted:rgba(32,32,48,.58);
+      --ai-consult-button-text:#ffffff;
+
+      box-shadow:
+        0 16px 38px
+        rgba(38,30,66,.10);
+    }
+
+    body[data-theme="blue"]
+    .visitAiConsultPanel {
+      --ai-consult-accent:#6f91ad;
+      --ai-consult-accent-strong:#507791;
+      --ai-consult-surface:rgba(111,145,173,.13);
+      --ai-consult-surface-strong:rgba(13,28,39,.90);
+      --ai-consult-border:rgba(111,145,173,.32);
+    }
+
+    body[data-theme="green"]
+    .visitAiConsultPanel {
+      --ai-consult-accent:#7c9c8a;
+      --ai-consult-accent-strong:#587865;
+      --ai-consult-surface:rgba(124,156,138,.13);
+      --ai-consult-surface-strong:rgba(15,31,24,.90);
+      --ai-consult-border:rgba(124,156,138,.32);
+    }
+
+    .visitAiConsultHead {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:15px;
+    }
+
+    .visitAiConsultIdentity {
+      display:flex;
+      align-items:flex-start;
+      gap:11px;
+      min-width:0;
+    }
+
+    .visitAiConsultIcon {
+      display:grid;
+      place-items:center;
+      width:38px;
+      height:38px;
+      flex:0 0 38px;
+      border-radius:12px;
+      background:
+        var(--ai-consult-accent);
+      color:
+        var(--ai-consult-button-text);
+      box-shadow:
+        0 10px 24px
+        rgba(0,0,0,.14);
+    }
+
+    .visitAiConsultTitle {
+      margin:0;
+      color:
+        var(--ai-consult-text);
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .visitAiConsultSubtitle {
+      margin:4px 0 0;
+      color:
+        var(--ai-consult-muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .visitAiConsultBadge {
+      padding:6px 9px;
+      border-radius:999px;
+      border:
+        1px solid
+        var(--ai-consult-border);
+      color:
+        var(--ai-consult-muted);
+      font-size:10px;
+      font-weight:750;
+      white-space:nowrap;
+    }
+
+    .visitAiConsultQuickActions {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .visitAiConsultQuickButton {
+      border:
+        1px solid
+        var(--ai-consult-border);
+      border-radius:10px;
+      padding:8px 10px;
+      background:
+        var(--ai-consult-surface);
+      color:
+        var(--ai-consult-text);
+      font:inherit;
+      font-size:11px;
+      font-weight:700;
+      cursor:pointer;
+      transition:
+        transform .16s ease,
+        border-color .16s ease;
+    }
+
+    .visitAiConsultQuickButton:hover {
+      transform:
+        translateY(-1px);
+      border-color:
+        var(--ai-consult-accent);
+    }
+
+    .visitAiConsultComposer {
+      display:grid;
+      grid-template-columns:
+        minmax(0,1fr) auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    .visitAiConsultInput {
+      width:100%;
+      min-height:86px;
+      resize:vertical;
+      box-sizing:border-box;
+      border:
+        1px solid
+        var(--ai-consult-border);
+      border-radius:12px;
+      padding:12px 13px;
+      outline:none;
+      background:
+        var(--ai-consult-surface-strong);
+      color:
+        var(--ai-consult-text);
+      font:inherit;
+      line-height:1.5;
+    }
+
+    .visitAiConsultInput::placeholder {
+      color:
+        var(--ai-consult-muted);
+    }
+
+    .visitAiConsultInput:focus {
+      border-color:
+        var(--ai-consult-accent);
+      box-shadow:
+        0 0 0 3px
+        var(--ai-consult-surface);
+    }
+
+    .visitAiConsultSend {
+      min-height:44px;
+      border:0;
+      border-radius:11px;
+      padding:11px 15px;
+      background:
+        linear-gradient(
+          135deg,
+          var(--ai-consult-accent),
+          var(--ai-consult-accent-strong)
+        );
+      color:
+        var(--ai-consult-button-text);
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .visitAiConsultSend:disabled {
+      opacity:.48;
+      cursor:not-allowed;
+    }
+
+    .visitAiConsultResult {
+      display:none;
+      margin-top:14px;
+    }
+          .visitAiConsultAnswer {
+      padding:15px;
+      border-radius:13px;
+      border:
+        1px solid
+        var(--ai-consult-border);
+      background:
+        var(--ai-consult-surface-strong);
+      color:
+        var(--ai-consult-text);
+    }
+
+    .visitAiConsultDirectAnswer {
+      font-size:13px;
+      line-height:1.62;
+      white-space:pre-wrap;
+    }
+
+    .visitAiConsultSection {
+      margin-top:14px;
+      padding-top:13px;
+      border-top:
+        1px solid
+        var(--ai-consult-border);
+    }
+
+    .visitAiConsultSection h4 {
+      margin:0 0 8px;
+      color:
+        var(--ai-consult-accent);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .visitAiConsultSection ul {
+      margin:0;
+      padding-left:18px;
+      color:
+        var(--ai-consult-text);
+    }
+
+    .visitAiConsultSection li {
+      margin:6px 0;
+      font-size:12px;
+      line-height:1.52;
+    }
+
+    .visitAiConsultSafety {
+      padding:11px 12px;
+      border-radius:10px;
+      border:
+        1px solid
+        rgba(239,68,68,.28);
+      background:
+        rgba(239,68,68,.10);
+    }
+
+    .visitAiConsultSafety h4 {
+      color:#fca5a5;
+    }
+
+    body[data-theme="white"]
+    .visitAiConsultSafety h4 {
+      color:#b91c1c;
+    }
+
+    .visitAiConsultMeta {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:13px;
+      color:
+        var(--ai-consult-muted);
+      font-size:10px;
+    }
+
+    .visitAiConsultLoading {
+      padding:14px;
+      border-radius:12px;
+      border:
+        1px solid
+        var(--ai-consult-border);
+      background:
+        var(--ai-consult-surface-strong);
+      color:
+        var(--ai-consult-muted);
+      font-size:12px;
+    }
+
+    .visitAiConsultError {
+      padding:13px;
+      border-radius:11px;
+      border:
+        1px solid
+        rgba(239,68,68,.28);
+      background:
+        rgba(239,68,68,.10);
+      color:#fecaca;
+      font-size:12px;
+    }
+
+    body[data-theme="white"]
+    .visitAiConsultError {
+      color:#991b1b;
+    }
+
+    @media (max-width:700px) {
+      .visitAiConsultPanel {
+        padding:14px;
+      }
+
+      .visitAiConsultHead {
+        align-items:flex-start;
+      }
+
+      .visitAiConsultComposer {
+        grid-template-columns:1fr;
+      }
+
+      .visitAiConsultSend {
+        width:100%;
+      }
+    }
+  `;
+
+  document.head.appendChild(
+    style
+  );
+}
+
+
 function renderVisitPage(visit, pet) {
     const visitId =
     String(
@@ -57149,6 +57676,491 @@ if (recommendationTextarea) {
   recommendationTextarea.value =
     parsedRx.recommendation;
 }
+ensureVisitAiConsultStyles();
+
+let visitAiConsultPanel =
+  document.getElementById(
+    "visitAiConsultPanel"
+  );
+
+if (
+  !visitAiConsultPanel &&
+  recommendationTextarea
+) {
+  visitAiConsultPanel =
+    document.createElement(
+      "section"
+    );
+
+  visitAiConsultPanel.id =
+    "visitAiConsultPanel";
+
+  visitAiConsultPanel.className =
+    "visitAiConsultPanel";
+
+  visitAiConsultPanel.innerHTML = `
+    <div
+      class="visitAiConsultHead"
+    >
+      <div
+        class="visitAiConsultIdentity"
+      >
+        <div
+          class="visitAiConsultIcon"
+        >
+          🩺
+        </div>
+
+        <div>
+          <h3
+            class="visitAiConsultTitle"
+          >
+            PUG AI · Ветеринарний консультант
+          </h3>
+
+          <p
+            class="visitAiConsultSubtitle"
+          >
+            Обговоріть клінічний випадок
+            на основі поточного прийому,
+            породи та історії пацієнта.
+          </p>
+        </div>
+      </div>
+
+      <span
+        class="visitAiConsultBadge"
+      >
+        Другий погляд
+      </span>
+    </div>
+
+    <div
+      class="visitAiConsultQuickActions"
+    >
+      <button
+        type="button"
+        class="visitAiConsultQuickButton"
+        data-ai-consult-question=
+          "Що я міг пропустити у цьому випадку?"
+      >
+        Що я міг пропустити?
+      </button>
+
+      <button
+        type="button"
+        class="visitAiConsultQuickButton"
+        data-ai-consult-question=
+          "Які диференційні діагнози варто розглянути та чому?"
+      >
+        Диференційні діагнози
+      </button>
+
+      <button
+        type="button"
+        class="visitAiConsultQuickButton"
+        data-ai-consult-question=
+          "Перевір поточний план лікування. Що потребує уточнення або додаткової перевірки?"
+      >
+        Перевірити лікування
+      </button>
+    </div>
+
+    <div
+      class="visitAiConsultComposer"
+    >
+      <textarea
+        id="visitAiConsultInput"
+        class="visitAiConsultInput"
+        placeholder=
+          "Наприклад: що ще варто перевірити перед вибором лікування?"
+      ></textarea>
+
+      <button
+        type="button"
+        id="visitAiConsultSend"
+        class="visitAiConsultSend"
+        disabled
+      >
+        ✦ Запитати PUG AI
+      </button>
+    </div>
+
+    <div
+      id="visitAiConsultResult"
+      class="visitAiConsultResult"
+    ></div>
+  `;
+
+  const consultInsertionTarget =
+    recommendationTextarea
+      .parentElement;
+
+  if (consultInsertionTarget) {
+    consultInsertionTarget
+      .insertAdjacentElement(
+        "afterend",
+        visitAiConsultPanel
+      );
+  }
+}
+
+if (visitAiConsultPanel) {
+  visitAiConsultPanel.dataset
+    .visitId = visitId;
+}
+
+const visitAiConsultInput =
+  document.getElementById(
+    "visitAiConsultInput"
+  );
+
+const visitAiConsultSend =
+  document.getElementById(
+    "visitAiConsultSend"
+  );
+
+const visitAiConsultResult =
+  document.getElementById(
+    "visitAiConsultResult"
+  );
+
+if (
+  visitAiConsultPanel &&
+  visitAiConsultInput &&
+  visitAiConsultSend &&
+  visitAiConsultResult
+) {
+  const updateVisitAiConsultSend =
+    () => {
+      const hasQuestion =
+        String(
+          visitAiConsultInput
+            .value || ""
+        ).trim().length >= 3;
+
+      visitAiConsultSend.disabled =
+        !hasQuestion;
+    };
+
+  visitAiConsultInput.oninput =
+    updateVisitAiConsultSend;
+
+  visitAiConsultPanel
+    .querySelectorAll(
+      "[data-ai-consult-question]"
+    )
+    .forEach((button) => {
+      button.onclick = () => {
+        visitAiConsultInput.value =
+          String(
+            button.dataset
+              .aiConsultQuestion ||
+            ""
+          ).trim();
+
+        updateVisitAiConsultSend();
+
+        visitAiConsultInput.focus();
+      };
+    });
+
+  updateVisitAiConsultSend();
+    visitAiConsultSend.onclick =
+    async () => {
+      const question =
+        String(
+          visitAiConsultInput
+            .value || ""
+        ).trim();
+
+      if (question.length < 3) {
+        return;
+      }
+
+      const currentVisitId =
+        String(
+          visitAiConsultPanel
+            .dataset
+            .visitId ||
+          visitId ||
+          ""
+        ).trim();
+
+      const weightValue =
+        String(
+          weightInput?.value || ""
+        ).trim();
+
+      const parsedWeight =
+        weightValue
+          ? Number(weightValue)
+          : null;
+
+      const quickButtons =
+        Array.from(
+          visitAiConsultPanel
+            .querySelectorAll(
+              "[data-ai-consult-question]"
+            )
+        );
+
+      visitAiConsultSend.disabled =
+        true;
+
+      visitAiConsultSend.textContent =
+        "PUG AI аналізує…";
+
+      quickButtons.forEach(
+        (button) => {
+          button.disabled = true;
+        }
+      );
+
+      visitAiConsultResult.style
+        .display = "block";
+
+      visitAiConsultResult.innerHTML = `
+        <div
+          class="visitAiConsultLoading"
+        >
+          PUG AI аналізує поточний прийом,
+          породу та клінічну історію пацієнта…
+        </div>
+      `;
+
+      try {
+        const result =
+          await requestVisitAiConsult(
+            currentVisitId,
+            question,
+            {
+              language: "uk",
+              currentVisit: {
+                complaints_anamnesis:
+                  String(
+                    complaintTextarea
+                      ?.value || ""
+                  ).trim(),
+
+                diagnosis:
+                  String(
+                    dxInput?.value || ""
+                  ).trim(),
+
+                treatment:
+                  String(
+                    rxTextarea?.value || ""
+                  ).trim(),
+
+                owner_recommendations:
+                  String(
+                    recommendationTextarea
+                      ?.value || ""
+                  ).trim(),
+
+                weight_kg:
+                  Number.isFinite(
+                    parsedWeight
+                  )
+                    ? parsedWeight
+                    : null,
+              },
+            }
+          );
+
+        const consultation =
+          result?.consultation || {};
+
+        const renderConsultItems =
+          (
+            title,
+            items,
+            extraClass = ""
+          ) => {
+            const normalizedItems =
+              (
+                Array.isArray(items)
+                  ? items
+                  : []
+              )
+                .map(
+                  (item) =>
+                    String(
+                      item || ""
+                    ).trim()
+                )
+                .filter(Boolean);
+
+            if (
+              !normalizedItems.length
+            ) {
+              return "";
+            }
+
+            return `
+              <section
+                class="
+                  visitAiConsultSection
+                  ${extraClass}
+                "
+              >
+                <h4>
+                  ${escapeHtml(title)}
+                </h4>
+
+                <ul>
+                  ${
+                    normalizedItems
+                      .map(
+                        (item) => `
+                          <li>
+                            ${escapeHtml(item)}
+                          </li>
+                        `
+                      )
+                      .join("")
+                  }
+                </ul>
+              </section>
+            `;
+          };
+
+        const confidenceLabels = {
+          low:
+            "Низька впевненість",
+          medium:
+            "Середня впевненість",
+          high:
+            "Висока впевненість",
+        };
+
+        const confidence =
+          String(
+            consultation.confidence ||
+            "low"
+          );
+
+        const durationSeconds =
+          Number(
+            result?.meta?.duration_ms
+          ) > 0
+            ? (
+              Number(
+                result.meta.duration_ms
+              ) / 1000
+            ).toFixed(1)
+            : null;
+
+        visitAiConsultResult.innerHTML = `
+          <div
+            class="visitAiConsultAnswer"
+          >
+            <div
+              class="visitAiConsultDirectAnswer"
+            >
+              ${escapeHtml(
+                consultation
+                  .direct_answer ||
+                "Відповідь не сформовано."
+              )}
+            </div>
+
+            ${renderConsultItems(
+              "Факти з картки",
+              consultation.record_facts
+            )}
+
+            ${renderConsultItems(
+              "Клінічні міркування",
+              consultation
+                .clinical_considerations
+            )}
+
+            ${renderConsultItems(
+              "Що потрібно уточнити",
+              consultation
+                .missing_information
+            )}
+
+            ${renderConsultItems(
+              "Що можна розглянути",
+              consultation
+                .suggested_next_steps
+            )}
+
+            ${renderConsultItems(
+              "Важливо перевірити",
+              consultation.safety_flags,
+              "visitAiConsultSafety"
+            )}
+
+            <div
+              class="visitAiConsultMeta"
+            >
+              <span>
+                ${
+                  escapeHtml(
+                    confidenceLabels[
+                      confidence
+                    ] ||
+                    confidenceLabels.low
+                  )
+                }
+              </span>
+
+              <span>
+                ${
+                  durationSeconds
+                    ? (
+                      `Відповідь за ${
+                        durationSeconds
+                      } с`
+                    )
+                    : ""
+                }
+              </span>
+
+              <span>
+                AI нічого не змінив
+                у медичній картці
+              </span>
+            </div>
+          </div>
+        `;
+
+        console.log(
+          "PUG AI VET CONSULT UI:",
+          result
+        );
+      } catch (error) {
+        visitAiConsultResult.innerHTML = `
+          <div
+            class="visitAiConsultError"
+          >
+            ${escapeHtml(
+              error?.message ||
+              "Сталася помилка."
+            )}
+          </div>
+        `;
+      } finally {
+        visitAiConsultSend.textContent =
+          "✦ Запитати PUG AI";
+
+        quickButtons.forEach(
+          (button) => {
+            button.disabled = false;
+          }
+        );
+
+        updateVisitAiConsultSend();
+      }
+    };
+}
+
+
+
 const legacyAiDocumentsPanel =
   document.getElementById(
     "visitAiDocumentsPanel"
