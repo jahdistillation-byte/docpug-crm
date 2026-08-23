@@ -57755,7 +57755,289 @@ if (
             </div>
           </div>
         `;
+const visitAiApplyButton =
+  visitAiStructureResult
+    .querySelector(
+      "#visitAiApplyButton"
+    );
 
+if (visitAiApplyButton) {
+  visitAiApplyButton.disabled =
+    false;
+
+  visitAiApplyButton.style
+    .cursor = "pointer";
+
+  visitAiApplyButton.style
+    .color = "#fff";
+
+  visitAiApplyButton.style
+    .background =
+      "linear-gradient("
+      + "135deg,"
+      + "#15803d,"
+      + "#22c55e"
+      + ")";
+
+  visitAiApplyButton.onclick =
+    () => {
+      const candidateFields = [
+        {
+          element:
+            complaintTextarea,
+          value:
+            structured
+              .complaints_anamnesis,
+        },
+        {
+          element:
+            dxInput,
+          value:
+            structured.diagnosis,
+        },
+        {
+          element:
+            rxTextarea,
+          value:
+            structured.treatment,
+        },
+        {
+          element:
+            recommendationTextarea,
+          value:
+            structured
+              .owner_recommendations,
+        },
+        {
+          element:
+            weightInput,
+          value:
+            structured.weight_kg
+              != null
+                ? String(
+                  structured.weight_kg
+                )
+                : "",
+        },
+      ];
+
+      const appliedFields = [];
+
+      candidateFields.forEach(
+        ({
+          element,
+          value,
+        }) => {
+          const normalizedValue =
+            String(
+              value ?? ""
+            ).trim();
+
+          if (
+            !element ||
+            !normalizedValue
+          ) {
+            return;
+          }
+
+          appliedFields.push({
+            element,
+            previousValue:
+              element.value,
+            previousBorderColor:
+              element.style
+                .borderColor,
+            previousBoxShadow:
+              element.style
+                .boxShadow,
+          });
+
+          element.value =
+            normalizedValue;
+
+          element.dataset.aiDraft =
+            "true";
+
+          element.style.borderColor =
+            "rgba(167,139,250,.85)";
+
+          element.style.boxShadow =
+            "0 0 0 3px "
+            + "rgba(139,92,246,.12)";
+
+          element.dispatchEvent(
+            new Event(
+              "input",
+              {
+                bubbles: true,
+              }
+            )
+          );
+
+          element.dispatchEvent(
+            new Event(
+              "change",
+              {
+                bubbles: true,
+              }
+            )
+          );
+        }
+      );
+
+      visitAiIntakePanel
+        .appliedAiFields =
+          appliedFields;
+
+      visitAiStructureResult
+        .innerHTML = `
+          <div
+            style="
+              padding:14px;
+              border-radius:12px;
+              background:
+                rgba(34,197,94,.10);
+              border:
+                1px solid
+                rgba(34,197,94,.22);
+            "
+          >
+            <div
+              style="
+                color:#bbf7d0;
+                font-weight:750;
+              "
+            >
+              ✓ AI-чернетку застосовано
+            </div>
+
+            <div
+              style="
+                margin-top:6px;
+                color:
+                  rgba(255,255,255,.66);
+                font-size:12px;
+                line-height:1.5;
+              "
+            >
+              Перевірте підсвічені поля.
+              Дані ще не збережені.
+            </div>
+
+            <div
+              style="
+                display:flex;
+                justify-content:flex-end;
+                margin-top:12px;
+              "
+            >
+              <button
+                type="button"
+                id="visitAiUndoButton"
+                style="
+                  border:
+                    1px solid
+                    rgba(255,255,255,.12);
+                  border-radius:9px;
+                  padding:8px 12px;
+                  background:
+                    rgba(255,255,255,.06);
+                  color:#fff;
+                  font-weight:700;
+                  cursor:pointer;
+                "
+              >
+                Скасувати AI-зміни
+              </button>
+            </div>
+          </div>
+        `;
+
+      const visitAiUndoButton =
+        visitAiStructureResult
+          .querySelector(
+            "#visitAiUndoButton"
+          );
+
+      if (visitAiUndoButton) {
+        visitAiUndoButton.onclick =
+          () => {
+            const fieldsToRestore =
+              Array.isArray(
+                visitAiIntakePanel
+                  .appliedAiFields
+              )
+                ? visitAiIntakePanel
+                    .appliedAiFields
+                : [];
+
+            fieldsToRestore.forEach(
+              (field) => {
+                field.element.value =
+                  field.previousValue;
+
+                field.element.style
+                  .borderColor =
+                    field
+                      .previousBorderColor;
+
+                field.element.style
+                  .boxShadow =
+                    field
+                      .previousBoxShadow;
+
+                delete field.element
+                  .dataset.aiDraft;
+
+                field.element
+                  .dispatchEvent(
+                    new Event(
+                      "input",
+                      {
+                        bubbles: true,
+                      }
+                    )
+                  );
+              }
+            );
+
+            visitAiIntakePanel
+              .appliedAiFields = [];
+
+            visitAiStructureResult
+              .innerHTML = `
+                <div
+                  style="
+                    padding:13px;
+                    border-radius:11px;
+                    background:
+                      rgba(255,255,255,.05);
+                    color:
+                      rgba(255,255,255,.65);
+                    font-size:13px;
+                  "
+                >
+                  AI-зміни скасовано.
+                  Початкові значення
+                  відновлено.
+                </div>
+              `;
+          };
+      }
+
+      const firstAppliedField =
+        appliedFields[0]
+          ?.element;
+
+      if (firstAppliedField) {
+        firstAppliedField
+          .scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+      }
+    };
+}
         console.log(
           "PUG AI INTAKE UI:",
           result
