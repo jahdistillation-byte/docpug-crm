@@ -57788,6 +57788,437 @@ if (
       }
     };
 }
+const visitAiRecordButton =
+  document.getElementById(
+    "visitAiRecordButton"
+  );
+
+const visitAiRecordText =
+  document.getElementById(
+    "visitAiRecordText"
+  );
+
+const visitAiRecordStatus =
+  document.getElementById(
+    "visitAiRecordStatus"
+  );
+
+const visitAiRecordTimer =
+  document.getElementById(
+    "visitAiRecordTimer"
+  );
+
+if (
+  visitAiRecordButton &&
+  visitAiRecordText &&
+  visitAiRecordStatus &&
+  visitAiRecordTimer &&
+  visitAiIntakeInput &&
+  visitAiIntakePanel
+) {
+  const recordingSupported =
+    Boolean(
+      navigator.mediaDevices
+        ?.getUserMedia
+      &&
+      window.MediaRecorder
+    );
+
+  if (!recordingSupported) {
+    visitAiRecordButton.disabled =
+      true;
+
+    visitAiRecordStatus.textContent =
+      "Цей браузер не підтримує "
+      + "запис голосу.";
+  } else {
+    visitAiRecordButton.disabled =
+      false;
+
+    visitAiRecordButton.style
+      .cursor = "pointer";
+
+    visitAiRecordButton.style
+      .color = "#fff";
+
+    visitAiRecordStatus.textContent =
+      "Готово до запису";
+
+    const stopRecordingTracks =
+      () => {
+        const stream =
+          visitAiIntakePanel
+            .recordingStream;
+
+        if (stream) {
+          stream
+            .getTracks()
+            .forEach(
+              (track) =>
+                track.stop()
+            );
+        }
+
+        visitAiIntakePanel
+          .recordingStream = null;
+      };
+
+    const stopRecordingTimer =
+      () => {
+        if (
+          visitAiIntakePanel
+            .recordingTimer
+        ) {
+          clearInterval(
+            visitAiIntakePanel
+              .recordingTimer
+          );
+        }
+
+        visitAiIntakePanel
+          .recordingTimer = null;
+      };
+
+    const formatRecordingTime =
+      (totalSeconds) => {
+        const minutes =
+          Math.floor(
+            totalSeconds / 60
+          );
+
+        const seconds =
+          totalSeconds % 60;
+
+        return (
+          String(minutes)
+            .padStart(2, "0")
+          + ":"
+          + String(seconds)
+            .padStart(2, "0")
+        );
+      };
+
+    visitAiRecordButton.onclick =
+      async () => {
+        const activeRecorder =
+          visitAiIntakePanel
+            .mediaRecorder;
+
+        if (
+          activeRecorder &&
+          activeRecorder.state ===
+            "recording"
+        ) {
+          visitAiRecordButton.disabled =
+            true;
+
+          visitAiRecordStatus
+            .textContent =
+              "Завершуємо запис…";
+
+          activeRecorder.stop();
+          return;
+        }
+
+        visitAiRecordButton.disabled =
+          true;
+
+        visitAiRecordStatus.textContent =
+          "Запитуємо доступ "
+          + "до мікрофона…";
+
+        visitAiRecordTimer.textContent =
+          "";
+
+        try {
+          const stream =
+            await navigator
+              .mediaDevices
+              .getUserMedia({
+                audio: {
+                  echoCancellation: true,
+                  noiseSuppression: true,
+                  autoGainControl: true,
+                },
+                video: false,
+              });
+
+          const preferredTypes = [
+            "audio/webm;codecs=opus",
+            "audio/webm",
+            "audio/mp4",
+            "video/mp4",
+          ];
+
+          const supportedType =
+            preferredTypes.find(
+              (type) =>
+                MediaRecorder
+                  .isTypeSupported(
+                    type
+                  )
+            ) || "";
+
+          const recorderOptions =
+            supportedType
+              ? {
+                mimeType:
+                  supportedType,
+              }
+              : undefined;
+
+          const mediaRecorder =
+            new MediaRecorder(
+              stream,
+              recorderOptions
+            );
+
+          const recordedChunks = [];
+
+          visitAiIntakePanel
+            .recordingStream =
+              stream;
+
+          visitAiIntakePanel
+            .mediaRecorder =
+              mediaRecorder;
+
+          mediaRecorder.ondataavailable =
+            (event) => {
+              if (
+                event.data &&
+                event.data.size > 0
+              ) {
+                recordedChunks.push(
+                  event.data
+                );
+              }
+            };
+
+          mediaRecorder.onerror =
+            (event) => {
+              console.error(
+                "PUG AI recording error:",
+                event
+              );
+
+              stopRecordingTimer();
+              stopRecordingTracks();
+
+              visitAiRecordButton.disabled =
+                false;
+
+              visitAiRecordText
+                .textContent =
+                  "Надиктувати прийом";
+
+              visitAiRecordStatus
+                .textContent =
+                  "Помилка запису.";
+
+              visitAiRecordTimer
+                .textContent = "";
+            };
+
+          mediaRecorder.onstop =
+            async () => {
+              stopRecordingTimer();
+              stopRecordingTracks();
+
+              const audioType =
+                mediaRecorder.mimeType
+                || supportedType
+                || "audio/webm";
+
+              const audioBlob =
+                new Blob(
+                  recordedChunks,
+                  {
+                    type: audioType,
+                  }
+                );
+
+              visitAiRecordText
+                .textContent =
+                  "Розпізнаємо голос…";
+
+              visitAiRecordStatus
+                .textContent =
+                  "Надсилаємо запис "
+                  + "до PUG AI";
+
+              visitAiRecordTimer
+                .textContent = "";
+
+              try {
+                const currentVisitId =
+                  String(
+                    visitAiIntakePanel
+                      ?.dataset
+                      ?.visitId ||
+                    visitId ||
+                    ""
+                  ).trim();
+
+                const transcription =
+                  await (
+                    requestVisitAiTranscription(
+                      currentVisitId,
+                      audioBlob
+                    )
+                  );
+
+                const transcript =
+                  String(
+                    transcription
+                      ?.transcript ||
+                    ""
+                  ).trim();
+
+                if (!transcript) {
+                  throw new Error(
+                    "PUG AI не розпізнав "
+                    + "текст."
+                  );
+                }
+
+                const previousText =
+                  String(
+                    visitAiIntakeInput
+                      .value || ""
+                  ).trim();
+
+                visitAiIntakeInput.value =
+                  previousText
+                    ? (
+                      previousText
+                      + "\n"
+                      + transcript
+                    )
+                    : transcript;
+
+                visitAiIntakeInput
+                  .dispatchEvent(
+                    new Event(
+                      "input",
+                      {
+                        bubbles: true,
+                      }
+                    )
+                  );
+
+                visitAiRecordStatus
+                  .textContent =
+                    "Голос розпізнано. "
+                    + "Перевірте текст.";
+
+                visitAiRecordText
+                  .textContent =
+                    "Записати ще";
+              } catch (error) {
+                console.error(
+                  "PUG AI transcription:",
+                  error
+                );
+
+                visitAiRecordStatus
+                  .textContent =
+                    error?.message ||
+                    "Не вдалося "
+                    + "розпізнати голос.";
+
+                visitAiRecordText
+                  .textContent =
+                    "Спробувати ще";
+              } finally {
+                visitAiRecordButton.disabled =
+                  false;
+              }
+            };
+
+          mediaRecorder.start(500);
+
+          const startedAt =
+            Date.now();
+
+          visitAiRecordButton.disabled =
+            false;
+
+          visitAiRecordButton.style
+            .background =
+              "linear-gradient("
+              + "135deg,"
+              + "#dc2626,"
+              + "#ef4444"
+              + ")";
+
+          visitAiRecordText.textContent =
+            "Зупинити запис";
+
+          visitAiRecordStatus.textContent =
+            "Йде запис";
+
+          visitAiIntakePanel
+            .recordingTimer =
+              setInterval(() => {
+                const elapsedSeconds =
+                  Math.floor(
+                    (
+                      Date.now()
+                      - startedAt
+                    ) / 1000
+                  );
+
+                visitAiRecordTimer
+                  .textContent =
+                    formatRecordingTime(
+                      elapsedSeconds
+                    );
+
+                if (
+                  elapsedSeconds >= 300 &&
+                  mediaRecorder.state ===
+                    "recording"
+                ) {
+                  mediaRecorder.stop();
+                }
+              }, 500);
+        } catch (error) {
+          console.error(
+            "PUG AI microphone:",
+            error
+          );
+
+          stopRecordingTimer();
+          stopRecordingTracks();
+
+          visitAiRecordButton.disabled =
+            false;
+
+          visitAiRecordText.textContent =
+            "Спробувати ще";
+
+          visitAiRecordTimer.textContent =
+            "";
+
+          if (
+            error?.name ===
+              "NotAllowedError"
+          ) {
+            visitAiRecordStatus
+              .textContent =
+                "Дозвольте доступ "
+                + "до мікрофона.";
+          } else {
+            visitAiRecordStatus
+              .textContent =
+                "Не вдалося "
+                + "увімкнути мікрофон.";
+          }
+        }
+      };
+  }
+}
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
