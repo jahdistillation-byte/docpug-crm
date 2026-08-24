@@ -18222,11 +18222,15 @@ def api_create_patient_lab(
 
     if (
         not isinstance(values, dict)
-        or not values
+        or (
+            not values
+            and not comment
+        )
     ):
         return fail(
             "Додайте хоча б один "
-            "результат аналізу.",
+            "результат або висновок "
+            "лабораторії.",
             400,
         )
 
@@ -18430,11 +18434,15 @@ def api_update_patient_lab(
 
     if (
         not isinstance(values, dict)
-        or not values
+        or (
+            not values
+            and not comment
+        )
     ):
         return fail(
             "Додайте хоча б один "
-            "результат аналізу.",
+            "результат або висновок "
+            "лабораторії.",
             400,
         )
 
