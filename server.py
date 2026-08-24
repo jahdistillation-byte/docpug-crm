@@ -17555,6 +17555,7 @@ AI_CONTEXT_LIMITS = {
     "vaccinations": 100,
     "visits": 100,
     "medcard_entries": 200,
+    "labs": 50,
 }
 
 
@@ -18784,7 +18785,36 @@ def api_get_patient_ai_context(
             attempts=3,
             delay=0.25,
         )
-
+        labs_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_labs")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "patient_id",
+                    patient_id,
+                )
+                .order(
+                    "performed_at",
+                    desc=True,
+                )
+                .order(
+                    "created_at",
+                    desc=True,
+                )
+                .limit(
+                    AI_CONTEXT_LIMITS[
+                        "labs"
+                    ]
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
         weight_fields = (
             "id",
             "patient_id",
@@ -18864,7 +18894,19 @@ def api_get_patient_ai_context(
             "created_at",
             "updated_at",
         )
-
+        lab_fields = (
+            "id",
+            "patient_id",
+            "visit_id",
+            "lab_type",
+            "performed_at",
+            "laboratory",
+            "comment",
+            "values",
+            "refs",
+            "created_at",
+            "updated_at",
+        )
         weights = [
             add_ai_source(
                 select_ai_fields(
@@ -18930,7 +18972,20 @@ def api_get_patient_ai_context(
             )
             for row in (medcard_result.data or [])
         ]
-
+        labs = [
+            add_ai_source(
+                select_ai_fields(
+                    row,
+                    lab_fields,
+                ),
+                "patient_lab",
+                "performed_at",
+                "created_at",
+            )
+            for row in (
+                labs_result.data or []
+            )
+        ]
         demographics = build_ai_demographics(
             patient
         )
@@ -18955,12 +19010,14 @@ def api_get_patient_ai_context(
 
         return ok({
             "patient": patient,
-            "history": {
+                        "history": {
                 "weights": weights,
                 "diagnoses": diagnoses,
                 "vaccinations": vaccinations,
                 "visits": visits,
-                "medcard_entries": medcard_entries,
+                "medcard_entries":
+                    medcard_entries,
+                "labs": labs,
             },
             "normalized": {
                 "demographics": demographics,
@@ -18969,7 +19026,7 @@ def api_get_patient_ai_context(
             },
             "meta": {
                 "read_only": True,
-                "normalization_version": "1",
+                "normalization_version": "2",
                 "generated_at": datetime.now(
                     timezone.utc
                 ).isoformat(),
@@ -18981,6 +19038,7 @@ def api_get_patient_ai_context(
                     + len(vaccinations)
                     + len(visits)
                     + len(medcard_entries)
+                    + len(labs)
                 ),
             },
         })
@@ -19582,6 +19640,13 @@ def build_compact_ai_summary_context(context):
     original_weights = (
         normalized.get("weight_timeline") or []
     )
+    history = (
+        context.get("history") or {}
+    )
+
+    original_labs = (
+        history.get("labs") or []
+    )
 
     events = []
     for event in original_events:
@@ -19611,12 +19676,16 @@ def build_compact_ai_summary_context(context):
         weights.append(
             compact_ai_value(weight)
         )
-
+        labs = [
+        compact_ai_value(lab)
+        for lab in original_labs[:20]
+    ]
     model_context = compact_ai_value({
         "patient": context.get("patient") or {},
         "demographics": normalized.get("demographics") or {},
         "weight_timeline": weights[:30],
         "clinical_timeline": events[:60],
+                "laboratory_history": labs,
         "normalization_version": (
             (context.get("meta") or {}).get(
                 "normalization_version"
@@ -19629,6 +19698,10 @@ def build_compact_ai_summary_context(context):
         "clinical_events_sent": len(events[:60]),
         "weight_points_original": len(original_weights),
         "weight_points_sent": len(weights[:30]),
+                "labs_original":
+            len(original_labs),
+        "labs_sent":
+            len(labs),
     }
 
     return model_context, stats
