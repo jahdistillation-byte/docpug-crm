@@ -20879,7 +20879,7 @@ Critical rules:
             "effort": "low",
             "mode": "standard",
         },
-        "max_output_tokens": 1800,
+        "max_output_tokens": 4000,
         "text": {
             "format": {
                 "type": "json_schema",
