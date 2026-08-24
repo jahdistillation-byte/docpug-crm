@@ -54000,3 +54000,131 @@ body[data-theme="white"]
   width: 100%;
   text-align: left;
 }
+/* =========================================================
+   PUG AI — READABLE TYPOGRAPHY
+   ========================================================= */
+
+.visitAiWorkspaceBrand strong {
+  font-size: 18px !important;
+  line-height: 1.2 !important;
+}
+
+.visitAiWorkspaceBrand span {
+  margin-top: 5px !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+.visitAiWorkspaceTab {
+  min-height: 44px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultTitle {
+  font-size: 17px !important;
+  line-height: 1.3 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSubtitle {
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultBadge {
+  font-size: 11px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultQuickButton {
+  min-height: 42px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultInput {
+  min-height: 105px !important;
+  padding: 13px 14px !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSend {
+  min-height: 46px !important;
+  font-size: 14px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultDirectAnswer {
+  font-size: 15px !important;
+  line-height: 1.68 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSection h4 {
+  margin-bottom: 10px !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSection ul {
+  padding-left: 21px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSection li {
+  margin: 8px 0 !important;
+  font-size: 14px !important;
+  line-height: 1.58 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultMeta {
+  gap: 12px !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+/* Первый AI-блок оформления приёма */
+
+.visitAiWorkspace
+#visitAiIntakePanel {
+  font-size: 14px !important;
+}
+
+.visitAiWorkspace
+#visitAiIntakePanel textarea {
+  min-height: 120px !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+.visitAiWorkspace
+#visitAiIntakePanel button {
+  min-height: 42px;
+  font-size: 13px !important;
+}
+
+.visitAiWorkspace
+#visitAiStructureResult {
+  font-size: 14px !important;
+  line-height: 1.58 !important;
+}
+
+@media (max-width: 560px) {
+  .visitAiWorkspace
+  .visitAiConsultDirectAnswer,
+  .visitAiWorkspace
+  .visitAiConsultSection li,
+  .visitAiWorkspace
+  #visitAiStructureResult {
+    font-size: 14px !important;
+  }
+}
