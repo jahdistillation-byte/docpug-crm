@@ -52407,7 +52407,7 @@ function renderLabAiInterpretation(
         <span
           class="labAiConfidence"
         >
-          Впевненість:
+                    Впевненість AI:
           ${escapeHtml(confidence)}
         </span>
       </div>
@@ -52542,11 +52542,22 @@ async function hydrateLabAiInterpretations(
           return;
         }
 
-        resultNode.innerHTML =
+                resultNode.innerHTML =
           renderLabAiInterpretation(
             data.interpretation,
             data.meta || {}
           );
+
+        const panel =
+          resultNode.querySelector(
+            ".labAiPanel"
+          );
+
+        if (panel) {
+          panel.classList.add(
+            "is-collapsed"
+          );
+        }
 
         const card =
           resultNode.closest(
@@ -52560,7 +52571,10 @@ async function hydrateLabAiInterpretations(
 
         if (button) {
           button.textContent =
-            "✓ Розшифровано PUG AI";
+            (
+              "✦ Показати повну " +
+              "розшифровку PUG AI"
+            );
         }
       }
     )
@@ -54490,10 +54504,37 @@ async function renderLabsTab(
             "[data-lab-ai-result]"
           );
 
-        if (
+                if (
           !labId ||
           !resultNode
         ) {
+          return;
+        }
+
+        const existingPanel =
+          resultNode.querySelector(
+            ".labAiPanel"
+          );
+
+        if (existingPanel) {
+          const isCollapsed =
+            existingPanel
+              .classList
+              .toggle(
+                "is-collapsed"
+              );
+
+          aiButton.textContent =
+            isCollapsed
+              ? (
+                  "✦ Показати повну " +
+                  "розшифровку PUG AI"
+                )
+              : (
+                  "Сховати повну " +
+                  "розшифровку"
+                );
+
           return;
         }
 
@@ -54524,14 +54565,17 @@ async function renderLabsTab(
               )
             );
 
-          resultNode.innerHTML =
+                    resultNode.innerHTML =
             renderLabAiInterpretation(
               data.interpretation,
               data.meta || {}
             );
 
           aiButton.textContent =
-            "✓ Розшифровано PUG AI";
+            (
+              "Сховати повну " +
+              "розшифровку"
+            );
         } catch (error) {
           console.error(
             "PUG AI lab failed:",

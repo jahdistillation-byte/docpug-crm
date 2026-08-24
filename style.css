@@ -54596,3 +54596,19 @@ body[data-theme="white"]
       flex-start;
   }
 }
+.labAiPanel.is-collapsed
+.labAiSections,
+
+.labAiPanel.is-collapsed
+.labAiFooter {
+  display: none;
+}
+
+.labAiPanel.is-collapsed {
+  padding-bottom: 16px;
+}
+
+.labAiPanel.is-collapsed
+.labAiOverview {
+  margin-bottom: 0;
+}
