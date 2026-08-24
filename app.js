@@ -47012,13 +47012,17 @@ const LAB_GROUPS = {
     "FIB",
   ],
 
-  "Електроліти": [
+    "Електроліти та гази крові": [
     "NA",
     "K",
     "CL",
     "CA",
     "PHOS",
     "MG",
+    "BLOOD_PH",
+    "PCO2",
+    "PO2",
+    "HCO3",
   ],
 };
 Object.assign(LAB_LABELS, {
@@ -47046,50 +47050,175 @@ Object.assign(LAB_LABELS, {
   CA: "Кальцій",
   PHOS: "Фосфор",
   MG: "Магній",
+    BLOOD_PH:
+    "pH крові",
+
+  PCO2:
+    "Парціальний тиск CO₂",
+
+  PO2:
+    "Парціальний тиск O₂",
+
+  HCO3:
+    "Бікарбонат",
 });
 
 const LAB_TYPE_META = {
+
   "Біохімія": {
+
     short: "БХ",
+
     icon: "⚗️",
-    description: "Печінка, нирки, білки та глюкоза",
+
+    description:
+      "Печінка, нирки, білки та глюкоза",
+
   },
 
   "ЗАК": {
+
     short: "ЗАК",
+
     icon: "🩸",
-    description: "Клітини крові та лейкоформула",
+
+    description:
+      "Клітини крові та лейкоформула",
+
   },
 
   "Т4": {
+
     short: "Т4",
+
     icon: "🦋",
-    description: "Функція щитоподібної залози",
+
+    description:
+      "Функція щитоподібної залози",
+
   },
 
   "ТТГ": {
+
     short: "ТТГ",
+
     icon: "◉",
-    description: "Тиреотропний гормон",
+
+    description:
+      "Тиреотропний гормон",
+
   },
 
   "Загальний аналіз сечі": {
+
     short: "Сеча",
+
     icon: "💧",
-    description: "Фізико-хімічні показники сечі",
+
+    description:
+      "Сеча, осад та фізико-хімічні показники",
+
   },
 
   "Коагулограма": {
+
     short: "Коаг.",
+
     icon: "🧬",
-    description: "Система згортання крові",
+
+    description:
+      "Система згортання крові",
+
   },
 
-  "Електроліти": {
-    short: "Електроліти",
+  "Електроліти та гази крові": {
+
+    short: "Електр.",
+
     icon: "⚡",
-    description: "Натрій, калій, хлор та мінерали",
+
+    description:
+      "Електроліти, кислотно-лужний стан і гази крові",
+
   },
+
+  "ПЛР": {
+
+    short: "ПЛР",
+
+    icon: "🧫",
+
+    description:
+      "Виявлення генетичного матеріалу збудника",
+
+  },
+
+  "Імунологія та серологія": {
+
+    short: "ІФА",
+
+    icon: "🛡️",
+
+    description:
+      "Антитіла, антигени, ІФА та експрес-тести",
+
+  },
+
+  "Бактеріологія": {
+
+    short: "Бакпосів",
+
+    icon: "🦠",
+
+    description:
+      "Посів, ідентифікація та антибіотикограма",
+
+  },
+
+  "Паразитологія": {
+
+    short: "Паразити",
+
+    icon: "🔬",
+
+    description:
+      "Дослідження калу, крові та інших матеріалів",
+
+  },
+
+  "Цитологія": {
+
+    short: "Цитологія",
+
+    icon: "🔎",
+
+    description:
+      "Клітини пунктатів, мазків, рідин і новоутворень",
+
+  },
+
+  "Гістологія": {
+
+    short: "Гістологія",
+
+    icon: "🧩",
+
+    description:
+      "Морфологічне дослідження біопсійного матеріалу",
+
+  },
+
+  "Інше": {
+
+    short: "Інше",
+
+    icon: "📋",
+
+    description:
+      "Інший лабораторний або діагностичний тест",
+
+  },
+
 };
 
 const LAB_DEFAULT_UNITS = {
@@ -47117,6 +47246,16 @@ const LAB_DEFAULT_UNITS = {
   CA: "ммоль/л",
   PHOS: "ммоль/л",
   MG: "ммоль/л",
+    BLOOD_PH: "",
+
+  PCO2:
+    "мм рт. ст.",
+
+  PO2:
+    "мм рт. ст.",
+
+  HCO3:
+    "ммоль/л",
 };
 
 function getPetSpeciesKey(pet) {
@@ -52050,6 +52189,420 @@ async function requestDeletePatientLab(
 
   return true;
 }
+async function requestCachedLabAiInterpretation(
+  patientId,
+  labId,
+  language = "uk"
+) {
+  const normalizedPatientId =
+    String(
+      patientId || ""
+    ).trim();
+
+  const normalizedLabId =
+    String(
+      labId || ""
+    ).trim();
+
+  if (
+    !normalizedPatientId ||
+    !normalizedLabId
+  ) {
+    throw new Error(
+      "patient_id and lab_id required"
+    );
+  }
+
+  const response = await fetch(
+    `/api/patients/${
+      encodeURIComponent(
+        normalizedPatientId
+      )
+    }/labs/${
+      encodeURIComponent(
+        normalizedLabId
+      )
+    }/ai-interpretation?language=${
+      encodeURIComponent(
+        language
+      )
+    }`,
+    {
+      method: "GET",
+
+      credentials:
+        "include",
+
+      cache:
+        "no-store",
+
+      headers: {
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  return (
+    readLabAiApiResponse(
+      response
+    )
+  );
+}
+async function requestCreateLabAiInterpretation(
+  patientId,
+  labId,
+  language = "uk"
+) {
+  const normalizedPatientId =
+    String(
+      patientId || ""
+    ).trim();
+
+  const normalizedLabId =
+    String(
+      labId || ""
+    ).trim();
+
+  if (
+    !normalizedPatientId ||
+    !normalizedLabId
+  ) {
+    throw new Error(
+      "patient_id and lab_id required"
+    );
+  }
+
+  const response = await fetch(
+    `/api/patients/${
+      encodeURIComponent(
+        normalizedPatientId
+      )
+    }/labs/${
+      encodeURIComponent(
+        normalizedLabId
+      )
+    }/ai-interpretation`,
+    {
+      method: "POST",
+
+      credentials:
+        "include",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+
+      body: JSON.stringify({
+        language,
+      }),
+    }
+  );
+
+  return (
+    readLabAiApiResponse(
+      response
+    )
+  );
+}
+function renderLabAiList(
+  title,
+  items,
+  tone = "default"
+) {
+  const normalizedItems =
+    Array.isArray(items)
+      ? items
+          .map((item) =>
+            String(
+              item || ""
+            ).trim()
+          )
+          .filter(Boolean)
+      : [];
+
+  if (
+    !normalizedItems.length
+  ) {
+    return "";
+  }
+
+  return `
+    <section
+      class="
+        labAiSection
+        is-${escapeHtml(tone)}
+      "
+    >
+      <h5>
+        ${escapeHtml(title)}
+      </h5>
+
+      <ul>
+        ${normalizedItems
+          .map(
+            (item) => `
+              <li>
+                ${escapeHtml(item)}
+              </li>
+            `
+          )
+          .join("")}
+      </ul>
+    </section>
+  `;
+}
+
+function renderLabAiInterpretation(
+  interpretation,
+  meta = {}
+) {
+  if (
+    !interpretation ||
+    typeof interpretation !==
+      "object"
+  ) {
+    return "";
+  }
+
+  const confidenceLabels = {
+    low:
+      "Низька",
+
+    medium:
+      "Середня",
+
+    high:
+      "Висока",
+  };
+
+  const confidence =
+    confidenceLabels[
+      interpretation.confidence
+    ] ||
+    "Не визначена";
+
+  return `
+    <div class="labAiPanel">
+      <div class="labAiPanelHead">
+        <div>
+          <div class="labAiEyebrow">
+            PUG AI · ЛАБОРАТОРНИЙ
+            АСИСТЕНТ
+          </div>
+
+          <h4>
+            Розшифровка аналізу
+          </h4>
+        </div>
+
+        <span
+          class="labAiConfidence"
+        >
+          Впевненість:
+          ${escapeHtml(confidence)}
+        </span>
+      </div>
+
+      ${
+        interpretation
+          .analysis_overview
+          ? `
+            <div
+              class="labAiOverview"
+            >
+              ${escapeHtml(
+                interpretation
+                  .analysis_overview
+              )}
+            </div>
+          `
+          : ""
+      }
+
+      <div class="labAiSections">
+        ${renderLabAiList(
+          "Ключові відхилення",
+          interpretation
+            .key_deviations,
+          "accent"
+        )}
+
+        ${renderLabAiList(
+          "Інтерпретація показників",
+          interpretation
+            .pattern_interpretation
+        )}
+
+        ${renderLabAiList(
+          "Зв’язок із клінічною картиною",
+          interpretation
+            .clinical_correlation
+        )}
+
+        ${renderLabAiList(
+          "Порівняння з попередніми аналізами",
+          interpretation
+            .comparison_with_previous
+        )}
+
+        ${renderLabAiList(
+          "Що варто перевірити",
+          interpretation
+            .recommended_checks,
+          "action"
+        )}
+
+        ${renderLabAiList(
+          "Важливі застереження",
+          interpretation
+            .safety_flags,
+          "warning"
+        )}
+
+        ${renderLabAiList(
+          "Обмеження",
+          interpretation
+            .limitations,
+          "muted"
+        )}
+      </div>
+
+      <div class="labAiFooter">
+        <span>
+          AI-підтримка не замінює
+          клінічне рішення лікаря.
+        </span>
+
+        <span>
+          ${
+            meta?.cached
+              ? (
+                  "Збережена " +
+                  "розшифровка"
+                )
+              : (
+                  "Нова " +
+                  "розшифровка"
+                )
+          }
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+async function hydrateLabAiInterpretations(
+  patientId,
+  root
+) {
+  if (
+    !patientId ||
+    !root
+  ) {
+    return;
+  }
+
+  const resultNodes = [
+    ...root.querySelectorAll(
+      "[data-lab-ai-result]"
+    ),
+  ];
+
+  await Promise.allSettled(
+    resultNodes.map(
+      async (resultNode) => {
+        const labId =
+          resultNode.dataset
+            .labAiResult;
+
+        if (!labId) {
+          return;
+        }
+
+        const data =
+          await (
+            requestCachedLabAiInterpretation(
+              patientId,
+              labId
+            )
+          );
+
+        if (
+          !data?.interpretation
+        ) {
+          return;
+        }
+
+        resultNode.innerHTML =
+          renderLabAiInterpretation(
+            data.interpretation,
+            data.meta || {}
+          );
+
+        const card =
+          resultNode.closest(
+            ".labHistoryCard"
+          );
+
+        const button =
+          card?.querySelector(
+            "[data-lab-ai]"
+          );
+
+        if (button) {
+          button.textContent =
+            "✓ Розшифровано PUG AI";
+        }
+      }
+    )
+  );
+}
+
+
+
+
+async function readLabAiApiResponse(
+  response
+) {
+  const text =
+    await response.text();
+
+  let payload = null;
+
+  try {
+    payload =
+      text
+        ? JSON.parse(text)
+        : null;
+  } catch {
+    payload = null;
+  }
+
+  if (
+    !response.ok ||
+    payload?.ok !== true
+  ) {
+    throw new Error(
+      payload?.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  return (
+    payload.data || {}
+  );
+}
+
+
 function getLabStatus(value, min, max) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "empty";
@@ -53912,8 +54465,109 @@ async function renderLabsTab(
       });
     });
 
-  $("#labsList")?.addEventListener("click", async (event) => {
-    const deleteButton = event.target.closest("[data-del-lab]");
+    $("#labsList")?.addEventListener(
+    "click",
+    async (event) => {
+      const aiButton =
+        event.target.closest(
+          "[data-lab-ai]"
+        );
+
+      if (aiButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const labId =
+          aiButton.dataset.labAi;
+
+        const card =
+          aiButton.closest(
+            ".labHistoryCard"
+          );
+
+        const resultNode =
+          card?.querySelector(
+            "[data-lab-ai-result]"
+          );
+
+        if (
+          !labId ||
+          !resultNode
+        ) {
+          return;
+        }
+
+        const originalText =
+          aiButton.textContent;
+
+        aiButton.disabled =
+          true;
+
+        aiButton.textContent =
+          "PUG AI аналізує…";
+
+        resultNode.innerHTML = `
+          <div class="labAiLoading">
+            ✦ Аналізуємо показники,
+            референси, історію та
+            останній релевантний
+            прийом…
+          </div>
+        `;
+
+        try {
+          const data =
+            await (
+              requestCreateLabAiInterpretation(
+                pet.id,
+                labId
+              )
+            );
+
+          resultNode.innerHTML =
+            renderLabAiInterpretation(
+              data.interpretation,
+              data.meta || {}
+            );
+
+          aiButton.textContent =
+            "✓ Розшифровано PUG AI";
+        } catch (error) {
+          console.error(
+            "PUG AI lab failed:",
+            error
+          );
+
+          resultNode.innerHTML = `
+            <div class="labAiError">
+              ${escapeHtml(
+                error?.message ||
+                (
+                  "Не вдалося " +
+                  "розшифрувати аналіз."
+                )
+              )}
+            </div>
+          `;
+
+          aiButton.textContent =
+            originalText ||
+            (
+              "✦ Розшифрувати " +
+              "з PUG AI"
+            );
+        } finally {
+          aiButton.disabled =
+            false;
+        }
+
+        return;
+      }
+
+      const deleteButton =
+        event.target.closest(
+          "[data-del-lab]"
+        );
 
     if (deleteButton) {
       event.preventDefault();
@@ -54032,7 +54686,12 @@ if (pdfButton) {
   await downloadLabPdf(pet, lab);
   return;
 }
-  });
+    });
+
+  void hydrateLabAiInterpretations(
+    pet.id,
+    box
+  );
 }
 
 
@@ -54086,13 +54745,26 @@ function openLabModal(pet, labData = {}) {
   document.getElementById("premiumLabModal")?.remove();
 
   const isEditMode = Boolean(labData?.id);
-  const selectedType =
-    labData?.type && LAB_GROUPS[labData.type]
+    const selectedType =
+    (
+      labData?.type &&
+      LAB_TYPE_META[
+        labData.type
+      ]
+    )
       ? labData.type
       : "Біохімія";
 
-  const keys = LAB_GROUPS[selectedType] || [];
-  const values = labData?.values || {};
+  const keys =
+    LAB_GROUPS[
+      selectedType
+    ] || [];
+
+  const isStructuredLab =
+    keys.length > 0;
+
+  const values =
+    labData?.values || {};
 
   const modal = document.createElement("div");
   modal.id = "premiumLabModal";
@@ -54155,7 +54827,7 @@ function openLabModal(pet, labData = {}) {
               id="premiumLabType"
               ${isEditMode ? "disabled" : ""}
             >
-              ${Object.keys(LAB_GROUPS)
+                            ${Object.keys(LAB_TYPE_META)
                 .map((type) => `
                   <option
                     value="${escapeHtml(type)}"
@@ -54192,16 +54864,42 @@ function openLabModal(pet, labData = {}) {
         </section>
 
         <section class="premiumLabResultsSection">
-          <div class="premiumLabSectionHead">
+                    <div
+            class="premiumLabSectionHead"
+          >
             <div>
-              <h3>Результати</h3>
+              <h3>
+                ${
+                  isStructuredLab
+                    ? "Результати"
+                    : "Опис дослідження"
+                }
+              </h3>
+
               <p>
-                Вкажіть значення та референс лабораторії.
+                ${
+                  isStructuredLab
+                    ? (
+                        "Вкажіть значення " +
+                        "та референс лабораторії."
+                      )
+                    : (
+                        "Додайте лабораторний " +
+                        "висновок у полі нижче."
+                      )
+                }
               </p>
             </div>
 
             <span>
-              ${keys.length} показників
+              ${
+                isStructuredLab
+                  ? (
+                      `${keys.length} ` +
+                      "показників"
+                    )
+                  : "Якісний результат"
+              }
             </span>
           </div>
 
@@ -54284,20 +54982,80 @@ function openLabModal(pet, labData = {}) {
                     </div>
                   </article>
                 `;
-              })
+                           })
               .join("")}
           </div>
+
+          ${
+            !isStructuredLab
+              ? `
+                <div
+                  style="
+                    margin-top:14px;
+                    padding:16px;
+                    border-radius:14px;
+                    border:
+                      1px dashed
+                      rgba(139,92,246,.30);
+                    background:
+                      rgba(139,92,246,.06);
+                    color:
+                      rgba(255,255,255,.72);
+                    line-height:1.55;
+                  "
+                >
+                  Для ПЛР, бактеріології,
+                  паразитології, цитології та
+                  гістології додайте повний текст
+                  результату і висновок лабораторії
+                  у полі нижче.
+
+                  PUG AI використає цей текст
+                  під час розшифровки.
+                </div>
+              `
+              : ""
+          }
         </section>
 
-        <label class="premiumLabCommentField">
-          <span>Коментар лікаря</span>
+                <label
+          class="premiumLabCommentField"
+        >
+          <span>
+            ${
+              isStructuredLab
+                ? "Коментар лікаря"
+                : (
+                    "Результат і висновок " +
+                    "лабораторії"
+                  )
+            }
+          </span>
 
           <textarea
             id="premiumLabComment"
-            rows="4"
-            maxlength="2000"
-            placeholder="Клінічна інтерпретація, умови забору або додаткова інформація..."
-          >${escapeHtml(labData?.comment || "")}</textarea>
+            rows="${
+              isStructuredLab
+                ? "4"
+                : "8"
+            }"
+            maxlength="6000"
+            placeholder="${
+              isStructuredLab
+                ? (
+                    "Клінічна інтерпретація, " +
+                    "умови забору або " +
+                    "додаткова інформація..."
+                  )
+                : (
+                    "Вставте результат, опис " +
+                    "матеріалу, метод і висновок " +
+                    "лабораторії..."
+                  )
+            }"
+          >${escapeHtml(
+            labData?.comment || ""
+          )}</textarea>
         </label>
       </div>
 
@@ -54497,8 +55255,25 @@ function openLabModal(pet, labData = {}) {
           };
         });
 
-      if (!Object.keys(nextValues).length) {
-        alert("Вкажіть хоча б один результат.");
+            if (
+        !Object.keys(
+          nextValues
+        ).length &&
+        !comment
+      ) {
+        alert(
+          isStructuredLab
+            ? (
+                "Вкажіть хоча б один " +
+                "результат або додайте " +
+                "коментар."
+              )
+            : (
+                "Додайте результат або " +
+                "висновок лабораторії."
+              )
+        );
+
         return;
       }
 
@@ -56015,6 +56790,32 @@ function renderLabCard(lab, speciesKey) {
           `
           : ""
       }
+            <div class="labAiWrap">
+        <button
+          class="labAiButton"
+          type="button"
+          data-lab-ai="${
+            escapeHtml(
+              String(
+                lab.id || ""
+              )
+            )
+          }"
+        >
+          ✦ Розшифрувати з PUG AI
+        </button>
+
+        <div
+          class="labAiResult"
+          data-lab-ai-result="${
+            escapeHtml(
+              String(
+                lab.id || ""
+              )
+            )
+          }"
+        ></div>
+      </div>
     </article>
   `;
 }

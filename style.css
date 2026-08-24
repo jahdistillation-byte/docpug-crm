@@ -54313,3 +54313,286 @@ body[data-theme="white"]
 .visitAiWorkspaceBody {
   padding: 18px !important;
 }
+/* ========================================
+   PUG AI — лабораторный ассистент
+======================================== */
+
+.labAiWrap {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top:
+    1px solid
+    rgba(148, 163, 184, 0.16);
+}
+
+.labAiButton {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 18px;
+
+  border:
+    1px solid
+    rgba(139, 92, 246, 0.45);
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(124, 58, 237, 0.22),
+      rgba(76, 29, 149, 0.09)
+    );
+
+  color: #ddd6fe;
+
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.labAiButton:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(167, 139, 250, 0.75);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(124, 58, 237, 0.32),
+      rgba(76, 29, 149, 0.15)
+    );
+}
+
+.labAiButton:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
+}
+
+.labAiLoading,
+.labAiError {
+  margin-top: 12px;
+  padding: 14px 16px;
+
+  border-radius: 13px;
+
+  background:
+    rgba(15, 23, 42, 0.55);
+
+  color:
+    rgba(226, 232, 240, 0.84);
+
+  line-height: 1.55;
+}
+
+.labAiError {
+  border:
+    1px solid
+    rgba(248, 113, 113, 0.34);
+
+  color: #fecaca;
+}
+
+.labAiPanel {
+  margin-top: 14px;
+  padding: 18px;
+
+  border:
+    1px solid
+    rgba(139, 92, 246, 0.28);
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30, 24, 54, 0.92),
+      rgba(15, 23, 42, 0.8)
+    );
+}
+
+.labAiPanelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.labAiEyebrow {
+  color: #a78bfa;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.labAiPanel h4 {
+  margin: 5px 0 0;
+
+  color: #f8fafc;
+
+  font-size: 17px;
+}
+
+.labAiConfidence {
+  flex: 0 0 auto;
+
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(139, 92, 246, 0.16);
+
+  color: #c4b5fd;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.labAiOverview {
+  margin-top: 15px;
+  padding: 14px;
+
+  border-radius: 13px;
+
+  background:
+    rgba(139, 92, 246, 0.1);
+
+  color: #e2e8f0;
+
+  line-height: 1.6;
+}
+.labAiSections {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+.labAiSection {
+  padding: 13px 14px;
+
+  border:
+    1px solid
+    rgba(148, 163, 184, 0.14);
+
+  border-radius: 13px;
+
+  background:
+    rgba(15, 23, 42, 0.42);
+}
+
+.labAiSection.is-accent {
+  border-color:
+    rgba(167, 139, 250, 0.28);
+
+  background:
+    rgba(76, 29, 149, 0.13);
+}
+
+.labAiSection.is-action {
+  border-color:
+    rgba(52, 211, 153, 0.24);
+
+  background:
+    rgba(6, 78, 59, 0.1);
+}
+
+.labAiSection.is-warning {
+  border-color:
+    rgba(251, 191, 36, 0.3);
+
+  background:
+    rgba(120, 53, 15, 0.14);
+}
+
+.labAiSection.is-muted {
+  opacity: 0.82;
+}
+
+.labAiSection h5 {
+  margin:
+    0
+    0
+    8px;
+
+  color: #e9d5ff;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.labAiSection ul {
+  margin: 0;
+
+  padding-left: 17px;
+
+  color:
+    rgba(226, 232, 240, 0.84);
+
+  line-height: 1.52;
+}
+
+.labAiSection li + li {
+  margin-top: 6px;
+}
+
+.labAiFooter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  margin-top: 14px;
+  padding-top: 12px;
+
+  border-top:
+    1px solid
+    rgba(148, 163, 184, 0.14);
+
+  color:
+    rgba(148, 163, 184, 0.84);
+
+  font-size: 10px;
+}
+
+@media (
+  max-width: 760px
+) {
+  .labAiSections {
+    grid-template-columns:
+      1fr;
+  }
+
+  .labAiPanelHead,
+  .labAiFooter {
+    flex-direction:
+      column;
+  }
+
+  .labAiPanel {
+    padding: 15px;
+  }
+
+  .labAiConfidence {
+    align-self:
+      flex-start;
+  }
+}
