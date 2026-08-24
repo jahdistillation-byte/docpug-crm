@@ -53932,3 +53932,71 @@ body[data-theme="white"]
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   PUG AI — WIDE DESKTOP WORKSPACE FIX
+   ========================================================= */
+
+@media (min-width: 1551px) {
+  .main-content:has(
+    .visitWorkspace.hasPugAiWorkspace
+  ) {
+    width:
+      calc(100vw - 32px) !important;
+
+    max-width:
+      none !important;
+
+    margin-left:
+      16px !important;
+
+    margin-right:
+      16px !important;
+
+    padding-left:
+      0 !important;
+
+    padding-right:
+      0 !important;
+  }
+
+  .visitWorkspace.hasPugAiWorkspace {
+    width: 100%;
+    max-width: 1780px;
+  }
+
+  .visitWorkspaceGrid.hasPugAiWorkspace {
+    grid-template-columns:
+      minmax(420px, 460px)
+      minmax(760px, 1fr)
+      330px;
+
+    gap: 20px;
+  }
+}
+
+/* Внутри левой колонки поле вопроса
+   и кнопка располагаются вертикально. */
+
+.visitAiWorkspace
+.visitAiConsultComposer {
+  grid-template-columns:
+    minmax(0, 1fr);
+}
+
+.visitAiWorkspace
+.visitAiConsultSend {
+  width: 100%;
+}
+
+.visitAiWorkspace
+.visitAiConsultQuickActions {
+  display: grid;
+  grid-template-columns:
+    1fr;
+}
+
+.visitAiWorkspace
+.visitAiConsultQuickButton {
+  width: 100%;
+  text-align: left;
+}
