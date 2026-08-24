@@ -18037,7 +18037,589 @@ def build_ai_clinical_timeline(
 
     return events
 
+@app.get(
+    "/api/patients/<patient_id>/labs"
+)
+def api_get_patient_labs(
+    patient_id,
+):
+    user, auth_error = auth_required()
 
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    patient_id = str(
+        patient_id or ""
+    ).strip()
+
+    if not patient_id:
+        return fail(
+            "patient_id required",
+            400,
+        )
+
+    try:
+        patient_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patients")
+                .select("id")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    patient_id,
+                )
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        labs_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_labs")
+                .select("*")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "patient_id",
+                    patient_id,
+                )
+                .order(
+                    "performed_at",
+                    desc=True,
+                )
+                .order(
+                    "created_at",
+                    desc=True,
+                )
+                .limit(100)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        return ok({
+            "items":
+                labs_result.data or [],
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET patient labs:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити "
+            "аналізи пацієнта.",
+            500,
+        )
+@app.post(
+    "/api/patients/<patient_id>/labs"
+)
+def api_create_patient_lab(
+    patient_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    patient_id = str(
+        patient_id or ""
+    ).strip()
+
+    if not patient_id:
+        return fail(
+            "patient_id required",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        ) or {}
+    )
+
+    lab_type = str(
+        data.get("type")
+        or data.get("lab_type")
+        or ""
+    ).strip()[:100]
+
+    performed_at = str(
+        data.get("date")
+        or data.get("performed_at")
+        or ""
+    ).strip()
+
+    laboratory = str(
+        data.get("laboratory")
+        or ""
+    ).strip()[:150]
+
+    comment = str(
+        data.get("comment")
+        or ""
+    ).strip()[:2000]
+
+    values = data.get("values")
+    refs = data.get("refs") or {}
+
+    if not lab_type:
+        return fail(
+            "Тип аналізу не визначено.",
+            400,
+        )
+
+    if not performed_at:
+        return fail(
+            "Дата аналізу не визначена.",
+            400,
+        )
+
+    try:
+        datetime.strptime(
+            performed_at,
+            "%Y-%m-%d",
+        )
+    except ValueError:
+        return fail(
+            "Некоректна дата аналізу.",
+            400,
+        )
+
+    if (
+        not isinstance(values, dict)
+        or not values
+    ):
+        return fail(
+            "Додайте хоча б один "
+            "результат аналізу.",
+            400,
+        )
+
+    if not isinstance(refs, dict):
+        return fail(
+            "Некоректні референсні "
+            "значення.",
+            400,
+        )
+
+    if len(
+        json.dumps(
+            values,
+            ensure_ascii=False,
+        )
+    ) > 50000:
+        return fail(
+            "Результати аналізу "
+            "занадто великі.",
+            400,
+        )
+
+    if len(
+        json.dumps(
+            refs,
+            ensure_ascii=False,
+        )
+    ) > 50000:
+        return fail(
+            "Референсні значення "
+            "занадто великі.",
+            400,
+        )
+
+    try:
+        patient_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patients")
+                .select("id")
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "id",
+                    patient_id,
+                )
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not patient_result.data:
+            return fail(
+                "Пацієнта не знайдено.",
+                404,
+            )
+
+        insert_payload = {
+            "org_id":
+                current_org,
+
+            "patient_id":
+                patient_id,
+
+            "lab_type":
+                lab_type,
+
+            "performed_at":
+                performed_at,
+
+            "laboratory":
+                laboratory or None,
+
+            "comment":
+                comment or None,
+
+            "values":
+                values,
+
+            "refs":
+                refs,
+        }
+
+        lab_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_labs")
+                .insert(insert_payload)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        created_lab = (
+            lab_result.data[0]
+            if lab_result.data
+            else insert_payload
+        )
+
+        return ok({
+            "item": created_lab,
+        })
+
+    except Exception as error:
+        print(
+            "❌ POST patient lab:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося зберегти "
+            "аналіз пацієнта.",
+            500,
+        )    
+@app.put(
+    "/api/patients/<patient_id>"
+    "/labs/<lab_id>"
+)
+def api_update_patient_lab(
+    patient_id,
+    lab_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    patient_id = str(
+        patient_id or ""
+    ).strip()
+
+    lab_id = str(
+        lab_id or ""
+    ).strip()
+
+    if not patient_id or not lab_id:
+        return fail(
+            "patient_id and lab_id required",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        ) or {}
+    )
+
+    lab_type = str(
+        data.get("type")
+        or data.get("lab_type")
+        or ""
+    ).strip()[:100]
+
+    performed_at = str(
+        data.get("date")
+        or data.get("performed_at")
+        or ""
+    ).strip()
+
+    laboratory = str(
+        data.get("laboratory")
+        or ""
+    ).strip()[:150]
+
+    comment = str(
+        data.get("comment")
+        or ""
+    ).strip()[:2000]
+
+    values = data.get("values")
+    refs = data.get("refs") or {}
+
+    if not lab_type:
+        return fail(
+            "Тип аналізу не визначено.",
+            400,
+        )
+
+    try:
+        datetime.strptime(
+            performed_at,
+            "%Y-%m-%d",
+        )
+    except ValueError:
+        return fail(
+            "Некоректна дата аналізу.",
+            400,
+        )
+
+    if (
+        not isinstance(values, dict)
+        or not values
+    ):
+        return fail(
+            "Додайте хоча б один "
+            "результат аналізу.",
+            400,
+        )
+
+    if not isinstance(refs, dict):
+        return fail(
+            "Некоректні референсні "
+            "значення.",
+            400,
+        )
+
+    if len(
+        json.dumps(
+            values,
+            ensure_ascii=False,
+        )
+    ) > 50000:
+        return fail(
+            "Результати аналізу "
+            "занадто великі.",
+            400,
+        )
+
+    if len(
+        json.dumps(
+            refs,
+            ensure_ascii=False,
+        )
+    ) > 50000:
+        return fail(
+            "Референсні значення "
+            "занадто великі.",
+            400,
+        )
+
+    update_payload = {
+        "lab_type":
+            lab_type,
+
+        "performed_at":
+            performed_at,
+
+        "laboratory":
+            laboratory or None,
+
+        "comment":
+            comment or None,
+
+        "values":
+            values,
+
+        "refs":
+            refs,
+
+        "updated_at":
+            datetime.now(
+                timezone.utc
+            ).isoformat(),
+    }
+
+    try:
+        lab_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_labs")
+                .update(update_payload)
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "patient_id",
+                    patient_id,
+                )
+                .eq(
+                    "id",
+                    lab_id,
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not lab_result.data:
+            return fail(
+                "Аналіз не знайдено.",
+                404,
+            )
+
+        return ok({
+            "item":
+                lab_result.data[0],
+        })
+
+    except Exception as error:
+        print(
+            "❌ PUT patient lab:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося оновити "
+            "аналіз пацієнта.",
+            500,
+        )
+
+@app.delete(
+    "/api/patients/<patient_id>"
+    "/labs/<lab_id>"
+)
+def api_delete_patient_lab(
+    patient_id,
+    lab_id,
+):
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    patient_id = str(
+        patient_id or ""
+    ).strip()
+
+    lab_id = str(
+        lab_id or ""
+    ).strip()
+
+    if not patient_id or not lab_id:
+        return fail(
+            "patient_id and lab_id required",
+            400,
+        )
+
+    try:
+        lab_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("patient_labs")
+                .delete()
+                .eq(
+                    "org_id",
+                    current_org,
+                )
+                .eq(
+                    "patient_id",
+                    patient_id,
+                )
+                .eq(
+                    "id",
+                    lab_id,
+                )
+            ),
+            attempts=3,
+            delay=0.25,
+        )
+
+        if not lab_result.data:
+            return fail(
+                "Аналіз не знайдено.",
+                404,
+            )
+
+        return ok({
+            "deleted_id": lab_id,
+        })
+
+    except Exception as error:
+        print(
+            "❌ DELETE patient lab:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося видалити "
+            "аналіз пацієнта.",
+            500,
+        )
 @app.get(
     "/api/patients/<patient_id>/ai-context"
 )
