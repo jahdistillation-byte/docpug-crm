@@ -18192,7 +18192,7 @@ def api_create_patient_lab(
     comment = str(
         data.get("comment")
         or ""
-    ).strip()[:2000]
+    ).strip()[:6000]
 
     values = data.get("values")
     refs = data.get("refs") or {}
@@ -18406,7 +18406,7 @@ def api_update_patient_lab(
     comment = str(
         data.get("comment")
         or ""
-    ).strip()[:2000]
+    ).strip()[:6000]
 
     values = data.get("values")
     refs = data.get("refs") or {}
