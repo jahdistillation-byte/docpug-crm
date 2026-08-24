@@ -51640,19 +51640,416 @@ function addMinutesToTime(time, minutes) {
   return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
 }
 
-function loadLabs() {
-  const arr = LS.get(LABS_KEY, []);
-  return Array.isArray(arr) ? arr : [];
+
+
+const patientLabsApiCache =
+  new Map();
+
+function normalizePatientLabFromApi(
+  lab
+) {
+  return {
+    id:
+      String(lab?.id || ""),
+
+    pet_id:
+      String(
+        lab?.patient_id ||
+        lab?.pet_id ||
+        ""
+      ),
+
+    visit_id:
+      lab?.visit_id || null,
+
+    type:
+      String(
+        lab?.lab_type ||
+        lab?.type ||
+        ""
+      ),
+
+    date:
+      String(
+        lab?.performed_at ||
+        lab?.date ||
+        ""
+      ),
+
+    laboratory:
+      String(
+        lab?.laboratory || ""
+      ),
+
+    comment:
+      String(
+        lab?.comment || ""
+      ),
+
+    values:
+      (
+        lab?.values &&
+        typeof lab.values === "object"
+      )
+        ? lab.values
+        : {},
+
+    refs:
+      (
+        lab?.refs &&
+        typeof lab.refs === "object"
+      )
+        ? lab.refs
+        : {},
+
+    created_at:
+      lab?.created_at || null,
+
+    updated_at:
+      lab?.updated_at || null,
+  };
 }
 
-function saveLabs(arr) {
-  LS.set(LABS_KEY, Array.isArray(arr) ? arr : []);
+async function requestPatientLabs(
+  patientId
+) {
+  const normalizedPatientId =
+    String(
+      patientId || ""
+    ).trim();
+
+  if (!normalizedPatientId) {
+    throw new Error(
+      "patient_id required"
+    );
+  }
+
+  const response = await fetch(
+    `/api/patients/${
+      encodeURIComponent(
+        normalizedPatientId
+      )
+    }/labs`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const text =
+    await response.text();
+
+  let payload = null;
+
+  try {
+    payload =
+      text
+        ? JSON.parse(text)
+        : null;
+  } catch {
+    payload = null;
+  }
+
+  if (
+    !response.ok ||
+    payload?.ok !== true
+  ) {
+    throw new Error(
+      payload?.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  const items =
+    Array.isArray(
+      payload?.data?.items
+    )
+      ? payload.data.items
+      : [];
+
+  const normalizedItems =
+    items.map(
+      normalizePatientLabFromApi
+    );
+
+  patientLabsApiCache.set(
+    normalizedPatientId,
+    normalizedItems
+  );
+
+  return normalizedItems;
 }
 
-function getLabsByPetId(petId) {
-  return loadLabs().filter((x) => String(x.pet_id) === String(petId));
+function getCachedPatientLabs(
+  patientId
+) {
+  return (
+    patientLabsApiCache.get(
+      String(patientId || "")
+    ) || []
+  );
 }
 
+async function readPatientLabApiResponse(
+  response
+) {
+  const text =
+    await response.text();
+
+  let payload = null;
+
+  try {
+    payload =
+      text
+        ? JSON.parse(text)
+        : null;
+  } catch {
+    payload = null;
+  }
+
+  if (
+    !response.ok ||
+    payload?.ok !== true
+  ) {
+    throw new Error(
+      payload?.error ||
+      `HTTP ${response.status}`
+    );
+  }
+
+  return payload.data || {};
+}
+
+async function requestCreatePatientLab(
+  patientId,
+  lab
+) {
+  const normalizedPatientId =
+    String(
+      patientId || ""
+    ).trim();
+
+  const response = await fetch(
+    `/api/patients/${
+      encodeURIComponent(
+        normalizedPatientId
+      )
+    }/labs`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        type:
+          lab?.type || "",
+
+        date:
+          lab?.date || "",
+
+        laboratory:
+          lab?.laboratory || "",
+
+        comment:
+          lab?.comment || "",
+
+        values:
+          lab?.values || {},
+
+        refs:
+          lab?.refs || {},
+      }),
+    }
+  );
+
+  const data =
+    await readPatientLabApiResponse(
+      response
+    );
+
+  const createdLab =
+    normalizePatientLabFromApi(
+      data.item || {}
+    );
+
+  const currentLabs =
+    getCachedPatientLabs(
+      normalizedPatientId
+    );
+
+  patientLabsApiCache.set(
+    normalizedPatientId,
+    [
+      createdLab,
+      ...currentLabs.filter(
+        (item) =>
+          String(item.id) !==
+          String(createdLab.id)
+      ),
+    ]
+  );
+
+  return createdLab;
+}
+
+async function requestUpdatePatientLab(
+  patientId,
+  labId,
+  lab
+) {
+  const normalizedPatientId =
+    String(
+      patientId || ""
+    ).trim();
+
+  const normalizedLabId =
+    String(
+      labId || ""
+    ).trim();
+
+  const response = await fetch(
+    `/api/patients/${
+      encodeURIComponent(
+        normalizedPatientId
+      )
+    }/labs/${
+      encodeURIComponent(
+        normalizedLabId
+      )
+    }`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        type:
+          lab?.type || "",
+
+        date:
+          lab?.date || "",
+
+        laboratory:
+          lab?.laboratory || "",
+
+        comment:
+          lab?.comment || "",
+
+        values:
+          lab?.values || {},
+
+        refs:
+          lab?.refs || {},
+      }),
+    }
+  );
+
+  const data =
+    await readPatientLabApiResponse(
+      response
+    );
+
+  const updatedLab =
+    normalizePatientLabFromApi(
+      data.item || {}
+    );
+
+  const currentLabs =
+    getCachedPatientLabs(
+      normalizedPatientId
+    );
+
+  patientLabsApiCache.set(
+    normalizedPatientId,
+    currentLabs.map(
+      (item) =>
+        String(item.id) ===
+        normalizedLabId
+          ? updatedLab
+          : item
+    )
+  );
+
+  return updatedLab;
+}
+
+async function requestDeletePatientLab(
+  patientId,
+  labId
+) {
+  const normalizedPatientId =
+    String(
+      patientId || ""
+    ).trim();
+
+  const normalizedLabId =
+    String(
+      labId || ""
+    ).trim();
+
+  const response = await fetch(
+    `/api/patients/${
+      encodeURIComponent(
+        normalizedPatientId
+      )
+    }/labs/${
+      encodeURIComponent(
+        normalizedLabId
+      )
+    }`,
+    {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        Accept:
+          "application/json",
+
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  await readPatientLabApiResponse(
+    response
+  );
+
+  const currentLabs =
+    getCachedPatientLabs(
+      normalizedPatientId
+    );
+
+  patientLabsApiCache.set(
+    normalizedPatientId,
+    currentLabs.filter(
+      (item) =>
+        String(item.id) !==
+        normalizedLabId
+    )
+  );
+
+  return true;
+}
 function getLabStatus(value, min, max) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "empty";
@@ -53299,18 +53696,112 @@ if (arrivalButton) {
 };
 }
 
-function renderLabsTab(pet) {
-  const box = $("#patientTabContent");
-  if (!box || !pet) return;
+async function renderLabsTab(
+  pet
+) {
+  const box =
+    $("#patientTabContent");
 
-  const speciesKey = getPetSpeciesKey(pet);
-  const speciesName = speciesKey === "cat" ? "кіт" : "собака";
+  if (!box || !pet) {
+    return;
+  }
 
-  const labs = getLabsByPetId(pet.id)
+  box.innerHTML = `
+    <div
+      class="
+        patientInfoBox
+        premiumLabsPage
+      "
+    >
+      <div
+        class="premiumLabsEmpty"
+      >
+        <div
+          class="premiumLabsEmptyIcon"
+        >
+          🧪
+        </div>
+
+        <h3>
+          Завантажуємо аналізи
+        </h3>
+
+        <p>
+          Отримуємо лабораторну
+          історію пацієнта…
+        </p>
+      </div>
+    </div>
+  `;
+
+  let labs = [];
+
+  try {
+    labs =
+      await requestPatientLabs(
+        pet.id
+      );
+  } catch (error) {
+    console.error(
+      "requestPatientLabs failed:",
+      error
+    );
+
+    box.innerHTML = `
+      <div
+        class="
+          patientInfoBox
+          premiumLabsPage
+        "
+      >
+        <div
+          class="premiumLabsEmpty"
+        >
+          <div
+            class="premiumLabsEmptyIcon"
+          >
+            ⚠️
+          </div>
+
+          <h3>
+            Не вдалося завантажити
+            аналізи
+          </h3>
+
+          <p>
+            ${
+              escapeHtml(
+                error?.message ||
+                "Спробуйте ще раз."
+              )
+            }
+          </p>
+        </div>
+      </div>
+    `;
+
+    return;
+  }
+
+  const speciesKey =
+    getPetSpeciesKey(pet);
+
+  const speciesName =
+    speciesKey === "cat"
+      ? "кіт"
+      : "собака";
+
+  labs = labs
     .slice()
-    .sort((a, b) => {
-      return String(b.date || "").localeCompare(String(a.date || ""));
-    });
+    .sort((a, b) =>
+      String(
+        b.date || ""
+      ).localeCompare(
+        String(
+          a.date || ""
+        )
+      )
+    );
 
   box.innerHTML = `
     <div class="patientInfoBox premiumLabsPage">
@@ -53431,25 +53922,57 @@ function renderLabsTab(pet) {
       const id = deleteButton.dataset.delLab;
       if (!id) return;
 
-      const lab = loadLabs().find(
-        (item) => String(item.id) === String(id)
-      );
+            const lab =
+        getCachedPatientLabs(
+          pet.id
+        ).find(
+          (item) =>
+            String(item.id) ===
+            String(id)
+        );
 
       openDeleteModal(
         `
-          <b>${escapeHtml(lab?.type || "Аналіз")}</b>
+          <b>
+            ${
+              escapeHtml(
+                lab?.type ||
+                "Аналіз"
+              )
+            }
+          </b>
+
           <br><br>
-          Результати дослідження будуть видалені назавжди.
+
+          Результати дослідження
+          будуть видалені назавжди.
+
           <br>
-          Цю дію неможливо скасувати.
+
+          Цю дію неможливо
+          скасувати.
         `,
         async () => {
-          const next = loadLabs().filter(
-            (item) => String(item.id) !== String(id)
-          );
+          try {
+            await requestDeletePatientLab(
+              pet.id,
+              id
+            );
 
-          saveLabs(next);
-          renderLabsTab(pet);
+            await renderLabsTab(
+              pet
+            );
+          } catch (error) {
+            console.error(
+              "Delete patient lab failed:",
+              error
+            );
+
+            alert(
+              error?.message ||
+              "Не вдалося видалити аналіз."
+            );
+          }
         }
       );
 
@@ -53465,9 +53988,14 @@ function renderLabsTab(pet) {
       const id = editButton.dataset.editLab;
       if (!id) return;
 
-      const lab = loadLabs().find(
-        (item) => String(item.id) === String(id)
-      );
+      const lab =
+  getCachedPatientLabs(
+    pet.id
+  ).find(
+    (item) =>
+      String(item.id) ===
+      String(id)
+  );
 
       if (!lab) {
         alert("Аналіз не знайдено.");
@@ -53487,8 +54015,13 @@ if (pdfButton) {
   const id = pdfButton.dataset.pdfLab;
   if (!id) return;
 
-  const lab = loadLabs().find(
-    (item) => String(item.id) === String(id)
+  const lab =
+  getCachedPatientLabs(
+    pet.id
+  ).find(
+    (item) =>
+      String(item.id) ===
+      String(id)
   );
 
   if (!lab) {
@@ -53897,7 +54430,9 @@ function openLabModal(pet, labData = {}) {
 
   modal
     .querySelector("#premiumLabSave")
-    ?.addEventListener("click", () => {
+    ?.addEventListener(
+      "click",
+      async () => {
       const type =
         modal.querySelector("#premiumLabType")?.value ||
         selectedType;
@@ -53967,50 +54502,75 @@ function openLabModal(pet, labData = {}) {
         return;
       }
 
-      const labs = loadLabs();
+            const labPayload = {
+        type,
+        date,
+        laboratory,
+        comment,
+        values:
+          nextValues,
+        refs:
+          nextRefs,
+      };
 
-      if (isEditMode) {
-        const index = labs.findIndex(
-          (item) => String(item.id) === String(labData.id)
+      const saveButton =
+        modal.querySelector(
+          "#premiumLabSave"
         );
 
-        if (index < 0) {
-          alert("Аналіз не знайдено.");
-          return;
+      const originalButtonText =
+        saveButton?.textContent ||
+        "Зберегти";
+
+      try {
+        if (saveButton) {
+          saveButton.disabled =
+            true;
+
+          saveButton.textContent =
+            "Зберігаємо…";
         }
 
-        labs[index] = {
-          ...labs[index],
-          type,
-          date,
-          laboratory,
-          comment,
-          values: nextValues,
-          refs: nextRefs,
-          updated_at: new Date().toISOString(),
-        };
-      } else {
-        labs.unshift({
-          id:
-            "lab_" +
-            Date.now().toString(36) +
-            "_" +
-            Math.random().toString(16).slice(2),
+        if (isEditMode) {
+          await requestUpdatePatientLab(
+            pet.id,
+            labData.id,
+            labPayload
+          );
+        } else {
+          await requestCreatePatientLab(
+            pet.id,
+            labPayload
+          );
+        }
 
-          pet_id: String(pet.id),
-          type,
-          date,
-          laboratory,
-          comment,
-          values: nextValues,
-          refs: nextRefs,
-          created_at: new Date().toISOString(),
-        });
+        closeLabModal();
+
+        await renderLabsTab(
+          pet
+        );
+      } catch (error) {
+        console.error(
+          "Save patient lab failed:",
+          error
+        );
+
+        alert(
+          error?.message ||
+          "Не вдалося зберегти аналіз."
+        );
+      } finally {
+        if (
+          saveButton &&
+          saveButton.isConnected
+        ) {
+          saveButton.disabled =
+            false;
+
+          saveButton.textContent =
+            originalButtonText;
+        }
       }
-
-      saveLabs(labs);
-      closeLabModal();
-      renderLabsTab(pet);
     });
 }
 function normalizeLabPdfNumber(value) {
@@ -55029,11 +55589,19 @@ async function downloadLabPdf(pet, labOrId) {
     return;
   }
 
-  const lab =
-    labOrId && typeof labOrId === "object"
+    const lab =
+    (
+      labOrId &&
+      typeof labOrId ===
+        "object"
+    )
       ? labOrId
-      : loadLabs().find(
-          (item) => String(item.id) === String(labOrId)
+      : getCachedPatientLabs(
+          pet?.id
+        ).find(
+          (item) =>
+            String(item.id) ===
+            String(labOrId)
         );
 
   if (!lab) {
