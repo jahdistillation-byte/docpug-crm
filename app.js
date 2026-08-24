@@ -57579,6 +57579,231 @@ function ensureVisitAiConsultStyles() {
   );
 }
 
+function mountVisitAiWorkspace(
+  visitId
+) {
+  const workspace =
+    document.querySelector(
+      ".visitWorkspace"
+    );
+
+  const workspaceGrid =
+    document.querySelector(
+      ".visitWorkspaceGrid"
+    );
+
+  const workspaceMain =
+    document.querySelector(
+      ".visitWorkspaceMain"
+    );
+
+  const intakePanel =
+    document.getElementById(
+      "visitAiIntakePanel"
+    );
+
+  const consultPanel =
+    document.getElementById(
+      "visitAiConsultPanel"
+    );
+
+  if (
+    !workspace ||
+    !workspaceGrid ||
+    !workspaceMain ||
+    !intakePanel ||
+    !consultPanel
+  ) {
+    return;
+  }
+
+  let aiWorkspace =
+    document.getElementById(
+      "visitAiWorkspace"
+    );
+
+  if (!aiWorkspace) {
+    aiWorkspace =
+      document.createElement(
+        "aside"
+      );
+
+    aiWorkspace.id =
+      "visitAiWorkspace";
+
+    aiWorkspace.className =
+      "visitAiWorkspace";
+
+    aiWorkspace.innerHTML = `
+      <div
+        class="visitAiWorkspaceHead"
+      >
+        <div
+          class="visitAiWorkspaceBrand"
+        >
+          <div
+            class="visitAiWorkspaceBrandIcon"
+          >
+            ✦
+          </div>
+
+          <div>
+            <strong>
+              PUG AI
+            </strong>
+
+            <span>
+              Інтелектуальний простір
+              поточного прийому
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="visitAiWorkspaceTabs"
+        >
+          <button
+            type="button"
+            class="
+              visitAiWorkspaceTab
+              active
+            "
+            data-ai-workspace-tab=
+              "intake"
+          >
+            🎙 Оформлення
+          </button>
+
+          <button
+            type="button"
+            class="visitAiWorkspaceTab"
+            data-ai-workspace-tab=
+              "consult"
+          >
+            🩺 Консультант
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="visitAiWorkspaceBody"
+      >
+        <div
+          class="visitAiWorkspacePane"
+          data-ai-workspace-pane=
+            "intake"
+        ></div>
+
+        <div
+          class="visitAiWorkspacePane"
+          data-ai-workspace-pane=
+            "consult"
+          hidden
+        ></div>
+      </div>
+    `;
+
+    workspaceGrid.insertBefore(
+      aiWorkspace,
+      workspaceMain
+    );
+  }
+
+  workspace.classList.add(
+    "hasPugAiWorkspace"
+  );
+
+  workspaceGrid.classList.add(
+    "hasPugAiWorkspace"
+  );
+
+  aiWorkspace.dataset.visitId =
+    String(visitId || "");
+
+  const intakePane =
+    aiWorkspace.querySelector(
+      '[data-ai-workspace-pane="intake"]'
+    );
+
+  const consultPane =
+    aiWorkspace.querySelector(
+      '[data-ai-workspace-pane="consult"]'
+    );
+
+  if (
+    intakePane &&
+    intakePanel.parentElement !==
+      intakePane
+  ) {
+    intakePane.appendChild(
+      intakePanel
+    );
+  }
+
+  if (
+    consultPane &&
+    consultPanel.parentElement !==
+      consultPane
+  ) {
+    consultPane.appendChild(
+      consultPanel
+    );
+  }
+
+  const activateAiWorkspaceTab =
+    (tabName) => {
+      const normalizedTab =
+        tabName === "consult"
+          ? "consult"
+          : "intake";
+
+      aiWorkspace.dataset.activeTab =
+        normalizedTab;
+
+      aiWorkspace
+        .querySelectorAll(
+          "[data-ai-workspace-tab]"
+        )
+        .forEach((button) => {
+          button.classList.toggle(
+            "active",
+            button.dataset
+              .aiWorkspaceTab ===
+              normalizedTab
+          );
+        });
+
+      aiWorkspace
+        .querySelectorAll(
+          "[data-ai-workspace-pane]"
+        )
+        .forEach((pane) => {
+          pane.hidden =
+            pane.dataset
+              .aiWorkspacePane !==
+              normalizedTab;
+        });
+    };
+
+  aiWorkspace
+    .querySelectorAll(
+      "[data-ai-workspace-tab]"
+    )
+    .forEach((button) => {
+      button.onclick = () => {
+        activateAiWorkspaceTab(
+          button.dataset
+            .aiWorkspaceTab
+        );
+      };
+    });
+
+  activateAiWorkspaceTab(
+    aiWorkspace.dataset.activeTab ||
+    "intake"
+  );
+}
+
 
 function renderVisitPage(visit, pet) {
     const visitId =
@@ -59540,6 +59765,10 @@ if (
       };
   }
 }
+  mountVisitAiWorkspace(
+    visitId
+  );
+
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();

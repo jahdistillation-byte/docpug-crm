@@ -53665,3 +53665,270 @@ button[data-patient-status-value="deceased"]:hover {
 #visitNewPetGeneralVaccinationDetails[hidden] {
   display: none !important;
 }
+/* =========================================================
+   PUG AI — VISIT WORKSPACE
+   ========================================================= */
+
+.visitWorkspace.hasPugAiWorkspace {
+  max-width: 1760px;
+}
+
+.visitWorkspaceGrid.hasPugAiWorkspace {
+  grid-template-columns:
+    minmax(320px, 360px)
+    minmax(680px, 1fr)
+    330px;
+}
+
+.visitAiWorkspace {
+  position: sticky;
+  top: 18px;
+  min-width: 0;
+  max-height: calc(100vh - 36px);
+  overflow: hidden;
+
+  border:
+    1px solid
+    var(--finance-border-strong);
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      155deg,
+      var(--finance-surface-1),
+      var(--finance-surface-2)
+    );
+
+  box-shadow:
+    0 22px 65px
+    var(--finance-shadow);
+
+  color:
+    var(--finance-text);
+}
+
+.visitAiWorkspaceHead {
+  padding: 18px 18px 14px;
+
+  border-bottom:
+    1px solid
+    var(--finance-border);
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--finance-accent-soft),
+      transparent
+    );
+}
+
+.visitAiWorkspaceBrand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.visitAiWorkspaceBrandIcon {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--finance-accent),
+      var(--finance-accent-2)
+    );
+
+  color: #ffffff;
+  font-size: 17px;
+
+  box-shadow:
+    0 10px 26px
+    var(--finance-accent-glow);
+}
+
+.visitAiWorkspaceBrand strong {
+  display: block;
+
+  color:
+    var(--finance-text);
+
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.visitAiWorkspaceBrand span {
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    var(--finance-text-muted);
+
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.visitAiWorkspaceTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+
+  margin-top: 15px;
+  padding: 4px;
+
+  border:
+    1px solid
+    var(--finance-border);
+  border-radius: 12px;
+
+  background:
+    var(--finance-input);
+}
+
+.visitAiWorkspaceTab {
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 10px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: transparent;
+  color:
+    var(--finance-text-muted);
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.visitAiWorkspaceTab:hover {
+  color:
+    var(--finance-text);
+}
+
+.visitAiWorkspaceTab.active {
+  background:
+    var(--finance-accent-soft);
+
+  color:
+    var(--finance-accent-2);
+
+  box-shadow:
+    inset 0 0 0 1px
+    var(--finance-border-strong);
+}
+
+.visitAiWorkspaceBody {
+  max-height:
+    calc(100vh - 180px);
+
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.visitAiWorkspacePane[hidden] {
+  display: none !important;
+}
+
+.visitAiWorkspacePane {
+  min-width: 0;
+}
+
+.visitAiWorkspacePane
+#visitAiIntakePanel,
+.visitAiWorkspacePane
+#visitAiConsultPanel {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.visitAiWorkspacePane
+#visitAiIntakePanel
+> div {
+  margin-bottom: 0 !important;
+}
+
+.visitAiWorkspacePane
+#visitAiConsultPanel {
+  grid-column: auto;
+}
+
+body[data-theme="white"]
+.visitAiWorkspace {
+  box-shadow:
+    0 20px 55px
+    rgba(35, 30, 60, 0.12),
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.92);
+}
+
+/* Средние ноутбуки:
+   AI остаётся единым блоком над рабочей зоной. */
+
+@media (max-width: 1550px) {
+  .visitWorkspace.hasPugAiWorkspace {
+    max-width: 1380px;
+  }
+
+  .visitWorkspaceGrid.hasPugAiWorkspace {
+    grid-template-columns:
+      minmax(0, 1fr)
+      330px;
+  }
+
+  .visitAiWorkspace {
+    position: static;
+    grid-column: 1 / -1;
+    max-height: none;
+  }
+
+  .visitAiWorkspaceBody {
+    max-height: none;
+  }
+}
+
+/* Планшеты и телефоны. */
+
+@media (max-width: 1120px) {
+  .visitWorkspaceGrid.hasPugAiWorkspace {
+    grid-template-columns: 1fr;
+  }
+
+  .visitAiWorkspace {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .visitAiWorkspace {
+    border-radius: 18px;
+  }
+
+  .visitAiWorkspaceHead {
+    padding: 15px;
+  }
+
+  .visitAiWorkspaceBody {
+    padding: 11px;
+  }
+
+  .visitAiWorkspaceTabs {
+    grid-template-columns: 1fr;
+  }
+}
