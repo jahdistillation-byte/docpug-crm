@@ -54128,3 +54128,188 @@ body[data-theme="white"]
     font-size: 14px !important;
   }
 }
+/* =========================================================
+   PUG AI — LARGE CLINICAL WORKSPACE
+   ========================================================= */
+
+@media (min-width: 1551px) {
+  .main-content:has(
+    .visitWorkspace.hasPugAiWorkspace
+  ) {
+    width:
+      calc(100vw - 16px) !important;
+
+    margin-left:
+      8px !important;
+
+    margin-right:
+      8px !important;
+  }
+
+  .visitWorkspace.hasPugAiWorkspace {
+    max-width: 1900px !important;
+  }
+
+  .visitWorkspaceGrid.hasPugAiWorkspace {
+    grid-template-columns:
+      minmax(560px, 600px)
+      minmax(720px, 1fr)
+      330px !important;
+  }
+}
+
+/* Заголовок AI Workspace */
+
+.visitAiWorkspaceBrand strong {
+  font-size: 20px !important;
+}
+
+.visitAiWorkspaceBrand span {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.visitAiWorkspaceBrandIcon {
+  width: 46px !important;
+  height: 46px !important;
+  flex-basis: 46px !important;
+  font-size: 20px !important;
+}
+
+/* Вкладки */
+
+.visitAiWorkspaceTab {
+  min-height: 50px !important;
+  padding: 12px 14px !important;
+  font-size: 15px !important;
+}
+
+/* Заголовок консультанта */
+
+.visitAiWorkspace
+.visitAiConsultTitle {
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSubtitle {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultBadge {
+  padding: 7px 10px !important;
+  font-size: 13px !important;
+}
+
+/* Быстрые вопросы */
+
+.visitAiWorkspace
+.visitAiConsultQuickButton {
+  min-height: 48px !important;
+  padding: 12px 14px !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+/* Поле вопроса */
+
+.visitAiWorkspace
+.visitAiConsultInput {
+  min-height: 125px !important;
+  padding: 15px 16px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSend {
+  min-height: 52px !important;
+  font-size: 16px !important;
+}
+
+/* Основной ответ */
+
+.visitAiWorkspace
+.visitAiConsultAnswer {
+  padding: 19px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultDirectAnswer {
+  font-size: 18px !important;
+  line-height: 1.72 !important;
+}
+
+/* Разделы ответа */
+
+.visitAiWorkspace
+.visitAiConsultSection {
+  margin-top: 19px !important;
+  padding-top: 17px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSection h4 {
+  margin-bottom: 12px !important;
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSection ul {
+  padding-left: 24px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultSection li {
+  margin: 10px 0 !important;
+  font-size: 17px !important;
+  line-height: 1.65 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultMeta {
+  margin-top: 17px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+/* Оформление приёма */
+
+.visitAiWorkspace
+#visitAiIntakePanel {
+  font-size: 17px !important;
+}
+
+.visitAiWorkspace
+#visitAiIntakePanel textarea {
+  min-height: 150px !important;
+  padding: 15px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
+}
+
+.visitAiWorkspace
+#visitAiIntakePanel button {
+  min-height: 48px !important;
+  font-size: 15px !important;
+}
+
+.visitAiWorkspace
+#visitAiStructureResult {
+  font-size: 17px !important;
+  line-height: 1.65 !important;
+}
+
+/* Чуть больше воздуха внутри панели */
+
+.visitAiWorkspaceHead {
+  padding: 21px 21px 17px !important;
+}
+
+.visitAiWorkspaceBody {
+  padding: 18px !important;
+}
