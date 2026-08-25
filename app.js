@@ -52549,9 +52549,9 @@ async function hydrateLabAiInterpretations(
     ),
   ];
 
-  await Promise.allSettled(
-    resultNodes.map(
-      async (resultNode) => {
+  for (const resultNode of resultNodes) {
+    await Promise.allSettled([
+      (async () => {
         const labId =
           resultNode.dataset
             .labAiResult;
@@ -52608,9 +52608,9 @@ async function hydrateLabAiInterpretations(
               "розшифровку PUG AI"
             );
         }
-      }
-    )
-  );
+            })(),
+    ]);
+  }
 }
 
 
