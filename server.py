@@ -21230,7 +21230,7 @@ Critical rules:
             "effort": "low",
             "mode": "standard",
         },
-        "max_output_tokens": 2600,
+        "max_output_tokens": 4000,
         "text": {
             "format": {
                 "type": "json_schema",
