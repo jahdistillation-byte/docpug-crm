@@ -60296,6 +60296,12 @@ if (
                 "Відповідь не сформовано."
               )}
             </div>
+                          ${renderConsultItems(
+              "Першочергові дії",
+              consultation
+                .suggested_next_steps,
+              "visitAiConsultPriority"
+            )}
 
             ${renderConsultItems(
               "Факти з картки",
@@ -60313,13 +60319,6 @@ if (
               consultation
                 .missing_information
             )}
-
-            ${renderConsultItems(
-              "Що можна розглянути",
-              consultation
-                .suggested_next_steps
-            )}
-
             ${renderConsultItems(
               "Важливо перевірити",
               consultation.safety_flags,

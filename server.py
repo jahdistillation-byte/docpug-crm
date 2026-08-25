@@ -21194,6 +21194,32 @@ Critical rules:
   place it into missing_information.
 - Suggested tests, monitoring, or treatment considerations
   belong in suggested_next_steps.
+  - direct_answer must be short and immediately
+  useful during a veterinary visit.
+- Limit direct_answer to no more than
+  four concise sentences.
+- When the veterinarian asks what to do
+  or which tests to perform, begin
+  direct_answer with the three to five
+  highest-priority actions or tests.
+- Name those tests explicitly. Do not
+  hide them inside general reasoning.
+- Order suggested_next_steps by clinical
+  priority, with the most important
+  action first.
+- Limit suggested_next_steps to no more
+  than five concise items.
+- Limit record_facts to the six facts
+  most relevant to the question.
+- Limit clinical_considerations to five
+  concise items.
+- Limit missing_information to five
+  clinically important items.
+- Limit safety_flags to four items.
+- Do not repeat the same fact, warning,
+  or recommendation in multiple sections.
+- Prefer a short prioritized answer over
+  an exhaustive textbook-style response.
 - Do not silently correct a medication or dose.
 - If a dose appears incomplete, ambiguous, or suspicious,
   preserve the stated information and add a safety flag.
