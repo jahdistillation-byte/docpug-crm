@@ -52406,11 +52406,20 @@ function renderLabAiInterpretation(
           ${
         meta?.stale
           ? `
-            <div class="labAiStaleNotice">
-              Контекст пацієнта змінився після
-              створення цієї розшифровки.
-              Збережений результат показано
-              без повторної генерації.
+                        <div class="labAiStaleNotice">
+              <span>
+                Контекст пацієнта змінився після
+                створення цієї розшифровки.
+                Збережений результат показано
+                без повторної генерації.
+              </span>
+
+              <button
+                type="button"
+                data-lab-ai-refresh
+              >
+                ✦ Оновити за новими даними
+              </button>
             </div>
           `
           : ""
@@ -52576,10 +52585,7 @@ async function hydrateLabAiInterpretations(
             ".labAiPanel"
           );
 
-                if (
-          panel &&
-          !data?.meta?.stale
-        ) {
+                        if (panel) {
           panel.classList.add(
             "is-collapsed"
           );
@@ -52595,17 +52601,12 @@ async function hydrateLabAiInterpretations(
             "[data-lab-ai]"
           );
 
-                if (button) {
+                        if (button) {
           button.textContent =
-            data?.meta?.stale
-              ? (
-                  "✦ Оновити " +
-                  "розшифровку PUG AI"
-                )
-              : (
-                  "✦ Показати повну " +
-                  "розшифровку PUG AI"
-                );
+            (
+              "✦ Показати повну " +
+              "розшифровку PUG AI"
+            );
         }
       }
     )
@@ -54513,6 +54514,44 @@ async function renderLabsTab(
     $("#labsList")?.addEventListener(
     "click",
     async (event) => {
+            const refreshButton =
+        event.target.closest(
+          "[data-lab-ai-refresh]"
+        );
+
+      if (refreshButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const card =
+          refreshButton.closest(
+            ".labHistoryCard"
+          );
+
+        const aiButton =
+          card?.querySelector(
+            "[data-lab-ai]"
+          );
+
+        const resultNode =
+          card?.querySelector(
+            "[data-lab-ai-result]"
+          );
+
+        if (
+          !aiButton ||
+          !resultNode
+        ) {
+          return;
+        }
+
+        resultNode.innerHTML = "";
+
+        aiButton.click();
+
+        return;
+      }
+
       const aiButton =
         event.target.closest(
           "[data-lab-ai]"
@@ -54542,19 +54581,12 @@ async function renderLabsTab(
           return;
         }
 
-                const existingPanel =
+                       const existingPanel =
           resultNode.querySelector(
             ".labAiPanel"
           );
 
-        const existingPanelIsStale =
-          existingPanel?.dataset
-            ?.labAiStale === "true";
-
-        if (
-          existingPanel &&
-          !existingPanelIsStale
-        ) {
+        if (existingPanel) {
           const isCollapsed =
             existingPanel
               .classList
