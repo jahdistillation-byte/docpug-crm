@@ -54612,3 +54612,27 @@ body[data-theme="white"]
 .labAiOverview {
   margin-bottom: 0;
 }
+.labAiPanel.is-stale {
+  border-color:
+    rgba(245, 158, 11, 0.48);
+}
+
+.labAiStaleNotice {
+  margin:
+    0 0 14px;
+  padding:
+    11px 13px;
+  border:
+    1px solid
+    rgba(245, 158, 11, 0.34);
+  border-radius:
+    12px;
+  background:
+    rgba(245, 158, 11, 0.09);
+  color:
+    rgba(254, 243, 199, 0.92);
+  font-size:
+    12px;
+  line-height:
+    1.55;
+}

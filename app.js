@@ -52391,7 +52391,30 @@ function renderLabAiInterpretation(
     "Не визначена";
 
   return `
-    <div class="labAiPanel">
+        <div
+      class="labAiPanel${
+        meta?.stale
+          ? " is-stale"
+          : ""
+      }"
+      data-lab-ai-stale="${
+        meta?.stale
+          ? "true"
+          : "false"
+      }"
+    >
+          ${
+        meta?.stale
+          ? `
+            <div class="labAiStaleNotice">
+              Контекст пацієнта змінився після
+              створення цієї розшифровки.
+              Збережений результат показано
+              без повторної генерації.
+            </div>
+          `
+          : ""
+      }
       <div class="labAiPanelHead">
         <div>
           <div class="labAiEyebrow">
@@ -52553,7 +52576,10 @@ async function hydrateLabAiInterpretations(
             ".labAiPanel"
           );
 
-        if (panel) {
+                if (
+          panel &&
+          !data?.meta?.stale
+        ) {
           panel.classList.add(
             "is-collapsed"
           );
@@ -52569,12 +52595,17 @@ async function hydrateLabAiInterpretations(
             "[data-lab-ai]"
           );
 
-        if (button) {
+                if (button) {
           button.textContent =
-            (
-              "✦ Показати повну " +
-              "розшифровку PUG AI"
-            );
+            data?.meta?.stale
+              ? (
+                  "✦ Оновити " +
+                  "розшифровку PUG AI"
+                )
+              : (
+                  "✦ Показати повну " +
+                  "розшифровку PUG AI"
+                );
         }
       }
     )
@@ -54511,12 +54542,19 @@ async function renderLabsTab(
           return;
         }
 
-        const existingPanel =
+                const existingPanel =
           resultNode.querySelector(
             ".labAiPanel"
           );
 
-        if (existingPanel) {
+        const existingPanelIsStale =
+          existingPanel?.dataset
+            ?.labAiStale === "true";
+
+        if (
+          existingPanel &&
+          !existingPanelIsStale
+        ) {
           const isCollapsed =
             existingPanel
               .classList

@@ -21410,10 +21410,35 @@ def api_get_cached_lab_ai_interpretation(
             != context_fingerprint
         ):
             return ok({
-                "interpretation": None,
+                "interpretation":
+                    cached.get(
+                        "interpretation"
+                    ) or {},
                 "meta": {
-                    "cached": False,
+                    "cached": True,
+                    "stale": True,
                     "cache_status": "stale",
+                    "stored_in_cache": True,
+                    "interpretation_version":
+                        cached.get(
+                            "interpretation_version"
+                        ),
+                    "language":
+                        cached.get(
+                            "language"
+                        ) or language,
+                    "model":
+                        cached.get("model"),
+                    "usage":
+                        cached.get(
+                            "usage"
+                        ) or {},
+                    "generated_at":
+                        cached.get(
+                            "generated_at"
+                        ),
+                    "cached_context_fingerprint":
+                        cached_fingerprint,
                     "context_fingerprint":
                         context_fingerprint,
                     "context_stats":
