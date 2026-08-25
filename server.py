@@ -19064,13 +19064,13 @@ def api_get_patient_ai_context(
         )
 
 PUG_AI_SUMMARY_VERSION = "2"
-PUG_AI_LAB_INTERPRETATION_VERSION = "2"
+PUG_AI_LAB_INTERPRETATION_VERSION = "3"
 AI_SUMMARY_LANGUAGES = {
     "uk": "Ukrainian",
     "en": "English",
     "pl": "Polish",
-    "de": "German",
     "es": "Spanish",
+    "de": "German",
 }
 
 
@@ -19415,6 +19415,36 @@ def pug_ai_lab_interpretation_schema():
         },
     }
 
+    diagnostic_hypothesis_array = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "diagnosis": {
+                    "type": "string",
+                },
+                "compatibility_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                },
+                "basis": {
+                    "type": "string",
+                },
+                "counterpoints": {
+                    "type": "string",
+                },
+            },
+            "required": [
+                "diagnosis",
+                "compatibility_percent",
+                "basis",
+                "counterpoints",
+            ],
+        },
+    }
+
     return {
         "type": "object",
         "additionalProperties": False,
@@ -19422,6 +19452,11 @@ def pug_ai_lab_interpretation_schema():
             "analysis_overview": {
                 "type": "string",
             },
+            "clinical_conclusion": {
+                "type": "string",
+            },
+            "diagnostic_hypotheses":
+                diagnostic_hypothesis_array,
             "analysis_facts":
                 string_array,
             "key_deviations":
@@ -19449,6 +19484,8 @@ def pug_ai_lab_interpretation_schema():
         },
         "required": [
             "analysis_overview",
+            "clinical_conclusion",
+            "diagnostic_hypotheses",
             "analysis_facts",
             "key_deviations",
             "pattern_interpretation",
@@ -19460,6 +19497,8 @@ def pug_ai_lab_interpretation_schema():
             "confidence",
         ],
     }
+
+
 
 
 def extract_openai_output_text(response_data):
@@ -20675,6 +20714,35 @@ def normalize_ai_vet_consult_visit(
         current_visit,
         dict,
     ):
+        diagnostic_hypothesis_array = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "diagnosis": {
+                    "type": "string",
+                },
+                "compatibility_percent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                },
+                "basis": {
+                    "type": "string",
+                },
+                "counterpoints": {
+                    "type": "string",
+                },
+            },
+            "required": [
+                "diagnosis",
+                "compatibility_percent",
+                "basis",
+                "counterpoints",
+            ],
+        },
+    }
         return {}
 
     normalized = {}
@@ -20738,10 +20806,6 @@ def get_cached_lab_ai_interpretation(
             .eq(
                 "language",
                 language,
-            )
-            .eq(
-                "interpretation_version",
-                PUG_AI_LAB_INTERPRETATION_VERSION,
             )
             .limit(1)
             .execute()
@@ -20925,10 +20989,70 @@ Critical rules:
   explains the clinical signs.
 - Use previous_same_type_labs only to
   describe supported laboratory dynamics.
-- Do not diagnose.
-- Do not prescribe treatment or medication.
+- Provide a clear and clinically useful
+  clinical_conclusion.
+- State which diagnosis or pathological
+  process is most compatible with the
+  complete supplied evidence.
+- Do not hide the main conclusion behind
+  generic cautious wording.
+- Return between 1 and 3 ranked
+  diagnostic_hypotheses.
+- For every hypothesis provide:
+  diagnosis, compatibility_percent,
+  basis, and counterpoints.
+- compatibility_percent is an AI estimate
+  of relative compatibility with the
+  supplied evidence, not a calibrated
+  statistical probability.
+- The compatibility percentages of all
+  returned hypotheses must be whole
+  numbers and must total exactly 100.
+- If a valid pathogen-specific PCR or
+  another direct detection test is
+  positive, clearly state that the
+  laboratory finding confirms detection
+  of that pathogen in the submitted
+  sample.
+- A confirmed pathogen detection may be
+  the leading hypothesis, while its
+  clinical significance must still be
+  correlated by the veterinarian.
+- Do not invent alternative diagnoses
+  only to fill the list. Return one
+  hypothesis with 100 percent when the
+  supplied evidence directly supports
+  only one reasonable conclusion.
+- The final clinical diagnosis and all
+  clinical decisions remain the
+  responsibility of the veterinarian.
+- Do not prescribe treatment or
+  medication.
 - Clearly distinguish recorded laboratory
-  facts from possible interpretation.
+  facts, clinical interpretation, and
+  diagnostic hypotheses.
+- Localize all user-facing medical terms
+  into the requested language.
+- Never expose internal database keys or
+  raw parameter codes such as UA_BLOOD,
+  UA_RBC, UA_WBC, UA_PRO, CREA, UREA,
+  TBIL, RBC, HGB, HCT, WBC, or PLT as
+  standalone names.
+- Write the localized medical name first.
+  A commonly accepted abbreviation may
+  follow in parentheses when useful.
+- In Ukrainian use forms such as:
+  еритроцити, гемоглобін, гематокрит,
+  лейкоцити, тромбоцити, креатинін,
+  сечовина, загальний білірубін,
+  кров або гемоглобін у сечі.
+- Apply equivalent professional
+  terminology for English, Polish,
+  Spanish, and German.
+- Preserve Latin organism names, but add
+  a localized explanation when useful,
+  for example: Babesia canis — збудник
+  бабезіозу собак.
 - Mention possible pre-analytical issues
   when relevant, such as haemolysis,
   lipaemia, sample quality, platelet
@@ -20969,7 +21093,7 @@ Critical rules:
             "format": {
                 "type": "json_schema",
                 "name":
-                    "pug_ai_lab_interpretation_v1",
+                    "pug_ai_lab_interpretation_v3",
                 "strict": True,
                 "schema":
                     pug_ai_lab_interpretation_schema(),

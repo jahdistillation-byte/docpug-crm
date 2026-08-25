@@ -52189,6 +52189,34 @@ async function requestDeletePatientLab(
 
   return true;
 }
+function getPugAiLanguage() {
+  const supportedLanguages =
+    new Set([
+      "uk",
+      "en",
+      "pl",
+      "es",
+      "de",
+    ]);
+
+  const selectedLanguage =
+    String(
+      LS.get(
+        "docpug_clinic_lang",
+        "uk"
+      ) || "uk"
+    )
+      .trim()
+      .toLowerCase();
+
+  return supportedLanguages.has(
+    selectedLanguage
+  )
+    ? selectedLanguage
+    : "uk";
+}
+
+
 async function requestCachedLabAiInterpretation(
   patientId,
   labId,
@@ -52360,6 +52388,235 @@ function renderLabAiList(
     </section>
   `;
 }
+function renderLabAiDiagnosticHypotheses(
+  items,
+  language = "uk"
+) {
+  const hypotheses =
+    Array.isArray(items)
+      ? items.filter(
+          (item) =>
+            item &&
+            typeof item ===
+              "object"
+        )
+      : [];
+
+  if (!hypotheses.length) {
+    return "";
+  }
+
+  const labelsByLanguage = {
+    uk: {
+      title:
+        "Діагностичні гіпотези",
+      compatibility:
+        "Сумісність",
+      basis:
+        "На користь",
+      counterpoints:
+        "Що не збігається",
+      disclaimer:
+        "Відсоток — відносна AI-оцінка сумісності з наданими даними, а не статистична ймовірність. Остаточний висновок робить ветеринарний лікар.",
+    },
+
+    en: {
+      title:
+        "Diagnostic hypotheses",
+      compatibility:
+        "Compatibility",
+      basis:
+        "Supporting evidence",
+      counterpoints:
+        "Counterpoints",
+      disclaimer:
+        "The percentage is an AI estimate of relative compatibility with the supplied evidence, not a calibrated statistical probability. The final conclusion is made by the veterinarian.",
+    },
+
+    pl: {
+      title:
+        "Hipotezy diagnostyczne",
+      compatibility:
+        "Zgodność",
+      basis:
+        "Przemawia za",
+      counterpoints:
+        "Argumenty przeciw",
+      disclaimer:
+        "Wartość procentowa jest względną oceną AI zgodności z dostarczonymi danymi, a nie statystycznym prawdopodobieństwem. Ostateczny wniosek należy do lekarza weterynarii.",
+    },
+
+    es: {
+      title:
+        "Hipótesis diagnósticas",
+      compatibility:
+        "Compatibilidad",
+      basis:
+        "Datos a favor",
+      counterpoints:
+        "Puntos en contra",
+      disclaimer:
+        "El porcentaje es una estimación de IA de la compatibilidad relativa con los datos aportados, no una probabilidad estadística calibrada. La conclusión final corresponde al veterinario.",
+    },
+
+    de: {
+      title:
+        "Diagnostische Hypothesen",
+      compatibility:
+        "Übereinstimmung",
+      basis:
+        "Dafür spricht",
+      counterpoints:
+        "Gegenargumente",
+      disclaimer:
+        "Der Prozentwert ist eine relative KI-Einschätzung der Übereinstimmung mit den vorliegenden Daten und keine kalibrierte statistische Wahrscheinlichkeit. Die endgültige Beurteilung erfolgt durch den Tierarzt.",
+    },
+  };
+
+  const labels =
+    labelsByLanguage[language] ||
+    labelsByLanguage.uk;
+
+  return `
+    <section
+      class="labAiHypotheses"
+    >
+      <div
+        class="labAiHypothesesTitle"
+      >
+        ${escapeHtml(labels.title)}
+      </div>
+
+      <div
+        class="labAiHypothesesGrid"
+      >
+        ${hypotheses
+          .map((item) => {
+            const diagnosis =
+              String(
+                item.diagnosis || ""
+              ).trim();
+
+            const numericPercent =
+              Number(
+                item
+                  .compatibility_percent
+              );
+
+            const percent =
+              Number.isFinite(
+                numericPercent
+              )
+                ? Math.max(
+                    0,
+                    Math.min(
+                      100,
+                      Math.round(
+                        numericPercent
+                      )
+                    )
+                  )
+                : 0;
+
+            const basis =
+              String(
+                item.basis || ""
+              ).trim();
+
+            const counterpoints =
+              String(
+                item.counterpoints || ""
+              ).trim();
+
+            return `
+              <article
+                class="labAiHypothesisCard"
+              >
+                <div
+                  class="labAiHypothesisHead"
+                >
+                  <h5>
+                    ${escapeHtml(
+                      diagnosis
+                    )}
+                  </h5>
+
+                  <span
+                    class="labAiHypothesisPercent"
+                  >
+                    ${percent}%
+                  </span>
+                </div>
+
+                ${
+                  basis
+                    ? `
+                      <div
+                        class="labAiHypothesisEvidence"
+                      >
+                        <b>
+                          ${escapeHtml(
+                            labels.basis
+                          )}:
+                        </b>
+
+                        ${escapeHtml(
+                          basis
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+
+                ${
+                  counterpoints
+                    ? `
+                      <div
+                        class="labAiHypothesisCounterpoints"
+                      >
+                        <b>
+                          ${escapeHtml(
+                            labels
+                              .counterpoints
+                          )}:
+                        </b>
+
+                        ${escapeHtml(
+                          counterpoints
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+
+                <div
+                  class="labAiHypothesisBar"
+                  aria-label="${escapeHtml(
+                    labels
+                      .compatibility
+                  )}: ${percent}%"
+                >
+                  <span
+                    style="width:${percent}%"
+                  ></span>
+                </div>
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+
+      <div
+        class="labAiHypothesesDisclaimer"
+      >
+        ${escapeHtml(
+          labels.disclaimer
+        )}
+      </div>
+    </section>
+  `;
+}
+
 
 function renderLabAiInterpretation(
   interpretation,
@@ -52373,22 +52630,252 @@ function renderLabAiInterpretation(
     return "";
   }
 
-  const confidenceLabels = {
-    low:
-      "Низька",
+    const language = String(
+    meta.language || "uk"
+  )
+    .trim()
+    .toLowerCase();
 
-    medium:
-      "Середня",
+  const uiByLanguage = {
+    uk: {
+      assistant:
+        "PUG AI · ЛАБОРАТОРНИЙ АСИСТЕНТ",
+      title:
+        "Розшифровка аналізу",
+      confidenceLabel:
+        "Впевненість AI:",
+      clinicalConclusion:
+        "Клінічний висновок",
+      keyDeviations:
+        "Ключові відхилення",
+      interpretation:
+        "Інтерпретація показників",
+      clinicalCorrelation:
+        "Зв’язок із клінічною картиною",
+      comparison:
+        "Порівняння з попередніми аналізами",
+      checks:
+        "Що варто перевірити",
+      warnings:
+        "Важливі застереження",
+      limitations:
+        "Обмеження",
+      stale:
+        "Контекст пацієнта змінився після створення цієї розшифровки. Збережений результат показано без повторної генерації.",
+      refresh:
+        "✦ Оновити за новими даними",
+      footer:
+        "AI-підтримка не замінює клінічне рішення лікаря.",
+      confidence: {
+        low: "Низька",
+        medium: "Середня",
+        high: "Висока",
+        unknown: "Не визначена",
+      },
+    },
 
-    high:
-      "Висока",
+    en: {
+      assistant:
+        "PUG AI · LABORATORY ASSISTANT",
+      title:
+        "Laboratory interpretation",
+      confidenceLabel:
+        "AI confidence:",
+      clinicalConclusion:
+        "Clinical conclusion",
+      keyDeviations:
+        "Key abnormalities",
+      interpretation:
+        "Interpretation of results",
+      clinicalCorrelation:
+        "Clinical correlation",
+      comparison:
+        "Comparison with previous tests",
+      checks:
+        "Recommended checks",
+      warnings:
+        "Important warnings",
+      limitations:
+        "Limitations",
+      stale:
+        "The patient context has changed since this interpretation was created. The saved result is shown without regenerating it.",
+      refresh:
+        "✦ Update with new data",
+      footer:
+        "AI support does not replace the veterinarian’s clinical judgment.",
+      confidence: {
+        low: "Low",
+        medium: "Medium",
+        high: "High",
+        unknown: "Not determined",
+      },
+    },
+
+    pl: {
+      assistant:
+        "PUG AI · ASYSTENT LABORATORYJNY",
+      title:
+        "Interpretacja badania",
+      confidenceLabel:
+        "Pewność AI:",
+      clinicalConclusion:
+        "Wniosek kliniczny",
+      keyDeviations:
+        "Kluczowe odchylenia",
+      interpretation:
+        "Interpretacja wyników",
+      clinicalCorrelation:
+        "Korelacja kliniczna",
+      comparison:
+        "Porównanie z poprzednimi badaniami",
+      checks:
+        "Co warto sprawdzić",
+      warnings:
+        "Ważne ostrzeżenia",
+      limitations:
+        "Ograniczenia",
+      stale:
+        "Kontekst pacjenta zmienił się po utworzeniu tej interpretacji. Zapisany wynik jest wyświetlany bez ponownego generowania.",
+      refresh:
+        "✦ Zaktualizuj według nowych danych",
+      footer:
+        "Wsparcie AI nie zastępuje oceny klinicznej lekarza weterynarii.",
+      confidence: {
+        low: "Niska",
+        medium: "Średnia",
+        high: "Wysoka",
+        unknown: "Nie określono",
+      },
+    },
+
+    es: {
+      assistant:
+        "PUG AI · ASISTENTE DE LABORATORIO",
+      title:
+        "Interpretación del análisis",
+      confidenceLabel:
+        "Confianza de la IA:",
+      clinicalConclusion:
+        "Conclusión clínica",
+      keyDeviations:
+        "Alteraciones principales",
+      interpretation:
+        "Interpretación de resultados",
+      clinicalCorrelation:
+        "Correlación clínica",
+      comparison:
+        "Comparación con análisis anteriores",
+      checks:
+        "Comprobaciones recomendadas",
+      warnings:
+        "Advertencias importantes",
+      limitations:
+        "Limitaciones",
+      stale:
+        "El contexto del paciente ha cambiado desde que se creó esta interpretación. Se muestra el resultado guardado sin volver a generarlo.",
+      refresh:
+        "✦ Actualizar con nuevos datos",
+      footer:
+        "La asistencia de IA no sustituye el criterio clínico del veterinario.",
+      confidence: {
+        low: "Baja",
+        medium: "Media",
+        high: "Alta",
+        unknown: "No determinada",
+      },
+    },
+
+    de: {
+      assistant:
+        "PUG AI · LABORASSISTENT",
+      title:
+        "Interpretation der Laboranalyse",
+      confidenceLabel:
+        "KI-Konfidenz:",
+      clinicalConclusion:
+        "Klinische Beurteilung",
+      keyDeviations:
+        "Wichtige Abweichungen",
+      interpretation:
+        "Interpretation der Ergebnisse",
+      clinicalCorrelation:
+        "Klinischer Zusammenhang",
+      comparison:
+        "Vergleich mit früheren Untersuchungen",
+      checks:
+        "Empfohlene Überprüfungen",
+      warnings:
+        "Wichtige Warnhinweise",
+      limitations:
+        "Einschränkungen",
+      stale:
+        "Der Patientenkontext hat sich seit der Erstellung dieser Interpretation geändert. Das gespeicherte Ergebnis wird ohne erneute Generierung angezeigt.",
+      refresh:
+        "✦ Mit neuen Daten aktualisieren",
+      footer:
+        "Die KI-Unterstützung ersetzt nicht die klinische Beurteilung durch den Tierarzt.",
+      confidence: {
+        low: "Niedrig",
+        medium: "Mittel",
+        high: "Hoch",
+        unknown: "Nicht bestimmt",
+      },
+    },
   };
 
+  const ui =
+    uiByLanguage[language] ||
+    uiByLanguage.uk;
+
+  const clinicalConclusionTitle =
+    ui.clinicalConclusion;
+  const cacheStateByLanguage = {
+    uk: {
+      saved:
+        "Збережена розшифровка",
+      fresh:
+        "Нова розшифровка",
+    },
+
+    en: {
+      saved:
+        "Saved interpretation",
+      fresh:
+        "New interpretation",
+    },
+
+    pl: {
+      saved:
+        "Zapisana interpretacja",
+      fresh:
+        "Nowa interpretacja",
+    },
+
+    es: {
+      saved:
+        "Interpretación guardada",
+      fresh:
+        "Nueva interpretación",
+    },
+
+    de: {
+      saved:
+        "Gespeicherte Interpretation",
+      fresh:
+        "Neue Interpretation",
+    },
+  };
+
+  const cacheState =
+    cacheStateByLanguage[
+      language
+    ] ||
+    cacheStateByLanguage.uk;
   const confidence =
-    confidenceLabels[
+    ui.confidence[
       interpretation.confidence
     ] ||
-    "Не визначена";
+    ui.confidence.unknown;
 
   return `
         <div
@@ -52407,18 +52894,19 @@ function renderLabAiInterpretation(
         meta?.stale
           ? `
                         <div class="labAiStaleNotice">
-              <span>
-                Контекст пацієнта змінився після
-                створення цієї розшифровки.
-                Збережений результат показано
-                без повторної генерації.
+                           <span>
+                ${escapeHtml(
+                  ui.stale
+                )}
               </span>
 
               <button
                 type="button"
                 data-lab-ai-refresh
               >
-                ✦ Оновити за новими даними
+                                ${escapeHtml(
+                  ui.refresh
+                )}
               </button>
             </div>
           `
@@ -52426,20 +52914,25 @@ function renderLabAiInterpretation(
       }
       <div class="labAiPanelHead">
         <div>
-          <div class="labAiEyebrow">
-            PUG AI · ЛАБОРАТОРНИЙ
-            АСИСТЕНТ
+                    <div class="labAiEyebrow">
+            ${escapeHtml(
+              ui.assistant
+            )}
           </div>
 
-          <h4>
-            Розшифровка аналізу
+                   <h4>
+            ${escapeHtml(
+              ui.title
+            )}
           </h4>
         </div>
 
         <span
           class="labAiConfidence"
         >
-                    Впевненість AI:
+                              ${escapeHtml(
+            ui.confidenceLabel
+          )}
           ${escapeHtml(confidence)}
         </span>
       </div>
@@ -52459,73 +52952,102 @@ function renderLabAiInterpretation(
           `
           : ""
       }
+      ${
+        interpretation
+          .clinical_conclusion
+          ? `
+            <section
+              class="labAiClinicalConclusion"
+            >
+              <div
+                class="labAiClinicalConclusionTitle"
+              >
+                ${escapeHtml(
+                  clinicalConclusionTitle
+                )}
+              </div>
 
-      <div class="labAiSections">
+              <div
+                class="labAiClinicalConclusionText"
+              >
+                ${escapeHtml(
+                  interpretation
+                    .clinical_conclusion
+                )}
+              </div>
+            </section>
+          `
+          : ""
+      }
+
+      ${renderLabAiDiagnosticHypotheses(
+        interpretation
+          .diagnostic_hypotheses,
+        language
+      )}
+
+           <div class="labAiSections">
         ${renderLabAiList(
-          "Ключові відхилення",
+          ui.keyDeviations,
           interpretation
             .key_deviations,
           "accent"
         )}
 
         ${renderLabAiList(
-          "Інтерпретація показників",
+          ui.interpretation,
           interpretation
             .pattern_interpretation
         )}
 
         ${renderLabAiList(
-          "Зв’язок із клінічною картиною",
+          ui.clinicalCorrelation,
           interpretation
             .clinical_correlation
         )}
 
         ${renderLabAiList(
-          "Порівняння з попередніми аналізами",
+          ui.comparison,
           interpretation
             .comparison_with_previous
         )}
 
         ${renderLabAiList(
-          "Що варто перевірити",
+          ui.checks,
           interpretation
             .recommended_checks,
           "action"
         )}
 
         ${renderLabAiList(
-          "Важливі застереження",
+          ui.warnings,
           interpretation
             .safety_flags,
           "warning"
         )}
 
         ${renderLabAiList(
-          "Обмеження",
+          ui.limitations,
           interpretation
             .limitations,
           "muted"
         )}
       </div>
 
-      <div class="labAiFooter">
+
+            <div class="labAiFooter">
         <span>
-          AI-підтримка не замінює
-          клінічне рішення лікаря.
+          ${escapeHtml(
+            ui.footer
+          )}
         </span>
 
         <span>
-          ${
+          ${escapeHtml(
             meta?.cached
-              ? (
-                  "Збережена " +
-                  "розшифровка"
-                )
-              : (
-                  "Нова " +
-                  "розшифровка"
-                )
-          }
+              ? cacheState.saved
+              : cacheState.fresh
+          )}
         </span>
       </div>
     </div>
@@ -52562,9 +53084,10 @@ async function hydrateLabAiInterpretations(
 
         const data =
           await (
-            requestCachedLabAiInterpretation(
+                        requestCachedLabAiInterpretation(
               patientId,
-              labId
+              labId,
+              getPugAiLanguage()
             )
           );
 
@@ -54629,9 +55152,10 @@ async function renderLabsTab(
         try {
           const data =
             await (
-              requestCreateLabAiInterpretation(
+                            requestCreateLabAiInterpretation(
                 pet.id,
-                labId
+                labId,
+                getPugAiLanguage()
               )
             );
 
@@ -59733,7 +60257,6 @@ if (
               </section>
             `;
           };
-
         const confidenceLabels = {
           low:
             "Низька впевненість",

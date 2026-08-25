@@ -54472,6 +54472,212 @@ body[data-theme="white"]
 
   line-height: 1.6;
 }
+.labAiClinicalConclusion {
+  margin-top: 12px;
+  padding: 15px 16px;
+
+  border:
+    1px solid
+    rgba(167, 139, 250, 0.34);
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(124, 58, 237, 0.18),
+      rgba(76, 29, 149, 0.08)
+    );
+
+  box-shadow:
+    inset 3px 0 0
+    rgba(167, 139, 250, 0.72);
+}
+
+.labAiClinicalConclusionTitle {
+  margin-bottom: 7px;
+
+  color: #c4b5fd;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.labAiClinicalConclusionText {
+  color: #f8fafc;
+
+  font-size: 14px;
+  font-weight: 650;
+
+  line-height: 1.6;
+}
+
+.labAiHypotheses {
+  margin-top: 12px;
+}
+
+.labAiHypothesesTitle {
+  margin-bottom: 9px;
+
+  color:
+    rgba(226, 232, 240, 0.92);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.labAiHypothesesGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(230px, 1fr)
+    );
+
+  gap: 10px;
+}
+
+.labAiHypothesisCard {
+  position: relative;
+
+  overflow: hidden;
+
+  padding: 14px;
+
+  border:
+    1px solid
+    rgba(167, 139, 250, 0.24);
+
+  border-radius: 13px;
+
+  background:
+    rgba(15, 23, 42, 0.5);
+}
+
+.labAiHypothesisHead {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 11px;
+}
+
+.labAiHypothesisHead h5 {
+  margin: 0;
+
+  color: #f8fafc;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  line-height: 1.4;
+}
+
+.labAiHypothesisPercent {
+  flex: 0 0 auto;
+
+  min-width: 48px;
+
+  padding: 5px 8px;
+
+  border:
+    1px solid
+    rgba(167, 139, 250, 0.3);
+
+  border-radius: 999px;
+
+  background:
+    rgba(124, 58, 237, 0.2);
+
+  color: #ddd6fe;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  text-align: center;
+}
+
+.labAiHypothesisEvidence,
+.labAiHypothesisCounterpoints {
+  color:
+    rgba(203, 213, 225, 0.9);
+
+  font-size: 11px;
+
+  line-height: 1.55;
+}
+
+.labAiHypothesisEvidence {
+  margin-bottom: 8px;
+}
+
+.labAiHypothesisEvidence b {
+  color: #a7f3d0;
+}
+
+.labAiHypothesisCounterpoints b {
+  color: #fcd34d;
+}
+
+.labAiHypothesisBar {
+  overflow: hidden;
+
+  height: 5px;
+
+  margin-top: 12px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(148, 163, 184, 0.12);
+}
+
+.labAiHypothesisBar span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      #7c3aed,
+      #a78bfa
+    );
+
+  box-shadow:
+    0 0 10px
+    rgba(167, 139, 250, 0.38);
+}
+
+.labAiHypothesesDisclaimer {
+  margin-top: 9px;
+
+  color:
+    rgba(148, 163, 184, 0.82);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+.labAiPanel.is-collapsed
+.labAiClinicalConclusion,
+.labAiPanel.is-collapsed
+.labAiHypotheses {
+  display: none;
+}
 .labAiSections {
   display: grid;
 
