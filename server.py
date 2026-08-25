@@ -21194,16 +21194,18 @@ Critical rules:
   place it into missing_information.
 - Suggested tests, monitoring, or treatment considerations
   belong in suggested_next_steps.
-  - direct_answer must be short and immediately
-  useful during a veterinary visit.
+  - direct_answer must contain only a short
+  clinical answer to the veterinarian's
+  main question.
 - Limit direct_answer to no more than
-  four concise sentences.
-- When the veterinarian asks what to do
-  or which tests to perform, begin
-  direct_answer with the three to five
-  highest-priority actions or tests.
-- Name those tests explicitly. Do not
-  hide them inside general reasoning.
+  two concise sentences.
+- State what clinical process or leading
+  differential diagnoses are most likely.
+- Do not place numbered actions, tests,
+  monitoring, or procedures inside
+  direct_answer.
+- Put all concrete actions and tests only
+  into suggested_next_steps.
 - Order suggested_next_steps by clinical
   priority, with the most important
   action first.
