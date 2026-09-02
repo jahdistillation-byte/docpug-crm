@@ -51820,9 +51820,14 @@ function normalizePatientLabFromApi(
         lab?.laboratory || ""
       ),
 
-    comment:
+        comment:
       String(
         lab?.comment || ""
+      ),
+
+    owner_explanation:
+      String(
+        lab?.owner_explanation || ""
       ),
 
     values:
@@ -52003,8 +52008,11 @@ async function requestCreatePatientLab(
         laboratory:
           lab?.laboratory || "",
 
-        comment:
+                comment:
           lab?.comment || "",
+
+        owner_explanation:
+          lab?.owner_explanation || "",
 
         values:
           lab?.values || {},
@@ -52092,8 +52100,11 @@ async function requestUpdatePatientLab(
         laboratory:
           lab?.laboratory || "",
 
-        comment:
+                comment:
           lab?.comment || "",
+
+        owner_explanation:
+          lab?.owner_explanation || "",
 
         values:
           lab?.values || {},
@@ -52617,6 +52628,411 @@ function renderLabAiDiagnosticHypotheses(
   `;
 }
 
+function getLabAiOwnerStatusMeta(
+  status
+) {
+  const normalizedStatus =
+    String(status || "")
+      .trim()
+      .toLowerCase();
+
+  const statusMap = {
+    high: {
+      icon: "↑",
+      className: "is-high",
+    },
+
+    low: {
+      icon: "↓",
+      className: "is-low",
+    },
+
+    mixed: {
+      icon: "↕",
+      className: "is-mixed",
+    },
+
+    abnormal: {
+      icon: "!",
+      className: "is-abnormal",
+    },
+
+    positive: {
+      icon: "+",
+      className: "is-positive",
+    },
+
+    negative: {
+      icon: "−",
+      className: "is-negative",
+    },
+  };
+
+  return (
+    statusMap[normalizedStatus] ||
+    statusMap.abnormal
+  );
+}
+
+
+function renderLabAiOwnerExplanation(
+  ownerExplanation,
+  language = "uk"
+) {
+  if (
+    !ownerExplanation ||
+    typeof ownerExplanation !==
+      "object"
+  ) {
+    return "";
+  }
+
+  const labelsByLanguage = {
+    uk: {
+      title:
+        "Пояснення для власника",
+      deviations:
+        "Що означають відхилення",
+      normal:
+        "Важливі показники в нормі",
+      next:
+        "Що далі",
+        apply:
+  "Додати до бланка",
+    },
+
+    en: {
+      title:
+        "Explanation for the owner",
+      deviations:
+        "What the abnormalities mean",
+      normal:
+        "Important normal findings",
+      next:
+        "What happens next",
+      apply:
+    "Add to report",
+},
+
+    pl: {
+      title:
+        "Wyjaśnienie dla właściciela",
+      deviations:
+        "Co oznaczają odchylenia",
+      normal:
+        "Ważne wyniki prawidłowe",
+      next:
+        "Co dalej",
+      apply:
+    "Dodaj do wyniku",
+},
+
+    es: {
+      title:
+        "Explicación para el propietario",
+      deviations:
+        "Qué significan las alteraciones",
+      normal:
+        "Resultados normales importantes",
+      next:
+        "Qué sigue",
+      apply:
+    "Añadir al informe",
+},
+
+    de: {
+      title:
+        "Erklärung für den Tierhalter",
+      deviations:
+        "Was die Abweichungen bedeuten",
+      normal:
+        "Wichtige unauffällige Befunde",
+      next:
+        "Wie es weitergeht",
+      copy:
+        "Erklärung kopieren",
+    },
+  };
+
+  const labels =
+    labelsByLanguage[language] ||
+    labelsByLanguage.uk;
+
+  const summary =
+    String(
+      ownerExplanation.summary || ""
+    ).trim();
+
+  const deviations =
+    Array.isArray(
+      ownerExplanation.deviations
+    )
+      ? ownerExplanation.deviations
+          .filter(
+            (item) =>
+              item &&
+              typeof item ===
+                "object"
+          )
+          .slice(0, 5)
+      : [];
+
+  const normalFindings =
+    Array.isArray(
+      ownerExplanation
+        .normal_findings
+    )
+      ? ownerExplanation
+          .normal_findings
+          .map((item) =>
+            String(item || "").trim()
+          )
+          .filter(Boolean)
+          .slice(0, 3)
+      : [];
+
+  const nextStep =
+    String(
+      ownerExplanation.next_step || ""
+    ).trim();
+
+  if (
+    !summary &&
+    !deviations.length &&
+    !normalFindings.length &&
+    !nextStep
+  ) {
+    return "";
+  }
+
+  const copyParts = [];
+
+  if (summary) {
+    copyParts.push(summary);
+  }
+
+  if (deviations.length) {
+    copyParts.push(
+      [
+        labels.deviations + ":",
+        ...deviations.map(
+          (item) => {
+            const statusMeta =
+              getLabAiOwnerStatusMeta(
+                item.status
+              );
+
+            const indicators =
+              String(
+                item.indicators || ""
+              ).trim();
+
+            const explanation =
+              String(
+                item.explanation || ""
+              ).trim();
+
+            return (
+              `${statusMeta.icon} ` +
+              `${indicators} — ` +
+              explanation
+            );
+          }
+        ),
+      ].join("\n")
+    );
+  }
+
+  if (normalFindings.length) {
+    copyParts.push(
+      [
+        labels.normal + ":",
+        ...normalFindings.map(
+          (item) => `• ${item}`
+        ),
+      ].join("\n")
+    );
+  }
+
+  if (nextStep) {
+    copyParts.push(
+      `${labels.next}: ${nextStep}`
+    );
+  }
+
+  const copyText =
+    copyParts.join("\n\n");
+
+  return `
+    <section
+      class="labAiOwnerExplanation"
+    >
+      <div
+        class="labAiOwnerExplanationHead"
+      >
+        <div>
+          <div
+            class="labAiOwnerExplanationEyebrow"
+          >
+            PUG AI
+          </div>
+
+          <h5>
+            ${escapeHtml(labels.title)}
+          </h5>
+        </div>
+
+        <button
+          type="button"
+          class="labAiOwnerCopyButton"
+          data-lab-ai-owner-apply="${
+            escapeHtml(
+              encodeURIComponent(
+                copyText
+              )
+            )
+          }"
+        >
+          ${escapeHtml(labels.apply)}
+        </button>
+      </div>
+
+      ${
+        summary
+          ? `
+            <p
+              class="labAiOwnerSummary"
+            >
+              ${escapeHtml(summary)}
+            </p>
+          `
+          : ""
+      }
+
+      ${
+        deviations.length
+          ? `
+            <div
+              class="labAiOwnerGroup"
+            >
+              <div
+                class="labAiOwnerGroupTitle"
+              >
+                ${
+                  escapeHtml(
+                    labels.deviations
+                  )
+                }
+              </div>
+
+              <div
+                class="labAiOwnerDeviations"
+              >
+                ${deviations
+                  .map((item) => {
+                    const statusMeta =
+                      getLabAiOwnerStatusMeta(
+                        item.status
+                      );
+
+                    return `
+                      <div
+                        class="
+                          labAiOwnerDeviation
+                          ${
+                            statusMeta
+                              .className
+                          }
+                        "
+                      >
+                        <span
+                          class="labAiOwnerDeviationIcon"
+                        >
+                          ${
+                            escapeHtml(
+                              statusMeta.icon
+                            )
+                          }
+                        </span>
+
+                        <div>
+                          <strong>
+                            ${
+                              escapeHtml(
+                                item
+                                  .indicators ||
+                                ""
+                              )
+                            }
+                          </strong>
+
+                          <p>
+                            ${
+                              escapeHtml(
+                                item
+                                  .explanation ||
+                                ""
+                              )
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        normalFindings.length
+          ? `
+            <div
+              class="labAiOwnerNormal"
+            >
+              <strong>
+                ${escapeHtml(labels.normal)}
+              </strong>
+
+              <ul>
+                ${normalFindings
+                  .map(
+                    (item) => `
+                      <li>
+                        ${escapeHtml(item)}
+                      </li>
+                    `
+                  )
+                  .join("")}
+              </ul>
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        nextStep
+          ? `
+            <div
+              class="labAiOwnerNextStep"
+            >
+              <strong>
+                ${escapeHtml(labels.next)}
+              </strong>
+
+              <p>
+                ${escapeHtml(nextStep)}
+              </p>
+            </div>
+          `
+          : ""
+      }
+    </section>
+  `;
+}
+
 
 function renderLabAiInterpretation(
   interpretation,
@@ -52827,6 +53243,20 @@ function renderLabAiInterpretation(
     uiByLanguage[language] ||
     uiByLanguage.uk;
 
+      const detailedLabelByLanguage = {
+    uk: "Поглиблений аналіз",
+    en: "Detailed analysis",
+    pl: "Szczegółowa analiza",
+    es: "Análisis detallado",
+    de: "Ausführliche Analyse",
+  };
+
+  const detailedLabel =
+    detailedLabelByLanguage[
+      language
+    ] ||
+    detailedLabelByLanguage.uk;
+
   const clinicalConclusionTitle =
     ui.clinicalConclusion;
   const cacheStateByLanguage = {
@@ -52980,59 +53410,95 @@ function renderLabAiInterpretation(
           : ""
       }
 
-      ${renderLabAiDiagnosticHypotheses(
-        interpretation
-          .diagnostic_hypotheses,
-        language
-      )}
-
-           <div class="labAiSections">
-        ${renderLabAiList(
-          ui.keyDeviations,
-          interpretation
-            .key_deviations,
-          "accent"
-        )}
-
-        ${renderLabAiList(
-          ui.interpretation,
-          interpretation
-            .pattern_interpretation
-        )}
-
-        ${renderLabAiList(
-          ui.clinicalCorrelation,
-          interpretation
-            .clinical_correlation
-        )}
-
-        ${renderLabAiList(
-          ui.comparison,
-          interpretation
-            .comparison_with_previous
-        )}
-
+            <div
+        class="labAiPrimaryChecks"
+      >
         ${renderLabAiList(
           ui.checks,
           interpretation
             .recommended_checks,
           "action"
         )}
-
-        ${renderLabAiList(
-          ui.warnings,
-          interpretation
-            .safety_flags,
-          "warning"
-        )}
-
-        ${renderLabAiList(
-          ui.limitations,
-          interpretation
-            .limitations,
-          "muted"
-        )}
       </div>
+
+      ${renderLabAiOwnerExplanation(
+        interpretation
+          .owner_explanation,
+        language
+      )}
+
+      <details
+        class="labAiDetails"
+      >
+        <summary>
+          <span>
+            ${escapeHtml(
+              detailedLabel
+            )}
+          </span>
+
+          <span
+            class="labAiDetailsChevron"
+            aria-hidden="true"
+          >
+            ↓
+          </span>
+        </summary>
+
+        <div
+          class="labAiDetailsBody"
+        >
+          ${renderLabAiDiagnosticHypotheses(
+            interpretation
+              .diagnostic_hypotheses,
+            language
+          )}
+
+          <div
+            class="labAiSections"
+          >
+            ${renderLabAiList(
+              ui.keyDeviations,
+              interpretation
+                .key_deviations,
+              "accent"
+            )}
+
+            ${renderLabAiList(
+              ui.interpretation,
+              interpretation
+                .pattern_interpretation
+            )}
+
+            ${renderLabAiList(
+              ui.clinicalCorrelation,
+              interpretation
+                .clinical_correlation
+            )}
+
+            ${renderLabAiList(
+              ui.comparison,
+              interpretation
+                .comparison_with_previous
+            )}
+
+            ${renderLabAiList(
+              ui.warnings,
+              interpretation
+                .safety_flags,
+              "warning"
+            )}
+
+            ${renderLabAiList(
+              ui.limitations,
+              interpretation
+                .limitations,
+              "muted"
+            )}
+          </div>
+        </div>
+      </details>
+      
 
 
             <div class="labAiFooter">
@@ -55037,239 +55503,425 @@ async function renderLabsTab(
     $("#labsList")?.addEventListener(
     "click",
     async (event) => {
-            const refreshButton =
-        event.target.closest(
-          "[data-lab-ai-refresh]"
-        );
+  const ownerApplyButton =
+    event.target.closest(
+      "[data-lab-ai-owner-apply]"
+    );
 
-      if (refreshButton) {
-        event.preventDefault();
-        event.stopPropagation();
+  if (ownerApplyButton) {
+    event.preventDefault();
+    event.stopPropagation();
 
-        const card =
-          refreshButton.closest(
-            ".labHistoryCard"
-          );
+    const resultNode =
+      ownerApplyButton.closest(
+        "[data-lab-ai-result]"
+      );
 
-        const aiButton =
-          card?.querySelector(
-            "[data-lab-ai]"
-          );
+    const labId =
+      resultNode?.dataset
+        .labAiResult || "";
 
-        const resultNode =
-          card?.querySelector(
-            "[data-lab-ai-result]"
-          );
+    const lab =
+      getCachedPatientLabs(
+        pet.id
+      ).find(
+        (item) =>
+          String(item.id) ===
+          String(labId)
+      );
 
-        if (
-          !aiButton ||
-          !resultNode
-        ) {
-          return;
-        }
+    if (!lab) {
+      alert(
+        "Аналіз не знайдено."
+      );
+      return;
+    }
 
-        resultNode.innerHTML = "";
+    const encodedText =
+      ownerApplyButton.dataset
+        .labAiOwnerApply || "";
 
-        aiButton.click();
+    let ownerExplanation = "";
 
-        return;
-      }
+    try {
+      ownerExplanation =
+        decodeURIComponent(
+          encodedText
+        ).trim();
+    } catch (error) {
+      console.error(
+        "Owner explanation decode failed:",
+        error
+      );
 
-      const aiButton =
-        event.target.closest(
-          "[data-lab-ai]"
-        );
+      alert(
+        "Не вдалося прочитати пояснення."
+      );
+      return;
+    }
 
-      if (aiButton) {
-        event.preventDefault();
-        event.stopPropagation();
+    if (!ownerExplanation) {
+      return;
+    }
 
-        const labId =
-          aiButton.dataset.labAi;
+    const language =
+      getPugAiLanguage();
 
-        const card =
-          aiButton.closest(
-            ".labHistoryCard"
-          );
+    const messagesByLanguage = {
+      uk: {
+        saving:
+          "Зберігаємо…",
 
-        const resultNode =
-          card?.querySelector(
-            "[data-lab-ai-result]"
-          );
+        saved:
+          "Додано до бланка ✓",
 
-                if (
-          !labId ||
-          !resultNode
-        ) {
-          return;
-        }
+        error:
+          "Не вдалося зберегти",
+      },
 
-                       const existingPanel =
-          resultNode.querySelector(
-            ".labAiPanel"
-          );
+      en: {
+        saving:
+          "Saving…",
 
-        if (existingPanel) {
-          const isCollapsed =
-            existingPanel
-              .classList
-              .toggle(
-                "is-collapsed"
-              );
+        saved:
+          "Added to report ✓",
 
-          aiButton.textContent =
-            isCollapsed
-              ? (
-                  "✦ Показати повну " +
-                  "розшифровку PUG AI"
-                )
-              : (
-                  "Сховати повну " +
-                  "розшифровку"
-                );
+        error:
+          "Could not save",
+      },
 
-          return;
-        }
+      pl: {
+        saving:
+          "Zapisywanie…",
 
-        const originalText =
-          aiButton.textContent;
+        saved:
+          "Dodano do wyniku ✓",
 
-        aiButton.disabled =
-          true;
+        error:
+          "Nie udało się zapisać",
+      },
 
-        aiButton.textContent =
-          "PUG AI аналізує…";
+      es: {
+        saving:
+          "Guardando…",
 
-        resultNode.innerHTML = `
-          <div class="labAiLoading">
-            ✦ Аналізуємо показники,
-            референси, історію та
-            останній релевантний
-            прийом…
-          </div>
-        `;
+        saved:
+          "Añadido al informe ✓",
 
-        try {
-          const data =
-            await (
-                            requestCreateLabAiInterpretation(
-                pet.id,
-                labId,
-                getPugAiLanguage()
-              )
-            );
+        error:
+          "No se pudo guardar",
+      },
 
-                    resultNode.innerHTML =
-            renderLabAiInterpretation(
-              data.interpretation,
-              data.meta || {}
-            );
+      de: {
+        saving:
+          "Speichern…",
 
-          aiButton.textContent =
-            (
-              "Сховати повну " +
-              "розшифровку"
-            );
-        } catch (error) {
-          console.error(
-            "PUG AI lab failed:",
-            error
-          );
+        saved:
+          "Zum Befund hinzugefügt ✓",
 
-          resultNode.innerHTML = `
-            <div class="labAiError">
-              ${escapeHtml(
-                error?.message ||
-                (
-                  "Не вдалося " +
-                  "розшифрувати аналіз."
-                )
-              )}
-            </div>
-          `;
+        error:
+          "Speichern fehlgeschlagen",
+      },
+    };
 
-          aiButton.textContent =
-            originalText ||
-            (
-              "✦ Розшифрувати " +
-              "з PUG AI"
-            );
-        } finally {
-          aiButton.disabled =
-            false;
-        }
+    const messages =
+      messagesByLanguage[language] ||
+      messagesByLanguage.uk;
 
-        return;
-      }
+    const originalText =
+      ownerApplyButton.textContent;
 
-      const deleteButton =
-        event.target.closest(
-          "[data-del-lab]"
-        );
+    ownerApplyButton.disabled =
+      true;
 
-    if (deleteButton) {
-      event.preventDefault();
-      event.stopPropagation();
+    ownerApplyButton.textContent =
+      messages.saving;
 
-      const id = deleteButton.dataset.delLab;
-      if (!id) return;
+    try {
+      await requestUpdatePatientLab(
+        pet.id,
+        labId,
+        {
+          ...lab,
 
-            const lab =
-        getCachedPatientLabs(
-          pet.id
-        ).find(
-          (item) =>
-            String(item.id) ===
-            String(id)
-        );
-
-      openDeleteModal(
-        `
-          <b>
-            ${
-              escapeHtml(
-                lab?.type ||
-                "Аналіз"
-              )
-            }
-          </b>
-
-          <br><br>
-
-          Результати дослідження
-          будуть видалені назавжди.
-
-          <br>
-
-          Цю дію неможливо
-          скасувати.
-        `,
-        async () => {
-          try {
-            await requestDeletePatientLab(
-              pet.id,
-              id
-            );
-
-            await renderLabsTab(
-              pet
-            );
-          } catch (error) {
-            console.error(
-              "Delete patient lab failed:",
-              error
-            );
-
-            alert(
-              error?.message ||
-              "Не вдалося видалити аналіз."
-            );
-          }
+          owner_explanation:
+            ownerExplanation,
         }
       );
 
+      ownerApplyButton.textContent =
+        messages.saved;
+
+      await new Promise(
+        (resolve) =>
+          window.setTimeout(
+            resolve,
+            700
+          )
+      );
+
+      await renderLabsTab(pet);
+    } catch (error) {
+      console.error(
+        "Owner explanation save failed:",
+        error
+      );
+
+      ownerApplyButton.textContent =
+        messages.error;
+
+      window.setTimeout(
+        () => {
+          ownerApplyButton.disabled =
+            false;
+
+          ownerApplyButton.textContent =
+            originalText;
+        },
+        1800
+      );
+    }
+
+    return;
+  }
+
+  const refreshButton =
+    event.target.closest(
+      "[data-lab-ai-refresh]"
+    );
+
+  if (refreshButton) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const card =
+      refreshButton.closest(
+        ".labHistoryCard"
+      );
+
+    const aiButton =
+      card?.querySelector(
+        "[data-lab-ai]"
+      );
+
+    const resultNode =
+      card?.querySelector(
+        "[data-lab-ai-result]"
+      );
+
+    if (
+      !aiButton ||
+      !resultNode
+    ) {
       return;
     }
+
+    resultNode.innerHTML = "";
+
+    aiButton.click();
+
+    return;
+  }
+
+  const aiButton =
+    event.target.closest(
+      "[data-lab-ai]"
+    );
+
+  if (aiButton) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const labId =
+      aiButton.dataset.labAi;
+
+    const card =
+      aiButton.closest(
+        ".labHistoryCard"
+      );
+
+    const resultNode =
+      card?.querySelector(
+        "[data-lab-ai-result]"
+      );
+
+    if (
+      !labId ||
+      !resultNode
+    ) {
+      return;
+    }
+
+    const existingPanel =
+      resultNode.querySelector(
+        ".labAiPanel"
+      );
+
+    if (existingPanel) {
+      const isCollapsed =
+        existingPanel
+          .classList
+          .toggle(
+            "is-collapsed"
+          );
+
+      aiButton.textContent =
+        isCollapsed
+          ? (
+              "✦ Показати повну " +
+              "розшифровку PUG AI"
+            )
+          : (
+              "Сховати повну " +
+              "розшифровку"
+            );
+
+      return;
+    }
+
+    const originalText =
+      aiButton.textContent;
+
+    aiButton.disabled =
+      true;
+
+    aiButton.textContent =
+      "PUG AI аналізує…";
+
+    resultNode.innerHTML = `
+      <div class="labAiLoading">
+        ✦ Аналізуємо показники,
+        референси, історію та
+        останній релевантний
+        прийом…
+      </div>
+    `;
+
+    try {
+      const data =
+        await (
+          requestCreateLabAiInterpretation(
+            pet.id,
+            labId,
+            getPugAiLanguage()
+          )
+        );
+
+      resultNode.innerHTML =
+        renderLabAiInterpretation(
+          data.interpretation,
+          data.meta || {}
+        );
+
+      aiButton.textContent =
+        (
+          "Сховати повну " +
+          "розшифровку"
+        );
+    } catch (error) {
+      console.error(
+        "PUG AI lab failed:",
+        error
+      );
+
+      resultNode.innerHTML = `
+        <div class="labAiError">
+          ${escapeHtml(
+            error?.message ||
+            (
+              "Не вдалося " +
+              "розшифрувати аналіз."
+            )
+          )}
+        </div>
+      `;
+
+      aiButton.textContent =
+        originalText ||
+        (
+          "✦ Розшифрувати " +
+          "з PUG AI"
+        );
+    } finally {
+      aiButton.disabled =
+        false;
+    }
+
+    return;
+  }
+
+  const deleteButton =
+    event.target.closest(
+      "[data-del-lab]"
+    );
+
+  if (deleteButton) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const id =
+      deleteButton.dataset.delLab;
+
+    if (!id) {
+      return;
+    }
+
+    const lab =
+      getCachedPatientLabs(
+        pet.id
+      ).find(
+        (item) =>
+          String(item.id) ===
+          String(id)
+      );
+
+    openDeleteModal(
+      `
+        <b>
+          ${
+            escapeHtml(
+              lab?.type ||
+              "Аналіз"
+            )
+          }
+        </b>
+
+        <br><br>
+
+        Результати дослідження
+        будуть видалені назавжди.
+
+        <br>
+
+        Цю дію неможливо
+        скасувати.
+      `,
+      async () => {
+        try {
+          await requestDeletePatientLab(
+            pet.id,
+            id
+          );
+
+          await renderLabsTab(
+            pet
+          );
+        } catch (error) {
+          console.error(
+            "Delete patient lab failed:",
+            error
+          );
+
+          alert(
+            error?.message ||
+            "Не вдалося видалити аналіз."
+          );
+        }
+      }
+    );
+
+    return;
+  }
 
     const editButton = event.target.closest("[data-edit-lab]");
 
@@ -55691,9 +56343,40 @@ function openLabModal(pet, labData = {}) {
                     "лабораторії..."
                   )
             }"
-          >${escapeHtml(
+                    >${escapeHtml(
             labData?.comment || ""
           )}</textarea>
+        </label>
+
+        <label
+          class="
+            premiumLabCommentField
+            premiumLabOwnerExplanationField
+          "
+        >
+          <span>
+            Пояснення для власника
+          </span>
+
+          <textarea
+            id="premiumLabOwnerExplanation"
+            rows="6"
+            maxlength="6000"
+            placeholder="Простими словами поясніть, що означають результати аналізу та які наступні дії рекомендує лікар..."
+          >${escapeHtml(
+            labData
+              ?.owner_explanation ||
+            ""
+          )}</textarea>
+
+          <small
+            class="premiumLabOwnerExplanationHint"
+          >
+            Цей текст буде збережено разом
+            з аналізом і додано до PDF.
+            Його можна написати вручну або
+            підготувати за допомогою PUG AI.
+          </small>
         </label>
       </div>
 
@@ -55842,9 +56525,16 @@ function openLabModal(pet, labData = {}) {
           .querySelector("#premiumLabLaboratory")
           ?.value?.trim() || "";
 
-      const comment =
+            const comment =
         modal
           .querySelector("#premiumLabComment")
+          ?.value?.trim() || "";
+
+      const ownerExplanation =
+        modal
+          .querySelector(
+            "#premiumLabOwnerExplanation"
+          )
           ?.value?.trim() || "";
 
       const nextValues = {};
@@ -55919,7 +56609,11 @@ function openLabModal(pet, labData = {}) {
         type,
         date,
         laboratory,
-        comment,
+                comment,
+
+        owner_explanation:
+          ownerExplanation,
+
         values:
           nextValues,
         refs:
@@ -56408,6 +57102,53 @@ function buildLabPdfDocument(
       `
       : "";
 
+        const ownerExplanationHtml =
+    lab?.owner_explanation &&
+    String(
+      lab.owner_explanation
+    ).trim()
+      ? `
+        <section
+          class="labPdfOwnerExplanation"
+          style="
+            margin-top: 18px;
+            padding: 16px 18px;
+            background: #EFFCF8;
+            border: 1px solid #BCEBDD;
+            border-left: 4px solid #0F9F8F;
+            border-radius: 12px;
+            page-break-inside: avoid;
+          "
+        >
+          <div
+            style="
+              margin-bottom: 7px;
+              color: #0F766E;
+              font-size: 8px;
+              font-weight: 900;
+              letter-spacing: .1em;
+              text-transform: uppercase;
+            "
+          >
+            Пояснення результатів
+            для власника
+          </div>
+
+          <div
+            style="
+              color: #243C39;
+              font-size: 11px;
+              line-height: 1.62;
+              white-space: pre-wrap;
+            "
+          >
+            ${escapeHtml(
+              lab.owner_explanation
+            )}
+          </div>
+        </section>
+      `
+      : "";
   const documentNode = document.createElement("div");
 
   documentNode.className = "docPugLabPdfDocument";
@@ -56854,7 +57595,9 @@ documentNode.innerHTML = `
     </table>
   </section>
 
-  ${commentHtml}
+    ${commentHtml}
+
+  ${ownerExplanationHtml}
 
   <section style="
     margin-top: 18px;
@@ -57153,10 +57896,11 @@ renderHost.style.cssText = `
 
     pagebreak: {
       mode: ["css", "legacy"],
-      avoid: [
+            avoid: [
         "tr",
         ".labPdfSummary",
         ".labPdfComment",
+        ".labPdfOwnerExplanation",
       ],
     },
   })
@@ -57423,6 +58167,35 @@ function renderLabCard(lab, speciesKey) {
               <div class="labHistoryCommentLabel">Коментар лікаря</div>
               <div class="labHistoryCommentText">
                 ${escapeHtml(lab.comment).replace(/\n/g, "<br>")}
+              </div>
+            </div>
+          `
+          : ""
+      }
+            ${
+        lab.owner_explanation &&
+        String(
+          lab.owner_explanation
+        ).trim()
+          ? `
+            <div
+              class="labHistoryOwnerExplanation"
+            >
+              <div
+                class="labHistoryOwnerExplanationLabel"
+              >
+                Пояснення для власника
+              </div>
+
+              <div
+                class="labHistoryOwnerExplanationText"
+              >
+                ${escapeHtml(
+                  lab.owner_explanation
+                ).replace(
+                  /\n/g,
+                  "<br>"
+                )}
               </div>
             </div>
           `

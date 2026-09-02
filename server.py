@@ -18194,7 +18194,13 @@ def api_create_patient_lab(
         or ""
     ).strip()[:6000]
 
+    owner_explanation = str(
+        data.get("owner_explanation")
+        or ""
+    ).strip()[:6000]
+
     values = data.get("values")
+
     refs = data.get("refs") or {}
 
     if not lab_type:
@@ -18310,6 +18316,9 @@ def api_create_patient_lab(
             "comment":
                 comment or None,
 
+            "owner_explanation":
+                owner_explanation or None,
+
             "values":
                 values,
 
@@ -18411,6 +18420,11 @@ def api_update_patient_lab(
         data.get("comment")
         or ""
     ).strip()[:6000]
+    
+    owner_explanation = str(
+        data.get("owner_explanation")
+        or ""
+    ).strip()[:6000]
 
     values = data.get("values")
     refs = data.get("refs") or {}
@@ -18487,11 +18501,14 @@ def api_update_patient_lab(
         "laboratory":
             laboratory or None,
 
-        "comment":
+            "comment":
             comment or None,
 
+        "owner_explanation":
+            owner_explanation or None,
+
         "values":
-            values,
+            values,    
 
         "refs":
             refs,
@@ -19064,7 +19081,7 @@ def api_get_patient_ai_context(
         )
 
 PUG_AI_SUMMARY_VERSION = "2"
-PUG_AI_LAB_INTERPRETATION_VERSION = "3"
+PUG_AI_LAB_INTERPRETATION_VERSION = "4"
 AI_SUMMARY_LANGUAGES = {
     "uk": "Ukrainian",
     "en": "English",
@@ -19417,6 +19434,7 @@ def pug_ai_lab_interpretation_schema():
 
     diagnostic_hypothesis_array = {
         "type": "array",
+        "maxItems": 3,
         "items": {
             "type": "object",
             "additionalProperties": False,
@@ -19445,15 +19463,79 @@ def pug_ai_lab_interpretation_schema():
         },
     }
 
+    owner_deviation_array = {
+        "type": "array",
+        "maxItems": 5,
+        "items": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "indicators": {
+                    "type": "string",
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "high",
+                        "low",
+                        "mixed",
+                        "abnormal",
+                        "positive",
+                        "negative",
+                    ],
+                },
+                "explanation": {
+                    "type": "string",
+                },
+            },
+            "required": [
+                "indicators",
+                "status",
+                "explanation",
+            ],
+        },
+    }
+
     return {
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "analysis_overview": {
-                "type": "string",
-            },
             "clinical_conclusion": {
                 "type": "string",
+            },
+            "recommended_checks": {
+                "type": "array",
+                "maxItems": 5,
+                "items": {
+                    "type": "string",
+                },
+            },
+            "owner_explanation": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "summary": {
+                        "type": "string",
+                    },
+                    "deviations":
+                        owner_deviation_array,
+                    "normal_findings": {
+                        "type": "array",
+                        "maxItems": 3,
+                        "items": {
+                            "type": "string",
+                        },
+                    },
+                    "next_step": {
+                        "type": "string",
+                    },
+                },
+                "required": [
+                    "summary",
+                    "deviations",
+                    "normal_findings",
+                    "next_step",
+                ],
             },
             "diagnostic_hypotheses":
                 diagnostic_hypothesis_array,
@@ -19466,8 +19548,6 @@ def pug_ai_lab_interpretation_schema():
             "clinical_correlation":
                 string_array,
             "comparison_with_previous":
-                string_array,
-            "recommended_checks":
                 string_array,
             "safety_flags":
                 string_array,
@@ -19483,15 +19563,15 @@ def pug_ai_lab_interpretation_schema():
             },
         },
         "required": [
-            "analysis_overview",
             "clinical_conclusion",
+            "recommended_checks",
+            "owner_explanation",
             "diagnostic_hypotheses",
             "analysis_facts",
             "key_deviations",
             "pattern_interpretation",
             "clinical_correlation",
             "comparison_with_previous",
-            "recommended_checks",
             "safety_flags",
             "limitations",
             "confidence",
@@ -20989,15 +21069,100 @@ Critical rules:
   explains the clinical signs.
 - Use previous_same_type_labs only to
   describe supported laboratory dynamics.
-- Provide a clear and clinically useful
-  clinical_conclusion.
-- State which diagnosis or pathological
-  process is most compatible with the
-  complete supplied evidence.
-- Do not hide the main conclusion behind
-  generic cautious wording.
+- clinical_conclusion is the main default
+  answer for the veterinarian.
+- Keep clinical_conclusion concise:
+  between two and four short sentences.
+- State the main laboratory pattern,
+  its most likely clinical meaning,
+  and the most compatible pathological
+  process based on the complete supplied
+  evidence.
+- Do not repeat every abnormal value
+  inside clinical_conclusion.
+- Do not place a list of tests or actions
+  inside clinical_conclusion.
+- Put all concrete additional tests and
+  checks only into recommended_checks.
+- Return no more than five
+  recommended_checks.
+- Order recommended_checks by clinical
+  priority.
+- Name useful tests explicitly instead
+  of writing generic phrases such as
+  further diagnostics are recommended.
+- Do not recommend tests that are already
+  present in related_episode_labs.
+- Return an empty recommended_checks list
+  when no additional laboratory check is
+  meaningfully supported.
+
+Owner explanation rules:
+- owner_explanation is written for the
+  animal owner, not for a veterinarian.
+- Use calm, clear, everyday language.
+- Do not mention AI in owner_explanation.
+- Do not use unexplained medical
+  terminology.
+- owner_explanation.summary must contain
+  two or three short sentences explaining
+  the overall meaning of the analysis.
+- owner_explanation.deviations must contain
+  no more than five clinically meaningful
+  explanations.
+- Explain only abnormalities that matter
+  for understanding the current clinical
+  picture.
+- Group closely related abnormalities
+  when they describe one process.
+- For example, increased leukocytes,
+  neutrophils, and band neutrophils may
+  be explained together as evidence of
+  an active inflammatory response.
+- indicators must contain localized
+  human-readable parameter names and
+  must never contain raw database codes.
+- Set status to high, low, mixed,
+  abnormal, positive, or negative
+  according to the supplied result.
+- Each explanation must say in simple
+  words what the finding may mean in
+  this patient.
+- Never present one isolated abnormal
+  value as a confirmed diagnosis.
+- Never describe low lymphocytes simply
+  as weak immunity.
+- owner_explanation.normal_findings must
+  contain no more than three reassuring
+  normal findings that are relevant to
+  the current picture.
+- Do not list every normal parameter.
+- owner_explanation.next_step must be one
+  short and calm sentence explaining why
+  the veterinarian may recommend the
+  next examination, test, or monitoring.
+- Do not frighten the owner and do not
+  minimize potentially important findings.
+- The owner explanation must make clear
+  when the analysis alone cannot identify
+  the exact cause or location of disease.
+
+Detailed analysis rules:
 - Return between 1 and 3 ranked
   diagnostic_hypotheses.
+- analysis_facts, key_deviations,
+  pattern_interpretation,
+  clinical_correlation,
+  comparison_with_previous,
+  diagnostic_hypotheses, safety_flags,
+  and limitations form the optional
+  detailed analysis.
+- These detailed fields may expand the
+  reasoning but must not repeat complete
+  sentences from clinical_conclusion,
+  recommended_checks, or
+  owner_explanation.
+
 - For every hypothesis provide:
   diagnosis, compatibility_percent,
   basis, and counterpoints.
@@ -21093,7 +21258,7 @@ Critical rules:
             "format": {
                 "type": "json_schema",
                 "name":
-                    "pug_ai_lab_interpretation_v3",
+                    "pug_ai_lab_interpretation_v4",
                 "strict": True,
                 "schema":
                     pug_ai_lab_interpretation_schema(),
