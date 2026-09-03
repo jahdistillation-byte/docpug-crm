@@ -57184,9 +57184,11 @@ padding: ${labPdfLayout.sectionPadding};
 
   line-height: 1.55;
   white-space: pre-wrap;
-">
-  ${escapeHtml(lab.comment)}
-</div>
+">${escapeHtml(
+  String(
+    lab.comment || ""
+  ).trim()
+)}</div>
         </section>
       `
       : "";
@@ -57235,13 +57237,12 @@ padding: ${labPdfLayout.ownerPadding};
 
     line-height: ${labPdfLayout.ownerLineHeight};
     white-space: pre-wrap;
-
   "
->
-            ${escapeHtml(
-              lab.owner_explanation
-            )}
-          </div>
+>${escapeHtml(
+  String(
+    lab.owner_explanation || ""
+  ).trim()
+)}</div>
         </section>
       `
       : "";
