@@ -57040,14 +57040,20 @@ function buildLabPdfDocument(
             </div>
 
             <div style="
-              margin-top: 3px;
-              color: #9298A4;
-              font-size: 8px;
-              font-weight: 700;
-              letter-spacing: .08em;
-            ">
-              ${escapeHtml(metric.key)}
-            </div>
+  display: ${
+    isCompactLabPdf
+      ? "none"
+      : "block"
+  };
+
+  margin-top: 3px;
+  color: #9298A4;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .08em;
+">
+  ${escapeHtml(metric.key)}
+</div>
           </td>
 
           <td style="
@@ -57058,21 +57064,48 @@ function buildLabPdfDocument(
             background: ${resultCellBackground};
           ">
             <div style="
-              color: ${metric.statusMeta.color};
-              font-size: 15px;
-              font-weight: 900;
-              line-height: 1.15;
-            ">
-              ${escapeHtml(normalizeLabPdfNumber(metric.value))}
-            </div>
+  display: ${
+    isCompactLabPdf
+      ? "inline"
+      : "block"
+  };
+
+  color: ${metric.statusMeta.color};
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.15;
+">
+  ${escapeHtml(
+    normalizeLabPdfNumber(
+      metric.value
+    )
+  )}
+</div>
 
             <div style="
-              margin-top: 2px;
-              color: #777E8C;
-              font-size: 8px;
-            ">
-              ${unitText || "—"}
-            </div>
+  display: ${
+    isCompactLabPdf
+      ? "inline"
+      : "block"
+  };
+
+  margin-top: ${
+    isCompactLabPdf
+      ? "0"
+      : "2px"
+  };
+
+  margin-left: ${
+    isCompactLabPdf
+      ? "4px"
+      : "0"
+  };
+
+  color: #777E8C;
+  font-size: 8px;
+">
+  ${unitText || "—"}
+</div>
           </td>
 
           <td style="
