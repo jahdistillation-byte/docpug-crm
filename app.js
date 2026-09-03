@@ -52861,7 +52861,7 @@ function renderLabAiOwnerExplanation(
   }
 
   const copyText =
-    copyParts.join("\n\n");
+  copyParts.join("\n");
 
   return `
     <section
