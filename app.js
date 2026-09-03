@@ -56949,6 +56949,11 @@ function buildLabPdfDocument(
           ownerLineHeight:
             "1.62",
         };
+          const useCompactOwnerColumns =
+    isCompactLabPdf &&
+    String(
+      lab?.owner_explanation || ""
+    ).trim().length > 700;
 
   const normalCount = metrics.filter(
     (item) => item.status === "normal"
@@ -57202,6 +57207,24 @@ padding: ${labPdfLayout.ownerPadding};
 
     line-height: ${labPdfLayout.ownerLineHeight};
     white-space: pre-wrap;
+
+    column-count: ${
+      useCompactOwnerColumns
+        ? "2"
+        : "1"
+    };
+
+    column-gap: ${
+      useCompactOwnerColumns
+        ? "18px"
+        : "0"
+    };
+
+    column-rule: ${
+      useCompactOwnerColumns
+        ? "1px solid #D2EFE7"
+        : "none"
+    };
   "
 >
             ${escapeHtml(
@@ -57381,14 +57404,14 @@ documentNode.innerHTML = `
     gap: 10px;
     margin-top: ${
   isCompactLabPdf
-    ? "12px"
+    ? "8px"
     : "20px"
 };
   ">
     <div style="
       padding: ${
   isCompactLabPdf
-    ? "9px 11px"
+    ? "6px 10px"
     : "13px 14px"
 };
       background: #F7F5FA;
@@ -57406,18 +57429,38 @@ documentNode.innerHTML = `
       </div>
 
       <div style="
-        margin-top: 5px;
-        color: #1D212B;
-        font-size: 15px;
+        margin-top: ${
+  isCompactLabPdf
+    ? "3px"
+    : "5px"
+};
+
+color: #1D212B;
+
+font-size: ${
+  isCompactLabPdf
+    ? "13px"
+    : "15px"
+};
         font-weight: 900;
       ">
         ${escapeHtml(pet?.name || "—")}
       </div>
 
       <div style="
-        margin-top: 3px;
-        color: #697080;
-        font-size: 9px;
+        margin-top: ${
+  isCompactLabPdf
+    ? "1px"
+    : "3px"
+};
+
+color: #697080;
+
+font-size: ${
+  isCompactLabPdf
+    ? "8px"
+    : "9px"
+};
       ">
         ${escapeHtml(speciesLabel)}
         ${
@@ -57431,7 +57474,7 @@ documentNode.innerHTML = `
     <div style="
       padding: ${
   isCompactLabPdf
-    ? "9px 11px"
+    ? "6px 10px"
     : "13px 14px"
 };
       background: #F7F5FA;
@@ -57449,9 +57492,19 @@ documentNode.innerHTML = `
       </div>
 
       <div style="
-        margin-top: 7px;
-        color: #1D212B;
-        font-size: 12px;
+        margin-top: ${
+  isCompactLabPdf
+    ? "3px"
+    : "7px"
+};
+
+color: #1D212B;
+
+font-size: ${
+  isCompactLabPdf
+    ? "11px"
+    : "12px"
+};
         font-weight: 850;
       ">
         ${escapeHtml(
@@ -57465,7 +57518,7 @@ documentNode.innerHTML = `
     <div style="
      padding: ${
   isCompactLabPdf
-    ? "9px 11px"
+    ? "6px 10px"
     : "13px 14px"
 };
       background: #F7F5FA;
@@ -57483,9 +57536,19 @@ documentNode.innerHTML = `
       </div>
 
       <div style="
-        margin-top: 7px;
-        color: #1D212B;
-        font-size: 12px;
+       margin-top: ${
+  isCompactLabPdf
+    ? "3px"
+    : "7px"
+};
+
+color: #1D212B;
+
+font-size: ${
+  isCompactLabPdf
+    ? "11px"
+    : "12px"
+};
         font-weight: 850;
       ">
         ${escapeHtml(lab?.laboratory || "Не вказано")}
