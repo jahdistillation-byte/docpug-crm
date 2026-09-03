@@ -56900,6 +56900,56 @@ function buildLabPdfDocument(
     };
   });
 
+    const isCompactLabPdf =
+    metrics.length <= 12;
+
+  const labPdfLayout =
+    isCompactLabPdf
+      ? {
+          pagePadding:
+            "24px 34px 20px",
+
+          rowPadding:
+            "6px 10px",
+
+          tableHeaderPadding:
+            "7px 10px",
+
+          sectionGap:
+            "10px",
+
+          sectionPadding:
+            "10px 12px",
+
+          ownerPadding:
+            "11px 14px",
+
+          ownerLineHeight:
+            "1.42",
+        }
+      : {
+          pagePadding:
+            "38px 42px 30px",
+
+          rowPadding:
+            "11px 12px",
+
+          tableHeaderPadding:
+            "10px 12px",
+
+          sectionGap:
+            "18px",
+
+          sectionPadding:
+            "14px 16px",
+
+          ownerPadding:
+            "16px 18px",
+
+          ownerLineHeight:
+            "1.62",
+        };
+
   const normalCount = metrics.filter(
     (item) => item.status === "normal"
   ).length;
@@ -56971,7 +57021,7 @@ function buildLabPdfDocument(
         ">
           <td style="
             width: 34%;
-            padding: 11px 12px;
+            padding: ${labPdfLayout.rowPadding};
             border-bottom: 1px solid #E9EBF0;
             vertical-align: middle;
           ">
@@ -56997,7 +57047,7 @@ function buildLabPdfDocument(
 
           <td style="
             width: 19%;
-            padding: 11px 12px;
+            padding: ${labPdfLayout.rowPadding};
             border-bottom: 1px solid #E9EBF0;
             vertical-align: middle;
             background: ${resultCellBackground};
@@ -57022,7 +57072,7 @@ function buildLabPdfDocument(
 
           <td style="
             width: 24%;
-            padding: 11px 12px;
+            padding: ${labPdfLayout.rowPadding};
             border-bottom: 1px solid #E9EBF0;
             vertical-align: middle;
           ">
@@ -57037,7 +57087,7 @@ function buildLabPdfDocument(
 
           <td style="
             width: 23%;
-            padding: 11px 12px;
+            padding: ${labPdfLayout.rowPadding};
             border-bottom: 1px solid #E9EBF0;
             vertical-align: middle;
           ">
@@ -57071,8 +57121,8 @@ function buildLabPdfDocument(
     lab?.comment && String(lab.comment).trim()
       ? `
         <section style="
-          margin-top: 18px;
-          padding: 14px 16px;
+          margin-top: ${labPdfLayout.sectionGap};
+padding: ${labPdfLayout.sectionPadding};
           background: #F7F3FC;
           border: 1px solid #E8DDF5;
           border-left: 4px solid #8C43D6;
@@ -57091,13 +57141,19 @@ function buildLabPdfDocument(
           </div>
 
           <div style="
-            color: #333846;
-            font-size: 11px;
-            line-height: 1.55;
-            white-space: pre-wrap;
-          ">
-            ${escapeHtml(lab.comment)}
-          </div>
+  color: #333846;
+
+  font-size: ${
+    isCompactLabPdf
+      ? "9.5px"
+      : "11px"
+  };
+
+  line-height: 1.55;
+  white-space: pre-wrap;
+">
+  ${escapeHtml(lab.comment)}
+</div>
         </section>
       `
       : "";
@@ -57111,8 +57167,8 @@ function buildLabPdfDocument(
         <section
           class="labPdfOwnerExplanation"
           style="
-            margin-top: 18px;
-            padding: 16px 18px;
+            margin-top: ${labPdfLayout.sectionGap};
+padding: ${labPdfLayout.ownerPadding};
             background: #EFFCF8;
             border: 1px solid #BCEBDD;
             border-left: 4px solid #0F9F8F;
@@ -57135,13 +57191,19 @@ function buildLabPdfDocument(
           </div>
 
           <div
-            style="
-              color: #243C39;
-              font-size: 11px;
-              line-height: 1.62;
-              white-space: pre-wrap;
-            "
-          >
+  style="
+    color: #243C39;
+
+    font-size: ${
+      isCompactLabPdf
+        ? "9.5px"
+        : "11px"
+    };
+
+    line-height: ${labPdfLayout.ownerLineHeight};
+    white-space: pre-wrap;
+  "
+>
             ${escapeHtml(
               lab.owner_explanation
             )}
@@ -57156,7 +57218,7 @@ function buildLabPdfDocument(
   documentNode.style.cssText = `
     width: 794px;
     min-height: 1123px;
-    padding: 38px 42px 30px;
+    padding: ${labPdfLayout.pagePadding};
     box-sizing: border-box;
     color: #171A21;
     background: #FFFFFF;
@@ -57169,7 +57231,11 @@ documentNode.innerHTML = `
     justify-content: space-between;
     align-items: flex-start;
     gap: 24px;
-    padding-bottom: 22px;
+    padding-bottom: ${
+  isCompactLabPdf
+    ? "14px"
+    : "22px"
+};
     border-bottom: 2px solid ${escapeHtml(clinicAccent)};
   ">
     <div style="
@@ -57313,10 +57379,18 @@ documentNode.innerHTML = `
     display: grid;
     grid-template-columns: 1.25fr 1fr 1fr;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: ${
+  isCompactLabPdf
+    ? "12px"
+    : "20px"
+};
   ">
     <div style="
-      padding: 13px 14px;
+      padding: ${
+  isCompactLabPdf
+    ? "9px 11px"
+    : "13px 14px"
+};
       background: #F7F5FA;
       border: 1px solid #EBE6F1;
       border-radius: 12px;
@@ -57355,7 +57429,11 @@ documentNode.innerHTML = `
     </div>
 
     <div style="
-      padding: 13px 14px;
+      padding: ${
+  isCompactLabPdf
+    ? "9px 11px"
+    : "13px 14px"
+};
       background: #F7F5FA;
       border: 1px solid #EBE6F1;
       border-radius: 12px;
@@ -57385,7 +57463,11 @@ documentNode.innerHTML = `
     </div>
 
     <div style="
-      padding: 13px 14px;
+     padding: ${
+  isCompactLabPdf
+    ? "9px 11px"
+    : "13px 14px"
+};
       background: #F7F5FA;
       border: 1px solid #EBE6F1;
       border-radius: 12px;
@@ -57412,8 +57494,17 @@ documentNode.innerHTML = `
   </section>
 
   <section style="
-    margin-top: 16px;
-    padding: 14px 16px;
+   margin-top: ${
+  isCompactLabPdf
+    ? "10px"
+    : "16px"
+};
+
+padding: ${
+  isCompactLabPdf
+    ? "9px 12px"
+    : "14px 16px"
+};
     background: ${summaryBackground};
     border: 1px solid ${summaryBorder};
     border-radius: 12px;
@@ -57509,7 +57600,7 @@ documentNode.innerHTML = `
   </section>
 
   <section style="
-    margin-top: 18px;
+    margin-top: ${labPdfLayout.sectionGap};
     overflow: hidden;
     border: 1px solid #E2E5EA;
     border-radius: 13px;
@@ -57523,7 +57614,7 @@ documentNode.innerHTML = `
         <tr style="background: #292333;">
           <th style="
             width: 34%;
-            padding: 10px 12px;
+            padding: ${labPdfLayout.tableHeaderPadding};
             color: #FFFFFF;
             font-size: 8px;
             font-weight: 850;
@@ -57536,7 +57627,7 @@ documentNode.innerHTML = `
 
           <th style="
             width: 19%;
-            padding: 10px 12px;
+            padding: ${labPdfLayout.tableHeaderPadding};
             color: #FFFFFF;
             font-size: 8px;
             font-weight: 850;
@@ -57549,7 +57640,7 @@ documentNode.innerHTML = `
 
           <th style="
             width: 24%;
-            padding: 10px 12px;
+            padding: ${labPdfLayout.tableHeaderPadding};
             color: #FFFFFF;
             font-size: 8px;
             font-weight: 850;
@@ -57562,7 +57653,7 @@ documentNode.innerHTML = `
 
           <th style="
             width: 23%;
-            padding: 10px 12px;
+            padding: ${labPdfLayout.tableHeaderPadding};
             color: #FFFFFF;
             font-size: 8px;
             font-weight: 850;
@@ -57600,8 +57691,18 @@ documentNode.innerHTML = `
   ${ownerExplanationHtml}
 
   <section style="
-    margin-top: 18px;
-    padding: 12px 14px;
+    margin-top: ${
+      isCompactLabPdf
+        ? "9px"
+        : "18px"
+    };
+
+    padding: ${
+      isCompactLabPdf
+        ? "8px 10px"
+        : "12px 14px"
+    };
+
     background: #FAFAFC;
     border: 1px solid #EBEDF1;
     border-radius: 10px;
@@ -57712,8 +57813,17 @@ documentNode.innerHTML = `
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    margin-top: 22px;
-    padding-top: 14px;
+    margin-top: ${
+  isCompactLabPdf
+    ? "10px"
+    : "22px"
+};
+
+padding-top: ${
+  isCompactLabPdf
+    ? "8px"
+    : "14px"
+};
     border-top: 1px solid #E1E4E9;
     color: #8B929F;
     font-size: 8px;
