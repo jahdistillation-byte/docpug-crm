@@ -56949,11 +56949,6 @@ function buildLabPdfDocument(
           ownerLineHeight:
             "1.62",
         };
-          const useCompactOwnerColumns =
-    isCompactLabPdf &&
-    String(
-      lab?.owner_explanation || ""
-    ).trim().length > 700;
 
   const normalCount = metrics.filter(
     (item) => item.status === "normal"
@@ -57241,23 +57236,6 @@ padding: ${labPdfLayout.ownerPadding};
     line-height: ${labPdfLayout.ownerLineHeight};
     white-space: pre-wrap;
 
-    column-count: ${
-      useCompactOwnerColumns
-        ? "2"
-        : "1"
-    };
-
-    column-gap: ${
-      useCompactOwnerColumns
-        ? "18px"
-        : "0"
-    };
-
-    column-rule: ${
-      useCompactOwnerColumns
-        ? "1px solid #D2EFE7"
-        : "none"
-    };
   "
 >
             ${escapeHtml(

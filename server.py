@@ -18420,7 +18420,7 @@ def api_update_patient_lab(
         data.get("comment")
         or ""
     ).strip()[:6000]
-    
+
     owner_explanation = str(
         data.get("owner_explanation")
         or ""
@@ -18930,7 +18930,6 @@ def api_get_patient_ai_context(
             "values",
             "refs",
             "created_at",
-            "updated_at",
         )
         weights = [
             add_ai_source(
@@ -19081,7 +19080,7 @@ def api_get_patient_ai_context(
         )
 
 PUG_AI_SUMMARY_VERSION = "2"
-PUG_AI_LAB_INTERPRETATION_VERSION = "4"
+PUG_AI_LAB_INTERPRETATION_VERSION = "5"
 AI_SUMMARY_LANGUAGES = {
     "uk": "Ukrainian",
     "en": "English",
@@ -19465,7 +19464,7 @@ def pug_ai_lab_interpretation_schema():
 
     owner_deviation_array = {
         "type": "array",
-        "maxItems": 5,
+        "maxItems": 4,
         "items": {
             "type": "object",
             "additionalProperties": False,
@@ -19521,7 +19520,7 @@ def pug_ai_lab_interpretation_schema():
                         owner_deviation_array,
                     "normal_findings": {
                         "type": "array",
-                        "maxItems": 3,
+                        "maxItems": 2,
                         "items": {
                             "type": "string",
                         },
@@ -21104,48 +21103,70 @@ Owner explanation rules:
 - Do not mention AI in owner_explanation.
 - Do not use unexplained medical
   terminology.
+- The complete owner_explanation across
+  all of its fields must contain no more
+  than 120 words in total.
+- Prefer short sentences and remove every
+  detail that is not necessary for the
+  owner to understand the situation.
 - owner_explanation.summary must contain
-  two or three short sentences explaining
-  the overall meaning of the analysis.
+  one or two short sentences and no more
+  than 30 words.
+- The summary must explain only the main
+  meaning of the analysis.
 - owner_explanation.deviations must contain
-  no more than five clinically meaningful
+  no more than four clinically meaningful
   explanations.
-- Explain only abnormalities that matter
-  for understanding the current clinical
-  picture.
+- Use fewer than four deviations when the
+  same clinical picture can be explained
+  with fewer grouped items.
 - Group closely related abnormalities
   when they describe one process.
 - For example, increased leukocytes,
-  neutrophils, and band neutrophils may
-  be explained together as evidence of
-  an active inflammatory response.
-- indicators must contain localized
+  neutrophils, and band neutrophils must
+  normally be explained together as one
+  active inflammatory response.
+- Each deviation explanation must contain
+  only one short sentence of no more than
+  16 words.
+- indicators must contain short localized
   human-readable parameter names and
   must never contain raw database codes.
 - Set status to high, low, mixed,
   abnormal, positive, or negative
   according to the supplied result.
-- Each explanation must say in simple
-  words what the finding may mean in
-  this patient.
+- Explain in simple words what the finding
+  may mean in this patient.
+- Do not repeat exact values, units, or
+  reference intervals unless one number
+  is essential for understanding urgency.
 - Never present one isolated abnormal
   value as a confirmed diagnosis.
 - Never describe low lymphocytes simply
   as weak immunity.
 - owner_explanation.normal_findings must
-  contain no more than three reassuring
-  normal findings that are relevant to
-  the current picture.
+  contain no more than two short and
+  genuinely reassuring findings.
+- Each normal finding must contain no more
+  than 12 words.
+- Return an empty normal_findings list
+  when normal results do not add useful
+  reassurance.
 - Do not list every normal parameter.
-- owner_explanation.next_step must be one
-  short and calm sentence explaining why
-  the veterinarian may recommend the
-  next examination, test, or monitoring.
+- owner_explanation.next_step must contain
+  one calm sentence of no more than
+  20 words.
+- Explain only why the veterinarian may
+  recommend the next examination, test,
+  or monitoring.
 - Do not frighten the owner and do not
   minimize potentially important findings.
-- The owner explanation must make clear
-  when the analysis alone cannot identify
-  the exact cause or location of disease.
+- Make clear when the analysis alone cannot
+  identify the exact cause or location
+  of disease.
+- Do not repeat the same fact in summary,
+  deviations, normal_findings, and
+  next_step.
 
 Detailed analysis rules:
 - Return between 1 and 3 ranked
@@ -21258,7 +21279,7 @@ Detailed analysis rules:
             "format": {
                 "type": "json_schema",
                 "name":
-                    "pug_ai_lab_interpretation_v4",
+                    "pug_ai_lab_interpretation_v5",
                 "strict": True,
                 "schema":
                     pug_ai_lab_interpretation_schema(),
