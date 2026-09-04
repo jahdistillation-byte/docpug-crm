@@ -56104,3 +56104,23 @@ span {
       none !important;
   }
 }
+/* =========================================================
+   PUG AI — WIDER CLINICAL WORKSPACE
+   ========================================================= */
+
+@media (min-width: 1750px) {
+  .visitWorkspace.hasPugAiWorkspace {
+    max-width:
+      1960px !important;
+  }
+
+  .visitWorkspaceGrid.hasPugAiWorkspace {
+    grid-template-columns:
+      minmax(680px, 720px)
+      minmax(700px, 1fr)
+      310px !important;
+
+    gap:
+      18px !important;
+  }
+}
