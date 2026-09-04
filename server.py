@@ -19215,19 +19215,53 @@ def api_get_patient_ai_context(
         })
 
     except Exception as error:
-        traceback_module.print_exc()
+        traceback_frames = (
+            traceback_module.extract_tb(
+                error.__traceback__
+            )
+        )
+
+        deepest_frame = (
+            traceback_frames[-1]
+            if traceback_frames
+            else None
+        )
 
         print(
             "❌ GET patient AI context:",
-            repr(error),
+            {
+                "error":
+                    repr(error),
+
+                "line":
+                    (
+                        deepest_frame.lineno
+                        if deepest_frame
+                        else None
+                    ),
+
+                "function":
+                    (
+                        deepest_frame.name
+                        if deepest_frame
+                        else None
+                    ),
+
+                "code":
+                    (
+                        deepest_frame.line
+                        if deepest_frame
+                        else None
+                    ),
+            },
             flush=True,
         )
 
         return fail(
-            "Не вдалося зібрати AI-контекст пацієнта.",
+            "Не вдалося зібрати "
+            "AI-контекст пацієнта.",
             500,
         )
-
 PUG_AI_SUMMARY_VERSION = "2"
 PUG_AI_LAB_INTERPRETATION_VERSION = "5"
 AI_SUMMARY_LANGUAGES = {
