@@ -62100,24 +62100,56 @@ if (
           без підтвердження лікаря
         </span>
 
-        <button
-          type="button"
-          id="visitAiStructureButton"
-          disabled
-          style="
-            border:0;
-            border-radius:11px;
-            padding:10px 15px;
-            background:
-              rgba(139,92,246,.35);
-            color:
-              rgba(255,255,255,.58);
-            font-weight:750;
-            cursor:not-allowed;
-          "
-        >
-          ✦ Розподілити по полях
-        </button>
+        <div
+  style="
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:9px;
+    flex-wrap:wrap;
+  "
+>
+  <button
+    type="button"
+    id="visitAiStructureButton"
+    disabled
+    style="
+      border:0;
+      border-radius:11px;
+      padding:10px 15px;
+      background:
+        rgba(139,92,246,.35);
+      color:
+        rgba(255,255,255,.58);
+      font-weight:750;
+      cursor:not-allowed;
+    "
+  >
+    ✦ Розподілити по полях
+  </button>
+
+  <button
+    type="button"
+    id="visitAiApplyButton"
+    disabled
+    style="
+      display:none;
+      align-items:center;
+      justify-content:center;
+      border:0;
+      border-radius:11px;
+      padding:10px 15px;
+      background:
+        rgba(34,197,94,.24);
+      color:
+        rgba(255,255,255,.55);
+      font-weight:750;
+      cursor:not-allowed;
+    "
+  >
+    ✓ Застосувати до полів
+  </button>
+</div>
       </div>
 
       <div
@@ -62207,14 +62239,21 @@ if (visitAiIntakePanel) {
       previousInput.value = "";
     }
 
-    if (previousResult) {
+        if (previousResult) {
       previousResult.innerHTML = "";
+
       previousResult.style.display =
         "none";
     }
 
     visitAiIntakePanel
       .structuredDraft = null;
+
+    visitAiIntakePanel
+      .structuredSourceText = "";
+
+    visitAiIntakePanel
+      .aiDraftApplied = false;
 
     visitAiIntakePanel
       .appliedAiFields = [];
@@ -62238,6 +62277,11 @@ const visitAiStructureButton =
     "visitAiStructureButton"
   );
 
+const visitAiApplyButton =
+  document.getElementById(
+    "visitAiApplyButton"
+  );
+
 const visitAiStructureResult =
   document.getElementById(
     "visitAiStructureResult"
@@ -62246,48 +62290,122 @@ const visitAiStructureResult =
 if (
   visitAiIntakeInput &&
   visitAiStructureButton &&
+  visitAiApplyButton &&
   visitAiStructureResult
 ) {
-  const updateAiStructureButton =
-    () => {
-      const hasEnoughText =
-        String(
-          visitAiIntakeInput
-            .value || ""
-        ).trim().length >= 10;
+  const updateAiStructureControls =
+  () => {
+    const currentText =
+      String(
+        visitAiIntakeInput
+          .value || ""
+      ).trim();
 
-      visitAiStructureButton.disabled =
-        !hasEnoughText;
+    const sourceText =
+      String(
+        visitAiIntakePanel
+          ?.structuredSourceText || ""
+      ).trim();
 
-      visitAiStructureButton.style
-        .cursor =
-          hasEnoughText
-            ? "pointer"
-            : "not-allowed";
+    const hasEnoughText =
+      currentText.length >= 10;
 
-      visitAiStructureButton.style
-        .color =
-          hasEnoughText
-            ? "#fff"
-            : "rgba(255,255,255,.58)";
+    const hasCurrentDraft =
+      Boolean(
+        visitAiIntakePanel
+          ?.structuredDraft
+      )
+      &&
+      Boolean(sourceText)
+      &&
+      currentText === sourceText;
 
-      visitAiStructureButton.style
-        .background =
-          hasEnoughText
-            ? (
+    const draftApplied =
+      Boolean(
+        visitAiIntakePanel
+          ?.aiDraftApplied
+      );
+
+    const canStructure =
+      hasEnoughText &&
+      !hasCurrentDraft;
+
+    visitAiStructureButton.disabled =
+      !canStructure;
+
+    visitAiStructureButton.style
+      .cursor =
+        canStructure
+          ? "pointer"
+          : "not-allowed";
+
+    visitAiStructureButton.style
+      .color =
+        canStructure
+          ? "#fff"
+          : "rgba(255,255,255,.58)";
+
+    visitAiStructureButton.style
+      .background =
+        canStructure
+          ? (
               "linear-gradient("
               + "135deg,"
               + "#7c3aed,"
               + "#9333ea"
               + ")"
             )
-            : "rgba(139,92,246,.35)";
-    };
+          : "rgba(139,92,246,.35)";
+
+    visitAiApplyButton.style.display =
+      hasCurrentDraft
+        ? "inline-flex"
+        : "none";
+
+    visitAiApplyButton.disabled =
+      !hasCurrentDraft ||
+      draftApplied;
+
+    visitAiApplyButton.textContent =
+      draftApplied
+        ? "Застосовано ✓"
+        : "✓ Застосувати до полів";
+
+    visitAiApplyButton.style.cursor =
+      (
+        hasCurrentDraft &&
+        !draftApplied
+      )
+        ? "pointer"
+        : "not-allowed";
+
+    visitAiApplyButton.style.color =
+      (
+        hasCurrentDraft &&
+        !draftApplied
+      )
+        ? "#fff"
+        : "rgba(255,255,255,.55)";
+
+    visitAiApplyButton.style.background =
+      (
+        hasCurrentDraft &&
+        !draftApplied
+      )
+        ? (
+            "linear-gradient("
+            + "135deg,"
+            + "#15803d,"
+            + "#22c55e"
+            + ")"
+          )
+        : "rgba(34,197,94,.24)";
+  };
 
   visitAiIntakeInput.oninput =
-    updateAiStructureButton;
+  updateAiStructureControls;
 
-  updateAiStructureButton();
+updateAiStructureControls();
 
   visitAiStructureButton.onclick =
     async () => {
@@ -62346,12 +62464,12 @@ if (
       try {
         const result =
           await requestVisitAiStructure(
-            currentVisitId,
-            doctorDraft,
-            {
-              language: "uk",
-            }
-          );
+  currentVisitId,
+  doctorDraft,
+  {
+    language: "uk",
+  }
+);
 
         const structured =
           result?.structured || {};
@@ -62359,6 +62477,13 @@ if (
         visitAiIntakePanel
           .structuredDraft =
             structured;
+            visitAiIntakePanel
+  .structuredSourceText =
+    doctorDraft;
+
+visitAiIntakePanel
+  .aiDraftApplied =
+    false;
 
                 const vitalSigns =
           (
@@ -62832,53 +62957,11 @@ if (
                 display:flex;
                 justify-content:flex-end;
                 margin-top:15px;
-              "
-            >
-              <button
-                type="button"
-                id="visitAiApplyButton"
-                disabled
-                style="
-                  border:0;
-                  border-radius:10px;
-                  padding:10px 14px;
-                  background:
-                    rgba(34,197,94,.24);
-                  color:
-                    rgba(255,255,255,.55);
-                  font-weight:750;
-                  cursor:not-allowed;
-                "
-              >
-                Застосувати до полів
-              </button>
-            </div>
           </div>
         `;
-const visitAiApplyButton =
-  visitAiStructureResult
-    .querySelector(
-      "#visitAiApplyButton"
-    );
+updateAiStructureControls();
 
 if (visitAiApplyButton) {
-  visitAiApplyButton.disabled =
-    false;
-
-  visitAiApplyButton.style
-    .cursor = "pointer";
-
-  visitAiApplyButton.style
-    .color = "#fff";
-
-  visitAiApplyButton.style
-    .background =
-      "linear-gradient("
-      + "135deg,"
-      + "#15803d,"
-      + "#22c55e"
-      + ")";
-
   visitAiApplyButton.onclick =
     () => {
             const candidateFields = [
@@ -63144,7 +63227,11 @@ if (visitAiApplyButton) {
       visitAiIntakePanel
         .appliedAiFields =
           appliedFields;
+visitAiIntakePanel
+  .aiDraftApplied =
+    true;
 
+updateAiStructureControls();
       visitAiStructureResult
         .innerHTML = `
           <div
@@ -63267,26 +63354,31 @@ if (visitAiApplyButton) {
             );
 
             visitAiIntakePanel
-              .appliedAiFields = [];
+  .appliedAiFields = [];
 
-            visitAiStructureResult
-              .innerHTML = `
-                <div
-                  style="
-                    padding:13px;
-                    border-radius:11px;
-                    background:
-                      rgba(255,255,255,.05);
-                    color:
-                      rgba(255,255,255,.65);
-                    font-size:13px;
-                  "
-                >
-                  AI-зміни скасовано.
-                  Початкові значення
-                  відновлено.
-                </div>
-              `;
+visitAiIntakePanel
+  .aiDraftApplied = false;
+
+updateAiStructureControls();
+
+visitAiStructureResult
+  .innerHTML = `
+    <div
+      style="
+        padding:13px;
+        border-radius:11px;
+        background:
+          rgba(255,255,255,.05);
+        color:
+          rgba(255,255,255,.65);
+        font-size:13px;
+      "
+    >
+      AI-зміни скасовано.
+      Початкові значення
+      відновлено.
+    </div>
+  `;
           };
       }
 
@@ -63331,7 +63423,7 @@ if (visitAiApplyButton) {
         visitAiStructureButton.textContent =
           originalButtonText;
 
-        updateAiStructureButton();
+        updateAiStructureControls();
       }
     };
 }
