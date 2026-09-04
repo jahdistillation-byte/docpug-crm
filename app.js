@@ -62462,39 +62462,40 @@ updateAiStructureControls();
       `;
 
       try {
-        const result =
-          await requestVisitAiStructure(
-  currentVisitId,
-  doctorDraft,
-  {
-    language: "uk",
-  }
-);
+  const result =
+    await requestVisitAiStructure(
+      currentVisitId,
+      doctorDraft,
+      {
+        language: "uk",
+      }
+    );
 
-        const structured =
-          result?.structured || {};
+  const structured =
+    result?.structured || {};
 
-        visitAiIntakePanel
-          .structuredDraft =
-            structured;
-            visitAiIntakePanel
-  .structuredSourceText =
-    doctorDraft;
+  visitAiIntakePanel
+    .structuredDraft =
+      structured;
 
-visitAiIntakePanel
-  .aiDraftApplied =
-    false;
+  visitAiIntakePanel
+    .structuredSourceText =
+      doctorDraft;
 
-                const vitalSigns =
-          (
-            structured.vital_signs
-            &&
-            typeof (
-              structured.vital_signs
-            ) === "object"
-          )
-            ? structured.vital_signs
-            : {};
+  visitAiIntakePanel
+    .aiDraftApplied =
+      false;
+
+  const vitalSigns =
+    (
+      structured.vital_signs
+      &&
+      typeof (
+        structured.vital_signs
+      ) === "object"
+    )
+      ? structured.vital_signs
+      : {};
 
         const diagnosisStatusLabels = {
           not_established:
@@ -62952,14 +62953,10 @@ visitAiIntakePanel
                 : ""
             }
 
-            <div
-              style="
-                display:flex;
-                justify-content:flex-end;
-                margin-top:15px;
-          </div>
+                      </div>
         `;
-updateAiStructureControls();
+
+        updateAiStructureControls();
 
 if (visitAiApplyButton) {
   visitAiApplyButton.onclick =
@@ -65761,7 +65758,7 @@ const hiddenPetsCount =
           )}"
           style="
             display:flex;
-            flex-wrap:wrap;
+            flex-wrap:nowrap;
             align-items:center;
             gap:5px;
             max-width:230px;

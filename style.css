@@ -7846,7 +7846,7 @@ body[data-theme="white"] .monthDayNum {
     display:flex;
     gap:12px;
     margin-top:18px;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
 }
 
 .teamPhotoButtons .teamPrimaryBtn,
