@@ -66845,51 +66845,43 @@ const hiddenPetsCount =
       .join(", ");
 
   const petsHtml =
-    ownerPets.length
-      ? `
-        <div
-          title="${escapeHtml(
-            allPetsTitle
-          )}"
-          style="
-            display:flex;
-            flex-wrap:nowrap;
-            align-items:center;
-            gap:5px;
-            max-width:230px;
-          "
-        >
-          ${visiblePets
-            .map((patient) => {
-              const petName =
-                String(
-                  patient.name ||
-                  "Без клички"
-                ).trim();
+  ownerPets.length
+    ? `
+      <div
+        class="ownerPetsStack"
+        title="${escapeHtml(
+          allPetsTitle
+        )}"
+      >
+        ${visiblePets
+          .map((patient) => {
+            const petName =
+              String(
+                patient.name ||
+                "Без клички"
+              ).trim();
 
-              const petBreed =
-                String(
-                  patient.breed ||
-                  patient.species ||
-                  ""
-                ).trim();
+            const petBreed =
+              String(
+                patient.breed ||
+                patient.species ||
+                ""
+              ).trim();
 
-              return `
+            return `
+              <span
+                class="ownerPetChip"
+              >
                 <span
-                  style="
-                    display:inline-flex;
-                    align-items:center;
-                    gap:4px;
-                    padding:4px 8px;
-                    border-radius:999px;
-                    background:rgba(168,85,247,.12);
-                    border:1px solid rgba(168,85,247,.22);
-                    font-size:.78rem;
-                    white-space:nowrap;
-                  "
+                  class="ownerPetChipIcon"
+                  aria-hidden="true"
                 >
                   🐾
+                </span>
 
+                <span
+                  class="ownerPetChipText"
+                >
                   <b>
                     ${escapeHtml(
                       petName
@@ -66900,10 +66892,7 @@ const hiddenPetsCount =
                     petBreed
                       ? `
                         <span
-                          style="
-                            opacity:.55;
-                            font-weight:400;
-                          "
+                          class="ownerPetBreed"
                         >
                           ${escapeHtml(
                             petBreed
@@ -66913,41 +66902,34 @@ const hiddenPetsCount =
                       : ""
                   }
                 </span>
-              `;
-            })
-            .join("")}
+              </span>
+            `;
+          })
+          .join("")}
 
-          ${
-            hiddenPetsCount > 0
-              ? `
-                <span
-                  style="
-                    padding:4px 7px;
-                    border-radius:999px;
-                    background:rgba(255,255,255,.07);
-                    font-size:.76rem;
-                    opacity:.8;
-                    white-space:nowrap;
-                  "
-                >
-                  +${hiddenPetsCount}
-                </span>
-              `
-              : ""
-          }
-        </div>
-      `
-      : `
-        <span
-          style="
-            opacity:.38;
-            font-size:.82rem;
-          "
-        >
-          Не додано
-        </span>
-      `;
-
+        ${
+          hiddenPetsCount > 0
+            ? `
+              <span
+                class="ownerPetMore"
+                title="${escapeHtml(
+                  allPetsTitle
+                )}"
+              >
+                +${hiddenPetsCount}
+              </span>
+            `
+            : ""
+        }
+      </div>
+    `
+    : `
+      <span
+        class="ownerPetsEmpty"
+      >
+        Поки немає
+      </span>
+    `;
   tr.innerHTML = `
     <td style="font-weight:600;">
       👤 ${escapeHtml(
@@ -66960,12 +66942,52 @@ const hiddenPetsCount =
       ${petsHtml}
     </td>
 
-    <td>
-      📞 ${escapeHtml(
-        owner.phone ||
-        "Не вказано"
-      )}
-    </td>
+    <td class="ownerPhoneCell">
+  ${
+    owner.phone
+      ? `
+        <button
+          class="ownerPhoneCopy"
+          type="button"
+          data-copy-owner-phone="${escapeHtml(
+            owner.phone
+          )}"
+          title="Натисніть, щоб скопіювати номер"
+          aria-label="Скопіювати номер телефону ${escapeHtml(
+            owner.phone
+          )}"
+        >
+          <span
+            class="ownerPhoneIcon"
+            aria-hidden="true"
+          >
+            📞
+          </span>
+
+          <span
+            class="ownerPhoneNumber"
+          >
+            ${escapeHtml(
+              owner.phone
+            )}
+          </span>
+
+          <span
+            class="ownerPhoneCopyLabel"
+          >
+            Копіювати
+          </span>
+        </button>
+      `
+      : `
+        <span
+          class="ownerPhoneEmpty"
+        >
+          Телефон не вказано
+        </span>
+      `
+  }
+</td>
 
     <td>
       ${
@@ -67240,6 +67262,72 @@ modal.dataset.initialState =
     50
   );
 }
+async function copyOwnerPhone(
+  phone
+) {
+  const normalizedPhone =
+    String(phone || "").trim();
+
+  if (!normalizedPhone) {
+    return false;
+  }
+
+  try {
+    if (
+      navigator.clipboard &&
+      window.isSecureContext
+    ) {
+      await navigator.clipboard
+        .writeText(
+          normalizedPhone
+        );
+
+      return true;
+    }
+
+    const temporaryInput =
+      document.createElement(
+        "textarea"
+      );
+
+    temporaryInput.value =
+      normalizedPhone;
+
+    temporaryInput.setAttribute(
+      "readonly",
+      ""
+    );
+
+    temporaryInput.style.position =
+      "fixed";
+
+    temporaryInput.style.opacity =
+      "0";
+
+    document.body.appendChild(
+      temporaryInput
+    );
+
+    temporaryInput.select();
+
+    const copied =
+      document.execCommand(
+        "copy"
+      );
+
+    temporaryInput.remove();
+
+    return copied;
+
+  } catch (error) {
+    console.error(
+      "COPY OWNER PHONE:",
+      error
+    );
+
+    return false;
+  }
+}
 function initOwnersUI() {
   if (state.ownersUiBound) return;
   state.ownersUiBound = true;
@@ -67292,6 +67380,70 @@ function initOwnersUI() {
       e.target.closest(".data-table-container");
 
     if (!ownersList) return;
+
+    const copyPhoneButton =
+  e.target.closest(
+    "[data-copy-owner-phone]"
+  );
+
+if (copyPhoneButton) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const phone =
+    String(
+      copyPhoneButton.dataset
+        .copyOwnerPhone || ""
+    ).trim();
+
+  const copied =
+    await copyOwnerPhone(
+      phone
+    );
+
+  const label =
+    copyPhoneButton.querySelector(
+      ".ownerPhoneCopyLabel"
+    );
+
+  if (!copied) {
+    if (label) {
+      label.textContent =
+        "Не вдалося";
+    }
+
+    setTimeout(() => {
+      if (label) {
+        label.textContent =
+          "Копіювати";
+      }
+    }, 1600);
+
+    return;
+  }
+
+  copyPhoneButton.classList.add(
+    "is-copied"
+  );
+
+  if (label) {
+    label.textContent =
+      "Скопійовано ✓";
+  }
+
+  setTimeout(() => {
+    copyPhoneButton.classList.remove(
+      "is-copied"
+    );
+
+    if (label) {
+      label.textContent =
+        "Копіювати";
+    }
+  }, 1600);
+
+  return;
+}
 
     // ==========================
     // Видалити власника
