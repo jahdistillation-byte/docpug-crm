@@ -60475,7 +60475,6 @@ function renderVisitAiConsultItems(
   `;
 }
 
-
 function renderVisitAiConsultAnswer(
   consultation,
   meta = {},
@@ -60492,6 +60491,48 @@ function renderVisitAiConsultAnswer(
       ? consultation
       : {};
 
+  const directAnswer =
+    String(
+      normalizedConsultation
+        .direct_answer ||
+      "Відповідь не сформовано."
+    ).trim();
+
+  /*
+   * Every follow-up is rendered as a
+   * normal chat message without report
+   * sections, coloured cards, or metadata.
+   */
+  if (compact) {
+    return `
+      <div
+        class="
+          visitAiConsultAnswer
+          is-compact
+          is-chat-reply
+        "
+      >
+        <div
+          class="visitAiConsultAnswerLabel"
+        >
+          PUG AI
+        </div>
+
+        <div
+          class="visitAiConsultDirectAnswer"
+        >
+          ${escapeHtml(
+            directAnswer
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  /*
+   * Only the first assistant response
+   * receives the full clinical layout.
+   */
   const confidenceLabels = {
     low:
       "Низька впевненість",
@@ -60522,36 +60563,12 @@ function renderVisitAiConsultAnswer(
           durationMs / 1000
         ).toFixed(1)
       : null;
-  const supportingDetails = [
-    renderVisitAiConsultItems(
-      "Факти з картки",
-      normalizedConsultation
-        .record_facts
-    ),
 
-    renderVisitAiConsultItems(
-      "Клінічні міркування",
-      normalizedConsultation
-        .clinical_considerations
-    ),
-
-    renderVisitAiConsultItems(
-      "Що потрібно уточнити",
-      normalizedConsultation
-        .missing_information
-    ),
-  ]
-    .filter(Boolean)
-    .join("");
   return `
     <div
       class="
         visitAiConsultAnswer
-        ${
-          compact
-            ? "is-compact"
-            : "is-full"
-        }
+        is-full
       "
     >
       <div
@@ -60564,12 +60581,7 @@ function renderVisitAiConsultAnswer(
         class="visitAiConsultDirectAnswer"
       >
         ${escapeHtml(
-          normalizedConsultation
-            .direct_answer ||
-          (
-            "Відповідь не " +
-            "сформовано."
-          )
+          directAnswer
         )}
       </div>
 
@@ -60580,33 +60592,23 @@ function renderVisitAiConsultAnswer(
         "visitAiConsultPriority"
       )}
 
-            ${
-        compact
-          ? (
-              supportingDetails
-                ? `
-                  <details
-                    class="
-                      visitAiConsultFollowUpDetails
-                    "
-                  >
-                    <summary>
-                      Показати додаткові деталі
-                    </summary>
+      ${renderVisitAiConsultItems(
+        "Факти з картки",
+        normalizedConsultation
+          .record_facts
+      )}
 
-                    <div
-                      class="
-                        visitAiConsultFollowUpDetailsBody
-                      "
-                    >
-                      ${supportingDetails}
-                    </div>
-                  </details>
-                `
-                : ""
-            )
-          : supportingDetails
-      }
+      ${renderVisitAiConsultItems(
+        "Клінічні міркування",
+        normalizedConsultation
+          .clinical_considerations
+      )}
+
+      ${renderVisitAiConsultItems(
+        "Що потрібно уточнити",
+        normalizedConsultation
+          .missing_information
+      )}
 
       ${renderVisitAiConsultItems(
         "Важливо перевірити",
@@ -60648,7 +60650,6 @@ function renderVisitAiConsultAnswer(
     </div>
   `;
 }
-
 
 function renderVisitAiConsultMessage(
   message,

@@ -56743,3 +56743,57 @@ span {
   padding-top:
     3px;
 }
+/* Обычные сообщения продолжения чата */
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-chat-reply {
+  padding:
+    14px 16px !important;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.08
+    ) !important;
+
+  border-radius:
+    5px 17px
+    17px 17px !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.035
+    ) !important;
+
+  box-shadow:
+    none !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-chat-reply
+.visitAiConsultDirectAnswer {
+  font-size:
+    15px !important;
+
+  line-height:
+    1.62 !important;
+
+  font-weight:
+    450 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-chat-reply
+.visitAiConsultAnswerLabel {
+  margin-bottom:
+    7px;
+
+  font-size:
+    10px;
+}
