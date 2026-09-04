@@ -5,6 +5,7 @@ import hashlib
 import secrets
 import re
 import json
+import traceback as traceback_module
 import html
 import mimetypes
 import time
@@ -19214,6 +19215,8 @@ def api_get_patient_ai_context(
         })
 
     except Exception as error:
+        traceback_module.print_exc()
+
         print(
             "❌ GET patient AI context:",
             repr(error),
