@@ -61060,6 +61060,20 @@ if (weightInput) {
   weightInput.value =
     visit?.weight_kg ?? "";
 }
+const complaintTextarea =
+  document.getElementById(
+    "visitMedComplaint"
+  );
+
+const dxInput =
+  document.getElementById(
+    "visitMedDx"
+  );
+
+const rxTextarea =
+  document.getElementById(
+    "visitMedRx"
+  );
 
   // 2. Завантаження медичних даних
 const noteText =
