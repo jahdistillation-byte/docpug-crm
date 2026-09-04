@@ -52401,6 +52401,8 @@ function getPugAiLanguage() {
     : "uk";
 }
 
+document.documentElement.lang =
+  getPugAiLanguage();
 
 async function requestCachedLabAiInterpretation(
   patientId,
@@ -63558,8 +63560,9 @@ updateAiStructureControls();
     await requestVisitAiStructure(
       currentVisitId,
       doctorDraft,
-      {
-        language: "uk",
+            {
+        language:
+          getPugAiLanguage(),
       }
     );
 
@@ -75383,8 +75386,9 @@ async function initSettingsUI() {
               id="systemLanguageSelect"
             >
               <option value="uk">Українська</option>
-              <option value="en">English</option>
-              <option value="pl">Polski</option>
+<option value="en">English</option>
+<option value="pl">Polski</option>
+<option value="de">Deutsch</option>
             </select>
           </div>
 
@@ -75595,13 +75599,26 @@ function bindPersonalSettingsUI(page) {
       "uk"
     );
 
-    languageSelect.addEventListener(
+        languageSelect.addEventListener(
       "change",
       () => {
+        const selectedLanguage =
+          String(
+            languageSelect.value ||
+            "uk"
+          )
+            .trim()
+            .toLowerCase();
+
         LS.set(
           "docpug_clinic_lang",
-          languageSelect.value
+          selectedLanguage
         );
+
+        document.documentElement.lang =
+          selectedLanguage;
+
+        window.location.reload();
       }
     );
   }

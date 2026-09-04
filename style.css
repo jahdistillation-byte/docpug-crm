@@ -56805,3 +56805,194 @@ span {
   text-align: left !important;
   text-indent: 0 !important;
 }
+/* =====================================================
+   PUGCRM — CALENDAR READABILITY V3
+   Финальный приоритет над compact-calendar
+===================================================== */
+
+.page[data-page="calendar"]
+.calendarHeader h2 {
+  font-size: 28px !important;
+  line-height: 1.15 !important;
+}
+
+.page[data-page="calendar"]
+.calendarHeader .hint {
+  margin-top: 5px !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  font-weight: 600 !important;
+  color:
+    rgba(255, 255, 255, 0.72)
+    !important;
+}
+
+.page[data-page="calendar"]
+.calendarViewGroupLabel {
+  padding: 0 9px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.page[data-page="calendar"]
+.calendarHeaderActions button,
+.page[data-page="calendar"]
+.calendarTop button {
+  min-height: 42px !important;
+  padding: 10px 15px !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+}
+
+.page[data-page="calendar"]
+.calendarDate {
+  min-height: 42px !important;
+  padding: 10px 16px !important;
+  font-size: 15px !important;
+  font-weight: 750 !important;
+}
+
+.page[data-page="calendar"]
+.calendarDayGrid {
+  grid-template-columns:
+    76px
+    minmax(0, 1fr)
+    !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeHead,
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  height: 66px !important;
+  min-height: 66px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeHead {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineHead {
+  grid-template-columns:
+    38px
+    minmax(0, 1fr)
+    auto
+    !important;
+
+  column-gap: 11px !important;
+  padding: 9px 13px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorAvatar {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 14px !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity strong {
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity span {
+  margin-top: 3px !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  font-weight: 550 !important;
+  color:
+    rgba(255, 255, 255, 0.58)
+    !important;
+}
+
+.page[data-page="calendar"]
+.calendarDoctorSpecializations
+.calStaffSpecialization {
+  min-height: 22px !important;
+  padding: 4px 7px !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  font-weight: 750 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineTimeLabel {
+  padding-right: 10px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  font-weight: 700 !important;
+  color:
+    rgba(255, 255, 255, 0.64)
+    !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent {
+  min-height: 32px !important;
+  padding: 6px 9px !important;
+  border-radius: 9px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTime {
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  font-weight: 650 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEventTitle {
+  margin-top: 3px !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineStatus {
+  min-height: 20px !important;
+  padding: 3px 6px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 750 !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineHover {
+  height: 26px !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+
+  transform:
+    translateY(-13px)
+    !important;
+}
+
+.page[data-page="calendar"]
+.calendarShiftUnavailable span {
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Светлая тема */
+
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarHeader .hint,
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarDoctorTimelineIdentity span,
+body[data-theme="white"]
+.page[data-page="calendar"]
+.calendarTimelineTimeLabel {
+  color:
+    rgba(28, 28, 30, 0.68)
+    !important;
+}
