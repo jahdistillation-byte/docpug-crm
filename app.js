@@ -1588,38 +1588,148 @@ async function requestVisitAiConsult(
         language,
         question:
           normalizedQuestion,
-        current_visit: {
-          complaints_anamnesis:
+                current_visit: {
+          reason_for_visit:
             String(
               currentVisit
-                ?.complaints_anamnesis
-              || ""
+                ?.reason_for_visit ||
+              ""
             ).trim(),
 
-          diagnosis:
+          anamnesis:
             String(
               currentVisit
-                ?.diagnosis
-              || ""
-            ).trim(),
-
-          treatment:
-            String(
+                ?.anamnesis ||
               currentVisit
-                ?.treatment
-              || ""
-            ).trim(),
-
-          owner_recommendations:
-            String(
-              currentVisit
-                ?.owner_recommendations
-              || ""
+                ?.complaints_anamnesis ||
+              ""
             ).trim(),
 
           weight_kg:
             currentVisit
               ?.weight_kg ?? null,
+
+          vital_signs: {
+            temperature_c:
+              currentVisit
+                ?.vital_signs
+                ?.temperature_c ??
+              null,
+
+            heart_rate_bpm:
+              currentVisit
+                ?.vital_signs
+                ?.heart_rate_bpm ??
+              null,
+
+            respiratory_rate_bpm:
+              currentVisit
+                ?.vital_signs
+                ?.respiratory_rate_bpm ??
+              null,
+
+            mucous_membranes:
+              String(
+                currentVisit
+                  ?.vital_signs
+                  ?.mucous_membranes ||
+                ""
+              ).trim(),
+
+            crt_seconds:
+              currentVisit
+                ?.vital_signs
+                ?.crt_seconds ??
+              null,
+          },
+
+          objective_exam:
+            String(
+              currentVisit
+                ?.objective_exam ||
+              ""
+            ).trim(),
+
+          problem_list:
+            String(
+              currentVisit
+                ?.problem_list ||
+              ""
+            ).trim(),
+
+          diagnosis_status:
+            String(
+              currentVisit
+                ?.diagnosis_status ||
+              ""
+            ).trim(),
+
+          diagnosis:
+            String(
+              currentVisit
+                ?.diagnosis ||
+              ""
+            ).trim(),
+
+          differential_diagnoses:
+            String(
+              currentVisit
+                ?.differential_diagnoses ||
+              ""
+            ).trim(),
+
+          diagnostic_plan:
+            String(
+              currentVisit
+                ?.diagnostic_plan ||
+              ""
+            ).trim(),
+
+          performed_care:
+            String(
+              currentVisit
+                ?.performed_care ||
+              ""
+            ).trim(),
+
+          prescriptions:
+            String(
+              currentVisit
+                ?.prescriptions ||
+              currentVisit
+                ?.treatment ||
+              ""
+            ).trim(),
+
+          owner_explanation:
+            String(
+              currentVisit
+                ?.owner_explanation ||
+              ""
+            ).trim(),
+
+          home_recommendations:
+            String(
+              currentVisit
+                ?.home_recommendations ||
+              currentVisit
+                ?.owner_recommendations ||
+              ""
+            ).trim(),
+
+          red_flags:
+            String(
+              currentVisit
+                ?.red_flags ||
+              ""
+            ).trim(),
+
+          follow_up:
+            String(
+              currentVisit
+                ?.follow_up ||
+              ""
+            ).trim(),
         },
       }),
     }
@@ -62496,32 +62606,20 @@ if (
       try {
         const result =
           await requestVisitAiConsult(
-            currentVisitId,
-            question,
             {
-              language:
-                getPugAiLanguage(),
-
               currentVisit: {
-                complaints_anamnesis:
+                reason_for_visit:
                   String(
-                    complaintTextarea
+                    document
+                      .getElementById(
+                        "visitReasonForVisit"
+                      )
                       ?.value || ""
                   ).trim(),
 
-                diagnosis:
+                anamnesis:
                   String(
-                    dxInput?.value || ""
-                  ).trim(),
-
-                treatment:
-                  String(
-                    rxTextarea?.value || ""
-                  ).trim(),
-
-                owner_recommendations:
-                  String(
-                    recommendationTextarea
+                    complaintTextarea
                       ?.value || ""
                   ).trim(),
 
@@ -62531,6 +62629,152 @@ if (
                   )
                     ? parsedWeight
                     : null,
+
+                vital_signs: {
+                  temperature_c:
+                    String(
+                      document
+                        .getElementById(
+                          "visitTemperature"
+                        )
+                        ?.value || ""
+                    ).trim() || null,
+
+                  heart_rate_bpm:
+                    String(
+                      document
+                        .getElementById(
+                          "visitHeartRate"
+                        )
+                        ?.value || ""
+                    ).trim() || null,
+
+                  respiratory_rate_bpm:
+                    String(
+                      document
+                        .getElementById(
+                          "visitRespiratoryRate"
+                        )
+                        ?.value || ""
+                    ).trim() || null,
+
+                  mucous_membranes:
+                    String(
+                      document
+                        .getElementById(
+                          "visitMucousMembranes"
+                        )
+                        ?.value || ""
+                    ).trim(),
+
+                  crt_seconds:
+                    String(
+                      document
+                        .getElementById(
+                          "visitCrtSeconds"
+                        )
+                        ?.value || ""
+                    ).trim() || null,
+                },
+
+                objective_exam:
+                  String(
+                    document
+                      .getElementById(
+                        "visitObjectiveExam"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                problem_list:
+                  String(
+                    document
+                      .getElementById(
+                        "visitProblemList"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                diagnosis_status:
+                  String(
+                    document
+                      .getElementById(
+                        "visitDiagnosisStatus"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                diagnosis:
+                  String(
+                    dxInput?.value ||
+                    ""
+                  ).trim(),
+
+                differential_diagnoses:
+                  String(
+                    document
+                      .getElementById(
+                        "visitDifferentialDiagnoses"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                diagnostic_plan:
+                  String(
+                    document
+                      .getElementById(
+                        "visitDiagnosticPlan"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                performed_care:
+                  String(
+                    document
+                      .getElementById(
+                        "visitPerformedCare"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                prescriptions:
+                  String(
+                    rxTextarea
+                      ?.value || ""
+                  ).trim(),
+
+                owner_explanation:
+                  String(
+                    document
+                      .getElementById(
+                        "visitOwnerExplanation"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                home_recommendations:
+                  String(
+                    recommendationTextarea
+                      ?.value || ""
+                  ).trim(),
+
+                red_flags:
+                  String(
+                    document
+                      .getElementById(
+                        "visitRedFlags"
+                      )
+                      ?.value || ""
+                  ).trim(),
+
+                follow_up:
+                  String(
+                    document
+                      .getElementById(
+                        "visitFollowUp"
+                      )
+                      ?.value || ""
+                  ).trim(),
               },
             }
           );

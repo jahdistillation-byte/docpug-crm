@@ -20258,28 +20258,9 @@ def build_compact_ai_vet_consult_context(
 
     model_context[
         "current_visit"
-    ] = compact_ai_value({
-        "complaints_anamnesis":
-            current_visit.get(
-                "complaints_anamnesis"
-            ),
-        "diagnosis":
-            current_visit.get(
-                "diagnosis"
-            ),
-        "treatment":
-            current_visit.get(
-                "treatment"
-            ),
-        "owner_recommendations":
-            current_visit.get(
-                "owner_recommendations"
-            ),
-        "weight_kg":
-            current_visit.get(
-                "weight_kg"
-            ),
-    })
+    ] = compact_ai_value(
+        current_visit
+    )
 
     context_stats[
         "current_visit_included"
@@ -21114,61 +21095,104 @@ def build_compact_ai_lab_context(
 def normalize_ai_vet_consult_visit(
     current_visit,
 ):
+    """
+    Normalizes the current unsaved visit
+    before sending it to PUG AI.
+    """
     if not isinstance(
         current_visit,
         dict,
     ):
-        diagnostic_hypothesis_array = {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "additionalProperties": False,
-            "properties": {
-                "diagnosis": {
-                    "type": "string",
-                },
-                "compatibility_percent": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 100,
-                },
-                "basis": {
-                    "type": "string",
-                },
-                "counterpoints": {
-                    "type": "string",
-                },
-            },
-            "required": [
-                "diagnosis",
-                "compatibility_percent",
-                "basis",
-                "counterpoints",
-            ],
-        },
-    }
         return {}
 
     normalized = {}
 
-    text_fields = [
-        "complaints_anamnesis",
-        "diagnosis",
-        "treatment",
-        "owner_recommendations",
-    ]
+    text_field_sources = {
+        "reason_for_visit": (
+            "reason_for_visit",
+        ),
+        "anamnesis": (
+            "anamnesis",
+            "complaints_anamnesis",
+        ),
+        "objective_exam": (
+            "objective_exam",
+        ),
+        "problem_list": (
+            "problem_list",
+        ),
+        "diagnosis": (
+            "diagnosis",
+        ),
+        "differential_diagnoses": (
+            "differential_diagnoses",
+        ),
+        "diagnostic_plan": (
+            "diagnostic_plan",
+        ),
+        "performed_care": (
+            "performed_care",
+        ),
+        "prescriptions": (
+            "prescriptions",
+            "treatment",
+        ),
+        "owner_explanation": (
+            "owner_explanation",
+        ),
+        "home_recommendations": (
+            "home_recommendations",
+            "owner_recommendations",
+        ),
+        "red_flags": (
+            "red_flags",
+        ),
+        "follow_up": (
+            "follow_up",
+        ),
+    }
 
-    for field_name in text_fields:
-        field_value = str(
-            current_visit.get(
-                field_name
-            ) or ""
-        ).strip()
+    for (
+        normalized_name,
+        source_names,
+    ) in text_field_sources.items():
+        field_value = ""
+
+        for source_name in source_names:
+            candidate_value = str(
+                current_visit.get(
+                    source_name
+                )
+                or ""
+            ).strip()
+
+            if candidate_value:
+                field_value = (
+                    candidate_value
+                )
+
+                break
 
         if field_value:
-            normalized[field_name] = (
-                field_value[:6000]
-            )
+            normalized[
+                normalized_name
+            ] = field_value[:6000]
+
+    diagnosis_status = str(
+        current_visit.get(
+            "diagnosis_status"
+        )
+        or ""
+    ).strip().lower()
+
+    if diagnosis_status in (
+        "not_established",
+        "preliminary",
+        "confirmed",
+    ):
+        normalized[
+            "diagnosis_status"
+        ] = diagnosis_status
 
     weight_kg = normalize_ai_weight(
         current_visit.get(
@@ -21180,6 +21204,74 @@ def normalize_ai_vet_consult_visit(
         normalized["weight_kg"] = (
             weight_kg
         )
+
+    vital_signs_source = (
+        current_visit.get(
+            "vital_signs"
+        )
+    )
+
+    if not isinstance(
+        vital_signs_source,
+        dict,
+    ):
+        vital_signs_source = {}
+
+    vital_signs = {}
+
+    vital_sign_fields = (
+        "temperature_c",
+        "heart_rate_bpm",
+        "respiratory_rate_bpm",
+        "mucous_membranes",
+        "crt_seconds",
+    )
+
+    for field_name in vital_sign_fields:
+        raw_value = (
+            vital_signs_source.get(
+                field_name
+            )
+        )
+
+        if raw_value in (
+            None,
+            "",
+        ):
+            continue
+
+        if isinstance(
+            raw_value,
+            bool,
+        ):
+            continue
+
+        if isinstance(
+            raw_value,
+            (
+                int,
+                float,
+            ),
+        ):
+            vital_signs[
+                field_name
+            ] = raw_value
+
+            continue
+
+        text_value = str(
+            raw_value
+        ).strip()
+
+        if text_value:
+            vital_signs[
+                field_name
+            ] = text_value[:200]
+
+    if vital_signs:
+        normalized[
+            "vital_signs"
+        ] = vital_signs
 
     return normalized
 def get_cached_lab_ai_interpretation(
