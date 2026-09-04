@@ -56663,3 +56663,83 @@ span {
       none;
   }
 }
+/* Компактные подробности
+   уточняющего ответа PUG AI */
+
+.visitAiWorkspace
+.visitAiConsultFollowUpDetails {
+  margin-top:
+    12px;
+
+  border-top:
+    1px solid
+    var(--ai-consult-border);
+}
+
+.visitAiWorkspace
+.visitAiConsultFollowUpDetails
+> summary {
+  padding:
+    11px 0 2px;
+
+  color:
+    var(--ai-consult-muted);
+
+  font-size:
+    12px;
+
+  font-weight:
+    750;
+
+  line-height:
+    1.4;
+
+  cursor:
+    pointer;
+
+  user-select:
+    none;
+
+  list-style:
+    none;
+}
+
+.visitAiWorkspace
+.visitAiConsultFollowUpDetails
+> summary::-webkit-details-marker {
+  display:
+    none;
+}
+
+.visitAiWorkspace
+.visitAiConsultFollowUpDetails
+> summary::after {
+  content:
+    "↓";
+
+  display:
+    inline-block;
+
+  margin-left:
+    7px;
+
+  color:
+    var(--ai-consult-accent);
+
+  transition:
+    transform
+    160ms ease;
+}
+
+.visitAiWorkspace
+.visitAiConsultFollowUpDetails[open]
+> summary::after {
+  transform:
+    rotate(180deg);
+}
+
+.visitAiWorkspace
+.visitAiConsultFollowUpDetailsBody {
+  padding-top:
+    3px;
+}

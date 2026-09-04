@@ -60522,7 +60522,27 @@ function renderVisitAiConsultAnswer(
           durationMs / 1000
         ).toFixed(1)
       : null;
+  const supportingDetails = [
+    renderVisitAiConsultItems(
+      "Факти з картки",
+      normalizedConsultation
+        .record_facts
+    ),
 
+    renderVisitAiConsultItems(
+      "Клінічні міркування",
+      normalizedConsultation
+        .clinical_considerations
+    ),
+
+    renderVisitAiConsultItems(
+      "Що потрібно уточнити",
+      normalizedConsultation
+        .missing_information
+    ),
+  ]
+    .filter(Boolean)
+    .join("");
   return `
     <div
       class="
@@ -60560,23 +60580,33 @@ function renderVisitAiConsultAnswer(
         "visitAiConsultPriority"
       )}
 
-      ${renderVisitAiConsultItems(
-        "Факти з картки",
-        normalizedConsultation
-          .record_facts
-      )}
+            ${
+        compact
+          ? (
+              supportingDetails
+                ? `
+                  <details
+                    class="
+                      visitAiConsultFollowUpDetails
+                    "
+                  >
+                    <summary>
+                      Показати додаткові деталі
+                    </summary>
 
-      ${renderVisitAiConsultItems(
-        "Клінічні міркування",
-        normalizedConsultation
-          .clinical_considerations
-      )}
-
-      ${renderVisitAiConsultItems(
-        "Що потрібно уточнити",
-        normalizedConsultation
-          .missing_information
-      )}
+                    <div
+                      class="
+                        visitAiConsultFollowUpDetailsBody
+                      "
+                    >
+                      ${supportingDetails}
+                    </div>
+                  </details>
+                `
+                : ""
+            )
+          : supportingDetails
+      }
 
       ${renderVisitAiConsultItems(
         "Важливо перевірити",
