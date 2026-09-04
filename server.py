@@ -941,10 +941,31 @@ def visit_medical_audit_snapshot(
         if isinstance(visit, dict)
         else {}
     )
+    raw_clinical_data = (
+        source.get(
+            "clinical_data"
+        )
+    )
+
     clinical_data = (
-        source.get("clinical_data")
+        raw_clinical_data
         if isinstance(
-            source.get("clinical_data"),
+            raw_clinical_data,
+            dict,
+        )
+        else {}
+    )
+
+    raw_vital_signs = (
+        clinical_data.get(
+            "vital_signs"
+        )
+    )
+
+    vital_signs = (
+        raw_vital_signs
+        if isinstance(
+            raw_vital_signs,
             dict,
         )
         else {}
@@ -953,25 +974,18 @@ def visit_medical_audit_snapshot(
     def clinical_text(
         field_name
     ):
-        return str(
+        value = (
             clinical_data.get(
                 field_name
             )
-            or ""
-        ).strip()
+        )
 
-    vital_signs = (
-        clinical_data.get(
-            "vital_signs"
-        )
-        if isinstance(
-            clinical_data.get(
-                "vital_signs"
-            ),
-            dict,
-        )
-        else {}
-    )
+        if value is None:
+            return ""
+
+        return str(
+            value
+        ).strip()
     note = str(
         source.get("note")
         or ""
@@ -19022,6 +19036,7 @@ def api_get_patient_ai_context(
             "note",
             "dx",
             "rx",
+            "clinical_data",
             "weight_kg",
             "created_at",
             "updated_at",
