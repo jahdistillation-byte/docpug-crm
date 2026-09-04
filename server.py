@@ -1117,7 +1117,7 @@ def visit_medical_audit_snapshot(
     if treatment == "\u2014":
         treatment = ""
 
-        weight_value = source.get(
+    weight_value = source.get(
         "weight_kg"
     )
 
