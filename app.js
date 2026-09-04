@@ -62604,9 +62604,14 @@ if (
       `);
 
       try {
-        const result =
+                const result =
           await requestVisitAiConsult(
+            currentVisitId,
+            question,
             {
+              language:
+                getPugAiLanguage(),
+
               currentVisit: {
                 reason_for_visit:
                   String(
