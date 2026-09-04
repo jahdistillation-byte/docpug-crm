@@ -1117,7 +1117,7 @@ def visit_medical_audit_snapshot(
     if treatment == "\u2014":
         treatment = ""
 
-    weight_value = source.get(
+        weight_value = source.get(
         "weight_kg"
     )
 
@@ -1126,6 +1126,7 @@ def visit_medical_audit_snapshot(
         None,
     ):
         weight_kg = None
+
     else:
         try:
             weight_kg = float(
@@ -1145,32 +1146,60 @@ def visit_medical_audit_snapshot(
                 weight_value
             ).strip()
 
-        return {
+    reason_for_visit = (
+        clinical_text(
+            "reason_for_visit"
+        )
+    )
+
+    anamnesis = (
+        clinical_text(
+            "anamnesis"
+        )
+    )
+
+    structured_complaints = (
+        "\n\n".join(
+            item
+            for item in (
+                reason_for_visit,
+                anamnesis,
+            )
+            if item
+        )
+    )
+
+    raw_problem_list = (
+        clinical_data.get(
+            "problem_list"
+        )
+    )
+
+    problem_list = (
+        [
+            str(item).strip()
+            for item in raw_problem_list
+            if str(item).strip()
+        ]
+        if isinstance(
+            raw_problem_list,
+            list,
+        )
+        else []
+    )
+
+    return {
         "reason_for_visit":
-            clinical_text(
-                "reason_for_visit"
-            ),
+            reason_for_visit,
 
         "anamnesis":
-            clinical_text(
-                "anamnesis"
-            ),
+            anamnesis,
 
-        "complaints": (
-            "\n".join(
-                value
-                for value in (
-                    clinical_text(
-                        "reason_for_visit"
-                    ),
-                    clinical_text(
-                        "anamnesis"
-                    ),
-                )
-                if value
-            )
-            or complaints
-        ),
+        "complaints":
+            (
+                structured_complaints
+                or complaints
+            ),
 
         "vital_signs":
             vital_signs,
@@ -1180,25 +1209,16 @@ def visit_medical_audit_snapshot(
                 "objective_exam"
             ),
 
-        "problem_list": (
-            clinical_data.get(
-                "problem_list"
-            )
-            if isinstance(
-                clinical_data.get(
-                    "problem_list"
-                ),
-                list,
-            )
-            else []
-        ),
+        "problem_list":
+            problem_list,
 
-        "diagnosis": (
-            clinical_text(
-                "diagnosis"
-            )
-            or diagnosis
-        ),
+        "diagnosis":
+            (
+                clinical_text(
+                    "diagnosis"
+                )
+                or diagnosis
+            ),
 
         "diagnosis_status":
             clinical_text(
@@ -1220,36 +1240,39 @@ def visit_medical_audit_snapshot(
                 "performed_care"
             ),
 
-        "treatment": (
-            clinical_text(
-                "prescriptions"
-            )
-            or treatment
-        ),
+        "treatment":
+            (
+                clinical_text(
+                    "prescriptions"
+                )
+                or treatment
+            ),
 
         "owner_explanation":
             clinical_text(
                 "owner_explanation"
             ),
 
-        "recommendations": (
-            clinical_text(
-                "home_recommendations"
-            )
-            or recommendations
-        ),
+        "recommendations":
+            (
+                clinical_text(
+                    "home_recommendations"
+                )
+                or recommendations
+            ),
 
         "red_flags":
             clinical_text(
                 "red_flags"
             ),
 
-        "follow_up": (
-            clinical_text(
-                "follow_up"
-            )
-            or follow_up
-        ),
+        "follow_up":
+            (
+                clinical_text(
+                    "follow_up"
+                )
+                or follow_up
+            ),
 
         "weight_kg":
             weight_kg,
@@ -18082,9 +18105,18 @@ def build_ai_clinical_timeline(
         )
 
     for row in visits:
-        snapshot = visit_medical_audit_snapshot(
-            row
+        snapshot = (
+            visit_medical_audit_snapshot(
+                row
+            )
         )
+
+        if not isinstance(
+            snapshot,
+            dict,
+        ):
+            snapshot = {}
+
         quality_flags = []
 
         if (

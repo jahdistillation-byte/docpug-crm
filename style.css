@@ -56040,10 +56040,10 @@ span {
     .page[data-page="visit"].active
   )
   .mac-dock:focus-within {
-    transform:
+        transform:
       translate(
         -50%,
-        -14px
+        0
       ) !important;
 
     opacity: 1;

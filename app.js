@@ -61011,6 +61011,16 @@ function renderVisitPage(visit, pet) {
 
     return;
   }
+
+    const visitAiContextKey = [
+    String(
+      pet?.id ||
+      visit?.pet_id ||
+      ""
+    ).trim(),
+
+    visitId,
+  ].join(":");
   // 1. Оновлюємо заголовки та мета-інформацію
   const pill = document.getElementById("visitDatePill");
   if (pill) pill.textContent = visit.date || "—";
@@ -61431,10 +61441,75 @@ if (
 }
 
 if (visitAiConsultPanel) {
+  const previousContextKey =
+    String(
+      visitAiConsultPanel.dataset
+        .contextKey || ""
+    );
+
+  const contextChanged =
+    Boolean(
+      previousContextKey
+      &&
+      previousContextKey
+        !== visitAiContextKey
+    );
+
+  if (contextChanged) {
+    const previousInput =
+      visitAiConsultPanel
+        .querySelector(
+          "#visitAiConsultInput"
+        );
+
+    const previousResult =
+      visitAiConsultPanel
+        .querySelector(
+          "#visitAiConsultResult"
+        );
+
+    const previousSendButton =
+      visitAiConsultPanel
+        .querySelector(
+          "#visitAiConsultSend"
+        );
+
+    if (previousInput) {
+      previousInput.value = "";
+    }
+
+    if (previousResult) {
+      previousResult.innerHTML = "";
+      previousResult.style.display =
+        "none";
+    }
+
+    if (previousSendButton) {
+      previousSendButton.disabled =
+        true;
+
+      previousSendButton.textContent =
+        "✦ Запитати PUG AI";
+    }
+
+    visitAiConsultPanel
+      .querySelectorAll(
+        "[data-ai-consult-question]"
+      )
+      .forEach(
+        (button) => {
+          button.disabled = false;
+        }
+      );
+  }
+
   visitAiConsultPanel.dataset
     .visitId = visitId;
-}
 
+  visitAiConsultPanel.dataset
+    .contextKey =
+      visitAiContextKey;
+}
 const visitAiConsultInput =
   document.getElementById(
     "visitAiConsultInput"
@@ -62069,8 +62144,88 @@ if (
 }
 
 if (visitAiIntakePanel) {
+  const previousContextKey =
+    String(
+      visitAiIntakePanel.dataset
+        .contextKey || ""
+    );
+
+  const contextChanged =
+    Boolean(
+      previousContextKey
+      &&
+      previousContextKey
+        !== visitAiContextKey
+    );
+
+  if (contextChanged) {
+    const previousInput =
+      visitAiIntakePanel
+        .querySelector(
+          "#visitAiIntakeInput"
+        );
+
+    const previousResult =
+      visitAiIntakePanel
+        .querySelector(
+          "#visitAiStructureResult"
+        );
+
+    const previousAppliedFields =
+      Array.isArray(
+        visitAiIntakePanel
+          .appliedAiFields
+      )
+        ? visitAiIntakePanel
+            .appliedAiFields
+        : [];
+
+    previousAppliedFields.forEach(
+      (field) => {
+        if (!field?.element) {
+          return;
+        }
+
+        field.element.style
+          .borderColor =
+            field
+              .previousBorderColor ||
+            "";
+
+        field.element.style
+          .boxShadow =
+            field
+              .previousBoxShadow ||
+            "";
+
+        delete field.element
+          .dataset.aiDraft;
+      }
+    );
+
+    if (previousInput) {
+      previousInput.value = "";
+    }
+
+    if (previousResult) {
+      previousResult.innerHTML = "";
+      previousResult.style.display =
+        "none";
+    }
+
+    visitAiIntakePanel
+      .structuredDraft = null;
+
+    visitAiIntakePanel
+      .appliedAiFields = [];
+  }
+
   visitAiIntakePanel.dataset
     .visitId = visitId;
+
+  visitAiIntakePanel.dataset
+    .contextKey =
+      visitAiContextKey;
 }
 
 const visitAiIntakeInput =
