@@ -60518,13 +60518,11 @@ function renderVisitAiConsultAnswer(
           PUG AI
         </div>
 
-        <div
-          class="visitAiConsultDirectAnswer"
-        >
-          ${escapeHtml(
-            directAnswer
-          )}
-        </div>
+       <div
+  class="visitAiConsultDirectAnswer"
+>${escapeHtml(
+  directAnswer
+)}</div>
       </div>
     `;
   }
@@ -60578,12 +60576,10 @@ function renderVisitAiConsultAnswer(
       </div>
 
       <div
-        class="visitAiConsultDirectAnswer"
-      >
-        ${escapeHtml(
-          directAnswer
-        )}
-      </div>
+  class="visitAiConsultDirectAnswer"
+>${escapeHtml(
+  directAnswer
+)}</div>
 
       ${renderVisitAiConsultItems(
         "Першочергові дії",
@@ -60701,10 +60697,10 @@ function renderVisitAiConsultMessage(
         </div>
 
         <div
-          class="visitAiConsultUserBubble"
-        >
-          ${escapeHtml(content)}
-        </div>
+  class="visitAiConsultUserBubble"
+>${escapeHtml(
+  content
+)}</div>
       </div>
     `;
   }
@@ -60768,18 +60764,16 @@ function renderVisitAiConsultMessage(
                 </div>
 
                 <div
-                  class="
-                    visitAiConsultDirectAnswer
-                  "
-                >
-                  ${escapeHtml(
-                    content ||
-                    (
-                      "Відповідь не " +
-                      "сформовано."
-                    )
-                  )}
-                </div>
+  class="
+    visitAiConsultDirectAnswer
+  "
+>${escapeHtml(
+  content ||
+  (
+    "Відповідь не " +
+    "сформовано."
+  )
+)}</div>
               </div>
             `
       }

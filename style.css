@@ -56797,3 +56797,11 @@ span {
   font-size:
     10px;
 }
+.visitAiWorkspace
+.visitAiConsultDirectAnswer,
+.visitAiWorkspace
+.visitAiConsultUserBubble {
+  margin: 0 !important;
+  text-align: left !important;
+  text-indent: 0 !important;
+}
