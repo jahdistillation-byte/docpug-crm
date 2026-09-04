@@ -1655,7 +1655,71 @@ async function requestVisitAiConsult(
   return result.data;
 }
 
+async function requestVisitAiConsultMessages(
+  visitId
+) {
+  const normalizedVisitId =
+    String(
+      visitId || ""
+    ).trim();
 
+  if (!normalizedVisitId) {
+    throw new Error(
+      "Не вказано візит."
+    );
+  }
+
+  const response = await fetch(
+    `/api/visits/${
+      encodeURIComponent(
+        normalizedVisitId
+      )
+    }/ai-consult/messages`,
+    {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        Accept:
+          "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const responseText =
+    await response.text();
+
+  let result = null;
+
+  try {
+    result = responseText
+      ? JSON.parse(
+          responseText
+        )
+      : null;
+  } catch {
+    throw new Error(
+      "Сервер повернув "
+      + "некоректну відповідь."
+    );
+  }
+
+  if (
+    !response.ok ||
+    !result?.ok
+  ) {
+    throw new Error(
+      result?.error ||
+      (
+        "Не вдалося завантажити " +
+        "історію консультації."
+      )
+    );
+  }
+
+  return result.data;
+}
 async function requestVisitAiDocuments(
   visitId,
   {
@@ -60360,6 +60424,400 @@ async function syncCalendarEventStatusByVisitId(
 
   return primaryEvent;
 }
+function renderVisitAiConsultItems(
+  title,
+  items,
+  extraClass = ""
+) {
+  const normalizedItems =
+    (
+      Array.isArray(items)
+        ? items
+        : []
+    )
+      .map(
+        (item) =>
+          String(
+            item || ""
+          ).trim()
+      )
+      .filter(Boolean);
+
+  if (!normalizedItems.length) {
+    return "";
+  }
+
+  return `
+    <section
+      class="
+        visitAiConsultSection
+        ${extraClass}
+      "
+    >
+      <h4>
+        ${escapeHtml(title)}
+      </h4>
+
+      <ul>
+        ${
+          normalizedItems
+            .map(
+              (item) => `
+                <li>
+                  ${escapeHtml(item)}
+                </li>
+              `
+            )
+            .join("")
+        }
+      </ul>
+    </section>
+  `;
+}
+
+
+function renderVisitAiConsultAnswer(
+  consultation,
+  meta = {},
+  {
+    compact = false,
+  } = {}
+) {
+  const normalizedConsultation =
+    (
+      consultation &&
+      typeof consultation ===
+        "object"
+    )
+      ? consultation
+      : {};
+
+  const confidenceLabels = {
+    low:
+      "Низька впевненість",
+    medium:
+      "Середня впевненість",
+    high:
+      "Висока впевненість",
+  };
+
+  const confidence =
+    String(
+      normalizedConsultation
+        .confidence ||
+      "low"
+    );
+
+  const durationMs =
+    Number(
+      meta?.duration_ms
+    );
+
+  const durationSeconds =
+    Number.isFinite(
+      durationMs
+    ) &&
+    durationMs > 0
+      ? (
+          durationMs / 1000
+        ).toFixed(1)
+      : null;
+
+  return `
+    <div
+      class="
+        visitAiConsultAnswer
+        ${
+          compact
+            ? "is-compact"
+            : "is-full"
+        }
+      "
+    >
+      <div
+        class="visitAiConsultAnswerLabel"
+      >
+        PUG AI
+      </div>
+
+      <div
+        class="visitAiConsultDirectAnswer"
+      >
+        ${escapeHtml(
+          normalizedConsultation
+            .direct_answer ||
+          (
+            "Відповідь не " +
+            "сформовано."
+          )
+        )}
+      </div>
+
+      ${renderVisitAiConsultItems(
+        "Першочергові дії",
+        normalizedConsultation
+          .suggested_next_steps,
+        "visitAiConsultPriority"
+      )}
+
+      ${renderVisitAiConsultItems(
+        "Факти з картки",
+        normalizedConsultation
+          .record_facts
+      )}
+
+      ${renderVisitAiConsultItems(
+        "Клінічні міркування",
+        normalizedConsultation
+          .clinical_considerations
+      )}
+
+      ${renderVisitAiConsultItems(
+        "Що потрібно уточнити",
+        normalizedConsultation
+          .missing_information
+      )}
+
+      ${renderVisitAiConsultItems(
+        "Важливо перевірити",
+        normalizedConsultation
+          .safety_flags,
+        "visitAiConsultSafety"
+      )}
+
+      <div
+        class="visitAiConsultMeta"
+      >
+        <span>
+          ${escapeHtml(
+            confidenceLabels[
+              confidence
+            ] ||
+            confidenceLabels.low
+          )}
+        </span>
+
+        ${
+          durationSeconds
+            ? `
+              <span>
+                Відповідь за
+                ${escapeHtml(
+                  durationSeconds
+                )} с
+              </span>
+            `
+            : ""
+        }
+
+        <span>
+          AI нічого не змінив
+          у медичній картці
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+
+function renderVisitAiConsultMessage(
+  message,
+  {
+    firstAssistant = false,
+  } = {}
+) {
+  const normalizedMessage =
+    (
+      message &&
+      typeof message ===
+        "object"
+    )
+      ? message
+      : {};
+
+  const role =
+    String(
+      normalizedMessage.role ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const content =
+    String(
+      normalizedMessage.content ||
+      ""
+    ).trim();
+
+  if (role === "user") {
+    if (!content) {
+      return "";
+    }
+
+    return `
+      <div
+        class="
+          visitAiConsultMessage
+          is-user
+        "
+        data-ai-consult-message=
+          "user"
+      >
+        <div
+          class="visitAiConsultMessageRole"
+        >
+          Ви
+        </div>
+
+        <div
+          class="visitAiConsultUserBubble"
+        >
+          ${escapeHtml(content)}
+        </div>
+      </div>
+    `;
+  }
+
+  if (role !== "assistant") {
+    return "";
+  }
+
+  const consultation =
+    (
+      normalizedMessage
+        .consultation &&
+      typeof normalizedMessage
+        .consultation ===
+        "object"
+    )
+      ? normalizedMessage
+          .consultation
+      : {};
+
+  const hasConsultation =
+    Boolean(
+      Object.keys(
+        consultation
+      ).length
+    );
+
+  return `
+    <div
+      class="
+        visitAiConsultMessage
+        is-assistant
+      "
+      data-ai-consult-message=
+        "assistant"
+    >
+      ${
+        hasConsultation
+          ? renderVisitAiConsultAnswer(
+              consultation,
+              normalizedMessage.meta ||
+                {},
+              {
+                compact:
+                  !firstAssistant,
+              }
+            )
+          : `
+              <div
+                class="
+                  visitAiConsultAnswer
+                  is-compact
+                "
+              >
+                <div
+                  class="
+                    visitAiConsultAnswerLabel
+                  "
+                >
+                  PUG AI
+                </div>
+
+                <div
+                  class="
+                    visitAiConsultDirectAnswer
+                  "
+                >
+                  ${escapeHtml(
+                    content ||
+                    (
+                      "Відповідь не " +
+                      "сформовано."
+                    )
+                  )}
+                </div>
+              </div>
+            `
+      }
+    </div>
+  `;
+}
+
+
+function renderVisitAiConsultHistory(
+  messages
+) {
+  const normalizedMessages =
+    Array.isArray(messages)
+      ? messages
+      : [];
+
+  let assistantWasRendered =
+    false;
+
+  return normalizedMessages
+    .map(
+      (message) => {
+        const role =
+          String(
+            message?.role || ""
+          )
+            .trim()
+            .toLowerCase();
+
+        const firstAssistant =
+          (
+            role === "assistant" &&
+            !assistantWasRendered
+          );
+
+        if (role === "assistant") {
+          assistantWasRendered =
+            true;
+        }
+
+        return (
+          renderVisitAiConsultMessage(
+            message,
+            {
+              firstAssistant,
+            }
+          )
+        );
+      }
+    )
+    .filter(Boolean)
+    .join("");
+}
+
+
+function scrollVisitAiConsultToBottom(
+  resultNode
+) {
+  if (!resultNode) {
+    return;
+  }
+
+  requestAnimationFrame(
+    () => {
+      resultNode.scrollTop =
+        resultNode.scrollHeight;
+    }
+  );
+}
 function ensureVisitAiConsultStyles() {
   if (
     document.getElementById(
@@ -61350,15 +61808,16 @@ if (
           <h3
             class="visitAiConsultTitle"
           >
-            PUG AI · Ветеринарний консультант
+            PUG AI · Клінічний чат
           </h3>
 
           <p
             class="visitAiConsultSubtitle"
           >
-            Обговоріть клінічний випадок
-            на основі поточного прийому,
-            породи та історії пацієнта.
+            Обговорюйте цей випадок
+            разом із PUG AI. Чат пам’ятає
+            розмову в межах поточного
+            прийому.
           </p>
         </div>
       </div>
@@ -61366,12 +61825,13 @@ if (
       <span
         class="visitAiConsultBadge"
       >
-        Другий погляд
+        Чат пацієнта
       </span>
     </div>
 
     <div
       class="visitAiConsultQuickActions"
+      data-ai-consult-quick-actions
     >
       <button
         type="button"
@@ -61402,13 +61862,22 @@ if (
     </div>
 
     <div
+      id="visitAiConsultResult"
+      class="
+        visitAiConsultResult
+        visitAiConsultMessages
+      "
+      aria-live="polite"
+    ></div>
+
+    <div
       class="visitAiConsultComposer"
     >
       <textarea
         id="visitAiConsultInput"
         class="visitAiConsultInput"
         placeholder=
-          "Наприклад: що ще варто перевірити перед вибором лікування?"
+          "Запитайте про діагностику, лікування, ризики або продовжте обговорення…"
       ></textarea>
 
       <button
@@ -61417,14 +61886,15 @@ if (
         class="visitAiConsultSend"
         disabled
       >
-        ✦ Запитати PUG AI
+        ✦ Надіслати
       </button>
     </div>
 
     <div
-      id="visitAiConsultResult"
-      class="visitAiConsultResult"
-    ></div>
+      class="visitAiConsultComposerHint"
+    >
+      ⌘/Ctrl + Enter — надіслати
+    </div>
   `;
 
   const consultInsertionTarget =
@@ -61448,11 +61918,9 @@ if (visitAiConsultPanel) {
     );
 
   const contextChanged =
-    Boolean(
+    (
       previousContextKey
-      &&
-      previousContextKey
-        !== visitAiContextKey
+      !== visitAiContextKey
     );
 
   if (contextChanged) {
@@ -61474,6 +61942,12 @@ if (visitAiConsultPanel) {
           "#visitAiConsultSend"
         );
 
+    const previousQuickActions =
+      visitAiConsultPanel
+        .querySelector(
+          "[data-ai-consult-quick-actions]"
+        );
+
     if (previousInput) {
       previousInput.value = "";
     }
@@ -61489,7 +61963,12 @@ if (visitAiConsultPanel) {
         true;
 
       previousSendButton.textContent =
-        "✦ Запитати PUG AI";
+        "✦ Надіслати";
+    }
+
+    if (previousQuickActions) {
+      previousQuickActions.style
+        .display = "flex";
     }
 
     visitAiConsultPanel
@@ -61501,6 +61980,18 @@ if (visitAiConsultPanel) {
           button.disabled = false;
         }
       );
+
+    visitAiConsultPanel
+      .chatMessages = [];
+
+    visitAiConsultPanel.dataset
+      .historyLoaded = "false";
+
+    visitAiConsultPanel.dataset
+      .historyLoading = "false";
+
+    visitAiConsultPanel.dataset
+      .requestInFlight = "false";
   }
 
   visitAiConsultPanel.dataset
@@ -61510,6 +62001,7 @@ if (visitAiConsultPanel) {
     .contextKey =
       visitAiContextKey;
 }
+
 const visitAiConsultInput =
   document.getElementById(
     "visitAiConsultInput"
@@ -61525,12 +62017,61 @@ const visitAiConsultResult =
     "visitAiConsultResult"
   );
 
+const visitAiConsultQuickActions =
+  visitAiConsultPanel
+    ?.querySelector(
+      "[data-ai-consult-quick-actions]"
+    );
+
 if (
   visitAiConsultPanel &&
   visitAiConsultInput &&
   visitAiConsultSend &&
   visitAiConsultResult
 ) {
+  const isCurrentVisitAiChat =
+    (
+      expectedContextKey,
+      expectedVisitId
+    ) => {
+      return Boolean(
+        document.body.contains(
+          visitAiConsultPanel
+        )
+        &&
+        String(
+          visitAiConsultPanel
+            .dataset
+            .contextKey || ""
+        ) === String(
+          expectedContextKey || ""
+        )
+        &&
+        String(
+          visitAiConsultPanel
+            .dataset
+            .visitId || ""
+        ) === String(
+          expectedVisitId || ""
+        )
+      );
+    };
+
+  const setVisitAiQuickActionsVisible =
+    (visible) => {
+      if (
+        !visitAiConsultQuickActions
+      ) {
+        return;
+      }
+
+      visitAiConsultQuickActions
+        .style.display =
+          visible
+            ? "flex"
+            : "none";
+    };
+
   const updateVisitAiConsultSend =
     () => {
       const hasQuestion =
@@ -61539,34 +62080,256 @@ if (
             .value || ""
         ).trim().length >= 3;
 
+      const isBusy =
+        (
+          visitAiConsultPanel
+            .dataset
+            .requestInFlight ===
+              "true"
+          ||
+          visitAiConsultPanel
+            .dataset
+            .historyLoading ===
+              "true"
+        );
+
       visitAiConsultSend.disabled =
-        !hasQuestion;
+        (
+          !hasQuestion ||
+          isBusy
+        );
+    };
+
+  const appendVisitAiChatHtml =
+    (html) => {
+      if (!html) {
+        return;
+      }
+
+      visitAiConsultResult.style
+        .display = "flex";
+
+      visitAiConsultResult
+        .insertAdjacentHTML(
+          "beforeend",
+          html
+        );
+
+      scrollVisitAiConsultToBottom(
+        visitAiConsultResult
+      );
+    };
+
+  const loadVisitAiConsultHistory =
+    async () => {
+      if (
+        visitAiConsultPanel
+          .dataset
+          .historyLoaded ===
+            "true"
+        ||
+        visitAiConsultPanel
+          .dataset
+          .historyLoading ===
+            "true"
+      ) {
+        return;
+      }
+
+      const requestedContextKey =
+        String(
+          visitAiConsultPanel
+            .dataset
+            .contextKey || ""
+        );
+
+      const requestedVisitId =
+        String(
+          visitAiConsultPanel
+            .dataset
+            .visitId || ""
+        ).trim();
+
+      if (!requestedVisitId) {
+        return;
+      }
+
+      visitAiConsultPanel.dataset
+        .historyLoading = "true";
+
+      updateVisitAiConsultSend();
+
+      visitAiConsultResult.style
+        .display = "flex";
+
+      visitAiConsultResult.innerHTML = `
+        <div
+          class="
+            visitAiConsultLoading
+            visitAiConsultHistoryLoading
+          "
+        >
+          Завантажуємо розмову
+          цього прийому…
+        </div>
+      `;
+
+      try {
+        const historyData =
+          await (
+            requestVisitAiConsultMessages(
+              requestedVisitId
+            )
+          );
+
+        if (
+          !isCurrentVisitAiChat(
+            requestedContextKey,
+            requestedVisitId
+          )
+        ) {
+          return;
+        }
+
+        const messages =
+          Array.isArray(
+            historyData?.messages
+          )
+            ? historyData.messages
+            : [];
+
+        visitAiConsultPanel
+          .chatMessages =
+            messages;
+
+        if (messages.length) {
+          visitAiConsultResult
+            .innerHTML =
+              renderVisitAiConsultHistory(
+                messages
+              );
+
+          visitAiConsultResult.style
+            .display = "flex";
+
+          setVisitAiQuickActionsVisible(
+            false
+          );
+
+          scrollVisitAiConsultToBottom(
+            visitAiConsultResult
+          );
+        } else {
+          visitAiConsultResult
+            .innerHTML = "";
+
+          visitAiConsultResult.style
+            .display = "none";
+
+          setVisitAiQuickActionsVisible(
+            true
+          );
+        }
+
+        visitAiConsultPanel.dataset
+          .historyLoaded = "true";
+
+      } catch (error) {
+        if (
+          !isCurrentVisitAiChat(
+            requestedContextKey,
+            requestedVisitId
+          )
+        ) {
+          return;
+        }
+
+        visitAiConsultResult
+          .innerHTML = `
+            <div
+              class="visitAiConsultError"
+            >
+              ${escapeHtml(
+                error?.message ||
+                (
+                  "Не вдалося " +
+                  "завантажити чат."
+                )
+              )}
+            </div>
+          `;
+
+        visitAiConsultResult.style
+          .display = "flex";
+
+        visitAiConsultPanel.dataset
+          .historyLoaded = "error";
+
+        setVisitAiQuickActionsVisible(
+          true
+        );
+
+      } finally {
+        if (
+          isCurrentVisitAiChat(
+            requestedContextKey,
+            requestedVisitId
+          )
+        ) {
+          visitAiConsultPanel.dataset
+            .historyLoading = "false";
+
+          updateVisitAiConsultSend();
+        }
+      }
     };
 
   visitAiConsultInput.oninput =
     updateVisitAiConsultSend;
 
+  visitAiConsultInput.onkeydown =
+    (event) => {
+      if (
+        event.key === "Enter"
+        &&
+        (
+          event.metaKey ||
+          event.ctrlKey
+        )
+      ) {
+        event.preventDefault();
+
+        if (
+          !visitAiConsultSend
+            .disabled
+        ) {
+          visitAiConsultSend.click();
+        }
+      }
+    };
+
   visitAiConsultPanel
     .querySelectorAll(
       "[data-ai-consult-question]"
     )
-    .forEach((button) => {
-      button.onclick = () => {
-        visitAiConsultInput.value =
-          String(
-            button.dataset
-              .aiConsultQuestion ||
-            ""
-          ).trim();
+    .forEach(
+      (button) => {
+        button.onclick = () => {
+          visitAiConsultInput.value =
+            String(
+              button.dataset
+                .aiConsultQuestion ||
+              ""
+            ).trim();
 
-        updateVisitAiConsultSend();
+          updateVisitAiConsultSend();
 
-        visitAiConsultInput.focus();
-      };
-    });
+          visitAiConsultInput.focus();
+        };
+      }
+    );
 
-  updateVisitAiConsultSend();
-    visitAiConsultSend.onclick =
+  visitAiConsultSend.onclick =
     async () => {
       const question =
         String(
@@ -61578,6 +62341,22 @@ if (
         return;
       }
 
+      if (
+        visitAiConsultPanel
+          .dataset
+          .requestInFlight ===
+            "true"
+      ) {
+        return;
+      }
+
+      const requestedContextKey =
+        String(
+          visitAiConsultPanel
+            .dataset
+            .contextKey || ""
+        );
+
       const currentVisitId =
         String(
           visitAiConsultPanel
@@ -61587,47 +62366,107 @@ if (
           ""
         ).trim();
 
+      if (!currentVisitId) {
+        return;
+      }
+
       const weightValue =
         String(
           weightInput?.value || ""
-        ).trim();
+        )
+          .trim()
+          .replace(",", ".");
 
       const parsedWeight =
         weightValue
           ? Number(weightValue)
           : null;
 
-      const quickButtons =
-        Array.from(
-          visitAiConsultPanel
-            .querySelectorAll(
-              "[data-ai-consult-question]"
+      const hadAssistantMessage =
+        Boolean(
+          visitAiConsultResult
+            .querySelector(
+              [
+                "[data-ai-consult-message",
+                '="assistant"]',
+              ].join("")
             )
         );
 
-      visitAiConsultSend.disabled =
-        true;
+      const localUserMessage = {
+        role: "user",
+        content: question,
+        consultation: {},
+        meta: {
+          message_type:
+            "question",
+        },
+      };
+
+      visitAiConsultPanel
+        .chatMessages =
+          [
+            ...(
+              Array.isArray(
+                visitAiConsultPanel
+                  .chatMessages
+              )
+                ? visitAiConsultPanel
+                    .chatMessages
+                : []
+            ),
+            localUserMessage,
+          ];
+
+      setVisitAiQuickActionsVisible(
+        false
+      );
+
+      appendVisitAiChatHtml(
+        renderVisitAiConsultMessage(
+          localUserMessage
+        )
+      );
+
+      visitAiConsultInput.value =
+        "";
+
+      visitAiConsultPanel.dataset
+        .requestInFlight = "true";
 
       visitAiConsultSend.textContent =
         "PUG AI аналізує…";
 
-      quickButtons.forEach(
-        (button) => {
-          button.disabled = true;
-        }
-      );
+      updateVisitAiConsultSend();
 
-      visitAiConsultResult.style
-        .display = "block";
-
-      visitAiConsultResult.innerHTML = `
+      appendVisitAiChatHtml(`
         <div
-          class="visitAiConsultLoading"
+          class="
+            visitAiConsultMessage
+            is-assistant
+          "
+          data-ai-consult-loading
         >
-          PUG AI аналізує поточний прийом,
-          породу та клінічну історію пацієнта…
+          <div
+            class="visitAiConsultLoading"
+          >
+            <span
+              class="visitAiConsultTypingDot"
+            ></span>
+
+            <span
+              class="visitAiConsultTypingDot"
+            ></span>
+
+            <span
+              class="visitAiConsultTypingDot"
+            ></span>
+
+            PUG AI аналізує
+            поточні дані пацієнта…
+          </div>
         </div>
-      `;
+      `);
 
       try {
         const result =
@@ -61635,7 +62474,9 @@ if (
             currentVisitId,
             question,
             {
-              language: "uk",
+              language:
+                getPugAiLanguage(),
+
               currentVisit: {
                 complaints_anamnesis:
                   String(
@@ -61669,196 +62510,173 @@ if (
             }
           );
 
+        if (
+          !isCurrentVisitAiChat(
+            requestedContextKey,
+            currentVisitId
+          )
+        ) {
+          return;
+        }
+
+        visitAiConsultResult
+          .querySelector(
+            "[data-ai-consult-loading]"
+          )
+          ?.remove();
+
         const consultation =
-          result?.consultation || {};
+          result?.consultation ||
+          {};
 
-        const renderConsultItems =
+        const savedAssistantMessage =
           (
-            title,
-            items,
-            extraClass = ""
-          ) => {
-            const normalizedItems =
-              (
-                Array.isArray(items)
-                  ? items
-                  : []
+            Array.isArray(
+              result?.messages
+            )
+              ? result.messages
+              : []
+          ).find(
+            (message) =>
+              String(
+                message?.role || ""
               )
-                .map(
-                  (item) =>
-                    String(
-                      item || ""
-                    ).trim()
-                )
-                .filter(Boolean);
-
-            if (
-              !normalizedItems.length
-            ) {
-              return "";
-            }
-
-            return `
-              <section
-                class="
-                  visitAiConsultSection
-                  ${extraClass}
-                "
-              >
-                <h4>
-                  ${escapeHtml(title)}
-                </h4>
-
-                <ul>
-                  ${
-                    normalizedItems
-                      .map(
-                        (item) => `
-                          <li>
-                            ${escapeHtml(item)}
-                          </li>
-                        `
-                      )
-                      .join("")
-                  }
-                </ul>
-              </section>
-            `;
-          };
-        const confidenceLabels = {
-          low:
-            "Низька впевненість",
-          medium:
-            "Середня впевненість",
-          high:
-            "Висока впевненість",
-        };
-
-        const confidence =
-          String(
-            consultation.confidence ||
-            "low"
+                .trim()
+                .toLowerCase() ===
+                "assistant"
           );
 
-        const durationSeconds =
-          Number(
-            result?.meta?.duration_ms
-          ) > 0
-            ? (
-              Number(
-                result.meta.duration_ms
-              ) / 1000
-            ).toFixed(1)
-            : null;
+        const assistantMessage =
+          savedAssistantMessage ||
+          {
+            role:
+              "assistant",
 
-        visitAiConsultResult.innerHTML = `
-          <div
-            class="visitAiConsultAnswer"
-          >
-            <div
-              class="visitAiConsultDirectAnswer"
-            >
-              ${escapeHtml(
+            content:
+              String(
                 consultation
                   .direct_answer ||
-                "Відповідь не сформовано."
-              )}
-            </div>
-                          ${renderConsultItems(
-              "Першочергові дії",
-              consultation
-                .suggested_next_steps,
-              "visitAiConsultPriority"
-            )}
+                ""
+              ).trim(),
 
-            ${renderConsultItems(
-              "Факти з картки",
-              consultation.record_facts
-            )}
+            consultation:
+              consultation,
 
-            ${renderConsultItems(
-              "Клінічні міркування",
-              consultation
-                .clinical_considerations
-            )}
+            meta: {
+              message_type:
+                result?.meta
+                  ?.is_follow_up
+                  ? "follow_up"
+                  : "first_response",
 
-            ${renderConsultItems(
-              "Що потрібно уточнити",
-              consultation
-                .missing_information
-            )}
-            ${renderConsultItems(
-              "Важливо перевірити",
-              consultation.safety_flags,
-              "visitAiConsultSafety"
-            )}
+              duration_ms:
+                result?.meta
+                  ?.duration_ms,
+            },
+          };
 
+        visitAiConsultPanel
+          .chatMessages =
+            [
+              ...visitAiConsultPanel
+                .chatMessages,
+              assistantMessage,
+            ];
+
+        appendVisitAiChatHtml(
+          renderVisitAiConsultMessage(
+            assistantMessage,
+            {
+              firstAssistant:
+                !hadAssistantMessage,
+            }
+          )
+        );
+
+        if (
+          result?.meta
+            ?.history_saved ===
+              false
+        ) {
+          appendVisitAiChatHtml(`
             <div
-              class="visitAiConsultMeta"
+              class="
+                visitAiConsultHistoryWarning
+              "
             >
-              <span>
-                ${
-                  escapeHtml(
-                    confidenceLabels[
-                      confidence
-                    ] ||
-                    confidenceLabels.low
-                  )
-                }
-              </span>
-
-              <span>
-                ${
-                  durationSeconds
-                    ? (
-                      `Відповідь за ${
-                        durationSeconds
-                      } с`
-                    )
-                    : ""
-                }
-              </span>
-
-              <span>
-                AI нічого не змінив
-                у медичній картці
-              </span>
+              Відповідь отримано,
+              але історію чату
+              не вдалося зберегти.
             </div>
-          </div>
-        `;
+          `);
+        }
 
         console.log(
-          "PUG AI VET CONSULT UI:",
+          "PUG AI VET CONSULT CHAT:",
           result
         );
+
       } catch (error) {
-        visitAiConsultResult.innerHTML = `
+        if (
+          !isCurrentVisitAiChat(
+            requestedContextKey,
+            currentVisitId
+          )
+        ) {
+          return;
+        }
+
+        visitAiConsultResult
+          .querySelector(
+            "[data-ai-consult-loading]"
+          )
+          ?.remove();
+
+        appendVisitAiChatHtml(`
           <div
-            class="visitAiConsultError"
+            class="
+              visitAiConsultMessage
+              is-assistant
+            "
           >
-            ${escapeHtml(
-              error?.message ||
-              "Сталася помилка."
-            )}
+            <div
+              class="visitAiConsultError"
+            >
+              ${escapeHtml(
+                error?.message ||
+                "Сталася помилка."
+              )}
+            </div>
           </div>
-        `;
+        `);
+
+        visitAiConsultInput.value =
+          question;
+
       } finally {
-        visitAiConsultSend.textContent =
-          "✦ Запитати PUG AI";
+        if (
+          isCurrentVisitAiChat(
+            requestedContextKey,
+            currentVisitId
+          )
+        ) {
+          visitAiConsultPanel.dataset
+            .requestInFlight = "false";
 
-        quickButtons.forEach(
-          (button) => {
-            button.disabled = false;
-          }
-        );
+          visitAiConsultSend.textContent =
+            "✦ Надіслати";
 
-        updateVisitAiConsultSend();
+          updateVisitAiConsultSend();
+
+          visitAiConsultInput.focus();
+        }
       }
     };
+
+  updateVisitAiConsultSend();
+
+  void loadVisitAiConsultHistory();
 }
-
-
-
 const legacyAiDocumentsPanel =
   document.getElementById(
     "visitAiDocumentsPanel"

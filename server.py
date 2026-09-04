@@ -21657,13 +21657,103 @@ Detailed analysis rules:
         context_fingerprint,
     )
 
+PUG_AI_VET_CONSULT_HISTORY_LIMIT = 12
 
+
+def prepare_ai_vet_consult_history(
+    messages,
+):
+    """
+    Prepares a bounded conversation history
+    from the current visit only.
+    """
+
+    prepared = []
+
+    source_messages = (
+        messages
+        if isinstance(messages, list)
+        else []
+    )
+
+    for source in source_messages:
+        if not isinstance(source, dict):
+            continue
+
+        role = str(
+            source.get("role") or ""
+        ).strip().lower()
+
+        if role not in (
+            "user",
+            "assistant",
+        ):
+            continue
+
+        content = str(
+            source.get("content") or ""
+        ).strip()
+
+        consultation = (
+            source.get("consultation")
+            if isinstance(
+                source.get("consultation"),
+                dict,
+            )
+            else {}
+        )
+
+        if not content and not consultation:
+            continue
+
+        item = {
+            "role": role,
+            "content": content[:4000],
+        }
+
+        if (
+            role == "assistant"
+            and consultation
+        ):
+            item["consultation"] = {
+                "direct_answer":
+                    consultation.get(
+                        "direct_answer"
+                    ),
+
+                "suggested_next_steps":
+                    consultation.get(
+                        "suggested_next_steps"
+                    ) or [],
+
+                "clinical_considerations":
+                    consultation.get(
+                        "clinical_considerations"
+                    ) or [],
+
+                "missing_information":
+                    consultation.get(
+                        "missing_information"
+                    ) or [],
+
+                "safety_flags":
+                    consultation.get(
+                        "safety_flags"
+                    ) or [],
+            }
+
+        prepared.append(item)
+
+    return prepared[
+        -PUG_AI_VET_CONSULT_HISTORY_LIMIT:
+    ]
 
 def call_openai_vet_consult(
     context,
     current_visit,
     question,
     language,
+    conversation_history=None,
 ):
     language_name = (
         AI_SUMMARY_LANGUAGES[language]
@@ -21676,7 +21766,15 @@ def call_openai_vet_consult(
         context,
         current_visit,
     )
+    prepared_history = (
+        prepare_ai_vet_consult_history(
+            conversation_history
+        )
+    )
 
+    is_follow_up = bool(
+        prepared_history
+    )
     instructions = f"""
 You are PUG AI, a veterinary clinical
 decision-support assistant for veterinarians.
@@ -21747,6 +21845,28 @@ Critical rules:
 - When evidence is insufficient, say so clearly.
 - Keep the answer concise, practical,
   and suitable for use during a veterinary visit.
+  Conversation rules:
+- conversation_history contains only earlier
+  messages from this specific visit.
+- Use it to understand follow-up questions,
+  references, and the course of discussion.
+- The newest patient_context and current_visit
+  are always the source of truth.
+- If current clinical data differs from an
+  earlier message, prefer the newest data and
+  briefly acknowledge the change.
+- Do not claim to remember information that is
+  absent from patient_context, current_visit,
+  or conversation_history.
+- On the first response, provide the useful
+  structured clinical overview requested by
+  the veterinarian.
+- On follow-up responses, answer the newest
+  question directly and do not repeat the
+  entire previous analysis.
+- For follow-up responses, return empty arrays
+  for sections that contain no new or directly
+  relevant information.
 - Do not claim that any AI recommendation
   was confirmed by the veterinarian.
 """.strip()
@@ -21755,10 +21875,21 @@ Critical rules:
         "model": PUG_AI_MODEL,
         "store": False,
         "instructions": instructions,
-        "input": json.dumps(
+                "input": json.dumps(
             {
+                "conversation_mode":
+                    (
+                        "follow_up"
+                        if is_follow_up
+                        else "first_message"
+                    ),
+
+                "conversation_history":
+                    prepared_history,
+
                 "question":
                     question,
+
                 "patient_context":
                     model_context,
             },
@@ -23062,29 +23193,263 @@ def api_transcribe_visit_audio(
             "аудіозапис.",
             500,
         )
-@app.post(
-    "/api/visits/<visit_id>/ai-consult"
+VISIT_AI_CONSULT_MESSAGE_SELECT = (
+    "id,org_id,patient_id,visit_id,"
+    "role,content,consultation,meta,"
+    "language,created_by,created_at"
 )
-def api_consult_visit(
+
+
+def load_visit_ai_consult_messages(
+    org_id,
+    patient_id,
     visit_id,
 ):
     """
-    Discusses the current clinical case
-    without saving anything to the CRM.
+    Loads only the latest messages
+    belonging to this organisation,
+    patient, and visit.
     """
-    user, auth_error = auth_required()
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table(
+                "visit_ai_consult_messages"
+            )
+            .select(
+                VISIT_AI_CONSULT_MESSAGE_SELECT
+            )
+            .eq(
+                "org_id",
+                org_id,
+            )
+            .eq(
+                "patient_id",
+                patient_id,
+            )
+            .eq(
+                "visit_id",
+                visit_id,
+            )
+            .order(
+                "created_at",
+                desc=True,
+            )
+            .order(
+                "id",
+                desc=True,
+            )
+            .limit(
+                PUG_AI_VET_CONSULT_HISTORY_LIMIT
+            )
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+    messages = (
+        result.data
+        if isinstance(
+            result.data,
+            list,
+        )
+        else []
+    )
+
+    return list(
+        reversed(messages)
+    )
+
+
+def save_visit_ai_consult_exchange(
+    *,
+    org_id,
+    patient_id,
+    visit_id,
+    user_id,
+    question,
+    consultation,
+    language,
+    provider_response,
+    is_follow_up,
+):
+    """
+    Saves the veterinarian question and
+    assistant response as one idempotent
+    bulk operation.
+    """
+    saved_at = datetime.now(
+        timezone.utc
+    )
+
+    assistant_saved_at = (
+        saved_at
+        + timedelta(
+            microseconds=1
+        )
+    )
+
+    provider_model = (
+        provider_response.get(
+            "model"
+        )
+        or PUG_AI_MODEL
+    )
+
+    assistant_content = str(
+        consultation.get(
+            "direct_answer"
+        )
+        or ""
+    ).strip()
+
+    if not assistant_content:
+        assistant_content = (
+            "PUG AI clinical response"
+        )
+
+    created_by = str(
+        user_id or ""
+    ).strip() or None
+
+    rows = [
+        {
+            "id": str(
+                uuid.uuid4()
+            ),
+            "org_id": org_id,
+            "patient_id":
+                patient_id,
+            "visit_id":
+                visit_id,
+            "role": "user",
+            "content":
+                question,
+            "consultation": {},
+            "meta": {
+                "message_type":
+                    "question",
+                "consult_version":
+                    "2",
+            },
+            "language":
+                language,
+            "created_by":
+                created_by,
+            "created_at":
+                saved_at.isoformat(),
+        },
+        {
+            "id": str(
+                uuid.uuid4()
+            ),
+            "org_id": org_id,
+            "patient_id":
+                patient_id,
+            "visit_id":
+                visit_id,
+            "role": "assistant",
+            "content":
+                assistant_content,
+            "consultation":
+                consultation,
+            "meta": {
+                "message_type":
+                    (
+                        "follow_up"
+                        if is_follow_up
+                        else "first_response"
+                    ),
+                "consult_version":
+                    "2",
+                "model":
+                    provider_model,
+                "response_id":
+                    provider_response.get(
+                        "id"
+                    ),
+                "usage":
+                    provider_response.get(
+                        "usage"
+                    ) or {},
+            },
+            "language":
+                language,
+            "created_by":
+                created_by,
+            "created_at":
+                assistant_saved_at
+                .isoformat(),
+        },
+    ]
+
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table(
+                "visit_ai_consult_messages"
+            )
+            .upsert(
+                rows,
+                on_conflict="id",
+            )
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+    saved_messages = (
+        result.data
+        if isinstance(
+            result.data,
+            list,
+        )
+        else []
+    )
+
+    if len(saved_messages) < 2:
+        raise ValueError(
+            "Consultation exchange "
+            "was not fully saved"
+        )
+
+    return sorted(
+        saved_messages,
+        key=lambda item: (
+            str(
+                item.get(
+                    "created_at"
+                )
+                or ""
+            ),
+            str(
+                item.get("id")
+                or ""
+            ),
+        ),
+    )
+
+
+@app.get(
+    "/api/visits/<visit_id>/ai-consult/messages"
+)
+def api_get_visit_ai_consult_messages(
+    visit_id,
+):
+    """
+    Restores the chat belonging only
+    to the current visit.
+    """
+    _user, auth_error = (
+        auth_required()
+    )
 
     if auth_error:
         return auth_error
 
-    if not OPENAI_API_KEY:
-        return fail(
-            "PUG AI не налаштовано "
-            "на сервері.",
-            503,
-        )
-
-    current_org = get_current_org_id()
+    current_org = (
+        get_current_org_id()
+    )
 
     if not current_org:
         return fail(
@@ -23102,54 +23467,14 @@ def api_consult_visit(
             400,
         )
 
-    data = (
-        request.get_json(
-            silent=True
-        ) or {}
-    )
-
-    question = str(
-        data.get("question") or ""
-    ).strip()
-
-    if len(question) < 3:
-        return fail(
-            "Напишіть запитання "
-            "для PUG AI.",
-            400,
-        )
-
-    if len(question) > 3000:
-        return fail(
-            "Запитання перевищує "
-            "3000 символів.",
-            400,
-        )
-
-    language = str(
-        data.get("language") or "uk"
-    ).strip().lower()
-
-    if language not in AI_SUMMARY_LANGUAGES:
-        return fail(
-            "Unsupported language",
-            400,
-        )
-
-    current_visit = (
-        normalize_ai_vet_consult_visit(
-            data.get("current_visit")
-        )
-    )
-
-    started_at = time.monotonic()
-
     try:
         visit_result = execute_with_retry(
             lambda: (
                 supabase
                 .table("visits")
-                .select("id,pet_id")
+                .select(
+                    "id,pet_id"
+                )
                 .eq(
                     "org_id",
                     current_org,
@@ -23170,10 +23495,189 @@ def api_consult_visit(
                 404,
             )
 
-        visit = visit_result.data[0]
+        patient_id = str(
+            visit_result
+            .data[0]
+            .get("pet_id")
+            or ""
+        ).strip()
+
+        if not patient_id:
+            return fail(
+                "У прийомі не вказано "
+                "пацієнта.",
+                400,
+            )
+
+        messages = (
+            load_visit_ai_consult_messages(
+                current_org,
+                patient_id,
+                visit_id,
+            )
+        )
+
+        return ok({
+            "messages":
+                messages,
+            "meta": {
+                "visit_id":
+                    visit_id,
+                "patient_id":
+                    patient_id,
+                "message_count":
+                    len(messages),
+                "history_limit":
+                    (
+                        PUG_AI_VET_CONSULT_HISTORY_LIMIT
+                    ),
+            },
+        })
+
+    except Exception as error:
+        print(
+            "❌ GET AI consult messages:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося завантажити "
+            "історію консультації.",
+            500,
+        )
+    
+@app.post(
+    "/api/visits/<visit_id>/ai-consult"
+)
+def api_consult_visit(
+    visit_id,
+):
+    """
+    Discusses the current clinical case
+    and stores the visit-specific chat.
+    """
+    user, auth_error = auth_required()
+
+    if auth_error:
+        return auth_error
+
+    if not OPENAI_API_KEY:
+        return fail(
+            "PUG AI не налаштовано "
+            "на сервері.",
+            503,
+        )
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Організацію не визначено.",
+            400,
+        )
+
+    visit_id = str(
+        visit_id or ""
+    ).strip()
+
+    if not visit_id:
+        return fail(
+            "visit_id required",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    question = str(
+        data.get("question")
+        or ""
+    ).strip()
+
+    if len(question) < 3:
+        return fail(
+            "Напишіть запитання "
+            "для PUG AI.",
+            400,
+        )
+
+    if len(question) > 3000:
+        return fail(
+            "Запитання перевищує "
+            "3000 символів.",
+            400,
+        )
+
+    language = str(
+        data.get("language")
+        or "uk"
+    ).strip().lower()
+
+    if (
+        language
+        not in AI_SUMMARY_LANGUAGES
+    ):
+        return fail(
+            "Unsupported language",
+            400,
+        )
+
+    current_visit = (
+        normalize_ai_vet_consult_visit(
+            data.get(
+                "current_visit"
+            )
+        )
+    )
+
+    started_at = (
+        time.monotonic()
+    )
+
+    try:
+        visit_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("visits")
+                    .select(
+                        "id,pet_id"
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        visit_id,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if not visit_result.data:
+            return fail(
+                "Візит не знайдено.",
+                404,
+            )
+
+        visit = (
+            visit_result.data[0]
+        )
 
         patient_id = str(
-            visit.get("pet_id") or ""
+            visit.get("pet_id")
+            or ""
         ).strip()
 
         if not patient_id:
@@ -23198,15 +23702,32 @@ def api_consult_visit(
         context_payload = (
             context_response.get_json(
                 silent=True
-            ) or {}
+            )
+            or {}
         )
 
-        if not context_payload.get("ok"):
+        if not context_payload.get(
+            "ok"
+        ):
             return context_response
 
         patient_context = (
-            context_payload.get("data")
+            context_payload.get(
+                "data"
+            )
             or {}
+        )
+
+        conversation_history = (
+            load_visit_ai_consult_messages(
+                current_org,
+                patient_id,
+                visit_id,
+            )
+        )
+
+        is_follow_up = bool(
+            conversation_history
         )
 
         (
@@ -23218,40 +23739,124 @@ def api_consult_visit(
             current_visit,
             question,
             language,
+            conversation_history=(
+                conversation_history
+            ),
         )
+
+        saved_messages = []
+        history_saved = False
+
+        try:
+            saved_messages = (
+                save_visit_ai_consult_exchange(
+                    org_id=
+                        current_org,
+                    patient_id=
+                        patient_id,
+                    visit_id=
+                        visit_id,
+                    user_id=
+                        (
+                            user or {}
+                        ).get("id"),
+                    question=
+                        question,
+                    consultation=
+                        consultation,
+                    language=
+                        language,
+                    provider_response=
+                        provider_response,
+                    is_follow_up=
+                        is_follow_up,
+                )
+            )
+
+            history_saved = True
+
+        except Exception as save_error:
+            print(
+                "❌ SAVE AI consult history:",
+                repr(save_error),
+                flush=True,
+            )
 
         return ok({
             "consultation":
                 consultation,
+
+            "messages":
+                saved_messages,
+
             "meta": {
-                "read_only": True,
-                "stored_in_crm": False,
-                "provider_store": False,
-                "consult_version": "1",
-                "reasoning_effort": "low",
-                "language": language,
-                "visit_id": visit_id,
-                "patient_id": patient_id,
-                "model":
-                    provider_response.get(
-                        "model"
-                    ) or PUG_AI_MODEL,
-                "response_id":
-                    provider_response.get(
-                        "id"
+                "read_only":
+                    True,
+
+                "stored_in_crm":
+                    history_saved,
+
+                "history_saved":
+                    history_saved,
+
+                "provider_store":
+                    False,
+
+                "consult_version":
+                    "2",
+
+                "is_follow_up":
+                    is_follow_up,
+
+                "message_count_before":
+                    len(
+                        conversation_history
                     ),
+
+                "reasoning_effort":
+                    "low",
+
+                "language":
+                    language,
+
+                "visit_id":
+                    visit_id,
+
+                "patient_id":
+                    patient_id,
+
+                "model":
+                    (
+                        provider_response
+                        .get("model")
+                        or PUG_AI_MODEL
+                    ),
+
+                "response_id":
+                    (
+                        provider_response
+                        .get("id")
+                    ),
+
                 "usage":
-                    provider_response.get(
-                        "usage"
-                    ) or {},
+                    (
+                        provider_response
+                        .get("usage")
+                        or {}
+                    ),
+
                 "context_stats":
                     context_stats,
-                "duration_ms": round(
-                    (
-                        time.monotonic()
-                        - started_at
-                    ) * 1000
-                ),
+
+                "duration_ms":
+                    round(
+                        (
+                            time.monotonic()
+                            - started_at
+                        )
+                        * 1000
+                    ),
+
                 "generated_at":
                     datetime.now(
                         timezone.utc
@@ -23264,10 +23869,10 @@ def api_consult_visit(
 
         try:
             provider_body = (
-                error.read().decode(
-                    "utf-8"
-                )
+                error.read()
+                .decode("utf-8")
             )
+
         except Exception:
             provider_body = ""
 
@@ -23319,7 +23924,6 @@ def api_consult_visit(
             "відповідь консультанта.",
             500,
         )
-
 
 @app.post(
     "/api/visits/<visit_id>/ai-structure"

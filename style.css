@@ -7846,7 +7846,7 @@ body[data-theme="white"] .monthDayNum {
     display:flex;
     gap:12px;
     margin-top:18px;
-    flex-wrap:nowrap;
+    flex-wrap:wrap;
 }
 
 .teamPhotoButtons .teamPrimaryBtn,
@@ -56122,5 +56122,544 @@ span {
 
     gap:
       18px !important;
+  }
+}
+/* =========================================================
+   PUG AI — VISIT CONSULTATION CHAT
+   ========================================================= */
+
+.visitAiWorkspace
+#visitAiConsultPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.visitAiWorkspace
+.visitAiConsultMessages {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(
+    62vh,
+    820px
+  );
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  margin-top: 14px;
+  padding:
+    3px 8px
+    10px 2px;
+
+  flex-direction: column;
+  gap: 14px;
+
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--ai-consult-accent)
+    rgba(255, 255, 255, 0.05);
+}
+
+.visitAiWorkspace
+.visitAiConsultMessages::-webkit-scrollbar {
+  width: 7px;
+}
+
+.visitAiWorkspace
+.visitAiConsultMessages::-webkit-scrollbar-track {
+  border-radius: 999px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.04
+    );
+}
+
+.visitAiWorkspace
+.visitAiConsultMessages::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    var(--ai-consult-accent);
+}
+
+.visitAiWorkspace
+.visitAiConsultMessage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.visitAiWorkspace
+.visitAiConsultMessage.is-user {
+  width: min(
+    84%,
+    560px
+  );
+
+  margin-left: auto;
+  align-items: flex-end;
+}
+
+.visitAiWorkspace
+.visitAiConsultMessage.is-assistant {
+  width: 100%;
+  align-items: stretch;
+}
+
+.visitAiWorkspace
+.visitAiConsultMessageRole {
+  margin:
+    0 7px
+    5px;
+
+  color:
+    var(--ai-consult-muted);
+
+  font-size:
+    11px;
+
+  font-weight:
+    750;
+
+  letter-spacing:
+    0.04em;
+
+  text-transform:
+    uppercase;
+}
+
+.visitAiWorkspace
+.visitAiConsultUserBubble {
+  padding:
+    13px 15px;
+
+  border:
+    1px solid
+    var(--ai-consult-border);
+
+  border-radius:
+    16px 16px
+    5px 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--ai-consult-accent),
+      var(--ai-consult-accent-strong)
+    );
+
+  color:
+    var(--ai-consult-button-text);
+
+  box-shadow:
+    0 10px 28px
+    rgba(
+      0,
+      0,
+      0,
+      0.15
+    );
+
+  font-size:
+    15px;
+
+  line-height:
+    1.55;
+
+  white-space:
+    pre-wrap;
+
+  overflow-wrap:
+    anywhere;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer {
+  min-width: 0;
+
+  border-radius:
+    5px 16px
+    16px 16px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswerLabel {
+  margin-bottom:
+    9px;
+
+  color:
+    var(--ai-consult-accent);
+
+  font-size:
+    11px;
+
+  font-weight:
+    850;
+
+  letter-spacing:
+    0.08em;
+
+  text-transform:
+    uppercase;
+}
+
+/* Первый ответ остаётся подробным. */
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-full {
+  box-shadow:
+    0 14px 34px
+    rgba(
+      0,
+      0,
+      0,
+      0.14
+    );
+}
+
+/* Продолжения диалога компактнее. */
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact {
+  padding:
+    15px 16px !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--ai-consult-surface-strong)
+        92%,
+      var(--ai-consult-accent)
+        8%
+    );
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact
+.visitAiConsultDirectAnswer {
+  font-size:
+    15px !important;
+
+  line-height:
+    1.6 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact
+.visitAiConsultSection {
+  margin-top:
+    13px !important;
+
+  padding-top:
+    12px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact
+.visitAiConsultSection h4 {
+  margin-bottom:
+    7px !important;
+
+  font-size:
+    13px !important;
+
+  line-height:
+    1.4 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact
+.visitAiConsultSection ul {
+  padding-left:
+    20px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact
+.visitAiConsultSection li {
+  margin:
+    6px 0 !important;
+
+  font-size:
+    14px !important;
+
+  line-height:
+    1.55 !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultAnswer.is-compact
+.visitAiConsultMeta {
+  margin-top:
+    12px !important;
+
+  font-size:
+    11px !important;
+}
+
+/* Поле ввода всегда остаётся внизу чата. */
+
+.visitAiWorkspace
+#visitAiConsultPanel
+.visitAiConsultComposer {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    155px !important;
+
+  gap:
+    10px;
+
+  align-items:
+    stretch;
+
+  margin-top:
+    12px;
+
+  padding-top:
+    14px;
+
+  border-top:
+    1px solid
+    var(--ai-consult-border);
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      var(--ai-consult-surface-strong)
+        18%
+    );
+}
+
+.visitAiWorkspace
+#visitAiConsultPanel
+.visitAiConsultInput {
+  min-height:
+    78px !important;
+
+  max-height:
+    170px;
+
+  padding:
+    12px 14px !important;
+
+  font-size:
+    15px !important;
+
+  line-height:
+    1.5 !important;
+}
+
+.visitAiWorkspace
+#visitAiConsultPanel
+.visitAiConsultSend {
+  width:
+    100%;
+
+  min-height:
+    52px !important;
+
+  padding:
+    11px 14px !important;
+
+  font-size:
+    14px !important;
+}
+
+.visitAiWorkspace
+.visitAiConsultComposerHint {
+  margin-top:
+    7px;
+
+  color:
+    var(--ai-consult-muted);
+
+  font-size:
+    10px;
+
+  line-height:
+    1.4;
+
+  text-align:
+    right;
+}
+
+/* Анимация ожидания ответа. */
+
+.visitAiWorkspace
+.visitAiConsultLoading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.visitAiWorkspace
+.visitAiConsultHistoryLoading {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.visitAiWorkspace
+.visitAiConsultTypingDot {
+  width: 6px;
+  height: 6px;
+
+  border-radius:
+    999px;
+
+  background:
+    var(--ai-consult-accent);
+
+  animation:
+    visitAiConsultTyping
+    1.15s
+    infinite ease-in-out;
+}
+
+.visitAiWorkspace
+.visitAiConsultTypingDot:nth-child(2) {
+  animation-delay:
+    0.14s;
+}
+
+.visitAiWorkspace
+.visitAiConsultTypingDot:nth-child(3) {
+  margin-right:
+    5px;
+
+  animation-delay:
+    0.28s;
+}
+
+@keyframes visitAiConsultTyping {
+  0%,
+  60%,
+  100% {
+    transform:
+      translateY(0);
+
+    opacity:
+      0.38;
+  }
+
+  30% {
+    transform:
+      translateY(-4px);
+
+    opacity:
+      1;
+  }
+}
+
+.visitAiWorkspace
+.visitAiConsultHistoryWarning {
+  padding:
+    10px 12px;
+
+  border:
+    1px solid
+    rgba(
+      245,
+      158,
+      11,
+      0.32
+    );
+
+  border-radius:
+    11px;
+
+  background:
+    rgba(
+      245,
+      158,
+      11,
+      0.10
+    );
+
+  color:
+    #fde68a;
+
+  font-size:
+    12px;
+
+  line-height:
+    1.5;
+}
+
+/* На большом экране чат получает
+   отдельную стабильную высоту. */
+
+@media (min-width: 1551px) {
+  .visitAiWorkspace
+  #visitAiConsultPanel {
+    height:
+      calc(
+        100vh - 285px
+      );
+
+    min-height:
+      610px;
+
+    max-height:
+      1180px;
+  }
+
+  .visitAiWorkspace
+  .visitAiConsultMessages {
+    max-height:
+      none;
+  }
+}
+
+@media (max-width: 700px) {
+  .visitAiWorkspace
+  #visitAiConsultPanel
+  .visitAiConsultComposer {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .visitAiWorkspace
+  .visitAiConsultMessage.is-user {
+    width:
+      92%;
+  }
+
+  .visitAiWorkspace
+  .visitAiConsultMessages {
+    max-height:
+      68vh;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  .visitAiWorkspace
+  .visitAiConsultMessages {
+    scroll-behavior:
+      auto;
+  }
+
+  .visitAiWorkspace
+  .visitAiConsultTypingDot {
+    animation:
+      none;
   }
 }
