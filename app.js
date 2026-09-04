@@ -59393,56 +59393,274 @@ function initVisitUI() {
         const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
         if (!current) return alert("Візит не знайдено");
 
-        const dx = String(
-  document.getElementById("visitMedDx")?.value || ""
-).trim();
+       const readVisitText = (
+  fieldId
+) => {
+  return String(
+    document
+      .getElementById(
+        fieldId
+      )
+      ?.value || ""
+  ).trim();
+};
 
-const complaint = String(
-  document.getElementById("visitMedComplaint")?.value || ""
-).trim();
+const readVisitNumber = (
+  fieldId
+) => {
+  const rawValue =
+    document
+      .getElementById(
+        fieldId
+      )
+      ?.value;
 
-const rx = String(
-  document.getElementById("visitMedRx")?.value || ""
-).trim();
+  if (
+    rawValue === "" ||
+    rawValue == null
+  ) {
+    return null;
+  }
 
-const recommendation = String(
-  document.getElementById("visitClientRecommendation")?.value || ""
-).trim();
+  const numericValue =
+    Number(rawValue);
 
-const weightValue =
-  document.getElementById("visitWeightDisplay")?.value;
+  return Number.isFinite(
+    numericValue
+  )
+    ? numericValue
+    : null;
+};
+
+const reasonForVisit =
+  readVisitText(
+    "visitReasonForVisit"
+  );
+
+const complaint =
+  readVisitText(
+    "visitMedComplaint"
+  );
+
+const objectiveExam =
+  readVisitText(
+    "visitObjectiveExam"
+  );
+
+const problemList =
+  readVisitText(
+    "visitProblemList"
+  )
+    .split(/\n+/)
+    .map(
+      (item) =>
+        item
+          .replace(
+            /^[•\-–—]\s*/,
+            ""
+          )
+          .trim()
+    )
+    .filter(Boolean);
+
+const dx =
+  readVisitText(
+    "visitMedDx"
+  );
+
+const diagnosisStatus =
+  readVisitText(
+    "visitDiagnosisStatus"
+  ) ||
+  (
+    dx
+      ? "preliminary"
+      : "not_established"
+  );
+
+const differentialDiagnoses =
+  readVisitText(
+    "visitDifferentialDiagnoses"
+  );
+
+const diagnosticPlan =
+  readVisitText(
+    "visitDiagnosticPlan"
+  );
+
+const performedCare =
+  readVisitText(
+    "visitPerformedCare"
+  );
+
+const rx =
+  readVisitText(
+    "visitMedRx"
+  );
+
+const ownerExplanation =
+  readVisitText(
+    "visitOwnerExplanation"
+  );
+
+const recommendation =
+  readVisitText(
+    "visitClientRecommendation"
+  );
+
+const redFlags =
+  readVisitText(
+    "visitRedFlags"
+  );
+
+const followUp =
+  readVisitText(
+    "visitFollowUp"
+  );
 
 const weightKg =
-  weightValue === "" || weightValue == null
-    ? null
-    : Number(weightValue);
+  readVisitNumber(
+    "visitWeightDisplay"
+  );
 
-const services = Array.isArray(current.services)
-  ? current.services
-  : [];
+const legacyComplaint = [
+  reasonForVisit,
+  complaint,
+]
+  .filter(Boolean)
+  .join("\n\n");
 
-const stock = Array.isArray(current.stock)
-  ? current.stock
-  : [];
+const previousClinicalData =
+  (
+    current?.clinical_data &&
+    typeof current
+      .clinical_data ===
+      "object" &&
+    !Array.isArray(
+      current.clinical_data
+    )
+  )
+    ? current.clinical_data
+    : {};
+
+const clinicalData = {
+  ...previousClinicalData,
+
+  schema_version:
+    1,
+
+  reason_for_visit:
+    reasonForVisit,
+
+  anamnesis:
+    complaint,
+
+  vital_signs: {
+    temperature_c:
+      readVisitNumber(
+        "visitTemperature"
+      ),
+
+    heart_rate_bpm:
+      readVisitNumber(
+        "visitHeartRate"
+      ),
+
+    respiratory_rate_bpm:
+      readVisitNumber(
+        "visitRespiratoryRate"
+      ),
+
+    mucous_membranes:
+      readVisitText(
+        "visitMucousMembranes"
+      ),
+
+    crt_seconds:
+      readVisitNumber(
+        "visitCrtSeconds"
+      ),
+  },
+
+  objective_exam:
+    objectiveExam,
+
+  problem_list:
+    problemList,
+
+  diagnosis:
+    dx,
+
+  diagnosis_status:
+    diagnosisStatus,
+
+  differential_diagnoses:
+    differentialDiagnoses,
+
+  diagnostic_plan:
+    diagnosticPlan,
+
+  performed_care:
+    performedCare,
+
+  prescriptions:
+    rx,
+
+  owner_explanation:
+    ownerExplanation,
+
+  home_recommendations:
+    recommendation,
+
+  red_flags:
+    redFlags,
+
+  follow_up:
+    followUp,
+};
+
+const services =
+  Array.isArray(
+    current.services
+  )
+    ? current.services
+    : [];
+
+const stock =
+  Array.isArray(
+    current.stock
+  )
+    ? current.stock
+    : [];
 
 const payload = {
-  pet_id: current.pet_id,
-  date: current.date,
+  pet_id:
+    current.pet_id,
+
+  date:
+    current.date,
 
   weight_kg:
-    Number.isFinite(weightKg)
+    Number.isFinite(
+      weightKg
+    )
       ? weightKg
       : current.weight_kg,
 
-  note: buildVisitNote(
-    dx,
-    complaint
-  ),
+  note:
+    buildVisitNote(
+      dx,
+      legacyComplaint
+    ),
 
-  rx: buildVisitRx(
-    rx,
-    recommendation
-  ),
+  rx:
+    buildVisitRx(
+      rx,
+      recommendation
+    ),
+
+  clinical_data:
+    clinicalData,
 };
 
 const btn =
@@ -59475,6 +59693,8 @@ const merged = {
   note: payload.note,
   rx: payload.rx,
   weight_kg: payload.weight_kg,
+    clinical_data:
+    payload.clinical_data,
 
   services,
   services_json: services,
@@ -59496,10 +59716,15 @@ if (
 }
 
 setDischarge(vid, {
-  complaint,
+  complaint:
+    legacyComplaint,
+
   dx,
   rx,
   recommendation,
+
+  clinical_data:
+    clinicalData,
 });
 
 if (btn) {
@@ -60836,36 +61061,232 @@ if (weightInput) {
     visit?.weight_kg ?? "";
 }
 
-  // 2. Безпечний розбір комбінованої нотатки (note) на Діагноз та Скарги
-  const noteText = String(visit.note || "").trim();
-  const parsed = parseVisitNote(noteText);
-  
-  const dxInput = document.getElementById("visitMedDx");
-  if (dxInput) dxInput.value = parsed.dx || "";
+  // 2. Завантаження медичних даних
+const noteText =
+  String(
+    visit.note || ""
+  ).trim();
 
-  const complaintTextarea = document.getElementById("visitMedComplaint");
-  if (complaintTextarea) complaintTextarea.value = parsed.complaint || "";
+const parsed =
+  parseVisitNote(
+    noteText
+  );
 
-  const parsedRx = parseVisitRx(
-  String(visit.rx || "")
+const parsedRx =
+  parseVisitRx(
+    String(
+      visit.rx || ""
+    )
+  );
+
+const clinicalData =
+  (
+    visit?.clinical_data &&
+    typeof visit
+      .clinical_data ===
+      "object" &&
+    !Array.isArray(
+      visit.clinical_data
+    )
+  )
+    ? visit.clinical_data
+    : {};
+
+const hasClinicalData =
+  Object.keys(
+    clinicalData
+  ).length > 0;
+
+const vitalSigns =
+  (
+    clinicalData
+      .vital_signs &&
+    typeof clinicalData
+      .vital_signs ===
+      "object" &&
+    !Array.isArray(
+      clinicalData
+        .vital_signs
+    )
+  )
+    ? clinicalData
+        .vital_signs
+    : {};
+
+const setVisitFieldValue = (
+  fieldId,
+  value
+) => {
+  const field =
+    document.getElementById(
+      fieldId
+    );
+
+  if (!field) {
+    return;
+  }
+
+  field.value =
+    value ?? "";
+};
+
+setVisitFieldValue(
+  "visitReasonForVisit",
+  hasClinicalData
+    ? clinicalData
+        .reason_for_visit
+    : ""
 );
 
-const rxTextarea =
-  document.getElementById("visitMedRx");
+setVisitFieldValue(
+  "visitMedComplaint",
+  hasClinicalData
+    ? clinicalData
+        .anamnesis
+    : parsed.complaint
+);
 
-if (rxTextarea) {
-  rxTextarea.value = parsedRx.rx;
-}
+setVisitFieldValue(
+  "visitTemperature",
+  vitalSigns
+    .temperature_c
+);
+
+setVisitFieldValue(
+  "visitHeartRate",
+  vitalSigns
+    .heart_rate_bpm
+);
+
+setVisitFieldValue(
+  "visitRespiratoryRate",
+  vitalSigns
+    .respiratory_rate_bpm
+);
+
+setVisitFieldValue(
+  "visitMucousMembranes",
+  vitalSigns
+    .mucous_membranes
+);
+
+setVisitFieldValue(
+  "visitCrtSeconds",
+  vitalSigns
+    .crt_seconds
+);
+
+setVisitFieldValue(
+  "visitObjectiveExam",
+  clinicalData
+    .objective_exam
+);
+
+setVisitFieldValue(
+  "visitProblemList",
+  Array.isArray(
+    clinicalData
+      .problem_list
+  )
+    ? clinicalData
+        .problem_list
+        .join("\n")
+    : (
+        clinicalData
+          .problem_list || ""
+      )
+);
+
+setVisitFieldValue(
+  "visitMedDx",
+  hasClinicalData
+    ? clinicalData
+        .diagnosis
+    : parsed.dx
+);
+
+setVisitFieldValue(
+  "visitDiagnosisStatus",
+  hasClinicalData
+    ? (
+        clinicalData
+          .diagnosis_status ||
+        (
+          clinicalData
+            .diagnosis
+            ? "preliminary"
+            : "not_established"
+        )
+      )
+    : (
+        parsed.dx
+          ? "preliminary"
+          : "not_established"
+      )
+);
+
+setVisitFieldValue(
+  "visitDifferentialDiagnoses",
+  clinicalData
+    .differential_diagnoses
+);
+
+setVisitFieldValue(
+  "visitDiagnosticPlan",
+  clinicalData
+    .diagnostic_plan
+);
+
+setVisitFieldValue(
+  "visitPerformedCare",
+  clinicalData
+    .performed_care
+);
+
+setVisitFieldValue(
+  "visitMedRx",
+  hasClinicalData
+    ? clinicalData
+        .prescriptions
+    : parsedRx.rx
+);
+
+setVisitFieldValue(
+  "visitOwnerExplanation",
+  clinicalData
+    .owner_explanation
+);
 
 const recommendationTextarea =
   document.getElementById(
     "visitClientRecommendation"
   );
 
-if (recommendationTextarea) {
+if (
+  recommendationTextarea
+) {
   recommendationTextarea.value =
-    parsedRx.recommendation;
+    hasClinicalData
+      ? (
+          clinicalData
+            .home_recommendations ||
+          ""
+        )
+      : parsedRx
+          .recommendation;
 }
+
+setVisitFieldValue(
+  "visitRedFlags",
+  clinicalData
+    .red_flags
+);
+
+setVisitFieldValue(
+  "visitFollowUp",
+  clinicalData
+    .follow_up
+);
 ensureVisitAiConsultStyles();
 
 let visitAiConsultPanel =
@@ -61770,48 +62191,358 @@ if (
           .structuredDraft =
             structured;
 
+                const vitalSigns =
+          (
+            structured.vital_signs
+            &&
+            typeof (
+              structured.vital_signs
+            ) === "object"
+          )
+            ? structured.vital_signs
+            : {};
+
+        const diagnosisStatusLabels = {
+          not_established:
+            "не встановлений",
+          preliminary:
+            "попередній",
+          confirmed:
+            "підтверджений",
+        };
+
+        const mucousMembraneLabels = {
+          pink:
+            "рожеві",
+          pale:
+            "бліді",
+          hyperemic:
+            "гіперемовані",
+          icteric:
+            "іктеричні",
+          cyanotic:
+            "ціанотичні",
+        };
+
+        const normalizeMucousMembranes =
+          (value) => {
+            const rawValue =
+              String(
+                value ?? ""
+              )
+                .trim()
+                .toLowerCase();
+
+            if (!rawValue) {
+              return "";
+            }
+
+            if (
+              Object.prototype
+                .hasOwnProperty.call(
+                  mucousMembraneLabels,
+                  rawValue
+                )
+            ) {
+              return rawValue;
+            }
+
+            if (
+              rawValue.includes(
+                "рожев"
+              )
+              ||
+              rawValue.includes(
+                "pink"
+              )
+            ) {
+              return "pink";
+            }
+
+            if (
+              rawValue.includes(
+                "блід"
+              )
+              ||
+              rawValue.includes(
+                "pale"
+              )
+            ) {
+              return "pale";
+            }
+
+            if (
+              rawValue.includes(
+                "гіперем"
+              )
+              ||
+              rawValue.includes(
+                "hyperem"
+              )
+            ) {
+              return "hyperemic";
+            }
+
+            if (
+              rawValue.includes(
+                "іктер"
+              )
+              ||
+              rawValue.includes(
+                "жовт"
+              )
+              ||
+              rawValue.includes(
+                "icter"
+              )
+            ) {
+              return "icteric";
+            }
+
+            if (
+              rawValue.includes(
+                "ціан"
+              )
+              ||
+              rawValue.includes(
+                "синюш"
+              )
+              ||
+              rawValue.includes(
+                "cyan"
+              )
+            ) {
+              return "cyanotic";
+            }
+
+            return "";
+          };
+
+        const formatAiMetric =
+          (
+            label,
+            value,
+            unit = ""
+          ) => {
+            const normalizedValue =
+              String(
+                value ?? ""
+              ).trim();
+
+            if (!normalizedValue) {
+              return "";
+            }
+
+            return (
+              `${label}: `
+              + normalizedValue
+              + (
+                unit
+                  ? ` ${unit}`
+                  : ""
+              )
+            );
+          };
+
+        const mucousCode =
+          normalizeMucousMembranes(
+            vitalSigns
+              .mucous_membranes
+          );
+
+        const vitalSignsText = [
+          formatAiMetric(
+            "Вага",
+            structured.weight_kg,
+            "кг"
+          ),
+          formatAiMetric(
+            "Температура",
+            vitalSigns
+              .temperature_c,
+            "°C"
+          ),
+          formatAiMetric(
+            "ЧСС",
+            vitalSigns
+              .heart_rate_bpm,
+            "уд/хв"
+          ),
+          formatAiMetric(
+            "ЧДР",
+            vitalSigns
+              .respiratory_rate_bpm,
+            "рухів/хв"
+          ),
+          mucousCode
+            ? (
+                "Слизові: "
+                + mucousMembraneLabels[
+                  mucousCode
+                ]
+              )
+            : "",
+          formatAiMetric(
+            "КНК",
+            vitalSigns
+              .crt_seconds,
+            "с"
+          ),
+        ]
+          .filter(Boolean)
+          .join(" • ");
+
+        const problemListText =
+          Array.isArray(
+            structured.problem_list
+          )
+            ? structured
+                .problem_list
+                .map(
+                  (item) =>
+                    String(
+                      item ?? ""
+                    ).trim()
+                )
+                .filter(Boolean)
+                .map(
+                  (item) =>
+                    `• ${item}`
+                )
+                .join("\n")
+            : String(
+                structured
+                  .problem_list || ""
+              ).trim();
+
+        const diagnosisStatus =
+          diagnosisStatusLabels[
+            structured
+              .diagnosis_status
+          ] || "";
+
         const fields = [
           {
             label:
-              "Скарги та анамнез",
+              "Причина звернення",
             value:
               structured
-                .complaints_anamnesis,
+                .reason_for_visit,
           },
           {
             label:
-              "Діагноз",
+              "Анамнез",
+            value:
+              (
+                structured.anamnesis
+                ||
+                structured
+                  .complaints_anamnesis
+              ),
+          },
+          {
+            label:
+              "Основні показники",
+            value:
+              vitalSignsText,
+          },
+          {
+            label:
+              "Об’єктивний огляд",
+            value:
+              structured
+                .objective_exam,
+          },
+          {
+            label:
+              "Ключові клінічні проблеми",
+            value:
+              problemListText,
+          },
+          {
+            label:
+              (
+                "Діагноз"
+                +
+                (
+                  diagnosisStatus
+                    ? (
+                        ` · ${
+                          diagnosisStatus
+                        }`
+                      )
+                    : ""
+                )
+              ),
             value:
               structured.diagnosis,
           },
           {
             label:
-              "Призначення лікаря",
-            value:
-              structured.treatment,
-          },
-          {
-            label:
-              "Рекомендації власнику",
+              "Диференційні діагнози",
             value:
               structured
-                .owner_recommendations,
+                .differential_diagnoses,
           },
           {
             label:
-              "Вага",
+              "План діагностики",
             value:
-              structured.weight_kg
-                != null
-                ? (
-                  `${structured.weight_kg} кг`
-                )
-                : "",
+              structured
+                .diagnostic_plan,
+          },
+          {
+            label:
+              "Проведено на прийомі",
+            value:
+              structured
+                .performed_care,
+          },
+          {
+            label:
+              "Лікування та призначення",
+            value:
+              (
+                structured.prescriptions
+                ||
+                structured.treatment
+              ),
+          },
+          {
+            label:
+              "Пояснення для власника",
+            value:
+              structured
+                .owner_explanation,
+          },
+          {
+            label:
+              "Домашні рекомендації",
+            value:
+              (
+                structured
+                  .home_recommendations
+                ||
+                structured
+                  .owner_recommendations
+              ),
+          },
+          {
+            label:
+              "Коли звернутися терміново",
+            value:
+              structured.red_flags,
+          },
+          {
+            label:
+              "Контроль і повторний огляд",
+            value:
+              structured.follow_up,
           },
         ].filter(
           (field) =>
             String(
-              field.value || ""
+              field.value ?? ""
             ).trim()
         );
 
@@ -61981,13 +62712,119 @@ if (visitAiApplyButton) {
 
   visitAiApplyButton.onclick =
     () => {
-      const candidateFields = [
+            const candidateFields = [
+        {
+          element:
+            document.getElementById(
+              "visitReasonForVisit"
+            ),
+          value:
+            structured
+              .reason_for_visit,
+        },
         {
           element:
             complaintTextarea,
           value:
+            (
+              structured.anamnesis
+              ||
+              structured
+                .complaints_anamnesis
+            ),
+        },
+        {
+          element:
+            weightInput,
+          value:
+            structured.weight_kg,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitTemperature"
+            ),
+          value:
+            vitalSigns
+              .temperature_c,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitHeartRate"
+            ),
+          value:
+            vitalSigns
+              .heart_rate_bpm,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitRespiratoryRate"
+            ),
+          value:
+            vitalSigns
+              .respiratory_rate_bpm,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitMucousMembranes"
+            ),
+          value:
+            normalizeMucousMembranes(
+              vitalSigns
+                .mucous_membranes
+            ),
+        },
+        {
+          element:
+            document.getElementById(
+              "visitCrtSeconds"
+            ),
+          value:
+            vitalSigns
+              .crt_seconds,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitObjectiveExam"
+            ),
+          value:
             structured
-              .complaints_anamnesis,
+              .objective_exam,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitProblemList"
+            ),
+          value:
+            Array.isArray(
+              structured.problem_list
+            )
+              ? structured
+                  .problem_list
+                  .map(
+                    (item) =>
+                      String(
+                        item ?? ""
+                      ).trim()
+                  )
+                  .filter(Boolean)
+                  .join("\n")
+              : structured
+                  .problem_list,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitDiagnosisStatus"
+            ),
+          value:
+            structured
+              .diagnosis_status,
         },
         {
           element:
@@ -61997,27 +62834,77 @@ if (visitAiApplyButton) {
         },
         {
           element:
+            document.getElementById(
+              "visitDifferentialDiagnoses"
+            ),
+          value:
+            structured
+              .differential_diagnoses,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitDiagnosticPlan"
+            ),
+          value:
+            structured
+              .diagnostic_plan,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitPerformedCare"
+            ),
+          value:
+            structured
+              .performed_care,
+        },
+        {
+          element:
             rxTextarea,
           value:
-            structured.treatment,
+            (
+              structured.prescriptions
+              ||
+              structured.treatment
+            ),
+        },
+        {
+          element:
+            document.getElementById(
+              "visitOwnerExplanation"
+            ),
+          value:
+            structured
+              .owner_explanation,
         },
         {
           element:
             recommendationTextarea,
           value:
-            structured
-              .owner_recommendations,
+            (
+              structured
+                .home_recommendations
+              ||
+              structured
+                .owner_recommendations
+            ),
         },
         {
           element:
-            weightInput,
+            document.getElementById(
+              "visitRedFlags"
+            ),
           value:
-            structured.weight_kg
-              != null
-                ? String(
-                  structured.weight_kg
-                )
-                : "",
+            structured.red_flags,
+        },
+        {
+          element:
+            document.getElementById(
+              "visitFollowUp"
+            ),
+          value:
+            structured.follow_up,
         },
       ];
 
@@ -62193,6 +63080,15 @@ if (visitAiApplyButton) {
                   .dispatchEvent(
                     new Event(
                       "input",
+                      {
+                        bubbles: true,
+                      }
+                    )
+                  );
+                                  field.element
+                  .dispatchEvent(
+                    new Event(
+                      "change",
                       {
                         bubbles: true,
                       }

@@ -6,7 +6,7 @@
   <title>Doc.PUG CRM - Преміум Панель</title>
   <link
   rel="stylesheet"
-  href="style.css?v=20260902-pug-ai-lab-collapse-v5"
+  href="style.css?v=20260904-visit-clinical-ai-v1"
 >
 </head>
 
@@ -177,9 +177,33 @@
             </div>
           </div>
 
-          <div class="visitMedicalGrid">
-            <label class="visitField visitFieldWide">
-              <span>Скарги та анамнез</span>
+                    <div class="visitMedicalGrid">
+            <label
+              class="
+                visitField
+                visitFieldWide
+              "
+            >
+              <span>Причина звернення</span>
+
+              <textarea
+                class="
+                  visitControl
+                  visitTextareaShort
+                "
+                id="visitReasonForVisit"
+                rows="2"
+                placeholder="Коли почалися симптоми, як змінювався стан, харчування, лікування та важливі події..."
+              ></textarea>
+            </label>
+
+            <label
+              class="
+                visitField
+                visitFieldWide
+              "
+            >
+              <span>Анамнез</span>
 
               <textarea
                 class="visitControl visitTextareaLarge"
@@ -189,55 +213,373 @@
               ></textarea>
             </label>
 
-            <label class="visitField">
-              <span>Діагноз</span>
 
-              <input
-                class="visitControl"
-                id="visitMedDx"
-                type="text"
-                placeholder="Вкажіть попередній або остаточний діагноз..."
-              >
-            </label>
-
-            <label class="visitField">
-              <span>Вага на момент прийому</span>
-
-              <div class="visitWeightControl">
-                <input
-                  class="visitControl"
-                  id="visitWeightDisplay"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  placeholder="0.0"
-                >
-
-                <span>кг</span>
+                        <div
+              class="
+                visitVitalsBlock
+                visitFieldWide
+              "
+            >
+              <div class="visitVitalsTitle">
+                Показники стану
               </div>
-            </label>
 
-            <label class="visitField visitFieldWide">
-              <span>Призначення лікаря</span>
+              <div class="visitVitalsGrid">
+                <label class="visitVitalField">
+                  <span>Вага</span>
+
+                  <div class="visitWeightControl">
+                    <input
+                      class="visitControl"
+                      id="visitWeightDisplay"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="0.0"
+                    >
+
+                    <span>кг</span>
+                  </div>
+                </label>
+
+                <label class="visitVitalField">
+                  <span>Температура</span>
+
+                  <div class="visitWeightControl">
+                    <input
+                      class="visitControl"
+                      id="visitTemperature"
+                      type="number"
+                      step="0.1"
+                      min="25"
+                      max="45"
+                      placeholder="38.5"
+                    >
+
+                    <span>°C</span>
+                  </div>
+                </label>
+
+                <label class="visitVitalField">
+                  <span>ЧСС / пульс</span>
+
+                  <div class="visitWeightControl">
+                    <input
+                      class="visitControl"
+                      id="visitHeartRate"
+                      type="number"
+                      step="1"
+                      min="0"
+                      placeholder="120"
+                    >
+
+                    <span>/хв</span>
+                  </div>
+                </label>
+
+                <label class="visitVitalField">
+                  <span>Частота дихання</span>
+
+                  <div class="visitWeightControl">
+                    <input
+                      class="visitControl"
+                      id="visitRespiratoryRate"
+                      type="number"
+                      step="1"
+                      min="0"
+                      placeholder="24"
+                    >
+
+                    <span>/хв</span>
+                  </div>
+                </label>
+
+                <label class="visitVitalField">
+                  <span>Слизові</span>
+
+                  <select
+                    class="visitControl"
+                    id="visitMucousMembranes"
+                  >
+                    <option value="">
+                      Не оцінено
+                    </option>
+
+                    <option value="pink">
+                      Рожеві
+                    </option>
+
+                    <option value="pale">
+                      Бліді
+                    </option>
+
+                    <option value="hyperemic">
+                      Гіперемовані
+                    </option>
+
+                    <option value="icteric">
+                      Іктеричні
+                    </option>
+
+                    <option value="cyanotic">
+                      Ціанотичні
+                    </option>
+                  </select>
+                </label>
+
+                <label class="visitVitalField">
+                  <span>Час наповнення капілярів</span>
+
+                  <div class="visitWeightControl">
+                    <input
+                      class="visitControl"
+                      id="visitCrtSeconds"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="20"
+                      placeholder="1.5"
+                    >
+
+                    <span>с</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <label
+              class="
+                visitField
+                visitFieldWide
+              "
+            >
+              <span>Об’єктивний огляд</span>
 
               <textarea
-                class="visitControl visitTextareaLarge"
-                id="visitMedRx"
-                rows="5"
-                placeholder="Препарати, дозування, тривалість лікування, контроль..."
+                class="
+                  visitControl
+                  visitTextareaClinical
+                "
+                id="visitObjectiveExam"
+                rows="4"
+                placeholder="Загальний стан, положення тіла, слизові, лімфовузли, аускультація, пальпація та інші об’єктивні дані..."
               ></textarea>
             </label>
 
-            <label class="visitField visitFieldWide">
-              <span>Рекомендації для власника</span>
+            <label
+              class="
+                visitField
+                visitFieldWide
+              "
+            >
+              <span>Ключові клінічні проблеми</span>
 
               <textarea
-                class="visitControl"
-                id="visitClientRecommendation"
+                class="
+                  visitControl
+                  visitTextareaProblems
+                "
+                id="visitProblemList"
                 rows="3"
-                placeholder="Що потрібно виконувати вдома та коли звернутися повторно..."
+                placeholder="Коротко, кожна проблема з нового рядка: гарячка, анорексія, увеїт, атаксія..."
               ></textarea>
             </label>
+
+            <div
+              class="
+                visitAssessmentBlock
+                visitFieldWide
+              "
+            >
+              <div class="visitAssessmentGrid">
+                <label class="visitField">
+                  <span>Статус діагнозу</span>
+
+                  <select
+                    class="visitControl"
+                    id="visitDiagnosisStatus"
+                  >
+                    <option value="not_established">
+                      Не встановлений
+                    </option>
+
+                    <option value="preliminary">
+                      Попередній
+                    </option>
+
+                    <option value="confirmed">
+                      Підтверджений
+                    </option>
+                  </select>
+                </label>
+
+                <label class="visitField">
+                  <span>Діагноз</span>
+
+                  <textarea
+                    class="
+                      visitControl
+                      visitTextareaDiagnosis
+                    "
+                    id="visitMedDx"
+                    rows="3"
+                    placeholder="Основний попередній або підтверджений діагноз..."
+                  ></textarea>
+                </label>
+              </div>
+
+              <label class="visitField">
+                <span>
+                  Диференційні діагнози
+                  <small>необов’язково</small>
+                </span>
+
+                <textarea
+                  class="
+                    visitControl
+                    visitTextareaProblems
+                  "
+                  id="visitDifferentialDiagnoses"
+                  rows="2"
+                  placeholder="Основні альтернативи, які ще потрібно виключити..."
+                ></textarea>
+              </label>
+            </div>
+
+                        <div
+              class="
+                visitActionGrid
+                visitFieldWide
+              "
+            >
+              <label class="visitField">
+                <span>План діагностики</span>
+
+                <textarea
+                  class="
+                    visitControl
+                    visitTextareaAction
+                  "
+                  id="visitDiagnosticPlan"
+                  rows="3"
+                  placeholder="Аналізи, візуальна діагностика та інші дослідження..."
+                ></textarea>
+              </label>
+
+              <label class="visitField">
+                <span>Проведено на прийомі</span>
+
+                <textarea
+                  class="
+                    visitControl
+                    visitTextareaAction
+                  "
+                  id="visitPerformedCare"
+                  rows="3"
+                  placeholder="Огляд, ін’єкції, інфузії, обробки та виконані маніпуляції..."
+                ></textarea>
+              </label>
+            </div>
+
+            <label
+              class="
+                visitField
+                visitFieldWide
+              "
+            >
+              <span>Лікування та призначення</span>
+
+              <textarea
+                class="
+                  visitControl
+                  visitTextareaPrescription
+                "
+                id="visitMedRx"
+                rows="4"
+                placeholder="Препарати, дозування, шлях введення, кратність і тривалість лікування..."
+              ></textarea>
+            </label>
+
+            <div
+              class="
+                visitOwnerCommunication
+                visitFieldWide
+              "
+            >
+              <div class="visitOwnerCommunicationHead">
+                <div>
+                  <strong>
+                    Комунікація з власником
+                  </strong>
+
+                  <span>
+                    Пояснення стану та домашній план
+                  </span>
+                </div>
+
+                <span class="visitOwnerCommunicationBadge">
+                  Для виписки
+                </span>
+              </div>
+
+              <label class="visitField">
+                <span>Пояснення для власника</span>
+
+                <textarea
+                  class="
+                    visitControl
+                    visitTextareaOwner
+                  "
+                  id="visitOwnerExplanation"
+                  rows="3"
+                  placeholder="Простими словами: що відбувається з твариною та що означають результати огляду..."
+                ></textarea>
+              </label>
+
+              <label class="visitField">
+                <span>Домашні рекомендації</span>
+
+                <textarea
+                  class="
+                    visitControl
+                    visitTextareaOwner
+                  "
+                  id="visitClientRecommendation"
+                  rows="3"
+                  placeholder="Догляд, харчування, обмеження та що потрібно виконувати вдома..."
+                ></textarea>
+              </label>
+
+              <div class="visitOwnerFollowGrid">
+                <label class="visitField">
+                  <span>Коли звернутися терміново</span>
+
+                  <textarea
+                    class="
+                      visitControl
+                      visitTextareaFollow
+                    "
+                    id="visitRedFlags"
+                    rows="2"
+                    placeholder="Конкретні ознаки погіршення..."
+                  ></textarea>
+                </label>
+
+                <label class="visitField">
+                  <span>Контроль і повторний огляд</span>
+
+                  <textarea
+                    class="
+                      visitControl
+                      visitTextareaFollow
+                    "
+                    id="visitFollowUp"
+                    rows="2"
+                    placeholder="Коли та з якою метою потрібен контроль..."
+                  ></textarea>
+                </label>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -1873,7 +2215,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="ach.js"></script>
-<script src="app.js?v=20260903-lab-pdf-one-page-v9"></script>
+<script src="app.js?v=20260904-visit-clinical-ai-v1"></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>
