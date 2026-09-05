@@ -67091,31 +67091,7 @@ const doctorName =
         </div>
       </div>
 
-      <div class="disModernSection">
-  <div class="disModernSectionTitle">
-    Скарги та анамнез
-  </div>
-
-  <div class="disModernText">
-    ${escapeHtml(
-      complaint || "—"
-    )}
-  </div>
-</div>
-
-${
-  examinationText ||
-  performedCare
-    ? `
-      <div
-        class="
-          disModernClinicalGrid
-        "
-      >
-        ${
-  performedCare
-    ? `
-      <div
+       <div
         class="
           disModernSection
         "
@@ -67125,74 +67101,58 @@ ${
             disModernSectionTitle
           "
         >
-          Проведено та результати
+          Скарги та анамнез
         </div>
 
-        <ul
+        <div
           class="
-            disModernBulletList
+            disModernText
           "
         >
-          ${performedCareItems
-            .map(
-              (item) => `
-                <li>
-                  ${escapeHtml(item)}
-                </li>
-              `
-            )
-            .join("")}
-        </ul>
+          ${escapeHtml(
+            complaint || "—"
+          )}
+        </div>
       </div>
-    `
-    : ""
-}
 
-        ${
-          performedCare
-            ? `
+      ${
+        performedCare
+          ? `
+            <div
+              class="
+                disModernSection
+              "
+            >
               <div
                 class="
-                  disModernSection
+                  disModernSectionTitle
                 "
               >
-                <div
-                  class="
-                    disModernSectionTitle
-                  "
-                >
-                  Проведено та результати
-                </div>
-
-                <ul
-  class="
-    disModernBulletList
-  "
->
-  ${performedCareItems
-    .map(
-      (item) => `
-        <li>
-          ${escapeHtml(item)}
-        </li>
-      `
-    )
-    .join("")}
-</ul>
+                Проведено та результати
               </div>
-            `
-            : ""
-        }
-      </div>
-    `
-    : ""
-}
 
-<div class="disModernSection">
-  <div class="disModernSectionTitle">
-    ${escapeHtml(
-      diagnosisTitle
-    )}
+              <ul
+                class="
+                  disModernBulletList
+                "
+              >
+                ${performedCareItems
+                  .map(
+                    (item) => `
+                      <li>
+                        ${escapeHtml(
+                          item
+                        )}
+                      </li>
+                    `
+                  )
+                  .join("")}
+              </ul>
+            </div>
+          `
+          : ""
+      }
+
   </div>
 
   <div class="disModernText">
