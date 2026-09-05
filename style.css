@@ -60767,3 +60767,26 @@ textarea.visitControl {
       1fr;
   }
 }
+.disModernBulletList {
+  margin: 0;
+  padding-left: 17px;
+  color: #374151;
+  font-size: 11px;
+  line-height: 1.42;
+}
+
+.disModernBulletList li {
+  padding-left: 2px;
+}
+
+.disModernBulletList li + li {
+  margin-top: 5px;
+}
+
+.disModernBulletList li::marker {
+  color: var(
+    --disAccent,
+    #0f8f87
+  );
+  font-size: 1.05em;
+}

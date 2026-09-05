@@ -66734,6 +66734,22 @@ const performedCare =
     clinicalData.performed_care
   );
 
+const performedCareItems =
+  performedCare
+    .split(/\n+/)
+    .flatMap(
+      (paragraph) =>
+        paragraph.match(
+          /[^.!?]+(?:[.!?]+|$)/g
+        ) || [paragraph]
+    )
+    .map(
+      (item) =>
+        String(item || "")
+          .trim()
+    )
+    .filter(Boolean);
+
 const redFlags =
   firstNonEmpty(
     clinicalData.red_flags
@@ -67126,15 +67142,21 @@ ${
                   Проведено та результати
                 </div>
 
-                <div
-                  class="
-                    disModernText
-                  "
-                >
-                  ${escapeHtml(
-                    performedCare
-                  )}
-                </div>
+                <ul
+  class="
+    disModernBulletList
+  "
+>
+  ${performedCareItems
+    .map(
+      (item) => `
+        <li>
+          ${escapeHtml(item)}
+        </li>
+      `
+    )
+    .join("")}
+</ul>
               </div>
             `
             : ""
