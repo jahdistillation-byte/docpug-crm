@@ -60794,3 +60794,121 @@ textarea.visitControl {
   break-inside: avoid;
   page-break-inside: avoid;
 }
+/* =====================================================
+   CALENDAR — QUICK PATIENT FORM READABILITY
+===================================================== */
+
+#visitNewPatientBox {
+  font-size:
+    16px !important;
+}
+
+#visitNewPatientBox
+.pugQuickPatientTitle {
+  font-size:
+    20px !important;
+
+  line-height:
+    1.25 !important;
+
+  font-weight:
+    800 !important;
+}
+
+#visitNewPatientBox
+.pugQuickPatientSub {
+  margin-top:
+    5px !important;
+
+  font-size:
+    14px !important;
+
+  line-height:
+    1.4 !important;
+}
+
+#visitNewPatientBox
+.pugQuickGroupTitle {
+  margin-bottom:
+    6px !important;
+
+  font-size:
+    17px !important;
+
+  line-height:
+    1.3 !important;
+
+  font-weight:
+    800 !important;
+}
+
+#visitNewPatientBox
+.pugVisitField {
+  gap:
+    8px !important;
+}
+
+#visitNewPatientBox
+.pugVisitField > span {
+  font-size:
+    14px !important;
+
+  line-height:
+    1.3 !important;
+
+  font-weight:
+    700 !important;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .72
+    ) !important;
+}
+
+#visitNewPatientBox
+.pugVisitInput {
+  min-height:
+    50px !important;
+
+  padding:
+    0 15px !important;
+
+  font-size:
+    16px !important;
+
+  line-height:
+    1.35 !important;
+}
+
+#visitNewPatientBox
+.pugVisitInput::placeholder {
+  font-size:
+    15px !important;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .34
+    ) !important;
+}
+
+#visitNewPatientBox
+.pugQuickPatientActions button,
+#visitNewPatientCreate {
+  min-height:
+    46px !important;
+
+  padding:
+    0 18px !important;
+
+  font-size:
+    15px !important;
+
+  font-weight:
+    750 !important;
+}
