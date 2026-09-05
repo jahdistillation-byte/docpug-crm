@@ -33949,26 +33949,119 @@ async function downloadA4Pdf(
      * Сколько пикселей исходного canvas
      * помещается на одной странице A4.
      */
-    const pageSliceHeightPx =
-      Math.floor(
-        canvas.width *
-        (
-          contentHeightMm /
-          contentWidthMm
-        )
-      );
+   const pageSliceHeightPx =
+  Math.floor(
+    canvas.width *
+    (
+      contentHeightMm /
+      contentWidthMm
+    )
+  );
 
-    const breakRanges =
-      collectPatientDocumentBreakRanges(
-        pdfDocument,
-        canvas.width
-      );
+/*
+ * Если выписка немного превышает
+ * высоту A4, уменьшаем её целиком.
+ * Это убирает пустую вторую страницу.
+ */
+const widthScale =
+  contentWidthMm /
+  canvas.width;
+
+const fitScale =
+  Math.min(
+    widthScale,
+
+    contentHeightMm /
+      canvas.height
+  );
+
+const relativeOnePageScale =
+  fitScale /
+  widthScale;
+
+/*
+ * Допускаем уменьшение максимум
+ * примерно на 22%. Более длинный
+ * документ остаётся многостраничным,
+ * чтобы текст не стал слишком мелким.
+ */
+if (
+  relativeOnePageScale >= 0.78
+) {
+  const renderedWidthMm =
+    canvas.width *
+    fitScale;
+
+  const renderedHeightMm =
+    canvas.height *
+    fitScale;
+
+  const renderedLeftMm =
+    marginLeftMm +
+    (
+      contentWidthMm -
+      renderedWidthMm
+    ) / 2;
+
+  const pageImage =
+    canvas.toDataURL(
+      "image/jpeg",
+      0.98
+    );
+
+  pdf.addImage(
+    pageImage,
+    "JPEG",
+    renderedLeftMm,
+    marginTopMm,
+    renderedWidthMm,
+    renderedHeightMm,
+    undefined,
+    "FAST"
+  );
+
+  pdf.save(
+    options.filename ||
+    a4FilenameFromVisit(
+      visitId
+    )
+  );
+
+  return;
+}
+
+const breakRanges =
+  collectPatientDocumentBreakRanges(
+    pdfDocument,
+    canvas.width
+  );
 
     let sourceY = 0;
-    let pageIndex = 0;
+let pageIndex = 0;
 
-    while (sourceY < canvas.height) {
-      const sliceHeight =
+const minimumMeaningfulSlicePx =
+  Math.max(
+    12,
+
+    Math.round(
+      canvas.width * 0.01
+    )
+  );
+
+while (sourceY < canvas.height) {
+  const remainingHeight =
+    canvas.height -
+    sourceY;
+
+  if (
+    pageIndex > 0 &&
+    remainingHeight <=
+      minimumMeaningfulSlicePx
+  ) {
+    break;
+  }
+
+  const sliceHeight =
         choosePatientDocumentSliceHeight({
           sourceY,
           idealSliceHeight:
@@ -63513,14 +63606,24 @@ if (
       currentText === sourceText;
 
     const draftApplied =
-      Boolean(
-        visitAiIntakePanel
-          ?.aiDraftApplied
-      );
+  Boolean(
+    visitAiIntakePanel
+      ?.aiDraftApplied
+  );
 
-    const canStructure =
-      hasEnoughText &&
-      !hasCurrentDraft;
+const patientMismatch =
+  String(
+    visitAiIntakePanel
+      ?.structuredDraft
+      ?.patient_match || ""
+  )
+    .trim()
+    .toLowerCase() ===
+      "mismatch";
+
+const canStructure =
+  hasEnoughText &&
+  !hasCurrentDraft;
 
     visitAiStructureButton.disabled =
       !canStructure;
@@ -63550,48 +63653,59 @@ if (
           : "rgba(139,92,246,.35)";
 
     visitAiApplyButton.style.display =
-      hasCurrentDraft
-        ? "inline-flex"
-        : "none";
+  hasCurrentDraft
+    ? "inline-flex"
+    : "none";
 
-    visitAiApplyButton.disabled =
-      !hasCurrentDraft ||
-      draftApplied;
+visitAiApplyButton.disabled =
+  !hasCurrentDraft ||
+  draftApplied ||
+  patientMismatch;
 
-    visitAiApplyButton.textContent =
-      draftApplied
-        ? "Застосовано ✓"
-        : "✓ Застосувати до полів";
+visitAiApplyButton.textContent =
+  patientMismatch
+    ? "⛔ Інший пацієнт"
+    : (
+        draftApplied
+          ? "Застосовано ✓"
+          : "✓ Застосувати до полів"
+      );
 
-    visitAiApplyButton.style.cursor =
-      (
-        hasCurrentDraft &&
-        !draftApplied
-      )
-        ? "pointer"
-        : "not-allowed";
+visitAiApplyButton.style.cursor =
+  (
+    hasCurrentDraft &&
+    !draftApplied &&
+    !patientMismatch
+  )
+    ? "pointer"
+    : "not-allowed";
 
-    visitAiApplyButton.style.color =
-      (
-        hasCurrentDraft &&
-        !draftApplied
-      )
-        ? "#fff"
-        : "rgba(255,255,255,.55)";
+visitAiApplyButton.style.color =
+  (
+    hasCurrentDraft &&
+    !draftApplied &&
+    !patientMismatch
+  )
+    ? "#fff"
+    : "rgba(255,255,255,.55)";
 
-    visitAiApplyButton.style.background =
-      (
-        hasCurrentDraft &&
-        !draftApplied
-      )
-        ? (
-            "linear-gradient("
-            + "135deg,"
-            + "#15803d,"
-            + "#22c55e"
-            + ")"
-          )
-        : "rgba(34,197,94,.24)";
+visitAiApplyButton.style.background =
+  patientMismatch
+    ? "rgba(239,68,68,.20)"
+    : (
+        (
+          hasCurrentDraft &&
+          !draftApplied
+        )
+          ? (
+              "linear-gradient("
+              + "135deg,"
+              + "#15803d,"
+              + "#22c55e"
+              + ")"
+            )
+          : "rgba(34,197,94,.24)"
+      );
   };
 
   visitAiIntakeInput.oninput =
@@ -63665,11 +63779,28 @@ updateAiStructureControls();
     );
 
   const structured =
-    result?.structured || {};
+  result?.structured || {};
 
-  visitAiIntakePanel
-    .structuredDraft =
-      structured;
+const patientMatch =
+  String(
+    structured.patient_match ||
+    "not_mentioned"
+  )
+    .trim()
+    .toLowerCase();
+
+const patientMatchNote =
+  String(
+    structured.patient_match_note ||
+    ""
+  ).trim();
+
+const patientMismatch =
+  patientMatch === "mismatch";
+
+visitAiIntakePanel
+  .structuredDraft =
+    structured;
 
   visitAiIntakePanel
     .structuredSourceText =
@@ -64054,16 +64185,67 @@ updateAiStructureControls();
             "
           >
             <div
-              style="
-                color:#fff;
-                font-size:15px;
-                font-weight:750;
-              "
-            >
-              Чернетку підготовлено
-            </div>
+  style="
+    color:#fff;
+    font-size:15px;
+    font-weight:750;
+  "
+>
+  Чернетку підготовлено
+</div>
 
-            ${fields
+${
+  patientMismatch
+    ? `
+      <div
+        role="alert"
+        style="
+          margin-top:13px;
+          padding:13px;
+          border-radius:11px;
+          background:
+            rgba(239,68,68,.14);
+          border:
+            1px solid
+            rgba(248,113,113,.34);
+          color:#fecaca;
+          font-size:13px;
+          line-height:1.5;
+        "
+      >
+        <strong>
+          ⛔ Дані іншого пацієнта
+        </strong>
+
+        <div
+          style="
+            margin-top:6px;
+          "
+        >
+          ${escapeHtml(
+            patientMatchNote ||
+            (
+              "Дані у диктуванні "
+              + "не відповідають "
+              + "пацієнту поточного візиту."
+            )
+          )}
+        </div>
+
+        <div
+          style="
+            margin-top:6px;
+          "
+        >
+          Застосування AI-чернетки
+          заблоковано.
+        </div>
+      </div>
+    `
+    : ""
+}
+
+${fields
               .map(
                 (field) => `
                   <div
@@ -64154,7 +64336,27 @@ updateAiStructureControls();
 if (visitAiApplyButton) {
   visitAiApplyButton.onclick =
     () => {
-            const candidateFields = [
+      const patientMismatch =
+        String(
+          structured.patient_match ||
+          ""
+        )
+          .trim()
+          .toLowerCase() ===
+            "mismatch";
+
+      if (patientMismatch) {
+        alert(
+          "AI-чернетку не застосовано: "
+          + "дані у диктуванні належать "
+          + "іншому пацієнту."
+        );
+
+        updateAiStructureControls();
+        return;
+      }
+
+      const candidateFields = [
         {
           element:
             document.getElementById(
@@ -66216,29 +66418,161 @@ function buildVisitRx(
 // Часть 8
 // ==========================================================================
 
-function fillDischargeForm(visit, existing) {
-  const ex = existing || {};
-  const parsed = parseVisitNote(visit?.note || "");
-  
-  const complaint = (ex.complaint ?? ex.disComplaint ?? parsed.complaint ?? "").toString();
-  const dx = (ex.dx ?? ex.disDx ?? parsed.dx ?? "").toString();
-  
-  const parsedRx = typeof parseRxCombined === "function" ? parseRxCombined(visit?.rx || "") : { rx: visit?.rx || "", recs: "", follow: "" };
-  const rx = (ex.rx ?? ex.disRx ?? parsedRx.rx ?? "").toString();
-  const recs = (ex.recs ?? ex.disRecs ?? parsedRx.recs ?? "").toString();
-  const follow = (ex.follow ?? ex.disFollow ?? parsedRx.follow ?? "").toString();
+function fillDischargeForm(
+  visit,
+  existing
+) {
+  const ex =
+    existing || {};
 
-  const c = document.getElementById("disComplaint");
-  const d = document.getElementById("disDx");
-  const r = document.getElementById("disRx");
-  const re = document.getElementById("disRecs");
-  const f = document.getElementById("disFollow");
+  const parsed =
+    parseVisitNote(
+      visit?.note || ""
+    );
 
-  if (c) c.value = complaint;
-  if (d) d.value = dx;
-  if (r) r.value = rx;
-  if (re) re.value = recs;
-  if (f) f.value = follow;
+  const parsedRx =
+    typeof parseRxCombined ===
+    "function"
+      ? parseRxCombined(
+          visit?.rx || ""
+        )
+      : {
+          rx:
+            visit?.rx || "",
+          recs: "",
+          follow: "",
+        };
+
+  const clinicalData =
+    (
+      visit?.clinical_data &&
+      typeof (
+        visit.clinical_data
+      ) === "object" &&
+      !Array.isArray(
+        visit.clinical_data
+      )
+    )
+      ? visit.clinical_data
+      : {};
+
+  const firstNonEmpty =
+    (...values) => {
+      for (const value of values) {
+        const text =
+          String(
+            value ?? ""
+          ).trim();
+
+        if (text) {
+          return text;
+        }
+      }
+
+      return "";
+    };
+
+  const clinicalComplaint = [
+    clinicalData
+      .reason_for_visit,
+
+    clinicalData
+      .anamnesis,
+  ]
+    .map(
+      (value) =>
+        String(
+          value || ""
+        ).trim()
+    )
+    .filter(Boolean)
+    .join("\n\n");
+
+  const complaint =
+    firstNonEmpty(
+      ex.complaint,
+      ex.disComplaint,
+      clinicalComplaint,
+      parsed.complaint
+    );
+
+  const dx =
+    firstNonEmpty(
+      ex.dx,
+      ex.disDx,
+      clinicalData.diagnosis,
+      parsed.dx
+    );
+
+  const rx =
+    firstNonEmpty(
+      ex.rx,
+      ex.disRx,
+      clinicalData.prescriptions,
+      parsedRx.rx
+    );
+
+  const recs =
+    firstNonEmpty(
+      ex.recs,
+      ex.disRecs,
+      clinicalData
+        .home_recommendations,
+      parsedRx.recs
+    );
+
+  const follow =
+    firstNonEmpty(
+      ex.follow,
+      ex.disFollow,
+      clinicalData.follow_up,
+      parsedRx.follow
+    );
+
+  const c =
+    document.getElementById(
+      "disComplaint"
+    );
+
+  const d =
+    document.getElementById(
+      "disDx"
+    );
+
+  const r =
+    document.getElementById(
+      "disRx"
+    );
+
+  const re =
+    document.getElementById(
+      "disRecs"
+    );
+
+  const f =
+    document.getElementById(
+      "disFollow"
+    );
+
+  if (c) {
+    c.value = complaint;
+  }
+
+  if (d) {
+    d.value = dx;
+  }
+
+  if (r) {
+    r.value = rx;
+  }
+
+  if (re) {
+    re.value = recs;
+  }
+
+  if (f) {
+    f.value = follow;
+  }
 }
 
 function readDischargeForm() {
@@ -66284,15 +66618,249 @@ async function renderDischargeA4(visitId) {
 
   const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
 
-  const dis = getDischarge(visitId) || {};
-  const parsed = parseVisitNote(v.note || "");
-  const parsedRx = parseRxCombined(v.rx || "");
+  const dis =
+  getDischarge(visitId) || {};
 
-  const complaint = String(dis.complaint ?? parsed.complaint ?? "").trim();
-  const dx = String(dis.dx ?? parsed.dx ?? "").trim();
-  const rx = String(dis.rx ?? parsedRx.rx ?? v.rx ?? "").trim();
-  const recs = String(dis.recs ?? dis.recommendation ?? parsedRx.recs ?? "").trim();
-  const follow = String(dis.follow ?? parsedRx.follow ?? "").trim();
+const parsed =
+  parseVisitNote(
+    v.note || ""
+  );
+
+const parsedRx =
+  parseRxCombined(
+    v.rx || ""
+  );
+
+const clinicalData =
+  (
+    v?.clinical_data &&
+    typeof (
+      v.clinical_data
+    ) === "object" &&
+    !Array.isArray(
+      v.clinical_data
+    )
+  )
+    ? v.clinical_data
+    : {};
+
+const vitalSigns =
+  (
+    clinicalData.vital_signs &&
+    typeof (
+      clinicalData.vital_signs
+    ) === "object" &&
+    !Array.isArray(
+      clinicalData.vital_signs
+    )
+  )
+    ? clinicalData.vital_signs
+    : {};
+
+const firstNonEmpty =
+  (...values) => {
+    for (const value of values) {
+      const text =
+        String(
+          value ?? ""
+        ).trim();
+
+      if (text) {
+        return text;
+      }
+    }
+
+    return "";
+  };
+
+const clinicalComplaint = [
+  clinicalData.reason_for_visit,
+  clinicalData.anamnesis,
+]
+  .map(
+    (value) =>
+      String(
+        value || ""
+      ).trim()
+  )
+  .filter(Boolean)
+  .join("\n\n");
+
+const complaint =
+  firstNonEmpty(
+    dis.complaint,
+    clinicalComplaint,
+    parsed.complaint
+  );
+
+const dx =
+  firstNonEmpty(
+    dis.dx,
+    clinicalData.diagnosis,
+    parsed.dx
+  );
+
+const rx =
+  firstNonEmpty(
+    dis.rx,
+    clinicalData.prescriptions,
+    parsedRx.rx,
+    v.rx
+  );
+
+const recs =
+  firstNonEmpty(
+    dis.recs,
+    dis.recommendation,
+    clinicalData
+      .home_recommendations,
+    parsedRx.recs
+  );
+
+const follow =
+  firstNonEmpty(
+    dis.follow,
+    clinicalData.follow_up,
+    parsedRx.follow
+  );
+
+const objectiveExam =
+  firstNonEmpty(
+    clinicalData.objective_exam
+  );
+
+const performedCare =
+  firstNonEmpty(
+    clinicalData.performed_care
+  );
+
+const redFlags =
+  firstNonEmpty(
+    clinicalData.red_flags
+  );
+
+const diagnosisStatus =
+  String(
+    clinicalData
+      .diagnosis_status || ""
+  )
+    .trim()
+    .toLowerCase();
+
+const diagnosisTitles = {
+  confirmed:
+    "Підтверджений діагноз",
+
+  preliminary:
+    "Попередній діагноз",
+
+  not_established:
+    "Діагноз не встановлено",
+};
+
+const diagnosisTitle =
+  diagnosisTitles[
+    diagnosisStatus
+  ] || "Діагноз";
+
+const formatDischargeMetric =
+  (
+    label,
+    value,
+    unit = ""
+  ) => {
+    const normalizedValue =
+      String(
+        value ?? ""
+      ).trim();
+
+    if (!normalizedValue) {
+      return "";
+    }
+
+    return (
+      `${label}: ${normalizedValue}`
+      +
+      (
+        unit
+          ? ` ${unit}`
+          : ""
+      )
+    );
+  };
+
+const mucousMembraneLabels = {
+  pink:
+    "рожеві",
+
+  pale:
+    "бліді",
+
+  hyperemic:
+    "гіперемовані",
+
+  icteric:
+    "іктеричні",
+
+  cyanotic:
+    "ціанотичні",
+};
+
+const mucousCode =
+  String(
+    vitalSigns
+      .mucous_membranes || ""
+  )
+    .trim()
+    .toLowerCase();
+
+const mucousMembranes =
+  mucousMembraneLabels[
+    mucousCode
+  ] || mucousCode;
+
+const vitalSignsText = [
+  formatDischargeMetric(
+    "Температура",
+    vitalSigns.temperature_c,
+    "°C"
+  ),
+
+  formatDischargeMetric(
+    "ЧСС",
+    vitalSigns.heart_rate_bpm,
+    "/хв"
+  ),
+
+  formatDischargeMetric(
+    "ЧДР",
+    vitalSigns
+      .respiratory_rate_bpm,
+    "/хв"
+  ),
+
+  mucousMembranes
+    ? (
+        "Слизові: "
+        + mucousMembranes
+      )
+    : "",
+
+  formatDischargeMetric(
+    "КНК",
+    vitalSigns.crt_seconds,
+    "с"
+  ),
+]
+  .filter(Boolean)
+  .join(" • ");
+
+const examinationText = [
+  vitalSignsText,
+  objectiveExam,
+]
+  .filter(Boolean)
+  .join("\n");
 
   let org =
   state.clinicProfile ||
@@ -66492,14 +67060,103 @@ const doctorName =
       </div>
 
       <div class="disModernSection">
-        <div class="disModernSectionTitle">Скарги та анамнез</div>
-        <div class="disModernText">${escapeHtml(complaint || "—")}</div>
-      </div>
+  <div class="disModernSectionTitle">
+    Скарги та анамнез
+  </div>
 
-      <div class="disModernSection">
-        <div class="disModernSectionTitle">Встановлений діагноз</div>
-        <div class="disModernText">${escapeHtml(dx || "—")}</div>
+  <div class="disModernText">
+    ${escapeHtml(
+      complaint || "—"
+    )}
+  </div>
+</div>
+
+${
+  examinationText ||
+  performedCare
+    ? `
+      <div
+        class="
+          disModernClinicalGrid
+        "
+      >
+        ${
+          examinationText
+            ? `
+              <div
+                class="
+                  disModernSection
+                "
+              >
+                <div
+                  class="
+                    disModernSectionTitle
+                  "
+                >
+                  Стан під час огляду
+                </div>
+
+                <div
+                  class="
+                    disModernText
+                  "
+                >
+                  ${escapeHtml(
+                    examinationText
+                  )}
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          performedCare
+            ? `
+              <div
+                class="
+                  disModernSection
+                "
+              >
+                <div
+                  class="
+                    disModernSectionTitle
+                  "
+                >
+                  Проведено та результати
+                </div>
+
+                <div
+                  class="
+                    disModernText
+                  "
+                >
+                  ${escapeHtml(
+                    performedCare
+                  )}
+                </div>
+              </div>
+            `
+            : ""
+        }
       </div>
+    `
+    : ""
+}
+
+<div class="disModernSection">
+  <div class="disModernSectionTitle">
+    ${escapeHtml(
+      diagnosisTitle
+    )}
+  </div>
+
+  <div class="disModernText">
+    ${escapeHtml(
+      dx || "—"
+    )}
+  </div>
+</div>
 
       <div class="disModernSection">
         <div class="disModernSectionTitle">Призначення лікаря</div>
@@ -66507,14 +67164,52 @@ const doctorName =
       </div>
 
       <div class="disModernSection">
-        <div class="disModernSectionTitle">Рекомендації для власника</div>
-        <div class="disModernText">${escapeHtml(recs || "—")}</div>
-      </div>
+  <div class="disModernSectionTitle">
+    Рекомендації для власника
+  </div>
 
-      <div class="disModernSection">
-        <div class="disModernSectionTitle">Контроль / повторний огляд</div>
-        <div class="disModernText">${escapeHtml(follow || "—")}</div>
+  <div class="disModernText">
+    ${escapeHtml(
+      recs || "—"
+    )}
+  </div>
+</div>
+
+${
+  redFlags
+    ? `
+      <div
+        class="
+          disModernSection
+          disModernSection--warning
+        "
+      >
+        <div
+          class="
+            disModernSectionTitle
+          "
+        >
+          Коли звернутися терміново
+        </div>
+
+        <div
+          class="
+            disModernText
+          "
+        >
+          ${escapeHtml(
+            redFlags
+          )}
+        </div>
       </div>
+    `
+    : ""
+}
+
+<div class="disModernSection">
+  <div class="disModernSectionTitle">
+    Контроль / повторний огляд
+  </div>
 
       <div class="disModernSection disModernFinanceSection">
         <div class="disModernFinanceHead">

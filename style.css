@@ -60729,3 +60729,41 @@ textarea.visitControl {
     font-size: 16px !important;
   }
 }
+/* =========================================================
+   DISCHARGE — CLINICAL SUMMARY
+   ========================================================= */
+
+.disModernClinicalGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.disModernClinicalGrid
+.disModernSection {
+  min-width: 0;
+  margin-top: 0 !important;
+}
+
+.disModernSection--warning {
+  border-color:
+    #fecaca !important;
+
+  background:
+    #fff7f7 !important;
+}
+
+.disModernSection--warning
+.disModernSectionTitle {
+  color:
+    #b42318 !important;
+}
+
+@media (max-width: 720px) {
+  .disModernClinicalGrid {
+    grid-template-columns:
+      1fr;
+  }
+}
