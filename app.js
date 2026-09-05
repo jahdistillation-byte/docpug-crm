@@ -58461,6 +58461,9 @@ function renderLabCard(lab, speciesKey) {
       ${
   metrics.length
     ? `
+      ${
+  metrics.length
+    ? `
       <div class="labHistoryStats">
         <div class="labHistoryStat">
           <span>Показників</span>
@@ -58497,6 +58500,29 @@ function renderLabCard(lab, speciesKey) {
           <strong>${countLow}</strong>
         </div>
       </div>
+    `
+    : `
+      <div class="labHistoryQualitative">
+        <span
+          class="labHistoryQualitativeIcon"
+          aria-hidden="true"
+        >
+          ✓
+        </span>
+
+        <div>
+          <strong>
+            Якісне дослідження
+          </strong>
+
+          <small>
+            Результат зазначено у висновку,
+            коментарі лікаря або документі.
+          </small>
+        </div>
+      </div>
+    `
+}
     `
     : `
       <div class="labHistoryQualitative">
