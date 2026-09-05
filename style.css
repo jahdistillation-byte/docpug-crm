@@ -60912,3 +60912,108 @@ textarea.visitControl {
   font-weight:
     750 !important;
 }
+/* =====================================================
+   CALENDAR — COMPACT TIMELINE EVENTS
+===================================================== */
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-compact {
+  padding:
+    5px 28px 5px 10px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny {
+  min-height:
+    34px !important;
+
+  padding:
+    4px 28px 4px 10px !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineEventContent {
+  height:
+    100%;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    8px;
+
+  min-width:
+    0;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineEventHead {
+  flex:
+    0 0 auto;
+
+  min-width:
+    auto;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineEventTime {
+  flex:
+    none;
+
+  font-size:
+    11px !important;
+
+  line-height:
+    1 !important;
+
+  white-space:
+    nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineStatus {
+  display:
+    none !important;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineEventTitle {
+  flex:
+    1;
+
+  min-width:
+    0;
+
+  margin-top:
+    0 !important;
+
+  font-size:
+    14px !important;
+
+  line-height:
+    1.1 !important;
+
+  overflow:
+    hidden;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+.page[data-page="calendar"]
+.calendarTimelineEvent.is-tiny
+.calendarTimelineEventNote {
+  display:
+    none !important;
+}
