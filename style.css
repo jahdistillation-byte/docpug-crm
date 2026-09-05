@@ -59181,3 +59181,247 @@ body[data-theme="white"]
     font-size: 27px !important;
   }
 }
+/* =========================================
+   PATIENT LABS — FINAL READABILITY BOOST
+   ========================================= */
+
+.premiumLabsPage {
+  gap: 24px;
+}
+
+.patientProfileTabs button,
+.patientProfileTabs .patientProfileTab {
+  min-height: 52px;
+  font-size: 15px !important;
+  font-weight: 700;
+}
+
+.premiumLabsHero {
+  padding: 30px 32px !important;
+  min-height: 190px;
+}
+
+.premiumLabsKicker {
+  font-size: 12px !important;
+  letter-spacing: 0.13em;
+}
+
+.premiumLabsHeroText h2 {
+  margin-top: 10px;
+  font-size: 30px !important;
+  line-height: 1.15;
+}
+
+.premiumLabsHeroText p {
+  margin-top: 12px;
+  max-width: 900px;
+  font-size: 15px !important;
+  line-height: 1.55;
+}
+
+.premiumLabsSpecies {
+  margin-top: 18px;
+  padding: 9px 14px !important;
+  font-size: 13px !important;
+}
+
+.premiumLabsHeroIcon {
+  width: 78px !important;
+  height: 78px !important;
+  font-size: 34px !important;
+}
+
+
+/* Типы анализов */
+
+.premiumLabTypes {
+  gap: 14px !important;
+}
+
+.premiumLabTypeButton {
+  min-height: 98px !important;
+  padding: 17px 16px !important;
+  border-radius: 18px !important;
+}
+
+.premiumLabTypeIcon {
+  width: 46px !important;
+  height: 46px !important;
+  flex: 0 0 46px;
+  border-radius: 14px !important;
+  font-size: 21px !important;
+}
+
+.premiumLabTypeText strong {
+  display: block;
+  font-size: 16px !important;
+  line-height: 1.25;
+  font-weight: 750;
+}
+
+.premiumLabTypeText span {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.premiumLabTypePlus {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px;
+  font-size: 20px !important;
+}
+
+
+/* История исследований */
+
+.premiumLabsHistory {
+  padding: 28px 24px !important;
+  border-radius: 22px !important;
+}
+
+.premiumLabsHistoryHead h3 {
+  font-size: 22px !important;
+  line-height: 1.25;
+}
+
+.premiumLabsHistoryHead p {
+  margin-top: 6px;
+  font-size: 14px !important;
+}
+
+.labHistoryCard {
+  border-radius: 20px !important;
+}
+
+.labHistoryHeader {
+  padding: 22px 22px 18px !important;
+}
+
+.labHistoryIcon {
+  width: 50px !important;
+  height: 50px !important;
+  flex: 0 0 50px;
+  font-size: 22px !important;
+}
+
+.labHistoryKicker {
+  font-size: 11px !important;
+  letter-spacing: 0.12em;
+}
+
+.labHistoryTitle {
+  margin-top: 5px;
+  font-size: 24px !important;
+  line-height: 1.2;
+}
+
+.labHistorySubtitle {
+  margin-top: 7px;
+  font-size: 14px !important;
+}
+
+.labHistoryStat {
+  min-height: 72px;
+  padding: 13px 15px !important;
+}
+
+.labHistoryStat span {
+  font-size: 11px !important;
+}
+
+.labHistoryStat strong {
+  margin-top: 5px;
+  font-size: 22px !important;
+}
+
+
+/* Показатели и текст результатов */
+
+.labMetricCard {
+  padding: 17px !important;
+  border-radius: 16px !important;
+}
+
+.labMetricLabel {
+  font-size: 15px !important;
+  line-height: 1.35;
+}
+
+.labMetricCode,
+.labMetricRef,
+.labMetricUnit {
+  font-size: 12.5px !important;
+}
+
+.labMetricValue {
+  font-size: 22px !important;
+}
+
+.labMetricStatus {
+  font-size: 11px !important;
+}
+
+.labHistoryComment,
+.labHistoryOwnerExplanation,
+.labHistoryQualitative {
+  padding: 18px 20px !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.labHistoryComment strong,
+.labHistoryOwnerExplanation strong,
+.labHistoryQualitative strong {
+  font-size: 14px !important;
+}
+
+.labHistoryActions button,
+.labAiButton {
+  min-height: 42px;
+  font-size: 14px !important;
+}
+
+
+/* На больших экранах оставляем пять карточек,
+   но даём тексту нормальную ширину */
+
+@media (min-width: 1500px) {
+  .premiumLabTypes {
+    grid-template-columns:
+      repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .premiumLabTypes {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .premiumLabsHero {
+    padding: 23px 20px !important;
+  }
+
+  .premiumLabsHeroText h2 {
+    font-size: 26px !important;
+  }
+
+  .premiumLabTypes {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .premiumLabTypeButton {
+    min-height: 94px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .premiumLabTypes {
+    grid-template-columns: 1fr !important;
+  }
+}
