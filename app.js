@@ -66750,6 +66750,22 @@ const performedCareItems =
     )
     .filter(Boolean);
 
+const prescriptionItems =
+  rx
+    .split(/\n+/)
+    .flatMap(
+      (paragraph) =>
+        paragraph.match(
+          /[^.!?]+(?:[.!?]+|$)/g
+        ) || [paragraph]
+    )
+    .map(
+      (item) =>
+        String(item || "")
+          .trim()
+    )
+    .filter(Boolean);    
+
 const redFlags =
   firstNonEmpty(
     clinicalData.red_flags
@@ -67097,34 +67113,40 @@ ${
         "
       >
         ${
-          examinationText
-            ? `
-              <div
-                class="
-                  disModernSection
-                "
-              >
-                <div
-                  class="
-                    disModernSectionTitle
-                  "
-                >
-                  Стан під час огляду
-                </div>
+  performedCare
+    ? `
+      <div
+        class="
+          disModernSection
+        "
+      >
+        <div
+          class="
+            disModernSectionTitle
+          "
+        >
+          Проведено та результати
+        </div>
 
-                <div
-                  class="
-                    disModernText
-                  "
-                >
-                  ${escapeHtml(
-                    examinationText
-                  )}
-                </div>
-              </div>
-            `
-            : ""
-        }
+        <ul
+          class="
+            disModernBulletList
+          "
+        >
+          ${performedCareItems
+            .map(
+              (item) => `
+                <li>
+                  ${escapeHtml(item)}
+                </li>
+              `
+            )
+            .join("")}
+        </ul>
+      </div>
+    `
+    : ""
+}
 
         ${
           performedCare
@@ -67181,9 +67203,42 @@ ${
 </div>
 
       <div class="disModernSection">
-        <div class="disModernSectionTitle">Призначення лікаря</div>
-        <div class="disModernText disModernTextSoft">${escapeHtml(rx || "—")}</div>
-      </div>
+  <div class="disModernSectionTitle">
+    Призначення лікаря
+  </div>
+
+  ${
+    prescriptionItems.length
+      ? `
+        <ul
+          class="
+            disModernBulletList
+            disModernBulletList--prescriptions
+          "
+        >
+          ${prescriptionItems
+            .map(
+              (item) => `
+                <li>
+                  ${escapeHtml(item)}
+                </li>
+              `
+            )
+            .join("")}
+        </ul>
+      `
+      : `
+        <div
+          class="
+            disModernText
+            disModernTextSoft
+          "
+        >
+          —
+        </div>
+      `
+  }
+</div>
 
       <div class="disModernSection">
   <div class="disModernSectionTitle">

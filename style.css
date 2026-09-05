@@ -60790,3 +60790,7 @@ textarea.visitControl {
   );
   font-size: 1.05em;
 }
+.disModernBulletList--prescriptions li {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
