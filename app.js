@@ -67153,6 +67153,11 @@ const doctorName =
           : ""
       }
 
+  <div class="disModernSection">
+  <div class="disModernSectionTitle">
+    ${escapeHtml(
+      diagnosisTitle
+    )}
   </div>
 
   <div class="disModernText">
@@ -67162,7 +67167,7 @@ const doctorName =
   </div>
 </div>
 
-      <div class="disModernSection">
+<div class="disModernSection">
   <div class="disModernSectionTitle">
     Призначення лікаря
   </div>
@@ -67180,7 +67185,9 @@ const doctorName =
             .map(
               (item) => `
                 <li>
-                  ${escapeHtml(item)}
+                  ${escapeHtml(
+                    item
+                  )}
                 </li>
               `
             )
@@ -67200,7 +67207,7 @@ const doctorName =
   }
 </div>
 
-      <div class="disModernSection">
+<div class="disModernSection">
   <div class="disModernSectionTitle">
     Рекомендації для власника
   </div>
@@ -67247,6 +67254,14 @@ ${
   <div class="disModernSectionTitle">
     Контроль / повторний огляд
   </div>
+
+  <div class="disModernText">
+    ${escapeHtml(
+      follow || "—"
+    )}
+  </div>
+</div>
+
 
       <div class="disModernSection disModernFinanceSection">
         <div class="disModernFinanceHead">
