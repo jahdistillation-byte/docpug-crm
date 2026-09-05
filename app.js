@@ -50950,12 +50950,12 @@ page.innerHTML = `
       </p>
 
       <button
-        type="button"
-        class="primary"
-        id="calendarOpenTeamButton"
-      >
-        Налаштувати графік
-      </button>
+  type="button"
+  class="primary"
+  data-cal-mode="month"
+>
+  Налаштувати графік
+</button>
     </div>
   `
 }
