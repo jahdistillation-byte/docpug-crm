@@ -59190,19 +59190,35 @@ function updateVisitServicePickerPreview() {
 }
 
 
-function openVisitServicePicker() {
+async function openVisitServicePicker() {
   document
     .getElementById(
       "visitServicePickerModal"
     )
     ?.remove();
 
-  const services =
+  let services =
     loadServices()
       .filter(
         (service) =>
           service.active !== false
       );
+
+  /*
+   * Повторная страховка:
+   * если каталог ещё не загружен,
+   * получаем его перед открытием picker.
+   */
+  if (!services.length) {
+    await loadServicesApi();
+
+    services =
+      loadServices()
+        .filter(
+          (service) =>
+            service.active !== false
+        );
+  }
 
   const modal =
     document.createElement("div");
@@ -60007,7 +60023,8 @@ if (
   e.preventDefault();
   e.stopPropagation();
 
-  openVisitServicePicker();
+  await openVisitServicePicker();
+
   return;
 }
 // Добавление услуги в чек
@@ -60265,19 +60282,32 @@ async function openVisit(visitId, opts = { pushHash: true }) {
     } catch {}
   }
 
-  if (!visit) {
+    if (!visit) {
     alert("Візит не знайдено");
     setHash("visits");
     return;
   }
 
-  ensureVisitServicesShape(
-  visit
-);
+  /*
+   * Каталог мог ещё не загрузиться,
+   * если визит открыли из карточки пациента.
+   */
+  if (
+    !Array.isArray(
+      state.services
+    ) ||
+    state.services.length === 0
+  ) {
+    await loadServicesApi();
+  }
 
-ensureVisitStockShape(
-  visit
-);
+  ensureVisitServicesShape(
+    visit
+  );
+
+  ensureVisitStockShape(
+    visit
+  );
 
 try {
   const calendarEvents =
