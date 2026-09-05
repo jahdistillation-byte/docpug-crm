@@ -59123,7 +59123,7 @@ body[data-theme="white"]
   font-weight: 800 !important;
 }
 
-/* Светлая теыма */
+/* Светлая теыgit add style.css index.html && git commit -m "Increase laboratory workspace readability" && git pushма */
 body[data-theme="white"]
 .labHistoryQualitative {
   border-color:
@@ -59424,4 +59424,32 @@ body[data-theme="white"]
   .premiumLabTypes {
     grid-template-columns: 1fr !important;
   }
+}
+/* LAB TYPE CARD — readable descriptions */
+
+.premiumLabTypeText strong {
+  font-size: 17px !important;
+  line-height: 1.25 !important;
+}
+
+.premiumLabTypeText small {
+  display: block !important;
+  margin-top: 6px !important;
+
+  color:
+    rgba(
+      238,
+      232,
+      248,
+      0.62
+    ) !important;
+
+  font-size: 14px !important;
+  font-weight: 520 !important;
+  line-height: 1.4 !important;
+}
+
+.premiumLabTypeButton {
+  min-height: 108px !important;
+  padding: 18px 16px !important;
 }
