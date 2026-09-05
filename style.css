@@ -59849,3 +59849,246 @@ body[data-theme="white"]
     width: 100%;
   }
 }
+/* =========================================
+   PATIENT DOCUMENTS — READABILITY UPGRADE
+   ========================================= */
+
+.patientDocumentsPage {
+  font-size: 15px;
+}
+
+.patientDocumentsLoading {
+  padding: 52px 28px !important;
+  font-size: 15px !important;
+}
+
+
+/* Шапка раздела */
+
+.patientDocumentsHead {
+  gap: 28px !important;
+  margin-bottom: 28px !important;
+}
+
+.patientDocumentsKicker {
+  margin-bottom: 9px !important;
+  font-size: 13px !important;
+  letter-spacing: 0.12em;
+}
+
+.patientDocumentsHead h2 {
+  font-size: 32px !important;
+  line-height: 1.15;
+}
+
+.patientDocumentsHead p {
+  max-width: 850px !important;
+  margin-top: 10px !important;
+  font-size: 16px !important;
+  line-height: 1.55 !important;
+  color:
+    var(
+      --text-muted,
+      rgba(255, 255, 255, 0.58)
+    ) !important;
+}
+
+
+/* Счётчик доступных документов */
+
+.patientDocumentsSummary {
+  min-width: 240px !important;
+  padding: 20px 22px !important;
+  border-radius: 19px !important;
+}
+
+.patientDocumentsSummary span {
+  font-size: 12px !important;
+  line-height: 1.3;
+}
+
+.patientDocumentsSummary strong {
+  margin-top: 6px !important;
+  font-size: 30px !important;
+  line-height: 1.1;
+}
+
+.patientDocumentsSummary small {
+  margin-top: 7px !important;
+  font-size: 13px !important;
+  line-height: 1.4;
+}
+
+
+/* Сетка документов */
+
+.patientDocumentsGrid {
+  gap: 20px !important;
+}
+
+.patientDocumentCard {
+  min-height: 340px !important;
+  padding: 27px !important;
+  border-radius: 24px !important;
+}
+
+.patientDocumentCard.is-disabled {
+  min-height: 275px !important;
+}
+
+
+/* Верх карточки */
+
+.patientDocumentCardTop {
+  gap: 15px !important;
+}
+
+.patientDocumentIcon {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 17px !important;
+  font-size: 25px !important;
+}
+
+.patientDocumentBadge {
+  padding: 8px 12px !important;
+  font-size: 11px !important;
+  line-height: 1.2;
+}
+
+
+/* Название и описание */
+
+.patientDocumentCard h3 {
+  margin: 22px 0 10px !important;
+  font-size: 22px !important;
+  line-height: 1.25;
+}
+
+.patientDocumentCard > p {
+  min-height: 70px !important;
+  margin-bottom: 21px !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+  color:
+    var(
+      --text-muted,
+      rgba(255, 255, 255, 0.6)
+    ) !important;
+}
+
+
+/* Выбор визита */
+
+.patientDocumentSelectLabel > span {
+  margin-bottom: 9px !important;
+  font-size: 13px !important;
+  font-weight: 750;
+}
+
+.patientDocumentSelect {
+  min-height: 52px !important;
+  padding: 0 15px !important;
+  border-radius: 14px !important;
+  font-size: 15px !important;
+}
+
+
+/* Кнопка формирования PDF */
+
+.patientDocumentCreate {
+  min-height: 50px !important;
+  gap: 9px !important;
+  margin-top: 13px !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+}
+
+
+/* Пустые и недоступные состояния */
+
+.patientDocumentEmpty,
+.patientDocumentNotice {
+  padding: 18px !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  color:
+    var(
+      --text-muted,
+      rgba(255, 255, 255, 0.58)
+    ) !important;
+}
+
+
+/* Подсказка под документами */
+
+.patientDocumentsHint {
+  gap: 12px !important;
+  margin-top: 20px !important;
+  padding: 18px 20px !important;
+  border-radius: 16px !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  color:
+    var(
+      --text-muted,
+      rgba(255, 255, 255, 0.58)
+    ) !important;
+}
+
+
+/* Планшет */
+
+@media (max-width: 1100px) {
+  .patientDocumentCard {
+    min-height: 325px !important;
+  }
+}
+
+
+/* Мобильная версия */
+
+@media (max-width: 820px) {
+  .patientDocumentsHead {
+    gap: 18px !important;
+  }
+
+  .patientDocumentsHead h2 {
+    font-size: 28px !important;
+  }
+
+  .patientDocumentsSummary {
+    width: 100%;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .patientDocumentsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .patientDocumentCard {
+    min-height: auto !important;
+    padding: 22px !important;
+  }
+
+  .patientDocumentCard > p {
+    min-height: 0 !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .patientDocumentsHead p {
+    font-size: 15px !important;
+  }
+
+  .patientDocumentIcon {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .patientDocumentCard h3 {
+    font-size: 20px !important;
+  }
+}
