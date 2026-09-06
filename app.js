@@ -1398,6 +1398,7 @@ const APP_TRANSLATIONS = {
       "Додайте співробітників у графік роботи, щоб вони з’явилися в календарі записів.",
     "calendar.configureSchedule":
       "Налаштувати графік",
+      
   },
 
   en: {
@@ -1500,6 +1501,334 @@ const APP_TRANSLATIONS = {
       "Ustaw grafik",
   },
 };
+
+Object.assign(
+  APP_TRANSLATIONS.uk,
+  {
+    "schedule.title":
+      "Графік роботи команди",
+    "schedule.hint":
+      "Налаштовуйте робочі зміни співробітників окремо від записів пацієнтів.",
+    "schedule.backToAppointments":
+      "До записів",
+    "schedule.staffShifts":
+      "Зміни співробітників",
+    "schedule.employee":
+      "Працівник",
+    "schedule.noShifts":
+      "Змін немає",
+    "schedule.more":
+      "ще",
+    "schedule.selectDay":
+      "Обери день",
+    "schedule.selectDayHint":
+      "Натисни на дату в календарі, щоб налаштувати графік зміни.",
+    "schedule.editorEyebrow":
+      "ГРАФІК КОМАНДИ",
+    "schedule.editorHint":
+      "Налаштуйте статус та години роботи кожного співробітника.",
+    "schedule.singleDay":
+      "Один день",
+    "schedule.repeatingSchedule":
+      "Повторюваний графік",
+    "schedule.repeatHint":
+      "Налаштуйте регулярні зміни на декілька тижнів вперед.",
+    "schedule.status":
+      "Статус",
+    "schedule.start":
+      "Початок",
+    "schedule.end":
+      "Кінець",
+    "schedule.onShift":
+      "На зміні",
+    "schedule.dayOff":
+      "Вихідний",
+    "schedule.daysOff":
+      "Вихідні",
+    "schedule.assistant":
+      "Асистент",
+    "schedule.veterinarian":
+      "Ветеринар",
+    "schedule.weekdays":
+      "Дні тижня",
+    "schedule.shiftStart":
+      "Початок зміни",
+    "schedule.shiftEnd":
+      "Кінець зміни",
+    "schedule.dateFrom":
+      "Починаючи з",
+    "schedule.dateTo":
+      "До дати",
+    "schedule.repeatExample":
+      "Наприклад: Пн · Ср · Пт, 09:00–18:00.",
+    "schedule.cancel":
+      "Скасувати",
+    "schedule.saveDay":
+      "Зберегти день",
+    "schedule.applySchedule":
+      "Застосувати графік",
+    "schedule.selectedDay":
+      "ОБРАНИЙ ДЕНЬ",
+    "schedule.close":
+      "Закрити",
+    "schedule.noStaffAssigned":
+      "На цей день працівників ще не призначено.",
+    "schedule.manageSchedule":
+      "Налаштувати графік",
+    "schedule.statusesAndHours":
+      "Статуси та години роботи",
+    "schedule.openDayCalendar":
+      "Відкрити календар дня",
+    "schedule.drawerHint":
+      "Натисни на дату в календарі, щоб переглянути графік зміни.",
+  }
+);
+
+Object.assign(
+  APP_TRANSLATIONS.en,
+  {
+    "schedule.title":
+      "Team work schedule",
+    "schedule.hint":
+      "Manage employee shifts separately from patient appointments.",
+    "schedule.backToAppointments":
+      "Back to appointments",
+    "schedule.staffShifts":
+      "Employee shifts",
+    "schedule.employee":
+      "Employee",
+    "schedule.noShifts":
+      "No shifts",
+    "schedule.more":
+      "more",
+    "schedule.selectDay":
+      "Select a day",
+    "schedule.selectDayHint":
+      "Select a date in the calendar to configure employee shifts.",
+    "schedule.editorEyebrow":
+      "TEAM SCHEDULE",
+    "schedule.editorHint":
+      "Configure the status and working hours of each employee.",
+    "schedule.singleDay":
+      "Single day",
+    "schedule.repeatingSchedule":
+      "Recurring schedule",
+    "schedule.repeatHint":
+      "Configure recurring shifts for several weeks ahead.",
+    "schedule.status":
+      "Status",
+    "schedule.start":
+      "Start",
+    "schedule.end":
+      "End",
+    "schedule.onShift":
+      "On shift",
+    "schedule.dayOff":
+      "Day off",
+    "schedule.daysOff":
+      "Days off",
+    "schedule.assistant":
+      "Assistant",
+    "schedule.veterinarian":
+      "Veterinarian",
+    "schedule.weekdays":
+      "Days of the week",
+    "schedule.shiftStart":
+      "Shift start",
+    "schedule.shiftEnd":
+      "Shift end",
+    "schedule.dateFrom":
+      "Starting from",
+    "schedule.dateTo":
+      "Until date",
+    "schedule.repeatExample":
+      "Example: Mon · Wed · Fri, 09:00–18:00.",
+    "schedule.cancel":
+      "Cancel",
+    "schedule.saveDay":
+      "Save day",
+    "schedule.applySchedule":
+      "Apply schedule",
+    "schedule.selectedDay":
+      "SELECTED DAY",
+    "schedule.close":
+      "Close",
+    "schedule.noStaffAssigned":
+      "No employees have been assigned for this day.",
+    "schedule.manageSchedule":
+      "Configure schedule",
+    "schedule.statusesAndHours":
+      "Statuses and working hours",
+    "schedule.openDayCalendar":
+      "Open day calendar",
+    "schedule.drawerHint":
+      "Select a date in the calendar to view the shift schedule.",
+  }
+);
+
+Object.assign(
+  APP_TRANSLATIONS.de,
+  {
+    "schedule.title":
+      "Dienstplan des Teams",
+    "schedule.hint":
+      "Verwalten Sie Mitarbeiterschichten getrennt von Patiententerminen.",
+    "schedule.backToAppointments":
+      "Zurück zu den Terminen",
+    "schedule.staffShifts":
+      "Mitarbeiterschichten",
+    "schedule.employee":
+      "Mitarbeiter",
+    "schedule.noShifts":
+      "Keine Schichten",
+    "schedule.more":
+      "weitere",
+    "schedule.selectDay":
+      "Tag auswählen",
+    "schedule.selectDayHint":
+      "Wählen Sie ein Datum aus, um die Mitarbeiterschichten einzurichten.",
+    "schedule.editorEyebrow":
+      "TEAMDIENSTPLAN",
+    "schedule.editorHint":
+      "Legen Sie Status und Arbeitszeiten für jeden Mitarbeiter fest.",
+    "schedule.singleDay":
+      "Einzelner Tag",
+    "schedule.repeatingSchedule":
+      "Wiederkehrender Dienstplan",
+    "schedule.repeatHint":
+      "Planen Sie regelmäßige Schichten für mehrere Wochen.",
+    "schedule.status":
+      "Status",
+    "schedule.start":
+      "Beginn",
+    "schedule.end":
+      "Ende",
+    "schedule.onShift":
+      "Im Dienst",
+    "schedule.dayOff":
+      "Dienstfrei",
+    "schedule.daysOff":
+      "Dienstfrei",
+    "schedule.assistant":
+      "Assistenz",
+    "schedule.veterinarian":
+      "Tierarzt",
+    "schedule.weekdays":
+      "Wochentage",
+    "schedule.shiftStart":
+      "Schichtbeginn",
+    "schedule.shiftEnd":
+      "Schichtende",
+    "schedule.dateFrom":
+      "Beginn am",
+    "schedule.dateTo":
+      "Bis zum",
+    "schedule.repeatExample":
+      "Beispiel: Mo · Mi · Fr, 09:00–18:00.",
+    "schedule.cancel":
+      "Abbrechen",
+    "schedule.saveDay":
+      "Tag speichern",
+    "schedule.applySchedule":
+      "Dienstplan anwenden",
+    "schedule.selectedDay":
+      "AUSGEWÄHLTER TAG",
+    "schedule.close":
+      "Schließen",
+    "schedule.noStaffAssigned":
+      "Für diesen Tag wurden noch keine Mitarbeiter eingeteilt.",
+    "schedule.manageSchedule":
+      "Dienstplan bearbeiten",
+    "schedule.statusesAndHours":
+      "Status und Arbeitszeiten",
+    "schedule.openDayCalendar":
+      "Tageskalender öffnen",
+    "schedule.drawerHint":
+      "Wählen Sie ein Datum aus, um den Dienstplan anzuzeigen.",
+  }
+);
+
+Object.assign(
+  APP_TRANSLATIONS.pl,
+  {
+    "schedule.title":
+      "Grafik pracy zespołu",
+    "schedule.hint":
+      "Zarządzaj zmianami pracowników niezależnie od wizyt pacjentów.",
+    "schedule.backToAppointments":
+      "Powrót do wizyt",
+    "schedule.staffShifts":
+      "Zmiany pracowników",
+    "schedule.employee":
+      "Pracownik",
+    "schedule.noShifts":
+      "Brak zmian",
+    "schedule.more":
+      "więcej",
+    "schedule.selectDay":
+      "Wybierz dzień",
+    "schedule.selectDayHint":
+      "Wybierz datę w kalendarzu, aby skonfigurować zmiany pracowników.",
+    "schedule.editorEyebrow":
+      "GRAFIK ZESPOŁU",
+    "schedule.editorHint":
+      "Ustaw status i godziny pracy każdego pracownika.",
+    "schedule.singleDay":
+      "Jeden dzień",
+    "schedule.repeatingSchedule":
+      "Grafik cykliczny",
+    "schedule.repeatHint":
+      "Ustaw regularne zmiany na kilka tygodni do przodu.",
+    "schedule.status":
+      "Status",
+    "schedule.start":
+      "Początek",
+    "schedule.end":
+      "Koniec",
+    "schedule.onShift":
+      "Na zmianie",
+    "schedule.dayOff":
+      "Dzień wolny",
+    "schedule.daysOff":
+      "Dni wolne",
+    "schedule.assistant":
+      "Asystent",
+    "schedule.veterinarian":
+      "Weterynarz",
+    "schedule.weekdays":
+      "Dni tygodnia",
+    "schedule.shiftStart":
+      "Początek zmiany",
+    "schedule.shiftEnd":
+      "Koniec zmiany",
+    "schedule.dateFrom":
+      "Począwszy od",
+    "schedule.dateTo":
+      "Do dnia",
+    "schedule.repeatExample":
+      "Przykład: pon. · śr. · pt., 09:00–18:00.",
+    "schedule.cancel":
+      "Anuluj",
+    "schedule.saveDay":
+      "Zapisz dzień",
+    "schedule.applySchedule":
+      "Zastosuj grafik",
+    "schedule.selectedDay":
+      "WYBRANY DZIEŃ",
+    "schedule.close":
+      "Zamknij",
+    "schedule.noStaffAssigned":
+      "Na ten dzień nie przypisano jeszcze pracowników.",
+    "schedule.manageSchedule":
+      "Ustaw grafik",
+    "schedule.statusesAndHours":
+      "Statusy i godziny pracy",
+    "schedule.openDayCalendar":
+      "Otwórz kalendarz dnia",
+    "schedule.drawerHint":
+      "Wybierz datę w kalendarzu, aby zobaczyć grafik zmian.",
+  }
+);
 
 function getInterfaceLanguage() {
   const selectedLanguage =
@@ -48690,150 +49019,543 @@ $$("[data-week-create-date]")
     return;
   }
 
-  if (calendarMode === "month") {
-    const base = new Date(today);
-    const year = base.getFullYear();
-    const month = base.getMonth();
+     const interfaceLanguage =
+      getInterfaceLanguage();
 
-    const monthStart = new Date(year, month, 1);
+    const interfaceLocale =
+      {
+        uk: "uk-UA",
+        en: "en-US",
+        de: "de-DE",
+        pl: "pl-PL",
+      }[
+        interfaceLanguage
+      ] || "uk-UA";
 
-    const startDay = monthStart.getDay() || 7;
-    const gridStart = new Date(monthStart);
-    gridStart.setDate(monthStart.getDate() - startDay + 1);
+    const monthLabel =
+      new Intl.DateTimeFormat(
+        interfaceLocale,
+        {
+          month: "long",
+          year: "numeric",
+        }
+      ).format(
+        new Date(
+          year,
+          month,
+          1,
+          12,
+          0,
+          0
+        )
+      );
 
-    const localISO = (d) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
+    const dayNames =
+      Array.from(
+        {
+          length: 7,
+        },
+        (
+          _,
+          index
+        ) =>
+          new Intl.DateTimeFormat(
+            interfaceLocale,
+            {
+              weekday: "short",
+            }
+          )
+            .format(
+              new Date(
+                2026,
+                0,
+                5 + index,
+                12,
+                0,
+                0
+              )
+            )
+            .replace(
+              /\.$/,
+              ""
+            )
+      );
+
+    const appointmentForms = {
+      uk: {
+        one: "запис",
+        few: "записи",
+        many: "записів",
+        other: "запису",
+      },
+
+      en: {
+        one: "appointment",
+        other: "appointments",
+      },
+
+      de: {
+        one: "Termin",
+        other: "Termine",
+      },
+
+      pl: {
+        one: "wizyta",
+        few: "wizyty",
+        many: "wizyt",
+        other: "wizyty",
+      },
     };
 
-    const monthDays = Array.from({ length: 42 }, (_, i) => {
-      const d = new Date(gridStart);
-      d.setDate(gridStart.getDate() + i);
-      return localISO(d);
-    });
+    const formatAppointmentCount = (
+      count
+    ) => {
+      const forms =
+        appointmentForms[
+          interfaceLanguage
+        ] ||
+        appointmentForms.uk;
 
-    const monthNames = [
-      "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
-      "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
-    ];
+      const category =
+        new Intl.PluralRules(
+          interfaceLocale
+        ).select(
+          Number(
+            count
+          ) || 0
+        );
 
-    const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+      return `${
+        count
+      } ${
+        forms[
+          category
+        ] ||
+        forms.other
+      }`;
+    };
 
-    const monthEvents = events.filter((ev) => {
-      const d = String(ev.event_date || "");
-      return monthDays.includes(d);
-    });
+    const monthEvents =
+      events.filter(
+        (event) => {
+          const eventDate =
+            String(
+              event.event_date ||
+              ""
+            );
 
-    const scheduleRows = await loadStaffScheduleRangeApi(
-      monthDays[0],
-      monthDays[monthDays.length - 1]
-    );
+          return monthDays.includes(
+            eventDate
+          );
+        }
+      );
 
-    const scheduleByDate = new Map(
-      monthDays.map((date) => [
-        date,
-        scheduleRows.filter((row) => String(row.work_date || "") === date),
-      ])
-    );
+    const scheduleRows =
+      await loadStaffScheduleRangeApi(
+        monthDays[0],
+        monthDays[
+          monthDays.length - 1
+        ]
+      );
+
+    const scheduleByDate =
+      new Map(
+        monthDays.map(
+          (date) => [
+            date,
+
+            scheduleRows.filter(
+              (row) =>
+                String(
+                  row.work_date ||
+                  ""
+                ) === date
+            ),
+          ]
+        )
+      );
 
     page.innerHTML = `
-      <div class="card calendarCard">
-        <div class="calendarHeader">
+      <div
+        class="
+          card
+          calendarCard
+        "
+      >
+        <div
+          class="
+            calendarHeader
+          "
+        >
           <div>
-            <h2>Графік роботи команди</h2>
-            <div class="hint">
-  Налаштовуйте робочі зміни співробітників окремо від записів пацієнтів.
-</div>
-          </div>
+            <h2>
+              ${translateInterfaceText(
+                "schedule.title"
+              )}
+            </h2>
 
-          <div class="calendarViewSwitcher">
-  <button
-    class="ghost calendarBackToVisits"
-    data-cal-mode="day"
-    type="button"
-  >
-    ← До записів
-  </button>
-
-  <div class="calendarScheduleActive">
-    <span>👥</span>
-
-    <div>
-      <strong>
-        Графік команди
-      </strong>
-
-      <small>
-        Зміни співробітників
-      </small>
-    </div>
-  </div>
-</div>
-        </div>
-
-        <div class="calendarTop">
-          <button class="ghost" id="calPrevMonth" type="button">←</button>
-          <div class="calendarDate">${monthNames[month]} ${year}</div>
-          <button class="ghost" id="calNextMonth" type="button">→</button>
-        </div>
-
-        <div class="monthPlannerLayout">
-          <div class="monthPlannerMain">
-            <div class="monthWeekHead">
-              ${dayNames.map((d) => `<div>${d}</div>`).join("")}
-            </div>
-
-            <div class="monthGrid">
-              ${monthDays.map((date) => {
-                const d = new Date(date);
-                const isCurrentMonth = d.getMonth() === month;
-                const isToday = date === (typeof todayISO === "function" ? todayISO() : new Date().toISOString().slice(0, 10));
-
-                const daySchedule = scheduleByDate.get(date) || [];
-                const activeIds = new Set(
-                  daySchedule
-                    .filter((x) => x.is_active !== false)
-                    .map((x) => String(x.staff_id))
-                );
-
-                const activeStaff = daySchedule.length
-                  ? staff.filter((doc) => activeIds.has(String(doc.id)))
-                  : [];
-
-                const dayEvents = monthEvents.filter((ev) => String(ev.event_date || "") === date);
-
-                return `
-                  <div class="monthDay ${isCurrentMonth ? "" : "muted"} ${isToday ? "today" : ""}" data-month-date="${escapeHtml(date)}">
-                    <div class="monthDayTop">
-                      <div class="monthDayNum">${d.getDate()}</div>
-                      ${dayEvents.length ? `<div class="monthVisitCount">${dayEvents.length} записів</div>` : ""}
-                    </div>
-
-                    <div class="monthStaffList">
-                      ${
-                        activeStaff.length
-                          ? activeStaff.slice(0, 3).map((doc) => `
-                            <div class="monthStaffPill" style="border-left:4px solid ${escapeHtml(doc.color || "#7C5CFF")}">
-                              👨‍⚕️ ${escapeHtml(doc.name || "Працівник")}
-                            </div>
-                          `).join("")
-                          : `<div class="monthEmptyShift">Змін немає</div>`
-                      }
-                      ${activeStaff.length > 3 ? `<div class="monthMore">+${activeStaff.length - 3} ще</div>` : ""}
-                    </div>
-                  </div>
-                `;
-              }).join("")}
+            <div
+              class="
+                hint
+              "
+            >
+              ${translateInterfaceText(
+                "schedule.hint"
+              )}
             </div>
           </div>
 
-          <aside class="monthShiftDrawer" id="monthShiftDrawer">
-            <div class="monthDrawerPlaceholder">
-              <div class="monthDrawerPlaceholderIcon">📅</div>
-              <div class="monthDrawerPlaceholderTitle">Обери день</div>
-              <div class="hint">Натисни на дату в календарі, щоб налаштувати графік зміни.</div>
+          <div
+            class="
+              calendarViewSwitcher
+            "
+          >
+            <button
+              class="
+                ghost
+                calendarBackToVisits
+              "
+              data-cal-mode="day"
+              type="button"
+            >
+              ← ${translateInterfaceText(
+                "schedule.backToAppointments"
+              )}
+            </button>
+
+            <div
+              class="
+                calendarScheduleActive
+              "
+            >
+              <span>
+                👥
+              </span>
+
+              <div>
+                <strong>
+                  ${translateInterfaceText(
+                    "calendar.teamSchedule"
+                  )}
+                </strong>
+
+                <small>
+                  ${translateInterfaceText(
+                    "schedule.staffShifts"
+                  )}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="
+            calendarTop
+          "
+        >
+          <button
+            class="
+              ghost
+            "
+            id="calPrevMonth"
+            type="button"
+          >
+            ←
+          </button>
+
+          <div
+            class="
+              calendarDate
+            "
+          >
+            ${escapeHtml(
+              monthLabel
+            )}
+          </div>
+
+          <button
+            class="
+              ghost
+            "
+            id="calNextMonth"
+            type="button"
+          >
+            →
+          </button>
+        </div>
+
+        <div
+          class="
+            monthPlannerLayout
+          "
+        >
+          <div
+            class="
+              monthPlannerMain
+            "
+          >
+            <div
+              class="
+                monthWeekHead
+              "
+            >
+              ${dayNames
+                .map(
+                  (dayName) => `
+                    <div>
+                      ${escapeHtml(
+                        dayName
+                      )}
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
+
+            <div
+              class="
+                monthGrid
+              "
+            >
+              ${monthDays
+                .map(
+                  (date) => {
+                    const currentDate =
+                      new Date(
+                        `${date}T12:00:00`
+                      );
+
+                    const isCurrentMonth =
+                      currentDate.getMonth() ===
+                      month;
+
+                    const isToday =
+                      date ===
+                      (
+                        typeof todayISO ===
+                        "function"
+                          ? todayISO()
+                          : new Date()
+                              .toISOString()
+                              .slice(
+                                0,
+                                10
+                              )
+                      );
+
+                    const daySchedule =
+                      scheduleByDate.get(
+                        date
+                      ) || [];
+
+                    const activeIds =
+                      new Set(
+                        daySchedule
+                          .filter(
+                            (row) =>
+                              row.is_active !==
+                              false
+                          )
+                          .map(
+                            (row) =>
+                              String(
+                                row.staff_id
+                              )
+                          )
+                      );
+
+                    const activeStaff =
+                      daySchedule.length
+                        ? staff.filter(
+                            (employee) =>
+                              activeIds.has(
+                                String(
+                                  employee.id
+                                )
+                              )
+                          )
+                        : [];
+
+                    const dayEvents =
+                      monthEvents.filter(
+                        (event) =>
+                          String(
+                            event.event_date ||
+                            ""
+                          ) === date
+                      );
+
+                    return `
+                      <div
+                        class="
+                          monthDay
+                          ${
+                            isCurrentMonth
+                              ? ""
+                              : "muted"
+                          }
+                          ${
+                            isToday
+                              ? "today"
+                              : ""
+                          }
+                        "
+                        data-month-date="${escapeHtml(
+                          date
+                        )}"
+                      >
+                        <div
+                          class="
+                            monthDayTop
+                          "
+                        >
+                          <div
+                            class="
+                              monthDayNum
+                            "
+                          >
+                            ${currentDate.getDate()}
+                          </div>
+
+                          ${
+                            dayEvents.length
+                              ? `
+                                <div
+                                  class="
+                                    monthVisitCount
+                                  "
+                                >
+                                  ${escapeHtml(
+                                    formatAppointmentCount(
+                                      dayEvents.length
+                                    )
+                                  )}
+                                </div>
+                              `
+                              : ""
+                          }
+                        </div>
+
+                        <div
+                          class="
+                            monthStaffList
+                          "
+                        >
+                          ${
+                            activeStaff.length
+                              ? activeStaff
+                                  .slice(
+                                    0,
+                                    3
+                                  )
+                                  .map(
+                                    (
+                                      employee
+                                    ) => `
+                                      <div
+                                        class="
+                                          monthStaffPill
+                                        "
+                                        style="
+                                          border-left:
+                                            4px solid
+                                            ${escapeHtml(
+                                              employee.color ||
+                                              "#7C5CFF"
+                                            )};
+                                        "
+                                      >
+                                        👨‍⚕️ ${escapeHtml(
+                                          employee.name ||
+                                          translateInterfaceText(
+                                            "schedule.employee"
+                                          )
+                                        )}
+                                      </div>
+                                    `
+                                  )
+                                  .join("")
+                              : `
+                                <div
+                                  class="
+                                    monthEmptyShift
+                                  "
+                                >
+                                  ${translateInterfaceText(
+                                    "schedule.noShifts"
+                                  )}
+                                </div>
+                              `
+                          }
+
+                          ${
+                            activeStaff.length >
+                            3
+                              ? `
+                                <div
+                                  class="
+                                    monthMore
+                                  "
+                                >
+                                  +${
+                                    activeStaff.length -
+                                    3
+                                  }
+                                  ${translateInterfaceText(
+                                    "schedule.more"
+                                  )}
+                                </div>
+                              `
+                              : ""
+                          }
+                        </div>
+                      </div>
+                    `;
+                  }
+                )
+                .join("")}
+            </div>
+          </div>
+
+          <aside
+            class="
+              monthShiftDrawer
+            "
+            id="monthShiftDrawer"
+          >
+            <div
+              class="
+                monthDrawerPlaceholder
+              "
+            >
+              <div
+                class="
+                  monthDrawerPlaceholderIcon
+                "
+              >
+                📅
+              </div>
+
+              <div
+                class="
+                  monthDrawerPlaceholderTitle
+                "
+              >
+                ${translateInterfaceText(
+                  "schedule.selectDay"
+                )}
+              </div>
+
+              <div
+                class="
+                  hint
+                "
+              >
+                ${translateInterfaceText(
+                  "schedule.selectDayHint"
+                )}
+              </div>
             </div>
           </aside>
         </div>
@@ -49443,8 +50165,12 @@ const setScheduleEditorMode = (
   if (saveButton) {
     saveButton.textContent =
       repeatMode
-        ? "↻ Застосувати графік"
-        : "💾 Зберегти день";
+        ? `↻ ${translateInterfaceText(
+            "schedule.applySchedule"
+          )}`
+        : `💾 ${translateInterfaceText(
+            "schedule.saveDay"
+          )}`;
   }
 };
 
@@ -49539,11 +50265,15 @@ overlay
                 "b"
               );
 
-            if (label) {
+                        if (label) {
               label.textContent =
                 nextActive
-                  ? "На зміні"
-                  : "Вихідний";
+                  ? translateInterfaceText(
+                      "schedule.onShift"
+                    )
+                  : translateInterfaceText(
+                      "schedule.dayOff"
+                    );
             }
 
             if (startInput) {
@@ -49768,8 +50498,10 @@ for (
       saveButton.disabled =
         false;
 
-      saveButton.textContent =
-        "↻ Застосувати графік";
+            saveButton.textContent =
+        `↻ ${translateInterfaceText(
+          "schedule.applySchedule"
+        )}`;
     }
 
     showCrmNotice({
@@ -49818,8 +50550,10 @@ return;
       saveButton.disabled =
         true;
 
-      saveButton.textContent =
-        "Зберігаємо…";
+            saveButton.textContent =
+        `💾 ${translateInterfaceText(
+          "schedule.saveDay"
+        )}…`;
 
       try {
         for (
@@ -49947,8 +50681,10 @@ return;
           saveButton.disabled =
             false;
 
-          saveButton.textContent =
-            "💾 Зберегти день";
+                    saveButton.textContent =
+            `💾 ${translateInterfaceText(
+              "schedule.saveDay"
+            )}`;
         }
       }
     }
@@ -49958,7 +50694,8 @@ return;
   date
 ) => {
   const canManageSchedule =
-    isOwner() || isAdmin();
+    isOwner() ||
+    isAdmin();
 
   const drawer =
     $("#monthShiftDrawer");
@@ -49967,59 +50704,82 @@ return;
     return;
   }
 
+  const formattedDate =
+    new Intl.DateTimeFormat(
+      interfaceLocale,
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }
+    ).format(
+      new Date(
+        `${date}T12:00:00`
+      )
+    );
+
   const daySchedule =
-    scheduleByDate.get(date) || [];
+    scheduleByDate.get(
+      date
+    ) || [];
 
   const activeRows =
     daySchedule.filter(
       (row) =>
-        row.is_active !== false
+        row.is_active !==
+        false
     );
 
   const activeStaff =
     activeRows
-      .map((row) => {
-        const doc =
-          staff.find(
-            (item) =>
-              String(
-                item.id
-              ) ===
-              String(
-                row.staff_id
-              )
-          );
+      .map(
+        (row) => {
+          const employee =
+            staff.find(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                String(
+                  row.staff_id
+                )
+            );
 
-        if (!doc) {
-          return null;
+          if (!employee) {
+            return null;
+          }
+
+          return {
+            ...employee,
+
+            start_time:
+              String(
+                row.start_time ||
+                "09:00"
+              ).slice(
+                0,
+                5
+              ),
+
+            end_time:
+              String(
+                row.end_time ||
+                "18:00"
+              ).slice(
+                0,
+                5
+              ),
+          };
         }
-
-        return {
-          ...doc,
-
-          start_time:
-            String(
-              row.start_time ||
-              "09:00"
-            ).slice(
-              0,
-              5
-            ),
-
-          end_time:
-            String(
-              row.end_time ||
-              "18:00"
-            ).slice(
-              0,
-              5
-            ),
-        };
-      })
-      .filter(Boolean);
+      )
+      .filter(
+        Boolean
+      );
 
   const totalStaff =
-    Array.isArray(staff)
+    Array.isArray(
+      staff
+    )
       ? staff.length
       : 0;
 
@@ -50048,43 +50808,63 @@ return;
 
   drawer.innerHTML = `
     <div
-      class="monthDaySummary"
+      class="
+        monthDaySummary
+      "
     >
       <div
-        class="monthDaySummaryHead"
+        class="
+          monthDaySummaryHead
+        "
       >
         <div>
           <span
-            class="monthDaySummaryEyebrow"
+            class="
+              monthDaySummaryEyebrow
+            "
           >
-            ОБРАНИЙ ДЕНЬ
+            ${translateInterfaceText(
+              "schedule.selectedDay"
+            )}
           </span>
 
           <h3>
             📅 ${escapeHtml(
-              date
+              formattedDate
             )}
           </h3>
         </div>
 
         <button
           type="button"
-          class="monthDaySummaryClose"
+          class="
+            monthDaySummaryClose
+          "
           id="monthDrawerClose"
-          aria-label="Закрити"
+          aria-label="${escapeHtml(
+            translateInterfaceText(
+              "schedule.close"
+            )
+          )}"
         >
           ×
         </button>
       </div>
 
       <div
-        class="monthDaySummaryStats"
+        class="
+          monthDaySummaryStats
+        "
       >
         <div
-          class="monthDaySummaryStat"
+          class="
+            monthDaySummaryStat
+          "
         >
           <span>
-            На зміні
+            ${translateInterfaceText(
+              "schedule.onShift"
+            )}
           </span>
 
           <strong>
@@ -50093,10 +50873,14 @@ return;
         </div>
 
         <div
-          class="monthDaySummaryStat"
+          class="
+            monthDaySummaryStat
+          "
         >
           <span>
-            Вихідні
+            ${translateInterfaceText(
+              "schedule.daysOff"
+            )}
           </span>
 
           <strong>
@@ -50106,54 +50890,70 @@ return;
       </div>
 
       <div
-        class="monthDaySummaryList"
+        class="
+          monthDaySummaryList
+        "
       >
         ${
           previewStaff.length
             ? previewStaff
                 .map(
-                  (doc) => `
+                  (
+                    employee
+                  ) => `
                     <div
-                      class="monthDaySummaryPerson"
+                      class="
+                        monthDaySummaryPerson
+                      "
                     >
                       <span
-                        class="monthDaySummaryPersonColor"
+                        class="
+                          monthDaySummaryPersonColor
+                        "
                         style="
                           background:
                             ${escapeHtml(
-                              doc.color ||
+                              employee.color ||
                               "#7C5CFF"
                             )};
                         "
                       ></span>
 
                       <div
-                        class="monthDaySummaryPersonMain"
+                        class="
+                          monthDaySummaryPersonMain
+                        "
                       >
                         <strong>
                           ${escapeHtml(
-                            doc.name ||
-                            "Працівник"
+                            employee.name ||
+                            translateInterfaceText(
+                              "schedule.employee"
+                            )
                           )}
                         </strong>
 
                         <small>
                           ${
-                            doc.role ===
+                            employee.role ===
                             "assistant"
-                              ? "Асистент"
-                              : "Ветеринар"
+                              ? translateInterfaceText(
+                                  "schedule.assistant"
+                                )
+                              : translateInterfaceText(
+                                  "schedule.veterinarian"
+                                )
                           }
                         </small>
                       </div>
 
                       <b>
                         ${escapeHtml(
-                          doc.start_time
+                          employee.start_time
                         )}
                         –
                         ${escapeHtml(
-                          doc.end_time
+                          employee.end_time
                         )}
                       </b>
                     </div>
@@ -50162,7 +50962,9 @@ return;
                 .join("")
             : `
               <div
-                class="monthDaySummaryEmpty"
+                class="
+                  monthDaySummaryEmpty
+                "
               >
                 <span>
                   ☕
@@ -50170,13 +50972,15 @@ return;
 
                 <div>
                   <strong>
-                    Змін немає
+                    ${translateInterfaceText(
+                      "schedule.noShifts"
+                    )}
                   </strong>
 
                   <small>
-                    На цей день
-                    працівників ще
-                    не призначено.
+                    ${translateInterfaceText(
+                      "schedule.noStaffAssigned"
+                    )}
                   </small>
                 </div>
               </div>
@@ -50187,14 +50991,14 @@ return;
           moreCount > 0
             ? `
               <div
-                class="monthDaySummaryMore"
+                class="
+                  monthDaySummaryMore
+                "
               >
                 +${moreCount}
-                ${
-                  moreCount === 1
-                    ? "працівник"
-                    : "працівників"
-                }
+                ${translateInterfaceText(
+                  "schedule.more"
+                )}
               </div>
             `
             : ""
@@ -50206,7 +51010,9 @@ return;
           ? `
             <button
               type="button"
-              class="monthDaySummaryManage"
+              class="
+                monthDaySummaryManage
+              "
               id="monthOpenScheduleEditor"
             >
               <span>
@@ -50215,11 +51021,15 @@ return;
 
               <span>
                 <strong>
-                  Налаштувати графік
+                  ${translateInterfaceText(
+                    "schedule.manageSchedule"
+                  )}
                 </strong>
 
                 <small>
-                  Статуси та години роботи
+                  ${translateInterfaceText(
+                    "schedule.statusesAndHours"
+                  )}
                 </small>
               </span>
 
@@ -50233,10 +51043,14 @@ return;
 
       <button
         type="button"
-        class="monthDaySummaryOpenDay"
+        class="
+          monthDaySummaryOpenDay
+        "
         id="monthGoToDay"
       >
-        Відкрити календар дня
+        ${translateInterfaceText(
+          "schedule.openDayCalendar"
+        )}
       </button>
     </div>
   `;
@@ -50258,27 +51072,36 @@ return;
 
         drawer.innerHTML = `
           <div
-            class="monthDrawerPlaceholder"
+            class="
+              monthDrawerPlaceholder
+            "
           >
             <div
-              class="monthDrawerPlaceholderIcon"
+              class="
+                monthDrawerPlaceholderIcon
+              "
             >
               📅
             </div>
 
             <div
-              class="monthDrawerPlaceholderTitle"
+              class="
+                monthDrawerPlaceholderTitle
+              "
             >
-              Обери день
+              ${translateInterfaceText(
+                "schedule.selectDay"
+              )}
             </div>
 
             <div
-              class="hint"
+              class="
+                hint
+              "
             >
-              Натисни на дату
-              в календарі,
-              щоб переглянути
-              графік зміни.
+              ${translateInterfaceText(
+                "schedule.drawerHint"
+              )}
             </div>
           </div>
         `;
@@ -50303,19 +51126,18 @@ return;
     );
 
   drawer
-  .querySelector(
-    "#monthOpenScheduleEditor"
-  )
-  ?.addEventListener(
-    "click",
-    () => {
-      openMonthScheduleEditor(
-        date
-      );
-    }
-  );
+    .querySelector(
+      "#monthOpenScheduleEditor"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openMonthScheduleEditor(
+          date
+        );
+      }
+    );
 };
-
     $$("[data-month-date]").forEach(
   (cell) => {
     cell.addEventListener(
@@ -51876,7 +52698,7 @@ $("#calendarCreateVisitButton")
     };
   });
 }
-}
+
 
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ПЕРСОНАЛ, МОДАЛКИ КАЛЕНДАРЯ И КАРТОЧКИ АНАЛИЗОВ)
