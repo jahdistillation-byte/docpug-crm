@@ -66129,6 +66129,8 @@ const completedVisit =
     visitId
   );
 
+await loadPatientsApi();
+
 const mergedVisit = {
   ...current,
   ...updatedVisit,
