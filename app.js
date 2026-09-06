@@ -41875,30 +41875,82 @@ function renderPatientWeightPanel(
                         "";
 
                       const dateLabel =
-                        date
-                          ? new Date(
-                              date
-                            ).toLocaleDateString(
-                              "uk-UA",
-                              {
-                                day:
-                                  "2-digit",
-                                month:
-                                  "2-digit",
-                                year:
-                                  "numeric",
-                              }
-                            )
-                          : "—";
+  date
+    ? new Date(
+        date
+      ).toLocaleDateString(
+        "uk-UA",
+        {
+          day:
+            "2-digit",
+          month:
+            "2-digit",
+          year:
+            "numeric",
+        }
+      )
+    : "—";
 
-                      return `
+const isVisitWeight =
+  Boolean(
+    String(
+      item.source_visit_id ||
+      ""
+    ).trim()
+  ) ||
+  String(
+    item.source ||
+    ""
+  ).toLowerCase() ===
+    "visit";
+
+const sourceLabel =
+  isVisitWeight
+    ? "Візит"
+    : "Вручну";
+
+return `
                         <div class="patientWeightRow">
 
-                          <span>
-                            ${escapeHtml(
-                              dateLabel
-                            )}
-                          </span>
+                          <span
+  style="
+    display:flex;
+    align-items:center;
+    gap:9px;
+  "
+>
+  <span>
+    ${escapeHtml(
+      dateLabel
+    )}
+  </span>
+
+  <small
+    style="
+      padding:3px 7px;
+      border-radius:999px;
+      background:${
+        isVisitWeight
+          ? "rgba(34,197,94,.12)"
+          : "rgba(255,255,255,.06)"
+      };
+      border:1px solid ${
+        isVisitWeight
+          ? "rgba(34,197,94,.22)"
+          : "rgba(255,255,255,.08)"
+      };
+      color:${
+        isVisitWeight
+          ? "#6ee7a0"
+          : "rgba(255,255,255,.58)"
+      };
+      font-size:11px;
+      line-height:1;
+    "
+  >
+    ${sourceLabel}
+  </small>
+</span>
 
                           <strong>
                             ${Number(
