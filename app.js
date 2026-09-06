@@ -71378,13 +71378,35 @@ function askSpecies(current = "dog") {
 // =========================
 // Вспомогательные функции модального окна визитов
 // =========================
-function openVisitModalForCreate(pet = null) {
+async function openVisitModalForCreate(
+  pet = null
+) {
   const modal = $("#visitModal");
 
-  if (!modal) {
-    alert("Не знайдено #visitModal в HTML");
-    return;
+    await loadAppointmentTemplatesApi();
+
+  const visitTemplateInput =
+    document.getElementById(
+      "visitTemplateId"
+    );
+
+  if (visitTemplateInput) {
+    visitTemplateInput.value = "";
   }
+
+  const templateClearButton =
+    document.getElementById(
+      "appointmentTemplateClear"
+    );
+
+  if (templateClearButton) {
+    templateClearButton.hidden = true;
+  }
+
+  renderAppointmentTemplatePicker();
+  updateAppointmentTemplateSelector();
+  bindAppointmentTemplatePicker();
+  bindAppointmentTemplateDrawer();
 
   delete modal.dataset.visitId;
 
