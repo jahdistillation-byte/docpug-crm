@@ -29060,9 +29060,217 @@ def api_update_visit():
             500,
         )
 
-@app.post(
-    "/api/visits/<visit_id>/complete"
-)
+def sync_completed_visit_weight(
+    current_org,
+    visit,
+    created_by,
+):
+    patient_id = str(
+        visit.get("pet_id")
+        or ""
+    ).strip()
+
+    visit_id = str(
+        visit.get("id")
+        or ""
+    ).strip()
+
+    try:
+        weight_kg = float(
+            visit.get("weight_kg")
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return False
+
+    if (
+        not patient_id
+        or not visit_id
+        or weight_kg <= 0
+        or weight_kg > 500
+    ):
+        return False
+
+    visit_date = str(
+        visit.get("date")
+        or ""
+    ).strip()
+
+    measured_at = (
+        f"{visit_date[:10]}"
+        "T12:00:00+00:00"
+        if len(visit_date) >= 10
+        else datetime.now(
+            timezone.utc
+        ).isoformat()
+    )
+
+    try:
+        existing_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "patient_weight_history"
+                    )
+                    .select("id")
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "patient_id",
+                        patient_id,
+                    )
+                    .eq(
+                        "source_visit_id",
+                        visit_id,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        weight_payload = {
+            "weight_kg":
+                weight_kg,
+
+            "measured_at":
+                measured_at,
+
+            "source":
+                "visit",
+
+            "source_visit_id":
+                visit_id,
+
+            "note":
+                "Вага зафіксована "
+                "під час візиту.",
+        }
+
+        if existing_result.data:
+            weight_row_id = (
+                existing_result
+                .data[0]
+                .get("id")
+            )
+
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "patient_weight_history"
+                    )
+                    .update(
+                        weight_payload
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        weight_row_id,
+                    )
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+
+        else:
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "patient_weight_history"
+                    )
+                    .insert({
+                        "org_id":
+                            current_org,
+
+                        "patient_id":
+                            patient_id,
+
+                        **weight_payload,
+
+                        "created_by":
+                            created_by,
+                    })
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+
+        latest_result = (
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "patient_weight_history"
+                    )
+                    .select("weight_kg")
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "patient_id",
+                        patient_id,
+                    )
+                    .order(
+                        "measured_at",
+                        desc=True,
+                    )
+                    .limit(1)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+        )
+
+        if latest_result.data:
+            latest_weight = (
+                latest_result
+                .data[0]
+                .get("weight_kg")
+            )
+
+            execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("patients")
+                    .update({
+                        "weight_kg":
+                            latest_weight,
+                    })
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "id",
+                        patient_id,
+                    )
+                ),
+                attempts=3,
+                delay=0.25,
+            )
+
+        return True
+
+    except Exception as error:
+        print(
+            "⚠️ Complete visit weight sync:",
+            repr(error),
+            flush=True,
+        )
+
+        return False
 def api_complete_visit(
     visit_id
 ):
@@ -29217,6 +29425,13 @@ def api_complete_visit(
             updated_visit = (
                 update_result.data[0]
             )
+        weight_synced = (
+            sync_completed_visit_weight(
+                current_org,
+                updated_visit,
+                user.get("id"),
+            )
+        )
 
         calendar_result = (
             execute_with_retry(
@@ -29441,6 +29656,10 @@ def api_complete_visit(
         updated_visit[
             "audit_recorded"
         ] = audit_recorded
+
+        updated_visit[
+            "weight_synced"
+        ] = weight_synced
 
         return ok(
             updated_visit
