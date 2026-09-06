@@ -35339,6 +35339,25 @@ async function openHospitalTasksModal(
                 ${
                   completed
                     ? `
+                    ${
+  task.completion_note
+    ? `
+      <div
+        style="
+          margin-top:8px;
+          color:#86efac;
+          font-size:13px;
+          font-weight:600;
+        "
+      >
+        Результат:
+        ${escapeHtml(
+          task.completion_note
+        )}
+      </div>
+    `
+    : ""
+}
                       <div class="hospitalTaskCompletedInfo">
                         Виконано
                         ${
@@ -35620,6 +35639,53 @@ await renderHospitalTab();
           return;
         }
 
+        const targetTask =
+  hospitalTasks.find(
+    (item) =>
+      String(item.id) ===
+      String(taskId)
+  );
+
+let completionNote =
+  "";
+
+if (
+  targetTask?.task_type ===
+  "measurement"
+) {
+  const result =
+    await openAppPrompt({
+      title:
+        "Результат вимірювання",
+
+      text:
+        targetTask.title ||
+        "Вимірювання",
+
+      label:
+        "Фактичне значення",
+
+      placeholder:
+        "Наприклад: 39,1 °C",
+
+      confirmText:
+        "Зберегти результат",
+
+      cancelText:
+        "Скасувати",
+
+      required:
+        true,
+    });
+
+  if (result === null) {
+    return;
+  }
+
+  completionNote =
+    String(result).trim();
+}
+
         completeButton.disabled =
           true;
 
@@ -35627,17 +35693,21 @@ await renderHospitalTab();
           "Збереження…";
 
         const completed =
-          await completeHospitalTaskApi(
-            taskId,
-            {
-              completed_by:
-                completedBy,
+  await completeHospitalTaskApi(
+    taskId,
+    {
+      completed_by:
+        completedBy,
 
-              completed_at:
-                new Date()
-                  .toISOString(),
-            }
-          );
+      completed_at:
+        new Date()
+          .toISOString(),
+
+      completion_note:
+        completionNote ||
+        null,
+    }
+  );
 
         if (!completed) {
           completeButton.disabled =
