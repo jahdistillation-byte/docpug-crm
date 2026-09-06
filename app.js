@@ -6238,7 +6238,8 @@ async function updateHospitalizationApi(
 
 async function dischargeHospitalizationApi(
   hospitalizationId,
-  notes = ""
+  notes = "",
+  recommendations = ""
 ) {
   const currentRole =
     String(
@@ -6283,11 +6284,16 @@ async function dischargeHospitalizationApi(
             ...getOrgHeaders(),
           },
 
-          body:
+                    body:
             JSON.stringify({
               notes:
                 String(
                   notes || ""
+                ).trim(),
+
+              recommendations:
+                String(
+                  recommendations || ""
                 ).trim(),
             }),
         }
@@ -37240,15 +37246,27 @@ function openHospitalDischargeConfirm(
           </div>
         </div>
 
-        <label class="hospitalDischargeConfirmField">
+               <label class="hospitalDischargeConfirmField">
           <span>
-            Примітка до виписки
+            Стан та примітка до виписки
           </span>
 
           <textarea
             id="hospitalDischargeNote"
             rows="3"
-            placeholder="Стан на момент виписки, рекомендації або коментар..."
+            placeholder="Стан пацієнта на момент виписки..."
+          ></textarea>
+        </label>
+
+        <label class="hospitalDischargeConfirmField">
+          <span>
+            Рекомендації власнику
+          </span>
+
+          <textarea
+            id="hospitalDischargeRecommendations"
+            rows="3"
+            placeholder="Домашній догляд, лікування та повторний огляд..."
           ></textarea>
         </label>
 
@@ -37277,9 +37295,10 @@ function openHospitalDischargeConfirm(
       modal
     );
 
-    const finish = (
+        const finish = (
       confirmed,
-      note = ""
+      note = "",
+      recommendations = ""
     ) => {
       modal.remove();
 
@@ -37288,9 +37307,10 @@ function openHospitalDischargeConfirm(
         handleEscape
       );
 
-      resolve({
+            resolve({
         confirmed,
         note,
+        recommendations,
       });
     };
 
@@ -37332,9 +37352,17 @@ function openHospitalDischargeConfirm(
               )?.value || ""
             ).trim();
 
+                    const recommendations =
+            String(
+              modal.querySelector(
+                "#hospitalDischargeRecommendations"
+              )?.value || ""
+            ).trim();
+
           finish(
             true,
-            note
+            note,
+            recommendations
           );
         }
       );
@@ -37489,9 +37517,10 @@ if (
         "Виписуємо…";
 
       const result =
-  await dischargeHospitalizationApi(
+    await dischargeHospitalizationApi(
     hospitalizationId,
-    dischargeDecision.note
+    dischargeDecision.note,
+    dischargeDecision.recommendations
   );
 
       if (!result) {
