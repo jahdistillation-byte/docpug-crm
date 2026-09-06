@@ -41725,20 +41725,20 @@ function renderPatientWeightPanel(
       : [];
 
   const sorted =
-    rows.sort(
-      (a, b) =>
+  rows.sort(
+    (a, b) =>
+      String(
+        b.created_at ||
+        b.measured_at ||
+        ""
+      ).localeCompare(
         String(
-          b.measured_at ||
-          b.created_at ||
+          a.created_at ||
+          a.measured_at ||
           ""
-        ).localeCompare(
-          String(
-            a.measured_at ||
-            a.created_at ||
-            ""
-          )
         )
-    );
+      )
+  );
 
   const latest =
     sorted[0] || null;
