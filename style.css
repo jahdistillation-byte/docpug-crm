@@ -53938,8 +53938,9 @@ body[data-theme="white"]
 
 @media (min-width: 1551px) {
   .main-content:has(
-    .visitWorkspace.hasPugAiWorkspace
-  ) {
+  .page[data-page="visit"].active
+  .visitWorkspace.hasPugAiWorkspace
+) {
     width:
       calc(100vw - 32px) !important;
 
@@ -54216,8 +54217,9 @@ body[data-theme="white"]
 
 @media (min-width: 1551px) {
   .main-content:has(
-    .visitWorkspace.hasPugAiWorkspace
-  ) {
+  .page[data-page="visit"].active
+  .visitWorkspace.hasPugAiWorkspace
+) {
     width:
       calc(100vw - 16px) !important;
 
