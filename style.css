@@ -50876,7 +50876,7 @@ body[data-theme="white"] .appPromptModalBtnSecondary {
   width: 100vw !important;
   height: 100vh !important;
 
-  z-index: 999999 !important;
+  z-index: 2147483647 !important;
 
   display: flex !important;
   align-items: center !important;
