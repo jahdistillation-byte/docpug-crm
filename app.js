@@ -5380,8 +5380,17 @@ function bindAppointmentTemplatePicker() {
           );
         }
 
-        durationInput.value =
+                durationInput.value =
           duration;
+
+        durationInput.dispatchEvent(
+          new Event(
+            "change",
+            {
+              bubbles: true,
+            }
+          )
+        );
       }
 
       if (noteInput) {
@@ -71905,89 +71914,338 @@ const petName =
   }
 
   // Ветеринар
+    // Ветеринар — только врачи,
+  // работающие в выбранное время
   const staffSelect =
     $("#visitStaff");
 
-  const fillStaffSelect = (staffList) => {
-    if (!staffSelect) {
-      return;
-    }
+  const allStaff =
+    await loadStaffApi();
 
-    const safeStaffList =
-      Array.isArray(staffList)
-        ? staffList
-        : [];
+  const availableDoctors =
+    (
+      Array.isArray(allStaff)
+        ? allStaff
+        : []
+    ).filter((doctor) => {
+      if (
+        doctor?.is_active === false
+      ) {
+        return false;
+      }
 
-    staffSelect.innerHTML = `
-      <option value="">
-        Оберіть ветеринара
-      </option>
+      const role =
+        String(
+          doctor?.role || ""
+        )
+          .trim()
+          .toLowerCase();
 
-      ${safeStaffList
-        .map((doctor) => {
-          return `
-            <option value="${escapeHtml(
-              String(doctor.id)
-            )}">
-              ${escapeHtml(
-                doctor.name ||
-                "Працівник"
-              )}
-            </option>
-          `;
-        })
-        .join("")}
-    `;
-  };
+      return ![
+        "assistant",
+        "admin",
+      ].includes(role);
+    });
 
-  const fillStaffFallback = () => {
-    if (!staffSelect) {
-      return;
-    }
+  const visitTimeToMinutes =
+    (value) => {
+      const parts =
+        String(value || "")
+          .slice(0, 5)
+          .split(":")
+          .map(Number);
 
-    staffSelect.innerHTML = `
-      <option value="">
-        Оберіть ветеринара
-      </option>
+      if (
+        parts.length !== 2 ||
+        !Number.isFinite(parts[0]) ||
+        !Number.isFinite(parts[1])
+      ) {
+        return null;
+      }
 
-      <option
-        value="default_doc"
-        selected
-      >
-        Черговий лікар 🩺
-      </option>
-    `;
-  };
+      return (
+        parts[0] * 60 +
+        parts[1]
+      );
+    };
 
-  if (
-    typeof loadStaffApi === "function"
-  ) {
-    loadStaffApi()
-      .then((staff) => {
-        const staffList =
-          Array.isArray(staff) &&
-          staff.length
-            ? staff
-            : [
-                {
-                  id: "default_doc",
-                  name: "Черговий лікар 🩺",
-                },
-              ];
+  let staffRefreshRequestId = 0;
 
-        fillStaffSelect(staffList);
-      })
-      .catch((error) => {
-        console.warn(
-          "Бэкенд недоступен, ставим дефолтного врача:",
-          error
+  const refreshVisitStaffSelect =
+    async (
+      showAll = false
+    ) => {
+      if (!staffSelect) {
+        return;
+      }
+
+      const requestId =
+        ++staffRefreshRequestId;
+
+      const previousStaffId =
+        String(
+          staffSelect.value || ""
+        ).startsWith("__")
+          ? ""
+          : String(
+              staffSelect.value || ""
+            );
+
+      const selectedDate =
+        String(
+          dateInput?.value ||
+          todayISO()
+        ).trim();
+
+      const selectedStartTime =
+        String(
+          startTimeInput?.value ||
+          "10:00"
+        ).trim();
+
+      const selectedDuration =
+        Math.max(
+          1,
+          Number(
+            durationInput?.value ||
+            60
+          ) || 60
         );
 
-        fillStaffFallback();
-      });
-  } else {
-    fillStaffFallback();
+      const appointmentStart =
+        visitTimeToMinutes(
+          selectedStartTime
+        );
+
+      const appointmentEnd =
+        appointmentStart === null
+          ? null
+          : (
+              appointmentStart +
+              selectedDuration
+            );
+
+      staffSelect.disabled = true;
+
+      staffSelect.innerHTML = `
+        <option value="">
+          Завантаження графіка...
+        </option>
+      `;
+
+      const schedule =
+        await loadStaffScheduleApi(
+          selectedDate
+        );
+
+      if (
+        requestId !==
+        staffRefreshRequestId
+      ) {
+        return;
+      }
+
+      const scheduleByStaff =
+        new Map(
+          (
+            Array.isArray(schedule)
+              ? schedule
+              : []
+          ).map((row) => [
+            String(row.staff_id),
+            row,
+          ])
+        );
+
+      const doctorsWithSchedule =
+        availableDoctors.map(
+          (doctor) => {
+            const scheduleRow =
+              scheduleByStaff.get(
+                String(doctor.id)
+              ) || null;
+
+            const shiftStart =
+              String(
+                scheduleRow
+                  ?.start_time ||
+                ""
+              ).slice(0, 5);
+
+            const shiftEnd =
+              String(
+                scheduleRow
+                  ?.end_time ||
+                ""
+              ).slice(0, 5);
+
+            const shiftStartMinutes =
+              visitTimeToMinutes(
+                shiftStart
+              );
+
+            const shiftEndMinutes =
+              visitTimeToMinutes(
+                shiftEnd
+              );
+
+            const isOnShift =
+              Boolean(
+                scheduleRow &&
+                scheduleRow
+                  .is_active !== false &&
+                appointmentStart !==
+                  null &&
+                appointmentEnd !==
+                  null &&
+                appointmentEnd <=
+                  24 * 60 &&
+                shiftStartMinutes !==
+                  null &&
+                shiftEndMinutes !==
+                  null &&
+                appointmentStart >=
+                  shiftStartMinutes &&
+                appointmentEnd <=
+                  shiftEndMinutes
+              );
+
+            return {
+              doctor,
+              shiftStart,
+              shiftEnd,
+              isOnShift,
+            };
+          }
+        );
+
+      const visibleDoctors =
+        showAll
+          ? doctorsWithSchedule
+          : doctorsWithSchedule.filter(
+              (item) =>
+                item.isOnShift
+            );
+
+      const canShowAll =
+        typeof isOwnerOrAdmin ===
+          "function" &&
+        isOwnerOrAdmin();
+
+      staffSelect.innerHTML = `
+        <option value="">
+          ${
+            visibleDoctors.length
+              ? "Оберіть ветеринара"
+              : (
+                  showAll
+                    ? "Ветеринарів не знайдено"
+                    : "На цей час лікарів на зміні немає"
+                )
+          }
+        </option>
+
+        ${visibleDoctors
+          .map((item) => {
+            const doctor =
+              item.doctor;
+
+            const shiftLabel =
+              item.shiftStart &&
+              item.shiftEnd
+                ? (
+                    `${item.shiftStart}` +
+                    `–${item.shiftEnd}`
+                  )
+                : "поза зміною";
+
+            return `
+              <option
+                value="${escapeHtml(
+                  String(doctor.id)
+                )}"
+              >
+                ${escapeHtml(
+                  doctor.name ||
+                  "Ветеринар"
+                )}
+                ·
+                ${escapeHtml(
+                  shiftLabel
+                )}
+              </option>
+            `;
+          })
+          .join("")}
+
+        ${
+          canShowAll &&
+          !showAll
+            ? `
+              <option
+                value="__show_all__"
+              >
+                Показати всіх ветеринарів…
+              </option>
+            `
+            : ""
+        }
+      `;
+
+      const previousDoctorExists =
+        visibleDoctors.some(
+          (item) =>
+            String(
+              item.doctor.id
+            ) === previousStaffId
+        );
+
+      staffSelect.value =
+        previousDoctorExists
+          ? previousStaffId
+          : "";
+
+      staffSelect.disabled = false;
+
+      staffSelect.onchange =
+        () => {
+          if (
+            staffSelect.value ===
+            "__show_all__"
+          ) {
+            refreshVisitStaffSelect(
+              true
+            );
+          }
+        };
+    };
+
+  const refreshDoctorsByVisitTime =
+    () => {
+      refreshVisitStaffSelect(
+        false
+      );
+    };
+
+  if (dateInput) {
+    dateInput.onchange =
+      refreshDoctorsByVisitTime;
   }
+
+  if (startTimeInput) {
+    startTimeInput.onchange =
+      refreshDoctorsByVisitTime;
+  }
+
+  if (durationInput) {
+    durationInput.onchange =
+      refreshDoctorsByVisitTime;
+  }
+
+  await refreshVisitStaffSelect(
+    false
+  );
+
 
   // Закрытие модального окна
   const closeThisVisitModal = () => {
@@ -72858,7 +73116,7 @@ const isInsideWorkingHours =
   );
 
 const isOutsideShift =
-  !isDoctorOnShift;
+  !isInsideWorkingHours;
     const createCalendarAppointment =
   async (
     allowOverlap = false
