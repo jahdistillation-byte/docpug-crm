@@ -1351,6 +1351,80 @@ const LS = {
     localStorage.setItem(key, JSON.stringify(val));
   },
 };
+// =========================
+// INTERFACE LOCALIZATION
+// =========================
+
+const APP_LANGUAGE_KEY =
+  "docpug_clinic_lang";
+
+const APP_SUPPORTED_LANGUAGES =
+  new Set([
+    "uk",
+    "en",
+    "de",
+    "pl",
+  ]);
+
+const APP_TRANSLATIONS = {
+  uk: {
+    "nav.calendar": "Календар",
+    "nav.owners": "Власники",
+    "nav.patients": "Пацієнти",
+    "nav.tasks": "Задачі",
+    "nav.hospital": "Стаціонар",
+    "nav.services": "Послуги",
+    "nav.stock": "Склад",
+    "nav.finance": "Фінанси",
+    "nav.team": "Команда",
+    "nav.audit": "Журнал дій",
+    "nav.settings": "Налаштування",
+  },
+
+  en: {
+    "nav.calendar": "Calendar",
+    "nav.owners": "Owners",
+    "nav.patients": "Patients",
+    "nav.tasks": "Tasks",
+    "nav.hospital": "Hospital",
+    "nav.services": "Services",
+    "nav.stock": "Inventory",
+    "nav.finance": "Finance",
+    "nav.team": "Team",
+    "nav.audit": "Activity log",
+    "nav.settings": "Settings",
+  },
+
+  de: {
+    "nav.calendar": "Kalender",
+    "nav.owners": "Tierhalter",
+    "nav.patients": "Patienten",
+    "nav.tasks": "Aufgaben",
+    "nav.hospital": "Station",
+    "nav.services": "Leistungen",
+    "nav.stock": "Lager",
+    "nav.finance": "Finanzen",
+    "nav.team": "Team",
+    "nav.audit": "Aktivitätsprotokoll",
+    "nav.settings": "Einstellungen",
+  },
+
+  pl: {
+    "nav.calendar": "Kalendarz",
+    "nav.owners": "Właściciele",
+    "nav.patients": "Pacjenci",
+    "nav.tasks": "Zadania",
+    "nav.hospital": "Szpital",
+    "nav.services": "Usługi",
+    "nav.stock": "Magazyn",
+    "nav.finance": "Finanse",
+    "nav.team": "Zespół",
+    "nav.audit": "Dziennik działań",
+    "nav.settings": "Ustawienia",
+  },
+};
+
+
 
 function getOrgHeaders() {
   /*
