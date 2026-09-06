@@ -58920,8 +58920,54 @@ async function renderVisits(petId) {
     calendarEvents = [];
   }
 
-  const eventByVisitId =
-    new Map();
+    const plannedCalendarEvents =
+    (
+      Array.isArray(calendarEvents)
+        ? calendarEvents
+        : []
+    )
+      .filter((event) => {
+        const eventPatientId =
+          String(
+            event?.patient_id || ""
+          );
+
+        const linkedVisitId =
+          String(
+            event?.visit_id || ""
+          ).trim();
+
+        const status =
+          String(
+            event?.status ||
+            "planned"
+          )
+            .trim()
+            .toLowerCase();
+
+        return (
+          eventPatientId ===
+            String(petId) &&
+          !linkedVisitId &&
+          [
+            "planned",
+            "waiting",
+          ].includes(status)
+        );
+      })
+      .sort((a, b) => {
+        const first =
+          `${a.event_date || ""}` +
+          `T${a.start_time || ""}`;
+
+        const second =
+          `${b.event_date || ""}` +
+          `T${b.start_time || ""}`;
+
+        return first.localeCompare(
+          second
+        );
+      });
 
   (calendarEvents || []).forEach(
     (event) => {
@@ -58941,8 +58987,24 @@ async function renderVisits(petId) {
     }
   );
 
-  if (!visits.length) {
-    box.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки візитів немає. Натисніть "+ Новий візит".</div>`;
+    if (
+    !visits.length &&
+    !plannedCalendarEvents.length
+  ) {
+    box.innerHTML = `
+      <div
+        class="hint"
+        style="
+          text-align:center;
+          padding:40px;
+          opacity:0.5;
+        "
+      >
+        Запланованих записів та візитів
+        поки немає.
+      </div>
+    `;
+
     return;
   }
 
@@ -58961,6 +59023,166 @@ async function renderVisits(petId) {
   const lineTrack = document.createElement("div");
   lineTrack.style.cssText = "position: absolute; left: 12px; top: 15px; bottom: 15px; width: 2px; background: linear-gradient(180deg, #c084fc 0%, rgba(147, 51, 234, 0.1) 100%); box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); opacity: 0.6;";
   timelineContainer.appendChild(lineTrack);
+  plannedCalendarEvents.forEach(
+    (calendarEvent) => {
+      const clone =
+        template.content.cloneNode(
+          true
+        );
+
+      const cardEl =
+        clone.querySelector(
+          ".visit-card-el"
+        );
+
+      if (!cardEl) {
+        return;
+      }
+
+      const eventStatus =
+        String(
+          calendarEvent.status ||
+          "planned"
+        )
+          .trim()
+          .toLowerCase();
+
+      const isWaiting =
+        eventStatus === "waiting";
+
+      cardEl.dataset
+        .openCalendarEvent =
+        String(
+          calendarEvent.id
+        );
+
+      cardEl.classList.add(
+        isWaiting
+          ? "premiumVisitCardInProgress"
+          : "premiumVisitCardPlanned"
+      );
+
+      const startTime =
+        String(
+          calendarEvent.start_time ||
+          ""
+        ).slice(0, 5);
+
+      const endTime =
+        String(
+          calendarEvent.end_time ||
+          ""
+        ).slice(0, 5);
+
+      const dateEl =
+        clone.querySelector(
+          ".v-date"
+        );
+
+      if (dateEl) {
+        dateEl.textContent =
+          [
+            formatVisitDatePremium(
+              calendarEvent.event_date
+            ),
+            startTime && endTime
+              ? `${startTime}–${endTime}`
+              : startTime,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+      }
+
+      const dxEl =
+        clone.querySelector(
+          ".v-dx"
+        );
+
+      if (dxEl) {
+        dxEl.textContent =
+          isWaiting
+            ? "Пацієнт очікує прийому"
+            : "Запланований прийом";
+      }
+
+      const statusBadgeEl =
+        clone.querySelector(
+          ".v-status-badge"
+        );
+
+      if (statusBadgeEl) {
+        statusBadgeEl.textContent =
+          isWaiting
+            ? "Очікує"
+            : "Заплановано";
+
+        statusBadgeEl.className =
+          (
+            "v-status-badge " +
+            "premiumVisitStatus " +
+            (
+              isWaiting
+                ? "premiumVisitStatusInProgress"
+                : "premiumVisitStatusPlanned"
+            )
+          );
+      }
+
+      const priceEl =
+        clone.querySelector(
+          ".v-price-badge"
+        );
+
+      if (priceEl) {
+        priceEl.textContent =
+          "Запис у календарі";
+      }
+
+      const complaintEl =
+        clone.querySelector(
+          ".v-complaint"
+        );
+
+      if (complaintEl) {
+        complaintEl.innerHTML =
+          formatVisitTextPremium(
+            calendarEvent.note,
+            "Причину звернення не вказано"
+          );
+      }
+
+      const treatmentBlock =
+        clone.querySelector(
+          ".v-rx-container"
+        );
+
+      if (treatmentBlock) {
+        treatmentBlock.style.display =
+          "none";
+      }
+
+      const openHint =
+        clone.querySelector(
+          ".premiumVisitOpenHint"
+        );
+
+      if (openHint) {
+        openHint.textContent =
+          (
+            "Натисніть на картку, " +
+            "щоб відкрити запис"
+          );
+      }
+
+      clone.querySelector(
+        ".v-del-btn"
+      )?.remove();
+
+      timelineContainer.appendChild(
+        clone
+      );
+    }
+  );
 
   // Сортируем визиты от новых к старым
   const sortedVisits = visits
@@ -59093,6 +59315,42 @@ if (deleteButton) {
 
   // Железно возвращаем оригинальный обработчик кликов (делегирование событий на родителе)
   box.onclick = async (e) => {
+        const calendarCard =
+      e.target.closest(
+        "[data-open-calendar-event]"
+      );
+
+    if (calendarCard) {
+      const calendarEventId =
+        String(
+          calendarCard.dataset
+            .openCalendarEvent || ""
+        );
+
+      const calendarEvent =
+        plannedCalendarEvents.find(
+          (event) =>
+            String(event.id) ===
+            calendarEventId
+        );
+
+      if (!calendarEvent) {
+        return;
+      }
+
+      await openCalendarEditModal(
+        calendarEvent,
+        calendarEvent.event_date ||
+          todayISO(),
+        async () => {
+          await renderVisits(
+            petId
+          );
+        }
+      );
+
+      return;
+    }
     const editBtn = e.target.closest("[data-edit-visit]");
     if (editBtn) {
       e.preventDefault(); e.stopPropagation();
