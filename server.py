@@ -26141,6 +26141,17 @@ def api_discharge_hospitalization(
                 or None
             )
 
+        if "recommendations" in data:
+            payload["recommendations"] = (
+                str(
+                    data.get(
+                        "recommendations"
+                    )
+                    or ""
+                ).strip()
+                or None
+            )
+
         result = execute_with_retry(
             lambda: (
                 supabase
