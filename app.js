@@ -58969,6 +58969,9 @@ async function renderVisits(petId) {
         );
       });
 
+        const eventByVisitId =
+    new Map();
+
   (calendarEvents || []).forEach(
     (event) => {
       const linkedVisitId =
