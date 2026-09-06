@@ -1424,6 +1424,76 @@ const APP_TRANSLATIONS = {
   },
 };
 
+function getInterfaceLanguage() {
+  const selectedLanguage =
+    String(
+      LS.get(
+        APP_LANGUAGE_KEY,
+        "uk"
+      ) || "uk"
+    )
+      .trim()
+      .toLowerCase();
+
+  return APP_SUPPORTED_LANGUAGES.has(
+    selectedLanguage
+  )
+    ? selectedLanguage
+    : "uk";
+}
+
+function translateInterfaceText(
+  key,
+  variables = {}
+) {
+  const language =
+    getInterfaceLanguage();
+
+  let text =
+    APP_TRANSLATIONS[language]?.[key] ??
+    APP_TRANSLATIONS.uk?.[key] ??
+    key;
+
+  Object.entries(
+    variables
+  ).forEach(
+    ([name, value]) => {
+      text = text.replaceAll(
+        `{${name}}`,
+        String(value)
+      );
+    }
+  );
+
+  return text;
+}
+
+function applyInterfaceTranslations(
+  root = document
+) {
+  root
+    .querySelectorAll(
+      "[data-i18n]"
+    )
+    .forEach((element) => {
+      const key =
+        element.getAttribute(
+          "data-i18n"
+        );
+
+      if (!key) return;
+
+      element.textContent =
+        translateInterfaceText(
+          key
+        );
+    });
+}
+
+document.documentElement.lang =
+  getInterfaceLanguage();
+
+applyInterfaceTranslations();
 
 
 function getOrgHeaders() {
