@@ -1379,6 +1379,25 @@ const APP_TRANSLATIONS = {
     "nav.team": "Команда",
     "nav.audit": "Журнал дій",
     "nav.settings": "Налаштування",
+        "calendar.title": "Календар",
+    "calendar.weekHint":
+      "Тижневий розклад записів клініки.",
+    "calendar.dayHint":
+      "Натисніть на потрібний час у колонці ветеринара, щоб створити запис.",
+    "calendar.appointments": "Записи",
+    "calendar.day": "День",
+    "calendar.week": "Тиждень",
+    "calendar.teamSchedule":
+      "Графік команди",
+    "calendar.createAppointment":
+      "Створити запис",
+    "calendar.time": "Час",
+    "calendar.noShiftsTitle":
+      "На цей день змін немає",
+    "calendar.noShiftsDescription":
+      "Додайте співробітників у графік роботи, щоб вони з’явилися в календарі записів.",
+    "calendar.configureSchedule":
+      "Налаштувати графік",
   },
 
   en: {
@@ -1391,8 +1410,28 @@ const APP_TRANSLATIONS = {
     "nav.stock": "Inventory",
     "nav.finance": "Finance",
     "nav.team": "Team",
-    "nav.audit": "Activity log",
+    "nav.audit": "Audit log",
     "nav.settings": "Settings",
+        "calendar.title": "Calendar",
+    "calendar.weekHint":
+      "Weekly clinic appointment schedule.",
+    "calendar.dayHint":
+      "Select a time in a veterinarian’s column to create an appointment.",
+    "calendar.appointments":
+      "Appointments",
+    "calendar.day": "Day",
+    "calendar.week": "Week",
+    "calendar.teamSchedule":
+      "Team schedule",
+    "calendar.createAppointment":
+      "Create appointment",
+    "calendar.time": "Time",
+    "calendar.noShiftsTitle":
+      "No shifts scheduled for this day",
+    "calendar.noShiftsDescription":
+      "Add employees to the work schedule to show them in the appointment calendar.",
+    "calendar.configureSchedule":
+      "Configure schedule",
   },
 
   de: {
@@ -1405,8 +1444,27 @@ const APP_TRANSLATIONS = {
     "nav.stock": "Lager",
     "nav.finance": "Finanzen",
     "nav.team": "Team",
-    "nav.audit": "Aktivitätsprotokoll",
+    "nav.audit": "Protokoll",
     "nav.settings": "Einstellungen",
+        "calendar.title": "Kalender",
+    "calendar.weekHint":
+      "Wöchentlicher Terminplan der Klinik.",
+    "calendar.dayHint":
+      "Wählen Sie eine Uhrzeit in der Spalte eines Tierarztes, um einen Termin zu erstellen.",
+    "calendar.appointments": "Termine",
+    "calendar.day": "Tag",
+    "calendar.week": "Woche",
+    "calendar.teamSchedule":
+      "Dienstplan",
+    "calendar.createAppointment":
+      "Termin erstellen",
+    "calendar.time": "Zeit",
+    "calendar.noShiftsTitle":
+      "Für diesen Tag sind keine Schichten geplant",
+    "calendar.noShiftsDescription":
+      "Fügen Sie Mitarbeitende zum Dienstplan hinzu, damit sie im Terminkalender erscheinen.",
+    "calendar.configureSchedule":
+      "Dienstplan einrichten",
   },
 
   pl: {
@@ -1419,8 +1477,27 @@ const APP_TRANSLATIONS = {
     "nav.stock": "Magazyn",
     "nav.finance": "Finanse",
     "nav.team": "Zespół",
-    "nav.audit": "Dziennik działań",
+    "nav.audit": "Dziennik",
     "nav.settings": "Ustawienia",
+        "calendar.title": "Kalendarz",
+    "calendar.weekHint":
+      "Tygodniowy harmonogram wizyt kliniki.",
+    "calendar.dayHint":
+      "Wybierz godzinę w kolumnie lekarza, aby utworzyć wizytę.",
+    "calendar.appointments": "Wizyty",
+    "calendar.day": "Dzień",
+    "calendar.week": "Tydzień",
+    "calendar.teamSchedule":
+      "Grafik zespołu",
+    "calendar.createAppointment":
+      "Utwórz wizytę",
+    "calendar.time": "Godzina",
+    "calendar.noShiftsTitle":
+      "Na ten dzień nie zaplanowano zmian",
+    "calendar.noShiftsDescription":
+      "Dodaj pracowników do grafiku, aby pojawili się w kalendarzu wizyt.",
+    "calendar.configureSchedule":
+      "Ustaw grafik",
   },
 };
 
@@ -48424,44 +48501,62 @@ events.forEach(
 
     page.innerHTML = `
       <div class="card calendarCard">
-        <div class="calendarHeader">
+                <div class="calendarHeader">
           <div>
-            <h2>Календар</h2>
-            <div class="hint">Тижневий розклад записів клініки.</div>
+            <h2>
+              ${translateInterfaceText(
+                "calendar.title"
+              )}
+            </h2>
+
+            <div class="hint">
+              ${translateInterfaceText(
+                "calendar.weekHint"
+              )}
+            </div>
           </div>
 
           <div class="calendarViewSwitcher">
-  <div class="calendarViewGroup">
-    <span class="calendarViewGroupLabel">
-      Записи
-    </span>
+            <div class="calendarViewGroup">
+              <span class="calendarViewGroupLabel">
+                ${translateInterfaceText(
+                  "calendar.appointments"
+                )}
+              </span>
 
-    <button
-      class="ghost"
-      data-cal-mode="day"
-      type="button"
-    >
-      День
-    </button>
+              <button
+                class="ghost"
+                data-cal-mode="day"
+                type="button"
+              >
+                ${translateInterfaceText(
+                  "calendar.day"
+                )}
+              </button>
 
-    <button
-      class="primary"
-      data-cal-mode="week"
-      type="button"
-    >
-      Тиждень
-    </button>
-  </div>
+              <button
+                class="primary"
+                data-cal-mode="week"
+                type="button"
+              >
+                ${translateInterfaceText(
+                  "calendar.week"
+                )}
+              </button>
+            </div>
 
-  <button
-    class="ghost calendarScheduleButton"
-    data-cal-mode="month"
-    type="button"
-  >
-    <span>👥</span>
-    Графік команди
-  </button>
-</div>
+            <button
+              class="ghost calendarScheduleButton"
+              data-cal-mode="month"
+              type="button"
+            >
+              <span>👥</span>
+
+              ${translateInterfaceText(
+                "calendar.teamSchedule"
+              )}
+            </button>
+          </div>
         </div>
 
         <div class="calendarTop">
@@ -51113,61 +51208,75 @@ const staffPaletteHtml =
 
 page.innerHTML = `
   <div class="card calendarCard">
-    <div class="calendarHeader">
+       <div class="calendarHeader">
       <div>
         <h2>
-          Календар
+          ${translateInterfaceText(
+            "calendar.title"
+          )}
         </h2>
 
         <div class="hint">
-          Натисніть на потрібний час
-у колонці ветеринара,
-щоб створити запис.
+          ${translateInterfaceText(
+            "calendar.dayHint"
+          )}
         </div>
       </div>
 
       <div class="calendarHeaderActions">
-  <button
-    class="primary"
-    id="calendarCreateVisitButton"
-    type="button"
-  >
-    ＋ Створити запис
-  </button>
+        <button
+          class="primary"
+          id="calendarCreateVisitButton"
+          type="button"
+        >
+          ＋
+          ${translateInterfaceText(
+            "calendar.createAppointment"
+          )}
+        </button>
 
-  <div class="calendarViewSwitcher">
-  <div class="calendarViewGroup">
-    <span class="calendarViewGroupLabel">
-      Записи
-    </span>
+        <div class="calendarViewSwitcher">
+          <div class="calendarViewGroup">
+            <span class="calendarViewGroupLabel">
+              ${translateInterfaceText(
+                "calendar.appointments"
+              )}
+            </span>
 
-    <button
-      class="primary"
-      data-cal-mode="day"
-      type="button"
-    >
-      День
-    </button>
+            <button
+              class="primary"
+              data-cal-mode="day"
+              type="button"
+            >
+              ${translateInterfaceText(
+                "calendar.day"
+              )}
+            </button>
 
-    <button
-      class="ghost"
-      data-cal-mode="week"
-      type="button"
-    >
-      Тиждень
-    </button>
-  </div>
+            <button
+              class="ghost"
+              data-cal-mode="week"
+              type="button"
+            >
+              ${translateInterfaceText(
+                "calendar.week"
+              )}
+            </button>
+          </div>
 
-  <button
-    class="ghost calendarScheduleButton"
-    data-cal-mode="month"
-    type="button"
-  >
-    <span>👥</span>
-    Графік команди
-  </button>
-</div>
-</div>
+          <button
+            class="ghost calendarScheduleButton"
+            data-cal-mode="month"
+            type="button"
+          >
+            <span>👥</span>
+
+            ${translateInterfaceText(
+              "calendar.teamSchedule"
+            )}
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="calendarTop">
@@ -51261,22 +51370,27 @@ page.innerHTML = `
         📅
       </div>
 
-      <h3>
-        На цей день змін немає
+            <h3>
+        ${translateInterfaceText(
+          "calendar.noShiftsTitle"
+        )}
       </h3>
 
       <p>
-        Додайте співробітників у графік роботи,
-        щоб вони з’явилися в календарі записів.
+        ${translateInterfaceText(
+          "calendar.noShiftsDescription"
+        )}
       </p>
 
       <button
-  type="button"
-  class="primary"
-  data-cal-mode="month"
->
-  Налаштувати графік
-</button>
+        type="button"
+        class="primary"
+        data-cal-mode="month"
+      >
+        ${translateInterfaceText(
+          "calendar.configureSchedule"
+        )}
+      </button>
     </div>
   `
 }
@@ -74771,7 +74885,9 @@ function ensureMedcardModal() {
 
             <label class="medcardField">
               <span class="medcardFieldLabel">
-                Час
+                              ${translateInterfaceText(
+                "calendar.time"
+              )}
               </span>
 
               <input
