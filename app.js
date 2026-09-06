@@ -41225,7 +41225,7 @@ if (addWeightBtn) {
       }
 
       try {
-        await createPatientWeightApi(
+               await createPatientWeightApi(
           pet.id,
           {
             weight_kg:
@@ -41236,13 +41236,30 @@ if (addWeightBtn) {
           }
         );
 
-        await renderPatientTab(
-          "overview",
-          {
+        await loadPatientsApi();
+
+        const freshPet =
+          (
+            state.patients || []
+          ).find(
+            (item) =>
+              String(item.id) ===
+              String(pet.id)
+          ) || {
             ...pet,
             weight_kg:
               weight,
-          }
+          };
+
+        state.selectedPet =
+          freshPet;
+
+        state.selectedPetId =
+          String(freshPet.id);
+
+        await renderPatientTab(
+          "overview",
+          freshPet
         );
 
       } catch (error) {
