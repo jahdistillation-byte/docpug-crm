@@ -73168,13 +73168,42 @@ const isOutsideShift =
   allowOverlap,
         });
 
-      if (!createdEvent?.id) {
+            if (!createdEvent?.id) {
         return;
       }
 
+      const openedFromPatient =
+        modal?.dataset
+          ?.openSource ===
+        "patient";
+
       closeVisitModal();
 
-await renderCalendarTab();
+      if (openedFromPatient) {
+        openDeleteModal(
+          `
+            <b>Запис успішно створено</b>
+            <br><br>
+            Пацієнта додано до календаря
+            на
+            <b>${escapeHtml(date)}</b>
+            о
+            <b>${escapeHtml(startTime)}</b>.
+            <br><br>
+            Почати медичний прийом зараз?
+          `,
+          async () => {
+            await startMedicalVisitFromCalendarEvent(
+              createdEvent
+            );
+          },
+          "visit_created"
+        );
+
+        return;
+      }
+
+      await renderCalendarTab();
     } finally {
       window.__calendarCreatePending =
         false;
