@@ -29271,6 +29271,7 @@ def sync_completed_visit_weight(
         )
 
         return False
+@app.post("/api/visits/<visit_id>/complete")
 def api_complete_visit(
     visit_id
 ):
