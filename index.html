@@ -1138,84 +1138,162 @@
 
 
 <!-- OWNER MODAL -->
-<div class="modal modal-overlay pugOwnerOverlay" id="ownerModal" aria-hidden="true" style="display:none;">
-  <div class="pugOwnerModal" role="dialog" aria-modal="true">
-    <input type="hidden" id="ownerModalId">
+<div
+  class="modal modal-overlay pugOwnerOverlay"
+  id="ownerModal"
+  aria-hidden="true"
+  style="display:none;"
+>
+  <div
+    class="pugOwnerModal"
+    role="dialog"
+    aria-modal="true"
+  >
+    <input
+      type="hidden"
+      id="ownerModalId"
+    >
 
     <div class="pugVisitHead">
       <div class="pugVisitHeadLeft">
-        <div class="pugVisitIcon">👤</div>
+        <div class="pugVisitIcon">
+          👤
+        </div>
+
         <div>
-          <div class="pugVisitTitle" id="ownerModalTitle">Новий власник</div>
-          <div class="pugVisitSub" id="ownerModalSub">Створення картки власника тварини</div>
+          <div
+            class="pugVisitTitle"
+            id="ownerModalTitle"
+            data-i18n="owners.form.newTitle"
+          >
+            Новий власник
+          </div>
+
+          <div
+            class="pugVisitSub"
+            id="ownerModalSub"
+            data-i18n="owners.form.newSubtitle"
+          >
+            Створення картки власника тварини
+          </div>
         </div>
       </div>
-      <button class="pugVisitClose" id="ownerModalClose" type="button">×</button>
+
+      <button
+        class="pugVisitClose"
+        id="ownerModalClose"
+        type="button"
+        aria-label="Закрити"
+        data-i18n-aria-label="owners.form.close"
+      >
+        ×
+      </button>
     </div>
 
     <div class="pugOwnerBody">
       <div class="pugQuickGroup">
-        <div class="pugQuickGroupTitle">📇 Контактні дані</div>
+        <div
+          class="pugQuickGroupTitle"
+          data-i18n="owners.form.contactDetails"
+        >
+          📇 Контактні дані
+        </div>
 
         <label class="pugVisitField">
-          <span>ПІБ власника *</span>
-          <input class="pugVisitInput" id="ownerModalName" placeholder="Напр. Іваненко Олена">
+          <span data-i18n="owners.form.fullName">
+            ПІБ власника *
+          </span>
+
+          <input
+            class="pugVisitInput"
+            id="ownerModalName"
+            placeholder="Напр. Іваненко Олена"
+            data-i18n-placeholder="owners.form.namePlaceholder"
+          >
         </label>
 
         <label class="pugVisitField">
-  <span>Телефон</span>
+          <span data-i18n="owners.form.phone">
+            Телефон
+          </span>
 
-  <input
-    class="pugVisitInput"
-    id="ownerModalPhone"
-    type="tel"
-    inputmode="tel"
-    maxlength="17"
-    autocomplete="tel"
-    placeholder="+380 XX XXX XX XX"
-  >
-</label>
-
-<label class="pugVisitField">
-  <span>Email</span>
-
-  <input
-    class="pugVisitInput"
-    id="ownerModalEmail"
-    type="email"
-    maxlength="200"
-    autocomplete="email"
-    placeholder="client@example.com"
-  >
-</label>
-
-<label class="pugVisitField">
-  <span>Telegram</span>
-
-  <input
-    class="pugVisitInput"
-    id="ownerModalTelegram"
-    type="text"
-    maxlength="64"
-    autocomplete="off"
-    placeholder="@username"
-  >
-</label>
+          <input
+            class="pugVisitInput"
+            id="ownerModalPhone"
+            type="tel"
+            inputmode="tel"
+            maxlength="17"
+            autocomplete="tel"
+            placeholder="+380 XX XXX XX XX"
+          >
+        </label>
 
         <label class="pugVisitField">
-          <span>Адреса / нотатка</span>
-          <input class="pugVisitInput" id="ownerModalNote" placeholder="Район, адреса, коментар">
+          <span data-i18n="owners.form.email">
+            Email
+          </span>
+
+          <input
+            class="pugVisitInput"
+            id="ownerModalEmail"
+            type="email"
+            maxlength="200"
+            autocomplete="email"
+            placeholder="client@example.com"
+          >
+        </label>
+
+        <label class="pugVisitField">
+          <span data-i18n="owners.form.telegram">
+            Telegram
+          </span>
+
+          <input
+            class="pugVisitInput"
+            id="ownerModalTelegram"
+            type="text"
+            maxlength="64"
+            autocomplete="off"
+            placeholder="@username"
+          >
+        </label>
+
+        <label class="pugVisitField">
+          <span data-i18n="owners.form.addressNote">
+            Адреса / нотатка
+          </span>
+
+          <input
+            class="pugVisitInput"
+            id="ownerModalNote"
+            placeholder="Район, адреса, коментар"
+            data-i18n-placeholder="owners.form.addressPlaceholder"
+          >
         </label>
       </div>
     </div>
 
     <div class="pugVisitFoot">
-      <button class="pugVisitCancel" id="ownerModalCancel" type="button">✕ Скасувати</button>
-      <button class="pugVisitSave" id="ownerModalSave" type="button">💾 Зберегти</button>
+      <button
+        class="pugVisitCancel"
+        id="ownerModalCancel"
+        type="button"
+        data-i18n="owners.form.cancel"
+      >
+        ✕ Скасувати
+      </button>
+
+      <button
+        class="pugVisitSave"
+        id="ownerModalSave"
+        type="button"
+        data-i18n="owners.form.save"
+      >
+        💾 Зберегти
+      </button>
     </div>
   </div>
 </div>
-
 <!-- VISIT MODAL -->
 <div class="modal modal-overlay pugVisitOverlay" id="visitModal" aria-hidden="true" style="display:none;">
   <div class="pugVisitModal" role="dialog" aria-modal="true">

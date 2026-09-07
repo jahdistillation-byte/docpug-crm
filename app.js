@@ -3334,6 +3334,134 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.search.placeholder": "Właściciel, telefon, zwierzę, rasa...",
   "owners.search.label": "Szukaj właścicieli i zwierząt"
 });
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.form.newTitle": "Новий власник",
+  "owners.form.editTitle": "Редагувати власника",
+  "owners.form.newSubtitle": "Створення картки власника тварини",
+  "owners.form.editSubtitle": "Оновлення даних власника",
+  "owners.form.contactDetails": "📇 Контактні дані",
+  "owners.form.fullName": "ПІБ власника *",
+  "owners.form.namePlaceholder": "Напр. Іваненко Олена",
+  "owners.form.phone": "Телефон",
+  "owners.form.email": "Email",
+  "owners.form.telegram": "Telegram",
+  "owners.form.addressNote": "Адреса / нотатка",
+  "owners.form.addressPlaceholder": "Район, адреса, коментар",
+  "owners.form.cancel": "✕ Скасувати",
+  "owners.form.save": "💾 Зберегти",
+  "owners.form.close": "Закрити"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.form.newTitle": "New owner",
+  "owners.form.editTitle": "Edit owner",
+  "owners.form.newSubtitle": "Create a pet owner profile",
+  "owners.form.editSubtitle": "Update owner details",
+  "owners.form.contactDetails": "📇 Contact details",
+  "owners.form.fullName": "Owner’s full name *",
+  "owners.form.namePlaceholder": "For example: Alex Smith",
+  "owners.form.phone": "Phone",
+  "owners.form.email": "Email",
+  "owners.form.telegram": "Telegram",
+  "owners.form.addressNote": "Address / note",
+  "owners.form.addressPlaceholder": "District, address, comment",
+  "owners.form.cancel": "✕ Cancel",
+  "owners.form.save": "💾 Save",
+  "owners.form.close": "Close"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.form.newTitle": "Neuer Tierhalter",
+  "owners.form.editTitle": "Tierhalter bearbeiten",
+  "owners.form.newSubtitle": "Tierhalterprofil erstellen",
+  "owners.form.editSubtitle": "Daten des Tierhalters aktualisieren",
+  "owners.form.contactDetails": "📇 Kontaktdaten",
+  "owners.form.fullName": "Name des Tierhalters *",
+  "owners.form.namePlaceholder": "Zum Beispiel: Anna Müller",
+  "owners.form.phone": "Telefon",
+  "owners.form.email": "E-Mail",
+  "owners.form.telegram": "Telegram",
+  "owners.form.addressNote": "Adresse / Notiz",
+  "owners.form.addressPlaceholder": "Stadtteil, Adresse, Kommentar",
+  "owners.form.cancel": "✕ Abbrechen",
+  "owners.form.save": "💾 Speichern",
+  "owners.form.close": "Schließen"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.form.newTitle": "Nowy właściciel",
+  "owners.form.editTitle": "Edytuj właściciela",
+  "owners.form.newSubtitle": "Tworzenie profilu właściciela zwierzęcia",
+  "owners.form.editSubtitle": "Aktualizacja danych właściciela",
+  "owners.form.contactDetails": "📇 Dane kontaktowe",
+  "owners.form.fullName": "Imię i nazwisko właściciela *",
+  "owners.form.namePlaceholder": "Na przykład: Anna Kowalska",
+  "owners.form.phone": "Telefon",
+  "owners.form.email": "E-mail",
+  "owners.form.telegram": "Telegram",
+  "owners.form.addressNote": "Adres / notatka",
+  "owners.form.addressPlaceholder": "Dzielnica, adres, komentarz",
+  "owners.form.cancel": "✕ Anuluj",
+  "owners.form.save": "💾 Zapisz",
+  "owners.form.close": "Zamknij"
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.form.unsaved": "Внесені дані власника ще не збережені.",
+  "owners.form.invalidEmail": "Вкажіть коректну електронну адресу.",
+  "owners.form.nameRequired": "Вкажіть ПІБ власника.",
+  "owners.form.phoneRequired": "Вкажіть телефон власника.",
+  "owners.form.phoneFormat": "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX.",
+  "owners.form.telegramFormat": "Ім’я користувача Telegram повинно містити від 5 до 32 символів після @.",
+  "owners.form.updating": "Оновлюємо...",
+  "owners.form.creating": "Створюємо...",
+  "owners.form.saveError": "Не вдалося зберегти власника.",
+  "owners.form.existingTitle": "Власник уже в базі",
+  "owners.form.existingText": "Відкриваємо картку існуючого власника. Новий дубль не створено."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.form.unsaved": "The owner details have not been saved yet.",
+  "owners.form.invalidEmail": "Enter a valid email address.",
+  "owners.form.nameRequired": "Enter the owner’s full name.",
+  "owners.form.phoneRequired": "Enter the owner’s phone number.",
+  "owners.form.phoneFormat": "The phone number must contain exactly 12 digits in the format +380 XX XXX XX XX.",
+  "owners.form.telegramFormat": "The Telegram username must contain 5 to 32 characters after @.",
+  "owners.form.updating": "Updating...",
+  "owners.form.creating": "Creating...",
+  "owners.form.saveError": "Could not save the owner.",
+  "owners.form.existingTitle": "Owner already exists",
+  "owners.form.existingText": "Opening the existing owner profile. No duplicate was created."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.form.unsaved": "Die Angaben zum Tierhalter wurden noch nicht gespeichert.",
+  "owners.form.invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein.",
+  "owners.form.nameRequired": "Geben Sie den vollständigen Namen des Tierhalters ein.",
+  "owners.form.phoneRequired": "Geben Sie die Telefonnummer des Tierhalters ein.",
+  "owners.form.phoneFormat": "Die Telefonnummer muss genau 12 Ziffern im Format +380 XX XXX XX XX enthalten.",
+  "owners.form.telegramFormat": "Der Telegram-Benutzername muss nach dem @ zwischen 5 und 32 Zeichen enthalten.",
+  "owners.form.updating": "Wird aktualisiert...",
+  "owners.form.creating": "Wird erstellt...",
+  "owners.form.saveError": "Der Tierhalter konnte nicht gespeichert werden.",
+  "owners.form.existingTitle": "Tierhalter bereits vorhanden",
+  "owners.form.existingText": "Das vorhandene Tierhalterprofil wird geöffnet. Es wurde kein Duplikat erstellt."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.form.unsaved": "Dane właściciela nie zostały jeszcze zapisane.",
+  "owners.form.invalidEmail": "Wprowadź poprawny adres e-mail.",
+  "owners.form.nameRequired": "Podaj imię i nazwisko właściciela.",
+  "owners.form.phoneRequired": "Podaj numer telefonu właściciela.",
+  "owners.form.phoneFormat": "Numer telefonu musi zawierać dokładnie 12 cyfr w formacie +380 XX XXX XX XX.",
+  "owners.form.telegramFormat": "Nazwa użytkownika Telegram musi zawierać od 5 do 32 znaków po @.",
+  "owners.form.updating": "Aktualizowanie...",
+  "owners.form.creating": "Tworzenie...",
+  "owners.form.saveError": "Nie udało się zapisać właściciela.",
+  "owners.form.existingTitle": "Właściciel już istnieje",
+  "owners.form.existingText": "Otwieramy profil istniejącego właściciela. Duplikat nie został utworzony."
+});
+
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -4343,8 +4471,10 @@ function bindTelegramInput(input) {
         )
       ) {
         input.setCustomValidity(
-          "Telegram username повинен містити від 5 до 32 символів після @"
-        );
+  translateInterfaceText(
+    "owners.form.telegramFormat"
+  )
+);
       } else {
         input.setCustomValidity(
           ""
@@ -71205,18 +71335,22 @@ const telegramInput =
       : "";
 
   if (title) {
-    title.textContent =
+  title.textContent =
+    translateInterfaceText(
       isEdit
-        ? "Редагувати власника"
-        : "Новий власник";
-  }
+        ? "owners.form.editTitle"
+        : "owners.form.newTitle"
+    );
+}
 
-  if (subTitle) {
-    subTitle.textContent =
+if (subTitle) {
+  subTitle.textContent =
+    translateInterfaceText(
       isEdit
-        ? "Оновлення даних власника"
-        : "Створення картки власника тварини";
-  }
+        ? "owners.form.editSubtitle"
+        : "owners.form.newSubtitle"
+    );
+}
 
   if (nameInput) {
     nameInput.value =
@@ -85774,15 +85908,14 @@ function requestCloseOwnerModal() {
   }
 
   openDeleteModal(
-    (
-      "Внесені дані власника " +
-      "ще не збережені."
-    ),
-    () => {
-      closeOwnerModal();
-    },
-    "unsaved"
-  );
+  translateInterfaceText(
+    "owners.form.unsaved"
+  ),
+  () => {
+    closeOwnerModal();
+  },
+  "unsaved"
+);
 }
 function closeOwnerModal() {
   const modal =
@@ -85889,10 +86022,11 @@ const telegramRaw =
     email
   )
 ) {
-  alert(
-    "Вкажіть коректну електронну адресу"
-  );
-
+ alert(
+  translateInterfaceText(
+    "owners.form.invalidEmail"
+  )
+);
   $("#ownerModalEmail")
     ?.focus();
 
@@ -85908,8 +86042,10 @@ const telegramRaw =
 
       if (!name) {
         alert(
-          "Вкажіть ПІБ власника"
-        );
+  translateInterfaceText(
+    "owners.form.nameRequired"
+  )
+);
 
         $("#ownerModalName")
           ?.focus();
@@ -85919,8 +86055,10 @@ const telegramRaw =
 
       if (!phone) {
         alert(
-          "Вкажіть телефон власника"
-        );
+  translateInterfaceText(
+    "owners.form.phoneRequired"
+  )
+);
 
         $("#ownerModalPhone")
           ?.focus();
@@ -85934,8 +86072,10 @@ const telegramRaw =
         )
       ) {
         alert(
-          "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX"
-        );
+  translateInterfaceText(
+    "owners.form.phoneFormat"
+  )
+);
 
         $("#ownerModalPhone")
           ?.focus();
@@ -85959,8 +86099,10 @@ if (
   )
 ) {
   alert(
-    "Telegram username повинен містити від 5 до 32 символів після @"
-  );
+  translateInterfaceText(
+    "owners.form.telegramFormat"
+  )
+);
 
   $("#ownerModalTelegram")
     ?.focus();
@@ -85971,17 +86113,21 @@ if (
         $("#ownerModalSave");
 
       const oldText =
-        btn?.textContent ||
-        "Зберегти";
+  btn?.textContent ||
+  translateInterfaceText(
+    "owners.form.save"
+  );
 
       if (btn) {
         btn.disabled =
           true;
 
         btn.textContent =
-          id
-            ? "Оновлюємо..."
-            : "Створюємо...";
+  translateInterfaceText(
+    id
+      ? "owners.form.updating"
+      : "owners.form.creating"
+  );
       }
 
       try {
@@ -86035,18 +86181,18 @@ if (
           saved.id
         ) {
           showCrmNotice({
-            icon: "👤",
+  icon: "👤",
 
-            title:
-              "Власник уже в базі",
+  title:
+    translateInterfaceText(
+      "owners.form.existingTitle"
+    ),
 
-            text:
-              (
-                "Відкриваємо картку " +
-                "існуючого власника. " +
-                "Новий дубль не створено."
-              ),
-          });
+  text:
+    translateInterfaceText(
+      "owners.form.existingText"
+    ),
+});
 
           openOwner(
             String(saved.id)
@@ -86073,12 +86219,10 @@ if (
         );
 
         alert(
-          "Помилка збереження власника: " +
-          (
-            e?.message ||
-            e
-          )
-        );
+  translateInterfaceText(
+    "owners.form.saveError"
+  )
+);
       } finally {
         if (btn) {
           btn.disabled =
