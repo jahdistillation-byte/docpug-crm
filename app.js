@@ -49019,6 +49019,8 @@ $$("[data-week-create-date]")
     return;
   }
 
+  
+  if (calendarMode === "month") {
      const interfaceLanguage =
       getInterfaceLanguage();
 
@@ -52698,7 +52700,7 @@ $("#calendarCreateVisitButton")
     };
   });
 }
-
+}
 
 // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ПЕРСОНАЛ, МОДАЛКИ КАЛЕНДАРЯ И КАРТОЧКИ АНАЛИЗОВ)
