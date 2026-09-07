@@ -50681,7 +50681,7 @@ return;
           saveButton.disabled =
             false;
 
-                    saveButton.textContent =
+                   saveButton.textContent =
             `💾 ${translateInterfaceText(
               "schedule.saveDay"
             )}`;
