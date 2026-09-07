@@ -3315,6 +3315,25 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.row.copied": "Skopiowano ✓",
   "owners.row.noName": "Bez imienia"
 });
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.search.placeholder": "Власник, телефон, улюбленець, порода...",
+  "owners.search.label": "Пошук власників та улюбленців"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.search.placeholder": "Owner, phone, pet, breed...",
+  "owners.search.label": "Search owners and pets"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.search.placeholder": "Tierhalter, Telefon, Tier, Rasse...",
+  "owners.search.label": "Tierhalter und Tiere suchen"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.search.placeholder": "Właściciel, telefon, zwierzę, rasa...",
+  "owners.search.label": "Szukaj właścicieli i zwierząt"
+});
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -6314,11 +6333,15 @@ if (ownersSearchWrap) {
 
 if (ownersSearchInput) {
   ownersSearchInput.placeholder =
-    "Власник, телефон, улюбленець, порода...";
+    translateInterfaceText(
+      "owners.search.placeholder"
+    );
 
   ownersSearchInput.setAttribute(
     "aria-label",
-    "Пошук власників та улюбленців"
+    translateInterfaceText(
+      "owners.search.label"
+    )
   );
 }
 
