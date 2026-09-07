@@ -6,7 +6,7 @@
   <title>Doc.PUG CRM - Преміум Панель</title>
   <link
   rel="stylesheet"
-  href="style.css?v=20260904-owners-premium-v2"
+  href="style.css?v=20260907-calendar-i18n-v3"
 />
 </head>
 
@@ -53,12 +53,12 @@
       </div>
 
       <div class="search-bar" style="flex:1;max-width:400px;margin:0 20px;">
-        <input type="text" id="globalSearch" placeholder="Пошук власника, пацієнта..." style="width:100%;">
+        <input type="text" id="globalSearch" data-i18n-placeholder="calendar.header.search" placeholder="Пошук власника, пацієнта..." style="width:100%;">
       </div>
 
       <div class="user-profile-badge" style="text-align:right;">
-        <div id="clinicNameTitle" style="font-weight:600;color:#fff;">Клініка</div>
-        <div style="font-size:.8rem;color:rgba(255,255,255,.5);">Адміністратор</div>
+        <div id="clinicNameTitle" data-i18n="calendar.header.clinic" style="font-weight:600;color:#fff;">Клініка</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.5);" data-i18n="calendar.header.administrator">Адміністратор</div>
       </div>
     </header>
 
@@ -1197,8 +1197,8 @@
       <div class="pugVisitHeadLeft">
         <div class="pugVisitIcon">📅</div>
         <div>
-          <div class="pugVisitTitle">Новий запис прийому</div>
-          <div class="pugVisitSub" id="visitModalSub">Пацієнт: —</div>
+          <div class="pugVisitTitle" data-i18n="calendar.detail.new.appointment">Новий запис прийому</div>
+          <div class="pugVisitSub" id="visitModalSub" data-i18n="calendar.detail.patient.3">Пацієнт: —</div>
         </div>
       </div>
 
@@ -1210,7 +1210,7 @@
       <div id="visitPatientBlock" class="pugVisitSection pugVisitPatientBlock" style="display:none;">
         <div class="pugSectionTitle">
           <span>👤</span>
-          <strong>1. Пацієнт</strong>
+          <strong data-i18n="calendar.detail.1.patient">1. Пацієнт</strong>
         </div>
 
         <div class="pugSearchWrap">
@@ -1220,36 +1220,36 @@
             id="visitPatientSearch"
             placeholder="Пошук: пацієнт, власник, телефон..."
             autocomplete="off"
-          >
+           data-i18n-placeholder="calendar.detail.search.patient.owner.phone">
           <input id="visitPatientSelect" type="hidden">
         </div>
 
         <div id="visitPatientResults" class="patientSearchResults pugPatientResults"></div>
 
         <button class="pugAddPatientBtn" id="btnCreatePatientFromVisit" type="button">
-          <span>＋</span> Новий пацієнт
-        </button>
+          <span>＋</span><span data-i18n="calendar.detail.new.patient"> Новий пацієнт
+        </span></button>
       </div>
 
       <div id="visitNewPatientBox" class="pugVisitSection pugQuickPatientBox" style="display:none;">
         <div class="pugQuickPatientHead">
           <div>
-            <div class="pugQuickPatientTitle">🐾 Новий пацієнт</div>
-            <div class="pugQuickPatientSub">Створення пацієнта прямо з календаря</div>
+            <div class="pugQuickPatientTitle" data-i18n="calendar.detail.new.patient.2">🐾 Новий пацієнт</div>
+            <div class="pugQuickPatientSub" data-i18n="calendar.detail.create.a.patient.directly.from.the.calendar">Створення пацієнта прямо з календаря</div>
           </div>
         </div>
 
         <div class="pugQuickPatientGrid">
           <div class="pugQuickGroup">
-            <div class="pugQuickGroupTitle">👤 Власник</div>
+            <div class="pugQuickGroupTitle" data-i18n="calendar.detail.owner">👤 Власник</div>
 
             <label class="pugVisitField">
-              <span>ПІБ власника *</span>
-              <input class="pugVisitInput" id="visitNewOwnerName" placeholder="Напр. Іваненко Олена">
+              <span data-i18n="calendar.detail.owner.s.full.name">ПІБ власника *</span>
+              <input class="pugVisitInput" id="visitNewOwnerName" placeholder="Напр. Іваненко Олена" data-i18n-placeholder="calendar.detail.for.example.alex.smith">
             </label>
 
             <label class="pugVisitField">
-  <span>Телефон *</span>
+  <span data-i18n="calendar.detail.phone">Телефон *</span>
 
   <input
     class="pugVisitInput"
@@ -1288,31 +1288,31 @@
 </label>
 
             <label class="pugVisitField">
-              <span>Адреса / нотатка</span>
-              <input class="pugVisitInput" id="visitNewOwnerNote" placeholder="Район, адреса, коментар">
+              <span data-i18n="calendar.detail.address.note">Адреса / нотатка</span>
+              <input class="pugVisitInput" id="visitNewOwnerNote" placeholder="Район, адреса, коментар" data-i18n-placeholder="calendar.detail.district.address.comment">
             </label>
           </div>
 
           <div class="pugQuickGroup">
-            <div class="pugQuickGroupTitle">🐶 Пацієнт</div>
+            <div class="pugQuickGroupTitle" data-i18n="calendar.detail.patient.4">🐶 Пацієнт</div>
 
             <label class="pugVisitField">
-              <span>Кличка *</span>
-              <input class="pugVisitInput" id="visitNewPetName" placeholder="Напр. Бусинка">
+              <span data-i18n="calendar.detail.patient.name">Кличка *</span>
+              <input class="pugVisitInput" id="visitNewPetName" placeholder="Напр. Бусинка" data-i18n-placeholder="calendar.detail.for.example.bella">
             </label>
 
             <label class="pugVisitField">
-              <span>Вид *</span>
+              <span data-i18n="calendar.detail.species">Вид *</span>
               <select class="pugVisitInput" id="visitNewPetSpecies">
-                <option value="">Оберіть вид</option>
-                <option value="dog">Собака</option>
-                <option value="cat">Кіт</option>
-                <option value="other">Інше</option>
+                <option value="" data-i18n="calendar.detail.select.a.species">Оберіть вид</option>
+                <option value="dog" data-i18n="calendar.detail.dog">Собака</option>
+                <option value="cat" data-i18n="calendar.detail.cat">Кіт</option>
+                <option value="other" data-i18n="calendar.detail.other">Інше</option>
               </select>
             </label>
 
             <label class="pugVisitField">
-  <span id="visitNewPetBreedLabel">Порода</span>
+  <span id="visitNewPetBreedLabel" data-i18n="calendar.detail.breed">Порода</span>
 
   <input
     class="pugVisitInput"
@@ -1322,49 +1322,49 @@
     placeholder="Спочатку оберіть вид"
     autocomplete="off"
     disabled
-  >
+   data-i18n-placeholder="calendar.detail.select.a.species.first">
 
   <datalist id="visitNewPetBreedList"></datalist>
 </label>
 
 
 <label class="pugVisitField">
-  <span>Стать</span>
+  <span data-i18n="calendar.detail.sex">Стать</span>
 
   <select
     class="pugVisitInput"
     id="visitNewPetSex"
   >
-    <option value="">
+    <option value="" data-i18n="calendar.detail.not.specified">
       Не вказано
     </option>
 
-    <option value="male">
+    <option value="male" data-i18n="calendar.detail.male">
       Самець
     </option>
 
-    <option value="female">
+    <option value="female" data-i18n="calendar.detail.female">
       Самка
     </option>
   </select>
 </label>
 
 <label class="pugVisitField">
-  <span>Кастрований / стерилізована</span>
+  <span data-i18n="calendar.detail.neutered.spayed">Кастрований / стерилізована</span>
 
   <select
     class="pugVisitInput"
     id="visitNewPetNeutered"
   >
-    <option value="">
+    <option value="" data-i18n="calendar.detail.not.specified">
       Не вказано
     </option>
 
-    <option value="true">
+    <option value="true" data-i18n="calendar.detail.yes">
       Так
     </option>
 
-    <option value="false">
+    <option value="false" data-i18n="calendar.detail.no">
       Ні
     </option>
   </select>
@@ -1385,7 +1385,7 @@
   <!-- ============================= -->
 
   <label class="pugVisitField">
-    <span>
+    <span data-i18n="calendar.detail.rabies">
       🛡 Сказ
     </span>
 
@@ -1393,15 +1393,15 @@
       class="pugVisitInput"
       id="visitNewPetRabiesStatus"
     >
-      <option value="unknown">
+      <option value="unknown" data-i18n="calendar.detail.unknown">
         Невідомо
       </option>
 
-      <option value="vaccinated">
+      <option value="vaccinated" data-i18n="calendar.detail.vaccinated">
         Вакцинований
       </option>
 
-      <option value="not_vaccinated">
+      <option value="not_vaccinated" data-i18n="calendar.detail.not.vaccinated">
         Не вакцинований
       </option>
     </select>
@@ -1413,7 +1413,7 @@
   <!-- ============================= -->
 
   <label class="pugVisitField">
-    <span>
+    <span data-i18n="calendar.detail.general.vaccination.2">
       💉 Загальна вакцина
     </span>
 
@@ -1421,15 +1421,15 @@
       class="pugVisitInput"
       id="visitNewPetGeneralVaccinationStatus"
     >
-      <option value="unknown">
+      <option value="unknown" data-i18n="calendar.detail.unknown">
         Невідомо
       </option>
 
-      <option value="vaccinated">
+      <option value="vaccinated" data-i18n="calendar.detail.vaccinated">
         Вакцинований
       </option>
 
-      <option value="not_vaccinated">
+      <option value="not_vaccinated" data-i18n="calendar.detail.not.vaccinated">
         Не вакцинований
       </option>
     </select>
@@ -1452,7 +1452,7 @@
     "
   >
     <label class="pugVisitField">
-      <span>
+      <span data-i18n="calendar.detail.rabies.vaccination.date">
         Дата вакцинації від сказу
       </span>
 
@@ -1465,7 +1465,7 @@
 
 
     <label class="pugVisitField">
-      <span>
+      <span data-i18n="calendar.detail.rabies.vaccine">
         Вакцина від сказу
       </span>
 
@@ -1473,7 +1473,7 @@
         class="pugVisitInput"
         id="visitNewPetRabiesVaccine"
       >
-        <option value="">
+        <option value="" data-i18n="calendar.detail.select.a.species.first">
           Спочатку оберіть вид
         </option>
       </select>
@@ -1497,7 +1497,7 @@
     "
   >
     <label class="pugVisitField">
-      <span>
+      <span data-i18n="calendar.detail.general.vaccination.date">
         Дата загальної вакцинації
       </span>
 
@@ -1510,7 +1510,7 @@
 
 
     <label class="pugVisitField">
-      <span>
+      <span data-i18n="calendar.detail.general.vaccine">
         Загальна вакцина
       </span>
 
@@ -1518,7 +1518,7 @@
         class="pugVisitInput"
         id="visitNewPetGeneralVaccine"
       >
-        <option value="">
+        <option value="" data-i18n="calendar.detail.select.a.species.first">
           Спочатку оберіть вид
         </option>
       </select>
@@ -1527,27 +1527,27 @@
 
 </div>
             <label class="pugVisitField">
-              <span>Вік</span>
-              <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки">
+              <span data-i18n="calendar.detail.age">Вік</span>
+              <input class="pugVisitInput" id="visitNewPetAge" placeholder="Напр. 4 роки" data-i18n-placeholder="calendar.detail.for.example.4.years">
             </label>
 
             <label class="pugVisitField">
-              <span>Вага, кг</span>
-              <input class="pugVisitInput" id="visitNewPetWeight" placeholder="Напр. 7.5">
+              <span data-i18n="calendar.detail.weight.kg">Вага, кг</span>
+              <input class="pugVisitInput" id="visitNewPetWeight" placeholder="Напр. 7.5" data-i18n-placeholder="calendar.detail.for.example.7.5">
             </label>
           </div>
         </div>
 
         <div class="pugQuickPatientActions">
-          <button type="button" class="pugQuickCancel" id="visitNewPatientCancel">Скасувати</button>
-          <button type="button" class="pugQuickCreate" id="visitNewPatientCreate">Створити пацієнта</button>
+          <button type="button" class="pugQuickCancel" id="visitNewPatientCancel" data-i18n="calendar.detail.cancel">Скасувати</button>
+          <button type="button" class="pugQuickCreate" id="visitNewPatientCreate" data-i18n="calendar.detail.create.patient">Створити пацієнта</button>
         </div>
       </div>
 
       <div class="pugVisitSection pugVisitDetailsBlock">
         <div class="pugSectionTitle">
           <span>📅</span>
-          <strong>2. Деталі прийому</strong>
+          <strong data-i18n="calendar.detail.2.appointment.details">2. Деталі прийому</strong>
         </div>
 
   <div
@@ -1567,19 +1567,19 @@
       </span>
 
       <span class="appointmentTemplateSelectorMain">
-        <span class="appointmentTemplateSelectorLabel">
+        <span class="appointmentTemplateSelectorLabel" data-i18n="calendar.detail.appointment.template">
           Шаблон прийому
         </span>
 
         <strong
           id="appointmentTemplateSelectorName"
-        >
+         data-i18n="calendar.detail.choose.a.template">
           Обрати шаблон
         </strong>
 
         <small
           id="appointmentTemplateSelectorMeta"
-        >
+         data-i18n="calendar.detail.duration.and.visit.type">
           Тривалість і тип прийому
         </small>
       </span>
@@ -1593,7 +1593,7 @@
       type="button"
       class="appointmentTemplateAddQuick"
       id="appointmentTemplateAddQuick"
-    >
+     data-i18n="calendar.detail.add.template">
       ＋ Додати шаблон
     </button>
 
@@ -1614,7 +1614,7 @@
       class="appointmentTemplateDrawerBackdrop"
       id="appointmentTemplateDrawerBackdrop"
       aria-label="Закрити"
-    ></button>
+     data-i18n-aria-label="calendar.detail.close"></button>
 
     <section
       class="appointmentTemplateDrawerPanel"
@@ -1624,15 +1624,15 @@
     >
       <header class="appointmentTemplateDrawerHeader">
         <div>
-          <span class="appointmentTemplateDrawerEyebrow">
+          <span class="appointmentTemplateDrawerEyebrow" data-i18n="calendar.detail.quick.appointment">
             ШВИДКИЙ ЗАПИС
           </span>
 
-          <h3 id="appointmentTemplateDrawerTitle">
+          <h3 id="appointmentTemplateDrawerTitle" data-i18n="calendar.detail.select.an.appointment.template">
             Оберіть шаблон прийому
           </h3>
 
-          <p>
+          <p data-i18n="calendar.detail.the.template.automatically.sets.the.duration.and.default.comment">
             Шаблон автоматично встановить
             тривалість і стандартний коментар.
           </p>
@@ -1643,7 +1643,7 @@
           class="appointmentTemplateDrawerClose"
           id="appointmentTemplateDrawerClose"
           aria-label="Закрити"
-        >
+         data-i18n-aria-label="calendar.detail.close">
           ×
         </button>
       </header>
@@ -1657,11 +1657,11 @@
           <span>＋</span>
 
           <span>
-            <strong>
+            <strong data-i18n="calendar.detail.add.template.2">
               Додати шаблон
             </strong>
 
-            <small>
+            <small data-i18n="calendar.detail.create.a.custom.visit.type">
               Створити власний тип прийому
             </small>
           </span>
@@ -1672,7 +1672,7 @@
         class="appointmentTemplateDrawerList"
         id="appointmentTemplateList"
       >
-        <div class="appointmentTemplateLoading">
+        <div class="appointmentTemplateLoading" data-i18n="calendar.detail.loading.templates">
           Завантаження шаблонів…
         </div>
       </div>
@@ -1682,7 +1682,7 @@
         class="appointmentTemplateDrawerClear"
         id="appointmentTemplateClear"
         hidden
-      >
+       data-i18n="calendar.detail.clear.selected.template">
         Скинути вибраний шаблон
       </button>
     </section>
@@ -1690,7 +1690,7 @@
 
   <div class="pugVisitFieldsGrid">
     <label class="pugVisitField">
-      <span>Дата</span>
+      <span data-i18n="calendar.detail.date">Дата</span>
 
       <input
         class="pugVisitInput"
@@ -1700,7 +1700,7 @@
     </label>
 
     <label class="pugVisitField">
-      <span>Час початку</span>
+      <span data-i18n="calendar.detail.start.time">Час початку</span>
 
       <input
         class="pugVisitInput"
@@ -1711,50 +1711,50 @@
     </label>
 
     <label class="pugVisitField">
-      <span>Тривалість</span>
+      <span data-i18n="calendar.detail.duration">Тривалість</span>
 
       <select
         class="pugVisitInput"
         id="visitDuration"
       >
-        <option value="15">
+        <option value="15" data-i18n="calendar.detail.15.min">
           15 хв
         </option>
 
-        <option value="30">
+        <option value="30" data-i18n="calendar.detail.30.min">
           30 хв
         </option>
 
-        <option value="45">
+        <option value="45" data-i18n="calendar.detail.45.min">
           45 хв
         </option>
 
-        <option value="60" selected>
+        <option value="60" selected data-i18n="calendar.detail.60.min">
           60 хв
         </option>
 
-        <option value="90">
+        <option value="90" data-i18n="calendar.detail.90.min">
           90 хв
         </option>
 
-        <option value="120">
+        <option value="120" data-i18n="calendar.detail.120.min">
           120 хв
         </option>
 
-        <option value="180">
+        <option value="180" data-i18n="calendar.detail.180.min">
           180 хв
         </option>
       </select>
     </label>
 
     <label class="pugVisitField">
-      <span>Ветеринар</span>
+      <span data-i18n="calendar.detail.veterinarian">Ветеринар</span>
 
       <select
         class="pugVisitInput"
         id="visitStaff"
       >
-        <option value="">
+        <option value="" data-i18n="calendar.detail.select.a.veterinarian">
           Оберіть ветеринара
         </option>
       </select>
@@ -1766,7 +1766,7 @@
   <div class="pugSectionTitle">
     <span>📝</span>
 
-    <strong>
+    <strong data-i18n="calendar.detail.3.reason.for.visit">
       3. Причина звернення
     </strong>
   </div>
@@ -1778,7 +1778,7 @@
         pugFieldWide
       "
     >
-      <span>
+      <span data-i18n="calendar.detail.reason.for.appointment.administrator.s.comment">
         Причина запису /
         коментар адміністратора
       </span>
@@ -1791,17 +1791,19 @@
         id="visitNote"
         rows="4"
         placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
-      ></textarea>
+       data-i18n-placeholder="calendar.detail.for.example.vomiting.this.morning.follow.up.examination.vaccination"></textarea>
     </label>
   </div>
 </div>
+
+    </div><!-- .pugVisitBody -->
 
     <div class="pugVisitFoot">
       <button
         class="pugVisitCancel"
         id="visitCancel"
         type="button"
-      >
+       data-i18n="calendar.detail.cancel.2">
         ✕ Скасувати
       </button>
 
@@ -1809,7 +1811,7 @@
   class="pugVisitSave"
   id="visitSave"
   type="button"
->
+ data-i18n="calendar.detail.save.appointment">
   💾 Зберегти запис
 </button>
     </div>
@@ -2320,7 +2322,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="ach.js"></script>
-<script src="app.js?v=20260907-calendar-i18n-v2"></script>
+<script src="app.js?v=20260907-calendar-i18n-v3"></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>

@@ -61019,3 +61019,74 @@ textarea.visitControl {
   display:
     none !important;
 }
+/* Calendar translations: allow longer labels without clipping controls. */
+.monthScheduleEditorTabs,
+.monthScheduleEditorFooter,
+.calEditFooter,
+.calEditFooterActions {
+  flex-wrap: wrap;
+}
+.monthScheduleEditorTabs button,
+.monthScheduleEditorFooter button,
+.calEditFooter button,
+#visitModal .pugVisitFoot button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  height: auto;
+  line-height: 1.35;
+}
+.monthScheduleEditorFooter button,
+.calEditFooter button {
+  padding: 10px 18px;
+}
+.page[data-page="calendar"] .calendarDate {
+  text-align: center;
+  white-space: normal;
+}
+@media (max-width: 650px) {
+  .monthScheduleEditorFooter button {
+    min-width: 0;
+    flex: 1 1 130px;
+  }
+  .monthScheduleEditorTabs button {
+    flex: 1 1 120px;
+  }
+}
+#calendarEventModal .calEditModal {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#calendarEventModal .calEditHeader,
+#calendarEventModal .calEditPatient,
+#calendarEventModal .calEditFooter {
+  flex-shrink: 0;
+}
+#calendarEventModal .calEditBody {
+  min-height: 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+@media (max-width: 900px) {
+  .monthScheduleEditorColumns { display: none; }
+  .monthScheduleEditorRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+  .monthScheduleEditorPerson,
+  .monthScheduleEditorStatus {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .monthScheduleEditorTime { min-width: 0; }
+  .monthScheduleEditorTime > span {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, .65);
+  }
+  .monthScheduleRepeatGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .monthScheduleRepeatDaysField { grid-column: auto; }
+  .monthScheduleRepeatDays { flex-wrap: wrap; }
+}

@@ -1830,6 +1830,1385 @@ Object.assign(
   }
 );
 
+// Calendar interface copy. User-entered names and notes are not translated.
+Object.assign(APP_TRANSLATIONS.uk, {
+  "calendar.detail.cancel": "Скасувати",
+  "calendar.detail.unsaved.changes": "Є незбережені зміни",
+  "calendar.detail.leave.without.saving": "Вийти без збереження",
+  "calendar.detail.continue.editing": "Продовжити редагування",
+  "calendar.detail.complete.visit": "Завершення візиту",
+  "calendar.detail.complete.visit.2": "Завершити візит",
+  "calendar.detail.go.back": "Повернутися",
+  "calendar.detail.veterinarian.is.off.shift": "Лікар не на зміні",
+  "calendar.detail.create.anyway": "Створити все одно",
+  "calendar.detail.choose.another.time": "Обрати інший час",
+  "calendar.detail.creating": "Створюємо…",
+  "calendar.detail.overlapping.appointments": "Перетин записів",
+  "calendar.detail.create.overlapping.appointment": "Створити паралельно",
+  "calendar.detail.appointment.created": "Запис створено",
+  "calendar.detail.start.visit": "▶ Почати прийом",
+  "calendar.detail.keep.in.calendar": "Залишити в календарі",
+  "calendar.detail.creating.visit": "Створення прийому…",
+  "calendar.detail.could.not.start.the.visit": "Не вдалося почати прийом.",
+  "calendar.detail.done": "Готово",
+  "calendar.detail.close": "Закрити",
+  "calendar.detail.cancel.payment": "Скасування платежу",
+  "calendar.detail.cancel.payment.2": "Скасувати платіж",
+  "calendar.detail.keep.payment": "Залишити платіж",
+  "calendar.detail.cancelling": "Скасовуємо…",
+  "calendar.detail.could.not.cancel.the.payment": "Не вдалося скасувати платіж.",
+  "calendar.detail.notification": "Повідомлення",
+  "calendar.detail.ok": "Добре",
+  "calendar.detail.confirmation": "Підтвердження",
+  "calendar.detail.delete": "Видалити",
+  "calendar.detail.patient": "Пацієнт",
+  "calendar.detail.patient.is.waiting": "Пацієнт очікує",
+  "calendar.detail.confirm.action": "Підтвердіть дію",
+  "calendar.detail.enter.a.value": "Введіть значення",
+  "calendar.detail.could.not.create.the.template": "Не вдалося створити шаблон.",
+  "calendar.detail.no.templates.yet": "Шаблонів поки немає",
+  "calendar.detail.min": "хв",
+  "calendar.detail.visit": "Прийом",
+  "calendar.detail.choose.a.template": "Обрати шаблон",
+  "calendar.detail.duration.and.visit.type": "Тривалість і тип прийому",
+  "calendar.detail.min.template.selected": "хв · шаблон вибрано",
+  "calendar.detail.new.template": "НОВИЙ ШАБЛОН",
+  "calendar.detail.add.appointment.template": "Додати шаблон прийому",
+  "calendar.detail.create.a.custom.appointment.type.to.speed.up.scheduling": "Створіть власний тип запису для швидкої роботи календаря.",
+  "calendar.detail.template.name": "Назва шаблону",
+  "calendar.detail.for.example.follow.up.examination": "Наприклад: Повторний огляд",
+  "calendar.detail.duration": "Тривалість",
+  "calendar.detail.icon": "Іконка",
+  "calendar.detail.colour": "Колір",
+  "calendar.detail.default.comment": "Стандартний коментар",
+  "calendar.detail.optional.for.example.follow.up.examination.after.treatment": "Необов'язково. Наприклад: контрольний огляд після лікування...",
+  "calendar.detail.preview": "Попередній перегляд",
+  "calendar.detail.new.template.2": "Новий шаблон",
+  "calendar.detail.30.min": "30 хв",
+  "calendar.detail.create.template": "Створити шаблон",
+  "calendar.detail.enter.a.template.name": "Вкажіть назву шаблону.",
+  "calendar.detail.duration.must.be.between.5.and.480.minutes": "Тривалість має бути від 5 до 480 хвилин.",
+  "calendar.detail.the.server.did.not.return.the.created.template": "Сервер не повернув створений шаблон.",
+  "calendar.detail.could.not.save.the.shift": "Не вдалося зберегти зміну:",
+  "calendar.detail.loading.calendar": "Завантаження календаря…",
+  "calendar.detail.mon": "Пн",
+  "calendar.detail.tue": "Вт",
+  "calendar.detail.wed": "Ср",
+  "calendar.detail.thu": "Чт",
+  "calendar.detail.fri": "Пт",
+  "calendar.detail.sat": "Сб",
+  "calendar.detail.sun": "Нд",
+  "calendar.detail.visit.2": "Візит",
+  "calendar.detail.no.veterinarian.assigned": "Лікар не вказаний",
+  "calendar.detail.no.appointments": "Немає записів",
+  "calendar.detail.appointment": "запис",
+  "calendar.detail.appointments": "записи",
+  "calendar.detail.appointments.2": "записів",
+  "calendar.detail.appointments.3": "запису",
+  "calendar.detail.start": "Початок",
+  "calendar.detail.end": "Кінець",
+  "calendar.detail.employee": "Працівник",
+  "calendar.detail.assistant": "Асистент",
+  "calendar.detail.veterinarian": "Ветеринар",
+  "calendar.detail.on.shift": "На зміні",
+  "calendar.detail.day.off": "Вихідний",
+  "calendar.detail.team.schedule": "ГРАФІК КОМАНДИ",
+  "calendar.detail.configure.the.status.and.working.hours.of.each.employee": "Налаштуйте статус та години роботи кожного співробітника.",
+  "calendar.detail.single.day": "Один день",
+  "calendar.detail.recurring.schedule": "Повторюваний графік",
+  "calendar.detail.status": "Статус",
+  "calendar.detail.configure.recurring.shifts.for.several.weeks.ahead": "Налаштуйте регулярні зміни на декілька тижнів вперед.",
+  "calendar.detail.days.of.the.week": "Дні тижня",
+  "calendar.detail.shift.start": "Початок зміни",
+  "calendar.detail.shift.end": "Кінець зміни",
+  "calendar.detail.starting.from": "Починаючи з",
+  "calendar.detail.until.date": "До дати",
+  "calendar.detail.example.mon.wed.fri.09.00.18.00": "Наприклад: Пн · Ср · Пт, 09:00–18:00.",
+  "calendar.detail.save.day": "💾 Зберегти день",
+  "calendar.detail.required.fields.are.missing": "Не всі дані заповнені",
+  "calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range": "Оберіть працівника, дні тижня, години зміни та період.",
+  "calendar.detail.invalid.time": "Некоректний час",
+  "calendar.detail.the.shift.must.end.after.it.starts": "Кінець зміни має бути пізніше за початок.",
+  "calendar.detail.invalid.date.range": "Некоректний період",
+  "calendar.detail.the.end.date.cannot.be.earlier.than.the.start.date": "Дата завершення не може бути раніше дати початку.",
+  "calendar.detail.no.shifts": "Немає змін",
+  "calendar.detail.the.selected.period.contains.none.of.the.selected.weekdays": "У вибраному періоді немає відповідних днів тижня.",
+  "calendar.detail.saving.0": "Збереження… 0/",
+  "calendar.detail.could.not.save.the.schedule": "Не вдалося зберегти графік",
+  "calendar.detail.saved": "Збережено",
+  "calendar.detail.of": "із",
+  "calendar.detail.shifts": "змін.",
+  "calendar.detail.saving": "Збереження…",
+  "calendar.detail.schedule.applied": "Графік застосовано",
+  "calendar.detail.created": "Створено",
+  "calendar.detail.recurring.shifts": "повторюваних змін.",
+  "calendar.detail.check.shift.times": "Перевірте час зміни",
+  "calendar.detail.the.shift.must.end.after.it.starts.2": ": час завершення зміни має бути пізніше за час початку.",
+  "calendar.detail.schedule.saved": "Графік збережено",
+  "calendar.detail.team.shifts.for": "Зміни команди на",
+  "calendar.detail.successfully.updated": "успішно оновлено.",
+  "calendar.detail.please.try.again": "Спробуйте ще раз.",
+  "calendar.detail.v": "В",
+  "calendar.detail.off.shift": "Поза зміною",
+  "calendar.detail.time": "Час",
+  "calendar.detail.add.at.least.one.employee.first": "Спочатку додайте хоча б одного співробітника.",
+  "calendar.detail.delete.this.appointment.from.the.calendar": "Видалити цей запис з календаря?",
+  "calendar.detail.appointment.not.found": "Запис не знайдено",
+  "calendar.detail.administrator": "Адміністратор",
+  "calendar.detail.veterinarian.2": "Ветеринарний лікар",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian": "Цей час вже зайнятий у вибраного лікаря.",
+  "calendar.detail.the.veterinarian.s.shift.has.ended.choose.an.earlier.time.or.move.the.appointment.to.": "Зміна лікаря на сьогодні вже завершена. Оберіть раніший час прийому або перенесіть запис на наступний день.",
+  "calendar.detail.could.not.create.the.appointment": "Не вдалося створити запис.",
+  "calendar.detail.could.not.create.appointment": "Не вдалося створити запис",
+  "calendar.detail.appointment.creation.failed": "Помилка створення запису",
+  "calendar.detail.an.error.occurred.while.creating.the.appointment": "Сталася помилка під час створення запису.",
+  "calendar.detail.could.not.update.the.appointment": "Не вдалося оновити запис:",
+  "calendar.detail.appointment.update.failed": "Помилка оновлення запису:",
+  "calendar.detail.only.a.clinic.administrator.or.owner.can.delete.calendar.appointments": "Видаляти записи з календаря може лише адміністратор або власник клініки.",
+  "calendar.detail.could.not.delete.the.appointment": "Не вдалося видалити запис:",
+  "calendar.detail.appointment.deletion.failed": "Помилка видалення запису:",
+  "calendar.detail.edit.appointment": "Редагування запису",
+  "calendar.detail.change.the.date.time.or.veterinarian": "Змініть дату, час або ветеринара",
+  "calendar.detail.patient.and.appointment": "Пацієнт і запис",
+  "calendar.detail.appointment.title": "Назва запису",
+  "calendar.detail.date": "Дата",
+  "calendar.detail.start.time": "Час початку",
+  "calendar.detail.15.min": "15 хв",
+  "calendar.detail.45.min": "45 хв",
+  "calendar.detail.60.min": "60 хв",
+  "calendar.detail.90.min": "90 хв",
+  "calendar.detail.120.min": "120 хв",
+  "calendar.detail.180.min": "180 хв",
+  "calendar.detail.select.a.veterinarian": "Оберіть ветеринара",
+  "calendar.detail.appointment.status": "Статус запису",
+  "calendar.detail.scheduled": "Заплановано",
+  "calendar.detail.in.clinic.waiting": "🟡 У клініці · очікує",
+  "calendar.detail.in.consultation": "🩺 На прийомі",
+  "calendar.detail.completed": "✓ Завершено",
+  "calendar.detail.cancelled": "Скасовано",
+  "calendar.detail.did.not.attend": "Не з’явився",
+  "calendar.detail.reason.for.visit.comment": "Причина звернення / коментар",
+  "calendar.detail.reason.for.appointment.or.administrator.s.comment": "Причина запису або коментар адміністратора",
+  "calendar.detail.patient.arrived": "🟡 Пацієнт прибув",
+  "calendar.detail.save.changes": "Зберегти зміни",
+  "calendar.detail.appointment.changes": "Внесені зміни запису",
+  "calendar.detail.have.not.been.saved.yet": "ще не збережені.",
+  "calendar.detail.completed.2": "Завершено",
+  "calendar.detail.visit.in.progress": "Прийом триває",
+  "calendar.detail.waiting": "Очікує",
+  "calendar.detail.calendar.appointment.not.found": "Календарний запис не знайдено.",
+  "calendar.detail.no.patient.is.linked.to.this.appointment": "До запису не прив’язаний пацієнт.",
+  "calendar.detail.no.veterinarian.is.linked.to.this.appointment": "До запису не прив’язаний ветеринар.",
+  "calendar.detail.this.appointment.has.no.date": "У записі не вказана дата.",
+  "calendar.detail.could.not.create.the.medical.visit": "Не вдалося створити медичний візит.",
+  "calendar.detail.patient.visit": "Прийом пацієнта",
+  "calendar.detail.the.medical.visit.was.created": "Медичний візит створено,",
+  "calendar.detail.but.could.not.be.linked": "але не вдалося прив’язати",
+  "calendar.detail.to.the.calendar": "його до календаря.",
+  "calendar.detail.unnamed": "Без імені",
+  "calendar.detail.appointment.2": "Запис",
+  "calendar.detail.open.visit": "↗ Відкрити прийом",
+  "calendar.detail.select.a.veterinarian.2": "Оберіть ветеринара.",
+  "calendar.detail.select.an.appointment.date": "Оберіть дату прийому.",
+  "calendar.detail.enter.the.reason.for.the.visit": "Вкажіть причину звернення.",
+  "calendar.detail.appointment.extends.past.midnight": "Прийом виходить за межі дня",
+  "calendar.detail.the.selected.duration.ends.the.appointment.after.24.00.choose.an.earlier.time.or.a.sh": "Обрана тривалість переносить завершення прийому після 24:00. Оберіть раніший час або меншу тривалість.",
+  "calendar.detail.the.medical.visit.was.created.but.could.not.be.linked.to.the.calendar": "Медичний візит створено, але не вдалося прив’язати його до календаря.",
+  "calendar.detail.updating": "Позначаємо…",
+  "calendar.detail.enter.an.appointment.title": "Вкажіть назву запису.",
+  "calendar.detail.select.a.date": "Оберіть дату.",
+  "calendar.detail.select.a.start.time": "Оберіть час початку.",
+  "calendar.detail.select.an.appointment.duration": "Оберіть тривалість прийому.",
+  "calendar.detail.this.time.is.already.booked": "Цей час уже зайнятий",
+  "calendar.detail.for.the.selected.veterinarian": "у вибраного ветеринара.",
+  "calendar.detail.saving.2": "Збереження...",
+  "calendar.detail.patient.2": "Пацієнт:",
+  "calendar.detail.select.a.patient": "Оберіть пацієнта",
+  "calendar.detail.enter.the.owner.s.full.name": "Вкажіть ПІБ власника.",
+  "calendar.detail.enter.the.owner.s.phone.number": "Вкажіть телефон власника.",
+  "calendar.detail.the.phone.number.must.contain.exactly.12.digits.in.the.format.380.xx.xxx.xx.xx": "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX",
+  "calendar.detail.enter.the.patient.s.name": "Вкажіть кличку пацієнта.",
+  "calendar.detail.select.the.animal.species": "Оберіть вид тварини.",
+  "calendar.detail.create.patient": "Створити пацієнта",
+  "calendar.detail.creating.2": "Створюємо...",
+  "calendar.detail.the.owner.was.not.created": "Власника не створено.",
+  "calendar.detail.the.patient.was.not.created": "Пацієнта не створено.",
+  "calendar.detail.the.phone.number.was.already.in.the.database": "Номер уже був у базі.",
+  "calendar.detail.the.patient.has.been.added.to.the.existing.owner": "Пацієнта додано до існуючого власника.",
+  "calendar.detail.the.owner.and.patient.have.been.created": "Власника та пацієнта створено.",
+  "calendar.detail.now.fill.in.the.appointment.details.and.save.the.visit": "Тепер заповніть деталі запису та збережіть візит.",
+  "calendar.detail.could.not.create.the.patient": "Не вдалося створити пацієнта.",
+  "calendar.detail.loading.schedule": "Завантаження графіка...",
+  "calendar.detail.no.veterinarians.found": "Ветеринарів не знайдено",
+  "calendar.detail.no.veterinarians.are.on.shift.at.this.time": "На цей час лікарів на зміні немає",
+  "calendar.detail.off.shift.2": "поза зміною",
+  "calendar.detail.show.all.veterinarians": "Показати всіх ветеринарів…",
+  "calendar.detail.appointment.data": "Внесені дані запису",
+  "calendar.detail.enter.the.owner.s.name": "Вкажи власника",
+  "calendar.detail.enter.the.owner.s.phone.number.2": "Вкажи телефон власника",
+  "calendar.detail.enter.a.phone.number.in.the.format.380.xx.xxx.xx.xx": "Вкажіть телефон у форматі +380 XX XXX XX XX",
+  "calendar.detail.enter.the.patient.s.name.2": "Вкажи кличку пацієнта",
+  "calendar.detail.could.not.create.the.owner": "Не вдалося створити власника",
+  "calendar.detail.could.not.create.the.patient.2": "Не вдалося створити пацієнта",
+  "calendar.detail.no.patient.selected": "Пацієнт не обраний",
+  "calendar.detail.enter.the.reason.for.the.appointment": "Вкажіть причину запису",
+  "calendar.detail.select.a.start.time.2": "Оберіть час початку",
+  "calendar.detail.visit.not.found": "Візит не знайдено",
+  "calendar.detail.appointment.successfully.created": "Запис успішно створено",
+  "calendar.detail.the.patient.has.been.added.to.the.calendar.for": "Пацієнта додано до календаря на",
+  "calendar.detail.at": "о",
+  "calendar.detail.start.the.medical.visit.now": "Почати медичний прийом зараз?",
+  "calendar.detail.this.time.is.already.booked.2": "Час уже зайнятий",
+  "calendar.detail.this.veterinarian.already.has.an.appointment.at.the.selected.time": "У цього ветеринара вже є запис на вибраний час.",
+  "calendar.detail.create.an.overlapping.appointment": "Створити ще один запис паралельно?",
+  "calendar.detail.veterinarian.s.working.hours": "Робочий час лікаря:",
+  "calendar.detail.the.veterinarian.is.not.on.shift.on.the.selected.date": "На вибрану дату лікар не знаходиться на зміні.",
+  "calendar.detail.the.veterinarian.is.unavailable.at.the.selected.time": "Лікар не працює у вибраний час",
+  "calendar.detail.create.the.appointment.anyway": "Все одно створити запис?",
+  "calendar.detail.error": "Помилка:",
+  "calendar.detail.select.a.vaccine": "Оберіть вакцину",
+  "calendar.detail.select.a.species.first": "Спочатку оберіть вид",
+  "calendar.detail.the.phone.number.must.use.the.format.380.xx.xxx.xx.xx": "Телефон повинен бути у форматі +380 XX XXX XX XX.",
+  "calendar.detail.enter.a.date": "Вкажіть дату:",
+  "calendar.detail.select.a.vaccine.2": "Оберіть вакцину:",
+  "calendar.detail.the.selected.vaccine.does.not.match.the.category": "Обрана вакцина не відповідає категорії \"",
+  "calendar.detail.added.when.creating.a.patient.from.the.calendar": "Додано під час створення пацієнта з календаря",
+  "calendar.detail.rabies.vaccination": "вакцинація від сказу",
+  "calendar.detail.general.vaccination": "загальна вакцинація",
+  "calendar.detail.could.not.create.the.owner.2": "Не вдалося створити власника.",
+  "calendar.detail.the.patient.was.created.but.vaccinations.could.not.be.saved": "Пацієнта створено, але вакцинації не вдалося зберегти.",
+  "calendar.detail.the.patient.has.been.created.now.save.the.appointment": "Пацієнта створено. Тепер збережіть візит.",
+  "calendar.detail.no.owner.specified": "Власник не вказаний",
+  "calendar.detail.no.phone.number.specified": "телефон не вказаний",
+  "calendar.detail.nothing.found": "Нічого не знайдено",
+  "calendar.detail.new.appointment": "Новий запис прийому",
+  "calendar.detail.patient.3": "Пацієнт: —",
+  "calendar.detail.1.patient": "1. Пацієнт",
+  "calendar.detail.search.patient.owner.phone": "Пошук: пацієнт, власник, телефон...",
+  "calendar.detail.new.patient": "Новий пацієнт",
+  "calendar.detail.new.patient.2": "🐾 Новий пацієнт",
+  "calendar.detail.create.a.patient.directly.from.the.calendar": "Створення пацієнта прямо з календаря",
+  "calendar.detail.owner": "👤 Власник",
+  "calendar.detail.owner.s.full.name": "ПІБ власника *",
+  "calendar.detail.for.example.alex.smith": "Напр. Іваненко Олена",
+  "calendar.detail.phone": "Телефон *",
+  "calendar.detail.address.note": "Адреса / нотатка",
+  "calendar.detail.district.address.comment": "Район, адреса, коментар",
+  "calendar.detail.patient.4": "🐶 Пацієнт",
+  "calendar.detail.patient.name": "Кличка *",
+  "calendar.detail.for.example.bella": "Напр. Бусинка",
+  "calendar.detail.species": "Вид *",
+  "calendar.detail.select.a.species": "Оберіть вид",
+  "calendar.detail.dog": "Собака",
+  "calendar.detail.cat": "Кіт",
+  "calendar.detail.other": "Інше",
+  "calendar.detail.breed": "Порода",
+  "calendar.detail.sex": "Стать",
+  "calendar.detail.not.specified": "Не вказано",
+  "calendar.detail.male": "Самець",
+  "calendar.detail.female": "Самка",
+  "calendar.detail.neutered.spayed": "Кастрований / стерилізована",
+  "calendar.detail.yes": "Так",
+  "calendar.detail.no": "Ні",
+  "calendar.detail.rabies": "🛡 Сказ",
+  "calendar.detail.unknown": "Невідомо",
+  "calendar.detail.vaccinated": "Вакцинований",
+  "calendar.detail.not.vaccinated": "Не вакцинований",
+  "calendar.detail.general.vaccination.2": "💉 Загальна вакцина",
+  "calendar.detail.rabies.vaccination.date": "Дата вакцинації від сказу",
+  "calendar.detail.rabies.vaccine": "Вакцина від сказу",
+  "calendar.detail.general.vaccination.date": "Дата загальної вакцинації",
+  "calendar.detail.general.vaccine": "Загальна вакцина",
+  "calendar.detail.age": "Вік",
+  "calendar.detail.for.example.4.years": "Напр. 4 роки",
+  "calendar.detail.weight.kg": "Вага, кг",
+  "calendar.detail.for.example.7.5": "Напр. 7.5",
+  "calendar.detail.2.appointment.details": "2. Деталі прийому",
+  "calendar.detail.appointment.template": "Шаблон прийому",
+  "calendar.detail.add.template": "＋ Додати шаблон",
+  "calendar.detail.quick.appointment": "ШВИДКИЙ ЗАПИС",
+  "calendar.detail.select.an.appointment.template": "Оберіть шаблон прийому",
+  "calendar.detail.the.template.automatically.sets.the.duration.and.default.comment": "Шаблон автоматично встановить тривалість і стандартний коментар.",
+  "calendar.detail.add.template.2": "Додати шаблон",
+  "calendar.detail.create.a.custom.visit.type": "Створити власний тип прийому",
+  "calendar.detail.loading.templates": "Завантаження шаблонів…",
+  "calendar.detail.clear.selected.template": "Скинути вибраний шаблон",
+  "calendar.detail.3.reason.for.visit": "3. Причина звернення",
+  "calendar.detail.reason.for.appointment.administrator.s.comment": "Причина запису / коментар адміністратора",
+  "calendar.detail.for.example.vomiting.this.morning.follow.up.examination.vaccination": "Наприклад: блювання зранку, повторний огляд, вакцинація...",
+  "calendar.detail.cancel.2": "✕ Скасувати",
+  "calendar.detail.save.appointment": "💾 Зберегти запис",
+  "calendar.detail.create.appointment": "Створити запис",
+  "calendar.detail.delete.appointment": "Видалити запис",
+  "calendar.detail.start.typing.a.dog.breed": "Почніть вводити породу собаки",
+  "calendar.detail.dog.breed": "Порода собаки",
+  "calendar.detail.start.typing.a.cat.breed": "Почніть вводити породу кота",
+  "calendar.detail.cat.breed": "Порода кота",
+  "calendar.detail.select.or.start.typing.an.animal.species": "Оберіть або почніть вводити вид тварини",
+  "calendar.detail.animal.species": "Вид тварини",
+  "calendar.detail.shifts.saved.saved.of.total": "Збережено {saved} із {total} змін.",
+  "calendar.detail.recurring.shifts.created.count": "Створено повторюваних змін: {count}.",
+  "calendar.detail.team.shifts.for.date.have.been.updated": "Зміни команди на {date} успішно оновлено.",
+  "calendar.detail.appointment.changes.have.not.been.saved.yet": "Внесені зміни запису ще не збережені.",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2": "Цей час уже зайнятий у вибраного ветеринара.",
+  "calendar.detail.could.not.complete.the.action.please.try.again": "Не вдалося виконати дію. Спробуйте ще раз.",
+  "calendar.detail.you.do.not.have.permission.to.perform.this.action": "Недостатньо прав для цієї дії.",
+  "calendar.detail.patient.not.found": "Пацієнта не знайдено.",
+  "calendar.detail.cannot.create.an.appointment.the.patient.is.marked.as.deceased": "Неможливо створити запис: пацієнт позначений як померлий.",
+  "calendar.detail.complete.the.required.fields": "Заповніть обов’язкові поля.",
+  "calendar.detail.the.end.time.must.be.later.than.the.start.time": "Час завершення має бути пізніше за час початку.",
+  "calendar.detail.previous.day": "Попередній день",
+  "calendar.detail.next.day": "Наступний день",
+  "calendar.detail.previous.week": "Попередній тиждень",
+  "calendar.detail.next.week": "Наступний тиждень",
+  "calendar.detail.previous.month": "Попередній місяць",
+  "calendar.detail.next.month": "Наступний місяць",
+  "calendar.detail.no.specialization.specified": "Напрям не вказано",
+  "calendar.detail.examination": "Огляд",
+  "calendar.detail.ultrasound": "УЗД",
+  "calendar.detail.procedure.visit": "Маніпуляційний візит",
+  "calendar.detail.neutering": "Кастрація",
+  "calendar.detail.basic.surgery": "Базова хірургія",
+  "calendar.detail.the.template.name.is.too.long": "Назва шаблону занадто довга.",
+  "calendar.detail.invalid.duration": "Некоректна тривалість.",
+  "calendar.detail.invalid.colour": "Некоректний колір."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "calendar.detail.cancel": "Cancel",
+  "calendar.detail.unsaved.changes": "Unsaved changes",
+  "calendar.detail.leave.without.saving": "Leave without saving",
+  "calendar.detail.continue.editing": "Continue editing",
+  "calendar.detail.complete.visit": "Complete visit",
+  "calendar.detail.complete.visit.2": "Complete visit",
+  "calendar.detail.go.back": "Go back",
+  "calendar.detail.veterinarian.is.off.shift": "Veterinarian is off shift",
+  "calendar.detail.create.anyway": "Create anyway",
+  "calendar.detail.choose.another.time": "Choose another time",
+  "calendar.detail.creating": "Creating…",
+  "calendar.detail.overlapping.appointments": "Overlapping appointments",
+  "calendar.detail.create.overlapping.appointment": "Create overlapping appointment",
+  "calendar.detail.appointment.created": "Appointment created",
+  "calendar.detail.start.visit": "▶ Start visit",
+  "calendar.detail.keep.in.calendar": "Keep in calendar",
+  "calendar.detail.creating.visit": "Creating visit…",
+  "calendar.detail.could.not.start.the.visit": "Could not start the visit.",
+  "calendar.detail.done": "Done",
+  "calendar.detail.close": "Close",
+  "calendar.detail.cancel.payment": "Cancel payment",
+  "calendar.detail.cancel.payment.2": "Cancel payment",
+  "calendar.detail.keep.payment": "Keep payment",
+  "calendar.detail.cancelling": "Cancelling…",
+  "calendar.detail.could.not.cancel.the.payment": "Could not cancel the payment.",
+  "calendar.detail.notification": "Notification",
+  "calendar.detail.ok": "OK",
+  "calendar.detail.confirmation": "Confirmation",
+  "calendar.detail.delete": "Delete",
+  "calendar.detail.patient": "Patient",
+  "calendar.detail.patient.is.waiting": "Patient is waiting",
+  "calendar.detail.confirm.action": "Confirm action",
+  "calendar.detail.enter.a.value": "Enter a value",
+  "calendar.detail.could.not.create.the.template": "Could not create the template.",
+  "calendar.detail.no.templates.yet": "No templates yet",
+  "calendar.detail.min": "min",
+  "calendar.detail.visit": "Visit",
+  "calendar.detail.choose.a.template": "Choose a template",
+  "calendar.detail.duration.and.visit.type": "Duration and visit type",
+  "calendar.detail.min.template.selected": "min · template selected",
+  "calendar.detail.new.template": "NEW TEMPLATE",
+  "calendar.detail.add.appointment.template": "Add appointment template",
+  "calendar.detail.create.a.custom.appointment.type.to.speed.up.scheduling": "Create a custom appointment type to speed up scheduling.",
+  "calendar.detail.template.name": "Template name",
+  "calendar.detail.for.example.follow.up.examination": "For example: Follow-up examination",
+  "calendar.detail.duration": "Duration",
+  "calendar.detail.icon": "Icon",
+  "calendar.detail.colour": "Colour",
+  "calendar.detail.default.comment": "Default comment",
+  "calendar.detail.optional.for.example.follow.up.examination.after.treatment": "Optional. For example: follow-up examination after treatment...",
+  "calendar.detail.preview": "Preview",
+  "calendar.detail.new.template.2": "New template",
+  "calendar.detail.30.min": "30 min",
+  "calendar.detail.create.template": "Create template",
+  "calendar.detail.enter.a.template.name": "Enter a template name.",
+  "calendar.detail.duration.must.be.between.5.and.480.minutes": "Duration must be between 5 and 480 minutes.",
+  "calendar.detail.the.server.did.not.return.the.created.template": "The server did not return the created template.",
+  "calendar.detail.could.not.save.the.shift": "Could not save the shift:",
+  "calendar.detail.loading.calendar": "Loading calendar…",
+  "calendar.detail.mon": "Mon",
+  "calendar.detail.tue": "Tue",
+  "calendar.detail.wed": "Wed",
+  "calendar.detail.thu": "Thu",
+  "calendar.detail.fri": "Fri",
+  "calendar.detail.sat": "Sat",
+  "calendar.detail.sun": "Sun",
+  "calendar.detail.visit.2": "Visit",
+  "calendar.detail.no.veterinarian.assigned": "No veterinarian assigned",
+  "calendar.detail.no.appointments": "No appointments",
+  "calendar.detail.appointment": "appointment",
+  "calendar.detail.appointments": "appointments",
+  "calendar.detail.appointments.2": "appointments",
+  "calendar.detail.appointments.3": "appointments",
+  "calendar.detail.start": "Start",
+  "calendar.detail.end": "End",
+  "calendar.detail.employee": "Employee",
+  "calendar.detail.assistant": "Assistant",
+  "calendar.detail.veterinarian": "Veterinarian",
+  "calendar.detail.on.shift": "On shift",
+  "calendar.detail.day.off": "Day off",
+  "calendar.detail.team.schedule": "TEAM SCHEDULE",
+  "calendar.detail.configure.the.status.and.working.hours.of.each.employee": "Configure the status and working hours of each employee.",
+  "calendar.detail.single.day": "Single day",
+  "calendar.detail.recurring.schedule": "Recurring schedule",
+  "calendar.detail.status": "Status",
+  "calendar.detail.configure.recurring.shifts.for.several.weeks.ahead": "Configure recurring shifts for several weeks ahead.",
+  "calendar.detail.days.of.the.week": "Days of the week",
+  "calendar.detail.shift.start": "Shift start",
+  "calendar.detail.shift.end": "Shift end",
+  "calendar.detail.starting.from": "Starting from",
+  "calendar.detail.until.date": "Until date",
+  "calendar.detail.example.mon.wed.fri.09.00.18.00": "Example: Mon · Wed · Fri, 09:00–18:00.",
+  "calendar.detail.save.day": "💾 Save day",
+  "calendar.detail.required.fields.are.missing": "Required fields are missing",
+  "calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range": "Select an employee, weekdays, shift hours and date range.",
+  "calendar.detail.invalid.time": "Invalid time",
+  "calendar.detail.the.shift.must.end.after.it.starts": "The shift must end after it starts.",
+  "calendar.detail.invalid.date.range": "Invalid date range",
+  "calendar.detail.the.end.date.cannot.be.earlier.than.the.start.date": "The end date cannot be earlier than the start date.",
+  "calendar.detail.no.shifts": "No shifts",
+  "calendar.detail.the.selected.period.contains.none.of.the.selected.weekdays": "The selected period contains none of the selected weekdays.",
+  "calendar.detail.saving.0": "Saving… 0/",
+  "calendar.detail.could.not.save.the.schedule": "Could not save the schedule",
+  "calendar.detail.saved": "Saved",
+  "calendar.detail.of": "of",
+  "calendar.detail.shifts": "shifts.",
+  "calendar.detail.saving": "Saving…",
+  "calendar.detail.schedule.applied": "Schedule applied",
+  "calendar.detail.created": "Created",
+  "calendar.detail.recurring.shifts": "recurring shifts.",
+  "calendar.detail.check.shift.times": "Check shift times",
+  "calendar.detail.the.shift.must.end.after.it.starts.2": ": the shift must end after it starts.",
+  "calendar.detail.schedule.saved": "Schedule saved",
+  "calendar.detail.team.shifts.for": "Team shifts for",
+  "calendar.detail.successfully.updated": "successfully updated.",
+  "calendar.detail.please.try.again": "Please try again.",
+  "calendar.detail.v": "V",
+  "calendar.detail.off.shift": "Off shift",
+  "calendar.detail.time": "Time",
+  "calendar.detail.add.at.least.one.employee.first": "Add at least one employee first.",
+  "calendar.detail.delete.this.appointment.from.the.calendar": "Delete this appointment from the calendar?",
+  "calendar.detail.appointment.not.found": "Appointment not found",
+  "calendar.detail.administrator": "Administrator",
+  "calendar.detail.veterinarian.2": "Veterinarian",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian": "This time is already booked for the selected veterinarian.",
+  "calendar.detail.the.veterinarian.s.shift.has.ended.choose.an.earlier.time.or.move.the.appointment.to.": "The veterinarian’s shift has ended. Choose an earlier time or move the appointment to another day.",
+  "calendar.detail.could.not.create.the.appointment": "Could not create the appointment.",
+  "calendar.detail.could.not.create.appointment": "Could not create appointment",
+  "calendar.detail.appointment.creation.failed": "Appointment creation failed",
+  "calendar.detail.an.error.occurred.while.creating.the.appointment": "An error occurred while creating the appointment.",
+  "calendar.detail.could.not.update.the.appointment": "Could not update the appointment:",
+  "calendar.detail.appointment.update.failed": "Appointment update failed:",
+  "calendar.detail.only.a.clinic.administrator.or.owner.can.delete.calendar.appointments": "Only a clinic administrator or owner can delete calendar appointments.",
+  "calendar.detail.could.not.delete.the.appointment": "Could not delete the appointment:",
+  "calendar.detail.appointment.deletion.failed": "Appointment deletion failed:",
+  "calendar.detail.edit.appointment": "Edit appointment",
+  "calendar.detail.change.the.date.time.or.veterinarian": "Change the date, time or veterinarian",
+  "calendar.detail.patient.and.appointment": "Patient and appointment",
+  "calendar.detail.appointment.title": "Appointment title",
+  "calendar.detail.date": "Date",
+  "calendar.detail.start.time": "Start time",
+  "calendar.detail.15.min": "15 min",
+  "calendar.detail.45.min": "45 min",
+  "calendar.detail.60.min": "60 min",
+  "calendar.detail.90.min": "90 min",
+  "calendar.detail.120.min": "120 min",
+  "calendar.detail.180.min": "180 min",
+  "calendar.detail.select.a.veterinarian": "Select a veterinarian",
+  "calendar.detail.appointment.status": "Appointment status",
+  "calendar.detail.scheduled": "Scheduled",
+  "calendar.detail.in.clinic.waiting": "🟡 In clinic · waiting",
+  "calendar.detail.in.consultation": "🩺 In consultation",
+  "calendar.detail.completed": "✓ Completed",
+  "calendar.detail.cancelled": "Cancelled",
+  "calendar.detail.did.not.attend": "Did not attend",
+  "calendar.detail.reason.for.visit.comment": "Reason for visit / comment",
+  "calendar.detail.reason.for.appointment.or.administrator.s.comment": "Reason for appointment or administrator’s comment",
+  "calendar.detail.patient.arrived": "🟡 Patient arrived",
+  "calendar.detail.save.changes": "Save changes",
+  "calendar.detail.appointment.changes": "Appointment changes",
+  "calendar.detail.have.not.been.saved.yet": "have not been saved yet.",
+  "calendar.detail.completed.2": "Completed",
+  "calendar.detail.visit.in.progress": "Visit in progress",
+  "calendar.detail.waiting": "Waiting",
+  "calendar.detail.calendar.appointment.not.found": "Calendar appointment not found.",
+  "calendar.detail.no.patient.is.linked.to.this.appointment": "No patient is linked to this appointment.",
+  "calendar.detail.no.veterinarian.is.linked.to.this.appointment": "No veterinarian is linked to this appointment.",
+  "calendar.detail.this.appointment.has.no.date": "This appointment has no date.",
+  "calendar.detail.could.not.create.the.medical.visit": "Could not create the medical visit.",
+  "calendar.detail.patient.visit": "Patient visit",
+  "calendar.detail.the.medical.visit.was.created": "The medical visit was created,",
+  "calendar.detail.but.could.not.be.linked": "but could not be linked",
+  "calendar.detail.to.the.calendar": "to the calendar.",
+  "calendar.detail.unnamed": "Unnamed",
+  "calendar.detail.appointment.2": "Appointment",
+  "calendar.detail.open.visit": "↗ Open visit",
+  "calendar.detail.select.a.veterinarian.2": "Select a veterinarian.",
+  "calendar.detail.select.an.appointment.date": "Select an appointment date.",
+  "calendar.detail.enter.the.reason.for.the.visit": "Enter the reason for the visit.",
+  "calendar.detail.appointment.extends.past.midnight": "Appointment extends past midnight",
+  "calendar.detail.the.selected.duration.ends.the.appointment.after.24.00.choose.an.earlier.time.or.a.sh": "The selected duration ends the appointment after 24:00. Choose an earlier time or a shorter duration.",
+  "calendar.detail.the.medical.visit.was.created.but.could.not.be.linked.to.the.calendar": "The medical visit was created, but could not be linked to the calendar.",
+  "calendar.detail.updating": "Updating…",
+  "calendar.detail.enter.an.appointment.title": "Enter an appointment title.",
+  "calendar.detail.select.a.date": "Select a date.",
+  "calendar.detail.select.a.start.time": "Select a start time.",
+  "calendar.detail.select.an.appointment.duration": "Select an appointment duration.",
+  "calendar.detail.this.time.is.already.booked": "This time is already booked",
+  "calendar.detail.for.the.selected.veterinarian": "for the selected veterinarian.",
+  "calendar.detail.saving.2": "Saving…",
+  "calendar.detail.patient.2": "Patient:",
+  "calendar.detail.select.a.patient": "Select a patient",
+  "calendar.detail.enter.the.owner.s.full.name": "Enter the owner’s full name.",
+  "calendar.detail.enter.the.owner.s.phone.number": "Enter the owner’s phone number.",
+  "calendar.detail.the.phone.number.must.contain.exactly.12.digits.in.the.format.380.xx.xxx.xx.xx": "The phone number must contain exactly 12 digits in the format +380 XX XXX XX XX",
+  "calendar.detail.enter.the.patient.s.name": "Enter the patient’s name.",
+  "calendar.detail.select.the.animal.species": "Select the animal species.",
+  "calendar.detail.create.patient": "Create patient",
+  "calendar.detail.creating.2": "Creating…",
+  "calendar.detail.the.owner.was.not.created": "The owner was not created.",
+  "calendar.detail.the.patient.was.not.created": "The patient was not created.",
+  "calendar.detail.the.phone.number.was.already.in.the.database": "The phone number was already in the database.",
+  "calendar.detail.the.patient.has.been.added.to.the.existing.owner": "The patient has been added to the existing owner.",
+  "calendar.detail.the.owner.and.patient.have.been.created": "The owner and patient have been created.",
+  "calendar.detail.now.fill.in.the.appointment.details.and.save.the.visit": "Now fill in the appointment details and save the visit.",
+  "calendar.detail.could.not.create.the.patient": "Could not create the patient.",
+  "calendar.detail.loading.schedule": "Loading schedule…",
+  "calendar.detail.no.veterinarians.found": "No veterinarians found",
+  "calendar.detail.no.veterinarians.are.on.shift.at.this.time": "No veterinarians are on shift at this time",
+  "calendar.detail.off.shift.2": "off shift",
+  "calendar.detail.show.all.veterinarians": "Show all veterinarians…",
+  "calendar.detail.appointment.data": "Appointment data",
+  "calendar.detail.enter.the.owner.s.name": "Enter the owner’s name",
+  "calendar.detail.enter.the.owner.s.phone.number.2": "Enter the owner’s phone number",
+  "calendar.detail.enter.a.phone.number.in.the.format.380.xx.xxx.xx.xx": "Enter a phone number in the format +380 XX XXX XX XX",
+  "calendar.detail.enter.the.patient.s.name.2": "Enter the patient’s name",
+  "calendar.detail.could.not.create.the.owner": "Could not create the owner",
+  "calendar.detail.could.not.create.the.patient.2": "Could not create the patient",
+  "calendar.detail.no.patient.selected": "No patient selected",
+  "calendar.detail.enter.the.reason.for.the.appointment": "Enter the reason for the appointment",
+  "calendar.detail.select.a.start.time.2": "Select a start time",
+  "calendar.detail.visit.not.found": "Visit not found",
+  "calendar.detail.appointment.successfully.created": "Appointment successfully created",
+  "calendar.detail.the.patient.has.been.added.to.the.calendar.for": "The patient has been added to the calendar for",
+  "calendar.detail.at": "at",
+  "calendar.detail.start.the.medical.visit.now": "Start the medical visit now?",
+  "calendar.detail.this.time.is.already.booked.2": "This time is already booked",
+  "calendar.detail.this.veterinarian.already.has.an.appointment.at.the.selected.time": "This veterinarian already has an appointment at the selected time.",
+  "calendar.detail.create.an.overlapping.appointment": "Create an overlapping appointment?",
+  "calendar.detail.veterinarian.s.working.hours": "Veterinarian’s working hours:",
+  "calendar.detail.the.veterinarian.is.not.on.shift.on.the.selected.date": "The veterinarian is not on shift on the selected date.",
+  "calendar.detail.the.veterinarian.is.unavailable.at.the.selected.time": "The veterinarian is unavailable at the selected time",
+  "calendar.detail.create.the.appointment.anyway": "Create the appointment anyway?",
+  "calendar.detail.error": "Error:",
+  "calendar.detail.select.a.vaccine": "Select a vaccine",
+  "calendar.detail.select.a.species.first": "Select a species first",
+  "calendar.detail.the.phone.number.must.use.the.format.380.xx.xxx.xx.xx": "The phone number must use the format +380 XX XXX XX XX.",
+  "calendar.detail.enter.a.date": "Enter a date:",
+  "calendar.detail.select.a.vaccine.2": "Select a vaccine:",
+  "calendar.detail.the.selected.vaccine.does.not.match.the.category": "The selected vaccine does not match the category \"",
+  "calendar.detail.added.when.creating.a.patient.from.the.calendar": "Added when creating a patient from the calendar",
+  "calendar.detail.rabies.vaccination": "rabies vaccination",
+  "calendar.detail.general.vaccination": "general vaccination",
+  "calendar.detail.could.not.create.the.owner.2": "Could not create the owner.",
+  "calendar.detail.the.patient.was.created.but.vaccinations.could.not.be.saved": "The patient was created, but vaccinations could not be saved.",
+  "calendar.detail.the.patient.has.been.created.now.save.the.appointment": "The patient has been created. Now save the appointment.",
+  "calendar.detail.no.owner.specified": "No owner specified",
+  "calendar.detail.no.phone.number.specified": "no phone number specified",
+  "calendar.detail.nothing.found": "Nothing found",
+  "calendar.detail.new.appointment": "New appointment",
+  "calendar.detail.patient.3": "Patient: —",
+  "calendar.detail.1.patient": "1. Patient",
+  "calendar.detail.search.patient.owner.phone": "Search: patient, owner, phone...",
+  "calendar.detail.new.patient": "New patient",
+  "calendar.detail.new.patient.2": "🐾 New patient",
+  "calendar.detail.create.a.patient.directly.from.the.calendar": "Create a patient directly from the calendar",
+  "calendar.detail.owner": "👤 Owner",
+  "calendar.detail.owner.s.full.name": "Owner’s full name *",
+  "calendar.detail.for.example.alex.smith": "For example: Alex Smith",
+  "calendar.detail.phone": "Phone *",
+  "calendar.detail.address.note": "Address / note",
+  "calendar.detail.district.address.comment": "District, address, comment",
+  "calendar.detail.patient.4": "🐶 Patient",
+  "calendar.detail.patient.name": "Patient name *",
+  "calendar.detail.for.example.bella": "For example: Bella",
+  "calendar.detail.species": "Species *",
+  "calendar.detail.select.a.species": "Select a species",
+  "calendar.detail.dog": "Dog",
+  "calendar.detail.cat": "Cat",
+  "calendar.detail.other": "Other",
+  "calendar.detail.breed": "Breed",
+  "calendar.detail.sex": "Sex",
+  "calendar.detail.not.specified": "Not specified",
+  "calendar.detail.male": "Male",
+  "calendar.detail.female": "Female",
+  "calendar.detail.neutered.spayed": "Neutered / spayed",
+  "calendar.detail.yes": "Yes",
+  "calendar.detail.no": "No",
+  "calendar.detail.rabies": "🛡 Rabies",
+  "calendar.detail.unknown": "Unknown",
+  "calendar.detail.vaccinated": "Vaccinated",
+  "calendar.detail.not.vaccinated": "Not vaccinated",
+  "calendar.detail.general.vaccination.2": "💉 General vaccination",
+  "calendar.detail.rabies.vaccination.date": "Rabies vaccination date",
+  "calendar.detail.rabies.vaccine": "Rabies vaccine",
+  "calendar.detail.general.vaccination.date": "General vaccination date",
+  "calendar.detail.general.vaccine": "General vaccine",
+  "calendar.detail.age": "Age",
+  "calendar.detail.for.example.4.years": "For example: 4 years",
+  "calendar.detail.weight.kg": "Weight, kg",
+  "calendar.detail.for.example.7.5": "For example: 7.5",
+  "calendar.detail.2.appointment.details": "2. Appointment details",
+  "calendar.detail.appointment.template": "Appointment template",
+  "calendar.detail.add.template": "＋ Add template",
+  "calendar.detail.quick.appointment": "QUICK APPOINTMENT",
+  "calendar.detail.select.an.appointment.template": "Select an appointment template",
+  "calendar.detail.the.template.automatically.sets.the.duration.and.default.comment": "The template automatically sets the duration and default comment.",
+  "calendar.detail.add.template.2": "Add template",
+  "calendar.detail.create.a.custom.visit.type": "Create a custom visit type",
+  "calendar.detail.loading.templates": "Loading templates…",
+  "calendar.detail.clear.selected.template": "Clear selected template",
+  "calendar.detail.3.reason.for.visit": "3. Reason for visit",
+  "calendar.detail.reason.for.appointment.administrator.s.comment": "Reason for appointment / administrator’s comment",
+  "calendar.detail.for.example.vomiting.this.morning.follow.up.examination.vaccination": "For example: vomiting this morning, follow-up examination, vaccination...",
+  "calendar.detail.cancel.2": "✕ Cancel",
+  "calendar.detail.save.appointment": "💾 Save appointment",
+  "calendar.detail.create.appointment": "Create appointment",
+  "calendar.detail.delete.appointment": "Delete appointment",
+  "calendar.detail.start.typing.a.dog.breed": "Start typing a dog breed",
+  "calendar.detail.dog.breed": "Dog breed",
+  "calendar.detail.start.typing.a.cat.breed": "Start typing a cat breed",
+  "calendar.detail.cat.breed": "Cat breed",
+  "calendar.detail.select.or.start.typing.an.animal.species": "Select or start typing an animal species",
+  "calendar.detail.animal.species": "Animal species",
+  "calendar.detail.shifts.saved.saved.of.total": "Shifts saved: {saved} of {total}.",
+  "calendar.detail.recurring.shifts.created.count": "Recurring shifts created: {count}.",
+  "calendar.detail.team.shifts.for.date.have.been.updated": "Team shifts for {date} have been updated.",
+  "calendar.detail.appointment.changes.have.not.been.saved.yet": "Appointment changes have not been saved yet.",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2": "This time is already booked for the selected veterinarian.",
+  "calendar.detail.could.not.complete.the.action.please.try.again": "Could not complete the action. Please try again.",
+  "calendar.detail.you.do.not.have.permission.to.perform.this.action": "You do not have permission to perform this action.",
+  "calendar.detail.patient.not.found": "Patient not found.",
+  "calendar.detail.cannot.create.an.appointment.the.patient.is.marked.as.deceased": "Cannot create an appointment: the patient is marked as deceased.",
+  "calendar.detail.complete.the.required.fields": "Complete the required fields.",
+  "calendar.detail.the.end.time.must.be.later.than.the.start.time": "The end time must be later than the start time.",
+  "calendar.detail.previous.day": "Previous day",
+  "calendar.detail.next.day": "Next day",
+  "calendar.detail.previous.week": "Previous week",
+  "calendar.detail.next.week": "Next week",
+  "calendar.detail.previous.month": "Previous month",
+  "calendar.detail.next.month": "Next month",
+  "calendar.detail.no.specialization.specified": "No specialization specified",
+  "calendar.detail.examination": "Examination",
+  "calendar.detail.ultrasound": "Ultrasound",
+  "calendar.detail.procedure.visit": "Procedure visit",
+  "calendar.detail.neutering": "Neutering",
+  "calendar.detail.basic.surgery": "Basic surgery",
+  "calendar.detail.the.template.name.is.too.long": "The template name is too long.",
+  "calendar.detail.invalid.duration": "Invalid duration.",
+  "calendar.detail.invalid.colour": "Invalid colour."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "calendar.detail.cancel": "Abbrechen",
+  "calendar.detail.unsaved.changes": "Ungespeicherte Änderungen",
+  "calendar.detail.leave.without.saving": "Ohne Speichern verlassen",
+  "calendar.detail.continue.editing": "Weiter bearbeiten",
+  "calendar.detail.complete.visit": "Besuch abschließen",
+  "calendar.detail.complete.visit.2": "Besuch abschließen",
+  "calendar.detail.go.back": "Zurück",
+  "calendar.detail.veterinarian.is.off.shift": "Tierarzt ist nicht im Dienst",
+  "calendar.detail.create.anyway": "Trotzdem erstellen",
+  "calendar.detail.choose.another.time": "Andere Uhrzeit wählen",
+  "calendar.detail.creating": "Wird erstellt…",
+  "calendar.detail.overlapping.appointments": "Terminüberschneidung",
+  "calendar.detail.create.overlapping.appointment": "Überschneidenden Termin erstellen",
+  "calendar.detail.appointment.created": "Termin erstellt",
+  "calendar.detail.start.visit": "▶ Behandlung starten",
+  "calendar.detail.keep.in.calendar": "Im Kalender belassen",
+  "calendar.detail.creating.visit": "Behandlung wird erstellt…",
+  "calendar.detail.could.not.start.the.visit": "Die Behandlung konnte nicht gestartet werden.",
+  "calendar.detail.done": "Fertig",
+  "calendar.detail.close": "Schließen",
+  "calendar.detail.cancel.payment": "Zahlung stornieren",
+  "calendar.detail.cancel.payment.2": "Zahlung stornieren",
+  "calendar.detail.keep.payment": "Zahlung beibehalten",
+  "calendar.detail.cancelling": "Wird storniert…",
+  "calendar.detail.could.not.cancel.the.payment": "Die Zahlung konnte nicht storniert werden.",
+  "calendar.detail.notification": "Mitteilung",
+  "calendar.detail.ok": "OK",
+  "calendar.detail.confirmation": "Bestätigung",
+  "calendar.detail.delete": "Löschen",
+  "calendar.detail.patient": "Patient",
+  "calendar.detail.patient.is.waiting": "Patient wartet",
+  "calendar.detail.confirm.action": "Aktion bestätigen",
+  "calendar.detail.enter.a.value": "Wert eingeben",
+  "calendar.detail.could.not.create.the.template": "Die Vorlage konnte nicht erstellt werden.",
+  "calendar.detail.no.templates.yet": "Noch keine Vorlagen",
+  "calendar.detail.min": "Min.",
+  "calendar.detail.visit": "Behandlung",
+  "calendar.detail.choose.a.template": "Vorlage auswählen",
+  "calendar.detail.duration.and.visit.type": "Dauer und Behandlungsart",
+  "calendar.detail.min.template.selected": "Min. · Vorlage ausgewählt",
+  "calendar.detail.new.template": "NEUE VORLAGE",
+  "calendar.detail.add.appointment.template": "Terminvorlage hinzufügen",
+  "calendar.detail.create.a.custom.appointment.type.to.speed.up.scheduling": "Erstellen Sie eine eigene Terminart für eine schnellere Terminplanung.",
+  "calendar.detail.template.name": "Name der Vorlage",
+  "calendar.detail.for.example.follow.up.examination": "Zum Beispiel: Kontrolluntersuchung",
+  "calendar.detail.duration": "Dauer",
+  "calendar.detail.icon": "Symbol",
+  "calendar.detail.colour": "Farbe",
+  "calendar.detail.default.comment": "Standardkommentar",
+  "calendar.detail.optional.for.example.follow.up.examination.after.treatment": "Optional. Zum Beispiel: Kontrolluntersuchung nach der Behandlung...",
+  "calendar.detail.preview": "Vorschau",
+  "calendar.detail.new.template.2": "Neue Vorlage",
+  "calendar.detail.30.min": "30 Min.",
+  "calendar.detail.create.template": "Vorlage erstellen",
+  "calendar.detail.enter.a.template.name": "Geben Sie einen Namen für die Vorlage ein.",
+  "calendar.detail.duration.must.be.between.5.and.480.minutes": "Die Dauer muss zwischen 5 und 480 Minuten liegen.",
+  "calendar.detail.the.server.did.not.return.the.created.template": "Der Server hat die erstellte Vorlage nicht zurückgegeben.",
+  "calendar.detail.could.not.save.the.shift": "Die Schicht konnte nicht gespeichert werden:",
+  "calendar.detail.loading.calendar": "Kalender wird geladen…",
+  "calendar.detail.mon": "Mo",
+  "calendar.detail.tue": "Di",
+  "calendar.detail.wed": "Mi",
+  "calendar.detail.thu": "Do",
+  "calendar.detail.fri": "Fr",
+  "calendar.detail.sat": "Sa",
+  "calendar.detail.sun": "So",
+  "calendar.detail.visit.2": "Behandlung",
+  "calendar.detail.no.veterinarian.assigned": "Kein Tierarzt zugewiesen",
+  "calendar.detail.no.appointments": "Keine Termine",
+  "calendar.detail.appointment": "Termin",
+  "calendar.detail.appointments": "Termine",
+  "calendar.detail.appointments.2": "Termine",
+  "calendar.detail.appointments.3": "Termine",
+  "calendar.detail.start": "Beginn",
+  "calendar.detail.end": "Ende",
+  "calendar.detail.employee": "Mitarbeiter",
+  "calendar.detail.assistant": "Assistenz",
+  "calendar.detail.veterinarian": "Tierarzt",
+  "calendar.detail.on.shift": "Im Dienst",
+  "calendar.detail.day.off": "Dienstfrei",
+  "calendar.detail.team.schedule": "TEAMDIENSTPLAN",
+  "calendar.detail.configure.the.status.and.working.hours.of.each.employee": "Legen Sie Status und Arbeitszeiten für jeden Mitarbeiter fest.",
+  "calendar.detail.single.day": "Einzelner Tag",
+  "calendar.detail.recurring.schedule": "Wiederkehrender Dienstplan",
+  "calendar.detail.status": "Status",
+  "calendar.detail.configure.recurring.shifts.for.several.weeks.ahead": "Planen Sie regelmäßige Schichten für mehrere Wochen im Voraus.",
+  "calendar.detail.days.of.the.week": "Wochentage",
+  "calendar.detail.shift.start": "Schichtbeginn",
+  "calendar.detail.shift.end": "Schichtende",
+  "calendar.detail.starting.from": "Beginn am",
+  "calendar.detail.until.date": "Bis zum",
+  "calendar.detail.example.mon.wed.fri.09.00.18.00": "Beispiel: Mo · Mi · Fr, 09:00–18:00.",
+  "calendar.detail.save.day": "💾 Tag speichern",
+  "calendar.detail.required.fields.are.missing": "Pflichtangaben fehlen",
+  "calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range": "Wählen Sie einen Mitarbeiter, Wochentage, Schichtzeiten und einen Zeitraum aus.",
+  "calendar.detail.invalid.time": "Ungültige Uhrzeit",
+  "calendar.detail.the.shift.must.end.after.it.starts": "Das Schichtende muss nach dem Schichtbeginn liegen.",
+  "calendar.detail.invalid.date.range": "Ungültiger Zeitraum",
+  "calendar.detail.the.end.date.cannot.be.earlier.than.the.start.date": "Das Enddatum darf nicht vor dem Anfangsdatum liegen.",
+  "calendar.detail.no.shifts": "Keine Schichten",
+  "calendar.detail.the.selected.period.contains.none.of.the.selected.weekdays": "Der gewählte Zeitraum enthält keine der ausgewählten Wochentage.",
+  "calendar.detail.saving.0": "Wird gespeichert… 0/",
+  "calendar.detail.could.not.save.the.schedule": "Der Dienstplan konnte nicht gespeichert werden",
+  "calendar.detail.saved": "Gespeichert:",
+  "calendar.detail.of": "von",
+  "calendar.detail.shifts": "Schichten.",
+  "calendar.detail.saving": "Wird gespeichert…",
+  "calendar.detail.schedule.applied": "Dienstplan angewendet",
+  "calendar.detail.created": "Erstellt:",
+  "calendar.detail.recurring.shifts": "wiederkehrende Schichten.",
+  "calendar.detail.check.shift.times": "Schichtzeiten überprüfen",
+  "calendar.detail.the.shift.must.end.after.it.starts.2": ": Das Schichtende muss nach dem Schichtbeginn liegen.",
+  "calendar.detail.schedule.saved": "Dienstplan gespeichert",
+  "calendar.detail.team.shifts.for": "Teamschichten für den",
+  "calendar.detail.successfully.updated": "wurden erfolgreich aktualisiert.",
+  "calendar.detail.please.try.again": "Bitte versuchen Sie es erneut.",
+  "calendar.detail.v": "T",
+  "calendar.detail.off.shift": "Außerhalb der Schicht",
+  "calendar.detail.time": "Uhrzeit",
+  "calendar.detail.add.at.least.one.employee.first": "Fügen Sie zunächst mindestens einen Mitarbeiter hinzu.",
+  "calendar.detail.delete.this.appointment.from.the.calendar": "Diesen Termin aus dem Kalender löschen?",
+  "calendar.detail.appointment.not.found": "Termin nicht gefunden",
+  "calendar.detail.administrator": "Administrator",
+  "calendar.detail.veterinarian.2": "Tierarzt",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian": "Diese Uhrzeit ist bei dem ausgewählten Tierarzt bereits belegt.",
+  "calendar.detail.the.veterinarian.s.shift.has.ended.choose.an.earlier.time.or.move.the.appointment.to.": "Die Schicht des Tierarztes ist beendet. Wählen Sie eine frühere Uhrzeit oder verschieben Sie den Termin auf einen anderen Tag.",
+  "calendar.detail.could.not.create.the.appointment": "Der Termin konnte nicht erstellt werden.",
+  "calendar.detail.could.not.create.appointment": "Termin konnte nicht erstellt werden",
+  "calendar.detail.appointment.creation.failed": "Fehler beim Erstellen des Termins",
+  "calendar.detail.an.error.occurred.while.creating.the.appointment": "Beim Erstellen des Termins ist ein Fehler aufgetreten.",
+  "calendar.detail.could.not.update.the.appointment": "Der Termin konnte nicht aktualisiert werden:",
+  "calendar.detail.appointment.update.failed": "Fehler beim Aktualisieren des Termins:",
+  "calendar.detail.only.a.clinic.administrator.or.owner.can.delete.calendar.appointments": "Nur ein Administrator oder der Klinikinhaber kann Termine aus dem Kalender löschen.",
+  "calendar.detail.could.not.delete.the.appointment": "Der Termin konnte nicht gelöscht werden:",
+  "calendar.detail.appointment.deletion.failed": "Fehler beim Löschen des Termins:",
+  "calendar.detail.edit.appointment": "Termin bearbeiten",
+  "calendar.detail.change.the.date.time.or.veterinarian": "Datum, Uhrzeit oder Tierarzt ändern",
+  "calendar.detail.patient.and.appointment": "Patient und Termin",
+  "calendar.detail.appointment.title": "Termintitel",
+  "calendar.detail.date": "Datum",
+  "calendar.detail.start.time": "Beginn",
+  "calendar.detail.15.min": "15 Min.",
+  "calendar.detail.45.min": "45 Min.",
+  "calendar.detail.60.min": "60 Min.",
+  "calendar.detail.90.min": "90 Min.",
+  "calendar.detail.120.min": "120 Min.",
+  "calendar.detail.180.min": "180 Min.",
+  "calendar.detail.select.a.veterinarian": "Tierarzt auswählen",
+  "calendar.detail.appointment.status": "Terminstatus",
+  "calendar.detail.scheduled": "Geplant",
+  "calendar.detail.in.clinic.waiting": "🟡 In der Klinik · wartet",
+  "calendar.detail.in.consultation": "🩺 In Behandlung",
+  "calendar.detail.completed": "✓ Abgeschlossen",
+  "calendar.detail.cancelled": "Storniert",
+  "calendar.detail.did.not.attend": "Nicht erschienen",
+  "calendar.detail.reason.for.visit.comment": "Besuchsgrund / Kommentar",
+  "calendar.detail.reason.for.appointment.or.administrator.s.comment": "Termingrund oder Kommentar der Verwaltung",
+  "calendar.detail.patient.arrived": "🟡 Patient eingetroffen",
+  "calendar.detail.save.changes": "Änderungen speichern",
+  "calendar.detail.appointment.changes": "Terminänderungen",
+  "calendar.detail.have.not.been.saved.yet": "wurden noch nicht gespeichert.",
+  "calendar.detail.completed.2": "Abgeschlossen",
+  "calendar.detail.visit.in.progress": "Behandlung läuft",
+  "calendar.detail.waiting": "Wartet",
+  "calendar.detail.calendar.appointment.not.found": "Kalendertermin nicht gefunden.",
+  "calendar.detail.no.patient.is.linked.to.this.appointment": "Diesem Termin ist kein Patient zugeordnet.",
+  "calendar.detail.no.veterinarian.is.linked.to.this.appointment": "Diesem Termin ist kein Tierarzt zugeordnet.",
+  "calendar.detail.this.appointment.has.no.date": "Für diesen Termin ist kein Datum angegeben.",
+  "calendar.detail.could.not.create.the.medical.visit": "Die Behandlung konnte nicht erstellt werden.",
+  "calendar.detail.patient.visit": "Patientenbehandlung",
+  "calendar.detail.the.medical.visit.was.created": "Die Behandlung wurde erstellt,",
+  "calendar.detail.but.could.not.be.linked": "konnte aber nicht verknüpft werden",
+  "calendar.detail.to.the.calendar": "mit dem Kalender.",
+  "calendar.detail.unnamed": "Ohne Namen",
+  "calendar.detail.appointment.2": "Termin",
+  "calendar.detail.open.visit": "↗ Behandlung öffnen",
+  "calendar.detail.select.a.veterinarian.2": "Wählen Sie einen Tierarzt aus.",
+  "calendar.detail.select.an.appointment.date": "Wählen Sie ein Termindatum aus.",
+  "calendar.detail.enter.the.reason.for.the.visit": "Geben Sie den Besuchsgrund ein.",
+  "calendar.detail.appointment.extends.past.midnight": "Termin endet nach Mitternacht",
+  "calendar.detail.the.selected.duration.ends.the.appointment.after.24.00.choose.an.earlier.time.or.a.sh": "Mit der gewählten Dauer endet der Termin nach 24:00 Uhr. Wählen Sie eine frühere Uhrzeit oder eine kürzere Dauer.",
+  "calendar.detail.the.medical.visit.was.created.but.could.not.be.linked.to.the.calendar": "Die Behandlung wurde erstellt, konnte aber nicht mit dem Kalender verknüpft werden.",
+  "calendar.detail.updating": "Wird aktualisiert…",
+  "calendar.detail.enter.an.appointment.title": "Geben Sie einen Termintitel ein.",
+  "calendar.detail.select.a.date": "Wählen Sie ein Datum aus.",
+  "calendar.detail.select.a.start.time": "Wählen Sie eine Anfangszeit aus.",
+  "calendar.detail.select.an.appointment.duration": "Wählen Sie die Termindauer aus.",
+  "calendar.detail.this.time.is.already.booked": "Diese Uhrzeit ist bereits belegt",
+  "calendar.detail.for.the.selected.veterinarian": "bei dem ausgewählten Tierarzt.",
+  "calendar.detail.saving.2": "Wird gespeichert…",
+  "calendar.detail.patient.2": "Patient:",
+  "calendar.detail.select.a.patient": "Patient auswählen",
+  "calendar.detail.enter.the.owner.s.full.name": "Geben Sie den vollständigen Namen des Tierhalters ein.",
+  "calendar.detail.enter.the.owner.s.phone.number": "Geben Sie die Telefonnummer des Tierhalters ein.",
+  "calendar.detail.the.phone.number.must.contain.exactly.12.digits.in.the.format.380.xx.xxx.xx.xx": "Die Telefonnummer muss genau 12 Ziffern im Format +380 XX XXX XX XX enthalten",
+  "calendar.detail.enter.the.patient.s.name": "Geben Sie den Namen des Patienten ein.",
+  "calendar.detail.select.the.animal.species": "Wählen Sie die Tierart aus.",
+  "calendar.detail.create.patient": "Patient anlegen",
+  "calendar.detail.creating.2": "Wird erstellt…",
+  "calendar.detail.the.owner.was.not.created": "Der Tierhalter wurde nicht angelegt.",
+  "calendar.detail.the.patient.was.not.created": "Der Patient wurde nicht angelegt.",
+  "calendar.detail.the.phone.number.was.already.in.the.database": "Die Telefonnummer war bereits gespeichert.",
+  "calendar.detail.the.patient.has.been.added.to.the.existing.owner": "Der Patient wurde dem bestehenden Tierhalter zugeordnet.",
+  "calendar.detail.the.owner.and.patient.have.been.created": "Tierhalter und Patient wurden angelegt.",
+  "calendar.detail.now.fill.in.the.appointment.details.and.save.the.visit": "Ergänzen Sie nun die Termindetails und speichern Sie den Termin.",
+  "calendar.detail.could.not.create.the.patient": "Der Patient konnte nicht angelegt werden.",
+  "calendar.detail.loading.schedule": "Dienstplan wird geladen…",
+  "calendar.detail.no.veterinarians.found": "Keine Tierärzte gefunden",
+  "calendar.detail.no.veterinarians.are.on.shift.at.this.time": "Zu dieser Uhrzeit ist kein Tierarzt im Dienst",
+  "calendar.detail.off.shift.2": "außerhalb der Schicht",
+  "calendar.detail.show.all.veterinarians": "Alle Tierärzte anzeigen…",
+  "calendar.detail.appointment.data": "Termindaten",
+  "calendar.detail.enter.the.owner.s.name": "Namen des Tierhalters eingeben",
+  "calendar.detail.enter.the.owner.s.phone.number.2": "Telefonnummer des Tierhalters eingeben",
+  "calendar.detail.enter.a.phone.number.in.the.format.380.xx.xxx.xx.xx": "Geben Sie eine Telefonnummer im Format +380 XX XXX XX XX ein",
+  "calendar.detail.enter.the.patient.s.name.2": "Namen des Patienten eingeben",
+  "calendar.detail.could.not.create.the.owner": "Tierhalter konnte nicht angelegt werden",
+  "calendar.detail.could.not.create.the.patient.2": "Patient konnte nicht angelegt werden",
+  "calendar.detail.no.patient.selected": "Kein Patient ausgewählt",
+  "calendar.detail.enter.the.reason.for.the.appointment": "Termingrund eingeben",
+  "calendar.detail.select.a.start.time.2": "Anfangszeit auswählen",
+  "calendar.detail.visit.not.found": "Behandlung nicht gefunden",
+  "calendar.detail.appointment.successfully.created": "Termin erfolgreich erstellt",
+  "calendar.detail.the.patient.has.been.added.to.the.calendar.for": "Der Patient wurde im Kalender eingetragen für den",
+  "calendar.detail.at": "um",
+  "calendar.detail.start.the.medical.visit.now": "Behandlung jetzt starten?",
+  "calendar.detail.this.time.is.already.booked.2": "Diese Uhrzeit ist bereits belegt",
+  "calendar.detail.this.veterinarian.already.has.an.appointment.at.the.selected.time": "Dieser Tierarzt hat zur gewählten Uhrzeit bereits einen Termin.",
+  "calendar.detail.create.an.overlapping.appointment": "Einen überschneidenden Termin erstellen?",
+  "calendar.detail.veterinarian.s.working.hours": "Arbeitszeiten des Tierarztes:",
+  "calendar.detail.the.veterinarian.is.not.on.shift.on.the.selected.date": "Der Tierarzt ist am gewählten Datum nicht im Dienst.",
+  "calendar.detail.the.veterinarian.is.unavailable.at.the.selected.time": "Der Tierarzt arbeitet nicht zur gewählten Uhrzeit",
+  "calendar.detail.create.the.appointment.anyway": "Termin trotzdem erstellen?",
+  "calendar.detail.error": "Fehler:",
+  "calendar.detail.select.a.vaccine": "Impfstoff auswählen",
+  "calendar.detail.select.a.species.first": "Zuerst eine Tierart auswählen",
+  "calendar.detail.the.phone.number.must.use.the.format.380.xx.xxx.xx.xx": "Die Telefonnummer muss das Format +380 XX XXX XX XX haben.",
+  "calendar.detail.enter.a.date": "Datum eingeben:",
+  "calendar.detail.select.a.vaccine.2": "Impfstoff auswählen:",
+  "calendar.detail.the.selected.vaccine.does.not.match.the.category": "Der gewählte Impfstoff entspricht nicht der Kategorie \"",
+  "calendar.detail.added.when.creating.a.patient.from.the.calendar": "Beim Anlegen eines Patienten aus dem Kalender hinzugefügt",
+  "calendar.detail.rabies.vaccination": "Tollwutimpfung",
+  "calendar.detail.general.vaccination": "Grundimpfung",
+  "calendar.detail.could.not.create.the.owner.2": "Der Tierhalter konnte nicht angelegt werden.",
+  "calendar.detail.the.patient.was.created.but.vaccinations.could.not.be.saved": "Der Patient wurde angelegt, aber die Impfungen konnten nicht gespeichert werden.",
+  "calendar.detail.the.patient.has.been.created.now.save.the.appointment": "Der Patient wurde angelegt. Speichern Sie nun den Termin.",
+  "calendar.detail.no.owner.specified": "Kein Tierhalter angegeben",
+  "calendar.detail.no.phone.number.specified": "keine Telefonnummer angegeben",
+  "calendar.detail.nothing.found": "Keine Ergebnisse",
+  "calendar.detail.new.appointment": "Neuer Termin",
+  "calendar.detail.patient.3": "Patient: —",
+  "calendar.detail.1.patient": "1. Patient",
+  "calendar.detail.search.patient.owner.phone": "Suche: Patient, Tierhalter, Telefon...",
+  "calendar.detail.new.patient": "Neuer Patient",
+  "calendar.detail.new.patient.2": "🐾 Neuer Patient",
+  "calendar.detail.create.a.patient.directly.from.the.calendar": "Patienten direkt aus dem Kalender anlegen",
+  "calendar.detail.owner": "👤 Tierhalter",
+  "calendar.detail.owner.s.full.name": "Vollständiger Name des Tierhalters *",
+  "calendar.detail.for.example.alex.smith": "Zum Beispiel: Anna Müller",
+  "calendar.detail.phone": "Telefon *",
+  "calendar.detail.address.note": "Adresse / Notiz",
+  "calendar.detail.district.address.comment": "Stadtteil, Adresse, Kommentar",
+  "calendar.detail.patient.4": "🐶 Patient",
+  "calendar.detail.patient.name": "Name des Patienten *",
+  "calendar.detail.for.example.bella": "Zum Beispiel: Bella",
+  "calendar.detail.species": "Tierart *",
+  "calendar.detail.select.a.species": "Tierart auswählen",
+  "calendar.detail.dog": "Hund",
+  "calendar.detail.cat": "Katze",
+  "calendar.detail.other": "Andere",
+  "calendar.detail.breed": "Rasse",
+  "calendar.detail.sex": "Geschlecht",
+  "calendar.detail.not.specified": "Nicht angegeben",
+  "calendar.detail.male": "Männlich",
+  "calendar.detail.female": "Weiblich",
+  "calendar.detail.neutered.spayed": "Kastriert / sterilisiert",
+  "calendar.detail.yes": "Ja",
+  "calendar.detail.no": "Nein",
+  "calendar.detail.rabies": "🛡 Tollwut",
+  "calendar.detail.unknown": "Unbekannt",
+  "calendar.detail.vaccinated": "Geimpft",
+  "calendar.detail.not.vaccinated": "Nicht geimpft",
+  "calendar.detail.general.vaccination.2": "💉 Grundimpfung",
+  "calendar.detail.rabies.vaccination.date": "Datum der Tollwutimpfung",
+  "calendar.detail.rabies.vaccine": "Tollwutimpfstoff",
+  "calendar.detail.general.vaccination.date": "Datum der Grundimpfung",
+  "calendar.detail.general.vaccine": "Impfstoff für die Grundimpfung",
+  "calendar.detail.age": "Alter",
+  "calendar.detail.for.example.4.years": "Zum Beispiel: 4 Jahre",
+  "calendar.detail.weight.kg": "Gewicht, kg",
+  "calendar.detail.for.example.7.5": "Zum Beispiel: 7.5",
+  "calendar.detail.2.appointment.details": "2. Termindetails",
+  "calendar.detail.appointment.template": "Terminvorlage",
+  "calendar.detail.add.template": "＋ Vorlage hinzufügen",
+  "calendar.detail.quick.appointment": "SCHNELLER TERMIN",
+  "calendar.detail.select.an.appointment.template": "Terminvorlage auswählen",
+  "calendar.detail.the.template.automatically.sets.the.duration.and.default.comment": "Die Vorlage legt Dauer und Standardkommentar automatisch fest.",
+  "calendar.detail.add.template.2": "Vorlage hinzufügen",
+  "calendar.detail.create.a.custom.visit.type": "Eigene Behandlungsart erstellen",
+  "calendar.detail.loading.templates": "Vorlagen werden geladen…",
+  "calendar.detail.clear.selected.template": "Vorlagenauswahl zurücksetzen",
+  "calendar.detail.3.reason.for.visit": "3. Besuchsgrund",
+  "calendar.detail.reason.for.appointment.administrator.s.comment": "Termingrund / Kommentar der Verwaltung",
+  "calendar.detail.for.example.vomiting.this.morning.follow.up.examination.vaccination": "Zum Beispiel: Erbrechen am Morgen, Kontrolluntersuchung, Impfung...",
+  "calendar.detail.cancel.2": "✕ Abbrechen",
+  "calendar.detail.save.appointment": "💾 Termin speichern",
+  "calendar.detail.create.appointment": "Termin erstellen",
+  "calendar.detail.delete.appointment": "Termin löschen",
+  "calendar.detail.start.typing.a.dog.breed": "Hunderasse eingeben",
+  "calendar.detail.dog.breed": "Hunderasse",
+  "calendar.detail.start.typing.a.cat.breed": "Katzenrasse eingeben",
+  "calendar.detail.cat.breed": "Katzenrasse",
+  "calendar.detail.select.or.start.typing.an.animal.species": "Tierart auswählen oder eingeben",
+  "calendar.detail.animal.species": "Tierart",
+  "calendar.detail.shifts.saved.saved.of.total": "Gespeicherte Schichten: {saved} von {total}.",
+  "calendar.detail.recurring.shifts.created.count": "Erstellte wiederkehrende Schichten: {count}.",
+  "calendar.detail.team.shifts.for.date.have.been.updated": "Die Teamschichten für den {date} wurden aktualisiert.",
+  "calendar.detail.appointment.changes.have.not.been.saved.yet": "Die Terminänderungen wurden noch nicht gespeichert.",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2": "Diese Uhrzeit ist bei dem ausgewählten Tierarzt bereits belegt.",
+  "calendar.detail.could.not.complete.the.action.please.try.again": "Die Aktion konnte nicht ausgeführt werden. Bitte versuchen Sie es erneut.",
+  "calendar.detail.you.do.not.have.permission.to.perform.this.action": "Sie haben keine Berechtigung für diese Aktion.",
+  "calendar.detail.patient.not.found": "Patient nicht gefunden.",
+  "calendar.detail.cannot.create.an.appointment.the.patient.is.marked.as.deceased": "Der Termin kann nicht erstellt werden: Der Patient ist als verstorben markiert.",
+  "calendar.detail.complete.the.required.fields": "Füllen Sie die Pflichtfelder aus.",
+  "calendar.detail.the.end.time.must.be.later.than.the.start.time": "Die Endzeit muss nach der Anfangszeit liegen.",
+  "calendar.detail.previous.day": "Vorheriger Tag",
+  "calendar.detail.next.day": "Nächster Tag",
+  "calendar.detail.previous.week": "Vorherige Woche",
+  "calendar.detail.next.week": "Nächste Woche",
+  "calendar.detail.previous.month": "Vorheriger Monat",
+  "calendar.detail.next.month": "Nächster Monat",
+  "calendar.detail.no.specialization.specified": "Kein Fachgebiet angegeben",
+  "calendar.detail.examination": "Untersuchung",
+  "calendar.detail.ultrasound": "Ultraschall",
+  "calendar.detail.procedure.visit": "Behandlungstermin",
+  "calendar.detail.neutering": "Kastration",
+  "calendar.detail.basic.surgery": "Allgemeine Chirurgie",
+  "calendar.detail.the.template.name.is.too.long": "Der Vorlagenname ist zu lang.",
+  "calendar.detail.invalid.duration": "Ungültige Dauer.",
+  "calendar.detail.invalid.colour": "Ungültige Farbe."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "calendar.detail.cancel": "Anuluj",
+  "calendar.detail.unsaved.changes": "Niezapisane zmiany",
+  "calendar.detail.leave.without.saving": "Wyjdź bez zapisywania",
+  "calendar.detail.continue.editing": "Kontynuuj edycję",
+  "calendar.detail.complete.visit": "Zakończenie wizyty",
+  "calendar.detail.complete.visit.2": "Zakończ wizytę",
+  "calendar.detail.go.back": "Wróć",
+  "calendar.detail.veterinarian.is.off.shift": "Lekarz nie jest na zmianie",
+  "calendar.detail.create.anyway": "Utwórz mimo to",
+  "calendar.detail.choose.another.time": "Wybierz inną godzinę",
+  "calendar.detail.creating": "Tworzenie…",
+  "calendar.detail.overlapping.appointments": "Nakładające się wizyty",
+  "calendar.detail.create.overlapping.appointment": "Utwórz nakładającą się wizytę",
+  "calendar.detail.appointment.created": "Wizyta utworzona",
+  "calendar.detail.start.visit": "▶ Rozpocznij wizytę",
+  "calendar.detail.keep.in.calendar": "Pozostaw w kalendarzu",
+  "calendar.detail.creating.visit": "Tworzenie wizyty…",
+  "calendar.detail.could.not.start.the.visit": "Nie udało się rozpocząć wizyty.",
+  "calendar.detail.done": "Gotowe",
+  "calendar.detail.close": "Zamknij",
+  "calendar.detail.cancel.payment": "Anulowanie płatności",
+  "calendar.detail.cancel.payment.2": "Anuluj płatność",
+  "calendar.detail.keep.payment": "Zachowaj płatność",
+  "calendar.detail.cancelling": "Anulowanie…",
+  "calendar.detail.could.not.cancel.the.payment": "Nie udało się anulować płatności.",
+  "calendar.detail.notification": "Powiadomienie",
+  "calendar.detail.ok": "OK",
+  "calendar.detail.confirmation": "Potwierdzenie",
+  "calendar.detail.delete": "Usuń",
+  "calendar.detail.patient": "Pacjent",
+  "calendar.detail.patient.is.waiting": "Pacjent oczekuje",
+  "calendar.detail.confirm.action": "Potwierdź działanie",
+  "calendar.detail.enter.a.value": "Wprowadź wartość",
+  "calendar.detail.could.not.create.the.template": "Nie udało się utworzyć szablonu.",
+  "calendar.detail.no.templates.yet": "Brak szablonów",
+  "calendar.detail.min": "min",
+  "calendar.detail.visit": "Wizyta",
+  "calendar.detail.choose.a.template": "Wybierz szablon",
+  "calendar.detail.duration.and.visit.type": "Czas trwania i rodzaj wizyty",
+  "calendar.detail.min.template.selected": "min · wybrano szablon",
+  "calendar.detail.new.template": "NOWY SZABLON",
+  "calendar.detail.add.appointment.template": "Dodaj szablon wizyty",
+  "calendar.detail.create.a.custom.appointment.type.to.speed.up.scheduling": "Utwórz własny rodzaj wizyty, aby przyspieszyć planowanie.",
+  "calendar.detail.template.name": "Nazwa szablonu",
+  "calendar.detail.for.example.follow.up.examination": "Na przykład: Badanie kontrolne",
+  "calendar.detail.duration": "Czas trwania",
+  "calendar.detail.icon": "Ikona",
+  "calendar.detail.colour": "Kolor",
+  "calendar.detail.default.comment": "Domyślny komentarz",
+  "calendar.detail.optional.for.example.follow.up.examination.after.treatment": "Opcjonalnie. Na przykład: badanie kontrolne po leczeniu...",
+  "calendar.detail.preview": "Podgląd",
+  "calendar.detail.new.template.2": "Nowy szablon",
+  "calendar.detail.30.min": "30 min",
+  "calendar.detail.create.template": "Utwórz szablon",
+  "calendar.detail.enter.a.template.name": "Wprowadź nazwę szablonu.",
+  "calendar.detail.duration.must.be.between.5.and.480.minutes": "Czas trwania musi wynosić od 5 do 480 minut.",
+  "calendar.detail.the.server.did.not.return.the.created.template": "Serwer nie zwrócił utworzonego szablonu.",
+  "calendar.detail.could.not.save.the.shift": "Nie udało się zapisać zmiany:",
+  "calendar.detail.loading.calendar": "Ładowanie kalendarza…",
+  "calendar.detail.mon": "pon.",
+  "calendar.detail.tue": "wt.",
+  "calendar.detail.wed": "śr.",
+  "calendar.detail.thu": "czw.",
+  "calendar.detail.fri": "pt.",
+  "calendar.detail.sat": "sob.",
+  "calendar.detail.sun": "niedz.",
+  "calendar.detail.visit.2": "Wizyta",
+  "calendar.detail.no.veterinarian.assigned": "Nie przypisano lekarza",
+  "calendar.detail.no.appointments": "Brak wizyt",
+  "calendar.detail.appointment": "wizyta",
+  "calendar.detail.appointments": "wizyty",
+  "calendar.detail.appointments.2": "wizyt",
+  "calendar.detail.appointments.3": "wizyty",
+  "calendar.detail.start": "Początek",
+  "calendar.detail.end": "Koniec",
+  "calendar.detail.employee": "Pracownik",
+  "calendar.detail.assistant": "Asystent",
+  "calendar.detail.veterinarian": "Lekarz weterynarii",
+  "calendar.detail.on.shift": "Na zmianie",
+  "calendar.detail.day.off": "Dzień wolny",
+  "calendar.detail.team.schedule": "GRAFIK ZESPOŁU",
+  "calendar.detail.configure.the.status.and.working.hours.of.each.employee": "Ustaw status i godziny pracy każdego pracownika.",
+  "calendar.detail.single.day": "Jeden dzień",
+  "calendar.detail.recurring.schedule": "Grafik cykliczny",
+  "calendar.detail.status": "Status",
+  "calendar.detail.configure.recurring.shifts.for.several.weeks.ahead": "Ustaw regularne zmiany na kilka tygodni do przodu.",
+  "calendar.detail.days.of.the.week": "Dni tygodnia",
+  "calendar.detail.shift.start": "Początek zmiany",
+  "calendar.detail.shift.end": "Koniec zmiany",
+  "calendar.detail.starting.from": "Począwszy od",
+  "calendar.detail.until.date": "Do dnia",
+  "calendar.detail.example.mon.wed.fri.09.00.18.00": "Przykład: pon. · śr. · pt., 09:00–18:00.",
+  "calendar.detail.save.day": "💾 Zapisz dzień",
+  "calendar.detail.required.fields.are.missing": "Brakuje wymaganych danych",
+  "calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range": "Wybierz pracownika, dni tygodnia, godziny zmiany i zakres dat.",
+  "calendar.detail.invalid.time": "Nieprawidłowa godzina",
+  "calendar.detail.the.shift.must.end.after.it.starts": "Koniec zmiany musi być późniejszy niż jej początek.",
+  "calendar.detail.invalid.date.range": "Nieprawidłowy zakres dat",
+  "calendar.detail.the.end.date.cannot.be.earlier.than.the.start.date": "Data końcowa nie może być wcześniejsza niż początkowa.",
+  "calendar.detail.no.shifts": "Brak zmian",
+  "calendar.detail.the.selected.period.contains.none.of.the.selected.weekdays": "Wybrany okres nie zawiera wskazanych dni tygodnia.",
+  "calendar.detail.saving.0": "Zapisywanie… 0/",
+  "calendar.detail.could.not.save.the.schedule": "Nie udało się zapisać grafiku",
+  "calendar.detail.saved": "Zapisano",
+  "calendar.detail.of": "z",
+  "calendar.detail.shifts": "zmian.",
+  "calendar.detail.saving": "Zapisywanie…",
+  "calendar.detail.schedule.applied": "Grafik zastosowany",
+  "calendar.detail.created": "Utworzono",
+  "calendar.detail.recurring.shifts": "cyklicznych zmian.",
+  "calendar.detail.check.shift.times": "Sprawdź godziny zmiany",
+  "calendar.detail.the.shift.must.end.after.it.starts.2": ": koniec zmiany musi być późniejszy niż jej początek.",
+  "calendar.detail.schedule.saved": "Grafik zapisany",
+  "calendar.detail.team.shifts.for": "Zmiany zespołu na",
+  "calendar.detail.successfully.updated": "zostały pomyślnie zaktualizowane.",
+  "calendar.detail.please.try.again": "Spróbuj ponownie.",
+  "calendar.detail.v": "L",
+  "calendar.detail.off.shift": "Poza zmianą",
+  "calendar.detail.time": "Godzina",
+  "calendar.detail.add.at.least.one.employee.first": "Najpierw dodaj co najmniej jednego pracownika.",
+  "calendar.detail.delete.this.appointment.from.the.calendar": "Usunąć tę wizytę z kalendarza?",
+  "calendar.detail.appointment.not.found": "Nie znaleziono wizyty",
+  "calendar.detail.administrator": "Administrator",
+  "calendar.detail.veterinarian.2": "Lekarz weterynarii",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian": "Wybrany lekarz ma już wizytę o tej godzinie.",
+  "calendar.detail.the.veterinarian.s.shift.has.ended.choose.an.earlier.time.or.move.the.appointment.to.": "Zmiana lekarza już się zakończyła. Wybierz wcześniejszą godzinę lub przenieś wizytę na inny dzień.",
+  "calendar.detail.could.not.create.the.appointment": "Nie udało się utworzyć wizyty.",
+  "calendar.detail.could.not.create.appointment": "Nie udało się utworzyć wizyty",
+  "calendar.detail.appointment.creation.failed": "Błąd tworzenia wizyty",
+  "calendar.detail.an.error.occurred.while.creating.the.appointment": "Wystąpił błąd podczas tworzenia wizyty.",
+  "calendar.detail.could.not.update.the.appointment": "Nie udało się zaktualizować wizyty:",
+  "calendar.detail.appointment.update.failed": "Błąd aktualizacji wizyty:",
+  "calendar.detail.only.a.clinic.administrator.or.owner.can.delete.calendar.appointments": "Tylko administrator lub właściciel kliniki może usuwać wizyty z kalendarza.",
+  "calendar.detail.could.not.delete.the.appointment": "Nie udało się usunąć wizyty:",
+  "calendar.detail.appointment.deletion.failed": "Błąd usuwania wizyty:",
+  "calendar.detail.edit.appointment": "Edytuj wizytę",
+  "calendar.detail.change.the.date.time.or.veterinarian": "Zmień datę, godzinę lub lekarza",
+  "calendar.detail.patient.and.appointment": "Pacjent i wizyta",
+  "calendar.detail.appointment.title": "Nazwa wizyty",
+  "calendar.detail.date": "Data",
+  "calendar.detail.start.time": "Godzina rozpoczęcia",
+  "calendar.detail.15.min": "15 min",
+  "calendar.detail.45.min": "45 min",
+  "calendar.detail.60.min": "60 min",
+  "calendar.detail.90.min": "90 min",
+  "calendar.detail.120.min": "120 min",
+  "calendar.detail.180.min": "180 min",
+  "calendar.detail.select.a.veterinarian": "Wybierz lekarza",
+  "calendar.detail.appointment.status": "Status wizyty",
+  "calendar.detail.scheduled": "Zaplanowana",
+  "calendar.detail.in.clinic.waiting": "🟡 W klinice · oczekuje",
+  "calendar.detail.in.consultation": "🩺 W trakcie wizyty",
+  "calendar.detail.completed": "✓ Zakończona",
+  "calendar.detail.cancelled": "Anulowana",
+  "calendar.detail.did.not.attend": "Nieobecny",
+  "calendar.detail.reason.for.visit.comment": "Powód wizyty / komentarz",
+  "calendar.detail.reason.for.appointment.or.administrator.s.comment": "Powód wizyty lub komentarz administratora",
+  "calendar.detail.patient.arrived": "🟡 Pacjent przybył",
+  "calendar.detail.save.changes": "Zapisz zmiany",
+  "calendar.detail.appointment.changes": "Zmiany wizyty",
+  "calendar.detail.have.not.been.saved.yet": "nie zostały jeszcze zapisane.",
+  "calendar.detail.completed.2": "Zakończona",
+  "calendar.detail.visit.in.progress": "Wizyta trwa",
+  "calendar.detail.waiting": "Oczekuje",
+  "calendar.detail.calendar.appointment.not.found": "Nie znaleziono wizyty w kalendarzu.",
+  "calendar.detail.no.patient.is.linked.to.this.appointment": "Do wizyty nie przypisano pacjenta.",
+  "calendar.detail.no.veterinarian.is.linked.to.this.appointment": "Do wizyty nie przypisano lekarza.",
+  "calendar.detail.this.appointment.has.no.date": "Wizyta nie ma daty.",
+  "calendar.detail.could.not.create.the.medical.visit": "Nie udało się utworzyć wizyty medycznej.",
+  "calendar.detail.patient.visit": "Wizyta pacjenta",
+  "calendar.detail.the.medical.visit.was.created": "Utworzono wizytę medyczną,",
+  "calendar.detail.but.could.not.be.linked": "ale nie udało się jej powiązać",
+  "calendar.detail.to.the.calendar": "z kalendarzem.",
+  "calendar.detail.unnamed": "Bez imienia",
+  "calendar.detail.appointment.2": "Wizyta",
+  "calendar.detail.open.visit": "↗ Otwórz wizytę",
+  "calendar.detail.select.a.veterinarian.2": "Wybierz lekarza.",
+  "calendar.detail.select.an.appointment.date": "Wybierz datę wizyty.",
+  "calendar.detail.enter.the.reason.for.the.visit": "Podaj powód wizyty.",
+  "calendar.detail.appointment.extends.past.midnight": "Wizyta wykracza poza koniec dnia",
+  "calendar.detail.the.selected.duration.ends.the.appointment.after.24.00.choose.an.earlier.time.or.a.sh": "Wybrany czas trwania powoduje zakończenie wizyty po 24:00. Wybierz wcześniejszą godzinę lub krótszy czas trwania.",
+  "calendar.detail.the.medical.visit.was.created.but.could.not.be.linked.to.the.calendar": "Utworzono wizytę medyczną, ale nie udało się jej powiązać z kalendarzem.",
+  "calendar.detail.updating": "Aktualizowanie…",
+  "calendar.detail.enter.an.appointment.title": "Wprowadź nazwę wizyty.",
+  "calendar.detail.select.a.date": "Wybierz datę.",
+  "calendar.detail.select.a.start.time": "Wybierz godzinę rozpoczęcia.",
+  "calendar.detail.select.an.appointment.duration": "Wybierz czas trwania wizyty.",
+  "calendar.detail.this.time.is.already.booked": "Ta godzina jest już zajęta",
+  "calendar.detail.for.the.selected.veterinarian": "u wybranego lekarza.",
+  "calendar.detail.saving.2": "Zapisywanie…",
+  "calendar.detail.patient.2": "Pacjent:",
+  "calendar.detail.select.a.patient": "Wybierz pacjenta",
+  "calendar.detail.enter.the.owner.s.full.name": "Podaj imię i nazwisko właściciela.",
+  "calendar.detail.enter.the.owner.s.phone.number": "Podaj numer telefonu właściciela.",
+  "calendar.detail.the.phone.number.must.contain.exactly.12.digits.in.the.format.380.xx.xxx.xx.xx": "Numer telefonu musi zawierać dokładnie 12 cyfr w formacie +380 XX XXX XX XX",
+  "calendar.detail.enter.the.patient.s.name": "Podaj imię pacjenta.",
+  "calendar.detail.select.the.animal.species": "Wybierz gatunek zwierzęcia.",
+  "calendar.detail.create.patient": "Utwórz pacjenta",
+  "calendar.detail.creating.2": "Tworzenie…",
+  "calendar.detail.the.owner.was.not.created": "Nie utworzono właściciela.",
+  "calendar.detail.the.patient.was.not.created": "Nie utworzono pacjenta.",
+  "calendar.detail.the.phone.number.was.already.in.the.database": "Numer telefonu był już w bazie.",
+  "calendar.detail.the.patient.has.been.added.to.the.existing.owner": "Pacjent został przypisany do istniejącego właściciela.",
+  "calendar.detail.the.owner.and.patient.have.been.created": "Utworzono właściciela i pacjenta.",
+  "calendar.detail.now.fill.in.the.appointment.details.and.save.the.visit": "Teraz uzupełnij szczegóły i zapisz wizytę.",
+  "calendar.detail.could.not.create.the.patient": "Nie udało się utworzyć pacjenta.",
+  "calendar.detail.loading.schedule": "Ładowanie grafiku…",
+  "calendar.detail.no.veterinarians.found": "Nie znaleziono lekarzy",
+  "calendar.detail.no.veterinarians.are.on.shift.at.this.time": "O tej godzinie żaden lekarz nie jest na zmianie",
+  "calendar.detail.off.shift.2": "poza zmianą",
+  "calendar.detail.show.all.veterinarians": "Pokaż wszystkich lekarzy…",
+  "calendar.detail.appointment.data": "Dane wizyty",
+  "calendar.detail.enter.the.owner.s.name": "Podaj właściciela",
+  "calendar.detail.enter.the.owner.s.phone.number.2": "Podaj telefon właściciela",
+  "calendar.detail.enter.a.phone.number.in.the.format.380.xx.xxx.xx.xx": "Podaj numer telefonu w formacie +380 XX XXX XX XX",
+  "calendar.detail.enter.the.patient.s.name.2": "Podaj imię pacjenta",
+  "calendar.detail.could.not.create.the.owner": "Nie udało się utworzyć właściciela",
+  "calendar.detail.could.not.create.the.patient.2": "Nie udało się utworzyć pacjenta",
+  "calendar.detail.no.patient.selected": "Nie wybrano pacjenta",
+  "calendar.detail.enter.the.reason.for.the.appointment": "Podaj powód wizyty",
+  "calendar.detail.select.a.start.time.2": "Wybierz godzinę rozpoczęcia",
+  "calendar.detail.visit.not.found": "Nie znaleziono wizyty",
+  "calendar.detail.appointment.successfully.created": "Wizyta została utworzona",
+  "calendar.detail.the.patient.has.been.added.to.the.calendar.for": "Pacjent został dodany do kalendarza na",
+  "calendar.detail.at": "o",
+  "calendar.detail.start.the.medical.visit.now": "Rozpocząć wizytę medyczną teraz?",
+  "calendar.detail.this.time.is.already.booked.2": "Ta godzina jest już zajęta",
+  "calendar.detail.this.veterinarian.already.has.an.appointment.at.the.selected.time": "Ten lekarz ma już wizytę o wybranej godzinie.",
+  "calendar.detail.create.an.overlapping.appointment": "Utworzyć nakładającą się wizytę?",
+  "calendar.detail.veterinarian.s.working.hours": "Godziny pracy lekarza:",
+  "calendar.detail.the.veterinarian.is.not.on.shift.on.the.selected.date": "Lekarz nie jest na zmianie w wybranym dniu.",
+  "calendar.detail.the.veterinarian.is.unavailable.at.the.selected.time": "Lekarz nie pracuje o wybranej godzinie",
+  "calendar.detail.create.the.appointment.anyway": "Utworzyć wizytę mimo to?",
+  "calendar.detail.error": "Błąd:",
+  "calendar.detail.select.a.vaccine": "Wybierz szczepionkę",
+  "calendar.detail.select.a.species.first": "Najpierw wybierz gatunek",
+  "calendar.detail.the.phone.number.must.use.the.format.380.xx.xxx.xx.xx": "Numer telefonu musi mieć format +380 XX XXX XX XX.",
+  "calendar.detail.enter.a.date": "Podaj datę:",
+  "calendar.detail.select.a.vaccine.2": "Wybierz szczepionkę:",
+  "calendar.detail.the.selected.vaccine.does.not.match.the.category": "Wybrana szczepionka nie pasuje do kategorii \"",
+  "calendar.detail.added.when.creating.a.patient.from.the.calendar": "Dodano podczas tworzenia pacjenta z kalendarza",
+  "calendar.detail.rabies.vaccination": "szczepienie przeciw wściekliźnie",
+  "calendar.detail.general.vaccination": "szczepienie ogólne",
+  "calendar.detail.could.not.create.the.owner.2": "Nie udało się utworzyć właściciela.",
+  "calendar.detail.the.patient.was.created.but.vaccinations.could.not.be.saved": "Pacjent został utworzony, ale nie udało się zapisać szczepień.",
+  "calendar.detail.the.patient.has.been.created.now.save.the.appointment": "Pacjent został utworzony. Teraz zapisz wizytę.",
+  "calendar.detail.no.owner.specified": "Nie podano właściciela",
+  "calendar.detail.no.phone.number.specified": "nie podano telefonu",
+  "calendar.detail.nothing.found": "Nic nie znaleziono",
+  "calendar.detail.new.appointment": "Nowa wizyta",
+  "calendar.detail.patient.3": "Pacjent: —",
+  "calendar.detail.1.patient": "1. Pacjent",
+  "calendar.detail.search.patient.owner.phone": "Szukaj: pacjent, właściciel, telefon...",
+  "calendar.detail.new.patient": "Nowy pacjent",
+  "calendar.detail.new.patient.2": "🐾 Nowy pacjent",
+  "calendar.detail.create.a.patient.directly.from.the.calendar": "Tworzenie pacjenta bezpośrednio z kalendarza",
+  "calendar.detail.owner": "👤 Właściciel",
+  "calendar.detail.owner.s.full.name": "Imię i nazwisko właściciela *",
+  "calendar.detail.for.example.alex.smith": "Na przykład: Anna Kowalska",
+  "calendar.detail.phone": "Telefon *",
+  "calendar.detail.address.note": "Adres / notatka",
+  "calendar.detail.district.address.comment": "Dzielnica, adres, komentarz",
+  "calendar.detail.patient.4": "🐶 Pacjent",
+  "calendar.detail.patient.name": "Imię pacjenta *",
+  "calendar.detail.for.example.bella": "Na przykład: Bella",
+  "calendar.detail.species": "Gatunek *",
+  "calendar.detail.select.a.species": "Wybierz gatunek",
+  "calendar.detail.dog": "Pies",
+  "calendar.detail.cat": "Kot",
+  "calendar.detail.other": "Inny",
+  "calendar.detail.breed": "Rasa",
+  "calendar.detail.sex": "Płeć",
+  "calendar.detail.not.specified": "Nie podano",
+  "calendar.detail.male": "Samiec",
+  "calendar.detail.female": "Samica",
+  "calendar.detail.neutered.spayed": "Wykastrowany / wysterylizowana",
+  "calendar.detail.yes": "Tak",
+  "calendar.detail.no": "Nie",
+  "calendar.detail.rabies": "🛡 Wścieklizna",
+  "calendar.detail.unknown": "Nie wiadomo",
+  "calendar.detail.vaccinated": "Zaszczepiony",
+  "calendar.detail.not.vaccinated": "Niezaszczepiony",
+  "calendar.detail.general.vaccination.2": "💉 Szczepienie ogólne",
+  "calendar.detail.rabies.vaccination.date": "Data szczepienia przeciw wściekliźnie",
+  "calendar.detail.rabies.vaccine": "Szczepionka przeciw wściekliźnie",
+  "calendar.detail.general.vaccination.date": "Data szczepienia ogólnego",
+  "calendar.detail.general.vaccine": "Szczepionka ogólna",
+  "calendar.detail.age": "Wiek",
+  "calendar.detail.for.example.4.years": "Na przykład: 4 lata",
+  "calendar.detail.weight.kg": "Masa ciała, kg",
+  "calendar.detail.for.example.7.5": "Na przykład: 7.5",
+  "calendar.detail.2.appointment.details": "2. Szczegóły wizyty",
+  "calendar.detail.appointment.template": "Szablon wizyty",
+  "calendar.detail.add.template": "＋ Dodaj szablon",
+  "calendar.detail.quick.appointment": "SZYBKA WIZYTA",
+  "calendar.detail.select.an.appointment.template": "Wybierz szablon wizyty",
+  "calendar.detail.the.template.automatically.sets.the.duration.and.default.comment": "Szablon automatycznie ustawi czas trwania i domyślny komentarz.",
+  "calendar.detail.add.template.2": "Dodaj szablon",
+  "calendar.detail.create.a.custom.visit.type": "Utwórz własny rodzaj wizyty",
+  "calendar.detail.loading.templates": "Ładowanie szablonów…",
+  "calendar.detail.clear.selected.template": "Wyczyść wybrany szablon",
+  "calendar.detail.3.reason.for.visit": "3. Powód wizyty",
+  "calendar.detail.reason.for.appointment.administrator.s.comment": "Powód wizyty / komentarz administratora",
+  "calendar.detail.for.example.vomiting.this.morning.follow.up.examination.vaccination": "Na przykład: poranne wymioty, badanie kontrolne, szczepienie...",
+  "calendar.detail.cancel.2": "✕ Anuluj",
+  "calendar.detail.save.appointment": "💾 Zapisz wizytę",
+  "calendar.detail.create.appointment": "Utwórz wizytę",
+  "calendar.detail.delete.appointment": "Usuń wizytę",
+  "calendar.detail.start.typing.a.dog.breed": "Zacznij wpisywać rasę psa",
+  "calendar.detail.dog.breed": "Rasa psa",
+  "calendar.detail.start.typing.a.cat.breed": "Zacznij wpisywać rasę kota",
+  "calendar.detail.cat.breed": "Rasa kota",
+  "calendar.detail.select.or.start.typing.an.animal.species": "Wybierz lub zacznij wpisywać gatunek zwierzęcia",
+  "calendar.detail.animal.species": "Gatunek zwierzęcia",
+  "calendar.detail.shifts.saved.saved.of.total": "Zapisane zmiany: {saved} z {total}.",
+  "calendar.detail.recurring.shifts.created.count": "Utworzone cykliczne zmiany: {count}.",
+  "calendar.detail.team.shifts.for.date.have.been.updated": "Zmiany zespołu na {date} zostały zaktualizowane.",
+  "calendar.detail.appointment.changes.have.not.been.saved.yet": "Zmiany wizyty nie zostały jeszcze zapisane.",
+  "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2": "Wybrany lekarz ma już wizytę o tej godzinie.",
+  "calendar.detail.could.not.complete.the.action.please.try.again": "Nie udało się wykonać działania. Spróbuj ponownie.",
+  "calendar.detail.you.do.not.have.permission.to.perform.this.action": "Nie masz uprawnień do wykonania tej czynności.",
+  "calendar.detail.patient.not.found": "Nie znaleziono pacjenta.",
+  "calendar.detail.cannot.create.an.appointment.the.patient.is.marked.as.deceased": "Nie można utworzyć wizyty: pacjent jest oznaczony jako zmarły.",
+  "calendar.detail.complete.the.required.fields": "Uzupełnij wymagane pola.",
+  "calendar.detail.the.end.time.must.be.later.than.the.start.time": "Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.",
+  "calendar.detail.previous.day": "Poprzedni dzień",
+  "calendar.detail.next.day": "Następny dzień",
+  "calendar.detail.previous.week": "Poprzedni tydzień",
+  "calendar.detail.next.week": "Następny tydzień",
+  "calendar.detail.previous.month": "Poprzedni miesiąc",
+  "calendar.detail.next.month": "Następny miesiąc",
+  "calendar.detail.no.specialization.specified": "Nie podano specjalizacji",
+  "calendar.detail.examination": "Badanie",
+  "calendar.detail.ultrasound": "USG",
+  "calendar.detail.procedure.visit": "Wizyta zabiegowa",
+  "calendar.detail.neutering": "Kastracja",
+  "calendar.detail.basic.surgery": "Chirurgia podstawowa",
+  "calendar.detail.the.template.name.is.too.long": "Nazwa szablonu jest za długa.",
+  "calendar.detail.invalid.duration": "Nieprawidłowy czas trwania.",
+  "calendar.detail.invalid.colour": "Nieprawidłowy kolor."
+});
+
+
+Object.assign(APP_TRANSLATIONS.uk, {"calendar.header.search": "Пошук власника, пацієнта...", "calendar.header.clinic": "Клініка", "calendar.header.administrator": "Адміністратор"});
+Object.assign(APP_TRANSLATIONS.en, {"calendar.header.search": "Search owners or patients...", "calendar.header.clinic": "Clinic", "calendar.header.administrator": "Administrator"});
+Object.assign(APP_TRANSLATIONS.de, {"calendar.header.search": "Tierhalter oder Patienten suchen...", "calendar.header.clinic": "Klinik", "calendar.header.administrator": "Administrator"});
+Object.assign(APP_TRANSLATIONS.pl, {"calendar.header.search": "Szukaj właścicieli lub pacjentów...", "calendar.header.clinic": "Klinika", "calendar.header.administrator": "Administrator"});
+
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -1874,9 +3253,69 @@ function translateInterfaceText(
   return text;
 }
 
+function getCalendarLocale() {
+  return { uk: "uk-UA", en: "en-GB", de: "de-DE", pl: "pl-PL" }[getInterfaceLanguage()];
+}
+
+function calendarLocalDate(value) {
+  return new Date(`${String(value).slice(0, 10)}T12:00:00`);
+}
+
+function calendarISODate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatCalendarDate(value, options = { day: "numeric", month: "long", year: "numeric" }) {
+  const date = calendarLocalDate(value);
+  return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat(getCalendarLocale(), options).format(date);
+}
+
+function formatCalendarAppointmentCount(count) {
+  const forms = {
+    uk: { one: "запис", few: "записи", many: "записів", other: "запису" },
+    en: { one: "appointment", other: "appointments" },
+    de: { one: "Termin", other: "Termine" },
+    pl: { one: "wizyta", few: "wizyty", many: "wizyt", other: "wizyty" },
+  }[getInterfaceLanguage()];
+  const number = Number(count) || 0;
+  const category = new Intl.PluralRules(getCalendarLocale()).select(number);
+  return `${number} ${forms[category] || forms.other}`;
+}
+
+function calendarErrorMessage(error, fallback) {
+  const raw = String(error?.message || error || "").trim();
+  const knownErrors = {
+    "time slot busy": "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2",
+    "end_time must be later than start_time": "calendar.detail.the.end.time.must.be.later.than.the.start.time",
+    "missing required fields": "calendar.detail.complete.the.required.fields",
+    "event_id required": "calendar.detail.appointment.not.found",
+    "calendar event not found": "calendar.detail.appointment.not.found",
+    "пацієнта не знайдено.": "calendar.detail.patient.not.found",
+    "неможливо створити запис: пацієнт позначений як померлий.": "calendar.detail.cannot.create.an.appointment.the.patient.is.marked.as.deceased",
+    "you can create calendar events only for yourself": "calendar.detail.you.do.not.have.permission.to.perform.this.action",
+    "you cannot delete this calendar event": "calendar.detail.you.do.not.have.permission.to.perform.this.action",
+    "you cannot update this calendar event": "calendar.detail.you.do.not.have.permission.to.perform.this.action",
+    "you cannot move this event to another employee": "calendar.detail.you.do.not.have.permission.to.perform.this.action",
+    "forbidden": "calendar.detail.you.do.not.have.permission.to.perform.this.action",
+    "access denied": "calendar.detail.you.do.not.have.permission.to.perform.this.action"
+};
+  const sourceKey = Object.keys(APP_TRANSLATIONS.uk).find((key) => APP_TRANSLATIONS.uk[key] === raw);
+  const key = knownErrors[raw.toLowerCase()] || sourceKey;
+  if (key) return translateInterfaceText(key);
+  // Preserve already-localized application messages; never expose raw server text.
+  if (Object.values(APP_TRANSLATIONS[getInterfaceLanguage()]).includes(raw)) return raw;
+  return fallback || translateInterfaceText("calendar.detail.could.not.complete.the.action.please.try.again");
+}
+
 function applyInterfaceTranslations(
   root = document
 ) {
+  for (const attribute of ["placeholder", "title", "aria-label"]) {
+    root.querySelectorAll(`[data-i18n-${attribute}]`).forEach((element) => {
+      element.setAttribute(attribute, translateInterfaceText(element.getAttribute(`data-i18n-${attribute}`)));
+    });
+  }
+
   root
     .querySelectorAll(
       "[data-i18n]"
@@ -2899,7 +4338,7 @@ function openDeleteModal(
     "";
 
   cancelBtn.textContent =
-    "Скасувати";
+    translateInterfaceText("calendar.detail.cancel");
 
   if (mode === "unsaved") {
     if (icon) {
@@ -2909,18 +4348,18 @@ function openDeleteModal(
 
     if (title) {
       title.textContent =
-        "Є незбережені зміни";
+        translateInterfaceText("calendar.detail.unsaved.changes");
     }
 
     confirmBtn.textContent =
-      "Вийти без збереження";
+      translateInterfaceText("calendar.detail.leave.without.saving");
 
     confirmBtn.classList.add(
       "btnDanger"
     );
 
     cancelBtn.textContent =
-      "Продовжити редагування";
+      translateInterfaceText("calendar.detail.continue.editing");
 
     confirmBtn.onclick =
       async () => {
@@ -2944,18 +4383,18 @@ function openDeleteModal(
 
   if (title) {
     title.textContent =
-      "Завершення візиту";
+      translateInterfaceText("calendar.detail.complete.visit");
   }
 
   confirmBtn.textContent =
-    "Завершити візит";
+    translateInterfaceText("calendar.detail.complete.visit.2");
 
   confirmBtn.classList.add(
     "primary"
   );
 
   cancelBtn.textContent =
-    "Повернутися";
+    translateInterfaceText("calendar.detail.go.back");
 
   confirmBtn.onclick =
     async () => {
@@ -2981,11 +4420,11 @@ function openDeleteModal(
 
   if (title) {
     title.textContent =
-      "Лікар не на зміні";
+      translateInterfaceText("calendar.detail.veterinarian.is.off.shift");
   }
 
   confirmBtn.textContent =
-    "Створити все одно";
+    translateInterfaceText("calendar.detail.create.anyway");
 
   confirmBtn.classList.add(
     "primary"
@@ -2995,7 +4434,7 @@ function openDeleteModal(
     "";
 
   cancelBtn.textContent =
-    "Обрати інший час";
+    translateInterfaceText("calendar.detail.choose.another.time");
 
   confirmBtn.onclick =
     async () => {
@@ -3009,7 +4448,7 @@ function openDeleteModal(
         true;
 
       confirmBtn.textContent =
-        "Створюємо…";
+        translateInterfaceText("calendar.detail.creating");
 
       try {
         if (
@@ -3033,7 +4472,7 @@ function openDeleteModal(
           false;
 
         confirmBtn.textContent =
-          "Створити все одно";
+          translateInterfaceText("calendar.detail.create.anyway");
       }
     };
     } else if (
@@ -3046,11 +4485,11 @@ function openDeleteModal(
 
   if (title) {
     title.textContent =
-      "Перетин записів";
+      translateInterfaceText("calendar.detail.overlapping.appointments");
   }
 
   confirmBtn.textContent =
-    "Створити паралельно";
+    translateInterfaceText("calendar.detail.create.overlapping.appointment");
 
   confirmBtn.classList.add(
     "primary"
@@ -3060,7 +4499,7 @@ function openDeleteModal(
     "";
 
   cancelBtn.textContent =
-    "Обрати інший час";
+    translateInterfaceText("calendar.detail.choose.another.time");
 
   confirmBtn.onclick =
     async () => {
@@ -3074,7 +4513,7 @@ function openDeleteModal(
         true;
 
       confirmBtn.textContent =
-        "Створюємо…";
+        translateInterfaceText("calendar.detail.creating");
 
       try {
         if (
@@ -3098,7 +4537,7 @@ function openDeleteModal(
           false;
 
         confirmBtn.textContent =
-          "Створити паралельно";
+          translateInterfaceText("calendar.detail.create.overlapping.appointment");
       }
     };  
     } else if (
@@ -3111,11 +4550,11 @@ function openDeleteModal(
 
   if (title) {
     title.textContent =
-      "Запис створено";
+      translateInterfaceText("calendar.detail.appointment.created");
   }
 
   confirmBtn.textContent =
-    "▶ Почати прийом";
+    translateInterfaceText("calendar.detail.start.visit");
 
   confirmBtn.classList.add(
     "primary"
@@ -3125,7 +4564,7 @@ function openDeleteModal(
     "";
 
   cancelBtn.textContent =
-    "Залишити в календарі";
+    translateInterfaceText("calendar.detail.keep.in.calendar");
 
   confirmBtn.onclick =
     async () => {
@@ -3139,7 +4578,7 @@ function openDeleteModal(
         true;
 
       confirmBtn.textContent =
-        "Створення прийому…";
+        translateInterfaceText("calendar.detail.creating.visit");
 
       try {
         closeDeleteModal();
@@ -3159,7 +4598,7 @@ function openDeleteModal(
         openDeleteModal(
           escapeHtml(
             error?.message ||
-            "Не вдалося почати прийом."
+            translateInterfaceText("calendar.detail.could.not.start.the.visit")
           ),
           null,
           "info"
@@ -3186,11 +4625,11 @@ function openDeleteModal(
 
     if (title) {
       title.textContent =
-        "Готово";
+        translateInterfaceText("calendar.detail.done");
     }
 
     confirmBtn.textContent =
-      "Закрити";
+      translateInterfaceText("calendar.detail.close");
 
     confirmBtn.classList.add(
       "primary"
@@ -3217,18 +4656,18 @@ function openDeleteModal(
 
     if (title) {
       title.textContent =
-        "Скасування платежу";
+        translateInterfaceText("calendar.detail.cancel.payment");
     }
 
     confirmBtn.textContent =
-      "Скасувати платіж";
+      translateInterfaceText("calendar.detail.cancel.payment.2");
 
     confirmBtn.classList.add(
       "btnDanger"
     );
 
     cancelBtn.textContent =
-      "Залишити платіж";
+      translateInterfaceText("calendar.detail.keep.payment");
 
     confirmBtn.onclick =
       async () => {
@@ -3242,7 +4681,7 @@ function openDeleteModal(
           true;
 
         confirmBtn.textContent =
-          "Скасовуємо…";
+          translateInterfaceText("calendar.detail.cancelling");
 
         try {
           if (
@@ -3261,7 +4700,7 @@ function openDeleteModal(
 
           textEl.textContent =
             error?.message ||
-            "Не вдалося скасувати платіж.";
+            translateInterfaceText("calendar.detail.could.not.cancel.the.payment");
 
           confirmBtn.disabled =
             false;
@@ -3270,7 +4709,7 @@ function openDeleteModal(
             false;
 
           confirmBtn.textContent =
-            "Скасувати платіж";
+            translateInterfaceText("calendar.detail.cancel.payment.2");
         }
       };
   } else if (mode === "info") {
@@ -3281,11 +4720,11 @@ function openDeleteModal(
 
     if (title) {
       title.textContent =
-        "Повідомлення";
+        translateInterfaceText("calendar.detail.notification");
     }
 
     confirmBtn.textContent =
-      "Добре";
+      translateInterfaceText("calendar.detail.ok");
 
     confirmBtn.classList.add(
       "primary"
@@ -3306,11 +4745,11 @@ function openDeleteModal(
 
     if (title) {
       title.textContent =
-        "Підтвердження";
+        translateInterfaceText("calendar.detail.confirmation");
     }
 
     confirmBtn.textContent =
-      "Видалити";
+      translateInterfaceText("calendar.detail.delete");
 
     confirmBtn.classList.add(
       "btnDanger"
@@ -3363,7 +4802,7 @@ function closeDeleteModal() {
       "";
 
     cancelBtn.textContent =
-      "Скасувати";
+      translateInterfaceText("calendar.detail.cancel");
   }
 
   deleteCallback =
@@ -3393,7 +4832,7 @@ function showWaitingPatientToast(
   const title =
     String(
       event.title ||
-      "Пацієнт"
+      translateInterfaceText("calendar.detail.patient")
     ).trim();
 
   const startTime =
@@ -3409,7 +4848,7 @@ function showWaitingPatientToast(
 
     <div class="waitingPatientToastContent">
       <strong>
-        Пацієнт очікує
+        ${escapeHtml(translateInterfaceText("calendar.detail.patient.is.waiting"))}
       </strong>
 
       <span>
@@ -3425,7 +4864,7 @@ function showWaitingPatientToast(
     <button
       type="button"
       class="waitingPatientToastClose"
-      aria-label="Закрити"
+      aria-label="${escapeHtml(translateInterfaceText("calendar.detail.close"))}"
     >
       ×
     </button>
@@ -3497,7 +4936,7 @@ function renderWaitingPatientAlert(
   const title =
     String(
       event?.title ||
-      "Пацієнт"
+      translateInterfaceText("calendar.detail.patient")
     ).trim();
 
   const startTime =
@@ -3524,7 +4963,7 @@ function renderWaitingPatientAlert(
 
     <div class="waitingPatientAlertContent">
       <strong>
-        Пацієнт очікує
+        ${escapeHtml(translateInterfaceText("calendar.detail.patient.is.waiting"))}
       </strong>
 
       <span>
@@ -3554,7 +4993,7 @@ function renderWaitingPatientAlert(
 }
 function showCrmNotice({
   icon = "ℹ",
-  title = "Повідомлення",
+  title = translateInterfaceText("calendar.detail.notification"),
   text = "",
 } = {}) {
   openDeleteModal(
@@ -3587,7 +5026,7 @@ function showCrmNotice({
     titleElement.textContent =
       String(
         title ||
-        "Повідомлення"
+        translateInterfaceText("calendar.detail.notification")
       );
   }
 }
@@ -5601,8 +7040,7 @@ async function createAppointmentTemplateApi(
       );
 
       throw new Error(
-        json?.error ||
-        "Не вдалося створити шаблон."
+        calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.template"))
       );
     }
 
@@ -5621,6 +7059,51 @@ async function createAppointmentTemplateApi(
     throw error;
   }
 }
+function getCalendarTemplateName(template = {}) {
+  const defaults = [
+  {
+    "name": "Огляд",
+    "duration_min": 45,
+    "icon": "🩺",
+    "sort_order": 10,
+    "key": "calendar.detail.examination"
+  },
+  {
+    "name": "УЗД",
+    "duration_min": 15,
+    "icon": "📡",
+    "sort_order": 20,
+    "key": "calendar.detail.ultrasound"
+  },
+  {
+    "name": "Маніпуляційний візит",
+    "duration_min": 15,
+    "icon": "💉",
+    "sort_order": 30,
+    "key": "calendar.detail.procedure.visit"
+  },
+  {
+    "name": "Кастрація",
+    "duration_min": 60,
+    "icon": "✂️",
+    "sort_order": 40,
+    "key": "calendar.detail.neutering"
+  },
+  {
+    "name": "Базова хірургія",
+    "duration_min": 120,
+    "icon": "🏥",
+    "sort_order": 50,
+    "key": "calendar.detail.basic.surgery"
+  }
+];
+  const original = defaults.find((item) =>
+    item.name === template.name && item.duration_min === Number(template.duration_min) &&
+    item.icon === template.icon && item.sort_order === Number(template.sort_order) && !template.default_note
+  );
+  return original ? translateInterfaceText(original.key) : (template.name || translateInterfaceText("calendar.detail.visit"));
+}
+
 function renderAppointmentTemplatePicker() {
   const list =
     document.getElementById(
@@ -5645,7 +7128,7 @@ function renderAppointmentTemplatePicker() {
   if (!templates.length) {
     list.innerHTML = `
       <div class="appointmentTemplateEmpty">
-        Шаблонів поки немає
+        ${escapeHtml(translateInterfaceText("calendar.detail.no.templates.yet"))}
       </div>
     `;
 
@@ -5702,8 +7185,7 @@ function renderAppointmentTemplatePicker() {
             <span class="appointmentTemplateText">
               <strong>
                 ${escapeHtml(
-                  template.name ||
-                  "Прийом"
+                  getCalendarTemplateName(template)
                 )}
               </strong>
 
@@ -5711,7 +7193,7 @@ function renderAppointmentTemplatePicker() {
                 ${Number(
                   template.duration_min ||
                   30
-                )} хв
+                )} ${escapeHtml(translateInterfaceText("calendar.detail.min"))}
               </small>
             </span>
           </button>
@@ -5765,12 +7247,12 @@ function updateAppointmentTemplateSelector() {
 
     if (nameElement) {
       nameElement.textContent =
-        "Обрати шаблон";
+        translateInterfaceText("calendar.detail.choose.a.template");
     }
 
     if (metaElement) {
       metaElement.textContent =
-        "Тривалість і тип прийому";
+        translateInterfaceText("calendar.detail.duration.and.visit.type");
     }
 
     if (selector) {
@@ -5797,8 +7279,7 @@ function updateAppointmentTemplateSelector() {
   if (nameElement) {
     nameElement.textContent =
       String(
-        template.name ||
-        "Прийом"
+        getCalendarTemplateName(template)
       );
   }
 
@@ -5807,7 +7288,7 @@ function updateAppointmentTemplateSelector() {
       `${Number(
         template.duration_min ||
         30
-      )} хв · шаблон вибрано`;
+      )} ${escapeHtml(translateInterfaceText("calendar.detail.min.template.selected"))}`;
   }
 
   if (selector) {
@@ -5923,7 +7404,7 @@ function bindAppointmentTemplatePicker() {
             duration;
 
           option.textContent =
-            `${duration} хв`;
+            `${duration} ${escapeHtml(translateInterfaceText("calendar.detail.min"))}`;
 
           durationInput.appendChild(
             option
@@ -6126,7 +7607,7 @@ function openAppointmentTemplateEditor() {
         type="button"
         class="appointmentTemplateEditorClose"
         data-close-template-editor
-        aria-label="Закрити"
+        aria-label="${escapeHtml(translateInterfaceText("calendar.detail.close"))}"
       >
         ×
       </button>
@@ -6142,16 +7623,15 @@ function openAppointmentTemplateEditor() {
 
         <div>
           <span>
-            НОВИЙ ШАБЛОН
+            ${escapeHtml(translateInterfaceText("calendar.detail.new.template"))}
           </span>
 
           <h2>
-            Додати шаблон прийому
+            ${escapeHtml(translateInterfaceText("calendar.detail.add.appointment.template"))}
           </h2>
 
           <p>
-            Створіть власний тип запису
-            для швидкої роботи календаря.
+            ${escapeHtml(translateInterfaceText("calendar.detail.create.a.custom.appointment.type.to.speed.up.scheduling"))}
           </p>
         </div>
       </header>
@@ -6167,7 +7647,7 @@ function openAppointmentTemplateEditor() {
             class="appointmentTemplateEditorField templateNameField"
           >
             <span>
-              Назва шаблону
+              ${escapeHtml(translateInterfaceText("calendar.detail.template.name"))}
             </span>
 
             <input
@@ -6175,7 +7655,7 @@ function openAppointmentTemplateEditor() {
               type="text"
               maxlength="100"
               autocomplete="off"
-              placeholder="Наприклад: Повторний огляд"
+              placeholder="${escapeHtml(translateInterfaceText("calendar.detail.for.example.follow.up.examination"))}"
               required
             >
           </label>
@@ -6184,7 +7664,7 @@ function openAppointmentTemplateEditor() {
             class="appointmentTemplateEditorField"
           >
             <span>
-              Тривалість
+              ${escapeHtml(translateInterfaceText("calendar.detail.duration"))}
             </span>
 
             <div
@@ -6201,7 +7681,7 @@ function openAppointmentTemplateEditor() {
               >
 
               <b>
-                хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.min"))}
               </b>
             </div>
           </label>
@@ -6210,7 +7690,7 @@ function openAppointmentTemplateEditor() {
             class="appointmentTemplateEditorField"
           >
             <span>
-              Іконка
+              ${escapeHtml(translateInterfaceText("calendar.detail.icon"))}
             </span>
 
             <input
@@ -6226,7 +7706,7 @@ function openAppointmentTemplateEditor() {
             class="appointmentTemplateEditorField"
           >
             <span>
-              Колір
+              ${escapeHtml(translateInterfaceText("calendar.detail.colour"))}
             </span>
 
             <input
@@ -6241,14 +7721,14 @@ function openAppointmentTemplateEditor() {
           class="appointmentTemplateEditorField"
         >
           <span>
-            Стандартний коментар
+            ${escapeHtml(translateInterfaceText("calendar.detail.default.comment"))}
           </span>
 
           <textarea
             id="appointmentTemplateEditorNote"
             rows="3"
             maxlength="1000"
-            placeholder="Необов'язково. Наприклад: контрольний огляд після лікування..."
+            placeholder="${escapeHtml(translateInterfaceText("calendar.detail.optional.for.example.follow.up.examination.after.treatment"))}"
           ></textarea>
         </label>
 
@@ -6264,19 +7744,19 @@ function openAppointmentTemplateEditor() {
 
           <div>
             <span>
-              Попередній перегляд
+              ${escapeHtml(translateInterfaceText("calendar.detail.preview"))}
             </span>
 
             <strong
               id="appointmentTemplateEditorPreviewName"
             >
-              Новий шаблон
+              ${escapeHtml(translateInterfaceText("calendar.detail.new.template.2"))}
             </strong>
 
             <small
               id="appointmentTemplateEditorPreviewMeta"
             >
-              30 хв
+              ${escapeHtml(translateInterfaceText("calendar.detail.30.min"))}
             </small>
           </div>
         </div>
@@ -6294,7 +7774,7 @@ function openAppointmentTemplateEditor() {
             class="appointmentTemplateEditorCancel"
             data-close-template-editor
           >
-            Скасувати
+            ${escapeHtml(translateInterfaceText("calendar.detail.cancel"))}
           </button>
 
           <button
@@ -6302,7 +7782,7 @@ function openAppointmentTemplateEditor() {
             class="appointmentTemplateEditorSave"
             id="appointmentTemplateEditorSave"
           >
-            Створити шаблон
+            ${escapeHtml(translateInterfaceText("calendar.detail.create.template"))}
           </button>
         </footer>
       </form>
@@ -6415,12 +7895,12 @@ function openAppointmentTemplateEditor() {
     if (previewName) {
       previewName.textContent =
         name ||
-        "Новий шаблон";
+        translateInterfaceText("calendar.detail.new.template.2");
     }
 
     if (previewMeta) {
       previewMeta.textContent =
-        `${duration} хв`;
+        `${duration} ${escapeHtml(translateInterfaceText("calendar.detail.min"))}`;
     }
   };
 
@@ -6479,7 +7959,7 @@ function openAppointmentTemplateEditor() {
         if (!name) {
           if (errorBox) {
             errorBox.textContent =
-              "Вкажіть назву шаблону.";
+              translateInterfaceText("calendar.detail.enter.a.template.name");
           }
 
           nameInput?.focus();
@@ -6496,7 +7976,7 @@ function openAppointmentTemplateEditor() {
         ) {
           if (errorBox) {
             errorBox.textContent =
-              "Тривалість має бути від 5 до 480 хвилин.";
+              translateInterfaceText("calendar.detail.duration.must.be.between.5.and.480.minutes");
           }
 
           durationInput?.focus();
@@ -6514,7 +7994,7 @@ function openAppointmentTemplateEditor() {
             true;
 
           saveButton.textContent =
-            "Створюємо…";
+            translateInterfaceText("calendar.detail.creating");
         }
 
         if (errorBox) {
@@ -6546,7 +8026,7 @@ function openAppointmentTemplateEditor() {
 
           if (!created?.id) {
             throw new Error(
-              "Сервер не повернув створений шаблон."
+              translateInterfaceText("calendar.detail.the.server.did.not.return.the.created.template")
             );
           }
 
@@ -6561,8 +8041,7 @@ function openAppointmentTemplateEditor() {
         } catch (error) {
           if (errorBox) {
             errorBox.textContent =
-              error?.message ||
-              "Не вдалося створити шаблон.";
+              calendarErrorMessage(error?.message, translateInterfaceText("calendar.detail.could.not.create.the.template"));
           }
 
           if (saveButton) {
@@ -6570,7 +8049,7 @@ function openAppointmentTemplateEditor() {
               false;
 
             saveButton.textContent =
-              "Створити шаблон";
+              translateInterfaceText("calendar.detail.create.template");
           }
         }
       }
@@ -7066,13 +8545,13 @@ notes:
 
     if (!res.ok) {
       console.error("API /patients POST HTTP", res.status, text);
-      alert(`Помилка сервера при створенні пацієнта (HTTP ${res.status})`);
+      alert(calendarErrorMessage(null, translateInterfaceText("calendar.detail.could.not.create.the.patient")));
       return null;
     }
 
     if (!json || !json.ok) {
       console.error("API /patients POST bad json", json, text);
-      alert(json?.error || "Помилка створення пацієнта");
+      alert(calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.patient")));
       return null;
     }
 
@@ -7087,7 +8566,7 @@ notes:
     return created;
   } catch (err) {
     console.error("createPatientApi failed:", err);
-    alert("Помилка зʼєднання з сервером");
+    alert(calendarErrorMessage(null, translateInterfaceText("calendar.detail.could.not.create.the.patient")));
     return null;
   }
 }
@@ -7680,10 +9159,7 @@ async function createOwner(
     null;
 
   if (!existingOwner?.id) {
-    alert(
-      json?.message ||
-      "Власник із таким номером уже є в базі."
-    );
+    alert(calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.owner.2")));
 
     return null;
   }
@@ -7733,11 +9209,7 @@ if (
     text
   );
 
-  alert(
-    json?.message ||
-    json?.error ||
-    `Не вдалося створити власника (HTTP ${res.status})`
-  );
+  alert(calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.owner.2")));
 
   return null;
 }
@@ -7754,9 +9226,7 @@ if (
       error
     );
 
-    alert(
-      "Помилка створення власника"
-    );
+    alert(calendarErrorMessage(null, translateInterfaceText("calendar.detail.could.not.create.the.owner.2")));
 
     return null;
   }
@@ -7962,13 +9432,13 @@ async function createVisitApi(payload) {
 
     if (!res.ok) {
       console.error("API /visits POST HTTP", res.status, text);
-      alert(`Помилка сервера при створенні візиту (HTTP ${res.status})`);
+      alert(calendarErrorMessage(null, translateInterfaceText("calendar.detail.could.not.create.the.medical.visit")));
       return null;
     }
 
     if (!json || !json.ok) {
       console.error("API /visits POST bad json:", json, text);
-      alert(json?.error || "Помилка створення візиту");
+      alert(calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.medical.visit")));
       return null;
     }
 
@@ -7977,7 +9447,7 @@ async function createVisitApi(payload) {
     return created;
   } catch (e) {
     console.error("createVisitApi failed:", e);
-    alert("Помилка зʼєднання з сервером");
+    alert(calendarErrorMessage(null, translateInterfaceText("calendar.detail.could.not.create.the.medical.visit")));
     return null;
   }
 }
@@ -13046,7 +14516,7 @@ function renderStaffSpecializationTags(
     <span class="${escapeHtml(className)} is-empty">
       ${escapeHtml(
         staffRow?.specialization ||
-        "Напрям не вказано"
+        translateInterfaceText("calendar.detail.no.specialization.specified")
       )}
     </span>
   `;
@@ -48640,11 +50110,8 @@ async function saveStaffScheduleApi(
       );
 
       alert(
-        "Не вдалося зберегти зміну: " +
-        (
-          error?.message ||
-          error
-        )
+        (translateInterfaceText("calendar.detail.could.not.save.the.shift") + " ") +
+        calendarErrorMessage(error)
       );
 
       return null;
@@ -48716,7 +50183,7 @@ async function renderCalendarTab() {
 
   page.innerHTML = `
     <div class="card">
-      <div class="hint">Завантаження календаря…</div>
+      <div class="hint">${escapeHtml(translateInterfaceText("calendar.detail.loading.calendar"))}</div>
     </div>
   `;
 
@@ -48814,7 +50281,7 @@ events.forEach(
   const todayEvents = events.filter((x) => String(x.event_date || "") === today);
 
   if (calendarMode === "week") {
-    const base = new Date(today);
+    const base = calendarLocalDate(today);
     const day = base.getDay() || 7;
     const monday = new Date(base);
     monday.setDate(base.getDate() - day + 1);
@@ -48822,10 +50289,10 @@ events.forEach(
     const weekDays = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      return d.toISOString().slice(0, 10);
+      return calendarISODate(d);
     });
 
-    const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+    const dayNames = [translateInterfaceText("calendar.detail.mon"), translateInterfaceText("calendar.detail.tue"), translateInterfaceText("calendar.detail.wed"), translateInterfaceText("calendar.detail.thu"), translateInterfaceText("calendar.detail.fri"), translateInterfaceText("calendar.detail.sat"), translateInterfaceText("calendar.detail.sun")];
     const weekEvents = events.filter((ev) => weekDays.includes(String(ev.event_date || "")));
 
     page.innerHTML = `
@@ -48889,9 +50356,9 @@ events.forEach(
         </div>
 
         <div class="calendarTop">
-          <button class="ghost" id="calPrevWeek" type="button">←</button>
-          <div class="calendarDate">${escapeHtml(weekDays[0])} — ${escapeHtml(weekDays[6])}</div>
-          <button class="ghost" id="calNextWeek" type="button">→</button>
+          <button class="ghost" id="calPrevWeek" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.previous.week"))}" type="button">←</button>
+          <div class="calendarDate">${escapeHtml(formatCalendarDate(weekDays[0]))} — ${escapeHtml(formatCalendarDate(weekDays[6]))}</div>
+          <button class="ghost" id="calNextWeek" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.next.week"))}" type="button">→</button>
         </div>
 
         <div class="weekCalendarGrid">
@@ -48917,7 +50384,7 @@ events.forEach(
     type="button"
     class="weekCreateVisitButton"
     data-week-create-date="${escapeHtml(date)}"
-    title="Створити запис"
+    title="${escapeHtml(translateInterfaceText("calendar.detail.create.appointment"))}"
   >
     ＋
   </button>
@@ -48931,14 +50398,14 @@ events.forEach(
                           <div class="weekEventTime">
                             ${escapeHtml(String(ev.start_time || "").slice(0, 5))} — ${escapeHtml(String(ev.end_time || "").slice(0, 5))}
                           </div>
-                          <div class="weekEventTitle">${escapeHtml(ev.title || "Візит")}</div>
+                          <div class="weekEventTitle">${escapeHtml(ev.title || translateInterfaceText("calendar.detail.visit.2"))}</div>
                           <div class="weekEventVet">
-                            👨‍⚕️ ${escapeHtml((staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || "Лікар не вказаний")}
+                            👨‍⚕️ ${escapeHtml((staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || translateInterfaceText("calendar.detail.no.veterinarian.assigned"))}
                           </div>
                           ${ev.note ? `<div class="weekEventMeta">${escapeHtml(ev.note)}</div>` : ""}
                         </div>
                       `).join("")
-                      : `<div class="weekEmpty">Немає записів</div>`
+                      : `<div class="weekEmpty">${escapeHtml(translateInterfaceText("calendar.detail.no.appointments"))}</div>`
                   }
                 </div>
               </div>
@@ -48966,14 +50433,14 @@ events.forEach(
     $("#calPrevWeek")?.addEventListener("click", async () => {
       const d = new Date(weekDays[0]);
       d.setDate(d.getDate() - 7);
-      window.__calendarDate = d.toISOString().slice(0, 10);
+      window.__calendarDate = calendarISODate(d);
       await renderCalendarTab();
     });
 
     $("#calNextWeek")?.addEventListener("click", async () => {
       const d = new Date(weekDays[0]);
       d.setDate(d.getDate() + 7);
-      window.__calendarDate = d.toISOString().slice(0, 10);
+      window.__calendarDate = calendarISODate(d);
       await renderCalendarTab();
     });
 $$("[data-week-create-date]")
@@ -49087,7 +50554,7 @@ const monthDays =
     const interfaceLocale =
       {
         uk: "uk-UA",
-        en: "en-US",
+        en: "en-GB",
         de: "de-DE",
         pl: "pl-PL",
       }[
@@ -49320,7 +50787,7 @@ const monthDays =
             class="
               ghost
             "
-            id="calPrevMonth"
+            id="calPrevMonth" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.previous.month"))}"
             type="button"
           >
             ←
@@ -49340,7 +50807,7 @@ const monthDays =
             class="
               ghost
             "
-            id="calNextMonth"
+            id="calNextMonth" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.next.month"))}"
             type="button"
           >
             →
@@ -49740,7 +51207,7 @@ const openMonthScheduleEditor = (
                   <strong>
                     ${escapeHtml(
                       doc.name ||
-                      "Працівник"
+                      translateInterfaceText("calendar.detail.employee")
                     )}
                   </strong>
 
@@ -49748,8 +51215,8 @@ const openMonthScheduleEditor = (
                     ${
                       doc.role ===
                       "assistant"
-                        ? "Асистент"
-                        : "Ветеринар"
+                        ? translateInterfaceText("calendar.detail.assistant")
+                        : translateInterfaceText("calendar.detail.veterinarian")
                     }
                   </span>
                 </div>
@@ -49774,8 +51241,8 @@ const openMonthScheduleEditor = (
                 <b>
                   ${
                     active
-                      ? "На зміні"
-                      : "Вихідний"
+                      ? translateInterfaceText("calendar.detail.on.shift")
+                      : translateInterfaceText("calendar.detail.day.off")
                   }
                 </b>
               </button>
@@ -49784,7 +51251,7 @@ const openMonthScheduleEditor = (
                 class="monthScheduleEditorTime"
               >
                 <span>
-                  Початок
+                  ${escapeHtml(translateInterfaceText("calendar.detail.start"))}
                 </span>
 
                 <input
@@ -49807,7 +51274,7 @@ const openMonthScheduleEditor = (
                 class="monthScheduleEditorTime"
               >
                 <span>
-                  Кінець
+                  ${escapeHtml(translateInterfaceText("calendar.detail.end"))}
                 </span>
 
                 <input
@@ -49851,26 +51318,22 @@ const openMonthScheduleEditor = (
       >
         <div>
           <span>
-            ГРАФІК КОМАНДИ
+            ${escapeHtml(translateInterfaceText("calendar.detail.team.schedule"))}
           </span>
 
           <h2>
-            📅 ${escapeHtml(
-              date
-            )}
+            📅 ${escapeHtml(formatCalendarDate(date))}
           </h2>
 
           <p>
-            Налаштуйте статус
-            та години роботи
-            кожного співробітника.
+            ${escapeHtml(translateInterfaceText("calendar.detail.configure.the.status.and.working.hours.of.each.employee"))}
           </p>
         </div>
 
         <button
           type="button"
           class="monthScheduleEditorClose"
-          id="monthScheduleEditorClose"
+          id="monthScheduleEditorClose" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.close"))}"
         >
           ×
         </button>
@@ -49884,14 +51347,14 @@ const openMonthScheduleEditor = (
   class="active"
   id="monthScheduleSingleTab"
 >
-  Один день
+  ${escapeHtml(translateInterfaceText("calendar.detail.single.day"))}
 </button>
 
         <button
           type="button"
           id="monthScheduleRepeatTab"
         >
-          Повторюваний графік
+          ${escapeHtml(translateInterfaceText("calendar.detail.recurring.schedule"))}
         </button>
       </div>
 
@@ -49899,19 +51362,19 @@ const openMonthScheduleEditor = (
         class="monthScheduleEditorColumns"
       >
         <span>
-          Працівник
+          ${escapeHtml(translateInterfaceText("calendar.detail.employee"))}
         </span>
 
         <span>
-          Статус
+          ${escapeHtml(translateInterfaceText("calendar.detail.status"))}
         </span>
 
         <span>
-          Початок
+          ${escapeHtml(translateInterfaceText("calendar.detail.start"))}
         </span>
 
         <span>
-          Кінець
+          ${escapeHtml(translateInterfaceText("calendar.detail.end"))}
         </span>
       </div>
 
@@ -49935,12 +51398,11 @@ const openMonthScheduleEditor = (
 
       <div>
         <strong>
-          Повторюваний графік
+          ${escapeHtml(translateInterfaceText("calendar.detail.recurring.schedule"))}
         </strong>
 
         <small>
-          Налаштуйте регулярні зміни
-          на декілька тижнів вперед.
+          ${escapeHtml(translateInterfaceText("calendar.detail.configure.recurring.shifts.for.several.weeks.ahead"))}
         </small>
       </div>
     </div>
@@ -49950,7 +51412,7 @@ const openMonthScheduleEditor = (
 
     <label class="monthScheduleRepeatField">
       <span>
-        Працівник
+        ${escapeHtml(translateInterfaceText("calendar.detail.employee"))}
       </span>
 
       <select
@@ -49968,7 +51430,7 @@ const openMonthScheduleEditor = (
               >
                 ${escapeHtml(
                   doc.name ||
-                  "Працівник"
+                  translateInterfaceText("calendar.detail.employee")
                 )}
               </option>
             `
@@ -49979,7 +51441,7 @@ const openMonthScheduleEditor = (
 
     <div class="monthScheduleRepeatField monthScheduleRepeatDaysField">
       <span>
-        Дні тижня
+        ${escapeHtml(translateInterfaceText("calendar.detail.days.of.the.week"))}
       </span>
 
       <div class="monthScheduleRepeatDays">
@@ -49987,56 +51449,56 @@ const openMonthScheduleEditor = (
           type="button"
           data-repeat-weekday="1"
         >
-          Пн
+          ${escapeHtml(translateInterfaceText("calendar.detail.mon"))}
         </button>
 
         <button
           type="button"
           data-repeat-weekday="2"
         >
-          Вт
+          ${escapeHtml(translateInterfaceText("calendar.detail.tue"))}
         </button>
 
         <button
           type="button"
           data-repeat-weekday="3"
         >
-          Ср
+          ${escapeHtml(translateInterfaceText("calendar.detail.wed"))}
         </button>
 
         <button
           type="button"
           data-repeat-weekday="4"
         >
-          Чт
+          ${escapeHtml(translateInterfaceText("calendar.detail.thu"))}
         </button>
 
         <button
           type="button"
           data-repeat-weekday="5"
         >
-          Пт
+          ${escapeHtml(translateInterfaceText("calendar.detail.fri"))}
         </button>
 
         <button
           type="button"
           data-repeat-weekday="6"
         >
-          Сб
+          ${escapeHtml(translateInterfaceText("calendar.detail.sat"))}
         </button>
 
         <button
           type="button"
           data-repeat-weekday="0"
         >
-          Нд
+          ${escapeHtml(translateInterfaceText("calendar.detail.sun"))}
         </button>
       </div>
     </div>
 
     <label class="monthScheduleRepeatField">
       <span>
-        Початок зміни
+        ${escapeHtml(translateInterfaceText("calendar.detail.shift.start"))}
       </span>
 
       <input
@@ -50048,7 +51510,7 @@ const openMonthScheduleEditor = (
 
     <label class="monthScheduleRepeatField">
       <span>
-        Кінець зміни
+        ${escapeHtml(translateInterfaceText("calendar.detail.shift.end"))}
       </span>
 
       <input
@@ -50060,7 +51522,7 @@ const openMonthScheduleEditor = (
 
     <label class="monthScheduleRepeatField">
       <span>
-        Починаючи з
+        ${escapeHtml(translateInterfaceText("calendar.detail.starting.from"))}
       </span>
 
       <input
@@ -50074,7 +51536,7 @@ const openMonthScheduleEditor = (
 
     <label class="monthScheduleRepeatField">
       <span>
-        До дати
+        ${escapeHtml(translateInterfaceText("calendar.detail.until.date"))}
       </span>
 
       <input
@@ -50089,9 +51551,7 @@ const openMonthScheduleEditor = (
   </div>
 
   <div class="monthScheduleRepeatHint">
-    Наприклад:
-    Пн · Ср · Пт,
-    09:00–18:00.
+    ${escapeHtml(translateInterfaceText("calendar.detail.example.mon.wed.fri.09.00.18.00"))}
   </div>
 </div>
 
@@ -50103,7 +51563,7 @@ const openMonthScheduleEditor = (
           class="ghost"
           id="monthScheduleEditorCancel"
         >
-          Скасувати
+          ${escapeHtml(translateInterfaceText("calendar.detail.cancel"))}
         </button>
 
         <button
@@ -50111,7 +51571,7 @@ const openMonthScheduleEditor = (
           class="primary"
           id="monthScheduleEditorSave"
         >
-          💾 Зберегти день
+          ${escapeHtml(translateInterfaceText("calendar.detail.save.day"))}
         </button>
       </footer>
     </section>
@@ -50425,9 +51885,9 @@ const dateTo =
 ) {
   showCrmNotice({
     icon: "⚠",
-    title: "Не всі дані заповнені",
+    title: translateInterfaceText("calendar.detail.required.fields.are.missing"),
     text:
-      "Оберіть працівника, дні тижня, години зміни та період.",
+      translateInterfaceText("calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range"),
   });
 
   return;
@@ -50438,9 +51898,9 @@ if (
 ) {
   showCrmNotice({
     icon: "⚠",
-    title: "Некоректний час",
+    title: translateInterfaceText("calendar.detail.invalid.time"),
     text:
-      "Кінець зміни має бути пізніше за початок.",
+      translateInterfaceText("calendar.detail.the.shift.must.end.after.it.starts"),
   });
 
   return;
@@ -50451,9 +51911,9 @@ if (
 ) {
   showCrmNotice({
     icon: "⚠",
-    title: "Некоректний період",
+    title: translateInterfaceText("calendar.detail.invalid.date.range"),
     text:
-      "Дата завершення не може бути раніше дати початку.",
+      translateInterfaceText("calendar.detail.the.end.date.cannot.be.earlier.than.the.start.date"),
   });
 
   return;
@@ -50511,9 +51971,9 @@ while (
 if (!datesToSave.length) {
   showCrmNotice({
     icon: "ℹ",
-    title: "Немає змін",
+    title: translateInterfaceText("calendar.detail.no.shifts"),
     text:
-      "У вибраному періоді немає відповідних днів тижня.",
+      translateInterfaceText("calendar.detail.the.selected.period.contains.none.of.the.selected.weekdays"),
   });
 
   return;
@@ -50528,7 +51988,7 @@ if (saveButton) {
   saveButton.disabled = true;
 
   saveButton.textContent =
-    `Збереження… 0/${datesToSave.length}`;
+    `${escapeHtml(translateInterfaceText("calendar.detail.saving.0"))}${datesToSave.length}`;
 }
 
 let savedCount = 0;
@@ -50568,9 +52028,9 @@ for (
 
     showCrmNotice({
       icon: "⚠",
-      title: "Не вдалося зберегти графік",
+      title: translateInterfaceText("calendar.detail.could.not.save.the.schedule"),
       text:
-        `Збережено ${savedCount} із ${datesToSave.length} змін.`,
+        translateInterfaceText("calendar.detail.shifts.saved.saved.of.total", { saved: savedCount, total: datesToSave.length }),
     });
 
     return;
@@ -50580,7 +52040,7 @@ for (
 
   if (saveButton) {
     saveButton.textContent =
-      `Збереження… ${savedCount}/${datesToSave.length}`;
+      `${escapeHtml(translateInterfaceText("calendar.detail.saving"))} ${savedCount}/${datesToSave.length}`;
   }
 }
 
@@ -50590,9 +52050,9 @@ await renderCalendarTab();
 
 showCrmNotice({
   icon: "✓",
-  title: "Графік застосовано",
+  title: translateInterfaceText("calendar.detail.schedule.applied"),
   text:
-    `Створено ${savedCount} повторюваних змін.`,
+    translateInterfaceText("calendar.detail.recurring.shifts.created.count", { count: savedCount }),
 });
 
 return;
@@ -50671,19 +52131,19 @@ return;
                 "⚠",
 
               title:
-                "Перевірте час зміни",
+                translateInterfaceText("calendar.detail.check.shift.times"),
 
               text:
                 `${
                   doc.name ||
-                  "Працівник"
-                }: час завершення зміни має бути пізніше за час початку.`,
+                  translateInterfaceText("calendar.detail.employee")
+                }${escapeHtml(translateInterfaceText("calendar.detail.the.shift.must.end.after.it.starts.2"))}`,
             });
 
             return;
           }
 
-          await saveStaffScheduleApi({
+          const savedShift = await saveStaffScheduleApi({
             work_date:
               date,
 
@@ -50699,6 +52159,7 @@ return;
             end_time:
               endTime,
           });
+          if (!savedShift) return;
         }
 
         closeEditor();
@@ -50710,10 +52171,10 @@ return;
             "✓",
 
           title:
-            "Графік збережено",
+            translateInterfaceText("calendar.detail.schedule.saved"),
 
           text:
-            `Зміни команди на ${date} успішно оновлено.`,
+            translateInterfaceText("calendar.detail.team.shifts.for.date.have.been.updated", { date: formatCalendarDate(date) }),
         });
 
       } catch (error) {
@@ -50727,11 +52188,10 @@ return;
             "⚠",
 
           title:
-            "Не вдалося зберегти графік",
+            translateInterfaceText("calendar.detail.could.not.save.the.schedule"),
 
           text:
-            error?.message ||
-            "Спробуйте ще раз.",
+            calendarErrorMessage(error, translateInterfaceText("calendar.detail.please.try.again")),
         });
 
       } finally {
@@ -50902,7 +52362,7 @@ return;
           class="
             monthDaySummaryClose
           "
-          id="monthDrawerClose"
+          id="monthDrawerClose" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.close"))}"
           aria-label="${escapeHtml(
             translateInterfaceText(
               "schedule.close"
@@ -51563,7 +53023,7 @@ finishOverlapGroup();
                 const title =
                   String(
                     event.title ||
-                    "Прийом"
+                    translateInterfaceText("calendar.detail.visit")
                   );
 
                 const note =
@@ -51691,8 +53151,8 @@ z-index:${
                           event.id
                         )
                       )}"
-                      title="Видалити запис"
-                      aria-label="Видалити запис"
+                      title="${escapeHtml(translateInterfaceText("calendar.detail.delete.appointment"))}"
+                      aria-label="${escapeHtml(translateInterfaceText("calendar.detail.delete.appointment"))}"
                     >
                       ···
                     </button>
@@ -51871,12 +53331,12 @@ return `
                 ${escapeHtml(
                   String(
                     doc.name ||
-                    "В"
+                    translateInterfaceText("calendar.detail.v")
                   )
                     .trim()
                     .charAt(0)
                     .toUpperCase() ||
-                  "В"
+                  translateInterfaceText("calendar.detail.v")
                 )}
               </div>
 
@@ -51886,7 +53346,7 @@ return `
                 <strong>
                   ${escapeHtml(
                     doc.name ||
-                    "Працівник"
+                    translateInterfaceText("calendar.detail.employee")
                   )}
                 </strong>
 
@@ -51894,17 +53354,11 @@ return `
   ${escapeHtml(
     doc.role ===
     "assistant"
-      ? "Асистент"
-      : "Ветеринар"
+      ? translateInterfaceText("calendar.detail.assistant")
+      : translateInterfaceText("calendar.detail.veterinarian")
   )}
   ·
-  ${docEvents.length}
-  ${
-    docEvents.length ===
-    1
-      ? "запис"
-      : "записів"
-  }
+  ${escapeHtml(formatCalendarAppointmentCount(docEvents.length))}
 
   ${
     (() => {
@@ -51989,7 +53443,7 @@ ${
         "
       >
         <span>
-          Поза зміною
+          ${escapeHtml(translateInterfaceText("calendar.detail.off.shift"))}
         </span>
       </div>
     `
@@ -52010,7 +53464,7 @@ ${
         "
       >
         <span>
-          Поза зміною
+          ${escapeHtml(translateInterfaceText("calendar.detail.off.shift"))}
         </span>
       </div>
     `
@@ -52066,7 +53520,7 @@ const staffPaletteHtml =
             👨‍⚕️
             ${escapeHtml(
               doc.name ||
-              "Працівник"
+              translateInterfaceText("calendar.detail.employee")
             )}
           </div>
 
@@ -52074,8 +53528,8 @@ const staffPaletteHtml =
             ${escapeHtml(
               doc.role ===
               "assistant"
-                ? "Асистент"
-                : "Ветеринар"
+                ? translateInterfaceText("calendar.detail.assistant")
+                : translateInterfaceText("calendar.detail.veterinarian")
             )}
           </div>
 
@@ -52166,21 +53620,19 @@ page.innerHTML = `
     <div class="calendarTop">
       <button
         class="ghost"
-        id="calPrevDay"
+        id="calPrevDay" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.previous.day"))}"
         type="button"
       >
         ←
       </button>
 
       <div class="calendarDate">
-        ${escapeHtml(
-          today
-        )}
+        ${escapeHtml(formatCalendarDate(today))}
       </div>
 
       <button
         class="ghost"
-        id="calNextDay"
+        id="calNextDay" aria-label="${escapeHtml(translateInterfaceText("calendar.detail.next.day"))}"
         type="button"
       >
         →
@@ -52209,7 +53661,7 @@ page.innerHTML = `
             <div
               class="calendarTimelineTimeHead"
             >
-              Час
+              ${escapeHtml(translateInterfaceText("calendar.detail.time"))}
             </div>
 
             <div
@@ -52667,7 +54119,7 @@ $("#calendarCreateVisitButton")
 
       if (!defaultStaffId) {
         openDeleteModal(
-          "Спочатку додайте хоча б одного співробітника.",
+          translateInterfaceText("calendar.detail.add.at.least.one.employee.first"),
           null,
           "info"
         );
@@ -52682,16 +54134,16 @@ $("#calendarCreateVisitButton")
     }
   );
   $("#calPrevDay")?.addEventListener("click", async () => {
-    const d = new Date(today);
+    const d = calendarLocalDate(today);
     d.setDate(d.getDate() - 1);
-    window.__calendarDate = d.toISOString().slice(0, 10);
+    window.__calendarDate = calendarISODate(d);
     await renderCalendarTab();
   });
 
   $("#calNextDay")?.addEventListener("click", async () => {
-    const d = new Date(today);
+    const d = calendarLocalDate(today);
     d.setDate(d.getDate() + 1);
-    window.__calendarDate = d.toISOString().slice(0, 10);
+    window.__calendarDate = calendarISODate(d);
     await renderCalendarTab();
   });
 
@@ -52706,7 +54158,7 @@ $("#calendarCreateVisitButton")
     if (!id) return;
 
     openDeleteModal(
-      "Видалити цей запис з календаря?",
+      translateInterfaceText("calendar.detail.delete.this.appointment.from.the.calendar"),
       async () => {
         const ok =
           await deleteCalendarEventApi(id);
@@ -52727,7 +54179,7 @@ $("#calendarCreateVisitButton")
       if (!id) return;
 
       const ev = todayEvents.find((x) => String(x.id) === String(id));
-      if (!ev) return alert("Запис не знайдено");
+      if (!ev) return alert(translateInterfaceText("calendar.detail.appointment.not.found"));
 
       openCalendarEditModal(ev, today, async () => {
         await renderCalendarTab();
@@ -53244,32 +54696,8 @@ async function createStaffApi(payload) {
     return null;
   }
 }
-function getCalendarCreateErrorMessage(
-  errorText = ""
-) {
-  const raw =
-    String(errorText || "")
-      .trim()
-      .toLowerCase();
-
-  if (
-    raw === "time slot busy"
-  ) {
-    return "Цей час вже зайнятий у вибраного лікаря.";
-  }
-
-  if (
-  raw ===
-  "end_time must be later than start_time"
-) {
-  return "Зміна лікаря на сьогодні вже завершена. Оберіть раніший час прийому або перенесіть запис на наступний день.";
-}
-
-  return (
-    String(errorText || "")
-      .trim() ||
-    "Не вдалося створити запис."
-  );
+function getCalendarCreateErrorMessage(errorText = "") {
+  return calendarErrorMessage(errorText, translateInterfaceText("calendar.detail.could.not.create.the.appointment"));
 }
 async function createCalendarEventApi(payload) {
   try {
@@ -53283,7 +54711,7 @@ async function createCalendarEventApi(payload) {
     if (!json.ok) {
   showCrmNotice({
     icon: "⚠",
-    title: "Не вдалося створити запис",
+    title: translateInterfaceText("calendar.detail.could.not.create.appointment"),
     text: getCalendarCreateErrorMessage(
       json.error
     ),
@@ -53296,10 +54724,10 @@ async function createCalendarEventApi(payload) {
     console.error("createCalendarEventApi failed:", e);
     showCrmNotice({
   icon: "⚠",
-  title: "Помилка створення запису",
+  title: translateInterfaceText("calendar.detail.appointment.creation.failed"),
   text:
-    "Сталася помилка під час створення запису. " +
-    (e?.message || e || ""),
+    (translateInterfaceText("calendar.detail.an.error.occurred.while.creating.the.appointment") + " ") +
+    calendarErrorMessage(e),
 });
     return null;
   }
@@ -53315,13 +54743,13 @@ async function updateCalendarEventApi(eventId, payload) {
     const json = await res.json();
 
     if (!json.ok) {
-      alert("Не вдалося оновити запис: " + (json.error || "unknown error"));
+      alert((translateInterfaceText("calendar.detail.could.not.update.the.appointment") + " ") + calendarErrorMessage(json.error));
       return null;
     }
     return json.data || json.item || null;
   } catch (e) {
     console.error("updateCalendarEventApi failed:", e);
-    alert("Помилка оновлення запису: " + (e?.message || e));
+    alert((translateInterfaceText("calendar.detail.appointment.update.failed") + " ") + calendarErrorMessage(e));
     return null;
   }
 }
@@ -53330,8 +54758,7 @@ async function deleteCalendarEventApi(eventId) {
     if (!isOwner() && !isAdmin()) {
     openDeleteModal(
   `
-    Видаляти записи з календаря може лише
-    адміністратор або власник клініки.
+    ${escapeHtml(translateInterfaceText("calendar.detail.only.a.clinic.administrator.or.owner.can.delete.calendar.appointments"))}
   `,
   null,
   "info"
@@ -53346,13 +54773,13 @@ return false;
     const json = await res.json();
 
     if (!json.ok) {
-      alert("Не вдалося видалити запис: " + (json.error || "unknown error"));
+      alert((translateInterfaceText("calendar.detail.could.not.delete.the.appointment") + " ") + calendarErrorMessage(json.error));
       return false;
     }
     return true;
   } catch (e) {
     console.error("deleteCalendarEventApi failed:", e);
-    alert("Помилка видалення запису: " + (e?.message || e));
+    alert((translateInterfaceText("calendar.detail.appointment.deletion.failed") + " ") + calendarErrorMessage(e));
     return false;
   }
 }
@@ -55314,11 +56741,11 @@ function ensureCalendarModal() {
               class="calEditTitle"
               id="calEditModalTitle"
             >
-              Редагування запису
+              ${escapeHtml(translateInterfaceText("calendar.detail.edit.appointment"))}
             </div>
 
             <div class="calEditSubtitle">
-              Змініть дату, час або ветеринара
+              ${escapeHtml(translateInterfaceText("calendar.detail.change.the.date.time.or.veterinarian"))}
             </div>
           </div>
         </div>
@@ -55327,7 +56754,7 @@ function ensureCalendarModal() {
           class="calEditClose"
           type="button"
           data-close-calendar-modal
-          aria-label="Закрити"
+          aria-label="${escapeHtml(translateInterfaceText("calendar.detail.close"))}"
         >
           ×
         </button>
@@ -55339,7 +56766,7 @@ function ensureCalendarModal() {
         </div>
 
         <div>
-          <span>Пацієнт і запис</span>
+          <span>${escapeHtml(translateInterfaceText("calendar.detail.patient.and.appointment"))}</span>
 
           <strong id="calEditPatientName">
             —
@@ -55350,19 +56777,19 @@ function ensureCalendarModal() {
       <div class="calEditBody">
         <div class="calEditGrid">
           <label class="calEditField calEditFieldWide">
-            <span>Назва запису</span>
+            <span>${escapeHtml(translateInterfaceText("calendar.detail.appointment.title"))}</span>
 
             <input
               class="calEditInput"
               id="calEditTitle"
               type="text"
               autocomplete="off"
-              placeholder="Назва запису"
+              placeholder="${escapeHtml(translateInterfaceText("calendar.detail.appointment.title"))}"
             >
           </label>
 
           <label class="calEditField">
-            <span>Дата</span>
+            <span>${escapeHtml(translateInterfaceText("calendar.detail.date"))}</span>
 
             <input
               class="calEditInput"
@@ -55372,7 +56799,7 @@ function ensureCalendarModal() {
           </label>
 
           <label class="calEditField">
-            <span>Час початку</span>
+            <span>${escapeHtml(translateInterfaceText("calendar.detail.start.time"))}</span>
 
             <input
               class="calEditInput"
@@ -55382,57 +56809,57 @@ function ensureCalendarModal() {
           </label>
 
           <label class="calEditField">
-            <span>Тривалість</span>
+            <span>${escapeHtml(translateInterfaceText("calendar.detail.duration"))}</span>
 
             <select
               class="calEditInput"
               id="calEditDuration"
             >
               <option value="15">
-                15 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.15.min"))}
               </option>
 
               <option value="30">
-                30 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.30.min"))}
               </option>
 
               <option value="45">
-                45 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.45.min"))}
               </option>
 
               <option value="60">
-                60 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.60.min"))}
               </option>
 
               <option value="90">
-                90 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.90.min"))}
               </option>
 
               <option value="120">
-                120 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.120.min"))}
               </option>
 
               <option value="180">
-                180 хв
+                ${escapeHtml(translateInterfaceText("calendar.detail.180.min"))}
               </option>
             </select>
           </label>
 
           <label class="calEditField">
-            <span>Ветеринар</span>
+            <span>${escapeHtml(translateInterfaceText("calendar.detail.veterinarian"))}</span>
 
             <select
               class="calEditInput"
               id="calEditStaff"
             >
               <option value="">
-                Оберіть ветеринара
+                ${escapeHtml(translateInterfaceText("calendar.detail.select.a.veterinarian"))}
               </option>
             </select>
           </label>
 <label class="calEditField calEditFieldWide">
   <span>
-    Статус запису
+    ${escapeHtml(translateInterfaceText("calendar.detail.appointment.status"))}
   </span>
 
  <select
@@ -55440,40 +56867,40 @@ function ensureCalendarModal() {
   id="calEditStatus"
 >
   <option value="planned">
-    Заплановано
+    ${escapeHtml(translateInterfaceText("calendar.detail.scheduled"))}
   </option>
 
   <option value="waiting">
-    🟡 У клініці · очікує
+    ${escapeHtml(translateInterfaceText("calendar.detail.in.clinic.waiting"))}
   </option>
 
   <option value="in_progress">
-    🩺 На прийомі
+    ${escapeHtml(translateInterfaceText("calendar.detail.in.consultation"))}
   </option>
 
   <option value="completed">
-    ✓ Завершено
+    ${escapeHtml(translateInterfaceText("calendar.detail.completed"))}
   </option>
 
   <option value="cancelled">
-    Скасовано
+    ${escapeHtml(translateInterfaceText("calendar.detail.cancelled"))}
   </option>
 
   <option value="no_show">
-    Не з’явився
+    ${escapeHtml(translateInterfaceText("calendar.detail.did.not.attend"))}
   </option>
 </select>
 </label>
           <label class="calEditField calEditFieldWide">
             <span>
-              Причина звернення / коментар
+              ${escapeHtml(translateInterfaceText("calendar.detail.reason.for.visit.comment"))}
             </span>
 
             <textarea
               class="calEditTextarea"
               id="calEditNote"
               rows="4"
-              placeholder="Причина запису або коментар адміністратора"
+              placeholder="${escapeHtml(translateInterfaceText("calendar.detail.reason.for.appointment.or.administrator.s.comment"))}"
             ></textarea>
           </label>
         </div>
@@ -55485,7 +56912,7 @@ function ensureCalendarModal() {
     type="button"
     data-close-calendar-modal
   >
-    Скасувати
+    ${escapeHtml(translateInterfaceText("calendar.detail.cancel"))}
   </button>
 
   <div class="calEditFooterActions">
@@ -55495,7 +56922,7 @@ function ensureCalendarModal() {
       id="calEditArrivalBtn"
       type="button"
     >
-      🟡 Пацієнт прибув
+      ${escapeHtml(translateInterfaceText("calendar.detail.patient.arrived"))}
     </button>
 
     <button
@@ -55503,7 +56930,7 @@ function ensureCalendarModal() {
       id="calEditStartVisitBtn"
       type="button"
     >
-      ▶ Почати прийом
+      ${escapeHtml(translateInterfaceText("calendar.detail.start.visit"))}
     </button>
 
     <button
@@ -55511,7 +56938,7 @@ function ensureCalendarModal() {
       id="calEditSaveBtn"
       type="button"
     >
-      Зберегти зміни
+      ${escapeHtml(translateInterfaceText("calendar.detail.save.changes"))}
     </button>
 
   </div>
@@ -55621,8 +57048,7 @@ function ensureCalendarModal() {
 
       openDeleteModal(
         (
-          "Внесені зміни запису " +
-          "ще не збережені."
+          translateInterfaceText("calendar.detail.appointment.changes.have.not.been.saved.yet")
         ),
         () => {
           closeModal();
@@ -55695,7 +57121,7 @@ function getCalendarEventVisualStatus(event) {
       badgeClass:
         "calendarStatusCompleted",
       label:
-        "Завершено",
+        translateInterfaceText("calendar.detail.completed.2"),
     };
   }
 
@@ -55710,7 +57136,7 @@ function getCalendarEventVisualStatus(event) {
       badgeClass:
         "calendarStatusInProgress",
       label:
-        "Прийом триває",
+        translateInterfaceText("calendar.detail.visit.in.progress"),
     };
   }
 
@@ -55724,7 +57150,7 @@ function getCalendarEventVisualStatus(event) {
       badgeClass:
         "calendarStatusWaiting",
       label:
-        "Очікує",
+        translateInterfaceText("calendar.detail.waiting"),
     };
   }
 
@@ -55738,7 +57164,7 @@ function getCalendarEventVisualStatus(event) {
       badgeClass:
         "calendarStatusCancelled",
       label:
-        "Скасовано",
+        translateInterfaceText("calendar.detail.cancelled"),
     };
   }
 
@@ -55752,7 +57178,7 @@ function getCalendarEventVisualStatus(event) {
       badgeClass:
         "calendarStatusNoShow",
       label:
-        "Не з’явився",
+        translateInterfaceText("calendar.detail.did.not.attend"),
     };
   }
 
@@ -55763,7 +57189,7 @@ function getCalendarEventVisualStatus(event) {
     badgeClass:
       "calendarStatusPlanned",
     label:
-      "Заплановано",
+      translateInterfaceText("calendar.detail.scheduled"),
   };
 }
 async function startMedicalVisitFromCalendarEvent(
@@ -55771,7 +57197,7 @@ async function startMedicalVisitFromCalendarEvent(
 ) {
   if (!calendarEvent?.id) {
     throw new Error(
-      "Календарний запис не знайдено."
+      translateInterfaceText("calendar.detail.calendar.appointment.not.found")
     );
   }
 
@@ -55820,19 +57246,19 @@ async function startMedicalVisitFromCalendarEvent(
 
   if (!patientId) {
     throw new Error(
-      "До запису не прив’язаний пацієнт."
+      translateInterfaceText("calendar.detail.no.patient.is.linked.to.this.appointment")
     );
   }
 
   if (!staffId) {
     throw new Error(
-      "До запису не прив’язаний ветеринар."
+      translateInterfaceText("calendar.detail.no.veterinarian.is.linked.to.this.appointment")
     );
   }
 
   if (!eventDate) {
     throw new Error(
-      "У записі не вказана дата."
+      translateInterfaceText("calendar.detail.this.appointment.has.no.date")
     );
   }
 
@@ -55858,7 +57284,7 @@ async function startMedicalVisitFromCalendarEvent(
 
   if (!createdVisit?.id) {
     throw new Error(
-      "Не вдалося створити медичний візит."
+      translateInterfaceText("calendar.detail.could.not.create.the.medical.visit")
     );
   }
 
@@ -55868,7 +57294,7 @@ async function startMedicalVisitFromCalendarEvent(
       {
         title:
           calendarEvent.title ||
-          "Прийом пацієнта",
+          translateInterfaceText("calendar.detail.patient.visit"),
 
         event_date:
           eventDate,
@@ -55902,9 +57328,7 @@ async function startMedicalVisitFromCalendarEvent(
   if (!updatedEvent?.id) {
     throw new Error(
       (
-        "Медичний візит створено, " +
-        "але не вдалося прив’язати " +
-        "його до календаря."
+        translateInterfaceText("calendar.detail.the.medical.visit.was.created.but.could.not.be.linked.to.the.calendar")
       )
     );
   }
@@ -56028,7 +57452,7 @@ async function openCalendarEditModal(
         String(duration);
 
       option.textContent =
-        `${duration} хв`;
+        `${duration} ${escapeHtml(translateInterfaceText("calendar.detail.min"))}`;
 
       durationSelect.appendChild(
         option
@@ -56051,7 +57475,7 @@ async function openCalendarEditModal(
 
     staffSelect.innerHTML = `
       <option value="">
-        Оберіть ветеринара
+        ${escapeHtml(translateInterfaceText("calendar.detail.select.a.veterinarian"))}
       </option>
 
       ${staffItems
@@ -56067,7 +57491,7 @@ async function openCalendarEditModal(
               ${escapeHtml(
                 item.name ||
                 item.full_name ||
-                "Без імені"
+                translateInterfaceText("calendar.detail.unnamed")
               )}
             </option>
           `
@@ -56103,9 +57527,9 @@ async function openCalendarEditModal(
   const patientName =
     patient?.name ||
     String(
-      ev.title || "Запис"
+      ev.title || translateInterfaceText("calendar.detail.appointment.2")
     ).split("—")[0].trim() ||
-    "Пацієнт";
+    translateInterfaceText("calendar.detail.patient");
 
   const ownerName =
     owner?.name || "";
@@ -56235,8 +57659,8 @@ if (startVisitButton) {
 
   startVisitButton.textContent =
     existingVisitId
-      ? "↗ Відкрити прийом"
-      : "▶ Почати прийом";
+      ? translateInterfaceText("calendar.detail.open.visit")
+      : translateInterfaceText("calendar.detail.start.visit");
 
   startVisitButton.onclick =
     async () => {
@@ -56318,7 +57742,7 @@ if (startVisitButton) {
 
       if (!patientId) {
         openDeleteModal(
-          "До запису не прив’язаний пацієнт.",
+          translateInterfaceText("calendar.detail.no.patient.is.linked.to.this.appointment"),
           null,
           "info"
         );
@@ -56328,7 +57752,7 @@ if (startVisitButton) {
 
       if (!staffId) {
         openDeleteModal(
-          "Оберіть ветеринара.",
+          translateInterfaceText("calendar.detail.select.a.veterinarian.2"),
           null,
           "info"
         );
@@ -56338,7 +57762,7 @@ if (startVisitButton) {
 
       if (!eventDate) {
         openDeleteModal(
-          "Оберіть дату прийому.",
+          translateInterfaceText("calendar.detail.select.an.appointment.date"),
           null,
           "info"
         );
@@ -56348,7 +57772,7 @@ if (startVisitButton) {
 
       if (!note) {
         openDeleteModal(
-          "Вкажіть причину звернення.",
+          translateInterfaceText("calendar.detail.enter.the.reason.for.the.visit"),
           null,
           "info"
         );
@@ -56379,9 +57803,9 @@ if (
 ) {
   showCrmNotice({
     icon: "🌙",
-    title: "Прийом виходить за межі дня",
+    title: translateInterfaceText("calendar.detail.appointment.extends.past.midnight"),
     text:
-      "Обрана тривалість переносить завершення прийому після 24:00. Оберіть раніший час або меншу тривалість.",
+      translateInterfaceText("calendar.detail.the.selected.duration.ends.the.appointment.after.24.00.choose.an.earlier.time.or.a.sh"),
   });
 
   return;
@@ -56391,7 +57815,7 @@ if (
         true;
 
       startVisitButton.textContent =
-        "Створення прийому…";
+        translateInterfaceText("calendar.detail.creating.visit");
 
       try {
         const createdVisit =
@@ -56425,7 +57849,7 @@ if (
               title:
                 title ||
                 ev.title ||
-                "Прийом",
+                translateInterfaceText("calendar.detail.visit"),
 
               event_date:
                 eventDate,
@@ -56459,9 +57883,7 @@ if (
         if (!updatedEvent) {
           openDeleteModal(
             `
-              Медичний візит створено,
-              але не вдалося прив’язати
-              його до календаря.
+              ${escapeHtml(translateInterfaceText("calendar.detail.the.medical.visit.was.created.but.could.not.be.linked.to.the.calendar"))}
             `,
             null,
             "info"
@@ -56501,8 +57923,8 @@ if (
 
         startVisitButton.textContent =
           ev.visit_id
-            ? "↗ Відкрити прийом"
-            : "▶ Почати прийом";
+            ? translateInterfaceText("calendar.detail.open.visit")
+            : translateInterfaceText("calendar.detail.start.visit");
       }
     };
 }
@@ -56567,7 +57989,7 @@ if (arrivalButton) {
         true;
 
       arrivalButton.textContent =
-        "Позначаємо…";
+        translateInterfaceText("calendar.detail.updating");
 
       try {
         const updated =
@@ -56616,7 +58038,7 @@ if (arrivalButton) {
           false;
 
         arrivalButton.textContent =
-          "🟡 Пацієнт прибув";
+          translateInterfaceText("calendar.detail.patient.arrived");
       }
     };
 }
@@ -56673,7 +58095,7 @@ if (arrivalButton) {
 
       if (!title) {
         alert(
-          "Вкажіть назву запису."
+          translateInterfaceText("calendar.detail.enter.an.appointment.title")
         );
 
         return;
@@ -56681,7 +58103,7 @@ if (arrivalButton) {
 
       if (!eventDate) {
         alert(
-          "Оберіть дату."
+          translateInterfaceText("calendar.detail.select.a.date")
         );
 
         return;
@@ -56689,7 +58111,7 @@ if (arrivalButton) {
 
       if (!startTimeValue) {
         alert(
-          "Оберіть час початку."
+          translateInterfaceText("calendar.detail.select.a.start.time")
         );
 
         return;
@@ -56702,7 +58124,7 @@ if (arrivalButton) {
         durationValue < 15
       ) {
         alert(
-          "Оберіть тривалість прийому."
+          translateInterfaceText("calendar.detail.select.an.appointment.duration")
         );
 
         return;
@@ -56710,7 +58132,7 @@ if (arrivalButton) {
 
       if (!staffId) {
         alert(
-          "Оберіть ветеринара."
+          translateInterfaceText("calendar.detail.select.a.veterinarian.2")
         );
 
         return;
@@ -56718,7 +58140,7 @@ if (arrivalButton) {
 
       if (!note) {
         alert(
-          "Вкажіть причину звернення."
+          translateInterfaceText("calendar.detail.enter.the.reason.for.the.visit")
         );
 
         return;
@@ -56785,8 +58207,7 @@ if (arrivalButton) {
       if (isBusy) {
         alert(
           (
-            "Цей час уже зайнятий " +
-            "у вибраного ветеринара."
+            translateInterfaceText("calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2")
           )
         );
 
@@ -56797,7 +58218,7 @@ if (arrivalButton) {
         true;
 
       saveButton.textContent =
-        "Збереження...";
+        translateInterfaceText("calendar.detail.saving.2");
 
       try {
   const updated =
@@ -56867,7 +58288,7 @@ if (arrivalButton) {
     false;
 
   saveButton.textContent =
-    "Зберегти зміни";
+    translateInterfaceText("calendar.detail.save.changes");
 }
 };
 }
@@ -70322,6 +71743,1624 @@ const OTHER_SPECIES_LIST =
     (group) => group.items
   );
 
+// Localized suggestions preserve the existing canonical values in patient records.
+const CALENDAR_BREED_NAMES = {
+  "Німецька вівчарка": [
+    "Німецька вівчарка",
+    "German Shepherd",
+    "Deutscher Schäferhund",
+    "Owczarek niemiecki"
+  ],
+  "Східноєвропейська вівчарка": [
+    "Східноєвропейська вівчарка",
+    "East European Shepherd",
+    "Osteuropäischer Schäferhund",
+    "Owczarek wschodnioeuropejski"
+  ],
+  "Лабрадор-ретривер": [
+    "Лабрадор-ретривер",
+    "Labrador Retriever",
+    "Labrador Retriever",
+    "Labrador retriever"
+  ],
+  "Золотистий ретривер": [
+    "Золотистий ретривер",
+    "Golden Retriever",
+    "Golden Retriever",
+    "Golden retriever"
+  ],
+  "Ротвейлер": [
+    "Ротвейлер",
+    "Rottweiler",
+    "Rottweiler",
+    "Rottweiler"
+  ],
+  "Доберман": [
+    "Доберман",
+    "Dobermann",
+    "Dobermann",
+    "Doberman"
+  ],
+  "Кавказька вівчарка": [
+    "Кавказька вівчарка",
+    "Caucasian Shepherd",
+    "Kaukasischer Owtscharka",
+    "Owczarek kaukaski"
+  ],
+  "Середньоазійська вівчарка (алабай)": [
+    "Середньоазійська вівчарка (алабай)",
+    "Central Asian Shepherd (Alabai)",
+    "Zentralasiatischer Owtscharka (Alabai)",
+    "Owczarek środkowoazjatycki (ałabaj)"
+  ],
+  "Сибірський хаскі": [
+    "Сибірський хаскі",
+    "Siberian Husky",
+    "Siberian Husky",
+    "Husky syberyjski"
+  ],
+  "Аляскинський маламут": [
+    "Аляскинський маламут",
+    "Alaskan Malamute",
+    "Alaskan Malamute",
+    "Alaskan malamute"
+  ],
+  "Бернський зенненхунд": [
+    "Бернський зенненхунд",
+    "Bernese Mountain Dog",
+    "Berner Sennenhund",
+    "Berneński pies pasterski"
+  ],
+  "Німецький дог": [
+    "Німецький дог",
+    "Great Dane",
+    "Deutsche Dogge",
+    "Dog niemiecki"
+  ],
+  "Боксер": [
+    "Боксер",
+    "Boxer",
+    "Boxer",
+    "Bokser"
+  ],
+  "Різеншнауцер": [
+    "Різеншнауцер",
+    "Giant Schnauzer",
+    "Riesenschnauzer",
+    "Sznaucer olbrzym"
+  ],
+  "Кане-корсо": [
+    "Кане-корсо",
+    "Cane Corso",
+    "Cane Corso",
+    "Cane corso"
+  ],
+  "Московська сторожова": [
+    "Московська сторожова",
+    "Moscow Watchdog",
+    "Moskauer Wachhund",
+    "Moskiewski stróżujący"
+  ],
+  "Російський чорний тер’єр": [
+    "Російський чорний тер’єр",
+    "Black Russian Terrier",
+    "Russischer Schwarzer Terrier",
+    "Czarny terier rosyjski"
+  ],
+  "Леонбергер": [
+    "Леонбергер",
+    "Leonberger",
+    "Leonberger",
+    "Leonberger"
+  ],
+  "Ньюфаундленд": [
+    "Ньюфаундленд",
+    "Newfoundland",
+    "Neufundländer",
+    "Nowofundland"
+  ],
+  "Бордоський дог": [
+    "Бордоський дог",
+    "Dogue de Bordeaux",
+    "Bordeauxdogge",
+    "Dog de Bordeaux"
+  ],
+  "Бордер-колі": [
+    "Бордер-колі",
+    "Border Collie",
+    "Border Collie",
+    "Border collie"
+  ],
+  "Австралійська вівчарка (ауссі)": [
+    "Австралійська вівчарка (ауссі)",
+    "Australian Shepherd (Aussie)",
+    "Australian Shepherd (Aussie)",
+    "Owczarek australijski (aussie)"
+  ],
+  "Далматин": [
+    "Далматин",
+    "Dalmatian",
+    "Dalmatiner",
+    "Dalmatyńczyk"
+  ],
+  "Англійський бульдог": [
+    "Англійський бульдог",
+    "English Bulldog",
+    "Englische Bulldogge",
+    "Buldog angielski"
+  ],
+  "Американський стаффордширський тер’єр": [
+    "Американський стаффордширський тер’єр",
+    "American Staffordshire Terrier",
+    "American Staffordshire Terrier",
+    "Amerykański staffordshire terrier"
+  ],
+  "Стаффордширський бультер’єр": [
+    "Стаффордширський бультер’єр",
+    "Staffordshire Bull Terrier",
+    "Staffordshire Bullterrier",
+    "Staffordshire bull terrier"
+  ],
+  "Бігль": [
+    "Бігль",
+    "Beagle",
+    "Beagle",
+    "Beagle"
+  ],
+  "Англійський кокер-спанієль": [
+    "Англійський кокер-спанієль",
+    "English Cocker Spaniel",
+    "English Cocker Spaniel",
+    "Cocker spaniel angielski"
+  ],
+  "Англійський спрингер-спанієль": [
+    "Англійський спрингер-спанієль",
+    "English Springer Spaniel",
+    "English Springer Spaniel",
+    "Springer spaniel angielski"
+  ],
+  "Шетландська вівчарка (шелті)": [
+    "Шетландська вівчарка (шелті)",
+    "Shetland Sheepdog (Sheltie)",
+    "Shetland Sheepdog (Sheltie)",
+    "Owczarek szetlandzki (sheltie)"
+  ],
+  "Західносибірська лайка": [
+    "Західносибірська лайка",
+    "West Siberian Laika",
+    "Westsibirischer Laika",
+    "Łajka zachodniosyberyjska"
+  ],
+  "Російсько-європейська лайка": [
+    "Російсько-європейська лайка",
+    "Russian-European Laika",
+    "Russisch-Europäischer Laika",
+    "Łajka rosyjsko-europejska"
+  ],
+  "Російський гончак": [
+    "Російський гончак",
+    "Russian Hound",
+    "Russischer Laufhund",
+    "Gończy rosyjski"
+  ],
+  "Угорська вижла": [
+    "Угорська вижла",
+    "Hungarian Vizsla",
+    "Ungarischer Vizsla",
+    "Wyżeł węgierski"
+  ],
+  "Веймаранер": [
+    "Веймаранер",
+    "Weimaraner",
+    "Weimaraner",
+    "Wyżeł weimarski"
+  ],
+  "Курцхаар": [
+    "Курцхаар",
+    "German Shorthaired Pointer",
+    "Deutsch Kurzhaar",
+    "Wyżeł niemiecki krótkowłosy"
+  ],
+  "Дратхаар": [
+    "Дратхаар",
+    "German Wirehaired Pointer",
+    "Deutsch Drahthaar",
+    "Wyżeł niemiecki szorstkowłosy"
+  ],
+  "Чехословацький вовчак": [
+    "Чехословацький вовчак",
+    "Czechoslovakian Wolfdog",
+    "Tschechoslowakischer Wolfhund",
+    "Wilczak czechosłowacki"
+  ],
+  "Басенджі": [
+    "Басенджі",
+    "Basenji",
+    "Basenji",
+    "Basenji"
+  ],
+  "Шарпей": [
+    "Шарпей",
+    "Shar Pei",
+    "Shar Pei",
+    "Shar pei"
+  ],
+  "Акіта-іну": [
+    "Акіта-іну",
+    "Akita Inu",
+    "Akita Inu",
+    "Akita inu"
+  ],
+  "Сіба-іну": [
+    "Сіба-іну",
+    "Shiba Inu",
+    "Shiba Inu",
+    "Shiba inu"
+  ],
+  "Йоркширський тер’єр": [
+    "Йоркширський тер’єр",
+    "Yorkshire Terrier",
+    "Yorkshire Terrier",
+    "Yorkshire terrier"
+  ],
+  "Чихуахуа": [
+    "Чихуахуа",
+    "Chihuahua",
+    "Chihuahua",
+    "Chihuahua"
+  ],
+  "Російський той": [
+    "Російський той",
+    "Russian Toy",
+    "Russischer Toy",
+    "Rosyjski toy"
+  ],
+  "Такса стандартна": [
+    "Такса стандартна",
+    "Standard Dachshund",
+    "Standarddackel",
+    "Jamnik standardowy"
+  ],
+  "Такса мініатюрна": [
+    "Такса мініатюрна",
+    "Miniature Dachshund",
+    "Zwergdackel",
+    "Jamnik miniaturowy"
+  ],
+  "Мопс": [
+    "Мопс",
+    "Pug",
+    "Mops",
+    "Mops"
+  ],
+  "Французький бульдог": [
+    "Французький бульдог",
+    "French Bulldog",
+    "Französische Bulldogge",
+    "Buldog francuski"
+  ],
+  "Німецький шпіц (померанський)": [
+    "Німецький шпіц (померанський)",
+    "German Spitz (Pomeranian)",
+    "Deutscher Spitz (Zwergspitz)",
+    "Szpic niemiecki (pomeranian)"
+  ],
+  "Ши-тцу": [
+    "Ши-тцу",
+    "Shih Tzu",
+    "Shih Tzu",
+    "Shih tzu"
+  ],
+  "Мальтезе": [
+    "Мальтезе",
+    "Maltese",
+    "Malteser",
+    "Maltańczyk"
+  ],
+  "Пекінес": [
+    "Пекінес",
+    "Pekingese",
+    "Pekinese",
+    "Pekińczyk"
+  ],
+  "Джек-рассел-тер’єр": [
+    "Джек-рассел-тер’єр",
+    "Jack Russell Terrier",
+    "Jack Russell Terrier",
+    "Jack russell terrier"
+  ],
+  "Вест-хайленд-вайт-тер’єр": [
+    "Вест-хайленд-вайт-тер’єр",
+    "West Highland White Terrier",
+    "West Highland White Terrier",
+    "West highland white terrier"
+  ],
+  "Цвергшнауцер": [
+    "Цвергшнауцер",
+    "Miniature Schnauzer",
+    "Zwergschnauzer",
+    "Sznaucer miniaturowy"
+  ],
+  "Папільйон": [
+    "Папільйон",
+    "Papillon",
+    "Papillon",
+    "Papillon"
+  ],
+  "Той-пудель": [
+    "Той-пудель",
+    "Toy Poodle",
+    "Toypudel",
+    "Pudel toy"
+  ],
+  "Карликовий пудель": [
+    "Карликовий пудель",
+    "Miniature Poodle",
+    "Zwergpudel",
+    "Pudel miniaturowy"
+  ],
+  "Великий пудель": [
+    "Великий пудель",
+    "Standard Poodle",
+    "Großpudel",
+    "Pudel duży"
+  ],
+  "Бішон-фрізе": [
+    "Бішон-фрізе",
+    "Bichon Frise",
+    "Bichon Frisé",
+    "Bichon frise"
+  ],
+  "Бассет-гаунд": [
+    "Бассет-гаунд",
+    "Basset Hound",
+    "Basset Hound",
+    "Basset hound"
+  ],
+  "Кавалер-кінг-чарльз-спанієль": [
+    "Кавалер-кінг-чарльз-спанієль",
+    "Cavalier King Charles Spaniel",
+    "Cavalier King Charles Spaniel",
+    "Cavalier king charles spaniel"
+  ],
+  "Італійський левретка": [
+    "Італійський левретка",
+    "Italian Greyhound",
+    "Italienisches Windspiel",
+    "Charcik włoski"
+  ],
+  "Англійський сетер": [
+    "Англійський сетер",
+    "English Setter",
+    "English Setter",
+    "Seter angielski"
+  ],
+  "Ірландський сетер": [
+    "Ірландський сетер",
+    "Irish Setter",
+    "Irish Red Setter",
+    "Seter irlandzki"
+  ],
+  "Шотландський сетер (гордон)": [
+    "Шотландський сетер (гордон)",
+    "Gordon Setter",
+    "Gordon Setter",
+    "Seter szkocki (gordon)"
+  ],
+  "Пойнтер": [
+    "Пойнтер",
+    "Pointer",
+    "English Pointer",
+    "Pointer"
+  ],
+  "Ірландський вовкодав": [
+    "Ірландський вовкодав",
+    "Irish Wolfhound",
+    "Irischer Wolfshund",
+    "Wilczarz irlandzki"
+  ],
+  "Російський псовий хорт": [
+    "Російський псовий хорт",
+    "Borzoi",
+    "Barsoi",
+    "Chart rosyjski borzoj"
+  ],
+  "Віпет": [
+    "Віпет",
+    "Whippet",
+    "Whippet",
+    "Whippet"
+  ],
+  "Грейгаунд": [
+    "Грейгаунд",
+    "Greyhound",
+    "Greyhound",
+    "Greyhound"
+  ],
+  "Афганський хорт": [
+    "Афганський хорт",
+    "Afghan Hound",
+    "Afghanischer Windhund",
+    "Chart afgański"
+  ],
+  "Салюкі": [
+    "Салюкі",
+    "Saluki",
+    "Saluki",
+    "Chart perski saluki"
+  ],
+  "Бассет-фов-де-бретань": [
+    "Бассет-фов-де-бретань",
+    "Basset Fauve de Bretagne",
+    "Basset Fauve de Bretagne",
+    "Basset fauve de Bretagne"
+  ],
+  "Гладкошерстий фокстер’єр": [
+    "Гладкошерстий фокстер’єр",
+    "Smooth Fox Terrier",
+    "Foxterrier (Glatthaar)",
+    "Foksterier krótkowłosy"
+  ],
+  "Жорсткошерстий фокстер’єр": [
+    "Жорсткошерстий фокстер’єр",
+    "Wire Fox Terrier",
+    "Foxterrier (Drahthaar)",
+    "Foksterier szorstkowłosy"
+  ],
+  "Бультер’єр": [
+    "Бультер’єр",
+    "Bull Terrier",
+    "Bullterrier",
+    "Bulterier"
+  ],
+  "Американський бульдог": [
+    "Американський бульдог",
+    "American Bulldog",
+    "Amerikanische Bulldogge",
+    "Buldog amerykański"
+  ],
+  "Аргентинський дог": [
+    "Аргентинський дог",
+    "Dogo Argentino",
+    "Argentinische Dogge",
+    "Dog argentyński"
+  ],
+  "Бразильська філа": [
+    "Бразильська філа",
+    "Fila Brasileiro",
+    "Fila Brasileiro",
+    "Fila brasileiro"
+  ],
+  "Тоса-іну": [
+    "Тоса-іну",
+    "Tosa Inu",
+    "Tosa Inu",
+    "Tosa inu"
+  ],
+  "Піренейський гірський собака": [
+    "Піренейський гірський собака",
+    "Pyrenean Mountain Dog",
+    "Pyrenäenberghund",
+    "Pirenejski pies górski"
+  ],
+  "Тибетський мастиф": [
+    "Тибетський мастиф",
+    "Tibetan Mastiff",
+    "Tibetdogge",
+    "Mastif tybetański"
+  ],
+  "Англійський мастиф": [
+    "Англійський мастиф",
+    "English Mastiff",
+    "Englischer Mastiff",
+    "Mastif angielski"
+  ],
+  "Бульмастиф": [
+    "Бульмастиф",
+    "Bullmastiff",
+    "Bullmastiff",
+    "Bullmastiff"
+  ],
+  "Сенбернар": [
+    "Сенбернар",
+    "Saint Bernard",
+    "Bernhardiner",
+    "Bernardyn"
+  ],
+  "Піренейський мастиф": [
+    "Піренейський мастиф",
+    "Pyrenean Mastiff",
+    "Pyrenäenmastiff",
+    "Mastif pirenejski"
+  ],
+  "Іспанський мастиф": [
+    "Іспанський мастиф",
+    "Spanish Mastiff",
+    "Spanischer Mastiff",
+    "Mastif hiszpański"
+  ],
+  "Анатолійська вівчарка (кангал)": [
+    "Анатолійська вівчарка (кангал)",
+    "Anatolian Shepherd (Kangal)",
+    "Anatolischer Hirtenhund (Kangal)",
+    "Owczarek anatolijski (kangal)"
+  ],
+  "Бельгійська вівчарка малінуа": [
+    "Бельгійська вівчарка малінуа",
+    "Belgian Shepherd Malinois",
+    "Belgischer Schäferhund (Malinois)",
+    "Owczarek belgijski malinois"
+  ],
+  "Бельгійська вівчарка тервюрен": [
+    "Бельгійська вівчарка тервюрен",
+    "Belgian Shepherd Tervuren",
+    "Belgischer Schäferhund (Tervueren)",
+    "Owczarek belgijski tervueren"
+  ],
+  "Голландська вівчарка": [
+    "Голландська вівчарка",
+    "Dutch Shepherd",
+    "Holländischer Schäferhund",
+    "Owczarek holenderski"
+  ],
+  "Колі довгошерста": [
+    "Колі довгошерста",
+    "Rough Collie",
+    "Langhaarcollie",
+    "Owczarek szkocki długowłosy"
+  ],
+  "Колі короткошерста": [
+    "Колі короткошерста",
+    "Smooth Collie",
+    "Kurzhaarcollie",
+    "Owczarek szkocki krótkowłosy"
+  ],
+  "Американський кокер-спанієль": [
+    "Американський кокер-спанієль",
+    "American Cocker Spaniel",
+    "American Cocker Spaniel",
+    "Cocker spaniel amerykański"
+  ],
+  "Ірландський тер’єр": [
+    "Ірландський тер’єр",
+    "Irish Terrier",
+    "Irish Terrier",
+    "Terier irlandzki"
+  ],
+  "Ердельтер’єр": [
+    "Ердельтер’єр",
+    "Airedale Terrier",
+    "Airedale Terrier",
+    "Airedale terrier"
+  ],
+  "Керн-тер’єр": [
+    "Керн-тер’єр",
+    "Cairn Terrier",
+    "Cairn Terrier",
+    "Cairn terrier"
+  ],
+  "Метис / безпородний": [
+    "Метис / безпородний",
+    "Mixed breed",
+    "Mischling",
+    "Mieszaniec"
+  ],
+  "Британська короткошерста": [
+    "Британська короткошерста",
+    "British Shorthair",
+    "Britisch Kurzhaar",
+    "Brytyjski krótkowłosy"
+  ],
+  "Британська довгошерста": [
+    "Британська довгошерста",
+    "British Longhair",
+    "Britisch Langhaar",
+    "Brytyjski długowłosy"
+  ],
+  "Шотландська висловуха": [
+    "Шотландська висловуха",
+    "Scottish Fold",
+    "Scottish Fold",
+    "Szkocki zwisłouchy"
+  ],
+  "Шотландська прямовуха": [
+    "Шотландська прямовуха",
+    "Scottish Straight",
+    "Scottish Straight",
+    "Szkocki prostouchy"
+  ],
+  "Хайленд-фолд": [
+    "Хайленд-фолд",
+    "Highland Fold",
+    "Highland Fold",
+    "Highland fold"
+  ],
+  "Хайленд-страйт": [
+    "Хайленд-страйт",
+    "Highland Straight",
+    "Highland Straight",
+    "Highland straight"
+  ],
+  "Мейн-кун": [
+    "Мейн-кун",
+    "Maine Coon",
+    "Maine Coon",
+    "Maine coon"
+  ],
+  "Російська блакитна": [
+    "Російська блакитна",
+    "Russian Blue",
+    "Russisch Blau",
+    "Rosyjski niebieski"
+  ],
+  "Сибірська": [
+    "Сибірська",
+    "Siberian",
+    "Sibirische Katze",
+    "Syberyjski"
+  ],
+  "Невська маскарадна": [
+    "Невська маскарадна",
+    "Neva Masquerade",
+    "Neva Masquerade",
+    "Neva masquerade"
+  ],
+  "Перська": [
+    "Перська",
+    "Persian",
+    "Perserkatze",
+    "Perski"
+  ],
+  "Гімалайська (колор-пойнт)": [
+    "Гімалайська (колор-пойнт)",
+    "Himalayan (Colourpoint)",
+    "Himalayakatze (Colourpoint)",
+    "Himalajski (colorpoint)"
+  ],
+  "Перська шиншила": [
+    "Перська шиншила",
+    "Chinchilla Persian",
+    "Chinchilla-Perser",
+    "Perski szynszylowy"
+  ],
+  "Екзотична короткошерста": [
+    "Екзотична короткошерста",
+    "Exotic Shorthair",
+    "Exotisch Kurzhaar",
+    "Egzotyczny krótkowłosy"
+  ],
+  "Канадський сфінкс": [
+    "Канадський сфінкс",
+    "Canadian Sphynx",
+    "Kanadische Sphynx",
+    "Sfinks kanadyjski"
+  ],
+  "Донський сфінкс": [
+    "Донський сфінкс",
+    "Don Sphynx",
+    "Don Sphynx",
+    "Sfinks doński"
+  ],
+  "Петерболд": [
+    "Петерболд",
+    "Peterbald",
+    "Peterbald",
+    "Peterbald"
+  ],
+  "Український левкой": [
+    "Український левкой",
+    "Ukrainian Levkoy",
+    "Ukrainische Levkoy",
+    "Ukraiński lewkoj"
+  ],
+  "Абіссинська": [
+    "Абіссинська",
+    "Abyssinian",
+    "Abessinierkatze",
+    "Abisyński"
+  ],
+  "Корніш-рекс": [
+    "Корніш-рекс",
+    "Cornish Rex",
+    "Cornish Rex",
+    "Cornish rex"
+  ],
+  "Девон-рекс": [
+    "Девон-рекс",
+    "Devon Rex",
+    "Devon Rex",
+    "Devon rex"
+  ],
+  "Селкірк-рекс короткошерстий": [
+    "Селкірк-рекс короткошерстий",
+    "Selkirk Rex Shorthair",
+    "Selkirk Rex Kurzhaar",
+    "Selkirk rex krótkowłosy"
+  ],
+  "Селкірк-рекс довгошерстий": [
+    "Селкірк-рекс довгошерстий",
+    "Selkirk Rex Longhair",
+    "Selkirk Rex Langhaar",
+    "Selkirk rex długowłosy"
+  ],
+  "Німецький рекс": [
+    "Німецький рекс",
+    "German Rex",
+    "German Rex",
+    "German rex"
+  ],
+  "Ла-перм": [
+    "Ла-перм",
+    "LaPerm",
+    "LaPerm",
+    "LaPerm"
+  ],
+  "Уральський рекс": [
+    "Уральський рекс",
+    "Ural Rex",
+    "Ural Rex",
+    "Ural rex"
+  ],
+  "Сомалійська": [
+    "Сомалійська",
+    "Somali",
+    "Somalikatze",
+    "Somalijski"
+  ],
+  "Бенгальська": [
+    "Бенгальська",
+    "Bengal",
+    "Bengalkatze",
+    "Bengalski"
+  ],
+  "Регдол": [
+    "Регдол",
+    "Ragdoll",
+    "Ragdoll",
+    "Ragdoll"
+  ],
+  "Рагамафін": [
+    "Рагамафін",
+    "Ragamuffin",
+    "Ragamuffin",
+    "Ragamuffin"
+  ],
+  "Норвезька лісова": [
+    "Норвезька лісова",
+    "Norwegian Forest Cat",
+    "Norwegische Waldkatze",
+    "Norweski leśny"
+  ],
+  "Сіамська": [
+    "Сіамська",
+    "Siamese",
+    "Siamkatze",
+    "Syjamski"
+  ],
+  "Тайська": [
+    "Тайська",
+    "Thai",
+    "Thaikatze",
+    "Tajski"
+  ],
+  "Орієнтальна короткошерста": [
+    "Орієнтальна короткошерста",
+    "Oriental Shorthair",
+    "Orientalisch Kurzhaar",
+    "Orientalny krótkowłosy"
+  ],
+  "Орієнтальна довгошерста": [
+    "Орієнтальна довгошерста",
+    "Oriental Longhair",
+    "Orientalisch Langhaar",
+    "Orientalny długowłosy"
+  ],
+  "Бурманська": [
+    "Бурманська",
+    "Burmese",
+    "Burmakatze",
+    "Burmski"
+  ],
+  "Бурміла": [
+    "Бурміла",
+    "Burmilla",
+    "Burmilla",
+    "Burmilla"
+  ],
+  "Тонкінська": [
+    "Тонкінська",
+    "Tonkinese",
+    "Tonkanese",
+    "Tonkijski"
+  ],
+  "Манчкін короткошерстий": [
+    "Манчкін короткошерстий",
+    "Munchkin Shorthair",
+    "Munchkin Kurzhaar",
+    "Munchkin krótkowłosy"
+  ],
+  "Манчкін довгошерстий": [
+    "Манчкін довгошерстий",
+    "Munchkin Longhair",
+    "Munchkin Langhaar",
+    "Munchkin długowłosy"
+  ],
+  "Наполеон (мінует)": [
+    "Наполеон (мінует)",
+    "Napoleon (Minuet)",
+    "Napoleon (Minuet)",
+    "Napoleon (minuet)"
+  ],
+  "Турецька ангора": [
+    "Турецька ангора",
+    "Turkish Angora",
+    "Türkisch Angora",
+    "Turecka angora"
+  ],
+  "Турецький ван": [
+    "Турецький ван",
+    "Turkish Van",
+    "Türkisch Van",
+    "Turecki van"
+  ],
+  "Єгипетська мау": [
+    "Єгипетська мау",
+    "Egyptian Mau",
+    "Ägyptische Mau",
+    "Egipski mau"
+  ],
+  "Американська короткошерста": [
+    "Американська короткошерста",
+    "American Shorthair",
+    "American Shorthair",
+    "Amerykański krótkowłosy"
+  ],
+  "Американська жорсткошерста": [
+    "Американська жорсткошерста",
+    "American Wirehair",
+    "American Wirehair",
+    "Amerykański szorstkowłosy"
+  ],
+  "Американський керл короткошерстий": [
+    "Американський керл короткошерстий",
+    "American Curl Shorthair",
+    "American Curl Kurzhaar",
+    "Amerykański curl krótkowłosy"
+  ],
+  "Американський керл довгошерстий": [
+    "Американський керл довгошерстий",
+    "American Curl Longhair",
+    "American Curl Langhaar",
+    "Amerykański curl długowłosy"
+  ],
+  "Оцикет": [
+    "Оцикет",
+    "Ocicat",
+    "Ocicat",
+    "Ocicat"
+  ],
+  "Балінезійська": [
+    "Балінезійська",
+    "Balinese",
+    "Balinesenkatze",
+    "Balijski"
+  ],
+  "Яванез": [
+    "Яванез",
+    "Javanese",
+    "Javanese",
+    "Jawajski"
+  ],
+  "Японський бобтейл короткошерстий": [
+    "Японський бобтейл короткошерстий",
+    "Japanese Bobtail Shorthair",
+    "Japanese Bobtail Kurzhaar",
+    "Japoński bobtail krótkowłosy"
+  ],
+  "Японський бобтейл довгошерстий": [
+    "Японський бобтейл довгошерстий",
+    "Japanese Bobtail Longhair",
+    "Japanese Bobtail Langhaar",
+    "Japoński bobtail długowłosy"
+  ],
+  "Курильський бобтейл короткошерстий": [
+    "Курильський бобтейл короткошерстий",
+    "Kurilian Bobtail Shorthair",
+    "Kurilen-Bobtail Kurzhaar",
+    "Kurylski bobtail krótkowłosy"
+  ],
+  "Курильський бобтейл довгошерстий": [
+    "Курильський бобтейл довгошерстий",
+    "Kurilian Bobtail Longhair",
+    "Kurilen-Bobtail Langhaar",
+    "Kurylski bobtail długowłosy"
+  ],
+  "Карельський бобтейл": [
+    "Карельський бобтейл",
+    "Karelian Bobtail",
+    "Karelischer Bobtail",
+    "Karelski bobtail"
+  ],
+  "Меконгський бобтейл": [
+    "Меконгський бобтейл",
+    "Mekong Bobtail",
+    "Mekong Bobtail",
+    "Mekong bobtail"
+  ],
+  "Піксибоб короткошерстий": [
+    "Піксибоб короткошерстий",
+    "Pixiebob Shorthair",
+    "Pixiebob Kurzhaar",
+    "Pixiebob krótkowłosy"
+  ],
+  "Піксибоб довгошерстий": [
+    "Піксибоб довгошерстий",
+    "Pixiebob Longhair",
+    "Pixiebob Langhaar",
+    "Pixiebob długowłosy"
+  ],
+  "Той-боб": [
+    "Той-боб",
+    "Toybob",
+    "Toybob",
+    "Toybob"
+  ],
+  "Шартрез": [
+    "Шартрез",
+    "Chartreux",
+    "Kartäuserkatze",
+    "Kartuski"
+  ],
+  "Азійська таббі": [
+    "Азійська таббі",
+    "Asian Tabby",
+    "Asiatische Tabby",
+    "Azjatycki tabby"
+  ],
+  "Азійська димчаста": [
+    "Азійська димчаста",
+    "Asian Smoke",
+    "Asiatische Smoke",
+    "Azjatycki dymny"
+  ],
+  "Азійська однотонна": [
+    "Азійська однотонна",
+    "Asian Self",
+    "Asiatische Katze (einfarbig)",
+    "Azjatycki jednobarwny"
+  ],
+  "Бомбейська": [
+    "Бомбейська",
+    "Bombay",
+    "Bombaykatze",
+    "Bombajski"
+  ],
+  "Гавана браун": [
+    "Гавана браун",
+    "Havana Brown",
+    "Havana Brown",
+    "Havana brown"
+  ],
+  "Корат": [
+    "Корат",
+    "Korat",
+    "Korat",
+    "Korat"
+  ],
+  "Сингапура": [
+    "Сингапура",
+    "Singapura",
+    "Singapura",
+    "Singapurski"
+  ],
+  "Серенгеті": [
+    "Серенгеті",
+    "Serengeti",
+    "Serengeti",
+    "Serengeti"
+  ],
+  "Саванна": [
+    "Саванна",
+    "Savannah",
+    "Savannah",
+    "Savannah"
+  ],
+  "Каракет": [
+    "Каракет",
+    "Caracat",
+    "Caracat",
+    "Karaket"
+  ],
+  "Чаузі": [
+    "Чаузі",
+    "Chausie",
+    "Chausie",
+    "Chausie"
+  ],
+  "Чіто (Cheetoh)": [
+    "Чіто (Cheetoh)",
+    "Cheetoh",
+    "Cheetoh",
+    "Cheetoh"
+  ],
+  "Менкс": [
+    "Менкс",
+    "Manx",
+    "Manxkatze",
+    "Manx"
+  ],
+  "Кімрик": [
+    "Кімрик",
+    "Cymric",
+    "Cymric",
+    "Cymric"
+  ],
+  "Нібелунг": [
+    "Нібелунг",
+    "Nebelung",
+    "Nebelung",
+    "Nebelung"
+  ],
+  "Тіффані": [
+    "Тіффані",
+    "Tiffany",
+    "Tiffany",
+    "Tiffany"
+  ],
+  "Скукум": [
+    "Скукум",
+    "Skookum",
+    "Skookum",
+    "Skookum"
+  ],
+  "Кінкалоу": [
+    "Кінкалоу",
+    "Kinkalow",
+    "Kinkalow",
+    "Kinkalow"
+  ],
+  "Лікой": [
+    "Лікой",
+    "Lykoi",
+    "Lykoi",
+    "Lykoi"
+  ],
+  "Ельф": [
+    "Ельф",
+    "Elf cat",
+    "Elfkatze",
+    "Elf"
+  ],
+  "Двельф": [
+    "Двельф",
+    "Dwelf",
+    "Dwelf",
+    "Dwelf"
+  ],
+  "Бамбіно": [
+    "Бамбіно",
+    "Bambino",
+    "Bambino",
+    "Bambino"
+  ],
+  "Мінскін": [
+    "Мінскін",
+    "Minskin",
+    "Minskin",
+    "Minskin"
+  ],
+  "Йоркська шоколадна": [
+    "Йоркська шоколадна",
+    "York Chocolate",
+    "York Chocolate",
+    "York chocolate"
+  ],
+  "Хайлендер": [
+    "Хайлендер",
+    "Highlander",
+    "Highlander",
+    "Highlander"
+  ],
+  "Австралійський міст": [
+    "Австралійський міст",
+    "Australian Mist",
+    "Australian Mist",
+    "Australijski mist"
+  ],
+  "Європейська короткошерста": [
+    "Європейська короткошерста",
+    "European Shorthair",
+    "Europäisch Kurzhaar",
+    "Europejski krótkowłosy"
+  ],
+  "Сококе": [
+    "Сококе",
+    "Sokoke",
+    "Sokoke",
+    "Sokoke"
+  ],
+  "Тойгер": [
+    "Тойгер",
+    "Toyger",
+    "Toyger",
+    "Toyger"
+  ],
+  "Сноу-шу": [
+    "Сноу-шу",
+    "Snowshoe",
+    "Snowshoe",
+    "Snowshoe"
+  ],
+  "Кіпрська кішка (Афродіта)": [
+    "Кіпрська кішка (Афродіта)",
+    "Cyprus cat (Aphrodite)",
+    "Zypernkatze (Aphrodite)",
+    "Cypryjski (Afrodyta)"
+  ],
+  "Аравійська мау": [
+    "Аравійська мау",
+    "Arabian Mau",
+    "Arabische Mau",
+    "Arabski mau"
+  ],
+  "Охос азулес": [
+    "Охос азулес",
+    "Ojos Azules",
+    "Ojos Azules",
+    "Ojos azules"
+  ],
+  "Каліфорнійська плямиста": [
+    "Каліфорнійська плямиста",
+    "California Spangled",
+    "California Spangled",
+    "Kalifornijski pręgowany"
+  ],
+  "Хайленд-лінкс": [
+    "Хайленд-лінкс",
+    "Highland Lynx",
+    "Highland Lynx",
+    "Highland lynx"
+  ],
+  "Американський бобтейл короткошерстий": [
+    "Американський бобтейл короткошерстий",
+    "American Bobtail Shorthair",
+    "American Bobtail Kurzhaar",
+    "Amerykański bobtail krótkowłosy"
+  ],
+  "Американський бобтейл довгошерстий": [
+    "Американський бобтейл довгошерстий",
+    "American Bobtail Longhair",
+    "American Bobtail Langhaar",
+    "Amerykański bobtail długowłosy"
+  ],
+  "Китайська Лі Хуа": [
+    "Китайська Лі Хуа",
+    "Chinese Li Hua",
+    "Chinesische Li Hua",
+    "Chiński li hua"
+  ],
+  "Метис / безпородна": [
+    "Метис / безпородна",
+    "Mixed breed",
+    "Mischling",
+    "Mieszaniec"
+  ],
+  "Хвилястий папуга": [
+    "Хвилястий папуга",
+    "Budgerigar",
+    "Wellensittich",
+    "Papużka falista"
+  ],
+  "Корела": [
+    "Корела",
+    "Cockatiel",
+    "Nymphensittich",
+    "Nimfa"
+  ],
+  "Жако": [
+    "Жако",
+    "African grey parrot",
+    "Graupapagei",
+    "Żako"
+  ],
+  "Какаду": [
+    "Какаду",
+    "Cockatoo",
+    "Kakadu",
+    "Kakadu"
+  ],
+  "Нерозлучник": [
+    "Нерозлучник",
+    "Lovebird",
+    "Unzertrennlicher",
+    "Nierozłączka"
+  ],
+  "Канарка": [
+    "Канарка",
+    "Canary",
+    "Kanarienvogel",
+    "Kanarek"
+  ],
+  "Амадина": [
+    "Амадина",
+    "Estrildid finch",
+    "Prachtfink",
+    "Amadyna"
+  ],
+  "Голуб": [
+    "Голуб",
+    "Pigeon",
+    "Taube",
+    "Gołąb"
+  ],
+  "Курка": [
+    "Курка",
+    "Hen",
+    "Henne",
+    "Kura"
+  ],
+  "Півень": [
+    "Півень",
+    "Rooster",
+    "Hahn",
+    "Kogut"
+  ],
+  "Качка": [
+    "Качка",
+    "Duck",
+    "Ente",
+    "Kaczka"
+  ],
+  "Гуска": [
+    "Гуска",
+    "Goose",
+    "Gans",
+    "Gęś"
+  ],
+  "Індик": [
+    "Індик",
+    "Turkey",
+    "Truthahn",
+    "Indyk"
+  ],
+  "Перепілка": [
+    "Перепілка",
+    "Quail",
+    "Wachtel",
+    "Przepiórka"
+  ],
+  "Інший птах": [
+    "Інший птах",
+    "Other bird",
+    "Anderer Vogel",
+    "Inny ptak"
+  ],
+  "Хом’як": [
+    "Хом’як",
+    "Hamster",
+    "Hamster",
+    "Chomik"
+  ],
+  "Щур": [
+    "Щур",
+    "Rat",
+    "Ratte",
+    "Szczur"
+  ],
+  "Миша": [
+    "Миша",
+    "Mouse",
+    "Maus",
+    "Mysz"
+  ],
+  "Морська свинка": [
+    "Морська свинка",
+    "Guinea pig",
+    "Meerschweinchen",
+    "Świnka morska"
+  ],
+  "Шиншила": [
+    "Шиншила",
+    "Chinchilla",
+    "Chinchilla",
+    "Szynszyla"
+  ],
+  "Дегу": [
+    "Дегу",
+    "Degu",
+    "Degu",
+    "Koszatniczka"
+  ],
+  "Піщанка": [
+    "Піщанка",
+    "Gerbil",
+    "Rennmaus",
+    "Myszoskoczek"
+  ],
+  "Бурундук": [
+    "Бурундук",
+    "Chipmunk",
+    "Streifenhörnchen",
+    "Burunduk"
+  ],
+  "Інший гризун": [
+    "Інший гризун",
+    "Other rodent",
+    "Anderes Nagetier",
+    "Inny gryzoń"
+  ],
+  "Декоративний кролик": [
+    "Декоративний кролик",
+    "Pet rabbit",
+    "Hauskaninchen",
+    "Królik domowy"
+  ],
+  "Карликовий кролик": [
+    "Карликовий кролик",
+    "Dwarf rabbit",
+    "Zwergkaninchen",
+    "Królik miniaturowy"
+  ],
+  "Висловухий кролик": [
+    "Висловухий кролик",
+    "Lop rabbit",
+    "Widderkaninchen",
+    "Królik baranek"
+  ],
+  "Звичайний кролик": [
+    "Звичайний кролик",
+    "Rabbit",
+    "Kaninchen",
+    "Królik"
+  ],
+  "Заєць": [
+    "Заєць",
+    "Hare",
+    "Hase",
+    "Zając"
+  ],
+  "Інший зайцеподібний": [
+    "Інший зайцеподібний",
+    "Other lagomorph",
+    "Anderes Hasentier",
+    "Inny zajęczak"
+  ],
+  "Сухопутна черепаха": [
+    "Сухопутна черепаха",
+    "Tortoise",
+    "Landschildkröte",
+    "Żółw lądowy"
+  ],
+  "Водна черепаха": [
+    "Водна черепаха",
+    "Aquatic turtle",
+    "Wasserschildkröte",
+    "Żółw wodny"
+  ],
+  "Гекон": [
+    "Гекон",
+    "Gecko",
+    "Gecko",
+    "Gekon"
+  ],
+  "Ігуана": [
+    "Ігуана",
+    "Iguana",
+    "Leguan",
+    "Legwan"
+  ],
+  "Хамелеон": [
+    "Хамелеон",
+    "Chameleon",
+    "Chamäleon",
+    "Kameleon"
+  ],
+  "Агама": [
+    "Агама",
+    "Agama",
+    "Agame",
+    "Agama"
+  ],
+  "Змія": [
+    "Змія",
+    "Snake",
+    "Schlange",
+    "Wąż"
+  ],
+  "Пітон": [
+    "Пітон",
+    "Python",
+    "Python",
+    "Pyton"
+  ],
+  "Полоз": [
+    "Полоз",
+    "Rat snake",
+    "Kletternatter",
+    "Wąż właściwy"
+  ],
+  "Інша рептилія": [
+    "Інша рептилія",
+    "Other reptile",
+    "Anderes Reptil",
+    "Inny gad"
+  ],
+  "Тхір": [
+    "Тхір",
+    "Polecat",
+    "Iltis",
+    "Tchórz"
+  ],
+  "Фретка": [
+    "Фретка",
+    "Ferret",
+    "Frettchen",
+    "Fretka"
+  ],
+  "Їжак": [
+    "Їжак",
+    "Hedgehog",
+    "Igel",
+    "Jeż"
+  ],
+  "Єнот": [
+    "Єнот",
+    "Raccoon",
+    "Waschbär",
+    "Szop pracz"
+  ],
+  "Інший дрібний хижак": [
+    "Інший дрібний хижак",
+    "Other small carnivore",
+    "Anderes kleines Raubtier",
+    "Inny mały drapieżnik"
+  ],
+  "Коза": [
+    "Коза",
+    "Goat",
+    "Ziege",
+    "Koza"
+  ],
+  "Вівця": [
+    "Вівця",
+    "Sheep",
+    "Schaf",
+    "Owca"
+  ],
+  "Свиня": [
+    "Свиня",
+    "Pig",
+    "Schwein",
+    "Świnia"
+  ],
+  "Мініпіг": [
+    "Мініпіг",
+    "Miniature pig",
+    "Minischwein",
+    "Świnka miniaturowa"
+  ],
+  "Корова": [
+    "Корова",
+    "Cow",
+    "Kuh",
+    "Krowa"
+  ],
+  "Теля": [
+    "Теля",
+    "Calf",
+    "Kalb",
+    "Cielę"
+  ],
+  "Кінь": [
+    "Кінь",
+    "Horse",
+    "Pferd",
+    "Koń"
+  ],
+  "Поні": [
+    "Поні",
+    "Pony",
+    "Pony",
+    "Kuc"
+  ],
+  "Осел": [
+    "Осел",
+    "Donkey",
+    "Esel",
+    "Osioł"
+  ],
+  "Лама": [
+    "Лама",
+    "Llama",
+    "Lama",
+    "Lama"
+  ],
+  "Альпака": [
+    "Альпака",
+    "Alpaca",
+    "Alpaka",
+    "Alpaka"
+  ],
+  "Інша сільськогосподарська тварина": [
+    "Інша сільськогосподарська тварина",
+    "Other farm animal",
+    "Anderes Nutztier",
+    "Inne zwierzę gospodarskie"
+  ],
+  "Мавпа": [
+    "Мавпа",
+    "Monkey",
+    "Affe",
+    "Małpa"
+  ],
+  "Лисиця": [
+    "Лисиця",
+    "Fox",
+    "Fuchs",
+    "Lis"
+  ],
+  "Білка": [
+    "Білка",
+    "Squirrel",
+    "Eichhörnchen",
+    "Wiewiórka"
+  ],
+  "Кажан": [
+    "Кажан",
+    "Bat",
+    "Fledermaus",
+    "Nietoperz"
+  ],
+  "Акваріумна риба": [
+    "Акваріумна риба",
+    "Aquarium fish",
+    "Aquarienfisch",
+    "Ryba akwariowa"
+  ],
+  "Інша риба": [
+    "Інша риба",
+    "Other fish",
+    "Anderer Fisch",
+    "Inna ryba"
+  ],
+  "Амфібія": [
+    "Амфібія",
+    "Amphibian",
+    "Amphibie",
+    "Płaz"
+  ],
+  "Павук": [
+    "Павук",
+    "Spider",
+    "Spinne",
+    "Pająk"
+  ],
+  "Комаха": [
+    "Комаха",
+    "Insect",
+    "Insekt",
+    "Owad"
+  ],
+  "Інший вид": [
+    "Інший вид",
+    "Other species",
+    "Andere Tierart",
+    "Inny gatunek"
+  ]
+};
+
+function getCalendarBreedLabel(value) {
+  const index = { uk: 0, en: 1, de: 2, pl: 3 }[getInterfaceLanguage()];
+  return CALENDAR_BREED_NAMES[value]?.[index] || value;
+}
+
+function getCalendarBreedValue(value) {
+  const entered = String(value || "").trim();
+  const species = document.getElementById("visitNewPetSpecies")?.value;
+  const choices = species === "dog" ? DOG_BREEDS : species === "cat" ? CAT_BREEDS : OTHER_SPECIES_LIST;
+  return choices.find((item) => getCalendarBreedLabel(item) === entered) || entered;
+}
+
 function initVisitNewPatientBreedPicker() {
   const speciesSelect =
     document.querySelector(
@@ -70368,11 +73407,11 @@ function initVisitNewPatientBreedPicker() {
       breedInput.disabled = false;
 
       breedInput.placeholder =
-        "Почніть вводити породу собаки";
+        translateInterfaceText("calendar.detail.start.typing.a.dog.breed");
 
       if (breedLabel) {
         breedLabel.textContent =
-          "Порода собаки";
+          translateInterfaceText("calendar.detail.dog.breed");
       }
     } else if (species === "cat") {
       breeds = CAT_BREEDS;
@@ -70380,11 +73419,11 @@ function initVisitNewPatientBreedPicker() {
       breedInput.disabled = false;
 
       breedInput.placeholder =
-        "Почніть вводити породу кота";
+        translateInterfaceText("calendar.detail.start.typing.a.cat.breed");
 
       if (breedLabel) {
         breedLabel.textContent =
-          "Порода кота";
+          translateInterfaceText("calendar.detail.cat.breed");
       }
     } else if (species === "other") {
   breeds =
@@ -70394,21 +73433,21 @@ function initVisitNewPatientBreedPicker() {
     false;
 
   breedInput.placeholder =
-    "Оберіть або почніть вводити вид тварини";
+    translateInterfaceText("calendar.detail.select.or.start.typing.an.animal.species");
 
   if (breedLabel) {
     breedLabel.textContent =
-      "Вид тварини";
+      translateInterfaceText("calendar.detail.animal.species");
   }
 } else {
       breedInput.disabled = true;
 
       breedInput.placeholder =
-        "Спочатку оберіть вид";
+        translateInterfaceText("calendar.detail.select.a.species.first");
 
       if (breedLabel) {
         breedLabel.textContent =
-          "Порода";
+          translateInterfaceText("calendar.detail.breed");
       }
     }
 
@@ -70417,7 +73456,7 @@ function initVisitNewPatientBreedPicker() {
         .map(
           (breed) => `
             <option
-              value="${escapeHtml(breed)}"
+              value="${escapeHtml(getCalendarBreedLabel(breed))}"
             ></option>
           `
         )
@@ -72826,7 +75865,7 @@ function closeVisitModal() {
 
   if (modalSub) {
     modalSub.textContent =
-      "Оберіть пацієнта";
+      translateInterfaceText("calendar.detail.select.a.patient");
   }
 
   const patientBlock =
@@ -73086,7 +76125,7 @@ async function openVisitModalForCreate(
 
     if (modalSub) {
       modalSub.textContent =
-        `Пацієнт: ${pet?.name || "—"}`;
+        `${escapeHtml(translateInterfaceText("calendar.detail.patient.2"))} ${pet?.name || "—"}`;
     }
 
     if (patientBlock) {
@@ -73110,7 +76149,7 @@ async function openVisitModalForCreate(
 
     if (modalSub) {
       modalSub.textContent =
-        "Оберіть пацієнта";
+        translateInterfaceText("calendar.detail.select.a.patient");
     }
 
     if (patientBlock) {
@@ -73211,8 +76250,8 @@ const petName =
 
         const breed =
           String(
-            $("#visitNewPetBreed")
-              ?.value || ""
+            getCalendarBreedValue($("#visitNewPetBreed")
+              ?.value) || ""
           ).trim();
 
         const age =
@@ -73229,7 +76268,7 @@ const petName =
 
         if (!ownerName) {
           alert(
-            "Вкажіть ПІБ власника."
+            translateInterfaceText("calendar.detail.enter.the.owner.s.full.name")
           );
 
           $("#visitNewOwnerName")
@@ -73240,7 +76279,7 @@ const petName =
 
         if (!ownerPhone) {
           alert(
-            "Вкажіть телефон власника."
+            translateInterfaceText("calendar.detail.enter.the.owner.s.phone.number")
           );
 
           $("#visitNewOwnerPhone")
@@ -73255,7 +76294,7 @@ const petName =
           )
         ) {
           alert(
-            "Телефон повинен містити рівно 12 цифр у форматі +380 XX XXX XX XX"
+            translateInterfaceText("calendar.detail.the.phone.number.must.contain.exactly.12.digits.in.the.format.380.xx.xxx.xx.xx")
           );
 
           $("#visitNewOwnerPhone")
@@ -73266,7 +76305,7 @@ const petName =
 
         if (!petName) {
           alert(
-            "Вкажіть кличку пацієнта."
+            translateInterfaceText("calendar.detail.enter.the.patient.s.name")
           );
 
           $("#visitNewPetName")
@@ -73277,7 +76316,7 @@ const petName =
 
         if (!species) {
           alert(
-            "Оберіть вид тварини."
+            translateInterfaceText("calendar.detail.select.the.animal.species")
           );
 
           $("#visitNewPetSpecies")
@@ -73289,13 +76328,13 @@ const petName =
         const oldText =
           visitNewPatientSave
             .textContent ||
-          "Створити пацієнта";
+          translateInterfaceText("calendar.detail.create.patient");
 
         visitNewPatientSave.disabled =
           true;
 
         visitNewPatientSave.textContent =
-          "Створюємо...";
+          translateInterfaceText("calendar.detail.creating.2");
 
         try {
           const owner =
@@ -73320,7 +76359,7 @@ const petName =
 
           if (!owner?.id) {
             throw new Error(
-              "Власника не створено."
+              translateInterfaceText("calendar.detail.the.owner.was.not.created")
             );
           }
 
@@ -73354,7 +76393,7 @@ const petName =
 
           if (!patient?.id) {
             throw new Error(
-              "Пацієнта не створено."
+              translateInterfaceText("calendar.detail.the.patient.was.not.created")
             );
           }
 
@@ -73411,7 +76450,7 @@ const petName =
 
           if (modalSub) {
             modalSub.textContent =
-              `Пацієнт: ${patient.name}`;
+              `${escapeHtml(translateInterfaceText("calendar.detail.patient.2"))} ${patient.name}`;
           }
 
           await loadOwners();
@@ -73456,12 +76495,12 @@ const petName =
           alert(
   owner._existingPhoneMatch
     ? (
-        "Номер уже був у базі. " +
-        "Пацієнта додано до існуючого власника."
+        (translateInterfaceText("calendar.detail.the.phone.number.was.already.in.the.database") + " ") +
+        translateInterfaceText("calendar.detail.the.patient.has.been.added.to.the.existing.owner")
       )
     : (
-        "Власника та пацієнта створено. " +
-        "Тепер заповніть деталі запису та збережіть візит."
+        (translateInterfaceText("calendar.detail.the.owner.and.patient.have.been.created") + " ") +
+        translateInterfaceText("calendar.detail.now.fill.in.the.appointment.details.and.save.the.visit")
       )
 );
         } catch (error) {
@@ -73471,8 +76510,7 @@ const petName =
           );
 
           alert(
-            error?.message ||
-            "Не вдалося створити пацієнта."
+            calendarErrorMessage(error?.message, translateInterfaceText("calendar.detail.could.not.create.the.patient"))
           );
         } finally {
           visitNewPatientSave.disabled =
@@ -73600,7 +76638,7 @@ const petName =
 
       staffSelect.innerHTML = `
         <option value="">
-          Завантаження графіка...
+          ${escapeHtml(translateInterfaceText("calendar.detail.loading.schedule"))}
         </option>
       `;
 
@@ -73707,11 +76745,11 @@ const petName =
         <option value="">
           ${
             visibleDoctors.length
-              ? "Оберіть ветеринара"
+              ? translateInterfaceText("calendar.detail.select.a.veterinarian")
               : (
                   showAll
-                    ? "Ветеринарів не знайдено"
-                    : "На цей час лікарів на зміні немає"
+                    ? translateInterfaceText("calendar.detail.no.veterinarians.found")
+                    : translateInterfaceText("calendar.detail.no.veterinarians.are.on.shift.at.this.time")
                 )
           }
         </option>
@@ -73728,7 +76766,7 @@ const petName =
                     `${item.shiftStart}` +
                     `–${item.shiftEnd}`
                   )
-                : "поза зміною";
+                : translateInterfaceText("calendar.detail.off.shift.2");
 
             return `
               <option
@@ -73738,7 +76776,7 @@ const petName =
               >
                 ${escapeHtml(
                   doctor.name ||
-                  "Ветеринар"
+                  translateInterfaceText("calendar.detail.veterinarian")
                 )}
                 ·
                 ${escapeHtml(
@@ -73756,7 +76794,7 @@ const petName =
               <option
                 value="__show_all__"
               >
-                Показати всіх ветеринарів…
+                ${escapeHtml(translateInterfaceText("calendar.detail.show.all.veterinarians"))}
               </option>
             `
             : ""
@@ -74169,8 +77207,8 @@ function getVisitModalState() {
 
     petBreed:
       String(
-        $("#visitNewPetBreed")
-          ?.value || ""
+        getCalendarBreedValue($("#visitNewPetBreed")
+          ?.value) || ""
       ).trim(),
 
     petAge:
@@ -74247,8 +77285,7 @@ function requestCloseVisitModal() {
 
   openDeleteModal(
     (
-      "Внесені дані запису " +
-      "ще не збережені."
+      translateInterfaceText("calendar.detail.appointment.changes.have.not.been.saved.yet")
     ),
     () => {
       closeVisitModal();
@@ -74368,8 +77405,8 @@ const species =
 
 const breed =
   String(
-    $("#visitNewPetBreed")
-      ?.value || ""
+    getCalendarBreedValue($("#visitNewPetBreed")
+      ?.value) || ""
   ).trim();
 
 const age =
@@ -74409,13 +77446,13 @@ const neutered =
 
       if (!ownerName) {
   return alert(
-    "Вкажи власника"
+    translateInterfaceText("calendar.detail.enter.the.owner.s.name")
   );
 }
 
 if (!ownerPhone) {
   return alert(
-    "Вкажи телефон власника"
+    translateInterfaceText("calendar.detail.enter.the.owner.s.phone.number.2")
   );
 }
 
@@ -74425,13 +77462,13 @@ if (
   )
 ) {
   return alert(
-    "Вкажіть телефон у форматі +380 XX XXX XX XX"
+    translateInterfaceText("calendar.detail.enter.a.phone.number.in.the.format.380.xx.xxx.xx.xx")
   );
 }
 
 if (!petName) {
   return alert(
-    "Вкажи кличку пацієнта"
+    translateInterfaceText("calendar.detail.enter.the.patient.s.name.2")
   );
 }
 
@@ -74454,7 +77491,7 @@ telegram:
     note:
       ownerNote,
   });
-      if (!owner?.id) return alert("Не вдалося створити власника");
+      if (!owner?.id) return alert(translateInterfaceText("calendar.detail.could.not.create.the.owner"));
 
       const createdPet =
   await createPatientApi({
@@ -74484,7 +77521,7 @@ telegram:
       "",
   });
 
-      if (!createdPet?.id) return alert("Не вдалося створити пацієнта");
+      if (!createdPet?.id) return alert(translateInterfaceText("calendar.detail.could.not.create.the.patient.2"));
 
       pet = createdPet;
       state.selectedPet = pet;
@@ -74494,7 +77531,7 @@ telegram:
       await loadPatientsApi();
     }
 
-    if (!pet) return alert("Пацієнт не обраний");
+    if (!pet) return alert(translateInterfaceText("calendar.detail.no.patient.selected"));
 
     const date =
   (
@@ -74553,20 +77590,20 @@ if (
   showCrmNotice({
     icon: "🌙",
     title:
-      "Прийом виходить за межі дня",
+      translateInterfaceText("calendar.detail.appointment.extends.past.midnight"),
     text:
-      "Обрана тривалість переносить завершення прийому після 24:00. Оберіть раніший час або меншу тривалість.",
+      translateInterfaceText("calendar.detail.the.selected.duration.ends.the.appointment.after.24.00.choose.an.earlier.time.or.a.sh"),
   });
 
   return;
 }
 if (!notePlain) {
   return alert(
-    "Вкажіть причину запису"
+    translateInterfaceText("calendar.detail.enter.the.reason.for.the.appointment")
   );
 }
-    if (!staffId) return alert("Оберіть ветеринара");
-    if (!startTime) return alert("Оберіть час початку");
+    if (!staffId) return alert(translateInterfaceText("calendar.detail.select.a.veterinarian"));
+    if (!startTime) return alert(translateInterfaceText("calendar.detail.select.a.start.time.2"));
 
     const payload = {
   pet_id:
@@ -74592,7 +77629,7 @@ if (!notePlain) {
     // =========================
     if (editVisitId) {
       const current = await fetchVisitById(editVisitId);
-      if (!current) return alert("Візит не знайдено");
+      if (!current) return alert(translateInterfaceText("calendar.detail.visit.not.found"));
 
       const updated = await updateVisitApi(editVisitId, payload);
       if (!updated) return;
@@ -74705,8 +77742,8 @@ const isOutsideShift =
       const createdEvent =
         await createCalendarEventApi({
           title:
-            `${pet.name || "Пацієнт"} — ` +
-            `${notePlain || "Запис"}`,
+            `${pet.name || translateInterfaceText("calendar.detail.patient")} — ` +
+            `${notePlain || translateInterfaceText("calendar.detail.appointment.2")}`,
 
           event_date:
             date,
@@ -74753,15 +77790,14 @@ const isOutsideShift =
       if (openedFromPatient) {
         openDeleteModal(
           `
-            <b>Запис успішно створено</b>
+            <b>${escapeHtml(translateInterfaceText("calendar.detail.appointment.successfully.created"))}</b>
             <br><br>
-            Пацієнта додано до календаря
-            на
-            <b>${escapeHtml(date)}</b>
-            о
+            ${escapeHtml(translateInterfaceText("calendar.detail.the.patient.has.been.added.to.the.calendar.for"))}
+            <b>${escapeHtml(formatCalendarDate(date))}</b>
+            ${escapeHtml(translateInterfaceText("calendar.detail.at"))}
             <b>${escapeHtml(startTime)}</b>.
             <br><br>
-            Почати медичний прийом зараз?
+            ${escapeHtml(translateInterfaceText("calendar.detail.start.the.medical.visit.now"))}
           `,
           async () => {
             await startMedicalVisitFromCalendarEvent(
@@ -74786,12 +77822,11 @@ const continueCalendarCreation =
     if (isBusy) {
       openDeleteModal(
         `
-          <b>Час уже зайнятий</b>
+          <b>${escapeHtml(translateInterfaceText("calendar.detail.this.time.is.already.booked.2"))}</b>
           <br><br>
-          У цього ветеринара вже є запис
-          на вибраний час.
+          ${escapeHtml(translateInterfaceText("calendar.detail.this.veterinarian.already.has.an.appointment.at.the.selected.time"))}
           <br><br>
-          Створити ще один запис паралельно?
+          ${escapeHtml(translateInterfaceText("calendar.detail.create.an.overlapping.appointment"))}
         `,
         async () => {
           await createCalendarAppointment(
@@ -74813,7 +77848,7 @@ if (isOutsideShift) {
     shiftStart &&
     shiftEnd
       ? `
-          Робочий час лікаря:
+          ${escapeHtml(translateInterfaceText("calendar.detail.veterinarian.s.working.hours"))}
           <b>${escapeHtml(
             shiftStart
           )}–${escapeHtml(
@@ -74821,17 +77856,16 @@ if (isOutsideShift) {
           )}</b>.
         `
       : `
-          На вибрану дату лікар
-          не знаходиться на зміні.
+          ${escapeHtml(translateInterfaceText("calendar.detail.the.veterinarian.is.not.on.shift.on.the.selected.date"))}
         `;
 
   openDeleteModal(
     `
-      <b>Лікар не працює у вибраний час</b>
+      <b>${escapeHtml(translateInterfaceText("calendar.detail.the.veterinarian.is.unavailable.at.the.selected.time"))}</b>
       <br><br>
       ${shiftDescription}
       <br><br>
-      Все одно створити запис?
+      ${escapeHtml(translateInterfaceText("calendar.detail.create.the.appointment.anyway"))}
     `,
     async () => {
       await continueCalendarCreation();
@@ -74847,11 +77881,8 @@ await continueCalendarCreation();
     console.error(e);
 
     alert(
-      "Помилка: " +
-      (
-        e?.message ||
-        e
-      )
+      (translateInterfaceText("calendar.detail.error") + " ") +
+      calendarErrorMessage(e)
     );
   }
 });
@@ -81245,7 +84276,7 @@ $("#visitPatientResults") && ($("#visitPatientResults").innerHTML = "");
 const visitModalSub = $("#visitModalSub");
 
 if (visitModalSub) {
-  visitModalSub.textContent = "Оберіть пацієнта";
+  visitModalSub.textContent = translateInterfaceText("calendar.detail.select.a.patient");
 }
 
 const visitPatientBlock = $("#visitPatientBlock");
@@ -81259,8 +84290,8 @@ $("#visitDuration") && ($("#visitDuration").value = "60");
   const staffSelect = $("#visitStaff");
   if (staffSelect) {
     staffSelect.innerHTML = `
-      <option value="">Оберіть ветеринара</option>
-      ${staff.map((doc) => `<option value="${escapeHtml(String(doc.id))}">${escapeHtml(doc.name || "Працівник")}</option>`).join("")}
+      <option value="">${escapeHtml(translateInterfaceText("calendar.detail.select.a.veterinarian"))}</option>
+      ${staff.map((doc) => `<option value="${escapeHtml(String(doc.id))}">${escapeHtml(doc.name || translateInterfaceText("calendar.detail.employee"))}</option>`).join("")}
     `;
     staffSelect.value = String(staffId || "");
   }
@@ -81380,8 +84411,8 @@ const fillVisitVaccineSelect =
       <option value="">
         ${
           species
-            ? "Оберіть вакцину"
-            : "Спочатку оберіть вид"
+            ? translateInterfaceText("calendar.detail.select.a.vaccine")
+            : translateInterfaceText("calendar.detail.select.a.species.first")
         }
       </option>
 
@@ -81625,8 +84656,8 @@ const ownerNote =
 
       const breed =
         String(
-          $("#visitNewPetBreed")
-            ?.value || ""
+          getCalendarBreedValue($("#visitNewPetBreed")
+            ?.value) || ""
         ).trim();
 
       const age =
@@ -81673,7 +84704,7 @@ const neutered =
     : neuteredRaw === "true";
       if (!ownerName) {
         alert(
-          "Вкажіть ПІБ власника."
+          translateInterfaceText("calendar.detail.enter.the.owner.s.full.name")
         );
 
         $("#visitNewOwnerName")
@@ -81684,7 +84715,7 @@ const neutered =
 
       if (!ownerPhone) {
         alert(
-          "Вкажіть телефон власника."
+          translateInterfaceText("calendar.detail.enter.the.owner.s.phone.number")
         );
 
         $("#visitNewOwnerPhone")
@@ -81701,7 +84732,7 @@ const neutered =
         )
       ) {
         alert(
-          "Телефон повинен бути у форматі +380 XX XXX XX XX."
+          translateInterfaceText("calendar.detail.the.phone.number.must.use.the.format.380.xx.xxx.xx.xx")
         );
 
         $("#visitNewOwnerPhone")
@@ -81712,7 +84743,7 @@ const neutered =
 
       if (!petName) {
         alert(
-          "Вкажіть кличку пацієнта."
+          translateInterfaceText("calendar.detail.enter.the.patient.s.name")
         );
 
         $("#visitNewPetName")
@@ -81723,7 +84754,7 @@ const neutered =
 
       if (!species) {
         alert(
-          "Оберіть вид тварини."
+          translateInterfaceText("calendar.detail.select.the.animal.species")
         );
 
         $("#visitNewPetSpecies")
@@ -81827,7 +84858,7 @@ const collectVaccination =
 
     if (!vaccinationDate) {
       alert(
-        `Вкажіть дату: ${label}.`
+        `${escapeHtml(translateInterfaceText("calendar.detail.enter.a.date"))} ${label}.`
       );
 
       dateInput?.focus();
@@ -81844,7 +84875,7 @@ const collectVaccination =
 
     if (!selected) {
       alert(
-        `Оберіть вакцину: ${label}.`
+        `${escapeHtml(translateInterfaceText("calendar.detail.select.a.vaccine.2"))} ${label}.`
       );
 
       vaccineInput?.focus();
@@ -81872,7 +84903,7 @@ const collectVaccination =
       )
     ) {
       alert(
-        `Обрана вакцина не відповідає категорії "${label}".`
+        `${escapeHtml(translateInterfaceText("calendar.detail.the.selected.vaccine.does.not.match.the.category"))}${label}".`
       );
 
       return false;
@@ -81916,7 +84947,7 @@ const collectVaccination =
           "",
 
         note:
-          "Додано під час створення пацієнта з календаря",
+          translateInterfaceText("calendar.detail.added.when.creating.a.patient.from.the.calendar"),
       });
     }
 
@@ -81940,7 +84971,7 @@ if (
       "rabies",
 
     label:
-      "вакцинація від сказу",
+      translateInterfaceText("calendar.detail.rabies.vaccination"),
   })
 ) {
   return;
@@ -81962,7 +84993,7 @@ if (
       "general",
 
     label:
-      "загальна вакцинація",
+      translateInterfaceText("calendar.detail.general.vaccination"),
   })
 ) {
   return;
@@ -81975,7 +85006,7 @@ if (
         true;
 
       visitNewPatientCreate.textContent =
-        "Створюємо...";
+        translateInterfaceText("calendar.detail.creating.2");
 
       try {
         const owner =
@@ -82003,7 +85034,7 @@ telegram:
 
         if (!owner?.id) {
           throw new Error(
-            "Не вдалося створити власника."
+            translateInterfaceText("calendar.detail.could.not.create.the.owner.2")
           );
         }
 
@@ -82040,7 +85071,7 @@ telegram:
 
         if (!patient?.id) {
           throw new Error(
-            "Не вдалося створити пацієнта."
+            translateInterfaceText("calendar.detail.could.not.create.the.patient")
           );
         }
 // =====================================================
@@ -82068,7 +85099,7 @@ if (
     );
 
     throw new Error(
-      "Пацієнта створено, але вакцинації не вдалося зберегти."
+      translateInterfaceText("calendar.detail.the.patient.was.created.but.vaccinations.could.not.be.saved")
     );
   }
 }
@@ -82117,7 +85148,7 @@ if (
 
         if (modalSub) {
           modalSub.textContent =
-            `Пацієнт: ${patient.name}`;
+            `${escapeHtml(translateInterfaceText("calendar.detail.patient.2"))} ${patient.name}`;
         }
 
         if (visitNewPatientBox) {
@@ -82130,7 +85161,7 @@ if (
         await loadPatientsApi();
 
         alert(
-          "Пацієнта створено. Тепер збережіть візит."
+          translateInterfaceText("calendar.detail.the.patient.has.been.created.now.save.the.appointment")
         );
       } catch (error) {
         console.error(
@@ -82139,8 +85170,7 @@ if (
         );
 
         alert(
-          error?.message ||
-          "Не вдалося створити пацієнта."
+          calendarErrorMessage(error?.message, translateInterfaceText("calendar.detail.could.not.create.the.patient"))
         );
       } finally {
         visitNewPatientCreate.disabled =
@@ -82148,7 +85178,7 @@ if (
 
         visitNewPatientCreate.textContent =
           originalText ||
-          "Створити пацієнта";
+          translateInterfaceText("calendar.detail.create.patient");
       }
     };
 }
@@ -82191,11 +85221,11 @@ $("#visitPatientSearch")?.addEventListener("input", () => {
   box.innerHTML = found.length
     ? found.map((p) => `
       <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(p.id))}">
-        <strong>${escapeHtml(p.name || "Пацієнт")}</strong>
-        <span>${escapeHtml(p.owner_name || "Власник не вказаний")} · ${escapeHtml(p.owner_phone || p.phone || "телефон не вказаний")}</span>
+        <strong>${escapeHtml(p.name || translateInterfaceText("calendar.detail.patient"))}</strong>
+        <span>${escapeHtml(p.owner_name || translateInterfaceText("calendar.detail.no.owner.specified"))} · ${escapeHtml(p.owner_phone || p.phone || translateInterfaceText("calendar.detail.no.phone.number.specified"))}</span>
       </div>
     `).join("")
-    : `<div class="hint">Нічого не знайдено</div>`;
+    : `<div class="hint">${escapeHtml(translateInterfaceText("calendar.detail.nothing.found"))}</div>`;
 
   $$("[data-select-visit-patient]").forEach((item) => {
     item.addEventListener("click", () => {
@@ -82212,7 +85242,7 @@ state.selectedPetId =
 
 $("#visitPatientSearch").value =
   patient
-    ? `${patient.name || "Пацієнт"} · ${patient.owner_name || ""}`
+    ? `${patient.name || translateInterfaceText("calendar.detail.patient")} · ${patient.owner_name || ""}`
     : id;
 
 const modalSub =
@@ -82221,8 +85251,8 @@ const modalSub =
 if (modalSub) {
   modalSub.textContent =
     patient
-      ? `Пацієнт: ${patient.name || "—"}`
-      : "Оберіть пацієнта";
+      ? `${escapeHtml(translateInterfaceText("calendar.detail.patient.2"))} ${patient.name || "—"}`
+      : translateInterfaceText("calendar.detail.select.a.patient");
 }
 
 box.innerHTML = "";
