@@ -3208,7 +3208,113 @@ Object.assign(APP_TRANSLATIONS.uk, {"calendar.header.search": "Пошук вла
 Object.assign(APP_TRANSLATIONS.en, {"calendar.header.search": "Search owners or patients...", "calendar.header.clinic": "Clinic", "calendar.header.administrator": "Administrator"});
 Object.assign(APP_TRANSLATIONS.de, {"calendar.header.search": "Tierhalter oder Patienten suchen...", "calendar.header.clinic": "Klinik", "calendar.header.administrator": "Administrator"});
 Object.assign(APP_TRANSLATIONS.pl, {"calendar.header.search": "Szukaj właścicieli lub pacjentów...", "calendar.header.clinic": "Klinika", "calendar.header.administrator": "Administrator"});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.list.title": "Власники тварин",
+  "owners.list.addOwner": "+ Додати власника",
+  "owners.list.fullName": "ПІБ",
+  "owners.list.pets": "Улюбленці",
+  "owners.list.phone": "Телефон",
+  "owners.list.emailStatus": "Email / Статус",
+  "owners.list.address": "Адреса",
+  "owners.list.actions": "Дії",
+  "owners.list.empty": "Нічого не знайдено."
+});
 
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.list.title": "Pet owners",
+  "owners.list.addOwner": "+ Add owner",
+  "owners.list.fullName": "Full name",
+  "owners.list.pets": "Pets",
+  "owners.list.phone": "Phone",
+  "owners.list.emailStatus": "Email / Status",
+  "owners.list.address": "Address",
+  "owners.list.actions": "Actions",
+  "owners.list.empty": "Nothing found."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.list.title": "Tierhalter",
+  "owners.list.addOwner": "+ Tierhalter hinzufügen",
+  "owners.list.fullName": "Name",
+  "owners.list.pets": "Tiere",
+  "owners.list.phone": "Telefon",
+  "owners.list.emailStatus": "E-Mail / Status",
+  "owners.list.address": "Adresse",
+  "owners.list.actions": "Aktionen",
+  "owners.list.empty": "Keine Ergebnisse."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.list.title": "Właściciele zwierząt",
+  "owners.list.addOwner": "+ Dodaj właściciela",
+  "owners.list.fullName": "Imię i nazwisko",
+  "owners.list.pets": "Zwierzęta",
+  "owners.list.phone": "Telefon",
+  "owners.list.emailStatus": "E-mail / Status",
+  "owners.list.address": "Adres",
+  "owners.list.actions": "Działania",
+  "owners.list.empty": "Nic nie znaleziono."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.row.noPetName": "Без клички",
+  "owners.row.noPets": "Поки немає",
+  "owners.row.copyHint": "Натисніть, щоб скопіювати номер",
+  "owners.row.copyPhone": "Скопіювати номер телефону {phone}",
+  "owners.row.copy": "Копіювати",
+  "owners.row.phoneMissing": "Телефон не вказано",
+  "owners.row.contactMissing": "Контакт не вказано",
+  "owners.row.edit": "Редагувати власника",
+  "owners.row.delete": "Видалити власника",
+  "owners.row.copyFailed": "Не вдалося",
+  "owners.row.copied": "Скопійовано ✓",
+  "owners.row.noName": "Без імені"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.row.noPetName": "No name",
+  "owners.row.noPets": "No pets yet",
+  "owners.row.copyHint": "Click to copy the number",
+  "owners.row.copyPhone": "Copy phone number {phone}",
+  "owners.row.copy": "Copy",
+  "owners.row.phoneMissing": "Phone number not provided",
+  "owners.row.contactMissing": "Contact details not provided",
+  "owners.row.edit": "Edit owner",
+  "owners.row.delete": "Delete owner",
+  "owners.row.copyFailed": "Could not copy",
+  "owners.row.copied": "Copied ✓",
+  "owners.row.noName": "Unnamed"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.row.noPetName": "Ohne Namen",
+  "owners.row.noPets": "Noch keine Tiere",
+  "owners.row.copyHint": "Zum Kopieren der Nummer anklicken",
+  "owners.row.copyPhone": "Telefonnummer {phone} kopieren",
+  "owners.row.copy": "Kopieren",
+  "owners.row.phoneMissing": "Telefonnummer nicht angegeben",
+  "owners.row.contactMissing": "Kontaktdaten nicht angegeben",
+  "owners.row.edit": "Tierhalter bearbeiten",
+  "owners.row.delete": "Tierhalter löschen",
+  "owners.row.copyFailed": "Kopieren fehlgeschlagen",
+  "owners.row.copied": "Kopiert ✓",
+  "owners.row.noName": "Ohne Namen"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.row.noPetName": "Bez imienia",
+  "owners.row.noPets": "Brak zwierząt",
+  "owners.row.copyHint": "Kliknij, aby skopiować numer",
+  "owners.row.copyPhone": "Skopiuj numer telefonu {phone}",
+  "owners.row.copy": "Kopiuj",
+  "owners.row.phoneMissing": "Nie podano numeru telefonu",
+  "owners.row.contactMissing": "Nie podano danych kontaktowych",
+  "owners.row.edit": "Edytuj właściciela",
+  "owners.row.delete": "Usuń właściciela",
+  "owners.row.copyFailed": "Nie udało się skopiować",
+  "owners.row.copied": "Skopiowano ✓",
+  "owners.row.noName": "Bez imienia"
+});
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -70584,22 +70690,27 @@ const qDigits =
 });
 
   if (!filteredOwners.length) {
-    tbody.innerHTML = `
-  <tr>
-    <td
-      colspan="6"
-      style="
-        text-align:center;
-        padding:20px;
-        opacity:.5;
-      "
-    >
-      Нічого не знайдено.
-    </td>
-  </tr>
-`;
-    return;
-  }
+  tbody.innerHTML = `
+    <tr>
+      <td
+        colspan="6"
+        style="
+          text-align:center;
+          padding:20px;
+          opacity:.5;
+        "
+      >
+        ${escapeHtml(
+          translateInterfaceText(
+            "owners.list.empty"
+          )
+        )}
+      </td>
+    </tr>
+  `;
+
+  return;
+}
 
   filteredOwners.forEach((owner) => {
   const tr =
@@ -70676,7 +70787,9 @@ const hiddenPetsCount =
         const petName =
           String(
             patient.name ||
-            "Без клички"
+translateInterfaceText(
+  "owners.row.noPetName"
+)
           ).trim();
 
         const petBreed =
@@ -70706,7 +70819,9 @@ const hiddenPetsCount =
             const petName =
               String(
                 patient.name ||
-                "Без клички"
+translateInterfaceText(
+  "owners.row.noPetName"
+)
               ).trim();
 
             const petBreed =
@@ -70775,14 +70890,20 @@ const hiddenPetsCount =
       <span
         class="ownerPetsEmpty"
       >
-        Поки немає
+        ${escapeHtml(
+  translateInterfaceText(
+    "owners.row.noPets"
+  )
+)}
       </span>
     `;
   tr.innerHTML = `
     <td style="font-weight:600;">
       👤 ${escapeHtml(
         owner.name ||
-        "Без імені"
+translateInterfaceText(
+  "owners.row.noName"
+)
       )}
     </td>
 
@@ -70800,10 +70921,19 @@ const hiddenPetsCount =
           data-copy-owner-phone="${escapeHtml(
             owner.phone
           )}"
-          title="Натисніть, щоб скопіювати номер"
-          aria-label="Скопіювати номер телефону ${escapeHtml(
-            owner.phone
-          )}"
+          title="${escapeHtml(
+  translateInterfaceText(
+    "owners.row.copyHint"
+  )
+)}"
+          aria-label="${escapeHtml(
+  translateInterfaceText(
+    "owners.row.copyPhone",
+    {
+      phone: owner.phone
+    }
+  )
+)}"
         >
           <span
             class="ownerPhoneIcon"
@@ -70823,7 +70953,11 @@ const hiddenPetsCount =
           <span
             class="ownerPhoneCopyLabel"
           >
-            Копіювати
+            ${escapeHtml(
+  translateInterfaceText(
+    "owners.row.copy"
+  )
+)}
           </span>
         </button>
       `
@@ -70831,7 +70965,11 @@ const hiddenPetsCount =
         <span
           class="ownerPhoneEmpty"
         >
-          Телефон не вказано
+          ${escapeHtml(
+  translateInterfaceText(
+    "owners.row.phoneMissing"
+  )
+)}
         </span>
       `
   }
@@ -70876,7 +71014,11 @@ const hiddenPetsCount =
                 opacity:.45;
               "
             >
-              Контакт не вказано
+             ${escapeHtml(
+  translateInterfaceText(
+    "owners.row.contactMissing"
+  )
+)}
             </span>
           `
           : ""
@@ -70894,8 +71036,16 @@ const hiddenPetsCount =
       <button
         class="iconBtn ownerActionBtn ownerEditBtn"
         type="button"
-        title="Редагувати власника"
-        aria-label="Редагувати власника"
+        title="${escapeHtml(
+  translateInterfaceText(
+    "owners.row.edit"
+  )
+)}"
+aria-label="${escapeHtml(
+  translateInterfaceText(
+    "owners.row.edit"
+  )
+)}"
         data-edit-owner="${escapeHtml(
           owner.id
         )}"
@@ -70919,8 +71069,16 @@ const hiddenPetsCount =
       <button
         class="iconBtn ownerActionBtn ownerDeleteBtn"
         type="button"
-        title="Видалити власника"
-        aria-label="Видалити власника"
+        title="${escapeHtml(
+  translateInterfaceText(
+    "owners.row.delete"
+  )
+)}"
+aria-label="${escapeHtml(
+  translateInterfaceText(
+    "owners.row.delete"
+  )
+)}"
         data-delete-owner="${escapeHtml(
           owner.id
         )}"
@@ -71257,13 +71415,17 @@ if (copyPhoneButton) {
   if (!copied) {
     if (label) {
       label.textContent =
-        "Не вдалося";
+  translateInterfaceText(
+    "owners.row.copyFailed"
+  );
     }
 
     setTimeout(() => {
       if (label) {
         label.textContent =
-          "Копіювати";
+  translateInterfaceText(
+    "owners.row.copy"
+  );
       }
     }, 1600);
 
@@ -71276,7 +71438,9 @@ if (copyPhoneButton) {
 
   if (label) {
     label.textContent =
-      "Скопійовано ✓";
+  translateInterfaceText(
+    "owners.row.copied"
+  );
   }
 
   setTimeout(() => {
@@ -71286,7 +71450,9 @@ if (copyPhoneButton) {
 
     if (label) {
       label.textContent =
-        "Копіювати";
+  translateInterfaceText(
+    "owners.row.copy"
+  );
     }
   }, 1600);
 

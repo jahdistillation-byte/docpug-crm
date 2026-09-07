@@ -64,24 +64,51 @@
 
     <section class="page content-section" data-page="owners">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-        <h2>Власники тварин</h2>
-        <button class="btn-primary" id="btnAddOwner">+ Додати власника</button>
-      </div>
+  <h2 data-i18n="owners.list.title">
+    Власники тварин
+  </h2>
 
-      <div class="data-table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-  <th>ПІБ</th>
-  <th>Улюбленці</th>
-  <th>Телефон</th>
-  <th>Email/Статус</th>
-  <th>Адреса</th>
-  <th>Дії</th>
-</tr>
-          </thead>
-          <tbody id="owners-table-body"></tbody>
-        </table>
+  <button
+    class="btn-primary"
+    id="btnAddOwner"
+    data-i18n="owners.list.addOwner"
+  >
+    + Додати власника
+  </button>
+</div>
+
+<div class="data-table-container">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th data-i18n="owners.list.fullName">
+          ПІБ
+        </th>
+
+        <th data-i18n="owners.list.pets">
+          Улюбленці
+        </th>
+
+        <th data-i18n="owners.list.phone">
+          Телефон
+        </th>
+
+        <th data-i18n="owners.list.emailStatus">
+          Email / Статус
+        </th>
+
+        <th data-i18n="owners.list.address">
+          Адреса
+        </th>
+
+        <th data-i18n="owners.list.actions">
+          Дії
+        </th>
+      </tr>
+    </thead>
+
+    <tbody id="owners-table-body"></tbody>
+  </table>
       </div>
 
       <div id="ownersList" style="display:none;"></div>
