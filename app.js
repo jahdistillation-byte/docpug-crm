@@ -49021,6 +49021,53 @@ $$("[data-week-create-date]")
 
   
   if (calendarMode === "month") {
+    const focusDate =
+  new Date(
+    `${today}T12:00:00`
+  );
+
+const year =
+  focusDate.getFullYear();
+
+const month =
+  focusDate.getMonth();
+
+const firstMonthDay =
+  new Date(
+    year,
+    month,
+    1,
+    12,
+    0,
+    0
+  );
+
+const gridStart =
+  new Date(firstMonthDay);
+
+const daysBeforeMonday =
+  (firstMonthDay.getDay() + 6) % 7;
+
+gridStart.setDate(
+  gridStart.getDate() -
+    daysBeforeMonday
+);
+
+const monthDays =
+  Array.from(
+    { length: 42 },
+    (_, index) => {
+      const date =
+        new Date(gridStart);
+
+      date.setDate(
+        gridStart.getDate() +
+          index
+      );
+
+      return localISO(date);
+    }
+  );
      const interfaceLanguage =
       getInterfaceLanguage();
 
