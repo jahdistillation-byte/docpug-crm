@@ -8806,7 +8806,7 @@ general_vaccination_status:
 
 
 // Старые поля пока оставляем
-// до полного перехода форм.
+// до полного перехыода форм.
 
 vaccination_status:
   String(
