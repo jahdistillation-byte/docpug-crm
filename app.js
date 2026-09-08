@@ -9287,7 +9287,7 @@ function openOwnerExistsModal(
           ".pugOwnerExistsBackdrop"
         );
 
-      if (
+            if (
         !modal ||
         !nameEl ||
         !phoneEl ||
@@ -9299,7 +9299,11 @@ function openOwnerExistsModal(
         return;
       }
 
-            nameEl.textContent =
+      applyInterfaceTranslations(
+        modal
+      );
+
+      nameEl.textContent =
         String(
           owner?.name ||
           translateInterfaceText(
