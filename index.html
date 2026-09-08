@@ -118,11 +118,19 @@
   <div id="ownerName">Власник</div>
   <div id="ownerMeta" style="display:none;">—</div>
 
-  <div class="ownerPetsHeader">
-    <h3>🐾 Улюбленці власника</h3>
-    <button class="btn-primary" id="btnAddPet">+ Додати тварину</button>
-  </div>
+    <div class="ownerPetsHeader">
+    <h3 data-i18n="owners.profile.petsTitle">
+      🐾 Улюбленці власника
+    </h3>
 
+    <button
+      class="btn-primary"
+      id="btnAddPet"
+      data-i18n="owners.profile.addPet"
+    >
+      + Додати тварину
+    </button>
+  </div>
   <div class="patients-grid" id="petsList"></div>
 </section>
 

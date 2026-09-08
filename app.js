@@ -3510,6 +3510,151 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.exists.fallbackName": "Właściciel"
 });
 
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.form.saveErrorTitle": "Помилка збереження"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.form.saveErrorTitle": "Save failed"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.form.saveErrorTitle": "Speichern fehlgeschlagen"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.form.saveErrorTitle": "Błąd zapisu"
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.profile.card": "Картка власника",
+  "owners.profile.petsTitle": "🐾 Улюбленці власника",
+  "owners.profile.addPet": "+ Додати тварину",
+  "owners.profile.statusVip": "VIP клієнт",
+  "owners.profile.statusRegular": "Постійний клієнт",
+  "owners.profile.statusActive": "Активний клієнт",
+  "owners.profile.statusNew": "Новий клієнт",
+  "owners.profile.noName": "Без імені",
+  "owners.profile.phoneMissing": "Телефон не вказано",
+  "owners.profile.edit": "✏️ Редагувати",
+  "owners.profile.backToList": "← До списку",
+  "owners.profile.patients": "Пацієнтів",
+  "owners.profile.visits": "Візитів",
+  "owners.profile.paid": "Сплачено",
+  "owners.profile.average": "Середній чек",
+  "owners.profile.lastVisit": "Останній візит",
+  "owners.profile.noPets": "Поки немає тварин у цього власника.",
+  "owners.profile.editPatient": "Редагувати пацієнта",
+  "owners.profile.deletePatient": "Видалити пацієнта",
+  "owners.profile.selectOwner": "Спочатку оберіть власника."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.profile.card": "Owner profile",
+  "owners.profile.petsTitle": "🐾 Owner’s pets",
+  "owners.profile.addPet": "+ Add animal",
+  "owners.profile.statusVip": "VIP client",
+  "owners.profile.statusRegular": "Regular client",
+  "owners.profile.statusActive": "Active client",
+  "owners.profile.statusNew": "New client",
+  "owners.profile.noName": "No name",
+  "owners.profile.phoneMissing": "Phone not provided",
+  "owners.profile.edit": "✏️ Edit",
+  "owners.profile.backToList": "← Back to list",
+  "owners.profile.patients": "Patients",
+  "owners.profile.visits": "Visits",
+  "owners.profile.paid": "Paid",
+  "owners.profile.average": "Average bill",
+  "owners.profile.lastVisit": "Last visit",
+  "owners.profile.noPets": "This owner has no animals yet.",
+  "owners.profile.editPatient": "Edit patient",
+  "owners.profile.deletePatient": "Delete patient",
+  "owners.profile.selectOwner": "Select an owner first."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.profile.card": "Tierhalterprofil",
+  "owners.profile.petsTitle": "🐾 Tiere des Tierhalters",
+  "owners.profile.addPet": "+ Tier hinzufügen",
+  "owners.profile.statusVip": "VIP-Kunde",
+  "owners.profile.statusRegular": "Stammkunde",
+  "owners.profile.statusActive": "Aktiver Kunde",
+  "owners.profile.statusNew": "Neukunde",
+  "owners.profile.noName": "Ohne Namen",
+  "owners.profile.phoneMissing": "Telefonnummer nicht angegeben",
+  "owners.profile.edit": "✏️ Bearbeiten",
+  "owners.profile.backToList": "← Zur Liste",
+  "owners.profile.patients": "Patienten",
+  "owners.profile.visits": "Besuche",
+  "owners.profile.paid": "Bezahlt",
+  "owners.profile.average": "Durchschnitt",
+  "owners.profile.lastVisit": "Letzter Besuch",
+  "owners.profile.noPets": "Dieser Tierhalter hat noch keine Tiere.",
+  "owners.profile.editPatient": "Patient bearbeiten",
+  "owners.profile.deletePatient": "Patient löschen",
+  "owners.profile.selectOwner": "Wählen Sie zuerst einen Tierhalter aus."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.profile.card": "Profil właściciela",
+  "owners.profile.petsTitle": "🐾 Zwierzęta właściciela",
+  "owners.profile.addPet": "+ Dodaj zwierzę",
+  "owners.profile.statusVip": "Klient VIP",
+  "owners.profile.statusRegular": "Stały klient",
+  "owners.profile.statusActive": "Aktywny klient",
+  "owners.profile.statusNew": "Nowy klient",
+  "owners.profile.noName": "Bez imienia",
+  "owners.profile.phoneMissing": "Nie podano telefonu",
+  "owners.profile.edit": "✏️ Edytuj",
+  "owners.profile.backToList": "← Wróć do listy",
+  "owners.profile.patients": "Pacjenci",
+  "owners.profile.visits": "Wizyty",
+  "owners.profile.paid": "Zapłacono",
+  "owners.profile.average": "Średni rachunek",
+  "owners.profile.lastVisit": "Ostatnia wizyta",
+  "owners.profile.noPets": "Ten właściciel nie ma jeszcze zwierząt.",
+  "owners.profile.editPatient": "Edytuj pacjenta",
+  "owners.profile.deletePatient": "Usuń pacjenta",
+  "owners.profile.selectOwner": "Najpierw wybierz właściciela."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.delete.fallbackName": "цього власника",
+  "owners.delete.confirmText": "Цю дію неможливо скасувати.",
+  "owners.delete.blockedTitle": "Власника неможливо видалити",
+  "owners.delete.blockedText": "До цього власника прив’язані пацієнти. Спочатку перенесіть або видаліть усіх його пацієнтів.",
+  "owners.delete.errorTitle": "Помилка видалення",
+  "owners.delete.errorText": "Не вдалося видалити власника."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.delete.fallbackName": "this owner",
+  "owners.delete.confirmText": "This action cannot be undone.",
+  "owners.delete.blockedTitle": "The owner cannot be deleted",
+  "owners.delete.blockedText": "Patients are linked to this owner. Move or delete all of the owner’s patients first.",
+  "owners.delete.errorTitle": "Deletion failed",
+  "owners.delete.errorText": "Could not delete the owner."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.delete.fallbackName": "diesen Tierhalter",
+  "owners.delete.confirmText": "Diese Aktion kann nicht rückgängig gemacht werden.",
+  "owners.delete.blockedTitle": "Der Tierhalter kann nicht gelöscht werden",
+  "owners.delete.blockedText": "Mit diesem Tierhalter sind Patienten verknüpft. Verschieben oder löschen Sie zuerst alle zugehörigen Patienten.",
+  "owners.delete.errorTitle": "Löschen fehlgeschlagen",
+  "owners.delete.errorText": "Der Tierhalter konnte nicht gelöscht werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.delete.fallbackName": "tego właściciela",
+  "owners.delete.confirmText": "Tej czynności nie można cofnąć.",
+  "owners.delete.blockedTitle": "Nie można usunąć właściciela",
+  "owners.delete.blockedText": "Z tym właścicielem są powiązani pacjenci. Najpierw przenieś lub usuń wszystkich jego pacjentów.",
+  "owners.delete.errorTitle": "Usuwanie nie powiodło się",
+  "owners.delete.errorText": "Nie udało się usunąć właściciela."
+});
+
+
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -9472,15 +9617,19 @@ async function createOwner(
     null;
 
   if (!existingOwner?.id) {
-    alert(calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.owner.2")));
+    showOwnerSaveError(
+  json?.error
+);
 
     return null;
   }
 
-  const existingName =
+    const existingName =
     String(
       existingOwner.name ||
-      "Власник"
+      translateInterfaceText(
+        "owners.exists.fallbackName"
+      )
     ).trim();
 
   const existingPhone =
@@ -9522,7 +9671,9 @@ if (
     text
   );
 
-  alert(calendarErrorMessage(json?.error, translateInterfaceText("calendar.detail.could.not.create.the.owner.2")));
+  showOwnerSaveError(
+  json?.error
+);
 
   return null;
 }
@@ -9539,7 +9690,9 @@ if (
       error
     );
 
-    alert(calendarErrorMessage(null, translateInterfaceText("calendar.detail.could.not.create.the.owner.2")));
+    showOwnerSaveError(
+  error
+);
 
     return null;
   }
@@ -9600,86 +9753,133 @@ async function updateOwner(id, payload = {}) {
 
     if (!res.ok) {
       console.error("API /owners PUT HTTP", res.status, text);
-      alert(`Помилка оновлення власника (HTTP ${res.status})`);
+      showOwnerSaveError(
+  json?.error
+);
       return null;
     }
 
     if (!json || !json.ok) {
       console.error("API /owners PUT bad json:", json, text);
-      alert(json?.error || "Помилка оновлення власника");
+      showOwnerSaveError(
+  json?.error
+);
       return null;
     }
 
     return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
   } catch (e) {
     console.error("updateOwner failed:", e);
-    alert("Помилка зʼєднання з сервером");
+    showOwnerSaveError(
+  e
+);
     return null;
   }
 }
 
-async function deleteOwner(id) {
+async function deleteOwner(
+  id
+) {
   try {
-    const res = await fetch(`/api/owners/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: { Accept: "application/json", ...getOrgHeaders() },
-    });
+    const response =
+      await fetch(
+        `/api/owners/${
+          encodeURIComponent(id)
+        }`,
+        {
+          method: "DELETE",
+          credentials: "include",
 
-    const text = await res.text();
-    let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
+          headers: {
+            Accept:
+              "application/json",
 
-    if (!res.ok) {
-  console.error(
-    "API /owners DELETE HTTP",
-    res.status,
-    text
-  );
-
-  if (res.status === 409) {
-    openDeleteModal(
-      `
-        <b>Власника неможливо видалити</b>
-        <br><br>
-        ${
-          escapeHtml(
-            json?.error ||
-            "До цього власника прив’язані пацієнти."
-          )
+            ...getOrgHeaders(),
+          },
         }
-        <br><br>
-        Спочатку перенесіть або видаліть
-        усіх його пацієнтів.
-      `,
-      null,
-      "info"
-    );
+      );
 
-    return false;
-  }
+    const text =
+      await response.text();
 
-  openDeleteModal(
-    escapeHtml(
-      json?.error ||
-      `Помилка видалення власника (HTTP ${res.status})`
-    ),
-    null,
-    "info"
-  );
+    let result = null;
 
-  return false;
-}
+    try {
+      result =
+        text
+          ? JSON.parse(text)
+          : null;
+    } catch {
+      result = null;
+    }
 
-    if (!json || !json.ok) {
-      console.error("API /owners DELETE bad json:", json, text);
-      alert(json?.error || "Помилка видалення власника");
+    if (
+      !response.ok ||
+      !result?.ok
+    ) {
+      console.error(
+        "deleteOwner failed:",
+        response.status,
+        result,
+        text
+      );
+
+      if (
+        response.status === 409
+      ) {
+        showCrmNotice({
+          icon: "👤",
+
+          title:
+            translateInterfaceText(
+              "owners.delete.blockedTitle"
+            ),
+
+          text:
+            translateInterfaceText(
+              "owners.delete.blockedText"
+            ),
+        });
+      } else {
+        showCrmNotice({
+          icon: "⚠️",
+
+          title:
+            translateInterfaceText(
+              "owners.delete.errorTitle"
+            ),
+
+          text:
+            translateInterfaceText(
+              "owners.delete.errorText"
+            ),
+        });
+      }
+
       return false;
     }
+
     return true;
-  } catch (e) {
-    console.error("deleteOwner failed:", e);
-    alert("Помилка зʼєднання з сервером");
+  } catch (error) {
+    console.error(
+      "deleteOwner failed:",
+      error
+    );
+
+    showCrmNotice({
+      icon: "⚠️",
+
+      title:
+        translateInterfaceText(
+          "owners.delete.errorTitle"
+        ),
+
+      text:
+        translateInterfaceText(
+          "owners.delete.errorText"
+        ),
+    });
+
     return false;
   }
 }
@@ -39910,62 +40110,181 @@ if (!owner) {
   const lastVisit = ownerVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
   // 1. Рендер Hero-блока (инфо владельца и статистика)
-  const ownerNameEl = $("#ownerName");
+   const ownerNameEl =
+    $("#ownerName");
+
   if (ownerNameEl) {
-   const ownerStatus =
-  Number(totalPaid || 0) >= 50000
-    ? "VIP клієнт"
-    : visitsCount >= 15
-      ? "Постійний клієнт"
-      : visitsCount > 0
-        ? "Активний клієнт"
-        : "Новий клієнт";
+    const ownerStatus =
+      Number(totalPaid || 0) >= 50000
+        ? translateInterfaceText(
+            "owners.profile.statusVip"
+          )
+        : visitsCount >= 15
+          ? translateInterfaceText(
+              "owners.profile.statusRegular"
+            )
+          : visitsCount > 0
+            ? translateInterfaceText(
+                "owners.profile.statusActive"
+              )
+            : translateInterfaceText(
+                "owners.profile.statusNew"
+              );
+
+    const lastVisitText =
+      lastVisit?.date
+        ? formatCalendarDate(
+            lastVisit.date,
+            {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }
+          )
+        : "—";
+
     ownerNameEl.innerHTML = `
-  <div class="ownerDashboardHero">
-    <div class="ownerDashTop">
-      <div class="ownerDashAvatar">👤</div>
+      <div class="ownerDashboardHero">
+        <div class="ownerDashTop">
+          <div class="ownerDashAvatar">
+            👤
+          </div>
 
-      <div class="ownerDashInfo">
-        <div class="ownerDashKicker">Картка власника</div>
-        <div class="ownerDashName">${escapeHtml(owner.name || "Без імені")}</div>
+          <div class="ownerDashInfo">
+            <div class="ownerDashKicker">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.card"
+                )
+              )}
+            </div>
 
-        <div class="ownerDashContacts">
-          <span>📞 ${escapeHtml(owner.phone || "Телефон не вказано")}</span>
-          ${owner.note ? `<span>📍 ${escapeHtml(owner.note)}</span>` : ""}
+            <div class="ownerDashName">
+              ${escapeHtml(
+                owner.name ||
+                translateInterfaceText(
+                  "owners.profile.noName"
+                )
+              )}
+            </div>
+
+            <div class="ownerDashContacts">
+              <span>
+                📞 ${escapeHtml(
+                  owner.phone ||
+                  translateInterfaceText(
+                    "owners.profile.phoneMissing"
+                  )
+                )}
+              </span>
+
+              ${
+                owner.note
+                  ? `<span>📍 ${escapeHtml(owner.note)}</span>`
+                  : ""
+              }
+            </div>
+          </div>
+
+          <div class="ownerDashStatus">
+            <div class="ownerDashBadge">
+              ${escapeHtml(ownerStatus)}
+            </div>
+
+            <button
+              class="ownerHeroEdit"
+              data-edit-owner="${escapeHtml(owner.id)}"
+            >
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.edit"
+                )
+              )}
+            </button>
+
+            <button
+              class="ownerHeroBack"
+              id="btnBackOwners"
+            >
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.backToList"
+                )
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div class="ownerDashStats">
+          <div class="ownerDashStat">
+            <span>
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.patients"
+                )
+              )}
+            </span>
+            <strong>${pets.length}</strong>
+          </div>
+
+          <div class="ownerDashStat">
+            <span>
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.visits"
+                )
+              )}
+            </span>
+            <strong>${visitsCount}</strong>
+          </div>
+
+          <div class="ownerDashStat">
+            <span>
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.paid"
+                )
+              )}
+            </span>
+            <strong>${totalPaid} ₴</strong>
+          </div>
+
+          <div class="ownerDashStat">
+            <span>
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.average"
+                )
+              )}
+            </span>
+
+            <strong>
+              ${
+                visitsCount
+                  ? Math.round(
+                      Number(totalPaid || 0) /
+                      visitsCount
+                    )
+                  : 0
+              } ₴
+            </strong>
+          </div>
+
+          <div class="ownerDashStat">
+            <span>
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.lastVisit"
+                )
+              )}
+            </span>
+            <strong>
+              ${escapeHtml(lastVisitText)}
+            </strong>
+          </div>
         </div>
       </div>
-
-      <div class="ownerDashStatus">
-        <div class="ownerDashBadge">${ownerStatus}</div>
-        <button class="ownerHeroEdit" data-edit-owner="${escapeHtml(owner.id)}">✏️ Редагувати</button>
-        <button class="ownerHeroBack" id="btnBackOwners">← До списку</button>
-      </div>
-    </div>
-
-    <div class="ownerDashStats">
-      <div class="ownerDashStat">
-        <span>Пацієнтів</span>
-        <strong>${pets.length}</strong>
-      </div>
-      <div class="ownerDashStat">
-        <span>Візитів</span>
-        <strong>${visitsCount}</strong>
-      </div>
-      <div class="ownerDashStat">
-        <span>Сплачено</span>
-        <strong>${totalPaid} ₴</strong>
-      </div>
-      <div class="ownerDashStat">
-        <span>Середній чек</span>
-        <strong>${visitsCount ? Math.round(Number(totalPaid || 0) / visitsCount) : 0} ₴</strong>
-      </div>
-      <div class="ownerDashStat">
-        <span>Останній візит</span>
-        <strong>${escapeHtml(lastVisit?.date || "—")}</strong>
-      </div>
-    </div>
-  </div>
-`;
+    `;
   }
 
   // 2. Рендер списка животных с "рамкой"
@@ -39977,7 +40296,18 @@ if (!owner) {
   list.innerHTML = "";
 
   if (!pets.length) {
-    list.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки немає тварин у цього власника.</div>`;
+    list.innerHTML = `
+  <div
+    class="hint"
+    style="text-align:center; padding:40px; opacity:0.5;"
+  >
+    ${escapeHtml(
+      translateInterfaceText(
+        "owners.profile.noPets"
+      )
+    )}
+  </div>
+`;
   } else {
     pets.forEach((pet) => {
       const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
@@ -39989,82 +40319,126 @@ if (!owner) {
 
       el.innerHTML = `
         <div style="flex:1;">
-          <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;">🐾 ${escapeHtml(pet.name || "Без імені")}</div>
-          <div style="font-size: 0.9rem; opacity: 0.6;">
-             ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)}
-             ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-             • ${petVisits.length} візитів
-          </div>
-        </div>
-        <div
-  style="
-    padding-left: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  "
->
-  <button
-    class="iconBtn"
-    type="button"
-    title="Редагувати пацієнта"
-    aria-label="Редагувати пацієнта"
-    data-edit-owner-pet="${escapeHtml(
-      String(pet.id)
-    )}"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 20h9"></path>
-      <path
-        d="
-          M16.5 3.5
-          a2.1 2.1 0 0 1 3 3
-          L8 18
-          l-4 1
-          1-4Z
-        "
-      ></path>
-    </svg>
-  </button>
-
-  <button
-    class="iconBtn"
-    type="button"
-    title="Видалити пацієнта"
-    aria-label="Видалити пацієнта"
-    data-del-pet="${escapeHtml(
-      String(pet.id)
-    )}"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M3 6h18"></path>
-      <path d="M8 6V4h8v2"></path>
-      <path d="M19 6l-1 14H6L5 6"></path>
-      <path d="M10 11v5"></path>
-      <path d="M14 11v5"></path>
-    </svg>
-  </button>
+          <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;">
+  🐾 ${escapeHtml(
+    pet.name ||
+    translateInterfaceText(
+      "owners.profile.noName"
+    )
+  )}
 </div>
+        <div style="font-size: 0.9rem; opacity: 0.6;">
+          ${escapeHtml(
+            speciesLabel(
+              pet.species
+            )
+          )}
+
+          ${
+            pet.breed
+              ? " • " +
+                escapeHtml(
+                  getCalendarBreedLabel(
+                    pet.breed
+                  )
+                )
+              : ""
+          }
+
+          • ${escapeHtml(
+            formatOwnerVisitCount(
+              petVisits.length
+            )
+          )}
+        </div>
+      </div>
+
+      <div
+        style="
+          padding-left: 15px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        "
+      >
+        <button
+          class="iconBtn"
+          type="button"
+          title="${escapeHtml(
+            translateInterfaceText(
+              "owners.profile.editPatient"
+            )
+          )}"
+          aria-label="${escapeHtml(
+            translateInterfaceText(
+              "owners.profile.editPatient"
+            )
+          )}"
+          data-edit-owner-pet="${escapeHtml(
+            String(pet.id)
+          )}"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 20h9"></path>
+
+            <path
+              d="
+                M16.5 3.5
+                a2.1 2.1 0 0 1 3 3
+                L8 18
+                l-4 1
+                1-4Z
+              "
+            ></path>
+          </svg>
+        </button>
+
+        <button
+          class="iconBtn"
+          type="button"
+          title="${escapeHtml(
+            translateInterfaceText(
+              "owners.profile.deletePatient"
+            )
+          )}"
+          aria-label="${escapeHtml(
+            translateInterfaceText(
+              "owners.profile.deletePatient"
+            )
+          )}"
+          data-del-pet="${escapeHtml(
+            String(pet.id)
+          )}"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18"></path>
+            <path d="M8 6V4h8v2"></path>
+            <path d="M19 6l-1 14H6L5 6"></path>
+            <path d="M10 11v5"></path>
+            <path d="M14 11v5"></path>
+          </svg>
+        </button>
+      </div>
       `;
       list.appendChild(el);
     });
@@ -71675,28 +72049,57 @@ if (copyPhoneButton) {
     // ==========================
     // Видалити власника
     // ==========================
-    const delBtn = e.target.closest("[data-del]");
+        // ==========================
+    // Удаление владельца
+    // ==========================
+    const delBtn =
+      e.target.closest(
+        "[data-delete-owner], [data-del]"
+      );
 
     if (delBtn) {
       e.preventDefault();
       e.stopPropagation();
 
-      const id = delBtn.dataset.del;
-      if (!id) return;
+      const id =
+        delBtn.dataset.deleteOwner ||
+        delBtn.dataset.del;
 
-      const owner = (state.owners || []).find(
-        (o) => String(o.id) === String(id)
-      );
+      if (!id) {
+        return;
+      }
 
-      const ownerName = owner?.name || "цього власника";
+      const owner =
+        (state.owners || []).find(
+          (item) =>
+            String(item.id) ===
+            String(id)
+        );
+
+      const ownerName =
+        owner?.name ||
+        translateInterfaceText(
+          "owners.delete.fallbackName"
+        );
 
       openDeleteModal(
-        `<b>${escapeHtml(ownerName)}</b><br><br>Цю дію неможливо скасувати.`,
-        async () => {
-          const ok = await deleteOwner(id);
+        `
+          <b>${escapeHtml(ownerName)}</b>
+          <br><br>
+          ${escapeHtml(
+            translateInterfaceText(
+              "owners.delete.confirmText"
+            )
+          )}
+        `,
 
-          if (!ok) {
-            alert("Не вдалося видалити");
+        async () => {
+          const deleted =
+            await deleteOwner(
+              id
+            );
+
+          if (!deleted) {
             return;
           }
 
@@ -71706,46 +72109,6 @@ if (copyPhoneButton) {
 
       return;
     }
-
-    // ==========================================================
-    // НИЖЕ НИЧЕГО НЕ ВСТАВЛЯЙ.
-    // Оставь весь свой существующий код:
-    // const row = ...
-    // const openBtn = ...
-    // openOwner(...)
-    // и т.д.
-    // ==========================================================
-
-
-if (delBtn) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const id = delBtn.dataset.del;
-  if (!id) return;
-
-  const owner = (state.owners || []).find(
-    (o) => String(o.id) === String(id)
-  );
-
-  const ownerName = owner?.name || "цього власника";
-
-  openDeleteModal(
-    `<b>${escapeHtml(ownerName)}</b><br><br>Цю дію неможливо скасувати.`,
-    async () => {
-      const ok = await deleteOwner(id);
-
-      if (!ok) {
-        alert("Не вдалося видалити");
-        return;
-      }
-
-      await loadOwners();
-    }
-  );
-
-  return;
-}
 
 const openZone = e.target.closest("[data-open-owner]");
 
@@ -76334,14 +76697,62 @@ function normalizeSpecies(value) {
   return "dog";
 }
 
-function speciesLabel(value) {
-  const key = normalizeSpecies(value);
+function speciesLabel(
+  value
+) {
+  const key =
+    normalizeSpecies(
+      value
+    );
 
-  if (key === "cat") {
-    return "кіт";
-  }
+  return translateInterfaceText(
+    key === "cat"
+      ? "calendar.detail.cat"
+      : "calendar.detail.dog"
+  );
+}
 
-  return "пес";
+function formatOwnerVisitCount(
+  count
+) {
+  const number =
+    Number(count) || 0;
+
+  const forms = {
+    uk: {
+      one: "візит",
+      few: "візити",
+      many: "візитів",
+      other: "візиту",
+    },
+
+    en: {
+      one: "visit",
+      other: "visits",
+    },
+
+    de: {
+      one: "Besuch",
+      other: "Besuche",
+    },
+
+    pl: {
+      one: "wizyta",
+      few: "wizyty",
+      many: "wizyt",
+      other: "wizyty",
+    },
+  }[getInterfaceLanguage()];
+
+  const category =
+    new Intl.PluralRules(
+      getCalendarLocale()
+    ).select(number);
+
+  return `${number} ${
+    forms[category] ||
+    forms.other
+  }`;
 }
 
 function askSpecies(current = "dog") {
@@ -86070,6 +86481,27 @@ function clearOwnerFormErrors() {
     );
 }
 
+function showOwnerSaveError(
+  error = null
+) {
+  showCrmNotice({
+    icon: "⚠️",
+
+    title:
+      translateInterfaceText(
+        "owners.form.saveErrorTitle"
+      ),
+
+    text:
+      calendarErrorMessage(
+        error,
+        translateInterfaceText(
+          "owners.form.saveError"
+        )
+      ),
+  });
+}
+
 function showOwnerFieldError(
   selector,
   translationKey
@@ -86134,7 +86566,6 @@ document
     );
   });
 
-$("#ownerModalSave")
 
 $("#ownerModalSave")
   ?.addEventListener(
@@ -86358,10 +86789,8 @@ if (
           e
         );
 
-        alert(
-  translateInterfaceText(
-    "owners.form.saveError"
-  )
+       showOwnerSaveError(
+  e
 );
       } finally {
         if (btn) {
