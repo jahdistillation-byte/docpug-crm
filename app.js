@@ -1830,6 +1830,26 @@ Object.assign(
   }
 );
 
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.form.name": "Кличка",
+  "patients.form.species": "Вид пацієнта"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.form.name": "Patient name",
+  "patients.form.species": "Patient species"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.form.name": "Name des Patienten",
+  "patients.form.species": "Tierart des Patienten"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.form.name": "Imię pacjenta",
+  "patients.form.species": "Gatunek pacjenta"
+});
+
 // Calendar interface copy. User-entered names and notes are not translated.
 Object.assign(APP_TRANSLATIONS.uk, {
   "calendar.detail.cancel": "Скасувати",
@@ -3652,6 +3672,213 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.delete.blockedText": "Z tym właścicielem są powiązani pacjenci. Najpierw przenieś lub usuń wszystkich jego pacjentów.",
   "owners.delete.errorTitle": "Usuwanie nie powiodło się",
   "owners.delete.errorText": "Nie udało się usunąć właściciela."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.form.newKicker": "НОВИЙ ПАЦІЄНТ",
+  "patients.form.editKicker": "РЕДАГУВАННЯ ПАЦІЄНТА",
+  "patients.form.addTitle": "Додати тварину",
+  "patients.form.editTitle": "Редагувати тварину",
+  "patients.form.newSubtitle": "Створіть картку пацієнта. Дані можна буде змінити пізніше.",
+  "patients.form.editSubtitle": "Оновіть дані пацієнта та збережіть зміни.",
+  "patients.form.catDescription": "Кішка або кіт",
+  "patients.form.dogDescription": "Собака або пес",
+  "patients.form.otherSpecies": "Інші види",
+  "patients.form.otherDescription": "Птахи, гризуни та інші",
+  "patients.form.optional": "необов’язково",
+  "patients.form.required": "обов’язково",
+  "patients.form.clearField": "Очистити поле",
+  "patients.form.weight": "Вага",
+  "patients.form.notes": "Нотатки",
+  "patients.form.notesPlaceholder": "Алергії, особливості поведінки або інша важлива інформація...",
+  "patients.form.add": "Додати тварину",
+  "patients.form.saveChanges": "Зберегти зміни"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.form.newKicker": "NEW PATIENT",
+  "patients.form.editKicker": "EDIT PATIENT",
+  "patients.form.addTitle": "Add animal",
+  "patients.form.editTitle": "Edit animal",
+  "patients.form.newSubtitle": "Create a patient profile. You can update the details later.",
+  "patients.form.editSubtitle": "Update the patient details and save your changes.",
+  "patients.form.catDescription": "Female or male cat",
+  "patients.form.dogDescription": "Female or male dog",
+  "patients.form.otherSpecies": "Other species",
+  "patients.form.otherDescription": "Birds, rodents and others",
+  "patients.form.optional": "optional",
+  "patients.form.required": "required",
+  "patients.form.clearField": "Clear field",
+  "patients.form.weight": "Weight",
+  "patients.form.notes": "Notes",
+  "patients.form.notesPlaceholder": "Allergies, behaviour or other important information...",
+  "patients.form.add": "Add animal",
+  "patients.form.saveChanges": "Save changes"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.form.newKicker": "NEUER PATIENT",
+  "patients.form.editKicker": "PATIENT BEARBEITEN",
+  "patients.form.addTitle": "Tier hinzufügen",
+  "patients.form.editTitle": "Tier bearbeiten",
+  "patients.form.newSubtitle": "Erstellen Sie ein Patientenprofil. Die Angaben können später geändert werden.",
+  "patients.form.editSubtitle": "Aktualisieren Sie die Patientendaten und speichern Sie die Änderungen.",
+  "patients.form.catDescription": "Katze oder Kater",
+  "patients.form.dogDescription": "Hündin oder Rüde",
+  "patients.form.otherSpecies": "Andere Tierarten",
+  "patients.form.otherDescription": "Vögel, Nagetiere und andere",
+  "patients.form.optional": "optional",
+  "patients.form.required": "erforderlich",
+  "patients.form.clearField": "Feld leeren",
+  "patients.form.weight": "Gewicht",
+  "patients.form.notes": "Notizen",
+  "patients.form.notesPlaceholder": "Allergien, Verhalten oder andere wichtige Informationen...",
+  "patients.form.add": "Tier hinzufügen",
+  "patients.form.saveChanges": "Änderungen speichern"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.form.newKicker": "NOWY PACJENT",
+  "patients.form.editKicker": "EDYCJA PACJENTA",
+  "patients.form.addTitle": "Dodaj zwierzę",
+  "patients.form.editTitle": "Edytuj zwierzę",
+  "patients.form.newSubtitle": "Utwórz profil pacjenta. Dane można później zmienić.",
+  "patients.form.editSubtitle": "Zaktualizuj dane pacjenta i zapisz zmiany.",
+  "patients.form.catDescription": "Kotka lub kot",
+  "patients.form.dogDescription": "Suka lub pies",
+  "patients.form.otherSpecies": "Inne gatunki",
+  "patients.form.otherDescription": "Ptaki, gryzonie i inne",
+  "patients.form.optional": "opcjonalnie",
+  "patients.form.required": "wymagane",
+  "patients.form.clearField": "Wyczyść pole",
+  "patients.form.weight": "Waga",
+  "patients.form.notes": "Notatki",
+  "patients.form.notesPlaceholder": "Alergie, zachowanie lub inne ważne informacje...",
+  "patients.form.add": "Dodaj zwierzę",
+  "patients.form.saveChanges": "Zapisz zmiany"
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.form.unsavedChanges": "Внесені дані пацієнта ще не збережені.",
+  "patients.form.chooseCategory": "Оберіть категорію",
+  "patients.form.chooseCategoryHint": "Після цього відкриється список конкретних видів.",
+  "patients.form.allCategories": "Усі категорії",
+  "patients.form.chooseSpecificSpecies": "Оберіть конкретний вид тварини.",
+  "patients.form.manualValueHint": "Ви можете залишити введений варіант вручну.",
+  "patients.form.dogBreedHint": "Введіть кілька літер або відкрийте список популярних порід.",
+  "patients.form.catBreedHint": "Введіть кілька літер або відкрийте список порід котів.",
+  "patients.form.otherSpeciesHint": "Оберіть вид зі списку або введіть власний варіант.",
+  "patients.form.breedHint": "Після вибору виду тут з’явиться список порід.",
+  "patients.form.group.birds": "Птахи",
+  "patients.form.group.rodents": "Гризуни",
+  "patients.form.group.rabbits": "Кролики та зайцеподібні",
+  "patients.form.group.reptiles": "Рептилії",
+  "patients.form.group.ferrets": "Тхори та дрібні хижаки",
+  "patients.form.group.farm": "Сільськогосподарські",
+  "patients.form.group.exotic": "Екзотичні та інші"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.form.unsavedChanges": "The patient details have not been saved yet.",
+  "patients.form.chooseCategory": "Choose a category",
+  "patients.form.chooseCategoryHint": "A list of specific species will open next.",
+  "patients.form.allCategories": "All categories",
+  "patients.form.chooseSpecificSpecies": "Choose a specific animal species.",
+  "patients.form.manualValueHint": "You can keep the value entered manually.",
+  "patients.form.dogBreedHint": "Enter a few letters or open the list of popular breeds.",
+  "patients.form.catBreedHint": "Enter a few letters or open the list of cat breeds.",
+  "patients.form.otherSpeciesHint": "Choose a species from the list or enter your own.",
+  "patients.form.breedHint": "The breed list will appear after you select a species.",
+  "patients.form.group.birds": "Birds",
+  "patients.form.group.rodents": "Rodents",
+  "patients.form.group.rabbits": "Rabbits and hares",
+  "patients.form.group.reptiles": "Reptiles",
+  "patients.form.group.ferrets": "Ferrets and small predators",
+  "patients.form.group.farm": "Farm animals",
+  "patients.form.group.exotic": "Exotic and other animals"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.form.unsavedChanges": "Die Patientendaten wurden noch nicht gespeichert.",
+  "patients.form.chooseCategory": "Kategorie auswählen",
+  "patients.form.chooseCategoryHint": "Anschließend wird eine Liste konkreter Tierarten angezeigt.",
+  "patients.form.allCategories": "Alle Kategorien",
+  "patients.form.chooseSpecificSpecies": "Wählen Sie eine konkrete Tierart.",
+  "patients.form.manualValueHint": "Sie können den eingegebenen Wert manuell übernehmen.",
+  "patients.form.dogBreedHint": "Geben Sie einige Buchstaben ein oder öffnen Sie die Liste beliebter Hunderassen.",
+  "patients.form.catBreedHint": "Geben Sie einige Buchstaben ein oder öffnen Sie die Liste der Katzenrassen.",
+  "patients.form.otherSpeciesHint": "Wählen Sie eine Tierart aus der Liste oder geben Sie eine eigene ein.",
+  "patients.form.breedHint": "Nach Auswahl der Tierart erscheint hier die Rassenliste.",
+  "patients.form.group.birds": "Vögel",
+  "patients.form.group.rodents": "Nagetiere",
+  "patients.form.group.rabbits": "Kaninchen und Hasenartige",
+  "patients.form.group.reptiles": "Reptilien",
+  "patients.form.group.ferrets": "Frettchen und kleine Raubtiere",
+  "patients.form.group.farm": "Nutztiere",
+  "patients.form.group.exotic": "Exotische und andere Tiere"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.form.unsavedChanges": "Dane pacjenta nie zostały jeszcze zapisane.",
+  "patients.form.chooseCategory": "Wybierz kategorię",
+  "patients.form.chooseCategoryHint": "Następnie otworzy się lista konkretnych gatunków.",
+  "patients.form.allCategories": "Wszystkie kategorie",
+  "patients.form.chooseSpecificSpecies": "Wybierz konkretny gatunek zwierzęcia.",
+  "patients.form.manualValueHint": "Możesz pozostawić ręcznie wpisaną wartość.",
+  "patients.form.dogBreedHint": "Wpisz kilka liter lub otwórz listę popularnych ras psów.",
+  "patients.form.catBreedHint": "Wpisz kilka liter lub otwórz listę ras kotów.",
+  "patients.form.otherSpeciesHint": "Wybierz gatunek z listy lub wpisz własny.",
+  "patients.form.breedHint": "Lista ras pojawi się po wybraniu gatunku.",
+  "patients.form.group.birds": "Ptaki",
+  "patients.form.group.rodents": "Gryzonie",
+  "patients.form.group.rabbits": "Króliki i zajęczaki",
+  "patients.form.group.reptiles": "Gady",
+  "patients.form.group.ferrets": "Fretki i małe drapieżniki",
+  "patients.form.group.farm": "Zwierzęta gospodarskie",
+  "patients.form.group.exotic": "Zwierzęta egzotyczne i inne"
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.form.enterDate": "Вкажіть дату:",
+  "patients.form.chooseVaccine": "Оберіть вакцину:",
+  "patients.form.vaccineMismatch": "Обрана вакцина не відповідає категорії",
+  "patients.form.initialVaccinationNote": "Додано під час створення пацієнта",
+  "patients.form.checkWeight": "Перевірте вагу тварини.",
+  "patients.form.couldNotSaveChanges": "Не вдалося зберегти зміни.",
+  "patients.form.patientCreated": "Пацієнта створено",
+  "patients.form.vaccinationSaveWarning": "Пацієнта збережено, але не всі дані вакцинації вдалося записати. Перевірте паспорт пацієнта."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.form.enterDate": "Enter the date:",
+  "patients.form.chooseVaccine": "Choose a vaccine:",
+  "patients.form.vaccineMismatch": "The selected vaccine does not match the category",
+  "patients.form.initialVaccinationNote": "Added when the patient was created",
+  "patients.form.checkWeight": "Check the animal’s weight.",
+  "patients.form.couldNotSaveChanges": "Could not save the changes.",
+  "patients.form.patientCreated": "Patient created",
+  "patients.form.vaccinationSaveWarning": "The patient was saved, but not all vaccination details could be recorded. Check the patient’s passport."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.form.enterDate": "Datum angeben:",
+  "patients.form.chooseVaccine": "Impfstoff auswählen:",
+  "patients.form.vaccineMismatch": "Der ausgewählte Impfstoff passt nicht zur Kategorie",
+  "patients.form.initialVaccinationNote": "Bei der Erstellung des Patienten hinzugefügt",
+  "patients.form.checkWeight": "Überprüfen Sie das Gewicht des Tieres.",
+  "patients.form.couldNotSaveChanges": "Die Änderungen konnten nicht gespeichert werden.",
+  "patients.form.patientCreated": "Patient angelegt",
+  "patients.form.vaccinationSaveWarning": "Der Patient wurde gespeichert, aber nicht alle Impfdaten konnten erfasst werden. Prüfen Sie den Impfpass des Patienten."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.form.enterDate": "Podaj datę:",
+  "patients.form.chooseVaccine": "Wybierz szczepionkę:",
+  "patients.form.vaccineMismatch": "Wybrana szczepionka nie odpowiada kategorii",
+  "patients.form.initialVaccinationNote": "Dodano podczas tworzenia pacjenta",
+  "patients.form.checkWeight": "Sprawdź masę ciała zwierzęcia.",
+  "patients.form.couldNotSaveChanges": "Nie udało się zapisać zmian.",
+  "patients.form.patientCreated": "Utworzono pacjenta",
+  "patients.form.vaccinationSaveWarning": "Pacjent został zapisany, ale nie udało się zapisać wszystkich danych szczepień. Sprawdź paszport pacjenta."
 });
 
 Object.assign(APP_TRANSLATIONS.uk, {
@@ -74697,22 +74924,52 @@ function initVisitNewPatientBreedPicker() {
 
 initVisitNewPatientBreedPicker();
 
-function openAddPetModal(ownerId, petToEdit = null) {
-  const isEditMode = Boolean(petToEdit?.id);
-  const editingPetId = isEditMode ? String(petToEdit.id) : null;
+function openAddPetModal(
+  ownerId,
+  petToEdit = null
+) {
+  const isEditMode =
+    Boolean(
+      petToEdit?.id
+    );
+
+  const editingPetId =
+    isEditMode
+      ? String(
+          petToEdit.id
+        )
+      : null;
 
   if (!ownerId) {
-    alert("Спочатку обери власника");
+    showCrmNotice({
+      icon:
+        "🐾",
+
+      title:
+        translateInterfaceText(
+          "owners.profile.selectOwner"
+        ),
+    });
+
     return;
   }
 
-  // дальше твой текущий код
+  document
+    .querySelector(
+      "#addPetModalOverlay"
+    )
+    ?.remove();
 
-  document.querySelector("#addPetModalOverlay")?.remove();
+  const overlay =
+    document.createElement(
+      "div"
+    );
 
-  const overlay = document.createElement("div");
-  overlay.id = "addPetModalOverlay";
-  overlay.className = "addPetModalOverlay";
+  overlay.id =
+    "addPetModalOverlay";
+
+  overlay.className =
+    "addPetModalOverlay";
 
   overlay.innerHTML = `
   <div
@@ -74724,262 +74981,293 @@ function openAddPetModal(ownerId, petToEdit = null) {
     <div class="addPetModalGlow addPetModalGlowOne"></div>
     <div class="addPetModalGlow addPetModalGlowTwo"></div>
 
-    <div class="addPetModalHeader">
-      <div>
-       <div class="addPetModalKicker">
-  ${isEditMode ? "РЕДАГУВАННЯ ПАЦІЄНТА" : "НОВИЙ ПАЦІЄНТ"}
+   <div class="addPetModalHeader">
+  <div>
+    <div
+      class="addPetModalKicker"
+      data-i18n="${
+        isEditMode
+          ? "patients.form.editKicker"
+          : "patients.form.newKicker"
+      }"
+    ></div>
+
+    <h2
+      id="addPetModalTitle"
+      data-i18n="${
+        isEditMode
+          ? "patients.form.editTitle"
+          : "patients.form.addTitle"
+      }"
+    ></h2>
+
+    <p
+      data-i18n="${
+        isEditMode
+          ? "patients.form.editSubtitle"
+          : "patients.form.newSubtitle"
+      }"
+    ></p>
+  </div>
+
+  <button
+    class="addPetModalClose"
+    id="addPetModalClose"
+    type="button"
+    data-i18n-aria-label="calendar.detail.close"
+  >
+    ×
+  </button>
 </div>
-
-<h2 id="addPetModalTitle">
-  ${isEditMode ? "Редагувати тварину" : "Додати тварину"}
-</h2>
-
-<p>
-  ${
-    isEditMode
-      ? "Оновіть дані пацієнта та збережіть зміни."
-      : "Створіть картку пацієнта. Дані можна буде змінити пізніше."
-  }
-</p>
-      </div>
-
-      <button
-        class="addPetModalClose"
-        id="addPetModalClose"
-        type="button"
-        aria-label="Закрити"
-      >
-        ×
-      </button>
-    </div>
 
     <form id="addPetModalForm" class="addPetModalForm" novalidate>
       <div class="addPetModalGrid">
 
         <label class="addPetField addPetFieldFull">
-          <span class="addPetLabel">
-            Кличка
-            <b>*</b>
-          </span>
+  <span class="addPetLabel">
+    <span data-i18n="patients.form.name"></span>
+    <b>*</b>
+  </span>
 
-          <div class="addPetInputWrap">
-            <span class="addPetInputIcon">✦</span>
+  <div class="addPetInputWrap">
+    <span class="addPetInputIcon">✦</span>
 
-            <input
-              id="addPetName"
-              class="addPetInput addPetInputWithIcon"
-              type="text"
-              maxlength="80"
-              autocomplete="off"
-              placeholder="Наприклад: Жужа"
-            >
-          </div>
-        </label>
+    <input
+      id="addPetName"
+      class="addPetInput addPetInputWithIcon"
+      type="text"
+      maxlength="80"
+      autocomplete="off"
+      data-i18n-placeholder="calendar.detail.for.example.bella"
+    >
+  </div>
+</label>
 
-        <div class="addPetField addPetFieldFull">
-          <span class="addPetLabel">
-            Вид пацієнта
-            <b>*</b>
-          </span>
+<div class="addPetField addPetFieldFull">
+  <span class="addPetLabel">
+    <span data-i18n="patients.form.species"></span>
+    <b>*</b>
+  </span>
 
-          <div class="addPetSpeciesSelector">
+  <div class="addPetSpeciesSelector">
+    <button
+      class="addPetSpeciesButton"
+      type="button"
+      data-add-pet-species="cat"
+    >
+      <span class="addPetSpeciesEmoji">🐈</span>
 
-            <button
-              class="addPetSpeciesButton"
-              type="button"
-              data-add-pet-species="cat"
-            >
-              <span class="addPetSpeciesEmoji">🐈</span>
+      <span class="addPetSpeciesInfo">
+        <strong data-i18n="calendar.detail.cat"></strong>
+        <small data-i18n="patients.form.catDescription"></small>
+      </span>
 
-              <span class="addPetSpeciesInfo">
-                <strong>Кіт</strong>
-                <small>Кішка або кіт</small>
-              </span>
+      <span class="addPetSpeciesCheck">✓</span>
+    </button>
 
-              <span class="addPetSpeciesCheck">✓</span>
-            </button>
+    <button
+      class="addPetSpeciesButton"
+      type="button"
+      data-add-pet-species="dog"
+    >
+      <span class="addPetSpeciesEmoji">🐕</span>
 
-            <button
-              class="addPetSpeciesButton"
-              type="button"
-              data-add-pet-species="dog"
-            >
-              <span class="addPetSpeciesEmoji">🐕</span>
+      <span class="addPetSpeciesInfo">
+        <strong data-i18n="calendar.detail.dog"></strong>
+        <small data-i18n="patients.form.dogDescription"></small>
+      </span>
 
-              <span class="addPetSpeciesInfo">
-                <strong>Пес</strong>
-                <small>Собака</small>
-              </span>
+      <span class="addPetSpeciesCheck">✓</span>
+    </button>
 
-              <span class="addPetSpeciesCheck">✓</span>
-            </button>
+    <button
+      class="addPetSpeciesButton addPetSpeciesButtonOther"
+      type="button"
+      data-add-pet-species="other"
+    >
+      <span class="addPetSpeciesEmoji">🐾</span>
 
-            <button
-              class="addPetSpeciesButton addPetSpeciesButtonOther"
-              type="button"
-              data-add-pet-species="other"
-            >
-              <span class="addPetSpeciesEmoji">🐾</span>
+      <span class="addPetSpeciesInfo">
+        <strong data-i18n="patients.form.otherSpecies"></strong>
+        <small data-i18n="patients.form.otherDescription"></small>
+      </span>
 
-              <span class="addPetSpeciesInfo">
-                <strong>Інші види</strong>
-                <small>Птахи, гризуни та інші</small>
-              </span>
+      <span class="addPetSpeciesCheck">✓</span>
+    </button>
+  </div>
 
-              <span class="addPetSpeciesCheck">✓</span>
-            </button>
+  <input
+    id="addPetSpecies"
+    type="hidden"
+    value=""
+  >
+</div>
 
-          </div>
-
-          <input
-            id="addPetSpecies"
-            type="hidden"
-            value=""
-          >
-        </div>
 
         <div
-          class="addPetField addPetFieldFull addPetBreedField"
-          id="addPetBreedField"
-        >
-          <span
-            class="addPetLabel"
-            id="addPetBreedLabel"
-          >
-            Порода
-            <small>необов’язково</small>
-          </span>
+         <div
+  class="addPetField addPetFieldFull addPetBreedField"
+  id="addPetBreedField"
+>
+  <span
+    class="addPetLabel"
+    id="addPetBreedLabel"
+  >
+    <span data-i18n="calendar.detail.breed"></span>
+    <small data-i18n="patients.form.optional"></small>
+  </span>
 
-          <div class="addPetBreedCombobox">
+  <div class="addPetBreedCombobox">
+    <div class="addPetInputWrap">
+      <span class="addPetInputIcon">⌕</span>
 
-            <div class="addPetInputWrap">
-              <span class="addPetInputIcon">⌕</span>
+      <input
+        id="addPetBreed"
+        class="addPetInput addPetInputWithIcon"
+        type="text"
+        maxlength="100"
+        autocomplete="off"
+        data-i18n-placeholder="calendar.detail.select.a.species.first"
+        disabled
+      >
 
-              <input
-                id="addPetBreed"
-                class="addPetInput addPetInputWithIcon"
-                type="text"
-                maxlength="100"
-                autocomplete="off"
-                placeholder="Спочатку оберіть вид пацієнта"
-                disabled
-              >
+      <button
+        class="addPetBreedClear"
+        id="addPetBreedClear"
+        type="button"
+        data-i18n-aria-label="patients.form.clearField"
+      >
+        ×
+      </button>
+    </div>
 
-              <button
-                class="addPetBreedClear"
-                id="addPetBreedClear"
-                type="button"
-                aria-label="Очистити поле"
-              >
-                ×
-              </button>
-            </div>
+    <div
+      class="addPetBreedDropdown"
+      id="addPetBreedDropdown"
+    ></div>
+  </div>
 
-            <div
-              class="addPetBreedDropdown"
-              id="addPetBreedDropdown"
-            ></div>
-
-          </div>
-
-          <div
-            class="addPetBreedHint"
-            id="addPetBreedHint"
-          >
-            Після вибору виду тут з’явиться список порід.
-          </div>
-        </div>
+  <div
+    class="addPetBreedHint"
+    id="addPetBreedHint"
+    data-i18n="calendar.detail.select.a.species.first"
+  ></div>
+</div>
 
         <label class="addPetField">
-          <span class="addPetLabel">
-            Вік
-            <small>необов’язково</small>
-          </span>
+  <span class="addPetLabel">
+    <span data-i18n="calendar.detail.age"></span>
+    <small data-i18n="patients.form.optional"></small>
+  </span>
 
-          <input
-            id="addPetAge"
-            class="addPetInput"
-            type="text"
-            maxlength="40"
-            autocomplete="off"
-            placeholder="Наприклад: 4 роки"
-          >
-        </label>
+  <input
+    id="addPetAge"
+    class="addPetInput"
+    type="text"
+    maxlength="40"
+    autocomplete="off"
+    data-i18n-placeholder="calendar.detail.for.example.4.years"
+  >
+</label>
+
 <div class="addPetFieldsRow">
   <label class="addPetField">
-    <span>Стать</span>
+    <span data-i18n="calendar.detail.sex"></span>
 
     <select id="addPetSex">
-      <option value="">
-        Не вказано
-      </option>
+      <option
+        value=""
+        data-i18n="calendar.detail.not.specified"
+      ></option>
 
-      <option value="male">
-        Самець
-      </option>
+      <option
+        value="male"
+        data-i18n="calendar.detail.male"
+      ></option>
 
-      <option value="female">
-        Самка
-      </option>
+      <option
+        value="female"
+        data-i18n="calendar.detail.female"
+      ></option>
     </select>
   </label>
 
   <label class="addPetField">
-    <span>
-      Кастрований /
-      стерилізована
-    </span>
+    <span data-i18n="calendar.detail.neutered.spayed"></span>
 
-    <div
+    <select id="addPetNeutered">
+      <option
+        value=""
+        data-i18n="calendar.detail.not.specified"
+      ></option>
+
+      <option
+        value="true"
+        data-i18n="calendar.detail.yes"
+      ></option>
+
+      <option
+        value="false"
+        data-i18n="calendar.detail.no"
+      ></option>
+    </select>
+  </label>
+</div>
+
+<div
   class="
     addPetFieldsRow
     addPetVaccinationStatusRow
   "
 >
   <label class="addPetField">
-    <span class="addPetLabel">
-      🛡 Сказ
-    </span>
+    <span
+      class="addPetLabel"
+      data-i18n="calendar.detail.rabies"
+    ></span>
 
     <select id="addPetRabiesStatus">
-      <option value="unknown">
-        Невідомо
-      </option>
+      <option
+        value="unknown"
+        data-i18n="calendar.detail.unknown"
+      ></option>
 
-      <option value="vaccinated">
-        Вакцинований
-      </option>
+      <option
+        value="vaccinated"
+        data-i18n="calendar.detail.vaccinated"
+      ></option>
 
-      <option value="not_vaccinated">
-        Не вакцинований
-      </option>
+      <option
+        value="not_vaccinated"
+        data-i18n="calendar.detail.not.vaccinated"
+      ></option>
     </select>
   </label>
 
-
   <label class="addPetField">
-    <span class="addPetLabel">
-      💉 Загальна вакцина
-    </span>
+    <span
+      class="addPetLabel"
+      data-i18n="calendar.detail.general.vaccination.2"
+    ></span>
 
-    <select
-      id="addPetGeneralVaccinationStatus"
-    >
-      <option value="unknown">
-        Невідомо
-      </option>
+    <select id="addPetGeneralVaccinationStatus">
+      <option
+        value="unknown"
+        data-i18n="calendar.detail.unknown"
+      ></option>
 
-      <option value="vaccinated">
-        Вакцинований
-      </option>
+      <option
+        value="vaccinated"
+        data-i18n="calendar.detail.vaccinated"
+      ></option>
 
-      <option value="not_vaccinated">
-        Не вакцинований
-      </option>
+      <option
+        value="not_vaccinated"
+        data-i18n="calendar.detail.not.vaccinated"
+      ></option>
     </select>
   </label>
 </div>
-
 
 <div
   class="
@@ -74990,9 +75278,10 @@ function openAddPetModal(ownerId, petToEdit = null) {
   hidden
 >
   <label class="addPetField">
-    <span class="addPetLabel">
-      Дата вакцинації від сказу
-    </span>
+    <span
+      class="addPetLabel"
+      data-i18n="calendar.detail.rabies.vaccination.date"
+    ></span>
 
     <input
       id="addPetRabiesDate"
@@ -75001,23 +75290,23 @@ function openAddPetModal(ownerId, petToEdit = null) {
     >
   </label>
 
-
   <label class="addPetField">
-    <span class="addPetLabel">
-      Вакцина від сказу
-    </span>
+    <span
+      class="addPetLabel"
+      data-i18n="calendar.detail.rabies.vaccine"
+    ></span>
 
     <select
       id="addPetRabiesVaccine"
       class="addPetInput"
     >
-      <option value="">
-        Оберіть вакцину
-      </option>
+      <option
+        value=""
+        data-i18n="calendar.detail.select.a.vaccine"
+      ></option>
     </select>
   </label>
 </div>
-
 
 <div
   class="
@@ -75028,9 +75317,10 @@ function openAddPetModal(ownerId, petToEdit = null) {
   hidden
 >
   <label class="addPetField">
-    <span class="addPetLabel">
-      Дата загальної вакцинації
-    </span>
+    <span
+      class="addPetLabel"
+      data-i18n="calendar.detail.general.vaccination.date"
+    ></span>
 
     <input
       id="addPetGeneralVaccinationDate"
@@ -75039,19 +75329,20 @@ function openAddPetModal(ownerId, petToEdit = null) {
     >
   </label>
 
-
   <label class="addPetField">
-    <span class="addPetLabel">
-      Загальна вакцина
-    </span>
+    <span
+      class="addPetLabel"
+      data-i18n="calendar.detail.general.vaccine"
+    ></span>
 
     <select
       id="addPetGeneralVaccine"
       class="addPetInput"
     >
-      <option value="">
-        Оберіть вакцину
-      </option>
+      <option
+        value=""
+        data-i18n="calendar.detail.select.a.vaccine"
+      ></option>
     </select>
   </label>
 </div>
@@ -75059,10 +75350,8 @@ function openAddPetModal(ownerId, petToEdit = null) {
 
 <label class="addPetField">
   <span class="addPetLabel">
-    Вага
-    <small>
-      необов’язково
-    </small>
+    <span data-i18n="patients.form.weight"></span>
+    <small data-i18n="patients.form.optional"></small>
   </span>
 
   <div class="addPetWeightWrap">
@@ -75078,11 +75367,10 @@ function openAddPetModal(ownerId, petToEdit = null) {
     >
 
     <span>
-      кг
+      ${getInterfaceLanguage() === "uk" ? "кг" : "kg"}
     </span>
   </div>
 </label>
-
 
 <label
   class="
@@ -75091,46 +75379,36 @@ function openAddPetModal(ownerId, petToEdit = null) {
   "
 >
   <span class="addPetLabel">
-    Нотатки
-
-    <small>
-      необов’язково
-    </small>
+    <span data-i18n="patients.form.notes"></span>
+    <small data-i18n="patients.form.optional"></small>
   </span>
 
   <textarea
     id="addPetNotes"
     class="addPetTextarea"
     maxlength="500"
-    placeholder="Алергії, особливості поведінки або інша важлива інформація..."
+    data-i18n-placeholder="patients.form.notesPlaceholder"
   ></textarea>
 
   <div class="addPetNotesCounter">
-    <span id="addPetNotesCount">
-      0
-    </span>/500
+    <span id="addPetNotesCount">0</span>/500
   </div>
 </label>
 
 </div>
-
 
 <div
   id="addPetModalError"
   class="addPetModalError"
 ></div>
 
-
 <div class="addPetModalActions">
-
   <button
     class="addPetCancelButton"
     id="addPetCancelButton"
     type="button"
-  >
-    Скасувати
-  </button>
-
+    data-i18n="calendar.detail.cancel"
+  ></button>
 
   <button
     class="addPetSubmitButton"
@@ -75138,22 +75416,17 @@ function openAddPetModal(ownerId, petToEdit = null) {
     type="submit"
   >
     <span class="addPetSubmitPlus">
-      ${
-        isEditMode
-          ? "✓"
-          : "＋"
-      }
+      ${isEditMode ? "✓" : "＋"}
     </span>
 
-    <span>
-      ${
+    <span
+      data-i18n="${
         isEditMode
-          ? "Зберегти зміни"
-          : "Додати тварину"
-      }
-    </span>
+          ? "patients.form.saveChanges"
+          : "patients.form.add"
+      }"
+    ></span>
   </button>
-
 </div>
 
 </form>
@@ -75161,7 +75434,8 @@ function openAddPetModal(ownerId, petToEdit = null) {
 `;
 
   document.body.appendChild(overlay);
-  document.body.classList.add("addPetModalOpened");
+applyInterfaceTranslations(overlay);
+document.body.classList.add("addPetModalOpened");
 
   const form = overlay.querySelector("#addPetModalForm");
   const nameInput = overlay.querySelector("#addPetName");
@@ -75250,27 +75524,22 @@ const fillRegistrationVaccineSelect =
       return;
     }
 
-
     const previousValue =
       String(
         select.value || ""
       );
-
 
     const species =
       String(
         speciesInput?.value || ""
       ).trim();
 
-
     const brands =
       getVaccineBrandsForPatient({
         species,
       });
 
-
     const vaccines = [];
-
 
     brands.forEach(
       (brand) => {
@@ -75288,7 +75557,6 @@ const fillRegistrationVaccineSelect =
                 vaccine
               );
 
-
             if (
               !coverage.includes(
                 coverageTag
@@ -75296,7 +75564,6 @@ const fillRegistrationVaccineSelect =
             ) {
               return;
             }
-
 
             vaccines.push({
               brand,
@@ -75307,56 +75574,56 @@ const fillRegistrationVaccineSelect =
       }
     );
 
+    const placeholder =
+      translateInterfaceText(
+        species
+          ? "calendar.detail.select.a.vaccine"
+          : "calendar.detail.select.a.species.first"
+      );
 
     select.innerHTML = `
       <option value="">
-        ${
-          species
-            ? "Оберіть вакцину"
-            : "Спочатку оберіть вид"
-        }
+        ${escapeHtml(
+          placeholder
+        )}
       </option>
 
-      ${
-        vaccines
-          .map(
-            ({
-              brand,
-              vaccine,
-            }) => {
-              const value =
-                `${brand.brand}|||${vaccine.name}`;
+      ${vaccines
+        .map(
+          ({
+            brand,
+            vaccine,
+          }) => {
+            const value =
+              `${brand.brand}|||${vaccine.name}`;
 
-              const label = [
-                brand.flag || "",
-                brand.brand || "",
-                vaccine.name || "",
-              ]
-                .filter(Boolean)
-                .join(" ");
+            const label = [
+              brand.flag || "",
+              brand.brand || "",
+              vaccine.name || "",
+            ]
+              .filter(Boolean)
+              .join(" ");
 
-              return `
-                <option
-                  value="${escapeHtml(
-                    value
-                  )}"
-                >
-                  ${escapeHtml(
-                    label
-                  )}
-                </option>
-              `;
-            }
-          )
-          .join("")
-      }
+            return `
+              <option
+                value="${escapeHtml(
+                  value
+                )}"
+              >
+                ${escapeHtml(
+                  label
+                )}
+              </option>
+            `;
+          }
+        )
+        .join("")}
     `;
-
 
     select.disabled =
       !species ||
       vaccines.length === 0;
-
 
     if (
       previousValue &&
@@ -75372,8 +75639,6 @@ const fillRegistrationVaccineSelect =
         previousValue;
     }
   };
-
-
 // =====================================================
 // REFRESH BOTH VACCINE LISTS
 // =====================================================
@@ -75639,18 +75904,17 @@ const requestCloseModal =
     }
 
     openDeleteModal(
-      (
-        "Внесені дані пацієнта " +
-        "ще не збережені."
-      ),
-      () => {
-        closeModal();
-      },
-      "unsaved"
-    );
-  };
+  translateInterfaceText(
+    "patients.form.unsavedChanges"
+  ),
+  () => {
+    closeModal();
+  },
+  "unsaved"
+);
+};
 
-  const handleKeydown =
+const handleKeydown =
   (event) => {
     if (
       event.key ===
@@ -75659,29 +75923,47 @@ const requestCloseModal =
       requestCloseModal();
     }
   };
-  const clearError = () => {
-    errorBox.textContent = "";
 
-    overlay.querySelectorAll(".is-error").forEach((element) => {
-      element.classList.remove("is-error");
+const clearError = () => {
+  errorBox.textContent = "";
+
+  overlay
+    .querySelectorAll(".is-error")
+    .forEach((element) => {
+      element.classList.remove(
+        "is-error"
+      );
     });
-  };
-
-  const showError = (message) => {
-    errorBox.textContent = message;
-  };
-
-const normalizeBreedSearch = (value) => {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replaceAll("ё", "е")
-    .replaceAll("’", "'")
-    .replaceAll("`", "'");
 };
 
+const showError = (message) => {
+  errorBox.textContent = message;
+};
+
+const normalizeBreedSearch =
+  (value) => {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replaceAll("ё", "е")
+      .replaceAll("’", "'")
+      .replaceAll("`", "'");
+  };
+
+const getOtherSpeciesGroupLabel =
+  (group) => {
+    return translateInterfaceText(
+      `patients.form.group.${
+        group?.id || "exotic"
+      }`
+    );
+  };
+
 const closeBreedDropdown = () => {
-  breedDropdown.classList.remove("is-open");
+  breedDropdown.classList.remove(
+    "is-open"
+  );
+
   breedDropdown.innerHTML = "";
 };
 
@@ -75701,57 +75983,57 @@ const renderBreedDropdown =
       !query &&
       !activeOtherGroupId
     ) {
-      breedDropdown.innerHTML =
-        `
-          <div
-            class="addPetBreedEmpty"
-          >
-            <span>
-              Оберіть категорію
-            </span>
+      breedDropdown.innerHTML = `
+        <div class="addPetBreedEmpty">
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "patients.form.chooseCategory"
+              )
+            )}
+          </span>
 
-            <small>
-              Після цього відкриється
-              список конкретних видів.
-            </small>
-          </div>
+          <small>
+            ${escapeHtml(
+              translateInterfaceText(
+                "patients.form.chooseCategoryHint"
+              )
+            )}
+          </small>
+        </div>
 
-          ${OTHER_SPECIES_GROUPS
-            .map(
-              (group) => `
-                <button
-                  class="addPetBreedOption"
-                  type="button"
-                  data-other-species-group="${
-                    escapeHtml(
-                      group.id
-                    )
-                  }"
+        ${OTHER_SPECIES_GROUPS
+          .map(
+            (group) => `
+              <button
+                class="addPetBreedOption"
+                type="button"
+                data-other-species-group="${escapeHtml(
+                  group.id
+                )}"
+              >
+                <span
+                  class="addPetBreedOptionIcon"
                 >
-                  <span
-                    class="addPetBreedOptionIcon"
-                  >
-                    ${
-                      escapeHtml(
-                        group.icon
-                      )
-                    }
-                  </span>
+                  ${escapeHtml(
+                    group.icon
+                  )}
+                </span>
 
-                  <span>
-                    ${
-                      escapeHtml(
-                        group.title
-                      )
-                    }
-                  </span>
+                <span>
+                  ${escapeHtml(
+                    getOtherSpeciesGroupLabel(
+                      group
+                    )
+                  )}
+                </span>
 
-                  <b>›</b>
-                </button>
-              `
-            )
-            .join("")}
-        `;
+                <b>›</b>
+              </button>
+            `
+          )
+          .join("")}
+      `;
 
       breedDropdown.classList.add(
         "is-open"
@@ -75763,12 +76045,11 @@ const renderBreedDropdown =
     const activeGroup =
       isOtherSpecies &&
       activeOtherGroupId
-        ? OTHER_SPECIES_GROUPS
-            .find(
-              (group) =>
-                group.id ===
-                activeOtherGroupId
-            )
+        ? OTHER_SPECIES_GROUPS.find(
+            (group) =>
+              group.id ===
+              activeOtherGroupId
+          )
         : null;
 
     const sourceList =
@@ -75783,9 +76064,19 @@ const renderBreedDropdown =
             return true;
           }
 
-          return normalizeBreedSearch(
-            item
-          ).includes(query);
+          const localizedItem =
+            getCalendarBreedLabel(
+              item
+            );
+
+          return (
+            normalizeBreedSearch(
+              item
+            ).includes(query) ||
+            normalizeBreedSearch(
+              localizedItem
+            ).includes(query)
+          );
         })
         .slice(0, 20);
 
@@ -75805,29 +76096,32 @@ const renderBreedDropdown =
               </span>
 
               <span>
-                Усі категорії
+                ${escapeHtml(
+                  translateInterfaceText(
+                    "patients.form.allCategories"
+                  )
+                )}
               </span>
             </button>
 
-            <div
-              class="addPetBreedEmpty"
-            >
+            <div class="addPetBreedEmpty">
               <span>
-                ${
-                  escapeHtml(
-                    activeGroup.icon
+                ${escapeHtml(
+                  activeGroup.icon
+                )}
+                ${escapeHtml(
+                  getOtherSpeciesGroupLabel(
+                    activeGroup
                   )
-                }
-                ${
-                  escapeHtml(
-                    activeGroup.title
-                  )
-                }
+                )}
               </span>
 
               <small>
-                Оберіть конкретний вид
-                тварини.
+                ${escapeHtml(
+                  translateInterfaceText(
+                    "patients.form.chooseSpecificSpecies"
+                  )
+                )}
               </small>
             </div>
           `
@@ -75849,11 +76143,9 @@ const renderBreedDropdown =
                         : ""
                     }"
                     type="button"
-                    data-select-breed="${
-                      escapeHtml(
-                        item
-                      )
-                    }"
+                    data-select-breed="${escapeHtml(
+                      item
+                    )}"
                   >
                     <span
                       class="addPetBreedOptionIcon"
@@ -75869,11 +76161,11 @@ const renderBreedDropdown =
                     </span>
 
                     <span>
-                      ${
-                        escapeHtml(
+                      ${escapeHtml(
+                        getCalendarBreedLabel(
                           item
                         )
-                      }
+                      )}
                     </span>
 
                     ${
@@ -75890,17 +76182,21 @@ const renderBreedDropdown =
         : `
             ${backButton}
 
-            <div
-              class="addPetBreedEmpty"
-            >
+            <div class="addPetBreedEmpty">
               <span>
-                Нічого не знайдено
+                ${escapeHtml(
+                  translateInterfaceText(
+                    "calendar.detail.nothing.found"
+                  )
+                )}
               </span>
 
               <small>
-                Ви можете залишити
-                введений варіант
-                вручну.
+                ${escapeHtml(
+                  translateInterfaceText(
+                    "patients.form.manualValueHint"
+                  )
+                )}
               </small>
             </div>
           `;
@@ -75909,88 +76205,137 @@ const renderBreedDropdown =
       "is-open"
     );
   };
-
-const configureBreedField = (species) => {
-  selectedBreed = "";
-  activeOtherGroupId =
-  "";
-  breedInput.value = "";
-  closeBreedDropdown();
-
-  breedField.classList.remove("is-other-species");
-
-  if (species === "dog") {
-    activeBreedList = DOG_BREEDS;
-
-    breedInput.disabled = false;
-    breedInput.placeholder = "Почніть вводити породу собаки";
-
+const setBreedLabel =
+  (
+    labelKey,
+    requirementKey
+  ) => {
     breedLabel.innerHTML = `
-      Порода собаки
-      <small>необов’язково</small>
+      ${escapeHtml(
+        translateInterfaceText(
+          labelKey
+        )
+      )}
+      <small>
+        ${escapeHtml(
+          translateInterfaceText(
+            requirementKey
+          )
+        )}
+      </small>
     `;
+  };
+
+const configureBreedField =
+  (species) => {
+    selectedBreed = "";
+    activeOtherGroupId = "";
+    breedInput.value = "";
+
+    closeBreedDropdown();
+
+    breedField.classList.remove(
+      "is-other-species"
+    );
+
+    if (species === "dog") {
+      activeBreedList =
+        DOG_BREEDS;
+
+      breedInput.disabled =
+        false;
+
+      breedInput.placeholder =
+        translateInterfaceText(
+          "calendar.detail.start.typing.a.dog.breed"
+        );
+
+      setBreedLabel(
+        "calendar.detail.dog.breed",
+        "patients.form.optional"
+      );
+
+      breedHint.textContent =
+        translateInterfaceText(
+          "patients.form.dogBreedHint"
+        );
+
+      return;
+    }
+
+    if (species === "cat") {
+      activeBreedList =
+        CAT_BREEDS;
+
+      breedInput.disabled =
+        false;
+
+      breedInput.placeholder =
+        translateInterfaceText(
+          "calendar.detail.start.typing.a.cat.breed"
+        );
+
+      setBreedLabel(
+        "calendar.detail.cat.breed",
+        "patients.form.optional"
+      );
+
+      breedHint.textContent =
+        translateInterfaceText(
+          "patients.form.catBreedHint"
+        );
+
+      return;
+    }
+
+    if (species === "other") {
+      activeBreedList =
+        OTHER_SPECIES_LIST;
+
+      breedInput.disabled =
+        false;
+
+      breedInput.placeholder =
+        translateInterfaceText(
+          "calendar.detail.select.or.start.typing.an.animal.species"
+        );
+
+      setBreedLabel(
+        "calendar.detail.animal.species",
+        "patients.form.required"
+      );
+
+      breedHint.textContent =
+        translateInterfaceText(
+          "patients.form.otherSpeciesHint"
+        );
+
+      breedField.classList.add(
+        "is-other-species"
+      );
+
+      return;
+    }
+
+    activeBreedList = [];
+
+    breedInput.disabled = true;
+
+    breedInput.placeholder =
+      translateInterfaceText(
+        "calendar.detail.select.a.species.first"
+      );
+
+    setBreedLabel(
+      "calendar.detail.breed",
+      "patients.form.optional"
+    );
 
     breedHint.textContent =
-      "Введіть кілька літер або відкрийте список популярних порід.";
-
-    return;
-  }
-
-  if (species === "cat") {
-    activeBreedList = CAT_BREEDS;
-
-    breedInput.disabled = false;
-    breedInput.placeholder = "Почніть вводити породу кота";
-
-    breedLabel.innerHTML = `
-      Порода кота
-      <small>необов’язково</small>
-    `;
-
-    breedHint.textContent =
-      "Введіть кілька літер або відкрийте список порід котів.";
-
-    return;
-  }
-
-  if (species === "other") {
-  activeBreedList =
-    OTHER_SPECIES_LIST;
-
-  breedInput.disabled =
-    false;
-
-  breedInput.placeholder =
-    "Оберіть або почніть вводити вид тварини";
-
-  breedLabel.innerHTML = `
-    Вид тварини
-    <small>обов’язково</small>
-  `;
-
-  breedHint.textContent =
-    "Оберіть вид зі списку або введіть власний варіант.";
-
-  breedField.classList.add(
-    "is-other-species"
-  );
-
-  return;
-}
-
-  activeBreedList = [];
-
-  breedInput.disabled = true;
-  breedInput.placeholder = "Спочатку оберіть вид пацієнта";
-
-  breedLabel.innerHTML = `
-    Порода
-    <small>необов’язково</small>
-  `;
-
-  breedHint.textContent =
-    "Після вибору виду тут з’явиться список порід.";
-};
+      translateInterfaceText(
+        "patients.form.breedHint"
+      );
+  };
 if (isEditMode) {
   const currentSpecies =
     normalizeStoredSpecies(
@@ -76077,15 +76422,15 @@ if (
     currentSpecies
   );
 
-  breedInput.value =
-    String(
-      petToEdit.breed || ""
-    );
-
   selectedBreed =
-    String(
-      petToEdit.breed || ""
-    );
+  String(
+    petToEdit.breed || ""
+  );
+
+breedInput.value =
+  getCalendarBreedLabel(
+    selectedBreed
+  );
 }
 
 refreshRegistrationVaccineSelects();
@@ -76267,10 +76612,12 @@ breedDropdown.addEventListener(
       "";
 
     selectedBreed =
-      breed;
+  breed;
 
-    breedInput.value =
-      breed;
+breedInput.value =
+  getCalendarBreedLabel(
+    breed
+  );
 
     closeBreedDropdown();
 
@@ -76340,7 +76687,12 @@ overlay.addEventListener(
 
     const name = nameInput.value.trim();
     const species = speciesInput.value.trim();
-    const breed = breedInput.value.trim();
+    const breed =
+  String(
+    selectedBreed ||
+    breedInput.value ||
+    ""
+  ).trim();
     const age = ageInput.value.trim();
     const weightRaw = weightInput.value.trim();
     const sex =
@@ -76469,16 +76821,18 @@ const addInitialVaccination =
       return true;
     }
 
-
     const vaccinationDate =
       String(
         dateInput?.value || ""
       ).trim();
 
-
     if (!vaccinationDate) {
       showError(
-        `Вкажіть дату: ${label}.`
+        `${
+          translateInterfaceText(
+            "patients.form.enterDate"
+          )
+        } ${label}.`
       );
 
       dateInput?.focus();
@@ -76486,16 +76840,18 @@ const addInitialVaccination =
       return false;
     }
 
-
     const selected =
       getRegistrationVaccine(
         vaccineInput
       );
 
-
     if (!selected) {
       showError(
-        `Оберіть вакцину: ${label}.`
+        `${
+          translateInterfaceText(
+            "patients.form.chooseVaccine"
+          )
+        } ${label}.`
       );
 
       vaccineInput?.focus();
@@ -76503,12 +76859,10 @@ const addInitialVaccination =
       return false;
     }
 
-
     const {
       brand,
       vaccine,
     } = selected;
-
 
     const coverageTags =
       getVaccineCoverageTags(
@@ -76516,14 +76870,17 @@ const addInitialVaccination =
         vaccine
       );
 
-
     if (
       !coverageTags.includes(
         coverageTag
       )
     ) {
       showError(
-        `Обрана вакцина не відповідає категорії "${label}".`
+        `${
+          translateInterfaceText(
+            "patients.form.vaccineMismatch"
+          )
+        } "${label}".`
       );
 
       vaccineInput?.focus();
@@ -76531,16 +76888,9 @@ const addInitialVaccination =
       return false;
     }
 
-
     const fullName =
       `${brand.brand} ${vaccine.name}`
         .trim();
-
-
-    // Если одна комбинированная
-    // вакцина выбрана одновременно
-    // для сказа и общей вакцинации,
-    // создаём только одну запись.
 
     const duplicate =
       initialVaccinations.some(
@@ -76550,7 +76900,6 @@ const addInitialVaccination =
           item.vaccine_name ===
             fullName
       );
-
 
     if (!duplicate) {
       initialVaccinations.push({
@@ -76575,14 +76924,14 @@ const addInitialVaccination =
           "",
 
         note:
-          "Додано під час створення пацієнта",
+          translateInterfaceText(
+            "patients.form.initialVaccinationNote"
+          ),
       });
     }
 
-
     return true;
   };
-
 
 const rabiesVaccinationValid =
   addInitialVaccination({
@@ -76599,16 +76948,16 @@ const rabiesVaccinationValid =
       "rabies",
 
     label:
-      "вакцинація від сказу",
+      translateInterfaceText(
+        "calendar.detail.rabies.vaccination"
+      ),
   });
-
 
 if (
   !rabiesVaccinationValid
 ) {
   return;
 }
-
 
 const generalVaccinationValid =
   addInitialVaccination({
@@ -76625,9 +76974,10 @@ const generalVaccinationValid =
       "general",
 
     label:
-      "загальна вакцинація",
+      translateInterfaceText(
+        "calendar.detail.general.vaccination"
+      ),
   });
-
 
 if (
   !generalVaccinationValid
@@ -76641,46 +76991,107 @@ const neutered =
     : neuteredRaw === "true";
     const notes = notesInput.value.trim();
 
-    if (!name) {
-      nameInput.classList.add("is-error");
-      showError("Вкажіть кличку тварини.");
-      nameInput.focus();
-      return;
-    }
+   if (!name) {
+  nameInput.classList.add(
+    "is-error"
+  );
 
-    if (!species) {
-      overlay
-        .querySelector(".addPetSpeciesSelector")
-        ?.classList.add("is-error");
+  showError(
+    translateInterfaceText(
+      "calendar.detail.enter.the.patient.s.name"
+    )
+  );
 
-      showError("Оберіть вид пацієнта.");
-      return;
-    }
+  nameInput.focus();
 
-    if (weightRaw) {
-      const weightNumber = Number(weightRaw.replace(",", "."));
+  return;
+}
 
-      if (
-        !Number.isFinite(weightNumber) ||
-        weightNumber <= 0 ||
-        weightNumber > 300
-      ) {
-        weightInput.classList.add("is-error");
-        showError("Перевірте вагу тварини.");
-        weightInput.focus();
-        return;
-      }
-    }
+if (!species) {
+  overlay
+    .querySelector(
+      ".addPetSpeciesSelector"
+    )
+    ?.classList.add(
+      "is-error"
+    );
 
+  showError(
+    translateInterfaceText(
+      "calendar.detail.select.the.animal.species"
+    )
+  );
+
+  return;
+}
+
+if (
+  species === "other" &&
+  !breed
+) {
+  breedInput.classList.add(
+    "is-error"
+  );
+
+  showError(
+    translateInterfaceText(
+      "patients.form.chooseSpecificSpecies"
+    )
+  );
+
+  breedInput.focus();
+
+  return;
+}
+
+if (weightRaw) {
+  const weightNumber =
+    Number(
+      weightRaw.replace(
+        ",",
+        "."
+      )
+    );
+
+  if (
+    !Number.isFinite(
+      weightNumber
+    ) ||
+    weightNumber <= 0 ||
+    weightNumber > 300
+  ) {
+    weightInput.classList.add(
+      "is-error"
+    );
+
+    showError(
+      translateInterfaceText(
+        "patients.form.checkWeight"
+      )
+    );
+
+    weightInput.focus();
+
+    return;
+  }
+}
     isSaving = true;
     submitButton.disabled = true;
 
     const originalButtonHtml = submitButton.innerHTML;
 
     submitButton.innerHTML = `
-      <span class="addPetLoader"></span>
-      <span>Створюємо...</span>
-    `;
+  <span class="addPetLoader"></span>
+  <span>
+    ${escapeHtml(
+      translateInterfaceText(
+        isEditMode
+          ? "calendar.detail.saving.2"
+          : "calendar.detail.creating.2"
+      )
+    )}
+  </span>
+`;
 
         const payload = {
   owner_id:
@@ -76714,19 +77125,23 @@ notes,
       ? await updatePatientApi(editingPetId, payload)
       : await createPatientApi(payload);
 
-    if (!savedPet) {
-      isSaving = false;
-      submitButton.disabled = false;
-      submitButton.innerHTML = originalButtonHtml;
+  if (!savedPet) {
+  isSaving = false;
+  submitButton.disabled = false;
+  submitButton.innerHTML =
+    originalButtonHtml;
 
-      showError(
-        isEditMode
-          ? "Не вдалося зберегти зміни."
-          : "Не вдалося створити пацієнта."
-      );
+  showError(
+    translateInterfaceText(
+      isEditMode
+        ? "patients.form.couldNotSaveChanges"
+        : "calendar.detail.could.not.create.the.patient"
+    )
+  );
 
-      return;
-    }
+  return;
+}
+
 // =====================================================
 // SAVE INITIAL VACCINATION HISTORY
 // =====================================================
@@ -76746,7 +77161,6 @@ if (
         vaccination
       );
     }
-
   } catch (error) {
     console.error(
       "INITIAL PATIENT VACCINATIONS:",
@@ -76758,14 +77172,17 @@ if (
         "⚠️",
 
       title:
-        "Пацієнта створено",
+        translateInterfaceText(
+          "patients.form.patientCreated"
+        ),
 
       text:
-        "Пацієнта збережено, але не всі дані вакцинації вдалося записати. Перевірте паспорт пацієнта.",
+        translateInterfaceText(
+          "patients.form.vaccinationSaveWarning"
+        ),
     });
   }
 }
-
     await loadPatientsApi();
 
     if (
@@ -76829,9 +77246,18 @@ function initOwnerUI() {
     const ownerId = state.selectedOwnerId;
 
     if (!ownerId) {
-      alert("Спочатку обери власника");
-      return;
-    }
+  showCrmNotice({
+    icon:
+      "🐾",
+
+    title:
+      translateInterfaceText(
+        "owners.profile.selectOwner"
+      ),
+  });
+
+  return;
+}
 
     openAddPetModal(ownerId);
   });
