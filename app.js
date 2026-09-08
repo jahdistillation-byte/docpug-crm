@@ -3901,6 +3901,62 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.form.phoneFormat": "Wprowadź prawidłowy międzynarodowy numer telefonu."
 });
 
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.delete.thisPatient": "цього пацієнта",
+  "patients.delete.failed": "Не вдалося видалити пацієнта."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.delete.thisPatient": "this patient",
+  "patients.delete.failed": "Could not delete the patient."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.delete.thisPatient": "diesen Patienten",
+  "patients.delete.failed": "Der Patient konnte nicht gelöscht werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.delete.thisPatient": "tego pacjenta",
+  "patients.delete.failed": "Nie udało się usunąć pacjenta."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.page.title": "Пацієнти",
+  "patients.page.subtitle": "Усі пацієнти клініки",
+  "patients.page.loadingTitle": "Завантажуємо пацієнтів",
+  "patients.page.loadingText": "Отримуємо актуальні дані клініки…",
+  "patients.page.empty": "Поки пацієнтів немає.",
+  "patients.delete.confirmDescription": "Пацієнта буде видалено назавжди разом із його карткою."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.page.title": "Patients",
+  "patients.page.subtitle": "All clinic patients",
+  "patients.page.loadingTitle": "Loading patients",
+  "patients.page.loadingText": "Getting the latest clinic data…",
+  "patients.page.empty": "No patients yet.",
+  "patients.delete.confirmDescription": "The patient will be permanently deleted together with their medical record."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.page.title": "Patienten",
+  "patients.page.subtitle": "Alle Patienten der Klinik",
+  "patients.page.loadingTitle": "Patienten werden geladen",
+  "patients.page.loadingText": "Aktuelle Klinikdaten werden geladen…",
+  "patients.page.empty": "Noch keine Patienten.",
+  "patients.delete.confirmDescription": "Der Patient wird zusammen mit seiner Patientenakte dauerhaft gelöscht."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.page.title": "Pacjenci",
+  "patients.page.subtitle": "Wszyscy pacjenci kliniki",
+  "patients.page.loadingTitle": "Ładowanie pacjentów",
+  "patients.page.loadingText": "Pobieranie aktualnych danych kliniki…",
+  "patients.page.empty": "Nie ma jeszcze pacjentów.",
+  "patients.delete.confirmDescription": "Pacjent zostanie trwale usunięty wraz z kartą pacjenta."
+});
+
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -37446,164 +37502,452 @@ function printA4Only(visitId) {
 // PATIENTS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
 // =========================
 function renderPatientsTab() {
-  const page = document.querySelector('.page[data-page="patients"]');
-  if (!page) return;
+  const page =
+    document.querySelector(
+      '.page[data-page="patients"]'
+    );
 
-  // Очищаем и задаем структуру страницы
+  if (!page) {
+    return;
+  }
+
   page.innerHTML = `
-    <div class="glass-card" style="padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
-        <h2 style="margin:0;">Пацієнти</h2>
-        <div class="hint">Всі пацієнти клініки</div>
+    <div
+      class="glass-card"
+      style="
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+      "
+    >
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+        "
+      >
+        <h2 style="margin:0;">
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.page.title"
+            )
+          )}
+        </h2>
+
+        <div class="hint">
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.page.subtitle"
+            )
+          )}
+        </div>
       </div>
+
       <div id="patientsTabList"></div>
     </div>
   `;
 
-  const patientListElement = document.getElementById("patientsTabList");
-  if (!patientListElement) return;
+  const patientListElement =
+    document.getElementById(
+      "patientsTabList"
+    );
 
-  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
-  const owners = Array.isArray(state.owners) && state.owners.length ? state.owners : LS.get(OWNERS_KEY, []);
-  const ownerById = new Map((owners || []).map((o) => [o.id, o]));
+  if (!patientListElement) {
+    return;
+  }
+
+  const patients =
+    Array.isArray(
+      state.patients
+    ) &&
+    state.patients.length
+      ? state.patients
+      : loadPatients();
+
+  const owners =
+    Array.isArray(
+      state.owners
+    ) &&
+    state.owners.length
+      ? state.owners
+      : LS.get(
+          OWNERS_KEY,
+          []
+        );
+
+  const ownerById =
+    new Map(
+      (owners || []).map(
+        (owner) => [
+          String(owner.id),
+          owner,
+        ]
+      )
+    );
 
   if (
     !patients.length &&
-    (patientsApiLoading || !patientsApiLoaded)
+    (
+      patientsApiLoading ||
+      !patientsApiLoaded
+    )
   ) {
     patientListElement.innerHTML = `
-      <div class="patientsTabLoading" role="status" aria-live="polite">
-        <div class="patientsTabLoadingIcon" aria-hidden="true">🐾</div>
-        <strong>Завантажуємо пацієнтів</strong>
-        <span>Отримуємо актуальні дані клініки…</span>
-        <div class="patientsTabLoadingDots" aria-hidden="true">
-          <i></i><i></i><i></i>
+      <div
+        class="patientsTabLoading"
+        role="status"
+        aria-live="polite"
+      >
+        <div
+          class="patientsTabLoadingIcon"
+          aria-hidden="true"
+        >
+          🐾
+        </div>
+
+        <strong>
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.page.loadingTitle"
+            )
+          )}
+        </strong>
+
+        <span>
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.page.loadingText"
+            )
+          )}
+        </span>
+
+        <div
+          class="patientsTabLoadingDots"
+          aria-hidden="true"
+        >
+          <i></i>
+          <i></i>
+          <i></i>
         </div>
       </div>
     `;
+
     return;
   }
 
   if (!patients.length) {
-    patientListElement.innerHTML = `<div class="hint" style="text-align:center; padding: 40px; opacity: 0.5;">Поки пацієнтів немає.</div>`;
+    patientListElement.innerHTML = `
+      <div
+        class="hint"
+        style="
+          text-align: center;
+          padding: 40px;
+          opacity: 0.5;
+        "
+      >
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.page.empty"
+          )
+        )}
+      </div>
+    `;
+
     return;
   }
 
-  patientListElement.innerHTML = "";
+  const weightUnit =
+    getInterfaceLanguage() ===
+    "uk"
+      ? "кг"
+      : "kg";
+
+  patientListElement.innerHTML =
+    "";
+
   patients
     .slice()
-    .sort((a, b) => String(b.id).localeCompare(String(a.id)))
-    .forEach((p) => {
-      const owner = ownerById.get(p.owner_id);
-      const ownerLine = owner ? (owner.name || "") : "";
+    .sort(
+      (first, second) =>
+        String(
+          second.id
+        ).localeCompare(
+          String(first.id)
+        )
+    )
+    .forEach(
+      (patient) => {
+        const owner =
+          ownerById.get(
+            String(
+              patient.owner_id
+            )
+          );
 
-      const el = document.createElement("div");
-      el.className = "glass-card";
-      el.style.cssText = "padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); cursor:pointer; transition: 0.2s;";
-      el.dataset.openPet = p.id;
+        const ownerName =
+          String(
+            owner?.name || ""
+          ).trim();
 
-      el.innerHTML = `
-        <div style="flex:1;">
-          <div style="font-size: 1.2rem; font-weight: 600;">🐾 ${escapeHtml(p.name || "Без клички")}</div>
-          <div style="font-size: 0.9rem; opacity: 0.6; margin-top: 4px;">
-            ${escapeHtml(p.species || "")}
-            ${p.breed ? " • " + escapeHtml(p.breed) : ""}
-            ${p.age ? " • " + escapeHtml(p.age) : ""}
-            ${p.weight_kg ? " • " + escapeHtml(p.weight_kg) + " кг" : ""}
-            ${ownerLine ? " • 👤 " + escapeHtml(ownerLine) : ""}
+        const patientName =
+          String(
+            patient.name || ""
+          ).trim() ||
+          translateInterfaceText(
+            "calendar.detail.unnamed"
+          );
+
+        const meta = [
+          speciesLabel(
+            patient.species
+          ),
+
+          patient.breed
+            ? getCalendarBreedLabel(
+                patient.breed
+              )
+            : "",
+
+          patient.age || "",
+
+          patient.weight_kg
+            ? `${patient.weight_kg} ${weightUnit}`
+            : "",
+
+          ownerName
+            ? `👤 ${ownerName}`
+            : "",
+        ]
+          .filter(Boolean)
+          .map(
+            (value) =>
+              escapeHtml(
+                String(value)
+              )
+          )
+          .join(" • ");
+
+        const element =
+          document.createElement(
+            "div"
+          );
+
+        element.className =
+          "glass-card";
+
+        element.style.cssText =
+          "padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:0.2s;";
+
+        element.dataset.openPet =
+          String(patient.id);
+
+        element.innerHTML = `
+          <div style="flex:1;">
+            <div
+              style="
+                font-size: 1.2rem;
+                font-weight: 600;
+              "
+            >
+              🐾 ${escapeHtml(
+                patientName
+              )}
+            </div>
+
+            <div
+              style="
+                font-size: 0.9rem;
+                opacity: 0.6;
+                margin-top: 4px;
+              "
+            >
+              ${meta}
+            </div>
           </div>
-        </div>
-        <div class="patientActionsCell">
-  <button
-    class="iconBtn patientActionBtn patientEditBtn"
-    type="button"
-    title="Редагувати пацієнта"
-    aria-label="Редагувати пацієнта"
-    data-edit-pet="${escapeHtml(p.id)}"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 20h9"></path>
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
-    </svg>
-  </button>
 
-  <button
-    class="iconBtn patientActionBtn patientDeleteBtn"
-    type="button"
-    title="Видалити пацієнта"
-    aria-label="Видалити пацієнта"
-    data-del-pet="${escapeHtml(p.id)}"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M3 6h18"></path>
-      <path d="M8 6V4h8v2"></path>
-      <path d="M19 6l-1 14H6L5 6"></path>
-      <path d="M10 11v5"></path>
-      <path d="M14 11v5"></path>
-    </svg>
-  </button>
-</div>
-      `;
-      patientListElement.appendChild(el);
-    });
+          <div class="patientActionsCell">
+            <button
+              class="
+                iconBtn
+                patientActionBtn
+                patientEditBtn
+              "
+              type="button"
+              title="${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.editPatient"
+                )
+              )}"
+              aria-label="${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.editPatient"
+                )
+              )}"
+              data-edit-pet="${escapeHtml(
+                String(patient.id)
+              )}"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9"></path>
+                <path
+                  d="
+                    M16.5 3.5
+                    a2.1 2.1 0 0 1 3 3
+                    L8 18
+                    l-4 1
+                    1-4Z
+                  "
+                ></path>
+              </svg>
+            </button>
 
-  // Делегированный клик
-  patientListElement.onclick = async (e) => {
-    const editBtn = e.target.closest("[data-edit-pet]");
+            <button
+              class="
+                iconBtn
+                patientActionBtn
+                patientDeleteBtn
+              "
+              type="button"
+              title="${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.deletePatient"
+                )
+              )}"
+              aria-label="${escapeHtml(
+                translateInterfaceText(
+                  "owners.profile.deletePatient"
+                )
+              )}"
+              data-del-pet="${escapeHtml(
+                String(patient.id)
+              )}"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18"></path>
+                <path d="M8 6V4h8v2"></path>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v5"></path>
+                <path d="M14 11v5"></path>
+              </svg>
+            </button>
+          </div>
+        `;
 
-if (editBtn) {
-  e.preventDefault();
-  e.stopPropagation();
+        patientListElement.appendChild(
+          element
+        );
+      }
+    );
 
-  const petId = editBtn.dataset.editPet;
+  patientListElement.onclick =
+    async (event) => {
+      const editButton =
+        event.target.closest(
+          "[data-edit-pet]"
+        );
 
-  const pet = (state.patients || []).find(
-    (item) => String(item.id) === String(petId)
-  );
+      if (editButton) {
+        event.preventDefault();
+        event.stopPropagation();
 
-  if (!pet) {
-    alert("Пацієнта не знайдено.");
-    return;
-  }
+        const petId =
+          editButton.dataset
+            .editPet;
 
-  openAddPetModal(pet.owner_id, pet);
-  return;
-    }
+        const pet =
+          (
+            state.patients || []
+          ).find(
+            (item) =>
+              String(item.id) ===
+              String(petId)
+          );
 
-    const delBtn = e.target.closest("[data-del-pet]");
-    if (delBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const petId = delBtn.dataset.delPet;
-      if (petId) deletePatientEverywhere(petId);
-      return;
-    }
+        if (!pet) {
+          showCrmNotice({
+            icon:
+              "🐾",
 
-    const openZone = e.target.closest("[data-open-pet]");
-    if (openZone) {
-      const petId = openZone.dataset.openPet;
-      if (petId) openPatient(petId);
-    }
-  };
+            title:
+              translateInterfaceText(
+                "calendar.detail.patient.not.found"
+              ),
+          });
+
+          return;
+        }
+
+        openAddPetModal(
+          pet.owner_id,
+          pet
+        );
+
+        return;
+      }
+
+      const deleteButton =
+        event.target.closest(
+          "[data-del-pet]"
+        );
+
+      if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const petId =
+          deleteButton.dataset
+            .delPet;
+
+        if (petId) {
+          await deletePatientEverywhere(
+            petId
+          );
+        }
+
+        return;
+      }
+
+      const openZone =
+        event.target.closest(
+          "[data-open-pet]"
+        );
+
+      if (!openZone) {
+        return;
+      }
+
+      const petId =
+        openZone.dataset
+          .openPet;
+
+      if (petId) {
+        openPatient(
+          petId
+        );
+      }
+    };
 }
 async function renderHospitalTab() {
   const page =
@@ -77241,122 +77585,68 @@ if (
 
 
 function initOwnerUI() {
-  // Добавление животного владельцу
-  $("#btnAddPet")?.addEventListener("click", () => {
-    const ownerId = state.selectedOwnerId;
+  $("#btnAddPet")
+    ?.addEventListener(
+      "click",
+      () => {
+        const ownerId =
+          state.selectedOwnerId;
 
-    if (!ownerId) {
-  showCrmNotice({
-    icon:
-      "🐾",
+        if (!ownerId) {
+          showCrmNotice({
+            icon:
+              "🐾",
 
-    title:
-      translateInterfaceText(
-        "owners.profile.selectOwner"
-      ),
-  });
+            title:
+              translateInterfaceText(
+                "owners.profile.selectOwner"
+              ),
+          });
 
-  return;
-}
+          return;
+        }
 
-    openAddPetModal(ownerId);
-  });
-
-  // Клик по списку животных (Удаление / Открытие)
-  $("#petsList")?.addEventListener(
-  "click",
-  async (e) => {
-    const editBtn =
-      e.target.closest(
-        "[data-edit-owner-pet]"
-      );
-
-    if (editBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const petId =
-        editBtn.dataset
-          .editOwnerPet;
-
-      if (!petId) {
-        return;
-      }
-
-      const pet =
-        (
-          state.patients || []
-        ).find(
-          (item) =>
-            String(item.id) ===
-            String(petId)
+        openAddPetModal(
+          ownerId
         );
-
-      if (!pet) {
-        openDeleteModal(
-          "Пацієнта не знайдено.",
-          null,
-          "info"
-        );
-
-        return;
       }
+    );
 
-      openAddPetModal(
-        pet.owner_id,
-        pet
-      );
+  $("#petsList")
+    ?.addEventListener(
+      "click",
+      async (event) => {
+        const editButton =
+          event.target.closest(
+            "[data-edit-owner-pet]"
+          );
 
-      return;
-    }
+        if (editButton) {
+          event.preventDefault();
+          event.stopPropagation();
 
-    const delBtn =
-      e.target.closest(
-        "[data-del-pet]"
-      );
+          const petId =
+            editButton.dataset
+              .editOwnerPet;
 
-    if (delBtn) {
-      e.preventDefault();
-      e.stopPropagation();
+          if (!petId) {
+            return;
+          }
 
-      const petId =
-        delBtn.dataset
-          .delPet;
-
-      if (!petId) {
-        return;
-      }
-
-      const pet =
-        (
-          state.patients || []
-        ).find(
-          (item) =>
-            String(item.id) ===
-            String(petId)
-        );
-
-      const petName =
-        pet?.name ||
-        "цього пацієнта";
-
-      openDeleteModal(
-        `
-          <b>
-            ${escapeHtml(petName)}
-          </b>
-          <br><br>
-          Цю дію неможливо скасувати.
-        `,
-        async () => {
-          const ok =
-            await deletePatientApi(
-              petId
+          const pet =
+            (
+              state.patients || []
+            ).find(
+              (item) =>
+                String(item.id) ===
+                String(petId)
             );
 
-          if (!ok) {
+          if (!pet) {
             openDeleteModal(
-              "Не вдалося видалити пацієнта.",
+              translateInterfaceText(
+                "calendar.detail.patient.not.found"
+              ),
               null,
               "info"
             );
@@ -77364,53 +77654,129 @@ function initOwnerUI() {
             return;
           }
 
-          await loadPatientsApi();
+          openAddPetModal(
+            pet.owner_id,
+            pet
+          );
 
-          if (
-            String(
-              state.selectedPetId ||
-              ""
-            ) ===
-            String(petId)
-          ) {
-            state.selectedPetId =
-              null;
-
-            state.selectedPet =
-              null;
-          }
-
-          if (
-            state.selectedOwnerId
-          ) {
-            await renderOwnerPage(
-              state.selectedOwnerId
-            );
-          }
+          return;
         }
-      );
 
-      return;
-    }
+        const deleteButton =
+          event.target.closest(
+            "[data-del-pet]"
+          );
 
-    const openZone =
-      e.target.closest(
-        "[data-open-pet]"
-      );
+        if (deleteButton) {
+          event.preventDefault();
+          event.stopPropagation();
 
-    if (openZone) {
-      const petId =
-        openZone.dataset
-          .openPet;
+          const petId =
+            deleteButton.dataset
+              .delPet;
 
-      if (petId) {
-        openPatient(
-          petId
-        );
+          if (!petId) {
+            return;
+          }
+
+          const pet =
+            (
+              state.patients || []
+            ).find(
+              (item) =>
+                String(item.id) ===
+                String(petId)
+            );
+
+          const petName =
+            pet?.name ||
+            translateInterfaceText(
+              "patients.delete.thisPatient"
+            );
+
+          openDeleteModal(
+            `
+              <b>
+                ${escapeHtml(
+                  petName
+                )}
+              </b>
+
+              <br><br>
+
+              ${escapeHtml(
+                translateInterfaceText(
+                  "owners.delete.confirmText"
+                )
+              )}
+            `,
+            async () => {
+              const deleted =
+                await deletePatientApi(
+                  petId
+                );
+
+              if (!deleted) {
+                openDeleteModal(
+                  translateInterfaceText(
+                    "patients.delete.failed"
+                  ),
+                  null,
+                  "info"
+                );
+
+                return;
+              }
+
+              await loadPatientsApi();
+
+              if (
+                String(
+                  state.selectedPetId ||
+                  ""
+                ) ===
+                String(petId)
+              ) {
+                state.selectedPetId =
+                  null;
+
+                state.selectedPet =
+                  null;
+              }
+
+              if (
+                state.selectedOwnerId
+              ) {
+                await renderOwnerPage(
+                  state.selectedOwnerId
+                );
+              }
+            }
+          );
+
+          return;
+        }
+
+        const openZone =
+          event.target.closest(
+            "[data-open-pet]"
+          );
+
+        if (!openZone) {
+          return;
+        }
+
+        const petId =
+          openZone.dataset
+            .openPet;
+
+        if (petId) {
+          openPatient(
+            petId
+          );
+        }
       }
-    }
-  }
-);
+    );
 }
 // =========================
 // VISITS TAB UI — Глобальный журнал визитов
@@ -77579,45 +77945,67 @@ function closeVisitModal() {
 // =========================
 // Спецификации видов животных и нормализаторы
 // =========================
-function normalizeSpecies(value) {
-  const s = String(value || "")
-    .toLowerCase()
-    .trim();
+function normalizeSpecies(
+  value
+) {
+  const species =
+    String(value || "")
+      .toLowerCase()
+      .trim();
 
   if (
-    s === "dog" ||
-    s.includes("пес") ||
-    s.includes("соб") ||
-    s.includes("dog")
+    species === "dog" ||
+    species.includes("пес") ||
+    species.includes("соб") ||
+    species.includes("hund")
   ) {
     return "dog";
   }
 
   if (
-    s === "cat" ||
-    s.includes("кот") ||
-    s.includes("кіт") ||
-    s.includes("cat")
+    species === "cat" ||
+    species.includes("кот") ||
+    species.includes("кіт") ||
+    species.includes("кіш") ||
+    species.includes("katz")
   ) {
     return "cat";
   }
 
-  return "dog";
+  if (!species) {
+    return "";
+  }
+
+  return "other";
 }
 
 function speciesLabel(
   value
 ) {
-  const key =
+  const species =
     normalizeSpecies(
       value
     );
 
-  return translateInterfaceText(
-    key === "cat"
-      ? "calendar.detail.cat"
-      : "calendar.detail.dog"
-  );
+  if (species === "cat") {
+    return translateInterfaceText(
+      "calendar.detail.cat"
+    );
+  }
+
+  if (species === "dog") {
+    return translateInterfaceText(
+      "calendar.detail.dog"
+    );
+  }
+
+  if (species === "other") {
+    return translateInterfaceText(
+      "patients.form.otherSpecies"
+    );
+  }
+
+  return "—";
 }
 
 function formatOwnerVisitCount(
@@ -79774,90 +80162,200 @@ async function savePatientNotesApi(
 // =========================
 // DELETE — server-first (patients + visits)
 // =========================
-async function deletePatientApi(petId) {
+async function deletePatientApi(
+  petId
+) {
   try {
-    const res = await fetch(`/api/patients/${encodeURIComponent(petId)}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: { Accept: "application/json", ...getOrgHeaders() },
-    });
+    const response =
+      await fetch(
+        `/api/patients/${encodeURIComponent(
+          String(petId)
+        )}`,
+        {
+          method:
+            "DELETE",
 
-    const text = await res.text();
+          credentials:
+            "include",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+        }
+      );
+
+    const text =
+      await response.text();
+
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
 
-    if (!res.ok) {
-      console.error("API /patients DELETE HTTP", res.status, text);
-      alert(`Помилка сервера при видаленні пацієнта (HTTP ${res.status})`);
+    try {
+      json =
+        text
+          ? JSON.parse(
+              text
+            )
+          : null;
+    } catch {
+      json = null;
+    }
+
+    if (
+      !response.ok ||
+      !json ||
+      json.ok !== true
+    ) {
+      console.error(
+        "API /patients DELETE:",
+        response.status,
+        text
+      );
+
       return false;
     }
 
-    if (!json || !json.ok) {
-      console.error("API /patients DELETE bad json:", text);
-      alert(json?.error || "Помилка видалення пацієнта");
-      return false;
-    }
     return true;
-  } catch (e) {
-    console.error("deletePatientApi failed:", e);
-    alert("Помилка зʼєднання з сервером");
+  } catch (error) {
+    console.error(
+      "deletePatientApi:",
+      error
+    );
+
     return false;
   }
 }
 
-async function deletePatientEverywhere(petId) {
-  const id = String(petId || "");
-  if (!id) return;
+async function deletePatientEverywhere(
+  petId
+) {
+  const id =
+    String(
+      petId || ""
+    );
 
-  const patients =
-    Array.isArray(state.patients) && state.patients.length
-      ? state.patients
-      : loadPatients();
-
-  const pet = patients.find(
-    (item) => String(item.id) === id
-  );
-
-  if (!pet) {
-    alert("Пацієнта не знайдено.");
+  if (!id) {
     return;
   }
 
-  const petName = pet.name || "Без імені";
+  const patients =
+    Array.isArray(
+      state.patients
+    ) &&
+    state.patients.length
+      ? state.patients
+      : loadPatients();
+
+  const pet =
+    patients.find(
+      (item) =>
+        String(item.id) ===
+        id
+    );
+
+  if (!pet) {
+    showCrmNotice({
+      icon:
+        "🐾",
+
+      title:
+        translateInterfaceText(
+          "calendar.detail.patient.not.found"
+        ),
+    });
+
+    return;
+  }
+
+  const petName =
+    pet.name ||
+    translateInterfaceText(
+      "calendar.detail.unnamed"
+    );
 
   openDeleteModal(
     `
-      <b>${escapeHtml(petName)}</b>
+      <b>
+        ${escapeHtml(
+          petName
+        )}
+      </b>
+
       <br><br>
-      Пацієнта буде видалено назавжди разом із його карткою.
+
+      ${escapeHtml(
+        translateInterfaceText(
+          "patients.delete.confirmDescription"
+        )
+      )}
+
       <br>
-      Цю дію неможливо скасувати.
+
+      ${escapeHtml(
+        translateInterfaceText(
+          "owners.delete.confirmText"
+        )
+      )}
     `,
     async () => {
-      const ok = await deletePatientApi(id);
+      const deleted =
+        await deletePatientApi(
+          id
+        );
 
-      if (!ok) {
-        alert("Не вдалося видалити пацієнта.");
+      if (!deleted) {
+        showCrmNotice({
+          icon:
+            "⚠️",
+
+          title:
+            translateInterfaceText(
+              "patients.delete.failed"
+            ),
+        });
+
         return;
       }
 
       await loadPatientsApi();
 
-      if (String(state.selectedPetId || "") === id) {
-        state.selectedPetId = null;
-        state.selectedPet = null;
-        state.selectedVisitId = null;
+      if (
+        String(
+          state.selectedPetId ||
+          ""
+        ) === id
+      ) {
+        state.selectedPetId =
+          null;
+
+        state.selectedPet =
+          null;
+
+        state.selectedVisitId =
+          null;
       }
 
-      if (state.route === "patients") {
+      if (
+        state.route ===
+        "patients"
+      ) {
         renderPatientsTab();
       }
 
-      if (state.selectedOwnerId) {
-        renderOwnerPage(state.selectedOwnerId);
+      if (
+        state.selectedOwnerId
+      ) {
+        renderOwnerPage(
+          state.selectedOwnerId
+        );
       }
 
-      if (state.route === "visits") {
+      if (
+        state.route ===
+        "visits"
+      ) {
         renderVisitsTab();
       }
     }
