@@ -6,7 +6,7 @@
   <title>Doc.PUG CRM - Преміум Панель</title>
   <link
   rel="stylesheet"
-  href="style.css?v=20260907-calendar-i18n-v3"
+  href="style.css?v=20260908-owners-phone-v1"
 />
 </head>
 
@@ -1220,20 +1220,36 @@
           >
         </label>
 
-        <label class="pugVisitField">
+                <label class="pugVisitField">
           <span data-i18n="owners.form.phone">
             Телефон
           </span>
 
-          <input
-            class="pugVisitInput"
-            id="ownerModalPhone"
-            type="tel"
-            inputmode="tel"
-            maxlength="17"
-            autocomplete="tel"
-            placeholder="+380 XX XXX XX XX"
-          >
+          <div class="pugOwnerPhoneRow">
+            <select
+              class="pugOwnerPhoneCountry"
+              id="ownerModalPhoneCountry"
+              aria-label="Код країни"
+              data-i18n-aria-label="owners.phone.countryCode"
+            >
+              <option value="UA">🇺🇦 +380</option>
+              <option value="DE">🇩🇪 +49</option>
+              <option value="AT">🇦🇹 +43</option>
+              <option value="PL">🇵🇱 +48</option>
+              <option value="GB">🇬🇧 +44</option>
+              <option value="US">🇺🇸🇨🇦 +1</option>
+            </select>
+
+            <input
+              class="pugVisitInput"
+              id="ownerModalPhone"
+              type="tel"
+              inputmode="numeric"
+              maxlength="24"
+              autocomplete="tel"
+              placeholder="XX XXX XX XX"
+            >
+          </div>
         </label>
 
         <label class="pugVisitField">
@@ -2435,7 +2451,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="ach.js"></script>
-<script src="app.js?v=20260907-calendar-i18n-v3"></script>
+<script src="app.js?v=20260908-owners-phone-v1"></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>

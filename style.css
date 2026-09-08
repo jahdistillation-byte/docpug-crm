@@ -61141,3 +61141,59 @@ textarea.visitControl {
     transform: translateY(0);
   }
 }
+/* OWNER MODAL — international phone */
+
+#ownerModal .pugOwnerPhoneRow {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+#ownerModal .pugOwnerPhoneCountry {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid rgba(196, 181, 253, 0.16);
+  border-radius: 14px;
+  outline: none;
+  cursor: pointer;
+  background: rgba(10, 7, 25, 0.5);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  color-scheme: dark;
+  transition: 0.2s ease;
+}
+
+#ownerModal .pugOwnerPhoneCountry:focus {
+  border-color: rgba(168, 85, 247, 0.78);
+  box-shadow:
+    0 0 0 4px rgba(168, 85, 247, 0.13),
+    0 0 22px rgba(168, 85, 247, 0.13);
+}
+
+#ownerModal .pugOwnerPhoneCountry option {
+  background: #171027;
+  color: #fff;
+}
+
+body[data-theme="white"]
+#ownerModal .pugOwnerPhoneCountry {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  color: #1c1c1e;
+  color-scheme: light;
+}
+
+@media (max-width: 560px) {
+  #ownerModal .pugOwnerPhoneRow {
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  #ownerModal .pugOwnerPhoneCountry {
+    padding: 0 8px;
+    font-size: 13px;
+  }
+}

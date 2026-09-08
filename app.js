@@ -3654,6 +3654,25 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.delete.errorText": "Nie udało się usunąć właściciela."
 });
 
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.phone.countryCode": "Код країни",
+  "owners.form.phoneFormat": "Вкажіть коректний міжнародний номер телефону."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.phone.countryCode": "Country code",
+  "owners.form.phoneFormat": "Enter a valid international phone number."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.phone.countryCode": "Ländervorwahl",
+  "owners.form.phoneFormat": "Geben Sie eine gültige internationale Telefonnummer ein."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.phone.countryCode": "Kod kraju",
+  "owners.form.phoneFormat": "Wprowadź prawidłowy międzynarodowy numer telefonu."
+});
 
 function getInterfaceLanguage() {
   const selectedLanguage =
@@ -4565,7 +4584,6 @@ function bindUaPhoneInput(
 
 function initPhoneInputs() {
   [
-    "#ownerModalPhone",
     "#visitNewOwnerPhone",
     "#staffPhone",
   ].forEach(
@@ -4577,6 +4595,477 @@ function initPhoneInputs() {
       );
     }
   );
+}
+const OWNER_PHONE_COUNTRIES =
+  Object.freeze({
+    UA: {
+      dialCode: "380",
+      minLength: 9,
+      maxLength: 9,
+      groups: [2, 3, 2, 2],
+      placeholder: "XX XXX XX XX",
+      removeTrunkZero: true,
+    },
+
+    DE: {
+      dialCode: "49",
+      minLength: 5,
+      maxLength: 11,
+      groups: [3, 3, 5],
+      placeholder: "XXX XXX XXXXX",
+      removeTrunkZero: true,
+    },
+
+    AT: {
+      dialCode: "43",
+      minLength: 7,
+      maxLength: 13,
+      groups: [3, 3, 3, 4],
+      placeholder: "XXX XXX XXX XXXX",
+      removeTrunkZero: true,
+    },
+
+    PL: {
+      dialCode: "48",
+      minLength: 9,
+      maxLength: 9,
+      groups: [3, 3, 3],
+      placeholder: "XXX XXX XXX",
+      removeTrunkZero: false,
+    },
+
+    GB: {
+      dialCode: "44",
+      minLength: 10,
+      maxLength: 10,
+      groups: [4, 3, 3],
+      placeholder: "XXXX XXX XXX",
+      removeTrunkZero: true,
+    },
+
+    US: {
+      dialCode: "1",
+      minLength: 10,
+      maxLength: 10,
+      groups: [3, 3, 4],
+      placeholder: "XXX XXX XXXX",
+      removeTrunkZero: false,
+    },
+  });
+
+function getOwnerPhoneConfig(
+  country
+) {
+  return (
+    OWNER_PHONE_COUNTRIES[
+      String(country || "").toUpperCase()
+    ] ||
+    OWNER_PHONE_COUNTRIES.UA
+  );
+}
+
+function detectOwnerPhoneCountry(
+  value
+) {
+  let digits =
+    String(value || "")
+      .replace(/\D/g, "");
+
+  if (digits.startsWith("00")) {
+    digits =
+      digits.slice(2);
+  }
+
+  const country =
+    Object.keys(
+      OWNER_PHONE_COUNTRIES
+    ).find((code) => {
+      return digits.startsWith(
+        OWNER_PHONE_COUNTRIES[
+          code
+        ].dialCode
+      );
+    });
+
+  return country || "UA";
+}
+
+function getOwnerNationalPhoneDigits(
+  value,
+  country
+) {
+  const config =
+    getOwnerPhoneConfig(
+      country
+    );
+
+  const raw =
+    String(value || "")
+      .trim();
+
+  let digits =
+    raw.replace(
+      /\D/g,
+      ""
+    );
+
+  if (raw.startsWith("00")) {
+    digits =
+      digits.slice(2);
+  }
+
+  if (
+    (
+      raw.startsWith("+") ||
+      raw.startsWith("00") ||
+      digits.length >
+        config.maxLength
+    ) &&
+    digits.startsWith(
+      config.dialCode
+    )
+  ) {
+    digits =
+      digits.slice(
+        config.dialCode.length
+      );
+  }
+
+  if (
+    config.removeTrunkZero &&
+    digits.startsWith("0")
+  ) {
+    digits =
+      digits.slice(1);
+  }
+
+  return digits.slice(
+    0,
+    config.maxLength
+  );
+}
+
+function formatOwnerNationalPhone(
+  value,
+  country
+) {
+  const config =
+    getOwnerPhoneConfig(
+      country
+    );
+
+  const digits =
+    getOwnerNationalPhoneDigits(
+      value,
+      country
+    );
+
+  const parts = [];
+  let position = 0;
+
+  config.groups.forEach(
+    (size) => {
+      const part =
+        digits.slice(
+          position,
+          position + size
+        );
+
+      if (part) {
+        parts.push(part);
+      }
+
+      position += size;
+    }
+  );
+
+  return parts.join(" ");
+}
+
+function isValidOwnerPhone(
+  value,
+  country
+) {
+  const config =
+    getOwnerPhoneConfig(
+      country
+    );
+
+  const digits =
+    getOwnerNationalPhoneDigits(
+      value,
+      country
+    );
+
+  const fullLength =
+    config.dialCode.length +
+    digits.length;
+
+  return (
+    digits.length >=
+      config.minLength &&
+    digits.length <=
+      config.maxLength &&
+    fullLength >= 8 &&
+    fullLength <= 15
+  );
+}
+
+function buildOwnerPhone(
+  value,
+  country
+) {
+  if (
+    !isValidOwnerPhone(
+      value,
+      country
+    )
+  ) {
+    return "";
+  }
+
+  const config =
+    getOwnerPhoneConfig(
+      country
+    );
+
+  const digits =
+    getOwnerNationalPhoneDigits(
+      value,
+      country
+    );
+
+  return (
+    `+${config.dialCode}` +
+    digits
+  );
+}
+
+function updateOwnerPhonePlaceholder() {
+  const countrySelect =
+    document.querySelector(
+      "#ownerModalPhoneCountry"
+    );
+
+  const phoneInput =
+    document.querySelector(
+      "#ownerModalPhone"
+    );
+
+  if (
+    !countrySelect ||
+    !phoneInput
+  ) {
+    return;
+  }
+
+  const config =
+    getOwnerPhoneConfig(
+      countrySelect.value
+    );
+
+  phoneInput.placeholder =
+    config.placeholder;
+}
+
+function setOwnerPhoneEditorValue(
+  value = ""
+) {
+  const countrySelect =
+    document.querySelector(
+      "#ownerModalPhoneCountry"
+    );
+
+  const phoneInput =
+    document.querySelector(
+      "#ownerModalPhone"
+    );
+
+  if (
+    !countrySelect ||
+    !phoneInput
+  ) {
+    return;
+  }
+
+  let country = "UA";
+
+  if (value) {
+    country =
+      detectOwnerPhoneCountry(
+        value
+      );
+  } else {
+    try {
+      const savedCountry =
+        localStorage.getItem(
+          "pug_owner_phone_country"
+        );
+
+      if (
+        OWNER_PHONE_COUNTRIES[
+          savedCountry
+        ]
+      ) {
+        country =
+          savedCountry;
+      }
+    } catch {}
+  }
+
+  countrySelect.value =
+    country;
+
+  phoneInput.value =
+    value
+      ? formatOwnerNationalPhone(
+          value,
+          country
+        )
+      : "";
+
+  updateOwnerPhonePlaceholder();
+}
+
+function bindOwnerInternationalPhoneInput() {
+  const countrySelect =
+    document.querySelector(
+      "#ownerModalPhoneCountry"
+    );
+
+  const phoneInput =
+    document.querySelector(
+      "#ownerModalPhone"
+    );
+
+  if (
+    !countrySelect ||
+    !phoneInput ||
+    phoneInput.dataset
+      .internationalPhoneBound ===
+      "1"
+  ) {
+    return;
+  }
+
+  phoneInput.dataset
+    .internationalPhoneBound =
+    "1";
+
+  phoneInput.addEventListener(
+    "keydown",
+    (event) => {
+      const allowedKeys = [
+        "Backspace",
+        "Delete",
+        "ArrowLeft",
+        "ArrowRight",
+        "Tab",
+        "Home",
+        "End",
+      ];
+
+      if (
+        allowedKeys.includes(
+          event.key
+        ) ||
+        event.ctrlKey ||
+        event.metaKey
+      ) {
+        return;
+      }
+
+      if (
+        !/^\d$/.test(
+          event.key
+        )
+      ) {
+        event.preventDefault();
+      }
+    }
+  );
+
+  phoneInput.addEventListener(
+    "paste",
+    (event) => {
+      event.preventDefault();
+
+      const pasted =
+        event.clipboardData
+          ?.getData("text") ||
+        "";
+
+      if (
+        pasted.trim().startsWith("+") ||
+        pasted.trim().startsWith("00")
+      ) {
+        countrySelect.value =
+          detectOwnerPhoneCountry(
+            pasted
+          );
+      }
+
+      phoneInput.value =
+        formatOwnerNationalPhone(
+          pasted,
+          countrySelect.value
+        );
+
+      updateOwnerPhonePlaceholder();
+
+      phoneInput.dispatchEvent(
+        new Event(
+          "input",
+          {
+            bubbles: true,
+          }
+        )
+      );
+    }
+  );
+
+  phoneInput.addEventListener(
+    "input",
+    () => {
+      phoneInput.value =
+        formatOwnerNationalPhone(
+          phoneInput.value,
+          countrySelect.value
+        );
+
+      phoneInput.setCustomValidity(
+        ""
+      );
+    }
+  );
+
+  countrySelect.addEventListener(
+    "change",
+    () => {
+      try {
+        localStorage.setItem(
+          "pug_owner_phone_country",
+          countrySelect.value
+        );
+      } catch {}
+
+      phoneInput.value =
+        formatOwnerNationalPhone(
+          phoneInput.value,
+          countrySelect.value
+        );
+
+      updateOwnerPhonePlaceholder();
+
+      clearOwnerFieldError(
+        phoneInput
+      );
+
+      phoneInput.focus();
+    }
+  );
+
+  setOwnerPhoneEditorValue();
 }
 function normalizeTelegramUsername(value) {
   let telegram =
@@ -71787,16 +72276,9 @@ if (subTitle) {
       owner?.name || "";
   }
 
-  if (phoneInput) {
-    phoneInput.value =
-      owner?.phone
-        ? formatUaPhone(
-            owner.phone
-          )
-        : "";
-
-    bindUaPhoneInput(
-      phoneInput
+    if (phoneInput) {
+    setOwnerPhoneEditorValue(
+      owner?.phone || ""
     );
   }
 if (emailInput) {
@@ -86442,6 +86924,7 @@ bindUaPhoneInput(
   )
 );
 initPhoneInputs();
+bindOwnerInternationalPhoneInput();
 initTelegramInputs();
 
 function clearOwnerFieldError(
@@ -86592,6 +87075,13 @@ $("#ownerModalSave")
           ""
         ).trim();
 
+        const phoneCountry =
+        (
+          $("#ownerModalPhoneCountry")
+            ?.value ||
+          "UA"
+        ).trim();
+
         const email =
   (
     $("#ownerModalEmail")
@@ -86646,8 +87136,9 @@ const telegramRaw =
 }
 
       if (
-  !isValidUaPhone(
-    phone
+  !isValidOwnerPhone(
+    phone,
+    phoneCountry
   )
 ) {
   showOwnerFieldError(
@@ -86658,9 +87149,10 @@ const telegramRaw =
   return;
 }
 
-      const normalizedPhone =
-        formatUaPhone(
-          phone
+            const normalizedPhone =
+        buildOwnerPhone(
+          phone,
+          phoneCountry
         );
 const normalizedTelegram =
   normalizeTelegramUsername(

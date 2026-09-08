@@ -12188,35 +12188,67 @@ def api_get_owners():
 import re
 
 
-def normalize_ua_phone(value):
+def normalize_international_phone(value):
+    raw = str(
+        value or ""
+    ).strip()
+
+    if not raw:
+        return None
+
     digits = re.sub(
         r"\D",
         "",
-        str(value or ""),
+        raw,
     )
 
-    if digits.startswith("0"):
-        digits = "38" + digits
+    has_international_prefix = (
+        raw.startswith("+")
+        or raw.startswith("00")
+    )
+
+    if raw.startswith("00"):
+        digits = digits[2:]
+
+    # Поддержка старого украинского ввода:
+    # 067... или 67...
+    if not has_international_prefix:
+        if (
+            len(digits) == 10
+            and digits.startswith("0")
+        ):
+            digits = "38" + digits
+
+        elif len(digits) == 9:
+            digits = "380" + digits
+
+        else:
+            return None
 
     if (
-        len(digits) == 9
-        and not digits.startswith("380")
-    ):
-        digits = "380" + digits
-
-    if (
-        len(digits) != 12
-        or not digits.startswith("380")
+        len(digits) < 8
+        or len(digits) > 15
+        or digits.startswith("0")
     ):
         return None
 
-    return (
-        f"+{digits[:3]} "
-        f"{digits[3:5]} "
-        f"{digits[5:8]} "
-        f"{digits[8:10]} "
-        f"{digits[10:12]}"
-    )
+    # Сохраняем прежний формат украинских
+    # номеров для совместимости с базой.
+    if (
+        digits.startswith("380")
+        and len(digits) == 12
+    ):
+        return (
+            f"+{digits[:3]} "
+            f"{digits[3:5]} "
+            f"{digits[5:8]} "
+            f"{digits[8:10]} "
+            f"{digits[10:12]}"
+        )
+
+    return f"+{digits}"
+
+
 @app.post("/api/owners")
 def api_create_owner():
     _user, auth_error = auth_required()
@@ -12253,17 +12285,13 @@ def api_create_owner():
                 400,
             )
 
-        phone = normalize_ua_phone(
+        phone = normalize_international_phone(
             data.get("phone")
         )
 
         if not phone:
             return fail(
-                (
-                    "Телефон повинен містити "
-                    "рівно 12 цифр у форматі "
-                    "+380 XX XXX XX XX"
-                ),
+                "INVALID_PHONE",
                 400,
             )
 
@@ -12477,13 +12505,13 @@ def api_update_owner(owner_id):
                 400,
             )
 
-        phone = normalize_ua_phone(
+        phone = normalize_international_phone(
             data.get("phone")
         )
 
         if not phone:
             return fail(
-                "Телефон повинен бути у форматі +380 XX XXX XX XX",
+                "INVALID_PHONE",
                 400,
             )
 
