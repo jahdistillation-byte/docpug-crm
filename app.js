@@ -71272,13 +71272,15 @@ function openOwnerModal(
       "#ownerModal"
     );
 
-  if (!modal) {
+    if (!modal) {
     console.error(
       "Не знайдено #ownerModal"
     );
 
     return;
   }
+
+  clearOwnerFormErrors();
 
   const isEdit =
     Boolean(owner?.id);
@@ -85977,6 +85979,109 @@ bindUaPhoneInput(
 initPhoneInputs();
 initTelegramInputs();
 
+function clearOwnerFieldError(
+  input
+) {
+  if (!input) {
+    return;
+  }
+
+  const field =
+    input.closest(
+      ".pugVisitField"
+    );
+
+  field?.classList.remove(
+    "has-error"
+  );
+
+  field
+    ?.querySelector(
+      ".pugOwnerFieldError"
+    )
+    ?.remove();
+
+  input.removeAttribute(
+    "aria-invalid"
+  );
+}
+
+function clearOwnerFormErrors() {
+  document
+    .querySelectorAll(
+      "#ownerModal .pugVisitInput"
+    )
+    .forEach(
+      clearOwnerFieldError
+    );
+}
+
+function showOwnerFieldError(
+  selector,
+  translationKey
+) {
+  clearOwnerFormErrors();
+
+  const input =
+    document.querySelector(
+      selector
+    );
+
+  const field =
+    input?.closest(
+      ".pugVisitField"
+    );
+
+  if (!input || !field) {
+    return;
+  }
+
+  const error =
+    document.createElement(
+      "small"
+    );
+
+  error.className =
+    "pugOwnerFieldError";
+
+  error.textContent =
+    translateInterfaceText(
+      translationKey
+    );
+
+  field.classList.add(
+    "has-error"
+  );
+
+  field.appendChild(
+    error
+  );
+
+  input.setAttribute(
+    "aria-invalid",
+    "true"
+  );
+
+  input.focus();
+}
+
+document
+  .querySelectorAll(
+    "#ownerModal .pugVisitInput"
+  )
+  .forEach((input) => {
+    input.addEventListener(
+      "input",
+      () => {
+        clearOwnerFieldError(
+          input
+        );
+      }
+    );
+  });
+
+$("#ownerModalSave")
+
 $("#ownerModalSave")
   ?.addEventListener(
     "click",
@@ -86022,13 +86127,10 @@ const telegramRaw =
     email
   )
 ) {
- alert(
-  translateInterfaceText(
+  showOwnerFieldError(
+    "#ownerModalEmail",
     "owners.form.invalidEmail"
-  )
-);
-  $("#ownerModalEmail")
-    ?.focus();
+  );
 
   return;
 }
@@ -86041,47 +86143,35 @@ const telegramRaw =
         ).trim();
 
       if (!name) {
-        alert(
-  translateInterfaceText(
+  showOwnerFieldError(
+    "#ownerModalName",
     "owners.form.nameRequired"
-  )
-);
+  );
 
-        $("#ownerModalName")
-          ?.focus();
-
-        return;
-      }
+  return;
+}
 
       if (!phone) {
-        alert(
-  translateInterfaceText(
+  showOwnerFieldError(
+    "#ownerModalPhone",
     "owners.form.phoneRequired"
-  )
-);
+  );
 
-        $("#ownerModalPhone")
-          ?.focus();
-
-        return;
-      }
+  return;
+}
 
       if (
-        !isValidUaPhone(
-          phone
-        )
-      ) {
-        alert(
-  translateInterfaceText(
-    "owners.form.phoneFormat"
+  !isValidUaPhone(
+    phone
   )
-);
+) {
+  showOwnerFieldError(
+    "#ownerModalPhone",
+    "owners.form.phoneFormat"
+  );
 
-        $("#ownerModalPhone")
-          ?.focus();
-
-        return;
-      }
+  return;
+}
 
       const normalizedPhone =
         formatUaPhone(
@@ -86098,14 +86188,10 @@ if (
     normalizedTelegram
   )
 ) {
-  alert(
-  translateInterfaceText(
+  showOwnerFieldError(
+    "#ownerModalTelegram",
     "owners.form.telegramFormat"
-  )
-);
-
-  $("#ownerModalTelegram")
-    ?.focus();
+  );
 
   return;
 }
