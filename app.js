@@ -3462,6 +3462,54 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "owners.form.existingText": "Otwieramy profil istniejącego właściciela. Duplikat nie został utworzony."
 });
 
+Object.assign(APP_TRANSLATIONS.uk, {
+  "owners.exists.close": "Закрити",
+  "owners.exists.title": "Власник уже існує",
+  "owners.exists.subtitle": "У базі вже знайдено власника з таким номером телефону.",
+  "owners.exists.fullName": "ПІБ",
+  "owners.exists.phone": "Телефон",
+  "owners.exists.hint": "Ви можете використати вже існуючого власника, щоб не створювати дубль.",
+  "owners.exists.cancel": "Скасувати",
+  "owners.exists.confirm": "Використати власника",
+  "owners.exists.fallbackName": "Власник"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "owners.exists.close": "Close",
+  "owners.exists.title": "Owner already exists",
+  "owners.exists.subtitle": "An owner with this phone number was found in the database.",
+  "owners.exists.fullName": "Full name",
+  "owners.exists.phone": "Phone",
+  "owners.exists.hint": "You can use the existing owner to avoid creating a duplicate.",
+  "owners.exists.cancel": "Cancel",
+  "owners.exists.confirm": "Use existing owner",
+  "owners.exists.fallbackName": "Owner"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "owners.exists.close": "Schließen",
+  "owners.exists.title": "Tierhalter bereits vorhanden",
+  "owners.exists.subtitle": "In der Datenbank wurde bereits ein Tierhalter mit dieser Telefonnummer gefunden.",
+  "owners.exists.fullName": "Name",
+  "owners.exists.phone": "Telefonnummer",
+  "owners.exists.hint": "Sie können den vorhandenen Tierhalter verwenden, um einen doppelten Eintrag zu vermeiden.",
+  "owners.exists.cancel": "Abbrechen",
+  "owners.exists.confirm": "Tierhalter verwenden",
+  "owners.exists.fallbackName": "Tierhalter"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "owners.exists.close": "Zamknij",
+  "owners.exists.title": "Właściciel już istnieje",
+  "owners.exists.subtitle": "W bazie znaleziono już właściciela z tym numerem telefonu.",
+  "owners.exists.fullName": "Imię i nazwisko",
+  "owners.exists.phone": "Telefon",
+  "owners.exists.hint": "Możesz użyć istniejącego właściciela, aby uniknąć duplikatu.",
+  "owners.exists.cancel": "Anuluj",
+  "owners.exists.confirm": "Użyj właściciela",
+  "owners.exists.fallbackName": "Właściciel"
+});
+
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -9251,10 +9299,12 @@ function openOwnerExistsModal(
         return;
       }
 
-      nameEl.textContent =
+            nameEl.textContent =
         String(
           owner?.name ||
-          "Власник"
+          translateInterfaceText(
+            "owners.exists.fallbackName"
+          )
         );
 
       phoneEl.textContent =

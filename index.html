@@ -2456,12 +2456,19 @@
 >
   <div class="pugOwnerExistsBackdrop"></div>
 
-  <div class="pugOwnerExistsDialog">
+  <div
+    class="pugOwnerExistsDialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ownerExistsTitle"
+    aria-describedby="ownerExistsSubtitle"
+  >
     <button
       type="button"
       class="pugOwnerExistsClose"
       id="ownerExistsClose"
       aria-label="Закрити"
+      data-i18n-aria-label="owners.exists.close"
     >
       ×
     </button>
@@ -2472,34 +2479,45 @@
       </div>
 
       <div>
-        <h3>
+        <h3
+          id="ownerExistsTitle"
+          data-i18n="owners.exists.title"
+        >
           Власник уже існує
         </h3>
 
-        <p>
-          У базі вже знайдено
-          власника з таким
-          номером телефону
+        <p
+          id="ownerExistsSubtitle"
+          data-i18n="owners.exists.subtitle"
+        >
+          У базі вже знайдено власника з таким номером телефону.
         </p>
       </div>
     </div>
 
     <div class="pugOwnerExistsCard">
       <div class="pugOwnerExistsRow">
-        <span>ПІБ</span>
+        <span data-i18n="owners.exists.fullName">
+          ПІБ
+        </span>
+
         <b id="ownerExistsName">—</b>
       </div>
 
       <div class="pugOwnerExistsRow">
-        <span>Телефон</span>
+        <span data-i18n="owners.exists.phone">
+          Телефон
+        </span>
+
         <b id="ownerExistsPhone">—</b>
       </div>
     </div>
 
-    <div class="pugOwnerExistsHint">
-      Ви можете використати
-      вже існуючого власника,
-      щоб не створювати дубль.
+    <div
+      class="pugOwnerExistsHint"
+      data-i18n="owners.exists.hint"
+    >
+      Ви можете використати вже існуючого власника, щоб не створювати дубль.
     </div>
 
     <div class="pugOwnerExistsActions">
@@ -2507,6 +2525,7 @@
         type="button"
         class="pugOwnerExistsBtn ghost"
         id="ownerExistsCancel"
+        data-i18n="owners.exists.cancel"
       >
         Скасувати
       </button>
@@ -2515,18 +2534,13 @@
         type="button"
         class="pugOwnerExistsBtn primary"
         id="ownerExistsConfirm"
-      >
-             <button
-        type="button"
-        class="pugOwnerExistsBtn primary"
-        id="ownerExistsConfirm"
+        data-i18n="owners.exists.confirm"
       >
         Використати власника
       </button>
     </div>
   </div>
 </div>
-
 
 <!-- APP PROMPT MODAL -->
 <div
