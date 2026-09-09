@@ -7641,13 +7641,22 @@ function openDeleteModal(
       };
   }
 
-  cancelBtn.onclick =
-    () => {
-      closeDeleteModal();
-    };
+ cancelBtn.onclick =
+  () => {
+    closeDeleteModal();
+  };
 
-  modal.style.display =
-    "flex";
+if (
+  typeof localizeVisitWorkspaceElement ===
+  "function"
+) {
+  localizeVisitWorkspaceElement(
+    modal
+  );
+}
+
+modal.style.display =
+  "flex";
 }
 
 function closeDeleteModal() {
@@ -75087,7 +75096,11 @@ function initVisitUI() {
 
     if (e.target.closest("#btnDischarge")) {
       const visitId = state.selectedVisitId;
-      if (!visitId) return alert("Спочатку відкрий візит.");
+      if (!visitId) return alert(
+  getVisitWorkspaceText(
+    "Спочатку відкрий візит."
+  )
+);
       if (typeof openDischargeModal === "function") openDischargeModal(visitId);
       return;
     }
@@ -75106,10 +75119,18 @@ function initVisitUI() {
         e.stopPropagation();
 
         const vid = state.selectedVisitId;
-        if (!vid) return alert("Візит не обраний");
+        if (!vid) return alert(
+  getVisitWorkspaceText(
+    "Візит не обраний"
+  )
+);
 
         const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-        if (!current) return alert("Візит не знайдено");
+        if (!current) return alert(
+  getVisitWorkspaceText(
+    "Візит не знайдено"
+  )
+);
 
        const readVisitText = (
   fieldId
@@ -75400,8 +75421,10 @@ if (!updated) {
   }
 
   return alert(
+  getVisitWorkspaceText(
     "Не вдалося зберегти медичну частину"
-  );
+  )
+);
 }
 
 const merged = {
@@ -75527,8 +75550,10 @@ if (e.target.closest("#visitSvcAdd")) {
 
   if (!ok) {
     return alert(
-      "Не вдалося додати послугу"
-    );
+  getVisitWorkspaceText(
+    "Не вдалося додати послугу"
+  )
+);
   }
 
   const visit =
@@ -75585,8 +75610,10 @@ if (svcDel) {
 
   if (!ok) {
     return alert(
-      "Не вдалося прибрати послугу"
-    );
+  getVisitWorkspaceText(
+    "Не вдалося прибрати послугу"
+  )
+);
   }
 
   const fresh =
@@ -75651,8 +75678,10 @@ if (e.target.closest("#visitStkAdd")) {
 
   if (!ok) {
     return alert(
-      "Не вдалося додати препарат"
-    );
+  getVisitWorkspaceText(
+    "Не вдалося додати препарат"
+  )
+);
   }
 
   const fresh =
@@ -75690,7 +75719,11 @@ if (e.target.closest("#visitStkAdd")) {
         console.log("[visit-ui] del stock", { vid, idx });
 
         const ok = await removeStockLineFromVisit(vid, idx);
-        if (!ok) return alert("Не вдалося прибрати препарат");
+        if (!ok) return alert(
+  getVisitWorkspaceText(
+    "Не вдалося прибрати препарат"
+  )
+);
 
         const fresh = getVisitByIdSync(vid);
         if (fresh) {
@@ -75704,7 +75737,16 @@ if (e.target.closest("#visitStkAdd")) {
       }
     } catch (err) {
       console.error("Visit UI click failed:", err);
-      alert("Помилка: " + (err?.message || err));
+      alert(
+  getVisitWorkspaceText(
+    "Помилка:"
+  ) +
+  " " +
+  (
+    err?.message ||
+    err
+  )
+);
     }
   };
 
@@ -75741,7 +75783,11 @@ async function openVisit(visitId, opts = { pushHash: true }) {
   }
 
     if (!visit) {
-    alert("Візит не знайдено");
+    alert(
+  getVisitWorkspaceText(
+    "Візит не знайдено"
+  )
+);
     setHash("visits");
     return;
   }
@@ -76293,14 +76339,18 @@ function renderVisitAiConsultAnswer(
           )}
         </span>
 
-        ${
+                ${
           durationSeconds
             ? `
               <span>
-                Відповідь за
+                ${escapeHtml(
+                  getVisitWorkspaceText(
+                    "Відповідь за"
+                  )
+                )}
                 ${escapeHtml(
                   durationSeconds
-                )} с
+                )} s
               </span>
             `
             : ""
@@ -76919,7 +76969,1541 @@ function ensureVisitAiConsultStyles() {
     style
   );
 }
+function getVisitWorkspaceTranslationRows() {
+  return [
+    [
+      "До картки пацієнта",
+      "Back to patient record",
+      "Zur Patientenakte",
+      "Do karty pacjenta",
+    ],
+    [
+      "ПРОТОКОЛ ПРИЙОМУ",
+      "VISIT RECORD",
+      "BEHANDLUNGSPROTOKOLL",
+      "PROTOKÓŁ WIZYTY",
+    ],
+    [
+      "Прийом пацієнта",
+      "Patient visit",
+      "Patientenbesuch",
+      "Wizyta pacjenta",
+    ],
+    [
+      "Завантаження даних...",
+      "Loading data...",
+      "Daten werden geladen...",
+      "Wczytywanie danych...",
+    ],
+    [
+      "Чернетка",
+      "Draft",
+      "Entwurf",
+      "Wersja robocza",
+    ],
+    [
+      "Медична частина",
+      "Medical details",
+      "Medizinische Angaben",
+      "Dane medyczne",
+    ],
+    [
+      "Основна клінічна інформація поточного прийому.",
+      "Main clinical information for the current visit.",
+      "Die wichtigsten klinischen Angaben zum aktuellen Besuch.",
+      "Główne informacje kliniczne dotyczące bieżącej wizyty.",
+    ],
+    [
+      "Причина звернення",
+      "Reason for visit",
+      "Vorstellungsgrund",
+      "Powód wizyty",
+    ],
+    [
+      "Коли почалися симптоми, як змінювався стан, харчування, лікування та важливі події...",
+      "When the symptoms began, how the condition changed, nutrition, treatment and important events...",
+      "Beginn der Symptome, Verlauf, Fütterung, bisherige Behandlung und wichtige Ereignisse...",
+      "Kiedy zaczęły się objawy, jak zmieniał się stan, żywienie, leczenie i ważne zdarzenia...",
+    ],
+    [
+      "Анамнез",
+      "Medical history",
+      "Anamnese",
+      "Wywiad",
+    ],
+    [
+      "Скарги власника, історія стану, тривалість симптомів...",
+      "Owner’s concerns, history and duration of symptoms...",
+      "Angaben des Tierhalters, Verlauf und Dauer der Symptome...",
+      "Objawy zgłaszane przez właściciela, historia i czas ich trwania...",
+    ],
+    [
+      "Показники стану",
+      "Vital signs",
+      "Vitalparameter",
+      "Parametry życiowe",
+    ],
+    [
+      "Вага",
+      "Weight",
+      "Gewicht",
+      "Masa ciała",
+    ],
+    [
+      "кг",
+      "kg",
+      "kg",
+      "kg",
+    ],
+    [
+      "Температура",
+      "Temperature",
+      "Temperatur",
+      "Temperatura",
+    ],
+    [
+      "ЧСС / пульс",
+      "Heart rate / pulse",
+      "Herzfrequenz / Puls",
+      "Tętno / puls",
+    ],
+    [
+      "Частота дихання",
+      "Respiratory rate",
+      "Atemfrequenz",
+      "Częstość oddechów",
+    ],
+    [
+      "/хв",
+      "/min",
+      "/min",
+      "/min",
+    ],
+    [
+      "Слизові",
+      "Mucous membranes",
+      "Schleimhäute",
+      "Błony śluzowe",
+    ],
+    [
+      "Не оцінено",
+      "Not assessed",
+      "Nicht beurteilt",
+      "Nie oceniono",
+    ],
+    [
+      "Рожеві",
+      "Pink",
+      "Rosa",
+      "Różowe",
+    ],
+    [
+      "Бліді",
+      "Pale",
+      "Blass",
+      "Blade",
+    ],
+    [
+      "Гіперемовані",
+      "Hyperemic",
+      "Hyperämisch",
+      "Przekrwione",
+    ],
+    [
+      "Іктеричні",
+      "Icteric",
+      "Ikterisch",
+      "Żółtaczkowe",
+    ],
+    [
+      "Ціанотичні",
+      "Cyanotic",
+      "Zyanotisch",
+      "Sinicze",
+    ],
+    [
+      "Час наповнення капілярів",
+      "Capillary refill time",
+      "Kapilläre Rückfüllzeit",
+      "Czas wypełnienia naczyń włosowatych",
+    ],
+    [
+      "с",
+      "s",
+      "s",
+      "s",
+    ],
+    [
+      "Об’єктивний огляд",
+      "Physical examination",
+      "Klinische Untersuchung",
+      "Badanie kliniczne",
+    ],
+    [
+      "Загальний стан, положення тіла, слизові, лімфовузли, аускультація, пальпація та інші об’єктивні дані...",
+      "General condition, posture, mucous membranes, lymph nodes, auscultation, palpation and other findings...",
+      "Allgemeinzustand, Körperhaltung, Schleimhäute, Lymphknoten, Auskultation, Palpation und weitere Befunde...",
+      "Stan ogólny, pozycja ciała, błony śluzowe, węzły chłonne, osłuchiwanie, palpacja i inne wyniki...",
+    ],
+    [
+      "Ключові клінічні проблеми",
+      "Key clinical problems",
+      "Klinische Hauptprobleme",
+      "Główne problemy kliniczne",
+    ],
+    [
+      "Коротко, кожна проблема з нового рядка: гарячка, анорексія, увеїт, атаксія...",
+      "Briefly list each problem on a new line: fever, anorexia, uveitis, ataxia...",
+      "Jedes Problem kurz in einer neuen Zeile: Fieber, Anorexie, Uveitis, Ataxie...",
+      "Krótko, każdy problem w nowym wierszu: gorączka, anoreksja, zapalenie błony naczyniowej, ataksja...",
+    ],
+    [
+      "Статус діагнозу",
+      "Diagnosis status",
+      "Diagnosestatus",
+      "Status diagnozy",
+    ],
+    [
+      "Не встановлений",
+      "Not established",
+      "Nicht gestellt",
+      "Nie ustalono",
+    ],
+    [
+      "Попередній",
+      "Preliminary",
+      "Vorläufig",
+      "Wstępna",
+    ],
+    [
+      "Підтверджений",
+      "Confirmed",
+      "Bestätigt",
+      "Potwierdzona",
+    ],
+    [
+      "Діагноз",
+      "Diagnosis",
+      "Diagnose",
+      "Diagnoza",
+    ],
+    [
+      "Основний попередній або підтверджений діагноз...",
+      "Main preliminary or confirmed diagnosis...",
+      "Wichtigste vorläufige oder bestätigte Diagnose...",
+      "Główna diagnoza wstępna lub potwierdzona...",
+    ],
+    [
+      "Диференційні діагнози",
+      "Differential diagnoses",
+      "Differentialdiagnosen",
+      "Rozpoznania różnicowe",
+    ],
+    [
+      "необов’язково",
+      "optional",
+      "optional",
+      "opcjonalnie",
+    ],
+    [
+      "Основні альтернативи, які ще потрібно виключити...",
+      "Main alternatives that still need to be ruled out...",
+      "Wichtige Alternativen, die noch ausgeschlossen werden müssen...",
+      "Główne możliwości, które należy jeszcze wykluczyć...",
+    ],
+    [
+      "План діагностики",
+      "Diagnostic plan",
+      "Diagnostikplan",
+      "Plan diagnostyczny",
+    ],
+    [
+      "Аналізи, візуальна діагностика та інші дослідження...",
+      "Laboratory tests, diagnostic imaging and other examinations...",
+      "Laboruntersuchungen, bildgebende Diagnostik und weitere Untersuchungen...",
+      "Badania laboratoryjne, diagnostyka obrazowa i inne badania...",
+    ],
+    [
+      "Проведено на прийомі",
+      "Performed during the visit",
+      "Während des Besuchs durchgeführt",
+      "Wykonano podczas wizyty",
+    ],
+    [
+      "Огляд, ін’єкції, інфузії, обробки та виконані маніпуляції...",
+      "Examination, injections, infusions, treatments and performed procedures...",
+      "Untersuchung, Injektionen, Infusionen, Behandlungen und durchgeführte Maßnahmen...",
+      "Badanie, zastrzyki, infuzje, zabiegi i wykonane procedury...",
+    ],
+    [
+      "Лікування та призначення",
+      "Treatment and prescriptions",
+      "Behandlung und Verordnungen",
+      "Leczenie i zalecenia",
+    ],
+    [
+      "Препарати, дозування, шлях введення, кратність і тривалість лікування...",
+      "Medicines, dosage, route, frequency and duration of treatment...",
+      "Medikamente, Dosierung, Verabreichungsweg, Häufigkeit und Behandlungsdauer...",
+      "Leki, dawkowanie, droga podania, częstotliwość i czas leczenia...",
+    ],
+    [
+      "Комунікація з власником",
+      "Communication with the owner",
+      "Kommunikation mit dem Tierhalter",
+      "Komunikacja z właścicielem",
+    ],
+    [
+      "Пояснення стану та домашній план",
+      "Explanation of the condition and home-care plan",
+      "Erklärung des Zustands und Plan für zuhause",
+      "Wyjaśnienie stanu i plan opieki domowej",
+    ],
+    [
+      "Для виписки",
+      "For the discharge summary",
+      "Für den Entlassungsbericht",
+      "Do wypisu",
+    ],
+    [
+      "Пояснення для власника",
+      "Explanation for the owner",
+      "Erklärung für den Tierhalter",
+      "Wyjaśnienie dla właściciela",
+    ],
+    [
+      "Домашні рекомендації",
+      "Home-care recommendations",
+      "Empfehlungen für zuhause",
+      "Zalecenia domowe",
+    ],
+    [
+      "Коли звернутися терміново",
+      "When to seek urgent care",
+      "Wann dringend vorgestellt werden muss",
+      "Kiedy zgłosić się pilnie",
+    ],
+    [
+      "Контроль і повторний огляд",
+      "Follow-up and repeat examination",
+      "Kontrolle und Nachuntersuchung",
+      "Kontrola i ponowne badanie",
+    ],
+    [
+      "Надані послуги",
+      "Services provided",
+      "Erbrachte Leistungen",
+      "Wykonane usługi",
+    ],
+    [
+      "Додайте проведені процедури та консультації.",
+      "Add the procedures and consultations provided.",
+      "Fügen Sie die durchgeführten Maßnahmen und Beratungen hinzu.",
+      "Dodaj wykonane procedury i konsultacje.",
+    ],
+    [
+      "Пошук",
+      "Search",
+      "Suche",
+      "Szukaj",
+    ],
+    [
+      "Назва послуги...",
+      "Service name...",
+      "Leistungsname...",
+      "Nazwa usługi...",
+    ],
+    [
+      "Послуга",
+      "Service",
+      "Leistung",
+      "Usługa",
+    ],
+    [
+      "Оберіть послугу",
+      "Select a service",
+      "Leistung auswählen",
+      "Wybierz usługę",
+    ],
+    [
+      "Категорія та ціна",
+      "Category and price",
+      "Kategorie und Preis",
+      "Kategoria i cena",
+    ],
+    [
+      "К-сть",
+      "Qty.",
+      "Menge",
+      "Ilość",
+    ],
+    [
+      "+ Додати",
+      "+ Add",
+      "+ Hinzufügen",
+      "+ Dodaj",
+    ],
+    [
+      "Препарати та матеріали",
+      "Medicines and materials",
+      "Medikamente und Materialien",
+      "Leki i materiały",
+    ],
+    [
+      "Списання зі складу та медикаменти, використані під час прийому.",
+      "Stock write-offs and medicines used during the visit.",
+      "Lagerentnahmen und während des Besuchs verwendete Medikamente.",
+      "Rozchód z magazynu i leki wykorzystane podczas wizyty.",
+    ],
+    [
+      "Препарати",
+      "Medicines",
+      "Medikamente",
+      "Leki",
+    ],
+    [
+      "Назва препарату...",
+      "Medicine name...",
+      "Medikamentenname...",
+      "Nazwa leku...",
+    ],
+    [
+      "Препарат",
+      "Medicine",
+      "Medikament",
+      "Lek",
+    ],
+    [
+      "Підсумок візиту",
+      "Visit summary",
+      "Besuchsübersicht",
+      "Podsumowanie wizyty",
+    ],
+    [
+      "Пацієнт",
+      "Patient",
+      "Patient",
+      "Pacjent",
+    ],
+    [
+      "Дані пацієнта",
+      "Patient details",
+      "Patientendaten",
+      "Dane pacjenta",
+    ],
+    [
+      "Послуги",
+      "Services",
+      "Leistungen",
+      "Usługi",
+    ],
+    [
+      "Разом до сплати",
+      "Total due",
+      "Gesamtbetrag",
+      "Razem do zapłaty",
+    ],
+    [
+      "Статус оплати",
+      "Payment status",
+      "Zahlungsstatus",
+      "Status płatności",
+    ],
+    [
+      "Не оплачено",
+      "Unpaid",
+      "Nicht bezahlt",
+      "Nieopłacone",
+    ],
+    [
+      "Сплачено",
+      "Paid",
+      "Bezahlt",
+      "Zapłacono",
+    ],
+    [
+      "Залишилось",
+      "Remaining",
+      "Offener Betrag",
+      "Pozostało",
+    ],
+    [
+      "Чекаємо оплату",
+      "Awaiting payment",
+      "Zahlung ausstehend",
+      "Oczekiwanie na płatność",
+    ],
+    [
+      "💾 Зберегти зміни",
+      "💾 Save changes",
+      "💾 Änderungen speichern",
+      "💾 Zapisz zmiany",
+    ],
+    [
+      "✓ Завершити візит",
+      "✓ Complete visit",
+      "✓ Besuch abschließen",
+      "✓ Zakończ wizytę",
+    ],
+    [
+      "📄 Виписка для клієнта",
+      "📄 Client discharge summary",
+      "📄 Entlassungsbericht",
+      "📄 Wypis dla klienta",
+    ],
+    [
+      "Дані виписки формуються з медичної частини, послуг і препаратів.",
+      "The discharge summary is generated from the medical details, services and medicines.",
+      "Der Entlassungsbericht wird aus den medizinischen Angaben, Leistungen und Medikamenten erstellt.",
+      "Wypis jest tworzony na podstawie danych medycznych, usług i leków.",
+    ],
+    [
+      "Інтелектуальний простір поточного прийому",
+      "Intelligent workspace for the current visit",
+      "Intelligenter Arbeitsbereich für den aktuellen Besuch",
+      "Inteligentna przestrzeń bieżącej wizyty",
+    ],
+    [
+      "🎙 Оформлення",
+      "🎙 Intake",
+      "🎙 Aufnahme",
+      "🎙 Przyjęcie",
+    ],
+    [
+      "🩺 Консультант",
+      "🩺 Consultant",
+      "🩺 Assistent",
+      "🩺 Konsultant",
+    ],
+    [
+      "✦ PUG AI · Оформлення прийому",
+      "✦ PUG AI · Visit intake",
+      "✦ PUG AI · Aufnahme",
+      "✦ PUG AI · Przyjęcie pacjenta",
+    ],
+    [
+      "Опишіть прийом своїми словами. PUG AI підготує медичну картку.",
+      "Describe the visit in your own words. PUG AI will prepare the medical record.",
+      "Beschreiben Sie den Besuch mit eigenen Worten. PUG AI erstellt die Patientenakte.",
+      "Opisz wizytę własnymi słowami. PUG AI przygotuje dokumentację medyczną.",
+    ],
+    [
+      "Надиктувати прийом",
+      "Dictate visit",
+      "Besuch diktieren",
+      "Podyktuj wizytę",
+    ],
+    [
+      "Мікрофон готується",
+      "Preparing microphone",
+      "Mikrofon wird vorbereitet",
+      "Przygotowywanie mikrofonu",
+    ],
+    [
+      "або введіть короткі тези",
+      "or enter short notes",
+      "oder kurze Notizen eingeben",
+      "lub wpisz krótkie notatki",
+    ],
+    [
+      "Наприклад: зі слів власника блювання третій день, апетит знижений. Температура 39,4 °C. При пальпації живіт напружений. Підозрюю гастроентерит...",
+      "For example: According to the owner, vomiting for three days and reduced appetite. Temperature 39.4 °C. Abdomen tense on palpation. Suspected gastroenteritis...",
+      "Zum Beispiel: Laut Tierhalter seit drei Tagen Erbrechen und verminderter Appetit. Temperatur 39,4 °C. Bauch bei Palpation angespannt. Verdacht auf Gastroenteritis...",
+      "Na przykład: Według właściciela wymioty od trzech dni i zmniejszony apetyt. Temperatura 39,4 °C. Brzuch napięty przy palpacji. Podejrzenie zapalenia żołądka i jelit...",
+    ],
+    [
+      "AI нічого не збереже без підтвердження лікаря",
+      "AI will not save anything without the veterinarian’s confirmation",
+      "Ohne Bestätigung des Tierarztes speichert die KI nichts",
+      "AI nie zapisze niczego bez potwierdzenia lekarza weterynarii",
+    ],
+    [
+      "✦ Розподілити по полях",
+      "✦ Fill the fields",
+      "✦ Felder ausfüllen",
+      "✦ Uzupełnij pola",
+    ],
+    [
+      "✓ Застосувати до полів",
+      "✓ Apply to fields",
+      "✓ Auf Felder anwenden",
+      "✓ Zastosuj do pól",
+    ],
+  ];
+}
+function getVisitWorkspaceDynamicTranslationRows() {
+  return [
+    [
+      "PUG AI · Клінічний чат",
+      "PUG AI · Clinical chat",
+      "PUG AI · Klinischer Chat",
+      "PUG AI · Czat kliniczny",
+    ],
+    [
+      "Обговорюйте цей випадок разом із PUG AI. Чат пам’ятає розмову в межах поточного прийому.",
+      "Discuss this case with PUG AI. The chat remembers the conversation within the current visit.",
+      "Besprechen Sie diesen Fall mit PUG AI. Der Chat merkt sich das Gespräch innerhalb des aktuellen Besuchs.",
+      "Omów ten przypadek z PUG AI. Czat pamięta rozmowę w ramach bieżącej wizyty.",
+    ],
+    [
+      "Чат пацієнта",
+      "Patient chat",
+      "Patientenchat",
+      "Czat pacjenta",
+    ],
+    [
+      "Що я міг пропустити?",
+      "What might I have missed?",
+      "Was könnte ich übersehen haben?",
+      "Co mogłem przeoczyć?",
+    ],
+    [
+      "Диференційні діагнози",
+      "Differential diagnoses",
+      "Differentialdiagnosen",
+      "Rozpoznania różnicowe",
+    ],
+    [
+      "Перевірити лікування",
+      "Review treatment",
+      "Behandlung prüfen",
+      "Sprawdź leczenie",
+    ],
+    [
+      "Запитайте про діагностику, лікування, ризики або продовжте обговорення…",
+      "Ask about diagnostics, treatment or risks, or continue the discussion…",
+      "Fragen Sie nach Diagnostik, Behandlung oder Risiken oder setzen Sie das Gespräch fort…",
+      "Zapytaj o diagnostykę, leczenie lub ryzyko albo kontynuuj rozmowę…",
+    ],
+    [
+      "✦ Надіслати",
+      "✦ Send",
+      "✦ Senden",
+      "✦ Wyślij",
+    ],
+    [
+      "⌘/Ctrl + Enter — надіслати",
+      "⌘/Ctrl + Enter — send",
+      "⌘/Ctrl + Enter — senden",
+      "⌘/Ctrl + Enter — wyślij",
+    ],
+    [
+      "Не вдалося завантажити чат.",
+      "Could not load the chat.",
+      "Der Chat konnte nicht geladen werden.",
+      "Nie udało się wczytać czatu.",
+    ],
+    [
+      "PUG AI аналізує…",
+      "PUG AI is analyzing…",
+      "PUG AI analysiert…",
+      "PUG AI analizuje…",
+    ],
+    [
+      "Сталася помилка.",
+      "An error occurred.",
+      "Ein Fehler ist aufgetreten.",
+      "Wystąpił błąd.",
+    ],
+    [
+      "Опишіть прийом детальніше.",
+      "Describe the visit in more detail.",
+      "Beschreiben Sie den Besuch ausführlicher.",
+      "Opisz wizytę bardziej szczegółowo.",
+    ],
+    [
+      "PUG AI оформлює…",
+      "PUG AI is preparing the record…",
+      "PUG AI erstellt die Dokumentation…",
+      "PUG AI przygotowuje dokumentację…",
+    ],
+    [
+      "⛔ Інший пацієнт",
+      "⛔ Different patient",
+      "⛔ Anderer Patient",
+      "⛔ Inny pacjent",
+    ],
+    [
+      "Застосовано ✓",
+      "Applied ✓",
+      "Übernommen ✓",
+      "Zastosowano ✓",
+    ],
+    [
+      "Основні показники",
+      "Main vital signs",
+      "Wichtigste Vitalparameter",
+      "Główne parametry",
+    ],
+    [
+      "ЧСС",
+      "Heart rate",
+      "Herzfrequenz",
+      "Tętno",
+    ],
+    [
+      "уд/хв",
+      "bpm",
+      "Schläge/min",
+      "uderzeń/min",
+    ],
+    [
+      "ЧДР",
+      "Respiratory rate",
+      "Atemfrequenz",
+      "Częstość oddechów",
+    ],
+    [
+      "рухів/хв",
+      "breaths/min",
+      "Atemzüge/min",
+      "oddechów/min",
+    ],
+    [
+      "Слизові:",
+      "Mucous membranes:",
+      "Schleimhäute:",
+      "Błony śluzowe:",
+    ],
+    [
+      "КНК",
+      "CRT",
+      "KFZ",
+      "CRT",
+    ],
+    [
+      "Потрібно перевірити:",
+      "Needs review:",
+      "Zu prüfen:",
+      "Wymaga sprawdzenia:",
+    ],
+    [
+      "Дані у диктуванні не відповідають пацієнту поточного візиту.",
+      "The dictated information does not match the patient in the current visit.",
+      "Die diktierten Angaben stimmen nicht mit dem Patienten des aktuellen Besuchs überein.",
+      "Podyktowane dane nie odpowiadają pacjentowi bieżącej wizyty.",
+    ],
+    [
+      "AI-чернетку не застосовано: дані у диктуванні належать іншому пацієнту.",
+      "The AI draft was not applied because the dictated information belongs to another patient.",
+      "Der KI-Entwurf wurde nicht übernommen, da die diktierten Angaben zu einem anderen Patienten gehören.",
+      "Wersja robocza AI nie została zastosowana, ponieważ podyktowane dane dotyczą innego pacjenta.",
+    ],
+    [
+      "Цей браузер не підтримує запис голосу.",
+      "This browser does not support voice recording.",
+      "Dieser Browser unterstützt keine Sprachaufnahme.",
+      "Ta przeglądarka nie obsługuje nagrywania głosu.",
+    ],
+    [
+      "Готово до запису",
+      "Ready to record",
+      "Aufnahmebereit",
+      "Gotowe do nagrywania",
+    ],
+    [
+      "Завершуємо запис…",
+      "Finishing recording…",
+      "Aufnahme wird beendet…",
+      "Kończenie nagrywania…",
+    ],
+    [
+      "Запитуємо доступ до мікрофона…",
+      "Requesting microphone access…",
+      "Mikrofonzugriff wird angefordert…",
+      "Prośba o dostęp do mikrofonu…",
+    ],
+    [
+      "Помилка запису.",
+      "Recording error.",
+      "Aufnahmefehler.",
+      "Błąd nagrywania.",
+    ],
+    [
+      "Розпізнаємо голос…",
+      "Transcribing voice…",
+      "Sprache wird erkannt…",
+      "Rozpoznawanie głosu…",
+    ],
+    [
+      "Надсилаємо запис до PUG AI",
+      "Sending the recording to PUG AI",
+      "Aufnahme wird an PUG AI gesendet",
+      "Wysyłanie nagrania do PUG AI",
+    ],
+    [
+      "PUG AI не розпізнав текст.",
+      "PUG AI could not transcribe the recording.",
+      "PUG AI konnte die Aufnahme nicht transkribieren.",
+      "PUG AI nie rozpoznał nagrania.",
+    ],
+    [
+      "Голос розпізнано. PUG AI оформлює картку…",
+      "Voice transcribed. PUG AI is preparing the medical record…",
+      "Sprache erkannt. PUG AI erstellt die Patientenakte…",
+      "Głos rozpoznany. PUG AI przygotowuje dokumentację…",
+    ],
+    [
+      "Записати ще",
+      "Record more",
+      "Weitere Aufnahme",
+      "Nagraj ponownie",
+    ],
+    [
+      "Чернетку підготовлено. Перевірте результат.",
+      "Draft prepared. Review the result.",
+      "Entwurf erstellt. Bitte prüfen Sie das Ergebnis.",
+      "Wersja robocza jest gotowa. Sprawdź wynik.",
+    ],
+    [
+      "Голос розпізнано, але чернетку не створено.",
+      "Voice transcribed, but the draft could not be created.",
+      "Sprache erkannt, der Entwurf konnte jedoch nicht erstellt werden.",
+      "Głos rozpoznany, ale nie udało się utworzyć wersji roboczej.",
+    ],
+    [
+      "Спробувати ще",
+      "Try again",
+      "Erneut versuchen",
+      "Spróbuj ponownie",
+    ],
+    [
+      "Зупинити запис",
+      "Stop recording",
+      "Aufnahme stoppen",
+      "Zatrzymaj nagrywanie",
+    ],
+    [
+      "Йде запис",
+      "Recording",
+      "Aufnahme läuft",
+      "Nagrywanie",
+    ],
+    [
+      "Дозвольте доступ до мікрофона.",
+      "Allow microphone access.",
+      "Erlauben Sie den Mikrofonzugriff.",
+      "Zezwól na dostęp do mikrofonu.",
+    ],
+    [
+      "✓ AI-чернетку застосовано",
+      "✓ AI draft applied",
+      "✓ KI-Entwurf übernommen",
+      "✓ Zastosowano wersję roboczą AI",
+    ],
+    [
+      "Перевірте підсвічені поля. Дані ще не збережені.",
+      "Review the highlighted fields. The data has not been saved yet.",
+      "Prüfen Sie die markierten Felder. Die Daten wurden noch nicht gespeichert.",
+      "Sprawdź podświetlone pola. Dane nie zostały jeszcze zapisane.",
+    ],
+    [
+      "Скасувати AI-зміни",
+      "Undo AI changes",
+      "KI-Änderungen rückgängig machen",
+      "Cofnij zmiany AI",
+    ],
+    [
+      "AI-зміни скасовано. Початкові значення відновлено.",
+      "AI changes undone. The original values have been restored.",
+      "KI-Änderungen wurden rückgängig gemacht. Die ursprünglichen Werte wurden wiederhergestellt.",
+      "Zmiany AI zostały cofnięte. Przywrócono pierwotne wartości.",
+    ],
+    [
+      "Видалити послугу",
+      "Remove service",
+      "Leistung entfernen",
+      "Usuń usługę",
+    ],
+    [
+          
+      "Видалити препарат",
+      "Remove medicine",
+      "Medikament entfernen",
+      "Usuń lek",
+    ],
+    [
+      "Немає препаратів",
+      "No medicines available",
+      "Keine Medikamente verfügbar",
+      "Brak leków",
+    ],
+    [
+      "Послуг ще немає. Знайдіть потрібну послугу та додайте її до візиту.",
+      "No services added yet. Find a service and add it to the visit.",
+      "Noch keine Leistungen hinzugefügt. Suchen Sie eine Leistung und fügen Sie sie dem Besuch hinzu.",
+      "Nie dodano jeszcze usług. Znajdź usługę i dodaj ją do wizyty.",
+    ],
+    [
+      "Препаратів ще немає. Знайдіть позицію на складі та додайте її до візиту.",
+      "No medicines added yet. Find an inventory item and add it to the visit.",
+      "Noch keine Medikamente hinzugefügt. Suchen Sie einen Lagerartikel und fügen Sie ihn dem Besuch hinzu.",
+      "Nie dodano jeszcze leków. Znajdź pozycję w magazynie i dodaj ją do wizyty.",
+    ],
+    [
+      "Відповідь не сформовано.",
+      "No response was generated.",
+      "Es wurde keine Antwort erstellt.",
+      "Nie wygenerowano odpowiedzi.",
+    ],
+    [
+      "Низька впевненість",
+      "Low confidence",
+      "Niedrige Sicherheit",
+      "Niska pewność",
+    ],
+    [
+      "Середня впевненість",
+      "Medium confidence",
+      "Mittlere Sicherheit",
+      "Średnia pewność",
+    ],
+    [
+      "Висока впевненість",
+      "High confidence",
+      "Hohe Sicherheit",
+      "Wysoka pewność",
+    ],
+    [
+      "Першочергові дії",
+      "Priority actions",
+      "Vorrangige Maßnahmen",
+      "Działania priorytetowe",
+    ],
+    [
+      "Факти з картки",
+      "Medical record facts",
+      "Fakten aus der Patientenakte",
+      "Fakty z dokumentacji",
+    ],
+    [
+      "Клінічні міркування",
+      "Clinical considerations",
+      "Klinische Überlegungen",
+      "Rozważania kliniczne",
+    ],
+    [
+      "Що потрібно уточнити",
+      "Information to clarify",
+      "Zu klärende Informationen",
+      "Informacje do wyjaśnienia",
+    ],
+    [
+      "Важливо перевірити",
+      "Important checks",
+      "Wichtige Prüfungen",
+      "Ważne informacje do sprawdzenia",
+    ],
+    [
+      "Відповідь за",
+      "Response in",
+      "Antwort nach",
+      "Odpowiedź po",
+    ],
+    [
+      "AI нічого не змінив у медичній картці",
+      "AI did not change the medical record",
+      "Die KI hat die Patientenakte nicht verändert",
+      "AI nie zmieniło dokumentacji medycznej",
+    ],
+    [
+      "Ви",
+      "You",
+      "Sie",
+      "Ty",
+    ],
+    [
+      "Завантажуємо розмову цього прийому…",
+      "Loading the conversation for this visit…",
+      "Das Gespräch für diesen Besuch wird geladen…",
+      "Wczytywanie rozmowy z tej wizyty…",
+    ],
+    [
+      "PUG AI аналізує поточні дані пацієнта…",
+      "PUG AI is analyzing the current patient data…",
+      "PUG AI analysiert die aktuellen Patientendaten…",
+      "PUG AI analizuje aktualne dane pacjenta…",
+    ],
+    [
+      "Відповідь отримано, але історію чату не вдалося зберегти.",
+      "The response was received, but the chat history could not be saved.",
+      "Die Antwort wurde empfangen, aber der Chatverlauf konnte nicht gespeichert werden.",
+      "Otrzymano odpowiedź, ale nie udało się zapisać historii czatu.",
+    ],
+    [
+      "Аналізуємо текст лікаря та готуємо медичні поля…",
+      "Analyzing the veterinarian’s text and preparing the medical fields…",
+      "Der Text des Tierarztes wird analysiert und die medizinischen Felder werden vorbereitet…",
+      "Analizowanie tekstu lekarza i przygotowywanie pól medycznych…",
+    ],
+    [
+      "Чернетку підготовлено",
+      "Draft prepared",
+      "Entwurf erstellt",
+      "Szkic przygotowany",
+    ],
+    [
+      "⛔ Дані іншого пацієнта",
+      "⛔ Different patient’s data",
+      "⛔ Daten eines anderen Patienten",
+      "⛔ Dane innego pacjenta",
+    ],
+    [
+      "Застосування AI-чернетки заблоковано.",
+      "Applying the AI draft has been blocked.",
+      "Die Übernahme des KI-Entwurfs wurde blockiert.",
+      "Zastosowanie szkicu AI zostało zablokowane.",
+    ],
+    [
+      "Не вдалося розпізнати голос.",
+      "Could not transcribe the voice recording.",
+      "Die Sprachaufnahme konnte nicht erkannt werden.",
+      "Nie udało się rozpoznać nagrania głosowego.",
+    ],
+    [
+      "Не вдалося увімкнути мікрофон.",
+      "Could not turn on the microphone.",
+      "Das Mikrofon konnte nicht aktiviert werden.",
+      "Nie udało się włączyć mikrofonu.",
+    ],
+  ];
+}
+function getVisitWorkspaceActionTranslationRows() {
+  return [
+    [
+      "Збереження…",
+      "Saving…",
+      "Wird gespeichert…",
+      "Zapisywanie…",
+    ],
+    [
+      "💾 Зберегти",
+      "💾 Save",
+      "💾 Speichern",
+      "💾 Zapisz",
+    ],
+    [
+      "✅ Збережено",
+      "✅ Saved",
+      "✅ Gespeichert",
+      "✅ Zapisano",
+    ],
+    [
+      "Медична частина збережена.",
+      "Medical details saved.",
+      "Medizinische Angaben gespeichert.",
+      "Dane medyczne zapisano.",
+    ],
+    [
+      "Можна редагувати прямо тут. Після змін натисни “Зберегти”.",
+      "You can edit the details here. After making changes, click “Save”.",
+      "Sie können die Angaben hier bearbeiten. Klicken Sie danach auf „Speichern“.",
+      "Możesz edytować dane tutaj. Po zmianach kliknij „Zapisz”.",
+    ],
+    [
+      "Не вдалося зберегти медичну частину",
+      "Could not save the medical details.",
+      "Die medizinischen Angaben konnten nicht gespeichert werden.",
+      "Nie udało się zapisać danych medycznych.",
+    ],
+    [
+      "Не вдалося визначити візит для друку.",
+      "Could not identify the visit for printing.",
+      "Der Besuch für den Ausdruck konnte nicht ermittelt werden.",
+      "Nie udało się określić wizyty do wydruku.",
+    ],
+    [
+      "Підготовка документа…",
+      "Preparing document…",
+      "Dokument wird vorbereitet…",
+      "Przygotowywanie dokumentu…",
+    ],
+        [
+      "Браузер заблокував вікно друку",
+      "The browser blocked the print window",
+      "Der Browser hat das Druckfenster blockiert",
+      "Przeglądarka zablokowała okno drukowania",
+    ],
+    [
+      "Не вдалося підготувати виписку до друку:",
+      "Could not prepare the visit summary for printing:",
+      "Der Behandlungsbericht konnte nicht zum Drucken vorbereitet werden:",
+      "Nie udało się przygotować wypisu do wydruku:",
+    ],
+    [
+      "Виписка з амбулаторного прийому",
+      "Outpatient visit summary",
+      "Ambulanter Behandlungsbericht",
+      "Wypis z wizyty ambulatoryjnej",
+    ],
+    [
+      "✓ Візит завершено",
+      "✓ Visit completed",
+      "✓ Besuch abgeschlossen",
+      "✓ Wizyta zakończona",
+    ],
+    [
+      "Візит завершено",
+      "Visit completed",
+      "Besuch abgeschlossen",
+      "Wizyta zakończona",
+    ],
+    [
+      "Цей візит уже завершено",
+      "This visit has already been completed",
+      "Dieser Besuch wurde bereits abgeschlossen",
+      "Ta wizyta została już zakończona",
+    ],
+    [
+      "✓ Завершити візит",
+      "✓ Complete visit",
+      "✓ Besuch abschließen",
+      "✓ Zakończ wizytę",
+    ],
+    [
+      "Зберегти дані та завершити прийом",
+      "Save the data and complete the visit",
+      "Daten speichern und Besuch abschließen",
+      "Zapisz dane i zakończ wizytę",
+    ],
+    [
+      "Завершити цей візит?",
+      "Complete this visit?",
+      "Diesen Besuch abschließen?",
+      "Zakończyć tę wizytę?",
+    ],
+    [
+      "Медичні дані будуть збережені, а запис у календарі отримає статус «Завершено».",
+      "The medical details will be saved and the calendar appointment will be marked as completed.",
+      "Die medizinischen Angaben werden gespeichert und der Kalendertermin als abgeschlossen markiert.",
+      "Dane medyczne zostaną zapisane, a wizyta w kalendarzu otrzyma status zakończonej.",
+    ],
+    [
+      "Візит не знайдено.",
+      "Visit not found.",
+      "Besuch nicht gefunden.",
+      "Nie znaleziono wizyty.",
+    ],
+    [
+      "Візит уже завершено",
+      "Visit already completed",
+      "Besuch bereits abgeschlossen",
+      "Wizyta jest już zakończona",
+    ],
+    [
+      "Повторне завершення не потрібне.",
+      "The visit does not need to be completed again.",
+      "Der Besuch muss nicht erneut abgeschlossen werden.",
+      "Nie trzeba ponownie kończyć wizyty.",
+    ],
+    [
+      "Завершення…",
+      "Completing…",
+      "Wird abgeschlossen…",
+      "Kończenie…",
+    ],
+    [
+      "Не вдалося зберегти медичні дані.",
+      "Could not save the medical details.",
+      "Die medizinischen Angaben konnten nicht gespeichert werden.",
+      "Nie udało się zapisać danych medycznych.",
+    ],
+    [
+      "Медичні дані збережені, а календар оновлено.",
+      "The medical details were saved and the calendar was updated.",
+      "Die medizinischen Angaben wurden gespeichert und der Kalender aktualisiert.",
+      "Dane medyczne zapisano, a kalendarz zaktualizowano.",
+    ],
+        [
+      "Не вдалося завершити візит.",
+      "Could not complete the visit.",
+      "Der Besuch konnte nicht abgeschlossen werden.",
+      "Nie udało się zakończyć wizyty.",
+    ],
+    [
+      "Спочатку відкрий візит.",
+      "Open a visit first.",
+      "Öffnen Sie zuerst einen Besuch.",
+      "Najpierw otwórz wizytę.",
+    ],
+    [
+      "Візит не обраний",
+      "No visit selected",
+      "Kein Besuch ausgewählt",
+      "Nie wybrano wizyty",
+    ],
+    [
+      "Візит не знайдено",
+      "Visit not found",
+      "Besuch nicht gefunden",
+      "Nie znaleziono wizyty",
+    ],
+    [
+      "Не вдалося додати послугу",
+      "Could not add the service",
+      "Die Leistung konnte nicht hinzugefügt werden",
+      "Nie udało się dodać usługi",
+    ],
+    [
+      "Не вдалося прибрати послугу",
+      "Could not remove the service",
+      "Die Leistung konnte nicht entfernt werden",
+      "Nie udało się usunąć usługi",
+    ],
+    [
+      "Не вдалося додати препарат",
+      "Could not add the medicine",
+      "Das Medikament konnte nicht hinzugefügt werden",
+      "Nie udało się dodać leku",
+    ],
+    [
+      "Не вдалося прибрати препарат",
+      "Could not remove the medicine",
+      "Das Medikament konnte nicht entfernt werden",
+      "Nie udało się usunąć leku",
+    ],
+    [
+      "Помилка:",
+      "Error:",
+      "Fehler:",
+      "Błąd:",
+    ],
+    [
+      "Опишіть прийом детальніше.",
+      "Describe the visit in more detail.",
+      "Beschreiben Sie den Besuch ausführlicher.",
+      "Opisz wizytę bardziej szczegółowo.",
+    ],
+    [
+      "AI-чернетку не застосовано: дані у диктуванні належать іншому пацієнту.",
+      "The AI draft was not applied because the dictated information belongs to another patient.",
+      "Der KI-Entwurf wurde nicht übernommen, da die diktierten Angaben zu einem anderen Patienten gehören.",
+      "Szkic AI nie został zastosowany, ponieważ podyktowane dane dotyczą innego pacjenta.",
+    ],
+  ];
+}
+function getVisitWorkspaceText(
+  sourceText
+) {
+  const languageIndex =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[getInterfaceLanguage()] ?? 0;
 
+  const rows = [
+    ...getVisitWorkspaceTranslationRows(),
+    ...getVisitWorkspaceDynamicTranslationRows(),
+    ...getVisitWorkspaceActionTranslationRows(),
+  ];
+
+  const normalizedSource =
+    String(
+      sourceText || ""
+    )
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+  const row =
+    rows.find(
+      (translationRow) =>
+        translationRow.some(
+          (value) =>
+            String(
+              value || ""
+            )
+              .replace(
+                /\s+/g,
+                " "
+              )
+              .trim() ===
+            normalizedSource
+        )
+    );
+
+  return (
+    row?.[languageIndex] ??
+    row?.[0] ??
+    sourceText
+  );
+}
+let visitWorkspaceInterfaceObserver =
+  null;
+
+
+function localizeVisitWorkspaceElement(
+  root
+) {
+  if (
+    !root
+  ) {
+    return;
+  }
+
+  const languageIndex =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[getInterfaceLanguage()] ?? 0;
+
+  const translations =
+    new Map();
+
+  [
+  ...getVisitWorkspaceTranslationRows(),
+  ...getVisitWorkspaceDynamicTranslationRows(),
+  ...getVisitWorkspaceActionTranslationRows(),
+].forEach(
+      (row) => {
+        const translated =
+          row[languageIndex] ??
+          row[0];
+
+        row.forEach(
+          (sourceText) => {
+            translations.set(
+              String(sourceText)
+                .replace(
+                  /\s+/g,
+                  " "
+                )
+                .trim(),
+              translated
+            );
+          }
+        );
+      }
+    );
+
+  const translateValue =
+    (value) => {
+      const normalized =
+        String(
+          value || ""
+        )
+          .replace(
+            /\s+/g,
+            " "
+          )
+          .trim();
+
+      return (
+        translations.get(
+          normalized
+        ) ||
+        null
+      );
+    };
+
+  const translateNode =
+    (node) => {
+      if (
+        !node
+      ) {
+        return;
+      }
+
+      if (
+        node.nodeType ===
+        Node.TEXT_NODE
+      ) {
+        const currentValue =
+          String(
+            node.nodeValue ||
+            ""
+          );
+
+        const translated =
+          translateValue(
+            currentValue
+          );
+
+        if (
+          translated
+        ) {
+          const leadingSpace =
+            currentValue.match(
+              /^\s*/
+            )?.[0] || "";
+
+          const trailingSpace =
+            currentValue.match(
+              /\s*$/
+            )?.[0] || "";
+
+          const nextValue =
+            `${leadingSpace}${translated}${trailingSpace}`;
+
+          if (
+            currentValue !==
+            nextValue
+          ) {
+            node.nodeValue =
+              nextValue;
+          }
+        }
+
+        return;
+      }
+
+      if (
+        node.nodeType !==
+        Node.ELEMENT_NODE
+      ) {
+        return;
+      }
+
+      [
+        "placeholder",
+        "title",
+        "aria-label",
+      ].forEach(
+        (attribute) => {
+          if (
+            !node.hasAttribute(
+              attribute
+            )
+          ) {
+            return;
+          }
+
+          const currentValue =
+            node.getAttribute(
+              attribute
+            ) || "";
+
+          const translated =
+            translateValue(
+              currentValue
+            );
+
+          if (
+            translated &&
+            currentValue !==
+              translated
+          ) {
+            node.setAttribute(
+              attribute,
+              translated
+            );
+          }
+        }
+      );
+
+      node.childNodes.forEach(
+        (childNode) => {
+          translateNode(
+            childNode
+          );
+        }
+      );
+    };
+
+  translateNode(
+    root
+  );
+}
+
+
+function enableVisitWorkspaceLocalization() {
+  const page =
+    document.querySelector(
+      '[data-page="visit"]'
+    );
+
+  if (
+    !page
+  ) {
+    return;
+  }
+
+  localizeVisitWorkspaceElement(
+    page
+  );
+
+  if (
+    visitWorkspaceInterfaceObserver
+  ) {
+    return;
+  }
+
+  visitWorkspaceInterfaceObserver =
+    new MutationObserver(
+      (mutations) => {
+        mutations.forEach(
+          (mutation) => {
+            if (
+              mutation.type ===
+              "characterData"
+            ) {
+              localizeVisitWorkspaceElement(
+                mutation.target
+              );
+
+              return;
+            }
+
+            if (
+              mutation.type ===
+              "attributes"
+            ) {
+              localizeVisitWorkspaceElement(
+                mutation.target
+              );
+
+              return;
+            }
+
+            mutation.addedNodes.forEach(
+              (node) => {
+                localizeVisitWorkspaceElement(
+                  node
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+
+  visitWorkspaceInterfaceObserver.observe(
+    page,
+    {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: [
+        "placeholder",
+        "title",
+        "aria-label",
+      ],
+    }
+  );
+}
+
+
+if (
+  document.readyState ===
+  "loading"
+) {
+  document.addEventListener(
+    "DOMContentLoaded",
+    enableVisitWorkspaceLocalization,
+    {
+      once: true,
+    }
+  );
+} else {
+  enableVisitWorkspaceLocalization();
+}
 function mountVisitAiWorkspace(
   visitId
 ) {
@@ -77173,45 +78757,158 @@ function renderVisitPage(visit, pet) {
     visitId,
   ].join(":");
   // 1. Оновлюємо заголовки та мета-інформацію
-  const pill = document.getElementById("visitDatePill");
-  if (pill) pill.textContent = visit.date || "—";
+  const pill =
+  document.getElementById(
+    "visitDatePill"
+  );
 
-  const meta = document.getElementById("visitMeta");
-  if (meta) {
-    const parts = [];
-    if (pet?.name) parts.push(pet.name);
-    if (pet?.species) parts.push(pet.species);
-    if (pet?.breed) parts.push(pet.breed);
-    if (visit?.weight_kg) parts.push(`${visit.weight_kg} кг`);
-    meta.textContent = parts.length ? parts.join(" • ") : "—";
-  }
+if (
+  pill
+) {
+  pill.textContent =
+    visit?.date
+      ? formatCalendarDate(
+          visit.date,
+          {
+            day:
+              "2-digit",
 
-  const summaryPatientName =
-  document.getElementById("visitSummaryPatientName");
+            month:
+              "2-digit",
 
-if (summaryPatientName) {
-  summaryPatientName.textContent =
-    pet?.name || "Пацієнт";
+            year:
+              "numeric",
+          }
+        )
+      : "—";
 }
 
+
+const patientName =
+  String(
+    pet?.name ||
+    ""
+  ).trim() ||
+  getVisitWorkspaceText(
+    "Пацієнт"
+  );
+
+
+const patientSpecies =
+  pet?.species
+    ? (
+        typeof speciesLabel ===
+        "function"
+          ? speciesLabel(
+              pet.species
+            )
+          : String(
+              pet.species
+            )
+      )
+    : "";
+
+
+const patientBreed =
+  pet?.breed
+    ? (
+        typeof getCalendarBreedLabel ===
+        "function"
+          ? getCalendarBreedLabel(
+              pet.breed
+            )
+          : String(
+              pet.breed
+            )
+      )
+    : "";
+
+
+const visitWeight =
+  visit?.weight_kg ??
+  pet?.weight_kg ??
+  pet?.weight ??
+  "";
+
+
+const meta =
+  document.getElementById(
+    "visitMeta"
+  );
+
+if (
+  meta
+) {
+  const parts = [
+    patientName,
+    patientSpecies,
+    patientBreed,
+    visitWeight !== ""
+      ? `${
+          Number(
+            visitWeight
+          ).toLocaleString(
+            getCalendarLocale(),
+            {
+              maximumFractionDigits:
+                3,
+            }
+          )
+        } ${
+          getVisitWorkspaceText(
+            "кг"
+          )
+        }`
+      : "",
+  ].filter(
+    Boolean
+  );
+
+  meta.textContent =
+    parts.length
+      ? parts.join(
+          " • "
+        )
+      : "—";
+}
+
+
+const summaryPatientName =
+  document.getElementById(
+    "visitSummaryPatientName"
+  );
+
+if (
+  summaryPatientName
+) {
+  summaryPatientName.textContent =
+    patientName;
+}
+
+
 const summaryPatientMeta =
-  document.getElementById("visitSummaryPatientMeta");
+  document.getElementById(
+    "visitSummaryPatientMeta"
+  );
 
-if (summaryPatientMeta) {
-  const parts = [];
-
-  if (pet?.species) {
-    parts.push(pet.species);
-  }
-
-  if (pet?.breed) {
-    parts.push(pet.breed);
-  }
+if (
+  summaryPatientMeta
+) {
+  const parts = [
+    patientSpecies,
+    patientBreed,
+  ].filter(
+    Boolean
+  );
 
   summaryPatientMeta.textContent =
     parts.length
-      ? parts.join(" • ")
-      : "Дані пацієнта";
+      ? parts.join(
+          " • "
+        )
+      : getVisitWorkspaceText(
+          "Дані пацієнта"
+        );
 }
 
 const weightInput =
@@ -79096,11 +80793,14 @@ updateAiStructureControls();
         ).trim();
 
       if (doctorDraft.length < 10) {
-        alert(
-          "Опишіть прийом детальніше."
-        );
-        return;
-      }
+  alert(
+    getVisitWorkspaceText(
+      "Опишіть прийом детальніше."
+    )
+  );
+
+  return;
+}
 
       const originalButtonText =
         visitAiStructureButton
@@ -79711,15 +81411,15 @@ if (visitAiApplyButton) {
             "mismatch";
 
       if (patientMismatch) {
-        alert(
-          "AI-чернетку не застосовано: "
-          + "дані у диктуванні належать "
-          + "іншому пацієнту."
-        );
+  alert(
+    getVisitWorkspaceText(
+      "AI-чернетку не застосовано: дані у диктуванні належать іншому пацієнту."
+    )
+  );
 
-        updateAiStructureControls();
-        return;
-      }
+  updateAiStructureControls();
+  return;
+}
 
       const candidateFields = [
         {
@@ -80907,11 +82607,14 @@ if (btnPdf) {
       "";
 
     if (!visitId) {
-      alert(
-        "Не вдалося визначити візит для друку."
-      );
-      return;
-    }
+  alert(
+    getVisitWorkspaceText(
+      "Не вдалося визначити візит для друку."
+    )
+  );
+
+  return;
+}
 
     const originalText =
       btnPdf.textContent;
@@ -81193,18 +82896,23 @@ printWindow.document.close();
       );
 
       alert(
-        "Не вдалося підготувати виписку до друку: " +
-        (
-          error?.message ||
-          error
-        )
-      );
-    } finally {
-      btnPdf.disabled = false;
-      btnPdf.textContent =
-        originalText;
-    }
-  };
+  getVisitWorkspaceText(
+    "Не вдалося підготувати виписку до друку:"
+  ) +
+  " " +
+  (
+    error?.message ||
+    error
+  )
+);
+} finally {
+  btnPdf.disabled =
+    false;
+
+  btnPdf.textContent =
+    originalText;
+}
+};
 }
 
 const completeButton =
@@ -81214,25 +82922,25 @@ const completeButton =
 
 if (completeButton) {
   const visitIsCompleted =
-  Boolean(
-    visit?.completed_at ||
-    visit?.closed_by
-  ) ||
-  [
-    "completed",
-    "done",
-    "finished",
-  ].includes(
-    String(
-      visit?.status ||
-      visit?.calendar_status ||
-      ""
-    )
-      .trim()
-      .toLowerCase()
-  );
+    Boolean(
+      visit?.completed_at ||
+      visit?.closed_by
+    ) ||
+    [
+      "completed",
+      "done",
+      "finished",
+    ].includes(
+      String(
+        visit?.status ||
+        visit?.calendar_status ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+    );
 
-  if (visitIsCompleted) {
+   if (visitIsCompleted) {
     completeButton.disabled =
       true;
 
@@ -81240,19 +82948,26 @@ if (completeButton) {
       null;
 
     completeButton.textContent =
-      "✓ Візит завершено";
+      getVisitWorkspaceText(
+        "✓ Візит завершено"
+      );
 
     completeButton.title =
       visit?.completed_at
         ? (
-            "Візит завершено " +
+            getVisitWorkspaceText(
+              "Візит завершено"
+            ) +
+            " " +
             new Date(
               visit.completed_at
             ).toLocaleString(
-              "uk-UA"
+              getCalendarLocale()
             )
           )
-        : "Цей візит уже завершено";
+        : getVisitWorkspaceText(
+            "Цей візит уже завершено"
+          );
 
     completeButton.classList.add(
       "is-completed"
@@ -81268,10 +82983,14 @@ if (completeButton) {
     false;
 
   completeButton.textContent =
-    "✓ Завершити візит";
+    getVisitWorkspaceText(
+      "✓ Завершити візит"
+    );
 
   completeButton.title =
-    "Зберегти дані та завершити прийом";
+    getVisitWorkspaceText(
+      "Зберегти дані та завершити прийом"
+    );
 
   completeButton.classList.remove(
     "is-completed"
@@ -81308,10 +83027,11 @@ if (completeButton) {
 
             return;
           }
-          const calendarEvents =
-  await loadCalendarApi();
 
-const linkedCalendarEvent =
+          const calendarEvents =
+            await loadCalendarApi();
+
+          const linkedCalendarEvent =
   (
     Array.isArray(
       calendarEvents
@@ -82768,7 +84488,11 @@ function initDischargeModalUI() {
       setDischarge(vid, form);
 
       const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-      if (!current) return alert("Візит не знайдено");
+      if (!current) return alert(
+  getVisitWorkspaceText(
+    "Візит не знайдено"
+  )
+);
 
       const payload = {
         pet_id: current.pet_id,
