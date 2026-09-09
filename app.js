@@ -74755,9 +74755,51 @@ async function openVisitServicePicker() {
     </section>
   `;
 
-  document.body.appendChild(
+    document.body.appendChild(
     modal
   );
+
+  const visitServicePickerLocalizationObserver =
+    typeof MutationObserver ===
+    "function"
+      ? new MutationObserver(
+          () => {
+            if (
+              typeof localizeVisitWorkspaceElement ===
+              "function"
+            ) {
+              localizeVisitWorkspaceElement(
+                modal
+              );
+            }
+          }
+        )
+      : null;
+
+  if (
+    typeof localizeVisitWorkspaceElement ===
+    "function"
+  ) {
+    localizeVisitWorkspaceElement(
+      modal
+    );
+  }
+
+  visitServicePickerLocalizationObserver
+    ?.observe(
+      modal,
+      {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: [
+          "placeholder",
+          "title",
+          "aria-label",
+        ],
+      }
+    );
 
   let selectedCategory = "all";
   let searchQuery = "";
@@ -74951,23 +74993,26 @@ async function openVisitServicePicker() {
               </div>
 
               <div class="visitServicePickerCardPrice">
-                <strong>
-                  ${Number(
-                    service.price || 0
-                  ).toLocaleString(
-                    "uk-UA"
-                  )}
-                </strong>
+  <strong>
+    ${Number(
+      service.price || 0
+    ).toLocaleString(
+      getCalendarLocale()
+    )}
+  </strong>
 
-                <span>грн</span>
-              </div>
+  <span>грн</span>
+</div>
             </button>
           `;
         })
         .join("");
   };
 
-  const closeModal = () => {
+    const closeModal = () => {
+    visitServicePickerLocalizationObserver
+      ?.disconnect();
+
     modal.remove();
   };
 
@@ -77960,11 +78005,59 @@ function getVisitWorkspaceDynamicTranslationRows() {
       "Die Sprachaufnahme konnte nicht erkannt werden.",
       "Nie udało się rozpoznać nagrania głosowego.",
     ],
-    [
+        [
       "Не вдалося увімкнути мікрофон.",
       "Could not turn on the microphone.",
       "Das Mikrofon konnte nicht aktiviert werden.",
       "Nie udało się włączyć mikrofonu.",
+    ],
+    [
+      "КАТАЛОГ ПОСЛУГ",
+      "SERVICE CATALOG",
+      "LEISTUNGSKATALOG",
+      "KATALOG USŁUG",
+    ],
+    [
+      "Знайдіть потрібну процедуру та додайте її до візиту.",
+      "Find the required procedure and add it to the visit.",
+      "Suchen Sie die gewünschte Leistung und fügen Sie sie dem Besuch hinzu.",
+      "Znajdź potrzebną procedurę i dodaj ją do wizyty.",
+    ],
+    [
+      "Назва або категорія...",
+      "Name or category...",
+      "Name oder Kategorie...",
+      "Nazwa lub kategoria...",
+    ],
+    [
+      "Усі",
+      "All",
+      "Alle",
+      "Wszystkie",
+    ],
+    [
+      "Інше",
+      "Other",
+      "Sonstiges",
+      "Inne",
+    ],
+    [
+      "Послуг не знайдено",
+      "No services found",
+      "Keine Leistungen gefunden",
+      "Nie znaleziono usług",
+    ],
+    [
+      "Змініть пошук або категорію.",
+      "Change the search or category.",
+      "Ändern Sie die Suche oder Kategorie.",
+      "Zmień wyszukiwanie lub kategorię.",
+    ],
+    [
+      "грн",
+      "UAH",
+      "UAH",
+      "UAH",
     ],
   ];
 }
