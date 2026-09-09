@@ -15761,7 +15761,643 @@ function getServiceCategories(
   );
 }
 
+const SERVICES_INTERFACE_TEXT = {
+  "Завантаження каталогу…": {
+    en: "Loading catalog…",
+    de: "Katalog wird geladen…",
+    pl: "Ładowanie katalogu…",
+  },
 
+  "КАТАЛОГ КЛІНІКИ": {
+    en: "CLINIC CATALOG",
+    de: "KLINIKKATALOG",
+    pl: "KATALOG KLINIKI",
+  },
+
+  "Послуги та ціни": {
+    en: "Services and prices",
+    de: "Leistungen und Preise",
+    pl: "Usługi i ceny",
+  },
+
+  "Керуйте прайсом клініки, категоріями та доступністю послуг у візитах.": {
+    en: "Manage the clinic price list, categories and service availability during visits.",
+    de: "Verwalten Sie die Preisliste, Kategorien und Verfügbarkeit der Leistungen bei Terminen.",
+    pl: "Zarządzaj cennikiem kliniki, kategoriami i dostępnością usług podczas wizyt.",
+  },
+
+  "Додати послугу": {
+    en: "Add service",
+    de: "Leistung hinzufügen",
+    pl: "Dodaj usługę",
+  },
+
+  "Усього послуг": {
+    en: "Total services",
+    de: "Leistungen insgesamt",
+    pl: "Wszystkie usługi",
+  },
+
+  "у каталозі клініки": {
+    en: "in the clinic catalog",
+    de: "im Klinikkatalog",
+    pl: "w katalogu kliniki",
+  },
+
+  "Активні": {
+    en: "Active",
+    de: "Aktiv",
+    pl: "Aktywne",
+  },
+
+  "доступні у візитах": {
+    en: "available during visits",
+    de: "bei Terminen verfügbar",
+    pl: "dostępne podczas wizyt",
+  },
+
+  "Категорії": {
+    en: "Categories",
+    de: "Kategorien",
+    pl: "Kategorie",
+  },
+
+  "напрямів клініки": {
+    en: "clinic categories",
+    de: "Klinikbereiche",
+    pl: "kategorii kliniki",
+  },
+
+  "Середня ціна": {
+    en: "Average price",
+    de: "Durchschnittspreis",
+    pl: "Średnia cena",
+  },
+
+  "серед послуг з ціною": {
+    en: "among priced services",
+    de: "bei Leistungen mit Preis",
+    pl: "wśród usług z ceną",
+  },
+
+  "Пошук послуги або категорії...": {
+    en: "Search service or category...",
+    de: "Leistung oder Kategorie suchen...",
+    pl: "Szukaj usługi lub kategorii...",
+  },
+
+  "Усі": {
+    en: "All",
+    de: "Alle",
+    pl: "Wszystkie",
+  },
+
+  "Вимкнені": {
+    en: "Disabled",
+    de: "Deaktiviert",
+    pl: "Wyłączone",
+  },
+
+  "Усі категорії": {
+    en: "All categories",
+    de: "Alle Kategorien",
+    pl: "Wszystkie kategorie",
+  },
+
+  "Послуг не знайдено": {
+    en: "No services found",
+    de: "Keine Leistungen gefunden",
+    pl: "Nie znaleziono usług",
+  },
+
+  "Змініть фільтр або пошуковий запит.": {
+    en: "Change the filter or search query.",
+    de: "Ändern Sie den Filter oder die Suchanfrage.",
+    pl: "Zmień filtr lub wyszukiwane hasło.",
+  },
+
+  "Вимкнути послугу": {
+    en: "Disable service",
+    de: "Leistung deaktivieren",
+    pl: "Wyłącz usługę",
+  },
+
+  "Увімкнути послугу": {
+    en: "Enable service",
+    de: "Leistung aktivieren",
+    pl: "Włącz usługę",
+  },
+
+  "Активна": {
+    en: "Active",
+    de: "Aktiv",
+    pl: "Aktywna",
+  },
+
+  "Вимкнена": {
+    en: "Disabled",
+    de: "Deaktiviert",
+    pl: "Wyłączona",
+  },
+
+  "Редагувати": {
+    en: "Edit",
+    de: "Bearbeiten",
+    pl: "Edytuj",
+  },
+
+  "Видалити": {
+    en: "Delete",
+    de: "Löschen",
+    pl: "Usuń",
+  },
+
+  "Послуга": {
+    en: "Service",
+    de: "Leistung",
+    pl: "Usługa",
+  },
+
+  "Терапія": {
+    en: "Therapy",
+    de: "Therapie",
+    pl: "Terapia",
+  },
+
+  "Аналізи": {
+    en: "Laboratory tests",
+    de: "Laboruntersuchungen",
+    pl: "Badania laboratoryjne",
+  },
+
+  "Хірургія": {
+    en: "Surgery",
+    de: "Chirurgie",
+    pl: "Chirurgia",
+  },
+
+  "Діагностика": {
+    en: "Diagnostics",
+    de: "Diagnostik",
+    pl: "Diagnostyka",
+  },
+
+  "Вакцинація": {
+    en: "Vaccination",
+    de: "Impfungen",
+    pl: "Szczepienia",
+  },
+
+  "Стоматологія": {
+    en: "Dentistry",
+    de: "Zahnmedizin",
+    pl: "Stomatologia",
+  },
+
+  "Стаціонар": {
+    en: "Hospital",
+    de: "Station",
+    pl: "Szpital",
+  },
+
+  "Виїзд": {
+    en: "Home visit",
+    de: "Hausbesuch",
+    pl: "Wizyta domowa",
+  },
+
+  "Інше": {
+    en: "Other",
+    de: "Sonstiges",
+    pl: "Inne",
+  },
+
+  "РЕДАГУВАННЯ ПОСЛУГИ": {
+    en: "EDIT SERVICE",
+    de: "LEISTUNG BEARBEITEN",
+    pl: "EDYCJA USŁUGI",
+  },
+
+  "НОВА ПОСЛУГА": {
+    en: "NEW SERVICE",
+    de: "NEUE LEISTUNG",
+    pl: "NOWA USŁUGA",
+  },
+
+  "Оновити послугу": {
+    en: "Update service",
+    de: "Leistung aktualisieren",
+    pl: "Zaktualizuj usługę",
+  },
+
+  "Додати у каталог": {
+    en: "Add to catalog",
+    de: "Zum Katalog hinzufügen",
+    pl: "Dodaj do katalogu",
+  },
+
+  "Назва, категорія та ціна будуть доступні під час створення візиту.": {
+    en: "The name, category and price will be available when creating a visit.",
+    de: "Name, Kategorie und Preis stehen beim Erstellen eines Termins zur Verfügung.",
+    pl: "Nazwa, kategoria i cena będą dostępne podczas tworzenia wizyty.",
+  },
+
+  "Назва послуги": {
+    en: "Service name",
+    de: "Name der Leistung",
+    pl: "Nazwa usługi",
+  },
+
+  "Наприклад, Первинний огляд": {
+    en: "For example, Initial examination",
+    de: "Zum Beispiel Erstuntersuchung",
+    pl: "Na przykład Badanie wstępne",
+  },
+
+  "Категорія": {
+    en: "Category",
+    de: "Kategorie",
+    pl: "Kategoria",
+  },
+
+  "Ціна, грн": {
+    en: "Price, UAH",
+    de: "Preis, UAH",
+    pl: "Cena, UAH",
+  },
+
+  "грн": {
+    en: "UAH",
+    de: "UAH",
+    pl: "UAH",
+  },
+
+  "Активна послуга": {
+    en: "Active service",
+    de: "Aktive Leistung",
+    pl: "Aktywna usługa",
+  },
+
+  "Доступна для додавання у візит": {
+    en: "Available for adding to a visit",
+    de: "Kann zu einem Termin hinzugefügt werden",
+    pl: "Dostępna do dodania do wizyty",
+  },
+
+  "Попередній перегляд": {
+    en: "Preview",
+    de: "Vorschau",
+    pl: "Podgląd",
+  },
+
+  "Скасувати": {
+    en: "Cancel",
+    de: "Abbrechen",
+    pl: "Anuluj",
+  },
+
+  "Зберегти зміни": {
+    en: "Save changes",
+    de: "Änderungen speichern",
+    pl: "Zapisz zmiany",
+  },
+
+  "Збереження…": {
+    en: "Saving…",
+    de: "Wird gespeichert…",
+    pl: "Zapisywanie…",
+  },
+
+  "Вкажіть назву послуги.": {
+    en: "Enter the service name.",
+    de: "Geben Sie den Namen der Leistung ein.",
+    pl: "Podaj nazwę usługi.",
+  },
+
+  "Не вдалося зберегти послугу.": {
+    en: "Could not save the service.",
+    de: "Die Leistung konnte nicht gespeichert werden.",
+    pl: "Nie udało się zapisać usługi.",
+  },
+
+  "Не вдалося видалити послугу.": {
+    en: "Could not delete the service.",
+    de: "Die Leistung konnte nicht gelöscht werden.",
+    pl: "Nie udało się usunąć usługi.",
+  },
+
+  "Не вдалося змінити статус послуги.": {
+    en: "Could not change the service status.",
+    de: "Der Status der Leistung konnte nicht geändert werden.",
+    pl: "Nie udało się zmienić statusu usługi.",
+  },
+
+  "ВИДАЛЕННЯ ПОСЛУГИ": {
+    en: "DELETE SERVICE",
+    de: "LEISTUNG LÖSCHEN",
+    pl: "USUWANIE USŁUGI",
+  },
+
+  "Видалити послугу?": {
+    en: "Delete this service?",
+    de: "Diese Leistung löschen?",
+    pl: "Usunąć tę usługę?",
+  },
+
+  "Послуга більше не буде доступна у каталозі клініки.": {
+    en: "The service will no longer be available in the clinic catalog.",
+    de: "Die Leistung ist anschließend nicht mehr im Klinikkatalog verfügbar.",
+    pl: "Usługa nie będzie już dostępna w katalogu kliniki.",
+  },
+};
+
+
+function normalizeServicesInterfaceText(
+  value
+) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+function getServicesInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const normalizedSource =
+    normalizeServicesInterfaceText(
+      sourceText
+    );
+
+  const entry =
+    Object.entries(
+      SERVICES_INTERFACE_TEXT
+    ).find(
+      ([ukrainian, translations]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeServicesInterfaceText(
+              value
+            ) === normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText || ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+
+
+function getLocalizedServiceCategory(
+  category
+) {
+  return getServicesInterfaceText(
+    String(
+      category ||
+      "Інше"
+    )
+  );
+}
+
+
+function getServicesCountText(
+  count
+) {
+  const value =
+    Math.max(
+      0,
+      Number(count || 0)
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "service"
+      : "services";
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? "Leistung"
+      : "Leistungen";
+  }
+
+  if (language === "pl") {
+    const lastDigit =
+      value % 10;
+
+    const lastTwoDigits =
+      value % 100;
+
+    if (value === 1) {
+      return "usługa";
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      !(
+        lastTwoDigits >= 12 &&
+        lastTwoDigits <= 14
+      )
+    ) {
+      return "usługi";
+    }
+
+    return "usług";
+  }
+
+  const lastDigit =
+    value % 10;
+
+  const lastTwoDigits =
+    value % 100;
+
+  if (
+    lastDigit === 1 &&
+    lastTwoDigits !== 11
+  ) {
+    return "послуга";
+  }
+
+  if (
+    lastDigit >= 2 &&
+    lastDigit <= 4 &&
+    !(
+      lastTwoDigits >= 12 &&
+      lastTwoDigits <= 14
+    )
+  ) {
+    return "послуги";
+  }
+
+  return "послуг";
+}
+
+
+function showServicesAlert(
+  message
+) {
+  alert(
+    getServicesInterfaceText(
+      message
+    )
+  );
+}
+
+
+function localizeServicesElement(
+  root
+) {
+  if (!root) return;
+
+  const walker =
+    document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT
+    );
+
+  const textNodes = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  textNodes.forEach(
+    (node) => {
+      const parentElement =
+        node.parentElement;
+
+      if (
+        parentElement?.closest?.(
+          [
+            ".servicesPremiumCard h3",
+            "#serviceEditorPreviewName",
+            ".serviceDeleteService strong",
+            "[data-services-content]",
+          ].join(",")
+        )
+      ) {
+        return;
+      }
+
+      const currentText =
+        node.nodeValue || "";
+
+const normalized =
+  normalizeServicesInterfaceText(
+    currentText
+  );
+
+      if (!normalized) return;
+
+      const translated =
+        getServicesInterfaceText(
+          normalized
+        );
+
+      if (
+        translated === normalized
+      ) {
+        return;
+      }
+
+      const leadingSpace =
+        currentText.match(
+          /^\s*/
+        )?.[0] || "";
+
+      const trailingSpace =
+        currentText.match(
+          /\s*$/
+        )?.[0] || "";
+
+      node.nodeValue =
+        leadingSpace +
+        translated +
+        trailingSpace;
+    }
+  );
+
+  const elements = [
+    root,
+    ...root.querySelectorAll("*"),
+  ];
+
+  elements.forEach(
+    (element) => {
+      if (
+        element?.closest?.(
+          "[data-services-content]"
+        )
+      ) {
+        return;
+      }
+
+      [
+        "placeholder",
+        "title",
+        "aria-label",
+      ].forEach(
+        (attribute) => {
+          if (
+            !element?.hasAttribute?.(
+              attribute
+            )
+          ) {
+            return;
+          }
+
+          const currentValue =
+            element.getAttribute(
+              attribute
+            ) || "";
+
+          const translatedValue =
+            getServicesInterfaceText(
+              currentValue
+            );
+
+          if (
+            translatedValue !==
+            currentValue
+          ) {
+            element.setAttribute(
+              attribute,
+              translatedValue
+            );
+          }
+        }
+      );
+    }
+  );
+}
 async function renderServicesTab() {
   const page =
     document.querySelector(
@@ -15776,14 +16412,19 @@ async function renderServicesTab() {
       : [];
 
   if (!services.length) {
-    page.innerHTML = `
+        page.innerHTML = `
       <div class="servicesPremiumLoading">
         <div></div>
+
         <strong>
           Завантаження каталогу…
         </strong>
       </div>
     `;
+
+    localizeServicesElement(
+      page
+    );
 
     services =
       await loadServicesApi();
@@ -15919,14 +16560,14 @@ async function renderServicesTab() {
           </small>
         </div>
 
-        <div class="servicesPremiumStat servicesPremiumStatPrice">
+               <div class="servicesPremiumStat servicesPremiumStatPrice">
           <span>
             Середня ціна
           </span>
 
           <strong>
             ${averagePrice.toLocaleString(
-              "uk-UA"
+              getCalendarLocale()
             )}
             ₴
           </strong>
@@ -16056,12 +16697,40 @@ async function renderServicesTab() {
     </div>
   `;
 
+    page
+    ._servicesLocalizationObserver
+    ?.disconnect();
+
+  localizeServicesElement(
+    page
+  );
+
+  const servicesLocalizationObserver =
+    new MutationObserver(
+      () => {
+        localizeServicesElement(
+          page
+        );
+      }
+    );
+
+  servicesLocalizationObserver.observe(
+    page,
+    {
+      childList: true,
+      subtree: true,
+    }
+  );
+
+  page._servicesLocalizationObserver =
+    servicesLocalizationObserver;
+
   const grid =
     page.querySelector(
       "#servicesPremiumGrid"
-    );
+    );  
 
-  const renderServiceCards = () => {
+   const renderServiceCards = () => {
     if (!grid) return;
 
     const query =
@@ -16084,62 +16753,75 @@ async function renderServicesTab() {
       );
 
     const filtered =
-      services.filter((service) => {
-        const serviceCategory =
-          String(
-            service.cat ||
-            "Інше"
+      services.filter(
+        (service) => {
+          const serviceCategory =
+            String(
+              service.cat ||
+              "Інше"
+            );
+
+          const localizedCategory =
+            getLocalizedServiceCategory(
+              serviceCategory
+            );
+
+          const matchesQuery =
+            !query ||
+            [
+              service.name,
+              serviceCategory,
+              localizedCategory,
+              service.price,
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(query);
+
+          const matchesCategory =
+            category === "all" ||
+            serviceCategory ===
+              category;
+
+          const isActive =
+            service.active !== false;
+
+          const matchesStatus =
+            status === "all" ||
+            (
+              status === "active" &&
+              isActive
+            ) ||
+            (
+              status === "inactive" &&
+              !isActive
+            );
+
+          return (
+            matchesQuery &&
+            matchesCategory &&
+            matchesStatus
           );
-
-        const matchesQuery =
-          !query ||
-          [
-            service.name,
-            serviceCategory,
-            service.price,
-          ]
-            .join(" ")
-            .toLowerCase()
-            .includes(query);
-
-        const matchesCategory =
-          category === "all" ||
-          serviceCategory ===
-            category;
-
-        const isActive =
-          service.active !== false;
-
-        const matchesStatus =
-          status === "all" ||
-          (
-            status === "active" &&
-            isActive
-          ) ||
-          (
-            status === "inactive" &&
-            !isActive
-          );
-
-        return (
-          matchesQuery &&
-          matchesCategory &&
-          matchesStatus
-        );
-      });
+        }
+      );
 
     if (!filtered.length) {
       grid.innerHTML = `
         <div class="servicesPremiumEmpty">
-          <div>🔍</div>
+          <div>
+            🔍
+          </div>
 
           <h3>
-            Послуг не знайдено
+            ${getServicesInterfaceText(
+              "Послуг не знайдено"
+            )}
           </h3>
 
           <p>
-            Змініть фільтр або
-            пошуковий запит.
+            ${getServicesInterfaceText(
+              "Змініть фільтр або пошуковий запит."
+            )}
           </p>
         </div>
       `;
@@ -16149,18 +16831,29 @@ async function renderServicesTab() {
 
     const grouped =
       filtered.reduce(
-        (result, service) => {
+        (
+          result,
+          service
+        ) => {
           const categoryName =
             String(
               service.cat ||
               "Інше"
             );
 
-          if (!result[categoryName]) {
-            result[categoryName] = [];
+          if (
+            !result[
+              categoryName
+            ]
+          ) {
+            result[
+              categoryName
+            ] = [];
           }
 
-          result[categoryName].push(
+          result[
+            categoryName
+          ].push(
             service
           );
 
@@ -16176,192 +16869,230 @@ async function renderServicesTab() {
 
     grid.innerHTML =
       groupNames
-        .map((categoryName) => {
-          const categoryServices =
-            grouped[categoryName] || [];
+        .map(
+          (categoryName) => {
+            const categoryServices =
+              grouped[
+                categoryName
+              ] || [];
 
-          const categoryColor =
-            getServiceCategoryColor(
-              categoryName
-            );
+            const categoryColor =
+              getServiceCategoryColor(
+                categoryName
+              );
 
-          return `
-            <section
-              class="servicesPremiumGroup"
-              style="--service-category-color:${escapeHtml(
-                categoryColor
-              )}"
-            >
-              <div class="servicesPremiumGroupHead">
-                <div class="servicesPremiumGroupTitle">
-                  <span>
-                    ${getServiceCategoryIcon(
-                      categoryName
-                    )}
-                  </span>
-
-                  <div>
-                    <h2>
-                      ${escapeHtml(
+            return `
+              <section
+                class="servicesPremiumGroup"
+                style="--service-category-color:${escapeHtml(
+                  categoryColor
+                )}"
+              >
+                <div class="servicesPremiumGroupHead">
+                  <div class="servicesPremiumGroupTitle">
+                    <span>
+                      ${getServiceCategoryIcon(
                         categoryName
                       )}
-                    </h2>
+                    </span>
 
-                    <p>
-                      ${categoryServices.length}
-                      ${
-                        categoryServices.length ===
-                        1
-                          ? "послуга"
-                          : "послуг"
-                      }
-                    </p>
+                    <div>
+                      <h2>
+                        ${escapeHtml(
+                          getLocalizedServiceCategory(
+                            categoryName
+                          )
+                        )}
+                      </h2>
+
+                      <p>
+                        ${categoryServices.length}
+                        ${getServicesCountText(
+                          categoryServices.length
+                        )}
+                      </p>
+                    </div>
                   </div>
+
+                  <div class="servicesPremiumGroupLine"></div>
                 </div>
 
-                <div class="servicesPremiumGroupLine"></div>
-              </div>
+                <div class="servicesPremiumCards">
+                  ${categoryServices
+                    .map(
+                      (service) => {
+                        const isActive =
+                          service.active !==
+                          false;
 
-              <div class="servicesPremiumCards">
-                ${categoryServices
-                  .map((service) => {
-                    const isActive =
-                      service.active !== false;
+                        const price =
+                          Number(
+                            service.price ||
+                            0
+                          );
 
-                    const price =
-                      Number(
-                        service.price || 0
-                      );
-
-                    return `
-                      <article
-                        class="servicesPremiumCard ${
-                          isActive
-                            ? ""
-                            : "inactive"
-                        }"
-                        data-service-card="${escapeHtml(
+                        const serviceCategory =
                           String(
-                            service.id
-                          )
-                        )}"
-                      >
-                        <div class="servicesPremiumCardTop">
-                          <div class="servicesPremiumCardIcon">
-                            ${getServiceCategoryIcon(
-                              service.cat
-                            )}
-                          </div>
+                            service.cat ||
+                            "Інше"
+                          );
 
-                          <label
-                            class="servicesPremiumSwitch"
-                            title="${
-                              isActive
-                                ? "Вимкнути послугу"
-                                : "Увімкнути послугу"
-                            }"
-                          >
-                            <input
-                              type="checkbox"
-                              ${
-                                isActive
-                                  ? "checked"
-                                  : ""
-                              }
-                              data-service-toggle="${escapeHtml(
-                                String(
-                                  service.id
-                                )
-                              )}"
-                            >
-
-                            <span></span>
-                          </label>
-                        </div>
-
-                        <div class="servicesPremiumCardBody">
-                          <div class="servicesPremiumCardCategory">
-                            ${escapeHtml(
-                              service.cat ||
-                              "Інше"
-                            )}
-                          </div>
-
-                          <h3>
-                            ${escapeHtml(
-                              service.name ||
+                        const serviceName =
+                          String(
+                            service.name ||
+                            getServicesInterfaceText(
                               "Послуга"
-                            )}
-                          </h3>
+                            )
+                          );
 
-                          <div class="servicesPremiumCardPrice">
-                            <strong>
-                              ${price.toLocaleString(
-                                "uk-UA"
-                              )}
-                            </strong>
-
-                            <span>
-                              грн
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="servicesPremiumCardFooter">
-                          <span
-                            class="servicesPremiumCardStatus ${
+                        return `
+                          <article
+                            class="servicesPremiumCard ${
                               isActive
-                                ? "active"
+                                ? ""
                                 : "inactive"
                             }"
+                            data-service-card="${escapeHtml(
+                              String(
+                                service.id
+                              )
+                            )}"
                           >
-                            <i></i>
+                            <div class="servicesPremiumCardTop">
+                              <div class="servicesPremiumCardIcon">
+                                ${getServiceCategoryIcon(
+                                  serviceCategory
+                                )}
+                              </div>
 
-                            ${
-                              isActive
-                                ? "Активна"
-                                : "Вимкнена"
-                            }
-                          </span>
+                              <label
+                                class="servicesPremiumSwitch"
+                                title="${escapeHtml(
+                                  getServicesInterfaceText(
+                                    isActive
+                                      ? "Вимкнути послугу"
+                                      : "Увімкнути послугу"
+                                  )
+                                )}"
+                              >
+                                <input
+                                  type="checkbox"
+                                  ${
+                                    isActive
+                                      ? "checked"
+                                      : ""
+                                  }
+                                  data-service-toggle="${escapeHtml(
+                                    String(
+                                      service.id
+                                    )
+                                  )}"
+                                >
 
-                          <div class="servicesPremiumCardActions">
-                            <button
-                              type="button"
-                              title="Редагувати"
-                              data-service-edit="${escapeHtml(
-                                String(
-                                  service.id
-                                )
-                              )}"
-                            >
-                              ✎
-                            </button>
+                                <span></span>
+                              </label>
+                            </div>
 
-                            <button
-                              type="button"
-                              title="Видалити"
-                              class="danger"
-                              data-service-delete="${escapeHtml(
-                                String(
-                                  service.id
-                                )
-                              )}"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        </div>
-                      </article>
-                    `;
-                  })
-                  .join("")}
-              </div>
-            </section>
-          `;
-        })
+                            <div class="servicesPremiumCardBody">
+                              <div class="servicesPremiumCardCategory">
+                                ${escapeHtml(
+                                  getLocalizedServiceCategory(
+                                    serviceCategory
+                                  )
+                                )}
+                              </div>
+
+                              <h3
+                                data-services-content
+                              >
+                                ${escapeHtml(
+                                  serviceName
+                                )}
+                              </h3>
+
+                              <div class="servicesPremiumCardPrice">
+                                <strong>
+                                  ${price.toLocaleString(
+                                    getCalendarLocale()
+                                  )}
+                                </strong>
+
+                                <span>
+                                  ${getServicesInterfaceText(
+                                    "грн"
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div class="servicesPremiumCardFooter">
+                              <span
+                                class="servicesPremiumCardStatus ${
+                                  isActive
+                                    ? "active"
+                                    : "inactive"
+                                }"
+                              >
+                                <i></i>
+
+                                ${getServicesInterfaceText(
+                                  isActive
+                                    ? "Активна"
+                                    : "Вимкнена"
+                                )}
+                              </span>
+
+                              <div class="servicesPremiumCardActions">
+                                <button
+                                  type="button"
+                                  title="${escapeHtml(
+                                    getServicesInterfaceText(
+                                      "Редагувати"
+                                    )
+                                  )}"
+                                  data-service-edit="${escapeHtml(
+                                    String(
+                                      service.id
+                                    )
+                                  )}"
+                                >
+                                  ✎
+                                </button>
+
+                                <button
+                                  type="button"
+                                  title="${escapeHtml(
+                                    getServicesInterfaceText(
+                                      "Видалити"
+                                    )
+                                  )}"
+                                  class="danger"
+                                  data-service-delete="${escapeHtml(
+                                    String(
+                                      service.id
+                                    )
+                                  )}"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            </div>
+                          </article>
+                        `;
+                      }
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `;
+          }
+        )
         .join("");
-  };
 
+    localizeServicesElement(
+      grid
+    );
+  };
   renderServiceCards();
 
   page
@@ -16516,7 +17247,7 @@ async function renderServicesTab() {
           );
 
         if (!deleted) {
-          alert(
+                    showServicesAlert(
             "Не вдалося видалити послугу."
           );
 
@@ -16571,7 +17302,7 @@ async function renderServicesTab() {
 
         toggle.disabled = false;
 
-        alert(
+                showServicesAlert(
           "Не вдалося змінити статус послуги."
         );
 
@@ -16799,10 +17530,13 @@ function openServiceEditorModal(
 
             <strong
               id="serviceEditorPreviewName"
+              data-services-content
             >
               ${escapeHtml(
                 service?.name ||
-                "Назва послуги"
+                getServicesInterfaceText(
+                  "Назва послуги"
+                )
               )}
             </strong>
 
@@ -16811,7 +17545,9 @@ function openServiceEditorModal(
                 id="serviceEditorPreviewCategory"
               >
                 ${escapeHtml(
-                  selectedCategory
+                  getLocalizedServiceCategory(
+                    selectedCategory
+                  )
                 )}
               </b>
 
@@ -16823,9 +17559,11 @@ function openServiceEditorModal(
                 ${Number(
                   service?.price || 0
                 ).toLocaleString(
-                  "uk-UA"
+                  getCalendarLocale()
                 )}
-                грн
+                ${getServicesInterfaceText(
+                  "грн"
+                )}
               </em>
             </small>
           </div>
@@ -16855,6 +17593,10 @@ function openServiceEditorModal(
       </form>
     </section>
   `;
+
+  localizeServicesElement(
+    modal
+  );
 
   document.body.appendChild(
     modal
@@ -16939,19 +17681,25 @@ function openServiceEditorModal(
     if (previewName) {
       previewName.textContent =
         name ||
-        "Назва послуги";
+        getServicesInterfaceText(
+          "Назва послуги"
+        );
     }
 
     if (previewCategory) {
       previewCategory.textContent =
-        category;
+        getLocalizedServiceCategory(
+          category
+        );
     }
 
     if (previewPrice) {
       previewPrice.textContent =
         `${price.toLocaleString(
-          "uk-UA"
-        )} грн`;
+          getCalendarLocale()
+        )} ${getServicesInterfaceText(
+          "грн"
+        )}`;
     }
   };
 
@@ -17004,7 +17752,7 @@ function openServiceEditorModal(
           )?.checked !== false;
 
         if (!name) {
-          alert(
+          showServicesAlert(
             "Вкажіть назву послуги."
           );
 
@@ -17022,7 +17770,9 @@ function openServiceEditorModal(
             true;
 
           submitButton.textContent =
-            "Збереження…";
+            getServicesInterfaceText(
+              "Збереження…"
+            );
         }
 
         let saved = null;
@@ -17035,8 +17785,7 @@ function openServiceEditorModal(
                 name,
                 price,
                 active,
-                cat:
-                  category,
+                cat: category,
               }
             );
         } else {
@@ -17045,8 +17794,7 @@ function openServiceEditorModal(
               name,
               price,
               active,
-              cat:
-                category,
+              cat: category,
             });
         }
 
@@ -17056,12 +17804,14 @@ function openServiceEditorModal(
               false;
 
             submitButton.textContent =
-              isEdit
-                ? "Зберегти зміни"
-                : "Додати послугу";
+              getServicesInterfaceText(
+                isEdit
+                  ? "Зберегти зміни"
+                  : "Додати послугу"
+              );
           }
 
-          alert(
+          showServicesAlert(
             "Не вдалося зберегти послугу."
           );
 
@@ -17081,11 +17831,13 @@ function openServiceEditorModal(
       }
     );
 
-  setTimeout(() => {
-    nameInput?.focus();
-  }, 60);
+  setTimeout(
+    () => {
+      nameInput?.focus();
+    },
+    60
+  );
 }
-
 
 // =====================================================
 // SERVICE DELETE CONFIRM
@@ -17113,13 +17865,28 @@ function openServiceDeleteConfirm(
       modal.className =
         "serviceDeleteOverlay";
 
+      const serviceCategory =
+        String(
+          service?.cat ||
+          "Інше"
+        );
+
+      const servicePrice =
+        Number(
+          service?.price || 0
+        );
+
       modal.innerHTML = `
         <div
           class="serviceDeleteBackdrop"
           data-service-delete-cancel
         ></div>
 
-        <section class="serviceDeleteModal">
+        <section
+          class="serviceDeleteModal"
+          role="dialog"
+          aria-modal="true"
+        >
           <div class="serviceDeleteIcon">
             🗑
           </div>
@@ -17140,30 +17907,38 @@ function openServiceDeleteConfirm(
           <div class="serviceDeleteService">
             <span>
               ${getServiceCategoryIcon(
-                service?.cat
+                serviceCategory
               )}
             </span>
 
             <div>
-              <strong>
+              <strong
+                data-services-content
+              >
                 ${escapeHtml(
                   service?.name ||
-                  "Послуга"
+                  getServicesInterfaceText(
+                    "Послуга"
+                  )
                 )}
               </strong>
 
               <small>
                 ${escapeHtml(
-                  service?.cat ||
-                  "Інше"
+                  getLocalizedServiceCategory(
+                    serviceCategory
+                  )
                 )}
+
                 ·
-                ${Number(
-                  service?.price || 0
-                ).toLocaleString(
-                  "uk-UA"
+
+                ${servicePrice.toLocaleString(
+                  getCalendarLocale()
                 )}
-                грн
+
+                ${getServicesInterfaceText(
+                  "грн"
+                )}
               </small>
             </div>
           </div>
@@ -17187,6 +17962,10 @@ function openServiceDeleteConfirm(
           </div>
         </section>
       `;
+
+      localizeServicesElement(
+        modal
+      );
 
       document.body.appendChild(
         modal
@@ -17225,9 +18004,6 @@ function openServiceDeleteConfirm(
     }
   );
 }
-
-
-
 
 
 function openSpecializationCreateModal() {
