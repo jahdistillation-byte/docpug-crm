@@ -7655,6 +7655,15 @@ if (
   );
 }
 
+if (
+  typeof localizeHospitalElement ===
+  "function"
+) {
+  localizeHospitalElement(
+    modal
+  );
+}
+
 modal.style.display =
   "flex";
 }
@@ -11050,10 +11059,10 @@ async function createHospitalizationApi(
         text
       );
 
-      alert(
-        json?.error ||
-        "Не вдалося прийняти пацієнта у стаціонар."
-      );
+      showHospitalAlert(
+  json?.error ||
+  "Не вдалося прийняти пацієнта у стаціонар."
+);
 
       return null;
     }
@@ -11065,9 +11074,9 @@ async function createHospitalizationApi(
       error
     );
 
-    alert(
-      "Не вдалося з'єднатися із сервером."
-    );
+    showHospitalAlert(
+  "Не вдалося з'єднатися із сервером."
+);
 
     return null;
   }
@@ -40961,6 +40970,831 @@ function renderPatientsTab() {
       }
     };
 }
+const HOSPITAL_INTERFACE_TEXT = {
+  "СТАЦІОНАР КЛІНІКИ": {
+    en: "CLINIC HOSPITAL",
+    de: "KLINIKSTATION",
+    pl: "SZPITAL KLINIKI",
+  },
+  "Пацієнти під наглядом": {
+    en: "Patients under care",
+    de: "Patienten unter Beobachtung",
+    pl: "Pacjenci pod opieką",
+  },
+  "Контроль стану, призначень, процедур та догляду за тваринами, які знаходяться у клініці.": {
+    en: "Monitor the condition, treatments, procedures and care of animals staying at the clinic.",
+    de: "Überwachen Sie Zustand, Behandlungen, Maßnahmen und Pflege der Tiere in der Klinik.",
+    pl: "Monitoruj stan, leczenie, zabiegi i opiekę nad zwierzętami przebywającymi w klinice.",
+  },
+  "+ Прийняти у стаціонар": {
+    en: "+ Admit patient",
+    de: "+ Patient aufnehmen",
+    pl: "+ Przyjmij pacjenta",
+  },
+  "У стаціонарі": {
+    en: "Hospitalized",
+    de: "Stationär",
+    pl: "W szpitalu",
+  },
+  "активних пацієнтів": {
+    en: "active patients",
+    de: "aktive Patienten",
+    pl: "aktywnych pacjentów",
+  },
+    "активних": {
+    en: "active",
+    de: "aktiv",
+    pl: "aktywnych",
+  },
+  "Стабільні": {
+    en: "Stable",
+    de: "Stabil",
+    pl: "Stabilni",
+  },
+  "без погіршення": {
+    en: "no deterioration",
+    de: "ohne Verschlechterung",
+    pl: "bez pogorszenia",
+  },
+  "Під наглядом": {
+    en: "Under observation",
+    de: "Unter Beobachtung",
+    pl: "Pod obserwacją",
+  },
+  "потребують контролю": {
+    en: "require monitoring",
+    de: "Kontrolle erforderlich",
+    pl: "wymagają kontroli",
+  },
+  "Критичні": {
+    en: "Critical",
+    de: "Kritisch",
+    pl: "Krytyczni",
+  },
+  "термінова увага": {
+    en: "urgent attention",
+    de: "dringende Betreuung",
+    pl: "pilna opieka",
+  },
+  "Усі": {
+    en: "All",
+    de: "Alle",
+    pl: "Wszyscy",
+  },
+  "Пошук пацієнта або власника...": {
+    en: "Search patient or owner...",
+    de: "Patient oder Tierhalter suchen...",
+    pl: "Szukaj pacjenta lub właściciela...",
+  },
+  "Пацієнтів не знайдено": {
+    en: "No patients found",
+    de: "Keine Patienten gefunden",
+    pl: "Nie znaleziono pacjentów",
+  },
+  "Змініть фільтр або пошуковий запит.": {
+    en: "Change the filter or search query.",
+    de: "Ändern Sie den Filter oder die Suchanfrage.",
+    pl: "Zmień filtr lub wyszukiwane hasło.",
+  },
+  "Стабільний": {
+    en: "Stable",
+    de: "Stabil",
+    pl: "Stabilny",
+  },
+  "Критичний": {
+    en: "Critical",
+    de: "Kritisch",
+    pl: "Krytyczny",
+  },
+  "Пацієнт": {
+    en: "Patient",
+    de: "Patient",
+    pl: "Pacjent",
+  },
+  "Вид та порода не вказані": {
+    en: "Species and breed not specified",
+    de: "Tierart und Rasse nicht angegeben",
+    pl: "Nie podano gatunku ani rasy",
+  },
+  "Власник": {
+    en: "Owner",
+    de: "Tierhalter",
+    pl: "Właściciel",
+  },
+  "Не вказаний": {
+    en: "Not specified",
+    de: "Nicht angegeben",
+    pl: "Nie podano",
+  },
+  "Не вказана": {
+    en: "Not specified",
+    de: "Nicht angegeben",
+    pl: "Nie podano",
+  },
+  "Телефон": {
+    en: "Phone",
+    de: "Telefon",
+    pl: "Telefon",
+  },
+  "Діагноз": {
+    en: "Diagnosis",
+    de: "Diagnose",
+    pl: "Rozpoznanie",
+  },
+  "Палата": {
+    en: "Ward",
+    de: "Station",
+    pl: "Sala",
+  },
+  "Лікар": {
+    en: "Veterinarian",
+    de: "Tierarzt",
+    pl: "Lekarz weterynarii",
+  },
+  "Надійшов": {
+    en: "Admitted",
+    de: "Aufgenommen",
+    pl: "Przyjęto",
+  },
+  "Призначення": {
+    en: "Assignments",
+    de: "Anordnungen",
+    pl: "Zlecenia",
+  },
+  "Усі виконані": {
+    en: "All completed",
+    de: "Alle erledigt",
+    pl: "Wszystkie wykonane",
+  },
+  "Ще не додані": {
+    en: "Not added yet",
+    de: "Noch nicht hinzugefügt",
+    pl: "Jeszcze nie dodano",
+  },
+  "Препарат": {
+    en: "Medicine",
+    de: "Medikament",
+    pl: "Lek",
+  },
+  "Інфузія": {
+    en: "Infusion",
+    de: "Infusion",
+    pl: "Infuzja",
+  },
+  "Годування": {
+    en: "Feeding",
+    de: "Fütterung",
+    pl: "Karmienie",
+  },
+  "Вимірювання": {
+    en: "Measurement",
+    de: "Messung",
+    pl: "Pomiar",
+  },
+  "Процедура": {
+    en: "Procedure",
+    de: "Maßnahme",
+    pl: "Zabieg",
+  },
+  "Огляд": {
+    en: "Examination",
+    de: "Untersuchung",
+    pl: "Badanie",
+  },
+  "Інше": {
+    en: "Other",
+    de: "Sonstiges",
+    pl: "Inne",
+  },
+  "✓ Виконано": {
+    en: "✓ Completed",
+    de: "✓ Erledigt",
+    pl: "✓ Wykonano",
+  },
+  "Очікує виконання": {
+    en: "Pending",
+    de: "Ausstehend",
+    pl: "Oczekuje na wykonanie",
+  },
+  "Призначення ще не додані": {
+    en: "No assignments added yet",
+    de: "Noch keine Anordnungen hinzugefügt",
+    pl: "Nie dodano jeszcze zleceń",
+  },
+  "Відкрийте карту стаціонару, щоб додати перше.": {
+    en: "Open the hospital record to add the first assignment.",
+    de: "Öffnen Sie die Stationsakte, um die erste Anordnung hinzuzufügen.",
+    pl: "Otwórz kartę szpitalną, aby dodać pierwsze zlecenie.",
+  },
+  "Відкрити карту": {
+    en: "Open patient record",
+    de: "Patientenakte öffnen",
+    pl: "Otwórz kartę pacjenta",
+  },
+    "Виписати": {
+    en: "Discharge",
+    de: "Entlassen",
+    pl: "Wypisz",
+  },
+  "Не знайдено госпіталізацію.": {
+    en: "Hospitalization not found.",
+    de: "Stationärer Aufenthalt nicht gefunden.",
+    pl: "Nie znaleziono hospitalizacji.",
+  },
+  "Завантаження призначень…": {
+    en: "Loading assignments…",
+    de: "Anordnungen werden geladen…",
+    pl: "Wczytywanie zleceń…",
+  },
+  "КАРТА СТАЦІОНАРУ": {
+    en: "HOSPITAL RECORD",
+    de: "STATIONSAKTE",
+    pl: "KARTA SZPITALNA",
+  },
+  "Діагноз не вказаний": {
+    en: "Diagnosis not specified",
+    de: "Diagnose nicht angegeben",
+    pl: "Nie podano rozpoznania",
+  },
+  "Палата не вказана": {
+    en: "Ward not specified",
+    de: "Station nicht angegeben",
+    pl: "Nie podano sali",
+  },
+  "План процедур та догляду": {
+    en: "Procedure and care plan",
+    de: "Behandlungs- und Pflegeplan",
+    pl: "Plan zabiegów i opieki",
+  },
+  "Нове призначення": {
+    en: "New assignment",
+    de: "Neue Anordnung",
+    pl: "Nowe zlecenie",
+  },
+  "Тип": {
+    en: "Type",
+    de: "Typ",
+    pl: "Typ",
+  },
+  "Назва": {
+    en: "Name",
+    de: "Bezeichnung",
+    pl: "Nazwa",
+  },
+  "Наприклад, Цефтріаксон 0,5 г": {
+    en: "For example, Ceftriaxone 0.5 g",
+    de: "Zum Beispiel Ceftriaxon 0,5 g",
+    pl: "Na przykład Ceftriakson 0,5 g",
+  },
+  "Дата і час": {
+    en: "Date and time",
+    de: "Datum und Uhrzeit",
+    pl: "Data i godzina",
+  },
+  "Інструкція": {
+    en: "Instructions",
+    de: "Anweisung",
+    pl: "Instrukcja",
+  },
+  "Доза, спосіб введення, тривалість...": {
+    en: "Dose, administration route, duration...",
+    de: "Dosis, Verabreichungsweg, Dauer...",
+    pl: "Dawka, sposób podania, czas trwania...",
+  },
+  "+ Додати призначення": {
+    en: "+ Add assignment",
+    de: "+ Anordnung hinzufügen",
+    pl: "+ Dodaj zlecenie",
+  },
+  "Призначень поки немає": {
+    en: "No assignments yet",
+    de: "Noch keine Anordnungen",
+    pl: "Brak zleceń",
+  },
+  "Додайте першу процедуру або препарат.": {
+    en: "Add the first procedure or medicine.",
+    de: "Fügen Sie die erste Maßnahme oder das erste Medikament hinzu.",
+    pl: "Dodaj pierwszy zabieg lub lek.",
+  },
+  "Результат:": {
+    en: "Result:",
+    de: "Ergebnis:",
+    pl: "Wynik:",
+  },
+  "Виконано": {
+    en: "Completed",
+    de: "Erledigt",
+    pl: "Wykonano",
+  },
+  "Хто виконав": {
+    en: "Completed by",
+    de: "Ausgeführt von",
+    pl: "Wykonał",
+  },
+  "Працівник": {
+    en: "Employee",
+    de: "Mitarbeiter",
+    pl: "Pracownik",
+  },
+  "Видалити": {
+    en: "Delete",
+    de: "Löschen",
+    pl: "Usuń",
+  },
+  "Вкажіть назву призначення.": {
+    en: "Enter the assignment name.",
+    de: "Geben Sie die Bezeichnung der Anordnung ein.",
+    pl: "Podaj nazwę zlecenia.",
+  },
+  "Вкажіть дату і час.": {
+    en: "Select the date and time.",
+    de: "Wählen Sie Datum und Uhrzeit.",
+    pl: "Wybierz datę i godzinę.",
+  },
+  "Збереження…": {
+    en: "Saving…",
+    de: "Wird gespeichert…",
+    pl: "Zapisywanie…",
+  },
+  "Оберіть працівника, який виконав призначення.": {
+    en: "Select the employee who completed the assignment.",
+    de: "Wählen Sie den Mitarbeiter aus, der die Anordnung ausgeführt hat.",
+    pl: "Wybierz pracownika, który wykonał zlecenie.",
+  },
+  "Результат вимірювання": {
+    en: "Measurement result",
+    de: "Messergebnis",
+    pl: "Wynik pomiaru",
+  },
+  "Фактичне значення": {
+    en: "Actual value",
+    de: "Tatsächlicher Wert",
+    pl: "Wartość rzeczywista",
+  },
+  "Наприклад: 39,1 °C": {
+    en: "For example: 39.1 °C",
+    de: "Zum Beispiel: 39,1 °C",
+    pl: "Na przykład: 39,1 °C",
+  },
+  "Зберегти результат": {
+    en: "Save result",
+    de: "Ergebnis speichern",
+    pl: "Zapisz wynik",
+  },
+  "Скасувати": {
+    en: "Cancel",
+    de: "Abbrechen",
+    pl: "Anuluj",
+  },
+  "Видалити це призначення?": {
+    en: "Delete this assignment?",
+    de: "Diese Anordnung löschen?",
+    pl: "Usunąć to zlecenie?",
+  },
+  "Не вдалося видалити призначення.": {
+    en: "Could not delete the assignment.",
+    de: "Die Anordnung konnte nicht gelöscht werden.",
+    pl: "Nie udało się usunąć zlecenia.",
+  },
+  "Сервер повернув некоректну відповідь.": {
+    en: "The server returned an invalid response.",
+    de: "Der Server hat eine ungültige Antwort zurückgegeben.",
+    pl: "Serwer zwrócił nieprawidłową odpowiedź.",
+  },
+  "Не вдалося додати призначення.": {
+    en: "Could not add the assignment.",
+    de: "Die Anordnung konnte nicht hinzugefügt werden.",
+    pl: "Nie udało się dodać zlecenia.",
+  },
+  "Не вдалося відмітити призначення виконаним.": {
+    en: "Could not mark the assignment as completed.",
+    de: "Die Anordnung konnte nicht als erledigt markiert werden.",
+    pl: "Nie udało się oznaczyć zlecenia jako wykonanego.",
+  },
+    "Не вдалося з'єднатися із сервером.": {
+    en: "Could not connect to the server.",
+    de: "Die Verbindung zum Server konnte nicht hergestellt werden.",
+    pl: "Nie udało się połączyć z serwerem.",
+  },
+  "Завантаження пацієнтів…": {
+    en: "Loading patients…",
+    de: "Patienten werden geladen…",
+    pl: "Wczytywanie pacjentów…",
+  },
+  "НОВА ГОСПІТАЛІЗАЦІЯ": {
+    en: "NEW HOSPITALIZATION",
+    de: "NEUE STATIONÄRE AUFNAHME",
+    pl: "NOWA HOSPITALIZACJA",
+  },
+  "Прийняти у стаціонар": {
+    en: "Admit patient",
+    de: "Patient aufnehmen",
+    pl: "Przyjmij pacjenta",
+  },
+  "Оберіть пацієнта та вкажіть основні дані госпіталізації.": {
+    en: "Select a patient and enter the main hospitalization details.",
+    de: "Wählen Sie einen Patienten und geben Sie die wichtigsten Aufnahmedaten ein.",
+    pl: "Wybierz pacjenta i podaj podstawowe dane hospitalizacji.",
+  },
+  "Оберіть із бази клініки": {
+    en: "Select from the clinic database",
+    de: "Aus der Klinikdatenbank auswählen",
+    pl: "Wybierz z bazy kliniki",
+  },
+  "Пошук за ім’ям пацієнта або власника...": {
+    en: "Search by patient or owner name...",
+    de: "Nach Patienten- oder Tierhalternamen suchen...",
+    pl: "Szukaj według imienia pacjenta lub właściciela...",
+  },
+  "Дані стаціонару": {
+    en: "Hospital details",
+    de: "Stationsdaten",
+    pl: "Dane hospitalizacji",
+  },
+  "Статус, палата та лікар": {
+    en: "Status, ward and veterinarian",
+    de: "Status, Station und Tierarzt",
+    pl: "Status, sala i lekarz weterynarii",
+  },
+  "Лікуючий лікар": {
+    en: "Attending veterinarian",
+    de: "Behandelnder Tierarzt",
+    pl: "Lekarz prowadzący",
+  },
+  "Оберіть лікаря": {
+    en: "Select a veterinarian",
+    de: "Tierarzt auswählen",
+    pl: "Wybierz lekarza",
+  },
+  "Палата / місце": {
+    en: "Ward / place",
+    de: "Station / Platz",
+    pl: "Sala / miejsce",
+  },
+  "Наприклад, Палата 1": {
+    en: "For example, Ward 1",
+    de: "Zum Beispiel Station 1",
+    pl: "Na przykład Sala 1",
+  },
+  "Статус": {
+    en: "Status",
+    de: "Status",
+    pl: "Status",
+  },
+  "Дата і час надходження": {
+    en: "Admission date and time",
+    de: "Aufnahmedatum und Uhrzeit",
+    pl: "Data i godzina przyjęcia",
+  },
+  "Планова дата виписки": {
+    en: "Planned discharge date",
+    de: "Geplantes Entlassungsdatum",
+    pl: "Planowana data wypisu",
+  },
+  "Медична інформація": {
+    en: "Medical information",
+    de: "Medizinische Informationen",
+    pl: "Informacje medyczne",
+  },
+  "Причина госпіталізації": {
+    en: "Reason for hospitalization",
+    de: "Grund der stationären Aufnahme",
+    pl: "Powód hospitalizacji",
+  },
+  "Основний або попередній діагноз...": {
+    en: "Primary or preliminary diagnosis...",
+    de: "Haupt- oder vorläufige Diagnose...",
+    pl: "Rozpoznanie główne lub wstępne...",
+  },
+  "Примітки": {
+    en: "Notes",
+    de: "Notizen",
+    pl: "Notatki",
+  },
+  "Особливості стану, догляду або спостереження...": {
+    en: "Condition, care or observation details...",
+    de: "Besonderheiten zu Zustand, Pflege oder Beobachtung...",
+    pl: "Szczegóły stanu, opieki lub obserwacji...",
+  },
+  "Немає доступних пацієнтів": {
+    en: "No available patients",
+    de: "Keine verfügbaren Patienten",
+    pl: "Brak dostępnych pacjentów",
+  },
+  "Усі пацієнти вже знаходяться у стаціонарі або база порожня.": {
+    en: "All patients are already hospitalized or the database is empty.",
+    de: "Alle Patienten sind bereits stationär aufgenommen oder die Datenbank ist leer.",
+    pl: "Wszyscy pacjenci są już hospitalizowani albo baza jest pusta.",
+  },
+  "Нічого не знайдено": {
+    en: "Nothing found",
+    de: "Nichts gefunden",
+    pl: "Nic nie znaleziono",
+  },
+  "Змініть пошуковий запит.": {
+    en: "Change the search query.",
+    de: "Ändern Sie die Suchanfrage.",
+    pl: "Zmień wyszukiwane hasło.",
+  },
+  "Власник не вказаний": {
+    en: "Owner not specified",
+    de: "Tierhalter nicht angegeben",
+    pl: "Nie podano właściciela",
+  },
+  "Обраний пацієнт": {
+    en: "Selected patient",
+    de: "Ausgewählter Patient",
+    pl: "Wybrany pacjent",
+  },
+  "Дані не вказані": {
+    en: "Details not specified",
+    de: "Angaben nicht vorhanden",
+    pl: "Nie podano danych",
+  },
+  "Оберіть пацієнта.": {
+    en: "Select a patient.",
+    de: "Wählen Sie einen Patienten aus.",
+    pl: "Wybierz pacjenta.",
+  },
+  "Оберіть лікуючого лікаря.": {
+    en: "Select the attending veterinarian.",
+    de: "Wählen Sie den behandelnden Tierarzt aus.",
+    pl: "Wybierz lekarza prowadzącego.",
+  },
+  "Вкажіть палату або місце.": {
+    en: "Enter the ward or place.",
+    de: "Geben Sie die Station oder den Platz an.",
+    pl: "Podaj salę lub miejsce.",
+  },
+  "Вкажіть діагноз.": {
+    en: "Enter the diagnosis.",
+    de: "Geben Sie die Diagnose ein.",
+    pl: "Podaj rozpoznanie.",
+  },
+  "ВИПИСКА ЗІ СТАЦІОНАРУ": {
+    en: "HOSPITAL DISCHARGE",
+    de: "STATIONÄRE ENTLASSUNG",
+    pl: "WYPIS ZE SZPITALA",
+  },
+  "пацієнта": {
+    en: "patient",
+    de: "Patient",
+    pl: "pacjenta",
+  },
+  "Госпіталізацію буде завершено, а пацієнт зникне зі списку активного стаціонару.": {
+    en: "The hospitalization will be completed and the patient will be removed from the active hospital list.",
+    de: "Der stationäre Aufenthalt wird beendet und der Patient aus der aktiven Stationsliste entfernt.",
+    pl: "Hospitalizacja zostanie zakończona, a pacjent zniknie z listy aktywnego szpitala.",
+  },
+  "Стан та примітка до виписки": {
+    en: "Condition and discharge note",
+    de: "Zustand und Entlassungsnotiz",
+    pl: "Stan i notatka przy wypisie",
+  },
+  "Стан пацієнта на момент виписки...": {
+    en: "Patient’s condition at discharge...",
+    de: "Zustand des Patienten bei der Entlassung...",
+    pl: "Stan pacjenta w chwili wypisu...",
+  },
+  "Рекомендації власнику": {
+    en: "Recommendations for the owner",
+    de: "Empfehlungen für den Tierhalter",
+    pl: "Zalecenia dla właściciela",
+  },
+  "Домашній догляд, лікування та повторний огляд...": {
+    en: "Home care, treatment and follow-up examination...",
+    de: "Häusliche Pflege, Behandlung und Nachuntersuchung...",
+    pl: "Opieka domowa, leczenie i badanie kontrolne...",
+  },
+  "Залишити у стаціонарі": {
+    en: "Keep hospitalized",
+    de: "Stationär belassen",
+    pl: "Pozostaw w szpitalu",
+  },
+  "Виписати пацієнта": {
+    en: "Discharge patient",
+    de: "Patient entlassen",
+    pl: "Wypisz pacjenta",
+  },
+  "Виписуємо…": {
+    en: "Discharging…",
+    de: "Entlassung läuft…",
+    pl: "Wypisywanie…",
+  },
+  "Не знайдено ID пацієнта.": {
+    en: "Patient ID not found.",
+    de: "Patienten-ID nicht gefunden.",
+    pl: "Nie znaleziono identyfikatora pacjenta.",
+  },
+  "Не знайдено дані госпіталізації.": {
+    en: "Hospitalization details not found.",
+    de: "Daten zum stationären Aufenthalt nicht gefunden.",
+    pl: "Nie znaleziono danych hospitalizacji.",
+  },
+    "Не вдалося прийняти пацієнта у стаціонар.": {
+    en: "Could not admit the patient.",
+    de: "Der Patient konnte nicht stationär aufgenommen werden.",
+    pl: "Nie udało się przyjąć pacjenta do szpitala.",
+  },
+  "Виписувати пацієнтів зі стаціонару можуть ветеринар, адміністратор або власник клініки.": {
+    en: "Only a veterinarian, administrator or clinic owner can discharge hospitalized patients.",
+    de: "Nur ein Tierarzt, Administrator oder Klinikinhaber kann stationäre Patienten entlassen.",
+    pl: "Pacjentów ze szpitala może wypisywać lekarz weterynarii, administrator lub właściciel kliniki.",
+  },
+  "Не вдалося виписати пацієнта.": {
+    en: "Could not discharge the patient.",
+    de: "Der Patient konnte nicht entlassen werden.",
+    pl: "Nie udało się wypisać pacjenta.",
+  },
+};
+
+
+function normalizeHospitalInterfaceText(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
+}
+
+function getHospitalInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const normalizedSource =
+    normalizeHospitalInterfaceText(
+      sourceText
+    );
+
+  const entry =
+    Object.entries(
+      HOSPITAL_INTERFACE_TEXT
+    ).find(
+      ([ukrainian, translations]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeHospitalInterfaceText(
+              value
+            ) ===
+            normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText || ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+function showHospitalAlert(
+  message
+) {
+  alert(
+    getHospitalInterfaceText(
+      message
+    )
+  );
+}
+
+function confirmHospitalAction(
+  message
+) {
+  return confirm(
+    getHospitalInterfaceText(
+      message
+    )
+  );
+}
+function localizeHospitalElement(
+  root
+) {
+  if (!root) return;
+
+  const walker =
+    document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT
+    );
+
+  const textNodes = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  textNodes.forEach(
+    (node) => {
+      const currentText =
+        node.nodeValue || "";
+
+      const normalized =
+        normalizeHospitalInterfaceText(
+          currentText
+        );
+
+      if (!normalized) return;
+
+      const translated =
+        getHospitalInterfaceText(
+          normalized
+        );
+
+      if (
+        translated === normalized
+      ) {
+        return;
+      }
+
+      const leadingSpace =
+        currentText.match(
+          /^\s*/
+        )?.[0] || "";
+
+      const trailingSpace =
+        currentText.match(
+          /\s*$/
+        )?.[0] || "";
+
+      node.nodeValue =
+        leadingSpace +
+        translated +
+        trailingSpace;
+    }
+  );
+
+  const elements = [
+    root,
+    ...root.querySelectorAll(
+      "*"
+    ),
+  ];
+
+  elements.forEach(
+    (element) => {
+      [
+        "placeholder",
+        "title",
+        "aria-label",
+      ].forEach(
+        (attribute) => {
+          if (
+            !element?.hasAttribute?.(
+              attribute
+            )
+          ) {
+            return;
+          }
+
+          const currentValue =
+            element.getAttribute(
+              attribute
+            ) || "";
+
+          const translatedValue =
+            getHospitalInterfaceText(
+              currentValue
+            );
+
+          if (
+            translatedValue !==
+            currentValue
+          ) {
+            element.setAttribute(
+              attribute,
+              translatedValue
+            );
+          }
+        }
+      );
+    }
+  );
+}
 async function renderHospitalTab() {
   const page =
     document.querySelector(
@@ -41157,9 +41991,13 @@ hospitalPatients =
         ${hospitalPatients
           .map(renderHospitalPatientCard)
           .join("")}
-      </section>
+            </section>
     </div>
   `;
+
+  localizeHospitalElement(
+    page
+  );
 
   const renderFilteredPatients = () => {
     const activeFilter =
@@ -41220,9 +42058,13 @@ hospitalPatients =
             <h3>Пацієнтів не знайдено</h3>
             <p>
               Змініть фільтр або пошуковий запит.
-            </p>
+                        </p>
           </div>
         `;
+
+    localizeHospitalElement(
+      page
+    );
   };
 
   page
@@ -41363,9 +42205,9 @@ async function createHospitalTaskApi(
         text
       );
 
-      alert(
-        "Сервер повернув некоректну відповідь."
-      );
+      showHospitalAlert(
+  "Сервер повернув некоректну відповідь."
+);
 
       return null;
     }
@@ -41380,10 +42222,10 @@ async function createHospitalTaskApi(
         json
       );
 
-      alert(
-        json?.error ||
-        "Не вдалося додати призначення."
-      );
+      showHospitalAlert(
+  json?.error ||
+  "Не вдалося додати призначення."
+);
 
       return null;
     }
@@ -41397,9 +42239,9 @@ async function createHospitalTaskApi(
       error
     );
 
-    alert(
-      "Не вдалося з'єднатися із сервером."
-    );
+    showHospitalAlert(
+  "Не вдалося з'єднатися із сервером."
+);
 
     return null;
   }
@@ -41443,9 +42285,9 @@ async function completeHospitalTaskApi(
         text
       );
 
-      alert(
-        "Сервер повернув некоректну відповідь."
-      );
+      showHospitalAlert(
+  "Сервер повернув некоректну відповідь."
+);
 
       return null;
     }
@@ -41460,10 +42302,10 @@ async function completeHospitalTaskApi(
         json
       );
 
-      alert(
-        json?.error ||
-        "Не вдалося відмітити призначення виконаним."
-      );
+      showHospitalAlert(
+  json?.error ||
+  "Не вдалося відмітити призначення виконаним."
+);
 
       return null;
     }
@@ -41477,9 +42319,9 @@ async function completeHospitalTaskApi(
       error
     );
 
-    alert(
-      "Не вдалося з'єднатися із сервером."
-    );
+    showHospitalAlert(
+  "Не вдалося з'єднатися із сервером."
+);
 
     return null;
   }
@@ -41555,9 +42397,9 @@ async function openHospitalTasksModal(
     ?.remove();
 
   if (!hospitalization?.id) {
-    alert(
-      "Не знайдено госпіталізацію."
-    );
+    showHospitalAlert(
+  "Не знайдено госпіталізацію."
+);
     return;
   }
 
@@ -41583,13 +42425,51 @@ async function openHospitalTasksModal(
     </section>
   `;
 
-  document.body.appendChild(modal);
+    document.body.appendChild(
+    modal
+  );
 
-  const closeModal = async () => {
-  modal.remove();
+  const hospitalTasksLocalizationObserver =
+    typeof MutationObserver ===
+    "function"
+      ? new MutationObserver(
+          () => {
+            localizeHospitalElement(
+              modal
+            );
+          }
+        )
+      : null;
 
-  await renderHospitalTab();
-};
+  localizeHospitalElement(
+    modal
+  );
+
+  hospitalTasksLocalizationObserver
+    ?.observe(
+      modal,
+      {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: [
+          "placeholder",
+          "title",
+          "aria-label",
+        ],
+      }
+    );
+
+  const closeModal =
+    async () => {
+      hospitalTasksLocalizationObserver
+        ?.disconnect();
+
+      modal.remove();
+
+      await renderHospitalTab();
+    };
 
   modal.addEventListener(
     "click",
@@ -41857,7 +42737,9 @@ async function openHospitalTasksModal(
         ).length;
 
       count.textContent =
-        `${plannedCount} активних`;
+  `${plannedCount} ${getHospitalInterfaceText(
+    "активних"
+  )}`;
     }
 
     if (!sortedTasks.length) {
@@ -41961,33 +42843,41 @@ async function openHospitalTasksModal(
           font-weight:600;
         "
       >
-        Результат:
         ${escapeHtml(
-          task.completion_note
-        )}
+  getHospitalInterfaceText(
+    "Результат:"
+  )
+)}
+${escapeHtml(
+  task.completion_note
+)}
       </div>
     `
     : ""
 }
                       <div class="hospitalTaskCompletedInfo">
-                        Виконано
-                        ${
-                          task.completed_by_name
-                            ? `· ${escapeHtml(
-                                task.completed_by_name
-                              )}`
-                            : ""
-                        }
-                        ${
-                          task.completed_at
-                            ? `· ${escapeHtml(
-                                formatHospitalDateTime(
-                                  task.completed_at
-                                )
-                              )}`
-                            : ""
-                        }
-                      </div>
+  ${escapeHtml(
+    getHospitalInterfaceText(
+      "Виконано"
+    )
+  )}
+  ${
+    task.completed_by_name
+      ? `· ${escapeHtml(
+          task.completed_by_name
+        )}`
+      : ""
+  }
+  ${
+    task.completed_at
+      ? `· ${escapeHtml(
+          formatHospitalDateTime(
+            task.completed_at
+          )
+        )}`
+      : ""
+  }
+</div>
                     `
                     : `
                       <div class="hospitalTaskActions">
@@ -42096,16 +42986,16 @@ async function openHospitalTasksModal(
           ).trim();
 
         if (!title) {
-          alert(
-            "Вкажіть назву призначення."
-          );
+          showHospitalAlert(
+  "Вкажіть назву призначення."
+);
           return;
         }
 
         if (!scheduledAt) {
-          alert(
-            "Вкажіть дату і час."
-          );
+          showHospitalAlert(
+  "Вкажіть дату і час."
+);
           return;
         }
 
@@ -42244,9 +43134,9 @@ await renderHospitalTab();
           ).trim();
 
         if (!completedBy) {
-          alert(
-            "Оберіть працівника, який виконав призначення."
-          );
+          showHospitalAlert(
+  "Оберіть працівника, який виконав призначення."
+);
           return;
         }
 
@@ -42264,30 +43154,42 @@ if (
   targetTask?.task_type ===
   "measurement"
 ) {
-  const result =
-    await openAppPrompt({
-      title:
-        "Результат вимірювання",
+ const result =
+  await openAppPrompt({
+    title:
+      getHospitalInterfaceText(
+        "Результат вимірювання"
+      ),
 
-      text:
-        targetTask.title ||
-        "Вимірювання",
+    text:
+      targetTask.title ||
+      getHospitalInterfaceText(
+        "Вимірювання"
+      ),
 
-      label:
-        "Фактичне значення",
+    label:
+      getHospitalInterfaceText(
+        "Фактичне значення"
+      ),
 
-      placeholder:
-        "Наприклад: 39,1 °C",
+    placeholder:
+      getHospitalInterfaceText(
+        "Наприклад: 39,1 °C"
+      ),
 
-      confirmText:
-        "Зберегти результат",
+    confirmText:
+      getHospitalInterfaceText(
+        "Зберегти результат"
+      ),
 
-      cancelText:
-        "Скасувати",
+    cancelText:
+      getHospitalInterfaceText(
+        "Скасувати"
+      ),
 
-      required:
-        true,
-    });
+    required:
+      true,
+  });
 
   if (result === null) {
     return;
@@ -42354,10 +43256,9 @@ if (
             .deleteHospitalTask;
 
         const confirmed =
-          confirm(
-            "Видалити це призначення?"
-          );
-
+          confirmHospitalAction(
+  "Видалити це призначення?"
+)
         if (!confirmed) return;
 
         deleteButton.disabled = true;
@@ -42371,9 +43272,9 @@ if (
           deleteButton.disabled =
             false;
 
-          alert(
-            "Не вдалося видалити призначення."
-          );
+          showHospitalAlert(
+  "Не вдалося видалити призначення."
+);
 
           return;
         }
@@ -42416,9 +43317,23 @@ function renderHospitalPatientCard(
       hospitalization.admitted_at
     );
 
+    const localizedSpecies =
+    hospitalization.patient_species
+      ? speciesLabel(
+          hospitalization.patient_species
+        )
+      : "";
+
+  const localizedBreed =
+    hospitalization.patient_breed
+      ? getCalendarBreedLabel(
+          hospitalization.patient_breed
+        )
+      : "";
+
   const speciesBreed = [
-    hospitalization.patient_species,
-    hospitalization.patient_breed,
+    localizedSpecies,
+    localizedBreed,
   ]
     .filter(Boolean)
     .join(" • ");
@@ -42565,7 +43480,9 @@ function renderHospitalPatientCard(
             <strong>
               ${
                 item.active_tasks_count > 0
-                  ? `${item.active_tasks_count} активних`
+                  ? `${item.active_tasks_count} ${getHospitalInterfaceText(
+    "активних"
+  )}`
                   : item.tasks_count > 0
                     ? "Усі виконані"
                     : "Ще не додані"
@@ -42690,16 +43607,20 @@ function renderHospitalPatientCard(
                           ${
                             completed
                               ? `
-                                <small class="hospitalCardTaskDone">
-                                  ✓ Виконано
-                                  ${
-                                    task.completed_by_name
-                                      ? ` · ${escapeHtml(
-                                          task.completed_by_name
-                                        )}`
-                                      : ""
-                                  }
-                                </small>
+                               <small class="hospitalCardTaskDone">
+  ${escapeHtml(
+    getHospitalInterfaceText(
+      "✓ Виконано"
+    )
+  )}
+  ${
+    task.completed_by_name
+      ? ` · ${escapeHtml(
+          task.completed_by_name
+        )}`
+      : ""
+  }
+</small>
                               `
                               : `
                                 <small class="hospitalCardTaskPending">
@@ -42789,7 +43710,7 @@ function formatHospitalDateTime(
   }
 
   return date.toLocaleString(
-    "uk-UA",
+  getCalendarLocale(),
     {
       day: "2-digit",
       month: "2-digit",
@@ -42938,9 +43859,41 @@ async function openHospitalAdmissionModal() {
     </section>
   `;
 
-  document.body.appendChild(
+    document.body.appendChild(
     loadingModal
   );
+
+  const hospitalAdmissionLocalizationObserver =
+    typeof MutationObserver ===
+    "function"
+      ? new MutationObserver(
+          () => {
+            localizeHospitalElement(
+              loadingModal
+            );
+          }
+        )
+      : null;
+
+  localizeHospitalElement(
+    loadingModal
+  );
+
+  hospitalAdmissionLocalizationObserver
+    ?.observe(
+      loadingModal,
+      {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: [
+          "placeholder",
+          "title",
+          "aria-label",
+        ],
+      }
+    );
 
   let patients = [];
   let owners = [];
@@ -43290,7 +44243,10 @@ async function openHospitalAdmissionModal() {
     </section>
   `;
 
-  const closeModal = () => {
+    const closeModal = () => {
+    hospitalAdmissionLocalizationObserver
+      ?.disconnect();
+
     loadingModal.remove();
   };
 
@@ -43336,7 +44292,26 @@ async function openHospitalAdmissionModal() {
       "#hospitalSelectedPatientPreview"
     );
 
-  let selectedPatientId = "";
+    let selectedPatientId = "";
+
+  const getLocalizedPatientDescription =
+    (patient) => {
+      return [
+        patient?.species
+          ? speciesLabel(
+              patient.species
+            )
+          : "",
+
+        patient?.breed
+          ? getCalendarBreedLabel(
+              patient.breed
+            )
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" • ");
+    };
 
   const renderPatientList = () => {
     const query =
@@ -43425,12 +44400,10 @@ async function openHospitalAdmissionModal() {
               selectedPatientId
             );
 
-          const description = [
-            patient.species,
-            patient.breed,
-          ]
-            .filter(Boolean)
-            .join(" • ");
+          const description =
+  getLocalizedPatientDescription(
+    patient
+  );
 
           return `
             <button
@@ -43525,46 +44498,54 @@ async function openHospitalAdmissionModal() {
         String(patient.owner_id)
       ) || {};
 
-    const description = [
-      patient.species,
-      patient.breed,
-    ]
-      .filter(Boolean)
-      .join(" • ");
+    const description =
+  getLocalizedPatientDescription(
+    patient
+  );
 
     selectedPreview.hidden =
       false;
 
     selectedPreview.innerHTML = `
-      <div class="hospitalSelectedPatientIcon">
-        🐾
-      </div>
+  <div class="hospitalSelectedPatientIcon">
+    🐾
+  </div>
 
-      <div>
-        <span>
-          Обраний пацієнт
-        </span>
+  <div>
+    <span>
+      ${escapeHtml(
+        getHospitalInterfaceText(
+          "Обраний пацієнт"
+        )
+      )}
+    </span>
 
-        <strong>
-          ${escapeHtml(
-            patient.name ||
-            "Пацієнт"
-          )}
-        </strong>
+    <strong>
+      ${escapeHtml(
+        patient.name ||
+        getHospitalInterfaceText(
+          "Пацієнт"
+        )
+      )}
+    </strong>
 
-        <small>
-          ${escapeHtml(
-            description ||
-            "Дані не вказані"
-          )}
-          ·
-          ${escapeHtml(
-            owner.name ||
-            "Власник не вказаний"
-          )}
-        </small>
-      </div>
-    `;
+    <small>
+      ${escapeHtml(
+        description ||
+        getHospitalInterfaceText(
+          "Дані не вказані"
+        )
+      )}
+      ·
+      ${escapeHtml(
+        owner.name ||
+        getHospitalInterfaceText(
+          "Власник не вказаний"
+        )
+      )}
+    </small>
+  </div>
+`;
   };
 
   renderPatientList();
@@ -43679,28 +44660,28 @@ async function openHospitalAdmissionModal() {
           ).trim();
 
         if (!patientId) {
-          alert(
-            "Оберіть пацієнта."
-          );
+          showHospitalAlert(
+  "Оберіть пацієнта."
+);
           return;
         }
 
         if (!doctorId) {
-          alert(
+          showHospitalAlert(
             "Оберіть лікуючого лікаря."
           );
           return;
         }
 
         if (!room) {
-          alert(
+          showHospitalAlert(
             "Вкажіть палату або місце."
           );
           return;
         }
 
         if (!diagnosis) {
-          alert(
+          showHospitalAlert(
             "Вкажіть діагноз."
           );
           return;
@@ -43775,16 +44756,22 @@ function openHospitalDischargeConfirm(
       ?.remove();
 
     const patientName =
-      hospitalization?.patient_name ||
-      "пацієнта";
+  hospitalization?.patient_name ||
+  getHospitalInterfaceText(
+    "пацієнта"
+  );
 
-    const ownerName =
-      hospitalization?.owner_name ||
-      "Власник не вказаний";
+const ownerName =
+  hospitalization?.owner_name ||
+  getHospitalInterfaceText(
+    "Власник не вказаний"
+  );
 
-    const room =
-      hospitalization?.room ||
-      "Палата не вказана";
+const room =
+  hospitalization?.room ||
+  getHospitalInterfaceText(
+    "Палата не вказана"
+  );
 
     const modal =
       document.createElement("div");
@@ -43822,10 +44809,14 @@ function openHospitalDischargeConfirm(
           ВИПИСКА ЗІ СТАЦІОНАРУ
         </div>
 
-        <h2>
-          Виписати
-          ${escapeHtml(patientName)}?
-        </h2>
+       <h2>
+  ${escapeHtml(
+    getHospitalInterfaceText(
+      "Виписати"
+    )
+  )}
+  ${escapeHtml(patientName)}?
+</h2>
 
         <p>
           Госпіталізацію буде завершено,
@@ -43896,11 +44887,15 @@ function openHospitalDischargeConfirm(
       </section>
     `;
 
-    document.body.appendChild(
+        document.body.appendChild(
       modal
     );
 
-        const finish = (
+    localizeHospitalElement(
+      modal
+    );
+
+    const finish = (
       confirmed,
       note = "",
       recommendations = ""
@@ -44013,7 +45008,7 @@ function bindHospitalPageActions(
           .hospitalOpenPatient;
 
       if (!patientId) {
-        alert(
+        showHospitalAlert(
           "Не знайдено ID пацієнта."
         );
         return;
@@ -44036,7 +45031,7 @@ function bindHospitalPageActions(
           .hospitalAssignments;
 
       if (!hospitalizationId) {
-        alert(
+        showHospitalAlert(
           "Не знайдено госпіталізацію."
         );
         return;
@@ -44055,7 +45050,7 @@ function bindHospitalPageActions(
         hospitalization || null;
 
       if (!hospitalization) {
-  alert(
+  showHospitalAlert(
     "Не знайдено дані госпіталізації."
   );
   return;
@@ -44081,7 +45076,7 @@ await openHospitalTasksModal(
           .hospitalDischarge;
 
       if (!hospitalizationId) {
-        alert(
+        showHospitalAlert(
           "Не знайдено госпіталізацію."
         );
         return;
@@ -44119,7 +45114,9 @@ if (
         true;
 
       dischargeButton.textContent =
-        "Виписуємо…";
+  getHospitalInterfaceText(
+    "Виписуємо…"
+  );
 
       const result =
     await dischargeHospitalizationApi(
@@ -44134,7 +45131,9 @@ if (
 
         dischargeButton.textContent =
           oldText ||
-          "Виписати";
+getHospitalInterfaceText(
+  "Виписати"
+);
 
         return;
       }
