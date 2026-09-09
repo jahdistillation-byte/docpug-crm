@@ -3957,6 +3957,1656 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "patients.delete.confirmDescription": "Pacjent zostanie trwale usunięty wraz z kartą pacjenta."
 });
 
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.notFound": "Пацієнта не знайдено.",
+  "patients.card.loading": "Завантаження картки пацієнта…",
+  "patients.card.backToList": "Назад до списку",
+  "patients.card.medicalRecord": "Медична карта пацієнта",
+  "patients.card.statusActive": "Активний",
+  "patients.card.statusArchived": "Архів",
+  "patients.card.statusDeceased": "Помер",
+  "patients.card.newVisit": "Новий візит",
+  "patients.card.visits": "Візитів",
+  "patients.card.weight": "Вага",
+  "patients.card.lastVisit": "Останній візит",
+  "patients.card.totalPaid": "Усього сплачено",
+  "patients.card.overview": "Огляд",
+  "patients.card.medcard": "Веткарта",
+  "patients.card.labs": "Аналізи",
+  "patients.card.files": "Файли",
+  "patients.card.documents": "Документи",
+  "patients.card.visitUnavailable": "Функція створення нового візиту недоступна."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.notFound": "Patient not found.",
+  "patients.card.loading": "Loading patient record…",
+  "patients.card.backToList": "Back to list",
+  "patients.card.medicalRecord": "Patient medical record",
+  "patients.card.statusActive": "Active",
+  "patients.card.statusArchived": "Archived",
+  "patients.card.statusDeceased": "Deceased",
+  "patients.card.newVisit": "New visit",
+  "patients.card.visits": "Visits",
+  "patients.card.weight": "Weight",
+  "patients.card.lastVisit": "Last visit",
+  "patients.card.totalPaid": "Total paid",
+  "patients.card.overview": "Overview",
+  "patients.card.medcard": "Medical record",
+  "patients.card.labs": "Lab results",
+  "patients.card.files": "Files",
+  "patients.card.documents": "Documents",
+  "patients.card.visitUnavailable": "The new visit function is unavailable."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.notFound": "Patient nicht gefunden.",
+  "patients.card.loading": "Patientenakte wird geladen…",
+  "patients.card.backToList": "Zurück zur Liste",
+  "patients.card.medicalRecord": "Medizinische Patientenakte",
+  "patients.card.statusActive": "Aktiv",
+  "patients.card.statusArchived": "Archiviert",
+  "patients.card.statusDeceased": "Verstorben",
+  "patients.card.newVisit": "Neuer Termin",
+  "patients.card.visits": "Besuche",
+  "patients.card.weight": "Gewicht",
+  "patients.card.lastVisit": "Letzter Besuch",
+  "patients.card.totalPaid": "Insgesamt bezahlt",
+  "patients.card.overview": "Übersicht",
+  "patients.card.medcard": "Patientenakte",
+  "patients.card.labs": "Laborwerte",
+  "patients.card.files": "Dateien",
+  "patients.card.documents": "Dokumente",
+  "patients.card.visitUnavailable": "Die Funktion für einen neuen Termin ist nicht verfügbar."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.notFound": "Nie znaleziono pacjenta.",
+  "patients.card.loading": "Ładowanie karty pacjenta…",
+  "patients.card.backToList": "Wróć do listy",
+  "patients.card.medicalRecord": "Karta medyczna pacjenta",
+  "patients.card.statusActive": "Aktywny",
+  "patients.card.statusArchived": "Zarchiwizowany",
+  "patients.card.statusDeceased": "Zmarły",
+  "patients.card.newVisit": "Nowa wizyta",
+  "patients.card.visits": "Wizyty",
+  "patients.card.weight": "Masa ciała",
+  "patients.card.lastVisit": "Ostatnia wizyta",
+  "patients.card.totalPaid": "Łącznie zapłacono",
+  "patients.card.overview": "Przegląd",
+  "patients.card.medcard": "Karta medyczna",
+  "patients.card.labs": "Badania",
+  "patients.card.files": "Pliki",
+  "patients.card.documents": "Dokumenty",
+  "patients.card.visitUnavailable": "Funkcja tworzenia nowej wizyty jest niedostępna."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.aiTitle": "AI-підсумок пацієнта",
+  "patients.card.aiDescription": "Короткий клінічний огляд із посиланнями на записи пацієнта.",
+  "patients.card.aiCreate": "Створити AI-підсумок",
+  "patients.card.passport": "Паспорт пацієнта",
+  "patients.card.nextVaccination": "наступна",
+  "patients.card.vaccinationDate": "Дата щеплення",
+  "patients.card.vaccineName": "Назва вакцини",
+  "patients.card.doctorNotes": "Нотатки лікаря",
+  "patients.card.doctorNotesPlaceholder": "Алергії, поведінка, особливості лікування, важливі примітки...",
+  "patients.card.saveNote": "Зберегти нотатку"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.aiTitle": "Patient AI summary",
+  "patients.card.aiDescription": "A short clinical overview with links to the patient’s records.",
+  "patients.card.aiCreate": "Create AI summary",
+  "patients.card.passport": "Patient details",
+  "patients.card.nextVaccination": "next",
+  "patients.card.vaccinationDate": "Vaccination date",
+  "patients.card.vaccineName": "Vaccine name",
+  "patients.card.doctorNotes": "Veterinarian notes",
+  "patients.card.doctorNotesPlaceholder": "Allergies, behaviour, treatment details and important notes...",
+  "patients.card.saveNote": "Save note"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.aiTitle": "KI-Zusammenfassung des Patienten",
+  "patients.card.aiDescription": "Kurzer klinischer Überblick mit Verweisen auf die Patienteneinträge.",
+  "patients.card.aiCreate": "KI-Zusammenfassung erstellen",
+  "patients.card.passport": "Patientendaten",
+  "patients.card.nextVaccination": "nächste",
+  "patients.card.vaccinationDate": "Impfdatum",
+  "patients.card.vaccineName": "Impfstoff",
+  "patients.card.doctorNotes": "Notizen des Tierarztes",
+  "patients.card.doctorNotesPlaceholder": "Allergien, Verhalten, Behandlungsdetails und wichtige Hinweise...",
+  "patients.card.saveNote": "Notiz speichern"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.aiTitle": "Podsumowanie pacjenta przez AI",
+  "patients.card.aiDescription": "Krótki przegląd kliniczny z odnośnikami do dokumentacji pacjenta.",
+  "patients.card.aiCreate": "Utwórz podsumowanie AI",
+  "patients.card.passport": "Dane pacjenta",
+  "patients.card.nextVaccination": "następne",
+  "patients.card.vaccinationDate": "Data szczepienia",
+  "patients.card.vaccineName": "Nazwa szczepionki",
+  "patients.card.doctorNotes": "Notatki lekarza",
+  "patients.card.doctorNotesPlaceholder": "Alergie, zachowanie, szczegóły leczenia i ważne uwagi...",
+  "patients.card.saveNote": "Zapisz notatkę"
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.aiCreating": "Створюємо підсумок…",
+  "patients.card.aiAnalyzing": "PUG AI аналізує картку пацієнта…",
+  "patients.card.aiCreated": "AI-підсумок створено",
+  "patients.card.attentionToday": "Важливо сьогодні",
+  "patients.card.keyFacts": "Ключові факти",
+  "patients.card.aiError": "Не вдалося створити AI-підсумок.",
+  "patients.card.aiRefresh": "Оновити AI-підсумок",
+  "patients.card.aiLoading": "Завантажуємо AI-підсумок…",
+  "patients.card.sourceVisit": "Візит",
+  "patients.card.source": "Джерело",
+  "patients.card.notesSaving": "Збереження…",
+  "patients.card.notesSaved": "Збережено",
+  "patients.card.notesSaveFailed": "Не вдалося зберегти",
+  "patients.card.notesSaveError": "Сталася помилка під час збереження нотатки."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.aiCreating": "Creating summary…",
+  "patients.card.aiAnalyzing": "PUG AI is analysing the patient record…",
+  "patients.card.aiCreated": "AI summary created",
+  "patients.card.attentionToday": "Important today",
+  "patients.card.keyFacts": "Key facts",
+  "patients.card.aiError": "Could not create the AI summary.",
+  "patients.card.aiRefresh": "Refresh AI summary",
+  "patients.card.aiLoading": "Loading AI summary…",
+  "patients.card.sourceVisit": "Visit",
+  "patients.card.source": "Source",
+  "patients.card.notesSaving": "Saving…",
+  "patients.card.notesSaved": "Saved",
+  "patients.card.notesSaveFailed": "Could not save",
+  "patients.card.notesSaveError": "An error occurred while saving the note."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.aiCreating": "KI-Zusammenfassung wird erstellt…",
+  "patients.card.aiAnalyzing": "PUG AI analysiert die Patientenakte…",
+  "patients.card.aiCreated": "KI-Zusammenfassung erstellt",
+  "patients.card.attentionToday": "Heute wichtig",
+  "patients.card.keyFacts": "Wichtige Fakten",
+  "patients.card.aiError": "Die KI-Zusammenfassung konnte nicht erstellt werden.",
+  "patients.card.aiRefresh": "KI-Zusammenfassung aktualisieren",
+  "patients.card.aiLoading": "KI-Zusammenfassung wird geladen…",
+  "patients.card.sourceVisit": "Besuch",
+  "patients.card.source": "Quelle",
+  "patients.card.notesSaving": "Wird gespeichert…",
+  "patients.card.notesSaved": "Gespeichert",
+  "patients.card.notesSaveFailed": "Speichern fehlgeschlagen",
+  "patients.card.notesSaveError": "Beim Speichern der Notiz ist ein Fehler aufgetreten."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.aiCreating": "Tworzenie podsumowania…",
+  "patients.card.aiAnalyzing": "PUG AI analizuje kartę pacjenta…",
+  "patients.card.aiCreated": "Utworzono podsumowanie AI",
+  "patients.card.attentionToday": "Ważne dzisiaj",
+  "patients.card.keyFacts": "Kluczowe informacje",
+  "patients.card.aiError": "Nie udało się utworzyć podsumowania AI.",
+  "patients.card.aiRefresh": "Odśwież podsumowanie AI",
+  "patients.card.aiLoading": "Ładowanie podsumowania AI…",
+  "patients.card.sourceVisit": "Wizyta",
+  "patients.card.source": "Źródło",
+  "patients.card.notesSaving": "Zapisywanie…",
+  "patients.card.notesSaved": "Zapisano",
+  "patients.card.notesSaveFailed": "Nie udało się zapisać",
+  "patients.card.notesSaveError": "Wystąpił błąd podczas zapisywania notatki."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.recordNotFound": "Запис не знайдено",
+  "patients.card.refreshTryAgain": "Оновіть сторінку та спробуйте ще раз.",
+  "patients.card.vaccinationFallback": "Вакцинація",
+  "patients.card.deleteVaccination": "Видалити вакцинацію",
+  "patients.card.actionCannotUndo": "Цю дію неможливо буде скасувати.",
+  "patients.card.vaccinationDeleted": "Вакцинацію видалено",
+  "patients.card.deleteFailed": "Не вдалося видалити",
+  "patients.card.statusUpdateFailed": "Не вдалося змінити статус",
+  "patients.card.deathDate": "Дата смерті",
+  "patients.card.deathDateText": "Вкажіть дату смерті пацієнта.",
+  "patients.card.date": "Дата",
+  "patients.card.confirm": "Підтвердити",
+  "patients.card.cancel": "Скасувати",
+  "patients.card.addWeight": "Додати вагу",
+  "patients.card.patient": "Пацієнт",
+  "patients.card.weightKg": "Вага, кг",
+  "patients.card.weightExample": "Наприклад: 21.4",
+  "patients.card.save": "Зберегти",
+  "patients.card.invalidWeight": "Некоректна вага",
+  "patients.card.invalidWeightText": "Вкажіть вагу числом, наприклад 21.4 кг.",
+  "patients.card.weightSaveFailed": "Не вдалося зберегти вагу",
+  "patients.card.weightSaveError": "Сталася помилка під час збереження ваги."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.recordNotFound": "Record not found",
+  "patients.card.refreshTryAgain": "Refresh the page and try again.",
+  "patients.card.vaccinationFallback": "Vaccination",
+  "patients.card.deleteVaccination": "Delete vaccination",
+  "patients.card.actionCannotUndo": "This action cannot be undone.",
+  "patients.card.vaccinationDeleted": "Vaccination deleted",
+  "patients.card.deleteFailed": "Could not delete",
+  "patients.card.statusUpdateFailed": "Could not update the status",
+  "patients.card.deathDate": "Date of death",
+  "patients.card.deathDateText": "Enter the patient’s date of death.",
+  "patients.card.date": "Date",
+  "patients.card.confirm": "Confirm",
+  "patients.card.cancel": "Cancel",
+  "patients.card.addWeight": "Add weight",
+  "patients.card.patient": "Patient",
+  "patients.card.weightKg": "Weight, kg",
+  "patients.card.weightExample": "For example: 21.4",
+  "patients.card.save": "Save",
+  "patients.card.invalidWeight": "Invalid weight",
+  "patients.card.invalidWeightText": "Enter the weight as a number, for example 21.4 kg.",
+  "patients.card.weightSaveFailed": "Could not save weight",
+  "patients.card.weightSaveError": "An error occurred while saving the weight."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.recordNotFound": "Eintrag nicht gefunden",
+  "patients.card.refreshTryAgain": "Aktualisieren Sie die Seite und versuchen Sie es erneut.",
+  "patients.card.vaccinationFallback": "Impfung",
+  "patients.card.deleteVaccination": "Impfung löschen",
+  "patients.card.actionCannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden.",
+  "patients.card.vaccinationDeleted": "Impfung gelöscht",
+  "patients.card.deleteFailed": "Löschen fehlgeschlagen",
+  "patients.card.statusUpdateFailed": "Status konnte nicht geändert werden",
+  "patients.card.deathDate": "Sterbedatum",
+  "patients.card.deathDateText": "Geben Sie das Sterbedatum des Patienten ein.",
+  "patients.card.date": "Datum",
+  "patients.card.confirm": "Bestätigen",
+  "patients.card.cancel": "Abbrechen",
+  "patients.card.addWeight": "Gewicht hinzufügen",
+  "patients.card.patient": "Patient",
+  "patients.card.weightKg": "Gewicht, kg",
+  "patients.card.weightExample": "Zum Beispiel: 21,4",
+  "patients.card.save": "Speichern",
+  "patients.card.invalidWeight": "Ungültiges Gewicht",
+  "patients.card.invalidWeightText": "Geben Sie das Gewicht als Zahl ein, zum Beispiel 21,4 kg.",
+  "patients.card.weightSaveFailed": "Gewicht konnte nicht gespeichert werden",
+  "patients.card.weightSaveError": "Beim Speichern des Gewichts ist ein Fehler aufgetreten."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.recordNotFound": "Nie znaleziono wpisu",
+  "patients.card.refreshTryAgain": "Odśwież stronę i spróbuj ponownie.",
+  "patients.card.vaccinationFallback": "Szczepienie",
+  "patients.card.deleteVaccination": "Usuń szczepienie",
+  "patients.card.actionCannotUndo": "Tej czynności nie można cofnąć.",
+  "patients.card.vaccinationDeleted": "Szczepienie usunięte",
+  "patients.card.deleteFailed": "Nie udało się usunąć",
+  "patients.card.statusUpdateFailed": "Nie udało się zmienić statusu",
+  "patients.card.deathDate": "Data śmierci",
+  "patients.card.deathDateText": "Podaj datę śmierci pacjenta.",
+  "patients.card.date": "Data",
+  "patients.card.confirm": "Potwierdź",
+  "patients.card.cancel": "Anuluj",
+  "patients.card.addWeight": "Dodaj masę ciała",
+  "patients.card.patient": "Pacjent",
+  "patients.card.weightKg": "Masa ciała, kg",
+  "patients.card.weightExample": "Na przykład: 21,4",
+  "patients.card.save": "Zapisz",
+  "patients.card.invalidWeight": "Nieprawidłowa masa ciała",
+  "patients.card.invalidWeightText": "Podaj masę ciała jako liczbę, na przykład 21,4 kg.",
+  "patients.card.weightSaveFailed": "Nie udało się zapisać masy ciała",
+  "patients.card.weightSaveError": "Wystąpił błąd podczas zapisywania masy ciała."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.vaccine": "Вакцина",
+  "patients.card.series": "Серія",
+  "patients.card.nextVaccinationShort": "Наступна",
+  "patients.card.editVaccination": "Редагувати вакцинацію",
+  "patients.card.noVaccinations": "Вакцинацій ще немає",
+  "patients.card.noVaccinationsText": "Додайте першу вакцинацію пацієнта.",
+  "patients.card.prevention": "ПРОФІЛАКТИКА",
+  "patients.card.vaccinations": "Вакцинації",
+  "patients.card.addVaccination": "Додати вакцинацію",
+  "patients.card.vaccineCategory.viral": "Комплексна / вірусна",
+  "patients.card.vaccineCategory.rabies": "Сказ",
+  "patients.card.vaccineCategory.lepto": "Лептоспіроз",
+  "patients.card.vaccineCategory.respiratory": "Респіраторна",
+  "patients.card.vaccineCategory.felv": "FeLV",
+  "patients.card.vaccineCategory.combined": "Комбінована"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.vaccine": "Vaccine",
+  "patients.card.series": "Batch",
+  "patients.card.nextVaccinationShort": "Next",
+  "patients.card.editVaccination": "Edit vaccination",
+  "patients.card.noVaccinations": "No vaccinations yet",
+  "patients.card.noVaccinationsText": "Add the patient’s first vaccination.",
+  "patients.card.prevention": "PREVENTION",
+  "patients.card.vaccinations": "Vaccinations",
+  "patients.card.addVaccination": "Add vaccination",
+  "patients.card.vaccineCategory.viral": "Combined / viral",
+  "patients.card.vaccineCategory.rabies": "Rabies",
+  "patients.card.vaccineCategory.lepto": "Leptospirosis",
+  "patients.card.vaccineCategory.respiratory": "Respiratory",
+  "patients.card.vaccineCategory.felv": "FeLV",
+  "patients.card.vaccineCategory.combined": "Combined"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.vaccine": "Impfstoff",
+  "patients.card.series": "Charge",
+  "patients.card.nextVaccinationShort": "Nächste",
+  "patients.card.editVaccination": "Impfung bearbeiten",
+  "patients.card.noVaccinations": "Noch keine Impfungen",
+  "patients.card.noVaccinationsText": "Fügen Sie die erste Impfung des Patienten hinzu.",
+  "patients.card.prevention": "VORSORGE",
+  "patients.card.vaccinations": "Impfungen",
+  "patients.card.addVaccination": "Impfung hinzufügen",
+  "patients.card.vaccineCategory.viral": "Kombiniert / viral",
+  "patients.card.vaccineCategory.rabies": "Tollwut",
+  "patients.card.vaccineCategory.lepto": "Leptospirose",
+  "patients.card.vaccineCategory.respiratory": "Atemwege",
+  "patients.card.vaccineCategory.felv": "FeLV",
+  "patients.card.vaccineCategory.combined": "Kombiniert"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.vaccine": "Szczepionka",
+  "patients.card.series": "Seria",
+  "patients.card.nextVaccinationShort": "Następne",
+  "patients.card.editVaccination": "Edytuj szczepienie",
+  "patients.card.noVaccinations": "Brak szczepień",
+  "patients.card.noVaccinationsText": "Dodaj pierwsze szczepienie pacjenta.",
+  "patients.card.prevention": "PROFILAKTYKA",
+  "patients.card.vaccinations": "Szczepienia",
+  "patients.card.addVaccination": "Dodaj szczepienie",
+  "patients.card.vaccineCategory.viral": "Złożona / wirusowa",
+  "patients.card.vaccineCategory.rabies": "Wścieklizna",
+  "patients.card.vaccineCategory.lepto": "Leptospiroza",
+  "patients.card.vaccineCategory.respiratory": "Oddechowa",
+  "patients.card.vaccineCategory.felv": "FeLV",
+  "patients.card.vaccineCategory.combined": "Złożona"
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.editing": "РЕДАГУВАННЯ",
+  "patients.card.close": "Закрити",
+  "patients.card.batchNumber": "Серія / партія",
+  "patients.card.optional": "Необов’язково",
+  "patients.card.saveChanges": "Зберегти зміни",
+  "patients.card.enterDate": "Вкажіть дату",
+  "patients.card.vaccinationDateRequired": "Дата вакцинації є обов’язковою.",
+  "patients.card.vaccineNotFound": "Вакцину не знайдено",
+  "patients.card.selectProductAgain": "Оберіть препарат ще раз.",
+  "patients.card.saving": "Зберігаємо…",
+  "patients.card.vaccinationUpdated": "Вакцинацію оновлено",
+  "patients.card.updateFailed": "Не вдалося оновити"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.editing": "EDITING",
+  "patients.card.close": "Close",
+  "patients.card.batchNumber": "Batch number",
+  "patients.card.optional": "Optional",
+  "patients.card.saveChanges": "Save changes",
+  "patients.card.enterDate": "Enter a date",
+  "patients.card.vaccinationDateRequired": "The vaccination date is required.",
+  "patients.card.vaccineNotFound": "Vaccine not found",
+  "patients.card.selectProductAgain": "Select the product again.",
+  "patients.card.saving": "Saving…",
+  "patients.card.vaccinationUpdated": "Vaccination updated",
+  "patients.card.updateFailed": "Could not update"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.editing": "BEARBEITUNG",
+  "patients.card.close": "Schließen",
+  "patients.card.batchNumber": "Chargennummer",
+  "patients.card.optional": "Optional",
+  "patients.card.saveChanges": "Änderungen speichern",
+  "patients.card.enterDate": "Datum eingeben",
+  "patients.card.vaccinationDateRequired": "Das Impfdatum ist erforderlich.",
+  "patients.card.vaccineNotFound": "Impfstoff nicht gefunden",
+  "patients.card.selectProductAgain": "Wählen Sie das Präparat erneut aus.",
+  "patients.card.saving": "Wird gespeichert…",
+  "patients.card.vaccinationUpdated": "Impfung aktualisiert",
+  "patients.card.updateFailed": "Aktualisierung fehlgeschlagen"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.editing": "EDYCJA",
+  "patients.card.close": "Zamknij",
+  "patients.card.batchNumber": "Numer serii",
+  "patients.card.optional": "Opcjonalnie",
+  "patients.card.saveChanges": "Zapisz zmiany",
+  "patients.card.enterDate": "Podaj datę",
+  "patients.card.vaccinationDateRequired": "Data szczepienia jest wymagana.",
+  "patients.card.vaccineNotFound": "Nie znaleziono szczepionki",
+  "patients.card.selectProductAgain": "Wybierz preparat ponownie.",
+  "patients.card.saving": "Zapisywanie…",
+  "patients.card.vaccinationUpdated": "Szczepienie zaktualizowane",
+  "patients.card.updateFailed": "Nie udało się zaktualizować"
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.noVaccineCatalog": "Немає готового каталогу",
+  "patients.card.noVaccineCatalogText": "Для цього виду тварини поки немає готового каталогу вакцинацій.",
+  "patients.card.vaccinationEyebrow": "ВАКЦИНАЦІЯ",
+  "patients.card.popularBrands": "Популярні бренди",
+  "patients.card.chooseVaccineBrand": "Оберіть бренд вакцини",
+  "patients.card.other": "Інші",
+  "patients.card.selectedVaccine": "ОБРАНА ВАКЦИНА",
+  "patients.card.batchExample": "Наприклад: A12345",
+  "patients.card.chooseAnother": "Обрати іншу",
+  "patients.card.saveVaccination": "Зберегти вакцинацію",
+  "patients.card.enterVaccinationDate": "Вкажіть дату вакцинації",
+  "patients.card.vaccinationSaved": "Вакцинацію збережено",
+  "patients.card.vaccinationSaveFailed": "Не вдалося зберегти вакцинацію"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.noVaccineCatalog": "No vaccine catalogue available",
+  "patients.card.noVaccineCatalogText": "A vaccination catalogue is not yet available for this animal species.",
+  "patients.card.vaccinationEyebrow": "VACCINATION",
+  "patients.card.popularBrands": "Popular brands",
+  "patients.card.chooseVaccineBrand": "Choose a vaccine brand",
+  "patients.card.other": "Other",
+  "patients.card.selectedVaccine": "SELECTED VACCINE",
+  "patients.card.batchExample": "For example: A12345",
+  "patients.card.chooseAnother": "Choose another",
+  "patients.card.saveVaccination": "Save vaccination",
+  "patients.card.enterVaccinationDate": "Enter the vaccination date",
+  "patients.card.vaccinationSaved": "Vaccination saved",
+  "patients.card.vaccinationSaveFailed": "Could not save the vaccination"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.noVaccineCatalog": "Kein Impfstoffkatalog verfügbar",
+  "patients.card.noVaccineCatalogText": "Für diese Tierart ist noch kein Impfstoffkatalog verfügbar.",
+  "patients.card.vaccinationEyebrow": "IMPFUNG",
+  "patients.card.popularBrands": "Beliebte Marken",
+  "patients.card.chooseVaccineBrand": "Impfstoffmarke auswählen",
+  "patients.card.other": "Andere",
+  "patients.card.selectedVaccine": "AUSGEWÄHLTER IMPFSTOFF",
+  "patients.card.batchExample": "Zum Beispiel: A12345",
+  "patients.card.chooseAnother": "Anderen auswählen",
+  "patients.card.saveVaccination": "Impfung speichern",
+  "patients.card.enterVaccinationDate": "Impfdatum eingeben",
+  "patients.card.vaccinationSaved": "Impfung gespeichert",
+  "patients.card.vaccinationSaveFailed": "Impfung konnte nicht gespeichert werden"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.noVaccineCatalog": "Brak katalogu szczepionek",
+  "patients.card.noVaccineCatalogText": "Dla tego gatunku zwierzęcia katalog szczepionek nie jest jeszcze dostępny.",
+  "patients.card.vaccinationEyebrow": "SZCZEPIENIE",
+  "patients.card.popularBrands": "Popularne marki",
+  "patients.card.chooseVaccineBrand": "Wybierz markę szczepionki",
+  "patients.card.other": "Inne",
+  "patients.card.selectedVaccine": "WYBRANA SZCZEPIONKA",
+  "patients.card.batchExample": "Na przykład: A12345",
+  "patients.card.chooseAnother": "Wybierz inną",
+  "patients.card.saveVaccination": "Zapisz szczepienie",
+  "patients.card.enterVaccinationDate": "Podaj datę szczepienia",
+  "patients.card.vaccinationSaved": "Szczepienie zapisane",
+  "patients.card.vaccinationSaveFailed": "Nie udało się zapisać szczepienia"
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.weightDynamics": "Динаміка ваги",
+  "patients.card.weightHistoryDescription": "Історія вимірювань маси тіла пацієнта.",
+  "patients.card.currentWeight": "Поточна вага",
+  "patients.card.fromPreviousMeasurement": "від попереднього вимірювання",
+  "patients.card.noPreviousMeasurement": "Немає попереднього вимірювання",
+  "patients.card.manual": "Вручну",
+  "patients.card.noWeightHistory": "Історії ваги поки немає.",
+  "patients.card.kg": "кг"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.weightDynamics": "Weight history",
+  "patients.card.weightHistoryDescription": "History of the patient’s body weight measurements.",
+  "patients.card.currentWeight": "Current weight",
+  "patients.card.fromPreviousMeasurement": "since the previous measurement",
+  "patients.card.noPreviousMeasurement": "No previous measurement",
+  "patients.card.manual": "Manual",
+  "patients.card.noWeightHistory": "No weight history yet.",
+  "patients.card.kg": "kg"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.weightDynamics": "Gewichtsverlauf",
+  "patients.card.weightHistoryDescription": "Verlauf der Körpergewichtsmessungen des Patienten.",
+  "patients.card.currentWeight": "Aktuelles Gewicht",
+  "patients.card.fromPreviousMeasurement": "seit der vorherigen Messung",
+  "patients.card.noPreviousMeasurement": "Keine vorherige Messung",
+  "patients.card.manual": "Manuell",
+  "patients.card.noWeightHistory": "Noch kein Gewichtsverlauf vorhanden.",
+  "patients.card.kg": "kg"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.weightDynamics": "Historia masy ciała",
+  "patients.card.weightHistoryDescription": "Historia pomiarów masy ciała pacjenta.",
+  "patients.card.currentWeight": "Aktualna masa ciała",
+  "patients.card.fromPreviousMeasurement": "od poprzedniego pomiaru",
+  "patients.card.noPreviousMeasurement": "Brak poprzedniego pomiaru",
+  "patients.card.manual": "Ręcznie",
+  "patients.card.noWeightHistory": "Brak historii masy ciała.",
+  "patients.card.kg": "kg"
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.diagnosis.status.active": "Активний",
+  "patients.card.diagnosis.status.remission": "Ремісія",
+  "patients.card.diagnosis.status.resolved": "Завершений",
+  "patients.card.diagnosis.status.entered_in_error": "Помилковий запис",
+  "patients.card.diagnosis.certainty.provisional": "Попередній",
+  "patients.card.diagnosis.certainty.confirmed": "Підтверджений",
+  "patients.card.diagnosis.severity.mild": "Легкий",
+  "patients.card.diagnosis.severity.moderate": "Середній",
+  "patients.card.diagnosis.severity.severe": "Тяжкий",
+  "patients.card.diagnosis.severity.critical": "Критичний",
+  "patients.card.diagnosis.dateNotSpecified": "Дата не вказана",
+  "patients.card.diagnosis.untitled": "Без назви",
+  "patients.card.diagnosis.history": "Історія",
+  "patients.card.diagnosis.edit": "Редагувати",
+  "patients.card.diagnosis.toRemission": "У ремісію",
+  "patients.card.diagnosis.resolve": "Завершити",
+  "patients.card.diagnosis.reactivate": "Повернути в активні",
+  "patients.card.diagnosis.markError": "Помилковий",
+  "patients.card.diagnosis.activeTitle": "Активні діагнози",
+  "patients.card.diagnosis.activeDescription": "Поточний клінічний контекст пацієнта, незалежний від окремого візиту.",
+  "patients.card.diagnosis.fullHistory": "Повна історія",
+  "patients.card.diagnosis.add": "Додати діагноз",
+  "patients.card.diagnosis.loadFailed": "Не вдалося завантажити діагнози",
+  "patients.card.diagnosis.loadFailedText": "Клінічний контекст не вдалося завантажити.",
+  "patients.card.diagnosis.retry": "Повторити",
+  "patients.card.diagnosis.empty": "Активні діагнози не зафіксовані",
+  "patients.card.diagnosis.emptyText": "Це означає відсутність записів, а не медичний висновок про здоров’я."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.diagnosis.status.active": "Active",
+  "patients.card.diagnosis.status.remission": "Remission",
+  "patients.card.diagnosis.status.resolved": "Resolved",
+  "patients.card.diagnosis.status.entered_in_error": "Entered in error",
+  "patients.card.diagnosis.certainty.provisional": "Provisional",
+  "patients.card.diagnosis.certainty.confirmed": "Confirmed",
+  "patients.card.diagnosis.severity.mild": "Mild",
+  "patients.card.diagnosis.severity.moderate": "Moderate",
+  "patients.card.diagnosis.severity.severe": "Severe",
+  "patients.card.diagnosis.severity.critical": "Critical",
+  "patients.card.diagnosis.dateNotSpecified": "Date not specified",
+  "patients.card.diagnosis.untitled": "Untitled",
+  "patients.card.diagnosis.history": "History",
+  "patients.card.diagnosis.edit": "Edit",
+  "patients.card.diagnosis.toRemission": "Set to remission",
+  "patients.card.diagnosis.resolve": "Resolve",
+  "patients.card.diagnosis.reactivate": "Return to active",
+  "patients.card.diagnosis.markError": "Mark as error",
+  "patients.card.diagnosis.activeTitle": "Active diagnoses",
+  "patients.card.diagnosis.activeDescription": "The patient’s current clinical context, independent of an individual visit.",
+  "patients.card.diagnosis.fullHistory": "Full history",
+  "patients.card.diagnosis.add": "Add diagnosis",
+  "patients.card.diagnosis.loadFailed": "Could not load diagnoses",
+  "patients.card.diagnosis.loadFailedText": "The clinical context could not be loaded.",
+  "patients.card.diagnosis.retry": "Try again",
+  "patients.card.diagnosis.empty": "No active diagnoses recorded",
+  "patients.card.diagnosis.emptyText": "This means there are no records and is not a medical conclusion about the patient’s health."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.diagnosis.status.active": "Aktiv",
+  "patients.card.diagnosis.status.remission": "Remission",
+  "patients.card.diagnosis.status.resolved": "Abgeschlossen",
+  "patients.card.diagnosis.status.entered_in_error": "Fehlerhafter Eintrag",
+  "patients.card.diagnosis.certainty.provisional": "Vorläufig",
+  "patients.card.diagnosis.certainty.confirmed": "Bestätigt",
+  "patients.card.diagnosis.severity.mild": "Leicht",
+  "patients.card.diagnosis.severity.moderate": "Mittel",
+  "patients.card.diagnosis.severity.severe": "Schwer",
+  "patients.card.diagnosis.severity.critical": "Kritisch",
+  "patients.card.diagnosis.dateNotSpecified": "Datum nicht angegeben",
+  "patients.card.diagnosis.untitled": "Ohne Bezeichnung",
+  "patients.card.diagnosis.history": "Verlauf",
+  "patients.card.diagnosis.edit": "Bearbeiten",
+  "patients.card.diagnosis.toRemission": "In Remission setzen",
+  "patients.card.diagnosis.resolve": "Abschließen",
+  "patients.card.diagnosis.reactivate": "Wieder aktivieren",
+  "patients.card.diagnosis.markError": "Als fehlerhaft markieren",
+  "patients.card.diagnosis.activeTitle": "Aktive Diagnosen",
+  "patients.card.diagnosis.activeDescription": "Der aktuelle klinische Kontext des Patienten, unabhängig von einem einzelnen Besuch.",
+  "patients.card.diagnosis.fullHistory": "Vollständiger Verlauf",
+  "patients.card.diagnosis.add": "Diagnose hinzufügen",
+  "patients.card.diagnosis.loadFailed": "Diagnosen konnten nicht geladen werden",
+  "patients.card.diagnosis.loadFailedText": "Der klinische Kontext konnte nicht geladen werden.",
+  "patients.card.diagnosis.retry": "Erneut versuchen",
+  "patients.card.diagnosis.empty": "Keine aktiven Diagnosen erfasst",
+  "patients.card.diagnosis.emptyText": "Dies bedeutet, dass keine Einträge vorhanden sind, und ist keine medizinische Aussage über den Gesundheitszustand."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.diagnosis.status.active": "Aktywny",
+  "patients.card.diagnosis.status.remission": "Remisja",
+  "patients.card.diagnosis.status.resolved": "Zakończony",
+  "patients.card.diagnosis.status.entered_in_error": "Błędny wpis",
+  "patients.card.diagnosis.certainty.provisional": "Wstępne",
+  "patients.card.diagnosis.certainty.confirmed": "Potwierdzone",
+  "patients.card.diagnosis.severity.mild": "Łagodne",
+  "patients.card.diagnosis.severity.moderate": "Umiarkowane",
+  "patients.card.diagnosis.severity.severe": "Ciężkie",
+  "patients.card.diagnosis.severity.critical": "Krytyczne",
+  "patients.card.diagnosis.dateNotSpecified": "Nie podano daty",
+  "patients.card.diagnosis.untitled": "Bez nazwy",
+  "patients.card.diagnosis.history": "Historia",
+  "patients.card.diagnosis.edit": "Edytuj",
+  "patients.card.diagnosis.toRemission": "Ustaw remisję",
+  "patients.card.diagnosis.resolve": "Zakończ",
+  "patients.card.diagnosis.reactivate": "Przywróć jako aktywne",
+  "patients.card.diagnosis.markError": "Oznacz jako błędne",
+  "patients.card.diagnosis.activeTitle": "Aktywne diagnozy",
+  "patients.card.diagnosis.activeDescription": "Aktualny kontekst kliniczny pacjenta, niezależny od pojedynczej wizyty.",
+  "patients.card.diagnosis.fullHistory": "Pełna historia",
+  "patients.card.diagnosis.add": "Dodaj diagnozę",
+  "patients.card.diagnosis.loadFailed": "Nie udało się załadować diagnoz",
+  "patients.card.diagnosis.loadFailedText": "Nie udało się załadować kontekstu klinicznego.",
+  "patients.card.diagnosis.retry": "Spróbuj ponownie",
+  "patients.card.diagnosis.empty": "Brak aktywnych diagnoz",
+  "patients.card.diagnosis.emptyText": "Oznacza to brak wpisów i nie jest medyczną oceną stanu zdrowia pacjenta."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.diagnosis.editTitle": "Редагувати діагноз",
+  "patients.card.diagnosis.addTitle": "Додати діагноз",
+  "patients.card.diagnosis.name": "Діагноз",
+  "patients.card.diagnosis.nameExample": "Наприклад: атопічний дерматит",
+  "patients.card.diagnosis.code": "Код",
+  "patients.card.diagnosis.diagnosedAt": "Дата постановки",
+  "patients.card.diagnosis.certainty": "Підтвердження",
+  "patients.card.diagnosis.severity": "Тяжкість",
+  "patients.card.diagnosis.notSpecified": "Не вказана",
+  "patients.card.diagnosis.onsetAt": "Початок стану",
+  "patients.card.diagnosis.clinicalNote": "Клінічна примітка",
+  "patients.card.diagnosis.notePlaceholder": "Короткий контекст, не повний запис візиту",
+  "patients.card.diagnosis.addButton": "Додати",
+  "patients.card.diagnosis.nameRequired": "Вкажіть назву діагнозу.",
+  "patients.card.diagnosis.saving": "Збереження…",
+  "patients.card.diagnosis.saveFailed": "Не вдалося зберегти діагноз."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.diagnosis.editTitle": "Edit diagnosis",
+  "patients.card.diagnosis.addTitle": "Add diagnosis",
+  "patients.card.diagnosis.name": "Diagnosis",
+  "patients.card.diagnosis.nameExample": "For example: atopic dermatitis",
+  "patients.card.diagnosis.code": "Code",
+  "patients.card.diagnosis.diagnosedAt": "Diagnosis date",
+  "patients.card.diagnosis.certainty": "Certainty",
+  "patients.card.diagnosis.severity": "Severity",
+  "patients.card.diagnosis.notSpecified": "Not specified",
+  "patients.card.diagnosis.onsetAt": "Condition onset",
+  "patients.card.diagnosis.clinicalNote": "Clinical note",
+  "patients.card.diagnosis.notePlaceholder": "Brief context, not the full visit record",
+  "patients.card.diagnosis.addButton": "Add",
+  "patients.card.diagnosis.nameRequired": "Enter the diagnosis name.",
+  "patients.card.diagnosis.saving": "Saving…",
+  "patients.card.diagnosis.saveFailed": "Could not save the diagnosis."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.diagnosis.editTitle": "Diagnose bearbeiten",
+  "patients.card.diagnosis.addTitle": "Diagnose hinzufügen",
+  "patients.card.diagnosis.name": "Diagnose",
+  "patients.card.diagnosis.nameExample": "Zum Beispiel: atopische Dermatitis",
+  "patients.card.diagnosis.code": "Code",
+  "patients.card.diagnosis.diagnosedAt": "Diagnosedatum",
+  "patients.card.diagnosis.certainty": "Sicherheit",
+  "patients.card.diagnosis.severity": "Schweregrad",
+  "patients.card.diagnosis.notSpecified": "Nicht angegeben",
+  "patients.card.diagnosis.onsetAt": "Beginn der Erkrankung",
+  "patients.card.diagnosis.clinicalNote": "Klinische Notiz",
+  "patients.card.diagnosis.notePlaceholder": "Kurzer Kontext, kein vollständiger Besuchseintrag",
+  "patients.card.diagnosis.addButton": "Hinzufügen",
+  "patients.card.diagnosis.nameRequired": "Geben Sie den Namen der Diagnose ein.",
+  "patients.card.diagnosis.saving": "Wird gespeichert…",
+  "patients.card.diagnosis.saveFailed": "Die Diagnose konnte nicht gespeichert werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.diagnosis.editTitle": "Edytuj diagnozę",
+  "patients.card.diagnosis.addTitle": "Dodaj diagnozę",
+  "patients.card.diagnosis.name": "Diagnoza",
+  "patients.card.diagnosis.nameExample": "Na przykład: atopowe zapalenie skóry",
+  "patients.card.diagnosis.code": "Kod",
+  "patients.card.diagnosis.diagnosedAt": "Data rozpoznania",
+  "patients.card.diagnosis.certainty": "Pewność rozpoznania",
+  "patients.card.diagnosis.severity": "Stopień nasilenia",
+  "patients.card.diagnosis.notSpecified": "Nie podano",
+  "patients.card.diagnosis.onsetAt": "Początek choroby",
+  "patients.card.diagnosis.clinicalNote": "Notatka kliniczna",
+  "patients.card.diagnosis.notePlaceholder": "Krótki kontekst, bez pełnego zapisu wizyty",
+  "patients.card.diagnosis.addButton": "Dodaj",
+  "patients.card.diagnosis.nameRequired": "Podaj nazwę diagnozy.",
+  "patients.card.diagnosis.saving": "Zapisywanie…",
+  "patients.card.diagnosis.saveFailed": "Nie udało się zapisać diagnozy."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.diagnosis.moveToRemissionTitle": "Перевести у ремісію",
+  "patients.card.diagnosis.resolveTitle": "Завершити діагноз",
+  "patients.card.diagnosis.errorTitle": "Помилковий діагноз",
+  "patients.card.diagnosis.reactivateTitle": "Повернути в активні",
+  "patients.card.diagnosis.errorReasonText": "Вкажіть причину, чому діагноз є помилковим.",
+  "patients.card.diagnosis.statusReasonText": "За потреби вкажіть причину зміни статусу.",
+  "patients.card.diagnosis.reasonRequired": "Причина *",
+  "patients.card.diagnosis.statusReason": "Причина зміни статусу",
+  "patients.card.diagnosis.errorReasonExample": "Наприклад: діагноз не підтвердився",
+  "patients.card.diagnosis.markAsError": "Позначити помилковим",
+  "patients.card.diagnosis.statusChangeFailed": "Не вдалося змінити статус",
+  "patients.card.diagnosis.statusChangeFailedText": "Не вдалося змінити статус діагнозу.",
+  "patients.card.diagnosis.changeHistory": "ІСТОРІЯ ЗМІН",
+  "patients.card.diagnosis.fallbackName": "Діагноз",
+  "patients.card.diagnosis.historyLoading": "Завантаження історії…",
+  "patients.card.diagnosis.event.created": "Діагноз створено",
+  "patients.card.diagnosis.event.updated": "Дані оновлено",
+  "patients.card.diagnosis.event.status_changed": "Статус змінено",
+  "patients.card.diagnosis.emptyEvents": "Історія змін порожня.",
+  "patients.card.diagnosis.historyLoadFailed": "Не вдалося завантажити історію.",
+  "patients.card.diagnosis.historyTitle": "Історія діагнозів",
+  "patients.card.diagnosis.historyListLoadFailed": "Не вдалося завантажити історію діагнозів.",
+  "patients.card.diagnosis.noDiagnoses": "Діагнози ще не зафіксовані."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.diagnosis.moveToRemissionTitle": "Set diagnosis to remission",
+  "patients.card.diagnosis.resolveTitle": "Resolve diagnosis",
+  "patients.card.diagnosis.errorTitle": "Incorrect diagnosis",
+  "patients.card.diagnosis.reactivateTitle": "Return to active",
+  "patients.card.diagnosis.errorReasonText": "Enter why this diagnosis is incorrect.",
+  "patients.card.diagnosis.statusReasonText": "Optionally enter the reason for changing the status.",
+  "patients.card.diagnosis.reasonRequired": "Reason *",
+  "patients.card.diagnosis.statusReason": "Reason for status change",
+  "patients.card.diagnosis.errorReasonExample": "For example: the diagnosis was not confirmed",
+  "patients.card.diagnosis.markAsError": "Mark as incorrect",
+  "patients.card.diagnosis.statusChangeFailed": "Could not change status",
+  "patients.card.diagnosis.statusChangeFailedText": "The diagnosis status could not be changed.",
+  "patients.card.diagnosis.changeHistory": "CHANGE HISTORY",
+  "patients.card.diagnosis.fallbackName": "Diagnosis",
+  "patients.card.diagnosis.historyLoading": "Loading history…",
+  "patients.card.diagnosis.event.created": "Diagnosis created",
+  "patients.card.diagnosis.event.updated": "Details updated",
+  "patients.card.diagnosis.event.status_changed": "Status changed",
+  "patients.card.diagnosis.emptyEvents": "The change history is empty.",
+  "patients.card.diagnosis.historyLoadFailed": "Could not load the history.",
+  "patients.card.diagnosis.historyTitle": "Diagnosis history",
+  "patients.card.diagnosis.historyListLoadFailed": "Could not load the diagnosis history.",
+  "patients.card.diagnosis.noDiagnoses": "No diagnoses have been recorded yet."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.diagnosis.moveToRemissionTitle": "Diagnose in Remission setzen",
+  "patients.card.diagnosis.resolveTitle": "Diagnose abschließen",
+  "patients.card.diagnosis.errorTitle": "Fehlerhafte Diagnose",
+  "patients.card.diagnosis.reactivateTitle": "Wieder aktivieren",
+  "patients.card.diagnosis.errorReasonText": "Geben Sie an, warum diese Diagnose fehlerhaft ist.",
+  "patients.card.diagnosis.statusReasonText": "Geben Sie bei Bedarf den Grund für die Statusänderung an.",
+  "patients.card.diagnosis.reasonRequired": "Grund *",
+  "patients.card.diagnosis.statusReason": "Grund der Statusänderung",
+  "patients.card.diagnosis.errorReasonExample": "Zum Beispiel: Die Diagnose wurde nicht bestätigt",
+  "patients.card.diagnosis.markAsError": "Als fehlerhaft markieren",
+  "patients.card.diagnosis.statusChangeFailed": "Status konnte nicht geändert werden",
+  "patients.card.diagnosis.statusChangeFailedText": "Der Diagnosestatus konnte nicht geändert werden.",
+  "patients.card.diagnosis.changeHistory": "ÄNDERUNGSVERLAUF",
+  "patients.card.diagnosis.fallbackName": "Diagnose",
+  "patients.card.diagnosis.historyLoading": "Verlauf wird geladen…",
+  "patients.card.diagnosis.event.created": "Diagnose erstellt",
+  "patients.card.diagnosis.event.updated": "Daten aktualisiert",
+  "patients.card.diagnosis.event.status_changed": "Status geändert",
+  "patients.card.diagnosis.emptyEvents": "Der Änderungsverlauf ist leer.",
+  "patients.card.diagnosis.historyLoadFailed": "Der Verlauf konnte nicht geladen werden.",
+  "patients.card.diagnosis.historyTitle": "Diagnoseverlauf",
+  "patients.card.diagnosis.historyListLoadFailed": "Der Diagnoseverlauf konnte nicht geladen werden.",
+  "patients.card.diagnosis.noDiagnoses": "Es wurden noch keine Diagnosen erfasst."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.diagnosis.moveToRemissionTitle": "Ustaw diagnozę jako remisję",
+  "patients.card.diagnosis.resolveTitle": "Zakończ diagnozę",
+  "patients.card.diagnosis.errorTitle": "Błędna diagnoza",
+  "patients.card.diagnosis.reactivateTitle": "Przywróć jako aktywną",
+  "patients.card.diagnosis.errorReasonText": "Podaj powód uznania diagnozy za błędną.",
+  "patients.card.diagnosis.statusReasonText": "Opcjonalnie podaj powód zmiany statusu.",
+  "patients.card.diagnosis.reasonRequired": "Powód *",
+  "patients.card.diagnosis.statusReason": "Powód zmiany statusu",
+  "patients.card.diagnosis.errorReasonExample": "Na przykład: diagnoza nie została potwierdzona",
+  "patients.card.diagnosis.markAsError": "Oznacz jako błędną",
+  "patients.card.diagnosis.statusChangeFailed": "Nie udało się zmienić statusu",
+  "patients.card.diagnosis.statusChangeFailedText": "Nie udało się zmienić statusu diagnozy.",
+  "patients.card.diagnosis.changeHistory": "HISTORIA ZMIAN",
+  "patients.card.diagnosis.fallbackName": "Diagnoza",
+  "patients.card.diagnosis.historyLoading": "Ładowanie historii…",
+  "patients.card.diagnosis.event.created": "Utworzono diagnozę",
+  "patients.card.diagnosis.event.updated": "Zaktualizowano dane",
+  "patients.card.diagnosis.event.status_changed": "Zmieniono status",
+  "patients.card.diagnosis.emptyEvents": "Historia zmian jest pusta.",
+  "patients.card.diagnosis.historyLoadFailed": "Nie udało się załadować historii.",
+  "patients.card.diagnosis.historyTitle": "Historia diagnoz",
+  "patients.card.diagnosis.historyListLoadFailed": "Nie udało się załadować historii diagnoz.",
+  "patients.card.diagnosis.noDiagnoses": "Nie zapisano jeszcze żadnych diagnoz."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.visits.loading": "Завантаження візитів…",
+  "patients.card.visits.dateNotSpecified": "Дата не вказана",
+  "patients.card.visits.notSpecified": "Не вказано",
+  "patients.card.visits.completed": "Завершено",
+  "patients.card.visits.inProgress": "У процесі",
+  "patients.card.visits.planned": "Заплановано",
+  "patients.card.visits.waiting": "Очікує",
+  "patients.card.visits.empty": "Запланованих записів та візитів поки немає.",
+  "patients.card.visits.patientWaiting": "Пацієнт очікує прийому",
+  "patients.card.visits.scheduledAppointment": "Запланований прийом",
+  "patients.card.visits.calendarEntry": "Запис у календарі",
+  "patients.card.visits.reasonNotSpecified": "Причину звернення не вказано",
+  "patients.card.visits.openCalendarEntry": "Натисніть на картку, щоб відкрити запис",
+  "patients.card.visits.noDiagnosis": "Без встановленого діагнозу",
+  "patients.card.visits.complaintsNotSpecified": "Скарги не вказані",
+  "patients.card.visits.noPayment": "Без оплати",
+  "patients.card.visits.treatmentNotSpecified": "Лікування не вказано",
+  "patients.card.visits.outpatient": "Амбулаторно",
+  "patients.card.visits.complaint": "Скарга",
+  "patients.card.visits.treatment": "Лікування",
+  "patients.card.visits.openVisit": "Натисніть на картку, щоб відкрити візит",
+  "patients.card.visits.deleteVisit": "Видалити візит",
+  "patients.card.visits.visitWithoutDate": "без дати",
+  "patients.card.visits.visitFrom": "Візит від {date}",
+  "patients.card.visits.deleteText": "Візит буде видалено назавжди разом із медичними даними та чеком.",
+  "patients.card.visits.deleteFailed": "Не вдалося видалити візит."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.visits.loading": "Loading visits…",
+  "patients.card.visits.dateNotSpecified": "Date not specified",
+  "patients.card.visits.notSpecified": "Not specified",
+  "patients.card.visits.completed": "Completed",
+  "patients.card.visits.inProgress": "In progress",
+  "patients.card.visits.planned": "Planned",
+  "patients.card.visits.waiting": "Waiting",
+  "patients.card.visits.empty": "There are no scheduled appointments or visits yet.",
+  "patients.card.visits.patientWaiting": "The patient is waiting",
+  "patients.card.visits.scheduledAppointment": "Scheduled appointment",
+  "patients.card.visits.calendarEntry": "Calendar appointment",
+  "patients.card.visits.reasonNotSpecified": "Reason for the appointment not specified",
+  "patients.card.visits.openCalendarEntry": "Click the card to open the appointment",
+  "patients.card.visits.noDiagnosis": "No diagnosis established",
+  "patients.card.visits.complaintsNotSpecified": "Complaints not specified",
+  "patients.card.visits.noPayment": "No payment",
+  "patients.card.visits.treatmentNotSpecified": "Treatment not specified",
+  "patients.card.visits.outpatient": "Outpatient",
+  "patients.card.visits.complaint": "Complaint",
+  "patients.card.visits.treatment": "Treatment",
+  "patients.card.visits.openVisit": "Click the card to open the visit",
+  "patients.card.visits.deleteVisit": "Delete visit",
+  "patients.card.visits.visitWithoutDate": "without a date",
+  "patients.card.visits.visitFrom": "Visit from {date}",
+  "patients.card.visits.deleteText": "The visit will be permanently deleted together with its medical data and invoice.",
+  "patients.card.visits.deleteFailed": "Could not delete the visit."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.visits.loading": "Besuche werden geladen…",
+  "patients.card.visits.dateNotSpecified": "Datum nicht angegeben",
+  "patients.card.visits.notSpecified": "Nicht angegeben",
+  "patients.card.visits.completed": "Abgeschlossen",
+  "patients.card.visits.inProgress": "In Bearbeitung",
+  "patients.card.visits.planned": "Geplant",
+  "patients.card.visits.waiting": "Wartet",
+  "patients.card.visits.empty": "Es gibt noch keine geplanten Termine oder Besuche.",
+  "patients.card.visits.patientWaiting": "Der Patient wartet auf die Behandlung",
+  "patients.card.visits.scheduledAppointment": "Geplanter Termin",
+  "patients.card.visits.calendarEntry": "Kalendertermin",
+  "patients.card.visits.reasonNotSpecified": "Behandlungsgrund nicht angegeben",
+  "patients.card.visits.openCalendarEntry": "Klicken Sie auf die Karte, um den Termin zu öffnen",
+  "patients.card.visits.noDiagnosis": "Keine Diagnose festgestellt",
+  "patients.card.visits.complaintsNotSpecified": "Beschwerden nicht angegeben",
+  "patients.card.visits.noPayment": "Keine Zahlung",
+  "patients.card.visits.treatmentNotSpecified": "Behandlung nicht angegeben",
+  "patients.card.visits.outpatient": "Ambulant",
+  "patients.card.visits.complaint": "Beschwerde",
+  "patients.card.visits.treatment": "Behandlung",
+  "patients.card.visits.openVisit": "Klicken Sie auf die Karte, um den Besuch zu öffnen",
+  "patients.card.visits.deleteVisit": "Besuch löschen",
+  "patients.card.visits.visitWithoutDate": "ohne Datum",
+  "patients.card.visits.visitFrom": "Besuch vom {date}",
+  "patients.card.visits.deleteText": "Der Besuch wird zusammen mit den medizinischen Daten und der Rechnung dauerhaft gelöscht.",
+  "patients.card.visits.deleteFailed": "Der Besuch konnte nicht gelöscht werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.visits.loading": "Ładowanie wizyt…",
+  "patients.card.visits.dateNotSpecified": "Nie podano daty",
+  "patients.card.visits.notSpecified": "Nie podano",
+  "patients.card.visits.completed": "Zakończona",
+  "patients.card.visits.inProgress": "W trakcie",
+  "patients.card.visits.planned": "Zaplanowana",
+  "patients.card.visits.waiting": "Oczekuje",
+  "patients.card.visits.empty": "Brak zaplanowanych terminów i wizyt.",
+  "patients.card.visits.patientWaiting": "Pacjent oczekuje na przyjęcie",
+  "patients.card.visits.scheduledAppointment": "Zaplanowany termin",
+  "patients.card.visits.calendarEntry": "Termin w kalendarzu",
+  "patients.card.visits.reasonNotSpecified": "Nie podano powodu wizyty",
+  "patients.card.visits.openCalendarEntry": "Kliknij kartę, aby otworzyć termin",
+  "patients.card.visits.noDiagnosis": "Nie ustalono diagnozy",
+  "patients.card.visits.complaintsNotSpecified": "Nie podano objawów",
+  "patients.card.visits.noPayment": "Brak płatności",
+  "patients.card.visits.treatmentNotSpecified": "Nie podano leczenia",
+  "patients.card.visits.outpatient": "Ambulatoryjnie",
+  "patients.card.visits.complaint": "Objawy",
+  "patients.card.visits.treatment": "Leczenie",
+  "patients.card.visits.openVisit": "Kliknij kartę, aby otworzyć wizytę",
+  "patients.card.visits.deleteVisit": "Usuń wizytę",
+  "patients.card.visits.visitWithoutDate": "bez daty",
+  "patients.card.visits.visitFrom": "Wizyta z dnia {date}",
+  "patients.card.visits.deleteText": "Wizyta zostanie trwale usunięta wraz z danymi medycznymi i rachunkiem.",
+  "patients.card.visits.deleteFailed": "Nie udało się usunąć wizyty."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.medcard.diary": "МЕДИЧНИЙ ЩОДЕННИК",
+  "patients.card.medcard.newEntry": "Новий запис веткартки",
+  "patients.card.medcard.editEntry": "Редагування запису веткартки",
+  "patients.card.medcard.description": "Зафіксуйте стан пацієнта, показники, проведене лікування та подальший план спостереження.",
+ "patients.card.medcard.observationTitle": "Час спостереження та показники",
+  "patients.card.medcard.observationDescription": "Основні фізіологічні параметри пацієнта.",
+  "patients.card.medcard.date": "Дата",
+  "patients.card.medcard.time": "Час",
+  "patients.card.medcard.weight": "Вага",
+  "patients.card.medcard.temperature": "Температура",
+  "patients.card.medcard.pulse": "Пульс / серцевий ритм",
+  "patients.card.medcard.pulsePlaceholder": "Наприклад: 120/хв, ритмічний",
+  "patients.card.medcard.currentState": "Поточний стан",
+  "patients.card.medcard.currentStateDescription": "Швидка оцінка основних систем організму.",
+  "patients.card.medcard.mucosa": "Слизові / ясна",
+  "patients.card.medcard.mucosaPlaceholder": "Рожеві, бліді, ціанотичні...",
+  "patients.card.medcard.appetite": "Апетит",
+  "patients.card.medcard.appetitePlaceholder": "Добрий, знижений, відсутній...",
+  "patients.card.medcard.water": "Вода / спрага",
+  "patients.card.medcard.waterPlaceholder": "П’є, не п’є, полідипсія...",
+  "patients.card.medcard.urine": "Сечовипускання",
+  "patients.card.medcard.urinePlaceholder": "Норма, часте, відсутнє...",
+  "patients.card.medcard.stool": "Кал",
+  "patients.card.medcard.stoolPlaceholder": "Норма, діарея, запор...",
+  "patients.card.medcard.breathing": "Дихання",
+  "patients.card.medcard.breathingPlaceholder": "Норма, тахіпное, утруднене...",
+  "patients.card.medcard.condition": "Загальний стан",
+  "patients.card.medcard.conditionPlaceholder": "Свідомість, положення тіла, активність, біль, загальне самопочуття пацієнта...",
+  "patients.card.medcard.treatmentTitle": "Лікування та спостереження",
+  "patients.card.medcard.treatmentDescription": "Що зроблено зараз і як змінився стан пацієнта.",
+  "patients.card.medcard.performedTreatment": "Проведено / призначено",
+  "patients.card.medcard.treatmentPlaceholder": "Препарати, дозування, інфузії, маніпуляції, процедури...",
+  "patients.card.medcard.dynamics": "Динаміка",
+  "patients.card.medcard.dynamicsPlaceholder": "Що змінилося після лікування або за період спостереження...",
+  "patients.card.medcard.planTitle": "Подальший план",
+  "patients.card.medcard.planDescription": "Контроль, наступні процедури та відповідальний лікар.",
+  "patients.card.medcard.plan": "План / контроль",
+  "patients.card.medcard.planPlaceholder": "Повторний огляд, контроль показників, аналізи, зміна терапії...",
+  "patients.card.medcard.doctor": "Лікар",
+  "patients.card.medcard.selectDoctor": "Оберіть лікаря",
+  "patients.card.medcard.note": "Додаткова нотатка",
+  "patients.card.medcard.notePlaceholder": "Будь-які додаткові деталі...",
+  "patients.card.medcard.footerHint": "Запис буде додано до хронології стану пацієнта.",
+  "patients.card.medcard.saveEntry": "Зберегти запис",
+  "patients.card.medcard.dateRequired": "Вкажіть дату запису."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.medcard.diary": "MEDICAL JOURNAL",
+  "patients.card.medcard.newEntry": "New medical record entry",
+  "patients.card.medcard.editEntry": "Edit medical record entry",
+  "patients.card.medcard.description": "Record the patient’s condition, vital signs, treatment and follow-up plan.",
+  "patients.card.medcard.observationTitle": "Observation time and vital signs",
+  "patients.card.medcard.observationDescription": "The patient’s main physiological parameters.",
+  "patients.card.medcard.date": "Date",
+  "patients.card.medcard.time": "Time",
+  "patients.card.medcard.weight": "Weight",
+  "patients.card.medcard.temperature": "Temperature",
+  "patients.card.medcard.pulse": "Pulse / heart rate",
+  "patients.card.medcard.pulsePlaceholder": "For example: 120 bpm, regular",
+  "patients.card.medcard.currentState": "Current condition",
+  "patients.card.medcard.currentStateDescription": "A quick assessment of the main body systems.",
+  "patients.card.medcard.mucosa": "Mucous membranes / gums",
+  "patients.card.medcard.mucosaPlaceholder": "Pink, pale, cyanotic...",
+  "patients.card.medcard.appetite": "Appetite",
+  "patients.card.medcard.appetitePlaceholder": "Good, reduced, absent...",
+  "patients.card.medcard.water": "Water intake / thirst",
+  "patients.card.medcard.waterPlaceholder": "Drinking, not drinking, polydipsia...",
+  "patients.card.medcard.urine": "Urination",
+  "patients.card.medcard.urinePlaceholder": "Normal, frequent, absent...",
+  "patients.card.medcard.stool": "Stool",
+  "patients.card.medcard.stoolPlaceholder": "Normal, diarrhoea, constipation...",
+  "patients.card.medcard.breathing": "Breathing",
+  "patients.card.medcard.breathingPlaceholder": "Normal, rapid, laboured...",
+  "patients.card.medcard.condition": "General condition",
+  "patients.card.medcard.conditionPlaceholder": "Consciousness, posture, activity, pain and general wellbeing...",
+  "patients.card.medcard.treatmentTitle": "Treatment and observation",
+  "patients.card.medcard.treatmentDescription": "What was done and how the patient’s condition changed.",
+  "patients.card.medcard.performedTreatment": "Performed / prescribed",
+  "patients.card.medcard.treatmentPlaceholder": "Medication, dosage, infusions, procedures...",
+  "patients.card.medcard.dynamics": "Progress",
+  "patients.card.medcard.dynamicsPlaceholder": "Changes after treatment or during the observation period...",
+  "patients.card.medcard.planTitle": "Follow-up plan",
+  "patients.card.medcard.planDescription": "Monitoring, next procedures and responsible veterinarian.",
+  "patients.card.medcard.plan": "Plan / monitoring",
+  "patients.card.medcard.planPlaceholder": "Follow-up examination, tests, monitoring or treatment changes...",
+  "patients.card.medcard.doctor": "Veterinarian",
+  "patients.card.medcard.selectDoctor": "Select a veterinarian",
+  "patients.card.medcard.note": "Additional note",
+  "patients.card.medcard.notePlaceholder": "Any additional details...",
+  "patients.card.medcard.footerHint": "The entry will be added to the patient’s clinical timeline.",
+  "patients.card.medcard.saveEntry": "Save entry",
+  "patients.card.medcard.dateRequired": "Enter the entry date."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.medcard.diary": "MEDIZINISCHES TAGEBUCH",
+  "patients.card.medcard.newEntry": "Neuer Krankenakteneintrag",
+  "patients.card.medcard.editEntry": "Krankenakteneintrag bearbeiten",
+  "patients.card.medcard.description": "Erfassen Sie Zustand, Vitalwerte, Behandlung und weiteren Beobachtungsplan.",
+  "patients.card.medcard.observationTitle": "Beobachtungszeit und Vitalwerte",
+  "patients.card.medcard.observationDescription": "Die wichtigsten physiologischen Werte des Patienten.",
+  "patients.card.medcard.date": "Datum",
+  "patients.card.medcard.time": "Uhrzeit",
+  "patients.card.medcard.weight": "Gewicht",
+  "patients.card.medcard.temperature": "Temperatur",
+  "patients.card.medcard.pulse": "Puls / Herzfrequenz",
+  "patients.card.medcard.pulsePlaceholder": "Zum Beispiel: 120/min, regelmäßig",
+  "patients.card.medcard.currentState": "Aktueller Zustand",
+  "patients.card.medcard.currentStateDescription": "Kurze Beurteilung der wichtigsten Körpersysteme.",
+  "patients.card.medcard.mucosa": "Schleimhäute / Zahnfleisch",
+  "patients.card.medcard.mucosaPlaceholder": "Rosa, blass, zyanotisch...",
+  "patients.card.medcard.appetite": "Appetit",
+  "patients.card.medcard.appetitePlaceholder": "Gut, vermindert, nicht vorhanden...",
+  "patients.card.medcard.water": "Wasseraufnahme / Durst",
+  "patients.card.medcard.waterPlaceholder": "Trinkt, trinkt nicht, Polydipsie...",
+  "patients.card.medcard.urine": "Harnabsatz",
+  "patients.card.medcard.urinePlaceholder": "Normal, häufig, nicht vorhanden...",
+  "patients.card.medcard.stool": "Kot",
+  "patients.card.medcard.stoolPlaceholder": "Normal, Durchfall, Verstopfung...",
+  "patients.card.medcard.breathing": "Atmung",
+  "patients.card.medcard.breathingPlaceholder": "Normal, beschleunigt, erschwert...",
+  "patients.card.medcard.condition": "Allgemeinzustand",
+  "patients.card.medcard.conditionPlaceholder": "Bewusstsein, Körperhaltung, Aktivität, Schmerzen und Allgemeinbefinden...",
+  "patients.card.medcard.treatmentTitle": "Behandlung und Beobachtung",
+  "patients.card.medcard.treatmentDescription": "Durchgeführte Maßnahmen und Veränderung des Zustands.",
+  "patients.card.medcard.performedTreatment": "Durchgeführt / verordnet",
+  "patients.card.medcard.treatmentPlaceholder": "Medikamente, Dosierung, Infusionen und Maßnahmen...",
+  "patients.card.medcard.dynamics": "Verlauf",
+  "patients.card.medcard.dynamicsPlaceholder": "Veränderungen nach der Behandlung oder während der Beobachtung...",
+  "patients.card.medcard.planTitle": "Weiterer Plan",
+  "patients.card.medcard.planDescription": "Kontrolle, weitere Maßnahmen und verantwortlicher Tierarzt.",
+  "patients.card.medcard.plan": "Plan / Kontrolle",
+  "patients.card.medcard.planPlaceholder": "Nachuntersuchung, Kontrollen, Analysen oder Therapieänderung...",
+  "patients.card.medcard.doctor": "Tierarzt",
+  "patients.card.medcard.selectDoctor": "Tierarzt auswählen",
+  "patients.card.medcard.note": "Zusätzliche Notiz",
+  "patients.card.medcard.notePlaceholder": "Weitere wichtige Details...",
+  "patients.card.medcard.footerHint": "Der Eintrag wird zum klinischen Verlauf des Patienten hinzugefügt.",
+  "patients.card.medcard.saveEntry": "Eintrag speichern",
+  "patients.card.medcard.dateRequired": "Geben Sie das Datum des Eintrags ein."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.medcard.diary": "DZIENNIK MEDYCZNY",
+  "patients.card.medcard.newEntry": "Nowy wpis w karcie medycznej",
+  "patients.card.medcard.editEntry": "Edytuj wpis w karcie medycznej",
+  "patients.card.medcard.description": "Zapisz stan pacjenta, parametry, leczenie i dalszy plan obserwacji.",
+  "patients.card.medcard.observationTitle": "Czas obserwacji i parametry",
+  "patients.card.medcard.observationDescription": "Podstawowe parametry fizjologiczne pacjenta.",
+  "patients.card.medcard.date": "Data",
+  "patients.card.medcard.time": "Godzina",
+  "patients.card.medcard.weight": "Masa ciała",
+  "patients.card.medcard.temperature": "Temperatura",
+  "patients.card.medcard.pulse": "Tętno / rytm serca",
+  "patients.card.medcard.pulsePlaceholder": "Na przykład: 120/min, miarowe",
+  "patients.card.medcard.currentState": "Aktualny stan",
+  "patients.card.medcard.currentStateDescription": "Szybka ocena podstawowych układów organizmu.",
+  "patients.card.medcard.mucosa": "Błony śluzowe / dziąsła",
+  "patients.card.medcard.mucosaPlaceholder": "Różowe, blade, sinicze...",
+  "patients.card.medcard.appetite": "Apetyt",
+  "patients.card.medcard.appetitePlaceholder": "Dobry, obniżony, brak...",
+  "patients.card.medcard.water": "Woda / pragnienie",
+  "patients.card.medcard.waterPlaceholder": "Pije, nie pije, polidypsja...",
+  "patients.card.medcard.urine": "Oddawanie moczu",
+  "patients.card.medcard.urinePlaceholder": "Prawidłowe, częste, brak...",
+  "patients.card.medcard.stool": "Kał",
+  "patients.card.medcard.stoolPlaceholder": "Prawidłowy, biegunka, zaparcie...",
+  "patients.card.medcard.breathing": "Oddychanie",
+  "patients.card.medcard.breathingPlaceholder": "Prawidłowe, przyspieszone, utrudnione...",
+  "patients.card.medcard.condition": "Stan ogólny",
+  "patients.card.medcard.conditionPlaceholder": "Świadomość, pozycja ciała, aktywność, ból i ogólne samopoczucie...",
+  "patients.card.medcard.treatmentTitle": "Leczenie i obserwacja",
+  "patients.card.medcard.treatmentDescription": "Wykonane czynności i zmiana stanu pacjenta.",
+  "patients.card.medcard.performedTreatment": "Wykonano / zalecono",
+  "patients.card.medcard.treatmentPlaceholder": "Leki, dawkowanie, infuzje i wykonane procedury...",
+  "patients.card.medcard.dynamics": "Przebieg",
+  "patients.card.medcard.dynamicsPlaceholder": "Zmiany po leczeniu lub w okresie obserwacji...",
+  "patients.card.medcard.planTitle": "Dalszy plan",
+  "patients.card.medcard.planDescription": "Kontrola, kolejne procedury i odpowiedzialny lekarz.",
+  "patients.card.medcard.plan": "Plan / kontrola",
+  "patients.card.medcard.planPlaceholder": "Badanie kontrolne, parametry, analizy lub zmiana leczenia...",
+  "patients.card.medcard.doctor": "Lekarz weterynarii",
+  "patients.card.medcard.selectDoctor": "Wybierz lekarza",
+  "patients.card.medcard.note": "Dodatkowa notatka",
+  "patients.card.medcard.notePlaceholder": "Dodatkowe ważne informacje...",
+  "patients.card.medcard.footerHint": "Wpis zostanie dodany do historii klinicznej pacjenta.",
+  "patients.card.medcard.saveEntry": "Zapisz wpis",
+  "patients.card.medcard.dateRequired": "Podaj datę wpisu."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.medcard.tabTitle": "Ветеринарна картка",
+  "patients.card.medcard.tabDescription": "Медичний щоденник пацієнта: стан, температура, лікування, динаміка та план.",
+  "patients.card.medcard.addEntry": "Запис",
+  "patients.card.medcard.empty": "Записів поки немає. Додайте перший запис.",
+  "patients.card.medcard.parametersNotSpecified": "Параметри не вказані",
+  "patients.card.medcard.editRecord": "Редагувати запис",
+  "patients.card.medcard.deleteRecord": "Видалити запис",
+  "patients.card.medcard.entryStatus": "Запис веткартки",
+  "patients.card.medcard.deleteConfirm": "Видалити запис веткартки?",
+  "patients.card.medcard.recordNotFound": "Запис не знайдено.",
+  "patients.card.medcard.loadFailed": "Не вдалося завантажити веткартку.",
+  "patients.card.medcard.createFailed": "Не вдалося створити запис.",
+  "patients.card.medcard.updateFailed": "Не вдалося оновити запис.",
+  "patients.card.medcard.deleteFailed": "Не вдалося видалити запис."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.medcard.tabTitle": "Veterinary medical record",
+  "patients.card.medcard.tabDescription": "The patient’s medical journal: condition, temperature, treatment, progress and plan.",
+  "patients.card.medcard.addEntry": "Entry",
+  "patients.card.medcard.empty": "There are no entries yet. Add the first entry.",
+  "patients.card.medcard.parametersNotSpecified": "Parameters not specified",
+  "patients.card.medcard.editRecord": "Edit entry",
+  "patients.card.medcard.deleteRecord": "Delete entry",
+  "patients.card.medcard.entryStatus": "Medical record entry",
+  "patients.card.medcard.deleteConfirm": "Delete this medical record entry?",
+  "patients.card.medcard.recordNotFound": "Entry not found.",
+  "patients.card.medcard.loadFailed": "Could not load the medical record.",
+  "patients.card.medcard.createFailed": "Could not create the entry.",
+  "patients.card.medcard.updateFailed": "Could not update the entry.",
+  "patients.card.medcard.deleteFailed": "Could not delete the entry."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.medcard.tabTitle": "Tierärztliche Krankenakte",
+  "patients.card.medcard.tabDescription": "Medizinisches Tagebuch des Patienten: Zustand, Temperatur, Behandlung, Verlauf und Plan.",
+  "patients.card.medcard.addEntry": "Eintrag",
+  "patients.card.medcard.empty": "Noch keine Einträge vorhanden. Fügen Sie den ersten Eintrag hinzu.",
+  "patients.card.medcard.parametersNotSpecified": "Parameter nicht angegeben",
+  "patients.card.medcard.editRecord": "Eintrag bearbeiten",
+  "patients.card.medcard.deleteRecord": "Eintrag löschen",
+  "patients.card.medcard.entryStatus": "Krankenakteneintrag",
+  "patients.card.medcard.deleteConfirm": "Diesen Krankenakteneintrag löschen?",
+  "patients.card.medcard.recordNotFound": "Eintrag nicht gefunden.",
+  "patients.card.medcard.loadFailed": "Die Krankenakte konnte nicht geladen werden.",
+  "patients.card.medcard.createFailed": "Der Eintrag konnte nicht erstellt werden.",
+  "patients.card.medcard.updateFailed": "Der Eintrag konnte nicht aktualisiert werden.",
+  "patients.card.medcard.deleteFailed": "Der Eintrag konnte nicht gelöscht werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.medcard.tabTitle": "Weterynaryjna karta medyczna",
+  "patients.card.medcard.tabDescription": "Dziennik medyczny pacjenta: stan, temperatura, leczenie, przebieg i plan.",
+  "patients.card.medcard.addEntry": "Wpis",
+  "patients.card.medcard.empty": "Brak wpisów. Dodaj pierwszy wpis.",
+  "patients.card.medcard.parametersNotSpecified": "Nie podano parametrów",
+  "patients.card.medcard.editRecord": "Edytuj wpis",
+  "patients.card.medcard.deleteRecord": "Usuń wpis",
+  "patients.card.medcard.entryStatus": "Wpis w karcie medycznej",
+  "patients.card.medcard.deleteConfirm": "Usunąć ten wpis z karty medycznej?",
+  "patients.card.medcard.recordNotFound": "Nie znaleziono wpisu.",
+  "patients.card.medcard.loadFailed": "Nie udało się załadować karty medycznej.",
+  "patients.card.medcard.createFailed": "Nie udało się utworzyć wpisu.",
+  "patients.card.medcard.updateFailed": "Nie udało się zaktualizować wpisu.",
+  "patients.card.medcard.deleteFailed": "Nie udało się usunąć wpisu."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.labs.study": "ЛАБОРАТОРНЕ ДОСЛІДЖЕННЯ",
+  "patients.card.labs.analysis": "Аналіз",
+  "patients.card.labs.edit": "Редагувати",
+  "patients.card.labs.delete": "Видалити",
+  "patients.card.labs.indicators": "Показників",
+  "patients.card.labs.normal": "Норма",
+  "patients.card.labs.above": "Вище",
+  "patients.card.labs.below": "Нижче",
+  "patients.card.labs.qualitative": "Якісне дослідження",
+  "patients.card.labs.qualitativeText": "Результат зазначено у висновку, коментарі лікаря або документі.",
+  "patients.card.labs.referenceMissing": "Референс не вказаний",
+  "patients.card.labs.reference": "Референс",
+  "patients.card.labs.statusHigh": "Вище норми",
+  "patients.card.labs.statusLow": "Нижче норми",
+  "patients.card.labs.statusNormal": "Норма",
+  "patients.card.labs.statusUnknown": "Без оцінки",
+  "patients.card.labs.doctorComment": "Коментар лікаря",
+  "patients.card.labs.ownerExplanation": "Пояснення для власника",
+  "patients.card.labs.decodeAi": "Розшифрувати з PUG AI",
+  "patients.card.labs.type.biochemistry": "Біохімія",
+  "patients.card.labs.type.cbc": "Загальний аналіз крові",
+  "patients.card.labs.type.t4": "Тироксин загальний (Т4)",
+  "patients.card.labs.type.tsh": "Тиреотропний гормон (ТТГ)",
+  "patients.card.labs.type.urinalysis": "Загальний аналіз сечі",
+  "patients.card.labs.type.coagulation": "Коагулограма",
+  "patients.card.labs.type.electrolytes": "Електроліти та гази крові"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.labs.study": "LABORATORY TEST",
+  "patients.card.labs.analysis": "Test",
+  "patients.card.labs.edit": "Edit",
+  "patients.card.labs.delete": "Delete",
+  "patients.card.labs.indicators": "Parameters",
+  "patients.card.labs.normal": "Normal",
+  "patients.card.labs.above": "High",
+  "patients.card.labs.below": "Low",
+  "patients.card.labs.qualitative": "Qualitative test",
+  "patients.card.labs.qualitativeText": "The result is provided in the conclusion, veterinarian’s comment or attached document.",
+  "patients.card.labs.referenceMissing": "Reference range not specified",
+  "patients.card.labs.reference": "Reference",
+  "patients.card.labs.statusHigh": "Above range",
+  "patients.card.labs.statusLow": "Below range",
+  "patients.card.labs.statusNormal": "Normal",
+  "patients.card.labs.statusUnknown": "Not assessed",
+  "patients.card.labs.doctorComment": "Veterinarian’s comment",
+  "patients.card.labs.ownerExplanation": "Explanation for the owner",
+  "patients.card.labs.decodeAi": "Interpret with PUG AI",
+  "patients.card.labs.type.biochemistry": "Biochemistry",
+  "patients.card.labs.type.cbc": "Complete blood count",
+  "patients.card.labs.type.t4": "Total thyroxine (T4)",
+  "patients.card.labs.type.tsh": "Thyroid-stimulating hormone (TSH)",
+  "patients.card.labs.type.urinalysis": "Urinalysis",
+  "patients.card.labs.type.coagulation": "Coagulation profile",
+  "patients.card.labs.type.electrolytes": "Electrolytes and blood gases"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.labs.study": "LABORUNTERSUCHUNG",
+  "patients.card.labs.analysis": "Untersuchung",
+  "patients.card.labs.edit": "Bearbeiten",
+  "patients.card.labs.delete": "Löschen",
+  "patients.card.labs.indicators": "Parameter",
+  "patients.card.labs.normal": "Normal",
+  "patients.card.labs.above": "Erhöht",
+  "patients.card.labs.below": "Erniedrigt",
+  "patients.card.labs.qualitative": "Qualitative Untersuchung",
+  "patients.card.labs.qualitativeText": "Das Ergebnis ist im Befund, im tierärztlichen Kommentar oder im Dokument angegeben.",
+  "patients.card.labs.referenceMissing": "Referenzbereich nicht angegeben",
+  "patients.card.labs.reference": "Referenz",
+  "patients.card.labs.statusHigh": "Über dem Referenzbereich",
+  "patients.card.labs.statusLow": "Unter dem Referenzbereich",
+  "patients.card.labs.statusNormal": "Normal",
+  "patients.card.labs.statusUnknown": "Nicht bewertet",
+  "patients.card.labs.doctorComment": "Tierärztlicher Kommentar",
+  "patients.card.labs.ownerExplanation": "Erklärung für den Tierhalter",
+  "patients.card.labs.decodeAi": "Mit PUG AI auswerten",
+  "patients.card.labs.type.biochemistry": "Biochemie",
+  "patients.card.labs.type.cbc": "Großes Blutbild",
+  "patients.card.labs.type.t4": "Gesamtthyroxin (T4)",
+  "patients.card.labs.type.tsh": "Thyreoidea-stimulierendes Hormon (TSH)",
+  "patients.card.labs.type.urinalysis": "Urinanalyse",
+  "patients.card.labs.type.coagulation": "Gerinnungsprofil",
+  "patients.card.labs.type.electrolytes": "Elektrolyte und Blutgase"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.labs.study": "BADANIE LABORATORYJNE",
+  "patients.card.labs.analysis": "Badanie",
+  "patients.card.labs.edit": "Edytuj",
+  "patients.card.labs.delete": "Usuń",
+  "patients.card.labs.indicators": "Parametry",
+  "patients.card.labs.normal": "Norma",
+  "patients.card.labs.above": "Powyżej",
+  "patients.card.labs.below": "Poniżej",
+  "patients.card.labs.qualitative": "Badanie jakościowe",
+  "patients.card.labs.qualitativeText": "Wynik znajduje się we wniosku, komentarzu lekarza lub załączonym dokumencie.",
+  "patients.card.labs.referenceMissing": "Nie podano zakresu referencyjnego",
+  "patients.card.labs.reference": "Zakres referencyjny",
+  "patients.card.labs.statusHigh": "Powyżej normy",
+  "patients.card.labs.statusLow": "Poniżej normy",
+  "patients.card.labs.statusNormal": "Norma",
+  "patients.card.labs.statusUnknown": "Bez oceny",
+  "patients.card.labs.doctorComment": "Komentarz lekarza",
+  "patients.card.labs.ownerExplanation": "Wyjaśnienie dla właściciela",
+  "patients.card.labs.decodeAi": "Zinterpretuj z PUG AI",
+  "patients.card.labs.type.biochemistry": "Biochemia",
+  "patients.card.labs.type.cbc": "Morfologia krwi",
+  "patients.card.labs.type.t4": "Tyroksyna całkowita (T4)",
+  "patients.card.labs.type.tsh": "Hormon tyreotropowy (TSH)",
+  "patients.card.labs.type.urinalysis": "Badanie ogólne moczu",
+  "patients.card.labs.type.coagulation": "Koagulogram",
+  "patients.card.labs.type.electrolytes": "Elektrolity i gazy krwi"
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.labs.loading": "Завантажуємо аналізи",
+  "patients.card.labs.loadingText": "Отримуємо лабораторну історію пацієнта…",
+  "patients.card.labs.loadFailed": "Не вдалося завантажити аналізи",
+  "patients.card.labs.kicker": "ЛАБОРАТОРНА ДІАГНОСТИКА",
+  "patients.card.labs.title": "Аналізи пацієнта",
+  "patients.card.labs.description": "Створюйте лабораторні дослідження, контролюйте відхилення та формуйте історію показників пацієнта.",
+  "patients.card.labs.referenceFor": "Норми пацієнта",
+  "patients.card.labs.history": "Історія досліджень",
+  "patients.card.labs.savedCount": "Збережено досліджень: {count}",
+  "patients.card.labs.noStudies": "Досліджень поки немає",
+  "patients.card.labs.emptyTitle": "Аналізів поки немає",
+  "patients.card.labs.emptyText": "Оберіть потрібний тип дослідження вище."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.labs.loading": "Loading laboratory tests",
+  "patients.card.labs.loadingText": "Loading the patient’s laboratory history…",
+  "patients.card.labs.loadFailed": "Could not load laboratory tests",
+  "patients.card.labs.kicker": "LABORATORY DIAGNOSTICS",
+  "patients.card.labs.title": "Patient laboratory tests",
+  "patients.card.labs.description": "Create laboratory tests, monitor abnormalities and maintain the patient’s result history.",
+  "patients.card.labs.referenceFor": "Patient reference ranges",
+  "patients.card.labs.history": "Test history",
+  "patients.card.labs.savedCount": "Saved tests: {count}",
+  "patients.card.labs.noStudies": "No tests yet",
+  "patients.card.labs.emptyTitle": "No laboratory tests yet",
+  "patients.card.labs.emptyText": "Select the required test type above."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.labs.loading": "Laboruntersuchungen werden geladen",
+  "patients.card.labs.loadingText": "Der Laborverlauf des Patienten wird geladen…",
+  "patients.card.labs.loadFailed": "Laboruntersuchungen konnten nicht geladen werden",
+  "patients.card.labs.kicker": "LABORDIAGNOSTIK",
+  "patients.card.labs.title": "Laboruntersuchungen des Patienten",
+  "patients.card.labs.description": "Erstellen Sie Laboruntersuchungen, überwachen Sie Abweichungen und führen Sie den Befundverlauf.",
+  "patients.card.labs.referenceFor": "Referenzwerte für den Patienten",
+  "patients.card.labs.history": "Untersuchungsverlauf",
+  "patients.card.labs.savedCount": "Gespeicherte Untersuchungen: {count}",
+  "patients.card.labs.noStudies": "Noch keine Untersuchungen",
+  "patients.card.labs.emptyTitle": "Noch keine Laboruntersuchungen",
+  "patients.card.labs.emptyText": "Wählen Sie oben die gewünschte Untersuchungsart aus."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.labs.loading": "Ładowanie badań",
+  "patients.card.labs.loadingText": "Ładowanie historii badań laboratoryjnych pacjenta…",
+  "patients.card.labs.loadFailed": "Nie udało się załadować badań",
+  "patients.card.labs.kicker": "DIAGNOSTYKA LABORATORYJNA",
+  "patients.card.labs.title": "Badania pacjenta",
+  "patients.card.labs.description": "Twórz badania laboratoryjne, kontroluj odchylenia i prowadź historię wyników pacjenta.",
+  "patients.card.labs.referenceFor": "Zakresy referencyjne pacjenta",
+  "patients.card.labs.history": "Historia badań",
+  "patients.card.labs.savedCount": "Zapisane badania: {count}",
+  "patients.card.labs.noStudies": "Brak badań",
+  "patients.card.labs.emptyTitle": "Brak badań laboratoryjnych",
+  "patients.card.labs.emptyText": "Wybierz powyżej odpowiedni rodzaj badania."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.labs.notFound": "Аналіз не знайдено.",
+  "patients.card.labs.ownerTextReadFailed": "Не вдалося прочитати пояснення.",
+  "patients.card.labs.saving": "Зберігаємо…",
+  "patients.card.labs.addedToReport": "Додано до бланка ✓",
+  "patients.card.labs.saveFailed": "Не вдалося зберегти",
+  "patients.card.labs.showAi": "✦ Показати повну розшифровку PUG AI",
+  "patients.card.labs.hideAi": "Сховати повну розшифровку",
+  "patients.card.labs.aiAnalyzing": "PUG AI аналізує…",
+  "patients.card.labs.aiLoading": "✦ Аналізуємо показники, референси, історію та останній релевантний прийом…",
+  "patients.card.labs.aiFailed": "Не вдалося розшифрувати аналіз.",
+  "patients.card.labs.aiAction": "✦ Розшифрувати з PUG AI",
+  "patients.card.labs.analysis": "Аналіз",
+  "patients.card.labs.deleteText": "Результати дослідження будуть видалені назавжди.<br>Цю дію неможливо скасувати.",
+  "patients.card.labs.deleteFailed": "Не вдалося видалити аналіз."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.labs.notFound": "Laboratory test not found.",
+  "patients.card.labs.ownerTextReadFailed": "Could not read the explanation.",
+  "patients.card.labs.saving": "Saving…",
+  "patients.card.labs.addedToReport": "Added to report ✓",
+  "patients.card.labs.saveFailed": "Could not save",
+  "patients.card.labs.showAi": "✦ Show full PUG AI interpretation",
+  "patients.card.labs.hideAi": "Hide full interpretation",
+  "patients.card.labs.aiAnalyzing": "PUG AI is analyzing…",
+  "patients.card.labs.aiLoading": "✦ Analyzing results, reference ranges, history and the latest relevant visit…",
+  "patients.card.labs.aiFailed": "Could not interpret the laboratory test.",
+  "patients.card.labs.aiAction": "✦ Interpret with PUG AI",
+  "patients.card.labs.analysis": "Laboratory test",
+  "patients.card.labs.deleteText": "The test results will be deleted permanently.<br>This action cannot be undone.",
+  "patients.card.labs.deleteFailed": "Could not delete the laboratory test."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.labs.notFound": "Laboruntersuchung nicht gefunden.",
+  "patients.card.labs.ownerTextReadFailed": "Die Erklärung konnte nicht gelesen werden.",
+  "patients.card.labs.saving": "Speichern…",
+  "patients.card.labs.addedToReport": "Zum Befund hinzugefügt ✓",
+  "patients.card.labs.saveFailed": "Speichern fehlgeschlagen",
+  "patients.card.labs.showAi": "✦ Vollständige PUG AI Auswertung anzeigen",
+  "patients.card.labs.hideAi": "Vollständige Auswertung ausblenden",
+  "patients.card.labs.aiAnalyzing": "PUG AI analysiert…",
+  "patients.card.labs.aiLoading": "✦ Ergebnisse, Referenzwerte, Verlauf und den letzten relevanten Besuch werden analysiert…",
+  "patients.card.labs.aiFailed": "Die Laboruntersuchung konnte nicht ausgewertet werden.",
+  "patients.card.labs.aiAction": "✦ Mit PUG AI auswerten",
+  "patients.card.labs.analysis": "Laboruntersuchung",
+  "patients.card.labs.deleteText": "Die Untersuchungsergebnisse werden dauerhaft gelöscht.<br>Diese Aktion kann nicht rückgängig gemacht werden.",
+  "patients.card.labs.deleteFailed": "Die Laboruntersuchung konnte nicht gelöscht werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.labs.notFound": "Nie znaleziono badania.",
+  "patients.card.labs.ownerTextReadFailed": "Nie udało się odczytać wyjaśnienia.",
+  "patients.card.labs.saving": "Zapisywanie…",
+  "patients.card.labs.addedToReport": "Dodano do wyniku ✓",
+  "patients.card.labs.saveFailed": "Nie udało się zapisać",
+  "patients.card.labs.showAi": "✦ Pokaż pełną interpretację PUG AI",
+  "patients.card.labs.hideAi": "Ukryj pełną interpretację",
+  "patients.card.labs.aiAnalyzing": "PUG AI analizuje…",
+  "patients.card.labs.aiLoading": "✦ Analizowanie wyników, zakresów referencyjnych, historii i ostatniej odpowiedniej wizyty…",
+  "patients.card.labs.aiFailed": "Nie udało się zinterpretować badania.",
+  "patients.card.labs.aiAction": "✦ Zinterpretuj z PUG AI",
+  "patients.card.labs.analysis": "Badanie",
+  "patients.card.labs.deleteText": "Wyniki badania zostaną trwale usunięte.<br>Tej czynności nie można cofnąć.",
+  "patients.card.labs.deleteFailed": "Nie udało się usunąć badania."
+});
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.labs.modal.kicker": "ЛАБОРАТОРНЕ ДОСЛІДЖЕННЯ",
+  "patients.card.labs.modal.editTitle": "Редагувати аналіз",
+  "patients.card.labs.modal.newTitle": "Новий аналіз",
+  "patients.card.labs.modal.patient": "Пацієнт",
+  "patients.card.labs.modal.close": "Закрити",
+  "patients.card.labs.modal.type": "Тип дослідження",
+  "patients.card.labs.modal.date": "Дата дослідження",
+  "patients.card.labs.modal.laboratory": "Лабораторія",
+  "patients.card.labs.modal.laboratoryPlaceholder": "Наприклад: IDEXX, BioSoft…",
+  "patients.card.labs.modal.results": "Результати",
+  "patients.card.labs.modal.description": "Опис дослідження",
+  "patients.card.labs.modal.structuredHelp": "Вкажіть значення та референс лабораторії.",
+  "patients.card.labs.modal.qualitativeHelp": "Додайте лабораторний висновок у полі нижче.",
+  "patients.card.labs.modal.indicatorCount": "Показників: {count}",
+  "patients.card.labs.modal.qualitativeResult": "Якісний результат",
+  "patients.card.labs.modal.result": "Результат",
+  "patients.card.labs.modal.unitPlaceholder": "од.",
+  "patients.card.labs.modal.min": "Мін.",
+  "patients.card.labs.modal.max": "Макс.",
+  "patients.card.labs.modal.unstructuredInfo": "Для ПЛР, бактеріології, паразитології, цитології та гістології додайте повний текст результату і висновок лабораторії у полі нижче. PUG AI використає цей текст під час розшифровки.",
+  "patients.card.labs.modal.doctorComment": "Коментар лікаря",
+  "patients.card.labs.modal.labConclusion": "Результат і висновок лабораторії",
+  "patients.card.labs.modal.doctorPlaceholder": "Клінічна інтерпретація, умови забору або додаткова інформація…",
+  "patients.card.labs.modal.conclusionPlaceholder": "Вставте результат, опис матеріалу, метод і висновок лабораторії…",
+  "patients.card.labs.modal.ownerExplanation": "Пояснення для власника",
+  "patients.card.labs.modal.ownerPlaceholder": "Простими словами поясніть, що означають результати аналізу та які наступні дії рекомендує лікар…",
+  "patients.card.labs.modal.ownerHint": "Цей текст буде збережено разом з аналізом і додано до PDF. Його можна написати вручну або підготувати за допомогою PUG AI.",
+  "patients.card.labs.modal.cancel": "Скасувати",
+  "patients.card.labs.modal.saveChanges": "Зберегти зміни",
+  "patients.card.labs.modal.create": "Створити аналіз",
+  "patients.card.labs.modal.normal": "Норма",
+  "patients.card.labs.modal.high": "Вище",
+  "patients.card.labs.modal.low": "Нижче",
+  "patients.card.labs.modal.structuredRequired": "Вкажіть хоча б один результат або додайте коментар.",
+  "patients.card.labs.modal.qualitativeRequired": "Додайте результат або висновок лабораторії.",
+  "patients.card.labs.modal.saveFailed": "Не вдалося зберегти аналіз."
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.labs.modal.kicker": "LABORATORY TEST",
+  "patients.card.labs.modal.editTitle": "Edit laboratory test",
+  "patients.card.labs.modal.newTitle": "New laboratory test",
+  "patients.card.labs.modal.patient": "Patient",
+  "patients.card.labs.modal.close": "Close",
+  "patients.card.labs.modal.type": "Test type",
+  "patients.card.labs.modal.date": "Test date",
+  "patients.card.labs.modal.laboratory": "Laboratory",
+  "patients.card.labs.modal.laboratoryPlaceholder": "For example: IDEXX, BioSoft…",
+  "patients.card.labs.modal.results": "Results",
+  "patients.card.labs.modal.description": "Test description",
+  "patients.card.labs.modal.structuredHelp": "Enter the values and the laboratory reference ranges.",
+  "patients.card.labs.modal.qualitativeHelp": "Add the laboratory conclusion in the field below.",
+  "patients.card.labs.modal.indicatorCount": "Parameters: {count}",
+  "patients.card.labs.modal.qualitativeResult": "Qualitative result",
+  "patients.card.labs.modal.result": "Result",
+  "patients.card.labs.modal.unitPlaceholder": "unit",
+  "patients.card.labs.modal.min": "Min.",
+  "patients.card.labs.modal.max": "Max.",
+  "patients.card.labs.modal.unstructuredInfo": "For PCR, bacteriology, parasitology, cytology and histology, add the complete result and laboratory conclusion below. PUG AI will use this text when interpreting the test.",
+  "patients.card.labs.modal.doctorComment": "Doctor’s comment",
+  "patients.card.labs.modal.labConclusion": "Laboratory result and conclusion",
+  "patients.card.labs.modal.doctorPlaceholder": "Clinical interpretation, sampling conditions or additional information…",
+  "patients.card.labs.modal.conclusionPlaceholder": "Enter the result, material description, method and laboratory conclusion…",
+  "patients.card.labs.modal.ownerExplanation": "Explanation for the owner",
+  "patients.card.labs.modal.ownerPlaceholder": "Explain in simple terms what the results mean and what next steps the doctor recommends…",
+  "patients.card.labs.modal.ownerHint": "This text will be saved with the test and added to the PDF. You can write it manually or prepare it with PUG AI.",
+  "patients.card.labs.modal.cancel": "Cancel",
+  "patients.card.labs.modal.saveChanges": "Save changes",
+  "patients.card.labs.modal.create": "Create test",
+  "patients.card.labs.modal.normal": "Normal",
+  "patients.card.labs.modal.high": "High",
+  "patients.card.labs.modal.low": "Low",
+  "patients.card.labs.modal.structuredRequired": "Enter at least one result or add a comment.",
+  "patients.card.labs.modal.qualitativeRequired": "Add the laboratory result or conclusion.",
+  "patients.card.labs.modal.saveFailed": "Could not save the laboratory test."
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.labs.modal.kicker": "LABORUNTERSUCHUNG",
+  "patients.card.labs.modal.editTitle": "Laboruntersuchung bearbeiten",
+  "patients.card.labs.modal.newTitle": "Neue Laboruntersuchung",
+  "patients.card.labs.modal.patient": "Patient",
+  "patients.card.labs.modal.close": "Schließen",
+  "patients.card.labs.modal.type": "Untersuchungsart",
+  "patients.card.labs.modal.date": "Untersuchungsdatum",
+  "patients.card.labs.modal.laboratory": "Labor",
+  "patients.card.labs.modal.laboratoryPlaceholder": "Zum Beispiel: IDEXX, BioSoft…",
+  "patients.card.labs.modal.results": "Ergebnisse",
+  "patients.card.labs.modal.description": "Beschreibung der Untersuchung",
+  "patients.card.labs.modal.structuredHelp": "Geben Sie die Werte und die Referenzbereiche des Labors ein.",
+  "patients.card.labs.modal.qualitativeHelp": "Fügen Sie den Laborbefund im Feld unten ein.",
+  "patients.card.labs.modal.indicatorCount": "Parameter: {count}",
+  "patients.card.labs.modal.qualitativeResult": "Qualitatives Ergebnis",
+  "patients.card.labs.modal.result": "Ergebnis",
+  "patients.card.labs.modal.unitPlaceholder": "Einheit",
+  "patients.card.labs.modal.min": "Min.",
+  "patients.card.labs.modal.max": "Max.",
+  "patients.card.labs.modal.unstructuredInfo": "Fügen Sie bei PCR, Bakteriologie, Parasitologie, Zytologie und Histologie das vollständige Ergebnis und den Laborbefund unten ein. PUG AI verwendet diesen Text bei der Auswertung.",
+  "patients.card.labs.modal.doctorComment": "Kommentar des Tierarztes",
+  "patients.card.labs.modal.labConclusion": "Laborergebnis und Befund",
+  "patients.card.labs.modal.doctorPlaceholder": "Klinische Interpretation, Entnahmebedingungen oder zusätzliche Informationen…",
+  "patients.card.labs.modal.conclusionPlaceholder": "Ergebnis, Materialbeschreibung, Methode und Laborbefund eingeben…",
+  "patients.card.labs.modal.ownerExplanation": "Erklärung für den Tierhalter",
+  "patients.card.labs.modal.ownerPlaceholder": "Erklären Sie in einfachen Worten, was die Ergebnisse bedeuten und welche nächsten Schritte empfohlen werden…",
+  "patients.card.labs.modal.ownerHint": "Dieser Text wird mit der Untersuchung gespeichert und dem PDF hinzugefügt. Sie können ihn selbst schreiben oder mit PUG AI vorbereiten.",
+  "patients.card.labs.modal.cancel": "Abbrechen",
+  "patients.card.labs.modal.saveChanges": "Änderungen speichern",
+  "patients.card.labs.modal.create": "Untersuchung erstellen",
+  "patients.card.labs.modal.normal": "Normal",
+  "patients.card.labs.modal.high": "Erhöht",
+  "patients.card.labs.modal.low": "Erniedrigt",
+  "patients.card.labs.modal.structuredRequired": "Geben Sie mindestens ein Ergebnis ein oder fügen Sie einen Kommentar hinzu.",
+  "patients.card.labs.modal.qualitativeRequired": "Fügen Sie das Laborergebnis oder den Befund hinzu.",
+  "patients.card.labs.modal.saveFailed": "Die Laboruntersuchung konnte nicht gespeichert werden."
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.labs.modal.kicker": "BADANIE LABORATORYJNE",
+  "patients.card.labs.modal.editTitle": "Edytuj badanie",
+  "patients.card.labs.modal.newTitle": "Nowe badanie",
+  "patients.card.labs.modal.patient": "Pacjent",
+  "patients.card.labs.modal.close": "Zamknij",
+  "patients.card.labs.modal.type": "Rodzaj badania",
+  "patients.card.labs.modal.date": "Data badania",
+  "patients.card.labs.modal.laboratory": "Laboratorium",
+  "patients.card.labs.modal.laboratoryPlaceholder": "Na przykład: IDEXX, BioSoft…",
+  "patients.card.labs.modal.results": "Wyniki",
+  "patients.card.labs.modal.description": "Opis badania",
+  "patients.card.labs.modal.structuredHelp": "Wprowadź wartości i zakresy referencyjne laboratorium.",
+  "patients.card.labs.modal.qualitativeHelp": "Dodaj wniosek laboratorium w polu poniżej.",
+  "patients.card.labs.modal.indicatorCount": "Parametry: {count}",
+  "patients.card.labs.modal.qualitativeResult": "Wynik jakościowy",
+  "patients.card.labs.modal.result": "Wynik",
+  "patients.card.labs.modal.unitPlaceholder": "jedn.",
+  "patients.card.labs.modal.min": "Min.",
+  "patients.card.labs.modal.max": "Maks.",
+  "patients.card.labs.modal.unstructuredInfo": "W przypadku PCR, bakteriologii, parazytologii, cytologii i histologii dodaj poniżej pełny wynik oraz wniosek laboratorium. PUG AI wykorzysta ten tekst podczas interpretacji.",
+  "patients.card.labs.modal.doctorComment": "Komentarz lekarza",
+  "patients.card.labs.modal.labConclusion": "Wynik i wniosek laboratorium",
+  "patients.card.labs.modal.doctorPlaceholder": "Interpretacja kliniczna, warunki pobrania lub dodatkowe informacje…",
+  "patients.card.labs.modal.conclusionPlaceholder": "Wprowadź wynik, opis materiału, metodę i wniosek laboratorium…",
+  "patients.card.labs.modal.ownerExplanation": "Wyjaśnienie dla właściciela",
+  "patients.card.labs.modal.ownerPlaceholder": "Wyjaśnij prostymi słowami, co oznaczają wyniki i jakie dalsze działania zaleca lekarz…",
+  "patients.card.labs.modal.ownerHint": "Ten tekst zostanie zapisany z badaniem i dodany do pliku PDF. Możesz napisać go ręcznie lub przygotować za pomocą PUG AI.",
+  "patients.card.labs.modal.cancel": "Anuluj",
+  "patients.card.labs.modal.saveChanges": "Zapisz zmiany",
+  "patients.card.labs.modal.create": "Utwórz badanie",
+  "patients.card.labs.modal.normal": "Norma",
+  "patients.card.labs.modal.high": "Powyżej",
+  "patients.card.labs.modal.low": "Poniżej",
+  "patients.card.labs.modal.structuredRequired": "Wprowadź co najmniej jeden wynik lub dodaj komentarz.",
+  "patients.card.labs.modal.qualitativeRequired": "Dodaj wynik lub wniosek laboratorium.",
+  "patients.card.labs.modal.saveFailed": "Nie udało się zapisać badania."
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.labs.type.pcr": "ПЛР",
+  "patients.card.labs.type.immunology": "Імунологія та серологія",
+  "patients.card.labs.type.bacteriology": "Бактеріологія",
+  "patients.card.labs.type.parasitology": "Паразитологія",
+  "patients.card.labs.type.cytology": "Цитологія",
+  "patients.card.labs.type.histology": "Гістологія",
+  "patients.card.labs.type.other": "Інше"
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.labs.type.pcr": "PCR",
+  "patients.card.labs.type.immunology": "Immunology and serology",
+  "patients.card.labs.type.bacteriology": "Bacteriology",
+  "patients.card.labs.type.parasitology": "Parasitology",
+  "patients.card.labs.type.cytology": "Cytology",
+  "patients.card.labs.type.histology": "Histology",
+  "patients.card.labs.type.other": "Other"
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.labs.type.pcr": "PCR",
+  "patients.card.labs.type.immunology": "Immunologie und Serologie",
+  "patients.card.labs.type.bacteriology": "Bakteriologie",
+  "patients.card.labs.type.parasitology": "Parasitologie",
+  "patients.card.labs.type.cytology": "Zytologie",
+  "patients.card.labs.type.histology": "Histologie",
+  "patients.card.labs.type.other": "Sonstiges"
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.labs.type.pcr": "PCR",
+  "patients.card.labs.type.immunology": "Immunologia i serologia",
+  "patients.card.labs.type.bacteriology": "Bakteriologia",
+  "patients.card.labs.type.parasitology": "Parazytologia",
+  "patients.card.labs.type.cytology": "Cytologia",
+  "patients.card.labs.type.histology": "Histologia",
+  "patients.card.labs.type.other": "Inne"
+});
+
 function getInterfaceLanguage() {
   const selectedLanguage =
     String(
@@ -6668,26 +8318,20 @@ function showAssignedTaskToast(
 
 
   if (dueDate) {
-    const date =
-      new Date(
-        `${dueDate}T00:00:00`
-      );
-
-
     dueLabel =
-      date.toLocaleDateString(
-        "uk-UA",
-        {
-          day:
-            "2-digit",
+  formatCalendarDate(
+    dueDate,
+    {
+      day:
+        "2-digit",
 
-          month:
-            "2-digit",
+      month:
+        "2-digit",
 
-          year:
-            "numeric",
-        }
-      );
+      year:
+        "numeric",
+    }
+  );
 
 
     if (dueTime) {
@@ -11325,27 +12969,40 @@ function formatVisitTaskDate(
 ) {
   const dueDate =
     String(
-      task?.due_date || ""
-    ).slice(0, 10);
+      task?.due_date ||
+      ""
+    ).slice(
+      0,
+      10
+    );
 
   const dueTime =
     String(
-      task?.due_time || ""
-    ).slice(0, 5);
+      task?.due_time ||
+      ""
+    ).slice(
+      0,
+      5
+    );
 
-  if (!dueDate) {
+  if (
+    !dueDate
+  ) {
     return "Без дати";
   }
 
   const dateLabel =
-    new Date(
-      `${dueDate}T00:00:00`
-    ).toLocaleDateString(
-      "uk-UA",
+    formatCalendarDate(
+      dueDate,
       {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
+        day:
+          "2-digit",
+
+        month:
+          "2-digit",
+
+        year:
+          "numeric",
       }
     );
 
@@ -11353,7 +13010,6 @@ function formatVisitTaskDate(
     ? `${dateLabel} · ${dueTime}`
     : dateLabel;
 }
-
 
 function getVisitTaskPriorityMeta(
   priority
@@ -15902,6 +17558,1337 @@ function getStaffContrastColor(color) {
 
   return value;
 }
+function getTasksUi() {
+  const language =
+    getInterfaceLanguage();
+
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    center:
+      pick(
+        "ЦЕНТР ЗАДАЧ",
+        "TASK CENTER",
+        "AUFGABENCENTER",
+        "CENTRUM ZADAŃ"
+      ),
+
+    tasks:
+      pick(
+        "Задачі",
+        "Tasks",
+        "Aufgaben",
+        "Zadania"
+      ),
+
+    tasksDescription:
+      pick(
+        "Задачі, нагадування та подальші дії щодо пацієнтів",
+        "Tasks, reminders and patient follow-ups",
+        "Aufgaben, Erinnerungen und Nachverfolgung von Patienten",
+        "Zadania, przypomnienia i dalsza opieka nad pacjentami"
+      ),
+
+    newTask:
+      pick(
+        "Нова задача",
+        "New task",
+        "Neue Aufgabe",
+        "Nowe zadanie"
+      ),
+
+    editTask:
+      pick(
+        "Редагувати задачу",
+        "Edit task",
+        "Aufgabe bearbeiten",
+        "Edytuj zadanie"
+      ),
+
+    createDescription:
+      pick(
+        "Створіть задачу, нагадування або подальшу дію",
+        "Create a task, reminder or follow-up",
+        "Erstellen Sie eine Aufgabe, Erinnerung oder Nachverfolgung",
+        "Utwórz zadanie, przypomnienie lub dalsze działanie"
+      ),
+
+    taskTitle:
+      pick(
+        "Назва задачі *",
+        "Task title *",
+        "Aufgabentitel *",
+        "Nazwa zadania *"
+      ),
+
+    taskTitlePlaceholder:
+      pick(
+        "Наприклад: передзвонити власнику",
+        "For example: Call the owner back",
+        "Zum Beispiel: Tierhalter zurückrufen",
+        "Na przykład: Oddzwonić do właściciela"
+      ),
+
+    type:
+      pick(
+        "Тип",
+        "Type",
+        "Typ",
+        "Typ"
+      ),
+
+    task:
+      pick(
+        "Задача",
+        "Task",
+        "Aufgabe",
+        "Zadanie"
+      ),
+
+    reminder:
+      pick(
+        "Нагадування",
+        "Reminder",
+        "Erinnerung",
+        "Przypomnienie"
+      ),
+
+    followUp:
+      pick(
+        "Подальша дія",
+        "Follow-up",
+        "Nachverfolgung",
+        "Dalsze działanie"
+      ),
+
+    patient:
+      pick(
+        "Пацієнт",
+        "Patient",
+        "Patient",
+        "Pacjent"
+      ),
+
+    noPatient:
+      pick(
+        "Без прив’язки до пацієнта",
+        "No patient linked",
+        "Ohne Patientenzuordnung",
+        "Bez przypisanego pacjenta"
+      ),
+
+    assignee:
+      pick(
+        "Виконавець",
+        "Assignee",
+        "Verantwortliche Person",
+        "Osoba odpowiedzialna"
+      ),
+
+    noAssignee:
+      pick(
+        "Без виконавця",
+        "No assignee",
+        "Nicht zugewiesen",
+        "Bez osoby odpowiedzialnej"
+      ),
+
+    employee:
+      pick(
+        "Співробітник",
+        "Employee",
+        "Mitarbeiter",
+        "Pracownik"
+      ),
+
+    priority:
+      pick(
+        "Пріоритет",
+        "Priority",
+        "Priorität",
+        "Priorytet"
+      ),
+
+    priorityLow:
+      pick(
+        "Низький",
+        "Low",
+        "Niedrig",
+        "Niski"
+      ),
+
+    priorityNormal:
+      pick(
+        "Звичайний",
+        "Normal",
+        "Normal",
+        "Zwykły"
+      ),
+
+    priorityHigh:
+      pick(
+        "Високий",
+        "High",
+        "Hoch",
+        "Wysoki"
+      ),
+
+    important:
+      pick(
+        "Важливо",
+        "Important",
+        "Wichtig",
+        "Ważne"
+      ),
+
+    date:
+      pick(
+        "Дата",
+        "Date",
+        "Datum",
+        "Data"
+      ),
+
+    time:
+      pick(
+        "Час",
+        "Time",
+        "Uhrzeit",
+        "Godzina"
+      ),
+
+    remindAt:
+      pick(
+        "Коли нагадати",
+        "When to remind",
+        "Erinnerungszeit",
+        "Kiedy przypomnieć"
+      ),
+
+    reminderHelp:
+      pick(
+        "У цей момент PUG покаже нагадування відповідальному співробітнику.",
+        "At this time, PUG will show a reminder to the assigned employee.",
+        "Zu diesem Zeitpunkt zeigt PUG dem zuständigen Mitarbeiter eine Erinnerung.",
+        "W tym czasie PUG wyświetli przypomnienie osobie odpowiedzialnej."
+      ),
+
+    description:
+      pick(
+        "Опис",
+        "Description",
+        "Beschreibung",
+        "Opis"
+      ),
+
+    descriptionPlaceholder:
+      pick(
+        "Додаткова інформація…",
+        "Additional information…",
+        "Zusätzliche Informationen…",
+        "Dodatkowe informacje…"
+      ),
+
+    cancel:
+      pick(
+        "Скасувати",
+        "Cancel",
+        "Abbrechen",
+        "Anuluj"
+      ),
+
+    createTask:
+      pick(
+        "Створити задачу",
+        "Create task",
+        "Aufgabe erstellen",
+        "Utwórz zadanie"
+      ),
+
+    saveChanges:
+      pick(
+        "Зберегти зміни",
+        "Save changes",
+        "Änderungen speichern",
+        "Zapisz zmiany"
+      ),
+
+    enterTask:
+      pick(
+        "Вкажіть задачу",
+        "Enter a task",
+        "Geben Sie eine Aufgabe ein",
+        "Wprowadź zadanie"
+      ),
+
+    titleRequired:
+      pick(
+        "Назва задачі є обов’язковою.",
+        "The task title is required.",
+        "Der Aufgabentitel ist erforderlich.",
+        "Nazwa zadania jest wymagana."
+      ),
+
+    saving:
+      pick(
+        "Зберігаємо…",
+        "Saving…",
+        "Wird gespeichert…",
+        "Zapisywanie…"
+      ),
+
+    creating:
+      pick(
+        "Створюємо…",
+        "Creating…",
+        "Wird erstellt…",
+        "Tworzenie…"
+      ),
+
+    changesSaved:
+      pick(
+        "Зміни збережено",
+        "Changes saved",
+        "Änderungen gespeichert",
+        "Zmiany zapisano"
+      ),
+
+    taskCreated:
+      pick(
+        "Задачу створено",
+        "Task created",
+        "Aufgabe erstellt",
+        "Zadanie utworzono"
+      ),
+
+    createFailed:
+      pick(
+        "Не вдалося створити задачу.",
+        "Could not create the task.",
+        "Die Aufgabe konnte nicht erstellt werden.",
+        "Nie udało się utworzyć zadania."
+      ),
+
+    updateFailed:
+      pick(
+        "Не вдалося оновити задачу.",
+        "Could not update the task.",
+        "Die Aufgabe konnte nicht aktualisiert werden.",
+        "Nie udało się zaktualizować zadania."
+      ),
+
+    deleteFailed:
+      pick(
+        "Не вдалося видалити задачу.",
+        "Could not delete the task.",
+        "Die Aufgabe konnte nicht gelöscht werden.",
+        "Nie udało się usunąć zadania."
+      ),
+
+    loadFailed:
+      pick(
+        "Не вдалося завантажити задачі.",
+        "Could not load tasks.",
+        "Die Aufgaben konnten nicht geladen werden.",
+        "Nie udało się wczytać zadań."
+      ),
+
+    tryAgain:
+      pick(
+        "Спробуйте ще раз.",
+        "Please try again.",
+        "Bitte versuchen Sie es erneut.",
+        "Spróbuj ponownie."
+      ),
+
+    mine:
+      pick(
+        "Мої",
+        "Mine",
+        "Meine",
+        "Moje"
+      ),
+
+    today:
+      pick(
+        "Сьогодні",
+        "Today",
+        "Heute",
+        "Dzisiaj"
+      ),
+
+    overdue:
+      pick(
+        "Прострочені",
+        "Overdue",
+        "Überfällig",
+        "Zaległe"
+      ),
+
+    all:
+      pick(
+        "Усі",
+        "All",
+        "Alle",
+        "Wszystkie"
+      ),
+
+    loading:
+      pick(
+        "Завантаження задач…",
+        "Loading tasks…",
+        "Aufgaben werden geladen…",
+        "Wczytywanie zadań…"
+      ),
+
+    noOverdue:
+      pick(
+        "Прострочених задач немає",
+        "There are no overdue tasks",
+        "Es gibt keine überfälligen Aufgaben",
+        "Brak zaległych zadań"
+      ),
+
+    noToday:
+      pick(
+        "На сьогодні задач немає",
+        "There are no tasks for today",
+        "Für heute gibt es keine Aufgaben",
+        "Brak zadań na dzisiaj"
+      ),
+
+    noMine:
+      pick(
+        "У вас немає задач",
+        "You have no tasks",
+        "Sie haben keine Aufgaben",
+        "Nie masz żadnych zadań"
+      ),
+
+    noTasks:
+      pick(
+        "Задач поки немає",
+        "No tasks yet",
+        "Noch keine Aufgaben",
+        "Brak zadań"
+      ),
+
+    emptyDescription:
+      pick(
+        "Нові задачі та нагадування з’являться тут.",
+        "New tasks and reminders will appear here.",
+        "Neue Aufgaben und Erinnerungen werden hier angezeigt.",
+        "Tutaj pojawią się nowe zadania i przypomnienia."
+      ),
+
+    unnamed:
+      pick(
+        "Без назви",
+        "Untitled",
+        "Ohne Titel",
+        "Bez nazwy"
+      ),
+
+    restoreTask:
+      pick(
+        "Повернути задачу",
+        "Reopen task",
+        "Aufgabe wieder öffnen",
+        "Otwórz zadanie ponownie"
+      ),
+
+    completeTask:
+      pick(
+        "Позначити виконаною",
+        "Mark as completed",
+        "Als erledigt markieren",
+        "Oznacz jako wykonane"
+      ),
+
+    overdueUpper:
+      pick(
+        "ПРОСТРОЧЕНО",
+        "OVERDUE",
+        "ÜBERFÄLLIG",
+        "ZALEGŁE"
+      ),
+
+    deleteTask:
+      pick(
+        "Видалити задачу",
+        "Delete task",
+        "Aufgabe löschen",
+        "Usuń zadanie"
+      ),
+
+    deleteQuestion:
+      pick(
+        "Видалити цю задачу?",
+        "Delete this task?",
+        "Diese Aufgabe löschen?",
+        "Usunąć to zadanie?"
+      ),
+
+    cannotUndo:
+      pick(
+        "Цю дію не можна скасувати.",
+        "This action cannot be undone.",
+        "Diese Aktion kann nicht rückgängig gemacht werden.",
+        "Tej czynności nie można cofnąć."
+      ),
+
+    visitTasksTitle:
+      pick(
+        "Задачі та нагадування",
+        "Tasks and reminders",
+        "Aufgaben und Erinnerungen",
+        "Zadania i przypomnienia"
+      ),
+
+    visitTasksDescription:
+      pick(
+        "Контрольні дії після прийому, дзвінки та повторні огляди.",
+        "Follow-up actions after the visit, calls and repeat examinations.",
+        "Nachsorge nach dem Termin, Anrufe und Kontrolluntersuchungen.",
+        "Dalsze działania po wizycie, telefony i wizyty kontrolne."
+      ),
+
+    taskPlaceholder:
+      pick(
+        "Наприклад: зателефонувати власнику після аналізів",
+        "For example: Call the owner after the test results",
+        "Zum Beispiel: Tierhalter nach den Untersuchungsergebnissen anrufen",
+        "Na przykład: Zadzwonić do właściciela po wynikach badań"
+      ),
+
+    add:
+      pick(
+        "Додати",
+        "Add",
+        "Hinzufügen",
+        "Dodaj"
+      ),
+
+    allCompleted:
+      pick(
+        "Усе виконано",
+        "All completed",
+        "Alles erledigt",
+        "Wszystko wykonane"
+      ),
+
+    active:
+      pick(
+        "активних",
+        "active",
+        "aktiv",
+        "aktywnych"
+      ),
+
+    visitTasksEmpty:
+      pick(
+        "Додайте контрольний дзвінок, повторний огляд або нагадування.",
+        "Add a follow-up call, repeat examination or reminder.",
+        "Fügen Sie einen Kontrollanruf, eine Nachuntersuchung oder eine Erinnerung hinzu.",
+        "Dodaj telefon kontrolny, wizytę kontrolną lub przypomnienie."
+      ),
+  };
+}
+let tasksInterfaceObserver =
+  null;
+
+
+function localizeTasksElement(
+  root
+) {
+  if (
+    !root
+  ) {
+    return;
+  }
+
+  const ui =
+    getTasksUi();
+
+  const language =
+    getInterfaceLanguage();
+
+  const pick =
+    (...values) => {
+      const index =
+        {
+          uk: 0,
+          en: 1,
+          de: 2,
+          pl: 3,
+        }[language] ?? 0;
+
+      return (
+        values[index] ??
+        values[0]
+      );
+    };
+
+  const translations =
+    new Map([
+      [
+        "TASK CENTER",
+        ui.center,
+      ],
+      [
+        "✅ Задачі",
+        `✅ ${ui.tasks}`,
+      ],
+      [
+        "Задачі",
+        ui.tasks,
+      ],
+      [
+        "Задачі, нагадування та follow-up пацієнтів",
+        ui.tasksDescription,
+      ],
+      [
+        "+ Нова задача",
+        `+ ${ui.newTask}`,
+      ],
+      [
+        "Нова задача",
+        ui.newTask,
+      ],
+      [
+        "НОВА ЗАДАЧА",
+        ui.newTask.toUpperCase(),
+      ],
+      [
+        "Створіть задачу, нагадування або follow-up",
+        ui.createDescription,
+      ],
+      [
+        "Назва задачі *",
+        ui.taskTitle,
+      ],
+      [
+        "Наприклад: передзвонити власнику",
+        ui.taskTitlePlaceholder,
+      ],
+      [
+        "Тип",
+        ui.type,
+      ],
+      [
+        "✓ Задача",
+        `✓ ${ui.task}`,
+      ],
+      [
+        "Задача",
+        ui.task,
+      ],
+      [
+        "🔔 Нагадування",
+        `🔔 ${ui.reminder}`,
+      ],
+      [
+        "Нагадування",
+        ui.reminder,
+      ],
+      [
+        "↻ Follow-up",
+        `↻ ${ui.followUp}`,
+      ],
+      [
+        "Follow-up",
+        ui.followUp,
+      ],
+      [
+        "🐾 Пацієнт",
+        `🐾 ${ui.patient}`,
+      ],
+      [
+        "Пацієнт",
+        ui.patient,
+      ],
+      [
+        "Без прив'язки до пацієнта",
+        ui.noPatient,
+      ],
+      [
+        "Без прив’язки до пацієнта",
+        ui.noPatient,
+      ],
+      [
+        "👤 Виконавець",
+        `👤 ${ui.assignee}`,
+      ],
+      [
+        "Виконавець",
+        ui.assignee,
+      ],
+      [
+        "Без виконавця",
+        ui.noAssignee,
+      ],
+      [
+        "Співробітник",
+        ui.employee,
+      ],
+      [
+        "Пріоритет",
+        ui.priority,
+      ],
+      [
+        "Низький",
+        ui.priorityLow,
+      ],
+      [
+        "Звичайний",
+        ui.priorityNormal,
+      ],
+      [
+        "Високий",
+        ui.priorityHigh,
+      ],
+      [
+        "Важливо",
+        ui.important,
+      ],
+      [
+        "Дата",
+        ui.date,
+      ],
+      [
+        "Час",
+        ui.time,
+      ],
+      [
+        "🔔 Коли нагадати",
+        `🔔 ${ui.remindAt}`,
+      ],
+      [
+        "Коли нагадати",
+        ui.remindAt,
+      ],
+      [
+        "У цей момент PUG покаже нагадування відповідальному співробітнику.",
+        ui.reminderHelp,
+      ],
+      [
+        "Опис",
+        ui.description,
+      ],
+      [
+        "Додаткова інформація...",
+        ui.descriptionPlaceholder,
+      ],
+      [
+        "Додаткова інформація…",
+        ui.descriptionPlaceholder,
+      ],
+      [
+        "Скасувати",
+        ui.cancel,
+      ],
+      [
+        "Створити задачу",
+        ui.createTask,
+      ],
+      [
+        "✎ Редагувати задачу",
+        `✎ ${ui.editTask}`,
+      ],
+      [
+        "Редагувати задачу",
+        ui.editTask,
+      ],
+      [
+        "Зберегти зміни",
+        ui.saveChanges,
+      ],
+      [
+        "Вкажіть задачу",
+        ui.enterTask,
+      ],
+      [
+        "Назва задачі є обов'язковою.",
+        ui.titleRequired,
+      ],
+      [
+        "Назва задачі є обов’язковою.",
+        ui.titleRequired,
+      ],
+      [
+        "Зберігаємо…",
+        ui.saving,
+      ],
+      [
+        "Збереження…",
+        ui.saving,
+      ],
+      [
+        "Створюємо…",
+        ui.creating,
+      ],
+      [
+        "Зміни збережено",
+        ui.changesSaved,
+      ],
+      [
+        "Задачу створено",
+        ui.taskCreated,
+      ],
+      [
+        "Не вдалося створити",
+        ui.createFailed,
+      ],
+      [
+        "Не вдалося створити задачу.",
+        ui.createFailed,
+      ],
+      [
+        "Не вдалося оновити задачу",
+        ui.updateFailed,
+      ],
+      [
+        "Не вдалося оновити задачу.",
+        ui.updateFailed,
+      ],
+      [
+        "Не вдалося видалити задачу",
+        ui.deleteFailed,
+      ],
+      [
+        "Не вдалося видалити задачу.",
+        ui.deleteFailed,
+      ],
+      [
+        "Не вдалося завантажити задачі",
+        ui.loadFailed,
+      ],
+      [
+        "Не вдалося завантажити задачі.",
+        ui.loadFailed,
+      ],
+      [
+        "Спробуйте ще раз.",
+        ui.tryAgain,
+      ],
+      [
+        "👤 Мої",
+        `👤 ${ui.mine}`,
+      ],
+      [
+        "📅 Сьогодні",
+        `📅 ${ui.today}`,
+      ],
+      [
+        "⚠️ Прострочені",
+        `⚠️ ${ui.overdue}`,
+      ],
+      [
+        "☰ Усі",
+        `☰ ${ui.all}`,
+      ],
+      [
+        "Завантаження задач…",
+        ui.loading,
+      ],
+      [
+        "Завантажуємо задачі…",
+        ui.loading,
+      ],
+      [
+        "Прострочених задач немає",
+        ui.noOverdue,
+      ],
+      [
+        "На сьогодні задач немає",
+        ui.noToday,
+      ],
+      [
+        "У вас немає задач",
+        ui.noMine,
+      ],
+      [
+        "Задач поки немає",
+        ui.noTasks,
+      ],
+      [
+        "Нові задачі та нагадування з'являться тут.",
+        ui.emptyDescription,
+      ],
+      [
+        "Нові задачі та нагадування з’являться тут.",
+        ui.emptyDescription,
+      ],
+      [
+        "Без назви",
+        ui.unnamed,
+      ],
+      [
+        "Повернути задачу",
+        ui.restoreTask,
+      ],
+      [
+        "Позначити виконаною",
+        ui.completeTask,
+      ],
+      [
+        "ПРОСТРОЧЕНО",
+        ui.overdueUpper,
+      ],
+      [
+        "Видалити задачу",
+        ui.deleteTask,
+      ],
+      [
+        "Видалити цю задачу?",
+        ui.deleteQuestion,
+      ],
+      [
+        "Цю дію не можна скасувати.",
+        ui.cannotUndo,
+      ],
+      [
+        "Задачі та нагадування",
+        ui.visitTasksTitle,
+      ],
+      [
+        "Контрольні дії після прийому, дзвінки та повторні огляди.",
+        ui.visitTasksDescription,
+      ],
+      [
+        "Наприклад: зателефонувати власнику після аналізів",
+        ui.taskPlaceholder,
+      ],
+      [
+        "+ Додати",
+        `+ ${ui.add}`,
+      ],
+      [
+        "Усе виконано",
+        ui.allCompleted,
+      ],
+      [
+        "Додайте контрольний дзвінок, повторний огляд або нагадування.",
+        ui.visitTasksEmpty,
+      ],
+      [
+        "Без дати",
+        pick(
+          "Без дати",
+          "No date",
+          "Kein Datum",
+          "Brak daty"
+        ),
+      ],
+      [
+        "Прострочено",
+        pick(
+          "Прострочено",
+          "Overdue",
+          "Überfällig",
+          "Zaległe"
+        ),
+      ],
+      [
+        "Відкрити задачі →",
+        pick(
+          "Відкрити задачі →",
+          "Open tasks →",
+          "Aufgaben öffnen →",
+          "Otwórz zadania →"
+        ),
+      ],
+      [
+        "Власник",
+        pick(
+          "Власник",
+          "Owner",
+          "Inhaber",
+          "Właściciel"
+        ),
+      ],
+      [
+        "Адміністратор",
+        pick(
+          "Адміністратор",
+          "Administrator",
+          "Administrator",
+          "Administrator"
+        ),
+      ],
+      [
+        "Ветеринар",
+        pick(
+          "Ветеринар",
+          "Veterinarian",
+          "Tierarzt",
+          "Lekarz weterynarii"
+        ),
+      ],
+      [
+        "Асистент",
+        pick(
+          "Асистент",
+          "Assistant",
+          "Assistenz",
+          "Asystent"
+        ),
+      ],
+      [
+        "Рецепція",
+        pick(
+          "Рецепція",
+          "Reception",
+          "Empfang",
+          "Recepcja"
+        ),
+      ],
+      [
+        "Менеджер",
+        pick(
+          "Менеджер",
+          "Manager",
+          "Manager",
+          "Menedżer"
+        ),
+      ],
+    ]);
+
+  const translateText =
+  (value) => {
+    const normalized =
+      String(
+        value || ""
+      )
+        .replace(
+          /\s+/g,
+          " "
+        )
+        .trim();
+
+    if (
+      !normalized
+    ) {
+      return null;
+    }
+
+    if (
+      translations.has(
+        normalized
+      )
+    ) {
+      return translations.get(
+        normalized
+      );
+    }
+
+    if (
+      normalized ===
+      "Закрити"
+    ) {
+      return pick(
+        "Закрити",
+        "Close",
+        "Schließen",
+        "Zamknij"
+      );
+    }
+
+    const activeMatch =
+      normalized.match(
+        /^(\d+)\s+активних$/
+      );
+
+    if (
+      activeMatch
+    ) {
+      return `${activeMatch[1]} ${ui.active}`;
+    }
+
+    const moreTasksMatch =
+      normalized.match(
+        /^\+\s*ще\s+(\d+)\s+(?:нова задача|нові задачі)$/
+      );
+
+    if (
+      moreTasksMatch
+    ) {
+      const count =
+        Number(
+          moreTasksMatch[1]
+        );
+
+      if (
+        language ===
+        "en"
+      ) {
+        return `+ ${count} more ${
+          count === 1
+            ? "task"
+            : "tasks"
+        }`;
+      }
+
+      if (
+        language ===
+        "de"
+      ) {
+        return count === 1
+          ? "+ 1 weitere Aufgabe"
+          : `+ ${count} weitere Aufgaben`;
+      }
+
+      if (
+        language ===
+        "pl"
+      ) {
+        const lastDigit =
+          count % 10;
+
+        const lastTwoDigits =
+          count % 100;
+
+        const form =
+          count === 1
+            ? "zadanie"
+            : lastDigit >= 2 &&
+                lastDigit <= 4 &&
+                !(
+                  lastTwoDigits >= 12 &&
+                  lastTwoDigits <= 14
+                )
+              ? "zadania"
+              : "zadań";
+
+        return `+ jeszcze ${count} ${form}`;
+      }
+
+      return count === 1
+        ? "+ ще 1 нова задача"
+        : `+ ще ${count} нові задачі`;
+    }
+
+    const newTasksMatch =
+      normalized.match(
+        /^(\d+)\s+(?:нова задача|нові задачі)$/
+      );
+
+    if (
+      newTasksMatch
+    ) {
+      return `${newTasksMatch[1]} ${ui.newTask}`;
+    }
+
+    return null;
+  };
+  const translateNode =
+  (node) => {
+    if (
+      !node
+    ) {
+      return;
+    }
+
+    if (
+      node.nodeType ===
+      Node.TEXT_NODE
+    ) {
+      const currentValue =
+        String(
+          node.nodeValue ||
+          ""
+        );
+
+      const translated =
+        translateText(
+          currentValue
+        );
+
+      if (
+        translated
+      ) {
+        const leadingSpace =
+          currentValue.match(
+            /^\s*/
+          )?.[0] || "";
+
+        const trailingSpace =
+          currentValue.match(
+            /\s*$/
+          )?.[0] || "";
+
+        const nextValue =
+          `${leadingSpace}${translated}${trailingSpace}`;
+
+        if (
+          currentValue !==
+          nextValue
+        ) {
+          node.nodeValue =
+            nextValue;
+        }
+      }
+
+      return;
+    }
+
+    if (
+      node.nodeType !==
+      Node.ELEMENT_NODE
+    ) {
+      return;
+    }
+
+    [
+      "placeholder",
+      "title",
+      "aria-label",
+    ].forEach(
+      (attribute) => {
+        if (
+          !node.hasAttribute(
+            attribute
+          )
+        ) {
+          return;
+        }
+
+        const currentValue =
+          node.getAttribute(
+            attribute
+          ) || "";
+
+        const translated =
+          translateText(
+            currentValue
+          );
+
+        if (
+          translated &&
+          currentValue !==
+            translated
+        ) {
+          node.setAttribute(
+            attribute,
+            translated
+          );
+        }
+      }
+    );
+
+    node.childNodes.forEach(
+      (childNode) => {
+        translateNode(
+          childNode
+        );
+      }
+    );
+  };
+  translateNode(
+    root
+  );
+}
+
+
+function enableTasksInterfaceLocalization() {
+  if (
+    !document.body
+  ) {
+    return;
+  }
+
+  localizeTasksElement(
+    document.body
+  );
+
+  if (
+    tasksInterfaceObserver
+  ) {
+    return;
+  }
+
+  tasksInterfaceObserver =
+    new MutationObserver(
+      (mutations) => {
+        mutations.forEach(
+          (mutation) => {
+            if (
+              mutation.type ===
+              "characterData"
+            ) {
+              localizeTasksElement(
+                mutation.target
+              );
+
+              return;
+            }
+
+            if (
+              mutation.type ===
+              "attributes"
+            ) {
+              localizeTasksElement(
+                mutation.target
+              );
+
+              return;
+            }
+
+            mutation.addedNodes
+              .forEach(
+                (node) => {
+                  localizeTasksElement(
+                    node
+                  );
+                }
+              );
+          }
+        );
+      }
+    );
+
+  tasksInterfaceObserver.observe(
+    document.body,
+    {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: [
+        "placeholder",
+        "title",
+        "aria-label",
+      ],
+    }
+  );
+}
+
+
+if (
+  document.readyState ===
+  "loading"
+) {
+  document.addEventListener(
+    "DOMContentLoaded",
+    enableTasksInterfaceLocalization,
+    {
+      once: true,
+    }
+  );
+} else {
+  enableTasksInterfaceLocalization();
+}
 async function openTaskCreateModal(
   activeScope = "all",
   taskToEdit = null
@@ -17465,31 +20452,36 @@ const taskRoleLabels = {
     // ========================================
 
     const formatTaskDate =
-      (value) => {
-        const clean =
-          String(
-            value || ""
-          ).slice(
-            0,
-            10
-          );
+  (value) => {
+    const clean =
+      String(
+        value ||
+        ""
+      ).slice(
+        0,
+        10
+      );
 
-        if (!clean) {
-          return "";
-        }
+    if (
+      !clean
+    ) {
+      return "";
+    }
 
-        const [
-          year,
-          month,
-          day,
-        ] =
-          clean.split("-");
+    return formatCalendarDate(
+      clean,
+      {
+        day:
+          "2-digit",
 
+        month:
+          "2-digit",
 
-        return (
-          `${day}.${month}.${year}`
-        );
-      };
+        year:
+          "numeric",
+      }
+    );
+  };
 
 
     const getKindInfo =
@@ -27433,22 +30425,33 @@ function getFinancePurchasePaymentMeta(
 function formatFinancePurchaseDate(
   value
 ) {
-  if (!value) return "—";
-
-  const date = new Date(
-    `${value}T12:00:00`
-  );
+  const cleanDate =
+    String(
+      value ||
+      ""
+    ).slice(
+      0,
+      10
+    );
 
   if (
-    Number.isNaN(
-      date.getTime()
-    )
+    !cleanDate
   ) {
-    return value;
+    return "—";
   }
 
-  return date.toLocaleDateString(
-    "uk-UA"
+  return formatCalendarDate(
+    cleanDate,
+    {
+      day:
+        "2-digit",
+
+      month:
+        "2-digit",
+
+      year:
+        "numeric",
+    }
   );
 }
 function openFinanceSupplierCreateModal(
@@ -41519,84 +44522,107 @@ function openOwner(ownerId, opts = { pushHash: true }) {
   if (opts.pushHash) setHash("owner", ownerId);
 }
 
-function openPatient(petId, opts = { pushHash: true }) {
-  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : loadPatients();
-  const pet = (patients || []).find((p) => String(p.id) === String(petId));
-  if (!pet) return alert("Пацієнт не знайдено");
+function openPatient(
+  petId,
+  opts = {
+    pushHash:
+      true,
+  }
+) {
+  const patients =
+    Array.isArray(
+      state.patients
+    ) &&
+    state.patients.length
+      ? state.patients
+      : loadPatients();
 
-  state.selectedPetId = String(petId);
-  state.selectedPet = pet;
-  state.selectedOwnerId = String(pet.owner_id || state.selectedOwnerId || "");
+  const pet =
+    (
+      patients || []
+    ).find(
+      (item) =>
+        String(item.id) ===
+        String(petId)
+    );
 
-  renderPatientCard(pet);
-  setRoute("patient");
-  if (opts.pushHash) setHash("patient", petId);
-}
+  if (!pet) {
+    showCrmNotice({
+      icon:
+        "🐾",
 
-async function renderPatientCard(pet) {
-  const root = $("#patientCardRoot");
-  if (!root) return;
+      title:
+        translateInterfaceText(
+          "patients.card.notFound"
+        ),
+    });
 
-  const owner = pet?.owner_id ? getOwnerById(pet.owner_id) : null;
-  const vaccinationStatus =
-  String(
-    pet?.vaccination_status ||
-    "unknown"
+    return;
+  }
+
+  state.selectedPetId =
+    String(petId);
+
+  state.selectedPet =
+    pet;
+
+  state.selectedOwnerId =
+    String(
+      pet.owner_id ||
+      state.selectedOwnerId ||
+      ""
+    );
+
+  renderPatientCard(
+    pet
   );
 
-const vaccinationStatusText =
-  vaccinationStatus === "vaccinated"
-    ? "Вакцинована"
-    : vaccinationStatus ===
-        "not_vaccinated"
-      ? "Не вакцинована"
-      : "Статус невідомий";
+  setRoute(
+    "patient"
+  );
 
-const vaccinationStatusClass =
-  vaccinationStatus === "vaccinated"
-    ? "is-vaccinated"
-    : vaccinationStatus ===
-        "not_vaccinated"
-      ? "is-not-vaccinated"
-      : "is-unknown";
+  if (opts.pushHash) {
+    setHash(
+      "patient",
+      petId
+    );
+  }
+}
 
-const vaccinationDate =
-  String(
-    pet?.vaccination_date || ""
-  ).slice(0, 10);
+async function renderPatientCard(
+  pet
+) {
+  const root =
+    $("#patientCardRoot");
 
-const vaccinationName =
-  String(
-    pet?.vaccination_name || ""
-  ).trim();
-
-const vaccinationDateText =
-  vaccinationDate
-    ? new Date(
-        `${vaccinationDate}T00:00:00`
-      ).toLocaleDateString("uk-UA")
-    : "Не вказано";
+  if (!root) {
+    return;
+  }
 
   root.innerHTML = `
-  <div
-    class="patientPageLoading"
-    style="
-      min-height: 420px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: rgba(255, 255, 255, 0.45);
-      font-size: 14px;
-    "
-  >
-    Завантаження картки пацієнта…
-  </div>
-`;
+    <div
+      class="patientPageLoading"
+      style="
+        min-height: 420px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.45);
+        font-size: 14px;
+      "
+    >
+      ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.loading"
+        )
+      )}
+    </div>
+  `;
 
-await renderPatientTab(
-  "overview",
-  pet
-);
+  await renderPatientTab(
+    "overview",
+    pet
+  );
 }
 
 
@@ -41620,26 +44646,64 @@ function renderPatientVaccinationsPanel(
   vaccinations = []
 ) {
   const list =
-    Array.isArray(
-      vaccinations
-    )
+    Array.isArray(vaccinations)
       ? vaccinations
       : [];
 
-
   const currentRole =
     getCurrentCrmRole();
-
 
   const canManageVaccinations =
     [
       "owner",
       "admin",
       "vet",
-    ].includes(
-      currentRole
-    );
+    ].includes(currentRole);
 
+  const getVaccineCategoryLabel =
+    (value) => {
+      const category =
+        String(value || "")
+          .trim()
+          .toLowerCase();
+
+      if (!category) {
+        return "";
+      }
+
+      const translationKey =
+        `patients.card.vaccineCategory.${category}`;
+
+      const translated =
+        translateInterfaceText(
+          translationKey
+        );
+
+      return translated ===
+        translationKey
+        ? String(value)
+        : translated;
+    };
+
+  const formatVaccinationDate =
+    (value) => {
+      const date =
+        String(value || "")
+          .slice(0, 10);
+
+      if (!date) {
+        return "";
+      }
+
+      return formatCalendarDate(
+        date,
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }
+      );
+    };
 
   const items =
     list.length
@@ -41650,53 +44714,35 @@ function renderPatientVaccinationsPanel(
                 item.id || ""
               ).trim();
 
-
-            const date =
-              String(
-                item.vaccination_date ||
-                ""
-              ).slice(
-                0,
-                10
-              );
-
-
             const dateLabel =
-              date
-                ? new Date(
-                    `${date}T00:00:00`
-                  ).toLocaleDateString(
-                    "uk-UA"
-                  )
-                : "—";
-
-
-            const nextDate =
-              String(
-                item.next_vaccination_date ||
-                ""
-              ).slice(
-                0,
-                10
-              );
-
+              formatVaccinationDate(
+                item.vaccination_date
+              ) || "—";
 
             const nextDateLabel =
-              nextDate
-                ? new Date(
-                    `${nextDate}T00:00:00`
-                  ).toLocaleDateString(
-                    "uk-UA"
-                  )
-                : "";
-
+              formatVaccinationDate(
+                item.next_vaccination_date
+              );
 
             const batchNumber =
               String(
-                item.batch_number ||
-                ""
+                item.batch_number || ""
               ).trim();
 
+            const categoryLabel =
+              getVaccineCategoryLabel(
+                item.vaccine_type
+              );
+
+            const editLabel =
+              translateInterfaceText(
+                "patients.card.editVaccination"
+              );
+
+            const deleteLabel =
+              translateInterfaceText(
+                "patients.card.deleteVaccination"
+              );
 
             return `
               <div
@@ -41711,17 +44757,17 @@ function renderPatientVaccinationsPanel(
                   💉
                 </div>
 
-
                 <div
                   class="patientVaccinationMain"
                 >
                   <strong>
                     ${escapeHtml(
                       item.vaccine_name ||
-                      "Вакцина"
+                      translateInterfaceText(
+                        "patients.card.vaccine"
+                      )
                     )}
                   </strong>
-
 
                   <span>
                     ${escapeHtml(
@@ -41729,25 +44775,27 @@ function renderPatientVaccinationsPanel(
                     )}
                   </span>
 
-
                   ${
-                    item.vaccine_type
+                    categoryLabel
                       ? `
                         <small>
                           ${escapeHtml(
-                            item.vaccine_type
+                            categoryLabel
                           )}
                         </small>
                       `
                       : ""
                   }
 
-
                   ${
                     batchNumber
                       ? `
                         <small>
-                          Серія:
+                          ${escapeHtml(
+                            translateInterfaceText(
+                              "patients.card.series"
+                            )
+                          )}:
                           ${escapeHtml(
                             batchNumber
                           )}
@@ -41757,7 +44805,6 @@ function renderPatientVaccinationsPanel(
                   }
                 </div>
 
-
                 ${
                   nextDateLabel
                     ? `
@@ -41765,7 +44812,11 @@ function renderPatientVaccinationsPanel(
                         class="patientVaccinationNext"
                       >
                         <span>
-                          Наступна
+                          ${escapeHtml(
+                            translateInterfaceText(
+                              "patients.card.nextVaccinationShort"
+                            )
+                          )}
                         </span>
 
                         <strong>
@@ -41777,7 +44828,6 @@ function renderPatientVaccinationsPanel(
                     `
                     : ""
                 }
-
 
                 ${
                   canManageVaccinations &&
@@ -41792,12 +44842,15 @@ function renderPatientVaccinationsPanel(
                           data-edit-patient-vaccination="${escapeHtml(
                             vaccinationId
                           )}"
-                          title="Редагувати вакцинацію"
-                          aria-label="Редагувати вакцинацію"
+                          title="${escapeHtml(
+                            editLabel
+                          )}"
+                          aria-label="${escapeHtml(
+                            editLabel
+                          )}"
                         >
                           ✎
                         </button>
-
 
                         <button
                           type="button"
@@ -41808,8 +44861,12 @@ function renderPatientVaccinationsPanel(
                           data-delete-patient-vaccination="${escapeHtml(
                             vaccinationId
                           )}"
-                          title="Видалити вакцинацію"
-                          aria-label="Видалити вакцинацію"
+                          title="${escapeHtml(
+                            deleteLabel
+                          )}"
+                          aria-label="${escapeHtml(
+                            deleteLabel
+                          )}"
                         >
                           🗑
                         </button>
@@ -41831,17 +44888,23 @@ function renderPatientVaccinationsPanel(
 
           <div>
             <strong>
-              Вакцинацій ще немає
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.card.noVaccinations"
+                )
+              )}
             </strong>
 
             <small>
-              Додайте першу вакцинацію
-              пацієнта.
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.card.noVaccinationsText"
+                )
+              )}
             </small>
           </div>
         </div>
       `;
-
 
   return `
     <section
@@ -41854,14 +44917,21 @@ function renderPatientVaccinationsPanel(
           <span
             class="patientVaccinationsEyebrow"
           >
-            ПРОФІЛАКТИКА
+            ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.prevention"
+              )
+            )}
           </span>
 
           <h3>
-            💉 Вакцинації
+            💉 ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.vaccinations"
+              )
+            )}
           </h3>
         </div>
-
 
         ${
           canManageVaccinations
@@ -41871,13 +44941,16 @@ function renderPatientVaccinationsPanel(
                 class="patientVaccinationAddButton"
                 data-add-patient-vaccination
               >
-                + Додати вакцинацію
+                + ${escapeHtml(
+                  translateInterfaceText(
+                    "patients.card.addVaccination"
+                  )
+                )}
               </button>
             `
             : ""
         }
       </div>
-
 
       <div
         class="patientVaccinationsList"
@@ -41897,7 +44970,6 @@ function openPatientVaccinationEditor(
     )
     ?.remove();
 
-
   if (
     !pet ||
     !vaccination?.id
@@ -41905,49 +44977,40 @@ function openPatientVaccinationEditor(
     return;
   }
 
+  const t =
+    (key) =>
+      translateInterfaceText(key);
 
   const brands =
     getVaccineBrandsForPatient(
       pet
     );
 
-
   const vaccineOptions = [];
 
-
-  brands.forEach(
-    (brand) => {
-      (
-        Array.isArray(
-          brand.vaccines
-        )
-          ? brand.vaccines
-          : []
-      ).forEach(
-        (vaccine) => {
-          vaccineOptions.push({
-            brand,
-            vaccine,
-
-            value:
-              `${brand.brand}|||${vaccine.name}`,
-
-            fullName:
-              `${brand.brand} ${vaccine.name}`
-                .trim(),
-          });
-        }
-      );
-    }
-  );
-
+  brands.forEach((brand) => {
+    (
+      Array.isArray(brand.vaccines)
+        ? brand.vaccines
+        : []
+    ).forEach((vaccine) => {
+      vaccineOptions.push({
+        brand,
+        vaccine,
+        value:
+          `${brand.brand}|||${vaccine.name}`,
+        fullName:
+          `${brand.brand} ${vaccine.name}`
+            .trim(),
+      });
+    });
+  });
 
   const currentName =
     String(
       vaccination.vaccine_name ||
       ""
     ).trim();
-
 
   const currentOption =
     vaccineOptions.find(
@@ -41956,16 +45019,11 @@ function openPatientVaccinationEditor(
         currentName
     );
 
-
   const overlay =
-    document.createElement(
-      "div"
-    );
-
+    document.createElement("div");
 
   overlay.className =
     "patientVaccinePickerOverlay patientVaccinationEditOverlay";
-
 
   overlay.innerHTML = `
     <div
@@ -41980,56 +45038,77 @@ function openPatientVaccinationEditor(
           <span
             class="patientVaccinePickerEyebrow"
           >
-            РЕДАГУВАННЯ
+            ${escapeHtml(
+              t(
+                "patients.card.editing"
+              )
+            )}
           </span>
 
           <h2>
-            ✎ Редагувати вакцинацію
+            ✎ ${escapeHtml(
+              t(
+                "patients.card.editVaccination"
+              )
+            )}
           </h2>
 
           <p>
             ${escapeHtml(
               pet.name ||
-              "Пацієнт"
+              t(
+                "patients.card.patient"
+              )
             )}
           </p>
         </div>
-
 
         <button
           type="button"
           class="patientVaccinePickerClose"
           data-close-vaccination-editor
+          title="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+          aria-label="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
         >
           ×
         </button>
       </div>
 
-
       <div
         style="
-          display:grid;
+          display: grid;
           grid-template-columns:
-            repeat(2,minmax(0,1fr));
-          gap:16px;
-          padding:20px;
+            repeat(2, minmax(0, 1fr));
+          gap: 16px;
+          padding: 20px;
         "
       >
-
         <label
           style="
-            grid-column:1/-1;
+            grid-column: 1 / -1;
           "
         >
           <span>
-            Вакцина
+            ${escapeHtml(
+              t(
+                "patients.card.vaccine"
+              )
+            )}
           </span>
 
           <select
             data-edit-vaccine-product
             style="
-              width:100%;
-              margin-top:7px;
+              width: 100%;
+              margin-top: 7px;
             "
           >
             ${
@@ -42048,43 +45127,44 @@ function openPatientVaccinationEditor(
                 : ""
             }
 
-            ${
-              vaccineOptions
-                .map(
-                  (item) => `
-                    <option
-                      value="${escapeHtml(
-                        item.value
-                      )}"
-                      ${
-                        currentOption &&
-                        item.value ===
-                          currentOption.value
-                          ? "selected"
-                          : ""
-                      }
-                    >
-                      ${escapeHtml(
-                        [
-                          item.brand.flag ||
-                            "",
-                          item.fullName,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")
-                      )}
-                    </option>
-                  `
-                )
-                .join("")
-            }
+            ${vaccineOptions
+              .map(
+                (item) => `
+                  <option
+                    value="${escapeHtml(
+                      item.value
+                    )}"
+                    ${
+                      currentOption &&
+                      item.value ===
+                        currentOption.value
+                        ? "selected"
+                        : ""
+                    }
+                  >
+                    ${escapeHtml(
+                      [
+                        item.brand.flag ||
+                          "",
+                        item.fullName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")
+                    )}
+                  </option>
+                `
+              )
+              .join("")}
           </select>
         </label>
 
-
         <label>
           <span>
-            Дата вакцинації
+            ${escapeHtml(
+              t(
+                "patients.card.vaccinationDate"
+              )
+            )}
           </span>
 
           <input
@@ -42098,42 +45178,51 @@ function openPatientVaccinationEditor(
               ).slice(0, 10)
             )}"
             style="
-              width:100%;
-              margin-top:7px;
+              width: 100%;
+              margin-top: 7px;
             "
           >
         </label>
 
-
         <label>
           <span>
-            Серія / партія
+            ${escapeHtml(
+              t(
+                "patients.card.batchNumber"
+              )
+            )}
           </span>
 
           <input
             type="text"
             data-edit-vaccine-batch
             value="${escapeHtml(
-              vaccination
-                .batch_number ||
+              vaccination.batch_number ||
               ""
             )}"
-            placeholder="Необов'язково"
+            placeholder="${escapeHtml(
+              t(
+                "patients.card.optional"
+              )
+            )}"
             style="
-              width:100%;
-              margin-top:7px;
+              width: 100%;
+              margin-top: 7px;
             "
           >
         </label>
 
-
         <label
           style="
-            grid-column:1/-1;
+            grid-column: 1 / -1;
           "
         >
           <span>
-            Наступна вакцинація
+            ${escapeHtml(
+              t(
+                "patients.card.nextVaccination"
+              )
+            )}
           </span>
 
           <input
@@ -42147,21 +45236,19 @@ function openPatientVaccinationEditor(
               ).slice(0, 10)
             )}"
             style="
-              width:100%;
-              margin-top:7px;
+              width: 100%;
+              margin-top: 7px;
             "
           >
         </label>
-
       </div>
-
 
       <div
         style="
-          display:flex;
-          justify-content:flex-end;
-          gap:10px;
-          padding:0 20px 20px;
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          padding: 0 20px 20px;
         "
       >
         <button
@@ -42169,46 +45256,47 @@ function openPatientVaccinationEditor(
           class="ghost"
           data-close-vaccination-editor
         >
-          Скасувати
+          ${escapeHtml(
+            t(
+              "patients.card.cancel"
+            )
+          )}
         </button>
-
 
         <button
           type="button"
           class="primary"
           data-save-vaccination-editor
         >
-          ✓ Зберегти зміни
+          ✓ ${escapeHtml(
+            t(
+              "patients.card.saveChanges"
+            )
+          )}
         </button>
       </div>
     </div>
   `;
 
-
   document.body.appendChild(
     overlay
   );
-
 
   const closeEditor =
     () => {
       overlay.remove();
     };
 
-
   overlay
     .querySelectorAll(
       "[data-close-vaccination-editor]"
     )
-    .forEach(
-      (button) => {
-        button.addEventListener(
-          "click",
-          closeEditor
-        );
-      }
-    );
-
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        closeEditor
+      );
+    });
 
   overlay
     .querySelector(
@@ -42220,7 +45308,6 @@ function openPatientVaccinationEditor(
         const saveButton =
           event.currentTarget;
 
-
         const productValue =
           String(
             overlay
@@ -42230,7 +45317,6 @@ function openPatientVaccinationEditor(
               ?.value ||
             ""
           ).trim();
-
 
         const vaccinationDate =
           String(
@@ -42242,7 +45328,6 @@ function openPatientVaccinationEditor(
             ""
           ).trim();
 
-
         const batchNumber =
           String(
             overlay
@@ -42252,7 +45337,6 @@ function openPatientVaccinationEditor(
               ?.value ||
             ""
           ).trim();
-
 
         const nextDate =
           String(
@@ -42264,22 +45348,21 @@ function openPatientVaccinationEditor(
             ""
           ).trim();
 
-
         if (!vaccinationDate) {
           showCrmNotice({
-            icon:
-              "💉",
-
+            icon: "💉",
             title:
-              "Вкажіть дату",
-
+              t(
+                "patients.card.enterDate"
+              ),
             text:
-              "Дата вакцинації є обов'язковою.",
+              t(
+                "patients.card.vaccinationDateRequired"
+              ),
           });
 
           return;
         }
-
 
         let vaccineName =
           currentName;
@@ -42295,7 +45378,6 @@ function openPatientVaccinationEditor(
             ? vaccination.coverage_tags
             : [];
 
-
         if (
           productValue &&
           productValue !==
@@ -42305,59 +45387,48 @@ function openPatientVaccinationEditor(
             brandName,
             productName,
           ] =
-            productValue.split(
-              "|||"
-            );
-
+            productValue.split("|||");
 
           const brand =
             brands.find(
               (item) =>
-                String(
-                  item.brand
-                ) ===
+                String(item.brand) ===
                 brandName
             );
-
 
           const vaccine =
             brand?.vaccines?.find(
               (item) =>
-                String(
-                  item.name
-                ) ===
+                String(item.name) ===
                 productName
             );
-
 
           if (
             !brand ||
             !vaccine
           ) {
             showCrmNotice({
-              icon:
-                "⚠️",
-
+              icon: "⚠️",
               title:
-                "Вакцину не знайдено",
-
+                t(
+                  "patients.card.vaccineNotFound"
+                ),
               text:
-                "Оберіть препарат ще раз.",
+                t(
+                  "patients.card.selectProductAgain"
+                ),
             });
 
             return;
           }
 
-
           vaccineName =
             `${brand.brand} ${vaccine.name}`
               .trim();
 
-
           vaccineType =
             vaccine.category ||
             null;
-
 
           coverageTags =
             getVaccineCoverageTags(
@@ -42366,13 +45437,13 @@ function openPatientVaccinationEditor(
             );
         }
 
-
         saveButton.disabled =
           true;
 
         saveButton.textContent =
-          "Зберігаємо…";
-
+          t(
+            "patients.card.saving"
+          );
 
         try {
           const updated =
@@ -42381,103 +45452,84 @@ function openPatientVaccinationEditor(
               {
                 vaccination_date:
                   vaccinationDate,
-
                 vaccine_name:
                   vaccineName,
-
                 vaccine_type:
                   vaccineType,
-
                 coverage_tags:
                   coverageTags,
-
                 batch_number:
                   batchNumber,
-
                 next_vaccination_date:
                   nextDate,
-
                 note:
                   vaccination.note ||
                   "",
               }
             );
 
-
           if (!updated) {
             throw new Error(
-              "Сервер не повернув вакцинацію."
+              "Vaccination update returned no data."
             );
           }
 
-
           closeEditor();
 
-
           await loadPatientsApi();
-
 
           const freshPet =
             (
               state.patients || []
             ).find(
               (item) =>
-                String(
-                  item.id
-                ) ===
-                String(
-                  pet.id
-                )
+                String(item.id) ===
+                String(pet.id)
             ) ||
             pet;
 
-
           state.selectedPet =
             freshPet;
-
 
           await renderPatientTab(
             "overview",
             freshPet
           );
 
-
           showCrmNotice({
-            icon:
-              "✓",
-
+            icon: "✓",
             title:
-              "Вакцинацію оновлено",
-
+              t(
+                "patients.card.vaccinationUpdated"
+              ),
             text:
               vaccineName,
           });
-
         } catch (error) {
           console.error(
             "UPDATE PATIENT VACCINATION:",
             error
           );
 
-
           showCrmNotice({
-            icon:
-              "⚠️",
-
+            icon: "⚠️",
             title:
-              "Не вдалося оновити",
-
+              t(
+                "patients.card.updateFailed"
+              ),
             text:
-              error?.message ||
-              "Спробуйте ще раз.",
+              t(
+                "patients.card.refreshTryAgain"
+              ),
           });
-
 
           saveButton.disabled =
             false;
 
           saveButton.textContent =
-            "✓ Зберегти зміни";
+            `✓ ${t(
+              "patients.card.saveChanges"
+            )}`;
         }
       }
     );
@@ -42491,9 +45543,17 @@ function openPatientVaccinationPicker(
     )
     ?.remove();
 
+  if (!pet) {
+    return;
+  }
+
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
   const species =
     normalizeVaccineSpecies(
-      pet?.species
+      pet.species
     );
 
   const brands =
@@ -42505,20 +45565,55 @@ function openPatientVaccinationPicker(
     showCrmNotice({
       icon: "💉",
       title:
-        "Немає готового каталогу",
+        t(
+          "patients.card.noVaccineCatalog"
+        ),
       text:
-        "Для цього виду тварини поки немає готового каталогу вакцинацій.",
+        t(
+          "patients.card.noVaccineCatalogText"
+        ),
     });
 
     return;
   }
 
-  const speciesLabel =
-    species === "dog"
-      ? "Собака"
-      : species === "cat"
-        ? "Кіт"
-        : "Пацієнт";
+  const patientSpeciesLabel =
+    typeof speciesLabel ===
+    "function"
+      ? speciesLabel(
+          pet.species
+        )
+      : t(
+          "patients.card.patient"
+        );
+
+  const getCategoryLabel =
+    (categoryValue) => {
+      const category =
+        String(
+          categoryValue || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      if (!category) {
+        return t(
+          "patients.card.other"
+        );
+      }
+
+      const key =
+        `patients.card.vaccineCategory.${category}`;
+
+      const translated =
+        t(key);
+
+      return translated === key
+        ? t(
+            "patients.card.other"
+          )
+        : translated;
+    };
 
   const overlay =
     document.createElement(
@@ -42529,25 +45624,43 @@ function openPatientVaccinationPicker(
     "patientVaccinePickerOverlay";
 
   overlay.innerHTML = `
-    <div class="patientVaccinePicker">
-      <div class="patientVaccinePickerHead">
+    <div
+      class="patientVaccinePicker"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="patientVaccinePickerHead"
+      >
         <div>
-          <span class="patientVaccinePickerEyebrow">
-            ВАКЦИНАЦІЯ
+          <span
+            class="patientVaccinePickerEyebrow"
+          >
+            ${escapeHtml(
+              t(
+                "patients.card.vaccinationEyebrow"
+              )
+            )}
           </span>
 
           <h2>
-            💉 Додати вакцинацію
+            💉 ${escapeHtml(
+              t(
+                "patients.card.addVaccination"
+              )
+            )}
           </h2>
 
           <p>
             ${escapeHtml(
-              pet?.name ||
-              "Пацієнт"
+              pet.name ||
+              t(
+                "patients.card.patient"
+              )
             )}
             ·
             ${escapeHtml(
-              speciesLabel
+              patientSpeciesLabel
             )}
           </p>
         </div>
@@ -42556,29 +45669,48 @@ function openPatientVaccinationPicker(
           type="button"
           class="patientVaccinePickerClose"
           data-close-vaccine-picker
+          title="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+          aria-label="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
         >
           ×
         </button>
       </div>
 
-      <div class="patientVaccinePickerSection">
-        <div class="patientVaccinePickerTitle">
-          Популярні бренди
+      <div
+        class="patientVaccinePickerSection"
+      >
+        <div
+          class="patientVaccinePickerTitle"
+        >
+          ${escapeHtml(
+            t(
+              "patients.card.popularBrands"
+            )
+          )}
         </div>
 
-        <div class="patientVaccineBrandGrid">
+        <div
+          class="patientVaccineBrandGrid"
+        >
           ${brands
             .map(
-              (
-                brand,
-                index
-              ) => `
+              (brand, index) => `
                 <button
                   type="button"
                   class="patientVaccineBrandCard"
                   data-vaccine-brand="${index}"
                 >
-                  <span class="patientVaccineBrandFlag">
+                  <span
+                    class="patientVaccineBrandFlag"
+                  >
                     ${escapeHtml(
                       brand.flag ||
                       "💉"
@@ -42608,8 +45740,14 @@ function openPatientVaccinationPicker(
         class="patientVaccineProducts"
         data-vaccine-products
       >
-        <div class="patientVaccineChooseHint">
-          ↑ Оберіть бренд вакцини
+        <div
+          class="patientVaccineChooseHint"
+        >
+          ↑ ${escapeHtml(
+            t(
+              "patients.card.chooseVaccineBrand"
+            )
+          )}
         </div>
       </div>
     </div>
@@ -42641,7 +45779,9 @@ function openPatientVaccinationPicker(
   overlay.addEventListener(
     "click",
     (event) => {
-      if (event.target === overlay) {
+      if (
+        event.target === overlay
+      ) {
         closePicker();
       }
     }
@@ -42651,524 +45791,538 @@ function openPatientVaccinationPicker(
     .querySelectorAll(
       "[data-vaccine-brand]"
     )
-    .forEach(
-      (button) => {
-        button.addEventListener(
-          "click",
-          () => {
-            overlay
-              .querySelectorAll(
-                "[data-vaccine-brand]"
-              )
-              .forEach(
-                (item) => {
-                  item.classList.remove(
-                    "is-active"
-                  );
-                }
-              );
-
-            button.classList.add(
-              "is-active"
-            );
-
-            const brand =
-              brands[
-                Number(
-                  button.dataset
-                    .vaccineBrand
-                )
-              ];
-
-            if (!brand) {
-              return;
-            }
-
-            const groups = {};
-
-            (
-              brand.vaccines ||
-              []
-            ).forEach(
-              (vaccine) => {
-                const category =
-                  vaccine.category ||
-                  "combined";
-
-                if (
-                  !groups[
-                    category
-                  ]
-                ) {
-                  groups[
-                    category
-                  ] = [];
-                }
-
-                groups[
-                  category
-                ].push(
-                  vaccine
-                );
-              }
-            );
-
-            productsBox.innerHTML = `
-              <div class="patientVaccineSelectedBrand">
-                <span>
-                  ${escapeHtml(
-                    brand.flag ||
-                    "💉"
-                  )}
-                </span>
-
-                <div>
-                  <strong>
-                    ${escapeHtml(
-                      brand.brand
-                    )}
-                  </strong>
-
-                  <small>
-                    ${escapeHtml(
-                      brand.manufacturer ||
-                      ""
-                    )}
-                  </small>
-                </div>
-              </div>
-
-              ${Object.entries(
-                groups
-              )
-                .map(
-                  (
-                    [
-                      category,
-                      vaccines,
-                    ]
-                  ) => {
-                    const meta =
-                      VACCINE_CATEGORY_LABELS[
-                        category
-                      ] ||
-                      {
-                        icon:
-                          "💉",
-
-                        dog:
-                          "Інші",
-
-                        cat:
-                          "Інші",
-                      };
-
-                    const title =
-                      meta[
-                        species
-                      ] ||
-                      category;
-
-                    return `
-                      <div class="patientVaccineCategory">
-                        <div class="patientVaccineCategoryTitle">
-                          <span>
-                            ${escapeHtml(
-                              meta.icon
-                            )}
-                          </span>
-
-                          ${escapeHtml(
-                            title
-                          )}
-                        </div>
-
-                        <div class="patientVaccineProductGrid">
-                          ${vaccines
-                            .map(
-                              (
-                                vaccine,
-                                vaccineIndex
-                              ) => `
-                                <button
-                                  type="button"
-                                  class="patientVaccineProductCard"
-                                  data-vaccine-product="${vaccineIndex}"
-                                  data-vaccine-category="${escapeHtml(
-                                    category
-                                  )}"
-                                >
-                                  <strong>
-                                    ${escapeHtml(
-                                      vaccine.name
-                                    )}
-                                  </strong>
-
-                                  <small>
-                                    ${escapeHtml(
-                                      vaccine.description ||
-                                      ""
-                                    )}
-                                  </small>
-                                </button>
-                              `
-                            )
-                            .join("")}
-                        </div>
-                      </div>
-                    `;
-                  }
-                )
-                .join("")}
-            `;
-            productsBox
-  .querySelectorAll(
-    "[data-vaccine-product]"
-  )
-  .forEach(
-    (productButton) => {
-      productButton.addEventListener(
+    .forEach((button) => {
+      button.addEventListener(
         "click",
         () => {
-          productsBox
+          overlay
             .querySelectorAll(
-              "[data-vaccine-product]"
+              "[data-vaccine-brand]"
             )
-            .forEach(
-              (item) => {
-                item.classList.remove(
-                  "is-active"
-                );
-              }
-            );
+            .forEach((item) => {
+              item.classList.remove(
+                "is-active"
+              );
+            });
 
-          productButton.classList.add(
+          button.classList.add(
             "is-active"
           );
 
-          const category =
-            productButton.dataset
-              .vaccineCategory;
-
-          const vaccineIndex =
-            Number(
-              productButton.dataset
-                .vaccineProduct
-            );
-
-          const vaccine =
-            groups[
-              category
-            ]?.[
-              vaccineIndex
+          const brand =
+            brands[
+              Number(
+                button.dataset
+                  .vaccineBrand
+              )
             ];
 
-          if (!vaccine) {
+          if (!brand) {
             return;
           }
 
-          productsBox
-            .querySelector(
-              "[data-vaccine-save-box]"
-            )
-            ?.remove();
+          const groups = {};
 
-          const saveBox =
-            document.createElement(
-              "div"
+          (
+            brand.vaccines || []
+          ).forEach((vaccine) => {
+            const category =
+              vaccine.category ||
+              "combined";
+
+            if (!groups[category]) {
+              groups[category] = [];
+            }
+
+            groups[category].push(
+              vaccine
             );
+          });
 
-          saveBox.className =
-            "patientVaccineSaveBox";
+          productsBox.innerHTML = `
+            <div
+              class="patientVaccineSelectedBrand"
+            >
+              <span>
+                ${escapeHtml(
+                  brand.flag ||
+                  "💉"
+                )}
+              </span>
 
-          saveBox.dataset
-            .vaccineSaveBox =
-              "true";
-
-          saveBox.innerHTML = `
-            <div class="patientVaccineSaveHead">
               <div>
-                <span>
-                  ОБРАНА ВАКЦИНА
-                </span>
-
                 <strong>
                   ${escapeHtml(
                     brand.brand
-                  )}
-                  ${escapeHtml(
-                    vaccine.name
                   )}
                 </strong>
 
                 <small>
                   ${escapeHtml(
-                    vaccine.description ||
+                    brand.manufacturer ||
                     ""
                   )}
                 </small>
               </div>
             </div>
 
-            <div class="patientVaccineFormGrid">
+            ${Object.entries(groups)
+              .map(
+                ([
+                  category,
+                  vaccines,
+                ]) => {
+                  const meta =
+                    VACCINE_CATEGORY_LABELS[
+                      category
+                    ] || {
+                      icon: "💉",
+                    };
 
-              <label>
-                <span>
-                  Дата вакцинації
-                </span>
+                  const categoryTitle =
+                    getCategoryLabel(
+                      category
+                    );
 
-                <input
-                  type="date"
-                  data-vaccine-date
-                  value="${escapeHtml(
-                    todayISO()
-                  )}"
-                >
-              </label>
+                  return `
+                    <div
+                      class="patientVaccineCategory"
+                    >
+                      <div
+                        class="patientVaccineCategoryTitle"
+                      >
+                        <span>
+                          ${escapeHtml(
+                            meta.icon ||
+                            "💉"
+                          )}
+                        </span>
 
+                        ${escapeHtml(
+                          categoryTitle
+                        )}
+                      </div>
 
-              <label>
-                <span>
-                  Серія / партія
-                </span>
+                      <div
+                        class="patientVaccineProductGrid"
+                      >
+                        ${vaccines
+                          .map(
+                            (
+                              vaccine,
+                              vaccineIndex
+                            ) => `
+                              <button
+                                type="button"
+                                class="patientVaccineProductCard"
+                                data-vaccine-product="${vaccineIndex}"
+                                data-vaccine-category="${escapeHtml(
+                                  category
+                                )}"
+                              >
+                                <strong>
+                                  ${escapeHtml(
+                                    vaccine.name
+                                  )}
+                                </strong>
 
-                <input
-                  type="text"
-                  data-vaccine-batch
-                  placeholder="Наприклад: A12345"
-                  autocomplete="off"
-                >
-              </label>
-
-
-              <label>
-                <span>
-                  Наступна вакцинація
-                </span>
-
-                <input
-                  type="date"
-                  data-vaccine-next-date
-                >
-              </label>
-
-            </div>
-
-            <div class="patientVaccineSaveActions">
-              <button
-                type="button"
-                class="patientVaccineSaveCancel"
-                data-cancel-vaccine-selection
-              >
-                Обрати іншу
-              </button>
-
-              <button
-                type="button"
-                class="patientVaccineSaveButton"
-                data-save-patient-vaccine
-              >
-                Зберегти вакцинацію
-              </button>
-            </div>
+                                <small>
+                                  ${escapeHtml(
+                                    categoryTitle
+                                  )}
+                                </small>
+                              </button>
+                            `
+                          )
+                          .join("")}
+                      </div>
+                    </div>
+                  `;
+                }
+              )
+              .join("")}
           `;
 
-          productsBox.appendChild(
-            saveBox
-          );
-
-          saveBox.scrollIntoView({
-            behavior:
-              "smooth",
-
-            block:
-              "nearest",
-          });
-
-
-          saveBox
-            .querySelector(
-              "[data-cancel-vaccine-selection]"
+          productsBox
+            .querySelectorAll(
+              "[data-vaccine-product]"
             )
-            ?.addEventListener(
-              "click",
-              () => {
-                productButton.classList.remove(
-                  "is-active"
-                );
-
-                saveBox.remove();
-              }
-            );
-
-
-          const saveButton =
-            saveBox.querySelector(
-              "[data-save-patient-vaccine]"
-            );
-
-          saveButton
-            ?.addEventListener(
-              "click",
-              async () => {
-                const vaccinationDate =
-                  String(
-                    saveBox
-                      .querySelector(
-                        "[data-vaccine-date]"
+            .forEach(
+              (productButton) => {
+                productButton.addEventListener(
+                  "click",
+                  () => {
+                    productsBox
+                      .querySelectorAll(
+                        "[data-vaccine-product]"
                       )
-                      ?.value ||
-                    ""
-                  ).trim();
+                      .forEach(
+                        (item) => {
+                          item.classList.remove(
+                            "is-active"
+                          );
+                        }
+                      );
 
-                const batchNumber =
-                  String(
-                    saveBox
-                      .querySelector(
-                        "[data-vaccine-batch]"
-                      )
-                      ?.value ||
-                    ""
-                  ).trim();
-
-                const nextDate =
-                  String(
-                    saveBox
-                      .querySelector(
-                        "[data-vaccine-next-date]"
-                      )
-                      ?.value ||
-                    ""
-                  ).trim();
-
-                if (
-                  !vaccinationDate
-                ) {
-                  showCrmNotice({
-                    icon:
-                      "💉",
-
-                    title:
-                      "Вкажіть дату вакцинації",
-
-                    text:
-                      "Дата проведення вакцинації є обов’язковою.",
-                  });
-
-                  return;
-                }
-
-                saveButton.disabled =
-                  true;
-
-                saveButton.textContent =
-                  "Зберігаємо…";
-
-                try {
-                  const fullName =
-                    `${brand.brand} ${vaccine.name}`
-                      .trim();
-
-                  const created =
-                    await createPatientVaccinationApi(
-                      pet.id,
-                      {
-                        vaccination_date:
-                          vaccinationDate,
-
-                        vaccine_name:
-                          fullName,
-
-                        vaccine_type:
-  category,
-
-coverage_tags:
-  getVaccineCoverageTags(
-    brand,
-    vaccine
-  ),
-
-batch_number:
-  batchNumber,
-
-                        next_vaccination_date:
-                          nextDate,
-                      }
+                    productButton.classList.add(
+                      "is-active"
                     );
 
-                  if (!created) {
-                    throw new Error(
-                      "Сервер не повернув вакцинацію."
+                    const category =
+                      productButton.dataset
+                        .vaccineCategory;
+
+                    const vaccineIndex =
+                      Number(
+                        productButton.dataset
+                          .vaccineProduct
+                      );
+
+                    const vaccine =
+                      groups[
+                        category
+                      ]?.[
+                        vaccineIndex
+                      ];
+
+                    if (!vaccine) {
+                      return;
+                    }
+
+                    productsBox
+                      .querySelector(
+                        "[data-vaccine-save-box]"
+                      )
+                      ?.remove();
+
+                    const saveBox =
+                      document.createElement(
+                        "div"
+                      );
+
+                    saveBox.className =
+                      "patientVaccineSaveBox";
+
+                    saveBox.dataset
+                      .vaccineSaveBox =
+                      "true";
+
+                    saveBox.innerHTML = `
+                      <div
+                        class="patientVaccineSaveHead"
+                      >
+                        <div>
+                          <span>
+                            ${escapeHtml(
+                              t(
+                                "patients.card.selectedVaccine"
+                              )
+                            )}
+                          </span>
+
+                          <strong>
+                            ${escapeHtml(
+                              brand.brand
+                            )}
+                            ${escapeHtml(
+                              vaccine.name
+                            )}
+                          </strong>
+
+                          <small>
+                            ${escapeHtml(
+                              getCategoryLabel(
+                                category
+                              )
+                            )}
+                          </small>
+                        </div>
+                      </div>
+
+                      <div
+                        class="patientVaccineFormGrid"
+                      >
+                        <label>
+                          <span>
+                            ${escapeHtml(
+                              t(
+                                "patients.card.vaccinationDate"
+                              )
+                            )}
+                          </span>
+
+                          <input
+                            type="date"
+                            data-vaccine-date
+                            value="${escapeHtml(
+                              todayISO()
+                            )}"
+                          >
+                        </label>
+
+                        <label>
+                          <span>
+                            ${escapeHtml(
+                              t(
+                                "patients.card.batchNumber"
+                              )
+                            )}
+                          </span>
+
+                          <input
+                            type="text"
+                            data-vaccine-batch
+                            placeholder="${escapeHtml(
+                              t(
+                                "patients.card.batchExample"
+                              )
+                            )}"
+                            autocomplete="off"
+                          >
+                        </label>
+
+                        <label>
+                          <span>
+                            ${escapeHtml(
+                              t(
+                                "patients.card.nextVaccination"
+                              )
+                            )}
+                          </span>
+
+                          <input
+                            type="date"
+                            data-vaccine-next-date
+                          >
+                        </label>
+                      </div>
+
+                      <div
+                        class="patientVaccineSaveActions"
+                      >
+                        <button
+                          type="button"
+                          class="patientVaccineSaveCancel"
+                          data-cancel-vaccine-selection
+                        >
+                          ${escapeHtml(
+                            t(
+                              "patients.card.chooseAnother"
+                            )
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          class="patientVaccineSaveButton"
+                          data-save-patient-vaccine
+                        >
+                          ${escapeHtml(
+                            t(
+                              "patients.card.saveVaccination"
+                            )
+                          )}
+                        </button>
+                      </div>
+                    `;
+
+                    productsBox.appendChild(
+                      saveBox
                     );
+
+                    saveBox.scrollIntoView({
+                      behavior:
+                        "smooth",
+                      block:
+                        "nearest",
+                    });
+
+                    saveBox
+                      .querySelector(
+                        "[data-cancel-vaccine-selection]"
+                      )
+                      ?.addEventListener(
+                        "click",
+                        () => {
+                          productButton
+                            .classList
+                            .remove(
+                              "is-active"
+                            );
+
+                          saveBox.remove();
+                        }
+                      );
+
+                    const saveButton =
+                      saveBox.querySelector(
+                        "[data-save-patient-vaccine]"
+                      );
+
+                    saveButton
+                      ?.addEventListener(
+                        "click",
+                        async () => {
+                          const vaccinationDate =
+                            String(
+                              saveBox
+                                .querySelector(
+                                  "[data-vaccine-date]"
+                                )
+                                ?.value ||
+                              ""
+                            ).trim();
+
+                          const batchNumber =
+                            String(
+                              saveBox
+                                .querySelector(
+                                  "[data-vaccine-batch]"
+                                )
+                                ?.value ||
+                              ""
+                            ).trim();
+
+                          const nextDate =
+                            String(
+                              saveBox
+                                .querySelector(
+                                  "[data-vaccine-next-date]"
+                                )
+                                ?.value ||
+                              ""
+                            ).trim();
+
+                          if (
+                            !vaccinationDate
+                          ) {
+                            showCrmNotice({
+                              icon:
+                                "💉",
+                              title:
+                                t(
+                                  "patients.card.enterVaccinationDate"
+                                ),
+                              text:
+                                t(
+                                  "patients.card.vaccinationDateRequired"
+                                ),
+                            });
+
+                            return;
+                          }
+
+                          saveButton.disabled =
+                            true;
+
+                          saveButton.textContent =
+                            t(
+                              "patients.card.saving"
+                            );
+
+                          try {
+                            const fullName =
+                              `${brand.brand} ${vaccine.name}`
+                                .trim();
+
+                            const created =
+                              await createPatientVaccinationApi(
+                                pet.id,
+                                {
+                                  vaccination_date:
+                                    vaccinationDate,
+                                  vaccine_name:
+                                    fullName,
+                                  vaccine_type:
+                                    category,
+                                  coverage_tags:
+                                    getVaccineCoverageTags(
+                                      brand,
+                                      vaccine
+                                    ),
+                                  batch_number:
+                                    batchNumber,
+                                  next_vaccination_date:
+                                    nextDate,
+                                }
+                              );
+
+                            if (!created) {
+                              throw new Error(
+                                "Vaccination creation returned no data."
+                              );
+                            }
+
+                            pet.vaccination_status =
+                              "vaccinated";
+
+                            pet.vaccination_date =
+                              vaccinationDate;
+
+                            pet.vaccination_name =
+                              fullName;
+
+                            closePicker();
+
+                            await renderPatientTab(
+                              "overview",
+                              pet
+                            );
+
+                            showCrmNotice({
+                              icon:
+                                "💉",
+                              title:
+                                t(
+                                  "patients.card.vaccinationSaved"
+                                ),
+                              text:
+                                fullName,
+                            });
+                          } catch (error) {
+                            console.error(
+                              "CREATE PATIENT VACCINATION:",
+                              error
+                            );
+
+                            showCrmNotice({
+                              icon:
+                                "⚠️",
+                              title:
+                                t(
+                                  "patients.card.vaccinationSaveFailed"
+                                ),
+                              text:
+                                t(
+                                  "patients.card.refreshTryAgain"
+                                ),
+                            });
+
+                            saveButton.disabled =
+                              false;
+
+                            saveButton.textContent =
+                              t(
+                                "patients.card.saveVaccination"
+                              );
+                          }
+                        }
+                      );
                   }
-
-                  pet.vaccination_status =
-                    "vaccinated";
-
-                  pet.vaccination_date =
-                    vaccinationDate;
-
-                  pet.vaccination_name =
-                    fullName;
-
-                  closePicker();
-
-                  await renderPatientTab(
-                    "overview",
-                    pet
-                  );
-
-                  showCrmNotice({
-                    icon:
-                      "💉",
-
-                    title:
-                      "Вакцинацію збережено",
-
-                    text:
-                      fullName,
-                  });
-
-                } catch (error) {
-                  console.error(
-                    "CREATE PATIENT VACCINATION:",
-                    error
-                  );
-
-                  showCrmNotice({
-                    icon:
-                      "⚠️",
-
-                    title:
-                      "Не вдалося зберегти вакцинацію",
-
-                    text:
-                      error?.message ||
-                      "Спробуйте ще раз.",
-                  });
-
-                  saveButton.disabled =
-                    false;
-
-                  saveButton.textContent =
-                    "Зберегти вакцинацію";
-                }
+                );
               }
             );
         }
       );
-    }
-  );
-          }
-        );
-      }
-    );
+    });
 }
 function renderPatientAiEvidence(
   evidence
 ) {
   if (
-    !Array.isArray(evidence) ||
+    !Array.isArray(
+      evidence
+    ) ||
     !evidence.length
   ) {
     return "";
@@ -43184,51 +46338,91 @@ function renderPatientAiEvidence(
       "
     >
       ${evidence
-        .map((source) => {
-          const sourceType =
-            source?.source_type === "visit"
-              ? "Візит"
-              : "Джерело";
+        .map(
+          (source) => {
+            const sourceType =
+              translateInterfaceText(
+                source?.source_type ===
+                "visit"
+                  ? "patients.card.sourceVisit"
+                  : "patients.card.source"
+              );
 
-          const sourceDate =
-            String(
-              source?.recorded_at || ""
-            ).slice(0, 10);
+            const sourceDate =
+              String(
+                source?.recorded_at ||
+                ""
+              ).slice(
+                0,
+                10
+              );
 
-          return `
-                        <button
-              type="button"
-              data-patient-ai-source
-              data-source-type="${escapeHtml(
-                String(source?.source_type || "")
-              )}"
-              data-source-id="${escapeHtml(
-                String(source?.source_id || "")
-              )}"
-              style="
-                padding:4px 8px;
-                border-radius:7px;
-                border:1px solid rgba(255,255,255,.07);
-                background:rgba(255,255,255,.06);
-                color:inherit;
-                font-size:11px;
-                opacity:.75;
-                cursor:pointer;
-              "
-            >
-              ${sourceType}${
-                sourceDate
-                  ? ` · ${escapeHtml(sourceDate)}`
-                  : ""
-              }
-            </button>
-          `;
-        })
+            const sourceDateText =
+              sourceDate
+                ? formatCalendarDate(
+                    sourceDate,
+                    {
+                      day:
+                        "2-digit",
+
+                      month:
+                        "2-digit",
+
+                      year:
+                        "numeric",
+                    }
+                  )
+                : "";
+
+            return `
+              <button
+                type="button"
+                data-patient-ai-source
+                data-source-type="${escapeHtml(
+                  String(
+                    source?.source_type ||
+                    ""
+                  )
+                )}"
+                data-source-id="${escapeHtml(
+                  String(
+                    source?.source_id ||
+                    ""
+                  )
+                )}"
+                style="
+                  padding:4px 8px;
+                  border-radius:7px;
+                  border:
+                    1px solid
+                    rgba(255,255,255,.07);
+                  background:
+                    rgba(255,255,255,.06);
+                  color:inherit;
+                  font-size:11px;
+                  opacity:.75;
+                  cursor:pointer;
+                "
+              >
+                ${escapeHtml(
+                  sourceType
+                )}
+
+                ${
+                  sourceDateText
+                    ? ` · ${escapeHtml(
+                        sourceDateText
+                      )}`
+                    : ""
+                }
+              </button>
+            `;
+          }
+        )
         .join("")}
     </div>
   `;
 }
-
 async function renderPatientTab(tab, pet) {
   const box = $("#patientTabContent");
   const root = $("#patientCardRoot");
@@ -43393,164 +46587,613 @@ const generalVaccinationStatus =
     pet.general_vaccination_status ||
     "unknown"
   );
-  // Шаг 1: Полностью обновляем контейнер, включая кнопку Назад и Новый визит
-  root.innerHTML = `
-    <div style="margin-bottom: 16px;">
-      <button id="btnBackToProfile" class="patient-tab-btn" style="background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 10px;">
-        ← Назад до списку
+ const patientName =
+  String(
+    pet.name || ""
+  ).trim() ||
+  translateInterfaceText(
+    "calendar.detail.unnamed"
+  );
+
+const patientSpecies =
+  speciesLabel(
+    pet.species
+  );
+
+const patientBreed =
+  pet.breed
+    ? getCalendarBreedLabel(
+        pet.breed
+      )
+    : "";
+
+const patientWeight =
+  pet.weight_kg
+    ? `${
+        Number(
+          pet.weight_kg
+        ).toLocaleString(
+          getCalendarLocale(),
+          {
+            maximumFractionDigits:
+              3,
+          }
+        )
+      } ${
+        translateInterfaceText(
+          "patients.card.kg"
+        )
+      }`
+    : "—";
+
+const lastVisitText =
+  stats.lastDate &&
+  stats.lastDate !== "—"
+    ? formatCalendarDate(
+        stats.lastDate,
+        {
+          day:
+            "2-digit",
+
+          month:
+            "2-digit",
+
+          year:
+            "numeric",
+        }
+      )
+    : "—";
+
+const patientStatus =
+  String(
+    pet.patient_status ||
+    "active"
+  );
+
+const patientStatusClass =
+  patientStatus ===
+  "deceased"
+    ? "is-deceased"
+    : patientStatus ===
+        "archived"
+      ? "is-archived"
+      : "is-active";
+
+const deceasedDateText =
+  pet.deceased_at
+    ? formatCalendarDate(
+        String(
+          pet.deceased_at
+        ).slice(
+          0,
+          10
+        ),
+        {
+          day:
+            "2-digit",
+
+          month:
+            "2-digit",
+
+          year:
+            "numeric",
+        }
+      )
+    : "";
+
+const patientStatusText =
+  patientStatus ===
+  "deceased"
+       ? `† ${translateInterfaceText(
+        "patients.card.statusDeceased"
+      )}${
+        deceasedDateText
+          ? ` · ${deceasedDateText}`
+          : ""
+      }`
+    : patientStatus ===
+        "archived"
+      ? `📦 ${translateInterfaceText(
+          "patients.card.statusArchived"
+        )}`
+      : `● ${translateInterfaceText(
+          "patients.card.statusActive"
+        )}`;
+
+root.innerHTML = `
+  <div style="margin-bottom:16px;">
+    <button
+      id="btnBackToProfile"
+      class="patient-tab-btn"
+      type="button"
+      style="
+        background:rgba(255,255,255,0.05);
+        padding:8px 14px;
+        border-radius:10px;
+      "
+    >
+      ← ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.backToList"
+        )
+      )}
+    </button>
+  </div>
+
+  <div
+    class="
+      glass-card
+      patientRecordSummary
+    "
+    style="
+      background:
+        linear-gradient(
+          135deg,
+          rgba(147,51,234,0.15),
+          rgba(15,23,42,0.4)
+        );
+      padding:24px;
+      border-radius:20px;
+      border:
+        1px solid
+        rgba(255,255,255,0.1);
+      margin-bottom:24px;
+      width:100%;
+    "
+  >
+    <div
+      style="
+        display:flex;
+        justify-content:
+          space-between;
+        align-items:start;
+        gap:20px;
+      "
+    >
+      <div>
+        <div
+          style="
+            font-size:0.75rem;
+            text-transform:uppercase;
+            opacity:0.5;
+            letter-spacing:1px;
+            margin-bottom:4px;
+          "
+        >
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.medicalRecord"
+            )
+          )}
+        </div>
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex-wrap:wrap;
+          "
+        >
+          <h2
+            class="patientRecordTitle"
+            style="
+              margin:0;
+              font-size:2.2rem;
+              color:#fff;
+            "
+          >
+            🐾 ${escapeHtml(
+              patientName
+            )}
+          </h2>
+
+          <div
+            data-patient-status-toggle
+            class="
+              patientStatusBadge
+              ${patientStatusClass}
+            "
+          >
+            ${escapeHtml(
+              patientStatusText
+            )}
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top:6px;
+            opacity:0.7;
+            font-size:0.95rem;
+          "
+        >
+          ${escapeHtml(
+            patientSpecies
+          )}
+
+          ${
+            patientBreed
+              ? ` • ${escapeHtml(
+                  patientBreed
+                )}`
+              : ""
+          }
+        </div>
+      </div>
+
+      <button
+        class="btn-primary"
+        id="btnAddVisit"
+        type="button"
+        style="
+          box-shadow:
+            0 4px 15px
+            rgba(147,51,234,0.4);
+          border:none;
+          padding:12px 20px;
+          border-radius:12px;
+          font-weight:600;
+          cursor:pointer;
+        "
+      >
+        + ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.newVisit"
+          )
+        )}
       </button>
     </div>
 
-    <div class="glass-card patientRecordSummary" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(15, 23, 42, 0.4)); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; width:100%;">
-      <div style="display:flex; justify-content:space-between; align-items:start;">
-        <div>
-          <div style="font-size:0.75rem; text-transform:uppercase; opacity:0.5; letter-spacing:1px; margin-bottom:4px;">Медична карта пацієнта</div>
-          <div
-  style="
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-  "
->
-  <h2
-    class="patientRecordTitle"
+    <div
+      class="patientRecordStats"
+      style="
+        display:grid;
+        grid-template-columns:
+          repeat(4,1fr);
+        gap:16px;
+        margin-top:24px;
+      "
+    >
+      <div
+        class="patientRecordStat"
+        style="
+          background:rgba(0,0,0,0.2);
+          padding:14px;
+          border-radius:12px;
+          text-align:center;
+          border:
+            1px solid
+            rgba(255,255,255,0.03);
+        "
+      >
+        <div
+          style="
+            font-size:0.7rem;
+            opacity:0.5;
+            text-transform:uppercase;
+            margin-bottom:4px;
+          "
+        >
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.visits"
+            )
+          )}
+        </div>
+
+        <div
+          style="
+            font-size:1.4rem;
+            font-weight:700;
+            color:#c084fc;
+          "
+        >
+          ${escapeHtml(
+            String(stats.count)
+          )}
+        </div>
+      </div>
+
+      <div
+        class="patientRecordStat"
+        style="
+          background:rgba(0,0,0,0.2);
+          padding:14px;
+          border-radius:12px;
+          text-align:center;
+          border:
+            1px solid
+            rgba(255,255,255,0.03);
+        "
+      >
+        <div
+          style="
+            font-size:0.7rem;
+            opacity:0.5;
+            text-transform:uppercase;
+            margin-bottom:4px;
+          "
+        >
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.weight"
+            )
+          )}
+        </div>
+
+        <div
+          style="
+            font-size:1.4rem;
+            font-weight:700;
+            color:#c084fc;
+          "
+        >
+          ${escapeHtml(
+            patientWeight
+          )}
+        </div>
+      </div>
+
+      <div
+        class="patientRecordStat"
+        style="
+          background:rgba(0,0,0,0.2);
+          padding:14px;
+          border-radius:12px;
+          text-align:center;
+          border:
+            1px solid
+            rgba(255,255,255,0.03);
+        "
+      >
+        <div
+          style="
+            font-size:0.7rem;
+            opacity:0.5;
+            text-transform:uppercase;
+            margin-bottom:4px;
+          "
+        >
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.lastVisit"
+            )
+          )}
+        </div>
+
+        <div
+          style="
+            font-size:1.1rem;
+            font-weight:600;
+            color:#fff;
+            margin-top:4px;
+          "
+        >
+          ${escapeHtml(
+            lastVisitText
+          )}
+        </div>
+      </div>
+
+      <div
+        class="patientRecordStat"
+        style="
+          background:rgba(0,0,0,0.2);
+          padding:14px;
+          border-radius:12px;
+          text-align:center;
+          border:
+            1px solid
+            rgba(255,255,255,0.03);
+        "
+      >
+        <div
+          style="
+            font-size:0.7rem;
+            opacity:0.5;
+            text-transform:uppercase;
+            margin-bottom:4px;
+          "
+        >
+          ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.totalPaid"
+            )
+          )}
+        </div>
+
+        <div
+          style="
+            font-size:1.4rem;
+            font-weight:700;
+            color:#22c55e;
+          "
+        >
+          ${escapeHtml(
+            String(stats.total)
+          )} ₴
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="patient-tabs-nav"
     style="
-      margin:0;
-      font-size:2.2rem;
-      color:#fff;
+      display:flex;
+      gap:6px;
+      margin-bottom:24px;
+      padding:6px;
+      background:
+        rgba(255,255,255,0.04);
+      border-radius:14px;
+      border:
+        1px solid
+        rgba(255,255,255,0.08);
+      width:fit-content;
+      backdrop-filter:blur(15px);
+      -webkit-backdrop-filter:
+        blur(15px);
     "
   >
-    🐾 ${escapeHtml(
-      pet.name || "Без імені"
-    )}
-  </h2>
+    <button
+      class="patient-tab-btn"
+      type="button"
+      data-p-tab="overview"
+    >
+      👁️ ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.overview"
+        )
+      )}
+    </button>
 
-<div
-  data-patient-status-toggle
-  class="
-    patientStatusBadge
-    ${
-      pet?.patient_status === "deceased"
-        ? "is-deceased"
-        : pet?.patient_status === "archived"
-          ? "is-archived"
-          : "is-active"
-    }
-  "
->
-  ${
-  pet?.patient_status === "deceased"
-    ? `† Помер${
-        pet?.deceased_at
-          ? ` · ${new Date(
-              `${String(
-                pet.deceased_at
-              ).slice(0, 10)}T00:00:00`
-            ).toLocaleDateString(
-              "uk-UA"
-            )}`
-          : ""
-      }`
-    : pet?.patient_status === "archived"
-      ? "Архів"
-      : "● Активний"
-}
-</div>  
+    <button
+      class="patient-tab-btn"
+      type="button"
+      data-p-tab="visits"
+    >
+      📅 ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.visits"
+        )
+      )}
+    </button>
 
-  
-</div>
-          <div style="margin-top:6px; opacity: 0.7; font-size: 0.95rem;">
-            ${escapeHtml(typeof speciesLabel === "function" ? speciesLabel(pet.species) : pet.species)} 
-            ${pet.breed ? " • " + escapeHtml(pet.breed) : ""}
-          </div>
-        </div>
-        <button class="btn-primary" id="btnAddVisit" style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4); border:none; padding: 12px 20px; border-radius: 12px; font-weight:600; cursor:pointer;">+ Новий візит</button>
-      </div>
+    <button
+      class="patient-tab-btn"
+      type="button"
+      data-p-tab="medcard"
+    >
+      🩺 ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.medcard"
+        )
+      )}
+    </button>
 
-      <div class="patientRecordStats" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
-        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Візитів</div>
-          <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${stats.count}</div>
-        </div>
-        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Вага</div>
-          <div style="font-size: 1.4rem; font-weight: 700; color: #c084fc;">${escapeHtml(pet.weight_kg || "—")} кг</div>
-        </div>
-        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Останній візит</div>
-          <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 4px;">${escapeHtml(stats.lastDate || "—")}</div>
-        </div>
-        <div class="patientRecordStat" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03);">
-          <div style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px;">Всього сплачено</div>
-          <div style="font-size: 1.4rem; font-weight: 700; color: #22c55e;">${stats.total} ₴</div>
-        </div>
-      </div>
-    </div>
+    <button
+      class="patient-tab-btn"
+      type="button"
+      data-p-tab="labs"
+    >
+      🧪 ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.labs"
+        )
+      )}
+    </button>
 
-    <div class="patient-tabs-nav" style="display:flex; gap:6px; margin-bottom:24px; padding:6px; background: rgba(255, 255, 255, 0.04); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); width: fit-content; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
-      <button class="patient-tab-btn" data-p-tab="overview">👁️ Обзор</button>
-      <button class="patient-tab-btn" data-p-tab="visits">📅 Візити</button>
-      <button class="patient-tab-btn" data-p-tab="medcard">🩺 Веткарта</button>
-      <button class="patient-tab-btn" data-p-tab="labs">🧪 Аналізи</button>
-      <button class="patient-tab-btn" data-p-tab="files">📁 Файли</button>
-      <button class="patient-tab-btn" data-p-tab="documents">📄 Документи</button>
-    </div>
+    <button
+      class="patient-tab-btn"
+      type="button"
+      data-p-tab="files"
+    >
+      📁 ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.files"
+        )
+      )}
+    </button>
 
-    <div id="patientTabContent" style="animation: fadeIn 0.3s ease-in-out;"></div>
-  `;
+    <button
+      class="patient-tab-btn"
+      type="button"
+      data-p-tab="documents"
+    >
+      📄 ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.documents"
+        )
+      )}
+    </button>
+  </div>
 
-  // ОЖИВЛЯЕМ КНОПКУ «НАЗАД»
-  const btnBack = document.getElementById("btnBackToProfile");
-  if (btnBack) {
-    btnBack.onclick = () => {
-      // Здесь вызываем твою глобальную функцию перехода назад. 
-      // Например, если у тебя используется хэш-роутер, то:
-      window.location.hash = "#patients"; 
-      // Или если функция отрисовки списка клиентов называется renderPatientsList:
-      // if (typeof renderPatientsList === "function") renderPatientsList();
+  <div
+    id="patientTabContent"
+    style="
+      animation:
+        fadeIn 0.3s
+        ease-in-out;
+    "
+  ></div>
+`;
+
+const backButton =
+  root.querySelector(
+    "#btnBackToProfile"
+  );
+
+if (backButton) {
+  backButton.onclick =
+    () => {
+      window.location.hash =
+        "#patients";
     };
-  }
-
-     // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — БРОНЕБОЙНЫЙ ВАРИАНТ С ЛОГАМИ
-        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ВАРИАНТ С АВТО-СОЗДАНИЕМ МОДАЛКИ
-        // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
-       // ОЖИВЛЯЕМ КНОПКУ «+ НОВИЙ ВІЗИТ» — ИСПРАВЛЕННЫЙ ВАРИАНТ ПОД НАШУ ФУНКЦИЮ
-    const btnAddVisit =
-  document.getElementById("btnAddVisit");
-
-if (btnAddVisit) {
-  btnAddVisit.onclick = () => {
-    state.selectedPet = pet || null;
-
-    state.selectedPetId =
-      pet?.id ||
-      pet?._id ||
-      null;
-
-    if (
-      typeof openVisitModalForCreate ===
-      "function"
-    ) {
-      openVisitModalForCreate(pet);
-    } else {
-      alert(
-        "Помилка: функція openVisitModalForCreate не знайдена в системі."
-      );
-    }
-  };
 }
 
-  // Навешиваем клики ніа вкладки
-  root.querySelectorAll("[data-p-tab]").forEach((btn) => {
-    btn.onclick = () => {
-      const targetTab = btn.dataset.pTab;
-      renderPatientTab(targetTab, pet);
-    };
-  });
+const addVisitButton =
+  root.querySelector(
+    "#btnAddVisit"
+  );
 
-  const dynamicBox = $("#patientTabContent");
-  if (!dynamicBox) return;
+if (addVisitButton) {
+  addVisitButton.onclick =
+    () => {
+      state.selectedPet =
+        pet || null;
+
+      state.selectedPetId =
+        pet?.id ||
+        pet?._id ||
+        null;
+
+      if (
+        typeof openVisitModalForCreate ===
+        "function"
+      ) {
+        openVisitModalForCreate(
+          pet
+        );
+
+        return;
+      }
+
+      showCrmNotice({
+        icon:
+          "⚠️",
+
+        title:
+          translateInterfaceText(
+            "patients.card.visitUnavailable"
+          ),
+      });
+    };
+}
+
+root
+  .querySelectorAll(
+    "[data-p-tab]"
+  )
+  .forEach(
+    (button) => {
+      button.onclick =
+        async () => {
+          await renderPatientTab(
+            button.dataset.pTab,
+            pet
+          );
+        };
+    }
+  );
+
+const dynamicBox =
+  $("#patientTabContent");
+
+if (!dynamicBox) {
+  return;
+}
 
   // Красим вкладки
   const isWhitePatientTheme =
@@ -43578,173 +47221,182 @@ if (btnAddVisit) {
 
   // Шаг 2: Контент табов
   if (tab === "overview") {
-    const sexLabel = {
-  male: "Самець",
-  female: "Самка",
-}[String(pet.sex || "")] || "Не вказано";
+  const sexLabel =
+    translateInterfaceText(
+      String(
+        pet.sex || ""
+      ) === "male"
+        ? "calendar.detail.male"
+        : String(
+              pet.sex || ""
+            ) === "female"
+          ? "calendar.detail.female"
+          : "calendar.detail.not.specified"
+    );
 
-const neuteredLabel =
-  typeof pet.neutered === "boolean"
-    ? pet.neutered
-      ? "Так"
-      : "Ні"
-    : "Не вказано";
+  const neuteredLabel =
+    translateInterfaceText(
+      typeof pet.neutered ===
+        "boolean"
+        ? pet.neutered
+          ? "calendar.detail.yes"
+          : "calendar.detail.no"
+        : "calendar.detail.not.specified"
+    );
 
-const vaccinationLabel = {
-  vaccinated: "Вакцинована",
-  not_vaccinated:
-    "Не вакцинована",
-  unknown: "Невідомо",
-}[
-  String(
-    pet.vaccination_status ||
-    "unknown"
-  )
-] || "Невідомо";
+  const legacyVaccinationDate =
+    String(
+      pet.vaccination_date ||
+      ""
+    ).slice(
+      0,
+      10
+    );
 
-const vaccinationDate =
-  String(
-    pet.vaccination_date ||
-    ""
-  ).slice(0, 10);
+  const legacyVaccinationDateLabel =
+    legacyVaccinationDate
+      ? formatCalendarDate(
+          legacyVaccinationDate,
+          {
+            day:
+              "2-digit",
 
-const vaccinationDateLabel =
-  vaccinationDate
-    ? new Date(
-        `${vaccinationDate}T00:00:00`
-      ).toLocaleDateString(
-        "uk-UA"
-      )
-    : "Не вказано";
+            month:
+              "2-digit",
 
-const vaccinationName =
-  String(
-    pet.vaccination_name ||
-    ""
-  ).trim();
+            year:
+              "numeric",
+          }
+        )
+      : translateInterfaceText(
+          "calendar.detail.not.specified"
+        );
 
-dynamicBox.innerHTML = `
-  <section
-    style="
-      margin-bottom:20px;
-      padding:20px;
-      border-radius:18px;
-      border:1px solid rgba(147,70,232,.55);
-      background:linear-gradient(135deg,rgba(147,70,232,.18),rgba(20,15,35,.75));
-    "
-  >
-    <div style="font-size:11px;letter-spacing:1.4px;color:#c084fc;">
-      PUG AI · EVIDENCE FIRST
-    </div>
+  const legacyVaccinationName =
+    String(
+      pet.vaccination_name ||
+      ""
+    ).trim();
 
-    <h3 style="margin:7px 0 5px;color:#fff;">
-      AI-підсумок пацієнта
-    </h3>
+  const vaccinationStatusText =
+    (status) =>
+      translateInterfaceText(
+        status ===
+        "vaccinated"
+          ? "calendar.detail.vaccinated"
+          : status ===
+              "not_vaccinated"
+            ? "calendar.detail.not.vaccinated"
+            : "calendar.detail.unknown"
+      );
 
-    <p style="margin:0;opacity:.65;">
-      Короткий клінічний огляд із посиланнями на записи пацієнта.
-    </p>
-        <button
-      type="button"
-      data-patient-ai-generate
-      style="
-        margin-top:16px;
-        padding:10px 16px;
-        border:0;
-        border-radius:11px;
-        background:#9346e8;
-        color:#fff;
-        font-weight:600;
-        cursor:pointer;
-      "
-    >
-      ✦ Створити AI-підсумок
-    </button>
-    <div
-      data-patient-ai-result
-      style="margin-top:16px;"
-    ></div>
-  </section>
+  const renderPassportVaccination =
+    ({
+      labelKey,
+      latest,
+      status,
+    }) => {
+      const statusText =
+        vaccinationStatusText(
+          status
+        );
 
-  ${renderPatientDiagnosesPanel(
-    pet,
-    activeDiagnoses
-  )}
+      const statusColor =
+        status ===
+        "not_vaccinated"
+          ? "#ff8a8a"
+          : "#fff";
 
-  ${renderPatientWeightPanel(
-    pet,
-    weightHistory
-  )}
-
-  ${renderPatientVaccinationsPanel(
-    pet,
-    vaccinationHistory
-  )}
-
-  <div
-    style="
-      display:grid;
-      grid-template-columns:
-        1fr 1fr;
-      gap:20px;
-    "
-  >
-    <div
-      class="glass-card"
-      style="
-        background:
-          rgba(255,255,255,0.02);
-        padding:20px;
-        border-radius:16px;
-        border:
-          1px solid
-          rgba(255,255,255,0.05);
-      "
-    >
-      <h3
-        style="
-          margin-top:0;
-          color:#fff;
-          font-size:1.2rem;
-          border-bottom:
-            1px solid
-            rgba(255,255,255,0.08);
-          padding-bottom:10px;
-        "
-      >
-        📋 Паспорт пацієнта
-      </h3>
-
-      <div
-        style="
-          display:grid;
-          grid-template-columns:
-            1fr 1fr;
-          gap:12px 20px;
-          margin-top:15px;
-          font-size:0.95rem;
-        "
-      >
-        <div>
-          <span style="opacity:0.5;">
-            Кличка:
-          </span>
-
-          <b
+      if (!latest) {
+        return `
+          <div
             style="
-              color:#fff;
-              margin-left:6px;
+              grid-column:1/-1;
             "
           >
-            ${escapeHtml(
-              pet.name || "—"
-            )}
-          </b>
-        </div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  labelKey
+                )
+              )}:
+            </span>
 
-        <div>
-          <span style="opacity:0.5;">
-            Вид:
+            <span
+              style="
+                color:${statusColor};
+                margin-left:6px;
+                opacity:${
+                  status === "unknown"
+                    ? ".6"
+                    : "1"
+                };
+              "
+            >
+              ${escapeHtml(
+                statusText
+              )}
+            </span>
+          </div>
+        `;
+      }
+
+      const vaccinationDate =
+        latest.vaccination_date
+          ? formatCalendarDate(
+              String(
+                latest.vaccination_date
+              ).slice(
+                0,
+                10
+              ),
+              {
+                day:
+                  "2-digit",
+
+                month:
+                  "2-digit",
+
+                year:
+                  "numeric",
+              }
+            )
+          : "—";
+
+      const nextDate =
+        latest.next_vaccination_date
+          ? formatCalendarDate(
+              String(
+                latest.next_vaccination_date
+              ).slice(
+                0,
+                10
+              ),
+              {
+                day:
+                  "2-digit",
+
+                month:
+                  "2-digit",
+
+                year:
+                  "numeric",
+              }
+            )
+          : "";
+
+      return `
+        <div
+          style="
+            grid-column:1/-1;
+          "
+        >
+          <span style="opacity:.5;">
+            ${escapeHtml(
+              translateInterfaceText(
+                labelKey
+              )
+            )}:
           </span>
 
           <span
@@ -43753,447 +47405,516 @@ dynamicBox.innerHTML = `
               margin-left:6px;
             "
           >
-            ${escapeHtml(
-              pet.species || "—"
+            <b>
+              ${escapeHtml(
+                latest.vaccine_name ||
+                statusText
+              )}
+            </b>
+
+            · ${escapeHtml(
+              vaccinationDate
             )}
-          </span>
-        </div>
 
-        <div>
-          <span style="opacity:0.5;">
-            Порода:
-          </span>
-
-          <span
-            style="
-              color:#fff;
-              margin-left:6px;
-            "
-          >
-            ${escapeHtml(
-              pet.breed || "—"
-            )}
-          </span>
-        </div>
-
-        <div>
-          <span style="opacity:0.5;">
-            Вік:
-          </span>
-
-          <span
-            style="
-              color:#fff;
-              margin-left:6px;
-            "
-          >
-            ${escapeHtml(
-              pet.age || "—"
-            )}
-          </span>
-        </div>
-
-        <div>
-          <span style="opacity:0.5;">
-            Вага:
-          </span>
-
-          <span
-            style="
-              color:#fff;
-              margin-left:6px;
-            "
-          >
             ${
-              pet.weight_kg
-                ? `${escapeHtml(
-                    pet.weight_kg
-                  )} кг`
-                : "—"
+              nextDate
+                ? `
+                  <span
+                    style="
+                      opacity:.55;
+                      margin-left:5px;
+                    "
+                  >
+                    → ${escapeHtml(
+                      translateInterfaceText(
+                        "patients.card.nextVaccination"
+                      )
+                    )}
+                    ${escapeHtml(
+                      nextDate
+                    )}
+                  </span>
+                `
+                : ""
             }
           </span>
         </div>
+      `;
+    };
 
-        <div>
-          <span style="opacity:0.5;">
-            Стать:
-          </span>
-
-          <span
-            style="
-              color:#fff;
-              margin-left:6px;
-            "
-          >
-            ${escapeHtml(
-              sexLabel
-            )}
-          </span>
-        </div>
-
-        <div>
-          <span style="opacity:0.5;">
-            Кастрований /
-            стерилізована:
-          </span>
-
-          <span
-            style="
-              color:#fff;
-              margin-left:6px;
-            "
-          >
-            ${escapeHtml(
-              neuteredLabel
-            )}
-          </span>
-        </div>
- <div
-  style="
-    grid-column:1/-1;
-    margin-top:4px;
-    padding-top:12px;
-    border-top:
-      1px solid
-      rgba(255,255,255,.06);
-  "
->
-  <span
-    style="
-      opacity:.5;
-    "
-  >
-    🛡 Сказ:
-  </span>
-
-  ${
-    latestRabiesVaccination
-      ? `
-        <span
-          style="
-            color:#fff;
-            margin-left:6px;
-          "
-        >
-          <b>
-            ${escapeHtml(
-              latestRabiesVaccination
-                .vaccine_name ||
-              "Вакцинований"
-            )}
-          </b>
-
-          ·
-
-          ${escapeHtml(
-            formatPassportVaccinationDate(
-              latestRabiesVaccination
-                .vaccination_date
-            )
-          )}
-
-          ${
-            latestRabiesVaccination
-              .next_vaccination_date
-              ? `
-                <span
-                  style="
-                    opacity:.55;
-                    margin-left:5px;
-                  "
-                >
-                  → наступна
-                  ${escapeHtml(
-                    formatPassportVaccinationDate(
-                      latestRabiesVaccination
-                        .next_vaccination_date
-                    )
-                  )}
-                </span>
-              `
-              : ""
-          }
-        </span>
-      `
-      : rabiesStatus ===
-        "not_vaccinated"
-        ? `
-          <span
-            style="
-              color:#ff8a8a;
-              margin-left:6px;
-            "
-          >
-            Не вакцинований
-          </span>
-        `
-        : rabiesStatus ===
-          "vaccinated"
-          ? `
-            <span
-              style="
-                color:#fff;
-                margin-left:6px;
-              "
-            >
-              Вакцинований
-            </span>
-          `
-          : `
-            <span
-              style="
-                opacity:.6;
-                margin-left:6px;
-              "
-            >
-              Невідомо
-            </span>
-          `
-  }
-</div>
-
-
-<div
-  style="
-    grid-column:1/-1;
-  "
->
-  <span
-    style="
-      opacity:.5;
-    "
-  >
-    💉 Загальна вакцина:
-  </span>
-
-  ${
-    latestGeneralVaccination
-      ? `
-        <span
-          style="
-            color:#fff;
-            margin-left:6px;
-          "
-        >
-          <b>
-            ${escapeHtml(
-              latestGeneralVaccination
-                .vaccine_name ||
-              "Вакцинований"
-            )}
-          </b>
-
-          ·
-
-          ${escapeHtml(
-            formatPassportVaccinationDate(
-              latestGeneralVaccination
-                .vaccination_date
-            )
-          )}
-
-          ${
-            latestGeneralVaccination
-              .next_vaccination_date
-              ? `
-                <span
-                  style="
-                    opacity:.55;
-                    margin-left:5px;
-                  "
-                >
-                  → наступна
-                  ${escapeHtml(
-                    formatPassportVaccinationDate(
-                      latestGeneralVaccination
-                        .next_vaccination_date
-                    )
-                  )}
-                </span>
-              `
-              : ""
-          }
-        </span>
-      `
-      : generalVaccinationStatus ===
-        "not_vaccinated"
-        ? `
-          <span
-            style="
-              color:#ff8a8a;
-              margin-left:6px;
-            "
-          >
-            Не вакцинований
-          </span>
-        `
-        : generalVaccinationStatus ===
-          "vaccinated"
-          ? `
-            <span
-              style="
-                color:#fff;
-                margin-left:6px;
-              "
-            >
-              Вакцинований
-            </span>
-          `
-          : `
-            <span
-              style="
-                opacity:.6;
-                margin-left:6px;
-              "
-            >
-              Невідомо
-            </span>
-          `
-  }
-</div>      
-
-${
-  pet.vaccination_status ===
-  "vaccinated"
-    ? `
-      <div>
-        <span style="opacity:0.5;">
-          Дата щеплення:
-        </span>
-
-        <span
-          style="
-            color:#fff;
-            margin-left:6px;
-          "
-        >
-          ${escapeHtml(
-            vaccinationDateLabel
-          )}
-        </span>
+  dynamicBox.innerHTML = `
+    <section
+      style="
+        margin-bottom:20px;
+        padding:20px;
+        border-radius:18px;
+        border:
+          1px solid
+          rgba(147,70,232,.55);
+        background:
+          linear-gradient(
+            135deg,
+            rgba(147,70,232,.18),
+            rgba(20,15,35,.75)
+          );
+      "
+    >
+      <div
+        style="
+          font-size:11px;
+          letter-spacing:1.4px;
+          color:#c084fc;
+        "
+      >
+        PUG AI · EVIDENCE FIRST
       </div>
 
-      <div>
-        <span style="opacity:0.5;">
-          Назва вакцини:
-        </span>
+      <h3
+        style="
+          margin:7px 0 5px;
+          color:#fff;
+        "
+      >
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.aiTitle"
+          )
+        )}
+      </h3>
 
-        <span
-          style="
-            color:#fff;
-            margin-left:6px;
-          "
-        >
-          ${escapeHtml(
-            vaccinationName ||
-            "Не вказано"
-          )}
-        </span>
-      </div>
-    `
-    : ""
-}
-      </div>
-    </div>
+      <p
+        style="
+          margin:0;
+          opacity:.65;
+        "
+      >
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.aiDescription"
+          )
+        )}
+      </p>
+
+      <button
+        type="button"
+        data-patient-ai-generate
+        style="
+          margin-top:16px;
+          padding:10px 16px;
+          border:0;
+          border-radius:11px;
+          background:#9346e8;
+          color:#fff;
+          font-weight:600;
+          cursor:pointer;
+        "
+      >
+        ✦ ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.aiCreate"
+          )
+        )}
+      </button>
+
+      <div
+        data-patient-ai-result
+        style="margin-top:16px;"
+      ></div>
+    </section>
+
+    ${renderPatientDiagnosesPanel(
+      pet,
+      activeDiagnoses
+    )}
+
+    ${renderPatientWeightPanel(
+      pet,
+      weightHistory
+    )}
+
+    ${renderPatientVaccinationsPanel(
+      pet,
+      vaccinationHistory
+    )}
 
     <div
-  class="glass-card patientDoctorNotesCard"
-  style="
-    background:
-      rgba(255,255,255,0.02);
-    padding:20px;
-    border-radius:16px;
-    border:
-      1px solid
-      rgba(255,255,255,0.05);
-  "
->
-  <div
-    style="
-      display:flex;
-      align-items:center;
-      justify-content:
-        space-between;
-      gap:12px;
-      border-bottom:
-        1px solid
-        rgba(255,255,255,0.08);
-      padding-bottom:10px;
-    "
-  >
-    <h3
       style="
-        margin:0;
-        color:#fff;
-        font-size:1.2rem;
+        display:grid;
+        grid-template-columns:
+          1fr 1fr;
+        gap:20px;
       "
     >
-      📝 Нотатки лікаря
-    </h3>
+      <div
+        class="
+          glass-card
+          patientPassportCard
+        "
+        style="
+          background:
+            rgba(255,255,255,0.02);
+          padding:20px;
+          border-radius:16px;
+          border:
+            1px solid
+            rgba(255,255,255,0.05);
+        "
+      >
+        <h3
+          style="
+            margin-top:0;
+            color:#fff;
+            font-size:1.2rem;
+            border-bottom:
+              1px solid
+              rgba(255,255,255,0.08);
+            padding-bottom:10px;
+          "
+        >
+          📋 ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.passport"
+            )
+          )}
+        </h3>
 
-    <span
-      data-patient-notes-state
-      style="
-        opacity:.45;
-        font-size:.78rem;
-      "
-    >
-    </span>
-  </div>
+        <div
+          style="
+            display:grid;
+            grid-template-columns:
+              1fr 1fr;
+            gap:12px 20px;
+            margin-top:15px;
+            font-size:0.95rem;
+          "
+        >
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.form.name"
+                )
+              )}:
+            </span>
 
+            <b
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                patientName
+              )}
+            </b>
+          </div>
 
-  <textarea
-    data-patient-doctor-notes
-    maxlength="3000"
-    placeholder="Алергії, поведінка, особливості лікування, важливі примітки..."
-    style="
-      width:100%;
-      min-height:110px;
-      margin-top:15px;
-      padding:12px 14px;
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.form.species"
+                )
+              )}:
+            </span>
 
-      box-sizing:border-box;
-      resize:vertical;
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                patientSpecies
+              )}
+            </span>
+          </div>
 
-      color:#fff;
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "calendar.detail.breed"
+                )
+              )}:
+            </span>
 
-      background:
-        rgba(255,255,255,.025);
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                patientBreed ||
+                "—"
+              )}
+            </span>
+          </div>
 
-      border:
-        1px solid
-        rgba(255,255,255,.08);
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "calendar.detail.age"
+                )
+              )}:
+            </span>
 
-      border-radius:12px;
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                pet.age || "—"
+              )}
+            </span>
+          </div>
 
-      font:inherit;
-      line-height:1.5;
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.card.weight"
+                )
+              )}:
+            </span>
 
-      outline:none;
-    "
-  >${escapeHtml(
-    pet.notes || ""
-  )}</textarea>
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                patientWeight
+              )}
+            </span>
+          </div>
 
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "calendar.detail.sex"
+                )
+              )}:
+            </span>
 
-  <div
-    style="
-      display:flex;
-      justify-content:flex-end;
-      margin-top:12px;
-    "
-  >
-    <button
-      type="button"
-      class="ghost"
-      data-save-patient-notes
-    >
-      💾 Зберегти нотатку
-    </button>
-  </div>
-</div>
-  </div>
-`;
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                sexLabel
+              )}
+            </span>
+          </div>
+
+          <div>
+            <span style="opacity:.5;">
+              ${escapeHtml(
+                translateInterfaceText(
+                  "calendar.detail.neutered.spayed"
+                )
+              )}:
+            </span>
+
+            <span
+              style="
+                color:#fff;
+                margin-left:6px;
+              "
+            >
+              ${escapeHtml(
+                neuteredLabel
+              )}
+            </span>
+          </div>
+
+          ${renderPassportVaccination({
+            labelKey:
+              "calendar.detail.rabies",
+
+            latest:
+              latestRabiesVaccination,
+
+            status:
+              rabiesStatus,
+          })}
+
+          ${renderPassportVaccination({
+            labelKey:
+              "calendar.detail.general.vaccination.2",
+
+            latest:
+              latestGeneralVaccination,
+
+            status:
+              generalVaccinationStatus,
+          })}
+
+          ${
+            pet.vaccination_status ===
+            "vaccinated"
+              ? `
+                <div>
+                  <span style="opacity:.5;">
+                    ${escapeHtml(
+                      translateInterfaceText(
+                        "patients.card.vaccinationDate"
+                      )
+                    )}:
+                  </span>
+
+                  <span
+                    style="
+                      color:#fff;
+                      margin-left:6px;
+                    "
+                  >
+                    ${escapeHtml(
+                      legacyVaccinationDateLabel
+                    )}
+                  </span>
+                </div>
+
+                <div>
+                  <span style="opacity:.5;">
+                    ${escapeHtml(
+                      translateInterfaceText(
+                        "patients.card.vaccineName"
+                      )
+                    )}:
+                  </span>
+
+                  <span
+                    style="
+                      color:#fff;
+                      margin-left:6px;
+                    "
+                  >
+                    ${escapeHtml(
+                      legacyVaccinationName ||
+                      translateInterfaceText(
+                        "calendar.detail.not.specified"
+                      )
+                    )}
+                  </span>
+                </div>
+              `
+              : ""
+          }
+        </div>
+      </div>
+
+      <div
+        class="
+          glass-card
+          patientDoctorNotesCard
+        "
+        style="
+          background:
+            rgba(255,255,255,0.02);
+          padding:20px;
+          border-radius:16px;
+          border:
+            1px solid
+            rgba(255,255,255,0.05);
+        "
+      >
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:
+              space-between;
+            gap:12px;
+            border-bottom:
+              1px solid
+              rgba(255,255,255,0.08);
+            padding-bottom:10px;
+          "
+        >
+          <h3
+            style="
+              margin:0;
+              color:#fff;
+              font-size:1.2rem;
+            "
+          >
+            📝 ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.doctorNotes"
+              )
+            )}
+          </h3>
+
+          <span
+            data-patient-notes-state
+            style="
+              opacity:.45;
+              font-size:.78rem;
+            "
+          ></span>
+        </div>
+
+        <textarea
+          data-patient-doctor-notes
+          maxlength="3000"
+          placeholder="${escapeHtml(
+            translateInterfaceText(
+              "patients.card.doctorNotesPlaceholder"
+            )
+          )}"
+          style="
+            width:100%;
+            min-height:110px;
+            margin-top:15px;
+            padding:12px 14px;
+            box-sizing:border-box;
+            resize:vertical;
+            color:#fff;
+            background:
+              rgba(255,255,255,.025);
+            border:
+              1px solid
+              rgba(255,255,255,.08);
+            border-radius:12px;
+            font:inherit;
+            line-height:1.5;
+            outline:none;
+          "
+        >${escapeHtml(
+          pet.notes || ""
+        )}</textarea>
+
+        <div
+          style="
+            display:flex;
+            justify-content:flex-end;
+            margin-top:12px;
+          "
+        >
+          <button
+            type="button"
+            class="ghost"
+            data-save-patient-notes
+          >
+            💾 ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.saveNote"
+              )
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
 const patientAiButton =
   dynamicBox.querySelector(
     "[data-patient-ai-generate]"
@@ -44204,262 +47925,413 @@ const patientAiResult =
     "[data-patient-ai-result]"
   );
 
-if (patientAiButton && patientAiResult) {
-  patientAiButton.addEventListener(
-    "click",
-    async () => {
-      patientAiButton.disabled = true;
-      patientAiButton.textContent =
-        "Створюємо підсумок…";
+const aiLanguage =
+  [
+    "uk",
+    "en",
+    "de",
+    "pl",
+  ].includes(
+    getInterfaceLanguage()
+  )
+    ? getInterfaceLanguage()
+    : "en";
 
-      patientAiResult.innerHTML =
-        "PUG AI аналізує картку пацієнта…";
+const setPatientAiButtonText =
+  (
+    icon,
+    translationKey
+  ) => {
+    if (!patientAiButton) {
+      return;
+    }
 
-      try {
-        const response = await fetch(
-          `/api/patients/${encodeURIComponent(
-            String(pet.id)
-          )}/ai-summary`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type":
-                "application/json",
-              ...getOrgHeaders(),
-            },
-            body: JSON.stringify({
-              language: "uk",
-            }),
-          }
-        );
+    patientAiButton.textContent =
+      `${icon} ${
+        translateInterfaceText(
+          translationKey
+        )
+      }`;
+  };
 
-        const result =
-          await response.json();
+const bindPatientAiSources =
+  () => {
+    patientAiResult
+      ?.querySelectorAll(
+        "[data-patient-ai-source]"
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            async () => {
+              const sourceType =
+                String(
+                  button.dataset
+                    .sourceType ||
+                  ""
+                );
 
-        if (!response.ok || !result?.ok) {
-          throw new Error(
-            result?.error ||
-            "Не вдалося створити підсумок."
+              const sourceId =
+                String(
+                  button.dataset
+                    .sourceId ||
+                  ""
+                );
+
+              if (
+                sourceType !==
+                "visit" ||
+                !sourceId
+              ) {
+                return;
+              }
+
+              if (
+                typeof openVisit ===
+                "function"
+              ) {
+                await openVisit(
+                  sourceId
+                );
+              }
+            }
           );
         }
+      );
+  };
 
-        console.log(
-          "PUG AI SUMMARY UI:",
-          result
+if (
+  patientAiButton &&
+  patientAiResult
+) {
+  patientAiButton
+    .addEventListener(
+      "click",
+      async () => {
+        patientAiButton.disabled =
+          true;
+
+        setPatientAiButtonText(
+          "",
+          "patients.card.aiCreating"
         );
 
-                const summary =
-          result.data?.summary || {};
+        patientAiResult.textContent =
+          translateInterfaceText(
+            "patients.card.aiAnalyzing"
+          );
 
-        patientAiResult.innerHTML = `
-          <div
-            style="
-              padding:16px;
-              border-radius:13px;
-              background:rgba(0,0,0,.18);
-              border:1px solid rgba(255,255,255,.08);
-            "
-          >
-            <strong style="color:#fff;">
-              ${escapeHtml(
-                summary.summary_title ||
-                "AI-підсумок створено"
-              )}
-            </strong>
+        try {
+          const response =
+            await fetch(
+              `/api/patients/${encodeURIComponent(
+                String(pet.id)
+              )}/ai-summary`,
+              {
+                method:
+                  "POST",
 
-            <p
-              style="
-                margin:9px 0 0;
-                line-height:1.55;
-                opacity:.78;
-              "
-            >
-                            )}
-            </p>
-                        ${
-              Array.isArray(
-                summary.attention_today
-              ) &&
-              summary.attention_today.length
-                ? `
-                  <div
-                    style="
-                      margin-top:16px;
-                      padding-top:14px;
-                      border-top:1px solid rgba(255,255,255,.08);
-                    "
-                  >
-                    <h4 style="margin:0 0 10px;color:#fff;">
-                      Важливо сьогодні
-                    </h4>
+                credentials:
+                  "include",
 
-                    ${summary.attention_today
-                      .map(
-                        (item) => `
-                          <div
-                            style="
-                              margin-top:8px;
-                              padding:10px 12px;
-                              border-radius:10px;
-                              background:rgba(245,158,11,.09);
-                            "
-                          >
-                            ${escapeHtml(
-                              item?.statement || ""
-                            )}
-                                                        ${renderPatientAiEvidence(
-                              item?.evidence
-                            )}
-                          </div>
-                        `
-                      )
-                      .join("")}
-                  </div>
-                `
-                : ""
-            }
-                        ${
-              Array.isArray(
-                summary.important_points
-              ) &&
-              summary.important_points.length
-                ? `
-                  <div
-                    style="
-                      margin-top:16px;
-                      padding-top:14px;
-                      border-top:1px solid rgba(255,255,255,.08);
-                    "
-                  >
-                    <h4 style="margin:0 0 10px;color:#fff;">
-                      Ключові факти
-                    </h4>
+                headers: {
+                  "Content-Type":
+                    "application/json",
 
-                    ${summary.important_points
-                      .map(
-                        (item) => `
-                          <div
-                            style="
-                              margin-top:8px;
-                              padding:10px 12px;
-                              border-radius:10px;
-                              background:rgba(147,70,232,.10);
-                            "
-                          >
-                            ${escapeHtml(
-                              item?.statement || ""
-                            )}
-                            ${renderPatientAiEvidence(
-                              item?.evidence
-                            )}
-                          </div>
-                        `
-                      )
-                      .join("")}
-                  </div>
-                `
-                : ""
-            }
-          </div>
-        `;
-                patientAiResult
-          .querySelectorAll(
-            "[data-patient-ai-source]"
-          )
-          .forEach((button) => {
-            button.addEventListener(
-              "click",
-              async () => {
-                const sourceType =
-                  String(
-                    button.dataset
-                      .sourceType || ""
-                  );
+                  ...getOrgHeaders(),
+                },
 
-                const sourceId =
-                  String(
-                    button.dataset
-                      .sourceId || ""
-                  );
-
-                if (
-                  sourceType !== "visit" ||
-                  !sourceId
-                ) {
-                  return;
-                }
-
-                if (
-                  typeof openVisit ===
-                  "function"
-                ) {
-                  await openVisit(
-                    sourceId
-                  );
-                }
+                body:
+                  JSON.stringify({
+                    language:
+                      aiLanguage,
+                  }),
               }
             );
-          });
-      } catch (error) {
-        patientAiResult.textContent =
-          error?.message ||
-          "Сталася помилка.";
-      } finally {
-        patientAiButton.disabled = false;
-        patientAiButton.textContent =
-          "↻ Оновити AI-підсумок";
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => null
+              );
+
+          if (
+            !response.ok ||
+            !result?.ok
+          ) {
+            throw new Error(
+              translateInterfaceText(
+                "patients.card.aiError"
+              )
+            );
+          }
+
+          const summary =
+            result.data?.summary ||
+            {};
+
+          patientAiResult.innerHTML = `
+            <div
+              style="
+                padding:16px;
+                border-radius:13px;
+                background:
+                  rgba(0,0,0,.18);
+                border:
+                  1px solid
+                  rgba(255,255,255,.08);
+              "
+            >
+              <strong
+                style="color:#fff;"
+              >
+                ${escapeHtml(
+                  summary.summary_title ||
+                  translateInterfaceText(
+                    "patients.card.aiCreated"
+                  )
+                )}
+              </strong>
+
+              ${
+                summary.patient_overview
+                  ? `
+                    <p
+                      style="
+                        margin:9px 0 0;
+                        line-height:1.55;
+                        opacity:.78;
+                      "
+                    >
+                      ${escapeHtml(
+                        summary.patient_overview
+                      )}
+                    </p>
+                  `
+                  : ""
+              }
+
+              ${
+                Array.isArray(
+                  summary.attention_today
+                ) &&
+                summary.attention_today
+                  .length
+                  ? `
+                    <div
+                      style="
+                        margin-top:16px;
+                        padding-top:14px;
+                        border-top:
+                          1px solid
+                          rgba(255,255,255,.08);
+                      "
+                    >
+                      <h4
+                        style="
+                          margin:0 0 10px;
+                          color:#fff;
+                        "
+                      >
+                        ${escapeHtml(
+                          translateInterfaceText(
+                            "patients.card.attentionToday"
+                          )
+                        )}
+                      </h4>
+
+                      ${summary
+                        .attention_today
+                        .map(
+                          (item) => `
+                            <div
+                              style="
+                                margin-top:8px;
+                                padding:10px 12px;
+                                border-radius:10px;
+                                background:
+                                  rgba(245,158,11,.09);
+                              "
+                            >
+                              ${escapeHtml(
+                                item?.statement ||
+                                ""
+                              )}
+
+                              ${renderPatientAiEvidence(
+                                item?.evidence
+                              )}
+                            </div>
+                          `
+                        )
+                        .join("")}
+                    </div>
+                  `
+                  : ""
+              }
+
+              ${
+                Array.isArray(
+                  summary.important_points
+                ) &&
+                summary.important_points
+                  .length
+                  ? `
+                    <div
+                      style="
+                        margin-top:16px;
+                        padding-top:14px;
+                        border-top:
+                          1px solid
+                          rgba(255,255,255,.08);
+                      "
+                    >
+                      <h4
+                        style="
+                          margin:0 0 10px;
+                          color:#fff;
+                        "
+                      >
+                        ${escapeHtml(
+                          translateInterfaceText(
+                            "patients.card.keyFacts"
+                          )
+                        )}
+                      </h4>
+
+                      ${summary
+                        .important_points
+                        .map(
+                          (item) => `
+                            <div
+                              style="
+                                margin-top:8px;
+                                padding:10px 12px;
+                                border-radius:10px;
+                                background:
+                                  rgba(147,70,232,.10);
+                              "
+                            >
+                              ${escapeHtml(
+                                item?.statement ||
+                                ""
+                              )}
+
+                              ${renderPatientAiEvidence(
+                                item?.evidence
+                              )}
+                            </div>
+                          `
+                        )
+                        .join("")}
+                    </div>
+                  `
+                  : ""
+              }
+            </div>
+          `;
+
+          bindPatientAiSources();
+
+        } catch (error) {
+          console.error(
+            "PUG AI summary:",
+            error
+          );
+
+          patientAiResult.textContent =
+            translateInterfaceText(
+              "patients.card.aiError"
+            );
+
+        } finally {
+          patientAiButton.disabled =
+            false;
+
+          setPatientAiButtonText(
+            "↻",
+            "patients.card.aiRefresh"
+          );
+        }
       }
-    }
+    );
+
+  patientAiButton.disabled =
+    true;
+
+  setPatientAiButtonText(
+    "",
+    "patients.card.aiLoading"
   );
-}
-if (patientAiButton && patientAiResult) {
-  patientAiButton.disabled = true;
-  patientAiButton.textContent =
-    "Завантажуємо AI-підсумок…";
 
   fetch(
     `/api/patients/${encodeURIComponent(
       String(pet.id)
-    )}/ai-summary?language=uk`,
+    )}/ai-summary?language=${encodeURIComponent(
+      aiLanguage
+    )}`,
     {
-      method: "GET",
-      credentials: "include",
+      method:
+        "GET",
+
+      credentials:
+        "include",
+
       headers: {
         ...getOrgHeaders(),
       },
     }
   )
-    .then((response) =>
-      response.json()
+    .then(
+      (response) =>
+        response
+          .json()
+          .catch(
+            () => null
+          )
     )
-    .then((result) => {
-      patientAiButton.disabled = false;
+    .then(
+      (result) => {
+        patientAiButton.disabled =
+          false;
 
-      const cacheHit =
-        result?.ok &&
-        result.data?.summary &&
-        result.data?.meta
-          ?.cache_status === "hit";
+        const cacheHit =
+          result?.ok &&
+          result.data?.summary &&
+          result.data?.meta
+            ?.cache_status ===
+            "hit";
 
-      if (cacheHit) {
-        patientAiButton.click();
-        return;
+        if (cacheHit) {
+          patientAiButton.click();
+
+          return;
+        }
+
+        setPatientAiButtonText(
+          "✦",
+          "patients.card.aiCreate"
+        );
       }
+    )
+    .catch(
+      (error) => {
+        console.error(
+          "PUG AI cache load:",
+          error
+        );
 
-      patientAiButton.textContent =
-        "✦ Створити AI-підсумок";
-    })
-    .catch((error) => {
-      console.error(
-        "PUG AI cache load:",
-        error
-      );
+        patientAiButton.disabled =
+          false;
 
-      patientAiButton.disabled = false;
-      patientAiButton.textContent =
-        "✦ Створити AI-підсумок";
-    });
+        setPatientAiButtonText(
+          "✦",
+          "patients.card.aiCreate"
+        );
+      }
+    );
 }
 
 const patientNotesInput =
@@ -44467,18 +48339,32 @@ const patientNotesInput =
     "[data-patient-doctor-notes]"
   );
 
-
 const patientNotesSaveButton =
   dynamicBox.querySelector(
     "[data-save-patient-notes]"
   );
-
 
 const patientNotesState =
   dynamicBox.querySelector(
     "[data-patient-notes-state]"
   );
 
+const setPatientNotesButtonText =
+  (
+    icon,
+    translationKey
+  ) => {
+    if (
+      patientNotesSaveButton
+    ) {
+      patientNotesSaveButton.textContent =
+        `${icon} ${
+          translateInterfaceText(
+            translationKey
+          )
+        }`;
+    }
+  };
 
 if (
   patientNotesSaveButton &&
@@ -44490,23 +48376,23 @@ if (
       async () => {
         const notes =
           String(
-            patientNotesInput.value ||
+            patientNotesInput
+              .value ||
             ""
           ).trim();
-
 
         patientNotesSaveButton.disabled =
           true;
 
-        patientNotesSaveButton.textContent =
-          "Збереження…";
-
+        setPatientNotesButtonText(
+          "",
+          "patients.card.notesSaving"
+        );
 
         if (patientNotesState) {
           patientNotesState.textContent =
             "";
         }
-
 
         try {
           const updatedPet =
@@ -44515,26 +48401,25 @@ if (
               notes
             );
 
-
           if (!updatedPet) {
             throw new Error(
-              "Сервер не повернув пацієнта."
+              "PATIENT_NOT_RETURNED"
             );
           }
-
 
           pet.notes =
             updatedPet.notes ||
             "";
 
-
           state.selectedPet = {
-            ...(state.selectedPet || pet),
+            ...(
+              state.selectedPet ||
+              pet
+            ),
 
             notes:
               pet.notes,
           };
-
 
           state.patients =
             (
@@ -44560,23 +48445,21 @@ if (
                   : item
             );
 
-
           savePatients(
             state.patients
           );
 
-
-          if (
-            patientNotesState
-          ) {
+          if (patientNotesState) {
             patientNotesState.textContent =
-              "✓ Збережено";
+              `✓ ${translateInterfaceText(
+                "patients.card.notesSaved"
+              )}`;
           }
 
-
-          patientNotesSaveButton.textContent =
-            "✓ Збережено";
-
+          setPatientNotesButtonText(
+            "✓",
+            "patients.card.notesSaved"
+          );
 
           setTimeout(
             () => {
@@ -44584,10 +48467,11 @@ if (
                 patientNotesSaveButton
                   .isConnected
               ) {
-                patientNotesSaveButton.textContent =
-                  "💾 Зберегти нотатку";
+                setPatientNotesButtonText(
+                  "💾",
+                  "patients.card.saveNote"
+                );
               }
-
 
               if (
                 patientNotesState
@@ -44606,22 +48490,25 @@ if (
             error
           );
 
-
           showCrmNotice({
             icon:
-              "!",
+              "⚠️",
 
             title:
-              "Не вдалося зберегти",
+              translateInterfaceText(
+                "patients.card.notesSaveFailed"
+              ),
 
             text:
-              error?.message ||
-              "Сталася помилка під час збереження нотатки.",
+              translateInterfaceText(
+                "patients.card.notesSaveError"
+              ),
           });
 
-
-          patientNotesSaveButton.textContent =
-            "💾 Зберегти нотатку";
+          setPatientNotesButtonText(
+            "💾",
+            "patients.card.saveNote"
+          );
 
         } finally {
           patientNotesSaveButton.disabled =
@@ -44635,7 +48522,6 @@ const addWeightBtn =
     "[data-add-patient-weight]"
   );
 
-  
 const addVaccinationBtn =
   dynamicBox.querySelector(
     "[data-add-patient-vaccination]"
@@ -44651,205 +48537,171 @@ if (addVaccinationBtn) {
     }
   );
 }
-// =====================================================
-// EDIT PATIENT VACCINATION
-// =====================================================
 
 dynamicBox
   .querySelectorAll(
     "[data-edit-patient-vaccination]"
   )
-  .forEach(
-    (button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          const vaccinationId =
-            String(
-              button.dataset
-                .editPatientVaccination ||
-              ""
-            ).trim();
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const vaccinationId =
+          String(
+            button.dataset
+              .editPatientVaccination ||
+            ""
+          ).trim();
 
-
-          if (!vaccinationId) {
-            return;
-          }
-
-
-          const vaccination =
-            vaccinationHistory.find(
-              (item) =>
-                String(
-                  item.id
-                ) ===
-                vaccinationId
-            );
-
-
-          if (!vaccination) {
-            showCrmNotice({
-              icon:
-                "⚠️",
-
-              title:
-                "Запис не знайдено",
-
-              text:
-                "Оновіть сторінку та спробуйте ще раз.",
-            });
-
-            return;
-          }
-
-
-          openPatientVaccinationEditor(
-            pet,
-            vaccination
-          );
+        if (!vaccinationId) {
+          return;
         }
-      );
-    }
-  );
-// =====================================================
-// DELETE PATIENT VACCINATION
-// =====================================================
+
+        const vaccination =
+          vaccinationHistory.find(
+            (item) =>
+              String(item.id) ===
+              vaccinationId
+          );
+
+        if (!vaccination) {
+          showCrmNotice({
+            icon: "⚠️",
+            title:
+              translateInterfaceText(
+                "patients.card.recordNotFound"
+              ),
+            text:
+              translateInterfaceText(
+                "patients.card.refreshTryAgain"
+              ),
+          });
+
+          return;
+        }
+
+        openPatientVaccinationEditor(
+          pet,
+          vaccination
+        );
+      }
+    );
+  });
 
 dynamicBox
   .querySelectorAll(
     "[data-delete-patient-vaccination]"
   )
-  .forEach(
-    (button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          const vaccinationId =
-            String(
-              button.dataset
-                .deletePatientVaccination ||
-              ""
-            ).trim();
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const vaccinationId =
+          String(
+            button.dataset
+              .deletePatientVaccination ||
+            ""
+          ).trim();
 
-
-          if (!vaccinationId) {
-            return;
-          }
-
-
-          const vaccination =
-            vaccinationHistory.find(
-              (item) =>
-                String(
-                  item.id
-                ) ===
-                vaccinationId
-            );
-
-
-          const vaccineName =
-            String(
-              vaccination?.vaccine_name ||
-              "цю вакцинацію"
-            );
-
-
-          openDeleteModal(
-            `
-              Видалити вакцинацію
-              <b>${escapeHtml(
-                vaccineName
-              )}</b>?
-              <br><br>
-              Цю дію неможливо буде
-              скасувати.
-            `,
-
-            async () => {
-              try {
-                await deletePatientVaccinationApi(
-                  vaccinationId
-                );
-
-
-                // Подтягиваем свежего пациента,
-                // потому что сервер также
-                // пересчитывает vaccination statuses.
-
-                await loadPatientsApi();
-
-
-                const freshPet =
-                  (
-                    state.patients || []
-                  ).find(
-                    (item) =>
-                      String(
-                        item.id
-                      ) ===
-                      String(
-                        pet.id
-                      )
-                  ) ||
-                  pet;
-
-
-                state.selectedPet =
-                  freshPet;
-
-
-                await renderPatientTab(
-                  "overview",
-                  freshPet
-                );
-
-
-                showCrmNotice({
-                  icon:
-                    "🗑",
-
-                  title:
-                    "Вакцинацію видалено",
-
-                  text:
-                    vaccineName,
-                });
-
-              } catch (error) {
-                console.error(
-                  "DELETE PATIENT VACCINATION:",
-                  error
-                );
-
-
-                showCrmNotice({
-                  icon:
-                    "⚠️",
-
-                  title:
-                    "Не вдалося видалити",
-
-                  text:
-                    error?.message ||
-                    "Спробуйте ще раз.",
-                });
-              }
-            }
-          );
+        if (!vaccinationId) {
+          return;
         }
-      );
-    }
-  );
+
+        const vaccination =
+          vaccinationHistory.find(
+            (item) =>
+              String(item.id) ===
+              vaccinationId
+          );
+
+        const vaccineName =
+          String(
+            vaccination?.vaccine_name ||
+            translateInterfaceText(
+              "patients.card.vaccinationFallback"
+            )
+          );
+
+        openDeleteModal(
+          `
+            ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.deleteVaccination"
+              )
+            )}
+            <b>${escapeHtml(
+              vaccineName
+            )}</b>?
+            <br><br>
+            ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.actionCannotUndo"
+              )
+            )}
+          `,
+          async () => {
+            try {
+              await deletePatientVaccinationApi(
+                vaccinationId
+              );
+
+              await loadPatientsApi();
+
+              const freshPet =
+                (
+                  state.patients || []
+                ).find(
+                  (item) =>
+                    String(item.id) ===
+                    String(pet.id)
+                ) ||
+                pet;
+
+              state.selectedPet =
+                freshPet;
+
+              await renderPatientTab(
+                "overview",
+                freshPet
+              );
+
+              showCrmNotice({
+                icon: "🗑",
+                title:
+                  translateInterfaceText(
+                    "patients.card.vaccinationDeleted"
+                  ),
+                text:
+                  vaccineName,
+              });
+            } catch (error) {
+              console.error(
+                "DELETE PATIENT VACCINATION:",
+                error
+              );
+
+              showCrmNotice({
+                icon: "⚠️",
+                title:
+                  translateInterfaceText(
+                    "patients.card.deleteFailed"
+                  ),
+                text:
+                  translateInterfaceText(
+                    "patients.card.refreshTryAgain"
+                  ),
+              });
+            }
+          }
+        );
+      }
+    );
+  });
 
 const statusButton =
   root.querySelector(
     "[data-patient-status-toggle]"
   );
-
-console.log(
-  "STATUS BUTTON FOUND:",
-  statusButton
-);
 
 if (statusButton) {
   statusButton.style.cursor =
@@ -44877,29 +48729,40 @@ if (statusButton) {
           type="button"
           data-patient-status-value="active"
         >
-          ● Активний
+          ● ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.statusActive"
+            )
+          )}
         </button>
 
         <button
           type="button"
           data-patient-status-value="archived"
         >
-          📦 Архів
+          📦 ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.statusArchived"
+            )
+          )}
         </button>
 
         <button
           type="button"
           data-patient-status-value="deceased"
         >
-          † Помер
+          † ${escapeHtml(
+            translateInterfaceText(
+              "patients.card.statusDeceased"
+            )
+          )}
         </button>
       `;
 
-      statusButton
-        .insertAdjacentElement(
-          "afterend",
-          menu
-        );
+      statusButton.insertAdjacentElement(
+        "afterend",
+        menu
+      );
 
       menu.addEventListener(
         "click",
@@ -44917,79 +48780,93 @@ if (statusButton) {
             button.dataset
               .patientStatusValue;
 
-          console.log(
-            "PATIENT STATUS SELECTED:",
-            nextStatus
-          );
-if (
-  nextStatus === "deceased"
-) {
-  const deceasedDate =
-    await openAppPrompt({
-      title:
-        "Дата смерті",
+          if (
+            nextStatus ===
+            "deceased"
+          ) {
+            const deceasedDate =
+              await openAppPrompt({
+                title:
+                  translateInterfaceText(
+                    "patients.card.deathDate"
+                  ),
+                text:
+                  translateInterfaceText(
+                    "patients.card.deathDateText"
+                  ),
+                label:
+                  translateInterfaceText(
+                    "patients.card.date"
+                  ),
+                placeholder:
+                  "2026-08-17",
+                defaultValue:
+                  todayISO(),
+                confirmText:
+                  translateInterfaceText(
+                    "patients.card.confirm"
+                  ),
+                cancelText:
+                  translateInterfaceText(
+                    "patients.card.cancel"
+                  ),
+                required:
+                  true,
+              });
 
-      text:
-        "Вкажіть дату смерті пацієнта.",
+            if (!deceasedDate) {
+              menu.remove();
+              return;
+            }
 
-      label:
-        "Дата",
+            try {
+              const updatedPatient =
+                await updatePatientStatusApi(
+                  pet.id,
+                  {
+                    patient_status:
+                      "deceased",
+                    deceased_at:
+                      deceasedDate,
+                  }
+                );
 
-      placeholder:
-        "2026-08-17",
+              pet.patient_status =
+                updatedPatient
+                  .patient_status;
 
-      defaultValue:
-        todayISO(),
+              pet.deceased_at =
+                updatedPatient
+                  .deceased_at ||
+                deceasedDate;
 
-      confirmText:
-        "Підтвердити",
+              await renderPatientTab(
+                "overview",
+                pet
+              );
+            } catch (error) {
+              console.error(
+                "PATIENT DECEASED UPDATE FAILED:",
+                error
+              );
 
-      cancelText:
-        "Скасувати",
+              showCrmNotice({
+                icon: "⚠️",
+                title:
+                  translateInterfaceText(
+                    "patients.card.statusUpdateFailed"
+                  ),
+                text:
+                  translateInterfaceText(
+                    "patients.card.refreshTryAgain"
+                  ),
+              });
+            }
 
-      required:
-        true,
-    });
+            menu.remove();
+            return;
+          }
 
-  if (!deceasedDate) {
-    menu.remove();
-    return;
-  }
-
-  try {
-    const updatedPatient =
-      await updatePatientStatusApi(
-        pet.id,
-        {
-          patient_status:
-            "deceased",
-
-          deceased_at:
-            deceasedDate,
-        }
-      );
-
-    pet.patient_status =
-      updatedPatient.patient_status;
-
-    pet.deceased_at =
-      updatedPatient.deceased_at ||
-      deceasedDate;
-
-    await renderPatientTab(
-      "overview",
-      pet
-    );
-  } catch (error) {
-    console.error(
-      "PATIENT DECEASED UPDATE FAILED:",
-      error
-    );
-  }
-
-  menu.remove();
-  return;
-}
           if (
             nextStatus === "active" ||
             nextStatus === "archived"
@@ -45005,10 +48882,12 @@ if (
                 );
 
               pet.patient_status =
-                updatedPatient.patient_status;
+                updatedPatient
+                  .patient_status;
 
               pet.deceased_at =
-                updatedPatient.deceased_at ||
+                updatedPatient
+                  .deceased_at ||
                 null;
 
               await renderPatientTab(
@@ -45020,6 +48899,18 @@ if (
                 "PATIENT STATUS UPDATE FAILED:",
                 error
               );
+
+              showCrmNotice({
+                icon: "⚠️",
+                title:
+                  translateInterfaceText(
+                    "patients.card.statusUpdateFailed"
+                  ),
+                text:
+                  translateInterfaceText(
+                    "patients.card.refreshTryAgain"
+                  ),
+              });
             }
           }
 
@@ -45029,7 +48920,7 @@ if (
     }
   );
 }
-  
+
 if (addWeightBtn) {
   addWeightBtn.addEventListener(
     "click",
@@ -45037,26 +48928,33 @@ if (addWeightBtn) {
       const result =
         await openAppPrompt({
           title:
-            "Додати вагу",
-
+            translateInterfaceText(
+              "patients.card.addWeight"
+            ),
           text:
-            `Пацієнт: ${
-              pet?.name ||
-              "—"
+            `${
+              translateInterfaceText(
+                "patients.card.patient"
+              )
+            }: ${
+              pet?.name || "—"
             }`,
-
           label:
-            "Вага, кг",
-
+            translateInterfaceText(
+              "patients.card.weightKg"
+            ),
           placeholder:
-            "Наприклад: 21.4",
-
+            translateInterfaceText(
+              "patients.card.weightExample"
+            ),
           confirmText:
-            "Зберегти",
-
+            translateInterfaceText(
+              "patients.card.save"
+            ),
           cancelText:
-            "Скасувати",
-
+            translateInterfaceText(
+              "patients.card.cancel"
+            ),
           required:
             true,
         });
@@ -45079,24 +48977,26 @@ if (addWeightBtn) {
         weight > 500
       ) {
         showCrmNotice({
-          icon: "!",
+          icon: "⚠️",
           title:
-            "Некоректна вага",
-
+            translateInterfaceText(
+              "patients.card.invalidWeight"
+            ),
           text:
-            "Вкажіть вагу числом, наприклад 21.4 кг.",
+            translateInterfaceText(
+              "patients.card.invalidWeightText"
+            ),
         });
 
         return;
       }
 
       try {
-               await createPatientWeightApi(
+        await createPatientWeightApi(
           pet.id,
           {
             weight_kg:
               weight,
-
             source:
               "manual",
           }
@@ -45127,31 +49027,47 @@ if (addWeightBtn) {
           "overview",
           freshPet
         );
-
       } catch (error) {
-        showCrmNotice({
-          icon: "!",
-          title:
-            "Не вдалося зберегти вагу",
+        console.error(
+          "SAVE PATIENT WEIGHT:",
+          error
+        );
 
+        showCrmNotice({
+          icon: "⚠️",
+          title:
+            translateInterfaceText(
+              "patients.card.weightSaveFailed"
+            ),
           text:
-            error?.message ||
-            "Сталася помилка під час збереження ваги.",
+            translateInterfaceText(
+              "patients.card.weightSaveError"
+            ),
         });
       }
     }
   );
 }
-    bindPatientDiagnosisPanel(
-      dynamicBox,
-      pet,
-      activeDiagnoses
-    );
-    return;
-  }
+
+bindPatientDiagnosisPanel(
+  dynamicBox,
+  pet,
+  activeDiagnoses
+);
+
+return;
+}
 
   if (tab === "visits") {
-    dynamicBox.innerHTML = `<div class="hint">Завантаження візитів…</div>`;
+    dynamicBox.innerHTML = `
+  <div class="hint">
+    ${escapeHtml(
+      translateInterfaceText(
+        "patients.card.visits.loading"
+      )
+    )}
+  </div>
+`;
     if (typeof renderVisits === "function") await renderVisits(pet.id);
     return;
   }
@@ -45365,21 +49281,42 @@ function sortPatientDiagnoses(
   });
 }
 
+
+function getPatientDiagnosisLabel(
+  group,
+  value
+) {
+  const normalized =
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const key =
+    `patients.card.diagnosis.${group}.${normalized}`;
+
+  const translated =
+    translateInterfaceText(key);
+
+  return translated === key
+    ? String(value)
+    : translated;
+}
+
 function formatPatientDiagnosisDate(
   value
 ) {
-  if (!value) return "Дата не вказана";
-
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return escapeHtml(
-      String(value).slice(0, 10)
+  if (!value) {
+    return translateInterfaceText(
+      "patients.card.diagnosis.dateNotSpecified"
     );
   }
 
-  return parsed.toLocaleDateString(
-    "uk-UA",
+  return formatCalendarDate(
+    value,
     {
       day: "2-digit",
       month: "short",
@@ -45394,43 +49331,77 @@ function renderPatientDiagnosisCard(
     history = false,
   } = {}
 ) {
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
   const canEdit =
     canEditPatientDiagnoses();
-  const status = String(
-    diagnosis?.status || "active"
-  );
-  const severity = String(
-    diagnosis?.severity || "none"
-  );
-  const certainty = String(
-    diagnosis?.certainty || "confirmed"
-  );
-  const diagnosisId = escapeHtml(
-    String(diagnosis?.id || "")
-  );
+
+  const status =
+    String(
+      diagnosis?.status ||
+      "active"
+    );
+
+  const severity =
+    String(
+      diagnosis?.severity ||
+      "none"
+    );
+
+  const certainty =
+    String(
+      diagnosis?.certainty ||
+      "confirmed"
+    );
+
+  const diagnosisId =
+    escapeHtml(
+      String(
+        diagnosis?.id || ""
+      )
+    );
 
   return `
     <article
-      class="patientDiagnosisCard severity-${escapeHtml(
-        severity
-      )} status-${escapeHtml(status)}"
+      class="
+        patientDiagnosisCard
+        severity-${escapeHtml(
+          severity
+        )}
+        status-${escapeHtml(
+          status
+        )}
+      "
       data-diagnosis-id="${diagnosisId}"
     >
-      <div class="patientDiagnosisCardMain">
-        <div class="patientDiagnosisCardTitleRow">
+      <div
+        class="patientDiagnosisCardMain"
+      >
+        <div
+          class="patientDiagnosisCardTitleRow"
+        >
           <h4>
             ${escapeHtml(
-              diagnosis?.diagnosis_name ||
-              "Без назви"
+              diagnosis
+                ?.diagnosis_name ||
+              t(
+                "patients.card.diagnosis.untitled"
+              )
             )}
           </h4>
 
           ${
-            diagnosis?.diagnosis_code
+            diagnosis
+              ?.diagnosis_code
               ? `
-                <span class="patientDiagnosisCode">
+                <span
+                  class="patientDiagnosisCode"
+                >
                   ${escapeHtml(
-                    diagnosis.diagnosis_code
+                    diagnosis
+                      .diagnosis_code
                   )}
                 </span>
               `
@@ -45438,24 +49409,31 @@ function renderPatientDiagnosisCard(
           }
         </div>
 
-        <div class="patientDiagnosisMeta">
+        <div
+          class="patientDiagnosisMeta"
+        >
           <span
-            class="patientDiagnosisStatus status-${escapeHtml(
-              status
-            )}"
+            class="
+              patientDiagnosisStatus
+              status-${escapeHtml(
+                status
+              )}
+            "
           >
             ${escapeHtml(
-              PATIENT_DIAGNOSIS_STATUS_LABELS[
+              getPatientDiagnosisLabel(
+                "status",
                 status
-              ] || status
+              )
             )}
           </span>
 
           <span>
             ${escapeHtml(
-              PATIENT_DIAGNOSIS_CERTAINTY_LABELS[
+              getPatientDiagnosisLabel(
+                "certainty",
                 certainty
-              ] || certainty
+              )
             )}
           </span>
 
@@ -45463,18 +49441,23 @@ function renderPatientDiagnosisCard(
             diagnosis?.severity
               ? `
                 <span
-                  class="patientDiagnosisSeverity severity-${escapeHtml(
-                    severity
-                  )}"
+                  class="
+                    patientDiagnosisSeverity
+                    severity-${escapeHtml(
+                      severity
+                    )}
+                  "
                 >
                   ${
-                    severity === "critical"
+                    severity ===
+                    "critical"
                       ? "⚠️ "
                       : ""
                   }${escapeHtml(
-                    PATIENT_DIAGNOSIS_SEVERITY_LABELS[
+                    getPatientDiagnosisLabel(
+                      "severity",
                       severity
-                    ] || severity
+                    )
                   )}
                 </span>
               `
@@ -45484,18 +49467,23 @@ function renderPatientDiagnosisCard(
           <span>
             ${escapeHtml(
               formatPatientDiagnosisDate(
-                diagnosis?.diagnosed_at
+                diagnosis
+                  ?.diagnosed_at
               )
             )}
           </span>
         </div>
 
         ${
-          diagnosis?.clinical_note
+          diagnosis
+            ?.clinical_note
             ? `
-              <p class="patientDiagnosisNote">
+              <p
+                class="patientDiagnosisNote"
+              >
                 ${escapeHtml(
-                  diagnosis.clinical_note
+                  diagnosis
+                    .clinical_note
                 )}
               </p>
             `
@@ -45503,44 +49491,34 @@ function renderPatientDiagnosisCard(
         }
       </div>
 
-      <div class="patientDiagnosisActions">
+      <div
+        class="patientDiagnosisActions"
+      >
         <button
           type="button"
           data-diagnosis-events="${diagnosisId}"
         >
-          Історія
+          ${escapeHtml(
+            t(
+              "patients.card.diagnosis.history"
+            )
+          )}
         </button>
 
         ${
-          canEdit && status !== "entered_in_error"
+          canEdit &&
+          status !==
+            "entered_in_error"
             ? `
               <button
                 type="button"
                 data-edit-diagnosis="${diagnosisId}"
               >
-                Редагувати
-              </button>
-            `
-            : ""
-        }
-
-        ${
-          canEdit && status === "active"
-            ? `
-              <button
-                type="button"
-                data-diagnosis-status="remission"
-                data-diagnosis-id="${diagnosisId}"
-              >
-                У ремісію
-              </button>
-
-              <button
-                type="button"
-                data-diagnosis-status="resolved"
-                data-diagnosis-id="${diagnosisId}"
-              >
-                Завершити
+                ${escapeHtml(
+                  t(
+                    "patients.card.diagnosis.edit"
+                  )
+                )}
               </button>
             `
             : ""
@@ -45548,23 +49526,61 @@ function renderPatientDiagnosisCard(
 
         ${
           canEdit &&
-          ["remission", "resolved"].includes(
-            status
-          )
+          status === "active"
             ? `
               <button
                 type="button"
-                data-diagnosis-status="active"
+                data-diagnosis-status="remission"
                 data-diagnosis-id="${diagnosisId}"
               >
-                Повернути в активні
+                ${escapeHtml(
+                  t(
+                    "patients.card.diagnosis.toRemission"
+                  )
+                )}
+              </button>
+
+              <button
+                type="button"
+                data-diagnosis-status="resolved"
+                data-diagnosis-id="${diagnosisId}"
+              >
+                ${escapeHtml(
+                  t(
+                    "patients.card.diagnosis.resolve"
+                  )
+                )}
               </button>
             `
             : ""
         }
 
         ${
-          canEdit && status !== "entered_in_error"
+          canEdit &&
+          [
+            "remission",
+            "resolved",
+          ].includes(status)
+            ? `
+              <button
+                type="button"
+                data-diagnosis-status="active"
+                data-diagnosis-id="${diagnosisId}"
+              >
+                ${escapeHtml(
+                  t(
+                    "patients.card.diagnosis.reactivate"
+                  )
+                )}
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          canEdit &&
+          status !==
+            "entered_in_error"
             ? `
               <button
                 type="button"
@@ -45572,7 +49588,11 @@ function renderPatientDiagnosisCard(
                 data-diagnosis-status="entered_in_error"
                 data-diagnosis-id="${diagnosisId}"
               >
-                Помилковий
+                ${escapeHtml(
+                  t(
+                    "patients.card.diagnosis.markError"
+                  )
+                )}
               </button>
             `
             : ""
@@ -45585,26 +49605,30 @@ function renderPatientWeightPanel(
   pet,
   history = []
 ) {
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
   const rows =
     Array.isArray(history)
       ? [...history]
       : [];
 
   const sorted =
-  rows.sort(
-    (a, b) =>
-      String(
-        b.created_at ||
-        b.measured_at ||
-        ""
-      ).localeCompare(
+    rows.sort(
+      (a, b) =>
         String(
-          a.created_at ||
-          a.measured_at ||
+          b.created_at ||
+          b.measured_at ||
           ""
+        ).localeCompare(
+          String(
+            a.created_at ||
+            a.measured_at ||
+            ""
+          )
         )
-      )
-  );
+    );
 
   const latest =
     sorted[0] || null;
@@ -45634,22 +49658,41 @@ function renderPatientWeightPanel(
   }
 
   const recent =
-    sorted.slice(
-      0,
-      4
-    );
+    sorted.slice(0, 4);
+
+  const formatWeight =
+    (value) =>
+      Number(value || 0)
+        .toLocaleString(
+          getCalendarLocale(),
+          {
+            maximumFractionDigits:
+              3,
+          }
+        );
 
   return `
-    <section class="patientWeightPanel">
-
-      <header class="patientWeightHeader">
+    <section
+      class="patientWeightPanel"
+    >
+      <header
+        class="patientWeightHeader"
+      >
         <div>
           <h3>
-            Динаміка ваги
+            ${escapeHtml(
+              t(
+                "patients.card.weightDynamics"
+              )
+            )}
           </h3>
 
           <p>
-            Історія вимірювань маси тіла пацієнта.
+            ${escapeHtml(
+              t(
+                "patients.card.weightHistoryDescription"
+              )
+            )}
           </p>
         </div>
 
@@ -45658,28 +49701,40 @@ function renderPatientWeightPanel(
           class="patientWeightAdd"
           data-add-patient-weight
         >
-          + Додати вагу
+          + ${escapeHtml(
+            t(
+              "patients.card.addWeight"
+            )
+          )}
         </button>
       </header>
 
-      <div class="patientWeightBody">
-
-        <div class="patientWeightCurrent">
-
+      <div
+        class="patientWeightBody"
+      >
+        <div
+          class="patientWeightCurrent"
+        >
           <span>
-            Поточна вага
+            ${escapeHtml(
+              t(
+                "patients.card.currentWeight"
+              )
+            )}
           </span>
 
           <strong>
             ${
               currentWeight > 0
-                ? `${currentWeight.toLocaleString(
-                    "uk-UA",
-                    {
-                      maximumFractionDigits:
-                        3,
-                    }
-                  )} кг`
+                ? `${escapeHtml(
+                    formatWeight(
+                      currentWeight
+                    )
+                  )} ${escapeHtml(
+                    t(
+                      "patients.card.kg"
+                    )
+                  )}`
                 : "—"
             }
           </strong>
@@ -45704,187 +49759,223 @@ function renderPatientWeightPanel(
                         : "•"
                   }
 
-                  ${Math.abs(
-                    difference
-                  ).toLocaleString(
-                    "uk-UA",
-                    {
-                      maximumFractionDigits:
-                        3,
-                    }
-                  )} кг
+                  ${escapeHtml(
+                    formatWeight(
+                      Math.abs(
+                        difference
+                      )
+                    )
+                  )}
+                  ${escapeHtml(
+                    t(
+                      "patients.card.kg"
+                    )
+                  )}
 
-                  від попереднього
-                  вимірювання
+                  ${escapeHtml(
+                    t(
+                      "patients.card.fromPreviousMeasurement"
+                    )
+                  )}
                 </small>
               `
               : `
                 <small>
-                  Немає попереднього
-                  вимірювання
+                  ${escapeHtml(
+                    t(
+                      "patients.card.noPreviousMeasurement"
+                    )
+                  )}
                 </small>
               `
           }
-
         </div>
 
-        <div class="patientWeightHistory">
-
+        <div
+          class="patientWeightHistory"
+        >
           ${
             recent.length
               ? recent
-                  .map(
-                    (item) => {
-                      const date =
-                        item.measured_at ||
-                        item.created_at ||
-                        "";
+                  .map((item) => {
+                    const date =
+                      item.measured_at ||
+                      item.created_at ||
+                      "";
 
-                      const dateLabel =
-  date
-    ? new Date(
-        date
-      ).toLocaleDateString(
-        "uk-UA",
-        {
-          day:
-            "2-digit",
-          month:
-            "2-digit",
-          year:
-            "numeric",
-        }
-      )
-    : "—";
+                    const dateLabel =
+                      date
+                        ? formatCalendarDate(
+                            date,
+                            {
+                              day:
+                                "2-digit",
+                              month:
+                                "2-digit",
+                              year:
+                                "numeric",
+                            }
+                          )
+                        : "—";
 
-const isVisitWeight =
-  Boolean(
-    String(
-      item.source_visit_id ||
-      ""
-    ).trim()
-  ) ||
-  String(
-    item.source ||
-    ""
-  ).toLowerCase() ===
-    "visit";
+                    const isVisitWeight =
+                      Boolean(
+                        String(
+                          item
+                            .source_visit_id ||
+                          ""
+                        ).trim()
+                      ) ||
+                      String(
+                        item.source ||
+                        ""
+                      ).toLowerCase() ===
+                        "visit";
 
-const sourceLabel =
-  isVisitWeight
-    ? "Візит"
-    : "Вручну";
+                    const sourceLabel =
+                      isVisitWeight
+                        ? t(
+                            "patients.card.sourceVisit"
+                          )
+                        : t(
+                            "patients.card.manual"
+                          );
 
-return `
-                        <div class="patientWeightRow">
-
-                          <span
-  style="
-    display:flex;
-    align-items:center;
-    gap:9px;
-  "
->
-  <span>
-    ${escapeHtml(
-      dateLabel
-    )}
-  </span>
-
-  <small
-    style="
-      padding:3px 7px;
-      border-radius:999px;
-      background:${
-        isVisitWeight
-          ? "rgba(34,197,94,.12)"
-          : "rgba(255,255,255,.06)"
-      };
-      border:1px solid ${
-        isVisitWeight
-          ? "rgba(34,197,94,.22)"
-          : "rgba(255,255,255,.08)"
-      };
-      color:${
-        isVisitWeight
-          ? "#6ee7a0"
-          : "rgba(255,255,255,.58)"
-      };
-      font-size:11px;
-      line-height:1;
-    "
-  >
-    ${sourceLabel}
-  </small>
-</span>
-
-                          <strong>
-                            ${Number(
-                              item.weight_kg ||
-                              0
-                            ).toLocaleString(
-                              "uk-UA",
-                              {
-                                maximumFractionDigits:
-                                  3,
-                              }
+                    return `
+                      <div
+                        class="patientWeightRow"
+                      >
+                        <span
+                          style="
+                            display: flex;
+                            align-items: center;
+                            gap: 9px;
+                          "
+                        >
+                          <span>
+                            ${escapeHtml(
+                              dateLabel
                             )}
-                            кг
-                          </strong>
+                          </span>
 
-                        </div>
-                      `;
-                    }
-                  )
+                          <small
+                            style="
+                              padding: 3px 7px;
+                              border-radius: 999px;
+                              background: ${
+                                isVisitWeight
+                                  ? "rgba(34,197,94,.12)"
+                                  : "rgba(255,255,255,.06)"
+                              };
+                              border: 1px solid ${
+                                isVisitWeight
+                                  ? "rgba(34,197,94,.22)"
+                                  : "rgba(255,255,255,.08)"
+                              };
+                              color: ${
+                                isVisitWeight
+                                  ? "#6ee7a0"
+                                  : "rgba(255,255,255,.58)"
+                              };
+                              font-size: 11px;
+                              line-height: 1;
+                            "
+                          >
+                            ${escapeHtml(
+                              sourceLabel
+                            )}
+                          </small>
+                        </span>
+
+                        <strong>
+                          ${escapeHtml(
+                            formatWeight(
+                              item.weight_kg
+                            )
+                          )}
+                          ${escapeHtml(
+                            t(
+                              "patients.card.kg"
+                            )
+                          )}
+                        </strong>
+                      </div>
+                    `;
+                  })
                   .join("")
               : `
-                <div class="patientWeightEmpty">
-                  Історії ваги поки немає.
+                <div
+                  class="patientWeightEmpty"
+                >
+                  ${escapeHtml(
+                    t(
+                      "patients.card.noWeightHistory"
+                    )
+                  )}
                 </div>
               `
           }
-
         </div>
-
       </div>
-
     </section>
   `;
 }
-
 function renderPatientDiagnosesPanel(
   pet,
   diagnoses
 ) {
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
   const loadFailed =
     !Array.isArray(diagnoses);
-  const sorted = sortPatientDiagnoses(
-    diagnoses
-  );
+
+  const sorted =
+    sortPatientDiagnoses(
+      diagnoses
+    );
+
   const canEdit =
     canEditPatientDiagnoses();
 
   return `
-    <section class="patientDiagnosesPanel">
-      <header class="patientDiagnosesHeader">
-  <div>
-    <h3>
-      Активні діагнози
-    </h3>
+    <section
+      class="patientDiagnosesPanel"
+    >
+      <header
+        class="patientDiagnosesHeader"
+      >
+        <div>
+          <h3>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.activeTitle"
+              )
+            )}
+          </h3>
 
-    <p>
-      Поточний клінічний контекст пацієнта,
-      незалежний від окремого візиту.
-    </p>
-  </div>
+          <p>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.activeDescription"
+              )
+            )}
+          </p>
         </div>
 
-        <div class="patientDiagnosesHeaderActions">
+        <div
+          class="patientDiagnosesHeaderActions"
+        >
           <button
             type="button"
             data-show-diagnosis-history
           >
-            Повна історія
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.fullHistory"
+              )
+            )}
           </button>
 
           ${
@@ -45895,7 +49986,11 @@ function renderPatientDiagnosesPanel(
                   class="is-primary"
                   data-add-patient-diagnosis
                 >
-                  + Додати діагноз
+                  + ${escapeHtml(
+                    t(
+                      "patients.card.diagnosis.add"
+                    )
+                  )}
                 </button>
               `
               : ""
@@ -45903,51 +49998,84 @@ function renderPatientDiagnosesPanel(
         </div>
       </header>
 
-      <div class="patientDiagnosesList">
+      <div
+        class="patientDiagnosesList"
+      >
         ${
           loadFailed
             ? `
-              <div class="patientDiagnosesEmpty is-error">
+              <div
+                class="
+                  patientDiagnosesEmpty
+                  is-error
+                "
+              >
                 <span>!</span>
+
                 <div>
                   <strong>
-                    Не вдалося завантажити діагнози
+                    ${escapeHtml(
+                      t(
+                        "patients.card.diagnosis.loadFailed"
+                      )
+                    )}
                   </strong>
+
                   <p>
-                    Медичний контекст не приховується
-                    під виглядом порожнього списку.
+                    ${escapeHtml(
+                      t(
+                        "patients.card.diagnosis.loadFailedText"
+                      )
+                    )}
                   </p>
                 </div>
+
                 <button
                   type="button"
                   data-retry-patient-diagnoses
                 >
-                  Повторити
+                  ${escapeHtml(
+                    t(
+                      "patients.card.diagnosis.retry"
+                    )
+                  )}
                 </button>
               </div>
             `
             : sorted.length
-            ? sorted
-                .map((diagnosis) =>
-                  renderPatientDiagnosisCard(
-                    diagnosis
+              ? sorted
+                  .map(
+                    (diagnosis) =>
+                      renderPatientDiagnosisCard(
+                        diagnosis
+                      )
                   )
-                )
-                .join("")
-            : `
-              <div class="patientDiagnosesEmpty">
-                <span>✓</span>
-                <div>
-                  <strong>
-                    Активні діагнози не зафіксовані
-                  </strong>
-                  <p>
-                    Це означає відсутність записів,
-                    а не медичний висновок про здоров'я.
-                  </p>
+                  .join("")
+              : `
+                <div
+                  class="patientDiagnosesEmpty"
+                >
+                  <span>✓</span>
+
+                  <div>
+                    <strong>
+                      ${escapeHtml(
+                        t(
+                          "patients.card.diagnosis.empty"
+                        )
+                      )}
+                    </strong>
+
+                    <p>
+                      ${escapeHtml(
+                        t(
+                          "patients.card.diagnosis.emptyText"
+                        )
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            `
+              `
         }
       </div>
     </section>
@@ -46020,128 +50148,249 @@ function createPatientDiagnosisModalShell(
 
   return overlay;
 }
-
 function openPatientDiagnosisEditor(
   pet,
   diagnosis = null
 ) {
-  const editing = Boolean(diagnosis);
-  const dateValue = String(
-    diagnosis?.diagnosed_at || ""
-  ).slice(0, 10);
-  const today = new Date()
-    .toISOString()
-    .slice(0, 10);
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
+  const editing =
+    Boolean(diagnosis);
+
+  const dateValue =
+    String(
+      diagnosis?.diagnosed_at ||
+      ""
+    ).slice(0, 10);
+
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0, 10);
+
+  const severityOptions =
+    [
+      "mild",
+      "moderate",
+      "severe",
+      "critical",
+    ];
+
   const overlay =
     createPatientDiagnosisModalShell(`
-      <header class="patientDiagnosisModalHeader">
-  <div>
-    <h3>
-      ${
-        editing
-          ? "Редагувати діагноз"
-          : "Додати діагноз"
-      }
-    </h3>
+      <header
+        class="patientDiagnosisModalHeader"
+      >
+        <div>
+          <h3>
+            ${escapeHtml(
+              t(
+                editing
+                  ? "patients.card.diagnosis.editTitle"
+                  : "patients.card.diagnosis.addTitle"
+              )
+            )}
+          </h3>
+
           <p>
             ${escapeHtml(
-              pet?.name || "Пацієнт"
+              pet?.name ||
+              t(
+                "patients.card.patient"
+              )
             )}
           </p>
         </div>
+
         <button
           type="button"
           data-close-diagnosis-modal
-          aria-label="Закрити"
+          aria-label="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+          title="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
         >
           ×
         </button>
       </header>
 
-      <form class="patientDiagnosisForm">
-        <label class="is-wide">
-          <span>Діагноз *</span>
+      <form
+        class="patientDiagnosisForm"
+        novalidate
+      >
+        <label
+          class="is-wide"
+        >
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.name"
+              )
+            )} *
+          </span>
+
           <input
             name="diagnosis_name"
-            required
             maxlength="300"
             autocomplete="off"
             value="${escapeHtml(
-              diagnosis?.diagnosis_name || ""
+              diagnosis
+                ?.diagnosis_name ||
+              ""
             )}"
-            placeholder="Наприклад: атопічний дерматит"
+            placeholder="${escapeHtml(
+              t(
+                "patients.card.diagnosis.nameExample"
+              )
+            )}"
           >
         </label>
 
         <label>
-          <span>Код</span>
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.code"
+              )
+            )}
+          </span>
+
           <input
             name="diagnosis_code"
             maxlength="100"
             value="${escapeHtml(
-              diagnosis?.diagnosis_code || ""
+              diagnosis
+                ?.diagnosis_code ||
+              ""
             )}"
-            placeholder="Необов'язково"
+            placeholder="${escapeHtml(
+              t(
+                "patients.card.optional"
+              )
+            )}"
           >
         </label>
 
         <label>
-          <span>Дата постановки</span>
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.diagnosedAt"
+              )
+            )}
+          </span>
+
           <input
             type="date"
             name="diagnosed_at"
             value="${escapeHtml(
-              dateValue || today
+              dateValue ||
+              today
             )}"
           >
         </label>
 
         <label>
-          <span>Підтвердження</span>
-          <select name="certainty">
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.certainty"
+              )
+            )}
+          </span>
+
+          <select
+            name="certainty"
+          >
             <option
               value="confirmed"
               ${
-                diagnosis?.certainty !==
+                diagnosis
+                  ?.certainty !==
                 "provisional"
                   ? "selected"
                   : ""
               }
             >
-              Підтверджений
+              ${escapeHtml(
+                getPatientDiagnosisLabel(
+                  "certainty",
+                  "confirmed"
+                )
+              )}
             </option>
+
             <option
               value="provisional"
               ${
-                diagnosis?.certainty ===
+                diagnosis
+                  ?.certainty ===
                 "provisional"
                   ? "selected"
                   : ""
               }
             >
-              Попередній
+              ${escapeHtml(
+                getPatientDiagnosisLabel(
+                  "certainty",
+                  "provisional"
+                )
+              )}
             </option>
           </select>
         </label>
 
         <label>
-          <span>Тяжкість</span>
-          <select name="severity">
-            <option value="">Не вказана</option>
-            ${Object.entries(
-              PATIENT_DIAGNOSIS_SEVERITY_LABELS
-            )
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.severity"
+              )
+            )}
+          </span>
+
+          <select
+            name="severity"
+          >
+            <option
+              value=""
+            >
+              ${escapeHtml(
+                t(
+                  "patients.card.diagnosis.notSpecified"
+                )
+              )}
+            </option>
+
+            ${severityOptions
               .map(
-                ([value, label]) => `
+                (value) => `
                   <option
-                    value="${escapeHtml(value)}"
+                    value="${escapeHtml(
+                      value
+                    )}"
                     ${
-                      diagnosis?.severity === value
+                      diagnosis
+                        ?.severity ===
+                      value
                         ? "selected"
                         : ""
                     }
                   >
-                    ${escapeHtml(label)}
+                    ${escapeHtml(
+                      getPatientDiagnosisLabel(
+                        "severity",
+                        value
+                      )
+                    )}
                   </option>
                 `
               )
@@ -46150,27 +50399,51 @@ function openPatientDiagnosisEditor(
         </label>
 
         <label>
-          <span>Початок стану</span>
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.onsetAt"
+              )
+            )}
+          </span>
+
           <input
             type="date"
             name="onset_at"
             value="${escapeHtml(
               String(
-                diagnosis?.onset_at || ""
+                diagnosis
+                  ?.onset_at ||
+                ""
               ).slice(0, 10)
             )}"
           >
         </label>
 
-        <label class="is-wide">
-          <span>Клінічна примітка</span>
+        <label
+          class="is-wide"
+        >
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.clinicalNote"
+              )
+            )}
+          </span>
+
           <textarea
             name="clinical_note"
             maxlength="4000"
             rows="4"
-            placeholder="Короткий контекст, не повний запис візиту"
+            placeholder="${escapeHtml(
+              t(
+                "patients.card.diagnosis.notePlaceholder"
+              )
+            )}"
           >${escapeHtml(
-            diagnosis?.clinical_note || ""
+            diagnosis
+              ?.clinical_note ||
+            ""
           )}</textarea>
         </label>
 
@@ -46179,75 +50452,149 @@ function openPatientDiagnosisEditor(
           role="alert"
         ></div>
 
-        <footer class="patientDiagnosisFormActions">
+        <footer
+          class="patientDiagnosisFormActions"
+        >
           <button
             type="button"
             data-close-diagnosis-modal
           >
-            Скасувати
+            ${escapeHtml(
+              t(
+                "patients.card.cancel"
+              )
+            )}
           </button>
+
           <button
             type="submit"
             class="is-primary"
           >
-            ${editing ? "Зберегти" : "Додати"}
+            ${escapeHtml(
+              t(
+                editing
+                  ? "patients.card.save"
+                  : "patients.card.diagnosis.addButton"
+              )
+            )}
           </button>
         </footer>
       </form>
     `);
 
-  const form = overlay.querySelector(
-    ".patientDiagnosisForm"
-  );
-  const errorBox = overlay.querySelector(
-    ".patientDiagnosisFormError"
-  );
+  const form =
+    overlay.querySelector(
+      ".patientDiagnosisForm"
+    );
+
+  const errorBox =
+    overlay.querySelector(
+      ".patientDiagnosisFormError"
+    );
 
   form?.addEventListener(
     "submit",
     async (event) => {
       event.preventDefault();
-      errorBox.textContent = "";
+
+      errorBox.textContent =
+        "";
 
       const submitButton =
         form.querySelector(
           "button[type='submit']"
         );
-      const data = new FormData(form);
+
+      const data =
+        new FormData(form);
+
       const payload = {
-        diagnosis_name: String(
-          data.get("diagnosis_name") || ""
-        ).trim(),
-        diagnosis_code: String(
-          data.get("diagnosis_code") || ""
-        ).trim() || null,
-        diagnosed_at: String(
-          data.get("diagnosed_at") || ""
-        ).trim() || null,
-        certainty: String(
-          data.get("certainty") ||
-          "confirmed"
-        ),
-        severity: String(
-          data.get("severity") || ""
-        ) || null,
-        onset_at: String(
-          data.get("onset_at") || ""
-        ).trim() || null,
-        clinical_note: String(
-          data.get("clinical_note") || ""
-        ).trim() || null,
+        diagnosis_name:
+          String(
+            data.get(
+              "diagnosis_name"
+            ) ||
+            ""
+          ).trim(),
+
+        diagnosis_code:
+          String(
+            data.get(
+              "diagnosis_code"
+            ) ||
+            ""
+          ).trim() ||
+          null,
+
+        diagnosed_at:
+          String(
+            data.get(
+              "diagnosed_at"
+            ) ||
+            ""
+          ).trim() ||
+          null,
+
+        certainty:
+          String(
+            data.get(
+              "certainty"
+            ) ||
+            "confirmed"
+          ),
+
+        severity:
+          String(
+            data.get(
+              "severity"
+            ) ||
+            ""
+          ) ||
+          null,
+
+        onset_at:
+          String(
+            data.get(
+              "onset_at"
+            ) ||
+            ""
+          ).trim() ||
+          null,
+
+        clinical_note:
+          String(
+            data.get(
+              "clinical_note"
+            ) ||
+            ""
+          ).trim() ||
+          null,
       };
 
-      if (!payload.diagnosis_name) {
+      if (
+        !payload.diagnosis_name
+      ) {
         errorBox.textContent =
-          "Вкажіть назву діагнозу.";
+          t(
+            "patients.card.diagnosis.nameRequired"
+          );
+
+        form
+          .querySelector(
+            "[name='diagnosis_name']"
+          )
+          ?.focus();
+
         return;
       }
 
-      submitButton.disabled = true;
+      submitButton.disabled =
+        true;
+
       submitButton.textContent =
-        "Збереження…";
+        t(
+          "patients.card.diagnosis.saving"
+        );
 
       try {
         if (editing) {
@@ -46267,17 +50614,31 @@ function openPatientDiagnosisEditor(
         }
 
         closePatientDiagnosisModal();
+
         await renderPatientTab(
           "overview",
           pet
         );
       } catch (error) {
+        console.error(
+          "SAVE PATIENT DIAGNOSIS:",
+          error
+        );
+
         errorBox.textContent =
-          error.message ||
-          "Не вдалося зберегти діагноз.";
-        submitButton.disabled = false;
+          t(
+            "patients.card.diagnosis.saveFailed"
+          );
+
+        submitButton.disabled =
+          false;
+
         submitButton.textContent =
-          editing ? "Зберегти" : "Додати";
+          t(
+            editing
+              ? "patients.card.save"
+              : "patients.card.diagnosis.addButton"
+          );
       }
     }
   );
@@ -46288,11 +50649,9 @@ async function changePatientDiagnosisStatus(
   diagnosis,
   nextStatus
 ) {
-  console.log(
-    "DIAGNOSIS STATUS CLICK:",
-    nextStatus,
-    diagnosis
-  );
+  const t =
+    (key) =>
+      translateInterfaceText(key);
 
   const currentStatus =
     String(
@@ -46303,9 +50662,7 @@ async function changePatientDiagnosisStatus(
       .toLowerCase();
 
   const cleanNextStatus =
-    String(
-      nextStatus || ""
-    )
+    String(nextStatus || "")
       .trim()
       .toLowerCase();
 
@@ -46317,47 +50674,74 @@ async function changePatientDiagnosisStatus(
     return;
   }
 
+  const titleKey = {
+    remission:
+      "patients.card.diagnosis.moveToRemissionTitle",
+    resolved:
+      "patients.card.diagnosis.resolveTitle",
+    entered_in_error:
+      "patients.card.diagnosis.errorTitle",
+    active:
+      "patients.card.diagnosis.reactivateTitle",
+  }[cleanNextStatus];
+
+  const confirmKey = {
+    remission:
+      "patients.card.diagnosis.toRemission",
+    resolved:
+      "patients.card.diagnosis.resolve",
+    entered_in_error:
+      "patients.card.diagnosis.markAsError",
+    active:
+      "patients.card.diagnosis.reactivate",
+  }[cleanNextStatus];
+
+  const isErrorStatus =
+    cleanNextStatus ===
+    "entered_in_error";
+
   const result =
     await openAppPrompt({
       title:
-        cleanNextStatus === "remission"
-          ? "Перевести у ремісію"
-          : cleanNextStatus === "resolved"
-            ? "Завершити діагноз"
-            : cleanNextStatus === "entered_in_error"
-              ? "Помилковий діагноз"
-              : "Повернути в активні",
+        t(
+          titleKey ||
+          "patients.card.diagnosis.reactivateTitle"
+        ),
 
       text:
-        cleanNextStatus === "entered_in_error"
-          ? "Вкажіть причину, чому діагноз є помилковим."
-          : "За потреби вкажіть причину зміни статусу.",
+        t(
+          isErrorStatus
+            ? "patients.card.diagnosis.errorReasonText"
+            : "patients.card.diagnosis.statusReasonText"
+        ),
 
       label:
-        cleanNextStatus === "entered_in_error"
-          ? "Причина *"
-          : "Причина зміни статусу",
+        t(
+          isErrorStatus
+            ? "patients.card.diagnosis.reasonRequired"
+            : "patients.card.diagnosis.statusReason"
+        ),
 
       placeholder:
-        cleanNextStatus === "entered_in_error"
-          ? "Наприклад: діагноз не підтвердився"
-          : "Необов’язково",
+        t(
+          isErrorStatus
+            ? "patients.card.diagnosis.errorReasonExample"
+            : "patients.card.optional"
+        ),
 
       confirmText:
-        cleanNextStatus === "remission"
-          ? "У ремісію"
-          : cleanNextStatus === "resolved"
-            ? "Завершити"
-            : cleanNextStatus === "entered_in_error"
-              ? "Позначити помилковим"
-              : "Повернути в активні",
+        t(
+          confirmKey ||
+          "patients.card.diagnosis.reactivate"
+        ),
 
       cancelText:
-        "Скасувати",
+        t(
+          "patients.card.cancel"
+        ),
 
       required:
-        cleanNextStatus ===
-        "entered_in_error",
+        isErrorStatus,
     });
 
   if (result === null) {
@@ -46377,26 +50761,33 @@ async function changePatientDiagnosisStatus(
         status_reason:
           String(
             result || ""
-          ).trim() || null,
+          ).trim() ||
+          null,
       }
     );
 
-   closePatientDiagnosisModal();
+    closePatientDiagnosisModal();
 
-await renderPatientTab(
-  "overview",
-  pet
-);
-
+    await renderPatientTab(
+      "overview",
+      pet
+    );
   } catch (error) {
-    showCrmNotice({
-      icon: "!",
-      title:
-        "Не вдалося змінити статус",
+    console.error(
+      "CHANGE PATIENT DIAGNOSIS STATUS:",
+      error
+    );
 
+    showCrmNotice({
+      icon: "⚠️",
+      title:
+        t(
+          "patients.card.diagnosis.statusChangeFailed"
+        ),
       text:
-        error?.message ||
-        "Не вдалося змінити статус діагнозу.",
+        t(
+          "patients.card.diagnosis.statusChangeFailedText"
+        ),
     });
   }
 }
@@ -46404,34 +50795,72 @@ await renderPatientTab(
 async function openPatientDiagnosisEvents(
   diagnosis
 ) {
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
   const overlay =
     createPatientDiagnosisModalShell(`
-      <header class="patientDiagnosisModalHeader">
+      <header
+        class="patientDiagnosisModalHeader"
+      >
         <div>
-          <span>ІСТОРІЯ ЗМІН</span>
+          <span>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.changeHistory"
+              )
+            )}
+          </span>
+
           <h3>
             ${escapeHtml(
-              diagnosis?.diagnosis_name ||
-              "Діагноз"
+              diagnosis
+                ?.diagnosis_name ||
+              t(
+                "patients.card.diagnosis.fallbackName"
+              )
             )}
           </h3>
         </div>
+
         <button
           type="button"
           data-close-diagnosis-modal
-          aria-label="Закрити"
-        >×</button>
+          aria-label="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+          title="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+        >
+          ×
+        </button>
       </header>
-      <div class="patientDiagnosisTimeline">
-        <div class="patientDiagnosisModalLoading">
-          Завантаження історії…
+
+      <div
+        class="patientDiagnosisTimeline"
+      >
+        <div
+          class="patientDiagnosisModalLoading"
+        >
+          ${escapeHtml(
+            t(
+              "patients.card.diagnosis.historyLoading"
+            )
+          )}
         </div>
       </div>
     `);
 
-  const timeline = overlay.querySelector(
-    ".patientDiagnosisTimeline"
-  );
+  const timeline =
+    overlay.querySelector(
+      ".patientDiagnosisTimeline"
+    );
 
   try {
     const events =
@@ -46439,57 +50868,88 @@ async function openPatientDiagnosisEvents(
         diagnosis.id
       );
 
-    timeline.innerHTML = events.length
-      ? events
-          .map((item) => {
-            const eventLabel = {
-              created: "Діагноз створено",
-              updated: "Дані оновлено",
-              status_changed:
-                "Статус змінено",
-            }[item.event_type] ||
-              item.event_type;
+    timeline.innerHTML =
+      events.length
+        ? events
+            .map((item) => {
+              const eventKey =
+                `patients.card.diagnosis.event.${item.event_type}`;
 
-            return `
-              <article class="patientDiagnosisTimelineItem">
-                <span></span>
-                <div>
-                  <strong>
-                    ${escapeHtml(eventLabel)}
-                  </strong>
-                  <time>
-                    ${escapeHtml(
-                      formatPatientDocumentDate(
-                        item.occurred_at,
-                        true
-                      )
-                    )}
-                  </time>
-                  ${
-                    item.reason
-                      ? `
-                        <p>
-                          ${escapeHtml(item.reason)}
-                        </p>
-                      `
-                      : ""
-                  }
-                </div>
-              </article>
-            `;
-          })
-          .join("")
-      : `
-          <div class="patientDiagnosesEmpty">
-            Історія змін порожня.
-          </div>
-        `;
+              const translatedEvent =
+                t(eventKey);
+
+              const eventLabel =
+                translatedEvent ===
+                eventKey
+                  ? String(
+                      item.event_type ||
+                      ""
+                    )
+                  : translatedEvent;
+
+              return `
+                <article
+                  class="patientDiagnosisTimelineItem"
+                >
+                  <span></span>
+
+                  <div>
+                    <strong>
+                      ${escapeHtml(
+                        eventLabel
+                      )}
+                    </strong>
+
+                    <time>
+                      ${escapeHtml(
+                        formatPatientDocumentDate(
+                          item.occurred_at,
+                          true
+                        )
+                      )}
+                    </time>
+
+                    ${
+                      item.reason
+                        ? `
+                          <p>
+                            ${escapeHtml(
+                              item.reason
+                            )}
+                          </p>
+                        `
+                        : ""
+                    }
+                  </div>
+                </article>
+              `;
+            })
+            .join("")
+        : `
+            <div
+              class="patientDiagnosesEmpty"
+            >
+              ${escapeHtml(
+                t(
+                  "patients.card.diagnosis.emptyEvents"
+                )
+              )}
+            </div>
+          `;
   } catch (error) {
+    console.error(
+      "LOAD PATIENT DIAGNOSIS EVENTS:",
+      error
+    );
+
     timeline.innerHTML = `
-      <div class="patientDiagnosisFormError">
+      <div
+        class="patientDiagnosisFormError"
+      >
         ${escapeHtml(
-          error.message ||
-          "Не вдалося завантажити історію."
+          t(
+            "patients.card.diagnosis.historyLoadFailed"
+          )
         )}
       </div>
     `;
@@ -46499,68 +50959,123 @@ async function openPatientDiagnosisEvents(
 async function openPatientDiagnosisHistory(
   pet
 ) {
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
   const overlay =
     createPatientDiagnosisModalShell(`
-      <header class="patientDiagnosisModalHeader">
-  <div>
-    <h3>
-      Історія діагнозів
-    </h3>
+      <header
+        class="patientDiagnosisModalHeader"
+      >
+        <div>
+          <h3>
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.historyTitle"
+              )
+            )}
+          </h3>
 
-    <p>
-      ${escapeHtml(
-        pet?.name ||
-        "Пацієнт"
-      )}
-    </p>
-  </div>
+          <p>
+            ${escapeHtml(
+              pet?.name ||
+              t(
+                "patients.card.patient"
+              )
+            )}
+          </p>
+        </div>
+
         <button
           type="button"
           data-close-diagnosis-modal
-          aria-label="Закрити"
-        >×</button>
+          aria-label="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+          title="${escapeHtml(
+            t(
+              "patients.card.close"
+            )
+          )}"
+        >
+          ×
+        </button>
       </header>
-      <div class="patientDiagnosisHistoryList">
-        <div class="patientDiagnosisModalLoading">
-          Завантаження історії…
+
+      <div
+        class="patientDiagnosisHistoryList"
+      >
+        <div
+          class="patientDiagnosisModalLoading"
+        >
+          ${escapeHtml(
+            t(
+              "patients.card.diagnosis.historyLoading"
+            )
+          )}
         </div>
       </div>
     `);
 
-  const list = overlay.querySelector(
-    ".patientDiagnosisHistoryList"
-  );
+  const list =
+    overlay.querySelector(
+      ".patientDiagnosisHistoryList"
+    );
+
   const diagnoses =
     await loadPatientDiagnosesApi(
       pet.id,
       "history"
     );
 
-  if (!Array.isArray(diagnoses)) {
+  if (
+    !Array.isArray(diagnoses)
+  ) {
     list.innerHTML = `
-      <div class="patientDiagnosisFormError">
-        Не вдалося завантажити історію діагнозів.
+      <div
+        class="patientDiagnosisFormError"
+      >
+        ${escapeHtml(
+          t(
+            "patients.card.diagnosis.historyListLoadFailed"
+          )
+        )}
       </div>
     `;
+
     return;
   }
 
-  list.innerHTML = diagnoses.length
-    ? sortPatientDiagnoses(diagnoses)
-        .map((item) =>
-          renderPatientDiagnosisCard(
-            item,
-            {
-              history: true,
-            }
-          )
+  list.innerHTML =
+    diagnoses.length
+      ? sortPatientDiagnoses(
+          diagnoses
         )
-        .join("")
-    : `
-        <div class="patientDiagnosesEmpty">
-          Діагнози ще не зафіксовані.
-        </div>
-      `;
+          .map(
+            (item) =>
+              renderPatientDiagnosisCard(
+                item,
+                {
+                  history:
+                    true,
+                }
+              )
+          )
+          .join("")
+      : `
+          <div
+            class="patientDiagnosesEmpty"
+          >
+            ${escapeHtml(
+              t(
+                "patients.card.diagnosis.noDiagnoses"
+              )
+            )}
+          </div>
+        `;
 
   bindPatientDiagnosisPanel(
     list,
@@ -46574,46 +51089,55 @@ function bindPatientDiagnosisPanel(
   pet,
   diagnoses
 ) {
-  if (!root) return;
+  if (!root) {
+    return;
+  }
 
-  root.querySelector(
-    "[data-add-patient-diagnosis]"
-  )?.addEventListener(
-    "click",
-    () => {
-      openPatientDiagnosisEditor(
-        pet
-      );
-    }
-  );
+  root
+    .querySelector(
+      "[data-add-patient-diagnosis]"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openPatientDiagnosisEditor(
+          pet
+        );
+      }
+    );
 
-  root.querySelector(
-    "[data-show-diagnosis-history]"
-  )?.addEventListener(
-    "click",
-    () => {
-      openPatientDiagnosisHistory(
-        pet
-      );
-    }
-  );
+  root
+    .querySelector(
+      "[data-show-diagnosis-history]"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openPatientDiagnosisHistory(
+          pet
+        );
+      }
+    );
 
-  root.querySelector(
-    "[data-retry-patient-diagnoses]"
-  )?.addEventListener(
-    "click",
-    () => {
-      renderPatientTab(
-        "overview",
-        pet
-      );
-    }
-  );
+  root
+    .querySelector(
+      "[data-retry-patient-diagnoses]"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        renderPatientTab(
+          "overview",
+          pet
+        );
+      }
+    );
 
-  root.querySelectorAll(
-    "[data-edit-diagnosis]"
-  ).forEach(
-    (button) => {
+  root
+    .querySelectorAll(
+      "[data-edit-diagnosis]"
+    )
+    .forEach((button) => {
       button.addEventListener(
         "click",
         () => {
@@ -46634,13 +51158,13 @@ function bindPatientDiagnosisPanel(
           );
         }
       );
-    }
-  );
+    });
 
-  root.querySelectorAll(
-    "[data-diagnosis-status]"
-  ).forEach(
-    (button) => {
+  root
+    .querySelectorAll(
+      "[data-diagnosis-status]"
+    )
+    .forEach((button) => {
       button.addEventListener(
         "click",
         async () => {
@@ -46663,13 +51187,13 @@ function bindPatientDiagnosisPanel(
           );
         }
       );
-    }
-  );
+    });
 
-  root.querySelectorAll(
-    "[data-diagnosis-events]"
-  ).forEach(
-    (button) => {
+  root
+    .querySelectorAll(
+      "[data-diagnosis-events]"
+    )
+    .forEach((button) => {
       button.addEventListener(
         "click",
         () => {
@@ -46689,24 +51213,30 @@ function bindPatientDiagnosisPanel(
           );
         }
       );
-    }
-  );
+    });
 }
 
 function formatPatientDocumentDate(
   value,
   includeTime = false
 ) {
-  if (!value) return "—";
+  if (!value) {
+    return "—";
+  }
 
-  const date = new Date(value);
+  const date =
+    new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
     return String(value);
   }
 
   return date.toLocaleString(
-    "uk-UA",
+    getCalendarLocale(),
     includeTime
       ? {
           day: "2-digit",
@@ -46722,7 +51252,6 @@ function formatPatientDocumentDate(
         }
   );
 }
-
 function sanitizePatientDocumentFilename(
   value
 ) {
@@ -46732,7 +51261,366 @@ function sanitizePatientDocumentFilename(
     .replace(/^_+|_+$/g, "")
     .slice(0, 80) || "document";
 }
+function getPatientDocumentsUi() {
+  const language =
+    getInterfaceLanguage();
 
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    loading:
+      pick(
+        "Підготовка документів…",
+        "Preparing documents…",
+        "Dokumente werden vorbereitet…",
+        "Przygotowywanie dokumentów…"
+      ),
+
+    kicker:
+      pick(
+        "ДОКУМЕНТИ ПАЦІЄНТА",
+        "PATIENT DOCUMENTS",
+        "PATIENTENDOKUMENTE",
+        "DOKUMENTY PACJENTA"
+      ),
+
+    title:
+      pick(
+        "Медичні та фінансові документи",
+        "Medical and financial documents",
+        "Medizinische und finanzielle Dokumente",
+        "Dokumenty medyczne i finansowe"
+      ),
+
+    description:
+      pick(
+        "Оберіть джерело — CRM автоматично сформує окремий PDF без повторного введення даних.",
+        "Select a source and the CRM will automatically create a separate PDF without entering the data again.",
+        "Wählen Sie eine Quelle aus. Das CRM erstellt automatisch ein separates PDF, ohne dass die Daten erneut eingegeben werden müssen.",
+        "Wybierz źródło, a CRM automatycznie utworzy osobny plik PDF bez ponownego wprowadzania danych."
+      ),
+
+    availableSources:
+      pick(
+        "Доступно джерел",
+        "Available sources",
+        "Verfügbare Quellen",
+        "Dostępne źródła"
+      ),
+
+    visits:
+      pick(
+        "візитів",
+        "visits",
+        "Besuche",
+        "wizyt"
+      ),
+
+    discharges:
+      pick(
+        "виписок зі стаціонару",
+        "hospital discharges",
+        "Entlassungsberichte",
+        "wypisów ze szpitala"
+      ),
+
+    visitFallback:
+      pick(
+        "Прийом",
+        "Visit",
+        "Termin",
+        "Wizyta"
+      ),
+
+    generatePdf:
+      pick(
+        "Сформувати PDF",
+        "Generate PDF",
+        "PDF erstellen",
+        "Utwórz PDF"
+      ),
+
+    generating:
+      pick(
+        "Формування…",
+        "Generating…",
+        "Wird erstellt…",
+        "Generowanie…"
+      ),
+
+    templateNotice:
+      pick(
+        "Потрібно спочатку затвердити шаблони та тексти згоди клініки.",
+        "The clinic’s templates and consent texts must be approved first.",
+        "Die Vorlagen und Einwilligungstexte der Klinik müssen zuerst freigegeben werden.",
+        "Najpierw należy zatwierdzić szablony i treści zgód kliniki."
+      ),
+
+    createFailed:
+      pick(
+        "Не вдалося сформувати документ.",
+        "Could not generate the document.",
+        "Das Dokument konnte nicht erstellt werden.",
+        "Nie udało się utworzyć dokumentu."
+      ),
+
+    visitTitle:
+      pick(
+        "Виписка за візитом",
+        "Visit summary",
+        "Behandlungsbericht",
+        "Podsumowanie wizyty"
+      ),
+
+    visitDescription:
+      pick(
+        "Медичний підсумок прийому: скарги, діагноз, проведені процедури та рекомендації — без цін.",
+        "Medical visit summary with complaints, diagnosis, procedures and recommendations, without prices.",
+        "Medizinischer Behandlungsbericht mit Beschwerden, Diagnose, Maßnahmen und Empfehlungen, ohne Preise.",
+        "Podsumowanie wizyty zawierające objawy, diagnozę, wykonane procedury i zalecenia, bez cen."
+      ),
+
+    visitBadge:
+      pick(
+        "МЕДИЧНИЙ",
+        "MEDICAL",
+        "MEDIZINISCH",
+        "MEDYCZNY"
+      ),
+
+    selectVisit:
+      pick(
+        "Оберіть візит",
+        "Select a visit",
+        "Termin auswählen",
+        "Wybierz wizytę"
+      ),
+
+    noVisits:
+      pick(
+        "У пацієнта ще немає візитів.",
+        "The patient has no visits yet.",
+        "Für den Patienten gibt es noch keine Besuche.",
+        "Pacjent nie ma jeszcze wizyt."
+      ),
+
+    hospitalTitle:
+      pick(
+        "Виписка зі стаціонару",
+        "Hospital discharge summary",
+        "Entlassungsbericht",
+        "Wypis ze szpitala"
+      ),
+
+    hospitalDescription:
+      pick(
+        "Період госпіталізації, діагноз, стан, виконані процедури, призначення та стан на момент виписки.",
+        "Hospitalization period, diagnosis, condition, procedures, prescriptions and condition at discharge.",
+        "Aufenthaltszeitraum, Diagnose, Zustand, Maßnahmen, Verordnungen und Zustand bei der Entlassung.",
+        "Okres hospitalizacji, diagnoza, stan, procedury, zalecenia i stan przy wypisie."
+      ),
+
+    hospitalBadge:
+      pick(
+        "СТАЦІОНАР",
+        "HOSPITAL",
+        "STATIONÄR",
+        "SZPITAL"
+      ),
+
+    selectHospital:
+      pick(
+        "Оберіть госпіталізацію",
+        "Select a hospitalization",
+        "Aufenthalt auswählen",
+        "Wybierz hospitalizację"
+      ),
+
+    noHospital:
+      pick(
+        "Немає завершених госпіталізацій.",
+        "There are no completed hospitalizations.",
+        "Es gibt keine abgeschlossenen stationären Aufenthalte.",
+        "Brak zakończonych hospitalizacji."
+      ),
+
+    prescriptionsTitle:
+      pick(
+        "Лист призначень",
+        "Treatment plan",
+        "Behandlungsplan",
+        "Plan leczenia"
+      ),
+
+    prescriptionsDescription:
+      pick(
+        "Окремий зрозумілий документ з лікуванням, рекомендаціями власнику та планом контролю.",
+        "A clear document with treatment, recommendations for the owner and a follow-up plan.",
+        "Ein übersichtliches Dokument mit Behandlung, Empfehlungen für den Tierhalter und Kontrollplan.",
+        "Czytelny dokument z leczeniem, zaleceniami dla właściciela i planem kontroli."
+      ),
+
+    ownerBadge:
+      pick(
+        "ДЛЯ ВЛАСНИКА",
+        "FOR THE OWNER",
+        "FÜR DEN TIERHALTER",
+        "DLA WŁAŚCICIELA"
+      ),
+
+    createVisitFirst:
+      pick(
+        "Спочатку створіть візит.",
+        "Create a visit first.",
+        "Erstellen Sie zuerst einen Termin.",
+        "Najpierw utwórz wizytę."
+      ),
+
+    financeTitle:
+      pick(
+        "Фінансова виписка",
+        "Financial statement",
+        "Finanzübersicht",
+        "Zestawienie finansowe"
+      ),
+
+    financeDescription:
+      pick(
+        "Деталізація наданих послуг, використаних препаратів, знижок, оплат і залишку.",
+        "Details of services, medicines, discounts, payments and outstanding balance.",
+        "Aufstellung der Leistungen, Medikamente, Rabatte, Zahlungen und des offenen Betrags.",
+        "Szczegóły usług, leków, rabatów, płatności i pozostałej należności."
+      ),
+
+    financeBadge:
+      pick(
+        "ФІНАНСОВИЙ",
+        "FINANCIAL",
+        "FINANZEN",
+        "FINANSOWY"
+      ),
+
+    noFinanceVisits:
+      pick(
+        "Немає візитів для деталізації.",
+        "There are no visits available for a statement.",
+        "Es gibt keine Besuche für eine Abrechnung.",
+        "Brak wizyt dostępnych do zestawienia."
+      ),
+
+    consentTitle:
+      pick(
+        "Інформована згода",
+        "Informed consent",
+        "Einwilligungserklärung",
+        "Świadoma zgoda"
+      ),
+
+    consentDescription:
+      pick(
+        "Чотири окремі шаблони: лікування, операція й анестезія, госпіталізація та відмова від операції.",
+        "Four templates for treatment, surgery and anesthesia, hospitalization and refusal of surgery.",
+        "Vier Vorlagen für Behandlung, Operation und Anästhesie, stationäre Aufnahme und Ablehnung einer Operation.",
+        "Cztery szablony: leczenie, operacja i znieczulenie, hospitalizacja oraz odmowa operacji."
+      ),
+
+    consentBadge:
+      pick(
+        "4 ШАБЛОНИ",
+        "4 TEMPLATES",
+        "4 VORLAGEN",
+        "4 SZABLONY"
+      ),
+
+    selectDocumentType:
+      pick(
+        "Оберіть тип документа",
+        "Select document type",
+        "Dokumenttyp auswählen",
+        "Wybierz typ dokumentu"
+      ),
+
+    templatesUnavailable:
+      pick(
+        "Шаблони недоступні.",
+        "Templates are unavailable.",
+        "Vorlagen sind nicht verfügbar.",
+        "Szablony są niedostępne."
+      ),
+
+    consentDiagnostics:
+      pick(
+        "Діагностика та лікування",
+        "Diagnostics and treatment",
+        "Diagnostik und Behandlung",
+        "Diagnostyka i leczenie"
+      ),
+
+    consentAnesthesia:
+      pick(
+        "Анестезія та операція",
+        "Anesthesia and surgery",
+        "Anästhesie und Operation",
+        "Znieczulenie i operacja"
+      ),
+
+    consentHospitalization:
+      pick(
+        "Госпіталізація",
+        "Hospitalization",
+        "Stationäre Aufnahme",
+        "Hospitalizacja"
+      ),
+
+    consentRefusal:
+      pick(
+        "Відмова від операції",
+        "Refusal of surgery",
+        "Ablehnung der Operation",
+        "Odmowa operacji"
+      ),
+
+    hint:
+      pick(
+        "Документи формуються з актуальних даних CRM. Завантажена копія не змінює медичну карту пацієнта.",
+        "Documents are generated from current CRM data. Downloading a copy does not change the patient’s medical record.",
+        "Dokumente werden aus den aktuellen CRM-Daten erstellt. Eine heruntergeladene Kopie ändert die Patientenakte nicht.",
+        "Dokumenty są tworzone na podstawie aktualnych danych CRM. Pobrana kopia nie zmienia dokumentacji medycznej pacjenta."
+      ),
+  };
+}
+
+function getPatientConsentShortTitle(
+  type
+) {
+  const ui =
+    getPatientDocumentsUi();
+
+  return {
+    diagnostics:
+      ui.consentDiagnostics,
+
+    anesthesia:
+      ui.consentAnesthesia,
+
+    hospitalization:
+      ui.consentHospitalization,
+
+    surgery_refusal:
+      ui.consentRefusal,
+  }[type] || type;
+}
 const PATIENT_CONSENT_TYPES = {
   diagnostics: {
     code: "DIA",
@@ -46791,10 +51679,19 @@ const PATIENT_CONSENT_TYPES = {
 function getPatientDocumentVisitLabel(
   visit
 ) {
+  const ui =
+    getPatientDocumentsUi();
+
   const parsed =
-    typeof parseVisitNote === "function"
-      ? parseVisitNote(visit?.note || "")
-      : { dx: "" };
+    typeof parseVisitNote ===
+    "function"
+      ? parseVisitNote(
+          visit?.note ||
+          ""
+        )
+      : {
+          dx: "",
+        };
 
   const diagnosis =
     String(
@@ -46804,25 +51701,41 @@ function getPatientDocumentVisitLabel(
     ).trim();
 
   const serviceNames =
-    typeof expandServiceLines === "function"
-      ? expandServiceLines(visit)
-          .slice(0, 2)
-          .map((line) => line.name)
-          .filter(Boolean)
+    typeof expandServiceLines ===
+    "function"
+      ? expandServiceLines(
+          visit
+        )
+          .slice(
+            0,
+            2
+          )
+          .map(
+            (line) =>
+              line.name
+          )
+          .filter(
+            Boolean
+          )
       : [];
 
   const description =
     diagnosis ||
-    serviceNames.join(", ") ||
-    "Прийом";
+    serviceNames.join(
+      ", "
+    ) ||
+    ui.visitFallback;
 
   return [
     formatPatientDocumentDate(
       visit?.date ||
       visit?.created_at
     ),
+
     description,
-  ].join(" — ");
+  ].join(
+    " — "
+  );
 }
 
 async function loadPatientHospitalizationsApi(
@@ -46878,8 +51791,13 @@ function renderPatientDocumentCard({
   emptyText,
   disabled = false,
 }) {
+  const ui =
+    getPatientDocumentsUi();
+
   const available =
-    Array.isArray(options) &&
+    Array.isArray(
+      options
+    ) &&
     options.length > 0;
 
   return `
@@ -46890,45 +51808,74 @@ function renderPatientDocumentCard({
           : ""
       }"
     >
-      <div class="patientDocumentCardTop">
-        <span class="patientDocumentIcon">
+      <div
+        class="patientDocumentCardTop"
+      >
+        <span
+          class="patientDocumentIcon"
+        >
           ${icon}
         </span>
 
-        <span class="patientDocumentBadge">
-          ${escapeHtml(badge)}
+        <span
+          class="patientDocumentBadge"
+        >
+          ${escapeHtml(
+            badge
+          )}
         </span>
       </div>
 
-      <h3>${escapeHtml(title)}</h3>
+      <h3>
+        ${escapeHtml(
+          title
+        )}
+      </h3>
 
-      <p>${escapeHtml(description)}</p>
+      <p>
+        ${escapeHtml(
+          description
+        )}
+      </p>
 
       ${
         disabled
           ? `
-            <div class="patientDocumentNotice">
-              Потрібно спочатку затвердити
-              шаблони та тексти згоди клініки.
+            <div
+              class="patientDocumentNotice"
+            >
+              ${escapeHtml(
+                ui.templateNotice
+              )}
             </div>
           `
           : available
             ? `
-              <label class="patientDocumentSelectLabel">
+              <label
+                class="patientDocumentSelectLabel"
+              >
                 <span>
-                  ${escapeHtml(selectLabel)}
+                  ${escapeHtml(
+                    selectLabel
+                  )}
                 </span>
 
                 <select
                   class="patientDocumentSelect"
-                  data-patient-document-source="${escapeHtml(type)}"
+                  data-patient-document-source="${escapeHtml(
+                    type
+                  )}"
                 >
                   ${options
                     .map(
-                      (option) => `
+                      (
+                        option
+                      ) => `
                         <option
                           value="${escapeHtml(
-                            String(option.value)
+                            String(
+                              option.value
+                            )
                           )}"
                         >
                           ${escapeHtml(
@@ -46944,15 +51891,26 @@ function renderPatientDocumentCard({
               <button
                 type="button"
                 class="patientDocumentCreate"
-                data-create-patient-document="${escapeHtml(type)}"
+                data-create-patient-document="${escapeHtml(
+                  type
+                )}"
               >
-                <span>↓</span>
-                Сформувати PDF
+                <span>
+                  ↓
+                </span>
+
+                ${escapeHtml(
+                  ui.generatePdf
+                )}
               </button>
             `
             : `
-              <div class="patientDocumentEmpty">
-                ${escapeHtml(emptyText)}
+              <div
+                class="patientDocumentEmpty"
+              >
+                ${escapeHtml(
+                  emptyText
+                )}
               </div>
             `
       }
@@ -46964,22 +51922,30 @@ async function renderPatientDocumentsTab(
   root,
   pet
 ) {
-  if (!root || !pet) return;
+  if (
+    !root ||
+    !pet
+  ) {
+    return;
+  }
+
+  const ui =
+    getPatientDocumentsUi();
 
   root.innerHTML = `
-    <div class="patientDocumentsLoading">
-      Підготовка документів…
+    <div
+      class="patientDocumentsLoading"
+    >
+      ${escapeHtml(
+        ui.loading
+      )}
     </div>
   `;
 
-  /*
-   * Не запускаем два тяжёлых Supabase-чтения одновременно.
-   * На небольшом серверном инстансе параллельный старт мог
-   * временно исчерпать сетевые ресурсы и вернуть Errno 11.
-   */
   const visits =
     await loadVisitsApi({
-      pet_id: pet.id,
+      pet_id:
+        pet.id,
     });
 
   const hospitalizations =
@@ -46988,199 +51954,325 @@ async function renderPatientDocumentsTab(
     );
 
   const patientVisits =
-    (Array.isArray(visits)
-      ? visits
-      : []
-    ).sort((a, b) =>
-      String(
-        b.date ||
-        b.created_at ||
-        ""
-      ).localeCompare(
-        String(
-          a.date ||
-          a.created_at ||
-          ""
-        )
+    (
+      Array.isArray(
+        visits
       )
-    );
-
-  const completedHospitalizations =
-    (Array.isArray(hospitalizations)
-      ? hospitalizations
-      : []
-    )
-      .filter(
-        (item) =>
-          item?.is_active === false ||
-          Boolean(item?.discharged_at)
-      )
-      .sort((a, b) =>
+        ? visits
+        : []
+    ).sort(
+      (a, b) =>
         String(
-          b.discharged_at ||
-          b.admitted_at ||
+          b.date ||
+          b.created_at ||
           ""
         ).localeCompare(
           String(
-            a.discharged_at ||
-            a.admitted_at ||
+            a.date ||
+            a.created_at ||
             ""
           )
         )
+    );
+
+  const completedHospitalizations =
+    (
+      Array.isArray(
+        hospitalizations
+      )
+        ? hospitalizations
+        : []
+    )
+      .filter(
+        (item) =>
+          item?.is_active ===
+            false ||
+          Boolean(
+            item?.discharged_at
+          )
+      )
+      .sort(
+        (a, b) =>
+          String(
+            b.discharged_at ||
+            b.admitted_at ||
+            ""
+          ).localeCompare(
+            String(
+              a.discharged_at ||
+              a.admitted_at ||
+              ""
+            )
+          )
       );
 
   const visitOptions =
-    patientVisits.map((visit) => ({
-      value: visit.id,
-      label:
-        getPatientDocumentVisitLabel(
-          visit
-        ),
-    }));
+    patientVisits.map(
+      (visit) => ({
+        value:
+          visit.id,
+
+        label:
+          getPatientDocumentVisitLabel(
+            visit
+          ),
+      })
+    );
 
   const hospitalOptions =
     completedHospitalizations.map(
       (item) => ({
-        value: item.id,
+        value:
+          item.id,
+
         label: [
           formatPatientDocumentDate(
             item.admitted_at
           ),
+
           "—",
+
           formatPatientDocumentDate(
             item.discharged_at
           ),
+
           item.diagnosis
-            ? `· ${item.diagnosis}`
+            ? `· ${
+                item.diagnosis
+              }`
             : "",
         ]
-          .filter(Boolean)
-          .join(" "),
+          .filter(
+            Boolean
+          )
+          .join(
+            " "
+          ),
       })
     );
 
   const consentOptions =
-    Object.entries(
+    Object.keys(
       PATIENT_CONSENT_TYPES
-    ).map(([value, config]) => ({
-      value,
-      label: config.shortTitle,
-    }));
+    ).map(
+      (value) => ({
+        value,
+
+        label:
+          getPatientConsentShortTitle(
+            value
+          ),
+      })
+    );
+
+  const availableSources =
+    patientVisits.length +
+    completedHospitalizations
+      .length;
 
   root.innerHTML = `
-    <section class="patientDocumentsPage">
-      <header class="patientDocumentsHead">
+    <section
+      class="patientDocumentsPage"
+    >
+      <header
+        class="patientDocumentsHead"
+      >
         <div>
-          <div class="patientDocumentsKicker">
-            ДОКУМЕНТИ ПАЦІЄНТА
+          <div
+            class="patientDocumentsKicker"
+          >
+            ${escapeHtml(
+              ui.kicker
+            )}
           </div>
 
           <h2>
-            Медичні та фінансові документи
+            ${escapeHtml(
+              ui.title
+            )}
           </h2>
 
           <p>
-            Оберіть джерело — CRM автоматично
-            сформує окремий PDF без повторного
-            введення даних.
+            ${escapeHtml(
+              ui.description
+            )}
           </p>
         </div>
 
-        <div class="patientDocumentsSummary">
-          <span>Доступно джерел</span>
+        <div
+          class="patientDocumentsSummary"
+        >
+          <span>
+            ${escapeHtml(
+              ui.availableSources
+            )}
+          </span>
+
           <strong>
-            ${
-              patientVisits.length +
-              completedHospitalizations.length
-            }
+            ${availableSources}
           </strong>
+
           <small>
-            ${patientVisits.length} візитів ·
-            ${completedHospitalizations.length}
-            виписок зі стаціонару
+            ${patientVisits.length}
+            ${escapeHtml(
+              ui.visits
+            )}
+            ·
+            ${
+              completedHospitalizations
+                .length
+            }
+            ${escapeHtml(
+              ui.discharges
+            )}
           </small>
         </div>
       </header>
 
-      <div class="patientDocumentsGrid">
+      <div
+        class="patientDocumentsGrid"
+      >
         ${renderPatientDocumentCard({
-          type: "visit",
-          icon: "🩺",
-          title:
-            "Виписка за візитом",
-          description:
-            "Медичний підсумок прийому: скарги, діагноз, проведені процедури та рекомендації — без цін.",
-          badge: "МЕДИЧНИЙ",
-          options: visitOptions,
-          selectLabel: "Оберіть візит",
-          emptyText:
-            "У пацієнта ще немає візитів.",
-        })}
+          type:
+            "visit",
 
-        ${renderPatientDocumentCard({
-          type: "hospital",
-          icon: "🏥",
+          icon:
+            "🩺",
+
           title:
-            "Виписка зі стаціонару",
+            ui.visitTitle,
+
           description:
-            "Період госпіталізації, діагноз, стан, виконані процедури й призначення та стан на момент виписки.",
-          badge: "СТАЦІОНАР",
-          options: hospitalOptions,
+            ui.visitDescription,
+
+          badge:
+            ui.visitBadge,
+
+          options:
+            visitOptions,
+
           selectLabel:
-            "Оберіть госпіталізацію",
+            ui.selectVisit,
+
           emptyText:
-            "Немає завершених госпіталізацій.",
+            ui.noVisits,
         })}
 
         ${renderPatientDocumentCard({
-          type: "prescriptions",
-          icon: "💊",
-          title:
-            "Лист призначень",
-          description:
-            "Окремий зрозумілий документ з лікуванням, рекомендаціями власнику та планом контролю.",
-          badge: "ДЛЯ ВЛАСНИКА",
-          options: visitOptions,
-          selectLabel: "Оберіть візит",
-          emptyText:
-            "Спочатку створіть візит.",
-        })}
+          type:
+            "hospital",
 
-        ${renderPatientDocumentCard({
-          type: "finance",
-          icon: "🧾",
-          title:
-            "Фінансова виписка",
-          description:
-            "Деталізація наданих послуг, використаних препаратів, знижки, оплат і залишку.",
-          badge: "ФІНАНСОВИЙ",
-          options: visitOptions,
-          selectLabel: "Оберіть візит",
-          emptyText:
-            "Немає візитів для деталізації.",
-        })}
+          icon:
+            "🏥",
 
-        ${renderPatientDocumentCard({
-          type: "consent",
-          icon: "✍️",
           title:
-            "Інформована згода",
+            ui.hospitalTitle,
+
           description:
-            "Чотири окремі шаблони: лікування, операція й анестезія, госпіталізація та відмова від операції.",
-          badge: "4 ШАБЛОНИ",
-          options: consentOptions,
+            ui.hospitalDescription,
+
+          badge:
+            ui.hospitalBadge,
+
+          options:
+            hospitalOptions,
+
           selectLabel:
-            "Оберіть тип документа",
+            ui.selectHospital,
+
           emptyText:
-            "Шаблони недоступні.",
+            ui.noHospital,
+        })}
+
+        ${renderPatientDocumentCard({
+          type:
+            "prescriptions",
+
+          icon:
+            "💊",
+
+          title:
+            ui.prescriptionsTitle,
+
+          description:
+            ui.prescriptionsDescription,
+
+          badge:
+            ui.ownerBadge,
+
+          options:
+            visitOptions,
+
+          selectLabel:
+            ui.selectVisit,
+
+          emptyText:
+            ui.createVisitFirst,
+        })}
+
+        ${renderPatientDocumentCard({
+          type:
+            "finance",
+
+          icon:
+            "🧾",
+
+          title:
+            ui.financeTitle,
+
+          description:
+            ui.financeDescription,
+
+          badge:
+            ui.financeBadge,
+
+          options:
+            visitOptions,
+
+          selectLabel:
+            ui.selectVisit,
+
+          emptyText:
+            ui.noFinanceVisits,
+        })}
+
+        ${renderPatientDocumentCard({
+          type:
+            "consent",
+
+          icon:
+            "✍️",
+
+          title:
+            ui.consentTitle,
+
+          description:
+            ui.consentDescription,
+
+          badge:
+            ui.consentBadge,
+
+          options:
+            consentOptions,
+
+          selectLabel:
+            ui.selectDocumentType,
+
+          emptyText:
+            ui.templatesUnavailable,
         })}
       </div>
 
-      <div class="patientDocumentsHint">
-        <span>ⓘ</span>
-        Документи формуються з актуальних
-        даних CRM. Завантажена копія не
-        змінює медичну карту пацієнта.
+      <div
+        class="patientDocumentsHint"
+      >
+        <span>
+          ⓘ
+        </span>
+
+        ${escapeHtml(
+          ui.hint
+        )}
       </div>
     </section>
   `;
@@ -47189,73 +52281,96 @@ async function renderPatientDocumentsTab(
     .querySelectorAll(
       "[data-create-patient-document]"
     )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        async () => {
-          const type =
-            button.dataset
-              .createPatientDocument;
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          async () => {
+            const type =
+              button.dataset
+                .createPatientDocument;
 
-          const select =
-            root.querySelector(
-              `[data-patient-document-source="${type}"]`
-            );
+            const select =
+              root.querySelector(
+                `[data-patient-document-source="${type}"]`
+              );
 
-          const sourceId =
-            select?.value || "";
+            const sourceId =
+              select?.value ||
+              "";
 
-          if (!sourceId) return;
-
-          const original =
-            button.innerHTML;
-
-          button.disabled = true;
-          button.textContent =
-            "Формування…";
-
-          try {
-            let consentData = null;
-
-            if (type === "consent") {
-              consentData =
-                await openPatientConsentModal({
-                  consentType: sourceId,
-                  pet,
-                  visits: patientVisits,
-                });
-
-              if (!consentData) {
-                return;
-              }
+            if (!sourceId) {
+              return;
             }
 
-            await createPatientDocumentPdf({
-              type,
-              sourceId,
-              pet,
-              visits: patientVisits,
-              hospitalizations:
-                completedHospitalizations,
-              consentData,
-            });
-          } catch (error) {
-            console.error(
-              "createPatientDocumentPdf failed:",
-              error
-            );
+            const original =
+              button.innerHTML;
 
-            alert(
-              error?.message ||
-              "Не вдалося сформувати документ."
-            );
-          } finally {
-            button.disabled = false;
-            button.innerHTML = original;
+            button.disabled =
+              true;
+
+            button.textContent =
+              ui.generating;
+
+            try {
+              let consentData =
+                null;
+
+              if (
+                type ===
+                "consent"
+              ) {
+                consentData =
+                  await openPatientConsentModal({
+                    consentType:
+                      sourceId,
+
+                    pet,
+
+                    visits:
+                      patientVisits,
+                  });
+
+                if (
+                  !consentData
+                ) {
+                  return;
+                }
+              }
+
+              await createPatientDocumentPdf({
+                type,
+                sourceId,
+                pet,
+
+                visits:
+                  patientVisits,
+
+                hospitalizations:
+                  completedHospitalizations,
+
+                consentData,
+              });
+            } catch (error) {
+              console.error(
+                "createPatientDocumentPdf failed:",
+                error
+              );
+
+              alert(
+                ui.createFailed
+              );
+            } finally {
+              button.disabled =
+                false;
+
+              button.innerHTML =
+                original;
+            }
           }
-        }
-      );
-    });
+        );
+      }
+    );
 }
 
 async function getPatientDocumentClinic() {
@@ -47338,27 +52453,392 @@ function getPatientConsentVisitDefaults(
     notes: "",
   };
 }
+function getPatientConsentUi() {
+  const language =
+    getInterfaceLanguage();
 
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    unknownType:
+      pick(
+        "Невідомий тип згоди.",
+        "Unknown consent type.",
+        "Unbekannter Einwilligungstyp.",
+        "Nieznany typ zgody."
+      ),
+
+    legalDocument:
+      pick(
+        "ЮРИДИЧНИЙ ДОКУМЕНТ",
+        "LEGAL DOCUMENT",
+        "RECHTSDOKUMENT",
+        "DOKUMENT PRAWNY"
+      ),
+
+    intro:
+      pick(
+        "Заповніть індивідуальні умови. Після створення документ підписується власником і лікарем.",
+        "Complete the individual terms. After creation, the document is signed by the owner and the veterinarian.",
+        "Füllen Sie die individuellen Bedingungen aus. Nach der Erstellung wird das Dokument vom Tierhalter und vom Tierarzt unterschrieben.",
+        "Uzupełnij indywidualne warunki. Po utworzeniu dokument podpisują właściciel i lekarz weterynarii."
+      ),
+
+    close:
+      pick(
+        "Закрити",
+        "Close",
+        "Schließen",
+        "Zamknij"
+      ),
+
+    notice:
+      pick(
+        "Робочий шаблон клініки. Перед постійним використанням затвердьте редакцію з юристом.",
+        "This is the clinic’s working template. Have the wording approved by a lawyer before permanent use.",
+        "Dies ist eine Arbeitsvorlage der Klinik. Lassen Sie den Text vor der dauerhaften Verwendung rechtlich prüfen.",
+        "To roboczy szablon kliniki. Przed stałym użyciem zatwierdź jego treść z prawnikiem."
+      ),
+
+    dateTime:
+      pick(
+        "Дата і час документа",
+        "Document date and time",
+        "Datum und Uhrzeit des Dokuments",
+        "Data i godzina dokumentu"
+      ),
+
+    linkedVisit:
+      pick(
+        "Пов’язаний візит",
+        "Linked visit",
+        "Zugeordneter Termin",
+        "Powiązana wizyta"
+      ),
+
+    noVisit:
+      pick(
+        "Без прив’язки до візиту",
+        "Not linked to a visit",
+        "Ohne Zuordnung zu einem Termin",
+        "Bez powiązania z wizytą"
+      ),
+
+    representativeName:
+      pick(
+        "ПІБ власника / представника",
+        "Owner / representative’s full name",
+        "Vollständiger Name des Tierhalters / Vertreters",
+        "Imię i nazwisko właściciela / przedstawiciela"
+      ),
+
+    representativePhone:
+      pick(
+        "Телефон представника",
+        "Representative’s phone",
+        "Telefonnummer des Vertreters",
+        "Telefon przedstawiciela"
+      ),
+
+    representativeStatus:
+      pick(
+        "Статус представника",
+        "Representative’s role",
+        "Rolle des Vertreters",
+        "Status przedstawiciela"
+      ),
+
+    roleOwner:
+      pick(
+        "Власник тварини",
+        "Animal owner",
+        "Tierhalter",
+        "Właściciel zwierzęcia"
+      ),
+
+    roleAuthorized:
+      pick(
+        "Уповноважений представник власника",
+        "Authorized representative of the owner",
+        "Bevollmächtigter Vertreter des Tierhalters",
+        "Upoważniony przedstawiciel właściciela"
+      ),
+
+    roleKeeper:
+      pick(
+        "Утримувач тварини",
+        "Animal keeper",
+        "Tierbetreuer",
+        "Opiekun zwierzęcia"
+      ),
+
+    clinicalPlaceholder:
+      pick(
+        "Вкажіть клінічні дані, які були пояснені власнику",
+        "Enter the clinical information explained to the owner",
+        "Geben Sie die klinischen Informationen ein, die dem Tierhalter erklärt wurden",
+        "Wprowadź dane kliniczne wyjaśnione właścicielowi"
+      ),
+
+    risks:
+      pick(
+        "Індивідуальні ризики, альтернативи або додаткові умови",
+        "Individual risks, alternatives or additional terms",
+        "Individuelle Risiken, Alternativen oder zusätzliche Bedingungen",
+        "Indywidualne ryzyka, alternatywy lub dodatkowe warunki"
+      ),
+
+    risksPlaceholder:
+      pick(
+        "Особливості стану пацієнта, додаткові ризики, погоджені обмеження…",
+        "Patient-specific factors, additional risks and agreed limitations…",
+        "Besonderheiten des Patientenzustands, zusätzliche Risiken und vereinbarte Einschränkungen…",
+        "Szczególne cechy stanu pacjenta, dodatkowe ryzyka i uzgodnione ograniczenia…"
+      ),
+
+    authorityCheck:
+      pick(
+        "Представник підтвердив, що має право приймати рішення щодо лікування цієї тварини.",
+        "The representative confirms that they are authorized to make treatment decisions for this animal.",
+        "Der Vertreter bestätigt, dass er berechtigt ist, Behandlungsentscheidungen für dieses Tier zu treffen.",
+        "Przedstawiciel potwierdza, że ma prawo podejmować decyzje dotyczące leczenia tego zwierzęcia."
+      ),
+
+    informationCheck:
+      pick(
+        "Лікар надав пояснення зрозумілою мовою, а представник мав можливість поставити запитання.",
+        "The veterinarian provided a clear explanation and the representative had an opportunity to ask questions.",
+        "Der Tierarzt hat die Informationen verständlich erläutert und der Vertreter konnte Fragen stellen.",
+        "Lekarz weterynarii udzielił zrozumiałych wyjaśnień, a przedstawiciel miał możliwość zadawania pytań."
+      ),
+
+    personalDataCheck:
+      pick(
+        "Представник погодився на обробку контактних даних для оформлення документа, ведення медичної історії та зв’язку щодо лікування.",
+        "The representative agrees to the processing of contact data for this document, the medical record and treatment-related communication.",
+        "Der Vertreter stimmt der Verarbeitung der Kontaktdaten für dieses Dokument, die Patientenakte und die Kommunikation zur Behandlung zu.",
+        "Przedstawiciel wyraża zgodę na przetwarzanie danych kontaktowych w celu sporządzenia dokumentu, prowadzenia historii medycznej i kontaktu dotyczącego leczenia."
+      ),
+
+    cancel:
+      pick(
+        "Скасувати",
+        "Cancel",
+        "Abbrechen",
+        "Anuluj"
+      ),
+
+    generatePdf:
+      pick(
+        "Сформувати PDF",
+        "Generate PDF",
+        "PDF erstellen",
+        "Utwórz PDF"
+      ),
+
+    types: {
+      diagnostics: {
+        title:
+          pick(
+            "Згода на проведення діагностики та лікування",
+            "Consent to diagnostics and treatment",
+            "Einwilligung in Diagnostik und Behandlung",
+            "Zgoda na diagnostykę i leczenie"
+          ),
+
+        subjectLabel:
+          pick(
+            "Заплановані дослідження та лікування",
+            "Planned diagnostics and treatment",
+            "Geplante Untersuchungen und Behandlung",
+            "Planowane badania i leczenie"
+          ),
+
+        subjectPlaceholder:
+          pick(
+            "Наприклад: огляд, аналізи крові, УЗД, медикаментозне лікування",
+            "For example: examination, blood tests, ultrasound and medication",
+            "Zum Beispiel: Untersuchung, Bluttests, Ultraschall und medikamentöse Behandlung",
+            "Na przykład: badanie, badania krwi, USG i leczenie farmakologiczne"
+          ),
+
+        detailsLabel:
+          pick(
+            "Попередній діагноз або клінічне обґрунтування",
+            "Preliminary diagnosis or clinical rationale",
+            "Vorläufige Diagnose oder klinische Begründung",
+            "Wstępna diagnoza lub uzasadnienie kliniczne"
+          ),
+      },
+
+      anesthesia: {
+        title:
+          pick(
+            "Згода на анестезію та оперативне втручання",
+            "Consent to anesthesia and surgery",
+            "Einwilligung in Anästhesie und Operation",
+            "Zgoda na znieczulenie i zabieg chirurgiczny"
+          ),
+
+        subjectLabel:
+          pick(
+            "Назва запланованої операції",
+            "Planned procedure",
+            "Geplanter Eingriff",
+            "Nazwa planowanego zabiegu"
+          ),
+
+        subjectPlaceholder:
+          pick(
+            "Наприклад: оваріогістеректомія",
+            "For example: ovariohysterectomy",
+            "Zum Beispiel: Ovariohysterektomie",
+            "Na przykład: owariohisterektomia"
+          ),
+
+        detailsLabel:
+          pick(
+            "Діагноз та показання до операції",
+            "Diagnosis and indication for surgery",
+            "Diagnose und Indikation für die Operation",
+            "Diagnoza i wskazania do operacji"
+          ),
+      },
+
+      hospitalization: {
+        title:
+          pick(
+            "Згода на госпіталізацію та стаціонарне лікування",
+            "Consent to hospitalization and inpatient treatment",
+            "Einwilligung in stationäre Aufnahme und Behandlung",
+            "Zgoda na hospitalizację i leczenie stacjonarne"
+          ),
+
+        subjectLabel:
+          pick(
+            "Мета госпіталізації та план лікування",
+            "Purpose of hospitalization and treatment plan",
+            "Zweck der stationären Aufnahme und Behandlungsplan",
+            "Cel hospitalizacji i plan leczenia"
+          ),
+
+        subjectPlaceholder:
+          pick(
+            "Наприклад: стабілізація стану, інфузійна терапія та спостереження",
+            "For example: stabilization, infusion therapy and monitoring",
+            "Zum Beispiel: Stabilisierung, Infusionstherapie und Überwachung",
+            "Na przykład: stabilizacja, płynoterapia i obserwacja"
+          ),
+
+        detailsLabel:
+          pick(
+            "Діагноз або причина госпіталізації",
+            "Diagnosis or reason for hospitalization",
+            "Diagnose oder Grund der stationären Aufnahme",
+            "Diagnoza lub przyczyna hospitalizacji"
+          ),
+      },
+
+      surgery_refusal: {
+        title:
+          pick(
+            "Відмова від рекомендованої операції",
+            "Refusal of recommended surgery",
+            "Ablehnung der empfohlenen Operation",
+            "Odmowa zalecanej operacji"
+          ),
+
+        subjectLabel:
+          pick(
+            "Рекомендована операція",
+            "Recommended surgery",
+            "Empfohlene Operation",
+            "Zalecana operacja"
+          ),
+
+        subjectPlaceholder:
+          pick(
+            "Вкажіть операцію, від якої відмовляється власник",
+            "Enter the surgery declined by the owner",
+            "Geben Sie die vom Tierhalter abgelehnte Operation ein",
+            "Wprowadź operację, na którą właściciel nie wyraża zgody"
+          ),
+
+        detailsLabel:
+          pick(
+            "Діагноз та медичні показання",
+            "Diagnosis and medical indications",
+            "Diagnose und medizinische Indikation",
+            "Diagnoza i wskazania medyczne"
+          ),
+      },
+    },
+  };
+}
+
+function getPatientConsentTypeMeta(
+  type
+) {
+  const ui =
+    getPatientConsentUi();
+
+  const source =
+    PATIENT_CONSENT_TYPES[
+      type
+    ] || null;
+
+  const translated =
+    ui.types[type] ||
+    null;
+
+  if (
+    !source ||
+    !translated
+  ) {
+    return null;
+  }
+
+  return {
+    ...source,
+    ...translated,
+  };
+}
 function openPatientConsentModal({
   consentType,
   pet,
   visits,
 }) {
+  const ui =
+    getPatientConsentUi();
+
   const config =
-    PATIENT_CONSENT_TYPES[
+    getPatientConsentTypeMeta(
       consentType
-    ];
+    );
 
   if (!config) {
     return Promise.reject(
       new Error(
-        "Невідомий тип згоди."
+        ui.unknownType
       )
     );
   }
 
   const visitRows =
-    Array.isArray(visits)
+    Array.isArray(
+      visits
+    )
       ? visits
       : [];
 
@@ -47370,433 +52850,616 @@ function openPatientConsentModal({
       : null;
 
   const initialVisit =
-    visitRows[0] || null;
+    visitRows[0] ||
+    null;
 
   const initialDefaults =
     getPatientConsentVisitDefaults(
       initialVisit
     );
 
-  return new Promise((resolve) => {
-    document
-      .getElementById(
-        "patientConsentModal"
-      )
-      ?.remove();
+  return new Promise(
+    (resolve) => {
+      document
+        .getElementById(
+          "patientConsentModal"
+        )
+        ?.remove();
 
-    const modal =
-      document.createElement("div");
+      const modal =
+        document.createElement(
+          "div"
+        );
 
-    modal.id =
-      "patientConsentModal";
+      modal.id =
+        "patientConsentModal";
 
-    modal.className =
-      "patientConsentOverlay";
+      modal.className =
+        "patientConsentOverlay";
 
-    modal.innerHTML = `
-      <div
-        class="patientConsentBackdrop"
-        data-close-patient-consent
-      ></div>
+      modal.innerHTML = `
+        <div
+          class="patientConsentBackdrop"
+          data-close-patient-consent
+        ></div>
 
-      <section
-        class="patientConsentModal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="patientConsentTitle"
-      >
-        <header class="patientConsentModalHead">
-          <div>
-            <span>ЮРИДИЧНИЙ ДОКУМЕНТ</span>
-            <h2 id="patientConsentTitle">
-              ${escapeHtml(
-                config.title
-              )}
-            </h2>
-            <p>
-              Заповніть індивідуальні умови.
-              Після створення документ
-              підписується власником і лікарем.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            class="patientConsentClose"
-            data-close-patient-consent
-            aria-label="Закрити"
+        <section
+          class="patientConsentModal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="patientConsentTitle"
+        >
+          <header
+            class="patientConsentModalHead"
           >
-            ×
-          </button>
-        </header>
+            <div>
+              <span>
+                ${escapeHtml(
+                  ui.legalDocument
+                )}
+              </span>
 
-        <form class="patientConsentForm">
-          <div class="patientConsentNotice">
-            Робочий шаблон клініки.
-            Перед постійним використанням
-            затвердьте редакцію з юристом.
-          </div>
-
-          <div class="patientConsentGrid">
-            <label class="patientConsentField">
-              <span>Дата і час документа</span>
-              <input
-                name="signed_at"
-                type="datetime-local"
-                value="${escapeHtml(
-                  patientConsentLocalDateTime()
-                )}"
-                required
+              <h2
+                id="patientConsentTitle"
               >
-            </label>
+                ${escapeHtml(
+                  config.title
+                )}
+              </h2>
 
-            <label class="patientConsentField">
-              <span>Пов’язаний візит</span>
-              <select name="visit_id">
-                <option value="">
-                  Без прив’язки до візиту
-                </option>
-                ${visitRows
-                  .map(
-                    (visit) => `
-                      <option
-                        value="${escapeHtml(
-                          String(visit.id)
-                        )}"
-                        ${
-                          initialVisit &&
-                          String(
-                            visit.id
-                          ) ===
+              <p>
+                ${escapeHtml(
+                  ui.intro
+                )}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="patientConsentClose"
+              data-close-patient-consent
+              aria-label="${escapeHtml(
+                ui.close
+              )}"
+            >
+              ×
+            </button>
+          </header>
+
+          <form
+            class="patientConsentForm"
+          >
+            <div
+              class="patientConsentNotice"
+            >
+              ${escapeHtml(
+                ui.notice
+              )}
+            </div>
+
+            <div
+              class="patientConsentGrid"
+            >
+              <label
+                class="patientConsentField"
+              >
+                <span>
+                  ${escapeHtml(
+                    ui.dateTime
+                  )}
+                </span>
+
+                <input
+                  name="signed_at"
+                  type="datetime-local"
+                  value="${escapeHtml(
+                    patientConsentLocalDateTime()
+                  )}"
+                  required
+                >
+              </label>
+
+              <label
+                class="patientConsentField"
+              >
+                <span>
+                  ${escapeHtml(
+                    ui.linkedVisit
+                  )}
+                </span>
+
+                <select
+                  name="visit_id"
+                >
+                  <option
+                    value=""
+                  >
+                    ${escapeHtml(
+                      ui.noVisit
+                    )}
+                  </option>
+
+                  ${visitRows
+                    .map(
+                      (
+                        visit
+                      ) => `
+                        <option
+                          value="${escapeHtml(
+                            String(
+                              visit.id
+                            )
+                          )}"
+                          ${
+                            initialVisit &&
+                            String(
+                              visit.id
+                            ) ===
                             String(
                               initialVisit.id
                             )
-                            ? "selected"
-                            : ""
-                        }
-                      >
-                        ${escapeHtml(
-                          getPatientDocumentVisitLabel(
-                            visit
-                          )
-                        )}
-                      </option>
-                    `
-                  )
-                  .join("")}
-              </select>
-            </label>
+                              ? "selected"
+                              : ""
+                          }
+                        >
+                          ${escapeHtml(
+                            getPatientDocumentVisitLabel(
+                              visit
+                            )
+                          )}
+                        </option>
+                      `
+                    )
+                    .join("")}
+                </select>
+              </label>
 
-            <label class="patientConsentField">
-              <span>ПІБ власника / представника</span>
-              <input
-                name="representative_name"
-                type="text"
-                value="${escapeHtml(
-                  owner?.name || ""
-                )}"
-                required
+              <label
+                class="patientConsentField"
               >
-            </label>
+                <span>
+                  ${escapeHtml(
+                    ui.representativeName
+                  )}
+                </span>
 
-            <label class="patientConsentField">
-              <span>Телефон представника</span>
-              <input
-                name="representative_phone"
-                type="text"
-                value="${escapeHtml(
-                  owner?.phone || ""
-                )}"
+                <input
+                  name="representative_name"
+                  type="text"
+                  value="${escapeHtml(
+                    owner?.name ||
+                    ""
+                  )}"
+                  required
+                >
+              </label>
+
+              <label
+                class="patientConsentField"
               >
-            </label>
+                <span>
+                  ${escapeHtml(
+                    ui.representativePhone
+                  )}
+                </span>
 
-            <label class="patientConsentField patientConsentFieldWide">
-              <span>Статус представника</span>
-              <select name="representative_role">
-                <option value="Власник тварини">
-                  Власник тварини
-                </option>
-                <option value="Уповноважений представник власника">
-                  Уповноважений представник власника
-                </option>
-                <option value="Утримувач тварини">
-                  Утримувач тварини
-                </option>
-              </select>
-            </label>
+                <input
+                  name="representative_phone"
+                  type="text"
+                  value="${escapeHtml(
+                    owner?.phone ||
+                    ""
+                  )}"
+                >
+              </label>
 
-            <label class="patientConsentField patientConsentFieldWide">
-              <span>${escapeHtml(
-                config.subjectLabel
-              )}</span>
-              <textarea
-                name="subject"
-                rows="3"
-                placeholder="${escapeHtml(
-                  config.subjectPlaceholder
-                )}"
-                required
-              >${escapeHtml(
-                initialDefaults.subject
-              )}</textarea>
-            </label>
-
-            <label class="patientConsentField patientConsentFieldWide">
-              <span>${escapeHtml(
-                config.detailsLabel
-              )}</span>
-              <textarea
-                name="diagnosis"
-                rows="3"
-                placeholder="Вкажіть клінічні дані, які були пояснені власнику"
-              >${escapeHtml(
-                initialDefaults.diagnosis
-              )}</textarea>
-            </label>
-
-            <label class="patientConsentField patientConsentFieldWide">
-              <span>
-                Індивідуальні ризики, альтернативи
-                або додаткові умови
-              </span>
-              <textarea
-                name="notes"
-                rows="3"
-                placeholder="Особливості стану пацієнта, додаткові ризики, погоджені обмеження…"
-              ></textarea>
-            </label>
-          </div>
-
-          <div class="patientConsentChecks">
-            <label>
-              <input
-                name="authority_confirmed"
-                type="checkbox"
-                required
+              <label
+                class="
+                  patientConsentField
+                  patientConsentFieldWide
+                "
               >
-              <span>
-                Представник підтвердив,
-                що має право приймати рішення
-                щодо лікування цієї тварини.
-              </span>
-            </label>
+                <span>
+                  ${escapeHtml(
+                    ui.representativeStatus
+                  )}
+                </span>
 
-            <label>
-              <input
-                name="information_confirmed"
-                type="checkbox"
-                required
+                <select
+                  name="representative_role"
+                >
+                  <option
+                    value="${escapeHtml(
+                      ui.roleOwner
+                    )}"
+                  >
+                    ${escapeHtml(
+                      ui.roleOwner
+                    )}
+                  </option>
+
+                  <option
+                    value="${escapeHtml(
+                      ui.roleAuthorized
+                    )}"
+                  >
+                    ${escapeHtml(
+                      ui.roleAuthorized
+                    )}
+                  </option>
+
+                  <option
+                    value="${escapeHtml(
+                      ui.roleKeeper
+                    )}"
+                  >
+                    ${escapeHtml(
+                      ui.roleKeeper
+                    )}
+                  </option>
+                </select>
+              </label>
+
+              <label
+                class="
+                  patientConsentField
+                  patientConsentFieldWide
+                "
               >
-              <span>
-                Лікар надав пояснення зрозумілою
-                мовою, а представник мав
-                можливість поставити запитання.
-              </span>
-            </label>
+                <span>
+                  ${escapeHtml(
+                    config.subjectLabel
+                  )}
+                </span>
 
-            <label>
-              <input
-                name="personal_data_confirmed"
-                type="checkbox"
-                required
+                <textarea
+                  name="subject"
+                  rows="3"
+                  placeholder="${escapeHtml(
+                    config.subjectPlaceholder
+                  )}"
+                  required
+                >${escapeHtml(
+                  initialDefaults.subject
+                )}</textarea>
+              </label>
+
+              <label
+                class="
+                  patientConsentField
+                  patientConsentFieldWide
+                "
               >
-              <span>
-                Представник погодився на обробку
-                контактних даних для оформлення
-                документа, ведення медичної
-                історії та зв’язку щодо лікування.
-              </span>
-            </label>
-          </div>
+                <span>
+                  ${escapeHtml(
+                    config.detailsLabel
+                  )}
+                </span>
 
-          <footer class="patientConsentActions">
-            <button
-              type="button"
-              class="patientConsentCancel"
-              data-close-patient-consent
+                <textarea
+                  name="diagnosis"
+                  rows="3"
+                  placeholder="${escapeHtml(
+                    ui.clinicalPlaceholder
+                  )}"
+                >${escapeHtml(
+                  initialDefaults.diagnosis
+                )}</textarea>
+              </label>
+
+              <label
+                class="
+                  patientConsentField
+                  patientConsentFieldWide
+                "
+              >
+                <span>
+                  ${escapeHtml(
+                    ui.risks
+                  )}
+                </span>
+
+                <textarea
+                  name="notes"
+                  rows="3"
+                  placeholder="${escapeHtml(
+                    ui.risksPlaceholder
+                  )}"
+                ></textarea>
+              </label>
+            </div>
+
+            <div
+              class="patientConsentChecks"
             >
-              Скасувати
-            </button>
+              <label>
+                <input
+                  name="authority_confirmed"
+                  type="checkbox"
+                  required
+                >
 
-            <button
-              type="submit"
-              class="patientConsentSubmit"
+                <span>
+                  ${escapeHtml(
+                    ui.authorityCheck
+                  )}
+                </span>
+              </label>
+
+              <label>
+                <input
+                  name="information_confirmed"
+                  type="checkbox"
+                  required
+                >
+
+                <span>
+                  ${escapeHtml(
+                    ui.informationCheck
+                  )}
+                </span>
+              </label>
+
+              <label>
+                <input
+                  name="personal_data_confirmed"
+                  type="checkbox"
+                  required
+                >
+
+                <span>
+                  ${escapeHtml(
+                    ui.personalDataCheck
+                  )}
+                </span>
+              </label>
+            </div>
+
+            <footer
+              class="patientConsentActions"
             >
-              Сформувати PDF
-            </button>
-          </footer>
-        </form>
-      </section>
-    `;
+              <button
+                type="button"
+                class="patientConsentCancel"
+                data-close-patient-consent
+              >
+                ${escapeHtml(
+                  ui.cancel
+                )}
+              </button>
 
-    document.body.appendChild(
-      modal
-    );
+              <button
+                type="submit"
+                class="patientConsentSubmit"
+              >
+                ${escapeHtml(
+                  ui.generatePdf
+                )}
+              </button>
+            </footer>
+          </form>
+        </section>
+      `;
 
-    document.body.classList.add(
-      "patientConsentModalOpen"
-    );
+      document.body.appendChild(
+        modal
+      );
 
-    const finish = (result) => {
-      document.removeEventListener(
+      document.body.classList.add(
+        "patientConsentModalOpen"
+      );
+
+      const finish = (
+        result
+      ) => {
+        document.removeEventListener(
+          "keydown",
+          onKeyDown
+        );
+
+        document.body.classList.remove(
+          "patientConsentModalOpen"
+        );
+
+        modal.remove();
+
+        resolve(
+          result
+        );
+      };
+
+      const onKeyDown = (
+        event
+      ) => {
+        if (
+          event.key ===
+          "Escape"
+        ) {
+          finish(
+            null
+          );
+        }
+      };
+
+      document.addEventListener(
         "keydown",
         onKeyDown
       );
 
-      document.body.classList.remove(
-        "patientConsentModalOpen"
-      );
-
-      modal.remove();
-      resolve(result);
-    };
-
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        finish(null);
-      }
-    };
-
-    document.addEventListener(
-      "keydown",
-      onKeyDown
-    );
-
-    modal.addEventListener(
-      "click",
-      (event) => {
-        if (
-          event.target.closest(
-            "[data-close-patient-consent]"
-          )
-        ) {
-          finish(null);
+      modal.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target.closest(
+              "[data-close-patient-consent]"
+            )
+          ) {
+            finish(
+              null
+            );
+          }
         }
-      }
-    );
-
-    const form =
-      modal.querySelector(
-        ".patientConsentForm"
       );
 
-    const visitSelect =
-      form?.elements?.visit_id;
+      const form =
+        modal.querySelector(
+          ".patientConsentForm"
+        );
 
-    visitSelect?.addEventListener(
-      "change",
-      () => {
-        const visit =
-          visitRows.find(
-            (item) =>
-              String(item.id) ===
+      const visitSelect =
+        form?.elements
+          ?.visit_id;
+
+      visitSelect
+        ?.addEventListener(
+          "change",
+          () => {
+            const visit =
+              visitRows.find(
+                (item) =>
+                  String(
+                    item.id
+                  ) ===
+                  String(
+                    visitSelect.value
+                  )
+              );
+
+            if (!visit) {
+              return;
+            }
+
+            const defaults =
+              getPatientConsentVisitDefaults(
+                visit
+              );
+
+            if (
+              !String(
+                form.elements
+                  .diagnosis
+                  .value ||
+                ""
+              ).trim()
+            ) {
+              form.elements
+                .diagnosis
+                .value =
+                  defaults
+                    .diagnosis;
+            }
+
+            if (
+              !String(
+                form.elements
+                  .subject
+                  .value ||
+                ""
+              ).trim()
+            ) {
+              form.elements
+                .subject
+                .value =
+                  defaults
+                    .subject;
+            }
+          }
+        );
+
+      form?.addEventListener(
+        "submit",
+        (event) => {
+          event.preventDefault();
+
+          if (
+            !form.reportValidity()
+          ) {
+            return;
+          }
+
+          const data =
+            new FormData(
+              form
+            );
+
+          finish({
+            consentType,
+
+            signedAt:
               String(
-                visitSelect.value
-              )
-          );
+                data.get(
+                  "signed_at"
+                ) ||
+                ""
+              ),
 
-        if (!visit) return;
+            visitId:
+              String(
+                data.get(
+                  "visit_id"
+                ) ||
+                ""
+              ),
 
-        const defaults =
-          getPatientConsentVisitDefaults(
-            visit
-          );
+            representativeName:
+              String(
+                data.get(
+                  "representative_name"
+                ) ||
+                ""
+              ).trim(),
 
-        if (
-          !String(
-            form.elements
-              .diagnosis.value ||
-            ""
-          ).trim()
-        ) {
-          form.elements
-            .diagnosis.value =
-              defaults.diagnosis;
+            representativePhone:
+              String(
+                data.get(
+                  "representative_phone"
+                ) ||
+                ""
+              ).trim(),
+
+            representativeRole:
+              String(
+                data.get(
+                  "representative_role"
+                ) ||
+                ""
+              ).trim(),
+
+            subject:
+              String(
+                data.get(
+                  "subject"
+                ) ||
+                ""
+              ).trim(),
+
+            diagnosis:
+              String(
+                data.get(
+                  "diagnosis"
+                ) ||
+                ""
+              ).trim(),
+
+            notes:
+              String(
+                data.get(
+                  "notes"
+                ) ||
+                ""
+              ).trim(),
+          });
         }
+      );
 
-        if (
-          !String(
-            form.elements
-              .subject.value ||
-            ""
-          ).trim()
-        ) {
-          form.elements
-            .subject.value =
-              defaults.subject;
-        }
-      }
-    );
-
-    form?.addEventListener(
-      "submit",
-      (event) => {
-        event.preventDefault();
-
-        if (!form.reportValidity()) {
-          return;
-        }
-
-        const data =
-          new FormData(form);
-
-        finish({
-          consentType,
-          signedAt:
-            String(
-              data.get("signed_at") ||
-              ""
-            ),
-          visitId:
-            String(
-              data.get("visit_id") ||
-              ""
-            ),
-          representativeName:
-            String(
-              data.get(
-                "representative_name"
-              ) || ""
-            ).trim(),
-          representativePhone:
-            String(
-              data.get(
-                "representative_phone"
-              ) || ""
-            ).trim(),
-          representativeRole:
-            String(
-              data.get(
-                "representative_role"
-              ) || ""
-            ).trim(),
-          subject:
-            String(
-              data.get("subject") ||
-              ""
-            ).trim(),
-          diagnosis:
-            String(
-              data.get("diagnosis") ||
-              ""
-            ).trim(),
-          notes:
-            String(
-              data.get("notes") ||
-              ""
-            ).trim(),
-        });
-      }
-    );
-
-    form
-      ?.querySelector(
-        '[name="subject"]'
-      )
-      ?.focus();
-  });
+      form
+        ?.querySelector(
+          '[name="subject"]'
+        )
+        ?.focus();
+    }
+  );
 }
-
 function renderPatientDocumentShell({
   title,
   number,
@@ -48745,45 +54408,537 @@ function getPatientConsentClauses(
   consentType,
   subject
 ) {
+  const language =
+    getInterfaceLanguage();
+
+  const pick = (
+    translations
+  ) =>
+    translations[language] ||
+    translations.uk;
+
   const subjectText =
-    subject || "зазначеного плану";
+    subject ||
+    pick({
+      uk:
+        "зазначеного плану",
+
+      en:
+        "the stated plan",
+
+      de:
+        "des angegebenen Plans",
+
+      pl:
+        "wskazanego planu",
+    });
 
   const clauses = {
     diagnostics: [
-      `Мені зрозуміло пояснено мету, характер та очікувану користь запланованих заходів: ${subjectText}.`,
-      "Я погоджуюся на клінічний огляд, забір біологічного матеріалу, лабораторні та інструментальні дослідження, маніпуляції і застосування ветеринарних препаратів у межах погодженого плану.",
-      "Мені повідомлено про можливі ризики, побічні реакції, обмеження методів, доступні альтернативи та можливі наслідки відмови або зволікання.",
-      "Я розумію, що результат лікування залежить від стану тварини та її індивідуальної реакції, тому клініка не може гарантувати конкретний результат.",
-      "Зміна плану, яка не є невідкладною, погоджується зі мною додатково. Якщо зволікання створює безпосередню загрозу життю тварини, я дозволяю необхідні дії для стабілізації стану з подальшим інформуванням.",
-      "Мені повідомлено, що фактичний обсяг і вартість допомоги можуть змінитися після отримання результатів діагностики; додаткові планові витрати погоджуються окремо.",
+      pick({
+        uk:
+          `Мені зрозуміло пояснено мету, характер та очікувану користь запланованих заходів: ${subjectText}.`,
+
+        en:
+          `The purpose, nature and expected benefits of the planned measures have been clearly explained to me: ${subjectText}.`,
+
+        de:
+          `Zweck, Art und erwarteter Nutzen der geplanten Maßnahmen wurden mir verständlich erklärt: ${subjectText}.`,
+
+        pl:
+          `Cel, charakter i oczekiwane korzyści planowanych działań zostały mi jasno wyjaśnione: ${subjectText}.`,
+      }),
+
+      pick({
+        uk:
+          "Я погоджуюся на клінічний огляд, забір біологічного матеріалу, лабораторні та інструментальні дослідження, маніпуляції і застосування ветеринарних препаратів у межах погодженого плану.",
+
+        en:
+          "I consent to a clinical examination, collection of biological samples, laboratory and diagnostic procedures, medical interventions and the use of veterinary medicines within the agreed plan.",
+
+        de:
+          "Ich willige in die klinische Untersuchung, die Entnahme biologischer Proben, Labor- und apparative Untersuchungen, medizinische Maßnahmen sowie die Anwendung von Tierarzneimitteln im Rahmen des vereinbarten Plans ein.",
+
+        pl:
+          "Wyrażam zgodę na badanie kliniczne, pobranie materiału biologicznego, badania laboratoryjne i diagnostyczne, zabiegi oraz stosowanie leków weterynaryjnych w ramach uzgodnionego planu.",
+      }),
+
+      pick({
+        uk:
+          "Мені повідомлено про можливі ризики, побічні реакції, обмеження методів, доступні альтернативи та можливі наслідки відмови або зволікання.",
+
+        en:
+          "I have been informed about possible risks, adverse reactions, limitations of the methods, available alternatives and the possible consequences of refusal or delay.",
+
+        de:
+          "Ich wurde über mögliche Risiken, Nebenwirkungen, Grenzen der Methoden, verfügbare Alternativen und mögliche Folgen einer Ablehnung oder Verzögerung informiert.",
+
+        pl:
+          "Poinformowano mnie o możliwych zagrożeniach, działaniach niepożądanych, ograniczeniach metod, dostępnych alternatywach oraz możliwych skutkach odmowy lub zwłoki.",
+      }),
+
+      pick({
+        uk:
+          "Я розумію, що результат лікування залежить від стану тварини та її індивідуальної реакції, тому клініка не може гарантувати конкретний результат.",
+
+        en:
+          "I understand that the outcome depends on the animal’s condition and individual response, and therefore the clinic cannot guarantee a specific result.",
+
+        de:
+          "Mir ist bekannt, dass das Ergebnis vom Zustand des Tieres und seiner individuellen Reaktion abhängt und die Klinik daher kein bestimmtes Ergebnis garantieren kann.",
+
+        pl:
+          "Rozumiem, że wynik leczenia zależy od stanu zwierzęcia i jego indywidualnej reakcji, dlatego klinika nie może zagwarantować określonego rezultatu.",
+      }),
+
+      pick({
+        uk:
+          "Зміна плану, яка не є невідкладною, погоджується зі мною додатково. Якщо зволікання створює безпосередню загрозу життю тварини, я дозволяю необхідні дії для стабілізації стану з подальшим інформуванням.",
+
+        en:
+          "Any non-emergency change to the plan requires my additional consent. If delay creates an immediate threat to the animal’s life, I authorize the measures necessary to stabilize the animal, followed by notification.",
+
+        de:
+          "Jede nicht dringende Änderung des Plans bedarf meiner zusätzlichen Zustimmung. Wenn eine Verzögerung eine unmittelbare Lebensgefahr für das Tier darstellt, gestatte ich die zur Stabilisierung erforderlichen Maßnahmen mit anschließender Information.",
+
+        pl:
+          "Każda zmiana planu, która nie jest pilna, wymaga mojej dodatkowej zgody. Jeżeli zwłoka stwarza bezpośrednie zagrożenie życia zwierzęcia, zezwalam na działania niezbędne do stabilizacji, z późniejszym poinformowaniem mnie.",
+      }),
+
+      pick({
+        uk:
+          "Мені повідомлено, що фактичний обсяг і вартість допомоги можуть змінитися після отримання результатів діагностики; додаткові планові витрати погоджуються окремо.",
+
+        en:
+          "I have been informed that the scope and cost of care may change after diagnostic results are received. Additional planned expenses require separate approval.",
+
+        de:
+          "Ich wurde darüber informiert, dass sich Umfang und Kosten der Behandlung nach Vorliegen der Untersuchungsergebnisse ändern können. Zusätzliche planbare Kosten werden gesondert abgestimmt.",
+
+        pl:
+          "Poinformowano mnie, że zakres i koszt pomocy mogą ulec zmianie po otrzymaniu wyników diagnostycznych. Dodatkowe planowane koszty wymagają odrębnego uzgodnienia.",
+      }),
     ],
+
     anesthesia: [
-      `Я погоджуюся на проведення втручання: ${subjectText}, а також на вид анестезії, який лікар обере з урахуванням стану пацієнта та результатів обстежень.`,
-      "Мені пояснено мету операції, її основні етапи, очікувану користь, альтернативи та можливі наслідки відмови або перенесення.",
-      "Я поінформований/поінформована про ризики анестезії й операції, зокрема алергічні реакції, порушення дихання або роботи серця, кровотечу, інфекційні ускладнення, потребу в повторному втручанні та ризик смерті.",
-      "Я розумію, що передопераційні обстеження зменшують, але не усувають усі ризики, а конкретний результат операції не може бути гарантований.",
-      "Якщо під час операції виявляться непередбачені обставини, я дозволяю змінити обсяг втручання лише настільки, наскільки це необхідно для усунення безпосередньої загрози життю або стабілізації стану. Інші зміни погоджуються зі мною.",
-      "Мені пояснено правила підготовки, післяопераційного догляду, контролю болю та необхідність виконувати призначення лікаря.",
+      pick({
+        uk:
+          `Я погоджуюся на проведення втручання: ${subjectText}, а також на вид анестезії, який лікар обере з урахуванням стану пацієнта та результатів обстежень.`,
+
+        en:
+          `I consent to the following procedure: ${subjectText}, and to the form of anesthesia selected by the veterinarian based on the patient’s condition and examination results.`,
+
+        de:
+          `Ich willige in folgenden Eingriff ein: ${subjectText}, sowie in die vom Tierarzt anhand des Patientenzustands und der Untersuchungsergebnisse gewählte Anästhesie.`,
+
+        pl:
+          `Wyrażam zgodę na wykonanie zabiegu: ${subjectText}, a także na rodzaj znieczulenia wybrany przez lekarza z uwzględnieniem stanu pacjenta i wyników badań.`,
+      }),
+
+      pick({
+        uk:
+          "Мені пояснено мету операції, її основні етапи, очікувану користь, альтернативи та можливі наслідки відмови або перенесення.",
+
+        en:
+          "The purpose, main stages and expected benefits of the procedure, available alternatives and the possible consequences of refusal or postponement have been explained to me.",
+
+        de:
+          "Zweck, wesentliche Schritte und erwarteter Nutzen des Eingriffs, mögliche Alternativen sowie die Folgen einer Ablehnung oder Verschiebung wurden mir erklärt.",
+
+        pl:
+          "Wyjaśniono mi cel operacji, jej główne etapy, oczekiwane korzyści, dostępne alternatywy oraz możliwe skutki odmowy lub odroczenia.",
+      }),
+
+      pick({
+        uk:
+          "Я поінформований/поінформована про ризики анестезії й операції, зокрема алергічні реакції, порушення дихання або роботи серця, кровотечу, інфекційні ускладнення, потребу в повторному втручанні та ризик смерті.",
+
+        en:
+          "I have been informed about the risks of anesthesia and surgery, including allergic reactions, respiratory or cardiac complications, bleeding, infection, the need for another procedure and the risk of death.",
+
+        de:
+          "Ich wurde über die Risiken von Anästhesie und Operation informiert, darunter allergische Reaktionen, Atem- oder Herz-Kreislauf-Komplikationen, Blutungen, Infektionen, einen möglichen erneuten Eingriff und das Todesrisiko.",
+
+        pl:
+          "Poinformowano mnie o ryzyku związanym ze znieczuleniem i operacją, w tym o reakcjach alergicznych, zaburzeniach oddychania lub pracy serca, krwawieniu, zakażeniu, konieczności ponownego zabiegu i ryzyku śmierci.",
+      }),
+
+      pick({
+        uk:
+          "Я розумію, що передопераційні обстеження зменшують, але не усувають усі ризики, а конкретний результат операції не може бути гарантований.",
+
+        en:
+          "I understand that preoperative examinations reduce but do not eliminate all risks, and that a specific surgical outcome cannot be guaranteed.",
+
+        de:
+          "Mir ist bekannt, dass präoperative Untersuchungen die Risiken verringern, aber nicht vollständig ausschließen und kein bestimmtes Operationsergebnis garantiert werden kann.",
+
+        pl:
+          "Rozumiem, że badania przedoperacyjne zmniejszają ryzyko, ale nie eliminują go całkowicie, a określonego wyniku operacji nie można zagwarantować.",
+      }),
+
+      pick({
+        uk:
+          "Якщо під час операції виявляться непередбачені обставини, я дозволяю змінити обсяг втручання лише настільки, наскільки це необхідно для усунення безпосередньої загрози життю або стабілізації стану. Інші зміни погоджуються зі мною.",
+
+        en:
+          "If unforeseen circumstances arise during surgery, I authorize changes only to the extent necessary to address an immediate threat to life or stabilize the patient. Other changes require my consent.",
+
+        de:
+          "Treten während der Operation unvorhergesehene Umstände auf, gestatte ich Änderungen nur soweit sie zur Abwendung einer unmittelbaren Lebensgefahr oder zur Stabilisierung erforderlich sind. Andere Änderungen bedürfen meiner Zustimmung.",
+
+        pl:
+          "Jeżeli podczas operacji wystąpią nieprzewidziane okoliczności, zezwalam na zmianę zakresu zabiegu wyłącznie w stopniu koniecznym do usunięcia bezpośredniego zagrożenia życia lub stabilizacji stanu. Inne zmiany wymagają mojej zgody.",
+      }),
+
+      pick({
+        uk:
+          "Мені пояснено правила підготовки, післяопераційного догляду, контролю болю та необхідність виконувати призначення лікаря.",
+
+        en:
+          "The preparation requirements, postoperative care, pain management and the need to follow the veterinarian’s instructions have been explained to me.",
+
+        de:
+          "Die Anforderungen an Vorbereitung, postoperative Betreuung und Schmerztherapie sowie die Notwendigkeit, die tierärztlichen Anweisungen einzuhalten, wurden mir erklärt.",
+
+        pl:
+          "Wyjaśniono mi zasady przygotowania, opieki pooperacyjnej, kontroli bólu oraz konieczność przestrzegania zaleceń lekarza.",
+      }),
     ],
+
     hospitalization: [
-      `Я погоджуюся на госпіталізацію тварини з такою метою: ${subjectText}.`,
-      "Мені повідомлено про запланований режим спостереження, діагностики, лікування, годування та догляду відповідно до умов роботи клініки.",
-      "Я погоджуюся на виконання процедур, досліджень і застосування препаратів у межах погодженого плану стаціонарного лікування.",
-      "У разі істотної зміни стану клініка зв’язується зі мною за вказаним телефоном. Якщо зволікання створює безпосередню загрозу життю тварини, я дозволяю необхідні дії для стабілізації з подальшим інформуванням.",
-      "Я зобов’язуюся залишатися доступним/доступною для зв’язку, повідомляти про відомі особливості здоров’я тварини та забрати її у погоджений час після виписки.",
-      "Мені повідомлено, що строк госпіталізації, обсяг допомоги та вартість можуть змінитися залежно від динаміки стану; планові зміни погоджуються додатково.",
+      pick({
+        uk:
+          `Я погоджуюся на госпіталізацію тварини з такою метою: ${subjectText}.`,
+
+        en:
+          `I consent to the hospitalization of the animal for the following purpose: ${subjectText}.`,
+
+        de:
+          `Ich willige in die stationäre Aufnahme des Tieres zu folgendem Zweck ein: ${subjectText}.`,
+
+        pl:
+          `Wyrażam zgodę na hospitalizację zwierzęcia w następującym celu: ${subjectText}.`,
+      }),
+
+      pick({
+        uk:
+          "Мені повідомлено про запланований режим спостереження, діагностики, лікування, годування та догляду відповідно до умов роботи клініки.",
+
+        en:
+          "I have been informed about the planned monitoring, diagnostics, treatment, feeding and care in accordance with the clinic’s operating conditions.",
+
+        de:
+          "Ich wurde über die geplante Überwachung, Diagnostik, Behandlung, Fütterung und Betreuung entsprechend den Bedingungen der Klinik informiert.",
+
+        pl:
+          "Poinformowano mnie o planowanym nadzorze, diagnostyce, leczeniu, żywieniu i opiece zgodnie z warunkami pracy kliniki.",
+      }),
+
+      pick({
+        uk:
+          "Я погоджуюся на виконання процедур, досліджень і застосування препаратів у межах погодженого плану стаціонарного лікування.",
+
+        en:
+          "I consent to procedures, examinations and the use of medicines within the agreed inpatient treatment plan.",
+
+        de:
+          "Ich willige in Maßnahmen, Untersuchungen und die Anwendung von Medikamenten im Rahmen des vereinbarten stationären Behandlungsplans ein.",
+
+        pl:
+          "Wyrażam zgodę na procedury, badania i stosowanie leków w ramach uzgodnionego planu leczenia stacjonarnego.",
+      }),
+
+      pick({
+        uk:
+          "У разі істотної зміни стану клініка зв’язується зі мною за вказаним телефоном. Якщо зволікання створює безпосередню загрозу життю тварини, я дозволяю необхідні дії для стабілізації з подальшим інформуванням.",
+
+        en:
+          "If the animal’s condition changes significantly, the clinic will contact me using the provided phone number. If delay poses an immediate threat to life, I authorize the measures necessary for stabilization, followed by notification.",
+
+        de:
+          "Bei einer wesentlichen Zustandsänderung kontaktiert mich die Klinik unter der angegebenen Telefonnummer. Besteht durch eine Verzögerung unmittelbare Lebensgefahr, gestatte ich die erforderlichen Stabilisierungsmaßnahmen mit anschließender Information.",
+
+        pl:
+          "W przypadku istotnej zmiany stanu klinika skontaktuje się ze mną pod podanym numerem telefonu. Jeżeli zwłoka stwarza bezpośrednie zagrożenie życia, zezwalam na działania niezbędne do stabilizacji, z późniejszym poinformowaniem mnie.",
+      }),
+
+      pick({
+        uk:
+          "Я зобов’язуюся залишатися доступним/доступною для зв’язку, повідомляти про відомі особливості здоров’я тварини та забрати її у погоджений час після виписки.",
+
+        en:
+          "I agree to remain available for contact, disclose known health information about the animal and collect the animal at the agreed time after discharge.",
+
+        de:
+          "Ich verpflichte mich, erreichbar zu bleiben, bekannte gesundheitliche Besonderheiten des Tieres mitzuteilen und das Tier nach der Entlassung zum vereinbarten Zeitpunkt abzuholen.",
+
+        pl:
+          "Zobowiązuję się pozostawać dostępny do kontaktu, przekazać znane informacje o stanie zdrowia zwierzęcia oraz odebrać je w uzgodnionym terminie po wypisie.",
+      }),
+
+      pick({
+        uk:
+          "Мені повідомлено, що строк госпіталізації, обсяг допомоги та вартість можуть змінитися залежно від динаміки стану; планові зміни погоджуються додатково.",
+
+        en:
+          "I have been informed that the duration of hospitalization, scope of care and cost may change depending on the patient’s progress. Planned changes require additional approval.",
+
+        de:
+          "Ich wurde darüber informiert, dass sich Dauer des Aufenthalts, Behandlungsumfang und Kosten je nach Verlauf ändern können. Planbare Änderungen werden zusätzlich abgestimmt.",
+
+        pl:
+          "Poinformowano mnie, że czas hospitalizacji, zakres pomocy i koszt mogą się zmienić zależnie od przebiegu stanu pacjenta. Planowane zmiany wymagają dodatkowego uzgodnienia.",
+      }),
     ],
+
     surgery_refusal: [
-      `Мені рекомендовано оперативне втручання: ${subjectText}. Лікар пояснив його мету, очікувану користь та причини рекомендації.`,
-      "Мені зрозуміло повідомлено про можливі наслідки відмови або зволікання, зокрема прогресування захворювання, посилення болю, розвиток ускладнень, погіршення прогнозу та можливу загрозу життю тварини.",
-      "Мені пояснено доступні альтернативи, їхні обмеження, а також ознаки погіршення, за яких потрібне невідкладне повторне звернення.",
-      "Я мав/мала можливість поставити запитання та отримав/отримала зрозумілі відповіді.",
-      "Попри надані пояснення, я добровільно відмовляюся від рекомендованої операції на момент підписання цього документа і розумію, що можу повторно звернутися та переглянути своє рішення.",
-      "Ця відмова фіксує моє рішення та отримані роз’яснення, але не звільняє клініку від відповідальності за якість фактично наданої ветеринарної допомоги.",
+      pick({
+        uk:
+          `Мені рекомендовано оперативне втручання: ${subjectText}. Лікар пояснив його мету, очікувану користь та причини рекомендації.`,
+
+        en:
+          `The following surgical procedure has been recommended to me: ${subjectText}. The veterinarian explained its purpose, expected benefits and the reasons for the recommendation.`,
+
+        de:
+          `Mir wurde folgender operativer Eingriff empfohlen: ${subjectText}. Der Tierarzt hat Zweck, erwarteten Nutzen und Gründe für die Empfehlung erläutert.`,
+
+        pl:
+          `Zalecono mi następujący zabieg operacyjny: ${subjectText}. Lekarz wyjaśnił jego cel, oczekiwane korzyści i powody zalecenia.`,
+      }),
+
+      pick({
+        uk:
+          "Мені зрозуміло повідомлено про можливі наслідки відмови або зволікання, зокрема прогресування захворювання, посилення болю, розвиток ускладнень, погіршення прогнозу та можливу загрозу життю тварини.",
+
+        en:
+          "The possible consequences of refusal or delay have been clearly explained to me, including disease progression, increased pain, complications, a poorer prognosis and a possible threat to the animal’s life.",
+
+        de:
+          "Die möglichen Folgen einer Ablehnung oder Verzögerung wurden mir verständlich erklärt, darunter Fortschreiten der Erkrankung, stärkere Schmerzen, Komplikationen, eine Verschlechterung der Prognose und eine mögliche Lebensgefahr.",
+
+        pl:
+          "Jasno wyjaśniono mi możliwe skutki odmowy lub zwłoki, w tym postęp choroby, nasilenie bólu, rozwój powikłań, pogorszenie rokowania i możliwe zagrożenie życia zwierzęcia.",
+      }),
+
+      pick({
+        uk:
+          "Мені пояснено доступні альтернативи, їхні обмеження, а також ознаки погіршення, за яких потрібне невідкладне повторне звернення.",
+
+        en:
+          "The available alternatives, their limitations and the signs of deterioration requiring urgent veterinary attention have been explained to me.",
+
+        de:
+          "Verfügbare Alternativen, deren Grenzen sowie Anzeichen einer Verschlechterung, die eine dringende erneute Vorstellung erfordern, wurden mir erklärt.",
+
+        pl:
+          "Wyjaśniono mi dostępne alternatywy, ich ograniczenia oraz objawy pogorszenia wymagające pilnej ponownej konsultacji.",
+      }),
+
+      pick({
+        uk:
+          "Я мав/мала можливість поставити запитання та отримав/отримала зрозумілі відповіді.",
+
+        en:
+          "I had an opportunity to ask questions and received clear answers.",
+
+        de:
+          "Ich hatte Gelegenheit, Fragen zu stellen, und habe verständliche Antworten erhalten.",
+
+        pl:
+          "Miałem/miałam możliwość zadawania pytań i otrzymałem/otrzymałam zrozumiałe odpowiedzi.",
+      }),
+
+      pick({
+        uk:
+          "Попри надані пояснення, я добровільно відмовляюся від рекомендованої операції на момент підписання цього документа і розумію, що можу повторно звернутися та переглянути своє рішення.",
+
+        en:
+          "Despite the explanations provided, I voluntarily refuse the recommended surgery at the time of signing this document. I understand that I may return and reconsider my decision.",
+
+        de:
+          "Trotz der erfolgten Aufklärung lehne ich die empfohlene Operation zum Zeitpunkt der Unterzeichnung freiwillig ab. Mir ist bekannt, dass ich mich erneut vorstellen und meine Entscheidung überdenken kann.",
+
+        pl:
+          "Pomimo udzielonych wyjaśnień dobrowolnie odmawiam zalecanej operacji w chwili podpisania dokumentu. Rozumiem, że mogę ponownie zgłosić się do kliniki i zmienić swoją decyzję.",
+      }),
+
+      pick({
+        uk:
+          "Ця відмова фіксує моє рішення та отримані роз’яснення, але не звільняє клініку від відповідальності за якість фактично наданої ветеринарної допомоги.",
+
+        en:
+          "This refusal records my decision and the explanations received, but does not release the clinic from responsibility for the quality of veterinary care actually provided.",
+
+        de:
+          "Diese Ablehnung dokumentiert meine Entscheidung und die erhaltene Aufklärung, entbindet die Klinik jedoch nicht von der Verantwortung für die Qualität der tatsächlich erbrachten tierärztlichen Leistungen.",
+
+        pl:
+          "Niniejsza odmowa dokumentuje moją decyzję i otrzymane wyjaśnienia, ale nie zwalnia kliniki z odpowiedzialności za jakość faktycznie udzielonej pomocy weterynaryjnej.",
+      }),
     ],
   };
 
-  return clauses[consentType] || [];
+  return (
+    clauses[
+      consentType
+    ] || []
+  );
+}
+function getPatientConsentPdfUi() {
+  const language =
+    getInterfaceLanguage();
+
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    ownerRepresentative:
+      pick(
+        "Власник / представник",
+        "Owner / representative",
+        "Tierhalter / Vertreter",
+        "Właściciel / przedstawiciel"
+      ),
+
+    fullName:
+      pick(
+        "ПІБ",
+        "Full name",
+        "Vollständiger Name",
+        "Imię i nazwisko"
+      ),
+
+    veterinarian:
+      pick(
+        "Ветеринарний лікар",
+        "Veterinarian",
+        "Tierarzt",
+        "Lekarz weterynarii"
+      ),
+
+    signature:
+      pick(
+        "Підпис",
+        "Signature",
+        "Unterschrift",
+        "Podpis"
+      ),
+
+    signatureDateTime:
+      pick(
+        "Підпис · дата і час",
+        "Signature · date and time",
+        "Unterschrift · Datum und Uhrzeit",
+        "Podpis · data i godzina"
+      ),
+
+    representative:
+      pick(
+        "ПРЕДСТАВНИК",
+        "REPRESENTATIVE",
+        "VERTRETER",
+        "PRZEDSTAWICIEL"
+      ),
+
+    status:
+      pick(
+        "СТАТУС",
+        "ROLE",
+        "ROLLE",
+        "STATUS"
+      ),
+
+    phone:
+      pick(
+        "ТЕЛЕФОН",
+        "PHONE",
+        "TELEFON",
+        "TELEFON"
+      ),
+
+    individualRisks:
+      pick(
+        "Індивідуальні ризики та додаткові умови",
+        "Individual risks and additional terms",
+        "Individuelle Risiken und zusätzliche Bedingungen",
+        "Indywidualne ryzyka i dodatkowe warunki"
+      ),
+
+    decisionTitle:
+      pick(
+        "Підтвердження поінформованого рішення",
+        "Confirmation of an informed decision",
+        "Bestätigung der informierten Entscheidung",
+        "Potwierdzenie świadomej decyzji"
+      ),
+
+    decisionText:
+      pick(
+        "Я, {name}, підтверджую, що маю право приймати рішення щодо ветеринарної допомоги пацієнту {patient}. Інформацію надано зрозумілою мовою, я мав/мала можливість поставити запитання та отримати відповіді.",
+        "I, {name}, confirm that I am authorized to make decisions about veterinary care for patient {patient}. The information was provided in clear language, and I had an opportunity to ask questions and receive answers.",
+        "Ich, {name}, bestätige, dass ich berechtigt bin, Entscheidungen über die tierärztliche Versorgung des Patienten {patient} zu treffen. Die Informationen wurden verständlich erläutert und ich hatte Gelegenheit, Fragen zu stellen und Antworten zu erhalten.",
+        "Ja, {name}, potwierdzam, że mam prawo podejmować decyzje dotyczące opieki weterynaryjnej nad pacjentem {patient}. Informacje przekazano w zrozumiały sposób, a ja miałem/miałam możliwość zadawania pytań i uzyskania odpowiedzi."
+      ),
+
+    personalDataTitle:
+      pick(
+        "Обробка персональних даних",
+        "Processing of personal data",
+        "Verarbeitung personenbezogener Daten",
+        "Przetwarzanie danych osobowych"
+      ),
+
+    personalDataText:
+      pick(
+        "Надаю добровільну документовану згоду на обробку зазначених у цьому документі контактних та ідентифікаційних даних виключно для оформлення цієї згоди, ведення медичної і фінансової історії пацієнта та зв’язку щодо лікування. Мене повідомлено про право звернутися для доступу, уточнення або виправлення даних та відкликати згоду в межах, установлених законодавством.",
+        "I voluntarily consent to the processing of the contact and identification data contained in this document solely for recording this consent, maintaining the patient’s medical and financial history and treatment-related communication. I have been informed of my right to request access, clarification or correction of the data and to withdraw consent within the limits established by law.",
+        "Ich willige freiwillig und dokumentiert in die Verarbeitung der in diesem Dokument angegebenen Kontakt- und Identifikationsdaten ausschließlich zur Dokumentation dieser Einwilligung, zur Führung der medizinischen und finanziellen Patientenakte sowie zur Kommunikation über die Behandlung ein. Ich wurde über mein Recht auf Auskunft, Berichtigung und Widerruf der Einwilligung im gesetzlich zulässigen Umfang informiert.",
+        "Dobrowolnie wyrażam udokumentowaną zgodę na przetwarzanie danych kontaktowych i identyfikacyjnych zawartych w tym dokumencie wyłącznie w celu sporządzenia zgody, prowadzenia historii medycznej i finansowej pacjenta oraz kontaktu dotyczącego leczenia. Poinformowano mnie o prawie do dostępu, wyjaśnienia lub poprawienia danych oraz wycofania zgody w granicach określonych prawem."
+      ),
+
+    authorityConfirmed:
+      pick(
+        "Повноваження представника підтверджено",
+        "Representative’s authority confirmed",
+        "Vertretungsberechtigung bestätigt",
+        "Uprawnienia przedstawiciela potwierdzone"
+      ),
+
+    explanationReceived:
+      pick(
+        "Пояснення лікаря отримано",
+        "Veterinarian’s explanation received",
+        "Tierärztliche Aufklärung erhalten",
+        "Otrzymano wyjaśnienia lekarza"
+      ),
+
+    dataConsentConfirmed:
+      pick(
+        "Згоду на обробку даних надано",
+        "Consent to data processing provided",
+        "Einwilligung zur Datenverarbeitung erteilt",
+        "Wyrażono zgodę na przetwarzanie danych"
+      ),
+
+    date:
+      pick(
+        "Дата",
+        "Date",
+        "Datum",
+        "Data"
+      ),
+  };
 }
 
 function renderPatientConsentSignatures({
@@ -48792,56 +54947,104 @@ function renderPatientConsentSignatures({
   clinic,
   signedAt,
 }) {
+  const ui =
+    getPatientConsentPdfUi();
+
+  const formattedDate =
+    formatPatientDocumentDate(
+      signedAt,
+      true
+    );
+
   return `
-    <div class="disConsentSignGrid">
-      <div class="disConsentSignBox">
-        <div class="disModernSignTitle">
-          Власник / представник
-        </div>
-        <div class="disModernSignLine"></div>
-        <div class="disModernSignName">
+    <div
+      class="disConsentSignGrid"
+    >
+      <div
+        class="disConsentSignBox"
+      >
+        <div
+          class="disModernSignTitle"
+        >
           ${escapeHtml(
-            representativeName ||
-            "ПІБ"
+            ui.ownerRepresentative
           )}
         </div>
-        <div class="disConsentSignDate">
-          Підпис · ${escapeHtml(
-            formatPatientDocumentDate(
-              signedAt,
-              true
-            )
+
+        <div
+          class="disModernSignLine"
+        ></div>
+
+        <div
+          class="disModernSignName"
+        >
+          ${escapeHtml(
+            representativeName ||
+            ui.fullName
+          )}
+        </div>
+
+        <div
+          class="disConsentSignDate"
+        >
+          ${escapeHtml(
+            ui.signature
+          )}
+          ·
+          ${escapeHtml(
+            formattedDate
           )}
         </div>
       </div>
 
-      <div class="disConsentSignBox">
-        <div class="disModernSignTitle">
-          Ветеринарний лікар
+      <div
+        class="disConsentSignBox"
+      >
+        <div
+          class="disModernSignTitle"
+        >
+          ${escapeHtml(
+            ui.veterinarian
+          )}
         </div>
+
         ${
-          clinic?.doctor_signature_url
+          clinic
+            ?.doctor_signature_url
             ? `
               <img
                 src="${escapeHtml(
-                  clinic.doctor_signature_url
+                  clinic
+                    .doctor_signature_url
                 )}"
-                alt="Підпис лікаря"
+                alt="${escapeHtml(
+                  ui.signature
+                )}"
                 class="disModernSignImg"
               >
             `
             : `
-              <div class="disModernSignLine"></div>
+              <div
+                class="disModernSignLine"
+              ></div>
             `
         }
-        <div class="disModernSignName">
+
+        <div
+          class="disModernSignName"
+        >
           ${escapeHtml(
             doctorName ||
-            "Ветеринарний лікар"
+            ui.veterinarian
           )}
         </div>
-        <div class="disConsentSignDate">
-          Підпис · дата і час
+
+        <div
+          class="disConsentSignDate"
+        >
+          ${escapeHtml(
+            ui.signatureDateTime
+          )}
         </div>
       </div>
     </div>
@@ -48855,21 +55058,32 @@ function createPatientConsentDocumentHtml({
   clinic,
   visits,
 }) {
+  const consentUi =
+    getPatientConsentUi();
+
+  const pdfUi =
+    getPatientConsentPdfUi();
+
   const config =
-    PATIENT_CONSENT_TYPES[
+    getPatientConsentTypeMeta(
       consentData?.consentType
-    ];
+    );
 
   if (!config) {
     throw new Error(
-      "Невідомий тип згоди."
+      consentUi.unknownType
     );
   }
 
   const visit =
-    (visits || []).find(
+    (
+      visits ||
+      []
+    ).find(
       (item) =>
-        String(item.id) ===
+        String(
+          item.id
+        ) ===
         String(
           consentData.visitId ||
           ""
@@ -48878,7 +55092,8 @@ function createPatientConsentDocumentHtml({
 
   const doctorName =
     getPatientDocumentDoctorName(
-      visit || {}
+      visit ||
+      {}
     );
 
   const representativeName =
@@ -48893,6 +55108,11 @@ function createPatientConsentDocumentHtml({
     owner?.phone ||
     "—";
 
+  const representativeRole =
+    consentData
+      .representativeRole ||
+    consentUi.roleOwner;
+
   const clauses =
     getPatientConsentClauses(
       consentData.consentType,
@@ -48904,41 +55124,85 @@ function createPatientConsentDocumentHtml({
       consentData.signedAt ||
       Date.now()
     )
-      .replace(/\D/g, "")
-      .slice(-10);
+      .replace(
+        /\D/g,
+        ""
+      )
+      .slice(
+        -10
+      );
 
   const clauseHtml =
     clauses
       .map(
         (clause) => `
-          <li class="disConsentClause">
-            ${escapeHtml(clause)}
+          <li
+            class="disConsentClause"
+          >
+            ${escapeHtml(
+              clause
+            )}
           </li>
         `
       )
       .join("");
 
+  const decisionText =
+    pdfUi.decisionText
+      .replace(
+        "{name}",
+        representativeName
+      )
+      .replace(
+        "{patient}",
+        pet?.name ||
+        "—"
+      );
+
   const body = `
-    <div class="disConsentRepresentative">
+    <div
+      class="disConsentRepresentative"
+    >
       <div>
-        <span>ПРЕДСТАВНИК</span>
-        <strong>${escapeHtml(
-          representativeName
-        )}</strong>
+        <span>
+          ${escapeHtml(
+            pdfUi.representative
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            representativeName
+          )}
+        </strong>
       </div>
+
       <div>
-        <span>СТАТУС</span>
-        <strong>${escapeHtml(
-          consentData
-            .representativeRole ||
-          "Власник тварини"
-        )}</strong>
+        <span>
+          ${escapeHtml(
+            pdfUi.status
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            representativeRole
+          )}
+        </strong>
       </div>
+
       <div>
-        <span>ТЕЛЕФОН</span>
-        <strong>${escapeHtml(
-          representativePhone
-        )}</strong>
+        <span>
+          ${escapeHtml(
+            pdfUi.phone
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            representativePhone
+          )}
+        </strong>
       </div>
     </div>
 
@@ -48956,99 +55220,899 @@ function createPatientConsentDocumentHtml({
     ${
       consentData.notes
         ? renderPatientDocumentSection(
-            "Індивідуальні ризики та додаткові умови",
+            pdfUi.individualRisks,
             consentData.notes
           )
         : ""
     }
 
-    <div class="disModernSection disConsentSection">
-      <div class="disModernSectionTitle">
-        Підтвердження поінформованого рішення
+    <div
+      class="
+        disModernSection
+        disConsentSection
+      "
+    >
+      <div
+        class="disModernSectionTitle"
+      >
+        ${escapeHtml(
+          pdfUi.decisionTitle
+        )}
       </div>
 
-      <p class="disConsentLead">
-        Я, ${escapeHtml(
-          representativeName
-        )}, підтверджую, що маю право
-        приймати рішення щодо ветеринарної
-        допомоги пацієнту
-        ${escapeHtml(pet?.name || "—")}.
-        Інформацію надано зрозумілою мовою,
-        я мав/мала можливість поставити
-        запитання та отримати відповіді.
+      <p
+        class="disConsentLead"
+      >
+        ${escapeHtml(
+          decisionText
+        )}
       </p>
 
-      <ol class="disConsentClauses">
+      <ol
+        class="disConsentClauses"
+      >
         ${clauseHtml}
       </ol>
     </div>
 
-    <div class="disModernSection disConsentDataSection">
-      <div class="disModernSectionTitle">
-        Обробка персональних даних
+    <div
+      class="
+        disModernSection
+        disConsentDataSection
+      "
+    >
+      <div
+        class="disModernSectionTitle"
+      >
+        ${escapeHtml(
+          pdfUi.personalDataTitle
+        )}
       </div>
 
-      <p class="disConsentLead">
-        Надаю добровільну документовану згоду
-        на обробку зазначених у цьому документі
-        контактних та ідентифікаційних даних
-        виключно для оформлення цієї згоди,
-        ведення медичної і фінансової історії
-        пацієнта та зв’язку щодо лікування.
-        Мене повідомлено про право звернутися
-        для доступу, уточнення або виправлення
-        даних та відкликати згоду в межах,
-        установлених законодавством.
+      <p
+        class="disConsentLead"
+      >
+        ${escapeHtml(
+          pdfUi.personalDataText
+        )}
       </p>
     </div>
 
-    <div class="disConsentAcknowledgements">
+    <div
+      class="disConsentAcknowledgements"
+    >
       <div>
-        <span>✓</span>
-        Повноваження представника підтверджено
+        <span>
+          ✓
+        </span>
+
+        ${escapeHtml(
+          pdfUi.authorityConfirmed
+        )}
       </div>
+
       <div>
-        <span>✓</span>
-        Пояснення лікаря отримано
+        <span>
+          ✓
+        </span>
+
+        ${escapeHtml(
+          pdfUi.explanationReceived
+        )}
       </div>
+
       <div>
-        <span>✓</span>
-        Згоду на обробку даних надано
+        <span>
+          ✓
+        </span>
+
+        ${escapeHtml(
+          pdfUi.dataConsentConfirmed
+        )}
       </div>
     </div>
   `;
 
   return renderPatientDocumentShell({
-    title: config.title,
+    title:
+      config.title,
+
     number:
-      `${config.code}-${documentSeed || "DOC"}`,
+      `${
+        config.code
+      }-${
+        documentSeed ||
+        "DOC"
+      }`,
+
     dateLabel:
-      `Дата: ${
+      `${pdfUi.date}: ${
         formatPatientDocumentDate(
           consentData.signedAt,
           true
         )
       }`,
+
     pet,
+
     owner: {
-      ...(owner || {}),
-      name: representativeName,
-      phone: representativePhone,
+      ...(
+        owner ||
+        {}
+      ),
+
+      name:
+        representativeName,
+
+      phone:
+        representativePhone,
     },
+
     doctorName,
     clinic,
     body,
+
     signaturesHtml:
       renderPatientConsentSignatures({
         representativeName,
         doctorName,
         clinic,
+
         signedAt:
           consentData.signedAt,
       }),
   });
 }
+function localizePatientDocumentHtml(
+  html
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const sourceTranslations = {
+    "Ветеринарна клініка": [
+      "Ветеринарна клініка",
+      "Veterinary clinic",
+      "Tierklinik",
+      "Klinika weterynaryjna",
+    ],
+
+    "Пацієнт": [
+      "Пацієнт",
+      "Patient",
+      "Patient",
+      "Pacjent",
+    ],
+
+    "Вид": [
+  "Вид",
+  "Species",
+  "Tierart",
+  "Gatunek",
+],
+
+    "Порода": [
+      "Порода",
+      "Breed",
+      "Rasse",
+      "Rasa",
+    ],
+
+    "Вік": [
+      "Вік",
+      "Age",
+      "Alter",
+      "Wiek",
+    ],
+
+    "Вага": [
+      "Вага",
+      "Weight",
+      "Gewicht",
+      "Masa ciała",
+    ],
+
+    "Власник": [
+      "Власник",
+      "Owner",
+      "Tierhalter",
+      "Właściciel",
+    ],
+
+    "Телефон": [
+      "Телефон",
+      "Phone",
+      "Telefon",
+      "Telefon",
+    ],
+
+    "Лікар": [
+      "Лікар",
+      "Veterinarian",
+      "Tierarzt",
+      "Lekarz weterynarii",
+    ],
+
+    "Ветеринарний лікар": [
+      "Ветеринарний лікар",
+      "Veterinarian",
+      "Tierarzt",
+      "Lekarz weterynarii",
+    ],
+
+    "Печатка клініки": [
+      "Печатка клініки",
+      "Clinic stamp",
+      "Praxisstempel",
+      "Pieczęć kliniki",
+    ],
+
+    "Коли важливо — ми поруч.": [
+      "Коли важливо — ми поруч.",
+      "Here when it matters.",
+      "Für Sie da, wenn es darauf ankommt.",
+      "Jesteśmy blisko, gdy ma to znaczenie.",
+    ],
+
+    "Виписка за візитом": [
+      "Виписка за візитом",
+      "Visit summary",
+      "Behandlungsbericht",
+      "Podsumowanie wizyty",
+    ],
+
+    "Лист призначень і рекомендацій": [
+      "Лист призначень і рекомендацій",
+      "Treatment plan and recommendations",
+      "Behandlungsplan und Empfehlungen",
+      "Plan leczenia i zalecenia",
+    ],
+
+    "Фінансова виписка": [
+      "Фінансова виписка",
+      "Financial statement",
+      "Finanzübersicht",
+      "Zestawienie finansowe",
+    ],
+
+    "Виписка зі стаціонару": [
+      "Виписка зі стаціонару",
+      "Hospital discharge summary",
+      "Entlassungsbericht",
+      "Wypis ze szpitala",
+    ],
+
+    "Скарги та анамнез": [
+      "Скарги та анамнез",
+      "Complaints and history",
+      "Beschwerden und Anamnese",
+      "Objawy i wywiad",
+    ],
+
+    "Встановлений діагноз": [
+      "Встановлений діагноз",
+      "Diagnosis",
+      "Diagnose",
+      "Rozpoznanie",
+    ],
+
+    "Проведені процедури": [
+      "Проведені процедури",
+      "Procedures performed",
+      "Durchgeführte Maßnahmen",
+      "Wykonane procedury",
+    ],
+
+    "Використані препарати та матеріали": [
+      "Використані препарати та матеріали",
+      "Medicines and materials used",
+      "Verwendete Medikamente und Materialien",
+      "Użyte leki i materiały",
+    ],
+
+    "Призначення лікаря": [
+      "Призначення лікаря",
+      "Treatment prescribed",
+      "Verordnete Behandlung",
+      "Zalecone leczenie",
+    ],
+
+    "Рекомендації власнику": [
+      "Рекомендації власнику",
+      "Recommendations for the owner",
+      "Empfehlungen für den Tierhalter",
+      "Zalecenia dla właściciela",
+    ],
+
+    "Контроль та повторний огляд": [
+      "Контроль та повторний огляд",
+      "Follow-up and re-examination",
+      "Kontrolle und Nachuntersuchung",
+      "Kontrola i ponowne badanie",
+    ],
+
+    "Діагноз": [
+      "Діагноз",
+      "Diagnosis",
+      "Diagnose",
+      "Diagnoza",
+    ],
+
+    "Призначене лікування": [
+      "Призначене лікування",
+      "Prescribed treatment",
+      "Verordnete Behandlung",
+      "Zalecone leczenie",
+    ],
+
+    "Рекомендації з догляду": [
+      "Рекомендації з догляду",
+      "Care recommendations",
+      "Pflegeempfehlungen",
+      "Zalecenia dotyczące opieki",
+    ],
+
+    "Надані послуги та використані препарати": [
+      "Надані послуги та використані препарати",
+      "Services and medicines",
+      "Leistungen und Medikamente",
+      "Usługi i leki",
+    ],
+
+    "Деталізація візиту без медичних нотаток": [
+      "Деталізація візиту без медичних нотаток",
+      "Visit details without medical notes",
+      "Termindetails ohne medizinische Notizen",
+      "Szczegóły wizyty bez notatek medycznych",
+    ],
+
+    "Послуги та препарати не додані": [
+      "Послуги та препарати не додані",
+      "No services or medicines added",
+      "Keine Leistungen oder Medikamente hinzugefügt",
+      "Nie dodano usług ani leków",
+    ],
+
+    "Послуга": [
+      "Послуга",
+      "Service",
+      "Leistung",
+      "Usługa",
+    ],
+
+    "Препарат": [
+      "Препарат",
+      "Medicine",
+      "Medikament",
+      "Lek",
+    ],
+
+    "Препарат / матеріал": [
+      "Препарат / матеріал",
+      "Medicine / material",
+      "Medikament / Material",
+      "Lek / materiał",
+    ],
+
+    "Назва": [
+      "Назва",
+      "Name",
+      "Bezeichnung",
+      "Nazwa",
+    ],
+
+    "Тип": [
+      "Тип",
+      "Type",
+      "Typ",
+      "Typ",
+    ],
+
+    "К-сть": [
+      "К-сть",
+      "Qty.",
+      "Menge",
+      "Ilość",
+    ],
+
+    "Ціна": [
+      "Ціна",
+      "Price",
+      "Preis",
+      "Cena",
+    ],
+
+    "Сума": [
+      "Сума",
+      "Amount",
+      "Betrag",
+      "Suma",
+    ],
+
+    "Підсумок": [
+      "Підсумок",
+      "Subtotal",
+      "Zwischensumme",
+      "Suma częściowa",
+    ],
+
+    "Знижка": [
+      "Знижка",
+      "Discount",
+      "Rabatt",
+      "Rabat",
+    ],
+
+    "До сплати": [
+      "До сплати",
+      "Total due",
+      "Zu zahlen",
+      "Do zapłaty",
+    ],
+
+    "Стан оплати": [
+      "Стан оплати",
+      "Payment status",
+      "Zahlungsstatus",
+      "Status płatności",
+    ],
+
+    "Не оплачено": [
+      "Не оплачено",
+      "Unpaid",
+      "Nicht bezahlt",
+      "Nieopłacone",
+    ],
+
+    "Оплачено частково": [
+      "Оплачено частково",
+      "Partially paid",
+      "Teilweise bezahlt",
+      "Częściowo opłacone",
+    ],
+
+    "Оплачено": [
+      "Оплачено",
+      "Paid",
+      "Bezahlt",
+      "Opłacone",
+    ],
+
+    "Повернено": [
+      "Повернено",
+      "Refunded",
+      "Erstattet",
+      "Zwrócono",
+    ],
+
+    "Скасовано": [
+      "Скасовано",
+      "Cancelled",
+      "Storniert",
+      "Anulowano",
+    ],
+
+    "Статус недоступний": [
+      "Статус недоступний",
+      "Status unavailable",
+      "Status nicht verfügbar",
+      "Status niedostępny",
+    ],
+
+    "Залишок": [
+      "Залишок",
+      "Balance",
+      "Offener Betrag",
+      "Pozostało",
+    ],
+
+    "Оплата": [
+      "Оплата",
+      "Payment",
+      "Zahlung",
+      "Płatność",
+    ],
+
+    "Недоступно для поточної ролі": [
+      "Недоступно для поточної ролі",
+      "Unavailable for the current role",
+      "Für die aktuelle Rolle nicht verfügbar",
+      "Niedostępne dla obecnej roli",
+    ],
+
+    "Операцій": [
+      "Операцій",
+      "Transactions",
+      "Transaktionen",
+      "Transakcje",
+    ],
+
+    "Готівка": [
+      "Готівка",
+      "Cash",
+      "Barzahlung",
+      "Gotówka",
+    ],
+
+    "Картка": [
+      "Картка",
+      "Card",
+      "Karte",
+      "Karta",
+    ],
+
+    "Термінал": [
+      "Термінал",
+      "Terminal",
+      "Terminal",
+      "Terminal",
+    ],
+
+    "Переказ": [
+      "Переказ",
+      "Bank transfer",
+      "Überweisung",
+      "Przelew",
+    ],
+
+    "Інше": [
+      "Інше",
+      "Other",
+      "Sonstiges",
+      "Inne",
+    ],
+
+    "Період госпіталізації": [
+      "Період госпіталізації",
+      "Hospitalization period",
+      "Aufenthaltszeitraum",
+      "Okres hospitalizacji",
+    ],
+
+    "Виконані процедури та призначення": [
+      "Виконані процедури та призначення",
+      "Procedures and treatment performed",
+      "Durchgeführte Maßnahmen und Behandlungen",
+      "Wykonane procedury i leczenie",
+    ],
+
+    "Виконані призначення не зафіксовані.": [
+      "Виконані призначення не зафіксовані.",
+      "No completed treatment tasks were recorded.",
+      "Es wurden keine ausgeführten Behandlungsmaßnahmen dokumentiert.",
+      "Nie zarejestrowano wykonanych zaleceń.",
+    ],
+
+    "Стан та примітка до виписки": [
+      "Стан та примітка до виписки",
+      "Condition and discharge note",
+      "Zustand und Entlassungshinweis",
+      "Stan i uwagi przy wypisie",
+    ],
+  };
+
+  const translations =
+    new Map(
+      Object.entries(
+        sourceTranslations
+      ).map(
+        ([
+          source,
+          values,
+        ]) => [
+          source,
+          values[index] ||
+          values[0],
+        ]
+      )
+    );
+
+  const template =
+    document.createElement(
+      "template"
+    );
+
+  template.innerHTML =
+    String(
+      html ||
+      ""
+    );
+
+  const textNodes = [];
+
+  const walker =
+    document.createTreeWalker(
+      template.content,
+      NodeFilter.SHOW_TEXT
+    );
+
+  while (
+    walker.nextNode()
+  ) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  const normalize = (
+    value
+  ) =>
+    String(value || "")
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+  const setText = (
+    node,
+    value
+  ) => {
+    const source =
+      String(
+        node.nodeValue ||
+        ""
+      );
+
+    const leading =
+      source.match(
+        /^\s*/
+      )?.[0] || "";
+
+    const trailing =
+      source.match(
+        /\s*$/
+      )?.[0] || "";
+
+    node.nodeValue =
+      `${leading}${value}${trailing}`;
+  };
+
+  textNodes.forEach(
+    (node) => {
+      const text =
+        normalize(
+          node.nodeValue
+        );
+
+      if (
+        translations.has(
+          text
+        )
+      ) {
+        setText(
+          node,
+          translations.get(
+            text
+          )
+        );
+
+        return;
+      }
+
+      const visitDate =
+        text.match(
+          /^Дата візиту:\s*(.+)$/
+        );
+
+      if (visitDate) {
+        setText(
+          node,
+          `${
+            [
+              "Дата візиту:",
+              "Visit date:",
+              "Behandlungsdatum:",
+              "Data wizyty:",
+            ][index]
+          } ${visitDate[1]}`
+        );
+
+        return;
+      }
+
+      const dischargeDate =
+        text.match(
+          /^Дата виписки:\s*(.+)$/
+        );
+
+      if (
+        dischargeDate
+      ) {
+        setText(
+          node,
+          `${
+            [
+              "Дата виписки:",
+              "Discharge date:",
+              "Entlassungsdatum:",
+              "Data wypisu:",
+            ][index]
+          } ${dischargeDate[1]}`
+        );
+
+        return;
+      }
+
+      if (
+        /\bшт\b/.test(
+          text
+        )
+      ) {
+        node.nodeValue =
+          String(
+            node.nodeValue ||
+            ""
+          ).replace(
+            /\bшт\b/g,
+            [
+              "шт",
+              "pcs",
+              "Stk.",
+              "szt.",
+            ][index]
+          );
+      }
+    }
+  );
+
+  const tokenTranslations = {
+    "Готівка":
+      [
+        "Готівка",
+        "Cash",
+        "Barzahlung",
+        "Gotówka",
+      ][index],
+
+    "Картка":
+      [
+        "Картка",
+        "Card",
+        "Karte",
+        "Karta",
+      ][index],
+
+    "Термінал":
+      [
+        "Термінал",
+        "Terminal",
+        "Terminal",
+        "Terminal",
+      ][index],
+
+    "Переказ":
+      [
+        "Переказ",
+        "Bank transfer",
+        "Überweisung",
+        "Przelew",
+      ][index],
+  };
+
+  template.content
+    .querySelectorAll(
+      ".disModernCardMain"
+    )
+    .forEach(
+      (element) => {
+        let text =
+          element.textContent ||
+          "";
+
+        Object.entries(
+          tokenTranslations
+        ).forEach(
+          ([
+            source,
+            translated,
+          ]) => {
+            text =
+              text.replaceAll(
+                source,
+                translated
+              );
+          }
+        );
+
+        if (
+          normalize(
+            element.textContent
+          ) !==
+          normalize(text)
+        ) {
+          element.textContent =
+            text.trim();
+        }
+      }
+    );
+
+  template.content
+    .querySelectorAll(
+      'img[alt="Підпис лікаря"]'
+    )
+    .forEach(
+      (image) => {
+        image.alt =
+          [
+            "Підпис лікаря",
+            "Veterinarian’s signature",
+            "Unterschrift des Tierarztes",
+            "Podpis lekarza",
+          ][index];
+      }
+    );
+
+  template.content
+    .querySelectorAll(
+      'img[alt="Печатка клініки"]'
+    )
+    .forEach(
+      (image) => {
+        image.alt =
+          [
+            "Печатка клініки",
+            "Clinic stamp",
+            "Praxisstempel",
+            "Pieczęć kliniki",
+          ][index];
+      }
+    );
+
+  return template.innerHTML;
+}
+function getPatientDocumentErrorUi() {
+  const language =
+    getInterfaceLanguage();
+
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    consentDataMissing:
+      pick(
+        "Дані згоди не заповнені.",
+        "Consent details have not been completed.",
+        "Die Einwilligungsdaten wurden nicht ausgefüllt.",
+        "Dane zgody nie zostały uzupełnione."
+      ),
+
+    hospitalizationNotFound:
+      pick(
+        "Госпіталізацію не знайдено.",
+        "Hospitalization not found.",
+        "Der stationäre Aufenthalt wurde nicht gefunden.",
+        "Nie znaleziono hospitalizacji."
+      ),
+
+    visitNotFound:
+      pick(
+        "Візит не знайдено.",
+        "Visit not found.",
+        "Der Termin wurde nicht gefunden.",
+        "Nie znaleziono wizyty."
+      ),
+  };
+}
+
 
 async function createPatientDocumentPdf({
   type,
@@ -49058,6 +56122,9 @@ async function createPatientDocumentPdf({
   hospitalizations,
   consentData = null,
 }) {
+  const errorUi =
+    getPatientDocumentErrorUi();
+
   const owner =
     pet?.owner_id
       ? getOwnerById(
@@ -49069,12 +56136,18 @@ async function createPatientDocumentPdf({
     await getPatientDocumentClinic();
 
   let html = "";
-  let sourceDate = todayISO();
+  let sourceDate =
+    todayISO();
 
-  if (type === "consent") {
-    if (!consentData) {
+  if (
+    type ===
+    "consent"
+  ) {
+    if (
+      !consentData
+    ) {
       throw new Error(
-        "Дані згоди не заповнені."
+        errorUi.consentDataMissing
       );
     }
 
@@ -49090,17 +56163,26 @@ async function createPatientDocumentPdf({
         clinic,
         visits,
       });
-  } else if (type === "hospital") {
+  } else if (
+    type ===
+    "hospital"
+  ) {
     const hospitalization =
       hospitalizations.find(
         (item) =>
-          String(item.id) ===
-          String(sourceId)
+          String(
+            item.id
+          ) ===
+          String(
+            sourceId
+          )
       );
 
-    if (!hospitalization) {
+    if (
+      !hospitalization
+    ) {
       throw new Error(
-        "Госпіталізацію не знайдено."
+        errorUi.hospitalizationNotFound
       );
     }
 
@@ -49120,13 +56202,19 @@ async function createPatientDocumentPdf({
     const visit =
       visits.find(
         (item) =>
-          String(item.id) ===
-          String(sourceId)
+          String(
+            item.id
+          ) ===
+          String(
+            sourceId
+          )
       );
 
-    if (!visit) {
+    if (
+      !visit
+    ) {
       throw new Error(
-        "Візит не знайдено."
+        errorUi.visitNotFound
       );
     }
 
@@ -49145,34 +56233,51 @@ async function createPatientDocumentPdf({
       });
   }
 
+  html =
+    localizePatientDocumentHtml(
+      html
+    );
+
   let host =
     document.getElementById(
       "disA4"
     );
 
-  if (!host) {
+  if (
+    !host
+  ) {
     host =
       document.createElement(
         "div"
       );
-    host.id = "disA4";
+
+    host.id =
+      "disA4";
+
     host.className =
       "visitDischargePrintHost";
+
     document.body.appendChild(
       host
     );
   }
 
-  host.innerHTML = html;
+  host.innerHTML =
+    html;
 
   const typeNames = {
-    visit: "visit_discharge",
+    visit:
+      "visit_discharge",
+
     hospital:
       "hospital_discharge",
+
     prescriptions:
       "prescriptions",
+
     finance:
       "financial_statement",
+
     consent:
       `consent_${
         consentData
@@ -49182,19 +56287,30 @@ async function createPatientDocumentPdf({
   };
 
   const datePart =
-    String(sourceDate)
-      .slice(0, 10);
+    String(
+      sourceDate
+    ).slice(
+      0,
+      10
+    );
 
-  const filename = [
-    "DocPUG",
-    sanitizePatientDocumentFilename(
-      pet?.name ||
-      "patient"
-    ),
-    typeNames[type] ||
+  const filename =
+    [
+      "DocPUG",
+
+      sanitizePatientDocumentFilename(
+        pet?.name ||
+        "patient"
+      ),
+
+      typeNames[type] ||
       "document",
-    datePart,
-  ].join("_") + ".pdf";
+
+      datePart,
+    ].join(
+      "_"
+    ) +
+    ".pdf";
 
   await downloadA4Pdf(
     null,
@@ -49916,6 +57032,502 @@ function getPatientDayCountLabel(count) {
 
   return "днів";
 }
+function getPatientFilesUi() {
+  const language =
+    getInterfaceLanguage();
+
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
+
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    categoryAll:
+      pick(
+        "Усі",
+        "All",
+        "Alle",
+        "Wszystkie"
+      ),
+
+    categoryXray:
+      pick(
+        "Рентген",
+        "X-ray",
+        "Röntgen",
+        "RTG"
+      ),
+
+    categoryUltrasound:
+      pick(
+        "УЗД",
+        "Ultrasound",
+        "Ultraschall",
+        "USG"
+      ),
+
+    categoryMedia:
+      pick(
+        "Фото / відео",
+        "Photos / videos",
+        "Fotos / Videos",
+        "Zdjęcia / filmy"
+      ),
+
+    categoryDocument:
+      pick(
+        "Документи",
+        "Documents",
+        "Dokumente",
+        "Dokumenty"
+      ),
+
+    categoryOther:
+      pick(
+        "Інше",
+        "Other",
+        "Sonstiges",
+        "Inne"
+      ),
+
+    kicker:
+      pick(
+        "МЕДИЧНИЙ АРХІВ",
+        "MEDICAL ARCHIVE",
+        "MEDIZINISCHES ARCHIV",
+        "ARCHIWUM MEDYCZNE"
+      ),
+
+    title:
+      pick(
+        "Файли пацієнта",
+        "Patient files",
+        "Patientendateien",
+        "Pliki pacjenta"
+      ),
+
+    description:
+      pick(
+        "Рентген, УЗД, фотографії, відео та документи пацієнта.",
+        "X-rays, ultrasound scans, photos, videos and patient documents.",
+        "Röntgenbilder, Ultraschallaufnahmen, Fotos, Videos und Patientendokumente.",
+        "Zdjęcia RTG, badania USG, zdjęcia, filmy i dokumenty pacjenta."
+      ),
+
+    addFile:
+      pick(
+        "Додати файл",
+        "Add file",
+        "Datei hinzufügen",
+        "Dodaj plik"
+      ),
+
+    totalFiles:
+      pick(
+        "Усього файлів",
+        "Total files",
+        "Dateien insgesamt",
+        "Łącznie plików"
+      ),
+
+    file:
+      pick(
+        "файл",
+        "file",
+        "Datei",
+        "plik"
+      ),
+
+    filesFew:
+      pick(
+        "файли",
+        "files",
+        "Dateien",
+        "pliki"
+      ),
+
+    filesMany:
+      pick(
+        "файлів",
+        "files",
+        "Dateien",
+        "plików"
+      ),
+
+    thisFile:
+      pick(
+        "цей файл",
+        "this file",
+        "diese Datei",
+        "ten plik"
+      ),
+
+    deleteTitle:
+      pick(
+        "Видалити файл?",
+        "Delete file?",
+        "Datei löschen?",
+        "Usunąć plik?"
+      ),
+
+    deletePrefix:
+      pick(
+        "Файл",
+        "The file",
+        "Die Datei",
+        "Plik"
+      ),
+
+    deleteSuffix:
+      pick(
+        "буде видалено з медичного архіву пацієнта.",
+        "will be deleted from the patient’s medical archive.",
+        "wird aus dem medizinischen Archiv des Patienten gelöscht.",
+        "zostanie usunięty z archiwum medycznego pacjenta."
+      ),
+
+    defaultTitle:
+      pick(
+        "Файл пацієнта",
+        "Patient file",
+        "Patientendatei",
+        "Plik pacjenta"
+      ),
+
+    emptyAll:
+      pick(
+        "Файлів ще немає",
+        "No files yet",
+        "Noch keine Dateien",
+        "Brak plików"
+      ),
+
+    emptyCategory:
+      pick(
+        "У категорії «{category}» поки порожньо",
+        "The “{category}” category is empty",
+        "Die Kategorie „{category}“ ist leer",
+        "Kategoria „{category}” jest pusta"
+      ),
+
+    emptyText:
+      pick(
+        "Додайте медичне зображення або документ пацієнта.",
+        "Add a medical image or patient document.",
+        "Fügen Sie ein medizinisches Bild oder Patientendokument hinzu.",
+        "Dodaj obraz medyczny lub dokument pacjenta."
+      ),
+
+    addFirst:
+      pick(
+        "Додати перший файл",
+        "Add first file",
+        "Erste Datei hinzufügen",
+        "Dodaj pierwszy plik"
+      ),
+
+    dateMissing:
+      pick(
+        "Дата не вказана",
+        "Date not provided",
+        "Datum nicht angegeben",
+        "Nie podano daty"
+      ),
+
+    open:
+      pick(
+        "Відкрити",
+        "Open",
+        "Öffnen",
+        "Otwórz"
+      ),
+
+    unavailable:
+      pick(
+        "Файл недоступний",
+        "File unavailable",
+        "Datei nicht verfügbar",
+        "Plik niedostępny"
+      ),
+
+    edit:
+      pick(
+        "Редагувати",
+        "Edit",
+        "Bearbeiten",
+        "Edytuj"
+      ),
+
+    delete:
+      pick(
+        "Видалити",
+        "Delete",
+        "Löschen",
+        "Usuń"
+      ),
+
+    patientNotFound:
+      pick(
+        "Пацієнта не знайдено.",
+        "Patient not found.",
+        "Patient nicht gefunden.",
+        "Nie znaleziono pacjenta."
+      ),
+
+    close:
+      pick(
+        "Закрити",
+        "Close",
+        "Schließen",
+        "Zamknij"
+      ),
+
+    editFile:
+      pick(
+        "Редагувати файл",
+        "Edit file",
+        "Datei bearbeiten",
+        "Edytuj plik"
+      ),
+
+    addPatientFile:
+      pick(
+        "Додати файл пацієнта",
+        "Add patient file",
+        "Patientendatei hinzufügen",
+        "Dodaj plik pacjenta"
+      ),
+
+    patient:
+      pick(
+        "Пацієнт",
+        "Patient",
+        "Patient",
+        "Pacjent"
+      ),
+
+    archive:
+      pick(
+        "медичний архів",
+        "medical archive",
+        "medizinisches Archiv",
+        "archiwum medyczne"
+      ),
+
+    category:
+      pick(
+        "Категорія",
+        "Category",
+        "Kategorie",
+        "Kategoria"
+      ),
+
+    studyDate:
+      pick(
+        "Дата дослідження",
+        "Study date",
+        "Untersuchungsdatum",
+        "Data badania"
+      ),
+
+    name:
+      pick(
+        "Назва",
+        "Title",
+        "Bezeichnung",
+        "Nazwa"
+      ),
+
+    namePlaceholder:
+      pick(
+        "Наприклад: Грудна клітка, 2 проєкції",
+        "For example: Chest, two views",
+        "Zum Beispiel: Thorax, zwei Ebenen",
+        "Na przykład: Klatka piersiowa, dwie projekcje"
+      ),
+
+    comment:
+      pick(
+        "Коментар",
+        "Comment",
+        "Kommentar",
+        "Komentarz"
+      ),
+
+    commentPlaceholder:
+      pick(
+        "Опис дослідження або важливі примітки",
+        "Study description or important notes",
+        "Beschreibung der Untersuchung oder wichtige Hinweise",
+        "Opis badania lub ważne uwagi"
+      ),
+
+    currentFile:
+      pick(
+        "Поточний файл",
+        "Current file",
+        "Aktuelle Datei",
+        "Aktualny plik"
+      ),
+
+    chooseFile:
+      pick(
+        "Оберіть файл",
+        "Choose a file",
+        "Datei auswählen",
+        "Wybierz plik"
+      ),
+
+    formats:
+      pick(
+        "JPG, PNG, WEBP, MP4, PDF, DOC або DOCX. Максимальний розмір — 20 МБ.",
+        "JPG, PNG, WEBP, MP4, PDF, DOC or DOCX. Maximum size: 20 MB.",
+        "JPG, PNG, WEBP, MP4, PDF, DOC oder DOCX. Maximale Größe: 20 MB.",
+        "JPG, PNG, WEBP, MP4, PDF, DOC lub DOCX. Maksymalny rozmiar: 20 MB."
+      ),
+
+    replaceFile:
+      pick(
+        "Замінити файл",
+        "Replace file",
+        "Datei ersetzen",
+        "Zastąp plik"
+      ),
+
+    selectFile:
+      pick(
+        "Обрати файл",
+        "Select file",
+        "Datei auswählen",
+        "Wybierz plik"
+      ),
+
+    cancel:
+      pick(
+        "Скасувати",
+        "Cancel",
+        "Abbrechen",
+        "Anuluj"
+      ),
+
+    saveChanges:
+      pick(
+        "Зберегти зміни",
+        "Save changes",
+        "Änderungen speichern",
+        "Zapisz zmiany"
+      ),
+
+    fileNotSelected:
+      pick(
+        "Файл ще не вибрано",
+        "No file selected",
+        "Keine Datei ausgewählt",
+        "Nie wybrano pliku"
+      ),
+
+    document:
+      pick(
+        "Документ",
+        "Document",
+        "Dokument",
+        "Dokument"
+      ),
+
+    tooLarge:
+      pick(
+        "Файл завеликий. Максимум 20 МБ.",
+        "The file is too large. Maximum size: 20 MB.",
+        "Die Datei ist zu groß. Maximale Größe: 20 MB.",
+        "Plik jest za duży. Maksymalny rozmiar: 20 MB."
+      ),
+
+    enterName:
+      pick(
+        "Вкажіть назву файлу.",
+        "Enter a file title.",
+        "Geben Sie eine Dateibezeichnung ein.",
+        "Podaj nazwę pliku."
+      ),
+
+    selectUpload:
+      pick(
+        "Оберіть файл для завантаження.",
+        "Select a file to upload.",
+        "Wählen Sie eine Datei zum Hochladen aus.",
+        "Wybierz plik do przesłania."
+      ),
+
+    uploading:
+      pick(
+        "Завантаження…",
+        "Uploading…",
+        "Wird hochgeladen…",
+        "Przesyłanie…"
+      ),
+
+    saving:
+      pick(
+        "Збереження…",
+        "Saving…",
+        "Wird gespeichert…",
+        "Zapisywanie…"
+      ),
+
+    saveFailed:
+      pick(
+        "Не вдалося зберегти файл.",
+        "Could not save the file.",
+        "Die Datei konnte nicht gespeichert werden.",
+        "Nie udało się zapisać pliku."
+      ),
+  };
+}
+
+function getPatientFileCategoryMeta(
+  category
+) {
+  const ui =
+    getPatientFilesUi();
+
+  const labels = {
+    all:
+      ui.categoryAll,
+    xray:
+      ui.categoryXray,
+    ultrasound:
+      ui.categoryUltrasound,
+    media:
+      ui.categoryMedia,
+    document:
+      ui.categoryDocument,
+    other:
+      ui.categoryOther,
+  };
+
+  const source =
+    PATIENT_FILE_CATEGORIES[
+      category
+    ] ||
+    PATIENT_FILE_CATEGORIES
+      .other;
+
+  return {
+    ...source,
+
+    label:
+      labels[category] ||
+      ui.categoryOther,
+  };
+}
 const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 
 const PATIENT_FILE_CATEGORIES = {
@@ -50000,42 +57612,88 @@ async function uploadPatientFile(file) {
   return uploaded;
 }
 
-function renderPatientFilesTab(pet) {
-  const box = $("#patientTabContent");
+function renderPatientFilesTab(
+  pet
+) {
+  const box =
+    $("#patientTabContent");
 
-  if (!box || !pet) return;
+  if (
+    !box ||
+    !pet
+  ) {
+    return;
+  }
 
-  const petId = String(pet.id);
+  const ui =
+    getPatientFilesUi();
 
-  const files = getPatientFiles(petId)
-    .map(normalizePatientFile)
-    .sort((a, b) => {
-      return String(b.date || b.created_at || "")
-        .localeCompare(String(a.date || a.created_at || ""));
-    });
+  const petId =
+    String(pet.id);
 
-  const counts = getPatientFileCategoryCounts(files);
+  const files =
+    getPatientFiles(
+      petId
+    )
+      .map(
+        normalizePatientFile
+      )
+      .sort(
+        (a, b) =>
+          String(
+            b.date ||
+            b.created_at ||
+            ""
+          ).localeCompare(
+            String(
+              a.date ||
+              a.created_at ||
+              ""
+            )
+          )
+      );
+
+  const counts =
+    getPatientFileCategoryCounts(
+      files
+    );
 
   const filteredFiles =
-    patientFilesActiveFilter === "all"
+    patientFilesActiveFilter ===
+    "all"
       ? files
-      : files.filter((file) => {
-          return file.category === patientFilesActiveFilter;
-        });
+      : files.filter(
+          (file) =>
+            file.category ===
+            patientFilesActiveFilter
+        );
 
   box.innerHTML = `
-    <section class="patientFilesArchive">
-      <div class="patientFilesArchiveHead">
+    <section
+      class="patientFilesArchive"
+    >
+      <div
+        class="patientFilesArchiveHead"
+      >
         <div>
-          <div class="patientFilesKicker">
-            МЕДИЧНИЙ АРХІВ
+          <div
+            class="patientFilesKicker"
+          >
+            ${escapeHtml(
+              ui.kicker
+            )}
           </div>
 
-          <h2>Файли пацієнта</h2>
+          <h2>
+            ${escapeHtml(
+              ui.title
+            )}
+          </h2>
 
           <p>
-            Рентген, УЗД, фотографії, відео та документи
-            ${escapeHtml(pet.name || "пацієнта")}.
+            ${escapeHtml(
+              ui.description
+            )}
           </p>
         </div>
 
@@ -50044,232 +57702,472 @@ function renderPatientFilesTab(pet) {
           id="btnAddPatientFile"
           type="button"
         >
-          + Додати файл
+          + ${escapeHtml(
+            ui.addFile
+          )}
         </button>
       </div>
 
-      <div class="patientFilesStats">
+      <div
+        class="patientFilesStats"
+      >
         <div>
-          <span>Усього файлів</span>
-          <strong>${files.length}</strong>
+          <span>
+            ${escapeHtml(
+              ui.totalFiles
+            )}
+          </span>
+
+          <strong>
+            ${files.length}
+          </strong>
         </div>
 
         <div>
-          <span>Рентген</span>
-          <strong>${counts.xray}</strong>
+          <span>
+            ${escapeHtml(
+              ui.categoryXray
+            )}
+          </span>
+
+          <strong>
+            ${counts.xray}
+          </strong>
         </div>
 
         <div>
-          <span>УЗД</span>
-          <strong>${counts.ultrasound}</strong>
+          <span>
+            ${escapeHtml(
+              ui.categoryUltrasound
+            )}
+          </span>
+
+          <strong>
+            ${counts.ultrasound}
+          </strong>
         </div>
 
         <div>
-          <span>Документи</span>
-          <strong>${counts.document}</strong>
+          <span>
+            ${escapeHtml(
+              ui.categoryDocument
+            )}
+          </span>
+
+          <strong>
+            ${counts.document}
+          </strong>
         </div>
       </div>
 
-      <div class="patientFilesFilters">
-        ${Object.entries(PATIENT_FILE_CATEGORIES)
-          .map(([key, meta]) => {
-            const count =
-              key === "all"
-                ? files.length
-                : counts[key] || 0;
+      <div
+        class="patientFilesFilters"
+      >
+        ${Object.keys(
+          PATIENT_FILE_CATEGORIES
+        )
+          .map(
+            (key) => {
+              const meta =
+                getPatientFileCategoryMeta(
+                  key
+                );
 
-            return `
-              <button
-                class="patientFilesFilter ${
-                  patientFilesActiveFilter === key
-                    ? "active"
-                    : ""
-                }"
-                type="button"
-                data-patient-file-filter="${escapeHtml(key)}"
-              >
-                <span>${meta.icon}</span>
-                <b>${escapeHtml(meta.label)}</b>
-                <em>${count}</em>
-              </button>
-            `;
-          })
+              const count =
+                key === "all"
+                  ? files.length
+                  : counts[key] ||
+                    0;
+
+              return `
+                <button
+                  class="patientFilesFilter ${
+                    patientFilesActiveFilter ===
+                    key
+                      ? "active"
+                      : ""
+                  }"
+                  type="button"
+                  data-patient-file-filter="${escapeHtml(
+                    key
+                  )}"
+                >
+                  <span>
+                    ${meta.icon}
+                  </span>
+
+                  <b>
+                    ${escapeHtml(
+                      meta.label
+                    )}
+                  </b>
+
+                  <em>
+                    ${count}
+                  </em>
+                </button>
+              `;
+            }
+          )
           .join("")}
       </div>
 
-      <div id="patientFilesArchiveContent">
+      <div
+        id="patientFilesArchiveContent"
+      >
         ${
           filteredFiles.length
-            ? renderPatientFilesArchive(filteredFiles)
-            : renderPatientFilesEmptyState(patientFilesActiveFilter)
+            ? renderPatientFilesArchive(
+                filteredFiles
+              )
+            : renderPatientFilesEmptyState(
+                patientFilesActiveFilter
+              )
         }
       </div>
     </section>
   `;
 
   box
-    .querySelector("#btnAddPatientFile")
-    ?.addEventListener("click", () => {
-      openPatientFileModal(pet);
-    });
-
-  box
-    .querySelectorAll("[data-patient-file-filter]")
-    .forEach((button) => {
-      button.addEventListener("click", () => {
-        patientFilesActiveFilter =
-          button.dataset.patientFileFilter || "all";
-
-        renderPatientFilesTab(pet);
-      });
-    });
-
-  box
-    .querySelector("#patientFilesArchiveContent")
-    ?.addEventListener("click", (event) => {
-      const deleteButton = event.target.closest(
-        "[data-delete-patient-file]"
-      );
-
-      if (deleteButton) {
-  const fileId = deleteButton.dataset.deletePatientFile;
-
-  const file = getPatientFiles(petId).find((item) => {
-    return String(item.id) === String(fileId);
-  });
-
-  const fileTitle =
-    file?.title ||
-    file?.name ||
-    "цей файл";
-
-  openDeleteModal(
-    `
-      <div style="text-align:center;">
-        <div style="
-          font-size:42px;
-          margin-bottom:12px;
-        ">
-          🗑️
-        </div>
-
-        <div style="
-          font-size:18px;
-          font-weight:800;
-          color:#fff;
-          margin-bottom:8px;
-        ">
-          Видалити файл?
-        </div>
-
-        <div style="
-          font-size:13px;
-          line-height:1.5;
-          color:rgba(255,255,255,.58);
-        ">
-          Файл
-          <strong style="color:#fff;">
-            «${escapeHtml(fileTitle)}»
-          </strong>
-          буде видалено з медичного архіву пацієнта.
-        </div>
-      </div>
-    `,
-
-    () => {
-      const next = getPatientFiles(petId).filter((item) => {
-        return String(item.id) !== String(fileId);
-      });
-
-      setPatientFiles(petId, next);
-
-      closeDeleteModal();
-      renderPatientFilesTab(pet);
-    }
-  );
-
-  return;
-
+    .querySelector(
+      "#btnAddPatientFile"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openPatientFileModal(
+          pet
+        );
       }
+    );
 
-      const editButton = event.target.closest(
-        "[data-edit-patient-file]"
-      );
+  box
+    .querySelectorAll(
+      "[data-patient-file-filter]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            patientFilesActiveFilter =
+              button.dataset
+                .patientFileFilter ||
+              "all";
 
-      if (editButton) {
-        const fileId = editButton.dataset.editPatientFile;
+            renderPatientFilesTab(
+              pet
+            );
+          }
+        );
+      }
+    );
 
-        const file = getPatientFiles(petId).find((item) => {
-          return String(item.id) === String(fileId);
-        });
+  box
+    .querySelector(
+      "#patientFilesArchiveContent"
+    )
+    ?.addEventListener(
+      "click",
+      (event) => {
+        const deleteButton =
+          event.target.closest(
+            "[data-delete-patient-file]"
+          );
 
-        if (file) {
-          openPatientFileModal(pet, file);
+        if (deleteButton) {
+          const fileId =
+            deleteButton.dataset
+              .deletePatientFile;
+
+          const file =
+            getPatientFiles(
+              petId
+            ).find(
+              (item) =>
+                String(item.id) ===
+                String(fileId)
+            );
+
+          const fileTitle =
+            file?.title ||
+            file?.name ||
+            ui.thisFile;
+
+          openDeleteModal(
+            `
+              <div
+                style="
+                  text-align:center;
+                "
+              >
+                <div
+                  style="
+                    font-size:42px;
+                    margin-bottom:12px;
+                  "
+                >
+                  🗑️
+                </div>
+
+                <div
+                  style="
+                    font-size:18px;
+                    font-weight:800;
+                    color:#fff;
+                    margin-bottom:8px;
+                  "
+                >
+                  ${escapeHtml(
+                    ui.deleteTitle
+                  )}
+                </div>
+
+                <div
+                  style="
+                    font-size:13px;
+                    line-height:1.5;
+                    color:
+                      rgba(
+                        255,
+                        255,
+                        255,
+                        .58
+                      );
+                  "
+                >
+                  ${escapeHtml(
+                    ui.deletePrefix
+                  )}
+
+                  <strong
+                    style="
+                      color:#fff;
+                    "
+                  >
+                    «${escapeHtml(
+                      fileTitle
+                    )}»
+                  </strong>
+
+                  ${escapeHtml(
+                    ui.deleteSuffix
+                  )}
+                </div>
+              </div>
+            `,
+            () => {
+              const next =
+                getPatientFiles(
+                  petId
+                ).filter(
+                  (item) =>
+                    String(
+                      item.id
+                    ) !==
+                    String(
+                      fileId
+                    )
+                );
+
+              setPatientFiles(
+                petId,
+                next
+              );
+
+              closeDeleteModal();
+
+              renderPatientFilesTab(
+                pet
+              );
+            }
+          );
+
+          return;
+        }
+
+        const editButton =
+          event.target.closest(
+            "[data-edit-patient-file]"
+          );
+
+        if (editButton) {
+          const fileId =
+            editButton.dataset
+              .editPatientFile;
+
+          const file =
+            getPatientFiles(
+              petId
+            ).find(
+              (item) =>
+                String(
+                  item.id
+                ) ===
+                String(
+                  fileId
+                )
+            );
+
+          if (file) {
+            openPatientFileModal(
+              pet,
+              file
+            );
+          }
         }
       }
-    });
+    );
 }
-function normalizePatientFile(file) {
-  const originalType = String(
-    file?.category ||
-    file?.type ||
-    ""
-  )
-    .trim()
-    .toLowerCase();
 
-  let category = "other";
+function normalizePatientFile(
+  file
+) {
+  const ui =
+    getPatientFilesUi();
+
+  const originalType =
+    String(
+      file?.category ||
+      file?.type ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  let category =
+    "other";
 
   if (
-    originalType.includes("рентген") ||
-    originalType.includes("xray") ||
-    originalType.includes("x-ray")
+    originalType.includes(
+      "рентген"
+    ) ||
+    originalType.includes(
+      "xray"
+    ) ||
+    originalType.includes(
+      "x-ray"
+    ) ||
+    originalType.includes(
+      "röntgen"
+    ) ||
+    originalType.includes(
+      "rtg"
+    )
   ) {
-    category = "xray";
+    category =
+      "xray";
   } else if (
-    originalType.includes("узд") ||
-    originalType.includes("ультра") ||
-    originalType.includes("ultrasound")
+    originalType.includes(
+      "узд"
+    ) ||
+    originalType.includes(
+      "ультра"
+    ) ||
+    originalType.includes(
+      "ultrasound"
+    ) ||
+    originalType.includes(
+      "ultraschall"
+    ) ||
+    originalType.includes(
+      "usg"
+    )
   ) {
-    category = "ultrasound";
+    category =
+      "ultrasound";
   } else if (
-    originalType.includes("фото") ||
-    originalType.includes("video") ||
-    originalType.includes("відео") ||
-    originalType.includes("image") ||
-    String(file?.mime || "").startsWith("image/") ||
-    String(file?.mime || "").startsWith("video/")
+    originalType.includes(
+      "фото"
+    ) ||
+    originalType.includes(
+      "photo"
+    ) ||
+    originalType.includes(
+      "foto"
+    ) ||
+    originalType.includes(
+      "video"
+    ) ||
+    originalType.includes(
+      "відео"
+    ) ||
+    originalType.includes(
+      "image"
+    ) ||
+    String(
+      file?.mime ||
+      ""
+    ).startsWith(
+      "image/"
+    ) ||
+    String(
+      file?.mime ||
+      ""
+    ).startsWith(
+      "video/"
+    )
   ) {
-    category = "media";
+    category =
+      "media";
   } else if (
-    originalType.includes("pdf") ||
-    originalType.includes("документ") ||
-    originalType.includes("document") ||
-    String(file?.mime || "").includes("pdf") ||
-    String(file?.mime || "").includes("word")
+    originalType.includes(
+      "pdf"
+    ) ||
+    originalType.includes(
+      "документ"
+    ) ||
+    originalType.includes(
+      "document"
+    ) ||
+    originalType.includes(
+      "dokument"
+    ) ||
+    String(
+      file?.mime ||
+      ""
+    ).includes(
+      "pdf"
+    ) ||
+    String(
+      file?.mime ||
+      ""
+    ).includes(
+      "word"
+    )
   ) {
-    category = "document";
+    category =
+      "document";
   }
 
   return {
     ...file,
+
     category,
+
     title:
       file?.title ||
       file?.name ||
-      "Файл пацієнта",
+      ui.defaultTitle,
   };
 }
 
-function getPatientFileCategoryCounts(files) {
+function getPatientFileCategoryCounts(
+  files
+) {
   return files.reduce(
-    (acc, file) => {
+    (
+      acc,
+      file
+    ) => {
       const category =
-        file.category in PATIENT_FILE_CATEGORIES
+        file.category in
+        PATIENT_FILE_CATEGORIES
           ? file.category
           : "other";
 
-      acc[category] += 1;
+      acc[category] +=
+        1;
 
       return acc;
     },
@@ -50283,12 +58181,21 @@ function getPatientFileCategoryCounts(files) {
   );
 }
 
-function renderPatientFilesArchive(files) {
-  if (patientFilesActiveFilter !== "all") {
+function renderPatientFilesArchive(
+  files
+) {
+  if (
+    patientFilesActiveFilter !==
+    "all"
+  ) {
     return `
-      <div class="patientFilesGrid">
+      <div
+        class="patientFilesGrid"
+      >
         ${files
-          .map(renderPatientFileCard)
+          .map(
+            renderPatientFileCard
+          )
           .join("")}
       </div>
     `;
@@ -50303,90 +58210,186 @@ function renderPatientFilesArchive(files) {
   ];
 
   return order
-    .map((category) => {
-      const categoryFiles = files.filter((file) => {
-        return file.category === category;
-      });
+    .map(
+      (category) => {
+        const categoryFiles =
+          files.filter(
+            (file) =>
+              file.category ===
+              category
+          );
 
-      if (!categoryFiles.length) return "";
+        if (
+          !categoryFiles.length
+        ) {
+          return "";
+        }
 
-      const meta = PATIENT_FILE_CATEGORIES[category];
+        const meta =
+          getPatientFileCategoryMeta(
+            category
+          );
 
-      return `
-        <section class="patientFilesGroup">
-          <div class="patientFilesGroupHead">
-            <div>
-              <span>${meta.icon}</span>
-              <h3>${escapeHtml(meta.label)}</h3>
+        return `
+          <section
+            class="patientFilesGroup"
+          >
+            <div
+              class="patientFilesGroupHead"
+            >
+              <div>
+                <span>
+                  ${meta.icon}
+                </span>
+
+                <h3>
+                  ${escapeHtml(
+                    meta.label
+                  )}
+                </h3>
+              </div>
+
+              <strong>
+                ${categoryFiles.length}
+                ${escapeHtml(
+                  getPatientFilesCountLabel(
+                    categoryFiles.length
+                  )
+                )}
+              </strong>
             </div>
 
-            <strong>
-              ${categoryFiles.length}
-              ${getPatientFilesCountLabel(categoryFiles.length)}
-            </strong>
-          </div>
-
-          <div class="patientFilesGrid">
-            ${categoryFiles
-              .map(renderPatientFileCard)
-              .join("")}
-          </div>
-        </section>
-      `;
-    })
+            <div
+              class="patientFilesGrid"
+            >
+              ${categoryFiles
+                .map(
+                  renderPatientFileCard
+                )
+                .join("")}
+            </div>
+          </section>
+        `;
+      }
+    )
     .join("");
 }
 
-function getPatientFilesCountLabel(count) {
-  const value = Number(count) || 0;
+function getPatientFilesCountLabel(
+  count
+) {
+  const ui =
+    getPatientFilesUi();
 
-  if (value === 1) return "файл";
-  if (value >= 2 && value <= 4) return "файли";
+  const value =
+    Math.abs(
+      Number(count) ||
+      0
+    );
 
-  return "файлів";
+  const lastDigit =
+    value % 10;
+
+  const lastTwoDigits =
+    value % 100;
+
+  const language =
+    getInterfaceLanguage();
+
+  if (
+    language === "uk" ||
+    language === "pl"
+  ) {
+    if (
+      lastDigit === 1 &&
+      lastTwoDigits !== 11
+    ) {
+      return ui.file;
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      (
+        lastTwoDigits < 12 ||
+        lastTwoDigits > 14
+      )
+    ) {
+      return ui.filesFew;
+    }
+
+    return ui.filesMany;
+  }
+
+  return value === 1
+    ? ui.file
+    : ui.filesMany;
 }
 
-function renderPatientFilesEmptyState(filter) {
+function renderPatientFilesEmptyState(
+  filter
+) {
+  const ui =
+    getPatientFilesUi();
+
   const meta =
-    PATIENT_FILE_CATEGORIES[filter] ||
-    PATIENT_FILE_CATEGORIES.all;
+    getPatientFileCategoryMeta(
+      filter
+    );
+
+  const title =
+    filter === "all"
+      ? ui.emptyAll
+      : ui.emptyCategory.replace(
+          "{category}",
+          meta.label
+        );
 
   return `
-    <div class="patientFilesEmpty">
-      <div class="patientFilesEmptyIcon">
+    <div
+      class="patientFilesEmpty"
+    >
+      <div
+        class="patientFilesEmptyIcon"
+      >
         ${meta.icon}
       </div>
 
       <h3>
-        ${
-          filter === "all"
-            ? "Файлів ще немає"
-            : `У категорії «${escapeHtml(meta.label)}» поки порожньо`
-        }
+        ${escapeHtml(
+          title
+        )}
       </h3>
 
       <p>
-        Додайте медичне зображення або документ пацієнта.
+        ${escapeHtml(
+          ui.emptyText
+        )}
       </p>
 
       <button
         class="patientFilesAddButton"
         type="button"
-        onclick="openPatientFileModal(state.selectedPet)"
+        onclick="
+          openPatientFileModal(
+            state.selectedPet
+          )
+        "
       >
-        + Додати перший файл
+        + ${escapeHtml(
+          ui.addFirst
+        )}
       </button>
     </div>
   `;
 }
 
+function renderPatientFileCard(
+  file
+) {
+  const ui =
+    getPatientFilesUi();
 
-
-
-
-
-
-function renderPatientFileCard(file) {
   const rawUrl =
     file.url ||
     file.path ||
@@ -50395,72 +58398,139 @@ function renderPatientFileCard(file) {
     file.file_url ||
     "";
 
-  const url = rawUrl
-    ? new URL(rawUrl, window.location.origin).toString()
-    : "";
+  const url =
+    rawUrl
+      ? new URL(
+          rawUrl,
+          window.location
+            .origin
+        ).toString()
+      : "";
 
-  const mime = String(file.mime || file.type || "").toLowerCase();
+  const mime =
+    String(
+      file.mime ||
+      file.type ||
+      ""
+    ).toLowerCase();
 
   const isImage =
-    mime.startsWith("image/") ||
-    /\.(png|jpe?g|webp|gif)$/i.test(url);
+    mime.startsWith(
+      "image/"
+    ) ||
+    /\.(png|jpe?g|webp|gif)$/i
+      .test(url);
 
   const isVideo =
-    mime.startsWith("video/") ||
-    /\.(mp4|mov|webm)$/i.test(url);
+    mime.startsWith(
+      "video/"
+    ) ||
+    /\.(mp4|mov|webm)$/i
+      .test(url);
 
   const categoryMeta =
-    PATIENT_FILE_CATEGORIES[file.category] ||
-    PATIENT_FILE_CATEGORIES.other;
+    getPatientFileCategoryMeta(
+      file.category
+    );
+
+  const fileTitle =
+    file.title ||
+    file.name ||
+    ui.defaultTitle;
+
+  const displayDate =
+    file.date
+      ? formatLabCardDate(
+          file.date
+        )
+      : ui.dateMissing;
 
   return `
-    <article class="patientFileCard">
-      <div class="patientFilePreview">
+    <article
+      class="patientFileCard"
+    >
+      <div
+        class="patientFilePreview"
+      >
         ${
-          isImage && url
+          isImage &&
+          url
             ? `
               <img
-                src="${escapeHtml(url)}"
-                alt="${escapeHtml(file.title || file.name || "Файл")}"
+                src="${escapeHtml(
+                  url
+                )}"
+                alt="${escapeHtml(
+                  fileTitle
+                )}"
                 loading="lazy"
               >
             `
-            : isVideo && url
+            : isVideo &&
+              url
               ? `
                 <video
-                  src="${escapeHtml(url)}"
+                  src="${escapeHtml(
+                    url
+                  )}"
                   muted
                   preload="metadata"
                 ></video>
 
-                <div class="patientFilePlayIcon">▶</div>
+                <div
+                  class="patientFilePlayIcon"
+                >
+                  ▶
+                </div>
               `
               : `
-                <div class="patientFileDocumentIcon">
+                <div
+                  class="patientFileDocumentIcon"
+                >
                   ${categoryMeta.icon}
                 </div>
               `
         }
 
-        <span class="patientFileCategory">
+        <span
+          class="patientFileCategory"
+        >
           ${categoryMeta.icon}
-          ${escapeHtml(categoryMeta.label)}
+          ${escapeHtml(
+            categoryMeta.label
+          )}
         </span>
       </div>
 
-      <div class="patientFileCardBody">
+      <div
+        class="patientFileCardBody"
+      >
         <h4>
-          ${escapeHtml(file.title || file.name || "Файл")}
+          ${escapeHtml(
+            fileTitle
+          )}
         </h4>
 
-        <div class="patientFileMeta">
+        <div
+          class="patientFileMeta"
+        >
           <span>
-            ${escapeHtml(file.date || "Дата не вказана")}
+            ${escapeHtml(
+              displayDate
+            )}
           </span>
 
           ${
             file.size
-              ? `<span>${escapeHtml(formatFileSize(file.size))}</span>`
+              ? `
+                <span>
+                  ${escapeHtml(
+                    formatFileSize(
+                      file.size
+                    )
+                  )}
+                </span>
+              `
               : ""
           }
         </div>
@@ -50468,24 +58538,34 @@ function renderPatientFileCard(file) {
         ${
           file.note
             ? `
-              <p class="patientFileNote">
-                ${escapeHtml(file.note)}
+              <p
+                class="patientFileNote"
+              >
+                ${escapeHtml(
+                  file.note
+                )}
               </p>
             `
             : ""
         }
 
-        <div class="patientFileCardActions">
+        <div
+          class="patientFileCardActions"
+        >
           ${
             url
               ? `
                 <a
-                  href="${escapeHtml(url)}"
+                  href="${escapeHtml(
+                    url
+                  )}"
                   target="_blank"
                   rel="noopener"
                   class="patientFileOpenButton"
                 >
-                  Відкрити
+                  ${escapeHtml(
+                    ui.open
+                  )}
                 </a>
               `
               : `
@@ -50494,7 +58574,9 @@ function renderPatientFileCard(file) {
                   type="button"
                   disabled
                 >
-                  Файл недоступний
+                  ${escapeHtml(
+                    ui.unavailable
+                  )}
                 </button>
               `
           }
@@ -50502,17 +58584,34 @@ function renderPatientFileCard(file) {
           <button
             class="patientFileActionButton"
             type="button"
-            title="Редагувати"
-            data-edit-patient-file="${escapeHtml(file.id)}"
+            title="${escapeHtml(
+              ui.edit
+            )}"
+            aria-label="${escapeHtml(
+              ui.edit
+            )}"
+            data-edit-patient-file="${escapeHtml(
+              file.id
+            )}"
           >
             ✏️
           </button>
 
           <button
-            class="patientFileActionButton danger"
+            class="
+              patientFileActionButton
+              danger
+            "
             type="button"
-            title="Видалити"
-            data-delete-patient-file="${escapeHtml(file.id)}"
+            title="${escapeHtml(
+              ui.delete
+            )}"
+            aria-label="${escapeHtml(
+              ui.delete
+            )}"
+            data-delete-patient-file="${escapeHtml(
+              file.id
+            )}"
           >
             🗑
           </button>
@@ -50521,108 +58620,194 @@ function renderPatientFileCard(file) {
     </article>
   `;
 }
-function openPatientFileModal(pet, existingFile = null) {
+function openPatientFileModal(
+  pet,
+  existingFile = null
+) {
+  const ui =
+    getPatientFilesUi();
+
   if (!pet) {
-    alert("Пацієнта не знайдено.");
+    alert(
+      ui.patientNotFound
+    );
+
     return;
   }
 
   document
-    .querySelector(".patientFileModalOverlay")
+    .querySelector(
+      ".patientFileModalOverlay"
+    )
     ?.remove();
 
-  const isEdit = Boolean(existingFile);
+  const isEdit =
+    Boolean(
+      existingFile
+    );
 
-  const fileData = normalizePatientFile(
-    existingFile || {
-      category: "xray",
-      title: "",
-      date: todayISO(),
-      note: "",
-      url: "",
-      name: "",
-      size: 0,
-      mime: "",
-    }
-  );
+  const fileData =
+    normalizePatientFile(
+      existingFile || {
+        category:
+          "xray",
+        title:
+          "",
+        date:
+          todayISO(),
+        note:
+          "",
+        url:
+          "",
+        name:
+          "",
+        size:
+          0,
+        mime:
+          "",
+      }
+    );
 
-  const modal = document.createElement("div");
-  modal.className = "patientFileModalOverlay";
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "patientFileModalOverlay";
 
   modal.innerHTML = `
-    <div class="patientFileModal">
+    <div
+      class="patientFileModal"
+    >
       <button
         class="patientFileModalClose"
         type="button"
-        aria-label="Закрити"
+        aria-label="${escapeHtml(
+          ui.close
+        )}"
       >
         ×
       </button>
 
-      <div class="patientFileModalHead">
-        <div class="patientFileModalIcon">
+      <div
+        class="patientFileModalHead"
+      >
+        <div
+          class="patientFileModalIcon"
+        >
           📁
         </div>
 
         <div>
           <h2>
-            ${
+            ${escapeHtml(
               isEdit
-                ? "Редагувати файл"
-                : "Додати файл пацієнта"
-            }
+                ? ui.editFile
+                : ui.addPatientFile
+            )}
           </h2>
 
           <p>
-            ${escapeHtml(pet.name || "Пацієнт")}
-            · медичний архів
+            ${escapeHtml(
+              pet.name ||
+              ui.patient
+            )}
+            ·
+            ${escapeHtml(
+              ui.archive
+            )}
           </p>
         </div>
       </div>
 
-      <form id="patientFileModalForm">
-        <div class="patientFileModalGrid">
-          <label class="patientFileModalField">
-            <span>Категорія *</span>
+      <form
+        id="patientFileModalForm"
+      >
+        <div
+          class="patientFileModalGrid"
+        >
+          <label
+            class="patientFileModalField"
+          >
+            <span>
+              ${escapeHtml(
+                ui.category
+              )} *
+            </span>
 
             <select
               id="patientFileCategory"
               required
             >
-              ${Object.entries(PATIENT_FILE_CATEGORIES)
-                .filter(([key]) => key !== "all")
+              ${Object.keys(
+                PATIENT_FILE_CATEGORIES
+              )
+                .filter(
+                  (key) =>
+                    key !== "all"
+                )
                 .map(
-                  ([key, meta]) => `
-                    <option
-                      value="${escapeHtml(key)}"
-                      ${
-                        fileData.category === key
-                          ? "selected"
-                          : ""
-                      }
-                    >
-                      ${meta.icon} ${escapeHtml(meta.label)}
-                    </option>
-                  `
+                  (key) => {
+                    const meta =
+                      getPatientFileCategoryMeta(
+                        key
+                      );
+
+                    return `
+                      <option
+                        value="${escapeHtml(
+                          key
+                        )}"
+                        ${
+                          fileData.category ===
+                          key
+                            ? "selected"
+                            : ""
+                        }
+                      >
+                        ${meta.icon}
+                        ${escapeHtml(
+                          meta.label
+                        )}
+                      </option>
+                    `;
+                  }
                 )
                 .join("")}
             </select>
           </label>
 
-          <label class="patientFileModalField">
-            <span>Дата дослідження</span>
+          <label
+            class="patientFileModalField"
+          >
+            <span>
+              ${escapeHtml(
+                ui.studyDate
+              )}
+            </span>
 
             <input
               id="patientFileDate"
               type="date"
               value="${escapeHtml(
-                fileData.date || todayISO()
+                fileData.date ||
+                todayISO()
               )}"
             >
           </label>
 
-          <label class="patientFileModalField patientFileModalWide">
-            <span>Назва *</span>
+          <label
+            class="
+              patientFileModalField
+              patientFileModalWide
+            "
+          >
+            <span>
+              ${escapeHtml(
+                ui.name
+              )} *
+            </span>
 
             <input
               id="patientFileTitle"
@@ -50630,29 +58815,54 @@ function openPatientFileModal(pet, existingFile = null) {
               maxlength="160"
               required
               value="${escapeHtml(
-                fileData.title || ""
+                fileData.title ||
+                ""
               )}"
-              placeholder="Наприклад: Грудна клітка, 2 проєкції"
+              placeholder="${escapeHtml(
+                ui.namePlaceholder
+              )}"
             >
           </label>
 
-          <label class="patientFileModalField patientFileModalWide">
-            <span>Коментар</span>
+          <label
+            class="
+              patientFileModalField
+              patientFileModalWide
+            "
+          >
+            <span>
+              ${escapeHtml(
+                ui.comment
+              )}
+            </span>
 
             <textarea
               id="patientFileNote"
               rows="4"
               maxlength="600"
-              placeholder="Опис дослідження або важливі примітки"
-            >${escapeHtml(fileData.note || "")}</textarea>
+              placeholder="${escapeHtml(
+                ui.commentPlaceholder
+              )}"
+            >${escapeHtml(
+              fileData.note ||
+              ""
+            )}</textarea>
           </label>
         </div>
 
-        <div class="patientFileUploadZone">
+        <div
+          class="patientFileUploadZone"
+        >
           <input
             id="patientFileUploadInput"
             type="file"
-            accept="image/*,video/*,.pdf,.doc,.docx"
+            accept="
+              image/*,
+              video/*,
+              .pdf,
+              .doc,
+              .docx
+            "
             hidden
           >
 
@@ -50660,21 +58870,27 @@ function openPatientFileModal(pet, existingFile = null) {
             class="patientFileUploadPreview"
             id="patientFileUploadPreview"
           >
-            ${renderPatientFileModalPreview(fileData)}
+            ${renderPatientFileModalPreview(
+              fileData
+            )}
           </div>
 
-          <div class="patientFileUploadInfo">
+          <div
+            class="patientFileUploadInfo"
+          >
             <h3>
-              ${
-                isEdit && fileData.url
-                  ? "Поточний файл"
-                  : "Оберіть файл"
-              }
+              ${escapeHtml(
+                isEdit &&
+                fileData.url
+                  ? ui.currentFile
+                  : ui.chooseFile
+              )}
             </h3>
 
             <p>
-              JPG, PNG, WEBP, MP4, PDF, DOC або DOCX.
-              Максимальний розмір — 20 МБ.
+              ${escapeHtml(
+                ui.formats
+              )}
             </p>
 
             <button
@@ -50682,22 +58898,27 @@ function openPatientFileModal(pet, existingFile = null) {
               id="btnChoosePatientFile"
               type="button"
             >
-              ${
-                isEdit && fileData.url
-                  ? "Замінити файл"
-                  : "Обрати файл"
-              }
+              ${escapeHtml(
+                isEdit &&
+                fileData.url
+                  ? ui.replaceFile
+                  : ui.selectFile
+              )}
             </button>
           </div>
         </div>
 
-        <div class="patientFileModalActions">
+        <div
+          class="patientFileModalActions"
+        >
           <button
             class="patientFileModalCancel"
             id="btnCancelPatientFile"
             type="button"
           >
-            Скасувати
+            ${escapeHtml(
+              ui.cancel
+            )}
           </button>
 
           <button
@@ -50705,291 +58926,466 @@ function openPatientFileModal(pet, existingFile = null) {
             id="btnSavePatientFile"
             type="submit"
           >
-            ${
+            ${escapeHtml(
               isEdit
-                ? "Зберегти зміни"
-                : "Додати файл"
-            }
+                ? ui.saveChanges
+                : ui.addFile
+            )}
           </button>
         </div>
       </form>
     </div>
   `;
 
-  document.body.appendChild(modal);
+  document.body.appendChild(
+    modal
+  );
 
   const form =
-    modal.querySelector("#patientFileModalForm");
+    modal.querySelector(
+      "#patientFileModalForm"
+    );
 
   const fileInput =
-    modal.querySelector("#patientFileUploadInput");
+    modal.querySelector(
+      "#patientFileUploadInput"
+    );
 
   const preview =
-    modal.querySelector("#patientFileUploadPreview");
+    modal.querySelector(
+      "#patientFileUploadPreview"
+    );
 
-  let selectedFile = null;
-  let uploadedFileData = null;
+  let selectedFile =
+    null;
 
-  const close = () => {
-    modal.remove();
-  };
+  let uploadedFileData =
+    null;
 
-  modal
-    .querySelector(".patientFileModalClose")
-    ?.addEventListener("click", close);
-
-  modal
-    .querySelector("#btnCancelPatientFile")
-    ?.addEventListener("click", close);
-
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) {
-      close();
-    }
-  });
+  const close =
+    () => {
+      modal.remove();
+    };
 
   modal
-    .querySelector("#btnChoosePatientFile")
-    ?.addEventListener("click", () => {
-      fileInput?.click();
-    });
+    .querySelector(
+      ".patientFileModalClose"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
 
-  fileInput?.addEventListener("change", () => {
-    const file = fileInput.files?.[0];
+  modal
+    .querySelector(
+      "#btnCancelPatientFile"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
 
-    if (!file) return;
-
-    if (file.size > 20 * 1024 * 1024) {
-      alert("Файл завеликий. Максимум 20 МБ.");
-      fileInput.value = "";
-      return;
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target ===
+        modal
+      ) {
+        close();
+      }
     }
+  );
 
-    selectedFile = file;
-    uploadedFileData = null;
-
-    if (preview) {
-      preview.innerHTML =
-        renderSelectedPatientFilePreview(file);
+  modal.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key ===
+        "Escape"
+      ) {
+        close();
+      }
     }
+  );
 
-    const titleInput =
-      modal.querySelector("#patientFileTitle");
+  modal
+    .querySelector(
+      "#btnChoosePatientFile"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        fileInput?.click();
+      }
+    );
 
-    if (
-      titleInput &&
-      !String(titleInput.value || "").trim()
-    ) {
-      titleInput.value =
-        removePatientFileExtension(file.name);
-    }
-  });
+  fileInput
+    ?.addEventListener(
+      "change",
+      () => {
+        const file =
+          fileInput
+            .files?.[0];
 
-  form?.addEventListener("submit", async (event) => {
-    event.preventDefault();
+        if (!file) {
+          return;
+        }
 
-    const category =
-      modal
-        .querySelector("#patientFileCategory")
-        ?.value || "other";
+        if (
+          file.size >
+          20 *
+          1024 *
+          1024
+        ) {
+          alert(
+            ui.tooLarge
+          );
 
-    const date =
-      modal
-        .querySelector("#patientFileDate")
-        ?.value || todayISO();
+          fileInput.value =
+            "";
 
-    const title =
-      modal
-        .querySelector("#patientFileTitle")
-        ?.value?.trim() || "";
+          return;
+        }
 
-    const note =
-      modal
-        .querySelector("#patientFileNote")
-        ?.value?.trim() || "";
+        selectedFile =
+          file;
 
-    if (!title) {
-      alert("Вкажіть назву файлу.");
-      return;
-    }
-
-    if (!isEdit && !selectedFile) {
-      alert("Оберіть файл для завантаження.");
-      return;
-    }
-
-    const saveButton =
-      modal.querySelector("#btnSavePatientFile");
-
-    if (saveButton) {
-      saveButton.disabled = true;
-      saveButton.textContent = selectedFile
-        ? "Завантаження…"
-        : "Збереження…";
-    }
-
-    try {
-      if (selectedFile) {
         uploadedFileData =
-          await uploadPatientFile(selectedFile);
+          null;
+
+        if (preview) {
+          preview.innerHTML =
+            renderSelectedPatientFilePreview(
+              file
+            );
+        }
+
+        const titleInput =
+          modal.querySelector(
+            "#patientFileTitle"
+          );
+
+        if (
+          titleInput &&
+          !String(
+            titleInput.value ||
+            ""
+          ).trim()
+        ) {
+          titleInput.value =
+            removePatientFileExtension(
+              file.name
+            );
+        }
+      }
+    );
+
+  form?.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
+
+      const category =
+        modal
+          .querySelector(
+            "#patientFileCategory"
+          )
+          ?.value ||
+        "other";
+
+      const date =
+        modal
+          .querySelector(
+            "#patientFileDate"
+          )
+          ?.value ||
+        todayISO();
+
+      const title =
+        modal
+          .querySelector(
+            "#patientFileTitle"
+          )
+          ?.value
+          ?.trim() ||
+        "";
+
+      const note =
+        modal
+          .querySelector(
+            "#patientFileNote"
+          )
+          ?.value
+          ?.trim() ||
+        "";
+
+      if (!title) {
+        alert(
+          ui.enterName
+        );
+
+        return;
       }
 
-      const petId = String(pet.id);
-      const files = getPatientFiles(petId);
+      if (
+        !isEdit &&
+        !selectedFile
+      ) {
+        alert(
+          ui.selectUpload
+        );
 
-      const savedUrl =
-        uploadedFileData?.url ||
-        uploadedFileData?.path ||
-        uploadedFileData?.href ||
-        existingFile?.url ||
-        "";
+        return;
+      }
 
-      const savedName =
-        uploadedFileData?.name ||
-        uploadedFileData?.original_name ||
-        selectedFile?.name ||
-        existingFile?.name ||
-        title;
+      const saveButton =
+        modal.querySelector(
+          "#btnSavePatientFile"
+        );
 
-      const savedSize =
-        selectedFile?.size ||
-        uploadedFileData?.size ||
-        existingFile?.size ||
-        0;
+      if (saveButton) {
+        saveButton.disabled =
+          true;
 
-      const savedMime =
-        selectedFile?.type ||
-        uploadedFileData?.mime ||
-        uploadedFileData?.type ||
-        existingFile?.mime ||
-        "";
+        saveButton.textContent =
+          selectedFile
+            ? ui.uploading
+            : ui.saving;
+      }
 
-      if (isEdit) {
-        const next = files.map((file) => {
-          if (
-            String(file.id) !==
-            String(existingFile.id)
-          ) {
-            return file;
-          }
+      try {
+        if (selectedFile) {
+          uploadedFileData =
+            await uploadPatientFile(
+              selectedFile
+            );
+        }
 
-          return {
-            ...file,
+        const petId =
+          String(
+            pet.id
+          );
+
+        const files =
+          getPatientFiles(
+            petId
+          );
+
+        const savedUrl =
+          uploadedFileData
+            ?.url ||
+          uploadedFileData
+            ?.path ||
+          uploadedFileData
+            ?.href ||
+          existingFile?.url ||
+          "";
+
+        const savedName =
+          uploadedFileData
+            ?.name ||
+          uploadedFileData
+            ?.original_name ||
+          selectedFile?.name ||
+          existingFile?.name ||
+          title;
+
+        const savedSize =
+          selectedFile?.size ||
+          uploadedFileData
+            ?.size ||
+          existingFile?.size ||
+          0;
+
+        const savedMime =
+          selectedFile?.type ||
+          uploadedFileData
+            ?.mime ||
+          uploadedFileData
+            ?.type ||
+          existingFile?.mime ||
+          "";
+
+        if (isEdit) {
+          const next =
+            files.map(
+              (file) => {
+                if (
+                  String(
+                    file.id
+                  ) !==
+                  String(
+                    existingFile.id
+                  )
+                ) {
+                  return file;
+                }
+
+                return {
+                  ...file,
+
+                  category,
+
+                  type:
+                    category,
+
+                  title,
+                  name:
+                    savedName,
+                  url:
+                    savedUrl,
+                  size:
+                    savedSize,
+                  mime:
+                    savedMime,
+                  note,
+                  date,
+
+                  updated_at:
+                    new Date()
+                      .toISOString(),
+                };
+              }
+            );
+
+          setPatientFiles(
+            petId,
+            next
+          );
+        } else {
+          const nextFile = {
+            id:
+              "pfile_" +
+              Date.now()
+                .toString(36) +
+              "_" +
+              Math.random()
+                .toString(16)
+                .slice(2),
 
             category,
+
             type:
-              PATIENT_FILE_CATEGORIES[category]
-                ?.label || "Інше",
+              category,
 
             title,
-            name: savedName,
-            url: savedUrl,
-            size: savedSize,
-            mime: savedMime,
+
+            name:
+              savedName,
+
+            url:
+              savedUrl,
+
+            size:
+              savedSize,
+
+            mime:
+              savedMime,
+
             note,
             date,
 
-            updated_at:
-              new Date().toISOString(),
+            created_by:
+              state.me
+                ?.display_name ||
+              sessionStorage
+                .getItem(
+                  "pug_active_display_name"
+                ) ||
+              "",
+
+            created_at:
+              new Date()
+                .toISOString(),
           };
-        });
 
-        setPatientFiles(petId, next);
-      } else {
-        const nextFile = {
-          id:
-            "pfile_" +
-            Date.now().toString(36) +
-            "_" +
-            Math.random()
-              .toString(16)
-              .slice(2),
+          setPatientFiles(
+            petId,
+            [
+              nextFile,
+              ...files,
+            ]
+          );
+        }
 
-          category,
+        close();
 
-          type:
-            PATIENT_FILE_CATEGORIES[category]
-              ?.label || "Інше",
-
-          title,
-          name: savedName,
-          url: savedUrl,
-          size: savedSize,
-          mime: savedMime,
-          note,
-          date,
-
-          created_by:
-            state.me?.display_name ||
-            sessionStorage.getItem(
-              "pug_active_display_name"
-            ) ||
-            "",
-
-          created_at:
-            new Date().toISOString(),
-        };
-
-        setPatientFiles(
-          petId,
-          [nextFile, ...files]
+        renderPatientFilesTab(
+          pet
         );
-      }
+      } catch (error) {
+        console.error(
+          "save patient file failed:",
+          error
+        );
 
-      close();
-      renderPatientFilesTab(pet);
-    } catch (error) {
-      console.error(
-        "save patient file failed:",
-        error
-      );
+        alert(
+          ui.saveFailed
+        );
+      } finally {
+        if (saveButton) {
+          saveButton.disabled =
+            false;
 
-      alert(
-        "Не вдалося зберегти файл: " +
-        (error?.message || error)
-      );
-    } finally {
-      if (saveButton) {
-        saveButton.disabled = false;
-        saveButton.textContent = isEdit
-          ? "Зберегти зміни"
-          : "Додати файл";
+          saveButton.textContent =
+            isEdit
+              ? ui.saveChanges
+              : ui.addFile;
+        }
       }
     }
-  });
+  );
 
   modal
-    .querySelector("#patientFileTitle")
+    .querySelector(
+      "#patientFileTitle"
+    )
     ?.focus();
 }
 
-function renderPatientFileModalPreview(file) {
+function renderPatientFileModalPreview(
+  file
+) {
+  const ui =
+    getPatientFilesUi();
+
   const rawUrl =
     file?.url ||
     file?.path ||
     file?.href ||
     "";
 
-  const url = rawUrl
-    ? new URL(
-        rawUrl,
-        window.location.origin
-      ).toString()
-    : "";
+  const url =
+    rawUrl
+      ? new URL(
+          rawUrl,
+          window.location
+            .origin
+        ).toString()
+      : "";
 
   const mime =
-    String(file?.mime || "").toLowerCase();
+    String(
+      file?.mime ||
+      ""
+    ).toLowerCase();
 
   if (
     url &&
     (
-      mime.startsWith("image/") ||
-      /\.(png|jpe?g|webp|gif)$/i.test(url)
+      mime.startsWith(
+        "image/"
+      ) ||
+      /\.(png|jpe?g|webp|gif)$/i
+        .test(url)
     )
   ) {
     return `
       <img
-        src="${escapeHtml(url)}"
+        src="${escapeHtml(
+          url
+        )}"
         alt=""
       >
     `;
@@ -50998,13 +59394,18 @@ function renderPatientFileModalPreview(file) {
   if (
     url &&
     (
-      mime.startsWith("video/") ||
-      /\.(mp4|mov|webm)$/i.test(url)
+      mime.startsWith(
+        "video/"
+      ) ||
+      /\.(mp4|mov|webm)$/i
+        .test(url)
     )
   ) {
     return `
       <video
-        src="${escapeHtml(url)}"
+        src="${escapeHtml(
+          url
+        )}"
         muted
         controls
         preload="metadata"
@@ -51014,11 +59415,15 @@ function renderPatientFileModalPreview(file) {
 
   if (url) {
     return `
-      <div class="patientFileUploadDocument">
+      <div
+        class="patientFileUploadDocument"
+      >
         📄
+
         <span>
           ${escapeHtml(
-            file?.name || "Документ"
+            file?.name ||
+            ui.document
           )}
         </span>
       </div>
@@ -51026,40 +59431,75 @@ function renderPatientFileModalPreview(file) {
   }
 
   return `
-    <div class="patientFileUploadEmpty">
-      <span>＋</span>
-      <small>Файл ще не вибрано</small>
+    <div
+      class="patientFileUploadEmpty"
+    >
+      <span>
+        ＋
+      </span>
+
+      <small>
+        ${escapeHtml(
+          ui.fileNotSelected
+        )}
+      </small>
     </div>
   `;
 }
 
-function renderSelectedPatientFilePreview(file) {
+function renderSelectedPatientFilePreview(
+  file
+) {
+  const ui =
+    getPatientFilesUi();
+
   if (!file) {
-    return renderPatientFileModalPreview(null);
+    return (
+      renderPatientFileModalPreview(
+        null
+      )
+    );
   }
 
   const tempUrl =
-    URL.createObjectURL(file);
+    URL.createObjectURL(
+      file
+    );
 
   if (
-    String(file.type || "")
-      .startsWith("image/")
+    String(
+      file.type ||
+      ""
+    ).startsWith(
+      "image/"
+    )
   ) {
     return `
       <img
-        src="${escapeHtml(tempUrl)}"
-        alt="${escapeHtml(file.name || "")}"
+        src="${escapeHtml(
+          tempUrl
+        )}"
+        alt="${escapeHtml(
+          file.name ||
+          ""
+        )}"
       >
     `;
   }
 
   if (
-    String(file.type || "")
-      .startsWith("video/")
+    String(
+      file.type ||
+      ""
+    ).startsWith(
+      "video/"
+    )
   ) {
     return `
       <video
-        src="${escapeHtml(tempUrl)}"
+        src="${escapeHtml(
+          tempUrl
+        )}"
         muted
         controls
       ></video>
@@ -51067,15 +59507,20 @@ function renderSelectedPatientFilePreview(file) {
   }
 
   return `
-    <div class="patientFileUploadDocument">
+    <div
+      class="patientFileUploadDocument"
+    >
       📄
+
       <span>
-        ${escapeHtml(file.name || "Документ")}
+        ${escapeHtml(
+          file.name ||
+          ui.document
+        )}
       </span>
     </div>
   `;
 }
-
 function removePatientFileExtension(filename) {
   return String(filename || "")
     .replace(/\.[^/.]+$/, "")
@@ -57511,8 +65956,8 @@ function renderLabAiOwnerExplanation(
         "Wichtige unauffällige Befunde",
       next:
         "Wie es weitergeht",
-      copy:
-        "Erklärung kopieren",
+      apply:
+  "Zum Befund hinzufügen",
     },
   };
 
@@ -57809,8 +66254,9 @@ function renderLabAiInterpretation(
   }
 
     const language = String(
-    meta.language || "uk"
-  )
+  meta.language ||
+  getInterfaceLanguage()
+)
     .trim()
     .toLowerCase();
 
@@ -58299,7 +66745,10 @@ async function hydrateLabAiInterpretations(
     ),
   ];
 
-  for (const resultNode of resultNodes) {
+  for (
+    const resultNode
+    of resultNodes
+  ) {
     await Promise.allSettled([
       (async () => {
         const labId =
@@ -58311,12 +66760,10 @@ async function hydrateLabAiInterpretations(
         }
 
         const data =
-          await (
-                        requestCachedLabAiInterpretation(
-              patientId,
-              labId,
-              getPugAiLanguage()
-            )
+          await requestCachedLabAiInterpretation(
+            patientId,
+            labId,
+            getInterfaceLanguage()
           );
 
         if (
@@ -58325,10 +66772,20 @@ async function hydrateLabAiInterpretations(
           return;
         }
 
-                resultNode.innerHTML =
+        resultNode.innerHTML =
           renderLabAiInterpretation(
             data.interpretation,
-            data.meta || {}
+            {
+              ...(
+                data.meta ||
+                {}
+              ),
+
+              language:
+                data.meta
+                  ?.language ||
+                getInterfaceLanguage(),
+            }
           );
 
         const panel =
@@ -58336,7 +66793,7 @@ async function hydrateLabAiInterpretations(
             ".labAiPanel"
           );
 
-                        if (panel) {
+        if (panel) {
           panel.classList.add(
             "is-collapsed"
           );
@@ -58352,20 +66809,16 @@ async function hydrateLabAiInterpretations(
             "[data-lab-ai]"
           );
 
-                        if (button) {
+        if (button) {
           button.textContent =
-            (
-              "✦ Показати повну " +
-              "розшифровку PUG AI"
+            translateInterfaceText(
+              "patients.card.labs.showAi"
             );
         }
-            })(),
+      })(),
     ]);
   }
 }
-
-
-
 
 async function readLabAiApiResponse(
   response
@@ -60046,9 +68499,22 @@ async function renderLabsTab(
   const box =
     $("#patientTabContent");
 
-  if (!box || !pet) {
+  if (
+    !box ||
+    !pet
+  ) {
     return;
   }
+
+  const t =
+    (
+      key,
+      variables = {}
+    ) =>
+      translateInterfaceText(
+        key,
+        variables
+      );
 
   box.innerHTML = `
     <div
@@ -60067,12 +68533,19 @@ async function renderLabsTab(
         </div>
 
         <h3>
-          Завантажуємо аналізи
+          ${escapeHtml(
+            t(
+              "patients.card.labs.loading"
+            )
+          )}
         </h3>
 
         <p>
-          Отримуємо лабораторну
-          історію пацієнта…
+          ${escapeHtml(
+            t(
+              "patients.card.labs.loadingText"
+            )
+          )}
         </p>
       </div>
     </div>
@@ -60108,17 +68581,19 @@ async function renderLabsTab(
           </div>
 
           <h3>
-            Не вдалося завантажити
-            аналізи
+            ${escapeHtml(
+              t(
+                "patients.card.labs.loadFailed"
+              )
+            )}
           </h3>
 
           <p>
-            ${
-              escapeHtml(
-                error?.message ||
-                "Спробуйте ще раз."
+            ${escapeHtml(
+              t(
+                "patients.card.refreshTryAgain"
               )
-            }
+            )}
           </p>
         </div>
       </div>
@@ -60130,46 +68605,96 @@ async function renderLabsTab(
   const speciesKey =
     getPetSpeciesKey(pet);
 
-  const speciesName =
-    speciesKey === "cat"
-      ? "кіт"
-      : "собака";
-
-  labs = labs
-    .slice()
-    .sort((a, b) =>
-      String(
-        b.date || ""
-      ).localeCompare(
-        String(
-          a.date || ""
+  const patientSpecies =
+    typeof speciesLabel ===
+    "function"
+      ? speciesLabel(
+          pet.species
         )
-      )
-    );
+      : t(
+          "patients.card.patient"
+        );
+
+  labs =
+    (
+      Array.isArray(labs)
+        ? labs
+        : []
+    )
+      .slice()
+      .sort(
+        (a, b) =>
+          String(
+            b.date || ""
+          ).localeCompare(
+            String(
+              a.date || ""
+            )
+          )
+      );
 
   box.innerHTML = `
-    <div class="patientInfoBox premiumLabsPage">
-
-      <section class="premiumLabsHero">
-        <div class="premiumLabsHeroText">
-          <div class="premiumLabsKicker">
-            ЛАБОРАТОРНА ДІАГНОСТИКА
+    <div
+      class="
+        patientInfoBox
+        premiumLabsPage
+      "
+    >
+      <section
+        class="premiumLabsHero"
+      >
+        <div
+          class="premiumLabsHeroText"
+        >
+          <div
+            class="premiumLabsKicker"
+          >
+            ${escapeHtml(
+              t(
+                "patients.card.labs.kicker"
+              )
+            )}
           </div>
 
-          <h2>Аналізи пацієнта</h2>
+          <h2>
+            ${escapeHtml(
+              t(
+                "patients.card.labs.title"
+              )
+            )}
+          </h2>
 
           <p>
-            Створюйте лабораторні дослідження, контролюйте відхилення
-            та формуйте історію показників пацієнта.
+            ${escapeHtml(
+              t(
+                "patients.card.labs.description"
+              )
+            )}
           </p>
 
-          <div class="premiumLabsSpecies">
-            <span>Норми пацієнта:</span>
-            <strong>${escapeHtml(speciesName)}</strong>
+          <div
+            class="premiumLabsSpecies"
+          >
+            <span>
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.referenceFor"
+                )
+              )}:
+            </span>
+
+            <strong>
+              ${escapeHtml(
+                patientSpecies
+              )}
+            </strong>
           </div>
         </div>
 
-        <div class="premiumLabsHeroIcon" aria-hidden="true">
+        <div
+          class="premiumLabsHeroIcon"
+          aria-hidden="true"
+        >
           <svg
             viewBox="0 0 24 24"
             width="34"
@@ -60187,54 +68712,140 @@ async function renderLabsTab(
         </div>
       </section>
 
-      <section class="premiumLabTypes">
-        ${Object.entries(LAB_TYPE_META)
-          .map(([type, meta]) => `
-            <button
-              class="premiumLabTypeButton"
-              type="button"
-              data-create-lab-type="${escapeHtml(type)}"
-            >
-              <span class="premiumLabTypeIcon">
-                ${meta.icon}
-              </span>
+      <section
+        class="premiumLabTypes"
+      >
+        ${Object.entries(
+          LAB_TYPE_META
+        )
+          .map(
+            ([
+              type,
+              meta,
+            ]) => {
+              const localized =
+                getPatientLabTypeMeta(
+                  type
+                );
 
-              <span class="premiumLabTypeText">
-                <strong>${escapeHtml(meta.short)}</strong>
-                <small>${escapeHtml(meta.description)}</small>
-              </span>
+              return `
+                <button
+                  class="premiumLabTypeButton"
+                  type="button"
+                  data-create-lab-type="${escapeHtml(
+                    type
+                  )}"
+                >
+                  <span
+                    class="premiumLabTypeIcon"
+                  >
+                    ${localized.icon}
+                  </span>
 
-              <span class="premiumLabTypePlus">
-                +
-              </span>
-            </button>
-          `)
+                  <span
+                    class="premiumLabTypeText"
+                  >
+                    <strong>
+                      ${escapeHtml(
+                        localized.code
+                      )}
+                    </strong>
+
+                    <small>
+                      ${escapeHtml(
+                        localized.name
+                      )}
+                    </small>
+                  </span>
+
+                  <span
+                    class="premiumLabTypePlus"
+                  >
+                    +
+                  </span>
+                </button>
+              `;
+            }
+          )
           .join("")}
       </section>
 
-      <section class="premiumLabsHistory">
-        <div class="premiumLabsHistoryHead">
+      <section
+        class="premiumLabsHistory"
+      >
+        <div
+          class="premiumLabsHistoryHead"
+        >
           <div>
-            <h3>Історія досліджень</h3>
+            <h3>
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.history"
+                )
+              )}
+            </h3>
+
             <p>
-              ${labs.length
-                ? `Збережено досліджень: ${labs.length}`
-                : "Досліджень поки немає"}
+              ${escapeHtml(
+                labs.length
+                  ? t(
+                      "patients.card.labs.savedCount",
+                      {
+                        count:
+                          labs.length,
+                      }
+                    )
+                  : t(
+                      "patients.card.labs.noStudies"
+                    )
+              )}
             </p>
           </div>
         </div>
 
-        <div id="labsList" class="labsList premiumLabsList">
+        <div
+          id="labsList"
+          class="
+            labsList
+            premiumLabsList
+          "
+        >
           ${
             labs.length
               ? labs
-                  .map((lab) => renderLabCard(lab, speciesKey))
+                  .map(
+                    (lab) =>
+                      renderLabCard(
+                        lab,
+                        speciesKey
+                      )
+                  )
                   .join("")
               : `
-                <div class="premiumLabsEmpty">
-                  <div class="premiumLabsEmptyIcon">🧪</div>
-                  <h3>Аналізів поки немає</h3>
-                  <p>Оберіть потрібний тип дослідження вище.</p>
+                <div
+                  class="premiumLabsEmpty"
+                >
+                  <div
+                    class="premiumLabsEmptyIcon"
+                  >
+                    🧪
+                  </div>
+
+                  <h3>
+                    ${escapeHtml(
+                      t(
+                        "patients.card.labs.emptyTitle"
+                      )
+                    )}
+                  </h3>
+
+                  <p>
+                    ${escapeHtml(
+                      t(
+                        "patients.card.labs.emptyText"
+                      )
+                    )}
+                  </p>
                 </div>
               `
           }
@@ -60256,407 +68867,113 @@ async function renderLabsTab(
       });
     });
 
-    $("#labsList")?.addEventListener(
+      $("#labsList")?.addEventListener(
     "click",
     async (event) => {
-  const ownerApplyButton =
-    event.target.closest(
-      "[data-lab-ai-owner-apply]"
-    );
+      const findLab = (id) =>
+        getCachedPatientLabs(
+          pet.id
+        ).find(
+          (item) =>
+            String(item.id) ===
+            String(id)
+        );
 
-  if (ownerApplyButton) {
-    event.preventDefault();
-    event.stopPropagation();
+      const ownerApplyButton =
+        event.target.closest(
+          "[data-lab-ai-owner-apply]"
+        );
 
-    const resultNode =
-      ownerApplyButton.closest(
-        "[data-lab-ai-result]"
-      );
+      if (ownerApplyButton) {
+        event.preventDefault();
+        event.stopPropagation();
 
-    const labId =
-      resultNode?.dataset
-        .labAiResult || "";
-
-    const lab =
-      getCachedPatientLabs(
-        pet.id
-      ).find(
-        (item) =>
-          String(item.id) ===
-          String(labId)
-      );
-
-    if (!lab) {
-      alert(
-        "Аналіз не знайдено."
-      );
-      return;
-    }
-
-    const encodedText =
-      ownerApplyButton.dataset
-        .labAiOwnerApply || "";
-
-    let ownerExplanation = "";
-
-    try {
-      ownerExplanation =
-        decodeURIComponent(
-          encodedText
-        ).trim();
-    } catch (error) {
-      console.error(
-        "Owner explanation decode failed:",
-        error
-      );
-
-      alert(
-        "Не вдалося прочитати пояснення."
-      );
-      return;
-    }
-
-    if (!ownerExplanation) {
-      return;
-    }
-
-    const language =
-      getPugAiLanguage();
-
-    const messagesByLanguage = {
-      uk: {
-        saving:
-          "Зберігаємо…",
-
-        saved:
-          "Додано до бланка ✓",
-
-        error:
-          "Не вдалося зберегти",
-      },
-
-      en: {
-        saving:
-          "Saving…",
-
-        saved:
-          "Added to report ✓",
-
-        error:
-          "Could not save",
-      },
-
-      pl: {
-        saving:
-          "Zapisywanie…",
-
-        saved:
-          "Dodano do wyniku ✓",
-
-        error:
-          "Nie udało się zapisać",
-      },
-
-      es: {
-        saving:
-          "Guardando…",
-
-        saved:
-          "Añadido al informe ✓",
-
-        error:
-          "No se pudo guardar",
-      },
-
-      de: {
-        saving:
-          "Speichern…",
-
-        saved:
-          "Zum Befund hinzugefügt ✓",
-
-        error:
-          "Speichern fehlgeschlagen",
-      },
-    };
-
-    const messages =
-      messagesByLanguage[language] ||
-      messagesByLanguage.uk;
-
-    const originalText =
-      ownerApplyButton.textContent;
-
-    ownerApplyButton.disabled =
-      true;
-
-    ownerApplyButton.textContent =
-      messages.saving;
-
-    try {
-      await requestUpdatePatientLab(
-        pet.id,
-        labId,
-        {
-          ...lab,
-
-          owner_explanation:
-            ownerExplanation,
-        }
-      );
-
-      ownerApplyButton.textContent =
-        messages.saved;
-
-      await new Promise(
-        (resolve) =>
-          window.setTimeout(
-            resolve,
-            700
-          )
-      );
-
-      await renderLabsTab(pet);
-    } catch (error) {
-      console.error(
-        "Owner explanation save failed:",
-        error
-      );
-
-      ownerApplyButton.textContent =
-        messages.error;
-
-      window.setTimeout(
-        () => {
-          ownerApplyButton.disabled =
-            false;
-
-          ownerApplyButton.textContent =
-            originalText;
-        },
-        1800
-      );
-    }
-
-    return;
-  }
-
-  const refreshButton =
-    event.target.closest(
-      "[data-lab-ai-refresh]"
-    );
-
-  if (refreshButton) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const card =
-      refreshButton.closest(
-        ".labHistoryCard"
-      );
-
-    const aiButton =
-      card?.querySelector(
-        "[data-lab-ai]"
-      );
-
-    const resultNode =
-      card?.querySelector(
-        "[data-lab-ai-result]"
-      );
-
-    if (
-      !aiButton ||
-      !resultNode
-    ) {
-      return;
-    }
-
-    resultNode.innerHTML = "";
-
-    aiButton.click();
-
-    return;
-  }
-
-  const aiButton =
-    event.target.closest(
-      "[data-lab-ai]"
-    );
-
-  if (aiButton) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const labId =
-      aiButton.dataset.labAi;
-
-    const card =
-      aiButton.closest(
-        ".labHistoryCard"
-      );
-
-    const resultNode =
-      card?.querySelector(
-        "[data-lab-ai-result]"
-      );
-
-    if (
-      !labId ||
-      !resultNode
-    ) {
-      return;
-    }
-
-    const existingPanel =
-      resultNode.querySelector(
-        ".labAiPanel"
-      );
-
-    if (existingPanel) {
-      const isCollapsed =
-        existingPanel
-          .classList
-          .toggle(
-            "is-collapsed"
+        const resultNode =
+          ownerApplyButton.closest(
+            "[data-lab-ai-result]"
           );
 
-      aiButton.textContent =
-        isCollapsed
-          ? (
-              "✦ Показати повну " +
-              "розшифровку PUG AI"
+        const labId =
+          resultNode?.dataset
+            .labAiResult || "";
+
+        const lab =
+          findLab(labId);
+
+        if (!lab) {
+          alert(
+            t(
+              "patients.card.labs.notFound"
             )
-          : (
-              "Сховати повну " +
-              "розшифровку"
-            );
+          );
 
-      return;
-    }
+          return;
+        }
 
-    const originalText =
-      aiButton.textContent;
+        const encodedText =
+          ownerApplyButton.dataset
+            .labAiOwnerApply || "";
 
-    aiButton.disabled =
-      true;
+        let ownerExplanation = "";
 
-    aiButton.textContent =
-      "PUG AI аналізує…";
+        try {
+          ownerExplanation =
+            decodeURIComponent(
+              encodedText
+            ).trim();
+        } catch (error) {
+          console.error(
+            "Owner explanation decode failed:",
+            error
+          );
 
-    resultNode.innerHTML = `
-      <div class="labAiLoading">
-        ✦ Аналізуємо показники,
-        референси, історію та
-        останній релевантний
-        прийом…
-      </div>
-    `;
+          alert(
+            t(
+              "patients.card.labs.ownerTextReadFailed"
+            )
+          );
 
-    try {
-      const data =
-        await (
-          requestCreateLabAiInterpretation(
+          return;
+        }
+
+        if (!ownerExplanation) {
+          return;
+        }
+
+        const originalText =
+          ownerApplyButton.textContent;
+
+        ownerApplyButton.disabled =
+          true;
+
+        ownerApplyButton.textContent =
+          t(
+            "patients.card.labs.saving"
+          );
+
+        try {
+          await requestUpdatePatientLab(
             pet.id,
             labId,
-            getPugAiLanguage()
-          )
-        );
+            {
+              ...lab,
 
-      resultNode.innerHTML =
-        renderLabAiInterpretation(
-          data.interpretation,
-          data.meta || {}
-        );
+              owner_explanation:
+                ownerExplanation,
+            }
+          );
 
-      aiButton.textContent =
-        (
-          "Сховати повну " +
-          "розшифровку"
-        );
-    } catch (error) {
-      console.error(
-        "PUG AI lab failed:",
-        error
-      );
+          ownerApplyButton.textContent =
+            t(
+              "patients.card.labs.addedToReport"
+            );
 
-      resultNode.innerHTML = `
-        <div class="labAiError">
-          ${escapeHtml(
-            error?.message ||
-            (
-              "Не вдалося " +
-              "розшифрувати аналіз."
-            )
-          )}
-        </div>
-      `;
-
-      aiButton.textContent =
-        originalText ||
-        (
-          "✦ Розшифрувати " +
-          "з PUG AI"
-        );
-    } finally {
-      aiButton.disabled =
-        false;
-    }
-
-    return;
-  }
-
-  const deleteButton =
-    event.target.closest(
-      "[data-del-lab]"
-    );
-
-  if (deleteButton) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const id =
-      deleteButton.dataset.delLab;
-
-    if (!id) {
-      return;
-    }
-
-    const lab =
-      getCachedPatientLabs(
-        pet.id
-      ).find(
-        (item) =>
-          String(item.id) ===
-          String(id)
-      );
-
-    openDeleteModal(
-      `
-        <b>
-          ${
-            escapeHtml(
-              lab?.type ||
-              "Аналіз"
-            )
-          }
-        </b>
-
-        <br><br>
-
-        Результати дослідження
-        будуть видалені назавжди.
-
-        <br>
-
-        Цю дію неможливо
-        скасувати.
-      `,
-      async () => {
-        try {
-          await requestDeletePatientLab(
-            pet.id,
-            id
+          await new Promise(
+            (resolve) =>
+              window.setTimeout(
+                resolve,
+                700
+              )
           );
 
           await renderLabsTab(
@@ -60664,75 +68981,331 @@ async function renderLabsTab(
           );
         } catch (error) {
           console.error(
-            "Delete patient lab failed:",
+            "Owner explanation save failed:",
             error
           );
 
-          alert(
-            error?.message ||
-            "Не вдалося видалити аналіз."
+          ownerApplyButton.textContent =
+            t(
+              "patients.card.labs.saveFailed"
+            );
+
+          window.setTimeout(
+            () => {
+              ownerApplyButton.disabled =
+                false;
+
+              ownerApplyButton.textContent =
+                originalText;
+            },
+            1800
           );
         }
-      }
-    );
 
-    return;
-  }
-
-    const editButton = event.target.closest("[data-edit-lab]");
-
-    if (editButton) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const id = editButton.dataset.editLab;
-      if (!id) return;
-
-      const lab =
-  getCachedPatientLabs(
-    pet.id
-  ).find(
-    (item) =>
-      String(item.id) ===
-      String(id)
-  );
-
-      if (!lab) {
-        alert("Аналіз не знайдено.");
         return;
       }
 
-      openLabModal(pet, lab);
-      return;
+      const refreshButton =
+        event.target.closest(
+          "[data-lab-ai-refresh]"
+        );
+
+      if (refreshButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const card =
+          refreshButton.closest(
+            ".labHistoryCard"
+          );
+
+        const aiButton =
+          card?.querySelector(
+            "[data-lab-ai]"
+          );
+
+        const resultNode =
+          card?.querySelector(
+            "[data-lab-ai-result]"
+          );
+
+        if (
+          !aiButton ||
+          !resultNode
+        ) {
+          return;
+        }
+
+        resultNode.innerHTML = "";
+
+        aiButton.click();
+
+        return;
+      }
+
+      const aiButton =
+        event.target.closest(
+          "[data-lab-ai]"
+        );
+
+      if (aiButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const labId =
+          aiButton.dataset.labAi;
+
+        const card =
+          aiButton.closest(
+            ".labHistoryCard"
+          );
+
+        const resultNode =
+          card?.querySelector(
+            "[data-lab-ai-result]"
+          );
+
+        if (
+          !labId ||
+          !resultNode
+        ) {
+          return;
+        }
+
+        const existingPanel =
+          resultNode.querySelector(
+            ".labAiPanel"
+          );
+
+        if (existingPanel) {
+          const isCollapsed =
+            existingPanel
+              .classList
+              .toggle(
+                "is-collapsed"
+              );
+
+          aiButton.textContent =
+            t(
+              isCollapsed
+                ? "patients.card.labs.showAi"
+                : "patients.card.labs.hideAi"
+            );
+
+          return;
+        }
+
+        const originalText =
+          aiButton.textContent;
+
+        aiButton.disabled =
+          true;
+
+        aiButton.textContent =
+          t(
+            "patients.card.labs.aiAnalyzing"
+          );
+
+        resultNode.innerHTML = `
+          <div class="labAiLoading">
+            ${escapeHtml(
+              t(
+                "patients.card.labs.aiLoading"
+              )
+            )}
+          </div>
+        `;
+
+        try {
+          const data =
+            await requestCreateLabAiInterpretation(
+              pet.id,
+              labId,
+              getInterfaceLanguage()
+            );
+
+          resultNode.innerHTML =
+            renderLabAiInterpretation(
+              data.interpretation,
+              data.meta || {}
+            );
+
+          aiButton.textContent =
+            t(
+              "patients.card.labs.hideAi"
+            );
+        } catch (error) {
+          console.error(
+            "PUG AI lab failed:",
+            error
+          );
+
+          resultNode.innerHTML = `
+            <div class="labAiError">
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.aiFailed"
+                )
+              )}
+            </div>
+          `;
+
+          aiButton.textContent =
+            originalText ||
+            t(
+              "patients.card.labs.aiAction"
+            );
+        } finally {
+          aiButton.disabled =
+            false;
+        }
+
+        return;
+      }
+
+      const deleteButton =
+        event.target.closest(
+          "[data-del-lab]"
+        );
+
+      if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const id =
+          deleteButton.dataset.delLab;
+
+        if (!id) {
+          return;
+        }
+
+        const lab =
+          findLab(id);
+
+        const labName =
+          lab
+            ? getPatientLabTypeMeta(
+                lab.type
+              ).name
+            : t(
+                "patients.card.labs.analysis"
+              );
+
+        openDeleteModal(
+          `
+            <b>
+              ${escapeHtml(
+                labName
+              )}
+            </b>
+
+            <br><br>
+
+            ${t(
+              "patients.card.labs.deleteText"
+            )}
+          `,
+          async () => {
+            try {
+              await requestDeletePatientLab(
+                pet.id,
+                id
+              );
+
+              await renderLabsTab(
+                pet
+              );
+            } catch (error) {
+              console.error(
+                "Delete patient lab failed:",
+                error
+              );
+
+              alert(
+                t(
+                  "patients.card.labs.deleteFailed"
+                )
+              );
+            }
+          }
+        );
+
+        return;
+      }
+
+      const editButton =
+        event.target.closest(
+          "[data-edit-lab]"
+        );
+
+      if (editButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const id =
+          editButton.dataset.editLab;
+
+        if (!id) {
+          return;
+        }
+
+        const lab =
+          findLab(id);
+
+        if (!lab) {
+          alert(
+            t(
+              "patients.card.labs.notFound"
+            )
+          );
+
+          return;
+        }
+
+        openLabModal(
+          pet,
+          lab
+        );
+
+        return;
+      }
+
+      const pdfButton =
+        event.target.closest(
+          "[data-pdf-lab]"
+        );
+
+      if (pdfButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const id =
+          pdfButton.dataset.pdfLab;
+
+        if (!id) {
+          return;
+        }
+
+        const lab =
+          findLab(id);
+
+        if (!lab) {
+          alert(
+            t(
+              "patients.card.labs.notFound"
+            )
+          );
+
+          return;
+        }
+
+        await downloadLabPdf(
+          pet,
+          lab
+        );
+      }
     }
-
-    const pdfButton = event.target.closest("[data-pdf-lab]");
-
-if (pdfButton) {
-  event.preventDefault();
-  event.stopPropagation();
-
-  const id = pdfButton.dataset.pdfLab;
-  if (!id) return;
-
-  const lab =
-  getCachedPatientLabs(
-    pet.id
-  ).find(
-    (item) =>
-      String(item.id) ===
-      String(id)
   );
-
-  if (!lab) {
-    alert("Аналіз не знайдено.");
-    return;
-  }
-
-  await downloadLabPdf(pet, lab);
-  return;
-}
-    });
 
   void hydrateLabAiInterpretations(
     pet.id,
@@ -60787,11 +69360,31 @@ function closeLabModal() {
   }, 180);
 }
 
-function openLabModal(pet, labData = {}) {
-  document.getElementById("premiumLabModal")?.remove();
+function openLabModal(
+  pet,
+  labData = {}
+) {
+  document
+    .getElementById(
+      "premiumLabModal"
+    )
+    ?.remove();
 
-  const isEditMode = Boolean(labData?.id);
-    const selectedType =
+  const t = (
+    key,
+    variables = {}
+  ) =>
+    translateInterfaceText(
+      key,
+      variables
+    );
+
+  const isEditMode =
+    Boolean(
+      labData?.id
+    );
+
+  const selectedType =
     (
       labData?.type &&
       LAB_TYPE_META[
@@ -60800,6 +69393,11 @@ function openLabModal(pet, labData = {}) {
     )
       ? labData.type
       : "Біохімія";
+
+  const selectedTypeMeta =
+    getPatientLabTypeMeta(
+      selectedType
+    );
 
   const keys =
     LAB_GROUPS[
@@ -60812,9 +69410,16 @@ function openLabModal(pet, labData = {}) {
   const values =
     labData?.values || {};
 
-  const modal = document.createElement("div");
-  modal.id = "premiumLabModal";
-  modal.className = "premiumLabModalOverlay";
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.id =
+    "premiumLabModal";
+
+  modal.className =
+    "premiumLabModalOverlay";
 
   modal.innerHTML = `
     <div
@@ -60828,28 +69433,55 @@ function openLabModal(pet, labData = {}) {
       aria-modal="true"
       aria-labelledby="premiumLabModalTitle"
     >
-      <header class="premiumLabModalHeader">
-        <div class="premiumLabModalHeaderMain">
-          <div class="premiumLabModalIcon">
-            ${LAB_TYPE_META[selectedType]?.icon || "🧪"}
+      <header
+        class="premiumLabModalHeader"
+      >
+        <div
+          class="premiumLabModalHeaderMain"
+        >
+          <div
+            class="premiumLabModalIcon"
+          >
+            ${
+              selectedTypeMeta.icon ||
+              "🧪"
+            }
           </div>
 
           <div>
-            <div class="premiumLabModalKicker">
-              ЛАБОРАТОРНЕ ДОСЛІДЖЕННЯ
+            <div
+              class="premiumLabModalKicker"
+            >
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.modal.kicker"
+                )
+              )}
             </div>
 
-            <h2 id="premiumLabModalTitle">
-              ${
-                isEditMode
-                  ? "Редагувати аналіз"
-                  : "Новий аналіз"
-              }
+            <h2
+              id="premiumLabModalTitle"
+            >
+              ${escapeHtml(
+                t(
+                  isEditMode
+                    ? "patients.card.labs.modal.editTitle"
+                    : "patients.card.labs.modal.newTitle"
+                )
+              )}
             </h2>
 
             <p>
-              ${escapeHtml(selectedType)}
-              · ${escapeHtml(pet.name || "Пацієнт")}
+              ${escapeHtml(
+                selectedTypeMeta.name
+              )}
+              ·
+              ${escapeHtml(
+                pet.name ||
+                t(
+                  "patients.card.labs.modal.patient"
+                )
+              )}
             </p>
           </div>
         </div>
@@ -60858,177 +69490,317 @@ function openLabModal(pet, labData = {}) {
           class="premiumLabModalClose"
           type="button"
           data-close-lab-modal
-          aria-label="Закрити"
+          aria-label="${escapeHtml(
+            t(
+              "patients.card.labs.modal.close"
+            )
+          )}"
         >
           ×
         </button>
       </header>
 
-      <div class="premiumLabModalScroll">
-        <section class="premiumLabMetaSection">
-          <label class="premiumLabField">
-            <span>Тип дослідження</span>
+      <div
+        class="premiumLabModalScroll"
+      >
+        <section
+          class="premiumLabMetaSection"
+        >
+          <label
+            class="premiumLabField"
+          >
+            <span>
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.modal.type"
+                )
+              )}
+            </span>
 
             <select
               id="premiumLabType"
-              ${isEditMode ? "disabled" : ""}
+              ${
+                isEditMode
+                  ? "disabled"
+                  : ""
+              }
             >
-                            ${Object.keys(LAB_TYPE_META)
-                .map((type) => `
-                  <option
-                    value="${escapeHtml(type)}"
-                    ${type === selectedType ? "selected" : ""}
-                  >
-                    ${escapeHtml(type)}
-                  </option>
-                `)
+              ${Object.keys(
+                LAB_TYPE_META
+              )
+                .map(
+                  (type) => {
+                    const typeMeta =
+                      getPatientLabTypeMeta(
+                        type
+                      );
+
+                    return `
+                      <option
+                        value="${escapeHtml(
+                          type
+                        )}"
+                        ${
+                          type ===
+                          selectedType
+                            ? "selected"
+                            : ""
+                        }
+                      >
+                        ${escapeHtml(
+                          typeMeta.name
+                        )}
+                      </option>
+                    `;
+                  }
+                )
                 .join("")}
             </select>
           </label>
 
-          <label class="premiumLabField">
-            <span>Дата дослідження</span>
+          <label
+            class="premiumLabField"
+          >
+            <span>
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.modal.date"
+                )
+              )}
+            </span>
 
             <input
               id="premiumLabDate"
               type="date"
-              value="${escapeHtml(labData?.date || todayISO())}"
+              value="${escapeHtml(
+                labData?.date ||
+                todayISO()
+              )}"
             >
           </label>
 
-          <label class="premiumLabField">
-            <span>Лабораторія</span>
+          <label
+            class="premiumLabField"
+          >
+            <span>
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.modal.laboratory"
+                )
+              )}
+            </span>
 
             <input
               id="premiumLabLaboratory"
               type="text"
               maxlength="150"
-              value="${escapeHtml(labData?.laboratory || "")}"
-              placeholder="Наприклад: IDEXX, BioSoft..."
+              value="${escapeHtml(
+                labData?.laboratory ||
+                ""
+              )}"
+              placeholder="${escapeHtml(
+                t(
+                  "patients.card.labs.modal.laboratoryPlaceholder"
+                )
+              )}"
             >
           </label>
         </section>
 
-        <section class="premiumLabResultsSection">
-                    <div
+        <section
+          class="premiumLabResultsSection"
+        >
+          <div
             class="premiumLabSectionHead"
           >
             <div>
               <h3>
-                ${
-                  isStructuredLab
-                    ? "Результати"
-                    : "Опис дослідження"
-                }
+                ${escapeHtml(
+                  t(
+                    isStructuredLab
+                      ? "patients.card.labs.modal.results"
+                      : "patients.card.labs.modal.description"
+                  )
+                )}
               </h3>
 
               <p>
-                ${
-                  isStructuredLab
-                    ? (
-                        "Вкажіть значення " +
-                        "та референс лабораторії."
-                      )
-                    : (
-                        "Додайте лабораторний " +
-                        "висновок у полі нижче."
-                      )
-                }
+                ${escapeHtml(
+                  t(
+                    isStructuredLab
+                      ? "patients.card.labs.modal.structuredHelp"
+                      : "patients.card.labs.modal.qualitativeHelp"
+                  )
+                )}
               </p>
             </div>
 
             <span>
-              ${
+              ${escapeHtml(
                 isStructuredLab
-                  ? (
-                      `${keys.length} ` +
-                      "показників"
+                  ? t(
+                      "patients.card.labs.modal.indicatorCount",
+                      {
+                        count:
+                          keys.length,
+                      }
                     )
-                  : "Якісний результат"
-              }
+                  : t(
+                      "patients.card.labs.modal.qualitativeResult"
+                    )
+              )}
             </span>
           </div>
 
-          <div class="premiumLabResultsGrid">
+          <div
+            class="premiumLabResultsGrid"
+          >
             ${keys
-              .map((key) => {
-                const ref = getLabReference(pet, labData, key);
-                const value = values[key] ?? "";
+              .map(
+                (key) => {
+                  const ref =
+                    getLabReference(
+                      pet,
+                      labData,
+                      key
+                    );
 
-                return `
-                  <article
-                    class="premiumLabResultCard"
-                    data-lab-result-key="${escapeHtml(key)}"
-                  >
-                    <div class="premiumLabResultTop">
-                      <div>
-                        <strong>
-                          ${escapeHtml(LAB_LABELS[key] || key)}
-                        </strong>
+                  const value =
+                    values[key] ??
+                    "";
 
-                        <small>
-                          ${escapeHtml(key)}
-                        </small>
+                  const label =
+                    getPatientLabMetricLabel(
+                      key
+                    );
+
+                  return `
+                    <article
+                      class="premiumLabResultCard"
+                      data-lab-result-key="${escapeHtml(
+                        key
+                      )}"
+                    >
+                      <div
+                        class="premiumLabResultTop"
+                      >
+                        <div>
+                          <strong>
+                            ${escapeHtml(
+                              label
+                            )}
+                          </strong>
+
+                          ${
+                            label !== key
+                              ? `
+                                <small>
+                                  ${escapeHtml(
+                                    key
+                                  )}
+                                </small>
+                              `
+                              : ""
+                          }
+                        </div>
+
+                        <div
+                          class="premiumLabLiveStatus"
+                          data-lab-live-status
+                        >
+                          —
+                        </div>
                       </div>
+
+                      <label
+                        class="premiumLabValueField"
+                      >
+                        <span>
+                          ${escapeHtml(
+                            t(
+                              "patients.card.labs.modal.result"
+                            )
+                          )}
+                        </span>
+
+                        <div>
+                          <input
+                            type="number"
+                            inputmode="decimal"
+                            step="any"
+                            data-lab-value
+                            value="${escapeHtml(
+                              value
+                            )}"
+                            placeholder="—"
+                          >
+
+                          <input
+                            type="text"
+                            data-lab-unit
+                            value="${escapeHtml(
+                              localizePatientLabUnit(
+                                ref.unit
+                              )
+                            )}"
+                            placeholder="${escapeHtml(
+                              t(
+                                "patients.card.labs.modal.unitPlaceholder"
+                              )
+                            )}"
+                          >
+                        </div>
+                      </label>
 
                       <div
-                        class="premiumLabLiveStatus"
-                        data-lab-live-status
+                        class="premiumLabReferenceGrid"
                       >
-                        —
+                        <label>
+                          <span>
+                            ${escapeHtml(
+                              t(
+                                "patients.card.labs.modal.min"
+                              )
+                            )}
+                          </span>
+
+                          <input
+                            type="number"
+                            inputmode="decimal"
+                            step="any"
+                            data-lab-min
+                            value="${escapeHtml(
+                              ref.min
+                            )}"
+                            placeholder="—"
+                          >
+                        </label>
+
+                        <label>
+                          <span>
+                            ${escapeHtml(
+                              t(
+                                "patients.card.labs.modal.max"
+                              )
+                            )}
+                          </span>
+
+                          <input
+                            type="number"
+                            inputmode="decimal"
+                            step="any"
+                            data-lab-max
+                            value="${escapeHtml(
+                              ref.max
+                            )}"
+                            placeholder="—"
+                          >
+                        </label>
                       </div>
-                    </div>
-
-                    <label class="premiumLabValueField">
-                      <span>Результат</span>
-
-                      <div>
-                        <input
-                          type="number"
-                          inputmode="decimal"
-                          step="any"
-                          data-lab-value
-                          value="${escapeHtml(value)}"
-                          placeholder="—"
-                        >
-
-                        <input
-                          type="text"
-                          data-lab-unit
-                          value="${escapeHtml(ref.unit)}"
-                          placeholder="од."
-                        >
-                      </div>
-                    </label>
-
-                    <div class="premiumLabReferenceGrid">
-                      <label>
-                        <span>Мін.</span>
-                        <input
-                          type="number"
-                          inputmode="decimal"
-                          step="any"
-                          data-lab-min
-                          value="${escapeHtml(ref.min)}"
-                          placeholder="—"
-                        >
-                      </label>
-
-                      <label>
-                        <span>Макс.</span>
-                        <input
-                          type="number"
-                          inputmode="decimal"
-                          step="any"
-                          data-lab-max
-                          value="${escapeHtml(ref.max)}"
-                          placeholder="—"
-                        >
-                      </label>
-                    </div>
-                  </article>
-                `;
-                           })
+                    </article>
+                  `;
+                }
+              )
               .join("")}
           </div>
 
@@ -61050,32 +69822,28 @@ function openLabModal(pet, labData = {}) {
                     line-height:1.55;
                   "
                 >
-                  Для ПЛР, бактеріології,
-                  паразитології, цитології та
-                  гістології додайте повний текст
-                  результату і висновок лабораторії
-                  у полі нижче.
-
-                  PUG AI використає цей текст
-                  під час розшифровки.
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.modal.unstructuredInfo"
+                    )
+                  )}
                 </div>
               `
               : ""
           }
         </section>
 
-                <label
+        <label
           class="premiumLabCommentField"
         >
           <span>
-            ${
-              isStructuredLab
-                ? "Коментар лікаря"
-                : (
-                    "Результат і висновок " +
-                    "лабораторії"
-                  )
-            }
+            ${escapeHtml(
+              t(
+                isStructuredLab
+                  ? "patients.card.labs.modal.doctorComment"
+                  : "patients.card.labs.modal.labConclusion"
+              )
+            )}
           </span>
 
           <textarea
@@ -61086,21 +69854,16 @@ function openLabModal(pet, labData = {}) {
                 : "8"
             }"
             maxlength="6000"
-            placeholder="${
-              isStructuredLab
-                ? (
-                    "Клінічна інтерпретація, " +
-                    "умови забору або " +
-                    "додаткова інформація..."
-                  )
-                : (
-                    "Вставте результат, опис " +
-                    "матеріалу, метод і висновок " +
-                    "лабораторії..."
-                  )
-            }"
-                    >${escapeHtml(
-            labData?.comment || ""
+            placeholder="${escapeHtml(
+              t(
+                isStructuredLab
+                  ? "patients.card.labs.modal.doctorPlaceholder"
+                  : "patients.card.labs.modal.conclusionPlaceholder"
+              )
+            )}"
+          >${escapeHtml(
+            labData?.comment ||
+            ""
           )}</textarea>
         </label>
 
@@ -61111,14 +69874,22 @@ function openLabModal(pet, labData = {}) {
           "
         >
           <span>
-            Пояснення для власника
+            ${escapeHtml(
+              t(
+                "patients.card.labs.modal.ownerExplanation"
+              )
+            )}
           </span>
 
           <textarea
             id="premiumLabOwnerExplanation"
             rows="6"
             maxlength="6000"
-            placeholder="Простими словами поясніть, що означають результати аналізу та які наступні дії рекомендує лікар..."
+            placeholder="${escapeHtml(
+              t(
+                "patients.card.labs.modal.ownerPlaceholder"
+              )
+            )}"
           >${escapeHtml(
             labData
               ?.owner_explanation ||
@@ -61128,21 +69899,28 @@ function openLabModal(pet, labData = {}) {
           <small
             class="premiumLabOwnerExplanationHint"
           >
-            Цей текст буде збережено разом
-            з аналізом і додано до PDF.
-            Його можна написати вручну або
-            підготувати за допомогою PUG AI.
+            ${escapeHtml(
+              t(
+                "patients.card.labs.modal.ownerHint"
+              )
+            )}
           </small>
         </label>
       </div>
 
-      <footer class="premiumLabModalFooter">
+      <footer
+        class="premiumLabModalFooter"
+      >
         <button
           class="premiumLabCancel"
           type="button"
           data-close-lab-modal
         >
-          Скасувати
+          ${escapeHtml(
+            t(
+              "patients.card.labs.modal.cancel"
+            )
+          )}
         </button>
 
         <button
@@ -61150,304 +69928,802 @@ function openLabModal(pet, labData = {}) {
           id="premiumLabSave"
           type="button"
         >
-          ${
-            isEditMode
-              ? "Зберегти зміни"
-              : "Створити аналіз"
-          }
+          ${escapeHtml(
+            t(
+              isEditMode
+                ? "patients.card.labs.modal.saveChanges"
+                : "patients.card.labs.modal.create"
+            )
+          )}
         </button>
       </footer>
     </section>
   `;
 
-  document.body.appendChild(modal);
-  document.body.classList.add("premiumLabModalOpen");
+  document.body.appendChild(
+    modal
+  );
 
-  requestAnimationFrame(() => {
-    modal.classList.add("open");
-  });
+  document.body.classList.add(
+    "premiumLabModalOpen"
+  );
 
-  const updateLiveStatus = (card) => {
-    const valueRaw =
-      card.querySelector("[data-lab-value]")?.value ?? "";
-
-    const minRaw =
-      card.querySelector("[data-lab-min]")?.value ?? "";
-
-    const maxRaw =
-      card.querySelector("[data-lab-max]")?.value ?? "";
-
-    const statusElement =
-      card.querySelector("[data-lab-live-status]");
-
-    card.classList.remove(
-      "is-normal",
-      "is-low",
-      "is-high",
-      "is-empty"
-    );
-
-    if (
-      String(valueRaw).trim() === "" ||
-      String(minRaw).trim() === "" ||
-      String(maxRaw).trim() === ""
-    ) {
-      card.classList.add("is-empty");
-
-      if (statusElement) {
-        statusElement.textContent = "—";
-      }
-
-      return;
+  requestAnimationFrame(
+    () => {
+      modal.classList.add(
+        "open"
+      );
     }
+  );
 
-    const value = Number(valueRaw);
-    const min = Number(minRaw);
-    const max = Number(maxRaw);
+  const updateLiveStatus =
+    (card) => {
+      const valueRaw =
+        card.querySelector(
+          "[data-lab-value]"
+        )?.value ?? "";
 
-    const status = getLabStatus(value, min, max);
+      const minRaw =
+        card.querySelector(
+          "[data-lab-min]"
+        )?.value ?? "";
 
-    card.classList.add(`is-${status}`);
+      const maxRaw =
+        card.querySelector(
+          "[data-lab-max]"
+        )?.value ?? "";
 
-    if (statusElement) {
-      statusElement.textContent =
-        status === "normal"
-          ? "Норма"
-          : status === "high"
-            ? "Вище"
-            : status === "low"
-              ? "Нижче"
-              : "—";
-    }
-  };
-
-  modal
-    .querySelectorAll("[data-lab-result-key]")
-    .forEach((card) => {
-      card
-        .querySelectorAll("input")
-        .forEach((input) => {
-          input.addEventListener("input", () => {
-            updateLiveStatus(card);
-          });
-        });
-
-      updateLiveStatus(card);
-    });
-
-  modal.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close-lab-modal]")) {
-      closeLabModal();
-    }
-  });
-
-  modal.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeLabModal();
-    }
-  });
-
-  modal
-    .querySelector("#premiumLabType")
-    ?.addEventListener("change", (event) => {
-      const nextType = event.target.value;
-      closeLabModal();
-
-      setTimeout(() => {
-        openLabModal(pet, {
-          type: nextType,
-          date:
-            modal.querySelector("#premiumLabDate")?.value ||
-            todayISO(),
-        });
-      }, 190);
-    });
-
-  modal
-    .querySelector("#premiumLabSave")
-    ?.addEventListener(
-      "click",
-      async () => {
-      const type =
-        modal.querySelector("#premiumLabType")?.value ||
-        selectedType;
-
-      const date =
-        modal.querySelector("#premiumLabDate")?.value ||
-        todayISO();
-
-      const laboratory =
-        modal
-          .querySelector("#premiumLabLaboratory")
-          ?.value?.trim() || "";
-
-            const comment =
-        modal
-          .querySelector("#premiumLabComment")
-          ?.value?.trim() || "";
-
-      const ownerExplanation =
-        modal
-          .querySelector(
-            "#premiumLabOwnerExplanation"
-          )
-          ?.value?.trim() || "";
-
-      const nextValues = {};
-      const nextRefs = {};
-
-      modal
-        .querySelectorAll("[data-lab-result-key]")
-        .forEach((card) => {
-          const key = card.dataset.labResultKey;
-          if (!key) return;
-
-          const valueRaw =
-            card.querySelector("[data-lab-value]")?.value ?? "";
-
-          const minRaw =
-            card.querySelector("[data-lab-min]")?.value ?? "";
-
-          const maxRaw =
-            card.querySelector("[data-lab-max]")?.value ?? "";
-
-          const unit =
-            card
-              .querySelector("[data-lab-unit]")
-              ?.value?.trim() || "";
-
-          if (String(valueRaw).trim() !== "") {
-            const value = Number(valueRaw);
-
-            if (Number.isFinite(value)) {
-              nextValues[key] = value;
-            }
-          }
-
-          nextRefs[key] = {
-            min:
-              String(minRaw).trim() === ""
-                ? ""
-                : Number(minRaw),
-
-            max:
-              String(maxRaw).trim() === ""
-                ? ""
-                : Number(maxRaw),
-
-            unit,
-          };
-        });
-
-            if (
-        !Object.keys(
-          nextValues
-        ).length &&
-        !comment
-      ) {
-        alert(
-          isStructuredLab
-            ? (
-                "Вкажіть хоча б один " +
-                "результат або додайте " +
-                "коментар."
-              )
-            : (
-                "Додайте результат або " +
-                "висновок лабораторії."
-              )
+      const statusElement =
+        card.querySelector(
+          "[data-lab-live-status]"
         );
+
+      card.classList.remove(
+        "is-normal",
+        "is-low",
+        "is-high",
+        "is-empty"
+      );
+
+      if (
+        String(
+          valueRaw
+        ).trim() === "" ||
+        String(
+          minRaw
+        ).trim() === "" ||
+        String(
+          maxRaw
+        ).trim() === ""
+      ) {
+        card.classList.add(
+          "is-empty"
+        );
+
+        if (statusElement) {
+          statusElement.textContent =
+            "—";
+        }
 
         return;
       }
 
-            const labPayload = {
-        type,
-        date,
-        laboratory,
-                comment,
-
-        owner_explanation:
-          ownerExplanation,
-
-        values:
-          nextValues,
-        refs:
-          nextRefs,
-      };
-
-      const saveButton =
-        modal.querySelector(
-          "#premiumLabSave"
+      const value =
+        Number(
+          valueRaw
         );
 
-      const originalButtonText =
-        saveButton?.textContent ||
-        "Зберегти";
+      const min =
+        Number(
+          minRaw
+        );
 
-      try {
-        if (saveButton) {
-          saveButton.disabled =
-            true;
+      const max =
+        Number(
+          maxRaw
+        );
 
-          saveButton.textContent =
-            "Зберігаємо…";
-        }
+      const status =
+        getLabStatus(
+          value,
+          min,
+          max
+        );
 
-        if (isEditMode) {
-          await requestUpdatePatientLab(
-            pet.id,
-            labData.id,
-            labPayload
+      card.classList.add(
+        `is-${status}`
+      );
+
+      if (statusElement) {
+        statusElement.textContent =
+          status === "normal"
+            ? t(
+                "patients.card.labs.modal.normal"
+              )
+            : status === "high"
+              ? t(
+                  "patients.card.labs.modal.high"
+                )
+              : status === "low"
+                ? t(
+                    "patients.card.labs.modal.low"
+                  )
+                : "—";
+      }
+    };
+
+  modal
+    .querySelectorAll(
+      "[data-lab-result-key]"
+    )
+    .forEach(
+      (card) => {
+        card
+          .querySelectorAll(
+            "input"
+          )
+          .forEach(
+            (input) => {
+              input.addEventListener(
+                "input",
+                () => {
+                  updateLiveStatus(
+                    card
+                  );
+                }
+              );
+            }
           );
-        } else {
-          await requestCreatePatientLab(
-            pet.id,
-            labPayload
-          );
-        }
+
+        updateLiveStatus(
+          card
+        );
+      }
+    );
+
+  modal.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.closest(
+          "[data-close-lab-modal]"
+        )
+      ) {
+        closeLabModal();
+      }
+    }
+  );
+
+  modal.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key ===
+        "Escape"
+      ) {
+        closeLabModal();
+      }
+    }
+  );
+
+  modal
+    .querySelector(
+      "#premiumLabType"
+    )
+    ?.addEventListener(
+      "change",
+      (event) => {
+        const nextType =
+          event.target.value;
+
+        const nextDate =
+          modal.querySelector(
+            "#premiumLabDate"
+          )?.value ||
+          todayISO();
 
         closeLabModal();
 
-        await renderLabsTab(
-          pet
+        setTimeout(
+          () => {
+            openLabModal(
+              pet,
+              {
+                type:
+                  nextType,
+                date:
+                  nextDate,
+              }
+            );
+          },
+          190
         );
-      } catch (error) {
-        console.error(
-          "Save patient lab failed:",
-          error
-        );
+      }
+    );
 
-        alert(
-          error?.message ||
-          "Не вдалося зберегти аналіз."
-        );
-      } finally {
+  modal
+    .querySelector(
+      "#premiumLabSave"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const type =
+          modal.querySelector(
+            "#premiumLabType"
+          )?.value ||
+          selectedType;
+
+        const date =
+          modal.querySelector(
+            "#premiumLabDate"
+          )?.value ||
+          todayISO();
+
+        const laboratory =
+          modal
+            .querySelector(
+              "#premiumLabLaboratory"
+            )
+            ?.value
+            ?.trim() ||
+          "";
+
+        const comment =
+          modal
+            .querySelector(
+              "#premiumLabComment"
+            )
+            ?.value
+            ?.trim() ||
+          "";
+
+        const ownerExplanation =
+          modal
+            .querySelector(
+              "#premiumLabOwnerExplanation"
+            )
+            ?.value
+            ?.trim() ||
+          "";
+
+        const nextValues = {};
+        const nextRefs = {};
+
+        modal
+          .querySelectorAll(
+            "[data-lab-result-key]"
+          )
+          .forEach(
+            (card) => {
+              const key =
+                card.dataset
+                  .labResultKey;
+
+              if (!key) {
+                return;
+              }
+
+              const valueRaw =
+                card.querySelector(
+                  "[data-lab-value]"
+                )?.value ?? "";
+
+              const minRaw =
+                card.querySelector(
+                  "[data-lab-min]"
+                )?.value ?? "";
+
+              const maxRaw =
+                card.querySelector(
+                  "[data-lab-max]"
+                )?.value ?? "";
+
+              const unit =
+                card
+                  .querySelector(
+                    "[data-lab-unit]"
+                  )
+                  ?.value
+                  ?.trim() ||
+                "";
+
+              if (
+                String(
+                  valueRaw
+                ).trim() !==
+                ""
+              ) {
+                const value =
+                  Number(
+                    valueRaw
+                  );
+
+                if (
+                  Number.isFinite(
+                    value
+                  )
+                ) {
+                  nextValues[
+                    key
+                  ] = value;
+                }
+              }
+
+              nextRefs[key] = {
+                min:
+                  String(
+                    minRaw
+                  ).trim() ===
+                  ""
+                    ? ""
+                    : Number(
+                        minRaw
+                      ),
+
+                max:
+                  String(
+                    maxRaw
+                  ).trim() ===
+                  ""
+                    ? ""
+                    : Number(
+                        maxRaw
+                      ),
+
+                unit,
+              };
+            }
+          );
+
         if (
-          saveButton &&
-          saveButton.isConnected
+          !Object.keys(
+            nextValues
+          ).length &&
+          !comment
         ) {
-          saveButton.disabled =
-            false;
+          alert(
+            t(
+              isStructuredLab
+                ? "patients.card.labs.modal.structuredRequired"
+                : "patients.card.labs.modal.qualitativeRequired"
+            )
+          );
 
-          saveButton.textContent =
-            originalButtonText;
+          return;
+        }
+
+        const labPayload = {
+          type,
+          date,
+          laboratory,
+          comment,
+
+          owner_explanation:
+            ownerExplanation,
+
+          values:
+            nextValues,
+
+          refs:
+            nextRefs,
+        };
+
+        const saveButton =
+          modal.querySelector(
+            "#premiumLabSave"
+          );
+
+        const originalButtonText =
+          saveButton
+            ?.textContent ||
+          t(
+            isEditMode
+              ? "patients.card.labs.modal.saveChanges"
+              : "patients.card.labs.modal.create"
+          );
+
+        try {
+          if (saveButton) {
+            saveButton.disabled =
+              true;
+
+            saveButton.textContent =
+              t(
+                "patients.card.labs.saving"
+              );
+          }
+
+          if (isEditMode) {
+            await requestUpdatePatientLab(
+              pet.id,
+              labData.id,
+              labPayload
+            );
+          } else {
+            await requestCreatePatientLab(
+              pet.id,
+              labPayload
+            );
+          }
+
+          closeLabModal();
+
+          await renderLabsTab(
+            pet
+          );
+        } catch (error) {
+          console.error(
+            "Save patient lab failed:",
+            error
+          );
+
+          alert(
+            t(
+              "patients.card.labs.modal.saveFailed"
+            )
+          );
+        } finally {
+          if (
+            saveButton &&
+            saveButton.isConnected
+          ) {
+            saveButton.disabled =
+              false;
+
+            saveButton.textContent =
+              originalButtonText;
+          }
         }
       }
-    });
+    );
 }
-function normalizeLabPdfNumber(value) {
-  if (value === null || value === undefined || value === "") return "—";
+function getLabPdfUi() {
+  const language =
+    getInterfaceLanguage();
 
-  const number = Number(value);
+  const index =
+    {
+      uk: 0,
+      en: 1,
+      de: 2,
+      pl: 3,
+    }[language] ?? 0;
 
-  if (!Number.isFinite(number)) {
-    return String(value);
+  const pick =
+    (...values) =>
+      values[index] ??
+      values[0];
+
+  return {
+    clinic:
+      pick(
+        "Ветеринарна клініка",
+        "Veterinary clinic",
+        "Tierklinik",
+        "Klinika weterynaryjna"
+      ),
+
+    clinicFooter:
+      pick(
+        "Коли важливо — ми поруч.",
+        "Here when it matters.",
+        "Für Sie da, wenn es darauf ankommt.",
+        "Jesteśmy blisko, gdy ma to znaczenie."
+      ),
+
+    cat:
+      pick(
+        "Кіт",
+        "Cat",
+        "Katze",
+        "Kot"
+      ),
+
+    dog:
+      pick(
+        "Собака",
+        "Dog",
+        "Hund",
+        "Pies"
+      ),
+
+    animal:
+      pick(
+        "Тварина",
+        "Animal",
+        "Tier",
+        "Zwierzę"
+      ),
+
+    documentTitle:
+      pick(
+        "Результати лабораторного дослідження",
+        "Laboratory test results",
+        "Ergebnisse der Laboruntersuchung",
+        "Wyniki badania laboratoryjnego"
+      ),
+
+    analysis:
+      pick(
+        "Аналіз",
+        "Laboratory test",
+        "Laboruntersuchung",
+        "Badanie"
+      ),
+
+    patient:
+      pick(
+        "Пацієнт",
+        "Patient",
+        "Patient",
+        "Pacjent"
+      ),
+
+    date:
+      pick(
+        "Дата дослідження",
+        "Test date",
+        "Untersuchungsdatum",
+        "Data badania"
+      ),
+
+    laboratory:
+      pick(
+        "Лабораторія",
+        "Laboratory",
+        "Labor",
+        "Laboratorium"
+      ),
+
+    notProvided:
+      pick(
+        "Не вказано",
+        "Not provided",
+        "Nicht angegeben",
+        "Nie podano"
+      ),
+
+    deviations:
+      pick(
+        "Є відхилення: {count}",
+        "Abnormal results: {count}",
+        "Abweichende Werte: {count}",
+        "Odchylenia: {count}"
+      ),
+
+    allNormal:
+      pick(
+        "Усі оцінені показники в нормі",
+        "All evaluated results are within the reference ranges",
+        "Alle bewerteten Werte liegen im Referenzbereich",
+        "Wszystkie ocenione wyniki mieszczą się w normie"
+      ),
+
+    deviationsText:
+      pick(
+        "Зверніть увагу на показники, виділені червоним або синім кольором. Остаточну інтерпретацію результатів проводить ветеринарний лікар.",
+        "Review the results highlighted in red or blue. The final interpretation must be made by the veterinarian.",
+        "Beachten Sie die rot oder blau markierten Werte. Die endgültige Interpretation erfolgt durch den Tierarzt.",
+        "Zwróć uwagę na wyniki oznaczone kolorem czerwonym lub niebieskim. Ostatecznej interpretacji dokonuje lekarz weterynarii."
+      ),
+
+    normalText:
+      pick(
+        "За вказаними референтними значеннями відхилень не виявлено. Результат необхідно оцінювати разом із клінічним станом тварини.",
+        "No abnormalities were found using the stated reference ranges. The results must be evaluated together with the animal’s clinical condition.",
+        "Anhand der angegebenen Referenzbereiche wurden keine Abweichungen festgestellt. Die Ergebnisse müssen zusammen mit dem klinischen Zustand des Tieres beurteilt werden.",
+        "Według podanych zakresów referencyjnych nie wykryto odchyleń. Wyniki należy oceniać razem ze stanem klinicznym zwierzęcia."
+      ),
+
+    normal:
+      pick(
+        "Норма",
+        "Normal",
+        "Normal",
+        "Norma"
+      ),
+
+    high:
+      pick(
+        "Вище",
+        "High",
+        "Erhöht",
+        "Powyżej"
+      ),
+
+    low:
+      pick(
+        "Нижче",
+        "Low",
+        "Erniedrigt",
+        "Poniżej"
+      ),
+
+    unknown:
+      pick(
+        "Без оцінки",
+        "Not evaluated",
+        "Nicht bewertet",
+        "Bez oceny"
+      ),
+
+    normalFull:
+      pick(
+        "У межах норми",
+        "Within reference range",
+        "Im Referenzbereich",
+        "W zakresie referencyjnym"
+      ),
+
+    highFull:
+      pick(
+        "Вище норми",
+        "Above reference range",
+        "Über dem Referenzbereich",
+        "Powyżej zakresu referencyjnego"
+      ),
+
+    lowFull:
+      pick(
+        "Нижче норми",
+        "Below reference range",
+        "Unter dem Referenzbereich",
+        "Poniżej zakresu referencyjnego"
+      ),
+
+    parameter:
+      pick(
+        "Показник",
+        "Parameter",
+        "Parameter",
+        "Parametr"
+      ),
+
+    result:
+      pick(
+        "Результат",
+        "Result",
+        "Ergebnis",
+        "Wynik"
+      ),
+
+    reference:
+      pick(
+        "Референс",
+        "Reference range",
+        "Referenzbereich",
+        "Zakres referencyjny"
+      ),
+
+    assessment:
+      pick(
+        "Оцінка",
+        "Assessment",
+        "Bewertung",
+        "Ocena"
+      ),
+
+    noResults:
+      pick(
+        "Результати не внесені",
+        "No results entered",
+        "Keine Ergebnisse eingetragen",
+        "Nie wprowadzono wyników"
+      ),
+
+    doctorComment:
+      pick(
+        "Коментар ветеринарного лікаря",
+        "Veterinarian’s comment",
+        "Kommentar des Tierarztes",
+        "Komentarz lekarza weterynarii"
+      ),
+
+    ownerExplanation:
+      pick(
+        "Пояснення результатів для власника",
+        "Explanation of the results for the owner",
+        "Erklärung der Ergebnisse für den Tierhalter",
+        "Wyjaśnienie wyników dla właściciela"
+      ),
+
+    important:
+      pick(
+        "Важливо:",
+        "Important:",
+        "Wichtig:",
+        "Ważne:"
+      ),
+
+    disclaimer:
+      pick(
+        "Референтні значення можуть відрізнятися залежно від лабораторії, обладнання, віку та фізіологічного стану тварини. Цей документ не є самостійним діагнозом. Результати повинен інтерпретувати ветеринарний лікар.",
+        "Reference ranges may vary depending on the laboratory, equipment, age and physiological condition of the animal. This document is not a standalone diagnosis. The results must be interpreted by a veterinarian.",
+        "Referenzbereiche können je nach Labor, Gerät, Alter und physiologischem Zustand des Tieres abweichen. Dieses Dokument stellt keine eigenständige Diagnose dar. Die Ergebnisse müssen durch einen Tierarzt interpretiert werden.",
+        "Zakresy referencyjne mogą się różnić w zależności od laboratorium, sprzętu, wieku i stanu fizjologicznego zwierzęcia. Ten dokument nie stanowi samodzielnej diagnozy. Wyniki powinien zinterpretować lekarz weterynarii."
+      ),
+
+    signature:
+      pick(
+        "Підпис лікаря",
+        "Veterinarian’s signature",
+        "Unterschrift des Tierarztes",
+        "Podpis lekarza"
+      ),
+
+    stamp:
+      pick(
+        "Печатка клініки",
+        "Clinic stamp",
+        "Praxisstempel",
+        "Pieczęć kliniki"
+      ),
+
+    generated:
+      pick(
+        "Сформовано:",
+        "Generated:",
+        "Erstellt:",
+        "Wygenerowano:"
+      ),
+
+    moduleMissing:
+      pick(
+        "Модуль формування PDF не підключений.",
+        "The PDF generation module is unavailable.",
+        "Das Modul zur PDF-Erstellung ist nicht verfügbar.",
+        "Moduł generowania PDF jest niedostępny."
+      ),
+
+    notFound:
+      pick(
+        "Аналіз не знайдено.",
+        "Laboratory test not found.",
+        "Laboruntersuchung nicht gefunden.",
+        "Nie znaleziono badania."
+      ),
+
+    pdfFailed:
+      pick(
+        "Не вдалося сформувати PDF.",
+        "Could not generate the PDF.",
+        "Das PDF konnte nicht erstellt werden.",
+        "Nie udało się wygenerować pliku PDF."
+      ),
+  };
+}
+function normalizeLabPdfNumber(
+  value
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "—";
   }
 
-  return number.toLocaleString("uk-UA", {
-    maximumFractionDigits: 2,
-  });
+  const number =
+    Number(value);
+
+  if (
+    !Number.isFinite(
+      number
+    )
+  ) {
+    return String(
+      value
+    );
+  }
+
+  return number.toLocaleString(
+    getCalendarLocale(),
+    {
+      maximumFractionDigits:
+        2,
+    }
+  );
 }
 
 function sanitizeLabPdfFilename(value) {
@@ -61523,49 +70799,100 @@ function getLabPdfStatus(value, min, max) {
   return "normal";
 }
 
-function getLabPdfStatusMeta(status) {
+function getLabPdfStatusMeta(
+  status
+) {
+  const ui =
+    getLabPdfUi();
+
+  const locale =
+    getCalendarLocale();
+
+  const upper = (
+    value
+  ) =>
+    String(value)
+      .toLocaleUpperCase(
+        locale
+      );
+
   const statuses = {
     normal: {
-      label: "У межах норми",
-      shortLabel: "НОРМА",
-      symbol: "✓",
-      color: "#147D4A",
-      background: "#E8F7EF",
-      border: "#B9E6CD",
+      label:
+        ui.normalFull,
+      shortLabel:
+        upper(
+          ui.normal
+        ),
+      symbol:
+        "✓",
+      color:
+        "#147D4A",
+      background:
+        "#E8FDF0",
+      border:
+        "#B9E6CD",
     },
 
     high: {
-      label: "Вище норми",
-      shortLabel: "ВИЩЕ",
-      symbol: "↑",
-      color: "#B42318",
-      background: "#FEECEB",
-      border: "#F7C5C1",
+      label:
+        ui.highFull,
+      shortLabel:
+        upper(
+          ui.high
+        ),
+      symbol:
+        "↑",
+      color:
+        "#B42318",
+      background:
+        "#FFF2F0",
+      border:
+        "#F7C5C1",
     },
 
     low: {
-      label: "Нижче норми",
-      shortLabel: "НИЖЧЕ",
-      symbol: "↓",
-      color: "#175CD3",
-      background: "#EAF2FF",
-      border: "#BDD4FF",
+      label:
+        ui.lowFull,
+      shortLabel:
+        upper(
+          ui.low
+        ),
+      symbol:
+        "↓",
+      color:
+        "#175CD3",
+      background:
+        "#EFF5FF",
+      border:
+        "#BDD4FF",
     },
 
     unknown: {
-      label: "Без оцінки",
-      shortLabel: "БЕЗ ОЦІНКИ",
-      symbol: "—",
-      color: "#5F6673",
-      background: "#F2F4F7",
-      border: "#DDE1E7",
+      label:
+        ui.unknown,
+      shortLabel:
+        upper(
+          ui.unknown
+        ),
+      symbol:
+        "—",
+      color:
+        "#5F6673",
+      background:
+        "#F7F8FA",
+      border:
+        "#DDE1E7",
     },
   };
 
-  return statuses[status] || statuses.unknown;
+  return (
+    statuses[status] ||
+    statuses.unknown
+  );
 }
 
-function buildLabPdfDocument(
+function buildLabPdfDocumentBase(
   pet,
   lab,
   clinicProfile = {}
@@ -62679,10 +72006,448 @@ padding-top: ${
 
   return documentNode;
 }
+function buildLabPdfDocument(
+  pet,
+  lab,
+  clinicProfile = {}
+) {
+  const documentNode =
+    buildLabPdfDocumentBase(
+      pet,
+      lab,
+      clinicProfile
+    );
 
-async function downloadLabPdf(pet, labOrId) {
-  if (typeof window.html2pdf === "undefined") {
-    alert("Модуль формування PDF не підключений.");
+  const ui =
+    getLabPdfUi();
+
+  const textNodes = [];
+
+  const walker =
+    document.createTreeWalker(
+      documentNode,
+      NodeFilter.SHOW_TEXT
+    );
+
+  while (
+    walker.nextNode()
+  ) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  const normalize = (
+    value
+  ) =>
+    String(value || "")
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+  const setNodeText = (
+    node,
+    value
+  ) => {
+    const source =
+      String(
+        node.nodeValue ||
+        ""
+      );
+
+    const leading =
+      source.match(
+        /^\s*/
+      )?.[0] || "";
+
+    const trailing =
+      source.match(
+        /\s*$/
+      )?.[0] || "";
+
+    node.nodeValue =
+      `${leading}${value}${trailing}`;
+  };
+
+  const replaceExact = (
+    source,
+    translated
+  ) => {
+    const normalizedSource =
+      normalize(source);
+
+    textNodes.forEach(
+      (node) => {
+        if (
+          normalize(
+            node.nodeValue
+          ) ===
+          normalizedSource
+        ) {
+          setNodeText(
+            node,
+            translated
+          );
+        }
+      }
+    );
+  };
+
+  const exactTranslations = [
+    [
+      "Ветеринарна клініка",
+      ui.clinic,
+    ],
+    [
+      "Коли важливо — ми поруч.",
+      ui.clinicFooter,
+    ],
+    [
+      "Результати лабораторного дослідження",
+      ui.documentTitle,
+    ],
+    [
+      "Аналіз",
+      ui.analysis,
+    ],
+    [
+      "Пацієнт",
+      ui.patient,
+    ],
+    [
+      "Дата дослідження",
+      ui.date,
+    ],
+    [
+      "Лабораторія",
+      ui.laboratory,
+    ],
+    [
+      "Не вказано",
+      ui.notProvided,
+    ],
+    [
+      "Усі оцінені показники в нормі",
+      ui.allNormal,
+    ],
+    [
+      "Зверніть увагу на показники, виділені червоним або синім кольором. Остаточну інтерпретацію результатів проводить ветеринарний лікар.",
+      ui.deviationsText,
+    ],
+    [
+      "За вказаними референтними значеннями відхилень не виявлено. Результат необхідно оцінювати разом із клінічним станом тварини.",
+      ui.normalText,
+    ],
+    [
+      "Показник",
+      ui.parameter,
+    ],
+    [
+      "Результат",
+      ui.result,
+    ],
+    [
+      "Референс",
+      ui.reference,
+    ],
+    [
+      "Оцінка",
+      ui.assessment,
+    ],
+    [
+      "Результати не внесені",
+      ui.noResults,
+    ],
+    [
+      "Коментар ветеринарного лікаря",
+      ui.doctorComment,
+    ],
+    [
+      "Пояснення результатів для власника",
+      ui.ownerExplanation,
+    ],
+    [
+      "Важливо:",
+      ui.important,
+    ],
+    [
+      "Референтні значення можуть відрізнятися залежно від лабораторії, обладнання, віку та фізіологічного стану тварини. Цей документ не є самостійним діагнозом. Результати повинен інтерпретувати ветеринарний лікар.",
+      ui.disclaimer,
+    ],
+    [
+      "Підпис лікаря",
+      ui.signature,
+    ],
+    [
+      "Печатка клініки",
+      ui.stamp,
+    ],
+    [
+      "Кіт",
+      ui.cat,
+    ],
+    [
+      "Собака",
+      ui.dog,
+    ],
+    [
+      "Тварина",
+      ui.animal,
+    ],
+  ];
+
+  exactTranslations.forEach(
+    ([
+      source,
+      translated,
+    ]) => {
+      replaceExact(
+        source,
+        translated
+      );
+    }
+  );
+
+  Object.keys(
+    LAB_TYPE_META
+  ).forEach(
+    (type) => {
+      replaceExact(
+        type,
+        getPatientLabTypeMeta(
+          type
+        ).name
+      );
+    }
+  );
+
+  Object.entries(
+    LAB_LABELS
+  ).forEach(
+    ([
+      key,
+      label,
+    ]) => {
+      replaceExact(
+        label,
+        getPatientLabMetricLabel(
+          key
+        )
+      );
+    }
+  );
+
+  textNodes.forEach(
+    (node) => {
+      const text =
+        normalize(
+          node.nodeValue
+        );
+
+      const deviationsMatch =
+        text.match(
+          /^Є відхилення:\s*(\d+)$/
+        );
+
+      if (
+        deviationsMatch
+      ) {
+        setNodeText(
+          node,
+          ui.deviations.replace(
+            "{count}",
+            deviationsMatch[1]
+          )
+        );
+
+        return;
+      }
+
+      const normalMatch =
+        text.match(
+          /^✓\s*Норма:\s*(\d+)$/
+        );
+
+      if (normalMatch) {
+        setNodeText(
+          node,
+          `✓ ${ui.normal}: ${normalMatch[1]}`
+        );
+
+        return;
+      }
+
+      const highMatch =
+        text.match(
+          /^↑\s*Вище:\s*(\d+)$/
+        );
+
+      if (highMatch) {
+        setNodeText(
+          node,
+          `↑ ${ui.high}: ${highMatch[1]}`
+        );
+
+        return;
+      }
+
+      const lowMatch =
+        text.match(
+          /^↓\s*Нижче:\s*(\d+)$/
+        );
+
+      if (lowMatch) {
+        setNodeText(
+          node,
+          `↓ ${ui.low}: ${lowMatch[1]}`
+        );
+
+        return;
+      }
+
+      const unknownMatch =
+        text.match(
+          /^—\s*Без оцінки:\s*(\d+)$/
+        );
+
+      if (
+        unknownMatch
+      ) {
+        setNodeText(
+          node,
+          `— ${ui.unknown}: ${unknownMatch[1]}`
+        );
+      }
+    }
+  );
+
+  const unitTranslations = {
+    "Од/л":
+      "U/L",
+    "од/л":
+      "U/L",
+    "ммоль/л":
+      "mmol/L",
+    "мкмоль/л":
+      "µmol/L",
+    "г/л":
+      "g/L",
+    "тис./мкл":
+      "10³/µL",
+    "млн/мм³":
+      "10⁶/mm³",
+    "л/л":
+      "L/L",
+  };
+
+  documentNode
+    .querySelectorAll(
+      "tbody td"
+    )
+    .forEach(
+      (cell) => {
+        const cellWalker =
+          document.createTreeWalker(
+            cell,
+            NodeFilter.SHOW_TEXT
+          );
+
+        while (
+          cellWalker.nextNode()
+        ) {
+          let text =
+            String(
+              cellWalker
+                .currentNode
+                .nodeValue ||
+              ""
+            );
+
+          Object.entries(
+            unitTranslations
+          ).forEach(
+            ([
+              source,
+              translated,
+            ]) => {
+              text =
+                text.replaceAll(
+                  source,
+                  translated
+                );
+            }
+          );
+
+          cellWalker
+            .currentNode
+            .nodeValue =
+              text;
+        }
+      }
+    );
+
+  documentNode
+    .querySelectorAll(
+      'img[alt="Підпис лікаря"]'
+    )
+    .forEach(
+      (image) => {
+        image.alt =
+          ui.signature;
+      }
+    );
+
+  documentNode
+    .querySelectorAll(
+      'img[alt="Печатка клініки"]'
+    )
+    .forEach(
+      (image) => {
+        image.alt =
+          ui.stamp;
+      }
+    );
+
+  const footerSpans =
+    documentNode
+      .querySelectorAll(
+        "footer > span"
+      );
+
+  const generatedNode =
+    footerSpans[
+      footerSpans.length - 1
+    ];
+
+  if (generatedNode) {
+    generatedNode.textContent =
+      `${ui.generated} ${
+        new Date()
+          .toLocaleString(
+            getCalendarLocale()
+          )
+      }`;
+  }
+
+  return documentNode;
+}
+async function downloadLabPdf(
+  pet,
+  labOrId
+) {
+  const ui =
+    getLabPdfUi();
+
+  if (
+    typeof window.html2pdf ===
+    "undefined"
+  ) {
+    alert(
+      ui.moduleMissing
+    );
+
     return;
   }
 
@@ -62702,9 +72467,12 @@ async function downloadLabPdf(pet, labOrId) {
         );
 
   if (!lab) {
-    alert("Аналіз не знайдено.");
-    return;
-  }
+  alert(
+    ui.notFound
+  );
+
+  return;
+}
   const clinicProfile =
   state.clinicProfile ||
   await loadClinicProfileApi();
@@ -62853,71 +72621,316 @@ renderHost.style.cssText = `
     console.error("downloadLabPdf failed:", error);
 
     alert(
-      "Не вдалося сформувати PDF: " +
-      (error?.message || error)
-    );
+  ui.pdfFailed
+);
   } finally {
     renderHost.remove();
   }
 }
 
-function formatLabCardDate(dateStr) {
-  if (!dateStr) return "—";
-  const parts = String(dateStr).split("-");
-  if (parts.length === 3) {
-    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+function getPatientLabTypeMeta(
+  type
+) {
+  const raw =
+    String(type || "")
+      .trim();
+
+  const normalized =
+    raw.toLowerCase();
+
+  const typeKeys = {
+    "біохімія":
+      "biochemistry",
+    "biochemistry":
+      "biochemistry",
+
+    "зак":
+      "cbc",
+    "cbc":
+      "cbc",
+
+    "т4":
+      "t4",
+    "t4":
+      "t4",
+
+    "ттг":
+      "tsh",
+    "tsh":
+      "tsh",
+
+    "загальний аналіз сечі":
+      "urinalysis",
+    "urinalysis":
+      "urinalysis",
+
+    "коагулограма":
+      "coagulation",
+    "coagulation":
+      "coagulation",
+
+    "електроліти та гази крові":
+      "electrolytes",
+    "electrolytes":
+      "electrolytes",
+
+    "плр":
+      "pcr",
+    "pcr":
+      "pcr",
+
+    "імунологія та серологія":
+      "immunology",
+    "immunology and serology":
+      "immunology",
+
+    "бактеріологія":
+      "bacteriology",
+    "bacteriology":
+      "bacteriology",
+
+    "паразитологія":
+      "parasitology",
+    "parasitology":
+      "parasitology",
+
+    "цитологія":
+      "cytology",
+    "cytology":
+      "cytology",
+
+    "гістологія":
+      "histology",
+    "histology":
+      "histology",
+
+    "інше":
+      "other",
+    "other":
+      "other",
+  };
+
+  const key =
+    typeKeys[
+      normalized
+    ] || "";
+
+  const sourceMeta =
+    LAB_TYPE_META?.[
+      raw
+    ] || {};
+
+  const translationKey =
+    key
+      ? `patients.card.labs.type.${key}`
+      : "";
+
+  const translated =
+    translationKey
+      ? translateInterfaceText(
+          translationKey
+        )
+      : "";
+
+  const code = {
+    biochemistry:
+      "BIO",
+    cbc:
+      "CBC",
+    t4:
+      "T4",
+    tsh:
+      "TSH",
+    urinalysis:
+      "UA",
+    coagulation:
+      "COAG",
+    electrolytes:
+      "ION/GAS",
+    pcr:
+      "PCR",
+    immunology:
+      "IMM",
+    bacteriology:
+      "C&S",
+    parasitology:
+      "PARA",
+    cytology:
+      "CYTO",
+    histology:
+      "HIST",
+    other:
+      "LAB",
+  }[key] || "LAB";
+
+  return {
+    icon:
+      sourceMeta.icon ||
+      "🧪",
+
+    code,
+
+    name:
+      translated &&
+      translated !==
+        translationKey
+        ? translated
+        : raw ||
+          translateInterfaceText(
+            "patients.card.labs.analysis"
+          ),
+  };
+}
+function localizePatientLabUnit(
+  value
+) {
+  const unit =
+    String(value || "")
+      .trim();
+
+  const units = {
+    "Од/л": "U/L",
+    "од/л": "U/L",
+    "ммоль/л": "mmol/L",
+    "мкмоль/л": "µmol/L",
+    "г/л": "g/L",
+    "тис./мкл": "10³/µL",
+    "млн/мм³": "10⁶/mm³",
+    "л/л": "L/L",
+  };
+
+  return units[unit] ||
+    unit;
+}
+
+function getPatientLabMetricLabel(
+  key
+) {
+  if (
+    getInterfaceLanguage() ===
+    "uk"
+  ) {
+    return LAB_LABELS?.[key] ||
+      key;
   }
-  return dateStr;
+
+  return key;
 }
 
-function formatLabCardValue(value) {
-  if (value === null || value === undefined || value === "") return "—";
+function formatLabCardDate(
+  value
+) {
+  if (!value) {
+    return "—";
+  }
 
-  const num = Number(value);
-  if (!Number.isFinite(num)) return String(value);
-
-  return num.toLocaleString("uk-UA", {
-    maximumFractionDigits: 2,
-  });
+  return formatCalendarDate(
+    value,
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  );
 }
 
-function renderLabCard(lab, speciesKey) {
-  const typeMeta = LAB_TYPE_META?.[lab.type] || {
-    short: lab.type || "Аналіз",
-    icon: "🧪",
-    description: "",
-  };
+function formatLabCardValue(
+  value
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "—";
+  }
 
-  const values = lab?.values || {};
-  const refs = lab?.refs || {};
+  const number =
+    Number(value);
 
-  const resolveRef = (key) => {
-    const saved = refs[key];
-    if (saved) {
-      return {
-        min: saved.min ?? "",
-        max: saved.max ?? "",
-        unit: saved.unit ?? "",
-      };
+  if (!Number.isFinite(number)) {
+    return String(value);
+  }
+
+  return number.toLocaleString(
+    getCalendarLocale(),
+    {
+      maximumFractionDigits:
+        2,
     }
+  );
+}
 
-    const fallback = LAB_REF?.[speciesKey]?.[key];
-    if (Array.isArray(fallback)) {
+function renderLabCard(
+  lab,
+  speciesKey
+) {
+  const t =
+    (key) =>
+      translateInterfaceText(key);
+
+  const typeMeta =
+    getPatientLabTypeMeta(
+      lab.type
+    );
+
+  const values =
+    lab?.values || {};
+
+  const refs =
+    lab?.refs || {};
+
+  const resolveReference =
+    (key) => {
+      const saved =
+        refs[key];
+
+      if (saved) {
+        return {
+          min:
+            saved.min ?? "",
+          max:
+            saved.max ?? "",
+          unit:
+            localizePatientLabUnit(
+              saved.unit
+            ),
+        };
+      }
+
+      const fallback =
+        LAB_REF
+          ?.[speciesKey]
+          ?.[key];
+
+      if (
+        Array.isArray(fallback)
+      ) {
+        return {
+          min:
+            fallback[0] ?? "",
+          max:
+            fallback[1] ?? "",
+          unit:
+            localizePatientLabUnit(
+              fallback[2]
+            ),
+        };
+      }
+
       return {
-        min: fallback[0] ?? "",
-        max: fallback[1] ?? "",
-        unit: fallback[2] ?? "",
+        min: "",
+        max: "",
+        unit:
+          localizePatientLabUnit(
+            LAB_DEFAULT_UNITS
+              ?.[key] ||
+            ""
+          ),
       };
-    }
-
-    return {
-      min: "",
-      max: "",
-      unit: LAB_DEFAULT_UNITS?.[key] || "",
     };
-  };
 
-  const metricPriority = {
+  const priority = {
     high: 0,
     low: 0,
     normal: 1,
@@ -62925,95 +72938,231 @@ function renderLabCard(lab, speciesKey) {
     unknown: 2,
   };
 
-  const metrics = Object.entries(values)
-    .map(([key, rawValue]) => {
-      const ref = resolveRef(key);
+  const metrics =
+    Object.entries(values)
+      .map(
+        ([
+          key,
+          rawValue,
+        ]) => {
+          const reference =
+            resolveReference(key);
 
-      const value = Number(rawValue);
-      const min = Number(ref.min);
-      const max = Number(ref.max);
+          const value =
+            Number(rawValue);
 
-      let status = "unknown";
+          const minimum =
+            Number(
+              reference.min
+            );
 
-      if (
-        Number.isFinite(value) &&
-        Number.isFinite(min) &&
-        Number.isFinite(max)
-      ) {
-        status = getLabStatus(value, min, max);
-      }
+          const maximum =
+            Number(
+              reference.max
+            );
 
-      return {
-        key,
-        label: LAB_LABELS?.[key] || key,
-        code: key,
-        value: rawValue,
-        valueText: formatLabCardValue(rawValue),
-        unit: ref.unit || "",
-        min: ref.min,
-        max: ref.max,
-        refText:
-          ref.min !== "" && ref.max !== ""
-            ? `${formatLabCardValue(ref.min)}–${formatLabCardValue(ref.max)} ${ref.unit || ""}`.trim()
-            : "Референс не вказаний",
-        status,
-        statusText:
-          status === "high"
-            ? "Вище норми"
-            : status === "low"
-              ? "Нижче норми"
-              : status === "normal"
-                ? "Норма"
-                : "Без оцінки",
-      };
-    })
-    .sort((a, b) => {
-      const pA = metricPriority[a.status] ?? 9;
-      const pB = metricPriority[b.status] ?? 9;
-      if (pA !== pB) return pA - pB;
-      return a.label.localeCompare(b.label, "uk");
-    });
+          let status =
+            "unknown";
 
-  const countHigh = metrics.filter((m) => m.status === "high").length;
-  const countLow = metrics.filter((m) => m.status === "low").length;
-  const countNormal = metrics.filter((m) => m.status === "normal").length;
+          if (
+            Number.isFinite(
+              value
+            ) &&
+            Number.isFinite(
+              minimum
+            ) &&
+            Number.isFinite(
+              maximum
+            )
+          ) {
+            status =
+              getLabStatus(
+                value,
+                minimum,
+                maximum
+              );
+          }
+
+          const statusKey = {
+            high:
+              "patients.card.labs.statusHigh",
+            low:
+              "patients.card.labs.statusLow",
+            normal:
+              "patients.card.labs.statusNormal",
+            unknown:
+              "patients.card.labs.statusUnknown",
+          }[status] ||
+            "patients.card.labs.statusUnknown";
+
+          return {
+            key,
+            label:
+              getPatientLabMetricLabel(
+                key
+              ),
+            code:
+              key,
+            valueText:
+              formatLabCardValue(
+                rawValue
+              ),
+            unit:
+              reference.unit ||
+              "",
+            referenceText:
+              reference.min !== "" &&
+              reference.max !== ""
+                ? `${
+                    formatLabCardValue(
+                      reference.min
+                    )
+                  }–${
+                    formatLabCardValue(
+                      reference.max
+                    )
+                  } ${
+                    reference.unit ||
+                    ""
+                  }`.trim()
+                : t(
+                    "patients.card.labs.referenceMissing"
+                  ),
+            status,
+            statusText:
+              t(statusKey),
+          };
+        }
+      )
+      .sort((a, b) => {
+        const first =
+          priority[a.status] ??
+          9;
+
+        const second =
+          priority[b.status] ??
+          9;
+
+        if (
+          first !== second
+        ) {
+          return first -
+            second;
+        }
+
+        return a.label.localeCompare(
+          b.label,
+          getCalendarLocale()
+        );
+      });
+
+  const countHigh =
+    metrics.filter(
+      (item) =>
+        item.status ===
+        "high"
+    ).length;
+
+  const countLow =
+    metrics.filter(
+      (item) =>
+        item.status ===
+        "low"
+    ).length;
+
+  const countNormal =
+    metrics.filter(
+      (item) =>
+        item.status ===
+        "normal"
+    ).length;
 
   return `
-    <article class="labHistoryCard">
-      <div class="labHistoryCardAccent"></div>
+    <article
+      class="labHistoryCard"
+    >
+      <div
+        class="labHistoryCardAccent"
+      ></div>
 
-      <div class="labHistoryHeader">
-        <div class="labHistoryMeta">
-          <div class="labHistoryIcon">
-            ${typeMeta.icon || "🧪"}
+      <div
+        class="labHistoryHeader"
+      >
+        <div
+          class="labHistoryMeta"
+        >
+          <div
+            class="labHistoryIcon"
+          >
+            ${typeMeta.icon}
           </div>
 
-          <div class="labHistoryText">
-            <div class="labHistoryKicker">
-              ЛАБОРАТОРНЕ ДОСЛІДЖЕННЯ
+          <div
+            class="labHistoryText"
+          >
+            <div
+              class="labHistoryKicker"
+            >
+              ${escapeHtml(
+                t(
+                  "patients.card.labs.study"
+                )
+              )}
             </div>
 
-            <h3 class="labHistoryTitle">
-              ${escapeHtml(lab.type || "Аналіз")}
+            <h3
+              class="labHistoryTitle"
+            >
+              ${escapeHtml(
+                typeMeta.name
+              )}
             </h3>
 
-            <div class="labHistorySubtitle">
-              <span>📅 ${escapeHtml(formatLabCardDate(lab.date))}</span>
+            <div
+              class="labHistorySubtitle"
+            >
+              <span>
+                📅 ${escapeHtml(
+                  formatLabCardDate(
+                    lab.date
+                  )
+                )}
+              </span>
+
               ${
                 lab.laboratory
-                  ? `<span>🏥 ${escapeHtml(lab.laboratory)}</span>`
+                  ? `
+                    <span>
+                      🏥 ${escapeHtml(
+                        lab.laboratory
+                      )}
+                    </span>
+                  `
                   : ""
               }
             </div>
           </div>
         </div>
 
-        <div class="labHistoryActions">
+        <div
+          class="labHistoryActions"
+        >
           <button
             class="iconBtn labActionBtn"
             type="button"
-            title="Редагувати"
-            data-edit-lab="${escapeHtml(String(lab.id))}"
+            title="${escapeHtml(
+              t(
+                "patients.card.labs.edit"
+              )
+            )}"
+            aria-label="${escapeHtml(
+              t(
+                "patients.card.labs.edit"
+              )
+            )}"
+            data-edit-lab="${escapeHtml(
+              String(lab.id)
+            )}"
           >
             ✏️
           </button>
@@ -63022,16 +73171,34 @@ function renderLabCard(lab, speciesKey) {
             class="iconBtn labActionBtn"
             type="button"
             title="PDF"
-            data-pdf-lab="${escapeHtml(String(lab.id))}"
+            aria-label="PDF"
+            data-pdf-lab="${escapeHtml(
+              String(lab.id)
+            )}"
           >
             📄
           </button>
 
           <button
-            class="iconBtn labActionBtn labActionBtnDanger"
+            class="
+              iconBtn
+              labActionBtn
+              labActionBtnDanger
+            "
             type="button"
-            title="Видалити"
-            data-del-lab="${escapeHtml(String(lab.id))}"
+            title="${escapeHtml(
+              t(
+                "patients.card.labs.delete"
+              )
+            )}"
+            aria-label="${escapeHtml(
+              t(
+                "patients.card.labs.delete"
+              )
+            )}"
+            data-del-lab="${escapeHtml(
+              String(lab.id)
+            )}"
           >
             🗑
           </button>
@@ -63039,149 +73206,252 @@ function renderLabCard(lab, speciesKey) {
       </div>
 
       ${
-  metrics.length
-    ? `
-      ${
-  metrics.length
-    ? `
-      <div class="labHistoryStats">
-        <div class="labHistoryStat">
-          <span>Показників</span>
-          <strong>${metrics.length}</strong>
-        </div>
-
-        <div
-          class="
-            labHistoryStat
-            labHistoryStatOk
-          "
-        >
-          <span>Норма</span>
-          <strong>${countNormal}</strong>
-        </div>
-
-        <div
-          class="
-            labHistoryStat
-            labHistoryStatHigh
-          "
-        >
-          <span>Вище</span>
-          <strong>${countHigh}</strong>
-        </div>
-
-        <div
-          class="
-            labHistoryStat
-            labHistoryStatLow
-          "
-        >
-          <span>Нижче</span>
-          <strong>${countLow}</strong>
-        </div>
-      </div>
-    `
-    : `
-      <div class="labHistoryQualitative">
-        <span
-          class="labHistoryQualitativeIcon"
-          aria-hidden="true"
-        >
-          ✓
-        </span>
-
-        <div>
-          <strong>
-            Якісне дослідження
-          </strong>
-
-          <small>
-            Результат зазначено у висновку,
-            коментарі лікаря або документі.
-          </small>
-        </div>
-      </div>
-    `
-}
-    `
-    : `
-      <div class="labHistoryQualitative">
-        <span
-          class="labHistoryQualitativeIcon"
-          aria-hidden="true"
-        >
-          ✓
-        </span>
-
-        <div>
-          <strong>
-            Якісне дослідження
-          </strong>
-
-          <small>
-            Результат зазначено у висновку,
-            коментарі лікаря або документі.
-          </small>
-        </div>
-      </div>
-    `
-}
-      </div>
-
-      <div class="labMetricsGrid">
-        ${metrics
-          .map(
-            (metric) => `
-              <div class="labMetricCard is-${metric.status}">
-                <div class="labMetricHeader">
-                  <div class="labMetricNames">
-                    <div class="labMetricLabel">
-                      ${escapeHtml(metric.label)}
-                    </div>
-                    <div class="labMetricCode">
-                      ${escapeHtml(metric.code)}
-                    </div>
-                  </div>
-
-                  <div class="labMetricStatus labMetricStatus-${metric.status}">
-                    ${escapeHtml(metric.statusText)}
-                  </div>
-                </div>
-
-                <div class="labMetricMain">
-                  <div class="labMetricValue">
-                    ${escapeHtml(metric.valueText)}
-                  </div>
-
-                  ${
-                    metric.unit
-                      ? `<div class="labMetricUnit">${escapeHtml(metric.unit)}</div>`
-                      : ""
-                  }
-                </div>
-
-                <div class="labMetricRef">
-                  Референс: ${escapeHtml(metric.refText)}
-                </div>
-              </div>
-            `
-          )
-          .join("")}
-      </div>
-
-      ${
-        lab.comment && String(lab.comment).trim()
+        metrics.length
           ? `
-            <div class="labHistoryComment">
-              <div class="labHistoryCommentLabel">Коментар лікаря</div>
-              <div class="labHistoryCommentText">
-                ${escapeHtml(lab.comment).replace(/\n/g, "<br>")}
+            <div
+              class="labHistoryStats"
+            >
+              <div
+                class="labHistoryStat"
+              >
+                <span>
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.indicators"
+                    )
+                  )}
+                </span>
+                <strong>
+                  ${metrics.length}
+                </strong>
+              </div>
+
+              <div
+                class="
+                  labHistoryStat
+                  labHistoryStatOk
+                "
+              >
+                <span>
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.normal"
+                    )
+                  )}
+                </span>
+                <strong>
+                  ${countNormal}
+                </strong>
+              </div>
+
+              <div
+                class="
+                  labHistoryStat
+                  labHistoryStatHigh
+                "
+              >
+                <span>
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.above"
+                    )
+                  )}
+                </span>
+                <strong>
+                  ${countHigh}
+                </strong>
+              </div>
+
+              <div
+                class="
+                  labHistoryStat
+                  labHistoryStatLow
+                "
+              >
+                <span>
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.below"
+                    )
+                  )}
+                </span>
+                <strong>
+                  ${countLow}
+                </strong>
+              </div>
+            </div>
+          `
+          : `
+            <div
+              class="labHistoryQualitative"
+            >
+              <span
+                class="labHistoryQualitativeIcon"
+                aria-hidden="true"
+              >
+                ✓
+              </span>
+
+              <div>
+                <strong>
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.qualitative"
+                    )
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    t(
+                      "patients.card.labs.qualitativeText"
+                    )
+                  )}
+                </small>
+              </div>
+            </div>
+          `
+      }
+
+      ${
+        metrics.length
+          ? `
+            <div
+              class="labMetricsGrid"
+            >
+              ${metrics
+                .map(
+                  (metric) => `
+                    <div
+                      class="
+                        labMetricCard
+                        is-${metric.status}
+                      "
+                    >
+                      <div
+                        class="labMetricHeader"
+                      >
+                        <div
+                          class="labMetricNames"
+                        >
+                          <div
+                            class="labMetricLabel"
+                          >
+                            ${escapeHtml(
+                              metric.label
+                            )}
+                          </div>
+
+                          ${
+                            metric.label !==
+                            metric.code
+                              ? `
+                                <div
+                                  class="labMetricCode"
+                                >
+                                  ${escapeHtml(
+                                    metric.code
+                                  )}
+                                </div>
+                              `
+                              : ""
+                          }
+                        </div>
+
+                        <div
+                          class="
+                            labMetricStatus
+                            labMetricStatus-${metric.status}
+                          "
+                        >
+                          ${escapeHtml(
+                            metric.statusText
+                          )}
+                        </div>
+                      </div>
+
+                      <div
+                        class="labMetricMain"
+                      >
+                        <div
+                          class="labMetricValue"
+                        >
+                          ${escapeHtml(
+                            metric.valueText
+                          )}
+                        </div>
+
+                        ${
+                          metric.unit
+                            ? `
+                              <div
+                                class="labMetricUnit"
+                              >
+                                ${escapeHtml(
+                                  metric.unit
+                                )}
+                              </div>
+                            `
+                            : ""
+                        }
+                      </div>
+
+                      <div
+                        class="labMetricRef"
+                      >
+                        ${escapeHtml(
+                          t(
+                            "patients.card.labs.reference"
+                          )
+                        )}:
+                        ${escapeHtml(
+                          metric.referenceText
+                        )}
+                      </div>
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        lab.comment &&
+        String(
+          lab.comment
+        ).trim()
+          ? `
+            <div
+              class="labHistoryComment"
+            >
+              <div
+                class="labHistoryCommentLabel"
+              >
+                ${escapeHtml(
+                  t(
+                    "patients.card.labs.doctorComment"
+                  )
+                )}
+              </div>
+
+              <div
+                class="labHistoryCommentText"
+              >
+                ${escapeHtml(
+                  lab.comment
+                ).replace(
+                  /\n/g,
+                  "<br>"
+                )}
               </div>
             </div>
           `
           : ""
       }
-            ${
+
+      ${
         lab.owner_explanation &&
         String(
           lab.owner_explanation
@@ -63193,7 +73463,11 @@ function renderLabCard(lab, speciesKey) {
               <div
                 class="labHistoryOwnerExplanationLabel"
               >
-                Пояснення для власника
+                ${escapeHtml(
+                  t(
+                    "patients.card.labs.ownerExplanation"
+                  )
+                )}
               </div>
 
               <div
@@ -63210,79 +73484,88 @@ function renderLabCard(lab, speciesKey) {
           `
           : ""
       }
-            <div class="labAiWrap">
+
+      <div class="labAiWrap">
         <button
           class="labAiButton"
           type="button"
-          data-lab-ai="${
-            escapeHtml(
-              String(
-                lab.id || ""
-              )
+          data-lab-ai="${escapeHtml(
+            String(
+              lab.id || ""
             )
-          }"
+          )}"
         >
-          ✦ Розшифрувати з PUG AI
+          ✦ ${escapeHtml(
+            t(
+              "patients.card.labs.decodeAi"
+            )
+          )}
         </button>
 
         <div
           class="labAiResult"
-          data-lab-ai-result="${
-            escapeHtml(
-              String(
-                lab.id || ""
-              )
+          data-lab-ai-result="${escapeHtml(
+            String(
+              lab.id || ""
             )
-          }"
+          )}"
         ></div>
       </div>
     </article>
   `;
 }
 
-function formatVisitDatePremium(value) {
-  const raw = String(value || "").trim();
+function formatVisitDatePremium(
+  value
+) {
+  const raw =
+    String(value || "")
+      .trim();
 
-  if (!raw) return "Дата не вказана";
+  if (!raw) {
+    return translateInterfaceText(
+      "patients.card.visits.dateNotSpecified"
+    );
+  }
 
-  const parts = raw.slice(0, 10).split("-");
-
-  if (parts.length !== 3) return raw;
-
-  const [year, month, day] = parts;
-
-  const monthNames = [
-    "січня",
-    "лютого",
-    "березня",
-    "квітня",
-    "травня",
-    "червня",
-    "липня",
-    "серпня",
-    "вересня",
-    "жовтня",
-    "листопада",
-    "грудня",
-  ];
-
-  const monthIndex = Number(month) - 1;
-  const monthName = monthNames[monthIndex];
-
-  if (!monthName) return raw;
-
-  return `${Number(day)} ${monthName} ${year}`;
+  return formatCalendarDate(
+    raw,
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  );
 }
 
-function formatVisitTextPremium(value, fallback = "Не вказано") {
-  const text = String(value || "").trim();
+function formatVisitTextPremium(
+  value,
+  fallback = ""
+) {
+  const text =
+    String(value || "")
+      .trim();
 
-  if (!text) return fallback;
+  const fallbackText =
+    fallback ||
+    translateInterfaceText(
+      "patients.card.visits.notSpecified"
+    );
 
-  const lines = text
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+  if (!text) {
+    return escapeHtml(
+      fallbackText
+    );
+  }
+
+  const lines =
+    text
+      .split(/\n+/)
+      .map(
+        (line) =>
+          line.trim()
+      )
+      .filter(Boolean);
 
   if (lines.length <= 1) {
     return escapeHtml(text);
@@ -63292,13 +73575,23 @@ function formatVisitTextPremium(value, fallback = "Не вказано") {
     <ul class="premiumVisitList">
       ${lines
         .map((line) => {
-          const clean = line.replace(/^[-•*]\s*/, "");
-          return `<li>${escapeHtml(clean)}</li>`;
+          const clean =
+            line.replace(
+              /^[-•*]\s*/,
+              ""
+            );
+
+          return `
+            <li>
+              ${escapeHtml(clean)}
+            </li>
+          `;
         })
         .join("")}
     </ul>
   `;
 }
+
 function getPatientVisitVisualStatus(
   visit,
   linkedEvent = null
@@ -63337,8 +73630,12 @@ function getPatientVisitVisualStatus(
 
   if (isCompleted) {
     return {
-      key: "completed",
-      label: "Завершено",
+      key:
+        "completed",
+      label:
+        translateInterfaceText(
+          "patients.card.visits.completed"
+        ),
       cardClass:
         "premiumVisitCardCompleted",
       badgeClass:
@@ -63355,8 +73652,12 @@ function getPatientVisitVisualStatus(
 
   if (isInProgress) {
     return {
-      key: "in_progress",
-      label: "У процесі",
+      key:
+        "in_progress",
+      label:
+        translateInterfaceText(
+          "patients.card.visits.inProgress"
+        ),
       cardClass:
         "premiumVisitCardInProgress",
       badgeClass:
@@ -63365,24 +73666,54 @@ function getPatientVisitVisualStatus(
   }
 
   return {
-    key: "planned",
-    label: "Заплановано",
+    key:
+      "planned",
+    label:
+      translateInterfaceText(
+        "patients.card.visits.planned"
+      ),
     cardClass:
       "premiumVisitCardPlanned",
     badgeClass:
       "premiumVisitStatusPlanned",
   };
 }
-async function renderVisits(petId) {
-  const box = $("#patientTabContent");
-  if (!box) return;
 
-  box.innerHTML = ""; // Полностью очищаем контейнер вкладки от старого контента
+async function renderVisits(
+  petId
+) {
+  const box =
+    $("#patientTabContent");
 
-  const visits = await getVisitsByPetId(petId);
+  if (!box) {
+    return;
+  }
+
+  const t =
+    (key, variables = {}) =>
+      translateInterfaceText(
+        key,
+        variables
+      );
+
+  box.innerHTML =
+    "";
+
+  const loadedVisits =
+    await getVisitsByPetId(
+      petId
+    );
+
+  const visits =
+    Array.isArray(
+      loadedVisits
+    )
+      ? loadedVisits
+      : [];
+
   cacheVisits(visits);
 
-    let calendarEvents = [];
+  let calendarEvents = [];
 
   try {
     calendarEvents =
@@ -63392,13 +73723,14 @@ async function renderVisits(petId) {
         : [];
   } catch (error) {
     console.warn(
-      "Не вдалося завантажити календарні події для статусів візитів:",
+      "Could not load calendar events for visit statuses:",
       error
     );
+
     calendarEvents = [];
   }
 
-    const plannedCalendarEvents =
+  const plannedCalendarEvents =
     (
       Array.isArray(calendarEvents)
         ? calendarEvents
@@ -63407,12 +73739,14 @@ async function renderVisits(petId) {
       .filter((event) => {
         const eventPatientId =
           String(
-            event?.patient_id || ""
+            event?.patient_id ||
+            ""
           );
 
         const linkedVisitId =
           String(
-            event?.visit_id || ""
+            event?.visit_id ||
+            ""
           ).trim();
 
         const status =
@@ -63447,28 +73781,30 @@ async function renderVisits(petId) {
         );
       });
 
-        const eventByVisitId =
+  const eventByVisitId =
     new Map();
 
-  (calendarEvents || []).forEach(
-    (event) => {
-      const linkedVisitId =
-        String(
-          event?.visit_id || ""
-        ).trim();
+  (
+    Array.isArray(calendarEvents)
+      ? calendarEvents
+      : []
+  ).forEach((event) => {
+    const linkedVisitId =
+      String(
+        event?.visit_id || ""
+      ).trim();
 
-      if (!linkedVisitId) {
-        return;
-      }
-
-      eventByVisitId.set(
-        linkedVisitId,
-        event
-      );
+    if (!linkedVisitId) {
+      return;
     }
-  );
 
-    if (
+    eventByVisitId.set(
+      linkedVisitId,
+      event
+    );
+  });
+
+  if (
     !visits.length &&
     !plannedCalendarEvents.length
   ) {
@@ -63476,40 +73812,144 @@ async function renderVisits(petId) {
       <div
         class="hint"
         style="
-          text-align:center;
-          padding:40px;
-          opacity:0.5;
+          text-align: center;
+          padding: 40px;
+          opacity: 0.5;
         "
       >
-        Запланованих записів та візитів
-        поки немає.
+        ${escapeHtml(
+          t(
+            "patients.card.visits.empty"
+          )
+        )}
       </div>
     `;
 
     return;
   }
 
-  // Достаем наш нативный HTML5-шаблон из index.html
-  const template = document.getElementById("visit-timeline-item-template");
+  const template =
+    document.getElementById(
+      "visit-timeline-item-template"
+    );
+
   if (!template) {
-    console.error("Помилка: Шаблон visit-timeline-item-template не знайдено в index.html");
+    console.error(
+      "Template visit-timeline-item-template was not found."
+    );
+
     return;
   }
 
-  // Создаем обертку для всего списка (контейнер таймлайна)
-  const timelineContainer = document.createElement("div");
-  timelineContainer.style.cssText = "position: relative; padding-left: 0px; margin-top: 10px;";
-  
-  // Добавляем одну направляющую линию трека времени
-  const lineTrack = document.createElement("div");
-  lineTrack.style.cssText = "position: absolute; left: 12px; top: 15px; bottom: 15px; width: 2px; background: linear-gradient(180deg, #c084fc 0%, rgba(147, 51, 234, 0.1) 100%); box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); opacity: 0.6;";
-  timelineContainer.appendChild(lineTrack);
+  const applyStaticLabels =
+    (clone) => {
+      const visitType =
+        clone.querySelector(
+          ".premiumVisitType"
+        );
+
+      if (visitType) {
+        visitType.textContent =
+          t(
+            "patients.card.visits.outpatient"
+          );
+      }
+
+      const complaintTitle =
+        clone.querySelector(
+          ".complaint-box .premiumVisitSectionHead > span:last-child"
+        );
+
+      if (complaintTitle) {
+        complaintTitle.textContent =
+          t(
+            "patients.card.visits.complaint"
+          );
+      }
+
+      const treatmentTitle =
+        clone.querySelector(
+          ".rx-box .premiumVisitSectionHead > span:last-child"
+        );
+
+      if (treatmentTitle) {
+        treatmentTitle.textContent =
+          t(
+            "patients.card.visits.treatment"
+          );
+      }
+
+      const openHint =
+        clone.querySelector(
+          ".premiumVisitOpenHint"
+        );
+
+      if (openHint) {
+        openHint.textContent =
+          t(
+            "patients.card.visits.openVisit"
+          );
+      }
+
+      const deleteButton =
+        clone.querySelector(
+          ".v-del-btn"
+        );
+
+      if (deleteButton) {
+        const deleteLabel =
+          t(
+            "patients.card.visits.deleteVisit"
+          );
+
+        deleteButton.title =
+          deleteLabel;
+
+        deleteButton.setAttribute(
+          "aria-label",
+          deleteLabel
+        );
+
+        const buttonText =
+          deleteButton.querySelector(
+            "span"
+          );
+
+        if (buttonText) {
+          buttonText.textContent =
+            deleteLabel;
+        }
+      }
+    };
+
+  const timelineContainer =
+    document.createElement(
+      "div"
+    );
+
+  timelineContainer.style.cssText =
+    "position: relative; padding-left: 0; margin-top: 10px;";
+
+  const lineTrack =
+    document.createElement(
+      "div"
+    );
+
+  lineTrack.style.cssText =
+    "position:absolute;left:12px;top:15px;bottom:15px;width:2px;background:linear-gradient(180deg,#c084fc 0%,rgba(147,51,234,.1) 100%);box-shadow:0 0 10px rgba(168,85,247,.3);opacity:.6;";
+
+  timelineContainer.appendChild(
+    lineTrack
+  );
+
   plannedCalendarEvents.forEach(
     (calendarEvent) => {
       const clone =
         template.content.cloneNode(
           true
         );
+
+      applyStaticLabels(clone);
 
       const cardEl =
         clone.querySelector(
@@ -63529,7 +73969,8 @@ async function renderVisits(petId) {
           .toLowerCase();
 
       const isWaiting =
-        eventStatus === "waiting";
+        eventStatus ===
+        "waiting";
 
       cardEl.dataset
         .openCalendarEvent =
@@ -63581,9 +74022,11 @@ async function renderVisits(petId) {
 
       if (dxEl) {
         dxEl.textContent =
-          isWaiting
-            ? "Пацієнт очікує прийому"
-            : "Запланований прийом";
+          t(
+            isWaiting
+              ? "patients.card.visits.patientWaiting"
+              : "patients.card.visits.scheduledAppointment"
+          );
       }
 
       const statusBadgeEl =
@@ -63593,20 +74036,18 @@ async function renderVisits(petId) {
 
       if (statusBadgeEl) {
         statusBadgeEl.textContent =
-          isWaiting
-            ? "Очікує"
-            : "Заплановано";
+          t(
+            isWaiting
+              ? "patients.card.visits.waiting"
+              : "patients.card.visits.planned"
+          );
 
         statusBadgeEl.className =
-          (
-            "v-status-badge " +
-            "premiumVisitStatus " +
-            (
-              isWaiting
-                ? "premiumVisitStatusInProgress"
-                : "premiumVisitStatusPlanned"
-            )
-          );
+          `v-status-badge premiumVisitStatus ${
+            isWaiting
+              ? "premiumVisitStatusInProgress"
+              : "premiumVisitStatusPlanned"
+          }`;
       }
 
       const priceEl =
@@ -63616,7 +74057,9 @@ async function renderVisits(petId) {
 
       if (priceEl) {
         priceEl.textContent =
-          "Запис у календарі";
+          t(
+            "patients.card.visits.calendarEntry"
+          );
       }
 
       const complaintEl =
@@ -63628,7 +74071,9 @@ async function renderVisits(petId) {
         complaintEl.innerHTML =
           formatVisitTextPremium(
             calendarEvent.note,
-            "Причину звернення не вказано"
+            t(
+              "patients.card.visits.reasonNotSpecified"
+            )
           );
       }
 
@@ -63649,15 +74094,16 @@ async function renderVisits(petId) {
 
       if (openHint) {
         openHint.textContent =
-          (
-            "Натисніть на картку, " +
-            "щоб відкрити запис"
+          t(
+            "patients.card.visits.openCalendarEntry"
           );
       }
 
-      clone.querySelector(
-        ".v-del-btn"
-      )?.remove();
+      clone
+        .querySelector(
+          ".v-del-btn"
+        )
+        ?.remove();
 
       timelineContainer.appendChild(
         clone
@@ -63665,235 +74111,406 @@ async function renderVisits(petId) {
     }
   );
 
-  // Сортируем визиты от новых к старым
-  const sortedVisits = visits
-    .slice()
-    .sort((a, b) => String(b.date || b.id).localeCompare(String(a.date || a.id)));
+  const sortedVisits =
+    visits
+      .slice()
+      .sort(
+        (a, b) =>
+          String(
+            b.date || b.id
+          ).localeCompare(
+            String(
+              a.date || a.id
+            )
+          )
+      );
 
-  sortedVisits.forEach((v) => {
-    // Глубокое клонирование структуры шаблона из index.html
-    const clone = template.content.cloneNode(true);
-    
-    // Парсим сохраненный диагноз и жалобы
-    const parsed = typeof parseVisitNote === "function" ? parseVisitNote(v.note || "") : { dx: "", complaint: v.note };
-    const dx = parsed.dx || "Без встановленого діагнозу";
-    const complaint = parsed.complaint || "Скарги не вказані";
-    
-    // Считаем общую стоимость приёма
-    const grandTotal = (calcServicesTotal(v) || 0) + (calcStockTotal(v) || 0);
+  sortedVisits.forEach((visit) => {
+    const clone =
+      template.content.cloneNode(
+        true
+      );
 
-    // Безопасно наполняем текстовые узлы внутри клона
-    const cardEl = clone.querySelector(".visit-card-el");
+    applyStaticLabels(clone);
 
-if (!cardEl) {
-  console.warn("У шаблоні немає .visit-card-el");
-  return;
-}
+    const parsed =
+      typeof parseVisitNote ===
+      "function"
+        ? parseVisitNote(
+            visit.note || ""
+          )
+        : {
+            dx: "",
+            complaint:
+              visit.note,
+          };
 
-cardEl.dataset.openVisit = String(v.id);
+    const diagnosis =
+      parsed.dx ||
+      t(
+        "patients.card.visits.noDiagnosis"
+      );
 
-const linkedEvent =
-  eventByVisitId.get(
-    String(v.id)
-  ) || null;
+    const complaint =
+      parsed.complaint ||
+      t(
+        "patients.card.visits.complaintsNotSpecified"
+      );
 
-const visitVisualStatus =
-  getPatientVisitVisualStatus(
-    v,
-    linkedEvent
-  );
+    const grandTotal =
+      (
+        calcServicesTotal(
+          visit
+        ) || 0
+      ) +
+      (
+        calcStockTotal(
+          visit
+        ) || 0
+      );
 
-cardEl.classList.add(
-  visitVisualStatus.cardClass
-);
+    const cardEl =
+      clone.querySelector(
+        ".visit-card-el"
+      );
 
-const dateEl =
-  clone.querySelector(".v-date");
+    if (!cardEl) {
+      return;
+    }
 
-const dxEl =
-  clone.querySelector(".v-dx");
+    cardEl.dataset
+      .openVisit =
+      String(visit.id);
 
-const statusBadgeEl =
-  clone.querySelector(
-    ".v-status-badge"
-  );
+    const linkedEvent =
+      eventByVisitId.get(
+        String(visit.id)
+      ) ||
+      null;
 
-const priceEl =
-  clone.querySelector(
-    ".v-price-badge"
-  );
+    const visitVisualStatus =
+      getPatientVisitVisualStatus(
+        visit,
+        linkedEvent
+      );
 
-const complaintEl =
-  clone.querySelector(
-    ".v-complaint"
-  );
-
-const rxContainer =
-  clone.querySelector(
-    ".v-rx-container"
-  );
-
-const rxEl =
-  clone.querySelector(".v-rx");
-
-const deleteButton =
-  clone.querySelector(".v-del-btn");
-
-if (dateEl) {
-  dateEl.textContent = formatVisitDatePremium(v.date);
-}
-
-if (dxEl) {
-  dxEl.textContent = dx;
-}
-
-if (priceEl) {
-  priceEl.textContent =
-    grandTotal > 0
-      ? `${grandTotal.toLocaleString("uk-UA")} ₴`
-      : "Без оплати";
-}
-if (statusBadgeEl) {
-  statusBadgeEl.textContent =
-    visitVisualStatus.label;
-
-  statusBadgeEl.className =
-    `v-status-badge premiumVisitStatus ${visitVisualStatus.badgeClass}`;
-}
-
-if (complaintEl) {
-  complaintEl.innerHTML = formatVisitTextPremium(
-    complaint,
-    "Скарги не вказані"
-  );
-}
-
-if (v.rx && v.rx.trim()) {
-  if (rxContainer) {
-    rxContainer.style.display = "block";
-  }
-
-  if (rxEl) {
-    rxEl.innerHTML = formatVisitTextPremium(
-      v.rx,
-      "Лікування не вказано"
+    cardEl.classList.add(
+      visitVisualStatus.cardClass
     );
-  }
-}
 
-if (deleteButton) {
-  deleteButton.dataset.delVisit = String(v.id);
-}
+    const dateEl =
+      clone.querySelector(
+        ".v-date"
+      );
 
-    // Добавляем премиальные hover-эффекты динамически через JS (чтобы не забивать стили)
+    const dxEl =
+      clone.querySelector(
+        ".v-dx"
+      );
 
-    // Пушим карточку в контейнер
-    timelineContainer.appendChild(clone);
+    const statusBadgeEl =
+      clone.querySelector(
+        ".v-status-badge"
+      );
+
+    const priceEl =
+      clone.querySelector(
+        ".v-price-badge"
+      );
+
+    const complaintEl =
+      clone.querySelector(
+        ".v-complaint"
+      );
+
+    const rxContainer =
+      clone.querySelector(
+        ".v-rx-container"
+      );
+
+    const rxEl =
+      clone.querySelector(
+        ".v-rx"
+      );
+
+    const deleteButton =
+      clone.querySelector(
+        ".v-del-btn"
+      );
+
+    if (dateEl) {
+      dateEl.textContent =
+        formatVisitDatePremium(
+          visit.date
+        );
+    }
+
+    if (dxEl) {
+      dxEl.textContent =
+        diagnosis;
+    }
+
+    if (priceEl) {
+      priceEl.textContent =
+        grandTotal > 0
+          ? `${
+              grandTotal.toLocaleString(
+                getCalendarLocale()
+              )
+            } ₴`
+          : t(
+              "patients.card.visits.noPayment"
+            );
+    }
+
+    if (statusBadgeEl) {
+      statusBadgeEl.textContent =
+        visitVisualStatus.label;
+
+      statusBadgeEl.className =
+        `v-status-badge premiumVisitStatus ${visitVisualStatus.badgeClass}`;
+    }
+
+    if (complaintEl) {
+      complaintEl.innerHTML =
+        formatVisitTextPremium(
+          complaint,
+          t(
+            "patients.card.visits.complaintsNotSpecified"
+          )
+        );
+    }
+
+    if (
+      visit.rx &&
+      visit.rx.trim()
+    ) {
+      if (rxContainer) {
+        rxContainer.style.display =
+          "block";
+      }
+
+      if (rxEl) {
+        rxEl.innerHTML =
+          formatVisitTextPremium(
+            visit.rx,
+            t(
+              "patients.card.visits.treatmentNotSpecified"
+            )
+          );
+      }
+    }
+
+    if (deleteButton) {
+      deleteButton.dataset
+        .delVisit =
+        String(visit.id);
+    }
+
+    timelineContainer.appendChild(
+      clone
+    );
   });
 
-  // Вставляем собранный таймлайн в DOM
-  box.appendChild(timelineContainer);
+  box.appendChild(
+    timelineContainer
+  );
 
-  // Железно возвращаем оригинальный обработчик кликов (делегирование событий на родителе)
-  box.onclick = async (e) => {
-        const calendarCard =
-      e.target.closest(
-        "[data-open-calendar-event]"
-      );
-
-    if (calendarCard) {
-      const calendarEventId =
-        String(
-          calendarCard.dataset
-            .openCalendarEvent || ""
+  box.onclick =
+    async (event) => {
+      const calendarCard =
+        event.target.closest(
+          "[data-open-calendar-event]"
         );
 
-      const calendarEvent =
-        plannedCalendarEvents.find(
-          (event) =>
-            String(event.id) ===
-            calendarEventId
+      if (calendarCard) {
+        const calendarEventId =
+          String(
+            calendarCard.dataset
+              .openCalendarEvent ||
+            ""
+          );
+
+        const calendarEvent =
+          plannedCalendarEvents.find(
+            (item) =>
+              String(item.id) ===
+              calendarEventId
+          );
+
+        if (!calendarEvent) {
+          return;
+        }
+
+        await openCalendarEditModal(
+          calendarEvent,
+          calendarEvent
+            .event_date ||
+            todayISO(),
+          async () => {
+            await renderVisits(
+              petId
+            );
+          }
         );
 
-      if (!calendarEvent) {
         return;
       }
 
-      await openCalendarEditModal(
-        calendarEvent,
-        calendarEvent.event_date ||
-          todayISO(),
-        async () => {
-          await renderVisits(
-            petId
+      const editButton =
+        event.target.closest(
+          "[data-edit-visit]"
+        );
+
+      if (editButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const visitId =
+          editButton.dataset
+            .editVisit;
+
+        if (
+          visitId &&
+          typeof openVisitModalForEdit ===
+            "function"
+        ) {
+          await openVisitModalForEdit(
+            visitId
           );
         }
-      );
 
-      return;
-    }
-    const editBtn = e.target.closest("[data-edit-visit]");
-    if (editBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const visitId = editBtn.dataset.editVisit;
-      if (visitId && typeof openVisitModalForEdit === "function") await openVisitModalForEdit(visitId);
-      return;
-    }
-
-    const delBtn = e.target.closest("[data-del-visit]");
-
-if (delBtn) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const visitId = delBtn.dataset.delVisit;
-  if (!visitId) return;
-
-  const visit = visits.find(
-    (item) => String(item.id) === String(visitId)
-  );
-
-  const visitDate = visit?.date || "без дати";
-
-  openDeleteModal(
-    `
-      <b>Візит від ${escapeHtml(visitDate)}</b>
-      <br><br>
-      Візит буде видалено назавжди разом із медичними даними та чеком.
-      <br>
-      Цю дію неможливо скасувати.
-    `,
-    async () => {
-      const ok = await deleteVisitApi(visitId);
-
-      if (!ok) {
-        alert("Не вдалося видалити візит.");
         return;
       }
 
-      state.visits = (state.visits || []).filter(
-        (item) => String(item.id) !== String(visitId)
-      );
+      const deleteButton =
+        event.target.closest(
+          "[data-del-visit]"
+        );
 
-      state.visitsById.delete(String(visitId));
+      if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
 
-      await renderVisits(petId);
+        const visitId =
+          deleteButton.dataset
+            .delVisit;
 
-      if (state.selectedPet) {
-        await renderPatientTab("visits", state.selectedPet);
+        if (!visitId) {
+          return;
+        }
+
+        const visit =
+          visits.find(
+            (item) =>
+              String(item.id) ===
+              String(visitId)
+          );
+
+        const visitDate =
+          visit?.date
+            ? formatVisitDatePremium(
+                visit.date
+              )
+            : t(
+                "patients.card.visits.visitWithoutDate"
+              );
+
+        openDeleteModal(
+          `
+            <b>
+              ${escapeHtml(
+                t(
+                  "patients.card.visits.visitFrom",
+                  {
+                    date:
+                      visitDate,
+                  }
+                )
+              )}
+            </b>
+            <br><br>
+            ${escapeHtml(
+              t(
+                "patients.card.visits.deleteText"
+              )
+            )}
+            <br>
+            ${escapeHtml(
+              t(
+                "patients.card.actionCannotUndo"
+              )
+            )}
+          `,
+          async () => {
+            const deleted =
+              await deleteVisitApi(
+                visitId
+              );
+
+            if (!deleted) {
+              showCrmNotice({
+                icon: "⚠️",
+                title:
+                  t(
+                    "patients.card.visits.deleteFailed"
+                  ),
+              });
+
+              return;
+            }
+
+            state.visits =
+              (
+                state.visits ||
+                []
+              ).filter(
+                (item) =>
+                  String(
+                    item.id
+                  ) !==
+                  String(
+                    visitId
+                  )
+              );
+
+            state.visitsById.delete(
+              String(visitId)
+            );
+
+            if (
+              state.selectedPet
+            ) {
+              await renderPatientTab(
+                "visits",
+                state.selectedPet
+              );
+            } else {
+              await renderVisits(
+                petId
+              );
+            }
+          }
+        );
+
+        return;
       }
-    }
-  );
 
-  return;
-}
+      const card =
+        event.target.closest(
+          "[data-open-visit]"
+        );
 
-    const card = e.target.closest("[data-open-visit]");
-    if (card) {
-      const visitId = card.dataset.openVisit;
-      if (visitId) openVisit(visitId);
-    }
-  };
+      if (card) {
+        const visitId =
+          card.dataset
+            .openVisit;
+
+        if (visitId) {
+          openVisit(visitId);
+        }
+      }
+    };
 }
 
 function refreshVisitServiceSelect() {
@@ -80697,89 +91314,233 @@ async function deleteStockItemApi(
 // =========================
 // PATIENT MEDCARD / VET CARD
 // =========================
-async function loadMedcardApi(patientId) {
+async function loadMedcardApi(
+  patientId
+) {
   try {
-    const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}/medcard`);
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot load medcard");
-    return Array.isArray(json.items) ? json.items : [];
-  } catch (e) {
-    console.error("loadMedcardApi failed:", e);
-    alert("Не вдалося завантажити веткартку: " + (e?.message || e));
+    const response =
+      await fetch(
+        `/api/patients/${encodeURIComponent(
+          patientId
+        )}/medcard`
+      );
+
+    const result =
+      await response.json();
+
+    if (!result.ok) {
+      throw new Error(
+        result.error ||
+        "Cannot load medical record"
+      );
+    }
+
+    return Array.isArray(
+      result.items
+    )
+      ? result.items
+      : [];
+  } catch (error) {
+    console.error(
+      "loadMedcardApi failed:",
+      error
+    );
+
+    showCrmNotice({
+      icon: "⚠️",
+      title:
+        translateInterfaceText(
+          "patients.card.medcard.loadFailed"
+        ),
+      text:
+        translateInterfaceText(
+          "patients.card.refreshTryAgain"
+        ),
+    });
+
     return [];
   }
 }
 
-async function createMedcardApi(patientId, payload) {
+async function createMedcardApi(
+  patientId,
+  payload
+) {
   try {
-    const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}/medcard`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
+    const response =
+      await fetch(
+        `/api/patients/${encodeURIComponent(
+          patientId
+        )}/medcard`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body:
+            JSON.stringify(
+              payload || {}
+            ),
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!result.ok) {
+      throw new Error(
+        result.error ||
+        "Cannot create medical record entry"
+      );
+    }
+
+    return result.item ||
+      null;
+  } catch (error) {
+    console.error(
+      "createMedcardApi failed:",
+      error
+    );
+
+    showCrmNotice({
+      icon: "⚠️",
+      title:
+        translateInterfaceText(
+          "patients.card.medcard.createFailed"
+        ),
+      text:
+        translateInterfaceText(
+          "patients.card.refreshTryAgain"
+        ),
     });
 
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot create medcard entry");
-    return json.item || null;
-  } catch (e) {
-    console.error("createMedcardApi failed:", e);
-    alert("Не вдалося створити запис: " + (e?.message || e));
     return null;
   }
 }
 
-async function updateMedcardApi(entryId, payload) {
+async function updateMedcardApi(
+  entryId,
+  payload
+) {
   try {
-    const res = await fetch(`/api/medcard/${encodeURIComponent(entryId)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
+    const response =
+      await fetch(
+        `/api/medcard/${encodeURIComponent(
+          entryId
+        )}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body:
+            JSON.stringify(
+              payload || {}
+            ),
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!result.ok) {
+      throw new Error(
+        result.error ||
+        "Cannot update medical record entry"
+      );
+    }
+
+    return result.item ||
+      null;
+  } catch (error) {
+    console.error(
+      "updateMedcardApi failed:",
+      error
+    );
+
+    showCrmNotice({
+      icon: "⚠️",
+      title:
+        translateInterfaceText(
+          "patients.card.medcard.updateFailed"
+        ),
+      text:
+        translateInterfaceText(
+          "patients.card.refreshTryAgain"
+        ),
     });
 
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot update medcard entry");
-    return json.item || null;
-  } catch (e) {
-    console.error("updateMedcardApi failed:", e);
-    alert("Не вдалося оновити запис: " + (e?.message || e));
     return null;
   }
 }
-function fillMedcardDoctorsSelect(selectedDoctor = "") {
-  const select = document.getElementById("medDoctor");
-  if (!select) return;
+function fillMedcardDoctorsSelect(
+  selectedDoctor = ""
+) {
+  const select =
+    document.getElementById(
+      "medDoctor"
+    );
 
-  const staff = Array.isArray(state.staff)
-    ? state.staff
-    : [];
+  if (!select) {
+    return;
+  }
 
-  const doctors = staff.filter((item) => {
-    if (item.is_active === false) return false;
+  const staff =
+    Array.isArray(state.staff)
+      ? state.staff
+      : [];
 
-    return item.role === "vet";
-  });
+  const doctors =
+    staff.filter(
+      (item) =>
+        item.is_active !==
+          false &&
+        item.role === "vet"
+    );
 
   select.innerHTML = `
-    <option value="">Оберіть лікаря</option>
+    <option value="">
+      ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.medcard.selectDoctor"
+        )
+      )}
+    </option>
 
     ${doctors
       .map((doctor) => {
-        const name = String(doctor.name || "").trim();
-        if (!name) return "";
+        const name =
+          String(
+            doctor.name || ""
+          ).trim();
 
-        const specialization = String(
-          doctor.specialization || ""
-        ).trim();
+        if (!name) {
+          return "";
+        }
 
-        const label = specialization
-          ? `${name} — ${specialization}`
-          : name;
+        const specialization =
+          String(
+            doctor.specialization ||
+            ""
+          ).trim();
+
+        const label =
+          specialization
+            ? `${name} — ${specialization}`
+            : name;
 
         return `
           <option
-            value="${escapeHtml(name)}"
+            value="${escapeHtml(
+              name
+            )}"
             ${
-              String(selectedDoctor || "") === name
+              String(
+                selectedDoctor ||
+                ""
+              ) === name
                 ? "selected"
                 : ""
             }
@@ -80791,84 +91552,361 @@ function fillMedcardDoctorsSelect(selectedDoctor = "") {
       .join("")}
   `;
 }
-async function deleteMedcardApi(entryId) {
+async function deleteMedcardApi(
+  entryId
+) {
   try {
-    const res = await fetch(`/api/medcard/${encodeURIComponent(entryId)}`, {
-      method: "DELETE",
+    const response =
+      await fetch(
+        `/api/medcard/${encodeURIComponent(
+          entryId
+        )}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!result.ok) {
+      throw new Error(
+        result.error ||
+        "Cannot delete medical record entry"
+      );
+    }
+
+    return true;
+  } catch (error) {
+    console.error(
+      "deleteMedcardApi failed:",
+      error
+    );
+
+    showCrmNotice({
+      icon: "⚠️",
+      title:
+        translateInterfaceText(
+          "patients.card.medcard.deleteFailed"
+        ),
+      text:
+        translateInterfaceText(
+          "patients.card.refreshTryAgain"
+        ),
     });
 
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Cannot delete medcard entry");
-    return true;
-  } catch (e) {
-    console.error("deleteMedcardApi failed:", e);
-    alert("Не вдалося видалити запис: " + (e?.message || e));
     return false;
   }
 }
+function applyMedcardModalTranslations(
+  modal
+) {
+  if (!modal) {
+    return;
+  }
 
-function renderMedcardEntryCard(x) {
-  const dateLine = [x.entry_date, x.entry_time].filter(Boolean).join(" • ") || "—";
+  const t =
+    (key) =>
+      translateInterfaceText(key);
 
-  const vitals = [
-    x.temperature ? `🌡 T: ${escapeHtml(x.temperature)}` : "",
-    x.weight_kg ? `⚖️ ${escapeHtml(x.weight_kg)} кг` : "",
-    x.pulse ? `❤️ ${escapeHtml(x.pulse)}` : "",
-  ].filter(Boolean).join(" · ");
+  const setText =
+    (selector, key) => {
+      const element =
+        modal.querySelector(
+          selector
+        );
 
-  const smallRows = [
-    ["Апетит", x.appetite],
-    ["Вода", x.water],
-    ["Сеча", x.urine],
-    ["Кал", x.stool],
-    ["Слизові", x.mucosa],
-    ["Дихання", x.breathing],
-  ].filter(([, v]) => String(v || "").trim());
+      if (element) {
+        element.textContent =
+          t(key);
+      }
+    };
 
-  return `
-    <div class="medEntry">
-      <div class="medEntryHead">
-        <div>
-          <div class="medEntryDate">${escapeHtml(dateLine)}</div>
-          ${vitals ? `<div class="medEntryVitals">${vitals}</div>` : ""}
-        </div>
-        <div class="medEntryActions">
-          <button class="iconBtn" title="Редагувати" data-edit-medcard="${escapeHtml(String(x.id))}">✏️</button>
-          <button class="iconBtn" title="Видалити" data-del-medcard="${escapeHtml(String(x.id))}">🗑</button>
-        </div>
-      </div>
+  const setField =
+    (
+      inputId,
+      labelKey,
+      placeholderKey = "",
+      unit = "",
+      required = false
+    ) => {
+      const input =
+        modal.querySelector(
+          `#${inputId}`
+        );
 
-      ${
-        smallRows.length
-          ? `
-            <div class="medEntryGrid">
-              ${smallRows.map(([label, value]) => `
-                <div class="medMini">
-                  <div class="medMiniLabel">${escapeHtml(label)}</div>
-                  <div class="medMiniValue">${escapeHtml(value || "—")}</div>
-                </div>
-              `).join("")}
-            </div>
-          `
-          : ""
+      const label =
+        input
+          ?.closest(
+            ".medcardField"
+          )
+          ?.querySelector(
+            ".medcardFieldLabel"
+          );
+
+      if (label) {
+        label.textContent =
+          "";
+
+        label.append(
+          document.createTextNode(
+            t(labelKey)
+          )
+        );
+
+        if (required) {
+          const marker =
+            document.createElement(
+              "b"
+            );
+
+          marker.textContent =
+            " *";
+
+          label.append(marker);
+        }
+
+        if (unit) {
+          const small =
+            document.createElement(
+              "small"
+            );
+
+          small.textContent =
+            ` ${unit}`;
+
+          label.append(small);
+        }
       }
 
-      ${x.condition ? `<div class="medBlock"><div class="history-label">Стан</div><div>${escapeHtml(x.condition)}</div></div>` : ""}
-      ${x.treatment ? `<div class="medBlock"><div class="history-label">Проведено / призначено</div><div>${escapeHtml(x.treatment)}</div></div>` : ""}
-      ${x.dynamics ? `<div class="medBlock"><div class="history-label">Динаміка</div><div>${escapeHtml(x.dynamics)}</div></div>` : ""}
-      ${x.plan ? `<div class="medBlock"><div class="history-label">План</div><div>${escapeHtml(x.plan)}</div></div>` : ""}
-      ${x.note ? `<div class="medBlock"><div class="history-label">Нотатка</div><div>${escapeHtml(x.note)}</div></div>` : ""}
-      ${x.doctor ? `<div class="medDoctor">👩‍⚕️ ${escapeHtml(x.doctor)}</div>` : ""}
-    </div>
-  `;
+      if (
+        input &&
+        placeholderKey
+      ) {
+        input.placeholder =
+          t(placeholderKey);
+      }
+    };
+
+  setText(
+    ".medcardModalKicker",
+    "patients.card.medcard.diary"
+  );
+
+  setText(
+    ".medcardModalHeaderMain > div:last-child > p",
+    "patients.card.medcard.description"
+  );
+
+  const sections =
+    modal.querySelectorAll(
+      ".medcardSectionHeader"
+    );
+
+  const sectionTexts = [
+    [
+      "patients.card.medcard.observationTitle",
+      "patients.card.medcard.observationDescription",
+    ],
+    [
+      "patients.card.medcard.currentState",
+      "patients.card.medcard.currentStateDescription",
+    ],
+    [
+      "patients.card.medcard.treatmentTitle",
+      "patients.card.medcard.treatmentDescription",
+    ],
+    [
+      "patients.card.medcard.planTitle",
+      "patients.card.medcard.planDescription",
+    ],
+  ];
+
+  sections.forEach(
+    (section, index) => {
+      const values =
+        sectionTexts[index];
+
+      if (!values) {
+        return;
+      }
+
+      const title =
+        section.querySelector("h3");
+
+      const description =
+        section.querySelector("p");
+
+      if (title) {
+        title.textContent =
+          t(values[0]);
+      }
+
+      if (description) {
+        description.textContent =
+          t(values[1]);
+      }
+    }
+  );
+
+  setField(
+    "medEntryDate",
+    "patients.card.medcard.date",
+    "",
+    "",
+    true
+  );
+
+  setField(
+    "medEntryTime",
+    "patients.card.medcard.time"
+  );
+
+  setField(
+    "medWeight",
+    "patients.card.medcard.weight",
+    "",
+    t(
+      "patients.card.kg"
+    )
+  );
+
+  setField(
+    "medTemp",
+    "patients.card.medcard.temperature",
+    "",
+    "°C"
+  );
+
+  setField(
+    "medPulse",
+    "patients.card.medcard.pulse",
+    "patients.card.medcard.pulsePlaceholder"
+  );
+
+  setField(
+    "medMucosa",
+    "patients.card.medcard.mucosa",
+    "patients.card.medcard.mucosaPlaceholder"
+  );
+
+  setField(
+    "medAppetite",
+    "patients.card.medcard.appetite",
+    "patients.card.medcard.appetitePlaceholder"
+  );
+
+  setField(
+    "medWater",
+    "patients.card.medcard.water",
+    "patients.card.medcard.waterPlaceholder"
+  );
+
+  setField(
+    "medUrine",
+    "patients.card.medcard.urine",
+    "patients.card.medcard.urinePlaceholder"
+  );
+
+  setField(
+    "medStool",
+    "patients.card.medcard.stool",
+    "patients.card.medcard.stoolPlaceholder"
+  );
+
+  setField(
+    "medBreathing",
+    "patients.card.medcard.breathing",
+    "patients.card.medcard.breathingPlaceholder"
+  );
+
+  setField(
+    "medCondition",
+    "patients.card.medcard.condition",
+    "patients.card.medcard.conditionPlaceholder"
+  );
+
+  setField(
+    "medTreatment",
+    "patients.card.medcard.performedTreatment",
+    "patients.card.medcard.treatmentPlaceholder"
+  );
+
+  setField(
+    "medDynamics",
+    "patients.card.medcard.dynamics",
+    "patients.card.medcard.dynamicsPlaceholder"
+  );
+
+  setField(
+    "medPlan",
+    "patients.card.medcard.plan",
+    "patients.card.medcard.planPlaceholder"
+  );
+
+  setField(
+    "medDoctor",
+    "patients.card.medcard.doctor"
+  );
+
+  setField(
+    "medNote",
+    "patients.card.medcard.note",
+    "patients.card.medcard.notePlaceholder"
+  );
+
+  setText(
+    ".medcardModalFooterHint",
+    "patients.card.medcard.footerHint"
+  );
+
+  setText(
+    ".medcardCancelButton",
+    "patients.card.cancel"
+  );
+
+  setText(
+    ".medcardSaveButton span",
+    "patients.card.medcard.saveEntry"
+  );
+
+  const closeButton =
+    modal.querySelector(
+      ".medcardModalClose"
+    );
+
+  if (closeButton) {
+    const closeText =
+      t(
+        "patients.card.close"
+      );
+
+    closeButton.title =
+      closeText;
+
+    closeButton.setAttribute(
+      "aria-label",
+      closeText
+    );
+  }
 }
 
 function ensureMedcardModal() {
   let modal = document.getElementById("medcardModal");
 
   if (modal) {
-    return modal;
-  }
+  applyMedcardModalTranslations(
+    modal
+  );
+
+  fillMedcardDoctorsSelect(
+    modal.querySelector(
+      "#medDoctor"
+    )?.value || ""
+  );
+
+  return modal;
+}
 
   modal = document.createElement("div");
   modal.id = "medcardModal";
@@ -81360,7 +92398,13 @@ function ensureMedcardModal() {
     }
   });
 
-  return modal;
+  applyMedcardModalTranslations(
+  modal
+);
+
+fillMedcardDoctorsSelect("");
+
+return modal;
 }
 
 // ==========================================================================
@@ -81396,31 +92440,73 @@ function medcardFormSet(existing = {}) {
 }
 
 function medcardFormRead() {
-  const val = (id) => String(document.getElementById(id)?.value || "").trim();
-  const entry_date = val("medEntryDate");
-  if (!entry_date) {
-    alert("Вкажи дату запису");
+  const value =
+    (id) =>
+      String(
+        document
+          .getElementById(id)
+          ?.value ||
+        ""
+      ).trim();
+
+  const entryDate =
+    value(
+      "medEntryDate"
+    );
+
+  if (!entryDate) {
+    showCrmNotice({
+      icon: "⚠️",
+      title:
+        translateInterfaceText(
+          "patients.card.medcard.dateRequired"
+        ),
+    });
+
+    document
+      .getElementById(
+        "medEntryDate"
+      )
+      ?.focus();
+
     return null;
   }
 
   return {
-    entry_date,
-    entry_time: val("medEntryTime"),
-    weight_kg: val("medWeight"),
-    temperature: val("medTemp"),
-    pulse: val("medPulse"),
-    mucosa: val("medMucosa"),
-    appetite: val("medAppetite"),
-    water: val("medWater"),
-    urine: val("medUrine"),
-    stool: val("medStool"),
-    breathing: val("medBreathing"),
-    condition: val("medCondition"),
-    treatment: val("medTreatment"),
-    dynamics: val("medDynamics"),
-    plan: val("medPlan"),
-    doctor: val("medDoctor"),
-    note: val("medNote"),
+    entry_date:
+      entryDate,
+    entry_time:
+      value("medEntryTime"),
+    weight_kg:
+      value("medWeight"),
+    temperature:
+      value("medTemp"),
+    pulse:
+      value("medPulse"),
+    mucosa:
+      value("medMucosa"),
+    appetite:
+      value("medAppetite"),
+    water:
+      value("medWater"),
+    urine:
+      value("medUrine"),
+    stool:
+      value("medStool"),
+    breathing:
+      value("medBreathing"),
+    condition:
+      value("medCondition"),
+    treatment:
+      value("medTreatment"),
+    dynamics:
+      value("medDynamics"),
+    plan:
+      value("medPlan"),
+    doctor:
+      value("medDoctor"),
+    note:
+      value("medNote"),
   };
 }
 
@@ -81440,250 +92526,740 @@ function closeMedcardModal() {
 // ==========================================
 // ВЕТЕРИНАРНАЯ КАРТА — ЧИСТЫЙ РЕНДЕР ШАБЛОНОВ
 // ==========================================
-async function renderMedcardTab(pet) {
-  const box = $("#patientTabContent");
-  if (!box || !pet) return;
+async function renderMedcardTab(
+  pet
+) {
+  const box =
+    $("#patientTabContent");
 
-  // Очищаем старую верстку и подготавливаем каркас таба
-  box.innerHTML = "";
-
-  const container = document.createElement("div");
-  container.className = "patientInfoBox";
-
-  const rowHead = document.createElement("div");
-  rowHead.className = "row";
-  rowHead.style.cssText = "align-items: flex-start; gap: 12px; margin-bottom: 20px;";
-  rowHead.innerHTML = `
-    <div>
-      <h2 style="margin:0;">Ветеринарна картка</h2>
-      <div class="hint">Медичний щоденник пацієнта: стан, температура, лікування, динаміка, план.</div>
-    </div>
-    <button class="primary" id="btnAddMedcardEntry" type="button">+ Запис</button>
-  `;
-  container.appendChild(rowHead);
-
-  const listElement = document.createElement("div");
-  listElement.id = "medcardList";
-  listElement.className = "medcardList";
-  container.appendChild(listElement);
-  box.appendChild(container);
-
-  // Тянем записи из API
-  const items = await loadMedcardApi(pet.id);
-
-  if (!items.length) {
-    listElement.innerHTML = `<div class="hint">Поки записів немає. Натисніть “+ Запис”.</div>`;
-  } else {
-    const mainTemplate = document.getElementById("medcard-entry-template");
-    const miniTemplate = document.getElementById("medcard-mini-row-template");
-
-    if (!mainTemplate || !miniTemplate) {
-      console.error("Помилка: Шаблони medcard не знайдено в index.html");
-      return;
-    }
-
-    items.forEach((x) => {
-      const clone = mainTemplate.content.cloneNode(true);
-
-      // 1. Наполнение базовой инфы
-      const dateLine = [x.entry_date, x.entry_time].filter(Boolean).join(" • ") || "—";
-      clone.querySelector(".med-card-date").textContent = dateLine;
-
-      // 2. Наполнение витальных параметров (Строка: Температура, Вес, Пульс)
-      const vitalsArr = [
-        x.temperature ? `🌡 T: ${x.temperature}` : "",
-        x.weight_kg ? `⚖️ ${x.weight_kg} кг` : "",
-        x.pulse ? `❤️ ${x.pulse}` : "",
-      ].filter(Boolean);
-      clone.querySelector(".med-card-vitals").textContent = vitalsArr.join(" · ") || "Параметри не вказані";
-
-      // 3. Динамическая сетка мини-параметров (Аппетит, Слизистые и т.д.)
-      const grid = clone.querySelector(".med-card-vitals-grid");
-      const smallRows = [
-        ["Апетит", x.appetite],
-        ["Вода", x.water],
-        ["Сеча", x.urine],
-        ["Кал", x.stool],
-        ["Слизові", x.mucosa],
-        ["Дихання", x.breathing],
-      ].filter(([, val]) => String(val || "").trim());
-
-      if (smallRows.length === 0) {
-        grid.style.display = "none";
-      } else {
-        smallRows.forEach(([label, value]) => {
-          const cellClone = miniTemplate.content.cloneNode(true);
-          cellClone.querySelector(".med-mini-label").textContent = label;
-          cellClone.querySelector(".med-mini-value").textContent = value || "—";
-          grid.appendChild(cellClone);
-        });
-      }
-
-      // 4. Текстовые медицинские блоки (Скрываем блоки, если они пустые)
-      const fillTextBlock = (selector, dataVal) => {
-        const block = clone.querySelector(selector);
-        if (dataVal && dataVal.trim()) {
-          block.querySelector(".m-text").textContent = dataVal;
-        } else {
-          block.style.display = "none";
-        }
-      };
-
-      fillTextBlock(".m-block-condition", x.condition);
-      fillTextBlock(".m-block-treatment", x.treatment);
-      fillTextBlock(".m-block-dynamics", x.dynamics);
-      fillTextBlock(".m-block-plan", x.plan);
-      fillTextBlock(".m-block-note", x.note);
-
-      // 5. Имя врача
-      const docEl = clone.querySelector(".med-card-doctor");
-      if (x.doctor && x.doctor.trim()) {
-        docEl.textContent = `👩‍⚕️ ${x.doctor}`;
-      } else {
-        docEl.style.display = "none";
-      }
-
-      // 6. Айдишники к кнопкам для обработчиков редактирования/удаления
-      clone.querySelector(".m-edit-btn").dataset.editMedcard = String(x.id);
-      clone.querySelector(".m-del-btn").dataset.delMedcard = String(x.id);
-
-      listElement.appendChild(clone);
-    });
-  }
-
-  // ==========================================
-  // ЖЕЛЕЗНЫЕ ОБРАБОТЧИКИ (Остаются без изменений)
-  // ==========================================
-  // ==========================================
-// ДОБАВЛЕНИЕ НОВОЙ ЗАПИСИ
-// ==========================================
-
-$("#btnAddMedcardEntry")?.addEventListener("click", async () => {
-  const modal = ensureMedcardModal();
-
-  if (!Array.isArray(state.staff) || !state.staff.length) {
-    await loadStaffApi();
-  }
-
-  modal.dataset.patientId = String(pet.id);
-  delete modal.dataset.entryId;
-
-  const title = document.getElementById("medcardModalTitle");
-  if (title) title.textContent = "Новий запис веткартки";
-
-  medcardFormSet({});
-  fillMedcardDoctorsSelect("");
-
-  modal.style.cssText = "";
-modal.style.display = "flex";
-
-modal.classList.add("open");
-modal.setAttribute("aria-hidden", "false");
-
-document.body.classList.add(
-  "medcardModalIsOpen"
-);
-
-console.log(
-  "[calendar] modal opened",
-  {
-    selectedPet: state.selectedPet,
-    selectedPetId: state.selectedPetId,
-    hiddenPatientId:
-      $("#visitPatientSelect")?.value || "",
-  }
-);
-
-  const saveBtn = document.getElementById("medcardSaveBtn");
-
-  if (saveBtn) {
-    saveBtn.onclick = async () => {
-      const payload = medcardFormRead();
-      if (!payload) return;
-
-      const created = await createMedcardApi(pet.id, payload);
-      if (!created) return;
-
-      closeMedcardModal();
-      await renderMedcardTab(pet);
-    };
-  }
-});
-
-
-// ==========================================
-// РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ
-// ==========================================
-
-listElement.onclick = async (e) => {
-
-  const del = e.target.closest("[data-del-medcard]");
-
-  if (del) {
-    const id = del.dataset.delMedcard;
-    if (!id) return;
-
-    if (!confirm("Видалити запис веткартки?")) return;
-
-    const ok = await deleteMedcardApi(id);
-
-    if (ok) {
-      await renderMedcardTab(pet);
-    }
-
+  if (
+    !box ||
+    !pet
+  ) {
     return;
   }
 
-  const edit = e.target.closest("[data-edit-medcard]");
+  const t =
+    (key) =>
+      translateInterfaceText(key);
 
-  if (edit) {
-    const id = edit.dataset.editMedcard;
-    if (!id) return;
+  const formatValue =
+    (value) => {
+      const normalized =
+        String(value || "")
+          .trim()
+          .replace(",", ".");
 
-    const current = items.find(x => String(x.id) === String(id));
+      const number =
+        Number(normalized);
 
-    if (!current) {
-      alert("Запис не знайдено");
+      return Number.isFinite(number)
+        ? number.toLocaleString(
+            getCalendarLocale(),
+            {
+              maximumFractionDigits:
+                3,
+            }
+          )
+        : String(value || "");
+    };
+
+  box.innerHTML =
+    "";
+
+  const container =
+    document.createElement(
+      "div"
+    );
+
+  container.className =
+    "patientInfoBox";
+
+  const rowHead =
+    document.createElement(
+      "div"
+    );
+
+  rowHead.className =
+    "row";
+
+  rowHead.style.cssText =
+    "align-items:flex-start;gap:12px;margin-bottom:20px;";
+
+  rowHead.innerHTML = `
+    <div>
+      <h2 style="margin:0;">
+        ${escapeHtml(
+          t(
+            "patients.card.medcard.tabTitle"
+          )
+        )}
+      </h2>
+
+      <div class="hint">
+        ${escapeHtml(
+          t(
+            "patients.card.medcard.tabDescription"
+          )
+        )}
+      </div>
+    </div>
+
+    <button
+      class="primary"
+      id="btnAddMedcardEntry"
+      type="button"
+    >
+      + ${escapeHtml(
+        t(
+          "patients.card.medcard.addEntry"
+        )
+      )}
+    </button>
+  `;
+
+  container.appendChild(
+    rowHead
+  );
+
+  const listElement =
+    document.createElement(
+      "div"
+    );
+
+  listElement.id =
+    "medcardList";
+
+  listElement.className =
+    "medcardList";
+
+  container.appendChild(
+    listElement
+  );
+
+  box.appendChild(
+    container
+  );
+
+  const items =
+    await loadMedcardApi(
+      pet.id
+    );
+
+  if (!items.length) {
+    listElement.innerHTML = `
+      <div class="hint">
+        ${escapeHtml(
+          t(
+            "patients.card.medcard.empty"
+          )
+        )}
+      </div>
+    `;
+  } else {
+    const mainTemplate =
+      document.getElementById(
+        "medcard-entry-template"
+      );
+
+    const miniTemplate =
+      document.getElementById(
+        "medcard-mini-row-template"
+      );
+
+    if (
+      !mainTemplate ||
+      !miniTemplate
+    ) {
+      console.error(
+        "Medical record templates were not found."
+      );
+
       return;
     }
 
-    if (!Array.isArray(state.staff) || !state.staff.length) {
-      await loadStaffApi();
-    }
+    items.forEach((item) => {
+      const clone =
+        mainTemplate.content
+          .cloneNode(true);
 
-    const modal = ensureMedcardModal();
+      const editButton =
+        clone.querySelector(
+          ".m-edit-btn"
+        );
 
-    modal.dataset.patientId = String(pet.id);
-    modal.dataset.entryId = String(id);
+      const deleteButton =
+        clone.querySelector(
+          ".m-del-btn"
+        );
 
-    const title = document.getElementById("medcardModalTitle");
-    if (title) title.textContent = "Редагування запису веткартки";
+      const editLabel =
+        t(
+          "patients.card.medcard.editRecord"
+        );
 
-    medcardFormSet(current);
-    fillMedcardDoctorsSelect(current.doctor || "");
+      const deleteLabel =
+        t(
+          "patients.card.medcard.deleteRecord"
+        );
 
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("medcardModalIsOpen");
+      if (editButton) {
+        editButton.title =
+          editLabel;
 
-    const saveBtn = document.getElementById("medcardSaveBtn");
+        editButton.setAttribute(
+          "aria-label",
+          editLabel
+        );
 
-    if (saveBtn) {
-      saveBtn.onclick = async () => {
-        const payload = medcardFormRead();
-        if (!payload) return;
+        editButton.dataset
+          .editMedcard =
+          String(item.id);
+      }
 
-        const updated = await updateMedcardApi(id, payload);
-        if (!updated) return;
+      if (deleteButton) {
+        deleteButton.title =
+          deleteLabel;
 
-        closeMedcardModal();
-        await renderMedcardTab(pet);
-      };
-    }
+        deleteButton.setAttribute(
+          "aria-label",
+          deleteLabel
+        );
+
+        deleteButton.dataset
+          .delMedcard =
+          String(item.id);
+      }
+
+      const dateLabel =
+        item.entry_date
+          ? formatCalendarDate(
+              item.entry_date,
+              {
+                day:
+                  "2-digit",
+                month:
+                  "2-digit",
+                year:
+                  "numeric",
+              }
+            )
+          : "—";
+
+      const dateLine =
+        [
+          dateLabel,
+          item.entry_time,
+        ]
+          .filter(Boolean)
+          .join(" • ");
+
+      const dateElement =
+        clone.querySelector(
+          ".med-card-date"
+        );
+
+      if (dateElement) {
+        dateElement.textContent =
+          dateLine;
+      }
+
+      const vitals = [
+        item.temperature
+          ? `🌡 ${formatValue(
+              item.temperature
+            )} °C`
+          : "",
+        item.weight_kg
+          ? `⚖️ ${formatValue(
+              item.weight_kg
+            )} ${t(
+              "patients.card.kg"
+            )}`
+          : "",
+        item.pulse
+          ? `❤️ ${item.pulse}`
+          : "",
+      ].filter(Boolean);
+
+      const vitalsElement =
+        clone.querySelector(
+          ".med-card-vitals"
+        );
+
+      if (vitalsElement) {
+        vitalsElement.textContent =
+          vitals.join(" · ") ||
+          t(
+            "patients.card.medcard.parametersNotSpecified"
+          );
+      }
+
+      const grid =
+        clone.querySelector(
+          ".med-card-vitals-grid"
+        );
+
+      const smallRows = [
+        [
+          t(
+            "patients.card.medcard.appetite"
+          ),
+          item.appetite,
+        ],
+        [
+          t(
+            "patients.card.medcard.water"
+          ),
+          item.water,
+        ],
+        [
+          t(
+            "patients.card.medcard.urine"
+          ),
+          item.urine,
+        ],
+        [
+          t(
+            "patients.card.medcard.stool"
+          ),
+          item.stool,
+        ],
+        [
+          t(
+            "patients.card.medcard.mucosa"
+          ),
+          item.mucosa,
+        ],
+        [
+          t(
+            "patients.card.medcard.breathing"
+          ),
+          item.breathing,
+        ],
+      ].filter(
+        ([, value]) =>
+          String(
+            value || ""
+          ).trim()
+      );
+
+      if (
+        grid &&
+        !smallRows.length
+      ) {
+        grid.style.display =
+          "none";
+      } else if (grid) {
+        smallRows.forEach(
+          ([
+            label,
+            value,
+          ]) => {
+            const cell =
+  miniTemplate.content
+    .cloneNode(true);
+
+            const labelElement =
+              cell.querySelector(
+                ".med-mini-label"
+              );
+
+            const valueElement =
+              cell.querySelector(
+                ".med-mini-value"
+              );
+
+            if (labelElement) {
+              labelElement.textContent =
+                label;
+            }
+
+            if (valueElement) {
+              valueElement.textContent =
+                value || "—";
+            }
+
+            grid.appendChild(
+              cell
+            );
+          }
+        );
+      }
+
+      const fillTextBlock =
+        (
+          selector,
+          value,
+          labelKey
+        ) => {
+          const block =
+            clone.querySelector(
+              selector
+            );
+
+          if (!block) {
+            return;
+          }
+
+          const text =
+            String(value || "")
+              .trim();
+
+          if (!text) {
+            block.style.display =
+              "none";
+
+            return;
+          }
+
+          const label =
+            block.querySelector(
+              ".history-label"
+            );
+
+          const content =
+            block.querySelector(
+              ".m-text"
+            );
+
+          if (label) {
+            label.textContent =
+              t(labelKey);
+          }
+
+          if (content) {
+            content.textContent =
+              text;
+          }
+        };
+
+      fillTextBlock(
+        ".m-block-condition",
+        item.condition,
+        "patients.card.medcard.condition"
+      );
+
+      fillTextBlock(
+        ".m-block-treatment",
+        item.treatment,
+        "patients.card.medcard.performedTreatment"
+      );
+
+      fillTextBlock(
+        ".m-block-dynamics",
+        item.dynamics,
+        "patients.card.medcard.dynamics"
+      );
+
+      fillTextBlock(
+        ".m-block-plan",
+        item.plan,
+        "patients.card.medcard.plan"
+      );
+
+      fillTextBlock(
+        ".m-block-note",
+        item.note,
+        "patients.card.medcard.note"
+      );
+
+      const doctorElement =
+        clone.querySelector(
+          ".med-card-doctor"
+        );
+
+      if (
+        doctorElement &&
+        String(
+          item.doctor || ""
+        ).trim()
+      ) {
+        doctorElement.textContent =
+          `👩‍⚕️ ${item.doctor}`;
+      } else if (
+        doctorElement
+      ) {
+        doctorElement.style.display =
+          "none";
+      }
+
+      const statusElement =
+        clone.querySelector(
+          ".premiumMedEntryStatus"
+        );
+
+      if (statusElement) {
+        statusElement.textContent =
+          t(
+            "patients.card.medcard.entryStatus"
+          );
+      }
+
+      listElement.appendChild(
+        clone
+      );
+    });
   }
-};
-}
 
+  $(
+    "#btnAddMedcardEntry"
+  )?.addEventListener(
+    "click",
+    async () => {
+      const modal =
+        ensureMedcardModal();
+
+      if (
+        !Array.isArray(
+          state.staff
+        ) ||
+        !state.staff.length
+      ) {
+        await loadStaffApi();
+      }
+
+      modal.dataset.patientId =
+        String(pet.id);
+
+      delete modal.dataset
+        .entryId;
+
+      const title =
+        document.getElementById(
+          "medcardModalTitle"
+        );
+
+      if (title) {
+        title.textContent =
+          t(
+            "patients.card.medcard.newEntry"
+          );
+      }
+
+      medcardFormSet({});
+
+      fillMedcardDoctorsSelect(
+        ""
+      );
+
+      modal.style.cssText =
+        "";
+
+      modal.style.display =
+        "flex";
+
+      modal.classList.add(
+        "open"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.classList.add(
+        "medcardModalIsOpen"
+      );
+
+      const saveButton =
+        document.getElementById(
+          "medcardSaveBtn"
+        );
+
+      if (saveButton) {
+        saveButton.onclick =
+          async () => {
+            const payload =
+              medcardFormRead();
+
+            if (!payload) {
+              return;
+            }
+
+            const created =
+              await createMedcardApi(
+                pet.id,
+                payload
+              );
+
+            if (!created) {
+              return;
+            }
+
+            closeMedcardModal();
+
+            await renderMedcardTab(
+              pet
+            );
+          };
+      }
+    }
+  );
+
+  listElement.onclick =
+    async (event) => {
+      const deleteButton =
+        event.target.closest(
+          "[data-del-medcard]"
+        );
+
+      if (deleteButton) {
+        const id =
+          deleteButton.dataset
+            .delMedcard;
+
+        if (!id) {
+          return;
+        }
+
+        openDeleteModal(
+          escapeHtml(
+            t(
+              "patients.card.medcard.deleteConfirm"
+            )
+          ),
+          async () => {
+            const deleted =
+              await deleteMedcardApi(
+                id
+              );
+
+            if (deleted) {
+              await renderMedcardTab(
+                pet
+              );
+            }
+          }
+        );
+
+        return;
+      }
+
+      const editButton =
+        event.target.closest(
+          "[data-edit-medcard]"
+        );
+
+      if (!editButton) {
+        return;
+      }
+
+      const id =
+        editButton.dataset
+          .editMedcard;
+
+      if (!id) {
+        return;
+      }
+
+      const current =
+        items.find(
+          (item) =>
+            String(item.id) ===
+            String(id)
+        );
+
+      if (!current) {
+        showCrmNotice({
+          icon: "⚠️",
+          title:
+            t(
+              "patients.card.medcard.recordNotFound"
+            ),
+        });
+
+        return;
+      }
+
+      if (
+        !Array.isArray(
+          state.staff
+        ) ||
+        !state.staff.length
+      ) {
+        await loadStaffApi();
+      }
+
+      const modal =
+        ensureMedcardModal();
+
+      modal.dataset.patientId =
+        String(pet.id);
+
+      modal.dataset.entryId =
+        String(id);
+
+      const title =
+        document.getElementById(
+          "medcardModalTitle"
+        );
+
+      if (title) {
+        title.textContent =
+          t(
+            "patients.card.medcard.editEntry"
+          );
+      }
+
+      medcardFormSet(
+        current
+      );
+
+      fillMedcardDoctorsSelect(
+        current.doctor || ""
+      );
+
+      modal.style.display =
+        "flex";
+
+      modal.classList.add(
+        "open"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.classList.add(
+        "medcardModalIsOpen"
+      );
+
+      const saveButton =
+        document.getElementById(
+          "medcardSaveBtn"
+        );
+
+      if (saveButton) {
+        saveButton.onclick =
+          async () => {
+            const payload =
+              medcardFormRead();
+
+            if (!payload) {
+              return;
+            }
+
+            const updated =
+              await updateMedcardApi(
+                id,
+                payload
+              );
+
+            if (!updated) {
+              return;
+            }
+
+            closeMedcardModal();
+
+            await renderMedcardTab(
+              pet
+            );
+          };
+      }
+    };
+}
 // ==========================================
 // НАСТРОЙКИ СИСТЕМЫ — ЛОГИКА И ХЕНДЛЕРЫ
 // ==========================================
