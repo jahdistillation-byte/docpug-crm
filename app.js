@@ -22164,6 +22164,932 @@ content.addEventListener(
     `;
   }
 }
+const TEAM_INTERFACE_TEXT = {
+  "Завантаження команди…": {
+    en: "Loading the team…",
+    de: "Team wird geladen…",
+    pl: "Ładowanie zespołu…",
+  },
+
+  "Команда": {
+    en: "Team",
+    de: "Team",
+    pl: "Zespół",
+  },
+
+  "Співробітники клініки, ставки, спеціалізації та профілі.": {
+    en: "Clinic employees, rates, specializations and profiles.",
+    de: "Klinikmitarbeiter, Vergütung, Fachgebiete und Profile.",
+    pl: "Pracownicy kliniki, stawki, specjalizacje i profile.",
+  },
+
+  "Ваш особистий профіль, показники та досягнення.": {
+    en: "Your personal profile, performance and achievements.",
+    de: "Ihr persönliches Profil, Ihre Kennzahlen und Erfolge.",
+    pl: "Twój profil, wyniki i osiągnięcia.",
+  },
+
+  "+ Додати співробітника": {
+    en: "+ Add employee",
+    de: "+ Mitarbeiter hinzufügen",
+    pl: "+ Dodaj pracownika",
+  },
+
+  "Напрями клініки": {
+    en: "Clinic specializations",
+    de: "Fachbereiche der Klinik",
+    pl: "Specjalizacje kliniki",
+  },
+
+  "Створюй власні фільтри: хірург, дерматолог, екзовет, УЗД...": {
+    en: "Create custom filters: surgeon, dermatologist, exotic vet, ultrasound…",
+    de: "Erstellen Sie eigene Filter: Chirurgie, Dermatologie, Exotenmedizin, Ultraschall…",
+    pl: "Twórz własne filtry: chirurg, dermatolog, egzotyka, USG…",
+  },
+
+  "+ Додати напрям": {
+    en: "+ Add specialization",
+    de: "+ Fachbereich hinzufügen",
+    pl: "+ Dodaj specjalizację",
+  },
+
+  "Напрям": {
+    en: "Specialization",
+    de: "Fachbereich",
+    pl: "Specjalizacja",
+  },
+
+  "Без напряму": {
+    en: "No specialization",
+    de: "Ohne Fachbereich",
+    pl: "Bez specjalizacji",
+  },
+
+  "Видалити напрям": {
+    en: "Delete specialization",
+    de: "Fachbereich löschen",
+    pl: "Usuń specjalizację",
+  },
+
+  "Напрями ще не створені.": {
+    en: "No specializations created yet.",
+    de: "Noch keine Fachbereiche erstellt.",
+    pl: "Nie utworzono jeszcze specjalizacji.",
+  },
+
+  "Працівник": {
+    en: "Employee",
+    de: "Mitarbeiter",
+    pl: "Pracownik",
+  },
+
+  "Асистент": {
+    en: "Assistant",
+    de: "Assistenz",
+    pl: "Asystent",
+  },
+
+  "Адміністратор": {
+    en: "Administrator",
+    de: "Administrator",
+    pl: "Administrator",
+  },
+
+  "Ветеринарний лікар": {
+    en: "Veterinarian",
+    de: "Tierarzt",
+    pl: "Lekarz weterynarii",
+  },
+
+  "На зміні": {
+    en: "On shift",
+    de: "Im Dienst",
+    pl: "Na zmianie",
+  },
+
+  "Вихідний": {
+    en: "Day off",
+    de: "Frei",
+    pl: "Dzień wolny",
+  },
+
+  "Телефон": {
+    en: "Phone",
+    de: "Telefon",
+    pl: "Telefon",
+  },
+
+  "Не вказано": {
+    en: "Not provided",
+    de: "Nicht angegeben",
+    pl: "Nie podano",
+  },
+
+  "Ставка": {
+    en: "Shift rate",
+    de: "Schichtsatz",
+    pl: "Stawka za zmianę",
+  },
+
+  "грн / зміна": {
+    en: "UAH / shift",
+    de: "UAH / Schicht",
+    pl: "UAH / zmiana",
+  },
+
+  "Відсоток": {
+    en: "Percentage",
+    de: "Prozentsatz",
+    pl: "Procent",
+  },
+
+  "👤 Профіль": {
+    en: "👤 Profile",
+    de: "👤 Profil",
+    pl: "👤 Profil",
+  },
+
+  "✏️ Редагувати": {
+    en: "✏️ Edit",
+    de: "✏️ Bearbeiten",
+    pl: "✏️ Edytuj",
+  },
+
+  "🗑 Звільнити": {
+    en: "🗑 Deactivate",
+    de: "🗑 Deaktivieren",
+    pl: "🗑 Dezaktywuj",
+  },
+
+  "Співробітників ще немає.": {
+    en: "No employees yet.",
+    de: "Noch keine Mitarbeiter vorhanden.",
+    pl: "Nie ma jeszcze pracowników.",
+  },
+
+  "Ваш профіль співробітника не знайдено. Перевірте прив’язку staff_id до акаунта.": {
+    en: "Your employee profile was not found. Check the staff_id linked to the account.",
+    de: "Ihr Mitarbeiterprofil wurde nicht gefunden. Prüfen Sie die mit dem Konto verknüpfte staff_id.",
+    pl: "Nie znaleziono Twojego profilu pracownika. Sprawdź staff_id powiązane z kontem.",
+  },
+};
+
+
+function normalizeTeamInterfaceText(
+  value
+) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+function getTeamInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const normalizedSource =
+    normalizeTeamInterfaceText(
+      sourceText
+    );
+
+  const entry =
+    Object.entries(
+      TEAM_INTERFACE_TEXT
+    ).find(
+      ([
+        ukrainian,
+        translations,
+      ]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeTeamInterfaceText(
+              value
+            ) ===
+            normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText || ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+
+
+function localizeTeamElement(
+  root
+) {
+  if (!root) return;
+
+  const walker =
+    document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT
+    );
+
+  const textNodes = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  textNodes.forEach(
+    (node) => {
+      if (
+        node.parentElement
+          ?.closest?.(
+            "[data-team-content]"
+          )
+      ) {
+        return;
+      }
+
+      const currentText =
+        node.nodeValue || "";
+
+      const normalized =
+        normalizeTeamInterfaceText(
+          currentText
+        );
+
+      if (!normalized) return;
+
+      const translated =
+        getTeamInterfaceText(
+          normalized
+        );
+
+      if (
+        translated === normalized
+      ) {
+        return;
+      }
+
+      const leadingSpace =
+        currentText.match(
+          /^\s*/
+        )?.[0] || "";
+
+      const trailingSpace =
+        currentText.match(
+          /\s*$/
+        )?.[0] || "";
+
+      node.nodeValue =
+        leadingSpace +
+        translated +
+        trailingSpace;
+    }
+  );
+
+  const elements = [
+    root,
+    ...root.querySelectorAll("*"),
+  ];
+
+  elements.forEach(
+    (element) => {
+      if (
+        element?.closest?.(
+          "[data-team-content]"
+        )
+      ) {
+        return;
+      }
+
+      [
+        "placeholder",
+        "title",
+        "aria-label",
+      ].forEach(
+        (attribute) => {
+          if (
+            !element?.hasAttribute?.(
+              attribute
+            )
+          ) {
+            return;
+          }
+
+          const currentValue =
+            element.getAttribute(
+              attribute
+            ) || "";
+
+          const translatedValue =
+            getTeamInterfaceText(
+              currentValue
+            );
+
+          if (
+            translatedValue !==
+            currentValue
+          ) {
+            element.setAttribute(
+              attribute,
+              translatedValue
+            );
+          }
+        }
+      );
+    }
+  );
+}
+
+
+function installTeamLocalization(
+  root
+) {
+  if (!root) return;
+
+  root
+    ._teamLocalizationObserver
+    ?.disconnect();
+
+  localizeTeamElement(
+    root
+  );
+
+  const observer =
+    new MutationObserver(
+      () => {
+        localizeTeamElement(
+          root
+        );
+      }
+    );
+
+  observer.observe(
+    root,
+    {
+      childList: true,
+      subtree: true,
+    }
+  );
+
+  root._teamLocalizationObserver =
+    observer;
+}
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Форма недоступна": {
+      en: "Form unavailable",
+      de: "Formular nicht verfügbar",
+      pl: "Formularz niedostępny",
+    },
+
+    "Форма додавання співробітника не підключена.": {
+      en: "The employee form is not connected.",
+      de: "Das Mitarbeiterformular ist nicht verfügbar.",
+      pl: "Formularz pracownika nie jest podłączony.",
+    },
+
+    "Не вдалося видалити напрям.": {
+      en: "Could not delete the specialization.",
+      de: "Der Fachbereich konnte nicht gelöscht werden.",
+      pl: "Nie udało się usunąć specjalizacji.",
+    },
+
+    "Доступ обмежено": {
+      en: "Access restricted",
+      de: "Zugriff eingeschränkt",
+      pl: "Dostęp ograniczony",
+    },
+
+    "Змінювати графік співробітників може лише керівництво клініки.": {
+      en: "Only clinic management can change employee schedules.",
+      de: "Nur die Klinikleitung kann Mitarbeiterpläne ändern.",
+      pl: "Tylko kierownictwo kliniki może zmieniać grafiki pracowników.",
+    },
+
+    "Не можна звільнити власний профіль.": {
+      en: "You cannot deactivate your own profile.",
+      de: "Sie können Ihr eigenes Profil nicht deaktivieren.",
+      pl: "Nie możesz dezaktywować własnego profilu.",
+    },
+
+    "Не вдалося звільнити співробітника.": {
+      en: "Could not deactivate the employee.",
+      de: "Der Mitarbeiter konnte nicht deaktiviert werden.",
+      pl: "Nie udało się dezaktywować pracownika.",
+    },
+
+    "Ви можете відкривати лише власний профіль співробітника.": {
+      en: "You can only open your own employee profile.",
+      de: "Sie können nur Ihr eigenes Mitarbeiterprofil öffnen.",
+      pl: "Możesz otworzyć tylko własny profil pracownika.",
+    },
+
+    "Ви можете відкривати лише власний профіль.": {
+      en: "You can only open your own profile.",
+      de: "Sie können nur Ihr eigenes Profil öffnen.",
+      pl: "Możesz otworzyć tylko własny profil.",
+    },
+
+    "Профіль не знайдено": {
+      en: "Profile not found",
+      de: "Profil nicht gefunden",
+      pl: "Nie znaleziono profilu",
+    },
+
+    "Не вдалося завантажити профіль співробітника.": {
+      en: "Could not load the employee profile.",
+      de: "Das Mitarbeiterprofil konnte nicht geladen werden.",
+      pl: "Nie udało się wczytać profilu pracownika.",
+    },
+  }
+);
+
+
+function showTeamNotice({
+  icon,
+  title,
+  text,
+}) {
+  showCrmNotice({
+    icon,
+
+    title:
+      getTeamInterfaceText(
+        title
+      ),
+
+    text:
+      getTeamInterfaceText(
+        text
+      ),
+  });
+}
+
+
+function getTeamDeleteSpecializationMessage(
+  specializationName
+) {
+  const safeName =
+    escapeHtml(
+      specializationName ||
+      getTeamInterfaceText(
+        "Напрям"
+      )
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `Delete specialization <b>${safeName}</b>? ` +
+      "It will be removed from the list of available specializations."
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `Fachbereich <b>${safeName}</b> löschen? ` +
+      "Er wird aus der Liste der verfügbaren Fachbereiche entfernt."
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Usunąć specjalizację <b>${safeName}</b>? ` +
+      "Zniknie ona z listy dostępnych specjalizacji."
+    );
+  }
+
+  return (
+    `Видалити напрям <b>${safeName}</b>? ` +
+    "Він зникне зі списку доступних напрямів."
+  );
+}
+
+
+function getTeamDeactivateStaffMessage(
+  staffName
+) {
+  const safeName =
+    escapeHtml(
+      staffName ||
+      getTeamInterfaceText(
+        "Працівник"
+      )
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `Deactivate <b>${safeName}</b>?<br><br>` +
+      "The employee’s login will be blocked and the profile " +
+      "will disappear from the active team. Visit and finance " +
+      "history will be retained."
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `<b>${safeName}</b> deaktivieren?<br><br>` +
+      "Der Zugang des Mitarbeiters wird gesperrt und das Profil " +
+      "wird aus dem aktiven Team entfernt. Die Besuchs- und " +
+      "Finanzhistorie bleibt erhalten."
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Dezaktywować pracownika <b>${safeName}</b>?<br><br>` +
+      "Dostęp pracownika zostanie zablokowany, a profil zniknie " +
+      "z aktywnego zespołu. Historia wizyt i finansów zostanie zachowana."
+    );
+  }
+
+  return (
+    `Звільнити <b>${safeName}</b>?<br><br>` +
+    "Вхід співробітника буде заблоковано, а профіль зникне " +
+    "з активної команди. Історія візитів і фінансів збережеться."
+  );
+}
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "← Команда": {
+      en: "← Team",
+      de: "← Team",
+      pl: "← Zespół",
+    },
+
+    "Телефон не вказано": {
+      en: "Phone not provided",
+      de: "Telefon nicht angegeben",
+      pl: "Nie podano telefonu",
+    },
+
+    "✉ Email не вказано": {
+      en: "✉ Email not provided",
+      de: "✉ E-Mail nicht angegeben",
+      pl: "✉ Nie podano adresu e-mail",
+    },
+
+    "☎ Екстрений контакт": {
+      en: "☎ Emergency contact",
+      de: "☎ Notfallkontakt",
+      pl: "☎ Kontakt alarmowy",
+    },
+
+    "Контактна особа": {
+      en: "Contact person",
+      de: "Ansprechperson",
+      pl: "Osoba kontaktowa",
+    },
+
+    "▦ Огляд": {
+      en: "▦ Overview",
+      de: "▦ Übersicht",
+      pl: "▦ Przegląd",
+    },
+
+    "📈 Аналітика": {
+      en: "📈 Analytics",
+      de: "📈 Analyse",
+      pl: "📈 Analityka",
+    },
+
+    "🩺 Прийоми": {
+      en: "🩺 Visits",
+      de: "🩺 Termine",
+      pl: "🩺 Wizyty",
+    },
+
+    "💰 Фінанси": {
+      en: "💰 Finance",
+      de: "💰 Finanzen",
+      pl: "💰 Finanse",
+    },
+
+    "🏆 Досягнення": {
+      en: "🏆 Achievements",
+      de: "🏆 Erfolge",
+      pl: "🏆 Osiągnięcia",
+    },
+
+    "⚙ Налаштування": {
+      en: "⚙ Settings",
+      de: "⚙ Einstellungen",
+      pl: "⚙ Ustawienia",
+    },
+
+    "ID співробітника": {
+      en: "Employee ID",
+      de: "Mitarbeiter-ID",
+      pl: "ID pracownika",
+    },
+
+    "Ваші показники, досягнення та ефективність": {
+      en: "Your performance, achievements and efficiency",
+      de: "Ihre Kennzahlen, Erfolge und Leistung",
+      pl: "Twoje wyniki, osiągnięcia i efektywność",
+    },
+
+    "⬇ Експорт": {
+      en: "⬇ Export",
+      de: "⬇ Exportieren",
+      pl: "⬇ Eksport",
+    },
+
+    "✏️ Редагувати профіль": {
+      en: "✏️ Edit profile",
+      de: "✏️ Profil bearbeiten",
+      pl: "✏️ Edytuj profil",
+    },
+  }
+);
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Виручка": {
+      en: "Revenue",
+      de: "Umsatz",
+      pl: "Przychód",
+    },
+
+    "Візити": {
+      en: "Visits",
+      de: "Termine",
+      pl: "Wizyty",
+    },
+
+    "Середній чек": {
+      en: "Average invoice",
+      de: "Durchschnittsrechnung",
+      pl: "Średni rachunek",
+    },
+
+    "Рейтинг клієнтів": {
+      en: "Client rating",
+      de: "Kundenbewertung",
+      pl: "Ocena klientów",
+    },
+
+    "Закрито чеків": {
+      en: "Closed invoices",
+      de: "Abgeschlossene Rechnungen",
+      pl: "Zamknięte rachunki",
+    },
+
+    "Що варто знати сьогодні": {
+      en: "What you should know today",
+      de: "Was Sie heute wissen sollten",
+      pl: "Co warto wiedzieć dzisiaj",
+    },
+
+    "Кількість візитів": {
+      en: "Number of visits",
+      de: "Anzahl der Termine",
+      pl: "Liczba wizyt",
+    },
+
+    "грн": {
+      en: "UAH",
+      de: "UAH",
+      pl: "UAH",
+    },
+
+    "візити": {
+      en: "visits",
+      de: "Termine",
+      pl: "wizyty",
+    },
+
+    "🎯 Сьогодні": {
+      en: "🎯 Today",
+      de: "🎯 Heute",
+      pl: "🎯 Dzisiaj",
+    },
+
+    "Статус": {
+      en: "Status",
+      de: "Status",
+      pl: "Status",
+    },
+
+    "Записів сьогодні": {
+      en: "Appointments today",
+      de: "Termine heute",
+      pl: "Dzisiejsze wizyty",
+    },
+
+    "Виконано": {
+      en: "Completed",
+      de: "Abgeschlossen",
+      pl: "Wykonano",
+    },
+
+    "Попереду": {
+      en: "Upcoming",
+      de: "Bevorstehend",
+      pl: "Nadchodzące",
+    },
+
+    "🏆 Карʼєра": {
+      en: "🏆 Career",
+      de: "🏆 Karriere",
+      pl: "🏆 Kariera",
+    },
+
+    "💰 Фінансова інформація": {
+      en: "💰 Financial information",
+      de: "💰 Finanzinformationen",
+      pl: "💰 Informacje finansowe",
+    },
+
+    "(за цей місяць)": {
+      en: "(this month)",
+      de: "(diesen Monat)",
+      pl: "(w tym miesiącu)",
+    },
+
+    "Бонуси": {
+      en: "Bonuses",
+      de: "Boni",
+      pl: "Premie",
+    },
+
+    "Нараховано": {
+      en: "Accrued",
+      de: "Berechnet",
+      pl: "Naliczono",
+    },
+
+    "🧠 Навички": {
+      en: "🧠 Skills",
+      de: "🧠 Fähigkeiten",
+      pl: "🧠 Umiejętności",
+    },
+
+    "+ Додати": {
+      en: "+ Add",
+      de: "+ Hinzufügen",
+      pl: "+ Dodaj",
+    },
+
+    "Навички ще не додані. Наприклад: УЗД, хірургія, кастрація, неврологія.": {
+      en: "No skills added yet. For example: ultrasound, surgery, neutering or neurology.",
+      de: "Noch keine Fähigkeiten hinzugefügt. Zum Beispiel: Ultraschall, Chirurgie, Kastration oder Neurologie.",
+      pl: "Nie dodano jeszcze umiejętności. Na przykład: USG, chirurgia, kastracja lub neurologia.",
+    },
+
+    "Додати навичку": {
+      en: "Add skill",
+      de: "Fähigkeit hinzufügen",
+      pl: "Dodaj umiejętność",
+    },
+
+    "Вкажіть професійну навичку співробітника.": {
+      en: "Enter the employee’s professional skill.",
+      de: "Geben Sie die berufliche Fähigkeit des Mitarbeiters ein.",
+      pl: "Podaj umiejętność zawodową pracownika.",
+    },
+
+    "Назва навички": {
+      en: "Skill name",
+      de: "Name der Fähigkeit",
+      pl: "Nazwa umiejętności",
+    },
+
+    "Наприклад: УЗД, хірургія, кастрація": {
+      en: "For example: ultrasound, surgery, neutering",
+      de: "Zum Beispiel: Ultraschall, Chirurgie, Kastration",
+      pl: "Na przykład: USG, chirurgia, kastracja",
+    },
+
+    "Популярні навички": {
+      en: "Popular skills",
+      de: "Beliebte Fähigkeiten",
+      pl: "Popularne umiejętności",
+    },
+
+    "Скасувати": {
+      en: "Cancel",
+      de: "Abbrechen",
+      pl: "Anuluj",
+    },
+
+    "Додати +": {
+      en: "Add +",
+      de: "Hinzufügen +",
+      pl: "Dodaj +",
+    },
+
+    "Така навичка вже є.": {
+      en: "This skill already exists.",
+      de: "Diese Fähigkeit ist bereits vorhanden.",
+      pl: "Ta umiejętność już istnieje.",
+    },
+
+    "УЗД": {
+      en: "Ultrasound",
+      de: "Ultraschall",
+      pl: "USG",
+    },
+
+    "Хірургія": {
+      en: "Surgery",
+      de: "Chirurgie",
+      pl: "Chirurgia",
+    },
+
+    "Кастрація": {
+      en: "Neutering",
+      de: "Kastration",
+      pl: "Kastracja",
+    },
+
+    "Неврологія": {
+      en: "Neurology",
+      de: "Neurologie",
+      pl: "Neurologia",
+    },
+
+    "Дерматологія": {
+      en: "Dermatology",
+      de: "Dermatologie",
+      pl: "Dermatologia",
+    },
+
+    "Кардіологія": {
+      en: "Cardiology",
+      de: "Kardiologie",
+      pl: "Kardiologia",
+    },
+
+    "Діагностика за допомогою ультразвуку": {
+      en: "Ultrasound diagnostics",
+      de: "Ultraschalldiagnostik",
+      pl: "Diagnostyka ultrasonograficzna",
+    },
+
+    "Хірургічні втручання різної складності": {
+      en: "Surgical procedures of varying complexity",
+      de: "Chirurgische Eingriffe unterschiedlicher Komplexität",
+      pl: "Zabiegi chirurgiczne o różnym stopniu złożoności",
+    },
+
+    "Стерилізація та кастрація тварин": {
+      en: "Spaying and neutering animals",
+      de: "Sterilisation und Kastration von Tieren",
+      pl: "Sterylizacja i kastracja zwierząt",
+    },
+
+    "Діагностика та лікування нервової системи": {
+      en: "Diagnosis and treatment of the nervous system",
+      de: "Diagnostik und Behandlung des Nervensystems",
+      pl: "Diagnostyka i leczenie układu nerwowego",
+    },
+
+    "Шкіра, шерсть, алергії та дерматологія": {
+      en: "Skin, coat, allergies and dermatology",
+      de: "Haut, Fell, Allergien und Dermatologie",
+      pl: "Skóra, sierść, alergie i dermatologia",
+    },
+
+    "Серце, судини та кардіологічна діагностика": {
+      en: "Heart, blood vessels and cardiac diagnostics",
+      de: "Herz, Gefäße und kardiologische Diagnostik",
+      pl: "Serce, naczynia i diagnostyka kardiologiczna",
+    },
+
+    "Професійна навичка співробітника": {
+      en: "Employee professional skill",
+      de: "Berufliche Fähigkeit des Mitarbeiters",
+      pl: "Umiejętność zawodowa pracownika",
+    },
+  }
+);
 async function renderTeamTab() {
   const page =
     document.querySelector(
@@ -22172,8 +23098,12 @@ async function renderTeamTab() {
 
   if (!page) return;
 
-  const teamManager =
-    isOwnerOrAdmin();
+installTeamLocalization(
+  page
+);
+
+const teamManager =
+  isOwnerOrAdmin();
 
   const currentStaffId =
     getCurrentStaffId();
@@ -22663,7 +23593,7 @@ async function renderTeamTab() {
                               <button
   class="
     ghost
-    premiumDeleteBtnф
+    premiumDeleteBtn
   "
   type="button"
   data-deactivate-team-staff="${escapeHtml(
@@ -22696,7 +23626,40 @@ async function renderTeamTab() {
       </div>
     </div>
   `;
+const teamDynamicContent =
+  [
+    ".specPill > span",
+    ".staffGroupHeader > span",
+    ".premiumVetName",
+    ".premiumVetSpecs",
+    ".premiumMetaItem:first-child strong",
+  ].join(",");
 
+page
+  .querySelectorAll(
+    teamDynamicContent
+  )
+  .forEach(
+    (element) => {
+      const content =
+        normalizeTeamInterfaceText(
+          element.textContent
+        );
+
+      if (
+        !Object.prototype
+          .hasOwnProperty.call(
+            TEAM_INTERFACE_TEXT,
+            content
+          )
+      ) {
+        element.setAttribute(
+          "data-team-content",
+          ""
+        );
+      }
+    }
+  );
   page
     .querySelector(
       "#btnAddStaffTeam"
@@ -22720,7 +23683,7 @@ async function renderTeamTab() {
           "openCreateStaffModal не знайдена"
         );
 
-        showCrmNotice({
+        showTeamNotice({
           icon: "⚠️",
           title: "Форма недоступна",
           text:
@@ -22758,14 +23721,17 @@ async function renderTeamTab() {
     );
 
   page
-    .querySelectorAll(
-      "[data-delete-specialization-id]"
-    )
-    .forEach((button) => {
+  .querySelectorAll(
+    "[data-delete-specialization-id]"
+  )
+  .forEach(
+    (button) => {
       button.addEventListener(
         "click",
         () => {
-          if (!teamManager) return;
+          if (!teamManager) {
+            return;
+          }
 
           const specializationId =
             button.dataset
@@ -22774,12 +23740,15 @@ async function renderTeamTab() {
           const specializationName =
             button.dataset
               .deleteSpecializationName ||
-            "цей напрям";
+            getTeamInterfaceText(
+              "Напрям"
+            );
 
           openDeleteModal(
-            `Видалити напрям <b>${escapeHtml(
+            getTeamDeleteSpecializationMessage(
               specializationName
-            )}</b>? Він зникне зі списку доступних напрямів.`,
+            ),
+
             async () => {
               const result =
                 await deleteSpecializationApi(
@@ -22789,8 +23758,10 @@ async function renderTeamTab() {
               if (!result.ok) {
                 openDeleteModal(
                   escapeHtml(
-                    result.error ||
-                    "Не вдалося видалити напрям."
+                    getTeamInterfaceText(
+                      result.error ||
+                      "Не вдалося видалити напрям."
+                    )
                   ),
                   null,
                   "info"
@@ -22804,8 +23775,8 @@ async function renderTeamTab() {
           );
         }
       );
-    });
-
+    }
+  );
     
 
   page
@@ -22817,7 +23788,7 @@ async function renderTeamTab() {
         "click",
         async () => {
           if (!teamManager) {
-            showCrmNotice({
+            showTeamNotice({
               icon: "🔒",
               title:
                 "Доступ обмежено",
@@ -22909,70 +23880,80 @@ page
   .querySelectorAll(
     "[data-deactivate-team-staff]"
   )
-  .forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        if (!teamManager) return;
-
-        const staffId =
-          button.dataset
-            .deactivateTeamStaff;
-
-        const staffName =
-          button.dataset
-            .deactivateTeamStaffName ||
-          "цього співробітника";
-
-        if (
-          String(staffId) ===
-          String(currentStaffId)
-        ) {
-          openDeleteModal(
-            "Не можна звільнити власний профіль.",
-            null,
-            "info"
-          );
-
-          return;
-        }
-
-        openDeleteModal(
-          `Звільнити <b>${escapeHtml(
-            staffName
-          )}</b>?<br><br>
-          Вхід співробітника буде заблоковано,
-          а профіль зникне з активної команди.
-          Історія візитів і фінансів збережеться.`,
-          async () => {
-            button.disabled = true;
-
-            const result =
-              await deactivateStaffApi(
-                staffId
-              );
-
-            if (!result.ok) {
-              button.disabled = false;
-
-              openDeleteModal(
-                escapeHtml(
-                  result.error ||
-                  "Не вдалося звільнити співробітника."
-                ),
-                null,
-                "info"
-              );
-
-              return;
-            }
-
-            await renderTeamTab();
+  .forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          if (!teamManager) {
+            return;
           }
-        );
-      }
-    );
-  });
+
+          const staffId =
+            button.dataset
+              .deactivateTeamStaff;
+
+          const staffName =
+            button.dataset
+              .deactivateTeamStaffName ||
+            getTeamInterfaceText(
+              "Працівник"
+            );
+
+          if (
+            String(staffId) ===
+            String(currentStaffId)
+          ) {
+            openDeleteModal(
+              getTeamInterfaceText(
+                "Не можна звільнити власний профіль."
+              ),
+              null,
+              "info"
+            );
+
+            return;
+          }
+
+          openDeleteModal(
+            getTeamDeactivateStaffMessage(
+              staffName
+            ),
+
+            async () => {
+              button.disabled =
+                true;
+
+              const result =
+                await deactivateStaffApi(
+                  staffId
+                );
+
+              if (!result.ok) {
+                button.disabled =
+                  false;
+
+                openDeleteModal(
+                  escapeHtml(
+                    getTeamInterfaceText(
+                      result.error ||
+                      "Не вдалося звільнити співробітника."
+                    )
+                  ),
+                  null,
+                  "info"
+                );
+
+                return;
+              }
+
+              await renderTeamTab();
+            }
+          );
+        }
+      );
+    }
+  );
   page
     .querySelectorAll(
       "[data-open-team-profile]"
@@ -22988,7 +23969,7 @@ page
           if (
             !canOpenStaffProfile(id)
           ) {
-            showCrmNotice({
+            showTeamNotice({
               icon: "🔒",
               title:
                 "Доступ обмежено",
@@ -23007,7 +23988,7 @@ page
             );
 
           if (!staffRow) {
-            showCrmNotice({
+            showTeamNotice({
               icon: "⚠️",
               title:
                 "Профіль не знайдено",
@@ -23026,25 +24007,40 @@ page
     });
 }
 async function renderTeamProfilePage(doc) {
-  const page = document.querySelector('.page[data-page="team"]');
-  if (!page) return;
+  const page =
+  document.querySelector(
+    '.page[data-page="team"]'
+  );
+
+if (!page) return;
+
+installTeamLocalization(
+  page
+);
     if (
     !canOpenStaffProfile(
       doc?.id
     )
   ) {
-    showCrmNotice({
-      icon: "🔒",
-      title: "Доступ обмежено",
-      text:
-        "Ви можете відкривати лише власний профіль.",
-    });
+    showTeamNotice({
+  icon: "🔒",
+
+  title:
+    "Доступ обмежено",
+
+  text:
+    "Ви можете відкривати лише власний профіль.",
+});
 
     await renderTeamTab();
     return;
   }
 
-  const staffName = doc.name || "Працівник";
+  const staffName =
+  doc.name ||
+  getTeamInterfaceText(
+    "Працівник"
+  );
   const staffLetter = staffName.trim().charAt(0).toUpperCase() || "?";
   const staffColor = doc.color || "#7C5CFF";
 
@@ -23075,7 +24071,15 @@ const selectedFrame = unlockedFrames.find((x) => x.id === careerPrefs.frameId);
 const profileTitle =
   careerPrefs.titleId === "none"
     ? ""
-    : selectedTitle?.label || career.title || roleLabel;
+    : (
+        selectedTitle?.label ||
+        translateAchievementText(
+          career.title
+        ) ||
+        getTeamInterfaceText(
+          roleLabel
+        )
+      );
 
 const profileFrame =
   careerPrefs.frameId === "none"
@@ -23117,11 +24121,19 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
       <div class="teamDashStatus">На зміні</div>
 
       <div class="teamDashContact">
-  <div>
+  <div
+    ${
+      doc.phone
+        ? "data-team-content"
+        : ""
+    }
+  >
     📞
     ${escapeHtml(
       doc.phone ||
-      "Телефон не вказано"
+      getTeamInterfaceText(
+        "Телефон не вказано"
+      )
     )}
   </div>
 
@@ -23138,17 +24150,27 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
             ☎ Екстрений контакт
           </span>
 
-          <strong>
+          <strong
+            ${
+              doc.emergency_contact_name
+                ? "data-team-content"
+                : ""
+            }
+          >
             ${escapeHtml(
               doc.emergency_contact_name ||
-              "Контактна особа"
+              getTeamInterfaceText(
+                "Контактна особа"
+              )
             )}
           </strong>
 
           ${
             doc.emergency_contact_relation
               ? `
-                <small>
+                <small
+                  data-team-content
+                >
                   ${escapeHtml(
                     doc.emergency_contact_relation
                   )}
@@ -23161,6 +24183,7 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
             doc.emergency_contact_phone
               ? `
                 <a
+                  data-team-content
                   href="tel:${escapeHtml(
                     String(
                       doc.emergency_contact_phone
@@ -23171,7 +24194,7 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
                   )}"
                 >
                   ${escapeHtml(
-                    formatUaPhone(
+                    String(
                       doc.emergency_contact_phone
                     )
                   )}
@@ -23244,7 +24267,25 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
   </div>
 `;
 
-
+[
+  ".teamDashAvatar",
+  ".teamDashName",
+  ".teamDashTitle",
+  ".teamDashTop h1",
+  ".teamDashIdBox b",
+]
+  .forEach(
+    (selector) => {
+      page
+        .querySelector(
+          selector
+        )
+        ?.setAttribute(
+          "data-team-content",
+          ""
+        );
+    }
+  );
 
   document.getElementById("btnBackToTeam")?.addEventListener("click", () => {
     renderTeamTab();
@@ -23284,28 +24325,77 @@ document.querySelectorAll("[data-profile-tab]").forEach((btn) => {
 });
 }
 
-function renderTeamProfileTab(tab, state) {
-  const root = document.getElementById("teamProfileContent");
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Фінанси приховано": {
+      en: "Finance is hidden",
+      de: "Finanzen sind ausgeblendet",
+      pl: "Finanse są ukryte",
+    },
+
+    "Доступ до фінансових нарахувань має лише керівництво клініки.": {
+      en: "Only clinic management can access financial accruals.",
+      de: "Nur die Klinikleitung hat Zugriff auf finanzielle Abrechnungen.",
+      pl: "Tylko kierownictwo kliniki ma dostęp do rozliczeń finansowych.",
+    },
+
+    "Додати": {
+      en: "Add",
+      de: "Hinzufügen",
+      pl: "Dodaj",
+    },
+  }
+);
+
+
+function renderTeamProfileTab(
+  tab,
+  state
+) {
+  const root =
+    document.getElementById(
+      "teamProfileContent"
+    );
+
   if (!root) return;
 
   if (tab === "overview") {
-  renderTeamOverviewTab(root, state);
-  window.__lastTeamDashboard = state.dashboard;
+    renderTeamOverviewTab(
+      root,
+      state
+    );
 
-  requestAnimationFrame(() => {
-    renderStaffProfileCharts(state.dashboard, 6);
-  });
+    window.__lastTeamDashboard =
+      state.dashboard;
 
-  return;
-}
+    requestAnimationFrame(
+      () => {
+        renderStaffProfileCharts(
+          state.dashboard,
+          6
+        );
+      }
+    );
+
+    return;
+  }
 
   if (tab === "analytics") {
-    renderTeamAnalyticsTab(root, state);
+    renderTeamAnalyticsTab(
+      root,
+      state
+    );
+
     return;
   }
 
   if (tab === "visits") {
-    renderTeamVisitsTab(root, state);
+    renderTeamVisitsTab(
+      root,
+      state
+    );
+
     return;
   }
 
@@ -23313,9 +24403,12 @@ function renderTeamProfileTab(tab, state) {
     tab === "finance" &&
     !isOwnerOrAdmin()
   ) {
-    showCrmNotice({
+    showTeamNotice({
       icon: "🔒",
-      title: "Фінанси приховано",
+
+      title:
+        "Фінанси приховано",
+
       text:
         "Доступ до фінансових нарахувань має лише керівництво клініки.",
     });
@@ -23329,22 +24422,207 @@ function renderTeamProfileTab(tab, state) {
   }
 
   if (tab === "finance") {
-    renderTeamFinanceTab(root, state);
+    renderTeamFinanceTab(
+      root,
+      state
+    );
+
     return;
   }
 
-  if (tab === "achievements") {
-    renderTeamAchievementsTab(root, state);
+  if (
+    tab ===
+    "achievements"
+  ) {
+    renderTeamAchievementsTab(
+      root,
+      state
+    );
+
     return;
   }
-
 
   if (tab === "settings") {
-    renderTeamSettingsTab(root, state);
-    return;
+    renderTeamSettingsTab(
+      root,
+      state
+    );
   }
 }
-function renderTeamOverviewTab(root, state) {
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Завершено": {
+      en: "Completed",
+      de: "Abgeschlossen",
+      pl: "Zakończono",
+    },
+  }
+);
+function getTeamMoneyText(
+  value
+) {
+  return (
+    Number(value || 0)
+      .toLocaleString(
+        getCalendarLocale()
+      ) +
+    " " +
+    getTeamInterfaceText(
+      "грн"
+    )
+  );
+}
+
+
+function getTeamLevelText(
+  level
+) {
+  const value =
+    Number(level || 1);
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Level ${value}`;
+  }
+
+  if (language === "de") {
+    return `Stufe ${value}`;
+  }
+
+  if (language === "pl") {
+    return `Poziom ${value}`;
+  }
+
+  return `Рівень ${value}`;
+}
+
+
+function getTeamNextLevelText(
+  xp
+) {
+  const value =
+    Number(xp || 0)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `${value} XP remaining to the next level`;
+  }
+
+  if (language === "de") {
+    return `${value} XP bis zur nächsten Stufe`;
+  }
+
+  if (language === "pl") {
+    return `${value} XP do następnego poziomu`;
+  }
+
+  return (
+    `До наступного рівня ` +
+    `залишилось ${value} XP`
+  );
+}
+
+
+function getTeamOverviewInsightHtml({
+  staffName,
+  revenueGrowth,
+  visitsGrowth,
+  rating,
+}) {
+  const safeName =
+    escapeHtml(
+      staffName || ""
+    );
+
+  const safeRevenueGrowth =
+    escapeHtml(
+      String(
+        Number(
+          revenueGrowth || 0
+        )
+      )
+    );
+
+  const safeVisitsGrowth =
+    escapeHtml(
+      String(
+        Number(
+          visitsGrowth || 0
+        )
+      )
+    );
+
+  const safeRating =
+    rating
+      ? escapeHtml(
+          Number(rating)
+            .toFixed(2)
+        )
+      : "—";
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `
+      ${safeName} has stable performance:
+      revenue changed by
+      <strong>${safeRevenueGrowth}%</strong>,
+      visits changed by
+      <strong>${safeVisitsGrowth}%</strong>.
+      Current client rating:
+      <strong>${safeRating}</strong>.
+    `;
+  }
+
+  if (language === "de") {
+    return `
+      ${safeName} zeigt stabile Ergebnisse:
+      Der Umsatz hat sich um
+      <strong>${safeRevenueGrowth}%</strong>
+      verändert, die Anzahl der Termine um
+      <strong>${safeVisitsGrowth}%</strong>.
+      Aktuelle Kundenbewertung:
+      <strong>${safeRating}</strong>.
+    `;
+  }
+
+  if (language === "pl") {
+    return `
+      ${safeName} ma stabilne wyniki:
+      przychód zmienił się o
+      <strong>${safeRevenueGrowth}%</strong>,
+      a liczba wizyt o
+      <strong>${safeVisitsGrowth}%</strong>.
+      Aktualna ocena klientów:
+      <strong>${safeRating}</strong>.
+    `;
+  }
+
+  return `
+    ${safeName} має стабільні показники:
+    виручка змінилась на
+    <strong>${safeRevenueGrowth}%</strong>,
+    кількість візитів — на
+    <strong>${safeVisitsGrowth}%</strong>.
+    Поточний рейтинг клієнтів —
+    <strong>${safeRating}</strong>.
+  `;
+}
+
+
+function renderTeamOverviewTab(
+  root,
+  state
+) {
   const {
     dashboard,
     staffName,
@@ -23362,94 +24640,260 @@ function renderTeamOverviewTab(root, state) {
 
   root.innerHTML = `
     <section class="teamDashKpis">
-      ${renderTeamKpiCard("💰", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, revenueGrowth)}
-      ${renderTeamKpiCard("🐾", "Візити", visits, visitsGrowth)}
-      ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, avgCheckGrowth)}
-      ${renderTeamKpiCard("⭐", "Рейтинг клієнтів", rating ? rating.toFixed(2) : "—", 0)}
-      ${renderTeamKpiCard("🧾", "Закрито чеків", checks, checksGrowth)}
+      ${renderTeamKpiCard(
+        "💰",
+        "Виручка",
+        getTeamMoneyText(
+          revenue
+        ),
+        revenueGrowth
+      )}
+
+      ${renderTeamKpiCard(
+        "🐾",
+        "Візити",
+        visits,
+        visitsGrowth
+      )}
+
+      ${renderTeamKpiCard(
+        "💳",
+        "Середній чек",
+        getTeamMoneyText(
+          avgCheck
+        ),
+        avgCheckGrowth
+      )}
+
+      ${renderTeamKpiCard(
+        "⭐",
+        "Рейтинг клієнтів",
+        rating
+          ? rating.toFixed(2)
+          : "—",
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "🧾",
+        "Закрито чеків",
+        checks,
+        checksGrowth
+      )}
     </section>
 
     <section class="teamDashInsight">
-      <div class="teamInsightIcon">✨</div>
+      <div class="teamInsightIcon">
+        ✨
+      </div>
+
       <div>
-        <b>Що варто знати сьогодні</b>
+        <b>
+          Що варто знати сьогодні
+        </b>
+
         <p>
-          ${escapeHtml(staffName)} має стабільні показники: виручка змінилась на 
-          <strong>${revenueGrowth}%</strong>, кількість візитів — на 
-          <strong>${visitsGrowth}%</strong>. Поточний рейтинг клієнтів — 
-          <strong>${rating ? rating.toFixed(2) : "—"}</strong>.
+          ${getTeamOverviewInsightHtml({
+            staffName,
+            revenueGrowth,
+            visitsGrowth,
+            rating,
+          })}
         </p>
       </div>
     </section>
 
     <section class="teamDashGrid">
-      <div class="teamDashPanel teamDashPanelLarge">
+      <div
+        class="
+          teamDashPanel
+          teamDashPanelLarge
+        "
+      >
         <div class="teamDashPanelHead">
-         <h3>Виручка</h3>
-          <span>грн</span>
+          <h3>
+            Виручка
+          </h3>
+
+          <span>
+            грн
+          </span>
         </div>
+
         <div class="teamChartBox">
-          <canvas id="staffRevenueChart"></canvas>
+          <canvas
+            id="staffRevenueChart"
+          ></canvas>
         </div>
       </div>
 
-      <div class="teamDashPanel teamDashPanelLarge">
+      <div
+        class="
+          teamDashPanel
+          teamDashPanelLarge
+        "
+      >
         <div class="teamDashPanelHead">
-          <h3>Кількість візитів</h3>
-          <span>візити</span>
+          <h3>
+            Кількість візитів
+          </h3>
+
+          <span>
+            візити
+          </span>
         </div>
+
         <div class="teamChartBox">
-          <canvas id="staffVisitsChart"></canvas>
+          <canvas
+            id="staffVisitsChart"
+          ></canvas>
         </div>
       </div>
 
       <div class="teamDashPanel">
         <div class="teamDashPanelHead">
-          <h3>🎯 Сьогодні</h3>
+          <h3>
+            🎯 Сьогодні
+          </h3>
         </div>
+
         <div class="teamDashRows">
-          <p><span>Статус</span><b>На зміні</b></p>
-          <p><span>Записів сьогодні</span><b>0</b></p>
-          <p><span>Виконано</span><b>0</b></p>
-          <p><span>Попереду</span><b>0</b></p>
+          <p>
+            <span>Статус</span>
+            <b>На зміні</b>
+          </p>
+
+          <p>
+            <span>Записів сьогодні</span>
+            <b>0</b>
+          </p>
+
+          <p>
+            <span>Виконано</span>
+            <b>0</b>
+          </p>
+
+          <p>
+            <span>Попереду</span>
+            <b>0</b>
+          </p>
         </div>
       </div>
 
       <div class="teamDashPanel">
         <div class="teamDashPanelHead">
-          <h3>🏆 Карʼєра</h3>
-          <span>Level 1</span>
+          <h3>
+            🏆 Карʼєра
+          </h3>
+
+          <span>
+            ${getTeamLevelText(1)}
+          </span>
         </div>
+
         <div class="teamDashXp">
-          <div><b>Рівень 1</b><span>0 / 100 XP</span></div>
-          <i><em style="width:0%"></em></i>
-          <p>До наступного рівня залишилось 100 XP</p>
+          <div>
+            <b>
+              ${getTeamLevelText(1)}
+            </b>
+
+            <span>
+              0 / 100 XP
+            </span>
+          </div>
+
+          <i>
+            <em
+              style="width:0%"
+            ></em>
+          </i>
+
+          <p>
+            ${getTeamNextLevelText(
+              100
+            )}
+          </p>
         </div>
       </div>
 
-      ${renderStaffSkillsPanel(doc)}
+      ${renderStaffSkillsPanel(
+        doc
+      )}
 
-      <div class="teamDashPanel teamDashFull">
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+        "
+      >
         <div class="teamDashPanelHead">
-          <h3>💰 Фінансова інформація <span class="panelMutedTitle">(за цей місяць)</span></h3>
+          <h3>
+            💰 Фінансова інформація
+
+            <span class="panelMutedTitle">
+              (за цей місяць)
+            </span>
+          </h3>
         </div>
+
         <div class="teamDashRows">
-          <p><span>Ставка</span><b>${escapeHtml(String(doc.shift_rate || 0))} грн / зміна</b></p>
-          <p><span>Відсоток</span><b>${escapeHtml(String(doc.percent_rate || 0))}%</b></p>
-          <p><span>Бонуси</span><b>—</b></p>
-          <p><span>Нараховано</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
+          <p>
+            <span>Ставка</span>
+
+            <b>
+              ${escapeHtml(
+                String(
+                  doc.shift_rate ||
+                  0
+                )
+              )}
+              ${getTeamInterfaceText(
+                "грн / зміна"
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>Відсоток</span>
+
+            <b>
+              ${escapeHtml(
+                String(
+                  doc.percent_rate ||
+                  0
+                )
+              )}%
+            </b>
+          </p>
+
+          <p>
+            <span>Бонуси</span>
+            <b>—</b>
+          </p>
+
+          <p>
+            <span>Нараховано</span>
+
+            <b>
+              ${getTeamMoneyText(
+                revenue
+              )}
+            </b>
+          </p>
         </div>
       </div>
-        </section>
-
+    </section>
   `;
 
-  if (typeof bindStaffSkillsPanel === "function") {
-
-    bindStaffSkillsPanel(root, state);
-
+  if (
+    typeof bindStaffSkillsPanel ===
+    "function"
+  ) {
+    bindStaffSkillsPanel(
+      root,
+      state
+    );
   }
-
 }
 function getStaffSkills(doc) {
   const raw = doc?.skills;
@@ -23494,797 +24938,3857 @@ function renderStaffSkillsPanel(doc) {
   `;
 }
 
-function renderStaffSkillCard(skill) {
-  const icon = getSkillIcon(skill);
+function renderStaffSkillCard(
+  skill
+) {
+  const icon =
+    getSkillIcon(
+      skill
+    );
+
+  const displayedSkill =
+    getTeamInterfaceText(
+      skill
+    );
+
+  const description =
+    getTeamInterfaceText(
+      getSkillDescription(
+        skill
+      )
+    );
 
   return `
     <div class="staffSkillCard">
-      <button class="staffSkillRemove" type="button" data-remove-skill="${escapeHtml(skill)}">×</button>
-      <div class="staffSkillIcon">${icon}</div>
-      <b>${escapeHtml(skill)}</b>
-      <span>${escapeHtml(getSkillDescription(skill))}</span>
+      <button
+        class="staffSkillRemove"
+        type="button"
+        data-remove-skill="${escapeHtml(
+          skill
+        )}"
+      >
+        ×
+      </button>
+
+      <div class="staffSkillIcon">
+        ${icon}
+      </div>
+
+      <b>
+        ${escapeHtml(
+          displayedSkill
+        )}
+      </b>
+
+      <span>
+        ${escapeHtml(
+          description
+        )}
+      </span>
     </div>
   `;
 }
 
-function bindStaffSkillsPanel(root, state) {
-  root.querySelector("#btnAddStaffSkill")?.addEventListener("click", () => {
-    openStaffSkillModal(root, state);
-  });
 
-  root.querySelectorAll("[data-remove-skill]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const skill = btn.dataset.removeSkill;
-      const skills = getStaffSkills(state.doc);
-      const updatedSkills = skills.filter((s) => s !== skill);
+function bindStaffSkillsPanel(
+  root,
+  state
+) {
+  root
+    .querySelector(
+      "#btnAddStaffSkill"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openStaffSkillModal(
+          root,
+          state
+        );
+      }
+    );
 
-      await updateStaffApi(state.doc.id, {
-        ...state.doc,
-        skills: updatedSkills,
-      });
+  root
+    .querySelectorAll(
+      "[data-remove-skill]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          async () => {
+            const skill =
+              button.dataset
+                .removeSkill;
 
-      state.doc.skills = updatedSkills;
-      renderTeamOverviewTab(root, state);
-    });
-  });
+            const skills =
+              getStaffSkills(
+                state.doc
+              );
+
+            const updatedSkills =
+              skills.filter(
+                (item) =>
+                  item !== skill
+              );
+
+            await updateStaffApi(
+              state.doc.id,
+              {
+                ...state.doc,
+                skills:
+                  updatedSkills,
+              }
+            );
+
+            state.doc.skills =
+              updatedSkills;
+
+            renderTeamOverviewTab(
+              root,
+              state
+            );
+          }
+        );
+      }
+    );
 }
 
-function openStaffSkillModal(root, state) {
-  const existing = document.querySelector(".staffSkillModalOverlay");
-  existing?.remove();
 
-  const presets = ["УЗД", "Хірургія", "Кастрація", "Неврологія", "Дерматологія", "Кардіологія"];
+function openStaffSkillModal(
+  root,
+  state
+) {
+  document
+    .querySelector(
+      ".staffSkillModalOverlay"
+    )
+    ?.remove();
 
-  const modal = document.createElement("div");
-  modal.className = "staffSkillModalOverlay";
+  const presets = [
+    "УЗД",
+    "Хірургія",
+    "Кастрація",
+    "Неврологія",
+    "Дерматологія",
+    "Кардіологія",
+  ];
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "staffSkillModalOverlay";
 
   modal.innerHTML = `
     <div class="staffSkillModal">
-      <button class="staffSkillModalClose" type="button">×</button>
+      <button
+        class="staffSkillModalClose"
+        type="button"
+      >
+        ×
+      </button>
 
       <div class="staffSkillModalHead">
-        <div class="staffSkillModalIcon">🧠</div>
+        <div class="staffSkillModalIcon">
+          🧠
+        </div>
+
         <div>
-          <h2>Додати навичку</h2>
-          <p>Вкажіть професійну навичку співробітника.</p>
+          <h2>
+            Додати навичку
+          </h2>
+
+          <p>
+            Вкажіть професійну навичку співробітника.
+          </p>
         </div>
       </div>
 
       <label class="staffSkillField">
-        <span>Назва навички</span>
-        <input id="staffSkillInput" type="text" placeholder="Наприклад: УЗД, хірургія, кастрація">
+        <span>
+          Назва навички
+        </span>
+
+        <input
+          id="staffSkillInput"
+          type="text"
+          placeholder="Наприклад: УЗД, хірургія, кастрація"
+        >
       </label>
 
       <div class="staffSkillPresets">
-        <span>Популярні навички</span>
+        <span>
+          Популярні навички
+        </span>
+
         <div>
-          ${presets.map((p) => `
-            <button type="button" data-skill-preset="${escapeHtml(p)}">
-              ${getSkillIcon(p)} ${escapeHtml(p)}
-            </button>
-          `).join("")}
+          ${
+            presets
+              .map(
+                (preset) => `
+                  <button
+                    type="button"
+                    data-skill-preset="${escapeHtml(
+                      preset
+                    )}"
+                  >
+                    ${getSkillIcon(
+                      preset
+                    )}
+
+                    ${escapeHtml(
+                      getTeamInterfaceText(
+                        preset
+                      )
+                    )}
+                  </button>
+                `
+              )
+              .join("")
+          }
         </div>
       </div>
 
       <div class="staffSkillModalActions">
-        <button class="teamGhostBtn" type="button" id="btnCancelSkill">Скасувати</button>
-        <button class="teamPrimaryBtn" type="button" id="btnSaveSkill">Додати +</button>
+        <button
+          class="teamGhostBtn"
+          type="button"
+          id="btnCancelSkill"
+        >
+          Скасувати
+        </button>
+
+        <button
+          class="teamPrimaryBtn"
+          type="button"
+          id="btnSaveSkill"
+        >
+          Додати +
+        </button>
       </div>
     </div>
   `;
 
-  document.body.appendChild(modal);
+  document.body.appendChild(
+    modal
+  );
 
-  const input = modal.querySelector("#staffSkillInput");
+  installTeamLocalization(
+    modal
+  );
+
+  const input =
+    modal.querySelector(
+      "#staffSkillInput"
+    );
+
   input?.focus();
 
-  const close = () => modal.remove();
+  const close = () => {
+    modal.remove();
+  };
 
-  modal.querySelector(".staffSkillModalClose")?.addEventListener("click", close);
-  modal.querySelector("#btnCancelSkill")?.addEventListener("click", close);
+  modal
+    .querySelector(
+      ".staffSkillModalClose"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
 
-  modal.querySelectorAll("[data-skill-preset]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      input.value = btn.dataset.skillPreset || "";
-      input.focus();
-    });
-  });
+  modal
+    .querySelector(
+      "#btnCancelSkill"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
 
-  modal.querySelector("#btnSaveSkill")?.addEventListener("click", async () => {
-    const cleanSkill = input.value.trim();
-    if (!cleanSkill) return;
+  modal
+    .querySelectorAll(
+      "[data-skill-preset]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            input.value =
+              button.dataset
+                .skillPreset ||
+              "";
 
-    const skills = getStaffSkills(state.doc);
+            input.focus();
+          }
+        );
+      }
+    );
 
-    if (skills.some((s) => s.toLowerCase() === cleanSkill.toLowerCase())) {
-      alert("Така навичка вже є.");
-      return;
-    }
+  modal
+    .querySelector(
+      "#btnSaveSkill"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const cleanSkill =
+          input.value.trim();
 
-    const updatedSkills = [...skills, cleanSkill];
+        if (!cleanSkill) {
+          return;
+        }
 
-    await updateStaffApi(state.doc.id, {
-      ...state.doc,
-      skills: updatedSkills,
-    });
+        const skills =
+          getStaffSkills(
+            state.doc
+          );
 
-    state.doc.skills = updatedSkills;
-    close();
-    renderTeamOverviewTab(root, state);
-  });
+        const alreadyExists =
+          skills.some(
+            (skill) =>
+              skill
+                .toLowerCase() ===
+              cleanSkill
+                .toLowerCase()
+          );
+
+        if (alreadyExists) {
+          alert(
+            getTeamInterfaceText(
+              "Така навичка вже є."
+            )
+          );
+
+          return;
+        }
+
+        const updatedSkills = [
+          ...skills,
+          cleanSkill,
+        ];
+
+        await updateStaffApi(
+          state.doc.id,
+          {
+            ...state.doc,
+            skills:
+              updatedSkills,
+          }
+        );
+
+        state.doc.skills =
+          updatedSkills;
+
+        close();
+
+        renderTeamOverviewTab(
+          root,
+          state
+        );
+      }
+    );
 }
-function getSkillIcon(skill) {
-  const s = String(skill || "").toLowerCase();
 
-  if (s.includes("узд") || s.includes("ультра")) return "🖥️";
-  if (s.includes("хірур") || s.includes("хирург")) return "✂️";
-  if (s.includes("кастр") || s.includes("стерил")) return "🐾";
-  if (s.includes("невро")) return "🧠";
-  if (s.includes("дермат")) return "🩹";
-  if (s.includes("карді") || s.includes("кардио")) return "❤️";
+
+function getSkillIcon(
+  skill
+) {
+  const value =
+    String(skill || "")
+      .toLowerCase();
+
+  if (
+    value.includes("узд") ||
+    value.includes("ультра") ||
+    value.includes("ultrasound") ||
+    value.includes("ultraschall") ||
+    value.includes("usg")
+  ) {
+    return "🖥️";
+  }
+
+  if (
+    value.includes("хірур") ||
+    value.includes("хирург") ||
+    value.includes("surgery") ||
+    value.includes("chirurg")
+  ) {
+    return "✂️";
+  }
+
+  if (
+    value.includes("кастр") ||
+    value.includes("стерил") ||
+    value.includes("neuter") ||
+    value.includes("spay")
+  ) {
+    return "🐾";
+  }
+
+  if (
+    value.includes("невро") ||
+    value.includes("neuro")
+  ) {
+    return "🧠";
+  }
+
+  if (
+    value.includes("дермат") ||
+    value.includes("dermat")
+  ) {
+    return "🩹";
+  }
+
+  if (
+    value.includes("карді") ||
+    value.includes("кардио") ||
+    value.includes("cardio") ||
+    value.includes("kardio")
+  ) {
+    return "❤️";
+  }
 
   return "✨";
 }
 
-function getSkillDescription(skill) {
-  const s = String(skill || "").toLowerCase();
 
-  if (s.includes("узд")) return "Діагностика за допомогою ультразвуку";
-  if (s.includes("хірур") || s.includes("хирург")) return "Хірургічні втручання різної складності";
-  if (s.includes("кастр") || s.includes("стерил")) return "Стерилізація та кастрація тварин";
-  if (s.includes("невро")) return "Діагностика та лікування нервової системи";
-  if (s.includes("дермат")) return "Шкіра, шерсть, алергії та дерматологія";
-  if (s.includes("карді") || s.includes("кардио")) return "Серце, судини та кардіологічна діагностика";
+function getSkillDescription(
+  skill
+) {
+  const value =
+    String(skill || "")
+      .toLowerCase();
 
-  return "Професійна навичка співробітника";
+  if (
+    value.includes("узд") ||
+    value.includes("ультра") ||
+    value.includes("ultrasound") ||
+    value.includes("ultraschall") ||
+    value.includes("usg")
+  ) {
+    return (
+      "Діагностика за допомогою ультразвуку"
+    );
+  }
+
+  if (
+    value.includes("хірур") ||
+    value.includes("хирург") ||
+    value.includes("surgery") ||
+    value.includes("chirurg")
+  ) {
+    return (
+      "Хірургічні втручання різної складності"
+    );
+  }
+
+  if (
+    value.includes("кастр") ||
+    value.includes("стерил") ||
+    value.includes("neuter") ||
+    value.includes("spay")
+  ) {
+    return (
+      "Стерилізація та кастрація тварин"
+    );
+  }
+
+  if (
+    value.includes("невро") ||
+    value.includes("neuro")
+  ) {
+    return (
+      "Діагностика та лікування нервової системи"
+    );
+  }
+
+  if (
+    value.includes("дермат") ||
+    value.includes("dermat")
+  ) {
+    return (
+      "Шкіра, шерсть, алергії та дерматологія"
+    );
+  }
+
+  if (
+    value.includes("карді") ||
+    value.includes("кардио") ||
+    value.includes("cardio") ||
+    value.includes("kardio")
+  ) {
+    return (
+      "Серце, судини та кардіологічна діагностика"
+    );
+  }
+
+  return (
+    "Професійна навичка співробітника"
+  );
 }
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Динаміка роботи, виручка, візити та ефективність співробітника.": {
+      en: "Work trends, revenue, visits and employee performance.",
+      de: "Arbeitsentwicklung, Umsatz, Termine und Leistung des Mitarbeiters.",
+      pl: "Dynamika pracy, przychód, wizyty i efektywność pracownika.",
+    },
 
-function renderTeamAnalyticsTab(root, state) {
-  const visits = state.dashboard.live_staff_visits || [];
-  const monthVisits = state.dashboard.live_month_visits || [];
+    "Виручка за місяць": {
+      en: "Monthly revenue",
+      de: "Monatsumsatz",
+      pl: "Przychód miesięczny",
+    },
 
-  const totalRevenue = monthVisits.reduce((sum, v) => {
-    return sum + calcServicesTotal(v) + calcStockTotal(v);
-  }, 0);
+    "Візитів за місяць": {
+      en: "Visits this month",
+      de: "Termine in diesem Monat",
+      pl: "Wizyty w tym miesiącu",
+    },
 
-  const avgCheck = monthVisits.length ? Math.round(totalRevenue / monthVisits.length) : 0;
+    "1 місяць": {
+      en: "1 month",
+      de: "1 Monat",
+      pl: "1 miesiąc",
+    },
 
-  root.innerHTML = `
-    <section class="teamSubHero">
-      <div>
-        <h2>📈 Аналітика</h2>
-        <p>Динаміка роботи, виручка, візити та ефективність співробітника.</p>
-      </div>
-    </section>
+    "3 місяці": {
+      en: "3 months",
+      de: "3 Monate",
+      pl: "3 miesiące",
+    },
 
-    <section class="teamDashKpis">
-      ${renderTeamKpiCard("💰", "Виручка за місяць", `${totalRevenue.toLocaleString("uk-UA")} грн`, 0)}
-      ${renderTeamKpiCard("🐾", "Візитів за місяць", monthVisits.length, 0)}
-      ${renderTeamKpiCard("💳", "Середній чек", `${avgCheck.toLocaleString("uk-UA")} грн`, 0)}
-    </section>
+    "6 місяців": {
+      en: "6 months",
+      de: "6 Monate",
+      pl: "6 miesięcy",
+    },
 
-<div class="teamChartRange">
-  <button class="active" data-chart-range="1" type="button">1 місяць</button>
-  <button data-chart-range="3" type="button">3 місяці</button>
-  <button data-chart-range="6" type="button">6 місяців</button>
-</div>
+    "Виручка по днях": {
+      en: "Revenue by day",
+      de: "Umsatz nach Tagen",
+      pl: "Przychód według dni",
+    },
+
+    "Виручка по місяцях": {
+      en: "Revenue by month",
+      de: "Umsatz nach Monaten",
+      pl: "Przychód według miesięcy",
+    },
+
+    "Кількість візитів по днях": {
+      en: "Visits by day",
+      de: "Termine nach Tagen",
+      pl: "Wizyty według dni",
+    },
+
+    "Кількість візитів по місяцях": {
+      en: "Visits by month",
+      de: "Termine nach Monaten",
+      pl: "Wizyty według miesięcy",
+    },
+
+    "🧠 Висновок": {
+      en: "🧠 Summary",
+      de: "🧠 Auswertung",
+      pl: "🧠 Podsumowanie",
+    },
+
+    "📌 Показники": {
+      en: "📌 Metrics",
+      de: "📌 Kennzahlen",
+      pl: "📌 Wskaźniki",
+    },
+
+    "Усього прийомів": {
+      en: "Total visits",
+      de: "Termine insgesamt",
+      pl: "Wszystkie wizyty",
+    },
+
+    "Прийомів цього місяця": {
+      en: "Visits this month",
+      de: "Termine in diesem Monat",
+      pl: "Wizyty w tym miesiącu",
+    },
+
+    "Виручка цього місяця": {
+      en: "Revenue this month",
+      de: "Umsatz in diesem Monat",
+      pl: "Przychód w tym miesiącu",
+    },
+  }
+);
 
 
-    <section class="teamDashGrid">
-      <div class="teamDashPanel teamDashPanelLarge">
-        <div class="teamDashPanelHead">
-          <h3>${window.__staffChartRange === 1 ? "Виручка по днях" : "Виручка по місяцях"}</h3>
-          <span>грн</span>
-        </div>
-        <div class="teamChartBox">
-          <canvas id="staffRevenueChart"></canvas>
-        </div>
-      </div>
+function buildTeamAnalyticsInsight(
+  totalRevenue,
+  visitsCount,
+  avgCheck
+) {
+  const language =
+    getInterfaceLanguage();
 
-      <div class="teamDashPanel teamDashPanelLarge">
-        <div class="teamDashPanelHead">
-          <h3>${window.__staffChartRange === 1 ? "Кількість візитів по днях" : "Кількість візитів по місяцях"}</h3>
-          <span>візити</span>
-        </div>
-        <div class="teamChartBox">
-          <canvas id="staffVisitsChart"></canvas>
-        </div>
-      </div>
-
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>🧠 Висновок</h3>
-        </div>
-        <div class="teamAnalyticsInsight">
-          ${buildTeamAnalyticsInsight(totalRevenue, monthVisits.length, avgCheck)}
-        </div>
-      </div>
-
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>📌 Показники</h3>
-        </div>
-        <div class="teamDashRows">
-          <p><span>Усього прийомів</span><b>${visits.length}</b></p>
-          <p><span>Прийомів цього місяця</span><b>${monthVisits.length}</b></p>
-          <p><span>Виручка цього місяця</span><b>${totalRevenue.toLocaleString("uk-UA")} грн</b></p>
-          <p><span>Середній чек</span><b>${avgCheck.toLocaleString("uk-UA")} грн</b></p>
-        </div>
-      </div>
-    </section>
-  `;
-
-  window.__lastTeamDashboard = state.dashboard;
-window.__staffChartRange = 1;
-requestAnimationFrame(() => {
-  renderStaffProfileCharts(state.dashboard, 1);
-
-  const rangeBox = root.querySelector(".teamChartRange");
-  if (!rangeBox) return;
-
-  rangeBox.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-chart-range]");
-    if (!btn) return;
-
-    const months = Number(btn.dataset.chartRange || 1);
-    console.log("CHART RANGE CLICK:", months);
-
-    rangeBox.querySelectorAll("[data-chart-range]").forEach((b) => {
-      b.classList.remove("active");
-    });
-
-    btn.classList.add("active");
-    renderStaffProfileCharts(state.dashboard, months);
-  });
-});
-}
-function buildTeamAnalyticsInsight(totalRevenue, visitsCount, avgCheck) {
   if (!visitsCount) {
+    if (language === "en") {
+      return `
+        <p>
+          There is not enough data for analytics yet.
+          Create several visits with this employee,
+          and the CRM will begin showing trends.
+        </p>
+      `;
+    }
+
+    if (language === "de") {
+      return `
+        <p>
+          Für eine Analyse sind noch nicht genügend Daten vorhanden.
+          Erstellen Sie einige Termine mit diesem Mitarbeiter,
+          damit die CRM die Entwicklung anzeigen kann.
+        </p>
+      `;
+    }
+
+    if (language === "pl") {
+      return `
+        <p>
+          Nie ma jeszcze wystarczających danych do analizy.
+          Utwórz kilka wizyt z tym pracownikiem,
+          a CRM zacznie pokazywać dynamikę.
+        </p>
+      `;
+    }
+
     return `
-      <p>Поки що немає достатньо даних для аналітики. Створіть кілька прийомів з цим співробітником — і CRM почне показувати динаміку.</p>
+      <p>
+        Поки що немає достатньо даних для аналітики.
+        Створіть кілька прийомів з цим співробітником —
+        і CRM почне показувати динаміку.
+      </p>
+    `;
+  }
+
+  const visitsText =
+    Number(visitsCount)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const revenueText =
+    escapeHtml(
+      getTeamMoneyText(
+        totalRevenue
+      )
+    );
+
+  const averageText =
+    escapeHtml(
+      getTeamMoneyText(
+        avgCheck
+      )
+    );
+
+  if (language === "en") {
+    return `
+      <p>
+        This month, the employee completed
+        <b>${visitsText}</b> visits with revenue of
+        <b>${revenueText}</b>.
+        The average invoice is
+        <b>${averageText}</b>.
+      </p>
+    `;
+  }
+
+  if (language === "de") {
+    return `
+      <p>
+        In diesem Monat hat der Mitarbeiter
+        <b>${visitsText}</b> Termine mit einem Umsatz von
+        <b>${revenueText}</b> durchgeführt.
+        Die durchschnittliche Rechnung beträgt
+        <b>${averageText}</b>.
+      </p>
+    `;
+  }
+
+  if (language === "pl") {
+    return `
+      <p>
+        W tym miesiącu pracownik zrealizował
+        <b>${visitsText}</b> wizyt o łącznym przychodzie
+        <b>${revenueText}</b>.
+        Średni rachunek wynosi
+        <b>${averageText}</b>.
+      </p>
     `;
   }
 
   return `
     <p>
-      За поточний місяць співробітник провів <b>${visitsCount}</b> прийомів
-      на суму <b>${totalRevenue.toLocaleString("uk-UA")} грн</b>.
-      Середній чек складає <b>${avgCheck.toLocaleString("uk-UA")} грн</b>.
+      За поточний місяць співробітник провів
+      <b>${visitsText}</b> прийомів
+      на суму <b>${revenueText}</b>.
+      Середній чек складає
+      <b>${averageText}</b>.
     </p>
   `;
 }
 
-function renderTeamVisitsTab(root, state) {
-  const visits = state.dashboard.live_staff_visits || [];
-  const today = typeof todayISO === "function"
-    ? todayISO()
-    : new Date().toISOString().slice(0, 10);
 
-  const monthVisits = state.dashboard.live_month_visits || [];
+function renderTeamAnalyticsTab(
+  root,
+  state
+) {
+  const visits =
+    state.dashboard
+      .live_staff_visits ||
+    [];
 
-  const todayVisits = visits.filter((v) => {
-    const d = String(v.date || v.event_date || "").slice(0, 10);
-    return d === today;
-  });
+  const monthVisits =
+    state.dashboard
+      .live_month_visits ||
+    [];
 
-  const plannedVisits = visits.filter((v) => {
-    const status = String(v.status || "").toLowerCase();
-    return status.includes("plan") || status.includes("scheduled") || status.includes("заплан");
-  });
+  const totalRevenue =
+    monthVisits.reduce(
+      (sum, visit) =>
+        sum +
+        calcServicesTotal(
+          visit
+        ) +
+        calcStockTotal(
+          visit
+        ),
+      0
+    );
 
-  const sortedVisits = [...visits].sort((a, b) => {
-    const da = new Date(a.date || a.event_date || a.created_at || 0);
-    const db = new Date(b.date || b.event_date || b.created_at || 0);
-    return db - da;
-  });
+  const avgCheck =
+    monthVisits.length
+      ? Math.round(
+          totalRevenue /
+          monthVisits.length
+        )
+      : 0;
+
+  const savedRange =
+    Number(
+      window.__staffChartRange ||
+      1
+    );
+
+  const currentRange =
+    [1, 3, 6].includes(
+      savedRange
+    )
+      ? savedRange
+      : 1;
+
+  const dailyMode =
+    currentRange === 1;
+
+  window.__staffChartRange =
+    currentRange;
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
-        <h2>🩺 Прийоми</h2>
-        <p>Історія прийомів, пацієнти та робоча активність співробітника.</p>
+        <h2>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "📈 Аналітика"
+            )
+          )}
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Динаміка роботи, виручка, візити та ефективність співробітника."
+            )
+          )}
+        </p>
       </div>
     </section>
 
     <section class="teamDashKpis">
-      ${renderTeamKpiCard("📋", "Усього прийомів", visits.length, 0)}
-      ${renderTeamKpiCard("📅", "Цього місяця", monthVisits.length, 0)}
-      ${renderTeamKpiCard("🎯", "Сьогодні", todayVisits.length, 0)}
-      ${renderTeamKpiCard("⏳", "Заплановано", plannedVisits.length, 0)}
+      ${renderTeamKpiCard(
+        "💰",
+        getTeamInterfaceText(
+          "Виручка за місяць"
+        ),
+        getTeamMoneyText(
+          totalRevenue
+        ),
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "🐾",
+        getTeamInterfaceText(
+          "Візитів за місяць"
+        ),
+        monthVisits.length,
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "💳",
+        getTeamInterfaceText(
+          "Середній чек"
+        ),
+        getTeamMoneyText(
+          avgCheck
+        ),
+        0
+      )}
     </section>
 
-    <div class="teamVisitFilters">
-      <button class="active" type="button" data-visit-filter="all">Усі</button>
-      <button type="button" data-visit-filter="today">Сьогодні</button>
-      <button type="button" data-visit-filter="month">Місяць</button>
-      <button type="button" data-visit-filter="planned">Заплановані</button>
+    <div class="teamChartRange">
+      <button
+        class="${
+          currentRange === 1
+            ? "active"
+            : ""
+        }"
+        data-chart-range="1"
+        type="button"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "1 місяць"
+          )
+        )}
+      </button>
+
+      <button
+        class="${
+          currentRange === 3
+            ? "active"
+            : ""
+        }"
+        data-chart-range="3"
+        type="button"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "3 місяці"
+          )
+        )}
+      </button>
+
+      <button
+        class="${
+          currentRange === 6
+            ? "active"
+            : ""
+        }"
+        data-chart-range="6"
+        type="button"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "6 місяців"
+          )
+        )}
+      </button>
     </div>
 
-    <section class="teamVisitsLayout">
-      <div class="teamVisitsList" id="teamVisitsList">
-        ${renderTeamVisitCards(sortedVisits)}
+    <section class="teamDashGrid">
+      <div
+        class="
+          teamDashPanel
+          teamDashPanelLarge
+        "
+      >
+        <div class="teamDashPanelHead">
+          <h3 id="staffRevenueChartTitle">
+            ${escapeHtml(
+              getTeamInterfaceText(
+                dailyMode
+                  ? "Виручка по днях"
+                  : "Виручка по місяцях"
+              )
+            )}
+          </h3>
+
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "грн"
+              )
+            )}
+          </span>
+        </div>
+
+        <div class="teamChartBox">
+          <canvas
+            id="staffRevenueChart"
+          ></canvas>
+        </div>
+      </div>
+
+      <div
+        class="
+          teamDashPanel
+          teamDashPanelLarge
+        "
+      >
+        <div class="teamDashPanelHead">
+          <h3 id="staffVisitsChartTitle">
+            ${escapeHtml(
+              getTeamInterfaceText(
+                dailyMode
+                  ? "Кількість візитів по днях"
+                  : "Кількість візитів по місяцях"
+              )
+            )}
+          </h3>
+
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "візити"
+              )
+            )}
+          </span>
+        </div>
+
+        <div class="teamChartBox">
+          <canvas
+            id="staffVisitsChart"
+          ></canvas>
+        </div>
       </div>
 
       <div class="teamDashPanel">
         <div class="teamDashPanelHead">
-          <h3>📌 Підсумок</h3>
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🧠 Висновок"
+              )
+            )}
+          </h3>
         </div>
+
+        <div class="teamAnalyticsInsight">
+          ${buildTeamAnalyticsInsight(
+            totalRevenue,
+            monthVisits.length,
+            avgCheck
+          )}
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "📌 Показники"
+              )
+            )}
+          </h3>
+        </div>
+
         <div class="teamDashRows">
-          <p><span>Усього прийомів</span><b>${visits.length}</b></p>
-          <p><span>Сьогодні</span><b>${todayVisits.length}</b></p>
-          <p><span>Цього місяця</span><b>${monthVisits.length}</b></p>
-          <p><span>Заплановано</span><b>${plannedVisits.length}</b></p>
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Усього прийомів"
+                )
+              )}
+            </span>
+
+            <b>${visits.length}</b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Прийомів цього місяця"
+                )
+              )}
+            </span>
+
+            <b>${monthVisits.length}</b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Виручка цього місяця"
+                )
+              )}
+            </span>
+
+            <b>
+              ${escapeHtml(
+                getTeamMoneyText(
+                  totalRevenue
+                )
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Середній чек"
+                )
+              )}
+            </span>
+
+            <b>
+              ${escapeHtml(
+                getTeamMoneyText(
+                  avgCheck
+                )
+              )}
+            </b>
+          </p>
         </div>
       </div>
     </section>
   `;
 
-  root.querySelectorAll("[data-visit-filter]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      root.querySelectorAll("[data-visit-filter]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
+  window.__lastTeamDashboard =
+    state.dashboard;
 
-      const filter = btn.dataset.visitFilter;
-      let filtered = sortedVisits;
+  requestAnimationFrame(
+    () => {
+      renderStaffProfileCharts(
+        state.dashboard,
+        currentRange
+      );
 
-      if (filter === "today") filtered = todayVisits;
-      if (filter === "month") filtered = monthVisits;
-      if (filter === "planned") filtered = plannedVisits;
+      const rangeBox =
+        root.querySelector(
+          ".teamChartRange"
+        );
 
-      const list = root.querySelector("#teamVisitsList");
-      if (list) list.innerHTML = renderTeamVisitCards(filtered);
-    });
-  });
-}
-function renderTeamVisitCards(visits) {
-  if (!visits.length) {
-    return `
-      <div class="teamDashPanel teamDashFull">
-        <h3>Прийомів ще немає</h3>
-        <p class="hint">Коли співробітник буде проводити прийоми, вони зʼявляться тут.</p>
-      </div>
-    `;
-  }
+      if (!rangeBox) return;
 
-  return visits.map((v) => {
-    const date = String(v.date || v.event_date || v.created_at || "").slice(0, 10) || "—";
-    const time = String(v.time || v.start_time || "").slice(0, 5) || "—";
-    const total = calcServicesTotal(v) + calcStockTotal(v);
+      rangeBox.addEventListener(
+        "click",
+        (event) => {
+          const button =
+            event.target.closest(
+              "[data-chart-range]"
+            );
 
-    const petName =
-      v.pet_name ||
-      v.patient_name ||
-      v.pet?.name ||
-      "Пацієнт";
+          if (!button) return;
 
-    const ownerName =
-      v.owner_name ||
-      v.client_name ||
-      v.owner?.name ||
-      "Власник не вказаний";
+          const months =
+            Number(
+              button.dataset
+                .chartRange ||
+              1
+            );
 
-    const status = v.status || "Завершено";
+          window.__staffChartRange =
+            months;
 
-    return `
-      <div class="teamVisitCard">
-        <div class="teamVisitIcon">🐾</div>
+          rangeBox
+            .querySelectorAll(
+              "[data-chart-range]"
+            )
+            .forEach(
+              (item) => {
+                item.classList.remove(
+                  "active"
+                );
+              }
+            );
 
-        <div class="teamVisitMain">
-          <div class="teamVisitTitle">${escapeHtml(petName)}</div>
-          <div class="teamVisitMeta">
-            ${escapeHtml(date)} · ${escapeHtml(time)}
-          </div>
-          <div class="teamVisitOwner">
-            Власник: ${escapeHtml(ownerName)}
-          </div>
-        </div>
+          button.classList.add(
+            "active"
+          );
 
-        <div class="teamVisitRight">
-          <span class="teamVisitStatus">${escapeHtml(status)}</span>
-          <b>${total.toLocaleString("uk-UA")} грн</b>
-          <button type="button" class="teamVisitOpenBtn" onclick="openVisitFromTeam('${escapeHtml(String(v.id || v.visit_id || v._id || ""))}')">
-  Відкрити →
-</button>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-function openVisitFromTeam(visitId) {
-  if (!visitId) return;
+          const revenueTitle =
+            root.querySelector(
+              "#staffRevenueChartTitle"
+            );
 
-  const id = String(visitId);
+          const visitsTitle =
+            root.querySelector(
+              "#staffVisitsChartTitle"
+            );
 
-  if (typeof openVisit === "function") {
-    openVisit(id);
-    return;
-  }
+          if (revenueTitle) {
+            revenueTitle.textContent =
+              getTeamInterfaceText(
+                months === 1
+                  ? "Виручка по днях"
+                  : "Виручка по місяцях"
+              );
+          }
 
-  if (typeof openVisitModalForEdit === "function") {
-    openVisitModalForEdit(id);
-    return;
-  }
+          if (visitsTitle) {
+            visitsTitle.textContent =
+              getTeamInterfaceText(
+                months === 1
+                  ? "Кількість візитів по днях"
+                  : "Кількість візитів по місяцях"
+              );
+          }
 
-  alert("Не вдалося відкрити візит");
-}
-
-async function renderTeamFinanceTab(root, state) {
-  const doc = state.doc;
-  const visits = state.dashboard.live_month_visits || [];
-
-  const adjustments = await loadStaffAdjustmentsApi(doc.id);
-
-  const revenue = visits.reduce((sum, v) => {
-    return sum + calcServicesTotal(v) + calcStockTotal(v);
-  }, 0);
-
-  const shiftRate = Number(doc.shift_rate || 0);
-  const percentRate = Number(doc.percent_rate || 0);
-
-  const percentAmount = Math.round(revenue * (percentRate / 100));
-
-  const bonuses = adjustments
-    .filter((x) => x.type === "bonus")
-    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
-
-  const penalties = adjustments
-    .filter((x) => x.type === "penalty")
-    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
-
-  const totalToPay = Math.max(0, shiftRate + percentAmount + bonuses - penalties);
-
-  root.innerHTML = `
-  <section class="teamSubHero">
-    <div>
-      <h2>💰 Фінанси</h2>
-      <p>Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць.</p>
-    </div>
-  </section>
-
-  <section class="teamDashKpis">
-    ${renderTeamKpiCard("💵", "Виручка", `${revenue.toLocaleString("uk-UA")} грн`, 0)}
-    ${renderTeamKpiCard("🏦", "Ставка", `${shiftRate.toLocaleString("uk-UA")} грн`, 0)}
-    ${renderTeamKpiCard("📈", "Відсоток", `${percentRate}%`, 0)}
-    ${renderTeamKpiCard("✅", "До виплати", `${totalToPay.toLocaleString("uk-UA")} грн`, 0)}
-  </section>
-
-  <section class="teamVisitsLayout">
-
-    <div class="teamDashPanel">
-      <div class="teamDashPanelHead">
-        <h3>🧾 Бонуси та штрафи</h3>
-        <button class="teamPrimaryBtn"
-                id="btnAddFinanceAdjustment"
-                type="button">
-          + Додати
-        </button>
-      </div>
-
-      <div class="teamFinanceList">
-        ${
-          adjustments.length
-            ? adjustments.map((a) => `
-              <div class="teamFinanceRow">
-
-                <div>
-                  <b>
-                    ${a.type === "bonus" ? "Бонус" : "Штраф"}
-                    ·
-                    ${escapeHtml(a.adjustment_date || "—")}
-                  </b>
-
-                  <span>
-                    ${escapeHtml(a.reason || "Без коментаря")}
-                  </span>
-                </div>
-
-                <strong class="${a.type === "bonus" ? "moneyPlus" : "moneyMinus"}">
-                  ${a.type === "bonus" ? "+" : "-"}
-                  ${Number(a.amount || 0).toLocaleString("uk-UA")} грн
-                </strong>
-
-                <button
-                  class="financeDeleteBtn"
-                  type="button"
-                  data-delete-adjustment="${escapeHtml(a.id)}"
-                  title="Видалити">
-
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-                    <path
-                      d="M8 8L16 16M16 8L8 16"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"/>
-                  </svg>
-
-                </button>
-
-              </div>
-            `).join("")
-            : `
-              <div class="hint">
-                Поки немає бонусів або штрафів за цей місяць.
-              </div>
-            `
+          renderStaffProfileCharts(
+            state.dashboard,
+            months
+          );
         }
-      </div>
-    </div>
-
-    <div class="teamDashPanel">
-      <div class="teamDashPanelHead">
-        <h3>📌 Розрахунок</h3>
-      </div>
-
-      <div class="teamDashRows">
-        <p><span>Виручка місяця</span><b>${revenue.toLocaleString("uk-UA")} грн</b></p>
-        <p><span>Ставка</span><b>${shiftRate.toLocaleString("uk-UA")} грн</b></p>
-        <p><span>${percentRate}% від виручки</span><b>${percentAmount.toLocaleString("uk-UA")} грн</b></p>
-        <p><span>Бонуси</span><b class="moneyPlus">+${bonuses.toLocaleString("uk-UA")} грн</b></p>
-        <p><span>Штрафи</span><b class="moneyMinus">-${penalties.toLocaleString("uk-UA")} грн</b></p>
-        <p><span>До виплати</span><b>${totalToPay.toLocaleString("uk-UA")} грн</b></p>
-      </div>
-    </div>
-
-  </section>
-`;
-
-bindFinanceAdjustments(root, state);
-}
-
-function bindFinanceAdjustments(root, state) {
-  root.querySelector("#btnAddFinanceAdjustment")?.addEventListener("click", () => {
-    openFinanceAdjustmentModal(root, state);
-  });
-
-  root.querySelectorAll("[data-delete-adjustment]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      if (!confirm("Видалити запис?")) return;
-
-      const id = btn.dataset.deleteAdjustment;
-      await deleteStaffAdjustmentApi(id);
-
-      renderTeamFinanceTab(root, state);
-    });
-  });
-}
-function openFinanceAdjustmentModal(root, state) {
-  document.querySelector(".financeAdjustModalOverlay")?.remove();
-
-  const modal = document.createElement("div");
-  modal.className = "financeAdjustModalOverlay";
-
-  modal.innerHTML = `
-    <div class="financeAdjustModal">
-      <button class="financeAdjustClose" type="button">×</button>
-
-      <div class="financeAdjustHead">
-        <div class="financeAdjustIcon">💰</div>
-        <div>
-          <h2>Додати нарахування</h2>
-          <p>Додайте бонус або штраф співробітнику за поточний місяць.</p>
-        </div>
-      </div>
-
-      <div class="financeTypeSwitch">
-        <button class="active" type="button" data-adjust-type="bonus">✅ Бонус</button>
-        <button type="button" data-adjust-type="penalty">⚠️ Штраф</button>
-      </div>
-
-      <label class="financeAdjustField">
-        <span>Сума, грн</span>
-        <input id="financeAdjustAmount" type="number" min="1" step="1" placeholder="Наприклад: 500">
-      </label>
-
-      <label class="financeAdjustField">
-        <span>Причина</span>
-        <input id="financeAdjustReason" type="text" placeholder="Наприклад: запізнення або бонус за результат">
-      </label>
-
-      <div class="financeQuickReasons">
-        <span>Швидкі причини</span>
-        <div>
-          <button type="button" data-reason="Запізнення">Запізнення</button>
-          <button type="button" data-reason="Пропуск зміни">Пропуск зміни</button>
-          <button type="button" data-reason="Бонус за результат">Бонус за результат</button>
-          <button type="button" data-reason="Додаткова зміна">Додаткова зміна</button>
-        </div>
-      </div>
-
-      <div class="financeAdjustActions">
-        <button class="teamGhostBtn" id="btnCancelAdjust" type="button">Скасувати</button>
-        <button class="teamPrimaryBtn" id="btnSaveAdjust" type="button">Додати</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  let selectedType = "bonus";
-
-  const close = () => modal.remove();
-
-  modal.querySelector(".financeAdjustClose")?.addEventListener("click", close);
-  modal.querySelector("#btnCancelAdjust")?.addEventListener("click", close);
-
-  modal.querySelectorAll("[data-adjust-type]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      selectedType = btn.dataset.adjustType || "bonus";
-
-      modal.querySelectorAll("[data-adjust-type]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
-  });
-
-  modal.querySelectorAll("[data-reason]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const reasonInput = modal.querySelector("#financeAdjustReason");
-      if (reasonInput) reasonInput.value = btn.dataset.reason || "";
-    });
-  });
-
-  modal.querySelector("#btnSaveAdjust")?.addEventListener("click", async () => {
-    const amount = Number(modal.querySelector("#financeAdjustAmount")?.value || 0);
-    const reason = modal.querySelector("#financeAdjustReason")?.value?.trim() || "";
-
-    if (!amount || amount <= 0) {
-      alert("Вкажіть суму.");
-      return;
+      );
     }
+  );
+}
 
-    const res = await createStaffAdjustmentApi(state.doc.id, {
-      type: selectedType,
-      amount,
-      reason,
-    });
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Історія прийомів, пацієнти та робоча активність співробітника.": {
+      en: "Visit history, patients and employee activity.",
+      de: "Terminhistorie, Patienten und Arbeitsaktivität des Mitarbeiters.",
+      pl: "Historia wizyt, pacjenci i aktywność pracownika.",
+    },
 
-    if (!res.ok) {
-      alert(res.error || "Не вдалося додати запис");
-      return;
-    }
+    "Цього місяця": {
+      en: "This month",
+      de: "Diesen Monat",
+      pl: "W tym miesiącu",
+    },
 
-    close();
-    renderTeamFinanceTab(root, state);
-  });
+    "Сьогодні": {
+      en: "Today",
+      de: "Heute",
+      pl: "Dzisiaj",
+    },
 
-  modal.querySelector("#financeAdjustAmount")?.focus();
+    "Заплановано": {
+      en: "Scheduled",
+      de: "Geplant",
+      pl: "Zaplanowano",
+    },
+
+    "Усі": {
+      en: "All",
+      de: "Alle",
+      pl: "Wszystkie",
+    },
+
+    "Місяць": {
+      en: "Month",
+      de: "Monat",
+      pl: "Miesiąc",
+    },
+
+    "Заплановані": {
+      en: "Scheduled",
+      de: "Geplant",
+      pl: "Zaplanowane",
+    },
+
+    "📌 Підсумок": {
+      en: "📌 Summary",
+      de: "📌 Zusammenfassung",
+      pl: "📌 Podsumowanie",
+    },
+
+    "Прийомів ще немає": {
+      en: "No visits yet",
+      de: "Noch keine Termine",
+      pl: "Nie ma jeszcze wizyt",
+    },
+
+    "Коли співробітник буде проводити прийоми, вони зʼявляться тут.": {
+      en: "Visits completed by this employee will appear here.",
+      de: "Die Termine dieses Mitarbeiters werden hier angezeigt.",
+      pl: "Wizyty tego pracownika pojawią się tutaj.",
+    },
+
+    "Пацієнт": {
+      en: "Patient",
+      de: "Patient",
+      pl: "Pacjent",
+    },
+
+    "Власник не вказаний": {
+      en: "Owner not provided",
+      de: "Tierhalter nicht angegeben",
+      pl: "Nie podano właściciela",
+    },
+
+    "Відкрити →": {
+      en: "Open →",
+      de: "Öffnen →",
+      pl: "Otwórz →",
+    },
+
+    "Не вдалося відкрити візит": {
+      en: "Could not open the visit",
+      de: "Der Termin konnte nicht geöffnet werden",
+      pl: "Nie udało się otworzyć wizyty",
+    },
+
+    "В роботі": {
+      en: "In progress",
+      de: "In Bearbeitung",
+      pl: "W trakcie",
+    },
+
+    "Скасовано": {
+      en: "Cancelled",
+      de: "Storniert",
+      pl: "Anulowano",
+    },
+
+    "Чернетка": {
+      en: "Draft",
+      de: "Entwurf",
+      pl: "Wersja robocza",
+    },
+  }
+);
+
+
+function getTeamVisitStatusKey(
+  value
+) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(
+      /[\s-]+/g,
+      "_"
+    );
 }
 
 
-async function renderTeamAchievementsTab(root, state) {
-  const career = buildStaffCareer(state);
-  const rating = await loadStaffRatingApi();
+function isTeamPlannedVisitStatus(
+  value
+) {
+  const status =
+    getTeamVisitStatusKey(
+      value
+    );
 
-  const ratingRows = rating.rows || [];
-  const currentStaffId = String(state.doc.id || "");
+  return [
+    "planned",
+    "scheduled",
+    "plan",
+    "заплановано",
+    "запланований",
+    "запланирован",
+    "запланировано",
+    "geplant",
+    "zaplanowano",
+    "zaplanowane",
+  ].includes(
+    status
+  );
+}
 
-  const currentRank = ratingRows.find((r) => String(r.staff_id) === currentStaffId);
-  const totalStaff = ratingRows.length;
+
+function getTeamVisitStatusText(
+  value
+) {
+  const original =
+    String(value || "")
+      .trim();
+
+  const status =
+    getTeamVisitStatusKey(
+      original
+    );
+
+  if (
+    [
+      "planned",
+      "scheduled",
+      "plan",
+      "заплановано",
+      "запланований",
+      "запланирован",
+      "запланировано",
+      "geplant",
+      "zaplanowano",
+      "zaplanowane",
+    ].includes(status)
+  ) {
+    return getTeamInterfaceText(
+      "Заплановано"
+    );
+  }
+
+  if (
+    [
+      "completed",
+      "complete",
+      "done",
+      "finished",
+      "завершено",
+      "завершений",
+      "завершен",
+      "abgeschlossen",
+      "zakończono",
+      "zakonczono",
+    ].includes(status)
+  ) {
+    return getTeamInterfaceText(
+      "Завершено"
+    );
+  }
+
+  if (
+    [
+      "in_progress",
+      "active",
+      "started",
+      "working",
+      "в_роботі",
+      "в_работе",
+      "in_bearbeitung",
+      "w_trakcie",
+    ].includes(status)
+  ) {
+    return getTeamInterfaceText(
+      "В роботі"
+    );
+  }
+
+  if (
+    [
+      "cancelled",
+      "canceled",
+      "скасовано",
+      "отменено",
+      "storniert",
+      "anulowano",
+    ].includes(status)
+  ) {
+    return getTeamInterfaceText(
+      "Скасовано"
+    );
+  }
+
+  if (
+    [
+      "draft",
+      "чернетка",
+      "entwurf",
+      "wersja_robocza",
+    ].includes(status)
+  ) {
+    return getTeamInterfaceText(
+      "Чернетка"
+    );
+  }
+
+  return (
+    original ||
+    getTeamInterfaceText(
+      "Завершено"
+    )
+  );
+}
+
+
+function getTeamVisitOwnerText(
+  ownerName
+) {
+  const name =
+    String(ownerName || "")
+      .trim() ||
+    getTeamInterfaceText(
+      "Власник не вказаний"
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Owner: ${name}`;
+  }
+
+  if (language === "de") {
+    return `Tierhalter: ${name}`;
+  }
+
+  if (language === "pl") {
+    return `Właściciel: ${name}`;
+  }
+
+  return `Власник: ${name}`;
+}
+
+
+function formatTeamVisitDate(
+  value
+) {
+  const rawDate =
+    String(value || "")
+      .slice(0, 10);
+
+  if (!rawDate) {
+    return "—";
+  }
+
+  const date =
+    new Date(
+      `${rawDate}T00:00:00`
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return rawDate;
+  }
+
+  return date.toLocaleDateString(
+    getCalendarLocale(),
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  );
+}
+
+
+function renderTeamVisitsTab(
+  root,
+  state
+) {
+  const visits = [
+    ...(
+      state.dashboard
+        .live_staff_visits ||
+      []
+    ),
+  ];
+
+  const monthVisits = [
+    ...(
+      state.dashboard
+        .live_month_visits ||
+      []
+    ),
+  ];
+
+  const today =
+    typeof todayISO ===
+    "function"
+      ? todayISO()
+      : new Date()
+          .toISOString()
+          .slice(0, 10);
+
+  const sortedVisits =
+    visits.sort(
+      (first, second) => {
+        const firstDate =
+          new Date(
+            first.date ||
+            first.event_date ||
+            first.created_at ||
+            0
+          );
+
+        const secondDate =
+          new Date(
+            second.date ||
+            second.event_date ||
+            second.created_at ||
+            0
+          );
+
+        return (
+          secondDate -
+          firstDate
+        );
+      }
+    );
+
+  const sortedMonthVisits = [
+    ...monthVisits,
+  ].sort(
+    (first, second) => {
+      const firstDate =
+        new Date(
+          first.date ||
+          first.event_date ||
+          first.created_at ||
+          0
+        );
+
+      const secondDate =
+        new Date(
+          second.date ||
+          second.event_date ||
+          second.created_at ||
+          0
+        );
+
+      return (
+        secondDate -
+        firstDate
+      );
+    }
+  );
+
+  const todayVisits =
+    sortedVisits.filter(
+      (visit) => {
+        const date =
+          String(
+            visit.date ||
+            visit.event_date ||
+            ""
+          ).slice(
+            0,
+            10
+          );
+
+        return date === today;
+      }
+    );
+
+  const plannedVisits =
+    sortedVisits.filter(
+      (visit) =>
+        isTeamPlannedVisitStatus(
+          visit.status ||
+          visit.calendar_status
+        )
+    );
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
-        <h2>🏆 Карʼєра ветеринара</h2>
-        <p>Рівень, сезонний рейтинг клініки, титули та професійні досягнення.</p>
+        <h2>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "🩺 Прийоми"
+            )
+          )}
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Історія прийомів, пацієнти та робоча активність співробітника."
+            )
+          )}
+        </p>
       </div>
     </section>
 
-    ${renderClinicRatingBoard(ratingRows, currentStaffId, rating.season_key)}
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard(
+        "📋",
+        "Усього прийомів",
+        sortedVisits.length,
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "📅",
+        "Цього місяця",
+        sortedMonthVisits.length,
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "🎯",
+        "Сьогодні",
+        todayVisits.length,
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "⏳",
+        "Заплановано",
+        plannedVisits.length,
+        0
+      )}
+    </section>
+
+    <div class="teamVisitFilters">
+      <button
+        class="active"
+        type="button"
+        data-visit-filter="all"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "Усі"
+          )
+        )}
+      </button>
+
+      <button
+        type="button"
+        data-visit-filter="today"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "Сьогодні"
+          )
+        )}
+      </button>
+
+      <button
+        type="button"
+        data-visit-filter="month"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "Місяць"
+          )
+        )}
+      </button>
+
+      <button
+        type="button"
+        data-visit-filter="planned"
+      >
+        ${escapeHtml(
+          getTeamInterfaceText(
+            "Заплановані"
+          )
+        )}
+      </button>
+    </div>
+
+    <section class="teamVisitsLayout">
+      <div
+        class="teamVisitsList"
+        id="teamVisitsList"
+      >
+        ${renderTeamVisitCards(
+          sortedVisits
+        )}
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "📌 Підсумок"
+              )
+            )}
+          </h3>
+        </div>
+
+        <div class="teamDashRows">
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Усього прийомів"
+                )
+              )}
+            </span>
+
+            <b>
+              ${sortedVisits.length}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Сьогодні"
+                )
+              )}
+            </span>
+
+            <b>
+              ${todayVisits.length}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Цього місяця"
+                )
+              )}
+            </span>
+
+            <b>
+              ${sortedMonthVisits.length}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Заплановано"
+                )
+              )}
+            </span>
+
+            <b>
+              ${plannedVisits.length}
+            </b>
+          </p>
+        </div>
+      </div>
+    </section>
+  `;
+
+  const list =
+    root.querySelector(
+      "#teamVisitsList"
+    );
+
+  root
+    .querySelectorAll(
+      "[data-visit-filter]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            root
+              .querySelectorAll(
+                "[data-visit-filter]"
+              )
+              .forEach(
+                (item) => {
+                  item.classList.remove(
+                    "active"
+                  );
+                }
+              );
+
+            button.classList.add(
+              "active"
+            );
+
+            const filter =
+              button.dataset
+                .visitFilter;
+
+            let filteredVisits =
+              sortedVisits;
+
+            if (
+              filter === "today"
+            ) {
+              filteredVisits =
+                todayVisits;
+            }
+
+            if (
+              filter === "month"
+            ) {
+              filteredVisits =
+                sortedMonthVisits;
+            }
+
+            if (
+              filter === "planned"
+            ) {
+              filteredVisits =
+                plannedVisits;
+            }
+
+            if (list) {
+              list.innerHTML =
+                renderTeamVisitCards(
+                  filteredVisits
+                );
+            }
+          }
+        );
+      }
+    );
+
+  list?.addEventListener(
+    "click",
+    (event) => {
+      const button =
+        event.target.closest(
+          "[data-open-team-visit]"
+        );
+
+      if (!button) return;
+
+      openVisitFromTeam(
+        button.dataset
+          .openTeamVisit
+      );
+    }
+  );
+}
+
+
+function renderTeamVisitCards(
+  visits
+) {
+  if (
+    !Array.isArray(visits) ||
+    !visits.length
+  ) {
+    return `
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+        "
+      >
+        <h3>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Прийомів ще немає"
+            )
+          )}
+        </h3>
+
+        <p class="hint">
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Коли співробітник буде проводити прийоми, вони зʼявляться тут."
+            )
+          )}
+        </p>
+      </div>
+    `;
+  }
+
+  return visits
+    .map(
+      (visit) => {
+        const date =
+          formatTeamVisitDate(
+            visit.date ||
+            visit.event_date ||
+            visit.created_at
+          );
+
+        const time =
+          String(
+            visit.time ||
+            visit.start_time ||
+            ""
+          ).slice(
+            0,
+            5
+          ) ||
+          "—";
+
+        const total =
+          calcServicesTotal(
+            visit
+          ) +
+          calcStockTotal(
+            visit
+          );
+
+        const petName =
+          visit.pet_name ||
+          visit.patient_name ||
+          visit.pet?.name ||
+          getTeamInterfaceText(
+            "Пацієнт"
+          );
+
+        const ownerName =
+          visit.owner_name ||
+          visit.client_name ||
+          visit.owner?.name ||
+          getTeamInterfaceText(
+            "Власник не вказаний"
+          );
+
+        const status =
+          getTeamVisitStatusText(
+            visit.status ||
+            visit.calendar_status ||
+            "Завершено"
+          );
+
+        const visitId =
+          String(
+            visit.id ||
+            visit.visit_id ||
+            visit._id ||
+            ""
+          );
+
+        return `
+          <div class="teamVisitCard">
+            <div class="teamVisitIcon">
+              🐾
+            </div>
+
+            <div class="teamVisitMain">
+              <div
+                class="teamVisitTitle"
+                data-team-content
+              >
+                ${escapeHtml(
+                  petName
+                )}
+              </div>
+
+              <div
+                class="teamVisitMeta"
+                data-team-content
+              >
+                ${escapeHtml(
+                  date
+                )}
+                ·
+                ${escapeHtml(
+                  time
+                )}
+              </div>
+
+              <div
+                class="teamVisitOwner"
+                data-team-content
+              >
+                ${escapeHtml(
+                  getTeamVisitOwnerText(
+                    ownerName
+                  )
+                )}
+              </div>
+            </div>
+
+            <div class="teamVisitRight">
+              <span
+                class="teamVisitStatus"
+                data-team-content
+              >
+                ${escapeHtml(
+                  status
+                )}
+              </span>
+
+              <b data-team-content>
+                ${escapeHtml(
+                  getTeamMoneyText(
+                    total
+                  )
+                )}
+              </b>
+
+              <button
+                type="button"
+                class="teamVisitOpenBtn"
+                data-open-team-visit="${escapeHtml(
+                  visitId
+                )}"
+              >
+                ${escapeHtml(
+                  getTeamInterfaceText(
+                    "Відкрити →"
+                  )
+                )}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    )
+    .join("");
+}
+
+
+function openVisitFromTeam(
+  visitId
+) {
+  if (!visitId) return;
+
+  const id =
+    String(visitId);
+
+  if (
+    typeof openVisit ===
+    "function"
+  ) {
+    openVisit(id);
+    return;
+  }
+
+  if (
+    typeof openVisitModalForEdit ===
+    "function"
+  ) {
+    openVisitModalForEdit(
+      id
+    );
+
+    return;
+  }
+
+  alert(
+    getTeamInterfaceText(
+      "Не вдалося відкрити візит"
+    )
+  );
+}
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць.": {
+      en: "Accruals, base rate, revenue percentage, bonuses and penalties for this month.",
+      de: "Abrechnungen, Grundvergütung, Umsatzbeteiligung, Boni und Abzüge für diesen Monat.",
+      pl: "Rozliczenia, stawka, procent od przychodu, premie i potrącenia za ten miesiąc.",
+    },
+
+    "До виплати": {
+      en: "Amount due",
+      de: "Auszahlungsbetrag",
+      pl: "Do wypłaty",
+    },
+
+    "🧾 Бонуси та штрафи": {
+      en: "🧾 Bonuses and penalties",
+      de: "🧾 Boni und Abzüge",
+      pl: "🧾 Premie i potrącenia",
+    },
+
+    "+ Додати": {
+      en: "+ Add",
+      de: "+ Hinzufügen",
+      pl: "+ Dodaj",
+    },
+
+    "Бонус": {
+      en: "Bonus",
+      de: "Bonus",
+      pl: "Premia",
+    },
+
+    "Штраф": {
+      en: "Penalty",
+      de: "Abzug",
+      pl: "Potrącenie",
+    },
+
+    "Без коментаря": {
+      en: "No comment",
+      de: "Ohne Kommentar",
+      pl: "Bez komentarza",
+    },
+
+    "Видалити": {
+      en: "Delete",
+      de: "Löschen",
+      pl: "Usuń",
+    },
+
+    "Поки немає бонусів або штрафів за цей місяць.": {
+      en: "There are no bonuses or penalties for this month yet.",
+      de: "Für diesen Monat gibt es noch keine Boni oder Abzüge.",
+      pl: "Nie ma jeszcze premii ani potrąceń za ten miesiąc.",
+    },
+
+    "📌 Розрахунок": {
+      en: "📌 Calculation",
+      de: "📌 Berechnung",
+      pl: "📌 Rozliczenie",
+    },
+
+    "Виручка місяця": {
+      en: "Monthly revenue",
+      de: "Monatsumsatz",
+      pl: "Przychód miesięczny",
+    },
+
+    "Бонуси": {
+      en: "Bonuses",
+      de: "Boni",
+      pl: "Premie",
+    },
+
+    "Штрафи": {
+      en: "Penalties",
+      de: "Abzüge",
+      pl: "Potrącenia",
+    },
+
+    "Видалити запис?": {
+      en: "Delete this entry?",
+      de: "Diesen Eintrag löschen?",
+      pl: "Usunąć ten wpis?",
+    },
+
+    "Не вдалося видалити запис.": {
+      en: "Could not delete the entry.",
+      de: "Der Eintrag konnte nicht gelöscht werden.",
+      pl: "Nie udało się usunąć wpisu.",
+    },
+
+    "Додати нарахування": {
+      en: "Add adjustment",
+      de: "Abrechnung hinzufügen",
+      pl: "Dodaj rozliczenie",
+    },
+
+    "Додайте бонус або штраф співробітнику за поточний місяць.": {
+      en: "Add a bonus or penalty for the employee for the current month.",
+      de: "Fügen Sie für den aktuellen Monat einen Bonus oder Abzug hinzu.",
+      pl: "Dodaj premię lub potrącenie pracownikowi za bieżący miesiąc.",
+    },
+
+    "✅ Бонус": {
+      en: "✅ Bonus",
+      de: "✅ Bonus",
+      pl: "✅ Premia",
+    },
+
+    "⚠️ Штраф": {
+      en: "⚠️ Penalty",
+      de: "⚠️ Abzug",
+      pl: "⚠️ Potrącenie",
+    },
+
+    "Сума, грн": {
+      en: "Amount, UAH",
+      de: "Betrag, UAH",
+      pl: "Kwota, UAH",
+    },
+
+    "Наприклад: 500": {
+      en: "For example: 500",
+      de: "Zum Beispiel: 500",
+      pl: "Na przykład: 500",
+    },
+
+    "Причина": {
+      en: "Reason",
+      de: "Grund",
+      pl: "Powód",
+    },
+
+    "Наприклад: запізнення або бонус за результат": {
+      en: "For example: late arrival or performance bonus",
+      de: "Zum Beispiel: Verspätung oder Leistungsbonus",
+      pl: "Na przykład: spóźnienie lub premia za wynik",
+    },
+
+    "Швидкі причини": {
+      en: "Quick reasons",
+      de: "Schnellauswahl",
+      pl: "Szybki wybór",
+    },
+
+    "Запізнення": {
+      en: "Late arrival",
+      de: "Verspätung",
+      pl: "Spóźnienie",
+    },
+
+    "Пропуск зміни": {
+      en: "Missed shift",
+      de: "Versäumte Schicht",
+      pl: "Nieobecność na zmianie",
+    },
+
+    "Бонус за результат": {
+      en: "Performance bonus",
+      de: "Leistungsbonus",
+      pl: "Premia za wynik",
+    },
+
+    "Додаткова зміна": {
+      en: "Additional shift",
+      de: "Zusätzliche Schicht",
+      pl: "Dodatkowa zmiana",
+    },
+
+    "Вкажіть суму.": {
+      en: "Enter an amount.",
+      de: "Geben Sie einen Betrag ein.",
+      pl: "Wprowadź kwotę.",
+    },
+
+    "Не вдалося додати запис": {
+      en: "Could not add the entry",
+      de: "Der Eintrag konnte nicht hinzugefügt werden",
+      pl: "Nie udało się dodać wpisu",
+    },
+  }
+);
+
+
+function getTeamRevenueShareText(
+  percentage
+) {
+  const value =
+    Number(percentage || 0)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `${value}% of revenue`;
+  }
+
+  if (language === "de") {
+    return `${value}% vom Umsatz`;
+  }
+
+  if (language === "pl") {
+    return `${value}% przychodu`;
+  }
+
+  return `${value}% від виручки`;
+}
+
+
+async function renderTeamFinanceTab(
+  root,
+  state
+) {
+  const doc =
+    state.doc;
+
+  const visits =
+    state.dashboard
+      .live_month_visits ||
+    [];
+
+  const adjustments =
+    await loadStaffAdjustmentsApi(
+      doc.id
+    );
+
+  const revenue =
+    visits.reduce(
+      (sum, visit) =>
+        sum +
+        calcServicesTotal(
+          visit
+        ) +
+        calcStockTotal(
+          visit
+        ),
+      0
+    );
+
+  const shiftRate =
+    Number(
+      doc.shift_rate ||
+      0
+    );
+
+  const percentRate =
+    Number(
+      doc.percent_rate ||
+      0
+    );
+
+  const percentAmount =
+    Math.round(
+      revenue *
+      (
+        percentRate /
+        100
+      )
+    );
+
+  const bonuses =
+    adjustments
+      .filter(
+        (item) =>
+          item.type ===
+          "bonus"
+      )
+      .reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            item.amount ||
+            0
+          ),
+        0
+      );
+
+  const penalties =
+    adjustments
+      .filter(
+        (item) =>
+          item.type ===
+          "penalty"
+      )
+      .reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            item.amount ||
+            0
+          ),
+        0
+      );
+
+  const totalToPay =
+    Math.max(
+      0,
+      shiftRate +
+      percentAmount +
+      bonuses -
+      penalties
+    );
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "💰 Фінанси"
+            )
+          )}
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць."
+            )
+          )}
+        </p>
+      </div>
+    </section>
+
+    <section class="teamDashKpis">
+      ${renderTeamKpiCard(
+        "💵",
+        "Виручка",
+        getTeamMoneyText(
+          revenue
+        ),
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "🏦",
+        "Ставка",
+        getTeamMoneyText(
+          shiftRate
+        ),
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "📈",
+        "Відсоток",
+        `${percentRate.toLocaleString(
+          getCalendarLocale()
+        )}%`,
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "✅",
+        "До виплати",
+        getTeamMoneyText(
+          totalToPay
+        ),
+        0
+      )}
+    </section>
+
+    <section class="teamVisitsLayout">
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🧾 Бонуси та штрафи"
+              )
+            )}
+          </h3>
+
+          <button
+            class="teamPrimaryBtn"
+            id="btnAddFinanceAdjustment"
+            type="button"
+          >
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "+ Додати"
+              )
+            )}
+          </button>
+        </div>
+
+        <div class="teamFinanceList">
+          ${
+            adjustments.length
+              ? adjustments
+                  .map(
+                    (adjustment) => {
+                      const isBonus =
+                        adjustment.type ===
+                        "bonus";
+
+                      const typeText =
+                        getTeamInterfaceText(
+                          isBonus
+                            ? "Бонус"
+                            : "Штраф"
+                        );
+
+                      const reason =
+                        String(
+                          adjustment.reason ||
+                          ""
+                        ).trim() ||
+                        getTeamInterfaceText(
+                          "Без коментаря"
+                        );
+
+                      const date =
+                        formatTeamVisitDate(
+                          adjustment
+                            .adjustment_date
+                        );
+
+                      return `
+                        <div class="teamFinanceRow">
+                          <div>
+                            <b>
+                              ${escapeHtml(
+                                typeText
+                              )}
+                              ·
+                              <span data-team-content>
+                                ${escapeHtml(
+                                  date
+                                )}
+                              </span>
+                            </b>
+
+                            <span data-team-content>
+                              ${escapeHtml(
+                                reason
+                              )}
+                            </span>
+                          </div>
+
+                          <strong
+                            class="${
+                              isBonus
+                                ? "moneyPlus"
+                                : "moneyMinus"
+                            }"
+                            data-team-content
+                          >
+                            ${
+                              isBonus
+                                ? "+"
+                                : "-"
+                            }${escapeHtml(
+                              getTeamMoneyText(
+                                adjustment.amount
+                              )
+                            )}
+                          </strong>
+
+                          <button
+                            class="financeDeleteBtn"
+                            type="button"
+                            data-delete-adjustment="${escapeHtml(
+                              String(
+                                adjustment.id
+                              )
+                            )}"
+                            title="${escapeHtml(
+                              getTeamInterfaceText(
+                                "Видалити"
+                              )
+                            )}"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="16"
+                              height="16"
+                              fill="none"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M8 8L16 16M16 8L8 16"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      `;
+                    }
+                  )
+                  .join("")
+              : `
+                <div class="hint">
+                  ${escapeHtml(
+                    getTeamInterfaceText(
+                      "Поки немає бонусів або штрафів за цей місяць."
+                    )
+                  )}
+                </div>
+              `
+          }
+        </div>
+      </div>
+
+      <div class="teamDashPanel">
+        <div class="teamDashPanelHead">
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "📌 Розрахунок"
+              )
+            )}
+          </h3>
+        </div>
+
+        <div class="teamDashRows">
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Виручка місяця"
+                )
+              )}
+            </span>
+
+            <b>
+              ${escapeHtml(
+                getTeamMoneyText(
+                  revenue
+                )
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Ставка"
+                )
+              )}
+            </span>
+
+            <b>
+              ${escapeHtml(
+                getTeamMoneyText(
+                  shiftRate
+                )
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamRevenueShareText(
+                  percentRate
+                )
+              )}
+            </span>
+
+            <b>
+              ${escapeHtml(
+                getTeamMoneyText(
+                  percentAmount
+                )
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Бонуси"
+                )
+              )}
+            </span>
+
+            <b
+              class="moneyPlus"
+              data-team-content
+            >
+              +${escapeHtml(
+                getTeamMoneyText(
+                  bonuses
+                )
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Штрафи"
+                )
+              )}
+            </span>
+
+            <b
+              class="moneyMinus"
+              data-team-content
+            >
+              -${escapeHtml(
+                getTeamMoneyText(
+                  penalties
+                )
+              )}
+            </b>
+          </p>
+
+          <p>
+            <span>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "До виплати"
+                )
+              )}
+            </span>
+
+            <b>
+              ${escapeHtml(
+                getTeamMoneyText(
+                  totalToPay
+                )
+              )}
+            </b>
+          </p>
+        </div>
+      </div>
+    </section>
+  `;
+
+  bindFinanceAdjustments(
+    root,
+    state
+  );
+}
+
+
+function bindFinanceAdjustments(
+  root,
+  state
+) {
+  root
+    .querySelector(
+      "#btnAddFinanceAdjustment"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openFinanceAdjustmentModal(
+          root,
+          state
+        );
+      }
+    );
+
+  root
+    .querySelectorAll(
+      "[data-delete-adjustment]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            openDeleteModal(
+              getTeamInterfaceText(
+                "Видалити запис?"
+              ),
+
+              async () => {
+                try {
+                  const id =
+                    button.dataset
+                      .deleteAdjustment;
+
+                  await deleteStaffAdjustmentApi(
+                    id
+                  );
+
+                  await renderTeamFinanceTab(
+                    root,
+                    state
+                  );
+                } catch (error) {
+                  console.error(
+                    error
+                  );
+
+                  openDeleteModal(
+                    getTeamInterfaceText(
+                      "Не вдалося видалити запис."
+                    ),
+                    null,
+                    "info"
+                  );
+                }
+              }
+            );
+          }
+        );
+      }
+    );
+}
+
+
+function openFinanceAdjustmentModal(
+  root,
+  state
+) {
+  document
+    .querySelector(
+      ".financeAdjustModalOverlay"
+    )
+    ?.remove();
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "financeAdjustModalOverlay";
+
+  modal.innerHTML = `
+    <div class="financeAdjustModal">
+      <button
+        class="financeAdjustClose"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div class="financeAdjustHead">
+        <div class="financeAdjustIcon">
+          💰
+        </div>
+
+        <div>
+          <h2>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Додати нарахування"
+              )
+            )}
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Додайте бонус або штраф співробітнику за поточний місяць."
+              )
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div class="financeTypeSwitch">
+        <button
+          class="active"
+          type="button"
+          data-adjust-type="bonus"
+        >
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "✅ Бонус"
+            )
+          )}
+        </button>
+
+        <button
+          type="button"
+          data-adjust-type="penalty"
+        >
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "⚠️ Штраф"
+            )
+          )}
+        </button>
+      </div>
+
+      <label class="financeAdjustField">
+        <span>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Сума, грн"
+            )
+          )}
+        </span>
+
+        <input
+          id="financeAdjustAmount"
+          type="number"
+          min="1"
+          step="1"
+          placeholder="${escapeHtml(
+            getTeamInterfaceText(
+              "Наприклад: 500"
+            )
+          )}"
+        >
+      </label>
+
+      <label class="financeAdjustField">
+        <span>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Причина"
+            )
+          )}
+        </span>
+
+        <input
+          id="financeAdjustReason"
+          type="text"
+          placeholder="${escapeHtml(
+            getTeamInterfaceText(
+              "Наприклад: запізнення або бонус за результат"
+            )
+          )}"
+        >
+      </label>
+
+      <div class="financeQuickReasons">
+        <span>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Швидкі причини"
+            )
+          )}
+        </span>
+
+        <div>
+          ${
+            [
+              "Запізнення",
+              "Пропуск зміни",
+              "Бонус за результат",
+              "Додаткова зміна",
+            ]
+              .map(
+                (reason) => {
+                  const translated =
+                    getTeamInterfaceText(
+                      reason
+                    );
+
+                  return `
+                    <button
+                      type="button"
+                      data-reason="${escapeHtml(
+                        translated
+                      )}"
+                    >
+                      ${escapeHtml(
+                        translated
+                      )}
+                    </button>
+                  `;
+                }
+              )
+              .join("")
+          }
+        </div>
+      </div>
+
+      <div class="financeAdjustActions">
+        <button
+          class="teamGhostBtn"
+          id="btnCancelAdjust"
+          type="button"
+        >
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Скасувати"
+            )
+          )}
+        </button>
+
+        <button
+          class="teamPrimaryBtn"
+          id="btnSaveAdjust"
+          type="button"
+        >
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Додати"
+            )
+          )}
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  installTeamLocalization(
+    modal
+  );
+
+  let selectedType =
+    "bonus";
+
+  const close = () => {
+    modal.remove();
+  };
+
+  modal
+    .querySelector(
+      ".financeAdjustClose"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
+
+  modal
+    .querySelector(
+      "#btnCancelAdjust"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
+
+  modal
+    .querySelectorAll(
+      "[data-adjust-type]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            selectedType =
+              button.dataset
+                .adjustType ||
+              "bonus";
+
+            modal
+              .querySelectorAll(
+                "[data-adjust-type]"
+              )
+              .forEach(
+                (item) => {
+                  item.classList.remove(
+                    "active"
+                  );
+                }
+              );
+
+            button.classList.add(
+              "active"
+            );
+          }
+        );
+      }
+    );
+
+  modal
+    .querySelectorAll(
+      "[data-reason]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const reasonInput =
+              modal.querySelector(
+                "#financeAdjustReason"
+              );
+
+            if (reasonInput) {
+              reasonInput.value =
+                button.dataset
+                  .reason ||
+                "";
+            }
+          }
+        );
+      }
+    );
+
+  modal
+    .querySelector(
+      "#btnSaveAdjust"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const amount =
+          Number(
+            modal.querySelector(
+              "#financeAdjustAmount"
+            )?.value ||
+            0
+          );
+
+        const reason =
+          modal.querySelector(
+            "#financeAdjustReason"
+          )?.value?.trim() ||
+          "";
+
+        if (
+          !amount ||
+          amount <= 0
+        ) {
+          alert(
+            getTeamInterfaceText(
+              "Вкажіть суму."
+            )
+          );
+
+          return;
+        }
+
+        const saveButton =
+          modal.querySelector(
+            "#btnSaveAdjust"
+          );
+
+        if (saveButton) {
+          saveButton.disabled =
+            true;
+        }
+
+        try {
+          const result =
+            await createStaffAdjustmentApi(
+              state.doc.id,
+              {
+                type:
+                  selectedType,
+
+                amount,
+                reason,
+              }
+            );
+
+          if (!result.ok) {
+            throw new Error(
+              result.error ||
+              getTeamInterfaceText(
+                "Не вдалося додати запис"
+              )
+            );
+          }
+
+          close();
+
+          await renderTeamFinanceTab(
+            root,
+            state
+          );
+        } catch (error) {
+          console.error(
+            error
+          );
+
+          alert(
+            error?.message ||
+            getTeamInterfaceText(
+              "Не вдалося додати запис"
+            )
+          );
+
+          if (saveButton) {
+            saveButton.disabled =
+              false;
+          }
+        }
+      }
+    );
+
+  modal
+    .querySelector(
+      "#financeAdjustAmount"
+    )
+    ?.focus();
+}
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "🏆 Карʼєра ветеринара": {
+      en: "🏆 Veterinary career",
+      de: "🏆 Tierärztliche Karriere",
+      pl: "🏆 Kariera weterynaryjna",
+    },
+
+    "Рівень, сезонний рейтинг клініки, титули та професійні досягнення.": {
+      en: "Level, seasonal clinic ranking, titles and professional achievements.",
+      de: "Stufe, saisonale Klinikrangliste, Titel und berufliche Erfolge.",
+      pl: "Poziom, sezonowy ranking kliniki, tytuły i osiągnięcia zawodowe.",
+    },
+
+    "До наступного рівня": {
+      en: "Next level",
+      de: "Nächste Stufe",
+      pl: "Do następnego poziomu",
+    },
+
+    "Відкрито": {
+      en: "Unlocked",
+      de: "Freigeschaltet",
+      pl: "Odblokowano",
+    },
+
+    "Титул": {
+      en: "Title",
+      de: "Titel",
+      pl: "Tytuł",
+    },
+
+    "Рейтинг клініки": {
+      en: "Clinic ranking",
+      de: "Klinikrangliste",
+      pl: "Ranking kliniki",
+    },
+
+    "🏆 Рейтинг клініки": {
+      en: "🏆 Clinic ranking",
+      de: "🏆 Klinikrangliste",
+      pl: "🏆 Ranking kliniki",
+    },
+
+    "Поки немає даних рейтингу. Перерахуйте сезон на сервері.": {
+      en: "No ranking data is available yet. Recalculate the season on the server.",
+      de: "Es sind noch keine Ranglistendaten vorhanden. Berechnen Sie die Saison auf dem Server neu.",
+      pl: "Nie ma jeszcze danych rankingu. Przelicz sezon na serwerze.",
+    },
+
+    "Ваш профіль": {
+      en: "Your profile",
+      de: "Ihr Profil",
+      pl: "Twój profil",
+    },
+
+    "Співробітник клініки": {
+      en: "Clinic employee",
+      de: "Klinikmitarbeiter",
+      pl: "Pracownik kliniki",
+    },
+
+    "Бал": {
+      en: "Score",
+      de: "Punkte",
+      pl: "Wynik",
+    },
+
+    "Сер. чек": {
+      en: "Avg. invoice",
+      de: "Ø Rechnung",
+      pl: "Śr. rachunek",
+    },
+
+    "I квартал": {
+      en: "Q1",
+      de: "1. Quartal",
+      pl: "I kwartał",
+    },
+
+    "II квартал": {
+      en: "Q2",
+      de: "2. Quartal",
+      pl: "II kwartał",
+    },
+
+    "III квартал": {
+      en: "Q3",
+      de: "3. Quartal",
+      pl: "III kwartał",
+    },
+
+    "IV квартал": {
+      en: "Q4",
+      de: "4. Quartal",
+      pl: "IV kwartał",
+    },
+
+    "Поточний сезон": {
+      en: "Current season",
+      de: "Aktuelle Saison",
+      pl: "Bieżący sezon",
+    },
+  }
+);
+
+
+function getTeamCareerLevelSummaryText(
+  level,
+  xp
+) {
+  const levelText =
+    getTeamLevelText(
+      level
+    );
+
+  const xpText =
+    Number(xp || 0)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  return (
+    `${levelText} · ` +
+    `${xpText} XP`
+  );
+}
+
+
+function getTeamClinicRankText(
+  rank,
+  total
+) {
+  if (!rank) {
+    return "—";
+  }
+
+  const rankText =
+    Number(rank)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const totalText =
+    Number(total || 0)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `#${rankText} of ` +
+      `${totalText}`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `#${rankText} von ` +
+      `${totalText}`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `#${rankText} z ` +
+      `${totalText}`
+    );
+  }
+
+  return (
+    `#${rankText} із ` +
+    `${totalText}`
+  );
+}
+
+
+function getTeamSeasonDescription(
+  seasonLabel
+) {
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `Season ${seasonLabel} · ` +
+      "updated every 3 months"
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `Saison ${seasonLabel} · ` +
+      "Aktualisierung alle 3 Monate"
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Sezon ${seasonLabel} · ` +
+      "aktualizacja co 3 miesiące"
+    );
+  }
+
+  return (
+    `Сезон ${seasonLabel} · ` +
+    "оновлення кожні 3 місяці"
+  );
+}
+
+
+async function renderTeamAchievementsTab(
+  root,
+  state
+) {
+  const career =
+    buildStaffCareer(
+      state
+    );
+
+  const rating =
+    await loadStaffRatingApi();
+
+  const ratingRows =
+    Array.isArray(
+      rating?.rows
+    )
+      ? rating.rows
+      : [];
+
+  const currentStaffId =
+    String(
+      state.doc.id ||
+      ""
+    );
+
+  const currentRank =
+    ratingRows.find(
+      (row) =>
+        String(
+          row.staff_id
+        ) ===
+        currentStaffId
+    );
+
+  const totalStaff =
+    ratingRows.length;
+
+  const translatedTitle =
+    translateAchievementText(
+      career.title
+    );
+
+  root.innerHTML = `
+    <section class="teamSubHero">
+      <div>
+        <h2>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "🏆 Карʼєра ветеринара"
+            )
+          )}
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Рівень, сезонний рейтинг клініки, титули та професійні досягнення."
+            )
+          )}
+        </p>
+      </div>
+    </section>
+
+    ${renderClinicRatingBoard(
+      ratingRows,
+      currentStaffId,
+      rating?.season_key
+    )}
 
     <section class="teamCareerHero">
       <div class="teamCareerLevel">
-        <div class="teamCareerBadge">${career.levelIcon}</div>
+        <div class="teamCareerBadge">
+          ${escapeHtml(
+            career.levelIcon
+          )}
+        </div>
+
         <div>
-          <div class="teamCareerTitle">${escapeHtml(career.title)}</div>
-          <div class="teamCareerSub">Рівень ${career.level} · ${career.xp.toLocaleString("uk-UA")} XP</div>
+          <div class="teamCareerTitle">
+            ${escapeHtml(
+              translatedTitle
+            )}
+          </div>
+
+          <div
+            class="teamCareerSub"
+            data-team-content
+          >
+            ${escapeHtml(
+              getTeamCareerLevelSummaryText(
+                career.level,
+                career.xp
+              )
+            )}
+          </div>
         </div>
       </div>
 
       <div class="teamCareerProgress">
         <div>
-          <span>До наступного рівня</span>
-          <b>${career.xpInLevel} / ${career.neededForNext} XP</b>
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "До наступного рівня"
+              )
+            )}
+          </span>
+
+          <b data-team-content>
+            ${Number(
+              career.xpInLevel ||
+              0
+            ).toLocaleString(
+              getCalendarLocale()
+            )}
+            /
+            ${Number(
+              career.neededForNext ||
+              0
+            ).toLocaleString(
+              getCalendarLocale()
+            )}
+            XP
+          </b>
         </div>
-        <i><em style="width:${career.progressPercent}%"></em></i>
+
+        <i>
+          <em
+            style="width:${Math.max(
+              0,
+              Math.min(
+                100,
+                Number(
+                  career.progressPercent ||
+                  0
+                )
+              )
+            )}%"
+          ></em>
+        </i>
       </div>
     </section>
 
     <section class="teamDashKpis">
-      ${renderTeamKpiCard("⭐", "XP", career.xp.toLocaleString("uk-UA"), 0)}
-      ${renderTeamKpiCard("🏅", "Відкрито", `${career.unlockedCount} / ${career.achievements.length}`, 0)}
-      ${renderTeamKpiCard("👑", "Титул", career.title, 0)}
-      ${renderTeamKpiCard("🏆", "Рейтинг клініки", currentRank ? `#${currentRank.rank} із ${totalStaff}` : "—", 0)}
+      ${renderTeamKpiCard(
+        "⭐",
+        "XP",
+        Number(
+          career.xp ||
+          0
+        ).toLocaleString(
+          getCalendarLocale()
+        ),
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "🏅",
+        "Відкрито",
+        (
+          `${Number(
+            career.unlockedCount ||
+            0
+          ).toLocaleString(
+            getCalendarLocale()
+          )} / ` +
+          `${Number(
+            career.achievements
+              ?.length ||
+            0
+          ).toLocaleString(
+            getCalendarLocale()
+          )}`
+        ),
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "👑",
+        "Титул",
+        translatedTitle,
+        0
+      )}
+
+      ${renderTeamKpiCard(
+        "🏆",
+        "Рейтинг клініки",
+        getTeamClinicRankText(
+          currentRank?.rank,
+          totalStaff
+        ),
+        0
+      )}
     </section>
 
     <section class="teamAchievementsGrid">
-      ${career.achievements.map(renderAchievementCard).join("")}
+      ${
+        (
+          career.achievements ||
+          []
+        )
+          .map(
+            (achievement) =>
+              renderAchievementCard(
+                achievement
+              )
+          )
+          .join("")
+      }
     </section>
   `;
 }
-function renderClinicRatingBoard(rows, currentStaffId, seasonKey) {
-  if (!rows.length) {
+
+
+function renderClinicRatingBoard(
+  rows,
+  currentStaffId,
+  seasonKey
+) {
+  if (
+    !Array.isArray(rows) ||
+    !rows.length
+  ) {
     return `
       <section class="clinicRatingBoard">
         <div class="clinicRatingHead">
           <div>
-            <h3>🏆 Рейтинг клініки</h3>
-            <p>Поки немає даних рейтингу. Перерахуйте сезон на сервері.</p>
+            <h3>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "🏆 Рейтинг клініки"
+                )
+              )}
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Поки немає даних рейтингу. Перерахуйте сезон на сервері."
+                )
+              )}
+            </p>
           </div>
         </div>
       </section>
     `;
   }
 
-  const seasonLabel = formatSeasonLabel(seasonKey);
+  const seasonLabel =
+    formatSeasonLabel(
+      seasonKey
+    );
 
   return `
     <section class="clinicRatingBoard">
       <div class="clinicRatingHead">
         <div>
-          <h3>🏆 Рейтинг клініки</h3>
-          <p>Сезон ${escapeHtml(seasonLabel)} · оновлення кожні 3 місяці</p>
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🏆 Рейтинг клініки"
+              )
+            )}
+          </h3>
+
+          <p data-team-content>
+            ${escapeHtml(
+              getTeamSeasonDescription(
+                seasonLabel
+              )
+            )}
+          </p>
         </div>
-        <span>${escapeHtml(seasonKey || "—")}</span>
+
+        <span data-team-content>
+          ${escapeHtml(
+            seasonKey ||
+            "—"
+          )}
+        </span>
       </div>
 
       <div class="clinicRatingTable">
-        ${rows.map((r) => renderClinicRatingRow(r, currentStaffId)).join("")}
+        ${
+          rows
+            .map(
+              (row) =>
+                renderClinicRatingRow(
+                  row,
+                  currentStaffId
+                )
+            )
+            .join("")
+        }
       </div>
     </section>
   `;
 }
 
-function renderClinicRatingRow(r, currentStaffId) {
-  const rank = Number(r.rank || 0);
-  const isCurrent = String(r.staff_id) === String(currentStaffId);
+
+function renderClinicRatingRow(
+  row,
+  currentStaffId
+) {
+  const rank =
+    Number(
+      row.rank ||
+      0
+    );
+
+  const isCurrent =
+    String(
+      row.staff_id
+    ) ===
+    String(
+      currentStaffId
+    );
 
   const medal =
-    rank === 1 ? "🥇" :
-    rank === 2 ? "🥈" :
-    rank === 3 ? "🥉" :
-    `#${rank}`;
+    rank === 1
+      ? "🥇"
+      : rank === 2
+        ? "🥈"
+        : rank === 3
+          ? "🥉"
+          : `#${rank}`;
 
-  const avatar = r.avatar
-    ? `<img src="${escapeHtml(r.avatar)}" alt="${escapeHtml(r.staff_name || "Працівник")}">`
-    : `<span>${escapeHtml(String(r.staff_name || "?").trim().charAt(0).toUpperCase() || "?")}</span>`;
+  const staffName =
+    String(
+      row.staff_name ||
+      getTeamInterfaceText(
+        "Працівник"
+      )
+    );
+
+  const staffLetter =
+    staffName
+      .trim()
+      .charAt(0)
+      .toUpperCase() ||
+    "?";
+
+  const avatar =
+    row.avatar
+      ? `
+        <img
+          src="${escapeHtml(
+            row.avatar
+          )}"
+          alt="${escapeHtml(
+            staffName
+          )}"
+        >
+      `
+      : `
+        <span>
+          ${escapeHtml(
+            staffLetter
+          )}
+        </span>
+      `;
 
   return `
-    <div class="clinicRatingRow ${isCurrent ? "current" : ""} rank-${rank}">
-      <div class="clinicRatingPlace">${medal}</div>
+    <div
+      class="
+        clinicRatingRow
+        ${
+          isCurrent
+            ? "current"
+            : ""
+        }
+        rank-${rank}
+      "
+    >
+      <div
+        class="clinicRatingPlace"
+        data-team-content
+      >
+        ${escapeHtml(
+          medal
+        )}
+      </div>
 
       <div class="clinicRatingAvatar">
         ${avatar}
       </div>
 
       <div class="clinicRatingPerson">
-        <b>${escapeHtml(r.staff_name || "Працівник")}</b>
-        <span>${isCurrent ? "Ваш профіль" : "Співробітник клініки"}</span>
+        <b data-team-content>
+          ${escapeHtml(
+            staffName
+          )}
+        </b>
+
+        <span>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              isCurrent
+                ? "Ваш профіль"
+                : "Співробітник клініки"
+            )
+          )}
+        </span>
       </div>
 
       <div class="clinicRatingStats">
-        <div><span>Score</span><b>${Number(r.score || 0).toLocaleString("uk-UA")}</b></div>
-        <div><span>Візити</span><b>${Number(r.visits_count || 0).toLocaleString("uk-UA")}</b></div>
-        <div><span>Виручка</span><b>${Number(r.revenue || 0).toLocaleString("uk-UA")} грн</b></div>
-        <div><span>Сер. чек</span><b>${Number(r.avg_check || 0).toLocaleString("uk-UA")} грн</b></div>
+        <div>
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Бал"
+              )
+            )}
+          </span>
+
+          <b data-team-content>
+            ${Number(
+              row.score ||
+              0
+            ).toLocaleString(
+              getCalendarLocale()
+            )}
+          </b>
+        </div>
+
+        <div>
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Візити"
+              )
+            )}
+          </span>
+
+          <b data-team-content>
+            ${Number(
+              row.visits_count ||
+              0
+            ).toLocaleString(
+              getCalendarLocale()
+            )}
+          </b>
+        </div>
+
+        <div>
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Виручка"
+              )
+            )}
+          </span>
+
+          <b data-team-content>
+            ${escapeHtml(
+              getTeamMoneyText(
+                row.revenue
+              )
+            )}
+          </b>
+        </div>
+
+        <div>
+          <span>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Сер. чек"
+              )
+            )}
+          </span>
+
+          <b data-team-content>
+            ${escapeHtml(
+              getTeamMoneyText(
+                row.avg_check
+              )
+            )}
+          </b>
+        </div>
       </div>
     </div>
   `;
 }
 
-function formatSeasonLabel(seasonKey) {
-  const s = String(seasonKey || "");
-  const [year, q] = s.split("-Q");
 
-  const map = {
-    "1": "I квартал",
-    "2": "II квартал",
-    "3": "III квартал",
-    "4": "IV квартал",
+function formatSeasonLabel(
+  seasonKey
+) {
+  const value =
+    String(
+      seasonKey ||
+      ""
+    );
+
+  const [
+    year,
+    quarter,
+  ] =
+    value.split(
+      "-Q"
+    );
+
+  const quarters = {
+    "1":
+      "I квартал",
+
+    "2":
+      "II квартал",
+
+    "3":
+      "III квартал",
+
+    "4":
+      "IV квартал",
   };
 
-  return `${map[q] || "поточний сезон"} ${year || ""}`.trim();
-}
+  const quarterText =
+    getTeamInterfaceText(
+      quarters[quarter] ||
+      "Поточний сезон"
+    );
 
+  return (
+    `${quarterText} ` +
+    `${year || ""}`
+  ).trim();
+}
 function buildStaffCareer(state) {
   const visits = state.dashboard.live_staff_visits || [];
   const revenue = Number(state.revenue || 0);
@@ -24622,11 +29126,271 @@ async function resetStaffPasswordApi(
 }
 
 
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "🔐 Доступ до CRM": {
+      en: "🔐 CRM access",
+      de: "🔐 CRM-Zugang",
+      pl: "🔐 Dostęp do CRM",
+    },
+
+    "Створіть окремий логін для цього співробітника.": {
+      en: "Create a separate login for this employee.",
+      de: "Erstellen Sie einen eigenen Zugang für diesen Mitarbeiter.",
+      pl: "Utwórz osobny login dla tego pracownika.",
+    },
+
+    "Акаунт не створено": {
+      en: "Account not created",
+      de: "Konto nicht erstellt",
+      pl: "Konto nie zostało utworzone",
+    },
+
+    "Логін": {
+      en: "Login",
+      de: "Benutzername",
+      pl: "Login",
+    },
+
+    "Роль доступу": {
+      en: "Access role",
+      de: "Zugriffsrolle",
+      pl: "Rola dostępu",
+    },
+
+    "Ветеринар": {
+      en: "Veterinarian",
+      de: "Tierarzt",
+      pl: "Weterynarz",
+    },
+
+    "Тимчасовий пароль": {
+      en: "Temporary password",
+      de: "Temporäres Passwort",
+      pl: "Hasło tymczasowe",
+    },
+
+    "Мінімум 8 символів": {
+      en: "At least 8 characters",
+      de: "Mindestens 8 Zeichen",
+      pl: "Minimum 8 znaków",
+    },
+
+    "＋ Створити акаунт": {
+      en: "＋ Create account",
+      de: "＋ Konto erstellen",
+      pl: "＋ Utwórz konto",
+    },
+
+    "Обліковий запис прив’язаний до цього профілю співробітника.": {
+      en: "The account is linked to this employee profile.",
+      de: "Das Konto ist mit diesem Mitarbeiterprofil verknüpft.",
+      pl: "Konto jest powiązane z profilem tego pracownika.",
+    },
+
+    "● Активний": {
+      en: "● Active",
+      de: "● Aktiv",
+      pl: "● Aktywne",
+    },
+
+    "○ Вимкнений": {
+      en: "○ Disabled",
+      de: "○ Deaktiviert",
+      pl: "○ Wyłączone",
+    },
+
+    "Останній вхід": {
+      en: "Last login",
+      de: "Letzte Anmeldung",
+      pl: "Ostatnie logowanie",
+    },
+
+    "Ще не входив": {
+      en: "Never logged in",
+      de: "Noch nie angemeldet",
+      pl: "Jeszcze się nie logował",
+    },
+
+    "Співробітник повинен змінити тимчасовий пароль при вході.": {
+      en: "The employee must change the temporary password after logging in.",
+      de: "Der Mitarbeiter muss das temporäre Passwort nach der Anmeldung ändern.",
+      pl: "Pracownik musi zmienić hasło tymczasowe po zalogowaniu.",
+    },
+
+    "Постійний пароль уже встановлено.": {
+      en: "A permanent password has already been set.",
+      de: "Ein dauerhaftes Passwort wurde bereits eingerichtet.",
+      pl: "Hasło stałe zostało już ustawione.",
+    },
+
+    "🔑 Скинути пароль": {
+      en: "🔑 Reset password",
+      de: "🔑 Passwort zurücksetzen",
+      pl: "🔑 Zresetuj hasło",
+    },
+
+    "⛔ Вимкнути доступ": {
+      en: "⛔ Disable access",
+      de: "⛔ Zugang deaktivieren",
+      pl: "⛔ Wyłącz dostęp",
+    },
+
+    "✅ Увімкнути доступ": {
+      en: "✅ Enable access",
+      de: "✅ Zugang aktivieren",
+      pl: "✅ Włącz dostęp",
+    },
+
+    "Зберегти зміни": {
+      en: "Save changes",
+      de: "Änderungen speichern",
+      pl: "Zapisz zmiany",
+    },
+
+    "Логін повинен містити мінімум 3 символи.": {
+      en: "The login must contain at least 3 characters.",
+      de: "Der Benutzername muss mindestens 3 Zeichen enthalten.",
+      pl: "Login musi zawierać co najmniej 3 znaki.",
+    },
+
+    "Тимчасовий пароль повинен містити мінімум 8 символів.": {
+      en: "The temporary password must contain at least 8 characters.",
+      de: "Das temporäre Passwort muss mindestens 8 Zeichen enthalten.",
+      pl: "Hasło tymczasowe musi zawierać co najmniej 8 znaków.",
+    },
+
+    "Не вдалося створити акаунт.": {
+      en: "Could not create the account.",
+      de: "Das Konto konnte nicht erstellt werden.",
+      pl: "Nie udało się utworzyć konta.",
+    },
+
+    "Передайте співробітнику логін і тимчасовий пароль.": {
+      en: "Give the employee their login and temporary password.",
+      de: "Geben Sie dem Mitarbeiter den Benutzernamen und das temporäre Passwort.",
+      pl: "Przekaż pracownikowi login i hasło tymczasowe.",
+    },
+
+    "Не вдалося зберегти зміни.": {
+      en: "Could not save the changes.",
+      de: "Die Änderungen konnten nicht gespeichert werden.",
+      pl: "Nie udało się zapisać zmian.",
+    },
+
+    "Налаштування доступу успішно збережено.": {
+      en: "Access settings were saved successfully.",
+      de: "Die Zugangseinstellungen wurden gespeichert.",
+      pl: "Ustawienia dostępu zostały zapisane.",
+    },
+
+    "Відновити цьому співробітнику доступ до CRM?": {
+      en: "Restore CRM access for this employee?",
+      de: "Den CRM-Zugang für diesen Mitarbeiter wiederherstellen?",
+      pl: "Przywrócić temu pracownikowi dostęp do CRM?",
+    },
+
+    "Співробітник більше не зможе увійти до CRM.": {
+      en: "The employee will no longer be able to log in to the CRM.",
+      de: "Der Mitarbeiter kann sich anschließend nicht mehr im CRM anmelden.",
+      pl: "Pracownik nie będzie już mógł zalogować się do CRM.",
+    },
+
+    "Не вдалося змінити доступ.": {
+      en: "Could not change the access settings.",
+      de: "Der Zugang konnte nicht geändert werden.",
+      pl: "Nie udało się zmienić dostępu.",
+    },
+
+    "Доступ до CRM увімкнено.": {
+      en: "CRM access has been enabled.",
+      de: "Der CRM-Zugang wurde aktiviert.",
+      pl: "Dostęp do CRM został włączony.",
+    },
+
+    "Доступ до CRM вимкнено.": {
+      en: "CRM access has been disabled.",
+      de: "Der CRM-Zugang wurde deaktiviert.",
+      pl: "Dostęp do CRM został wyłączony.",
+    },
+
+    "Встановити тимчасовий пароль": {
+      en: "Set temporary password",
+      de: "Temporäres Passwort festlegen",
+      pl: "Ustaw hasło tymczasowe",
+    },
+
+    "Введіть новий пароль для співробітника. Після входу він повинен буде створити постійний пароль.": {
+      en: "Enter a new password for the employee. After logging in, they must create a permanent password.",
+      de: "Geben Sie ein neues Passwort für den Mitarbeiter ein. Nach der Anmeldung muss ein dauerhaftes Passwort erstellt werden.",
+      pl: "Wprowadź nowe hasło dla pracownika. Po zalogowaniu pracownik musi utworzyć hasło stałe.",
+    },
+
+    "Новий тимчасовий пароль": {
+      en: "New temporary password",
+      de: "Neues temporäres Passwort",
+      pl: "Nowe hasło tymczasowe",
+    },
+
+    "Встановити пароль": {
+      en: "Set password",
+      de: "Passwort festlegen",
+      pl: "Ustaw hasło",
+    },
+
+    "Пароль повинен містити мінімум 8 символів.": {
+      en: "The password must contain at least 8 characters.",
+      de: "Das Passwort muss mindestens 8 Zeichen enthalten.",
+      pl: "Hasło musi zawierać co najmniej 8 znaków.",
+    },
+
+    "Не вдалося скинути пароль.": {
+      en: "Could not reset the password.",
+      de: "Das Passwort konnte nicht zurückgesetzt werden.",
+      pl: "Nie udało się zresetować hasła.",
+    },
+
+    "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль.": {
+      en: "The temporary password has been set. The employee must create a new password after their next login.",
+      de: "Das temporäre Passwort wurde festgelegt. Der Mitarbeiter muss nach der nächsten Anmeldung ein neues Passwort erstellen.",
+      pl: "Hasło tymczasowe zostało ustawione. Przy następnym logowaniu pracownik musi utworzyć nowe hasło.",
+    },
+
+    "Не вдалося завантажити акаунт": {
+      en: "Could not load the account",
+      de: "Das Konto konnte nicht geladen werden",
+      pl: "Nie udało się wczytać konta",
+    },
+
+    "Не вдалося з'єднатися із сервером": {
+      en: "Could not connect to the server",
+      de: "Die Verbindung zum Server konnte nicht hergestellt werden",
+      pl: "Nie udało się połączyć z serwerem",
+    },
+
+    "Створювати акаунти співробітників може лише власник клініки.": {
+      en: "Only the clinic owner can create employee accounts.",
+      de: "Nur der Klinikinhaber kann Mitarbeiterkonten erstellen.",
+      pl: "Tylko właściciel kliniki może tworzyć konta pracowników.",
+    },
+
+    "Закрити": {
+      en: "Close",
+      de: "Schließen",
+      pl: "Zamknij",
+    },
+  }
+);
+
+
 function formatStaffLastLogin(
   value
 ) {
   if (!value) {
-    return "Ще не входив";
+    return getTeamInterfaceText(
+      "Ще не входив"
+    );
   }
 
   const date =
@@ -24641,7 +29405,7 @@ function formatStaffLastLogin(
   }
 
   return date.toLocaleString(
-    "uk-UA",
+    getCalendarLocale(),
     {
       dateStyle: "medium",
       timeStyle: "short",
@@ -24654,11 +29418,19 @@ function renderStaffAccountPanel(
   accountResult,
   profileState
 ) {
+  if (
+    accountResult?.skipped
+  ) {
+    return "";
+  }
+
   const account =
-    accountResult?.data || null;
+    accountResult?.data ||
+    null;
 
   const loadError =
-    accountResult?.ok === false
+    accountResult?.ok ===
+    false
       ? accountResult.error
       : "";
 
@@ -24670,17 +29442,21 @@ function renderStaffAccountPanel(
           teamDashFull
         "
       >
-        <div
-          class="teamDashPanelHead"
-        >
+        <div class="teamDashPanelHead">
           <h3>
-            🔐 Доступ до CRM
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🔐 Доступ до CRM"
+              )
+            )}
           </h3>
         </div>
 
         <div class="hint">
           ${escapeHtml(
-            loadError
+            getTeamInterfaceText(
+              loadError
+            )
           )}
         </div>
       </div>
@@ -24712,22 +29488,31 @@ function renderStaffAccountPanel(
           staffAccessPanel
         "
       >
-        <div
-          class="teamDashPanelHead"
-        >
+        <div class="teamDashPanelHead">
           <div>
             <h3>
-              🔐 Доступ до CRM
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "🔐 Доступ до CRM"
+                )
+              )}
             </h3>
 
             <p class="hint">
-              Створіть окремий логін
-              для цього співробітника.
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Створіть окремий логін для цього співробітника."
+                )
+              )}
             </p>
           </div>
 
           <span>
-            Акаунт не створено
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Акаунт не створено"
+              )
+            )}
           </span>
         </div>
 
@@ -24744,11 +29529,13 @@ function renderStaffAccountPanel(
             margin-top:18px;
           "
         >
-          <label
-            class="financeAdjustField"
-          >
+          <label class="financeAdjustField">
             <span>
-              Логін
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Логін"
+                )
+              )}
             </span>
 
             <input
@@ -24762,35 +29549,49 @@ function renderStaffAccountPanel(
             >
           </label>
 
-          <label
-            class="financeAdjustField"
-          >
+          <label class="financeAdjustField">
             <span>
-              Роль доступу
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Роль доступу"
+                )
+              )}
             </span>
 
-            <select
-              id="staffAccountRole"
-            >
+            <select id="staffAccountRole">
               <option value="vet">
-                Ветеринар
+                ${escapeHtml(
+                  getTeamInterfaceText(
+                    "Ветеринар"
+                  )
+                )}
               </option>
 
               <option value="assistant">
-                Асистент
+                ${escapeHtml(
+                  getTeamInterfaceText(
+                    "Асистент"
+                  )
+                )}
               </option>
 
               <option value="admin">
-                Адміністратор
+                ${escapeHtml(
+                  getTeamInterfaceText(
+                    "Адміністратор"
+                  )
+                )}
               </option>
             </select>
           </label>
 
-          <label
-            class="financeAdjustField"
-          >
+          <label class="financeAdjustField">
             <span>
-              Тимчасовий пароль
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Тимчасовий пароль"
+                )
+              )}
             </span>
 
             <input
@@ -24798,7 +29599,11 @@ function renderStaffAccountPanel(
               type="password"
               minlength="8"
               autocomplete="new-password"
-              placeholder="Мінімум 8 символів"
+              placeholder="${escapeHtml(
+                getTeamInterfaceText(
+                  "Мінімум 8 символів"
+                )
+              )}"
             >
           </label>
         </div>
@@ -24815,7 +29620,11 @@ function renderStaffAccountPanel(
             class="teamPrimaryBtn"
             type="button"
           >
-            ＋ Створити акаунт
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "＋ Створити акаунт"
+              )
+            )}
           </button>
         </div>
       </div>
@@ -24830,27 +29639,33 @@ function renderStaffAccountPanel(
         staffAccessPanel
       "
     >
-      <div
-        class="teamDashPanelHead"
-      >
+      <div class="teamDashPanelHead">
         <div>
           <h3>
-            🔐 Доступ до CRM
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🔐 Доступ до CRM"
+              )
+            )}
           </h3>
 
           <p class="hint">
-            Обліковий запис
-            прив’язаний до цього
-            профілю співробітника.
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Обліковий запис прив’язаний до цього профілю співробітника."
+              )
+            )}
           </p>
         </div>
 
         <span>
-          ${
-            account.is_active
-              ? "● Активний"
-              : "○ Вимкнений"
-          }
+          ${escapeHtml(
+            getTeamInterfaceText(
+              account.is_active
+                ? "● Активний"
+                : "○ Вимкнений"
+            )
+          )}
         </span>
       </div>
 
@@ -24866,42 +29681,50 @@ function renderStaffAccountPanel(
           margin-top:18px;
         "
       >
-        <label
-          class="financeAdjustField"
-        >
+        <label class="financeAdjustField">
           <span>
-            Логін
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Логін"
+              )
+            )}
           </span>
 
           <input
             id="staffAccountUsername"
             type="text"
             value="${escapeHtml(
-              account.username || ""
+              account.username ||
+              ""
             )}"
             autocomplete="off"
           >
         </label>
 
-        <label
-          class="financeAdjustField"
-        >
+        <label class="financeAdjustField">
           <span>
-            Роль доступу
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Роль доступу"
+              )
+            )}
           </span>
 
-          <select
-            id="staffAccountRole"
-          >
+          <select id="staffAccountRole">
             <option
               value="vet"
               ${
-                account.role === "vet"
+                account.role ===
+                "vet"
                   ? "selected"
                   : ""
               }
             >
-              Ветеринар
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Ветеринар"
+                )
+              )}
             </option>
 
             <option
@@ -24913,7 +29736,11 @@ function renderStaffAccountPanel(
                   : ""
               }
             >
-              Асистент
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Асистент"
+                )
+              )}
             </option>
 
             <option
@@ -24925,19 +29752,26 @@ function renderStaffAccountPanel(
                   : ""
               }
             >
-              Адміністратор
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Адміністратор"
+                )
+              )}
             </option>
           </select>
         </label>
 
-        <div
-          class="financeAdjustField"
-        >
+        <div class="financeAdjustField">
           <span>
-            Останній вхід
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Останній вхід"
+              )
+            )}
           </span>
 
           <div
+            data-team-content
             style="
               min-height:48px;
               display:flex;
@@ -24973,11 +29807,13 @@ function renderStaffAccountPanel(
         "
       >
         <div class="hint">
-          ${
-            account.must_change_password
-              ? "Співробітник повинен змінити тимчасовий пароль при вході."
-              : "Постійний пароль уже встановлено."
-          }
+          ${escapeHtml(
+            getTeamInterfaceText(
+              account.must_change_password
+                ? "Співробітник повинен змінити тимчасовий пароль при вході."
+                : "Постійний пароль уже встановлено."
+            )
+          )}
         </div>
 
         <div
@@ -24992,7 +29828,11 @@ function renderStaffAccountPanel(
             class="teamGhostBtn"
             type="button"
           >
-            🔑 Скинути пароль
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🔑 Скинути пароль"
+              )
+            )}
           </button>
 
           <button
@@ -25000,11 +29840,13 @@ function renderStaffAccountPanel(
             class="teamGhostBtn"
             type="button"
           >
-            ${
-              account.is_active
-                ? "⛔ Вимкнути доступ"
-                : "✅ Увімкнути доступ"
-            }
+            ${escapeHtml(
+              getTeamInterfaceText(
+                account.is_active
+                  ? "⛔ Вимкнути доступ"
+                  : "✅ Увімкнути доступ"
+              )
+            )}
           </button>
 
           <button
@@ -25012,12 +29854,241 @@ function renderStaffAccountPanel(
             class="teamPrimaryBtn"
             type="button"
           >
-            Зберегти зміни
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Зберегти зміни"
+              )
+            )}
           </button>
         </div>
       </div>
     </div>
   `;
+}
+
+
+function openStaffPasswordResetModal(
+  root,
+  profileState,
+  staffId
+) {
+  document
+    .querySelector(
+      ".staffPasswordResetOverlay"
+    )
+    ?.remove();
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.className =
+    "financeAdjustModalOverlay staffPasswordResetOverlay";
+
+  modal.innerHTML = `
+    <div class="financeAdjustModal">
+      <button
+        class="financeAdjustClose"
+        type="button"
+        aria-label="${escapeHtml(
+          getTeamInterfaceText(
+            "Закрити"
+          )
+        )}"
+      >
+        ×
+      </button>
+
+      <div class="financeAdjustHead">
+        <div class="financeAdjustIcon">
+          🔑
+        </div>
+
+        <div>
+          <h2>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Встановити тимчасовий пароль"
+              )
+            )}
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "Введіть новий пароль для співробітника. Після входу він повинен буде створити постійний пароль."
+              )
+            )}
+          </p>
+        </div>
+      </div>
+
+      <label class="financeAdjustField">
+        <span>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Новий тимчасовий пароль"
+            )
+          )}
+        </span>
+
+        <input
+          id="staffTemporaryPassword"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="${escapeHtml(
+            getTeamInterfaceText(
+              "Мінімум 8 символів"
+            )
+          )}"
+        >
+      </label>
+
+      <div class="financeAdjustActions">
+        <button
+          class="teamGhostBtn"
+          id="btnCancelPasswordReset"
+          type="button"
+        >
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Скасувати"
+            )
+          )}
+        </button>
+
+        <button
+          class="teamPrimaryBtn"
+          id="btnSavePasswordReset"
+          type="button"
+        >
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Встановити пароль"
+            )
+          )}
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  installTeamLocalization(
+    modal
+  );
+
+  const input =
+    modal.querySelector(
+      "#staffTemporaryPassword"
+    );
+
+  const close = () => {
+    modal.remove();
+  };
+
+  modal
+    .querySelector(
+      ".financeAdjustClose"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
+
+  modal
+    .querySelector(
+      "#btnCancelPasswordReset"
+    )
+    ?.addEventListener(
+      "click",
+      close
+    );
+
+  modal
+    .querySelector(
+      "#btnSavePasswordReset"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const password =
+          String(
+            input?.value ||
+            ""
+          );
+
+        if (
+          password.trim()
+            .length < 8
+        ) {
+          openDeleteModal(
+            getTeamInterfaceText(
+              "Пароль повинен містити мінімум 8 символів."
+            ),
+            null,
+            "info"
+          );
+
+          return;
+        }
+
+        const saveButton =
+          modal.querySelector(
+            "#btnSavePasswordReset"
+          );
+
+        if (saveButton) {
+          saveButton.disabled =
+            true;
+        }
+
+        const result =
+          await resetStaffPasswordApi(
+            staffId,
+            password
+          );
+
+        if (!result.ok) {
+          openDeleteModal(
+            getTeamInterfaceText(
+              result.error ||
+              "Не вдалося скинути пароль."
+            ),
+            null,
+            "info"
+          );
+
+          if (saveButton) {
+            saveButton.disabled =
+              false;
+          }
+
+          return;
+        }
+
+        close();
+
+        await renderTeamSettingsTab(
+          root,
+          profileState
+        );
+
+        openDeleteModal(
+          getTeamInterfaceText(
+            "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль."
+          ),
+          null,
+          "success"
+        );
+      }
+    );
+
+  input?.focus();
 }
 
 
@@ -25032,7 +30103,8 @@ function bindStaffAccountPanel(
   if (!staffId) return;
 
   const account =
-    accountResult?.data || null;
+    accountResult?.data ||
+    null;
 
   root
     .querySelector(
@@ -25045,26 +30117,33 @@ function bindStaffAccountPanel(
           String(
             root.querySelector(
               "#staffAccountUsername"
-            )?.value || ""
+            )?.value ||
+            ""
           ).trim();
 
         const role =
           String(
             root.querySelector(
               "#staffAccountRole"
-            )?.value || "vet"
+            )?.value ||
+            "vet"
           );
 
         const password =
           String(
             root.querySelector(
               "#staffAccountPassword"
-            )?.value || ""
+            )?.value ||
+            ""
           );
 
-        if (username.length < 3) {
+        if (
+          username.length < 3
+        ) {
           openDeleteModal(
-            "Логін повинен містити мінімум 3 символи.",
+            getTeamInterfaceText(
+              "Логін повинен містити мінімум 3 символи."
+            ),
             null,
             "info"
           );
@@ -25072,9 +30151,13 @@ function bindStaffAccountPanel(
           return;
         }
 
-        if (password.length < 8) {
+        if (
+          password.length < 8
+        ) {
           openDeleteModal(
-            "Тимчасовий пароль повинен містити мінімум 8 символів.",
+            getTeamInterfaceText(
+              "Тимчасовий пароль повинен містити мінімум 8 символів."
+            ),
             null,
             "info"
           );
@@ -25094,8 +30177,10 @@ function bindStaffAccountPanel(
 
         if (!result.ok) {
           openDeleteModal(
-            result.error ||
-            "Не вдалося створити акаунт.",
+            getTeamInterfaceText(
+              result.error ||
+              "Не вдалося створити акаунт."
+            ),
             null,
             "info"
           );
@@ -25109,7 +30194,9 @@ function bindStaffAccountPanel(
         );
 
         openDeleteModal(
-          "Передайте співробітнику логін і тимчасовий пароль.",
+          getTeamInterfaceText(
+            "Передайте співробітнику логін і тимчасовий пароль."
+          ),
           null,
           "success"
         );
@@ -25127,15 +30214,31 @@ function bindStaffAccountPanel(
           String(
             root.querySelector(
               "#staffAccountUsername"
-            )?.value || ""
+            )?.value ||
+            ""
           ).trim();
 
         const role =
           String(
             root.querySelector(
               "#staffAccountRole"
-            )?.value || "vet"
+            )?.value ||
+            "vet"
           );
+
+        if (
+          username.length < 3
+        ) {
+          openDeleteModal(
+            getTeamInterfaceText(
+              "Логін повинен містити мінімум 3 символи."
+            ),
+            null,
+            "info"
+          );
+
+          return;
+        }
 
         const result =
           await updateStaffAccountApi(
@@ -25148,8 +30251,10 @@ function bindStaffAccountPanel(
 
         if (!result.ok) {
           openDeleteModal(
-            result.error ||
-            "Не вдалося зберегти зміни.",
+            getTeamInterfaceText(
+              result.error ||
+              "Не вдалося зберегти зміни."
+            ),
             null,
             "info"
           );
@@ -25163,7 +30268,9 @@ function bindStaffAccountPanel(
         );
 
         openDeleteModal(
-          "Налаштування доступу успішно збережено.",
+          getTeamInterfaceText(
+            "Налаштування доступу успішно збережено."
+          ),
           null,
           "success"
         );
@@ -25183,9 +30290,12 @@ function bindStaffAccountPanel(
           !account.is_active;
 
         openDeleteModal(
-          nextActive
-            ? "Відновити цьому співробітнику доступ до CRM?"
-            : "Співробітник більше не зможе увійти до CRM.",
+          getTeamInterfaceText(
+            nextActive
+              ? "Відновити цьому співробітнику доступ до CRM?"
+              : "Співробітник більше не зможе увійти до CRM."
+          ),
+
           async () => {
             const result =
               await updateStaffAccountApi(
@@ -25198,8 +30308,10 @@ function bindStaffAccountPanel(
 
             if (!result.ok) {
               openDeleteModal(
-                result.error ||
-                "Не вдалося змінити доступ.",
+                getTeamInterfaceText(
+                  result.error ||
+                  "Не вдалося змінити доступ."
+                ),
                 null,
                 "info"
               );
@@ -25213,13 +30325,16 @@ function bindStaffAccountPanel(
             );
 
             openDeleteModal(
-              nextActive
-                ? "Доступ до CRM увімкнено."
-                : "Доступ до CRM вимкнено.",
+              getTeamInterfaceText(
+                nextActive
+                  ? "Доступ до CRM увімкнено."
+                  : "Доступ до CRM вимкнено."
+              ),
               null,
               "success"
             );
           },
+
           nextActive
             ? "activate"
             : "deactivate"
@@ -25228,66 +30343,138 @@ function bindStaffAccountPanel(
     );
 
   root
-  .querySelector(
-    "#btnResetStaffPassword"
-  )
-  ?.addEventListener(
-    "click",
-    async () => {
-      const password =
-        prompt(
-          "Введіть новий тимчасовий пароль. Мінімум 8 символів:"
+    .querySelector(
+      "#btnResetStaffPassword"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openStaffPasswordResetModal(
+          root,
+          profileState,
+          staffId
         );
-
-      if (password === null) {
-        return;
       }
-
-      const cleanPassword =
-        String(password).trim();
-
-      if (
-        cleanPassword.length < 8
-      ) {
-        openDeleteModal(
-          "Пароль повинен містити мінімум 8 символів.",
-          null,
-          "info"
-        );
-
-        return;
-      }
-
-      const result =
-        await resetStaffPasswordApi(
-          staffId,
-          cleanPassword
-        );
-
-      if (!result.ok) {
-        openDeleteModal(
-          result.error ||
-          "Не вдалося скинути пароль.",
-          null,
-          "info"
-        );
-
-        return;
-      }
-
-      await renderTeamSettingsTab(
-        root,
-        profileState
-      );
-
-      openDeleteModal(
-        "Тимчасовий пароль встановлено. При наступному вході співробітник повинен створити новий пароль.",
-        null,
-        "success"
-      );
-    }
-  );
+    );
 }
+Object.assign(
+  TEAM_INTERFACE_TEXT,
+  {
+    "⚙ Налаштування профілю": {
+      en: "⚙ Profile settings",
+      de: "⚙ Profileinstellungen",
+      pl: "⚙ Ustawienia profilu",
+    },
+
+    "Налаштуйте професійний вигляд профілю: активний титул, фото та рамку.": {
+      en: "Customize the professional profile appearance: active title, photo and frame.",
+      de: "Passen Sie das professionelle Profil an: aktiver Titel, Foto und Rahmen.",
+      pl: "Dostosuj wygląd profilu zawodowego: aktywny tytuł, zdjęcie i ramkę.",
+    },
+
+    "🏆 Активний титул": {
+      en: "🏆 Active title",
+      de: "🏆 Aktiver Titel",
+      pl: "🏆 Aktywny tytuł",
+    },
+
+    "Поки немає відкритих титулів.": {
+      en: "No titles have been unlocked yet.",
+      de: "Noch keine Titel freigeschaltet.",
+      pl: "Nie odblokowano jeszcze żadnych tytułów.",
+    },
+
+    "📷 Фото профілю": {
+      en: "📷 Profile photo",
+      de: "📷 Profilfoto",
+      pl: "📷 Zdjęcie profilowe",
+    },
+
+    "Фото співробітника": {
+      en: "Employee photo",
+      de: "Mitarbeiterfoto",
+      pl: "Zdjęcie pracownika",
+    },
+
+    "Фото використовується у профілі ветеринара та списку команди.": {
+      en: "The photo is displayed in the veterinarian profile and team list.",
+      de: "Das Foto wird im Tierarztprofil und in der Teamliste angezeigt.",
+      pl: "Zdjęcie jest wyświetlane w profilu weterynarza i na liście zespołu.",
+    },
+
+    "📷 Завантажити фото": {
+      en: "📷 Upload photo",
+      de: "📷 Foto hochladen",
+      pl: "📷 Prześlij zdjęcie",
+    },
+
+    "🗑 Видалити фото": {
+      en: "🗑 Delete photo",
+      de: "🗑 Foto löschen",
+      pl: "🗑 Usuń zdjęcie",
+    },
+
+    "🖼 Активна рамка": {
+      en: "🖼 Active frame",
+      de: "🖼 Aktiver Rahmen",
+      pl: "🖼 Aktywna ramka",
+    },
+
+    "Поки немає відкритих рамок.": {
+      en: "No frames have been unlocked yet.",
+      de: "Noch keine Rahmen freigeschaltet.",
+      pl: "Nie odblokowano jeszcze żadnych ramek.",
+    },
+
+    "Фото завелике. Максимум 5 МБ.": {
+      en: "The photo is too large. Maximum size: 5 MB.",
+      de: "Das Foto ist zu groß. Maximale Größe: 5 MB.",
+      pl: "Zdjęcie jest za duże. Maksymalny rozmiar: 5 MB.",
+    },
+
+    "Не вдалося завантажити фото.": {
+      en: "Could not upload the photo.",
+      de: "Das Foto konnte nicht hochgeladen werden.",
+      pl: "Nie udało się przesłać zdjęcia.",
+    },
+
+    "Видалити фото?": {
+      en: "Delete the photo?",
+      de: "Foto löschen?",
+      pl: "Usunąć zdjęcie?",
+    },
+
+    "Не вдалося видалити фото.": {
+      en: "Could not delete the photo.",
+      de: "Das Foto konnte nicht gelöscht werden.",
+      pl: "Nie udało się usunąć zdjęcia.",
+    },
+  }
+);
+
+
+function getTeamPhotoErrorText(
+  sourceText,
+  error
+) {
+  const translated =
+    getTeamInterfaceText(
+      sourceText
+    );
+
+  const details =
+    String(
+      error?.message ||
+      error ||
+      ""
+    ).trim();
+
+  return details
+    ? `${translated} ${details}`
+    : translated;
+}
+
+
 async function renderTeamSettingsTab(
   root,
   state
@@ -25305,13 +30492,19 @@ async function renderTeamSettingsTab(
         };
 
   const career =
-    buildStaffCareer(state);
+    buildStaffCareer(
+      state
+    );
 
   const titles =
-    getUnlockedCareerTitles(career);
+    getUnlockedCareerTitles(
+      career
+    );
 
   const frames =
-    getUnlockedCareerFrames(career);
+    getUnlockedCareerFrames(
+      career
+    );
 
   const prefs =
     getStaffCareerPrefs(
@@ -25319,21 +30512,42 @@ async function renderTeamSettingsTab(
     );
 
   const profilePhoto =
-    state.doc.avatar || "";
+    state.doc.avatar ||
+    "";
+
+  const staffName =
+    String(
+      state.staffName ||
+      getTeamInterfaceText(
+        "Працівник"
+      )
+    );
 
   const staffLetter =
-    (
-      state.staffName || "?"
-    )
+    staffName
       .trim()
       .charAt(0)
-      .toUpperCase() || "?";
+      .toUpperCase() ||
+    "?";
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
-        <h2>⚙ Налаштування профілю</h2>
-        <p>Налаштуйте професійний вигляд профілю: активний титул, фото та рамку.</p>
+        <h2>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "⚙ Налаштування профілю"
+            )
+          )}
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Налаштуйте професійний вигляд профілю: активний титул, фото та рамку."
+            )
+          )}
+        </p>
       </div>
     </section>
 
@@ -25343,169 +30557,463 @@ async function renderTeamSettingsTab(
         state
       )}
 
-      <div class="teamDashPanel teamDashFull">
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+        "
+      >
         <div class="teamDashPanelHead">
-          <h3>🏆 Активний титул</h3>
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🏆 Активний титул"
+              )
+            )}
+          </h3>
         </div>
 
         <div class="careerChoiceGrid">
           ${
             titles.length
-              ? titles.map((t) => `
-                <button class="careerChoice ${prefs.titleId === t.id ? "active" : ""}" type="button" data-title-choice="${escapeHtml(t.id)}">
-                  <span>${escapeHtml(t.icon)}</span>
-                  <b>${escapeHtml(t.label)}</b>
-                  <small>${escapeHtml(achievementRarityLabel(t.rarity))}</small>
-                </button>
-              `).join("")
-              : `<div class="hint">Поки немає відкритих титулів.</div>`
+              ? titles
+                  .map(
+                    (title) => `
+                      <button
+                        class="
+                          careerChoice
+                          ${
+                            prefs.titleId ===
+                            title.id
+                              ? "active"
+                              : ""
+                          }
+                        "
+                        type="button"
+                        data-title-choice="${escapeHtml(
+                          title.id
+                        )}"
+                      >
+                        <span>
+                          ${escapeHtml(
+                            title.icon
+                          )}
+                        </span>
+
+                        <b>
+                          ${escapeHtml(
+                            translateAchievementText(
+                              title.label
+                            )
+                          )}
+                        </b>
+
+                        <small>
+                          ${escapeHtml(
+                            achievementRarityLabel(
+                              title.rarity
+                            )
+                          )}
+                        </small>
+                      </button>
+                    `
+                  )
+                  .join("")
+              : `
+                <div class="hint">
+                  ${escapeHtml(
+                    getTeamInterfaceText(
+                      "Поки немає відкритих титулів."
+                    )
+                  )}
+                </div>
+              `
           }
         </div>
       </div>
 
-      <div class="teamDashPanel teamDashFull">
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+        "
+      >
         <div class="teamDashPanelHead">
-          <h3>📷 Фото профілю</h3>
-          <span>PNG / JPG</span>
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "📷 Фото профілю"
+              )
+            )}
+          </h3>
+
+          <span>
+            PNG / JPG
+          </span>
         </div>
 
         <div class="teamPhotoSettings">
           <div class="teamPhotoPreview">
             ${
               profilePhoto
-                ? `<img src="${escapeHtml(profilePhoto)}" alt="${escapeHtml(state.staffName || "Працівник")}">`
-                : `<span>${escapeHtml(staffLetter)}</span>`
+                ? `
+                  <img
+                    src="${escapeHtml(
+                      profilePhoto
+                    )}"
+                    alt="${escapeHtml(
+                      staffName
+                    )}"
+                  >
+                `
+                : `
+                  <span data-team-content>
+                    ${escapeHtml(
+                      staffLetter
+                    )}
+                  </span>
+                `
             }
           </div>
 
           <div class="teamPhotoRight">
-            <h4>Фото співробітника</h4>
+            <h4>
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Фото співробітника"
+                )
+              )}
+            </h4>
 
             <p>
-              Фото використовується у профілі ветеринара та списку команди.
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Фото використовується у профілі ветеринара та списку команди."
+                )
+              )}
             </p>
 
             <div class="teamPhotoButtons">
-              <label class="teamPrimaryBtn profileUploadBtn">
-                📷 Завантажити фото
+              <label
+                class="
+                  teamPrimaryBtn
+                  profileUploadBtn
+                "
+              >
+                ${escapeHtml(
+                  getTeamInterfaceText(
+                    "📷 Завантажити фото"
+                  )
+                )}
+
                 <input
                   id="staffPhotoInput"
                   type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  hidden>
+                  accept="
+                    image/png,
+                    image/jpeg,
+                    image/webp
+                  "
+                  hidden
+                >
               </label>
 
               <button
                 id="btnDeleteStaffPhoto"
                 class="teamGhostBtn"
-                type="button">
-                🗑 Видалити фото
+                type="button"
+              >
+                ${escapeHtml(
+                  getTeamInterfaceText(
+                    "🗑 Видалити фото"
+                  )
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="teamDashPanel teamDashFull">
+      <div
+        class="
+          teamDashPanel
+          teamDashFull
+        "
+      >
         <div class="teamDashPanelHead">
-          <h3>🖼 Активна рамка</h3>
+          <h3>
+            ${escapeHtml(
+              getTeamInterfaceText(
+                "🖼 Активна рамка"
+              )
+            )}
+          </h3>
         </div>
 
         <div class="careerChoiceGrid">
           ${
             frames.length
-              ? frames.map((f) => `
-                <button
-                  class="careerChoice rarity-${escapeHtml(f.rarity)} ${prefs.frameId === f.id ? "active" : ""}"
-                  type="button"
-                  data-frame-choice="${escapeHtml(f.id)}">
+              ? frames
+                  .map(
+                    (frame) => `
+                      <button
+                        class="
+                          careerChoice
+                          rarity-${escapeHtml(
+                            frame.rarity
+                          )}
+                          ${
+                            prefs.frameId ===
+                            frame.id
+                              ? "active"
+                              : ""
+                          }
+                        "
+                        type="button"
+                        data-frame-choice="${escapeHtml(
+                          frame.id
+                        )}"
+                      >
+                        <span>
+                          ${escapeHtml(
+                            frame.icon
+                          )}
+                        </span>
 
-                  <span>${escapeHtml(f.icon)}</span>
-                  <b>${escapeHtml(f.label)}</b>
-                  <small>${escapeHtml(achievementRarityLabel(f.rarity))}</small>
-                </button>
-              `).join("")
-              : `<div class="hint">Поки немає відкритих рамок.</div>`
+                        <b>
+                          ${escapeHtml(
+                            translateAchievementText(
+                              frame.label
+                            )
+                          )}
+                        </b>
+
+                        <small>
+                          ${escapeHtml(
+                            achievementRarityLabel(
+                              frame.rarity
+                            )
+                          )}
+                        </small>
+                      </button>
+                    `
+                  )
+                  .join("")
+              : `
+                <div class="hint">
+                  ${escapeHtml(
+                    getTeamInterfaceText(
+                      "Поки немає відкритих рамок."
+                    )
+                  )}
+                </div>
+              `
           }
         </div>
       </div>
     </section>
   `;
 
-  root.querySelectorAll("[data-title-choice]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const titleId = btn.dataset.titleChoice || "none";
+  root
+    .querySelectorAll(
+      "[data-title-choice]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const titleId =
+              button.dataset
+                .titleChoice ||
+              "none";
 
-      saveStaffCareerPrefs(state.doc.id, { titleId });
-      applyCareerLookToSidebar(state);
-      renderTeamSettingsTab(root, state);
-    });
-  });
+            saveStaffCareerPrefs(
+              state.doc.id,
+              {
+                titleId,
+              }
+            );
 
-  root.querySelectorAll("[data-frame-choice]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const frameId = btn.dataset.frameChoice || "none";
+            applyCareerLookToSidebar(
+              state
+            );
 
-      saveStaffCareerPrefs(state.doc.id, { frameId });
-      applyCareerLookToSidebar(state);
-      renderTeamSettingsTab(root, state);
-    });
-  });
+            renderTeamSettingsTab(
+              root,
+              state
+            );
+          }
+        );
+      }
+    );
 
-  const photoInput = root.querySelector("#staffPhotoInput");
+  root
+    .querySelectorAll(
+      "[data-frame-choice]"
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const frameId =
+              button.dataset
+                .frameChoice ||
+              "none";
 
-  photoInput?.addEventListener("change", async () => {
-    const file = photoInput.files?.[0];
-    if (!file) return;
+            saveStaffCareerPrefs(
+              state.doc.id,
+              {
+                frameId,
+              }
+            );
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Фото завелике. Максимум 5 МБ.");
-      return;
+            applyCareerLookToSidebar(
+              state
+            );
+
+            renderTeamSettingsTab(
+              root,
+              state
+            );
+          }
+        );
+      }
+    );
+
+  const photoInput =
+    root.querySelector(
+      "#staffPhotoInput"
+    );
+
+  photoInput?.addEventListener(
+    "change",
+    async () => {
+      const file =
+        photoInput.files?.[0];
+
+      if (!file) return;
+
+      if (
+        file.size >
+        5 * 1024 * 1024
+      ) {
+        openDeleteModal(
+          getTeamInterfaceText(
+            "Фото завелике. Максимум 5 МБ."
+          ),
+          null,
+          "info"
+        );
+
+        return;
+      }
+
+      try {
+        const url =
+          await uploadFile(
+            file
+          );
+
+        await updateStaffApi(
+          state.doc.id,
+          {
+            ...state.doc,
+            avatar: url,
+          }
+        );
+
+        state.doc.avatar =
+          url;
+
+        await renderTeamSettingsTab(
+          root,
+          state
+        );
+
+        applyCareerLookToSidebar(
+          state
+        );
+      } catch (error) {
+        console.error(
+          error
+        );
+
+        openDeleteModal(
+          escapeHtml(
+            getTeamPhotoErrorText(
+              "Не вдалося завантажити фото.",
+              error
+            )
+          ),
+          null,
+          "info"
+        );
+      }
     }
+  );
 
-    try {
-      const url = await uploadFile(file);
+  root
+    .querySelector(
+      "#btnDeleteStaffPhoto"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        openDeleteModal(
+          getTeamInterfaceText(
+            "Видалити фото?"
+          ),
 
-      await updateStaffApi(state.doc.id, {
-        ...state.doc,
-        avatar: url,
-      });
+          async () => {
+            try {
+              await updateStaffApi(
+                state.doc.id,
+                {
+                  ...state.doc,
+                  avatar: "",
+                }
+              );
 
-      state.doc.avatar = url;
+              state.doc.avatar =
+                "";
 
-      renderTeamSettingsTab(root, state);
-      applyCareerLookToSidebar(state);
-    } catch (e) {
-      console.error(e);
-      alert("Не вдалося завантажити фото: " + (e.message || e));
-    }
-  });
+              await renderTeamSettingsTab(
+                root,
+                state
+              );
 
-  root.querySelector("#btnDeleteStaffPhoto")?.addEventListener("click", async () => {
-    if (!confirm("Видалити фото?")) return;
+              applyCareerLookToSidebar(
+                state
+              );
+            } catch (error) {
+              console.error(
+                error
+              );
 
-    try {
-      await updateStaffApi(state.doc.id, {
-        ...state.doc,
-        avatar: "",
-      });
+              openDeleteModal(
+                escapeHtml(
+                  getTeamPhotoErrorText(
+                    "Не вдалося видалити фото.",
+                    error
+                  )
+                ),
+                null,
+                "info"
+              );
+            }
+          }
+        );
+      }
+    );
 
-      state.doc.avatar = "";
-
-      renderTeamSettingsTab(root, state);
-      applyCareerLookToSidebar(state);
-    } catch (e) {
-      console.error(e);
-      alert("Не вдалося видалити фото: " + (e.message || e));
-    }
-  });
-    bindStaffAccountPanel(
+  bindStaffAccountPanel(
     root,
     state,
     accountResult
   );
 }
-
 async function loadStaffAdjustmentsApi(staffId) {
   const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/adjustments`);
   const json = await res.json();
@@ -25528,247 +31036,704 @@ async function deleteStaffAdjustmentApi(adjustmentId) {
   return await res.json();
 }
 
-function applyCareerLookToSidebar(state) {
-  const career = buildStaffCareer(state);
-  const prefs = getStaffCareerPrefs(state.doc.id);
+function applyCareerLookToSidebar(
+  state
+) {
+  const career =
+    buildStaffCareer(
+      state
+    );
 
+  const prefs =
+    getStaffCareerPrefs(
+      state.doc.id
+    );
 
-  const titles = getUnlockedCareerTitles(career);
-  const frames = getUnlockedCareerFrames(career);
+  const titles =
+    getUnlockedCareerTitles(
+      career
+    );
 
-  const selectedTitle = titles.find((x) => x.id === prefs.titleId);
-  const selectedFrame = frames.find((x) => x.id === prefs.frameId);
+  const frames =
+    getUnlockedCareerFrames(
+      career
+    );
+
+  const selectedTitle =
+    titles.find(
+      (title) =>
+        title.id ===
+        prefs.titleId
+    );
+
+  const selectedFrame =
+    frames.find(
+      (frame) =>
+        frame.id ===
+        prefs.frameId
+    );
 
   const titleText =
-    prefs.titleId === "none"
+    prefs.titleId ===
+    "none"
       ? ""
-      : selectedTitle?.label || career.title || "";
+      : translateAchievementText(
+          selectedTitle?.label ||
+          career.title ||
+          ""
+        );
 
   const frameId =
-    prefs.frameId === "none"
+    prefs.frameId ===
+    "none"
       ? ""
-      : selectedFrame?.id || career.activeFrame || "";
+      : (
+          selectedFrame?.id ||
+          career.activeFrame ||
+          ""
+        );
 
-  const avatar = document.querySelector(".teamDashAvatar");
+  const avatar =
+    document.querySelector(
+      ".teamDashAvatar"
+    );
+
   if (avatar) {
-    avatar.className = `teamDashAvatar ${frameId ? `frame-${frameId}` : ""}`;
+    avatar.className =
+      (
+        "teamDashAvatar" +
+        (
+          frameId
+            ? ` frame-${frameId}`
+            : ""
+        )
+      );
   }
 
-  const nameEl = document.querySelector(".teamDashName");
-  if (!nameEl) return;
+  const nameElement =
+    document.querySelector(
+      ".teamDashName"
+    );
 
-  let titleEl = document.querySelector(".teamDashTitle");
-
-  if (!titleText) {
-    titleEl?.remove();
+  if (!nameElement) {
     return;
   }
 
-  if (!titleEl) {
-    titleEl = document.createElement("div");
-    titleEl.className = "teamDashTitle";
-    nameEl.insertAdjacentElement("afterend", titleEl);
+  let titleElement =
+    document.querySelector(
+      ".teamDashTitle"
+    );
+
+  if (!titleText) {
+    titleElement?.remove();
+    return;
   }
 
-  titleEl.innerHTML = `🏆 ${escapeHtml(titleText)}`;
+  if (!titleElement) {
+    titleElement =
+      document.createElement(
+        "div"
+      );
+
+    titleElement.className =
+      "teamDashTitle";
+
+    nameElement
+      .insertAdjacentElement(
+        "afterend",
+        titleElement
+      );
+  }
+
+  titleElement.setAttribute(
+    "data-team-content",
+    ""
+  );
+
+  titleElement.innerHTML = `
+    🏆 ${escapeHtml(
+      titleText
+    )}
+  `;
 }
-function buildStaffChartsFromVisits(visits, monthsCount = 6) {
-  const monthNames = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
-  const now = new Date();
+function getTeamChartMonthNames() {
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+  }
+
+  if (language === "de") {
+    return [
+      "Jan",
+      "Feb",
+      "Mär",
+      "Apr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez",
+    ];
+  }
+
+  if (language === "pl") {
+    return [
+      "Sty",
+      "Lut",
+      "Mar",
+      "Kwi",
+      "Maj",
+      "Cze",
+      "Lip",
+      "Sie",
+      "Wrz",
+      "Paź",
+      "Lis",
+      "Gru",
+    ];
+  }
+
+  return [
+    "Січ",
+    "Лют",
+    "Бер",
+    "Кві",
+    "Тра",
+    "Чер",
+    "Лип",
+    "Сер",
+    "Вер",
+    "Жов",
+    "Лис",
+    "Гру",
+  ];
+}
+
+
+function buildStaffChartsFromVisits(
+  visits,
+  monthsCount = 6
+) {
+  const monthNames =
+    getTeamChartMonthNames();
+
+  const now =
+    new Date();
+
   const result = [];
 
-  if (Number(monthsCount) === 1) {
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  if (
+    Number(monthsCount) === 1
+  ) {
+    const year =
+      now.getFullYear();
 
-    for (let day = 1; day <= daysInMonth; day++) {
+    const month =
+      now.getMonth();
+
+    const daysInMonth =
+      new Date(
+        year,
+        month + 1,
+        0
+      ).getDate();
+
+    for (
+      let day = 1;
+      day <= daysInMonth;
+      day += 1
+    ) {
       result.push({
         year,
-        monthIndex: month,
+        monthIndex:
+          month,
         day,
-        label: String(day),
+        label:
+          String(day),
         revenue: 0,
         visits: 0,
       });
     }
 
-    visits.forEach((v) => {
-      const date = new Date(v.date || v.event_date || v.created_at || "");
-      if (Number.isNaN(date.getTime())) return;
-      if (date.getFullYear() !== year || date.getMonth() !== month) return;
+    visits.forEach(
+      (visit) => {
+        const date =
+          new Date(
+            visit.date ||
+            visit.event_date ||
+            visit.created_at ||
+            ""
+          );
 
-      const bucket = result[date.getDate() - 1];
-      if (!bucket) return;
+        if (
+          Number.isNaN(
+            date.getTime()
+          )
+        ) {
+          return;
+        }
 
-      bucket.visits += 1;
-      bucket.revenue += calcServicesTotal(v) + calcStockTotal(v);
-    });
+        if (
+          date.getFullYear() !==
+            year ||
+          date.getMonth() !==
+            month
+        ) {
+          return;
+        }
+
+        const bucket =
+          result[
+            date.getDate() - 1
+          ];
+
+        if (!bucket) return;
+
+        bucket.visits += 1;
+
+        bucket.revenue +=
+          calcServicesTotal(
+            visit
+          ) +
+          calcStockTotal(
+            visit
+          );
+      }
+    );
 
     return result;
   }
 
-  for (let i = monthsCount - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+  for (
+    let index =
+      Number(monthsCount) - 1;
+    index >= 0;
+    index -= 1
+  ) {
+    const date =
+      new Date(
+        now.getFullYear(),
+        now.getMonth() -
+          index,
+        1
+      );
 
     result.push({
-      year: d.getFullYear(),
-      monthIndex: d.getMonth(),
-      label: monthNames[d.getMonth()],
+      year:
+        date.getFullYear(),
+
+      monthIndex:
+        date.getMonth(),
+
+      label:
+        monthNames[
+          date.getMonth()
+        ],
+
       revenue: 0,
       visits: 0,
     });
   }
 
-  visits.forEach((v) => {
-    const date = new Date(v.date || v.event_date || v.created_at || "");
-    if (Number.isNaN(date.getTime())) return;
+  visits.forEach(
+    (visit) => {
+      const date =
+        new Date(
+          visit.date ||
+          visit.event_date ||
+          visit.created_at ||
+          ""
+        );
 
-    const bucket = result.find((x) => {
-      return x.year === date.getFullYear() && x.monthIndex === date.getMonth();
-    });
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
+        return;
+      }
 
-    if (!bucket) return;
+      const bucket =
+        result.find(
+          (item) =>
+            item.year ===
+              date.getFullYear() &&
+            item.monthIndex ===
+              date.getMonth()
+        );
 
-    bucket.visits += 1;
-    bucket.revenue += calcServicesTotal(v) + calcStockTotal(v);
-  });
+      if (!bucket) return;
+
+      bucket.visits += 1;
+
+      bucket.revenue +=
+        calcServicesTotal(
+          visit
+        ) +
+        calcStockTotal(
+          visit
+        );
+    }
+  );
 
   return result;
 }
-let staffRevenueChartInstance = null;
-let staffVisitsChartInstance = null;
 
-function renderStaffProfileCharts(dashboard, monthsCount = 6) {
-  if (typeof Chart === "undefined") {
-    console.warn("Chart.js не завантажився");
+
+let staffRevenueChartInstance =
+  null;
+
+let staffVisitsChartInstance =
+  null;
+
+
+function renderStaffProfileCharts(
+  dashboard,
+  monthsCount = 6
+) {
+  if (
+    typeof Chart ===
+    "undefined"
+  ) {
+    console.warn(
+      "Chart.js is unavailable"
+    );
+
     return;
   }
 
-  const visits = dashboard.live_staff_visits || dashboard.live_month_visits || [];
- const chartData = buildStaffChartsFromVisits(visits, monthsCount);
+  const visits =
+    dashboard
+      .live_staff_visits ||
+    dashboard
+      .live_month_visits ||
+    [];
 
-  const labels = chartData.map((x) => x.label);
-  const revenueValues = chartData.map((x) => x.revenue);
-  const visitsValues = chartData.map((x) => x.visits);
+  const chartData =
+    buildStaffChartsFromVisits(
+      visits,
+      monthsCount
+    );
 
-  const revenueCanvas = document.getElementById("staffRevenueChart");
-  const visitsCanvas = document.getElementById("staffVisitsChart");
+  const labels =
+    chartData.map(
+      (item) =>
+        item.label
+    );
+
+  const revenueValues =
+    chartData.map(
+      (item) =>
+        item.revenue
+    );
+
+  const visitsValues =
+    chartData.map(
+      (item) =>
+        item.visits
+    );
+
+  const revenueCanvas =
+    document.getElementById(
+      "staffRevenueChart"
+    );
+
+  const visitsCanvas =
+    document.getElementById(
+      "staffVisitsChart"
+    );
+
   const activeTheme =
-    document.body.dataset.theme || "purple";
+    document.body.dataset
+      .theme ||
+    "purple";
+
   const chartPalettes = {
     purple: {
-      revenueTop: "rgba(54, 224, 127, 0.95)",
-      revenueBottom: "rgba(54, 224, 127, 0.18)",
-      visitsTop: "rgba(180, 92, 255, 0.95)",
-      visitsBottom: "rgba(124, 92, 255, 0.18)",
+      revenueTop:
+        "rgba(54, 224, 127, 0.95)",
+
+      revenueBottom:
+        "rgba(54, 224, 127, 0.18)",
+
+      visitsTop:
+        "rgba(180, 92, 255, 0.95)",
+
+      visitsBottom:
+        "rgba(124, 92, 255, 0.18)",
     },
+
     black: {
-      revenueTop: "rgba(183, 154, 114, 0.94)",
-      revenueBottom: "rgba(183, 154, 114, 0.16)",
-      visitsTop: "rgba(126, 154, 166, 0.92)",
-      visitsBottom: "rgba(126, 154, 166, 0.16)",
+      revenueTop:
+        "rgba(183, 154, 114, 0.94)",
+
+      revenueBottom:
+        "rgba(183, 154, 114, 0.16)",
+
+      visitsTop:
+        "rgba(126, 154, 166, 0.92)",
+
+      visitsBottom:
+        "rgba(126, 154, 166, 0.16)",
     },
+
     white: {
-      revenueTop: "rgba(54, 142, 119, 0.92)",
-      revenueBottom: "rgba(54, 142, 119, 0.16)",
-      visitsTop: "rgba(52, 120, 168, 0.94)",
-      visitsBottom: "rgba(52, 120, 168, 0.16)",
+      revenueTop:
+        "rgba(54, 142, 119, 0.92)",
+
+      revenueBottom:
+        "rgba(54, 142, 119, 0.16)",
+
+      visitsTop:
+        "rgba(52, 120, 168, 0.94)",
+
+      visitsBottom:
+        "rgba(52, 120, 168, 0.16)",
     },
+
     blue: {
-      revenueTop: "rgba(95, 150, 188, 0.94)",
-      revenueBottom: "rgba(95, 150, 188, 0.16)",
-      visitsTop: "rgba(126, 174, 207, 0.92)",
-      visitsBottom: "rgba(126, 174, 207, 0.15)",
+      revenueTop:
+        "rgba(95, 150, 188, 0.94)",
+
+      revenueBottom:
+        "rgba(95, 150, 188, 0.16)",
+
+      visitsTop:
+        "rgba(126, 174, 207, 0.92)",
+
+      visitsBottom:
+        "rgba(126, 174, 207, 0.15)",
     },
+
     green: {
-      revenueTop: "rgba(124, 156, 138, 0.94)",
-      revenueBottom: "rgba(124, 156, 138, 0.16)",
-      visitsTop: "rgba(160, 185, 170, 0.92)",
-      visitsBottom: "rgba(160, 185, 170, 0.15)",
+      revenueTop:
+        "rgba(124, 156, 138, 0.94)",
+
+      revenueBottom:
+        "rgba(124, 156, 138, 0.16)",
+
+      visitsTop:
+        "rgba(160, 185, 170, 0.92)",
+
+      visitsBottom:
+        "rgba(160, 185, 170, 0.15)",
     },
   };
+
   const chartPalette =
-    chartPalettes[activeTheme] ||
+    chartPalettes[
+      activeTheme
+    ] ||
     chartPalettes.purple;
 
-  if (staffRevenueChartInstance) staffRevenueChartInstance.destroy();
-  if (staffVisitsChartInstance) staffVisitsChartInstance.destroy();
+  if (
+    staffRevenueChartInstance
+  ) {
+    staffRevenueChartInstance
+      .destroy();
+  }
+
+  if (
+    staffVisitsChartInstance
+  ) {
+    staffVisitsChartInstance
+      .destroy();
+  }
 
   if (revenueCanvas) {
-    const ctx = revenueCanvas.getContext("2d");
+    const context =
+      revenueCanvas.getContext(
+        "2d"
+      );
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    const gradient =
+      context.createLinearGradient(
+        0,
+        0,
+        0,
+        220
+      );
+
     gradient.addColorStop(
       0,
-      chartPalette.revenueTop
-    );
-    gradient.addColorStop(
-      1,
-      chartPalette.revenueBottom
+      chartPalette
+        .revenueTop
     );
 
-    staffRevenueChartInstance = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: "Виручка",
-          data: revenueValues,
-          backgroundColor: gradient,
-          borderRadius: 14,
-          borderSkipped: false,
-        }],
-      },
-      options: buildTeamChartOptions("грн"),
-    });
+    gradient.addColorStop(
+      1,
+      chartPalette
+        .revenueBottom
+    );
+
+    staffRevenueChartInstance =
+      new Chart(
+        context,
+        {
+          type: "bar",
+
+          data: {
+            labels,
+
+            datasets: [
+              {
+                label:
+                  getTeamInterfaceText(
+                    "Виручка"
+                  ),
+
+                data:
+                  revenueValues,
+
+                backgroundColor:
+                  gradient,
+
+                borderRadius:
+                  14,
+
+                borderSkipped:
+                  false,
+              },
+            ],
+          },
+
+          options:
+            buildTeamChartOptions(
+              "грн"
+            ),
+        }
+      );
   }
 
   if (visitsCanvas) {
-    const ctx = visitsCanvas.getContext("2d");
+    const context =
+      visitsCanvas.getContext(
+        "2d"
+      );
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    const gradient =
+      context.createLinearGradient(
+        0,
+        0,
+        0,
+        220
+      );
+
     gradient.addColorStop(
       0,
-      chartPalette.visitsTop
-    );
-    gradient.addColorStop(
-      1,
-      chartPalette.visitsBottom
+      chartPalette
+        .visitsTop
     );
 
-    staffVisitsChartInstance = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: "Візити",
-          data: visitsValues,
-          backgroundColor: gradient,
-          borderRadius: 14,
-          borderSkipped: false,
-        }],
-      },
-      options: buildTeamChartOptions("візити"),
-    });
+    gradient.addColorStop(
+      1,
+      chartPalette
+        .visitsBottom
+    );
+
+    staffVisitsChartInstance =
+      new Chart(
+        context,
+        {
+          type: "bar",
+
+          data: {
+            labels,
+
+            datasets: [
+              {
+                label:
+                  getTeamInterfaceText(
+                    "Візити"
+                  ),
+
+                data:
+                  visitsValues,
+
+                backgroundColor:
+                  gradient,
+
+                borderRadius:
+                  14,
+
+                borderSkipped:
+                  false,
+              },
+            ],
+          },
+
+          options:
+            buildTeamChartOptions(
+              "візити"
+            ),
+        }
+      );
   }
 }
 
-function switchStaffChartRange(monthsCount, btn) {
-  window.__staffChartRange = Number(monthsCount || 1);
 
-  document.querySelectorAll("[data-chart-range]").forEach((b) => {
-    b.classList.remove("active");
-  });
+function switchStaffChartRange(
+  monthsCount,
+  button
+) {
+  window.__staffChartRange =
+    Number(
+      monthsCount ||
+      1
+    );
 
-  btn?.classList.add("active");
+  document
+    .querySelectorAll(
+      "[data-chart-range]"
+    )
+    .forEach(
+      (item) => {
+        item.classList.remove(
+          "active"
+        );
+      }
+    );
 
-  if (!window.__lastTeamDashboard) {
-    console.warn("Немає dashboard для графіка");
+  button?.classList.add(
+    "active"
+  );
+
+  if (
+    !window
+      .__lastTeamDashboard
+  ) {
+    console.warn(
+      "Dashboard data is unavailable"
+    );
+
     return;
   }
 
-  renderStaffProfileCharts(window.__lastTeamDashboard, window.__staffChartRange);
+  renderStaffProfileCharts(
+    window
+      .__lastTeamDashboard,
+
+    window
+      .__staffChartRange
+  );
 }
 
 async function buildStaffLiveStats(staffId) {
@@ -25829,86 +31794,236 @@ async function buildStaffLiveStats(staffId) {
   };
 }
 
-function buildTeamChartOptions(unitLabel) {
+function getTeamChartUnitText(
+  unitType
+) {
+  if (
+    unitType === "money" ||
+    unitType === "грн"
+  ) {
+    return getTeamInterfaceText(
+      "грн"
+    );
+  }
+
+  if (
+    unitType === "visits" ||
+    unitType === "візити"
+  ) {
+    return getTeamInterfaceText(
+      "візити"
+    );
+  }
+
+  return getTeamInterfaceText(
+    unitType
+  );
+}
+
+
+function getTeamKpiComparisonText(
+  growth
+) {
+  const numericGrowth =
+    Number(growth || 0);
+
+  const direction =
+    numericGrowth >= 0
+      ? "↑"
+      : "↓";
+
+  const value =
+    Math.abs(
+      numericGrowth
+    ).toLocaleString(
+      getCalendarLocale()
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${direction} ${value}% ` +
+      "vs previous month"
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${direction} ${value}% ` +
+      "gegenüber dem Vormonat"
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `${direction} ${value}% ` +
+      "w porównaniu z poprzednim miesiącem"
+    );
+  }
+
+  return (
+    `${direction} ${value}% ` +
+    "до минулого місяця"
+  );
+}
+
+
+function buildTeamChartOptions(
+  unitType
+) {
   const isWhiteTheme =
-    document.body.dataset.theme === "white";
+    document.body.dataset
+      .theme ===
+    "white";
+
+  const isMoney =
+    unitType === "money" ||
+    unitType === "грн";
+
+  const isVisits =
+    unitType === "visits" ||
+    unitType === "візити";
+
+  const localizedUnit =
+    getTeamChartUnitText(
+      unitType
+    );
 
   return {
     responsive: true,
-    maintainAspectRatio: false,
+
+    maintainAspectRatio:
+      false,
+
     animation: {
       duration: 800,
-      easing: "easeOutQuart",
+      easing:
+        "easeOutQuart",
     },
+
     plugins: {
       legend: {
         display: false,
       },
+
       tooltip: {
-        backgroundColor: isWhiteTheme
-          ? "rgba(23, 43, 58, 0.96)"
-          : "rgba(10, 16, 34, 0.96)",
-        titleColor: "#fff",
-        bodyColor: "#fff",
-        borderColor: isWhiteTheme
-          ? "rgba(160, 198, 223, 0.35)"
-          : "rgba(255,255,255,0.12)",
+        backgroundColor:
+          isWhiteTheme
+            ? "rgba(23, 43, 58, 0.96)"
+            : "rgba(10, 16, 34, 0.96)",
+
+        titleColor:
+          "#fff",
+
+        bodyColor:
+          "#fff",
+
+        borderColor:
+          isWhiteTheme
+            ? "rgba(160, 198, 223, 0.35)"
+            : "rgba(255,255,255,0.12)",
+
         borderWidth: 1,
         padding: 12,
         displayColors: false,
-        callbacks: {
-          label: function(context) {
-            const value = Number(context.raw || 0);
 
-            if (unitLabel === "грн") {
-              return `${value.toLocaleString("uk-UA")} грн`;
+        callbacks: {
+          label(
+            context
+          ) {
+            const value =
+              Number(
+                context.raw ||
+                0
+              );
+
+            if (isMoney) {
+              return getTeamMoneyText(
+                value
+              );
             }
 
-            return `${value} ${unitLabel}`;
+            if (isVisits) {
+              return (
+                value.toLocaleString(
+                  getCalendarLocale()
+                ) +
+                " " +
+                localizedUnit
+              );
+            }
+
+            return (
+              value.toLocaleString(
+                getCalendarLocale()
+              ) +
+              (
+                localizedUnit
+                  ? ` ${localizedUnit}`
+                  : ""
+              )
+            );
           },
         },
       },
     },
+
     scales: {
       x: {
         grid: {
           display: false,
         },
+
         ticks: {
-  color: isWhiteTheme
-    ? "rgba(38, 65, 82, 0.72)"
-    : "rgba(255,255,255,0.72)",
-  autoSkip: false,
-  maxRotation: 0,
-  minRotation: 0,
-  font: {
-    weight: "700",
-    size: 10,
-  },
-},
+          color:
+            isWhiteTheme
+              ? "rgba(38, 65, 82, 0.72)"
+              : "rgba(255,255,255,0.72)",
+
+          autoSkip: false,
+          maxRotation: 0,
+          minRotation: 0,
+
+          font: {
+            weight: "700",
+            size: 10,
+          },
+        },
+
         border: {
           display: false,
         },
       },
+
       y: {
         beginAtZero: true,
-        grid: {
-          color: isWhiteTheme
-            ? "rgba(47, 86, 112, 0.1)"
-            : "rgba(255,255,255,0.06)",
-        },
-        ticks: {
-          color: isWhiteTheme
-            ? "rgba(55, 81, 97, 0.58)"
-            : "rgba(255,255,255,0.48)",
-          callback: function(value) {
-            if (unitLabel === "грн") {
-              return Number(value).toLocaleString("uk-UA");
-            }
 
-            return value;
+        grid: {
+          color:
+            isWhiteTheme
+              ? "rgba(47, 86, 112, 0.1)"
+              : "rgba(255,255,255,0.06)",
+        },
+
+        ticks: {
+          color:
+            isWhiteTheme
+              ? "rgba(55, 81, 97, 0.58)"
+              : "rgba(255,255,255,0.48)",
+
+          callback(
+            value
+          ) {
+            return Number(
+              value
+            ).toLocaleString(
+              getCalendarLocale()
+            );
           },
         },
+
         border: {
           display: false,
         },
@@ -25917,20 +32032,45 @@ function buildTeamChartOptions(unitLabel) {
   };
 }
 
-function renderTeamKpiCard(icon, title, value, growth) {
-  const g = Number(growth || 0);
+
+function renderTeamKpiCard(
+  icon,
+  title,
+  value,
+  growth
+) {
   return `
     <div class="teamKpiCard">
-      <div class="teamKpiIcon">${icon}</div>
+      <div class="teamKpiIcon">
+        ${icon}
+      </div>
+
       <div>
-        <span>${escapeHtml(title)}</span>
-        <strong>${escapeHtml(String(value))}</strong>
-        <small>${g >= 0 ? "↑" : "↓"} ${Math.abs(g)}% до минулого місяця</small>
+        <span>
+          ${escapeHtml(
+            getTeamInterfaceText(
+              title
+            )
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            String(value)
+          )}
+        </strong>
+
+        <small>
+          ${escapeHtml(
+            getTeamKpiComparisonText(
+              growth
+            )
+          )}
+        </small>
       </div>
     </div>
   `;
 }
-
 function renderTeamBars(labels, values, color) {
   const max = Math.max(...values, 1);
 
@@ -31087,7 +37227,6 @@ function bindFinanceSectionNavigation(
       }
     );
 }
-
 async function loadFinanceTransactionsApi(
   options = {}
 ) {

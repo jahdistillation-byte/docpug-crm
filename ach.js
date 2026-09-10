@@ -1,3 +1,547 @@
+const ACHIEVEMENT_TRANSLATIONS = {
+  "Робота з собаками": {
+    en: "Working with dogs",
+    de: "Arbeit mit Hunden",
+    pl: "Praca z psami",
+  },
+
+  "Базовий досвід": {
+    en: "Basic experience",
+    de: "Grunderfahrung",
+    pl: "Podstawowe doświadczenie",
+  },
+
+  "50 прийомів собак": {
+    en: "50 dog visits",
+    de: "50 Hundetermine",
+    pl: "50 wizyt z psami",
+  },
+
+  "Досвід роботи з собаками": {
+    en: "Dog care experience",
+    de: "Erfahrung mit Hunden",
+    pl: "Doświadczenie w pracy z psami",
+  },
+
+  "250 прийомів собак": {
+    en: "250 dog visits",
+    de: "250 Hundetermine",
+    pl: "250 wizyt z psami",
+  },
+
+  "Експерт з собак": {
+    en: "Dog expert",
+    de: "Hundeexperte",
+    pl: "Ekspert od psów",
+  },
+
+  "1000 прийомів собак": {
+    en: "1,000 dog visits",
+    de: "1.000 Hundetermine",
+    pl: "1 000 wizyt z psami",
+  },
+
+  "Провідний спеціаліст з собак": {
+    en: "Leading dog specialist",
+    de: "Führender Hundespezialist",
+    pl: "Wiodący specjalista od psów",
+  },
+
+  "2500 прийомів собак": {
+    en: "2,500 dog visits",
+    de: "2.500 Hundetermine",
+    pl: "2 500 wizyt z psami",
+  },
+
+  "Робота з котами": {
+    en: "Working with cats",
+    de: "Arbeit mit Katzen",
+    pl: "Praca z kotami",
+  },
+
+  "50 прийомів котів": {
+    en: "50 cat visits",
+    de: "50 Katzentermine",
+    pl: "50 wizyt z kotami",
+  },
+
+  "Досвід роботи з котами": {
+    en: "Cat care experience",
+    de: "Erfahrung mit Katzen",
+    pl: "Doświadczenie w pracy z kotami",
+  },
+
+  "250 прийомів котів": {
+    en: "250 cat visits",
+    de: "250 Katzentermine",
+    pl: "250 wizyt z kotami",
+  },
+
+  "Експерт з котів": {
+    en: "Cat expert",
+    de: "Katzenexperte",
+    pl: "Ekspert od kotów",
+  },
+
+  "1000 прийомів котів": {
+    en: "1,000 cat visits",
+    de: "1.000 Katzentermine",
+    pl: "1 000 wizyt z kotami",
+  },
+
+  "Провідний спеціаліст з котів": {
+    en: "Leading cat specialist",
+    de: "Führender Katzenspezialist",
+    pl: "Wiodący specjalista od kotów",
+  },
+
+  "2500 прийомів котів": {
+    en: "2,500 cat visits",
+    de: "2.500 Katzentermine",
+    pl: "2 500 wizyt z kotami",
+  },
+
+  "Фінансовий внесок": {
+    en: "Financial contribution",
+    de: "Finanzieller Beitrag",
+    pl: "Wkład finansowy",
+  },
+
+  "Перші 100 000 грн": {
+    en: "First UAH 100,000",
+    de: "Die ersten 100.000 UAH",
+    pl: "Pierwsze 100 000 UAH",
+  },
+
+  "100 000 грн виручки": {
+    en: "UAH 100,000 in revenue",
+    de: "100.000 UAH Umsatz",
+    pl: "100 000 UAH przychodu",
+  },
+
+  "Стабільний внесок": {
+    en: "Consistent contribution",
+    de: "Stabiler Beitrag",
+    pl: "Stabilny wkład",
+  },
+
+  "1 000 000 грн виручки": {
+    en: "UAH 1,000,000 in revenue",
+    de: "1.000.000 UAH Umsatz",
+    pl: "1 000 000 UAH przychodu",
+  },
+
+  "Високий фінансовий результат": {
+    en: "Outstanding financial result",
+    de: "Hervorragendes Finanzergebnis",
+    pl: "Wysoki wynik finansowy",
+  },
+
+  "10 000 000 грн виручки": {
+    en: "UAH 10,000,000 in revenue",
+    de: "10.000.000 UAH Umsatz",
+    pl: "10 000 000 UAH przychodu",
+  },
+};
+
+
+function getAchievementLanguage() {
+  const language =
+    typeof getInterfaceLanguage ===
+    "function"
+      ? getInterfaceLanguage()
+      : "uk";
+
+  return [
+    "uk",
+    "en",
+    "de",
+    "pl",
+  ].includes(language)
+    ? language
+    : "uk";
+}
+
+
+function translateAchievementText(
+  value
+) {
+  const source =
+    String(value || "");
+
+  const language =
+    getAchievementLanguage();
+
+  const entry =
+    Object.entries(
+      ACHIEVEMENT_TRANSLATIONS
+    ).find(
+      ([
+        ukrainian,
+        translations,
+      ]) =>
+        ukrainian === source ||
+        Object.values(
+          translations
+        ).includes(source)
+    );
+
+  if (!entry) {
+    return source;
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+Object.assign(
+  ACHIEVEMENT_TRANSLATIONS,
+  {
+    "Профілактика": {
+      en: "Preventive care",
+      de: "Vorsorge",
+      pl: "Profilaktyka",
+    },
+
+    "Профілактична практика": {
+      en: "Preventive care practice",
+      de: "Vorsorgepraxis",
+      pl: "Praktyka profilaktyczna",
+    },
+
+    "100 вакцинацій": {
+      en: "100 vaccinations",
+      de: "100 Impfungen",
+      pl: "100 szczepień",
+    },
+
+    "Майстер профілактики": {
+      en: "Preventive care master",
+      de: "Meister der Vorsorge",
+      pl: "Mistrz profilaktyki",
+    },
+
+    "1000 вакцинацій": {
+      en: "1,000 vaccinations",
+      de: "1.000 Impfungen",
+      pl: "1 000 szczepień",
+    },
+
+    "Хірургічний досвід": {
+      en: "Surgical experience",
+      de: "Chirurgische Erfahrung",
+      pl: "Doświadczenie chirurgiczne",
+    },
+
+    "Перший хірургічний досвід": {
+      en: "First surgical experience",
+      de: "Erste chirurgische Erfahrung",
+      pl: "Pierwsze doświadczenie chirurgiczne",
+    },
+
+    "Перша операція": {
+      en: "First surgery",
+      de: "Erste Operation",
+      pl: "Pierwsza operacja",
+    },
+
+    "Хірургічна практика": {
+      en: "Surgical practice",
+      de: "Chirurgische Praxis",
+      pl: "Praktyka chirurgiczna",
+    },
+
+    "100 операцій": {
+      en: "100 surgeries",
+      de: "100 Operationen",
+      pl: "100 operacji",
+    },
+
+    "Майстер хірургії": {
+      en: "Master of surgery",
+      de: "Meister der Chirurgie",
+      pl: "Mistrz chirurgii",
+    },
+
+    "500 операцій": {
+      en: "500 surgeries",
+      de: "500 Operationen",
+      pl: "500 operacji",
+    },
+
+    "Професійна активність": {
+      en: "Professional activity",
+      de: "Berufliche Aktivität",
+      pl: "Aktywność zawodowa",
+    },
+
+    "Стабільна присутність": {
+      en: "Consistent attendance",
+      de: "Beständige Anwesenheit",
+      pl: "Regularna obecność",
+    },
+
+    "7 змін поспіль без вихідного": {
+      en: "7 consecutive shifts without a day off",
+      de: "7 Schichten in Folge ohne freien Tag",
+      pl: "7 zmian z rzędu bez dnia wolnego",
+    },
+
+    "Надійний спеціаліст": {
+      en: "Reliable specialist",
+      de: "Zuverlässiger Spezialist",
+      pl: "Niezawodny specjalista",
+    },
+
+    "15 змін поспіль без вихідного": {
+      en: "15 consecutive shifts without a day off",
+      de: "15 Schichten in Folge ohne freien Tag",
+      pl: "15 zmian z rzędu bez dnia wolnego",
+    },
+
+    "Колекція досвіду": {
+      en: "Experience collection",
+      de: "Erfahrungssammlung",
+      pl: "Kolekcja doświadczenia",
+    },
+
+    "Колекціонер досвіду I": {
+      en: "Experience collector I",
+      de: "Erfahrungssammler I",
+      pl: "Kolekcjoner doświadczenia I",
+    },
+
+    "Відкрити 5 етапів": {
+      en: "Unlock 5 stages",
+      de: "5 Stufen freischalten",
+      pl: "Odblokuj 5 etapów",
+    },
+
+    "Колекціонер досвіду II": {
+      en: "Experience collector II",
+      de: "Erfahrungssammler II",
+      pl: "Kolekcjoner doświadczenia II",
+    },
+
+    "Відкрити 10 етапів": {
+      en: "Unlock 10 stages",
+      de: "10 Stufen freischalten",
+      pl: "Odblokuj 10 etapów",
+    },
+
+    "Колекціонер досвіду III": {
+      en: "Experience collector III",
+      de: "Erfahrungssammler III",
+      pl: "Kolekcjoner doświadczenia III",
+    },
+
+    "Відкрити 20 етапів": {
+      en: "Unlock 20 stages",
+      de: "20 Stufen freischalten",
+      pl: "Odblokuj 20 etapów",
+    },
+
+    "Жива легенда": {
+      en: "Living legend",
+      de: "Lebende Legende",
+      pl: "Żywa legenda",
+    },
+
+    "Відкрити всі етапи": {
+      en: "Unlock all stages",
+      de: "Alle Stufen freischalten",
+      pl: "Odblokuj wszystkie etapy",
+    },
+
+    "Нагорода попереду": {
+      en: "Reward ahead",
+      de: "Belohnung voraus",
+      pl: "Nagroda przed Tobą",
+    },
+
+    "Відкриється після першого етапу": {
+      en: "Unlocks after the first stage",
+      de: "Wird nach der ersten Stufe freigeschaltet",
+      pl: "Odblokuje się po pierwszym etapie",
+    },
+
+    "Досягнення": {
+      en: "Achievement",
+      de: "Erfolg",
+      pl: "Osiągnięcie",
+    },
+
+    "Професійний титул": {
+      en: "Professional title",
+      de: "Berufstitel",
+      pl: "Tytuł zawodowy",
+    },
+
+    "Значок собак": {
+      en: "Dog badge",
+      de: "Hundeabzeichen",
+      pl: "Odznaka psów",
+    },
+
+    "Значок котів": {
+      en: "Cat badge",
+      de: "Katzenabzeichen",
+      pl: "Odznaka kotów",
+    },
+
+    "Фінансова відзнака": {
+      en: "Financial award",
+      de: "Finanzauszeichnung",
+      pl: "Odznaka finansowa",
+    },
+
+    "Значок профілактики": {
+      en: "Preventive care badge",
+      de: "Vorsorgeabzeichen",
+      pl: "Odznaka profilaktyki",
+    },
+
+    "Хірургічна відзнака": {
+      en: "Surgical award",
+      de: "Chirurgische Auszeichnung",
+      pl: "Odznaka chirurgiczna",
+    },
+
+    "Відзнака активності": {
+      en: "Activity award",
+      de: "Aktivitätsauszeichnung",
+      pl: "Odznaka aktywności",
+    },
+
+    "Колекційна рамка": {
+      en: "Collection frame",
+      de: "Sammlerrahmen",
+      pl: "Ramka kolekcjonerska",
+    },
+
+    "Нагорода": {
+      en: "Reward",
+      de: "Belohnung",
+      pl: "Nagroda",
+    },
+
+    "Легенда ветеринарії": {
+      en: "Veterinary legend",
+      de: "Legende der Tiermedizin",
+      pl: "Legenda weterynarii",
+    },
+
+    "Експерт ветеринарії": {
+      en: "Veterinary expert",
+      de: "Experte der Tiermedizin",
+      pl: "Ekspert weterynarii",
+    },
+
+    "Майстер ветеринарії": {
+      en: "Master of veterinary medicine",
+      de: "Meister der Tiermedizin",
+      pl: "Mistrz weterynarii",
+    },
+
+    "Досвідчений ветеринар": {
+      en: "Experienced veterinarian",
+      de: "Erfahrener Tierarzt",
+      pl: "Doświadczony weterynarz",
+    },
+
+    "Практикант": {
+      en: "Trainee",
+      de: "Praktikant",
+      pl: "Praktykant",
+    },
+
+    "Перший крок": {
+      en: "First step",
+      de: "Erster Schritt",
+      pl: "Pierwszy krok",
+    },
+
+    "Новий спеціаліст": {
+      en: "New specialist",
+      de: "Neuer Spezialist",
+      pl: "Nowy specjalista",
+    },
+
+    "Гілку завершено": {
+      en: "Track completed",
+      de: "Pfad abgeschlossen",
+      pl: "Ścieżka ukończona",
+    },
+
+    "Наступна ціль": {
+      en: "Next goal",
+      de: "Nächstes Ziel",
+      pl: "Następny cel",
+    },
+
+    "Відкриється пізніше": {
+      en: "Unlocks later",
+      de: "Wird später freigeschaltet",
+      pl: "Odblokuje się później",
+    },
+
+    "Звичайне": {
+      en: "Common",
+      de: "Gewöhnlich",
+      pl: "Zwykłe",
+    },
+
+    "Незвичайне": {
+      en: "Uncommon",
+      de: "Ungewöhnlich",
+      pl: "Niezwykłe",
+    },
+
+    "Рідкісне": {
+      en: "Rare",
+      de: "Selten",
+      pl: "Rzadkie",
+    },
+
+    "Епічне": {
+      en: "Epic",
+      de: "Episch",
+      pl: "Epickie",
+    },
+
+    "Легендарне": {
+      en: "Legendary",
+      de: "Legendär",
+      pl: "Legendarne",
+    },
+
+    "Міфічне": {
+      en: "Mythic",
+      de: "Mythisch",
+      pl: "Mityczne",
+    },
+
+    "Без титулу": {
+      en: "No title",
+      de: "Kein Titel",
+      pl: "Bez tytułu",
+    },
+
+    "Без рамки": {
+      en: "No frame",
+      de: "Kein Rahmen",
+      pl: "Bez ramki",
+    },
+  }
+);
 function buildStaffCareer(state) {
   const visits = state.dashboard.live_staff_visits || [];
   const revenue = Number(state.revenue || state.dashboard.revenue || 0);
@@ -337,47 +881,176 @@ function getCareerIcon(totalVisits) {
   return "✨";
 }
 
+function getAchievementLocale() {
+  const language =
+    getAchievementLanguage();
+
+  if (language === "en") {
+    return "en-GB";
+  }
+
+  if (language === "de") {
+    return "de-DE";
+  }
+
+  if (language === "pl") {
+    return "pl-PL";
+  }
+
+  return "uk-UA";
+}
+
+
 function renderAchievementCard(a) {
-  const isComplete = a.unlocked;
-  const statusText = isComplete ? "Гілку завершено" : "Наступна ціль";
+  const isComplete =
+    a.unlocked;
+
+  const statusText =
+    translateAchievementText(
+      isComplete
+        ? "Гілку завершено"
+        : "Наступна ціль"
+    );
 
   return `
-    <div class="achievementCard ${isComplete ? "unlocked" : "locked"} rarity-${escapeHtml(a.rarity)}">
-      <div class="achievementIcon">${a.icon}</div>
+    <div
+      class="
+        achievementCard
+        ${
+          isComplete
+            ? "unlocked"
+            : "locked"
+        }
+        rarity-${escapeHtml(
+          a.rarity
+        )}
+      "
+    >
+      <div class="achievementIcon">
+        ${a.icon}
+      </div>
 
       <div class="achievementBody">
         <div class="achievementTop">
-          <b>${escapeHtml(a.groupName)}</b>
-          <span>${escapeHtml(achievementRarityLabel(a.rarity))}</span>
+          <b>
+            ${escapeHtml(
+              translateAchievementText(
+                a.groupName
+              )
+            )}
+          </b>
+
+          <span>
+            ${escapeHtml(
+              achievementRarityLabel(
+                a.rarity
+              )
+            )}
+          </span>
         </div>
 
-        <div class="achievementStage">${escapeHtml(a.name)}</div>
+        <div class="achievementStage">
+          ${escapeHtml(
+            translateAchievementText(
+              a.name
+            )
+          )}
+        </div>
 
-        <p>${escapeHtml(a.description)}</p>
+        <p>
+          ${escapeHtml(
+            translateAchievementText(
+              a.description
+            )
+          )}
+        </p>
 
         <div class="achievementProgress">
           <div>
-            <span>${statusText}: ${Number(a.current || 0).toLocaleString("uk-UA")} / ${Number(a.target || 0).toLocaleString("uk-UA")}</span>
-            <b>${a.progress}%</b>
+            <span>
+              ${statusText}:
+              ${Number(
+                a.current || 0
+              ).toLocaleString(
+                getAchievementLocale()
+              )}
+              /
+              ${Number(
+                a.target || 0
+              ).toLocaleString(
+                getAchievementLocale()
+              )}
+            </span>
+
+            <b>
+              ${a.progress}%
+            </b>
           </div>
-          <i><em style="width:${a.progress}%"></em></i>
+
+          <i>
+            <em
+              style="
+                width:${a.progress}%;
+              "
+            ></em>
+          </i>
         </div>
 
-        <div class="achievementReward ${a.unlockedSteps ? "unlocked" : ""}">
-          <span>${a.reward?.icon || "🏆"}</span>
+        <div
+          class="
+            achievementReward
+            ${
+              a.unlockedSteps
+                ? "unlocked"
+                : ""
+            }
+          "
+        >
+          <span>
+            ${
+              a.reward?.icon ||
+              "🏆"
+            }
+          </span>
+
           <div>
-            <b>${escapeHtml(a.reward?.label || "Нагорода")}</b>
-            <small>${escapeHtml(a.reward?.title || "Відкриється пізніше")}</small>
+            <b>
+              ${escapeHtml(
+                translateAchievementText(
+                  a.reward?.label ||
+                  "Нагорода"
+                )
+              )}
+            </b>
+
+            <small>
+              ${escapeHtml(
+                translateAchievementText(
+                  a.reward?.title ||
+                  "Відкриється пізніше"
+                )
+              )}
+            </small>
           </div>
         </div>
       </div>
 
-      <div class="achievementXp">+${Number(a.xp || 0).toLocaleString("uk-UA")} XP</div>
+      <div class="achievementXp">
+        +${Number(
+          a.xp || 0
+        ).toLocaleString(
+          getAchievementLocale()
+        )}
+        XP
+      </div>
     </div>
   `;
 }
 
-function achievementRarityLabel(rarity) {
+
+function achievementRarityLabel(
+  rarity
+) {
   const map = {
     common: "Звичайне",
     uncommon: "Незвичайне",
@@ -387,82 +1060,170 @@ function achievementRarityLabel(rarity) {
     mythic: "Міфічне",
   };
 
-  return map[rarity] || "Досягнення";
+  return translateAchievementText(
+    map[rarity] ||
+    "Досягнення"
+  );
 }
-function getUnlockedCareerTitles(career) {
+
+
+function getUnlockedCareerTitles(
+  career
+) {
   const titles = [
     {
       id: "none",
-      label: "Без титулу",
+
+      label:
+        translateAchievementText(
+          "Без титулу"
+        ),
+
       rarity: "common",
       icon: "—",
-    }
+    },
   ];
 
-  const careerTrack = career.achievements.find((a) => a.id === "career");
+  const careerTrack =
+    career.achievements.find(
+      (achievement) =>
+        achievement.id ===
+        "career"
+    );
+
+  const defaultTitle =
+    career.title ||
+    "Новий спеціаліст";
 
   if (!careerTrack) {
     titles.push({
-      id: career.title || "Новий спеціаліст",
-      label: career.title || "Новий спеціаліст",
+      id: defaultTitle,
+
+      label:
+        translateAchievementText(
+          defaultTitle
+        ),
+
       rarity: "common",
-      icon: career.levelIcon || "✨",
+
+      icon:
+        career.levelIcon ||
+        "✨",
     });
 
     return titles;
   }
 
   careerTrack.steps
-    .filter((s) => careerTrack.rawCurrent >= s.target)
-    .forEach((s) => {
-      titles.push({
-        id: s.name,
-        label: s.name,
-        rarity: s.rarity,
-        icon: s.icon,
-      });
-    });
+    .filter(
+      (stepItem) =>
+        careerTrack.rawCurrent >=
+        stepItem.target
+    )
+    .forEach(
+      (stepItem) => {
+        titles.push({
+          id: stepItem.name,
+
+          label:
+            translateAchievementText(
+              stepItem.name
+            ),
+
+          rarity:
+            stepItem.rarity,
+
+          icon:
+            stepItem.icon,
+        });
+      }
+    );
 
   if (titles.length === 1) {
     titles.push({
-      id: career.title || "Новий спеціаліст",
-      label: career.title || "Новий спеціаліст",
+      id: defaultTitle,
+
+      label:
+        translateAchievementText(
+          defaultTitle
+        ),
+
       rarity: "common",
-      icon: career.levelIcon || "✨",
+
+      icon:
+        career.levelIcon ||
+        "✨",
     });
   }
 
   return titles;
 }
 
-function getUnlockedCareerFrames(career) {
+
+function getUnlockedCareerFrames(
+  career
+) {
   const frames = [
     {
       id: "none",
-      label: "Без рамки",
+
+      label:
+        translateAchievementText(
+          "Без рамки"
+        ),
+
       rarity: "common",
       icon: "⬜",
-    }
+    },
   ];
 
-  career.achievements.forEach((a) => {
-    const frame = a.reward?.frame;
-    if (!frame) return;
+  career.achievements.forEach(
+    (achievement) => {
+      const frame =
+        achievement.reward?.frame;
 
-    frames.push({
-      id: frame,
-      label: a.reward?.title || a.groupName,
-      rarity: frame === "gold" ? "legendary" : frame,
-      icon: a.reward?.icon || "🏆",
-    });
-  });
+      if (!frame) return;
 
-  const unique = new Map();
-  frames.forEach((f) => unique.set(f.id, f));
+      const frameLabel =
+        achievement.reward?.title ||
+        achievement.groupName;
 
-  return Array.from(unique.values());
+      frames.push({
+        id: frame,
+
+        label:
+          translateAchievementText(
+            frameLabel
+          ),
+
+        rarity:
+          frame === "gold"
+            ? "legendary"
+            : frame,
+
+        icon:
+          achievement.reward?.icon ||
+          "🏆",
+      });
+    }
+  );
+
+  const uniqueFrames =
+    new Map();
+
+  frames.forEach(
+    (frame) => {
+      uniqueFrames.set(
+        frame.id,
+        frame
+      );
+    }
+  );
+
+  return Array.from(
+    uniqueFrames.values()
+  );
 }
-
 function getStaffCareerPrefs(staffId) {
   try {
     return JSON.parse(localStorage.getItem(`staff_career_prefs_${staffId}`) || "{}");
