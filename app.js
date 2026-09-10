@@ -26251,26 +26251,291 @@ function getStockCategories(
 }
 
 
-function getStockStatus(item) {
-  const quantity = Math.max(
-    0,
-    Number(item?.qty || 0)
-  );
+function getStockDynamicMessage(
+  type,
+  values = {}
+) {
+  const language =
+    getInterfaceLanguage();
 
-  const minimum = Math.max(
-    0,
+  const name =
+    String(
+      values.name || ""
+    );
+
+  const unit =
+    String(
+      values.unit || ""
+    );
+
+  const quantity =
     Number(
-      item?.min_qty ??
-      item?.minimum_qty ??
-      5
-    )
+      values.quantity || 0
+    ).toLocaleString(
+      getCalendarLocale()
+    );
+
+  const minimum =
+    Number(
+      values.minimum || 0
+    ).toLocaleString(
+      getCalendarLocale()
+    );
+
+  const days =
+    Math.max(
+      0,
+      Math.round(
+        Number(
+          values.days || 0
+        )
+      )
+    );
+
+  const expiryLabel =
+    String(
+      values.expiryLabel || ""
+    );
+
+  const formattedDate =
+    String(
+      values.formattedDate || ""
+    );
+
+  const messages = {
+    uk: {
+      expiryDays:
+        `${days} дн. до завершення`,
+
+      validUntil:
+        `Придатний до ${formattedDate}`,
+
+      expiredTitle:
+        `${name}: термін придатності минув`,
+
+      expiryTitle:
+        `${name}: ${expiryLabel}`,
+
+      atRisk:
+        `Під ризиком ${quantity} ${unit}.`,
+
+      checkBeforeUse:
+        "Перевірте позицію перед використанням.",
+
+      emptyTitle:
+        `${name} закінчився`,
+
+      recommendedMinimum:
+        `Рекомендований мінімум — ${minimum} ${unit}.`,
+
+      unavailable:
+        "Позиція недоступна для використання.",
+
+      criticalTitle:
+        `${name}: критичний залишок`,
+
+      criticalDescription:
+        `Залишилось ${quantity} ${unit}, мінімум — ${minimum}.`,
+
+      forecastTitle:
+        `${name} вистачить приблизно на ${days} дн.`,
+
+      forecastDescription:
+        "Прогноз за списаннями останніх 30 днів.",
+    },
+
+    en: {
+      expiryDays:
+        `${days} ${
+          days === 1
+            ? "day"
+            : "days"
+        } until expiry`,
+
+      validUntil:
+        `Valid until ${formattedDate}`,
+
+      expiredTitle:
+        `${name}: expired`,
+
+      expiryTitle:
+        `${name}: ${expiryLabel}`,
+
+      atRisk:
+        `${quantity} ${unit} at risk.`,
+
+      checkBeforeUse:
+        "Check this item before use.",
+
+      emptyTitle:
+        `${name} is out of stock`,
+
+      recommendedMinimum:
+        `Recommended minimum: ${minimum} ${unit}.`,
+
+      unavailable:
+        "This item is unavailable for use.",
+
+      criticalTitle:
+        `${name}: critical quantity`,
+
+      criticalDescription:
+        `${quantity} ${unit} remaining, minimum: ${minimum}.`,
+
+      forecastTitle:
+        `${name} will last approximately ${days} ${
+          days === 1
+            ? "day"
+            : "days"
+        }.`,
+
+      forecastDescription:
+        "Forecast based on write-offs during the last 30 days.",
+    },
+
+    de: {
+      expiryDays:
+        `Noch ${days} ${
+          days === 1
+            ? "Tag"
+            : "Tage"
+        } bis zum Ablauf`,
+
+      validUntil:
+        `Verwendbar bis ${formattedDate}`,
+
+      expiredTitle:
+        `${name}: abgelaufen`,
+
+      expiryTitle:
+        `${name}: ${expiryLabel}`,
+
+      atRisk:
+        `${quantity} ${unit} gefährdet.`,
+
+      checkBeforeUse:
+        "Prüfen Sie diesen Artikel vor der Verwendung.",
+
+      emptyTitle:
+        `${name} ist nicht vorrätig`,
+
+      recommendedMinimum:
+        `Empfohlener Mindestbestand: ${minimum} ${unit}.`,
+
+      unavailable:
+        "Dieser Artikel ist nicht verfügbar.",
+
+      criticalTitle:
+        `${name}: kritischer Bestand`,
+
+      criticalDescription:
+        `${quantity} ${unit} verbleiben, Mindestbestand: ${minimum}.`,
+
+      forecastTitle:
+        `${name} reicht voraussichtlich noch ${days} ${
+          days === 1
+            ? "Tag"
+            : "Tage"
+        }.`,
+
+      forecastDescription:
+        "Prognose anhand der Abschreibungen der letzten 30 Tage.",
+    },
+
+    pl: {
+      expiryDays:
+        `${days} ${
+          days === 1
+            ? "dzień"
+            : "dni"
+        } do końca ważności`,
+
+      validUntil:
+        `Ważne do ${formattedDate}`,
+
+      expiredTitle:
+        `${name}: termin ważności minął`,
+
+      expiryTitle:
+        `${name}: ${expiryLabel}`,
+
+      atRisk:
+        `Zagrożone: ${quantity} ${unit}.`,
+
+      checkBeforeUse:
+        "Sprawdź tę pozycję przed użyciem.",
+
+      emptyTitle:
+        `${name}: brak w magazynie`,
+
+      recommendedMinimum:
+        `Zalecane minimum: ${minimum} ${unit}.`,
+
+      unavailable:
+        "Ta pozycja jest niedostępna do użycia.",
+
+      criticalTitle:
+        `${name}: stan krytyczny`,
+
+      criticalDescription:
+        `Pozostało ${quantity} ${unit}, minimum: ${minimum}.`,
+
+      forecastTitle:
+        `${name} wystarczy na około ${days} ${
+          days === 1
+            ? "dzień"
+            : "dni"
+        }.`,
+
+      forecastDescription:
+        "Prognoza na podstawie rozchodów z ostatnich 30 dni.",
+    },
+  };
+
+  const currentMessages =
+    messages[language] ||
+    messages.uk;
+
+  return (
+    currentMessages[type] ||
+    ""
   );
+}
+
+
+function getStockStatus(item) {
+  const quantity =
+    Math.max(
+      0,
+      Number(
+        item?.qty || 0
+      )
+    );
+
+  const minimum =
+    Math.max(
+      0,
+      Number(
+        item?.min_qty ??
+        item?.minimum_qty ??
+        5
+      )
+    );
 
   if (quantity <= 0) {
     return {
       key: "empty",
-      label: "Немає в наявності",
-      shortLabel: "Немає",
+
+      label:
+        getStockInterfaceText(
+          "Немає в наявності"
+        ),
+
+      shortLabel:
+        getStockInterfaceText(
+          "Немає"
+        ),
+
       icon: "○",
     };
   }
@@ -26278,25 +26543,55 @@ function getStockStatus(item) {
   if (quantity <= minimum) {
     return {
       key: "critical",
-      label: "Критичний залишок",
-      shortLabel: "Критично",
+
+      label:
+        getStockInterfaceText(
+          "Критичний залишок"
+        ),
+
+      shortLabel:
+        getStockInterfaceText(
+          "Критично"
+        ),
+
       icon: "!",
     };
   }
 
-  if (quantity <= minimum * 2) {
+  if (
+    quantity <=
+    minimum * 2
+  ) {
     return {
       key: "low",
-      label: "Закінчується",
-      shortLabel: "Мало",
+
+      label:
+        getStockInterfaceText(
+          "Закінчується"
+        ),
+
+      shortLabel:
+        getStockInterfaceText(
+          "Мало"
+        ),
+
       icon: "↓",
     };
   }
 
   return {
     key: "good",
-    label: "Достатній запас",
-    shortLabel: "В наявності",
+
+    label:
+      getStockInterfaceText(
+        "Достатній запас"
+      ),
+
+    shortLabel:
+      getStockInterfaceText(
+        "В наявності"
+      ),
+
     icon: "✓",
   };
 }
@@ -26332,7 +26627,7 @@ function formatStockDate(value) {
 
   return parsed
     ? parsed.toLocaleDateString(
-        "uk-UA"
+        getCalendarLocale()
       )
     : "";
 }
@@ -26365,17 +26660,21 @@ function getStockExpiryMeta(
   const days =
     Math.ceil(
       (
-        expiryDate.getTime()
-        - today.getTime()
-      )
-      / 86400000
+        expiryDate.getTime() -
+        today.getTime()
+      ) /
+      86400000
     );
 
   if (days < 0) {
     return {
       key: "expired",
       days,
-      label: "Термін минув",
+
+      label:
+        getStockInterfaceText(
+          "Термін минув"
+        ),
     };
   }
 
@@ -26383,10 +26682,18 @@ function getStockExpiryMeta(
     return {
       key: "critical",
       days,
+
       label:
         days === 0
-          ? "Останній день"
-          : `${days} дн. до завершення`,
+          ? getStockInterfaceText(
+              "Останній день"
+            )
+          : getStockDynamicMessage(
+              "expiryDays",
+              {
+                days,
+              }
+            ),
     };
   }
 
@@ -26394,26 +26701,43 @@ function getStockExpiryMeta(
     return {
       key: "warning",
       days,
+
       label:
-        `${days} дн. до завершення`,
+        getStockDynamicMessage(
+          "expiryDays",
+          {
+            days,
+          }
+        ),
     };
   }
 
   return {
     key: "good",
     days,
+
     label:
-      `Придатний до ${formatStockDate(
-        item.expiry_date
-      )}`,
+      getStockDynamicMessage(
+        "validUntil",
+        {
+          formattedDate:
+            formatStockDate(
+              item.expiry_date
+            ),
+        }
+      ),
   };
 }
 
 
-function buildStockPugInsights(items) {
+function buildStockPugInsights(
+  items
+) {
   const signals = [];
+
   const attentionItemIds =
     new Set();
+
   let expiryRiskCount = 0;
   let forecastRiskCount = 0;
   let valueAtRisk = 0;
@@ -26423,154 +26747,256 @@ function buildStockPugInsights(items) {
       (item) =>
         item?.active !== false
     )
-    .forEach((item) => {
-      const itemId =
-        String(item.id || "");
-      const quantity =
-        Math.max(
-          0,
-          Number(item.qty || 0)
-        );
-      const minimum =
-        Math.max(
-          0,
-          Number(item.min_qty || 0)
-        );
-      const cost =
-        Math.max(
-          0,
-          Number(item.cost || 0)
-        );
-      const expiry =
-        getStockExpiryMeta(item);
-      const estimatedDaysLeft =
-        item.estimated_days_left ==
-        null
-          ? null
-          : Math.max(
-              0,
-              Number(
-                item.estimated_days_left
-              )
-            );
+    .forEach(
+      (item) => {
+        const itemId =
+          String(
+            item.id || ""
+          );
 
-      if (
-        expiry.key === "expired" ||
-        expiry.key === "critical"
-      ) {
-        expiryRiskCount += 1;
-        attentionItemIds.add(itemId);
-        valueAtRisk +=
-          quantity * cost;
+        const quantity =
+          Math.max(
+            0,
+            Number(
+              item.qty || 0
+            )
+          );
 
-        signals.push({
-          priority:
-            expiry.key === "expired"
-              ? 0
-              : 1,
-          tone:
-            expiry.key === "expired"
-              ? "danger"
-              : "warning",
-          icon:
-            expiry.key === "expired"
-              ? "!"
-              : "◷",
-          itemId,
-          title:
-            expiry.key === "expired"
-              ? `${item.name}: термін придатності минув`
-              : `${item.name}: ${expiry.label.toLowerCase()}`,
-          description:
-            quantity > 0
-              ? `Під ризиком ${quantity.toLocaleString(
-                  "uk-UA"
-                )} ${item.unit}.`
-              : "Перевірте позицію перед використанням.",
-        });
+        const minimum =
+          Math.max(
+            0,
+            Number(
+              item.min_qty || 0
+            )
+          );
+
+        const cost =
+          Math.max(
+            0,
+            Number(
+              item.cost || 0
+            )
+          );
+
+        const expiry =
+          getStockExpiryMeta(
+            item
+          );
+
+        const estimatedDaysLeft =
+          item.estimated_days_left ==
+          null
+            ? null
+            : Math.max(
+                0,
+                Number(
+                  item
+                    .estimated_days_left
+                )
+              );
+
+        if (
+          expiry.key ===
+            "expired" ||
+          expiry.key ===
+            "critical"
+        ) {
+          expiryRiskCount += 1;
+
+          attentionItemIds.add(
+            itemId
+          );
+
+          valueAtRisk +=
+            quantity * cost;
+
+          signals.push({
+            priority:
+              expiry.key ===
+              "expired"
+                ? 0
+                : 1,
+
+            tone:
+              expiry.key ===
+              "expired"
+                ? "danger"
+                : "warning",
+
+            icon:
+              expiry.key ===
+              "expired"
+                ? "!"
+                : "◷",
+
+            itemId,
+
+            title:
+              getStockDynamicMessage(
+                expiry.key ===
+                  "expired"
+                  ? "expiredTitle"
+                  : "expiryTitle",
+                {
+                  name:
+                    item.name,
+
+                  expiryLabel:
+                    expiry.label,
+                }
+              ),
+
+            description:
+              quantity > 0
+                ? getStockDynamicMessage(
+                    "atRisk",
+                    {
+                      quantity,
+                      unit:
+                        item.unit,
+                    }
+                  )
+                : getStockDynamicMessage(
+                    "checkBeforeUse"
+                  ),
+          });
+        }
+
+        if (quantity <= 0) {
+          attentionItemIds.add(
+            itemId
+          );
+
+          signals.push({
+            priority: 0,
+            tone: "danger",
+            icon: "0",
+            itemId,
+
+            title:
+              getStockDynamicMessage(
+                "emptyTitle",
+                {
+                  name:
+                    item.name,
+                }
+              ),
+
+            description:
+              minimum > 0
+                ? getStockDynamicMessage(
+                    "recommendedMinimum",
+                    {
+                      minimum,
+                      unit:
+                        item.unit,
+                    }
+                  )
+                : getStockDynamicMessage(
+                    "unavailable"
+                  ),
+          });
+        } else if (
+          quantity <= minimum
+        ) {
+          attentionItemIds.add(
+            itemId
+          );
+
+          signals.push({
+            priority: 1,
+            tone: "warning",
+            icon: "↓",
+            itemId,
+
+            title:
+              getStockDynamicMessage(
+                "criticalTitle",
+                {
+                  name:
+                    item.name,
+                }
+              ),
+
+            description:
+              getStockDynamicMessage(
+                "criticalDescription",
+                {
+                  quantity,
+                  minimum,
+                  unit:
+                    item.unit,
+                }
+              ),
+          });
+        }
+
+        if (
+          estimatedDaysLeft !=
+            null &&
+          estimatedDaysLeft > 0 &&
+          estimatedDaysLeft <=
+            14 &&
+          quantity > minimum
+        ) {
+          forecastRiskCount += 1;
+
+          attentionItemIds.add(
+            itemId
+          );
+
+          signals.push({
+            priority:
+              estimatedDaysLeft <=
+              7
+                ? 1
+                : 2,
+
+            tone:
+              estimatedDaysLeft <=
+              7
+                ? "warning"
+                : "info",
+
+            icon: "↘",
+            itemId,
+
+            title:
+              getStockDynamicMessage(
+                "forecastTitle",
+                {
+                  name:
+                    item.name,
+
+                  days:
+                    estimatedDaysLeft,
+                }
+              ),
+
+            description:
+              getStockDynamicMessage(
+                "forecastDescription"
+              ),
+          });
+        }
       }
-
-      if (quantity <= 0) {
-        attentionItemIds.add(itemId);
-
-        signals.push({
-          priority: 0,
-          tone: "danger",
-          icon: "0",
-          itemId,
-          title:
-            `${item.name} закінчився`,
-          description:
-            minimum > 0
-              ? `Рекомендований мінімум — ${minimum.toLocaleString(
-                  "uk-UA"
-                )} ${item.unit}.`
-              : "Позиція недоступна для використання.",
-        });
-      } else if (
-        quantity <= minimum
-      ) {
-        attentionItemIds.add(itemId);
-
-        signals.push({
-          priority: 1,
-          tone: "warning",
-          icon: "↓",
-          itemId,
-          title:
-            `${item.name}: критичний залишок`,
-          description:
-            `Залишилось ${quantity.toLocaleString(
-              "uk-UA"
-            )} ${item.unit}, мінімум — ${minimum.toLocaleString(
-              "uk-UA"
-            )}.`,
-        });
-      }
-
-      if (
-        estimatedDaysLeft != null &&
-        estimatedDaysLeft > 0 &&
-        estimatedDaysLeft <= 14 &&
-        quantity > minimum
-      ) {
-        forecastRiskCount += 1;
-        attentionItemIds.add(itemId);
-
-        signals.push({
-          priority:
-            estimatedDaysLeft <= 7
-              ? 1
-              : 2,
-          tone:
-            estimatedDaysLeft <= 7
-              ? "warning"
-              : "info",
-          icon: "↘",
-          itemId,
-          title:
-            `${item.name} вистачить приблизно на ${Math.max(
-              1,
-              Math.round(
-                estimatedDaysLeft
-              )
-            )} дн.`,
-          description:
-            "Прогноз за списаннями останніх 30 днів.",
-        });
-      }
-    });
+    );
 
   signals.sort(
-    (left, right) =>
+    (
+      left,
+      right
+    ) =>
       left.priority -
       right.priority
   );
 
   return {
     signals,
+
     attentionCount:
       attentionItemIds.size,
+
     expiryRiskCount,
     forecastRiskCount,
     valueAtRisk,
@@ -37775,7 +38201,1484 @@ async function renderFinanceTab(
       );
   }
 }
+const STOCK_INTERFACE_TEXT = {
+  "ОБЛІК КЛІНІКИ": {
+    en: "CLINIC INVENTORY",
+    de: "KLINIKBESTAND",
+    pl: "MAGAZYN KLINIKI",
+  },
 
+  "Склад клініки": {
+    en: "Clinic inventory",
+    de: "Klinikbestand",
+    pl: "Magazyn kliniki",
+  },
+
+  "Контролюйте препарати, матеріали, залишки та вартість запасів.": {
+    en: "Monitor medicines, materials, quantities and inventory value.",
+    de: "Überwachen Sie Medikamente, Materialien, Bestände und Lagerwert.",
+    pl: "Kontroluj leki, materiały, stany oraz wartość zapasów.",
+  },
+
+  "Додати позицію": {
+    en: "Add item",
+    de: "Artikel hinzufügen",
+    pl: "Dodaj pozycję",
+  },
+
+  "Позицій": {
+    en: "Items",
+    de: "Artikel",
+    pl: "Pozycje",
+  },
+
+  "у каталозі складу": {
+    en: "in the inventory catalog",
+    de: "im Lagerkatalog",
+    pl: "w katalogu magazynu",
+  },
+
+  "Загальний залишок": {
+    en: "Total quantity",
+    de: "Gesamtbestand",
+    pl: "Łączny stan",
+  },
+
+  "одиниць товару": {
+    en: "units in stock",
+    de: "Einheiten auf Lager",
+    pl: "jednostek towaru",
+  },
+
+  "Потребують уваги": {
+    en: "Require attention",
+    de: "Aufmerksamkeit erforderlich",
+    pl: "Wymagają uwagi",
+  },
+
+  "закінчуються": {
+    en: "running low",
+    de: "gehen zur Neige",
+    pl: "kończą się",
+  },
+
+  "Закінчилися": {
+    en: "Out of stock",
+    de: "Nicht vorrätig",
+    pl: "Brak w magazynie",
+  },
+
+  "немає в наявності": {
+    en: "not available",
+    de: "nicht verfügbar",
+    pl: "niedostępne",
+  },
+
+  "Вартість запасів": {
+    en: "Inventory value",
+    de: "Lagerwert",
+    pl: "Wartość zapasów",
+  },
+
+  "за закупівельною ціною": {
+    en: "at purchase price",
+    de: "zum Einkaufspreis",
+    pl: "według ceny zakupu",
+  },
+
+  "PUG КОРОТКО · АВТОМАТИЧНИЙ КОНТРОЛЬ": {
+    en: "PUG SUMMARY · AUTOMATIC MONITORING",
+    de: "PUG ÜBERSICHT · AUTOMATISCHE KONTROLLE",
+    pl: "PUG W SKRÓCIE · AUTOMATYCZNA KONTROLA",
+  },
+
+  "На складі все спокійно": {
+    en: "Inventory is in good condition",
+    de: "Im Lager ist alles in Ordnung",
+    pl: "W magazynie wszystko jest w porządku",
+  },
+
+  "Перевіряємо залишки, терміни придатності та темп використання.": {
+    en: "We monitor quantities, expiration dates and usage rates.",
+    de: "Bestände, Verfallsdaten und Verbrauch werden überwacht.",
+    pl: "Monitorujemy stany, terminy ważności i tempo zużycia.",
+  },
+
+  "Терміни": {
+    en: "Expiry",
+    de: "Verfall",
+    pl: "Terminy",
+  },
+
+  "Прогноз": {
+    en: "Forecast",
+    de: "Prognose",
+    pl: "Prognoza",
+  },
+
+  "Під ризиком": {
+    en: "At risk",
+    de: "Gefährdet",
+    pl: "Zagrożone",
+  },
+
+  "Переглянути →": {
+    en: "View →",
+    de: "Anzeigen →",
+    pl: "Zobacz →",
+  },
+
+  "Критичних сигналів немає": {
+    en: "No critical alerts",
+    de: "Keine kritischen Warnungen",
+    pl: "Brak krytycznych alertów",
+  },
+
+  "PUG продовжує стежити за змінами автоматично.": {
+    en: "PUG continues monitoring changes automatically.",
+    de: "PUG überwacht Änderungen weiterhin automatisch.",
+    pl: "PUG nadal automatycznie monitoruje zmiany.",
+  },
+
+  "Пошук препарату або матеріалу...": {
+    en: "Search medicine or material...",
+    de: "Medikament oder Material suchen...",
+    pl: "Szukaj leku lub materiału...",
+  },
+
+  "Усі": {
+    en: "All",
+    de: "Alle",
+    pl: "Wszystkie",
+  },
+
+  "В наявності": {
+    en: "In stock",
+    de: "Vorrätig",
+    pl: "Dostępne",
+  },
+
+  "Закінчуються": {
+    en: "Running low",
+    de: "Wenig Bestand",
+    pl: "Kończą się",
+  },
+
+  "Немає": {
+    en: "Out of stock",
+    de: "Nicht vorrätig",
+    pl: "Brak",
+  },
+
+  "Усі групи": {
+    en: "All groups",
+    de: "Alle Gruppen",
+    pl: "Wszystkie grupy",
+  },
+
+  "Усі категорії": {
+    en: "All categories",
+    de: "Alle Kategorien",
+    pl: "Wszystkie kategorie",
+  },
+
+  "Форма випуску": {
+    en: "Dosage form",
+    de: "Darreichungsform",
+    pl: "Postać preparatu",
+  },
+
+  "Усі форми": {
+    en: "All forms",
+    de: "Alle Formen",
+    pl: "Wszystkie postacie",
+  },
+
+  "Для кого": {
+    en: "For which animals",
+    de: "Für welche Tiere",
+    pl: "Dla jakich zwierząt",
+  },
+
+  "Усі тварини": {
+    en: "All animals",
+    de: "Alle Tiere",
+    pl: "Wszystkie zwierzęta",
+  },
+
+  "Позицій не знайдено": {
+    en: "No items found",
+    de: "Keine Artikel gefunden",
+    pl: "Nie znaleziono pozycji",
+  },
+
+  "Змініть пошук або фільтр.": {
+    en: "Change the search query or filter.",
+    de: "Ändern Sie die Suche oder den Filter.",
+    pl: "Zmień wyszukiwanie lub filtr.",
+  },
+
+  "Активність позиції": {
+    en: "Item availability",
+    de: "Artikelverfügbarkeit",
+    pl: "Dostępność pozycji",
+  },
+
+  "Форма": {
+    en: "Form",
+    de: "Form",
+    pl: "Postać",
+  },
+
+  "Застосування": {
+    en: "Administration",
+    de: "Anwendung",
+    pl: "Sposób podania",
+  },
+
+  "Не вказано": {
+    en: "Not specified",
+    de: "Nicht angegeben",
+    pl: "Nie podano",
+  },
+
+  "Універсальний": {
+    en: "All animals",
+    de: "Alle Tiere",
+    pl: "Wszystkie zwierzęta",
+  },
+
+  "Партія": {
+    en: "Batch",
+    de: "Charge",
+    pl: "Partia",
+  },
+
+  "Продаж": {
+    en: "Sale price",
+    de: "Verkauf",
+    pl: "Sprzedaż",
+  },
+
+  "Закупівля": {
+    en: "Purchase price",
+    de: "Einkauf",
+    pl: "Zakup",
+  },
+
+  "Залишок": {
+    en: "Quantity",
+    de: "Bestand",
+    pl: "Stan",
+  },
+
+  "Мінімум": {
+    en: "Minimum",
+    de: "Minimum",
+    pl: "Minimum",
+  },
+
+  "Вартість залишку:": {
+    en: "Stock value:",
+    de: "Bestandswert:",
+    pl: "Wartość zapasu:",
+  },
+
+  "− Списати": {
+    en: "− Write off",
+    de: "− Abschreiben",
+    pl: "− Rozchód",
+  },
+
+  "＋ Поповнити": {
+    en: "＋ Add stock",
+    de: "＋ Auffüllen",
+    pl: "＋ Uzupełnij",
+  },
+
+  "✎ Редагувати": {
+    en: "✎ Edit",
+    de: "✎ Bearbeiten",
+    pl: "✎ Edytuj",
+  },
+
+  "Видалити": {
+    en: "Delete",
+    de: "Löschen",
+    pl: "Usuń",
+  },
+
+  "Немає в наявності": {
+    en: "Out of stock",
+    de: "Nicht vorrätig",
+    pl: "Brak w magazynie",
+  },
+
+  "Критичний залишок": {
+    en: "Critical quantity",
+    de: "Kritischer Bestand",
+    pl: "Stan krytyczny",
+  },
+
+  "Критично": {
+    en: "Critical",
+    de: "Kritisch",
+    pl: "Krytycznie",
+  },
+
+  "Закінчується": {
+    en: "Running low",
+    de: "Geht zur Neige",
+    pl: "Kończy się",
+  },
+
+  "Мало": {
+    en: "Low",
+    de: "Wenig",
+    pl: "Mało",
+  },
+
+  "Достатній запас": {
+    en: "Sufficient quantity",
+    de: "Ausreichender Bestand",
+    pl: "Wystarczający stan",
+  },
+
+  "Термін минув": {
+    en: "Expired",
+    de: "Abgelaufen",
+    pl: "Termin minął",
+  },
+
+  "Останній день": {
+    en: "Last valid day",
+    de: "Letzter Gültigkeitstag",
+    pl: "Ostatni dzień ważności",
+  },
+
+  "Лікарські засоби": {
+    en: "Medicines",
+    de: "Arzneimittel",
+    pl: "Leki",
+  },
+
+  "Місцеві препарати": {
+    en: "Topical preparations",
+    de: "Präparate zur äußeren Anwendung",
+    pl: "Preparaty miejscowe",
+  },
+
+  "Профілактика та діагностика": {
+    en: "Prevention and diagnostics",
+    de: "Prävention und Diagnostik",
+    pl: "Profilaktyka i diagnostyka",
+  },
+
+  "Матеріали та обладнання": {
+    en: "Materials and equipment",
+    de: "Materialien und Ausstattung",
+    pl: "Materiały i wyposażenie",
+  },
+
+  "Інше": {
+    en: "Other",
+    de: "Sonstiges",
+    pl: "Inne",
+  },
+
+  "Аналгетики, седативні та спазмолітики": {
+    en: "Analgesics, sedatives and antispasmodics",
+    de: "Analgetika, Sedativa und Spasmolytika",
+    pl: "Leki przeciwbólowe, uspokajające i rozkurczowe",
+  },
+
+  "Антибактеріальні препарати": {
+    en: "Antibacterial medicines",
+    de: "Antibakterielle Arzneimittel",
+    pl: "Leki przeciwbakteryjne",
+  },
+
+  "Гормональні препарати": {
+    en: "Hormonal medicines",
+    de: "Hormonpräparate",
+    pl: "Leki hormonalne",
+  },
+
+  "НПЗП": {
+    en: "NSAIDs",
+    de: "NSAR",
+    pl: "NLPZ",
+  },
+
+  "Кардіологічні препарати": {
+    en: "Cardiology medicines",
+    de: "Herzmedikamente",
+    pl: "Leki kardiologiczne",
+  },
+
+  "Протиблювотні препарати": {
+    en: "Antiemetics",
+    de: "Antiemetika",
+    pl: "Leki przeciwwymiotne",
+  },
+
+  "Протиепілептичні препарати": {
+    en: "Antiepileptic medicines",
+    de: "Antiepileptika",
+    pl: "Leki przeciwpadaczkowe",
+  },
+
+  "Протимаститні препарати": {
+    en: "Mastitis medicines",
+    de: "Mastitispräparate",
+    pl: "Leki przeciw mastitis",
+  },
+
+  "Протипаразитарні препарати": {
+    en: "Antiparasitic medicines",
+    de: "Antiparasitika",
+    pl: "Leki przeciwpasożytnicze",
+  },
+
+  "Сироватки, імуноглобуліни та імуномодулятори": {
+    en: "Sera, immunoglobulins and immunomodulators",
+    de: "Seren, Immunglobuline und Immunmodulatoren",
+    pl: "Surowice, immunoglobuliny i immunomodulatory",
+  },
+
+  "Дерматологічні препарати": {
+    en: "Dermatological preparations",
+    de: "Dermatologische Präparate",
+    pl: "Preparaty dermatologiczne",
+  },
+
+  "Для очей та вух": {
+    en: "Eye and ear preparations",
+    de: "Augen- und Ohrenpräparate",
+    pl: "Preparaty do oczu i uszu",
+  },
+
+  "Спреї, мазі, гелі та олії": {
+    en: "Sprays, ointments, gels and oils",
+    de: "Sprays, Salben, Gele und Öle",
+    pl: "Spraye, maści, żele i oleje",
+  },
+
+  "Вакцини": {
+    en: "Vaccines",
+    de: "Impfstoffe",
+    pl: "Szczepionki",
+  },
+
+  "Діагностикуми та експрес-тести": {
+    en: "Diagnostic and rapid tests",
+    de: "Diagnostika und Schnelltests",
+    pl: "Testy diagnostyczne i szybkie",
+  },
+
+  "Витратні матеріали": {
+    en: "Consumables",
+    de: "Verbrauchsmaterialien",
+    pl: "Materiały zużywalne",
+  },
+
+  "Інструменти та обладнання": {
+    en: "Instruments and equipment",
+    de: "Instrumente und Ausstattung",
+    pl: "Narzędzia i wyposażenie",
+  },
+
+  "Таблетки": {
+    en: "Tablets",
+    de: "Tabletten",
+    pl: "Tabletki",
+  },
+
+  "Капсули": {
+    en: "Capsules",
+    de: "Kapseln",
+    pl: "Kapsułki",
+  },
+
+  "Суспензія": {
+    en: "Suspension",
+    de: "Suspension",
+    pl: "Zawiesina",
+  },
+
+  "Розчин": {
+    en: "Solution",
+    de: "Lösung",
+    pl: "Roztwór",
+  },
+
+  "Ампула": {
+    en: "Ampoule",
+    de: "Ampulle",
+    pl: "Ampułka",
+  },
+
+  "Флакон": {
+    en: "Vial",
+    de: "Flasche",
+    pl: "Fiolka",
+  },
+
+  "Мазь": {
+    en: "Ointment",
+    de: "Salbe",
+    pl: "Maść",
+  },
+
+  "Гель": {
+    en: "Gel",
+    de: "Gel",
+    pl: "Żel",
+  },
+
+  "Спрей": {
+    en: "Spray",
+    de: "Spray",
+    pl: "Spray",
+  },
+
+  "Краплі": {
+    en: "Drops",
+    de: "Tropfen",
+    pl: "Krople",
+  },
+
+  "Порошок": {
+    en: "Powder",
+    de: "Pulver",
+    pl: "Proszek",
+  },
+
+  "Паста": {
+    en: "Paste",
+    de: "Paste",
+    pl: "Pasta",
+  },
+
+  "Супозиторії": {
+    en: "Suppositories",
+    de: "Zäpfchen",
+    pl: "Czopki",
+  },
+
+  "Корм": {
+    en: "Feed",
+    de: "Futtermittel",
+    pl: "Karma",
+  },
+
+  "Матеріал": {
+    en: "Material",
+    de: "Material",
+    pl: "Materiał",
+  },
+
+  "Обладнання": {
+    en: "Equipment",
+    de: "Ausstattung",
+    pl: "Wyposażenie",
+  },
+
+  "Перорально": {
+    en: "Oral",
+    de: "Oral",
+    pl: "Doustnie",
+  },
+
+  "Внутрішньовенно": {
+    en: "Intravenous",
+    de: "Intravenös",
+    pl: "Dożylnie",
+  },
+
+  "Внутрішньом’язово": {
+    en: "Intramuscular",
+    de: "Intramuskulär",
+    pl: "Domięśniowo",
+  },
+
+  "Підшкірно": {
+    en: "Subcutaneous",
+    de: "Subkutan",
+    pl: "Podskórnie",
+  },
+
+  "Місцево": {
+    en: "Topical",
+    de: "Topisch",
+    pl: "Miejscowo",
+  },
+
+  "Очні": {
+    en: "Ophthalmic",
+    de: "Am Auge",
+    pl: "Do oczu",
+  },
+
+  "Вушні": {
+    en: "Otic",
+    de: "Am Ohr",
+    pl: "Do uszu",
+  },
+
+  "Ректально": {
+    en: "Rectal",
+    de: "Rektal",
+    pl: "Doodbytniczo",
+  },
+
+  "Інгаляційно": {
+    en: "Inhalation",
+    de: "Inhalativ",
+    pl: "Wziewnie",
+  },
+
+  "Не застосовується": {
+    en: "Not applicable",
+    de: "Nicht zutreffend",
+    pl: "Nie dotyczy",
+  },
+
+  "Собаки": {
+    en: "Dogs",
+    de: "Hunde",
+    pl: "Psy",
+  },
+
+  "Коти": {
+    en: "Cats",
+    de: "Katzen",
+    pl: "Koty",
+  },
+};
+
+Object.assign(
+  STOCK_INTERFACE_TEXT,
+  {
+    "РЕДАГУВАННЯ ПОЗИЦІЇ": {
+      en: "EDIT ITEM",
+      de: "ARTIKEL BEARBEITEN",
+      pl: "EDYCJA POZYCJI",
+    },
+
+    "НОВА ПОЗИЦІЯ": {
+      en: "NEW ITEM",
+      de: "NEUER ARTIKEL",
+      pl: "NOWA POZYCJA",
+    },
+
+    "Оновити дані": {
+      en: "Update item",
+      de: "Artikel aktualisieren",
+      pl: "Zaktualizuj pozycję",
+    },
+
+    "Додати на склад": {
+      en: "Add to inventory",
+      de: "Zum Lager hinzufügen",
+      pl: "Dodaj do magazynu",
+    },
+
+    "Вкажіть назву, категорію, ціни та початковий залишок.": {
+      en: "Enter the name, category, prices and initial quantity.",
+      de: "Geben Sie Name, Kategorie, Preise und Anfangsbestand ein.",
+      pl: "Podaj nazwę, kategorię, ceny i początkowy stan.",
+    },
+
+    "Назва позиції": {
+      en: "Item name",
+      de: "Artikelname",
+      pl: "Nazwa pozycji",
+    },
+
+    "Наприклад, Мелоксивет": {
+      en: "For example, Meloxivet",
+      de: "Zum Beispiel Meloxivet",
+      pl: "Na przykład Meloxivet",
+    },
+
+    "Група": {
+      en: "Group",
+      de: "Gruppe",
+      pl: "Grupa",
+    },
+
+    "Категорія": {
+      en: "Category",
+      de: "Kategorie",
+      pl: "Kategoria",
+    },
+
+    "Спосіб застосування": {
+      en: "Administration route",
+      de: "Anwendungsart",
+      pl: "Sposób podania",
+    },
+
+    "Для яких тварин": {
+      en: "For which animals",
+      de: "Für welche Tiere",
+      pl: "Dla jakich zwierząt",
+    },
+
+    "Одиниця обліку": {
+      en: "Unit",
+      de: "Einheit",
+      pl: "Jednostka",
+    },
+
+    "Ціна продажу, грн": {
+      en: "Sale price, UAH",
+      de: "Verkaufspreis, UAH",
+      pl: "Cena sprzedaży, UAH",
+    },
+
+    "Закупівельна ціна": {
+      en: "Purchase price",
+      de: "Einkaufspreis",
+      pl: "Cena zakupu",
+    },
+
+    "Поточний залишок": {
+      en: "Current quantity",
+      de: "Aktueller Bestand",
+      pl: "Aktualny stan",
+    },
+
+    "Мінімальний залишок": {
+      en: "Minimum quantity",
+      de: "Mindestbestand",
+      pl: "Minimalny stan",
+    },
+
+    "Контроль терміну й партії": {
+      en: "Expiration and batch tracking",
+      de: "Verfalls- und Chargenkontrolle",
+      pl: "Kontrola terminu i partii",
+    },
+
+    "Необов’язково. Увімкніть для вакцин і важливих препаратів.": {
+      en: "Optional. Enable for vaccines and important medicines.",
+      de: "Optional. Für Impfstoffe und wichtige Medikamente aktivieren.",
+      pl: "Opcjonalnie. Włącz dla szczepionek i ważnych leków.",
+    },
+
+    "Придатний до": {
+      en: "Valid until",
+      de: "Verwendbar bis",
+      pl: "Ważne do",
+    },
+
+    "Номер партії": {
+      en: "Batch number",
+      de: "Chargennummer",
+      pl: "Numer partii",
+    },
+
+    "Необов’язково": {
+      en: "Optional",
+      de: "Optional",
+      pl: "Opcjonalnie",
+    },
+
+    "PUG використає ці дані лише для попереджень і складських звітів.": {
+      en: "PUG will use this data only for alerts and inventory reports.",
+      de: "PUG verwendet diese Daten nur für Warnungen und Lagerberichte.",
+      pl: "PUG użyje tych danych wyłącznie do alertów i raportów magazynowych.",
+    },
+
+    "Активна позиція": {
+      en: "Active item",
+      de: "Aktiver Artikel",
+      pl: "Aktywna pozycja",
+    },
+
+    "Доступна для додавання у візит": {
+      en: "Available for adding to a visit",
+      de: "Kann zu einem Termin hinzugefügt werden",
+      pl: "Dostępna do dodania do wizyty",
+    },
+
+    "Попередній перегляд": {
+      en: "Preview",
+      de: "Vorschau",
+      pl: "Podgląd",
+    },
+
+    "Скасувати": {
+      en: "Cancel",
+      de: "Abbrechen",
+      pl: "Anuluj",
+    },
+
+    "Зберегти зміни": {
+      en: "Save changes",
+      de: "Änderungen speichern",
+      pl: "Zapisz zmiany",
+    },
+
+    "Зберегти": {
+      en: "Save",
+      de: "Speichern",
+      pl: "Zapisz",
+    },
+
+    "Збереження…": {
+      en: "Saving…",
+      de: "Wird gespeichert…",
+      pl: "Zapisywanie…",
+    },
+
+    "Вкажіть назву позиції.": {
+      en: "Enter the item name.",
+      de: "Geben Sie den Artikelnamen ein.",
+      pl: "Podaj nazwę pozycji.",
+    },
+
+    "Сервер не повернув позицію.": {
+      en: "The server did not return the saved item.",
+      de: "Der Server hat den gespeicherten Artikel nicht zurückgegeben.",
+      pl: "Serwer nie zwrócił zapisanej pozycji.",
+    },
+
+    "Не вдалося зберегти позицію.": {
+      en: "Could not save the item.",
+      de: "Der Artikel konnte nicht gespeichert werden.",
+      pl: "Nie udało się zapisać pozycji.",
+    },
+
+    "НАДХОДЖЕННЯ": {
+      en: "STOCK RECEIPT",
+      de: "WARENEINGANG",
+      pl: "PRZYJĘCIE TOWARU",
+    },
+
+    "СПИСАННЯ": {
+      en: "WRITE-OFF",
+      de: "ABSCHREIBUNG",
+      pl: "ROZCHÓD",
+    },
+
+    "Поповнити залишок": {
+      en: "Add stock",
+      de: "Bestand auffüllen",
+      pl: "Uzupełnij stan",
+    },
+
+    "Списати зі складу": {
+      en: "Write off stock",
+      de: "Vom Lager abschreiben",
+      pl: "Rozchód z magazynu",
+    },
+
+    "Зараз:": {
+      en: "Current:",
+      de: "Aktuell:",
+      pl: "Obecnie:",
+    },
+
+    "Кількість": {
+      en: "Quantity",
+      de: "Menge",
+      pl: "Ilość",
+    },
+
+    "Коментар": {
+      en: "Comment",
+      de: "Kommentar",
+      pl: "Komentarz",
+    },
+
+    "Наприклад, нова поставка": {
+      en: "For example, new delivery",
+      de: "Zum Beispiel neue Lieferung",
+      pl: "Na przykład nowa dostawa",
+    },
+
+    "Наприклад, використано або прострочено": {
+      en: "For example, used or expired",
+      de: "Zum Beispiel verwendet oder abgelaufen",
+      pl: "Na przykład zużyto lub przeterminowano",
+    },
+
+    "Новий залишок": {
+      en: "New quantity",
+      de: "Neuer Bestand",
+      pl: "Nowy stan",
+    },
+
+    "Поповнити": {
+      en: "Add stock",
+      de: "Auffüllen",
+      pl: "Uzupełnij",
+    },
+
+    "Списати": {
+      en: "Write off",
+      de: "Abschreiben",
+      pl: "Rozchód",
+    },
+
+    "Вкажіть кількість.": {
+      en: "Enter the quantity.",
+      de: "Geben Sie die Menge ein.",
+      pl: "Podaj ilość.",
+    },
+
+    "Не вдалося змінити залишок.": {
+      en: "Could not update the quantity.",
+      de: "Der Bestand konnte nicht geändert werden.",
+      pl: "Nie udało się zmienić stanu.",
+    },
+
+    "ВИДАЛЕННЯ ПОЗИЦІЇ": {
+      en: "DELETE ITEM",
+      de: "ARTIKEL LÖSCHEN",
+      pl: "USUWANIE POZYCJI",
+    },
+
+    "Видалити зі складу?": {
+      en: "Delete this inventory item?",
+      de: "Diesen Lagerartikel löschen?",
+      pl: "Usunąć tę pozycję z magazynu?",
+    },
+
+    "Позиція буде остаточно видалена з локального каталогу складу.": {
+      en: "The item will be permanently removed from the inventory catalog.",
+      de: "Der Artikel wird endgültig aus dem Lagerkatalog entfernt.",
+      pl: "Pozycja zostanie trwale usunięta z katalogu magazynu.",
+    },
+
+    "Не вдалося видалити позицію.": {
+      en: "Could not delete the item.",
+      de: "Der Artikel konnte nicht gelöscht werden.",
+      pl: "Nie udało się usunąć pozycji.",
+    },
+
+    "Не вдалося змінити статус позиції.": {
+      en: "Could not change the item status.",
+      de: "Der Artikelstatus konnte nicht geändert werden.",
+      pl: "Nie udało się zmienić statusu pozycji.",
+    },
+
+    "шт": {
+      en: "pcs",
+      de: "Stk.",
+      pl: "szt.",
+    },
+
+    "мл": {
+      en: "ml",
+      de: "ml",
+      pl: "ml",
+    },
+
+    "мг": {
+      en: "mg",
+      de: "mg",
+      pl: "mg",
+    },
+
+    "г": {
+      en: "g",
+      de: "g",
+      pl: "g",
+    },
+
+    "кг": {
+      en: "kg",
+      de: "kg",
+      pl: "kg",
+    },
+
+    "таб": {
+      en: "tab.",
+      de: "Tab.",
+      pl: "tabl.",
+    },
+
+    "амп": {
+      en: "amp.",
+      de: "Amp.",
+      pl: "amp.",
+    },
+
+    "фл": {
+      en: "vial",
+      de: "Fl.",
+      pl: "fiol.",
+    },
+
+    "уп": {
+      en: "pack",
+      de: "Pack.",
+      pl: "op.",
+    },
+
+    "рул": {
+      en: "roll",
+      de: "Rolle",
+      pl: "rolka",
+    },
+
+    "л": {
+      en: "l",
+      de: "l",
+      pl: "l",
+    },
+  }
+);
+function normalizeStockInterfaceText(
+  value
+) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+function getStockInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const normalizedSource =
+    normalizeStockInterfaceText(
+      sourceText
+    );
+
+  const entry =
+    Object.entries(
+      STOCK_INTERFACE_TEXT
+    ).find(
+      ([ukrainian, translations]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeStockInterfaceText(
+              value
+            ) ===
+            normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText || ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+
+
+function getLocalizedStockText(
+  value
+) {
+  return getStockInterfaceText(
+    String(value || "")
+  );
+}
+
+
+function getStockCountText(
+  count
+) {
+  const value =
+    Math.max(
+      0,
+      Number(count || 0)
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "item"
+      : "items";
+  }
+
+  if (language === "de") {
+    return "Artikel";
+  }
+
+  if (language === "pl") {
+    const lastDigit =
+      value % 10;
+
+    const lastTwoDigits =
+      value % 100;
+
+    if (value === 1) {
+      return "pozycja";
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      !(
+        lastTwoDigits >= 12 &&
+        lastTwoDigits <= 14
+      )
+    ) {
+      return "pozycje";
+    }
+
+    return "pozycji";
+  }
+
+  const lastDigit =
+    value % 10;
+
+  const lastTwoDigits =
+    value % 100;
+
+  if (
+    lastDigit === 1 &&
+    lastTwoDigits !== 11
+  ) {
+    return "позиція";
+  }
+
+  if (
+    lastDigit >= 2 &&
+    lastDigit <= 4 &&
+    !(
+      lastTwoDigits >= 12 &&
+      lastTwoDigits <= 14
+    )
+  ) {
+    return "позиції";
+  }
+
+  return "позицій";
+}
+
+
+function getStockAttentionText(
+  count
+) {
+  const value =
+    Math.max(
+      0,
+      Number(count || 0)
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `${value} ${
+      value === 1
+        ? "item requires"
+        : "items require"
+    } attention`;
+  }
+
+  if (language === "de") {
+    return `${value} ${
+      value === 1
+        ? "Artikel benötigt"
+        : "Artikel benötigen"
+    } Aufmerksamkeit`;
+  }
+
+  if (language === "pl") {
+    return `${value} ${getStockCountText(
+      value
+    )} ${
+      value === 1
+        ? "wymaga"
+        : "wymagają"
+    } uwagi`;
+  }
+
+  return `${value} ${getStockCountText(
+    value
+  )} ${
+    value === 1
+      ? "потребує"
+      : "потребують"
+  } уваги`;
+}
+
+
+function getStockCompactForecastText(
+  days
+) {
+  const value =
+    Math.max(
+      1,
+      Math.round(
+        Number(days || 1)
+      )
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Forecast ≈ ${value} ${
+      value === 1
+        ? "day"
+        : "days"
+    }`;
+  }
+
+  if (language === "de") {
+    return `Prognose ≈ ${value} ${
+      value === 1
+        ? "Tag"
+        : "Tage"
+    }`;
+  }
+
+  if (language === "pl") {
+    return `Prognoza ≈ ${value} ${
+      value === 1
+        ? "dzień"
+        : "dni"
+    }`;
+  }
+
+  return `Прогноз ≈ ${value} дн.`;
+}
+
+
+function getStockRenderedText(
+  sourceText
+) {
+  const source =
+    normalizeStockInterfaceText(
+      sourceText
+    );
+
+  if (!source) return "";
+
+  const exactTranslation =
+    getStockInterfaceText(
+      source
+    );
+
+  if (
+    exactTranslation !== source
+  ) {
+    return exactTranslation;
+  }
+
+  const attentionMatch =
+    source.match(
+      /^(\d+)\s+позиці(?:я|ї|й)\s+потребу(?:є|ють)\s+уваги$/i
+    );
+
+  if (attentionMatch) {
+    return getStockAttentionText(
+      Number(attentionMatch[1])
+    );
+  }
+
+  const countMatch =
+    source.match(
+      /^(\d+)\s+позиці(?:я|ї|й)$/i
+    );
+
+  if (countMatch) {
+    const count =
+      Number(countMatch[1]);
+
+    return `${count} ${getStockCountText(
+      count
+    )}`;
+  }
+
+  const batchMatch =
+    source.match(
+      /^Партія\s+(.+)$/i
+    );
+
+  if (batchMatch) {
+    return `${getStockInterfaceText(
+      "Партія"
+    )} ${batchMatch[1]}`;
+  }
+
+  const forecastMatch =
+    source.match(
+      /^Прогноз\s*≈\s*(\d+)\s*дн\.?$/i
+    );
+
+  if (forecastMatch) {
+    return getStockCompactForecastText(
+      Number(forecastMatch[1])
+    );
+  }
+
+  return source;
+}
+
+
+function showStockAlert(
+  message
+) {
+  alert(
+    getStockInterfaceText(
+      message
+    )
+  );
+}
+
+
+function localizeStockElement(
+  root
+) {
+  if (!root) return;
+
+  const walker =
+    document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT
+    );
+
+  const textNodes = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  textNodes.forEach(
+    (node) => {
+      const parentElement =
+        node.parentElement;
+
+      if (
+        parentElement?.closest?.(
+          [
+            ".stockPremiumCard h3",
+            ".stockPugSignalCopy strong",
+            "#stockEditorPreviewName",
+            ".stockAdjustmentItem strong",
+            ".stockDeleteItem strong",
+            "[data-stock-content]",
+          ].join(",")
+        )
+      ) {
+        return;
+      }
+
+      const currentText =
+        node.nodeValue || "";
+
+      const normalized =
+        normalizeStockInterfaceText(
+          currentText
+        );
+
+      if (!normalized) return;
+
+      const translated =
+        getStockRenderedText(
+          normalized
+        );
+
+      if (
+        translated === normalized
+      ) {
+        return;
+      }
+
+      const leadingSpace =
+        currentText.match(
+          /^\s*/
+        )?.[0] || "";
+
+      const trailingSpace =
+        currentText.match(
+          /\s*$/
+        )?.[0] || "";
+
+      node.nodeValue =
+        leadingSpace +
+        translated +
+        trailingSpace;
+    }
+  );
+
+  const elements = [
+    root,
+    ...root.querySelectorAll("*"),
+  ];
+
+  elements.forEach(
+    (element) => {
+      if (
+        element?.closest?.(
+          "[data-stock-content]"
+        )
+      ) {
+        return;
+      }
+
+      [
+        "placeholder",
+        "title",
+        "aria-label",
+      ].forEach(
+        (attribute) => {
+          if (
+            !element?.hasAttribute?.(
+              attribute
+            )
+          ) {
+            return;
+          }
+
+          const currentValue =
+            element.getAttribute(
+              attribute
+            ) || "";
+
+          const translatedValue =
+            getStockRenderedText(
+              currentValue
+            );
+
+          if (
+            translatedValue !==
+            currentValue
+          ) {
+            element.setAttribute(
+              attribute,
+              translatedValue
+            );
+          }
+        }
+      );
+    }
+  );
+}
 function renderStockTab() {
   const page =
     document.querySelector(
@@ -37867,23 +39770,27 @@ const currentSpecies =
   );
 
 
-  page.innerHTML = `
+   page.innerHTML = `
     <div class="stockPremiumPage">
 
       <header class="stockPremiumHero">
         <div>
           <div class="stockPremiumEyebrow">
-            ОБЛІК КЛІНІКИ
+            ${getStockInterfaceText(
+              "ОБЛІК КЛІНІКИ"
+            )}
           </div>
 
           <h1>
-            Склад клініки
+            ${getStockInterfaceText(
+              "Склад клініки"
+            )}
           </h1>
 
           <p>
-            Контролюйте препарати,
-            матеріали, залишки та
-            вартість запасів.
+            ${getStockInterfaceText(
+              "Контролюйте препарати, матеріали, залишки та вартість запасів."
+            )}
           </p>
         </div>
 
@@ -37893,14 +39800,19 @@ const currentSpecies =
           type="button"
         >
           <span>＋</span>
-          Додати позицію
+
+          ${getStockInterfaceText(
+            "Додати позицію"
+          )}
         </button>
       </header>
 
       <section class="stockPremiumStats">
         <div class="stockPremiumStat">
           <span>
-            Позицій
+            ${getStockInterfaceText(
+              "Позицій"
+            )}
           </span>
 
           <strong>
@@ -37908,29 +39820,37 @@ const currentSpecies =
           </strong>
 
           <small>
-            у каталозі складу
+            ${getStockInterfaceText(
+              "у каталозі складу"
+            )}
           </small>
         </div>
 
         <div class="stockPremiumStat stockPremiumStatUnits">
           <span>
-            Загальний залишок
+            ${getStockInterfaceText(
+              "Загальний залишок"
+            )}
           </span>
 
           <strong>
             ${totalUnits.toLocaleString(
-              "uk-UA"
+              getCalendarLocale()
             )}
           </strong>
 
           <small>
-            одиниць товару
+            ${getStockInterfaceText(
+              "одиниць товару"
+            )}
           </small>
         </div>
 
         <div class="stockPremiumStat stockPremiumStatLow">
           <span>
-            Потребують уваги
+            ${getStockInterfaceText(
+              "Потребують уваги"
+            )}
           </span>
 
           <strong>
@@ -37938,13 +39858,17 @@ const currentSpecies =
           </strong>
 
           <small>
-            закінчуються
+            ${getStockInterfaceText(
+              "закінчуються"
+            )}
           </small>
         </div>
 
         <div class="stockPremiumStat stockPremiumStatEmpty">
           <span>
-            Закінчилися
+            ${getStockInterfaceText(
+              "Закінчилися"
+            )}
           </span>
 
           <strong>
@@ -37952,26 +39876,32 @@ const currentSpecies =
           </strong>
 
           <small>
-            немає в наявності
+            ${getStockInterfaceText(
+              "немає в наявності"
+            )}
           </small>
         </div>
 
         <div class="stockPremiumStat stockPremiumStatValue">
           <span>
-            Вартість запасів
+            ${getStockInterfaceText(
+              "Вартість запасів"
+            )}
           </span>
 
           <strong>
             ${Math.round(
               totalCostValue
             ).toLocaleString(
-              "uk-UA"
+              getCalendarLocale()
             )}
             ₴
           </strong>
 
           <small>
-            за закупівельною ціною
+            ${getStockInterfaceText(
+              "за закупівельною ціною"
+            )}
           </small>
         </div>
       </section>
@@ -37985,49 +39915,72 @@ const currentSpecies =
 
             <div>
               <div class="stockPugBriefEyebrow">
-                PUG КОРОТКО · АВТОМАТИЧНИЙ КОНТРОЛЬ
+                ${getStockInterfaceText(
+                  "PUG КОРОТКО · АВТОМАТИЧНИЙ КОНТРОЛЬ"
+                )}
               </div>
 
               <h2>
                 ${
                   stockPugInsights
                     .attentionCount
-                    ? `${stockPugInsights.attentionCount} позицій потребують уваги`
-                    : "На складі все спокійно"
+                    ? getStockAttentionText(
+                        stockPugInsights
+                          .attentionCount
+                      )
+                    : getStockInterfaceText(
+                        "На складі все спокійно"
+                      )
                 }
               </h2>
 
               <p>
-                Перевіряємо залишки,
-                терміни придатності та
-                темп використання.
+                ${getStockInterfaceText(
+                  "Перевіряємо залишки, терміни придатності та темп використання."
+                )}
               </p>
             </div>
           </div>
 
           <div class="stockPugBriefMetrics">
             <div>
-              <span>Терміни</span>
+              <span>
+                ${getStockInterfaceText(
+                  "Терміни"
+                )}
+              </span>
+
               <strong>
                 ${stockPugInsights.expiryRiskCount}
               </strong>
             </div>
 
             <div>
-              <span>Прогноз</span>
+              <span>
+                ${getStockInterfaceText(
+                  "Прогноз"
+                )}
+              </span>
+
               <strong>
                 ${stockPugInsights.forecastRiskCount}
               </strong>
             </div>
 
             <div>
-              <span>Під ризиком</span>
+              <span>
+                ${getStockInterfaceText(
+                  "Під ризиком"
+                )}
+              </span>
+
               <strong>
                 ${Math.round(
                   stockPugInsights.valueAtRisk
                 ).toLocaleString(
-                  "uk-UA"
-                )} ₴
+                  getCalendarLocale()
+                )}
+                ₴
               </strong>
             </div>
           </div>
@@ -38039,7 +39992,10 @@ const currentSpecies =
               .signals.length
               ? stockPugInsights
                   .signals
-                  .slice(0, 5)
+                  .slice(
+                    0,
+                    5
+                  )
                   .map(
                     (signal) => `
                       <button
@@ -38056,7 +40012,9 @@ const currentSpecies =
                         </span>
 
                         <span class="stockPugSignalCopy">
-                          <strong>
+                          <strong
+                            data-stock-content
+                          >
                             ${escapeHtml(
                               signal.title
                             )}
@@ -38070,7 +40028,9 @@ const currentSpecies =
                         </span>
 
                         <span class="stockPugSignalAction">
-                          Переглянути →
+                          ${getStockInterfaceText(
+                            "Переглянути →"
+                          )}
                         </span>
                       </button>
                     `
@@ -38078,16 +40038,21 @@ const currentSpecies =
                   .join("")
               : `
                 <div class="stockPugBriefHealthy">
-                  <span>✓</span>
+                  <span>
+                    ✓
+                  </span>
 
                   <div>
                     <strong>
-                      Критичних сигналів немає
+                      ${getStockInterfaceText(
+                        "Критичних сигналів немає"
+                      )}
                     </strong>
 
                     <small>
-                      PUG продовжує стежити за
-                      змінами автоматично.
+                      ${getStockInterfaceText(
+                        "PUG продовжує стежити за змінами автоматично."
+                      )}
                     </small>
                   </div>
                 </div>
@@ -38095,6 +40060,8 @@ const currentSpecies =
           }
         </div>
       </section>
+
+   
 
       <section class="stockPremiumControls">
         <div class="stockPremiumSearch">
@@ -38388,12 +40355,40 @@ const currentSpecies =
     </div>
   `;
 
+    page
+    ._stockLocalizationObserver
+    ?.disconnect();
+
+  localizeStockElement(
+    page
+  );
+
+  const stockLocalizationObserver =
+    new MutationObserver(
+      () => {
+        localizeStockElement(
+          page
+        );
+      }
+    );
+
+  stockLocalizationObserver.observe(
+    page,
+    {
+      childList: true,
+      subtree: true,
+    }
+  );
+
+  page._stockLocalizationObserver =
+    stockLocalizationObserver;
+
   const grid =
     page.querySelector(
       "#stockPremiumGrid"
     );
 
-  const renderStockCards = () => {
+   const renderStockCards = () => {
     if (!grid) return;
 
     const query =
@@ -38405,126 +40400,208 @@ const currentSpecies =
 
     const filter =
       String(
-        state.stockFilter || "all"
+        state.stockFilter ||
+        "all"
       );
 
     const categoryFilter =
       String(
-        state.stockCategory || "all"
+        state.stockCategory ||
+        "all"
       );
-      const groupFilter =
-  String(
-    state.stockGroup || "all"
-  );
 
-const formFilter =
-  String(
-    state.stockForm || "all"
-  );
+    const groupFilter =
+      String(
+        state.stockGroup ||
+        "all"
+      );
 
-const speciesFilter =
-  String(
-    state.stockSpecies || "all"
-  );
+    const formFilter =
+      String(
+        state.stockForm ||
+        "all"
+      );
 
+    const speciesFilter =
+      String(
+        state.stockSpecies ||
+        "all"
+      );
 
     const filtered =
-      items.filter((item) => {
-        const status =
-          getStockStatus(item);
+      items.filter(
+        (item) => {
+          const status =
+            getStockStatus(
+              item
+            );
 
-        const matchesQuery =
-          !query ||
-          [
-  item.name,
-  item.category,
-  getStockGroupLabel(item),
-  item.form,
-  item.route,
-  item.species,
-  item.unit,
-]
-            .join(" ")
-            .toLowerCase()
-            .includes(query);
+          const originalGroup =
+            getStockGroupLabel(
+              item
+            );
 
-        const matchesCategory =
-          categoryFilter === "all" ||
-          String(item.category) ===
-            categoryFilter;
-            const matchesGroup =
-  groupFilter === "all" ||
-  String(item.group) ===
-    String(groupFilter);
+          const searchValues = [
+            item.name,
+            item.category,
+            getLocalizedStockText(
+              item.category
+            ),
+            originalGroup,
+            getLocalizedStockText(
+              originalGroup
+            ),
+            item.form,
+            getLocalizedStockText(
+              item.form
+            ),
+            item.route,
+            getLocalizedStockText(
+              item.route
+            ),
+            item.species,
+            getLocalizedStockText(
+              item.species
+            ),
+            item.unit,
+            status.label,
+          ];
 
-const matchesForm =
-  formFilter === "all" ||
-  String(item.form) ===
-    String(formFilter);
+          const matchesQuery =
+            !query ||
+            searchValues
+              .join(" ")
+              .toLowerCase()
+              .includes(
+                query
+              );
 
-const matchesSpecies =
-  speciesFilter === "all" ||
-  String(item.species) ===
-    String(speciesFilter);
+          const matchesCategory =
+            categoryFilter ===
+              "all" ||
+            String(
+              item.category
+            ) ===
+              categoryFilter;
 
+          const matchesGroup =
+            groupFilter ===
+              "all" ||
+            String(
+              item.group
+            ) ===
+              String(
+                groupFilter
+              );
 
-        const matchesFilter =
-          filter === "all" ||
-          (
-            filter === "good" &&
-            status.key === "good"
-          ) ||
-          (
-            filter === "attention" &&
+          const matchesForm =
+            formFilter ===
+              "all" ||
+            String(
+              item.form
+            ) ===
+              String(
+                formFilter
+              );
+
+          const matchesSpecies =
+            speciesFilter ===
+              "all" ||
+            String(
+              item.species
+            ) ===
+              String(
+                speciesFilter
+              );
+
+          const matchesFilter =
+            filter === "all" ||
             (
-              status.key === "low" ||
-              status.key === "critical"
-            )
-          ) ||
-          (
-            filter === "empty" &&
-            status.key === "empty"
-          );
+              filter === "good" &&
+              status.key ===
+                "good"
+            ) ||
+            (
+              filter ===
+                "attention" &&
+              (
+                status.key ===
+                  "low" ||
+                status.key ===
+                  "critical"
+              )
+            ) ||
+            (
+              filter ===
+                "empty" &&
+              status.key ===
+                "empty"
+            );
 
-        return (
-  matchesQuery &&
-  matchesGroup &&
-  matchesCategory &&
-  matchesForm &&
-  matchesSpecies &&
-  matchesFilter
-);
-      });
+          return (
+            matchesQuery &&
+            matchesGroup &&
+            matchesCategory &&
+            matchesForm &&
+            matchesSpecies &&
+            matchesFilter
+          );
+        }
+      );
 
     if (!filtered.length) {
       grid.innerHTML = `
         <div class="stockPremiumEmpty">
-          <div>📦</div>
+          <div>
+            📦
+          </div>
 
           <h3>
-            Позицій не знайдено
+            ${getStockInterfaceText(
+              "Позицій не знайдено"
+            )}
           </h3>
 
           <p>
-            Змініть пошук або фільтр.
+            ${getStockInterfaceText(
+              "Змініть пошук або фільтр."
+            )}
           </p>
         </div>
       `;
+
+      localizeStockElement(
+        grid
+      );
 
       return;
     }
 
     const grouped =
       filtered.reduce(
-        (result, item) => {
+        (
+          result,
+          item
+        ) => {
           const category =
-            item.category || "Інше";
+            item.category ||
+            "Інше";
 
-          if (!result[category]) {
-            result[category] = [];
+          if (
+            !result[
+              category
+            ]
+          ) {
+            result[
+              category
+            ] = [];
           }
 
-          result[category].push(item);
+          result[
+            category
+          ].push(
+            item
+          );
 
           return result;
         },
@@ -38532,394 +40609,474 @@ const matchesSpecies =
       );
 
     const groupNames =
-      getStockCategories(filtered);
+      getStockCategories(
+        filtered
+      );
 
     grid.innerHTML =
       groupNames
-        .map((category) => {
-          const categoryItems =
-            grouped[category] || [];
+        .map(
+          (category) => {
+            const categoryItems =
+              grouped[
+                category
+              ] || [];
 
-          return `
-            <section class="stockPremiumGroup">
-              <div class="stockPremiumGroupHead">
-                <div class="stockPremiumGroupTitle">
-                  <span>
-                    ${getStockCategoryIcon(
-                      category
-                    )}
-                  </span>
+            return `
+              <section class="stockPremiumGroup">
+                <div class="stockPremiumGroupHead">
+                  <div class="stockPremiumGroupTitle">
+                    <span>
+                      ${getStockCategoryIcon(
+                        category
+                      )}
+                    </span>
 
-                  <div>
-                    <h2>
-                      ${escapeHtml(category)}
-                    </h2>
+                    <div>
+                      <h2>
+                        ${escapeHtml(
+                          getLocalizedStockText(
+                            category
+                          )
+                        )}
+                      </h2>
 
-                    <p>
-                      ${categoryItems.length}
-                      позицій
-                    </p>
+                      <p>
+                        ${categoryItems.length}
+                        ${getStockCountText(
+                          categoryItems.length
+                        )}
+                      </p>
+                    </div>
                   </div>
+
+                  <div></div>
                 </div>
 
-                <div></div>
-              </div>
-
-              <div class="stockPremiumCards">
-                ${categoryItems
-                  .map((item) => {
-                    const status =
-                      getStockStatus(item);
-
-                    const salePrice =
-                      Number(
-                        item.price || 0
-                      );
-
-                    const cost =
-                      Number(
-                        item.cost || 0
-                      );
-
-                    const quantity =
-                      Number(
-                        item.qty || 0
-                      );
-
-                    const minimum =
-                      Number(
-                        item.min_qty || 0
-                      );
-
-                    const stockValue =
-                      quantity * cost;
-
-                    const expiry =
-                      getStockExpiryMeta(
-                        item
-                      );
-
-                    const estimatedDaysLeft =
-                      item.estimated_days_left ==
-                      null
-                        ? null
-                        : Number(
-                            item.estimated_days_left
+                <div class="stockPremiumCards">
+                  ${categoryItems
+                    .map(
+                      (item) => {
+                        const status =
+                          getStockStatus(
+                            item
                           );
 
-                    return `
-                      <article
-                        class="
-                          stockPremiumCard
-                          stock-status-${
-                            status.key
-                          }
-                          ${
-                            item.active ===
-                            false
-                              ? "inactive"
-                              : ""
-                          }
-                        "
-                        data-stock-card="${escapeHtml(
-                          item.id
-                        )}"
-                      >
-                        <div class="stockPremiumCardTop">
-                          <div class="stockPremiumCardIcon">
-                            ${getStockCategoryIcon(
-                              item.category
-                            )}
-                          </div>
+                        const salePrice =
+                          Number(
+                            item.price ||
+                            0
+                          );
 
-                          <label
-                            class="stockPremiumSwitch"
-                            title="Активність позиції"
-                          >
-                            <input
-                              type="checkbox"
+                        const cost =
+                          Number(
+                            item.cost ||
+                            0
+                          );
+
+                        const quantity =
+                          Number(
+                            item.qty ||
+                            0
+                          );
+
+                        const minimum =
+                          Number(
+                            item.min_qty ||
+                            0
+                          );
+
+                        const stockValue =
+                          quantity *
+                          cost;
+
+                        const expiry =
+                          getStockExpiryMeta(
+                            item
+                          );
+
+                        const estimatedDaysLeft =
+                          item
+                            .estimated_days_left ==
+                          null
+                            ? null
+                            : Number(
+                                item
+                                  .estimated_days_left
+                              );
+
+                        const groupLabel =
+                          getStockGroupLabel(
+                            item
+                          );
+
+                        return `
+                          <article
+                            class="
+                              stockPremiumCard
+                              stock-status-${status.key}
                               ${
                                 item.active ===
                                 false
-                                  ? ""
-                                  : "checked"
+                                  ? "inactive"
+                                  : ""
                               }
-                              data-stock-toggle="${escapeHtml(
-                                item.id
-                              )}"
-                            >
+                            "
+                            data-stock-card="${escapeHtml(
+                              item.id
+                            )}"
+                          >
+                            <div class="stockPremiumCardTop">
+                              <div class="stockPremiumCardIcon">
+                                ${getStockCategoryIcon(
+                                  item.category
+                                )}
+                              </div>
 
-                            <span></span>
-                          </label>
-                        </div>
+                              <label
+                                class="stockPremiumSwitch"
+                                title="${escapeHtml(
+                                  getStockInterfaceText(
+                                    "Активність позиції"
+                                  )
+                                )}"
+                              >
+                                <input
+                                  type="checkbox"
+                                  ${
+                                    item.active ===
+                                    false
+                                      ? ""
+                                      : "checked"
+                                  }
+                                  data-stock-toggle="${escapeHtml(
+                                    item.id
+                                  )}"
+                                >
 
-                      
-                          <div class="stockPremiumCardBody">
+                                <span></span>
+                              </label>
+                            </div>
 
-  <div class="stockPremiumCardGroup">
-    ${escapeHtml(
-      getStockGroupLabel(item)
-    )}
-  </div>
+                            <div class="stockPremiumCardBody">
+                              <div class="stockPremiumCardGroup">
+                                ${escapeHtml(
+                                  getLocalizedStockText(
+                                    groupLabel
+                                  )
+                                )}
+                              </div>
 
-<div class="stockPremiumCardCategory">
-  ${escapeHtml(
-    item.category
-  )}
-</div>
+                              <div class="stockPremiumCardCategory">
+                                ${escapeHtml(
+                                  getLocalizedStockText(
+                                    item.category
+                                  )
+                                )}
+                              </div>
 
-<h3>
-  ${escapeHtml(
-    item.name
-  )}
-</h3>
+                              <h3
+                                data-stock-content
+                              >
+                                ${escapeHtml(
+                                  item.name
+                                )}
+                              </h3>
 
-<div class="stockPremiumProperties">
-  <span>
-    <b>Форма</b>
+                              <div class="stockPremiumProperties">
+                                <span>
+                                  <b>
+                                    ${getStockInterfaceText(
+                                      "Форма"
+                                    )}
+                                  </b>
 
-    ${escapeHtml(
-      item.form ||
-      "Не вказано"
-    )}
-  </span>
+                                  ${escapeHtml(
+                                    getLocalizedStockText(
+                                      item.form ||
+                                      "Не вказано"
+                                    )
+                                  )}
+                                </span>
 
-  <span>
-    <b>Застосування</b>
+                                <span>
+                                  <b>
+                                    ${getStockInterfaceText(
+                                      "Застосування"
+                                    )}
+                                  </b>
 
-    ${escapeHtml(
-      item.route ||
-      "Не вказано"
-    )}
-  </span>
+                                  ${escapeHtml(
+                                    getLocalizedStockText(
+                                      item.route ||
+                                      "Не вказано"
+                                    )
+                                  )}
+                                </span>
 
-  <span>
-    <b>Для кого</b>
+                                <span>
+                                  <b>
+                                    ${getStockInterfaceText(
+                                      "Для кого"
+                                    )}
+                                  </b>
 
-    ${escapeHtml(
-      item.species ||
-      "Універсальний"
-    )}
-  </span>
+                                  ${escapeHtml(
+                                    getLocalizedStockText(
+                                      item.species ||
+                                      "Універсальний"
+                                    )
+                                  )}
+                                </span>
+                              </div>
 
+                              ${
+                                item.expiry_date ||
+                                item.batch_number ||
+                                (
+                                  estimatedDaysLeft !=
+                                    null &&
+                                  Number.isFinite(
+                                    estimatedDaysLeft
+                                  )
+                                )
+                                  ? `
+                                    <div class="stockPremiumTraceability">
+                                      ${
+                                        item.expiry_date
+                                          ? `
+                                            <span
+                                              class="stockPremiumExpiry ${expiry.key}"
+                                            >
+                                              <b>◷</b>
 
-</div>
+                                              ${escapeHtml(
+                                                expiry.label
+                                              )}
+                                            </span>
+                                          `
+                                          : ""
+                                      }
 
-${
-  item.expiry_date ||
-  item.batch_number ||
-  (
-    estimatedDaysLeft != null &&
-    Number.isFinite(
-      estimatedDaysLeft
-    )
-  )
-    ? `
-      <div class="stockPremiumTraceability">
-        ${
-          item.expiry_date
-            ? `
-              <span class="stockPremiumExpiry ${expiry.key}">
-                <b>◷</b>
-                ${escapeHtml(
-                  expiry.label
-                )}
-              </span>
-            `
-            : ""
-        }
+                                      ${
+                                        item.batch_number
+                                          ? `
+                                            <span>
+                                              <b>№</b>
 
-        ${
-          item.batch_number
-            ? `
-              <span>
-                <b>№</b>
-                Партія ${escapeHtml(
-                  item.batch_number
-                )}
-              </span>
-            `
-            : ""
-        }
+                                              ${getStockInterfaceText(
+                                                "Партія"
+                                              )}
 
-        ${
-          estimatedDaysLeft != null &&
-          Number.isFinite(
-            estimatedDaysLeft
-          ) &&
-          estimatedDaysLeft > 0
-            ? `
-              <span>
-                <b>↘</b>
-                Прогноз ≈ ${Math.max(
-                  1,
-                  Math.round(
-                    estimatedDaysLeft
-                  )
-                )} дн.
-              </span>
-            `
-            : ""
-        }
-      </div>
-    `
-    : ""
-}
+                                              ${escapeHtml(
+                                                item.batch_number
+                                              )}
+                                            </span>
+                                          `
+                                          : ""
+                                      }
 
-<div class="stockPremiumPrices">
-  <div>
-    <span>
-      Продаж
-    </span>
+                                      ${
+                                        estimatedDaysLeft !=
+                                          null &&
+                                        Number.isFinite(
+                                          estimatedDaysLeft
+                                        ) &&
+                                        estimatedDaysLeft >
+                                          0
+                                          ? `
+                                            <span>
+                                              <b>↘</b>
 
-    <strong>
-      ${salePrice.toLocaleString(
-        "uk-UA"
-      )}
-      ₴
-    </strong>
-  </div>
+                                              ${getStockCompactForecastText(
+                                                estimatedDaysLeft
+                                              )}
+                                            </span>
+                                          `
+                                          : ""
+                                      }
+                                    </div>
+                                  `
+                                  : ""
+                              }
 
-  <div>
-    <span>
-      Закупівля
-    </span>
+                              <div class="stockPremiumPrices">
+                                <div>
+                                  <span>
+                                    ${getStockInterfaceText(
+                                      "Продаж"
+                                    )}
+                                  </span>
 
-    <strong>
-      ${cost.toLocaleString(
-        "uk-UA"
-      )}
-      ₴
-    </strong>
-  </div>
-</div>
+                                  <strong>
+                                    ${salePrice.toLocaleString(
+                                      getCalendarLocale()
+                                    )}
+                                    ₴
+                                  </strong>
+                                </div>
 
-<div class="stockPremiumQuantity">
-  <div>
-    <span>
-      Залишок
-    </span>
+                                <div>
+                                  <span>
+                                    ${getStockInterfaceText(
+                                      "Закупівля"
+                                    )}
+                                  </span>
 
-    <strong>
-      ${quantity.toLocaleString(
-        "uk-UA"
-      )}
+                                  <strong>
+                                    ${cost.toLocaleString(
+                                      getCalendarLocale()
+                                    )}
+                                    ₴
+                                  </strong>
+                                </div>
+                              </div>
 
-      <small>
-        ${escapeHtml(
-          item.unit
-        )}
-      </small>
-    </strong>
-  </div>
+                              <div class="stockPremiumQuantity">
+                                <div>
+                                  <span>
+                                    ${getStockInterfaceText(
+                                      "Залишок"
+                                    )}
+                                  </span>
 
-  <div>
-    <span>
-      Мінімум
-    </span>
+                                  <strong>
+                                    ${quantity.toLocaleString(
+                                      getCalendarLocale()
+                                    )}
 
-    <strong>
-      ${minimum.toLocaleString(
-        "uk-UA"
-      )}
+                                    <small>
+                                      ${escapeHtml(
+                                        item.unit
+                                      )}
+                                    </small>
+                                  </strong>
+                                </div>
 
-      <small>
-        ${escapeHtml(
-          item.unit
-        )}
-      </small>
-    </strong>
-  </div>
-</div>
+                                <div>
+                                  <span>
+                                    ${getStockInterfaceText(
+                                      "Мінімум"
+                                    )}
+                                  </span>
 
-<div
-  class="
-    stockPremiumStatus
-    ${status.key}
-  "
->
-  <i></i>
+                                  <strong>
+                                    ${minimum.toLocaleString(
+                                      getCalendarLocale()
+                                    )}
 
-  <span>
-    ${escapeHtml(
-      status.label
-    )}
-  </span>
-</div>
+                                    <small>
+                                      ${escapeHtml(
+                                        item.unit
+                                      )}
+                                    </small>
+                                  </strong>
+                                </div>
+                              </div>
 
-${
-  cost > 0
-    ? `
-      <div class="stockPremiumCardValue">
-        Вартість залишку:
+                              <div
+                                class="
+                                  stockPremiumStatus
+                                  ${status.key}
+                                "
+                              >
+                                <i></i>
 
-        <strong>
-          ${stockValue.toLocaleString(
-            "uk-UA"
-          )}
-          ₴
-        </strong>
-      </div>
-    `
-    : ""
-}
-</div>
+                                <span>
+                                  ${escapeHtml(
+                                    status.label
+                                  )}
+                                </span>
+                              </div>
 
-<div class="stockPremiumCardActions">
-  <button
-    type="button"
-    class="stockActionButton stockActionWriteoff"
-    data-stock-adjust="${escapeHtml(
-      item.id
-    )}"
-    data-stock-adjust-mode="writeoff"
-  >
-    − Списати
-  </button>
+                              ${
+                                cost > 0
+                                  ? `
+                                    <div class="stockPremiumCardValue">
+                                      ${getStockInterfaceText(
+                                        "Вартість залишку:"
+                                      )}
 
-  <button
-    type="button"
-    class="stockActionButton stockActionIncome"
-    data-stock-adjust="${escapeHtml(
-      item.id
-    )}"
-    data-stock-adjust-mode="income"
-  >
-    ＋ Поповнити
-  </button>
-</div>
+                                      <strong>
+                                        ${stockValue.toLocaleString(
+                                          getCalendarLocale()
+                                        )}
+                                        ₴
+                                      </strong>
+                                    </div>
+                                  `
+                                  : ""
+                              }
+                            </div>
 
-<div class="stockPremiumCardFooter">
-  <button
-    type="button"
-    data-stock-edit="${escapeHtml(
-      item.id
-    )}"
-  >
-    ✎ Редагувати
-  </button>
+                            <div class="stockPremiumCardActions">
+                              <button
+                                type="button"
+                                class="stockActionButton stockActionWriteoff"
+                                data-stock-adjust="${escapeHtml(
+                                  item.id
+                                )}"
+                                data-stock-adjust-mode="writeoff"
+                              >
+                                ${getStockInterfaceText(
+                                  "− Списати"
+                                )}
+                              </button>
 
-  <button
-    type="button"
-    class="danger"
-    data-stock-delete="${escapeHtml(
-      item.id
-    )}"
-  >
-    Видалити
-  </button>
-</div>
-</article>
-`;
-})
-.join("")}
-</div>
-</section>
-`;
-})
-.join("");
-};
+                              <button
+                                type="button"
+                                class="stockActionButton stockActionIncome"
+                                data-stock-adjust="${escapeHtml(
+                                  item.id
+                                )}"
+                                data-stock-adjust-mode="income"
+                              >
+                                ${getStockInterfaceText(
+                                  "＋ Поповнити"
+                                )}
+                              </button>
+                            </div>
 
+                            <div class="stockPremiumCardFooter">
+                              <button
+                                type="button"
+                                data-stock-edit="${escapeHtml(
+                                  item.id
+                                )}"
+                              >
+                                ${getStockInterfaceText(
+                                  "✎ Редагувати"
+                                )}
+                              </button>
+
+                              <button
+                                type="button"
+                                class="danger"
+                                data-stock-delete="${escapeHtml(
+                                  item.id
+                                )}"
+                              >
+                                ${getStockInterfaceText(
+                                  "Видалити"
+                                )}
+                              </button>
+                            </div>
+                          </article>
+                        `;
+                      }
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `;
+          }
+        )
+        .join("");
+
+    localizeStockElement(
+      grid
+    );
+  };
   renderStockCards();
 
   page
@@ -39058,7 +41215,7 @@ ${
       }
     );
 
-  grid?.addEventListener(
+    grid?.addEventListener(
     "click",
     async (event) => {
       const editButton =
@@ -39070,15 +41227,20 @@ ${
         const item =
           items.find(
             (row) =>
-              String(row.id) ===
               String(
-                editButton.dataset
+                row.id
+              ) ===
+              String(
+                editButton
+                  .dataset
                   .stockEdit
               )
           );
 
         if (item) {
-          openStockEditorModal(item);
+          openStockEditorModal(
+            item
+          );
         }
 
         return;
@@ -39093,9 +41255,12 @@ ${
         const item =
           items.find(
             (row) =>
-              String(row.id) ===
               String(
-                adjustButton.dataset
+                row.id
+              ) ===
+              String(
+                adjustButton
+                  .dataset
                   .stockAdjust
               )
           );
@@ -39104,7 +41269,8 @@ ${
 
         openStockAdjustmentModal(
           item,
-          adjustButton.dataset
+          adjustButton
+            .dataset
             .stockAdjustMode ||
             "income"
         );
@@ -39117,110 +41283,122 @@ ${
           "[data-stock-delete]"
         );
 
-      if (deleteButton) {
-        const item =
-          items.find(
-            (row) =>
-              String(row.id) ===
-              String(
-                deleteButton.dataset
-                  .stockDelete
-              )
-          );
+      if (!deleteButton) {
+        return;
+      }
 
-        if (!item) return;
+      const item =
+        items.find(
+          (row) =>
+            String(
+              row.id
+            ) ===
+            String(
+              deleteButton
+                .dataset
+                .stockDelete
+            )
+        );
 
-        const confirmed =
-          await openStockDeleteConfirm(
-            item
-          );
+      if (!item) return;
 
-        if (!confirmed) return;
+      const confirmed =
+        await openStockDeleteConfirm(
+          item
+        );
 
-        try {
-  await deleteStockItemApi(
-    item.id
-  );
+      if (!confirmed) {
+        return;
+      }
 
-  items =
-    loadStock()
-      .map(normalizeStockItem);
+      try {
+        await deleteStockItemApi(
+          item.id
+        );
 
-  renderStockTab();
+        items =
+          loadStock()
+            .map(
+              normalizeStockItem
+            );
 
-} catch (error) {
-  console.error(
-    "Stock delete failed:",
-    error
-  );
+        renderStockTab();
 
-  alert(
-    error?.message ||
-    "Не вдалося видалити позицію."
-  );
-}
+      } catch (error) {
+        console.error(
+          "Stock delete failed:",
+          error
+        );
+
+        showStockAlert(
+          error?.message ||
+          "Не вдалося видалити позицію."
+        );
       }
     }
   );
 
   grid?.addEventListener(
-  "change",
-  async (event) => {
-    const toggle =
-      event.target.closest(
-        "[data-stock-toggle]"
-      );
+    "change",
+    async (event) => {
+      const toggle =
+        event.target.closest(
+          "[data-stock-toggle]"
+        );
 
-    if (!toggle) return;
+      if (!toggle) return;
 
-    const stockId =
-      toggle.dataset.stockToggle;
+      const stockId =
+        toggle.dataset
+          .stockToggle;
 
-    if (!stockId) return;
+      if (!stockId) return;
 
-    const newActiveValue =
-      Boolean(toggle.checked);
+      const newActiveValue =
+        Boolean(
+          toggle.checked
+        );
 
-    toggle.disabled = true;
+      toggle.disabled =
+        true;
 
-    try {
-      await updateStockItemApi(
-        stockId,
-        {
-          active:
-            newActiveValue,
-        }
-      );
+      try {
+        await updateStockItemApi(
+          stockId,
+          {
+            active:
+              newActiveValue,
+          }
+        );
 
-      items =
-        loadStock()
-          .map(normalizeStockItem);
+        items =
+          loadStock()
+            .map(
+              normalizeStockItem
+            );
 
-      renderStockTab();
+        renderStockTab();
 
-    } catch (error) {
-      console.error(
-        "Stock toggle failed:",
-        error
-      );
+      } catch (error) {
+        console.error(
+          "Stock toggle failed:",
+          error
+        );
 
-      toggle.checked =
-        !newActiveValue;
+        toggle.checked =
+          !newActiveValue;
 
-      toggle.disabled = false;
+        toggle.disabled =
+          false;
 
-      alert(
-        error?.message ||
-        "Не вдалося змінити статус позиції."
-      );
+        showStockAlert(
+          error?.message ||
+          "Не вдалося змінити статус позиції."
+        );
+      }
     }
-  }
-);
-
-
-  
+  );
 }
-
 
 // =====================================================
 // STOCK EDITOR
@@ -39765,10 +41943,17 @@ const categories =
     </section>
   `;
 
-  document.body.appendChild(modal);
+  localizeStockElement(
+    modal
+  );
 
-  const closeModal = () =>
+  document.body.appendChild(
+    modal
+  );
+
+  const closeModal = () => {
     modal.remove();
+  };
 
   modal.addEventListener(
     "click",
@@ -39788,14 +41973,15 @@ const categories =
       "#stockEditorName"
     );
 
+  const groupInput =
+    modal.querySelector(
+      "#stockEditorGroup"
+    );
+
   const categoryInput =
     modal.querySelector(
       "#stockEditorCategory"
     );
-    const groupInput =
-  modal.querySelector(
-    "#stockEditorGroup"
-  );
 
   const unitInput =
     modal.querySelector(
@@ -39817,71 +42003,42 @@ const categories =
       "#stockEditorTraceabilityPanel"
     );
 
+  if (groupInput) {
+    Array.from(
+      groupInput.options
+    ).forEach(
+      (option) => {
+        const group =
+          STOCK_CATEGORY_GROUPS.find(
+            (entry) =>
+              String(
+                entry.id
+              ) ===
+              String(
+                option.value
+              )
+          );
+
+        if (!group) return;
+
+        option.textContent =
+          `${group.icon} ${getLocalizedStockText(
+            group.name
+          )}`;
+      }
+    );
+  }
+
   const syncTraceabilityPanel =
     () => {
       traceabilityPanel
         ?.classList.toggle(
           "hidden",
-          !traceabilityInput?.checked
+          !traceabilityInput
+            ?.checked
         );
     };
 
-  traceabilityInput
-    ?.addEventListener(
-      "change",
-      syncTraceabilityPanel
-    );
-
-const renderCategoryOptions = () => {
-  const selectedGroup =
-    STOCK_CATEGORY_GROUPS.find(
-      (group) =>
-        String(group.id) ===
-        String(
-          groupInput?.value
-        )
-    ) ||
-    STOCK_CATEGORY_GROUPS[
-      STOCK_CATEGORY_GROUPS.length - 1
-    ];
-
-  if (!categoryInput) return;
-
-  const previousCategory =
-    String(
-      categoryInput.value || ""
-    );
-
-  categoryInput.innerHTML =
-    selectedGroup.categories
-      .map((category) => `
-        <option
-          value="${escapeHtml(
-            category
-          )}"
-        >
-          ${escapeHtml(
-            category
-          )}
-        </option>
-      `)
-      .join("");
-
-  if (
-    selectedGroup.categories.includes(
-      previousCategory
-    )
-  ) {
-    categoryInput.value =
-      previousCategory;
-  } else {
-    categoryInput.value =
-      selectedGroup.categories[0] ||
-      "Інше";
-  }
-
-  updatePreview();
-};
   const updatePreview = () => {
     const name =
       String(
@@ -39896,12 +42053,14 @@ const renderCategoryOptions = () => {
 
     const unit =
       String(
-        unitInput?.value || "шт"
+        unitInput?.value ||
+        "шт"
       );
 
     const quantity =
       Number(
-        quantityInput?.value || 0
+        quantityInput?.value ||
+        0
       );
 
     const icon =
@@ -39928,52 +42087,141 @@ const renderCategoryOptions = () => {
 
     if (previewName) {
       previewName.textContent =
-        name || "Назва позиції";
+        name ||
+        getStockInterfaceText(
+          "Назва позиції"
+        );
     }
 
     if (previewMeta) {
       previewMeta.textContent =
-        `${category} · ${quantity} ${unit}`;
+        [
+          getLocalizedStockText(
+            category
+          ),
+          `${quantity.toLocaleString(
+            getCalendarLocale()
+          )} ${getLocalizedStockText(
+            unit
+          )}`,
+        ].join(" · ");
     }
   };
-  groupInput?.addEventListener(
-  "change",
-  renderCategoryOptions
-);
+
+  const renderCategoryOptions =
+    () => {
+      const selectedGroup =
+        STOCK_CATEGORY_GROUPS.find(
+          (group) =>
+            String(
+              group.id
+            ) ===
+            String(
+              groupInput?.value
+            )
+        ) ||
+        STOCK_CATEGORY_GROUPS[
+          STOCK_CATEGORY_GROUPS
+            .length - 1
+        ];
+
+      if (!categoryInput) {
+        return;
+      }
+
+      const previousCategory =
+        String(
+          categoryInput.value ||
+          ""
+        );
+
+      categoryInput.innerHTML =
+        selectedGroup
+          .categories
+          .map(
+            (category) => `
+              <option
+                value="${escapeHtml(
+                  category
+                )}"
+              >
+                ${escapeHtml(
+                  getLocalizedStockText(
+                    category
+                  )
+                )}
+              </option>
+            `
+          )
+          .join("");
+
+      if (
+        selectedGroup
+          .categories
+          .includes(
+            previousCategory
+          )
+      ) {
+        categoryInput.value =
+          previousCategory;
+      } else {
+        categoryInput.value =
+          selectedGroup
+            .categories[0] ||
+          "Інше";
+      }
+
+      updatePreview();
+    };
+
+  traceabilityInput
+    ?.addEventListener(
+      "change",
+      syncTraceabilityPanel
+    );
+
+  groupInput
+    ?.addEventListener(
+      "change",
+      renderCategoryOptions
+    );
 
   [
     nameInput,
     categoryInput,
     unitInput,
     quantityInput,
-  ].forEach((element) => {
-    element?.addEventListener(
-      "input",
-      updatePreview
-    );
+  ].forEach(
+    (element) => {
+      element?.addEventListener(
+        "input",
+        updatePreview
+      );
 
-    element?.addEventListener(
-      "change",
-      updatePreview
-    );
-  });
+      element?.addEventListener(
+        "change",
+        updatePreview
+      );
+    }
+  );
 
   modal
     .querySelector(
       "#stockEditorForm"
     )
     ?.addEventListener(
-  "submit",
-  async (event) => {
+      "submit",
+      async (event) => {
         event.preventDefault();
 
         const name =
           String(
-            nameInput?.value || ""
+            nameInput?.value ||
+            ""
           ).trim();
 
         if (!name) {
-          alert(
+          showStockAlert(
             "Вкажіть назву позиції."
           );
 
@@ -39982,176 +42230,243 @@ const renderCategoryOptions = () => {
         }
 
         const payload = {
-  name,
+          name,
 
-  group: String(
-    groupInput?.value ||
-    "other"
-  ),
+          group:
+            String(
+              groupInput?.value ||
+              "other"
+            ),
 
-  category: String(
-    categoryInput?.value ||
-    "Інше"
-  ),
+          category:
+            String(
+              categoryInput
+                ?.value ||
+              "Інше"
+            ),
 
-  form: String(
-    modal.querySelector(
-      "#stockEditorFormType"
-    )?.value ||
-    "Інше"
-  ),
+          form:
+            String(
+              modal.querySelector(
+                "#stockEditorFormType"
+              )?.value ||
+              "Інше"
+            ),
 
-  route: String(
-    modal.querySelector(
-      "#stockEditorRoute"
-    )?.value ||
-    "Не застосовується"
-  ),
+          route:
+            String(
+              modal.querySelector(
+                "#stockEditorRoute"
+              )?.value ||
+              "Не застосовується"
+            ),
 
-  species: String(
-    modal.querySelector(
-      "#stockEditorSpecies"
-    )?.value ||
-    "Універсальний"
-  ),
+          species:
+            String(
+              modal.querySelector(
+                "#stockEditorSpecies"
+              )?.value ||
+              "Універсальний"
+            ),
 
-  unit: String(
-    unitInput?.value ||
-    "шт"
-  ),
+          unit:
+            String(
+              unitInput?.value ||
+              "шт"
+            ),
 
-  price: Math.max(
-    0,
-    Number(
-      modal.querySelector(
-        "#stockEditorPrice"
-      )?.value || 0
-    )
-  ),
+          price:
+            Math.max(
+              0,
+              Number(
+                modal.querySelector(
+                  "#stockEditorPrice"
+                )?.value ||
+                0
+              )
+            ),
 
-  cost: Math.max(
-    0,
-    Number(
-      modal.querySelector(
-        "#stockEditorCost"
-      )?.value || 0
-    )
-  ),
+          cost:
+            Math.max(
+              0,
+              Number(
+                modal.querySelector(
+                  "#stockEditorCost"
+                )?.value ||
+                0
+              )
+            ),
 
-  qty: Math.max(
-    0,
-    Number(
-      quantityInput?.value || 0
-    )
-  ),
+          qty:
+            Math.max(
+              0,
+              Number(
+                quantityInput?.value ||
+                0
+              )
+            ),
 
-  min_qty: Math.max(
-    0,
-    Number(
-      modal.querySelector(
-        "#stockEditorMinimum"
-      )?.value || 0
-    )
-  ),
+          min_qty:
+            Math.max(
+              0,
+              Number(
+                modal.querySelector(
+                  "#stockEditorMinimum"
+                )?.value ||
+                0
+              )
+            ),
 
-  expiry_date:
-    traceabilityInput?.checked
-      ? (
-          String(
+          expiry_date:
+            traceabilityInput
+              ?.checked
+              ? (
+                  String(
+                    modal.querySelector(
+                      "#stockEditorExpiryDate"
+                    )?.value ||
+                    ""
+                  ).trim() ||
+                  null
+                )
+              : null,
+
+          batch_number:
+            traceabilityInput
+              ?.checked
+              ? (
+                  String(
+                    modal.querySelector(
+                      "#stockEditorBatchNumber"
+                    )?.value ||
+                    ""
+                  ).trim() ||
+                  null
+                )
+              : null,
+
+          active:
             modal.querySelector(
-              "#stockEditorExpiryDate"
-            )?.value || ""
-          ).trim() || null
-        )
-      : null,
+              "#stockEditorActive"
+            )?.checked !==
+            false,
+        };
 
-  batch_number:
-    traceabilityInput?.checked
-      ? (
-          String(
-            modal.querySelector(
-              "#stockEditorBatchNumber"
-            )?.value || ""
-          ).trim() || null
-        )
-      : null,
+        const submitButton =
+          modal.querySelector(
+            "#stockEditorSubmit"
+          );
 
-  active:
-    modal.querySelector(
-      "#stockEditorActive"
-    )?.checked !== false,
-};
+        const originalButtonText =
+          submitButton
+            ?.textContent ||
+          getStockInterfaceText(
+            "Зберегти"
+          );
 
-const submitButton =
-  modal.querySelector(
-    "#stockEditorSubmit"
-  );
+        if (submitButton) {
+          submitButton.disabled =
+            true;
 
-const originalButtonText =
-  submitButton?.textContent ||
-  "Зберегти";
+          submitButton.textContent =
+            getStockInterfaceText(
+              "Збереження…"
+            );
+        }
 
-if (submitButton) {
-  submitButton.disabled = true;
-  submitButton.textContent =
-    "Збереження…";
-}
+        try {
+          const savedItem =
+            isEdit
+              ? await updateStockItemApi(
+                  item.id,
+                  payload
+                )
+              : await createStockItemApi(
+                  payload
+                );
 
-try {
-  const savedItem =
-    isEdit
-      ? await updateStockItemApi(
-          item.id,
-          payload
-        )
-      : await createStockItemApi(
-          payload
-        );
+          if (!savedItem?.id) {
+            throw new Error(
+              "Сервер не повернув позицію."
+            );
+          }
 
-  if (!savedItem?.id) {
-    throw new Error(
-      "Сервер не повернув позицію."
-    );
-  }
+          closeModal();
+          renderStockTab();
 
-  closeModal();
-  renderStockTab();
+        } catch (error) {
+          console.error(
+            "Stock save failed:",
+            error
+          );
 
-} catch (error) {
-  console.error(
-    "Stock save failed:",
-    error
-  );
+          showStockAlert(
+            error?.message ||
+            "Не вдалося зберегти позицію."
+          );
 
-  alert(
-    error?.message ||
-    "Не вдалося зберегти позицію."
-  );
+        } finally {
+          if (
+            submitButton &&
+            document.body.contains(
+              submitButton
+            )
+          ) {
+            submitButton.disabled =
+              false;
 
-} finally {
-  if (
-    submitButton &&
-    document.body.contains(
-      submitButton
-    )
-  ) {
-    submitButton.disabled = false;
-    submitButton.textContent =
-      originalButtonText;
-  }
-}
+            submitButton.textContent =
+              originalButtonText;
+          }
+        }
       }
     );
 
-  setTimeout(() => {
-    nameInput?.focus();
-  }, 50);
+  syncTraceabilityPanel();
+  updatePreview();
+
+  setTimeout(
+    () => {
+      nameInput?.focus();
+    },
+    50
+  );
 }
 
+function getStockAvailableQuantityMessage(
+  quantity,
+  unit
+) {
+  const formattedQuantity =
+    Number(
+      quantity || 0
+    ).toLocaleString(
+      getCalendarLocale()
+    );
 
-// =====================================================
-// STOCK QUANTITY ADJUSTMENT
-// =====================================================
+  const localizedUnit =
+    getLocalizedStockText(
+      unit
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Only ${formattedQuantity} ${localizedUnit} available in stock.`;
+  }
+
+  if (language === "de") {
+    return `Nur ${formattedQuantity} ${localizedUnit} auf Lager verfügbar.`;
+  }
+
+  if (language === "pl") {
+    return `W magazynie dostępne jest tylko ${formattedQuantity} ${localizedUnit}.`;
+  }
+
+  return `На складі лише ${formattedQuantity} ${localizedUnit}.`;
+}
+
 
 function openStockAdjustmentModal(
   stockItem,
@@ -40172,7 +42487,9 @@ function openStockAdjustmentModal(
     mode === "income";
 
   const modal =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   modal.id =
     "stockAdjustmentModal";
@@ -40180,13 +42497,22 @@ function openStockAdjustmentModal(
   modal.className =
     "stockAdjustmentOverlay";
 
+  const localizedUnit =
+    getLocalizedStockText(
+      item.unit
+    );
+
   modal.innerHTML = `
     <div
       class="stockAdjustmentBackdrop"
       data-close-stock-adjustment
     ></div>
 
-    <section class="stockAdjustmentModal">
+    <section
+      class="stockAdjustmentModal"
+      role="dialog"
+      aria-modal="true"
+    >
       <button
         type="button"
         class="stockAdjustmentClose"
@@ -40198,7 +42524,11 @@ function openStockAdjustmentModal(
       <div
         class="
           stockAdjustmentIcon
-          ${isIncome ? "income" : "writeoff"}
+          ${
+            isIncome
+              ? "income"
+              : "writeoff"
+          }
         "
       >
         ${
@@ -40209,19 +42539,19 @@ function openStockAdjustmentModal(
       </div>
 
       <div class="stockAdjustmentEyebrow">
-        ${
+        ${getStockInterfaceText(
           isIncome
             ? "НАДХОДЖЕННЯ"
             : "СПИСАННЯ"
-        }
+        )}
       </div>
 
       <h2>
-        ${
+        ${getStockInterfaceText(
           isIncome
             ? "Поповнити залишок"
             : "Списати зі складу"
-        }
+        )}
       </h2>
 
       <div class="stockAdjustmentItem">
@@ -40232,22 +42562,41 @@ function openStockAdjustmentModal(
         </span>
 
         <div>
-          <strong>
-            ${escapeHtml(item.name)}
+          <strong
+            data-stock-content
+          >
+            ${escapeHtml(
+              item.name
+            )}
           </strong>
 
           <small>
-            Зараз:
-            ${item.qty}
-            ${escapeHtml(item.unit)}
+            ${getStockInterfaceText(
+              "Зараз:"
+            )}
+
+            ${Number(
+              item.qty || 0
+            ).toLocaleString(
+              getCalendarLocale()
+            )}
+
+            ${escapeHtml(
+              localizedUnit
+            )}
           </small>
         </div>
       </div>
 
       <label class="stockAdjustmentField">
         <span>
-          Кількість,
-          ${escapeHtml(item.unit)}
+          ${getStockInterfaceText(
+            "Кількість"
+          )},
+
+          ${escapeHtml(
+            localizedUnit
+          )}
         </span>
 
         <input
@@ -40261,28 +42610,43 @@ function openStockAdjustmentModal(
 
       <label class="stockAdjustmentField">
         <span>
-          Коментар
+          ${getStockInterfaceText(
+            "Коментар"
+          )}
         </span>
 
         <textarea
           id="stockAdjustmentComment"
           rows="3"
-          placeholder="${
-            isIncome
-              ? "Наприклад, нова поставка"
-              : "Наприклад, використано або прострочено"
-          }"
+          placeholder="${escapeHtml(
+            getStockInterfaceText(
+              isIncome
+                ? "Наприклад, нова поставка"
+                : "Наприклад, використано або прострочено"
+            )
+          )}"
         ></textarea>
       </label>
 
       <div class="stockAdjustmentResult">
         <span>
-          Новий залишок
+          ${getStockInterfaceText(
+            "Новий залишок"
+          )}
         </span>
 
-        <strong id="stockAdjustmentResult">
-          ${item.qty}
-          ${escapeHtml(item.unit)}
+        <strong
+          id="stockAdjustmentResult"
+        >
+          ${Number(
+            item.qty || 0
+          ).toLocaleString(
+            getCalendarLocale()
+          )}
+
+          ${escapeHtml(
+            localizedUnit
+          )}
         </strong>
       </div>
 
@@ -40292,28 +42656,40 @@ function openStockAdjustmentModal(
           class="stockAdjustmentCancel"
           data-close-stock-adjustment
         >
-          Скасувати
+          ${getStockInterfaceText(
+            "Скасувати"
+          )}
         </button>
 
         <button
           type="button"
           class="
             stockAdjustmentSubmit
-            ${isIncome ? "income" : "writeoff"}
+            ${
+              isIncome
+                ? "income"
+                : "writeoff"
+            }
           "
           id="stockAdjustmentSubmit"
         >
-          ${
+          ${getStockInterfaceText(
             isIncome
               ? "Поповнити"
               : "Списати"
-          }
+          )}
         </button>
       </div>
     </section>
   `;
 
-  document.body.appendChild(modal);
+  localizeStockElement(
+    modal
+  );
+
+  document.body.appendChild(
+    modal
+  );
 
   const quantityInput =
     modal.querySelector(
@@ -40325,8 +42701,9 @@ function openStockAdjustmentModal(
       "#stockAdjustmentResult"
     );
 
-  const closeModal = () =>
+  const closeModal = () => {
     modal.remove();
+  };
 
   modal.addEventListener(
     "click",
@@ -40346,127 +42723,151 @@ function openStockAdjustmentModal(
       Math.max(
         0,
         Number(
-          quantityInput?.value || 0
+          quantityInput?.value ||
+          0
         )
       );
 
     const result =
       isIncome
-        ? item.qty + quantity
+        ? item.qty +
+          quantity
         : Math.max(
             0,
-            item.qty - quantity
+            item.qty -
+            quantity
           );
 
     if (resultElement) {
       resultElement.textContent =
-        `${result} ${item.unit}`;
+        `${result.toLocaleString(
+          getCalendarLocale()
+        )} ${localizedUnit}`;
     }
   };
 
-  quantityInput?.addEventListener(
-    "input",
-    calculateResult
-  );
+  quantityInput
+    ?.addEventListener(
+      "input",
+      calculateResult
+    );
 
   const submitButton =
-  modal.querySelector(
-    "#stockAdjustmentSubmit"
-  );
+    modal.querySelector(
+      "#stockAdjustmentSubmit"
+    );
 
-submitButton?.addEventListener(
-  "click",
-  async () => {
-    const quantity =
-      Math.max(
-        0,
-        Number(
-          quantityInput?.value || 0
-        )
-      );
+  submitButton
+    ?.addEventListener(
+      "click",
+      async () => {
+        const quantity =
+          Math.max(
+            0,
+            Number(
+              quantityInput
+                ?.value ||
+              0
+            )
+          );
 
-    if (!quantity) {
-      alert(
-        "Вкажіть кількість."
-      );
+        if (!quantity) {
+          showStockAlert(
+            "Вкажіть кількість."
+          );
 
-      quantityInput?.focus();
-      return;
-    }
+          quantityInput
+            ?.focus();
 
-    if (
-      !isIncome &&
-      quantity > item.qty
-    ) {
-      alert(
-        `На складі лише ${item.qty} ${item.unit}.`
-      );
-
-      return;
-    }
-
-    const comment =
-      modal
-        .querySelector(
-          "#stockAdjustmentComment"
-        )
-        ?.value
-        ?.trim() || "";
-
-    const originalButtonText =
-      submitButton.textContent;
-
-    submitButton.disabled = true;
-    submitButton.textContent =
-      "Збереження…";
-
-    try {
-      await adjustStockItemApi(
-        item.id,
-        {
-          mode:
-            isIncome
-              ? "income"
-              : "writeoff",
-
-          quantity,
-          comment,
+          return;
         }
-      );
 
-      closeModal();
-      renderStockTab();
+        if (
+          !isIncome &&
+          quantity > item.qty
+        ) {
+          showStockAlert(
+            getStockAvailableQuantityMessage(
+              item.qty,
+              item.unit
+            )
+          );
 
-    } catch (error) {
-      console.error(
-        "Stock adjustment failed:",
-        error
-      );
+          return;
+        }
 
-      alert(
-        error?.message ||
-        "Не вдалося змінити залишок."
-      );
+        const comment =
+          modal
+            .querySelector(
+              "#stockAdjustmentComment"
+            )
+            ?.value
+            ?.trim() ||
+          "";
 
-    } finally {
-      if (
-        document.body.contains(
+        const originalButtonText =
           submitButton
-        )
-      ) {
+            .textContent;
+
         submitButton.disabled =
-          false;
+          true;
 
         submitButton.textContent =
-          originalButtonText;
-      }
-    }
-  }
-);
+          getStockInterfaceText(
+            "Збереження…"
+          );
 
-  setTimeout(() => {
-    quantityInput?.focus();
-  }, 50);
+        try {
+          await adjustStockItemApi(
+            item.id,
+            {
+              mode:
+                isIncome
+                  ? "income"
+                  : "writeoff",
+
+              quantity,
+              comment,
+            }
+          );
+
+          closeModal();
+          renderStockTab();
+
+        } catch (error) {
+          console.error(
+            "Stock adjustment failed:",
+            error
+          );
+
+          showStockAlert(
+            error?.message ||
+            "Не вдалося змінити залишок."
+          );
+
+        } finally {
+          if (
+            document.body.contains(
+              submitButton
+            )
+          ) {
+            submitButton.disabled =
+              false;
+
+            submitButton.textContent =
+              originalButtonText;
+          }
+        }
+      }
+    );
+
+  setTimeout(
+    () => {
+      quantityInput
+        ?.focus();
+    },
+    50
+  );
 }
 
 
@@ -40477,122 +42878,170 @@ submitButton?.addEventListener(
 function openStockDeleteConfirm(
   stockItem
 ) {
-  return new Promise((resolve) => {
-    document
-      .getElementById(
-        "stockDeleteModal"
-      )
-      ?.remove();
+  return new Promise(
+    (resolve) => {
+      document
+        .getElementById(
+          "stockDeleteModal"
+        )
+        ?.remove();
 
-    const item =
-      normalizeStockItem(
-        stockItem
-      );
+      const item =
+        normalizeStockItem(
+          stockItem
+        );
 
-    const modal =
-      document.createElement("div");
+      const modal =
+        document.createElement(
+          "div"
+        );
 
-    modal.id =
-      "stockDeleteModal";
+      modal.id =
+        "stockDeleteModal";
 
-    modal.className =
-      "stockDeleteOverlay";
+      modal.className =
+        "stockDeleteOverlay";
 
-    modal.innerHTML = `
-      <div
-        class="stockDeleteBackdrop"
-        data-close-stock-delete
-      ></div>
+      const localizedUnit =
+        getLocalizedStockText(
+          item.unit
+        );
 
-      <section class="stockDeleteModal">
-        <div class="stockDeleteIcon">
-          🗑
-        </div>
+      modal.innerHTML = `
+        <div
+          class="stockDeleteBackdrop"
+          data-close-stock-delete
+        ></div>
 
-        <div class="stockDeleteEyebrow">
-          ВИДАЛЕННЯ ПОЗИЦІЇ
-        </div>
-
-        <h2>
-          Видалити зі складу?
-        </h2>
-
-        <p>
-          Позиція буде остаточно
-          видалена з локального
-          каталогу складу.
-        </p>
-
-        <div class="stockDeleteItem">
-          <span>
-            ${getStockCategoryIcon(
-              item.category
-            )}
-          </span>
-
-          <div>
-            <strong>
-              ${escapeHtml(item.name)}
-            </strong>
-
-            <small>
-              ${item.qty}
-              ${escapeHtml(item.unit)}
-              ·
-              ${escapeHtml(item.category)}
-            </small>
+        <section
+          class="stockDeleteModal"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="stockDeleteIcon">
+            🗑
           </div>
-        </div>
 
-        <div class="stockDeleteActions">
-          <button
-            type="button"
-            class="stockDeleteCancel"
-            data-close-stock-delete
-          >
-            Скасувати
-          </button>
+          <div class="stockDeleteEyebrow">
+            ${getStockInterfaceText(
+              "ВИДАЛЕННЯ ПОЗИЦІЇ"
+            )}
+          </div>
 
-          <button
-            type="button"
-            class="stockDeleteSubmit"
-            id="stockDeleteSubmit"
-          >
-            Видалити
-          </button>
-        </div>
-      </section>
-    `;
+          <h2>
+            ${getStockInterfaceText(
+              "Видалити зі складу?"
+            )}
+          </h2>
 
-    document.body.appendChild(modal);
+          <p>
+            ${getStockInterfaceText(
+              "Позиція буде остаточно видалена з локального каталогу складу."
+            )}
+          </p>
 
-    const finish = (result) => {
-      modal.remove();
-      resolve(result);
-    };
+          <div class="stockDeleteItem">
+            <span>
+              ${getStockCategoryIcon(
+                item.category
+              )}
+            </span>
 
-    modal.addEventListener(
-      "click",
-      (event) => {
-        if (
-          event.target.closest(
-            "[data-close-stock-delete]"
-          )
-        ) {
-          finish(false);
-        }
-      }
-    );
+            <div>
+              <strong
+                data-stock-content
+              >
+                ${escapeHtml(
+                  item.name
+                )}
+              </strong>
 
-    modal
-      .querySelector(
-        "#stockDeleteSubmit"
-      )
-      ?.addEventListener(
-        "click",
-        () => finish(true)
+              <small>
+                ${Number(
+                  item.qty || 0
+                ).toLocaleString(
+                  getCalendarLocale()
+                )}
+
+                ${escapeHtml(
+                  localizedUnit
+                )}
+
+                ·
+
+                ${escapeHtml(
+                  getLocalizedStockText(
+                    item.category
+                  )
+                )}
+              </small>
+            </div>
+          </div>
+
+          <div class="stockDeleteActions">
+            <button
+              type="button"
+              class="stockDeleteCancel"
+              data-close-stock-delete
+            >
+              ${getStockInterfaceText(
+                "Скасувати"
+              )}
+            </button>
+
+            <button
+              type="button"
+              class="stockDeleteSubmit"
+              id="stockDeleteSubmit"
+            >
+              ${getStockInterfaceText(
+                "Видалити"
+              )}
+            </button>
+          </div>
+        </section>
+      `;
+
+      localizeStockElement(
+        modal
       );
-  });
+
+      document.body.appendChild(
+        modal
+      );
+
+      const finish = (
+        result
+      ) => {
+        modal.remove();
+        resolve(result);
+      };
+
+      modal.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target.closest(
+              "[data-close-stock-delete]"
+            )
+          ) {
+            finish(false);
+          }
+        }
+      );
+
+      modal
+        .querySelector(
+          "#stockDeleteSubmit"
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+            finish(true);
+          }
+        );
+    }
+  );
 }
 
 function a4FilenameFromVisit(visitId) {
