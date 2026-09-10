@@ -13664,39 +13664,68 @@ function formatVisitFinanceMoney(
   value
 ) {
   return (
-    Number(value || 0)
-      .toLocaleString("uk-UA") +
+    Number(
+      value || 0
+    ).toLocaleString(
+      getCalendarLocale()
+    ) +
     " ₴"
   );
 }
+
 
 function getVisitFinanceStatusMeta(
   status
 ) {
   const statuses = {
     unpaid: {
-      label: "Не оплачено",
-      className: "is-unpaid",
+      label:
+        getFinanceInterfaceText(
+          "Не оплачено"
+        ),
+
+      className:
+        "is-unpaid",
     },
 
     partial: {
-      label: "Частково",
-      className: "is-partial",
+      label:
+        getFinanceInterfaceText(
+          "Частково"
+        ),
+
+      className:
+        "is-partial",
     },
 
     paid: {
-      label: "Оплачено",
-      className: "is-paid",
+      label:
+        getFinanceInterfaceText(
+          "Оплачено"
+        ),
+
+      className:
+        "is-paid",
     },
 
     refunded: {
-      label: "Повернено",
-      className: "is-refunded",
+      label:
+        getFinanceInterfaceText(
+          "Повернено"
+        ),
+
+      className:
+        "is-refunded",
     },
 
     cancelled: {
-      label: "Скасовано",
-      className: "is-cancelled",
+      label:
+        getFinanceInterfaceText(
+          "Скасовано"
+        ),
+
+      className:
+        "is-cancelled",
     },
   };
 
@@ -13705,7 +13734,6 @@ function getVisitFinanceStatusMeta(
     statuses.unpaid
   );
 }
-
 async function loadVisitFinanceApi(
   visitId
 ) {
@@ -27370,76 +27398,3654 @@ async function loadFinanceAccountsApi() {
 
   return result.data;
 }
+const FINANCE_INTERFACE_TEXT = {
+  "Сьогодні": {
+    en: "Today",
+    de: "Heute",
+    pl: "Dzisiaj",
+  },
+
+  "Операції": {
+    en: "Transactions",
+    de: "Transaktionen",
+    pl: "Operacje",
+  },
+
+  "Клієнти": {
+    en: "Clients",
+    de: "Kunden",
+    pl: "Klienci",
+  },
+
+  "Аналітика": {
+    en: "Analytics",
+    de: "Analysen",
+    pl: "Analityka",
+  },
+
+  "Звіт власника": {
+    en: "Owner report",
+    de: "Inhaberbericht",
+    pl: "Raport właściciela",
+  },
+
+  "Формуємо фінансову аналітику…": {
+    en: "Preparing financial analytics…",
+    de: "Finanzanalyse wird erstellt…",
+    pl: "Przygotowywanie analizy finansowej…",
+  },
+
+  "АНАЛІТИКА": {
+    en: "ANALYTICS",
+    de: "ANALYSE",
+    pl: "ANALITYKA",
+  },
+
+  "Фінансова аналітика": {
+    en: "Financial analytics",
+    de: "Finanzanalyse",
+    pl: "Analiza finansowa",
+  },
+
+  "Динаміка надходжень, витрат, оплат і результату за обраний період.": {
+    en: "Revenue, expenses, payments and results for the selected period.",
+    de: "Einnahmen, Ausgaben, Zahlungen und Ergebnis für den gewählten Zeitraum.",
+    pl: "Przychody, wydatki, płatności i wynik za wybrany okres.",
+  },
+
+  "Витрати й закупівлі": {
+    en: "Expenses and purchases",
+    de: "Ausgaben und Einkäufe",
+    pl: "Wydatki i zakupy",
+  },
+
+  "Додати витрату": {
+    en: "Add expense",
+    de: "Ausgabe hinzufügen",
+    pl: "Dodaj wydatek",
+  },
+
+  "7 днів": {
+    en: "7 days",
+    de: "7 Tage",
+    pl: "7 dni",
+  },
+
+  "Місяць": {
+    en: "Month",
+    de: "Monat",
+    pl: "Miesiąc",
+  },
+
+  "↻ Оновити": {
+    en: "↻ Refresh",
+    de: "↻ Aktualisieren",
+    pl: "↻ Odśwież",
+  },
+
+  "Початок періоду": {
+    en: "Period start",
+    de: "Zeitraumbeginn",
+    pl: "Początek okresu",
+  },
+
+  "Кінець періоду": {
+    en: "Period end",
+    de: "Zeitraumende",
+    pl: "Koniec okresu",
+  },
+
+  "Застосувати період": {
+    en: "Apply period",
+    de: "Zeitraum anwenden",
+    pl: "Zastosuj okres",
+  },
+
+  "Надходження": {
+    en: "Revenue",
+    de: "Einnahmen",
+    pl: "Przychody",
+  },
+
+  "Орієнтовний прибуток": {
+    en: "Estimated profit",
+    de: "Geschätzter Gewinn",
+    pl: "Szacowany zysk",
+  },
+
+  "Після витрат і собівартості складу": {
+    en: "After expenses and inventory cost",
+    de: "Nach Ausgaben und Lagerkosten",
+    pl: "Po wydatkach i kosztach magazynowych",
+  },
+
+  "Середній чек": {
+    en: "Average payment",
+    de: "Durchschnittlicher Umsatz",
+    pl: "Średnia płatność",
+  },
+
+  "За оплаченими візитами": {
+    en: "For paid visits",
+    de: "Für bezahlte Termine",
+    pl: "Dla opłaconych wizyt",
+  },
+
+  "Заборгованість": {
+    en: "Outstanding balance",
+    de: "Offene Forderungen",
+    pl: "Zadłużenie",
+  },
+
+  "ДИНАМІКА": {
+    en: "TREND",
+    de: "ENTWICKLUNG",
+    pl: "TREND",
+  },
+
+  "Надходження та витрати": {
+    en: "Revenue and expenses",
+    de: "Einnahmen und Ausgaben",
+    pl: "Przychody i wydatki",
+  },
+
+  "Надходження та витрати клініки": {
+    en: "Clinic revenue and expenses",
+    de: "Einnahmen und Ausgaben der Klinik",
+    pl: "Przychody i wydatki kliniki",
+  },
+
+  "Витрати": {
+    en: "Expenses",
+    de: "Ausgaben",
+    pl: "Wydatki",
+  },
+
+  "СТРУКТУРА": {
+    en: "BREAKDOWN",
+    de: "STRUKTUR",
+    pl: "STRUKTURA",
+  },
+
+  "Способи оплати": {
+    en: "Payment methods",
+    de: "Zahlungsarten",
+    pl: "Metody płatności",
+  },
+
+  "отримано": {
+    en: "received",
+    de: "erhalten",
+    pl: "otrzymano",
+  },
+
+  "Готівка": {
+    en: "Cash",
+    de: "Barzahlung",
+    pl: "Gotówka",
+  },
+
+  "Картка": {
+    en: "Card",
+    de: "Karte",
+    pl: "Karta",
+  },
+
+  "Картка / термінал": {
+    en: "Card / terminal",
+    de: "Karte / Terminal",
+    pl: "Karta / terminal",
+  },
+
+  "Переказ": {
+    en: "Bank transfer",
+    de: "Überweisung",
+    pl: "Przelew",
+  },
+
+  "Інше": {
+    en: "Other",
+    de: "Sonstiges",
+    pl: "Inne",
+  },
+
+  "ДЕБІТОРКА": {
+    en: "RECEIVABLES",
+    de: "FORDERUNGEN",
+    pl: "NALEŻNOŚCI",
+  },
+
+  "Стан оплат": {
+    en: "Payment status",
+    de: "Zahlungsstatus",
+    pl: "Status płatności",
+  },
+
+  "Нараховано": {
+    en: "Billed",
+    de: "Berechnet",
+    pl: "Naliczone",
+  },
+
+  "Отримано": {
+    en: "Received",
+    de: "Erhalten",
+    pl: "Otrzymano",
+  },
+
+  "Залишилось": {
+    en: "Outstanding",
+    de: "Ausstehend",
+    pl: "Pozostało",
+  },
+
+  "PUG AI ПОМІТИВ": {
+    en: "PUG AI INSIGHT",
+    de: "PUG AI HINWEIS",
+    pl: "SPOSTRZEŻENIE PUG AI",
+  },
+
+  "Борги перевищують отриману виручку": {
+    en: "Outstanding balances exceed received revenue",
+    de: "Offene Forderungen übersteigen die Einnahmen",
+    pl: "Zadłużenie przekracza otrzymane przychody",
+  },
+
+  "Фінансовий потік виглядає стабільно": {
+    en: "Cash flow appears stable",
+    de: "Der Finanzfluss erscheint stabil",
+    pl: "Przepływ finansowy wygląda stabilnie",
+  },
+
+  "Критичних відхилень за обраний період не виявлено.": {
+    en: "No critical deviations were found for the selected period.",
+    de: "Für den gewählten Zeitraum wurden keine kritischen Abweichungen festgestellt.",
+    pl: "Nie wykryto krytycznych odchyleń w wybranym okresie.",
+  },
+
+  "ЖУРНАЛ": {
+    en: "ACTIVITY",
+    de: "VERLAUF",
+    pl: "DZIENNIK",
+  },
+
+  "Останні операції": {
+    en: "Recent transactions",
+    de: "Letzte Transaktionen",
+    pl: "Ostatnie operacje",
+  },
+
+  "Проведено": {
+    en: "Completed",
+    de: "Gebucht",
+    pl: "Zaksięgowano",
+  },
+
+  "За обраний період операцій немає.": {
+    en: "No transactions for the selected period.",
+    de: "Keine Transaktionen im gewählten Zeitraum.",
+    pl: "Brak operacji w wybranym okresie.",
+  },
+
+  "Оплата": {
+    en: "Payment",
+    de: "Zahlung",
+    pl: "Płatność",
+  },
+
+  "Повернення": {
+    en: "Refund",
+    de: "Erstattung",
+    pl: "Zwrot",
+  },
+
+  "Витрата": {
+    en: "Expense",
+    de: "Ausgabe",
+    pl: "Wydatek",
+  },
+
+  "Внесення": {
+    en: "Deposit",
+    de: "Einzahlung",
+    pl: "Wpłata",
+  },
+
+  "Вилучення": {
+    en: "Withdrawal",
+    de: "Entnahme",
+    pl: "Wypłata",
+  },
+
+  "Операція": {
+    en: "Transaction",
+    de: "Transaktion",
+    pl: "Operacja",
+  },
+
+  "Оберіть коректний фінансовий період.": {
+    en: "Select a valid financial period.",
+    de: "Wählen Sie einen gültigen Finanzzeitraum.",
+    pl: "Wybierz prawidłowy okres finansowy.",
+  },
+
+  "Не вдалося завантажити фінанси": {
+    en: "Could not load financial data",
+    de: "Finanzdaten konnten nicht geladen werden",
+    pl: "Nie udało się wczytać danych finansowych",
+  },
+
+  "Невідома помилка": {
+    en: "Unknown error",
+    de: "Unbekannter Fehler",
+    pl: "Nieznany błąd",
+  },
+
+  "Спробувати ще раз": {
+    en: "Try again",
+    de: "Erneut versuchen",
+    pl: "Spróbuj ponownie",
+  },
+
+  "Не оплачено": {
+    en: "Unpaid",
+    de: "Nicht bezahlt",
+    pl: "Nieopłacone",
+  },
+
+  "Частково": {
+    en: "Partially paid",
+    de: "Teilweise bezahlt",
+    pl: "Częściowo opłacone",
+  },
+
+  "Оплачено": {
+    en: "Paid",
+    de: "Bezahlt",
+    pl: "Opłacone",
+  },
+
+  "Повернено": {
+    en: "Refunded",
+    de: "Erstattet",
+    pl: "Zwrócono",
+  },
+
+  "Скасовано": {
+    en: "Cancelled",
+    de: "Storniert",
+    pl: "Anulowano",
+  },
+};
+
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "Збираємо фінансовий день клініки…": {
+      en: "Preparing the clinic’s financial day…",
+      de: "Der Finanztag der Klinik wird vorbereitet…",
+      pl: "Przygotowywanie dnia finansowego kliniki…",
+    },
+
+    "Фінансові дані тимчасово недоступні. Спробуйте оновити сторінку.": {
+      en: "Financial data is temporarily unavailable. Try refreshing the page.",
+      de: "Die Finanzdaten sind vorübergehend nicht verfügbar. Aktualisieren Sie die Seite.",
+      pl: "Dane finansowe są tymczasowo niedostępne. Odśwież stronę.",
+    },
+
+    "операції та підсумки": {
+      en: "transactions and summaries",
+      de: "Transaktionen und Zusammenfassungen",
+      pl: "operacje i podsumowania",
+    },
+
+    "розрахунки з клієнтами": {
+      en: "client balances",
+      de: "Kundenabrechnungen",
+      pl: "rozliczenia z klientami",
+    },
+
+    "складські сигнали": {
+      en: "inventory alerts",
+      de: "Lagerwarnungen",
+      pl: "alerty magazynowe",
+    },
+
+    "залишки на рахунках": {
+      en: "account balances",
+      de: "Kontostände",
+      pl: "salda rachunków",
+    },
+
+    "Частина даних не завантажилась": {
+      en: "Some data could not be loaded",
+      de: "Einige Daten konnten nicht geladen werden",
+      pl: "Część danych nie została wczytana",
+    },
+
+    "Оновити": {
+      en: "Refresh",
+      de: "Aktualisieren",
+      pl: "Odśwież",
+    },
+
+    "ФІНАНСОВИЙ ДЕНЬ": {
+      en: "FINANCIAL DAY",
+      de: "FINANZTAG",
+      pl: "DZIEŃ FINANSOWY",
+    },
+
+    "Сьогодні у клініці": {
+      en: "Today at the clinic",
+      de: "Heute in der Klinik",
+      pl: "Dzisiaj w klinice",
+    },
+
+    "Не звіт заради звіту, а короткий список грошей і дій, які варто закрити до кінця зміни.": {
+      en: "A concise overview of money and actions to complete before the end of the shift.",
+      de: "Eine kurze Übersicht über Geld und Aufgaben, die bis zum Schichtende erledigt werden sollten.",
+      pl: "Krótki przegląd pieniędzy i działań do zamknięcia przed końcem zmiany.",
+    },
+
+    "Прийняти оплату": {
+      en: "Accept payment",
+      de: "Zahlung annehmen",
+      pl: "Przyjmij płatność",
+    },
+
+    "Отримано сьогодні": {
+      en: "Received today",
+      de: "Heute erhalten",
+      pl: "Otrzymano dzisiaj",
+    },
+
+    "Очікуємо від клієнтів": {
+      en: "Expected from clients",
+      de: "Von Kunden ausstehend",
+      pl: "Oczekujemy od klientów",
+    },
+
+    "Готівка сьогодні": {
+      en: "Cash today",
+      de: "Bargeld heute",
+      pl: "Gotówka dzisiaj",
+    },
+
+    "Орієнтовний результат": {
+      en: "Estimated result",
+      de: "Geschätztes Ergebnis",
+      pl: "Szacowany wynik",
+    },
+
+    "Тимчасово недоступно": {
+      en: "Temporarily unavailable",
+      de: "Vorübergehend nicht verfügbar",
+      pl: "Tymczasowo niedostępne",
+    },
+
+    "За проведеними оплатами · переглянути": {
+      en: "Based on completed payments · view",
+      de: "Nach gebuchten Zahlungen · anzeigen",
+      pl: "Na podstawie zaksięgowanych płatności · zobacz",
+    },
+
+    "Після витрат і собівартості · пояснення": {
+      en: "After expenses and inventory cost · details",
+      de: "Nach Ausgaben und Lagerkosten · Details",
+      pl: "Po wydatkach i kosztach magazynowych · szczegóły",
+    },
+
+    "ГРОШІ КЛІНІКИ": {
+      en: "CLINIC FUNDS",
+      de: "KLINIKGELDER",
+      pl: "ŚRODKI KLINIKI",
+    },
+
+    "Залишки на рахунках": {
+      en: "Account balances",
+      de: "Kontostände",
+      pl: "Salda rachunków",
+    },
+
+    "За всіма проведеними фінансовими операціями.": {
+      en: "Based on all completed financial transactions.",
+      de: "Basierend auf allen gebuchten Finanztransaktionen.",
+      pl: "Na podstawie wszystkich zaksięgowanych operacji finansowych.",
+    },
+
+    "Доступно разом": {
+      en: "Total available",
+      de: "Insgesamt verfügbar",
+      pl: "Łącznie dostępne",
+    },
+
+    "Не вдалося завантажити залишки на рахунках. Інші фінансові блоки продовжують працювати.": {
+      en: "Could not load account balances. Other financial sections remain available.",
+      de: "Kontostände konnten nicht geladen werden. Die anderen Finanzbereiche sind weiterhin verfügbar.",
+      pl: "Nie udało się wczytać sald rachunków. Pozostałe sekcje finansowe nadal działają.",
+    },
+
+    "ПОТРЕБУЄ УВАГИ": {
+      en: "REQUIRES ATTENTION",
+      de: "AUFMERKSAMKEIT ERFORDERLICH",
+      pl: "WYMAGA UWAGI",
+    },
+
+    "Розрахунки з клієнтами": {
+      en: "Client balances",
+      de: "Kundenabrechnungen",
+      pl: "Rozliczenia z klientami",
+    },
+
+    "Усі клієнти →": {
+      en: "All clients →",
+      de: "Alle Kunden →",
+      pl: "Wszyscy klienci →",
+    },
+
+    "Не вдалося завантажити розрахунки з клієнтами. Спробуйте оновити екран.": {
+      en: "Could not load client balances. Try refreshing the screen.",
+      de: "Kundenabrechnungen konnten nicht geladen werden. Aktualisieren Sie die Ansicht.",
+      pl: "Nie udało się wczytać rozliczeń z klientami. Odśwież ekran.",
+    },
+
+    "Власник": {
+      en: "Owner",
+      de: "Tierhalter",
+      pl: "Właściciel",
+    },
+
+    "Пацієнт": {
+      en: "Patient",
+      de: "Patient",
+      pl: "Pacjent",
+    },
+
+    "Прийняти": {
+      en: "Accept",
+      de: "Annehmen",
+      pl: "Przyjmij",
+    },
+
+    "Незакритих оплат немає": {
+      en: "No outstanding payments",
+      de: "Keine offenen Zahlungen",
+      pl: "Brak nieuregulowanych płatności",
+    },
+
+    "Усі поточні розрахунки з клієнтами закриті.": {
+      en: "All current client balances are settled.",
+      de: "Alle aktuellen Kundenabrechnungen sind ausgeglichen.",
+      pl: "Wszystkie bieżące rozliczenia z klientami są zamknięte.",
+    },
+
+    "СКЛАД І МАРЖА": {
+      en: "INVENTORY AND MARGIN",
+      de: "LAGER UND MARGE",
+      pl: "MAGAZYN I MARŻA",
+    },
+
+    "Ризики, що впливають на гроші": {
+      en: "Risks affecting finances",
+      de: "Finanzielle Risiken",
+      pl: "Ryzyka wpływające na finanse",
+    },
+
+    "Відкрити склад →": {
+      en: "Open inventory →",
+      de: "Lager öffnen →",
+      pl: "Otwórz magazyn →",
+    },
+
+    "позицій закінчуються": {
+      en: "items running low",
+      de: "Artikel gehen zur Neige",
+      pl: "pozycje kończą się",
+    },
+
+    "позицій без маржі": {
+      en: "items without margin",
+      de: "Artikel ohne Marge",
+      pl: "pozycje bez marży",
+    },
+
+    "Складські показники не завантажились.": {
+      en: "Inventory indicators could not be loaded.",
+      de: "Lagerkennzahlen konnten nicht geladen werden.",
+      pl: "Nie udało się wczytać wskaźników magazynowych.",
+    },
+
+    "Складські дані тимчасово недоступні.": {
+      en: "Inventory data is temporarily unavailable.",
+      de: "Lagerdaten sind vorübergehend nicht verfügbar.",
+      pl: "Dane magazynowe są tymczasowo niedostępne.",
+    },
+
+    "Маржа": {
+      en: "Margin",
+      de: "Marge",
+      pl: "Marża",
+    },
+
+    "Стан": {
+      en: "Status",
+      de: "Status",
+      pl: "Stan",
+    },
+
+    "Запаси й ціни без критичних сигналів": {
+      en: "No critical inventory or pricing alerts",
+      de: "Keine kritischen Lager- oder Preiswarnungen",
+      pl: "Brak krytycznych alertów dotyczących zapasów i cen",
+    },
+
+    "СЬОГОДНІ": {
+      en: "TODAY",
+      de: "HEUTE",
+      pl: "DZISIAJ",
+    },
+
+    "Весь журнал →": {
+      en: "Full activity log →",
+      de: "Gesamten Verlauf öffnen →",
+      pl: "Pełny dziennik →",
+    },
+
+    "Журнал операцій тимчасово недоступний.": {
+      en: "The transaction log is temporarily unavailable.",
+      de: "Der Transaktionsverlauf ist vorübergehend nicht verfügbar.",
+      pl: "Dziennik operacji jest tymczasowo niedostępny.",
+    },
+
+    "Сьогодні проведених операцій ще немає.": {
+      en: "No completed transactions today.",
+      de: "Heute wurden noch keine Transaktionen gebucht.",
+      pl: "Dzisiaj nie zaksięgowano jeszcze żadnych operacji.",
+    },
+
+    "PUG КОРОТКО": {
+      en: "PUG SUMMARY",
+      de: "PUG ÜBERSICHT",
+      pl: "PUG W SKRÓCIE",
+    },
+
+    "Дані фінансового дня завантажені не повністю": {
+      en: "The financial day data is incomplete",
+      de: "Die Daten des Finanztags sind unvollständig",
+      pl: "Dane dnia finansowego są niepełne",
+    },
+
+    "Є кілька дій до завершення зміни": {
+      en: "Several actions remain before the shift ends",
+      de: "Vor Schichtende sind noch einige Aufgaben offen",
+      pl: "Przed końcem zmiany pozostało kilka działań",
+    },
+
+    "Фінансовий день під контролем": {
+      en: "The financial day is under control",
+      de: "Der Finanztag ist unter Kontrolle",
+      pl: "Dzień finansowy jest pod kontrolą",
+    },
+
+    "Оновіть недоступні блоки перед закриттям фінансового дня.": {
+      en: "Refresh unavailable sections before closing the financial day.",
+      de: "Aktualisieren Sie nicht verfügbare Bereiche vor Abschluss des Finanztags.",
+      pl: "Odśwież niedostępne sekcje przed zamknięciem dnia finansowego.",
+    },
+
+    "Незакритих оплат і критичних складських сигналів немає.": {
+      en: "There are no outstanding payments or critical inventory alerts.",
+      de: "Es gibt keine offenen Zahlungen oder kritischen Lagerwarnungen.",
+      pl: "Nie ma nieuregulowanych płatności ani krytycznych alertów magazynowych.",
+    },
+
+    "Не вдалося зібрати фінансовий день": {
+      en: "Could not prepare the financial day",
+      de: "Der Finanztag konnte nicht erstellt werden",
+      pl: "Nie udało się przygotować dnia finansowego",
+    },
+  }
+);
+
+function getFinanceClientWord(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "client"
+      : "clients";
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? "Kunde"
+      : "Kunden";
+  }
+
+  if (language === "pl") {
+    const lastDigit = value % 10;
+    const lastTwoDigits = value % 100;
+
+    if (value === 1) {
+      return "klient";
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      !(
+        lastTwoDigits >= 12 &&
+        lastTwoDigits <= 14
+      )
+    ) {
+      return "klientów";
+    }
+
+    return "klientów";
+  }
+
+  const lastDigit = value % 10;
+  const lastTwoDigits = value % 100;
+
+  if (
+    lastDigit === 1 &&
+    lastTwoDigits !== 11
+  ) {
+    return "клієнт";
+  }
+
+  if (
+    lastDigit >= 2 &&
+    lastDigit <= 4 &&
+    !(
+      lastTwoDigits >= 12 &&
+      lastTwoDigits <= 14
+    )
+  ) {
+    return "клієнти";
+  }
+
+  return "клієнтів";
+}
+
+
+function getFinanceOperationWord(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "transaction"
+      : "transactions";
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? "Transaktion"
+      : "Transaktionen";
+  }
+
+  if (language === "pl") {
+    const lastDigit = value % 10;
+    const lastTwoDigits = value % 100;
+
+    if (value === 1) {
+      return "operacja";
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      !(
+        lastTwoDigits >= 12 &&
+        lastTwoDigits <= 14
+      )
+    ) {
+      return "operacje";
+    }
+
+    return "operacji";
+  }
+
+  const lastDigit = value % 10;
+  const lastTwoDigits = value % 100;
+
+  if (
+    lastDigit === 1 &&
+    lastTwoDigits !== 11
+  ) {
+    return "операція";
+  }
+
+  if (
+    lastDigit >= 2 &&
+    lastDigit <= 4 &&
+    !(
+      lastTwoDigits >= 12 &&
+      lastTwoDigits <= 14
+    )
+  ) {
+    return "операції";
+  }
+
+  return "операцій";
+}
+
+
+function getFinanceTodayPaidVisitsText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${value} paid ` +
+      `${value === 1 ? "visit" : "visits"} · view`
+    );
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? `${value} bezahlter Termin · anzeigen`
+      : `${value} bezahlte Termine · anzeigen`;
+  }
+
+  if (language === "pl") {
+    return (
+      `${value} opłaconych wizyt · zobacz`
+    );
+  }
+
+  return (
+    `${value} оплачених візитів · переглянути`
+  );
+}
+
+
+function getFinanceTodayClientsText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "1 client with an outstanding balance · view"
+      : `${value} clients with outstanding balances · view`;
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? "1 Kunde mit offenem Betrag · anzeigen"
+      : `${value} Kunden mit offenen Beträgen · anzeigen`;
+  }
+
+  if (language === "pl") {
+    return (
+      `${value} ${getFinanceClientWord(value)} ` +
+      `z zaległością · zobacz`
+    );
+  }
+
+  return (
+    `${value} ${getFinanceClientWord(value)} ` +
+    `із залишком · переглянути`
+  );
+}
+
+
+function getFinanceTodayOperationsText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${value} ${getFinanceOperationWord(value)} · view`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${value} ${getFinanceOperationWord(value)} · anzeigen`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `${value} ${getFinanceOperationWord(value)} · zobacz`
+    );
+  }
+
+  return (
+    `${value} ${getFinanceOperationWord(value)} · переглянути`
+  );
+}
+
+
+function getFinanceTodayPartialDataText(
+  unavailableSections
+) {
+  const sections = Array.isArray(
+    unavailableSections
+  )
+    ? unavailableSections.filter(Boolean)
+    : [];
+
+  const language =
+    getInterfaceLanguage();
+
+  const sectionList =
+    sections.join(", ");
+
+  if (language === "en") {
+    return (
+      `Temporarily unavailable: ${sectionList}. ` +
+      "Other sections remain available."
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `Vorübergehend nicht verfügbar: ${sectionList}. ` +
+      "Die anderen Bereiche können weiterhin verwendet werden."
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Tymczasowo niedostępne: ${sectionList}. ` +
+      "Pozostałe sekcje są nadal dostępne."
+    );
+  }
+
+  return (
+    `Тимчасово недоступні: ${sectionList}. ` +
+    "Інші блоки можна використовувати."
+  );
+}
+
+
+function getFinanceTodayStockSignalText(
+  count,
+  type
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    const itemWord =
+      value === 1
+        ? "item"
+        : "items";
+
+    return type === "margin"
+      ? `${value} ${itemWord} without margin`
+      : `${value} ${itemWord} running low`;
+  }
+
+  if (language === "de") {
+    const itemWord =
+      value === 1
+        ? "Artikel"
+        : "Artikel";
+
+    return type === "margin"
+      ? `${value} ${itemWord} ohne Marge`
+      : `${value} ${itemWord} mit niedrigem Bestand`;
+  }
+
+  if (language === "pl") {
+    return type === "margin"
+      ? `${value} pozycji bez marży`
+      : `${value} pozycji na wyczerpaniu`;
+  }
+
+  return type === "margin"
+    ? `${value} позицій без маржі`
+    : `${value} позицій закінчуються`;
+}
+
+
+function getFinanceTodayAttentionSummary(
+  debtCount,
+  stockSignalCount
+) {
+  const debts = Math.max(
+    0,
+    Number(debtCount || 0)
+  );
+
+  const stockSignals = Math.max(
+    0,
+    Number(stockSignalCount || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    if (debts && stockSignals) {
+      return (
+        `${debts} client payments and ` +
+        `${stockSignals} inventory alerts require attention.`
+      );
+    }
+
+    if (debts) {
+      return (
+        `${debts} client ` +
+        `${debts === 1 ? "payment requires" : "payments require"} ` +
+        "attention."
+      );
+    }
+
+    if (stockSignals) {
+      return (
+        `${stockSignals} inventory ` +
+        `${stockSignals === 1 ? "alert requires" : "alerts require"} ` +
+        "attention."
+      );
+    }
+
+    return (
+      "There are no outstanding payments or critical inventory alerts."
+    );
+  }
+
+  if (language === "de") {
+    if (debts && stockSignals) {
+      return (
+        `${debts} Kundenzahlungen und ` +
+        `${stockSignals} Lagerhinweise erfordern Aufmerksamkeit.`
+      );
+    }
+
+    if (debts) {
+      return (
+        `${debts} offene Kundenzahlungen ` +
+        "erfordern Aufmerksamkeit."
+      );
+    }
+
+    if (stockSignals) {
+      return (
+        `${stockSignals} Lagerhinweise ` +
+        "erfordern Aufmerksamkeit."
+      );
+    }
+
+    return (
+      "Es gibt keine offenen Zahlungen oder kritischen Lagerwarnungen."
+    );
+  }
+
+  if (language === "pl") {
+    if (debts && stockSignals) {
+      return (
+        `${debts} płatności klientów i ` +
+        `${stockSignals} alertów magazynowych wymaga uwagi.`
+      );
+    }
+
+    if (debts) {
+      return (
+        `${debts} płatności klientów wymaga uwagi.`
+      );
+    }
+
+    if (stockSignals) {
+      return (
+        `${stockSignals} alertów magazynowych wymaga uwagi.`
+      );
+    }
+
+    return (
+      "Nie ma nieuregulowanych płatności ani krytycznych alertów magazynowych."
+    );
+  }
+
+  if (debts && stockSignals) {
+    return (
+      `${debts} оплат клієнтів і ` +
+      `${stockSignals} складських сигналів потребують уваги.`
+    );
+  }
+
+  if (debts) {
+    return (
+      `${debts} оплат клієнтів потребують уваги.`
+    );
+  }
+
+  if (stockSignals) {
+    return (
+      `${stockSignals} складських сигналів потребують уваги.`
+    );
+  }
+
+  return (
+    "Незакритих оплат і критичних складських сигналів немає."
+  );
+}
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "Збираємо розрахунки з клієнтами…": {
+      en: "Loading client balances…",
+      de: "Kundenabrechnungen werden geladen…",
+      pl: "Wczytywanie rozliczeń z klientami…",
+    },
+
+    "РОЗРАХУНКИ": {
+      en: "SETTLEMENTS",
+      de: "ABRECHNUNGEN",
+      pl: "ROZLICZENIA",
+    },
+
+    "Клієнти та оплати": {
+      en: "Clients and payments",
+      de: "Kunden und Zahlungen",
+      pl: "Klienci i płatności",
+    },
+
+    "Один список для адміністратора: хто вже сплатив, який візит залишився відкритим і де прийняти оплату.": {
+      en: "One list for the administrator: who has paid, which visit remains open, and where to accept payment.",
+      de: "Eine Übersicht für die Verwaltung: Wer bereits bezahlt hat, welcher Termin noch offen ist und wo Zahlungen angenommen werden können.",
+      pl: "Jedna lista dla administratora: kto już zapłacił, która wizyta pozostaje otwarta i gdzie przyjąć płatność.",
+    },
+
+    "Зібрано": {
+      en: "Collected",
+      de: "Eingezogen",
+      pl: "Zebrano",
+    },
+
+    "від нарахованої суми": {
+      en: "of the billed amount",
+      de: "des berechneten Betrags",
+      pl: "naliczonej kwoty",
+    },
+
+    "Нараховано": {
+      en: "Billed",
+      de: "Berechnet",
+      pl: "Naliczono",
+    },
+
+    "Отримано": {
+      en: "Received",
+      de: "Erhalten",
+      pl: "Otrzymano",
+    },
+
+    "До сплати": {
+      en: "Amount due",
+      de: "Offener Betrag",
+      pl: "Do zapłaty",
+    },
+
+    "Відкриті візити": {
+      en: "Open visits",
+      de: "Offene Termine",
+      pl: "Otwarte wizyty",
+    },
+
+    "Очікують оплату": {
+      en: "Awaiting payment",
+      de: "Zahlung ausstehend",
+      pl: "Oczekują na płatność",
+    },
+
+    "Сплачено": {
+      en: "Paid",
+      de: "Bezahlt",
+      pl: "Opłacono",
+    },
+
+    "Частково": {
+      en: "Partially paid",
+      de: "Teilweise bezahlt",
+      pl: "Częściowo opłacono",
+    },
+
+    "Очікує оплати": {
+      en: "Awaiting payment",
+      de: "Zahlung ausstehend",
+      pl: "Oczekuje na płatność",
+    },
+
+    "Усі": {
+      en: "All",
+      de: "Alle",
+      pl: "Wszystkie",
+    },
+
+    "Власник, телефон або пацієнт": {
+      en: "Owner, phone, or patient",
+      de: "Tierhalter, Telefon oder Patient",
+      pl: "Właściciel, telefon lub pacjent",
+    },
+
+    "Показано:": {
+      en: "Shown:",
+      de: "Angezeigt:",
+      pl: "Wyświetlono:",
+    },
+
+    "Телефон не вказано": {
+      en: "Phone not provided",
+      de: "Keine Telefonnummer angegeben",
+      pl: "Nie podano telefonu",
+    },
+
+    "Баланс": {
+      en: "Balance",
+      de: "Saldo",
+      pl: "Saldo",
+    },
+
+    "Є відкриті розрахунки": {
+      en: "Outstanding balance",
+      de: "Offene Abrechnung",
+      pl: "Otwarte rozliczenia",
+    },
+
+    "Розрахунки закриті": {
+      en: "Balance settled",
+      de: "Abrechnung abgeschlossen",
+      pl: "Rozliczenia zamknięte",
+    },
+
+    "Без дати": {
+      en: "No date",
+      de: "Kein Datum",
+      pl: "Brak daty",
+    },
+
+    "Візит": {
+      en: "Visit",
+      de: "Termin",
+      pl: "Wizyta",
+    },
+
+    "Немає відкритих візитів.": {
+      en: "No open visits.",
+      de: "Keine offenen Termine.",
+      pl: "Brak otwartych wizyt.",
+    },
+
+    "Відкрити картку клієнта →": {
+      en: "Open client profile →",
+      de: "Kundenprofil öffnen →",
+      pl: "Otwórz kartę klienta →",
+    },
+
+    "За цими умовами клієнтів не знайдено": {
+      en: "No clients match these filters",
+      de: "Keine Kunden entsprechen diesen Filtern",
+      pl: "Nie znaleziono klientów spełniających te warunki",
+    },
+
+    "Змініть фільтр або пошуковий запит.": {
+      en: "Change the filter or search query.",
+      de: "Ändern Sie den Filter oder die Suchanfrage.",
+      pl: "Zmień filtr lub zapytanie wyszukiwania.",
+    },
+
+    "Не вдалося завантажити клієнтські розрахунки": {
+      en: "Could not load client balances",
+      de: "Kundenabrechnungen konnten nicht geladen werden",
+      pl: "Nie udało się wczytać rozliczeń z klientami",
+    },
+  }
+);
+
+
+function getFinancePatientWord(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "patient"
+      : "patients";
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? "Patient"
+      : "Patienten";
+  }
+
+  if (language === "pl") {
+    const lastDigit = value % 10;
+    const lastTwoDigits = value % 100;
+
+    if (value === 1) {
+      return "pacjent";
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      !(
+        lastTwoDigits >= 12 &&
+        lastTwoDigits <= 14
+      )
+    ) {
+      return "pacjenci";
+    }
+
+    return "pacjentów";
+  }
+
+  const lastDigit = value % 10;
+  const lastTwoDigits = value % 100;
+
+  if (
+    lastDigit === 1 &&
+    lastTwoDigits !== 11
+  ) {
+    return "пацієнт";
+  }
+
+  if (
+    lastDigit >= 2 &&
+    lastDigit <= 4 &&
+    !(
+      lastTwoDigits >= 12 &&
+      lastTwoDigits <= 14
+    )
+  ) {
+    return "пацієнти";
+  }
+
+  return "пацієнтів";
+}
+
+
+function getFinanceClientPatientCountText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  return (
+    `${value} ` +
+    getFinancePatientWord(
+      value
+    )
+  );
+}
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "Завантажуємо фінансовий журнал…": {
+      en: "Loading the financial journal…",
+      de: "Finanzjournal wird geladen…",
+      pl: "Wczytywanie dziennika finansowego…",
+    },
+
+    "ФІНАНСОВИЙ ЖУРНАЛ": {
+      en: "FINANCIAL JOURNAL",
+      de: "FINANZJOURNAL",
+      pl: "DZIENNIK FINANSOWY",
+    },
+
+    "Оплати, витрати, повернення, внесення та вилучення коштів в одному журналі.": {
+      en: "Payments, expenses, refunds, deposits, and withdrawals in one journal.",
+      de: "Zahlungen, Ausgaben, Erstattungen, Einzahlungen und Entnahmen in einem Journal.",
+      pl: "Płatności, wydatki, zwroty, wpłaty i wypłaty w jednym dzienniku.",
+    },
+
+    "↻ Оновити": {
+      en: "↻ Refresh",
+      de: "↻ Aktualisieren",
+      pl: "↻ Odśwież",
+    },
+
+    "Пошук": {
+      en: "Search",
+      de: "Suche",
+      pl: "Szukaj",
+    },
+
+    "Категорія, опис або контрагент…": {
+      en: "Category, description, or counterparty…",
+      de: "Kategorie, Beschreibung oder Geschäftspartner…",
+      pl: "Kategoria, opis lub kontrahent…",
+    },
+
+    "Тип операції": {
+      en: "Transaction type",
+      de: "Transaktionstyp",
+      pl: "Typ operacji",
+    },
+
+    "Усі операції": {
+      en: "All transactions",
+      de: "Alle Transaktionen",
+      pl: "Wszystkie operacje",
+    },
+
+    "Оплати": {
+      en: "Payments",
+      de: "Zahlungen",
+      pl: "Płatności",
+    },
+
+    "Витрати": {
+      en: "Expenses",
+      de: "Ausgaben",
+      pl: "Wydatki",
+    },
+
+    "Повернення": {
+      en: "Refunds",
+      de: "Erstattungen",
+      pl: "Zwroty",
+    },
+
+    "Внесення": {
+      en: "Deposits",
+      de: "Einzahlungen",
+      pl: "Wpłaty",
+    },
+
+    "Вилучення": {
+      en: "Withdrawals",
+      de: "Entnahmen",
+      pl: "Wypłaty",
+    },
+
+    "Спосіб оплати": {
+      en: "Payment method",
+      de: "Zahlungsmethode",
+      pl: "Metoda płatności",
+    },
+
+    "Усі способи": {
+      en: "All methods",
+      de: "Alle Methoden",
+      pl: "Wszystkie metody",
+    },
+
+    "Готівка": {
+      en: "Cash",
+      de: "Bargeld",
+      pl: "Gotówka",
+    },
+
+    "Картка": {
+      en: "Card",
+      de: "Karte",
+      pl: "Karta",
+    },
+
+    "Термінал": {
+      en: "Terminal",
+      de: "Terminal",
+      pl: "Terminal",
+    },
+
+    "Переказ": {
+      en: "Bank transfer",
+      de: "Überweisung",
+      pl: "Przelew",
+    },
+
+    "Інше": {
+      en: "Other",
+      de: "Sonstiges",
+      pl: "Inne",
+    },
+
+    "Рахунок": {
+      en: "Account",
+      de: "Konto",
+      pl: "Rachunek",
+    },
+
+    "Усі рахунки": {
+      en: "All accounts",
+      de: "Alle Konten",
+      pl: "Wszystkie rachunki",
+    },
+
+    "Від": {
+      en: "From",
+      de: "Von",
+      pl: "Od",
+    },
+
+    "До": {
+      en: "To",
+      de: "Bis",
+      pl: "Do",
+    },
+
+    "Застосувати": {
+      en: "Apply",
+      de: "Anwenden",
+      pl: "Zastosuj",
+    },
+
+    "Скинути": {
+      en: "Reset",
+      de: "Zurücksetzen",
+      pl: "Resetuj",
+    },
+
+    "ЖУРНАЛ": {
+      en: "JOURNAL",
+      de: "JOURNAL",
+      pl: "DZIENNIK",
+    },
+
+    "Фінансові операції": {
+      en: "Financial transactions",
+      de: "Finanztransaktionen",
+      pl: "Operacje finansowe",
+    },
+
+    "Проведено": {
+      en: "Completed",
+      de: "Gebucht",
+      pl: "Zaksięgowano",
+    },
+
+    "Очікується": {
+      en: "Pending",
+      de: "Ausstehend",
+      pl: "Oczekuje",
+    },
+
+    "Скасовано": {
+      en: "Cancelled",
+      de: "Storniert",
+      pl: "Anulowano",
+    },
+
+    "Помилка": {
+      en: "Failed",
+      de: "Fehlgeschlagen",
+      pl: "Błąd",
+    },
+
+    "Контрагент:": {
+      en: "Counterparty:",
+      de: "Geschäftspartner:",
+      pl: "Kontrahent:",
+    },
+
+    "🩺 Відкрити візит": {
+      en: "🩺 Open visit",
+      de: "🩺 Termin öffnen",
+      pl: "🩺 Otwórz wizytę",
+    },
+
+    "🧾 Відкрити чек": {
+      en: "🧾 Open receipt",
+      de: "🧾 Beleg öffnen",
+      pl: "🧾 Otwórz paragon",
+    },
+
+    "Повернено повністю": {
+      en: "Fully refunded",
+      de: "Vollständig erstattet",
+      pl: "Zwrócono w całości",
+    },
+
+    "↙ Повернути платіж": {
+      en: "↙ Refund payment",
+      de: "↙ Zahlung erstatten",
+      pl: "↙ Zwróć płatność",
+    },
+
+    "↩ Скасувати платіж": {
+      en: "↩ Cancel payment",
+      de: "↩ Zahlung stornieren",
+      pl: "↩ Anuluj płatność",
+    },
+
+    "✎ Редагувати": {
+      en: "✎ Edit",
+      de: "✎ Bearbeiten",
+      pl: "✎ Edytuj",
+    },
+
+    "Операцій не знайдено": {
+      en: "No transactions found",
+      de: "Keine Transaktionen gefunden",
+      pl: "Nie znaleziono operacji",
+    },
+
+    "Змініть фільтри або оберіть інший період.": {
+      en: "Change the filters or select another period.",
+      de: "Ändern Sie die Filter oder wählen Sie einen anderen Zeitraum.",
+      pl: "Zmień filtry lub wybierz inny okres.",
+    },
+
+    "← Назад": {
+      en: "← Previous",
+      de: "← Zurück",
+      pl: "← Wstecz",
+    },
+
+    "Далі →": {
+      en: "Next →",
+      de: "Weiter →",
+      pl: "Dalej →",
+    },
+
+    "Не вдалося відкрити візит.": {
+      en: "Could not open the visit.",
+      de: "Der Termin konnte nicht geöffnet werden.",
+      pl: "Nie udało się otworzyć wizyty.",
+    },
+
+    "Посилання на чек недоступне.": {
+      en: "The receipt link is unavailable.",
+      de: "Der Beleglink ist nicht verfügbar.",
+      pl: "Link do paragonu jest niedostępny.",
+    },
+
+    "Оберіть коректний період.": {
+      en: "Select a valid period.",
+      de: "Wählen Sie einen gültigen Zeitraum.",
+      pl: "Wybierz prawidłowy okres.",
+    },
+
+    "Не вдалося завантажити операції": {
+      en: "Could not load transactions",
+      de: "Transaktionen konnten nicht geladen werden",
+      pl: "Nie udało się wczytać operacji",
+    },
+  }
+);
+
+
+function getFinanceOperationsShownText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${value} ${getFinanceOperationWord(value)} shown`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${value} ${getFinanceOperationWord(value)} angezeigt`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Wyświetlono ${value} ` +
+      getFinanceOperationWord(value)
+    );
+  }
+
+  return (
+    `Показано ${value} ` +
+    getFinanceOperationWord(value)
+  );
+}
+
+
+function getFinanceRefundedText(
+  amount
+) {
+  const formattedAmount =
+    formatVisitFinanceMoney(
+      amount
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Refunded ${formattedAmount}`;
+  }
+
+  if (language === "de") {
+    return `${formattedAmount} erstattet`;
+  }
+
+  if (language === "pl") {
+    return `Zwrócono ${formattedAmount}`;
+  }
+
+  return `Повернено ${formattedAmount}`;
+}
+
+
+function getFinanceCancelPaymentMessage(
+  amount
+) {
+  const formattedAmount =
+    escapeHtml(
+      formatVisitFinanceMoney(
+        amount
+      )
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `The payment of <strong>${formattedAmount}</strong> ` +
+      "will be cancelled. Client and account balances " +
+      "will be recalculated automatically. " +
+      "The entry will remain in the journal."
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `Die Zahlung über <strong>${formattedAmount}</strong> ` +
+      "wird storniert. Kunden- und Kontostände werden " +
+      "automatisch neu berechnet. " +
+      "Der Eintrag bleibt im Journal erhalten."
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Płatność w wysokości <strong>${formattedAmount}</strong> ` +
+      "zostanie anulowana. Saldo klienta i rachunku zostanie " +
+      "automatycznie przeliczone. " +
+      "Wpis pozostanie w dzienniku."
+    );
+  }
+
+  return (
+    `Платіж на суму <strong>${formattedAmount}</strong> ` +
+    "буде скасовано. Баланс клієнта та каси " +
+    "перерахуються автоматично. " +
+    "Запис залишиться у журналі."
+  );
+}
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "ПОВЕРНЕННЯ КЛІЄНТУ": {
+      en: "CLIENT REFUND",
+      de: "KUNDENERSTATTUNG",
+      pl: "ZWROT DLA KLIENTA",
+    },
+
+    "Повернути платіж": {
+      en: "Refund payment",
+      de: "Zahlung erstatten",
+      pl: "Zwróć płatność",
+    },
+
+    "Повернення стане окремою операцією. Початковий платіж залишиться в журналі.": {
+      en: "The refund will be recorded as a separate transaction. The original payment will remain in the journal.",
+      de: "Die Erstattung wird als separate Transaktion erfasst. Die ursprüngliche Zahlung bleibt im Journal.",
+      pl: "Zwrot zostanie zapisany jako osobna operacja. Pierwotna płatność pozostanie w dzienniku.",
+    },
+
+    "Закрити": {
+      en: "Close",
+      de: "Schließen",
+      pl: "Zamknij",
+    },
+
+    "Початковий платіж": {
+      en: "Original payment",
+      de: "Ursprüngliche Zahlung",
+      pl: "Pierwotna płatność",
+    },
+
+    "Доступно повернути": {
+      en: "Available to refund",
+      de: "Erstattungsbetrag verfügbar",
+      pl: "Dostępne do zwrotu",
+    },
+
+    "Сума повернення": {
+      en: "Refund amount",
+      de: "Erstattungsbetrag",
+      pl: "Kwota zwrotu",
+    },
+
+    "Причина повернення": {
+      en: "Refund reason",
+      de: "Grund der Erstattung",
+      pl: "Powód zwrotu",
+    },
+
+    "Наприклад, послугу скасовано або клієнт переплатив…": {
+      en: "For example, the service was cancelled or the client overpaid…",
+      de: "Zum Beispiel wurde die Leistung storniert oder der Kunde hat zu viel bezahlt…",
+      pl: "Na przykład usługa została anulowana lub klient zapłacił za dużo…",
+    },
+
+    "Баланс візиту, клієнта та фінансового рахунку перерахуються автоматично. Часткове повернення можна продовжити пізніше в межах залишку платежу.": {
+      en: "The visit, client, and account balances will be recalculated automatically. A partial refund can be continued later within the remaining payment amount.",
+      de: "Die Salden des Termins, des Kunden und des Kontos werden automatisch neu berechnet. Eine Teilerstattung kann später bis zum verbleibenden Zahlungsbetrag fortgesetzt werden.",
+      pl: "Saldo wizyty, klienta i rachunku zostanie automatycznie przeliczone. Częściowy zwrot można później kontynuować w ramach pozostałej kwoty płatności.",
+    },
+
+    "Залишити платіж": {
+      en: "Keep payment",
+      de: "Zahlung behalten",
+      pl: "Pozostaw płatność",
+    },
+
+    "Оформити повернення": {
+      en: "Process refund",
+      de: "Erstattung ausführen",
+      pl: "Wykonaj zwrot",
+    },
+
+    "Вкажіть причину повернення.": {
+      en: "Enter a refund reason.",
+      de: "Geben Sie einen Grund für die Erstattung ein.",
+      pl: "Podaj powód zwrotu.",
+    },
+
+    "Оформлюємо повернення…": {
+      en: "Processing refund…",
+      de: "Erstattung wird bearbeitet…",
+      pl: "Przetwarzanie zwrotu…",
+    },
+
+    "Не вдалося оформити повернення.": {
+      en: "Could not process the refund.",
+      de: "Die Erstattung konnte nicht ausgeführt werden.",
+      pl: "Nie udało się wykonać zwrotu.",
+    },
+
+    "Додавати витрати може лише адміністратор або власник клініки.": {
+      en: "Only an administrator or clinic owner can add expenses.",
+      de: "Nur ein Administrator oder Klinikinhaber kann Ausgaben hinzufügen.",
+      pl: "Tylko administrator lub właściciel kliniki może dodawać wydatki.",
+    },
+
+    "ФІНАНСОВА ОПЕРАЦІЯ": {
+      en: "FINANCIAL TRANSACTION",
+      de: "FINANZTRANSAKTION",
+      pl: "OPERACJA FINANSOWA",
+    },
+
+    "Редагувати витрату": {
+      en: "Edit expense",
+      de: "Ausgabe bearbeiten",
+      pl: "Edytuj wydatek",
+    },
+
+    "Зміни одразу оновлять журнал, рахунок та аналітику.": {
+      en: "The changes will immediately update the journal, account, and analytics.",
+      de: "Die Änderungen aktualisieren sofort das Journal, das Konto und die Analyse.",
+      pl: "Zmiany natychmiast zaktualizują dziennik, rachunek i analitykę.",
+    },
+
+    "Витрата одразу потрапить до аналітики та журналу.": {
+      en: "The expense will immediately appear in analytics and the journal.",
+      de: "Die Ausgabe erscheint sofort in der Analyse und im Journal.",
+      pl: "Wydatek natychmiast pojawi się w analityce i dzienniku.",
+    },
+
+    "Сума витрати": {
+      en: "Expense amount",
+      de: "Ausgabenbetrag",
+      pl: "Kwota wydatku",
+    },
+
+    "Категорія": {
+      en: "Category",
+      de: "Kategorie",
+      pl: "Kategoria",
+    },
+
+    "Оберіть категорію": {
+      en: "Select a category",
+      de: "Kategorie auswählen",
+      pl: "Wybierz kategorię",
+    },
+
+    "Закупівля препаратів": {
+      en: "Medication purchases",
+      de: "Medikamenteneinkäufe",
+      pl: "Zakup leków",
+    },
+
+    "Витратні матеріали": {
+      en: "Consumables",
+      de: "Verbrauchsmaterialien",
+      pl: "Materiały eksploatacyjne",
+    },
+
+    "Оренда": {
+      en: "Rent",
+      de: "Miete",
+      pl: "Czynsz",
+    },
+
+    "Комунальні послуги": {
+      en: "Utilities",
+      de: "Nebenkosten",
+      pl: "Media",
+    },
+
+    "Зарплата": {
+      en: "Payroll",
+      de: "Gehälter",
+      pl: "Wynagrodzenia",
+    },
+
+    "Податки": {
+      en: "Taxes",
+      de: "Steuern",
+      pl: "Podatki",
+    },
+
+    "Маркетинг": {
+      en: "Marketing",
+      de: "Marketing",
+      pl: "Marketing",
+    },
+
+    "Обслуговування обладнання": {
+      en: "Equipment maintenance",
+      de: "Gerätewartung",
+      pl: "Serwis urządzeń",
+    },
+
+    "Транспорт": {
+      en: "Transport",
+      de: "Transport",
+      pl: "Transport",
+    },
+
+    "Банківський переказ": {
+      en: "Bank transfer",
+      de: "Banküberweisung",
+      pl: "Przelew bankowy",
+    },
+
+    "Дата та час": {
+      en: "Date and time",
+      de: "Datum und Uhrzeit",
+      pl: "Data i godzina",
+    },
+
+    "Постачальник / отримувач": {
+      en: "Supplier / recipient",
+      de: "Lieferant / Empfänger",
+      pl: "Dostawca / odbiorca",
+    },
+
+    "Наприклад, постачальник": {
+      en: "For example, a supplier",
+      de: "Zum Beispiel ein Lieferant",
+      pl: "Na przykład dostawca",
+    },
+
+    "Опис": {
+      en: "Description",
+      de: "Beschreibung",
+      pl: "Opis",
+    },
+
+    "За що сплачено та додаткові деталі…": {
+      en: "What was paid for and additional details…",
+      de: "Zahlungszweck und zusätzliche Angaben…",
+      pl: "Cel płatności i dodatkowe informacje…",
+    },
+
+    "Посилання на чек або документ": {
+      en: "Receipt or document link",
+      de: "Link zum Beleg oder Dokument",
+      pl: "Link do paragonu lub dokumentu",
+    },
+
+    "Операція буде зафіксована від імені поточного користувача. Після проведення вона вплине на грошовий потік і прибуток.": {
+      en: "The transaction will be recorded under the current user. Once completed, it will affect cash flow and profit.",
+      de: "Die Transaktion wird im Namen des aktuellen Benutzers erfasst. Nach der Buchung wirkt sie sich auf Cashflow und Gewinn aus.",
+      pl: "Operacja zostanie zapisana w imieniu bieżącego użytkownika. Po zaksięgowaniu wpłynie na przepływy pieniężne i zysk.",
+    },
+
+    "Скасувати": {
+      en: "Cancel",
+      de: "Abbrechen",
+      pl: "Anuluj",
+    },
+
+    "Зберегти зміни": {
+      en: "Save changes",
+      de: "Änderungen speichern",
+      pl: "Zapisz zmiany",
+    },
+
+    "Провести витрату": {
+      en: "Record expense",
+      de: "Ausgabe buchen",
+      pl: "Zaksięguj wydatek",
+    },
+
+    "Вкажіть коректну суму витрати.": {
+      en: "Enter a valid expense amount.",
+      de: "Geben Sie einen gültigen Ausgabenbetrag ein.",
+      pl: "Podaj prawidłową kwotę wydatku.",
+    },
+
+    "Оберіть категорію витрати.": {
+      en: "Select an expense category.",
+      de: "Wählen Sie eine Ausgabenkategorie.",
+      pl: "Wybierz kategorię wydatku.",
+    },
+
+    "Зберігаємо зміни…": {
+      en: "Saving changes…",
+      de: "Änderungen werden gespeichert…",
+      pl: "Zapisywanie zmian…",
+    },
+
+    "Проводимо операцію…": {
+      en: "Recording transaction…",
+      de: "Transaktion wird gebucht…",
+      pl: "Księgowanie operacji…",
+    },
+
+    "Зміни витрати успішно збережено.": {
+      en: "Expense changes saved successfully.",
+      de: "Die Änderungen der Ausgabe wurden gespeichert.",
+      pl: "Zmiany wydatku zostały zapisane.",
+    },
+
+    "Витрату успішно додано до фінансового журналу.": {
+      en: "The expense was added to the financial journal.",
+      de: "Die Ausgabe wurde dem Finanzjournal hinzugefügt.",
+      pl: "Wydatek został dodany do dziennika finansowego.",
+    },
+
+    "Не вдалося зберегти зміни витрати.": {
+      en: "Could not save the expense changes.",
+      de: "Die Änderungen der Ausgabe konnten nicht gespeichert werden.",
+      pl: "Nie udało się zapisać zmian wydatku.",
+    },
+
+    "Не вдалося додати витрату.": {
+      en: "Could not add the expense.",
+      de: "Die Ausgabe konnte nicht hinzugefügt werden.",
+      pl: "Nie udało się dodać wydatku.",
+    },
+  }
+);
+
+
+function getFinanceRefundAmountError(
+  maximumAmount
+) {
+  const amount =
+    formatVisitFinanceMoney(
+      maximumAmount
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Enter an amount from 0.01 to ${amount}.`;
+  }
+
+  if (language === "de") {
+    return `Geben Sie einen Betrag von 0,01 bis ${amount} ein.`;
+  }
+
+  if (language === "pl") {
+    return `Podaj kwotę od 0,01 do ${amount}.`;
+  }
+
+  return `Вкажіть суму від 0,01 до ${amount}.`;
+}
+
+
+function getFinanceRefundSuccessMessage(
+  amount
+) {
+  const formattedAmount =
+    escapeHtml(
+      formatVisitFinanceMoney(
+        amount
+      )
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `A refund of <strong>${formattedAmount}</strong> ` +
+      "was processed successfully."
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `Eine Erstattung über <strong>${formattedAmount}</strong> ` +
+      "wurde erfolgreich ausgeführt."
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Zwrot w wysokości <strong>${formattedAmount}</strong> ` +
+      "został pomyślnie wykonany."
+    );
+  }
+
+  return (
+    `Повернення на суму <strong>${formattedAmount}</strong> ` +
+    "успішно проведено."
+  );
+}
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "Аналізуємо витрати клініки…": {
+      en: "Analysing clinic expenses…",
+      de: "Klinikausgaben werden analysiert…",
+      pl: "Analizowanie wydatków kliniki…",
+    },
+
+    "КОНТРОЛЬ ВИТРАТ": {
+      en: "EXPENSE CONTROL",
+      de: "AUSGABENKONTROLLE",
+      pl: "KONTROLA WYDATKÓW",
+    },
+
+    "Витрати клініки": {
+      en: "Clinic expenses",
+      de: "Klinikausgaben",
+      pl: "Wydatki kliniki",
+    },
+
+    "Закупівлі, зарплати, постійні витрати та контрагенти в одному просторі.": {
+      en: "Purchases, payroll, recurring expenses, and counterparties in one place.",
+      de: "Einkäufe, Gehälter, laufende Ausgaben und Geschäftspartner an einem Ort.",
+      pl: "Zakupy, wynagrodzenia, stałe wydatki i kontrahenci w jednym miejscu.",
+    },
+
+    "← До сьогодні": {
+      en: "← Back to today",
+      de: "← Zurück zu heute",
+      pl: "← Wróć do dzisiaj",
+    },
+
+    "↕ Журнал витрат": {
+      en: "↕ Expense journal",
+      de: "↕ Ausgabenjournal",
+      pl: "↕ Dziennik wydatków",
+    },
+
+    "Початок періоду": {
+      en: "Period start",
+      de: "Zeitraumbeginn",
+      pl: "Początek okresu",
+    },
+
+    "Кінець періоду": {
+      en: "Period end",
+      de: "Zeitraumende",
+      pl: "Koniec okresu",
+    },
+
+    "Застосувати період": {
+      en: "Apply period",
+      de: "Zeitraum anwenden",
+      pl: "Zastosuj okres",
+    },
+
+    "Усього витрат": {
+      en: "Total expenses",
+      de: "Gesamtausgaben",
+      pl: "Łączne wydatki",
+    },
+
+    "проведених операцій": {
+      en: "completed transactions",
+      de: "gebuchte Transaktionen",
+      pl: "zaksięgowanych operacji",
+    },
+
+    "Закупівлі": {
+      en: "Purchases",
+      de: "Einkäufe",
+      pl: "Zakupy",
+    },
+
+    "Препарати та матеріали": {
+      en: "Medication and supplies",
+      de: "Medikamente und Materialien",
+      pl: "Leki i materiały",
+    },
+
+    "Зарплатний фонд": {
+      en: "Payroll",
+      de: "Lohnkosten",
+      pl: "Fundusz wynagrodzeń",
+    },
+
+    "Персональні дані доступні власнику": {
+      en: "Personal details are available to the owner",
+      de: "Personaldaten sind für den Inhaber verfügbar",
+      pl: "Dane osobowe są dostępne dla właściciela",
+    },
+
+    "Лише загальна сума без ставок": {
+      en: "Only the total amount is shown, without rates",
+      de: "Nur der Gesamtbetrag ohne einzelne Sätze",
+      pl: "Tylko łączna kwota bez stawek",
+    },
+
+    "Постійні витрати": {
+      en: "Recurring expenses",
+      de: "Laufende Ausgaben",
+      pl: "Stałe wydatki",
+    },
+
+    "Оренда та комунальні": {
+      en: "Rent and utilities",
+      de: "Miete und Nebenkosten",
+      pl: "Czynsz i media",
+    },
+
+    "У середньому за день": {
+      en: "Daily average",
+      de: "Tagesdurchschnitt",
+      pl: "Średnio dziennie",
+    },
+
+    "За обраний період": {
+      en: "For the selected period",
+      de: "Für den ausgewählten Zeitraum",
+      pl: "Za wybrany okres",
+    },
+
+    "ДИНАМІКА": {
+      en: "TREND",
+      de: "ENTWICKLUNG",
+      pl: "DYNAMIKA",
+    },
+
+    "Витрати за днями": {
+      en: "Expenses by day",
+      de: "Ausgaben nach Tagen",
+      pl: "Wydatki według dni",
+    },
+
+    "За цей період витрат немає": {
+      en: "No expenses for this period",
+      de: "Keine Ausgaben in diesem Zeitraum",
+      pl: "Brak wydatków w tym okresie",
+    },
+
+    "Графік зʼявиться після проведення першої витрати.": {
+      en: "The chart will appear after the first expense is recorded.",
+      de: "Das Diagramm erscheint, sobald die erste Ausgabe gebucht wurde.",
+      pl: "Wykres pojawi się po zaksięgowaniu pierwszego wydatku.",
+    },
+
+    "Динаміка витрат": {
+      en: "Expense trend",
+      de: "Ausgabenentwicklung",
+      pl: "Dynamika wydatków",
+    },
+
+    "СТРУКТУРА": {
+      en: "BREAKDOWN",
+      de: "STRUKTUR",
+      pl: "STRUKTURA",
+    },
+
+    "Категорії витрат": {
+      en: "Expense categories",
+      de: "Ausgabenkategorien",
+      pl: "Kategorie wydatków",
+    },
+
+    "Категорій ще немає": {
+      en: "No categories yet",
+      de: "Noch keine Kategorien",
+      pl: "Brak kategorii",
+    },
+
+    "Додайте першу витрату.": {
+      en: "Add the first expense.",
+      de: "Fügen Sie die erste Ausgabe hinzu.",
+      pl: "Dodaj pierwszy wydatek.",
+    },
+
+    "ПОСТАЧАННЯ": {
+      en: "SUPPLY",
+      de: "LIEFERUNGEN",
+      pl: "DOSTAWY",
+    },
+
+    "+ Нова закупівля": {
+      en: "+ New purchase",
+      de: "+ Neuer Einkauf",
+      pl: "+ Nowy zakup",
+    },
+
+    "Документів": {
+      en: "Documents",
+      de: "Dokumente",
+      pl: "Dokumenty",
+    },
+
+    "Сума документів": {
+      en: "Document total",
+      de: "Dokumentsumme",
+      pl: "Suma dokumentów",
+    },
+
+    "Очікують оплати": {
+      en: "Awaiting payment",
+      de: "Zahlung ausstehend",
+      pl: "Oczekują na płatność",
+    },
+
+    "Закупівля": {
+      en: "Purchase",
+      de: "Einkauf",
+      pl: "Zakup",
+    },
+
+    "Постачальник не вказаний": {
+      en: "Supplier not provided",
+      de: "Kein Lieferant angegeben",
+      pl: "Nie podano dostawcy",
+    },
+
+    "Отримано:": {
+      en: "Received:",
+      de: "Erhalten:",
+      pl: "Otrzymano:",
+    },
+
+    "із": {
+      en: "of",
+      de: "von",
+      pl: "z",
+    },
+
+    "Залишок:": {
+      en: "Remaining:",
+      de: "Restbetrag:",
+      pl: "Pozostało:",
+    },
+
+    "Закупівель за цей період немає": {
+      en: "No purchases for this period",
+      de: "Keine Einkäufe in diesem Zeitraum",
+      pl: "Brak zakupów w tym okresie",
+    },
+
+    "Створіть перше замовлення постачальнику.": {
+      en: "Create the first supplier order.",
+      de: "Erstellen Sie die erste Bestellung bei einem Lieferanten.",
+      pl: "Utwórz pierwsze zamówienie u dostawcy.",
+    },
+
+    "КОНТРАГЕНТИ": {
+      en: "COUNTERPARTIES",
+      de: "GESCHÄFTSPARTNER",
+      pl: "KONTRAHENCI",
+    },
+
+    "Кому сплачували": {
+      en: "Payment recipients",
+      de: "Zahlungsempfänger",
+      pl: "Odbiorcy płatności",
+    },
+
+    "Без назви": {
+      en: "Unnamed",
+      de: "Ohne Namen",
+      pl: "Bez nazwy",
+    },
+
+    "остання": {
+      en: "latest",
+      de: "zuletzt",
+      pl: "ostatnia",
+    },
+
+    "Контрагентів ще немає": {
+      en: "No counterparties yet",
+      de: "Noch keine Geschäftspartner",
+      pl: "Brak kontrahentów",
+    },
+
+    "Вкажіть отримувача під час додавання витрати.": {
+      en: "Enter a recipient when adding an expense.",
+      de: "Geben Sie beim Hinzufügen einer Ausgabe einen Empfänger an.",
+      pl: "Podaj odbiorcę podczas dodawania wydatku.",
+    },
+
+    "Не вдалося завантажити витрати": {
+      en: "Could not load expenses",
+      de: "Ausgaben konnten nicht geladen werden",
+      pl: "Nie udało się wczytać wydatków",
+    },
+
+    "Чернетка": {
+      en: "Draft",
+      de: "Entwurf",
+      pl: "Wersja robocza",
+    },
+
+    "Замовлено": {
+      en: "Ordered",
+      de: "Bestellt",
+      pl: "Zamówiono",
+    },
+
+    "Отримано частково": {
+      en: "Partially received",
+      de: "Teilweise erhalten",
+      pl: "Otrzymano częściowo",
+    },
+
+    "Оплачено частково": {
+      en: "Partially paid",
+      de: "Teilweise bezahlt",
+      pl: "Opłacono częściowo",
+    },
+
+    "Оплачено": {
+      en: "Paid",
+      de: "Bezahlt",
+      pl: "Opłacono",
+    },
+
+    "Не оплачено": {
+      en: "Unpaid",
+      de: "Nicht bezahlt",
+      pl: "Nie opłacono",
+    },
+  }
+);
+
+
+function getFinanceCompletedOperationsText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${value} completed ` +
+      `${value === 1 ? "transaction" : "transactions"}`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${value} gebuchte ` +
+      `${value === 1 ? "Transaktion" : "Transaktionen"}`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `${value} zaksięgowanych operacji`
+    );
+  }
+
+  return (
+    `${value} проведених операцій`
+  );
+}
+
+
+function getFinancePurchaseItemsText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `${value} ${value === 1 ? "item" : "items"}`;
+  }
+
+  if (language === "de") {
+    return `${value} ${value === 1 ? "Position" : "Positionen"}`;
+  }
+
+  if (language === "pl") {
+    return `${value} pozycji`;
+  }
+
+  return `${value} позицій`;
+}
+
+
+function getFinanceReceivedItemsText(
+  received,
+  total
+) {
+  const receivedValue =
+    Number(received || 0);
+
+  const totalValue =
+    Number(total || 0);
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Received: ${receivedValue} of ${totalValue}`;
+  }
+
+  if (language === "de") {
+    return `Erhalten: ${receivedValue} von ${totalValue}`;
+  }
+
+  if (language === "pl") {
+    return `Otrzymano: ${receivedValue} z ${totalValue}`;
+  }
+
+  return `Отримано: ${receivedValue} із ${totalValue}`;
+}
+
+
+function getFinanceRemainingAmountText(
+  amount
+) {
+  const formattedAmount =
+    formatVisitFinanceMoney(
+      amount
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Remaining: ${formattedAmount}`;
+  }
+
+  if (language === "de") {
+    return `Restbetrag: ${formattedAmount}`;
+  }
+
+  if (language === "pl") {
+    return `Pozostało: ${formattedAmount}`;
+  }
+
+  return `Залишок: ${formattedAmount}`;
+}
+
+
+function getFinanceCounterpartyOperationsText(
+  count,
+  date
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const safeDate =
+    String(date || "—");
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${value} ${value === 1 ? "transaction" : "transactions"} ` +
+      `· latest ${safeDate}`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${value} ${value === 1 ? "Transaktion" : "Transaktionen"} ` +
+      `· zuletzt ${safeDate}`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `${value} ${getFinanceOperationWord(value)} ` +
+      `· ostatnia ${safeDate}`
+    );
+  }
+
+  return (
+    `${value} ${getFinanceOperationWord(value)} ` +
+    `· остання ${safeDate}`
+  );
+}
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "НОВИЙ КОНТРАГЕНТ": {
+      en: "NEW COUNTERPARTY",
+      de: "NEUER GESCHÄFTSPARTNER",
+      pl: "NOWY KONTRAHENT",
+    },
+
+    "Додати постачальника": {
+      en: "Add supplier",
+      de: "Lieferanten hinzufügen",
+      pl: "Dodaj dostawcę",
+    },
+
+    "Контактні дані для закупівель і документів.": {
+      en: "Contact details for purchases and documents.",
+      de: "Kontaktdaten für Einkäufe und Dokumente.",
+      pl: "Dane kontaktowe do zakupów i dokumentów.",
+    },
+
+    "Назва постачальника *": {
+      en: "Supplier name *",
+      de: "Lieferantenname *",
+      pl: "Nazwa dostawcy *",
+    },
+
+    "Наприклад, ВетМаркет": {
+      en: "For example, VetMarket",
+      de: "Zum Beispiel VetMarket",
+      pl: "Na przykład VetMarket",
+    },
+
+    "ЄДРПОУ": {
+      en: "Company ID",
+      de: "Unternehmensnummer",
+      pl: "Numer firmy",
+    },
+
+    "Контактна особа": {
+      en: "Contact person",
+      de: "Ansprechperson",
+      pl: "Osoba kontaktowa",
+    },
+
+    "Імʼя менеджера": {
+      en: "Manager name",
+      de: "Name des Ansprechpartners",
+      pl: "Imię opiekuna",
+    },
+
+    "Телефон": {
+      en: "Phone",
+      de: "Telefon",
+      pl: "Telefon",
+    },
+
+    "Адреса": {
+      en: "Address",
+      de: "Adresse",
+      pl: "Adres",
+    },
+
+    "Місто, вулиця, склад": {
+      en: "City, street, warehouse",
+      de: "Stadt, Straße, Lager",
+      pl: "Miasto, ulica, magazyn",
+    },
+
+    "Примітка": {
+      en: "Note",
+      de: "Notiz",
+      pl: "Notatka",
+    },
+
+    "Умови оплати, доставки або додаткові контакти…": {
+      en: "Payment and delivery terms or additional contacts…",
+      de: "Zahlungs- und Lieferbedingungen oder zusätzliche Kontakte…",
+      pl: "Warunki płatności i dostawy lub dodatkowe kontakty…",
+    },
+
+    "Додати постачальника →": {
+      en: "Add supplier →",
+      de: "Lieferanten hinzufügen →",
+      pl: "Dodaj dostawcę →",
+    },
+
+    "Вкажіть назву постачальника.": {
+      en: "Enter the supplier name.",
+      de: "Geben Sie den Namen des Lieferanten ein.",
+      pl: "Podaj nazwę dostawcy.",
+    },
+
+    "Додаємо…": {
+      en: "Adding…",
+      de: "Wird hinzugefügt…",
+      pl: "Dodawanie…",
+    },
+
+    "Не вдалося створити постачальника.": {
+      en: "Could not create the supplier.",
+      de: "Der Lieferant konnte nicht erstellt werden.",
+      pl: "Nie udało się utworzyć dostawcy.",
+    },
+  }
+);
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "Готуємо нову закупівлю…": {
+      en: "Preparing a new purchase…",
+      de: "Neuer Einkauf wird vorbereitet…",
+      pl: "Przygotowywanie nowego zakupu…",
+    },
+
+    "НОВЕ ПОСТАЧАННЯ": {
+      en: "NEW SUPPLY",
+      de: "NEUE LIEFERUNG",
+      pl: "NOWA DOSTAWA",
+    },
+
+    "Створити закупівлю": {
+      en: "Create purchase",
+      de: "Einkauf erstellen",
+      pl: "Utwórz zakup",
+    },
+
+    "Сформуйте замовлення постачальнику.": {
+      en: "Create an order for the supplier.",
+      de: "Erstellen Sie eine Bestellung beim Lieferanten.",
+      pl: "Utwórz zamówienie u dostawcy.",
+    },
+
+    "ОСНОВНІ ДАНІ": {
+      en: "GENERAL DETAILS",
+      de: "GRUNDDATEN",
+      pl: "DANE PODSTAWOWE",
+    },
+
+    "Постачальник і документ": {
+      en: "Supplier and document",
+      de: "Lieferant und Dokument",
+      pl: "Dostawca i dokument",
+    },
+
+    "+ Новий постачальник": {
+      en: "+ New supplier",
+      de: "+ Neuer Lieferant",
+      pl: "+ Nowy dostawca",
+    },
+
+    "Постачальник": {
+      en: "Supplier",
+      de: "Lieferant",
+      pl: "Dostawca",
+    },
+
+    "Оберіть постачальника": {
+      en: "Select a supplier",
+      de: "Lieferanten auswählen",
+      pl: "Wybierz dostawcę",
+    },
+
+    "Активних постачальників немає.": {
+      en: "No active suppliers.",
+      de: "Keine aktiven Lieferanten.",
+      pl: "Brak aktywnych dostawców.",
+    },
+
+    "Дата замовлення": {
+      en: "Order date",
+      de: "Bestelldatum",
+      pl: "Data zamówienia",
+    },
+
+    "Очікувана дата": {
+      en: "Expected date",
+      de: "Erwartetes Datum",
+      pl: "Przewidywana data",
+    },
+
+    "Номер накладної": {
+      en: "Invoice number",
+      de: "Rechnungsnummer",
+      pl: "Numer faktury",
+    },
+
+    "Наприклад, НК-2048": {
+      en: "For example, INV-2048",
+      de: "Zum Beispiel RE-2048",
+      pl: "Na przykład FV-2048",
+    },
+
+    "Валюта": {
+      en: "Currency",
+      de: "Währung",
+      pl: "Waluta",
+    },
+
+    "UAH — гривня": {
+      en: "UAH — Ukrainian hryvnia",
+      de: "UAH — Ukrainische Hrywnja",
+      pl: "UAH — hrywna ukraińska",
+    },
+
+    "USD — долар": {
+      en: "USD — US dollar",
+      de: "USD — US-Dollar",
+      pl: "USD — dolar amerykański",
+    },
+
+    "EUR — євро": {
+      en: "EUR — euro",
+      de: "EUR — Euro",
+      pl: "EUR — euro",
+    },
+
+    "PLN — злотий": {
+      en: "PLN — Polish zloty",
+      de: "PLN — Polnischer Złoty",
+      pl: "PLN — złoty polski",
+    },
+
+    "СКЛАД ЗАМОВЛЕННЯ": {
+      en: "ORDER CONTENTS",
+      de: "BESTELLINHALT",
+      pl: "ZAWARTOŚĆ ZAMÓWIENIA",
+    },
+
+    "Позиції закупівлі": {
+      en: "Purchase items",
+      de: "Einkaufspositionen",
+      pl: "Pozycje zakupu",
+    },
+
+    "+ Додати позицію": {
+      en: "+ Add item",
+      de: "+ Position hinzufügen",
+      pl: "+ Dodaj pozycję",
+    },
+
+    "Знижка": {
+      en: "Discount",
+      de: "Rabatt",
+      pl: "Rabat",
+    },
+
+    "Посилання на накладну": {
+      en: "Invoice link",
+      de: "Link zur Rechnung",
+      pl: "Link do faktury",
+    },
+
+    "Умови постачання або коментар…": {
+      en: "Delivery terms or comment…",
+      de: "Lieferbedingungen oder Kommentar…",
+      pl: "Warunki dostawy lub komentarz…",
+    },
+
+    "Підсумок": {
+      en: "Subtotal",
+      de: "Zwischensumme",
+      pl: "Suma częściowa",
+    },
+
+    "Разом": {
+      en: "Total",
+      de: "Gesamt",
+      pl: "Razem",
+    },
+
+    "Створити закупівлю →": {
+      en: "Create purchase →",
+      de: "Einkauf erstellen →",
+      pl: "Utwórz zakup →",
+    },
+
+    "Новий постачальник": {
+      en: "New supplier",
+      de: "Neuer Lieferant",
+      pl: "Nowy dostawca",
+    },
+
+    "Позиція складу": {
+      en: "Inventory item",
+      de: "Lagerposition",
+      pl: "Pozycja magazynowa",
+    },
+
+    "+ Нова позиція": {
+      en: "+ New item",
+      de: "+ Neue Position",
+      pl: "+ Nowa pozycja",
+    },
+
+    "Назва": {
+      en: "Name",
+      de: "Name",
+      pl: "Nazwa",
+    },
+
+    "Назва позиції": {
+      en: "Item name",
+      de: "Positionsname",
+      pl: "Nazwa pozycji",
+    },
+
+    "Од.": {
+      en: "Unit",
+      de: "Einheit",
+      pl: "Jedn.",
+    },
+
+    "Кількість": {
+      en: "Quantity",
+      de: "Menge",
+      pl: "Ilość",
+    },
+
+    "Закупівельна ціна": {
+      en: "Purchase price",
+      de: "Einkaufspreis",
+      pl: "Cena zakupu",
+    },
+
+    "Сума": {
+      en: "Amount",
+      de: "Summe",
+      pl: "Kwota",
+    },
+
+    "У закупівлі повинна залишитися хоча б одна позиція.": {
+      en: "The purchase must contain at least one item.",
+      de: "Der Einkauf muss mindestens eine Position enthalten.",
+      pl: "Zakup musi zawierać co najmniej jedną pozycję.",
+    },
+
+    "Перевірте всі позиції закупівлі.": {
+      en: "Check all purchase items.",
+      de: "Prüfen Sie alle Einkaufspositionen.",
+      pl: "Sprawdź wszystkie pozycje zakupu.",
+    },
+
+    "Очікувана дата не може бути раніше дати замовлення.": {
+      en: "The expected date cannot be earlier than the order date.",
+      de: "Das erwartete Datum darf nicht vor dem Bestelldatum liegen.",
+      pl: "Przewidywana data nie może być wcześniejsza niż data zamówienia.",
+    },
+
+    "Знижка не може перевищувати підсумок.": {
+      en: "The discount cannot exceed the subtotal.",
+      de: "Der Rabatt darf die Zwischensumme nicht überschreiten.",
+      pl: "Rabat nie może przekraczać sumy częściowej.",
+    },
+
+    "Створюємо…": {
+      en: "Creating…",
+      de: "Wird erstellt…",
+      pl: "Tworzenie…",
+    },
+
+    "Не вдалося створити закупівлю.": {
+      en: "Could not create the purchase.",
+      de: "Der Einkauf konnte nicht erstellt werden.",
+      pl: "Nie udało się utworzyć zakupu.",
+    },
+  }
+);
+
+
+function getFinancePurchaseSuccessMessage(
+  purchaseNumber
+) {
+  const number =
+    escapeHtml(
+      String(
+        purchaseNumber ||
+        getFinanceInterfaceText(
+          "Закупівля"
+        )
+      )
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `Purchase <strong>${number}</strong> ` +
+      "was created successfully."
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `Der Einkauf <strong>${number}</strong> ` +
+      "wurde erfolgreich erstellt."
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Zakup <strong>${number}</strong> ` +
+      "został pomyślnie utworzony."
+    );
+  }
+
+  return (
+    `Закупівлю <strong>${number}</strong> ` +
+    "успішно створено."
+  );
+}
+function normalizeFinanceInterfaceText(
+  value
+) {
+  return String(value || "")
+    .replace(/\s+/g, " ")  
+    .trim();
+}
+
+
+function getFinanceInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const normalizedSource =
+    normalizeFinanceInterfaceText(
+      sourceText
+    );
+
+  const entry =
+    Object.entries(
+      FINANCE_INTERFACE_TEXT
+    ).find(
+      ([ukrainian, translations]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeFinanceInterfaceText(
+              value
+            ) ===
+            normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText || ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+
+
+function getFinanceVisitWord(
+  count
+) {
+  const value =
+    Math.max(
+      0,
+      Number(count || 0)
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return value === 1
+      ? "visit"
+      : "visits";
+  }
+
+  if (language === "de") {
+    return value === 1
+      ? "Termin"
+      : "Termine";
+  }
+
+  if (language === "pl") {
+    const lastDigit =
+      value % 10;
+
+    const lastTwoDigits =
+      value % 100;
+
+    if (value === 1) {
+      return "wizyta";
+    }
+
+    if (
+      lastDigit >= 2 &&
+      lastDigit <= 4 &&
+      !(
+        lastTwoDigits >= 12 &&
+        lastTwoDigits <= 14
+      )
+    ) {
+      return "wizyty";
+    }
+
+    return "wizyt";
+  }
+
+  const lastDigit =
+    value % 10;
+
+  const lastTwoDigits =
+    value % 100;
+
+  if (
+    lastDigit === 1 &&
+    lastTwoDigits !== 11
+  ) {
+    return "візит";
+  }
+
+  if (
+    lastDigit >= 2 &&
+    lastDigit <= 4 &&
+    !(
+      lastTwoDigits >= 12 &&
+      lastTwoDigits <= 14
+    )
+  ) {
+    return "візити";
+  }
+
+  return "візитів";
+}
+
+
+function getFinancePaymentsForVisitsText(
+  count
+) {
+  const value =
+    Math.max(
+      0,
+      Number(count || 0)
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Payments for ${value} ${getFinanceVisitWord(
+      value
+    )}`;
+  }
+
+  if (language === "de") {
+    return `Zahlungen für ${value} ${getFinanceVisitWord(
+      value
+    )}`;
+  }
+
+  if (language === "pl") {
+    return `Płatności za ${value} ${getFinanceVisitWord(
+      value
+    )}`;
+  }
+
+  return `Оплати за ${value} ${getFinanceVisitWord(
+    value
+  )}`;
+}
+
+
+function getFinanceDebtVisitsText(
+  count
+) {
+  const value =
+    Math.max(
+      0,
+      Number(count || 0)
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `${value} ${getFinanceVisitWord(
+      value
+    )} with outstanding balance`;
+  }
+
+  if (language === "de") {
+    return `${value} ${getFinanceVisitWord(
+      value
+    )} mit offenem Betrag`;
+  }
+
+  if (language === "pl") {
+    return `${value} ${getFinanceVisitWord(
+      value
+    )} z zadłużeniem`;
+  }
+
+  return `${value} ${getFinanceVisitWord(
+    value
+  )} із боргом`;
+}
+
+
+function getFinanceOutstandingInsightText(
+  amount
+) {
+  const formattedAmount =
+    formatVisitFinanceMoney(
+      amount
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `The clinic is still owed ${formattedAmount}. Review unpaid invoices.`;
+  }
+
+  if (language === "de") {
+    return `Der Klinik stehen noch ${formattedAmount} zu. Prüfen Sie offene Rechnungen.`;
+  }
+
+  if (language === "pl") {
+    return `Klinice pozostało do otrzymania ${formattedAmount}. Sprawdź nieopłacone rachunki.`;
+  }
+
+  return `Клініці ще мають сплатити ${formattedAmount}. Варто перевірити незакриті рахунки.`;
+}
+
+
+function getFinanceRenderedText(
+  sourceText
+) {
+  const source =
+    normalizeFinanceInterfaceText(
+      sourceText
+    );
+
+  if (!source) return "";
+
+  const exactTranslation =
+    getFinanceInterfaceText(
+      source
+    );
+
+  if (
+    exactTranslation !== source
+  ) {
+    return exactTranslation;
+  }
+
+  const paymentsMatch =
+    source.match(
+      /^Оплати за\s+(\d+)\s+візит(?:и|ів)?$/i
+    );
+
+  if (paymentsMatch) {
+    return getFinancePaymentsForVisitsText(
+      Number(
+        paymentsMatch[1]
+      )
+    );
+  }
+
+  const debtMatch =
+    source.match(
+      /^(\d+)\s+візит(?:и|ів)?\s+із боргом$/i
+    );
+
+  if (debtMatch) {
+    return getFinanceDebtVisitsText(
+      Number(
+        debtMatch[1]
+      )
+    );
+  }
+
+  return source;
+}
+
+
+function showFinanceAlert(
+  message
+) {
+  alert(
+    getFinanceInterfaceText(
+      message
+    )
+  );
+}
+
+
+function localizeFinanceElement(
+  root
+) {
+  if (!root) return;
+
+  const walker =
+    document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT
+    );
+
+  const textNodes = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(
+      walker.currentNode
+    );
+  }
+
+  textNodes.forEach(
+    (node) => {
+      if (
+        node.parentElement
+          ?.closest?.(
+            "[data-finance-content]"
+          )
+      ) {
+        return;
+      }
+
+      const currentText =
+        node.nodeValue || "";
+
+      const normalized =
+        normalizeFinanceInterfaceText(
+          currentText
+        );
+
+      if (!normalized) return;
+
+      const translated =
+        getFinanceRenderedText(
+          normalized
+        );
+
+      if (
+        translated === normalized
+      ) {
+        return;
+      }
+
+      const leadingSpace =
+        currentText.match(
+          /^\s*/
+        )?.[0] || "";
+
+      const trailingSpace =
+        currentText.match(
+          /\s*$/
+        )?.[0] || "";
+
+      node.nodeValue =
+        leadingSpace +
+        translated +
+        trailingSpace;
+    }
+  );
+
+  const elements = [
+    root,
+    ...root.querySelectorAll("*"),
+  ];
+
+  elements.forEach(
+    (element) => {
+      if (
+        element?.closest?.(
+          "[data-finance-content]"
+        )
+      ) {
+        return;
+      }
+
+      [
+        "placeholder",
+        "title",
+        "aria-label",
+      ].forEach(
+        (attribute) => {
+          if (
+            !element?.hasAttribute?.(
+              attribute
+            )
+          ) {
+            return;
+          }
+
+          const currentValue =
+            element.getAttribute(
+              attribute
+            ) || "";
+
+          const translatedValue =
+            getFinanceRenderedText(
+              currentValue
+            );
+
+          if (
+            translatedValue !==
+            currentValue
+          ) {
+            element.setAttribute(
+              attribute,
+              translatedValue
+            );
+          }
+        }
+      );
+    }
+  );
+}
+function installFinanceLocalization(
+  root
+) {
+  if (!root) return;
+
+  root
+    ._financeLocalizationObserver
+    ?.disconnect();
+
+  localizeFinanceElement(
+    root
+  );
+
+  const observer =
+    new MutationObserver(
+      () => {
+        localizeFinanceElement(
+          root
+        );
+      }
+    );
+
+  observer.observe(
+    root,
+    {
+      childList: true,
+      subtree: true,
+    }
+  );
+
+  root._financeLocalizationObserver =
+    observer;
+}
+
 
 function buildFinanceSectionNavigation() {
   const sections = [
     {
       key: "today",
       icon: "⌁",
-      label: "Сьогодні",
+
+      label:
+        getFinanceInterfaceText(
+          "Сьогодні"
+        ),
     },
 
     {
       key: "transactions",
       icon: "↕",
-      label: "Операції",
+
+      label:
+        getFinanceInterfaceText(
+          "Операції"
+        ),
     },
 
     {
       key: "clients",
       icon: "◎",
-      label: "Клієнти",
+
+      label:
+        getFinanceInterfaceText(
+          "Клієнти"
+        ),
     },
 
     {
       key: "analytics",
       icon: "⌁",
-      label: "Аналітика",
+
+      label:
+        getFinanceInterfaceText(
+          "Аналітика"
+        ),
     },
 
-    ...(isOwner()
-      ? [{
-          key: "report",
-          icon: "✦",
-          label: "Звіт власника",
-        }]
-      : []),
+    ...(
+      isOwner()
+        ? [
+            {
+              key: "report",
+              icon: "✦",
+
+              label:
+                getFinanceInterfaceText(
+                  "Звіт власника"
+                ),
+            },
+          ]
+        : []
+    ),
   ];
 
   return `
     <nav class="financeSectionNavigation">
-      ${
-        sections
-          .map(
-            (section) => `
-              <button
-                type="button"
-                class="
-                  financeSectionButton
-                  ${
-                    financeDashboardState
-                      .section ===
-                    section.key
-                      ? "active"
-                      : ""
-                  }
-                "
-                data-finance-section="${
+      ${sections
+        .map(
+          (section) => `
+            <button
+              type="button"
+              class="
+                financeSectionButton
+                ${
+                  financeDashboardState
+                    .section ===
                   section.key
-                }"
-              >
-                <span>
-                  ${section.icon}
-                </span>
+                    ? "active"
+                    : ""
+                }
+              "
+              data-finance-section="${section.key}"
+            >
+              <span>
+                ${section.icon}
+              </span>
 
-                <strong>
-                  ${section.label}
-                </strong>
-              </button>
-            `
-          )
-          .join("")
-      }
+              <strong>
+                ${section.label}
+              </strong>
+            </button>
+          `
+        )
+        .join("")}
     </nav>
   `;
 }
@@ -28294,7 +31900,7 @@ function buildFinanceTrendChart(
               ${Math.round(
                 value
               ).toLocaleString(
-                "uk-UA"
+                getCalendarLocale()
               )}
             </text>
           `;
@@ -28355,7 +31961,7 @@ function buildFinanceTrendChart(
                 `${rawDate}T00:00:00`
               )
                 .toLocaleDateString(
-                  "uk-UA",
+                  getCalendarLocale(),
                   {
                     day: "2-digit",
                     month: "2-digit",
@@ -28402,10 +32008,12 @@ function buildFinanceTrendChart(
                       <title>
                         ${escapeHtml(rawDate)}
 
-                        Надходження:
-                        ${formatVisitFinanceMoney(
-                          row.payments
-                        )}
+                        ${getFinanceInterfaceText(
+  "Надходження"
+)}:
+${formatVisitFinanceMoney(
+  row.payments
+)}
                       </title>
                     </rect>
 
@@ -28430,7 +32038,7 @@ function buildFinanceTrendChart(
                             ${Math.round(
                               row.payments
                             ).toLocaleString(
-                              "uk-UA"
+                              getCalendarLocale()
                             )}
                           </text>
                         `
@@ -28454,7 +32062,9 @@ function buildFinanceTrendChart(
                       <title>
                         ${escapeHtml(rawDate)}
 
-                        Витрати:
+                        ${getFinanceInterfaceText(
+  "Витрати"
+)}:
                         ${formatVisitFinanceMoney(
                           row.outcome
                         )}
@@ -28482,7 +32092,7 @@ function buildFinanceTrendChart(
                             ${Math.round(
                               row.outcome
                             ).toLocaleString(
-                              "uk-UA"
+                              getCalendarLocale()
                             )}
                           </text>
                         `
@@ -28554,53 +32164,88 @@ function getFinanceTransactionMeta(
 ) {
   const methods = {
     cash:
-      "Готівка",
+      getFinanceInterfaceText(
+        "Готівка"
+      ),
 
     card:
-      "Картка / термінал",
+      getFinanceInterfaceText(
+        "Картка / термінал"
+      ),
 
     terminal:
-      "Картка / термінал",
+      getFinanceInterfaceText(
+        "Картка / термінал"
+      ),
 
     transfer:
-      "Переказ",
+      getFinanceInterfaceText(
+        "Переказ"
+      ),
 
     other:
-      "Інше",
+      getFinanceInterfaceText(
+        "Інше"
+      ),
   };
 
   const types = {
     payment: {
       icon: "↗",
-      label: "Оплата",
+
+      label:
+        getFinanceInterfaceText(
+          "Оплата"
+        ),
+
       className:
         "is-income",
     },
 
     refund: {
       icon: "↙",
-      label: "Повернення",
+
+      label:
+        getFinanceInterfaceText(
+          "Повернення"
+        ),
+
       className:
         "is-outcome",
     },
 
     expense: {
       icon: "−",
-      label: "Витрата",
+
+      label:
+        getFinanceInterfaceText(
+          "Витрата"
+        ),
+
       className:
         "is-outcome",
     },
 
     deposit: {
       icon: "+",
-      label: "Внесення",
+
+      label:
+        getFinanceInterfaceText(
+          "Внесення"
+        ),
+
       className:
         "is-income",
     },
 
     withdrawal: {
       icon: "−",
-      label: "Вилучення",
+
+      label:
+        getFinanceInterfaceText(
+          "Вилучення"
+        ),
+
       className:
         "is-outcome",
     },
@@ -28612,7 +32257,9 @@ function getFinanceTransactionMeta(
         transaction
           .payment_method
       ] ||
-      "Інше",
+      getFinanceInterfaceText(
+        "Інше"
+      ),
 
     type:
       types[
@@ -28624,7 +32271,9 @@ function getFinanceTransactionMeta(
         label:
           transaction
             .transaction_type ||
-          "Операція",
+          getFinanceInterfaceText(
+            "Операція"
+          ),
 
         className: "",
       },
@@ -29081,12 +32730,16 @@ function openFinancePaymentRefundModal(
   `;
 
   document.body.appendChild(
-    modal
-  );
+  modal
+);
 
-  document.body.classList.add(
-    "financeExpenseModalOpen"
-  );
+installFinanceLocalization(
+  modal
+);
+
+document.body.classList.add(
+  "financeExpenseModalOpen"
+);
 
   const form =
     modal.querySelector(
@@ -29192,13 +32845,9 @@ function openFinancePaymentRefundModal(
           false;
 
         errorElement.textContent =
-          (
-            "Вкажіть суму від 0,01 до " +
-            formatVisitFinanceMoney(
-              refundableAmount
-            ) +
-            "."
-          );
+  getFinanceRefundAmountError(
+    refundableAmount
+  );
 
         return;
       }
@@ -29255,18 +32904,12 @@ function openFinancePaymentRefundModal(
         await renderFinanceTab();
 
         openDeleteModal(
-          (
-            "Повернення на суму <strong>" +
-            escapeHtml(
-              formatVisitFinanceMoney(
-                amount
-              )
-            ) +
-            "</strong> успішно проведено."
-          ),
-          null,
-          "operation-success"
-        );
+  getFinanceRefundSuccessMessage(
+    amount
+  ),
+  null,
+  "operation-success"
+);
 
       } catch (error) {
         console.error(
@@ -29319,13 +32962,12 @@ function openFinanceExpenseModal(
     !isOwnerOrAdmin()
   ) {
     openDeleteModal(
-      (
-        "Додавати витрати може лише " +
-        "адміністратор або власник клініки."
-      ),
-      null,
-      "info"
-    );
+  getFinanceInterfaceText(
+    "Додавати витрати може лише адміністратор або власник клініки."
+  ),
+  null,
+  "info"
+);
 
     return;
   }
@@ -29657,12 +33299,16 @@ function openFinanceExpenseModal(
   `;
 
   document.body.appendChild(
-    modal
-  );
+  modal
+);
 
-  document.body.classList.add(
-    "financeExpenseModalOpen"
-  );
+installFinanceLocalization(
+  modal
+);
+
+document.body.classList.add(
+  "financeExpenseModalOpen"
+);
 
   const form =
     modal.querySelector(
@@ -29951,7 +33597,7 @@ function openFinanceExpenseModal(
         await renderFinanceTab();
 
         openDeleteModal(
-  (
+  getFinanceInterfaceText(
     isEditing
       ? "Зміни витрати успішно збережено."
       : "Витрату успішно додано до фінансового журналу."
@@ -30053,15 +33699,14 @@ async function renderFinanceOperationsTab(
       <div class="visitPaymentSpinner"></div>
 
       <strong>
-        Завантажуємо фінансовий журнал…
+        ${getFinanceInterfaceText(
+          "Завантажуємо фінансовий журнал…"
+        )}
       </strong>
     </div>
   `;
 
   try {
-    // Both requests use the same clinic session and server-side database
-    // client. Keep them sequential to avoid intermittent connection failures
-    // when opening an account with no operations, such as the safe.
     const result =
       await loadFinanceTransactionsApi();
 
@@ -30092,17 +33737,21 @@ async function renderFinanceOperationsTab(
         <header class="financeHero financeOperationsHero">
           <div>
             <span class="financeEyebrow">
-              ФІНАНСОВИЙ ЖУРНАЛ
+              ${getFinanceInterfaceText(
+                "ФІНАНСОВИЙ ЖУРНАЛ"
+              )}
             </span>
 
             <h1>
-              Операції
+              ${getFinanceInterfaceText(
+                "Операції"
+              )}
             </h1>
 
             <p>
-              Оплати, витрати, повернення,
-              внесення та вилучення коштів
-              в одному журналі.
+              ${getFinanceInterfaceText(
+                "Оплати, витрати, повернення, внесення та вилучення коштів в одному журналі."
+              )}
             </p>
           </div>
 
@@ -30113,7 +33762,10 @@ async function renderFinanceOperationsTab(
               id="financeOperationsAddExpense"
             >
               <span>−</span>
-              Додати витрату
+
+              ${getFinanceInterfaceText(
+                "Додати витрату"
+              )}
             </button>
 
             <button
@@ -30121,7 +33773,9 @@ async function renderFinanceOperationsTab(
               class="financeRefreshButton"
               id="financeOperationsRefresh"
             >
-              ↻ Оновити
+              ${getFinanceInterfaceText(
+                "↻ Оновити"
+              )}
             </button>
           </div>
         </header>
@@ -30132,13 +33786,19 @@ async function renderFinanceOperationsTab(
         >
           <label class="financeOperationsSearch">
             <span>
-              Пошук
+              ${getFinanceInterfaceText(
+                "Пошук"
+              )}
             </span>
 
             <input
               type="search"
               name="search"
-              placeholder="Категорія, опис або контрагент…"
+              placeholder="${escapeHtml(
+                getFinanceInterfaceText(
+                  "Категорія, опис або контрагент…"
+                )
+              )}"
               value="${escapeHtml(
                 financeDashboardState
                   .transactionSearch
@@ -30148,14 +33808,18 @@ async function renderFinanceOperationsTab(
 
           <label>
             <span>
-              Тип операції
+              ${getFinanceInterfaceText(
+                "Тип операції"
+              )}
             </span>
 
             <select
               name="transaction_type"
             >
               <option value="">
-                Усі операції
+                ${getFinanceInterfaceText(
+                  "Усі операції"
+                )}
               </option>
 
               <option
@@ -30168,7 +33832,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Оплати
+                ${getFinanceInterfaceText(
+                  "Оплати"
+                )}
               </option>
 
               <option
@@ -30181,7 +33847,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Витрати
+                ${getFinanceInterfaceText(
+                  "Витрати"
+                )}
               </option>
 
               <option
@@ -30194,7 +33862,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Повернення
+                ${getFinanceInterfaceText(
+                  "Повернення"
+                )}
               </option>
 
               <option
@@ -30207,7 +33877,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Внесення
+                ${getFinanceInterfaceText(
+                  "Внесення"
+                )}
               </option>
 
               <option
@@ -30220,21 +33892,27 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Вилучення
+                ${getFinanceInterfaceText(
+                  "Вилучення"
+                )}
               </option>
             </select>
           </label>
 
           <label>
             <span>
-              Спосіб оплати
+              ${getFinanceInterfaceText(
+                "Спосіб оплати"
+              )}
             </span>
 
             <select
               name="payment_method"
             >
               <option value="">
-                Усі способи
+                ${getFinanceInterfaceText(
+                  "Усі способи"
+                )}
               </option>
 
               <option
@@ -30247,7 +33925,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Готівка
+                ${getFinanceInterfaceText(
+                  "Готівка"
+                )}
               </option>
 
               <option
@@ -30260,7 +33940,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Картка
+                ${getFinanceInterfaceText(
+                  "Картка"
+                )}
               </option>
 
               <option
@@ -30273,7 +33955,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Термінал
+                ${getFinanceInterfaceText(
+                  "Термінал"
+                )}
               </option>
 
               <option
@@ -30286,7 +33970,9 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Переказ
+                ${getFinanceInterfaceText(
+                  "Переказ"
+                )}
               </option>
 
               <option
@@ -30299,21 +33985,27 @@ async function renderFinanceOperationsTab(
                     : ""
                 }
               >
-                Інше
+                ${getFinanceInterfaceText(
+                  "Інше"
+                )}
               </option>
             </select>
           </label>
 
           <label>
             <span>
-              Рахунок
+              ${getFinanceInterfaceText(
+                "Рахунок"
+              )}
             </span>
 
             <select
               name="financial_account_id"
             >
               <option value="">
-                Усі рахунки
+                ${getFinanceInterfaceText(
+                  "Усі рахунки"
+                )}
               </option>
 
               ${financialAccounts
@@ -30323,6 +34015,7 @@ async function renderFinanceOperationsTab(
                       value="${escapeHtml(
                         account.id
                       )}"
+                      data-finance-content
                       ${
                         financeDashboardState
                           .financialAccountId ===
@@ -30343,7 +34036,9 @@ async function renderFinanceOperationsTab(
 
           <label>
             <span>
-              Від
+              ${getFinanceInterfaceText(
+                "Від"
+              )}
             </span>
 
             <input
@@ -30358,7 +34053,9 @@ async function renderFinanceOperationsTab(
 
           <label>
             <span>
-              До
+              ${getFinanceInterfaceText(
+                "До"
+              )}
             </span>
 
             <input
@@ -30376,7 +34073,9 @@ async function renderFinanceOperationsTab(
               type="submit"
               class="financeOperationsApply"
             >
-              Застосувати
+              ${getFinanceInterfaceText(
+                "Застосувати"
+              )}
             </button>
 
             <button
@@ -30384,7 +34083,9 @@ async function renderFinanceOperationsTab(
               class="financeOperationsReset"
               id="financeOperationsReset"
             >
-              Скинути
+              ${getFinanceInterfaceText(
+                "Скинути"
+              )}
             </button>
           </div>
         </form>
@@ -30393,11 +34094,15 @@ async function renderFinanceOperationsTab(
           <div class="financePanelHead">
             <div>
               <span>
-                ЖУРНАЛ
+                ${getFinanceInterfaceText(
+                  "ЖУРНАЛ"
+                )}
               </span>
 
               <h2>
-                Фінансові операції
+                ${getFinanceInterfaceText(
+                  "Фінансові операції"
+                )}
               </h2>
             </div>
 
@@ -30408,399 +34113,430 @@ async function renderFinanceOperationsTab(
               )}
             </b>
           </div>
-
           <div class="financeOperationsList">
             ${
-              items.length
-                ? items
-                    .map(
-                      (transaction) => {
-                        const meta =
-                          getFinanceTransactionMeta(
-                            transaction
-                          );
-                          const documentUrl =
-  getSafeFinanceDocumentUrl(
-    transaction.document_url
-  );
+  items.length
+    ? items
+        .map(
+          (transaction) => {
+            const meta =
+              getFinanceTransactionMeta(
+                transaction
+              );
 
-                        const date =
-                          new Date(
-                            transaction
-                              .occurred_at
-                          )
-                            .toLocaleString(
-                              "uk-UA",
-                              {
-                                day:
-                                  "2-digit",
+            const documentUrl =
+              getSafeFinanceDocumentUrl(
+                transaction.document_url
+              );
 
-                                month:
-                                  "2-digit",
+            const date =
+              new Date(
+                transaction.occurred_at
+              )
+                .toLocaleString(
+                  getCalendarLocale(),
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                );
 
-                                year:
-                                  "numeric",
+            const isOutcome =
+              meta.type.className ===
+              "is-outcome";
 
-                                hour:
-                                  "2-digit",
+            const paymentAmount =
+              Number(
+                transaction.amount ||
+                0
+              );
 
-                                minute:
-                                  "2-digit",
-                              }
-                            );
+            const refundedAmount =
+              Math.max(
+                0,
+                Number(
+                  transaction.metadata
+                    ?.refunded_amount ||
+                  0
+                )
+              );
 
-                        const isOutcome =
-                          meta.type
-                            .className ===
-                          "is-outcome";
-
-                        const paymentAmount =
-                          Number(
-                            transaction.amount ||
-                            0
-                          );
-
-                        const refundedAmount =
-                          Math.max(
-                            0,
-                            Number(
-                              transaction.metadata
-                                ?.refunded_amount ||
-                              0
-                            )
-                          );
-
-                        const refundableAmount =
-                          Math.max(
-                            0,
-                            Math.min(
-                              paymentAmount,
-                              Number(
-                                transaction.metadata
-                                  ?.refundable_amount ??
-                                (
-                                  paymentAmount -
-                                  refundedAmount
-                                )
-                              )
-                            )
-                          );
-
-                        const isCompletedPayment =
-                          transaction
-                            .transaction_type ===
-                            "payment" &&
-                          transaction.status ===
-                            "completed" &&
-                          Boolean(
-                            transaction.visit_id
-                          );
-
-                        const hasPaymentRefunds =
-                          isCompletedPayment &&
-                          refundedAmount > 0;
-
-                        const canRefundPayment =
-                          isCompletedPayment &&
-                          refundableAmount > 0;
-
-                        const canCancelPayment =
-                          isCompletedPayment &&
-                          refundedAmount <= 0;
-
-                        const canEditExpense =
-                          transaction
-                            .transaction_type ===
-                            "expense" &&
-                          transaction.source ===
-                            "manual" &&
-                          transaction.status ===
-                            "completed" &&
-                          !transaction.visit_id;
-
-                        const sign =
-                          isOutcome
-                            ? "−"
-                            : "+";
-
-                        const statusLabel = {
-                          completed:
-                            "Проведено",
-
-                          pending:
-                            "Очікується",
-
-                          cancelled:
-                            "Скасовано",
-
-                          failed:
-                            "Помилка",
-                        }[
-                          transaction.status
-                        ] || transaction.status || "";
-
-                        const details = [
-                          meta.type.label,
-                          meta.method,
-                          date,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ");
-
-                        return `
-                          <article class="financeOperationCard">
-                            <div
-                              class="
-                                financeTransactionIcon
-                                ${meta.type.className}
-                              "
-                            >
-                              ${meta.type.icon}
-                            </div>
-
-                            <div class="financeOperationContent">
-                              <div class="financeOperationTitle">
-                                <strong>
-                                  ${escapeHtml(
-                                    transaction.category ||
-                                    meta.type.label
-                                  )}
-                                </strong>
-
-                                <span>
-                                  ${escapeHtml(
-                                    details
-                                  )}
-                                </span>
-                              </div>
-
-                              ${
-                                transaction.counterparty
-                                  ? `
-                                    <p>
-                                      <b>
-                                        Контрагент:
-                                      </b>
-
-                                      ${escapeHtml(
-                                        transaction.counterparty
-                                      )}
-                                    </p>
-                                  `
-                                  : ""
-                              }
-
-                              ${
-                                transaction.description
-                                  ? `
-                                    <p>
-                                      ${escapeHtml(
-                                        transaction.description
-                                      )}
-                                    </p>
-                                  `
-                                  : ""
-                              }
-
-                              ${
-  transaction.visit_id ||
-  documentUrl ||
-  hasPaymentRefunds ||
-  canRefundPayment ||
-  canCancelPayment ||
-  canEditExpense
-    ? `
-      <div class="financeOperationActions">
-        ${
-          transaction.visit_id
-            ? `
-              <button
-                type="button"
-                class="financeOperationVisitButton"
-                data-finance-open-visit="${escapeHtml(
-                  transaction.visit_id
-                )}"
-              >
-                🩺 Відкрити візит
-              </button>
-            `
-            : ""
-        }
-
-        ${
-          documentUrl
-            ? `
-              <button
-                type="button"
-                class="financeOperationDocumentButton"
-                data-finance-open-document="${escapeHtml(
-                  documentUrl
-                )}"
-              >
-                🧾 Відкрити чек
-              </button>
-            `
-            : ""
-        }
-
-        ${
-          hasPaymentRefunds
-            ? `
-              <span class="financeOperationRefundState">
-                ${
-                  refundableAmount <= 0
-                    ? "Повернено повністю"
-                    : (
-                        "Повернено " +
-                        escapeHtml(
-                          formatVisitFinanceMoney(
-                            refundedAmount
-                          )
-                        )
-                      )
-                }
-              </span>
-            `
-            : ""
-        }
-
-        ${
-          canRefundPayment
-            ? `
-              <button
-                type="button"
-                class="financeOperationRefundButton"
-                data-finance-refund-payment="${escapeHtml(
-                  transaction.id
-                )}"
-              >
-                ↙ Повернути платіж
-              </button>
-            `
-            : ""
-        }
-
-        ${
-          canCancelPayment
-            ? `
-              <button
-                type="button"
-                class="financeOperationCancelButton"
-                data-finance-cancel-payment="${escapeHtml(
-                  transaction.id
-                )}"
-                data-finance-cancel-amount="${escapeHtml(
-                  transaction.amount
-                )}"
-              >
-                ↩ Скасувати платіж
-              </button>
-            `
-            : ""
-        }
-
-        ${
-          canEditExpense
-            ? `
-              <button
-                type="button"
-                class="financeOperationEditButton"
-                data-finance-edit-expense="${escapeHtml(
-                  transaction.id
-                )}"
-              >
-                ✎ Редагувати
-              </button>
-            `
-            : ""
-        }
-      </div>
-    `
-    : ""
-}
-                            </div>
-
-                            <div
-                              class="
-                                financeOperationAmount
-                                ${meta.type.className}
-                              "
-                            >
-                              <strong>
-                                ${sign}${formatVisitFinanceMoney(
-                                  transaction.amount
-                                )}
-                              </strong>
-
-                              <span
-                                class="
-                                  financeOperationStatus
-                                  is-${
-                                    transaction.status ||
-                                    "unknown"
-                                  }
-                                "
-                              >
-                                ${escapeHtml(
-                                  statusLabel
-                                )}
-                              </span>
-                            </div>
-                          </article>
-                        `;
-                      }
+            const refundableAmount =
+              Math.max(
+                0,
+                Math.min(
+                  paymentAmount,
+                  Number(
+                    transaction.metadata
+                      ?.refundable_amount ??
+                    (
+                      paymentAmount -
+                      refundedAmount
                     )
-                    .join("")
-                : `
-                  <div class="financeTransactionsEmpty">
-                    <strong>
-                      Операцій не знайдено
+                  )
+                )
+              );
+
+            const isCompletedPayment =
+              transaction
+                .transaction_type ===
+                "payment" &&
+              transaction.status ===
+                "completed" &&
+              Boolean(
+                transaction.visit_id
+              );
+
+            const hasPaymentRefunds =
+              isCompletedPayment &&
+              refundedAmount > 0;
+
+            const canRefundPayment =
+              isCompletedPayment &&
+              refundableAmount > 0;
+
+            const canCancelPayment =
+              isCompletedPayment &&
+              refundedAmount <= 0;
+
+            const canEditExpense =
+              transaction
+                .transaction_type ===
+                "expense" &&
+              transaction.source ===
+                "manual" &&
+              transaction.status ===
+                "completed" &&
+              !transaction.visit_id;
+
+            const sign =
+              isOutcome
+                ? "−"
+                : "+";
+
+            const statusLabel = {
+              completed:
+                getFinanceInterfaceText(
+                  "Проведено"
+                ),
+
+              pending:
+                getFinanceInterfaceText(
+                  "Очікується"
+                ),
+
+              cancelled:
+                getFinanceInterfaceText(
+                  "Скасовано"
+                ),
+
+              failed:
+                getFinanceInterfaceText(
+                  "Помилка"
+                ),
+            }[
+              transaction.status
+            ] ||
+            transaction.status ||
+            "";
+
+            const details = [
+              meta.type.label,
+              meta.method,
+              date,
+            ]
+              .filter(Boolean)
+              .join(" · ");
+
+            const hasCustomCategory =
+              Boolean(
+                transaction.category
+              );
+
+            const transactionTitle =
+              transaction.category ||
+              meta.type.label;
+
+            return `
+              <article class="financeOperationCard">
+                <div
+                  class="
+                    financeTransactionIcon
+                    ${meta.type.className}
+                  "
+                >
+                  ${meta.type.icon}
+                </div>
+
+                <div class="financeOperationContent">
+                  <div class="financeOperationTitle">
+                    <strong
+                      ${
+                        hasCustomCategory
+                          ? "data-finance-content"
+                          : ""
+                      }
+                    >
+                      ${escapeHtml(
+                        transactionTitle
+                      )}
                     </strong>
 
                     <span>
-                      Змініть фільтри або
-                      оберіть інший період.
+                      ${escapeHtml(
+                        details
+                      )}
                     </span>
                   </div>
-                `
-            }
-          </div>
 
-          <footer class="financeOperationsPagination">
-            <span>
-              Показано
-              ${items.length}
-              операцій
-            </span>
+                  ${
+                    transaction.counterparty
+                      ? `
+                        <p>
+                          <b>
+                            ${getFinanceInterfaceText(
+                              "Контрагент:"
+                            )}
+                          </b>
 
-            <div>
-              <button
-                type="button"
-                id="financeOperationsPrevious"
-                ${
-                  Number(
-                    pagination.offset || 0
-                  ) <= 0
-                    ? "disabled"
-                    : ""
-                }
-              >
-                ← Назад
-              </button>
+                          <span data-finance-content>
+                            ${escapeHtml(
+                              transaction.counterparty
+                            )}
+                          </span>
+                        </p>
+                      `
+                      : ""
+                  }
 
-              <button
-                type="button"
-                id="financeOperationsNext"
-                ${
-                  pagination.has_more
-                    ? ""
-                    : "disabled"
-                }
-              >
-                Далі →
-              </button>
-            </div>
-          </footer>
+                  ${
+                    transaction.description
+                      ? `
+                        <p data-finance-content>
+                          ${escapeHtml(
+                            transaction.description
+                          )}
+                        </p>
+                      `
+                      : ""
+                  }
+
+                  ${
+                    transaction.visit_id ||
+                    documentUrl ||
+                    hasPaymentRefunds ||
+                    canRefundPayment ||
+                    canCancelPayment ||
+                    canEditExpense
+                      ? `
+                        <div class="financeOperationActions">
+                          ${
+                            transaction.visit_id
+                              ? `
+                                <button
+                                  type="button"
+                                  class="financeOperationVisitButton"
+                                  data-finance-open-visit="${escapeHtml(
+                                    transaction.visit_id
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "🩺 Відкрити візит"
+                                  )}
+                                </button>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            documentUrl
+                              ? `
+                                <button
+                                  type="button"
+                                  class="financeOperationDocumentButton"
+                                  data-finance-open-document="${escapeHtml(
+                                    documentUrl
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "🧾 Відкрити чек"
+                                  )}
+                                </button>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            hasPaymentRefunds
+                              ? `
+                                <span class="financeOperationRefundState">
+                                  ${
+                                    refundableAmount <= 0
+                                      ? getFinanceInterfaceText(
+                                          "Повернено повністю"
+                                        )
+                                      : getFinanceRefundedText(
+                                          refundedAmount
+                                        )
+                                  }
+                                </span>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            canRefundPayment
+                              ? `
+                                <button
+                                  type="button"
+                                  class="financeOperationRefundButton"
+                                  data-finance-refund-payment="${escapeHtml(
+                                    transaction.id
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "↙ Повернути платіж"
+                                  )}
+                                </button>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            canCancelPayment
+                              ? `
+                                <button
+                                  type="button"
+                                  class="financeOperationCancelButton"
+                                  data-finance-cancel-payment="${escapeHtml(
+                                    transaction.id
+                                  )}"
+                                  data-finance-cancel-amount="${escapeHtml(
+                                    transaction.amount
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "↩ Скасувати платіж"
+                                  )}
+                                </button>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            canEditExpense
+                              ? `
+                                <button
+                                  type="button"
+                                  class="financeOperationEditButton"
+                                  data-finance-edit-expense="${escapeHtml(
+                                    transaction.id
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "✎ Редагувати"
+                                  )}
+                                </button>
+                              `
+                              : ""
+                          }
+                        </div>
+                      `
+                      : ""
+                  }
+                </div>
+
+                <div
+                  class="
+                    financeOperationAmount
+                    ${meta.type.className}
+                  "
+                >
+                  <strong>
+                    ${sign}${formatVisitFinanceMoney(
+                      transaction.amount
+                    )}
+                  </strong>
+
+                  <span
+                    class="
+                      financeOperationStatus
+                      is-${
+                        transaction.status ||
+                        "unknown"
+                      }
+                    "
+                  >
+                    ${escapeHtml(
+                      statusLabel
+                    )}
+                  </span>
+                </div>
+              </article>
+            `;
+          }
+        )
+        .join("")
+    : `
+      <div class="financeTransactionsEmpty">
+        <strong>
+          ${getFinanceInterfaceText(
+            "Операцій не знайдено"
+          )}
+        </strong>
+
+        <span>
+          ${getFinanceInterfaceText(
+            "Змініть фільтри або оберіть інший період."
+          )}
+        </span>
+      </div>
+    `
+}
+</div>
+
+<footer class="financeOperationsPagination">
+  <span>
+    ${getFinanceOperationsShownText(
+      items.length
+    )}
+  </span>
+
+  <div>
+    <button
+      type="button"
+      id="financeOperationsPrevious"
+      ${
+        Number(
+          pagination.offset || 0
+        ) <= 0
+          ? "disabled"
+          : ""
+      }
+    >
+      ${getFinanceInterfaceText(
+        "← Назад"
+      )}
+    </button>
+
+    <button
+      type="button"
+      id="financeOperationsNext"
+      ${
+        pagination.has_more
+          ? ""
+          : "disabled"
+      }
+    >
+      ${getFinanceInterfaceText(
+        "Далі →"
+      )}
+    </button>
+  </div>
+</footer>
         </section>
       </div>
     `;
@@ -30809,7 +34545,7 @@ async function renderFinanceOperationsTab(
       page
     );
 
-    page
+ page
   .querySelector(
     ".financeOperationsList"
   )
@@ -30904,17 +34640,8 @@ async function renderFinanceOperationsTab(
         }
 
         openDeleteModal(
-          (
-            "Платіж на суму <strong>" +
-            escapeHtml(
-              formatVisitFinanceMoney(
-                amount
-              )
-            ) +
-            "</strong> буде скасовано. " +
-            "Баланс клієнта та каси " +
-            "перерахуються автоматично. " +
-            "Запис залишиться у журналі."
+          getFinanceCancelPaymentMessage(
+            amount
           ),
           async () => {
             await cancelFinancePaymentApi(
@@ -30937,9 +34664,12 @@ async function renderFinanceOperationsTab(
             ""
           ).trim();
 
-        if (!visitId) return;
+        if (!visitId) {
+          return;
+        }
 
-        visitButton.disabled = true;
+        visitButton.disabled =
+          true;
 
         try {
           await openVisit(
@@ -30952,11 +34682,12 @@ async function renderFinanceOperationsTab(
             error
           );
 
-          alert(
+          showFinanceAlert(
             "Не вдалося відкрити візит."
           );
 
-          visitButton.disabled = false;
+          visitButton.disabled =
+            false;
         }
 
         return;
@@ -30975,7 +34706,7 @@ async function renderFinanceOperationsTab(
           );
 
         if (!documentUrl) {
-          alert(
+          showFinanceAlert(
             "Посилання на чек недоступне."
           );
 
@@ -30990,7 +34721,6 @@ async function renderFinanceOperationsTab(
       }
     }
   );
-
     page
       .querySelector(
         "#financeOperationsAddExpense"
@@ -31047,9 +34777,9 @@ async function renderFinanceOperationsTab(
             !dateTo ||
             dateFrom > dateTo
           ) {
-            alert(
-              "Оберіть коректний період."
-            );
+           showFinanceAlert(
+  "Оберіть коректний період."
+);
 
             return;
           }
@@ -31176,46 +34906,55 @@ async function renderFinanceOperationsTab(
       );
 
   } catch (error) {
-    console.error(
-      "renderFinanceOperationsTab failed:",
-      error
+  console.error(
+    "renderFinanceOperationsTab failed:",
+    error
+  );
+
+  const errorMessage =
+    getFinanceInterfaceText(
+      error?.message ||
+      "Невідома помилка"
     );
 
-    page.innerHTML = `
-      <div class="financeLoadError">
-        <span>!</span>
+  page.innerHTML = `
+    <div class="financeLoadError">
+      <span>!</span>
 
-        <h2>
-          Не вдалося завантажити операції
-        </h2>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Не вдалося завантажити операції"
+        )}
+      </h2>
 
-        <p>
-          ${escapeHtml(
-            error?.message ||
-            "Невідома помилка"
-          )}
-        </p>
+      <p>
+        ${escapeHtml(
+          errorMessage
+        )}
+      </p>
 
-        <button
-          type="button"
-          id="financeOperationsRetry"
-        >
-          Спробувати ще раз
-        </button>
-      </div>
-    `;
+      <button
+        type="button"
+        id="financeOperationsRetry"
+      >
+        ${getFinanceInterfaceText(
+          "Спробувати ще раз"
+        )}
+      </button>
+    </div>
+  `;
 
-    page
-      .querySelector(
-        "#financeOperationsRetry"
-      )
-      ?.addEventListener(
-        "click",
-        () => {
-          renderFinanceTab();
-        }
-      );
-  }
+  page
+    .querySelector(
+      "#financeOperationsRetry"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        renderFinanceTab();
+      }
+    );
+}
 }
 function getFinanceExpenseCategoryMeta(
   category
@@ -31403,7 +35142,7 @@ function buildFinanceExpensesTrendChart(
             >
               ${Math.round(value)
                 .toLocaleString(
-                  "uk-UA"
+                  getCalendarLocale()
                 )}
             </text>
           `;
@@ -31476,7 +35215,7 @@ function buildFinanceExpensesTrendChart(
               )
             : date
                 .toLocaleDateString(
-                  "uk-UA",
+                  getCalendarLocale(),
                   {
                     day:
                       "2-digit",
@@ -31844,10 +35583,14 @@ function openFinanceSupplierCreateModal(
   `;
 
   document.body.appendChild(
-    overlay
-  );
+  overlay
+);
 
-  const form =
+installFinanceLocalization(
+  overlay
+);
+
+const form =
     overlay.querySelector(
       "#financeSupplierCreateForm"
     );
@@ -32065,13 +35808,17 @@ async function openFinancePurchaseModal() {
     </div>
   `;
 
-  document.body.appendChild(
-    overlay
-  );
+ document.body.appendChild(
+  overlay
+);
 
-  document.body.classList.add(
-    "financePurchaseModalOpen"
-  );
+installFinanceLocalization(
+  overlay
+);
+
+document.body.classList.add(
+  "financePurchaseModalOpen"
+);
 
   let closed = false;
 
@@ -32215,15 +35962,16 @@ async function openFinancePurchaseModal() {
                     activeSuppliers
                       .map(
                         (supplier) => `
-                          <option
-                            value="${escapeHtml(
-                              supplier.id
-                            )}"
-                          >
-                            ${escapeHtml(
-                              supplier.name
-                            )}
-                          </option>
+                         <option
+  value="${escapeHtml(
+    supplier.id
+  )}"
+  data-finance-content
+>
+  ${escapeHtml(
+    supplier.name
+  )}
+</option>
                         `
                       )
                       .join("")
@@ -32480,20 +36228,27 @@ addSupplierButton.addEventListener(
         }
 
         const option =
-          document.createElement(
-            "option"
-          );
+  document.createElement(
+    "option"
+  );
 
-        option.value =
-          supplier.id;
+option.value =
+  supplier.id;
 
-        option.textContent =
-          supplier.name ||
-          "Новий постачальник";
+option.setAttribute(
+  "data-finance-content",
+  ""
+);
 
-        supplierSelect.appendChild(
-          option
-        );
+option.textContent =
+  supplier.name ||
+  getFinanceInterfaceText(
+    "Новий постачальник"
+  );
+
+supplierSelect.appendChild(
+  option
+);
 
         supplierSelect.value =
           supplier.id;
@@ -32638,32 +36393,33 @@ addSupplierButton.addEventListener(
             </option>
 
             ${
-              activeStock
-                .map(
-                  (item) => `
-                    <option
-                      value="${escapeHtml(
-                        item.id
-                      )}"
-                    >
-                      ${escapeHtml(
-                        item.name
-                      )}
-                      ·
-                      ${Number(
-                        item.qty || 0
-                      )}
-                      ${escapeHtml(
-                        item.unit ||
-                        "шт"
-                      )}
-                    </option>
-                  `
-                )
-                .join("")
-            }
-          </select>
-        </label>
+  activeStock
+    .map(
+      (item) => `
+        <option
+          value="${escapeHtml(
+            item.id
+          )}"
+          data-finance-content
+        >
+          ${escapeHtml(
+            item.name
+          )}
+          ·
+          ${Number(
+            item.qty || 0
+          )}
+          ${escapeHtml(
+            item.unit ||
+            "шт"
+          )}
+        </option>
+      `
+    )
+    .join("")
+}
+</select>
+</label>
 
         <label class="financePurchaseItemNameInput">
           <span>
@@ -33131,14 +36887,12 @@ addSupplierButton.addEventListener(
           await renderFinanceTab();
 
           openDeleteModal(
-            `Закупівлю ${
-              purchase
-                ?.purchase_number ||
-              ""
-            } успішно створено.`,
-            null,
-            "operation-success"
-          );
+  getFinancePurchaseSuccessMessage(
+    purchase?.purchase_number
+  ),
+  null,
+  "operation-success"
+);
 
         } catch (error) {
           console.error(
@@ -33204,7 +36958,118 @@ addSupplierButton.addEventListener(
       );
   }
 }
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "ДОКУМЕНТ ЗАКУПІВЛІ": {
+      en: "PURCHASE DOCUMENT",
+      de: "EINKAUFSDOKUMENT",
+      pl: "DOKUMENT ZAKUPU",
+    },
 
+    "Статус постачання": {
+      en: "Delivery status",
+      de: "Lieferstatus",
+      pl: "Status dostawy",
+    },
+
+    "Статус оплати": {
+      en: "Payment status",
+      de: "Zahlungsstatus",
+      pl: "Status płatności",
+    },
+
+    "ПОСТАЧАЛЬНИК": {
+      en: "SUPPLIER",
+      de: "LIEFERANT",
+      pl: "DOSTAWCA",
+    },
+
+    "Контакт": {
+      en: "Contact",
+      de: "Kontakt",
+      pl: "Kontakt",
+    },
+
+    "Email": {
+      en: "Email",
+      de: "E-Mail",
+      pl: "E-mail",
+    },
+
+    "Накладна": {
+      en: "Invoice",
+      de: "Rechnung",
+      pl: "Faktura",
+    },
+
+    "Не вказано": {
+      en: "Not provided",
+      de: "Nicht angegeben",
+      pl: "Nie podano",
+    },
+
+    "Позиції": {
+      en: "Items",
+      de: "Positionen",
+      pl: "Pozycje",
+    },
+
+    "Повʼязано зі складом": {
+      en: "Linked to inventory",
+      de: "Mit dem Lager verknüpft",
+      pl: "Powiązano z magazynem",
+    },
+
+    "Нова позиція": {
+      en: "New item",
+      de: "Neue Position",
+      pl: "Nowa pozycja",
+    },
+
+    "Ціна": {
+      en: "Price",
+      de: "Preis",
+      pl: "Cena",
+    },
+
+    "Позицій немає": {
+      en: "No items",
+      de: "Keine Positionen",
+      pl: "Brak pozycji",
+    },
+
+    "Без примітки": {
+      en: "No note",
+      de: "Keine Notiz",
+      pl: "Brak notatki",
+    },
+
+    "↗ Відкрити накладну": {
+      en: "↗ Open invoice",
+      de: "↗ Rechnung öffnen",
+      pl: "↗ Otwórz fakturę",
+    },
+
+    "Накладну не додано": {
+      en: "No invoice attached",
+      de: "Keine Rechnung hinzugefügt",
+      pl: "Nie dodano faktury",
+    },
+
+    "Залишок": {
+      en: "Remaining",
+      de: "Restbetrag",
+      pl: "Pozostało",
+    },
+
+    "Приймання та оплата будуть підключені наступним етапом.": {
+      en: "Receiving and payment will be enabled in the next stage.",
+      de: "Wareneingang und Zahlung werden im nächsten Schritt aktiviert.",
+      pl: "Odbiór i płatność zostaną włączone w następnym etapie.",
+    },
+  }
+);
 function openFinancePurchaseDetailsModal(
   purchase
 ) {
@@ -33667,12 +37532,121 @@ function openFinancePurchaseDetailsModal(
   `;
 
   document.body.appendChild(
-    overlay
+  overlay
+);
+
+const preserveFinanceContent = (
+  element
+) => {
+  if (!element) return;
+
+  element.setAttribute(
+    "data-finance-content",
+    ""
+  );
+};
+
+if (
+  purchase.purchase_number
+) {
+  preserveFinanceContent(
+    overlay.querySelector(
+      ".financePurchaseDetailsHeader h2"
+    )
+  );
+}
+
+if (supplier.name) {
+  preserveFinanceContent(
+    overlay.querySelector(
+      ".financePurchaseDetailsHeader p"
+    )
   );
 
-  document.body.classList.add(
-    "financePurchaseModalOpen"
+  preserveFinanceContent(
+    overlay.querySelector(
+      ".financePurchaseDetailsSupplier h3"
+    )
   );
+}
+
+const supplierContentValues = [
+  supplier.contact_person,
+  supplier.phone,
+  supplier.email,
+  purchase.invoice_number,
+];
+
+overlay
+  .querySelectorAll(
+    ".financePurchaseSupplierGrid strong"
+  )
+  .forEach(
+    (
+      element,
+      index
+    ) => {
+      if (
+        supplierContentValues[
+          index
+        ]
+      ) {
+        preserveFinanceContent(
+          element
+        );
+      }
+    }
+  );
+
+overlay
+  .querySelectorAll(
+    ".financePurchaseDetailsItem"
+  )
+  .forEach(
+    (
+      row,
+      index
+    ) => {
+      const item =
+        items[index] || {};
+
+      row
+        .querySelectorAll(
+          "strong"
+        )
+        .forEach(
+          (
+            element,
+            strongIndex
+          ) => {
+            if (
+              strongIndex > 0 ||
+              item.name_snap
+            ) {
+              preserveFinanceContent(
+                element
+              );
+            }
+          }
+        );
+    }
+  );
+
+if (purchase.note) {
+  preserveFinanceContent(
+    overlay.querySelector(
+      ".financePurchaseDetailsInformation strong"
+    )
+  );
+}
+
+installFinanceLocalization(
+  overlay
+);
+
+document.body.classList.add(
+  "financePurchaseModalOpen"
+);
 
   const close = () => {
     overlay.remove();
@@ -33740,22 +37714,21 @@ async function renderFinanceExpensesTab(
       <div class="visitPaymentSpinner"></div>
 
       <strong>
-        Аналізуємо витрати клініки…
+        ${getFinanceInterfaceText(
+          "Аналізуємо витрати клініки…"
+        )}
       </strong>
     </div>
   `;
 
   try {
-        const [
+    const [
       overview,
       purchasesResult,
     ] = await Promise.all([
       loadFinanceExpensesOverviewApi(
-        financeDashboardState
-          .dateFrom,
-
-        financeDashboardState
-          .dateTo
+        financeDashboardState.dateFrom,
+        financeDashboardState.dateTo
       ),
 
       loadFinancePurchasesApi({
@@ -33788,8 +37761,8 @@ async function renderFinanceExpensesTab(
         : [];
 
     const purchasePagination =
-      purchasesResult.pagination
-      || {};
+      purchasesResult.pagination ||
+      {};
 
     const purchaseDocumentsTotal =
       purchases.reduce(
@@ -33799,8 +37772,8 @@ async function renderFinanceExpensesTab(
         ) =>
           total +
           Number(
-            purchase.total_amount
-            || 0
+            purchase.total_amount ||
+            0
           ),
         0
       );
@@ -33832,17 +37805,21 @@ async function renderFinanceExpensesTab(
         <header class="financeHero financeExpensesHero">
           <div>
             <span class="financeEyebrow">
-              КОНТРОЛЬ ВИТРАТ
+              ${getFinanceInterfaceText(
+                "КОНТРОЛЬ ВИТРАТ"
+              )}
             </span>
 
             <h1>
-              Витрати клініки
+              ${getFinanceInterfaceText(
+                "Витрати клініки"
+              )}
             </h1>
 
             <p>
-              Закупівлі, зарплати,
-              постійні витрати та
-              контрагенти в одному просторі.
+              ${getFinanceInterfaceText(
+                "Закупівлі, зарплати, постійні витрати та контрагенти в одному просторі."
+              )}
             </p>
           </div>
 
@@ -33852,7 +37829,9 @@ async function renderFinanceExpensesTab(
               class="financeRefreshButton"
               data-finance-go="today"
             >
-              ← До сьогодні
+              ${getFinanceInterfaceText(
+                "← До сьогодні"
+              )}
             </button>
 
             <button
@@ -33860,7 +37839,9 @@ async function renderFinanceExpensesTab(
               class="financeExpensesJournalButton"
               id="financeExpensesJournalButton"
             >
-              ↕ Журнал витрат
+              ${getFinanceInterfaceText(
+                "↕ Журнал витрат"
+              )}
             </button>
 
             <button
@@ -33869,7 +37850,10 @@ async function renderFinanceExpensesTab(
               id="financeExpensesAddButton"
             >
               <span>−</span>
-              Додати витрату
+
+              ${getFinanceInterfaceText(
+                "Додати витрату"
+              )}
             </button>
           </div>
         </header>
@@ -33877,7 +37861,9 @@ async function renderFinanceExpensesTab(
         <section class="financeDateRange">
           <label>
             <span>
-              Початок періоду
+              ${getFinanceInterfaceText(
+                "Початок періоду"
+              )}
             </span>
 
             <input
@@ -33892,7 +37878,9 @@ async function renderFinanceExpensesTab(
 
           <label>
             <span>
-              Кінець періоду
+              ${getFinanceInterfaceText(
+                "Кінець періоду"
+              )}
             </span>
 
             <input
@@ -33909,7 +37897,9 @@ async function renderFinanceExpensesTab(
             type="button"
             id="financeExpensesApplyPeriod"
           >
-            Застосувати період
+            ${getFinanceInterfaceText(
+              "Застосувати період"
+            )}
           </button>
         </section>
 
@@ -33920,7 +37910,9 @@ async function renderFinanceExpensesTab(
             </div>
 
             <span>
-              Усього витрат
+              ${getFinanceInterfaceText(
+                "Усього витрат"
+              )}
             </span>
 
             <strong>
@@ -33930,12 +37922,12 @@ async function renderFinanceExpensesTab(
             </strong>
 
             <small>
-              ${Number(
-                summary
-                  .transactions_count ||
-                0
+              ${getFinanceCompletedOperationsText(
+                Number(
+                  summary.transactions_count ||
+                  0
+                )
               )}
-              проведених операцій
             </small>
           </article>
 
@@ -33945,7 +37937,9 @@ async function renderFinanceExpensesTab(
             </div>
 
             <span>
-              Закупівлі
+              ${getFinanceInterfaceText(
+                "Закупівлі"
+              )}
             </span>
 
             <strong>
@@ -33955,7 +37949,9 @@ async function renderFinanceExpensesTab(
             </strong>
 
             <small>
-              Препарати та матеріали
+              ${getFinanceInterfaceText(
+                "Препарати та матеріали"
+              )}
             </small>
           </article>
 
@@ -33965,7 +37961,9 @@ async function renderFinanceExpensesTab(
             </div>
 
             <span>
-              Зарплатний фонд
+              ${getFinanceInterfaceText(
+                "Зарплатний фонд"
+              )}
             </span>
 
             <strong>
@@ -33975,11 +37973,11 @@ async function renderFinanceExpensesTab(
             </strong>
 
             <small>
-              ${
+              ${getFinanceInterfaceText(
                 isOwner()
                   ? "Персональні дані доступні власнику"
                   : "Лише загальна сума без ставок"
-              }
+              )}
             </small>
           </article>
 
@@ -33989,18 +37987,21 @@ async function renderFinanceExpensesTab(
             </div>
 
             <span>
-              Постійні витрати
+              ${getFinanceInterfaceText(
+                "Постійні витрати"
+              )}
             </span>
 
             <strong>
               ${formatVisitFinanceMoney(
-                summary
-                  .fixed_expenses_total
+                summary.fixed_expenses_total
               )}
             </strong>
 
             <small>
-              Оренда та комунальні
+              ${getFinanceInterfaceText(
+                "Оренда та комунальні"
+              )}
             </small>
           </article>
 
@@ -34010,7 +38011,9 @@ async function renderFinanceExpensesTab(
             </div>
 
             <span>
-              У середньому за день
+              ${getFinanceInterfaceText(
+                "У середньому за день"
+              )}
             </span>
 
             <strong>
@@ -34020,534 +38023,608 @@ async function renderFinanceExpensesTab(
             </strong>
 
             <small>
-              За обраний період
+              ${getFinanceInterfaceText(
+                "За обраний період"
+              )}
             </small>
           </article>
         </section>
 
-        <section class="financeExpensesMainGrid">
-          <article class="financePanel financeExpensesTrendPanel">
-            <div class="financePanelHead">
-              <div>
-                <span>
-                  ДИНАМІКА
-                </span>
+<section class="financeExpensesMainGrid">
+  <article class="financePanel financeExpensesTrendPanel">
+    <div class="financePanelHead">
+      <div>
+        <span>
+          ${getFinanceInterfaceText(
+            "ДИНАМІКА"
+          )}
+        </span>
 
-                <h2>
-                  Витрати за днями
-                </h2>
-              </div>
+        <h2>
+          ${getFinanceInterfaceText(
+            "Витрати за днями"
+          )}
+        </h2>
+      </div>
 
-              <strong class="financeExpenseTotalValue">
-                ${formatVisitFinanceMoney(
-                  totalExpenses
+      <strong class="financeExpenseTotalValue">
+        ${formatVisitFinanceMoney(
+          totalExpenses
+        )}
+      </strong>
+    </div>
+
+    ${buildFinanceExpensesTrendChart(
+      overview.daily
+    )}
+  </article>
+
+  <article class="financePanel financeExpenseCategoriesPanel">
+    <div class="financePanelHead">
+      <div>
+        <span>
+          ${getFinanceInterfaceText(
+            "СТРУКТУРА"
+          )}
+        </span>
+
+        <h2>
+          ${getFinanceInterfaceText(
+            "Категорії витрат"
+          )}
+        </h2>
+      </div>
+
+      <b>
+        ${categories.length}
+      </b>
+    </div>
+
+    <div class="financeExpenseCategories">
+      ${
+        categories.length
+          ? categories
+              .map(
+                (item) => {
+                  const meta =
+                    getFinanceExpenseCategoryMeta(
+                      item.category
+                    );
+
+                  const share =
+                    Math.max(
+                      0,
+                      Math.min(
+                        100,
+                        Number(
+                          item.share_percent ||
+                          0
+                        )
+                      )
+                    );
+
+                  const operationsCount =
+                    Number(
+                      item.operations_count ||
+                      0
+                    );
+
+                  const categoryLabel =
+                    getFinanceInterfaceText(
+                      item.category ||
+                      "Без категорії"
+                    );
+
+                  return `
+                    <article class="financeExpenseCategory">
+                      <div
+                        class="financeExpenseCategoryIcon"
+                        style="
+                          --category-color:
+                            ${meta.color};
+                        "
+                      >
+                        ${meta.icon}
+                      </div>
+
+                      <div class="financeExpenseCategoryMain">
+                        <div>
+                          <strong>
+                            ${escapeHtml(
+                              categoryLabel
+                            )}
+                          </strong>
+
+                          <span>
+                            ${operationsCount}
+                            ${getFinanceOperationWord(
+                              operationsCount
+                            )}
+                          </span>
+                        </div>
+
+                        <div class="financeExpenseCategoryProgress">
+                          <i
+                            style="
+                              width:${share}%;
+                              --category-color:
+                                ${meta.color};
+                            "
+                          ></i>
+                        </div>
+                      </div>
+
+                      <div class="financeExpenseCategoryAmount">
+                        <strong>
+                          ${formatVisitFinanceMoney(
+                            item.amount
+                          )}
+                        </strong>
+
+                        <span>
+                          ${share.toLocaleString(
+                            getCalendarLocale(),
+                            {
+                              maximumFractionDigits: 1,
+                            }
+                          )}%
+                        </span>
+                      </div>
+                    </article>
+                  `;
+                }
+              )
+              .join("")
+          : `
+            <div class="financeTransactionsEmpty">
+              <strong>
+                ${getFinanceInterfaceText(
+                  "Категорій ще немає"
                 )}
               </strong>
+
+              <span>
+                ${getFinanceInterfaceText(
+                  "Додайте першу витрату."
+                )}
+              </span>
             </div>
-
-            ${buildFinanceExpensesTrendChart(
-              overview.daily
-            )}
-          </article>
-
-          <article class="financePanel financeExpenseCategoriesPanel">
-            <div class="financePanelHead">
-              <div>
-                <span>
-                  СТРУКТУРА
-                </span>
-
-                <h2>
-                  Категорії витрат
-                </h2>
-              </div>
-
-              <b>
-                ${categories.length}
-              </b>
-            </div>
-
-            <div class="financeExpenseCategories">
-              ${
-                categories.length
-                  ? categories
-                      .map(
-                        (item) => {
-                          const meta =
-                            getFinanceExpenseCategoryMeta(
-                              item.category
-                            );
-
-                          const share =
-                            Math.max(
-                              0,
-                              Math.min(
-                                100,
-                                Number(
-                                  item.share_percent ||
-                                  0
-                                )
-                              )
-                            );
-
-                          return `
-                            <article class="financeExpenseCategory">
-                              <div
-                                class="financeExpenseCategoryIcon"
-                                style="
-                                  --category-color:
-                                    ${meta.color};
-                                "
-                              >
-                                ${meta.icon}
-                              </div>
-
-                              <div class="financeExpenseCategoryMain">
-                                <div>
-                                  <strong>
-                                    ${escapeHtml(
-                                      item.category
-                                    )}
-                                  </strong>
-
-                                  <span>
-                                    ${Number(
-                                      item.operations_count ||
-                                      0
-                                    )}
-                                    операцій
-                                  </span>
-                                </div>
-
-                                <div class="financeExpenseCategoryProgress">
-                                  <i
-                                    style="
-                                      width:${share}%;
-                                      --category-color:
-                                        ${meta.color};
-                                    "
-                                  ></i>
-                                </div>
-                              </div>
-
-                              <div class="financeExpenseCategoryAmount">
-                                <strong>
-                                  ${formatVisitFinanceMoney(
-                                    item.amount
-                                  )}
-                                </strong>
-
-                                <span>
-                                  ${share.toFixed(1)}%
-                                </span>
-                              </div>
-                            </article>
-                          `;
-                        }
-                      )
-                      .join("")
-                  : `
-                    <div class="financeTransactionsEmpty">
-                      <strong>
-                        Категорій ще немає
-                      </strong>
-
-                      <span>
-                        Додайте першу витрату.
-                      </span>
-                    </div>
-                  `
-              }
-            </div>
-          </article>
-        </section>
-
+          `
+      }
+    </div>
+  </article>
+</section>
         <section class="financeExpensesSecondaryGrid">
-                    <article class="financePanel financePurchasesPanel">
-            <div class="financePanelHead financePurchasesPanelHead">
-              <div>
-                <span>
-                  ПОСТАЧАННЯ
-                </span>
+                   <article class="financePanel financePurchasesPanel">
+  <div class="financePanelHead financePurchasesPanelHead">
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "ПОСТАЧАННЯ"
+        )}
+      </span>
 
-                <h2>
-                  Закупівлі
-                </h2>
-              </div>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Закупівлі"
+        )}
+      </h2>
+    </div>
 
-              <div class="financePurchasesPanelActions">
-                <b>
-                  ${purchases.length}
-                </b>
+    <div class="financePurchasesPanelActions">
+      <b>
+        ${purchases.length}
+      </b>
 
-                <button
-                  type="button"
-                  id="financePurchaseCreateButton"
-                >
-                  + Нова закупівля
-                </button>
-              </div>
-            </div>
+      <button
+        type="button"
+        id="financePurchaseCreateButton"
+      >
+        ${getFinanceInterfaceText(
+          "+ Нова закупівля"
+        )}
+      </button>
+    </div>
+  </div>
 
-            <div class="financePurchasesSummary">
-              <div>
-                <span>
-                  Документів
-                </span>
+  <div class="financePurchasesSummary">
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "Документів"
+        )}
+      </span>
 
-                <strong>
-                  ${purchases.length}
-                </strong>
-              </div>
+      <strong>
+        ${purchases.length}
+      </strong>
+    </div>
 
-              <div>
-                <span>
-                  Сума документів
-                </span>
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "Сума документів"
+        )}
+      </span>
 
-                <strong>
-                  ${formatVisitFinanceMoney(
-                    purchaseDocumentsTotal
-                  )}
-                </strong>
-              </div>
+      <strong>
+        ${formatVisitFinanceMoney(
+          purchaseDocumentsTotal
+        )}
+      </strong>
+    </div>
 
-              <div>
-                <span>
-                  Очікують оплати
-                </span>
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "Очікують оплати"
+        )}
+      </span>
 
-                <strong>
-                  ${
-                    purchases.filter(
-                      (purchase) =>
-                        purchase
-                          .payment_status !==
-                        "paid"
-                    ).length
-                  }
-                </strong>
-              </div>
-            </div>
+      <strong>
+        ${
+          purchases.filter(
+            (purchase) =>
+              purchase.payment_status !==
+              "paid"
+          ).length
+        }
+      </strong>
+    </div>
+  </div>
 
-            <div class="financePurchasesList">
-              ${
-                purchases.length
-                  ? purchases
-                      .map(
-                        (purchase) => {
-                          const statusMeta =
-                            getFinancePurchaseStatusMeta(
-                              purchase.status
-                            );
+  <div class="financePurchasesList">
+    ${
+      purchases.length
+        ? purchases
+            .map(
+              (purchase) => {
+                const statusMeta =
+                  getFinancePurchaseStatusMeta(
+                    purchase.status
+                  );
 
-                          const paymentMeta =
-                            getFinancePurchasePaymentMeta(
-                              purchase
-                                .payment_status
-                            );
+                const paymentMeta =
+                  getFinancePurchasePaymentMeta(
+                    purchase.payment_status
+                  );
 
-                          const orderedUnits =
-                            Number(
-                              purchase
-                                .ordered_units ||
-                              0
-                            );
+                const orderedUnits =
+                  Number(
+                    purchase.ordered_units ||
+                    0
+                  );
 
-                          const receivedUnits =
-                            Number(
-                              purchase
-                                .received_units ||
-                              0
-                            );
+                const receivedUnits =
+                  Number(
+                    purchase.received_units ||
+                    0
+                  );
 
-                          const receiveProgress =
-                            orderedUnits > 0
-                              ? Math.min(
-                                  100,
-                                  Math.max(
-                                    0,
-                                    (
-                                      receivedUnits /
-                                      orderedUnits
-                                    ) * 100
-                                  )
-                                )
-                              : 0;
-
-                          return `
-                            <button
-                              type="button"
-                              class="financePurchaseCard"
-                              data-finance-purchase-id="${
-                                purchase.id
-                              }"
-                            >
-                              <div class="financePurchaseCardIcon">
-                                ${statusMeta.icon}
-                              </div>
-
-                              <div class="financePurchaseCardMain">
-                                <div class="financePurchaseCardTitle">
-                                  <div>
-                                    <strong>
-                                      ${escapeHtml(
-                                        purchase
-                                          .purchase_number ||
-                                        "Закупівля"
-                                      )}
-                                    </strong>
-
-                                    <span>
-                                      ${escapeHtml(
-                                        purchase
-                                          .supplier
-                                          ?.name ||
-                                        "Постачальник не вказаний"
-                                      )}
-                                    </span>
-                                  </div>
-
-                                  <div class="financePurchaseBadges">
-                                    <span
-                                      class="financePurchaseStatus ${
-                                        statusMeta
-                                          .className
-                                      }"
-                                    >
-                                      ${statusMeta.label}
-                                    </span>
-
-                                    <span
-                                      class="financePurchasePaymentStatus ${
-                                        paymentMeta
-                                          .className
-                                      }"
-                                    >
-                                      ${paymentMeta.label}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div class="financePurchaseCardMeta">
-                                  <span>
-                                    ${formatFinancePurchaseDate(
-                                      purchase
-                                        .order_date
-                                    )}
-                                  </span>
-
-                                  <span>
-                                    ${
-                                      Number(
-                                        purchase
-                                          .items_count ||
-                                        0
-                                      )
-                                    }
-                                    позицій
-                                  </span>
-
-                                  <span>
-                                    Отримано:
-                                    ${receivedUnits}
-                                    із
-                                    ${orderedUnits}
-                                  </span>
-                                </div>
-
-                                <div class="financePurchaseProgress">
-                                  <i
-                                    style="
-                                      width:
-                                        ${receiveProgress}%;
-                                    "
-                                  ></i>
-                                </div>
-                              </div>
-
-                              <div class="financePurchaseCardAmount">
-                                <strong>
-                                  ${formatVisitFinanceMoney(
-                                    purchase
-                                      .total_amount
-                                  )}
-                                </strong>
-
-                                <span>
-                                  Залишок:
-                                  ${formatVisitFinanceMoney(
-                                    purchase
-                                      .remaining_amount
-                                  )}
-                                </span>
-                              </div>
-
-                              <span class="financePurchaseCardArrow">
-                                →
-                              </span>
-                            </button>
-                          `;
-                        }
+                const receiveProgress =
+                  orderedUnits > 0
+                    ? Math.min(
+                        100,
+                        Math.max(
+                          0,
+                          (
+                            receivedUnits /
+                            orderedUnits
+                          ) * 100
+                        )
                       )
-                      .join("")
-                  : `
-                    <div class="financePurchasesEmpty">
-                      <span>
-                        📦
-                      </span>
+                    : 0;
 
+                const purchaseNumber =
+                  purchase.purchase_number ||
+                  getFinanceInterfaceText(
+                    "Закупівля"
+                  );
+
+                const supplierName =
+                  purchase.supplier?.name ||
+                  getFinanceInterfaceText(
+                    "Постачальник не вказаний"
+                  );
+
+                return `
+                  <button
+                    type="button"
+                    class="financePurchaseCard"
+                    data-finance-purchase-id="${escapeHtml(
+                      purchase.id
+                    )}"
+                  >
+                    <div class="financePurchaseCardIcon">
+                      ${statusMeta.icon}
+                    </div>
+
+                    <div class="financePurchaseCardMain">
+                      <div class="financePurchaseCardTitle">
+                        <div>
+                          <strong
+                            ${
+                              purchase.purchase_number
+                                ? "data-finance-content"
+                                : ""
+                            }
+                          >
+                            ${escapeHtml(
+                              purchaseNumber
+                            )}
+                          </strong>
+
+                          <span
+                            ${
+                              purchase.supplier?.name
+                                ? "data-finance-content"
+                                : ""
+                            }
+                          >
+                            ${escapeHtml(
+                              supplierName
+                            )}
+                          </span>
+                        </div>
+
+                        <div class="financePurchaseBadges">
+                          <span
+                            class="financePurchaseStatus ${
+                              statusMeta.className
+                            }"
+                          >
+                            ${escapeHtml(
+                              getFinanceInterfaceText(
+                                statusMeta.label
+                              )
+                            )}
+                          </span>
+
+                          <span
+                            class="financePurchasePaymentStatus ${
+                              paymentMeta.className
+                            }"
+                          >
+                            ${escapeHtml(
+                              getFinanceInterfaceText(
+                                paymentMeta.label
+                              )
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="financePurchaseCardMeta">
+                        <span>
+                          ${formatFinancePurchaseDate(
+                            purchase.order_date
+                          )}
+                        </span>
+
+                        <span>
+                          ${getFinancePurchaseItemsText(
+                            Number(
+                              purchase.items_count ||
+                              0
+                            )
+                          )}
+                        </span>
+
+                        <span>
+                          ${getFinanceReceivedItemsText(
+                            receivedUnits,
+                            orderedUnits
+                          )}
+                        </span>
+                      </div>
+
+                      <div class="financePurchaseProgress">
+                        <i
+                          style="
+                            width:
+                              ${receiveProgress}%;
+                          "
+                        ></i>
+                      </div>
+                    </div>
+
+                    <div class="financePurchaseCardAmount">
                       <strong>
-                        Закупівель за цей період немає
+                        ${formatVisitFinanceMoney(
+                          purchase.total_amount
+                        )}
                       </strong>
 
-                      <p>
-                        Створіть перше замовлення
-                        постачальнику.
-                      </p>
+                      <span>
+                        ${getFinanceRemainingAmountText(
+                          purchase.remaining_amount
+                        )}
+                      </span>
                     </div>
-                  `
+
+                    <span class="financePurchaseCardArrow">
+                      →
+                    </span>
+                  </button>
+                `;
               }
-            </div>
+            )
+            .join("")
+        : `
+          <div class="financePurchasesEmpty">
+            <span>📦</span>
 
+            <strong>
+              ${getFinanceInterfaceText(
+                "Закупівель за цей період немає"
+              )}
+            </strong>
+
+            <p>
+              ${getFinanceInterfaceText(
+                "Створіть перше замовлення постачальнику."
+              )}
+            </p>
+          </div>
+        `
+    }
+  </div>
+
+  ${
+    purchasePagination.has_more ||
+    Number(
+      purchasePagination.offset ||
+      0
+    ) > 0
+      ? `
+        <div class="financePurchasesPagination">
+          <button
+            type="button"
+            id="financePurchasesPrevious"
             ${
-              purchasePagination
-                .has_more ||
               Number(
-                purchasePagination
-                  .offset ||
+                purchasePagination.offset ||
                 0
-              ) > 0
-                ? `
-                  <div class="financePurchasesPagination">
-                    <button
-                      type="button"
-                      id="financePurchasesPrevious"
-                      ${
-                        Number(
-                          purchasePagination
-                            .offset ||
-                          0
-                        ) <= 0
-                          ? "disabled"
-                          : ""
-                      }
-                    >
-                      ← Назад
-                    </button>
-
-                    <button
-                      type="button"
-                      id="financePurchasesNext"
-                      ${
-                        purchasePagination
-                          .has_more
-                          ? ""
-                          : "disabled"
-                      }
-                    >
-                      Далі →
-                    </button>
-                  </div>
-                `
+              ) <= 0
+                ? "disabled"
                 : ""
             }
-          </article>
+          >
+            ${getFinanceInterfaceText(
+              "← Назад"
+            )}
+          </button>
 
+          <button
+            type="button"
+            id="financePurchasesNext"
+            ${
+              purchasePagination.has_more
+                ? ""
+                : "disabled"
+            }
+          >
+            ${getFinanceInterfaceText(
+              "Далі →"
+            )}
+          </button>
+        </div>
+      `
+      : ""
+  }
+</article>
+         <article class="financePanel financeExpenseCounterpartiesPanel">
+  <div class="financePanelHead">
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "КОНТРАГЕНТИ"
+        )}
+      </span>
 
-          <article class="financePanel financeExpenseCounterpartiesPanel">
-            <div class="financePanelHead">
-              <div>
-                <span>
-                  КОНТРАГЕНТИ
-                </span>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Кому сплачували"
+        )}
+      </h2>
+    </div>
 
-                <h2>
-                  Кому сплачували
-                </h2>
-              </div>
+    <b>
+      ${Number(
+        summary.counterparties_count ||
+        0
+      )}
+    </b>
+  </div>
 
-              <b>
-                ${Number(
-                  summary
-                    .counterparties_count ||
-                  0
-                )}
-              </b>
-            </div>
-
-            <div class="financeExpenseCounterparties">
-              ${
-                counterparties.length
-                  ? counterparties
-                      .map(
-                        (
-                          item,
-                          index
-                        ) => {
-                          const date =
-                            item.last_operation_at
-                              ? new Date(
-                                  item.last_operation_at
-                                )
-                                  .toLocaleDateString(
-                                    "uk-UA"
-                                  )
-                              : "—";
-
-                          return `
-                            <article class="financeExpenseCounterparty">
-                              <span>
-                                ${index + 1}
-                              </span>
-
-                              <div>
-                                <strong>
-                                  ${escapeHtml(
-                                    item.counterparty ||
-                                    "Без назви"
-                                  )}
-                                </strong>
-
-                                <small>
-                                  ${Number(
-                                    item.operations_count ||
-                                    0
-                                  )}
-                                  операцій
-                                  ·
-                                  остання
-                                  ${escapeHtml(
-                                    date
-                                  )}
-                                </small>
-                              </div>
-
-                              <b>
-                                ${formatVisitFinanceMoney(
-                                  item.amount
-                                )}
-                              </b>
-                            </article>
-                          `;
-                        }
+  <div class="financeExpenseCounterparties">
+    ${
+      counterparties.length
+        ? counterparties
+            .map(
+              (
+                item,
+                index
+              ) => {
+                const date =
+                  item.last_operation_at
+                    ? new Date(
+                        item.last_operation_at
                       )
-                      .join("")
-                  : `
-                    <div class="financeTransactionsEmpty">
-                      <strong>
-                        Контрагентів ще немає
+                        .toLocaleDateString(
+                          getCalendarLocale()
+                        )
+                    : "—";
+
+                const counterpartyName =
+                  item.counterparty ||
+                  getFinanceInterfaceText(
+                    "Без назви"
+                  );
+
+                const operationsCount =
+                  Number(
+                    item.operations_count ||
+                    0
+                  );
+
+                return `
+                  <article class="financeExpenseCounterparty">
+                    <span>
+                      ${index + 1}
+                    </span>
+
+                    <div>
+                      <strong
+                        ${
+                          item.counterparty
+                            ? "data-finance-content"
+                            : ""
+                        }
+                      >
+                        ${escapeHtml(
+                          counterpartyName
+                        )}
                       </strong>
 
-                      <span>
-                        Вкажіть отримувача
-                        під час додавання витрати.
-                      </span>
+                      <small>
+                        ${escapeHtml(
+                          getFinanceCounterpartyOperationsText(
+                            operationsCount,
+                            date
+                          )
+                        )}
+                      </small>
                     </div>
-                  `
+
+                    <b>
+                      ${formatVisitFinanceMoney(
+                        item.amount
+                      )}
+                    </b>
+                  </article>
+                `;
               }
-            </div>
-          </article>
+            )
+            .join("")
+        : `
+          <div class="financeTransactionsEmpty">
+            <strong>
+              ${getFinanceInterfaceText(
+                "Контрагентів ще немає"
+              )}
+            </strong>
+
+            <span>
+              ${getFinanceInterfaceText(
+                "Вкажіть отримувача під час додавання витрати."
+              )}
+            </span>
+          </div>
+        `
+    }
+  </div>
+</article>
         </section>
       </div>
     `;
@@ -34555,6 +38632,59 @@ async function renderFinanceExpensesTab(
     bindFinanceWorkspaceActions(
       page
     );
+    page
+  .querySelector(
+    "#financeExpensesApplyPeriod"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+      const dateFrom =
+        String(
+          page
+            .querySelector(
+              "#financeExpensesDateFrom"
+            )
+            ?.value ||
+          ""
+        );
+
+      const dateTo =
+        String(
+          page
+            .querySelector(
+              "#financeExpensesDateTo"
+            )
+            ?.value ||
+          ""
+        );
+
+      if (
+        !dateFrom ||
+        !dateTo ||
+        dateFrom > dateTo
+      ) {
+        showFinanceAlert(
+          "Оберіть коректний період."
+        );
+
+        return;
+      }
+
+      financeDashboardState
+        .dateFrom =
+          dateFrom;
+
+      financeDashboardState
+        .dateTo =
+          dateTo;
+
+      financeDashboardState
+        .purchaseOffset = 0;
+
+      renderFinanceTab();
+    }
+  );
 
     page
       .querySelector(
@@ -34702,46 +38832,55 @@ async function renderFinanceExpensesTab(
       );
 
   } catch (error) {
-    console.error(
-      "renderFinanceExpensesTab failed:",
-      error
+  console.error(
+    "renderFinanceExpensesTab failed:",
+    error
+  );
+
+  const errorMessage =
+    getFinanceInterfaceText(
+      error?.message ||
+      "Невідома помилка"
     );
 
-    page.innerHTML = `
-      <div class="financeLoadError">
-        <span>!</span>
+  page.innerHTML = `
+    <div class="financeLoadError">
+      <span>!</span>
 
-        <h2>
-          Не вдалося завантажити витрати
-        </h2>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Не вдалося завантажити витрати"
+        )}
+      </h2>
 
-        <p>
-          ${escapeHtml(
-            error?.message ||
-            "Невідома помилка"
-          )}
-        </p>
+      <p>
+        ${escapeHtml(
+          errorMessage
+        )}
+      </p>
 
-        <button
-          type="button"
-          id="financeExpensesRetry"
-        >
-          Спробувати ще раз
-        </button>
-      </div>
-    `;
+      <button
+        type="button"
+        id="financeExpensesRetry"
+      >
+        ${getFinanceInterfaceText(
+          "Спробувати ще раз"
+        )}
+      </button>
+    </div>
+  `;
 
-    page
-      .querySelector(
-        "#financeExpensesRetry"
-      )
-      ?.addEventListener(
-        "click",
-        () => {
-          renderFinanceTab();
-        }
-      );
-  }
+  page
+    .querySelector(
+      "#financeExpensesRetry"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        renderFinanceTab();
+      }
+    );
+}
 }
 
 function getFinanceSettlementMeta(
@@ -34755,20 +38894,32 @@ function getFinanceSettlementMeta(
   if (normalized === "paid") {
     return {
       key: "paid",
-      label: "Сплачено",
+
+      label:
+        getFinanceInterfaceText(
+          "Сплачено"
+        ),
     };
   }
 
   if (normalized === "partial") {
     return {
       key: "partial",
-      label: "Частково",
+
+      label:
+        getFinanceInterfaceText(
+          "Частково"
+        ),
     };
   }
 
   return {
     key: "unpaid",
-    label: "Очікує оплати",
+
+    label:
+      getFinanceInterfaceText(
+        "Очікує оплати"
+      ),
   };
 }
 
@@ -34924,9 +39075,9 @@ function bindFinanceWorkspaceActions(
               error
             );
 
-            alert(
-              "Не вдалося відкрити візит."
-            );
+            showFinanceAlert(
+  "Не вдалося відкрити візит."
+);
 
             button.disabled = false;
           }
@@ -34974,14 +39125,16 @@ async function renderFinanceTodayTab(
   page
 ) {
   page.innerHTML = `
-    <div class="financePageLoading">
-      <div class="visitPaymentSpinner"></div>
+  <div class="financePageLoading">
+    <div class="visitPaymentSpinner"></div>
 
-      <strong>
-        Збираємо фінансовий день клініки…
-      </strong>
-    </div>
-  `;
+    <strong>
+      ${getFinanceInterfaceText(
+        "Збираємо фінансовий день клініки…"
+      )}
+    </strong>
+  </div>
+`;
 
   try {
     const today =
@@ -35086,852 +39239,978 @@ async function renderFinanceTodayTab(
         : [];
 
     const unavailableSections = [
-      !overviewAvailable
-        ? "операції та підсумки"
-        : "",
-
-      !balancesAvailable
-        ? "розрахунки з клієнтами"
-        : "",
-
-      !stockAvailable
-        ? "складські сигнали"
-        : "",
-
-      !accountsAvailable
-        ? "залишки на рахунках"
-        : "",
-    ].filter(Boolean);
-
-    const hasPartialData =
-      unavailableSections.length > 0;
-
-    const summary =
-      overview.summary || {};
-
-    const balanceSummary =
-      balances.summary || {};
-
-    const clients =
-      Array.isArray(balances.items)
-        ? balances.items
-        : [];
-
-    const transactions =
-      Array.isArray(
-        overview.recent_transactions
+  !overviewAvailable
+    ? getFinanceInterfaceText(
+        "операції та підсумки"
       )
-        ? overview.recent_transactions
-        : [];
+    : "",
 
-    const normalizedStock =
-      (stockItems || [])
-        .map(normalizeStockItem)
-        .filter(
-          (item) =>
-            item.active !== false
-        );
+  !balancesAvailable
+    ? getFinanceInterfaceText(
+        "розрахунки з клієнтами"
+      )
+    : "",
 
-    const lowStock =
-      normalizedStock.filter(
-        (item) =>
-          getStockStatus(item).key
-          !== "good"
-      );
+  !stockAvailable
+    ? getFinanceInterfaceText(
+        "складські сигнали"
+      )
+    : "",
 
-    const marginRisks =
-      normalizedStock.filter(
-        (item) =>
-          Number(item.cost || 0) > 0 &&
-          Number(item.price || 0) <=
-            Number(item.cost || 0)
-      );
+  !accountsAvailable
+    ? getFinanceInterfaceText(
+        "залишки на рахунках"
+      )
+    : "",
+].filter(Boolean);
 
-    const debtClients =
-      clients
-        .filter(
-          (client) =>
-            Number(
-              client.remaining || 0
-            ) > 0
-        )
-        .slice(0, 4);
+const hasPartialData =
+  unavailableSections.length > 0;
 
-    const paymentMethods =
-      overview.payment_methods || {};
+const summary =
+  overview.summary || {};
 
-    const cashToday =
-      Number(
-        paymentMethods.cash || 0
-      );
+const balanceSummary =
+  balances.summary || {};
 
-    const hasAttention =
-      debtClients.length ||
-      lowStock.length ||
-      marginRisks.length;
+const clients =
+  Array.isArray(balances.items)
+    ? balances.items
+    : [];
 
-    page.innerHTML = `
-      <div class="financeDashboard financeWorkspaceV2">
-        ${buildFinanceSectionNavigation()}
+const transactions =
+  Array.isArray(
+    overview.recent_transactions
+  )
+    ? overview.recent_transactions
+    : [];
 
-        ${
-          hasPartialData
-            ? `
-              <div
-                class="financePartialDataNotice"
-                role="status"
-              >
-                <span>!</span>
+const normalizedStock =
+  (stockItems || [])
+    .map(normalizeStockItem)
+    .filter(
+      (item) =>
+        item.active !== false
+    );
 
-                <p>
-                  <strong>
-                    Частина даних не завантажилась
-                  </strong>
+const lowStock =
+  normalizedStock.filter(
+    (item) =>
+      getStockStatus(item).key
+      !== "good"
+  );
 
-                  <small>
-                    Тимчасово недоступні:
-                    ${escapeHtml(
-                      unavailableSections.join(
-                        ", "
-                      )
-                    )}.
-                    Інші блоки можна використовувати.
-                  </small>
-                </p>
+const marginRisks =
+  normalizedStock.filter(
+    (item) =>
+      Number(item.cost || 0) > 0 &&
+      Number(item.price || 0) <=
+        Number(item.cost || 0)
+  );
 
-                <button
-                  type="button"
-                  id="financeTodayPartialRetry"
-                >
-                  Оновити
-                </button>
-              </div>
-            `
-            : ""
-        }
+const debtClients =
+  clients
+    .filter(
+      (client) =>
+        Number(
+          client.remaining || 0
+        ) > 0
+    )
+    .slice(0, 4);
 
-        <header class="financeControlHero">
-          <div class="financeControlHeroMain">
-            <span class="financeEyebrow">
-              ФІНАНСОВИЙ ДЕНЬ
-            </span>
+const paymentMethods =
+  overview.payment_methods || {};
 
-            <h1>
-              Сьогодні у клініці
-            </h1>
+const cashToday =
+  Number(
+    paymentMethods.cash || 0
+  );
+
+const hasAttention =
+  debtClients.length ||
+  lowStock.length ||
+  marginRisks.length;
+
+page.innerHTML = `
+  <div class="financeDashboard financeWorkspaceV2">
+    ${buildFinanceSectionNavigation()}
+
+    ${
+      hasPartialData
+        ? `
+          <div
+            class="financePartialDataNotice"
+            role="status"
+          >
+            <span>!</span>
 
             <p>
-              Не звіт заради звіту, а короткий список грошей
-              і дій, які варто закрити до кінця зміни.
+              <strong>
+                ${getFinanceInterfaceText(
+                  "Частина даних не завантажилась"
+                )}
+              </strong>
+
+              <small>
+                ${escapeHtml(
+                  getFinanceTodayPartialDataText(
+                    unavailableSections
+                  )
+                )}
+              </small>
             </p>
-          </div>
-
-          <div class="financeControlHeroActions">
-            <button
-              type="button"
-              class="financePrimaryAction"
-              data-finance-go="clients"
-            >
-              <span>＋</span>
-              Прийняти оплату
-            </button>
 
             <button
               type="button"
-              class="financeQuietAction"
-              id="financeTodayAddExpense"
+              id="financeTodayPartialRetry"
             >
-              Додати витрату
-            </button>
-
-            <button
-              type="button"
-              class="financeQuietAction"
-              data-finance-go="expenses"
-            >
-              Витрати й закупівлі
+              ${getFinanceInterfaceText(
+                "Оновити"
+              )}
             </button>
           </div>
-        </header>
+        `
+        : ""
+    }
 
-        <section class="financeTodayKpis">
-          <button
-            type="button"
-            class="financeKpiCard"
-            data-finance-go="transactions"
-            data-finance-transaction-type="payment"
-            data-finance-payment-method=""
-            data-finance-account-id=""
-            data-finance-date="${today}"
-          >
-            <span>
-              Отримано сьогодні
-            </span>
+    <header class="financeControlHero">
+      <div class="financeControlHeroMain">
+        <span class="financeEyebrow">
+          ${getFinanceInterfaceText(
+            "ФІНАНСОВИЙ ДЕНЬ"
+          )}
+        </span>
 
-            <strong>
-              ${
-                overviewAvailable
-                  ? formatVisitFinanceMoney(
-                      summary.net_revenue
-                    )
-                  : "—"
-              }
-            </strong>
+        <h1>
+          ${getFinanceInterfaceText(
+            "Сьогодні у клініці"
+          )}
+        </h1>
 
-            <small>
-              ${overviewAvailable
-                ? `
-                  ${Number(
+        <p>
+          ${getFinanceInterfaceText(
+            "Не звіт заради звіту, а короткий список грошей і дій, які варто закрити до кінця зміни."
+          )}
+        </p>
+      </div>
+
+      <div class="financeControlHeroActions">
+        <button
+          type="button"
+          class="financePrimaryAction"
+          data-finance-go="clients"
+        >
+          <span>＋</span>
+
+          ${getFinanceInterfaceText(
+            "Прийняти оплату"
+          )}
+        </button>
+
+        <button
+          type="button"
+          class="financeQuietAction"
+          id="financeTodayAddExpense"
+        >
+          ${getFinanceInterfaceText(
+            "Додати витрату"
+          )}
+        </button>
+
+        <button
+          type="button"
+          class="financeQuietAction"
+          data-finance-go="expenses"
+        >
+          ${getFinanceInterfaceText(
+            "Витрати й закупівлі"
+          )}
+        </button>
+      </div>
+    </header>
+
+    <section class="financeTodayKpis">
+      <button
+        type="button"
+        class="financeKpiCard"
+        data-finance-go="transactions"
+        data-finance-transaction-type="payment"
+        data-finance-payment-method=""
+        data-finance-account-id=""
+        data-finance-date="${today}"
+      >
+        <span>
+          ${getFinanceInterfaceText(
+            "Отримано сьогодні"
+          )}
+        </span>
+
+        <strong>
+          ${
+            overviewAvailable
+              ? formatVisitFinanceMoney(
+                  summary.net_revenue
+                )
+              : "—"
+          }
+        </strong>
+
+        <small>
+          ${
+            overviewAvailable
+              ? getFinanceTodayPaidVisitsText(
+                  Number(
                     summary
                       .paid_visits_count ||
                     0
-                  )}
-                  оплачених візитів ·
-                  переглянути
-                `
-                : "Тимчасово недоступно"
-              }
-            </small>
-          </button>
+                  )
+                )
+              : getFinanceInterfaceText(
+                  "Тимчасово недоступно"
+                )
+          }
+        </small>
+      </button>
 
-          <button
-            type="button"
-            class="financeKpiCard"
-            data-finance-go="clients"
-          >
-            <span>
-              Очікуємо від клієнтів
-            </span>
+      <button
+        type="button"
+        class="financeKpiCard"
+        data-finance-go="clients"
+      >
+        <span>
+          ${getFinanceInterfaceText(
+            "Очікуємо від клієнтів"
+          )}
+        </span>
 
-            <strong>
-              ${
-                balancesAvailable
-                  ? formatVisitFinanceMoney(
-                      balanceSummary.outstanding
-                    )
-                  : "—"
-              }
-            </strong>
+        <strong>
+          ${
+            balancesAvailable
+              ? formatVisitFinanceMoney(
+                  balanceSummary.outstanding
+                )
+              : "—"
+          }
+        </strong>
 
-            <small>
-              ${balancesAvailable
-                ? `
-                  ${Number(
+        <small>
+          ${
+            balancesAvailable
+              ? getFinanceTodayClientsText(
+                  Number(
                     balanceSummary
                       .debt_clients_count ||
                     0
-                  )}
-                  клієнтів із залишком ·
-                  переглянути
-                `
-                : "Тимчасово недоступно"
-              }
-            </small>
-          </button>
+                  )
+                )
+              : getFinanceInterfaceText(
+                  "Тимчасово недоступно"
+                )
+          }
+        </small>
+      </button>
 
-          <button
-            type="button"
-            class="financeKpiCard"
-            data-finance-go="transactions"
-            data-finance-transaction-type="payment"
-            data-finance-payment-method="cash"
-            data-finance-account-id=""
-            data-finance-date="${today}"
-          >
-            <span>
-              Готівка сьогодні
-            </span>
+      <button
+        type="button"
+        class="financeKpiCard"
+        data-finance-go="transactions"
+        data-finance-transaction-type="payment"
+        data-finance-payment-method="cash"
+        data-finance-account-id=""
+        data-finance-date="${today}"
+      >
+        <span>
+          ${getFinanceInterfaceText(
+            "Готівка сьогодні"
+          )}
+        </span>
 
-            <strong>
-              ${
-                overviewAvailable
-                  ? formatVisitFinanceMoney(
-                      cashToday
-                    )
-                  : "—"
-              }
-            </strong>
+        <strong>
+          ${
+            overviewAvailable
+              ? formatVisitFinanceMoney(
+                  cashToday
+                )
+              : "—"
+          }
+        </strong>
 
-            <small>
-              ${
-                overviewAvailable
-                  ? "За проведеними оплатами · переглянути"
-                  : "Тимчасово недоступно"
-              }
-            </small>
-          </button>
+        <small>
+          ${
+            overviewAvailable
+              ? getFinanceInterfaceText(
+                  "За проведеними оплатами · переглянути"
+                )
+              : getFinanceInterfaceText(
+                  "Тимчасово недоступно"
+                )
+          }
+        </small>
+      </button>
 
-          <button
-            type="button"
-            class="financeKpiCard"
-            data-finance-go="analytics"
-          >
-            <span>
-              Орієнтовний результат
-            </span>
+      <button
+        type="button"
+        class="financeKpiCard"
+        data-finance-go="analytics"
+      >
+        <span>
+          ${getFinanceInterfaceText(
+            "Орієнтовний результат"
+          )}
+        </span>
 
-            <strong>
-              ${
-                overviewAvailable
-                  ? formatVisitFinanceMoney(
-                      summary.estimated_profit
-                    )
-                  : "—"
-              }
-            </strong>
+        <strong>
+          ${
+            overviewAvailable
+              ? formatVisitFinanceMoney(
+                  summary.estimated_profit
+                )
+              : "—"
+          }
+        </strong>
 
-            <small>
-              ${
-                overviewAvailable
-                  ? "Після витрат і собівартості · пояснення"
-                  : "Тимчасово недоступно"
-              }
-            </small>
-          </button>
+        <small>
+          ${
+            overviewAvailable
+              ? getFinanceInterfaceText(
+                  "Після витрат і собівартості · пояснення"
+                )
+              : getFinanceInterfaceText(
+                  "Тимчасово недоступно"
+                )
+          }
+        </small>
+      </button>
         </section>
 
-        <section class="financeAccountsPanel">
-          <div class="financeAccountsHeading">
-            <div>
-              <span>
-                ГРОШІ КЛІНІКИ
-              </span>
+       <section class="financeAccountsPanel">
+  <div class="financeAccountsHeading">
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "ГРОШІ КЛІНІКИ"
+        )}
+      </span>
 
-              <h2>
-                Залишки на рахунках
-              </h2>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Залишки на рахунках"
+        )}
+      </h2>
 
-              <p>
-                За всіма проведеними фінансовими операціями.
-              </p>
+      <p>
+        ${getFinanceInterfaceText(
+          "За всіма проведеними фінансовими операціями."
+        )}
+      </p>
+    </div>
+
+    <div class="financeAccountsTotal">
+      <span>
+        ${getFinanceInterfaceText(
+          "Доступно разом"
+        )}
+      </span>
+
+      <strong>
+        ${
+          accountsAvailable
+            ? formatVisitFinanceMoney(
+                accountsData.total_balance
+              )
+            : "—"
+        }
+      </strong>
+    </div>
+  </div>
+
+  ${
+    accountsAvailable
+      ? `
+        <div class="financeAccountsGrid">
+          ${financialAccounts
+            .map(
+              (account) => {
+                const key =
+                  String(
+                    account.system_key ||
+                    ""
+                  );
+
+                const icon =
+                  key === "cash"
+                    ? "₴"
+                    : key === "bank"
+                      ? "▣"
+                      : "◇";
+
+                const operationsCount =
+                  Number(
+                    account.operations_count ||
+                    0
+                  );
+
+                return `
+                  <button
+                    type="button"
+                    class="financeAccountCard is-${escapeHtml(
+                      key
+                    )}"
+                    data-finance-go="transactions"
+                    data-finance-account-id="${escapeHtml(
+                      account.id
+                    )}"
+                    data-finance-payment-method=""
+                  >
+                    <span class="financeAccountIcon">
+                      ${icon}
+                    </span>
+
+                    <span
+                      class="financeAccountName"
+                      data-finance-content
+                    >
+                      ${escapeHtml(
+                        account.name
+                      )}
+                    </span>
+
+                    <strong>
+                      ${formatVisitFinanceMoney(
+                        account.balance
+                      )}
+                    </strong>
+
+                    <small>
+                      ${getFinanceTodayOperationsText(
+                        operationsCount
+                      )}
+                    </small>
+                  </button>
+                `;
+              }
+            )
+            .join("")}
+        </div>
+      `
+      : `
+        <div class="financeInlineUnavailable">
+          ${getFinanceInterfaceText(
+            "Не вдалося завантажити залишки на рахунках. Інші фінансові блоки продовжують працювати."
+          )}
+        </div>
+      `
+  }
+</section>
+
+<section class="financeTodayLayout">
+  <article class="financeActionPanel">
+    <div class="financePanelHead">
+      <div>
+        <span>
+          ${getFinanceInterfaceText(
+            "ПОТРЕБУЄ УВАГИ"
+          )}
+        </span>
+
+        <h2>
+          ${getFinanceInterfaceText(
+            "Розрахунки з клієнтами"
+          )}
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        data-finance-go="clients"
+      >
+        ${getFinanceInterfaceText(
+          "Усі клієнти →"
+        )}
+      </button>
+    </div>
+
+    <div class="financeAttentionList">
+      ${
+        !balancesAvailable
+          ? `
+            <div class="financeInlineUnavailable">
+              ${getFinanceInterfaceText(
+                "Не вдалося завантажити розрахунки з клієнтами. Спробуйте оновити екран."
+              )}
             </div>
-
-            <div class="financeAccountsTotal">
-              <span>
-                Доступно разом
-              </span>
-
-              <strong>
-                ${
-                  accountsAvailable
-                    ? formatVisitFinanceMoney(
-                        accountsData
-                          .total_balance
-                      )
-                    : "—"
-                }
-              </strong>
-            </div>
-          </div>
-
-          ${
-            accountsAvailable
-              ? `
-                <div class="financeAccountsGrid">
-                  ${financialAccounts
-                    .map((account) => {
-                      const key =
-                        String(
-                          account.system_key ||
-                          ""
+          `
+          : debtClients.length
+            ? debtClients
+                .map(
+                  (client) => {
+                    const visit =
+                      (client.visits || [])
+                        .find(
+                          (item) =>
+                            Number(
+                              item.remaining ||
+                              0
+                            ) > 0
                         );
 
-                      const icon =
-                        key === "cash"
-                          ? "₴"
-                          : key === "bank"
-                            ? "▣"
-                            : "◇";
+                    const ownerName =
+                      client.owner_name ||
+                      getFinanceInterfaceText(
+                        "Власник"
+                      );
 
-                      return `
-                        <button
-                          type="button"
-                          class="financeAccountCard is-${escapeHtml(
-                            key
-                          )}"
-                          data-finance-go="transactions"
-                          data-finance-account-id="${escapeHtml(
-                            account.id
-                          )}"
-                          data-finance-payment-method=""
+                    const patientName =
+                      visit?.patient_name ||
+                      getFinanceInterfaceText(
+                        "Пацієнт"
+                      );
+
+                    return `
+                      <div class="financeAttentionRow">
+                        <div
+                          class="financeAttentionAvatar"
+                          data-finance-content
                         >
-                          <span class="financeAccountIcon">
-                            ${icon}
-                          </span>
+                          ${escapeHtml(
+                            String(
+                              ownerName || "К"
+                            )
+                              .trim()
+                              .charAt(0)
+                              .toUpperCase()
+                          )}
+                        </div>
 
-                          <span class="financeAccountName">
+                        <div class="financeAttentionMain">
+                          <strong data-finance-content>
                             ${escapeHtml(
-                              account.name
+                              ownerName
                             )}
-                          </span>
+                          </strong>
 
+                          <span>
+                            <span data-finance-content>
+                              ${escapeHtml(
+                                patientName
+                              )}
+                            </span>
+
+                            ${
+                              visit?.date
+                                ? `
+                                  ·
+                                  <span data-finance-content>
+                                    ${escapeHtml(
+                                      formatFinancePurchaseDate(
+                                        visit.date
+                                      )
+                                    )}
+                                  </span>
+                                `
+                                : ""
+                            }
+                          </span>
+                        </div>
+
+                        <div class="financeAttentionAmount">
                           <strong>
                             ${formatVisitFinanceMoney(
-                              account.balance
+                              client.remaining
+                            )}
+                          </strong>
+
+                          ${
+                            visit?.visit_id
+                              ? `
+                                <button
+                                  type="button"
+                                  data-finance-pay-visit="${escapeHtml(
+                                    visit.visit_id
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "Прийняти"
+                                  )}
+                                </button>
+                              `
+                              : ""
+                          }
+                        </div>
+                      </div>
+                    `;
+                  }
+                )
+                .join("")
+            : `
+              <div class="financePositiveEmpty">
+                <span>✓</span>
+
+                <div>
+                  <strong>
+                    ${getFinanceInterfaceText(
+                      "Незакритих оплат немає"
+                    )}
+                  </strong>
+
+                  <p>
+                    ${getFinanceInterfaceText(
+                      "Усі поточні розрахунки з клієнтами закриті."
+                    )}
+                  </p>
+                </div>
+              </div>
+            `
+      }
+    </div>
+  </article>
+
+
+         <article class="financeActionPanel">
+  <div class="financePanelHead">
+    <div>
+      <span>
+        ${getFinanceInterfaceText(
+          "СКЛАД І МАРЖА"
+        )}
+      </span>
+
+      <h2>
+        ${getFinanceInterfaceText(
+          "Ризики, що впливають на гроші"
+        )}
+      </h2>
+    </div>
+
+    <button
+      type="button"
+      data-finance-open-stock
+    >
+      ${getFinanceInterfaceText(
+        "Відкрити склад →"
+      )}
+    </button>
+  </div>
+
+  <div class="financeSignalGrid">
+    ${
+      stockAvailable
+        ? `
+          <button
+            type="button"
+            class="financeSignalCard ${
+              lowStock.length
+                ? "is-warning"
+                : "is-good"
+            }"
+            data-finance-open-stock
+          >
+            <span class="financeSignalIcon">
+              ${lowStock.length ? "↓" : "✓"}
+            </span>
+
+            <div>
+              <strong>
+                ${lowStock.length}
+              </strong>
+
+              <span>
+                ${getFinanceInterfaceText(
+                  "позицій закінчуються"
+                )}
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="financeSignalCard ${
+              marginRisks.length
+                ? "is-danger"
+                : "is-good"
+            }"
+            data-finance-open-stock
+          >
+            <span class="financeSignalIcon">
+              ${marginRisks.length ? "!" : "✓"}
+            </span>
+
+            <div>
+              <strong>
+                ${marginRisks.length}
+              </strong>
+
+              <span>
+                ${getFinanceInterfaceText(
+                  "позицій без маржі"
+                )}
+              </span>
+            </div>
+          </button>
+        `
+        : `
+          <div class="financeInlineUnavailable">
+            ${getFinanceInterfaceText(
+              "Складські показники не завантажились."
+            )}
+          </div>
+        `
+    }
+  </div>
+
+  <div class="financeSignalDetails">
+    ${
+      !stockAvailable
+        ? `
+          <div class="financeInlineUnavailable">
+            ${getFinanceInterfaceText(
+              "Складські дані тимчасово недоступні."
+            )}
+          </div>
+        `
+        : lowStock
+            .slice(0, 2)
+            .map(
+              (item) => `
+                <div>
+                  <span>
+                    ${escapeHtml(
+                      getStockStatus(item)
+                        .shortLabel
+                    )}
+                  </span>
+
+                  <strong data-finance-content>
+                    ${escapeHtml(
+                      item.name
+                    )}
+                  </strong>
+
+                  <small>
+                    ${escapeHtml(
+                      String(item.qty)
+                    )}
+
+                    ${escapeHtml(
+                      getLocalizedStockText(
+                        item.unit
+                      )
+                    )}
+                  </small>
+                </div>
+              `
+            )
+            .join("")
+    }
+
+    ${
+      marginRisks
+        .slice(0, 2)
+        .map(
+          (item) => `
+            <div>
+              <span>
+                ${getFinanceInterfaceText(
+                  "Маржа"
+                )}
+              </span>
+
+              <strong data-finance-content>
+                ${escapeHtml(
+                  item.name
+                )}
+              </strong>
+
+              <small>
+                ${formatVisitFinanceMoney(
+                  Number(item.price || 0) -
+                  Number(item.cost || 0)
+                )}
+              </small>
+            </div>
+          `
+        )
+        .join("")
+    }
+
+    ${
+      stockAvailable &&
+      !lowStock.length &&
+      !marginRisks.length
+        ? `
+          <div class="is-calm">
+            <span>
+              ${getFinanceInterfaceText(
+                "Стан"
+              )}
+            </span>
+
+            <strong>
+              ${getFinanceInterfaceText(
+                "Запаси й ціни без критичних сигналів"
+              )}
+            </strong>
+          </div>
+        `
+        : ""
+    }
+  </div>
+</article>
+        </section>
+
+       <section class="financeTodayBottom">
+  <article class="financeActionPanel financeTodayOperations">
+    <div class="financePanelHead">
+      <div>
+        <span>
+          ${getFinanceInterfaceText(
+            "СЬОГОДНІ"
+          )}
+        </span>
+
+        <h2>
+          ${getFinanceInterfaceText(
+            "Останні операції"
+          )}
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        data-finance-go="transactions"
+      >
+        ${getFinanceInterfaceText(
+          "Весь журнал →"
+        )}
+      </button>
+    </div>
+
+    <div class="financeCompactOperations">
+      ${
+        !overviewAvailable
+          ? `
+            <div class="financeInlineUnavailable">
+              ${getFinanceInterfaceText(
+                "Журнал операцій тимчасово недоступний."
+              )}
+            </div>
+          `
+          : transactions.length
+            ? transactions
+                .slice(0, 5)
+                .map(
+                  (transaction) => {
+                    const meta =
+                      getFinanceTransactionMeta(
+                        transaction
+                      );
+
+                    const isOutcome =
+                      meta.type.className ===
+                      "is-outcome";
+
+                    const hasCustomCategory =
+                      Boolean(
+                        transaction.category
+                      );
+
+                    const transactionTitle =
+                      transaction.category ||
+                      meta.type.label;
+
+                    return `
+                      <div>
+                        <span class="${meta.type.className}">
+                          ${meta.type.icon}
+                        </span>
+
+                        <p>
+                          <strong
+                            ${
+                              hasCustomCategory
+                                ? "data-finance-content"
+                                : ""
+                            }
+                          >
+                            ${escapeHtml(
+                              transactionTitle
                             )}
                           </strong>
 
                           <small>
-                            ${Number(
-                              account
-                                .operations_count ||
-                              0
+                            ${escapeHtml(
+                              meta.method
                             )}
-                            операцій · переглянути
                           </small>
-                        </button>
-                      `;
-                    })
-                    .join("")}
-                </div>
-              `
-              : `
-                <div class="financeInlineUnavailable">
-                  Не вдалося завантажити залишки на рахунках.
-                  Інші фінансові блоки продовжують працювати.
-                </div>
-              `
-          }
-        </section>
-
-        <section class="financeTodayLayout">
-          <article class="financeActionPanel">
-            <div class="financePanelHead">
-              <div>
-                <span>
-                  ПОТРЕБУЄ УВАГИ
-                </span>
-
-                <h2>
-                  Розрахунки з клієнтами
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                data-finance-go="clients"
-              >
-                Усі клієнти →
-              </button>
-            </div>
-
-            <div class="financeAttentionList">
-              ${
-                !balancesAvailable
-                  ? `
-                    <div class="financeInlineUnavailable">
-                      Не вдалося завантажити розрахунки з клієнтами.
-                      Спробуйте оновити екран.
-                    </div>
-                  `
-                  : debtClients.length
-                  ? debtClients
-                      .map(
-                        (client) => {
-                          const visit =
-                            (client.visits || [])
-                              .find(
-                                (item) =>
-                                  Number(
-                                    item.remaining ||
-                                    0
-                                  ) > 0
-                              );
-
-                          return `
-                            <div class="financeAttentionRow">
-                              <div class="financeAttentionAvatar">
-                                ${escapeHtml(
-                                  String(
-                                    client.owner_name ||
-                                    "К"
-                                  )
-                                    .trim()
-                                    .charAt(0)
-                                    .toUpperCase()
-                                )}
-                              </div>
-
-                              <div class="financeAttentionMain">
-                                <strong>
-                                  ${escapeHtml(
-                                    client.owner_name ||
-                                    "Власник"
-                                  )}
-                                </strong>
-
-                                <span>
-                                  ${escapeHtml(
-                                    visit?.patient_name ||
-                                    "Пацієнт"
-                                  )}
-                                  ${
-                                    visit?.date
-                                      ? `· ${escapeHtml(
-                                          formatFinancePurchaseDate(
-                                            visit.date
-                                          )
-                                        )}`
-                                      : ""
-                                  }
-                                </span>
-                              </div>
-
-                              <div class="financeAttentionAmount">
-                                <strong>
-                                  ${formatVisitFinanceMoney(
-                                    client.remaining
-                                  )}
-                                </strong>
-
-                                ${
-                                  visit?.visit_id
-                                    ? `
-                                      <button
-                                        type="button"
-                                        data-finance-pay-visit="${escapeHtml(
-                                          visit.visit_id
-                                        )}"
-                                      >
-                                        Прийняти
-                                      </button>
-                                    `
-                                    : ""
-                                }
-                              </div>
-                            </div>
-                          `;
-                        }
-                      )
-                      .join("")
-                  : `
-                    <div class="financePositiveEmpty">
-                      <span>✓</span>
-
-                      <div>
-                        <strong>
-                          Незакритих оплат немає
-                        </strong>
-
-                        <p>
-                          Усі поточні розрахунки з клієнтами закриті.
                         </p>
+
+                        <b class="${meta.type.className}">
+                          ${isOutcome ? "−" : "+"}${formatVisitFinanceMoney(
+                            transaction.amount
+                          )}
+                        </b>
                       </div>
-                    </div>
-                  `
-              }
-            </div>
-          </article>
-
-          <article class="financeActionPanel">
-            <div class="financePanelHead">
-              <div>
-                <span>
-                  СКЛАД І МАРЖА
-                </span>
-
-                <h2>
-                  Ризики, що впливають на гроші
-                </h2>
+                    `;
+                  }
+                )
+                .join("")
+            : `
+              <div class="financeCompactEmpty">
+                ${getFinanceInterfaceText(
+                  "Сьогодні проведених операцій ще немає."
+                )}
               </div>
+            `
+      }
+    </div>
+  </article>
 
-              <button
-                type="button"
-                data-finance-open-stock
-              >
-                Відкрити склад →
-              </button>
-            </div>
+  <article class="financeDayBrief ${
+    hasPartialData ||
+    hasAttention
+      ? "has-attention"
+      : "is-calm"
+  }">
+    <span>✦</span>
 
-            <div class="financeSignalGrid">
-              ${
-                stockAvailable
-                  ? `
-                    <button
-                      type="button"
-                      class="financeSignalCard ${
-                        lowStock.length
-                          ? "is-warning"
-                          : "is-good"
-                      }"
-                      data-finance-open-stock
-                    >
-                      <span class="financeSignalIcon">
-                        ${lowStock.length ? "↓" : "✓"}
-                      </span>
+    <div>
+      <small>
+        ${getFinanceInterfaceText(
+          "PUG КОРОТКО"
+        )}
+      </small>
 
-                      <div>
-                        <strong>
-                          ${lowStock.length}
-                        </strong>
+      <h2>
+        ${
+          hasPartialData
+            ? getFinanceInterfaceText(
+                "Дані фінансового дня завантажені не повністю"
+              )
+            : hasAttention
+              ? getFinanceInterfaceText(
+                  "Є кілька дій до завершення зміни"
+                )
+              : getFinanceInterfaceText(
+                  "Фінансовий день під контролем"
+                )
+        }
+      </h2>
 
-                        <span>
-                          позицій закінчуються
-                        </span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      class="financeSignalCard ${
-                        marginRisks.length
-                          ? "is-danger"
-                          : "is-good"
-                      }"
-                      data-finance-open-stock
-                    >
-                      <span class="financeSignalIcon">
-                        ${marginRisks.length ? "!" : "✓"}
-                      </span>
-
-                      <div>
-                        <strong>
-                          ${marginRisks.length}
-                        </strong>
-
-                        <span>
-                          позицій без маржі
-                        </span>
-                      </div>
-                    </button>
-                  `
-                  : `
-                    <div class="financeInlineUnavailable">
-                      Складські показники не завантажились.
-                    </div>
-                  `
-              }
-            </div>
-
-            <div class="financeSignalDetails">
-              ${
-                !stockAvailable
-                  ? `
-                    <div class="financeInlineUnavailable">
-                      Складські дані тимчасово недоступні.
-                    </div>
-                  `
-                  : lowStock
-                  .slice(0, 2)
-                  .map(
-                    (item) => `
-                      <div>
-                        <span>
-                          ${escapeHtml(
-                            getStockStatus(item)
-                              .shortLabel
-                          )}
-                        </span>
-
-                        <strong>
-                          ${escapeHtml(
-                            item.name
-                          )}
-                        </strong>
-
-                        <small>
-                          ${escapeHtml(
-                            String(item.qty)
-                          )}
-                          ${escapeHtml(
-                            item.unit
-                          )}
-                        </small>
-                      </div>
-                    `
-                  )
-                  .join("")
-              }
-
-              ${
-                marginRisks
-                  .slice(0, 2)
-                  .map(
-                    (item) => `
-                      <div>
-                        <span>
-                          Маржа
-                        </span>
-
-                        <strong>
-                          ${escapeHtml(
-                            item.name
-                          )}
-                        </strong>
-
-                        <small>
-                          ${formatVisitFinanceMoney(
-                            Number(item.price || 0) -
-                            Number(item.cost || 0)
-                          )}
-                        </small>
-                      </div>
-                    `
-                  )
-                  .join("")
-              }
-
-              ${
-                stockAvailable &&
-                !lowStock.length &&
-                !marginRisks.length
-                  ? `
-                    <div class="is-calm">
-                      <span>Стан</span>
-
-                      <strong>
-                        Запаси й ціни без критичних сигналів
-                      </strong>
-                    </div>
-                  `
-                  : ""
-              }
-            </div>
-          </article>
-        </section>
-
-        <section class="financeTodayBottom">
-          <article class="financeActionPanel financeTodayOperations">
-            <div class="financePanelHead">
-              <div>
-                <span>
-                  СЬОГОДНІ
-                </span>
-
-                <h2>
-                  Останні операції
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                data-finance-go="transactions"
-              >
-                Весь журнал →
-              </button>
-            </div>
-
-            <div class="financeCompactOperations">
-              ${
-                !overviewAvailable
-                  ? `
-                    <div class="financeInlineUnavailable">
-                      Журнал операцій тимчасово недоступний.
-                    </div>
-                  `
-                  : transactions.length
-                  ? transactions
-                      .slice(0, 5)
-                      .map(
-                        (transaction) => {
-                          const meta =
-                            getFinanceTransactionMeta(
-                              transaction
-                            );
-
-                          const isOutcome =
-                            meta.type.className ===
-                            "is-outcome";
-
-                          return `
-                            <div>
-                              <span class="${meta.type.className}">
-                                ${meta.type.icon}
-                              </span>
-
-                              <p>
-                                <strong>
-                                  ${escapeHtml(
-                                    transaction.category ||
-                                    meta.type.label
-                                  )}
-                                </strong>
-
-                                <small>
-                                  ${escapeHtml(
-                                    meta.method
-                                  )}
-                                </small>
-                              </p>
-
-                              <b class="${meta.type.className}">
-                                ${isOutcome ? "−" : "+"}${formatVisitFinanceMoney(
-                                  transaction.amount
-                                )}
-                              </b>
-                            </div>
-                          `;
-                        }
-                      )
-                      .join("")
-                  : `
-                    <div class="financeCompactEmpty">
-                      Сьогодні проведених операцій ще немає.
-                    </div>
-                  `
-              }
-            </div>
-          </article>
-
-          <article class="financeDayBrief ${
-            hasPartialData ||
-            hasAttention
-              ? "has-attention"
-              : "is-calm"
-          }">
-            <span>✦</span>
-
-            <div>
-              <small>
-                PUG КОРОТКО
-              </small>
-
-              <h2>
-                ${
-                  hasPartialData
-                    ? "Дані фінансового дня завантажені не повністю"
-                    : hasAttention
-                    ? "Є кілька дій до завершення зміни"
-                    : "Фінансовий день під контролем"
-                }
-              </h2>
-
-              <p>
-                ${
-                  hasPartialData
-                    ? `
-                      Оновіть недоступні блоки перед закриттям
-                      фінансового дня.
-                    `
-                    : hasAttention
-                    ? `
-                      ${
-                        debtClients.length
-                          ? `${debtClients.length} клієнтських оплат`
-                          : ""
-                      }
-                      ${
-                        debtClients.length &&
-                        (
-                          lowStock.length ||
-                          marginRisks.length
-                        )
-                          ? " та "
-                          : ""
-                      }
-                      ${
-                        lowStock.length ||
-                        marginRisks.length
-                          ? `${lowStock.length + marginRisks.length} складських сигналів`
-                          : ""
-                      }
-                      потребують уваги.
-                    `
-                    : "Незакритих оплат і критичних складських сигналів немає."
-                }
-              </p>
-            </div>
-          </article>
+      <p>
+        ${
+          hasPartialData
+            ? getFinanceInterfaceText(
+                "Оновіть недоступні блоки перед закриттям фінансового дня."
+              )
+            : getFinanceTodayAttentionSummary(
+                debtClients.length,
+                lowStock.length +
+                  marginRisks.length
+              )
+        }
+      </p>
+    </div>
+  </article>
         </section>
       </div>
     `;
@@ -35965,46 +40244,55 @@ async function renderFinanceTodayTab(
       );
 
   } catch (error) {
-    console.error(
-      "renderFinanceTodayTab failed:",
-      error
+  console.error(
+    "renderFinanceTodayTab failed:",
+    error
+  );
+
+  const errorMessage =
+    getFinanceInterfaceText(
+      error?.message ||
+      "Невідома помилка"
     );
 
-    page.innerHTML = `
-      <div class="financeLoadError">
-        <span>!</span>
+  page.innerHTML = `
+    <div class="financeLoadError">
+      <span>!</span>
 
-        <h2>
-          Не вдалося зібрати фінансовий день
-        </h2>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Не вдалося зібрати фінансовий день"
+        )}
+      </h2>
 
-        <p>
-          ${escapeHtml(
-            error?.message ||
-            "Невідома помилка"
-          )}
-        </p>
+      <p>
+        ${escapeHtml(
+          errorMessage
+        )}
+      </p>
 
-        <button
-          type="button"
-          id="financeTodayRetry"
-        >
-          Спробувати ще раз
-        </button>
-      </div>
-    `;
+      <button
+        type="button"
+        id="financeTodayRetry"
+      >
+        ${getFinanceInterfaceText(
+          "Спробувати ще раз"
+        )}
+      </button>
+    </div>
+  `;
 
-    page
-      .querySelector(
-        "#financeTodayRetry"
-      )
-      ?.addEventListener(
-        "click",
-        () => {
-          renderFinanceTab();
-        }
-      );
-  }
+  page
+    .querySelector(
+      "#financeTodayRetry"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        renderFinanceTab();
+      }
+    );
+}
 }
 
 function applyFinanceClientFilters(
@@ -36017,7 +40305,7 @@ function applyFinanceClientFilters(
     )
       .trim()
       .toLocaleLowerCase(
-        "uk-UA"
+        getCalendarLocale()
       );
 
   const filter =
@@ -36030,31 +40318,33 @@ function applyFinanceClientFilters(
     .querySelectorAll(
       "[data-finance-client-card]"
     )
-    .forEach((card) => {
-      const matchesSearch =
-        !search ||
-        String(
+    .forEach(
+      (card) => {
+        const matchesSearch =
+          !search ||
+          String(
+            card.dataset
+              .financeClientSearch ||
+            ""
+          ).includes(search);
+
+        const matchesFilter =
+          filter === "all" ||
           card.dataset
-            .financeClientSearch ||
-          ""
-        ).includes(search);
+            .financeClientStatus ===
+            filter;
 
-      const matchesFilter =
-        filter === "all" ||
-        card.dataset
-          .financeClientStatus ===
-          filter;
+        const show =
+          matchesSearch &&
+          matchesFilter;
 
-      const show =
-        matchesSearch &&
-        matchesFilter;
+        card.hidden = !show;
 
-      card.hidden = !show;
-
-      if (show) {
-        visible += 1;
+        if (show) {
+          visible += 1;
+        }
       }
-    });
+    );
 
   const count =
     page.querySelector(
@@ -36080,15 +40370,18 @@ function applyFinanceClientFilters(
     .querySelectorAll(
       "[data-finance-client-filter]"
     )
-    .forEach((button) => {
-      button.classList.toggle(
-        "active",
-        button.dataset
-          .financeClientFilter ===
-          filter
-      );
-    });
+    .forEach(
+      (button) => {
+        button.classList.toggle(
+          "active",
+          button.dataset
+            .financeClientFilter ===
+            filter
+        );
+      }
+    );
 }
+
 
 async function renderFinanceClientsTab(
   page
@@ -36098,7 +40391,9 @@ async function renderFinanceClientsTab(
       <div class="visitPaymentSpinner"></div>
 
       <strong>
-        Збираємо розрахунки з клієнтами…
+        ${getFinanceInterfaceText(
+          "Збираємо розрахунки з клієнтами…"
+        )}
       </strong>
     </div>
   `;
@@ -36111,7 +40406,9 @@ async function renderFinanceClientsTab(
       balances.summary || {};
 
     const clients =
-      Array.isArray(balances.items)
+      Array.isArray(
+        balances.items
+      )
         ? balances.items
         : [];
 
@@ -36122,22 +40419,29 @@ async function renderFinanceClientsTab(
         <header class="financeControlHero financeClientsHero">
           <div class="financeControlHeroMain">
             <span class="financeEyebrow">
-              РОЗРАХУНКИ
+              ${getFinanceInterfaceText(
+                "РОЗРАХУНКИ"
+              )}
             </span>
 
             <h1>
-              Клієнти та оплати
+              ${getFinanceInterfaceText(
+                "Клієнти та оплати"
+              )}
             </h1>
 
             <p>
-              Один список для адміністратора: хто вже сплатив,
-              який візит залишився відкритим і де прийняти оплату.
+              ${getFinanceInterfaceText(
+                "Один список для адміністратора: хто вже сплатив, який візит залишився відкритим і де прийняти оплату."
+              )}
             </p>
           </div>
 
           <div class="financeCollectionScore">
             <span>
-              Зібрано
+              ${getFinanceInterfaceText(
+                "Зібрано"
+              )}
             </span>
 
             <strong>
@@ -36145,7 +40449,7 @@ async function renderFinanceClientsTab(
                 summary.collection_rate ||
                 0
               ).toLocaleString(
-                "uk-UA",
+                getCalendarLocale(),
                 {
                   maximumFractionDigits: 1,
                 }
@@ -36153,7 +40457,9 @@ async function renderFinanceClientsTab(
             </strong>
 
             <small>
-              від нарахованої суми
+              ${getFinanceInterfaceText(
+                "від нарахованої суми"
+              )}
             </small>
           </div>
         </header>
@@ -36161,7 +40467,9 @@ async function renderFinanceClientsTab(
         <section class="financeClientKpis">
           <article>
             <span>
-              Нараховано
+              ${getFinanceInterfaceText(
+                "Нараховано"
+              )}
             </span>
 
             <strong>
@@ -36173,7 +40481,9 @@ async function renderFinanceClientsTab(
 
           <article>
             <span>
-              Отримано
+              ${getFinanceInterfaceText(
+                "Отримано"
+              )}
             </span>
 
             <strong>
@@ -36185,7 +40495,9 @@ async function renderFinanceClientsTab(
 
           <article class="is-debt">
             <span>
-              До сплати
+              ${getFinanceInterfaceText(
+                "До сплати"
+              )}
             </span>
 
             <strong>
@@ -36197,7 +40509,9 @@ async function renderFinanceClientsTab(
 
           <article>
             <span>
-              Відкриті візити
+              ${getFinanceInterfaceText(
+                "Відкриті візити"
+              )}
             </span>
 
             <strong>
@@ -36222,7 +40536,9 @@ async function renderFinanceClientsTab(
                   : ""
               }"
             >
-              Очікують оплату
+              ${getFinanceInterfaceText(
+                "Очікують оплату"
+              )}
             </button>
 
             <button
@@ -36236,7 +40552,9 @@ async function renderFinanceClientsTab(
                   : ""
               }"
             >
-              Сплачено
+              ${getFinanceInterfaceText(
+                "Сплачено"
+              )}
             </button>
 
             <button
@@ -36250,7 +40568,9 @@ async function renderFinanceClientsTab(
                   : ""
               }"
             >
-              Усі
+              ${getFinanceInterfaceText(
+                "Усі"
+              )}
             </button>
           </div>
 
@@ -36264,12 +40584,19 @@ async function renderFinanceClientsTab(
                 financeDashboardState
                   .clientSearch || ""
               )}"
-              placeholder="Власник, телефон або пацієнт"
+              placeholder="${escapeHtml(
+                getFinanceInterfaceText(
+                  "Власник, телефон або пацієнт"
+                )
+              )}"
             >
           </label>
 
           <span class="financeClientsCount">
-            Показано:
+            ${getFinanceInterfaceText(
+              "Показано:"
+            )}
+
             <strong id="financeClientsVisibleCount">
               ${clients.length}
             </strong>
@@ -36278,288 +40605,348 @@ async function renderFinanceClientsTab(
 
         <section class="financeClientsList">
           ${
-            clients
+  clients
+    .map(
+      (client) => {
+        const hasDebt =
+          Number(
+            client.remaining || 0
+          ) > 0;
+
+        const ownerName =
+          client.owner_name ||
+          getFinanceInterfaceText(
+            "Власник"
+          );
+
+        const patientCount =
+          new Set(
+            (client.visits || [])
               .map(
-                (client) => {
-                  const hasDebt =
-                    Number(
-                      client.remaining || 0
-                    ) > 0;
+                (visit) =>
+                  visit.patient_id
+              )
+          ).size;
 
-                  const searchable =
-                    [
-                      client.owner_name,
-                      client.phone,
-                      ...(client.visits || [])
-                        .map(
-                          (visit) =>
-                            visit.patient_name
-                        ),
-                    ]
-                      .filter(Boolean)
-                      .join(" ")
-                      .toLocaleLowerCase(
-                        "uk-UA"
-                      );
+        const searchable =
+          [
+            client.owner_name,
+            client.phone,
+            ...(client.visits || [])
+              .map(
+                (visit) =>
+                  visit.patient_name
+              ),
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLocaleLowerCase(
+              getCalendarLocale()
+            );
 
-                  const visibleVisits =
-                    (client.visits || [])
-                      .filter(
-                        (visit) =>
-                          hasDebt
-                            ? Number(
-                                visit.remaining ||
-                                0
-                              ) > 0
-                            : true
+        const visibleVisits =
+          (client.visits || [])
+            .filter(
+              (visit) =>
+                hasDebt
+                  ? Number(
+                      visit.remaining ||
+                      0
+                    ) > 0
+                  : true
+            )
+            .slice(0, 4);
+
+        return `
+          <article
+            class="financeClientCard ${
+              hasDebt
+                ? "has-debt"
+                : "is-paid"
+            }"
+            data-finance-client-card
+            data-finance-client-status="${
+              hasDebt
+                ? "debt"
+                : "paid"
+            }"
+            data-finance-client-search="${escapeHtml(
+              searchable
+            )}"
+          >
+            <header>
+              <div class="financeClientIdentity">
+                <div
+                  class="financeClientAvatar"
+                  data-finance-content
+                >
+                  ${escapeHtml(
+                    String(
+                      ownerName
+                    )
+                      .trim()
+                      .charAt(0)
+                      .toUpperCase()
+                  )}
+                </div>
+
+                <div>
+                  <h2 data-finance-content>
+                    ${escapeHtml(
+                      ownerName
+                    )}
+                  </h2>
+
+                  <p>
+                    <span data-finance-content>
+                      ${
+                        client.phone
+                          ? escapeHtml(
+                              client.phone
+                            )
+                          : getFinanceInterfaceText(
+                              "Телефон не вказано"
+                            )
+                      }
+                    </span>
+
+                    ·
+
+                    ${escapeHtml(
+                      getFinanceClientPatientCountText(
+                        patientCount
                       )
-                      .slice(0, 4);
+                    )}
+                  </p>
+                </div>
+              </div>
 
-                  return `
-                    <article
-                      class="financeClientCard ${
-                        hasDebt
-                          ? "has-debt"
-                          : "is-paid"
-                      }"
-                      data-finance-client-card
-                      data-finance-client-status="${
-                        hasDebt
-                          ? "debt"
-                          : "paid"
-                      }"
-                      data-finance-client-search="${escapeHtml(
-                        searchable
+              <div class="financeClientBalance">
+                <span>
+                  ${
+                    hasDebt
+                      ? getFinanceInterfaceText(
+                          "До сплати"
+                        )
+                      : getFinanceInterfaceText(
+                          "Баланс"
+                        )
+                  }
+                </span>
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    client.remaining
+                  )}
+                </strong>
+
+                <small class="${
+                  hasDebt
+                    ? "is-unpaid"
+                    : "is-paid"
+                }">
+                  ${
+                    hasDebt
+                      ? getFinanceInterfaceText(
+                          "Є відкриті розрахунки"
+                        )
+                      : getFinanceInterfaceText(
+                          "Розрахунки закриті"
+                        )
+                  }
+                </small>
+              </div>
+            </header>
+
+            <div class="financeClientVisitList">
+              ${
+                visibleVisits.length
+                  ? visibleVisits
+                      .map(
+                        (visit) => {
+                          const meta =
+                            getFinanceSettlementMeta(
+                              visit.financial_status
+                            );
+
+                          const patientName =
+                            visit.patient_name ||
+                            getFinanceInterfaceText(
+                              "Пацієнт"
+                            );
+
+                          const visitDateText =
+                            visit.date
+                              ? formatFinancePurchaseDate(
+                                  visit.date
+                                )
+                              : getFinanceInterfaceText(
+                                  "Без дати"
+                                );
+
+                          return `
+                            <div class="financeClientVisit">
+                              <div>
+                                <strong data-finance-content>
+                                  ${escapeHtml(
+                                    patientName
+                                  )}
+                                </strong>
+
+                                <span>
+                                  ${escapeHtml(
+                                    visitDateText
+                                  )}
+
+                                  ${
+                                    visit.diagnosis
+                                      ? `
+                                        ·
+                                        <span data-finance-content>
+                                          ${escapeHtml(
+                                            visit.diagnosis
+                                          )}
+                                        </span>
+                                      `
+                                      : ""
+                                  }
+                                </span>
+                              </div>
+
+                              <div class="financeClientVisitAmounts">
+                                <span>
+                                  ${escapeHtml(
+                                    getFinanceInterfaceText(
+                                      meta.label
+                                    )
+                                  )}
+                                </span>
+
+                                <strong>
+                                  ${formatVisitFinanceMoney(
+                                    visit.remaining
+                                  )}
+                                </strong>
+                              </div>
+
+                              <div class="financeClientVisitActions">
+                                <button
+                                  type="button"
+                                  class="financeVisitOpenButton"
+                                  data-finance-open-visit="${escapeHtml(
+                                    visit.visit_id
+                                  )}"
+                                >
+                                  ${getFinanceInterfaceText(
+                                    "Візит"
+                                  )}
+                                </button>
+
+                                ${
+                                  Number(
+                                    visit.remaining ||
+                                    0
+                                  ) > 0
+                                    ? `
+                                      <button
+                                        type="button"
+                                        class="financeVisitPayButton"
+                                        data-finance-pay-visit="${escapeHtml(
+                                          visit.visit_id
+                                        )}"
+                                      >
+                                        ${getFinanceInterfaceText(
+                                          "Прийняти оплату"
+                                        )}
+                                      </button>
+                                    `
+                                    : ""
+                                }
+                              </div>
+                            </div>
+                          `;
+                        }
+                      )
+                      .join("")
+                  : `
+                    <div class="financeClientVisitsEmpty">
+                      ${getFinanceInterfaceText(
+                        "Немає відкритих візитів."
+                      )}
+                    </div>
+                  `
+              }
+            </div>
+
+            <footer>
+              <div>
+                ${getFinanceInterfaceText(
+                  "Нараховано"
+                )}
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    client.billed
+                  )}
+                </strong>
+              </div>
+
+              <div>
+                ${getFinanceInterfaceText(
+                  "Отримано"
+                )}
+
+                <strong>
+                  ${formatVisitFinanceMoney(
+                    client.paid
+                  )}
+                </strong>
+              </div>
+
+              ${
+                client.owner_id
+                  ? `
+                    <button
+                      type="button"
+                      data-finance-open-owner="${escapeHtml(
+                        client.owner_id
                       )}"
                     >
-                      <header>
-                        <div class="financeClientIdentity">
-                          <div class="financeClientAvatar">
-                            ${escapeHtml(
-                              String(
-                                client.owner_name ||
-                                "К"
-                              )
-                                .trim()
-                                .charAt(0)
-                                .toUpperCase()
-                            )}
-                          </div>
+                      ${getFinanceInterfaceText(
+                        "Відкрити картку клієнта →"
+                      )}
+                    </button>
+                  `
+                  : ""
+              }
+            </footer>
+          </article>
+        `;
+      }
+    )
+    .join("")
+}
 
-                          <div>
-                            <h2>
-                              ${escapeHtml(
-                                client.owner_name ||
-                                "Власник"
-                              )}
-                            </h2>
+<div
+  class="financeClientsFilteredEmpty"
+  id="financeClientsFilteredEmpty"
+  hidden
+>
+  <span>⌕</span>
 
-                            <p>
-                              ${
-                                client.phone
-                                  ? escapeHtml(
-                                      client.phone
-                                    )
-                                  : "Телефон не вказано"
-                              }
-                              ·
-                              ${
-                                new Set(
-                                  (client.visits || [])
-                                    .map(
-                                      (visit) =>
-                                        visit.patient_id
-                                    )
-                                ).size
-                              }
-                              пацієнтів
-                            </p>
-                          </div>
-                        </div>
+  <strong>
+    ${getFinanceInterfaceText(
+      "За цими умовами клієнтів не знайдено"
+    )}
+  </strong>
 
-                        <div class="financeClientBalance">
-                          <span>
-                            ${
-                              hasDebt
-                                ? "До сплати"
-                                : "Баланс"
-                            }
-                          </span>
-
-                          <strong>
-                            ${formatVisitFinanceMoney(
-                              client.remaining
-                            )}
-                          </strong>
-
-                          <small class="${
-                            hasDebt
-                              ? "is-unpaid"
-                              : "is-paid"
-                          }">
-                            ${
-                              hasDebt
-                                ? "Є відкриті розрахунки"
-                                : "Розрахунки закриті"
-                            }
-                          </small>
-                        </div>
-                      </header>
-
-                      <div class="financeClientVisitList">
-                        ${
-                          visibleVisits.length
-                            ? visibleVisits
-                                .map(
-                                  (visit) => {
-                                    const meta =
-                                      getFinanceSettlementMeta(
-                                        visit.financial_status
-                                      );
-
-                                    return `
-                                      <div class="financeClientVisit">
-                                        <div>
-                                          <strong>
-                                            ${escapeHtml(
-                                              visit.patient_name ||
-                                              "Пацієнт"
-                                            )}
-                                          </strong>
-
-                                          <span>
-                                            ${
-                                              visit.date
-                                                ? escapeHtml(
-                                                    formatFinancePurchaseDate(
-                                                      visit.date
-                                                    )
-                                                  )
-                                                : "Без дати"
-                                            }
-                                            ${
-                                              visit.diagnosis
-                                                ? `· ${escapeHtml(
-                                                    visit.diagnosis
-                                                  )}`
-                                                : ""
-                                            }
-                                          </span>
-                                        </div>
-
-                                        <div class="financeClientVisitAmounts">
-                                          <span>
-                                            ${
-                                              meta.label
-                                            }
-                                          </span>
-
-                                          <strong>
-                                            ${formatVisitFinanceMoney(
-                                              visit.remaining
-                                            )}
-                                          </strong>
-                                        </div>
-
-                                        <div class="financeClientVisitActions">
-                                          <button
-                                            type="button"
-                                            class="financeVisitOpenButton"
-                                            data-finance-open-visit="${escapeHtml(
-                                              visit.visit_id
-                                            )}"
-                                          >
-                                            Візит
-                                          </button>
-
-                                          ${
-                                            Number(
-                                              visit.remaining ||
-                                              0
-                                            ) > 0
-                                              ? `
-                                                <button
-                                                  type="button"
-                                                  class="financeVisitPayButton"
-                                                  data-finance-pay-visit="${escapeHtml(
-                                                    visit.visit_id
-                                                  )}"
-                                                >
-                                                  Прийняти оплату
-                                                </button>
-                                              `
-                                              : ""
-                                          }
-                                        </div>
-                                      </div>
-                                    `;
-                                  }
-                                )
-                                .join("")
-                            : `
-                              <div class="financeClientVisitsEmpty">
-                                Немає відкритих візитів.
-                              </div>
-                            `
-                        }
-                      </div>
-
-                      <footer>
-                        <div>
-                          Нараховано
-                          <strong>
-                            ${formatVisitFinanceMoney(
-                              client.billed
-                            )}
-                          </strong>
-                        </div>
-
-                        <div>
-                          Отримано
-                          <strong>
-                            ${formatVisitFinanceMoney(
-                              client.paid
-                            )}
-                          </strong>
-                        </div>
-
-                        ${
-                          client.owner_id
-                            ? `
-                              <button
-                                type="button"
-                                data-finance-open-owner="${escapeHtml(
-                                  client.owner_id
-                                )}"
-                              >
-                                Відкрити картку клієнта →
-                              </button>
-                            `
-                            : ""
-                        }
-                      </footer>
-                    </article>
-                  `;
-                }
-              )
-              .join("")
-          }
-
-          <div
-            class="financeClientsFilteredEmpty"
-            id="financeClientsFilteredEmpty"
-            hidden
-          >
-            <span>⌕</span>
-
-            <strong>
-              За цими умовами клієнтів не знайдено
-            </strong>
-
-            <p>
-              Змініть фільтр або пошуковий запит.
-            </p>
-          </div>
+  <p>
+    ${getFinanceInterfaceText(
+      "Змініть фільтр або пошуковий запит."
+    )}
+  </p>
+</div>
+                
         </section>
       </div>
     `;
@@ -36612,46 +40999,55 @@ async function renderFinanceClientsTab(
     );
 
   } catch (error) {
-    console.error(
-      "renderFinanceClientsTab failed:",
-      error
+  console.error(
+    "renderFinanceClientsTab failed:",
+    error
+  );
+
+  const errorMessage =
+    getFinanceInterfaceText(
+      error?.message ||
+      "Невідома помилка"
     );
 
-    page.innerHTML = `
-      <div class="financeLoadError">
-        <span>!</span>
+  page.innerHTML = `
+    <div class="financeLoadError">
+      <span>!</span>
 
-        <h2>
-          Не вдалося завантажити клієнтські розрахунки
-        </h2>
+      <h2>
+        ${getFinanceInterfaceText(
+          "Не вдалося завантажити клієнтські розрахунки"
+        )}
+      </h2>
 
-        <p>
-          ${escapeHtml(
-            error?.message ||
-            "Невідома помилка"
-          )}
-        </p>
+      <p>
+        ${escapeHtml(
+          errorMessage
+        )}
+      </p>
 
-        <button
-          type="button"
-          id="financeClientsRetry"
-        >
-          Спробувати ще раз
-        </button>
-      </div>
-    `;
+      <button
+        type="button"
+        id="financeClientsRetry"
+      >
+        ${getFinanceInterfaceText(
+          "Спробувати ще раз"
+        )}
+      </button>
+    </div>
+  `;
 
-    page
-      .querySelector(
-        "#financeClientsRetry"
-      )
-      ?.addEventListener(
-        "click",
-        () => {
-          renderFinanceTab();
-        }
-      );
-  }
+  page
+    .querySelector(
+      "#financeClientsRetry"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        renderFinanceTab();
+      }
+    );
+}
 }
 
 async function loadOwnerDailyReportApi(
@@ -36808,14 +41204,583 @@ async function sendOwnerDailyReportApi(
 
   return result.data || {};
 }
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "Збираємо підсумки клініки…": {
+      en: "Preparing the clinic summary…",
+      de: "Klinikübersicht wird erstellt…",
+      pl: "Przygotowywanie podsumowania kliniki…",
+    },
+
+    "ЩОДЕННИЙ КОНТРОЛЬ": {
+      en: "DAILY OVERVIEW",
+      de: "TAGESÜBERSICHT",
+      pl: "DZIENNY PRZEGLĄD",
+    },
+
+    "Головні цифри клініки, ризики та точки уваги в одному зрозумілому підсумку.": {
+      en: "Key clinic figures, risks and items requiring attention in one clear summary.",
+      de: "Die wichtigsten Klinikzahlen, Risiken und Handlungsfelder in einer klaren Übersicht.",
+      pl: "Najważniejsze wyniki kliniki, ryzyka i obszary wymagające uwagi w jednym czytelnym podsumowaniu.",
+    },
+
+    "Дата звіту": {
+      en: "Report date",
+      de: "Berichtsdatum",
+      pl: "Data raportu",
+    },
+
+    "Завершено візитів": {
+      en: "Completed visits",
+      de: "Abgeschlossene Termine",
+      pl: "Zakończone wizyty",
+    },
+
+    "Результат дня": {
+      en: "Daily result",
+      de: "Tagesergebnis",
+      pl: "Wynik dnia",
+    },
+
+    "Після повернень і витрат": {
+      en: "After refunds and expenses",
+      de: "Nach Erstattungen und Ausgaben",
+      pl: "Po zwrotach i wydatkach",
+    },
+
+    "РОБОТА КЛІНІКИ": {
+      en: "CLINIC ACTIVITY",
+      de: "KLINIKBETRIEB",
+      pl: "PRACA KLINIKI",
+    },
+
+    "Прийоми та клієнти": {
+      en: "Visits and clients",
+      de: "Termine und Kunden",
+      pl: "Wizyty i klienci",
+    },
+
+    "Заплановано": {
+      en: "Scheduled",
+      de: "Geplant",
+      pl: "Zaplanowano",
+    },
+
+    "Завершено": {
+      en: "Completed",
+      de: "Abgeschlossen",
+      pl: "Zakończono",
+    },
+
+    "Зараз у роботі": {
+      en: "In progress",
+      de: "In Bearbeitung",
+      pl: "W trakcie",
+    },
+
+    "Нових власників": {
+      en: "New owners",
+      de: "Neue Tierhalter",
+      pl: "Nowi właściciele",
+    },
+
+    "Нових пацієнтів": {
+      en: "New patients",
+      de: "Neue Patienten",
+      pl: "Nowi pacjenci",
+    },
+
+    "ПОПИТ": {
+      en: "DEMAND",
+      de: "NACHFRAGE",
+      pl: "POPYT",
+    },
+
+    "Топ послуг дня": {
+      en: "Top services today",
+      de: "Top-Leistungen des Tages",
+      pl: "Najpopularniejsze usługi dnia",
+    },
+
+    "За цю дату послуги ще не додавалися.": {
+      en: "No services were added on this date.",
+      de: "Für dieses Datum wurden noch keine Leistungen hinzugefügt.",
+      pl: "W tym dniu nie dodano jeszcze żadnych usług.",
+    },
+
+    "КОНТРОЛЬ ЗАПАСІВ": {
+      en: "INVENTORY CONTROL",
+      de: "BESTANDSKONTROLLE",
+      pl: "KONTROLA ZAPASÓW",
+    },
+
+    "Склад": {
+      en: "Inventory",
+      de: "Lager",
+      pl: "Magazyn",
+    },
+
+    "Позицій нижче мінімуму": {
+      en: "Items below minimum",
+      de: "Positionen unter Mindestbestand",
+      pl: "Pozycje poniżej minimum",
+    },
+
+    "Списань за день": {
+      en: "Write-offs today",
+      de: "Abschreibungen heute",
+      pl: "Odpisy dzisiaj",
+    },
+
+    "Собівартість списань": {
+      en: "Write-off cost",
+      de: "Kosten der Abschreibungen",
+      pl: "Koszt odpisów",
+    },
+
+    "СТАЦІОНАР": {
+      en: "HOSPITAL",
+      de: "STATIONÄR",
+      pl: "SZPITAL",
+    },
+
+    "Пацієнти та задачі": {
+      en: "Patients and tasks",
+      de: "Patienten und Aufgaben",
+      pl: "Pacjenci i zadania",
+    },
+
+    "У стаціонарі": {
+      en: "Hospitalized",
+      de: "Stationär",
+      pl: "W szpitalu",
+    },
+
+    "Критичний стан": {
+      en: "Critical condition",
+      de: "Kritischer Zustand",
+      pl: "Stan krytyczny",
+    },
+
+    "Відкритих задач": {
+      en: "Open tasks",
+      de: "Offene Aufgaben",
+      pl: "Otwarte zadania",
+    },
+
+    "Прострочених задач": {
+      en: "Overdue tasks",
+      de: "Überfällige Aufgaben",
+      pl: "Zaległe zadania",
+    },
+
+    "ФОКУС ВЛАСНИКА": {
+      en: "OWNER FOCUS",
+      de: "INHABERFOKUS",
+      pl: "UWAGA WŁAŚCICIELA",
+    },
+
+    "Потребує уваги": {
+      en: "Needs attention",
+      de: "Handlungsbedarf",
+      pl: "Wymaga uwagi",
+    },
+  }
+);
+Object.assign(
+  FINANCE_INTERFACE_TEXT,
+  {
+    "TELEGRAM ВЛАСНИКА": {
+      en: "OWNER TELEGRAM",
+      de: "TELEGRAM DES INHABERS",
+      pl: "TELEGRAM WŁAŚCICIELA",
+    },
+
+    "Відправити готовий підсумок": {
+      en: "Send the completed summary",
+      de: "Fertige Übersicht senden",
+      pl: "Wyślij gotowe podsumowanie",
+    },
+
+    "У боті залишиться одна кнопка «Отримати ID». Після підключення можна ввімкнути автоматичний звіт щодня о 21:00 за Києвом.": {
+      en: "The bot will keep one “Get ID” button. After connecting it, you can enable an automatic daily report at 21:00 Kyiv time.",
+      de: "Im Bot bleibt eine Schaltfläche „ID abrufen“. Nach der Verbindung kann täglich um 21:00 Uhr Kiewer Zeit ein automatischer Bericht gesendet werden.",
+      pl: "W bocie pozostanie jeden przycisk „Pobierz ID”. Po połączeniu można włączyć automatyczny raport codziennie o 21:00 czasu kijowskiego.",
+    },
+
+    "Наприклад, 123456789": {
+      en: "For example, 123456789",
+      de: "Zum Beispiel 123456789",
+      pl: "Na przykład 123456789",
+    },
+
+    "Зберегти": {
+      en: "Save",
+      de: "Speichern",
+      pl: "Zapisz",
+    },
+
+    "Автоматичний звіт": {
+      en: "Automatic report",
+      de: "Automatischer Bericht",
+      pl: "Automatyczny raport",
+    },
+
+    "Щодня о 21:00 · Europe/Kyiv": {
+      en: "Daily at 21:00 · Europe/Kyiv",
+      de: "Täglich um 21:00 Uhr · Europe/Kyiv",
+      pl: "Codziennie o 21:00 · Europe/Kyiv",
+    },
+
+    "Оновити меню бота": {
+      en: "Update bot menu",
+      de: "Bot-Menü aktualisieren",
+      pl: "Zaktualizuj menu bota",
+    },
+
+    "Надіслати в Telegram": {
+      en: "Send to Telegram",
+      de: "An Telegram senden",
+      pl: "Wyślij do Telegrama",
+    },
+
+    "● Telegram-чат підключено": {
+      en: "● Telegram chat connected",
+      de: "● Telegram-Chat verbunden",
+      pl: "● Czat Telegram połączony",
+    },
+
+    "○ Telegram-чат ще не підключено": {
+      en: "○ Telegram chat is not connected yet",
+      de: "○ Telegram-Chat ist noch nicht verbunden",
+      pl: "○ Czat Telegram nie jest jeszcze połączony",
+    },
+
+    "· на сервері відсутній TELEGRAM_BOT_TOKEN": {
+      en: "· TELEGRAM_BOT_TOKEN is missing on the server",
+      de: "· TELEGRAM_BOT_TOKEN fehlt auf dem Server",
+      pl: "· na serwerze brakuje TELEGRAM_BOT_TOKEN",
+    },
+
+    "Зберігаємо…": {
+      en: "Saving…",
+      de: "Wird gespeichert…",
+      pl: "Zapisywanie…",
+    },
+
+    "Налаштування збережено": {
+      en: "Settings saved",
+      de: "Einstellungen gespeichert",
+      pl: "Ustawienia zapisane",
+    },
+
+    "Автоматичний звіт увімкнено на 21:00 за Києвом.": {
+      en: "The automatic report is enabled for 21:00 Kyiv time.",
+      de: "Der automatische Bericht ist für 21:00 Uhr Kiewer Zeit aktiviert.",
+      pl: "Automatyczny raport włączono na 21:00 czasu kijowskiego.",
+    },
+
+    "Telegram ID збережено. Автоматичний звіт вимкнено.": {
+      en: "Telegram ID saved. The automatic report is disabled.",
+      de: "Telegram-ID gespeichert. Der automatische Bericht ist deaktiviert.",
+      pl: "ID Telegrama zapisano. Automatyczny raport jest wyłączony.",
+    },
+
+    "Telegram ID не вказано. Автоматичний звіт вимкнено.": {
+      en: "Telegram ID was not provided. The automatic report is disabled.",
+      de: "Keine Telegram-ID angegeben. Der automatische Bericht ist deaktiviert.",
+      pl: "Nie podano ID Telegrama. Automatyczny raport jest wyłączony.",
+    },
+
+    "Не вдалося зберегти": {
+      en: "Could not save",
+      de: "Speichern nicht möglich",
+      pl: "Nie udało się zapisać",
+    },
+
+    "Перевірте Telegram chat ID.": {
+      en: "Check the Telegram chat ID.",
+      de: "Prüfen Sie die Telegram-Chat-ID.",
+      pl: "Sprawdź ID czatu Telegram.",
+    },
+
+    "Оновлюємо…": {
+      en: "Updating…",
+      de: "Wird aktualisiert…",
+      pl: "Aktualizowanie…",
+    },
+
+    "Меню бота оновлено": {
+      en: "Bot menu updated",
+      de: "Bot-Menü aktualisiert",
+      pl: "Menu bota zaktualizowane",
+    },
+
+    "Старі CRM-кнопки прибрано. У Telegram залишилася кнопка «Отримати ID».": {
+      en: "The old CRM buttons were removed. The “Get ID” button remains in Telegram.",
+      de: "Die alten CRM-Schaltflächen wurden entfernt. In Telegram bleibt die Schaltfläche „ID abrufen“.",
+      pl: "Stare przyciski CRM zostały usunięte. W Telegramie pozostał przycisk „Pobierz ID”.",
+    },
+
+    "Меню оновлено ✓": {
+      en: "Menu updated ✓",
+      de: "Menü aktualisiert ✓",
+      pl: "Menu zaktualizowane ✓",
+    },
+
+    "Не вдалося оновити бота": {
+      en: "Could not update the bot",
+      de: "Bot konnte nicht aktualisiert werden",
+      pl: "Nie udało się zaktualizować bota",
+    },
+
+    "Перевірте налаштування Telegram-бота.": {
+      en: "Check the Telegram bot settings.",
+      de: "Prüfen Sie die Einstellungen des Telegram-Bots.",
+      pl: "Sprawdź ustawienia bota Telegram.",
+    },
+
+    "Відправляємо…": {
+      en: "Sending…",
+      de: "Wird gesendet…",
+      pl: "Wysyłanie…",
+    },
+
+    "Звіт уже надсилали": {
+      en: "Report already sent",
+      de: "Bericht bereits gesendet",
+      pl: "Raport został już wysłany",
+    },
+
+    "Звіт відправлено": {
+      en: "Report sent",
+      de: "Bericht gesendet",
+      pl: "Raport wysłany",
+    },
+
+    "Уже надіслано ✓": {
+      en: "Already sent ✓",
+      de: "Bereits gesendet ✓",
+      pl: "Już wysłano ✓",
+    },
+
+    "Відправлено ✓": {
+      en: "Sent ✓",
+      de: "Gesendet ✓",
+      pl: "Wysłano ✓",
+    },
+
+    "Telegram не прийняв звіт": {
+      en: "Telegram did not accept the report",
+      de: "Telegram hat den Bericht nicht angenommen",
+      pl: "Telegram nie przyjął raportu",
+    },
+
+    "Перевірте chat ID та налаштування бота.": {
+      en: "Check the chat ID and bot settings.",
+      de: "Prüfen Sie die Chat-ID und die Bot-Einstellungen.",
+      pl: "Sprawdź ID czatu i ustawienia bota.",
+    },
+
+    "Не вдалося сформувати звіт власника": {
+      en: "Could not generate the owner report",
+      de: "Der Inhaberbericht konnte nicht erstellt werden",
+      pl: "Nie udało się utworzyć raportu właściciela",
+    },
+  }
+);
+function getFinanceOwnerCompletedText(
+  count
+) {
+  const value = Math.max(
+    0,
+    Number(count || 0)
+  );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `${value} completed`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${value} abgeschlossen`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `${value} wykonano`
+    );
+  }
+
+  return `${value} виконано`;
+}
+
+
+function getFinanceOwnerAttentionText(
+  value
+) {
+  const source =
+    normalizeFinanceInterfaceText(
+      value
+    );
+
+  const language =
+    getInterfaceLanguage();
+
+  const lowStockMatch =
+    source.match(
+      /^(\d+)\s+позицій складу нижче мінімуму$/i
+    );
+
+  if (lowStockMatch) {
+    const count =
+      Number(lowStockMatch[1]);
+
+    if (language === "en") {
+      return (
+        `${count} inventory ` +
+        `${count === 1 ? "item is" : "items are"} ` +
+        "below minimum"
+      );
+    }
+
+    if (language === "de") {
+      return (
+        `${count} ` +
+        `${count === 1 ? "Lagerposition liegt" : "Lagerpositionen liegen"} ` +
+        "unter dem Mindestbestand"
+      );
+    }
+
+    if (language === "pl") {
+      return (
+        `${count} pozycji magazynowych ` +
+        "poniżej minimum"
+      );
+    }
+
+    return source;
+  }
+
+  const overdueMatch =
+    source.match(
+      /^(\d+)\s+прострочених завдань стаціонару$/i
+    );
+
+  if (overdueMatch) {
+    const count =
+      Number(overdueMatch[1]);
+
+    if (language === "en") {
+      return (
+        `${count} overdue hospital ` +
+        `${count === 1 ? "task" : "tasks"}`
+      );
+    }
+
+    if (language === "de") {
+      return (
+        `${count} überfällige ` +
+        `${count === 1 ? "Stationsaufgabe" : "Stationsaufgaben"}`
+      );
+    }
+
+    if (language === "pl") {
+      return (
+        `${count} zaległych zadań ` +
+        "szpitalnych"
+      );
+    }
+
+    return source;
+  }
+
+  const debtMatch =
+    source.match(
+      /^Заборгованість клієнтів:\s*([0-9.,-]+)\s*грн$/i
+    );
+
+  if (debtMatch) {
+    const amount =
+      Number(
+        String(debtMatch[1])
+          .replace(",", ".")
+      ) || 0;
+
+    const formatted =
+      formatVisitFinanceMoney(
+        amount
+      );
+
+    if (language === "en") {
+      return (
+        `Outstanding client balance: ${formatted}`
+      );
+    }
+
+    if (language === "de") {
+      return (
+        `Offene Kundenforderungen: ${formatted}`
+      );
+    }
+
+    if (language === "pl") {
+      return (
+        `Zadłużenie klientów: ${formatted}`
+      );
+    }
+
+    return source;
+  }
+
+  if (
+    source ===
+    "Критичних відхилень не виявлено"
+  ) {
+    if (language === "en") {
+      return (
+        "No critical issues detected"
+      );
+    }
+
+    if (language === "de") {
+      return (
+        "Keine kritischen Abweichungen festgestellt"
+      );
+    }
+
+    if (language === "pl") {
+      return (
+        "Nie wykryto krytycznych odchyleń"
+      );
+    }
+
+    return source;
+  }
+
+  return getFinanceInterfaceText(
+    source
+  );
+}
 
 
 function ownerReportDelta(
   value,
   suffix = ""
 ) {
-  const number = Number(value || 0);
-  const sign = number > 0 ? "+" : "";
+  const number =
+    Number(value || 0);
+
+  const absoluteNumber =
+    Math.abs(number);
+
   const className =
     number > 0
       ? "is-positive"
@@ -36823,10 +41788,47 @@ function ownerReportDelta(
         ? "is-negative"
         : "is-neutral";
 
+  const formattedValue =
+    String(suffix)
+      .trim() === "грн"
+      ? formatVisitFinanceMoney(
+          absoluteNumber
+        )
+      : (
+          absoluteNumber.toLocaleString(
+            getCalendarLocale()
+          ) +
+          suffix
+        );
+
+  const signedValue =
+    number > 0
+      ? `+${formattedValue}`
+      : number < 0
+        ? `−${formattedValue}`
+        : formattedValue;
+
+  const language =
+    getInterfaceLanguage();
+
+  const comparisonText =
+    language === "en"
+      ? "vs yesterday"
+      : language === "de"
+        ? "zum Vortag"
+        : language === "pl"
+          ? "względem wczoraj"
+          : "до вчора";
+
   return `
-    <span class="ownerReportDelta ${className}">
-      ${sign}${number.toLocaleString("uk-UA")}${suffix}
-      до вчора
+    <span
+      class="
+        ownerReportDelta
+        ${className}
+      "
+    >
+      ${signedValue}
+      ${comparisonText}
     </span>
   `;
 }
@@ -36841,14 +41843,84 @@ function ownerReportMetricCard({
 }) {
   return `
     <article class="ownerReportMetric">
-      <div class="ownerReportMetricIcon">${icon}</div>
-      <span>${escapeHtml(label)}</span>
-      <strong>${value}</strong>
-      ${delta || `<small>${escapeHtml(note || "")}</small>`}
+      <div class="ownerReportMetricIcon">
+        ${icon}
+      </div>
+
+      <span>
+        ${escapeHtml(label)}
+      </span>
+
+      <strong>
+        ${value}
+      </strong>
+
+      ${
+        delta ||
+        `
+          <small>
+            ${escapeHtml(
+              note || ""
+            )}
+          </small>
+        `
+      }
     </article>
   `;
 }
+function showFinanceOwnerNotice({
+  icon,
+  title,
+  text,
+}) {
+  showCrmNotice({
+    icon,
 
+    title:
+      getFinanceInterfaceText(
+        title
+      ),
+
+    text:
+      getFinanceInterfaceText(
+        text
+      ),
+  });
+}
+
+
+function getFinanceOwnerTelegramResultText(
+  reportDate,
+  alreadySent
+) {
+  const date =
+    String(reportDate || "");
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return alreadySent
+      ? `The summary for ${date} is already in the owner's Telegram.`
+      : `The summary for ${date} was sent to the owner's Telegram.`;
+  }
+
+  if (language === "de") {
+    return alreadySent
+      ? `Die Zusammenfassung für den ${date} befindet sich bereits im Telegram des Inhabers.`
+      : `Die Zusammenfassung für den ${date} wurde an das Telegram des Inhabers gesendet.`;
+  }
+
+  if (language === "pl") {
+    return alreadySent
+      ? `Podsumowanie za ${date} jest już w Telegramie właściciela.`
+      : `Podsumowanie za ${date} wysłano do Telegrama właściciela.`;
+  }
+
+  return alreadySent
+    ? `Підсумок за ${date} вже є в Telegram власника.`
+    : `Підсумок за ${date} відправлено в Telegram власника.`;
+}
 
 async function renderFinanceOwnerReportTab(
   page
@@ -36927,7 +41999,9 @@ async function renderFinanceOwnerReportTab(
           ${ownerReportMetricCard({
             icon: "✓",
             label: "Завершено візитів",
-            value: Number(visits.completed || 0).toLocaleString("uk-UA"),
+            value: Number(visits.completed || 0).toLocaleString(
+  getCalendarLocale()
+),
             delta: ownerReportDelta(comparison.completed_delta),
           })}
           ${ownerReportMetricCard({
@@ -36957,7 +42031,7 @@ async function renderFinanceOwnerReportTab(
                 <span>РОБОТА КЛІНІКИ</span>
                 <h2>Прийоми та клієнти</h2>
               </div>
-              <strong>${Number(visits.completion_rate || 0).toLocaleString("uk-UA")}%</strong>
+              <strong>${Number(visits.completion_rate || 0).toLocaleString(getCalendarLocale())}%</strong>
             </div>
 
             <div class="ownerReportProgress">
@@ -36975,34 +42049,64 @@ async function renderFinanceOwnerReportTab(
           </article>
 
           <article class="ownerReportPanel">
-            <div class="ownerReportPanelHead">
-              <div>
-                <span>ПОПИТ</span>
-                <h2>Топ послуг дня</h2>
-              </div>
-            </div>
+  <div class="ownerReportPanelHead">
+    <div>
+      <span>ПОПИТ</span>
+      <h2>Топ послуг дня</h2>
+    </div>
+  </div>
 
-            <div class="ownerReportServiceList">
-              ${
-                topServices.length
-                  ? topServices.map((service, index) => `
-                      <div>
-                        <i>${index + 1}</i>
-                        <span>
-                          <b>${escapeHtml(service.name || "Послуга")}</b>
-                          <small>${Number(service.qty || 0).toLocaleString("uk-UA")} виконано</small>
-                        </span>
-                        <strong>${formatVisitFinanceMoney(service.revenue)}</strong>
-                      </div>
-                    `).join("")
-                  : `
-                    <div class="ownerReportEmpty">
-                      За цю дату послуги ще не додавалися.
-                    </div>
-                  `
-              }
-            </div>
-          </article>
+  <div class="ownerReportServiceList">
+    ${
+      topServices.length
+        ? topServices
+            .map(
+              (
+                service,
+                index
+              ) => `
+                <div>
+                  <i>
+                    ${index + 1}
+                  </i>
+
+                  <span>
+                    <b
+                      data-finance-content
+                    >
+                      ${escapeHtml(
+                        service.name ||
+                        "Послуга"
+                      )}
+                    </b>
+
+                    <small>
+                      ${getFinanceOwnerCompletedText(
+                        Number(
+                          service.qty ||
+                          0
+                        )
+                      )}
+                    </small>
+                  </span>
+
+                  <strong>
+                    ${formatVisitFinanceMoney(
+                      service.revenue
+                    )}
+                  </strong>
+                </div>
+              `
+            )
+            .join("")
+        : `
+          <div class="ownerReportEmpty">
+            За цю дату послуги ще не додавалися.
+          </div>
+        `
+    }
+  </div>
+</article>
         </section>
 
         <section class="ownerReportSecondaryGrid">
@@ -37023,7 +42127,7 @@ async function renderFinanceOwnerReportTab(
               ${lowStock.slice(0, 4).map((item) => `
                 <span>
                   ${escapeHtml(item.name)} ·
-                  ${Number(item.qty || 0).toLocaleString("uk-UA")}
+                  ${Number(item.qty || 0).toLocaleString(getCalendarLocale())}
                   ${escapeHtml(item.unit || "шт")}
                 </span>
               `).join("")}
@@ -37046,19 +42150,42 @@ async function renderFinanceOwnerReportTab(
             </div>
           </article>
 
-          <article class="ownerReportPanel ownerReportAttention">
-            <div class="ownerReportPanelHead">
-              <div>
-                <span>ФОКУС ВЛАСНИКА</span>
-                <h2>Потребує уваги</h2>
-              </div>
-            </div>
-            <ul>
-              ${attention.map((item) => `
-                <li>${escapeHtml(item)}</li>
-              `).join("")}
-            </ul>
-          </article>
+          <article
+  class="
+    ownerReportPanel
+    ownerReportAttention
+  "
+>
+  <div class="ownerReportPanelHead">
+    <div>
+      <span>
+        ФОКУС ВЛАСНИКА
+      </span>
+
+      <h2>
+        Потребує уваги
+      </h2>
+    </div>
+  </div>
+
+  <ul>
+    ${
+      attention
+        .map(
+          (item) => `
+            <li>
+              ${escapeHtml(
+                getFinanceOwnerAttentionText(
+                  item
+                )
+              )}
+            </li>
+          `
+        )
+        .join("")
+    }
+  </ul>
+</article>
         </section>
 
         <section class="ownerReportTelegram">
@@ -37115,17 +42242,20 @@ async function renderFinanceOwnerReportTab(
             </button>
           </div>
           <small class="ownerReportTelegramStatus">
-            ${
-              settings.telegram_configured
-                ? "● Telegram-чат підключено"
-                : "○ Telegram-чат ще не підключено"
-            }
-            ${
-              settings.bot_configured
-                ? ""
-                : " · на сервері відсутній TELEGRAM_BOT_TOKEN"
-            }
-          </small>
+  ${getFinanceInterfaceText(
+    settings.telegram_configured
+      ? "● Telegram-чат підключено"
+      : "○ Telegram-чат ще не підключено"
+  )}
+
+  ${
+    settings.bot_configured
+      ? ""
+      : getFinanceInterfaceText(
+          " · на сервері відсутній TELEGRAM_BOT_TOKEN"
+        )
+  }
+</small>
         </section>
       </div>
     `;
@@ -37157,7 +42287,7 @@ async function renderFinanceOwnerReportTab(
             input?.value || "",
             dailyEnabled?.checked === true
           );
-          showCrmNotice({
+          showFinanceOwnerNotice({
             icon: "✓",
             title: "Налаштування збережено",
             text: savedSettings.daily_enabled
@@ -37168,7 +42298,7 @@ async function renderFinanceOwnerReportTab(
           });
           await renderFinanceTab();
         } catch (error) {
-          showCrmNotice({
+          showFinanceOwnerNotice({
             icon: "!",
             title: "Не вдалося зберегти",
             text: error?.message || "Перевірте Telegram chat ID.",
@@ -37209,14 +42339,14 @@ async function renderFinanceOwnerReportTab(
 
         try {
           await setupOwnerReportTelegramBotApi();
-          showCrmNotice({
+          showFinanceOwnerNotice({
             icon: "🆔",
             title: "Меню бота оновлено",
             text: "Старі CRM-кнопки прибрано. У Telegram залишилася кнопка «Отримати ID».",
           });
           button.textContent = "Меню оновлено ✓";
         } catch (error) {
-          showCrmNotice({
+          showFinanceOwnerNotice({
             icon: "!",
             title: "Не вдалося оновити бота",
             text: error?.message || "Перевірте налаштування Telegram-бота.",
@@ -37235,20 +42365,22 @@ async function renderFinanceOwnerReportTab(
         try {
           const sendResult = await sendOwnerDailyReportApi(report.date);
           const alreadySent = sendResult.already_sent === true;
-          showCrmNotice({
+          showFinanceOwnerNotice({
             icon: alreadySent ? "✓" : "✈",
             title: alreadySent
               ? "Звіт уже надсилали"
               : "Звіт відправлено",
-            text: alreadySent
-              ? `Підсумок за ${report.date} вже є в Telegram власника.`
-              : `Підсумок за ${report.date} відправлено в Telegram власника.`,
+            text:
+  getFinanceOwnerTelegramResultText(
+    report.date,
+    alreadySent
+  ),
           });
           button.textContent = alreadySent
             ? "Уже надіслано ✓"
             : "Відправлено ✓";
         } catch (error) {
-          showCrmNotice({
+          showFinanceOwnerNotice({
             icon: "!",
             title: "Telegram не прийняв звіт",
             text: error?.message || "Перевірте chat ID та налаштування бота.",
@@ -37276,7 +42408,7 @@ async function renderFinanceOwnerReportTab(
 async function renderFinanceTab(
   options = {}
 ) {
-  const page =
+    const page =
     document.querySelector(
       '.page[data-page="finance"]'
     );
@@ -37293,6 +42425,9 @@ async function renderFinanceTab(
     return;
   }
 
+  installFinanceLocalization(
+    page
+  );
   if (options.preset) {
     financeDashboardState.preset =
       options.preset;
@@ -37866,14 +43001,16 @@ async function renderFinanceTab(
             </div>
           </article>
 
-          <article class="financePanel financeInsightPanel">
+                    <article class="financePanel financeInsightPanel">
             <div class="financeInsightIcon">
               ✦
             </div>
 
             <div>
               <span>
-                PUG AI ПОМІТИВ
+                ${getFinanceInterfaceText(
+                  "PUG AI ПОМІТИВ"
+                )}
               </span>
 
               <h2>
@@ -37888,8 +43025,12 @@ async function renderFinanceTab(
                       .net_revenue ||
                     0
                   )
-                    ? "Борги перевищують отриману виручку"
-                    : "Фінансовий потік виглядає стабільно"
+                    ? getFinanceInterfaceText(
+                        "Борги перевищують отриману виручку"
+                      )
+                    : getFinanceInterfaceText(
+                        "Фінансовий потік виглядає стабільно"
+                      )
                 }
               </h2>
 
@@ -37905,15 +43046,11 @@ async function renderFinanceTab(
                       .net_revenue ||
                     0
                   )
-                    ? (
-                        "Клініці ще мають сплатити " +
-                        formatVisitFinanceMoney(
-                          summary
-                            .outstanding
-                        ) +
-                        ". Варто перевірити незакриті рахунки."
+                    ? getFinanceOutstandingInsightText(
+                        summary
+                          .outstanding
                       )
-                    : (
+                    : getFinanceInterfaceText(
                         "Критичних відхилень за обраний період не виявлено."
                       )
                 }
@@ -37922,15 +43059,19 @@ async function renderFinanceTab(
           </article>
         </section>
 
-        <section class="financePanel financeTransactionsPanel">
+             <section class="financePanel financeTransactionsPanel">
           <div class="financePanelHead">
             <div>
               <span>
-                ЖУРНАЛ
+                ${getFinanceInterfaceText(
+                  "ЖУРНАЛ"
+                )}
               </span>
 
               <h2>
-                Останні операції
+                ${getFinanceInterfaceText(
+                  "Останні операції"
+                )}
               </h2>
             </div>
 
@@ -37958,7 +43099,7 @@ async function renderFinanceTab(
                               .occurred_at
                           )
                             .toLocaleString(
-                              "uk-UA",
+                              getCalendarLocale(),
                               {
                                 day:
                                   "2-digit",
@@ -37984,6 +43125,31 @@ async function renderFinanceTab(
                             ? "−"
                             : "+";
 
+                        const hasCustomCategory =
+                          Boolean(
+                            transaction
+                              .category
+                          );
+
+                        const transactionTitle =
+                          transaction
+                            .category ||
+                          meta.type
+                            .label;
+
+                        const transactionStatus =
+                          transaction
+                            .status ===
+                          "completed"
+                            ? getFinanceInterfaceText(
+                                "Проведено"
+                              )
+                            : String(
+                                transaction
+                                  .status ||
+                                ""
+                              );
+
                         return `
                           <article class="financeTransactionRow">
                             <div
@@ -37996,10 +43162,15 @@ async function renderFinanceTab(
                             </div>
 
                             <div class="financeTransactionMain">
-                              <strong>
+                              <strong
+                                ${
+                                  hasCustomCategory
+                                    ? "data-finance-content"
+                                    : ""
+                                }
+                              >
                                 ${escapeHtml(
-                                  transaction.category ||
-                                  meta.type.label
+                                  transactionTitle
                                 )}
                               </strong>
 
@@ -38007,11 +43178,15 @@ async function renderFinanceTab(
                                 ${escapeHtml(
                                   meta.type.label
                                 )}
+
                                 ·
+
                                 ${escapeHtml(
                                   meta.method
                                 )}
+
                                 ·
+
                                 ${escapeHtml(
                                   date
                                 )}
@@ -38031,15 +43206,9 @@ async function renderFinanceTab(
                               </strong>
 
                               <span>
-                                ${
-                                  transaction.status ===
-                                  "completed"
-                                    ? "Проведено"
-                                    : escapeHtml(
-                                        transaction.status ||
-                                        ""
-                                      )
-                                }
+                                ${escapeHtml(
+                                  transactionStatus
+                                )}
                               </span>
                             </div>
                           </article>
@@ -38049,8 +43218,9 @@ async function renderFinanceTab(
                     .join("")
                 : `
                   <div class="financeTransactionsEmpty">
-                    За обраний період
-                    операцій немає.
+                    ${getFinanceInterfaceText(
+                      "За обраний період операцій немає."
+                    )}
                   </div>
                 `
             }
@@ -38107,7 +43277,7 @@ async function renderFinanceTab(
         }
       );
 
-    page
+       page
       .querySelector(
         "#financeApplyPeriod"
       )
@@ -38129,16 +43299,18 @@ async function renderFinanceTab(
           if (
             !dateFrom ||
             !dateTo ||
-            dateFrom > dateTo
+            dateFrom >
+              dateTo
           ) {
-            alert(
+            showFinanceAlert(
               "Оберіть коректний фінансовий період."
             );
 
             return;
           }
 
-          financeDashboardState.preset =
+          financeDashboardState
+            .preset =
             "custom";
 
           renderFinanceTab({
@@ -38165,18 +43337,29 @@ async function renderFinanceTab(
       error
     );
 
+    const errorMessage =
+      error?.message ||
+      getFinanceInterfaceText(
+        "Невідома помилка"
+      );
+
     page.innerHTML = `
       <div class="financeLoadError">
-        <span>!</span>
+        <span>
+          !
+        </span>
 
         <h2>
-          Не вдалося завантажити фінанси
+          ${getFinanceInterfaceText(
+            "Не вдалося завантажити фінанси"
+          )}
         </h2>
 
-        <p>
+        <p
+          data-finance-content
+        >
           ${escapeHtml(
-            error?.message ||
-            "Невідома помилка"
+            errorMessage
           )}
         </p>
 
@@ -38184,7 +43367,9 @@ async function renderFinanceTab(
           type="button"
           id="financeRetryButton"
         >
-          Спробувати ще раз
+          ${getFinanceInterfaceText(
+            "Спробувати ще раз"
+          )}
         </button>
       </div>
     `;
@@ -79317,22 +84502,65 @@ async function openVisitServicePicker() {
 }
 
 function refreshVisitStockSelect() {
-  const select = document.getElementById("visitStkSelect");
+  const select =
+    document.getElementById(
+      "visitStkSelect"
+    );
+
   if (!select) return;
 
-  const q = String(state.visitStkQuery || "").trim().toLowerCase();
+  const q = String(
+    state.visitStkQuery || ""
+  )
+    .trim()
+    .toLowerCase();
+
   const options = loadStock()
-    .filter((it) => it.active !== false)
-    .filter((it) => !q || String(it.name || "").toLowerCase().includes(q))
+    .filter(
+      (it) =>
+        it.active !== false
+    )
+    .filter(
+      (it) =>
+        !q ||
+        String(it.name || "")
+          .toLowerCase()
+          .includes(q)
+    )
     .map((it) => {
-      const left = Number(it.qty) || 0;
-      const unit = String(it.unit || "шт");
-      const price = Number(it.price) || 0;
-      return `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(price))} грн/${escapeHtml(unit)} • залишок: ${escapeHtml(String(left))}</option>`;
+      const left =
+        Number(it.qty) || 0;
+
+      const unit =
+        String(it.unit || "шт");
+
+      const price =
+        Number(it.price) || 0;
+
+      return `
+        <option
+          value="${escapeHtml(
+            it.id
+          )}"
+        >
+          ${escapeHtml(it.name)}
+          —
+          ${escapeHtml(
+            String(price)
+          )}
+          грн/${escapeHtml(unit)}
+          • залишок:
+          ${escapeHtml(
+            String(left)
+          )}
+        </option>
+      `;
     })
     .join("");
 
-  select.innerHTML = options || `<option value="">Немає препаратів</option>`;
+  select.innerHTML =
+    options ||
+    `<option value="">Немає препаратів</option>`;
 }
 
 function initVisitUI() {
@@ -86666,14 +91894,45 @@ if (
   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
   const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
-  const svcSelect = document.getElementById("visitSvcSelect");
-  if (svcSelect) {
-    svcSelect.innerHTML = loadServices()
-      .filter((s) => s.active !== false)
-      .filter((s) => !svcQ || String(s.name || "").toLowerCase().includes(svcQ))
-      .map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(String(Number(s.price) || 0))} грн</option>`)
+  const svcSelect =
+  document.getElementById(
+    "visitSvcSelect"
+  );
+
+if (svcSelect) {
+  svcSelect.innerHTML =
+    loadServices()
+      .filter(
+        (s) =>
+          s.active !== false
+      )
+      .filter(
+        (s) =>
+          !svcQ ||
+          String(s.name || "")
+            .toLowerCase()
+            .includes(svcQ)
+      )
+      .map(
+        (s) => `
+          <option
+            value="${escapeHtml(
+              s.id
+            )}"
+          >
+            ${escapeHtml(s.name)}
+            —
+            ${escapeHtml(
+              String(
+                Number(s.price) || 0
+              )
+            )}
+            грн
+          </option>
+        `
+      )
       .join("");
-  }
+}
 
   // ВІДРИСОВКА ОНОВЛЕНИХ ФУТУРИСТИЧНИХ ПОСЛУГ
   const expandedServices = expandServiceLines(visit);
