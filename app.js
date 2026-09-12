@@ -110779,38 +110779,68 @@ async function loadClinicProfileApi() {
   }
 }
 
-async function saveClinicProfileApi(payload = {}) {
+async function saveClinicProfileApi(
+  payload = {}
+) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Не вдалося зберегти налаштування клініки.": {
+        en: "Could not save the clinic settings.",
+        de: "Die Klinikeinstellungen konnten nicht gespeichert werden.",
+        pl: "Nie udało się zapisać ustawień kliniki.",
+      },
+    }
+  );
+
   try {
-    const response = await fetch(
-      "/api/organization/profile",
-      {
-        method: "PUT",
-        credentials: "include",
+    const response =
+      await fetch(
+        "/api/organization/profile",
+        {
+          method: "PUT",
 
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          ...getOrgHeaders(),
-        },
+          credentials:
+            "include",
 
-        body: JSON.stringify(payload),
-      }
-    );
+          headers: {
+            "Content-Type":
+              "application/json",
 
-    const text = await response.text();
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            ),
+        }
+      );
+
+    const text =
+      await response.text();
 
     let json = null;
 
     try {
-      json = text ? JSON.parse(text) : null;
+      json =
+        text
+          ? JSON.parse(text)
+          : null;
     } catch {
       json = null;
     }
 
-    if (!response.ok || !json?.ok) {
+    if (
+      !response.ok ||
+      !json?.ok
+    ) {
       throw new Error(
         json?.error ||
-        `Помилка збереження профілю клініки HTTP ${response.status}`
+        `Clinic profile HTTP ${response.status}`
       );
     }
 
@@ -110828,25 +110858,81 @@ async function saveClinicProfileApi(payload = {}) {
     sessionStorage.setItem(
       "pug_active_clinic_name",
       state.clinicProfile.name ||
-      "Клініка"
+      getSettingsInterfaceText(
+        "Клініка"
+      )
     );
 
     return state.clinicProfile;
   } catch (error) {
-    console.error("saveClinicProfileApi failed:", error);
+    console.error(
+      "saveClinicProfileApi failed:",
+      error
+    );
 
-    alert(
-      "Не вдалося зберегти налаштування клініки: " +
-      (error?.message || error)
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося зберегти налаштування клініки."
+      )
     );
 
     return null;
   }
 }
 
-async function uploadClinicBrandFile(file) {
+
+async function uploadClinicBrandFile(
+  file
+) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Файл не вибрано": {
+        en: "No file selected",
+        de: "Keine Datei ausgewählt",
+        pl: "Nie wybrano pliku",
+      },
+
+      "Дозволені лише PNG, JPG або WEBP": {
+        en: "Only PNG, JPG or WEBP files are allowed",
+        de: "Nur PNG-, JPG- oder WEBP-Dateien sind erlaubt",
+        pl: "Dozwolone są tylko pliki PNG, JPG lub WEBP",
+      },
+
+      "Максимальний розмір файлу — 5 МБ": {
+        en: "Maximum file size is 5 MB",
+        de: "Die maximale Dateigröße beträgt 5 MB",
+        pl: "Maksymalny rozmiar pliku to 5 MB",
+      },
+
+      "Не вдалося завантажити файл.": {
+        en: "Could not upload the file.",
+        de: "Die Datei konnte nicht hochgeladen werden.",
+        pl: "Nie udało się przesłać pliku.",
+      },
+
+      "Сервер не повернув завантажений файл": {
+        en: "The server did not return the uploaded file",
+        de: "Der Server hat die hochgeladene Datei nicht zurückgegeben",
+        pl: "Serwer nie zwrócił przesłanego pliku",
+      },
+
+      "Сервер не повернув адресу файлу": {
+        en: "The server did not return the file URL",
+        de: "Der Server hat keine Datei-URL zurückgegeben",
+        pl: "Serwer nie zwrócił adresu pliku",
+      },
+    }
+  );
+
+
   if (!file) {
-    throw new Error("Файл не вибрано");
+    throw new Error(
+      getSettingsInterfaceText(
+        "Файл не вибрано"
+      )
+    );
   }
 
   const allowedTypes = [
@@ -110855,46 +110941,82 @@ async function uploadClinicBrandFile(file) {
     "image/webp",
   ];
 
-  if (!allowedTypes.includes(file.type)) {
+  if (
+    !allowedTypes.includes(
+      file.type
+    )
+  ) {
     throw new Error(
-      "Дозволені лише PNG, JPG або WEBP"
+      getSettingsInterfaceText(
+        "Дозволені лише PNG, JPG або WEBP"
+      )
     );
   }
 
-  if (file.size > 5 * 1024 * 1024) {
+  if (
+    file.size >
+    5 * 1024 * 1024
+  ) {
     throw new Error(
-      "Максимальний розмір файлу — 5 МБ"
+      getSettingsInterfaceText(
+        "Максимальний розмір файлу — 5 МБ"
+      )
     );
   }
 
-  const formData = new FormData();
-  formData.append("files", file);
 
-  const response = await fetch("/api/upload", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      ...getOrgHeaders(),
-    },
-    body: formData,
-  });
+  const formData =
+    new FormData();
 
-  const text = await response.text();
+  formData.append(
+    "files",
+    file
+  );
+
+  const response =
+    await fetch(
+      "/api/upload",
+      {
+        method: "POST",
+
+        credentials:
+          "include",
+
+        headers: {
+          ...getOrgHeaders(),
+        },
+
+        body:
+          formData,
+      }
+    );
+
+  const text =
+    await response.text();
 
   let json = null;
 
   try {
-    json = text ? JSON.parse(text) : null;
+    json =
+      text
+        ? JSON.parse(text)
+        : null;
   } catch {
     json = null;
   }
 
-  if (!response.ok || !json?.ok) {
+  if (
+    !response.ok ||
+    !json?.ok
+  ) {
     throw new Error(
       json?.error ||
-      `Помилка завантаження HTTP ${response.status}`
+      getSettingsInterfaceText(
+        "Не вдалося завантажити файл."
+      )
     );
   }
+
 
   const uploaded =
     json.files?.[0] ||
@@ -110904,7 +111026,9 @@ async function uploadClinicBrandFile(file) {
 
   if (!uploaded) {
     throw new Error(
-      "Сервер не повернув завантажений файл"
+      getSettingsInterfaceText(
+        "Сервер не повернув завантажений файл"
+      )
     );
   }
 
@@ -110917,7 +111041,9 @@ async function uploadClinicBrandFile(file) {
 
   if (!rawUrl) {
     throw new Error(
-      "Сервер не повернув адресу файлу"
+      getSettingsInterfaceText(
+        "Сервер не повернув адресу файлу"
+      )
     );
   }
 
@@ -110926,7 +111052,6 @@ async function uploadClinicBrandFile(file) {
     window.location.origin
   ).toString();
 }
-
 const AUDIT_EVENTS_PAGE_SIZE = 50;
 
 const auditViewState = {
@@ -110934,70 +111059,579 @@ const auditViewState = {
 };
 
 
-function getAuditActionLabel(action) {
-  const labels = {
-    "visit.completed":
-      "Візит завершено",
-    "visit.medical_updated":
-      "Медичні дані змінено",
-    "payment.created":
-      "Оплату проведено",
-    "payment.cancelled":
-      "Оплату скасовано",
-    "payment.refunded":
-      "Оплату повернено",
-    "expense.created":
-      "Витрату створено",
-    "expense.updated":
-      "Витрату змінено",
-    "cash.deposit_created":
-      "Внесення в касу",
-    "cash.withdrawal_created":
-      "Вилучення з каси",
-    "service.added":
-      "Послугу додано",
-    "service.removed":
-      "Послугу видалено",
-    "stock.added":
-      "Препарат списано",
-    "stock.removed":
-      "Препарат повернено",
-    "report.telegram_sent":
-      "Звіт відправлено в Telegram",
-    "report.telegram_auto_sent":
-      "Автоматичний звіт відправлено",
-    "organization.created":
-      "Клініку створено",
-    "subscription.extend":
-      "Підписку продовжено",
-    "subscription.set_period":
-      "Період підписки змінено",
-    "subscription.pause":
-      "Підписку призупинено",
-    "subscription.resume":
-      "Підписку відновлено",
-  };
+const AUDIT_INTERFACE_TEXT = {
+  "Подія": {
+    en: "Event",
+    de: "Ereignis",
+    pl: "Zdarzenie",
+  },
 
-  const cleanAction =
-    String(action || "").trim();
+  "Система": {
+    en: "System",
+    de: "System",
+    pl: "System",
+  },
 
-  return labels[cleanAction] ||
-    cleanAction ||
-    "Подія";
+  "Візит завершено": {
+    en: "Visit completed",
+    de: "Termin abgeschlossen",
+    pl: "Wizyta zakończona",
+  },
+
+  "Медичні дані змінено": {
+    en: "Medical data updated",
+    de: "Medizinische Daten geändert",
+    pl: "Dane medyczne zmieniono",
+  },
+
+  "Оплату проведено": {
+    en: "Payment recorded",
+    de: "Zahlung erfasst",
+    pl: "Płatność zarejestrowana",
+  },
+
+  "Оплату скасовано": {
+    en: "Payment cancelled",
+    de: "Zahlung storniert",
+    pl: "Płatność anulowana",
+  },
+
+  "Оплату повернено": {
+    en: "Payment refunded",
+    de: "Zahlung erstattet",
+    pl: "Płatność zwrócona",
+  },
+
+  "Витрату створено": {
+    en: "Expense created",
+    de: "Ausgabe erstellt",
+    pl: "Wydatek utworzony",
+  },
+
+  "Витрату змінено": {
+    en: "Expense updated",
+    de: "Ausgabe geändert",
+    pl: "Wydatek zmieniony",
+  },
+
+  "Внесення в касу": {
+    en: "Cash deposit",
+    de: "Kasseneinzahlung",
+    pl: "Wpłata do kasy",
+  },
+
+  "Вилучення з каси": {
+    en: "Cash withdrawal",
+    de: "Kassenentnahme",
+    pl: "Wypłata z kasy",
+  },
+
+  "Послугу додано": {
+    en: "Service added",
+    de: "Leistung hinzugefügt",
+    pl: "Usługa dodana",
+  },
+
+  "Послугу видалено": {
+    en: "Service removed",
+    de: "Leistung entfernt",
+    pl: "Usługa usunięta",
+  },
+
+  "Препарат списано": {
+    en: "Stock item used",
+    de: "Bestandsartikel verbraucht",
+    pl: "Preparat rozchodowany",
+  },
+
+  "Препарат повернено": {
+    en: "Stock item returned",
+    de: "Bestandsartikel zurückgegeben",
+    pl: "Preparat zwrócony",
+  },
+
+  "Звіт відправлено в Telegram": {
+    en: "Report sent to Telegram",
+    de: "Bericht an Telegram gesendet",
+    pl: "Raport wysłany do Telegrama",
+  },
+
+  "Автоматичний звіт відправлено": {
+    en: "Automatic report sent",
+    de: "Automatischer Bericht gesendet",
+    pl: "Raport automatyczny wysłany",
+  },
+
+  "Клініку створено": {
+    en: "Clinic created",
+    de: "Klinik erstellt",
+    pl: "Klinika utworzona",
+  },
+
+  "Підписку продовжено": {
+    en: "Subscription extended",
+    de: "Abonnement verlängert",
+    pl: "Subskrypcja przedłużona",
+  },
+
+  "Період підписки змінено": {
+    en: "Subscription period changed",
+    de: "Abonnementzeitraum geändert",
+    pl: "Okres subskrypcji zmieniony",
+  },
+
+  "Підписку призупинено": {
+    en: "Subscription paused",
+    de: "Abonnement pausiert",
+    pl: "Subskrypcja wstrzymana",
+  },
+
+  "Підписку відновлено": {
+    en: "Subscription resumed",
+    de: "Abonnement fortgesetzt",
+    pl: "Subskrypcja wznowiona",
+  },
+
+  "Подій не знайдено": {
+    en: "No events found",
+    de: "Keine Ereignisse gefunden",
+    pl: "Nie znaleziono zdarzeń",
+  },
+
+  "Спробуйте змінити фільтри або виконайте нову дію у CRM.": {
+    en: "Change the filters or perform a new action in the CRM.",
+    de: "Ändern Sie die Filter oder führen Sie eine neue Aktion im CRM aus.",
+    pl: "Zmień filtry lub wykonaj nową czynność w CRM.",
+  },
+
+  "Дата": {
+    en: "Date",
+    de: "Datum",
+    pl: "Data",
+  },
+
+  "Користувач": {
+    en: "User",
+    de: "Benutzer",
+    pl: "Użytkownik",
+  },
+
+  "Дія": {
+    en: "Action",
+    de: "Aktion",
+    pl: "Działanie",
+  },
+
+  "Обʼєкт": {
+    en: "Object",
+    de: "Objekt",
+    pl: "Obiekt",
+  },
+
+  "Деталі": {
+    en: "Details",
+    de: "Details",
+    pl: "Szczegóły",
+  },
+
+  "Переглянути": {
+    en: "View",
+    de: "Anzeigen",
+    pl: "Zobacz",
+  },
+
+  "Без опису": {
+    en: "No description",
+    de: "Keine Beschreibung",
+    pl: "Brak opisu",
+  },
+
+  "До": {
+    en: "Before",
+    de: "Vorher",
+    pl: "Przed",
+  },
+
+  "Після": {
+    en: "After",
+    de: "Nachher",
+    pl: "Po",
+  },
+
+  "Метадані": {
+    en: "Metadata",
+    de: "Metadaten",
+    pl: "Metadane",
+  },
+
+  "← Назад": {
+    en: "← Back",
+    de: "← Zurück",
+    pl: "← Wstecz",
+  },
+
+  "Далі →": {
+    en: "Next →",
+    de: "Weiter →",
+    pl: "Dalej →",
+  },
+
+  "Не вдалося завантажити журнал дій.": {
+    en: "Could not load the audit log.",
+    de: "Das Aktivitätsprotokoll konnte nicht geladen werden.",
+    pl: "Nie udało się wczytać dziennika działań.",
+  },
+
+  "Візит пацієнта": {
+    en: "Patient visit",
+    de: "Patiententermin",
+    pl: "Wizyta pacjenta",
+  },
+
+  "Оплата візиту": {
+    en: "Visit payment",
+    de: "Terminzahlung",
+    pl: "Płatność za wizytę",
+  },
+
+  "Витрата": {
+    en: "Expense",
+    de: "Ausgabe",
+    pl: "Wydatek",
+  },
+
+  "Клініка": {
+    en: "Clinic",
+    de: "Klinik",
+    pl: "Klinika",
+  },
+
+  "Послуга": {
+    en: "Service",
+    de: "Leistung",
+    pl: "Usługa",
+  },
+
+  "Препарат": {
+    en: "Stock item",
+    de: "Bestandsartikel",
+    pl: "Preparat",
+  },
+
+  "Звіт": {
+    en: "Report",
+    de: "Bericht",
+    pl: "Raport",
+  },
+
+  "Власник": {
+    en: "Owner",
+    de: "Inhaber",
+    pl: "Właściciel",
+  },
+
+  "Адміністратор": {
+    en: "Administrator",
+    de: "Administrator",
+    pl: "Administrator",
+  },
+
+  "Ветеринар": {
+    en: "Veterinarian",
+    de: "Tierarzt",
+    pl: "Weterynarz",
+  },
+
+  "Асистент": {
+    en: "Assistant",
+    de: "Assistenz",
+    pl: "Asystent",
+  },
+
+  "Працівник": {
+    en: "Employee",
+    de: "Mitarbeiter",
+    pl: "Pracownik",
+  },
+};
+
+
+const AUDIT_ACTION_LABELS = {
+  "visit.completed":
+    "Візит завершено",
+
+  "visit.medical_updated":
+    "Медичні дані змінено",
+
+  "payment.created":
+    "Оплату проведено",
+
+  "payment.cancelled":
+    "Оплату скасовано",
+
+  "payment.refunded":
+    "Оплату повернено",
+
+  "expense.created":
+    "Витрату створено",
+
+  "expense.updated":
+    "Витрату змінено",
+
+  "cash.deposit_created":
+    "Внесення в касу",
+
+  "cash.withdrawal_created":
+    "Вилучення з каси",
+
+  "service.added":
+    "Послугу додано",
+
+  "service.removed":
+    "Послугу видалено",
+
+  "stock.added":
+    "Препарат списано",
+
+  "stock.removed":
+    "Препарат повернено",
+
+  "report.telegram_sent":
+    "Звіт відправлено в Telegram",
+
+  "report.telegram_auto_sent":
+    "Автоматичний звіт відправлено",
+
+  "organization.created":
+    "Клініку створено",
+
+  "subscription.extend":
+    "Підписку продовжено",
+
+  "subscription.set_period":
+    "Період підписки змінено",
+
+  "subscription.pause":
+    "Підписку призупинено",
+
+  "subscription.resume":
+    "Підписку відновлено",
+};
+
+
+const AUDIT_FILTER_ACTIONS =
+  Object.keys(
+    AUDIT_ACTION_LABELS
+  );
+
+
+function normalizeAuditText(
+  value
+) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 
-function formatAuditDate(value) {
-  if (!value) return "—";
+function getAuditInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
 
-  const date = new Date(value);
+  const normalizedSource =
+    normalizeAuditText(
+      sourceText
+    );
 
-  if (Number.isNaN(date.getTime())) {
+  const entry =
+    Object.entries(
+      AUDIT_INTERFACE_TEXT
+    ).find(
+      ([
+        ukrainian,
+        translations,
+      ]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeAuditText(
+              value
+            ) ===
+            normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText ||
+      ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+
+
+function getAuditActionLabel(
+  action
+) {
+  const cleanAction =
+    String(action || "")
+      .trim();
+
+  const sourceLabel =
+    AUDIT_ACTION_LABELS[
+      cleanAction
+    ];
+
+  return sourceLabel
+    ? getAuditInterfaceText(
+        sourceLabel
+      )
+    : (
+        cleanAction ||
+        getAuditInterfaceText(
+          "Подія"
+        )
+      );
+}
+
+
+function getAuditRoleLabel(
+  role
+) {
+  const value =
+    String(role || "")
+      .trim()
+      .toLowerCase();
+
+  const roles = {
+    owner:
+      "Власник",
+
+    admin:
+      "Адміністратор",
+
+    vet:
+      "Ветеринар",
+
+    veterinarian:
+      "Ветеринар",
+
+    assistant:
+      "Асистент",
+
+    staff:
+      "Працівник",
+
+    employee:
+      "Працівник",
+
+    system:
+      "Система",
+  };
+
+  return getAuditInterfaceText(
+    roles[value] ||
+    role ||
+    "Система"
+  );
+}
+
+
+function getAuditStructuredText(
+  value
+) {
+  const original =
+    String(value || "")
+      .trim();
+
+  if (!original) {
+    return "";
+  }
+
+  const directlyTranslated =
+    getAuditInterfaceText(
+      original
+    );
+
+  if (
+    directlyTranslated !==
+    original
+  ) {
+    return directlyTranslated;
+  }
+
+  const prefixes = [
+    "Візит пацієнта",
+    "Оплата візиту",
+    "Витрата",
+    "Клініка",
+    "Послуга",
+    "Препарат",
+    "Звіт",
+  ];
+
+  const matchedPrefix =
+    prefixes.find(
+      (prefix) =>
+        original === prefix ||
+        original.startsWith(
+          `${prefix} `
+        )
+    );
+
+  if (!matchedPrefix) {
+    return original;
+  }
+
+  return (
+    getAuditInterfaceText(
+      matchedPrefix
+    ) +
+    original.slice(
+      matchedPrefix.length
+    )
+  );
+}
+
+
+function formatAuditDate(
+  value
+) {
+  if (!value) {
+    return "—";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
     return String(value);
   }
 
   return date.toLocaleString(
-    "uk-UA",
+    getCalendarLocale(),
     {
       dateStyle: "medium",
       timeStyle: "short",
@@ -111006,12 +111640,16 @@ function formatAuditDate(value) {
 }
 
 
-function renderAuditJson(value) {
+function renderAuditJson(
+  value
+) {
   if (
     value == null ||
     (
-      typeof value === "object" &&
-      Object.keys(value).length === 0
+      typeof value ===
+        "object" &&
+      Object.keys(value)
+        .length === 0
     )
   ) {
     return "—";
@@ -111033,6 +111671,63 @@ function renderAuditJson(value) {
 }
 
 
+function getAuditPaginationText(
+  start,
+  end,
+  total
+) {
+  const locale =
+    getCalendarLocale();
+
+  const startText =
+    Number(start || 0)
+      .toLocaleString(
+        locale
+      );
+
+  const endText =
+    Number(end || 0)
+      .toLocaleString(
+        locale
+      );
+
+  const totalText =
+    Number(total || 0)
+      .toLocaleString(
+        locale
+      );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return (
+      `Showing ${startText}–` +
+      `${endText} of ${totalText}`
+    );
+  }
+
+  if (language === "de") {
+    return (
+      `${startText}–${endText} ` +
+      `von ${totalText} angezeigt`
+    );
+  }
+
+  if (language === "pl") {
+    return (
+      `Wyświetlono ${startText}–` +
+      `${endText} z ${totalText}`
+    );
+  }
+
+  return (
+    `Показано ${startText}–` +
+    `${endText} із ${totalText}`
+  );
+}
+
+
 async function loadAuditEventsApi(
   filters = {}
 ) {
@@ -111041,7 +111736,9 @@ async function loadAuditEventsApi(
 
   params.set(
     "limit",
-    String(AUDIT_EVENTS_PAGE_SIZE)
+    String(
+      AUDIT_EVENTS_PAGE_SIZE
+    )
   );
 
   params.set(
@@ -111049,7 +111746,10 @@ async function loadAuditEventsApi(
     String(
       Math.max(
         0,
-        Number(filters.offset) || 0
+        Number(
+          filters.offset
+        ) ||
+        0
       )
     )
   );
@@ -111059,28 +111759,43 @@ async function loadAuditEventsApi(
     "actor_name",
     "date_from",
     "date_to",
-  ].forEach((key) => {
-    const value =
-      String(filters[key] || "").trim();
+  ].forEach(
+    (key) => {
+      const value =
+        String(
+          filters[key] ||
+          ""
+        ).trim();
 
-    if (value) {
-      params.set(key, value);
-    }
-  });
-
-  const response = await fetch(
-    `/api/audit-events?${params.toString()}`,
-    {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        ...getOrgHeaders(),
-      },
+      if (value) {
+        params.set(
+          key,
+          value
+        );
+      }
     }
   );
 
-  const text = await response.text();
+  const response =
+    await fetch(
+      `/api/audit-events?${params.toString()}`,
+      {
+        method: "GET",
+        credentials:
+          "include",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+  const text =
+    await response.text();
+
   let json = null;
 
   try {
@@ -111095,16 +111810,22 @@ async function loadAuditEventsApi(
   ) {
     throw new Error(
       json?.error ||
-      "Не вдалося завантажити журнал дій."
+      getAuditInterfaceText(
+        "Не вдалося завантажити журнал дій."
+      )
     );
   }
 
-  return json.data || {
-    events: [],
-    total: 0,
-    limit: AUDIT_EVENTS_PAGE_SIZE,
-    offset: 0,
-  };
+  return (
+    json.data ||
+    {
+      events: [],
+      total: 0,
+      limit:
+        AUDIT_EVENTS_PAGE_SIZE,
+      offset: 0,
+    }
+  );
 }
 
 
@@ -111122,148 +111843,307 @@ function renderAuditEventsResult(
       "#auditEventsPagination"
     );
 
-  if (!results || !pagination) {
+  if (
+    !results ||
+    !pagination
+  ) {
     return;
   }
 
   const events =
-    Array.isArray(data?.events)
+    Array.isArray(
+      data?.events
+    )
       ? data.events
       : [];
 
   const total =
     Math.max(
       0,
-      Number(data?.total) || 0
+      Number(
+        data?.total
+      ) ||
+      0
     );
 
   const offset =
     Math.max(
       0,
-      Number(data?.offset) || 0
+      Number(
+        data?.offset
+      ) ||
+      0
     );
 
   const limit =
     Math.max(
       1,
-      Number(data?.limit) ||
-        AUDIT_EVENTS_PAGE_SIZE
+      Number(
+        data?.limit
+      ) ||
+      AUDIT_EVENTS_PAGE_SIZE
     );
 
   if (!events.length) {
     results.innerHTML = `
       <div class="auditEventsEmpty">
         <span>🛡️</span>
-        <strong>Подій не знайдено</strong>
+
+        <strong>
+          ${escapeHtml(
+            getAuditInterfaceText(
+              "Подій не знайдено"
+            )
+          )}
+        </strong>
+
         <p>
-          Спробуйте змінити фільтри або
-          виконайте нову дію у CRM.
+          ${escapeHtml(
+            getAuditInterfaceText(
+              "Спробуйте змінити фільтри або виконайте нову дію у CRM."
+            )
+          )}
         </p>
       </div>
     `;
   } else {
+    const dateLabel =
+      getAuditInterfaceText(
+        "Дата"
+      );
+
+    const userLabel =
+      getAuditInterfaceText(
+        "Користувач"
+      );
+
+    const actionLabel =
+      getAuditInterfaceText(
+        "Дія"
+      );
+
+    const objectLabel =
+      getAuditInterfaceText(
+        "Обʼєкт"
+      );
+
+    const detailsLabel =
+      getAuditInterfaceText(
+        "Деталі"
+      );
+
     results.innerHTML = `
       <div class="auditEventsTableWrap">
         <table class="auditEventsTable">
           <thead>
             <tr>
-              <th>Дата</th>
-              <th>Користувач</th>
-              <th>Дія</th>
-              <th>Обʼєкт</th>
-              <th>Деталі</th>
+              <th>
+                ${escapeHtml(
+                  dateLabel
+                )}
+              </th>
+
+              <th>
+                ${escapeHtml(
+                  userLabel
+                )}
+              </th>
+
+              <th>
+                ${escapeHtml(
+                  actionLabel
+                )}
+              </th>
+
+              <th>
+                ${escapeHtml(
+                  objectLabel
+                )}
+              </th>
+
+              <th>
+                ${escapeHtml(
+                  detailsLabel
+                )}
+              </th>
             </tr>
           </thead>
+
           <tbody>
-            ${events.map((event) => `
-              <tr>
-                <td data-label="Дата">
-                  <time>
-                    ${escapeHtml(
-                      formatAuditDate(
-                        event.created_at
-                      )
-                    )}
-                  </time>
-                </td>
-                <td data-label="Користувач">
-                  <strong>
-                    ${escapeHtml(
+            ${
+              events
+                .map(
+                  (event) => {
+                    const actorName =
                       event.actor_name ||
-                      "Система"
-                    )}
-                  </strong>
-                  <small>
-                    ${escapeHtml(
-                      event.actor_role ||
-                      "system"
-                    )}
-                  </small>
-                </td>
-                <td data-label="Дія">
-                  <span class="auditActionBadge">
-                    ${escapeHtml(
-                      getAuditActionLabel(
-                        event.action
-                      )
-                    )}
-                  </span>
-                  <small>
-                    ${escapeHtml(
-                      event.action || "—"
-                    )}
-                  </small>
-                </td>
-                <td data-label="Обʼєкт">
-                  <strong>
-                    ${escapeHtml(
-                      event.entity_label ||
-                      event.entity_type ||
-                      "—"
-                    )}
-                  </strong>
-                  <small>
-                    ${escapeHtml(
-                      event.entity_id || "—"
-                    )}
-                  </small>
-                </td>
-                <td data-label="Деталі">
-                  <details class="auditEventDetails">
-                    <summary>Переглянути</summary>
-                    <div>
-                      <p>
-                        ${escapeHtml(
-                          event.summary ||
+                      getAuditInterfaceText(
+                        "Система"
+                      );
+
+                    const entityLabel =
+                      getAuditStructuredText(
+                        event.entity_label ||
+                        event.entity_type ||
+                        "—"
+                      );
+
+                    const summary =
+                      getAuditStructuredText(
+                        event.summary ||
+                        getAuditInterfaceText(
                           "Без опису"
-                        )}
-                      </p>
+                        )
+                      );
 
-                      <label>До</label>
-                      <pre>${renderAuditJson(
-                        event.before_data
-                      )}</pre>
+                    return `
+                      <tr>
+                        <td
+                          data-label="${escapeHtml(
+                            dateLabel
+                          )}"
+                        >
+                          <time>
+                            ${escapeHtml(
+                              formatAuditDate(
+                                event.created_at
+                              )
+                            )}
+                          </time>
+                        </td>
 
-                      <label>Після</label>
-                      <pre>${renderAuditJson(
-                        event.after_data
-                      )}</pre>
+                        <td
+                          data-label="${escapeHtml(
+                            userLabel
+                          )}"
+                        >
+                          <strong>
+                            ${escapeHtml(
+                              actorName
+                            )}
+                          </strong>
 
-                      <label>Метадані</label>
-                      <pre>${renderAuditJson(
-                        event.metadata
-                      )}</pre>
+                          <small>
+                            ${escapeHtml(
+                              getAuditRoleLabel(
+                                event.actor_role
+                              )
+                            )}
+                          </small>
+                        </td>
 
-                      <footer>
-                        IP: ${escapeHtml(
-                          event.ip_address || "—"
-                        )}
-                      </footer>
-                    </div>
-                  </details>
-                </td>
-              </tr>
-            `).join("")}
+                        <td
+                          data-label="${escapeHtml(
+                            actionLabel
+                          )}"
+                        >
+                          <span class="auditActionBadge">
+                            ${escapeHtml(
+                              getAuditActionLabel(
+                                event.action
+                              )
+                            )}
+                          </span>
+
+                          <small>
+                            ${escapeHtml(
+                              event.action ||
+                              "—"
+                            )}
+                          </small>
+                        </td>
+
+                        <td
+                          data-label="${escapeHtml(
+                            objectLabel
+                          )}"
+                        >
+                          <strong>
+                            ${escapeHtml(
+                              entityLabel
+                            )}
+                          </strong>
+
+                          <small>
+                            ${escapeHtml(
+                              event.entity_id ||
+                              "—"
+                            )}
+                          </small>
+                        </td>
+
+                        <td
+                          data-label="${escapeHtml(
+                            detailsLabel
+                          )}"
+                        >
+                          <details class="auditEventDetails">
+                            <summary>
+                              ${escapeHtml(
+                                getAuditInterfaceText(
+                                  "Переглянути"
+                                )
+                              )}
+                            </summary>
+
+                            <div>
+                              <p>
+                                ${escapeHtml(
+                                  summary
+                                )}
+                              </p>
+
+                              <label>
+                                ${escapeHtml(
+                                  getAuditInterfaceText(
+                                    "До"
+                                  )
+                                )}
+                              </label>
+
+                              <pre>${renderAuditJson(
+                                event.before_data
+                              )}</pre>
+
+                              <label>
+                                ${escapeHtml(
+                                  getAuditInterfaceText(
+                                    "Після"
+                                  )
+                                )}
+                              </label>
+
+                              <pre>${renderAuditJson(
+                                event.after_data
+                              )}</pre>
+
+                              <label>
+                                ${escapeHtml(
+                                  getAuditInterfaceText(
+                                    "Метадані"
+                                  )
+                                )}
+                              </label>
+
+                              <pre>${renderAuditJson(
+                                event.metadata
+                              )}</pre>
+
+                              <footer>
+                                IP:
+                                ${escapeHtml(
+                                  event.ip_address ||
+                                  "—"
+                                )}
+                              </footer>
+                            </div>
+                          </details>
+                        </td>
+                      </tr>
+                    `;
+                  }
+                )
+                .join("")
+            }
           </tbody>
         </table>
       </div>
@@ -111271,49 +112151,161 @@ function renderAuditEventsResult(
   }
 
   const start =
-    total && events.length
+    total &&
+    events.length
       ? offset + 1
       : 0;
 
   const end =
-    offset + events.length;
+    offset +
+    events.length;
 
   pagination.innerHTML = `
     <span>
-      Показано ${start}–${end} із ${total}
+      ${escapeHtml(
+        getAuditPaginationText(
+          start,
+          end,
+          total
+        )
+      )}
     </span>
 
     <div>
       <button
         type="button"
         id="auditEventsPrevious"
-        ${offset <= 0 ? "disabled" : ""}
+        ${
+          offset <= 0
+            ? "disabled"
+            : ""
+        }
       >
-        ← Назад
+        ${escapeHtml(
+          getAuditInterfaceText(
+            "← Назад"
+          )
+        )}
       </button>
 
       <button
         type="button"
         id="auditEventsNext"
         ${
-          offset + limit >= total
+          offset + limit >=
+          total
             ? "disabled"
             : ""
         }
       >
-        Далі →
+        ${escapeHtml(
+          getAuditInterfaceText(
+            "Далі →"
+          )
+        )}
       </button>
     </div>
   `;
 }
+Object.assign(
+  AUDIT_INTERFACE_TEXT,
+  {
+    "Завантажуємо журнал дій…": {
+      en: "Loading the audit log…",
+      de: "Aktivitätsprotokoll wird geladen…",
+      pl: "Ładowanie dziennika działań…",
+    },
+
+    "Не вдалося завантажити журнал.": {
+      en: "Could not load the audit log.",
+      de: "Das Aktivitätsprotokoll konnte nicht geladen werden.",
+      pl: "Nie udało się wczytać dziennika działań.",
+    },
+
+    "Доступ лише для власника": {
+      en: "Owner access only",
+      de: "Nur für den Inhaber",
+      pl: "Dostęp tylko dla właściciela",
+    },
+
+    "Журнал дій містить конфіденційні дані про роботу клініки.": {
+      en: "The audit log contains confidential information about clinic operations.",
+      de: "Das Aktivitätsprotokoll enthält vertrauliche Informationen über den Klinikbetrieb.",
+      pl: "Dziennik działań zawiera poufne informacje o pracy kliniki.",
+    },
+
+    "БЕЗПЕКА ТА КОНТРОЛЬ": {
+      en: "SECURITY AND CONTROL",
+      de: "SICHERHEIT UND KONTROLLE",
+      pl: "BEZPIECZEŃSTWO I KONTROLA",
+    },
+
+    "Журнал дій": {
+      en: "Audit log",
+      de: "Aktivitätsprotokoll",
+      pl: "Dziennik działań",
+    },
+
+    "Переглядайте, хто і коли виконував важливі дії у CRM.": {
+      en: "See who performed important actions in the CRM and when.",
+      de: "Sehen Sie, wer wann wichtige Aktionen im CRM durchgeführt hat.",
+      pl: "Sprawdzaj, kto i kiedy wykonywał ważne działania w CRM.",
+    },
+
+    "🛡️ Тільки власник": {
+      en: "🛡️ Owner only",
+      de: "🛡️ Nur Inhaber",
+      pl: "🛡️ Tylko właściciel",
+    },
+
+    "Усі дії": {
+      en: "All actions",
+      de: "Alle Aktionen",
+      pl: "Wszystkie działania",
+    },
+
+    "Імʼя працівника": {
+      en: "Employee name",
+      de: "Name des Mitarbeiters",
+      pl: "Imię pracownika",
+    },
+
+    "Від дати": {
+      en: "From date",
+      de: "Von Datum",
+      pl: "Data od",
+    },
+
+    "До дати": {
+      en: "To date",
+      de: "Bis Datum",
+      pl: "Data do",
+    },
+
+    "Застосувати": {
+      en: "Apply",
+      de: "Anwenden",
+      pl: "Zastosuj",
+    },
+
+    "Скинути": {
+      en: "Reset",
+      de: "Zurücksetzen",
+      pl: "Resetuj",
+    },
+  }
+);
 
 
 async function refreshAuditEvents(
   page,
-  { reset = false } = {}
+  {
+    reset = false,
+  } = {}
 ) {
   if (reset) {
-    auditViewState.offset = 0;
+    auditViewState.offset =
+      0;
   }
 
   const results =
@@ -111325,28 +112317,41 @@ async function refreshAuditEvents(
 
   results.innerHTML = `
     <div class="auditEventsLoading">
-      Завантажуємо журнал дій…
+      ${escapeHtml(
+        getAuditInterfaceText(
+          "Завантажуємо журнал дій…"
+        )
+      )}
     </div>
   `;
 
   const filters = {
-    offset: auditViewState.offset,
+    offset:
+      auditViewState.offset,
+
     action:
       page.querySelector(
         "#auditActionFilter"
-      )?.value || "",
+      )?.value ||
+      "",
+
     actor_name:
       page.querySelector(
         "#auditActorFilter"
-      )?.value || "",
+      )?.value ||
+      "",
+
     date_from:
       page.querySelector(
         "#auditDateFrom"
-      )?.value || "",
+      )?.value ||
+      "",
+
     date_to:
       page.querySelector(
         "#auditDateTo"
-      )?.value || "",
+      )?.value ||
+      "",
   };
 
   try {
@@ -111356,19 +112361,23 @@ async function refreshAuditEvents(
       );
 
     auditViewState.offset =
-      Number(data?.offset) || 0;
+      Number(
+        data?.offset
+      ) ||
+      0;
 
     renderAuditEventsResult(
       page,
       data
     );
-
   } catch (error) {
     results.innerHTML = `
       <div class="auditEventsError">
         ${escapeHtml(
-          error?.message ||
-          "Не вдалося завантажити журнал."
+          getAuditInterfaceText(
+            error?.message ||
+            "Не вдалося завантажити журнал."
+          )
         )}
       </div>
     `;
@@ -111377,9 +112386,10 @@ async function refreshAuditEvents(
 
 
 async function renderAuditTab() {
-  const page = document.querySelector(
-    '.page[data-page="audit"]'
-  );
+  const page =
+    document.querySelector(
+      '.page[data-page="audit"]'
+    );
 
   if (!page) return;
 
@@ -111387,110 +112397,218 @@ async function renderAuditTab() {
     page.innerHTML = `
       <div class="auditEventsDenied">
         <span>🔒</span>
-        <h2>Доступ лише для власника</h2>
+
+        <h2>
+          ${escapeHtml(
+            getAuditInterfaceText(
+              "Доступ лише для власника"
+            )
+          )}
+        </h2>
+
         <p>
-          Журнал дій містить конфіденційні
-          дані про роботу клініки.
+          ${escapeHtml(
+            getAuditInterfaceText(
+              "Журнал дій містить конфіденційні дані про роботу клініки."
+            )
+          )}
         </p>
       </div>
     `;
+
     return;
   }
 
-  auditViewState.offset = 0;
+  auditViewState.offset =
+    0;
 
   page.innerHTML = `
     <div class="auditEventsPage">
       <section class="auditEventsHero">
         <div>
-          <span>БЕЗПЕКА ТА КОНТРОЛЬ</span>
-          <h1>Журнал дій</h1>
+          <span>
+            ${escapeHtml(
+              getAuditInterfaceText(
+                "БЕЗПЕКА ТА КОНТРОЛЬ"
+              )
+            )}
+          </span>
+
+          <h1>
+            ${escapeHtml(
+              getAuditInterfaceText(
+                "Журнал дій"
+              )
+            )}
+          </h1>
+
           <p>
-            Переглядайте, хто і коли виконував
-            важливі дії у CRM.
+            ${escapeHtml(
+              getAuditInterfaceText(
+                "Переглядайте, хто і коли виконував важливі дії у CRM."
+              )
+            )}
           </p>
         </div>
 
         <div class="auditOwnerBadge">
-          🛡️ Тільки власник
+          ${escapeHtml(
+            getAuditInterfaceText(
+              "🛡️ Тільки власник"
+            )
+          )}
         </div>
       </section>
 
       <section class="auditEventsPanel">
-        <form class="auditEventsFilters" id="auditEventsFilters">
+        <form
+          class="auditEventsFilters"
+          id="auditEventsFilters"
+        >
           <label>
-            <span>Дія</span>
+            <span>
+              ${escapeHtml(
+                getAuditInterfaceText(
+                  "Дія"
+                )
+              )}
+            </span>
+
             <select id="auditActionFilter">
-              <option value="">Усі дії</option>
-              <option value="visit.completed">Завершення візиту</option>
-              <option value="visit.medical_updated">Зміна медичних даних</option>
-              <option value="payment.created">Проведення оплати</option>
-              <option value="payment.cancelled">Скасування оплати</option>
-              <option value="payment.refunded">Повернення оплати</option>
-              <option value="expense.created">Створення витрати</option>
-              <option value="expense.updated">Зміна витрати</option>
-              <option value="cash.deposit_created">Внесення в касу</option>
-              <option value="cash.withdrawal_created">Вилучення з каси</option>
-              <option value="service.added">Додавання послуги</option>
-              <option value="service.removed">Видалення послуги</option>
-              <option value="stock.added">Списання препарату</option>
-              <option value="stock.removed">Повернення препарату</option>
-              <option value="report.telegram_sent">Відправлення звіту в Telegram</option>
-              <option value="report.telegram_auto_sent">Автоматичне відправлення звіту</option>
-              <option value="organization.created">Створення клініки</option>
-              <option value="subscription.extend">Продовження підписки</option>
-              <option value="subscription.set_period">Зміна періоду підписки</option>
-              <option value="subscription.pause">Призупинення підписки</option>
-              <option value="subscription.resume">Відновлення підписки</option>
+              <option value="">
+                ${escapeHtml(
+                  getAuditInterfaceText(
+                    "Усі дії"
+                  )
+                )}
+              </option>
+
+              ${
+                AUDIT_FILTER_ACTIONS
+                  .map(
+                    (action) => `
+                      <option
+                        value="${escapeHtml(
+                          action
+                        )}"
+                      >
+                        ${escapeHtml(
+                          getAuditActionLabel(
+                            action
+                          )
+                        )}
+                      </option>
+                    `
+                  )
+                  .join("")
+              }
             </select>
           </label>
 
           <label>
-            <span>Користувач</span>
+            <span>
+              ${escapeHtml(
+                getAuditInterfaceText(
+                  "Користувач"
+                )
+              )}
+            </span>
+
             <input
               id="auditActorFilter"
               type="search"
-              placeholder="Імʼя працівника"
+              placeholder="${escapeHtml(
+                getAuditInterfaceText(
+                  "Імʼя працівника"
+                )
+              )}"
             >
           </label>
 
           <label>
-            <span>Від дати</span>
-            <input id="auditDateFrom" type="date">
+            <span>
+              ${escapeHtml(
+                getAuditInterfaceText(
+                  "Від дати"
+                )
+              )}
+            </span>
+
+            <input
+              id="auditDateFrom"
+              type="date"
+            >
           </label>
 
           <label>
-            <span>До дати</span>
-            <input id="auditDateTo" type="date">
+            <span>
+              ${escapeHtml(
+                getAuditInterfaceText(
+                  "До дати"
+                )
+              )}
+            </span>
+
+            <input
+              id="auditDateTo"
+              type="date"
+            >
           </label>
 
           <div class="auditEventsFilterActions">
-            <button type="submit">Застосувати</button>
-            <button type="button" id="auditEventsReset">Скинути</button>
+            <button type="submit">
+              ${escapeHtml(
+                getAuditInterfaceText(
+                  "Застосувати"
+                )
+              )}
+            </button>
+
+            <button
+              type="button"
+              id="auditEventsReset"
+            >
+              ${escapeHtml(
+                getAuditInterfaceText(
+                  "Скинути"
+                )
+              )}
+            </button>
           </div>
         </form>
 
         <div id="auditEventsResult"></div>
-        <div id="auditEventsPagination" class="auditEventsPagination"></div>
+
+        <div
+          id="auditEventsPagination"
+          class="auditEventsPagination"
+        ></div>
       </section>
     </div>
   `;
 
   page
-    .querySelector("#auditEventsFilters")
+    .querySelector(
+      "#auditEventsFilters"
+    )
     ?.addEventListener(
       "submit",
       async (event) => {
         event.preventDefault();
+
         await refreshAuditEvents(
           page,
-          { reset: true }
+          {
+            reset: true,
+          }
         );
       }
     );
 
   page
-    .querySelector("#auditEventsReset")
+    .querySelector(
+      "#auditEventsReset"
+    )
     ?.addEventListener(
       "click",
       async () => {
@@ -111502,13 +112620,23 @@ async function renderAuditTab() {
 
         await refreshAuditEvents(
           page,
-          { reset: true }
+          {
+            reset: true,
+          }
         );
       }
     );
 
-  page.addEventListener(
-    "click",
+  if (
+    page._auditEventsClickHandler
+  ) {
+    page.removeEventListener(
+      "click",
+      page._auditEventsClickHandler
+    );
+  }
+
+  const handleAuditEventsClick =
     async (event) => {
       if (
         event.target.closest(
@@ -111519,10 +112647,14 @@ async function renderAuditTab() {
           Math.max(
             0,
             auditViewState.offset -
-              AUDIT_EVENTS_PAGE_SIZE
+            AUDIT_EVENTS_PAGE_SIZE
           );
 
-        await refreshAuditEvents(page);
+        await refreshAuditEvents(
+          page
+        );
+
+        return;
       }
 
       if (
@@ -111533,15 +112665,24 @@ async function renderAuditTab() {
         auditViewState.offset +=
           AUDIT_EVENTS_PAGE_SIZE;
 
-        await refreshAuditEvents(page);
+        await refreshAuditEvents(
+          page
+        );
       }
-    }
+    };
+
+  page._auditEventsClickHandler =
+    handleAuditEventsClick;
+
+  page.addEventListener(
+    "click",
+    handleAuditEventsClick
   );
 
-  await refreshAuditEvents(page);
+  await refreshAuditEvents(
+    page
+  );
 }
-
-
 function isAdmin() {
   const role =
     state.me?.role ||
@@ -111600,6 +112741,340 @@ async function platformClinicsRequest(
   return payload.data || {};
 }
 
+const SETTINGS_INTERFACE_TEXT = {
+  "Клінік ще немає.": {
+    en: "No clinics yet.",
+    de: "Noch keine Kliniken vorhanden.",
+    pl: "Nie ma jeszcze klinik.",
+  },
+
+  "Клініка": {
+    en: "Clinic",
+    de: "Klinik",
+    pl: "Klinika",
+  },
+
+  "Власник": {
+    en: "Owner",
+    de: "Inhaber",
+    pl: "Właściciel",
+  },
+
+  "Власника не знайдено": {
+    en: "Owner not found",
+    de: "Inhaber nicht gefunden",
+    pl: "Nie znaleziono właściciela",
+  },
+
+  "Активна": {
+    en: "Active",
+    de: "Aktiv",
+    pl: "Aktywna",
+  },
+
+  "Закінчується": {
+    en: "Expiring",
+    de: "Läuft bald ab",
+    pl: "Wygasa",
+  },
+
+  "Термін минув": {
+    en: "Expired",
+    de: "Abgelaufen",
+    pl: "Wygasła",
+  },
+
+  "Призупинена": {
+    en: "Paused",
+    de: "Pausiert",
+    pl: "Wstrzymana",
+  },
+
+  "Тестовий період": {
+    en: "Trial period",
+    de: "Testzeitraum",
+    pl: "Okres próbny",
+  },
+
+  "Не налаштована": {
+    en: "Not configured",
+    de: "Nicht eingerichtet",
+    pl: "Nie skonfigurowano",
+  },
+
+  "Доступ вимкнено": {
+    en: "Access disabled",
+    de: "Zugang deaktiviert",
+    pl: "Dostęp wyłączony",
+  },
+
+  "Період ще не задано": {
+    en: "Period not set",
+    de: "Zeitraum nicht festgelegt",
+    pl: "Nie ustawiono okresu",
+  },
+
+  "Ручне керування": {
+    en: "Manual management",
+    de: "Manuelle Verwaltung",
+    pl: "Zarządzanie ręczne",
+  },
+
+  "+1 місяць": {
+    en: "+1 month",
+    de: "+1 Monat",
+    pl: "+1 miesiąc",
+  },
+
+  "Керувати": {
+    en: "Manage",
+    de: "Verwalten",
+    pl: "Zarządzaj",
+  },
+
+  "Початок": {
+    en: "Start",
+    de: "Beginn",
+    pl: "Początek",
+  },
+
+  "Кінець періоду": {
+    en: "End of period",
+    de: "Ende des Zeitraums",
+    pl: "Koniec okresu",
+  },
+
+  "Ціна за місяць, ₴": {
+    en: "Monthly price, ₴",
+    de: "Monatspreis, ₴",
+    pl: "Cena miesięczna, ₴",
+  },
+
+  "Отримано, ₴": {
+    en: "Received, ₴",
+    de: "Erhalten, ₴",
+    pl: "Otrzymano, ₴",
+  },
+
+  "Необов’язково": {
+    en: "Optional",
+    de: "Optional",
+    pl: "Opcjonalnie",
+  },
+
+  "Коментар": {
+    en: "Comment",
+    de: "Kommentar",
+    pl: "Komentarz",
+  },
+
+  "Наприклад, оплата готівкою": {
+    en: "For example, cash payment",
+    de: "Zum Beispiel Barzahlung",
+    pl: "Na przykład płatność gotówką",
+  },
+
+  "Кінцева дата не включається: період до 01.09 діє по 31.08 включно.": {
+    en: "The end date is excluded: a period ending on 01.09 remains active through 31.08.",
+    de: "Das Enddatum ist ausgeschlossen: Ein Zeitraum bis 01.09 gilt einschließlich 31.08.",
+    pl: "Data końcowa nie jest wliczana: okres do 01.09 obowiązuje do 31.08 włącznie.",
+  },
+
+  "Зберегти період": {
+    en: "Save period",
+    de: "Zeitraum speichern",
+    pl: "Zapisz okres",
+  },
+
+  "Відновити": {
+    en: "Resume",
+    de: "Fortsetzen",
+    pl: "Wznów",
+  },
+
+  "Призупинити": {
+    en: "Pause",
+    de: "Pausieren",
+    pl: "Wstrzymaj",
+  },
+
+  "Історія": {
+    en: "History",
+    de: "Verlauf",
+    pl: "Historia",
+  },
+};
+
+
+function normalizeSettingsText(
+  value
+) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+function getSettingsInterfaceText(
+  sourceText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  const normalizedSource =
+    normalizeSettingsText(
+      sourceText
+    );
+
+  const entry =
+    Object.entries(
+      SETTINGS_INTERFACE_TEXT
+    ).find(
+      ([
+        ukrainian,
+        translations,
+      ]) =>
+        [
+          ukrainian,
+          ...Object.values(
+            translations
+          ),
+        ].some(
+          (value) =>
+            normalizeSettingsText(
+              value
+            ) ===
+            normalizedSource
+        )
+    );
+
+  if (!entry) {
+    return String(
+      sourceText ||
+      ""
+    );
+  }
+
+  const [
+    ukrainian,
+    translations,
+  ] = entry;
+
+  return language === "uk"
+    ? ukrainian
+    : (
+        translations[language] ||
+        ukrainian
+      );
+}
+
+
+function formatSettingsDate(
+  value,
+  options = {}
+) {
+  if (!value) {
+    return "—";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat(
+    getCalendarLocale(),
+    options
+  ).format(date);
+}
+
+
+function getSettingsSubscriptionStatusText(
+  status
+) {
+  const labels = {
+    active:
+      "Активна",
+
+    expiring:
+      "Закінчується",
+
+    expired:
+      "Термін минув",
+
+    paused:
+      "Призупинена",
+
+    trial:
+      "Тестовий період",
+
+    unconfigured:
+      "Не налаштована",
+  };
+
+  return getSettingsInterfaceText(
+    labels[status] ||
+    "Не налаштована"
+  );
+}
+
+
+function getSettingsAccessUntilText(
+  dateText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Access until ${dateText}`;
+  }
+
+  if (language === "de") {
+    return `Zugang bis ${dateText}`;
+  }
+
+  if (language === "pl") {
+    return `Dostęp do ${dateText}`;
+  }
+
+  return `Доступ до ${dateText}`;
+}
+
+
+function getSettingsDaysRemainingText(
+  days
+) {
+  const value =
+    Number(days || 0)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `${value} days remaining`;
+  }
+
+  if (language === "de") {
+    return `${value} Tage verbleibend`;
+  }
+
+  if (language === "pl") {
+    return `Pozostało dni: ${value}`;
+  }
+
+  return `${value} дн. залишилось`;
+}
+
+
 function renderPlatformClinicsList(
   container,
   clinics = []
@@ -111609,266 +113084,776 @@ function renderPlatformClinicsList(
   if (!clinics.length) {
     container.innerHTML = `
       <div class="platformClinicEmpty">
-        Клінік ще немає.
+        ${escapeHtml(
+          getSettingsInterfaceText(
+            "Клінік ще немає."
+          )
+        )}
       </div>
     `;
+
     return;
   }
 
-  container.innerHTML = clinics
-    .map((clinic) => {
-      const subscription =
-        clinic.subscription || {};
-      const subscriptionLabels = {
-        active: "Активна",
-        expiring: "Закінчується",
-        expired: "Термін минув",
-        paused: "Призупинена",
-        trial: "Тестовий період",
-        unconfigured: "Не налаштована",
-      };
-      const subscriptionStatus =
-        subscription.status ||
-        "unconfigured";
-      const subscriptionLabel =
-        subscriptionLabels[
-          subscriptionStatus
-        ] || "Не налаштована";
-      const accessLabel =
-        subscription.last_access_day
-          ? new Intl.DateTimeFormat(
-              "uk-UA",
-              {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              }
-            ).format(
-              new Date(
-                `${subscription.last_access_day}T12:00:00`
-              )
-            )
-          : "—";
-      const createdAt = clinic.created_at
-        ? new Intl.DateTimeFormat(
-            "uk-UA",
-            {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            }
-          ).format(
-            new Date(clinic.created_at)
-          )
-        : "—";
+  container.innerHTML =
+    clinics
+      .map(
+        (clinic) => {
+          const subscription =
+            clinic.subscription ||
+            {};
 
-      return `
-        <article class="platformClinicItem">
-          <div class="platformClinicMark" data-clinic-theme="${escapeHtml(
-            clinic.theme || "purple"
-          )}">
-            🏥
-          </div>
+          const subscriptionStatus =
+            subscription.status ||
+            "unconfigured";
 
-          <div class="platformClinicMeta">
-            <strong>${escapeHtml(clinic.name || "Клініка")}</strong>
-            <span>
-              ${
-                clinic.owner
-                  ? `${escapeHtml(
-                      clinic.owner.display_name ||
-                      "Власник"
-                    )} · ${escapeHtml(
-                      clinic.owner.username || "—"
-                    )}`
-                  : "Власника не знайдено"
-              }
-            </span>
-          </div>
+          const subscriptionLabel =
+            getSettingsSubscriptionStatusText(
+              subscriptionStatus
+            );
 
-          <div class="platformClinicState">
-            <strong>${escapeHtml(createdAt)}</strong>
-            <span class="${
-              clinic.owner?.is_active === false
-                ? "inactive"
-                : ""
-            }">
-              ${
-                clinic.owner?.is_active === false
-                  ? "Доступ вимкнено"
-                  : "Активна"
-              }
-            </span>
-          </div>
+          const accessLabel =
+            subscription
+              .last_access_day
+              ? formatSettingsDate(
+                  `${subscription.last_access_day}T12:00:00`,
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }
+                )
+              : "—";
 
-          <div class="platformSubscriptionRow">
-            <div>
-              <span class="platformSubscriptionBadge ${escapeHtml(
-                subscriptionStatus
-              )}">
-                ${escapeHtml(subscriptionLabel)}
-              </span>
-              <strong>
-                ${
-                  subscription.last_access_day
-                    ? `Доступ до ${escapeHtml(accessLabel)}`
-                    : "Період ще не задано"
-                }
-              </strong>
-              <small>
-                ${
-                  subscription.days_remaining != null
-                    ? `${escapeHtml(subscription.days_remaining)} дн. залишилось`
-                    : "Ручне керування"
-                }
-              </small>
-            </div>
+          const createdAt =
+            clinic.created_at
+              ? formatSettingsDate(
+                  clinic.created_at,
+                  {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  }
+                )
+              : "—";
 
-            <div class="platformSubscriptionActions">
-              <button
-                type="button"
-                data-subscription-extend="${escapeHtml(clinic.id)}"
-                data-clinic-name="${escapeHtml(clinic.name || "Клініка")}"
-              >+1 місяць</button>
-              <button
-                type="button"
-                data-subscription-edit="${escapeHtml(clinic.id)}"
-              >Керувати</button>
-            </div>
-          </div>
+          const clinicName =
+            clinic.name ||
+            getSettingsInterfaceText(
+              "Клініка"
+            );
 
-          <form
-            class="platformSubscriptionEditor"
-            data-subscription-editor="${escapeHtml(clinic.id)}"
-            hidden
-          >
-            <label>
-              <span>Початок</span>
-              <input type="date" name="access_starts_on" value="${escapeHtml(
-                subscription.access_starts_on || ""
-              )}" required>
-            </label>
-            <label>
-              <span>Кінець періоду</span>
-              <input type="date" name="access_ends_on" value="${escapeHtml(
-                subscription.access_ends_on || ""
-              )}" required>
-            </label>
-            <label>
-              <span>Ціна за місяць, ₴</span>
-              <input type="number" min="0" step="0.01" name="monthly_price" value="${escapeHtml(
-                subscription.monthly_price ?? ""
-              )}" placeholder="0">
-            </label>
-            <label>
-              <span>Отримано, ₴</span>
-              <input type="number" min="0" step="0.01" name="amount" placeholder="Необов’язково">
-            </label>
-            <label class="wide">
-              <span>Коментар</span>
-              <input type="text" maxlength="500" name="note" value="${escapeHtml(
-                subscription.note || ""
-              )}" placeholder="Наприклад, оплата готівкою">
-            </label>
-            <p>
-              Кінцева дата не включається: період до 01.09 діє по 31.08 включно.
-            </p>
-            <div class="platformSubscriptionEditorActions">
-              <button type="submit">Зберегти період</button>
-              <button
-                type="button"
-                data-subscription-state="${escapeHtml(clinic.id)}"
-                data-next-action="${
-                  subscription.stored_status === "paused"
-                    ? "resume"
-                    : "pause"
-                }"
+          const ownerName =
+            clinic.owner
+              ? (
+                  clinic.owner
+                    .display_name ||
+                  getSettingsInterfaceText(
+                    "Власник"
+                  )
+                )
+              : "";
+
+          return `
+            <article class="platformClinicItem">
+              <div
+                class="platformClinicMark"
+                data-clinic-theme="${escapeHtml(
+                  clinic.theme ||
+                  "purple"
+                )}"
               >
-                ${
-                  subscription.stored_status === "paused"
-                    ? "Відновити"
-                    : "Призупинити"
-                }
-              </button>
-              <button
-                type="button"
-                data-subscription-history="${escapeHtml(clinic.id)}"
-              >Історія</button>
-            </div>
-            <div
-              class="platformSubscriptionHistory"
-              data-subscription-history-box="${escapeHtml(clinic.id)}"
-              hidden
-            ></div>
-          </form>
-        </article>
-      `;
-    })
-    .join("");
+                🏥
+              </div>
+
+              <div class="platformClinicMeta">
+                <strong>
+                  ${escapeHtml(
+                    clinicName
+                  )}
+                </strong>
+
+                <span>
+                  ${
+                    clinic.owner
+                      ? (
+                          `${escapeHtml(
+                            ownerName
+                          )} · ` +
+                          `${escapeHtml(
+                            clinic.owner
+                              .username ||
+                            "—"
+                          )}`
+                        )
+                      : escapeHtml(
+                          getSettingsInterfaceText(
+                            "Власника не знайдено"
+                          )
+                        )
+                  }
+                </span>
+              </div>
+
+              <div class="platformClinicState">
+                <strong>
+                  ${escapeHtml(
+                    createdAt
+                  )}
+                </strong>
+
+                <span
+                  class="${
+                    clinic.owner
+                      ?.is_active ===
+                    false
+                      ? "inactive"
+                      : ""
+                  }"
+                >
+                  ${escapeHtml(
+                    getSettingsInterfaceText(
+                      clinic.owner
+                        ?.is_active ===
+                      false
+                        ? "Доступ вимкнено"
+                        : "Активна"
+                    )
+                  )}
+                </span>
+              </div>
+
+              <div class="platformSubscriptionRow">
+                <div>
+                  <span
+                    class="
+                      platformSubscriptionBadge
+                      ${escapeHtml(
+                        subscriptionStatus
+                      )}
+                    "
+                  >
+                    ${escapeHtml(
+                      subscriptionLabel
+                    )}
+                  </span>
+
+                  <strong>
+                    ${escapeHtml(
+                      subscription
+                        .last_access_day
+                        ? getSettingsAccessUntilText(
+                            accessLabel
+                          )
+                        : getSettingsInterfaceText(
+                            "Період ще не задано"
+                          )
+                    )}
+                  </strong>
+
+                  <small>
+                    ${escapeHtml(
+                      subscription
+                        .days_remaining !=
+                      null
+                        ? getSettingsDaysRemainingText(
+                            subscription
+                              .days_remaining
+                          )
+                        : getSettingsInterfaceText(
+                            "Ручне керування"
+                          )
+                    )}
+                  </small>
+                </div>
+
+                <div class="platformSubscriptionActions">
+                  <button
+                    type="button"
+                    data-subscription-extend="${escapeHtml(
+                      String(
+                        clinic.id
+                      )
+                    )}"
+                    data-clinic-name="${escapeHtml(
+                      clinicName
+                    )}"
+                  >
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "+1 місяць"
+                      )
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    data-subscription-edit="${escapeHtml(
+                      String(
+                        clinic.id
+                      )
+                    )}"
+                  >
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Керувати"
+                      )
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <form
+                class="platformSubscriptionEditor"
+                data-subscription-editor="${escapeHtml(
+                  String(
+                    clinic.id
+                  )
+                )}"
+                hidden
+              >
+                <label>
+                  <span>
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Початок"
+                      )
+                    )}
+                  </span>
+
+                  <input
+                    type="date"
+                    name="access_starts_on"
+                    value="${escapeHtml(
+                      subscription
+                        .access_starts_on ||
+                      ""
+                    )}"
+                    required
+                  >
+                </label>
+
+                <label>
+                  <span>
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Кінець періоду"
+                      )
+                    )}
+                  </span>
+
+                  <input
+                    type="date"
+                    name="access_ends_on"
+                    value="${escapeHtml(
+                      subscription
+                        .access_ends_on ||
+                      ""
+                    )}"
+                    required
+                  >
+                </label>
+
+                <label>
+                  <span>
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Ціна за місяць, ₴"
+                      )
+                    )}
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    name="monthly_price"
+                    value="${escapeHtml(
+                      subscription
+                        .monthly_price ??
+                      ""
+                    )}"
+                    placeholder="0"
+                  >
+                </label>
+
+                <label>
+                  <span>
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Отримано, ₴"
+                      )
+                    )}
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    name="amount"
+                    placeholder="${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Необов’язково"
+                      )
+                    )}"
+                  >
+                </label>
+
+                <label class="wide">
+                  <span>
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Коментар"
+                      )
+                    )}
+                  </span>
+
+                  <input
+                    type="text"
+                    maxlength="500"
+                    name="note"
+                    value="${escapeHtml(
+                      subscription.note ||
+                      ""
+                    )}"
+                    placeholder="${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Наприклад, оплата готівкою"
+                      )
+                    )}"
+                  >
+                </label>
+
+                <p>
+                  ${escapeHtml(
+                    getSettingsInterfaceText(
+                      "Кінцева дата не включається: період до 01.09 діє по 31.08 включно."
+                    )
+                  )}
+                </p>
+
+                <div class="platformSubscriptionEditorActions">
+                  <button type="submit">
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Зберегти період"
+                      )
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    data-subscription-state="${escapeHtml(
+                      String(
+                        clinic.id
+                      )
+                    )}"
+                    data-next-action="${
+                      subscription
+                        .stored_status ===
+                      "paused"
+                        ? "resume"
+                        : "pause"
+                    }"
+                  >
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        subscription
+                          .stored_status ===
+                        "paused"
+                          ? "Відновити"
+                          : "Призупинити"
+                      )
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    data-subscription-history="${escapeHtml(
+                      String(
+                        clinic.id
+                      )
+                    )}"
+                  >
+                    ${escapeHtml(
+                      getSettingsInterfaceText(
+                        "Історія"
+                      )
+                    )}
+                  </button>
+                </div>
+
+                <div
+                  class="platformSubscriptionHistory"
+                  data-subscription-history-box="${escapeHtml(
+                    String(
+                      clinic.id
+                    )
+                  )}"
+                  hidden
+                ></div>
+              </form>
+            </article>
+          `;
+        }
+      )
+      .join("");
 }
+
+Object.assign(
+  SETTINGS_INTERFACE_TEXT,
+  {
+    "Підтвердження": {
+      en: "Confirmation",
+      de: "Bestätigung",
+      pl: "Potwierdzenie",
+    },
+
+    "Додати місяць": {
+      en: "Add month",
+      de: "Monat hinzufügen",
+      pl: "Dodaj miesiąc",
+    },
+
+    "Додаємо…": {
+      en: "Adding…",
+      de: "Wird hinzugefügt…",
+      pl: "Dodawanie…",
+    },
+
+    "Не вдалося продовжити підписку.": {
+      en: "Could not extend the subscription.",
+      de: "Das Abonnement konnte nicht verlängert werden.",
+      pl: "Nie udało się przedłużyć subskrypcji.",
+    },
+
+    "Зберігаємо…": {
+      en: "Saving…",
+      de: "Wird gespeichert…",
+      pl: "Zapisywanie…",
+    },
+
+    "Не вдалося зберегти період.": {
+      en: "Could not save the subscription period.",
+      de: "Der Abonnementzeitraum konnte nicht gespeichert werden.",
+      pl: "Nie udało się zapisać okresu subskrypcji.",
+    },
+
+    "Призупинити підписку? CRM поки не буде заблокована.": {
+      en: "Pause the subscription? The CRM will remain available for now.",
+      de: "Abonnement pausieren? Das CRM bleibt vorerst verfügbar.",
+      pl: "Wstrzymać subskrypcję? System CRM pozostanie na razie dostępny.",
+    },
+
+    "Відновити підписку?": {
+      en: "Resume the subscription?",
+      de: "Abonnement fortsetzen?",
+      pl: "Wznowić subskrypcję?",
+    },
+
+    "Не вдалося змінити стан підписки.": {
+      en: "Could not change the subscription status.",
+      de: "Der Abonnementstatus konnte nicht geändert werden.",
+      pl: "Nie udało się zmienić statusu subskrypcji.",
+    },
+
+    "Завантажуємо історію…": {
+      en: "Loading history…",
+      de: "Verlauf wird geladen…",
+      pl: "Ładowanie historii…",
+    },
+
+    "Продовжено": {
+      en: "Extended",
+      de: "Verlängert",
+      pl: "Przedłużono",
+    },
+
+    "Період змінено": {
+      en: "Period changed",
+      de: "Zeitraum geändert",
+      pl: "Zmieniono okres",
+    },
+
+    "Призупинено": {
+      en: "Paused",
+      de: "Pausiert",
+      pl: "Wstrzymano",
+    },
+
+    "Відновлено": {
+      en: "Resumed",
+      de: "Fortgesetzt",
+      pl: "Wznowiono",
+    },
+
+    "Без коментаря": {
+      en: "No comment",
+      de: "Kein Kommentar",
+      pl: "Bez komentarza",
+    },
+
+    "Історія ще порожня.": {
+      en: "The history is empty.",
+      de: "Der Verlauf ist leer.",
+      pl: "Historia jest pusta.",
+    },
+
+    "Не вдалося завантажити історію.": {
+      en: "Could not load the history.",
+      de: "Der Verlauf konnte nicht geladen werden.",
+      pl: "Nie udało się załadować historii.",
+    },
+  }
+);
+
+
+function getSettingsExtendMessage(
+  clinicName
+) {
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Add one month of access for “${clinicName}”?`;
+  }
+
+  if (language === "de") {
+    return `Einen Monat Zugang für „${clinicName}“ hinzufügen?`;
+  }
+
+  if (language === "pl") {
+    return `Dodać jeden miesiąc dostępu dla „${clinicName}”?`;
+  }
+
+  return `Додати один місяць доступу для «${clinicName}»?`;
+}
+
+
+function getSettingsSafeErrorText(
+  error,
+  fallback
+) {
+  const sourceMessage =
+    normalizeSettingsText(
+      error?.message
+    );
+
+  if (!sourceMessage) {
+    return getSettingsInterfaceText(
+      fallback
+    );
+  }
+
+  const translatedMessage =
+    getSettingsInterfaceText(
+      sourceMessage
+    );
+
+  if (
+    getInterfaceLanguage() !== "uk" &&
+    translatedMessage === sourceMessage
+  ) {
+    return getSettingsInterfaceText(
+      fallback
+    );
+  }
+
+  return translatedMessage;
+}
+
+
+function showSettingsMessage(
+  message
+) {
+  openDeleteModal(
+    escapeHtml(message),
+    null,
+    "info"
+  );
+}
+
+
+function openSettingsConfirmation(
+  message,
+  confirmText,
+  callback,
+  danger = false
+) {
+  openDeleteModal(
+    escapeHtml(message),
+    callback
+  );
+
+  const modal =
+    document.getElementById(
+      "deleteModal"
+    );
+
+  const title =
+    modal?.querySelector("h2");
+
+  const icon =
+    modal?.querySelector(
+      ".deleteIcon"
+    );
+
+  const confirmButton =
+    document.getElementById(
+      "deleteConfirm"
+    );
+
+  if (title) {
+    title.textContent =
+      getSettingsInterfaceText(
+        "Підтвердження"
+      );
+  }
+
+  if (icon) {
+    icon.textContent =
+      danger ? "!" : "✓";
+  }
+
+  if (confirmButton) {
+    confirmButton.textContent =
+      confirmText;
+
+    confirmButton.classList.remove(
+      "primary",
+      "btnDanger"
+    );
+
+    confirmButton.classList.add(
+      danger
+        ? "btnDanger"
+        : "primary"
+    );
+  }
+}
+
+
+function getSettingsHistoryActionText(
+  action
+) {
+  const labels = {
+    extended: "Продовжено",
+    period_set: "Період змінено",
+    paused: "Призупинено",
+    resumed: "Відновлено",
+  };
+
+  return getSettingsInterfaceText(
+    labels[action] ||
+    action ||
+    "—"
+  );
+}
+
 
 async function bindPlatformSubscriptionControls(
   list,
   refreshList
 ) {
   list
-    .querySelectorAll("[data-subscription-edit]")
+    .querySelectorAll(
+      "[data-subscription-edit]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", () => {
-        const editor = list.querySelector(
-          `[data-subscription-editor="${CSS.escape(
-            button.dataset.subscriptionEdit
-          )}"]`
-        );
+      button.addEventListener(
+        "click",
+        () => {
+          const editor =
+            list.querySelector(
+              `[data-subscription-editor="${CSS.escape(
+                button.dataset.subscriptionEdit
+              )}"]`
+            );
 
-        if (editor) {
-          editor.hidden = !editor.hidden;
+          if (editor) {
+            editor.hidden =
+              !editor.hidden;
+          }
         }
-      });
+      );
     });
 
+
   list
-    .querySelectorAll("[data-subscription-extend]")
+    .querySelectorAll(
+      "[data-subscription-extend]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", async () => {
-        const clinicName =
-          button.dataset.clinicName || "клініки";
+      button.addEventListener(
+        "click",
+        () => {
+          const clinicName =
+            button.dataset.clinicName ||
+            "—";
 
-        if (!window.confirm(
-          `Додати один місяць доступу для «${clinicName}»?`
-        )) return;
+          openSettingsConfirmation(
+            getSettingsExtendMessage(
+              clinicName
+            ),
+            getSettingsInterfaceText(
+              "Додати місяць"
+            ),
+            async () => {
+              button.disabled = true;
 
-        button.disabled = true;
-        button.textContent = "Додаємо…";
+              button.textContent =
+                getSettingsInterfaceText(
+                  "Додаємо…"
+                );
 
-        try {
-          await platformClinicsRequest(
-            `/${encodeURIComponent(
-              button.dataset.subscriptionExtend
-            )}/subscription`,
-            {
-              method: "POST",
-              body: JSON.stringify({
-                action: "extend",
-                months: 1,
-              }),
+              try {
+                await platformClinicsRequest(
+                  `/${encodeURIComponent(
+                    button.dataset.subscriptionExtend
+                  )}/subscription`,
+                  {
+                    method: "POST",
+
+                    body:
+                      JSON.stringify({
+                        action: "extend",
+                        months: 1,
+                      }),
+                  }
+                );
+
+                await refreshList();
+              } catch (error) {
+                console.error(
+                  "Subscription extension failed:",
+                  error
+                );
+
+                showSettingsMessage(
+                  getSettingsSafeErrorText(
+                    error,
+                    "Не вдалося продовжити підписку."
+                  )
+                );
+
+                button.disabled = false;
+
+                button.textContent =
+                  getSettingsInterfaceText(
+                    "+1 місяць"
+                  );
+              }
             }
           );
-
-          await refreshList();
-        } catch (error) {
-          window.alert(
-            error.message ||
-            "Не вдалося продовжити підписку"
-          );
-          button.disabled = false;
-          button.textContent = "+1 місяць";
         }
-      });
+      );
     });
 
+
   list
-    .querySelectorAll(".platformSubscriptionEditor")
+    .querySelectorAll(
+      ".platformSubscriptionEditor"
+    )
     .forEach((form) => {
       const orgId =
         form.dataset.subscriptionEditor;
@@ -111877,261 +113862,746 @@ async function bindPlatformSubscriptionControls(
         "submit",
         async (event) => {
           event.preventDefault();
-          const submit = form.querySelector(
-            'button[type="submit"]'
-          );
-          const data = new FormData(form);
 
-          submit.disabled = true;
-          submit.textContent = "Зберігаємо…";
+          const submit =
+            form.querySelector(
+              'button[type="submit"]'
+            );
+
+          const data =
+            new FormData(form);
+
+          if (submit) {
+            submit.disabled = true;
+
+            submit.textContent =
+              getSettingsInterfaceText(
+                "Зберігаємо…"
+              );
+          }
 
           try {
             await platformClinicsRequest(
-              `/${encodeURIComponent(orgId)}/subscription`,
+              `/${encodeURIComponent(
+                orgId
+              )}/subscription`,
               {
                 method: "POST",
-                body: JSON.stringify({
-                  action: "set_period",
-                  access_starts_on:
-                    data.get("access_starts_on"),
-                  access_ends_on:
-                    data.get("access_ends_on"),
-                  monthly_price:
-                    data.get("monthly_price"),
-                  amount: data.get("amount"),
-                  note: data.get("note"),
-                }),
+
+                body:
+                  JSON.stringify({
+                    action:
+                      "set_period",
+
+                    access_starts_on:
+                      data.get(
+                        "access_starts_on"
+                      ),
+
+                    access_ends_on:
+                      data.get(
+                        "access_ends_on"
+                      ),
+
+                    monthly_price:
+                      data.get(
+                        "monthly_price"
+                      ),
+
+                    amount:
+                      data.get(
+                        "amount"
+                      ),
+
+                    note:
+                      data.get(
+                        "note"
+                      ),
+                  }),
               }
             );
 
             await refreshList();
           } catch (error) {
-            window.alert(
-              error.message ||
-              "Не вдалося зберегти період"
+            console.error(
+              "Subscription period save failed:",
+              error
             );
-            submit.disabled = false;
-            submit.textContent = "Зберегти період";
+
+            showSettingsMessage(
+              getSettingsSafeErrorText(
+                error,
+                "Не вдалося зберегти період."
+              )
+            );
+
+            if (submit) {
+              submit.disabled = false;
+
+              submit.textContent =
+                getSettingsInterfaceText(
+                  "Зберегти період"
+                );
+            }
           }
         }
       );
     });
 
+
   list
-    .querySelectorAll("[data-subscription-state]")
+    .querySelectorAll(
+      "[data-subscription-state]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", async () => {
-        const action = button.dataset.nextAction;
+      button.addEventListener(
+        "click",
+        () => {
+          const action =
+            button.dataset.nextAction;
 
-        if (!window.confirm(
-          action === "pause"
-            ? "Призупинити підписку? CRM поки не буде заблокована."
-            : "Відновити підписку?"
-        )) return;
+          const isPause =
+            action === "pause";
 
-        button.disabled = true;
+          const question =
+            isPause
+              ? "Призупинити підписку? CRM поки не буде заблокована."
+              : "Відновити підписку?";
 
-        try {
-          await platformClinicsRequest(
-            `/${encodeURIComponent(
-              button.dataset.subscriptionState
-            )}/subscription`,
-            {
-              method: "POST",
-              body: JSON.stringify({ action }),
-            }
+          const confirmText =
+            isPause
+              ? "Призупинити"
+              : "Відновити";
+
+          openSettingsConfirmation(
+            getSettingsInterfaceText(
+              question
+            ),
+            getSettingsInterfaceText(
+              confirmText
+            ),
+            async () => {
+              const originalText =
+                button.textContent;
+
+              button.disabled = true;
+
+              try {
+                await platformClinicsRequest(
+                  `/${encodeURIComponent(
+                    button.dataset.subscriptionState
+                  )}/subscription`,
+                  {
+                    method: "POST",
+
+                    body:
+                      JSON.stringify({
+                        action,
+                      }),
+                  }
+                );
+
+                await refreshList();
+              } catch (error) {
+                console.error(
+                  "Subscription status change failed:",
+                  error
+                );
+
+                showSettingsMessage(
+                  getSettingsSafeErrorText(
+                    error,
+                    "Не вдалося змінити стан підписки."
+                  )
+                );
+
+                button.disabled = false;
+
+                button.textContent =
+                  originalText;
+              }
+            },
+            isPause
           );
-
-          await refreshList();
-        } catch (error) {
-          window.alert(error.message);
-          button.disabled = false;
         }
-      });
+      );
     });
 
+
   list
-    .querySelectorAll("[data-subscription-history]")
+    .querySelectorAll(
+      "[data-subscription-history]"
+    )
     .forEach((button) => {
-      button.addEventListener("click", async () => {
-        const orgId = button.dataset.subscriptionHistory;
-        const box = list.querySelector(
-          `[data-subscription-history-box="${CSS.escape(orgId)}"]`
-        );
+      button.addEventListener(
+        "click",
+        async () => {
+          const orgId =
+            button.dataset.subscriptionHistory;
 
-        if (!box) return;
+          const box =
+            list.querySelector(
+              `[data-subscription-history-box="${CSS.escape(
+                orgId
+              )}"]`
+            );
 
-        if (!box.hidden) {
-          box.hidden = true;
-          return;
+          if (!box) return;
+
+          if (!box.hidden) {
+            box.hidden = true;
+            return;
+          }
+
+          box.hidden = false;
+
+          box.textContent =
+            getSettingsInterfaceText(
+              "Завантажуємо історію…"
+            );
+
+          try {
+            const data =
+              await platformClinicsRequest(
+                `/${encodeURIComponent(
+                  orgId
+                )}/subscription/history`
+              );
+
+            const events =
+              Array.isArray(
+                data.events
+              )
+                ? data.events
+                : [];
+
+            box.innerHTML =
+              events.length
+                ? events
+                    .map((item) => {
+                      const amount =
+                        Number(
+                          item.amount
+                        );
+
+                      const details =
+                        item.amount != null &&
+                        Number.isFinite(
+                          amount
+                        )
+                          ? (
+                              amount.toLocaleString(
+                                getCalendarLocale()
+                              ) + " ₴"
+                            )
+                          : (
+                              item.note ||
+                              getSettingsInterfaceText(
+                                "Без коментаря"
+                              )
+                            );
+
+                      return `
+                        <div>
+                          <strong>
+                            ${escapeHtml(
+                              getSettingsHistoryActionText(
+                                item.action
+                              )
+                            )}
+                          </strong>
+
+                          <span>
+                            ${escapeHtml(
+                              formatSettingsDate(
+                                item.created_at,
+                                {
+                                  dateStyle:
+                                    "medium",
+
+                                  timeStyle:
+                                    "short",
+                                }
+                              )
+                            )}
+                          </span>
+
+                          <small>
+                            ${escapeHtml(
+                              details
+                            )}
+                          </small>
+                        </div>
+                      `;
+                    })
+                    .join("")
+                : getSettingsInterfaceText(
+                    "Історія ще порожня."
+                  );
+          } catch (error) {
+            console.error(
+              "Subscription history loading failed:",
+              error
+            );
+
+            box.textContent =
+              getSettingsSafeErrorText(
+                error,
+                "Не вдалося завантажити історію."
+              );
+          }
         }
-
-        box.hidden = false;
-        box.textContent = "Завантажуємо історію…";
-
-        try {
-          const data = await platformClinicsRequest(
-            `/${encodeURIComponent(orgId)}/subscription/history`
-          );
-          const labels = {
-            extended: "Продовжено",
-            period_set: "Період змінено",
-            paused: "Призупинено",
-            resumed: "Відновлено",
-          };
-
-          box.innerHTML = (data.events || []).length
-            ? data.events.map((item) => `
-                <div>
-                  <strong>${escapeHtml(labels[item.action] || item.action)}</strong>
-                  <span>${escapeHtml(
-                    new Intl.DateTimeFormat("uk-UA", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    }).format(new Date(item.created_at))
-                  )}</span>
-                  <small>${
-                    item.amount != null
-                      ? `${escapeHtml(item.amount)} ₴`
-                      : escapeHtml(item.note || "Без коментаря")
-                  }</small>
-                </div>
-              `).join("")
-            : "Історія ще порожня.";
-        } catch (error) {
-          box.textContent = error.message;
-        }
-      });
+      );
     });
 }
+Object.assign(
+  SETTINGS_INTERFACE_TEXT,
+  {
+    "Завантажуємо клініки…": {
+      en: "Loading clinics…",
+      de: "Kliniken werden geladen…",
+      pl: "Ładowanie klinik…",
+    },
 
-async function bindPlatformClinicUI(page) {
-  const form = page.querySelector(
-    "#platformClinicCreateForm"
-  );
-  const list = page.querySelector(
-    "#platformClinicsList"
-  );
-  const counter = page.querySelector(
-    "#platformClinicsCounter"
-  );
-  const resultCard = page.querySelector(
-    "#platformClinicCredentials"
-  );
+    "Не вдалося завантажити клініки.": {
+      en: "Could not load the clinics.",
+      de: "Die Kliniken konnten nicht geladen werden.",
+      pl: "Nie udało się załadować klinik.",
+    },
 
-  if (!form || !list) return;
+    "Створюємо клініку…": {
+      en: "Creating clinic…",
+      de: "Klinik wird erstellt…",
+      pl: "Tworzenie kliniki…",
+    },
 
-  const refreshList = async () => {
-    list.innerHTML = `
-      <div class="platformClinicEmpty">
-        Завантажуємо клініки…
-      </div>
-    `;
+    "Клініка": {
+      en: "Clinic",
+      de: "Klinik",
+      pl: "Klinika",
+    },
 
-    try {
-      const data = await platformClinicsRequest();
-      const clinics = data.clinics || [];
-      renderPlatformClinicsList(list, clinics);
-      await bindPlatformSubscriptionControls(
-        list,
-        refreshList
-      );
+    "Доступ готовий": {
+      en: "Access is ready",
+      de: "Zugang ist bereit",
+      pl: "Dostęp jest gotowy",
+    },
 
-      if (counter) {
-        counter.textContent = String(
-          data.total ?? clinics.length
-        );
-      }
-    } catch (error) {
+    "Пароль показується лише зараз. Власник змінить його під час першого входу.": {
+      en: "The password is shown only now. The owner will change it during the first sign-in.",
+      de: "Das Passwort wird nur jetzt angezeigt. Der Inhaber ändert es bei der ersten Anmeldung.",
+      pl: "Hasło jest wyświetlane tylko teraz. Właściciel zmieni je podczas pierwszego logowania.",
+    },
+
+    "Логін": {
+      en: "Username",
+      de: "Benutzername",
+      pl: "Login",
+    },
+
+    "Тимчасовий пароль": {
+      en: "Temporary password",
+      de: "Temporäres Passwort",
+      pl: "Hasło tymczasowe",
+    },
+
+    "Скопіювати доступ": {
+      en: "Copy access details",
+      de: "Zugangsdaten kopieren",
+      pl: "Kopiuj dane dostępu",
+    },
+
+    "Скопійовано ✓": {
+      en: "Copied ✓",
+      de: "Kopiert ✓",
+      pl: "Skopiowano ✓",
+    },
+
+    "Не вдалося скопіювати дані доступу.": {
+      en: "Could not copy the access details.",
+      de: "Die Zugangsdaten konnten nicht kopiert werden.",
+      pl: "Nie udało się skopiować danych dostępu.",
+    },
+
+    "Клініку створено повністю": {
+      en: "The clinic has been created",
+      de: "Die Klinik wurde erstellt",
+      pl: "Klinika została utworzona",
+    },
+
+    "Не вдалося створити клініку.": {
+      en: "Could not create the clinic.",
+      de: "Die Klinik konnte nicht erstellt werden.",
+      pl: "Nie udało się utworzyć kliniki.",
+    },
+
+    "Створити клініку": {
+      en: "Create clinic",
+      de: "Klinik erstellen",
+      pl: "Utwórz klinikę",
+    },
+
+    "Не вдалося завантажити підписку.": {
+      en: "Could not load the subscription.",
+      de: "Das Abonnement konnte nicht geladen werden.",
+      pl: "Nie udało się załadować subskrypcji.",
+    },
+
+    "Підписка активна": {
+      en: "Subscription active",
+      de: "Abonnement aktiv",
+      pl: "Subskrypcja aktywna",
+    },
+
+    "Підписка скоро завершується": {
+      en: "Subscription expires soon",
+      de: "Abonnement läuft bald ab",
+      pl: "Subskrypcja wkrótce wygaśnie",
+    },
+
+    "Термін підписки минув": {
+      en: "Subscription expired",
+      de: "Abonnement abgelaufen",
+      pl: "Subskrypcja wygasła",
+    },
+
+    "Підписку призупинено": {
+      en: "Subscription paused",
+      de: "Abonnement pausiert",
+      pl: "Subskrypcja wstrzymana",
+    },
+
+    "Тестовий період": {
+      en: "Trial period",
+      de: "Testzeitraum",
+      pl: "Okres próbny",
+    },
+
+    "Період ще не налаштовано": {
+      en: "Subscription period is not set",
+      de: "Abonnementzeitraum ist nicht festgelegt",
+      pl: "Okres subskrypcji nie został ustawiony",
+    },
+
+    "ДОСТУП ДО DOC.PUG CRM": {
+      en: "ACCESS TO DOC.PUG CRM",
+      de: "ZUGANG ZU DOC.PUG CRM",
+      pl: "DOSTĘP DO DOC.PUG CRM",
+    },
+
+    "Власник платформи ще не вказав оплачений період. CRM продовжує працювати.": {
+      en: "The platform owner has not set a paid period yet. The CRM remains available.",
+      de: "Der Plattforminhaber hat noch keinen bezahlten Zeitraum festgelegt. Das CRM bleibt verfügbar.",
+      pl: "Właściciel platformy nie ustawił jeszcze opłaconego okresu. System CRM pozostaje dostępny.",
+    },
+
+    "днів залишилось": {
+      en: "days remaining",
+      de: "Tage verbleibend",
+      pl: "dni pozostało",
+    },
+  }
+);
+
+
+function getSettingsCredentialsCopyText(
+  created,
+  ownerUsername
+) {
+  const clinicName =
+    created.clinic_name ||
+    getSettingsInterfaceText(
+      "Клініка"
+    );
+
+  const username =
+    created.owner_username ||
+    ownerUsername ||
+    "—";
+
+  const temporaryPassword =
+    created.temporary_password ||
+    "—";
+
+  return [
+    `${
+      getSettingsInterfaceText(
+        "Клініка"
+      )
+    }: ${clinicName}`,
+
+    `${
+      getSettingsInterfaceText(
+        "Логін"
+      )
+    }: ${username}`,
+
+    `${
+      getSettingsInterfaceText(
+        "Тимчасовий пароль"
+      )
+    }: ${temporaryPassword}`,
+  ].join("\n");
+}
+
+
+async function bindPlatformClinicUI(
+  page
+) {
+  const form =
+    page.querySelector(
+      "#platformClinicCreateForm"
+    );
+
+  const list =
+    page.querySelector(
+      "#platformClinicsList"
+    );
+
+  const counter =
+    page.querySelector(
+      "#platformClinicsCounter"
+    );
+
+  const resultCard =
+    page.querySelector(
+      "#platformClinicCredentials"
+    );
+
+  if (!form || !list) {
+    return;
+  }
+
+
+  const refreshList =
+    async () => {
       list.innerHTML = `
-        <div class="platformClinicEmpty error">
+        <div class="platformClinicEmpty">
           ${escapeHtml(
-            error.message ||
-            "Не вдалося завантажити клініки"
+            getSettingsInterfaceText(
+              "Завантажуємо клініки…"
+            )
           )}
         </div>
       `;
-    }
-  };
+
+      try {
+        const data =
+          await platformClinicsRequest();
+
+        const clinics =
+          Array.isArray(
+            data.clinics
+          )
+            ? data.clinics
+            : [];
+
+        renderPlatformClinicsList(
+          list,
+          clinics
+        );
+
+        await bindPlatformSubscriptionControls(
+          list,
+          refreshList
+        );
+
+        if (counter) {
+          counter.textContent =
+            Number(
+              data.total ??
+              clinics.length
+            ).toLocaleString(
+              getCalendarLocale()
+            );
+        }
+      } catch (error) {
+        console.error(
+          "Platform clinics loading failed:",
+          error
+        );
+
+        list.innerHTML = `
+          <div class="platformClinicEmpty error">
+            ${escapeHtml(
+              getSettingsSafeErrorText(
+                error,
+                "Не вдалося завантажити клініки."
+              )
+            )}
+          </div>
+        `;
+      }
+    };
+
 
   form.addEventListener(
     "submit",
     async (event) => {
       event.preventDefault();
 
-      const submitButton = form.querySelector(
-        'button[type="submit"]'
-      );
-      const status = form.querySelector(
-        "#platformClinicCreateStatus"
-      );
-      const formData = new FormData(form);
+      const submitButton =
+        form.querySelector(
+          'button[type="submit"]'
+        );
 
-      const ownerUsername = String(
-        formData.get("owner_username") || ""
-      )
-        .trim()
-        .toLowerCase();
+      const status =
+        form.querySelector(
+          "#platformClinicCreateStatus"
+        );
+
+      const formData =
+        new FormData(form);
+
+      const ownerUsername =
+        String(
+          formData.get(
+            "owner_username"
+          ) ||
+          ""
+        )
+          .trim()
+          .toLowerCase();
 
       if (status) {
         status.textContent = "";
-        status.classList.remove("error");
+
+        status.classList.remove(
+          "error"
+        );
       }
 
-      submitButton.disabled = true;
-      submitButton.textContent = "Створюємо клініку…";
+      if (submitButton) {
+        submitButton.disabled = true;
+
+        submitButton.textContent =
+          getSettingsInterfaceText(
+            "Створюємо клініку…"
+          );
+      }
 
       try {
-        const created = await platformClinicsRequest(
-          "",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              name: formData.get("name"),
-              subtitle: formData.get("subtitle"),
-              phone: formData.get("phone"),
-              address: formData.get("address"),
-              website: formData.get("website"),
-              theme: formData.get("theme"),
-              owner_display_name:
-                formData.get("owner_display_name"),
-              owner_username: ownerUsername,
-            }),
-          }
-        );
+        const created =
+          await platformClinicsRequest(
+            "",
+            {
+              method: "POST",
+
+              body:
+                JSON.stringify({
+                  name:
+                    formData.get(
+                      "name"
+                    ),
+
+                  subtitle:
+                    formData.get(
+                      "subtitle"
+                    ),
+
+                  phone:
+                    formData.get(
+                      "phone"
+                    ),
+
+                  address:
+                    formData.get(
+                      "address"
+                    ),
+
+                  website:
+                    formData.get(
+                      "website"
+                    ),
+
+                  theme:
+                    formData.get(
+                      "theme"
+                    ),
+
+                  owner_display_name:
+                    formData.get(
+                      "owner_display_name"
+                    ),
+
+                  owner_username:
+                    ownerUsername,
+                }),
+            }
+          );
+
 
         if (resultCard) {
           resultCard.hidden = false;
-          resultCard.dataset.copyText = [
-            `Клініка: ${created.clinic_name || ""}`,
-            `Логін: ${created.owner_username || ownerUsername}`,
-            `Тимчасовий пароль: ${created.temporary_password || ""}`,
-          ].join("\n");
+
+          resultCard.dataset.copyText =
+            getSettingsCredentialsCopyText(
+              created,
+              ownerUsername
+            );
 
           resultCard.innerHTML = `
             <div>
-              <span>Доступ готовий</span>
-              <strong>${escapeHtml(
-                created.clinic_name || "Клініка"
-              )}</strong>
+              <span>
+                ${escapeHtml(
+                  getSettingsInterfaceText(
+                    "Доступ готовий"
+                  )
+                )}
+              </span>
+
+              <strong>
+                ${escapeHtml(
+                  created.clinic_name ||
+                  getSettingsInterfaceText(
+                    "Клініка"
+                  )
+                )}
+              </strong>
+
               <p>
-                Пароль показується лише зараз. Власник змінить
-                його під час першого входу.
+                ${escapeHtml(
+                  getSettingsInterfaceText(
+                    "Пароль показується лише зараз. Власник змінить його під час першого входу."
+                  )
+                )}
               </p>
             </div>
 
             <dl>
               <div>
-                <dt>Логін</dt>
-                <dd>${escapeHtml(
-                  created.owner_username || ownerUsername
-                )}</dd>
+                <dt>
+                  ${escapeHtml(
+                    getSettingsInterfaceText(
+                      "Логін"
+                    )
+                  )}
+                </dt>
+
+                <dd>
+                  ${escapeHtml(
+                    created.owner_username ||
+                    ownerUsername ||
+                    "—"
+                  )}
+                </dd>
               </div>
+
               <div>
-                <dt>Тимчасовий пароль</dt>
-                <dd>${escapeHtml(
-                  created.temporary_password || "—"
-                )}</dd>
+                <dt>
+                  ${escapeHtml(
+                    getSettingsInterfaceText(
+                      "Тимчасовий пароль"
+                    )
+                  )}
+                </dt>
+
+                <dd>
+                  ${escapeHtml(
+                    created.temporary_password ||
+                    "—"
+                  )}
+                </dd>
               </div>
             </dl>
 
@@ -112139,9 +114609,14 @@ async function bindPlatformClinicUI(page) {
               class="platformCopyCredentialsButton"
               type="button"
             >
-              Скопіювати доступ
+              ${escapeHtml(
+                getSettingsInterfaceText(
+                  "Скопіювати доступ"
+                )
+              )}
             </button>
           `;
+
 
           resultCard
             .querySelector(
@@ -112149,16 +114624,41 @@ async function bindPlatformClinicUI(page) {
             )
             ?.addEventListener(
               "click",
-              async (copyEvent) => {
-                const button = copyEvent.currentTarget;
+              async (
+                copyEvent
+              ) => {
+                const button =
+                  copyEvent.currentTarget;
 
-                await navigator.clipboard.writeText(
-                  resultCard.dataset.copyText || ""
-                );
+                try {
+                  await navigator
+                    .clipboard
+                    .writeText(
+                      resultCard
+                        .dataset
+                        .copyText ||
+                      ""
+                    );
 
-                button.textContent = "Скопійовано ✓";
+                  button.textContent =
+                    getSettingsInterfaceText(
+                      "Скопійовано ✓"
+                    );
+                } catch (error) {
+                  console.error(
+                    "Credentials copying failed:",
+                    error
+                  );
+
+                  showSettingsMessage(
+                    getSettingsInterfaceText(
+                      "Не вдалося скопіювати дані доступу."
+                    )
+                  );
+                }
               }
             );
+
 
           resultCard.scrollIntoView({
             behavior: "smooth",
@@ -112166,161 +114666,648 @@ async function bindPlatformClinicUI(page) {
           });
         }
 
+
         form.reset();
-        form.querySelector('[name="theme"]').value =
-          "purple";
+
+        const themeField =
+          form.querySelector(
+            '[name="theme"]'
+          );
+
+        if (themeField) {
+          themeField.value =
+            "purple";
+        }
 
         if (status) {
           status.textContent =
-            "Клініку створено повністю";
+            getSettingsInterfaceText(
+              "Клініку створено повністю"
+            );
         }
 
         await refreshList();
       } catch (error) {
+        console.error(
+          "Platform clinic creation failed:",
+          error
+        );
+
         if (status) {
           status.textContent =
-            error.message ||
-            "Не вдалося створити клініку";
-          status.classList.add("error");
+            getSettingsSafeErrorText(
+              error,
+              "Не вдалося створити клініку."
+            );
+
+          status.classList.add(
+            "error"
+          );
         }
       } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = "Створити клініку";
+        if (submitButton) {
+          submitButton.disabled = false;
+
+          submitButton.textContent =
+            getSettingsInterfaceText(
+              "Створити клініку"
+            );
+        }
       }
     }
   );
+
 
   await refreshList();
 }
 
-async function renderOwnerSubscriptionStatus(page) {
-  const container = page.querySelector(
-    "#ownerSubscriptionStatus"
-  );
 
-  if (!container) return;
+function getSettingsSubscriptionTitle(
+  status
+) {
+  const labels = {
+    active:
+      "Підписка активна",
+
+    expiring:
+      "Підписка скоро завершується",
+
+    expired:
+      "Термін підписки минув",
+
+    paused:
+      "Підписку призупинено",
+
+    trial:
+      "Тестовий період",
+
+    unconfigured:
+      "Період ще не налаштовано",
+  };
+
+  return getSettingsInterfaceText(
+    labels[status] ||
+    labels.unconfigured
+  );
+}
+
+
+function getSettingsPaidUntilText(
+  dateText
+) {
+  const language =
+    getInterfaceLanguage();
+
+  if (language === "en") {
+    return `Access is paid through ${dateText}, inclusive.`;
+  }
+
+  if (language === "de") {
+    return `Der Zugang ist bis einschließlich ${dateText} bezahlt.`;
+  }
+
+  if (language === "pl") {
+    return `Dostęp jest opłacony do ${dateText} włącznie.`;
+  }
+
+  return `Доступ оплачено до ${dateText} включно.`;
+}
+async function renderOwnerSubscriptionStatus(
+  page
+) {
+  const container =
+    page.querySelector(
+      "#ownerSubscriptionStatus"
+    );
+
+  if (!container) {
+    return;
+  }
 
   try {
-    const response = await fetch(
-      "/api/subscription",
-      {
-        credentials: "include",
-        cache: "no-store",
-        headers: { Accept: "application/json" },
-      }
-    );
-    const payload = await response.json();
+    const response =
+      await fetch(
+        "/api/subscription",
+        {
+          credentials:
+            "include",
 
-    if (!response.ok || payload?.ok !== true) {
+          cache:
+            "no-store",
+
+          headers: {
+            Accept:
+              "application/json",
+          },
+        }
+      );
+
+    let payload = null;
+
+    try {
+      payload =
+        await response.json();
+    } catch {
+      payload = null;
+    }
+
+    if (
+      !response.ok ||
+      payload?.ok !== true
+    ) {
       throw new Error(
         payload?.error ||
-        "Не вдалося завантажити підписку"
+        "Не вдалося завантажити підписку."
       );
     }
 
-    const subscription = payload.data || {};
-    const labels = {
-      active: "Підписка активна",
-      expiring: "Підписка скоро завершується",
-      expired: "Термін підписки минув",
-      paused: "Підписку призупинено",
-      trial: "Тестовий період",
-      unconfigured: "Період ще не налаштовано",
-    };
-    const status = subscription.status || "unconfigured";
-    const lastDay = subscription.last_access_day
-      ? new Intl.DateTimeFormat("uk-UA", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }).format(
-          new Date(
-            `${subscription.last_access_day}T12:00:00`
+
+    const subscription =
+      payload.data ||
+      {};
+
+    const status =
+      subscription.status ||
+      "unconfigured";
+
+    const lastDay =
+      subscription.last_access_day
+        ? formatSettingsDate(
+            `${subscription.last_access_day}T12:00:00`,
+            {
+              day:
+                "numeric",
+
+              month:
+                "long",
+
+              year:
+                "numeric",
+            }
           )
-        )
-      : null;
+        : null;
+
+    const daysRemaining =
+      subscription.days_remaining !=
+      null
+        ? Number(
+            subscription.days_remaining
+          ).toLocaleString(
+            getCalendarLocale()
+          )
+        : "—";
+
 
     container.className =
       `ownerSubscriptionStatus ${status}`;
+
     container.innerHTML = `
-      <div class="ownerSubscriptionIcon">🗓️</div>
+      <div class="ownerSubscriptionIcon">
+        🗓️
+      </div>
+
       <div>
-        <span>ДОСТУП ДО DOC.PUG CRM</span>
-        <strong>${escapeHtml(labels[status] || labels.unconfigured)}</strong>
+        <span>
+          ${escapeHtml(
+            getSettingsInterfaceText(
+              "ДОСТУП ДО DOC.PUG CRM"
+            )
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            getSettingsSubscriptionTitle(
+              status
+            )
+          )}
+        </strong>
+
         <p>
-          ${
+          ${escapeHtml(
             lastDay
-              ? `Доступ оплачено до ${escapeHtml(lastDay)} включно.`
-              : "Власник платформи ще не вказав оплачений період. CRM продовжує працювати."
-          }
+              ? getSettingsPaidUntilText(
+                  lastDay
+                )
+              : getSettingsInterfaceText(
+                  "Власник платформи ще не вказав оплачений період. CRM продовжує працювати."
+                )
+          )}
         </p>
       </div>
+
       <div class="ownerSubscriptionDays">
-        <strong>${
-          subscription.days_remaining != null
-            ? escapeHtml(subscription.days_remaining)
-            : "—"
-        }</strong>
-        <span>днів залишилось</span>
+        <strong>
+          ${escapeHtml(
+            daysRemaining
+          )}
+        </strong>
+
+        <span>
+          ${escapeHtml(
+            getSettingsInterfaceText(
+              "днів залишилось"
+            )
+          )}
+        </span>
       </div>
     `;
   } catch (error) {
+    console.error(
+      "Owner subscription loading failed:",
+      error
+    );
+
     container.className =
       "ownerSubscriptionStatus unconfigured";
+
     container.textContent =
-      error.message ||
-      "Не вдалося завантажити підписку";
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося завантажити підписку."
+      );
   }
 }
-
 async function initSettingsUI() {
-  const page = document.querySelector(
-    '.page[data-page="settings"]'
-  );
+  const page =
+    document.querySelector(
+      '.page[data-page="settings"]'
+    );
 
   if (!page) return;
 
-  const ownerMode = isClinicOwner();
-  const platformMode = isPlatformAdmin();
+
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "НАЛАШТУВАННЯ СИСТЕМИ": {
+        en: "SYSTEM SETTINGS",
+        de: "SYSTEMEINSTELLUNGEN",
+        pl: "USTAWIENIA SYSTEMU",
+      },
+
+      "Налаштування": {
+        en: "Settings",
+        de: "Einstellungen",
+        pl: "Ustawienia",
+      },
+
+      "Керуйте брендингом клініки, документами та особистими налаштуваннями.": {
+        en: "Manage clinic branding, documents and personal settings.",
+        de: "Verwalten Sie das Klinikdesign, Dokumente und persönliche Einstellungen.",
+        pl: "Zarządzaj wyglądem kliniki, dokumentami i ustawieniami osobistymi.",
+      },
+
+      "Налаштуйте мову та зовнішній вигляд свого робочого простору.": {
+        en: "Choose the language and appearance of your workspace.",
+        de: "Wählen Sie Sprache und Erscheinungsbild Ihres Arbeitsbereichs.",
+        pl: "Wybierz język i wygląd swojego obszaru roboczego.",
+      },
+
+      "Користувач": {
+        en: "User",
+        de: "Benutzer",
+        pl: "Użytkownik",
+      },
+
+      "Власник клініки": {
+        en: "Clinic owner",
+        de: "Klinikinhaber",
+        pl: "Właściciel kliniki",
+      },
+
+      "Клініки платформи": {
+        en: "Platform clinics",
+        de: "Kliniken der Plattform",
+        pl: "Kliniki na platformie",
+      },
+
+      "Створіть готову клініку та одразу передайте власнику логін і тимчасовий пароль.": {
+        en: "Create a clinic and give the owner a username and temporary password.",
+        de: "Erstellen Sie eine Klinik und geben Sie dem Inhaber einen Benutzernamen und ein temporäres Passwort.",
+        pl: "Utwórz klinikę i przekaż właścicielowi login oraz hasło tymczasowe.",
+      },
+
+      "Всього:": {
+        en: "Total:",
+        de: "Gesamt:",
+        pl: "Łącznie:",
+      },
+
+      "Нова клініка": {
+        en: "New clinic",
+        de: "Neue Klinik",
+        pl: "Nowa klinika",
+      },
+
+      "Усе необхідне створиться автоматично": {
+        en: "Everything needed will be created automatically",
+        de: "Alles Erforderliche wird automatisch erstellt",
+        pl: "Wszystko, co potrzebne, zostanie utworzone automatycznie",
+      },
+
+      "Назва клініки": {
+        en: "Clinic name",
+        de: "Klinikname",
+        pl: "Nazwa kliniki",
+      },
+
+      "Наприклад, Animal Clinic": {
+        en: "For example, Animal Clinic",
+        de: "Zum Beispiel Animal Clinic",
+        pl: "Na przykład Animal Clinic",
+      },
+
+      "Ім’я власника": {
+        en: "Owner’s name",
+        de: "Name des Inhabers",
+        pl: "Imię i nazwisko właściciela",
+      },
+
+      "Наприклад, Олена Коваль": {
+        en: "For example, Alex Smith",
+        de: "Zum Beispiel Anna Müller",
+        pl: "Na przykład Anna Kowalska",
+      },
+
+      "Логін власника": {
+        en: "Owner’s username",
+        de: "Benutzername des Inhabers",
+        pl: "Login właściciela",
+      },
+
+      "Телефон": {
+        en: "Phone",
+        de: "Telefon",
+        pl: "Telefon",
+      },
+
+      "Міжнародний номер із кодом країни": {
+        en: "International number with country code",
+        de: "Internationale Nummer mit Ländervorwahl",
+        pl: "Numer międzynarodowy z kodem kraju",
+      },
+
+      "Тема": {
+        en: "Theme",
+        de: "Design",
+        pl: "Motyw",
+      },
+
+      "Фіолетова": {
+        en: "Purple",
+        de: "Violett",
+        pl: "Fioletowy",
+      },
+
+      "Графіт": {
+        en: "Graphite",
+        de: "Graphit",
+        pl: "Grafitowy",
+      },
+
+      "Мармурова біла": {
+        en: "Marble white",
+        de: "Marmorweiß",
+        pl: "Marmurowa biel",
+      },
+
+      "Глибокий синій": {
+        en: "Deep blue",
+        de: "Tiefblau",
+        pl: "Głęboki niebieski",
+      },
+
+      "Темний евкаліпт": {
+        en: "Dark eucalyptus",
+        de: "Dunkler Eukalyptus",
+        pl: "Ciemny eukaliptus",
+      },
+
+      "Підпис клініки": {
+        en: "Clinic tagline",
+        de: "Klinikslogan",
+        pl: "Hasło kliniki",
+      },
+
+      "Ветеринарна клініка турботи": {
+        en: "Veterinary care with compassion",
+        de: "Tiermedizin mit Fürsorge",
+        pl: "Opieka weterynaryjna z troską",
+      },
+
+      "Адреса": {
+        en: "Address",
+        de: "Adresse",
+        pl: "Adres",
+      },
+
+      "Місто, вулиця, будинок": {
+        en: "City, street, building",
+        de: "Stadt, Straße, Hausnummer",
+        pl: "Miasto, ulica, numer budynku",
+      },
+
+      "Сайт": {
+        en: "Website",
+        de: "Website",
+        pl: "Strona internetowa",
+      },
+
+      "Створені клініки": {
+        en: "Created clinics",
+        de: "Erstellte Kliniken",
+        pl: "Utworzone kliniki",
+      },
+
+      "Останні підключення": {
+        en: "Latest additions",
+        de: "Zuletzt hinzugefügt",
+        pl: "Ostatnio dodane",
+      },
+
+      "Завантажуємо дані підписки…": {
+        en: "Loading subscription details…",
+        de: "Abonnementdaten werden geladen…",
+        pl: "Ładowanie danych subskrypcji…",
+      },
+
+      "Моя клініка": {
+        en: "My clinic",
+        de: "Meine Klinik",
+        pl: "Moja klinika",
+      },
+
+      "Дані, які використовуються у виписках, аналізах, рахунках та інших документах.": {
+        en: "Details used in discharge summaries, lab reports, invoices and other documents.",
+        de: "Angaben für Entlassungsberichte, Laborberichte, Rechnungen und andere Dokumente.",
+        pl: "Dane używane w wypisach, wynikach badań, fakturach i innych dokumentach.",
+      },
+
+      "Тільки власник": {
+        en: "Owner only",
+        de: "Nur für den Inhaber",
+        pl: "Tylko właściciel",
+      },
+
+      "Завантаження профілю клініки…": {
+        en: "Loading clinic profile…",
+        de: "Klinikprofil wird geladen…",
+        pl: "Ładowanie profilu kliniki…",
+      },
+
+      "Не вдалося завантажити профіль клініки.": {
+        en: "Could not load the clinic profile.",
+        de: "Das Klinikprofil konnte nicht geladen werden.",
+        pl: "Nie udało się załadować profilu kliniki.",
+      },
+
+      "Особисті налаштування": {
+        en: "Personal settings",
+        de: "Persönliche Einstellungen",
+        pl: "Ustawienia osobiste",
+      },
+
+      "Ці параметри застосовуються лише для вашого браузера.": {
+        en: "These settings apply only to your browser.",
+        de: "Diese Einstellungen gelten nur für Ihren Browser.",
+        pl: "Te ustawienia dotyczą tylko Twojej przeglądarki.",
+      },
+
+      "Мова інтерфейсу": {
+        en: "Interface language",
+        de: "Sprache der Benutzeroberfläche",
+        pl: "Język interfejsu",
+      },
+
+      "Тема системи": {
+        en: "System theme",
+        de: "Systemdesign",
+        pl: "Motyw systemu",
+      },
+
+      "Зберегти тему": {
+        en: "Save theme",
+        de: "Design speichern",
+        pl: "Zapisz motyw",
+      },
+
+      "Поточний користувач": {
+        en: "Current user",
+        de: "Aktueller Benutzer",
+        pl: "Bieżący użytkownik",
+      },
+
+      "Вийти з акаунта": {
+        en: "Log out",
+        de: "Abmelden",
+        pl: "Wyloguj się",
+      },
+    }
+  );
+
+
+  const ui =
+    (text) =>
+      escapeHtml(
+        getSettingsInterfaceText(
+          text
+        )
+      );
+
+  const ownerMode =
+    isClinicOwner();
+
+  const platformMode =
+    isPlatformAdmin();
+
+  const themes = [
+    [
+      "purple",
+      "Фіолетова",
+      "#9346E8",
+    ],
+    [
+      "black",
+      "Графіт",
+      "#B79A72",
+    ],
+    [
+      "white",
+      "Мармурова біла",
+      "#F4F9FC",
+    ],
+    [
+      "blue",
+      "Глибокий синій",
+      "#6F91AD",
+    ],
+    [
+      "green",
+      "Темний евкаліпт",
+      "#7C9C8A",
+    ],
+  ];
+
+  const userName =
+    state.me?.display_name ||
+    sessionStorage.getItem(
+      "pug_active_display_name"
+    ) ||
+    getSettingsInterfaceText(
+      "Користувач"
+    );
+
+  const userRole =
+    ownerMode
+      ? getSettingsInterfaceText(
+          "Власник клініки"
+        )
+      : getAuditRoleLabel(
+          state.me?.role ||
+          sessionStorage.getItem(
+            "pug_active_role"
+          ) ||
+          "staff"
+        );
+
 
   page.innerHTML = `
     <div class="clinicSettingsPage">
       <section class="clinicSettingsHero">
         <div>
           <div class="clinicSettingsKicker">
-            НАЛАШТУВАННЯ СИСТЕМИ
+            ${ui(
+              "НАЛАШТУВАННЯ СИСТЕМИ"
+            )}
           </div>
 
-          <h1>Налаштування</h1>
+          <h1>
+            ${ui(
+              "Налаштування"
+            )}
+          </h1>
 
           <p>
-            ${
+            ${ui(
               ownerMode
                 ? "Керуйте брендингом клініки, документами та особистими налаштуваннями."
                 : "Налаштуйте мову та зовнішній вигляд свого робочого простору."
-            }
+            )}
           </p>
         </div>
 
         <div class="clinicSettingsUser">
           <span>
             ${escapeHtml(
-              state.me?.display_name ||
-              sessionStorage.getItem("pug_active_display_name") ||
-              "Користувач"
+              userName
             )}
           </span>
 
           <strong>
-            ${
-              ownerMode
-                ? "Власник клініки"
-                : escapeHtml(
-                    state.me?.role ||
-                    sessionStorage.getItem("pug_active_role") ||
-                    "Працівник"
-                  )
-            }
+            ${escapeHtml(
+              userRole
+            )}
           </strong>
         </div>
       </section>
@@ -112334,19 +115321,33 @@ async function initSettingsUI() {
             >
               <div class="clinicSettingsPanelHead">
                 <div>
-                  <div class="clinicSettingsPanelIcon">✨</div>
+                  <div class="clinicSettingsPanelIcon">
+                    ✨
+                  </div>
 
                   <div>
-                    <h2>Клініки платформи</h2>
+                    <h2>
+                      ${ui(
+                        "Клініки платформи"
+                      )}
+                    </h2>
+
                     <p>
-                      Створіть готову клініку та одразу передайте
-                      власнику логін і тимчасовий пароль.
+                      ${ui(
+                        "Створіть готову клініку та одразу передайте власнику логін і тимчасовий пароль."
+                      )}
                     </p>
                   </div>
                 </div>
 
                 <span class="clinicOwnerBadge">
-                  Всього: <b id="platformClinicsCounter">…</b>
+                  ${ui(
+                    "Всього:"
+                  )}
+
+                  <b id="platformClinicsCounter">
+                    …
+                  </b>
                 </span>
               </div>
 
@@ -112356,68 +115357,204 @@ async function initSettingsUI() {
                   id="platformClinicCreateForm"
                 >
                   <div class="platformClinicFormTitle">
-                    <strong>Нова клініка</strong>
-                    <span>Усе необхідне створиться автоматично</span>
+                    <strong>
+                      ${ui(
+                        "Нова клініка"
+                      )}
+                    </strong>
+
+                    <span>
+                      ${ui(
+                        "Усе необхідне створиться автоматично"
+                      )}
+                    </span>
                   </div>
 
                   <div class="clinicSettingsFormGrid">
                     <label class="clinicSettingsField clinicSettingsFieldWide">
-                      <span>Назва клініки *</span>
-                      <input class="clinicSettingsInput" name="name" required maxlength="160" placeholder="Наприклад, Animal Clinic Lviv">
+                      <span>
+                        ${ui(
+                          "Назва клініки"
+                        )} *
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="name"
+                        required
+                        maxlength="160"
+                        placeholder="${ui(
+                          "Наприклад, Animal Clinic"
+                        )}"
+                      >
                     </label>
 
                     <label class="clinicSettingsField">
-                      <span>Ім’я власника *</span>
-                      <input class="clinicSettingsInput" name="owner_display_name" required maxlength="160" placeholder="Олена Коваль">
+                      <span>
+                        ${ui(
+                          "Ім’я власника"
+                        )} *
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="owner_display_name"
+                        required
+                        maxlength="160"
+                        placeholder="${ui(
+                          "Наприклад, Олена Коваль"
+                        )}"
+                      >
                     </label>
 
                     <label class="clinicSettingsField">
-                      <span>Логін власника *</span>
-                      <input class="clinicSettingsInput" name="owner_username" required minlength="3" maxlength="80" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,79}" autocomplete="off" placeholder="animal.lviv">
+                      <span>
+                        ${ui(
+                          "Логін власника"
+                        )} *
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="owner_username"
+                        required
+                        minlength="3"
+                        maxlength="80"
+                        pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,79}"
+                        autocomplete="off"
+                        placeholder="animal.clinic"
+                      >
                     </label>
 
                     <label class="clinicSettingsField">
-                      <span>Телефон</span>
-                      <input class="clinicSettingsInput" name="phone" maxlength="80" placeholder="+380…">
+                      <span>
+                        ${ui(
+                          "Телефон"
+                        )}
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="phone"
+                        maxlength="80"
+                        type="tel"
+                        placeholder="${ui(
+                          "Міжнародний номер із кодом країни"
+                        )}"
+                      >
                     </label>
 
                     <label class="clinicSettingsField">
-                      <span>Тема</span>
-                      <select class="clinicSettingsInput" name="theme">
-                        <option value="purple">Фіолетова</option>
-                        <option value="black">Графіт</option>
-                        <option value="white">Мармурова біла</option>
-                        <option value="blue">Глибокий синій</option>
-                        <option value="green">Темний евкаліпт</option>
+                      <span>
+                        ${ui(
+                          "Тема"
+                        )}
+                      </span>
+
+                      <select
+                        class="clinicSettingsInput"
+                        name="theme"
+                      >
+                        ${
+                          themes
+                            .map(
+                              ([
+                                value,
+                                label,
+                              ]) => `
+                                <option
+                                  value="${escapeHtml(
+                                    value
+                                  )}"
+                                >
+                                  ${ui(
+                                    label
+                                  )}
+                                </option>
+                              `
+                            )
+                            .join("")
+                        }
                       </select>
                     </label>
 
                     <label class="clinicSettingsField clinicSettingsFieldWide">
-                      <span>Підпис клініки</span>
-                      <input class="clinicSettingsInput" name="subtitle" maxlength="240" placeholder="Ветеринарна клініка турботи">
+                      <span>
+                        ${ui(
+                          "Підпис клініки"
+                        )}
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="subtitle"
+                        maxlength="240"
+                        placeholder="${ui(
+                          "Ветеринарна клініка турботи"
+                        )}"
+                      >
                     </label>
 
                     <label class="clinicSettingsField clinicSettingsFieldWide">
-                      <span>Адреса</span>
-                      <input class="clinicSettingsInput" name="address" maxlength="300" placeholder="Місто, вулиця, будинок">
+                      <span>
+                        ${ui(
+                          "Адреса"
+                        )}
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="address"
+                        maxlength="300"
+                        placeholder="${ui(
+                          "Місто, вулиця, будинок"
+                        )}"
+                      >
                     </label>
 
                     <label class="clinicSettingsField clinicSettingsFieldWide">
-                      <span>Сайт</span>
-                      <input class="clinicSettingsInput" name="website" maxlength="300" placeholder="https://…">
+                      <span>
+                        ${ui(
+                          "Сайт"
+                        )}
+                      </span>
+
+                      <input
+                        class="clinicSettingsInput"
+                        name="website"
+                        maxlength="300"
+                        placeholder="https://…"
+                      >
                     </label>
                   </div>
 
                   <div class="platformClinicFormActions">
-                    <span id="platformClinicCreateStatus" role="status"></span>
-                    <button type="submit">Створити клініку</button>
+                    <span
+                      id="platformClinicCreateStatus"
+                      role="status"
+                    ></span>
+
+                    <button type="submit">
+                      ${ui(
+                        "Створити клініку"
+                      )}
+                    </button>
                   </div>
                 </form>
 
                 <div class="platformClinicsColumn">
                   <div class="platformClinicFormTitle">
-                    <strong>Створені клініки</strong>
-                    <span>Останні підключення</span>
+                    <strong>
+                      ${ui(
+                        "Створені клініки"
+                      )}
+                    </strong>
+
+                    <span>
+                      ${ui(
+                        "Останні підключення"
+                      )}
+                    </span>
                   </div>
 
                   <div
@@ -112444,7 +115581,9 @@ async function initSettingsUI() {
               class="ownerSubscriptionStatus unconfigured"
               id="ownerSubscriptionStatus"
             >
-              Завантажуємо дані підписки…
+              ${ui(
+                "Завантажуємо дані підписки…"
+              )}
             </section>
 
             <section
@@ -112453,19 +115592,29 @@ async function initSettingsUI() {
             >
               <div class="clinicSettingsPanelHead">
                 <div>
-                  <div class="clinicSettingsPanelIcon">🏥</div>
+                  <div class="clinicSettingsPanelIcon">
+                    🏥
+                  </div>
 
                   <div>
-                    <h2>Моя клініка</h2>
+                    <h2>
+                      ${ui(
+                        "Моя клініка"
+                      )}
+                    </h2>
+
                     <p>
-                      Дані, які використовуються у виписках,
-                      аналізах, рахунках та інших документах.
+                      ${ui(
+                        "Дані, які використовуються у виписках, аналізах, рахунках та інших документах."
+                      )}
                     </p>
                   </div>
                 </div>
 
                 <span class="clinicOwnerBadge">
-                  Тільки власник
+                  ${ui(
+                    "Тільки власник"
+                  )}
                 </span>
               </div>
 
@@ -112473,7 +115622,9 @@ async function initSettingsUI() {
                 class="clinicSettingsLoading"
                 id="clinicSettingsLoading"
               >
-                Завантаження профілю клініки…
+                ${ui(
+                  "Завантаження профілю клініки…"
+                )}
               </div>
 
               <div
@@ -112489,12 +115640,21 @@ async function initSettingsUI() {
       <section class="clinicSettingsPanel">
         <div class="clinicSettingsPanelHead">
           <div>
-            <div class="clinicSettingsPanelIcon">👤</div>
+            <div class="clinicSettingsPanelIcon">
+              👤
+            </div>
 
             <div>
-              <h2>Особисті налаштування</h2>
+              <h2>
+                ${ui(
+                  "Особисті налаштування"
+                )}
+              </h2>
+
               <p>
-                Ці параметри застосовуються лише для вашого браузера.
+                ${ui(
+                  "Ці параметри застосовуються лише для вашого браузера."
+                )}
               </p>
             </div>
           </div>
@@ -112502,43 +115662,73 @@ async function initSettingsUI() {
 
         <div class="clinicPersonalGrid">
           <div class="clinicPersonalBlock">
-            <h3>Мова інтерфейсу</h3>
+            <h3>
+              ${ui(
+                "Мова інтерфейсу"
+              )}
+            </h3>
 
             <select
               class="clinicSettingsInput"
               id="systemLanguageSelect"
             >
-              <option value="uk">Українська</option>
-<option value="en">English</option>
-<option value="pl">Polski</option>
-<option value="de">Deutsch</option>
+              <option value="uk">
+                Українська
+              </option>
+
+              <option value="en">
+                English
+              </option>
+
+              <option value="pl">
+                Polski
+              </option>
+
+              <option value="de">
+                Deutsch
+              </option>
             </select>
           </div>
 
           <div class="clinicPersonalBlock">
-            <h3>Тема системи</h3>
+            <h3>
+              ${ui(
+                "Тема системи"
+              )}
+            </h3>
 
             <div class="clinicThemeGrid">
-              ${[
-                ["purple", "Фіолетова", "#9346E8"],
-                ["black", "Графіт", "#B79A72"],
-                ["white", "Мармурова біла", "#F4F9FC"],
-                ["blue", "Глибокий синій", "#6F91AD"],
-                ["green", "Темний евкаліпт", "#7C9C8A"],
-              ]
-                .map(
-                  ([value, label, color]) => `
-                    <button
-                      class="clinicThemeChoice"
-                      type="button"
-                      data-theme-set="${escapeHtml(value)}"
-                    >
-                      <span style="background:${escapeHtml(color)}"></span>
-                      <strong>${escapeHtml(label)}</strong>
-                    </button>
-                  `
-                )
-                .join("")}
+              ${
+                themes
+                  .map(
+                    ([
+                      value,
+                      label,
+                      color,
+                    ]) => `
+                      <button
+                        class="clinicThemeChoice"
+                        type="button"
+                        data-theme-set="${escapeHtml(
+                          value
+                        )}"
+                      >
+                        <span
+                          style="background:${escapeHtml(
+                            color
+                          )}"
+                        ></span>
+
+                        <strong>
+                          ${ui(
+                            label
+                          )}
+                        </strong>
+                      </button>
+                    `
+                  )
+                  .join("")
+              }
             </div>
 
             ${
@@ -112550,9 +115740,15 @@ async function initSettingsUI() {
                       id="saveClinicThemeButton"
                       type="button"
                     >
-                      Зберегти тему
+                      ${ui(
+                        "Зберегти тему"
+                      )}
                     </button>
-                    <span id="clinicThemeSaveStatus" role="status"></span>
+
+                    <span
+                      id="clinicThemeSaveStatus"
+                      role="status"
+                    ></span>
                   </div>
                 `
                 : ""
@@ -112562,11 +115758,18 @@ async function initSettingsUI() {
 
         <div class="clinicSettingsLogoutRow">
           <div>
-            <strong>Поточний користувач</strong>
+            <strong>
+              ${ui(
+                "Поточний користувач"
+              )}
+            </strong>
+
             <span>
               ${escapeHtml(
                 state.me?.username ||
-                sessionStorage.getItem("pug_active_username") ||
+                sessionStorage.getItem(
+                  "pug_active_username"
+                ) ||
                 "—"
               )}
             </span>
@@ -112577,107 +115780,207 @@ async function initSettingsUI() {
             id="btnClinicLogout"
             type="button"
           >
-            Вийти з акаунта
+            ${ui(
+              "Вийти з акаунта"
+            )}
           </button>
         </div>
       </section>
     </div>
   `;
 
-  bindPersonalSettingsUI(page);
 
-if (platformMode) {
-  await bindPlatformClinicUI(page);
-}
-
-if (ownerMode) {
-  await renderOwnerSubscriptionStatus(page);
-
-  const profile =
-    await loadClinicProfileApi();
-
-  renderClinicProfileSettings(
-    page,
-    profile
+  bindPersonalSettingsUI(
+    page
   );
-}
 
-bindSettingsLogoutUI(page);
+  bindSettingsLogoutUI(
+    page
+  );
+
+
+  if (platformMode) {
+    await bindPlatformClinicUI(
+      page
+    );
+  }
+
+
+  if (ownerMode) {
+    await renderOwnerSubscriptionStatus(
+      page
+    );
+
+    try {
+      const profile =
+        await loadClinicProfileApi();
+
+      renderClinicProfileSettings(
+        page,
+        profile
+      );
+    } catch (error) {
+      console.error(
+        "Clinic settings profile loading failed:",
+        error
+      );
+
+      const loading =
+        page.querySelector(
+          "#clinicSettingsLoading"
+        );
+
+      if (loading) {
+        loading.textContent =
+          getSettingsSafeErrorText(
+            error,
+            "Не вдалося завантажити профіль клініки."
+          );
+      }
+    }
+  }
 }
 function bindPersonalSettingsUI(page) {
-  const savedTheme = LS.get(
-    "docpug_clinic_theme",
-    "purple"
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Не вдалося зберегти тему.": {
+        en: "Could not save the theme.",
+        de: "Das Design konnte nicht gespeichert werden.",
+        pl: "Nie udało się zapisać motywu.",
+      },
+
+      "Тему збережено для клініки": {
+        en: "Theme saved for the clinic",
+        de: "Design für die Klinik gespeichert",
+        pl: "Motyw zapisany dla kliniki",
+      },
+    }
   );
+
+
+  const savedTheme =
+    LS.get(
+      "docpug_clinic_theme",
+      "purple"
+    );
+
   let selectedTheme =
     document.body.dataset.theme ||
     savedTheme;
 
+
   page
-    .querySelectorAll("[data-theme-set]")
+    .querySelectorAll(
+      "[data-theme-set]"
+    )
     .forEach((button) => {
-      const theme = button.dataset.themeSet;
+      const theme =
+        button.dataset.themeSet;
 
       button.classList.toggle(
         "active",
         theme === selectedTheme
       );
 
-      button.addEventListener("click", () => {
-        selectedTheme = theme;
-        document.body.dataset.theme = theme;
-        LS.set(
-          "docpug_clinic_theme",
-          theme
-        );
+      button.addEventListener(
+        "click",
+        () => {
+          selectedTheme = theme;
 
-        page
-          .querySelectorAll("[data-theme-set]")
-          .forEach((item) => {
-            item.classList.remove("active");
-          });
+          document.body.dataset.theme =
+            theme;
 
-        button.classList.add("active");
-      });
+          LS.set(
+            "docpug_clinic_theme",
+            theme
+          );
+
+          page
+            .querySelectorAll(
+              "[data-theme-set]"
+            )
+            .forEach((item) => {
+              item.classList.remove(
+                "active"
+              );
+            });
+
+          button.classList.add(
+            "active"
+          );
+        }
+      );
     });
 
+
   const saveThemeButton =
-    page.querySelector("#saveClinicThemeButton");
+    page.querySelector(
+      "#saveClinicThemeButton"
+    );
+
   const saveThemeStatus =
-    page.querySelector("#clinicThemeSaveStatus");
+    page.querySelector(
+      "#clinicThemeSaveStatus"
+    );
+
 
   saveThemeButton?.addEventListener(
     "click",
     async () => {
-      saveThemeButton.disabled = true;
-      saveThemeButton.textContent = "Зберігаємо…";
+      saveThemeButton.disabled =
+        true;
+
+      saveThemeButton.textContent =
+        getSettingsInterfaceText(
+          "Зберігаємо…"
+        );
 
       if (saveThemeStatus) {
-        saveThemeStatus.textContent = "";
-        saveThemeStatus.classList.remove("error");
+        saveThemeStatus.textContent =
+          "";
+
+        saveThemeStatus.classList.remove(
+          "error"
+        );
       }
 
       try {
-        const response = await fetch(
-          "/api/organization/theme",
-          {
-            method: "PUT",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify({
-              theme: selectedTheme,
-            }),
-          }
-        );
-        const payload = await response.json();
+        const response =
+          await fetch(
+            "/api/organization/theme",
+            {
+              method: "PUT",
 
-        if (!response.ok || !payload?.ok) {
+              credentials:
+                "include",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Accept:
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  theme:
+                    selectedTheme,
+                }),
+            }
+          );
+
+        const payload =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !payload?.ok
+        ) {
           throw new Error(
             payload?.error ||
-            "Не вдалося зберегти тему"
+            "Не вдалося зберегти тему."
           );
         }
 
@@ -112687,6 +115990,7 @@ function bindPersonalSettingsUI(page) {
 
         document.body.dataset.theme =
           persistedTheme;
+
         LS.set(
           "docpug_clinic_theme",
           persistedTheme
@@ -112694,35 +115998,50 @@ function bindPersonalSettingsUI(page) {
 
         if (saveThemeStatus) {
           saveThemeStatus.textContent =
-            "Тему збережено для клініки";
+            getSettingsInterfaceText(
+              "Тему збережено для клініки"
+            );
         }
       } catch (error) {
+        console.error(
+          "Clinic theme save failed:",
+          error
+        );
+
         if (saveThemeStatus) {
           saveThemeStatus.textContent =
-            error.message ||
-            "Не вдалося зберегти тему";
-          saveThemeStatus.classList.add("error");
+            getSettingsSafeErrorText(
+              error,
+              "Не вдалося зберегти тему."
+            );
+
+          saveThemeStatus.classList.add(
+            "error"
+          );
         }
       } finally {
-        saveThemeButton.disabled = false;
+        saveThemeButton.disabled =
+          false;
+
         saveThemeButton.textContent =
-          "Зберегти тему";
+          getSettingsInterfaceText(
+            "Зберегти тему"
+          );
       }
     }
   );
 
 
-
   const languageSelect =
-    page.querySelector("#systemLanguageSelect");
-
-    if (languageSelect) {
-    languageSelect.value = LS.get(
-      "docpug_clinic_lang",
-      "uk"
+    page.querySelector(
+      "#systemLanguageSelect"
     );
 
-        languageSelect.addEventListener(
+  if (languageSelect) {
+    languageSelect.value =
+      getInterfaceLanguage();
+
+    languageSelect.addEventListener(
       "change",
       () => {
         const selectedLanguage =
@@ -112749,12 +116068,36 @@ function bindPersonalSettingsUI(page) {
 
 
 function bindSettingsLogoutUI(page) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Ви завершите поточну сесію та повернетеся на сторінку входу.": {
+        en: "You will end the current session and return to the sign-in page.",
+        de: "Sie beenden die aktuelle Sitzung und kehren zur Anmeldeseite zurück.",
+        pl: "Zakończysz bieżącą sesję i wrócisz do strony logowania.",
+      },
+
+      "Вихід…": {
+        en: "Logging out…",
+        de: "Abmeldung läuft…",
+        pl: "Wylogowywanie…",
+      },
+
+      "Не вдалося завершити сесію. Спробуйте ще раз.": {
+        en: "Could not end the session. Please try again.",
+        de: "Die Sitzung konnte nicht beendet werden. Bitte versuchen Sie es erneut.",
+        pl: "Nie udało się zakończyć sesji. Spróbuj ponownie.",
+      },
+    }
+  );
+
+
   const oldLogoutButton =
-    document.getElementById(
-      "btn-logout"
-    ) ||
     page.querySelector(
       "#btnClinicLogout"
+    ) ||
+    document.getElementById(
+      "btn-logout"
     );
 
   if (!oldLogoutButton) {
@@ -112762,11 +116105,14 @@ function bindSettingsLogoutUI(page) {
   }
 
   const logoutButton =
-    oldLogoutButton.cloneNode(true);
+    oldLogoutButton.cloneNode(
+      true
+    );
 
   oldLogoutButton.replaceWith(
     logoutButton
   );
+
 
   logoutButton.addEventListener(
     "click",
@@ -112774,11 +116120,13 @@ function bindSettingsLogoutUI(page) {
       event.preventDefault();
       event.stopPropagation();
 
-      openDeleteModal(
-        `
-          Ви завершите поточну сесію
-          та повернетеся на сторінку входу.
-        `,
+      openSettingsConfirmation(
+        getSettingsInterfaceText(
+          "Ви завершите поточну сесію та повернетеся на сторінку входу."
+        ),
+        getSettingsInterfaceText(
+          "Вийти з акаунта"
+        ),
         async () => {
           const originalText =
             logoutButton.textContent;
@@ -112787,17 +116135,23 @@ function bindSettingsLogoutUI(page) {
             true;
 
           logoutButton.textContent =
-            "Вихід…";
+            getSettingsInterfaceText(
+              "Вихід…"
+            );
 
           try {
             const response =
               await fetch(
                 "/api/logout",
                 {
-                  method: "POST",
+                  method:
+                    "POST",
+
                   credentials:
                     "include",
-                  cache: "no-store",
+
+                  cache:
+                    "no-store",
 
                   headers: {
                     Accept:
@@ -112812,9 +116166,12 @@ function bindSettingsLogoutUI(page) {
             let json = null;
 
             try {
-              json = text
-                ? JSON.parse(text)
-                : null;
+              json =
+                text
+                  ? JSON.parse(
+                      text
+                    )
+                  : null;
             } catch {
               json = null;
             }
@@ -112830,6 +116187,7 @@ function bindSettingsLogoutUI(page) {
             }
 
             state.me = null;
+
             state.clinicProfile =
               null;
 
@@ -112848,20 +116206,17 @@ function bindSettingsLogoutUI(page) {
             window.location.replace(
               "/?logged_out=1"
             );
-
           } catch (error) {
             console.error(
               "Logout failed:",
               error
             );
 
-            openDeleteModal(
-              `
-                Не вдалося завершити сесію.
-                Спробуйте ще раз.
-              `,
-              null,
-              "info"
+            showSettingsMessage(
+              getSettingsSafeErrorText(
+                error,
+                "Не вдалося завершити сесію. Спробуйте ще раз."
+              )
             );
 
             logoutButton.disabled =
@@ -112870,18 +116225,119 @@ function bindSettingsLogoutUI(page) {
             logoutButton.textContent =
               originalText;
           }
-        },
-        "logout"
+        }
       );
     }
   );
 }
-
-
 function renderClinicProfileSettings(
   page,
   profile
 ) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Підпис під назвою": {
+        en: "Tagline below the name",
+        de: "Slogan unter dem Namen",
+        pl: "Hasło pod nazwą",
+      },
+
+      "Ветеринарна клініка": {
+        en: "Veterinary clinic",
+        de: "Tierarztpraxis",
+        pl: "Klinika weterynaryjna",
+      },
+
+      "Сайт або Instagram": {
+        en: "Website or Instagram",
+        de: "Website oder Instagram",
+        pl: "Strona internetowa lub Instagram",
+      },
+
+      "Акцентний колір документів": {
+        en: "Document accent color",
+        de: "Akzentfarbe der Dokumente",
+        pl: "Kolor akcentu w dokumentach",
+      },
+
+      "Підпис у нижній частині документа": {
+        en: "Document footer text",
+        de: "Text in der Dokumentfußzeile",
+        pl: "Tekst w stopce dokumentu",
+      },
+
+      "Коли важливо — ми поруч.": {
+        en: "Here when it matters.",
+        de: "Wir sind da, wenn es darauf ankommt.",
+        pl: "Jesteśmy blisko, gdy to ważne.",
+      },
+
+      "Логотип клініки": {
+        en: "Clinic logo",
+        de: "Kliniklogo",
+        pl: "Logo kliniki",
+      },
+
+      "Використовується у виписках, аналізах та рахунках.": {
+        en: "Used in discharge summaries, lab reports and invoices.",
+        de: "Wird in Entlassungsberichten, Laborberichten und Rechnungen verwendet.",
+        pl: "Używane w wypisach, wynikach badań i fakturach.",
+      },
+
+      "Підпис лікаря": {
+        en: "Veterinarian’s signature",
+        de: "Unterschrift des Tierarztes",
+        pl: "Podpis lekarza weterynarii",
+      },
+
+      "Бажано PNG з прозорим фоном.": {
+        en: "A PNG with a transparent background is recommended.",
+        de: "Empfohlen wird eine PNG-Datei mit transparentem Hintergrund.",
+        pl: "Zalecany jest plik PNG z przezroczystym tłem.",
+      },
+
+      "Печатка клініки": {
+        en: "Clinic stamp",
+        de: "Klinikstempel",
+        pl: "Pieczęć kliniki",
+      },
+
+      "Зберегти зміни": {
+        en: "Save changes",
+        de: "Änderungen speichern",
+        pl: "Zapisz zmiany",
+      },
+
+      "ПРЕДПЕРЕГЛЯД ДОКУМЕНТА": {
+        en: "DOCUMENT PREVIEW",
+        de: "DOKUMENTVORSCHAU",
+        pl: "PODGLĄD DOKUMENTU",
+      },
+
+      "Завантажити": {
+        en: "Upload",
+        de: "Hochladen",
+        pl: "Prześlij",
+      },
+
+      "Видалити": {
+        en: "Remove",
+        de: "Entfernen",
+        pl: "Usuń",
+      },
+    }
+  );
+
+
+  const ui =
+    (text) =>
+      escapeHtml(
+        getSettingsInterfaceText(
+          text
+        )
+      );
+
   const loading =
     page.querySelector(
       "#clinicSettingsLoading"
@@ -112894,9 +116350,7 @@ function renderClinicProfileSettings(
 
   if (!root) return;
 
-  if (loading) {
-    loading.remove();
-  }
+  loading?.remove();
 
   root.hidden = false;
 
@@ -112904,6 +116358,7 @@ function renderClinicProfileSettings(
     ...DEFAULT_CLINIC_PROFILE,
     ...(profile || {}),
   };
+
 
   root.innerHTML = `
     <div class="clinicProfileLayout">
@@ -112913,7 +116368,11 @@ function renderClinicProfileSettings(
       >
         <div class="clinicSettingsFormGrid">
           <label class="clinicSettingsField">
-            <span>Назва клініки *</span>
+            <span>
+              ${ui(
+                "Назва клініки"
+              )} *
+            </span>
 
             <input
               class="clinicSettingsInput"
@@ -112921,13 +116380,21 @@ function renderClinicProfileSettings(
               type="text"
               maxlength="120"
               required
-              value="${escapeHtml(clinic.name || "")}"
-              placeholder="Наприклад: Animal Clinic"
+              value="${escapeHtml(
+                clinic.name || ""
+              )}"
+              placeholder="${ui(
+                "Наприклад, Animal Clinic"
+              )}"
             >
           </label>
 
           <label class="clinicSettingsField">
-            <span>Підпис під назвою</span>
+            <span>
+              ${ui(
+                "Підпис під назвою"
+              )}
+            </span>
 
             <input
               class="clinicSettingsInput"
@@ -112937,25 +116404,39 @@ function renderClinicProfileSettings(
               value="${escapeHtml(
                 clinic.subtitle || ""
               )}"
-              placeholder="Ветеринарна клініка"
+              placeholder="${ui(
+                "Ветеринарна клініка"
+              )}"
             >
           </label>
 
           <label class="clinicSettingsField">
-            <span>Телефон</span>
+            <span>
+              ${ui(
+                "Телефон"
+              )}
+            </span>
 
             <input
               class="clinicSettingsInput"
               id="clinicProfilePhone"
               type="tel"
               maxlength="80"
-              value="${escapeHtml(clinic.phone || "")}"
-              placeholder="+380..."
+              value="${escapeHtml(
+                clinic.phone || ""
+              )}"
+              placeholder="${ui(
+                "Міжнародний номер із кодом країни"
+              )}"
             >
           </label>
 
           <label class="clinicSettingsField">
-            <span>Сайт або Instagram</span>
+            <span>
+              ${ui(
+                "Сайт або Instagram"
+              )}
+            </span>
 
             <input
               class="clinicSettingsInput"
@@ -112970,7 +116451,11 @@ function renderClinicProfileSettings(
           </label>
 
           <label class="clinicSettingsField clinicSettingsFieldWide">
-            <span>Адреса</span>
+            <span>
+              ${ui(
+                "Адреса"
+              )}
+            </span>
 
             <input
               class="clinicSettingsInput"
@@ -112980,12 +116465,18 @@ function renderClinicProfileSettings(
               value="${escapeHtml(
                 clinic.address || ""
               )}"
-              placeholder="Місто, вулиця, номер будинку"
+              placeholder="${ui(
+                "Місто, вулиця, будинок"
+              )}"
             >
           </label>
 
           <label class="clinicSettingsField">
-            <span>Акцентний колір документів</span>
+            <span>
+              ${ui(
+                "Акцентний колір документів"
+              )}
+            </span>
 
             <div class="clinicColorField">
               <input
@@ -113011,7 +116502,11 @@ function renderClinicProfileSettings(
           </label>
 
           <label class="clinicSettingsField">
-            <span>Підпис у нижній частині документа</span>
+            <span>
+              ${ui(
+                "Підпис у нижній частині документа"
+              )}
+            </span>
 
             <input
               class="clinicSettingsInput"
@@ -113021,47 +116516,74 @@ function renderClinicProfileSettings(
               value="${escapeHtml(
                 clinic.document_footer || ""
               )}"
-              placeholder="Коли важливо — ми поруч."
+              placeholder="${ui(
+                "Коли важливо — ми поруч."
+              )}"
             >
           </label>
         </div>
 
         <div class="clinicBrandUploads">
-          ${renderClinicBrandUpload({
-            type: "logo",
-            title: "Логотип клініки",
-            description:
-              "Використовується у виписках, аналізах та рахунках.",
-            value: clinic.logo_url,
-            accept:
-              "image/png,image/jpeg,image/webp",
-          })}
+          ${
+            renderClinicBrandUpload({
+              type: "logo",
 
-          ${renderClinicBrandUpload({
-            type: "signature",
-            title: "Підпис лікаря",
-            description:
-              "Бажано PNG з прозорим фоном.",
-            value: clinic.doctor_signature_url,
-            accept:
-              "image/png,image/jpeg,image/webp",
-          })}
+              title:
+                "Логотип клініки",
 
-          ${renderClinicBrandUpload({
-            type: "stamp",
-            title: "Печатка клініки",
-            description:
-              "Бажано PNG з прозорим фоном.",
-            value: clinic.clinic_stamp_url,
-            accept:
-              "image/png,image/jpeg,image/webp",
-          })}
+              description:
+                "Використовується у виписках, аналізах та рахунках.",
+
+              value:
+                clinic.logo_url,
+
+              accept:
+                "image/png,image/jpeg,image/webp",
+            })
+          }
+
+          ${
+            renderClinicBrandUpload({
+              type: "signature",
+
+              title:
+                "Підпис лікаря",
+
+              description:
+                "Бажано PNG з прозорим фоном.",
+
+              value:
+                clinic.doctor_signature_url,
+
+              accept:
+                "image/png,image/jpeg,image/webp",
+            })
+          }
+
+          ${
+            renderClinicBrandUpload({
+              type: "stamp",
+
+              title:
+                "Печатка клініки",
+
+              description:
+                "Бажано PNG з прозорим фоном.",
+
+              value:
+                clinic.clinic_stamp_url,
+
+              accept:
+                "image/png,image/jpeg,image/webp",
+            })
+          }
         </div>
 
         <div class="clinicProfileActions">
           <div
             class="clinicProfileSaveStatus"
             id="clinicProfileSaveStatus"
+            role="status"
           ></div>
 
           <button
@@ -113069,14 +116591,18 @@ function renderClinicProfileSettings(
             id="btnSaveClinicProfile"
             type="submit"
           >
-            Зберегти зміни
+            ${ui(
+              "Зберегти зміни"
+            )}
           </button>
         </div>
       </form>
 
       <aside class="clinicDocumentPreview">
         <div class="clinicPreviewKicker">
-          ПРЕДПЕРЕГЛЯД ДОКУМЕНТА
+          ${ui(
+            "ПРЕДПЕРЕГЛЯД ДОКУМЕНТА"
+          )}
         </div>
 
         <div
@@ -113087,9 +116613,17 @@ function renderClinicProfileSettings(
     </div>
   `;
 
-  bindClinicProfileSettings(page, clinic);
-  updateClinicDocumentPreview(page);
+
+  bindClinicProfileSettings(
+    page,
+    clinic
+  );
+
+  updateClinicDocumentPreview(
+    page
+  );
 }
+
 
 function renderClinicBrandUpload({
   type,
@@ -113098,103 +116632,190 @@ function renderClinicBrandUpload({
   value,
   accept,
 }) {
+  const localizedTitle =
+    getSettingsInterfaceText(
+      title
+    );
+
+  const localizedDescription =
+    getSettingsInterfaceText(
+      description
+    );
+
+
   return `
     <div
       class="clinicBrandUpload"
-      data-brand-upload="${escapeHtml(type)}"
+      data-brand-upload="${escapeHtml(
+        type
+      )}"
     >
       <div
         class="clinicBrandPreview"
-        data-brand-preview="${escapeHtml(type)}"
+        data-brand-preview="${escapeHtml(
+          type
+        )}"
       >
         ${
           value
             ? `
               <img
-                src="${escapeHtml(value)}"
-                alt="${escapeHtml(title)}"
+                src="${escapeHtml(
+                  value
+                )}"
+                alt="${escapeHtml(
+                  localizedTitle
+                )}"
               >
             `
-            : `
-              <span>＋</span>
-            `
+            : "<span>＋</span>"
         }
       </div>
 
       <div class="clinicBrandUploadText">
-        <strong>${escapeHtml(title)}</strong>
-        <p>${escapeHtml(description)}</p>
+        <strong>
+          ${escapeHtml(
+            localizedTitle
+          )}
+        </strong>
+
+        <p>
+          ${escapeHtml(
+            localizedDescription
+          )}
+        </p>
 
         <div class="clinicBrandUploadActions">
           <label class="clinicBrandUploadButton">
-            Завантажити
+            ${escapeHtml(
+              getSettingsInterfaceText(
+                "Завантажити"
+              )
+            )}
 
             <input
               type="file"
               hidden
-              accept="${escapeHtml(accept)}"
-              data-brand-file="${escapeHtml(type)}"
+              accept="${escapeHtml(
+                accept
+              )}"
+              data-brand-file="${escapeHtml(
+                type
+              )}"
             >
           </label>
 
           <button
             class="clinicBrandRemoveButton"
             type="button"
-            data-brand-remove="${escapeHtml(type)}"
+            data-brand-remove="${escapeHtml(
+              type
+            )}"
           >
-            Видалити
+            ${escapeHtml(
+              getSettingsInterfaceText(
+                "Видалити"
+              )
+            )}
           </button>
         </div>
       </div>
 
       <input
         type="hidden"
-        data-brand-url="${escapeHtml(type)}"
-        value="${escapeHtml(value || "")}"
+        data-brand-url="${escapeHtml(
+          type
+        )}"
+        value="${escapeHtml(
+          value || ""
+        )}"
       >
     </div>
   `;
 }
+function bindClinicProfileSettings(
+  page,
+  clinic
+) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Вкажіть назву клініки.": {
+        en: "Enter the clinic name.",
+        de: "Geben Sie den Kliniknamen ein.",
+        pl: "Podaj nazwę kliniki.",
+      },
 
-function bindClinicProfileSettings(page, clinic) {
+      "Зміни успішно збережені": {
+        en: "Changes saved successfully",
+        de: "Änderungen erfolgreich gespeichert",
+        pl: "Zmiany zostały zapisane",
+      },
+    }
+  );
+
+
   const form =
-    page.querySelector("#clinicProfileForm");
+    page.querySelector(
+      "#clinicProfileForm"
+    );
 
   if (!form) return;
 
   const colorPicker =
-    page.querySelector(
+    form.querySelector(
       "#clinicProfileAccentColor"
     );
 
   const colorText =
-    page.querySelector(
+    form.querySelector(
       "#clinicProfileAccentText"
     );
 
-  colorPicker?.addEventListener("input", () => {
-    if (colorText) {
-      colorText.value =
-        colorPicker.value.toUpperCase();
-    }
 
-    updateClinicDocumentPreview(page);
-  });
-
-  colorText?.addEventListener("input", () => {
-    const value =
-      String(colorText.value || "")
-        .trim()
-        .toUpperCase();
-
-    if (/^#[0-9A-F]{6}$/.test(value)) {
-      if (colorPicker) {
-        colorPicker.value = value;
+  colorPicker?.addEventListener(
+    "input",
+    () => {
+      if (colorText) {
+        colorText.value =
+          colorPicker.value
+            .toUpperCase();
       }
 
-      updateClinicDocumentPreview(page);
+      updateClinicDocumentPreview(
+        page
+      );
     }
-  });
+  );
+
+
+  colorText?.addEventListener(
+    "input",
+    () => {
+      const value =
+        String(
+          colorText.value || ""
+        )
+          .trim()
+          .toUpperCase();
+
+      if (
+        /^#[0-9A-F]{6}$/.test(
+          value
+        )
+      ) {
+        if (colorPicker) {
+          colorPicker.value =
+            value;
+        }
+
+        updateClinicDocumentPreview(
+          page
+        );
+      }
+    }
+  );
+
 
   form
     .querySelectorAll(
@@ -113203,12 +116824,18 @@ function bindClinicProfileSettings(page, clinic) {
     .forEach((input) => {
       input.addEventListener(
         "input",
-        () => updateClinicDocumentPreview(page)
+        () =>
+          updateClinicDocumentPreview(
+            page
+          )
       );
     });
 
+
   form
-    .querySelectorAll("[data-brand-file]")
+    .querySelectorAll(
+      "[data-brand-file]"
+    )
     .forEach((input) => {
       input.addEventListener(
         "change",
@@ -113219,10 +116846,14 @@ function bindClinicProfileSettings(page, clinic) {
           const file =
             input.files?.[0];
 
-          if (!type || !file) return;
+          if (!type || !file) {
+            return;
+          }
 
           const uploadBlock =
-            input.closest(".clinicBrandUpload");
+            input.closest(
+              ".clinicBrandUpload"
+            );
 
           uploadBlock?.classList.add(
             "uploading"
@@ -113230,36 +116861,54 @@ function bindClinicProfileSettings(page, clinic) {
 
           try {
             const url =
-              await uploadClinicBrandFile(file);
+              await uploadClinicBrandFile(
+                file
+              );
 
             const hidden =
-              page.querySelector(
-                `[data-brand-url="${type}"]`
+              form.querySelector(
+                `[data-brand-url="${CSS.escape(
+                  type
+                )}"]`
               );
 
             if (hidden) {
-              hidden.value = url;
+              hidden.value =
+                url;
             }
 
             const preview =
-              page.querySelector(
-                `[data-brand-preview="${type}"]`
+              form.querySelector(
+                `[data-brand-preview="${CSS.escape(
+                  type
+                )}"]`
               );
 
             if (preview) {
               preview.innerHTML = `
                 <img
-                  src="${escapeHtml(url)}"
+                  src="${escapeHtml(
+                    url
+                  )}"
                   alt=""
                 >
               `;
             }
 
-            updateClinicDocumentPreview(page);
+            updateClinicDocumentPreview(
+              page
+            );
           } catch (error) {
-            alert(
-              "Не вдалося завантажити файл: " +
-              (error?.message || error)
+            console.error(
+              "Clinic brand upload failed:",
+              error
+            );
+
+            showSettingsMessage(
+              getSettingsSafeErrorText(
+                error,
+                "Не вдалося завантажити файл."
+              )
             );
           } finally {
             uploadBlock?.classList.remove(
@@ -113272,8 +116921,11 @@ function bindClinicProfileSettings(page, clinic) {
       );
     });
 
+
   form
-    .querySelectorAll("[data-brand-remove]")
+    .querySelectorAll(
+      "[data-brand-remove]"
+    )
     .forEach((button) => {
       button.addEventListener(
         "click",
@@ -113281,9 +116933,13 @@ function bindClinicProfileSettings(page, clinic) {
           const type =
             button.dataset.brandRemove;
 
+          if (!type) return;
+
           const hidden =
-            page.querySelector(
-              `[data-brand-url="${type}"]`
+            form.querySelector(
+              `[data-brand-url="${CSS.escape(
+                type
+              )}"]`
             );
 
           if (hidden) {
@@ -113291,18 +116947,24 @@ function bindClinicProfileSettings(page, clinic) {
           }
 
           const preview =
-            page.querySelector(
-              `[data-brand-preview="${type}"]`
+            form.querySelector(
+              `[data-brand-preview="${CSS.escape(
+                type
+              )}"]`
             );
 
           if (preview) {
-            preview.innerHTML = "<span>＋</span>";
+            preview.innerHTML =
+              "<span>＋</span>";
           }
 
-          updateClinicDocumentPreview(page);
+          updateClinicDocumentPreview(
+            page
+          );
         }
       );
     });
+
 
   form.addEventListener(
     "submit",
@@ -113310,201 +116972,404 @@ function bindClinicProfileSettings(page, clinic) {
       event.preventDefault();
 
       const saveButton =
-        page.querySelector(
+        form.querySelector(
           "#btnSaveClinicProfile"
         );
 
       const status =
-        page.querySelector(
+        form.querySelector(
           "#clinicProfileSaveStatus"
         );
 
-      const payload = {
-        name:
-          page
-            .querySelector("#clinicProfileName")
-            ?.value?.trim() || "",
-
-        subtitle:
-          page
-            .querySelector(
-              "#clinicProfileSubtitle"
-            )
-            ?.value?.trim() || "",
-
-        phone:
-          page
-            .querySelector(
-              "#clinicProfilePhone"
-            )
-            ?.value?.trim() || "",
-
-        address:
-          page
-            .querySelector(
-              "#clinicProfileAddress"
-            )
-            ?.value?.trim() || "",
-
-        website:
-          page
-            .querySelector(
-              "#clinicProfileWebsite"
-            )
-            ?.value?.trim() || "",
-
-        document_accent_color:
-          page
-            .querySelector(
-              "#clinicProfileAccentText"
-            )
-            ?.value?.trim()
-            .toUpperCase() || "#9346E8",
-
-        document_footer:
-          page
-            .querySelector(
-              "#clinicProfileFooter"
-            )
-            ?.value?.trim() || "",
-
-        logo_url:
-          page
-            .querySelector(
-              '[data-brand-url="logo"]'
-            )
-            ?.value || "",
-
-        doctor_signature_url:
-          page
-            .querySelector(
-              '[data-brand-url="signature"]'
-            )
-            ?.value || "",
-
-        clinic_stamp_url:
-          page
-            .querySelector(
-              '[data-brand-url="stamp"]'
-            )
-            ?.value || "",
-      };
-
-      if (!payload.name) {
-        alert("Вкажіть назву клініки.");
+      if (saveButton?.disabled) {
         return;
       }
 
-      saveButton.disabled = true;
-      saveButton.textContent = "Збереження…";
+      const read =
+        (selector) =>
+          String(
+            form.querySelector(
+              selector
+            )?.value ||
+            ""
+          ).trim();
+
+      const payload = {
+        name:
+          read(
+            "#clinicProfileName"
+          ),
+
+        subtitle:
+          read(
+            "#clinicProfileSubtitle"
+          ),
+
+        phone:
+          read(
+            "#clinicProfilePhone"
+          ),
+
+        address:
+          read(
+            "#clinicProfileAddress"
+          ),
+
+        website:
+          read(
+            "#clinicProfileWebsite"
+          ),
+
+        document_accent_color:
+          read(
+            "#clinicProfileAccentText"
+          ).toUpperCase() ||
+          "#9346E8",
+
+        document_footer:
+          read(
+            "#clinicProfileFooter"
+          ),
+
+        logo_url:
+          read(
+            '[data-brand-url="logo"]'
+          ),
+
+        doctor_signature_url:
+          read(
+            '[data-brand-url="signature"]'
+          ),
+
+        clinic_stamp_url:
+          read(
+            '[data-brand-url="stamp"]'
+          ),
+      };
+
+
+      if (!payload.name) {
+        showSettingsMessage(
+          getSettingsInterfaceText(
+            "Вкажіть назву клініки."
+          )
+        );
+
+        form.querySelector(
+          "#clinicProfileName"
+        )?.focus();
+
+        return;
+      }
+
+
+      if (saveButton) {
+        saveButton.disabled =
+          true;
+
+        saveButton.textContent =
+          getSettingsInterfaceText(
+            "Зберігаємо…"
+          );
+      }
 
       if (status) {
         status.textContent = "";
+
         status.className =
           "clinicProfileSaveStatus";
       }
 
-      const saved =
-        await saveClinicProfileApi(payload);
 
-      saveButton.disabled = false;
-      saveButton.textContent =
-        "Зберегти зміни";
+      try {
+        const saved =
+          await saveClinicProfileApi(
+            payload
+          );
 
-      if (!saved) return;
+        if (!saved) {
+          if (status) {
+            status.textContent =
+              getSettingsInterfaceText(
+                "Не вдалося зберегти налаштування клініки."
+              );
 
-      if (status) {
-        status.textContent =
-          "Зміни успішно збережені";
+            status.classList.add(
+              "error"
+            );
+          }
 
-        status.classList.add("success");
-      }
+          return;
+        }
 
-      const clinicTitle =
-        document.getElementById(
-          "clinicNameTitle"
-        ) ||
-        document.querySelector(
-          ".clinic-title"
+        if (status) {
+          status.textContent =
+            getSettingsInterfaceText(
+              "Зміни успішно збережені"
+            );
+
+          status.classList.add(
+            "success"
+          );
+        }
+
+        const clinicTitle =
+          document.getElementById(
+            "clinicNameTitle"
+          ) ||
+          document.querySelector(
+            ".clinic-title"
+          );
+
+        if (clinicTitle) {
+          clinicTitle.textContent =
+            saved.name;
+        }
+
+        updateClinicDocumentPreview(
+          page
+        );
+      } catch (error) {
+        console.error(
+          "Clinic profile form save failed:",
+          error
         );
 
-      if (clinicTitle) {
-        clinicTitle.textContent =
-          saved.name;
-      }
+        const message =
+          getSettingsSafeErrorText(
+            error,
+            "Не вдалося зберегти налаштування клініки."
+          );
 
-      updateClinicDocumentPreview(page);
+        if (status) {
+          status.textContent =
+            message;
+
+          status.classList.add(
+            "error"
+          );
+        }
+
+        showSettingsMessage(
+          message
+        );
+      } finally {
+        if (saveButton) {
+          saveButton.disabled =
+            false;
+
+          saveButton.textContent =
+            getSettingsInterfaceText(
+              "Зберегти зміни"
+            );
+        }
+      }
     }
   );
 }
 
-function updateClinicDocumentPreview(page) {
+
+function updateClinicDocumentPreview(
+  page
+) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Результати дослідження": {
+        en: "Test results",
+        de: "Untersuchungsergebnisse",
+        pl: "Wyniki badań",
+      },
+
+      "Пацієнт": {
+        en: "Patient",
+        de: "Patient",
+        pl: "Pacjent",
+      },
+
+      "Дата": {
+        en: "Date",
+        de: "Datum",
+        pl: "Data",
+      },
+
+      "Показник": {
+        en: "Parameter",
+        de: "Parameter",
+        pl: "Parametr",
+      },
+
+      "Результат": {
+        en: "Result",
+        de: "Ergebnis",
+        pl: "Wynik",
+      },
+
+      "Статус": {
+        en: "Status",
+        de: "Status",
+        pl: "Status",
+      },
+
+      "Глюкоза": {
+        en: "Glucose",
+        de: "Glukose",
+        pl: "Glukoza",
+      },
+
+      "Креатинін": {
+        en: "Creatinine",
+        de: "Kreatinin",
+        pl: "Kreatynina",
+      },
+
+      "Норма": {
+        en: "Normal",
+        de: "Normal",
+        pl: "W normie",
+      },
+
+      "Вище": {
+        en: "High",
+        de: "Erhöht",
+        pl: "Podwyższony",
+      },
+
+      "Печатка": {
+        en: "Stamp",
+        de: "Stempel",
+        pl: "Pieczęć",
+      },
+
+      "ммоль/л": {
+        en: "mmol/L",
+        de: "mmol/l",
+        pl: "mmol/l",
+      },
+
+      "мкмоль/л": {
+        en: "µmol/L",
+        de: "µmol/l",
+        pl: "µmol/l",
+      },
+    }
+  );
+
+
   const preview =
-    page.querySelector("#clinicPreviewPaper");
+    page.querySelector(
+      "#clinicPreviewPaper"
+    );
 
   if (!preview) return;
 
+  const ui =
+    (text) =>
+      escapeHtml(
+        getSettingsInterfaceText(
+          text
+        )
+      );
+
+  const read =
+    (selector) =>
+      String(
+        page.querySelector(
+          selector
+        )?.value ||
+        ""
+      ).trim();
+
+
   const name =
-    page
-      .querySelector("#clinicProfileName")
-      ?.value?.trim() ||
-    "Ветеринарна клініка";
+    read(
+      "#clinicProfileName"
+    ) ||
+    getSettingsInterfaceText(
+      "Ветеринарна клініка"
+    );
 
   const subtitle =
-    page
-      .querySelector("#clinicProfileSubtitle")
-      ?.value?.trim() ||
-    "Ветеринарна клініка";
+    read(
+      "#clinicProfileSubtitle"
+    ) ||
+    getSettingsInterfaceText(
+      "Ветеринарна клініка"
+    );
 
   const phone =
-    page
-      .querySelector("#clinicProfilePhone")
-      ?.value?.trim() || "";
+    read(
+      "#clinicProfilePhone"
+    );
 
   const address =
-    page
-      .querySelector("#clinicProfileAddress")
-      ?.value?.trim() || "";
+    read(
+      "#clinicProfileAddress"
+    );
 
   const website =
-    page
-      .querySelector("#clinicProfileWebsite")
-      ?.value?.trim() || "";
+    read(
+      "#clinicProfileWebsite"
+    );
 
   const color =
-    page
-      .querySelector("#clinicProfileAccentText")
-      ?.value?.trim() ||
+    read(
+      "#clinicProfileAccentText"
+    ) ||
     "#9346E8";
 
   const footer =
-    page
-      .querySelector("#clinicProfileFooter")
-      ?.value?.trim() || "";
+    read(
+      "#clinicProfileFooter"
+    );
 
   const logo =
-    page
-      .querySelector('[data-brand-url="logo"]')
-      ?.value || "";
+    read(
+      '[data-brand-url="logo"]'
+    );
 
   const signature =
-    page
-      .querySelector(
-        '[data-brand-url="signature"]'
-      )
-      ?.value || "";
+    read(
+      '[data-brand-url="signature"]'
+    );
 
   const stamp =
-    page
-      .querySelector(
-        '[data-brand-url="stamp"]'
-      )
-      ?.value || "";
+    read(
+      '[data-brand-url="stamp"]'
+    );
+
+  const samplePatient =
+    getInterfaceLanguage() === "uk"
+      ? "Мойша"
+      : "Moysha";
+
+  const sampleDate =
+    formatSettingsDate(
+      `${todayISO()}T12:00:00`,
+      {
+        dateStyle:
+          "medium",
+      }
+    );
+
+  const glucoseValue =
+    Number(5.2)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
+  const creatinineValue =
+    Number(132)
+      .toLocaleString(
+        getCalendarLocale()
+      );
+
 
   preview.style.setProperty(
     "--document-accent",
     color
   );
+
 
   preview.innerHTML = `
     <div class="clinicPreviewHeader">
@@ -113513,67 +117378,168 @@ function updateClinicDocumentPreview(page) {
           logo
             ? `
               <img
-                src="${escapeHtml(logo)}"
+                src="${escapeHtml(
+                  logo
+                )}"
                 alt=""
               >
             `
             : `
               <div class="clinicPreviewLogoFallback">
                 ${escapeHtml(
-                  name.charAt(0).toUpperCase()
+                  name
+                    .charAt(0)
+                    .toUpperCase()
                 )}
               </div>
             `
         }
 
         <div>
-          <strong>${escapeHtml(name)}</strong>
-          <span>${escapeHtml(subtitle)}</span>
+          <strong>
+            ${escapeHtml(
+              name
+            )}
+          </strong>
+
+          <span>
+            ${escapeHtml(
+              subtitle
+            )}
+          </span>
         </div>
       </div>
 
       <div class="clinicPreviewDocTitle">
-        Результати дослідження
+        ${ui(
+          "Результати дослідження"
+        )}
       </div>
     </div>
 
     <div class="clinicPreviewLine"></div>
 
     <div class="clinicPreviewContacts">
-      ${phone ? `<span>${escapeHtml(phone)}</span>` : ""}
-      ${address ? `<span>${escapeHtml(address)}</span>` : ""}
-      ${website ? `<span>${escapeHtml(website)}</span>` : ""}
+      ${
+        phone
+          ? `<span>${escapeHtml(
+              phone
+            )}</span>`
+          : ""
+      }
+
+      ${
+        address
+          ? `<span>${escapeHtml(
+              address
+            )}</span>`
+          : ""
+      }
+
+      ${
+        website
+          ? `<span>${escapeHtml(
+              website
+            )}</span>`
+          : ""
+      }
     </div>
 
     <div class="clinicPreviewPatient">
       <div>
-        <span>Пацієнт</span>
-        <strong>Мойша</strong>
+        <span>
+          ${ui(
+            "Пацієнт"
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            samplePatient
+          )}
+        </strong>
       </div>
 
       <div>
-        <span>Дата</span>
-        <strong>${escapeHtml(todayISO())}</strong>
+        <span>
+          ${ui(
+            "Дата"
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            sampleDate
+          )}
+        </strong>
       </div>
     </div>
 
     <div class="clinicPreviewTable">
       <div class="head">
-        <span>Показник</span>
-        <span>Результат</span>
-        <span>Статус</span>
+        <span>
+          ${ui(
+            "Показник"
+          )}
+        </span>
+
+        <span>
+          ${ui(
+            "Результат"
+          )}
+        </span>
+
+        <span>
+          ${ui(
+            "Статус"
+          )}
+        </span>
       </div>
 
       <div>
-        <span>Глюкоза</span>
-        <strong>5.2 ммоль/л</strong>
-        <b>Норма</b>
+        <span>
+          ${ui(
+            "Глюкоза"
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            glucoseValue
+          )}
+          ${ui(
+            "ммоль/л"
+          )}
+        </strong>
+
+        <b>
+          ${ui(
+            "Норма"
+          )}
+        </b>
       </div>
 
       <div>
-        <span>Креатинін</span>
-        <strong>132 мкмоль/л</strong>
-        <b class="high">Вище</b>
+        <span>
+          ${ui(
+            "Креатинін"
+          )}
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            creatinineValue
+          )}
+          ${ui(
+            "мкмоль/л"
+          )}
+        </strong>
+
+        <b class="high">
+          ${ui(
+            "Вище"
+          )}
+        </b>
       </div>
     </div>
 
@@ -113581,28 +117547,59 @@ function updateClinicDocumentPreview(page) {
       <div>
         ${
           signature
-            ? `<img src="${escapeHtml(signature)}" alt="">`
-            : `<span>Підпис лікаря</span>`
+            ? `
+              <img
+                src="${escapeHtml(
+                  signature
+                )}"
+                alt=""
+              >
+            `
+            : `
+              <span>
+                ${ui(
+                  "Підпис лікаря"
+                )}
+              </span>
+            `
         }
       </div>
 
       <div>
         ${
           stamp
-            ? `<img src="${escapeHtml(stamp)}" alt="">`
-            : `<span>Печатка</span>`
+            ? `
+              <img
+                src="${escapeHtml(
+                  stamp
+                )}"
+                alt=""
+              >
+            `
+            : `
+              <span>
+                ${ui(
+                  "Печатка"
+                )}
+              </span>
+            `
         }
       </div>
     </div>
 
     <div class="clinicPreviewFooter">
-      <span>${escapeHtml(footer)}</span>
-      <small>Powered by Doc.PUG CRM</small>
+      <span>
+        ${escapeHtml(
+          footer
+        )}
+      </span>
+
+      <small>
+        Powered by Doc.PUG CRM
+      </small>
     </div>
   `;
 }
-
-// Функция для применения темы при загрузке страницы
 function bootstrapClinicTheme() {
   const savedTheme = LS.get("docpug_clinic_theme", "purple");
   document.body.dataset.theme = savedTheme;
@@ -113614,15 +117611,144 @@ function bootstrapClinicTheme() {
   }
 }
 function openRequiredPasswordChangeModal() {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "БЕЗПЕКА АКАУНТА": {
+        en: "ACCOUNT SECURITY",
+        de: "KONTOSICHERHEIT",
+        pl: "BEZPIECZEŃSTWO KONTA",
+      },
+
+      "Створіть новий пароль": {
+        en: "Create a new password",
+        de: "Erstellen Sie ein neues Passwort",
+        pl: "Utwórz nowe hasło",
+      },
+
+      "Ви увійшли з тимчасовим паролем. Для продовження роботи його потрібно змінити.": {
+        en: "You signed in with a temporary password. Change it to continue.",
+        de: "Sie haben sich mit einem temporären Passwort angemeldet. Ändern Sie es, um fortzufahren.",
+        pl: "Zalogowano się przy użyciu hasła tymczasowego. Zmień je, aby kontynuować.",
+      },
+
+      "Поточний пароль": {
+        en: "Current password",
+        de: "Aktuelles Passwort",
+        pl: "Obecne hasło",
+      },
+
+      "Новий пароль": {
+        en: "New password",
+        de: "Neues Passwort",
+        pl: "Nowe hasło",
+      },
+
+      "Повторіть новий пароль": {
+        en: "Repeat the new password",
+        de: "Neues Passwort wiederholen",
+        pl: "Powtórz nowe hasło",
+      },
+
+      "Мінімум 8 символів": {
+        en: "At least 8 characters",
+        de: "Mindestens 8 Zeichen",
+        pl: "Co najmniej 8 znaków",
+      },
+
+      "Зберегти новий пароль": {
+        en: "Save new password",
+        de: "Neues Passwort speichern",
+        pl: "Zapisz nowe hasło",
+      },
+
+      "Введіть поточний пароль.": {
+        en: "Enter your current password.",
+        de: "Geben Sie Ihr aktuelles Passwort ein.",
+        pl: "Podaj obecne hasło.",
+      },
+
+      "Новий пароль повинен містити щонайменше 8 символів.": {
+        en: "The new password must contain at least 8 characters.",
+        de: "Das neue Passwort muss mindestens 8 Zeichen enthalten.",
+        pl: "Nowe hasło musi zawierać co najmniej 8 znaków.",
+      },
+
+      "Нові паролі не збігаються.": {
+        en: "The new passwords do not match.",
+        de: "Die neuen Passwörter stimmen nicht überein.",
+        pl: "Nowe hasła nie są zgodne.",
+      },
+
+      "Новий пароль повинен відрізнятися від поточного.": {
+        en: "The new password must differ from the current password.",
+        de: "Das neue Passwort muss sich vom aktuellen Passwort unterscheiden.",
+        pl: "Nowe hasło musi różnić się od obecnego.",
+      },
+
+      "Поточний пароль введено неправильно.": {
+        en: "The current password is incorrect.",
+        de: "Das aktuelle Passwort ist falsch.",
+        pl: "Obecne hasło jest nieprawidłowe.",
+      },
+
+      "Поточний пароль не налаштований.": {
+        en: "No current password is configured.",
+        de: "Es ist kein aktuelles Passwort eingerichtet.",
+        pl: "Obecne hasło nie zostało ustawione.",
+      },
+
+      "Сесію завершено. Увійдіть повторно.": {
+        en: "Your session has ended. Sign in again.",
+        de: "Ihre Sitzung ist beendet. Melden Sie sich erneut an.",
+        pl: "Sesja została zakończona. Zaloguj się ponownie.",
+      },
+
+      "Обліковий запис вимкнений.": {
+        en: "The account is disabled.",
+        de: "Das Konto ist deaktiviert.",
+        pl: "Konto jest wyłączone.",
+      },
+
+      "Не вдалося оновити пароль.": {
+        en: "Could not update the password.",
+        de: "Das Passwort konnte nicht aktualisiert werden.",
+        pl: "Nie udało się zaktualizować hasła.",
+      },
+
+      "Не вдалося змінити пароль.": {
+        en: "Could not change the password.",
+        de: "Das Passwort konnte nicht geändert werden.",
+        pl: "Nie udało się zmienić hasła.",
+      },
+
+      "Не вдалося з'єднатися із сервером.": {
+        en: "Could not connect to the server.",
+        de: "Die Verbindung zum Server konnte nicht hergestellt werden.",
+        pl: "Nie udało się połączyć z serwerem.",
+      },
+    }
+  );
+
+
+  const ui =
+    (text) =>
+      escapeHtml(
+        getSettingsInterfaceText(
+          text
+        )
+      );
+
+
   return new Promise((resolve) => {
-    document
-      .getElementById(
-        "requiredPasswordChangeOverlay"
-      )
-      ?.remove();
+    document.getElementById(
+      "requiredPasswordChangeOverlay"
+    )?.remove();
 
     const overlay =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     overlay.id =
       "requiredPasswordChangeOverlay";
@@ -113638,12 +117764,76 @@ function openRequiredPasswordChangeModal() {
       background:
         radial-gradient(
           circle at top,
-          rgba(124, 92, 255, 0.24),
+          rgba(124,92,255,.24),
           transparent 42%
         ),
-        rgba(5, 8, 18, 0.94);
+        rgba(5,8,18,.94);
       backdrop-filter: blur(18px);
     `;
+
+
+    const inputStyle = `
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px 15px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      outline: none;
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      font: inherit;
+    `;
+
+    const passwordField = (
+      id,
+      label,
+      autocomplete,
+      hint = ""
+    ) => `
+      <label
+        style="
+          display: block;
+          margin-bottom: 15px;
+        "
+      >
+        <span
+          style="
+            display: block;
+            margin-bottom: 7px;
+            color: rgba(255,255,255,.76);
+            font-size: 13px;
+            font-weight: 800;
+          "
+        >
+          ${ui(label)}
+        </span>
+
+        <input
+          id="${id}"
+          type="password"
+          autocomplete="${autocomplete}"
+          required
+          style="${inputStyle}"
+        >
+
+        ${
+          hint
+            ? `
+              <small
+                style="
+                  display: block;
+                  margin-top: 7px;
+                  color: rgba(255,255,255,.44);
+                "
+              >
+                ${ui(hint)}
+              </small>
+            `
+            : ""
+        }
+      </label>
+    `;
+
 
     overlay.innerHTML = `
       <section
@@ -113652,6 +117842,9 @@ function openRequiredPasswordChangeModal() {
         aria-labelledby="requiredPasswordTitle"
         style="
           width: min(480px, 100%);
+          box-sizing: border-box;
+          max-height: 90vh;
+          overflow-y: auto;
           padding: 30px;
           border: 1px solid rgba(255,255,255,.12);
           border-radius: 28px;
@@ -113697,7 +117890,9 @@ function openRequiredPasswordChangeModal() {
             letter-spacing: .13em;
           "
         >
-          БЕЗПЕКА АКАУНТА
+          ${ui(
+            "БЕЗПЕКА АКАУНТА"
+          )}
         </div>
 
         <h2
@@ -113708,7 +117903,9 @@ function openRequiredPasswordChangeModal() {
             line-height: 1.15;
           "
         >
-          Створіть новий пароль
+          ${ui(
+            "Створіть новий пароль"
+          )}
         </h2>
 
         <p
@@ -113718,136 +117915,43 @@ function openRequiredPasswordChangeModal() {
             line-height: 1.55;
           "
         >
-          Ви увійшли з тимчасовим паролем.
-          Для продовження роботи його потрібно змінити.
+          ${ui(
+            "Ви увійшли з тимчасовим паролем. Для продовження роботи його потрібно змінити."
+          )}
         </p>
 
-        <form id="requiredPasswordForm">
-          <label
-            style="
-              display: block;
-              margin-bottom: 15px;
-            "
-          >
-            <span
-              style="
-                display: block;
-                margin-bottom: 7px;
-                color: rgba(255,255,255,.76);
-                font-size: 13px;
-                font-weight: 800;
-              "
-            >
-              Поточний пароль
-            </span>
+        <form
+          id="requiredPasswordForm"
+          novalidate
+        >
+          ${
+            passwordField(
+              "requiredCurrentPassword",
+              "Поточний пароль",
+              "current-password"
+            )
+          }
 
-            <input
-              id="requiredCurrentPassword"
-              type="password"
-              autocomplete="current-password"
-              required
-              style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 14px 15px;
-                border: 1px solid rgba(255,255,255,.12);
-                border-radius: 14px;
-                outline: none;
-                background: rgba(255,255,255,.06);
-                color: #fff;
-                font: inherit;
-              "
-            >
-          </label>
+          ${
+            passwordField(
+              "requiredNewPassword",
+              "Новий пароль",
+              "new-password",
+              "Мінімум 8 символів"
+            )
+          }
 
-          <label
-            style="
-              display: block;
-              margin-bottom: 15px;
-            "
-          >
-            <span
-              style="
-                display: block;
-                margin-bottom: 7px;
-                color: rgba(255,255,255,.76);
-                font-size: 13px;
-                font-weight: 800;
-              "
-            >
-              Новий пароль
-            </span>
-
-            <input
-              id="requiredNewPassword"
-              type="password"
-              minlength="8"
-              autocomplete="new-password"
-              required
-              style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 14px 15px;
-                border: 1px solid rgba(255,255,255,.12);
-                border-radius: 14px;
-                outline: none;
-                background: rgba(255,255,255,.06);
-                color: #fff;
-                font: inherit;
-              "
-            >
-
-            <small
-              style="
-                display: block;
-                margin-top: 7px;
-                color: rgba(255,255,255,.44);
-              "
-            >
-              Мінімум 8 символів
-            </small>
-          </label>
-
-          <label
-            style="
-              display: block;
-              margin-bottom: 18px;
-            "
-          >
-            <span
-              style="
-                display: block;
-                margin-bottom: 7px;
-                color: rgba(255,255,255,.76);
-                font-size: 13px;
-                font-weight: 800;
-              "
-            >
-              Повторіть новий пароль
-            </span>
-
-            <input
-              id="requiredConfirmPassword"
-              type="password"
-              minlength="8"
-              autocomplete="new-password"
-              required
-              style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 14px 15px;
-                border: 1px solid rgba(255,255,255,.12);
-                border-radius: 14px;
-                outline: none;
-                background: rgba(255,255,255,.06);
-                color: #fff;
-                font: inherit;
-              "
-            >
-          </label>
+          ${
+            passwordField(
+              "requiredConfirmPassword",
+              "Повторіть новий пароль",
+              "new-password"
+            )
+          }
 
           <div
             id="requiredPasswordError"
+            role="alert"
             style="
               display: none;
               margin-bottom: 15px;
@@ -113883,11 +117987,14 @@ function openRequiredPasswordChangeModal() {
                 0 16px 34px rgba(124,92,255,.3);
             "
           >
-            Зберегти новий пароль
+            ${ui(
+              "Зберегти новий пароль"
+            )}
           </button>
         </form>
       </section>
     `;
+
 
     document.body.appendChild(
       overlay
@@ -113923,35 +118030,47 @@ function openRequiredPasswordChangeModal() {
         "#requiredPasswordSubmit"
       );
 
-    const showError = (message) => {
-      if (!errorBox) return;
 
-      errorBox.textContent =
-        message ||
-        "Не вдалося змінити пароль.";
+    const showError =
+      (message) => {
+        if (!errorBox) return;
 
-      errorBox.style.display =
-        "block";
-    };
+        errorBox.textContent =
+          getSettingsInterfaceText(
+            message ||
+            "Не вдалося змінити пароль."
+          );
+
+        errorBox.style.display =
+          "block";
+      };
+
 
     form?.addEventListener(
       "submit",
       async (event) => {
         event.preventDefault();
 
+        if (submitButton?.disabled) {
+          return;
+        }
+
         const currentPassword =
           String(
-            currentInput?.value || ""
+            currentInput?.value ||
+            ""
           );
 
         const newPassword =
           String(
-            newInput?.value || ""
+            newInput?.value ||
+            ""
           );
 
         const confirmPassword =
           String(
-            confirmInput?.value || ""
+            confirmInput?.value ||
+            ""
           );
 
         if (errorBox) {
@@ -113959,7 +118078,19 @@ function openRequiredPasswordChangeModal() {
             "none";
         }
 
-        if (newPassword.length < 8) {
+
+        if (!currentPassword) {
+          showError(
+            "Введіть поточний пароль."
+          );
+
+          currentInput?.focus();
+          return;
+        }
+
+        if (
+          newPassword.length < 8
+        ) {
           showError(
             "Новий пароль повинен містити щонайменше 8 символів."
           );
@@ -113980,13 +118111,29 @@ function openRequiredPasswordChangeModal() {
           return;
         }
 
+        if (
+          newPassword ===
+          currentPassword
+        ) {
+          showError(
+            "Новий пароль повинен відрізнятися від поточного."
+          );
+
+          newInput?.focus();
+          return;
+        }
+
+
         if (submitButton) {
           submitButton.disabled =
             true;
 
           submitButton.textContent =
-            "Збереження…";
+            getSettingsInterfaceText(
+              "Зберігаємо…"
+            );
         }
+
 
         try {
           const response =
@@ -113994,7 +118141,9 @@ function openRequiredPasswordChangeModal() {
               "/api/change-password",
               {
                 method: "POST",
-                credentials: "include",
+
+                credentials:
+                  "include",
 
                 headers: {
                   "Content-Type":
@@ -114004,16 +118153,17 @@ function openRequiredPasswordChangeModal() {
                     "application/json",
                 },
 
-                body: JSON.stringify({
-                  current_password:
-                    currentPassword,
+                body:
+                  JSON.stringify({
+                    current_password:
+                      currentPassword,
 
-                  new_password:
-                    newPassword,
+                    new_password:
+                      newPassword,
 
-                  confirm_password:
-                    confirmPassword,
-                }),
+                    confirm_password:
+                      confirmPassword,
+                  }),
               }
             );
 
@@ -114023,22 +118173,33 @@ function openRequiredPasswordChangeModal() {
           let json = null;
 
           try {
-            json = text
-              ? JSON.parse(text)
-              : null;
-          } catch {}
+            json =
+              text
+                ? JSON.parse(
+                    text
+                  )
+                : null;
+          } catch {
+            json = null;
+          }
 
           if (
             !response.ok ||
             json?.ok !== true
           ) {
             showError(
-              json?.error ||
-              "Не вдалося змінити пароль."
+              getSettingsSafeErrorText(
+                new Error(
+                  json?.error ||
+                  ""
+                ),
+                "Не вдалося змінити пароль."
+              )
             );
 
             return;
           }
+
 
           if (state.me) {
             state.me.must_change_password =
@@ -114046,8 +118207,8 @@ function openRequiredPasswordChangeModal() {
           }
 
           overlay.remove();
-          resolve(true);
 
+          resolve(true);
         } catch (error) {
           console.error(
             "Password change failed:",
@@ -114057,7 +118218,6 @@ function openRequiredPasswordChangeModal() {
           showError(
             "Не вдалося з'єднатися із сервером."
           );
-
         } finally {
           if (
             submitButton &&
@@ -114069,20 +118229,23 @@ function openRequiredPasswordChangeModal() {
               false;
 
             submitButton.textContent =
-              "Зберегти новий пароль";
+              getSettingsInterfaceText(
+                "Зберегти новий пароль"
+              );
           }
         }
       }
     );
 
-    setTimeout(() => {
-      currentInput?.focus();
-    }, 80);
+
+    setTimeout(
+      () => {
+        currentInput?.focus();
+      },
+      80
+    );
   });
 }
-// =========================
-// ГЛАВНЫЙ ИНИЦИАЛИЗАТОР ПРИЛОЖЕНИЯ (BOOTSTRAP)
-// =========================
 async function init() {
   // === ПРЕМИУМ ЛОГИН КЛИНИКИ ===
   const authForm =
