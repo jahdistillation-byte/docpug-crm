@@ -92578,11 +92578,17 @@ function getVisitWorkspaceTranslationRows() {
       "Für den Entlassungsbericht",
       "Do wypisu",
     ],
-    [
+        [
       "Пояснення для власника",
       "Explanation for the owner",
       "Erklärung für den Tierhalter",
       "Wyjaśnienie dla właściciela",
+    ],
+    [
+      "Простими словами: що відбувається з твариною та що означають результати огляду...",
+      "In simple terms: what is happening to the animal and what the examination results mean...",
+      "Einfach erklärt: Was mit dem Tier geschieht und was die Untersuchungsergebnisse bedeuten...",
+      "Prostymi słowami: co dzieje się ze zwierzęciem i co oznaczają wyniki badania...",
     ],
     [
       "Домашні рекомендації",
@@ -92591,16 +92597,34 @@ function getVisitWorkspaceTranslationRows() {
       "Zalecenia domowe",
     ],
     [
+      "Догляд, харчування, обмеження та що потрібно виконувати вдома...",
+      "Care, feeding, restrictions and what needs to be done at home...",
+      "Pflege, Fütterung, Einschränkungen und Maßnahmen für zuhause...",
+      "Opieka, żywienie, ograniczenia i zalecenia do wykonania w domu...",
+    ],
+    [
       "Коли звернутися терміново",
       "When to seek urgent care",
       "Wann dringend vorgestellt werden muss",
       "Kiedy zgłosić się pilnie",
     ],
     [
+      "Конкретні ознаки погіршення...",
+      "Specific signs of deterioration...",
+      "Konkrete Anzeichen einer Verschlechterung...",
+      "Konkretne oznaki pogorszenia stanu...",
+    ],
+    [
       "Контроль і повторний огляд",
       "Follow-up and repeat examination",
       "Kontrolle und Nachuntersuchung",
       "Kontrola i ponowne badanie",
+    ],
+    [
+      "Коли та з якою метою потрібен контроль...",
+      "When follow-up is needed and for what purpose...",
+      "Wann eine Kontrolle erforderlich ist und welchem Zweck sie dient...",
+      "Kiedy potrzebna jest kontrola i w jakim celu...",
     ],
     [
       "Надані послуги",
