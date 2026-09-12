@@ -9605,13 +9605,20 @@ async function loadPatientsApi() {
 }
 
 async function loadPatientsApiRequest() {
-  const cachedPatients =
-    Array.isArray(state.patients)
-      ? state.patients
-      : [];
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося завантажити пацієнтів.": {
+      en: "Could not load patients.",
+      de: "Die Patienten konnten nicht geladen werden.",
+      pl: "Nie udało się wczytać pacjentów.",
+    },
+  });
+
+  const cachedPatients = Array.isArray(state.patients)
+    ? state.patients
+    : [];
 
   try {
-    const res = await fetch("/api/patients", {
+    const response = await fetch("/api/patients", {
       credentials: "include",
       headers: {
         Accept: "application/json",
@@ -9619,113 +9626,32 @@ async function loadPatientsApiRequest() {
       },
     });
 
-    const text = await res.text();
-
+    const responseText = await response.text();
     let json = null;
 
     try {
-      json = text
-        ? JSON.parse(text)
+      json = responseText
+        ? JSON.parse(responseText)
         : null;
-    } catch {}
-
-    if (!res.ok) {
-      console.error(
-        "API /patients HTTP",
-        res.status,
-        text
-      );
-
-      alert(
-        `Помилка завантаження пацієнтів (HTTP ${res.status})`
-      );
-
-      state.patients =
-        cachedPatients;
-
-      if (state.route === "patients") {
-        renderPatientsTab();
-      }
-
-      if (
-        state.route === "owner" &&
-        state.selectedOwnerId
-      ) {
-        await renderOwnerPage(
-          state.selectedOwnerId
-        );
-      }
-
-      return cachedPatients;
+    } catch {
+      json = null;
     }
 
-    if (!json || !json.ok) {
-      console.error(
-        "API /patients bad json",
-        json,
-        text
-      );
-
-      alert(
+    if (!response.ok || json?.ok !== true) {
+      throw new Error(
         json?.error ||
-        "Помилка завантаження пацієнтів"
+        `Patients loading HTTP ${response.status}`
       );
-
-      state.patients =
-        cachedPatients;
-
-      if (state.route === "patients") {
-        renderPatientsTab();
-      }
-
-      if (
-        state.route === "owner" &&
-        state.selectedOwnerId
-      ) {
-        await renderOwnerPage(
-          state.selectedOwnerId
-        );
-      }
-
-      return cachedPatients;
     }
 
-    const arr = Array.isArray(json.data)
+    const patients = Array.isArray(json.data)
       ? json.data
       : json.data
         ? [json.data]
         : [];
 
-    state.patients = arr;
-
-    savePatients(arr);
-
-    if (state.route === "patients") {
-      renderPatientsTab();
-    }
-
-    if (
-      state.route === "owner" &&
-      state.selectedOwnerId
-    ) {
-      await renderOwnerPage(
-        state.selectedOwnerId
-      );
-    }
-
-    return arr;
-  } catch (e) {
-    console.error(
-      "loadPatientsApi failed:",
-      e
-    );
-
-    alert(
-      "Помилка завантаження пацієнтів (network)"
-    );
-
-    state.patients =
-      cachedPatients;
+    state.patients = patients;
+    savePatients(patients);
 
     if (state.route === "patients") {
       renderPatientsTab();
@@ -9735,9 +9661,31 @@ async function loadPatientsApiRequest() {
       state.route === "owner" &&
       state.selectedOwnerId
     ) {
-      await renderOwnerPage(
-        state.selectedOwnerId
-      );
+      await renderOwnerPage(state.selectedOwnerId);
+    }
+
+    return patients;
+  } catch (error) {
+    console.error("Patients loading failed:", error);
+
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося завантажити пацієнтів."
+      )
+    );
+
+    state.patients = cachedPatients;
+
+    if (state.route === "patients") {
+      renderPatientsTab();
+    }
+
+    if (
+      state.route === "owner" &&
+      state.selectedOwnerId
+    ) {
+      await renderOwnerPage(state.selectedOwnerId);
     }
 
     return cachedPatients;
@@ -12330,36 +12278,69 @@ function saveVisits(v) { LS.set(VISITS_KEY, v); }
 // Visits API
 // =========================
 async function loadVisitsApi(params = {}) {
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося завантажити візити.": {
+      en: "Could not load visits.",
+      de: "Die Besuche konnten nicht geladen werden.",
+      pl: "Nie udało się wczytać wizyt.",
+    },
+  });
+
   try {
-    const qs = new URLSearchParams(params).toString();
-    const res = await fetch("/api/visits" + (qs ? `?${qs}` : ""), {
-      credentials: "include",
-      headers: { Accept: "application/json", ...getOrgHeaders() },
-    });
+    const query = new URLSearchParams(params).toString();
 
-    const text = await res.text();
+    const response = await fetch(
+      "/api/visits" + (query ? `?${query}` : ""),
+      {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const responseText = await response.text();
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
 
-    if (!res.ok) {
-      console.error("API /visits HTTP", res.status, text);
-      alert(`Помилка завантаження візитів (HTTP ${res.status})`);
-      return [];
+    try {
+      json = responseText
+        ? JSON.parse(responseText)
+        : null;
+    } catch {
+      json = null;
     }
 
-    if (!json || !json.ok) {
-      console.error("API /visits bad json:", json, text);
-      alert(json?.error || "Помилка завантаження візитів");
-      return [];
+    if (!response.ok || json?.ok !== true) {
+      throw new Error(
+        json?.error ||
+        `Visits loading HTTP ${response.status}`
+      );
     }
 
-    const arr = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
-    const normArr = arr.map(normalizeVisitFromServer);
-    cacheVisits(normArr);
-    return normArr;
-  } catch (e) {
-    console.error("loadVisitsApi failed:", e);
-    alert("Помилка зʼєднання з сервером");
+    const visits = Array.isArray(json.data)
+      ? json.data
+      : json.data
+        ? [json.data]
+        : [];
+
+    const normalizedVisits = visits.map(
+      normalizeVisitFromServer
+    );
+
+    cacheVisits(normalizedVisits);
+
+    return normalizedVisits;
+  } catch (error) {
+    console.error("Visits loading failed:", error);
+
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося завантажити візити."
+      )
+    );
+
     return [];
   }
 }
@@ -12399,204 +12380,136 @@ async function createVisitApi(payload) {
   }
 }
 
-async function updateVisitApi(
-  visitId,
-  payload
-) {
+async function updateVisitApi(visitId, payload) {
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося оновити візит.": {
+      en: "Could not update the visit.",
+      de: "Der Besuch konnte nicht aktualisiert werden.",
+      pl: "Nie udało się zaktualizować wizyty.",
+    },
+    "Сервер повернув некоректну відповідь.": {
+      en: "The server returned an invalid response.",
+      de: "Der Server hat eine ungültige Antwort zurückgegeben.",
+      pl: "Serwer zwrócił nieprawidłową odpowiedź.",
+    },
+  });
+
   try {
-    const cleanVisitId =
-      String(
-        visitId || ""
-      ).trim();
+    const cleanVisitId = String(visitId || "").trim();
 
     if (!cleanVisitId) {
       console.error(
         "updateVisitApi: visitId is required"
       );
-
       return null;
     }
 
-    const url =
-      `/api/visits?id=${encodeURIComponent(
-        cleanVisitId
-      )}`;
+    const response = await fetch(
+      `/api/visits?id=${encodeURIComponent(cleanVisitId)}`,
+      {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+        body: JSON.stringify(payload || {}),
+      }
+    );
 
-    const response =
-      await fetch(
-        url,
-        {
-          method: "PUT",
-          credentials: "include",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Accept:
-              "application/json",
-
-            ...getOrgHeaders(),
-          },
-
-          body:
-            JSON.stringify(
-              payload || {}
-            ),
-        }
-      );
-
-    const text =
-      await response.text();
-
+    const responseText = await response.text();
     let json = null;
 
     try {
-      json = text
-        ? JSON.parse(text)
+      json = responseText
+        ? JSON.parse(responseText)
         : null;
     } catch {
       json = null;
     }
 
     if (!response.ok) {
-      console.error(
-        "updateVisitApi HTTP error:",
-        response.status,
-        text
-      );
-
-      alert(
+      throw new Error(
         json?.error ||
-        `API error ${response.status}`
+        `Visit update HTTP ${response.status}`
       );
-
-      return null;
     }
 
-    if (
-      !json ||
-      typeof json !== "object"
-    ) {
-      console.error(
-        "updateVisitApi: server returned non-JSON:",
-        text
-      );
-
-      alert(
+    if (!json || typeof json !== "object") {
+      throw new Error(
         "Сервер повернув некоректну відповідь."
       );
-
-      return null;
     }
 
     if (json.ok !== true) {
-      console.error(
-        "updateVisitApi: json.ok=false:",
-        json
+      throw new Error(
+        json.error || "Не вдалося оновити візит."
       );
-
-      alert(
-        json.error ||
-        "Не вдалося оновити візит."
-      );
-
-      return null;
     }
 
-    const raw =
-      Array.isArray(json.data)
-        ? json.data[0] || null
-        : json.data || null;
+    const raw = Array.isArray(json.data)
+      ? json.data[0] || null
+      : json.data || null;
 
-    let updated =
-      normalizeVisitFromServer(
-        raw
-      );
+    const updated = normalizeVisitFromServer(raw);
 
-    if (
-      !updated ||
-      updated.id == null
-    ) {
+    if (!updated || updated.id == null) {
       console.warn(
         "updateVisitApi: updated visit has no id:",
         updated,
         json
       );
-
       return updated || null;
     }
 
-    const normalizedVisitId =
-      String(updated.id);
+    const normalizedVisitId = String(updated.id);
 
-    const previousVisit =
-      state.visitsById.get(
-        normalizedVisitId
-      ) || null;
+    const previousVisit = state.visitsById.get(
+      normalizedVisitId
+    ) || null;
 
     if (previousVisit) {
-      const previousServices =
-        Array.isArray(
-          previousVisit.services
-        )
-          ? previousVisit.services
-          : [];
+      const previousServices = Array.isArray(
+        previousVisit.services
+      )
+        ? previousVisit.services
+        : [];
 
-      const previousStock =
-        Array.isArray(
-          previousVisit.stock
-        )
-          ? previousVisit.stock
-          : [];
-
-      const updatedHasServices =
-        Array.isArray(
-          updated.services
-        );
-
-      const updatedHasStock =
-        Array.isArray(
-          updated.stock
-        );
+      const previousStock = Array.isArray(
+        previousVisit.stock
+      )
+        ? previousVisit.stock
+        : [];
 
       if (
-        !updatedHasServices &&
+        !Array.isArray(updated.services) &&
         previousServices.length
       ) {
-        updated.services =
-          previousServices;
-
-        updated.services_json =
-          previousServices;
+        updated.services = previousServices;
+        updated.services_json = previousServices;
       }
 
       if (
-        !updatedHasStock &&
+        !Array.isArray(updated.stock) &&
         previousStock.length
       ) {
-        updated.stock =
-          previousStock;
-
-        updated.stock_json =
-          previousStock;
+        updated.stock = previousStock;
+        updated.stock_json = previousStock;
       }
     }
 
-    cacheVisits([
-      updated,
-    ]);
+    cacheVisits([updated]);
 
     return updated;
-
   } catch (error) {
-    console.error(
-      "updateVisitApi failed:",
-      error
-    );
+    console.error("Visit update failed:", error);
 
-    alert(
-      "Помилка зʼєднання з сервером."
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося оновити візит."
+      )
     );
 
     return null;
@@ -14075,37 +13988,147 @@ async function refreshVisitFinanceSummary(
 
 async function openVisitPaymentModal(
   visitId,
-  {
-    onPaymentRecorded = null,
-  } = {}
+  { onPaymentRecorded = null } = {}
 ) {
-  if (
-    !isOwner() &&
-    !isAdmin()
-  ) {
-    openDeleteModal(
+  const translations = [
+    [
       "Приймати оплату може лише адміністратор або власник клініки.",
-      null,
-      "info"
-    );
+      "Only an administrator or clinic owner can accept payments.",
+      "Nur Administratoren oder Klinikinhaber können Zahlungen entgegennehmen.",
+      "Płatności może przyjmować tylko administrator lub właściciel kliniki.",
+    ],
+    [
+      "Завантажуємо касу…",
+      "Loading payments…",
+      "Zahlungen werden geladen…",
+      "Wczytywanie płatności…",
+    ],
+    ["Готівка", "Cash", "Bargeld", "Gotówka"],
+    [
+      "Картка / термінал",
+      "Card / terminal",
+      "Karte / Terminal",
+      "Karta / terminal",
+    ],
+    ["Переказ", "Bank transfer", "Überweisung", "Przelew"],
+    ["Інше", "Other", "Sonstige", "Inne"],
+    ["Проведено", "Recorded", "Verbucht", "Zaksięgowano"],
+    ["Очікується", "Pending", "Ausstehend", "Oczekująca"],
+    ["Скасовано", "Cancelled", "Storniert", "Anulowana"],
+    ["Помилка", "Failed", "Fehlgeschlagen", "Nieudana"],
+    ["Повернено", "Refunded", "Erstattet", "Zwrócona"],
+    [
+      "КАСА ВІЗИТУ",
+      "VISIT PAYMENTS",
+      "ZAHLUNGEN FÜR DEN BESUCH",
+      "PŁATNOŚCI ZA WIZYTĘ",
+    ],
+    [
+      "Прийняти оплату",
+      "Accept payment",
+      "Zahlung entgegennehmen",
+      "Przyjmij płatność",
+    ],
+    [
+      "Часткова або повна оплата з фіксацією транзакції.",
+      "Record a partial or full payment.",
+      "Teil- oder vollständige Zahlung erfassen.",
+      "Zarejestruj częściową lub pełną płatność.",
+    ],
+    ["Закрити", "Close", "Schließen", "Zamknij"],
+    ["До сплати", "Total due", "Gesamtbetrag", "Do zapłaty"],
+    ["Вже сплачено", "Already paid", "Bereits bezahlt", "Już zapłacono"],
+    ["Залишок", "Remaining", "Restbetrag", "Pozostało"],
+    [
+      "Візит повністю оплачено",
+      "The visit is fully paid",
+      "Der Besuch ist vollständig bezahlt",
+      "Wizyta jest w pełni opłacona",
+    ],
+    [
+      "Нові платежі для цього візиту не потрібні.",
+      "No further payments are needed for this visit.",
+      "Für diesen Besuch sind keine weiteren Zahlungen erforderlich.",
+      "Ta wizyta nie wymaga dodatkowych płatności.",
+    ],
+    ["Сума платежу", "Payment amount", "Zahlungsbetrag", "Kwota płatności"],
+    ["Весь залишок", "Full balance", "Gesamter Restbetrag", "Cała pozostała kwota"],
+    ["Спосіб оплати", "Payment method", "Zahlungsart", "Metoda płatności"],
+    [
+      "Провести оплату",
+      "Record payment",
+      "Zahlung verbuchen",
+      "Zaksięguj płatność",
+    ],
+    ["ІСТОРІЯ", "HISTORY", "VERLAUF", "HISTORIA"],
+    [
+      "Транзакції візиту",
+      "Visit transactions",
+      "Transaktionen des Besuchs",
+      "Transakcje wizyty",
+    ],
+    [
+      "Платежів за цим візитом ще немає.",
+      "There are no payments for this visit yet.",
+      "Für diesen Besuch wurden noch keine Zahlungen erfasst.",
+      "Nie zarejestrowano jeszcze płatności za tę wizytę.",
+    ],
+    [
+      "Вкажіть коректну суму платежу.",
+      "Enter a valid payment amount.",
+      "Geben Sie einen gültigen Zahlungsbetrag ein.",
+      "Podaj prawidłową kwotę płatności.",
+    ],
+    [
+      "Сума платежу не може перевищувати залишок.",
+      "The payment amount cannot exceed the remaining balance.",
+      "Der Zahlungsbetrag darf den Restbetrag nicht überschreiten.",
+      "Kwota płatności nie może przekraczać pozostałej kwoty.",
+    ],
+    [
+      "Проводимо оплату…",
+      "Recording payment…",
+      "Zahlung wird verbucht…",
+      "Księgowanie płatności…",
+    ],
+    [
+      "Не вдалося провести оплату.",
+      "Could not record the payment.",
+      "Die Zahlung konnte nicht verbucht werden.",
+      "Nie udało się zaksięgować płatności.",
+    ],
+    [
+      "Не вдалося відкрити касу візиту.",
+      "Could not open visit payments.",
+      "Die Zahlungen für den Besuch konnten nicht geöffnet werden.",
+      "Nie udało się otworzyć płatności za wizytę.",
+    ],
+  ];
 
+  translations.forEach(([source, en, de, pl]) => {
+    SETTINGS_INTERFACE_TEXT[source] = { en, de, pl };
+  });
+
+  const text = (source) =>
+    getSettingsInterfaceText(source);
+
+  const ui = (source) =>
+    escapeHtml(text(source));
+
+  if (!isOwner() && !isAdmin()) {
+    showSettingsMessage(
+      text(
+        "Приймати оплату може лише адміністратор або власник клініки."
+      )
+    );
     return;
   }
 
-  document
-    .getElementById(
-      "visitPaymentModal"
-    )
-    ?.remove();
+  document.getElementById("visitPaymentModal")?.remove();
 
-  const modal =
-    document.createElement("div");
-
-  modal.id =
-    "visitPaymentModal";
-
-  modal.className =
-    "visitPaymentOverlay";
+  const modal = document.createElement("div");
+  modal.id = "visitPaymentModal";
+  modal.className = "visitPaymentOverlay";
 
   modal.innerHTML = `
     <div
@@ -14117,40 +14140,31 @@ async function openVisitPaymentModal(
       class="visitPaymentModal"
       role="dialog"
       aria-modal="true"
+      aria-label="${ui("Прийняти оплату")}"
     >
       <div class="visitPaymentLoading">
         <div class="visitPaymentSpinner"></div>
-
-        <strong>
-          Завантажуємо касу…
-        </strong>
+        <strong>${ui("Завантажуємо касу…")}</strong>
       </div>
     </section>
   `;
 
-  document.body.appendChild(
-    modal
-  );
-
-  document.body.classList.add(
-    "visitPaymentModalOpen"
-  );
+  document.body.appendChild(modal);
+  document.body.classList.add("visitPaymentModalOpen");
 
   const methods = {
-    cash: {
-      icon: "💵",
-      label: "Готівка",
-    },
+    cash: { icon: "💵", label: "Готівка" },
+    card: { icon: "💳", label: "Картка / термінал" },
+    transfer: { icon: "↗", label: "Переказ" },
+  };
 
-    card: {
-      icon: "💳",
-      label: "Картка / термінал",
-    },
-
-    transfer: {
-      icon: "↗",
-      label: "Переказ",
-    },
+  const transactionStatuses = {
+    completed: "Проведено",
+    pending: "Очікується",
+    cancelled: "Скасовано",
+    canceled: "Скасовано",
+    failed: "Помилка",
+    refunded: "Повернено",
   };
 
   let finance = null;
@@ -14161,57 +14175,38 @@ async function openVisitPaymentModal(
     if (submitting) return;
 
     modal.remove();
-
-    document.body.classList.remove(
-      "visitPaymentModalOpen"
-    );
-
-    document.removeEventListener(
-      "keydown",
-      onKeydown
-    );
+    document.body.classList.remove("visitPaymentModalOpen");
+    document.removeEventListener("keydown", onKeydown);
   };
 
-  const onKeydown = (
-    event
-  ) => {
-    if (
-      event.key ===
-      "Escape"
-    ) {
-      close();
-    }
+  const onKeydown = (event) => {
+    if (event.key === "Escape") close();
   };
 
-  const transactionHtml = (
-    transaction
-  ) => {
-    const method =
-      methods[
-        transaction.payment_method
-      ] || {
-        icon: "•",
+  const transactionHtml = (transaction) => {
+    const method = methods[transaction.payment_method] || {
+      icon: "•",
+      label: transaction.payment_method || "Інше",
+    };
 
-        label:
-          transaction.payment_method ||
-          "Інше",
-      };
+    const dateValue = new Date(
+      transaction.occurred_at || transaction.created_at
+    );
 
-    const date =
-      new Date(
-        transaction.occurred_at ||
-        transaction.created_at
-      )
-        .toLocaleString(
-          "uk-UA",
-          {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }
-        );
+    const date = Number.isNaN(dateValue.getTime())
+      ? "—"
+      : dateValue.toLocaleString(getCalendarLocale(), {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+    const statusLabel =
+      transactionStatuses[transaction.status] ||
+      transaction.status ||
+      "";
 
     return `
       <article class="visitPaymentHistoryItem">
@@ -14220,90 +14215,52 @@ async function openVisitPaymentModal(
         </div>
 
         <div class="visitPaymentHistoryMain">
-          <strong>
-            ${escapeHtml(
-              method.label
-            )}
-          </strong>
-
-          <span>
-            ${escapeHtml(
-              date
-            )}
-          </span>
+          <strong>${ui(method.label)}</strong>
+          <span>${escapeHtml(date)}</span>
         </div>
 
         <div class="visitPaymentHistoryAmount">
           <strong>
-            +${formatVisitFinanceMoney(
-              transaction.amount
+            +${escapeHtml(
+              formatVisitFinanceMoney(transaction.amount)
             )}
           </strong>
 
-          <span>
-            ${
-              transaction.status ===
-              "completed"
-                ? "Проведено"
-                : escapeHtml(
-                    transaction.status ||
-                    ""
-                  )
-            }
-          </span>
+          <span>${ui(statusLabel)}</span>
         </div>
       </article>
     `;
   };
 
   const render = () => {
-    const panel =
-      modal.querySelector(
-        ".visitPaymentModal"
-      );
+    const panel = modal.querySelector(".visitPaymentModal");
+    if (!panel || !finance) return;
 
-    if (
-      !panel ||
-      !finance
-    ) {
-      return;
-    }
+    const remaining = Number(finance.remaining || 0);
 
-    const remaining =
-      Number(
-        finance.remaining || 0
-      );
+    const transactions = Array.isArray(finance.transactions)
+      ? finance.transactions
+      : [];
 
-    const transactions =
-      Array.isArray(
-        finance.transactions
-      )
-        ? finance.transactions
-        : [];
-
-    const status =
-      getVisitFinanceStatusMeta(
-        finance.financial_status
-      );
+    const status = getVisitFinanceStatusMeta(
+      finance.financial_status
+    );
 
     panel.innerHTML = `
       <header class="visitPaymentHeader">
-        <div class="visitPaymentHeaderIcon">
-          💳
-        </div>
+        <div class="visitPaymentHeaderIcon">💳</div>
 
         <div>
           <span class="visitPaymentEyebrow">
-            КАСА ВІЗИТУ
+            ${ui("КАСА ВІЗИТУ")}
           </span>
 
-          <h2>
-            Прийняти оплату
-          </h2>
+          <h2>${ui("Прийняти оплату")}</h2>
 
           <p>
-            Часткова або повна оплата
-            з фіксацією транзакції.
+            ${ui(
+              "Часткова або повна оплата з фіксацією транзакції."
+            )}
           </p>
         </div>
 
@@ -14311,50 +14268,36 @@ async function openVisitPaymentModal(
           type="button"
           class="visitPaymentClose"
           data-close-payment-modal
-        >
-          ✕
-        </button>
+          title="${ui("Закрити")}"
+          aria-label="${ui("Закрити")}"
+        >✕</button>
       </header>
 
       <div class="visitPaymentContent">
         <section class="visitPaymentOverview">
           <div>
-            <span>До сплати</span>
-
+            <span>${ui("До сплати")}</span>
             <strong>
-              ${formatVisitFinanceMoney(
-                finance.total
-              )}
+              ${escapeHtml(formatVisitFinanceMoney(finance.total))}
             </strong>
           </div>
 
           <div>
-            <span>Вже сплачено</span>
-
+            <span>${ui("Вже сплачено")}</span>
             <strong>
-              ${formatVisitFinanceMoney(
-                finance.paid
-              )}
+              ${escapeHtml(formatVisitFinanceMoney(finance.paid))}
             </strong>
           </div>
 
           <div class="visitPaymentRemainingCard">
-            <span>Залишок</span>
-
+            <span>${ui("Залишок")}</span>
             <strong>
-              ${formatVisitFinanceMoney(
-                remaining
-              )}
+              ${escapeHtml(formatVisitFinanceMoney(remaining))}
             </strong>
           </div>
 
-          <b
-            class="
-              visitPaymentStatus
-              ${status.className}
-            "
-          >
-            ${status.label}
+          <b class="visitPaymentStatus ${escapeHtml(status.className)}">
+            ${escapeHtml(status.label)}
           </b>
         </section>
 
@@ -14363,14 +14306,9 @@ async function openVisitPaymentModal(
             ? `
               <section class="visitPaymentSuccess">
                 <div>✓</div>
-
-                <strong>
-                  Візит повністю оплачено
-                </strong>
-
+                <strong>${ui("Візит повністю оплачено")}</strong>
                 <span>
-                  Нові платежі для цього
-                  візиту не потрібні.
+                  ${ui("Нові платежі для цього візиту не потрібні.")}
                 </span>
               </section>
             `
@@ -14378,11 +14316,10 @@ async function openVisitPaymentModal(
               <form
                 class="visitPaymentForm"
                 id="visitPaymentForm"
+                novalidate
               >
                 <label class="visitPaymentAmountField">
-                  <span>
-                    Сума платежу
-                  </span>
+                  <span>${ui("Сума платежу")}</span>
 
                   <div>
                     <input
@@ -14394,7 +14331,6 @@ async function openVisitPaymentModal(
                       value="${remaining}"
                       required
                     >
-
                     <b>₴</b>
                   </div>
                 </label>
@@ -14403,9 +14339,7 @@ async function openVisitPaymentModal(
                   <button
                     type="button"
                     data-payment-amount="${remaining}"
-                  >
-                    Весь залишок
-                  </button>
+                  >${ui("Весь залишок")}</button>
 
                   ${
                     remaining > 2
@@ -14413,55 +14347,31 @@ async function openVisitPaymentModal(
                         <button
                           type="button"
                           data-payment-amount="${
-                            Math.round(
-                              remaining *
-                              50
-                            ) /
-                            100
+                            Math.round(remaining * 50) / 100
                           }"
-                        >
-                          50%
-                        </button>
+                        >50%</button>
                       `
                       : ""
                   }
                 </div>
 
                 <div class="visitPaymentMethodsLabel">
-                  Спосіб оплати
+                  ${ui("Спосіб оплати")}
                 </div>
 
                 <div class="visitPaymentMethods">
                   ${
-                    Object
-                      .entries(
-                        methods
-                      )
-                      .map(
-                        ([
-                          key,
-                          method,
-                        ]) => `
-                          <button
-                            type="button"
-                            class="${
-                              selectedMethod ===
-                              key
-                                ? "active"
-                                : ""
-                            }"
-                            data-payment-method="${key}"
-                          >
-                            <span>
-                              ${method.icon}
-                            </span>
-
-                            <b>
-                              ${method.label}
-                            </b>
-                          </button>
-                        `
-                      )
+                    Object.entries(methods)
+                      .map(([key, method]) => `
+                        <button
+                          type="button"
+                          class="${selectedMethod === key ? "active" : ""}"
+                          data-payment-method="${key}"
+                        >
+                          <span>${method.icon}</span>
+                          <b>${ui(method.label)}</b>
+                        </button>
+                      `)
                       .join("")
                   }
                 </div>
@@ -14470,14 +14380,9 @@ async function openVisitPaymentModal(
                   class="visitPaymentSubmit"
                   type="submit"
                 >
-                  <span>
-                    Провести оплату
-                  </span>
-
+                  <span>${ui("Провести оплату")}</span>
                   <strong>
-                    ${formatVisitFinanceMoney(
-                      remaining
-                    )}
+                    ${escapeHtml(formatVisitFinanceMoney(remaining))}
                   </strong>
                 </button>
               </form>
@@ -14487,30 +14392,20 @@ async function openVisitPaymentModal(
         <section class="visitPaymentHistory">
           <div class="visitPaymentHistoryHead">
             <div>
-              <span>ІСТОРІЯ</span>
-
-              <strong>
-                Транзакції візиту
-              </strong>
+              <span>${ui("ІСТОРІЯ")}</span>
+              <strong>${ui("Транзакції візиту")}</strong>
             </div>
 
-            <b>
-              ${transactions.length}
-            </b>
+            <b>${transactions.length}</b>
           </div>
 
           <div class="visitPaymentHistoryList">
             ${
               transactions.length
-                ? transactions
-                    .map(
-                      transactionHtml
-                    )
-                    .join("")
+                ? transactions.map(transactionHtml).join("")
                 : `
                   <div class="visitPaymentHistoryEmpty">
-                    Платежів за цим
-                    візитом ще немає.
+                    ${ui("Платежів за цим візитом ще немає.")}
                   </div>
                 `
             }
@@ -14519,276 +14414,172 @@ async function openVisitPaymentModal(
       </div>
     `;
 
-    panel
-      .querySelector(
-        "#visitPaymentAmount"
-      )
-      ?.focus();
+    panel.querySelector("#visitPaymentAmount")?.focus();
   };
 
-  modal.addEventListener(
-    "click",
-    (event) => {
-      if (
-        event.target.closest(
-          "[data-close-payment-modal]"
+  const updateSubmitAmount = () => {
+    const input = modal.querySelector("#visitPaymentAmount");
+    const amountElement = modal.querySelector(
+      ".visitPaymentSubmit strong"
+    );
+
+    if (input && amountElement) {
+      amountElement.textContent = formatVisitFinanceMoney(
+        Number(input.value || 0)
+      );
+    }
+  };
+
+  modal.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-payment-modal]")) {
+      close();
+      return;
+    }
+
+    const methodButton = event.target.closest(
+      "[data-payment-method]"
+    );
+
+    if (methodButton && !submitting) {
+      selectedMethod =
+        methodButton.dataset.paymentMethod || "cash";
+
+      modal
+        .querySelectorAll("[data-payment-method]")
+        .forEach((button) => {
+          button.classList.toggle(
+            "active",
+            button.dataset.paymentMethod === selectedMethod
+          );
+        });
+
+      return;
+    }
+
+    const amountButton = event.target.closest(
+      "[data-payment-amount]"
+    );
+
+    if (amountButton && !submitting) {
+      const input = modal.querySelector("#visitPaymentAmount");
+
+      if (input) {
+        input.value = amountButton.dataset.paymentAmount || "";
+        updateSubmitAmount();
+      }
+    }
+  });
+
+  modal.addEventListener("input", (event) => {
+    if (event.target.id === "visitPaymentAmount") {
+      updateSubmitAmount();
+    }
+  });
+
+  modal.addEventListener("submit", async (event) => {
+    if (event.target.id !== "visitPaymentForm") return;
+
+    event.preventDefault();
+
+    if (submitting || !finance) return;
+
+    const input = modal.querySelector("#visitPaymentAmount");
+    const amount = Number(input?.value || 0);
+    const remaining = Number(finance.remaining || 0);
+
+    if (
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      !input ||
+      !input.checkValidity()
+    ) {
+      showSettingsMessage(
+        text(
+          amount > remaining
+            ? "Сума платежу не може перевищувати залишок."
+            : "Вкажіть коректну суму платежу."
         )
-      ) {
-        close();
-        return;
-      }
+      );
+      return;
+    }
 
-      const methodButton =
-        event.target.closest(
-          "[data-payment-method]"
-        );
+    if (amount > remaining) {
+      showSettingsMessage(
+        text("Сума платежу не може перевищувати залишок.")
+      );
+      return;
+    }
 
-      if (
-        methodButton &&
-        !submitting
-      ) {
-        selectedMethod =
-          methodButton.dataset
-            .paymentMethod ||
-          "cash";
+    const submitButton = modal.querySelector(
+      ".visitPaymentSubmit"
+    );
 
-        modal
-          .querySelectorAll(
-            "[data-payment-method]"
-          )
-          .forEach(
-            (button) => {
-              button.classList.toggle(
-                "active",
+    submitting = true;
 
-                button.dataset
-                  .paymentMethod ===
-                  selectedMethod
-              );
-            }
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.innerHTML = `
+        <span>${ui("Проводимо оплату…")}</span>
+      `;
+    }
+
+    try {
+      await registerVisitPaymentApi(visitId, {
+        amount,
+        method: selectedMethod,
+        idempotencyKey: crypto.randomUUID(),
+      });
+
+      finance = await loadVisitFinanceApi(visitId);
+      await refreshVisitFinanceSummary(visitId);
+
+      submitting = false;
+      render();
+
+      if (typeof onPaymentRecorded === "function") {
+        try {
+          await onPaymentRecorded({ visitId, finance });
+        } catch (refreshError) {
+          console.error(
+            "Refresh finance workspace after payment failed:",
+            refreshError
           );
-
-        return;
-      }
-
-      const amountButton =
-        event.target.closest(
-          "[data-payment-amount]"
-        );
-
-      if (
-        amountButton &&
-        !submitting
-      ) {
-        const input =
-          modal.querySelector(
-            "#visitPaymentAmount"
-          );
-
-        if (input) {
-          input.value =
-            amountButton.dataset
-              .paymentAmount ||
-            "";
         }
       }
-    }
-  );
+    } catch (error) {
+      submitting = false;
 
-  modal.addEventListener(
-    "input",
-    (event) => {
-      if (
-        event.target.id !==
-        "visitPaymentAmount"
-      ) {
-        return;
-      }
+      console.error("Visit payment failed:", error);
 
-      const amount =
-        Number(
-          event.target.value || 0
-        );
-
-      const amountElement =
-        modal.querySelector(
-          ".visitPaymentSubmit strong"
-        );
-
-      if (amountElement) {
-        amountElement.textContent =
-          formatVisitFinanceMoney(
-            amount
-          );
-      }
-    }
-  );
-
-  modal.addEventListener(
-    "submit",
-    async (event) => {
-      if (
-        event.target.id !==
-        "visitPaymentForm"
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (
-        submitting ||
-        !finance
-      ) {
-        return;
-      }
-
-      const amount =
-        Number(
-          modal.querySelector(
-            "#visitPaymentAmount"
-          )?.value ||
-          0
-        );
-
-      const remaining =
-        Number(
-          finance.remaining || 0
-        );
-
-      if (
-        !Number.isFinite(
-          amount
-        ) ||
-        amount <= 0
-      ) {
-        alert(
-          "Вкажіть коректну суму платежу."
-        );
-
-        return;
-      }
-
-      if (
-        amount >
-        remaining
-      ) {
-        alert(
-          "Сума платежу не може перевищувати залишок."
-        );
-
-        return;
-      }
-
-      const submitButton =
-        modal.querySelector(
-          ".visitPaymentSubmit"
-        );
-
-      submitting = true;
-
-      if (submitButton) {
-        submitButton.disabled =
-          true;
-
-        submitButton.innerHTML = `
-          <span>
-            Проводимо оплату…
-          </span>
-        `;
-      }
-
-      try {
-        await registerVisitPaymentApi(
-          visitId,
-          {
-            amount,
-
-            method:
-              selectedMethod,
-
-            idempotencyKey:
-              crypto.randomUUID(),
-          }
-        );
-
-        finance =
-          await loadVisitFinanceApi(
-            visitId
-          );
-
-        await refreshVisitFinanceSummary(
-          visitId
-        );
-
-        submitting = false;
-
-        render();
-
-        if (
-          typeof onPaymentRecorded ===
-          "function"
-        ) {
-          try {
-            await onPaymentRecorded({
-              visitId,
-              finance,
-            });
-          } catch (refreshError) {
-            // The payment is already recorded at this point. A secondary
-            // dashboard refresh must never turn a successful payment into an
-            // error message or encourage the user to submit it again.
-            console.error(
-              "refresh finance workspace after payment failed:",
-              refreshError
-            );
-          }
-        }
-      } catch (error) {
-        submitting = false;
-
-        console.error(
-          "registerVisitPaymentApi failed:",
-          error
-        );
-
-        alert(
-          error?.message ||
+      showSettingsMessage(
+        getSettingsSafeErrorText(
+          error,
           "Не вдалося провести оплату."
-        );
-
-        render();
-      }
-    }
-  );
-
-  document.addEventListener(
-    "keydown",
-    onKeydown
-  );
-
-  try {
-    finance =
-      await loadVisitFinanceApi(
-        visitId
+        )
       );
 
+      render();
+    }
+  });
+
+  document.addEventListener("keydown", onKeydown);
+
+  try {
+    finance = await loadVisitFinanceApi(visitId);
     render();
   } catch (error) {
-    console.error(
-      "openVisitPaymentModal failed:",
-      error
-    );
+    console.error("Opening visit payments failed:", error);
 
     close();
 
-    alert(
-      error?.message ||
-      "Не вдалося відкрити касу візиту."
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося відкрити касу візиту."
+      )
     );
   }
 }
-
 // =========================
 // Discharges (LOCAL ONLY)
 // =========================
@@ -54502,119 +54293,124 @@ function choosePatientDocumentSliceHeight({
   );
 }
 
-async function downloadA4Pdf(
-  visitId,
-  options = {}
-) {
+async function downloadA4Pdf(visitId, options = {}) {
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Модуль формування PDF не підключений.": {
+      en: "The PDF export module is unavailable.",
+      de: "Das Modul für den PDF-Export ist nicht verfügbar.",
+      pl: "Moduł eksportu PDF jest niedostępny.",
+    },
+    "Не вдалося сформувати виписку.": {
+      en: "Could not generate the discharge summary.",
+      de: "Der Entlassungsbericht konnte nicht erstellt werden.",
+      pl: "Nie udało się wygenerować wypisu.",
+    },
+    "Документ не вдалося перетворити на зображення": {
+      en: "Could not convert the document to an image.",
+      de: "Das Dokument konnte nicht in ein Bild umgewandelt werden.",
+      pl: "Nie udało się przekształcić dokumentu w obraz.",
+    },
+    "Не вдалося створити сторінку PDF": {
+      en: "Could not create a PDF page.",
+      de: "Eine PDF-Seite konnte nicht erstellt werden.",
+      pl: "Nie udało się utworzyć strony PDF.",
+    },
+    "Не вдалося сформувати PDF.": {
+      en: "Could not generate the PDF.",
+      de: "Die PDF-Datei konnte nicht erstellt werden.",
+      pl: "Nie udało się wygenerować pliku PDF.",
+    },
+  });
+
+  const notify = (source) => {
+    showSettingsMessage(
+      getSettingsInterfaceText(source)
+    );
+  };
+
   if (
     typeof window.html2canvas === "undefined" &&
     typeof window.html2pdf === "undefined"
   ) {
-    alert("Модуль формування PDF не підключений.");
+    notify("Модуль формування PDF не підключений.");
     return;
   }
 
   const JsPdfConstructor =
-    window.jspdf?.jsPDF ||
-    window.jsPDF;
+    window.jspdf?.jsPDF || window.jsPDF;
 
   if (!JsPdfConstructor) {
-    alert("Модуль jsPDF не підключений.");
+    notify("Модуль формування PDF не підключений.");
     return;
   }
 
-  if (options.render !== false) {
-    await renderDischargeA4(visitId);
-  }
-
-  const sourceHost =
-    document.getElementById("disA4");
-
-  const sourceDocument =
-    sourceHost?.querySelector(".disModernDoc");
-
-  if (!sourceDocument) {
-    alert("Не вдалося сформувати виписку.");
-    return;
-  }
-
-  /*
-   * Создаём независимую копию документа.
-   * Размер 794 px соответствует A4 при 96 dpi.
-   */
-  const renderHost =
-    document.createElement("div");
-
-  renderHost.id =
-    "visitPdfRenderHost";
-
-  renderHost.style.cssText = `
-    position: fixed;
-    left: 0;
-    top: 0;
-
-    width: 794px;
-    min-width: 794px;
-    max-width: 794px;
-
-    margin: 0;
-    padding: 0;
-
-    display: block;
-    visibility: visible;
-    opacity: 1;
-
-    background: #ffffff;
-    overflow: visible;
-
-    pointer-events: none;
-    z-index: 2147483647;
-
-    transform: none;
-    box-sizing: border-box;
-  `;
-
-  const pdfDocument =
-    sourceDocument.cloneNode(true);
-
-  pdfDocument.style.cssText += `
-    position: relative !important;
-    left: 0 !important;
-    top: 0 !important;
-
-    width: 794px !important;
-    min-width: 794px !important;
-    max-width: 794px !important;
-
-    margin: 0 !important;
-    padding: 24px !important;
-
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-
-    background: #ffffff !important;
-    color: #1f2937 !important;
-
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-
-    overflow: visible !important;
-    transform: none !important;
-
-    box-sizing: border-box !important;
-  `;
-
-  renderHost.appendChild(
-    pdfDocument
-  );
-
-  document.body.appendChild(
-    renderHost
-  );
+  let renderHost = null;
 
   try {
+    if (options.render !== false) {
+      await renderDischargeA4(visitId);
+    }
+
+    const sourceHost = document.getElementById("disA4");
+    const sourceDocument = sourceHost?.querySelector(
+      ".disModernDoc"
+    );
+
+    if (!sourceDocument) {
+      notify("Не вдалося сформувати виписку.");
+      return;
+    }
+
+    renderHost = document.createElement("div");
+    renderHost.id = "visitPdfRenderHost";
+
+    renderHost.style.cssText = `
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 794px;
+      min-width: 794px;
+      max-width: 794px;
+      margin: 0;
+      padding: 0;
+      display: block;
+      visibility: visible;
+      opacity: 1;
+      background: #ffffff;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 2147483647;
+      transform: none;
+      box-sizing: border-box;
+    `;
+
+    const pdfDocument = sourceDocument.cloneNode(true);
+
+    pdfDocument.style.cssText += `
+      position: relative !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 794px !important;
+      min-width: 794px !important;
+      max-width: 794px !important;
+      margin: 0 !important;
+      padding: 24px !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      background: #ffffff !important;
+      color: #1f2937 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      transform: none !important;
+      box-sizing: border-box !important;
+    `;
+
+    renderHost.appendChild(pdfDocument);
+    document.body.appendChild(renderHost);
+
     if (document.fonts?.ready) {
       await document.fonts.ready;
     }
@@ -54625,174 +54421,102 @@ async function downloadA4Pdf(
       });
     });
 
-    const images = Array.from(
-      pdfDocument.querySelectorAll("img")
-    );
-
     await Promise.all(
-      images.map((image) => {
-        if (
-          image.complete &&
-          image.naturalWidth > 0
-        ) {
-          return Promise.resolve();
+      Array.from(pdfDocument.querySelectorAll("img")).map(
+        (image) => {
+          if (image.complete && image.naturalWidth > 0) {
+            return Promise.resolve();
+          }
+
+          return new Promise((resolve) => {
+            const finish = () => resolve();
+
+            image.addEventListener("load", finish, {
+              once: true,
+            });
+
+            image.addEventListener("error", finish, {
+              once: true,
+            });
+
+            setTimeout(finish, 4000);
+          });
         }
-
-        return new Promise((resolve) => {
-          const finish = () => resolve();
-
-          image.addEventListener(
-            "load",
-            finish,
-            { once: true }
-          );
-
-          image.addEventListener(
-            "error",
-            finish,
-            { once: true }
-          );
-
-          setTimeout(finish, 4000);
-        });
-      })
+      )
     );
 
-    /*
-     * html2pdf bundle обычно содержит html2canvas,
-     * но на всякий случай получаем его обоими способами.
-     */
     const html2canvasFunction =
       window.html2canvas ||
-      window.html2pdf?.Worker?.prototype
-        ?.prop?.html2canvas;
+      window.html2pdf?.Worker?.prototype?.prop?.html2canvas;
 
-    if (
-      typeof html2canvasFunction !==
-      "function"
-    ) {
-      alert("Модуль html2canvas не підключений.");
+    if (typeof html2canvasFunction !== "function") {
+      notify("Модуль формування PDF не підключений.");
       return;
     }
 
-    const canvas =
-      await html2canvasFunction(
-        pdfDocument,
-        {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          logging: false,
+    const canvas = await html2canvasFunction(
+      pdfDocument,
+      {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        width: 794,
+        windowWidth: 794,
 
-          scrollX: 0,
-          scrollY: 0,
+        onclone: (clonedDocument) => {
+          const clonedHost = clonedDocument.getElementById(
+            "visitPdfRenderHost"
+          );
 
-          width: 794,
-          windowWidth: 794,
+          if (clonedHost) {
+            Object.assign(clonedHost.style, {
+              position: "absolute",
+              left: "0",
+              top: "0",
+              width: "794px",
+              minWidth: "794px",
+              maxWidth: "794px",
+              margin: "0",
+              padding: "0",
+              display: "block",
+              visibility: "visible",
+              opacity: "1",
+              transform: "none",
+              background: "#ffffff",
+            });
+          }
 
-          onclone: (
-            clonedDocument
-          ) => {
-            const clonedHost =
-              clonedDocument.getElementById(
-                "visitPdfRenderHost"
-              );
+          const clonedDocumentNode =
+            clonedHost?.querySelector(".disModernDoc");
 
-            if (clonedHost) {
-              clonedHost.style.position =
-                "absolute";
-
-              clonedHost.style.left = "0";
-              clonedHost.style.top = "0";
-
-              clonedHost.style.width =
-                "794px";
-
-              clonedHost.style.minWidth =
-                "794px";
-
-              clonedHost.style.maxWidth =
-                "794px";
-
-              clonedHost.style.margin = "0";
-              clonedHost.style.padding = "0";
-
-              clonedHost.style.display =
-                "block";
-
-              clonedHost.style.visibility =
-                "visible";
-
-              clonedHost.style.opacity = "1";
-
-              clonedHost.style.transform =
-                "none";
-
-              clonedHost.style.background =
-                "#ffffff";
-            }
-
-            const clonedDocumentNode =
-              clonedHost?.querySelector(
-                ".disModernDoc"
-              );
-
-            if (clonedDocumentNode) {
-              clonedDocumentNode.style.position =
-                "relative";
-
-              clonedDocumentNode.style.left =
-                "0";
-
-              clonedDocumentNode.style.top =
-                "0";
-
-              clonedDocumentNode.style.width =
-                "794px";
-
-              clonedDocumentNode.style.minWidth =
-                "794px";
-
-              clonedDocumentNode.style.maxWidth =
-                "794px";
-
-              clonedDocumentNode.style.margin =
-                "0";
-
-              clonedDocumentNode.style.padding =
-                "24px";
-
-              clonedDocumentNode.style.display =
-                "block";
-
-              clonedDocumentNode.style.visibility =
-                "visible";
-
-              clonedDocumentNode.style.opacity =
-                "1";
-
-              clonedDocumentNode.style.transform =
-                "none";
-
-              clonedDocumentNode.style.borderRadius =
-                "0";
-
-              clonedDocumentNode.style.boxShadow =
-                "none";
-
-              clonedDocumentNode.style.background =
-                "#ffffff";
-
-              clonedDocumentNode.style.boxSizing =
-                "border-box";
-
-              clonedDocumentNode.style.overflow =
-                "visible";
-            }
-          },
-        }
-      );
+          if (clonedDocumentNode) {
+            Object.assign(clonedDocumentNode.style, {
+              position: "relative",
+              left: "0",
+              top: "0",
+              width: "794px",
+              minWidth: "794px",
+              maxWidth: "794px",
+              margin: "0",
+              padding: "24px",
+              display: "block",
+              visibility: "visible",
+              opacity: "1",
+              transform: "none",
+              borderRadius: "0",
+              boxShadow: "none",
+              background: "#ffffff",
+              boxSizing: "border-box",
+              overflow: "visible",
+            });
+          }
+        },
+      }
+    );
 
     if (
       !canvas ||
@@ -54804,18 +54528,12 @@ async function downloadA4Pdf(
       );
     }
 
-    /*
-     * A4:
-     * 210 × 297 мм.
-     * Оставляем поля по 8 мм.
-     */
-    const pdf =
-      new JsPdfConstructor({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-        compress: true,
-      });
+    const pdf = new JsPdfConstructor({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
 
     const pageWidthMm = 210;
     const pageHeightMm = 297;
@@ -54826,152 +54544,85 @@ async function downloadA4Pdf(
     const marginBottomMm = 8;
 
     const contentWidthMm =
-      pageWidthMm -
-      marginLeftMm -
-      marginRightMm;
+      pageWidthMm - marginLeftMm - marginRightMm;
 
     const contentHeightMm =
-      pageHeightMm -
-      marginTopMm -
-      marginBottomMm;
+      pageHeightMm - marginTopMm - marginBottomMm;
 
-    /*
-     * Сколько пикселей исходного canvas
-     * помещается на одной странице A4.
-     */
-   const pageSliceHeightPx =
-  Math.floor(
-    canvas.width *
-    (
-      contentHeightMm /
-      contentWidthMm
-    )
-  );
-
-/*
- * Если выписка немного превышает
- * высоту A4, уменьшаем её целиком.
- * Это убирает пустую вторую страницу.
- */
-const widthScale =
-  contentWidthMm /
-  canvas.width;
-
-const fitScale =
-  Math.min(
-    widthScale,
-
-    contentHeightMm /
-      canvas.height
-  );
-
-const relativeOnePageScale =
-  fitScale /
-  widthScale;
-
-/*
- * Допускаем уменьшение максимум
- * примерно на 22%. Более длинный
- * документ остаётся многостраничным,
- * чтобы текст не стал слишком мелким.
- */
-if (
-  relativeOnePageScale >= 0.78
-) {
-  const renderedWidthMm =
-    canvas.width *
-    fitScale;
-
-  const renderedHeightMm =
-    canvas.height *
-    fitScale;
-
-  const renderedLeftMm =
-    marginLeftMm +
-    (
-      contentWidthMm -
-      renderedWidthMm
-    ) / 2;
-
-  const pageImage =
-    canvas.toDataURL(
-      "image/jpeg",
-      0.98
+    const pageSliceHeightPx = Math.floor(
+      canvas.width * (contentHeightMm / contentWidthMm)
     );
 
-  pdf.addImage(
-    pageImage,
-    "JPEG",
-    renderedLeftMm,
-    marginTopMm,
-    renderedWidthMm,
-    renderedHeightMm,
-    undefined,
-    "FAST"
-  );
+    const widthScale = contentWidthMm / canvas.width;
 
-  pdf.save(
-    options.filename ||
-    a4FilenameFromVisit(
-      visitId
-    )
-  );
+    const fitScale = Math.min(
+      widthScale,
+      contentHeightMm / canvas.height
+    );
 
-  return;
-}
+    const relativeOnePageScale = fitScale / widthScale;
 
-const breakRanges =
-  collectPatientDocumentBreakRanges(
-    pdfDocument,
-    canvas.width
-  );
+    if (relativeOnePageScale >= 0.78) {
+      const renderedWidthMm = canvas.width * fitScale;
+      const renderedHeightMm = canvas.height * fitScale;
+
+      const renderedLeftMm =
+        marginLeftMm +
+        (contentWidthMm - renderedWidthMm) / 2;
+
+      pdf.addImage(
+        canvas.toDataURL("image/jpeg", 0.98),
+        "JPEG",
+        renderedLeftMm,
+        marginTopMm,
+        renderedWidthMm,
+        renderedHeightMm,
+        undefined,
+        "FAST"
+      );
+
+      pdf.save(
+        options.filename || a4FilenameFromVisit(visitId)
+      );
+
+      return;
+    }
+
+    const breakRanges = collectPatientDocumentBreakRanges(
+      pdfDocument,
+      canvas.width
+    );
 
     let sourceY = 0;
-let pageIndex = 0;
+    let pageIndex = 0;
 
-const minimumMeaningfulSlicePx =
-  Math.max(
-    12,
+    const minimumMeaningfulSlicePx = Math.max(
+      12,
+      Math.round(canvas.width * 0.01)
+    );
 
-    Math.round(
-      canvas.width * 0.01
-    )
-  );
+    while (sourceY < canvas.height) {
+      const remainingHeight = canvas.height - sourceY;
 
-while (sourceY < canvas.height) {
-  const remainingHeight =
-    canvas.height -
-    sourceY;
+      if (
+        pageIndex > 0 &&
+        remainingHeight <= minimumMeaningfulSlicePx
+      ) {
+        break;
+      }
 
-  if (
-    pageIndex > 0 &&
-    remainingHeight <=
-      minimumMeaningfulSlicePx
-  ) {
-    break;
-  }
+      const sliceHeight = choosePatientDocumentSliceHeight({
+        sourceY,
+        idealSliceHeight: pageSliceHeightPx,
+        canvasHeight: canvas.height,
+        breakRanges,
+      });
 
-  const sliceHeight =
-        choosePatientDocumentSliceHeight({
-          sourceY,
-          idealSliceHeight:
-            pageSliceHeightPx,
-          canvasHeight:
-            canvas.height,
-          breakRanges,
-        });
+      const pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
 
-      const pageCanvas =
-        document.createElement("canvas");
-
-      pageCanvas.width =
-        canvas.width;
-
-      pageCanvas.height =
-        sliceHeight;
-
-      const context =
-        pageCanvas.getContext("2d");
+      const context = pageCanvas.getContext("2d");
 
       if (!context) {
         throw new Error(
@@ -54980,7 +54631,6 @@ while (sourceY < canvas.height) {
       }
 
       context.fillStyle = "#ffffff";
-
       context.fillRect(
         0,
         0,
@@ -54990,37 +54640,25 @@ while (sourceY < canvas.height) {
 
       context.drawImage(
         canvas,
-
         0,
         sourceY,
         canvas.width,
         sliceHeight,
-
         0,
         0,
         pageCanvas.width,
         sliceHeight
       );
 
-      const pageImage =
-        pageCanvas.toDataURL(
-          "image/jpeg",
-          0.98
-        );
-
       const renderedHeightMm =
-        contentWidthMm *
-        (
-          sliceHeight /
-          canvas.width
-        );
+        contentWidthMm * (sliceHeight / canvas.width);
 
       if (pageIndex > 0) {
         pdf.addPage();
       }
 
       pdf.addImage(
-        pageImage,
+        pageCanvas.toDataURL("image/jpeg", 0.98),
         "JPEG",
         marginLeftMm,
         marginTopMm,
@@ -55035,24 +54673,19 @@ while (sourceY < canvas.height) {
     }
 
     pdf.save(
-      options.filename ||
-      a4FilenameFromVisit(visitId)
+      options.filename || a4FilenameFromVisit(visitId)
     );
   } catch (error) {
-    console.error(
-      "downloadA4Pdf failed:",
-      error
-    );
+    console.error("PDF export failed:", error);
 
-    alert(
-      "Не вдалося сформувати PDF: " +
-      (
-        error?.message ||
-        error
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося сформувати PDF."
       )
     );
   } finally {
-    renderHost.remove();
+    renderHost?.remove();
   }
 }
 
@@ -62108,30 +61741,15 @@ const latestGeneralVaccination =
   );
 
 
-const formatPassportVaccinationDate =
-  (
-    value
-  ) => {
-    const cleanDate =
-      String(
-        value || ""
-      ).slice(
-        0,
-        10
-      );
+const formatPassportVaccinationDate = (value) => {
+  const cleanDate = String(value || "").slice(0, 10);
 
-    if (!cleanDate) {
-      return "";
-    }
+  if (!cleanDate) return "";
 
-    return new Date(
-      `${cleanDate}T00:00:00`
-    ).toLocaleDateString(
-      "uk-UA"
-    );
-  };
-
-
+  return new Date(
+    `${cleanDate}T00:00:00`
+  ).toLocaleDateString(getCalendarLocale());
+};
 const rabiesStatus =
   String(
     pet.rabies_status ||
@@ -72500,7 +72118,7 @@ function buildPatientFinanceInsight({
 
 function formatPatientMoney(value) {
   return (
-    Number(value || 0).toLocaleString("uk-UA") +
+    Number(value || 0).toLocaleString(getCalendarLocale()) +
     " ₴"
   );
 }
@@ -72517,7 +72135,7 @@ function formatPatientFinanceDate(value) {
     return raw;
   }
 
-  return date.toLocaleDateString("uk-UA", {
+  return date.toLocaleDateString(getCalendarLocale(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -80126,7 +79744,7 @@ modal.className = "staffProfileOverlay";
             <div class="staffKpiIcon">💳</div>
             <div>
               <span>Виручка</span>
-              <strong>${demoRevenue.toLocaleString("uk-UA")} грн</strong>
+              <strong>${demoRevenue.toLocaleString(getCalendarLocale())} грн</strong>
               <small>↑ ${revenueGrowth}% до минулого місяця</small>
             </div>
           </div>
@@ -80135,7 +79753,7 @@ modal.className = "staffProfileOverlay";
             <div class="staffKpiIcon">📊</div>
             <div>
               <span>Середній чек</span>
-              <strong>${demoAvgCheck.toLocaleString("uk-UA")} грн</strong>
+              <strong>${demoAvgCheck.toLocaleString(getCalendarLocale())} грн</strong>
               <small>↑ ${avgCheckGrowth}% до минулого місяця</small>
             </div>
           </div>
@@ -80259,7 +79877,7 @@ modal.className = "staffProfileOverlay";
           </div>
 
           <div>
-            <b>${Number(v.total || 0).toLocaleString("uk-UA")} грн</b>
+            <b>${Number(v.total || 0).toLocaleString(getCalendarLocale())} грн</b>
             <span class="done">Відкрити →</span>
           </div>
         </button>
@@ -80353,24 +79971,63 @@ async function loadSpecializationsApi() {
 }
 
 async function createSpecializationApi(payload) {
-  try {
-    const res = await fetch("/api/specializations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-    const json = await res.json();
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося створити спеціалізацію.": {
+      en: "Could not create the specialization.",
+      de: "Das Fachgebiet konnte nicht angelegt werden.",
+      pl: "Nie udało się utworzyć specjalizacji.",
+    },
+  });
 
-    if (!json.ok) {
-      alert(json.error || "Не вдалося створити напрям");
-      return null;
+  try {
+    const response = await fetch(
+      "/api/specializations",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+        body: JSON.stringify(payload || {}),
+      }
+    );
+
+    const responseText = await response.text();
+    let json = null;
+
+    try {
+      json = responseText
+        ? JSON.parse(responseText)
+        : null;
+    } catch {
+      json = null;
     }
+
+    if (!response.ok || json?.ok !== true) {
+      throw new Error(
+        json?.error ||
+        `Specialization creation HTTP ${response.status}`
+      );
+    }
+
     return Array.isArray(json.data)
-  ? json.data[0] || null
-  : json.data || null;
-  } catch (e) {
-    console.error("createSpecializationApi failed:", e);
-    alert("Помилка створення напряму");
+      ? json.data[0] || null
+      : json.data || null;
+  } catch (error) {
+    console.error(
+      "Specialization creation failed:",
+      error
+    );
+
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося створити спеціалізацію."
+      )
+    );
+
     return null;
   }
 }
@@ -80426,22 +80083,56 @@ async function deleteSpecializationApi(specializationId) {
 }
 
 async function createStaffApi(payload) {
-  try {
-    const res = await fetch("/api/staff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося створити співробітника.": {
+      en: "Could not create the staff member.",
+      de: "Der Mitarbeiter konnte nicht angelegt werden.",
+      pl: "Nie udało się utworzyć pracownika.",
+    },
+  });
 
-    if (!json.ok) {
-      alert(json.error || "Помилка створення ветеринара");
-      return null;
+  try {
+    const response = await fetch("/api/staff", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify(payload || {}),
+    });
+
+    const responseText = await response.text();
+
+    let json = null;
+
+    try {
+      json = responseText
+        ? JSON.parse(responseText)
+        : null;
+    } catch {
+      json = null;
     }
+
+    if (!response.ok || json?.ok !== true) {
+      throw new Error(
+        json?.error ||
+        `Staff creation HTTP ${response.status}`
+      );
+    }
+
     return json.data || null;
-  } catch (e) {
-    console.error(e);
-    alert("Помилка створення ветеринара");
+  } catch (error) {
+    console.error("Staff creation failed:", error);
+
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося створити співробітника."
+      )
+    );
+
     return null;
   }
 }
@@ -87555,7 +87246,7 @@ padding-top: ${
     <span>
       Сформовано:
       ${escapeHtml(
-        new Date().toLocaleString("uk-UA")
+        new Date().toLocaleString(getCalendarLocale())
       )}
     </span>
   </footer>
@@ -90127,47 +89818,38 @@ function refreshVisitServiceSelect() {
   updateVisitServicePickerPreview();
 }
 function updateVisitServicePickerPreview() {
-  const select =
-    document.getElementById(
-      "visitSvcSelect"
-    );
+  const select = document.getElementById(
+    "visitSvcSelect"
+  );
 
-  const nameElement =
-    document.getElementById(
-      "visitServicePickerName"
-    );
+  const nameElement = document.getElementById(
+    "visitServicePickerName"
+  );
 
-  const metaElement =
-    document.getElementById(
-      "visitServicePickerMeta"
-    );
+  const metaElement = document.getElementById(
+    "visitServicePickerMeta"
+  );
 
-  const iconElement =
-    document.querySelector(
-      "#visitServicePickerButton .visitServicePickerIcon"
-    );
+  const iconElement = document.querySelector(
+    "#visitServicePickerButton .visitServicePickerIcon"
+  );
 
-  if (
-    !select ||
-    !nameElement ||
-    !metaElement
-  ) {
+  if (!select || !nameElement || !metaElement) {
     return;
   }
 
-  const service =
-    loadServices().find(
-      (item) =>
-        String(item.id) ===
-        String(select.value)
-    );
+  const service = loadServices().find(
+    (item) => String(item.id) === String(select.value)
+  );
 
   if (!service) {
-    nameElement.textContent =
-      "Оберіть послугу";
+    nameElement.textContent = getVisitWorkspaceText(
+      "Оберіть послугу"
+    );
 
-    metaElement.textContent =
-      "Категорія та ціна";
+    metaElement.textContent = getVisitWorkspaceText(
+      "Категорія та ціна"
+    );
 
     if (iconElement) {
       iconElement.textContent = "💼";
@@ -90176,35 +89858,27 @@ function updateVisitServicePickerPreview() {
     return;
   }
 
-  const category =
-    String(
-      service.cat ||
-      "Інше"
-    );
+  const category = String(service.cat || "Інше");
+
+  const categoryLabel = getServicesInterfaceText(
+    category
+  );
 
   nameElement.textContent =
-    service.name ||
-    "Послуга";
+    service.name || getVisitWorkspaceText("Послуга");
 
   metaElement.textContent =
-    `${category} · ${Number(
-      service.price || 0
-    ).toLocaleString(
-      "uk-UA"
-    )} грн`;
+    `${categoryLabel} · ${formatVisitFinanceMoney(
+      service.price
+    )}`;
 
   if (iconElement) {
     iconElement.textContent =
-      typeof getServiceCategoryIcon ===
-      "function"
-        ? getServiceCategoryIcon(
-            category
-          )
+      typeof getServiceCategoryIcon === "function"
+        ? getServiceCategoryIcon(category)
         : "💼";
   }
 }
-
-
 async function openVisitServicePicker() {
   document
     .getElementById(
@@ -98107,13 +97781,13 @@ if (svcContainer) {
                   <span>
                     ${quantity}
                     ×
-                    ${price.toLocaleString("uk-UA")} ₴
+                    ${price.toLocaleString(getCalendarLocale())} ₴
                   </span>
                 </div>
 
                 <div class="visitLineActions">
                   <div class="visitLineTotal">
-                    ${lineTotal.toLocaleString("uk-UA")} ₴
+                    ${lineTotal.toLocaleString(getCalendarLocale())} ₴
                   </div>
 
                   <button
@@ -98182,13 +97856,13 @@ if (stkContainer) {
                   <span>
                     ${quantity}
                     ×
-                    ${price.toLocaleString("uk-UA")} ₴
+                    ${price.toLocaleString(getCalendarLocale())} ₴
                   </span>
                 </div>
 
                 <div class="visitLineActions">
                   <div class="visitLineTotal">
-                    ${lineTotal.toLocaleString("uk-UA")} ₴
+                    ${lineTotal.toLocaleString(getCalendarLocale())} ₴
                   </div>
 
                   <button
@@ -98218,7 +97892,7 @@ if (stkContainer) {
 const money = (value) => {
   return (
     Number(value || 0)
-      .toLocaleString("uk-UA") +
+      .toLocaleString(getCalendarLocale()) +
     " ₴"
   );
 };
@@ -100174,86 +99848,187 @@ function safeVisitArray(primary, backup) {
 }
 
 function initDischargeModalUI() {
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Візит не знайдено.": {
+      en: "Visit not found.",
+      de: "Besuch nicht gefunden.",
+      pl: "Nie znaleziono wizyty.",
+    },
+    "Не вдалося зберегти виписку.": {
+      en: "Could not save the discharge summary.",
+      de: "Der Entlassungsbericht konnte nicht gespeichert werden.",
+      pl: "Nie udało się zapisać wypisu.",
+    },
+    "✅ Зміни збережено": {
+      en: "✅ Changes saved",
+      de: "✅ Änderungen gespeichert",
+      pl: "✅ Zmiany zapisane",
+    },
+    "Зберігаємо…": {
+      en: "Saving…",
+      de: "Wird gespeichert…",
+      pl: "Zapisywanie…",
+    },
+  });
+
   if (state.dischargeListenersBound) return;
 
   const modal = $("#dischargeModal");
   if (!modal) return;
 
   const live = () => {
-    const vid = modal.dataset.visitId;
-    if (vid) renderDischargeA4(vid);
+    const visitId = modal.dataset.visitId;
+    if (visitId) renderDischargeA4(visitId);
   };
 
-  ["#disComplaint", "#disDx", "#disRx", "#disRecs", "#disFollow"].forEach((sel) => {
-    const el = $(sel);
-    if (el) el.addEventListener("input", live);
+  [
+    "#disComplaint",
+    "#disDx",
+    "#disRx",
+    "#disRecs",
+    "#disFollow",
+  ].forEach((selector) => {
+    $(selector)?.addEventListener("input", live);
   });
 
-  document.addEventListener("click", async (e) => {
-    const modal = $("#dischargeModal");
-    if (!modal) return;
-    const vid = modal.dataset.visitId;
+  document.addEventListener(
+    "click",
+    async (event) => {
+      const currentModal = $("#dischargeModal");
+      if (!currentModal) return;
 
-    // Сохранение на сервер
-    if (e.target.closest("#disSave")) {
-      e.preventDefault(); e.stopPropagation();
-      if (!vid) return;
+      const visitId = currentModal.dataset.visitId;
+      const saveButton = event.target.closest("#disSave");
 
-      const form = readDischargeForm();
-      setDischarge(vid, form);
+      if (saveButton) {
+        event.preventDefault();
+        event.stopPropagation();
 
-      const current = getVisitByIdSync(vid) || (await fetchVisitById(vid));
-      if (!current) return alert(
-  getVisitWorkspaceText(
-    "Візит не знайдено"
-  )
-);
+        if (!visitId || saveButton.disabled) return;
 
-      const payload = {
-        pet_id: current.pet_id,
-        date: current.date,
-        weight_kg: current.weight_kg,
-        note: buildVisitNote(form.dx, form.complaint),
-        rx: typeof buildRxCombined === "function" ? buildRxCombined(form.rx, form.recs, form.follow) : `${form.rx}\n\nРекомендації:\n${form.recs}\n\nКонтроль / при погіршенні:\n${form.follow}`,
-      };
+        const originalText = saveButton.textContent;
 
-      const updated = await updateVisitApi(vid, payload);
-      if (!updated) return alert("Помилка збереження візиту");
+        saveButton.disabled = true;
+        saveButton.textContent = getSettingsInterfaceText(
+          "Зберігаємо…"
+        );
 
-      const fresh = await fetchVisitById(vid);
-      if (fresh?.id) {
-        cacheVisits([fresh]);
-        if (String(state.selectedVisitId) === String(vid)) state.selectedVisit = fresh;
+        try {
+          const form = readDischargeForm();
+          setDischarge(visitId, form);
+
+          const current =
+            getVisitByIdSync(visitId) ||
+            await fetchVisitById(visitId);
+
+          if (!current) {
+            showSettingsMessage(
+              getSettingsInterfaceText("Візит не знайдено.")
+            );
+            return;
+          }
+
+          const payload = {
+            pet_id: current.pet_id,
+            date: current.date,
+            weight_kg: current.weight_kg,
+            note: buildVisitNote(form.dx, form.complaint),
+
+            rx:
+              typeof buildRxCombined === "function"
+                ? buildRxCombined(
+                    form.rx,
+                    form.recs,
+                    form.follow
+                  )
+                : `${form.rx}\n\nРекомендації:\n${form.recs}\n\nКонтроль / при погіршенні:\n${form.follow}`,
+          };
+
+          const updated = await updateVisitApi(
+            visitId,
+            payload
+          );
+
+          if (!updated) return;
+
+          const fresh = await fetchVisitById(visitId);
+          const savedVisit = fresh?.id ? fresh : updated;
+
+          if (savedVisit?.id) {
+            cacheVisits([savedVisit]);
+
+            if (
+              String(state.selectedVisitId) ===
+              String(visitId)
+            ) {
+              state.selectedVisit = savedVisit;
+            }
+          }
+
+          fillDischargeForm(
+            savedVisit,
+            getDischarge(visitId) || form
+          );
+
+          await renderDischargeA4(visitId);
+          await refreshVisitUIIfOpen();
+
+          showSettingsMessage(
+            getSettingsInterfaceText(
+              "✅ Зміни збережено"
+            )
+          );
+        } catch (error) {
+          console.error(
+            "Discharge summary save failed:",
+            error
+          );
+
+          showSettingsMessage(
+            getSettingsSafeErrorText(
+              error,
+              "Не вдалося зберегти виписку."
+            )
+          );
+        } finally {
+          saveButton.disabled = false;
+          saveButton.textContent =
+            getSettingsInterfaceText(originalText);
+        }
+
+        return;
       }
 
-      fillDischargeForm(fresh, getDischarge(vid) || form);
-      renderDischargeA4(vid);
-      await refreshVisitUIIfOpen();
-      alert("✅ Збережено на сервері");
-      return;
-    }
+      if (event.target.closest("#disPrint")) {
+        event.preventDefault();
+        event.stopPropagation();
 
-    if (e.target.closest("#disPrint")) {
-      e.preventDefault(); e.stopPropagation();
-      if (!vid) return;
-      printA4Only(vid); return;
-    }
+        if (visitId) printA4Only(visitId);
+        return;
+      }
 
-    if (e.target.closest("#disDownload")) {
-      e.preventDefault(); e.stopPropagation();
-      if (!vid) return;
-      await downloadA4Pdf(vid); return;
-    }
+      if (event.target.closest("#disDownload")) {
+        event.preventDefault();
+        event.stopPropagation();
 
-    if (e.target.closest("[data-close-discharge]")) {
-      closeDischargeModal(); return;
-    }
-  }, true);
+        if (visitId) await downloadA4Pdf(visitId);
+        return;
+      }
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
+      if (event.target.closest("[data-close-discharge]")) {
+        closeDischargeModal();
+      }
+    },
+    true
+  );
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
       closeDischargeModal();
-      if (typeof closeVisitModal === "function") closeVisitModal();
+
+      if (typeof closeVisitModal === "function") {
+        closeVisitModal();
+      }
     }
   });
 
@@ -100261,27 +100036,62 @@ function initDischargeModalUI() {
 }
 
 async function openDischargeModal(visitId) {
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося відкрити виписку.": {
+      en: "Could not open the discharge summary.",
+      de: "Der Entlassungsbericht konnte nicht geöffnet werden.",
+      pl: "Nie udało się otworzyć wypisu.",
+    },
+  });
+
   const modal = $("#dischargeModal");
-  if (!modal) return alert("Не знайдено #dischargeModal в HTML");
 
-  const vid = String(visitId || "");
-  if (!vid) return;
+  if (!modal) {
+    showSettingsMessage(
+      getSettingsInterfaceText(
+        "Не вдалося відкрити виписку."
+      )
+    );
+    return;
+  }
 
-  modal.dataset.visitId = vid;
+  const cleanVisitId = String(visitId || "").trim();
+  if (!cleanVisitId) return;
 
-  let v = getVisitByIdSync(vid);
-  if (!v) v = await fetchVisitById(vid);
-  if (v?.id) cacheVisits([v]);
+  try {
+    modal.dataset.visitId = cleanVisitId;
 
-  const existing = getDischarge(vid) || {};
-  fillDischargeForm(v || {}, existing);
+    let visit = getVisitByIdSync(cleanVisitId);
 
-  await renderDischargeA4(vid);
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("medcardModalIsOpen");
+    if (!visit) {
+      visit = await fetchVisitById(cleanVisitId);
+    }
+
+    if (visit?.id) cacheVisits([visit]);
+
+    const existing = getDischarge(cleanVisitId) || {};
+
+    fillDischargeForm(visit || {}, existing);
+
+    await renderDischargeA4(cleanVisitId);
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("medcardModalIsOpen");
+  } catch (error) {
+    console.error(
+      "Opening discharge summary failed:",
+      error
+    );
+
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося відкрити виписку."
+      )
+    );
+  }
 }
-
 function closeDischargeModal() {
   const modal = $("#dischargeModal");
   if (!modal) return;
@@ -107125,132 +106935,404 @@ const petName =
 // =========================
 // subdivision
 function initPatientUI() {
-  $("#btnBackOwner")?.addEventListener("click", () => {
-    if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
-    else setHash("owners");
-  });
+  $("#btnBackOwner")
+    ?.addEventListener(
+      "click",
+      () => {
+        if (
+          state.selectedOwnerId
+        ) {
+          openOwner(
+            state.selectedOwnerId
+          );
+        } else {
+          setHash(
+            "owners"
+          );
+        }
+      }
+    );
 
-  $("#btnAddVisit")?.addEventListener("click", () => {
-    const pet = state.selectedPet;
-    if (!pet) return alert("Пацієнт не обраний");
-    openVisitModalForCreate(pet);
-  });
 
-  $("#visitsList")?.addEventListener("click", async (e) => {
-    // Удаление
-    const delBtn = e.target.closest("[data-del-visit]");
-    if (delBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const visitId = delBtn.dataset.delVisit;
-      if (!visitId) return;
-      if (!confirm("Видалити цей візит?")) return;
+  $("#btnAddVisit")
+    ?.addEventListener(
+      "click",
+      () => {
+        const pet =
+          state.selectedPet;
 
-      const ok = await deleteVisitApi(visitId);
-      if (!ok) return alert("Не вдалося видалити візит.");
+        if (!pet) {
+          showSettingsMessage(
+            translateInterfaceText(
+              "calendar.detail.no.patient.selected"
+            )
+          );
 
-      if (state.selectedPetId) await renderVisits(state.selectedPetId);
-      return;
-    }
+          return;
+        }
 
-    // Редактирование
-    const editBtn = e.target.closest("[data-edit-visit]");
-    if (editBtn) {
-      e.preventDefault(); e.stopPropagation();
-      const visitId = editBtn.dataset.editVisit;
-      if (visitId) await openVisitModalForEdit(visitId);
-      return;
-    }
+        openVisitModalForCreate(
+          pet
+        );
+      }
+    );
 
-    // Открытие визита
-    const item = e.target.closest(".item");
-    if (!item) return;
 
-    const visitId = item.dataset.openVisit;
-    if (visitId) openVisit(visitId);
-  });
+  $("#visitsList")
+    ?.addEventListener(
+      "click",
+      async (event) => {
+        const deleteButton =
+          event.target.closest(
+            "[data-del-visit]"
+          );
 
-  if (!state.visitFilesUiBound) {
-    if (typeof initVisitFilesUI === "function") initVisitFilesUI();
+        if (deleteButton) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const visitId =
+            deleteButton.dataset
+              .delVisit;
+
+          if (!visitId) return;
+
+          openDeleteModal(
+            `
+              <b>
+                ${escapeHtml(
+                  translateInterfaceText(
+                    "patients.card.visits.deleteVisit"
+                  )
+                )}
+              </b>
+
+              <br><br>
+
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.card.visits.deleteText"
+                )
+              )}
+            `,
+            async () => {
+              try {
+                const deleted =
+                  await deleteVisitApi(
+                    visitId
+                  );
+
+                if (!deleted) {
+                  showSettingsMessage(
+                    translateInterfaceText(
+                      "patients.card.visits.deleteFailed"
+                    )
+                  );
+
+                  return;
+                }
+
+                if (
+                  state.selectedPetId
+                ) {
+                  await renderVisits(
+                    state.selectedPetId
+                  );
+                }
+              } catch (error) {
+                console.error(
+                  "Patient visit deletion failed:",
+                  error
+                );
+
+                showSettingsMessage(
+                  translateInterfaceText(
+                    "patients.card.visits.deleteFailed"
+                  )
+                );
+              }
+            }
+          );
+
+          return;
+        }
+
+
+        const editButton =
+          event.target.closest(
+            "[data-edit-visit]"
+          );
+
+        if (editButton) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const visitId =
+            editButton.dataset
+              .editVisit;
+
+          if (visitId) {
+            await openVisitModalForEdit(
+              visitId
+            );
+          }
+
+          return;
+        }
+
+
+        const item =
+          event.target.closest(
+            ".item"
+          );
+
+        if (!item) return;
+
+        const visitId =
+          item.dataset.openVisit;
+
+        if (visitId) {
+          openVisit(
+            visitId
+          );
+        }
+      }
+    );
+
+
+  if (
+    !state.visitFilesUiBound &&
+    typeof initVisitFilesUI ===
+      "function"
+  ) {
+    initVisitFilesUI();
   }
 }
-// ==========================================================================
-// Doc.PUG CRM Mini — app.js (ЗАГРУЗКА МЕДИА, АВТОДОБАВЛЕНИЕ ПАЦИЕНТОВ И ИСКЛЮЧЕНИЕ КОЛЛИЗИЙ)
-// Часть 9
-// ==========================================================================
+
 
 function initVisitFilesUI() {
-  // Загрузка файлов на сервер и привязка к визиту
-  document.addEventListener("change", async (e) => {
-    const input = e.target && e.target.closest ? e.target.closest("#visitFiles") : null;
-    if (!input) return;
+  if (
+    state.visitFilesUiBound
+  ) {
+    return;
+  }
 
-    try {
-      const visitId = state.selectedVisitId;
-      if (!visitId) {
-        alert("Спочатку відкрий візит (щоб було куди прикріпляти файли).");
-        return;
-      }
 
-      const chosen = Array.from(input.files || []);
-      if (!chosen.length) return;
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Спочатку відкрийте візит, щоб прикріпити файли.": {
+        en: "Open a visit first to attach files.",
+        de: "Öffnen Sie zuerst einen Besuch, um Dateien anzuhängen.",
+        pl: "Najpierw otwórz wizytę, aby dołączyć pliki.",
+      },
 
-      const fd = new FormData();
-      chosen.forEach((f) => fd.append("files", f));
+      "Не вдалося завантажити файли.": {
+        en: "Could not upload the files.",
+        de: "Die Dateien konnten nicht hochgeladen werden.",
+        pl: "Nie udało się przesłać plików.",
+      },
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        credentials: "include",
-        body: fd,
-      });
+      "Сервер не повернув файли.": {
+        en: "The server did not return the uploaded files.",
+        de: "Der Server hat die hochgeladenen Dateien nicht zurückgegeben.",
+        pl: "Serwer nie zwrócił przesłanych plików.",
+      },
+    }
+  );
 
-      const text = await res.text();
-      let json = null;
-      try { json = text ? JSON.parse(text) : null; } catch {}
 
-      if (!res.ok) {
-        console.error("API /upload HTTP", res.status, text);
-        throw new Error(`Upload HTTP ${res.status}`);
-      }
-      if (!json || json.ok !== true) {
-        console.error("API /upload bad json", json, text);
-        throw new Error(json?.error || "Upload failed");
-      }
+  document.addEventListener(
+    "change",
+    async (event) => {
+      const input =
+        event.target?.closest
+          ? event.target.closest(
+              "#visitFiles"
+            )
+          : null;
 
-      const savedMeta = Array.isArray(json.files) ? json.files : (Array.isArray(json.data) ? json.data : []);
-      if (!savedMeta.length) throw new Error("Сервер не повернув файли");
+      if (!input) return;
 
-      upsertFilesFromServerMeta(savedMeta);
-
-      const fileIds = savedMeta
-        .map((m) => (m?.stored_name ? fileIdFromStored(m.stored_name) : null))
-        .filter(Boolean);
 
       try {
-        linkFilesToVisit(visitId, fileIds);
-        if (typeof renderVisitFiles === "function") {
-          renderVisitFiles(visitId);
+        const visitId =
+          state.selectedVisitId;
+
+        if (!visitId) {
+          showSettingsMessage(
+            getSettingsInterfaceText(
+              "Спочатку відкрийте візит, щоб прикріпити файли."
+            )
+          );
+
+          return;
         }
-      } catch (attachErr) {
-        console.warn("⚠️ local attach files failed:", attachErr);
+
+        const chosen =
+          Array.from(
+            input.files ||
+            []
+          );
+
+        if (!chosen.length) {
+          return;
+        }
+
+
+        const formData =
+          new FormData();
+
+        chosen.forEach(
+          (file) => {
+            formData.append(
+              "files",
+              file
+            );
+          }
+        );
+
+
+        const response =
+          await fetch(
+            "/api/upload",
+            {
+              method:
+                "POST",
+
+              credentials:
+                "include",
+
+              body:
+                formData,
+            }
+          );
+
+        const responseText =
+          await response.text();
+
+        let json = null;
+
+        try {
+          json =
+            responseText
+              ? JSON.parse(
+                  responseText
+                )
+              : null;
+        } catch {
+          json = null;
+        }
+
+
+        if (
+          !response.ok ||
+          json?.ok !== true
+        ) {
+          throw new Error(
+            json?.error ||
+            getSettingsInterfaceText(
+              "Не вдалося завантажити файли."
+            )
+          );
+        }
+
+
+        const savedMeta =
+          Array.isArray(
+            json.files
+          )
+            ? json.files
+            : (
+                Array.isArray(
+                  json.data
+                )
+                  ? json.data
+                  : []
+              );
+
+        if (
+          !savedMeta.length
+        ) {
+          throw new Error(
+            getSettingsInterfaceText(
+              "Сервер не повернув файли."
+            )
+          );
+        }
+
+
+        upsertFilesFromServerMeta(
+          savedMeta
+        );
+
+        const fileIds =
+          savedMeta
+            .map(
+              (file) =>
+                file?.stored_name
+                  ? fileIdFromStored(
+                      file.stored_name
+                    )
+                  : null
+            )
+            .filter(
+              Boolean
+            );
+
+
+        try {
+          linkFilesToVisit(
+            visitId,
+            fileIds
+          );
+
+          if (
+            typeof renderVisitFiles ===
+            "function"
+          ) {
+            renderVisitFiles(
+              visitId
+            );
+          }
+        } catch (error) {
+          console.warn(
+            "Local file attachment failed:",
+            error
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Visit file upload failed:",
+          error
+        );
+
+        showSettingsMessage(
+          getSettingsSafeErrorText(
+            error,
+            "Не вдалося завантажити файли."
+          )
+        );
+
+        if (
+          state.selectedVisitId &&
+          typeof renderVisitFiles ===
+            "function"
+        ) {
+          renderVisitFiles(
+            state.selectedVisitId
+          );
+        }
+      } finally {
+        input.value = "";
       }
-    } catch (err) {
-      console.error(err);
-      alert("Помилка завантаження: " + (err?.message || err));
-      if (state.selectedVisitId && typeof renderVisitFiles === "function") {
-        renderVisitFiles(state.selectedVisitId);
-      }
-    } finally {
-      try { e.target.value = ""; } catch {}
     }
-  });
+  );
 
-  state.visitFilesUiBound = true;
+
+  state.visitFilesUiBound =
+    true;
 }
-
-// =========================
-// VISIT MODAL — защита незбережених змін
-// =========================
-
 function getVisitModalState() {
   const newPatientBox =
     $("#visitNewPatientBox");
@@ -108035,109 +108117,98 @@ await continueCalendarCreation();
 // ==========================================================================
 
 async function updatePatientApi(petId, payload = {}) {
+  Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Не вдалося оновити дані пацієнта.": {
+      en: "Could not update the patient’s details.",
+      de: "Die Patientendaten konnten nicht aktualisiert werden.",
+      pl: "Nie udało się zaktualizować danych pacjenta.",
+    },
+  });
+
   try {
     const bodyObj = {
-  name:
-    String(
-      payload.name || ""
-    ).trim(),
+      name: String(payload.name || "").trim(),
+      species: String(payload.species || "").trim(),
+      breed: String(payload.breed || "").trim(),
+      age: String(payload.age || "").trim(),
+      weight_kg: String(payload.weight_kg || "").trim(),
+      sex: String(payload.sex || "").trim(),
 
-  species:
-    String(
-      payload.species || ""
-    ).trim(),
+      neutered:
+        typeof payload.neutered === "boolean"
+          ? payload.neutered
+          : null,
 
-  breed:
-    String(
-      payload.breed || ""
-    ).trim(),
+      vaccination_status: String(
+        payload.vaccination_status || "unknown"
+      ).trim(),
 
-  age:
-    String(
-      payload.age || ""
-    ).trim(),
+      vaccination_date: String(
+        payload.vaccination_date || ""
+      ).trim(),
 
-  weight_kg:
-    String(
-      payload.weight_kg || ""
-    ).trim(),
+      vaccination_name: String(
+        payload.vaccination_name || ""
+      ).trim(),
 
-  sex:
-    String(
-      payload.sex || ""
-    ).trim(),
+      notes: String(payload.notes || "").trim(),
+    };
 
-  neutered:
-    typeof payload.neutered ===
-      "boolean"
-      ? payload.neutered
-      : null,
-
-  vaccination_status:
-  String(
-    payload.vaccination_status ||
-    "unknown"
-  ).trim(),
-
-vaccination_date:
-  String(
-    payload.vaccination_date ||
-    ""
-  ).trim(),
-
-vaccination_name:
-  String(
-    payload.vaccination_name ||
-    ""
-  ).trim(),
-
-notes:
-    String(
-      payload.notes || ""
-    ).trim(),
-};
-
-    Object.keys(
-  bodyObj
-).forEach((key) => {
-  if (
-    bodyObj[key] === "" ||
-    bodyObj[key] === null
-  ) {
-    delete bodyObj[key];
-  }
-});
-
-    const res = await fetch(`/api/patients/${encodeURIComponent(petId)}`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(bodyObj),
+    Object.keys(bodyObj).forEach((key) => {
+      if (
+        bodyObj[key] === "" ||
+        bodyObj[key] === null
+      ) {
+        delete bodyObj[key];
+      }
     });
 
-    const text = await res.text();
+    const response = await fetch(
+      `/api/patients/${encodeURIComponent(petId)}`,
+      {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+        body: JSON.stringify(bodyObj),
+      }
+    );
+
+    const responseText = await response.text();
+
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch {}
 
-    if (!res.ok) {
-      console.error("API /patients PUT HTTP", res.status, text);
-      alert(`Помилка оновлення пацієнта (HTTP ${res.status})`);
-      return null;
+    try {
+      json = responseText
+        ? JSON.parse(responseText)
+        : null;
+    } catch {
+      json = null;
     }
 
-    if (!json || !json.ok) {
-      console.error("API /patients PUT bad json:", json, text);
-      alert(json?.error || "Помилка оновлення пацієнта");
-      return null;
+    if (!response.ok || json?.ok !== true) {
+      throw new Error(
+        json?.error ||
+        `Patient update HTTP ${response.status}`
+      );
     }
 
-    return Array.isArray(json.data) ? (json.data[0] || null) : (json.data || null);
-  } catch (e) {
-    console.error("updatePatientApi failed:", e);
-    alert("Помилка зʼєднання з сервером");
+    return Array.isArray(json.data)
+      ? json.data[0] || null
+      : json.data || null;
+  } catch (error) {
+    console.error("Patient update failed:", error);
+
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося оновити дані пацієнта."
+      )
+    );
+
     return null;
   }
 }
@@ -118247,7 +118318,120 @@ function openRequiredPasswordChangeModal() {
   });
 }
 async function init() {
-  // === ПРЕМИУМ ЛОГИН КЛИНИКИ ===
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Привіт! Дивлюсь у планшет, чекаю твій логін... 🐶": {
+        en: "Hi! I’m checking my tablet and waiting for your username... 🐶",
+        de: "Hallo! Ich schaue auf mein Tablet und warte auf deinen Benutzernamen... 🐶",
+        pl: "Cześć! Sprawdzam tablet i czekam na Twój login... 🐶",
+      },
+
+      "Вхід у командний центр клініки": {
+        en: "Sign in to your clinic workspace",
+        de: "Anmeldung im Arbeitsbereich Ihrer Klinik",
+        pl: "Zaloguj się do obszaru roboczego kliniki",
+      },
+
+      "Логін клініки": {
+        en: "Clinic username",
+        de: "Benutzername der Klinik",
+        pl: "Login kliniki",
+      },
+
+      "Пароль доступу": {
+        en: "Password",
+        de: "Passwort",
+        pl: "Hasło",
+      },
+
+      "Наприклад, Zoolux": {
+        en: "For example, Zoolux",
+        de: "Zum Beispiel Zoolux",
+        pl: "Na przykład Zoolux",
+      },
+
+      "Увійти у систему →": {
+        en: "Sign in →",
+        de: "Anmelden →",
+        pl: "Zaloguj się →",
+      },
+
+      "Мова інтерфейсу": {
+        en: "Interface language",
+        de: "Sprache der Benutzeroberfläche",
+        pl: "Język interfejsu",
+      },
+
+      "Введіть логін і пароль.": {
+        en: "Enter your username and password.",
+        de: "Geben Sie Ihren Benutzernamen und Ihr Passwort ein.",
+        pl: "Podaj login i hasło.",
+      },
+
+      "Перевірка доступу…": {
+        en: "Checking access…",
+        de: "Zugang wird geprüft…",
+        pl: "Sprawdzanie dostępu…",
+      },
+
+      "Невірний логін або пароль.": {
+        en: "Incorrect username or password.",
+        de: "Benutzername oder Passwort ist falsch.",
+        pl: "Nieprawidłowy login lub hasło.",
+      },
+
+      "Обліковий запис вимкнений.": {
+        en: "The account is disabled.",
+        de: "Das Konto ist deaktiviert.",
+        pl: "Konto jest wyłączone.",
+      },
+
+      "Пароль користувача не налаштований.": {
+        en: "No password is configured for this account.",
+        de: "Für dieses Konto ist kein Passwort eingerichtet.",
+        pl: "Dla tego konta nie ustawiono hasła.",
+      },
+
+      "Користувач не прив’язаний до клініки.": {
+        en: "This account is not linked to a clinic.",
+        de: "Dieses Konto ist keiner Klinik zugeordnet.",
+        pl: "To konto nie jest przypisane do kliniki.",
+      },
+
+      "Помилка авторизації.": {
+        en: "Could not sign in. Please try again.",
+        de: "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        pl: "Nie udało się zalogować. Spróbuj ponownie.",
+      },
+
+      "Не вдалося з'єднатися з сервером.": {
+        en: "Could not connect to the server.",
+        de: "Die Verbindung zum Server konnte nicht hergestellt werden.",
+        pl: "Nie udało się połączyć z serwerem.",
+      },
+
+      "Користувач": {
+        en: "User",
+        de: "Benutzer",
+        pl: "Użytkownik",
+      },
+
+      "Очистити пошук": {
+        en: "Clear search",
+        de: "Suche löschen",
+        pl: "Wyczyść wyszukiwanie",
+      },
+    }
+  );
+
+
+  const text =
+    (source) =>
+      getSettingsInterfaceText(
+        source
+      );
+
   const authForm =
     document.getElementById(
       "authForm"
@@ -118258,16 +118442,355 @@ async function init() {
       "authOverlay"
     );
 
-  let sessionAuthenticated = false;
+  const usernameInput =
+    document.getElementById(
+      "authUsername"
+    );
 
-  // Проверяем настоящую серверную сессию
+  const passwordInput =
+    document.getElementById(
+      "authPassword"
+    );
+
+  const authError =
+    document.getElementById(
+      "authError"
+    );
+
+  const authSubmit =
+    document.getElementById(
+      "btnAuthSubmit"
+    );
+
+
+  document.title =
+    "Doc.PUG CRM";
+
+  document.documentElement.lang =
+    getInterfaceLanguage();
+
+
+  const localizeLogin =
+    () => {
+      if (!authOverlay) return;
+
+      const bubble =
+        authOverlay.querySelector(
+          ".pug-bubble"
+        );
+
+      if (bubble) {
+        bubble.textContent =
+          text(
+            "Привіт! Дивлюсь у планшет, чекаю твій логін... 🐶"
+          );
+      }
+
+      const description =
+        authOverlay.querySelector(
+          ".auth-header p"
+        );
+
+      if (description) {
+        description.textContent =
+          text(
+            "Вхід у командний центр клініки"
+          );
+      }
+
+      const usernameLabel =
+        usernameInput
+          ?.closest(".auth-field")
+          ?.querySelector("label");
+
+      if (usernameLabel) {
+        usernameLabel.htmlFor =
+          "authUsername";
+
+        usernameLabel.textContent =
+          text(
+            "Логін клініки"
+          );
+      }
+
+      if (usernameInput) {
+        usernameInput.placeholder =
+          text(
+            "Наприклад, Zoolux"
+          );
+      }
+
+      const passwordLabel =
+        passwordInput
+          ?.closest(".auth-field")
+          ?.querySelector("label");
+
+      if (passwordLabel) {
+        passwordLabel.htmlFor =
+          "authPassword";
+
+        passwordLabel.textContent =
+          text(
+            "Пароль доступу"
+          );
+      }
+
+      if (
+        authSubmit &&
+        !authSubmit.disabled
+      ) {
+        authSubmit.textContent =
+          text(
+            "Увійти у систему →"
+          );
+      }
+
+      const languageLabel =
+        authOverlay.querySelector(
+          'label[for="authLanguageSelect"]'
+        );
+
+      if (languageLabel) {
+        languageLabel.textContent =
+          text(
+            "Мова інтерфейсу"
+          );
+      }
+    };
+
+
+  if (authForm) {
+    authForm.noValidate = true;
+
+    let languageSelect =
+      document.getElementById(
+        "authLanguageSelect"
+      );
+
+    if (!languageSelect) {
+      const languageField =
+        document.createElement(
+          "div"
+        );
+
+      languageField.className =
+        "auth-field";
+
+      languageField.innerHTML = `
+        <label
+          for="authLanguageSelect"
+        ></label>
+
+        <select
+          id="authLanguageSelect"
+          style="
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 12px;
+            background: #171126;
+            color: #fff;
+            font: inherit;
+          "
+        >
+          <option value="uk">
+            Українська
+          </option>
+
+          <option value="en">
+            English
+          </option>
+
+          <option value="de">
+            Deutsch
+          </option>
+
+          <option value="pl">
+            Polski
+          </option>
+        </select>
+      `;
+
+      authForm.prepend(
+        languageField
+      );
+
+      languageSelect =
+        languageField.querySelector(
+          "#authLanguageSelect"
+        );
+    }
+
+    languageSelect.value =
+      getInterfaceLanguage();
+
+    languageSelect.addEventListener(
+      "change",
+      () => {
+        const language =
+          String(
+            languageSelect.value ||
+            "uk"
+          );
+
+        if (
+          !APP_SUPPORTED_LANGUAGES.has(
+            language
+          )
+        ) {
+          return;
+        }
+
+        LS.set(
+          APP_LANGUAGE_KEY,
+          language
+        );
+
+        document.documentElement.lang =
+          language;
+
+        applyInterfaceTranslations();
+
+        localizeLogin();
+
+        if (authError) {
+          authError.textContent = "";
+
+          authError.style.display =
+            "none";
+        }
+      }
+    );
+  }
+
+
+  localizeLogin();
+
+
+  const showLoginError =
+    (message) => {
+      if (!authError) return;
+
+      authError.textContent =
+        message;
+
+      authError.style.display =
+        "block";
+    };
+
+
+  const getLoginErrorText =
+    (source) => {
+      const normalized =
+        normalizeSettingsText(
+          source
+        ).replace(
+          /[.!]+$/,
+          ""
+        );
+
+      const messages = {
+        "Введіть логін та пароль":
+          "Введіть логін і пароль.",
+
+        "Введіть логін і пароль":
+          "Введіть логін і пароль.",
+
+        "Невірний логін або пароль":
+          "Невірний логін або пароль.",
+
+        "Обліковий запис вимкнений":
+          "Обліковий запис вимкнений.",
+
+        "Пароль користувача не налаштований":
+          "Пароль користувача не налаштований.",
+
+        "Користувач не прив’язаний до клініки":
+          "Користувач не прив’язаний до клініки.",
+
+        "Помилка авторизації":
+          "Помилка авторизації.",
+      };
+
+      return text(
+        messages[normalized] ||
+        "Помилка авторизації."
+      );
+    };
+
+
+  const buildSessionUser =
+    (
+      user,
+      fallbackUsername = ""
+    ) => ({
+      user_id:
+        user.user_id ||
+        null,
+
+      org_id:
+        user.org_id ||
+        null,
+
+      staff_id:
+        user.staff_id ||
+        null,
+
+      username:
+        user.username ||
+        fallbackUsername,
+
+      display_name:
+        user.display_name ||
+        user.username ||
+        fallbackUsername ||
+        text(
+          "Користувач"
+        ),
+
+      role:
+        String(
+          user.role ||
+          "vet"
+        )
+          .trim()
+          .toLowerCase(),
+
+      clinic_name:
+        user.clinic_name ||
+        text(
+          "Клініка"
+        ),
+
+      theme:
+        user.theme ||
+        null,
+
+      must_change_password:
+        Boolean(
+          user.must_change_password
+        ),
+
+      is_platform_admin:
+        user.is_platform_admin ===
+        true,
+    });
+
+
+  let sessionAuthenticated =
+    false;
+
+
   try {
     const sessionResponse =
       await fetch(
         "/api/session",
         {
           method: "GET",
-          credentials: "include",
+
+          credentials:
+            "include",
 
           headers: {
             Accept:
@@ -118281,10 +118804,10 @@ async function init() {
     try {
       sessionJson =
         await sessionResponse.json();
-    } catch (jsonError) {
+    } catch (error) {
       console.warn(
-        "Сервер повернув некоректну відповідь сесії:",
-        jsonError
+        "Invalid session response:",
+        error
       );
     }
 
@@ -118294,55 +118817,13 @@ async function init() {
       sessionJson?.authenticated === true &&
       sessionJson?.data
     ) {
-      sessionAuthenticated = true;
+      sessionAuthenticated =
+        true;
 
-      const sessionUser =
-        sessionJson.data;
-
-      state.me = {
-        user_id:
-          sessionUser.user_id ||
-          null,
-
-        org_id:
-          sessionUser.org_id ||
-          null,
-
-        staff_id:
-          sessionUser.staff_id ||
-          null,
-
-        username:
-          sessionUser.username ||
-          "",
-
-        display_name:
-          sessionUser.display_name ||
-          sessionUser.username ||
-          "Користувач",
-
-        role:
-          String(
-            sessionUser.role ||
-            "vet"
-          )
-            .trim()
-            .toLowerCase(),
-
-        clinic_name:
-          sessionUser.clinic_name ||
-          "Клініка",
-
-        must_change_password:
-          Boolean(
-            sessionUser
-              .must_change_password
-          ),
-
-        is_platform_admin:
-          sessionUser
-            .is_platform_admin === true,
-      };
+      state.me =
+        buildSessionUser(
+          sessionJson.data
+        );
 
       if (
         typeof applyRoleAccessUI ===
@@ -118358,14 +118839,7 @@ async function init() {
         authOverlay.style.opacity =
           "1";
       }
-
-      console.log(
-        "Серверна сесія активна:",
-        state.me.username,
-        state.me.role
-      );
     } else {
-      sessionAuthenticated = false;
       state.me = null;
 
       if (authOverlay) {
@@ -118376,13 +118850,12 @@ async function init() {
           "1";
       }
     }
-  } catch (sessionError) {
+  } catch (error) {
     console.warn(
-      "Не вдалося перевірити сесію:",
-      sessionError
+      "Session check failed:",
+      error
     );
 
-    sessionAuthenticated = false;
     state.me = null;
 
     if (authOverlay) {
@@ -118394,8 +118867,7 @@ async function init() {
     }
   }
 
-  // Обязательная смена пароля
-  // выполняется только при активной сессии
+
   if (
     sessionAuthenticated &&
     state.me?.must_change_password &&
@@ -118405,251 +118877,209 @@ async function init() {
     await openRequiredPasswordChangeModal();
   }
 
-  // Обработчик формы входа
-  if (authForm) {
-    authForm.addEventListener(
-      "submit",
-      async (event) => {
-        event.preventDefault();
 
-        const username =
-          String(
-            document.getElementById(
-              "authUsername"
-            )?.value || ""
-          ).trim();
+  authForm?.addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
 
-        const password =
-          String(
-            document.getElementById(
-              "authPassword"
-            )?.value || ""
-          );
+      if (authSubmit?.disabled) {
+        return;
+      }
 
-        const errorBox =
-          document.getElementById(
-            "authError"
-          );
+      const username =
+        String(
+          usernameInput?.value ||
+          ""
+        ).trim();
 
-        const btnSubmit =
-          document.getElementById(
-            "btnAuthSubmit"
-          );
+      const password =
+        String(
+          passwordInput?.value ||
+          ""
+        );
 
-        if (errorBox) {
-          errorBox.textContent = "";
-          errorBox.style.display =
-            "none";
+      if (authError) {
+        authError.textContent = "";
+
+        authError.style.display =
+          "none";
+      }
+
+      if (
+        !username ||
+        !password
+      ) {
+        showLoginError(
+          text(
+            "Введіть логін і пароль."
+          )
+        );
+
+        if (!username) {
+          usernameInput?.focus();
+        } else {
+          passwordInput?.focus();
         }
 
-        if (!username || !password) {
-          if (errorBox) {
-            errorBox.textContent =
-              "Введіть логін і пароль.";
+        return;
+      }
 
-            errorBox.style.display =
-              "block";
-          }
 
-          return;
-        }
+      if (authSubmit) {
+        authSubmit.disabled =
+          true;
 
-        if (btnSubmit) {
-          btnSubmit.disabled = true;
+        authSubmit.textContent =
+          text(
+            "Перевірка доступу…"
+          );
+      }
 
-          btnSubmit.textContent =
-            "Перевірка доступу...";
-        }
+      let loginSucceeded =
+        false;
+
+
+      try {
+        const response =
+          await fetch(
+            "/api/login",
+            {
+              method: "POST",
+
+              credentials:
+                "include",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Accept:
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  username,
+                  password,
+                }),
+            }
+          );
+
+        let json = null;
 
         try {
-          const response =
-            await fetch(
-              "/api/login",
-              {
-                method: "POST",
-                credentials: "include",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-
-                  Accept:
-                    "application/json",
-                },
-
-                body:
-                  JSON.stringify({
-                    username,
-                    password,
-                  }),
-              }
-            );
-
-          let json = null;
-
-          try {
-            json =
-              await response.json();
-          } catch (jsonError) {
-            console.warn(
-              "Некоректна відповідь сервера при вході:",
-              jsonError
-            );
-          }
-
-          if (
-            !response.ok ||
-            json?.ok !== true ||
-            !json?.data
-          ) {
-            if (errorBox) {
-              errorBox.textContent =
-                json?.error ||
-                "Помилка авторизації";
-
-              errorBox.style.display =
-                "block";
-            }
-
-            if (btnSubmit) {
-              btnSubmit.disabled =
-                false;
-
-              btnSubmit.textContent =
-                "Увійти у систему →";
-            }
-
-            return;
-          }
-
-          const loginUser =
-            json.data;
-
-          state.me = {
-            user_id:
-              loginUser.user_id ||
-              null,
-
-            org_id:
-              loginUser.org_id ||
-              null,
-
-            staff_id:
-              loginUser.staff_id ||
-              null,
-
-            username:
-              loginUser.username ||
-              username,
-
-            display_name:
-              loginUser.display_name ||
-              loginUser.username ||
-              username ||
-              "Користувач",
-
-            role:
-              String(
-                loginUser.role ||
-                "vet"
-              )
-                .trim()
-                .toLowerCase(),
-
-            clinic_name:
-              loginUser.clinic_name ||
-              "Клініка",
-
-            must_change_password:
-              Boolean(
-                loginUser
-                  .must_change_password
-              ),
-
-            is_platform_admin:
-              loginUser
-                .is_platform_admin === true,
-          };
-
-          sessionAuthenticated = true;
-
-          console.log(
-            "Успішний вхід:",
-            state.me.display_name,
-            state.me.role,
-            state.me.clinic_name
+          json =
+            await response.json();
+        } catch (error) {
+          console.warn(
+            "Invalid login response:",
+            error
           );
+        }
 
-          if (
-            typeof applyRoleAccessUI ===
-            "function"
-          ) {
-            applyRoleAccessUI();
-          }
-
-          if (authOverlay) {
-            authOverlay.style.transition =
-              "all 0.4s ease";
-
-            authOverlay.style.opacity =
-              "0";
-
-            setTimeout(() => {
-              authOverlay.style.display =
-                "none";
-            }, 400);
-          }
-
-          window.location.replace(
-            "/"
+        if (
+          !response.ok ||
+          json?.ok !== true ||
+          !json?.data
+        ) {
+          showLoginError(
+            getLoginErrorText(
+              json?.error
+            )
           );
 
           return;
-        } catch (loginError) {
-          console.error(
-            "Помилка входу:",
-            loginError
+        }
+
+
+        state.me =
+          buildSessionUser(
+            json.data,
+            username
           );
 
-          if (errorBox) {
-            errorBox.textContent =
-              "Не вдалося з'єднатися з сервером.";
+        sessionAuthenticated =
+          true;
 
-            errorBox.style.display =
-              "block";
-          }
+        loginSucceeded =
+          true;
 
-          if (btnSubmit) {
-            btnSubmit.disabled =
-              false;
+        if (
+          typeof applyRoleAccessUI ===
+          "function"
+        ) {
+          applyRoleAccessUI();
+        }
 
-            btnSubmit.textContent =
-              "Увійти у систему →";
-          }
+        if (authOverlay) {
+          authOverlay.style.transition =
+            "all 0.4s ease";
+
+          authOverlay.style.opacity =
+            "0";
+
+          setTimeout(
+            () => {
+              authOverlay.style.display =
+                "none";
+            },
+            400
+          );
+        }
+
+        window.location.replace(
+          "/"
+        );
+      } catch (error) {
+        console.error(
+          "Login failed:",
+          error
+        );
+
+        showLoginError(
+          text(
+            "Не вдалося з'єднатися з сервером."
+          )
+        );
+      } finally {
+        if (
+          authSubmit &&
+          !loginSucceeded
+        ) {
+          authSubmit.disabled =
+            false;
+
+          authSubmit.textContent =
+            text(
+              "Увійти у систему →"
+            );
         }
       }
+    }
+  );
+
+
+  if (!sessionAuthenticated) {
+    return;
+  }
+
+
+  if (
+    typeof loadStockApi ===
+    "function"
+  ) {
+    await loadStockApi(
+      true
     );
   }
 
-  // Если активной сессии нет —
-  // оставляем экран входа и не запускаем CRM
-  if (!sessionAuthenticated) {
-  return;
-}
-
-if (
-  typeof loadStockApi ===
-  "function"
-) {
-  await loadStockApi(true);
-}
-
-if (
-  typeof initTabs ===
-  "function"
-) {
-  initTabs();
-}
+  if (
+    typeof initTabs ===
+    "function"
+  ) {
+    initTabs();
+  }
 
   if (
     typeof seedIfEmpty ===
@@ -118701,20 +119131,20 @@ if (
   }
 
   if (
-  state.route === "settings" &&
-  typeof initSettingsUI ===
-    "function"
-) {
-  await initSettingsUI();
-}
+    state.route === "settings" &&
+    typeof initSettingsUI ===
+      "function"
+  ) {
+    await initSettingsUI();
+  }
 
-  // Применяем сохранённую тему
   if (
     typeof bootstrapClinicTheme ===
     "function"
   ) {
     bootstrapClinicTheme();
   }
+
 
   $("#btnReload")
     ?.addEventListener(
@@ -118727,175 +119157,183 @@ if (
       }
     );
 
+
   const ownersGlobalSearch =
-  document.getElementById(
-    "globalSearch"
-  );
-
-ownersGlobalSearch
-  ?.addEventListener(
-    "input",
-    () => {
-      if (
-        state.route ===
-        "owners"
-      ) {
-        renderOwners();
-      }
-    }
-  );
-
-ownersGlobalSearch
-  ?.addEventListener(
-    "keydown",
-    (event) => {
-      if (
-        event.key !==
-        "Escape"
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-
-      ownersGlobalSearch.value =
-        "";
-
-      renderOwners();
-
-      ownersGlobalSearch.blur();
-    }
-  );
-  if (
-  ownersGlobalSearch &&
-  ownersGlobalSearch.parentElement &&
-  !document.getElementById(
-    "ownersGlobalSearchClear"
-  )
-) {
-  const searchWrap =
-    ownersGlobalSearch
-      .parentElement;
-
-  searchWrap.classList.add(
-    "ownersGlobalSearchWrap"
-  );
-
-  const clearButton =
-    document.createElement(
-      "button"
+    document.getElementById(
+      "globalSearch"
     );
-
-  clearButton.id =
-    "ownersGlobalSearchClear";
-
-  clearButton.className =
-    "ownersGlobalSearchClear";
-
-  clearButton.type =
-    "button";
-
-  clearButton.title =
-    "Очистити пошук";
-
-  clearButton.setAttribute(
-    "aria-label",
-    "Очистити пошук"
-  );
-
-  clearButton.textContent =
-    "×";
-
-  searchWrap.appendChild(
-    clearButton
-  );
-
-  const syncClearButton =
-    () => {
-      clearButton.hidden =
-        !ownersGlobalSearch
-          .value.trim();
-  };
 
   ownersGlobalSearch
-    .addEventListener(
+    ?.addEventListener(
       "input",
-      syncClearButton
+      () => {
+        if (
+          state.route ===
+          "owners"
+        ) {
+          renderOwners();
+        }
+      }
     );
 
-  clearButton.addEventListener(
-    "click",
-    () => {
-      ownersGlobalSearch.value =
-        "";
+  ownersGlobalSearch
+    ?.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key !==
+          "Escape"
+        ) {
+          return;
+        }
 
-      syncClearButton();
-      renderOwners();
-      ownersGlobalSearch.focus();
-    }
-  );
+        event.preventDefault();
 
-  syncClearButton();
-}
+        ownersGlobalSearch.value =
+          "";
 
-  const clinicTitleEl =
-  document.getElementById(
-    "clinicNameTitle"
-  ) ||
-  document.querySelector(
-    ".clinic-title"
-  );
+        renderOwners();
 
-if (
-  clinicTitleEl &&
-  state.me?.clinic_name
-) {
-  clinicTitleEl.textContent =
-    state.me.clinic_name;
-}
+        ownersGlobalSearch.blur();
+      }
+    );
 
-if (state.me?.theme) {
-  document.body.dataset.theme =
-    state.me.theme;
-
-  LS.set(
-    "docpug_clinic_theme",
-    state.me.theme
-  );
-
-  console.log(
-    `[Bootstrap] Установлена тема клініки: ${state.me.theme}`
-  );
-} else if (
-  typeof bootstrapClinicTheme ===
-  "function"
-) {
-  bootstrapClinicTheme();
-}
 
   if (
-  state.route === "owners" ||
-  state.route === "owner"
-) {
-  await loadPatientsApi();
-  await loadOwners();
-}
+    ownersGlobalSearch &&
+    ownersGlobalSearch.parentElement &&
+    !document.getElementById(
+      "ownersGlobalSearchClear"
+    )
+  ) {
+    const searchWrap =
+      ownersGlobalSearch
+        .parentElement;
 
-if (
-  state.route === "patients" ||
-  state.route === "patient"
-) {
-  await loadPatientsApi();
-}
+    searchWrap.classList.add(
+      "ownersGlobalSearchWrap"
+    );
 
-if (
-  state.route === "services" ||
-  state.route === "visit"
-) {
-  await loadServicesApi();
-}
-}
+    const clearButton =
+      document.createElement(
+        "button"
+      );
 
+    clearButton.id =
+      "ownersGlobalSearchClear";
+
+    clearButton.className =
+      "ownersGlobalSearchClear";
+
+    clearButton.type =
+      "button";
+
+    clearButton.title =
+      text(
+        "Очистити пошук"
+      );
+
+    clearButton.setAttribute(
+      "aria-label",
+      text(
+        "Очистити пошук"
+      )
+    );
+
+    clearButton.textContent =
+      "×";
+
+    searchWrap.appendChild(
+      clearButton
+    );
+
+    const syncClearButton =
+      () => {
+        clearButton.hidden =
+          !ownersGlobalSearch
+            .value.trim();
+      };
+
+    ownersGlobalSearch
+      .addEventListener(
+        "input",
+        syncClearButton
+      );
+
+    clearButton.addEventListener(
+      "click",
+      () => {
+        ownersGlobalSearch.value =
+          "";
+
+        syncClearButton();
+
+        renderOwners();
+
+        ownersGlobalSearch.focus();
+      }
+    );
+
+    syncClearButton();
+  }
+
+
+  const clinicTitleEl =
+    document.getElementById(
+      "clinicNameTitle"
+    ) ||
+    document.querySelector(
+      ".clinic-title"
+    );
+
+  if (
+    clinicTitleEl &&
+    state.me?.clinic_name
+  ) {
+    clinicTitleEl.textContent =
+      state.me.clinic_name;
+  }
+
+
+  if (state.me?.theme) {
+    document.body.dataset.theme =
+      state.me.theme;
+
+    LS.set(
+      "docpug_clinic_theme",
+      state.me.theme
+    );
+  } else if (
+    typeof bootstrapClinicTheme ===
+    "function"
+  ) {
+    bootstrapClinicTheme();
+  }
+
+
+  if (
+    state.route === "owners" ||
+    state.route === "owner"
+  ) {
+    await loadPatientsApi();
+
+    await loadOwners();
+  }
+
+  if (
+    state.route === "patients" ||
+    state.route === "patient"
+  ) {
+    await loadPatientsApi();
+  }
+
+  if (
+    state.route === "services" ||
+    state.route === "visit"
+  ) {
+    await loadServicesApi();
+  }
+}
 
 // Корректировка вьюпорта под мобильные платформы iOS / Telegram WebApp
 function setVH() {
@@ -118910,235 +119348,728 @@ init();
 // =========================
 // VISIT FILES — Отрисовка списка файлов приёма
 // =========================
-function renderVisitFiles(visitId) {
-  const wrap = document.getElementById("visitFilesList");
+function renderVisitFiles(
+  visitId
+) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Поки файлів немає.": {
+        en: "No files yet.",
+        de: "Noch keine Dateien vorhanden.",
+        pl: "Nie ma jeszcze plików.",
+      },
+
+      "Файл": {
+        en: "File",
+        de: "Datei",
+        pl: "Plik",
+      },
+
+      "Відкрити": {
+        en: "Open",
+        de: "Öffnen",
+        pl: "Otwórz",
+      },
+
+      "Відв’язати": {
+        en: "Detach",
+        de: "Verknüpfung lösen",
+        pl: "Odłącz",
+      },
+
+      "байт": {
+        en: "bytes",
+        de: "Byte",
+        pl: "bajtów",
+      },
+    }
+  );
+
+
+  const wrap =
+    document.getElementById(
+      "visitFilesList"
+    );
+
   if (!wrap) return;
 
-  const allFiles = LS.get(FILES_KEY, []);
-  const byId = new Map((Array.isArray(allFiles) ? allFiles : []).map((f) => [String(f.id), f]));
-  const ids = getFileIdsForVisit(visitId);
+  const ui =
+    (source) =>
+      escapeHtml(
+        getSettingsInterfaceText(
+          source
+        )
+      );
+
+
+  const storedFiles =
+    LS.get(
+      FILES_KEY,
+      []
+    );
+
+  const allFiles =
+    Array.isArray(
+      storedFiles
+    )
+      ? storedFiles
+      : [];
+
+  const byId =
+    new Map(
+      allFiles.map(
+        (file) => [
+          String(
+            file.id
+          ),
+          file,
+        ]
+      )
+    );
+
+  const ids =
+    getFileIdsForVisit(
+      visitId
+    );
+
 
   if (!ids.length) {
-    wrap.innerHTML = `<div class="hint">Поки файлів немає.</div>`;
+    wrap.innerHTML = `
+      <div class="hint">
+        ${ui(
+          "Поки файлів немає."
+        )}
+      </div>
+    `;
+
+    wrap.onclick = null;
+
     return;
   }
 
-  wrap.innerHTML = ids
-    .map((id) => {
-      const f = byId.get(String(id));
-      if (!f) return "";
-      const url = f.url || (f.stored_name ? `/uploads/${f.stored_name}` : "#");
-      const name = f.name || f.stored_name || "file";
-      return `
-        <div class="fileRow">
-          <div class="fileMain">
-            <div class="fileName">${escapeHtml(name)}</div>
-            <div class="fileMeta">${escapeHtml(f.type || "")} ${f.size ? "• " + escapeHtml(String(f.size)) + " bytes" : ""}</div>
-          </div>
-          <div class="fileActions">
-            <a class="miniBtn" href="${escapeHtml(url)}" target="_blank" rel="noopener">Відкрити</a>
-            <button type="button" class="miniBtn danger" data-detach-file="${escapeHtml(String(id))}">Відвʼязати</button>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
 
-  wrap.onclick = (e) => {
-    const btn = e.target.closest("[data-detach-file]");
-    if (!btn) return;
-    e.preventDefault();
-    const fid = btn.dataset.detachFile;
-    if (!fid) return;
-    detachFileFromVisit(visitId, fid);
-    renderVisitFiles(visitId);
-  };
+  wrap.innerHTML =
+    ids
+      .map((id) => {
+        const file =
+          byId.get(
+            String(id)
+          );
+
+        if (!file) {
+          return "";
+        }
+
+        const url =
+          file.url ||
+          (
+            file.stored_name
+              ? `/uploads/${file.stored_name}`
+              : "#"
+          );
+
+        const name =
+          file.name ||
+          file.stored_name ||
+          getSettingsInterfaceText(
+            "Файл"
+          );
+
+        const size =
+          Number(
+            file.size
+          );
+
+        const sizeText =
+          file.size &&
+          Number.isFinite(
+            size
+          )
+            ? (
+                size.toLocaleString(
+                  getCalendarLocale()
+                ) +
+                " " +
+                getSettingsInterfaceText(
+                  "байт"
+                )
+              )
+            : "";
+
+
+        return `
+          <div class="fileRow">
+            <div class="fileMain">
+              <div class="fileName">
+                ${escapeHtml(
+                  name
+                )}
+              </div>
+
+              <div class="fileMeta">
+                ${escapeHtml(
+                  file.type || ""
+                )}
+
+                ${
+                  sizeText
+                    ? "• " +
+                      escapeHtml(
+                        sizeText
+                      )
+                    : ""
+                }
+              </div>
+            </div>
+
+            <div class="fileActions">
+              <a
+                class="miniBtn"
+                href="${escapeHtml(
+                  url
+                )}"
+                target="_blank"
+                rel="noopener"
+              >
+                ${ui(
+                  "Відкрити"
+                )}
+              </a>
+
+              <button
+                type="button"
+                class="miniBtn danger"
+                data-detach-file="${escapeHtml(
+                  String(id)
+                )}"
+              >
+                ${ui(
+                  "Відв’язати"
+                )}
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+
+  wrap.onclick =
+    (event) => {
+      const button =
+        event.target.closest(
+          "[data-detach-file]"
+        );
+
+      if (!button) return;
+
+      event.preventDefault();
+
+      const fileId =
+        button.dataset
+          .detachFile;
+
+      if (!fileId) return;
+
+      detachFileFromVisit(
+        visitId,
+        fileId
+      );
+
+      renderVisitFiles(
+        visitId
+      );
+    };
 }
 
-async function updateStaffApi(staffId, payload) {
-  try {
-    const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {}),
-    });
-    const json = await res.json();
-    if (!json.ok) { alert(json.error || "Помилка оновлення ветеринара"); return null; }
-    return json.data || null;
-  } catch (e) {
-    console.error(e); alert("Помилка оновлення ветеринара"); return null;
-  }
-}
 
-async function deactivateStaffApi(staffId) {
-  try {
-    const response = await fetch(
-      `/api/staff/${encodeURIComponent(staffId)}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          ...getOrgHeaders(),
-        },
-      }
-    );
+async function updateStaffApi(
+  staffId,
+  payload
+) {
+  Object.assign(
+    SETTINGS_INTERFACE_TEXT,
+    {
+      "Не вдалося оновити дані співробітника.": {
+        en: "Could not update the employee’s details.",
+        de: "Die Mitarbeiterdaten konnten nicht aktualisiert werden.",
+        pl: "Nie udało się zaktualizować danych pracownika.",
+      },
+    }
+  );
 
-    const text = await response.text();
+
+  try {
+    const response =
+      await fetch(
+        `/api/staff/${encodeURIComponent(
+          staffId
+        )}`,
+        {
+          method: "PUT",
+
+          credentials:
+            "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+
+            ...getOrgHeaders(),
+          },
+
+          body:
+            JSON.stringify(
+              payload || {}
+            ),
+        }
+      );
+
+    const responseText =
+      await response.text();
+
     let json = null;
 
     try {
-      json = text
-        ? JSON.parse(text)
-        : null;
+      json =
+        responseText
+          ? JSON.parse(
+              responseText
+            )
+          : null;
     } catch {
       json = null;
     }
+
 
     if (
       !response.ok ||
       json?.ok !== true
     ) {
-      return {
-        ok: false,
-        error:
-          json?.error ||
-          `HTTP ${response.status}`,
-      };
+      throw new Error(
+        json?.error ||
+        `Staff update HTTP ${response.status}`
+      );
     }
 
-    return {
-      ok: true,
-      data: json.data || null,
-    };
+    return json.data ||
+      null;
   } catch (error) {
     console.error(
-      "deactivateStaffApi failed:",
+      "Staff update failed:",
       error
     );
 
-    return {
-      ok: false,
-      error:
-        "Помилка з'єднання під час звільнення співробітника.",
-    };
-  }
-}
-
-async function renderStaffSpecsBox(selectedIds = []) {
-  const box = $("#staffSpecsBox");
-  if (!box) return;
-
-  const specs = await loadSpecializationsApi();
-  const selected = new Set((selectedIds || []).map(String));
-
-  box.innerHTML = specs.length
-    ? specs.map((s) => `
-      <label class="staffSpecializationOption">
-        <input type="checkbox" data-staff-spec value="${escapeHtml(String(s.id))}" ${selected.has(String(s.id)) ? "checked" : ""}>
-        <span class="staffSpecDot" style="background:${escapeHtml(s.color || "#7C5CFF")}"></span>
-        <span class="staffSpecializationOptionName">${escapeHtml(s.name || "Напрям")}</span>
-        <span class="staffSpecializationCheckmark">✓</span>
-      </label>
-    `).join("")
-    : `<div class="hint">Спочатку додай напрями клініки вище.</div>`;
-
-  const toggle = $("#staffSpecializationToggle");
-  const select = $("#staffSpecializationSelect");
-
-  const updateSummary = () => {
-    const summary = $("#staffSpecializationSummary");
-    if (!summary) return;
-
-    const checked = Array.from(
-      box.querySelectorAll(
-        "[data-staff-spec]:checked"
+    showSettingsMessage(
+      getSettingsSafeErrorText(
+        error,
+        "Не вдалося оновити дані співробітника."
       )
     );
 
-    summary.innerHTML = checked.length
-      ? checked
-          .map((input) => {
-            const option = input.closest(
-              ".staffSpecializationOption"
-            );
+    return null;
+  }
+}
+async function renderStaffSpecsBox(
+  selectedIds = []
+) {
+  Object.assign(
+    TEAM_INTERFACE_TEXT,
+    {
+      "Напрям": {
+        en: "Specialization",
+        de: "Fachgebiet",
+        pl: "Specjalizacja",
+      },
 
+      "Оберіть напрями": {
+        en: "Select specializations",
+        de: "Fachgebiete auswählen",
+        pl: "Wybierz specjalizacje",
+      },
+
+      "Спочатку додайте напрями клініки вище.": {
+        en: "Add clinic specializations above first.",
+        de: "Fügen Sie zuerst oben die Fachgebiete der Klinik hinzu.",
+        pl: "Najpierw dodaj powyżej specjalizacje kliniki.",
+      },
+    }
+  );
+
+
+  const box =
+    $("#staffSpecsBox");
+
+  if (!box) return;
+
+  const loaded =
+    await loadSpecializationsApi();
+
+  const specs =
+    Array.isArray(
+      loaded
+    )
+      ? loaded
+      : [];
+
+  const selected =
+    new Set(
+      (
+        Array.isArray(
+          selectedIds
+        )
+          ? selectedIds
+          : []
+      ).map(
+        String
+      )
+    );
+
+
+  box.innerHTML =
+    specs.length
+      ? specs
+          .map((spec) => {
             const name =
-              option?.querySelector(
-                ".staffSpecializationOptionName"
-              )?.textContent?.trim() ||
-              "Напрям";
-
-            const color =
-              option?.querySelector(
-                ".staffSpecDot"
-              )?.style?.background ||
-              "#7C5CFF";
+              spec.name ||
+              getTeamInterfaceText(
+                "Напрям"
+              );
 
             return `
-              <span
-                class="staffSpecializationChip"
-                style="--specialization-color:${escapeHtml(
-                  color
-                )}"
-              >
-                ${escapeHtml(name)}
-              </span>
+              <label class="staffSpecializationOption">
+                <input
+                  type="checkbox"
+                  data-staff-spec
+                  data-staff-spec-name="${escapeHtml(
+                    name
+                  )}"
+                  value="${escapeHtml(
+                    String(
+                      spec.id
+                    )
+                  )}"
+                  ${
+                    selected.has(
+                      String(
+                        spec.id
+                      )
+                    )
+                      ? "checked"
+                      : ""
+                  }
+                >
+
+                <span
+                  class="staffSpecDot"
+                  style="background:${escapeHtml(
+                    spec.color ||
+                    "#7C5CFF"
+                  )}"
+                ></span>
+
+                <span
+                  class="staffSpecializationOptionName"
+                  data-team-content
+                >
+                  ${escapeHtml(
+                    name
+                  )}
+                </span>
+
+                <span class="staffSpecializationCheckmark">
+                  ✓
+                </span>
+              </label>
             `;
           })
           .join("")
-      : `<span class="staffSpecializationPlaceholder">Оберіть напрями</span>`;
-  };
+      : `
+        <div class="hint">
+          ${escapeHtml(
+            getTeamInterfaceText(
+              "Спочатку додайте напрями клініки вище."
+            )
+          )}
+        </div>
+      `;
 
-  const setOpen = (isOpen) => {
-    box.hidden = !isOpen;
-    box.setAttribute(
-      "aria-hidden",
-      String(!isOpen)
-    );
-    toggle?.setAttribute(
-      "aria-expanded",
-      String(isOpen)
-    );
-    select?.classList.toggle(
-      "open",
-      isOpen
-    );
-  };
+
+  const toggle =
+    $("#staffSpecializationToggle");
+
+  const select =
+    $("#staffSpecializationSelect");
+
+
+  const updateSummary =
+    () => {
+      const summary =
+        $("#staffSpecializationSummary");
+
+      if (!summary) return;
+
+      const checked =
+        Array.from(
+          box.querySelectorAll(
+            "[data-staff-spec]:checked"
+          )
+        );
+
+      summary.innerHTML =
+        checked.length
+          ? checked
+              .map((input) => {
+                const option =
+                  input.closest(
+                    ".staffSpecializationOption"
+                  );
+
+                const name =
+                  input.dataset
+                    .staffSpecName ||
+                  getTeamInterfaceText(
+                    "Напрям"
+                  );
+
+                const color =
+                  option
+                    ?.querySelector(
+                      ".staffSpecDot"
+                    )
+                    ?.style
+                    ?.background ||
+                  "#7C5CFF";
+
+                return `
+                  <span
+                    class="staffSpecializationChip"
+                    data-team-content
+                    style="--specialization-color:${escapeHtml(
+                      color
+                    )}"
+                  >
+                    ${escapeHtml(
+                      name
+                    )}
+                  </span>
+                `;
+              })
+              .join("")
+          : `
+            <span class="staffSpecializationPlaceholder">
+              ${escapeHtml(
+                getTeamInterfaceText(
+                  "Оберіть напрями"
+                )
+              )}
+            </span>
+          `;
+    };
+
+
+  const setOpen =
+    (isOpen) => {
+      box.hidden =
+        !isOpen;
+
+      box.setAttribute(
+        "aria-hidden",
+        String(
+          !isOpen
+        )
+      );
+
+      toggle?.setAttribute(
+        "aria-expanded",
+        String(
+          isOpen
+        )
+      );
+
+      select?.classList.toggle(
+        "open",
+        isOpen
+      );
+    };
+
 
   if (toggle) {
-    toggle.onclick = () =>
-      setOpen(box.hidden);
+    toggle.onclick =
+      () => {
+        setOpen(
+          box.hidden
+        );
+      };
   }
 
-  box.onchange = () => {
-  updateSummary();
 
-  setOpen(false);
+  box.onchange =
+    () => {
+      updateSummary();
 
-  if (toggle) {
-    toggle.focus();
-  }
-};
+      setOpen(
+        false
+      );
 
-  setOpen(false);
+      toggle?.focus();
+    };
+
+
+  setOpen(
+    false
+  );
+
   updateSummary();
 }
 
+
 function ensureStaffEmergencyContactFields() {
+  Object.assign(
+    TEAM_INTERFACE_TEXT,
+    {
+      "Ветеринар": {
+        en: "Veterinarian",
+        de: "Tierarzt",
+        pl: "Lekarz weterynarii",
+      },
+
+      "Асистент": {
+        en: "Assistant",
+        de: "Assistenz",
+        pl: "Asystent",
+      },
+
+      "ПІБ *": {
+        en: "Full name *",
+        de: "Vollständiger Name *",
+        pl: "Imię i nazwisko *",
+      },
+
+      "Іванов Іван Іванович": {
+        en: "For example, Alex Smith",
+        de: "Zum Beispiel Anna Müller",
+        pl: "Na przykład Anna Kowalska",
+      },
+
+      "Роль": {
+        en: "Role",
+        de: "Rolle",
+        pl: "Rola",
+      },
+
+      "Спеціалізація": {
+        en: "Specialization",
+        de: "Fachgebiet",
+        pl: "Specjalizacja",
+      },
+
+      "Телефон": {
+        en: "Phone",
+        de: "Telefon",
+        pl: "Telefon",
+      },
+
+      "Ставка (грн/зміна)": {
+        en: "Rate (UAH/shift)",
+        de: "Vergütung (UAH/Schicht)",
+        pl: "Stawka (UAH/zmiana)",
+      },
+
+      "Відсоток %": {
+        en: "Percentage %",
+        de: "Prozentsatz %",
+        pl: "Procent %",
+      },
+
+      "Колір": {
+        en: "Color",
+        de: "Farbe",
+        pl: "Kolor",
+      },
+
+      "Нотатка": {
+        en: "Note",
+        de: "Notiz",
+        pl: "Notatka",
+      },
+
+      "Скасувати": {
+        en: "Cancel",
+        de: "Abbrechen",
+        pl: "Anuluj",
+      },
+
+      "💾 Зберегти": {
+        en: "💾 Save",
+        de: "💾 Speichern",
+        pl: "💾 Zapisz",
+      },
+
+      "☎ Екстрений контакт": {
+        en: "☎ Emergency contact",
+        de: "☎ Notfallkontakt",
+        pl: "☎ Kontakt alarmowy",
+      },
+
+      "Контакт близької людини": {
+        en: "Contact details of a close person",
+        de: "Kontaktdaten einer nahestehenden Person",
+        pl: "Dane kontaktowe bliskiej osoby",
+      },
+
+      "Ім’я контактної особи": {
+        en: "Contact person’s name",
+        de: "Name der Kontaktperson",
+        pl: "Imię i nazwisko osoby kontaktowej",
+      },
+
+      "Олена Коваль": {
+        en: "For example, Alex Smith",
+        de: "Zum Beispiel Anna Müller",
+        pl: "Na przykład Anna Kowalska",
+      },
+
+      "Ким доводиться": {
+        en: "Relationship",
+        de: "Beziehung",
+        pl: "Relacja",
+      },
+
+      "Дружина, брат, мати": {
+        en: "Spouse, sibling, parent",
+        de: "Ehepartner, Geschwister, Elternteil",
+        pl: "Małżonek, rodzeństwo, rodzic",
+      },
+    }
+  );
+
+
   const drawer =
     document.getElementById(
       "staffDrawer"
     );
 
-  if (
-    !drawer ||
+  if (!drawer) return;
+
+
+  const existing =
     document.getElementById(
       "staffEmergencyContactBlock"
-    )
-  ) {
+    );
+
+  if (existing) {
+    localizeTeamElement(
+      drawer
+    );
+
     return;
   }
+
 
   const saveButton =
     document.getElementById(
@@ -119150,11 +120081,20 @@ function ensureStaffEmergencyContactFields() {
 
   if (!actions) {
     console.warn(
-      "Не знайдено кнопки форми співробітника"
+      "Staff form actions not found"
     );
 
     return;
   }
+
+
+  const ui =
+    (source) =>
+      escapeHtml(
+        getTeamInterfaceText(
+          source
+        )
+      );
 
   const block =
     document.createElement(
@@ -119167,44 +120107,59 @@ function ensureStaffEmergencyContactFields() {
   block.className =
     "staffEmergencyContactBlock";
 
+
   block.innerHTML = `
     <div class="staffEmergencyContactHead">
       <strong>
-        ☎ Екстрений контакт
+        ${ui(
+          "☎ Екстрений контакт"
+        )}
       </strong>
 
       <span>
-        Контакт близької людини
+        ${ui(
+          "Контакт близької людини"
+        )}
       </span>
     </div>
 
     <label>
       <span>
-        Ім’я контактної особи
+        ${ui(
+          "Ім’я контактної особи"
+        )}
       </span>
 
       <input
         id="staffEmergencyContactName"
         type="text"
-        placeholder="Олена Коваль"
+        placeholder="${ui(
+          "Олена Коваль"
+        )}"
       >
     </label>
 
     <label>
       <span>
-        Ким доводиться
+        ${ui(
+          "Ким доводиться"
+        )}
       </span>
 
       <input
         id="staffEmergencyContactRelation"
         type="text"
-        placeholder="Дружина, брат, мати"
+        placeholder="${ui(
+          "Дружина, брат, мати"
+        )}"
       >
     </label>
 
     <label>
       <span>
-        Телефон
+        ${ui(
+          "Телефон"
+        )}
       </span>
 
       <input
@@ -119214,6 +120169,7 @@ function ensureStaffEmergencyContactFields() {
       >
     </label>
   `;
+
 
   actions.insertAdjacentElement(
     "beforebegin",
@@ -119225,365 +120181,292 @@ function ensureStaffEmergencyContactFields() {
       "staffEmergencyContactPhone"
     )
   );
+
+  localizeTeamElement(
+    drawer
+  );
 }
 async function openCreateStaffModal() {
-  const drawer =
-    document.getElementById(
-      "staffDrawer"
-    );
+  Object.assign(TEAM_INTERFACE_TEXT, {
+    "Новий співробітник": {
+      en: "New staff member",
+      de: "Neuer Mitarbeiter",
+      pl: "Nowy pracownik",
+    },
+    "Не вдалося відкрити форму співробітника.": {
+      en: "Could not open the staff form.",
+      de: "Das Mitarbeiterformular konnte nicht geöffnet werden.",
+      pl: "Nie udało się otworzyć formularza pracownika.",
+    },
+  });
+
+  const drawer = document.getElementById("staffDrawer");
 
   if (!drawer) {
-    console.error(
-      "staffDrawer не знайдено"
+    showSettingsMessage(
+      getTeamInterfaceText(
+        "Не вдалося відкрити форму співробітника."
+      )
     );
-
-    alert(
-      "Форма співробітника не знайдена в index.html."
-    );
-
     return;
   }
 
   ensureStaffEmergencyContactFields();
 
-  /*
-   * Очищаем ID.
-   * Пустой ID означает создание,
-   * а не редактирование.
-   */
-  const idInput =
-    document.getElementById(
-      "staffId"
-    );
+  const values = {
+    staffId: "",
+    staffName: "",
+    staffRole: "vet",
+    staffPhone: "",
+    staffShiftRate: "0",
+    staffPercentRate: "0",
+    staffColor: "#7C5CFF",
+    staffNote: "",
+    staffEmergencyContactName: "",
+    staffEmergencyContactPhone: "",
+    staffEmergencyContactRelation: "",
+  };
 
-  if (idInput) {
-    idInput.value = "";
+  Object.entries(values).forEach(([id, value]) => {
+    const input = document.getElementById(id);
+    if (input) input.value = value;
+  });
+
+  const title = drawer.querySelector("h3");
+
+  if (title) {
+    title.textContent = getTeamInterfaceText(
+      "Новий співробітник"
+    );
   }
 
-  const nameInput =
-    document.getElementById(
-      "staffName"
-    );
-
-  if (nameInput) {
-    nameInput.value = "";
-  }
-
-  const roleInput =
-    document.getElementById(
-      "staffRole"
-    );
-
-  if (roleInput) {
-    roleInput.value = "vet";
-  }
-
-  const phoneInput =
-    document.getElementById(
-      "staffPhone"
-    );
-
-  if (phoneInput) {
-    phoneInput.value = "";
-  }
-
-  const shiftRateInput =
-    document.getElementById(
-      "staffShiftRate"
-    );
-
-  if (shiftRateInput) {
-    shiftRateInput.value = "0";
-  }
-
-  const percentRateInput =
-    document.getElementById(
-      "staffPercentRate"
-    );
-
-  if (percentRateInput) {
-    percentRateInput.value = "0";
-  }
-
-  const colorInput =
-    document.getElementById(
-      "staffColor"
-    );
-
-  if (colorInput) {
-    colorInput.value = "#7C5CFF";
-  }
-
-  const noteInput =
-    document.getElementById(
-      "staffNote"
-    );
-
-  if (noteInput) {
-    noteInput.value = "";
-  }
-
-  const emergencyNameInput =
-    document.getElementById(
-      "staffEmergencyContactName"
-    );
-
-  const emergencyPhoneInput =
-    document.getElementById(
-      "staffEmergencyContactPhone"
-    );
-
-  const emergencyRelationInput =
-    document.getElementById(
-      "staffEmergencyContactRelation"
-    );
-
-  if (emergencyNameInput) {
-    emergencyNameInput.value =
-      "";
-  }
-
-  if (emergencyPhoneInput) {
-    emergencyPhoneInput.value =
-      "";
-  }
-
-  if (emergencyRelationInput) {
-    emergencyRelationInput.value =
-      "";
-  }
-
-  /*
-   * Для нового сотрудника
-   * специализации пока не выбраны.
-   */
   await renderStaffSpecsBox([]);
 
-  drawer.classList.add(
-    "open"
-  );
-
-  drawer.setAttribute(
-    "aria-hidden",
-    "false"
-  );
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden", "false");
 
   setTimeout(() => {
-    nameInput?.focus();
+    document.getElementById("staffName")?.focus();
   }, 50);
 }
 
-async function openEditStaffModal(
-  staffRow
-) {
+async function openEditStaffModal(staffRow) {
+  Object.assign(TEAM_INTERFACE_TEXT, {
+    "Редагування співробітника": {
+      en: "Edit staff member",
+      de: "Mitarbeiter bearbeiten",
+      pl: "Edytuj pracownika",
+    },
+    "Не вдалося відкрити форму співробітника.": {
+      en: "Could not open the staff form.",
+      de: "Das Mitarbeiterformular konnte nicht geöffnet werden.",
+      pl: "Nie udało się otworzyć formularza pracownika.",
+    },
+  });
+
+  const drawer = document.getElementById("staffDrawer");
+
+  if (!drawer || !staffRow) {
+    showSettingsMessage(
+      getTeamInterfaceText(
+        "Не вдалося відкрити форму співробітника."
+      )
+    );
+    return;
+  }
+
   ensureStaffEmergencyContactFields();
 
-  $("#staffId").value =
-    staffRow.id || "";
+  const values = {
+    staffId: staffRow.id || "",
+    staffName: staffRow.name || "",
+    staffRole: staffRow.role || "vet",
+    staffPhone: staffRow.phone || "",
+    staffShiftRate: staffRow.shift_rate ?? 0,
+    staffPercentRate: staffRow.percent_rate ?? 0,
+    staffColor: staffRow.color || "#7C5CFF",
+    staffNote: staffRow.note || "",
+    staffEmergencyContactName:
+      staffRow.emergency_contact_name || "",
+    staffEmergencyContactPhone: formatUaPhone(
+      staffRow.emergency_contact_phone || ""
+    ),
+    staffEmergencyContactRelation:
+      staffRow.emergency_contact_relation || "",
+  };
 
-  $("#staffName").value =
-    staffRow.name || "";
+  Object.entries(values).forEach(([id, value]) => {
+    const input = document.getElementById(id);
+    if (input) input.value = value;
+  });
 
-  $("#staffRole").value =
-    staffRow.role || "vet";
+  const title = drawer.querySelector("h3");
 
-  $("#staffPhone").value =
-    staffRow.phone || "";
-
-  $("#staffShiftRate").value =
-    staffRow.shift_rate || 0;
-
-  $("#staffPercentRate").value =
-    staffRow.percent_rate || 0;
-
-  $("#staffColor").value =
-    staffRow.color ||
-    "#7C5CFF";
-
-  $("#staffNote").value =
-    staffRow.note || "";
-
-  const emergencyNameInput =
-    document.getElementById(
-      "staffEmergencyContactName"
+  if (title) {
+    title.textContent = getTeamInterfaceText(
+      "Редагування співробітника"
     );
-
-  const emergencyPhoneInput =
-    document.getElementById(
-      "staffEmergencyContactPhone"
-    );
-
-  const emergencyRelationInput =
-    document.getElementById(
-      "staffEmergencyContactRelation"
-    );
-
-  if (emergencyNameInput) {
-    emergencyNameInput.value =
-      staffRow
-        .emergency_contact_name ||
-      "";
-  }
-
-  if (emergencyPhoneInput) {
-    emergencyPhoneInput.value =
-      formatUaPhone(
-        staffRow
-          .emergency_contact_phone ||
-        ""
-      );
-  }
-
-  if (emergencyRelationInput) {
-    emergencyRelationInput.value =
-      staffRow
-        .emergency_contact_relation ||
-      "";
   }
 
   await renderStaffSpecsBox(
-    staffRow
-      .specialization_ids ||
-    []
+    staffRow.specialization_ids || []
   );
 
-  $("#staffDrawer")
-    .classList.add(
-      "open"
-    );
-
-  $("#staffDrawer")
-    .setAttribute(
-      "aria-hidden",
-      "false"
-    );
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden", "false");
 }
 
-$$("[data-close-staff]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    $("#staffDrawer")?.classList.remove("open");
-    $("#staffDrawer")?.setAttribute("aria-hidden", "true");
+$$("[data-close-staff]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const drawer = document.getElementById("staffDrawer");
+
+    drawer?.classList.remove("open");
+    drawer?.setAttribute("aria-hidden", "true");
   });
 });
 
 $("#staffSave")?.addEventListener("click", async () => {
-  const staffId = ($("#staffId").value || "").trim();
-  const selectedSpecializations = $$("[data-staff-spec]:checked");
-  const specializationIds = selectedSpecializations.map((el) => el.value);
+  Object.assign(TEAM_INTERFACE_TEXT, {
+    "Вкажіть ПІБ співробітника.": {
+      en: "Enter the staff member’s full name.",
+      de: "Geben Sie den vollständigen Namen des Mitarbeiters ein.",
+      pl: "Podaj imię i nazwisko pracownika.",
+    },
+    "Телефон екстреного контакту повинен бути у форматі +380 XX XXX XX XX": {
+      en: "The emergency contact phone number must use the format +380 XX XXX XX XX.",
+      de: "Die Telefonnummer des Notfallkontakts muss das Format +380 XX XXX XX XX haben.",
+      pl: "Numer telefonu kontaktu alarmowego musi mieć format +380 XX XXX XX XX.",
+    },
+    "Зберігаємо…": {
+      en: "Saving…",
+      de: "Wird gespeichert…",
+      pl: "Zapisywanie…",
+    },
+    "Не вдалося зберегти співробітника. Спробуйте ще раз.": {
+      en: "Could not save the staff member. Please try again.",
+      de: "Der Mitarbeiter konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      pl: "Nie udało się zapisać pracownika. Spróbuj ponownie.",
+    },
+    "💾 Зберегти": {
+      en: "💾 Save",
+      de: "💾 Speichern",
+      pl: "💾 Zapisz",
+    },
+  });
+
+  const saveButton = document.getElementById("staffSave");
+
+  if (!saveButton || saveButton.disabled) return;
+
+  const value = (id) =>
+    String(document.getElementById(id)?.value || "").trim();
+
+  const staffId = value("staffId");
+  const selectedSpecializations = $$(
+    "#staffDrawer [data-staff-spec]:checked"
+  );
+
+  const specializationIds = selectedSpecializations.map(
+    (input) => input.value
+  );
+
   const specializationNames = selectedSpecializations
-    .map(
-      (input) =>
+    .map((input) =>
+      String(
+        input.dataset.staffSpecName ??
         input
-          .closest(
-            ".staffSpecializationOption"
-          )
-          ?.querySelector(
-            ".staffSpecializationOptionName"
-          )
-          ?.textContent?.trim() || ""
+          .closest(".staffSpecializationOption")
+          ?.querySelector(".staffSpecializationOptionName")
+          ?.textContent ??
+        ""
+      ).trim()
     )
     .filter(Boolean);
 
-  const emergencyPhone =
-  String(
-    $(
-      "#staffEmergencyContactPhone"
-    )?.value || ""
-  ).trim();
-
-if (
-  emergencyPhone &&
-  !isValidUaPhone(
-    emergencyPhone
-  )
-) {
-  alert(
-    "Телефон екстреного контакту повинен бути у форматі +380 XX XXX XX XX"
+  const emergencyPhone = value(
+    "staffEmergencyContactPhone"
   );
 
-  $(
-    "#staffEmergencyContactPhone"
-  )?.focus();
-
-  return;
-}
-
-const payload = {
-  name:
-    $("#staffName")
-      .value
-      .trim(),
-
-  role:
-    $("#staffRole")
-      .value,
-
-  specialization:
-    specializationNames
-      .join(", "),
-
-  specialization_ids:
-    specializationIds,
-
-  phone:
-    $("#staffPhone")
-      .value
-      .trim(),
-
-  shift_rate:
-    Number(
-      $("#staffShiftRate")
-        .value || 0
+  const payload = {
+    name: value("staffName"),
+    role: value("staffRole"),
+    specialization: specializationNames.join(", "),
+    specialization_ids: specializationIds,
+    phone: value("staffPhone"),
+    shift_rate: Number(value("staffShiftRate") || 0),
+    percent_rate: Number(value("staffPercentRate") || 0),
+    color: value("staffColor"),
+    note: value("staffNote"),
+    emergency_contact_name: value(
+      "staffEmergencyContactName"
     ),
-
-  percent_rate:
-    Number(
-      $("#staffPercentRate")
-        .value || 0
+    emergency_contact_phone: emergencyPhone,
+    emergency_contact_relation: value(
+      "staffEmergencyContactRelation"
     ),
+  };
 
-  color:
-    $("#staffColor")
-      .value,
+  if (!payload.name) {
+    showSettingsMessage(
+      getTeamInterfaceText("Вкажіть ПІБ співробітника.")
+    );
+    document.getElementById("staffName")?.focus();
+    return;
+  }
 
-  note:
-    $("#staffNote")
-      .value
-      .trim(),
+  if (
+    emergencyPhone &&
+    !isValidUaPhone(emergencyPhone)
+  ) {
+    showSettingsMessage(
+      getTeamInterfaceText(
+        "Телефон екстреного контакту повинен бути у форматі +380 XX XXX XX XX"
+      )
+    );
+    document
+      .getElementById("staffEmergencyContactPhone")
+      ?.focus();
+    return;
+  }
 
-  emergency_contact_name:
-    String(
-      $(
-        "#staffEmergencyContactName"
-      )?.value || ""
-    ).trim(),
+  saveButton.disabled = true;
+  saveButton.textContent = getTeamInterfaceText(
+    "Зберігаємо…"
+  );
 
-  emergency_contact_phone:
-    emergencyPhone,
+  let saved = null;
 
-  emergency_contact_relation:
-    String(
-      $(
-        "#staffEmergencyContactRelation"
-      )?.value || ""
-    ).trim(),
-};
+  try {
+    saved = staffId
+      ? await updateStaffApi(staffId, payload)
+      : await createStaffApi(payload);
+  } catch (error) {
+    console.error("Staff save failed:", error);
 
-  if (!payload.name) { alert("Вкажи ПІБ співробітника"); return; }
-  let saved = staffId ? await updateStaffApi(staffId, payload) : await createStaffApi(payload);
+    showSettingsMessage(
+      getTeamInterfaceText(
+        "Не вдалося зберегти співробітника. Спробуйте ще раз."
+      )
+    );
+  } finally {
+    saveButton.disabled = false;
+    saveButton.textContent = getTeamInterfaceText(
+      "💾 Зберегти"
+    );
+  }
+
   if (!saved) return;
 
-  $("#staffDrawer")?.classList.remove("open");
-$("#staffDrawer")?.setAttribute(
-  "aria-hidden",
-  "true"
-);
+  const drawer = document.getElementById("staffDrawer");
 
-if (state.route === "team") {
-  await renderTeamTab();
-} else if (state.route === "calendar") {
-  await renderCalendarTab();
-}
+  drawer?.classList.remove("open");
+  drawer?.setAttribute("aria-hidden", "true");
+
+  if (state.route === "team") {
+    await renderTeamTab();
+  } else if (state.route === "calendar") {
+    await renderCalendarTab();
+  }
 });
 
 async function openVisitFromCalendar(hour, staffId) {
