@@ -5650,7 +5650,17 @@ function translateInterfaceText(
 
   return text;
 }
+APP_TRANSLATIONS.uk["patients.card.backToProfile"] =
+  "← Назад до профілю";
 
+APP_TRANSLATIONS.en["patients.card.backToProfile"] =
+  "← Back to profile";
+
+APP_TRANSLATIONS.de["patients.card.backToProfile"] =
+  "← Zurück zum Profil";
+
+APP_TRANSLATIONS.pl["patients.card.backToProfile"] =
+  "← Wróć do profilu";
 function getCalendarLocale() {
   return { uk: "uk-UA", en: "en-GB", de: "de-DE", pl: "pl-PL" }[getInterfaceLanguage()];
 }
