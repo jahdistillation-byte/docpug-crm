@@ -90315,56 +90315,48 @@ async function openVisitServicePicker() {
 }
 
 function refreshVisitStockSelect() {
-  const select =
-    document.getElementById(
-      "visitStkSelect"
-    );
-
+  const select = document.getElementById("visitStkSelect");
   if (!select) return;
 
-  const q = String(
-    state.visitStkQuery || ""
-  )
+  const previousValue = select.value;
+
+  const query = String(state.visitStkQuery || "")
     .trim()
     .toLowerCase();
 
+  const stockLabel = {
+    uk: "Залишок",
+    en: "Stock",
+    de: "Bestand",
+    pl: "Stan magazynowy",
+  }[getInterfaceLanguage()] || "Залишок";
+
   const options = loadStock()
+    .filter((item) => item.active !== false)
     .filter(
-      (it) =>
-        it.active !== false
-    )
-    .filter(
-      (it) =>
-        !q ||
-        String(it.name || "")
+      (item) =>
+        !query ||
+        String(item.name || "")
           .toLowerCase()
-          .includes(q)
+          .includes(query)
     )
-    .map((it) => {
-      const left =
-        Number(it.qty) || 0;
+    .map((item) => {
+      const quantity = Number(item.qty) || 0;
+      const unit = getStockInterfaceText(
+        String(item.unit || "шт")
+      );
 
-      const unit =
-        String(it.unit || "шт");
-
-      const price =
-        Number(it.price) || 0;
+      const price = formatVisitFinanceMoney(
+        Number(item.price) || 0
+      );
 
       return `
-        <option
-          value="${escapeHtml(
-            it.id
-          )}"
-        >
-          ${escapeHtml(it.name)}
-          —
+        <option value="${escapeHtml(String(item.id))}">
+          ${escapeHtml(item.name || "")}
+          — ${escapeHtml(price)}/${escapeHtml(unit)}
+          • ${escapeHtml(stockLabel)}:
           ${escapeHtml(
-            String(price)
-          )}
-          грн/${escapeHtml(unit)}
-          • залишок:
-          ${escapeHtml(
-            String(left)
+            quantity.toLocaleString(getCalendarLocale())
           )}
         </option>
       `;
@@ -90373,7 +90365,18 @@ function refreshVisitStockSelect() {
 
   select.innerHTML =
     options ||
-    `<option value="">Немає препаратів</option>`;
+    `<option value="">${escapeHtml(
+      getVisitWorkspaceText("Немає препаратів")
+    )}</option>`;
+
+  if (
+    previousValue &&
+    Array.from(select.options).some(
+      (option) => option.value === previousValue
+    )
+  ) {
+    select.value = previousValue;
+  }
 }
 
 function initVisitUI() {
@@ -97812,15 +97815,7 @@ if (svcContainer) {
 
   // 4. Збираємо селектор товарів / складу
   ensureVisitStockShape(visit);
-  const stkQ = String(state.visitStkQuery || "").trim().toLowerCase();
-  const stkSelect = document.getElementById("visitStkSelect");
-  if (stkSelect) {
-    stkSelect.innerHTML = loadStock()
-      .filter((it) => it.active !== false)
-      .filter((it) => !stkQ || String(it.name || "").toLowerCase().includes(stkQ))
-      .map((it) => `<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)} — ${escapeHtml(String(Number(it.price) || 0))} грн • залишок: ${it.qty}</option>`)
-      .join("");
-  }
+  refreshVisitStockSelect();
 
   // ВІДРИСОВКА ОНОВЛЕНОГО ФУТУРИСТИЧНОГО СКЛАДУ
   const expandedStock = expandStockLines(visit);
