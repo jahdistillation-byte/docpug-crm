@@ -2583,6 +2583,7 @@ CLINIC_PROFILE_FIELDS = [
     "phone",
     "address",
     "website",
+    "currency",
     "document_accent_color",
     "doctor_signature_url",
     "clinic_stamp_url",
@@ -2670,7 +2671,6 @@ def api_get_organization_profile():
             500
         )
 
-
 @app.put("/api/organization/profile")
 def api_update_organization_profile():
     """
@@ -2696,6 +2696,7 @@ def api_update_organization_profile():
             "phone",
             "address",
             "website",
+            "currency",
             "document_accent_color",
             "doctor_signature_url",
             "clinic_stamp_url",
@@ -2708,7 +2709,6 @@ def api_update_organization_profile():
             if key in data
         }
 
-        # Текстовые поля очищаем от лишних пробелов.
         for key, value in list(payload.items()):
             if isinstance(value, str):
                 payload[key] = value.strip()
@@ -2717,6 +2717,26 @@ def api_update_organization_profile():
 
         if clinic_name is not None and not clinic_name:
             return fail("Clinic name required", 400)
+
+        if "currency" in payload:
+            currency = str(
+                payload["currency"] or ""
+            ).strip().upper()
+
+            if currency not in {
+                "UAH",
+                "EUR",
+                "USD",
+                "GBP",
+                "PLN",
+                "CHF",
+            }:
+                return fail(
+                    "Unsupported clinic currency",
+                    400,
+                )
+
+            payload["currency"] = currency
 
         accent_color = payload.get(
             "document_accent_color"
@@ -2731,7 +2751,7 @@ def api_update_organization_profile():
             ):
                 return fail(
                     "Invalid document accent color",
-                    400
+                    400,
                 )
 
             try:
@@ -2739,12 +2759,10 @@ def api_update_organization_profile():
             except ValueError:
                 return fail(
                     "Invalid document accent color",
-                    400
+                    400,
                 )
 
-            payload["document_accent_color"] = (
-                accent_color
-            )
+            payload["document_accent_color"] = accent_color
 
         if not payload:
             return fail("Nothing to update", 400)
@@ -2754,7 +2772,8 @@ def api_update_organization_profile():
         )
 
         res = (
-            supabase.table("orgs")
+            supabase
+            .table("orgs")
             .update(payload)
             .eq("id", current_org)
             .execute()
@@ -2765,15 +2784,15 @@ def api_update_organization_profile():
 
         return ok(res.data[0])
 
-    except Exception as e:
+    except Exception as error:
         print(
-            "❌ /api/organization/profile PUT error:",
-            repr(e)
+            "Organization profile PUT failed:",
+            repr(error),
         )
 
         return fail(
-            f"Cannot update organization profile: {e}",
-            500
+            f"Cannot update organization profile: {error}",
+            500,
         )
 
 
@@ -2781,7 +2800,7 @@ def api_update_organization_profile():
 def api_update_organization_theme():
     """Save the visual theme for the current clinic."""
     try:
-        _current_user, auth_error = owner_required()
+        current_user, auth_error = owner_required()
 
         if auth_error:
             return auth_error
@@ -2792,7 +2811,10 @@ def api_update_organization_theme():
             return fail("Organization not selected", 400)
 
         data = request.get_json(silent=True) or {}
-        theme = str(data.get("theme") or "").strip().lower()
+
+        theme = str(
+            data.get("theme") or ""
+        ).strip().lower()
 
         if theme not in CLINIC_THEMES:
             return fail("Invalid clinic theme", 400)
@@ -2802,7 +2824,9 @@ def api_update_organization_theme():
             .table("orgs")
             .update({
                 "theme": theme,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": (
+                    datetime.now(timezone.utc).isoformat()
+                ),
             })
             .eq("id", current_org)
             .execute()
@@ -2815,7 +2839,7 @@ def api_update_organization_theme():
 
     except Exception as error:
         print(
-            "❌ /api/organization/theme PUT error:",
+            "Organization theme PUT failed:",
             repr(error),
         )
 
@@ -4070,6 +4094,65 @@ def api_adjust_stock_item(stock_id):
             "Не вдалося змінити залишок.",
             500
         )
+def check_visit_catalog_currency(visit_id, org_id):
+    if not org_id:
+        return fail("Organization not selected", 400)
+
+    visit_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visits")
+            .select("id,currency")
+            .eq("org_id", org_id)
+            .eq("id", visit_id)
+            .limit(1)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    if not visit_result.data:
+        return fail("Візит не знайдено.", 404)
+
+    org_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("orgs")
+            .select("id,currency")
+            .eq("id", org_id)
+            .limit(1)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    if not org_result.data:
+        return fail("Organization not found", 404)
+
+    visit_currency = str(
+        visit_result.data[0].get("currency") or "UAH"
+    ).strip().upper()
+
+    catalog_currency = str(
+        org_result.data[0].get("currency") or "UAH"
+    ).strip().upper()
+
+    supported = {
+        "UAH", "EUR", "USD",
+        "GBP", "PLN", "CHF",
+    }
+
+    if (
+        visit_currency not in supported
+        or catalog_currency not in supported
+        or visit_currency != catalog_currency
+    ):
+        return fail(
+            "Visit currency differs from clinic currency.",
+            409,
+        )
+
+    return None
 
 @app.post("/api/visits/<visit_id>/services")
 def api_add_service_to_visit(visit_id):
@@ -4106,21 +4189,14 @@ def api_add_service_to_visit(visit_id):
         return fail("Оберіть послугу.", 400)
 
     try:
-        visit_result = execute_with_retry(
-            lambda: (
-                supabase
-                .table("visits")
-                .select("id")
-                .eq("org_id", current_org)
-                .eq("id", visit_id)
-                .limit(1)
-            ),
-            attempts=4,
-            delay=0.3,
+        currency_error = check_visit_catalog_currency(
+            visit_id,
+            current_org
         )
 
-        if not visit_result.data:
-            return fail("Візит не знайдено.", 404)
+        if currency_error is not None:
+            return currency_error
+
 
         service_result = execute_with_retry(
             lambda: (
@@ -4361,27 +4437,14 @@ def api_add_stock_to_visit(
     stock_was_updated = False
 
     try:
-        visit_result = (
-            supabase
-            .table("visits")
-            .select("id")
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "id",
-                visit_id
-            )
-            .limit(1)
-            .execute()
+        currency_error = check_visit_catalog_currency(
+            visit_id,
+            current_org
         )
 
-        if not visit_result.data:
-            return fail(
-                "Візит не знайдено.",
-                404
-            )
+        if currency_error is not None:
+            return currency_error
+
 
         stock_result = (
             supabase
@@ -5420,74 +5483,37 @@ def api_get_visit_finance(
                 delay=0.3,
             )
         )
-
-        transactions_result = (
-            execute_with_retry(
-                lambda: (
-                    supabase
-                    .table(
-                        "finance_transactions"
-                    )
-                    .select("*")
-                    .eq(
-                        "org_id",
-                        current_org
-                    )
-                    .eq(
-                        "visit_id",
-                        visit_id
-                    )
-                    .order(
-                        "occurred_at",
-                        desc=True
-                    )
-                ),
-                attempts=4,
-                delay=0.3,
-            )
+        transactions_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("finance_transactions")
+                .select("*")
+                .eq("org_id", current_org)
+                .eq("visit_id", visit_id)
+                .order("occurred_at", desc=True)
+            ),
+            attempts=4,
+            delay=0.3,
         )
 
         service_total = sum(
-            finance_number(
-                row.get("qty")
-            )
-            * finance_number(
-                row.get(
-                    "price_snap"
-                )
-            )
-            for row in (
-                services_result.data
-                or []
-            )
+            finance_number(row.get("qty"))
+            * finance_number(row.get("price_snap"))
+            for row in (services_result.data or [])
         )
 
         stock_total = sum(
-            finance_number(
-                row.get("qty")
-            )
-            * finance_number(
-                row.get(
-                    "price_snap"
-                )
-            )
-            for row in (
-                stock_result.data
-                or []
-            )
+            finance_number(row.get("qty"))
+            * finance_number(row.get("price_snap"))
+            for row in (stock_result.data or [])
         )
 
-        subtotal = (
-            service_total
-            + stock_total
-        )
+        subtotal = service_total + stock_total
 
         discount = max(
             0,
             finance_number(
-                visit.get(
-                    "discount_amount"
-                )
+                visit.get("discount_amount")
             )
         )
 
@@ -5496,17 +5522,22 @@ def api_get_visit_finance(
             subtotal - discount
         )
 
-        transactions = (
-            transactions_result.data
-            or []
-        )
+        transactions = transactions_result.data or []
+
+        visit_currency = str(
+            visit.get("currency") or "UAH"
+        ).strip().upper()
 
         paid = 0
 
         for row in transactions:
+            transaction_currency = str(
+                row.get("currency") or "UAH"
+            ).strip().upper()
+
             if (
-                row.get("status")
-                != "completed"
+                row.get("status") != "completed"
+                or transaction_currency != visit_currency
             ):
                 continue
 
@@ -5515,34 +5546,27 @@ def api_get_visit_finance(
             )
 
             if (
-                row.get(
-                    "transaction_type"
-                )
+                row.get("transaction_type")
                 == "payment"
             ):
                 paid += amount
 
             elif (
-                row.get(
-                    "transaction_type"
-                )
+                row.get("transaction_type")
                 == "refund"
             ):
                 paid -= amount
 
         paid = max(
             0,
-            finance_number(
-                paid
-            )
+            finance_number(paid)
         )
 
         remaining = max(
             0,
-            finance_number(
-                total - paid
-            )
+            finance_number(total - paid)
         )
+
 
         stored_status = str(
             visit.get(
@@ -5578,46 +5602,43 @@ def api_get_visit_finance(
             )
 
         return ok({
-            "visit_id":
-                visit_id,
+            "visit_id": visit_id,
 
-            "service_total":
-                finance_number(
-                    service_total
-                ),
+            "currency": str(
+                visit.get("currency") or "UAH"
+            ).strip().upper(),
 
-            "stock_total":
-                finance_number(
-                    stock_total
-                ),
+            "service_total": finance_number(
+                service_total
+            ),
 
-            "subtotal":
-                finance_number(
-                    subtotal
-                ),
+            "stock_total": finance_number(
+                stock_total
+            ),
 
-            "discount":
-                finance_number(
-                    discount
-                ),
+            "subtotal": finance_number(
+                subtotal
+            ),
 
-            "total":
-                finance_number(
-                    total
-                ),
+            "discount": finance_number(
+                discount
+            ),
 
-            "paid":
-                finance_number(
-                    paid
-                ),
+            "total": finance_number(
+                total
+            ),
 
-            "remaining":
-                finance_number(
-                    remaining
-                ),
+            "paid": finance_number(
+                paid
+            ),
 
-            "financial_status":
-                financial_status,
+            "remaining": finance_number(
+                remaining
+            ),
+
+            "financial_status": (
+                financial_status
+            ),
 
             "transactions": [
                 serialize_finance_transaction(
@@ -5626,6 +5647,7 @@ def api_get_visit_finance(
                 for row in transactions
             ],
         })
+
 
     except Exception as error:
         print(
@@ -5762,70 +5784,72 @@ def api_create_visit_payment(
         )
 
         payment_transaction = (
-            response_payload.get(
-                "transaction"
-            )
+            response_payload.get("transaction")
             if isinstance(
-                response_payload.get(
-                    "transaction"
-                ),
+                response_payload.get("transaction"),
                 dict,
             )
             else {}
         )
+
+        payment_currency = str(
+            payment_transaction.get("currency")
+            or response_payload.get("currency")
+            or "UAH"
+        ).strip().upper()
 
         if not response_payload.get(
             "idempotent_replay"
         ):
             write_audit_event(
                 action="payment.created",
-                entity_type=
-                    "finance_transaction",
+                entity_type="finance_transaction",
                 entity_id=(
-                    payment_transaction.get(
-                        "id"
-                    )
+                    payment_transaction.get("id")
                     or response_payload.get(
                         "transaction_id"
                     )
                 ),
-                entity_label=
-                    "Оплата візиту",
+                entity_label="Оплата візиту",
                 summary=(
-                    f"Оплату {amount:g} UAH "
-                    "проведено"
+                    f"Оплату {amount:g} "
+                    f"{payment_currency} проведено"
                 ),
                 after_data={
                     "visit_id": visit_id,
                     "amount": amount,
-                    "currency": "UAH",
-                    "payment_method":
-                        payment_method,
+                    "currency": payment_currency,
+                    "payment_method": payment_method,
                     "status": (
                         payment_transaction.get(
                             "status"
                         )
                         or "completed"
                     ),
-                    "paid_after":
+                    "paid_after": (
                         response_payload.get(
                             "paid_after"
-                        ),
-                    "remaining":
+                        )
+                    ),
+                    "remaining": (
                         response_payload.get(
                             "remaining"
-                        ),
-                    "financial_status":
+                        )
+                    ),
+                    "financial_status": (
                         response_payload.get(
                             "financial_status"
-                        ),
+                        )
+                    ),
                 },
                 metadata={
                     "visit_id": visit_id,
-                    "idempotency_key":
-                        idempotency_key,
+                    "idempotency_key": (
+                        idempotency_key
+                    ),
                 },
             )
+
 
         return ok(
             response_data
@@ -5953,27 +5977,49 @@ def report_rows(query_factory):
     return result.data if isinstance(result.data, list) else []
 
 
-def report_finance_overview(org_id, day):
+def report_finance_overview(
+    org_id,
+    day,
+    currency="UAH"
+):
+    selected_currency = str(
+        currency or "UAH"
+    ).strip().upper()
+
+    if selected_currency not in {
+        "UAH", "EUR", "USD",
+        "GBP", "PLN", "CHF",
+    }:
+        raise ValueError("Invalid report currency")
+
     result = execute_with_retry(
         lambda: supabase.rpc(
-            "get_finance_overview",
+            "get_finance_overview_currency",
             {
                 "p_org_id": org_id,
                 "p_date_from": day.isoformat(),
                 "p_date_to": day.isoformat(),
+                "p_currency": selected_currency,
             },
         ),
         attempts=4,
         delay=0.3,
     )
 
-    data = result.data or {}
+    data = result.data
 
     if isinstance(data, list):
-        data = data[0] if data else {}
+        data = data[0] if data else None
 
-    return data if isinstance(data, dict) else {}
+    if (
+        not isinstance(data, dict)
+        or data.get("currency") != selected_currency
+    ):
+        raise RuntimeError(
+            "Unexpected finance report response"
+        )
 
+    return data
 
 def report_status_count(rows, *statuses):
     allowed = {
@@ -5997,89 +6043,86 @@ def build_owner_daily_report(org_id, day):
 
     org_rows = report_rows(
         lambda: supabase.table("orgs")
-        .select("id,name")
+        .select("id,name,currency")
         .eq("id", org_id)
         .limit(1)
     )
-    clinic_name = (
-        str(org_rows[0].get("name") or "Клініка").strip()
-        if org_rows
-        else "Клініка"
-    )
 
-    visits = report_rows(
-        lambda: supabase.table("visits")
-        .select(
-            "id,status,total_amount,paid_amount,financial_status,completed_at"
+    if not org_rows:
+        raise ValueError("Organization not found")
+
+    clinic_name = str(
+        org_rows[0].get("name") or "Клініка"
+    ).strip()
+    currency = str(
+        org_rows[0].get("currency") or "UAH"
+    ).strip().upper()
+
+    if currency not in {"UAH", "EUR", "USD", "GBP", "PLN", "CHF"}:
+        raise ValueError("Invalid report currency")
+
+    def rows(table, columns, configure):
+        return report_rows(
+            lambda: configure(
+                supabase.table(table)
+                .select(columns)
+                .eq("org_id", org_id)
+            )
         )
-        .eq("org_id", org_id)
-        .eq("date", day_iso)
+
+    visits = rows(
+        "visits", "id,status,currency",
+        lambda query: query.eq("date", day_iso)
     )
-    previous_visits = report_rows(
-        lambda: supabase.table("visits")
-        .select("id,status")
-        .eq("org_id", org_id)
-        .eq("date", previous_iso)
+    previous_visits = rows(
+        "visits", "id,status",
+        lambda query: query.eq("date", previous_iso)
     )
-    events = report_rows(
-        lambda: supabase.table("calendar_events")
-        .select("id,status,visit_id")
-        .eq("org_id", org_id)
-        .eq("event_date", day_iso)
+    events = rows(
+        "calendar_events", "id,status,visit_id",
+        lambda query: query.eq("event_date", day_iso)
     )
-    previous_events = report_rows(
-        lambda: supabase.table("calendar_events")
-        .select("id,status")
-        .eq("org_id", org_id)
-        .eq("event_date", previous_iso)
+    previous_events = rows(
+        "calendar_events", "id,status",
+        lambda query: query.eq("event_date", previous_iso)
     )
-    new_owners = report_rows(
-        lambda: supabase.table("owners")
-        .select("id")
-        .eq("org_id", org_id)
-        .gte("created_at", start_utc)
-        .lt("created_at", end_utc)
+    new_owners = rows(
+        "owners", "id",
+        lambda query: query.gte("created_at", start_utc).lt("created_at", end_utc)
     )
-    previous_owners = report_rows(
-        lambda: supabase.table("owners")
-        .select("id")
-        .eq("org_id", org_id)
-        .gte("created_at", previous_start_utc)
-        .lt("created_at", previous_end_utc)
+    previous_owners = rows(
+        "owners", "id",
+        lambda query: query.gte("created_at", previous_start_utc).lt("created_at", previous_end_utc)
     )
-    new_patients = report_rows(
-        lambda: supabase.table("patients")
-        .select("id")
-        .eq("org_id", org_id)
-        .gte("created_at", start_utc)
-        .lt("created_at", end_utc)
+    new_patients = rows(
+        "patients", "id",
+        lambda query: query.gte("created_at", start_utc).lt("created_at", end_utc)
     )
-    previous_patients = report_rows(
-        lambda: supabase.table("patients")
-        .select("id")
-        .eq("org_id", org_id)
-        .gte("created_at", previous_start_utc)
-        .lt("created_at", previous_end_utc)
+    previous_patients = rows(
+        "patients", "id",
+        lambda query: query.gte("created_at", previous_start_utc).lt("created_at", previous_end_utc)
     )
 
-    finance = report_finance_overview(org_id, day)
-    previous_finance = report_finance_overview(org_id, previous_day)
+    finance = report_finance_overview(org_id, day, currency)
+    previous_finance = report_finance_overview(org_id, previous_day, currency)
     finance_summary = finance.get("summary") or {}
     previous_finance_summary = previous_finance.get("summary") or {}
 
     visit_ids = [
-        str(row.get("id"))
+        str(row["id"])
         for row in visits
         if row.get("id")
+        and str(row.get("currency") or "UAH").strip().upper() == currency
     ]
     service_lines = []
 
-    if visit_ids:
-        service_lines = report_rows(
+    for offset in range(0, len(visit_ids), 150):
+        chunk = visit_ids[offset:offset + 150]
+        service_lines.extend(report_rows(
             lambda: supabase.table("visit_services")
             .select("visit_id,name_snap,qty,price_snap")
-            .in_("visit_id", visit_ids)
-        )
+            .in_("visit_id", chunk)
+        ))
 
     services_by_name = {}
 
@@ -6089,7 +6132,7 @@ def build_owner_daily_report(org_id, day):
         revenue = qty * max(report_number(line.get("price_snap")), 0)
         bucket = services_by_name.setdefault(
             name,
-            {"name": name, "qty": 0.0, "revenue": 0.0},
+            {"name": name, "qty": 0.0, "revenue": 0.0, "currency": currency}
         )
         bucket["qty"] += qty
         bucket["revenue"] += revenue
@@ -6097,79 +6140,72 @@ def build_owner_daily_report(org_id, day):
     top_services = sorted(
         services_by_name.values(),
         key=lambda item: (item["revenue"], item["qty"]),
-        reverse=True,
+        reverse=True
     )[:5]
 
     for item in top_services:
         item["qty"] = round(item["qty"], 2)
         item["revenue"] = round(item["revenue"], 2)
 
-    stock_rows = report_rows(
-        lambda: supabase.table("stock")
-        .select("id,name,unit,qty,minimum_qty,active")
-        .eq("org_id", org_id)
-        .eq("active", True)
+    stock_rows = rows(
+        "stock", "id,name,unit,qty,minimum_qty,active",
+        lambda query: query.eq("active", True)
     )
     low_stock = []
 
     for item in stock_rows:
         quantity = report_number(item.get("qty"))
         minimum = report_number(item.get("minimum_qty"))
-
         if minimum > 0 and quantity <= minimum:
             low_stock.append({
                 "name": str(item.get("name") or "Препарат"),
                 "qty": round(quantity, 2),
                 "minimum_qty": round(minimum, 2),
-                "unit": str(item.get("unit") or "шт"),
+                "unit": str(item.get("unit") or "шт")
             })
 
-    low_stock.sort(key=lambda item: (item["qty"] - item["minimum_qty"], item["name"]))
-
-    stock_movements = report_rows(
-        lambda: supabase.table("stock_movements")
-        .select("movement_type,quantity,unit_cost,name_snap")
-        .eq("org_id", org_id)
-        .eq("movement_type", "writeoff")
-        .gte("created_at", start_utc)
-        .lt("created_at", end_utc)
+    low_stock.sort(
+        key=lambda item: (item["qty"] - item["minimum_qty"], item["name"])
+    )
+    stock_movements = rows(
+        "stock_movements", "movement_type,quantity,unit_cost,name_snap",
+        lambda query: query.eq("movement_type", "writeoff")
+        .gte("created_at", start_utc).lt("created_at", end_utc)
     )
     writeoff_quantity = sum(
-        abs(report_number(row.get("quantity")))
-        for row in stock_movements
+        abs(report_number(row.get("quantity"))) for row in stock_movements
     )
-    writeoff_cost = sum(
-        abs(report_number(row.get("quantity")))
-        * max(report_number(row.get("unit_cost")), 0)
-        for row in stock_movements
+    stock_cost_available = (
+        currency == "UAH" and finance.get("stock_cost_available") is True
+    )
+    writeoff_cost = (
+        sum(
+            abs(report_number(row.get("quantity")))
+            * max(report_number(row.get("unit_cost")), 0)
+            for row in stock_movements
+        )
+        if stock_cost_available else None
     )
 
-    hospitalizations = report_rows(
-        lambda: supabase.table("hospitalizations")
-        .select("id,status")
-        .eq("org_id", org_id)
-        .eq("is_active", True)
+    hospitalizations = rows(
+        "hospitalizations", "id,status",
+        lambda query: query.eq("is_active", True)
     )
-    open_tasks = report_rows(
-        lambda: supabase.table("hospital_tasks")
-        .select("id,status,scheduled_at")
-        .eq("org_id", org_id)
-        .neq("status", "completed")
+    open_tasks = rows(
+        "hospital_tasks", "id,status,scheduled_at",
+        lambda query: query.neq("status", "completed")
     )
     now_utc = datetime.now(timezone.utc)
     overdue_tasks = 0
 
     for task in open_tasks:
         raw_scheduled = str(task.get("scheduled_at") or "").strip()
-
         if not raw_scheduled:
             continue
-
         try:
             scheduled = datetime.fromisoformat(raw_scheduled.replace("Z", "+00:00"))
         except ValueError:
             continue
-
         if scheduled.astimezone(timezone.utc) < now_utc:
             overdue_tasks += 1
 
@@ -6178,99 +6214,86 @@ def build_owner_daily_report(org_id, day):
     in_progress_count = report_status_count(visits, "in_progress")
     cancelled_count = report_status_count(events, "cancelled", "canceled")
     previous_completed = report_status_count(previous_visits, "completed")
-    previous_scheduled = len(previous_events)
 
     payments = report_number(finance_summary.get("payments"))
     refunds = report_number(finance_summary.get("refunds"))
     expenses = report_number(finance_summary.get("expenses"))
-    net_revenue = report_number(
-        finance_summary.get("net_revenue"),
-        payments - refunds,
-    )
-    result_amount = report_number(
-        finance_summary.get("estimated_profit"),
-        payments - refunds - expenses,
-    )
+    net_revenue = report_number(finance_summary.get("net_revenue"), payments - refunds)
+    profit_value = finance_summary.get("estimated_profit")
+    result_amount = report_number(profit_value) if profit_value is not None else None
     previous_revenue = report_number(
         previous_finance_summary.get("net_revenue"),
         report_number(previous_finance_summary.get("payments"))
-        - report_number(previous_finance_summary.get("refunds")),
+        - report_number(previous_finance_summary.get("refunds"))
     )
-
-    attention = []
-
-    if low_stock:
-        attention.append(f"{len(low_stock)} позицій складу нижче мінімуму")
-
-    if overdue_tasks:
-        attention.append(f"{overdue_tasks} прострочених завдань стаціонару")
-
     debt = report_number(finance_summary.get("outstanding"))
 
+    attention = []
+    if low_stock:
+        attention.append(f"{len(low_stock)} позицій складу нижче мінімуму")
+    if overdue_tasks:
+        attention.append(f"{overdue_tasks} прострочених завдань стаціонару")
     if debt > 0:
-        attention.append(f"Заборгованість клієнтів: {debt:.2f} грн")
-
+        debt_currency = "грн" if currency == "UAH" else currency
+        attention.append(f"Заборгованість клієнтів: {debt:.2f} {debt_currency}")
     if not attention:
         attention.append("Критичних відхилень не виявлено")
 
     report = {
         "date": day_iso,
         "clinic_name": clinic_name,
+        "currency": currency,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "visits": {
             "scheduled": scheduled_count,
             "completed": completed_count,
             "in_progress": in_progress_count,
             "cancelled": cancelled_count,
-            "completion_rate": round(
-                completed_count / scheduled_count * 100,
-                1,
-            ) if scheduled_count else 0,
+            "completion_rate": round(completed_count / scheduled_count * 100, 1)
+            if scheduled_count else 0
         },
         "clients": {
             "new_owners": len(new_owners),
-            "new_patients": len(new_patients),
+            "new_patients": len(new_patients)
         },
         "finance": {
+            "currency": currency,
             "payments": round(payments, 2),
             "refunds": round(refunds, 2),
             "expenses": round(expenses, 2),
             "revenue": round(net_revenue, 2),
-            "result": round(result_amount, 2),
-            "average_check": round(
-                report_number(finance_summary.get("average_check")),
-                2,
-            ),
-            "outstanding": round(debt, 2),
+            "result": round(result_amount, 2) if result_amount is not None else None,
+            "average_check": round(report_number(finance_summary.get("average_check")), 2),
+            "outstanding": round(debt, 2)
         },
         "comparison": {
-            "scheduled_delta": scheduled_count - previous_scheduled,
+            "currency": currency,
+            "scheduled_delta": scheduled_count - len(previous_events),
             "completed_delta": completed_count - previous_completed,
             "new_owners_delta": len(new_owners) - len(previous_owners),
             "new_patients_delta": len(new_patients) - len(previous_patients),
-            "revenue_delta": round(net_revenue - previous_revenue, 2),
+            "revenue_delta": round(net_revenue - previous_revenue, 2)
         },
-        "services": {
-            "top": top_services,
-        },
+        "services": {"currency": currency, "top": top_services},
         "stock": {
             "writeoffs_count": len(stock_movements),
             "writeoffs_qty": round(writeoff_quantity, 2),
-            "writeoffs_cost": round(writeoff_cost, 2),
+            "writeoffs_cost": round(writeoff_cost, 2) if writeoff_cost is not None else None,
+            "cost_currency": "UAH" if stock_cost_available else None,
+            "cost_available": stock_cost_available,
             "low_stock_count": len(low_stock),
-            "low_stock": low_stock[:8],
+            "low_stock": low_stock[:8]
         },
         "hospital": {
             "active": len(hospitalizations),
             "critical": report_status_count(hospitalizations, "critical"),
             "open_tasks": len(open_tasks),
-            "overdue_tasks": overdue_tasks,
+            "overdue_tasks": overdue_tasks
         },
-        "attention": attention,
+        "attention": attention
     }
 
     report["telegram_message"] = build_owner_report_telegram_message(report)
-
     return report
 
 
@@ -6287,6 +6310,18 @@ def build_owner_report_telegram_message(report):
     hospital = report.get("hospital") or {}
     services = report.get("services") or {}
     comparison = report.get("comparison") or {}
+    currency = str(
+        report.get("currency") or finance.get("currency") or "UAH"
+    ).strip().upper()
+
+    if currency not in {"UAH", "EUR", "USD", "GBP", "PLN", "CHF"}:
+        raise ValueError("Invalid report currency")
+
+    def money(value):
+        if value is None:
+            return "—"
+        return f"{report_money(value)} {currency}"
+
     safe_clinic = html.escape(str(report.get("clinic_name") or "Клініка"))
     safe_date = html.escape(str(report.get("date") or ""))
 
@@ -6302,10 +6337,10 @@ def build_owner_report_telegram_message(report):
         f"скасовано: <b>{report_int(visits.get('cancelled'))}</b>",
         "",
         "<b>💰 Фінанси</b>",
-        f"Надходження: <b>{report_money(finance.get('revenue'))} грн</b>",
-        f"Витрати: <b>{report_money(finance.get('expenses'))} грн</b>",
-        f"Результат: <b>{report_money(finance.get('result'))} грн</b>",
-        f"Середній чек: {report_money(finance.get('average_check'))} грн",
+        f"Надходження: <b>{money(finance.get('revenue'))}</b>",
+        f"Витрати: <b>{money(finance.get('expenses'))}</b>",
+        f"Результат: <b>{money(finance.get('result'))}</b>",
+        f"Середній чек: {money(finance.get('average_check'))}",
         "",
         "<b>👥 Нові клієнти</b>",
         f"Власники: <b>{report_int(clients.get('new_owners'))}</b> · "
@@ -6333,7 +6368,7 @@ def build_owner_report_telegram_message(report):
         "",
         "<b>⚡ Порівняно з учора</b>",
         f"Завершених візитів: {report_int(comparison.get('completed_delta')):+d}",
-        f"Надходження: {report_money(comparison.get('revenue_delta'))} грн",
+        f"Надходження: {money(comparison.get('revenue_delta'))}",
         "",
         "<b>🔎 Потребує уваги</b>",
     ])
@@ -6342,6 +6377,8 @@ def build_owner_report_telegram_message(report):
         lines.append(f"• {html.escape(str(item))}")
 
     return "\n".join(lines)
+
+
 
 
 def get_report_settings(org_id):
@@ -7216,314 +7253,243 @@ def api_internal_daily_report_dispatch():
         return fail("Automatic report dispatch failed", 500)
 
 
-@app.get(
-    "/api/finance/overview"
-)
-def api_finance_overview():
-    user, auth_error = (
-        owner_or_admin_required()
-    )
+def _load_finance_currency_overview(
+    rpc_name,
+    error_message,
+):
+    _user, auth_error = owner_or_admin_required()
 
     if auth_error:
         return auth_error
 
-    current_org = (
-        get_current_org_id()
-    )
+    current_org = get_current_org_id()
 
     if not current_org:
-        return fail(
-            "Organization not selected",
-            400
-        )
+        return fail("Organization not selected", 400)
 
     try:
-        kyiv_today = (
-            datetime.now(
-                ZoneInfo(
-                    "Europe/Kyiv"
-                )
-            )
-            .date()
-        )
-
-        default_date_from = (
-            kyiv_today.replace(
-                day=1
-            )
-        )
+        today = datetime.now(
+            ZoneInfo("Europe/Kyiv")
+        ).date()
 
         raw_date_from = str(
-            request.args.get(
-                "date_from"
-            )
-            or default_date_from
+            request.args.get("date_from")
+            or today.replace(day=1)
         ).strip()
 
         raw_date_to = str(
-            request.args.get(
-                "date_to"
-            )
-            or kyiv_today
+            request.args.get("date_to")
+            or today
         ).strip()
 
         try:
-            date_from = (
-                datetime.strptime(
-                    raw_date_from,
-                    "%Y-%m-%d"
-                )
-                .date()
-            )
+            date_from = datetime.strptime(
+                raw_date_from,
+                "%Y-%m-%d",
+            ).date()
 
-            date_to = (
-                datetime.strptime(
-                    raw_date_to,
-                    "%Y-%m-%d"
-                )
-                .date()
-            )
+            date_to = datetime.strptime(
+                raw_date_to,
+                "%Y-%m-%d",
+            ).date()
 
         except ValueError:
             return fail(
                 "Invalid date format. Use YYYY-MM-DD.",
-                400
+                400,
             )
 
         if date_from > date_to:
             return fail(
                 "date_from cannot be later than date_to.",
-                400
+                400,
             )
 
-        if (
-            date_to - date_from
-        ).days > 366:
+        if (date_to - date_from).days > 366:
             return fail(
                 "Finance period cannot exceed 366 days.",
-                400
+                400,
+            )
+
+        currency = str(
+            request.args.get("currency")
+            or "UAH"
+        ).strip().upper()
+
+        if currency not in (
+            "UAH",
+            "EUR",
+            "USD",
+            "GBP",
+            "PLN",
+            "CHF",
+        ):
+            return fail(
+                "Unsupported finance currency",
+                400,
             )
 
         result = execute_with_retry(
-            lambda: (
-                supabase
-                .rpc(
-                    "get_finance_overview",
-                    {
-                        "p_org_id":
-                            current_org,
-
-                        "p_date_from":
-                            date_from.isoformat(),
-
-                        "p_date_to":
-                            date_to.isoformat(),
-                    }
-                )
+            lambda: supabase.rpc(
+                rpc_name,
+                {
+                    "p_org_id": current_org,
+                    "p_date_from": date_from.isoformat(),
+                    "p_date_to": date_to.isoformat(),
+                    "p_currency": currency,
+                },
             ),
             attempts=4,
             delay=0.35,
         )
 
-        overview = (
-            result.data
-            if result.data
-            is not None
-            else {}
-        )
+        overview = result.data
 
-        if (
-            isinstance(
-                overview,
-                list
-            )
-            and overview
-        ):
+        if isinstance(overview, list):
             overview = (
                 overview[0]
+                if overview
+                else {}
             )
 
-        return ok(
-            overview
-        )
+        if not isinstance(overview, dict):
+            raise ValueError(
+                "Invalid finance report response"
+            )
+
+        if overview.get("currency") != currency:
+            raise ValueError(
+                "Finance report currency mismatch"
+            )
+
+        return ok(overview)
 
     except Exception as error:
         print(
-            "❌ GET finance overview:",
+            "❌ GET finance currency report:",
+            rpc_name,
             repr(error),
             flush=True,
         )
 
-        return fail(
-            "Не вдалося завантажити фінансову аналітику.",
-            500
-        )      
+        return fail(error_message, 500)
 
 
-@app.get(
-    "/api/finance/client-balances"
-)
-def api_finance_client_balances():
-    """
-    Read-only client settlement register.
-
-    The endpoint deliberately derives balances from the same visit lines and
-    completed payments as the visit payment modal. This keeps the finance
-    workspace useful without introducing a second accounting truth.
-    """
-    user, auth_error = (
-        owner_or_admin_required()
+@app.get("/api/finance/overview")
+def api_finance_overview():
+    return _load_finance_currency_overview(
+        "get_finance_overview_currency",
+        "Не вдалося завантажити фінансову аналітику.",
     )
+
+@app.get("/api/finance/client-balances")
+def api_finance_client_balances():
+    _user, auth_error = owner_or_admin_required()
 
     if auth_error:
         return auth_error
 
-    current_org = (
-        get_current_org_id()
-    )
+    current_org = get_current_org_id()
 
     if not current_org:
-        return fail(
-            "Organization not selected",
-            400,
-        )
+        return fail("Organization not selected", 400)
+
+    currency = str(
+        request.args.get("currency") or "UAH"
+    ).strip().upper()
+
+    if currency not in (
+        "UAH", "EUR", "USD",
+        "GBP", "PLN", "CHF",
+    ):
+        return fail("Unsupported finance currency", 400)
 
     try:
-        owners = (
-            load_finance_org_rows(
-                "owners",
-                order_by="name",
-            )
+        owners = load_finance_org_rows(
+            "owners",
+            order_by="name",
         )
+        patients = load_finance_org_rows("patients")
 
-        patients = (
-            load_finance_org_rows(
-                "patients"
-            )
-        )
-
-        visits = (
-            load_finance_org_rows(
+        visits = [
+            visit
+            for visit in load_finance_org_rows(
                 "visits",
                 order_by="date",
                 desc=True,
             )
-        )
+            if str(
+                visit.get("currency") or "UAH"
+            ).strip().upper() == currency
+        ]
 
         owners_by_id = {
-            str(owner.get("id")):
-                owner
+            str(owner["id"]): owner
             for owner in owners
             if owner.get("id")
         }
-
         patients_by_id = {
-            str(patient.get("id")):
-                patient
+            str(patient["id"]): patient
             for patient in patients
             if patient.get("id")
         }
 
         visit_ids = [
-            str(visit.get("id"))
+            str(visit["id"])
             for visit in visits
             if visit.get("id")
         ]
 
         services_by_visit = {
-            visit_id: []
-            for visit_id in visit_ids
+            visit_id: [] for visit_id in visit_ids
         }
-
         stock_by_visit = {
-            visit_id: []
-            for visit_id in visit_ids
+            visit_id: [] for visit_id in visit_ids
         }
-
         transactions_by_visit = {
-            visit_id: []
-            for visit_id in visit_ids
+            visit_id: [] for visit_id in visit_ids
         }
 
-        # Keep the PostgREST URL and the in-filter reasonably small for clinics
-        # with a long history.
-        for chunk_start in range(
-            0,
-            len(visit_ids),
-            150,
-        ):
-            visit_id_chunk = (
-                visit_ids[
-                    chunk_start:
-                    chunk_start + 150
-                ]
-            )
+        for chunk_start in range(0, len(visit_ids), 150):
+            ids = visit_ids[
+                chunk_start:chunk_start + 150
+            ]
 
-            if not visit_id_chunk:
-                continue
+            chunk_services, chunk_stock = load_visit_lines(ids)
 
-            (
-                chunk_services,
-                chunk_stock,
-            ) = load_visit_lines(
-                visit_id_chunk
-            )
+            services_by_visit.update(chunk_services)
+            stock_by_visit.update(chunk_stock)
 
-            services_by_visit.update(
-                chunk_services
-            )
-
-            stock_by_visit.update(
-                chunk_stock
-            )
-
-            transactions_result = (
-                execute_with_retry(
-                    lambda ids=visit_id_chunk: (
-                        supabase
-                        .table(
-                            "finance_transactions"
-                        )
-                        .select(
-                            "visit_id, "
-                            "transaction_type, "
-                            "status, amount, "
-                            "occurred_at"
-                        )
-                        .eq(
-                            "org_id",
-                            current_org,
-                        )
-                        .in_(
-                            "visit_id",
-                            ids,
-                        )
-                    ),
-                    attempts=3,
-                    delay=0.25,
-                )
-            )
-
-            for transaction in (
-                transactions_result.data
-                or []
-            ):
-                transaction_visit_id = str(
-                    transaction.get(
-                        "visit_id"
+            result = execute_with_retry(
+                lambda ids=ids: (
+                    supabase.table("finance_transactions")
+                    .select(
+                        "visit_id, transaction_type, status, "
+                        "amount, currency, occurred_at"
                     )
-                    or ""
-                )
+                    .eq("org_id", current_org)
+                    .eq("currency", currency)
+                    .in_("visit_id", ids)
+                ),
+                attempts=3,
+                delay=0.25,
+            )
 
-                if not transaction_visit_id:
+            for transaction in result.data or []:
+                visit_id = str(
+                    transaction.get("visit_id") or ""
+                )
+                transaction_currency = str(
+                    transaction.get("currency") or "UAH"
+                ).strip().upper()
+
+                if visit_id not in transactions_by_visit:
                     continue
 
-                transactions_by_visit.setdefault(
-                    transaction_visit_id,
-                    [],
-                ).append(
-                    transaction
-                )
+                if transaction_currency != currency:
+                    continue
+
+                transactions_by_visit[visit_id].append(transaction)
 
         clients_by_owner = {}
 
@@ -7538,279 +7504,136 @@ def api_finance_client_balances():
         }
 
         for visit in visits:
-            visit_id = str(
-                visit.get("id")
-                or ""
-            )
+            visit_id = str(visit.get("id") or "")
+            patient_id = str(visit.get("pet_id") or "")
+            patient = patients_by_id.get(patient_id)
 
-            patient_id = str(
-                visit.get("pet_id")
-                or ""
-            )
-
-            patient = (
-                patients_by_id.get(
-                    patient_id
-                )
-            )
-
-            if (
-                not visit_id
-                or not patient
-            ):
+            if not visit_id or not patient:
                 continue
 
-            owner_id = str(
-                patient.get("owner_id")
-                or ""
-            )
-
-            owner = (
-                owners_by_id.get(
-                    owner_id
-                )
-                or {}
-            )
+            owner_id = str(patient.get("owner_id") or "")
+            owner = owners_by_id.get(owner_id) or {}
 
             service_total = sum(
-                finance_number(
-                    line.get("qty")
-                )
-                * finance_number(
-                    line.get(
-                        "priceSnap"
-                    )
-                )
-                for line in (
-                    services_by_visit.get(
-                        visit_id,
-                        [],
-                    )
-                )
+                finance_number(line.get("qty"))
+                * finance_number(line.get("priceSnap"))
+                for line in services_by_visit.get(visit_id, [])
             )
-
             stock_total = sum(
-                finance_number(
-                    line.get("qty")
-                )
-                * finance_number(
-                    line.get(
-                        "priceSnap"
-                    )
-                )
-                for line in (
-                    stock_by_visit.get(
-                        visit_id,
-                        [],
-                    )
-                )
+                finance_number(line.get("qty"))
+                * finance_number(line.get("priceSnap"))
+                for line in stock_by_visit.get(visit_id, [])
             )
 
             discount = max(
                 0,
-                finance_number(
-                    visit.get(
-                        "discount_amount"
-                    )
-                ),
+                finance_number(visit.get("discount_amount")),
             )
-
             total = max(
                 0,
                 finance_number(
-                    service_total
-                    + stock_total
-                    - discount
+                    service_total + stock_total - discount
                 ),
             )
 
             paid = 0
 
-            for transaction in (
-                transactions_by_visit.get(
-                    visit_id,
-                    [],
-                )
+            for transaction in transactions_by_visit.get(
+                visit_id, []
             ):
-                if (
-                    transaction.get("status")
-                    != "completed"
-                ):
+                if transaction.get("status") != "completed":
                     continue
 
                 amount = finance_number(
                     transaction.get("amount")
                 )
 
-                if (
-                    transaction.get(
-                        "transaction_type"
-                    )
-                    == "payment"
-                ):
+                if transaction.get("transaction_type") == "payment":
                     paid += amount
-
-                elif (
-                    transaction.get(
-                        "transaction_type"
-                    )
-                    == "refund"
-                ):
+                elif transaction.get("transaction_type") == "refund":
                     paid -= amount
 
-            paid = max(
-                0,
-                finance_number(paid),
-            )
+            paid = max(0, finance_number(paid))
 
             stored_status = str(
-                visit.get(
-                    "financial_status"
-                )
-                or ""
+                visit.get("financial_status") or ""
             ).lower()
 
-            if stored_status in {
-                "cancelled",
-                "refunded",
-            }:
+            if stored_status in {"cancelled", "refunded"}:
                 total = 0
                 paid = 0
 
             remaining = max(
                 0,
-                finance_number(
-                    total - paid
-                ),
+                finance_number(total - paid),
             )
 
             if total <= 0 and paid <= 0:
                 continue
 
-            if remaining <= 0:
-                financial_status = "paid"
-            elif paid > 0:
-                financial_status = "partial"
-            else:
-                financial_status = "unpaid"
-
-            owner_name = (
-                owner.get("name")
-                or "Власник не вказаний"
+            financial_status = (
+                "paid" if remaining <= 0
+                else "partial" if paid > 0
+                else "unpaid"
             )
 
-            client = (
-                clients_by_owner.setdefault(
-                    owner_id
-                    or f"unknown:{patient_id}",
-                    {
-                        "owner_id":
-                            owner_id
-                            or None,
-
-                        "owner_name":
-                            owner_name,
-
-                        "phone":
-                            owner.get("phone")
-                            or "",
-
-                        "billed": 0,
-                        "paid": 0,
-                        "remaining": 0,
-                        "visits": [],
-                    },
-                )
+            client = clients_by_owner.setdefault(
+                owner_id or f"unknown:{patient_id}",
+                {
+                    "owner_id": owner_id or None,
+                    "owner_name": (
+                        owner.get("name")
+                        or "Власник не вказаний"
+                    ),
+                    "phone": owner.get("phone") or "",
+                    "currency": currency,
+                    "billed": 0,
+                    "paid": 0,
+                    "remaining": 0,
+                    "visits": [],
+                },
             )
 
             client["billed"] += total
             client["paid"] += paid
-            client["remaining"] += (
-                remaining
-            )
+            client["remaining"] += remaining
 
             client["visits"].append({
-                "visit_id":
-                    visit_id,
-
-                "patient_id":
-                    patient_id,
-
-                "patient_name":
-                    patient.get("name")
-                    or "Пацієнт",
-
-                "species":
-                    patient.get("species")
-                    or "",
-
-                "date":
-                    visit.get("date"),
-
-                "diagnosis":
-                    visit.get("dx")
-                    or "",
-
-                "total":
-                    finance_number(total),
-
-                "paid":
-                    finance_number(paid),
-
-                "remaining":
-                    finance_number(
-                        remaining
-                    ),
-
-                "financial_status":
-                    financial_status,
+                "visit_id": visit_id,
+                "patient_id": patient_id,
+                "patient_name": (
+                    patient.get("name") or "Пацієнт"
+                ),
+                "species": patient.get("species") or "",
+                "date": visit.get("date"),
+                "diagnosis": visit.get("dx") or "",
+                "currency": currency,
+                "total": finance_number(total),
+                "paid": finance_number(paid),
+                "remaining": finance_number(remaining),
+                "financial_status": financial_status,
             })
 
             summary["billed"] += total
             summary["paid"] += paid
-            summary["outstanding"] += (
-                remaining
-            )
+            summary["outstanding"] += remaining
 
             if remaining > 0:
-                summary[
-                    "debt_visits_count"
-                ] += 1
+                summary["debt_visits_count"] += 1
 
         clients = []
 
-        for client in (
-            clients_by_owner.values()
-        ):
-            client["billed"] = (
-                finance_number(
-                    client["billed"]
-                )
-            )
-
-            client["paid"] = (
-                finance_number(
-                    client["paid"]
-                )
-            )
-
-            client["remaining"] = (
-                finance_number(
-                    client["remaining"]
-                )
-            )
+        for client in clients_by_owner.values():
+            for key in ("billed", "paid", "remaining"):
+                client[key] = finance_number(client[key])
 
             client["status"] = (
-                "debt"
-                if client["remaining"] > 0
+                "debt" if client["remaining"] > 0
                 else "paid"
             )
 
             client["visits"].sort(
-                key=lambda item: str(
-                    item.get("date")
-                    or ""
-                ),
+                key=lambda item: str(item.get("date") or ""),
                 reverse=True,
             )
 
@@ -7818,47 +7641,24 @@ def api_finance_client_balances():
 
         clients.sort(
             key=lambda client: (
-                client.get("remaining", 0),
-                client.get("billed", 0),
+                client["remaining"],
+                client["billed"],
             ),
             reverse=True,
         )
 
-        summary["clients_count"] = (
-            len(clients)
-        )
-
+        summary["clients_count"] = len(clients)
         summary["debt_clients_count"] = sum(
-            1
-            for client in clients
-            if client.get("remaining", 0) > 0
+            1 for client in clients
+            if client["remaining"] > 0
         )
 
-        summary["billed"] = (
-            finance_number(
-                summary["billed"]
-            )
-        )
-
-        summary["paid"] = (
-            finance_number(
-                summary["paid"]
-            )
-        )
-
-        summary["outstanding"] = (
-            finance_number(
-                summary["outstanding"]
-            )
-        )
+        for key in ("billed", "paid", "outstanding"):
+            summary[key] = finance_number(summary[key])
 
         summary["collection_rate"] = (
             round(
-                (
-                    summary["paid"]
-                    / summary["billed"]
-                    * 100
-                ),
+                summary["paid"] / summary["billed"] * 100,
                 1,
             )
             if summary["billed"] > 0
@@ -7866,6 +7666,7 @@ def api_finance_client_balances():
         )
 
         return ok({
+            "currency": currency,
             "summary": summary,
             "items": clients,
         })
@@ -7881,7 +7682,6 @@ def api_finance_client_balances():
             "Не вдалося завантажити розрахунки з клієнтами.",
             500,
         )
-
 
 @app.get(
     "/api/finance/accounts"
@@ -8287,72 +8087,101 @@ def api_finance_transaction_create():
                     True,
             })
 
+        financial_account_id = str(
+            data.get("financial_account_id") or ""
+        ).strip()
+
+        supported_currencies = {
+            "UAH", "EUR", "USD", "GBP", "PLN", "CHF"
+        }
+
+        if financial_account_id:
+            try:
+                uuid.UUID(financial_account_id)
+            except (ValueError, TypeError, AttributeError):
+                return fail("Invalid financial account", 400)
+
+            account_result = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("financial_accounts")
+                    .select("id, currency, account_type")
+                    .eq("org_id", current_org)
+                    .eq("id", financial_account_id)
+                    .eq("is_active", True)
+                    .limit(1)
+                )
+            )
+
+            if not account_result.data:
+                return fail("Financial account not found", 400)
+
+            selected_account = account_result.data[0]
+
+            transaction_currency = str(
+                selected_account.get("currency") or "UAH"
+            ).strip().upper()
+
+            account_is_cash = (
+                selected_account.get("account_type") == "cash"
+            )
+
+            if account_is_cash != (payment_method == "cash"):
+                return fail(
+                    "Payment method does not match financial account",
+                    400,
+                )
+
+        else:
+            organization_result = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("orgs")
+                    .select("currency")
+                    .eq("id", current_org)
+                    .limit(1)
+                )
+            )
+
+            if not organization_result.data:
+                return fail("Organization not found", 404)
+
+            transaction_currency = str(
+                organization_result.data[0].get("currency")
+                or "UAH"
+            ).strip().upper()
+
+        if transaction_currency not in supported_currencies:
+            return fail("Unsupported currency", 400)
+
         payload = {
-            "org_id":
-                current_org,
-
-            "created_by":
-                user.get("id"),
-
-            "transaction_type":
-                transaction_type,
-
-            "amount":
-                amount,
-
-            "currency":
-                "UAH",
-
-            "payment_method":
-                payment_method,
-
-            "category":
-                category,
-
-            "description":
-                (
-                    description
-                    or allowed_types[
-                        transaction_type
-                    ]
-                ),
-
-            "counterparty":
-                counterparty
-                or None,
-
-            "document_url":
-                document_url
-                or None,
-
-            "source":
-                "manual",
-
-            "status":
-                "completed",
-
-            "cash_shift_id":
-                None,
-
-            "visit_id":
-                None,
-
-            "external_provider":
-                "pugcrm",
-
-            "external_reference":
-                idempotency_key,
-
-            "occurred_at":
-                occurred_at,
-
+            "org_id": current_org,
+            "created_by": user.get("id"),
+            "transaction_type": transaction_type,
+            "amount": amount,
+            "currency": transaction_currency,
+            "payment_method": payment_method,
+            "category": category,
+            "description": (
+                description or allowed_types[transaction_type]
+            ),
+            "counterparty": counterparty or None,
+            "document_url": document_url or None,
+            "source": "manual",
+            "status": "completed",
+            "cash_shift_id": None,
+            "visit_id": None,
+            "external_provider": "pugcrm",
+            "external_reference": idempotency_key,
+            "occurred_at": occurred_at,
             "metadata": {
                 **metadata,
-
-                "created_via":
-                    "finance_dashboard",
+                "created_via": "finance_dashboard",
             },
         }
+
+        if financial_account_id:
+            payload["financial_account_id"] = financial_account_id
 
         insert_result = (
             supabase
@@ -8401,7 +8230,7 @@ def api_finance_transaction_create():
             ),
             summary=(
                 f"{allowed_types[transaction_type]}: "
-                f"{amount:g} UAH"
+                f"{amount:g} {transaction_currency}"
             ),
             after_data=(
                 finance_audit_snapshot(
@@ -9727,33 +9556,27 @@ def api_finance_expense_update(
         )
 
         updated_transaction = (
-            response_payload.get(
-                "transaction"
-            )
+            response_payload.get("transaction")
             if isinstance(
-                response_payload.get(
-                    "transaction"
-                ),
+                response_payload.get("transaction"),
                 dict,
             )
             else {
+                **(original_transaction or {}),
                 "id": transaction_id,
-                "transaction_type":
-                    "expense",
+                "transaction_type": "expense",
                 "amount": amount,
-                "currency": "UAH",
-                "payment_method":
-                    payment_method,
+                "currency": (
+                    (original_transaction or {}).get("currency")
+                    or "UAH"
+                ),
+                "payment_method": payment_method,
                 "status": "completed",
                 "category": category,
-                "counterparty":
-                    counterparty or None,
-                "description":
-                    description or "Витрата",
-                "document_url":
-                    document_url or None,
-                "occurred_at":
-                    occurred_at,
+                "counterparty": counterparty or None,
+                "description": description or "Витрата",
+                "document_url": document_url or None,
+                "occurred_at": occurred_at,
             }
         )
 
@@ -9886,155 +9709,12 @@ def api_finance_expense_update(
             500,
         )
     
-@app.get(
-    "/api/finance/expenses/overview"
-)
+@app.get("/api/finance/expenses/overview")
 def api_finance_expenses_overview():
-    user, auth_error = (
-        owner_or_admin_required()
+    return _load_finance_currency_overview(
+        "get_finance_expenses_overview_currency",
+        "Не вдалося завантажити аналітику витрат.",
     )
-
-    if auth_error:
-        return auth_error
-
-    current_org = (
-        get_current_org_id()
-    )
-
-    if not current_org:
-        return fail(
-            "Organization not selected",
-            400,
-        )
-
-    kyiv_today = (
-        datetime.now(
-            ZoneInfo(
-                "Europe/Kyiv"
-            )
-        )
-        .date()
-    )
-
-    default_date_from = (
-        kyiv_today.replace(
-            day=1
-        )
-    )
-
-    raw_date_from = str(
-        request.args.get(
-            "date_from"
-        )
-        or default_date_from
-    ).strip()
-
-    raw_date_to = str(
-        request.args.get(
-            "date_to"
-        )
-        or kyiv_today
-    ).strip()
-
-    try:
-        date_from = (
-            datetime.strptime(
-                raw_date_from,
-                "%Y-%m-%d",
-            )
-            .date()
-        )
-
-        date_to = (
-            datetime.strptime(
-                raw_date_to,
-                "%Y-%m-%d",
-            )
-            .date()
-        )
-
-    except ValueError:
-        return fail(
-            "Invalid date format. Use YYYY-MM-DD.",
-            400,
-        )
-
-    if date_from > date_to:
-        return fail(
-            "date_from cannot be later than date_to.",
-            400,
-        )
-
-    if (
-        date_to -
-        date_from
-    ).days > 366:
-        return fail(
-            "Finance period cannot exceed 366 days.",
-            400,
-        )
-
-    try:
-        result = execute_with_retry(
-            lambda: (
-                supabase
-                .rpc(
-                    "get_finance_expenses_overview",
-                    {
-                        "p_org_id":
-                            current_org,
-
-                        "p_date_from":
-                            date_from.isoformat(),
-
-                        "p_date_to":
-                            date_to.isoformat(),
-                    }
-                )
-            ),
-            attempts=4,
-            delay=0.35,
-        )
-
-        overview = (
-            result.data
-            if result.data
-            is not None
-            else {}
-        )
-
-        if (
-            isinstance(
-                overview,
-                list
-            )
-            and overview
-        ):
-            overview = (
-                overview[0]
-            )
-
-        if not isinstance(
-            overview,
-            dict,
-        ):
-            overview = {}
-
-        return ok(
-            overview
-        )
-
-    except Exception as error:
-        print(
-            "❌ GET finance expenses overview:",
-            repr(error),
-            flush=True,
-        )
-
-        return fail(
-            "Не вдалося завантажити аналітику витрат.",
-            500,
-        )    
     
 @app.get(
     "/api/finance/suppliers"
@@ -11313,9 +10993,11 @@ def api_finance_purchase_create():
 
     if currency not in {
         "UAH",
-        "USD",
         "EUR",
+        "USD",
+        "GBP",
         "PLN",
+        "CHF",
     }:
         return fail(
             "Непідтримувана валюта.",
@@ -28774,61 +28456,141 @@ def api_get_visits():
 
 @app.post("/api/visits")
 def api_create_visit():
-    d = request.get_json(silent=True) or {}
-    pet_id = (d.get("pet_id") or "").strip()
+    try:
+        d = request.get_json(silent=True) or {}
+        pet_id = str(
+            d.get("pet_id") or ""
+        ).strip()
 
-    if not pet_id:
-        return fail("pet_id required", 400)
+        if not pet_id:
+            return fail("pet_id required", 400)
 
-    current_org = get_current_org_id()
+        current_org = get_current_org_id()
 
-    payload = {
-        "org_id": current_org,
-        "pet_id": pet_id,
-        "staff_id": d.get("staff_id"),
-        "date": d.get("date"),
-        "note": d.get("note"),
-        "dx": d.get("dx"),
-        "rx": d.get("rx"),
-
-        "clinical_data": (
-            d.get("clinical_data")
-            if isinstance(
-                d.get("clinical_data"),
-                dict,
+        if not current_org:
+            return fail(
+                "Organization not selected",
+                400,
             )
-            else {}
-        ),
 
-        "weight_kg": d.get("weight_kg"),
-    }
+        clinic_result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("orgs")
+                .select("currency")
+                .eq("id", current_org)
+                .limit(1)
+            ),
+            attempts=3,
+            delay=0.25,
+        )
 
-    res = insert_with_optional_fallback("visits", payload)
-    row = (res.data[0] if getattr(res, "data", None) and res.data else None)
 
-    if not row:
-        row = {"id": str(uuid.uuid4()), **payload}
+        clinic_rows = (
+            getattr(clinic_result, "data", None)
+            or []
+        )
 
-    visit_id = row["id"]
+        if not clinic_rows:
+            return fail(
+                "Organization not found",
+                404,
+            )
 
-    if (
-        "services" in d
-        or "services_json" in d
-        or "stock" in d
-        or "stock_json" in d
-    ):
-        try:
-            save_visit_lines(visit_id, d)
-        except Exception as e:
-            return fail(f"save_visit_lines failed: {e}", 500)
+        visit_currency = str(
+            clinic_rows[0].get("currency") or ""
+        ).strip().upper()
 
-    
+        if visit_currency not in {
+            "UAH",
+            "EUR",
+            "USD",
+            "GBP",
+            "PLN",
+            "CHF",
+        }:
+            return fail(
+                "Unsupported clinic currency",
+                400,
+            )
 
-    services_map, stock_map = load_visit_lines([visit_id])
-    row["services"] = services_map.get(visit_id, [])
-    row["stock"] = stock_map.get(visit_id, [])
+        payload = {
+            "org_id": current_org,
+            "pet_id": pet_id,
+            "currency": visit_currency,
+            "staff_id": d.get("staff_id"),
+            "date": d.get("date"),
+            "note": d.get("note"),
+            "dx": d.get("dx"),
+            "rx": d.get("rx"),
+            "clinical_data": (
+                d.get("clinical_data")
+                if isinstance(
+                    d.get("clinical_data"),
+                    dict,
+                )
+                else {}
+            ),
+            "weight_kg": d.get("weight_kg"),
+        }
 
-    return ok(row)
+        res = insert_with_optional_fallback(
+            "visits",
+            payload,
+        )
+
+        rows = getattr(res, "data", None) or []
+
+        if not rows:
+            return fail(
+                "Cannot create visit",
+                500,
+            )
+
+        row = rows[0]
+        visit_id = row["id"]
+
+        if (
+            "services" in d
+            or "services_json" in d
+            or "stock" in d
+            or "stock_json" in d
+        ):
+            try:
+                save_visit_lines(visit_id, d)
+            except Exception as error:
+                return fail(
+                    f"save_visit_lines failed: {error}",
+                    500,
+                )
+
+        services_map, stock_map = (
+            load_visit_lines([visit_id])
+        )
+
+        row["services"] = services_map.get(
+            visit_id,
+            [],
+        )
+
+        row["stock"] = stock_map.get(
+            visit_id,
+            [],
+        )
+
+        return ok(row)
+
+    except Exception as error:
+        print(
+            "❌ POST /api/visits error:",
+            repr(error),
+        )
+
+        return fail(
+            f"Cannot create visit: {error}",
+            500,
+        )
+
 
 @app.put("/api/visits")
 def api_update_visit():
