@@ -13584,15 +13584,12 @@ async function renderVisitTasksBlock(
 // =========================
 
 function formatVisitFinanceMoney(
-  value
+  value,
+  currency = "UAH"
 ) {
-  return (
-    Number(
-      value || 0
-    ).toLocaleString(
-      getCalendarLocale()
-    ) +
-    " ₴"
+  return formatClinicMoney(
+    value,
+    currency || "UAH"
   );
 }
 
@@ -13756,96 +13753,102 @@ async function registerVisitPaymentApi(
   return result.data;
 }
 
-async function refreshVisitFinanceSummary(
-  visitId
-) {
+async function refreshVisitFinanceSummary(visitId) {
   const stateElement =
-    document.getElementById(
-      "visitPaymentState"
-    );
+    document.getElementById("visitPaymentState");
 
   const button =
-    document.getElementById(
-      "visitPaymentButton"
-    );
+    document.getElementById("visitPaymentButton");
 
-  const canManagePayments =
-    isOwner() ||
-    isAdmin();
+  const texts = {
+    uk: {
+      checking: "Перевіряємо оплату…",
+      waiting: "Чекаємо оплату",
+      partial: "Чекаємо доплату",
+      paid: "Оплату завершено",
+    },
+    en: {
+      checking: "Checking payment…",
+      waiting: "Awaiting payment",
+      partial: "Awaiting remaining payment",
+      paid: "Payment completed",
+    },
+    de: {
+      checking: "Zahlung wird geprüft…",
+      waiting: "Zahlung ausstehend",
+      partial: "Restzahlung ausstehend",
+      paid: "Zahlung abgeschlossen",
+    },
+    pl: {
+      checking: "Sprawdzanie płatności…",
+      waiting: "Oczekiwanie na płatność",
+      partial: "Oczekiwanie na dopłatę",
+      paid: "Płatność zakończona",
+    },
+  };
 
-  if (!canManagePayments) {
-    if (stateElement) {
-      stateElement.hidden =
-        true;
-    }
+  const text =
+    texts[getInterfaceLanguage()] || texts.uk;
 
-    if (button) {
-      button.hidden =
-        true;
+  const setButton = (
+    label,
+    { paid = false, partial = false } = {}
+  ) => {
+    if (!button) return;
 
-      button.style.display =
-        "none";
-    }
+    button.hidden = false;
+    button.style.display = "flex";
+    button.disabled = false;
 
-    return;
-  }
-
-  if (button) {
-    button.hidden =
-      false;
-
-    button.style.display =
-      "flex";
-
-    button.disabled =
-      false;
-
-    button.classList.remove(
-      "is-paid",
+    button.classList.toggle("is-paid", paid);
+    button.classList.toggle("is-partial", partial);
+    button.classList.toggle(
       "is-waiting",
-      "is-partial"
-    );
-
-    button.classList.add(
-      "is-waiting"
+      !paid && !partial
     );
 
     button.innerHTML = `
-      <span>◷</span>
-      <span>Перевіряємо оплату…</span>
+      <span>${paid ? "✓" : "◷"}</span>
+      <span>${escapeHtml(label)}</span>
     `;
-  }
+  };
 
-  if (stateElement) {
-    stateElement.hidden =
-      false;
-  }
+  if (!(isOwner() || isAdmin())) {
+    if (stateElement) {
+      stateElement.hidden = true;
+    }
 
-  if (!visitId) {
     if (button) {
-      button.innerHTML = `
-        <span>◷</span>
-        <span>Чекаємо оплату</span>
-      `;
+      button.hidden = true;
+      button.style.display = "none";
     }
 
     return;
   }
 
+  setButton(text.checking);
+
+  if (stateElement) {
+    stateElement.hidden = !visitId;
+  }
+
+  if (!visitId) {
+    setButton(text.waiting);
+    return;
+  }
+
+  const isCurrentVisit = () =>
+    String(state.selectedVisitId || "") ===
+    String(visitId);
+
   try {
     const finance =
-      await loadVisitFinanceApi(
-        visitId
-      );
+      await loadVisitFinanceApi(visitId);
 
-    if (
-      String(
-        state.selectedVisitId || ""
-      ) !==
-      String(visitId)
-    ) {
-      return;
-    }
+    if (!isCurrentVisit()) return;
+
+    const currency =
+      finance.currency || "UAH";
 
     const statusMeta =
       getVisitFinanceStatusMeta(
@@ -13853,14 +13856,10 @@ async function refreshVisitFinanceSummary(
       );
 
     const statusElement =
-      document.getElementById(
-        "visitPaymentStatus"
-      );
+      document.getElementById("visitPaymentStatus");
 
     const paidElement =
-      document.getElementById(
-        "visitPaymentPaid"
-      );
+      document.getElementById("visitPaymentPaid");
 
     const remainingElement =
       document.getElementById(
@@ -13868,131 +13867,64 @@ async function refreshVisitFinanceSummary(
       );
 
     if (statusElement) {
-      statusElement.textContent =
-        statusMeta.label;
-
-      statusElement.className =
-        statusMeta.className;
+      statusElement.textContent = statusMeta.label;
+      statusElement.className = statusMeta.className;
     }
 
     if (paidElement) {
       paidElement.textContent =
         formatVisitFinanceMoney(
-          finance.paid
+          finance.paid,
+          currency
         );
     }
 
     if (remainingElement) {
       remainingElement.textContent =
         formatVisitFinanceMoney(
-          finance.remaining
+          finance.remaining,
+          currency
         );
     }
 
-    if (button) {
-      const total =
-        Number(
-          finance.total || 0
-        );
+    const total = Number(finance.total || 0);
+    const paid = Number(finance.paid || 0);
 
-      const paid =
-        Number(
-          finance.paid || 0
-        );
+    const remaining = Math.max(
+      0,
+      Number(finance.remaining || 0)
+    );
 
-      const remaining =
-        Math.max(
-          0,
-          Number(
-            finance.remaining || 0
-          )
-        );
+    const isPaid =
+      total > 0 && remaining <= 0;
 
-      const isPaid =
-        total > 0 &&
-        remaining <= 0;
+    const isPartial =
+      paid > 0 && remaining > 0;
 
-      const isPartial =
-        paid > 0 &&
-        remaining > 0;
-
-      button.hidden =
-        false;
-
-      button.style.display =
-        "flex";
-
-      button.disabled =
-        false;
-
-      button.classList.toggle(
-        "is-paid",
-        isPaid
-      );
-
-      button.classList.toggle(
-        "is-partial",
-        isPartial
-      );
-
-      button.classList.toggle(
-        "is-waiting",
-        !isPaid &&
-        !isPartial
-      );
-
-      if (isPaid) {
-        button.innerHTML = `
-          <span>✓</span>
-          <span>Оплату завершено</span>
-        `;
-      } else if (isPartial) {
-        button.innerHTML = `
-          <span>◷</span>
-          <span>Чекаємо доплату</span>
-        `;
-      } else {
-        button.innerHTML = `
-          <span>◷</span>
-          <span>Чекаємо оплату</span>
-        `;
+    setButton(
+      isPaid
+        ? text.paid
+        : isPartial
+          ? text.partial
+          : text.waiting,
+      {
+        paid: isPaid,
+        partial: isPartial,
       }
-    }
+    );
   } catch (error) {
     console.error(
       "refreshVisitFinanceSummary failed:",
       error
     );
 
+    if (!isCurrentVisit()) return;
+
     if (stateElement) {
-      stateElement.hidden =
-        true;
+      stateElement.hidden = true;
     }
 
-    if (button) {
-      button.hidden =
-        false;
-
-      button.style.display =
-        "flex";
-
-      button.disabled =
-        false;
-
-      button.classList.remove(
-        "is-paid",
-        "is-partial"
-      );
-
-      button.classList.add(
-        "is-waiting"
-      );
-
-      button.innerHTML = `
-        <span>◷</span>
-        <span>Чекаємо оплату</span>
-      `;
-    }
+    setButton(text.waiting);
   }
 }
 
@@ -14232,7 +14164,10 @@ async function openVisitPaymentModal(
         <div class="visitPaymentHistoryAmount">
           <strong>
             +${escapeHtml(
-              formatVisitFinanceMoney(transaction.amount)
+             formatVisitFinanceMoney(
+  transaction.amount,
+  transaction.currency || "UAH"
+)
             )}
           </strong>
 
@@ -14242,15 +14177,24 @@ async function openVisitPaymentModal(
     `;
   };
 
-  const render = () => {
-    const panel = modal.querySelector(".visitPaymentModal");
+    const render = () => {
+    const panel =
+      modal.querySelector(".visitPaymentModal");
+
     if (!panel || !finance) return;
 
+    const currency = finance.currency || "UAH";
     const remaining = Number(finance.remaining || 0);
 
-    const transactions = Array.isArray(finance.transactions)
-      ? finance.transactions
-      : [];
+    const money = (value) =>
+      escapeHtml(
+        formatVisitFinanceMoney(value, currency)
+      );
+
+    const transactions =
+      Array.isArray(finance.transactions)
+        ? finance.transactions
+        : [];
 
     const status = getVisitFinanceStatusMeta(
       finance.financial_status
@@ -14287,26 +14231,22 @@ async function openVisitPaymentModal(
         <section class="visitPaymentOverview">
           <div>
             <span>${ui("До сплати")}</span>
-            <strong>
-              ${escapeHtml(formatVisitFinanceMoney(finance.total))}
-            </strong>
+            <strong>${money(finance.total)}</strong>
           </div>
 
           <div>
             <span>${ui("Вже сплачено")}</span>
-            <strong>
-              ${escapeHtml(formatVisitFinanceMoney(finance.paid))}
-            </strong>
+            <strong>${money(finance.paid)}</strong>
           </div>
 
           <div class="visitPaymentRemainingCard">
             <span>${ui("Залишок")}</span>
-            <strong>
-              ${escapeHtml(formatVisitFinanceMoney(remaining))}
-            </strong>
+            <strong>${money(remaining)}</strong>
           </div>
 
-          <b class="visitPaymentStatus ${escapeHtml(status.className)}">
+          <b class="visitPaymentStatus ${escapeHtml(
+            status.className
+          )}">
             ${escapeHtml(status.label)}
           </b>
         </section>
@@ -14316,9 +14256,15 @@ async function openVisitPaymentModal(
             ? `
               <section class="visitPaymentSuccess">
                 <div>✓</div>
-                <strong>${ui("Візит повністю оплачено")}</strong>
+
+                <strong>
+                  ${ui("Візит повністю оплачено")}
+                </strong>
+
                 <span>
-                  ${ui("Нові платежі для цього візиту не потрібні.")}
+                  ${ui(
+                    "Нові платежі для цього візиту не потрібні."
+                  )}
                 </span>
               </section>
             `
@@ -14341,7 +14287,10 @@ async function openVisitPaymentModal(
                       value="${remaining}"
                       required
                     >
-                    <b>₴</b>
+
+                    <b>${escapeHtml(
+                      getClinicCurrencySymbol(currency)
+                    )}</b>
                   </div>
                 </label>
 
@@ -14375,7 +14324,11 @@ async function openVisitPaymentModal(
                       .map(([key, method]) => `
                         <button
                           type="button"
-                          class="${selectedMethod === key ? "active" : ""}"
+                          class="${
+                            selectedMethod === key
+                              ? "active"
+                              : ""
+                          }"
                           data-payment-method="${key}"
                         >
                           <span>${method.icon}</span>
@@ -14391,9 +14344,7 @@ async function openVisitPaymentModal(
                   type="submit"
                 >
                   <span>${ui("Провести оплату")}</span>
-                  <strong>
-                    ${escapeHtml(formatVisitFinanceMoney(remaining))}
-                  </strong>
+                  <strong>${money(remaining)}</strong>
                 </button>
               </form>
             `
@@ -14412,10 +14363,14 @@ async function openVisitPaymentModal(
           <div class="visitPaymentHistoryList">
             ${
               transactions.length
-                ? transactions.map(transactionHtml).join("")
+                ? transactions
+                    .map(transactionHtml)
+                    .join("")
                 : `
                   <div class="visitPaymentHistoryEmpty">
-                    ${ui("Платежів за цим візитом ще немає.")}
+                    ${ui(
+                      "Платежів за цим візитом ще немає."
+                    )}
                   </div>
                 `
             }
@@ -14424,19 +14379,25 @@ async function openVisitPaymentModal(
       </div>
     `;
 
-    panel.querySelector("#visitPaymentAmount")?.focus();
+    panel
+      .querySelector("#visitPaymentAmount")
+      ?.focus();
   };
 
   const updateSubmitAmount = () => {
-    const input = modal.querySelector("#visitPaymentAmount");
+    const input =
+      modal.querySelector("#visitPaymentAmount");
+
     const amountElement = modal.querySelector(
       ".visitPaymentSubmit strong"
     );
 
     if (input && amountElement) {
-      amountElement.textContent = formatVisitFinanceMoney(
-        Number(input.value || 0)
-      );
+      amountElement.textContent =
+        formatVisitFinanceMoney(
+          Number(input.value || 0),
+          finance?.currency || "UAH"
+        );
     }
   };
 
@@ -15950,54 +15911,50 @@ function normalizeServicesInterfaceText(
 }
 
 
-function getServicesInterfaceText(
-  sourceText
-) {
-  const language =
-    getInterfaceLanguage();
+function getServicesInterfaceText(sourceText) {
+  const language = getInterfaceLanguage();
 
   const normalizedSource =
-    normalizeServicesInterfaceText(
-      sourceText
-    );
+    normalizeServicesInterfaceText(sourceText);
 
-  const entry =
-    Object.entries(
-      SERVICES_INTERFACE_TEXT
-    ).find(
-      ([ukrainian, translations]) =>
-        [
-          ukrainian,
-          ...Object.values(
-            translations
-          ),
-        ].some(
-          (value) =>
-            normalizeServicesInterfaceText(
-              value
-            ) === normalizedSource
-        )
-    );
+  const entry = Object.entries(
+    SERVICES_INTERFACE_TEXT
+  ).find(([ukrainian, translations]) =>
+    [
+      ukrainian,
+      ...Object.values(translations),
+    ].some(
+      (value) =>
+        normalizeServicesInterfaceText(value) ===
+        normalizedSource
+    )
+  );
 
   if (!entry) {
-    return String(
-      sourceText || ""
-    );
+    return String(sourceText || "");
   }
 
-  const [
-    ukrainian,
-    translations,
-  ] = entry;
+  const [ukrainian, translations] = entry;
+
+  if (ukrainian === "грн") {
+    return getClinicCurrency();
+  }
+
+  if (ukrainian === "Ціна, грн") {
+    const priceLabel = {
+      uk: "Ціна",
+      en: "Price",
+      de: "Preis",
+      pl: "Cena",
+    }[language] || "Ціна";
+
+    return `${priceLabel}, ${getClinicCurrency()}`;
+  }
 
   return language === "uk"
     ? ukrainian
-    : (
-        translations[language] ||
-        ukrainian
-      );
+    : translations[language] || ukrainian;
 }
-
 
 function getLocalizedServiceCategory(
   category
@@ -16389,20 +16346,25 @@ async function renderServicesTab() {
           </small>
         </div>
 
-               <div class="servicesPremiumStat servicesPremiumStatPrice">
+            <div class="servicesPremiumStat servicesPremiumStatPrice">
           <span>
-            Середня ціна
+            ${escapeHtml(
+              getServicesInterfaceText("Середня ціна")
+            )}
           </span>
 
           <strong>
-            ${averagePrice.toLocaleString(
-              getCalendarLocale()
+            ${escapeHtml(
+              formatClinicMoney(averagePrice)
             )}
-            ₴
           </strong>
 
           <small>
-            серед послуг з ціною
+            ${escapeHtml(
+              getServicesInterfaceText(
+                "серед послуг з ціною"
+              )
+            )}
           </small>
         </div>
       </section>
@@ -16414,10 +16376,12 @@ async function renderServicesTab() {
           <input
             id="servicesPremiumSearch"
             type="search"
-            placeholder="Пошук послуги або категорії..."
-            value="${escapeHtml(
-              currentQuery
+            placeholder="${escapeHtml(
+              getServicesInterfaceText(
+                "Пошук послуги або категорії..."
+              )
             )}"
+            value="${escapeHtml(currentQuery)}"
           >
         </div>
 
@@ -16839,18 +16803,12 @@ async function renderServicesTab() {
                                 )}
                               </h3>
 
-                              <div class="servicesPremiumCardPrice">
+                                                            <div class="servicesPremiumCardPrice">
                                 <strong>
-                                  ${price.toLocaleString(
-                                    getCalendarLocale()
+                                  ${escapeHtml(
+                                    formatClinicMoney(price)
                                   )}
                                 </strong>
-
-                                <span>
-                                  ${getServicesInterfaceText(
-                                    "грн"
-                                  )}
-                                </span>
                               </div>
                             </div>
 
@@ -33222,37 +33180,44 @@ function getFinancePresetDates(
 
 async function loadFinanceOverviewApi(
   dateFrom,
-  dateTo
+  dateTo,
+  currency = "UAH"
 ) {
-  const params =
-    new URLSearchParams({
-      date_from:
-        dateFrom,
+  const selectedCurrency = String(
+    currency || "UAH"
+  ).trim().toUpperCase();
 
-      date_to:
-        dateTo,
-    });
+  const errorText = getFinanceInterfaceText(
+    "Не вдалося завантажити фінанси"
+  );
 
-  const response =
-    await fetch(
-      `/api/finance/overview?${params.toString()}`,
-      {
-        credentials:
-          "include",
+  if (![
+    "UAH", "EUR", "USD",
+    "GBP", "PLN", "CHF",
+  ].includes(selectedCurrency)) {
+    throw new Error(errorText);
+  }
 
-        headers: {
-          Accept:
-            "application/json",
+  const params = new URLSearchParams({
+    date_from: dateFrom,
+    date_to: dateTo,
+    currency: selectedCurrency,
+  });
 
-          ...getOrgHeaders(),
-        },
-      }
-    );
+  const response = await fetch(
+    `/api/finance/overview?${params.toString()}`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
 
-  const result =
-    await response
-      .json()
-      .catch(() => null);
+  const result = await response
+    .json()
+    .catch(() => null);
 
   if (
     !response.ok ||
@@ -33260,35 +33225,54 @@ async function loadFinanceOverviewApi(
     !result?.data
   ) {
     throw new Error(
-      result?.error ||
-      `Не вдалося завантажити фінанси (HTTP ${response.status}).`
+      `${errorText} (HTTP ${response.status}).`
     );
+  }
+
+  if (
+    result.data.currency !== selectedCurrency
+  ) {
+    throw new Error(errorText);
   }
 
   return result.data;
 }
+async function loadFinanceClientBalancesApi(
+  currency = "UAH"
+) {
+  const selectedCurrency = String(
+    currency || "UAH"
+  ).trim().toUpperCase();
 
-async function loadFinanceClientBalancesApi() {
-  const response =
-    await fetch(
-      "/api/finance/client-balances",
-      {
-        credentials:
-          "include",
+  const errorText = getFinanceInterfaceText(
+    "Не вдалося завантажити клієнтські розрахунки"
+  );
 
-        headers: {
-          Accept:
-            "application/json",
+  if (![
+    "UAH", "EUR", "USD",
+    "GBP", "PLN", "CHF",
+  ].includes(selectedCurrency)) {
+    throw new Error(errorText);
+  }
 
-          ...getOrgHeaders(),
-        },
-      }
-    );
+  const params = new URLSearchParams({
+    currency: selectedCurrency,
+  });
 
-  const result =
-    await response
-      .json()
-      .catch(() => null);
+  const response = await fetch(
+    `/api/finance/client-balances?${params.toString()}`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(() => null);
 
   if (
     !response.ok ||
@@ -33296,14 +33280,18 @@ async function loadFinanceClientBalancesApi() {
     !result?.data
   ) {
     throw new Error(
-      result?.error ||
-      `Не вдалося завантажити розрахунки з клієнтами (HTTP ${response.status}).`
+      `${errorText} (HTTP ${response.status}).`
     );
+  }
+
+  if (
+    result.data.currency !== selectedCurrency
+  ) {
+    throw new Error(errorText);
   }
 
   return result.data;
 }
-
 async function loadFinanceAccountsApi() {
   const response =
     await fetch(
@@ -35091,15 +35079,15 @@ function getFinanceOperationsShownText(
 
 
 function getFinanceRefundedText(
-  amount
+  amount,
+  currency = "UAH"
 ) {
-  const formattedAmount =
-    formatVisitFinanceMoney(
-      amount
-    );
+  const formattedAmount = formatClinicMoney(
+    amount,
+    currency
+  );
 
-  const language =
-    getInterfaceLanguage();
+  const language = getInterfaceLanguage();
 
   if (language === "en") {
     return `Refunded ${formattedAmount}`;
@@ -35116,19 +35104,15 @@ function getFinanceRefundedText(
   return `Повернено ${formattedAmount}`;
 }
 
-
 function getFinanceCancelPaymentMessage(
-  amount
+  amount,
+  currency = "UAH"
 ) {
-  const formattedAmount =
-    escapeHtml(
-      formatVisitFinanceMoney(
-        amount
-      )
-    );
+  const formattedAmount = escapeHtml(
+    formatClinicMoney(amount, currency)
+  );
 
-  const language =
-    getInterfaceLanguage();
+  const language = getInterfaceLanguage();
 
   if (language === "en") {
     return (
@@ -35477,15 +35461,15 @@ Object.assign(
 
 
 function getFinanceRefundAmountError(
-  maximumAmount
+  maximumAmount,
+  currency = "UAH"
 ) {
-  const amount =
-    formatVisitFinanceMoney(
-      maximumAmount
-    );
+  const amount = formatClinicMoney(
+    maximumAmount,
+    currency
+  );
 
-  const language =
-    getInterfaceLanguage();
+  const language = getInterfaceLanguage();
 
   if (language === "en") {
     return `Enter an amount from 0.01 to ${amount}.`;
@@ -35502,45 +35486,29 @@ function getFinanceRefundAmountError(
   return `Вкажіть суму від 0,01 до ${amount}.`;
 }
 
-
 function getFinanceRefundSuccessMessage(
-  amount
+  amount,
+  currency = "UAH"
 ) {
-  const formattedAmount =
-    escapeHtml(
-      formatVisitFinanceMoney(
-        amount
-      )
-    );
+  const formattedAmount = escapeHtml(
+    formatClinicMoney(amount, currency)
+  );
 
-  const language =
-    getInterfaceLanguage();
+  const language = getInterfaceLanguage();
 
   if (language === "en") {
-    return (
-      `A refund of <strong>${formattedAmount}</strong> ` +
-      "was processed successfully."
-    );
+    return `A refund of <strong>${formattedAmount}</strong> was processed successfully.`;
   }
 
   if (language === "de") {
-    return (
-      `Eine Erstattung über <strong>${formattedAmount}</strong> ` +
-      "wurde erfolgreich ausgeführt."
-    );
+    return `Eine Erstattung über <strong>${formattedAmount}</strong> wurde erfolgreich ausgeführt.`;
   }
 
   if (language === "pl") {
-    return (
-      `Zwrot w wysokości <strong>${formattedAmount}</strong> ` +
-      "został pomyślnie wykonany."
-    );
+    return `Zwrot w wysokości <strong>${formattedAmount}</strong> został pomyślnie wykonany.`;
   }
 
-  return (
-    `Повернення на суму <strong>${formattedAmount}</strong> ` +
-    "успішно проведено."
-  );
+  return `Повернення на суму <strong>${formattedAmount}</strong> успішно проведено.`;
 }
 Object.assign(
   FINANCE_INTERFACE_TEXT,
@@ -35965,32 +35933,24 @@ function getFinanceReceivedItemsText(
 }
 
 
-function getFinanceRemainingAmountText(
-  amount
-) {
-  const formattedAmount =
-    formatVisitFinanceMoney(
-      amount
-    );
+function getFinanceRemainingAmountText(amount, currency = "UAH") {
+  const formattedAmount = formatVisitFinanceMoney(
+    amount,
+    currency
+  );
 
-  const language =
-    getInterfaceLanguage();
+  const labels = {
+    uk: "Залишок",
+    en: "Remaining",
+    de: "Restbetrag",
+    pl: "Pozostało",
+  };
 
-  if (language === "en") {
-    return `Remaining: ${formattedAmount}`;
-  }
+  const language = getInterfaceLanguage();
+  const label = labels[language] || labels.uk;
 
-  if (language === "de") {
-    return `Restbetrag: ${formattedAmount}`;
-  }
-
-  if (language === "pl") {
-    return `Pozostało: ${formattedAmount}`;
-  }
-
-  return `Залишок: ${formattedAmount}`;
+  return `${label}: ${formattedAmount}`;
 }
-
 
 function getFinanceCounterpartyOperationsText(
   count,
@@ -36654,15 +36614,13 @@ function getFinanceDebtVisitsText(
 
 
 function getFinanceOutstandingInsightText(
-  amount
+  amount,
+  currency = getFinanceReportCurrency()
 ) {
   const formattedAmount =
-    formatVisitFinanceMoney(
-      amount
-    );
+    formatClinicMoney(amount, currency);
 
-  const language =
-    getInterfaceLanguage();
+  const language = getInterfaceLanguage();
 
   if (language === "en") {
     return `The clinic is still owed ${formattedAmount}. Review unpaid invoices.`;
@@ -36898,135 +36856,192 @@ function installFinanceLocalization(
 }
 
 
+function getFinanceReportCurrency() {
+  const currency = String(
+    financeDashboardState.reportCurrency ||
+    getClinicCurrency()
+  ).trim().toUpperCase();
+
+  return [
+    "UAH", "EUR", "USD",
+    "GBP", "PLN", "CHF",
+  ].includes(currency)
+    ? currency
+    : "UAH";
+}
+
 function buildFinanceSectionNavigation() {
   const sections = [
     {
       key: "today",
       icon: "⌁",
-
-      label:
-        getFinanceInterfaceText(
-          "Сьогодні"
-        ),
+      label: getFinanceInterfaceText("Сьогодні"),
     },
-
     {
       key: "transactions",
       icon: "↕",
-
-      label:
-        getFinanceInterfaceText(
-          "Операції"
-        ),
+      label: getFinanceInterfaceText("Операції"),
     },
-
     {
       key: "clients",
       icon: "◎",
-
-      label:
-        getFinanceInterfaceText(
-          "Клієнти"
-        ),
+      label: getFinanceInterfaceText("Клієнти"),
     },
-
     {
       key: "analytics",
       icon: "⌁",
-
-      label:
-        getFinanceInterfaceText(
-          "Аналітика"
-        ),
+      label: getFinanceInterfaceText("Аналітика"),
     },
-
-    ...(
-      isOwner()
-        ? [
-            {
-              key: "report",
-              icon: "✦",
-
-              label:
-                getFinanceInterfaceText(
-                  "Звіт власника"
-                ),
-            },
-          ]
-        : []
-    ),
+    ...(isOwner()
+      ? [{
+          key: "report",
+          icon: "✦",
+          label: getFinanceInterfaceText("Звіт власника"),
+        }]
+      : []),
   ];
+
+  const showCurrency = [
+  "today",
+  "clients",
+  "analytics",
+  "expenses",
+].includes(financeDashboardState.section);
+
+  const currency = getFinanceReportCurrency();
+
+  const currencyLabels = {
+    uk: "Валюта звіту",
+    en: "Report currency",
+    de: "Berichtswährung",
+    pl: "Waluta raportu",
+  };
+
+  const currencyLabel =
+    currencyLabels[getInterfaceLanguage()] ||
+    currencyLabels.en;
 
   return `
     <nav class="financeSectionNavigation">
-      ${sections
-        .map(
-          (section) => `
-            <button
-              type="button"
-              class="
-                financeSectionButton
-                ${
-                  financeDashboardState
-                    .section ===
-                  section.key
-                    ? "active"
-                    : ""
-                }
-              "
-              data-finance-section="${section.key}"
-            >
-              <span>
-                ${section.icon}
-              </span>
-
-              <strong>
-                ${section.label}
-              </strong>
-            </button>
-          `
-        )
-        .join("")}
+      ${sections.map((section) => `
+        <button
+          type="button"
+          class="financeSectionButton ${
+            financeDashboardState.section === section.key
+              ? "active"
+              : ""
+          }"
+          data-finance-section="${section.key}"
+        >
+          <span>${section.icon}</span>
+          <strong>${section.label}</strong>
+        </button>
+      `).join("")}
     </nav>
+
+    ${showCurrency ? `
+      <div style="
+        display:flex;
+        justify-content:flex-end;
+        margin:12px 0;
+      ">
+        <label style="
+          display:flex;
+          align-items:center;
+          flex-wrap:wrap;
+          gap:10px;
+          max-width:100%;
+        ">
+          <span>
+            ${escapeHtml(currencyLabel)}
+          </span>
+
+          <select
+            data-finance-report-currency
+            aria-label="${escapeHtml(currencyLabel)}"
+            style="
+              min-width:130px;
+              max-width:100%;
+              padding:10px 14px;
+              border-radius:12px;
+              border:1px solid rgba(255,255,255,.15);
+              background:rgba(255,255,255,.06);
+              color:inherit;
+              font:inherit;
+            "
+          >
+            ${[
+              "UAH", "EUR", "USD",
+              "GBP", "PLN", "CHF",
+            ].map((code) => `
+              <option
+                value="${code}"
+                ${code === currency ? "selected" : ""}
+              >
+                ${code}
+              </option>
+            `).join("")}
+          </select>
+        </label>
+      </div>
+    ` : ""}
   `;
 }
 
-function bindFinanceSectionNavigation(
-  page
-) {
-  page
-    .querySelectorAll(
-      "[data-finance-section]:not(:disabled)"
-    )
-    .forEach(
-      (button) => {
-        button.addEventListener(
-          "click",
-          () => {
-            const section =
-              button.dataset
-                .financeSection ||
-              "today";
+function bindFinanceSectionNavigation(page) {
+  page.querySelectorAll(
+    "[data-finance-section]:not(:disabled)"
+  ).forEach((button) => {
+    button.addEventListener("click", () => {
+      const section =
+        button.dataset.financeSection ||
+        "today";
 
-            if (
-              section ===
-              financeDashboardState
-                .section
-            ) {
-              return;
-            }
-
-            financeDashboardState.section =
-              section;
-
-            financeDashboardState
-              .transactionOffset = 0;
-
-            renderFinanceTab();
-          }
-        );
+      if (
+        section === financeDashboardState.section
+      ) {
+        return;
       }
-    );
+
+      financeDashboardState.section = section;
+      financeDashboardState.transactionOffset = 0;
+
+      renderFinanceTab();
+    });
+  });
+
+  const currencySelect = page.querySelector(
+    "[data-finance-report-currency]"
+  );
+
+  if (!currencySelect) return;
+
+  currencySelect.addEventListener(
+    "change",
+    async () => {
+      const currency = currencySelect.value;
+
+      if (![
+        "UAH", "EUR", "USD",
+        "GBP", "PLN", "CHF",
+      ].includes(currency)) {
+        return;
+      }
+
+      financeDashboardState.reportCurrency =
+        currency;
+
+      currencySelect.disabled = true;
+
+      try {
+        await renderFinanceTab();
+      } finally {
+        if (currencySelect.isConnected) {
+          currencySelect.disabled = false;
+        }
+      }
+    }
+  );
 }
 async function loadFinanceTransactionsApi(
   options = {}
@@ -37166,51 +37181,62 @@ async function loadFinanceTransactionsApi(
 }
 async function loadFinanceExpensesOverviewApi(
   dateFrom,
-  dateTo
+  dateTo,
+  currency = "UAH"
 ) {
-  const params =
-    new URLSearchParams({
-      date_from:
-        dateFrom,
+  const selectedCurrency = String(
+    currency || "UAH"
+  ).trim().toUpperCase();
 
-      date_to:
-        dateTo,
-    });
+  const errorText = getFinanceInterfaceText(
+    "Не вдалося завантажити витрати"
+  );
 
-  const response =
-    await fetch(
-      `/api/finance/expenses/overview?${params.toString()}`,
-      {
-        credentials: "include",
-      }
-    );
+  if (![
+    "UAH", "EUR", "USD",
+    "GBP", "PLN", "CHF",
+  ].includes(selectedCurrency)) {
+    throw new Error(errorText);
+  }
 
-  const result =
-    await response
-      .json()
-      .catch(
-        () => ({})
-      );
+  const params = new URLSearchParams({
+    date_from: dateFrom,
+    date_to: dateTo,
+    currency: selectedCurrency,
+  });
+
+  const response = await fetch(
+    `/api/finance/expenses/overview?${params.toString()}`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(() => null);
 
   if (
     !response.ok ||
-    !result?.ok
+    !result?.ok ||
+    !result?.data
   ) {
     throw new Error(
-      result?.error ||
-      `Не вдалося завантажити витрати (HTTP ${response.status}).`
+      `${errorText} (HTTP ${response.status}).`
     );
   }
 
-  return (
-    result.data || {
-      period: {},
-      summary: {},
-      categories: [],
-      daily: [],
-      counterparties: [],
-    }
-  );
+  if (
+    result.data.currency !== selectedCurrency
+  ) {
+    throw new Error(errorText);
+  }
+
+  return result.data;
 }
 async function loadFinancePurchasesApi(
   options = {}
@@ -37682,8 +37708,11 @@ async function receiveFinancePurchaseApi(
 }
 
 function buildFinanceTrendChart(
-  rows
+  rows,
+  currency = getFinanceReportCurrency()
 ) {
+  const formatVisitFinanceMoney = (value) =>
+    formatClinicMoney(value, currency);
   const data =
     Array.isArray(rows)
       ? rows
@@ -38424,94 +38453,79 @@ async function updateFinanceExpenseApi(
 }
 
 
-function openFinancePaymentRefundModal(
-  transaction
-) {
-  if (
-    !isOwnerOrAdmin()
-  ) {
+function openFinancePaymentRefundModal(transaction) {
+  if (!isOwnerOrAdmin()) {
     openDeleteModal(
-      (
-        "Оформлювати повернення може лише " +
-        "адміністратор або власник клініки."
+      getFinanceInterfaceText(
+        "Оформлювати повернення може лише адміністратор або власник клініки."
       ),
       null,
       "info"
     );
-
     return;
   }
 
   if (
     !transaction ||
-    transaction.transaction_type !==
-      "payment" ||
-    transaction.status !==
-      "completed"
-  ) {
-    return;
-  }
+    transaction.transaction_type !== "payment" ||
+    transaction.status !== "completed"
+  ) return;
 
-  const originalAmount =
+  const currency = String(
+    transaction.currency || "UAH"
+  ).trim().toUpperCase();
+
+  const money = (amount) => escapeHtml(
+    formatClinicMoney(amount, currency)
+  );
+
+  const text = (value) => escapeHtml(
+    getFinanceInterfaceText(value)
+  );
+
+  const originalAmount = Number(
+    transaction.amount || 0
+  );
+
+  const refundedAmount = Math.max(
+    0,
     Number(
-      transaction.amount || 0
-    );
+      transaction.metadata?.refunded_amount || 0
+    )
+  );
 
-  const refundedAmount =
-    Math.max(
-      0,
+  const refundableAmount = Math.max(
+    0,
+    Math.min(
+      originalAmount,
       Number(
-        transaction.metadata
-          ?.refunded_amount ||
-        0
+        transaction.metadata?.refundable_amount ??
+        (originalAmount - refundedAmount)
       )
-    );
-
-  const refundableAmount =
-    Math.max(
-      0,
-      Math.min(
-        originalAmount,
-        Number(
-          transaction.metadata
-            ?.refundable_amount ??
-          (
-            originalAmount -
-            refundedAmount
-          )
-        )
-      )
-    );
+    )
+  );
 
   if (
-    !Number.isFinite(
-      refundableAmount
-    ) ||
+    !Number.isFinite(refundableAmount) ||
     refundableAmount <= 0
   ) {
     openDeleteModal(
-      "Цей платіж уже повернено повністю.",
+      getFinanceInterfaceText(
+        "Цей платіж уже повернено повністю."
+      ),
       null,
       "info"
     );
-
     return;
   }
 
   document
-    .getElementById(
-      "financePaymentRefundModal"
-    )
+    .getElementById("financePaymentRefundModal")
     ?.remove();
 
-  const modal =
-    document.createElement(
-      "div"
-    );
+  const modal = document.createElement("div");
 
-  modal.id =
-    "financePaymentRefundModal";
-
+  modal.id = "financePaymentRefundModal";
   modal.className =
     "financeExpenseOverlay financeRefundOverlay";
 
@@ -38528,22 +38542,17 @@ function openFinancePaymentRefundModal(
       aria-labelledby="financeRefundTitle"
     >
       <header class="financeExpenseHeader">
-        <div class="financeExpenseHeaderIcon">
-          ↙
-        </div>
+        <div class="financeExpenseHeaderIcon">↙</div>
 
         <div>
-          <span>
-            ПОВЕРНЕННЯ КЛІЄНТУ
-          </span>
+          <span>${text("ПОВЕРНЕННЯ КЛІЄНТУ")}</span>
 
           <h2 id="financeRefundTitle">
-            Повернути платіж
+            ${text("Повернути платіж")}
           </h2>
 
           <p>
-            Повернення стане окремою операцією.
-            Початковий платіж залишиться в журналі.
+            ${text("Повернення стане окремою операцією. Початковий платіж залишиться в журналі.")}
           </p>
         </div>
 
@@ -38551,10 +38560,8 @@ function openFinancePaymentRefundModal(
           type="button"
           class="financeExpenseClose"
           data-close-finance-refund
-          aria-label="Закрити"
-        >
-          ✕
-        </button>
+          aria-label="${text("Закрити")}"
+        >✕</button>
       </header>
 
       <form
@@ -38569,35 +38576,19 @@ function openFinancePaymentRefundModal(
 
         <div class="financeRefundSummary">
           <div>
-            <span>
-              Початковий платіж
-            </span>
-
-            <strong>
-              ${formatVisitFinanceMoney(
-                originalAmount
-              )}
-            </strong>
+            <span>${text("Початковий платіж")}</span>
+            <strong>${money(originalAmount)}</strong>
           </div>
 
           <div>
-            <span>
-              Доступно повернути
-            </span>
-
-            <strong>
-              ${formatVisitFinanceMoney(
-                refundableAmount
-              )}
-            </strong>
+            <span>${text("Доступно повернути")}</span>
+            <strong>${money(refundableAmount)}</strong>
           </div>
         </div>
 
         <div class="financeExpenseAmountBlock">
           <label>
-            <span>
-              Сума повернення
-            </span>
+            <span>${text("Сума повернення")}</span>
 
             <div class="financeExpenseAmountInput">
               <input
@@ -38612,21 +38603,23 @@ function openFinancePaymentRefundModal(
                 autofocus
               >
 
-              <b>₴</b>
+              <b>${escapeHtml(
+                getClinicCurrencySymbol(currency)
+              )}</b>
             </div>
           </label>
         </div>
 
-        <label class="financeExpenseField financeExpenseWide">
-          <span>
-            Причина повернення
-          </span>
+        <label
+          class="financeExpenseField financeExpenseWide"
+        >
+          <span>${text("Причина повернення")}</span>
 
           <textarea
             name="reason"
             maxlength="500"
             rows="3"
-            placeholder="Наприклад, послугу скасовано або клієнт переплатив…"
+            placeholder="${text("Наприклад, послугу скасовано або клієнт переплатив…")}"
             required
           ></textarea>
         </label>
@@ -38635,10 +38628,7 @@ function openFinancePaymentRefundModal(
           <span>i</span>
 
           <p>
-            Баланс візиту, клієнта та фінансового
-            рахунку перерахуються автоматично.
-            Часткове повернення можна продовжити
-            пізніше в межах залишку платежу.
+            ${text("Баланс візиту, клієнта та фінансового рахунку перерахуються автоматично. Часткове повернення можна продовжити пізніше в межах залишку платежу.")}
           </p>
         </div>
 
@@ -38648,7 +38638,7 @@ function openFinancePaymentRefundModal(
             class="financeExpenseCancel"
             data-close-finance-refund
           >
-            Залишити платіж
+            ${text("Залишити платіж")}
           </button>
 
           <button
@@ -38656,45 +38646,34 @@ function openFinancePaymentRefundModal(
             class="financeExpenseSubmit"
             id="financeRefundSubmit"
           >
-            <span>
-              Оформити повернення
-            </span>
-
-            <strong>
-              ↙
-            </strong>
+            <span>${text("Оформити повернення")}</span>
+            <strong>↙</strong>
           </button>
         </footer>
       </form>
     </section>
   `;
 
-  document.body.appendChild(
-  modal
-);
+  document.body.appendChild(modal);
+  installFinanceLocalization(modal);
 
-installFinanceLocalization(
-  modal
-);
+  document.body.classList.add(
+    "financeExpenseModalOpen"
+  );
 
-document.body.classList.add(
-  "financeExpenseModalOpen"
-);
+  const form = modal.querySelector(
+    "#financeRefundForm"
+  );
 
-  const form =
-    modal.querySelector(
-      "#financeRefundForm"
-    );
+  const submitButton = modal.querySelector(
+    "#financeRefundSubmit"
+  );
 
-  const submitButton =
-    modal.querySelector(
-      "#financeRefundSubmit"
-    );
+  const errorElement = modal.querySelector(
+    "#financeRefundError"
+  );
 
-  const errorElement =
-    modal.querySelector(
-      "#financeRefundError"
-    );
+  const idempotencyKey = crypto.randomUUID();
 
   let submitting = false;
 
@@ -38713,15 +38692,15 @@ document.body.classList.add(
     );
   };
 
-  const onKeydown = (
-    event
-  ) => {
-    if (
-      event.key ===
-      "Escape"
-    ) {
-      close();
-    }
+  const onKeydown = (event) => {
+    if (event.key === "Escape") close();
+  };
+
+  const showError = (message) => {
+    errorElement.hidden = false;
+
+    errorElement.textContent =
+      getFinanceInterfaceText(message);
   };
 
   document.addEventListener(
@@ -38729,90 +38708,59 @@ document.body.classList.add(
     onKeydown
   );
 
-  modal.addEventListener(
-    "click",
-    (
-      event
-    ) => {
-      if (
-        event.target.closest(
-          "[data-close-finance-refund]"
-        )
-      ) {
-        close();
-      }
+  modal.addEventListener("click", (event) => {
+    if (
+      event.target.closest(
+        "[data-close-finance-refund]"
+      )
+    ) {
+      close();
     }
-  );
+  });
 
   form?.addEventListener(
     "submit",
-    async (
-      event
-    ) => {
+    async (event) => {
       event.preventDefault();
 
       if (submitting) return;
 
-      const formData =
-        new FormData(
-          form
-        );
+      const formData = new FormData(form);
 
-      const amount =
-        Number(
-          formData.get(
-            "amount"
-          )
-        );
+      const amount = Number(
+        formData.get("amount")
+      );
 
-      const reason =
-        String(
-          formData.get(
-            "reason"
-          )
-          || ""
-        ).trim();
+      const reason = String(
+        formData.get("reason") || ""
+      ).trim();
 
       if (
-        !Number.isFinite(
-          amount
-        ) ||
+        !Number.isFinite(amount) ||
         amount <= 0 ||
-        amount >
-          refundableAmount
+        amount > refundableAmount
       ) {
-        errorElement.hidden =
-          false;
-
-        errorElement.textContent =
-  getFinanceRefundAmountError(
-    refundableAmount
-  );
-
+        showError(
+          getFinanceRefundAmountError(
+            refundableAmount,
+            currency
+          )
+        );
         return;
       }
 
       if (!reason) {
-        errorElement.hidden =
-          false;
-
-        errorElement.textContent =
-          "Вкажіть причину повернення.";
-
+        showError("Вкажіть причину повернення.");
         return;
       }
 
       submitting = true;
-
-      errorElement.hidden =
-        true;
-
-      submitButton.disabled =
-        true;
+      errorElement.hidden = true;
+      submitButton.disabled = true;
 
       submitButton.innerHTML = `
         <span>
-          Оформлюємо повернення…
+          ${text("Оформлюємо повернення…")}
         </span>
 
         <div class="visitPaymentSpinner"></div>
@@ -38824,9 +38772,7 @@ document.body.classList.add(
           {
             amount,
             reason,
-
-            idempotency_key:
-              crypto.randomUUID(),
+            idempotency_key: idempotencyKey,
           }
         );
 
@@ -38844,13 +38790,13 @@ document.body.classList.add(
         await renderFinanceTab();
 
         openDeleteModal(
-  getFinanceRefundSuccessMessage(
-    amount
-  ),
-  null,
-  "operation-success"
-);
-
+          getFinanceRefundSuccessMessage(
+            amount,
+            currency
+          ),
+          null,
+          "operation-success"
+        );
       } catch (error) {
         console.error(
           "refund finance payment failed:",
@@ -38858,114 +38804,103 @@ document.body.classList.add(
         );
 
         submitting = false;
-
-        submitButton.disabled =
-          false;
+        submitButton.disabled = false;
 
         submitButton.innerHTML = `
           <span>
-            Оформити повернення
+            ${text("Оформити повернення")}
           </span>
 
-          <strong>
-            ↙
-          </strong>
+          <strong>↙</strong>
         `;
 
-        errorElement.hidden =
-          false;
-
-        errorElement.textContent =
+        showError(
           error?.message ||
-          "Не вдалося оформити повернення.";
+          "Не вдалося оформити повернення."
+        );
       }
     }
   );
 
-  window.setTimeout(
-    () => {
-      modal
-        .querySelector(
-          'textarea[name="reason"]'
-        )
-        ?.focus();
-    },
-    50
-  );
+  window.setTimeout(() => {
+    modal
+      .querySelector('textarea[name="reason"]')
+      ?.focus();
+  }, 50);
 }
 
-
-function openFinanceExpenseModal(
-  transaction = null
-) {
-  if (
-    !isOwnerOrAdmin()
-  ) {
+function openFinanceExpenseModal(transaction = null) {
+  if (!isOwnerOrAdmin()) {
     openDeleteModal(
-  getFinanceInterfaceText(
-    "Додавати витрати може лише адміністратор або власник клініки."
-  ),
-  null,
-  "info"
-);
-
+      getFinanceInterfaceText(
+        "Додавати витрати може лише адміністратор або власник клініки."
+      ),
+      null,
+      "info"
+    );
     return;
   }
 
-  const editingTransaction =
-    (
-      transaction &&
-      transaction.transaction_type ===
-        "expense" &&
-      transaction.source ===
-        "manual" &&
-      transaction.status ===
-        "completed"
-    )
-      ? transaction
-      : null;
+  const editingTransaction = (
+    transaction &&
+    transaction.transaction_type === "expense" &&
+    transaction.source === "manual" &&
+    transaction.status === "completed"
+  ) ? transaction : null;
 
-  const isEditing =
-    Boolean(
-      editingTransaction
-    );
+  const isEditing = Boolean(editingTransaction);
+  const text = (value) => escapeHtml(getFinanceInterfaceText(value));
+  const language = getInterfaceLanguage();
 
-  document
-    .getElementById(
-      "financeExpenseModal"
-    )
-    ?.remove();
+  const accountErrors = {
+    uk: "Не вдалося завантажити доступний рахунок. Закрийте форму та спробуйте ще раз.",
+    en: "Could not load an available account. Close the form and try again.",
+    de: "Ein verfügbares Konto konnte nicht geladen werden. Schließen Sie das Formular und versuchen Sie es erneut.",
+    pl: "Nie udało się załadować dostępnego konta. Zamknij formularz i spróbuj ponownie.",
+  };
 
-  const now =
-    isEditing
-      ? new Date(
-          editingTransaction
-            .occurred_at
-        )
-      : new Date();
+  document.getElementById("financeExpenseModal")?.remove();
 
-  const localDateTime =
-    new Date(
-      now.getTime() -
-      now.getTimezoneOffset() *
-      60_000
-    )
-      .toISOString()
-      .slice(
-        0,
-        16
-      );
+  let now = isEditing
+    ? new Date(editingTransaction.occurred_at)
+    : new Date();
 
-  const modal =
-    document.createElement(
-      "div"
-    );
+  if (!Number.isFinite(now.getTime())) {
+    now = new Date();
+  }
 
-  modal.id =
-    "financeExpenseModal";
+  const localDateTime = new Date(
+    now.getTime() - now.getTimezoneOffset() * 60_000
+  ).toISOString().slice(0, 16);
 
-  modal.className =
-    "financeExpenseOverlay";
+  const categories = [
+    "Закупівля препаратів",
+    "Витратні матеріали",
+    "Оренда",
+    "Комунальні послуги",
+    "Зарплата",
+    "Податки",
+    "Маркетинг",
+    "Обслуговування обладнання",
+    "Транспорт",
+    "Інше",
+  ];
+
+  const methods = [
+    ["cash", "Готівка"],
+    ["card", "Картка"],
+    ["terminal", "Термінал"],
+    ["transfer", "Банківський переказ"],
+    ["other", "Інше"],
+  ];
+
+  const initialCurrency = isEditing
+    ? editingTransaction.currency || "UAH"
+    : getClinicCurrency();
+
+  const modal = document.createElement("div");
+  modal.id = "financeExpenseModal";
+  modal.className = "financeExpenseOverlay";
 
   modal.innerHTML = `
     <div
@@ -38980,35 +38915,25 @@ function openFinanceExpenseModal(
       aria-labelledby="financeExpenseTitle"
     >
       <header class="financeExpenseHeader">
-        <div class="financeExpenseHeaderIcon">
-          −
-        </div>
+        <div class="financeExpenseHeaderIcon">−</div>
 
         <div>
-          <span>
-            ФІНАНСОВА ОПЕРАЦІЯ
-          </span>
+          <span>${text("ФІНАНСОВА ОПЕРАЦІЯ")}</span>
 
           <h2 id="financeExpenseTitle">
-            ${
+            ${text(
               isEditing
                 ? "Редагувати витрату"
                 : "Додати витрату"
-            }
+            )}
           </h2>
 
           <p>
-            ${
+            ${text(
               isEditing
-                ? (
-                    "Зміни одразу оновлять " +
-                    "журнал, рахунок та аналітику."
-                  )
-                : (
-                    "Витрата одразу потрапить " +
-                    "до аналітики та журналу."
-                  )
-            }
+                ? "Зміни одразу оновлять журнал, рахунок та аналітику."
+                : "Витрата одразу потрапить до аналітики та журналу."
+            )}
           </p>
         </div>
 
@@ -39016,7 +38941,7 @@ function openFinanceExpenseModal(
           type="button"
           class="financeExpenseClose"
           data-close-finance-expense
-          aria-label="Закрити"
+          aria-label="${text("Закрити")}"
         >
           ✕
         </button>
@@ -39034,9 +38959,7 @@ function openFinanceExpenseModal(
 
         <div class="financeExpenseAmountBlock">
           <label>
-            <span>
-              Сума витрати
-            </span>
+            <span>${text("Сума витрати")}</span>
 
             <div class="financeExpenseAmountInput">
               <input
@@ -39051,102 +38974,59 @@ function openFinanceExpenseModal(
                 autofocus
               >
 
-              <b>₴</b>
+              <b data-finance-content>
+                ${escapeHtml(
+                  getClinicCurrencySymbol(initialCurrency)
+                )}
+              </b>
             </div>
           </label>
         </div>
 
         <div class="financeExpenseGrid">
           <label class="financeExpenseField">
-            <span>
-              Категорія
-            </span>
+            <span>${text("Категорія")}</span>
 
-            <select
-              name="category"
-              required
-            >
+            <select name="category" required>
               <option value="">
-                Оберіть категорію
+                ${text("Оберіть категорію")}
               </option>
 
-              <option value="Закупівля препаратів">
-                Закупівля препаратів
-              </option>
-
-              <option value="Витратні матеріали">
-                Витратні матеріали
-              </option>
-
-              <option value="Оренда">
-                Оренда
-              </option>
-
-              <option value="Комунальні послуги">
-                Комунальні послуги
-              </option>
-
-              <option value="Зарплата">
-                Зарплата
-              </option>
-
-              <option value="Податки">
-                Податки
-              </option>
-
-              <option value="Маркетинг">
-                Маркетинг
-              </option>
-
-              <option value="Обслуговування обладнання">
-                Обслуговування обладнання
-              </option>
-
-              <option value="Транспорт">
-                Транспорт
-              </option>
-
-              <option value="Інше">
-                Інше
-              </option>
+              ${
+                categories.map((category) => `
+                  <option value="${escapeHtml(category)}">
+                    ${text(category)}
+                  </option>
+                `).join("")
+              }
             </select>
           </label>
 
           <label class="financeExpenseField">
-            <span>
-              Спосіб оплати
-            </span>
+            <span>${text("Спосіб оплати")}</span>
+
+            <select name="payment_method" required>
+              ${
+                methods.map(([value, label]) => `
+                  <option value="${value}">
+                    ${text(label)}
+                  </option>
+                `).join("")
+              }
+            </select>
+          </label>
+
+          <label class="financeExpenseField">
+            <span>${text("Рахунок")}</span>
 
             <select
-              name="payment_method"
+              name="financial_account_id"
               required
-            >
-              <option value="cash">
-                Готівка
-              </option>
-
-              <option value="card">
-                Картка
-              </option>
-
-              <option value="terminal">
-                Термінал
-              </option>
-
-              <option value="transfer">
-                Банківський переказ
-              </option>
-
-              <option value="other">
-                Інше
-              </option>
-            </select>
+            ></select>
           </label>
 
           <label class="financeExpenseField">
-            <span>
-              Дата та час
-            </span>
+            <span>${text("Дата та час")}</span>
 
             <input
               type="datetime-local"
@@ -39157,36 +39037,32 @@ function openFinanceExpenseModal(
           </label>
 
           <label class="financeExpenseField">
-            <span>
-              Постачальник / отримувач
-            </span>
+            <span>${text("Постачальник / отримувач")}</span>
 
             <input
               type="text"
               name="counterparty"
               maxlength="300"
-              placeholder="Наприклад, постачальник"
+              placeholder="${text("Наприклад, постачальник")}"
             >
           </label>
         </div>
 
         <label class="financeExpenseField financeExpenseWide">
-          <span>
-            Опис
-          </span>
+          <span>${text("Опис")}</span>
 
           <textarea
             name="description"
             maxlength="2000"
             rows="3"
-            placeholder="За що сплачено та додаткові деталі…"
+            placeholder="${text(
+              "За що сплачено та додаткові деталі…"
+            )}"
           ></textarea>
         </label>
 
         <label class="financeExpenseField financeExpenseWide">
-          <span>
-            Посилання на чек або документ
-          </span>
+          <span>${text("Посилання на чек або документ")}</span>
 
           <input
             type="url"
@@ -39200,10 +39076,9 @@ function openFinanceExpenseModal(
           <span>i</span>
 
           <p>
-            Операція буде зафіксована
-            від імені поточного користувача.
-            Після проведення вона вплине
-            на грошовий потік і прибуток.
+            ${text(
+              "Операція буде зафіксована від імені поточного користувача. Після проведення вона вплине на грошовий потік і прибуток."
+            )}
           </p>
         </div>
 
@@ -39213,7 +39088,7 @@ function openFinanceExpenseModal(
             class="financeExpenseCancel"
             data-close-finance-expense
           >
-            Скасувати
+            ${text("Скасувати")}
           </button>
 
           <button
@@ -39222,383 +39097,350 @@ function openFinanceExpenseModal(
             id="financeExpenseSubmit"
           >
             <span>
-              ${
+              ${text(
                 isEditing
                   ? "Зберегти зміни"
                   : "Провести витрату"
-              }
+              )}
             </span>
 
-            <strong>
-              →
-            </strong>
+            <strong>→</strong>
           </button>
         </footer>
       </form>
     </section>
   `;
 
-  document.body.appendChild(
-  modal
-);
+  document.body.appendChild(modal);
+  document.body.classList.add("financeExpenseModalOpen");
 
-installFinanceLocalization(
-  modal
-);
+  const form = modal.querySelector("#financeExpenseForm");
+  const submitButton = modal.querySelector("#financeExpenseSubmit");
+  const errorElement = modal.querySelector("#financeExpenseError");
 
-document.body.classList.add(
-  "financeExpenseModalOpen"
-);
+  const accountSelect = form.elements.financial_account_id;
+  const methodSelect = form.elements.payment_method;
 
-  const form =
-    modal.querySelector(
-      "#financeExpenseForm"
-    );
-
-  const submitButton =
-    modal.querySelector(
-      "#financeExpenseSubmit"
-    );
-
-  const errorElement =
-    modal.querySelector(
-      "#financeExpenseError"
-    );
-
-  if (
-    form &&
-    editingTransaction
-  ) {
-    const categorySelect =
-      form.elements.category;
-
-    const category =
-      String(
-        editingTransaction.category ||
-        ""
-      );
-
-    if (
-      category &&
-      !Array.from(
-        categorySelect.options
-      ).some(
-        (option) =>
-          option.value === category
-      )
-    ) {
-      categorySelect.add(
-        new Option(
-          category,
-          category
-        )
-      );
-    }
-
-    form.elements.amount.value =
-      editingTransaction.amount ??
-      "";
-
-    categorySelect.value =
-      category;
-
-    form.elements
-      .payment_method.value =
-        editingTransaction
-          .payment_method ||
-        "cash";
-
-    form.elements
-      .occurred_at.value =
-        localDateTime;
-
-    form.elements
-      .counterparty.value =
-        editingTransaction
-          .counterparty ||
-        "";
-
-    form.elements
-      .description.value =
-        editingTransaction
-          .description ||
-        "";
-
-    form.elements
-      .document_url.value =
-        editingTransaction
-          .document_url ||
-        "";
-  }
+  const currencyElement = form.querySelector(
+    ".financeExpenseAmountInput b"
+  );
 
   let submitting = false;
+  let accountsReady = isEditing;
+  let expenseAccounts = [];
+
+  const showError = (message) => {
+    errorElement.hidden = false;
+    errorElement.textContent = getFinanceInterfaceText(message);
+  };
+
+  const resetSubmitButton = () => {
+    submitButton.disabled = submitting || !accountsReady;
+
+    submitButton.innerHTML = `
+      <span>
+        ${text(
+          isEditing
+            ? "Зберегти зміни"
+            : "Провести витрату"
+        )}
+      </span>
+      <strong>→</strong>
+    `;
+  };
 
   const close = () => {
     if (submitting) return;
 
     modal.remove();
-
-    document.body.classList.remove(
-      "financeExpenseModalOpen"
-    );
-
-    document.removeEventListener(
-      "keydown",
-      onKeydown
-    );
+    document.body.classList.remove("financeExpenseModalOpen");
+    document.removeEventListener("keydown", onKeydown);
   };
 
-  const onKeydown = (
-    event
-  ) => {
+  const onKeydown = (event) => {
+    if (event.key === "Escape") close();
+  };
+
+  document.addEventListener("keydown", onKeydown);
+
+  modal.addEventListener("click", (event) => {
     if (
-      event.key ===
-      "Escape"
+      event.target.closest("[data-close-finance-expense]")
     ) {
       close();
     }
+  });
+
+  const updateCurrency = () => {
+    const account = expenseAccounts.find(
+      (item) => String(item.id) === accountSelect.value
+    );
+
+    const currency = isEditing
+      ? editingTransaction.currency || "UAH"
+      : account?.currency || getClinicCurrency();
+
+    currencyElement.textContent = getClinicCurrencySymbol(currency);
+    currencyElement.title = currency;
   };
 
-  document.addEventListener(
-    "keydown",
-    onKeydown
-  );
+  const renderAccounts = () => {
+    const previousId = accountSelect.value;
+    const cashMethod = methodSelect.value === "cash";
 
-  modal.addEventListener(
-    "click",
-    (
-      event
-    ) => {
-      if (
-        event.target.closest(
-          "[data-close-finance-expense]"
-        )
-      ) {
-        close();
-      }
+    const available = expenseAccounts.filter(
+      (account) =>
+        (account.account_type === "cash") === cashMethod
+    );
+
+    accountSelect.replaceChildren();
+
+    available.forEach((account) => {
+      const option = new Option(
+        `${account.name} · ${account.currency || "UAH"}`,
+        String(account.id)
+      );
+
+      option.setAttribute("data-finance-content", "");
+      accountSelect.add(option);
+    });
+
+    const selected =
+      available.find(
+        (account) => String(account.id) === previousId
+      ) ||
+      available.find(
+        (account) => account.currency === getClinicCurrency()
+      ) ||
+      available[0];
+
+    accountSelect.value = selected
+      ? String(selected.id)
+      : "";
+
+    accountsReady = Boolean(selected);
+
+    updateCurrency();
+    resetSubmitButton();
+  };
+
+  if (isEditing) {
+    const category = String(editingTransaction.category || "");
+
+    if (category && !categories.includes(category)) {
+      const option = new Option(category, category);
+
+      option.setAttribute("data-finance-content", "");
+      form.elements.category.add(option);
     }
-  );
 
-  form?.addEventListener(
-    "submit",
-    async (
-      event
-    ) => {
-      event.preventDefault();
+    form.elements.amount.value = editingTransaction.amount ?? "";
+    form.elements.category.value = category;
 
-      if (submitting) return;
+    methodSelect.value =
+      editingTransaction.payment_method || "cash";
 
-      const formData =
-        new FormData(
-          form
-        );
+    form.elements.counterparty.value =
+      editingTransaction.counterparty || "";
 
-      const amount =
-        Number(
-          formData.get(
-            "amount"
-          )
-        );
+    form.elements.description.value =
+      editingTransaction.description || "";
 
-      const category =
-        String(
-          formData.get(
-            "category"
-          )
-          || ""
-        ).trim();
+    form.elements.document_url.value =
+      editingTransaction.document_url || "";
 
-      if (
-        !Number.isFinite(
-          amount
-        )
-        || amount <= 0
-      ) {
-        errorElement.hidden =
-          false;
+    const option = new Option(
+      initialCurrency,
+      String(editingTransaction.financial_account_id || "")
+    );
 
-        errorElement.textContent =
-          "Вкажіть коректну суму витрати.";
+    option.setAttribute("data-finance-content", "");
+    accountSelect.add(option);
 
-        return;
-      }
+    accountSelect.disabled = true;
+    methodSelect.disabled = true;
 
-      if (!category) {
-        errorElement.hidden =
-          false;
+    updateCurrency();
 
-        errorElement.textContent =
-          "Оберіть категорію витрати.";
+  } else {
+    submitButton.disabled = true;
 
-        return;
-      }
+    methodSelect.addEventListener("change", renderAccounts);
+    accountSelect.addEventListener("change", updateCurrency);
 
-      submitting = true;
+    loadFinanceAccountsApi()
+      .then((result) => {
+        if (!modal.isConnected) return;
 
-      errorElement.hidden =
-        true;
+        expenseAccounts = Array.isArray(result.accounts)
+          ? result.accounts
+          : [];
 
-      submitButton.disabled =
-        true;
+        renderAccounts();
 
-      submitButton.innerHTML = `
-        <span>
-          ${
-            isEditing
-              ? "Зберігаємо зміни…"
-              : "Проводимо операцію…"
-          }
-        </span>
-
-        <div class="visitPaymentSpinner"></div>
-      `;
-
-      try {
-        const expensePayload = {
-          transaction_type:
-            "expense",
-
-          amount,
-
-          category,
-
-          payment_method:
-            String(
-              formData.get(
-                "payment_method"
-              )
-              || "cash"
-            ),
-
-          occurred_at:
-            String(
-              formData.get(
-                "occurred_at"
-              )
-              || ""
-            ),
-
-          counterparty:
-            String(
-              formData.get(
-                "counterparty"
-              )
-              || ""
-            ).trim(),
-
-          description:
-            String(
-              formData.get(
-                "description"
-              )
-              || ""
-            ).trim(),
-
-          document_url:
-            String(
-              formData.get(
-                "document_url"
-              )
-              || ""
-            ).trim(),
-
-          idempotency_key:
-            crypto.randomUUID(),
-
-          metadata: {
-            expense_form_version:
-              1,
-          },
-        };
-
-        if (isEditing) {
-          await updateFinanceExpenseApi(
-            editingTransaction.id,
-            expensePayload
-          );
-
-        } else {
-          await createFinanceTransactionApi(
-            expensePayload
+        if (!accountsReady) {
+          showError(
+            accountErrors[language] || accountErrors.en
           );
         }
+      })
+      .catch((error) => {
+        if (!modal.isConnected) return;
 
-        modal.remove();
-
-        document.body.classList.remove(
-          "financeExpenseModalOpen"
-        );
-
-        document.removeEventListener(
-          "keydown",
-          onKeydown
-        );
-
-        await renderFinanceTab();
-
-        openDeleteModal(
-  getFinanceInterfaceText(
-    isEditing
-      ? "Зміни витрати успішно збережено."
-      : "Витрату успішно додано до фінансового журналу."
-  ),
-  null,
-  "operation-success"
-);
-
-      } catch (error) {
         console.error(
-          (
-            isEditing
-              ? "update finance expense failed:"
-              : "create finance expense failed:"
-          ),
+          "Expense accounts loading failed:",
           error
         );
 
-        submitting = false;
+        accountsReady = false;
+        resetSubmitButton();
 
-        submitButton.disabled =
-          false;
+        showError(
+          accountErrors[language] || accountErrors.en
+        );
+      });
+  }
 
-        submitButton.innerHTML = `
-          <span>
-            ${
-              isEditing
-                ? "Зберегти зміни"
-                : "Провести витрату"
-            }
-          </span>
+  installFinanceLocalization(modal);
 
-          <strong>
-            →
-          </strong>
-        `;
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-        errorElement.hidden =
-          false;
+    if (submitting || !accountsReady) return;
 
-        errorElement.textContent =
-          error?.message ||
-          (
-            isEditing
-              ? "Не вдалося зберегти зміни витрати."
-              : "Не вдалося додати витрату."
-          );
-      }
+    const formData = new FormData(form);
+    const amount = Number(formData.get("amount"));
+    const category = String(
+      formData.get("category") || ""
+    ).trim();
+
+    if (
+      !Number.isFinite(amount) ||
+      amount < 0.01 ||
+      amount > 1000000000
+    ) {
+      showError("Вкажіть коректну суму витрати.");
+      return;
     }
-  );
 
-  window.setTimeout(
-    () => {
-      modal
-        .querySelector(
-          'input[name="amount"]'
+    if (!category) {
+      showError("Оберіть категорію витрати.");
+      return;
+    }
+
+    if (!isEditing && !accountSelect.value) {
+      showError(
+        accountErrors[language] || accountErrors.en
+      );
+      return;
+    }
+
+    const expensePayload = {
+      transaction_type: "expense",
+      amount,
+      category,
+
+      financial_account_id: isEditing
+        ? editingTransaction.financial_account_id || null
+        : accountSelect.value,
+
+      payment_method: isEditing
+        ? editingTransaction.payment_method || "cash"
+        : String(
+            formData.get("payment_method") || "cash"
+          ),
+
+      occurred_at: String(
+        formData.get("occurred_at") || ""
+      ),
+
+      counterparty: String(
+        formData.get("counterparty") || ""
+      ).trim(),
+
+      description: String(
+        formData.get("description") || ""
+      ).trim(),
+
+      document_url: String(
+        formData.get("document_url") || ""
+      ).trim(),
+
+      idempotency_key: crypto.randomUUID(),
+
+      metadata: {
+        expense_form_version: 2,
+      },
+    };
+
+    submitting = true;
+    errorElement.hidden = true;
+    submitButton.disabled = true;
+
+    submitButton.innerHTML = `
+      <span>
+        ${text(
+          isEditing
+            ? "Зберігаємо зміни…"
+            : "Проводимо операцію…"
+        )}
+      </span>
+      <div class="visitPaymentSpinner"></div>
+    `;
+
+    try {
+      if (isEditing) {
+        await updateFinanceExpenseApi(
+          editingTransaction.id,
+          expensePayload
+        );
+      } else {
+        await createFinanceTransactionApi(
+          expensePayload
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Finance expense save failed:",
+        error
+      );
+
+      submitting = false;
+      resetSubmitButton();
+
+      showError(
+        error?.message ||
+        (
+          isEditing
+            ? "Не вдалося зберегти зміни витрати."
+            : "Не вдалося додати витрату."
         )
-        ?.focus();
-    },
-    50
-  );
+      );
+
+      return;
+    }
+
+    submitting = false;
+    close();
+
+    await renderFinanceTab();
+
+    openDeleteModal(
+      getFinanceInterfaceText(
+        isEditing
+          ? "Зміни витрати успішно збережено."
+          : "Витрату успішно додано до фінансового журналу."
+      ),
+      null,
+      "operation-success"
+    );
+  });
+
+  window.setTimeout(() => {
+    if (modal.isConnected) {
+      form.elements.amount.focus();
+    }
+  }, 50);
 }
 function getSafeFinanceDocumentUrl(
   value
@@ -40319,8 +40161,9 @@ async function renderFinanceOperationsTab(
                                           "Повернено повністю"
                                         )
                                       : getFinanceRefundedText(
-                                          refundedAmount
-                                        )
+  refundedAmount,
+  transaction.currency || "UAH"
+)
                                   }
                                 </span>
                               `
@@ -40389,30 +40232,24 @@ async function renderFinanceOperationsTab(
                   }
                 </div>
 
-                <div
-                  class="
-                    financeOperationAmount
-                    ${meta.type.className}
-                  "
+                                <div
+                  class="financeOperationAmount ${meta.type.className}"
                 >
                   <strong>
-                    ${sign}${formatVisitFinanceMoney(
-                      transaction.amount
+                    ${sign}${escapeHtml(
+                      formatVisitFinanceMoney(
+                        transaction.amount,
+                        transaction.currency || "UAH"
+                      )
                     )}
                   </strong>
 
                   <span
-                    class="
-                      financeOperationStatus
-                      is-${
-                        transaction.status ||
-                        "unknown"
-                      }
-                    "
+                    class="financeOperationStatus is-${escapeHtml(
+                      transaction.status || "unknown"
+                    )}"
                   >
-                    ${escapeHtml(
-                      statusLabel
-                    )}
+                    ${escapeHtml(statusLabel)}
                   </span>
                 </div>
               </article>
@@ -40560,34 +40397,30 @@ async function renderFinanceOperationsTab(
         return;
       }
 
-      if (cancelButton) {
-        const transactionId =
-          String(
-            cancelButton.dataset
-              .financeCancelPayment ||
-            ""
-          ).trim();
+            if (cancelButton) {
+        const transactionId = String(
+          cancelButton.dataset.financeCancelPayment || ""
+        ).trim();
 
-        const amount =
-          Number(
-            cancelButton.dataset
-              .financeCancelAmount ||
-            0
-          );
+        const transaction = items.find(
+          (item) => String(item.id) === transactionId
+        );
 
-        if (!transactionId) {
+        if (
+          !transaction ||
+          transaction.transaction_type !== "payment" ||
+          transaction.status !== "completed"
+        ) {
           return;
         }
 
         openDeleteModal(
           getFinanceCancelPaymentMessage(
-            amount
+            Number(transaction.amount || 0),
+            transaction.currency || "UAH"
           ),
           async () => {
-            await cancelFinancePaymentApi(
-              transactionId
-            );
-
+            await cancelFinancePaymentApi(transactionId);
             await renderFinanceTab();
           },
           "payment-cancel"
@@ -40595,6 +40428,7 @@ async function renderFinanceOperationsTab(
 
         return;
       }
+
 
       if (visitButton) {
         const visitId =
@@ -40965,8 +40799,11 @@ function getFinanceExpenseCategoryMeta(
 }
 
 function buildFinanceExpensesTrendChart(
-  rows
+  rows,
+  currency = getFinanceReportCurrency()
 ) {
+  const formatVisitFinanceMoney = (value) =>
+    formatClinicMoney(value, currency);
   const data =
     Array.isArray(rows)
       ? rows
@@ -41967,32 +41804,35 @@ document.body.classList.add(
                 >
               </label>
 
-              <label>
+                            <label>
                 <span>
-                  Валюта
+                  ${escapeHtml(
+                    getFinanceInterfaceText("Валюта")
+                  )}
                 </span>
 
-                <select name="currency">
-                  <option value="UAH">
-                    UAH — гривня
-                  </option>
-
-                  <option value="USD">
-                    USD — долар
-                  </option>
-
-                  <option value="EUR">
-                    EUR — євро
-                  </option>
-
-                  <option value="PLN">
-                    PLN — злотий
-                  </option>
+                <select name="currency" required>
+                  ${
+                    CLINIC_CURRENCY_CODES
+                      .map((currency) => `
+                        <option
+                          value="${currency}"
+                          data-finance-content
+                          ${
+                            currency === getClinicCurrency()
+                              ? "selected"
+                              : ""
+                          }
+                        >
+                          ${currency}
+                        </option>
+                      `)
+                      .join("")
+                  }
                 </select>
               </label>
             </div>
           </section>
-
           <section class="financePurchaseCreateItems">
             <div class="financePurchaseCreateSectionHead">
               <div>
@@ -42205,8 +42045,17 @@ supplierSelect.appendChild(
     );
   }
 );
-    let rowCounter = 0;
+        let rowCounter = 0;
     let submitting = false;
+
+    const getPurchaseCurrency = () =>
+      form.elements.currency?.value || "UAH";
+
+    const purchaseMoney = (value) =>
+      formatVisitFinanceMoney(
+        value,
+        getPurchaseCurrency()
+      );
 
     const updateTotals = () => {
       const rows = [
@@ -42215,107 +42064,74 @@ supplierSelect.appendChild(
         ),
       ];
 
-      const subtotal =
-        rows.reduce(
-          (
-            total,
-            row
-          ) => {
-            const quantity =
-              Math.max(
-                0,
-                Number(
-                  row.querySelector(
-                    '[name="ordered_qty"]'
-                  )?.value ||
-                  0
-                )
-              );
-
-            const price =
-              Math.max(
-                0,
-                Number(
-                  row.querySelector(
-                    '[name="purchase_price"]'
-                  )?.value ||
-                  0
-                )
-              );
-
-            const lineTotal =
-              quantity * price;
-
-            const lineElement =
-              row.querySelector(
-                ".financePurchaseItemLineTotal"
-              );
-
-            if (lineElement) {
-              lineElement.textContent =
-                formatVisitFinanceMoney(
-                  lineTotal
-                );
-            }
-
-            return (
-              total +
-              lineTotal
-            );
-          },
-          0
-        );
-
-      const discount =
-        Math.max(
+      const subtotal = rows.reduce((total, row) => {
+        const quantity = Math.max(
           0,
           Number(
-            form.elements
-              .discount_amount
-              ?.value ||
-            0
+            row.querySelector(
+              '[name="ordered_qty"]'
+            )?.value || 0
           )
         );
 
-      const total =
-        Math.max(
+        const price = Math.max(
           0,
-          subtotal -
-          discount
+          Number(
+            row.querySelector(
+              '[name="purchase_price"]'
+            )?.value || 0
+          )
         );
+
+        const lineTotal = quantity * price;
+
+        const lineElement = row.querySelector(
+          ".financePurchaseItemLineTotal"
+        );
+
+        if (lineElement) {
+          lineElement.textContent =
+            purchaseMoney(lineTotal);
+        }
+
+        return total + lineTotal;
+      }, 0);
+
+      const discount = Math.max(
+        0,
+        Number(
+          form.elements.discount_amount?.value || 0
+        )
+      );
+
+      const total = Math.max(
+        0,
+        subtotal - discount
+      );
 
       overlay.querySelector(
         "#financePurchaseCreateSubtotal"
-      ).textContent =
-        formatVisitFinanceMoney(
-          subtotal
-        );
+      ).textContent = purchaseMoney(subtotal);
 
       overlay.querySelector(
         "#financePurchaseCreateDiscount"
-      ).textContent =
-        formatVisitFinanceMoney(
-          discount
-        );
+      ).textContent = purchaseMoney(discount);
 
       overlay.querySelector(
         "#financePurchaseCreateTotal"
-      ).textContent =
-        formatVisitFinanceMoney(
-          total
-        );
+      ).textContent = purchaseMoney(total);
     };
+
+    form.elements.currency.addEventListener(
+      "change",
+      updateTotals
+    );
 
     const addItemRow = () => {
       rowCounter += 1;
 
-      const row =
-        document.createElement(
-          "article"
-        );
-
-      row.className =
-        "financePurchaseCreateItem";
+      const row = document.createElement("article");
+      row.className = "financePurchaseCreateItem";
 
       row.innerHTML = `
         <div class="financePurchaseCreateItemNumber">
@@ -42324,60 +42140,63 @@ supplierSelect.appendChild(
 
         <label class="financePurchaseStockSelect">
           <span>
-            Позиція складу
+            ${escapeHtml(
+              getFinanceInterfaceText("Позиція складу")
+            )}
           </span>
 
           <select name="stock_id">
             <option value="">
-              + Нова позиція
+              ${escapeHtml(
+                getFinanceInterfaceText("+ Нова позиція")
+              )}
             </option>
 
             ${
-  activeStock
-    .map(
-      (item) => `
-        <option
-          value="${escapeHtml(
-            item.id
-          )}"
-          data-finance-content
-        >
-          ${escapeHtml(
-            item.name
-          )}
-          ·
-          ${Number(
-            item.qty || 0
-          )}
-          ${escapeHtml(
-            item.unit ||
-            "шт"
-          )}
-        </option>
-      `
-    )
-    .join("")
-}
-</select>
-</label>
+              activeStock
+                .map((item) => `
+                  <option
+                    value="${escapeHtml(String(item.id))}"
+                    data-finance-content
+                  >
+                    ${escapeHtml(item.name)}
+                    ·
+                    ${Number(item.qty || 0)}
+                    ${escapeHtml(
+                      getStockInterfaceText(
+                        item.unit || "шт"
+                      )
+                    )}
+                  </option>
+                `)
+                .join("")
+            }
+          </select>
+        </label>
 
         <label class="financePurchaseItemNameInput">
           <span>
-            Назва
+            ${escapeHtml(
+              getFinanceInterfaceText("Назва")
+            )}
           </span>
 
           <input
             type="text"
             name="name_snap"
             maxlength="250"
-            placeholder="Назва позиції"
+            placeholder="${escapeHtml(
+              getFinanceInterfaceText("Назва позиції")
+            )}"
             required
           >
         </label>
 
         <label>
           <span>
-            Од.
+            ${escapeHtml(
+              getFinanceInterfaceText("Од.")
+            )}
           </span>
 
           <input
@@ -42391,7 +42210,9 @@ supplierSelect.appendChild(
 
         <label>
           <span>
-            Кількість
+            ${escapeHtml(
+              getFinanceInterfaceText("Кількість")
+            )}
           </span>
 
           <input
@@ -42406,7 +42227,9 @@ supplierSelect.appendChild(
 
         <label>
           <span>
-            Закупівельна ціна
+            ${escapeHtml(
+              getFinanceInterfaceText("Закупівельна ціна")
+            )}
           </span>
 
           <input
@@ -42421,11 +42244,16 @@ supplierSelect.appendChild(
 
         <div class="financePurchaseItemLine">
           <span>
-            Сума
+            ${escapeHtml(
+              getFinanceInterfaceText("Сума")
+            )}
           </span>
 
-          <strong class="financePurchaseItemLineTotal">
-            0 ₴
+          <strong
+            class="financePurchaseItemLineTotal"
+            data-finance-content
+          >
+            ${escapeHtml(purchaseMoney(0))}
           </strong>
         </div>
 
@@ -42437,9 +42265,7 @@ supplierSelect.appendChild(
         </button>
       `;
 
-      itemsList.appendChild(
-        row
-      );
+      itemsList.appendChild(row);
 
       const stockSelect =
         row.querySelector(
@@ -43010,82 +42836,103 @@ Object.assign(
     },
   }
 );
-function openFinancePurchaseDetailsModal(
-  purchase
-) {
-  document
-    .querySelector(
-      ".financePurchaseDetailsOverlay"
-    )
-    ?.remove();
+function openFinancePurchaseDetailsModal(purchase) {
+  document.querySelector(".financePurchaseDetailsOverlay")?.remove();
 
-  const statusMeta =
-    getFinancePurchaseStatusMeta(
-      purchase.status
-    );
+  const statusMeta = getFinancePurchaseStatusMeta(purchase.status);
+  const paymentMeta = getFinancePurchasePaymentMeta(purchase.payment_status);
+  const supplier = purchase.supplier || {};
+  const items = Array.isArray(purchase.items) ? purchase.items : [];
+  const documentUrl = getSafeFinanceDocumentUrl(purchase.document_url);
+  const currency = purchase.currency || "UAH";
 
-  const paymentMeta =
-    getFinancePurchasePaymentMeta(
-      purchase.payment_status
-    );
+  const text = (value) => escapeHtml(getFinanceInterfaceText(value));
 
-  const supplier =
-    purchase.supplier || {};
+  const money = (value) => escapeHtml(
+    formatVisitFinanceMoney(value, currency)
+  );
 
-  const items =
-    Array.isArray(
-      purchase.items
-    )
-      ? purchase.items
-      : [];
+  const remaining = purchase.remaining_amount ?? Math.max(
+    0,
+    Number(purchase.total_amount || 0) -
+    Number(purchase.paid_amount || 0)
+  );
 
-  const documentUrl =
-    getSafeFinanceDocumentUrl(
-      purchase.document_url
-    );
+  const totals = [
+    {
+      label: "Підсумок",
+      amount: purchase.subtotal,
+      className: "",
+      prefix: "",
+    },
+    {
+      label: "Знижка",
+      amount: purchase.discount_amount,
+      className: "",
+      prefix: "−",
+    },
+    {
+      label: "Разом",
+      amount: purchase.total_amount,
+      className: "is-total",
+      prefix: "",
+    },
+    {
+      label: "Сплачено",
+      amount: purchase.paid_amount,
+      className: "",
+      prefix: "",
+    },
+    {
+      label: "Залишок",
+      amount: remaining,
+      className: "is-remaining",
+      prefix: "",
+    },
+  ];
 
-  const overlay =
-    document.createElement(
-      "div"
-    );
-
-  overlay.className =
-    "financePurchaseDetailsOverlay";
+  const overlay = document.createElement("div");
+  overlay.className = "financePurchaseDetailsOverlay";
 
   overlay.innerHTML = `
     <div
       class="financePurchaseDetailsModal"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="financePurchaseDetailsTitle"
     >
       <header class="financePurchaseDetailsHeader">
         <div class="financePurchaseDetailsHeaderIcon">
-          ${statusMeta.icon}
+          ${escapeHtml(statusMeta.icon)}
         </div>
 
         <div>
-          <span>
-            ДОКУМЕНТ ЗАКУПІВЛІ
-          </span>
+          <span>${text("ДОКУМЕНТ ЗАКУПІВЛІ")}</span>
 
-          <h2>
-            ${escapeHtml(
-              purchase.purchase_number ||
-              "Закупівля"
-            )}
+          <h2
+            id="financePurchaseDetailsTitle"
+            data-finance-content
+          >
+            ${
+              purchase.purchase_number
+                ? escapeHtml(purchase.purchase_number)
+                : text("Закупівля")
+            }
           </h2>
 
-          <p>
-            ${escapeHtml(
-              supplier.name ||
-              "Постачальник не вказаний"
-            )}
+          <p data-finance-content>
+            ${
+              supplier.name
+                ? escapeHtml(supplier.name)
+                : text("Постачальник не вказаний")
+            }
           </p>
         </div>
 
         <button
           type="button"
           class="financePurchaseDetailsClose"
+          aria-label="${text("Закрити")}"
         >
           ×
         </button>
@@ -43093,54 +42940,32 @@ function openFinancePurchaseDetailsModal(
 
       <div class="financePurchaseDetailsBody">
         <section class="financePurchaseDetailsStatuses">
-          <div
-            class="${
-              statusMeta.className
-            }"
-          >
-            <span>
-              Статус постачання
-            </span>
-
-            <strong>
-              ${statusMeta.label}
-            </strong>
+          <div class="${escapeHtml(statusMeta.className)}">
+            <span>${text("Статус постачання")}</span>
+            <strong>${text(statusMeta.label)}</strong>
           </div>
 
-          <div
-            class="${
-              paymentMeta.className
-            }"
-          >
-            <span>
-              Статус оплати
-            </span>
-
-            <strong>
-              ${paymentMeta.label}
-            </strong>
+          <div class="${escapeHtml(paymentMeta.className)}">
+            <span>${text("Статус оплати")}</span>
+            <strong>${text(paymentMeta.label)}</strong>
           </div>
 
           <div>
-            <span>
-              Дата замовлення
-            </span>
+            <span>${text("Дата замовлення")}</span>
 
-            <strong>
-              ${formatFinancePurchaseDate(
-                purchase.order_date
+            <strong data-finance-content>
+              ${escapeHtml(
+                formatFinancePurchaseDate(purchase.order_date)
               )}
             </strong>
           </div>
 
           <div>
-            <span>
-              Очікується
-            </span>
+            <span>${text("Очікується")}</span>
 
-            <strong>
-              ${formatFinancePurchaseDate(
-                purchase.expected_date
+            <strong data-finance-content>
+              ${escapeHtml(
+                formatFinancePurchaseDate(purchase.expected_date)
               )}
             </strong>
           </div>
@@ -43149,206 +42974,143 @@ function openFinancePurchaseDetailsModal(
         <section class="financePurchaseDetailsSupplier">
           <div class="financePurchaseDetailsSectionHead">
             <div>
-              <span>
-                ПОСТАЧАЛЬНИК
-              </span>
+              <span>${text("ПОСТАЧАЛЬНИК")}</span>
 
-              <h3>
-                ${escapeHtml(
-                  supplier.name ||
-                  "Без назви"
-                )}
+              <h3 data-finance-content>
+                ${
+                  supplier.name
+                    ? escapeHtml(supplier.name)
+                    : text("Без назви")
+                }
               </h3>
             </div>
           </div>
 
           <div class="financePurchaseSupplierGrid">
-            <div>
-              <span>
-                Контакт
-              </span>
+            ${
+              [
+                {
+                  label: "Контакт",
+                  value: supplier.contact_person,
+                  fallback: "—",
+                },
+                {
+                  label: "Телефон",
+                  value: supplier.phone,
+                  fallback: "—",
+                },
+                {
+                  label: "Email",
+                  value: supplier.email,
+                  fallback: "—",
+                },
+                {
+                  label: "Накладна",
+                  value: purchase.invoice_number,
+                  fallback: "Не вказано",
+                },
+              ]
+                .map((field) => `
+                  <div>
+                    <span>${text(field.label)}</span>
 
-              <strong>
-                ${escapeHtml(
-                  supplier.contact_person ||
-                  "—"
-                )}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                Телефон
-              </span>
-
-              <strong>
-                ${escapeHtml(
-                  supplier.phone ||
-                  "—"
-                )}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                Email
-              </span>
-
-              <strong>
-                ${escapeHtml(
-                  supplier.email ||
-                  "—"
-                )}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                Накладна
-              </span>
-
-              <strong>
-                ${escapeHtml(
-                  purchase.invoice_number ||
-                  "Не вказано"
-                )}
-              </strong>
-            </div>
+                    <strong data-finance-content>
+                      ${
+                        field.value
+                          ? escapeHtml(field.value)
+                          : text(field.fallback)
+                      }
+                    </strong>
+                  </div>
+                `)
+                .join("")
+            }
           </div>
         </section>
 
         <section class="financePurchaseDetailsItems">
           <div class="financePurchaseDetailsSectionHead">
             <div>
-              <span>
-                СКЛАД ЗАМОВЛЕННЯ
-              </span>
-
-              <h3>
-                Позиції
-              </h3>
+              <span>${text("СКЛАД ЗАМОВЛЕННЯ")}</span>
+              <h3>${text("Позиції")}</h3>
             </div>
 
-            <b>
-              ${items.length}
-            </b>
+            <b data-finance-content>${items.length}</b>
           </div>
 
           <div class="financePurchaseDetailsItemsList">
             ${
               items.length
-                ? items
-                    .map(
-                      (
-                        item,
-                        index
-                      ) => {
-                        const quantity =
-                          Number(
-                            item.ordered_qty ||
-                            0
-                          );
+                ? items.map((item, index) => {
+                    const quantity = Number(item.ordered_qty || 0);
+                    const received = Number(item.received_qty || 0);
+                    const price = Number(item.purchase_price || 0);
 
-                        const received =
-                          Number(
-                            item.received_qty ||
-                            0
-                          );
+                    const lineTotal = Number(
+                      item.line_total ?? quantity * price
+                    );
 
-                        const price =
-                          Number(
-                            item.purchase_price ||
-                            0
-                          );
+                    const unit = escapeHtml(
+                      getStockInterfaceText(item.unit_snap || "шт")
+                    );
 
-                        const lineTotal =
-                          Number(
-                            item.line_total ??
-                            quantity * price
-                          );
+                    return `
+                      <article class="financePurchaseDetailsItem">
+                        <span class="financePurchaseItemNumber">
+                          ${index + 1}
+                        </span>
 
-                        return `
-                          <article class="financePurchaseDetailsItem">
-                            <span class="financePurchaseItemNumber">
-                              ${index + 1}
-                            </span>
+                        <div class="financePurchaseItemName">
+                          <strong data-finance-content>
+                            ${
+                              item.name_snap
+                                ? escapeHtml(item.name_snap)
+                                : text("Без назви")
+                            }
+                          </strong>
 
-                            <div class="financePurchaseItemName">
-                              <strong>
-                                ${escapeHtml(
-                                  item.name_snap ||
-                                  "Без назви"
-                                )}
-                              </strong>
+                          <small>
+                            ${text(
+                              item.stock_id
+                                ? "Повʼязано зі складом"
+                                : "Нова позиція"
+                            )}
+                          </small>
+                        </div>
 
-                              <small>
-                                ${
-                                  item.stock_id
-                                    ? "Повʼязано зі складом"
-                                    : "Нова позиція"
-                                }
-                              </small>
-                            </div>
+                        <div>
+                          <span>${text("Замовлено")}</span>
+                          <strong data-finance-content>
+                            ${quantity} ${unit}
+                          </strong>
+                        </div>
 
-                            <div>
-                              <span>
-                                Замовлено
-                              </span>
+                        <div>
+                          <span>${text("Отримано")}</span>
+                          <strong data-finance-content>
+                            ${received} ${unit}
+                          </strong>
+                        </div>
 
-                              <strong>
-                                ${quantity}
-                                ${escapeHtml(
-                                  item.unit_snap ||
-                                  "шт"
-                                )}
-                              </strong>
-                            </div>
+                        <div>
+                          <span>${text("Ціна")}</span>
+                          <strong data-finance-content>
+                            ${money(price)}
+                          </strong>
+                        </div>
 
-                            <div>
-                              <span>
-                                Отримано
-                              </span>
-
-                              <strong>
-                                ${received}
-                                ${escapeHtml(
-                                  item.unit_snap ||
-                                  "шт"
-                                )}
-                              </strong>
-                            </div>
-
-                            <div>
-                              <span>
-                                Ціна
-                              </span>
-
-                              <strong>
-                                ${formatVisitFinanceMoney(
-                                  price
-                                )}
-                              </strong>
-                            </div>
-
-                            <div class="financePurchaseItemTotal">
-                              <span>
-                                Сума
-                              </span>
-
-                              <strong>
-                                ${formatVisitFinanceMoney(
-                                  lineTotal
-                                )}
-                              </strong>
-                            </div>
-                          </article>
-                        `;
-                      }
-                    )
-                    .join("")
+                        <div class="financePurchaseItemTotal">
+                          <span>${text("Сума")}</span>
+                          <strong data-finance-content>
+                            ${money(lineTotal)}
+                          </strong>
+                        </div>
+                      </article>
+                    `;
+                  }).join("")
                 : `
                   <div class="financePurchasesEmpty">
-                    Позицій немає
+                    ${text("Позицій немає")}
                   </div>
                 `
             }
@@ -43358,15 +43120,14 @@ function openFinancePurchaseDetailsModal(
         <section class="financePurchaseDetailsFooterGrid">
           <div class="financePurchaseDetailsInformation">
             <div>
-              <span>
-                Примітка
-              </span>
+              <span>${text("Примітка")}</span>
 
-              <strong>
-                ${escapeHtml(
-                  purchase.note ||
-                  "Без примітки"
-                )}
+              <strong data-finance-content>
+                ${
+                  purchase.note
+                    ? escapeHtml(purchase.note)
+                    : text("Без примітки")
+                }
               </strong>
             </div>
 
@@ -43374,219 +43135,58 @@ function openFinancePurchaseDetailsModal(
               documentUrl
                 ? `
                   <a
-                    href="${escapeHtml(
-                      documentUrl
-                    )}"
+                    href="${escapeHtml(documentUrl)}"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    ↗ Відкрити накладну
+                    ${text("↗ Відкрити накладну")}
                   </a>
                 `
                 : `
                   <span class="financePurchaseNoDocument">
-                    Накладну не додано
+                    ${text("Накладну не додано")}
                   </span>
                 `
             }
           </div>
 
           <div class="financePurchaseDetailsTotals">
-            <div>
-              <span>
-                Підсумок
-              </span>
+            ${
+              totals.map((row) => `
+                <div class="${row.className}">
+                  <span>${text(row.label)}</span>
 
-              <strong>
-                ${formatVisitFinanceMoney(
-                  purchase.subtotal
-                )}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                Знижка
-              </span>
-
-              <strong>
-                −${formatVisitFinanceMoney(
-                  purchase.discount_amount
-                )}
-              </strong>
-            </div>
-
-            <div class="is-total">
-              <span>
-                Разом
-              </span>
-
-              <strong>
-                ${formatVisitFinanceMoney(
-                  purchase.total_amount
-                )}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                Сплачено
-              </span>
-
-              <strong>
-                ${formatVisitFinanceMoney(
-                  purchase.paid_amount
-                )}
-              </strong>
-            </div>
-
-            <div class="is-remaining">
-              <span>
-                Залишок
-              </span>
-
-              <strong>
-                ${formatVisitFinanceMoney(
-                  purchase.remaining_amount
-                )}
-              </strong>
-            </div>
+                  <strong data-finance-content>
+                    ${row.prefix}${money(row.amount)}
+                  </strong>
+                </div>
+              `).join("")
+            }
           </div>
         </section>
       </div>
 
       <footer class="financePurchaseDetailsActions">
         <span>
-          Приймання та оплата будуть
-          підключені наступним етапом.
+          ${text(
+            "Приймання та оплата будуть підключені наступним етапом."
+          )}
         </span>
 
         <button
           type="button"
           class="financePurchaseDetailsDone"
         >
-          Закрити
+          ${text("Закрити")}
         </button>
       </footer>
     </div>
   `;
 
-  document.body.appendChild(
-  overlay
-);
+  document.body.appendChild(overlay);
+  installFinanceLocalization(overlay);
 
-const preserveFinanceContent = (
-  element
-) => {
-  if (!element) return;
-
-  element.setAttribute(
-    "data-finance-content",
-    ""
-  );
-};
-
-if (
-  purchase.purchase_number
-) {
-  preserveFinanceContent(
-    overlay.querySelector(
-      ".financePurchaseDetailsHeader h2"
-    )
-  );
-}
-
-if (supplier.name) {
-  preserveFinanceContent(
-    overlay.querySelector(
-      ".financePurchaseDetailsHeader p"
-    )
-  );
-
-  preserveFinanceContent(
-    overlay.querySelector(
-      ".financePurchaseDetailsSupplier h3"
-    )
-  );
-}
-
-const supplierContentValues = [
-  supplier.contact_person,
-  supplier.phone,
-  supplier.email,
-  purchase.invoice_number,
-];
-
-overlay
-  .querySelectorAll(
-    ".financePurchaseSupplierGrid strong"
-  )
-  .forEach(
-    (
-      element,
-      index
-    ) => {
-      if (
-        supplierContentValues[
-          index
-        ]
-      ) {
-        preserveFinanceContent(
-          element
-        );
-      }
-    }
-  );
-
-overlay
-  .querySelectorAll(
-    ".financePurchaseDetailsItem"
-  )
-  .forEach(
-    (
-      row,
-      index
-    ) => {
-      const item =
-        items[index] || {};
-
-      row
-        .querySelectorAll(
-          "strong"
-        )
-        .forEach(
-          (
-            element,
-            strongIndex
-          ) => {
-            if (
-              strongIndex > 0 ||
-              item.name_snap
-            ) {
-              preserveFinanceContent(
-                element
-              );
-            }
-          }
-        );
-    }
-  );
-
-if (purchase.note) {
-  preserveFinanceContent(
-    overlay.querySelector(
-      ".financePurchaseDetailsInformation strong"
-    )
-  );
-}
-
-installFinanceLocalization(
-  overlay
-);
-
-document.body.classList.add(
-  "financePurchaseModalOpen"
-);
+  document.body.classList.add("financePurchaseModalOpen");
 
   const close = () => {
     overlay.remove();
@@ -43601,54 +43201,40 @@ document.body.classList.add(
     );
   };
 
-  const onKeydown = (
-    event
-  ) => {
-    if (
-      event.key === "Escape"
-    ) {
+  const onKeydown = (event) => {
+    if (event.key === "Escape") {
       close();
     }
   };
 
-  overlay
-    .querySelector(
-      ".financePurchaseDetailsClose"
-    )
-    ?.addEventListener(
-      "click",
-      close
-    );
+  overlay.querySelector(".financePurchaseDetailsClose")
+    ?.addEventListener("click", close);
 
-  overlay
-    .querySelector(
-      ".financePurchaseDetailsDone"
-    )
-    ?.addEventListener(
-      "click",
-      close
-    );
+  overlay.querySelector(".financePurchaseDetailsDone")
+    ?.addEventListener("click", close);
 
-  overlay.addEventListener(
-    "click",
-    (event) => {
-      if (
-        event.target === overlay
-      ) {
-        close();
-      }
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      close();
     }
-  );
+  });
 
-  document.addEventListener(
-    "keydown",
-    onKeydown
-  );
+  document.addEventListener("keydown", onKeydown);
 }
 
 async function renderFinanceExpensesTab(
   page
 ) {
+  const reportCurrency =
+    getFinanceReportCurrency();
+
+  const formatVisitFinanceMoney = (
+    value,
+    currency = reportCurrency
+  ) => value == null
+    ? "—"
+    : formatClinicMoney(value, currency);
+
   page.innerHTML = `
     <div class="financePageLoading">
       <div class="visitPaymentSpinner"></div>
@@ -43668,25 +43254,22 @@ async function renderFinanceExpensesTab(
     ] = await Promise.all([
       loadFinanceExpensesOverviewApi(
         financeDashboardState.dateFrom,
-        financeDashboardState.dateTo
+        financeDashboardState.dateTo,
+        reportCurrency
       ),
 
       loadFinancePurchasesApi({
         dateFrom:
-          financeDashboardState
-            .dateFrom,
+          financeDashboardState.dateFrom,
 
         dateTo:
-          financeDashboardState
-            .dateTo,
+          financeDashboardState.dateTo,
 
         limit:
-          financeDashboardState
-            .purchaseLimit,
+          financeDashboardState.purchaseLimit,
 
         offset:
-          financeDashboardState
-            .purchaseOffset,
+          financeDashboardState.purchaseOffset,
       }),
     ]);
 
@@ -44167,46 +43750,61 @@ async function renderFinanceExpensesTab(
     </div>
   </div>
 
-  <div class="financePurchasesSummary">
+    <div class="financePurchasesSummary">
     <div>
       <span>
-        ${getFinanceInterfaceText(
-          "Документів"
-        )}
+        ${getFinanceInterfaceText("Документів")}
       </span>
 
-      <strong>
+      <strong data-finance-content>
         ${purchases.length}
       </strong>
     </div>
 
     <div>
       <span>
-        ${getFinanceInterfaceText(
-          "Сума документів"
-        )}
+        ${getFinanceInterfaceText("Сума документів")}
       </span>
 
-      <strong>
-        ${formatVisitFinanceMoney(
-          purchaseDocumentsTotal
-        )}
+      <strong data-finance-content>
+        ${
+          purchases.length
+            ? Object.entries(
+                purchases.reduce((totals, purchase) => {
+                  const currency = purchase.currency || "UAH";
+
+                  totals[currency] =
+                    Number(totals[currency] || 0) +
+                    Number(purchase.total_amount || 0);
+
+                  return totals;
+                }, {})
+              )
+                .map(([currency, amount]) =>
+                  escapeHtml(
+                    formatVisitFinanceMoney(amount, currency)
+                  )
+                )
+                .join("<br>")
+            : escapeHtml(
+                formatVisitFinanceMoney(
+                  0,
+                  getClinicCurrency()
+                )
+              )
+        }
       </strong>
     </div>
 
     <div>
       <span>
-        ${getFinanceInterfaceText(
-          "Очікують оплати"
-        )}
+        ${getFinanceInterfaceText("Очікують оплати")}
       </span>
 
-      <strong>
+      <strong data-finance-content>
         ${
           purchases.filter(
-            (purchase) =>
-              purchase.payment_status !==
-              "paid"
+            (purchase) => purchase.payment_status !== "paid"
           ).length
         }
       </strong>
@@ -44368,16 +43966,27 @@ async function renderFinanceExpensesTab(
                       </div>
                     </div>
 
-                    <div class="financePurchaseCardAmount">
-                      <strong>
-                        ${formatVisitFinanceMoney(
-                          purchase.total_amount
+                                       <div class="financePurchaseCardAmount">
+                      <strong data-finance-content>
+                        ${escapeHtml(
+                          formatVisitFinanceMoney(
+                            purchase.total_amount,
+                            purchase.currency || "UAH"
+                          )
                         )}
                       </strong>
 
-                      <span>
-                        ${getFinanceRemainingAmountText(
-                          purchase.remaining_amount
+                      <span data-finance-content>
+                        ${escapeHtml(
+                          getFinanceRemainingAmountText(
+                            purchase.remaining_amount ??
+                            Math.max(
+                              0,
+                              Number(purchase.total_amount || 0) -
+                              Number(purchase.paid_amount || 0)
+                            ),
+                            purchase.currency || "UAH"
+                          )
                         )}
                       </span>
                     </div>
@@ -45061,68 +44670,69 @@ function bindFinanceWorkspaceActions(
     });
 }
 
-async function renderFinanceTodayTab(
-  page
-) {
-  page.innerHTML = `
-  <div class="financePageLoading">
-    <div class="visitPaymentSpinner"></div>
+async function renderFinanceTodayTab(page) {
+  const reportCurrency = getFinanceReportCurrency();
 
-    <strong>
-      ${getFinanceInterfaceText(
-        "Збираємо фінансовий день клініки…"
-      )}
-    </strong>
-  </div>
-`;
+  const formatVisitFinanceMoney = (
+    value,
+    currency = reportCurrency
+  ) => (
+    value == null
+      ? "—"
+      : formatClinicMoney(value, currency)
+  );
+
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+
+      <strong>
+        ${getFinanceInterfaceText(
+          "Збираємо фінансовий день клініки…"
+        )}
+      </strong>
+    </div>
+  `;
 
   try {
-    const today =
-      financeDateToIso(
-        new Date()
-      );
+    const today = financeDateToIso(new Date());
 
-    const settleFinanceTodayLoad =
-      async (loader) => {
-        try {
-          return {
-            status: "fulfilled",
-            value: await loader(),
-          };
-        } catch (reason) {
-          return {
-            status: "rejected",
-            reason,
-          };
-        }
-      };
+    const settleFinanceTodayLoad = async (loader) => {
+      try {
+        return {
+          status: "fulfilled",
+          value: await loader(),
+        };
+      } catch (reason) {
+        return {
+          status: "rejected",
+          reason,
+        };
+      }
+    };
 
-    // These blocks all use the same clinic session and database client.
-    // Loading four heavy registers at once can exhaust the small production
-    // connection pool and surface intermittent HTTP 500 responses. Keep the
-    // page resilient, but collect the blocks one by one.
-    const overviewResult =
-      await settleFinanceTodayLoad(
-        () => loadFinanceOverviewApi(
-          today,
-          today
-        )
-      );
+    // Загружаем блоки последовательно,
+    // чтобы не перегружать соединения с базой.
+    const overviewResult = await settleFinanceTodayLoad(
+      () => loadFinanceOverviewApi(
+        today,
+        today,
+        reportCurrency
+      )
+    );
 
-    const accountsResult =
-      await settleFinanceTodayLoad(
-        () => loadFinanceAccountsApi()
-      );
+    const accountsResult = await settleFinanceTodayLoad(
+      () => loadFinanceAccountsApi()
+    );
 
-    const balancesResult =
-      await settleFinanceTodayLoad(
-        () => loadFinanceClientBalancesApi()
-      );
+    const balancesResult = await settleFinanceTodayLoad(
+      () => loadFinanceClientBalancesApi(reportCurrency)
+    );
 
-    const stockResult =
-      await settleFinanceTodayLoad(
-        () => loadStockApi()
-      );
+    const stockResult = await settleFinanceTodayLoad(
+      () => loadStockApi()
+    );
+
 
     const overviewAvailable =
       overviewResult.status ===
@@ -45241,12 +44851,16 @@ const lowStock =
   );
 
 const marginRisks =
-  normalizedStock.filter(
-    (item) =>
-      Number(item.cost || 0) > 0 &&
-      Number(item.price || 0) <=
-        Number(item.cost || 0)
-  );
+  reportCurrency === "UAH" &&
+  getClinicCurrency() === "UAH" &&
+  overview.stock_cost_available === true
+    ? normalizedStock.filter(
+        (item) =>
+          Number(item.cost || 0) > 0 &&
+          Number(item.price || 0) <=
+            Number(item.cost || 0)
+      )
+    : [];
 
 const debtClients =
   clients
@@ -45523,41 +45137,70 @@ page.innerHTML = `
       </button>
         </section>
 
-       <section class="financeAccountsPanel">
+  <section class="financeAccountsPanel">
   <div class="financeAccountsHeading">
     <div>
       <span>
-        ${getFinanceInterfaceText(
-          "ГРОШІ КЛІНІКИ"
+        ${escapeHtml(
+          getFinanceInterfaceText("ГРОШІ КЛІНІКИ")
         )}
       </span>
 
       <h2>
-        ${getFinanceInterfaceText(
-          "Залишки на рахунках"
+        ${escapeHtml(
+          getFinanceInterfaceText(
+            "Залишки на рахунках"
+          )
         )}
       </h2>
 
       <p>
-        ${getFinanceInterfaceText(
-          "За всіма проведеними фінансовими операціями."
+        ${escapeHtml(
+          getFinanceInterfaceText(
+            "За всіма проведеними фінансовими операціями."
+          )
         )}
       </p>
     </div>
 
     <div class="financeAccountsTotal">
       <span>
-        ${getFinanceInterfaceText(
-          "Доступно разом"
+        ${escapeHtml(
+          getFinanceInterfaceText("Доступно разом")
         )}
       </span>
 
       <strong>
         ${
           accountsAvailable
-            ? formatVisitFinanceMoney(
-                accountsData.total_balance
-              )
+            ? Object.entries({
+                [accountsData.currency ||
+                  getClinicCurrency()]: 0,
+
+                ...(accountsData.totals_by_currency || {
+                  [accountsData.currency ||
+                    getClinicCurrency()]:
+                      accountsData.total_balance || 0,
+                }),
+              })
+                .filter(
+                  ([currency, amount]) =>
+                    currency === (
+                      accountsData.currency ||
+                      getClinicCurrency()
+                    ) ||
+                    Number(amount) !== 0
+                )
+                .map(
+                  ([currency, amount]) =>
+                    escapeHtml(
+                      formatVisitFinanceMoney(
+                        amount,
+                        currency
+                      )
+                    )
+                )
+                .join("<br>")
             : "—"
         }
       </strong>
@@ -45569,74 +45212,89 @@ page.innerHTML = `
       ? `
         <div class="financeAccountsGrid">
           ${financialAccounts
-            .map(
-              (account) => {
-                const key =
-                  String(
-                    account.system_key ||
-                    ""
-                  );
-
-                const icon =
-                  key === "cash"
-                    ? "₴"
-                    : key === "bank"
-                      ? "▣"
-                      : "◇";
-
-                const operationsCount =
-                  Number(
-                    account.operations_count ||
-                    0
-                  );
-
-                return `
-                  <button
-                    type="button"
-                    class="financeAccountCard is-${escapeHtml(
-                      key
-                    )}"
-                    data-finance-go="transactions"
-                    data-finance-account-id="${escapeHtml(
-                      account.id
-                    )}"
-                    data-finance-payment-method=""
-                  >
-                    <span class="financeAccountIcon">
-                      ${icon}
-                    </span>
-
-                    <span
-                      class="financeAccountName"
-                      data-finance-content
-                    >
-                      ${escapeHtml(
-                        account.name
-                      )}
-                    </span>
-
-                    <strong>
-                      ${formatVisitFinanceMoney(
-                        account.balance
-                      )}
-                    </strong>
-
-                    <small>
-                      ${getFinanceTodayOperationsText(
-                        operationsCount
-                      )}
-                    </small>
-                  </button>
-                `;
-              }
+            .filter(
+              (account) =>
+                (account.currency || "UAH") === (
+                  accountsData.currency ||
+                  getClinicCurrency()
+                ) ||
+                Number(account.balance || 0) !== 0 ||
+                Number(
+                  account.operations_count || 0
+                ) > 0
             )
+            .map((account) => {
+              const type = String(
+                account.account_type ||
+                account.system_key ||
+                "other"
+              );
+
+              const currency =
+                account.currency || "UAH";
+
+              const icon =
+                type === "cash"
+                  ? getClinicCurrencySymbol(currency)
+                  : type === "bank"
+                    ? "▣"
+                    : "◇";
+
+              const operationsCount = Number(
+                account.operations_count || 0
+              );
+
+              return `
+                <button
+                  type="button"
+                  class="financeAccountCard is-${escapeHtml(
+                    type
+                  )}"
+                  data-finance-go="transactions"
+                  data-finance-account-id="${escapeHtml(
+                    account.id
+                  )}"
+                  data-finance-payment-method=""
+                >
+                  <span class="financeAccountIcon">
+                    ${escapeHtml(icon)}
+                  </span>
+
+                  <span
+                    class="financeAccountName"
+                    data-finance-content
+                  >
+                    ${escapeHtml(account.name)}
+                  </span>
+
+                  <strong>
+                    ${escapeHtml(
+                      formatVisitFinanceMoney(
+                        account.balance,
+                        currency
+                      )
+                    )}
+                  </strong>
+
+                  <small>
+                    ${escapeHtml(
+                      getFinanceTodayOperationsText(
+                        operationsCount
+                      )
+                    )}
+                  </small>
+                </button>
+              `;
+            })
             .join("")}
         </div>
       `
       : `
         <div class="financeInlineUnavailable">
-          ${getFinanceInterfaceText(
-            "Не вдалося завантажити залишки на рахунках. Інші фінансові блоки продовжують працювати."
+          ${escapeHtml(
+            getFinanceInterfaceText(
+              "Не вдалося завантажити залишки на рахунках. Інші фінансові блоки продовжують працювати."
+            )
           )}
         </div>
       `
@@ -46084,9 +45742,12 @@ page.innerHTML = `
                           </small>
                         </p>
 
-                        <b class="${meta.type.className}">
-                          ${isOutcome ? "−" : "+"}${formatVisitFinanceMoney(
-                            transaction.amount
+                                                <b class="${meta.type.className}">
+                          ${isOutcome ? "−" : "+"}${escapeHtml(
+                            formatVisitFinanceMoney(
+                              transaction.amount,
+                              transaction.currency || "UAH"
+                            )
                           )}
                         </b>
                       </div>
@@ -46323,9 +45984,18 @@ function applyFinanceClientFilters(
 }
 
 
-async function renderFinanceClientsTab(
-  page
-) {
+async function renderFinanceClientsTab(page) {
+  const reportCurrency = getFinanceReportCurrency();
+
+  const formatVisitFinanceMoney = (
+    value,
+    currency = reportCurrency
+  ) => (
+    value == null
+      ? "—"
+      : formatClinicMoney(value, currency)
+  );
+
   page.innerHTML = `
     <div class="financePageLoading">
       <div class="visitPaymentSpinner"></div>
@@ -46340,10 +46010,10 @@ async function renderFinanceClientsTab(
 
   try {
     const balances =
-      await loadFinanceClientBalancesApi();
+      await loadFinanceClientBalancesApi(reportCurrency);
 
-    const summary =
-      balances.summary || {};
+    const summary = balances.summary || {};
+
 
     const clients =
       Array.isArray(
@@ -47644,7 +47314,7 @@ function getFinanceOwnerAttentionText(
 
   const debtMatch =
     source.match(
-      /^Заборгованість клієнтів:\s*([0-9.,-]+)\s*грн$/i
+      /^Заборгованість клієнтів:\s*([0-9.,-]+)\s*(грн|UAH|EUR|USD|GBP|PLN|CHF)$/i
     );
 
   if (debtMatch) {
@@ -47654,10 +47324,11 @@ function getFinanceOwnerAttentionText(
           .replace(",", ".")
       ) || 0;
 
-    const formatted =
-      formatVisitFinanceMoney(
-        amount
-      );
+    const currency = debtMatch[2].toUpperCase() === "ГРН"
+      ? "UAH"
+      : debtMatch[2].toUpperCase();
+
+    const formatted = formatClinicMoney(amount, currency);
 
     if (language === "en") {
       return (
@@ -47677,7 +47348,7 @@ function getFinanceOwnerAttentionText(
       );
     }
 
-    return source;
+    return `Заборгованість клієнтів: ${formatted}`;
   }
 
   if (
@@ -47728,18 +47399,15 @@ function ownerReportDelta(
         ? "is-negative"
         : "is-neutral";
 
-  const formattedValue =
-    String(suffix)
-      .trim() === "грн"
-      ? formatVisitFinanceMoney(
-          absoluteNumber
-        )
-      : (
-          absoluteNumber.toLocaleString(
-            getCalendarLocale()
-          ) +
-          suffix
-        );
+  const currencyCode = String(suffix).trim().toUpperCase();
+  const currency = ["UAH", "EUR", "USD", "GBP", "PLN", "CHF"]
+    .includes(currencyCode)
+      ? currencyCode
+      : String(suffix).trim() === "грн" ? "UAH" : null;
+
+  const formattedValue = currency
+    ? formatClinicMoney(absoluteNumber, currency)
+    : absoluteNumber.toLocaleString(getCalendarLocale()) + suffix;
 
   const signedValue =
     number > 0
@@ -47772,6 +47440,8 @@ function ownerReportDelta(
     </span>
   `;
 }
+
+
 
 
 function ownerReportMetricCard({
@@ -47889,6 +47559,13 @@ async function renderFinanceOwnerReportTab(
       loadOwnerDailyReportApi(reportDate),
       loadOwnerReportSettingsApi(),
     ]);
+    const currency = String(
+      report.currency || report.finance?.currency || "UAH"
+    ).trim().toUpperCase();
+
+    const formatVisitFinanceMoney = (value, code = currency) =>
+      value == null ? "—" : formatClinicMoney(value, code);
+
     const visits = report.visits || {};
     const clients = report.clients || {};
     const finance = report.finance || {};
@@ -47913,6 +47590,7 @@ async function renderFinanceOwnerReportTab(
           <div>
             <span class="financeEyebrow">ЩОДЕННИЙ КОНТРОЛЬ</span>
             <h1>Звіт власника</h1>
+            <p>${escapeHtml(getFinanceInterfaceText("Валюта"))}: <b>${escapeHtml(currency)}</b></p>
             <p>
               Головні цифри клініки, ризики та точки уваги
               в одному зрозумілому підсумку.
@@ -47945,10 +47623,10 @@ async function renderFinanceOwnerReportTab(
             delta: ownerReportDelta(comparison.completed_delta),
           })}
           ${ownerReportMetricCard({
-            icon: "₴",
+            icon: escapeHtml(getClinicCurrencySymbol(currency)),
             label: "Надходження",
             value: formatVisitFinanceMoney(finance.revenue),
-            delta: ownerReportDelta(comparison.revenue_delta, " грн"),
+            delta: ownerReportDelta(comparison.revenue_delta, currency),
           })}
           ${ownerReportMetricCard({
             icon: "↗",
@@ -48061,7 +47739,7 @@ async function renderFinanceOwnerReportTab(
             <div class="ownerReportRows">
               <p><span>Позицій нижче мінімуму</span><b>${Number(stock.low_stock_count || 0)}</b></p>
               <p><span>Списань за день</span><b>${Number(stock.writeoffs_count || 0)}</b></p>
-              <p><span>Собівартість списань</span><b>${formatVisitFinanceMoney(stock.writeoffs_cost)}</b></p>
+              <p><span>Собівартість списань</span><b>${formatVisitFinanceMoney(stock.writeoffs_cost, stock.cost_currency || "UAH")}</b></p>
             </div>
             <div class="ownerReportChips">
               ${lowStock.slice(0, 4).map((item) => `
@@ -48345,6 +48023,9 @@ async function renderFinanceOwnerReportTab(
 }
 
 
+
+
+
 async function renderFinanceTab(
   options = {}
 ) {
@@ -48470,18 +48151,25 @@ async function renderFinanceTab(
   `;
 
   try {
+       const reportCurrency =
+      getFinanceReportCurrency();
+
+    const formatVisitFinanceMoney = (
+      value,
+      currency = reportCurrency
+    ) => value == null
+      ? "—"
+      : formatClinicMoney(value, currency);
+
     const overview =
       await loadFinanceOverviewApi(
-        financeDashboardState
-          .dateFrom,
-
-        financeDashboardState
-          .dateTo
+        financeDashboardState.dateFrom,
+        financeDashboardState.dateTo,
+        reportCurrency
       );
 
     const summary =
-      overview.summary ||
-      {};
+      overview.summary || {};
 
     const paymentMethods =
       overview.payment_methods ||
@@ -49133,15 +48821,15 @@ async function renderFinanceTab(
                               </span>
                             </div>
 
-                            <div
-                              class="
-                                financeTransactionAmount
-                                ${meta.type.className}
-                              "
+                                                        <div
+                              class="financeTransactionAmount ${meta.type.className}"
                             >
                               <strong>
-                                ${sign}${formatVisitFinanceMoney(
-                                  transaction.amount
+                                ${sign}${escapeHtml(
+                                  formatVisitFinanceMoney(
+                                    transaction.amount,
+                                    transaction.currency || "UAH"
+                                  )
                                 )}
                               </strong>
 
@@ -50367,55 +50055,50 @@ function normalizeStockInterfaceText(
 }
 
 
-function getStockInterfaceText(
-  sourceText
-) {
-  const language =
-    getInterfaceLanguage();
+function getStockInterfaceText(sourceText) {
+  const language = getInterfaceLanguage();
 
   const normalizedSource =
-    normalizeStockInterfaceText(
-      sourceText
-    );
+    normalizeStockInterfaceText(sourceText);
 
-  const entry =
-    Object.entries(
-      STOCK_INTERFACE_TEXT
-    ).find(
-      ([ukrainian, translations]) =>
-        [
-          ukrainian,
-          ...Object.values(
-            translations
-          ),
-        ].some(
-          (value) =>
-            normalizeStockInterfaceText(
-              value
-            ) ===
-            normalizedSource
-        )
-    );
+  const entry = Object.entries(
+    STOCK_INTERFACE_TEXT
+  ).find(([ukrainian, translations]) =>
+    [
+      ukrainian,
+      ...Object.values(translations),
+    ].some(
+      (value) =>
+        normalizeStockInterfaceText(value) ===
+        normalizedSource
+    )
+  );
 
   if (!entry) {
-    return String(
-      sourceText || ""
+    return String(sourceText || "");
+  }
+
+  const [ukrainian, translations] = entry;
+
+  if (ukrainian === "Ціна продажу, грн") {
+    const labels = {
+      uk: "Ціна продажу",
+      en: "Sale price",
+      de: "Verkaufspreis",
+      pl: "Cena sprzedaży",
+    };
+
+    return (
+      (labels[language] || labels.uk) +
+      ", " +
+      getClinicCurrency()
     );
   }
 
-  const [
-    ukrainian,
-    translations,
-  ] = entry;
-
   return language === "uk"
     ? ukrainian
-    : (
-        translations[language] ||
-        ukrainian
-      );
+    : translations[language] || ukrainian;
 }
-
 
 function getLocalizedStockText(
   value
@@ -52025,37 +51708,37 @@ const currentSpecies =
                                   : ""
                               }
 
-                              <div class="stockPremiumPrices">
-                                <div>
-                                  <span>
-                                    ${getStockInterfaceText(
-                                      "Продаж"
-                                    )}
-                                  </span>
+                             <div class="stockPremiumPrices">
+  <div>
+    <span>
+      ${escapeHtml(
+        getStockInterfaceText("Продаж")
+      )}
+    </span>
 
-                                  <strong>
-                                    ${salePrice.toLocaleString(
-                                      getCalendarLocale()
-                                    )}
-                                    ₴
-                                  </strong>
-                                </div>
+    <strong>
+      ${escapeHtml(
+        formatClinicMoney(salePrice)
+      )}
+    </strong>
+  </div>
 
-                                <div>
-                                  <span>
-                                    ${getStockInterfaceText(
-                                      "Закупівля"
-                                    )}
-                                  </span>
+  <div>
+    <span>
+      ${escapeHtml(
+        getStockInterfaceText("Закупівля")
+      )}
+    </span>
 
-                                  <strong>
-                                    ${cost.toLocaleString(
-                                      getCalendarLocale()
-                                    )}
-                                    ₴
-                                  </strong>
-                                </div>
-                              </div>
+    <strong>
+      ${escapeHtml(
+        formatClinicMoney(cost, "UAH")
+      )}
+    </strong>
+  </div>
+</div>
+
+
 
                               <div class="stockPremiumQuantity">
                                 <div>
@@ -69161,23 +68844,32 @@ async function createVisitBasedDocumentHtml({
         follow
       ),
     ].join("");
-  } else if (type === "finance") {
-    title =
-      "Фінансова виписка";
+    } else if (type === "finance") {
+    title = "Фінансова виписка";
 
     let finance = null;
 
     try {
-      finance =
-        await loadVisitFinanceApi(
-          visit.id
-        );
+      finance = await loadVisitFinanceApi(visit.id);
     } catch (error) {
       console.warn(
         "Finance document fallback:",
         error
       );
     }
+
+    const documentCurrency =
+      finance?.currency ||
+      visit?.currency ||
+      "UAH";
+
+    const documentMoney = (value) =>
+      escapeHtml(
+        formatVisitFinanceMoney(
+          value,
+          documentCurrency
+        )
+      );
 
     const rows = [
       ...services.map((line) => ({
@@ -69188,12 +68880,10 @@ async function createVisitBasedDocumentHtml({
         price: line.price || 0,
         total: line.lineTotal || 0,
       })),
+
       ...stock.map((line) => ({
-        name:
-          line.name ||
-          "Препарат",
-        type:
-          "Препарат / матеріал",
+        name: line.name || "Препарат",
+        type: "Препарат / матеріал",
         qty: line.qty || 1,
         unit: line.unit || "шт",
         price: line.price || 0,
@@ -69201,49 +68891,41 @@ async function createVisitBasedDocumentHtml({
       })),
     ];
 
-    const subtotal =
-      Number(
-        finance?.subtotal ??
-        rows.reduce(
-          (sum, row) =>
-            sum +
-            Number(row.total || 0),
-          0
-        )
-      ) || 0;
+    const subtotal = Number(
+      finance?.subtotal ??
+      rows.reduce(
+        (sum, row) =>
+          sum + Number(row.total || 0),
+        0
+      )
+    ) || 0;
 
     const discount =
-      Number(
-        finance?.discount || 0
-      ) || 0;
+      Number(finance?.discount || 0) || 0;
 
-    const total =
-      Number(
-        finance?.total ??
-        Math.max(
-          0,
-          subtotal - discount
-        )
-      ) || 0;
+    const total = Number(
+      finance?.total ??
+      Math.max(0, subtotal - discount)
+    ) || 0;
 
     const paid =
-      Number(
-        finance?.paid || 0
-      ) || 0;
+      Number(finance?.paid || 0) || 0;
 
-    const remaining =
-      Number(
-        finance?.remaining ??
-        Math.max(0, total - paid)
-      ) || 0;
+    const remaining = Number(
+      finance?.remaining ??
+      Math.max(0, total - paid)
+    ) || 0;
 
-    const financeAvailable =
-      Boolean(finance);
+    const financeAvailable = Boolean(finance);
+
+    const transactions =
+      Array.isArray(finance?.transactions)
+        ? finance.transactions
+        : [];
 
     const statusLabels = {
       unpaid: "Не оплачено",
-      partial:
-        "Оплачено частково",
+      partial: "Оплачено частково",
       paid: "Оплачено",
       refunded: "Повернено",
       cancelled: "Скасовано",
@@ -69257,73 +68939,48 @@ async function createVisitBasedDocumentHtml({
       other: "Інше",
     };
 
-    const paymentMethods =
-      Array.from(
-        new Set(
-          (finance?.transactions || [])
-            .filter(
-              (transaction) =>
-                transaction?.status ===
-                "completed"
-            )
-            .map(
-              (transaction) =>
-                methodLabels[
-                  transaction
-                    ?.payment_method
-                ] ||
-                transaction
-                  ?.payment_method
-            )
-            .filter(Boolean)
-        )
-      ).join(", ") || "—";
+    const paymentMethods = Array.from(
+      new Set(
+        transactions
+          .filter(
+            (transaction) =>
+              transaction?.status === "completed"
+          )
+          .map(
+            (transaction) =>
+              methodLabels[
+                transaction?.payment_method
+              ] ||
+              transaction?.payment_method
+          )
+          .filter(Boolean)
+      )
+    ).join(", ") || "—";
 
-    const rowsHtml =
-      rows.length
-        ? rows
-            .map(
-              (row) => `
-                <tr>
-                  <td>${escapeHtml(
-                    row.name
-                  )}</td>
-                  <td>${escapeHtml(
-                    row.type
-                  )}</td>
-                  <td>
-                    ${escapeHtml(
-                      String(row.qty)
-                    )}
-                    ${escapeHtml(
-                      row.unit
-                    )}
-                  </td>
-                  <td>
-                    ${formatPatientMoney(
-                      row.price
-                    )}
-                  </td>
-                  <td>
-                    ${formatPatientMoney(
-                      row.total
-                    )}
-                  </td>
-                </tr>
-              `
-            )
-            .join("")
-        : `
-          <tr>
-            <td
-              colspan="5"
-              class="disModernEmpty"
-            >
-              Послуги та препарати
-              не додані
-            </td>
-          </tr>
-        `;
+    const rowsHtml = rows.length
+      ? rows
+          .map((row) => `
+            <tr>
+              <td>${escapeHtml(row.name)}</td>
+              <td>${escapeHtml(row.type)}</td>
+
+              <td>
+                ${escapeHtml(String(row.qty))}
+                ${escapeHtml(row.unit)}
+              </td>
+
+              <td>${documentMoney(row.price)}</td>
+              <td>${documentMoney(row.total)}</td>
+            </tr>
+          `)
+          .join("")
+      : `
+        <tr>
+          <td colspan="5" class="disModernEmpty">
+            Послуги та препарати не додані
+          </td>
+        </tr>
+      `;
 
     body = `
       <div class="disModernSection disModernFinanceSection">
@@ -69332,13 +68989,14 @@ async function createVisitBasedDocumentHtml({
             <div class="disModernSectionTitle">
               Надані послуги та використані препарати
             </div>
+
             <div class="disModernSectionSub">
               Деталізація візиту без медичних нотаток
             </div>
           </div>
 
           <div class="disModernGrandTotalBadge">
-            ${formatPatientMoney(total)}
+            ${documentMoney(total)}
           </div>
         </div>
 
@@ -69353,6 +69011,7 @@ async function createVisitBasedDocumentHtml({
                 <th>Сума</th>
               </tr>
             </thead>
+
             <tbody>${rowsHtml}</tbody>
           </table>
         </div>
@@ -69360,23 +69019,17 @@ async function createVisitBasedDocumentHtml({
         <div class="disModernFinanceSummary">
           <div class="disModernFinanceMini">
             <span>Підсумок</span>
-            <b>${formatPatientMoney(
-              subtotal
-            )}</b>
+            <b>${documentMoney(subtotal)}</b>
           </div>
 
           <div class="disModernFinanceMini">
             <span>Знижка</span>
-            <b>${formatPatientMoney(
-              discount
-            )}</b>
+            <b>${documentMoney(discount)}</b>
           </div>
 
           <div class="disModernFinanceMini disModernFinanceMiniTotal">
             <span>До сплати</span>
-            <b>${formatPatientMoney(
-              total
-            )}</b>
+            <b>${documentMoney(total)}</b>
           </div>
         </div>
       </div>
@@ -69386,14 +69039,13 @@ async function createVisitBasedDocumentHtml({
           <div class="disModernCardTitle">
             Стан оплати
           </div>
+
           <div class="disModernCardMain">
             ${escapeHtml(
               statusLabels[
-                finance
-                  ?.financial_status
+                finance?.financial_status
               ] ||
-              finance
-                ?.financial_status ||
+              finance?.financial_status ||
               (
                 financeAvailable
                   ? "Не оплачено"
@@ -69401,18 +69053,16 @@ async function createVisitBasedDocumentHtml({
               )
             )}
           </div>
+
           <div class="disModernInfoRows">
             <div class="disModernInfoRow">
               <span>Оплачено</span>
-              <b>${formatPatientMoney(
-                paid
-              )}</b>
+              <b>${documentMoney(paid)}</b>
             </div>
+
             <div class="disModernInfoRow">
               <span>Залишок</span>
-              <b>${formatPatientMoney(
-                remaining
-              )}</b>
+              <b>${documentMoney(remaining)}</b>
             </div>
           </div>
         </div>
@@ -69421,6 +69071,7 @@ async function createVisitBasedDocumentHtml({
           <div class="disModernCardTitle">
             Оплата
           </div>
+
           <div class="disModernCardMain">
             ${escapeHtml(
               financeAvailable
@@ -69428,16 +69079,11 @@ async function createVisitBasedDocumentHtml({
                 : "Недоступно для поточної ролі"
             )}
           </div>
+
           <div class="disModernInfoRows">
             <div class="disModernInfoRow">
               <span>Операцій</span>
-              <b>${
-                (
-                  finance
-                    ?.transactions ||
-                  []
-                ).length
-              }</b>
+              <b>${transactions.length}</b>
             </div>
           </div>
         </div>
@@ -89828,9 +89474,7 @@ function refreshVisitServiceSelect() {
   updateVisitServicePickerPreview();
 }
 function updateVisitServicePickerPreview() {
-  const select = document.getElementById(
-    "visitSvcSelect"
-  );
+  const select = document.getElementById("visitSvcSelect");
 
   const nameElement = document.getElementById(
     "visitServicePickerName"
@@ -89844,9 +89488,7 @@ function updateVisitServicePickerPreview() {
     "#visitServicePickerButton .visitServicePickerIcon"
   );
 
-  if (!select || !nameElement || !metaElement) {
-    return;
-  }
+  if (!select || !nameElement || !metaElement) return;
 
   const service = loadServices().find(
     (item) => String(item.id) === String(select.value)
@@ -89870,17 +89512,12 @@ function updateVisitServicePickerPreview() {
 
   const category = String(service.cat || "Інше");
 
-  const categoryLabel = getServicesInterfaceText(
-    category
-  );
-
   nameElement.textContent =
     service.name || getVisitWorkspaceText("Послуга");
 
   metaElement.textContent =
-    `${categoryLabel} · ${formatVisitFinanceMoney(
-      service.price
-    )}`;
+    `${getLocalizedServiceCategory(category)} · ` +
+    formatClinicMoney(service.price);
 
   if (iconElement) {
     iconElement.textContent =
@@ -90352,11 +89989,12 @@ function refreshVisitStockSelect() {
     )
     .map((item) => {
       const quantity = Number(item.qty) || 0;
+
       const unit = getStockInterfaceText(
         String(item.unit || "шт")
       );
 
-      const price = formatVisitFinanceMoney(
+      const price = formatClinicMoney(
         Number(item.price) || 0
       );
 
@@ -97741,97 +97379,128 @@ if (
     visitId
   );
 
-  // 3. Збираємо селектор послуг
+   // 3. Збираємо селектор послуг
   ensureVisitServicesShape(visit);
-  const svcQ = String(state.visitSvcQuery || "").trim().toLowerCase();
-  const svcSelect =
-  document.getElementById(
-    "visitSvcSelect"
-  );
 
-if (svcSelect) {
-  svcSelect.innerHTML =
-    loadServices()
+  const svcQ = String(
+    state.visitSvcQuery || ""
+  ).trim().toLowerCase();
+
+  const svcSelect =
+    document.getElementById("visitSvcSelect");
+
+  if (svcSelect) {
+    svcSelect.innerHTML = loadServices()
+      .filter((service) => service.active !== false)
       .filter(
-        (s) =>
-          s.active !== false
-      )
-      .filter(
-        (s) =>
+        (service) =>
           !svcQ ||
-          String(s.name || "")
+          String(service.name || "")
             .toLowerCase()
             .includes(svcQ)
       )
-      .map(
-        (s) => `
-          <option
-            value="${escapeHtml(
-              s.id
-            )}"
-          >
-            ${escapeHtml(s.name)}
-            —
-            ${escapeHtml(
-              String(
-                Number(s.price) || 0
-              )
-            )}
-            грн
-          </option>
-        `
-      )
+      .map((service) => `
+        <option
+          value="${escapeHtml(String(service.id))}"
+        >
+          ${escapeHtml(service.name || "")}
+          —
+          ${escapeHtml(
+            formatClinicMoney(
+              Number(service.price) || 0
+            )
+          )}
+        </option>
+      `)
       .join("");
-}
+  }
 
-  // ВІДРИСОВКА ОНОВЛЕНИХ ФУТУРИСТИЧНИХ ПОСЛУГ
-  const expandedServices = expandServiceLines(visit);
-  const servicesTotal = calcServicesTotal(visit);
-  const svcContainer =
-  document.getElementById(
-    "visitSvcListContainer"
-  );
+  const renderVisitCurrencyLines = (
+    containerId,
+    items,
+    kind
+  ) => {
+    const container =
+      document.getElementById(containerId);
 
-if (svcContainer) {
-  svcContainer.innerHTML =
-    expandedServices.length
-      ? expandedServices
+    if (!container) return;
+
+    const isService = kind === "service";
+
+    const fallbackName = isService
+      ? "Послуга"
+      : "Препарат";
+
+    const deleteText = isService
+      ? "Видалити послугу"
+      : "Видалити препарат";
+
+    const emptyText = isService
+      ? "Послуг ще немає. Знайдіть потрібну послугу та додайте її до візиту."
+      : "Препаратів ще немає. Знайдіть позицію на складі та додайте її до візиту.";
+
+    const deleteAttribute = isService
+      ? "data-svc-del"
+      : "data-stk-del";
+
+    const currency = visit?.currency || "UAH";
+
+    container.innerHTML = items.length
+      ? items
           .map((item, index) => {
-            const quantity =
-              Number(item.qty || 0);
-
-            const price =
-              Number(item.price || 0);
-
-            const lineTotal =
-              Number(item.lineTotal || 0);
+            const quantity = Number(item.qty || 0);
+            const price = Number(item.price || 0);
+            const lineTotal = Number(
+              item.lineTotal || 0
+            );
 
             return `
               <article class="visitLine">
                 <div class="visitLineMain">
                   <strong>
                     ${escapeHtml(
-                      item.name || "Послуга"
+                      item.name ||
+                      getVisitWorkspaceText(
+                        fallbackName
+                      )
                     )}
                   </strong>
 
                   <span>
-                    ${quantity}
+                    ${escapeHtml(
+                      quantity.toLocaleString(
+                        getCalendarLocale()
+                      )
+                    )}
                     ×
-                    ${price.toLocaleString(getCalendarLocale())} ₴
+                    ${escapeHtml(
+                      formatVisitFinanceMoney(
+                        price,
+                        currency
+                      )
+                    )}
                   </span>
                 </div>
 
                 <div class="visitLineActions">
                   <div class="visitLineTotal">
-                    ${lineTotal.toLocaleString(getCalendarLocale())} ₴
+                    ${escapeHtml(
+                      formatVisitFinanceMoney(
+                        lineTotal,
+                        currency
+                      )
+                    )}
                   </div>
 
                   <button
                     class="visitLineDelete"
                     type="button"
-                    title="Видалити послугу"
-                    data-svc-del="${index}"
+                    title="${escapeHtml(
+                      getVisitWorkspaceText(
+                        deleteText
+                      )
+                    )}"
+                    ${deleteAttribute}="${index}"
                   >
                     ✕
                   </button>
@@ -97842,164 +97511,92 @@ if (svcContainer) {
           .join("")
       : `
         <div class="visitLinesEmpty">
-          Послуг ще немає. Знайдіть потрібну послугу та додайте її до візиту.
+          ${escapeHtml(
+            getVisitWorkspaceText(emptyText)
+          )}
         </div>
       `;
-}
+  };
+
+  const expandedServices =
+    expandServiceLines(visit);
+
+  const servicesTotal =
+    calcServicesTotal(visit);
+
+  renderVisitCurrencyLines(
+    "visitSvcListContainer",
+    expandedServices,
+    "service"
+  );
 
   // 4. Збираємо селектор товарів / складу
   ensureVisitStockShape(visit);
   refreshVisitStockSelect();
 
-  // ВІДРИСОВКА ОНОВЛЕНОГО ФУТУРИСТИЧНОГО СКЛАДУ
-  const expandedStock = expandStockLines(visit);
-  const stockTotal = calcStockTotal(visit);
-  const stkContainer =
-  document.getElementById(
-    "visitStkListContainer"
+  const expandedStock =
+    expandStockLines(visit);
+
+  const stockTotal =
+    calcStockTotal(visit);
+
+  renderVisitCurrencyLines(
+    "visitStkListContainer",
+    expandedStock,
+    "stock"
   );
-
-if (stkContainer) {
-  stkContainer.innerHTML =
-    expandedStock.length
-      ? expandedStock
-          .map((item, index) => {
-            const quantity =
-              Number(item.qty || 0);
-
-            const price =
-              Number(item.price || 0);
-
-            const lineTotal =
-              Number(item.lineTotal || 0);
-
-            return `
-              <article class="visitLine">
-                <div class="visitLineMain">
-                  <strong>
-                    ${escapeHtml(
-                      item.name || "Препарат"
-                    )}
-                  </strong>
-
-                  <span>
-                    ${quantity}
-                    ×
-                    ${price.toLocaleString(getCalendarLocale())} ₴
-                  </span>
-                </div>
-
-                <div class="visitLineActions">
-                  <div class="visitLineTotal">
-                    ${lineTotal.toLocaleString(getCalendarLocale())} ₴
-                  </div>
-
-                  <button
-                    class="visitLineDelete"
-                    type="button"
-                    title="Видалити препарат"
-                    data-stk-del="${index}"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </article>
-            `;
-          })
-          .join("")
-      : `
-        <div class="visitLinesEmpty">
-          Препаратів ще немає. Знайдіть позицію на складі та додайте її до візиту.
-        </div>
-      `;
-}
 
   // 5. Виводимо загальну фінансову суму
   const grandTotal =
-  servicesTotal + stockTotal;
+    servicesTotal + stockTotal;
 
-const money = (value) => {
-  return (
-    Number(value || 0)
-      .toLocaleString(getCalendarLocale()) +
-    " ₴"
-  );
-};
+  const money = (value) =>
+    formatVisitFinanceMoney(
+      value,
+      visit?.currency || "UAH"
+    );
 
-const totalDisplay =
-  document.getElementById(
-    "visitGrandTotal"
-  );
+  const summaryAmounts = [
+    ["visitGrandTotal", grandTotal],
+    ["visitServicesSubtotal", servicesTotal],
+    ["visitStockSubtotal", stockTotal],
+    ["visitSummaryServices", servicesTotal],
+    ["visitSummaryStock", stockTotal],
+  ];
 
-if (totalDisplay) {
-  totalDisplay.textContent =
-    money(grandTotal);
-}
+  summaryAmounts.forEach(([id, amount]) => {
+    const element =
+      document.getElementById(id);
 
-const servicesSubtotal =
-  document.getElementById(
-    "visitServicesSubtotal"
-  );
-
-if (servicesSubtotal) {
-  servicesSubtotal.textContent =
-    money(servicesTotal);
-}
-
-const stockSubtotal =
-  document.getElementById(
-    "visitStockSubtotal"
-  );
-
-if (stockSubtotal) {
-  stockSubtotal.textContent =
-    money(stockTotal);
-}
-
-const summaryServices =
-  document.getElementById(
-    "visitSummaryServices"
-  );
-
-if (summaryServices) {
-  summaryServices.textContent =
-    money(servicesTotal);
-}
-
-const summaryStock =
-  document.getElementById(
-    "visitSummaryStock"
-  );
-
-if (summaryStock) {
-  summaryStock.textContent =
-    money(stockTotal);
-}
-const paymentButton =
-  document.getElementById(
-    "visitPaymentButton"
-  );
-
-if (paymentButton) {
-  paymentButton.onclick = () => {
-    const visitId =
-      visit?.id ||
-      visit?._id ||
-      state.selectedVisitId;
-
-    if (visitId) {
-      openVisitPaymentModal(
-        visitId
-      );
+    if (element) {
+      element.textContent = money(amount);
     }
-  };
-}
+  });
 
-refreshVisitFinanceSummary(
-  visit?.id ||
-  visit?._id ||
-  state.selectedVisitId
-);
+  const paymentButton =
+    document.getElementById(
+      "visitPaymentButton"
+    );
+
+  if (paymentButton) {
+    paymentButton.onclick = () => {
+      const visitId =
+        visit?.id ||
+        visit?._id ||
+        state.selectedVisitId;
+
+      if (visitId) {
+        openVisitPaymentModal(visitId);
+      }
+    };
+  }
+
+  refreshVisitFinanceSummary(
+    visit?.id ||
+    visit?._id ||
+    state.selectedVisitId
+  );
+
 
   // Відновлюємо оригінальні обробники подій кнопок та пошуку (initVisitUI)
   if (typeof initVisitUI === "function") {
@@ -99477,6 +99074,14 @@ const doctorName =
   const stockTotal = Number(calcStockTotal(v) || 0);
   const grandTotal = serviceTotal + stockTotal;
 
+  const dischargeMoney = (value) =>
+    escapeHtml(
+      formatVisitFinanceMoney(
+        value,
+        v.currency || "UAH"
+      )
+    );
+
   const financeRows = [
     ...expandedServices.map((x) => ({
       name: x.name || "—",
@@ -99485,6 +99090,7 @@ const doctorName =
       price: x.price || 0,
       total: x.lineTotal || 0,
     })),
+
     ...expandedStock.map((x) => ({
       name: x.name || "—",
       type: "Препарат",
@@ -99496,21 +99102,21 @@ const doctorName =
 
   const financeRowsHtml = financeRows.length
     ? financeRows
-        .map(
-          (x) => `
-            <tr>
-              <td>${escapeHtml(String(x.name))}</td>
-              <td>${escapeHtml(String(x.type))}</td>
-              <td>${escapeHtml(String(x.qty))}</td>
-              <td>${escapeHtml(String(x.price))} ₴</td>
-              <td>${escapeHtml(String(x.total))} ₴</td>
-            </tr>
-          `
-        )
+        .map((x) => `
+          <tr>
+            <td>${escapeHtml(String(x.name))}</td>
+            <td>${escapeHtml(String(x.type))}</td>
+            <td>${escapeHtml(String(x.qty))}</td>
+            <td>${dischargeMoney(x.price)}</td>
+            <td>${dischargeMoney(x.total)}</td>
+          </tr>
+        `)
         .join("")
     : `
       <tr>
-        <td colspan="5" class="disModernEmpty">Фінансова частина не заповнена</td>
+        <td colspan="5" class="disModernEmpty">
+          Фінансова частина не заповнена
+        </td>
       </tr>
     `;
 
@@ -99768,15 +99374,20 @@ ${
 </div>
 
 
-      <div class="disModernSection disModernFinanceSection">
+          <div class="disModernSection disModernFinanceSection">
         <div class="disModernFinanceHead">
           <div>
-            <div class="disModernSectionTitle">Надані послуги та використані матеріали</div>
-            <div class="disModernSectionSub">Фінансова деталізація прийому</div>
+            <div class="disModernSectionTitle">
+              Надані послуги та використані матеріали
+            </div>
+
+            <div class="disModernSectionSub">
+              Фінансова деталізація прийому
+            </div>
           </div>
 
           <div class="disModernGrandTotalBadge">
-            ${escapeHtml(String(grandTotal))} ₴
+            ${dischargeMoney(grandTotal)}
           </div>
         </div>
 
@@ -99791,6 +99402,7 @@ ${
                 <th>Сума</th>
               </tr>
             </thead>
+
             <tbody>
               ${financeRowsHtml}
             </tbody>
@@ -99800,15 +99412,17 @@ ${
         <div class="disModernFinanceSummary">
           <div class="disModernFinanceMini">
             <span>Послуги</span>
-            <b>${escapeHtml(String(serviceTotal))} ₴</b>
+            <b>${dischargeMoney(serviceTotal)}</b>
           </div>
+
           <div class="disModernFinanceMini">
             <span>Препарати</span>
-            <b>${escapeHtml(String(stockTotal))} ₴</b>
+            <b>${dischargeMoney(stockTotal)}</b>
           </div>
+
           <div class="disModernFinanceMini disModernFinanceMiniTotal">
             <span>Разом до сплати</span>
-            <b>${escapeHtml(String(grandTotal))} ₴</b>
+            <b>${dischargeMoney(grandTotal)}</b>
           </div>
         </div>
       </div>
@@ -108567,49 +108181,53 @@ function getStockById(id) {
 }
 
 
-async function stockApiRequest(
-  url,
-  options = {}
-) {
-  const response =
-    await fetch(
-      url,
-      {
-        credentials: "include",
+async function stockApiRequest(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "include",
+    ...options,
 
-        ...options,
+    headers: {
+      Accept: "application/json",
 
-        headers: {
-          Accept:
-            "application/json",
+      ...(options.body
+        ? {
+            "Content-Type": "application/json",
+          }
+        : {}),
 
-          ...(options.body
-            ? {
-                "Content-Type":
-                  "application/json",
-              }
-            : {}),
+      ...(options.headers || {}),
+    },
+  });
 
-          ...(options.headers || {}),
-        },
-      }
-    );
-
-  const text =
-    await response.text();
+  const text = await response.text();
 
   let json = null;
 
   try {
-    json = text
-      ? JSON.parse(text)
-      : null;
+    json = text ? JSON.parse(text) : null;
   } catch {}
 
-  if (
-    !response.ok ||
-    json?.ok !== true
-  ) {
+  if (!response.ok || json?.ok !== true) {
+    if (
+      json?.error ===
+      "Visit currency differs from clinic currency."
+    ) {
+      const messages = {
+        uk: "Візит і каталог мають різні валюти. Створіть новий візит у поточній валюті клініки.",
+
+        en: "The visit and catalog use different currencies. Create a new visit in the current clinic currency.",
+
+        de: "Der Besuch und der Katalog verwenden unterschiedliche Währungen. Erstellen Sie einen neuen Besuch in der aktuellen Klinikwährung.",
+
+        pl: "Wizyta i katalog mają różne waluty. Utwórz nową wizytę w aktualnej walucie kliniki.",
+      };
+
+      throw new Error(
+        messages[getInterfaceLanguage()] ||
+        messages.en
+      );
+    }
+
     throw new Error(
       json?.error ||
       `HTTP ${response.status}`
@@ -110812,11 +110430,21 @@ const DEFAULT_CLINIC_PROFILE = {
   phone: "",
   address: "",
   website: "",
+  currency: "UAH",
   document_accent_color: "#9346E8",
   doctor_signature_url: "",
   clinic_stamp_url: "",
   document_footer: "Коли важливо — ми поруч.",
 };
+
+const CLINIC_CURRENCY_CODES = [
+  "UAH",
+  "EUR",
+  "USD",
+  "GBP",
+  "PLN",
+  "CHF",
+];
 
 function getClinicProfile() {
   return {
@@ -110825,6 +110453,66 @@ function getClinicProfile() {
   };
 }
 
+function getClinicCurrency() {
+  const currency = String(
+    getClinicProfile().currency || "UAH"
+  ).trim().toUpperCase();
+
+  return CLINIC_CURRENCY_CODES.includes(currency)
+    ? currency
+    : "UAH";
+}
+
+function getClinicCurrencySymbol(
+  currency = getClinicCurrency()
+) {
+  const code = String(currency).trim().toUpperCase();
+
+  const symbols = {
+    UAH: "₴",
+    EUR: "€",
+    USD: "$",
+    GBP: "£",
+    PLN: "zł",
+    CHF: "CHF",
+  };
+
+  return symbols[code] || code;
+}
+
+function formatClinicMoney(
+  value,
+  currency = getClinicCurrency()
+) {
+  const amount = Number(value ?? 0);
+
+  if (!Number.isFinite(amount)) {
+    return "—";
+  }
+
+  const code = String(currency).trim().toUpperCase();
+
+  if (!CLINIC_CURRENCY_CODES.includes(code)) {
+    return (
+      amount.toLocaleString(getCalendarLocale(), {
+        maximumFractionDigits: 2,
+      }) +
+      " " +
+      code
+    );
+  }
+
+  return new Intl.NumberFormat(
+    getCalendarLocale(),
+    {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "symbol",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }
+  ).format(amount);
+}
 async function loadClinicProfileApi() {
   try {
     const response = await fetch(
@@ -116714,14 +116402,108 @@ function renderClinicProfileSettings(
   `;
 
 
-  bindClinicProfileSettings(
-    page,
-    clinic
-  );
+   Object.assign(SETTINGS_INTERFACE_TEXT, {
+    "Валюта клініки": {
+      en: "Clinic currency",
+      de: "Klinikwährung",
+      pl: "Waluta kliniki",
+    },
+    "Ціни не перераховуються за курсом автоматично.": {
+      en: "Prices are not automatically converted using exchange rates.",
+      de: "Preise werden nicht automatisch zum Wechselkurs umgerechnet.",
+      pl: "Ceny nie są automatycznie przeliczane według kursu walut.",
+    },
+    "Unsupported clinic currency": {
+      en: "This clinic currency is not supported.",
+      de: "Diese Klinikwährung wird nicht unterstützt.",
+      pl: "Ta waluta kliniki nie jest obsługiwana.",
+    },
+  });
 
-  updateClinicDocumentPreview(
-    page
-  );
+  const currencyNames = {
+    uk: {
+      UAH: "Українська гривня",
+      EUR: "Євро",
+      USD: "Долар США",
+      GBP: "Британський фунт",
+      PLN: "Польський злотий",
+      CHF: "Швейцарський франк",
+    },
+    en: {
+      UAH: "Ukrainian hryvnia",
+      EUR: "Euro",
+      USD: "US dollar",
+      GBP: "British pound",
+      PLN: "Polish złoty",
+      CHF: "Swiss franc",
+    },
+    de: {
+      UAH: "Ukrainische Hrywnja",
+      EUR: "Euro",
+      USD: "US-Dollar",
+      GBP: "Britisches Pfund",
+      PLN: "Polnischer Złoty",
+      CHF: "Schweizer Franken",
+    },
+    pl: {
+      UAH: "Hrywna ukraińska",
+      EUR: "Euro",
+      USD: "Dolar amerykański",
+      GBP: "Funt brytyjski",
+      PLN: "Złoty polski",
+      CHF: "Frank szwajcarski",
+    },
+  };
+
+  const names =
+    currencyNames[getInterfaceLanguage()] ||
+    currencyNames.uk;
+
+  const selectedCurrency = String(
+    clinic.currency || "UAH"
+  ).toUpperCase();
+
+  const currencyField = document.createElement("label");
+
+  currencyField.className =
+    "clinicSettingsField clinicSettingsFieldWide";
+
+  currencyField.innerHTML = `
+    <span>
+      ${ui("Валюта клініки")}
+    </span>
+
+    <select
+      class="clinicSettingsInput"
+      id="clinicProfileCurrency"
+    >
+      ${
+        Object.entries(names)
+          .map(([code, name]) => `
+            <option
+              value="${code}"
+              ${selectedCurrency === code ? "selected" : ""}
+            >
+              ${escapeHtml(name)} (${code})
+            </option>
+          `)
+          .join("")
+      }
+    </select>
+
+    <small>
+      ${ui(
+        "Ціни не перераховуються за курсом автоматично."
+      )}
+    </small>
+  `;
+
+  root
+    .querySelector(".clinicSettingsFormGrid")
+    ?.appendChild(currencyField);
+
+  bindClinicProfileSettings(page, clinic);
+  updateClinicDocumentPreview(page);
 }
 
 
@@ -117094,57 +116876,34 @@ function bindClinicProfileSettings(
             ""
           ).trim();
 
-      const payload = {
-        name:
-          read(
-            "#clinicProfileName"
-          ),
+            const payload = {
+        name: read("#clinicProfileName"),
+        subtitle: read("#clinicProfileSubtitle"),
+        phone: read("#clinicProfilePhone"),
+        address: read("#clinicProfileAddress"),
+        website: read("#clinicProfileWebsite"),
 
-        subtitle:
-          read(
-            "#clinicProfileSubtitle"
-          ),
-
-        phone:
-          read(
-            "#clinicProfilePhone"
-          ),
-
-        address:
-          read(
-            "#clinicProfileAddress"
-          ),
-
-        website:
-          read(
-            "#clinicProfileWebsite"
-          ),
+        currency: (
+          read("#clinicProfileCurrency") ||
+          clinic.currency ||
+          "UAH"
+        ).toUpperCase(),
 
         document_accent_color:
-          read(
-            "#clinicProfileAccentText"
-          ).toUpperCase() ||
+          read("#clinicProfileAccentText").toUpperCase() ||
           "#9346E8",
 
-        document_footer:
-          read(
-            "#clinicProfileFooter"
-          ),
+        document_footer: read("#clinicProfileFooter"),
 
-        logo_url:
-          read(
-            '[data-brand-url="logo"]'
-          ),
+        logo_url: read('[data-brand-url="logo"]'),
 
-        doctor_signature_url:
-          read(
-            '[data-brand-url="signature"]'
-          ),
+        doctor_signature_url: read(
+          '[data-brand-url="signature"]'
+        ),
 
-        clinic_stamp_url:
-          read(
-            '[data-brand-url="stamp"]'
-          ),
+        clinic_stamp_url: read(
+          '[data-brand-url="stamp"]'
+        ),
       };
 
 
@@ -119089,9 +118848,13 @@ async function init() {
   );
 
 
-  if (!sessionAuthenticated) {
+    if (!sessionAuthenticated) {
     return;
   }
+
+  state.clinicProfile = null;
+
+  await loadClinicProfileApi();
 
 
   if (
@@ -119175,16 +118938,16 @@ async function init() {
   }
 
 
-  $("#btnReload")
-    ?.addEventListener(
-      "click",
-      async () => {
-        await loadMe();
-        await loadOwners();
-        await loadPatientsApi();
-        await loadServicesApi();
-      }
-    );
+    $("#btnReload")?.addEventListener(
+    "click",
+    async () => {
+      await loadMe();
+      await loadClinicProfileApi();
+      await loadOwners();
+      await loadPatientsApi();
+      await loadServicesApi();
+    }
+  );
 
 
   const ownersGlobalSearch =
