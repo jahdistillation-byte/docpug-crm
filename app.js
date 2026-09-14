@@ -54756,7 +54756,7 @@ function renderPatientsTab() {
         );
       }
     );
-
+mountMobilePatientsList(page, patients, owners);
   patientListElement.onclick =
     async (event) => {
       const editButton =
@@ -122631,4 +122631,88 @@ function mountMobileCalendarDay(page) {
   };
   select.addEventListener("change", applySelection);
   applySelection();
+}
+// PUG CRM — compact mobile patients list, v1
+function mountMobilePatientsList(page, patients, owners) {
+  const list = page.querySelector('#patientsTabList');
+  if (!list) return;
+  window.pugMobilePatientsListCleanup?.();
+  page.querySelector('.mobilePatientsTools')?.remove();
+  page.querySelector('.mobilePatientsNoResults')?.remove();
+  const language = getInterfaceLanguage();
+  const copy = ({
+    uk: { search: 'Кличка, власник, телефон, порода', species: 'Вид тварини', all: 'Усі види', clear: 'Очистити пошук', empty: 'Нікого не знайдено. Змініть пошук або вид тварини.', count: 'Показано', owner: 'Власника не вказано' },
+    en: { search: 'Pet, owner, phone, breed', species: 'Animal species', all: 'All species', clear: 'Clear search', empty: 'No patients found. Change the search or species.', count: 'Showing', owner: 'No owner specified' },
+    de: { search: 'Tier, Tierhalter, Telefon, Rasse', species: 'Tierart', all: 'Alle Tierarten', clear: 'Suche löschen', empty: 'Keine Patienten gefunden. Suche oder Tierart ändern.', count: 'Angezeigt', owner: 'Kein Tierhalter angegeben' },
+    pl: { search: 'Zwierzę, właściciel, telefon, rasa', species: 'Gatunek zwierzęcia', all: 'Wszystkie gatunki', clear: 'Wyczyść wyszukiwanie', empty: 'Nie znaleziono pacjentów. Zmień wyszukiwanie lub gatunek.', count: 'Wyświetlono', owner: 'Nie podano właściciela' }
+  })[language] || { search: 'Pet, owner, phone, breed', species: 'Animal species', all: 'All species', clear: 'Clear search', empty: 'No patients found.', count: 'Showing', owner: 'No owner specified' };
+  const normalize = value => String(value ?? '').normalize('NFKC').toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+  const byId = new Map(patients.map(pet => [String(pet.id), pet]));
+  const ownerById = new Map(owners.map(owner => [String(owner.id), owner]));
+  const entries = Array.from(list.querySelectorAll('[data-open-pet]')).map(card => {
+    const pet = byId.get(card.dataset.openPet) || {};
+    const owner = ownerById.get(String(pet.owner_id)) || {};
+    const content = card.firstElementChild;
+    content?.classList.add('mobilePatientInfo');
+    content?.children[0]?.classList.add('mobilePatientName');
+    content?.children[1]?.classList.add('mobilePatientDesktopMeta');
+    content?.querySelector('.mobilePatientDetails')?.remove();
+    const detail = document.createElement('div');
+    detail.className = 'mobilePatientDetails';
+    const meta = [speciesLabel(pet.species), pet.breed ? getCalendarBreedLabel(pet.breed) : '', pet.age || '', pet.weight_kg ? `${pet.weight_kg} ${language === 'uk' ? 'кг' : 'kg'}` : ''].filter(Boolean).join(' · ');
+    detail.innerHTML = `<div>${escapeHtml(meta)}</div><div class="mobilePatientOwner">${escapeHtml(String(owner.name || '').trim() || copy.owner)}</div>`;
+    content?.appendChild(detail);
+    card.classList.add('mobilePatientRow');
+    return { card, species: normalize(pet.species), text: normalize([pet.name, pet.breed, getCalendarBreedLabel(pet.breed || ''), speciesLabel(pet.species), owner.name, owner.phone].filter(Boolean).join(' ')), phone: String(owner.phone || '').replace(/\D/g, '') };
+  });
+  const tools = document.createElement('div');
+  tools.className = 'mobilePatientsTools';
+  tools.innerHTML = `<div class="mobilePatientsSearch"><input type="search" aria-label="${escapeHtml(copy.search)}" placeholder="${escapeHtml(copy.search)}"><button type="button" aria-label="${escapeHtml(copy.clear)}" title="${escapeHtml(copy.clear)}">×</button></div><div class="mobilePatientsFilter"><select aria-label="${escapeHtml(copy.species)}"><option value="">${escapeHtml(copy.all)}</option></select><span class="mobilePatientsCount" role="status" aria-live="polite"></span></div>`;
+  list.before(tools);
+  const empty = document.createElement('div');
+  empty.className = 'mobilePatientsNoResults';
+  empty.textContent = copy.empty;
+  empty.hidden = true;
+  list.after(empty);
+  const search = tools.querySelector('input');
+  const filter = tools.querySelector('select');
+  const clear = tools.querySelector('button');
+  const count = tools.querySelector('.mobilePatientsCount');
+  const species = new Map();
+  patients.forEach(pet => {
+    const value = normalize(pet.species);
+    if (value && !species.has(value)) species.set(value, speciesLabel(pet.species));
+  });
+  Array.from(species).sort((a, b) => String(a[1]).localeCompare(String(b[1]), language)).forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    filter.appendChild(option);
+  });
+  const saved = window.pugMobilePatientsFilters || {};
+  search.value = saved.query || '';
+  filter.value = species.has(saved.species) ? saved.species : '';
+  const media = window.matchMedia('(max-width:700px), (max-width:950px) and (max-height:500px)');
+  const apply = () => {
+    const query = normalize(search.value);
+    const digits = query.replace(/\D/g, '');
+    const isPhone = digits.length > 0 && /^[\d\s+().-]+$/.test(query);
+    const tokens = query.split(' ').filter(Boolean);
+    let visible = 0;
+    entries.forEach(entry => {
+      const matches = (!filter.value || entry.species === filter.value) && (!query || (isPhone ? entry.phone.includes(digits) : tokens.every(token => entry.text.includes(token))));
+      entry.card.hidden = media.matches && !matches;
+      if (!entry.card.hidden) visible++;
+    });
+    empty.hidden = !media.matches || visible > 0;
+    clear.disabled = !query;
+    count.textContent = `${copy.count}: ${visible} / ${entries.length}`;
+    window.pugMobilePatientsFilters = { query: search.value, species: filter.value };
+  };
+  search.addEventListener('input', apply);
+  filter.addEventListener('change', apply);
+  clear.addEventListener('click', () => { search.value = ''; apply(); search.focus(); });
+  media.addEventListener('change', apply);
+  window.pugMobilePatientsListCleanup = () => media.removeEventListener('change', apply);
+  apply();
 }

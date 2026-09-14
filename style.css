@@ -63129,3 +63129,44 @@ body[data-theme="white"]
   .patientVaccinePickerOverlay :is(.patientVaccineBrandCard, .patientVaccineProductCard) strong { font-size: 14px !important; }
   #visitPaymentModal :is(.visitPaymentOverview, .visitPaymentMethods) { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
 }
+/* PUG CRM — compact mobile patients list, v1 */
+.mobilePatientsTools, .mobilePatientDetails, .mobilePatientsNoResults { display: none; }
+@media screen and (max-width:700px), screen and (max-width:950px) and (max-height:500px) {
+  body:has(.page[data-page="patients"].active) .header-panel { gap: 10px !important; margin-bottom: 14px !important; padding: 12px 0 !important; min-width: 0; }
+  body:has(.page[data-page="patients"].active) .top-logo { font-size: 18px !important; white-space: nowrap; }
+  body:has(.page[data-page="patients"].active) .user-profile-badge { min-width: 0 !important; max-width: 55%; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+  body:has(.page[data-page="patients"].active) #clinicNameTitle { font-size: 14px !important; overflow-wrap: anywhere; }
+  body:has(.page[data-page="patients"].active) .user-profile-badge span { font-size: 11px !important; }
+  .page[data-page="patients"] { min-width: 0; max-width: 100%; }
+  .page[data-page="patients"] > .glass-card { padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; border-radius: 0 !important; }
+  .page[data-page="patients"] > .glass-card > div:first-child { flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px !important; }
+  .page[data-page="patients"] h2 { font-size: 22px !important; line-height: 1.2 !important; }
+  .page[data-page="patients"] > .glass-card > div:first-child .hint { font-size: 12px !important; line-height: 1.4 !important; }
+  .page[data-page="patients"] .mobilePatientsTools { display: grid; gap: 8px; margin-bottom: 8px; min-width: 0; }
+  .page[data-page="patients"] .mobilePatientsSearch { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass-bg); }
+  .page[data-page="patients"] .mobilePatientsSearch input { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 16px !important; color: var(--text-main) !important; box-sizing: border-box; }
+  .page[data-page="patients"] .mobilePatientsSearch input::placeholder { color: var(--text-muted); opacity: 1; }
+  .page[data-page="patients"] .mobilePatientsSearch input::-webkit-search-cancel-button { display: none; }
+  .page[data-page="patients"] .mobilePatientsSearch button { width: 44px; height: 44px; min-width: 44px; padding: 0 !important; font-size: 22px !important; color: var(--text-muted); border: 0; border-radius: 10px; background: transparent; }
+  .page[data-page="patients"] .mobilePatientsSearch button:disabled { opacity: .3; }
+  .page[data-page="patients"] .mobilePatientsFilter { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; }
+  .page[data-page="patients"] .mobilePatientsFilter select { width: 100%; max-width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px !important; font-size: 16px !important; box-sizing: border-box; border: 1px solid var(--glass-border); border-radius: 10px; color: var(--text-main) !important; background: var(--glass-bg) !important; }
+  .page[data-page="patients"] .mobilePatientsCount { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .page[data-page="patients"] #patientsTabList { min-width: 0; }
+  .page[data-page="patients"] #patientsTabList > [data-open-pet] { display: grid !important; grid-template-columns: minmax(0, 1fr) 94px; gap: 8px; align-items: center !important; padding: 12px 0 !important; margin: 0 !important; border: 0 !important; border-bottom: 1px solid var(--glass-border) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; min-width: 0; }
+  .page[data-page="patients"] #patientsTabList > [data-open-pet][hidden] { display: none !important; }
+  .page[data-page="patients"] #patientsTabList > [data-open-pet] > div:first-child { min-width: 0; }
+  .page[data-page="patients"] #patientsTabList > [data-open-pet] > div:first-child > div:first-child { font-size: 16px !important; font-weight: 600 !important; line-height: 1.35 !important; overflow-wrap: anywhere; }
+  .page[data-page="patients"] .mobilePatientDesktopMeta { display: none; }
+  .page[data-page="patients"] .mobilePatientDetails { display: grid; gap: 3px; margin-top: 4px; font-size: 12px; line-height: 1.45; color: var(--text-muted); overflow-wrap: anywhere; }
+  .page[data-page="patients"] .mobilePatientOwner { font-size: 12px; color: var(--text-main); opacity: .8; }
+  .page[data-page="patients"] .patientActionsCell { padding: 0 !important; gap: 6px !important; }
+  .page[data-page="patients"] .patientActionBtn { width: 44px !important; min-width: 44px !important; height: 44px !important; min-height: 44px !important; box-shadow: none !important; }
+  .page[data-page="patients"] .patientActionBtn svg { width: 17px; height: 17px; }
+  .page[data-page="patients"] .mobilePatientsNoResults:not([hidden]) { display: block; padding: 24px 12px; font-size: 13px; line-height: 1.5; text-align: center; color: var(--text-muted); }
+  .page[data-page="patients"] .patientsTabLoading { min-height: 150px !important; padding: 20px 12px !important; }
+  .page[data-page="patients"] .patientsTabLoadingIcon { width: 36px; height: 36px; font-size: 22px; border-radius: 12px; }
+  .page[data-page="patients"] #patientsTabList > .hint { padding: 24px 12px !important; font-size: 13px !important; }
+  body[data-theme="white"] .page[data-page="patients"] .mobilePatientsSearch,
+  body[data-theme="white"] .page[data-page="patients"] .mobilePatientsFilter select { background: #f3f6f5 !important; border-color: #dce5df !important; }
+}
