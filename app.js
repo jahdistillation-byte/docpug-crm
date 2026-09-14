@@ -78762,6 +78762,7 @@ page.innerHTML = `
   </div>
 `;
 
+mountMobileCalendarDay(page);
 initCalendarTopScroll();
   $$("[data-calendar-timeline]")
   .forEach(
@@ -122427,4 +122428,207 @@ function mountCrmImportSettings(page) {
     const link = document.createElement("a"); link.href = url; link.download = "pug-import-template.csv"; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
+}
+function mountMobileCalendarDay(page) {
+  const card = page?.querySelector(".calendarCard");
+  const grid = card?.querySelector("#calendarDayGrid");
+  if (!grid || card.querySelector(".calendarMobileDoctorPicker")) return;
+
+  const columns = [...grid.querySelectorAll("[data-calendar-doctor-column]")];
+  if (!columns.length) return;
+
+  if (!document.getElementById("pugMobileCalendarBlockStyles")) {
+    const style = document.createElement("style");
+    style.id = "pugMobileCalendarBlockStyles";
+    style.textContent = `/* PUG CRM — compact mobile day calendar v3 */
+.calendarMobileDoctorPicker,
+.calendarMobileScrollHint {
+  display: none;
+}
+
+@media (max-width: 640px),
+       (max-width: 1024px) and (max-height: 500px) and (orientation: landscape) {
+  .page[data-page="calendar"] .calendarMobileDay .calendarHeader {
+    display: block;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarHeader .hint {
+    display: none;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarHeaderActions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarViewSwitcher {
+    display: contents;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarViewGroup {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarViewGroupLabel {
+    display: none;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarScheduleButton {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarTop {
+    margin: 10px 0 !important;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarMobileDoctorPicker {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px 10px;
+    margin: 10px 0;
+    min-width: 0;
+  }
+
+  .calendarMobileDoctorPicker label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .calendarMobileDoctorPicker select {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--glass-border, rgba(128, 128, 128, .3));
+    border-radius: 12px;
+    color: var(--text-main, #fff);
+    background: var(--card-bg, #171126);
+    font: inherit;
+    font-size: 16px;
+  }
+
+  .calendarMobileDoctorMeta {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-muted, #999);
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calTopScroll {
+    display: none;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarDayGrid {
+    height: 340px;
+    height: clamp(240px, 42dvh, 380px);
+    max-height: none !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarDoctorsTimelineGrid {
+    grid-auto-columns: 100% !important;
+    min-width: 0;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarDoctorTimelineColumn {
+    min-width: 0 !important;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay [data-mobile-calendar-hidden],
+  .page[data-page="calendar"] .calendarMobileDay .calendarDoctorTimelineHead,
+  .page[data-page="calendar"] .calendarMobileDay .calendarTimelineTimeHead {
+    display: none !important;
+  }
+
+  .page[data-page="calendar"] .calendarMobileDay .calendarMobileScrollHint {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-muted, #999);
+  }
+}
+`;
+    document.head.appendChild(style);
+  }
+
+  const texts = {
+    uk: ["Лікар", "Розклад на день", "Прокручуйте час усередині розкладу"],
+    en: ["Clinician", "Day schedule", "Scroll through times inside the schedule"],
+    de: ["Behandelnde Person", "Tagesplan", "Zeiten innerhalb des Plans scrollen"],
+    pl: ["Osoba prowadząca", "Plan dnia", "Przewijaj godziny wewnątrz planu"],
+  };
+  const language = typeof getInterfaceLanguage === "function"
+    ? getInterfaceLanguage() : "uk";
+  const text = texts[language] || texts.uk;
+  const picker = document.createElement("div");
+  picker.className = "calendarMobileDoctorPicker";
+
+  const label = document.createElement("label");
+  label.htmlFor = "calendarMobileDoctorSelect";
+  label.textContent = text[0];
+  const select = document.createElement("select");
+  select.id = "calendarMobileDoctorSelect";
+  const meta = document.createElement("div");
+  meta.className = "calendarMobileDoctorMeta";
+  meta.setAttribute("aria-live", "polite");
+
+  columns.forEach((column, index) => {
+    const option = document.createElement("option");
+    option.value = String(column.dataset.staffId || index);
+    option.textContent = column.dataset.staffName ||
+      column.querySelector(".calendarDoctorTimelineIdentity strong")?.textContent.trim() ||
+      text[0];
+    select.appendChild(option);
+  });
+  picker.append(label, select, meta);
+  card.querySelector(".calendarMainArea").insertBefore(picker, grid);
+
+  const hint = document.createElement("div");
+  hint.className = "calendarMobileScrollHint";
+  hint.textContent = text[2];
+  grid.insertAdjacentElement("afterend", hint);
+  card.classList.add("calendarMobileDay");
+  grid.setAttribute("aria-label", text[1]);
+  grid.tabIndex = 0;
+
+  const query = "(max-width: 640px), (max-width: 1024px) and (max-height: 500px) and (orientation: landscape)";
+  const saved = String(window.__pugMobileCalendarStaffId || "");
+  select.value = [...select.options].some(option => option.value === saved)
+    ? saved : select.options[0].value;
+
+  const applySelection = () => {
+    const selected = columns[select.selectedIndex] || columns[0];
+    window.__pugMobileCalendarStaffId = select.value;
+    columns.forEach(column => {
+      column.toggleAttribute("data-mobile-calendar-hidden", column !== selected);
+    });
+    const detail = selected.querySelector(".calendarDoctorTimelineIdentity span")?.textContent;
+    const specialties = selected.querySelector(".calendarDoctorSpecializations")?.textContent;
+    meta.textContent = [detail, specialties]
+      .map(value => String(value || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean).join(" · ");
+
+    requestAnimationFrame(() => {
+      if (!grid.isConnected || !window.matchMedia(query).matches) return;
+      grid.scrollLeft = 0;
+      const beforeShift = selected.querySelector(".calendarShiftUnavailableBefore");
+      const shiftOffset = parseFloat(beforeShift?.style.height || "0");
+      grid.scrollTop = Number.isFinite(shiftOffset) ? Math.max(0, shiftOffset - 12) : 0;
+    });
+  };
+  select.addEventListener("change", applySelection);
+  applySelection();
 }
