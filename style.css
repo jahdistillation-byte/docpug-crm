@@ -62712,8 +62712,8 @@ body[data-theme="white"]
     flex: 0 0 44px;
   }
 }
-/* PUG CRM — compact patient page, phones only, v1 */
-@media (max-width: 700px) {
+/* PUG CRM — complete mobile patient workflow, v2 */
+@media screen and (max-width: 700px), screen and (max-width: 950px) and (max-height: 500px) {
   .main-content:has(.page[data-page="patient"].active) {
     width: 100% !important;
     max-width: 100% !important;
@@ -62907,4 +62907,225 @@ body[data-theme="white"]
     background: #f5effc !important; border-color: #d9c7ee !important;
   }
   body[data-theme="white"] .page[data-page="patient"] #patientCardRoot #patientTabContent > section:has([data-patient-ai-generate]) > div:first-child { color: #7841a7 !important; }
+}
+
+/* PUG CRM — patient records, visits and editors, mobile v2 */
+@media screen and (max-width: 700px), screen and (max-width: 950px) and (max-height: 500px) {
+  /* Flex items in the stacked visit header must not acquire a fixed height. */
+  .page[data-page="patient"] #patientCardRoot :is(.premiumVisitHeading, .premiumMedEntryMainInfo) {
+    flex: 0 1 auto !important; width: 100% !important; min-height: 0 !important;
+  }
+  .page[data-page="patient"] #patientCardRoot :is(.premiumVisitTop, .premiumMedEntryHeader) { align-items: flex-start !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumVisitBadges { width: 100%; flex-direction: row !important; justify-content: flex-start !important; gap: 6px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.premiumVisitStatus, .premiumVisitPrice, .premiumVisitType) {
+    min-height: 28px !important; padding: 5px 8px !important; font-size: 11px !important;
+  }
+  .page[data-page="patient"] #patientCardRoot .premiumVisitDivider { margin: 10px 0 !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumVisitText:has(.premiumVisitList),
+  .page[data-page="patient"] #patientCardRoot .premiumVisitList { white-space: normal !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumVisitList { gap: 6px !important; margin: 0 !important; padding: 0 !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumVisitList li { white-space: normal !important; line-height: 1.5 !important; padding-left: 14px !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumVisitSectionHead { margin-bottom: 6px !important; font-size: 10px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.premiumVisitOpenHint, .premiumMedEntryVitalsLine, .premiumMedBlockHeader) { font-size: 12px !important; line-height: 1.4 !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumMedEntryActions { flex-direction: row !important; width: auto !important; }
+  .page[data-page="patient"] #patientCardRoot .premiumMedEntryAction { width: 44px !important; height: 44px !important; padding: 10px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.premiumMedMiniRow, .premiumMedVitalsGrid > div) { min-width: 0; padding: 10px !important; overflow-wrap: anywhere; }
+  .page[data-page="patient"] #patientCardRoot .patientFilesEmpty { padding: 16px !important; min-height: 110px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientFilesEmptyIcon { width: 36px !important; height: 36px !important; font-size: 22px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientFilesEmpty h3 { font-size: 17px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientFilesEmpty p { font-size: 13px !important; line-height: 1.45 !important; }
+  .page[data-page="patient"] #patientCardRoot .patientFileCardBody h4 { font-size: 15px !important; overflow-wrap: anywhere; }
+  .page[data-page="patient"] #patientCardRoot :is(.patientFileMeta, .patientFileNote) { font-size: 12px !important; line-height: 1.45 !important; overflow-wrap: anywhere; }
+  .page[data-page="patient"] #patientCardRoot .patientFileCardActions { gap: 6px !important; padding: 10px !important; flex-wrap: wrap; }
+  .page[data-page="patient"] #patientCardRoot .patientFileActionButton { min-width: 44px !important; min-height: 44px !important; padding: 10px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientFileOpenButton { min-height: 44px !important; padding: 10px !important; font-size: 13px !important; }
+  .page[data-page="patient"] #patientCardRoot .labHistoryStats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; padding: 12px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.labHistoryComment, .labHistoryOwnerExplanation, .labHistoryQualitative) { padding: 12px !important; font-size: 13px !important; line-height: 1.5 !important; overflow-wrap: anywhere; }
+  .page[data-page="patient"] #patientCardRoot .labHistoryActions { flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="patient"] #patientCardRoot .labActionBtn { width: 44px !important; height: 44px !important; padding: 10px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientDocumentCard { gap: 8px !important; border-radius: 12px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientDocumentCard :is(select, button) { width: 100% !important; min-height: 44px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.patientDocumentHint, .patientDocumentNotice) { font-size: 12px !important; line-height: 1.45 !important; }
+
+  /* The open appointment is part of the same patient workflow. */
+  .main-content:has(.page[data-page="visit"].active) { width: 100% !important; max-width: 100% !important; padding: 12px 10px 120px !important; box-sizing: border-box; }
+  .main-content:has(.page[data-page="visit"].active) .header-panel { padding: 0 !important; min-height: 44px !important; gap: 10px !important; margin-bottom: 14px !important; }
+  .main-content:has(.page[data-page="visit"].active) .top-logo { font-size: 18px !important; }
+  .main-content:has(.page[data-page="visit"].active) .user-profile-badge { background: none !important; border: 0 !important; padding: 4px 0 !important; min-width: 0 !important; max-width: 55%; }
+  .main-content:has(.page[data-page="visit"].active) #clinicNameTitle { font-size: 14px !important; overflow-wrap: anywhere; }
+  .page[data-page="visit"] .visitWorkspace,
+  .page[data-page="visit"] .visitWorkspace.hasPugAiWorkspace { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; box-sizing: border-box; }
+  .page[data-page="visit"] .visitWorkspace :is(div, section, aside, main, label, header) { min-width: 0; box-sizing: border-box; }
+  .page[data-page="visit"] .visitWorkspaceHeader { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; margin-bottom: 12px !important; }
+  .page[data-page="visit"] .visitBackPatientButton { min-height: 44px !important; margin-bottom: 8px !important; padding: 8px 10px !important; font-size: 13px !important; }
+  .page[data-page="visit"] .visitWorkspaceHeader h1 { font-size: 26px !important; line-height: 1.15 !important; overflow-wrap: anywhere; }
+  .page[data-page="visit"] .visitWorkspaceEyebrow { font-size: 10px !important; margin-bottom: 5px !important; }
+  .page[data-page="visit"] .visitWorkspaceMeta { font-size: 13px !important; line-height: 1.4 !important; margin-top: 6px !important; overflow-wrap: anywhere; }
+  .page[data-page="visit"] .visitWorkspaceHeaderActions { display: flex !important; justify-content: flex-start !important; width: 100%; gap: 6px !important; }
+  .page[data-page="visit"] :is(.visitWorkspaceStatus, .visitWorkspaceDate) { width: auto !important; min-height: 30px !important; padding: 6px 10px !important; font-size: 12px !important; }
+  .page[data-page="visit"] .visitWorkspaceGrid,
+  .page[data-page="visit"] .visitWorkspaceGrid.hasPugAiWorkspace { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; }
+  .page[data-page="visit"] :is(.visitAiWorkspace, .visitWorkspaceMain, .visitWorkspaceSidebar) { grid-column: 1 !important; width: 100% !important; position: static !important; max-height: none !important; }
+  .page[data-page="visit"] .visitAiWorkspace { grid-row: auto !important; order: 0; border-radius: 14px !important; }
+  .page[data-page="visit"] .visitWorkspaceMain { order: 1; gap: 12px !important; }
+  .page[data-page="visit"] .visitWorkspaceSidebar { order: 2; }
+  .page[data-page="visit"] .visitAiWorkspaceHead { padding: 12px !important; }
+  .page[data-page="visit"] .visitAiWorkspaceBrand { gap: 8px !important; }
+  .page[data-page="visit"] .visitAiWorkspaceBrandIcon { width: 32px !important; height: 32px !important; min-width: 32px !important; flex: 0 0 32px !important; border-radius: 10px !important; }
+  .page[data-page="visit"] .visitAiWorkspaceBrand strong { font-size: 16px !important; }
+  .page[data-page="visit"] .visitAiWorkspaceBrand span { font-size: 11px !important; line-height: 1.35 !important; }
+  .page[data-page="visit"] .visitAiWorkspaceTabs { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; margin-top: 10px !important; gap: 4px !important; }
+  .page[data-page="visit"] .visitAiWorkspaceTab { min-height: 44px !important; padding: 8px 4px !important; font-size: 12px !important; white-space: normal !important; }
+  .page[data-page="visit"] .visitAiWorkspaceBody { padding: 10px !important; max-height: none !important; overflow: visible !important; }
+  .page[data-page="visit"] #visitAiIntakePanel { font-size: 13px !important; line-height: 1.45 !important; }
+  .page[data-page="visit"] #visitAiIntakePanel > div { padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="visit"] #visitAiIntakePanel > div > div:first-child { gap: 8px !important; flex-wrap: wrap !important; }
+  .page[data-page="visit"] #visitAiIntakePanel > div > div:first-child > div > div { font-size: 14px !important; }
+  .page[data-page="visit"] #visitAiIntakePanel > div > div:first-child > div > div + div { font-size: 12px !important; }
+  .page[data-page="visit"] :is(input, select, textarea) { min-width: 0 !important; max-width: 100%; box-sizing: border-box; font-size: 16px !important; }
+  .page[data-page="visit"] :is(.visitControl, .visitAiConsultInput) { min-height: 44px !important; padding: 10px !important; border-radius: 10px !important; }
+  .page[data-page="visit"] #visitAiIntakePanel textarea { min-height: 110px !important; padding: 10px !important; margin-top: 10px !important; }
+  .page[data-page="visit"] #visitAiIntakePanel button { min-height: 44px !important; min-width: 0 !important; padding: 10px !important; font-size: 13px !important; max-width: 100%; white-space: normal; }
+  .page[data-page="visit"] .visitSectionCard { padding: 14px !important; border-radius: 14px !important; }
+  .page[data-page="visit"] .visitSectionHead { gap: 8px !important; margin-bottom: 12px !important; flex-wrap: wrap !important; }
+  .page[data-page="visit"] .visitSectionHead > div:first-child { gap: 8px !important; }
+  .page[data-page="visit"] .visitSectionIcon { width: 32px !important; height: 32px !important; min-width: 32px !important; font-size: 18px !important; }
+  .page[data-page="visit"] .visitSectionHead h2 { font-size: 18px !important; line-height: 1.3 !important; }
+  .page[data-page="visit"] .visitSectionHead p { font-size: 12px !important; line-height: 1.4 !important; margin-top: 4px !important; }
+  .page[data-page="visit"] :is(.visitMedicalGrid, .visitAssessmentGrid, .visitOwnerFollowGrid) { grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; }
+  .page[data-page="visit"] .visitVitalsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  .page[data-page="visit"] :is(.visitField, .visitVitalField) > span { font-size: 12px !important; line-height: 1.4 !important; }
+  .page[data-page="visit"] :is(.visitVitalsBlock, .visitOwnerCommunicationBlock) { padding: 10px !important; }
+  .page[data-page="visit"] .visitTextareaShort { min-height: 80px !important; }
+  .page[data-page="visit"] .visitTextareaLarge { min-height: 120px !important; }
+  .page[data-page="visit"] .visitPickerModern { display: grid !important; grid-template-columns: minmax(0, 1fr) 64px !important; gap: 8px !important; padding: 10px !important; }
+  .page[data-page="visit"] .visitPickerModern .visitPickerSearch { grid-column: 1 / -1 !important; }
+  .page[data-page="visit"] .visitPickerModern .visitPickerSelect { grid-column: 1 !important; }
+  .page[data-page="visit"] .visitPickerModern .visitPickerQty { grid-column: 2 !important; }
+  .page[data-page="visit"] .visitPickerModern .visitAddLineButton { grid-column: 1 / -1 !important; min-height: 44px !important; width: 100% !important; }
+  .page[data-page="visit"] .visitPickerModern label > span { font-size: 12px !important; }
+  .page[data-page="visit"] .visitServicePickerButton { width: 100% !important; padding: 8px !important; min-height: 44px !important; }
+  .page[data-page="visit"] .visitServicePickerIcon { width: 26px !important; height: 26px !important; flex: 0 0 26px; }
+  .page[data-page="visit"] .visitServicePickerText strong { font-size: 13px !important; }
+  .page[data-page="visit"] .visitServicePickerText small { font-size: 11px !important; white-space: normal; }
+  .page[data-page="visit"] .visitSectionTotal { padding: 8px !important; }
+  .page[data-page="visit"] .visitSectionTotal strong { font-size: 16px !important; }
+  .page[data-page="visit"] .visitSummaryCard { position: static !important; padding: 14px !important; border-radius: 14px !important; }
+  .page[data-page="visit"] .visitSummaryPatient { padding: 10px !important; margin: 12px 0 !important; }
+  .page[data-page="visit"] .visitSummaryAvatar { width: 32px !important; height: 32px !important; min-width: 32px !important; }
+  .page[data-page="visit"] .visitSummaryPatient strong { font-size: 15px !important; }
+  .page[data-page="visit"] .visitSummaryPatient span { font-size: 12px !important; overflow-wrap: anywhere; }
+  .page[data-page="visit"] .visitSummaryRows { gap: 8px !important; }
+  .page[data-page="visit"] .visitSummaryGrand strong { font-size: 24px !important; }
+  .page[data-page="visit"] :is(.visitSavePrimary, .visitCompleteButton, .visitPrintButton, .visitPaymentButton) { min-height: 44px !important; padding: 10px !important; font-size: 14px !important; white-space: normal; }
+  .page[data-page="visit"] .visitSummaryHint { font-size: 12px !important; line-height: 1.4 !important; }
+
+  /* Patient editors: scroll within the window; keep close/save accessible. */
+  :is(.premiumLabModalOverlay, .medcardModalOverlay, .patientFileModalOverlay, .patientDiagnosisModalOverlay, .patientVaccinePickerOverlay, .patientConsentOverlay, .visitServicePickerOverlay, .addPetModalOverlay) {
+    padding: 8px !important; box-sizing: border-box; align-items: center !important;
+  }
+  :is(#premiumLabModal .premiumLabModal, #medcardModal .medcardModalWindow, .patientFileModalOverlay .patientFileModal, .patientDiagnosisModalOverlay .patientDiagnosisModal, .patientVaccinePickerOverlay .patientVaccinePicker, .patientConsentOverlay .patientConsentModal, .visitServicePickerOverlay .visitServicePickerModal, #addPetModalOverlay .addPetModal) {
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important;
+    max-height: calc(100dvh - 16px) !important; margin: 0 !important; box-sizing: border-box; border-radius: 16px !important;
+  }
+  :is(#premiumLabModal, #medcardModal, .patientFileModalOverlay, .patientDiagnosisModalOverlay, .patientVaccinePickerOverlay, .patientConsentOverlay, .visitServicePickerOverlay, #addPetModalOverlay) :is(div, section, label, form, header, footer) { min-width: 0; box-sizing: border-box; }
+  :is(#premiumLabModal, #medcardModal, .patientFileModalOverlay, .patientDiagnosisModalOverlay, .patientVaccinePickerOverlay, .patientConsentOverlay, .visitServicePickerOverlay, #addPetModalOverlay) :is(input, select, textarea) { max-width: 100%; min-width: 0 !important; box-sizing: border-box; font-size: 16px !important; }
+  :is(#premiumLabModal, #medcardModal, .patientFileModalOverlay, .patientDiagnosisModalOverlay, .patientVaccinePickerOverlay, .patientConsentOverlay, .visitServicePickerOverlay, #addPetModalOverlay) button { min-height: 44px !important; max-width: 100%; font-size: 14px !important; white-space: normal; }
+  :is(#premiumLabModal .premiumLabModalHeader, #medcardModal .medcardModalHeader, .patientFileModalOverlay .patientFileModalHead, .patientDiagnosisModalOverlay .patientDiagnosisModalHeader, .patientVaccinePickerOverlay .patientVaccinePickerHead, .patientConsentOverlay .patientConsentModalHead, .visitServicePickerOverlay .visitServicePickerHeader, #addPetModalOverlay .addPetModalHeader) { padding: 12px !important; gap: 8px !important; flex: 0 0 auto; }
+  :is(#premiumLabModal, #medcardModal, .patientFileModalOverlay, .patientDiagnosisModalOverlay, .patientVaccinePickerOverlay, .patientConsentOverlay, .visitServicePickerOverlay, #addPetModalOverlay) :is(h2, h3) { font-size: 18px !important; line-height: 1.3 !important; overflow-wrap: anywhere; }
+  :is(#premiumLabModal, #medcardModal, .patientFileModalOverlay, .patientDiagnosisModalOverlay, .patientVaccinePickerOverlay, .patientConsentOverlay, .visitServicePickerOverlay, #addPetModalOverlay) p { font-size: 12px !important; line-height: 1.45 !important; }
+  :is(#premiumLabModal .premiumLabModalIcon, #medcardModal .medcardModalIcon, .patientFileModalOverlay .patientFileModalIcon) { width: 32px !important; height: 32px !important; min-width: 32px !important; flex: 0 0 32px !important; font-size: 18px !important; }
+  #premiumLabModal .premiumLabModalScroll, #medcardModal .medcardModalScroll { padding: 12px !important; min-height: 0 !important; overflow-y: auto !important; overscroll-behavior: contain; }
+  #premiumLabModal :is(.premiumLabMetaSection, .premiumLabResultsGrid), #medcardModal :is(.medcardTextGrid, .medcardPlanGrid) { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  #premiumLabModal .premiumLabResultCard { padding: 12px !important; }
+  #premiumLabModal .premiumLabReferenceGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #medcardModal :is(.medcardVitalsGrid, .medcardStateGrid) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  #medcardModal .medcardFormSection { padding: 12px !important; margin-bottom: 10px !important; }
+  #medcardModal .medcardSectionHeader { gap: 8px !important; margin-bottom: 10px !important; }
+  #medcardModal :is(.medcardInput, .medcardTextarea) { padding: 10px !important; min-height: 44px !important; }
+  #medcardModal .medcardTextarea { min-height: 90px !important; }
+  #medcardModal .medcardModalFooterHint { display: none !important; }
+  #medcardModal .medcardModalActions { width: 100% !important; }
+  #premiumLabModal .premiumLabModalFooter, #medcardModal .medcardModalFooter { padding: 10px 12px !important; gap: 8px !important; flex: 0 0 auto; }
+  #premiumLabModal .premiumLabModalFooter button, #medcardModal .medcardModalActions button { flex: 1 1 0; min-width: 0; padding: 10px !important; }
+  .patientFileModalOverlay .patientFileModal { padding: 12px !important; overflow-y: auto !important; overscroll-behavior: contain; }
+  .patientFileModalOverlay .patientFileModalHead { padding: 0 44px 10px 0 !important; }
+  .patientFileModalOverlay .patientFileModalClose { top: 8px !important; right: 8px !important; width: 44px !important; height: 44px !important; }
+  .patientFileModalOverlay :is(.patientFileModalGrid, .patientFileUploadZone) { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .patientFileModalOverlay .patientFileUploadZone { padding: 12px !important; }
+  .patientFileModalOverlay .patientFileModalField :is(input, select) { min-height: 44px !important; padding: 10px !important; }
+  .patientFileModalOverlay .patientFileModalField textarea { min-height: 80px !important; padding: 10px !important; }
+  .patientFileModalOverlay .patientFileModalActions { position: sticky; bottom: -12px; padding: 10px 0; display: flex !important; gap: 8px !important; background: var(--finance-surface-1, #111827); }
+  .patientFileModalOverlay .patientFileModalActions button { flex: 1 1 0; padding: 10px !important; }
+  .patientDiagnosisModalOverlay .patientDiagnosisModal { overflow-y: auto !important; padding: 12px !important; overscroll-behavior: contain; }
+  .patientDiagnosisModalOverlay .patientDiagnosisModalHeader { padding: 0 0 10px !important; }
+  .patientDiagnosisModalOverlay .patientDiagnosisForm { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .patientDiagnosisModalOverlay .patientDiagnosisForm .is-wide { grid-column: 1 !important; }
+  .patientVaccinePickerOverlay .patientVaccinePicker { overflow-y: auto !important; overscroll-behavior: contain; }
+  .patientVaccinePickerOverlay .patientVaccinePicker > div:has(> label) { padding: 12px !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .patientConsentOverlay .patientConsentModal { overflow-y: auto !important; }
+  .patientConsentOverlay .patientConsentForm { padding: 12px !important; }
+  .patientConsentOverlay .patientConsentGrid { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .patientConsentOverlay .patientConsentChecks label { min-height: 44px; }
+  .patientConsentOverlay .patientConsentActions { gap: 8px !important; }
+  .visitServicePickerOverlay .visitServicePickerModal { display: flex; flex-direction: column; overflow: hidden; }
+  .visitServicePickerOverlay .visitServicePickerGrid { grid-template-columns: minmax(0, 1fr) !important; min-height: 0; overflow-y: auto; padding: 10px !important; gap: 8px !important; }
+  .visitServicePickerOverlay .visitServicePickerSearch { padding: 10px !important; }
+  .visitServicePickerOverlay .visitServicePickerSearch input { min-height: 44px !important; }
+  .visitServicePickerOverlay .visitServicePickerCategories { padding: 0 10px 10px !important; gap: 6px !important; flex-shrink: 0; }
+  .visitServicePickerOverlay .visitServicePickerCard { min-height: 64px !important; padding: 10px !important; }
+  #addPetModalOverlay .addPetModalForm { overflow-y: auto !important; padding: 12px !important; }
+  #addPetModalOverlay .addPetModalGrid { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+
+  .page[data-page="visit"] #visitAiConsultPanel { padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="visit"] .visitAiConsultTitle { font-size: 15px !important; }
+  .page[data-page="visit"] .visitAiConsultSubtitle { font-size: 12px !important; line-height: 1.45 !important; }
+  .page[data-page="visit"] .visitAiConsultHead { gap: 8px !important; flex-wrap: wrap; }
+  .page[data-page="visit"] .visitAiConsultQuickActions { grid-template-columns: minmax(0, 1fr) !important; gap: 6px !important; }
+  .page[data-page="visit"] :is(.visitAiConsultQuickButton, .visitAiConsultSend) { min-height: 44px !important; padding: 10px !important; font-size: 13px !important; }
+  .page[data-page="visit"] .visitAiConsultComposer { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .page[data-page="visit"] .visitAiConsultMessages:empty { min-height: 0 !important; padding: 0 !important; margin: 0 !important; }
+  .page[data-page="visit"] .visitAiConsultMessage { padding: 10px !important; font-size: 13px !important; line-height: 1.5 !important; overflow-wrap: anywhere; }
+  .page[data-page="visit"] .visitAiConsultInput { min-height: 90px !important; }
+  .page[data-page="visit"] .visitAiConsultComposerHint { font-size: 11px !important; }
+  .patientFileModalOverlay .patientFileUploadPreview { min-height: 100px !important; height: 110px !important; }
+  .patientFileModalOverlay .patientFileModalActions { flex-direction: row !important; }
+  .patientFileModalOverlay .patientFileModalActions button { width: auto !important; }
+  .patientDiagnosisModalOverlay .patientDiagnosisFormActions { gap: 8px !important; }
+  .page[data-page="patient"] #patientCardRoot .patientDocumentIcon { width: 36px !important; height: 36px !important; font-size: 20px !important; }
+  body[data-theme="white"] :is(.patientFileModalOverlay, .patientVaccinePickerOverlay) :is(p, label > span, .patientFileUploadInfo, .patientFileUploadEmpty, .patientFileUploadDocument) { color: #526779 !important; }
+  body[data-theme="white"] :is(.patientFileModalOverlay, .patientVaccinePickerOverlay) :is(input, select, textarea) { color: #172b3a !important; background: #f1f6fa !important; border-color: #dce6ee !important; }
+  body[data-theme="white"] :is(.patientFileModalOverlay, .patientVaccinePickerOverlay) :is(input, textarea)::placeholder { color: #738493 !important; opacity: 1; }
+  body[data-theme="white"] .patientFileModalOverlay :is(.patientFileUploadPreview, .patientFileUploadZone) { background: #edf3f8 !important; border-color: #dce6ee !important; }
+  body[data-theme="white"] .patientFileModalOverlay :is(.patientFileModalClose, .patientFileModalCancel),
+  body[data-theme="white"] .patientVaccinePickerOverlay .patientVaccinePickerClose { color: #172b3a !important; background: #edf3f8 !important; }
+  body[data-theme="white"] .patientFileModalOverlay .patientFileModalActions { background: #f8fbfe !important; }
+  body[data-theme="white"] .page[data-page="visit"] #visitAiIntakePanel > div > div:first-child > div > div { color: #172b3a !important; }
+  body[data-theme="white"] .page[data-page="visit"] #visitAiIntakeInput { color: #172b3a !important; background: #f8fbfe !important; }
+  #visitPaymentModal { padding: 8px !important; }
+  #visitPaymentModal .visitPaymentModal { width: 100% !important; max-width: 100% !important; max-height: calc(100dvh - 16px) !important; overflow-y: auto; border-radius: 16px !important; }
+  #visitPaymentModal .visitPaymentHeader { grid-template-columns: 32px minmax(0, 1fr) 44px !important; padding: 12px !important; gap: 8px !important; }
+  #visitPaymentModal .visitPaymentHeaderIcon { width: 32px !important; height: 32px !important; }
+  #visitPaymentModal .visitPaymentClose { width: 44px !important; height: 44px !important; }
+  #visitPaymentModal .visitPaymentHeader h2 { font-size: 18px !important; }
+  #visitPaymentModal .visitPaymentHeader p { font-size: 12px !important; }
+  #visitPaymentModal .visitPaymentContent { padding: 12px !important; }
+  #visitPaymentModal :is(input, select) { font-size: 16px !important; min-width: 0; max-width: 100%; box-sizing: border-box; }
+  #visitPaymentModal button { min-height: 44px !important; font-size: 13px !important; max-width: 100%; }
+
+  .page[data-page="patient"] #patientCardRoot .labMetricsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; padding: 12px !important; }
+  .page[data-page="patient"] #patientCardRoot .labMetricCard { padding: 10px !important; border-radius: 10px !important; }
+  .page[data-page="patient"] #patientCardRoot .labMetricHeader { flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="patient"] #patientCardRoot .labMetricLabel { font-size: 12px !important; overflow-wrap: anywhere; }
+  .page[data-page="patient"] #patientCardRoot .labMetricValue { font-size: 21px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.labMetricUnit, .labMetricRef) { font-size: 11px !important; overflow-wrap: anywhere; }
+  .page[data-page="patient"] #patientCardRoot .labAiPanel { padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="patient"] #patientCardRoot .labAiSections { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .page[data-page="patient"] #patientCardRoot .labAiDetails > summary { min-height: 44px !important; font-size: 13px !important; }
+  .page[data-page="patient"] #patientCardRoot :is(.labAiSection, .labAiDetailsBody) { padding: 10px !important; font-size: 13px !important; line-height: 1.5 !important; }
+  .patientVaccinePickerOverlay :is(.patientVaccinePickerSection, .patientVaccineProducts, .patientVaccineSaveBox) { padding: 12px !important; }
+  .patientVaccinePickerOverlay :is(.patientVaccineBrandGrid, .patientVaccineProductGrid, .patientVaccineFormGrid) { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .patientVaccinePickerOverlay :is(.patientVaccineBrandCard, .patientVaccineProductCard) { padding: 10px !important; }
+  .patientVaccinePickerOverlay :is(.patientVaccineBrandCard, .patientVaccineProductCard) strong { font-size: 14px !important; }
+  #visitPaymentModal :is(.visitPaymentOverview, .visitPaymentMethods) { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
 }
