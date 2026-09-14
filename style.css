@@ -61462,3 +61462,169 @@ body[data-theme="white"]
     padding: 24px 20px;
   }
 }
+/* PUG CRM — mobile calendar v1 */
+@media (max-width: 640px) {
+  .page[data-page="calendar"] {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .page[data-page="calendar"] .calendarCard {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 12px !important;
+    border-radius: 20px;
+  }
+
+  .page[data-page="calendar"] .calendarHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .page[data-page="calendar"] .calendarHeader > div {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page[data-page="calendar"] .calendarHeader h2 {
+    font-size: 24px !important;
+    margin: 0;
+  }
+
+  .page[data-page="calendar"] .calendarHeader .hint {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    font-weight: 400 !important;
+  }
+
+  .page[data-page="calendar"] .calendarHeaderActions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .page[data-page="calendar"] .calendarViewSwitcher {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page[data-page="calendar"] .calendarViewGroup {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .page[data-page="calendar"] .calendarViewGroupLabel {
+    padding: 0 6px !important;
+    font-size: 10px !important;
+  }
+
+  .page[data-page="calendar"] .calendarHeaderActions button,
+  .page[data-page="calendar"] .calendarViewSwitcher button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    white-space: normal;
+    justify-content: center;
+  }
+
+  .page[data-page="calendar"] .calendarTop {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+    margin: 14px 0 !important;
+  }
+
+  .page[data-page="calendar"] .calendarTop button {
+    width: 44px;
+    min-width: 0;
+    min-height: 44px !important;
+    padding: 8px !important;
+  }
+
+  .page[data-page="calendar"] .calendarDate {
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 10px 6px !important;
+    font-size: 14px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="calendar"] .calendarMainArea {
+    min-width: 0;
+  }
+
+  .page[data-page="calendar"] .calendarDayGrid {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    border-radius: 14px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page[data-page="calendar"] .calendarTimelineTimeColumn {
+    min-width: 0;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorsTimelineGrid {
+    grid-auto-columns: 100% !important;
+    min-width: 0;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorTimelineColumn {
+    min-width: 0 !important;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorTimelineHead {
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    height: 88px !important;
+    min-height: 88px !important;
+    gap: 4px 8px !important;
+    padding: 8px !important;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorAvatar {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorTimelineIdentity strong {
+    font-size: 15px !important;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorTimelineIdentity span {
+    font-size: 11px !important;
+  }
+
+  .page[data-page="calendar"] .calendarDoctorSpecializations {
+    display: flex;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  .page[data-page="calendar"] .calendarTimelineTimeHead {
+    height: 88px !important;
+    min-height: 88px !important;
+  }
+
+  .page[data-page="calendar"] .calendarTimelineTimeHead,
+  .page[data-page="calendar"] .calendarTimelineTimeLabel {
+    font-size: 12px !important;
+  }
+
+  .page[data-page="calendar"] .calendarTimelineTimeLabel {
+    padding-right: 6px !important;
+  }
+}
