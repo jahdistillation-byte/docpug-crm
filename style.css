@@ -61197,3 +61197,192 @@ body[data-theme="white"]
     font-size: 13px;
   }
 }
+/* PUG CRM — mobile foundation v1. Append at the end of style.css. */
+
+#crmImportPanel .clinicSettingsPanelHead > div {
+  display: block;
+  min-width: 0;
+}
+
+.clinicSettingsPage,
+.clinicSettingsPanel,
+.clinicSettingsPanelHead > div,
+.clinicSettingsPanelHead > div > div,
+.clinicSettingsField,
+.clinicPersonalBlock {
+  min-width: 0;
+}
+
+.clinicSettingsPage p,
+.clinicSettingsUser,
+.clinicSettingsLogoutRow,
+#crmImportPanel [role="status"] {
+  overflow-wrap: anywhere;
+}
+
+#crmImportPanel .crmImportTableWrap {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+#crmImportPanel .crmImportPagination {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1024px) {
+  .app-container {
+    min-width: 0;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .main-content {
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto !important;
+    padding: 20px 16px !important;
+  }
+
+  .mac-dock {
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mac-dock .dock-menu {
+    width: max-content !important;
+    min-width: 100%;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mac-dock .menu-item {
+    flex: 0 0 auto;
+  }
+
+  .mac-dock .dock-menu .menu-item a {
+    min-height: 52px !important;
+    padding: 8px 12px !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+  }
+
+  .mac-dock .dock-menu .menu-item a .dock-text {
+    display: block !important;
+    white-space: nowrap;
+  }
+
+  .mac-dock .dock-menu .menu-item a .dock-icon {
+    font-size: 20px !important;
+    line-height: 1.2;
+  }
+
+  .clinicSettingsPage {
+    padding-bottom: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    padding: 16px 10px !important;
+  }
+
+  .header-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: center !important;
+  }
+
+  .header-panel > .search-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  .header-panel .user-profile-badge {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .header-panel input,
+  .clinicSettingsPage input,
+  .clinicSettingsPage select,
+  .clinicSettingsPage textarea,
+  .addPetModal input,
+  .addPetModal select,
+  .addPetModal textarea {
+    font-size: 16px !important;
+  }
+
+  .clinicSettingsPanel {
+    padding: 16px;
+  }
+
+  .clinicSettingsPanelHead > div {
+    gap: 10px;
+    width: 100%;
+  }
+
+  .clinicThemeChoice,
+  .clinicSettingsPage button,
+  #crmImportPanel button {
+    min-height: 44px !important;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  #crmImportPanel .crmImportActions > button {
+    flex: 1 1 180px;
+  }
+
+  #crmImportPanel input[type="file"] {
+    height: auto;
+    min-height: 48px;
+    padding: 10px;
+  }
+
+  .addPetModalOverlay {
+    padding: 10px !important;
+  }
+
+  .addPetModal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    padding: 20px 16px !important;
+    overscroll-behavior-y: contain;
+  }
+
+  .addPetSpeciesSelector {
+    grid-template-columns: 1fr !important;
+  }
+
+  .addPetModalActions {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: stretch;
+    background: var(--pet-modal-bg-2, var(--pet-modal-bg-1));
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .addPetModalActions > button {
+    flex: 1 1 160px;
+    min-height: 44px;
+    height: auto;
+    white-space: normal;
+  }
+}
