@@ -62442,3 +62442,273 @@ body[data-theme="white"]
     min-height: 44px;
   }
 }
+/* PUG CRM — compact mobile owner profile v1 */
+@media (max-width: 760px),
+       (max-width: 1024px) and (max-height: 500px) and (orientation: landscape) {
+  body:has(.page[data-page="owner"].active) .header-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 16px !important;
+  }
+
+  body:has(.page[data-page="owner"].active) .top-logo {
+    font-size: 18px !important;
+  }
+
+  body:has(.page[data-page="owner"].active) .user-profile-badge {
+    min-width: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0;
+  }
+
+  body:has(.page[data-page="owner"].active) #clinicNameTitle {
+    font-size: 14px !important;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(.page[data-page="owner"].active) .user-profile-badge > div:last-child {
+    font-size: 11px !important;
+  }
+
+  body:has(.page[data-page="owner"].active) .ownersGlobalSearchWrap {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  body:has(.page[data-page="owner"].active) #globalSearch {
+    width: 100%;
+    min-height: 44px !important;
+    font-size: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .page[data-page="owner"] {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 0;
+  }
+
+  .page[data-page="owner"] .ownerDashboardHero {
+    width: 100% !important;
+    min-width: 0;
+    padding: 0 0 16px !important;
+    margin: 0 0 18px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-page="owner"] .ownerDashTop {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    gap: 10px 12px !important;
+    align-items: start !important;
+  }
+
+  .page[data-page="owner"] .ownerDashAvatar {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    font-size: 24px !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-page="owner"] .ownerDashInfo {
+    min-width: 0;
+  }
+
+  .page[data-page="owner"] .ownerDashKicker {
+    display: none;
+  }
+
+  .page[data-page="owner"] .ownerDashName {
+    font-size: 24px !important;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="owner"] .ownerDashContacts {
+    margin-top: 6px !important;
+    gap: 4px !important;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page[data-page="owner"] .ownerDashContacts span {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    font-size: 14px !important;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="owner"] .ownerDashStatus {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+    align-items: stretch;
+  }
+
+  .page[data-page="owner"] .ownerDashBadge {
+    grid-column: 1 / -1;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--accent-color, #7C5CFF) !important;
+    font-size: 12px !important;
+    font-weight: 600;
+  }
+
+  .page[data-page="owner"] .ownerHeroEdit,
+  .page[data-page="owner"] .ownerHeroBack {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+    border-radius: 10px;
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  .page[data-page="owner"] .ownerDashStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 14px !important;
+    gap: 8px !important;
+  }
+
+  .page[data-page="owner"] .ownerDashStat {
+    min-width: 0;
+    min-height: 60px !important;
+    padding: 10px !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-page="owner"] .ownerDashStat span {
+    font-size: 10px !important;
+    letter-spacing: 0;
+  }
+
+  .page[data-page="owner"] .ownerDashStat strong {
+    margin-top: 5px;
+    font-size: 18px !important;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="owner"] .ownerDashStat:last-child {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px !important;
+  }
+
+  .page[data-page="owner"] .ownerDashStat:last-child strong {
+    margin-top: 0;
+    font-size: 14px !important;
+  }
+
+  .page[data-page="owner"] .ownerPetsHeader {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+  }
+
+  .page[data-page="owner"] .ownerPetsHeader h3 {
+    min-width: 0;
+    font-size: 15px;
+    color: var(--text-main, #fff);
+  }
+
+  .page[data-page="owner"] #btnAddPet {
+    width: auto;
+    max-width: 48%;
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  .page[data-page="owner"] #petsList.pets-container {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none;
+  }
+
+  .page[data-page="owner"] .pet-card {
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) 92px;
+    gap: 8px;
+    min-width: 0;
+    min-height: 72px;
+    padding: 10px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .page[data-page="owner"] .pet-card::before {
+    display: none;
+  }
+
+  .page[data-page="owner"] .pet-card > div {
+    min-width: 0;
+  }
+
+  .page[data-page="owner"] .pet-card > div:first-child > div:first-child {
+    font-size: 16px !important;
+    line-height: 1.3;
+    color: var(--text-main, #fff);
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="owner"] .pet-card > div:first-child > div:last-child {
+    font-size: 12px !important;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .page[data-page="owner"] .pet-card > div:last-child {
+    padding-left: 0 !important;
+    gap: 4px !important;
+  }
+
+  .page[data-page="owner"] .pet-card .iconBtn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 10px !important;
+    flex: 0 0 44px;
+  }
+}
