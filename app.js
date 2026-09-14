@@ -115578,6 +115578,10 @@ async function initSettingsUI() {
   `;
 
 
+  if (ownerMode) {
+    mountCrmImportSettings(page);
+  }
+
   bindPersonalSettingsUI(
     page
   );
@@ -115628,6 +115632,7 @@ async function initSettingsUI() {
     }
   }
 }
+
 function bindPersonalSettingsUI(page) {
   Object.assign(
     SETTINGS_INTERFACE_TEXT,
@@ -122113,3 +122118,313 @@ document.addEventListener("click", (event) => {
 
   openOwner(String(ownerId));
 });
+function getCrmImportText(key) {
+  const texts = {
+    import: ["Імпортувати дані", "Import data", "Daten importieren", "Importuj dane"],
+    confirm: ["Підтвердити імпорт", "Confirm import", "Import bestätigen", "Potwierdź import"],
+    cancel: ["Скасувати", "Cancel", "Abbrechen", "Anuluj"],
+    confirmNote: ["Додамо нові картки власників і пацієнтів з цього файлу. Існуючі картки залишаться без змін.", "New owner and patient records from this file will be added. Existing records will remain unchanged.", "Neue Tierhalter- und Patientendatensätze aus dieser Datei werden hinzugefügt. Vorhandene Datensätze bleiben unverändert.", "Dodamy nowe kartoteki właścicieli i pacjentów z tego pliku. Istniejące kartoteki pozostaną bez zmian."],
+    saving: ["Зберігаємо імпорт… Дочекайтеся результату.", "Saving import… Please wait for the result.", "Import wird gespeichert… Bitte warten Sie auf das Ergebnis.", "Zapisujemy import… Poczekaj na wynik."],
+    saved: ["Імпорт збережено", "Import saved", "Import gespeichert", "Import zapisany"],
+    alreadySaved: ["Цей файл уже імпортовано. Додаткові картки не створені.", "This file has already been imported. No additional records were created.", "Diese Datei wurde bereits importiert. Es wurden keine weiteren Datensätze erstellt.", "Ten plik został już zaimportowany. Nie utworzono dodatkowych kartotek."],
+    IMPORT_COMMIT_FAILED: ["Не вдалося отримати підтвердження збереження. Спробуйте підтвердити цей самий файл ще раз: повторна відправка не створить дублікати.", "Could not obtain confirmation of saving. Confirm the same file again: resubmitting will not create duplicates.", "Die Speicherung konnte nicht bestätigt werden. Bestätigen Sie dieselbe Datei erneut: Eine erneute Übermittlung erzeugt keine Duplikate.", "Nie udało się uzyskać potwierdzenia zapisu. Potwierdź ten sam plik ponownie: ponowne wysłanie nie utworzy duplikatów."],
+    IMPORT_PREVIEW_CHANGED: ["Файл або налаштування змінилися. Перевірте дані ще раз.", "The file or settings changed. Check the data again.", "Die Datei oder Einstellungen haben sich geändert. Prüfen Sie die Daten erneut.", "Plik lub ustawienia zmieniły się. Sprawdź dane ponownie."],
+    IMPORT_FILE_HAS_ERRORS: ["У файлі є помилки. Перевірте дані та виправте їх.", "The file contains errors. Check and correct the data.", "Die Datei enthält Fehler. Prüfen und korrigieren Sie die Daten.", "Plik zawiera błędy. Sprawdź i popraw dane."],
+    IMPORT_OWNER_ACCESS_REQUIRED: ["Імпорт доступний лише власнику клініки.", "Import is available only to the clinic owner.", "Import ist nur für den Klinikinhaber verfügbar.", "Import jest dostępny tylko dla właściciela kliniki."],
+    title: ["Імпорт даних", "Import data", "Daten importieren", "Import danych"],
+    intro: ["Перенесіть власників і пацієнтів з CSV або Excel. Спочатку перевірте дані у попередньому перегляді.", "Transfer owners and patients from CSV or Excel. Review the data before importing.", "Übertragen Sie Tierhalter und Patienten aus CSV oder Excel. Prüfen Sie zuerst die Vorschau.", "Przenieś właścicieli i pacjentów z CSV lub Excela. Najpierw sprawdź podgląd danych."],
+    file: ["Файл CSV або Excel", "CSV or Excel file", "CSV- oder Excel-Datei", "Plik CSV lub Excel"],
+    limits: ["До 5 МБ і 5 000 рядків. Для старого XLS збережіть копію у форматі XLSX.", "Up to 5 MB and 5,000 rows. Save older XLS files as XLSX first.", "Bis zu 5 MB und 5.000 Zeilen. Ältere XLS-Dateien zuerst als XLSX speichern.", "Do 5 MB i 5 000 wierszy. Starsze pliki XLS zapisz najpierw jako XLSX."],
+    country: ["Країна номерів без міжнародного коду", "Country for numbers without an international code", "Land für Nummern ohne internationale Vorwahl", "Kraj numerów bez prefiksu międzynarodowego"],
+    international: ["Лише номери з +кодом країни", "Only numbers with +country code", "Nur Nummern mit +Ländervorwahl", "Tylko numery z +prefiksem kraju"],
+    encoding: ["Кодування CSV", "CSV encoding", "CSV-Zeichenkodierung", "Kodowanie CSV"],
+    sheet: ["Аркуш Excel", "Excel sheet", "Excel-Arbeitsblatt", "Arkusz Excela"],
+    load: ["Прочитати файл", "Read file", "Datei einlesen", "Wczytaj plik"],
+    template: ["Завантажити зразок CSV", "Download CSV template", "CSV-Vorlage herunterladen", "Pobierz szablon CSV"],
+    mapping: ["Зіставте колонки", "Match columns", "Spalten zuordnen", "Przypisz kolumny"],
+    skip: ["Не імпортувати", "Do not import", "Nicht importieren", "Nie importuj"],
+    check: ["Перевірити дані", "Check data", "Daten prüfen", "Sprawdź dane"],
+    loading: ["Обробляємо файл…", "Processing file…", "Datei wird verarbeitet…", "Przetwarzanie pliku…"],
+    owner_name: ["Ім’я власника", "Owner name", "Name des Tierhalters", "Imię i nazwisko właściciela"],
+    phone: ["Телефон", "Phone", "Telefon", "Telefon"],
+    email: ["Email", "Email", "E-Mail", "Email"],
+    owner_note: ["Нотатка власника", "Owner note", "Notiz zum Tierhalter", "Notatka właściciela"],
+    pet_name: ["Кличка пацієнта", "Patient name", "Patientenname", "Imię pacjenta"],
+    species: ["Вид пацієнта", "Species", "Tierart", "Gatunek"],
+    breed: ["Порода", "Breed", "Rasse", "Rasa"],
+    sex: ["Стать", "Sex", "Geschlecht", "Płeć"],
+    age: ["Вік", "Age", "Alter", "Wiek"],
+    pet_notes: ["Нотатки пацієнта", "Patient notes", "Patientennotizen", "Notatki pacjenta"],
+    requirements: ["Ім’я власника та телефон обов’язкові. Для пацієнтів також потрібні кличка і вид. Існуючі картки не перезаписуються.", "Owner name and phone are required. Patients also need a name and species. Existing records are not overwritten.", "Name und Telefon des Tierhalters sind erforderlich. Patienten benötigen auch Name und Tierart. Vorhandene Datensätze werden nicht überschrieben.", "Imię i nazwisko oraz telefon właściciela są wymagane. Pacjent wymaga też imienia i gatunku. Istniejące kartoteki nie są nadpisywane."],
+    preview: ["Попередній перегляд", "Preview", "Vorschau", "Podgląd"],
+    untouched: ["Дані ще не збережені. Перевірте результат перед імпортом.", "No data has been saved. Review the results before importing.", "Es wurden noch keine Daten gespeichert. Prüfen Sie die Ergebnisse vor dem Import.", "Dane nie zostały jeszcze zapisane. Sprawdź wynik przed importem."],
+    ready: ["Готово", "Ready", "Bereit", "Gotowe"],
+    duplicate: ["Повтор у файлі", "Duplicate in file", "Duplikat in Datei", "Duplikat w pliku"],
+    error: ["Потрібне виправлення", "Needs correction", "Korrektur erforderlich", "Wymaga poprawy"],
+    reuse: ["Існуюча картка", "Existing record", "Vorhandener Datensatz", "Istniejąca kartoteka"],
+    new: ["Нова картка", "New record", "Neuer Datensatz", "Nowa kartoteka"],
+    rows: ["Рядків", "Rows", "Zeilen", "Wiersze"],
+    new_owners: ["Нових власників", "New owners", "Neue Tierhalter", "Nowi właściciele"],
+    existing_owners: ["Існуючих власників", "Existing owners", "Vorhandene Tierhalter", "Istniejący właściciele"],
+    new_patients: ["Нових пацієнтів", "New patients", "Neue Patienten", "Nowi pacjenci"],
+    existing_patients: ["Існуючих пацієнтів", "Existing patients", "Vorhandene Patienten", "Istniejący pacjenci"],
+    duplicate_rows: ["Повторів", "Duplicates", "Duplikate", "Duplikaty"],
+    errors: ["Рядків з помилками", "Rows with errors", "Fehlerhafte Zeilen", "Wiersze z błędami"],
+    previous: ["Назад", "Previous", "Zurück", "Wstecz"],
+    next: ["Далі", "Next", "Weiter", "Dalej"],
+    line: ["Рядок", "Row", "Zeile", "Wiersz"],
+    status: ["Результат", "Result", "Ergebnis", "Wynik"],
+    sample: ["Перші рядки файлу", "First rows in file", "Erste Dateizeilen", "Pierwsze wiersze pliku"],
+    generalError: ["Не вдалося обробити файл. Перевірте формат або спробуйте ще раз.", "Could not process the file. Check the format or try again.", "Die Datei konnte nicht verarbeitet werden. Prüfen Sie das Format oder versuchen Sie es erneut.", "Nie udało się przetworzyć pliku. Sprawdź format lub spróbuj ponownie."],
+    IMPORT_FILE_REQUIRED: ["Оберіть файл.", "Choose a file.", "Wählen Sie eine Datei.", "Wybierz plik."],
+    IMPORT_FILE_TOO_LARGE: ["Файл завеликий. Ліміт: 5 МБ; розпакований Excel — 30 МБ.", "File too large. Limit: 5 MB; expanded Excel data: 30 MB.", "Datei zu groß. Grenze: 5 MB; entpackte Excel-Daten: 30 MB.", "Plik jest zbyt duży. Limit: 5 MB; rozpakowany Excel: 30 MB."],
+    IMPORT_FILE_EMPTY: ["Файл не містить рядків даних.", "The file contains no data rows.", "Die Datei enthält keine Datenzeilen.", "Plik nie zawiera wierszy danych."],
+    IMPORT_ENCODING_INVALID: ["Оберіть інше кодування CSV і прочитайте файл знову.", "Choose another CSV encoding and read the file again.", "Wählen Sie eine andere CSV-Kodierung und lesen Sie die Datei erneut ein.", "Wybierz inne kodowanie CSV i wczytaj plik ponownie."],
+    IMPORT_FORMAT_UNSUPPORTED: ["Підтримуються CSV та XLSX.", "CSV and XLSX are supported.", "CSV und XLSX werden unterstützt.", "Obsługiwane są CSV i XLSX."],
+    IMPORT_XLSX_INVALID: ["Не вдалося прочитати Excel. Перевірте файл XLSX.", "Could not read Excel. Check the XLSX file.", "Excel konnte nicht gelesen werden. Prüfen Sie die XLSX-Datei.", "Nie można odczytać Excela. Sprawdź plik XLSX."],
+    IMPORT_XLSX_DEPENDENCY_MISSING: ["Читання Excel недоступне. Зверніться до адміністратора.", "Excel reading is unavailable. Contact your administrator.", "Excel-Dateien können nicht gelesen werden. Kontaktieren Sie die Administration.", "Odczyt Excela jest niedostępny. Skontaktuj się z administratorem."],
+    IMPORT_SHEET_INVALID: ["Оберіть наявний аркуш Excel.", "Choose an existing Excel sheet.", "Wählen Sie ein vorhandenes Excel-Arbeitsblatt.", "Wybierz istniejący arkusz Excela."],
+    IMPORT_FORMULAS_NOT_SUPPORTED: ["Замініть формули Excel їхніми значеннями у копії файлу.", "Replace Excel formulas with their values in a copy of the file.", "Ersetzen Sie Excel-Formeln in einer Dateikopie durch ihre Werte.", "W kopii pliku zastąp formuły Excela ich wartościami."],
+    IMPORT_TOO_MANY_ROWS: ["Ліміт: 5 000 рядків даних. Розділіть файл.", "Limit: 5,000 data rows. Split the file.", "Grenze: 5.000 Datenzeilen. Teilen Sie die Datei auf.", "Limit: 5 000 wierszy danych. Podziel plik."],
+    IMPORT_TOO_MANY_COLUMNS_OR_LONG_CELL: ["Ліміт: 80 колонок і 4 000 символів у комірці.", "Limit: 80 columns and 4,000 characters per cell.", "Grenze: 80 Spalten und 4.000 Zeichen pro Zelle.", "Limit: 80 kolumn i 4 000 znaków w komórce."],
+    IMPORT_ROW_WIDTH_INVALID: ["У рядку більше колонок, ніж у заголовку. Перевірте роздільники CSV.", "A row has more columns than the header. Check CSV separators.", "Eine Zeile hat mehr Spalten als die Kopfzeile. Prüfen Sie die CSV-Trennzeichen.", "Wiersz ma więcej kolumn niż nagłówek. Sprawdź separatory CSV."],
+    IMPORT_CSV_INVALID: ["Некоректний CSV. Перевірте лапки та роздільники.", "Invalid CSV. Check quotes and separators.", "Ungültige CSV-Datei. Prüfen Sie Anführungszeichen und Trennzeichen.", "Nieprawidłowy CSV. Sprawdź cudzysłowy i separatory."],
+    IMPORT_OWNER_NAME_AND_PHONE_REQUIRED: ["Оберіть колонки імені власника та телефону.", "Map owner name and phone columns.", "Ordnen Sie Name und Telefon des Tierhalters zu.", "Przypisz kolumny właściciela i telefonu."],
+    IMPORT_MAPPING_INVALID: ["Перевірте зіставлення колонок.", "Check column mapping.", "Prüfen Sie die Spaltenzuordnung.", "Sprawdź przypisanie kolumn."],
+    IMPORT_MAPPING_DUPLICATED: ["Одна колонка вибрана для кількох полів.", "One column is mapped to multiple fields.", "Eine Spalte ist mehreren Feldern zugeordnet.", "Jedna kolumna jest przypisana do kilku pól."],
+    IMPORT_COUNTRY_INVALID: ["Оберіть країну номерів.", "Choose the phone country.", "Wählen Sie das Land der Telefonnummern.", "Wybierz kraj numerów telefonu."],
+    IMPORT_OWNER_NAME_INVALID: ["Ім’я власника обов’язкове, до 200 символів.", "Owner name is required, up to 200 characters.", "Tierhaltername erforderlich, bis zu 200 Zeichen.", "Nazwa właściciela jest wymagana, do 200 znaków."],
+    IMPORT_PHONE_INVALID: ["Перевірте телефон. Для місцевого номера оберіть країну.", "Check the phone number. Select a country for local numbers.", "Prüfen Sie die Telefonnummer. Wählen Sie für lokale Nummern ein Land.", "Sprawdź telefon. Dla numeru lokalnego wybierz kraj."],
+    IMPORT_EMAIL_INVALID: ["Некоректний email.", "Invalid email.", "Ungültige E-Mail.", "Nieprawidłowy email."],
+    IMPORT_PATIENT_NAME_OR_SPECIES_INVALID: ["Перевірте кличку та вид: cat/dog/other або відповідник мовою інтерфейсу.", "Check patient name and species: cat/dog/other or their interface-language equivalents.", "Prüfen Sie Patientenname und Tierart: cat/dog/other oder die entsprechenden übersetzten Begriffe.", "Sprawdź imię i gatunek: cat/dog/other lub ich przetłumaczone odpowiedniki."],
+    IMPORT_SEX_INVALID: ["Перевірте стать: male/female або відповідний переклад.", "Check sex: male/female or the translated equivalent.", "Prüfen Sie das Geschlecht: male/female oder die übersetzte Entsprechung.", "Sprawdź płeć: male/female lub przetłumaczony odpowiednik."],
+    IMPORT_PATIENT_NAME_REQUIRED: ["Є дані пацієнта, але немає клички.", "Patient details are present but the name is missing.", "Patientendaten vorhanden, aber der Name fehlt.", "Są dane pacjenta, ale brakuje imienia."],
+    IMPORT_DETAILS_TOO_LONG: ["Завеликі поля породи, віку або нотаток.", "Breed, age or notes are too long.", "Rasse, Alter oder Notizen sind zu lang.", "Rasa, wiek lub notatki są zbyt długie."],
+    IMPORT_OWNER_AMBIGUOUS: ["У базі кілька власників з цим телефоном. Перевірте картки.", "Several owners share this phone in the database. Review the records.", "Mehrere Tierhalter haben diese Telefonnummer. Prüfen Sie die Datensätze.", "Kilku właścicieli ma ten telefon w bazie. Sprawdź kartoteki."],
+    IMPORT_OWNER_PHONE_NAME_CONFLICT: ["Телефон вже належить власнику з іншим ім’ям.", "This phone belongs to an owner with a different name.", "Diese Telefonnummer gehört zu einem Tierhalter mit anderem Namen.", "Ten telefon należy do właściciela o innym nazwisku."],
+    IMPORT_FILE_OWNER_CONFLICT: ["У файлі різні дані власника для одного телефону.", "The file has conflicting owner details for one phone.", "Die Datei enthält widersprüchliche Tierhalterdaten für eine Telefonnummer.", "Plik zawiera różne dane właściciela dla jednego telefonu."],
+    IMPORT_PATIENT_AMBIGUOUS: ["У власника кілька пацієнтів з цією кличкою.", "The owner has several patients with this name.", "Der Tierhalter hat mehrere Patienten mit diesem Namen.", "Właściciel ma kilku pacjentów o tym imieniu."],
+    IMPORT_PATIENT_DETAILS_CONFLICT: ["Кличка вже є у власника, але дані пацієнта відрізняються.", "This patient name exists for the owner, but details differ.", "Der Patientenname ist beim Tierhalter vorhanden, aber die Angaben unterscheiden sich.", "Pacjent o tym imieniu już istnieje, ale dane się różnią."],
+    IMPORT_FILE_PATIENT_CONFLICT: ["У файлі різні дані пацієнта з однією кличкою у власника.", "The file has conflicting details for the same owner and patient name.", "Widersprüchliche Patientendaten für denselben Tierhalter und Patientennamen.", "Plik zawiera różne dane dla tego samego właściciela i imienia pacjenta."],
+    Unauthorized: ["Увійдіть до акаунта знову.", "Sign in again.", "Melden Sie sich erneut an.", "Zaloguj się ponownie."],
+    "Owner access required": ["Імпорт доступний лише власнику клініки.", "Import is available only to the clinic owner.", "Import ist nur für den Klinikinhaber verfügbar.", "Import jest dostępny tylko dla właściciela kliniki."],
+  };
+  const index = {uk: 0, en: 1, de: 2, pl: 3}[getInterfaceLanguage()] ?? 0;
+  return (texts[key] || texts.generalError)[index];
+}
+
+function crmImportGuessMapping(columns) {
+  const aliases = {
+    owner_name: ["owner name", "owner", "client name", "клієнт", "клиент", "власник", "владелец", "піб", "фио", "tierhalter", "kundenname", "właściciel"],
+    phone: ["phone", "telephone", "телефон", "telefon", "mobile", "мобільний"],
+    email: ["email", "e mail", "електронна пошта"],
+    owner_note: ["owner note", "owner notes", "нотатка власника", "заметка владельца"],
+    pet_name: ["pet name", "patient name", "animal name", "кличка", "імя тварини", "пацієнт", "patientenname", "tiername", "imię zwierzęcia"],
+    species: ["species", "вид", "вид тварини", "вид животного", "tierart", "gatunek"],
+    breed: ["breed", "порода", "rasse", "rasa"],
+    sex: ["sex", "gender", "стать", "пол", "geschlecht", "płeć"],
+    age: ["age", "вік", "возраст", "alter", "wiek"],
+    pet_notes: ["pet notes", "patient notes", "нотатки пацієнта", "заметки пациента", "patientennotizen"],
+  };
+  const normalize = value => String(value).toLowerCase().replace(/[._'’\-]/g, " ").replace(/\s+/g, " ").trim();
+  const result = {}, used = new Set();
+  for (const [field, names] of Object.entries(aliases)) {
+    const matches = columns.filter(column => names.map(normalize).includes(normalize(column.name)));
+    if (matches.length === 1 && !used.has(matches[0].index)) {
+      result[field] = matches[0].index;
+      used.add(matches[0].index);
+    }
+  }
+  return result;
+}
+
+function mountCrmImportSettings(page) {
+  if (!isOwner() || page.querySelector("#crmImportPanel")) return;
+  const root = page.querySelector(".clinicSettingsPage");
+  if (!root) return;
+  const t = getCrmImportText;
+  const e = value => escapeHtml(String(value ?? ""));
+  const fields = ["owner_name", "phone", "email", "owner_note", "pet_name", "species", "breed", "sex", "age", "pet_notes"];
+  const panel = document.createElement("section");
+  panel.id = "crmImportPanel";
+  panel.className = "clinicSettingsPanel";
+  panel.innerHTML = `
+    <style>
+      #crmImportPanel .crmImportGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0}
+      #crmImportPanel .crmImportActions{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
+      #crmImportPanel button{min-height:42px;padding:10px 16px;border-radius:12px;border:1px solid var(--border,rgba(255,255,255,.12));background:var(--surface,rgba(128,128,128,.12));color:inherit;cursor:pointer}
+      #crmImportPanel button:disabled{opacity:.5;cursor:default}
+      #crmImportPanel small{display:block;margin-top:6px;opacity:.7}
+      #crmImportPanel [hidden]{display:none!important}
+      #crmImportPanel .crmImportTableWrap{overflow:auto;margin:16px 0;border-radius:12px;border:1px solid var(--border,rgba(128,128,128,.2))}
+      #crmImportPanel table{width:100%;min-width:600px;border-collapse:collapse}
+      #crmImportPanel th,#crmImportPanel td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border,rgba(128,128,128,.2));white-space:normal;overflow-wrap:anywhere}
+      #crmImportPanel .crmImportSummary{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}
+      #crmImportPanel .crmImportSummary span{padding:10px 12px;background:rgba(128,128,128,.1);border-radius:10px}
+      #crmImportPanel .crmImportError{color:#ee7788}
+      #crmImportPanel .crmImportPagination{display:flex;align-items:center;gap:14px}
+      @media(max-width:650px){#crmImportPanel .crmImportGrid{grid-template-columns:1fr}}
+    </style>
+    <div class="clinicSettingsPanelHead"><div><h2>📥 ${e(t("title"))}</h2><p>${e(t("intro"))}</p></div></div>
+    <div class="crmImportGrid">
+      <label class="clinicSettingsField"><span>${e(t("file"))}</span><input class="clinicSettingsInput" type="file" accept=".csv,.xlsx" data-import-file><small>${e(t("limits"))}</small></label>
+      <label class="clinicSettingsField"><span>${e(t("country"))}</span><select class="clinicSettingsInput" data-import-country><option value="">${e(t("international"))}</option>${["UA","DE","AT","GB","PL","CH","US"].map(code => {
+        const names = {UA:["Україна","Ukraine","Ukraine","Ukraina"],DE:["Німеччина","Germany","Deutschland","Niemcy"],AT:["Австрія","Austria","Österreich","Austria"],GB:["Велика Британія","United Kingdom","Vereinigtes Königreich","Wielka Brytania"],PL:["Польща","Poland","Polen","Polska"],CH:["Швейцарія","Switzerland","Schweiz","Szwajcaria"],US:["США","United States","USA","USA"]};
+        return `<option value="${code}">${e(names[code][{uk:0,en:1,de:2,pl:3}[getInterfaceLanguage()] ?? 0])}</option>`;
+      }).join("")}</select></label>
+      <label class="clinicSettingsField"><span>${e(t("encoding"))}</span><select class="clinicSettingsInput" data-import-encoding><option value="utf-8-sig">UTF-8</option><option value="cp1251">Windows-1251</option><option value="cp1252">Windows-1252</option></select></label>
+      <label class="clinicSettingsField" data-import-sheet-wrap hidden><span>${e(t("sheet"))}</span><select class="clinicSettingsInput" data-import-sheet></select></label>
+    </div>
+    <div class="crmImportActions"><button type="button" data-import-load>${e(t("load"))}</button><button type="button" data-import-template>${e(t("template"))}</button></div>
+    <p role="status" aria-live="polite" data-import-status></p>
+    <div data-import-mapping-wrap hidden><h3>${e(t("mapping"))}</h3><small>${e(t("requirements"))}</small><div class="crmImportGrid" data-import-mapping></div><div data-import-sample></div><button type="button" data-import-check>${e(t("check"))}</button></div>
+    <div data-import-preview hidden></div>
+  `;
+  root.insertBefore(panel, root.lastElementChild);
+  const find = selector => panel.querySelector(selector);
+  const fileInput = find("[data-import-file]");
+  const status = find("[data-import-status]");
+  const mappingWrap = find("[data-import-mapping-wrap]");
+  const previewElement = find("[data-import-preview]");
+  const loadButton = find("[data-import-load]");
+  const checkButton = find("[data-import-check]");
+  let loaded = null, result = null, currentPage = 0, revision = 0, controller = null;
+  let saving = false, savedSummary = null, confirming = false, previewMapping = null;
+  const setStatus = (text, error = false) => { status.textContent = text; status.classList.toggle("crmImportError", error); };
+  const invalidate = (discardColumns = false) => {
+    if (saving) return;
+    revision += 1; controller?.abort(); controller = null;
+    savedSummary = null; confirming = false; previewMapping = null;
+    result = null; previewElement.hidden = true; previewElement.innerHTML = "";
+    if (discardColumns) { loaded = null; mappingWrap.hidden = true; }
+    loadButton.disabled = false; checkButton.disabled = !loaded; setStatus("");
+  };
+  const request = async (endpoint, mapping, fingerprint) => {
+    const selectedFile = fileInput.files[0];
+    if (!selectedFile) throw Object.assign(new Error(), {code: "IMPORT_FILE_REQUIRED"});
+    if (selectedFile.size > 5 * 1024 * 1024) throw Object.assign(new Error(), {code: "IMPORT_FILE_TOO_LARGE"});
+    const body = new FormData();
+    body.append("file", selectedFile);
+    body.append("encoding", find("[data-import-encoding]").value);
+    body.append("country", find("[data-import-country]").value);
+    body.append("sheet", find("[data-import-sheet]").value || "");
+    if (mapping) body.append("mapping", JSON.stringify(mapping));
+    if (fingerprint) { body.append("fingerprint", fingerprint); body.append("confirm", "yes"); }
+    const response = await fetch(endpoint, {method: "POST", credentials: "include", headers: {Accept: "application/json"}, body, signal: controller.signal});
+    let json; try { json = await response.json(); } catch { throw Object.assign(new Error(), {code: "generalError"}); }
+    if (!response.ok || !json?.ok) throw Object.assign(new Error(), {code: json?.error || "generalError"});
+    return json.data;
+  };
+  const perform = async (action) => {
+    if (saving) return;
+    controller?.abort(); controller = new AbortController(); const expected = ++revision;
+    loadButton.disabled = true; checkButton.disabled = true; setStatus(t("loading"));
+    try { await action(expected); }
+    catch (error) { if (expected === revision && error.name !== "AbortError") setStatus(t(error.code || "generalError"), true); }
+    finally { if (expected === revision) { controller = null; loadButton.disabled = false; checkButton.disabled = !loaded; } }
+  };
+  fileInput.addEventListener("change", () => {
+    if (saving) return;
+    invalidate(true); find("[data-import-sheet]").innerHTML = ""; find("[data-import-sheet-wrap]").hidden = true;
+    find("[data-import-encoding]").disabled = fileInput.files[0]?.name.toLowerCase().endsWith(".xlsx") || false;
+  });
+  find("[data-import-encoding]").addEventListener("change", () => invalidate(true));
+  find("[data-import-sheet]").addEventListener("change", () => invalidate(true));
+  find("[data-import-country]").addEventListener("change", () => invalidate());
+  loadButton.addEventListener("click", () => {
+    if (saving) return;
+    invalidate(true);
+    perform(async expected => {
+      const data = await request("/api/import/columns");
+      if (expected !== revision || !panel.isConnected) return;
+      loaded = data;
+      find("[data-import-sheet-wrap]").hidden = !data.sheets?.length;
+      find("[data-import-sheet]").innerHTML = (data.sheets || []).map(name => `<option value="${e(name)}" ${name === data.sheet ? "selected" : ""}>${e(name)}</option>`).join("");
+      const guessed = crmImportGuessMapping(data.columns);
+      find("[data-import-mapping]").innerHTML = fields.map(field => `<label class="clinicSettingsField"><span>${e(t(field))}${["owner_name","phone"].includes(field) ? " *" : ""}</span><select class="clinicSettingsInput" data-import-field="${field}"><option value="" ${guessed[field] == null ? "selected" : ""}>${e(t("skip"))}</option>${data.columns.map(column => `<option value="${column.index}" ${guessed[field] === column.index ? "selected" : ""}>${e(column.name)} (${column.index+1})</option>`).join("")}</select></label>`).join("");
+      find("[data-import-mapping]").querySelectorAll("select").forEach(select => select.addEventListener("change", () => invalidate()));
+      find("[data-import-sample]").innerHTML = `<h4>${e(t("sample"))}</h4><div class="crmImportTableWrap"><table><thead><tr>${data.columns.map(column => `<th>${e(column.name)}</th>`).join("")}</tr></thead><tbody>${data.sample.map(row => `<tr>${row.cells.map(cell => `<td>${e(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+      mappingWrap.hidden = false; setStatus(`${t("rows")}: ${data.total_rows}`);
+    });
+  });
+  const renderPreview = () => {
+    if (!result) return;
+    const rows = result.rows, start = currentPage * 50, totalPages = Math.max(1, Math.ceil(rows.length / 50));
+    previewElement.hidden = false;
+    previewElement.innerHTML = `<h3>${e(t("preview"))}</h3><div class="crmImportSummary">${["rows","new_owners","existing_owners","new_patients","existing_patients","duplicate_rows","errors"].map(key => `<span>${e(t(key))}: <b>${Number((savedSummary || result.summary)[key] || 0)}</b></span>`).join("")}</div><p>${e(t(savedSummary ? (savedSummary.already_imported ? "alreadySaved" : "saved") : "untouched"))}</p><div class="crmImportTableWrap"><table><thead><tr><th>${e(t("line"))}</th><th>${e(t("owner_name"))}</th><th>${e(t("phone"))}</th><th>${e(t("pet_name"))}</th><th>${e(t("status"))}</th></tr></thead><tbody>${rows.slice(start, start+50).map(row => `<tr><td>${Number(row.line)}</td><td>${e(row.owner.name)}<small>${e(t(row.owner_action === "reuse" ? "reuse" : "new"))}</small></td><td>${e(row.owner.phone || "—")}</td><td>${e(row.patient?.name || "—")}${row.patient ? `<small>${e(t(row.patient_action === "reuse" ? "reuse" : "new"))}</small>` : ""}</td><td class="${row.status === "error" ? "crmImportError" : ""}">${e(t(row.status))}${(row.errors || []).map(error => `<small>${e(t(error))}</small>`).join("")}</td></tr>`).join("")}</tbody></table></div><div class="crmImportPagination"><button type="button" data-import-previous ${currentPage === 0 ? "disabled" : ""}>${e(t("previous"))}</button><span>${currentPage+1} / ${totalPages}</span><button type="button" data-import-next ${currentPage+1 >= totalPages ? "disabled" : ""}>${e(t("next"))}</button></div>`;
+    if (result.can_import && result.fingerprint && !savedSummary) {
+      const actions = document.createElement("div");
+      actions.className = "crmImportActions";
+      actions.innerHTML = confirming
+        ? `<div><p>${e(t("confirmNote"))}</p><button type="button" data-import-confirm>${e(t("confirm"))}</button> <button type="button" data-import-cancel>${e(t("cancel"))}</button></div>`
+        : `<button type="button" data-import-start>${e(t("import"))}</button>`;
+      previewElement.appendChild(actions);
+      if (confirming) {
+        find("[data-import-confirm]").onclick = commitImport;
+        find("[data-import-cancel]").onclick = () => { if (!saving) { confirming = false; renderPreview(); } };
+      } else find("[data-import-start]").onclick = () => { if (!saving) { confirming = true; renderPreview(); } };
+    }
+    find("[data-import-previous]").onclick = () => { currentPage--; renderPreview(); };
+    find("[data-import-next]").onclick = () => { currentPage++; renderPreview(); };
+  };
+  const commitImport = async () => {
+    if (saving || savedSummary || !confirming || !result?.can_import || !result.fingerprint || !previewMapping) return;
+    saving = true;
+    controller?.abort(); controller = new AbortController();
+    const expected = ++revision;
+    const controls = [...panel.querySelectorAll("input,select,button")];
+    const previousDisabled = controls.map(control => control.disabled);
+    controls.forEach(control => { control.disabled = true; });
+    setStatus(t("saving"));
+    const preventLeaving = event => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", preventLeaving);
+    try {
+      const summary = await request("/api/import/commit", previewMapping, result.fingerprint);
+      if (expected !== revision || !panel.isConnected) return;
+      savedSummary = summary; confirming = false;
+      setStatus(t(summary.already_imported ? "alreadySaved" : "saved"));
+      // Refresh the application's lists without treating a refresh failure as
+      // a failed import: the save has already been confirmed by the server.
+      Promise.allSettled([
+        typeof loadOwners === "function" ? loadOwners(true) : Promise.resolve(),
+        typeof loadPatientsApi === "function" ? loadPatientsApi() : Promise.resolve(),
+      ]);
+    } catch (error) {
+      if (expected === revision && panel.isConnected) {
+        setStatus(t(!error.code || error.code === "generalError" ? "IMPORT_COMMIT_FAILED" : error.code), true);
+        if (error.code === "IMPORT_PREVIEW_CHANGED" || error.code === "IMPORT_FILE_HAS_ERRORS" ||
+            ["IMPORT_OWNER_AMBIGUOUS","IMPORT_OWNER_PHONE_NAME_CONFLICT","IMPORT_PATIENT_AMBIGUOUS","IMPORT_PATIENT_DETAILS_CONFLICT"].includes(error.code)) {
+          result.can_import = false; confirming = false;
+        }
+      }
+    } finally {
+      window.removeEventListener("beforeunload", preventLeaving);
+      saving = false;
+      if (expected === revision) {
+        controller = null;
+        controls.forEach((control, index) => { control.disabled = previousDisabled[index]; });
+        renderPreview();
+      }
+    }
+  };
+  checkButton.addEventListener("click", () => {
+    if (!loaded || saving) return;
+    const mapping = {};
+    find("[data-import-mapping]").querySelectorAll("select").forEach(select => { if (select.value !== "") mapping[select.dataset.importField] = Number(select.value); });
+    if (mapping.owner_name == null || mapping.phone == null) { setStatus(t("IMPORT_OWNER_NAME_AND_PHONE_REQUIRED"), true); return; }
+    if (new Set(Object.values(mapping)).size !== Object.values(mapping).length) { setStatus(t("IMPORT_MAPPING_DUPLICATED"), true); return; }
+    invalidate();
+    perform(async expected => {
+      const data = await request("/api/import/preview", mapping);
+      if (expected !== revision || !panel.isConnected) return;
+      result = data; previewMapping = {...mapping}; currentPage = 0; renderPreview();
+      setStatus(data.can_import ? t("ready") : t("error"), !data.can_import);
+    });
+  });
+  find("[data-import-template]").addEventListener("click", () => {
+    const csv = '\uFEFFowner_name;phone;email;pet_name;species;breed;sex;age\r\nAlex Smith;+493012345678;alex@example.com;Bella;cat;British Shorthair;female;4 years\r\n';
+    const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+    const link = document.createElement("a"); link.href = url; link.download = "pug-import-template.csv"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+}

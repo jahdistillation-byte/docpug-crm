@@ -30616,6 +30616,365 @@ def api_clinic_login():
             "error": "Помилка сервера авторизації",
         }), 500
 
+# CRM import, stage 1: parse files and preview only. No database writes.
+# CRM import, stage 1: parse files and preview only. No database writes.
+def crm_import_read_file(upload, encoding="utf-8-sig", sheet=""):
+    import csv
+    import io
+    import zipfile
+    from datetime import date, datetime
+
+    if not upload or not upload.filename:
+        raise ValueError("IMPORT_FILE_REQUIRED")
+    raw = upload.stream.read(5 * 1024 * 1024 + 1)
+    if len(raw) > 5 * 1024 * 1024:
+        raise ValueError("IMPORT_FILE_TOO_LARGE")
+    if not raw:
+        raise ValueError("IMPORT_FILE_EMPTY")
+    extension = upload.filename.rsplit(".", 1)[-1].lower()
+    sheets = []
+    workbook = None
+    if extension == "csv":
+        if encoding not in {"utf-8-sig", "cp1251", "cp1252"}:
+            raise ValueError("IMPORT_ENCODING_INVALID")
+        try:
+            text = raw.decode(encoding)
+        except UnicodeDecodeError:
+            raise ValueError("IMPORT_ENCODING_INVALID") from None
+        try:
+            dialect = csv.Sniffer().sniff(text[:16384], delimiters=",;\t")
+        except csv.Error:
+            dialect = csv.excel
+        source = csv.reader(io.StringIO(text, newline=""), dialect, strict=True)
+    elif extension == "xlsx":
+        try:
+            import openpyxl
+        except ImportError:
+            raise ValueError("IMPORT_XLSX_DEPENDENCY_MISSING") from None
+        try:
+            with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+                members = archive.infolist()
+                if len(members) > 2000 or sum(x.file_size for x in members) > 30 * 1024 * 1024:
+                    raise ValueError("IMPORT_FILE_TOO_LARGE")
+            workbook = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=False)
+            sheets = workbook.sheetnames
+            if sheet and sheet not in sheets:
+                raise ValueError("IMPORT_SHEET_INVALID")
+            selected = workbook[sheet] if sheet else workbook.active
+            def excel_rows():
+                for cells in selected.iter_rows():
+                    values = []
+                    for cell in cells:
+                        if cell.data_type == "f":
+                            raise ValueError("IMPORT_FORMULAS_NOT_SUPPORTED")
+                        value = cell.value
+                        if isinstance(value, (datetime, date)):
+                            value = value.isoformat()
+                        elif isinstance(value, float) and value.is_integer():
+                            value = int(value)
+                        values.append(value)
+                    yield values
+            source = excel_rows()
+        except ValueError:
+            if workbook:
+                workbook.close()
+            raise
+        except Exception:
+            if workbook:
+                workbook.close()
+            raise ValueError("IMPORT_XLSX_INVALID") from None
+    else:
+        raise ValueError("IMPORT_FORMAT_UNSUPPORTED")
+    try:
+        header = None
+        rows = []
+        for number, values in enumerate(source, start=1):
+            if number > 10000:
+                raise ValueError("IMPORT_TOO_MANY_ROWS")
+            values = [str(x if x is not None else "").strip() for x in values]
+            while values and not values[-1]:
+                values.pop()
+            if not values:
+                continue
+            if len(values) > 80 or any(len(x) > 4000 for x in values):
+                raise ValueError("IMPORT_TOO_MANY_COLUMNS_OR_LONG_CELL")
+            if header is None:
+                header = values
+                continue
+            if len(values) > len(header):
+                raise ValueError("IMPORT_ROW_WIDTH_INVALID")
+            rows.append({"line": number, "cells": values + [""] * (len(header) - len(values))})
+            if len(rows) > 5000:
+                raise ValueError("IMPORT_TOO_MANY_ROWS")
+        if not header or not rows:
+            raise ValueError("IMPORT_FILE_EMPTY")
+        return {"columns": [{"index": i, "name": value or f"Column {i + 1}"} for i, value in enumerate(header)],
+                "rows": rows, "sheets": sheets, "sheet": selected.title if extension == "xlsx" else ""}
+    except csv.Error:
+        raise ValueError("IMPORT_CSV_INVALID") from None
+    finally:
+        if workbook:
+            workbook.close()
+
+
+def crm_import_phone(value, country=""):
+    import re
+    raw = str(value or "").strip()
+    if not raw or not re.fullmatch(r"(?:\+)?[\d\s()./-]+", raw):
+        return None
+    digits = re.sub(r"\D", "", raw)
+    if raw.startswith("+"):
+        international = "+" + digits
+    elif raw.startswith("00"):
+        international = "+" + digits[2:]
+    elif country == "UA":
+        if len(digits) == 12 and digits.startswith("380"):
+            international = "+" + digits
+        elif len(digits) == 10 and digits.startswith("0"):
+            international = "+38" + digits
+        elif len(digits) == 9:
+            international = "+380" + digits
+        else:
+            return None
+    elif country in {"DE", "AT", "GB", "PL", "CH", "US"}:
+        prefix = {"DE": "49", "AT": "43", "GB": "44", "PL": "48", "CH": "41", "US": "1"}[country]
+        if country == "US":
+            if len(digits) == 11 and digits.startswith("1"):
+                digits = digits[1:]
+            if len(digits) != 10:
+                return None
+        elif digits.startswith("0"):
+            digits = digits[1:]
+        international = "+" + prefix + digits
+    else:
+        return None
+    return normalize_international_phone(international)
+
+
+def crm_import_preview(parsed, mapping, country, owners, patients):
+    import re
+    if not isinstance(mapping, dict) or mapping.get("owner_name") is None or mapping.get("phone") is None:
+        raise ValueError("IMPORT_OWNER_NAME_AND_PHONE_REQUIRED")
+    fields = {"owner_name", "phone", "email", "owner_note", "pet_name", "species", "breed", "sex", "age", "pet_notes"}
+    for key, index in mapping.items():
+        if key not in fields or type(index) is not int or not 0 <= index < len(parsed["columns"]):
+            raise ValueError("IMPORT_MAPPING_INVALID")
+    if len(set(mapping.values())) != len(mapping):
+        raise ValueError("IMPORT_MAPPING_DUPLICATED")
+    if country not in {"", "UA", "DE", "AT", "GB", "PL", "CH", "US"}:
+        raise ValueError("IMPORT_COUNTRY_INVALID")
+    def identity(value):
+        return " ".join(str(value or "").casefold().split())
+    def phone_key(value):
+        return re.sub(r"\D", "", str(value or ""))
+    owner_by_phone = {}
+    for owner in owners:
+        normalized = normalize_international_phone(owner.get("phone"))
+        key = phone_key(normalized or owner.get("phone"))
+        if key:
+            owner_by_phone.setdefault(key, []).append(owner)
+    patient_by_owner = {}
+    for patient in patients:
+        patient_by_owner.setdefault((str(patient.get("owner_id")), identity(patient.get("name"))), []).append(patient)
+    species_aliases = {
+        "cat": "cat", "кіт": "cat", "кішка": "cat", "кот": "cat", "кошка": "cat", "katze": "cat", "kater": "cat", "kot": "cat", "kocica": "cat",
+        "dog": "dog", "пес": "dog", "собака": "dog", "hund": "dog", "rüde": "dog", "pies": "dog", "suka": "dog",
+        "other": "other", "інші": "other", "інше": "other", "другое": "other", "andere": "other", "inne": "other",
+    }
+    sex_aliases = {
+        "male": "male", "m": "male", "самець": "male", "самец": "male", "männlich": "male", "samiec": "male",
+        "female": "female", "f": "female", "самка": "female", "weiblich": "female", "samica": "female",
+        "": None, "unknown": None, "не вказано": None, "не указано": None, "nicht angegeben": None, "nie podano": None,
+    }
+    preview = []
+    seen_owners, seen_patients = {}, {}
+    counts = {"rows": len(parsed["rows"]), "new_owners": 0, "existing_owners": 0, "new_patients": 0, "existing_patients": 0, "duplicate_rows": 0, "errors": 0}
+    for row in parsed["rows"]:
+        def read(key):
+            return row["cells"][mapping[key]] if key in mapping else ""
+        errors = []
+        name, raw_phone, pet_name = read("owner_name"), read("phone"), read("pet_name")
+        phone = crm_import_phone(raw_phone, country)
+        if not name or len(name) > 200:
+            errors.append("IMPORT_OWNER_NAME_INVALID")
+        if not phone:
+            errors.append("IMPORT_PHONE_INVALID")
+        email = read("email").lower()
+        if email and (len(email) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email)):
+            errors.append("IMPORT_EMAIL_INVALID")
+        raw_species, raw_sex = identity(read("species")), identity(read("sex"))
+        species = species_aliases.get(raw_species)
+        sex = sex_aliases.get(raw_sex)
+        if pet_name and (len(pet_name) > 200 or species is None):
+            errors.append("IMPORT_PATIENT_NAME_OR_SPECIES_INVALID")
+        if pet_name and raw_sex not in sex_aliases:
+            errors.append("IMPORT_SEX_INVALID")
+        if not pet_name and any(read(x) for x in ("species", "breed", "sex", "age", "pet_notes")):
+            errors.append("IMPORT_PATIENT_NAME_REQUIRED")
+        if any(len(read(x)) > limit for x, limit in (("breed", 250), ("age", 100), ("owner_note", 2000), ("pet_notes", 2000))):
+            errors.append("IMPORT_DETAILS_TOO_LONG")
+        key = phone_key(phone)
+        matches = owner_by_phone.get(key, []) if key else []
+        owner_id = None
+        owner_action = "create"
+        if len(matches) > 1:
+            errors.append("IMPORT_OWNER_AMBIGUOUS")
+        elif matches:
+            owner_id = str(matches[0]["id"])
+            owner_action = "reuse"
+            if identity(matches[0].get("name")) != identity(name):
+                errors.append("IMPORT_OWNER_PHONE_NAME_CONFLICT")
+        owner_signature = (identity(name), email, read("owner_note"))
+        if key in seen_owners and seen_owners[key] != owner_signature:
+            errors.append("IMPORT_FILE_OWNER_CONFLICT")
+        patient_action = "create" if pet_name else "none"
+        patient_id = None
+        existing = patient_by_owner.get((owner_id, identity(pet_name)), []) if owner_id and pet_name else []
+        if len(existing) > 1:
+            errors.append("IMPORT_PATIENT_AMBIGUOUS")
+        elif existing:
+            patient_action = "reuse"
+            patient_id = str(existing[0]["id"])
+            for field, incoming in (("species", species), ("breed", read("breed")), ("sex", sex), ("age", read("age"))):
+                old = existing[0].get(field)
+                if incoming and old and identity(old) != identity(incoming):
+                    errors.append("IMPORT_PATIENT_DETAILS_CONFLICT")
+                    break
+        pet_key = (key, identity(pet_name))
+        pet_signature = (species, identity(read("breed")), sex, read("age"), read("pet_notes"))
+        duplicate = pet_key in seen_patients if pet_name else key in seen_owners
+        if pet_name and pet_key in seen_patients and seen_patients[pet_key] != pet_signature:
+            errors.append("IMPORT_FILE_PATIENT_CONFLICT")
+        if errors:
+            status = "error"
+            counts["errors"] += 1
+        else:
+            status = "duplicate" if duplicate else "ready"
+            if key not in seen_owners:
+                counts["existing_owners" if owner_action == "reuse" else "new_owners"] += 1
+            if pet_name and pet_key not in seen_patients:
+                counts["existing_patients" if patient_action == "reuse" else "new_patients"] += 1
+            if duplicate:
+                counts["duplicate_rows"] += 1
+            seen_owners[key] = owner_signature
+            if pet_name:
+                seen_patients[pet_key] = pet_signature
+        preview.append({"line": row["line"], "status": status, "errors": errors,
+                        "owner_action": owner_action, "patient_action": patient_action,
+                        "owner": {"id": owner_id, "name": name, "phone": phone, "email": email or None, "note": read("owner_note") or None},
+                        "patient": {"id": patient_id, "name": pet_name, "species": species, "breed": read("breed") or None, "sex": sex, "age": read("age") or None, "notes": read("pet_notes") or None} if pet_name else None})
+    return {"summary": counts, "rows": preview, "can_import": counts["errors"] == 0}
+
+
+def crm_import_clinic_rows(table, columns, org_id):
+    rows = []
+    offset = 0
+    while True:
+        result = execute_with_retry(lambda: supabase.table(table).select(columns).eq("org_id", org_id).order("id").range(offset, offset + 499), attempts=3, delay=0.25)
+        batch = result.data or []
+        rows.extend(batch)
+        if len(batch) < 500:
+            return rows
+        offset += 500
+
+
+@app.post("/api/import/columns")
+@app.post("/api/import/preview")
+def api_crm_import_preview():
+    import json
+    from flask import request
+    _user, auth_error = owner_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    try:
+        parsed = crm_import_read_file(request.files.get("file"), request.form.get("encoding", "utf-8-sig"), request.form.get("sheet", ""))
+        if request.path.endswith("/columns"):
+            return ok({"columns": parsed["columns"], "sample": parsed["rows"][:10], "total_rows": len(parsed["rows"]), "sheets": parsed["sheets"], "sheet": parsed["sheet"]})
+        try:
+            mapping = json.loads(request.form.get("mapping", "{}"))
+        except (ValueError, TypeError):
+            raise ValueError("IMPORT_MAPPING_INVALID") from None
+        owners = crm_import_clinic_rows("owners", "id,name,phone,email,note", org_id)
+        patients = crm_import_clinic_rows("patients", "id,owner_id,name,species,breed,sex,age,notes", org_id)
+        preview = crm_import_preview(parsed, mapping, request.form.get("country", ""), owners, patients)
+        preview["fingerprint"] = crm_import_fingerprint(crm_import_canonical_rows(preview))
+        return ok(preview)
+    except ValueError as error:
+        return fail(str(error), 400)
+    except Exception as error:
+        # Do not log uploaded personal data or raw database errors.
+        print("CRM import preview error:", type(error).__name__)
+        return fail("IMPORT_PREVIEW_FAILED", 500)
+
+
+def crm_import_canonical_rows(preview):
+    return [{"owner": {key: row["owner"].get(key) for key in ("name", "phone", "email", "note")},
+             "patient": {key: row["patient"].get(key) for key in ("name", "species", "breed", "sex", "age", "notes")} if row["patient"] else None}
+            for row in preview["rows"]]
+
+
+def crm_import_fingerprint(rows):
+    import hashlib
+    import json
+    canonical = json.dumps(rows, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(("pug-crm-import-v1\n" + canonical).encode("utf-8")).hexdigest()
+
+
+@app.post("/api/import/commit")
+def api_crm_import_commit():
+    import json
+    import re
+    _user, auth_error = owner_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    if request.form.get("confirm") != "yes":
+        return fail("IMPORT_CONFIRMATION_REQUIRED", 400)
+    try:
+        parsed = crm_import_read_file(request.files.get("file"), request.form.get("encoding", "utf-8-sig"), request.form.get("sheet", ""))
+        try:
+            mapping = json.loads(request.form.get("mapping", "{}"))
+        except (ValueError, TypeError):
+            raise ValueError("IMPORT_MAPPING_INVALID") from None
+        # Validate and normalize the original file again. Never trust preview IDs
+        # or row payloads supplied by the browser. SQL rechecks existing records.
+        validated = crm_import_preview(parsed, mapping, request.form.get("country", ""), [], [])
+        if not validated["can_import"]:
+            return fail("IMPORT_FILE_HAS_ERRORS", 400)
+        rows = crm_import_canonical_rows(validated)
+        fingerprint = crm_import_fingerprint(rows)
+        if request.form.get("fingerprint") != fingerprint:
+            return fail("IMPORT_PREVIEW_CHANGED", 409)
+        result = execute_with_retry(lambda: supabase.rpc("crm_import_owner_patients", {
+            "p_org_id": org_id, "p_user_id": _user["id"],
+            "p_fingerprint": fingerprint, "p_rows": rows,
+        }), attempts=3, delay=0.25)
+        payload = result.data
+        if isinstance(payload, list):
+            payload = payload[0] if payload else None
+        if not isinstance(payload, dict) or not payload.get("batch_id"):
+            raise RuntimeError("Invalid import response")
+        return ok(payload)
+    except ValueError as error:
+        return fail(str(error), 400)
+    except Exception as error:
+        # Return only known codes; DB errors can include personal information.
+        match = re.search(r"\b(IMPORT_[A-Z_]+)\b", str(error))
+        safe_codes = {"IMPORT_REQUEST_INVALID", "IMPORT_OWNER_ACCESS_REQUIRED", "IMPORT_ORGANIZATION_NOT_FOUND",
+                      "IMPORT_TOO_MANY_ROWS", "IMPORT_OWNER_NAME_INVALID", "IMPORT_PHONE_INVALID", "IMPORT_EMAIL_INVALID",
+                      "IMPORT_DETAILS_TOO_LONG", "IMPORT_FILE_OWNER_CONFLICT", "IMPORT_OWNER_AMBIGUOUS",
+                      "IMPORT_OWNER_PHONE_NAME_CONFLICT", "IMPORT_PATIENT_NAME_OR_SPECIES_INVALID", "IMPORT_SEX_INVALID",
+                      "IMPORT_PATIENT_AMBIGUOUS", "IMPORT_PATIENT_DETAILS_CONFLICT", "IMPORT_FILE_PATIENT_CONFLICT"}
+        if match and match.group(1) in safe_codes:
+            return fail(match.group(1), 409)
+        print("CRM import commit error:", type(error).__name__)
+        return fail("IMPORT_COMMIT_FAILED", 500)
+
 
 if __name__ == "__main__":
     app.run(
