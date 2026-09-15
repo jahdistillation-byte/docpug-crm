@@ -5748,6 +5748,68 @@ document.documentElement.lang =
 
 applyInterfaceTranslations();
 
+// Keep this tab bound to the clinic and user with which it opened.
+(() => {
+  const nativeFetch = window.fetch.bind(window);
+  let tabContext = null;
+  let blocked = false;
+  const excluded = new Set([
+    "/api/login", "/api/session", "/api/me",
+    "/api/telegram/webhook",
+    "/api/internal/reports/daily-dispatch",
+  ]);
+
+  function showSessionChanged() {
+    blocked = true;
+    if (document.getElementById("pugSessionChanged")) return;
+    const overlay = document.createElement("div");
+    overlay.id = "pugSessionChanged";
+    overlay.setAttribute("role", "alertdialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Змінено обліковий запис");
+    overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:#172b3af2;display:grid;place-items:center;padding:20px;";
+    const card = document.createElement("div");
+    card.style.cssText = "background:#fff;color:#172b3a;padding:24px;border-radius:16px;max-width:440px;font:16px/1.6 system-ui;";
+    const message = document.createElement("p");
+    message.textContent = "В іншій вкладці змінено обліковий запис. Цю вкладку заблоковано, щоб не зберегти дані в іншій клініці. Оновлення видалить незбережені зміни в цій вкладці. Для роботи з двома клініками використовуйте окремі профілі браузера.";
+    const reload = document.createElement("button");
+    reload.type = "button";
+    reload.textContent = "Оновити вкладку";
+    reload.style.cssText = "background:#2b638e;color:#fff;border:0;border-radius:10px;padding:12px 16px;font:600 16px system-ui;cursor:pointer;";
+    reload.onclick = () => window.location.reload();
+    card.append(message, reload);
+    overlay.append(card);
+    document.body.append(overlay);
+    reload.focus();
+  }
+
+  window.fetch = async function(input, init) {
+    const url = new URL(input instanceof Request ? input.url : String(input), location.href);
+    const protectedApi = url.origin === location.origin
+      && url.pathname.startsWith("/api/") && !excluded.has(url.pathname);
+    if (!protectedApi) return nativeFetch(input, init);
+    if (blocked) throw new Error("SESSION_CHANGED");
+    if (!tabContext && state.me?.org_id && state.me?.user_id) {
+      tabContext = {
+        org: String(state.me.org_id),
+        user: String(state.me.user_id),
+      };
+    }
+    if (!tabContext) return nativeFetch(input, init);
+    const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+    headers.set("X-PUG-Expected-Org", tabContext.org);
+    headers.set("X-PUG-Expected-User", tabContext.user);
+    const response = await nativeFetch(input, { ...init, headers });
+    if (response.status === 409) {
+      const body = await response.clone().json().catch(() => null);
+      if (body?.error === "SESSION_CHANGED") {
+        showSessionChanged();
+        throw new Error("SESSION_CHANGED");
+      }
+    }
+    return response;
+  };
+})();
 
 function getOrgHeaders() {
   /*
@@ -106201,6 +106263,7 @@ const petName =
     };
 
   let staffRefreshRequestId = 0;
+  let showAllVisitDoctors = false;
 
   const refreshVisitStaffSelect =
     async (
@@ -106444,6 +106507,7 @@ const petName =
             staffSelect.value ===
             "__show_all__"
           ) {
+            showAllVisitDoctors = true;
             refreshVisitStaffSelect(
               true
             );
@@ -106451,12 +106515,9 @@ const petName =
         };
     };
 
-  const refreshDoctorsByVisitTime =
-    () => {
-      refreshVisitStaffSelect(
-        false
-      );
-    };
+  const refreshDoctorsByVisitTime = () => {
+  refreshVisitStaffSelect(showAllVisitDoctors);
+};
 
   if (dateInput) {
     dateInput.onchange =
