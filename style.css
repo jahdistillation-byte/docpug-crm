@@ -63170,3 +63170,278 @@ body[data-theme="white"]
   body[data-theme="white"] .page[data-page="patients"] .mobilePatientsSearch,
   body[data-theme="white"] .page[data-page="patients"] .mobilePatientsFilter select { background: #f3f6f5 !important; border-color: #dce5df !important; }
 }
+/* PUG CRM — compact mobile hospital and team, v1 */
+@media screen and (max-width:700px), screen and (max-width:950px) and (max-height:500px) {
+  body:has(.page:is([data-page="hospital"], [data-page="team"]).active) .header-panel { gap: 10px !important; margin-bottom: 14px !important; padding: 12px 0 !important; }
+  body:has(.page:is([data-page="hospital"], [data-page="team"]).active) .top-logo { font-size: 18px !important; white-space: nowrap; }
+  body:has(.page:is([data-page="hospital"], [data-page="team"]).active) .user-profile-badge { min-width: 0 !important; max-width: 55%; padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+  body:has(.page:is([data-page="hospital"], [data-page="team"]).active) #clinicNameTitle { font-size: 14px !important; overflow-wrap: anywhere; }
+  body:has(.page:is([data-page="hospital"], [data-page="team"]).active) .user-profile-badge > div:last-child { font-size: 11px !important; }
+  .page:is([data-page="hospital"], [data-page="team"]) { min-width: 0; max-width: 100%; }
+  .page:is([data-page="hospital"], [data-page="team"]) :is(input, select, textarea) { min-width: 0 !important; max-width: 100%; box-sizing: border-box; font-size: 16px !important; }
+  .page:is([data-page="hospital"], [data-page="team"]) button { min-height: 44px !important; max-width: 100%; box-sizing: border-box; font-size: 13px !important; white-space: normal; line-height: 1.3; }
+
+  /* Hospital: overview and patients */
+  .page[data-page="hospital"] .hospitalPage { padding: 0 !important; margin: 0 !important; min-width: 0; }
+  .page[data-page="hospital"] .hospitalHero { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; padding: 14px !important; border-radius: 14px !important; margin-bottom: 12px !important; }
+  .page[data-page="hospital"] .hospitalHero h1 { font-size: 24px !important; line-height: 1.2 !important; margin: 5px 0 !important; }
+  .page[data-page="hospital"] .hospitalHero p { font-size: 12px !important; line-height: 1.45 !important; margin: 6px 0 0 !important; }
+  .page[data-page="hospital"] .hospitalEyebrow { font-size: 10px !important; }
+  .page[data-page="hospital"] .hospitalAdmitButton { width: 100%; padding: 10px 12px !important; }
+  .page[data-page="hospital"] .hospitalStats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; margin-bottom: 12px !important; }
+  .page[data-page="hospital"] .hospitalStatCard { min-width: 0; min-height: 0 !important; padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="hospital"] .hospitalStatCard span { font-size: 11px !important; }
+  .page[data-page="hospital"] .hospitalStatCard strong { font-size: 24px !important; margin: 4px 0 !important; }
+  .page[data-page="hospital"] .hospitalStatCard small { font-size: 10px !important; line-height: 1.3; }
+  .page[data-page="hospital"] .hospitalToolbar { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; margin-bottom: 12px !important; }
+  .page[data-page="hospital"] .hospitalFilters { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .page[data-page="hospital"] .hospitalFilter { min-width: 0 !important; width: 100%; padding: 8px !important; }
+  .page[data-page="hospital"] .hospitalSearch { width: 100% !important; min-height: 44px; padding: 10px 12px !important; }
+  .page[data-page="hospital"] .hospitalPatientGrid { grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; }
+  .page[data-page="hospital"] .hospitalPatientCard { min-width: 0; padding: 14px !important; border-radius: 14px !important; }
+  .page[data-page="hospital"] .hospitalPatientTop { display: grid !important; grid-template-columns: 36px minmax(0, 1fr) !important; gap: 8px !important; margin-bottom: 12px !important; }
+  .page[data-page="hospital"] .hospitalPatientAvatar { width: 36px !important; height: 36px !important; border-radius: 10px !important; font-size: 20px !important; }
+  .page[data-page="hospital"] .hospitalPatientIdentity { min-width: 0; }
+  .page[data-page="hospital"] .hospitalPatientIdentity h2 { font-size: 18px !important; line-height: 1.3 !important; margin: 0 !important; overflow-wrap: anywhere; }
+  .page[data-page="hospital"] .hospitalPatientIdentity p { font-size: 12px !important; line-height: 1.4; margin: 3px 0 0 !important; overflow-wrap: anywhere; }
+  .page[data-page="hospital"] .hospitalStatusBadge { grid-column: 2; justify-self: start; padding: 4px 8px !important; font-size: 11px !important; white-space: normal; }
+  .page[data-page="hospital"] .hospitalPatientBody { gap: 7px !important; padding: 0 !important; margin-bottom: 12px !important; }
+  .page[data-page="hospital"] .hospitalInfoRow { display: grid !important; grid-template-columns: 76px minmax(0, 1fr) !important; gap: 8px !important; align-items: start; }
+  .page[data-page="hospital"] .hospitalInfoRow span { font-size: 11px !important; }
+  .page[data-page="hospital"] .hospitalInfoRow strong { min-width: 0; font-size: 12px !important; line-height: 1.45 !important; text-align: left !important; overflow-wrap: anywhere; }
+  .page[data-page="hospital"] .hospitalCardTasks { padding: 10px !important; margin: 12px 0 !important; border-radius: 10px !important; }
+  .page[data-page="hospital"] .hospitalCardTasksHead { gap: 8px !important; margin-bottom: 8px !important; }
+  .page[data-page="hospital"] .hospitalCardTasksHead :is(span, strong, small) { font-size: 11px !important; }
+  .page[data-page="hospital"] .hospitalCardTask { grid-template-columns: 26px minmax(0, 1fr) !important; gap: 7px !important; padding: 8px !important; }
+  .page[data-page="hospital"] .hospitalCardTaskIcon { width: 26px !important; height: 26px !important; font-size: 16px !important; }
+  .page[data-page="hospital"] .hospitalCardTaskMain { min-width: 0; }
+  .page[data-page="hospital"] .hospitalCardTaskTop { flex-wrap: wrap; gap: 3px 8px !important; }
+  .page[data-page="hospital"] .hospitalCardTaskTop :is(span, time) { font-size: 10px !important; }
+  .page[data-page="hospital"] .hospitalCardTaskMain strong { font-size: 12px !important; line-height: 1.4; overflow-wrap: anywhere; }
+  .page[data-page="hospital"] .hospitalCardTaskMain p { font-size: 11px !important; line-height: 1.45 !important; margin: 4px 0 !important; overflow-wrap: anywhere; }
+  .page[data-page="hospital"] .hospitalCardTaskMain small { font-size: 10px !important; overflow-wrap: anywhere; }
+  .page[data-page="hospital"] .hospitalCardTasksEmpty { padding: 10px !important; gap: 8px !important; }
+  .page[data-page="hospital"] .hospitalCardTasksEmpty :is(strong, small) { font-size: 11px !important; line-height: 1.4; }
+  .page[data-page="hospital"] :is(.hospitalOpenCardButton, .hospitalDischargeButton) { width: 100%; padding: 10px !important; margin-top: 6px !important; }
+  .page[data-page="hospital"] .hospitalEmpty { grid-column: 1 / -1; min-height: 0 !important; padding: 24px 12px !important; }
+
+  /* Hospital forms and prescriptions */
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionOverlay, .hospitalTasksOverlay, .hospitalDischargeConfirmOverlay) { padding: 8px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionModal, .hospitalTasksModal, .hospitalDischargeConfirmModal) { width: 100% !important; max-width: 620px !important; max-height: calc(100dvh - 16px) !important; min-width: 0 !important; padding: 14px !important; border-radius: 16px !important; box-sizing: border-box; overflow-y: auto !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionModal, .hospitalTasksModal, .hospitalDischargeConfirmModal) :is(input, select, textarea) { width: 100%; min-width: 0 !important; max-width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px !important; font-size: 16px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionModal, .hospitalTasksModal, .hospitalDischargeConfirmModal) textarea { min-height: 88px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionModal, .hospitalTasksModal, .hospitalDischargeConfirmModal) button { min-height: 44px !important; min-width: 44px !important; max-width: 100%; padding: 10px !important; font-size: 13px !important; white-space: normal; box-sizing: border-box; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionHeader, .hospitalTasksHeader) { gap: 8px !important; margin-bottom: 12px !important; align-items: start; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionHeader, .hospitalTasksHeader) > div { min-width: 0; flex: 1; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionHeader, .hospitalTasksHeader) h2 { font-size: 20px !important; overflow-wrap: anywhere; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionHeader, .hospitalTasksHeader) p { font-size: 12px !important; line-height: 1.4 !important; margin: 5px 0 0 !important; overflow-wrap: anywhere; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionClose, .hospitalTasksClose, .hospitalDischargeConfirmClose) { width: 44px !important; height: 44px !important; flex: 0 0 44px; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionGrid, .hospitalTasksLayout) { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionSection, .hospitalTasksTimeline, .hospitalTaskCreateCard) { min-width: 0; padding: 12px !important; border-radius: 12px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalAdmissionSectionTitle { gap: 8px !important; margin-bottom: 10px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalAdmissionSectionTitle > span { width: 30px !important; height: 30px !important; flex-basis: 30px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalAdmissionSectionTitle strong { font-size: 14px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalAdmissionSectionTitle small { font-size: 11px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalAdmissionFieldsRow { grid-template-columns: minmax(0, 1fr) !important; gap: 0 !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalPatientSelectList { max-height: 180px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalPatientSelectItem, .hospitalSelectedPatientPreview) { min-width: 0; padding: 10px !important; overflow-wrap: anywhere; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionField, .hospitalTaskField) { gap: 5px !important; margin-bottom: 10px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalAdmissionField, .hospitalTaskField) > span { font-size: 11px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalAdmissionFooter { position: sticky; bottom: -14px; z-index: 2; display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; padding: 10px 0 !important; background: var(--module-surface, #131c20); }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalTasksSectionHead, .hospitalTaskTop) { flex-wrap: wrap; gap: 6px !important; }
+  body:has(.page[data-page="hospital"].active) :is(.hospitalTasksSectionHead h3, .hospitalTaskCreateCard h3) { font-size: 16px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskItem { display: grid !important; grid-template-columns: 28px minmax(0, 1fr) !important; padding: 10px !important; gap: 8px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskIcon { width: 28px !important; height: 28px !important; font-size: 16px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskContent { min-width: 0; overflow-wrap: anywhere; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskTop h4 { font-size: 14px !important; line-height: 1.4; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskTop time { font-size: 11px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskContent > p { font-size: 12px !important; line-height: 1.5 !important; margin: 6px 0 !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskActions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalTaskStaffSelect { grid-column: 1 / -1; }
+  body:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmModal { padding-top: 54px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmIcon { width: 40px !important; height: 40px !important; margin-bottom: 8px !important; font-size: 22px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmModal h2 { font-size: 20px !important; }
+  body:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmModal > p { font-size: 12px !important; line-height: 1.45; }
+  body:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmPatient > div { min-width: 0; overflow-wrap: anywhere; }
+  body:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmActions { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+
+  /* Team list */
+  .page[data-page="team"] .teamPageCard { padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .page[data-page="team"] .teamPageCard > .row { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .page[data-page="team"] .teamPageCard h2 { font-size: 22px !important; margin: 0 0 4px !important; }
+  .page[data-page="team"] .teamPageCard .hint { font-size: 12px !important; line-height: 1.45 !important; }
+  .page[data-page="team"] :is(#btnAddStaffTeam, #btnAddSpecTeam) { width: 100%; padding: 10px !important; }
+  .page[data-page="team"] .specPanel { padding: 12px !important; margin: 12px 0 !important; border-radius: 12px !important; }
+  .page[data-page="team"] .specPanelHead { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .page[data-page="team"] .specPanelTitle { font-size: 14px !important; }
+  .page[data-page="team"] .specList { flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="team"] .specPill { max-width: 100%; padding: 0 0 0 8px !important; gap: 6px !important; font-size: 12px !important; }
+  .page[data-page="team"] .specPill > span { min-width: 0; overflow-wrap: anywhere; }
+  .page[data-page="team"] .specPillDelete { width: 44px !important; flex: 0 0 44px; padding: 0 !important; }
+  .page[data-page="team"] .vetList { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .page[data-page="team"] .staffGroupHeader { padding: 8px 0 !important; font-size: 13px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .premiumVetCard { display: grid !important; grid-template-columns: 36px minmax(0, 1fr) !important; align-items: start !important; gap: 8px !important; padding: 12px !important; border-radius: 12px !important; min-width: 0 !important; }
+  .page[data-page="team"] .vetAvatarWrap { width: 36px !important; height: 36px !important; }
+  .page[data-page="team"] :is(.vetAvatarImg, .vetAvatarLetter) { width: 36px !important; height: 36px !important; border-radius: 10px !important; font-size: 18px !important; }
+  .page[data-page="team"] .premiumVetInfo { min-width: 0; }
+  .page[data-page="team"] .premiumVetTop { flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="team"] .premiumVetTop > div { min-width: 0; }
+  .page[data-page="team"] .premiumVetName { font-size: 17px !important; line-height: 1.3 !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .premiumVetRole { font-size: 11px !important; line-height: 1.4; }
+  .page[data-page="team"] .premiumStatus { padding: 8px 10px !important; font-size: 11px !important; }
+  .page[data-page="team"] .premiumVetSpecs { margin: 8px 0 !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .premiumVetSpecs > * { max-width: 100%; font-size: 11px !important; white-space: normal; }
+  .page[data-page="team"] .premiumVetMeta { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .page[data-page="team"] .premiumMetaItem { min-width: 0; padding: 6px !important; }
+  .page[data-page="team"] .premiumMetaItem:first-child { grid-column: 1 / -1; }
+  .page[data-page="team"] .premiumMetaItem span { font-size: 10px !important; }
+  .page[data-page="team"] .premiumMetaItem strong { font-size: 12px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .premiumVetActions { grid-column: 1 / -1; display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; width: 100%; }
+  .page[data-page="team"] .premiumVetActions button { width: 100%; padding: 8px !important; }
+  .page[data-page="team"] .premiumProfileBtn { grid-column: 1 / -1; }
+
+  body[data-theme="white"] .page[data-page="team"] .teamPageCard > .row:first-child { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  body[data-theme="white"] .page[data-page="team"] .teamPageCard > .row:first-child > button { margin-left: 0 !important; min-width: 0 !important; }
+
+  /* Employee profile and its tabs */
+  .page[data-page="team"] .teamDashProfile { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; }
+  .page[data-page="team"] .teamDashSidebar { min-width: 0; min-height: 0 !important; max-height: none !important; padding: 12px !important; border-radius: 14px !important; overflow: visible !important; }
+  .page[data-page="team"] .teamBackBtn { margin-bottom: 10px !important; padding: 8px 12px !important; }
+  .page[data-page="team"] .teamDashAvatar { width: 48px !important; height: 48px !important; border-radius: 14px !important; margin-bottom: 8px !important; font-size: 24px !important; box-shadow: none !important; }
+  .page[data-page="team"] .teamDashAvatar > img { border-radius: inherit; }
+  .page[data-page="team"] .teamDashName { font-size: 22px !important; line-height: 1.3; overflow-wrap: anywhere; }
+  .page[data-page="team"] :is(.teamDashTitle, .teamDashRole) { font-size: 12px !important; margin: 4px 0 !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamDashStatus { padding: 5px 8px !important; font-size: 11px !important; margin: 6px 0 !important; }
+  .page[data-page="team"] .teamDashContact { padding: 8px 0 !important; margin: 4px 0 8px !important; background: transparent !important; font-size: 12px !important; line-height: 1.5; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamDashContact > div { margin-bottom: 4px !important; }
+  .page[data-page="team"] .teamDashEmergencyContact { padding: 8px !important; margin-top: 6px !important; }
+  .page[data-page="team"] .teamDashEmergencyContact :is(span, strong, small, a) { font-size: 12px !important; }
+  .page[data-page="team"] .teamDashNav { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .page[data-page="team"] .teamDashNav button { width: 100%; min-width: 0; padding: 8px 4px !important; font-size: 12px !important; }
+  .page[data-page="team"] .teamDashIdBox { padding: 8px !important; margin-top: 8px !important; font-size: 11px !important; }
+  .page[data-page="team"] .teamDashMain { min-width: 0; max-height: none !important; overflow: visible !important; padding: 0 !important; }
+  .page[data-page="team"] :is(.teamDashTop, .teamSubHero) { flex-wrap: wrap; gap: 10px !important; margin-bottom: 12px !important; padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="team"] :is(.teamDashTop, .teamSubHero) :is(h1, h2) { font-size: 22px !important; line-height: 1.3; overflow-wrap: anywhere; }
+  .page[data-page="team"] :is(.teamDashTop, .teamSubHero) p { font-size: 12px !important; line-height: 1.45 !important; }
+  .page[data-page="team"] .teamDashActions { flex-wrap: wrap; gap: 6px !important; width: 100%; }
+  .page[data-page="team"] .teamDashActions button { flex: 1 1 120px; padding: 8px !important; }
+  .page[data-page="team"] .teamDashKpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; margin-bottom: 12px !important; }
+  .page[data-page="team"] .teamKpiCard { min-width: 0; min-height: 0 !important; padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="team"] .teamKpiIcon { width: 28px !important; height: 28px !important; font-size: 16px !important; }
+  .page[data-page="team"] .teamKpiTitle { font-size: 11px !important; }
+  .page[data-page="team"] .teamKpiValue { font-size: 22px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamKpiTrend { font-size: 10px !important; }
+  .page[data-page="team"] :is(.teamDashInsight, .teamAnalyticsInsight) { padding: 12px !important; gap: 8px !important; margin-bottom: 12px !important; }
+  .page[data-page="team"] .teamInsightIcon { width: 28px !important; height: 28px !important; flex: 0 0 28px !important; font-size: 16px !important; }
+  .page[data-page="team"] :is(.teamDashInsight, .teamAnalyticsInsight) :is(b, p) { font-size: 12px !important; line-height: 1.5 !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] :is(.teamDashGrid, .teamVisitsLayout, .teamAchievementsGrid, .careerChoiceGrid) { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .page[data-page="team"] .teamDashPanel { grid-column: auto !important; min-width: 0; min-height: 0 !important; padding: 12px !important; border-radius: 12px !important; }
+  .page[data-page="team"] .teamDashPanelHead { flex-wrap: wrap; gap: 8px !important; margin-bottom: 10px !important; }
+  .page[data-page="team"] .teamDashPanelHead > div { min-width: 0; }
+  .page[data-page="team"] .teamDashPanelHead h3 { font-size: 16px !important; line-height: 1.35; overflow-wrap: anywhere; }
+  .page[data-page="team"] :is(.teamDashPanelHead span, .teamDashPanel .hint) { font-size: 12px !important; }
+  .page[data-page="team"] .teamChartBox { width: 100% !important; min-width: 0; height: 180px !important; }
+  .page[data-page="team"] .teamChartBox canvas { max-width: 100% !important; }
+  .page[data-page="team"] .teamChartRange { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; width: 100%; gap: 4px !important; }
+  .page[data-page="team"] .teamDashRows p { gap: 8px !important; font-size: 12px !important; line-height: 1.45; }
+  .page[data-page="team"] .teamDashRows p :is(span, b) { min-width: 0; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamVisitFilters { flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="team"] .teamVisitFilters button { flex: 1 1 100px; padding: 8px !important; }
+  .page[data-page="team"] .teamVisitCard { grid-template-columns: 28px minmax(0, 1fr) !important; padding: 12px !important; gap: 8px !important; }
+  .page[data-page="team"] .teamVisitIcon { width: 28px !important; height: 28px !important; font-size: 16px !important; }
+  .page[data-page="team"] .teamVisitMain { min-width: 0; }
+  .page[data-page="team"] .teamVisitTitle { font-size: 16px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] :is(.teamVisitMeta, .teamVisitOwner) { font-size: 12px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamVisitRight { grid-column: 1 / -1; display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px !important; }
+  .page[data-page="team"] .teamFinanceRow { flex-wrap: wrap; gap: 8px !important; padding: 10px !important; }
+  .page[data-page="team"] .teamFinanceRow > div { min-width: 0; flex: 1 1 140px; }
+  .page[data-page="team"] .teamFinanceRow :is(b, span, strong) { font-size: 12px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamCareerHero { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; padding: 14px !important; gap: 12px !important; }
+  .page[data-page="team"] .teamCareerTitle { font-size: 22px !important; }
+  .page[data-page="team"] .teamCareerBadge { width: 44px !important; height: 44px !important; font-size: 24px !important; }
+  .page[data-page="team"] .teamCareerLevel { font-size: 16px !important; }
+  .page[data-page="team"] .clinicRatingHead { flex-wrap: wrap; gap: 8px !important; }
+  .page[data-page="team"] .clinicRatingTable { min-width: 0 !important; }
+  .page[data-page="team"] .clinicRatingRow { display: grid !important; grid-template-columns: 24px 32px minmax(0, 1fr) !important; gap: 6px !important; padding: 10px !important; }
+  .page[data-page="team"] .clinicRatingAvatar { width: 32px !important; height: 32px !important; }
+  .page[data-page="team"] .clinicRatingPerson { min-width: 0; }
+  .page[data-page="team"] .clinicRatingPerson :is(b, span) { font-size: 12px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .clinicRatingStats { grid-column: 1 / -1; flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="team"] :is(.staffAccountForm, .teamPhotoSettings) { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .page[data-page="team"] .teamPhotoRight { min-width: 0; }
+  .page[data-page="team"] .teamPhotoPreview { width: 64px !important; height: 64px !important; }
+  .page[data-page="team"] .teamPhotoButtons { flex-wrap: wrap; gap: 6px !important; }
+  .page[data-page="team"] .teamPhotoButtons :is(button, label) { min-height: 44px; padding: 10px !important; font-size: 13px !important; }
+  .page[data-page="team"] .financeAdjustField { min-width: 0; }
+  .page[data-page="team"] .financeAdjustField > span { font-size: 11px !important; }
+
+  .page[data-page="hospital"] .hospitalCardActions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .page[data-page="hospital"] .hospitalCardActions button { min-width: 0; padding: 10px 6px !important; }
+  .page[data-page="team"] .teamKpiCard { gap: 8px !important; }
+  .page[data-page="team"] .teamKpiCard > div:last-child { min-width: 0; }
+  .page[data-page="team"] .teamKpiCard > div:last-child > span { font-size: 11px !important; }
+  .page[data-page="team"] .teamKpiCard > div:last-child > strong { font-size: 22px !important; line-height: 1.3; overflow-wrap: anywhere; }
+  .page[data-page="team"] .teamKpiCard > div:last-child > small { font-size: 10px !important; }
+  .page[data-page="team"] .staffAccessPanel > div:has(> .financeAdjustField) { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  .page[data-page="team"] .staffAccessPanel :is(input, select) { width: 100%; min-height: 44px; }
+  .page[data-page="team"] .staffAccessPanel > div:last-child > div { min-width: 0; flex-wrap: wrap; }
+  .page[data-page="team"] .achievementCard { grid-template-columns: 32px minmax(0, 1fr) !important; gap: 8px !important; padding: 12px !important; }
+  .page[data-page="team"] .achievementIcon { width: 32px !important; height: 32px !important; font-size: 18px !important; }
+  .page[data-page="team"] .achievementCard > div { min-width: 0; overflow-wrap: anywhere; }
+  .page[data-page="team"] .achievementCard :is(b, h3) { font-size: 14px !important; }
+  .page[data-page="team"] .achievementCard :is(p, small) { font-size: 12px !important; line-height: 1.45; }
+  .page[data-page="team"] .achievementState { grid-column: 1 / -1; }
+  .page[data-page="team"] .careerChoice { min-height: 64px !important; padding: 10px !important; }
+
+  .page[data-page="team"] button { min-width: 44px !important; }
+  .page[data-page="team"] .teamDashAvatar { display: grid !important; place-items: center; }
+  .page[data-page="team"] .teamDashAvatar > span { font-size: 24px !important; line-height: 1 !important; }
+  .page[data-page="team"] .staffSkillCard { padding: 12px !important; min-width: 0; }
+  .page[data-page="team"] .staffSkillIcon { width: 28px !important; height: 28px !important; font-size: 18px !important; }
+  .page[data-page="team"] .staffSkillRemove { width: 44px !important; height: 44px !important; top: 4px !important; right: 4px !important; }
+  .page[data-page="team"] .staffSkillCard b { font-size: 13px !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .staffSkillCard span { font-size: 11px !important; line-height: 1.45 !important; overflow-wrap: anywhere; }
+  .page[data-page="team"] .achievementXp { grid-column: 1 / -1; }
+
+  /* Team forms only: shared forms in other sections keep their styles */
+  body:has(.page[data-page="team"].active) :is(#staffDrawer, .specializationEditorOverlay, .staffSkillModalOverlay, .financeAdjustModalOverlay) { padding: 8px !important; }
+  body:has(.page[data-page="team"].active) :is(#staffDrawer .modal-window, .specializationEditorModal, .staffSkillModal, .financeAdjustModal) { width: 100% !important; max-width: 520px !important; min-width: 0 !important; max-height: calc(100dvh - 16px) !important; overflow-y: auto !important; padding: 14px !important; border-radius: 16px !important; box-sizing: border-box; }
+  body:has(.page[data-page="team"].active) :is(#staffDrawer, .specializationEditorModal, .staffSkillModal, .financeAdjustModal) :is(input, select, textarea) { min-width: 0 !important; max-width: 100%; min-height: 44px; font-size: 16px !important; padding: 10px !important; box-sizing: border-box; }
+  body:has(.page[data-page="team"].active) :is(#staffDrawer, .specializationEditorModal, .staffSkillModal, .financeAdjustModal) input[type="color"] { width: 44px !important; height: 44px !important; padding: 3px !important; }
+  body:has(.page[data-page="team"].active) :is(#staffDrawer, .specializationEditorModal, .staffSkillModal, .financeAdjustModal) :is(button, .staffSpecializationToggle) { min-height: 44px !important; min-width: 44px !important; max-width: 100%; padding: 8px !important; font-size: 13px !important; white-space: normal; box-sizing: border-box; }
+  body:has(.page[data-page="team"].active) :is(.specializationEditorModal, .staffSkillModal, .financeAdjustModal) :is(h2, h3) { font-size: 20px !important; line-height: 1.3 !important; }
+  body:has(.page[data-page="team"].active) :is(.specializationEditorHeader, .staffSkillModalHead, .financeAdjustHead) { gap: 8px !important; padding-right: 42px; margin-bottom: 12px !important; }
+  body:has(.page[data-page="team"].active) :is(.specializationEditorHeader, .staffSkillModalHead, .financeAdjustHead) p { font-size: 12px !important; line-height: 1.45 !important; }
+  body:has(.page[data-page="team"].active) :is(.specializationEditorIcon, .staffSkillModalIcon, .financeAdjustIcon) { width: 30px !important; height: 30px !important; flex: 0 0 30px; font-size: 18px !important; }
+  body:has(.page[data-page="team"].active) :is(.specializationEditorClose, .staffSkillModalClose, .financeAdjustClose) { width: 44px !important; height: 44px !important; top: 8px !important; right: 8px !important; }
+  body:has(.page[data-page="team"].active) :is(.specializationEditorActions, .staffSkillModalActions, .financeAdjustActions, .financeTypeSwitch) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  body:has(.page[data-page="team"].active) .staffSkillPresets > div { flex-wrap: wrap; gap: 6px !important; }
+  body:has(.page[data-page="team"].active) #staffDrawer h3 { font-size: 20px !important; margin-bottom: 12px !important; }
+  body:has(.page[data-page="team"].active) #staffDrawer .modal-window > div:last-child { position: sticky; bottom: -14px; display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px !important; margin-top: 12px !important; padding: 10px 0 !important; background: var(--module-surface, #131c20); z-index: 3; }
+  body:has(.page[data-page="team"].active) #staffDrawer .modal-window > div:last-child button { width: 100% !important; }
+  body:has(.page[data-page="team"].active) #staffDrawer .staffSpecializationSummary { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+  body:has(.page[data-page="team"].active) #staffDrawer .staffEmergencyContactBlock { padding: 10px !important; }
+  body:has(.page[data-page="team"].active) #staffDrawer .staffEmergencyContactHead :is(strong, span) { font-size: 12px !important; }
+  body[data-theme="white"]:has(.page[data-page="team"].active) #staffDrawer .modal-window > div:last-child,
+  body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalAdmissionFooter { background: #f4f8fb !important; }
+
+  /* Readable labels and close buttons in the light theme */
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.specializationEditorModal, .staffSkillModal, .financeAdjustModal) { color: #172b3a !important; background: #f8fbfe !important; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.specializationEditorModal, .staffSkillModal, .financeAdjustModal) :is(h2, h3) { color: #172b3a !important; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.specializationEditorHeader, .staffSkillModalHead, .financeAdjustHead) p,
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.financeAdjustField, .specializationEditorField, .specializationEditorColorField, .staffSkillField, .staffSkillPresets, .financeQuickReasons) > span { color: #607586 !important; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.specializationEditorModal, .staffSkillModal, .financeAdjustModal) :is(input, select, textarea) { color: #172b3a !important; background: #f0f5f8 !important; border-color: #dce6ee !important; color-scheme: light; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.specializationEditorClose, .staffSkillModalClose, .financeAdjustClose) { color: #172b3a !important; background: #edf3f8 !important; border-color: #dce6ee !important; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) :is(.financeQuickReasons button, .financeTypeSwitch button:not(.active)) { color: #486477 !important; background: #edf3f8 !important; border-color: #dce6ee !important; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) .financeTypeSwitch button.active { color: #ffffff !important; background: #3478a8 !important; }
+  html body[data-theme="white"]:has(.page[data-page="team"].active) #staffDrawer .modal-window > div:first-of-type > div > div:first-child { color: #607586 !important; opacity: 1 !important; }
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmModal { color: #172b3a !important; background: #f8fbfe !important; border-color: #dce6ee !important; }
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmModal h2,
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmPatient strong { color: #172b3a !important; }
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmModal > p,
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmPatient span,
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmField > span { color: #607586 !important; }
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmPatient,
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmField textarea { color: #172b3a !important; background: #f0f5f8 !important; border-color: #dce6ee !important; color-scheme: light; }
+  html body[data-theme="white"]:has(.page[data-page="hospital"].active) :is(.hospitalDischargeConfirmCancel, .hospitalDischargeConfirmClose) { color: #486477 !important; background: #edf3f8 !important; border-color: #dce6ee !important; }
+}
