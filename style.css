@@ -63930,3 +63930,98 @@ body[data-theme="white"]
     html body[data-theme="white"] .taskCenterScopes button[style*="#f1d1a0"] { color: #ffffff !important; background: #2b638e !important; border-color: #2b638e !important; }
   }
 }
+/* PUG CRM — readable owners table in the white theme, v2.
+   Append at the END of style.css, after the white/fonts patch. */
+@layer pugReadableInterface {
+  @media screen {
+    html body[data-theme="white"] .page[data-page="owners"] .data-table-container {
+      background: #f3f7fa !important;
+      border-color: #d9e3eb !important;
+      box-shadow: 0 12px 32px rgba(23,43,58,.06) !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .data-table th {
+      color: #425869 !important;
+      background: transparent !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body td {
+      color: #425869 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body td:first-child {
+      color: #172b3a !important;
+      font-weight: 700 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body td:nth-child(4) :is(div, span) {
+      color: #425869 !important;
+      opacity: 1 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] :is(.ownerPetsEmpty, .ownerPhoneEmpty, .ownerPetBreed, .ownerPetMore) {
+      color: #526575 !important;
+      opacity: 1 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body td[colspan] {
+      color: #526575 !important;
+      opacity: 1 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerPetChip {
+      color: #172b3a !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerPhoneCopy {
+      color: #425869 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerPhoneCopy:hover {
+      color: #2b638e !important;
+      background: #eaf2f8 !important;
+      border-color: #b4cbdc !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerPhoneCopyLabel {
+      color: #425869 !important;
+      background: #eaf2f8 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerPhoneCopy.is-copied {
+      color: #176746 !important;
+      background: #e8f5ed !important;
+      border-color: #a7cfb6 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerActionBtn {
+      color: #425869 !important;
+      background: #fff !important;
+      border-color: #d9e3eb !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerEditBtn:hover {
+      color: #2b638e !important;
+      background: #eaf2f8 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] .ownerDeleteBtn:hover {
+      color: #ad3345 !important;
+      background: #fceef0 !important;
+    }
+    html body[data-theme="white"] .header-panel #globalSearch {
+      color: #172b3a !important;
+      background: #fff !important;
+    }
+    html body[data-theme="white"] .header-panel #globalSearch::placeholder {
+      color: #526575 !important;
+      opacity: 1 !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] :is(button:focus-visible, tr:focus-visible),
+    html body[data-theme="white"] .header-panel #globalSearch:focus-visible {
+      outline: 2px solid #2b638e !important;
+      outline-offset: 2px !important;
+    }
+  }
+  /* Keep the existing compact cards on phones. */
+  @media screen and (min-width: 761px) and (min-height: 501px), screen and (min-width: 1025px) {
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body td {
+      background: #fff !important;
+      border-color: #d9e3eb !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body .ownerActionsCell {
+      display: table-cell !important;
+      vertical-align: middle !important;
+    }
+    html body[data-theme="white"] .page[data-page="owners"] #owners-table-body tr:hover td {
+      background: #eaf2f8 !important;
+      border-color: #b4cbdc !important;
+    }
+  }
+}
