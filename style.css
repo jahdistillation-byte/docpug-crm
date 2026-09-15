@@ -64025,3 +64025,112 @@ body[data-theme="white"]
     }
   }
 }
+/* PUG CRM — calm visit surfaces and readable payment states.
+   Append at the END of style.css. White theme, screen interface only. */
+@layer pugReadableInterface {
+ @media screen {
+  html body[data-theme="white"] .page[data-page="patient"] :is(.patientRecordSummary, .premiumVisitCard) {
+    background: #fff !important;
+    border-color: #d9e3eb !important;
+    box-shadow: 0 8px 24px rgba(23,43,58,.05) !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] .premiumVisitCard:hover {
+    background: #fff !important;
+    border-color: #b4cbdc !important;
+    box-shadow: 0 10px 26px rgba(23,43,58,.08) !important;
+    transform: none !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] .premiumVisitAccent {
+    width: 3px !important;
+    background: #b4cbdc !important;
+    box-shadow: none !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] .premiumVisitNode {
+    background: #fff !important;
+    border-color: #b4cbdc !important;
+    box-shadow: none !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] :is(.patientRecordStat, .premiumVisitSection) {
+    background: #f5f8fb !important;
+    border: 1px solid #e0e8ef !important;
+    box-shadow: none !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] :is(.premiumVisitDateIcon, .premiumVisitDiagnosisIcon, .premiumVisitSectionIcon) {
+    color: #526575 !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] .premiumVisitOpenHint {
+    color: #2b638e !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] .premiumVisitStatusInProgress {
+    color: #805315 !important;
+    background: #fff5e4 !important;
+    border-color: #e7cf9e !important;
+  }
+  html body[data-theme="white"] .page[data-page="patient"] :is(.premiumVisitStatusCompleted, .premiumVisitPrice) {
+    color: #176746 !important;
+    background: #eaf5ee !important;
+    border-color: #bedcc9 !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] :is(.visitSectionCard, .visitSummaryCard, .visitAiWorkspace) {
+    background: #fff !important;
+    border-color: #d9e3eb !important;
+    box-shadow: 0 8px 24px rgba(23,43,58,.05) !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] :is(.visitSectionCard, .visitSummaryCard)::before {
+    background: none !important;
+    box-shadow: none !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] :is(.visitVitalsBlock, .visitAssessmentBlock, .visitOwnerCommunicationBlock, .visitOwnerCommunicationPanel) {
+    background: #f5f8fb !important;
+    border-color: #e0e8ef !important;
+    box-shadow: none !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] .visitPaymentButton {
+    color: #2b638e !important;
+    background: #eaf2f8 !important;
+    border-color: #b4cbdc !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] .visitPaymentButton span {
+    color: inherit !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] .visitPaymentButton.is-partial {
+    color: #805315 !important;
+    background: #fff5e4 !important;
+    border-color: #e7cf9e !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] .visitPaymentButton.is-paid {
+    color: #176746 !important;
+    background: #eaf5ee !important;
+    border-color: #bedcc9 !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] .visitPaymentButton:hover {
+    filter: none !important;
+    transform: none !important;
+    box-shadow: inset 0 0 0 1px currentColor !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] #visitPaymentStatus.is-unpaid {
+    color: #ad3345 !important;
+    background: #fceef0 !important;
+    border-color: #ecc6cc !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] #visitPaymentStatus.is-partial {
+    color: #805315 !important;
+    background: #fff5e4 !important;
+    border-color: #e7cf9e !important;
+  }
+  html body[data-theme="white"] .page[data-page="visit"] #visitPaymentStatus.is-paid {
+    color: #176746 !important;
+    background: #eaf5ee !important;
+    border-color: #bedcc9 !important;
+  }
+  html body[data-theme="white"] .page :is(.premiumVisitCard, .visitPaymentButton):focus-visible {
+    outline: 2px solid #2b638e !important;
+    outline-offset: 3px !important;
+  }
+ }
+}
