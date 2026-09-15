@@ -7553,8 +7553,9 @@ function openDeleteModal(
           false;
       }
     };
-  } else if (
-    mode === "operation-success"
+    } else if (
+    mode === "operation-success" ||
+    mode === "success"
   ) {
     modal.classList.add(
       "is-success"
@@ -28720,8 +28721,8 @@ async function loadStaffAccountApi(
 
     return {
       ok: true,
-      data:
-        json?.data || null,
+      data: json?.data || null,
+      loginPrefix: String(json?.login_prefix || ""),
     };
 
   } catch (error) {
@@ -29235,6 +29236,53 @@ function formatStaffLastLogin(
 }
 
 
+Object.assign(TEAM_INTERFACE_TEXT, {
+  "Повний логін": {en:"Full login",de:"Vollständiger Benutzername",pl:"Pełny login"},
+  "Оновіть сторінку після встановлення приставок клінік.": {en:"Reload after installing clinic login prefixes.",de:"Laden Sie die Seite nach der Einrichtung der Klinikpräfixe neu.",pl:"Odśwież stronę po skonfigurowaniu prefiksów klinik."},
+  "Наявний логін збережено. При зміні логіна приставка клініки додасться автоматично.": {en:"The existing login is preserved. Changing it automatically adds the clinic prefix.",de:"Der vorhandene Benutzername bleibt erhalten. Bei einer Änderung wird das Klinikpräfix automatisch ergänzt.",pl:"Obecny login pozostaje bez zmian. Zmiana loginu automatycznie doda prefiks kliniki."},
+  "Логін: 3–40 символів; латинські літери, цифри, крапка, дефіс або підкреслення.": {en:"Login: 3–40 characters; Latin letters, numbers, dots, hyphens or underscores.",de:"Benutzername: 3–40 Zeichen; lateinische Buchstaben, Ziffern, Punkte, Bindestriche oder Unterstriche.",pl:"Login: 3–40 znaków; litery łacińskie, cyfry, kropki, myślniki lub podkreślenia."},
+  "Цей логін уже використовується або акаунт співробітника вже створено": {en:"This login is already in use or the employee account already exists.",de:"Dieser Benutzername wird bereits verwendet oder das Mitarbeiterkonto besteht bereits.",pl:"Ten login jest już zajęty lub konto pracownika już istnieje."},
+  "Перевірте логін співробітника та приставку клініки": {en:"Check the employee login and clinic prefix.",de:"Prüfen Sie den Benutzernamen und das Klinikpräfix.",pl:"Sprawdź login pracownika i prefiks kliniki."},
+});
+
+function staffLoginInputHtml(prefix, username = "", legacy = false) {
+  const value = String(username);
+  const local = prefix && value.toLowerCase().startsWith(prefix + ".")
+    ? value.slice(prefix.length + 1) : value;
+  return `<div class="staffLoginInput">
+    ${legacy ? "" : `<span class="staffLoginPrefix">${escapeHtml(prefix)}.</span>`}
+    <input id="staffAccountUsername" type="text" autocomplete="off"
+      data-login-prefix="${escapeHtml(legacy ? "" : prefix)}"
+      value="${escapeHtml(local)}" placeholder="anna" maxlength="${legacy ? 100 : 40}"
+      autocapitalize="none" spellcheck="false">
+  </div>
+  <span id="staffLoginPreview" class="staffLoginPreview" aria-live="polite"></span>
+  ${legacy ? `<span class="staffLoginPreview">${escapeHtml(getTeamInterfaceText("Наявний логін збережено. При зміні логіна приставка клініки додасться автоматично."))}</span>` : ""}`;
+}
+
+function bindStaffLoginPreview(root) {
+  const input = root.querySelector("#staffAccountUsername");
+  const preview = root.querySelector("#staffLoginPreview");
+  if (!input || !preview) return;
+  const update = () => {
+    const prefix = input.dataset.loginPrefix;
+    let value = input.value.trim().toLowerCase();
+    if (prefix && value.startsWith(prefix + ".")) value = value.slice(prefix.length + 1);
+    const full = prefix ? prefix + "." + value : input.value.trim();
+    preview.textContent = getTeamInterfaceText("Повний логін") + ": " + full;
+  };
+  input.addEventListener("input", update);
+  update();
+}
+
+function suggestStaffLogin(name) {
+  const map = {а:"a",б:"b",в:"v",г:"h",ґ:"g",д:"d",е:"e",є:"ye",ё:"yo",ж:"zh",з:"z",и:"y",і:"i",ї:"yi",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"kh",ц:"ts",ч:"ch",ш:"sh",щ:"shch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya"};
+  const local = Array.from(String(name || "").toLowerCase()).map(c => map[c] ?? c)
+    .join("").replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "").slice(0, 40);
+  return local.length >= 3 ? local : "doctor";
+}
+
+
 function renderStaffAccountPanel(
   accountResult,
   profileState
@@ -29249,11 +29297,15 @@ function renderStaffAccountPanel(
     accountResult?.data ||
     null;
 
+  const loginPrefix = String(accountResult?.loginPrefix || "");
+
   const loadError =
     accountResult?.ok ===
     false
       ? accountResult.error
-      : "";
+      : !loginPrefix
+        ? "Оновіть сторінку після встановлення приставок клінік."
+        : "";
 
   if (loadError) {
     return `
@@ -29285,21 +29337,7 @@ function renderStaffAccountPanel(
   }
 
   if (!account) {
-    const suggestedLogin =
-      String(
-        profileState.doc?.name ||
-        ""
-      )
-        .trim()
-        .toLowerCase()
-        .replace(
-          /[^a-zа-яіїєґ0-9]+/gi,
-          "."
-        )
-        .replace(
-          /^\.+|\.+$/g,
-          ""
-        );
+    const suggestedLogin = suggestStaffLogin(profileState.doc?.name);
 
     return `
       <div
@@ -29359,15 +29397,7 @@ function renderStaffAccountPanel(
               )}
             </span>
 
-            <input
-              id="staffAccountUsername"
-              type="text"
-              autocomplete="off"
-              value="${escapeHtml(
-                suggestedLogin
-              )}"
-              placeholder="doctor.anna"
-            >
+            ${staffLoginInputHtml(loginPrefix, suggestedLogin)}
           </label>
 
           <label class="financeAdjustField">
@@ -29511,15 +29541,7 @@ function renderStaffAccountPanel(
             )}
           </span>
 
-          <input
-            id="staffAccountUsername"
-            type="text"
-            value="${escapeHtml(
-              account.username ||
-              ""
-            )}"
-            autocomplete="off"
-          >
+          ${staffLoginInputHtml(loginPrefix, account.username || "", !String(account.username || "").toLowerCase().startsWith(loginPrefix + "."))}
         </label>
 
         <label class="financeAdjustField">
@@ -29918,6 +29940,8 @@ function bindStaffAccountPanel(
   profileState,
   accountResult
 ) {
+  bindStaffLoginPreview(root);
+
   const staffId =
     profileState.doc?.id;
 
@@ -30015,9 +30039,9 @@ function bindStaffAccountPanel(
         );
 
         openDeleteModal(
-          getTeamInterfaceText(
-            "Передайте співробітнику логін і тимчасовий пароль."
-          ),
+          escapeHtml(
+            getTeamInterfaceText("Передайте співробітнику логін і тимчасовий пароль.")
+          ) + "<br><strong>" + escapeHtml(result.data?.username || "") + "</strong>",
           null,
           "success"
         );

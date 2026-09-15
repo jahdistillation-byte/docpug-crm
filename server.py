@@ -29815,6 +29815,44 @@ STAFF_ACCOUNT_ROLES = {
 }
 
 
+def get_clinic_login_prefix(org_id):
+    result = (
+        supabase.table("orgs")
+        .select("login_prefix")
+        .eq("id", str(org_id))
+        .limit(1)
+        .execute()
+    )
+    prefix = str((result.data[0] if result.data else {}).get("login_prefix") or "").strip()
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", prefix):
+        raise RuntimeError("CLINIC_LOGIN_PREFIX_NOT_CONFIGURED")
+    return prefix
+
+
+def build_staff_login(org_id, value):
+    prefix = get_clinic_login_prefix(org_id)
+    local_login = str(value or "").strip().lower()
+    if local_login.startswith(prefix + "."):
+        local_login = local_login[len(prefix) + 1:]
+    if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{2,39}", local_login):
+        raise ValueError("Логін: 3–40 символів; латинські літери, цифри, крапка, дефіс або підкреслення.")
+    return prefix + "." + local_login
+
+
+def literal_login_pattern(value):
+    # ILIKE uses SQL patterns: underscore and percent must be treated literally.
+    return str(value).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def staff_account_write_error(error, fallback):
+    code = str(getattr(error, "code", ""))
+    if code == "23505":
+        return fail("Цей логін уже використовується або акаунт співробітника вже створено", 409)
+    if code == "23514" and "STAFF_LOGIN" in str(error):
+        return fail("Перевірте логін співробітника та приставку клініки", 400)
+    return fail(fallback, 500)
+
+
 def serialize_staff_account(row):
     if not row:
         return None
@@ -29920,11 +29958,11 @@ def api_get_staff_account(
             else None
         )
 
-        return ok(
-            serialize_staff_account(
-                account
-            )
-        )
+        return jsonify({
+            "ok": True,
+            "data": serialize_staff_account(account),
+            "login_prefix": get_clinic_login_prefix(org_id),
+        })
 
     except Exception as error:
         print(
@@ -30002,6 +30040,7 @@ def api_create_staff_account(
         )
 
     try:
+        username = build_staff_login(org_id, username)
         staff_row = get_staff_for_owner(
             org_id,
             staff_id,
@@ -30041,7 +30080,7 @@ def api_create_staff_account(
             .select("id")
             .ilike(
                 "username",
-                username,
+                literal_login_pattern(username),
             )
             .limit(1)
             .execute()
@@ -30104,16 +30143,16 @@ def api_create_staff_account(
             )
         )
 
+    except ValueError as error:
+        return fail(str(error), 400)
+
     except Exception as error:
         print(
             "❌ create staff account:",
             repr(error),
         )
 
-        return fail(
-            "Не вдалося створити акаунт",
-            500,
-        )
+        return staff_account_write_error(error, "Не вдалося створити акаунт")
 
 
 @app.put(
@@ -30177,6 +30216,9 @@ def api_update_staff_account(
                 or ""
             ).strip()
 
+            if username != str(current_account.get("username") or ""):
+                username = build_staff_login(org_id, username)
+
             if len(username) < 3:
                 return fail(
                     "Логін повинен містити мінімум 3 символи",
@@ -30197,7 +30239,7 @@ def api_update_staff_account(
                 )
                 .ilike(
                     "username",
-                    username,
+                    literal_login_pattern(username),
                 )
                 .limit(5)
                 .execute()
@@ -30284,16 +30326,16 @@ def api_update_staff_account(
             )
         )
 
+    except ValueError as error:
+        return fail(str(error), 400)
+
     except Exception as error:
         print(
             "❌ update staff account:",
             repr(error),
         )
 
-        return fail(
-            "Не вдалося оновити акаунт",
-            500,
-        )
+        return staff_account_write_error(error, "Не вдалося оновити акаунт")
 
 
 @app.post(
@@ -30435,12 +30477,12 @@ def api_clinic_login():
                 "org_id, staff_id, role, display_name, is_active, "
                 "must_change_password"
             )
-            .ilike("username", username)
-            .limit(1)
+            .ilike("username", literal_login_pattern(username))
+            .limit(2)
             .execute()
         )
 
-        if not result.data:
+        if len(result.data or []) != 1:
             return jsonify({
                 "ok": False,
                 "error": "Невірний логін або пароль",

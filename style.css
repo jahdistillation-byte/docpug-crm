@@ -64201,3 +64201,35 @@ body[data-theme="white"]
   }
  }
 }
+
+@layer pugReadableInterface {
+  @media screen {
+    .staffAccessPanel .staffLoginInput {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      min-width: 0;
+    }
+    .staffAccessPanel .staffLoginInput .staffLoginPrefix {
+      color: var(--text-main) !important;
+      font: 600 15px/1.5 system-ui !important;
+      overflow-wrap: anywhere;
+      opacity: 1 !important;
+    }
+    .staffAccessPanel .staffLoginInput input {
+      flex: 1 1 120px;
+      min-width: 0;
+      width: 100%;
+      font-size: 16px !important;
+    }
+    .staffAccessPanel .staffLoginPreview {
+      display: block;
+      margin-top: 8px;
+      color: var(--text-muted) !important;
+      font: 400 14px/1.5 system-ui !important;
+      overflow-wrap: anywhere;
+      opacity: 1 !important;
+    }
+  }
+}
