@@ -63445,3 +63445,488 @@ body[data-theme="white"]
   html body[data-theme="white"]:has(.page[data-page="hospital"].active) .hospitalDischargeConfirmField textarea { color: #172b3a !important; background: #f0f5f8 !important; border-color: #dce6ee !important; color-scheme: light; }
   html body[data-theme="white"]:has(.page[data-page="hospital"].active) :is(.hospitalDischargeConfirmCancel, .hospitalDischargeConfirmClose) { color: #486477 !important; background: #edf3f8 !important; border-color: #dce6ee !important; }
 }
+/* PUG CRM — white theme and readable interface typography, v1.
+   Append after the existing styles. Screen interface only. */
+/* This layer gives these final corrections priority over older overrides. */
+@layer pugReadableInterface {
+@media screen {
+  html body {
+    --pug-ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+  }
+  html body :is(.main-content, .header-panel, .mac-dock, [class*="Modal"], [class*="modal"], #staffDrawer, .login-container) {
+    font-family: var(--pug-ui-font) !important;
+    -webkit-text-size-adjust: 100%;
+  }
+  html body :is(.page, .header-panel, .mac-dock, [class*="Modal"], [class*="modal"], #staffDrawer, .login-container) :is(input, select, textarea, button) {
+    font-family: var(--pug-ui-font) !important;
+  }
+  html body .page { font-size: 15px; line-height: 1.5; }
+  html body :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(p, li):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) {
+    line-height: 1.55 !important;
+  }
+  html body :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(label > span, small):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+  html body :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(input, select, textarea):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *, [type="checkbox"], [type="radio"], [type="color"])) {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+  html body :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) button:not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) {
+    font-family: var(--pug-ui-font) !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+  html body .page :is(th, td):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) { font-size: 14px !important; line-height: 1.5 !important; }
+  html body :is(.page, [class*="Modal"], [class*="modal"]) :is(h1, h2, h3, h4):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) {
+    font-family: var(--pug-ui-font) !important;
+    line-height: 1.3 !important;
+    letter-spacing: -.02em;
+    font-weight: 700;
+  }
+
+  /* White theme: opaque secondary text and calm, solid surfaces. */
+  html body[data-theme="white"] {
+    color-scheme: light;
+    --text-main: #172b3a !important;
+    --text-muted: #526575 !important;
+    --card-bg: #ffffff !important;
+    --glass-bg: #ffffff !important;
+    --glass-border: #d9e3eb !important;
+    --input-bg: #f8fafc !important;
+    --accent-color: #2b638e !important;
+    --primary-neon: #2b638e !important;
+    --finance-accent: #2b638e !important;
+    --finance-accent-2: #2b638e !important;
+    --finance-accent-soft: #eaf2f8 !important;
+    --finance-surface-1: #ffffff !important;
+    --finance-surface-2: #f5f8fb !important;
+    --finance-surface-soft: #f0f5f9 !important;
+    --finance-surface-hover: #e9f1f7 !important;
+    --finance-input: #f8fafc !important;
+    --finance-border: #d9e3eb !important;
+    --finance-border-strong: #b4cbdc !important;
+    --finance-text: #172b3a !important;
+    --finance-text-soft: #425869 !important;
+    --finance-text-muted: #526575 !important;
+    --finance-text-faint: #526575 !important;
+    --finance-color-scheme: light !important;
+    --pet-modal-accent: #2b638e !important;
+    --pet-modal-accent-2: #2b638e !important;
+    --med-accent: #2b638e !important;
+    --color-success: #176746 !important;
+    --color-warning: #805315 !important;
+    --color-danger: #ad3345 !important;
+    background: linear-gradient(145deg, #f8fafc, #edf3f7 55%, #f8fafc) !important;
+    color: var(--text-main) !important;
+  }
+  html body[data-theme="white"] :is(.hint, .text-muted, .field-title, .panelMutedTitle, .user-profile-badge > div) {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(p, small, label > span):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(input, select, textarea):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *, [type="checkbox"], [type="radio"], [type="color"])) {
+    color: var(--text-main) !important;
+    background: #f8fafc !important;
+    border-color: #cad8e3 !important;
+    color-scheme: light;
+    opacity: 1;
+  }
+  html body[data-theme="white"] :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(input, textarea)::placeholder { color: #607384 !important; opacity: 1 !important; }
+  html body[data-theme="white"] :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) :is(input, select, textarea):focus-visible { outline: 2px solid #2b638e; outline-offset: 2px; }
+
+  /* Forms that originally used a fixed dark palette. */
+  html body[data-theme="white"] :is(.premiumLabModal, .medcardModalWindow, .visitServicePickerModal, .patientConsentModal, .patientDiagnosisModal, .hospitalDischargeConfirmModal, .financeAdjustModal, .staffSkillModal, .specializationEditorModal) {
+    background: #ffffff !important;
+    color: var(--text-main) !important;
+    border-color: var(--glass-border) !important;
+  }
+  html body[data-theme="white"] :is(.premiumLabModalHeader, .premiumLabModalFooter, .premiumLabMetaSection, .premiumLabResultsSection, .premiumLabResultCard, .medcardFormSection, .medcardModalHeader, .medcardModalFooter, .visitServicePickerHeader, .patientConsentModalHead, .patientConsentModalFooter, .patientDiagnosisModalHeader, .patientDiagnosisModalFooter, .financeAdjustHead, .financeAdjustActions) {
+    background: #f5f8fb !important;
+    color: var(--text-main) !important;
+    border-color: var(--glass-border) !important;
+  }
+  html body[data-theme="white"] :is(.premiumLabCancel, .medcardCancel, .visitServicePickerClose, .patientConsentCancel, .patientFileUploadChoose, .patientVaccinePickerClose, .financeLoadError button, .financeQuietAction, .careerChoice) {
+    background: #edf3f8 !important;
+    color: #2b638e !important;
+    border-color: #cad8e3 !important;
+  }
+  html body[data-theme="white"] :is(.careerChoice b, .teamPhotoRight b, .staffAccessPanel .financeAdjustField > div, .labHistoryCommentText, .visitServicePickerText strong, .visitPickerSelect > span, .visitOwnerCommunicationHead strong, .visitVitalsTitle) { color: var(--text-main) !important; }
+  html body[data-theme="white"] :is(.premiumLabsSpecies span, .labHistoryStat span, .labMetricRef, .labMetricUnit, .premiumLabTypeText small, .premiumLabResultsSection, .visitWorkspaceMeta, .visitWeightControl > span, .visitSectionTotal > span, .visitOwnerCommunicationHead span, .premiumVisitType, .premiumVisitSectionHead > span, .premiumMetaItem > span, .teamDashIdBox > span, .teamDashNav button, .patientFilesStats span, .patientDocumentsSummary span) {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] :is([class$="Eyebrow"], [class$="Kicker"], .teamDashTitle, .hospitalCardTaskPending, .hospitalTaskType, .hospitalCardTaskTop > span, .auditOwnerBadge) {
+    color: #2b638e !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] :is(.patientStatusBadge.is-active, .teamDashStatus, .teamVisitStatus, .hospitalCardTaskDone, .hospitalTaskCompleteButton, .visitCompleteButton, .visitSummaryHead > b, .visitOwnerCommunicationBadge, .labMetricStatus-normal, .moneyPlus) {
+    color: #176746 !important;
+    background-color: #eaf5ee !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] :is(.labMetricStatus-high, .labMetricStatus-low, .patientConsentNotice) { color: #805315 !important; background: #fff5e4 !important; }
+  html body[data-theme="white"] :is(.hospitalTaskDeleteButton, .visitCardDelete, .premiumDeleteBtn, .moneyMinus) { color: #ad3345 !important; opacity: 1 !important; }
+  html body[data-theme="white"] :is(.premiumVisitStatusPlanned, .patientFileUploadChoose, .labAiButton) { color: #65409b !important; background: #f0eafa !important; }
+  html body[data-theme="white"] .hospitalCardTask.completed { opacity: 1 !important; }
+  html body[data-theme="white"] :is(.hospitalFilter.active, .visitAiWorkspaceTab.active, .patient-tab-btn.active, .teamVisitOpenBtn) { color: #2b638e !important; }
+
+  /* Visit workspace and AI draft use the same light surfaces as the record. */
+  html body[data-theme="white"] :is(.visitWorkspaceStatus, .visitWorkspaceDate, .visitSectionTotal, .visitOwnerCommunicationPanel) { background: #edf3f8 !important; color: var(--text-main) !important; border-color: #cad8e3 !important; }
+  html body[data-theme="white"] #visitAiIntakePanel > div { background: #f2edf9 !important; border-color: #d8c7e9 !important; }
+  html body[data-theme="white"] #visitAiIntakePanel :is(div, span):not(:has(> div, > section, > button, > textarea)) { color: #425869 !important; }
+  html body[data-theme="white"] :is(#visitAiIntakePanel button, .patientDocumentCreate, .patientConsentSubmit, .patientFileModalSave, .patientVaccineSaveButton, .visitAddLineButton, .visitTaskCreateForm .is-primary) {
+    color: #ffffff !important;
+    background: #2b638e !important;
+    border-color: #2b638e !important;
+  }
+  html body[data-theme="white"] :is(#visitAiIntakePanel button, .patientDocumentCreate, .patientConsentSubmit) span { color: inherit !important; }
+  html body[data-theme="white"] #visitAiRecordButton { background: #8f345b !important; border-color: #8f345b !important; }
+  html body[data-theme="white"] .hospitalDischargeConfirmSubmit { background: #ad3345 !important; color: #ffffff !important; }
+  html body[data-theme="white"] .hospitalDischargeConfirmSubmit span { color: inherit !important; }
+
+  /* Legacy inline copy and task filters: remove white-on-white text. */
+  html body[data-theme="white"] .page :is(div, p, small, label, span)[style*="color:"]:is([style*="rgba(255,255,255"], [style*="rgba(255, 255, 255"], [style*="color:#fff"], [style*="color: #fff"], [style*="color:#FFF"], [style*="color: #FFF"]):not(:where(button *, .premiumVetAvatar *, .teamDashAvatar *, .teamPhotoPreview *, #disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+  }
+  html body[data-theme="white"] :is(.page, #staffDrawer) :is(div, span)[style*="opacity:"]:is([style*=".5"], [style*="0.5"], [style*=".6"], [style*="0.6"]):not(:where(button *, #disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) { color: var(--text-muted) !important; opacity: 1 !important; }
+  html body[data-theme="white"] .taskCenterScopes button { color: #425869 !important; background: #edf3f8 !important; border-color: #cad8e3 !important; }
+  html body[data-theme="white"] .taskCenterScopes button.active { color: #ffffff !important; background: #2b638e !important; }
+}
+
+@media screen {
+  /* Readable secondary labels, dates and help text throughout the interface. */
+  html body :is(
+    #appointmentTemplateSelectorMeta,
+    #monthScheduleEditorOverlay .monthScheduleRepeatHint,
+    .addPetBreedEmpty small,
+    .addPetBreedHint,
+    .addPetLabel small,
+    .addPetModalKicker,
+    .addPetNotesCounter,
+    .appointmentTemplateDrawerEyebrow,
+    .appointmentTemplateEmpty,
+    .appointmentTemplateSelectorLabel,
+    .auditEventsFilters > label > span,
+    .auditEventsHero > div > span,
+    .auditOwnerBadge,
+    .calendarViewGroupLabel,
+    .careerChoice > small,
+    .careerChoice.rarity-rare > small,
+    .clinicSettingsKicker,
+    .clinicSettingsLogoutRow > div > span,
+    .financeAccountsHeading > div > p,
+    .financeAccountsHeading > div > span,
+    .financeAccountsTotal > span,
+    .financeAdjustField > span,
+    .financeAdjustHead > div > p,
+    .financeCashflowAxisLabel,
+    .financeCashflowDateLabel,
+    .financeCashflowValueLabel,
+    .financeChartEmpty p,
+    .financeChartEmpty strong,
+    .financeClientVisitsEmpty,
+    .financeClientsFilteredEmpty > p,
+    .financeCompactEmpty,
+    .financeCompactOperations > .financeCompactEmpty,
+    .financeControlHero .financeEyebrow,
+    .financeDayBrief.is-calm > div > small,
+    .financeExpenseDateLabel,
+    .financeExpenseGridLabel,
+    .financeExpenseHint > span,
+    .financeExpenseHint p,
+    .financeEyebrow,
+    .financeInlineUnavailable,
+    .financeKpiCard > small,
+    .financeKpiCard > span,
+    .financeLoadError > button,
+    .financePanelHead > button,
+    .financePanelHead > div > span,
+    .financePositiveEmpty p,
+    .financePositiveEmpty strong,
+    .financePrimaryAction,
+    .financePurchaseCardMeta,
+    .financeQuietAction,
+    .financeRefundModal .financeExpenseHint p,
+    .financeTransactionsEmpty,
+    .financeTransactionsEmpty span,
+    .hint,
+    .hospitalAdmissionField > span,
+    .hospitalAdmissionHeader > div > p,
+    .hospitalAdmissionSectionTitle > div > small,
+    .hospitalCardTaskDone,
+    .hospitalCardTaskMain > p,
+    .hospitalCardTaskMain > strong,
+    .hospitalCardTaskPending,
+    .hospitalCardTaskTop > span,
+    .hospitalCardTasksEmpty > div > small,
+    .hospitalCardTasksEmpty > div > strong,
+    .hospitalCardTasksHead > div > span,
+    .hospitalCardTasksHead > div > strong,
+    .hospitalDischargeConfirmField > span,
+    .hospitalDischargeConfirmModal > p,
+    .hospitalDischargeConfirmPatient > div > span,
+    .hospitalEyebrow,
+    .hospitalHero > div > p,
+    .hospitalInfoRow > span,
+    .hospitalInfoRow > strong,
+    .hospitalPatientIdentity > p,
+    .hospitalStatCard > small,
+    .hospitalStatCard > span,
+    .hospitalStatCard.hospitalStatCritical > small,
+    .hospitalStatCard.hospitalStatCritical > span,
+    .hospitalStatCard.hospitalStatStable > small,
+    .hospitalStatCard.hospitalStatStable > span,
+    .hospitalStatCard.hospitalStatWatch > small,
+    .hospitalStatCard.hospitalStatWatch > span,
+    .hospitalStatusBadge,
+    .hospitalTaskContent > p,
+    .hospitalTaskField > span,
+    .hospitalTaskType,
+    .hospitalTasksHeader > div > p,
+    .labAiEyebrow,
+    .labAiOwnerExplanationEyebrow,
+    .labHistoryCommentLabel,
+    .labHistoryKicker,
+    .labHistoryOwnerExplanationLabel,
+    .labHistoryStat > span,
+    .labHistoryStat.labHistoryStatHigh > span,
+    .labHistoryStat.labHistoryStatLow > span,
+    .labHistoryStat.labHistoryStatOk > span,
+    .labHistorySubtitle,
+    .labMetricLabel,
+    .labMetricRef,
+    .labMetricStatus.labMetricStatus-high,
+    .labMetricStatus.labMetricStatus-normal,
+    .labMetricUnit,
+    .medcardFieldLabel,
+    .medcardFieldLabel small,
+    .medcardModalFooterHint,
+    .medcardModalKicker,
+    .moneyMinus,
+    .moneyPlus,
+    .monthDaySummaryEmpty small,
+    .monthDaySummaryEmpty strong,
+    .monthDaySummaryEyebrow,
+    .monthScheduleRepeatHint,
+    .ownerPhoneCopyLabel,
+    .ownerReportEmpty,
+    .page[data-page="calendar"] .calendarTimelineEventNote,
+    .page[data-page="calendar"] .calendarTimelineTimeLabel,
+    .page[data-page="calendar"] .calendarViewGroupLabel,
+    .page[data-page="hospital"] .hospitalEyebrow,
+    .page[data-page="owners"] .ownerPetsEmpty,
+    .page[data-page="patient"] #patientCardRoot .labMetricLabel,
+    .page[data-page="patient"] .labHistoryCommentLabel,
+    .page[data-page="patient"] .labHistoryKicker,
+    .page[data-page="patient"] .patientVaccinationsEyebrow,
+    .page[data-page="patient"] .premiumLabsKicker,
+    .page[data-page="team"] .teamKpiTrend,
+    .page[data-page="visit"] .visitAiConsultComposerHint,
+    .page[data-page="visit"] .visitAiConsultSubtitle,
+    .page[data-page="visit"] .visitSummaryHint,
+    .page[data-page="visit"] .visitWorkspaceEyebrow,
+    .panelMutedTitle,
+    .patient-tab-btn,
+    .patientConsentChecks > label > span,
+    .patientConsentField > span,
+    .patientConsentField.patientConsentFieldWide > span,
+    .patientConsentModalHead > div > p,
+    .patientConsentModalHead > div > span,
+    .patientConsentNotice,
+    .patientDiagnosisForm > label > span,
+    .patientDiagnosisModalHeader > div > p,
+    .patientDocumentBadge,
+    .patientDocumentEmpty,
+    .patientDocumentSelectLabel > span,
+    .patientDocumentsHint,
+    .patientDocumentsKicker,
+    .patientDocumentsSummary > span,
+    .patientFileMeta,
+    .patientFileModalHead > div > p,
+    .patientFileNote,
+    .patientFileUploadEmpty small,
+    .patientFileUploadInfo > p,
+    .patientFilesEmpty p,
+    .patientFilesKicker,
+    .patientFinanceEmpty,
+    .patientFinanceKicker,
+    .patientPaymentDate span,
+    .patientPaymentDate strong,
+    .patientPaymentDescription span,
+    .patientPaymentDescription strong,
+    .patientRecordStat > div,
+    .patientStatusBadge.is-active,
+    .patientVaccinationsEmpty small,
+    .patientVaccinationsEyebrow,
+    .patientVaccinePickerEyebrow,
+    .patientVaccinePickerHead > div > p,
+    .patientVaccinePickerTitle,
+    .patientWeightEmpty,
+    .platformClinicEmpty,
+    .platformClinicMeta span,
+    .premiumLabCommentField > span,
+    .premiumLabCommentField.premiumLabOwnerExplanationField > span,
+    .premiumLabField > span,
+    .premiumLabModalHeaderMain > div > p,
+    .premiumLabModalKicker,
+    .premiumLabOwnerExplanationHint,
+    .premiumLabReferenceGrid > label > span,
+    .premiumLabResultTop > div > strong,
+    .premiumLabSectionHead > div > p,
+    .premiumLabSectionHead > span,
+    .premiumLabTypeText > small,
+    .premiumLabValueField > span,
+    .premiumLabsEmpty p,
+    .premiumLabsKicker,
+    .premiumMetaItem > span,
+    .premiumMetaItem > strong,
+    .premiumVetRole,
+    .premiumVetSpecs > span,
+    .premiumVisitEyebrow,
+    .premiumVisitOpenHint,
+    .premiumVisitSectionHead > span,
+    .premiumVisitType,
+    .scheduleStatus.premiumStatus.active,
+    .servicesPremiumStat > small,
+    .servicesPremiumStat > span,
+    .servicesPremiumStat.servicesPremiumStatActive > small,
+    .servicesPremiumStat.servicesPremiumStatActive > span,
+    .servicesPremiumStat.servicesPremiumStatPrice > small,
+    .servicesPremiumStat.servicesPremiumStatPrice > span,
+    .specPill > span,
+    .staffSkillModalHead > div > p,
+    .stockAdvancedFilter > span,
+    .stockPremiumCategories > button,
+    .stockPremiumFilters > button,
+    .stockPremiumGroupFilters > button,
+    .stockPremiumStat > small,
+    .stockPremiumStat > span,
+    .stockPremiumStat.stockPremiumStatEmpty > small,
+    .stockPremiumStat.stockPremiumStatEmpty > span,
+    .stockPremiumStat.stockPremiumStatLow > small,
+    .stockPremiumStat.stockPremiumStatLow > span,
+    .stockPremiumStat.stockPremiumStatUnits > small,
+    .stockPremiumStat.stockPremiumStatUnits > span,
+    .stockPremiumStat.stockPremiumStatValue > small,
+    .stockPremiumStat.stockPremiumStatValue > span,
+    .stockPugBriefEyebrow,
+    .stockPugBriefHealthy > div > small,
+    .stockPugBriefMetrics > div > span,
+    .teamDashContact > div,
+    .teamDashIdBox > span,
+    .teamDashInsight > div > b,
+    .teamDashInsight > div > p,
+    .teamDashNav > button,
+    .teamDashPanelHead > span,
+    .teamDashRows > p > b,
+    .teamDashRows > p > span,
+    .teamDashStatus,
+    .teamDashTitle,
+    .teamDashTop > div > p,
+    .teamFinanceRow > div > b,
+    .teamFinanceRow > div > span,
+    .teamKpiCard > div > span,
+    .teamSubHero > div > p,
+    .teamVisitOwner,
+    .teamVisitStatus,
+    .user-profile-badge > div,
+    .v-status-badge.premiumVisitStatus.premiumVisitStatusPlanned,
+    .visitAiConsultComposerHint,
+    .visitAiConsultSubtitle,
+    .visitAiWorkspace .visitAiConsultAnswer.is-chat-reply .visitAiConsultAnswerLabel,
+    .visitAiWorkspace .visitAiConsultAnswer.is-compact .visitAiConsultMeta,
+    .visitAiWorkspace .visitAiConsultAnswerLabel,
+    .visitAiWorkspace .visitAiConsultComposerHint,
+    .visitAiWorkspace .visitAiConsultMeta,
+    .visitAiWorkspaceBrand > div > span,
+    .visitAiWorkspacePane > section > div > div,
+    .visitAiWorkspacePane > section > div > div > div > div,
+    .visitAiWorkspacePane > section > div > div > span,
+    .visitAiWorkspaceTab,
+    .visitAiWorkspaceTab.active,
+    .visitField > span,
+    .visitField > span > small,
+    .visitField.visitFieldWide > span,
+    .visitLinesEmpty,
+    .visitPaymentEyebrow,
+    .visitPaymentHistoryEmpty,
+    .visitPaymentMethodsLabel,
+    .visitPickerQty > span,
+    .visitPickerSearch > span,
+    .visitPickerSelect > span,
+    .visitSectionHead > div > div > p,
+    .visitSectionTotal > span,
+    .visitServicePickerEyebrow,
+    .visitServicePickerHeader > div > p,
+    .visitServicePickerText > small,
+    .visitSummaryHead > b,
+    .visitSummaryHint,
+    .visitSummaryPatient > div > span,
+    .visitTaskMeta > span,
+    .visitTasksCounter,
+    .visitTasksEmpty span,
+    .visitVitalField > span,
+    .visitWeightControl > span,
+    .visitWorkspaceDate,
+    .visitWorkspaceEyebrow,
+    .visitWorkspaceStatus
+  ) { font-size: 13px !important; line-height: 1.45 !important; }
+  html body :is(.page, [class*="Modal"], #staffDrawer) :is(div, span)[style*="font-size"]:is([style*=".75rem"], [style*="0.75rem"], [style*=".8rem"], [style*="0.8rem"]) { font-size: 13px !important; }
+}
+
+}
+@layer pugReadableInterface {
+  @media screen {
+    html body[data-theme="white"] :is(.hospitalInfoRow > span, .hospitalCardTasksHead span, .premiumMetaItem > span, .premiumVetRole, .patientFilesFilter b, .teamKpiCard > div > span, .teamDashPanelHead > span, .teamDashRows > p > span, .financeAdjustField > span, .hospitalDischargeConfirmPatient span, .visitAiWorkspaceTab, .patientVaccinePickerTitle, .medcardInputUnit > span) { color: #526575 !important; opacity: 1 !important; }
+    html body[data-theme="white"] :is(.stockPremiumCategories button, .stockPremiumGroupFilters button, .stockPremiumFilters button, .teamDashNav button, .patient-tab-btn) { color: #425869 !important; }
+    html body[data-theme="white"] .premiumLabResultsSection > div { color: #425869 !important; }
+    html body[data-theme="white"] .patientDiagnosisModal .is-primary { color: #ffffff !important; background: #2b638e !important; }
+    html body[data-theme="white"] .patientRecordStat > div { color: #2b638e !important; }
+    html body[data-theme="white"] .visitCardDelete span { color: #ad3345 !important; opacity: 1 !important; }
+    html body[data-theme="white"] :is(.hospitalTaskCompleteButton, .visitCompleteButton) { background: #eaf5ee !important; }
+  }
+}
+@layer pugReadableInterface {
+  @media screen {
+    html body :is(.page, .header-panel, .mac-dock, #authOverlay, [class*="Modal"], [class*="modal"], #staffDrawer) :is(div, section, article, aside, header, footer, p, li, span, strong, b, small, label, h1, h2, h3, h4):not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) { font-family: var(--pug-ui-font) !important; }
+    html body :is(.page, [class*="Modal"], [class*="modal"], #staffDrawer) p:not(:where(#disA4, #disA4 *, #visitPdfRenderHost, #visitPdfRenderHost *, [id*="PdfRender"], [id*="PdfRender"] *, .clinicDocumentPreview, .clinicDocumentPreview *)) { font-size: 14px !important; }
+    html body :is(.calendarMobileDoctorMeta, .calendarMobileScrollHint, .user-profile-badge > div, .auth-field label) { font-size: 13px !important; line-height: 1.45 !important; }
+    html body #authOverlay :is(input, select, textarea, button) { font-family: var(--pug-ui-font) !important; font-size: 16px !important; }
+    html body[data-theme="white"] .patientVaccinePickerHead :is(div, p) { opacity: 1 !important; }
+  }
+}
+@layer pugReadableInterface {
+  @media screen {
+    html body :is(.financeDebtNumbers > div > span, .financeDonut > div > span, .financeMethodsLegend span, .financeMethodsLegend strong, .financeInsightPanel > div > span, .ownerReportAutoToggle b, .ownerReportPanelHead > div > span, .ownerReportTelegramCopy > span, .medcardInputUnit > span, .specializationEditorColorField strong) { font-size: 13px !important; line-height: 1.45 !important; }
+    html body[data-theme="white"] .financeKpiCard.is-revenue { --finance-kpi-color: #176746 !important; }
+    html body[data-theme="white"] .financeKpiCard.is-profit { --finance-kpi-color: #65409b !important; }
+    html body[data-theme="white"] .financeKpiCard.is-check { --finance-kpi-color: #2b638e !important; }
+    html body[data-theme="white"] .financeKpiCard.is-debt { --finance-kpi-color: #805315 !important; }
+    html body[data-theme="white"] .financeDebtNumbers strong { color: #805315 !important; }
+    html body[data-theme="white"] :is(.financeDonut span, .financeTransactionsEmpty) { color: #526575 !important; }
+    html body[data-theme="white"] .financeRefreshButton { color: #2b638e !important; background: #edf3f8 !important; border-color: #cad8e3 !important; }
+    html body[data-theme="white"] .financeAddExpenseButton { color: #ad3345 !important; background: #fff0f2 !important; border-color: #ebc2c9 !important; }
+    html body[data-theme="white"] #authOverlay { background: linear-gradient(145deg, #f8fafc, #edf3f7) !important; }
+    html body[data-theme="white"] .auth-glass-panel { background: #ffffff !important; border-color: #cad8e3 !important; box-shadow: 0 16px 50px rgba(36,68,89,.12) !important; }
+    html body[data-theme="white"] .auth-form-zone { background: #ffffff !important; }
+    html body[data-theme="white"] .auth-art-zone { background: #edf3f8 !important; border-color: #d9e3eb !important; }
+    html body[data-theme="white"] .auth-header h1 { color: #172b3a !important; }
+    html body[data-theme="white"] .auth-header h1 span { color: #2b638e !important; }
+    html body[data-theme="white"] :is(.auth-header p, .auth-field label, .pug-bubble) { color: #526575 !important; }
+    html body[data-theme="white"] .pug-bubble { background: #ffffff !important; border-color: #cad8e3 !important; }
+    html body[data-theme="white"] #authOverlay :is(input, select) { color: #172b3a !important; background: #f8fafc !important; border-color: #cad8e3 !important; color-scheme: light; }
+    html body[data-theme="white"] #authOverlay input::placeholder { color: #607384 !important; opacity: 1 !important; }
+    html body[data-theme="white"] .auth-submit-btn { color: #ffffff !important; background: #2b638e !important; }
+    html body[data-theme="white"] :is(.auth-error-msg, .financeExpenseError, .financeExpenseFilterError, .appointmentTemplateEditorError, .pugOwnerFieldError) { color: #ad3345 !important; background-color: #fff0f2 !important; }
+  }
+}
+@layer pugReadableInterface {
+  @media screen {
+    html body[data-theme="white"] .taskCenterScopes button[style*="#f1d1a0"] { color: #ffffff !important; background: #2b638e !important; border-color: #2b638e !important; }
+  }
+}
