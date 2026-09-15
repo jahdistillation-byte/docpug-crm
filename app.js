@@ -91140,7 +91140,7 @@ function renderVisitAiConsultItems(
             .map(
               (item) => `
                 <li>
-                  ${escapeHtml(item)}
+                  ${formatVisitAiConsultText(item, true)}
                 </li>
               `
             )
@@ -91150,7 +91150,32 @@ function renderVisitAiConsultItems(
     </section>
   `;
 }
+function formatVisitAiConsultText(value, inline = false) {
+  let text = String(value ?? "")
+    .replace(/\r\n?/g, "\n")
+    .trim();
 
+  if (!inline) {
+    text = text.replace(
+      /([.!?;])[ \t]+(?=\*\*[^*\n]{2,150}\*\*[ \t]*[—–:-])/g,
+      "$1\n\n"
+    );
+  }
+
+  const formatInline = part => escapeHtml(part).replace(
+    /\*\*([^*\n]+)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+  if (inline) return formatInline(text);
+
+  return text.split(/\n[ \t]*\n+/)
+    .filter(Boolean)
+    .map(part =>
+      `<p>${formatInline(part).replace(/\n/g, "<br>")}</p>`
+    )
+    .join("");
+}
 function renderVisitAiConsultAnswer(
   consultation,
   meta = {},
@@ -91196,7 +91221,7 @@ function renderVisitAiConsultAnswer(
 
        <div
   class="visitAiConsultDirectAnswer"
->${escapeHtml(
+>${formatVisitAiConsultText(
   directAnswer
 )}</div>
       </div>
@@ -91253,7 +91278,7 @@ function renderVisitAiConsultAnswer(
 
       <div
   class="visitAiConsultDirectAnswer"
->${escapeHtml(
+>${formatVisitAiConsultText(
   directAnswer
 )}</div>
 
@@ -91447,7 +91472,7 @@ function renderVisitAiConsultMessage(
   class="
     visitAiConsultDirectAnswer
   "
->${escapeHtml(
+>${formatVisitAiConsultText(
   content ||
   (
     "Відповідь не " +
