@@ -105335,6 +105335,7 @@ function initVisitsTabUI() {
 }
 
 function closeVisitModal() {
+    document.getElementById("visitPatientCreatedNotice")?.remove();
   const modal = $("#visitModal");
 
   if (!modal) return;
@@ -121215,9 +121216,39 @@ if (
         await loadOwners();
         await loadPatientsApi();
 
-        alert(
-          translateInterfaceText("calendar.detail.the.patient.has.been.created.now.save.the.appointment")
-        );
+        document.getElementById("visitPatientCreatedNotice")?.remove();
+
+const patientBlock = document.getElementById("visitPatientBlock");
+
+if (patientBlock) {
+  const messages = {
+    uk: 'Пацієнта додано. Щоб створити запис на прийом, натисніть «Зберегти запис».',
+    en: 'Patient added. Select “Save appointment” to create the appointment.',
+    de: 'Patient hinzugefügt. Klicken Sie auf „Termin speichern“, um den Termin anzulegen.',
+    pl: 'Pacjent dodany. Kliknij „Zapisz termin”, aby utworzyć termin.'
+  };
+
+  const notice = document.createElement("div");
+  notice.id = "visitPatientCreatedNotice";
+  notice.setAttribute("role", "status");
+  notice.setAttribute("aria-live", "polite");
+  notice.textContent =
+    messages[getInterfaceLanguage()] || messages.uk;
+
+  notice.style.cssText = `
+    margin-top:12px;
+    padding:10px 12px;
+    border:1px solid var(--glass-border);
+    border-radius:10px;
+    background:var(--finance-surface-soft);
+    color:var(--text-main);
+    font-size:14px;
+    line-height:1.5;
+    overflow-wrap:anywhere;
+  `;
+
+  patientBlock.appendChild(notice);
+}
       } catch (error) {
         console.error(
           "Помилка швидкого створення пацієнта:",
