@@ -1934,6 +1934,27 @@ def save_visit_lines(visit_id: str, d: dict):
                 .insert(clean_payload(stock_rows))
             )
         )
+@app.before_request
+def protect_tab_session_context():
+    path = request.path or ""
+    if not path.startswith("/api/") or path in {
+        "/api/login", "/api/session", "/api/me",
+        "/api/telegram/webhook",
+        "/api/internal/reports/daily-dispatch",
+    }:
+        return None
+
+    expected_org = request.headers.get("X-PUG-Expected-Org")
+    expected_user = request.headers.get("X-PUG-Expected-User")
+    if (
+        expected_org is not None
+        and expected_org != str(session.get("org_id") or "")
+    ) or (
+        expected_user is not None
+        and expected_user != str(session.get("user_id") or "")
+    ):
+        return jsonify({"ok": False, "error": "SESSION_CHANGED"}), 409
+
 
 @app.before_request
 def protect_api_routes():
