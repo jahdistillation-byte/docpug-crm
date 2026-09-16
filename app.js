@@ -7259,6 +7259,9 @@ function openDeleteModal(
     "is-payment-cancel"
   );
 
+  modal.dataset.confirmMode =
+    mode;
+
   confirmBtn.disabled =
     false;
 

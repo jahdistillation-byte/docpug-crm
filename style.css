@@ -63751,6 +63751,108 @@ body[data-theme="white"]
   }
 }
 
+/* Universal confirmation dialog: readable white-theme states. */
+@media screen {
+  html body[data-theme="white"] .deleteModalOverlay {
+    background: rgba(23, 43, 58, 0.38) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteModal {
+    background:
+      radial-gradient(circle at top, rgba(216, 70, 92, 0.08), transparent 38%),
+      #ffffff !important;
+    border-color: #ecc6cc !important;
+    box-shadow: 0 28px 80px rgba(23, 43, 58, 0.22) !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteIcon {
+    color: #ad3345 !important;
+    background: #fceef0 !important;
+    border-color: #ecc6cc !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteModal h2 {
+    color: #172b3a !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteModal p {
+    color: #526575 !important;
+    opacity: 1 !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteModal p b {
+    color: #172b3a !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteButtons .btnSecondary {
+    color: #425869 !important;
+    background: #f5f8fb !important;
+    border: 1px solid #d9e3eb !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteButtons .btnSecondary:hover {
+    color: #172b3a !important;
+    background: #eaf2f8 !important;
+    border-color: #b4cbdc !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteButtons .btnDanger {
+    color: #ffffff !important;
+    background: #c83f58 !important;
+    border-color: #c83f58 !important;
+    box-shadow: 0 10px 24px rgba(173, 51, 69, 0.2) !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay .deleteButtons .btnDanger:hover {
+    background: #ad3345 !important;
+    border-color: #ad3345 !important;
+    box-shadow: 0 12px 28px rgba(173, 51, 69, 0.26) !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay[data-confirm-mode="unsaved"] .deleteModal {
+    background:
+      radial-gradient(circle at top, rgba(194, 132, 36, 0.1), transparent 38%),
+      #ffffff !important;
+    border-color: #e7cf9e !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay[data-confirm-mode="unsaved"] .deleteIcon {
+    color: #805315 !important;
+    background: #fff5e4 !important;
+    border-color: #e7cf9e !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay.is-success .deleteModal {
+    background:
+      radial-gradient(circle at top, rgba(44, 143, 91, 0.09), transparent 38%),
+      #ffffff !important;
+    border-color: #bedcc9 !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay.is-success .deleteIcon {
+    color: #176746 !important;
+    background: #eaf5ee !important;
+    border-color: #bedcc9 !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay.is-success .deleteButtons .primary {
+    color: #ffffff !important;
+    background: #277a52 !important;
+    border-color: #277a52 !important;
+    box-shadow: 0 10px 24px rgba(23, 103, 70, 0.18) !important;
+  }
+
+  html body[data-theme="white"] .deleteModalOverlay :is(button):focus-visible {
+    outline: 2px solid #2b638e !important;
+    outline-offset: 3px !important;
+  }
+}
+
 @media screen {
   /* Readable secondary labels, dates and help text throughout the interface. */
   html body :is(
