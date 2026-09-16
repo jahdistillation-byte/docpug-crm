@@ -63598,6 +63598,159 @@ body[data-theme="white"]
   html body[data-theme="white"] .taskCenterScopes button.active { color: #ffffff !important; background: #2b638e !important; }
 }
 
+/* Appointment templates: complete white-theme treatment.
+   The picker and drawer were originally authored with fixed dark colours. */
+@media screen {
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelector,
+  html body[data-theme="white"] #visitModal .appointmentTemplateAddQuick {
+    color: #172b3a !important;
+    background: #ffffff !important;
+    border-color: #d9e3eb !important;
+    box-shadow: 0 6px 18px rgba(23, 43, 58, 0.06) !important;
+  }
+
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelector:hover,
+  html body[data-theme="white"] #visitModal .appointmentTemplateAddQuick:hover {
+    background: #f5f8fb !important;
+    border-color: #b4cbdc !important;
+  }
+
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelector.has-template {
+    background: color-mix(in srgb, var(--template-color) 8%, #ffffff) !important;
+    border-color: color-mix(in srgb, var(--template-color) 55%, #b4cbdc) !important;
+  }
+
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelectorIcon {
+    background: #eaf2f8 !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelector.has-template .appointmentTemplateSelectorIcon {
+    background: color-mix(in srgb, var(--template-color) 13%, #ffffff) !important;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--template-color) 32%, transparent) !important;
+  }
+
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelectorLabel {
+    color: #526575 !important;
+  }
+
+  html body[data-theme="white"] #visitModal #appointmentTemplateSelectorName {
+    color: #172b3a !important;
+  }
+
+  html body[data-theme="white"] #visitModal #appointmentTemplateSelectorMeta {
+    color: #526575 !important;
+  }
+
+  html body[data-theme="white"] #visitModal .appointmentTemplateSelectorArrow {
+    color: #425869 !important;
+    background: #eaf2f8 !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerBackdrop {
+    background: rgba(23, 43, 58, 0.36) !important;
+    backdrop-filter: blur(5px) !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerPanel {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 100%) !important;
+    border-left-color: #d9e3eb !important;
+    box-shadow: -24px 0 70px rgba(23, 43, 58, 0.18) !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerHeader {
+    border-bottom-color: #d9e3eb !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerEyebrow {
+    color: #2b638e !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerHeader h3 {
+    color: #172b3a !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerHeader p,
+  html body[data-theme="white"] .appointmentTemplateDrawerAdd small,
+  html body[data-theme="white"] .appointmentTemplateText small,
+  html body[data-theme="white"] .appointmentTemplateLoading,
+  html body[data-theme="white"] .appointmentTemplateEmpty {
+    color: #526575 !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerClose {
+    color: #425869 !important;
+    background: #ffffff !important;
+    border-color: #d9e3eb !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerClose:hover {
+    color: #172b3a !important;
+    background: #eaf2f8 !important;
+    border-color: #b4cbdc !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerAdd {
+    color: #172b3a !important;
+    background: #f4f1ff !important;
+    border-color: #b9abea !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerAdd:hover {
+    background: #ece7ff !important;
+    border-color: #8f78d8 !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerAdd > span:first-child {
+    color: #5c46ad !important;
+    background: #e5ddff !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateCard {
+    color: #172b3a !important;
+    background: #ffffff !important;
+    border-color: #d9e3eb !important;
+    box-shadow: 0 4px 14px rgba(23, 43, 58, 0.04) !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateCard:hover {
+    background: #f5f8fb !important;
+    border-color: #b4cbdc !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateCard.active {
+    background: color-mix(in srgb, var(--template-color) 9%, #ffffff) !important;
+    border-color: var(--template-color) !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateText strong {
+    color: #172b3a !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateLoading,
+  html body[data-theme="white"] .appointmentTemplateEmpty {
+    background: #ffffff !important;
+    border: 1px solid #d9e3eb !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerClear {
+    color: #425869 !important;
+    background: #ffffff !important;
+    border-color: #d9e3eb !important;
+  }
+
+  html body[data-theme="white"] .appointmentTemplateDrawerClear:hover {
+    color: #172b3a !important;
+    background: #eaf2f8 !important;
+    border-color: #b4cbdc !important;
+  }
+
+  html body[data-theme="white"] :is(.appointmentTemplateSelector, .appointmentTemplateAddQuick, .appointmentTemplateDrawerClose, .appointmentTemplateDrawerAdd, .appointmentTemplateCard, .appointmentTemplateDrawerClear):focus-visible {
+    outline: 2px solid #2b638e !important;
+    outline-offset: 2px !important;
+  }
+}
+
 @media screen {
   /* Readable secondary labels, dates and help text throughout the interface. */
   html body :is(
