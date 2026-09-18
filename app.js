@@ -6221,7 +6221,34 @@ async function requestVisitAiConsult(
     );
   }
 
-  return result.data;
+    const data =
+    result.data || {};
+
+  const subscriptionUsage =
+    data?.meta
+      ?.subscription_usage || null;
+
+  if (subscriptionUsage) {
+    window.PUG_AI_CONSULT_USAGE = {
+      billingPeriod:
+        subscriptionUsage
+          .billing_period ?? null,
+
+      used:
+        subscriptionUsage
+          .used ?? 0,
+
+      limit:
+        subscriptionUsage
+          .limit ?? null,
+
+      remaining:
+        subscriptionUsage
+          .remaining ?? null,
+    };
+  }
+
+  return data;
 }
 
 async function requestVisitAiConsultMessages(
@@ -79862,11 +79889,28 @@ async function createStaffApi(payload) {
     }
 
     if (!response.ok || json?.ok !== true) {
-      throw new Error(
-        json?.error ||
-        `Staff creation HTTP ${response.status}`
-      );
-    }
+  if (json?.error === "STAFF_LIMIT_REACHED") {
+    const messages = {
+      uk: "Досягнуто ліміту співробітників вашого тарифу. Щоб додати нового працівника, перейдіть на вищий тариф або деактивуйте одного з поточних співробітників.",
+
+      en: "Your plan's staff limit has been reached. To add another employee, upgrade your plan or deactivate one of the current staff members.",
+
+      de: "Das Mitarbeiterlimit Ihres Tarifs wurde erreicht. Um einen weiteren Mitarbeiter hinzuzufügen, wechseln Sie zu einem höheren Tarif oder deaktivieren Sie einen bestehenden Mitarbeiter.",
+
+      pl: "Osiągnięto limit pracowników w Twoim planie. Aby dodać kolejną osobę, przejdź na wyższy plan lub dezaktywuj jednego z obecnych pracowników.",
+    };
+
+    throw new Error(
+      messages[getInterfaceLanguage()] ||
+      messages.uk
+    );
+  }
+
+  throw new Error(
+    json?.error ||
+    `Staff creation HTTP ${response.status}`
+  );
+}
 
     return json.data || null;
   } catch (error) {
@@ -94360,7 +94404,8 @@ if (
         </div>
       </div>
 
-      <span
+            <span
+        id="visitAiConsultUsage"
         class="visitAiConsultBadge"
       >
         Чат пацієнта
@@ -95194,6 +95239,29 @@ if (
           )
         ) {
           return;
+        }
+
+                const usage =
+          result?.meta
+            ?.subscription_usage || null;
+
+        const usageBadge =
+          visitAiConsultPanel
+            ?.querySelector(
+              "#visitAiConsultUsage"
+            );
+
+        if (
+          usageBadge &&
+          usage
+        ) {
+          if (usage.limit == null) {
+            usageBadge.textContent =
+              "Безліміт";
+          } else {
+            usageBadge.textContent =
+              `${usage.used} / ${usage.limit}`;
+          }
         }
 
         visitAiConsultResult

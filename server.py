@@ -72,6 +72,30 @@ if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 print("SUPABASE STORAGE READY")
 
+
+# =========================
+# PUG CRM SUBSCRIPTION PLANS
+# =========================
+
+PUG_PLAN_LIMITS = {
+    "start": {
+        "staff": 6,
+        "ai_consult": 150,
+        "ai_labs": 0,
+    },
+
+    "team": {
+        "staff": 16,
+        "ai_consult": 500,
+        "ai_labs": 100,
+    },
+
+    "pro": {
+        "staff": 30,
+        "ai_consult": None,
+        "ai_labs": None,
+    },
+}
 # =========================
 # APP
 # =========================
@@ -2016,6 +2040,262 @@ def static_any(path):
 # =========================
 # API: ORGANIZATION PROFILE
 # =========================
+def normalize_pug_plan_name(value):
+    raw = str(value or "").strip().lower()
+
+    aliases = {
+        "start": "start",
+        "pug start": "start",
+        "pug_start": "start",
+
+        "team": "team",
+        "pug team": "team",
+        "pug_team": "team",
+
+        "pro": "pro",
+        "pug pro": "pro",
+        "pug_pro": "pro",
+    }
+
+    return aliases.get(raw)
+
+
+def get_current_subscription_plan():
+    org_id = get_current_org_id()
+
+    if not org_id:
+        return None
+
+    try:
+        result = (
+            supabase
+            .table("clinic_subscriptions")
+            .select("plan_name")
+            .eq("org_id", org_id)
+            .limit(1)
+            .execute()
+        )
+
+        rows = result.data or []
+
+        if not rows:
+            return None
+
+        return normalize_pug_plan_name(
+            rows[0].get("plan_name")
+        )
+
+    except Exception as error:
+        print(
+            "❌ subscription plan load failed:",
+            repr(error),
+        )
+        return None
+
+def get_current_billing_period():
+    return datetime.now(
+        ZoneInfo("Europe/Kyiv")
+    ).strftime("%Y-%m")
+
+def get_current_ai_usage():
+    org_id = get_current_org_id()
+
+    if not org_id:
+        return None
+
+    billing_period = get_current_billing_period()
+
+    try:
+        result = (
+            supabase
+            .table("clinic_ai_usage")
+            .select(
+                "ai_consult_requests,"
+                "ai_lab_requests"
+            )
+            .eq("org_id", org_id)
+            .eq(
+                "billing_period",
+                billing_period,
+            )
+            .limit(1)
+            .execute()
+        )
+
+        rows = result.data or []
+
+        if not rows:
+            return {
+                "billing_period": billing_period,
+                "ai_consult_requests": 0,
+                "ai_lab_requests": 0,
+            }
+
+        row = rows[0]
+
+        return {
+            "billing_period": billing_period,
+            "ai_consult_requests": int(
+                row.get(
+                    "ai_consult_requests"
+                )
+                or 0
+            ),
+            "ai_lab_requests": int(
+                row.get(
+                    "ai_lab_requests"
+                )
+                or 0
+            ),
+        }
+
+    except Exception as error:
+        print(
+            "❌ AI usage load failed:",
+            repr(error),
+        )
+        return None
+
+def get_ai_feature_access(feature):
+    plan = get_current_subscription_plan()
+
+    if not plan:
+        return {
+            "allowed": False,
+            "reason": "SUBSCRIPTION_PLAN_NOT_CONFIGURED",
+        }
+
+    plan_limits = PUG_PLAN_LIMITS.get(plan)
+
+    if not plan_limits:
+        return {
+            "allowed": False,
+            "reason": "SUBSCRIPTION_PLAN_INVALID",
+        }
+
+    limit = plan_limits.get(feature)
+
+    usage = get_current_ai_usage()
+
+    if usage is None:
+        return {
+            "allowed": False,
+            "reason": "AI_USAGE_LOAD_FAILED",
+        }
+
+    usage_field = {
+        "ai_consult": "ai_consult_requests",
+        "ai_labs": "ai_lab_requests",
+    }.get(feature)
+
+    if not usage_field:
+        return {
+            "allowed": False,
+            "reason": "AI_FEATURE_INVALID",
+        }
+
+    used = int(
+        usage.get(usage_field)
+        or 0
+    )
+
+    # None = unlimited
+    if limit is None:
+        return {
+            "allowed": True,
+            "plan": plan,
+            "used": used,
+            "limit": None,
+            "remaining": None,
+            "billing_period":
+                usage.get("billing_period"),
+        }
+
+    remaining = max(
+        0,
+        limit - used,
+    )
+
+    return {
+        "allowed": used < limit,
+        "plan": plan,
+        "used": used,
+        "limit": limit,
+        "remaining": remaining,
+        "billing_period":
+            usage.get("billing_period"),
+        "reason": (
+            None
+            if used < limit
+            else "AI_LIMIT_REACHED"
+        ),
+    }
+def increment_ai_usage(feature):
+    org_id = get_current_org_id()
+
+    if not org_id:
+        raise ValueError(
+            "Organization not selected"
+        )
+
+    if feature not in {
+        "ai_consult",
+        "ai_labs",
+    }:
+        raise ValueError(
+            "INVALID_AI_FEATURE"
+        )
+
+    billing_period = (
+        get_current_billing_period()
+    )
+
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .rpc(
+                "increment_clinic_ai_usage",
+                {
+                    "p_org_id": org_id,
+                    "p_billing_period":
+                        billing_period,
+                    "p_feature": feature,
+                },
+            )
+        ),
+        attempts=3,
+        delay=0.25,
+    )
+
+    rows = result.data or []
+
+    if not rows:
+        raise RuntimeError(
+            "AI_USAGE_INCREMENT_FAILED"
+        )
+
+    row = rows[0]
+
+    return {
+        "billing_period":
+            billing_period,
+
+        "ai_consult_requests":
+            int(
+                row.get(
+                    "ai_consult_requests"
+                )
+                or 0
+            ),
+
+        "ai_lab_requests":
+            int(
+                row.get(
+                    "ai_lab_requests"
+                )
+                or 0
+            ),
+    }
 
 def serialize_clinic_subscription(row):
     source = row if isinstance(row, dict) else {}
@@ -12764,6 +13044,60 @@ def api_create_staff():
     current_org = (
         get_current_org_id()
     )
+
+    # =====================================================
+    # SUBSCRIPTION STAFF LIMIT
+    # =====================================================
+
+    plan = get_current_subscription_plan()
+
+    if not plan:
+        return fail(
+            "SUBSCRIPTION_PLAN_NOT_CONFIGURED",
+            403,
+        )
+
+    plan_limits = PUG_PLAN_LIMITS.get(plan)
+
+    if not plan_limits:
+        return fail(
+            "SUBSCRIPTION_PLAN_INVALID",
+            403,
+        )
+
+    staff_limit = plan_limits.get("staff")
+
+    if staff_limit is not None:
+        try:
+            staff_result = (
+                supabase
+                .table("staff")
+                .select("id")
+                .eq("org_id", current_org)
+                .eq("is_active", True)
+                .execute()
+            )
+
+            active_staff_count = len(
+                staff_result.data or []
+            )
+
+        except Exception as error:
+            print(
+                "❌ staff limit check failed:",
+                repr(error),
+            )
+
+            return fail(
+                "STAFF_LIMIT_CHECK_FAILED",
+                500,
+            )
+
+        if active_staff_count >= staff_limit:
+            return fail(
+                "STAFF_LIMIT_REACHED",
+                403,
+            )
 
     try:
         specialization_ids = (
@@ -23565,6 +23899,24 @@ def api_consult_visit(
             400,
         )
 
+    ai_access = get_ai_feature_access(
+        "ai_consult"
+    )
+
+    if not ai_access.get("allowed"):
+        reason = ai_access.get("reason")
+
+        if reason == "AI_LIMIT_REACHED":
+            return fail(
+                "AI_CONSULT_LIMIT_REACHED",
+                403,
+            )
+
+        return fail(
+            reason or "AI_ACCESS_DENIED",
+            403,
+        )
+
     visit_id = str(
         visit_id or ""
     ).strip()
@@ -23729,7 +24081,19 @@ def api_consult_visit(
                 conversation_history
             ),
         )
+        ai_usage = None
 
+        try:
+            ai_usage = increment_ai_usage(
+                "ai_consult"
+            )
+
+        except Exception as usage_error:
+            print(
+                "❌ AI consult usage increment:",
+                repr(usage_error),
+                flush=True,
+            )
         saved_messages = []
         history_saved = False
 
@@ -23830,7 +24194,35 @@ def api_consult_visit(
                         .get("usage")
                         or {}
                     ),
+                                "subscription_usage": (
+                    {
+                        "billing_period":
+                            ai_usage.get(
+                                "billing_period"
+                            ),
 
+                        "used":
+                            ai_usage.get(
+                                "ai_consult_requests"
+                            ),
+
+                        "limit":
+                            (
+                                get_ai_feature_access(
+                                    "ai_consult"
+                                ).get("limit")
+                            ),
+
+                        "remaining":
+                            (
+                                get_ai_feature_access(
+                                    "ai_consult"
+                                ).get("remaining")
+                            ),
+                    }
+                    if ai_usage
+                    else None
+                ),
                 "context_stats":
                     context_stats,
 
