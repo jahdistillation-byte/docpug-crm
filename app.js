@@ -113283,6 +113283,79 @@ function renderPlatformClinicsList(
                 )}"
                 hidden
               >
+                              <label>
+                  <span>
+                    Тариф
+                  </span>
+
+                  <select
+                    name="plan_name"
+                    required
+                  >
+                    <option
+                      value="PUG Start"
+                      ${
+                        [
+                          "start",
+                          "pug start",
+                        ].includes(
+                          String(
+                            subscription
+                              .plan_name || ""
+                          )
+                            .trim()
+                            .toLowerCase()
+                        )
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      PUG Start
+                    </option>
+
+                    <option
+                      value="PUG Team"
+                      ${
+                        [
+                          "team",
+                          "pug team",
+                        ].includes(
+                          String(
+                            subscription
+                              .plan_name || ""
+                          )
+                            .trim()
+                            .toLowerCase()
+                        )
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      PUG Team
+                    </option>
+
+                    <option
+                      value="PUG Pro"
+                      ${
+                        [
+                          "pro",
+                          "pug pro",
+                        ].includes(
+                          String(
+                            subscription
+                              .plan_name || ""
+                          )
+                            .trim()
+                            .toLowerCase()
+                        )
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      PUG Pro
+                    </option>
+                  </select>
+                </label>
                 <label>
                   <span>
                     ${escapeHtml(
@@ -113863,7 +113936,11 @@ async function bindPlatformSubscriptionControls(
                   JSON.stringify({
                     action:
                       "set_period",
-
+                    
+                       plan_name:
+                      data.get(
+                        "plan_name"
+                      ),
                     access_starts_on:
                       data.get(
                         "access_starts_on"
@@ -113873,7 +113950,7 @@ async function bindPlatformSubscriptionControls(
                       data.get(
                         "access_ends_on"
                       ),
-
+                    
                     monthly_price:
                       data.get(
                         "monthly_price"

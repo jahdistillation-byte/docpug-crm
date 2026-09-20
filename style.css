@@ -64680,3 +64680,176 @@ body[data-theme="white"] .clinicRatingStats span {
 body[data-theme="white"] .clinicRatingStats b {
   color: #223247 !important;
 }
+
+/* PUG CRM — Firefox, desktop zoom and narrow desktop compatibility. */
+@layer pugBrowserCompatibility {
+  @media screen {
+    /* Keep the dock inside the real browser viewport. Long translations scroll
+       horizontally instead of shrinking or becoming transparent over content. */
+    .mac-dock {
+      box-sizing: border-box !important;
+      width: max-content;
+      max-width: calc(100vw - 24px) !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, .3) transparent;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .mac-dock::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .mac-dock::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .mac-dock::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .3);
+    }
+
+    .mac-dock .dock-menu {
+      width: max-content !important;
+      min-width: max-content !important;
+      flex-wrap: nowrap !important;
+    }
+
+    .mac-dock .menu-item {
+      flex: 0 0 auto !important;
+      min-width: 0 !important;
+    }
+
+    .mac-dock .menu-item a,
+    .mac-dock .dock-text {
+      white-space: nowrap !important;
+    }
+
+    body:not([data-theme="white"]) .mac-dock {
+      background: rgba(13, 22, 27, .92) !important;
+      border-color: rgba(255, 255, 255, .16) !important;
+    }
+
+    body[data-theme="white"] .mac-dock {
+      background: rgba(255, 255, 255, .94) !important;
+      border-color: rgba(35, 55, 70, .14) !important;
+    }
+
+    /* The schedule editor is a viewport-sized flex layout. Only its content
+       scrolls, while the Save and Cancel actions always remain visible. */
+    #monthScheduleEditorOverlay {
+      box-sizing: border-box !important;
+      padding: 16px !important;
+      overflow: hidden !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleEditorModal {
+      box-sizing: border-box !important;
+      width: min(1100px, calc(100vw - 32px)) !important;
+      max-width: 1100px !important;
+      max-height: calc(100vh - 32px) !important;
+      max-height: calc(100dvh - 32px) !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    #monthScheduleEditorOverlay :is(
+      .monthScheduleEditorHead,
+      .monthScheduleEditorTabs,
+      .monthScheduleEditorColumns,
+      .monthScheduleEditorFooter
+    ) {
+      flex: 0 0 auto !important;
+    }
+
+    #monthScheduleEditorOverlay :is(
+      .monthScheduleEditorRows,
+      .monthScheduleRepeatContent
+    ) {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, .32) transparent;
+      overscroll-behavior: contain;
+    }
+
+    #monthScheduleEditorOverlay :is(
+      .monthScheduleEditorRows,
+      .monthScheduleRepeatContent
+    )::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #monthScheduleEditorOverlay :is(
+      .monthScheduleEditorRows,
+      .monthScheduleRepeatContent
+    )::-webkit-scrollbar-thumb {
+      border: 2px solid transparent;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .32);
+      background-clip: padding-box;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleEditorFooter {
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  /* Firefox/Linux laptops and browser zoom often land in this range. */
+  @media screen and (max-width: 1450px) {
+    .mac-dock {
+      width: calc(100vw - 24px) !important;
+      padding: 6px 8px !important;
+    }
+
+    .mac-dock .dock-menu {
+      gap: 3px !important;
+    }
+
+    .mac-dock .menu-item a {
+      gap: 5px !important;
+      padding: 9px 10px !important;
+      font-size: 13px !important;
+    }
+  }
+
+  @media screen and (max-height: 820px) {
+    #monthScheduleEditorOverlay {
+      padding: 8px !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleEditorModal {
+      max-height: calc(100vh - 16px) !important;
+      max-height: calc(100dvh - 16px) !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleEditorHead {
+      padding: 12px 16px !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleEditorHead p {
+      margin-top: 4px !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleEditorTabs,
+    #monthScheduleEditorOverlay .monthScheduleEditorFooter {
+      padding: 10px 16px !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleRepeatContent {
+      padding: 14px 18px 18px !important;
+    }
+
+    #monthScheduleEditorOverlay .monthScheduleRepeatIntro {
+      margin-bottom: 14px !important;
+      padding: 12px 14px !important;
+    }
+  }
+}
