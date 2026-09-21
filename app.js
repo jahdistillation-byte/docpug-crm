@@ -79878,7 +79878,76 @@ async function deleteSpecializationApi(specializationId) {
     };
   }
 }
+async function deactivateStaffApi(staffId) {
+  const cleanId = String(
+    staffId || ""
+  ).trim();
 
+  if (!cleanId) {
+    return {
+      ok: false,
+      error:
+        "Не вказано співробітника.",
+    };
+  }
+
+  try {
+    const response = await fetch(
+      `/api/staff/${encodeURIComponent(
+        cleanId
+      )}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...getOrgHeaders(),
+        },
+      }
+    );
+
+    const responseText =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = responseText
+        ? JSON.parse(responseText)
+        : null;
+    } catch {
+      json = null;
+    }
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      return {
+        ok: false,
+        error:
+          json?.error ||
+          "Не вдалося звільнити співробітника.",
+      };
+    }
+
+    return {
+      ok: true,
+      data: json.data || null,
+    };
+  } catch (error) {
+    console.error(
+      "deactivateStaffApi failed:",
+      error
+    );
+
+    return {
+      ok: false,
+      error:
+        "Помилка з'єднання під час звільнення співробітника.",
+    };
+  }
+}
 async function createStaffApi(payload) {
   Object.assign(SETTINGS_INTERFACE_TEXT, {
     "Не вдалося створити співробітника.": {
