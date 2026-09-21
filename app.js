@@ -6211,15 +6211,39 @@ async function requestVisitAiConsult(
   }
 
   if (
-    !response.ok ||
-    !result?.ok
+  !response.ok ||
+  !result?.ok
+) {
+  if (
+    result?.error ===
+    "AI_CONSULT_LIMIT_REACHED"
   ) {
+    const messages = {
+      uk:
+        "Досягнуто місячного ліміту PUG AI Consultant для вашого тарифу.",
+
+      en:
+        "Your monthly PUG AI Consultant limit has been reached.",
+
+      de:
+        "Das monatliche Limit für PUG AI Consultant in Ihrem Tarif wurde erreicht.",
+
+      pl:
+        "Osiągnięto miesięczny limit PUG AI Consultant w Twoim planie.",
+    };
+
     throw new Error(
-      result?.error ||
-      "Не вдалося отримати "
-      + "відповідь консультанта."
+      messages[getInterfaceLanguage()] ||
+      messages.uk
     );
   }
+
+  throw new Error(
+    result?.error ||
+    "Не вдалося отримати "
+    + "відповідь консультанта."
+  );
+}
 
     const data =
     result.data || {};
