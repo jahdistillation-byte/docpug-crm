@@ -81646,6 +81646,27 @@ function renderLabAiInterpretation(
     ] ||
     ui.confidence.unknown;
 
+    const subscriptionUsage =
+  meta?.subscription_usage || null;
+
+let subscriptionUsageText = "";
+
+if (subscriptionUsage) {
+  if (subscriptionUsage.limit == null) {
+    subscriptionUsageText =
+      language === "en"
+        ? "Unlimited"
+        : language === "de"
+          ? "Unbegrenzt"
+          : language === "pl"
+            ? "Bez limitu"
+            : "Безліміт";
+  } else {
+    subscriptionUsageText =
+      `${subscriptionUsage.used ?? 0} / ${subscriptionUsage.limit}`;
+  }
+}
+
   return `
         <div
       class="labAiPanel${
@@ -81696,14 +81717,38 @@ function renderLabAiInterpretation(
           </h4>
         </div>
 
+        <div
+  style="
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  "
+>
+  ${
+    subscriptionUsageText
+      ? `
         <span
           class="labAiConfidence"
         >
-                              ${escapeHtml(
-            ui.confidenceLabel
+          ${escapeHtml(
+            subscriptionUsageText
           )}
-          ${escapeHtml(confidence)}
         </span>
+      `
+      : ""
+  }
+
+  <span
+    class="labAiConfidence"
+  >
+    ${escapeHtml(
+      ui.confidenceLabel
+    )}
+    ${escapeHtml(confidence)}
+  </span>
+</div>
       </div>
 
       ${
@@ -81969,14 +82014,67 @@ async function readLabAiApiResponse(
   }
 
   if (
-    !response.ok ||
-    payload?.ok !== true
+  !response.ok ||
+  payload?.ok !== true
+) {
+  const errorCode =
+    String(
+      payload?.error || ""
+    ).trim();
+
+  if (
+    errorCode ===
+    "AI_LABS_NOT_AVAILABLE"
   ) {
+    const messages = {
+      uk:
+        "AI-розшифровка лабораторних аналізів недоступна у тарифі PUG Start.",
+
+      en:
+        "AI laboratory interpretation is not available on the PUG Start plan.",
+
+      de:
+        "Die KI-Auswertung von Laboranalysen ist im Tarif PUG Start nicht verfügbar.",
+
+      pl:
+        "Interpretacja badań laboratoryjnych przez AI nie jest dostępna w planie PUG Start.",
+    };
+
     throw new Error(
-      payload?.error ||
-      `HTTP ${response.status}`
+      messages[getInterfaceLanguage()] ||
+      messages.uk
     );
   }
+
+  if (
+    errorCode ===
+    "AI_LAB_LIMIT_REACHED"
+  ) {
+    const messages = {
+      uk:
+        "Досягнуто місячного ліміту AI-розшифровок лабораторних аналізів для вашого тарифу.",
+
+      en:
+        "Your monthly AI laboratory interpretation limit has been reached.",
+
+      de:
+        "Das monatliche Limit für KI-Laborauswertungen in Ihrem Tarif wurdаe erreicht.",
+
+      pl:
+        "Osiągnięto miesięczny limit interpretacji badań laboratoryjnych przez AI.",
+    };
+
+    throw new Error(
+      messages[getInterfaceLanguage()] ||
+      messages.uk
+    );
+  }
+
+  throw new Error(
+    errorCode ||
+    `HTTP ${response.status}`
+  );
+}
 
   return (
     payload.data || {}

@@ -22786,7 +22786,30 @@ def api_create_lab_ai_interpretation(
 
     if auth_error:
         return auth_error
+    ai_access = get_ai_feature_access(
+        "ai_labs"
+    )
 
+    if not ai_access.get("allowed"):
+        reason = ai_access.get("reason")
+        limit = ai_access.get("limit")
+
+        if limit == 0:
+            return fail(
+                "AI_LABS_NOT_AVAILABLE",
+                403,
+            )
+
+        if reason == "AI_LIMIT_REACHED":
+            return fail(
+                "AI_LAB_LIMIT_REACHED",
+                403,
+            )
+
+        return fail(
+            reason or "AI_ACCESS_DENIED",
+            403,
+        )
     if not OPENAI_API_KEY:
         return fail(
             "PUG AI не налаштовано на сервері.",
@@ -22935,7 +22958,19 @@ def api_create_lab_ai_interpretation(
             lab_id,
             language,
         )
+        ai_usage = None
 
+        try:
+            ai_usage = increment_ai_usage(
+                "ai_labs"
+            )
+
+        except Exception as usage_error:
+            print(
+                "❌ AI lab usage increment:",
+                repr(usage_error),
+                flush=True,
+            )
         response_meta = {
             "read_only": True,
             "stored_in_crm": False,
@@ -22960,6 +22995,31 @@ def api_create_lab_ai_interpretation(
                 provider_response.get(
                     "usage"
                 ) or {},
+                            "subscription_usage": (
+                {
+                    "billing_period":
+                        ai_usage.get(
+                            "billing_period"
+                        ),
+
+                    "used":
+                        ai_usage.get(
+                            "ai_lab_requests"
+                        ),
+
+                    "limit":
+                        get_ai_feature_access(
+                            "ai_labs"
+                        ).get("limit"),
+
+                    "remaining":
+                        get_ai_feature_access(
+                            "ai_labs"
+                        ).get("remaining"),
+                }
+                if ai_usage
+                else None
+            ),
             "context_stats":
                 context_stats,
             "context_fingerprint":
