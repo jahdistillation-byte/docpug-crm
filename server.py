@@ -2595,6 +2595,33 @@ def api_manage_platform_subscription(org_id):
     data = request.get_json(silent=True) or {}
     action = str(data.get("action") or "").strip().lower()
 
+    plan_name = str(
+        data.get("plan_name") or ""
+    ).strip()
+
+    normalized_plan = (
+        normalize_pug_plan_name(
+            plan_name
+        )
+        if plan_name
+        else None
+    )
+
+    if (
+        action == "set_period"
+        and not normalized_plan
+    ):
+        return fail(
+            "Невірний тариф.",
+            400,
+        )
+
+    canonical_plan_name = {
+        "start": "PUG Start",
+        "team": "PUG Team",
+        "pro": "PUG Pro",
+    }.get(normalized_plan)
+
     if action not in {
         "extend",
         "set_period",
@@ -2685,6 +2712,36 @@ def api_manage_platform_subscription(org_id):
             attempts=2,
             delay=0.3,
         )
+
+        if (
+            action == "set_period"
+            and canonical_plan_name
+        ):
+            plan_result = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table(
+                        "clinic_subscriptions"
+                    )
+                    .update({
+                        "plan_name":
+                            canonical_plan_name,
+                    })
+                    .eq(
+                        "org_id",
+                        clean_org_id,
+                    )
+                ),
+                attempts=2,
+                delay=0.3,
+            )
+
+            if not plan_result.data:
+                raise RuntimeError(
+                    "SUBSCRIPTION_PLAN_SAVE_FAILED"
+                )
+
+            result = plan_result
 
         subscription = serialize_clinic_subscription(
             result.data or {"org_id": clean_org_id}
