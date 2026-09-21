@@ -20290,12 +20290,15 @@ def build_compact_ai_visit_documents_context(
 
 def build_compact_ai_summary_context(context):
     normalized = context.get("normalized") or {}
+
     original_events = (
         normalized.get("clinical_timeline") or []
     )
+
     original_weights = (
         normalized.get("weight_timeline") or []
     )
+
     history = (
         context.get("history") or {}
     )
@@ -20305,6 +20308,7 @@ def build_compact_ai_summary_context(context):
     )
 
     events = []
+
     for event in original_events:
         if is_ai_placeholder_event(event):
             continue
@@ -20317,7 +20321,10 @@ def build_compact_ai_summary_context(context):
     seen_weights = set()
 
     for weight in original_weights:
-        source = weight.get("source") or {}
+        source = (
+            weight.get("source") or {}
+        )
+
         identity = (
             weight.get("date"),
             weight.get("weight_kg"),
@@ -20329,19 +20336,32 @@ def build_compact_ai_summary_context(context):
             continue
 
         seen_weights.add(identity)
+
         weights.append(
             compact_ai_value(weight)
         )
-        labs = [
+
+    labs = [
         compact_ai_value(lab)
         for lab in original_labs[:20]
     ]
+
     model_context = compact_ai_value({
-        "patient": context.get("patient") or {},
-        "demographics": normalized.get("demographics") or {},
-        "weight_timeline": weights[:30],
-        "clinical_timeline": events[:60],
-                "laboratory_history": labs,
+        "patient":
+            context.get("patient") or {},
+
+        "demographics":
+            normalized.get("demographics") or {},
+
+        "weight_timeline":
+            weights[:30],
+
+        "clinical_timeline":
+            events[:60],
+
+        "laboratory_history":
+            labs,
+
         "normalization_version": (
             (context.get("meta") or {}).get(
                 "normalization_version"
@@ -20350,15 +20370,29 @@ def build_compact_ai_summary_context(context):
     })
 
     stats = {
-        "clinical_events_original": len(original_events),
-        "clinical_events_sent": len(events[:60]),
-        "weight_points_original": len(original_weights),
-        "weight_points_sent": len(weights[:30]),
-                "labs_original":
+        "clinical_events_original":
+            len(original_events),
+
+        "clinical_events_sent":
+            len(events[:60]),
+
+        "weight_points_original":
+            len(original_weights),
+
+        "weight_points_sent":
+            len(weights[:30]),
+
+        "labs_original":
             len(original_labs),
+
         "labs_sent":
             len(labs),
     }
+
+    return (
+        model_context,
+        stats,
+    )
 
     return model_context, stats
 def build_compact_ai_vet_consult_context(
