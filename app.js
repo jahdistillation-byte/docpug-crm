@@ -28666,6 +28666,57 @@ function formatSeasonLabel(
   ).trim();
 }
 function buildStaffCareer(state) {
+  const demoMode =
+  state?.doc?.achievements_demo_mode === true;
+
+if (demoMode) {
+  const totalVisits = 3000;
+
+  const achievements = getVeterinaryAchievements({
+    totalVisits: 3000,
+    dogVisits: 2500,
+    catVisits: 2500,
+    revenue: 10000000,
+    vaccineVisits: 1000,
+    surgeryVisits: 500,
+    consecutiveShifts: 15,
+  });
+
+  const unlockedCount = achievements.reduce(
+    (sum, achievement) =>
+      sum + Number(
+        achievement.unlockedSteps || 0
+      ),
+    0
+  );
+
+  const xp = achievements.reduce(
+    (sum, achievement) =>
+      sum + Number(achievement.xp || 0),
+    totalVisits * 10
+  );
+
+  const level = calculateCareerLevel(xp);
+  const title = getCareerTitle(totalVisits);
+  const levelIcon = getCareerIcon(totalVisits);
+  const activeFrame =
+    getActiveCareerFrame(achievements);
+
+  return {
+    xp,
+    level: level.level,
+    xpInLevel: level.xpInLevel,
+    neededForNext: level.neededForNext,
+    nextLevelXp: level.nextLevelXp,
+    progressPercent: level.progressPercent,
+    title,
+    levelIcon,
+    activeFrame,
+    achievements,
+    unlockedCount,
+    clinicRank: 1,
+  };
+}
   const visits = state.dashboard.live_staff_visits || [];
   const revenue = Number(state.revenue || 0);
 
