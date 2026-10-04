@@ -13,37 +13,122 @@
 <body>
 
 <div id="authOverlay" class="auth-overlay">
-  <div class="auth-glass-panel">
-    <div class="auth-art-zone">
-      <div class="pug-digital-avatar">🐾</div>
-      <div class="pug-bubble">Привіт! Дивлюсь у планшет, чекаю твій логін... 🐶</div>
-    </div>
+  <div class="auth-language-switcher">
+    <label for="authLanguageSelect">Мова інтерфейсу</label>
+
+    <select id="authLanguageSelect" aria-label="Мова інтерфейсу">
+      <option value="uk">UA</option>
+      <option value="en">EN</option>
+      <option value="de">DE</option>
+      <option value="pl">PL</option>
+    </select>
+  </div>
+
+  <div class="auth-layout">
+    <div class="auth-art-zone" aria-hidden="true"></div>
 
     <div class="auth-form-zone">
       <div class="auth-header">
-        <h1>🐾 Doc.PUG <span>CRM</span></h1>
+        <h1>
+          <span class="auth-logo-mark">🐾</span>
+          PUG <span>CRM</span>
+        </h1>
+
         <p>Вхід у командний центр клініки</p>
       </div>
 
-      <div id="authError" class="auth-error-msg" style="display:none;"></div>
+      <div
+        id="authError"
+        class="auth-error-msg"
+        role="alert"
+        style="display:none;"
+      ></div>
 
       <form id="authForm" onsubmit="return false;">
         <div class="auth-field">
-          <label>Логін клініки</label>
-          <input type="text" id="authUsername" placeholder="Наприклад, Zoolux" required autocomplete="username">
+          <label for="authUsername">Логін клініки</label>
+
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon" aria-hidden="true">♙</span>
+
+            <input
+              type="text"
+              id="authUsername"
+              placeholder="Наприклад, Zoolux"
+              required
+              autocomplete="username"
+            >
+          </div>
         </div>
 
         <div class="auth-field">
-          <label>Пароль доступу</label>
-          <input type="password" id="authPassword" placeholder="••••" required autocomplete="current-password">
+          <label for="authPassword">Пароль доступу</label>
+
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon" aria-hidden="true">♙</span>
+
+            <input
+              type="password"
+              id="authPassword"
+              placeholder="Введіть пароль"
+              required
+              autocomplete="current-password"
+            >
+
+            <button
+              type="button"
+              id="toggleAuthPassword"
+              class="auth-password-toggle"
+              aria-label="Показати пароль"
+            >
+              ◉
+            </button>
+          </div>
         </div>
 
-        <button type="submit" id="btnAuthSubmit" class="auth-submit-btn">Увійти у систему →</button>
+        <div class="auth-options">
+          <label class="auth-remember">
+            <input type="checkbox" id="rememberLogin" checked>
+            <span>Запам’ятати мене</span>
+          </label>
+
+          <button
+            type="button"
+            id="forgotPasswordButton"
+            class="auth-forgot-button"
+          >
+            Забули пароль?
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          id="btnAuthSubmit"
+          class="auth-submit-btn"
+        >
+          Увійти у систему →
+        </button>
       </form>
+
+      <div class="auth-benefits" aria-hidden="true">
+        <div>
+          <span>ϟ</span>
+          <strong>Швидко</strong>
+        </div>
+
+        <div>
+          <span>♢</span>
+          <strong>Надійно</strong>
+        </div>
+
+        <div>
+          <span>♡</span>
+          <strong>З вами</strong>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
 <div class="app-container" style="padding-bottom:120px;">
   <main class="main-content" style="max-width:1400px;margin:0 auto;">
 

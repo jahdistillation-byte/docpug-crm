@@ -64853,3 +64853,451 @@ body[data-theme="white"] .clinicRatingStats b {
     }
   }
 }
+/* =========================================
+   PUGCRM DESKTOP SCALE
+   ========================================= */
+
+@media (min-width: 1100px) and (max-width: 1700px) {
+
+  .app-container {
+    zoom: 0.80;
+    width: 125%;
+  }
+
+  .mac-dock {
+    zoom: 0.80;
+  }
+
+}
+/* =========================================================
+   PUG CRM — экран входа 2.0
+   ========================================================= */
+
+@layer pugReadableInterface {
+  @media screen {
+    html body #authOverlay.auth-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      min-height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      display: block !important;
+      color: #183149 !important;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(13, 35, 54, 0.03) 0%,
+          rgba(13, 35, 54, 0.03) 55%,
+          rgba(13, 35, 54, 0.14) 100%
+        ),
+        url("login-clinic-bg.png") center center / cover no-repeat
+        !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    html body #authOverlay,
+    html body #authOverlay * {
+      box-sizing: border-box;
+    }
+
+    html body #authOverlay .auth-layout {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: clamp(32px, 5vw, 90px);
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding:
+        clamp(76px, 8vh, 110px)
+        clamp(28px, 6vw, 96px)
+        clamp(32px, 6vh, 72px);
+    }
+
+    html body #authOverlay .auth-art-zone {
+      display: block !important;
+      flex: 1 1 auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      min-height: 1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
+
+    html body #authOverlay .auth-form-zone {
+      flex: 0 0 min(440px, 100%) !important;
+      width: min(440px, 100%) !important;
+      min-width: 0 !important;
+      padding: 42px 38px 32px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      color: #183149 !important;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.97),
+          rgba(244, 249, 253, 0.94)
+        ) !important;
+      border: 1px solid rgba(255, 255, 255, 0.92) !important;
+      border-radius: 28px !important;
+      box-shadow:
+        0 24px 70px rgba(21, 52, 77, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+      backdrop-filter: blur(22px) saturate(125%) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(125%) !important;
+    }
+
+    html body #authOverlay .auth-language-switcher {
+      position: fixed;
+      z-index: 3;
+      top: max(28px, env(safe-area-inset-top, 0px));
+      right: max(34px, env(safe-area-inset-right, 0px));
+    }
+
+    html body #authOverlay .auth-language-switcher label {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    html body #authOverlay .auth-language-switcher select {
+      width: 88px !important;
+      height: 48px !important;
+      padding: 0 34px 0 18px !important;
+      appearance: auto !important;
+      color: #183149 !important;
+      background: rgba(255, 255, 255, 0.94) !important;
+      border: 1px solid rgba(205, 219, 231, 0.9) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 10px 30px rgba(21, 52, 77, 0.12) !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      outline: none !important;
+    }
+
+    html body #authOverlay .auth-header {
+      text-align: center;
+    }
+
+    html body #authOverlay .auth-header h1 {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 10px !important;
+      margin: 0 !important;
+      color: #183149 !important;
+      font-size: 32px !important;
+      line-height: 1.15 !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.8px !important;
+    }
+
+    html body #authOverlay .auth-header h1 span:last-child {
+      color: #2f83d5 !important;
+    }
+
+    html body #authOverlay .auth-logo-mark {
+      color: #183149 !important;
+      font-size: 30px !important;
+      line-height: 1 !important;
+      filter: grayscale(1) brightness(0.55) saturate(1.5);
+    }
+
+    html body #authOverlay .auth-header p {
+      margin: 12px 0 30px !important;
+      color: #425b70 !important;
+      font-size: 16px !important;
+      line-height: 1.45 !important;
+    }
+
+    html body #authOverlay .auth-field {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      margin: 0 0 20px !important;
+    }
+
+    html body #authOverlay .auth-field > label {
+      color: #20384e !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+      font-weight: 700 !important;
+      letter-spacing: 0 !important;
+      text-transform: none !important;
+    }
+
+    html body #authOverlay .auth-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 56px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid #d5e0e9;
+      border-radius: 15px;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    }
+
+    html body #authOverlay .auth-input-wrap:focus-within {
+      background: #ffffff;
+      border-color: #3488d7;
+      box-shadow: 0 0 0 4px rgba(52, 136, 215, 0.13);
+    }
+
+    html body #authOverlay .auth-input-icon {
+      flex: 0 0 48px;
+      width: 48px;
+      color: #526d84 !important;
+      font-size: 20px !important;
+      line-height: 1 !important;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    html body #authOverlay .auth-input-wrap input {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 54px !important;
+      margin: 0 !important;
+      padding: 0 46px 0 0 !important;
+      color: #183149 !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      outline: none !important;
+      font-size: 16px !important;
+    }
+
+    html body #authOverlay .auth-input-wrap input::placeholder {
+      color: #a5b4c2 !important;
+      opacity: 1 !important;
+    }
+
+    html body #authOverlay .auth-password-toggle {
+      position: absolute;
+      right: 7px;
+      top: 50%;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      transform: translateY(-50%);
+      color: #47657e;
+      background: transparent;
+      border: 0;
+      border-radius: 10px;
+      font-size: 18px !important;
+      cursor: pointer;
+    }
+
+    html body #authOverlay .auth-password-toggle:hover {
+      color: #2f83d5;
+      background: rgba(47, 131, 213, 0.08);
+    }
+
+    html body #authOverlay .auth-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 22px;
+    }
+
+    html body #authOverlay .auth-remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: #344e64 !important;
+      font-size: 14px !important;
+      line-height: 1.3 !important;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    html body #authOverlay .auth-remember input {
+      width: 20px !important;
+      height: 20px !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      accent-color: #3488d7;
+      cursor: pointer;
+    }
+
+    html body #authOverlay .auth-forgot-button {
+      padding: 4px 0;
+      color: #287fd1;
+      background: transparent;
+      border: 0;
+      font-size: 14px !important;
+      line-height: 1.3;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    html body #authOverlay .auth-submit-btn {
+      width: 100% !important;
+      min-height: 58px !important;
+      margin: 0 !important;
+      padding: 14px 20px !important;
+      color: #ffffff !important;
+      background:
+        linear-gradient(135deg, #2383dc 0%, #3d91df 100%) !important;
+      border: 0 !important;
+      border-radius: 15px !important;
+      box-shadow: 0 12px 26px rgba(35, 131, 220, 0.25) !important;
+      font-size: 17px !important;
+      line-height: 1.3 !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease !important;
+    }
+
+    html body #authOverlay .auth-submit-btn:hover {
+      transform: translateY(-1px) !important;
+      filter: brightness(1.04) !important;
+      box-shadow: 0 16px 30px rgba(35, 131, 220, 0.32) !important;
+    }
+
+    html body #authOverlay .auth-submit-btn:disabled {
+      cursor: wait !important;
+      opacity: 0.7 !important;
+      transform: none !important;
+    }
+
+    html body #authOverlay .auth-error-msg {
+      margin: 0 0 18px !important;
+      padding: 11px 13px !important;
+      color: #a83245 !important;
+      background: #fff0f2 !important;
+      border: 1px solid #edc8cf !important;
+      border-radius: 12px !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+      font-weight: 600 !important;
+    }
+
+    html body #authOverlay .auth-benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 30px;
+      padding-top: 24px;
+      border-top: 1px solid #dbe5ed;
+    }
+
+    html body #authOverlay .auth-benefits > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      color: #247dcc;
+      text-align: center;
+    }
+
+    html body #authOverlay .auth-benefits span {
+      color: #183149 !important;
+      font-size: 28px !important;
+      line-height: 1 !important;
+      font-weight: 500 !important;
+    }
+
+    html body #authOverlay .auth-benefits strong {
+      color: #247dcc !important;
+      font-size: 13px !important;
+      line-height: 1.3 !important;
+      font-weight: 600 !important;
+    }
+  }
+
+  @media screen and (max-width: 820px) {
+    html body #authOverlay.auth-overlay {
+      background-position: 43% center !important;
+    }
+
+    html body #authOverlay.auth-overlay::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(19, 45, 66, 0.24);
+      pointer-events: none;
+    }
+
+    html body #authOverlay .auth-layout {
+      justify-content: center;
+      padding:
+        max(88px, env(safe-area-inset-top, 0px))
+        18px
+        max(28px, env(safe-area-inset-bottom, 0px));
+    }
+
+    html body #authOverlay .auth-art-zone {
+      display: none !important;
+    }
+
+    html body #authOverlay .auth-form-zone {
+      flex-basis: 440px !important;
+    }
+
+    html body #authOverlay .auth-language-switcher {
+      top: max(20px, env(safe-area-inset-top, 0px));
+      right: max(20px, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  @media screen and (max-width: 520px) {
+    html body #authOverlay .auth-form-zone {
+      width: 100% !important;
+      padding: 32px 20px 24px !important;
+      border-radius: 22px !important;
+    }
+
+    html body #authOverlay .auth-header h1 {
+      font-size: 28px !important;
+    }
+
+    html body #authOverlay .auth-header p {
+      margin-bottom: 24px !important;
+    }
+
+    html body #authOverlay .auth-options {
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    html body #authOverlay .auth-remember,
+    html body #authOverlay .auth-forgot-button {
+      font-size: 13px !important;
+    }
+
+    html body #authOverlay .auth-benefits {
+      margin-top: 24px;
+      padding-top: 20px;
+    }
+  }
+}
