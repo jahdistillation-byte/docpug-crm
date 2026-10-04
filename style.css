@@ -65301,3 +65301,66 @@ body[data-theme="white"] .clinicRatingStats b {
     }
   }
 }
+/* PUG CRM — login 2.0 sizing correction */
+
+@layer pugReadableInterface {
+  @media screen and (min-width: 821px) {
+    html body #authOverlay .auth-layout {
+      justify-content: flex-end !important;
+      padding-right: clamp(42px, 5vw, 90px) !important;
+    }
+
+    html body #authOverlay .auth-form-zone {
+      flex-basis: 480px !important;
+      width: 480px !important;
+      padding: 50px 44px 38px !important;
+    }
+
+    html body #authOverlay .auth-header p {
+      margin-bottom: 34px !important;
+    }
+
+    html body #authOverlay .auth-field {
+      margin-bottom: 24px !important;
+    }
+
+    html body #authOverlay .auth-input-wrap {
+      min-height: 60px !important;
+    }
+
+    html body #authOverlay .auth-input-wrap input {
+      min-height: 58px !important;
+    }
+
+    html body #authOverlay .auth-submit-btn {
+      min-height: 62px !important;
+    }
+
+    html body #authOverlay .auth-benefits {
+      margin-top: 34px !important;
+      padding-top: 28px !important;
+    }
+  }
+
+  @media screen {
+    html body #authOverlay .auth-language-switcher::after {
+      content: "⌄";
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      color: #183149;
+      font-size: 16px;
+      line-height: 1;
+      transform: translateY(-58%);
+      pointer-events: none;
+    }
+
+    html body #authOverlay .auth-language-switcher select {
+      width: 92px !important;
+      padding: 0 34px 0 18px !important;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      text-align: left !important;
+    }
+  }
+}
