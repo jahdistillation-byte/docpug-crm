@@ -118756,7 +118756,50 @@ async function init() {
     document.getElementById(
       "btnAuthSubmit"
     );
+  const toggleAuthPassword =
+    document.getElementById(
+      "toggleAuthPassword"
+    );
 
+
+  toggleAuthPassword?.addEventListener(
+    "click",
+    () => {
+      if (!passwordInput) {
+        return;
+      }
+
+      const showPassword =
+        passwordInput.type ===
+        "password";
+
+      passwordInput.type =
+        showPassword
+          ? "text"
+          : "password";
+
+      toggleAuthPassword.setAttribute(
+        "aria-pressed",
+        String(showPassword)
+      );
+
+      toggleAuthPassword.setAttribute(
+        "aria-label",
+        showPassword
+          ? "Приховати пароль"
+          : "Показати пароль"
+      );
+
+      toggleAuthPassword.classList.toggle(
+        "is-visible",
+        showPassword
+      );
+
+      passwordInput.focus({
+        preventScroll: true,
+      });
+    }
+  );
 
   document.title =
     "Doc.PUG CRM";

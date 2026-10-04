@@ -65365,3 +65365,40 @@ background-color: #dfe7ec !important;
     }
   }
 }
+/* PUG CRM — password visibility and login button spacing */
+
+@layer pugReadableInterface {
+  @media screen {
+    html body #authOverlay .auth-password-toggle svg {
+      display: block;
+      margin: auto;
+    }
+
+    html body #authOverlay .auth-password-toggle.is-visible::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 25px;
+      height: 2px;
+      border-radius: 999px;
+      background: currentColor;
+      transform:
+        translate(-50%, -50%)
+        rotate(-45deg);
+      pointer-events: none;
+    }
+
+    html body #authOverlay .auth-submit-btn {
+      margin-top: 10px !important;
+    }
+
+    html body #authOverlay .auth-benefits span {
+      line-height: 0 !important;
+    }
+
+    html body #authOverlay .auth-benefits svg {
+      display: block;
+    }
+  }
+}

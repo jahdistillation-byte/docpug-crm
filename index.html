@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261004-login-bg-v2">
+<link rel="stylesheet" href="style.css?v=20261004-login-controls-v3">
 </head>
 
 <body>
@@ -83,13 +83,27 @@
             >
 
             <button
-              type="button"
-              id="toggleAuthPassword"
-              class="auth-password-toggle"
-              aria-label="Показати пароль"
-            >
-              ◉
-            </button>
+  type="button"
+  id="toggleAuthPassword"
+  class="auth-password-toggle"
+  aria-label="Показати пароль"
+  aria-pressed="false"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="21"
+    height="21"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+    <circle cx="12" cy="12" r="2.8"></circle>
+  </svg>
+</button>
           </div>
         </div>
 
@@ -118,20 +132,62 @@
       </form>
 
       <div class="auth-benefits" aria-hidden="true">
-        <div>
-          <span>ϟ</span>
-          <strong>Швидко</strong>
-        </div>
+  <div>
+    <span>
+      <svg
+        viewBox="0 0 24 24"
+        width="28"
+        height="28"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M13 2 4.5 13h6.8L11 22l8.5-12h-6.8L13 2Z"></path>
+      </svg>
+    </span>
+    <strong>Швидко</strong>
+  </div>
 
-        <div>
-          <span>♢</span>
-          <strong>Надійно</strong>
-        </div>
+  <div>
+    <span>
+      <svg
+        viewBox="0 0 24 24"
+        width="28"
+        height="28"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 3 20 6v5.5c0 4.8-3.2 8-8 9.5-4.8-1.5-8-4.7-8-9.5V6l8-3Z"></path>
+        <path d="m8.5 12 2.2 2.2 4.8-5"></path>
+      </svg>
+    </span>
+    <strong>Надійно</strong>
+  </div>
 
-        <div>
-          <span>♡</span>
-          <strong>З вами</strong>
-        </div>
+  <div>
+    <span>
+      <svg
+        viewBox="0 0 24 24"
+        width="28"
+        height="28"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"></path>
+      </svg>
+    </span>
+    <strong>З вами</strong>
+  </div>
+</div>
+
       </div>
     </div>
   </div>
@@ -2550,7 +2606,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="ach.js"></script>
-<script src="app.js?v=20260920-firefox-zoom-fix-v1"></script>
+<script src="app.js?v=20261004-login-controls-v3"></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>
