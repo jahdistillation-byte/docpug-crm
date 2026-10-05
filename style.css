@@ -64886,7 +64886,7 @@ body[data-theme="white"] .clinicRatingStats b {
       padding: 0 !important;
       overflow-x: hidden !important;
       overflow-y: auto !important;
-      display: block !important;
+      display: block;
       color: #183149 !important;
       background:
         linear-gradient(
