@@ -66030,3 +66030,107 @@ background-color: #dfe7ec !important;
     white-space: normal;
   }
 }
+/* =========================================================
+   PUG CRM — PREMIUM DOCK / CLINICAL STEEL
+   ========================================================= */
+
+/* Единый вид SVG-иконок на всех устройствах */
+.mac-dock .dock-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+.mac-dock .dock-icon svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Стеклянная основа панели */
+body[data-theme="white"] .mac-dock {
+  background: rgba(251, 253, 254, 0.9) !important;
+  border: 1px solid rgba(43, 99, 142, 0.12) !important;
+  box-shadow:
+    0 16px 45px rgba(23, 44, 60, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(28px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(135%) !important;
+}
+
+/* Обычный пункт */
+body[data-theme="white"] .dock-menu .menu-item {
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item a {
+  color: #718391 !important;
+  font-weight: 600 !important;
+}
+
+/* Наведение мыши */
+body[data-theme="white"] .dock-menu .menu-item:hover {
+  background: #f0f4f6 !important;
+  border-color: rgba(43, 99, 142, 0.08) !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
+}
+
+body[data-theme="white"] .dock-menu .menu-item:hover a {
+  color: #234c69 !important;
+}
+
+/* Выбранный раздел */
+body[data-theme="white"] .dock-menu .menu-item.active {
+  background: #e7eff4 !important;
+  border: 1px solid #cbdce7 !important;
+  box-shadow:
+    0 5px 14px rgba(43, 99, 142, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+body[data-theme="white"] .dock-menu .menu-item.active a {
+  color: #2b638e !important;
+  font-weight: 750 !important;
+}
+
+/* Более собранные размеры на компьютере */
+@media (min-width: 769px) {
+  .mac-dock .dock-menu {
+    gap: 3px !important;
+  }
+
+  .mac-dock .dock-menu .menu-item a {
+    min-height: 48px !important;
+    padding: 9px 13px !important;
+    gap: 7px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* На телефоне и планшете сохраняем удобную область нажатия */
+@media (max-width: 768px) {
+  .mac-dock .dock-icon {
+    width: 21px;
+    height: 21px;
+    flex-basis: 21px;
+  }
+
+  .mac-dock .dock-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
