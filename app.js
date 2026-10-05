@@ -100173,11 +100173,675 @@ function closeDischargeModal() {
 // =========================
 // OWNERS — Адаптированный рендер для стеклянной таблицы
 // =========================
+function ownerCatalogIcon(
+  name,
+  size = 16
+) {
+  const paths = {
+    more: `
+      <circle cx="5" cy="12" r="1"></circle>
+      <circle cx="12" cy="12" r="1"></circle>
+      <circle cx="19" cy="12" r="1"></circle>
+    `,
+
+    phone: `
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+        19.79 19.79 0 0 1-8.63-3.07
+        19.5 19.5 0 0 1-6-6
+        19.79 19.79 0 0 1-3.07-8.67
+        A2 2 0 0 1 3.9 2h3
+        a2 2 0 0 1 2 1.72
+        12.84 12.84 0 0 0 .7 2.81
+        2 2 0 0 1-.45 2.11L7.91 9.91
+        a16 16 0 0 0 6 6l1.27-1.27
+        a2 2 0 0 1 2.11-.45
+        12.84 12.84 0 0 0 2.81.7
+        A2 2 0 0 1 22 16.92Z">
+      </path>
+    `,
+
+    mail: `
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <path d="m3 7 9 6 9-6"></path>
+    `,
+
+    pin: `
+      <path d="M20 10c0 5-8 12-8 12S4 15 4 10
+        a8 8 0 1 1 16 0Z">
+      </path>
+      <circle cx="12" cy="10" r="2.5"></circle>
+    `,
+
+    paw: `
+      <circle cx="5" cy="8" r="2"></circle>
+      <circle cx="9" cy="4" r="2"></circle>
+      <circle cx="15" cy="4" r="2"></circle>
+      <circle cx="19" cy="8" r="2"></circle>
+      <path d="M12 10c-4 0-7 3-7 6.5
+        C5 19 7 21 9.5 21
+        c1 0 1.7-.5 2.5-.5s1.5.5 2.5.5
+        C17 21 19 19 19 16.5
+        19 13 16 10 12 10Z">
+      </path>
+    `,
+
+    edit: `
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3
+        L8 18l-4 1 1-4Z">
+      </path>
+    `,
+
+    trash: `
+      <path d="M3 6h18"></path>
+      <path d="M8 6V4h8v2"></path>
+      <path d="M19 6l-1 14H6L5 6"></path>
+      <path d="M10 11v5"></path>
+      <path d="M14 11v5"></path>
+    `,
+
+    arrow: `
+      <path d="M5 12h14"></path>
+      <path d="m13 6 6 6-6 6"></path>
+    `,
+  };
+
+  return `
+    <svg
+      viewBox="0 0 24 24"
+      width="${size}"
+      height="${size}"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      ${paths[name] || ""}
+    </svg>
+  `;
+}
+
+
+function renderOwnersCards() {
+  const page =
+    document.querySelector(
+      '.page[data-page="owners"]'
+    );
+
+  const view =
+    document.getElementById(
+      "ownersCardsView"
+    );
+
+  const grid =
+    document.getElementById(
+      "ownersCardsGrid"
+    );
+
+  const empty =
+    document.getElementById(
+      "ownersCardsEmpty"
+    );
+
+  if (
+    !page ||
+    !view ||
+    !grid ||
+    !empty
+  ) {
+    return;
+  }
+
+  const owners =
+    Array.isArray(state.owners)
+      ? state.owners
+      : [];
+
+  const patients =
+    Array.isArray(state.patients)
+      ? state.patients
+      : [];
+
+  const search =
+    String(
+      document
+        .getElementById(
+          "globalSearch"
+        )
+        ?.value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const searchDigits =
+    search.replace(
+      /\D/g,
+      ""
+    );
+
+  const totalCount =
+    document.getElementById(
+      "ownersTotalCount"
+    );
+
+  const patientsCount =
+    document.getElementById(
+      "ownersPatientsCount"
+    );
+
+  const missingContactsCount =
+    document.getElementById(
+      "ownersMissingContactsCount"
+    );
+
+  if (totalCount) {
+    totalCount.textContent =
+      String(owners.length);
+  }
+
+  if (patientsCount) {
+    patientsCount.textContent =
+      String(patients.length);
+  }
+
+  if (missingContactsCount) {
+    missingContactsCount.textContent =
+      String(
+        owners.filter(
+          (owner) =>
+            !owner.phone &&
+            !owner.email &&
+            !owner.telegram
+        ).length
+      );
+  }
+
+    const activeFilter =
+    String(
+      state.ownersCatalogFilter ||
+      "all"
+    );
+
+  const sortMode =
+    String(
+      state.ownersCatalogSort ||
+      "recent"
+    );
+
+  document
+    .querySelectorAll(
+      "[data-owners-filter]"
+    )
+    .forEach((button) => {
+      const isActive =
+        button.dataset.ownersFilter ===
+        activeFilter;
+
+      button.classList.toggle(
+        "active",
+        isActive
+      );
+
+      button.setAttribute(
+        "aria-pressed",
+        String(isActive)
+      );
+    });
+
+  const sortSelect =
+    document.getElementById(
+      "ownersSortSelect"
+    );
+
+  if (sortSelect) {
+    sortSelect.value =
+      sortMode;
+  }
+
+  const getOwnerPets =
+    (ownerId) =>
+      patients.filter(
+        (patient) =>
+          String(patient.owner_id) ===
+          String(ownerId)
+      );
+
+  let visibleOwners =
+    owners.filter((owner) => {
+      const ownerPets =
+        getOwnerPets(owner.id);
+
+      const searchText = [
+        owner.name,
+        owner.phone,
+        owner.email,
+        owner.telegram,
+        owner.note,
+        ...ownerPets.flatMap(
+          (patient) => [
+            patient.name,
+            patient.breed,
+            patient.species,
+          ]
+        ),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const phoneDigits =
+        String(owner.phone || "")
+          .replace(/\D/g, "");
+
+      const matchesSearch =
+        !search ||
+        searchText.includes(search) ||
+        (
+          searchDigits.length >= 3 &&
+          phoneDigits.includes(
+            searchDigits
+          )
+        );
+
+      if (!matchesSearch) {
+        return false;
+      }
+
+      if (
+        activeFilter ===
+        "with-pets"
+      ) {
+        return ownerPets.length > 0;
+      }
+
+      if (
+        activeFilter ===
+        "without-pets"
+      ) {
+        return ownerPets.length === 0;
+      }
+
+      if (
+        activeFilter ===
+        "missing-contacts"
+      ) {
+        return (
+          !owner.phone &&
+          !owner.email &&
+          !owner.telegram
+        );
+      }
+
+      return true;
+    });
+
+  if (sortMode === "name") {
+    visibleOwners =
+      [...visibleOwners].sort(
+        (firstOwner, secondOwner) =>
+          String(
+            firstOwner.name || ""
+          ).localeCompare(
+            String(
+              secondOwner.name || ""
+            ),
+            getInterfaceLanguage(),
+            {
+              sensitivity: "base",
+            }
+          )
+      );
+  }
+
+  if (sortMode === "pets") {
+    visibleOwners =
+      [...visibleOwners].sort(
+        (firstOwner, secondOwner) =>
+          getOwnerPets(
+            secondOwner.id
+          ).length -
+          getOwnerPets(
+            firstOwner.id
+          ).length
+      );
+  }
+
+  grid.innerHTML =
+    visibleOwners
+      .map((owner) => {
+        const ownerName =
+          String(
+            owner.name ||
+            translateInterfaceText(
+              "owners.row.noName"
+            )
+          ).trim();
+
+        const initials =
+          ownerName
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(
+              (part) =>
+                part.charAt(0)
+                  .toUpperCase()
+            )
+            .join("") || "—";
+
+        const ownerPets =
+          patients.filter(
+            (patient) =>
+              String(patient.owner_id) ===
+              String(owner.id)
+          );
+
+        const visiblePets =
+          ownerPets.slice(0, 2);
+
+        const hiddenPetsCount =
+          Math.max(
+            0,
+            ownerPets.length -
+            visiblePets.length
+          );
+
+        const petsHtml =
+          ownerPets.length
+            ? `
+              ${visiblePets
+                .map((patient) => {
+                  const petName =
+                    String(
+                      patient.name ||
+                      translateInterfaceText(
+                        "owners.row.noPetName"
+                      )
+                    ).trim();
+
+                  const petDetails =
+                    String(
+                      patient.breed ||
+                      patient.species ||
+                      ""
+                    ).trim();
+
+                  return `
+                    <span
+                      class="ownerCatalogPet"
+                      title="${escapeHtml(
+                        petDetails
+                          ? `${petName} · ${petDetails}`
+                          : petName
+                      )}"
+                    >
+                      ${ownerCatalogIcon(
+                        "paw",
+                        15
+                      )}
+
+                      <span>
+                        ${escapeHtml(
+                          petDetails
+                            ? `${petName} · ${petDetails}`
+                            : petName
+                        )}
+                      </span>
+                    </span>
+                  `;
+                })
+                .join("")}
+
+              ${
+                hiddenPetsCount > 0
+                  ? `
+                    <span
+                      class="ownerCatalogPetMore"
+                    >
+                      +${hiddenPetsCount}
+                    </span>
+                  `
+                  : ""
+              }
+            `
+            : `
+              <span
+                class="ownerCatalogPetsEmpty"
+              >
+                ${escapeHtml(
+                  translateInterfaceText(
+                    "owners.row.noPets"
+                  )
+                )}
+              </span>
+            `;
+
+        const secondaryContact =
+          owner.email ||
+          owner.telegram ||
+          translateInterfaceText(
+            "owners.row.contactMissing"
+          );
+
+        const address =
+          String(
+            owner.note || ""
+          ).trim();
+
+        return `
+          <article
+            class="ownerCatalogCard"
+            data-open-owner="${escapeHtml(
+              owner.id
+            )}"
+          >
+            <div class="ownerCatalogHeader">
+              <span
+                class="ownerCatalogAvatar"
+                aria-hidden="true"
+              >
+                ${escapeHtml(initials)}
+              </span>
+
+              <span class="ownerCatalogIdentity">
+                <strong>
+                  ${escapeHtml(ownerName)}
+                </strong>
+
+                <span>
+                  ${
+                    ownerPets.length
+                  }
+                  ${
+                    ownerPets.length === 1
+                      ? "улюбленець"
+                      : "улюбленців"
+                  }
+                </span>
+              </span>
+
+              <div class="ownerCatalogActions">
+                <button
+                  type="button"
+                  class="ownerCatalogMenuButton"
+                  data-owner-menu="${escapeHtml(
+                    owner.id
+                  )}"
+                  aria-label="Дії з власником"
+                  aria-expanded="false"
+                >
+                  ${ownerCatalogIcon(
+                    "more",
+                    20
+                  )}
+                </button>
+
+                <div
+                  class="ownerCatalogMenu"
+                  data-owner-menu-panel="${escapeHtml(
+                    owner.id
+                  )}"
+                >
+                  <button
+                    type="button"
+                    data-edit-owner="${escapeHtml(
+                      owner.id
+                    )}"
+                  >
+                    ${ownerCatalogIcon(
+                      "edit",
+                      16
+                    )}
+                    Редагувати
+                  </button>
+
+                  <button
+                    type="button"
+                    class="ownerCatalogDelete"
+                    data-delete-owner="${escapeHtml(
+                      owner.id
+                    )}"
+                  >
+                    ${ownerCatalogIcon(
+                      "trash",
+                      16
+                    )}
+                    Видалити
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ownerCatalogContacts">
+              ${
+                owner.phone
+                  ? `
+                    <button
+                      type="button"
+                      class="ownerCatalogContact ownerPhoneCopy"
+                      data-copy-owner-phone="${escapeHtml(
+                        owner.phone
+                      )}"
+                    >
+                      ${ownerCatalogIcon(
+                        "phone",
+                        16
+                      )}
+
+                      <span>
+                        ${escapeHtml(
+                          owner.phone
+                        )}
+                      </span>
+
+                      <span
+                        class="ownerPhoneCopyLabel"
+                        style="display:none;"
+                      >
+                        ${escapeHtml(
+                          translateInterfaceText(
+                            "owners.row.copy"
+                          )
+                        )}
+                      </span>
+                    </button>
+                  `
+                  : `
+                    <span class="ownerCatalogContact">
+                      ${ownerCatalogIcon(
+                        "phone",
+                        16
+                      )}
+
+                      <span>
+                        ${escapeHtml(
+                          translateInterfaceText(
+                            "owners.row.phoneMissing"
+                          )
+                        )}
+                      </span>
+                    </span>
+                  `
+              }
+
+              <span class="ownerCatalogContact">
+                ${ownerCatalogIcon(
+                  "mail",
+                  16
+                )}
+
+                <span>
+                  ${escapeHtml(
+                    secondaryContact
+                  )}
+                </span>
+              </span>
+            </div>
+
+            <div class="ownerCatalogPets">
+              ${petsHtml}
+            </div>
+
+            <div class="ownerCatalogFooter">
+              <span class="ownerCatalogContact">
+                ${ownerCatalogIcon(
+                  "pin",
+                  15
+                )}
+
+                <span>
+                  ${escapeHtml(
+                    address ||
+                    "Адресу не вказано"
+                  )}
+                </span>
+              </span>
+
+              <span class="ownerCatalogOpen">
+                Відкрити
+                ${ownerCatalogIcon(
+                  "arrow",
+                  15
+                )}
+              </span>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+  const hasOwners =
+    visibleOwners.length > 0;
+
+  grid.hidden =
+    !hasOwners;
+
+  empty.hidden =
+    hasOwners;
+
+  view.hidden =
+    false;
+
+  page.classList.add(
+    "ownersCardsMode"
+  );
+}
 function renderOwners() {
   const tbody = document.getElementById("owners-table-body");
   if (!tbody) return;
 
   tbody.innerHTML = "";
+
+    try {
+    renderOwnersCards();
+  } catch (error) {
+    console.error(
+      "Rendering owner cards failed:",
+      error
+    );
+  }
 
   const q =
   String(
@@ -100914,6 +101578,34 @@ function initOwnersUI() {
 
   document.addEventListener("click", async (e) => {
 
+        const clickedOwnerMenuButton =
+      e.target.closest(
+        "[data-owner-menu]"
+      );
+
+    if (!clickedOwnerMenuButton) {
+      document
+        .querySelectorAll(
+          ".ownerCatalogMenu.open"
+        )
+        .forEach((menu) => {
+          menu.classList.remove(
+            "open"
+          );
+        });
+
+      document
+        .querySelectorAll(
+          '[data-owner-menu][aria-expanded="true"]'
+        )
+        .forEach((button) => {
+          button.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        });
+    }
+
     // ==========================
     // Додати власника
     // ==========================
@@ -100927,7 +101619,23 @@ function initOwnersUI() {
       openOwnerModal();
       return;
     }
+    const filterButton =
+      e.target.closest(
+        "[data-owners-filter]"
+      );
 
+    if (filterButton) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      state.ownersCatalogFilter =
+        filterButton.dataset
+          .ownersFilter ||
+        "all";
+
+      renderOwners();
+      return;
+    }
     // ==========================
     // Редагувати власника
     // (працює і в таблиці, і в Hero)
@@ -100954,12 +101662,93 @@ function initOwnersUI() {
     // ==========================
     // Далі працюємо тільки всередині списку
     // ==========================
-    const ownersList =
-      e.target.closest("#owners-table-body") ||
-      e.target.closest("#ownersList") ||
-      e.target.closest(".data-table-container");
+        const ownersList =
+      e.target.closest(
+        "#ownersCardsView"
+      ) ||
+      e.target.closest(
+        "#owners-table-body"
+      ) ||
+      e.target.closest(
+        "#ownersList"
+      ) ||
+      e.target.closest(
+        ".data-table-container"
+      );
 
-    if (!ownersList) return;
+          if (!ownersList) {
+      return;
+    }
+        const ownerMenuButton =
+      e.target.closest(
+        "[data-owner-menu]"
+      );
+
+    if (ownerMenuButton) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const ownerId =
+        String(
+          ownerMenuButton.dataset
+            .ownerMenu || ""
+        );
+
+      const menu =
+        Array.from(
+          document.querySelectorAll(
+            "[data-owner-menu-panel]"
+          )
+        ).find(
+          (panel) =>
+            String(
+              panel.dataset
+                .ownerMenuPanel
+            ) === ownerId
+        );
+
+      if (!menu) {
+        return;
+      }
+
+      const shouldOpen =
+        !menu.classList.contains(
+          "open"
+        );
+
+      document
+        .querySelectorAll(
+          ".ownerCatalogMenu.open"
+        )
+        .forEach((otherMenu) => {
+          otherMenu.classList.remove(
+            "open"
+          );
+        });
+
+      document
+        .querySelectorAll(
+          "[data-owner-menu]"
+        )
+        .forEach((button) => {
+          button.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        });
+
+      menu.classList.toggle(
+        "open",
+        shouldOpen
+      );
+
+      ownerMenuButton.setAttribute(
+        "aria-expanded",
+        String(shouldOpen)
+      );
+
+      return;
+    }
 
     const copyPhoneButton =
   e.target.closest(
@@ -101110,7 +101899,24 @@ if (openZone) {
   }
 }
   });
+  document.addEventListener(
+    "change",
+    (e) => {
+      if (
+        !e.target.matches(
+          "#ownersSortSelect"
+        )
+      ) {
+        return;
+      }
 
+      state.ownersCatalogSort =
+        e.target.value ||
+        "recent";
+
+      renderOwners();
+    }
+  );
   document.addEventListener("click", (e) => {
     if (e.target.closest("#btnBackOwners")) {
       setHash("owners");

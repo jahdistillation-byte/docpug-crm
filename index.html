@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261004-login-controls-v3">
+<link rel="stylesheet" href="style.css?v=20261005-owners-cards-v1">
 </head>
 
 <body>
@@ -260,6 +260,167 @@
       </div>
 
       <div id="ownersList" style="display:none;"></div>
+      <div
+  id="ownersCardsView"
+  class="ownersCardsView"
+  hidden
+>
+  <div
+    class="ownersOverview"
+    aria-label="Статистика власників"
+  >
+    <article class="ownersStatCard">
+      <span class="ownersStatIcon" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </span>
+
+      <span class="ownersStatContent">
+        <strong id="ownersTotalCount">0</strong>
+        <span>власників у базі</span>
+      </span>
+    </article>
+
+    <article class="ownersStatCard">
+      <span class="ownersStatIcon" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="5" cy="8" r="2"></circle>
+          <circle cx="9" cy="4" r="2"></circle>
+          <circle cx="15" cy="4" r="2"></circle>
+          <circle cx="19" cy="8" r="2"></circle>
+          <path d="M12 10c-4 0-7 3-7 6.5C5 19 7 21 9.5 21c1 0 1.7-.5 2.5-.5s1.5.5 2.5.5C17 21 19 19 19 16.5 19 13 16 10 12 10Z"></path>
+        </svg>
+      </span>
+
+      <span class="ownersStatContent">
+        <strong id="ownersPatientsCount">0</strong>
+        <span>активних пацієнтів</span>
+      </span>
+    </article>
+
+    <article class="ownersStatCard">
+      <span class="ownersStatIcon" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M16 12a4 4 0 1 0-8 0"></path>
+          <circle cx="12" cy="7" r="3"></circle>
+          <path d="M5 21v-2a7 7 0 0 1 14 0v2"></path>
+          <path d="M18 3 3 18"></path>
+        </svg>
+      </span>
+
+      <span class="ownersStatContent">
+        <strong id="ownersMissingContactsCount">0</strong>
+        <span>без контактних даних</span>
+      </span>
+    </article>
+  </div>
+
+  <div class="ownersCatalogToolbar">
+    <div
+      class="ownersFilterGroup"
+      role="group"
+      aria-label="Фільтри власників"
+    >
+      <button
+        type="button"
+        class="ownersFilterButton active"
+        data-owners-filter="all"
+        aria-pressed="true"
+      >
+        Усі
+      </button>
+
+      <button
+        type="button"
+        class="ownersFilterButton"
+        data-owners-filter="with-pets"
+        aria-pressed="false"
+      >
+        З тваринами
+      </button>
+
+      <button
+        type="button"
+        class="ownersFilterButton"
+        data-owners-filter="without-pets"
+        aria-pressed="false"
+      >
+        Без тварин
+      </button>
+
+      <button
+        type="button"
+        class="ownersFilterButton"
+        data-owners-filter="missing-contacts"
+        aria-pressed="false"
+      >
+        Немає контактів
+      </button>
+    </div>
+
+    <label class="ownersSortControl">
+      <span>Сортування</span>
+
+      <select id="ownersSortSelect">
+        <option value="recent">
+          Нещодавно додані
+        </option>
+
+        <option value="name">
+          За ім’ям
+        </option>
+
+        <option value="pets">
+          За кількістю тварин
+        </option>
+      </select>
+    </label>
+  </div>
+
+  <div
+    id="ownersCardsGrid"
+    class="ownersCardsGrid"
+  ></div>
+
+  <div
+    id="ownersCardsEmpty"
+    class="ownersCardsEmpty"
+    hidden
+  >
+    Власників за цими умовами не знайдено
+  </div>
+</div>
     </section>
 
    <section class="page content-section" data-page="owner" style="display:none;">
@@ -2606,7 +2767,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="ach.js"></script>
-<script src="app.js?v=20261004-login-controls-v3"></script>
+<script src="app.js?v=20261005-owners-cards-v1"></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>
