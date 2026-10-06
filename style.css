@@ -66134,3 +66134,77 @@ body[data-theme="white"] .dock-menu .menu-item.active a {
     height: 20px;
   }
 }
+/* =========================================================
+   OWNERS — CLINICAL STEEL PALETTE
+   ========================================================= */
+
+.page[data-page="owners"] {
+  --owners-surface: #ffffff;
+  --owners-surface-soft: #edf3f6;
+  --owners-text: #172c3c;
+  --owners-muted: #748693;
+  --owners-blue: #2b638e;
+  --owners-blue-dark: #1f4d70;
+  --owners-line: rgba(40, 71, 91, 0.12);
+  --owners-shadow:
+    0 14px 38px rgba(28, 49, 64, 0.065);
+}
+
+/* Главная кнопка */
+.page[data-page="owners"].ownersCardsMode #btnAddOwner {
+  background: #2b638e !important;
+  border: 1px solid rgba(31, 77, 112, 0.18) !important;
+  box-shadow:
+    0 10px 24px rgba(43, 99, 142, 0.18) !important;
+}
+
+.page[data-page="owners"].ownersCardsMode #btnAddOwner:hover {
+  background: #245777 !important;
+  box-shadow:
+    0 13px 28px rgba(43, 99, 142, 0.23) !important;
+  transform: translateY(-1px);
+}
+
+/* Иконки статистики и аватары */
+.page[data-page="owners"] .ownersStatIcon,
+.page[data-page="owners"] .ownerCatalogAvatar {
+  color: #1f4d70 !important;
+  background: #e7eff4 !important;
+}
+
+/* Верхняя панель фильтров */
+.page[data-page="owners"] .ownersCatalogToolbar {
+  background: rgba(250, 252, 253, 0.88) !important;
+  box-shadow:
+    0 8px 26px rgba(28, 49, 64, 0.045) !important;
+}
+
+/* Поле сортировки */
+.page[data-page="owners"] .ownersSortControl select:focus {
+  border-color: #2b638e !important;
+  box-shadow:
+    0 0 0 3px rgba(43, 99, 142, 0.11) !important;
+}
+
+/* Карточки */
+.page[data-page="owners"] .ownerCatalogCard:hover {
+  border-color: rgba(43, 99, 142, 0.26) !important;
+  box-shadow:
+    0 20px 46px rgba(28, 49, 64, 0.1) !important;
+}
+
+.page[data-page="owners"] .ownerCatalogCard:focus-within {
+  border-color: rgba(43, 99, 142, 0.32) !important;
+}
+
+/* Плашки питомцев */
+.page[data-page="owners"] .ownerCatalogPet {
+  background: #edf3f6 !important;
+  border-color: rgba(43, 99, 142, 0.11) !important;
+}
+
+.page[data-page="owners"] .ownerCatalogPet svg,
+.page[data-page="owners"] .ownerCatalogOpen,
+.page[data-page="owners"] .ownerCatalogPetMore {
+  color: #2b638e !important;
+}
