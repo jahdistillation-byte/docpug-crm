@@ -3548,16 +3548,16 @@ Object.assign(APP_TRANSLATIONS.pl, {
 
 Object.assign(APP_TRANSLATIONS.uk, {
   "owners.profile.card": "Картка власника",
-  "owners.profile.petsTitle": "🐾 Улюбленці власника",
-  "owners.profile.addPet": "+ Додати тварину",
+  "owners.profile.petsTitle": "Улюбленці власника",
+  "owners.profile.addPet": "Додати тварину",
   "owners.profile.statusVip": "VIP клієнт",
   "owners.profile.statusRegular": "Постійний клієнт",
   "owners.profile.statusActive": "Активний клієнт",
   "owners.profile.statusNew": "Новий клієнт",
   "owners.profile.noName": "Без імені",
   "owners.profile.phoneMissing": "Телефон не вказано",
-  "owners.profile.edit": "✏️ Редагувати",
-  "owners.profile.backToList": "← До списку",
+  "owners.profile.edit": "Редагувати",
+  "owners.profile.backToList": "До списку",
   "owners.profile.patients": "Пацієнтів",
   "owners.profile.visits": "Візитів",
   "owners.profile.paid": "Сплачено",
@@ -3571,16 +3571,16 @@ Object.assign(APP_TRANSLATIONS.uk, {
 
 Object.assign(APP_TRANSLATIONS.en, {
   "owners.profile.card": "Owner profile",
-  "owners.profile.petsTitle": "🐾 Owner’s pets",
-  "owners.profile.addPet": "+ Add animal",
+  "owners.profile.petsTitle": "Owner’s pets",
+ "owners.profile.addPet": "Add animal",
   "owners.profile.statusVip": "VIP client",
   "owners.profile.statusRegular": "Regular client",
   "owners.profile.statusActive": "Active client",
   "owners.profile.statusNew": "New client",
   "owners.profile.noName": "No name",
   "owners.profile.phoneMissing": "Phone not provided",
-  "owners.profile.edit": "✏️ Edit",
-  "owners.profile.backToList": "← Back to list",
+  "owners.profile.edit": "Edit",
+  "owners.profile.backToList": "Back to list",
   "owners.profile.patients": "Patients",
   "owners.profile.visits": "Visits",
   "owners.profile.paid": "Paid",
@@ -3594,16 +3594,16 @@ Object.assign(APP_TRANSLATIONS.en, {
 
 Object.assign(APP_TRANSLATIONS.de, {
   "owners.profile.card": "Tierhalterprofil",
-  "owners.profile.petsTitle": "🐾 Tiere des Tierhalters",
-  "owners.profile.addPet": "+ Tier hinzufügen",
+"owners.profile.petsTitle": "Tiere des Tierhalters",
+"owners.profile.addPet": "Tier hinzufügen",
   "owners.profile.statusVip": "VIP-Kunde",
   "owners.profile.statusRegular": "Stammkunde",
   "owners.profile.statusActive": "Aktiver Kunde",
   "owners.profile.statusNew": "Neukunde",
   "owners.profile.noName": "Ohne Namen",
   "owners.profile.phoneMissing": "Telefonnummer nicht angegeben",
-  "owners.profile.edit": "✏️ Bearbeiten",
-  "owners.profile.backToList": "← Zur Liste",
+  "owners.profile.edit": "Bearbeiten",
+  "owners.profile.backToList": "Zur Liste",
   "owners.profile.patients": "Patienten",
   "owners.profile.visits": "Besuche",
   "owners.profile.paid": "Bezahlt",
@@ -3617,16 +3617,16 @@ Object.assign(APP_TRANSLATIONS.de, {
 
 Object.assign(APP_TRANSLATIONS.pl, {
   "owners.profile.card": "Profil właściciela",
-  "owners.profile.petsTitle": "🐾 Zwierzęta właściciela",
-  "owners.profile.addPet": "+ Dodaj zwierzę",
+ "owners.profile.petsTitle": "Zwierzęta właściciela",
+ "owners.profile.addPet": "Dodaj zwierzę",
   "owners.profile.statusVip": "Klient VIP",
   "owners.profile.statusRegular": "Stały klient",
   "owners.profile.statusActive": "Aktywny klient",
   "owners.profile.statusNew": "Nowy klient",
   "owners.profile.noName": "Bez imienia",
   "owners.profile.phoneMissing": "Nie podano telefonu",
-  "owners.profile.edit": "✏️ Edytuj",
-  "owners.profile.backToList": "← Wróć do listy",
+"owners.profile.edit": "Edytuj",
+"owners.profile.backToList": "Wróć do listy",
   "owners.profile.patients": "Pacjenci",
   "owners.profile.visits": "Wizyty",
   "owners.profile.paid": "Zapłacono",
@@ -59246,32 +59246,615 @@ if (!owner) {
   // Сортируем и берем последний
   const lastVisit = ownerVisits.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))[0];
 
-  // 1. Рендер Hero-блока (инфо владельца и статистика)
-   const ownerNameEl =
-    $("#ownerName");
+// 1. Рендер современной карточки владельца
+const ownerNameEl =
+  $("#ownerName");
 
-  if (ownerNameEl) {
-    const ownerStatus =
-      Number(totalPaid || 0) >= 50000
+const ownerDisplayName =
+  owner.name ||
+  translateInterfaceText(
+    "owners.profile.noName"
+  );
+
+const ownerInitials =
+  String(ownerDisplayName)
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) =>
+      Array.from(part)[0] || ""
+    )
+    .join("")
+    .toUpperCase() || "—";
+
+const ownerStatus =
+  Number(totalPaid || 0) >= 50000
+    ? translateInterfaceText(
+        "owners.profile.statusVip"
+      )
+    : visitsCount >= 15
+      ? translateInterfaceText(
+          "owners.profile.statusRegular"
+        )
+      : visitsCount > 0
         ? translateInterfaceText(
-            "owners.profile.statusVip"
+            "owners.profile.statusActive"
           )
-        : visitsCount >= 15
-          ? translateInterfaceText(
-              "owners.profile.statusRegular"
-            )
-          : visitsCount > 0
-            ? translateInterfaceText(
-                "owners.profile.statusActive"
-              )
-            : translateInterfaceText(
-                "owners.profile.statusNew"
-              );
+        : translateInterfaceText(
+            "owners.profile.statusNew"
+          );
 
-    const lastVisitText =
-      lastVisit?.date
+const lastVisitText =
+  lastVisit?.date
+    ? formatCalendarDate(
+        lastVisit.date,
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }
+      )
+    : "—";
+
+const averageVisitAmount =
+  visitsCount
+    ? Math.round(
+        Number(totalPaid || 0) /
+        visitsCount
+      )
+    : 0;
+
+const editOwnerLabel =
+  String(
+    translateInterfaceText(
+      "owners.profile.edit"
+    )
+  )
+    .replace("✏️ ", "")
+    .replace("✏ ", "");
+
+const backToOwnersLabel =
+  String(
+    translateInterfaceText(
+      "owners.profile.backToList"
+    )
+  ).replace(/^←\s*/, "");
+
+if (ownerNameEl) {
+  ownerNameEl.innerHTML = `
+    <button
+      class="ownerProfileBack"
+      id="btnBackOwners"
+      type="button"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="17"
+        height="17"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M19 12H5"></path>
+        <path d="m12 19-7-7 7-7"></path>
+      </svg>
+
+      <span>
+        ${escapeHtml(backToOwnersLabel)}
+      </span>
+    </button>
+
+    <section class="ownerPremiumHero">
+      <div class="ownerPremiumMain">
+        <div
+          class="ownerPremiumAvatar"
+          aria-hidden="true"
+        >
+          ${escapeHtml(ownerInitials)}
+        </div>
+
+        <div class="ownerPremiumIdentity">
+          <div class="ownerPremiumKicker">
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.profile.card"
+              )
+            )}
+          </div>
+
+          <h1 class="ownerPremiumName">
+            ${escapeHtml(ownerDisplayName)}
+          </h1>
+
+          <div class="ownerPremiumContacts">
+            <span>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2
+                     19.79 19.79 0 0 1-8.63-3.07
+                     19.5 19.5 0 0 1-6-6
+                     19.79 19.79 0 0 1-3.07-8.67
+                     A2 2 0 0 1 3.9 2h3
+                     a2 2 0 0 1 2 1.72
+                     c.12.9.33 1.78.62 2.63
+                     a2 2 0 0 1-.45 2.11L7.8 9.73
+                     a16 16 0 0 0 6 6l1.27-1.27
+                     a2 2 0 0 1 2.11-.45
+                     c.85.29 1.73.5 2.63.62
+                     A2 2 0 0 1 22 16.92Z"
+                ></path>
+              </svg>
+
+              ${escapeHtml(
+                owner.phone ||
+                translateInterfaceText(
+                  "owners.profile.phoneMissing"
+                )
+              )}
+            </span>
+
+            <span>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="14"
+                  rx="3"
+                ></rect>
+
+                <path d="m3 7 9 6 9-6"></path>
+              </svg>
+
+              ${escapeHtml(
+  owner.email || "—"
+)}
+            </span>
+
+            <span>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M20 10c0 5-8 12-8 12S4 15 4 10
+                     a8 8 0 1 1 16 0Z"
+                ></path>
+
+                <circle
+                  cx="12"
+                  cy="10"
+                  r="2.5"
+                ></circle>
+              </svg>
+
+              ${escapeHtml(
+                owner.note || "—"
+              )}
+            </span>
+          </div>
+        </div>
+
+        <div class="ownerPremiumActions">
+          <div class="ownerPremiumStatus">
+            <span aria-hidden="true"></span>
+
+            ${escapeHtml(ownerStatus)}
+          </div>
+
+          <button
+            class="ownerHeroEdit"
+            type="button"
+            data-edit-owner="${escapeHtml(
+              String(owner.id)
+            )}"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 20h9"></path>
+
+              <path
+                d="M16.5 3.5a2.1 2.1 0 0 1 3 3
+                   L8 18l-4 1 1-4Z"
+              ></path>
+            </svg>
+
+            <span>
+              ${escapeHtml(editOwnerLabel)}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ownerPremiumMetrics">
+        <div class="ownerPremiumMetric">
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.profile.patients"
+              )
+            )}
+          </span>
+
+          <strong>${pets.length}</strong>
+        </div>
+
+        <div class="ownerPremiumMetric">
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.profile.visits"
+              )
+            )}
+          </span>
+
+          <strong>${visitsCount}</strong>
+        </div>
+
+        <div class="ownerPremiumMetric">
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.profile.paid"
+              )
+            )}
+          </span>
+
+          <strong>${totalPaid} ₴</strong>
+        </div>
+
+        <div class="ownerPremiumMetric">
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.profile.average"
+              )
+            )}
+          </span>
+
+          <strong>
+            ${averageVisitAmount} ₴
+          </strong>
+        </div>
+
+        <div class="ownerPremiumMetric">
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.profile.lastVisit"
+              )
+            )}
+          </span>
+
+          <strong>
+            ${escapeHtml(lastVisitText)}
+          </strong>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+/* Боковая панель контактов */
+const ownerContactPanel =
+  $("#ownerContactPanel");
+
+if (ownerContactPanel) {
+  const contactTitle =
+    String(
+      translateInterfaceText(
+        "owners.form.contactDetails"
+      )
+    ).replace(/^📇\s*/, "");
+
+  ownerContactPanel.innerHTML = `
+    <h3 class="ownerDetailsTitle">
+      ${escapeHtml(contactTitle)}
+    </h3>
+
+    <div class="ownerDetailsList">
+      <div class="ownerDetailsItem">
+        <span class="ownerDetailsIcon">
+          <svg
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2
+                 19.79 19.79 0 0 1-8.63-3.07
+                 19.5 19.5 0 0 1-6-6
+                 19.79 19.79 0 0 1-3.07-8.67
+                 A2 2 0 0 1 3.9 2h3
+                 a2 2 0 0 1 2 1.72"
+            ></path>
+          </svg>
+        </span>
+
+        <div>
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.form.phone"
+              )
+            )}
+          </span>
+
+          <strong>
+            ${escapeHtml(
+              owner.phone || "—"
+            )}
+          </strong>
+        </div>
+      </div>
+
+      <div class="ownerDetailsItem">
+        <span class="ownerDetailsIcon">
+          <svg
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect
+              x="3"
+              y="5"
+              width="18"
+              height="14"
+              rx="3"
+            ></rect>
+
+            <path d="m3 7 9 6 9-6"></path>
+          </svg>
+        </span>
+
+        <div>
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.form.email"
+              )
+            )}
+          </span>
+
+          <strong>
+            ${escapeHtml(
+              owner.email || "—"
+            )}
+          </strong>
+        </div>
+      </div>
+
+      ${
+        owner.telegram
+          ? `
+            <div class="ownerDetailsItem">
+              <span class="ownerDetailsIcon">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="17"
+                  height="17"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m22 2-7 20-4-9-9-4Z"></path>
+                  <path d="M22 2 11 13"></path>
+                </svg>
+              </span>
+
+              <div>
+                <span>
+                  ${escapeHtml(
+                    translateInterfaceText(
+                      "owners.form.telegram"
+                    )
+                  )}
+                </span>
+
+                <strong>
+                  ${escapeHtml(owner.telegram)}
+                </strong>
+              </div>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="ownerDetailsItem">
+        <span class="ownerDetailsIcon">
+          <svg
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M20 10c0 5-8 12-8 12S4 15 4 10
+                 a8 8 0 1 1 16 0Z"
+            ></path>
+
+            <circle
+              cx="12"
+              cy="10"
+              r="2.5"
+            ></circle>
+          </svg>
+        </span>
+
+        <div>
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "owners.form.addressNote"
+              )
+            )}
+          </span>
+
+          <strong>
+            ${escapeHtml(
+              owner.note || "—"
+            )}
+          </strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+ // 2. Рендер современных карточек питомцев
+const list =
+  $("#petsList");
+
+if (!list) {
+  return;
+}
+
+list.className =
+  "ownerProfilePetsList";
+
+list.innerHTML = "";
+
+if (!pets.length) {
+  list.innerHTML = `
+    <div class="ownerProfilePetsEmpty">
+      <svg
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <ellipse
+          cx="12"
+          cy="15.5"
+          rx="5"
+          ry="4"
+        ></ellipse>
+
+        <circle
+          cx="6.5"
+          cy="9"
+          r="2"
+        ></circle>
+
+        <circle
+          cx="10"
+          cy="5.5"
+          r="2"
+        ></circle>
+
+        <circle
+          cx="14"
+          cy="5.5"
+          r="2"
+        ></circle>
+
+        <circle
+          cx="17.5"
+          cy="9"
+          r="2"
+        ></circle>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "owners.profile.noPets"
+          )
+        )}
+      </span>
+    </div>
+  `;
+} else {
+  pets.forEach((pet) => {
+    const petVisits =
+      ownerVisits.filter(
+        (visit) =>
+          String(visit.pet_id) ===
+          String(pet.id)
+      );
+
+    const petLastVisit =
+      petVisits
+        .slice()
+        .sort(
+          (first, second) =>
+            String(
+              second.date || ""
+            ).localeCompare(
+              String(
+                first.date || ""
+              )
+            )
+        )[0];
+
+    const petLastVisitText =
+      petLastVisit?.date
         ? formatCalendarDate(
-            lastVisit.date,
+            petLastVisit.date,
             {
               day: "2-digit",
               month: "2-digit",
@@ -59280,191 +59863,84 @@ if (!owner) {
           )
         : "—";
 
-    ownerNameEl.innerHTML = `
-      <div class="ownerDashboardHero">
-        <div class="ownerDashTop">
-          <div class="ownerDashAvatar">
-            👤
-          </div>
-
-          <div class="ownerDashInfo">
-            <div class="ownerDashKicker">
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.card"
-                )
-              )}
-            </div>
-
-            <div class="ownerDashName">
-              ${escapeHtml(
-                owner.name ||
-                translateInterfaceText(
-                  "owners.profile.noName"
-                )
-              )}
-            </div>
-
-            <div class="ownerDashContacts">
-              <span>
-                📞 ${escapeHtml(
-                  owner.phone ||
-                  translateInterfaceText(
-                    "owners.profile.phoneMissing"
-                  )
-                )}
-              </span>
-
-              ${
-                owner.note
-                  ? `<span>📍 ${escapeHtml(owner.note)}</span>`
-                  : ""
-              }
-            </div>
-          </div>
-
-          <div class="ownerDashStatus">
-            <div class="ownerDashBadge">
-              ${escapeHtml(ownerStatus)}
-            </div>
-
-            <button
-              class="ownerHeroEdit"
-              data-edit-owner="${escapeHtml(owner.id)}"
-            >
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.edit"
-                )
-              )}
-            </button>
-
-            <button
-              class="ownerHeroBack"
-              id="btnBackOwners"
-            >
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.backToList"
-                )
-              )}
-            </button>
-          </div>
-        </div>
-
-        <div class="ownerDashStats">
-          <div class="ownerDashStat">
-            <span>
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.patients"
-                )
-              )}
-            </span>
-            <strong>${pets.length}</strong>
-          </div>
-
-          <div class="ownerDashStat">
-            <span>
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.visits"
-                )
-              )}
-            </span>
-            <strong>${visitsCount}</strong>
-          </div>
-
-          <div class="ownerDashStat">
-            <span>
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.paid"
-                )
-              )}
-            </span>
-            <strong>${totalPaid} ₴</strong>
-          </div>
-
-          <div class="ownerDashStat">
-            <span>
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.average"
-                )
-              )}
-            </span>
-
-            <strong>
-              ${
-                visitsCount
-                  ? Math.round(
-                      Number(totalPaid || 0) /
-                      visitsCount
-                    )
-                  : 0
-              } ₴
-            </strong>
-          </div>
-
-          <div class="ownerDashStat">
-            <span>
-              ${escapeHtml(
-                translateInterfaceText(
-                  "owners.profile.lastVisit"
-                )
-              )}
-            </span>
-            <strong>
-              ${escapeHtml(lastVisitText)}
-            </strong>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // 2. Рендер списка животных с "рамкой"
-  const list = $("#petsList");
-  if (!list) return;
-
-  // Добавляем класс рамки из CSS
-  list.className = "pets-container"; 
-  list.innerHTML = "";
-
-  if (!pets.length) {
-    list.innerHTML = `
-  <div
-    class="hint"
-    style="text-align:center; padding:40px; opacity:0.5;"
-  >
-    ${escapeHtml(
+    const petName =
+      pet.name ||
       translateInterfaceText(
-        "owners.profile.noPets"
-      )
-    )}
-  </div>
-`;
-  } else {
-    pets.forEach((pet) => {
-      const petVisits = ownerVisits.filter((v) => String(v.pet_id) === String(pet.id));
-      
-      const el = document.createElement("div");
-      el.className = "pet-card"; // Используем стиль карточки
-      el.style.cssText = "cursor:pointer; display: flex; justify-content: space-between; align-items: center;";
-      el.dataset.openPet = String(pet.id);
+        "owners.profile.noName"
+      );
 
-      el.innerHTML = `
-        <div style="flex:1;">
-          <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;">
-  🐾 ${escapeHtml(
-    pet.name ||
-    translateInterfaceText(
-      "owners.profile.noName"
-    )
-  )}
-</div>
-        <div style="font-size: 0.9rem; opacity: 0.6;">
+    const petBreed =
+      pet.breed
+        ? getCalendarBreedLabel(
+            pet.breed
+          )
+        : "";
+
+    const petCard =
+      document.createElement(
+        "article"
+      );
+
+    petCard.className =
+      "ownerProfilePetCard";
+
+    petCard.dataset.openPet =
+      String(pet.id);
+
+    petCard.innerHTML = `
+      <div
+        class="ownerProfilePetAvatar"
+        aria-hidden="true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="23"
+          height="23"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <ellipse
+            cx="12"
+            cy="15.5"
+            rx="5"
+            ry="4"
+          ></ellipse>
+
+          <circle
+            cx="6.5"
+            cy="9"
+            r="2"
+          ></circle>
+
+          <circle
+            cx="10"
+            cy="5.5"
+            r="2"
+          ></circle>
+
+          <circle
+            cx="14"
+            cy="5.5"
+            r="2"
+          ></circle>
+
+          <circle
+            cx="17.5"
+            cy="9"
+            r="2"
+          ></circle>
+        </svg>
+      </div>
+
+      <div class="ownerProfilePetIdentity">
+        <strong>
+          ${escapeHtml(petName)}
+        </strong>
+
+        <span>
           ${escapeHtml(
             speciesLabel(
               pet.species
@@ -59472,34 +59948,73 @@ if (!owner) {
           )}
 
           ${
-            pet.breed
-              ? " • " +
-                escapeHtml(
-                  getCalendarBreedLabel(
-                    pet.breed
-                  )
-                )
+            petBreed
+              ? ` · ${escapeHtml(
+                  petBreed
+                )}`
               : ""
           }
+        </span>
+      </div>
 
-          • ${escapeHtml(
+      <div class="ownerProfilePetVisit">
+        <span>
+          ${escapeHtml(
             formatOwnerVisitCount(
               petVisits.length
             )
           )}
-        </div>
+        </span>
+
+        <strong>
+          ${escapeHtml(
+            translateInterfaceText(
+              "owners.profile.lastVisit"
+            )
+          )}:
+          ${escapeHtml(
+            petLastVisitText
+          )}
+        </strong>
       </div>
 
-      <div
-        style="
-          padding-left: 15px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        "
-      >
+      <div class="ownerProfilePetActions">
         <button
-          class="iconBtn"
+          class="ownerProfilePetOpen"
+          type="button"
+          data-open-pet="${escapeHtml(
+            String(pet.id)
+          )}"
+        >
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "Відкрити"
+              )
+            )}
+          </span>
+
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14"></path>
+            <path d="m13 6 6 6-6 6"></path>
+          </svg>
+        </button>
+
+        <button
+          class="
+            ownerProfilePetIconButton
+            ownerProfilePetEdit
+          "
           type="button"
           title="${escapeHtml(
             translateInterfaceText(
@@ -59529,19 +60044,18 @@ if (!owner) {
             <path d="M12 20h9"></path>
 
             <path
-              d="
-                M16.5 3.5
-                a2.1 2.1 0 0 1 3 3
-                L8 18
-                l-4 1
-                1-4Z
-              "
+              d="M16.5 3.5
+                 a2.1 2.1 0 0 1 3 3
+                 L8 18l-4 1 1-4Z"
             ></path>
           </svg>
         </button>
 
         <button
-          class="iconBtn"
+          class="
+            ownerProfilePetIconButton
+            ownerProfilePetDelete
+          "
           type="button"
           title="${escapeHtml(
             translateInterfaceText(
@@ -59576,10 +60090,13 @@ if (!owner) {
           </svg>
         </button>
       </div>
-      `;
-      list.appendChild(el);
-    });
-  }
+    `;
+
+    list.appendChild(
+      petCard
+    );
+  });
+}
 
   // Переключаем секции
   document.querySelectorAll(".page").forEach(p => p.style.display = "none");

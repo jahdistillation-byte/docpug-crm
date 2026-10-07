@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261005-premium-dock-v1">
+<link rel="stylesheet" href="style.css?v=20261007-owner-profile-v3">
 </head>
 
 <body>
@@ -423,24 +423,112 @@
 </div>
     </section>
 
-   <section class="page content-section" data-page="owner" style="display:none;">
+   <section
+  class="page content-section ownerProfilePage"
+  data-page="owner"
+  style="display:none;"
+>
   <div id="ownerName">Власник</div>
-  <div id="ownerMeta" style="display:none;">—</div>
 
-    <div class="ownerPetsHeader">
-    <h3 data-i18n="owners.profile.petsTitle">
-      🐾 Улюбленці власника
-    </h3>
-
-    <button
-      class="btn-primary"
-      id="btnAddPet"
-      data-i18n="owners.profile.addPet"
-    >
-      + Додати тварину
-    </button>
+  <div
+    id="ownerMeta"
+    style="display:none;"
+  >
+    —
   </div>
-  <div class="patients-grid" id="petsList"></div>
+
+  <div class="ownerProfileContent">
+    <section class="ownerProfilePetsPanel">
+      <div class="ownerPetsHeader">
+        <h3>
+          <span
+            class="ownerPetsTitleIcon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <ellipse
+                cx="12"
+                cy="15.5"
+                rx="5"
+                ry="4"
+              ></ellipse>
+
+              <circle
+                cx="6.5"
+                cy="9"
+                r="2"
+              ></circle>
+
+              <circle
+                cx="10"
+                cy="5.5"
+                r="2"
+              ></circle>
+
+              <circle
+                cx="14"
+                cy="5.5"
+                r="2"
+              ></circle>
+
+              <circle
+                cx="17.5"
+                cy="9"
+                r="2"
+              ></circle>
+            </svg>
+          </span>
+
+          <span data-i18n="owners.profile.petsTitle">
+            Улюбленці власника
+          </span>
+        </h3>
+
+        <button
+  class="btn-primary"
+  id="btnAddPet"
+  type="button"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="16"
+    height="16"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 5v14"></path>
+    <path d="M5 12h14"></path>
+  </svg>
+
+  <span data-i18n="owners.profile.addPet">
+    Додати тварину
+  </span>
+</button>
+      </div>
+
+      <div
+        class="ownerProfilePetsList"
+        id="petsList"
+      ></div>
+    </section>
+
+    <aside
+      class="ownerProfileDetailsPanel"
+      id="ownerContactPanel"
+      aria-label="Контактні дані власника"
+    ></aside>
+  </div>
 </section>
 
     <section class="page content-section" data-page="patient" style="display:none;">
@@ -2822,7 +2910,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="ach.js"></script>
-<script src="app.js?v=20261005-owners-cards-v1"></script>
+<script src="app.js?v=20261007-owner-profile-v3"></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>

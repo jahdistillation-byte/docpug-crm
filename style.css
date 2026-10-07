@@ -66208,3 +66208,747 @@ body[data-theme="white"] .dock-menu .menu-item.active a {
 .page[data-page="owners"] .ownerCatalogPetMore {
   color: #2b638e !important;
 }
+/* =========================================================
+   OWNER PROFILE 3.0 — MULTI-THEME PREMIUM UI
+   ========================================================= */
+
+.ownerProfilePage {
+  --owner-accent: var(--accent-color, #a855f7);
+  --owner-surface: rgba(24, 17, 38, 0.94);
+  --owner-surface-soft: rgba(255, 255, 255, 0.055);
+  --owner-text: var(--text-main, #ffffff);
+  --owner-muted: var(--text-muted, rgba(255, 255, 255, 0.58));
+  --owner-line: var(--glass-border, rgba(255, 255, 255, 0.12));
+  --owner-accent-soft: rgba(168, 85, 247, 0.13);
+  --owner-danger: #d95c70;
+  --owner-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding-bottom: 120px;
+  color: var(--owner-text);
+}
+
+/* Белая тема — Clinical Steel */
+body[data-theme="white"] .ownerProfilePage,
+body.white .ownerProfilePage {
+  --owner-accent: #2b638e;
+  --owner-surface: #ffffff;
+  --owner-surface-soft: #edf3f6;
+  --owner-text: #172c3c;
+  --owner-muted: #718391;
+  --owner-line: rgba(40, 71, 91, 0.12);
+  --owner-accent-soft: #e7eff4;
+  --owner-danger: #b84559;
+  --owner-shadow:
+    0 18px 50px rgba(28, 49, 64, 0.08);
+}
+
+/* Фиолетовая тема */
+body[data-theme="purple"] .ownerProfilePage,
+body.purple .ownerProfilePage {
+  --owner-accent: #a855f7;
+  --owner-surface: rgba(27, 17, 43, 0.94);
+  --owner-surface-soft: rgba(168, 85, 247, 0.09);
+  --owner-text: #f8f5fb;
+  --owner-muted: #b5a7c1;
+  --owner-line: rgba(190, 151, 230, 0.17);
+  --owner-accent-soft: rgba(168, 85, 247, 0.15);
+  --owner-danger: #f07186;
+  --owner-shadow:
+    0 18px 54px rgba(3, 1, 8, 0.32);
+}
+
+/* Синяя тема */
+body[data-theme="blue"] .ownerProfilePage,
+body.blue .ownerProfilePage {
+  --owner-accent: #25a9c2;
+  --owner-surface: rgba(6, 27, 40, 0.95);
+  --owner-surface-soft: rgba(37, 169, 194, 0.09);
+  --owner-text: #edfafd;
+  --owner-muted: #91b4bf;
+  --owner-line: rgba(80, 190, 211, 0.17);
+  --owner-accent-soft: rgba(37, 169, 194, 0.15);
+  --owner-danger: #ed7184;
+  --owner-shadow:
+    0 18px 54px rgba(0, 8, 14, 0.34);
+}
+
+/* Зелёная тема */
+body[data-theme="green"] .ownerProfilePage,
+body.green .ownerProfilePage {
+  --owner-accent: #20a97b;
+  --owner-surface: rgba(6, 29, 23, 0.95);
+  --owner-surface-soft: rgba(32, 169, 123, 0.09);
+  --owner-text: #effbf7;
+  --owner-muted: #91b8aa;
+  --owner-line: rgba(73, 190, 150, 0.17);
+  --owner-accent-soft: rgba(32, 169, 123, 0.15);
+  --owner-danger: #ed7184;
+  --owner-shadow:
+    0 18px 54px rgba(0, 10, 7, 0.34);
+}
+
+/* Чёрная тема */
+body[data-theme="black"] .ownerProfilePage,
+body.black .ownerProfilePage {
+  --owner-accent: #d2d8de;
+  --owner-surface: #111315;
+  --owner-surface-soft: #1b1e21;
+  --owner-text: #f4f5f6;
+  --owner-muted: #929ba3;
+  --owner-line: rgba(255, 255, 255, 0.1);
+  --owner-accent-soft: #24292d;
+  --owner-danger: #ef6e82;
+  --owner-shadow:
+    0 18px 54px rgba(0, 0, 0, 0.42);
+}
+
+/* Возврат к каталогу */
+.ownerProfilePage .ownerProfileBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  padding: 7px 0;
+  color: var(--owner-muted);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ownerProfilePage .ownerProfileBack:hover {
+  color: var(--owner-accent);
+  transform: translateX(-2px);
+}
+
+/* Главная карточка */
+.ownerProfilePage .ownerPremiumHero {
+  overflow: hidden;
+  width: 100%;
+  margin: 0 0 20px;
+  color: var(--owner-text);
+  background: var(--owner-surface);
+  border: 1px solid var(--owner-line);
+  border-radius: 24px;
+  box-shadow: var(--owner-shadow);
+}
+
+.ownerProfilePage .ownerPremiumMain {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 26px 21px;
+}
+
+.ownerProfilePage .ownerPremiumAvatar {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 20px;
+  color: var(--owner-accent);
+  background: var(--owner-accent-soft);
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.ownerProfilePage .ownerPremiumIdentity {
+  min-width: 0;
+}
+
+.ownerProfilePage .ownerPremiumKicker {
+  margin-bottom: 5px;
+  color: var(--owner-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ownerProfilePage .ownerPremiumName {
+  margin: 0;
+  color: var(--owner-text);
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.08;
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.ownerProfilePage .ownerPremiumContacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 11px;
+  color: var(--owner-muted);
+  font-size: 13px;
+}
+
+.ownerProfilePage .ownerPremiumContacts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ownerProfilePage .ownerPremiumContacts svg {
+  flex: 0 0 auto;
+  color: var(--owner-accent);
+}
+
+/* Статус и редактирование */
+.ownerProfilePage .ownerPremiumActions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ownerProfilePage .ownerPremiumStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  color: var(--owner-accent);
+  background: var(--owner-accent-soft);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ownerProfilePage .ownerPremiumStatus > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4d9b72;
+}
+
+.ownerProfilePage .ownerHeroEdit {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0 !important;
+  min-height: 40px;
+  padding: 0 13px !important;
+  color: var(--owner-accent) !important;
+  background: var(--owner-surface-soft) !important;
+  border: 1px solid var(--owner-line) !important;
+  border-radius: 12px;
+  box-shadow: none !important;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ownerProfilePage .ownerHeroEdit:hover {
+  background: var(--owner-accent-soft) !important;
+  transform: translateY(-1px);
+}
+
+/* Единая строка показателей */
+.ownerProfilePage .ownerPremiumMetrics {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  background: var(--owner-surface-soft);
+  border-top: 1px solid var(--owner-line);
+}
+
+.ownerProfilePage .ownerPremiumMetric {
+  min-width: 0;
+  padding: 16px 20px;
+}
+
+.ownerProfilePage
+  .ownerPremiumMetric
+  + .ownerPremiumMetric {
+  border-left: 1px solid var(--owner-line);
+}
+
+.ownerProfilePage .ownerPremiumMetric span {
+  display: block;
+  overflow: hidden;
+  margin-bottom: 5px;
+  color: var(--owner-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ownerProfilePage .ownerPremiumMetric strong {
+  display: block;
+  color: var(--owner-text);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+/* Основной контент */
+.ownerProfilePage .ownerProfileContent {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.65fr)
+    minmax(250px, 0.75fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.ownerProfilePage .ownerProfilePetsPanel,
+.ownerProfilePage .ownerProfileDetailsPanel {
+  min-width: 0;
+  padding: 20px;
+  color: var(--owner-text);
+  background: var(--owner-surface);
+  border: 1px solid var(--owner-line);
+  border-radius: 24px;
+  box-shadow: var(--owner-shadow);
+}
+
+.ownerProfilePage .ownerPetsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  margin: 0 0 16px !important;
+}
+
+.ownerProfilePage .ownerPetsHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  color: var(--owner-text) !important;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.ownerProfilePage .ownerPetsTitleIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  color: var(--owner-accent);
+  background: var(--owner-accent-soft);
+  border-radius: 10px;
+}
+
+.ownerProfilePage .ownerPetsTitleIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+body .ownerProfilePage #btnAddPet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: auto !important;
+  min-height: 40px;
+  padding: 0 14px !important;
+  color: #ffffff !important;
+  background: var(--owner-accent) !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+body[data-theme="black"]
+  .ownerProfilePage
+  #btnAddPet,
+body.black
+  .ownerProfilePage
+  #btnAddPet {
+  color: #111315 !important;
+}
+
+/* Список питомцев */
+.ownerProfilePage #petsList.ownerProfilePetsList {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.ownerProfilePage .ownerProfilePetCard {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1.2fr)
+    minmax(150px, 0.7fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 17px;
+  color: var(--owner-text);
+  background: var(--owner-surface-soft);
+  border: 1px solid var(--owner-line);
+  border-radius: 18px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ownerProfilePage .ownerProfilePetCard:hover {
+  border-color: var(--owner-accent);
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.09);
+}
+
+.ownerProfilePage .ownerProfilePetAvatar {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  color: var(--owner-accent);
+  background: var(--owner-accent-soft);
+  border-radius: 16px;
+}
+
+.ownerProfilePage .ownerProfilePetIdentity,
+.ownerProfilePage .ownerProfilePetVisit {
+  min-width: 0;
+}
+
+.ownerProfilePage
+  .ownerProfilePetIdentity
+  strong {
+  display: block;
+  overflow: hidden;
+  color: var(--owner-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ownerProfilePage
+  .ownerProfilePetIdentity
+  span,
+.ownerProfilePage
+  .ownerProfilePetVisit
+  span {
+  display: block;
+  margin-top: 4px;
+  color: var(--owner-muted);
+  font-size: 12px;
+}
+
+.ownerProfilePage
+  .ownerProfilePetVisit
+  strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--owner-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Действия питомца */
+.ownerProfilePage .ownerProfilePetActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ownerProfilePage .ownerProfilePetOpen,
+.ownerProfilePage .ownerProfilePetIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  color: var(--owner-accent);
+  background: var(--owner-surface);
+  border: 1px solid var(--owner-line);
+  border-radius: 11px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ownerProfilePage .ownerProfilePetOpen {
+  gap: 6px;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ownerProfilePage
+  .ownerProfilePetIconButton {
+  width: 38px;
+  padding: 0;
+}
+
+.ownerProfilePage
+  .ownerProfilePetDelete {
+  color: var(--owner-danger);
+}
+
+.ownerProfilePage .ownerProfilePetOpen:hover,
+.ownerProfilePage
+  .ownerProfilePetIconButton:hover {
+  background: var(--owner-accent-soft);
+}
+
+/* Пустой список */
+.ownerProfilePage .ownerProfilePetsEmpty {
+  display: grid;
+  place-items: center;
+  gap: 9px;
+  min-height: 150px;
+  padding: 24px;
+  color: var(--owner-muted);
+  background: var(--owner-surface-soft);
+  border: 1px dashed var(--owner-line);
+  border-radius: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.ownerProfilePage
+  .ownerProfilePetsEmpty
+  svg {
+  color: var(--owner-accent);
+}
+
+/* Боковая контактная панель */
+.ownerProfilePage .ownerDetailsTitle {
+  margin: 0 0 18px;
+  color: var(--owner-text);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.ownerProfilePage .ownerDetailsList {
+  display: grid;
+  gap: 16px;
+}
+
+.ownerProfilePage .ownerDetailsItem {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.ownerProfilePage .ownerDetailsIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--owner-accent);
+  background: var(--owner-accent-soft);
+  border-radius: 11px;
+}
+
+.ownerProfilePage .ownerDetailsItem > div {
+  min-width: 0;
+}
+
+.ownerProfilePage
+  .ownerDetailsItem
+  div
+  > span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--owner-muted);
+  font-size: 11px;
+}
+
+.ownerProfilePage
+  .ownerDetailsItem
+  strong {
+  display: block;
+  color: var(--owner-text);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Планшеты */
+@media (max-width: 980px) {
+  .ownerProfilePage .ownerPremiumMain {
+    grid-template-columns:
+      auto minmax(0, 1fr);
+  }
+
+  .ownerProfilePage .ownerPremiumActions {
+    grid-column: 1 / -1;
+    padding-left: 84px;
+  }
+
+  .ownerProfilePage .ownerProfileContent {
+    grid-template-columns: 1fr;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetCard {
+    grid-template-columns:
+      auto minmax(0, 1fr) auto;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetVisit {
+    grid-column: 2;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetActions {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* Телефоны */
+@media (max-width: 650px) {
+  .ownerProfilePage {
+    padding-bottom: 110px;
+  }
+
+  .ownerProfilePage .ownerPremiumHero {
+    border-radius: 18px;
+  }
+
+  .ownerProfilePage .ownerPremiumMain {
+    grid-template-columns:
+      52px minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .ownerProfilePage .ownerPremiumAvatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    font-size: 16px;
+  }
+
+  .ownerProfilePage .ownerPremiumKicker {
+    display: none;
+  }
+
+  .ownerProfilePage .ownerPremiumName {
+    font-size: 25px;
+  }
+
+  .ownerProfilePage .ownerPremiumContacts {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .ownerProfilePage .ownerPremiumActions {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding-left: 0;
+  }
+
+  .ownerProfilePage .ownerPremiumStatus {
+    margin-right: auto;
+  }
+
+  .ownerProfilePage .ownerHeroEdit {
+    width: auto !important;
+    min-height: 40px !important;
+  }
+
+  .ownerProfilePage .ownerPremiumMetrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .ownerProfilePage
+    .ownerPremiumMetric
+    + .ownerPremiumMetric {
+    border-left: 0;
+  }
+
+  .ownerProfilePage .ownerPremiumMetric {
+    padding: 13px 16px;
+    border-top: 1px solid var(--owner-line);
+  }
+
+  .ownerProfilePage
+    .ownerPremiumMetric:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .ownerProfilePage .ownerProfilePetsPanel,
+  .ownerProfilePage
+    .ownerProfileDetailsPanel {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .ownerProfilePage .ownerPetsHeader {
+    align-items: flex-start;
+  }
+
+  body .ownerProfilePage #btnAddPet {
+    max-width: 45%;
+    min-height: 42px;
+    white-space: normal;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetCard {
+    grid-template-columns:
+      44px minmax(0, 1fr);
+    gap: 10px 12px;
+    padding: 14px;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetAvatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetVisit {
+    grid-column: 2;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetActions {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+
+  .ownerProfilePage
+    .ownerProfilePetOpen {
+    margin-right: auto;
+  }
+}
