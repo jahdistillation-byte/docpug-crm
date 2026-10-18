@@ -71350,6 +71350,13 @@ function localizePatientDocumentHtml(
       "Objawy i wywiad",
     ],
 
+        "Схема лікування": [
+      "Схема лікування",
+      "Treatment plan",
+      "Behandlungsplan",
+      "Plan leczenia",
+    ],
+
     "Встановлений діагноз": [
       "Встановлений діагноз",
       "Diagnosis",
@@ -89663,46 +89670,36 @@ function formatVisitTextPremium(
       "patients.card.visits.notSpecified"
     );
 
-  if (!text) {
-    return escapeHtml(
-      fallbackText
-    );
-  }
+  const sourceText =
+    text || fallbackText;
 
-  const lines =
-    text
+  const paragraphs =
+    sourceText
       .split(/\n+/)
-      .map(
-        (line) =>
-          line.trim()
+      .map((line) =>
+        line
+          .replace(
+            /^[-•*]\s*/,
+            ""
+          )
+          .trim()
       )
       .filter(Boolean);
 
-  if (lines.length <= 1) {
-    return escapeHtml(text);
-  }
-
   return `
-    <ul class="premiumVisitList">
-      ${lines
-        .map((line) => {
-          const clean =
-            line.replace(
-              /^[-•*]\s*/,
-              ""
-            );
-
-          return `
-            <li>
-              ${escapeHtml(clean)}
-            </li>
-          `;
-        })
+    <div class="premiumVisitParagraphs">
+      ${paragraphs
+        .map(
+          (paragraph) => `
+            <p class="premiumVisitParagraph">
+              ${escapeHtml(paragraph)}
+            </p>
+          `
+        )
         .join("")}
-    </ul>
+    </div>
   `;
 }
-
 function getPatientVisitVisualStatus(
   visit,
   linkedEvent = null
@@ -89966,15 +89963,15 @@ async function renderVisits(
           );
       }
 
-      const complaintTitle =
+            const complaintTitle =
         clone.querySelector(
           ".complaint-box .premiumVisitSectionHead > span:last-child"
         );
 
       if (complaintTitle) {
         complaintTitle.textContent =
-          t(
-            "patients.card.visits.complaint"
+          translateInterfaceText(
+            "Скарги та анамнез"
           );
       }
 
@@ -89985,8 +89982,20 @@ async function renderVisits(
 
       if (treatmentTitle) {
         treatmentTitle.textContent =
-          t(
-            "patients.card.visits.treatment"
+          translateInterfaceText(
+            "Схема лікування"
+          );
+      }
+
+      const recommendationTitle =
+        clone.querySelector(
+          ".recommendation-box .premiumVisitSectionHead > span:last-child"
+        );
+
+      if (recommendationTitle) {
+        recommendationTitle.textContent =
+          translateInterfaceText(
+            "Рекомендації власнику"
           );
       }
 
@@ -90268,6 +90277,29 @@ async function renderVisits(
         "patients.card.visits.complaintsNotSpecified"
       );
 
+          const parsedTreatment =
+      typeof parseVisitRx ===
+      "function"
+        ? parseVisitRx(
+            visit.rx || ""
+          )
+        : {
+            rx:
+              visit.rx || "",
+            recommendation: "",
+          };
+
+    const treatment =
+      String(
+        parsedTreatment.rx || ""
+      ).trim();
+
+    const recommendation =
+      String(
+        parsedTreatment.recommendation ||
+        ""
+      ).trim();
+
     const grandTotal =
       (
         calcServicesTotal(
@@ -90344,6 +90376,16 @@ async function renderVisits(
         ".v-rx"
       );
 
+          const recommendationContainer =
+      clone.querySelector(
+        ".v-recommendation-container"
+      );
+
+    const recommendationEl =
+      clone.querySelector(
+        ".v-recommendation"
+      );
+
     const deleteButton =
       clone.querySelector(
         ".v-del-btn"
@@ -90392,10 +90434,7 @@ async function renderVisits(
         );
     }
 
-    if (
-      visit.rx &&
-      visit.rx.trim()
-    ) {
+       if (treatment) {
       if (rxContainer) {
         rxContainer.style.display =
           "block";
@@ -90404,10 +90443,24 @@ async function renderVisits(
       if (rxEl) {
         rxEl.innerHTML =
           formatVisitTextPremium(
-            visit.rx,
+            treatment,
             t(
               "patients.card.visits.treatmentNotSpecified"
             )
+          );
+      }
+    }
+
+    if (recommendation) {
+      if (recommendationContainer) {
+        recommendationContainer.style.display =
+          "block";
+      }
+
+      if (recommendationEl) {
+        recommendationEl.innerHTML =
+          formatVisitTextPremium(
+            recommendation
           );
       }
     }
