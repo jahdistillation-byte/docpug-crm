@@ -60343,10 +60343,25 @@ function renderPatientVaccinationsPanel(
                 )}"
               >
                 <div
-                  class="patientVaccinationIcon"
-                >
-                  💉
-                </div>
+  class="patientVaccinationIcon"
+  aria-hidden="true"
+>
+  <svg viewBox="0 0 24 24" fill="none">
+    <path
+      d="m14.7 5.3 4 4M13.25 6.75l4 4M5.5 18.5l9.7-9.7M4 20l3.5-1.5-2-2L4 20Z"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="m16.5 3.5 4 4M18.5 5.5l1.5-1.5"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+    />
+  </svg>
+</div>
 
                 <div
                   class="patientVaccinationMain"
@@ -60440,7 +60455,15 @@ function renderPatientVaccinationsPanel(
                             editLabel
                           )}"
                         >
-                          ✎
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path
+    d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
                         </button>
 
                         <button
@@ -60459,7 +60482,15 @@ function renderPatientVaccinationsPanel(
                             deleteLabel
                           )}"
                         >
-                          🗑
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path
+    d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
                         </button>
                       </div>
                     `
@@ -60474,7 +60505,15 @@ function renderPatientVaccinationsPanel(
           class="patientVaccinationsEmpty"
         >
           <span>
-            💉
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path
+    d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
           </span>
 
           <div>
@@ -60501,48 +60540,82 @@ function renderPatientVaccinationsPanel(
     <section
       class="patientVaccinationsPanel"
     >
-      <div
-        class="patientVaccinationsHead"
-      >
-        <div>
-          <span
-            class="patientVaccinationsEyebrow"
+      <header class="patientPremiumSectionHeader">
+  <div class="patientPremiumSectionHeading">
+    <span
+      class="patientPremiumSectionIcon"
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="m14.7 5.3 4 4M13.25 6.75l4 4M5.5 18.5l9.7-9.7M4 20l3.5-1.5-2-2L4 20Z"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="m16.5 3.5 4 4M18.5 5.5l1.5-1.5"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+        />
+      </svg>
+    </span>
+
+    <div>
+      <span class="patientPremiumSectionKicker">
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.prevention"
+          )
+        )}
+      </span>
+
+      <h3>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.vaccinations"
+          )
+        )}
+      </h3>
+    </div>
+  </div>
+
+  ${
+    canManageVaccinations
+      ? `
+        <div class="patientPremiumSectionActions">
+          <button
+            type="button"
+            class="
+              patientPremiumPrimaryButton
+              patientVaccinationAddButton
+            "
+            data-add-patient-vaccination
           >
-            ${escapeHtml(
-              translateInterfaceText(
-                "patients.card.prevention"
-              )
-            )}
-          </span>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
 
-          <h3>
-            💉 ${escapeHtml(
-              translateInterfaceText(
-                "patients.card.vaccinations"
-              )
-            )}
-          </h3>
+            <span>
+              ${escapeHtml(
+                translateInterfaceText(
+                  "patients.card.addVaccination"
+                )
+              )}
+            </span>
+          </button>
         </div>
-
-        ${
-          canManageVaccinations
-            ? `
-              <button
-                type="button"
-                class="patientVaccinationAddButton"
-                data-add-patient-vaccination
-              >
-                + ${escapeHtml(
-                  translateInterfaceText(
-                    "patients.card.addVaccination"
-                  )
-                )}
-              </button>
-            `
-            : ""
-        }
-      </div>
-
+      `
+      : ""
+  }
+</header>
       <div
         class="patientVaccinationsList"
       >
@@ -62258,84 +62331,125 @@ const deceasedDateText =
     : "";
 
 const patientStatusText =
-  patientStatus ===
-  "deceased"
-       ? `† ${translateInterfaceText(
+  patientStatus === "deceased"
+    ? `${translateInterfaceText(
         "patients.card.statusDeceased"
       )}${
         deceasedDateText
           ? ` · ${deceasedDateText}`
           : ""
       }`
-    : patientStatus ===
-        "archived"
-      ? `📦 ${translateInterfaceText(
+    : patientStatus === "archived"
+      ? translateInterfaceText(
           "patients.card.statusArchived"
-        )}`
-      : `● ${translateInterfaceText(
+        )
+      : translateInterfaceText(
           "patients.card.statusActive"
-        )}`;
+        );
+
+const patientOwner =
+  getOwnerById(
+    pet.owner_id
+  );
+
+const patientOwnerName =
+  patientOwner?.name || "—";
+
+const patientSexText =
+  translateInterfaceText(
+    String(pet.sex || "") === "male"
+      ? "calendar.detail.male"
+      : String(pet.sex || "") === "female"
+        ? "calendar.detail.female"
+        : "calendar.detail.not.specified"
+  );
+
+const patientAgeText =
+  pet.age
+    ? String(pet.age)
+    : "—";
 
 root.innerHTML = `
-  <div style="margin-bottom:16px;">
-    <button
-      id="btnBackToProfile"
-      class="patient-tab-btn"
-      type="button"
-      style="
-        background:rgba(255,255,255,0.05);
-        padding:8px 14px;
-        border-radius:10px;
-      "
+  <button
+    id="btnBackToProfile"
+    class="patientPremiumBack"
+    type="button"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
     >
-      ← ${escapeHtml(
+      <path d="M19 12H5"></path>
+      <path d="m12 19-7-7 7-7"></path>
+    </svg>
+
+    <span>
+      ${escapeHtml(
         translateInterfaceText(
           "patients.card.backToList"
         )
       )}
-    </button>
-  </div>
+    </span>
+  </button>
 
-  <div
-    class="
-      glass-card
-      patientRecordSummary
-    "
-    style="
-      background:
-        linear-gradient(
-          135deg,
-          rgba(147,51,234,0.15),
-          rgba(15,23,42,0.4)
-        );
-      padding:24px;
-      border-radius:20px;
-      border:
-        1px solid
-        rgba(255,255,255,0.1);
-      margin-bottom:24px;
-      width:100%;
-    "
-  >
-    <div
-      style="
-        display:flex;
-        justify-content:
-          space-between;
-        align-items:start;
-        gap:20px;
-      "
-    >
-      <div>
-        <div
-          style="
-            font-size:0.75rem;
-            text-transform:uppercase;
-            opacity:0.5;
-            letter-spacing:1px;
-            margin-bottom:4px;
-          "
+  <section class="patientPremiumHero">
+    <div class="patientPremiumMain">
+      <div
+        class="patientPremiumAvatar"
+        aria-hidden="true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="28"
+          height="28"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         >
+          <ellipse
+            cx="12"
+            cy="15.5"
+            rx="5"
+            ry="4"
+          ></ellipse>
+
+          <circle
+            cx="6.5"
+            cy="9"
+            r="2"
+          ></circle>
+
+          <circle
+            cx="10"
+            cy="5.5"
+            r="2"
+          ></circle>
+
+          <circle
+            cx="14"
+            cy="5.5"
+            r="2"
+          ></circle>
+
+          <circle
+            cx="17.5"
+            cy="9"
+            r="2"
+          ></circle>
+        </svg>
+      </div>
+
+      <div class="patientPremiumIdentity">
+        <div class="patientPremiumKicker">
           ${escapeHtml(
             translateInterfaceText(
               "patients.card.medicalRecord"
@@ -62343,356 +62457,483 @@ root.innerHTML = `
           )}
         </div>
 
-        <div
-          style="
-            display:flex;
-            align-items:center;
-            gap:10px;
-            flex-wrap:wrap;
-          "
-        >
-          <h2
-            class="patientRecordTitle"
-            style="
-              margin:0;
-              font-size:2.2rem;
-              color:#fff;
-            "
-          >
-            🐾 ${escapeHtml(
-              patientName
-            )}
-          </h2>
+        <div class="patientPremiumNameRow">
+          <h1 class="patientPremiumName">
+            ${escapeHtml(patientName)}
+          </h1>
 
-          <div
+          <button
+            type="button"
             data-patient-status-toggle
             class="
               patientStatusBadge
+              patientPremiumStatus
               ${patientStatusClass}
             "
           >
+            <span aria-hidden="true"></span>
+
             ${escapeHtml(
               patientStatusText
             )}
-          </div>
+          </button>
         </div>
 
-        <div
-          style="
-            margin-top:6px;
-            opacity:0.7;
-            font-size:0.95rem;
-          "
-        >
-          ${escapeHtml(
-            patientSpecies
-          )}
+        <div class="patientPremiumMeta">
+          <span>
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <ellipse
+                cx="12"
+                cy="15.5"
+                rx="5"
+                ry="4"
+              ></ellipse>
 
-          ${
-            patientBreed
-              ? ` • ${escapeHtml(
-                  patientBreed
-                )}`
-              : ""
-          }
+              <circle
+                cx="6.5"
+                cy="9"
+                r="2"
+              ></circle>
+
+              <circle
+                cx="10"
+                cy="5.5"
+                r="2"
+              ></circle>
+
+              <circle
+                cx="14"
+                cy="5.5"
+                r="2"
+              ></circle>
+
+              <circle
+                cx="17.5"
+                cy="9"
+                r="2"
+              ></circle>
+            </svg>
+
+            ${escapeHtml(patientSpecies)}
+
+            ${
+              patientBreed
+                ? ` · ${escapeHtml(
+                    patientBreed
+                  )}`
+                : ""
+            }
+          </span>
+
+          <span>
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="8"
+                r="4"
+              ></circle>
+
+              <path
+                d="M4 21a8 8 0 0 1 16 0"
+              ></path>
+            </svg>
+
+            ${escapeHtml(
+              patientOwnerName
+            )}
+          </span>
+
+          <span>
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+              ></circle>
+
+              <path d="M12 11v5"></path>
+              <path d="M12 8h.01"></path>
+            </svg>
+
+            ${escapeHtml(
+              patientSexText
+            )}
+            ·
+            ${escapeHtml(
+              patientAgeText
+            )}
+          </span>
         </div>
       </div>
 
-      <button
-        class="btn-primary"
-        id="btnAddVisit"
-        type="button"
-        style="
-          box-shadow:
-            0 4px 15px
-            rgba(147,51,234,0.4);
-          border:none;
-          padding:12px 20px;
-          border-radius:12px;
-          font-weight:600;
-          cursor:pointer;
-        "
-      >
-        + ${escapeHtml(
-          translateInterfaceText(
-            "patients.card.newVisit"
-          )
-        )}
-      </button>
+      <div class="patientPremiumActions">
+        <button
+          class="patientPremiumNewVisit"
+          id="btnAddVisit"
+          type="button"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14"></path>
+            <path d="M5 12h14"></path>
+          </svg>
+
+          <span>
+            ${escapeHtml(
+              translateInterfaceText(
+                "patients.card.newVisit"
+              )
+            )}
+          </span>
+        </button>
+      </div>
     </div>
 
-    <div
-      class="patientRecordStats"
-      style="
-        display:grid;
-        grid-template-columns:
-          repeat(4,1fr);
-        gap:16px;
-        margin-top:24px;
-      "
-    >
-      <div
-        class="patientRecordStat"
-        style="
-          background:rgba(0,0,0,0.2);
-          padding:14px;
-          border-radius:12px;
-          text-align:center;
-          border:
-            1px solid
-            rgba(255,255,255,0.03);
-        "
-      >
-        <div
-          style="
-            font-size:0.7rem;
-            opacity:0.5;
-            text-transform:uppercase;
-            margin-bottom:4px;
-          "
-        >
+    <div class="patientPremiumMetrics">
+      <div class="patientPremiumMetric">
+        <span>
           ${escapeHtml(
             translateInterfaceText(
               "patients.card.visits"
             )
           )}
-        </div>
+        </span>
 
-        <div
-          style="
-            font-size:1.4rem;
-            font-weight:700;
-            color:#c084fc;
-          "
-        >
+        <strong>
           ${escapeHtml(
             String(stats.count)
           )}
-        </div>
+        </strong>
       </div>
 
-      <div
-        class="patientRecordStat"
-        style="
-          background:rgba(0,0,0,0.2);
-          padding:14px;
-          border-radius:12px;
-          text-align:center;
-          border:
-            1px solid
-            rgba(255,255,255,0.03);
-        "
-      >
-        <div
-          style="
-            font-size:0.7rem;
-            opacity:0.5;
-            text-transform:uppercase;
-            margin-bottom:4px;
-          "
-        >
+      <div class="patientPremiumMetric">
+        <span>
           ${escapeHtml(
             translateInterfaceText(
               "patients.card.weight"
             )
           )}
-        </div>
+        </span>
 
-        <div
-          style="
-            font-size:1.4rem;
-            font-weight:700;
-            color:#c084fc;
-          "
-        >
+        <strong>
           ${escapeHtml(
             patientWeight
           )}
-        </div>
+        </strong>
       </div>
 
-      <div
-        class="patientRecordStat"
-        style="
-          background:rgba(0,0,0,0.2);
-          padding:14px;
-          border-radius:12px;
-          text-align:center;
-          border:
-            1px solid
-            rgba(255,255,255,0.03);
-        "
-      >
-        <div
-          style="
-            font-size:0.7rem;
-            opacity:0.5;
-            text-transform:uppercase;
-            margin-bottom:4px;
-          "
-        >
+      <div class="patientPremiumMetric">
+        <span>
           ${escapeHtml(
             translateInterfaceText(
               "patients.card.lastVisit"
             )
           )}
-        </div>
+        </span>
 
-        <div
-          style="
-            font-size:1.1rem;
-            font-weight:600;
-            color:#fff;
-            margin-top:4px;
-          "
-        >
+        <strong>
           ${escapeHtml(
             lastVisitText
           )}
-        </div>
+        </strong>
       </div>
 
-      <div
-        class="patientRecordStat"
-        style="
-          background:rgba(0,0,0,0.2);
-          padding:14px;
-          border-radius:12px;
-          text-align:center;
-          border:
-            1px solid
-            rgba(255,255,255,0.03);
-        "
-      >
-        <div
-          style="
-            font-size:0.7rem;
-            opacity:0.5;
-            text-transform:uppercase;
-            margin-bottom:4px;
-          "
-        >
+      <div class="patientPremiumMetric">
+        <span>
           ${escapeHtml(
             translateInterfaceText(
               "patients.card.totalPaid"
             )
           )}
-        </div>
+        </span>
 
-        <div
-          style="
-            font-size:1.4rem;
-            font-weight:700;
-            color:#22c55e;
-          "
-        >
+        <strong>
           ${escapeHtml(
             String(stats.total)
           )} ₴
-        </div>
+        </strong>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div
-    class="patient-tabs-nav"
-    style="
-      display:flex;
-      gap:6px;
-      margin-bottom:24px;
-      padding:6px;
-      background:
-        rgba(255,255,255,0.04);
-      border-radius:14px;
-      border:
-        1px solid
-        rgba(255,255,255,0.08);
-      width:fit-content;
-      backdrop-filter:blur(15px);
-      -webkit-backdrop-filter:
-        blur(15px);
-    "
+  <nav
+    class="patient-tabs-nav patientPremiumTabs"
+    aria-label="Розділи медичної карти"
   >
     <button
-      class="patient-tab-btn"
+      class="patient-tab-btn patientPremiumTab"
       type="button"
       data-p-tab="overview"
     >
-      👁️ ${escapeHtml(
-        translateInterfaceText(
-          "patients.card.overview"
-        )
-      )}
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect
+          x="3"
+          y="3"
+          width="7"
+          height="7"
+          rx="2"
+        ></rect>
+
+        <rect
+          x="14"
+          y="3"
+          width="7"
+          height="7"
+          rx="2"
+        ></rect>
+
+        <rect
+          x="3"
+          y="14"
+          width="7"
+          height="7"
+          rx="2"
+        ></rect>
+
+        <rect
+          x="14"
+          y="14"
+          width="7"
+          height="7"
+          rx="2"
+        ></rect>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.overview"
+          )
+        )}
+      </span>
     </button>
 
     <button
-      class="patient-tab-btn"
+      class="patient-tab-btn patientPremiumTab"
       type="button"
       data-p-tab="visits"
     >
-      📅 ${escapeHtml(
-        translateInterfaceText(
-          "patients.card.visits"
-        )
-      )}
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M8 2v4"></path>
+        <path d="M16 2v4"></path>
+        <path d="M3 9h18"></path>
+
+        <rect
+          x="3"
+          y="4"
+          width="18"
+          height="17"
+          rx="3"
+        ></rect>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.visits"
+          )
+        )}
+      </span>
     </button>
 
     <button
-      class="patient-tab-btn"
+      class="patient-tab-btn patientPremiumTab"
       type="button"
       data-p-tab="medcard"
     >
-      🩺 ${escapeHtml(
-        translateInterfaceText(
-          "patients.card.medcard"
-        )
-      )}
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M6 3v6a6 6 0 0 0 12 0V3"
+        ></path>
+
+        <path
+          d="M18 12v2a4 4 0 0 0 8 0"
+          transform="translate(-4)"
+        ></path>
+
+        <circle
+          cx="20"
+          cy="14"
+          r="2"
+        ></circle>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.medcard"
+          )
+        )}
+      </span>
     </button>
 
     <button
-      class="patient-tab-btn"
+      class="patient-tab-btn patientPremiumTab"
       type="button"
       data-p-tab="labs"
     >
-      🧪 ${escapeHtml(
-        translateInterfaceText(
-          "patients.card.labs"
-        )
-      )}
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M9 3h6"></path>
+        <path d="M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"></path>
+        <path d="M8 15h8"></path>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.labs"
+          )
+        )}
+      </span>
     </button>
 
     <button
-      class="patient-tab-btn"
+      class="patient-tab-btn patientPremiumTab"
       type="button"
       data-p-tab="files"
     >
-      📁 ${escapeHtml(
-        translateInterfaceText(
-          "patients.card.files"
-        )
-      )}
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"
+        ></path>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.files"
+          )
+        )}
+      </span>
     </button>
 
     <button
-      class="patient-tab-btn"
+      class="patient-tab-btn patientPremiumTab"
       type="button"
       data-p-tab="documents"
     >
-      📄 ${escapeHtml(
-        translateInterfaceText(
-          "patients.card.documents"
-        )
-      )}
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M6 2h9l5 5v15H6Z"
+        ></path>
+
+        <path d="M14 2v6h6"></path>
+        <path d="M9 13h6"></path>
+        <path d="M9 17h6"></path>
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          translateInterfaceText(
+            "patients.card.documents"
+          )
+        )}
+      </span>
     </button>
-  </div>
+  </nav>
 
   <div
     id="patientTabContent"
-    style="
-      animation:
-        fadeIn 0.3s
-        ease-in-out;
-    "
+    class="patientPremiumTabContent"
   ></div>
 `;
 
@@ -62776,8 +63017,14 @@ if (!dynamicBox) {
     document.body.dataset.theme === "white";
 
   root.querySelectorAll("[data-p-tab]").forEach((btn) => {
-    const isActive = btn.dataset.pTab === tab;
-    btn.style.padding = "10px 18px";
+  const isActive = btn.dataset.pTab === tab;
+
+  btn.classList.toggle(
+    "is-active",
+    isActive
+  );
+
+  btn.style.padding = "10px 18px";
     btn.style.borderRadius = "10px";
     btn.style.border = "none";
     btn.style.cursor = "pointer";
@@ -63017,86 +63264,75 @@ if (!dynamicBox) {
         </div>
       `;
     };
+dynamicBox.innerHTML = `
+<section class="patientPremiumAi">
+  <div class="patientPremiumAiIcon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 3.5 13.35 8.1 18 9.5l-4.65 1.4L12 15.5l-1.35-4.6L6 9.5l4.65-1.4L12 3.5Z"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linejoin="round"
+      />
+      <path
+        d="m18.5 15 .65 2.2 2.2.65-2.2.65-.65 2.2-.65-2.2-2.2-.65 2.2-.65.65-2.2Z"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </div>
 
-  dynamicBox.innerHTML = `
-    <section
-      style="
-        margin-bottom:20px;
-        padding:20px;
-        border-radius:18px;
-        border:
-          1px solid
-          rgba(147,70,232,.55);
-        background:
-          linear-gradient(
-            135deg,
-            rgba(147,70,232,.18),
-            rgba(20,15,35,.75)
-          );
-      "
-    >
-      <div
-        style="
-          font-size:11px;
-          letter-spacing:1.4px;
-          color:#c084fc;
-        "
-      >
-        PUG AI · EVIDENCE FIRST
-      </div>
+  <div class="patientPremiumAiContent">
+    <div class="patientPremiumAiLabel">
+      PUG AI · EVIDENCE FIRST
+    </div>
 
-      <h3
-        style="
-          margin:7px 0 5px;
-          color:#fff;
-        "
-      >
-        ${escapeHtml(
-          translateInterfaceText(
-            "patients.card.aiTitle"
-          )
-        )}
-      </h3>
+    <h3 class="patientPremiumAiTitle">
+      ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.aiTitle"
+        )
+      )}
+    </h3>
 
-      <p
-        style="
-          margin:0;
-          opacity:.65;
-        "
-      >
-        ${escapeHtml(
-          translateInterfaceText(
-            "patients.card.aiDescription"
-          )
-        )}
-      </p>
+    <p class="patientPremiumAiDescription">
+      ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.aiDescription"
+        )
+      )}
+    </p>
 
-      <button
-        type="button"
-        data-patient-ai-generate
-        style="
-          margin-top:16px;
-          padding:10px 16px;
-          border:0;
-          border-radius:11px;
-          background:#9346e8;
-          color:#fff;
-          font-weight:600;
-          cursor:pointer;
-        "
-      >
-        ✦ ${escapeHtml(
-          translateInterfaceText(
-            "patients.card.aiCreate"
-          )
-        )}
-      </button>
+    <div
+      class="patientPremiumAiResult"
+      data-patient-ai-result
+    ></div>
+  </div>
 
-      <div
-        data-patient-ai-result
-        style="margin-top:16px;"
-      ></div>
-    </section>
+  <button
+    type="button"
+    class="patientPremiumAiButton"
+    data-patient-ai-generate
+  >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 3.5 13.35 8.1 18 9.5l-4.65 1.4L12 15.5l-1.35-4.6L6 9.5l4.65-1.4L12 3.5Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+    </svg>
+
+    <span>
+      ${escapeHtml(
+        translateInterfaceText(
+          "patients.card.aiCreate"
+        )
+      )}
+    </span>
+  </button>
+</section>
 
     ${renderPatientDiagnosesPanel(
       pet,
@@ -65251,39 +65487,74 @@ function renderPatientWeightPanel(
     <section
       class="patientWeightPanel"
     >
-      <header
-        class="patientWeightHeader"
-      >
-        <div>
-          <h3>
-            ${escapeHtml(
-              t(
-                "patients.card.weightDynamics"
-              )
-            )}
-          </h3>
+      <header class="patientPremiumSectionHeader">
+  <div class="patientPremiumSectionHeading">
+    <span
+      class="patientPremiumSectionIcon"
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M6.5 4.5h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Z"
+          stroke="currentColor"
+          stroke-width="1.7"
+        />
+        <path
+          d="M8.25 9.5a3.75 3.75 0 0 1 7.5 0M12 9.5l2-2"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+        />
+      </svg>
+    </span>
 
-          <p>
-            ${escapeHtml(
-              t(
-                "patients.card.weightHistoryDescription"
-              )
-            )}
-          </p>
-        </div>
+    <div>
+      <h3>
+        ${escapeHtml(
+          t(
+            "patients.card.weightDynamics"
+          )
+        )}
+      </h3>
 
-        <button
-          type="button"
-          class="patientWeightAdd"
-          data-add-patient-weight
-        >
-          + ${escapeHtml(
-            t(
-              "patients.card.addWeight"
-            )
-          )}
-        </button>
-      </header>
+      <p>
+        ${escapeHtml(
+          t(
+            "patients.card.weightHistoryDescription"
+          )
+        )}
+      </p>
+    </div>
+  </div>
+
+  <div class="patientPremiumSectionActions">
+    <button
+      type="button"
+      class="
+        patientPremiumSecondaryButton
+        patientWeightAdd
+      "
+      data-add-patient-weight
+    >
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 5v14M5 12h14"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+
+      <span>
+        ${escapeHtml(
+          t(
+            "patients.card.addWeight"
+          )
+        )}
+      </span>
+    </button>
+  </div>
+</header>
 
       <div
         class="patientWeightBody"
@@ -65519,60 +65790,89 @@ function renderPatientDiagnosesPanel(
     <section
       class="patientDiagnosesPanel"
     >
-      <header
-        class="patientDiagnosesHeader"
-      >
-        <div>
-          <h3>
-            ${escapeHtml(
-              t(
-                "patients.card.diagnosis.activeTitle"
-              )
-            )}
-          </h3>
+     <header class="patientPremiumSectionHeader">
+  <div class="patientPremiumSectionHeading">
+    <span
+      class="patientPremiumSectionIcon"
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 3.75c-3.7 0-6.7 3-6.7 6.7 0 4.75 6.7 9.8 6.7 9.8s6.7-5.05 6.7-9.8c0-3.7-3-6.7-6.7-6.7Z"
+          stroke="currentColor"
+          stroke-width="1.7"
+        />
+        <path
+          d="M9 10.55h6M12 7.55v6"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+        />
+      </svg>
+    </span>
 
-          <p>
-            ${escapeHtml(
-              t(
-                "patients.card.diagnosis.activeDescription"
-              )
-            )}
-          </p>
-        </div>
+    <div>
+      <h3>
+        ${escapeHtml(
+          t(
+            "patients.card.diagnosis.activeTitle"
+          )
+        )}
+      </h3>
 
-        <div
-          class="patientDiagnosesHeaderActions"
-        >
+      <p>
+        ${escapeHtml(
+          t(
+            "patients.card.diagnosis.activeDescription"
+          )
+        )}
+      </p>
+    </div>
+  </div>
+
+  <div class="patientPremiumSectionActions">
+    <button
+      type="button"
+      class="patientPremiumSecondaryButton"
+      data-show-diagnosis-history
+    >
+      ${escapeHtml(
+        t(
+          "patients.card.diagnosis.fullHistory"
+        )
+      )}
+    </button>
+
+    ${
+      canEdit
+        ? `
           <button
             type="button"
-            data-show-diagnosis-history
+            class="patientPremiumPrimaryButton"
+            data-add-patient-diagnosis
           >
-            ${escapeHtml(
-              t(
-                "patients.card.diagnosis.fullHistory"
-              )
-            )}
-          </button>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
 
-          ${
-            canEdit
-              ? `
-                <button
-                  type="button"
-                  class="is-primary"
-                  data-add-patient-diagnosis
-                >
-                  + ${escapeHtml(
-                    t(
-                      "patients.card.diagnosis.add"
-                    )
-                  )}
-                </button>
-              `
-              : ""
-          }
-        </div>
-      </header>
+            <span>
+              ${escapeHtml(
+                t(
+                  "patients.card.diagnosis.add"
+                )
+              )}
+            </span>
+          </button>
+        `
+        : ""
+    }
+  </div>
+</header>
 
       <div
         class="patientDiagnosesList"
