@@ -68423,3 +68423,84 @@ body.black
   font-weight: 500 !important;
   letter-spacing: 0 !important;
 }
+/* =========================================================
+   PATIENT OVERVIEW — RESTORE WIDTH + LIGHT TYPOGRAPHY
+   ========================================================= */
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewGrid {
+  display: block !important;
+  width: 100%;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewMain,
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewSide {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 14px !important;
+  width: 100%;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewSide {
+  margin-top: 14px;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewSide
+  > div:has(> .patientPassportCard) {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewGrid
+  :where(p, small) {
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewGrid
+  :where(h2, h3, strong, button) {
+  font-weight: 600 !important;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumAiLabel,
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientWeightCurrent > span {
+  font-weight: 500 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientWeightRow > span,
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientWeightRow > strong {
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+}
+
+@media screen and (max-width: 720px) {
+  .page[data-page="patient"]
+    #patientCardRoot
+    .patientPremiumOverviewSide
+    > div:has(> .patientPassportCard) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
