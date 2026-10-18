@@ -68363,7 +68363,7 @@ body.black
   min-width: 0;
 }
 
-/* На более узких экранах возвращаем одну колонку */
+/* На более узких экранах возвращаем одну колонку *ыфв/
 @media screen and (max-width: 980px) {
   .page[data-page="patient"]
     #patientCardRoot
