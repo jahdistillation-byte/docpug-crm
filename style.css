@@ -68391,3 +68391,35 @@ body.black
     justify-self: start;
   }
 }
+/* =========================================================
+   PATIENT VISITS — LIGHT TYPOGRAPHY
+   ========================================================= */
+
+.page[data-page="patient"] #patientTabContent .premiumVisitDiagnosis {
+  font-weight: 600 !important;
+  letter-spacing: -0.015em !important;
+}
+
+.page[data-page="patient"] #patientTabContent .premiumVisitEyebrow {
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+.page[data-page="patient"] #patientTabContent .premiumVisitSectionHead {
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+}
+
+.page[data-page="patient"] #patientTabContent .premiumVisitText,
+.page[data-page="patient"] #patientTabContent .premiumVisitList li {
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+}
+
+.page[data-page="patient"] #patientTabContent .premiumVisitStatus,
+.page[data-page="patient"] #patientTabContent .premiumVisitPrice,
+.page[data-page="patient"] #patientTabContent .premiumVisitType,
+.page[data-page="patient"] #patientTabContent .visitCardAction {
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
