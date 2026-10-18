@@ -9239,13 +9239,33 @@ if (ownersSearchInput) {
     }
   });
 
-  // Подсвечиваем активную вкладку в новом боковом меню
-  if (TAB_ROUTES.has(finalRoute)) {
-    Array.from(document.querySelectorAll("#tabs .menu-item, #tabs .tab")).forEach((btn) => {
-      const btnRoute = btn.dataset.target || btn.dataset.route;
-      btn.classList.toggle("active", btnRoute === finalRoute);
-    });
-  }
+ // Подсвечиваем основной раздел,
+ // включая внутренние страницы владельца, пациента и визита
+const activeDockRoute =
+  finalRoute === "owner"
+    ? "owners"
+    : finalRoute === "patient"
+      ? "patients"
+      : finalRoute === "visit"
+        ? "visits"
+        : finalRoute;
+
+if (TAB_ROUTES.has(activeDockRoute)) {
+  Array.from(
+    document.querySelectorAll(
+      "#tabs .menu-item, #tabs .tab"
+    )
+  ).forEach((button) => {
+    const buttonRoute =
+      button.dataset.target ||
+      button.dataset.route;
+
+    button.classList.toggle(
+      "active",
+      buttonRoute === activeDockRoute
+    );
+  });
+}
 }
 
 function initTabs() {
@@ -63012,34 +63032,22 @@ if (!dynamicBox) {
   return;
 }
 
-  // Красим вкладки
-  const isWhitePatientTheme =
-    document.body.dataset.theme === "white";
+// Активное состояние вкладок медицинской карты
+root
+  .querySelectorAll("[data-p-tab]")
+  .forEach((button) => {
+    const isActive =
+      button.dataset.pTab === tab;
 
-  root.querySelectorAll("[data-p-tab]").forEach((btn) => {
-  const isActive = btn.dataset.pTab === tab;
+    button.classList.toggle(
+      "is-active",
+      isActive
+    );
 
-  btn.classList.toggle(
-    "is-active",
-    isActive
-  );
-
-  btn.style.padding = "10px 18px";
-    btn.style.borderRadius = "10px";
-    btn.style.border = "none";
-    btn.style.cursor = "pointer";
-    btn.style.fontSize = "14px";
-    btn.style.fontWeight = isActive ? "600" : "500";
-    btn.style.color = isWhitePatientTheme
-      ? (isActive ? "#245f89" : "#667987")
-      : (isActive ? "#fff" : "rgba(255, 255, 255, 0.6)");
-    btn.style.background = isWhitePatientTheme
-      ? (isActive ? "#e8f3fa" : "transparent")
-      : (isActive ? "rgba(255, 255, 255, 0.15)" : "transparent");
-    btn.style.boxShadow = isWhitePatientTheme
-      ? (isActive ? "inset 0 0 0 1px #bdd7e8" : "none")
-      : (isActive ? "0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)" : "none");
-    btn.style.transition = "all 0.2s ease";
+    button.setAttribute(
+      "aria-selected",
+      String(isActive)
+    );
   });
 
   // Шаг 2: Контент табов
@@ -63265,7 +63273,9 @@ if (!dynamicBox) {
       `;
     };
 dynamicBox.innerHTML = `
-<section class="patientPremiumAi">
+<section class="patientPremiumOverviewGrid">
+  <div class="patientPremiumOverviewMain">
+    <section class="patientPremiumAi">
   <div class="patientPremiumAiIcon" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none">
       <path
@@ -63339,11 +63349,13 @@ dynamicBox.innerHTML = `
       activeDiagnoses
     )}
 
-    ${renderPatientWeightPanel(
+       ${renderPatientWeightPanel(
       pet,
       weightHistory
     )}
+  </div>
 
+  <aside class="patientPremiumOverviewSide">
     ${renderPatientVaccinationsPanel(
       pet,
       vaccinationHistory
@@ -63724,9 +63736,11 @@ dynamicBox.innerHTML = `
             )}
           </button>
         </div>
-      </div>
+            </div>
     </div>
-  `;
+  </aside>
+</section>
+`;
 const patientAiButton =
   dynamicBox.querySelector(
     "[data-patient-ai-generate]"

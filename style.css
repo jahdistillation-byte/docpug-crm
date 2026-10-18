@@ -68307,3 +68307,87 @@ body.black
     flex-wrap: wrap;
   }
 }
+/* =========================================================
+   PATIENT PROFILE 3.0 — TWO-COLUMN CLINICAL OVERVIEW
+   ========================================================= */
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewGrid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.45fr)
+    minmax(320px, 0.75fr);
+  align-items: start;
+  gap: 14px;
+  width: 100%;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewMain,
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewSide {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewGrid
+  :is(
+    .patientPremiumAi,
+    .patientDiagnosesPanel,
+    .patientWeightPanel,
+    .patientVaccinationsPanel,
+    .patientPassportCard,
+    .patientDoctorNotesCard
+  ) {
+  min-width: 0;
+  margin: 0 !important;
+}
+
+.page[data-page="patient"]
+  #patientCardRoot
+  .patientPremiumOverviewSide
+  > div:has(
+    > .patientPassportCard
+  ) {
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 1fr) !important;
+  gap: 14px !important;
+  min-width: 0;
+}
+
+/* На более узких экранах возвращаем одну колонку */
+@media screen and (max-width: 980px) {
+  .page[data-page="patient"]
+    #patientCardRoot
+    .patientPremiumOverviewGrid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+}
+
+/* Компактная раскладка AI-блока внутри левой колонки */
+@media screen and (min-width: 981px) {
+  .page[data-page="patient"]
+    #patientCardRoot
+    .patientPremiumOverviewMain
+    .patientPremiumAi {
+    grid-template-columns:
+      44px minmax(0, 1fr);
+  }
+
+  .page[data-page="patient"]
+    #patientCardRoot
+    .patientPremiumOverviewMain
+    .patientPremiumAiButton {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
