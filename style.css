@@ -68794,3 +68794,25 @@ body[data-theme="white"]
     padding: 15px;
   }
 }
+/* PATIENT VISITS — THEME-AWARE TIMELINE */
+
+.page[data-page="patient"]
+  #patientTabContent
+  .premiumVisitTrack {
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  left: 12px;
+  width: 2px;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      var(--accent-color, #2f6f98) 0%,
+      transparent 100%
+    );
+  box-shadow:
+    0 0 10px
+    var(--accent-color, #2f6f98);
+  opacity: 0.28;
+}

@@ -90055,8 +90055,8 @@ async function renderVisits(
       "div"
     );
 
-  lineTrack.style.cssText =
-    "position:absolute;left:12px;top:15px;bottom:15px;width:2px;background:linear-gradient(180deg,#c084fc 0%,rgba(147,51,234,.1) 100%);box-shadow:0 0 10px rgba(168,85,247,.3);opacity:.6;";
+  lineTrack.className =
+    "premiumVisitTrack";
 
   timelineContainer.appendChild(
     lineTrack
