@@ -69305,3 +69305,188 @@ body[data-theme="white"]
     animation: none;
   }
 }
+/* PUG AI DRAWER — VISUAL FIX */
+
+.page[data-page="visit"]
+  .visitAiWorkspacePane[
+    data-ai-workspace-pane="consult"
+  ]:not([hidden]),
+.page[data-page="visit"]
+  .visitAiWorkspacePane[
+    data-ai-workspace-pane="consult"
+  ]
+  #visitAiConsultPanel {
+  background:
+    linear-gradient(
+      145deg,
+      var(--med-window-start),
+      var(--med-window-end)
+    ) !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspace[
+    data-active-tab="consult"
+  ]
+  .visitAiWorkspaceTabs {
+  visibility: hidden !important;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultQuickActions {
+  display: grid !important;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultQuickButton {
+  min-height: 42px !important;
+  padding: 8px !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  text-align: left;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultComposer {
+  grid-template-columns:
+    minmax(0, 1fr) auto !important;
+  align-items: stretch !important;
+  margin-top: auto !important;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultInput {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 92px !important;
+  resize: none !important;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultSend {
+  width: auto !important;
+  min-width: 116px !important;
+  min-height: 92px !important;
+  padding: 12px !important;
+}
+
+@media screen and (max-width: 520px) {
+  .page[data-page="visit"]
+    #visitAiConsultPanel
+    .visitAiConsultQuickActions {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .page[data-page="visit"]
+    #visitAiConsultPanel
+    .visitAiConsultComposer {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .page[data-page="visit"]
+    #visitAiConsultPanel
+    .visitAiConsultSend {
+    min-height: 46px !important;
+  }
+}
+/* PUG AI BAR — COMFORTABLE INPUT */
+
+.page[data-page="visit"]
+  .visitAiWorkspace {
+  grid-template-columns:
+    minmax(0, 1fr) auto !important;
+  grid-template-rows:
+    auto auto;
+  gap:
+    10px 14px !important;
+  padding:
+    13px 14px !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBrand {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceTabs {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBody {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel > div {
+  grid-template-columns:
+    minmax(0, 1fr) auto auto !important;
+  gap: 10px !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakeInput {
+  width: 100% !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding:
+    10px 13px !important;
+  overflow-y: auto;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.page[data-page="visit"]
+  #visitAiRecordButton,
+.page[data-page="visit"]
+  #visitAiStructureButton,
+.page[data-page="visit"]
+  #visitAiApplyButton {
+  min-height: 58px !important;
+  padding:
+    10px 16px !important;
+}
+
+@media screen and (max-width: 760px) {
+  .page[data-page="visit"]
+    #visitAiIntakePanel > div {
+    grid-template-columns:
+      1fr 1fr !important;
+  }
+
+  .page[data-page="visit"]
+    #visitAiIntakeInput {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .page[data-page="visit"]
+    #visitAiRecordButton {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .page[data-page="visit"]
+    #visitAiIntakePanel
+    > div
+    > div:nth-child(5)
+    > div {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
