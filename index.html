@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261007-owner-profile-v3">
+<link rel="stylesheet" href="style.css?v=20261020-visit-workspace-v1">
 </head>
 
 <body>
@@ -635,7 +635,57 @@
 
     <!-- MAIN GRID -->
     <div class="visitWorkspaceGrid">
+<nav
+  class="visitStageRail"
+  aria-label="Етапи прийому"
+>
+  <button
+    type="button"
+    class="visitStageButton active"
+    data-visit-stage-target="#visitReasonForVisit"
+  >
+    <span class="visitStageIndex">1</span>
+    <span>Огляд</span>
+  </button>
 
+  <button
+    type="button"
+    class="visitStageButton"
+    data-visit-stage-target=".visitAssessmentBlock"
+  >
+    <span class="visitStageIndex">2</span>
+    <span>Діагноз</span>
+  </button>
+
+  <button
+    type="button"
+    class="visitStageButton"
+    data-visit-stage-target="#visitMedRx"
+  >
+    <span class="visitStageIndex">3</span>
+    <span>Лікування</span>
+  </button>
+
+  <button
+    type="button"
+    class="visitStageButton"
+    data-visit-stage-target="#visitSvcSearch"
+  >
+    <span class="visitStageIndex">4</span>
+    <span>Послуги</span>
+  </button>
+
+  <button
+    type="button"
+    class="visitStageButton"
+    data-visit-stage-target=".visitWorkspaceSidebar"
+  >
+    <span class="visitStageIndex">5</span>
+    <span>Фініш</span>
+  </button>
+</nav>
+
+<!-- LEFT / MEDICAL -->
       <!-- LEFT / MEDICAL -->
       <main class="visitWorkspaceMain">
 
@@ -3058,7 +3108,7 @@
 
 <script
   defer
-  src="app.js?v=20261020-performance-v1"
+  src="app.js?v=20261020-visit-workspace-v1"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">

@@ -91357,22 +91357,77 @@ function initVisitUI() {
   state.visitUiBound = true;
 
   document.addEventListener("click", (e) => {
-    if (e.target.closest("#btnBackVisitPatient")) {
-      e.preventDefault();
-      e.stopPropagation();
+   if (e.target.closest("#btnBackVisitPatient")) {
+  e.preventDefault();
+  e.stopPropagation();
 
-      const visit = getVisitByIdSync(state.selectedVisitId);
-      const patientId =
-        state.selectedPetId ||
-        state.selectedPet?.id ||
-        visit?.pet_id;
+  const visit =
+    getVisitByIdSync(
+      state.selectedVisitId
+    );
 
-      if (patientId) openPatient(String(patientId));
-      else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
-      else setHash("patients");
-      return;
-    }
+  const patientId =
+    state.selectedPetId ||
+    state.selectedPet?.id ||
+    visit?.pet_id;
 
+  if (patientId) {
+    openPatient(
+      String(patientId)
+    );
+  } else if (
+    state.selectedOwnerId
+  ) {
+    openOwner(
+      state.selectedOwnerId
+    );
+  } else {
+    setHash("patients");
+  }
+
+  return;
+}
+
+const visitStageButton =
+  e.target.closest(
+    "[data-visit-stage-target]"
+  );
+
+if (visitStageButton) {
+  e.preventDefault();
+
+  const targetSelector =
+    visitStageButton.dataset
+      .visitStageTarget;
+
+  const targetElement =
+    document.querySelector(
+      targetSelector
+    );
+
+  if (!targetElement) return;
+
+  document
+    .querySelectorAll(
+      ".visitStageButton"
+    )
+    .forEach((button) => {
+      button.classList.remove(
+        "active"
+      );
+    });
+
+  visitStageButton.classList.add(
+    "active"
+  );
+
+  targetElement.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+
+  return;
+}
     if (e.target.closest("#btnBackPatient")) {
       if (state.selectedPetId) openPatient(state.selectedPetId);
       else if (state.selectedOwnerId) openOwner(state.selectedOwnerId);
@@ -91391,6 +91446,100 @@ function initVisitUI() {
       return;
     }
   }, true);
+
+    let visitStageFrame = 0;
+
+  const syncActiveVisitStage = () => {
+    visitStageFrame = 0;
+
+    const visitPage =
+      document.querySelector(
+        '.page[data-page="visit"].active'
+      );
+
+    if (!visitPage) return;
+
+    const stageButtons =
+      Array.from(
+        visitPage.querySelectorAll(
+          "[data-visit-stage-target]"
+        )
+      );
+
+    if (!stageButtons.length) return;
+
+    const viewportAnchor =
+      Math.min(
+        240,
+        window.innerHeight * 0.28
+      );
+
+    let activeButton =
+      stageButtons[0];
+
+    stageButtons.forEach(
+      (button) => {
+        const selector =
+          button.dataset
+            .visitStageTarget;
+
+        const target =
+          visitPage.querySelector(
+            selector
+          );
+
+        if (!target) return;
+
+        const targetTop =
+          target
+            .getBoundingClientRect()
+            .top;
+
+        if (
+          targetTop <=
+          viewportAnchor
+        ) {
+          activeButton = button;
+        }
+      }
+    );
+
+    stageButtons.forEach(
+      (button) => {
+        button.classList.toggle(
+          "active",
+          button === activeButton
+        );
+      }
+    );
+  };
+
+  const queueVisitStageSync = () => {
+    if (visitStageFrame) return;
+
+    visitStageFrame =
+      window.requestAnimationFrame(
+        syncActiveVisitStage
+      );
+  };
+
+  window.addEventListener(
+    "scroll",
+    queueVisitStageSync,
+    {
+      passive: true,
+    }
+  );
+
+  window.addEventListener(
+    "resize",
+    queueVisitStageSync,
+    {
+      passive: true,
+    }
+  );
+
+  queueVisitStageSync();
 
   // ==========================================================================
 // Doc.PUG CRM Mini — app.js (ЭКРАН ПРИЕМА: ДЕЛЕГИРОВАНИЕ, СЛУШАТЕЛИ И ОБРАБОТКА ВИЗИТА)
