@@ -91351,7 +91351,366 @@ function refreshVisitStockSelect() {
     select.value = previousValue;
   }
 }
+function normalizeVisitHomeTreatmentItem(
+  item = {}
+) {
+  return {
+    kind:
+      String(
+        item.kind || "medicine"
+      ),
 
+    name:
+      String(
+        item.name || ""
+      ),
+
+    dose:
+      String(
+        item.dose || ""
+      ),
+
+    route:
+      String(
+        item.route || ""
+      ),
+
+    frequency:
+      String(
+        item.frequency || ""
+      ),
+
+    duration:
+      String(
+        item.duration || ""
+      ),
+
+    note:
+      String(
+        item.note || ""
+      ),
+  };
+}
+
+
+function readVisitHomeTreatments() {
+  return Array.from(
+    document.querySelectorAll(
+      "[data-home-treatment-row]"
+    )
+  )
+    .map(
+      (row) => {
+        const readField = (
+          fieldName
+        ) =>
+          String(
+            row.querySelector(
+              `[data-home-treatment-field="${fieldName}"]`
+            )?.value || ""
+          ).trim();
+
+        return normalizeVisitHomeTreatmentItem({
+          kind:
+            readField("kind") ||
+            "medicine",
+
+          name:
+            readField("name"),
+
+          dose:
+            readField("dose"),
+
+          route:
+            readField("route"),
+
+          frequency:
+            readField("frequency"),
+
+          duration:
+            readField("duration"),
+
+          note:
+            readField("note"),
+        });
+      }
+    )
+    .filter(
+      (item) =>
+        item.name ||
+        item.dose ||
+        item.route ||
+        item.frequency ||
+        item.duration ||
+        item.note
+    );
+}
+
+
+function refreshVisitHomeTreatmentCatalog() {
+  const catalog =
+    document.getElementById(
+      "visitHomeTreatmentCatalog"
+    );
+
+  if (!catalog) return;
+
+  const stockItems =
+    typeof loadStock === "function"
+      ? loadStock()
+      : [];
+
+  const names =
+    Array.from(
+      new Set(
+        stockItems
+          .filter(
+            (item) =>
+              item &&
+              item.active !== false &&
+              String(
+                item.name || ""
+              ).trim()
+          )
+          .map(
+            (item) =>
+              String(
+                item.name
+              ).trim()
+          )
+      )
+    )
+      .sort(
+        (left, right) =>
+          left.localeCompare(
+            right,
+            getCalendarLocale()
+          )
+      );
+
+  catalog.innerHTML =
+    names
+      .map(
+        (name) =>
+          `<option value="${escapeHtml(name)}"></option>`
+      )
+      .join("");
+}
+
+
+function renderVisitHomeTreatments(
+  items = []
+) {
+  const list =
+    document.getElementById(
+      "visitHomeTreatmentList"
+    );
+
+  if (!list) return;
+
+  refreshVisitHomeTreatmentCatalog();
+
+  const normalizedItems =
+    Array.isArray(items)
+      ? items.map(
+          normalizeVisitHomeTreatmentItem
+        )
+      : [];
+
+  if (!normalizedItems.length) {
+    list.innerHTML = `
+      <div class="visitHomeTreatmentEmpty">
+        <strong>
+          Домашніх призначень ще немає
+        </strong>
+
+        <span>
+          Додайте препарат, процедуру або догляд,
+          який власник виконуватиме вдома.
+        </span>
+      </div>
+    `;
+
+    return;
+  }
+
+  list.innerHTML =
+    normalizedItems
+      .map(
+        (item, index) => `
+          <article
+            class="visitHomeTreatmentRow"
+            data-home-treatment-row
+          >
+            <div class="visitHomeTreatmentRowHead">
+              <strong>
+                Призначення ${index + 1}
+              </strong>
+
+              <button
+                class="visitHomeTreatmentRemove"
+                type="button"
+                data-remove-home-treatment="${index}"
+                aria-label="Видалити призначення"
+              >
+                ×
+              </button>
+            </div>
+
+            <div class="visitHomeTreatmentPrimary">
+              <label class="visitField">
+                <span>Тип</span>
+
+                <select
+                  class="visitControl"
+                  data-home-treatment-field="kind"
+                >
+                  <option
+                    value="medicine"
+                    ${
+                      item.kind === "medicine"
+                        ? "selected"
+                        : ""
+                    }
+                  >
+                    Препарат
+                  </option>
+
+                  <option
+                    value="procedure"
+                    ${
+                      item.kind === "procedure"
+                        ? "selected"
+                        : ""
+                    }
+                  >
+                    Процедура
+                  </option>
+
+                  <option
+                    value="care"
+                    ${
+                      item.kind === "care"
+                        ? "selected"
+                        : ""
+                    }
+                  >
+                    Догляд
+                  </option>
+                </select>
+              </label>
+
+              <label class="visitField">
+                <span>Назва призначення</span>
+
+                <input
+                  class="visitControl"
+                  type="text"
+                  list="visitHomeTreatmentCatalog"
+                  data-home-treatment-field="name"
+                  value="${escapeHtml(item.name)}"
+                  placeholder="Наприклад: Синулокс"
+                  autocomplete="off"
+                >
+              </label>
+
+              <label class="visitField">
+                <span>Доза / кількість</span>
+
+                <input
+                  class="visitControl"
+                  type="text"
+                  data-home-treatment-field="dose"
+                  value="${escapeHtml(item.dose)}"
+                  placeholder="½ таблетки"
+                >
+              </label>
+            </div>
+
+            <div class="visitHomeTreatmentDetails">
+              <label class="visitField">
+                <span>Спосіб застосування</span>
+
+                <input
+                  class="visitControl"
+                  type="text"
+                  data-home-treatment-field="route"
+                  value="${escapeHtml(item.route)}"
+                  placeholder="Всередину, місцево..."
+                >
+              </label>
+
+              <label class="visitField">
+                <span>Кратність</span>
+
+                <input
+                  class="visitControl"
+                  type="text"
+                  data-home-treatment-field="frequency"
+                  value="${escapeHtml(item.frequency)}"
+                  placeholder="2 рази на день"
+                >
+              </label>
+
+              <label class="visitField">
+                <span>Тривалість</span>
+
+                <input
+                  class="visitControl"
+                  type="text"
+                  data-home-treatment-field="duration"
+                  value="${escapeHtml(item.duration)}"
+                  placeholder="7 днів"
+                >
+              </label>
+            </div>
+
+            <label class="visitField">
+              <span>Уточнення для власника</span>
+
+              <input
+                class="visitControl"
+                type="text"
+                data-home-treatment-field="note"
+                value="${escapeHtml(item.note)}"
+                placeholder="Після їжі, наносити тонким шаром..."
+              >
+            </label>
+          </article>
+        `
+      )
+      .join("");
+}
+
+
+function addVisitHomeTreatment() {
+  const items =
+    readVisitHomeTreatments();
+
+  items.push(
+    normalizeVisitHomeTreatmentItem()
+  );
+
+  renderVisitHomeTreatments(
+    items
+  );
+
+  const rows =
+    document.querySelectorAll(
+      "[data-home-treatment-row]"
+    );
+
+  const lastRow =
+    rows[
+      rows.length - 1
+    ];
+
+  lastRow
+    ?.querySelector(
+      '[data-home-treatment-field="name"]'
+    )
+    ?.focus();
+}
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
@@ -91549,6 +91908,59 @@ if (visitStageButton) {
   // Обработчик кликов внутри открытого визита (услуги + склад)
   const handler = async (e) => {
     try {
+            if (
+        e.target.closest(
+          "#visitHomeTreatmentAdd"
+        )
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        addVisitHomeTreatment();
+
+        return;
+      }
+
+      const removeHomeTreatmentButton =
+        e.target.closest(
+          "[data-remove-home-treatment]"
+        );
+
+      if (
+        removeHomeTreatmentButton
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const treatmentIndex =
+          Number(
+            removeHomeTreatmentButton
+              .dataset
+              .removeHomeTreatment
+          );
+
+        if (
+          !Number.isInteger(
+            treatmentIndex
+          )
+        ) {
+          return;
+        }
+
+        const treatments =
+          readVisitHomeTreatments();
+
+        treatments.splice(
+          treatmentIndex,
+          1
+        );
+
+        renderVisitHomeTreatments(
+          treatments
+        );
+
+        return;
+      }
       if (e.target.closest("#visitMedSave")) {
         e.preventDefault();
         e.stopPropagation();
@@ -91691,6 +92103,8 @@ const followUp =
   readVisitText(
     "visitFollowUp"
   );
+const homeTreatments =
+  readVisitHomeTreatments();
 
 const weightKg =
   readVisitNumber(
@@ -91721,7 +92135,7 @@ const clinicalData = {
   ...previousClinicalData,
 
   schema_version:
-    1,
+    2,
 
   reason_for_visit:
     reasonForVisit,
@@ -91779,6 +92193,9 @@ const clinicalData = {
 
   prescriptions:
     rx,
+
+  home_treatments:
+  homeTreatments,
 
   owner_explanation:
     ownerExplanation,
@@ -95227,7 +95644,7 @@ function mountVisitAiWorkspace(
               normalizedTab
           );
         });
-
+  
       aiWorkspace
         .querySelectorAll(
           "[data-ai-workspace-pane]"
@@ -95239,7 +95656,58 @@ function mountVisitAiWorkspace(
               normalizedTab;
         });
     };
+let consultantLauncher =
+    workspace.querySelector(
+      "#visitAiConsultLauncher"
+    );
 
+  if (!consultantLauncher) {
+    consultantLauncher =
+      document.createElement(
+        "button"
+      );
+
+    consultantLauncher.id =
+      "visitAiConsultLauncher";
+
+    consultantLauncher.className =
+      "visitAiConsultLauncher";
+
+    consultantLauncher.type =
+      "button";
+
+    consultantLauncher.title =
+      "Відкрити PUG AI консультанта";
+
+    consultantLauncher.setAttribute(
+      "aria-label",
+      "Відкрити PUG AI консультанта"
+    );
+
+    consultantLauncher.innerHTML = `
+      <span
+        class="visitAiConsultLauncherIcon"
+        aria-hidden="true"
+      >
+        ✦
+      </span>
+
+      <span class="visitAiConsultLauncherLabel">
+        AI
+      </span>
+    `;
+
+    workspace.appendChild(
+      consultantLauncher
+    );
+  }
+
+  consultantLauncher.onclick =
+    () => {
+      activateAiWorkspaceTab(
+        "consult"
+      );
+    };
   aiWorkspace
     .querySelectorAll(
       "[data-ai-workspace-tab]"
@@ -95702,6 +96170,15 @@ setVisitFieldValue(
   "visitFollowUp",
   clinicalData
     .follow_up
+);
+renderVisitHomeTreatments(
+  Array.isArray(
+    clinicalData
+      .home_treatments
+  )
+    ? clinicalData
+        .home_treatments
+    : []
 );
 ensureVisitAiConsultStyles();
 
