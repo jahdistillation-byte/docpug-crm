@@ -69904,300 +69904,14 @@ body[data-theme="white"]
   }
 }
 /* =========================================================
-   VISIT COCKPIT — HORIZONTAL SUMMARY
+   VISIT COCKPIT — CONSOLIDATED LAYOUT
    ========================================================= */
 
-@media screen and (min-width: 1121px) {
-  .page[data-page="visit"]
-    .visitWorkspaceGrid,
-  .page[data-page="visit"]
-    .visitWorkspaceGrid.hasPugAiWorkspace {
-    grid-template-columns:
-      minmax(0, 1fr) !important;
-    gap: 16px !important;
-  }
-
-  .page[data-page="visit"]
-    .visitAiWorkspace,
-  .page[data-page="visit"]
-    .visitWorkspaceMain,
-  .page[data-page="visit"]
-    .visitWorkspaceSidebar {
-    grid-column: 1 !important;
-    width: 100% !important;
-  }
-
-  .page[data-page="visit"]
-    .visitWorkspaceSidebar {
-    position: static !important;
-    min-width: 0 !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryCard {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-
-    width: 100%;
-    padding: 14px 16px !important;
-
-    border-radius: 18px !important;
-    box-sizing: border-box;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryHead {
-    flex: 0 0 155px;
-    justify-content: flex-start;
-    gap: 9px;
-    margin: 0 !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryHead > span {
-    font-size: 16px !important;
-    white-space: nowrap;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryPatient,
-  .page[data-page="visit"]
-    .visitSummaryHint {
-    display: none !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryRows {
-    display: grid !important;
-    grid-template-columns:
-      minmax(100px, 0.75fr)
-      minmax(110px, 0.85fr)
-      minmax(190px, 1.2fr);
-
-    flex: 1 1 450px;
-    gap: 0 !important;
-
-    min-width: 420px;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryRows
-    > div:not(.visitSummaryDivider) {
-    min-height: 48px;
-    padding: 4px 18px;
-    box-sizing: border-box;
-
-    border-left:
-      1px solid var(--finance-border);
-
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryDivider {
-    display: none;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryRows span {
-    font-size: 10px !important;
-    font-weight: 650 !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryRows strong {
-    font-size: 15px !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryGrand {
-    align-items: flex-start !important;
-    padding: 4px 18px !important;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryGrand strong {
-    font-size: 25px !important;
-    line-height: 1.05 !important;
-    white-space: nowrap;
-  }
-
-  .page[data-page="visit"]
-    .visitPaymentState {
-    flex: 0 1 250px;
-    min-width: 220px;
-    margin: 0 !important;
-    padding: 10px 12px !important;
-  }
-
-  .page[data-page="visit"]
-    :is(
-      .visitPaymentButton,
-      .visitSavePrimary,
-      .visitCompleteButton,
-      .visitPrintButton
-    ) {
-    width: auto !important;
-    min-height: 46px !important;
-    margin: 0 !important;
-    padding: 0 15px !important;
-    white-space: nowrap;
-  }
-
-  .page[data-page="visit"]
-    .visitSavePrimary {
-    margin-left: auto !important;
-  }
-
-  .page[data-page="visit"]
-    .visitCompleteButton {
-    order: 10;
-  }
-
-  .page[data-page="visit"]
-    .visitPrintButton {
-    order: 9;
-  }
+.visitStageRail {
+  display: none;
 }
 
-@media screen and (min-width: 1121px)
-  and (max-width: 1400px) {
-  .page[data-page="visit"]
-    .visitSummaryHead {
-    flex-basis: 100%;
-  }
-
-  .page[data-page="visit"]
-    .visitSummaryRows {
-    min-width: 0;
-  }
-}
-/* =========================================================
-   VISIT COCKPIT — TWO-COLUMN MEDICAL WORKSPACE
-   ========================================================= */
-
-@media screen and (min-width: 1280px) {
-  .page[data-page="visit"]
-    .visitMedicalGrid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-    align-items: start;
-  }
-
-  /* Скарги и анамнез */
-
-  .page[data-page="visit"]
-    .visitField:has(#visitReasonForVisit),
-  .page[data-page="visit"]
-    .visitField:has(#visitMedComplaint) {
-    grid-column: auto !important;
-  }
-
-  .page[data-page="visit"]
-    :is(
-      #visitReasonForVisit,
-      #visitMedComplaint
-    ) {
-    min-height: 132px !important;
-  }
-
-  /* Огляд и клинические проблемы */
-
-  .page[data-page="visit"]
-    .visitField:has(#visitObjectiveExam),
-  .page[data-page="visit"]
-    .visitField:has(#visitProblemList) {
-    grid-column: auto !important;
-  }
-
-  .page[data-page="visit"]
-    :is(
-      #visitObjectiveExam,
-      #visitProblemList
-    ) {
-    min-height: 150px !important;
-  }
-
-  /* Полноширинные медицинские блоки */
-
-  .page[data-page="visit"]
-    :is(
-      .visitVitalsBlock,
-      .visitAssessmentBlock,
-      .visitActionGrid,
-      .visitField:has(#visitMedRx),
-      .visitOwnerCommunication
-    ) {
-    grid-column: 1 / -1 !important;
-  }
-
-  /* Коммуникация с владельцем — две колонки */
-
-  .page[data-page="visit"]
-    .visitOwnerCommunication {
-    display: grid !important;
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 16px !important;
-  }
-
-  .page[data-page="visit"]
-    .visitOwnerCommunicationHead,
-  .page[data-page="visit"]
-    .visitOwnerFollowGrid {
-    grid-column: 1 / -1;
-  }
-
-  .page[data-page="visit"]
-    .visitOwnerCommunication
-    > .visitField {
-    grid-column: auto !important;
-  }
-}
-
-/* Услуги и препараты рядом на широком экране */
-
-@media screen and (min-width: 1500px) {
-  .page[data-page="visit"]
-    .visitWorkspaceMain {
-    display: grid !important;
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 16px !important;
-  }
-
-  .page[data-page="visit"]
-    .visitWorkspaceMain
-    > .visitSectionCard:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .page[data-page="visit"]
-    .visitWorkspaceMain
-    > .visitSectionCard:nth-of-type(2) {
-    grid-column: 1;
-  }
-
-  .page[data-page="visit"]
-    .visitWorkspaceMain
-    > .visitSectionCard:nth-of-type(3) {
-    grid-column: 2;
-  }
-}
-/* =========================================================
-   VISIT COCKPIT — COMPACT HEADER
-   ========================================================= */
+/* Компактная, но читаемая шапка */
 
 @media screen and (min-width: 901px) {
   .page[data-page="visit"]
@@ -70207,22 +69921,19 @@ body[data-theme="white"]
       minmax(0, 1fr) auto;
     align-items: center !important;
     gap: 20px !important;
-
     margin-bottom: 14px !important;
-    padding: 2px 0 !important;
   }
 
   .page[data-page="visit"]
     .visitWorkspaceHeaderMain {
     display: grid;
     grid-template-columns:
-      44px minmax(0, 1fr);
+      auto minmax(0, 1fr);
     grid-template-areas:
       "back title"
       "back meta";
-
     align-items: center;
-    column-gap: 13px;
+    column-gap: 14px;
     row-gap: 4px;
   }
 
@@ -70230,25 +69941,23 @@ body[data-theme="white"]
     .visitBackPatientButton {
     grid-area: back;
 
-    width: 44px !important;
-    height: 44px !important;
-    min-height: 44px !important;
+    width: auto !important;
+    height: 42px !important;
+    min-height: 42px !important;
 
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 15px !important;
 
-    justify-content: center;
-    border-radius: 14px !important;
+    border-radius: 999px !important;
 
-    overflow: hidden;
-    font-size: 0 !important;
+    font-size: 12px !important;
+    white-space: nowrap;
   }
 
   .page[data-page="visit"]
     .visitBackPatientButton
     > span {
-    font-size: 18px;
-    line-height: 1;
+    font-size: 15px;
   }
 
   .page[data-page="visit"]
@@ -70260,8 +69969,8 @@ body[data-theme="white"]
     .visitWorkspaceHeader h1 {
     grid-area: title;
 
-    font-size: 25px !important;
-    line-height: 1.15 !important;
+    font-size: 28px !important;
+    line-height: 1.12 !important;
     letter-spacing: -0.025em !important;
   }
 
@@ -70282,27 +69991,10 @@ body[data-theme="white"]
   .page[data-page="visit"]
     .visitWorkspaceHeaderActions {
     flex-wrap: nowrap !important;
-    gap: 8px !important;
-  }
-
-  .page[data-page="visit"]
-    :is(
-      .visitWorkspaceStatus,
-      .visitWorkspaceDate
-    ) {
-    min-height: 36px !important;
-    padding: 0 13px !important;
-    font-size: 12px !important;
-    white-space: nowrap;
   }
 }
-/* =========================================================
-   VISIT COCKPIT — STAGE NAVIGATION
-   ========================================================= */
 
-.visitStageRail {
-  display: none;
-}
+/* Общая структура */
 
 @media screen and (min-width: 1121px) {
   .page[data-page="visit"]
@@ -70310,77 +70002,58 @@ body[data-theme="white"]
   .page[data-page="visit"]
     .visitWorkspaceGrid.hasPugAiWorkspace {
     grid-template-columns:
-      82px minmax(0, 1fr) !important;
-    align-items: start;
+      minmax(0, 1fr) !important;
+    gap: 14px !important;
   }
+
+  /* Горизонтальная навигация вместо тяжёлой рейки */
 
   .page[data-page="visit"]
     .visitStageRail {
-    position: sticky;
-    top: 18px;
-
     grid-column: 1;
     grid-row: 1;
 
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-columns:
+      repeat(5, minmax(0, 1fr));
+    gap: 4px;
 
-    padding: 9px 7px;
+    padding: 5px;
 
     border:
       1px solid var(--finance-border);
-    border-radius: 18px;
+    border-radius: 16px;
 
     background:
       var(--finance-card);
-
-    box-shadow:
-      0 12px 32px
-      rgba(24, 49, 72, 0.06);
-  }
-
-  .page[data-page="visit"]
-    .visitWorkspaceMain {
-    grid-column: 2 !important;
-    grid-row: 1;
-  }
-
-  .page[data-page="visit"]
-    .visitWorkspaceSidebar {
-    grid-column: 1 / -1 !important;
-    grid-row: 2;
   }
 
   .page[data-page="visit"]
     .visitStageButton {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 7px;
 
-    width: 100%;
-    min-height: 62px;
-    padding: 7px 3px;
+    min-height: 42px;
+    padding: 7px 10px;
 
     cursor: pointer;
 
     border: 0;
-    border-radius: 13px;
+    border-radius: 11px;
 
     background: transparent;
     color:
       var(--finance-text-muted);
 
     font: inherit;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
-    line-height: 1.2;
 
     transition:
       background 0.16s ease,
-      color 0.16s ease,
-      transform 0.16s ease;
+      color 0.16s ease;
   }
 
   .page[data-page="visit"]
@@ -70388,31 +70061,22 @@ body[data-theme="white"]
     display: grid;
     place-items: center;
 
-    width: 29px;
-    height: 29px;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
 
     border:
       1px solid var(--finance-border);
-    border-radius: 10px;
+    border-radius: 8px;
 
     background:
       var(--finance-surface-soft);
 
-    color:
-      var(--finance-text-soft);
-
-    font-size: 11px;
-    font-weight: 800;
-
-    transition:
-      border-color 0.16s ease,
-      background 0.16s ease,
-      color 0.16s ease;
+    font-size: 10px;
   }
 
   .page[data-page="visit"]
     .visitStageButton:hover {
-    transform: translateY(-1px);
     background:
       var(--finance-surface-hover);
     color:
@@ -70438,177 +70102,276 @@ body[data-theme="white"]
   }
 
   .page[data-page="visit"]
+    .visitWorkspaceMain {
+    grid-column: 1 !important;
+    grid-row: 2;
+    width: 100% !important;
+  }
+
+  .page[data-page="visit"]
+    .visitWorkspaceSidebar {
+    position: static !important;
+
+    grid-column: 1 !important;
+    grid-row: 3;
+
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Нижний итог */
+
+  .page[data-page="visit"]
+    .visitSummaryCard {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    padding: 13px 15px !important;
+
+    border-radius: 18px !important;
+    box-sizing: border-box;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryHead {
+    flex: 0 0 140px;
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 0 !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryPatient,
+  .page[data-page="visit"]
+    .visitSummaryHint {
+    display: none !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryRows {
+    display: grid !important;
+    grid-template-columns:
+      repeat(3, minmax(100px, 1fr));
+
+    flex: 1 1 390px;
+    gap: 0 !important;
+
+    min-width: 350px;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryRows
+    > div:not(.visitSummaryDivider) {
+    display: flex;
+    min-height: 46px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+
+    padding: 3px 15px;
+    box-sizing: border-box;
+
+    border-left:
+      1px solid var(--finance-border);
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryDivider {
+    display: none;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryGrand {
+    align-items: flex-start !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryGrand strong {
+    font-size: 24px !important;
+    white-space: nowrap;
+  }
+
+  .page[data-page="visit"]
+    .visitPaymentState {
+    flex: 0 1 210px;
+    min-width: 190px;
+
+    margin: 0 !important;
+    padding: 9px 11px !important;
+  }
+
+  .page[data-page="visit"]
     :is(
-      .visitAssessmentBlock,
-      #visitReasonForVisit,
-      #visitMedRx,
-      #visitSvcSearch,
-      .visitWorkspaceSidebar
+      .visitPaymentButton,
+      .visitSavePrimary,
+      .visitCompleteButton,
+      .visitPrintButton
     ) {
-    scroll-margin-top: 20px;
+    width: auto !important;
+    min-height: 44px !important;
+
+    margin: 0 !important;
+    padding: 0 13px !important;
+
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  .page[data-page="visit"]
+    .visitPrintButton {
+    order: 9;
+  }
+
+  .page[data-page="visit"]
+    .visitCompleteButton {
+    order: 10;
   }
 }
-/* =========================================================
-   VISIT COCKPIT — CLINICAL CONTENT CARDS
-   ========================================================= */
 
-.page[data-page="visit"]
-  .visitMedicalGrid
-  > .visitField {
-  padding: 16px;
+/* Две колонки медицинских данных */
 
-  border:
-    1px solid var(--finance-border);
-  border-radius: 17px;
+@media screen and (min-width: 1280px) {
+  .page[data-page="visit"]
+    .visitMedicalGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+    gap: 15px !important;
+    align-items: start;
+  }
 
-  background:
-    var(--finance-surface-soft);
+  .page[data-page="visit"]
+    :is(
+      .visitField:has(#visitReasonForVisit),
+      .visitField:has(#visitMedComplaint),
+      .visitField:has(#visitObjectiveExam),
+      .visitField:has(#visitProblemList)
+    ) {
+    grid-column: auto !important;
+  }
 
-  box-sizing: border-box;
+  .page[data-page="visit"]
+    :is(
+      #visitReasonForVisit,
+      #visitMedComplaint
+    ) {
+    min-height: 126px !important;
+  }
+
+  .page[data-page="visit"]
+    :is(
+      #visitObjectiveExam,
+      #visitProblemList
+    ) {
+    min-height: 142px !important;
+  }
+
+  .page[data-page="visit"]
+    :is(
+      .visitVitalsBlock,
+      .visitAssessmentBlock,
+      .visitActionGrid,
+      .visitField:has(#visitMedRx),
+      .visitOwnerCommunication
+    ) {
+    grid-column: 1 / -1 !important;
+  }
 }
 
-.page[data-page="visit"]
-  .visitMedicalGrid
-  > .visitField
-  > span {
-  display: flex;
-  align-items: center;
-  min-height: 20px;
+/* Правильный порядок динамических карточек */
 
-  color:
-    var(--finance-text-soft) !important;
+@media screen and (min-width: 1500px) {
+  .page[data-page="visit"]
+    .visitWorkspaceMain {
+    display: grid !important;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px !important;
+  }
 
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0 !important;
-}
+  .page[data-page="visit"]
+    .visitWorkspaceMain
+    > .visitSectionCard:first-child {
+    grid-column: 1 / -1;
+    order: 1;
+  }
 
-.page[data-page="visit"]
-  .visitMedicalGrid
-  > .visitField
-  > .visitControl {
-  margin-top: 5px;
+  .page[data-page="visit"]
+    .visitWorkspaceMain
+    > .visitSectionCard:has(
+      #visitSvcListContainer
+    ) {
+    grid-column: 1;
+    order: 2;
+  }
 
-  border-color:
-    var(--finance-border) !important;
+  .page[data-page="visit"]
+    .visitWorkspaceMain
+    > .visitSectionCard:has(
+      #visitStkListContainer
+    ) {
+    grid-column: 2;
+    order: 2;
+  }
 
-  background:
-    var(--finance-card) !important;
+  .page[data-page="visit"]
+    #visitTasksSection {
+    grid-column: 1 / -1;
+    order: 3;
 
-  box-shadow: none !important;
-}
+    margin-top: 0 !important;
+  }
 
-.page[data-page="visit"]
-  .visitMedicalGrid
-  > .visitField
-  > .visitControl:hover {
-  border-color:
-    var(--finance-border-strong) !important;
-}
+  .page[data-page="visit"]
+    .visitSummaryCard {
+    display: grid;
+    grid-template-columns:
+      135px
+      minmax(330px, 1fr)
+      200px
+      repeat(4, max-content);
+    flex-wrap: initial;
+  }
 
-.page[data-page="visit"]
-  .visitMedicalGrid
-  > .visitField
-  > .visitControl:focus {
-  border-color:
-    var(--finance-accent) !important;
+  .page[data-page="visit"]
+    .visitSummaryHead {
+    order: 1;
+  }
 
-  box-shadow:
-    0 0 0 3px
-    color-mix(
-      in srgb,
-      var(--finance-accent) 10%,
-      transparent
-    ) !important;
-}
+  .page[data-page="visit"]
+    .visitSummaryRows {
+    order: 2;
+    min-width: 0;
+  }
 
-/* План диагностики и выполненные процедуры */
+  .page[data-page="visit"]
+    .visitPaymentState {
+    order: 3;
+  }
 
-.page[data-page="visit"]
-  .visitActionGrid {
-  padding: 16px;
+  .page[data-page="visit"]
+    .visitPaymentButton {
+    order: 4;
+  }
 
-  border:
-    1px solid var(--finance-border);
-  border-radius: 17px;
+  .page[data-page="visit"]
+    .visitSavePrimary {
+    order: 5;
+  }
 
-  background:
-    var(--finance-surface-soft);
-}
+  .page[data-page="visit"]
+    .visitPrintButton {
+    order: 6;
+  }
 
-.page[data-page="visit"]
-  .visitActionGrid
-  .visitControl {
-  background:
-    var(--finance-card) !important;
-  box-shadow: none !important;
-}
-
-/* Показатели, диагноз и коммуникация */
-
-.page[data-page="visit"]
-  :is(
-    .visitVitalsBlock,
-    .visitAssessmentBlock,
-    .visitOwnerCommunication
-  ) {
-  border-color:
-    var(--finance-border) !important;
-
-  background:
-    var(--finance-surface-soft) !important;
-
-  box-shadow: none !important;
-}
-
-.page[data-page="visit"]
-  :is(
-    .visitVitalsBlock,
-    .visitAssessmentBlock,
-    .visitOwnerCommunication
-  )
-  .visitControl {
-  background:
-    var(--finance-card) !important;
-  box-shadow: none !important;
-}
-
-/* Единая спокойная типографика внутри карты */
-
-.page[data-page="visit"]
-  .visitMedicalGrid
-  :is(
-    .visitVitalsTitle,
-    .visitOwnerCommunicationHead strong
-  ) {
-  color:
-    var(--finance-text) !important;
-
-  font-size: 13px !important;
-  font-weight: 750 !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-
-.page[data-page="visit"]
-  .visitOwnerCommunication {
-  box-shadow:
-    inset 3px 0 0
-    color-mix(
-      in srgb,
-      var(--finance-accent) 38%,
-      transparent
-    ) !important;
-}
-
-.page[data-page="visit"]
-  .visitOwnerCommunicationBadge {
-  color:
-    var(--finance-accent-2) !important;
-
-  border-color:
-    var(--finance-border-strong) !important;
-
-  background:
-    var(--finance-accent-soft) !important;
+  .page[data-page="visit"]
+    .visitCompleteButton {
+    order: 7;
+  }
 }
