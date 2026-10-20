@@ -68816,3 +68816,492 @@ body[data-theme="white"]
     var(--accent-color, #2f6f98);
   opacity: 0.28;
 }
+/* =========================================================
+   VISIT COCKPIT — COMPACT PUG AI BAR
+   ========================================================= */
+
+.page[data-page="visit"]
+  .visitWorkspace.hasPugAiWorkspace {
+  max-width: 1600px !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspace {
+  position: relative !important;
+  top: auto !important;
+  display: grid;
+  grid-template-columns:
+    200px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-height: none !important;
+  margin: 0 0 14px;
+  padding: 11px 14px;
+  overflow: visible !important;
+  border:
+    1px solid
+    var(--finance-border);
+  border-radius: 18px;
+  background:
+    var(--finance-card);
+  box-shadow:
+    0 10px 28px
+    rgba(24, 49, 72, 0.06);
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceHead {
+  display: contents !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBrand {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBrandIcon {
+  width: 34px !important;
+  height: 34px !important;
+  flex: 0 0 34px !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBrand strong {
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBrand span {
+  margin-top: 2px !important;
+  overflow: hidden;
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceTabs {
+  grid-column: 3;
+  display: flex !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceTab[
+    data-ai-workspace-tab="intake"
+  ] {
+  display: none !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceTab[
+    data-ai-workspace-tab="consult"
+  ] {
+  min-height: 38px !important;
+  padding: 8px 11px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color:
+    var(--finance-accent-2) !important;
+  font-size: 12px !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspaceBody {
+  grid-column: 2;
+  min-width: 0;
+  max-height: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspacePane {
+  min-width: 0;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel > div {
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 9px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(1),
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(3) {
+  display: none !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(2) {
+  display: contents !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(2)
+  > div {
+  display: none !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakeInput {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  resize: none !important;
+  border:
+    1px solid
+    var(--finance-border) !important;
+  border-radius: 11px !important;
+  background:
+    var(--finance-input) !important;
+  color:
+    var(--finance-text) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.page[data-page="visit"]
+  #visitAiRecordButton {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  padding: 9px 13px !important;
+  border-radius: 11px !important;
+  background:
+    var(--finance-accent) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(5) {
+  display: contents !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(5)
+  > span {
+  display: none !important;
+}
+
+.page[data-page="visit"]
+  #visitAiIntakePanel
+  > div
+  > div:nth-child(5)
+  > div {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureButton,
+.page[data-page="visit"]
+  #visitAiApplyButton {
+  min-height: 42px !important;
+  padding: 9px 13px !important;
+  border:
+    1px solid
+    var(--finance-border) !important;
+  border-radius: 11px !important;
+  background:
+    var(--finance-surface-soft) !important;
+  color:
+    var(--finance-text) !important;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+@media (max-width: 1050px) {
+  .page[data-page="visit"]
+    .visitAiWorkspace {
+    grid-template-columns:
+      minmax(0, 1fr) auto;
+  }
+
+  .page[data-page="visit"]
+    .visitAiWorkspaceBrand {
+    grid-column: 1;
+  }
+
+  .page[data-page="visit"]
+    .visitAiWorkspaceTabs {
+    grid-column: 2;
+  }
+
+  .page[data-page="visit"]
+    .visitAiWorkspaceBody {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 700px) {
+  .page[data-page="visit"]
+    #visitAiIntakePanel > div {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .page[data-page="visit"]
+    #visitAiIntakeInput {
+    grid-column: 1 / -1;
+  }
+
+  .page[data-page="visit"]
+    #visitAiRecordButton {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .page[data-page="visit"]
+    #visitAiIntakePanel
+    > div
+    > div:nth-child(5)
+    > div {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+/* =========================================================
+   VISIT COCKPIT — PUG AI CONSULT DRAWER
+   ========================================================= */
+
+.page[data-page="visit"]
+  .visitAiWorkspacePane[
+    data-ai-workspace-pane="consult"
+  ]:not([hidden]) {
+  position: fixed !important;
+  z-index: 10020;
+  top: 18px;
+  right: 18px;
+  bottom: 92px;
+  display: flex !important;
+  width: min(
+    470px,
+    calc(100vw - 36px)
+  );
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border:
+    1px solid
+    var(--finance-border);
+  border-radius: 22px;
+  background:
+    var(--finance-card);
+  box-shadow:
+    -24px 0 60px
+    rgba(20, 42, 60, 0.16);
+  animation:
+    visitConsultDrawerIn
+    0.22s ease-out;
+}
+
+.page[data-page="visit"]
+  .visitAiWorkspacePane[
+    data-ai-workspace-pane="consult"
+  ]
+  #visitAiConsultPanel {
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 18px !important;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 22px !important;
+  background:
+    var(--finance-card) !important;
+  box-shadow: none !important;
+  color:
+    var(--finance-text) !important;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultHead {
+  flex: 0 0 auto;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultHeadActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultClose {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border:
+    1px solid
+    var(--finance-border);
+  border-radius: 10px;
+  background:
+    var(--finance-surface-soft);
+  color:
+    var(--finance-text-soft);
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultClose:hover {
+  background:
+    var(--finance-surface-hover);
+  color:
+    var(--finance-text);
+  transform:
+    translateY(-1px);
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultQuickActions {
+  flex: 0 0 auto;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultMessages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultComposer {
+  position: static !important;
+  flex: 0 0 auto;
+  margin-top: 12px;
+  padding-top: 12px !important;
+  border-top:
+    1px solid
+    var(--finance-border);
+  background:
+    var(--finance-card) !important;
+}
+
+.page[data-page="visit"]
+  #visitAiConsultPanel
+  .visitAiConsultComposerHint {
+  flex: 0 0 auto;
+}
+
+@keyframes visitConsultDrawerIn {
+  from {
+    opacity: 0;
+    transform:
+      translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateX(0);
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .page[data-page="visit"]
+    .visitAiWorkspacePane[
+      data-ai-workspace-pane="consult"
+    ]:not([hidden]) {
+    inset: 0;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .page[data-page="visit"]
+    .visitAiWorkspacePane[
+      data-ai-workspace-pane="consult"
+    ]
+    #visitAiConsultPanel {
+    padding:
+      14px !important;
+    border-radius:
+      0 !important;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  .page[data-page="visit"]
+    .visitAiWorkspacePane[
+      data-ai-workspace-pane="consult"
+    ]:not([hidden]) {
+    animation: none;
+  }
+}

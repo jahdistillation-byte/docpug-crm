@@ -94866,9 +94866,9 @@ function mountVisitAiWorkspace(
     );
 
   if (!aiWorkspace) {
-    aiWorkspace =
+        aiWorkspace =
       document.createElement(
-        "aside"
+        "section"
       );
 
     aiWorkspace.id =
@@ -94946,9 +94946,8 @@ function mountVisitAiWorkspace(
       </div>
     `;
 
-    workspaceGrid.insertBefore(
-      aiWorkspace,
-      workspaceMain
+       workspaceGrid.before(
+      aiWorkspace
     );
   }
 
@@ -94956,9 +94955,7 @@ function mountVisitAiWorkspace(
     "hasPugAiWorkspace"
   );
 
-  workspaceGrid.classList.add(
-    "hasPugAiWorkspace"
-  );
+ 
 
   aiWorkspace.dataset.visitId =
     String(visitId || "");
@@ -95040,6 +95037,20 @@ function mountVisitAiWorkspace(
         );
       };
     });
+
+      const consultCloseButton =
+    aiWorkspace.querySelector(
+      "#visitAiConsultClose"
+    );
+
+  if (consultCloseButton) {
+    consultCloseButton.onclick =
+      () => {
+        activateAiWorkspaceTab(
+          "intake"
+        );
+      };
+  }
 
   activateAiWorkspaceTab(
     aiWorkspace.dataset.activeTab ||
@@ -95530,12 +95541,36 @@ if (
         </div>
       </div>
 
-            <span
-        id="visitAiConsultUsage"
-        class="visitAiConsultBadge"
-      >
-        Чат пацієнта
-      </span>
+            <div class="visitAiConsultHeadActions">
+  <span
+    id="visitAiConsultUsage"
+    class="visitAiConsultBadge"
+  >
+    Чат пацієнта
+  </span>
+
+  <button
+    type="button"
+    class="visitAiConsultClose"
+    id="visitAiConsultClose"
+    aria-label="Закрити консультанта"
+    title="Закрити"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      aria-hidden="true"
+    >
+      <path d="M6 6l12 12"></path>
+      <path d="M18 6L6 18"></path>
+    </svg>
+  </button>
+</div>
     </div>
 
     <div
