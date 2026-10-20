@@ -69752,3 +69752,154 @@ body[data-theme="white"]
   color:
     var(--finance-text-muted);
 }
+/* PUG AI DRAFT — EDITABLE VITAL SIGNS */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitals {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 9px;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVital {
+  display: block;
+  min-width: 0;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVital
+  > span:first-child {
+  display: block;
+  margin: 0 0 5px;
+  color:
+    var(--finance-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitalControl {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) auto;
+  align-items: center;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+
+  overflow: hidden;
+  border:
+    1px solid
+    var(--finance-border);
+  border-radius: 10px;
+
+  background:
+    var(--finance-input);
+
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitalControl:focus-within {
+  border-color:
+    var(--finance-accent);
+
+  background:
+    var(--finance-card);
+
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--finance-accent) 12%,
+      transparent
+    );
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitalInput {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+
+  padding: 0 10px !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+
+  background:
+    transparent !important;
+  color:
+    var(--finance-text) !important;
+
+  font-family:
+    var(
+      --pug-ui-font,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Arial,
+      sans-serif
+    ) !important;
+
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  select.visitAiDraftVitalInput {
+  grid-column: 1 / -1;
+  cursor: pointer;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitalControl
+  small {
+  padding-right: 10px;
+  color:
+    var(--finance-text-muted);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 900px) {
+  .page[data-page="visit"]
+    #visitAiStructureResult
+    .visitAiDraftVitals {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 560px) {
+  .page[data-page="visit"]
+    #visitAiStructureResult
+    .visitAiDraftVitals {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+}

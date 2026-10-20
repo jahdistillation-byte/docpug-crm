@@ -97752,16 +97752,181 @@ ${fields
                       )}
                     </div>
 
-                   ${
-  field.label ===
+                   
+ ${
+ field.label ===
     "Основні показники"
     ? `
-      <div
-        class="visitAiDraftReadonly"
-      >
-        ${escapeHtml(
-          field.value
-        )}
+      <div class="visitAiDraftVitals">
+        <label class="visitAiDraftVital">
+          <span>Вага</span>
+
+          <span class="visitAiDraftVitalControl">
+            <input
+              type="text"
+              inputmode="decimal"
+              class="visitAiDraftVitalInput"
+              data-ai-vital-key="weight_kg"
+              value="${escapeHtml(
+                String(
+                  structured.weight_kg ?? ""
+                )
+              )}"
+            >
+
+            <small>кг</small>
+          </span>
+        </label>
+
+        <label class="visitAiDraftVital">
+          <span>Температура</span>
+
+          <span class="visitAiDraftVitalControl">
+            <input
+              type="text"
+              inputmode="decimal"
+              class="visitAiDraftVitalInput"
+              data-ai-vital-key="temperature_c"
+              value="${escapeHtml(
+                String(
+                  vitalSigns.temperature_c ?? ""
+                )
+              )}"
+            >
+
+            <small>°C</small>
+          </span>
+        </label>
+
+        <label class="visitAiDraftVital">
+          <span>ЧСС / пульс</span>
+
+          <span class="visitAiDraftVitalControl">
+            <input
+              type="text"
+              inputmode="numeric"
+              class="visitAiDraftVitalInput"
+              data-ai-vital-key="heart_rate_bpm"
+              value="${escapeHtml(
+                String(
+                  vitalSigns.heart_rate_bpm ?? ""
+                )
+              )}"
+            >
+
+            <small>/хв</small>
+          </span>
+        </label>
+
+        <label class="visitAiDraftVital">
+          <span>Частота дихання</span>
+
+          <span class="visitAiDraftVitalControl">
+            <input
+              type="text"
+              inputmode="numeric"
+              class="visitAiDraftVitalInput"
+              data-ai-vital-key="respiratory_rate_bpm"
+              value="${escapeHtml(
+                String(
+                  vitalSigns.respiratory_rate_bpm ?? ""
+                )
+              )}"
+            >
+
+            <small>/хв</small>
+          </span>
+        </label>
+
+        <label class="visitAiDraftVital">
+          <span>Слизові</span>
+
+          <span class="visitAiDraftVitalControl">
+            <select
+              class="visitAiDraftVitalInput"
+              data-ai-vital-key="mucous_membranes"
+            >
+              <option value="">
+                Не вказано
+              </option>
+
+              <option
+                value="pink"
+                ${
+                  mucousCode === "pink"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Рожеві
+              </option>
+
+              <option
+                value="pale"
+                ${
+                  mucousCode === "pale"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Бліді
+              </option>
+
+              <option
+                value="hyperemic"
+                ${
+                  mucousCode === "hyperemic"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Гіперемовані
+              </option>
+
+              <option
+                value="icteric"
+                ${
+                  mucousCode === "icteric"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Іктеричні
+              </option>
+
+              <option
+                value="cyanotic"
+                ${
+                  mucousCode === "cyanotic"
+                    ? "selected"
+                    : ""
+                }
+              >
+                Ціанотичні
+              </option>
+            </select>
+          </span>
+        </label>
+
+        <label class="visitAiDraftVital">
+          <span>КНК</span>
+
+          <span class="visitAiDraftVitalControl">
+            <input
+              type="text"
+              inputmode="decimal"
+              class="visitAiDraftVitalInput"
+              data-ai-vital-key="crt_seconds"
+              value="${escapeHtml(
+                String(
+                  vitalSigns.crt_seconds ?? ""
+                )
+              )}"
+            >
+
+            <small>с</small>
+          </span>
+        </label>
       </div>
     `
     : `
@@ -97958,6 +98123,43 @@ ${fields
                 );
               }
             };
+          });
+                  structured.vital_signs =
+          vitalSigns;
+
+        visitAiStructureResult
+          .querySelectorAll(
+            ".visitAiDraftVitalInput"
+          )
+          .forEach((control) => {
+            const updateVitalValue =
+              () => {
+                const key =
+                  control.dataset
+                    .aiVitalKey;
+
+                if (!key) {
+                  return;
+                }
+
+                if (
+                  key === "weight_kg"
+                ) {
+                  structured.weight_kg =
+                    control.value;
+
+                  return;
+                }
+
+                vitalSigns[key] =
+                  control.value;
+              };
+
+            control.oninput =
+              updateVitalValue;
+
+            control.onchange =
+              updateVitalValue;
           });
         const discardDraftButton =
           visitAiStructureResult
