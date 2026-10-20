@@ -18,6 +18,51 @@
 </head>
 
 <body>
+  <script>
+  (() => {
+    const allowedThemes = new Set([
+      "purple",
+      "black",
+      "white",
+      "blue",
+      "green",
+    ]);
+
+    let initialTheme =
+      "purple";
+
+    try {
+      const storedTheme =
+        localStorage.getItem(
+          "docpug_clinic_theme"
+        );
+
+      if (storedTheme) {
+        const parsedTheme =
+          JSON.parse(
+            storedTheme
+          );
+
+        if (
+          allowedThemes.has(
+            parsedTheme
+          )
+        ) {
+          initialTheme =
+            parsedTheme;
+        }
+      }
+    } catch (error) {
+      console.warn(
+        "Could not restore theme:",
+        error
+      );
+    }
+
+    document.body.dataset.theme =
+      initialTheme;
+  })();
+</script>
 
 <div id="authOverlay" class="auth-overlay">
   <div class="auth-language-switcher">
@@ -2922,15 +2967,99 @@
     <div class="med-mini-value"></div>
   </div>
 </template>
+<script>
+  (() => {
+    const allowedRoutes =
+      new Set([
+        "owners",
+        "owner",
+        "patients",
+        "patient",
+        "visits",
+        "visit",
+        "calendar",
+        "tasks",
+        "hospital",
+        "services",
+        "stock",
+        "finance",
+        "team",
+        "audit",
+        "settings",
+      ]);
 
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+    const route =
+      String(
+        location.hash || ""
+      )
+        .replace("#", "")
+        .split(":")[0]
+        .trim();
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    const initialRoute =
+      allowedRoutes.has(route)
+        ? route
+        : "owners";
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="ach.js"></script>
-<script src="app.js?v=20261007-owner-profile-v3"></script>
+    const targetPage =
+      document.querySelector(
+        `.page[data-page="${initialRoute}"]`
+      );
+
+    if (!targetPage) {
+      return;
+    }
+
+    document
+      .querySelectorAll(".page")
+      .forEach((page) => {
+        const isActive =
+          page === targetPage;
+
+        page.classList.toggle(
+          "active",
+          isActive
+        );
+
+        page.style.display =
+          isActive
+            ? "block"
+            : "none";
+      });
+
+    document.body.dataset.currentRoute =
+      initialRoute;
+  })();
+</script>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"
+></script>
+
+<script
+  defer
+  src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+></script>
+
+<script
+  defer
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+></script>
+
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/chart.js"
+></script>
+
+<script
+  defer
+  src="ach.js"
+></script>
+
+<script
+  defer
+  src="app.js?v=20261020-performance-v1"
+></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
     <div class="deleteIcon">🗑</div>
