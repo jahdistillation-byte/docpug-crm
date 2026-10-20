@@ -97627,13 +97627,54 @@ visitAiIntakePanel
             "
           >
             <div
+  class="visitAiDraftHeader"
   style="
-    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    color:var(--finance-text);
     font-size:15px;
     font-weight:750;
   "
 >
-  Чернетку підготовлено
+  <span>
+    Чернетку підготовлено ·
+    ${fields.length}
+    ${
+      fields.length === 1
+        ? "поле"
+        : (
+            fields.length >= 2 &&
+            fields.length <= 4
+              ? "поля"
+              : "полів"
+          )
+    }
+  </span>
+
+  <button
+    type="button"
+    id="visitAiDiscardDraftButton"
+    style="
+      flex:0 0 auto;
+      padding:7px 10px;
+      border:
+        1px solid
+        var(--finance-border);
+      border-radius:9px;
+      background:
+        var(--finance-card);
+      color:
+        var(--finance-text-soft);
+      font:inherit;
+      font-size:11px;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    Скасувати
+  </button>
 </div>
 
 ${
@@ -97772,7 +97813,33 @@ ${fields
 
                       </div>
         `;
+        const discardDraftButton =
+          visitAiStructureResult
+            .querySelector(
+              "#visitAiDiscardDraftButton"
+            );
 
+        if (discardDraftButton) {
+          discardDraftButton.onclick =
+            () => {
+              visitAiIntakePanel
+                .structuredDraft = null;
+
+              visitAiIntakePanel
+                .structuredSourceText = "";
+
+              visitAiIntakePanel
+                .aiDraftApplied = false;
+
+              visitAiStructureResult
+                .innerHTML = "";
+
+              visitAiStructureResult
+                .style.display = "none";
+
+              updateAiStructureControls();
+            };
+        }
         updateAiStructureControls();
 
 if (visitAiApplyButton) {

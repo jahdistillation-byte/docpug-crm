@@ -69490,3 +69490,135 @@ body[data-theme="white"]
     grid-row: 2;
   }
 }
+/* PUG AI — COMPACT STRUCTURED DRAFT */
+
+.page[data-page="visit"]
+  #visitAiStructureResult {
+  margin-top: 10px !important;
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div {
+  display: grid !important;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px !important;
+  border:
+    1px solid
+    var(--finance-border) !important;
+  border-radius: 14px !important;
+  background:
+    var(--finance-surface-soft) !important;
+}
+
+/* Заголовок черновика */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div
+  > div:first-child {
+  grid-column: 1 / -1;
+  margin: 0 !important;
+  padding: 0 2px 9px !important;
+  border-bottom:
+    1px solid
+    var(--finance-border);
+  color:
+    var(--finance-text) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* Карточки подготовленных полей */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div
+  > div:not(:first-child):not(
+    [role="alert"]
+  ):not(
+    [style*="rgba(245,158,11"]
+  ) {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 12px !important;
+  border:
+    1px solid
+    var(--finance-border) !important;
+  border-radius: 12px;
+  background:
+    var(--finance-card) !important;
+}
+
+/* Название поля */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div
+  > div:not(:first-child):not(
+    [role="alert"]
+  ):not(
+    [style*="rgba(245,158,11"]
+  )
+  > div:first-child {
+  margin: 0 !important;
+  color:
+    var(--finance-accent-2) !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.02em;
+}
+
+/* Содержимое поля */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div
+  > div:not(:first-child):not(
+    [role="alert"]
+  ):not(
+    [style*="rgba(245,158,11"]
+  )
+  > div:last-child {
+  max-height: 92px;
+  margin-top: 7px !important;
+  overflow-y: auto;
+  color:
+    var(--finance-text-soft) !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+/* Предупреждение о другом пациенте */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  [role="alert"] {
+  grid-column: 1 / -1;
+  margin: 0 !important;
+}
+
+/* Информация, которую нужно проверить */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  [style*="rgba(245,158,11"] {
+  grid-column: 1 / -1;
+  margin: 0 !important;
+  color:
+    var(--finance-text) !important;
+}
+
+/* Узкие экраны */
+
+@media screen and (max-width: 900px) {
+  .page[data-page="visit"]
+    #visitAiStructureResult
+    > div {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+}
