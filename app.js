@@ -91391,7 +91391,67 @@ function normalizeVisitHomeTreatmentItem(
       ),
   };
 }
+function formatVisitHomeTreatmentItem(
+  item = {}
+) {
+  const normalized =
+    normalizeVisitHomeTreatmentItem(
+      item
+    );
 
+  const name =
+    normalized.name.trim();
+
+  const instructionParts = [
+    normalized.dose,
+    normalized.route,
+    normalized.frequency,
+    normalized.duration,
+  ]
+    .map(
+      (value) =>
+        String(
+          value || ""
+        ).trim()
+    )
+    .filter(Boolean);
+
+  let text =
+    name || "Призначення";
+
+  if (instructionParts.length) {
+    text +=
+      " — " +
+      instructionParts.join(", ");
+  }
+
+  const note =
+    normalized.note.trim();
+
+  if (note) {
+    text +=
+      text.endsWith(".")
+        ? ` ${note}`
+        : `. ${note}`;
+  }
+
+  return text.trim();
+}
+
+
+function formatVisitHomeTreatments(
+  items = []
+) {
+  return (
+    Array.isArray(items)
+      ? items
+      : []
+  )
+    .map(
+      formatVisitHomeTreatmentItem
+    )
+    .filter(Boolean);
+}
 
 function readVisitHomeTreatments() {
   return Array.from(
@@ -92656,7 +92716,27 @@ async function openVisit(visitId, opts = { pushHash: true }) {
 ) {
   void loadServicesApi();
 }
+if (!state.stockLoaded) {
+  void loadStockApi()
+    .then(() => {
+      if (
+        String(
+          state.selectedVisitId || ""
+        ) !== vid
+      ) {
+        return;
+      }
 
+      refreshVisitStockSelect();
+      refreshVisitHomeTreatmentCatalog();
+    })
+    .catch((error) => {
+      console.warn(
+        "Не вдалося завантажити каталог препаратів:",
+        error
+      );
+    });
+}
   ensureVisitServicesShape(
     visit
   );
@@ -100122,7 +100202,8 @@ const follow = String(
     "visitFollowUp"
   )?.value || ""
 ).trim();
-
+const homeTreatments =
+  readVisitHomeTreatments();
 setDischarge(visitId, {
   complaint,
   dx,
@@ -100134,7 +100215,38 @@ setDischarge(visitId, {
 
 const currentVisit =
   getVisitByIdSync(visitId);
+if (currentVisit) {
+  const currentClinicalData =
+    (
+      currentVisit
+        .clinical_data &&
+      typeof currentVisit
+        .clinical_data ===
+        "object" &&
+      !Array.isArray(
+        currentVisit
+          .clinical_data
+      )
+    )
+      ? currentVisit
+          .clinical_data
+      : {};
 
+  currentVisit.clinical_data = {
+    ...currentClinicalData,
+
+    schema_version:
+      2,
+
+    home_treatments:
+      homeTreatments,
+  };
+
+  state.visitsById.set(
+    String(visitId),
+    currentVisit
+  );
+}
 const weightValue =
   document.getElementById(
     "visitWeightDisplay"
@@ -101318,7 +101430,16 @@ const prescriptionItems =
           .trim()
     )
     .filter(Boolean);    
-
+const homeTreatmentItems =
+  formatVisitHomeTreatments(
+    Array.isArray(
+      clinicalData
+        .home_treatments
+    )
+      ? clinicalData
+          .home_treatments
+      : []
+  );
 const redFlags =
   firstNonEmpty(
     clinicalData.red_flags
@@ -101768,7 +101889,36 @@ const doctorName =
       `
   }
 </div>
+${
+  homeTreatmentItems.length
+    ? `
+      <div class="disModernSection">
+        <div class="disModernSectionTitle">
+          Лікування вдома
+        </div>
 
+        <ul
+          class="
+            disModernBulletList
+            disModernBulletList--prescriptions
+          "
+        >
+          ${homeTreatmentItems
+            .map(
+              (item) => `
+                <li>
+                  ${escapeHtml(
+                    item
+                  )}
+                </li>
+              `
+            )
+            .join("")}
+        </ul>
+      </div>
+    `
+    : ""
+}
 <div class="disModernSection">
   <div class="disModernSectionTitle">
     Рекомендації для власника
