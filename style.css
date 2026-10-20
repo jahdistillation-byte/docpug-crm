@@ -69622,3 +69622,92 @@ body[data-theme="white"]
       minmax(0, 1fr);
   }
 }
+/* PUG AI DRAFT — INLINE EDITORS */
+
+.page[data-page="visit"]
+  .visitAiDraftEditor {
+  display: block;
+  width: 100%;
+  min-height: 82px;
+  max-height: 180px;
+  margin-top: 7px;
+  padding: 8px 9px;
+  resize: vertical;
+  overflow-y: auto;
+  border:
+    1px solid
+    transparent;
+  border-radius: 9px;
+  outline: none;
+  background:
+    transparent;
+  color:
+    var(--finance-text-soft);
+  font-family:
+    var(
+      --pug-ui-font,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Arial,
+      sans-serif
+    );
+  font-size: 12px;
+  line-height: 1.5;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.page[data-page="visit"]
+  .visitAiDraftEditor:hover {
+  border-color:
+    var(--finance-border);
+  background:
+    var(--finance-input);
+}
+
+.page[data-page="visit"]
+  .visitAiDraftEditor:focus {
+  border-color:
+    var(--finance-accent);
+  background:
+    var(--finance-card);
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--finance-accent) 13%,
+      transparent
+    );
+  color:
+    var(--finance-text);
+}
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div
+  > div:has(
+    .visitAiDraftEditor:focus
+  ) {
+  border-color:
+    var(--finance-accent) !important;
+}
+
+.page[data-page="visit"]
+  .visitAiDraftReadonly {
+  margin-top: 7px;
+  padding: 8px 9px;
+  color:
+    var(--finance-text-soft);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.page[data-page="visit"]
+  .visitAiDraftEditor::placeholder {
+  color:
+    var(--finance-text-muted);
+}

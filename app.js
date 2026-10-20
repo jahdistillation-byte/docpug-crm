@@ -97729,8 +97729,8 @@ ${
 }
 
 ${fields
-              .map(
-                (field) => `
+                            .map(
+                (field, fieldIndex) => `
                   <div
                     style="
                       margin-top:13px;
@@ -97752,18 +97752,29 @@ ${fields
                       )}
                     </div>
 
-                    <div
-                      style="
-                        margin-top:6px;
-                        color:
-                          rgba(255,255,255,.76);
-                        font-size:13px;
-                        line-height:1.55;
-                        white-space:pre-wrap;
-                      "
-                    >${escapeHtml(
-                      field.value
-                    )}</div>
+                   ${
+  field.label ===
+    "Основні показники"
+    ? `
+      <div
+        class="visitAiDraftReadonly"
+      >
+        ${escapeHtml(
+          field.value
+        )}
+      </div>
+    `
+    : `
+      <textarea
+        class="visitAiDraftEditor"
+        data-ai-draft-index="${fieldIndex}"
+        rows="4"
+        spellcheck="true"
+      >${escapeHtml(
+        field.value
+      )}</textarea>
+    `
+}
                   </div>
                 `
               )
@@ -97813,6 +97824,141 @@ ${fields
 
                       </div>
         `;
+                const editableDraftSetters = {
+          "Причина звернення":
+            (value) => {
+              structured
+                .reason_for_visit = value;
+            },
+
+          "Анамнез":
+            (value) => {
+              structured.anamnesis =
+                value;
+
+              structured
+                .complaints_anamnesis =
+                  value;
+            },
+
+          "Об’єктивний огляд":
+            (value) => {
+              structured.objective_exam =
+                value;
+            },
+
+          "Ключові клінічні проблеми":
+            (value) => {
+              structured.problem_list =
+                value;
+            },
+
+          "Діагноз":
+            (value) => {
+              structured.diagnosis =
+                value;
+            },
+
+          "Диференційні діагнози":
+            (value) => {
+              structured
+                .differential_diagnoses =
+                  value;
+            },
+
+          "План діагностики":
+            (value) => {
+              structured.diagnostic_plan =
+                value;
+            },
+
+          "Проведено на прийомі":
+            (value) => {
+              structured.performed_care =
+                value;
+            },
+
+          "Лікування та призначення":
+            (value) => {
+              structured.prescriptions =
+                value;
+
+              structured.treatment =
+                value;
+            },
+
+          "Пояснення для власника":
+            (value) => {
+              structured
+                .owner_explanation =
+                  value;
+            },
+
+          "Домашні рекомендації":
+            (value) => {
+              structured
+                .home_recommendations =
+                  value;
+
+              structured
+                .owner_recommendations =
+                  value;
+            },
+
+          "Коли звернутися терміново":
+            (value) => {
+              structured.red_flags =
+                value;
+            },
+
+          "Контроль і повторний огляд":
+            (value) => {
+              structured.follow_up =
+                value;
+            },
+        };
+
+        visitAiStructureResult
+          .querySelectorAll(
+            ".visitAiDraftEditor"
+          )
+          .forEach((editor) => {
+            editor.oninput = () => {
+              const fieldIndex =
+                Number(
+                  editor.dataset
+                    .aiDraftIndex
+                );
+
+              const field =
+                fields[fieldIndex];
+
+              if (!field) {
+                return;
+              }
+
+              const normalizedLabel =
+                field.label.startsWith(
+                  "Діагноз"
+                )
+                  ? "Діагноз"
+                  : field.label;
+
+              field.value =
+                editor.value;
+
+              const updateDraftField =
+                editableDraftSetters[
+                  normalizedLabel
+                ];
+
+              if (updateDraftField) {
+                updateDraftField(
+                  editor.value
+                );
+              }
+            };
+          });
         const discardDraftButton =
           visitAiStructureResult
             .querySelector(
