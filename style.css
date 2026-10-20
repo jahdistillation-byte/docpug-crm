@@ -69622,27 +69622,38 @@ body[data-theme="white"]
       minmax(0, 1fr);
   }
 }
-/* PUG AI DRAFT — INLINE EDITORS */
+/* PUG AI DRAFT — EDITABLE CARDS */
 
 .page[data-page="visit"]
+  #visitAiStructureResult
   .visitAiDraftEditor {
-  display: block;
-  width: 100%;
-  min-height: 82px;
-  max-height: 180px;
-  margin-top: 7px;
-  padding: 8px 9px;
-  resize: vertical;
-  overflow-y: auto;
-  border:
-    1px solid
-    transparent;
-  border-radius: 9px;
-  outline: none;
+  display: block !important;
+
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+
+  height: auto !important;
+  min-height: 92px !important;
+  max-height: 220px !important;
+
+  margin: 8px 0 0 !important;
+  padding: 11px 12px !important;
+  box-sizing: border-box !important;
+
+  resize: vertical !important;
+  overflow-y: auto !important;
+
+  border: 1px solid
+    var(--finance-border) !important;
+  border-radius: 10px !important;
+  outline: none !important;
+
   background:
-    transparent;
+    var(--finance-input) !important;
   color:
-    var(--finance-text-soft);
+    var(--finance-text-soft) !important;
+
   font-family:
     var(
       --pug-ui-font,
@@ -69651,9 +69662,14 @@ body[data-theme="white"]
       "Segoe UI",
       Arial,
       sans-serif
-    );
-  font-size: 12px;
-  line-height: 1.5;
+    ) !important;
+
+  font-size: 13px !important;
+  font-weight: 450 !important;
+  line-height: 1.5 !important;
+
+  field-sizing: content;
+
   transition:
     border-color 0.16s ease,
     background 0.16s ease,
@@ -69661,28 +69677,35 @@ body[data-theme="white"]
 }
 
 .page[data-page="visit"]
+  #visitAiStructureResult
   .visitAiDraftEditor:hover {
   border-color:
-    var(--finance-border);
-  background:
-    var(--finance-input);
+    color-mix(
+      in srgb,
+      var(--finance-accent) 35%,
+      var(--finance-border)
+    ) !important;
 }
 
 .page[data-page="visit"]
+  #visitAiStructureResult
   .visitAiDraftEditor:focus {
   border-color:
-    var(--finance-accent);
+    var(--finance-accent) !important;
+
   background:
-    var(--finance-card);
+    var(--finance-card) !important;
+
   box-shadow:
     0 0 0 3px
     color-mix(
       in srgb,
-      var(--finance-accent) 13%,
+      var(--finance-accent) 12%,
       transparent
-    );
+    ) !important;
+
   color:
-    var(--finance-text);
+    var(--finance-text) !important;
 }
 
 .page[data-page="visit"]
@@ -69692,21 +69715,39 @@ body[data-theme="white"]
     .visitAiDraftEditor:focus
   ) {
   border-color:
-    var(--finance-accent) !important;
+    color-mix(
+      in srgb,
+      var(--finance-accent) 42%,
+      var(--finance-border)
+    ) !important;
 }
 
 .page[data-page="visit"]
+  #visitAiStructureResult
   .visitAiDraftReadonly {
-  margin-top: 7px;
-  padding: 8px 9px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 8px;
+  padding: 11px 12px;
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    var(--finance-border);
+  border-radius: 10px;
+
+  background:
+    var(--finance-input);
   color:
     var(--finance-text-soft);
-  font-size: 12px;
+
+  font-size: 13px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
 
 .page[data-page="visit"]
+  #visitAiStructureResult
   .visitAiDraftEditor::placeholder {
   color:
     var(--finance-text-muted);
