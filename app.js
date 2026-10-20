@@ -1351,6 +1351,21 @@ const LS = {
     localStorage.setItem(key, JSON.stringify(val));
   },
 };
+const cachedServices =
+  LS.get(
+    SERVICES_KEY,
+    []
+  );
+
+if (
+  Array.isArray(
+    cachedServices
+  ) &&
+  cachedServices.length
+) {
+  state.services =
+    cachedServices;
+}
 // =========================
 // INTERFACE LOCALIZATION
 // =========================
@@ -9515,7 +9530,25 @@ async function loadOwners(
               )
             : []
         );
+if (
+  cachedOwners.length &&
+  (
+    !Array.isArray(
+      state.owners
+    ) ||
+    !state.owners.length
+  )
+) {
+  state.owners =
+    cachedOwners;
 
+  if (
+    state.route ===
+    "owners"
+  ) {
+    renderOwners();
+  }
+}
 
   ownersApiInFlight =
     (async () => {
@@ -92018,13 +92051,13 @@ async function openVisit(visitId, opts = { pushHash: true }) {
    * если визит открыли из карточки пациента.
    */
   if (
-    !Array.isArray(
-      state.services
-    ) ||
-    state.services.length === 0
-  ) {
-    await loadServicesApi();
-  }
+  !Array.isArray(
+    state.services
+  ) ||
+  state.services.length === 0
+) {
+  void loadServicesApi();
+}
 
   ensureVisitServicesShape(
     visit
@@ -92034,10 +92067,10 @@ async function openVisit(visitId, opts = { pushHash: true }) {
     visit
   );
 
-try {
-  const calendarEvents =
-    await loadCalendarApi();
-
+void (async () => {
+  try {
+    const calendarEvents =
+      await loadCalendarApi();
   const linkedCalendarEvent =
     (
       Array.isArray(
@@ -92069,10 +92102,10 @@ try {
       .trim()
       .toLowerCase();
 
-  cacheVisits([
-    visit,
-  ]);
-} catch (error) {
+      cacheVisits([
+      visit,
+    ]);
+    } catch (error) {
   console.warn(
     "Не вдалося визначити статус календарного запису:",
     error
@@ -92090,10 +92123,11 @@ try {
       .trim()
       .toLowerCase();
 
-  cacheVisits([
+    cacheVisits([
     visit,
   ]);
 }
+})();
 
 
 state.selectedVisitId =
@@ -121544,24 +121578,29 @@ async function init() {
 
   state.clinicProfile = null;
 
-  await loadClinicProfileApi();
+const startupRequests = [
+  loadClinicProfileApi(),
+];
 
+if (
+  typeof loadStockApi ===
+  "function"
+) {
+  startupRequests.push(
+    loadStockApi(true)
+  );
+}
 
-  if (
-    typeof loadStockApi ===
-    "function"
-  ) {
-    await loadStockApi(
-      true
-    );
-  }
+if (
+  typeof initTabs ===
+  "function"
+) {
+  initTabs();
+}
 
-  if (
-    typeof initTabs ===
-    "function"
-  ) {
-    initTabs();
-  }
+await Promise.allSettled(
+  startupRequests
+);
 
   if (
     typeof seedIfEmpty ===
