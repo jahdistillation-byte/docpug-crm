@@ -62145,10 +62145,63 @@ async function renderPatientTab(tab, pet) {
   const root = $("#patientCardRoot");
   if (!root || !pet) return;
 
-  const patientVisits =
-  await loadVisitsApi({
+ const [
+  patientVisitsResult,
+  activeDiagnosesResult,
+  weightHistoryResult,
+  vaccinationHistoryResult,
+] = await Promise.all([
+  loadVisitsApi({
     pet_id: pet.id,
-  });
+  }),
+
+  tab === "overview"
+    ? loadPatientDiagnosesApi(
+        pet.id,
+        "active"
+      )
+    : Promise.resolve([]),
+
+  tab === "overview"
+    ? loadPatientWeightsApi(
+        pet.id
+      )
+    : Promise.resolve([]),
+
+  tab === "overview"
+    ? loadPatientVaccinationsApi(
+        pet.id
+      )
+    : Promise.resolve([]),
+]);
+
+const patientVisits =
+  Array.isArray(
+    patientVisitsResult
+  )
+    ? patientVisitsResult
+    : [];
+
+const activeDiagnoses =
+  Array.isArray(
+    activeDiagnosesResult
+  )
+    ? activeDiagnosesResult
+    : [];
+
+const weightHistory =
+  Array.isArray(
+    weightHistoryResult
+  )
+    ? weightHistoryResult
+    : [];
+
+const vaccinationHistory =
+  Array.isArray(
+    vaccinationHistoryResult
+  )
+    ? vaccinationHistoryResult
+    : [];
 
 const sortedPatientVisits =
   [...patientVisits].sort(
@@ -62196,27 +62249,6 @@ const stats = {
       ?.event_date ||
     "—",
 };
-
-const activeDiagnoses =
-  tab === "overview"
-    ? await loadPatientDiagnosesApi(
-        pet.id,
-        "active"
-      )
-    : [];
-const weightHistory =
-  tab === "overview"
-    ? await loadPatientWeightsApi(
-        pet.id
-      )
-    : [];
-
- const vaccinationHistory =
-  tab === "overview"
-    ? await loadPatientVaccinationsApi(
-        pet.id
-      )
-    : [];
 
 console.log(
   "PATIENT VACCINATIONS:",
