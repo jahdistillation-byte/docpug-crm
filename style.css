@@ -71022,3 +71022,79 @@ body[data-theme="white"]
 .page[data-page="visit"] .visitAiWorkspaceBody {
   grid-column: 1 / -1 !important;
 }
+/* VISIT — минималистичная шапка */
+
+@media screen and (min-width: 901px) {
+  .page[data-page="visit"] .visitWorkspaceHeader {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 16px !important;
+
+    margin-bottom: 12px !important;
+    padding: 12px 14px !important;
+
+    background: rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid #dbe5ec !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 24px rgba(42, 74, 98, 0.05) !important;
+  }
+
+  .page[data-page="visit"] .visitWorkspaceHeaderMain {
+    display: grid !important;
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "back title"
+      "back meta" !important;
+    align-items: center !important;
+    column-gap: 12px !important;
+    row-gap: 2px !important;
+  }
+
+  .page[data-page="visit"] .visitBackPatientButton {
+    grid-area: back !important;
+
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    justify-content: center !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .page[data-page="visit"] .visitBackPatientButton > span {
+    font-size: 19px !important;
+  }
+
+  .page[data-page="visit"] .visitWorkspaceHeader h1 {
+    grid-area: title !important;
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.025em !important;
+  }
+
+  .page[data-page="visit"] .visitWorkspaceMeta {
+    grid-area: meta !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  .page[data-page="visit"] .visitWorkspaceHeaderActions {
+    gap: 7px !important;
+  }
+
+  .page[data-page="visit"] :is(
+    .visitWorkspaceStatus,
+    .visitWorkspaceDate
+  ) {
+    min-height: 34px !important;
+    padding: 0 11px !important;
+    font-size: 12px !important;
+  }
+}
