@@ -70949,3 +70949,42 @@ body[data-theme="white"]
       repeat(2, minmax(0, 1fr));
   }
 }
+/* =========================================================
+   VISIT WORKSPACE — WIDE DESKTOP CANVAS
+   ========================================================= */
+
+@media screen and (min-width: 1121px) {
+  .main-content:has(
+    .page[data-page="visit"].active
+  ) {
+    width: calc(100vw - 48px) !important;
+    max-width: none !important;
+
+    margin-left: 24px !important;
+    margin-right: 24px !important;
+
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+
+    box-sizing: border-box;
+  }
+
+  .page[data-page="visit"] {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .page[data-page="visit"]
+    .visitWorkspace,
+  .page[data-page="visit"]
+    .visitWorkspace.hasPugAiWorkspace {
+    width: min(
+      100%,
+      2400px
+    ) !important;
+
+    max-width: 2400px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
