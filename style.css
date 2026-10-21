@@ -71098,3 +71098,96 @@ body[data-theme="white"]
     font-size: 12px !important;
   }
 }
+/* VISIT — чистая кнопка возврата */
+
+.page[data-page="visit"] .visitBackPatientButton {
+  position: relative !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+
+  overflow: hidden !important;
+  justify-content: center !important;
+
+  color: transparent !important;
+  font-size: 0 !important;
+  text-indent: -9999px !important;
+
+  border-radius: 12px !important;
+}
+
+.page[data-page="visit"] .visitBackPatientButton > span {
+  display: none !important;
+}
+
+.page[data-page="visit"] .visitBackPatientButton::before {
+  content: "←";
+  color: #2b638e;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  text-indent: 0;
+}
+
+
+/* PUG AI — большое поле и вертикальные кнопки */
+
+@media screen and (min-width: 761px) {
+  .page[data-page="visit"] #visitAiIntakePanel > div {
+    grid-template-columns:
+      minmax(0, 1fr) 230px !important;
+    grid-template-rows:
+      auto auto auto !important;
+
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .page[data-page="visit"] #visitAiIntakeInput {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 122px !important;
+    max-height: none !important;
+  }
+
+  .page[data-page="visit"] #visitAiRecordButton {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+
+    width: 100% !important;
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+
+  .page[data-page="visit"]
+    #visitAiIntakePanel
+    > div
+    > div:nth-child(5)
+    > div {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .page[data-page="visit"] #visitAiStructureButton,
+  .page[data-page="visit"] #visitAiApplyButton {
+    width: 100% !important;
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+
+  .page[data-page="visit"] #visitAiStructureResult {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+  }
+}
