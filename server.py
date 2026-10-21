@@ -19748,6 +19748,50 @@ def pug_ai_intake_structure_schema():
             "prescriptions": {
                 "type": "string",
             },
+            "home_treatments": {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "kind": {
+                "type": "string",
+                "enum": [
+                    "medicine",
+                    "procedure",
+                    "care",
+                ],
+            },
+            "name": {
+                "type": "string",
+            },
+            "dose": {
+                "type": "string",
+            },
+            "route": {
+                "type": "string",
+            },
+            "frequency": {
+                "type": "string",
+            },
+            "duration": {
+                "type": "string",
+            },
+            "note": {
+                "type": "string",
+            },
+        },
+        "required": [
+            "kind",
+            "name",
+            "dose",
+            "route",
+            "frequency",
+            "duration",
+            "note",
+        ],
+    },
+},
 
             "owner_explanation": {
                 "type": "string",
@@ -19801,6 +19845,7 @@ def pug_ai_intake_structure_schema():
             "diagnostic_plan",
             "performed_care",
             "prescriptions",
+            "home_treatments",
             "owner_explanation",
             "home_recommendations",
             "red_flags",
@@ -22403,7 +22448,10 @@ Core safety rules:
 - If information is absent, return an empty
   string, empty array, or null.
 - Do not repeat the same information in
-  several fields.
+  several fields, except that at-home
+  prescriptions must appear both in the
+  prescriptions summary and as structured
+  items in home_treatments.
 
 Patient verification:
 - Compare any patient name, species, breed,
@@ -22467,7 +22515,26 @@ Field routing:
   only procedures, medications, and care
   already performed during this visit.
 - prescriptions:
-  only treatment prescribed after the visit.
+  a concise clinical summary of all treatment
+  prescribed after the visit.
+- home_treatments:
+  every medication, procedure, or care action
+  that the owner must perform at home.
+  Return one separate object per appointment.
+  Use kind "medicine" for medications,
+  "procedure" for therapeutic procedures,
+  and "care" for feeding, cleaning, wound
+  care, or other home care.
+  Copy the stated name, dose or quantity,
+  route, frequency, duration, and owner note
+  exactly into name, dose, route, frequency,
+  duration, and note.
+  Use an empty string when a detail was not
+  explicitly provided.
+  Never combine several medications or
+  actions into one object.
+  Never invent a dose, route, frequency,
+  duration, or instruction.
 - owner_explanation:
   a concise non-technical paraphrase of
   documented findings or the veterinarian's
@@ -22520,7 +22587,7 @@ Writing rules:
             "format": {
                 "type": "json_schema",
                 "name":
-                    "pug_ai_intake_structure_v2",
+                    "pug_ai_intake_structure_v3",
                 "strict": True,
                 "schema":
                     pug_ai_intake_structure_schema(),
@@ -24626,7 +24693,7 @@ def api_structure_visit_intake(
                 "read_only": True,
                 "stored_in_crm": False,
                 "provider_store": False,
-                "structure_version": "2",
+                "structure_version": "3",
                 "reasoning_effort": "low",
                 "language": language,
                 "visit_id": visit_id,

@@ -97995,6 +97995,39 @@ updateAiStructureControls();
   const structured =
   result?.structured || {};
 
+  const aiHomeTreatments =
+  (
+    Array.isArray(
+      structured.home_treatments
+    )
+      ? structured.home_treatments
+      : []
+  )
+    .map(
+      normalizeVisitHomeTreatmentItem
+    )
+    .filter(
+      (item) =>
+        item.name ||
+        item.dose ||
+        item.route ||
+        item.frequency ||
+        item.duration ||
+        item.note
+    );
+
+structured.home_treatments =
+  aiHomeTreatments;
+
+const aiHomeTreatmentsText =
+  formatVisitHomeTreatments(
+    aiHomeTreatments
+  )
+    .map(
+      (item) => `• ${item}`
+    )
+    .join("\n");
+
 const patientMatch =
   String(
     structured.patient_match ||
@@ -98341,6 +98374,13 @@ visitAiIntakePanel
                 structured.treatment
               ),
           },
+
+          {
+  label:
+    "Лікування вдома",
+  value:
+    aiHomeTreatmentsText,
+},
           {
             label:
               "Пояснення для власника",
@@ -98707,6 +98747,12 @@ ${fields
         data-ai-draft-index="${fieldIndex}"
         rows="4"
         spellcheck="true"
+        ${
+  field.label ===
+    "Лікування вдома"
+    ? 'readonly aria-readonly="true"'
+    : ""
+}
       >${escapeHtml(
         field.value
       )}</textarea>
@@ -98984,7 +99030,11 @@ if (visitAiApplyButton) {
   updateAiStructureControls();
   return;
 }
-
+const previousHomeTreatments =
+  readVisitHomeTreatments()
+    .map(
+      normalizeVisitHomeTreatmentItem
+    );
       const candidateFields = [
         {
           element:
@@ -99244,7 +99294,22 @@ if (visitAiApplyButton) {
           );
         }
       );
+const homeTreatmentsApplied =
+  aiHomeTreatments.length > 0;
 
+if (homeTreatmentsApplied) {
+  renderVisitHomeTreatments(
+    aiHomeTreatments
+  );
+}
+
+visitAiIntakePanel
+  .previousHomeTreatments =
+    previousHomeTreatments;
+
+visitAiIntakePanel
+  .aiHomeTreatmentsApplied =
+    homeTreatmentsApplied;
       visitAiIntakePanel
         .appliedAiFields =
           appliedFields;
@@ -99326,6 +99391,26 @@ updateAiStructureControls();
       if (visitAiUndoButton) {
         visitAiUndoButton.onclick =
           () => {
+            if (
+  visitAiIntakePanel
+    .aiHomeTreatmentsApplied
+) {
+  renderVisitHomeTreatments(
+    Array.isArray(
+      visitAiIntakePanel
+        .previousHomeTreatments
+    )
+      ? visitAiIntakePanel
+          .previousHomeTreatments
+      : []
+  );
+}
+
+visitAiIntakePanel
+  .previousHomeTreatments = [];
+
+visitAiIntakePanel
+  .aiHomeTreatmentsApplied = false;
             const fieldsToRestore =
               Array.isArray(
                 visitAiIntakePanel
