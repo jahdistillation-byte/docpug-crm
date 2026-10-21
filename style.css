@@ -70866,3 +70866,86 @@ body[data-theme="white"]
     border-radius: 15px;
   }
 }
+/* =========================================================
+   PUG AI DRAFT — READABLE DOCUMENT LAYOUT
+   ========================================================= */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div {
+  grid-template-columns:
+    minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 14px !important;
+}
+
+/* Каждое подготовленное поле занимает всю ширину */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  > div
+  > div:not(:first-child) {
+  grid-column: 1 / -1 !important;
+}
+
+/* Убираем внутренние скроллы у показателей */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitals {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Текстовые поля растут по содержимому */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftEditor {
+  min-height: 76px !important;
+  max-height: none !important;
+  overflow-y: hidden !important;
+  padding: 13px 14px !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+/* Домашнее лечение визуально отделяем */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftEditor[readonly] {
+  background:
+    color-mix(
+      in srgb,
+      var(--finance-accent) 5%,
+      var(--finance-input)
+    ) !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--finance-accent) 20%,
+      var(--finance-border)
+    ) !important;
+
+  cursor: default;
+  resize: none !important;
+}
+
+/* Немного компактнее карточка показателей */
+
+.page[data-page="visit"]
+  #visitAiStructureResult
+  .visitAiDraftVitalControl {
+  min-height: 40px;
+}
+
+@media screen and (max-width: 700px) {
+  .page[data-page="visit"]
+    #visitAiStructureResult
+    .visitAiDraftVitals {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
