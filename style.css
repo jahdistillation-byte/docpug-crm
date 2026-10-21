@@ -71012,3 +71012,13 @@ body[data-theme="white"]
   min-height: 48px !important;
   align-self: end !important;
 }
+/* PUG AI — убрать пустую левую колонку */
+
+.page[data-page="visit"] .visitAiWorkspace {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.page[data-page="visit"] .visitAiWorkspaceBrand,
+.page[data-page="visit"] .visitAiWorkspaceBody {
+  grid-column: 1 / -1 !important;
+}
