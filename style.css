@@ -70988,3 +70988,27 @@ body[data-theme="white"]
     margin-right: auto !important;
   }
 }
+/* PUG AI — увеличенное поле ввода */
+
+.page[data-page="visit"] #visitAiIntakePanel > div {
+  align-items: end !important;
+}
+
+.page[data-page="visit"] #visitAiIntakeInput {
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 260px !important;
+  padding: 14px 15px !important;
+  overflow-y: auto !important;
+  resize: vertical !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.page[data-page="visit"] #visitAiRecordButton,
+.page[data-page="visit"] #visitAiStructureButton,
+.page[data-page="visit"] #visitAiApplyButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  align-self: end !important;
+}
