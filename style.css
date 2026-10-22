@@ -71191,3 +71191,438 @@ body[data-theme="white"]
     grid-row: 3 !important;
   }
 }
+/* VISIT — услуги и препараты */
+
+html body[data-theme="white"]
+  .page[data-page="visit"]
+  .visitLine {
+  min-height: 50px !important;
+  padding: 9px 11px !important;
+
+  background: #f5f8fb !important;
+  border: 1px solid #dbe5ec !important;
+  border-radius: 12px !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="visit"]
+  .visitLineMain strong {
+  color: #193247 !important;
+  font-size: 14px !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="visit"]
+  .visitLineMain span {
+  color: #6a7d8d !important;
+  font-size: 12px !important;
+}
+
+.page[data-page="visit"] .visitLinesModern {
+  gap: 7px !important;
+}
+
+.page[data-page="visit"] .visitPickerModern {
+  grid-template-columns:
+    minmax(140px, 0.65fr)
+    minmax(230px, 1.35fr)
+    72px
+    104px !important;
+
+  gap: 9px !important;
+  margin-bottom: 10px !important;
+}
+
+.page[data-page="visit"] .visitPickerModern input,
+.page[data-page="visit"] .visitPickerModern select,
+.page[data-page="visit"] .visitServicePickerButton,
+.page[data-page="visit"] .visitAddLineButton {
+  min-height: 46px !important;
+  height: 46px !important;
+}
+
+.page[data-page="visit"] .visitAddLineButton {
+  padding: 0 13px !important;
+}
+
+.page[data-page="visit"] .visitSectionCard:has(
+  #visitSvcListContainer
+),
+.page[data-page="visit"] .visitSectionCard:has(
+  #visitStkListContainer
+) {
+  padding: 18px !important;
+}
+/* VISIT — компактные задачи и напоминания */
+
+.page[data-page="visit"] #visitTasksSection {
+  padding: 18px !important;
+}
+
+.page[data-page="visit"] .visitTaskCreateForm {
+  grid-template-columns:
+    minmax(300px, 1fr)
+    140px
+    105px
+    135px
+    110px !important;
+
+  gap: 8px !important;
+  margin-top: 10px !important;
+  padding: 10px !important;
+  border-radius: 13px !important;
+}
+
+.page[data-page="visit"]
+  .visitTaskCreateForm
+  label {
+  gap: 5px !important;
+}
+
+.page[data-page="visit"]
+  .visitTaskCreateForm
+  .visitControl,
+.page[data-page="visit"]
+  .visitTaskCreateForm
+  .visitAddLineButton {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.page[data-page="visit"] .visitTasksList {
+  gap: 7px !important;
+  margin-top: 9px !important;
+}
+
+/* Компактное пустое состояние */
+
+.page[data-page="visit"] .visitTasksEmpty {
+  display: flex !important;
+  min-height: 68px !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 10px !important;
+  padding: 11px 16px !important;
+
+  text-align: left !important;
+  border-radius: 13px !important;
+}
+
+.page[data-page="visit"]
+  .visitTasksEmpty
+  > div {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+}
+
+.page[data-page="visit"]
+  .visitTasksEmpty
+  strong {
+  font-size: 13px !important;
+  white-space: nowrap;
+}
+
+.page[data-page="visit"]
+  .visitTasksEmpty
+  span {
+  max-width: none !important;
+  font-size: 12px !important;
+}
+
+/* Добавленные задачи */
+
+.page[data-page="visit"] .visitTaskItem {
+  min-height: 58px !important;
+  padding: 9px 11px !important;
+  border-radius: 12px !important;
+}
+
+.page[data-page="visit"] .visitTaskMeta {
+  gap: 5px !important;
+  margin-top: 4px !important;
+}
+
+.page[data-page="visit"]
+  .visitTaskMeta
+  > span {
+  min-height: 21px !important;
+  padding: 0 7px !important;
+}
+
+/* Светлая тема */
+
+html body[data-theme="white"]
+  .page[data-page="visit"]
+  .visitTaskCreateForm,
+html body[data-theme="white"]
+  .page[data-page="visit"]
+  .visitTaskItem,
+html body[data-theme="white"]
+  .page[data-page="visit"]
+  .visitTasksEmpty {
+  background: #f5f8fb !important;
+  border-color: #dbe5ec !important;
+}
+/* VISIT — компактный нижний итог */
+
+@media screen and (min-width: 1500px) {
+  .page[data-page="visit"] .visitSummaryCard {
+    display: grid !important;
+    grid-template-columns:
+      125px
+      minmax(330px, 1fr)
+      180px
+      repeat(4, max-content) !important;
+
+    align-items: center !important;
+    gap: 8px !important;
+
+    padding: 10px 12px !important;
+    border-radius: 15px !important;
+  }
+
+  .page[data-page="visit"] .visitSummaryHead {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryHead
+    > span {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* LIVE превращаем в спокойную зелёную точку */
+
+  .page[data-page="visit"]
+    .visitSummaryHead
+    > b {
+    width: 9px !important;
+    min-width: 9px !important;
+    height: 9px !important;
+    min-height: 9px !important;
+
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 50% !important;
+
+    background: #35a46f !important;
+    color: transparent !important;
+    font-size: 0 !important;
+  }
+
+  .page[data-page="visit"] .visitSummaryRows {
+    display: grid !important;
+    grid-template-columns:
+      repeat(3, minmax(100px, 1fr)) !important;
+
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryRows
+    > div:not(.visitSummaryDivider) {
+    min-height: 42px !important;
+    padding: 2px 12px !important;
+    gap: 2px !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryRows
+    span {
+    font-size: 11px !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryRows
+    strong {
+    font-size: 14px !important;
+  }
+
+  .page[data-page="visit"]
+    .visitSummaryGrand
+    strong {
+    font-size: 22px !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentState {
+    min-width: 170px !important;
+    margin: 0 !important;
+    padding: 7px 9px !important;
+    border-radius: 11px !important;
+  }
+
+  .page[data-page="visit"] :is(
+    .visitPaymentButton,
+    .visitSavePrimary,
+    .visitPrintButton,
+    .visitCompleteButton
+  ) {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+
+    border-radius: 11px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentButton {
+    order: 4 !important;
+  }
+
+  .page[data-page="visit"] .visitSavePrimary {
+    order: 5 !important;
+  }
+
+  .page[data-page="visit"] .visitPrintButton {
+    order: 6 !important;
+  }
+
+  .page[data-page="visit"] .visitCompleteButton {
+    order: 7 !important;
+  }
+}
+/* VISIT — удобный выбор услуг */
+
+/* Убираем дублирующий поиск у услуг */
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitSvcListContainer)
+  .visitPickerSearch {
+  display: none !important;
+}
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitSvcListContainer)
+  .visitPickerModern {
+  grid-template-columns:
+    minmax(0, 1fr)
+    72px
+    108px !important;
+
+  gap: 9px !important;
+}
+
+/* Кнопка выбора услуги становится главным полем */
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitSvcListContainer)
+  .visitPickerSelect {
+  min-width: 0 !important;
+}
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitSvcListContainer)
+  .visitServicePickerButton {
+  width: 100% !important;
+  height: 46px !important;
+  min-height: 46px !important;
+
+  padding: 6px 11px !important;
+  text-align: left !important;
+}
+
+/* VISIT — поиск по складу */
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitStkListContainer)
+  .visitPickerModern {
+  grid-template-columns:
+    minmax(150px, 0.7fr)
+    minmax(260px, 1.3fr)
+    72px
+    108px !important;
+
+  gap: 9px !important;
+}
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitStkListContainer)
+  .visitPickerSearch {
+  position: relative;
+}
+
+.page[data-page="visit"]
+  .visitSectionCard:has(#visitStkListContainer)
+  .visitPickerSearch input:focus {
+  border-color: #6d9fbe !important;
+  box-shadow:
+    0 0 0 3px
+    rgba(43, 99, 142, 0.1) !important;
+}
+
+/* Количество и добавление */
+
+.page[data-page="visit"] .visitPickerQty input {
+  text-align: center !important;
+}
+
+.page[data-page="visit"] .visitAddLineButton {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 11px !important;
+}
+/* VISIT — постоянная нижняя панель итога */
+
+@media screen and (min-width: 1500px) and (min-height: 720px) {
+  .page[data-page="visit"].active
+    .visitWorkspace {
+    padding-bottom: 145px !important;
+  }
+
+  .page[data-page="visit"].active
+    .visitWorkspaceSidebar {
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .page[data-page="visit"].active
+    .visitSummaryCard {
+    position: fixed !important;
+    z-index: 900;
+
+    right: auto !important;
+    bottom: 14px !important;
+    left: 50% !important;
+
+    width: min(
+      calc(100vw - 32px),
+      2400px
+    ) !important;
+
+    transform: translateX(-50%) !important;
+
+    background:
+      rgba(255, 255, 255, 0.94) !important;
+
+    border: 1px solid #d6e1e9 !important;
+
+    box-shadow:
+      0 16px 45px
+      rgba(32, 60, 80, 0.16) !important;
+
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter:
+      blur(18px) !important;
+  }
+
+  /* AI-кнопка поднимается над итоговой панелью */
+
+  .page[data-page="visit"].active
+    .visitAiConsultLauncher {
+    bottom: 92px !important;
+  }
+}
