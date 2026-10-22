@@ -71626,3 +71626,74 @@ html body[data-theme="white"]
     bottom: 92px !important;
   }
 }
+/* VISIT — компактный статус оплаты без отдельной карточки */
+
+@media screen and (min-width: 1500px) {
+  .page[data-page="visit"] .visitSummaryCard {
+    grid-template-columns:
+      125px
+      minmax(330px, 1fr)
+      255px
+      repeat(4, max-content) !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentState:not([hidden]) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-left: 1px solid #dbe5ec !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateTop {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateTop > span {
+    display: none !important;
+  }
+
+  .page[data-page="visit"] #visitPaymentStatus {
+    position: static !important;
+    padding: 7px 11px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(72px, 1fr)) !important;
+    flex: 1 1 auto !important;
+    gap: 0 !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney > div {
+    min-width: 0 !important;
+    padding: 0 9px !important;
+    text-align: left !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney > div + div {
+    border-left: 1px solid #dbe5ec !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney span {
+    font-size: 10px !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney strong {
+    margin-top: 2px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+}
