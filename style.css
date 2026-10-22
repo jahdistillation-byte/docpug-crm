@@ -71697,3 +71697,127 @@ html body[data-theme="white"]
     white-space: nowrap !important;
   }
 }
+/* VISIT — контрастные услуги и препараты */
+
+.page[data-page="visit"]
+:is(
+  .visitSectionCard:has(#visitSvcListContainer),
+  .visitSectionCard:has(#visitStkListContainer)
+) {
+  border: 1px solid #d5e1e9 !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(41, 72, 94, 0.08) !important;
+}
+
+.page[data-page="visit"]
+:is(
+  .visitSectionCard:has(#visitSvcListContainer),
+  .visitSectionCard:has(#visitStkListContainer)
+)
+.visitSectionIcon {
+  border-color: #cfe0eb !important;
+  background: #edf5fa !important;
+  box-shadow: none !important;
+}
+
+.page[data-page="visit"]
+:is(
+  .visitSectionCard:has(#visitSvcListContainer),
+  .visitSectionCard:has(#visitStkListContainer)
+)
+.visitSectionTotal {
+  min-width: 118px !important;
+  padding: 10px 13px !important;
+  border: 1px solid #cbdce7 !important;
+  background: #edf4f8 !important;
+  text-align: right !important;
+}
+
+.page[data-page="visit"] .visitSectionTotal span {
+  color: #657c8c !important;
+}
+
+.page[data-page="visit"] .visitSectionTotal strong,
+.page[data-page="visit"] .visitLineTotal {
+  color: #1e5f87 !important;
+  font-weight: 850 !important;
+}
+
+.page[data-page="visit"] .visitLine {
+  border: 1px solid #d9e4eb !important;
+  background: #f6f9fb !important;
+  box-shadow: none !important;
+}
+
+.page[data-page="visit"] .visitLine:hover {
+  border-color: #aac7d9 !important;
+  background: #eef5f9 !important;
+}
+
+.page[data-page="visit"] .visitLineMain strong {
+  color: #183449 !important;
+}
+
+.page[data-page="visit"] .visitLineMain span {
+  color: #657b8a !important;
+}
+
+.page[data-page="visit"] .visitServicePickerButton {
+  border-color: #cedde7 !important;
+  background: #f5f9fb !important;
+  box-shadow: none !important;
+}
+
+.page[data-page="visit"] .visitServicePickerText strong {
+  color: #183449 !important;
+}
+
+.page[data-page="visit"] .visitServicePickerText small {
+  color: #687d8c !important;
+}
+
+
+/* VISIT — исправление наложения нижней панели */
+
+@media screen and (min-width: 1500px) {
+  .page[data-page="visit"] .visitSummaryCard {
+    grid-template-columns:
+      115px
+      minmax(340px, 1fr)
+      290px
+      repeat(4, max-content) !important;
+
+    column-gap: 9px !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentState:not([hidden]) {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+    padding: 0 8px !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney {
+    min-width: 170px !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney > div {
+    padding: 0 7px !important;
+  }
+
+  .page[data-page="visit"] .visitPaymentStateMoney strong {
+    font-size: 11px !important;
+  }
+
+  .page[data-page="visit"]
+  :is(
+    .visitPaymentButton,
+    .visitSavePrimary,
+    .visitPrintButton,
+    .visitCompleteButton
+  ) {
+    padding: 0 10px !important;
+    font-size: 11.5px !important;
+  }
+}
