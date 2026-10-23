@@ -660,7 +660,7 @@
   <button
     type="button"
     class="visitStageButton"
-    data-visit-stage-target="#visitMedRx"
+    data-visit-stage-target=".visitHomeTreatment"
   >
     <span class="visitStageIndex">3</span>
     <span>Лікування</span>
@@ -1007,24 +1007,11 @@
               </label>
             </div>
 
-            <label
-              class="
-                visitField
-                visitFieldWide
-              "
-            >
-              <span>Лікування та призначення</span>
-
-              <textarea
-                class="
-                  visitControl
-                  visitTextareaPrescription
-                "
-                id="visitMedRx"
-                rows="4"
-                placeholder="Препарати, дозування, шлях введення, кратність і тривалість лікування..."
-              ></textarea>
-            </label>
+            <textarea
+  id="visitMedRx"
+  hidden
+  aria-hidden="true"
+></textarea>
 
             <div
               class="

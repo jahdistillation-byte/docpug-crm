@@ -91452,7 +91452,17 @@ function formatVisitHomeTreatments(
     )
     .filter(Boolean);
 }
-
+function getVisitHomeTreatmentsText(
+  items = readVisitHomeTreatments()
+) {
+  return formatVisitHomeTreatments(
+    items
+  )
+    .map(
+      (item) => `• ${item}`
+    )
+    .join("\n");
+}
 function readVisitHomeTreatments() {
   return Array.from(
     document.querySelectorAll(
@@ -92139,7 +92149,7 @@ const performedCare =
     "visitPerformedCare"
   );
 
-const rx =
+const legacyRx =
   readVisitText(
     "visitMedRx"
   );
@@ -92165,7 +92175,10 @@ const followUp =
   );
 const homeTreatments =
   readVisitHomeTreatments();
-
+const rx =
+  getVisitHomeTreatmentsText(
+    homeTreatments
+  ) || legacyRx;
 const weightKg =
   readVisitNumber(
     "visitWeightDisplay"
@@ -98364,16 +98377,7 @@ visitAiIntakePanel
               structured
                 .performed_care,
           },
-          {
-            label:
-              "Лікування та призначення",
-            value:
-              (
-                structured.prescriptions
-                ||
-                structured.treatment
-              ),
-          },
+          
 
           {
   label:
@@ -98861,14 +98865,6 @@ ${fields
                 value;
             },
 
-          "Лікування та призначення":
-            (value) => {
-              structured.prescriptions =
-                value;
-
-              structured.treatment =
-                value;
-            },
 
           "Пояснення для власника":
             (value) => {
@@ -99182,16 +99178,7 @@ const previousHomeTreatments =
             structured
               .performed_care,
         },
-        {
-          element:
-            rxTextarea,
-          value:
-            (
-              structured.prescriptions
-              ||
-              structured.treatment
-            ),
-        },
+      
         {
           element:
             document.getElementById(
@@ -100270,7 +100257,7 @@ const dx = String(
   )?.value || ""
 ).trim();
 
-const rx = String(
+const legacyRx = String(
   document.getElementById(
     "visitMedRx"
   )?.value || ""
@@ -100289,6 +100276,11 @@ const follow = String(
 ).trim();
 const homeTreatments =
   readVisitHomeTreatments();
+const rx =
+  getVisitHomeTreatmentsText(
+    homeTreatments
+  ) || legacyRx;
+  
 setDischarge(visitId, {
   complaint,
   dx,
@@ -100790,14 +100782,22 @@ if (
                 ?.value || ""
             ).trim();
 
-          const treatment =
-            String(
-              document
-                .getElementById(
-                  "visitMedRx"
-                )
-                ?.value || ""
-            ).trim();
+          const homeTreatments =
+  readVisitHomeTreatments();
+
+const legacyTreatment =
+  String(
+    document
+      .getElementById(
+        "visitMedRx"
+      )
+      ?.value || ""
+  ).trim();
+
+const treatment =
+  getVisitHomeTreatmentsText(
+    homeTreatments
+  ) || legacyTreatment;
 
           const recommendation =
             String(
@@ -101515,16 +101515,19 @@ const prescriptionItems =
           .trim()
     )
     .filter(Boolean);    
-const homeTreatmentItems =
+const structuredHomeTreatmentItems =
   formatVisitHomeTreatments(
     Array.isArray(
-      clinicalData
-        .home_treatments
+      clinicalData.home_treatments
     )
-      ? clinicalData
-          .home_treatments
+      ? clinicalData.home_treatments
       : []
   );
+
+const homeTreatmentItems =
+  structuredHomeTreatmentItems.length
+    ? structuredHomeTreatmentItems
+    : prescriptionItems;
 const redFlags =
   firstNonEmpty(
     clinicalData.red_flags
@@ -101935,45 +101938,6 @@ const doctorName =
   </div>
 </div>
 
-<div class="disModernSection">
-  <div class="disModernSectionTitle">
-    Призначення лікаря
-  </div>
-
-  ${
-    prescriptionItems.length
-      ? `
-        <ul
-          class="
-            disModernBulletList
-            disModernBulletList--prescriptions
-          "
-        >
-          ${prescriptionItems
-            .map(
-              (item) => `
-                <li>
-                  ${escapeHtml(
-                    item
-                  )}
-                </li>
-              `
-            )
-            .join("")}
-        </ul>
-      `
-      : `
-        <div
-          class="
-            disModernText
-            disModernTextSoft
-          "
-        >
-          —
-        </div>
-      `
-  }
-</div>
 ${
   homeTreatmentItems.length
     ? `
