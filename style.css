@@ -72042,3 +72042,224 @@ html body[data-theme="white"] .visitServicePickerCardPrice span {
     animation: none !important;
   }
 }
+/* VISIT PAYMENT — палитры окна оплаты */
+
+body[data-theme="white"] #visitPaymentModal {
+  --pay-bg: #ffffff;
+  --pay-card: #f5f8fb;
+  --pay-field: #ffffff;
+  --pay-border: #cddce6;
+  --pay-accent: #3479a3;
+  --pay-accent-strong: #205b80;
+  --pay-text: #172f42;
+  --pay-muted: #667c8c;
+}
+
+body[data-theme="purple"] #visitPaymentModal {
+  --pay-bg: #181022;
+  --pay-card: #241631;
+  --pay-field: #110b19;
+  --pay-border: rgba(188, 125, 239, 0.28);
+  --pay-accent: #ad68e4;
+  --pay-accent-strong: #7d3db9;
+  --pay-text: #f8f1ff;
+  --pay-muted: #bcaec8;
+}
+
+body[data-theme="blue"] #visitPaymentModal {
+  --pay-bg: #102430;
+  --pay-card: #183341;
+  --pay-field: #0c1d27;
+  --pay-border: rgba(112, 169, 199, 0.3);
+  --pay-accent: #70a8c6;
+  --pay-accent-strong: #477d9a;
+  --pay-text: #eef8fc;
+  --pay-muted: #a9bfca;
+}
+
+body[data-theme="green"] #visitPaymentModal {
+  --pay-bg: #11251b;
+  --pay-card: #1a3528;
+  --pay-field: #0d1e16;
+  --pay-border: rgba(126, 173, 142, 0.3);
+  --pay-accent: #7faf90;
+  --pay-accent-strong: #588268;
+  --pay-text: #f0faf3;
+  --pay-muted: #adc3b4;
+}
+
+body[data-theme="black"] #visitPaymentModal {
+  --pay-bg: #191815;
+  --pay-card: #28251f;
+  --pay-field: #12110f;
+  --pay-border: rgba(194, 161, 115, 0.3);
+  --pay-accent: #c1a070;
+  --pay-accent-strong: #8f7049;
+  --pay-text: #faf7f1;
+  --pay-muted: #c4baac;
+}
+
+
+/* Размер и основная поверхность */
+
+html body #visitPaymentModal .visitPaymentModal {
+  width: min(860px, calc(100vw - 32px)) !important;
+  border-color: var(--pay-border) !important;
+  border-radius: 22px !important;
+  background: var(--pay-bg) !important;
+  color: var(--pay-text) !important;
+  box-shadow: 0 30px 90px rgba(16, 32, 43, 0.32) !important;
+}
+
+html body #visitPaymentModal .visitPaymentHeader {
+  padding: 20px 22px !important;
+  border-color: var(--pay-border) !important;
+  background: var(--pay-card) !important;
+}
+
+html body #visitPaymentModal .visitPaymentHeaderIcon {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-card) !important;
+}
+
+html body #visitPaymentModal .visitPaymentEyebrow {
+  color: var(--pay-accent) !important;
+  font-size: 10px !important;
+}
+
+html body #visitPaymentModal .visitPaymentHeader h2 {
+  color: var(--pay-text) !important;
+  font-size: 22px !important;
+}
+
+html body #visitPaymentModal .visitPaymentHeader p {
+  color: var(--pay-muted) !important;
+  font-size: 12px !important;
+}
+
+html body #visitPaymentModal .visitPaymentClose {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-card) !important;
+  color: var(--pay-muted) !important;
+}
+
+
+/* Сводка и внутренние карточки */
+
+html body #visitPaymentModal .visitPaymentOverview > div,
+html body #visitPaymentModal
+:is(.visitPaymentForm, .visitPaymentHistory, .visitPaymentSuccess) {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-card) !important;
+}
+
+html body #visitPaymentModal .visitPaymentOverview span,
+html body #visitPaymentModal
+:is(.visitPaymentAmountField > span, .visitPaymentMethodsLabel) {
+  color: var(--pay-muted) !important;
+  font-size: 11px !important;
+}
+
+html body #visitPaymentModal .visitPaymentOverview strong {
+  color: var(--pay-text) !important;
+  font-size: 18px !important;
+}
+
+html body #visitPaymentModal .visitPaymentRemainingCard {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-card) !important;
+}
+
+html body #visitPaymentModal .visitPaymentRemainingCard strong {
+  color: var(--pay-accent) !important;
+}
+
+
+/* Сумма платежа */
+
+html body #visitPaymentModal .visitPaymentAmountField > div {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-field) !important;
+}
+
+html body #visitPaymentModal .visitPaymentAmountField input {
+  min-height: 54px !important;
+  color: var(--pay-text) !important;
+  background: transparent !important;
+  font-size: 19px !important;
+}
+
+html body #visitPaymentModal .visitPaymentAmountField b {
+  color: var(--pay-accent) !important;
+}
+
+
+/* Быстрые суммы и способы оплаты */
+
+html body #visitPaymentModal
+:is(.visitPaymentQuickAmounts button, .visitPaymentMethods button) {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-field) !important;
+  color: var(--pay-muted) !important;
+}
+
+html body #visitPaymentModal .visitPaymentMethods button {
+  min-height: 76px !important;
+}
+
+html body #visitPaymentModal
+:is(
+  .visitPaymentQuickAmounts button:hover,
+  .visitPaymentMethods button:hover,
+  .visitPaymentMethods button.active
+) {
+  border-color: var(--pay-accent) !important;
+  background: var(--pay-card) !important;
+  color: var(--pay-accent) !important;
+}
+
+html body #visitPaymentModal .visitPaymentMethods button b {
+  font-size: 11px !important;
+}
+
+
+/* Основная кнопка */
+
+html body #visitPaymentModal .visitPaymentSubmit {
+  min-height: 54px !important;
+  border-color: var(--pay-accent) !important;
+  background:
+    linear-gradient(
+      135deg,
+      var(--pay-accent),
+      var(--pay-accent-strong)
+    ) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+
+
+/* История */
+
+html body #visitPaymentModal .visitPaymentHistoryHead span,
+html body #visitPaymentModal .visitPaymentHistoryHead > b {
+  color: var(--pay-accent) !important;
+}
+
+html body #visitPaymentModal .visitPaymentHistoryHead strong {
+  color: var(--pay-text) !important;
+  font-size: 13px !important;
+}
+
+html body #visitPaymentModal
+:is(.visitPaymentHistoryItem, .visitPaymentHistoryIcon) {
+  border-color: var(--pay-border) !important;
+  background: var(--pay-field) !important;
+}
+
+html body #visitPaymentModal .visitPaymentHistoryEmpty,
+html body #visitPaymentModal
+:is(.visitPaymentHistoryMain span, .visitPaymentHistoryAmount span) {
+  color: var(--pay-muted) !important;
+  font-size: 11px !important;
+}
