@@ -71920,3 +71920,125 @@ html body[data-theme="white"] .visitServicePickerCardPrice strong {
 html body[data-theme="white"] .visitServicePickerCardPrice span {
   color: #718594 !important;
 }
+/* PUG AI — заметный индикатор голосовой записи */
+
+.page[data-page="visit"]
+#visitAiRecordButton:has(
+  + div #visitAiRecordTimer:not(:empty)
+) {
+  position: relative !important;
+  padding-right: 78px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #c92f42,
+      #e44754
+    ) !important;
+
+  border-color: #e96a74 !important;
+
+  box-shadow:
+    0 0 0 4px rgba(224, 62, 77, 0.12),
+    0 8px 22px rgba(173, 38, 53, 0.25) !important;
+
+  animation:
+    visitAiRecordingButtonPulse
+    1.8s infinite ease-in-out;
+}
+
+/* Возвращаем скрытый таймер и располагаем его внутри кнопки */
+
+.page[data-page="visit"]
+#visitAiIntakePanel
+> div
+> div:nth-child(2)
+> div:has(#visitAiRecordTimer:not(:empty)) {
+  display: flex !important;
+
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+
+  z-index: 3;
+  align-self: center !important;
+  justify-self: end !important;
+
+  margin-right: 10px !important;
+  pointer-events: none;
+}
+
+/* Надпись «Йде запис» скрываем — состояние уже понятно по кнопке */
+
+.page[data-page="visit"]
+#visitAiRecordStatus {
+  display: none !important;
+}
+
+/* Таймер REC */
+
+.page[data-page="visit"]
+#visitAiRecordTimer:not(:empty) {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+
+  margin: 0 !important;
+  padding: 5px 7px !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+
+  background: rgba(93, 8, 19, 0.32);
+  color: #ffffff !important;
+
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.page[data-page="visit"]
+#visitAiRecordTimer:not(:empty)::before {
+  content: "●";
+  color: #ffffff;
+  font-size: 9px;
+
+  animation:
+    visitAiRecordingDot
+    0.9s infinite ease-in-out;
+}
+
+@keyframes visitAiRecordingButtonPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px rgba(224, 62, 77, 0.10),
+      0 8px 22px rgba(173, 38, 53, 0.22);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 7px rgba(224, 62, 77, 0.17),
+      0 10px 28px rgba(173, 38, 53, 0.30);
+  }
+}
+
+@keyframes visitAiRecordingDot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page[data-page="visit"]
+  #visitAiRecordButton,
+  .page[data-page="visit"]
+  #visitAiRecordTimer::before {
+    animation: none !important;
+  }
+}
