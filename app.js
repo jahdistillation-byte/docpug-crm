@@ -93606,48 +93606,71 @@ function ensureVisitAiConsultStyles() {
         rgba(0,0,0,.14);
     }
 
-    body[data-theme="black"]
-    .visitAiConsultPanel {
-      --ai-consult-accent:#b79a72;
-      --ai-consult-accent-strong:#8f7450;
-      --ai-consult-surface:rgba(183,154,114,.11);
-      --ai-consult-surface-strong:rgba(20,19,17,.90);
-      --ai-consult-border:rgba(183,154,114,.28);
-    }
+    body:not([data-theme])
+.visitAiConsultPanel,
+body[data-theme="purple"]
+.visitAiConsultPanel {
+  --ai-consult-accent:#8b5cf6;
+  --ai-consult-accent-strong:#6d28d9;
+  --ai-consult-surface:rgba(139,92,246,.12);
+  --ai-consult-surface-strong:rgba(24,17,43,.96);
+  --ai-consult-border:rgba(167,139,250,.30);
+  --ai-consult-text:#f8f5ff;
+  --ai-consult-muted:rgba(235,228,255,.66);
+  --ai-consult-button-text:#ffffff;
+}
 
-    body[data-theme="white"]
-    .visitAiConsultPanel {
-      --ai-consult-accent:#7455c7;
-      --ai-consult-accent-strong:#5d3fb1;
-      --ai-consult-surface:rgba(116,85,199,.08);
-      --ai-consult-surface-strong:rgba(255,255,255,.94);
-      --ai-consult-border:rgba(116,85,199,.22);
-      --ai-consult-text:#202030;
-      --ai-consult-muted:rgba(32,32,48,.58);
-      --ai-consult-button-text:#ffffff;
+body[data-theme="black"]
+.visitAiConsultPanel {
+  --ai-consult-accent:#e85d75;
+  --ai-consult-accent-strong:#b83d55;
+  --ai-consult-surface:rgba(232,93,117,.12);
+  --ai-consult-surface-strong:rgba(16,16,19,.97);
+  --ai-consult-border:rgba(232,93,117,.30);
+  --ai-consult-text:#fafafa;
+  --ai-consult-muted:rgba(255,255,255,.62);
+  --ai-consult-button-text:#ffffff;
+}
 
-      box-shadow:
-        0 16px 38px
-        rgba(38,30,66,.10);
-    }
+body[data-theme="blue"]
+.visitAiConsultPanel {
+  --ai-consult-accent:#32b8d6;
+  --ai-consult-accent-strong:#167a9b;
+  --ai-consult-surface:rgba(50,184,214,.12);
+  --ai-consult-surface-strong:rgba(5,24,36,.97);
+  --ai-consult-border:rgba(78,199,224,.30);
+  --ai-consult-text:#f4fcff;
+  --ai-consult-muted:rgba(218,245,251,.66);
+  --ai-consult-button-text:#ffffff;
+}
 
-    body[data-theme="blue"]
-    .visitAiConsultPanel {
-      --ai-consult-accent:#6f91ad;
-      --ai-consult-accent-strong:#507791;
-      --ai-consult-surface:rgba(111,145,173,.13);
-      --ai-consult-surface-strong:rgba(13,28,39,.90);
-      --ai-consult-border:rgba(111,145,173,.32);
-    }
+body[data-theme="green"]
+.visitAiConsultPanel {
+  --ai-consult-accent:#2fb67f;
+  --ai-consult-accent-strong:#1f855d;
+  --ai-consult-surface:rgba(47,182,127,.12);
+  --ai-consult-surface-strong:rgba(5,29,20,.97);
+  --ai-consult-border:rgba(66,199,145,.30);
+  --ai-consult-text:#f3fff9;
+  --ai-consult-muted:rgba(218,247,232,.66);
+  --ai-consult-button-text:#ffffff;
+}
 
-    body[data-theme="green"]
-    .visitAiConsultPanel {
-      --ai-consult-accent:#7c9c8a;
-      --ai-consult-accent-strong:#587865;
-      --ai-consult-surface:rgba(124,156,138,.13);
-      --ai-consult-surface-strong:rgba(15,31,24,.90);
-      --ai-consult-border:rgba(124,156,138,.32);
-    }
+body[data-theme="white"]
+.visitAiConsultPanel {
+  --ai-consult-accent:#2f6f98;
+  --ai-consult-accent-strong:#245674;
+  --ai-consult-surface:rgba(47,111,152,.09);
+  --ai-consult-surface-strong:rgba(255,255,255,.97);
+  --ai-consult-border:rgba(47,111,152,.23);
+  --ai-consult-text:#193247;
+  --ai-consult-muted:rgba(45,72,91,.64);
+  --ai-consult-button-text:#ffffff;
+
+  box-shadow:
+    0 18px 44px
+    rgba(31,67,91,.13);
+}
 
     .visitAiConsultHead {
       display:flex;
@@ -96302,11 +96325,29 @@ if (
       <div
         class="visitAiConsultIdentity"
       >
-        <div
-          class="visitAiConsultIcon"
-        >
-          🩺
-        </div>
+       <div
+  class="visitAiConsultIcon"
+  aria-hidden="true"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="21"
+    height="21"
+    fill="none"
+  >
+    <path
+      d="M12 3C12.7 7.1 14.9 9.3 19 10C14.9 10.7 12.7 12.9 12 17C11.3 12.9 9.1 10.7 5 10C9.1 9.3 11.3 7.1 12 3Z"
+      fill="currentColor"
+    ></path>
+
+    <path
+      d="M19 3V7M17 5H21"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+    ></path>
+  </svg>
+</div>
 
         <div>
           <h3
