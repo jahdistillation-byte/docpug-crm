@@ -18311,20 +18311,6 @@ function renderStaffSpecializationTags(
         `
       )
       .join("");
-
-  const scheduleSeriesEndDate =
-    (() => {
-      const value =
-        new Date(
-          `${date}T12:00:00`
-        );
-
-      value.setDate(
-        value.getDate() + 30
-      );
-
-      return localISO(value);
-    })();
   }
 
   return `
@@ -77432,6 +77418,20 @@ const openMonthScheduleEditor = (
 
   const daySchedule =
     scheduleByDate.get(date) || [];
+
+  const scheduleSeriesEndDate =
+    (() => {
+      const value =
+        new Date(
+          `${date}T12:00:00`
+        );
+
+      value.setDate(
+        value.getDate() + 30
+      );
+
+      return localISO(value);
+    })();
 
   const rowsHtml =
     staff

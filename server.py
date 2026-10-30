@@ -3773,14 +3773,23 @@ def api_get_stock():
 
     current_org = get_current_org_id()
 
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
     try:
-        result = (
-            supabase
-            .table("stock")
-            .select("*")
-            .eq("org_id", current_org)
-            .order("name")
-            .execute()
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("stock")
+                .select("*")
+                .eq("org_id", current_org)
+                .order("name")
+            ),
+            attempts=4,
+            delay=0.3,
         )
 
         rows = list(
@@ -3790,29 +3799,32 @@ def api_get_stock():
         usage_by_stock = {}
 
         try:
-            usage_result = (
-                supabase
-                .table("stock_movements")
-                .select(
-                    "stock_id, quantity"
-                )
-                .eq(
-                    "org_id",
-                    current_org,
-                )
-                .eq(
-                    "movement_type",
-                    "writeoff",
-                )
-                .gte(
-                    "created_at",
-                    (
-                        datetime
-                        .now(timezone.utc)
-                        - timedelta(days=30)
-                    ).isoformat(),
-                )
-                .execute()
+            usage_result = execute_with_retry(
+                lambda: (
+                    supabase
+                    .table("stock_movements")
+                    .select(
+                        "stock_id, quantity"
+                    )
+                    .eq(
+                        "org_id",
+                        current_org,
+                    )
+                    .eq(
+                        "movement_type",
+                        "writeoff",
+                    )
+                    .gte(
+                        "created_at",
+                        (
+                            datetime
+                            .now(timezone.utc)
+                            - timedelta(days=30)
+                        ).isoformat(),
+                    )
+                ),
+                attempts=4,
+                delay=0.3,
             )
 
             for movement in (
