@@ -5357,8 +5357,25 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "patients.card.labs.savedCount": "Zapisane badania: {count}",
   "patients.card.labs.noStudies": "Brak badań",
   "patients.card.labs.emptyTitle": "Brak badań laboratoryjnych",
-  "patients.card.labs.emptyText": "Wybierz powyżej odpowiedni rodzaj badania."
+    "patients.card.labs.emptyText": "Wybierz powyżej odpowiedni rodzaj badania."
 });
+
+Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.card.labs.createShort": "Створити",
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "patients.card.labs.createShort": "Create",
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "patients.card.labs.createShort": "Erstellen",
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.card.labs.createShort": "Utwórz",
+});
+
 Object.assign(APP_TRANSLATIONS.uk, {
   "patients.card.labs.notFound": "Аналіз не знайдено.",
   "patients.card.labs.ownerTextReadFailed": "Не вдалося прочитати пояснення.",
@@ -82940,14 +82957,39 @@ async function hydrateLabAiInterpretations(
           );
 
         if (button) {
-          button.textContent =
+          setLabAiButtonLabel(
+            button,
             translateInterfaceText(
               "patients.card.labs.showAi"
-            );
+            )
+          );
         }
       })(),
     ]);
   }
+}
+
+function setLabAiButtonLabel(
+  button,
+  label
+) {
+  if (!button) {
+    return;
+  }
+
+  const labelNode =
+    button.querySelector(
+      "[data-lab-ai-label]"
+    );
+
+  if (labelNode) {
+    labelNode.textContent =
+      String(label || "");
+    return;
+  }
+
+  button.textContent =
+    String(label || "");
 }
 
 async function readLabAiApiResponse(
@@ -84913,7 +84955,17 @@ async function renderLabsTab(
 
               return `
                 <button
-                  class="premiumLabTypeButton"
+                 class="premiumLabTypeButton${
+  [
+    "BIO",
+    "CBC",
+    "UA",
+  ].includes(
+    String(type).toUpperCase()
+  )
+    ? " is-primary"
+    : ""
+}"
                   type="button"
                   data-create-lab-type="${escapeHtml(
                     type
@@ -84922,7 +84974,22 @@ async function renderLabsTab(
                   <span
                     class="premiumLabTypeIcon"
                   >
-                    ${localized.icon}
+                    <svg
+  viewBox="0 0 24 24"
+  width="22"
+  height="22"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M9 3h6"></path>
+  <path d="M10 3v6l-4.8 8.7A2.2 2.2 0 0 0 7.1 21h9.8a2.2 2.2 0 0 0 1.9-3.3L14 9V3"></path>
+  <path d="M7.5 15h9"></path>
+  <path d="M9.2 12.2h5.6"></path>
+</svg>
                   </span>
 
                   <span
@@ -84942,10 +85009,30 @@ async function renderLabsTab(
                   </span>
 
                   <span
-                    class="premiumLabTypePlus"
-                  >
-                    +
-                  </span>
+  class="premiumLabTypeAction"
+>
+  <svg
+    viewBox="0 0 20 20"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <path d="M10 4v12"></path>
+    <path d="M4 10h12"></path>
+  </svg>
+
+  <span>
+    ${escapeHtml(
+      t(
+        "patients.card.labs.createShort"
+      )
+    )}
+  </span>
+</span>
                 </button>
               `;
             }
@@ -85009,10 +85096,25 @@ async function renderLabsTab(
                   class="premiumLabsEmpty"
                 >
                   <div
-                    class="premiumLabsEmptyIcon"
-                  >
-                    🧪
-                  </div>
+  class="premiumLabsEmptyIcon"
+  aria-hidden="true"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="30"
+    height="30"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M9 3h6"></path>
+    <path d="M10 3v6l-4.8 8.7A2.2 2.2 0 0 0 7.1 21h9.8a2.2 2.2 0 0 0 1.9-3.3L14 9V3"></path>
+    <path d="M7.5 15h9"></path>
+    <path d="M9.2 12.2h5.6"></path>
+  </svg>
+</div>
 
                   <h3>
                     ${escapeHtml(
@@ -85268,26 +85370,33 @@ async function renderLabsTab(
                 "is-collapsed"
               );
 
-          aiButton.textContent =
+          setLabAiButtonLabel(
+            aiButton,
             t(
               isCollapsed
                 ? "patients.card.labs.showAi"
                 : "patients.card.labs.hideAi"
-            );
+            )
+          );
 
           return;
         }
 
         const originalText =
+          aiButton.querySelector(
+            "[data-lab-ai-label]"
+          )?.textContent ||
           aiButton.textContent;
 
         aiButton.disabled =
           true;
 
-        aiButton.textContent =
+        setLabAiButtonLabel(
+          aiButton,
           t(
             "patients.card.labs.aiAnalyzing"
-          );
+          )
+        );
 
         resultNode.innerHTML = `
           <div class="labAiLoading">
@@ -85313,10 +85422,12 @@ async function renderLabsTab(
               data.meta || {}
             );
 
-          aiButton.textContent =
+          setLabAiButtonLabel(
+            aiButton,
             t(
               "patients.card.labs.hideAi"
-            );
+            )
+          );
         } catch (error) {
           console.error(
             "PUG AI lab failed:",
@@ -85333,11 +85444,13 @@ async function renderLabsTab(
             </div>
           `;
 
-          aiButton.textContent =
+          setLabAiButtonLabel(
+            aiButton,
             originalText ||
             t(
               "patients.card.labs.aiAction"
-            );
+            )
+          );
         } finally {
           aiButton.disabled =
             false;
@@ -85623,13 +85736,25 @@ function openLabModal(
           class="premiumLabModalHeaderMain"
         >
           <div
-            class="premiumLabModalIcon"
-          >
-            ${
-              selectedTypeMeta.icon ||
-              "🧪"
-            }
-          </div>
+  class="premiumLabModalIcon"
+  aria-hidden="true"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M9 3h6"></path>
+    <path d="M10 3v6l-4.8 8.7A2.2 2.2 0 0 0 7.1 21h9.8a2.2 2.2 0 0 0 1.9-3.3L14 9V3"></path>
+    <path d="M7.5 15h9"></path>
+    <path d="M9.2 12.2h5.6"></path>
+  </svg>
+</div>
 
           <div>
             <div
@@ -85991,20 +86116,8 @@ function openLabModal(
             !isStructuredLab
               ? `
                 <div
-                  style="
-                    margin-top:14px;
-                    padding:16px;
-                    border-radius:14px;
-                    border:
-                      1px dashed
-                      rgba(139,92,246,.30);
-                    background:
-                      rgba(139,92,246,.06);
-                    color:
-                      rgba(255,255,255,.72);
-                    line-height:1.55;
-                  "
-                >
+  class="premiumLabUnstructuredInfo"
+>
                   ${escapeHtml(
                     t(
                       "patients.card.labs.modal.unstructuredInfo"
@@ -89274,11 +89387,26 @@ function renderLabCard(
         <div
           class="labHistoryMeta"
         >
-          <div
-            class="labHistoryIcon"
-          >
-            ${typeMeta.icon}
-          </div>
+         <div
+  class="labHistoryIcon"
+  aria-hidden="true"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="23"
+    height="23"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M9 3h6"></path>
+    <path d="M10 3v6l-4.8 8.7A2.2 2.2 0 0 0 7.1 21h9.8a2.2 2.2 0 0 0 1.9-3.3L14 9V3"></path>
+    <path d="M7.5 15h9"></path>
+    <path d="M9.2 12.2h5.6"></path>
+  </svg>
+</div>
 
           <div
             class="labHistoryText"
@@ -89302,28 +89430,66 @@ function renderLabCard(
             </h3>
 
             <div
-              class="labHistorySubtitle"
-            >
-              <span>
-                📅 ${escapeHtml(
-                  formatLabCardDate(
-                    lab.date
-                  )
-                )}
-              </span>
+  class="labHistorySubtitle"
+>
+  <span>
+    <svg
+      class="labHistoryMetaIcon"
+      viewBox="0 0 20 20"
+      width="15"
+      height="15"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="14" height="12" rx="2"></rect>
+      <path d="M6 3v4"></path>
+      <path d="M14 3v4"></path>
+      <path d="M3 9h14"></path>
+    </svg>
 
-              ${
-                lab.laboratory
-                  ? `
-                    <span>
-                      🏥 ${escapeHtml(
-                        lab.laboratory
-                      )}
-                    </span>
-                  `
-                  : ""
-              }
-            </div>
+    ${escapeHtml(
+      formatLabCardDate(
+        lab.date
+      )
+    )}
+  </span>
+
+  ${
+    lab.laboratory
+      ? `
+        <span>
+          <svg
+            class="labHistoryMetaIcon"
+            viewBox="0 0 20 20"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 17V5l6-2 6 2v12"></path>
+            <path d="M7 8h1"></path>
+            <path d="M12 8h1"></path>
+            <path d="M7 11h1"></path>
+            <path d="M12 11h1"></path>
+            <path d="M8 17v-3h4v3"></path>
+          </svg>
+
+          ${escapeHtml(
+            lab.laboratory
+          )}
+        </span>
+      `
+      : ""
+  }
+</div>
           </div>
         </div>
 
@@ -89347,7 +89513,20 @@ function renderLabCard(
               String(lab.id)
             )}"
           >
-            ✏️
+            <svg
+  viewBox="0 0 20 20"
+  width="17"
+  height="17"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M4 16l3.2-.7L16 6.5 13.5 4 4.7 12.8 4 16z"></path>
+  <path d="M11.8 5.7l2.5 2.5"></path>
+</svg>
           </button>
 
           <button
@@ -89359,7 +89538,22 @@ function renderLabCard(
               String(lab.id)
             )}"
           >
-            📄
+            <svg
+  viewBox="0 0 20 20"
+  width="17"
+  height="17"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M5 2.5h6l4 4V17.5H5z"></path>
+  <path d="M11 2.5v4h4"></path>
+  <path d="M7.5 11h5"></path>
+  <path d="M7.5 14h5"></path>
+</svg>
           </button>
 
           <button
@@ -89383,7 +89577,23 @@ function renderLabCard(
               String(lab.id)
             )}"
           >
-            🗑
+            <svg
+  viewBox="0 0 20 20"
+  width="17"
+  height="17"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M4 6h12"></path>
+  <path d="M8 3h4"></path>
+  <path d="M6 6l.7 11h6.6L14 6"></path>
+  <path d="M8.5 9v5"></path>
+  <path d="M11.5 9v5"></path>
+</svg>
           </button>
         </div>
       </div>
@@ -89678,12 +89888,30 @@ function renderLabCard(
             )
           )}"
         >
-          ✦ ${escapeHtml(
-            t(
-              "patients.card.labs.decodeAi"
-            )
-          )}
-        </button>
+  <svg
+    class="labAiButtonIcon"
+    viewBox="0 0 20 20"
+    width="17"
+    height="17"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M10 2.5l1.2 4.1 4.1 1.2-4.1 1.2-1.2 4.1L8.8 9 4.7 7.8l4.1-1.2L10 2.5z"></path>
+    <path d="M15.5 13l.6 2 .6-2 2-.6-2-.6-.6-2-.6 2-2 .6 2 .6z"></path>
+  </svg>
+
+  <span data-lab-ai-label>
+    ${escapeHtml(
+      t(
+        "patients.card.labs.decodeAi"
+      )
+    )}
+  </span>
+</button>
 
         <div
           class="labAiResult"

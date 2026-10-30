@@ -72263,3 +72263,826 @@ html body #visitPaymentModal
   color: var(--pay-muted) !important;
   font-size: 11px !important;
 }
+/* =========================================================
+   PATIENT LABS — CLEAN TEST CATALOG
+   ========================================================= */
+
+.page[data-page="patient"]
+  .premiumLabTypeButton {
+  position: relative;
+
+  min-height: 108px !important;
+  padding: 17px 16px !important;
+
+  gap: 14px !important;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 16%,
+      transparent
+    ) !important;
+
+  border-radius:
+    18px !important;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeButton:hover {
+  transform:
+    translateY(-2px) !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 48%,
+      transparent
+    ) !important;
+
+  box-shadow:
+    0 15px 32px
+    rgba(23, 48, 67, 0.12) !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeButton:focus-visible {
+  outline:
+    3px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 22%,
+      transparent
+    );
+
+  outline-offset:
+    3px;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeIcon {
+  width:
+    48px !important;
+
+  height:
+    48px !important;
+
+  flex:
+    0 0 48px !important;
+
+  color:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 10%,
+      transparent
+    ) !important;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 22%,
+      transparent
+    ) !important;
+
+  border-radius:
+    15px !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeIcon svg {
+  display:
+    block;
+
+  width:
+    23px;
+
+  height:
+    23px;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeText strong {
+  font-size:
+    16px !important;
+
+  font-weight:
+    850 !important;
+
+  letter-spacing:
+    0.015em;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeText small {
+  margin-top:
+    5px !important;
+
+  font-size:
+    12px !important;
+
+  font-weight:
+    560 !important;
+
+  line-height:
+    1.35 !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypePlus {
+  width:
+    32px !important;
+
+  height:
+    32px !important;
+
+  flex:
+    0 0 32px;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 18%,
+      transparent
+    );
+
+  border-radius:
+    10px !important;
+
+  font-size:
+    19px !important;
+
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeButton:hover
+  .premiumLabTypePlus {
+  color:
+    #ffffff !important;
+
+  background:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+
+  transform:
+    scale(1.04);
+}/* Patient labs — clear card action */
+
+.page[data-page="patient"]
+  .premiumLabTypeButton {
+  display: grid !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  column-gap: 14px !important;
+  row-gap: 0 !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeIcon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeText {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeAction {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-top: 9px;
+  min-height: 31px;
+  padding: 7px 10px;
+
+  color: var(--accent-color, #2f6f98);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 9%,
+      transparent
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 20%,
+      transparent
+    );
+
+  border-radius: 10px;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeAction svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeButton:hover
+  .premiumLabTypeAction {
+  color: #ffffff;
+  background: var(--accent-color, #2f6f98);
+  transform: translateY(-1px);
+}
+/* Patient labs — primary tests */
+
+.page[data-page="patient"]
+  .premiumLabTypeButton.is-primary {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--accent-color, #2f6f98) 9%,
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--accent-color, #2f6f98) 3%,
+        transparent
+      )
+    ),
+    #ffffff !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 34%,
+      transparent
+    ) !important;
+
+  box-shadow:
+    0 10px 24px
+    rgba(23, 48, 67, 0.08) !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeButton.is-primary
+  .premiumLabTypeIcon {
+  color:
+    #ffffff !important;
+
+  background:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+
+  border-color:
+    transparent !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabTypeButton.is-primary
+  .premiumLabTypeText strong {
+  color:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+}
+/* Patient labs — empty history */
+
+.page[data-page="patient"]
+  .premiumLabsEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 210px;
+  padding: 34px 24px !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 4%,
+      #ffffff
+    ) !important;
+
+  border:
+    1px dashed
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 30%,
+      transparent
+    ) !important;
+
+  border-radius: 18px !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabsEmptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 62px;
+  height: 62px;
+
+  color:
+    var(
+      --accent-color,
+      #2f6f98
+    );
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 11%,
+      #ffffff
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 22%,
+      transparent
+    );
+
+  border-radius: 18px;
+}
+
+.page[data-page="patient"]
+  .premiumLabsEmptyIcon svg {
+  display: block;
+}
+
+.page[data-page="patient"]
+  .premiumLabsEmpty h3 {
+  margin: 16px 0 7px !important;
+  color: #173043 !important;
+  font-size: 18px !important;
+  font-weight: 850 !important;
+}
+
+.page[data-page="patient"]
+  .premiumLabsEmpty p {
+  max-width: 380px;
+  margin: 0 !important;
+
+  color: #6d8292 !important;
+
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+/* Patient labs — history icons and actions */
+
+.page[data-page="patient"]
+  .labHistoryIcon svg {
+  display: block;
+}
+
+.page[data-page="patient"]
+  .labHistorySubtitle span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page[data-page="patient"]
+  .labHistoryMetaIcon {
+  display: block;
+  flex: 0 0 auto;
+
+  color:
+    var(
+      --accent-color,
+      #2f6f98
+    );
+
+  opacity: 0.82;
+}
+
+.page[data-page="patient"]
+  .labActionBtn {
+  color: #617889 !important;
+}
+
+.page[data-page="patient"]
+  .labActionBtn svg {
+  display: block;
+  pointer-events: none;
+}
+
+.page[data-page="patient"]
+  .labActionBtn:hover {
+  color:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 9%,
+      #ffffff
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labActionBtnDanger {
+  color: #c95a68 !important;
+}
+
+.page[data-page="patient"]
+  .labActionBtnDanger:hover {
+  color: #ffffff !important;
+  background: #c95a68 !important;
+  border-color: #c95a68 !important;
+}
+
+@media (max-width: 760px) {
+  .page[data-page="patient"]
+    .labHistoryHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page[data-page="patient"]
+    .labHistoryActions {
+    justify-content: flex-end;
+  }
+
+  .page[data-page="patient"]
+    .labHistoryTitle {
+    font-size: 20px !important;
+  }
+}
+/* Patient labs — modal theme polish */
+
+.premiumLabModalIcon {
+  color: #ffffff;
+}
+
+.premiumLabModalIcon svg {
+  display: block;
+}
+
+.premiumLabUnstructuredInfo {
+  margin-top: 14px;
+  padding: 16px;
+
+  color: rgba(239, 233, 248, 0.74);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 8%,
+      transparent
+    );
+
+  border:
+    1px dashed
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 34%,
+      transparent
+    );
+
+  border-radius: 14px;
+
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.premiumLabOwnerExplanationField {
+  margin-top: 16px;
+  padding: 16px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 6%,
+      transparent
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 18%,
+      transparent
+    );
+
+  border-radius: 16px;
+}
+
+body[data-theme="white"]
+  .premiumLabUnstructuredInfo {
+  color: #587082;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 6%,
+      #ffffff
+    );
+}
+
+body[data-theme="white"]
+  .premiumLabOwnerExplanationField {
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 4%,
+      #ffffff
+    );
+}
+/* Patient labs — PUG AI theme palette */
+
+.page[data-page="patient"]
+  .labAiButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 38%,
+      #ffffff
+    ) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 14%,
+      transparent
+    ) !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 42%,
+      transparent
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labAiButton:hover {
+  color: #ffffff !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent-color, #2f6f98),
+      color-mix(
+        in srgb,
+        var(--accent-color, #2f6f98) 70%,
+        #000000
+      )
+    ) !important;
+
+  border-color:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labAiButtonIcon {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.page[data-page="patient"]
+  .labAiPanel {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--accent-color, #2f6f98) 12%,
+        rgba(15, 23, 42, 0.96)
+      ),
+      rgba(15, 23, 42, 0.92)
+    ) !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 32%,
+      transparent
+    ) !important;
+}
+
+.page[data-page="patient"]
+  :is(
+    .labAiEyebrow,
+    .labAiClinicalConclusionTitle
+  ) {
+  color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 45%,
+      #ffffff
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labAiConfidence {
+  color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 42%,
+      #ffffff
+    ) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 18%,
+      transparent
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labAiOverview {
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 12%,
+      transparent
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labAiClinicalConclusion {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 36%,
+      transparent
+    ) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 13%,
+      transparent
+    ) !important;
+
+  box-shadow:
+    inset 3px 0 0
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+}
+
+.page[data-page="patient"]
+  .labAiHypothesisBar span {
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent-color, #2f6f98),
+      color-mix(
+        in srgb,
+        var(--accent-color, #2f6f98) 62%,
+        #ffffff
+      )
+    ) !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="patient"]
+  .labAiButton {
+  color:
+    var(
+      --accent-color,
+      #2f6f98
+    ) !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 8%,
+      #ffffff
+    ) !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="patient"]
+  .labAiPanel {
+  color: #173043 !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--accent-color, #2f6f98) 7%,
+        #ffffff
+      ),
+      #ffffff
+    ) !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="patient"]
+  :is(
+    .labAiPanel h4,
+    .labAiPanel h5,
+    .labAiClinicalConclusionText,
+    .labAiHypothesesTitle
+  ) {
+  color: #173043 !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="patient"]
+  :is(
+    .labAiOverview,
+    .labAiHypothesisEvidence,
+    .labAiHypothesisCounterpoints,
+    .labAiSection ul
+  ) {
+  color: #536b7c !important;
+}
+
+html body[data-theme="white"]
+  .page[data-page="patient"]
+  :is(
+    .labAiHypothesisCard,
+    .labAiSection
+  ) {
+  background:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 4%,
+      #ffffff
+    ) !important;
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent-color, #2f6f98) 18%,
+      transparent
+    ) !important;
+}
+
+@media (max-width: 620px) {
+  .page[data-page="patient"]
+    #patientCardRoot
+    .premiumLabTypeButton {
+    grid-template-columns:
+      36px minmax(0, 1fr) !important;
+  }
+
+  .page[data-page="patient"]
+    #patientCardRoot
+    .premiumLabTypeAction {
+    gap: 5px;
+    margin-top: 7px;
+    min-height: 29px;
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+}
