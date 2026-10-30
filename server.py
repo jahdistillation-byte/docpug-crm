@@ -15959,6 +15959,174 @@ def api_upsert_staff_schedule():
             "Не вдалося зберегти графік.",
             500,
         )
+
+
+@app.post("/api/staff-schedule/bulk")
+def api_upsert_staff_schedule_bulk():
+    user, auth_error = (
+        owner_or_admin_required()
+    )
+
+    if auth_error:
+        return auth_error
+
+    current_org = (
+        get_current_org_id()
+    )
+
+    if not current_org:
+        return fail(
+            "Organization not selected",
+            400,
+        )
+
+    data = (
+        request.get_json(
+            silent=True
+        )
+        or {}
+    )
+
+    rows = data.get("rows")
+
+    if not isinstance(rows, list) or not rows:
+        return fail(
+            "rows required",
+            400,
+        )
+
+    if len(rows) > 740:
+        return fail(
+            "Schedule range is too large",
+            400,
+        )
+
+    normalized_rows = []
+    seen_keys = set()
+
+    for row in rows:
+        if not isinstance(row, dict):
+            return fail(
+                "Invalid schedule row",
+                400,
+            )
+
+        work_date = str(
+            row.get("work_date")
+            or ""
+        ).strip()
+
+        staff_id = str(
+            row.get("staff_id")
+            or ""
+        ).strip()
+
+        start_time = str(
+            row.get("start_time")
+            or "09:00"
+        ).strip()
+
+        end_time = str(
+            row.get("end_time")
+            or "18:00"
+        ).strip()
+
+        if not work_date or not staff_id:
+            return fail(
+                "work_date and staff_id required",
+                400,
+            )
+
+        try:
+            datetime.strptime(
+                work_date,
+                "%Y-%m-%d",
+            )
+
+            datetime.strptime(
+                start_time,
+                "%H:%M",
+            )
+
+            datetime.strptime(
+                end_time,
+                "%H:%M",
+            )
+        except ValueError:
+            return fail(
+                "Invalid schedule date or time",
+                400,
+            )
+
+        unique_key = (
+            work_date,
+            staff_id,
+        )
+
+        if unique_key in seen_keys:
+            return fail(
+                "Duplicate schedule row",
+                400,
+            )
+
+        seen_keys.add(unique_key)
+
+        normalized_rows.append({
+            "org_id": current_org,
+            "work_date": work_date,
+            "staff_id": staff_id,
+            "is_active": row.get(
+                "is_active",
+                True,
+            ) is not False,
+            "start_time": start_time,
+            "end_time": end_time,
+        })
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase
+                .table("staff_schedule")
+                .upsert(
+                    normalized_rows,
+                    on_conflict=(
+                        "work_date,staff_id"
+                    ),
+                )
+            ),
+            attempts=5,
+            delay=0.4,
+        )
+
+        saved_rows = (
+            result.data
+            if getattr(
+                result,
+                "data",
+                None,
+            )
+            else normalized_rows
+        )
+
+        return ok({
+            "count": len(
+                normalized_rows
+            ),
+            "rows": saved_rows,
+        })
+
+    except Exception as error:
+        print(
+            "❌ POST /api/staff-schedule/bulk:",
+            repr(error),
+            flush=True,
+        )
+
+        return fail(
+            "Не вдалося зберегти графік.",
+            500,
+        )
     
     
 

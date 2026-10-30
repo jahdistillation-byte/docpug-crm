@@ -1846,6 +1846,98 @@ Object.assign(
 );
 
 Object.assign(APP_TRANSLATIONS.uk, {
+  "schedule.series": "Серія змін",
+  "schedule.seriesHint": "Створіть зрозумілий цикл або розклад за днями тижня.",
+  "schedule.pattern": "Тип графіка",
+  "schedule.patternCycle": "Робочі / вихідні",
+  "schedule.patternCycleHint": "Наприклад: 2 робочі дні через 3 вихідні.",
+  "schedule.patternWeekdays": "Дні тижня",
+  "schedule.patternWeekdaysHint": "Для стабільного графіка: понеділок, середа, п’ятниця.",
+  "schedule.workDays": "Робочих днів",
+  "schedule.offDays": "Вихідних днів",
+  "schedule.shiftType": "Тривалість зміни",
+  "schedule.regularShift": "Звичайна зміна",
+  "schedule.fullDayShift": "Добова зміна · 24 години",
+  "schedule.fullDayHint": "Добова зміна завершиться наступного дня у той самий час.",
+  "schedule.preview": "Попередній перегляд",
+  "schedule.previewWork": "Зміна",
+  "schedule.previewOff": "Вихідний",
+  "schedule.previewEmpty": "Заповніть параметри, щоб побачити майбутні зміни.",
+  "schedule.applySeries": "Застосувати серію",
+  "schedule.invalidRange": "Період має бути від 1 до 366 днів.",
+  "schedule.savedSeries": "Серію змін збережено",
+});
+
+Object.assign(APP_TRANSLATIONS.en, {
+  "schedule.series": "Shift series",
+  "schedule.seriesHint": "Create a clear rotation or a weekday-based schedule.",
+  "schedule.pattern": "Schedule type",
+  "schedule.patternCycle": "Work / days off",
+  "schedule.patternCycleHint": "For example: 2 work days followed by 3 days off.",
+  "schedule.patternWeekdays": "Days of the week",
+  "schedule.patternWeekdaysHint": "For a fixed schedule: Monday, Wednesday, Friday.",
+  "schedule.workDays": "Work days",
+  "schedule.offDays": "Days off",
+  "schedule.shiftType": "Shift duration",
+  "schedule.regularShift": "Regular shift",
+  "schedule.fullDayShift": "24-hour shift",
+  "schedule.fullDayHint": "A 24-hour shift ends at the same time on the following day.",
+  "schedule.preview": "Preview",
+  "schedule.previewWork": "Shift",
+  "schedule.previewOff": "Day off",
+  "schedule.previewEmpty": "Complete the settings to preview upcoming shifts.",
+  "schedule.applySeries": "Apply series",
+  "schedule.invalidRange": "The period must be between 1 and 366 days.",
+  "schedule.savedSeries": "Shift series saved",
+});
+
+Object.assign(APP_TRANSLATIONS.de, {
+  "schedule.series": "Schichtserie",
+  "schedule.seriesHint": "Erstellen Sie einen klaren Rhythmus oder einen Wochenplan.",
+  "schedule.pattern": "Dienstplantyp",
+  "schedule.patternCycle": "Arbeit / freie Tage",
+  "schedule.patternCycleHint": "Zum Beispiel: 2 Arbeitstage, danach 3 freie Tage.",
+  "schedule.patternWeekdays": "Wochentage",
+  "schedule.patternWeekdaysHint": "Für einen festen Plan: Montag, Mittwoch, Freitag.",
+  "schedule.workDays": "Arbeitstage",
+  "schedule.offDays": "Freie Tage",
+  "schedule.shiftType": "Schichtdauer",
+  "schedule.regularShift": "Reguläre Schicht",
+  "schedule.fullDayShift": "24-Stunden-Schicht",
+  "schedule.fullDayHint": "Eine 24-Stunden-Schicht endet am Folgetag zur gleichen Zeit.",
+  "schedule.preview": "Vorschau",
+  "schedule.previewWork": "Schicht",
+  "schedule.previewOff": "Frei",
+  "schedule.previewEmpty": "Füllen Sie die Einstellungen aus, um die Schichten anzuzeigen.",
+  "schedule.applySeries": "Serie anwenden",
+  "schedule.invalidRange": "Der Zeitraum muss zwischen 1 und 366 Tagen liegen.",
+  "schedule.savedSeries": "Schichtserie gespeichert",
+});
+
+Object.assign(APP_TRANSLATIONS.pl, {
+  "schedule.series": "Seria zmian",
+  "schedule.seriesHint": "Utwórz czytelny cykl lub grafik według dni tygodnia.",
+  "schedule.pattern": "Typ grafiku",
+  "schedule.patternCycle": "Praca / dni wolne",
+  "schedule.patternCycleHint": "Na przykład: 2 dni pracy, potem 3 dni wolne.",
+  "schedule.patternWeekdays": "Dni tygodnia",
+  "schedule.patternWeekdaysHint": "Dla stałego grafiku: poniedziałek, środa, piątek.",
+  "schedule.workDays": "Dni pracy",
+  "schedule.offDays": "Dni wolne",
+  "schedule.shiftType": "Czas trwania zmiany",
+  "schedule.regularShift": "Zwykła zmiana",
+  "schedule.fullDayShift": "Zmiana 24-godzinna",
+  "schedule.fullDayHint": "Zmiana 24-godzinna kończy się następnego dnia o tej samej porze.",
+  "schedule.preview": "Podgląd",
+  "schedule.previewWork": "Zmiana",
+  "schedule.previewOff": "Wolne",
+  "schedule.previewEmpty": "Uzupełnij ustawienia, aby zobaczyć przyszłe zmiany.",
+  "schedule.applySeries": "Zastosuj serię",
+  "schedule.invalidRange": "Okres musi wynosić od 1 do 366 dni.",
+  "schedule.savedSeries": "Seria zmian została zapisana",
+});
+
+Object.assign(APP_TRANSLATIONS.uk, {
   "patients.form.name": "Кличка",
   "patients.form.species": "Вид пацієнта"
 });
@@ -18219,6 +18311,20 @@ function renderStaffSpecializationTags(
         `
       )
       .join("");
+
+  const scheduleSeriesEndDate =
+    (() => {
+      const value =
+        new Date(
+          `${date}T12:00:00`
+        );
+
+      value.setDate(
+        value.getDate() + 30
+      );
+
+      return localISO(value);
+    })();
   }
 
   return `
@@ -76255,6 +76361,68 @@ async function saveStaffScheduleApi(
   return null;
 }
 
+async function saveStaffScheduleBulkApi(
+  rows
+) {
+  try {
+    const response =
+      await fetch(
+        "/api/staff-schedule/bulk",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Accept:
+              "application/json",
+            ...getOrgHeaders(),
+          },
+          body: JSON.stringify({
+            rows:
+              Array.isArray(rows)
+                ? rows
+                : [],
+          }),
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (
+      !response.ok ||
+      json?.ok !== true
+    ) {
+      throw new Error(
+        json?.error ||
+        `HTTP ${response.status}`
+      );
+    }
+
+    return (
+      json.data ||
+      json.item ||
+      null
+    );
+  } catch (error) {
+    console.error(
+      "saveStaffScheduleBulkApi failed:",
+      error
+    );
+
+    return null;
+  }
+}
+
 async function loadStaffDashboardApi(staffId) {
   try {
     const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/dashboard`, {
@@ -77332,7 +77500,10 @@ const openMonthScheduleEditor = (
                 <div
                   class="monthScheduleEditorAvatar"
                 >
-                  👨‍⚕️
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+                  </svg>
                 </div>
 
                 <div
@@ -77456,7 +77627,15 @@ const openMonthScheduleEditor = (
           </span>
 
           <h2>
-            📅 ${escapeHtml(formatCalendarDate(date))}
+            <span class="monthScheduleHeaderIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+                <path d="M8 3v4M16 3v4M3 10h18"></path>
+                <path d="M8 14h3M13 14h3M8 17h3"></path>
+              </svg>
+            </span>
+
+            <span>${escapeHtml(formatCalendarDate(date))}</span>
           </h2>
 
           <p>
@@ -77488,7 +77667,7 @@ const openMonthScheduleEditor = (
           type="button"
           id="monthScheduleRepeatTab"
         >
-          ${escapeHtml(translateInterfaceText("calendar.detail.recurring.schedule"))}
+          ${escapeHtml(translateInterfaceText("schedule.series"))}
         </button>
       </div>
 
@@ -77526,17 +77705,21 @@ const openMonthScheduleEditor = (
 >
   <div class="monthScheduleRepeatIntro">
     <div>
-      <span>
-        ↻
+      <span aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h11a5 5 0 0 1 0 10H9"></path>
+          <path d="m7 4-3 3 3 3"></path>
+          <path d="m12 14-3 3 3 3"></path>
+        </svg>
       </span>
 
       <div>
         <strong>
-          ${escapeHtml(translateInterfaceText("calendar.detail.recurring.schedule"))}
+          ${escapeHtml(translateInterfaceText("schedule.series"))}
         </strong>
 
         <small>
-          ${escapeHtml(translateInterfaceText("calendar.detail.configure.recurring.shifts.for.several.weeks.ahead"))}
+          ${escapeHtml(translateInterfaceText("schedule.seriesHint"))}
         </small>
       </div>
     </div>
@@ -77573,7 +77756,80 @@ const openMonthScheduleEditor = (
       </select>
     </label>
 
-    <div class="monthScheduleRepeatField monthScheduleRepeatDaysField">
+    <div class="monthScheduleRepeatField monthSchedulePatternField">
+      <span>
+        ${escapeHtml(translateInterfaceText("schedule.pattern"))}
+      </span>
+
+      <div class="monthSchedulePatternOptions">
+        <button
+          type="button"
+          class="active"
+          data-schedule-pattern="cycle"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 7h-9a5 5 0 0 0 0 10h7"></path>
+            <path d="m17 4 3 3-3 3"></path>
+            <path d="m15 14 3 3-3 3"></path>
+          </svg>
+
+          <span>
+            <strong>${escapeHtml(translateInterfaceText("schedule.patternCycle"))}</strong>
+            <small>${escapeHtml(translateInterfaceText("schedule.patternCycleHint"))}</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          data-schedule-pattern="weekdays"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+            <path d="M8 3v4M16 3v4M3 10h18"></path>
+          </svg>
+
+          <span>
+            <strong>${escapeHtml(translateInterfaceText("schedule.patternWeekdays"))}</strong>
+            <small>${escapeHtml(translateInterfaceText("schedule.patternWeekdaysHint"))}</small>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="monthScheduleCycleFields"
+      id="monthScheduleCycleFields"
+    >
+      <label class="monthScheduleRepeatField">
+        <span>${escapeHtml(translateInterfaceText("schedule.workDays"))}</span>
+        <input
+          type="number"
+          id="monthScheduleCycleWorkDays"
+          value="2"
+          min="1"
+          max="31"
+          inputmode="numeric"
+        >
+      </label>
+
+      <label class="monthScheduleRepeatField">
+        <span>${escapeHtml(translateInterfaceText("schedule.offDays"))}</span>
+        <input
+          type="number"
+          id="monthScheduleCycleOffDays"
+          value="3"
+          min="1"
+          max="31"
+          inputmode="numeric"
+        >
+      </label>
+    </div>
+
+    <div
+      class="monthScheduleRepeatField monthScheduleRepeatDaysField"
+      id="monthScheduleWeekdayFields"
+      hidden
+    >
       <span>
         ${escapeHtml(translateInterfaceText("calendar.detail.days.of.the.week"))}
       </span>
@@ -77630,6 +77886,29 @@ const openMonthScheduleEditor = (
       </div>
     </div>
 
+    <div class="monthScheduleRepeatField monthScheduleShiftTypeField">
+      <span>
+        ${escapeHtml(translateInterfaceText("schedule.shiftType"))}
+      </span>
+
+      <div class="monthScheduleShiftTypeOptions">
+        <button
+          type="button"
+          class="active"
+          data-schedule-shift-kind="regular"
+        >
+          ${escapeHtml(translateInterfaceText("schedule.regularShift"))}
+        </button>
+
+        <button
+          type="button"
+          data-schedule-shift-kind="full-day"
+        >
+          ${escapeHtml(translateInterfaceText("schedule.fullDayShift"))}
+        </button>
+      </div>
+    </div>
+
     <label class="monthScheduleRepeatField">
       <span>
         ${escapeHtml(translateInterfaceText("calendar.detail.shift.start"))}
@@ -77652,6 +77931,14 @@ const openMonthScheduleEditor = (
         id="monthScheduleRepeatEnd"
         value="18:00"
       >
+
+      <small
+        class="monthScheduleFullDayHint"
+        id="monthScheduleFullDayHint"
+        hidden
+      >
+        ${escapeHtml(translateInterfaceText("schedule.fullDayHint"))}
+      </small>
     </label>
 
     <label class="monthScheduleRepeatField">
@@ -77677,15 +77964,34 @@ const openMonthScheduleEditor = (
         type="date"
         id="monthScheduleRepeatDateTo"
         value="${escapeHtml(
-          date
+          scheduleSeriesEndDate
         )}"
       >
     </label>
 
   </div>
 
-  <div class="monthScheduleRepeatHint">
-    ${escapeHtml(translateInterfaceText("calendar.detail.example.mon.wed.fri.09.00.18.00"))}
+  <section class="monthSchedulePreview">
+    <header>
+      <div>
+        <span>${escapeHtml(translateInterfaceText("schedule.preview"))}</span>
+        <strong id="monthSchedulePatternSummary"></strong>
+      </div>
+
+      <div class="monthSchedulePreviewLegend">
+        <span class="is-work">${escapeHtml(translateInterfaceText("schedule.previewWork"))}</span>
+        <span class="is-off">${escapeHtml(translateInterfaceText("schedule.previewOff"))}</span>
+      </div>
+    </header>
+
+    <div
+      class="monthSchedulePreviewDays"
+      id="monthSchedulePatternPreview"
+    ></div>
+  </section>
+
+  <div class="monthScheduleRepeatHint" id="monthScheduleSeriesHint">
+    ${escapeHtml(translateInterfaceText("schedule.patternCycleHint"))}
   </div>
 </div>
 
@@ -77786,6 +78092,360 @@ const saveButton =
     "#monthScheduleEditorSave"
   );
 
+const getScheduleSeriesConfig = () => ({
+  pattern:
+    overlay.querySelector(
+      "[data-schedule-pattern].active"
+    )?.dataset.schedulePattern ||
+    "cycle",
+  shiftKind:
+    overlay.querySelector(
+      "[data-schedule-shift-kind].active"
+    )?.dataset.scheduleShiftKind ||
+    "regular",
+  staffId: String(
+    overlay.querySelector(
+      "#monthScheduleRepeatStaff"
+    )?.value || ""
+  ),
+  shiftStart: String(
+    overlay.querySelector(
+      "#monthScheduleRepeatStart"
+    )?.value || ""
+  ),
+  shiftEnd: String(
+    overlay.querySelector(
+      "#monthScheduleRepeatEnd"
+    )?.value || ""
+  ),
+  dateFrom: String(
+    overlay.querySelector(
+      "#monthScheduleRepeatDateFrom"
+    )?.value || ""
+  ),
+  dateTo: String(
+    overlay.querySelector(
+      "#monthScheduleRepeatDateTo"
+    )?.value || ""
+  ),
+  workDays: Math.max(
+    1,
+    Number(
+      overlay.querySelector(
+        "#monthScheduleCycleWorkDays"
+      )?.value || 1
+    )
+  ),
+  offDays: Math.max(
+    1,
+    Number(
+      overlay.querySelector(
+        "#monthScheduleCycleOffDays"
+      )?.value || 1
+    )
+  ),
+  weekdays: Array.from(
+    overlay.querySelectorAll(
+      "[data-repeat-weekday].active"
+    )
+  ).map(
+    (button) =>
+      Number(
+        button.dataset.repeatWeekday
+      )
+  ),
+});
+
+const buildScheduleSeriesRows = (
+  config
+) => {
+  const from = new Date(
+    `${config.dateFrom}T12:00:00`
+  );
+  const to = new Date(
+    `${config.dateTo}T12:00:00`
+  );
+
+  if (
+    Number.isNaN(from.getTime()) ||
+    Number.isNaN(to.getTime()) ||
+    to < from
+  ) {
+    return [];
+  }
+
+  const rowsByDate = new Map();
+  const dates = [];
+
+  for (
+    const cursor = new Date(from);
+    cursor <= to;
+    cursor.setDate(
+      cursor.getDate() + 1
+    )
+  ) {
+    const workDate =
+      localISO(cursor);
+
+    dates.push({
+      date: new Date(cursor),
+      workDate,
+    });
+
+    rowsByDate.set(
+      workDate,
+      {
+        work_date: workDate,
+        staff_id: config.staffId,
+        is_active: false,
+        start_time:
+          config.shiftStart ||
+          "09:00",
+        end_time:
+          config.shiftEnd ||
+          "18:00",
+      }
+    );
+  }
+
+  const mergeActiveSegment = (
+    workDate,
+    startTime,
+    endTime
+  ) => {
+    const row =
+      rowsByDate.get(workDate);
+
+    if (!row || startTime === endTime) {
+      return;
+    }
+
+    if (!row.is_active) {
+      row.is_active = true;
+      row.start_time = startTime;
+      row.end_time = endTime;
+      return;
+    }
+
+    row.start_time =
+      row.start_time < startTime
+        ? row.start_time
+        : startTime;
+
+    row.end_time =
+      row.end_time > endTime
+        ? row.end_time
+        : endTime;
+  };
+
+  const cycleLength =
+    config.workDays +
+    config.offDays;
+
+  dates.forEach(
+    (item, index) => {
+      const isWorkDay =
+        config.pattern ===
+        "weekdays"
+          ? config.weekdays.includes(
+              item.date.getDay()
+            )
+          : index % cycleLength <
+            config.workDays;
+
+      if (!isWorkDay) {
+        return;
+      }
+
+      const crossesMidnight =
+        config.shiftKind ===
+          "full-day" ||
+        config.shiftEnd <=
+          config.shiftStart;
+
+      if (!crossesMidnight) {
+        mergeActiveSegment(
+          item.workDate,
+          config.shiftStart,
+          config.shiftEnd
+        );
+        return;
+      }
+
+      mergeActiveSegment(
+        item.workDate,
+        config.shiftStart,
+        "23:59"
+      );
+
+      const nextDate =
+        new Date(item.date);
+
+      nextDate.setDate(
+        nextDate.getDate() + 1
+      );
+
+      const nextDateKey =
+        localISO(nextDate);
+
+      const nextEnd =
+        config.shiftKind ===
+          "full-day"
+          ? config.shiftStart
+          : config.shiftEnd;
+
+      if (nextEnd !== "00:00") {
+        mergeActiveSegment(
+          nextDateKey,
+          "00:00",
+          nextEnd
+        );
+      }
+    }
+  );
+
+  return Array.from(
+    rowsByDate.values()
+  );
+};
+
+const updateScheduleSeriesPreview = () => {
+  const config =
+    getScheduleSeriesConfig();
+
+  const cycleFields =
+    overlay.querySelector(
+      "#monthScheduleCycleFields"
+    );
+
+  const weekdayFields =
+    overlay.querySelector(
+      "#monthScheduleWeekdayFields"
+    );
+
+  if (cycleFields) {
+    cycleFields.hidden =
+      config.pattern !== "cycle";
+  }
+
+  if (weekdayFields) {
+    weekdayFields.hidden =
+      config.pattern !==
+      "weekdays";
+  }
+
+  const endInput =
+    overlay.querySelector(
+      "#monthScheduleRepeatEnd"
+    );
+
+  const fullDayHint =
+    overlay.querySelector(
+      "#monthScheduleFullDayHint"
+    );
+
+  if (endInput) {
+    endInput.disabled =
+      config.shiftKind ===
+      "full-day";
+  }
+
+  if (fullDayHint) {
+    fullDayHint.hidden =
+      config.shiftKind !==
+      "full-day";
+  }
+
+  const rows =
+    buildScheduleSeriesRows(config);
+
+  const preview =
+    overlay.querySelector(
+      "#monthSchedulePatternPreview"
+    );
+
+  const summary =
+    overlay.querySelector(
+      "#monthSchedulePatternSummary"
+    );
+
+  if (summary) {
+    summary.textContent =
+      config.pattern === "cycle"
+        ? `${config.workDays} / ${config.offDays} · ${config.shiftStart}${
+            config.shiftKind ===
+            "full-day"
+              ? " · 24h"
+              : `–${config.shiftEnd}`
+          }`
+        : `${config.weekdays.length} · ${config.shiftStart}${
+            config.shiftKind ===
+            "full-day"
+              ? " · 24h"
+              : `–${config.shiftEnd}`
+          }`;
+  }
+
+  if (!preview) {
+    return;
+  }
+
+  if (!rows.length) {
+    preview.innerHTML = `
+      <div class="monthSchedulePreviewEmpty">
+        ${escapeHtml(
+          translateInterfaceText(
+            "schedule.previewEmpty"
+          )
+        )}
+      </div>
+    `;
+    return;
+  }
+
+  const dateFormatter =
+    new Intl.DateTimeFormat(
+      interfaceLocale,
+      {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+      }
+    );
+
+  preview.innerHTML =
+    rows
+      .slice(0, 14)
+      .map(
+        (row) => `
+          <div class="monthSchedulePreviewDay ${
+            row.is_active
+              ? "is-work"
+              : "is-off"
+          }">
+            <span>${escapeHtml(
+              dateFormatter.format(
+                new Date(
+                  `${row.work_date}T12:00:00`
+                )
+              )
+            )}</span>
+
+            <strong>
+              ${escapeHtml(
+                row.is_active
+                  ? `${row.start_time}–${row.end_time}`
+                  : translateInterfaceText(
+                      "schedule.previewOff"
+                    )
+              )}
+            </strong>
+          </div>
+        `
+      )
+      .join("");
+};
+
 
 const setScheduleEditorMode = (
   mode
@@ -77821,12 +78481,16 @@ const setScheduleEditorMode = (
   if (saveButton) {
     saveButton.textContent =
       repeatMode
-        ? `↻ ${translateInterfaceText(
-            "schedule.applySchedule"
-          )}`
-        : `💾 ${translateInterfaceText(
+        ? translateInterfaceText(
+            "schedule.applySeries"
+          )
+        : translateInterfaceText(
             "schedule.saveDay"
-          )}`;
+          );
+  }
+
+  if (repeatMode) {
+    updateScheduleSeriesPreview();
   }
 };
 
@@ -77852,6 +78516,54 @@ repeatTab?.addEventListener(
 
 overlay
   .querySelectorAll(
+    "[data-schedule-pattern]"
+  )
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        overlay
+          .querySelectorAll(
+            "[data-schedule-pattern]"
+          )
+          .forEach((item) => {
+            item.classList.toggle(
+              "active",
+              item === button
+            );
+          });
+
+        updateScheduleSeriesPreview();
+      }
+    );
+  });
+
+overlay
+  .querySelectorAll(
+    "[data-schedule-shift-kind]"
+  )
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        overlay
+          .querySelectorAll(
+            "[data-schedule-shift-kind]"
+          )
+          .forEach((item) => {
+            item.classList.toggle(
+              "active",
+              item === button
+            );
+          });
+
+        updateScheduleSeriesPreview();
+      }
+    );
+  });
+
+overlay
+  .querySelectorAll(
     "[data-repeat-weekday]"
   )
   .forEach((button) => {
@@ -77861,9 +78573,29 @@ overlay
         button.classList.toggle(
           "active"
         );
+
+        updateScheduleSeriesPreview();
       }
     );
   });
+
+overlay
+  .querySelectorAll(
+    "#monthScheduleRepeatContent input, #monthScheduleRepeatContent select"
+  )
+  .forEach((control) => {
+    control.addEventListener(
+      "input",
+      updateScheduleSeriesPreview
+    );
+
+    control.addEventListener(
+      "change",
+      updateScheduleSeriesPreview
+    );
+  });
+
+updateScheduleSeriesPreview();
 
   overlay
     .querySelectorAll(
@@ -77963,233 +78695,163 @@ overlay
     ) === true;
 
 if (repeatMode) {
-  const selectedWeekdays =
-    Array.from(
-      overlay.querySelectorAll(
-        "[data-repeat-weekday].active"
-      )
-    ).map(
-      (button) =>
-        Number(
-          button.dataset
-            .repeatWeekday
-        )
-    );
-const staffId =
-  String(
-    overlay.querySelector(
-      "#monthScheduleRepeatStaff"
-    )?.value || ""
+  const config =
+    getScheduleSeriesConfig();
+
+  const from = new Date(
+    `${config.dateFrom}T12:00:00`
   );
 
-const shiftStart =
-  String(
-    overlay.querySelector(
-      "#monthScheduleRepeatStart"
-    )?.value || ""
+  const to = new Date(
+    `${config.dateTo}T12:00:00`
   );
 
-const shiftEnd =
-  String(
-    overlay.querySelector(
-      "#monthScheduleRepeatEnd"
-    )?.value || ""
-  );
+  const rangeDays =
+    Math.floor(
+      (
+        to.getTime() -
+        from.getTime()
+      ) /
+      86400000
+    ) + 1;
 
-const dateFrom =
-  String(
-    overlay.querySelector(
-      "#monthScheduleRepeatDateFrom"
-    )?.value || ""
-  );
+  const missingWeekdays =
+    config.pattern ===
+      "weekdays" &&
+    !config.weekdays.length;
 
-const dateTo =
-  String(
-    overlay.querySelector(
-      "#monthScheduleRepeatDateTo"
-    )?.value || ""
-  );
   if (
-  !staffId ||
-  !selectedWeekdays.length ||
-  !shiftStart ||
-  !shiftEnd ||
-  !dateFrom ||
-  !dateTo
-) {
-  showCrmNotice({
-    icon: "⚠",
-    title: translateInterfaceText("calendar.detail.required.fields.are.missing"),
-    text:
-      translateInterfaceText("calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range"),
-  });
-
-  return;
-}
-
-if (
-  shiftEnd <= shiftStart
-) {
-  showCrmNotice({
-    icon: "⚠",
-    title: translateInterfaceText("calendar.detail.invalid.time"),
-    text:
-      translateInterfaceText("calendar.detail.the.shift.must.end.after.it.starts"),
-  });
-
-  return;
-}
-
-if (
-  dateTo < dateFrom
-) {
-  showCrmNotice({
-    icon: "⚠",
-    title: translateInterfaceText("calendar.detail.invalid.date.range"),
-    text:
-      translateInterfaceText("calendar.detail.the.end.date.cannot.be.earlier.than.the.start.date"),
-  });
-
-  return;
-}
-
-const datesToSave = [];
-
-const cursor =
-  new Date(
-    `${dateFrom}T12:00:00`
-  );
-
-const endDate =
-  new Date(
-    `${dateTo}T12:00:00`
-  );
-
-while (
-  cursor <= endDate
-) {
-  if (
-    selectedWeekdays.includes(
-      cursor.getDay()
-    )
+    !config.staffId ||
+    !config.shiftStart ||
+    !config.dateFrom ||
+    !config.dateTo ||
+    (
+      config.shiftKind !==
+        "full-day" &&
+      !config.shiftEnd
+    ) ||
+    missingWeekdays
   ) {
-    const year =
-      cursor.getFullYear();
-
-    const month =
-      String(
-        cursor.getMonth() + 1
-      ).padStart(
-        2,
-        "0"
-      );
-
-    const day =
-      String(
-        cursor.getDate()
-      ).padStart(
-        2,
-        "0"
-      );
-
-    datesToSave.push(
-      `${year}-${month}-${day}`
-    );
-  }
-
-  cursor.setDate(
-    cursor.getDate() + 1
-  );
-}
-
-if (!datesToSave.length) {
-  showCrmNotice({
-    icon: "ℹ",
-    title: translateInterfaceText("calendar.detail.no.shifts"),
-    text:
-      translateInterfaceText("calendar.detail.the.selected.period.contains.none.of.the.selected.weekdays"),
-  });
-
-  return;
-}
-
-const saveButton =
-  overlay.querySelector(
-    "#monthScheduleEditorSave"
-  );
-
-if (saveButton) {
-  saveButton.disabled = true;
-
-  saveButton.textContent =
-    `${escapeHtml(translateInterfaceText("calendar.detail.saving.0"))}${datesToSave.length}`;
-}
-
-let savedCount = 0;
-
-for (
-  const workDate
-  of datesToSave
-) {
-  const saved =
-    await saveStaffScheduleApi({
-      work_date:
-        workDate,
-
-      staff_id:
-        staffId,
-
-      is_active:
-        true,
-
-      start_time:
-        shiftStart,
-
-      end_time:
-        shiftEnd,
-    });
-
-  if (!saved) {
-    if (saveButton) {
-      saveButton.disabled =
-        false;
-
-            saveButton.textContent =
-        `↻ ${translateInterfaceText(
-          "schedule.applySchedule"
-        )}`;
-    }
-
     showCrmNotice({
       icon: "⚠",
-      title: translateInterfaceText("calendar.detail.could.not.save.the.schedule"),
+      title:
+        translateInterfaceText(
+          "calendar.detail.required.fields.are.missing"
+        ),
       text:
-        translateInterfaceText("calendar.detail.shifts.saved.saved.of.total", { saved: savedCount, total: datesToSave.length }),
+        translateInterfaceText(
+          "calendar.detail.select.an.employee.weekdays.shift.hours.and.date.range"
+        ),
     });
-
     return;
   }
 
-  savedCount += 1;
+  if (
+    !Number.isFinite(rangeDays) ||
+    rangeDays < 1 ||
+    rangeDays > 366
+  ) {
+    showCrmNotice({
+      icon: "⚠",
+      title:
+        translateInterfaceText(
+          "calendar.detail.invalid.date.range"
+        ),
+      text:
+        translateInterfaceText(
+          "schedule.invalidRange"
+        ),
+    });
+    return;
+  }
+
+  const rows =
+    buildScheduleSeriesRows(
+      config
+    );
+
+  if (!rows.length) {
+    return;
+  }
 
   if (saveButton) {
+    saveButton.disabled = true;
     saveButton.textContent =
-      `${escapeHtml(translateInterfaceText("calendar.detail.saving"))} ${savedCount}/${datesToSave.length}`;
+      `${translateInterfaceText(
+        "calendar.detail.saving"
+      )} ${rows.length}`;
   }
-}
 
-closeEditor();
+  try {
+    const saved =
+      await saveStaffScheduleBulkApi(
+        rows
+      );
 
-await renderCalendarTab();
+    if (!saved) {
+      throw new Error(
+        translateInterfaceText(
+          "calendar.detail.could.not.save.the.schedule"
+        )
+      );
+    }
 
-showCrmNotice({
-  icon: "✓",
-  title: translateInterfaceText("calendar.detail.schedule.applied"),
-  text:
-    translateInterfaceText("calendar.detail.recurring.shifts.created.count", { count: savedCount }),
-});
+    closeEditor();
+    await renderCalendarTab();
 
-return;
+    showCrmNotice({
+      icon: "✓",
+      title:
+        translateInterfaceText(
+          "schedule.savedSeries"
+        ),
+      text:
+        translateInterfaceText(
+          "calendar.detail.recurring.shifts.created.count",
+          {
+            count: rows.filter(
+              (row) =>
+                row.is_active
+            ).length,
+          }
+        ),
+    });
+  } catch (error) {
+    console.error(
+      "schedule series save failed:",
+      error
+    );
+
+    showCrmNotice({
+      icon: "⚠",
+      title:
+        translateInterfaceText(
+          "calendar.detail.could.not.save.the.schedule"
+        ),
+      text:
+        calendarErrorMessage(
+          error,
+          translateInterfaceText(
+            "calendar.detail.please.try.again"
+          )
+        ),
+    });
+  } finally {
+    if (
+      saveButton &&
+      document.body.contains(
+        saveButton
+      )
+    ) {
+      saveButton.disabled = false;
+      saveButton.textContent =
+        translateInterfaceText(
+          "schedule.applySeries"
+        );
+    }
+  }
+
+  return;
 }
       const saveButton =
         overlay.querySelector(
