@@ -76627,11 +76627,19 @@ events.forEach(
                   "calendar.week"
                 )}
               </button>
+
+              <button
+                class="ghost"
+                data-cal-mode="month"
+                type="button"
+              >
+                Місяць
+              </button>
             </div>
 
             <button
               class="ghost calendarScheduleButton"
-              data-cal-mode="month"
+              data-open-team-schedule
               type="button"
             >
               <span>👥</span>
@@ -76709,6 +76717,12 @@ events.forEach(
     });
 
     $("[data-cal-mode='month']")?.addEventListener("click", async () => {
+      calendarMode = "month";
+      await renderCalendarTab();
+    });
+
+    $("[data-open-team-schedule]")?.addEventListener("click", async () => {
+      window.__openTeamScheduleAfterRender = true;
       calendarMode = "month";
       await renderCalendarTab();
     });
@@ -77027,50 +77041,38 @@ const monthDays =
               calendarViewSwitcher
             "
           >
-            <button
-              class="
-                ghost
-                calendarBackToVisits
-              "
-              data-cal-mode="day"
-              type="button"
-            >
-              ← ${translateInterfaceText(
-                "schedule.backToAppointments"
-              )}
-            </button>
+            <div class="calendarViewGroup">
+              <span class="calendarViewGroupLabel">
+                ${translateInterfaceText("calendar.appointments")}
+              </span>
 
-            <div class="calendarScheduleNavigation">
-              <div
-                class="calendarScheduleActive calendarMonthActive"
-              >
-                <span aria-hidden="true">▦</span>
+              <button class="ghost" data-cal-mode="day" type="button">
+                ${translateInterfaceText("calendar.day")}
+              </button>
 
-                <div>
-                  <strong>Місяць</strong>
-                  <small>${escapeHtml(monthLabel)}</small>
-                </div>
-              </div>
+              <button class="ghost" data-cal-mode="week" type="button">
+                ${translateInterfaceText("calendar.week")}
+              </button>
 
-              ${
-                isOwner() || isAdmin()
-                  ? `
-                    <button
-                      type="button"
-                      class="ghost calendarScheduleButton calendarScheduleLaunch"
-                      id="monthOpenTeamSchedule"
-                    >
-                      <span aria-hidden="true">👥</span>
-
-                      <span>
-                        <strong>Графік команди</strong>
-                        <small>Налаштувати зміни</small>
-                      </span>
-                    </button>
-                  `
-                  : ""
-              }
+              <button class="primary" data-cal-mode="month" type="button">
+                Місяць
+              </button>
             </div>
+
+            ${
+              isOwner() || isAdmin()
+                ? `
+                  <button
+                    type="button"
+                    class="ghost calendarScheduleButton"
+                    data-open-team-schedule
+                  >
+                    <span aria-hidden="true">👥</span>
+                    ${translateInterfaceText("calendar.teamSchedule")}
+                  </button>
+                `
+                : ""
+            }
           </div>
         </div>
 
@@ -79714,7 +79716,7 @@ if (repeatMode) {
 
 };
 
-    $("#monthOpenTeamSchedule")
+    $("[data-open-team-schedule]")
       ?.addEventListener(
         "click",
         () => {
@@ -79757,6 +79759,11 @@ if (repeatMode) {
     );
   }
 );
+
+    if (window.__openTeamScheduleAfterRender === true) {
+      window.__openTeamScheduleAfterRender = false;
+      openMonthScheduleEditor(today);
+    }
 
 return;
 }
@@ -80664,11 +80671,19 @@ page.innerHTML = `
                 "calendar.week"
               )}
             </button>
+
+            <button
+              class="ghost"
+              data-cal-mode="month"
+              type="button"
+            >
+              Місяць
+            </button>
           </div>
 
           <button
             class="ghost calendarScheduleButton"
-            data-cal-mode="month"
+            data-open-team-schedule
             type="button"
           >
             <span>👥</span>
@@ -80785,7 +80800,7 @@ page.innerHTML = `
       <button
         type="button"
         class="primary"
-        data-cal-mode="month"
+        data-open-team-schedule
       >
         ${translateInterfaceText(
           "calendar.configureSchedule"
@@ -81255,6 +81270,14 @@ $("#calendarCreateVisitButton")
   $$("[data-cal-mode]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       calendarMode = btn.dataset.calMode;
+      await renderCalendarTab();
+    });
+  });
+
+  $$("[data-open-team-schedule]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      window.__openTeamScheduleAfterRender = true;
+      calendarMode = "month";
       await renderCalendarTab();
     });
   });

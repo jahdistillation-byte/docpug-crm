@@ -74295,92 +74295,15 @@ html body[data-theme="white"]
   }
 }
 
-/* Team schedule month / editor navigation */
+/* Calendar navigation: one row for day, week, month and team schedule */
 
-.page[data-page="calendar"]
-  .calendarScheduleNavigation {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
+.page[data-page="calendar"] .calendarViewGroup {
+  flex-wrap: nowrap;
 }
 
-.page[data-page="calendar"]
-  .calendarMonthActive {
-  min-width: 136px;
-}
-
-.page[data-page="calendar"]
-  .calendarMonthActive > span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  color: var(--accent-color, #2f6f98);
-  background:
-    color-mix(
-      in srgb,
-      var(--accent-color, #2f6f98) 12%,
-      transparent
-    );
-  border-radius: 8px;
-  font-size: 16px;
-}
-
-.page[data-page="calendar"]
-  .calendarScheduleLaunch {
-  min-height: 46px !important;
-  padding: 7px 14px !important;
-  border-radius: 14px !important;
-  text-align: left;
-}
-
-.page[data-page="calendar"]
-  .calendarScheduleLaunch > span:last-child {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.page[data-page="calendar"]
-  .calendarScheduleLaunch strong {
-  color: var(--text-main, #173043);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.page[data-page="calendar"]
-  .calendarScheduleLaunch small {
-  color: var(--text-muted, #6e8291);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-@media (max-width: 850px) {
-  .page[data-page="calendar"]
-    .calendarScheduleNavigation {
-    display: grid;
+@media (max-width: 640px) {
+  .page[data-page="calendar"] .calendarViewGroup {
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-    width: 100%;
-  }
-
-  .page[data-page="calendar"]
-    :is(
-      .calendarMonthActive,
-      .calendarScheduleLaunch
-    ) {
-    width: 100%;
-    min-width: 0;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 520px) {
-  .page[data-page="calendar"]
-    .calendarScheduleNavigation {
-    grid-template-columns:
-      minmax(0, 1fr);
+      auto repeat(3, minmax(0, 1fr));
   }
 }
