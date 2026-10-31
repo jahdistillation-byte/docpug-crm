@@ -4152,6 +4152,7 @@ body[data-theme="white"] #monthScheduleEditorOverlay {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
 /* =======================================================
    VISIT MODAL — THEME ADAPTIVE PATCH
 ======================================================= */
@@ -73582,5 +73583,359 @@ html body[data-theme="white"]
     min-height: 29px;
     padding: 6px 8px;
     font-size: 10px;
+  }
+}
+
+/* Compact schedule result */
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-top: 18px;
+  padding: 16px 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(226, 241, 252, 0.92),
+      rgba(245, 250, 253, 0.96)
+    );
+
+  border: 1px solid #cfe1ed;
+  border-radius: 16px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultInfo {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+
+  width: 44px;
+  height: 44px;
+
+  color: #2f6f98;
+  background: #d9ecf8;
+  border-radius: 12px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultInfo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultEyebrow {
+  color: #6d8292;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+#monthScheduleEditorOverlay
+  #monthScheduleResultTitle {
+  color: #173043;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+#monthScheduleEditorOverlay
+  #monthSchedulePatternSummary {
+  color: #657c8d;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 40px;
+  padding: 0 14px;
+
+  color: #2f6f98;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid #c7dce9;
+  border-radius: 11px;
+
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails > summary::-webkit-details-marker {
+  display: none;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails > summary svg {
+  width: 17px;
+  height: 17px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails[open] {
+  width: 100%;
+  flex-basis: 100%;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails[open]
+  > summary {
+  margin-left: auto;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCalendarDetails[open]
+  .monthSchedulePreviewDays {
+  margin-top: 14px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleResultCard:has(
+    .monthScheduleCalendarDetails[open]
+  ) {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  #monthScheduleEditorOverlay
+    .monthScheduleResultCard {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #monthScheduleEditorOverlay
+    .monthScheduleCalendarDetails > summary {
+    width: 100%;
+  }
+}
+/* Natural-language schedule cycle */
+
+#monthScheduleEditorOverlay
+  .monthScheduleCycleSentence {
+  grid-column: 1 / -1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+
+  min-height: 78px;
+  padding: 14px 18px;
+
+  color: #173043;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(229, 241, 249, 0.86),
+      rgba(243, 249, 252, 0.96)
+    );
+
+  border: 1px solid #d1e2ec;
+  border-radius: 15px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleCycleSentence[hidden] {
+  display: none !important;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleSentenceText {
+  font-size: 14px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleNumberControl {
+  display: block;
+  flex: 0 0 auto;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleNumberControl input {
+  width: 82px;
+  height: 48px;
+  padding: 0 13px;
+
+  color: #173043;
+  background: #ffffff;
+  border: 1px solid #c7dce9;
+  border-radius: 11px;
+
+  font-size: 20px;
+  font-weight: 850;
+  text-align: center;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleNumberControl input:focus {
+  border-color: #2f7db0;
+  box-shadow:
+    0 0 0 3px
+    rgba(47, 125, 176, 0.12);
+  outline: none;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleSentenceArrow {
+  color: #7591a4;
+  font-size: 23px;
+  font-weight: 500;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleSentenceRepeat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 17px;
+
+  color: #2f6f98;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7dce9;
+  border-radius: 11px;
+
+  font-size: 13px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  #monthScheduleEditorOverlay
+    .monthScheduleCycleSentence {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  #monthScheduleEditorOverlay
+    .monthScheduleSentenceArrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* Weekday schedule chooser */
+
+#monthScheduleEditorOverlay
+  #monthScheduleWeekdayFields {
+  grid-column: 1 / -1;
+  padding: 0;
+}
+
+#monthScheduleEditorOverlay
+  #monthScheduleWeekdayFields[hidden] {
+  display: none !important;
+}
+
+#monthScheduleEditorOverlay
+  #monthScheduleWeekdayFields
+  > span {
+  display: block;
+  margin-bottom: 9px;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleRepeatDays {
+  display: grid !important;
+  grid-template-columns:
+    repeat(7, minmax(0, 1fr));
+  gap: 8px !important;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleRepeatDays button {
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 8px !important;
+
+  color: #173043 !important;
+  background: #ffffff !important;
+  border: 1px solid #cbdde8 !important;
+  border-radius: 11px !important;
+
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleRepeatDays button:hover {
+  color: #2f6f98 !important;
+  border-color: #7faac5 !important;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleRepeatDays button.active {
+  color: #ffffff !important;
+  background:
+    linear-gradient(
+      135deg,
+      #2f7db0,
+      #286b99
+    ) !important;
+  border-color: #2f7db0 !important;
+  box-shadow:
+    0 8px 18px
+    rgba(47, 111, 152, 0.18) !important;
+}
+
+#monthScheduleEditorOverlay
+  .monthScheduleWeekdayDescription {
+  display: block;
+  margin-top: 10px;
+
+  color: #6a8090;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  #monthScheduleEditorOverlay
+    .monthScheduleRepeatDays {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 460px) {
+  #monthScheduleEditorOverlay
+    .monthScheduleRepeatDays {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 }

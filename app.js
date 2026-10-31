@@ -77635,10 +77635,12 @@ const openMonthScheduleEditor = (
               </svg>
             </span>
 
-            <span>${escapeHtml(formatCalendarDate(date))}</span>
+            <span id="monthScheduleEditorTitle">
+              ${escapeHtml(formatCalendarDate(date))}
+            </span>
           </h2>
 
-          <p>
+          <p id="monthScheduleEditorSubtitle">
             ${escapeHtml(translateInterfaceText("calendar.detail.configure.the.status.and.working.hours.of.each.employee"))}
           </p>
         </div>
@@ -77660,14 +77662,14 @@ const openMonthScheduleEditor = (
   class="active"
   id="monthScheduleSingleTab"
 >
-  ${escapeHtml(translateInterfaceText("calendar.detail.single.day"))}
+  Зміни на цей день
 </button>
 
         <button
           type="button"
           id="monthScheduleRepeatTab"
         >
-          ${escapeHtml(translateInterfaceText("schedule.series"))}
+          Створити графік
         </button>
       </div>
 
@@ -77797,11 +77799,14 @@ const openMonthScheduleEditor = (
     </div>
 
     <div
-      class="monthScheduleCycleFields"
+      class="monthScheduleCycleSentence"
       id="monthScheduleCycleFields"
     >
-      <label class="monthScheduleRepeatField">
-        <span>${escapeHtml(translateInterfaceText("schedule.workDays"))}</span>
+      <span class="monthScheduleSentenceText">
+        Працює
+      </span>
+
+      <label class="monthScheduleNumberControl">
         <input
           type="number"
           id="monthScheduleCycleWorkDays"
@@ -77809,11 +77814,26 @@ const openMonthScheduleEditor = (
           min="1"
           max="31"
           inputmode="numeric"
+          aria-label="Робочих днів"
         >
       </label>
 
-      <label class="monthScheduleRepeatField">
-        <span>${escapeHtml(translateInterfaceText("schedule.offDays"))}</span>
+      <span
+        class="monthScheduleSentenceText"
+        id="monthScheduleCycleWorkUnit"
+      >
+        дні
+      </span>
+
+      <span class="monthScheduleSentenceArrow" aria-hidden="true">
+        →
+      </span>
+
+      <span class="monthScheduleSentenceText">
+        відпочиває
+      </span>
+
+      <label class="monthScheduleNumberControl">
         <input
           type="number"
           id="monthScheduleCycleOffDays"
@@ -77821,8 +77841,24 @@ const openMonthScheduleEditor = (
           min="1"
           max="31"
           inputmode="numeric"
+          aria-label="Вихідних днів"
         >
       </label>
+
+      <span
+        class="monthScheduleSentenceText"
+        id="monthScheduleCycleOffUnit"
+      >
+        дні
+      </span>
+
+      <span class="monthScheduleSentenceArrow" aria-hidden="true">
+        →
+      </span>
+
+      <strong class="monthScheduleSentenceRepeat">
+        повторювати
+      </strong>
     </div>
 
     <div
@@ -77884,6 +77920,13 @@ const openMonthScheduleEditor = (
           ${escapeHtml(translateInterfaceText("calendar.detail.sun"))}
         </button>
       </div>
+
+      <small
+        class="monthScheduleWeekdayDescription"
+        id="monthScheduleWeekdayDescription"
+      >
+        Оберіть робочі дні співробітника.
+      </small>
     </div>
 
     <div class="monthScheduleRepeatField monthScheduleShiftTypeField">
@@ -77971,28 +78014,66 @@ const openMonthScheduleEditor = (
 
   </div>
 
-  <section class="monthSchedulePreview">
-    <header>
-      <div>
-        <span>${escapeHtml(translateInterfaceText("schedule.preview"))}</span>
-        <strong id="monthSchedulePatternSummary"></strong>
-      </div>
+  <section class="monthScheduleResultCard">
+  <div class="monthScheduleResultInfo">
+    <span class="monthScheduleResultIcon" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+        <path d="M8 3v4M16 3v4M3 10h18"></path>
+        <path d="M8 14h3M13 14h3M8 17h3"></path>
+      </svg>
+    </span>
 
-      <div class="monthSchedulePreviewLegend">
-        <span class="is-work">${escapeHtml(translateInterfaceText("schedule.previewWork"))}</span>
-        <span class="is-off">${escapeHtml(translateInterfaceText("schedule.previewOff"))}</span>
-      </div>
-    </header>
+    <div>
+      <span class="monthScheduleResultEyebrow">
+        ЗАПЛАНОВАНІ ЗМІНИ
+      </span>
+
+      <strong id="monthScheduleResultTitle">
+        Графік підготовлено
+      </strong>
+
+      <small id="monthSchedulePatternSummary"></small>
+    </div>
+  </div>
+
+  <details class="monthScheduleCalendarDetails">
+    <summary>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+        <path d="M8 3v4M16 3v4M3 10h18"></path>
+      </svg>
+
+      Показати календар
+    </summary>
 
     <div
       class="monthSchedulePreviewDays"
       id="monthSchedulePatternPreview"
     ></div>
-  </section>
+  </details>
+</section>
 
-  <div class="monthScheduleRepeatHint" id="monthScheduleSeriesHint">
-    ${escapeHtml(translateInterfaceText("schedule.patternCycleHint"))}
-  </div>
+<div
+  class="monthScheduleRepeatHint"
+  id="monthScheduleSeriesHint"
+  hidden
+></div>
 </div>
 
 <footer
@@ -78198,6 +78279,7 @@ const buildScheduleSeriesRows = (
         work_date: workDate,
         staff_id: config.staffId,
         is_active: false,
+        starts_shift: false,
         start_time:
           config.shiftStart ||
           "09:00",
@@ -78255,6 +78337,16 @@ const buildScheduleSeriesRows = (
 
       if (!isWorkDay) {
         return;
+      }
+
+      const shiftStartRow =
+        rowsByDate.get(
+          item.workDate
+        );
+
+      if (shiftStartRow) {
+        shiftStartRow.starts_shift =
+          true;
       }
 
       const crossesMidnight =
@@ -78369,21 +78461,174 @@ const updateScheduleSeriesPreview = () => {
       "#monthSchedulePatternSummary"
     );
 
+  const resultTitle =
+    overlay.querySelector(
+      "#monthScheduleResultTitle"
+    );
+
+  const weekdayDescription =
+    overlay.querySelector(
+      "#monthScheduleWeekdayDescription"
+    );
+
+  const cycleWorkUnit =
+    overlay.querySelector(
+      "#monthScheduleCycleWorkUnit"
+    );
+
+  const cycleOffUnit =
+    overlay.querySelector(
+      "#monthScheduleCycleOffUnit"
+    );
+
+  const shiftRows =
+    rows.filter(
+      (row) =>
+        row.starts_shift === true
+    );
+
+  const shortScheduleDate = (
+    value
+  ) => {
+    const cleanValue =
+      String(value || "");
+
+    return cleanValue.length >= 10
+      ? `${cleanValue.slice(8, 10)}.${cleanValue.slice(5, 7)}`
+      : cleanValue;
+  };
+
+  const scheduleShiftWord = (
+    count
+  ) => {
+    const lastTwo = count % 100;
+    const last = count % 10;
+
+    if (
+      lastTwo >= 11 &&
+      lastTwo <= 14
+    ) {
+      return "змін";
+    }
+
+    if (last === 1) {
+      return "зміну";
+    }
+
+    if (
+      last >= 2 &&
+      last <= 4
+    ) {
+      return "зміни";
+    }
+
+    return "змін";
+  };
+
+  const scheduleDayWord = (
+    count
+  ) => {
+    const lastTwo = count % 100;
+    const last = count % 10;
+
+    if (
+      lastTwo >= 11 &&
+      lastTwo <= 14
+    ) {
+      return "днів";
+    }
+
+    if (last === 1) {
+      return "день";
+    }
+
+    if (
+      last >= 2 &&
+      last <= 4
+    ) {
+      return "дні";
+    }
+
+    return "днів";
+  };
+
+  if (cycleWorkUnit) {
+    cycleWorkUnit.textContent =
+      scheduleDayWord(
+        config.workDays
+      );
+  }
+
+  if (cycleOffUnit) {
+    cycleOffUnit.textContent =
+      scheduleDayWord(
+        config.offDays
+      );
+  }
+
+  if (resultTitle) {
+    resultTitle.textContent =
+      shiftRows.length
+        ? `Буде створено ${shiftRows.length} ${scheduleShiftWord(
+            shiftRows.length
+          )}`
+        : "Робочі дні не вибрано";
+  }
+
   if (summary) {
+    const firstShift = shiftRows[0];
+    const lastShift =
+      shiftRows[
+        shiftRows.length - 1
+      ];
+
     summary.textContent =
-      config.pattern === "cycle"
-        ? `${config.workDays} / ${config.offDays} · ${config.shiftStart}${
-            config.shiftKind ===
-            "full-day"
-              ? " · 24h"
-              : `–${config.shiftEnd}`
-          }`
-        : `${config.weekdays.length} · ${config.shiftStart}${
-            config.shiftKind ===
-            "full-day"
-              ? " · 24h"
-              : `–${config.shiftEnd}`
-          }`;
+      firstShift && lastShift
+        ? `Перша зміна ${shortScheduleDate(
+            firstShift.work_date
+          )} · Остання зміна ${shortScheduleDate(
+            lastShift.work_date
+          )}`
+        : "Оберіть робочі дні";
+  }
+
+  if (weekdayDescription) {
+    const weekdayLabels = [
+      "щонеділі",
+      "щопонеділка",
+      "щовівторка",
+      "щосереди",
+      "щочетверга",
+      "щоп’ятниці",
+      "щосуботи",
+    ];
+
+    const selectedDays =
+      config.weekdays.map(
+        (day) =>
+          weekdayLabels[day]
+      );
+
+    weekdayDescription.textContent =
+      selectedDays.length
+        ? `Працює ${selectedDays.join(
+            ", "
+          )}.`
+        : "Оберіть робочі дні співробітника.";
+  }
+
+  if (
+    saveButton &&
+    repeatTab?.classList.contains(
+      "active"
+    )
+  ) {
+    saveButton.textContent =
+      shiftRows.length
+        ? `Створити ${shiftRows.length} ${scheduleShiftWord(
+            shiftRows.length
+          )}`
+        : "Створити графік";
   }
 
   if (!preview) {
@@ -78453,6 +78698,16 @@ const setScheduleEditorMode = (
   const repeatMode =
     mode === "repeat";
 
+  const editorTitle =
+    overlay.querySelector(
+      "#monthScheduleEditorTitle"
+    );
+
+  const editorSubtitle =
+    overlay.querySelector(
+      "#monthScheduleEditorSubtitle"
+    );
+
   singleTab?.classList.toggle(
     "active",
     !repeatMode
@@ -78486,6 +78741,22 @@ const setScheduleEditorMode = (
           )
         : translateInterfaceText(
             "schedule.saveDay"
+          );
+  }
+
+  if (editorTitle) {
+    editorTitle.textContent =
+      repeatMode
+        ? "Новий графік працівника"
+        : formatCalendarDate(date);
+  }
+
+  if (editorSubtitle) {
+    editorSubtitle.textContent =
+      repeatMode
+        ? "Налаштуйте зміни один раз — календар заповниться автоматично."
+        : translateInterfaceText(
+            "calendar.detail.configure.the.status.and.working.hours.of.each.employee"
           );
   }
 
@@ -78811,7 +79082,8 @@ if (repeatMode) {
           {
             count: rows.filter(
               (row) =>
-                row.is_active
+                row.starts_shift ===
+                true
             ).length,
           }
         ),
@@ -78844,10 +79116,7 @@ if (repeatMode) {
       )
     ) {
       saveButton.disabled = false;
-      saveButton.textContent =
-        translateInterfaceText(
-          "schedule.applySeries"
-        );
+      updateScheduleSeriesPreview();
     }
   }
 
