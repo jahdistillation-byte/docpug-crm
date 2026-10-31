@@ -77040,28 +77040,36 @@ const monthDays =
               )}
             </button>
 
-            <div
-              class="
-                calendarScheduleActive
-              "
-            >
-              <span>
-                👥
-              </span>
+            <div class="calendarScheduleNavigation">
+              <div
+                class="calendarScheduleActive calendarMonthActive"
+              >
+                <span aria-hidden="true">▦</span>
 
-              <div>
-                <strong>
-                  ${translateInterfaceText(
-                    "calendar.teamSchedule"
-                  )}
-                </strong>
-
-                <small>
-                  ${translateInterfaceText(
-                    "schedule.staffShifts"
-                  )}
-                </small>
+                <div>
+                  <strong>Місяць</strong>
+                  <small>${escapeHtml(monthLabel)}</small>
+                </div>
               </div>
+
+              ${
+                isOwner() || isAdmin()
+                  ? `
+                    <button
+                      type="button"
+                      class="ghost calendarScheduleButton calendarScheduleLaunch"
+                      id="monthOpenTeamSchedule"
+                    >
+                      <span aria-hidden="true">👥</span>
+
+                      <span>
+                        <strong>Графік команди</strong>
+                        <small>Налаштувати зміни</small>
+                      </span>
+                    </button>
+                  `
+                  : ""
+              }
             </div>
           </div>
         </div>
@@ -77627,21 +77635,13 @@ const openMonthScheduleEditor = (
           </span>
 
           <h2>
-            <span class="monthScheduleHeaderIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="5" width="18" height="16" rx="3"></rect>
-                <path d="M8 3v4M16 3v4M3 10h18"></path>
-                <path d="M8 14h3M13 14h3M8 17h3"></path>
-              </svg>
-            </span>
-
             <span id="monthScheduleEditorTitle">
-              ${escapeHtml(formatCalendarDate(date))}
+              Новий графік працівника
             </span>
           </h2>
 
           <p id="monthScheduleEditorSubtitle">
-            ${escapeHtml(translateInterfaceText("calendar.detail.configure.the.status.and.working.hours.of.each.employee"))}
+            Налаштуйте зміни один раз — календар заповниться автоматично.
           </p>
         </div>
 
@@ -77659,7 +77659,6 @@ const openMonthScheduleEditor = (
       >
         <button
   type="button"
-  class="active"
   id="monthScheduleSingleTab"
 >
   Зміни на цей день
@@ -77667,6 +77666,7 @@ const openMonthScheduleEditor = (
 
         <button
           type="button"
+          class="active"
           id="monthScheduleRepeatTab"
         >
           Створити графік
@@ -77675,6 +77675,7 @@ const openMonthScheduleEditor = (
 
       <div
         class="monthScheduleEditorColumns"
+        hidden
       >
         <span>
           ${escapeHtml(translateInterfaceText("calendar.detail.employee"))}
@@ -77696,6 +77697,7 @@ const openMonthScheduleEditor = (
       <div
   class="monthScheduleEditorRows"
   id="monthScheduleSingleContent"
+  hidden
 >
   ${rowsHtml}
 </div>
@@ -77703,7 +77705,6 @@ const openMonthScheduleEditor = (
 <div
   class="monthScheduleRepeatContent"
   id="monthScheduleRepeatContent"
-  hidden
 >
   <div class="monthScheduleRepeatIntro">
     <div>
@@ -77734,41 +77735,55 @@ const openMonthScheduleEditor = (
         ${escapeHtml(translateInterfaceText("calendar.detail.employee"))}
       </span>
 
-      <select
-        id="monthScheduleRepeatStaff"
-      >
-        ${staff
-          .map(
-            (doc) => `
-              <option
-                value="${escapeHtml(
-                  String(
-                    doc.id || ""
-                  )
-                )}"
-              >
-                ${escapeHtml(
-                  doc.name ||
-                  translateInterfaceText("calendar.detail.employee")
-                )}
-              </option>
-            `
-          )
-          .join("")}
-      </select>
+      <div class="monthScheduleStaffSelect">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+        </svg>
+
+        <select
+          id="monthScheduleRepeatStaff"
+        >
+          ${staff
+            .map(
+              (doc) => `
+                <option
+                  value="${escapeHtml(
+                    String(
+                      doc.id || ""
+                    )
+                  )}"
+                >
+                  ${escapeHtml(
+                    `${
+                      doc.name ||
+                      translateInterfaceText("calendar.detail.employee")
+                    } — ${
+                      doc.role === "assistant"
+                        ? translateInterfaceText("calendar.detail.assistant")
+                        : translateInterfaceText("calendar.detail.veterinarian")
+                    }`
+                  )}
+                </option>
+              `
+            )
+            .join("")}
+        </select>
+      </div>
     </label>
 
     <div class="monthScheduleRepeatField monthSchedulePatternField">
       <span>
-        ${escapeHtml(translateInterfaceText("schedule.pattern"))}
+        Як працює співробітник?
       </span>
 
       <div class="monthSchedulePatternOptions">
         <button
           type="button"
-          class="active"
           data-schedule-pattern="cycle"
         >
+          <i class="monthScheduleChoiceRadio" aria-hidden="true"></i>
+
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 7h-9a5 5 0 0 0 0 10h7"></path>
             <path d="m17 4 3 3-3 3"></path>
@@ -77776,23 +77791,26 @@ const openMonthScheduleEditor = (
           </svg>
 
           <span>
-            <strong>${escapeHtml(translateInterfaceText("schedule.patternCycle"))}</strong>
-            <small>${escapeHtml(translateInterfaceText("schedule.patternCycleHint"))}</small>
+            <strong>Циклічний графік</strong>
+            <small>Наприклад: 2 робочі дні, потім 3 вихідні</small>
           </span>
         </button>
 
         <button
           type="button"
+          class="active"
           data-schedule-pattern="weekdays"
         >
+          <i class="monthScheduleChoiceRadio" aria-hidden="true"></i>
+
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="5" width="18" height="16" rx="3"></rect>
             <path d="M8 3v4M16 3v4M3 10h18"></path>
           </svg>
 
           <span>
-            <strong>${escapeHtml(translateInterfaceText("schedule.patternWeekdays"))}</strong>
-            <small>${escapeHtml(translateInterfaceText("schedule.patternWeekdaysHint"))}</small>
+            <strong>За днями тижня</strong>
+            <small>Наприклад: понеділок, середа, п’ятниця</small>
           </span>
         </button>
       </div>
@@ -77867,12 +77885,13 @@ const openMonthScheduleEditor = (
       hidden
     >
       <span>
-        ${escapeHtml(translateInterfaceText("calendar.detail.days.of.the.week"))}
+        Оберіть робочі дні
       </span>
 
       <div class="monthScheduleRepeatDays">
         <button
           type="button"
+          class="active"
           data-repeat-weekday="1"
         >
           ${escapeHtml(translateInterfaceText("calendar.detail.mon"))}
@@ -77887,6 +77906,7 @@ const openMonthScheduleEditor = (
 
         <button
           type="button"
+          class="active"
           data-repeat-weekday="3"
         >
           ${escapeHtml(translateInterfaceText("calendar.detail.wed"))}
@@ -77901,6 +77921,7 @@ const openMonthScheduleEditor = (
 
         <button
           type="button"
+          class="active"
           data-repeat-weekday="5"
         >
           ${escapeHtml(translateInterfaceText("calendar.detail.fri"))}
@@ -77931,7 +77952,7 @@ const openMonthScheduleEditor = (
 
     <div class="monthScheduleRepeatField monthScheduleShiftTypeField">
       <span>
-        ${escapeHtml(translateInterfaceText("schedule.shiftType"))}
+        Зміна
       </span>
 
       <div class="monthScheduleShiftTypeOptions">
@@ -77940,21 +77961,40 @@ const openMonthScheduleEditor = (
           class="active"
           data-schedule-shift-kind="regular"
         >
-          ${escapeHtml(translateInterfaceText("schedule.regularShift"))}
+          <i class="monthScheduleChoiceRadio" aria-hidden="true"></i>
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path>
+          </svg>
+
+          <span>
+            <strong>Денна зміна</strong>
+            <small>Звичайний робочий день</small>
+          </span>
         </button>
 
         <button
           type="button"
           data-schedule-shift-kind="full-day"
         >
-          ${escapeHtml(translateInterfaceText("schedule.fullDayShift"))}
+          <i class="monthScheduleChoiceRadio" aria-hidden="true"></i>
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"></path>
+          </svg>
+
+          <span>
+            <strong>Добова · 24 години</strong>
+            <small>Безперервна зміна</small>
+          </span>
         </button>
       </div>
     </div>
 
-    <label class="monthScheduleRepeatField">
+    <label class="monthScheduleRepeatField monthScheduleStartField">
       <span>
-        ${escapeHtml(translateInterfaceText("calendar.detail.shift.start"))}
+        Час роботи
       </span>
 
       <input
@@ -77964,9 +78004,9 @@ const openMonthScheduleEditor = (
       >
     </label>
 
-    <label class="monthScheduleRepeatField">
+    <label class="monthScheduleRepeatField monthScheduleEndField">
       <span>
-        ${escapeHtml(translateInterfaceText("calendar.detail.shift.end"))}
+        Кінець зміни
       </span>
 
       <input
@@ -77984,9 +78024,9 @@ const openMonthScheduleEditor = (
       </small>
     </label>
 
-    <label class="monthScheduleRepeatField">
+    <label class="monthScheduleRepeatField monthScheduleDateFromField">
       <span>
-        ${escapeHtml(translateInterfaceText("calendar.detail.starting.from"))}
+        Почати з
       </span>
 
       <input
@@ -77998,9 +78038,9 @@ const openMonthScheduleEditor = (
       >
     </label>
 
-    <label class="monthScheduleRepeatField">
+    <label class="monthScheduleRepeatField monthScheduleDateToField">
       <span>
-        ${escapeHtml(translateInterfaceText("calendar.detail.until.date"))}
+        Повторювати до
       </span>
 
       <input
@@ -79280,10 +79320,6 @@ if (repeatMode) {
     const openMonthShiftDrawer = (
   date
 ) => {
-  const canManageSchedule =
-    isOwner() ||
-    isAdmin();
-
   const drawer =
     $("#monthShiftDrawer");
 
@@ -79592,42 +79628,6 @@ if (repeatMode) {
         }
       </div>
 
-      ${
-        canManageSchedule
-          ? `
-            <button
-              type="button"
-              class="
-                monthDaySummaryManage
-              "
-              id="monthOpenScheduleEditor"
-            >
-              <span>
-                ⚙
-              </span>
-
-              <span>
-                <strong>
-                  ${translateInterfaceText(
-                    "schedule.manageSchedule"
-                  )}
-                </strong>
-
-                <small>
-                  ${translateInterfaceText(
-                    "schedule.statusesAndHours"
-                  )}
-                </small>
-              </span>
-
-              <b>
-                →
-              </b>
-            </button>
-          `
-          : ""
-      }
-
       <button
         type="button"
         class="
@@ -79712,19 +79712,18 @@ if (repeatMode) {
       }
     );
 
-  drawer
-    .querySelector(
-      "#monthOpenScheduleEditor"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        openMonthScheduleEditor(
-          date
-        );
-      }
-    );
 };
+
+    $("#monthOpenTeamSchedule")
+      ?.addEventListener(
+        "click",
+        () => {
+          openMonthScheduleEditor(
+            today
+          );
+        }
+      );
+
     $$("[data-month-date]").forEach(
   (cell) => {
     cell.addEventListener(
