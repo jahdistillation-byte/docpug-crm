@@ -23203,6 +23203,9 @@ const teamManager =
                   groupName:
                     specialization.name ||
                     "Напрям",
+                  groupColor:
+                    specialization.color ||
+                    "#2F7AA8",
                 }))
           ),
           ...visibleStaff
@@ -23215,6 +23218,7 @@ const teamManager =
             .map((employee) => ({
               employee,
               groupName: "Без напряму",
+              groupColor: "#8294A3",
             })),
         ]
       : visibleStaff.map((employee) => ({
@@ -23224,6 +23228,9 @@ const teamManager =
               .map((item) => item.name)
               .join(" · ") ||
             "Без напряму",
+          groupColor:
+            getStaffSpecializations(employee)[0]?.color ||
+            "#8294A3",
         }));
 
   const scheduleMap =
@@ -23235,6 +23242,22 @@ const teamManager =
         ]
       )
     );
+
+  const getTeamGroupLabel = (name) => {
+    const value = String(name || "Напрям");
+    const normalized = value.trim().toLowerCase();
+
+    if (normalized.includes("хірур")) return "Хірурги";
+    if (normalized.includes("терап")) return "Терапевти";
+    if (normalized.includes("дермат")) return "Дерматологи";
+    if (normalized.includes("узд")) return "Фахівці УЗД";
+    if (normalized.includes("кардіо")) return "Кардіологи";
+    if (normalized.includes("стомат")) return "Стоматологи";
+    if (normalized.includes("екзо")) return "Екзотологи";
+    if (normalized === "без напряму") return "Інші спеціалісти";
+
+    return value;
+  };
 
   page.innerHTML = `
     <div class="card teamPageCard">
@@ -23362,6 +23385,68 @@ const teamManager =
           : ""
       }
 
+      <div class="teamDirectoryToolbar">
+        <label class="teamDirectorySearch">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="teamDirectorySearchInput"
+            type="search"
+            placeholder="Знайти співробітника за ім’ям, роллю або напрямом"
+            autocomplete="off"
+          >
+        </label>
+
+        <div class="teamDirectorySummary">
+          <div>
+            <strong>${visibleStaff.length}</strong>
+            <span>у команді</span>
+          </div>
+          <div>
+            <strong>${visibleStaff.filter((employee) => scheduleMap.get(String(employee.id))?.is_active !== false && scheduleMap.has(String(employee.id))).length}</strong>
+            <span>на зміні</span>
+          </div>
+          <div>
+            <strong>${specializations.length}</strong>
+            <span>напрямів</span>
+          </div>
+        </div>
+      </div>
+
+      ${
+        teamManager
+          ? `
+            <div class="teamDirectoryFilters" role="group" aria-label="Фільтр за напрямом">
+              <button class="active" type="button" data-team-group-filter="all">
+                Уся команда
+              </button>
+              ${specializations
+                .map(
+                  (specialization) => `
+                    <button
+                      type="button"
+                      data-team-group-filter="${escapeHtml(specialization.name || "Напрям")}"
+                    >
+                      <span style="--team-filter-color:${escapeHtml(specialization.color || "#2F7AA8")}"></span>
+                      ${escapeHtml(getTeamGroupLabel(specialization.name || "Напрям"))}
+                    </button>
+                  `
+                )
+                .join("")}
+              ${
+                visibleStaff.some((employee) => !getStaffSpecializations(employee).length)
+                  ? `
+                    <button type="button" data-team-group-filter="Без напряму">
+                      <span style="--team-filter-color:#8294A3"></span>
+                      Інші спеціалісти
+                    </button>
+                  `
+                  : ""
+              }
+            </div>
+          `
+          : ""
+      }
+
       <div class="vetList">
         ${
           groupedVisibleStaffEntries.length
@@ -23411,31 +23496,67 @@ const teamManager =
                   const groupName =
                     entry.groupName;
 
+                  const groupLabel =
+                    getTeamGroupLabel(
+                      groupName
+                    );
+
+                  const groupColor =
+                    entry.groupColor ||
+                    "#8294A3";
+
                   const previousGroup =
                     index > 0
                       ? rows[index - 1]
                           .groupName
                       : "";
 
+                  const nextGroup =
+                    index < rows.length - 1
+                      ? rows[index + 1]
+                          .groupName
+                      : "";
+
+                  const groupCount =
+                    rows.filter(
+                      (item) =>
+                        item.groupName ===
+                        groupName
+                    ).length;
+
                   const groupHeader =
                     groupName !==
                     previousGroup
                       ? `
-                        <div class="staffGroupHeader">
-                          <span>
-                            ${escapeHtml(
-                              groupName
-                            )}
-                          </span>
-                          <small>
-                            ${rows.filter(
-                              (item) =>
-                                item.groupName ===
-                                groupName
-                            ).length}
-                          </small>
-                        </div>
+                        <section
+                          class="teamDirectorySection"
+                          data-team-section
+                          data-team-group="${escapeHtml(groupName)}"
+                          style="--team-group-color:${escapeHtml(groupColor)}"
+                        >
+                          <button
+                            type="button"
+                            class="staffGroupHeader teamDirectorySectionHeader"
+                            data-team-section-toggle
+                            aria-expanded="true"
+                          >
+                            <span class="teamDirectoryGroupMark" aria-hidden="true">
+                              ${escapeHtml(groupLabel.trim().charAt(0).toUpperCase() || "?")}
+                            </span>
+                            <span class="teamDirectoryGroupCopy">
+                              <strong>${escapeHtml(groupLabel)}</strong>
+                              <small>Співробітники напряму</small>
+                            </span>
+                            <span class="teamDirectoryGroupCount">${groupCount}</span>
+                            <span class="teamDirectoryGroupChevron" aria-hidden="true">⌃</span>
+                          </button>
+                          <div class="teamDirectoryGrid">
                       `
+                      : "";
+
+                  const groupFooter =
+                    groupName !== nextGroup
+                      ? `</div></section>`
                       : "";
 
                   return `
@@ -23444,7 +23565,10 @@ const teamManager =
                       class="
                         vetCard
                         premiumVetCard
+                        teamDirectoryCard
                       "
+                      data-team-staff-card
+                      data-team-search="${escapeHtml(`${staffName} ${roleLabel} ${groupName} ${groupLabel} ${doc.phone || ""}`.toLowerCase())}"
                       style="
                         --staff-color:
                           ${escapeHtml(
@@ -23608,7 +23732,8 @@ const teamManager =
                             )
                           )}"
                         >
-                          👤 Профіль
+                          <span class="teamActionIcon" aria-hidden="true">↗</span>
+                          Профіль
                         </button>
 
                         ${
@@ -23626,7 +23751,8 @@ const teamManager =
                                   )
                                 )}"
                               >
-                                ✏️ Редагувати
+                                <span class="teamActionIcon" aria-hidden="true">✎</span>
+                                Змінити
                               </button>
                               <button
   class="
@@ -23641,13 +23767,15 @@ const teamManager =
     staffName
   )}"
 >
-  🗑 Звільнити
+  <span class="teamActionIcon" aria-hidden="true">×</span>
+  Звільнити
 </button>
                             `
                             : ""
                         }
                       </div>
                     </div>
+                    ${groupFooter}
                   `;
                 })
                 .join("")
@@ -23662,12 +23790,16 @@ const teamManager =
             `
         }
       </div>
+      <div class="teamDirectoryEmpty" id="teamDirectoryEmpty" hidden>
+        <strong>Нікого не знайдено</strong>
+        <span>Спробуйте змінити пошук або обрати інший напрям.</span>
+      </div>
     </div>
   `;
 const teamDynamicContent =
   [
     ".specPill > span",
-    ".staffGroupHeader > span",
+    ".teamDirectoryGroupCopy strong",
     ".premiumVetName",
     ".premiumVetSpecs",
     ".premiumMetaItem:first-child strong",
@@ -23698,6 +23830,62 @@ page
       }
     }
   );
+
+  let activeTeamGroup = "all";
+
+  const applyTeamDirectoryFilters = () => {
+    const query = String(
+      page.querySelector("#teamDirectorySearchInput")?.value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    let visibleSections = 0;
+
+    page.querySelectorAll("[data-team-section]").forEach((section) => {
+      const groupMatches =
+        activeTeamGroup === "all" ||
+        section.dataset.teamGroup === activeTeamGroup;
+      let visibleCards = 0;
+
+      section.querySelectorAll("[data-team-staff-card]").forEach((card) => {
+        const searchText = String(card.dataset.teamSearch || "");
+        const cardMatches = groupMatches && (!query || searchText.includes(query));
+        card.hidden = !cardMatches;
+        if (cardMatches) visibleCards += 1;
+      });
+
+      section.hidden = !groupMatches || visibleCards === 0;
+      if (!section.hidden) visibleSections += 1;
+    });
+
+    const emptyState = page.querySelector("#teamDirectoryEmpty");
+    if (emptyState) emptyState.hidden = visibleSections > 0;
+  };
+
+  page
+    .querySelector("#teamDirectorySearchInput")
+    ?.addEventListener("input", applyTeamDirectoryFilters);
+
+  page.querySelectorAll("[data-team-group-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeTeamGroup = button.dataset.teamGroupFilter || "all";
+      page.querySelectorAll("[data-team-group-filter]").forEach((item) => {
+        item.classList.toggle("active", item === button);
+      });
+      applyTeamDirectoryFilters();
+    });
+  });
+
+  page.querySelectorAll("[data-team-section-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const section = button.closest("[data-team-section]");
+      if (!section) return;
+      const collapsed = section.classList.toggle("isCollapsed");
+      button.setAttribute("aria-expanded", String(!collapsed));
+    });
+  });
+
   page
     .querySelector(
       "#btnAddStaffTeam"

@@ -74508,3 +74508,502 @@ body[data-theme="white"] .calendarDatePopoverNav:hover {
     border-radius: 16px;
   }
 }
+
+/* Team directory — grouped, searchable and compact */
+
+.page[data-page="team"] .teamPageCard {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.teamDirectoryToolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  align-items: stretch;
+  gap: 14px;
+  margin: 18px 0 12px;
+}
+
+.teamDirectorySearch {
+  display: flex;
+  min-width: 0;
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  color: var(--text-muted, #7b8e9c);
+  background: color-mix(in srgb, var(--card-bg, transparent) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-main, #fff) 10%, transparent);
+  border-radius: 16px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.teamDirectorySearch:focus-within {
+  border-color: color-mix(in srgb, var(--accent-color, #2f78a8) 45%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color, #2f78a8) 9%, transparent);
+}
+
+.teamDirectorySearch > span {
+  flex: 0 0 auto;
+  font-size: 25px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.teamDirectorySearch input {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  padding: 0;
+  color: var(--text-main, #fff);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 13px;
+}
+
+.teamDirectorySearch input::placeholder {
+  color: var(--text-muted, #7b8e9c);
+  opacity: 0.8;
+}
+
+.teamDirectorySummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(82px, 1fr));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--text-main, #fff) 10%, transparent);
+  border-radius: 16px;
+}
+
+.teamDirectorySummary > div {
+  display: flex;
+  min-height: 52px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7px 14px;
+}
+
+.teamDirectorySummary > div + div {
+  border-left: 1px solid color-mix(in srgb, var(--text-main, #fff) 9%, transparent);
+}
+
+.teamDirectorySummary strong {
+  color: var(--text-main, #fff);
+  font-size: 16px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.teamDirectorySummary span {
+  margin-top: 5px;
+  color: var(--text-muted, #7b8e9c);
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.teamDirectoryFilters {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 18px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.teamDirectoryFilters button {
+  display: inline-flex;
+  min-height: 36px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  color: var(--text-muted, #718596);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-main, #fff) 11%, transparent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.teamDirectoryFilters button > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--team-filter-color, #8294a3);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--team-filter-color, #8294a3) 13%, transparent);
+}
+
+.teamDirectoryFilters button:hover,
+.teamDirectoryFilters button.active {
+  color: var(--text-main, #fff);
+  border-color: color-mix(in srgb, var(--accent-color, #2f78a8) 35%, transparent);
+  background: color-mix(in srgb, var(--accent-color, #2f78a8) 10%, transparent);
+}
+
+.page[data-page="team"] .vetList {
+  display: grid;
+  gap: 16px;
+}
+
+.teamDirectorySection {
+  min-width: 0;
+  padding: 12px;
+  background: color-mix(in srgb, var(--card-bg, transparent) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--team-group-color, #8294a3) 18%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(13, 44, 62, 0.04);
+}
+
+.teamDirectorySection[hidden],
+.teamDirectoryCard[hidden] {
+  display: none !important;
+}
+
+.page[data-page="team"] .teamDirectorySectionHeader {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto 26px;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  padding: 4px 4px 12px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.page[data-page="team"] .teamDirectorySectionHeader::after {
+  display: none !important;
+  content: none !important;
+}
+
+.teamDirectoryGroupMark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: var(--team-group-color, #2f78a8);
+  background: color-mix(in srgb, var(--team-group-color, #2f78a8) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--team-group-color, #2f78a8) 22%, transparent);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.teamDirectoryGroupCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.teamDirectoryGroupCopy strong {
+  overflow: hidden;
+  color: var(--text-main, #fff);
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamDirectoryGroupCopy small {
+  color: var(--text-muted, #718596);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.teamDirectoryGroupCount {
+  display: grid;
+  min-width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0 8px;
+  color: var(--team-group-color, #2f78a8);
+  background: color-mix(in srgb, var(--team-group-color, #2f78a8) 10%, transparent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.teamDirectoryGroupChevron {
+  color: var(--text-muted, #718596);
+  font-size: 15px;
+  text-align: center;
+  transition: transform 0.18s ease;
+}
+
+.teamDirectorySection.isCollapsed .teamDirectoryGroupChevron {
+  transform: rotate(180deg);
+}
+
+.teamDirectorySection.isCollapsed .teamDirectoryGrid {
+  display: none;
+}
+
+.teamDirectoryEmpty {
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--text-muted, #718596);
+  border: 1px dashed color-mix(in srgb, var(--text-main, #fff) 14%, transparent);
+  border-radius: 18px;
+  text-align: center;
+}
+
+.teamDirectoryEmpty[hidden] {
+  display: none !important;
+}
+
+.teamDirectoryEmpty strong {
+  color: var(--text-main, #fff);
+  font-size: 14px;
+}
+
+.teamDirectoryEmpty span {
+  font-size: 11px;
+}
+
+.teamDirectoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.page[data-page="team"] .teamDirectoryCard {
+  display: grid !important;
+  grid-template-columns: 50px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 10px !important;
+  min-width: 0;
+  padding: 14px !important;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-bg, transparent) 82%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--staff-color, #8294a3) 17%, transparent) !important;
+  border-left: 3px solid var(--staff-color, #8294a3) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.page[data-page="team"] .teamDirectoryCard:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--staff-color, #8294a3) 34%, transparent) !important;
+  box-shadow: 0 14px 28px rgba(18, 52, 73, 0.08) !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard .vetAvatarWrap,
+.page[data-page="team"] .teamDirectoryCard :is(.vetAvatarImg, .vetAvatarLetter) {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard :is(.vetAvatarImg, .vetAvatarLetter) {
+  border-radius: 14px !important;
+  font-size: 20px !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetTop {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetName {
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetRole {
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumStatus {
+  min-height: 27px !important;
+  margin-left: 0 !important;
+  padding: 5px 9px !important;
+  font-size: 9px !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetSpecs {
+  margin-top: 8px;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetMeta {
+  grid-column: 1 / -1;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+  gap: 6px !important;
+  margin-top: 10px;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumMetaItem {
+  min-width: 0;
+  padding: 7px 9px !important;
+  background: color-mix(in srgb, var(--text-main, #fff) 4%, transparent) !important;
+  border-radius: 10px !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumMetaItem span {
+  font-size: 8px !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumMetaItem strong {
+  overflow: hidden;
+  font-size: 10px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetActions {
+  grid-column: 1 / -1;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px !important;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumVetActions button {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  padding: 7px 10px !important;
+  justify-content: center;
+  font-size: 10px !important;
+}
+
+.page[data-page="team"] .teamDirectoryCard .premiumProfileBtn {
+  color: #fff !important;
+  background: var(--staff-color, #2f78a8) !important;
+  border-color: transparent !important;
+}
+
+.teamActionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+}
+
+body[data-theme="white"] .teamDirectorySearch,
+body[data-theme="white"] .teamDirectorySummary,
+body[data-theme="white"] .teamDirectorySection {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(40, 83, 110, 0.12);
+}
+
+body[data-theme="white"] .teamDirectorySearch input,
+body[data-theme="white"] .teamDirectorySummary strong,
+body[data-theme="white"] .teamDirectoryGroupCopy strong,
+body[data-theme="white"] .teamDirectoryFilters button.active {
+  color: #173043;
+}
+
+body[data-theme="white"] .teamDirectoryFilters button {
+  border-color: rgba(40, 83, 110, 0.14);
+}
+
+body[data-theme="white"] .teamPageCard .teamDirectorySectionHeader {
+  margin: 0 !important;
+  color: #173043 !important;
+}
+
+body[data-theme="white"] .teamPageCard .teamDirectoryGroupCopy small {
+  min-width: 0;
+  height: auto;
+  color: #718491 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+body[data-theme="white"] .page[data-page="team"] .teamDirectoryCard {
+  background: rgba(255, 255, 255, 0.86) !important;
+}
+
+body[data-theme="white"] .page[data-page="team"] .teamDirectoryCard .premiumMetaItem {
+  background: #f2f7fa !important;
+}
+
+@media (max-width: 900px) {
+  .teamDirectoryToolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teamDirectoryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .teamDirectorySummary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .teamDirectorySummary > div {
+    min-width: 0;
+    padding: 7px 9px;
+  }
+
+  .teamDirectorySection {
+    padding: 9px;
+    border-radius: 16px;
+  }
+
+  .page[data-page="team"] .teamDirectorySectionHeader {
+    grid-template-columns: 36px minmax(0, 1fr) auto 22px;
+    gap: 8px;
+  }
+
+  .teamDirectoryGroupMark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .page[data-page="team"] .teamDirectoryCard {
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    padding: 11px !important;
+  }
+
+  .page[data-page="team"] .teamDirectoryCard .vetAvatarWrap,
+  .page[data-page="team"] .teamDirectoryCard :is(.vetAvatarImg, .vetAvatarLetter) {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .page[data-page="team"] .teamDirectoryCard .premiumVetMeta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page[data-page="team"] .teamDirectoryCard .premiumMetaItem:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .page[data-page="team"] .teamDirectoryCard .premiumVetActions {
+    grid-template-columns: minmax(0, 1fr) repeat(2, 38px);
+  }
+
+  .page[data-page="team"] .teamDirectoryCard .premiumVetActions button:not(.premiumProfileBtn) {
+    overflow: hidden;
+    color: transparent !important;
+    font-size: 0 !important;
+    white-space: nowrap;
+  }
+
+  .page[data-page="team"] .teamDirectoryCard .premiumVetActions button:not(.premiumProfileBtn) .teamActionIcon {
+    color: var(--text-main, #173043);
+    font-size: 13px;
+  }
+}
