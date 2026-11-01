@@ -76455,6 +76455,147 @@ async function loadStaffDashboardApi(staffId) {
 // Часть 6 (Строки 3501 — 4000)
 // ==========================================================================
 
+function openCalendarDatePopover({ anchor, value, onSelect }) {
+  document.getElementById("calendarDatePopover")?.remove();
+
+  const selectedDate = calendarLocalDate(value);
+  let visibleMonth = new Date(
+    selectedDate.getFullYear(),
+    selectedDate.getMonth(),
+    1,
+    12,
+    0,
+    0
+  );
+
+  const popover = document.createElement("div");
+  popover.id = "calendarDatePopover";
+  popover.className = "calendarDatePopover";
+  popover.setAttribute("role", "dialog");
+  popover.setAttribute("aria-label", "Оберіть дату");
+  document.body.appendChild(popover);
+
+  const close = () => {
+    document.removeEventListener("pointerdown", handleOutsideClick, true);
+    window.removeEventListener("resize", close);
+    window.removeEventListener("scroll", close, true);
+    popover.remove();
+  };
+
+  const handleOutsideClick = (event) => {
+    if (!popover.contains(event.target) && !anchor.contains(event.target)) {
+      close();
+    }
+  };
+
+  const placePopover = () => {
+    const anchorRect = anchor.getBoundingClientRect();
+    const popoverRect = popover.getBoundingClientRect();
+    const gutter = 12;
+    const left = Math.max(
+      gutter,
+      Math.min(
+        anchorRect.left + anchorRect.width / 2 - popoverRect.width / 2,
+        window.innerWidth - popoverRect.width - gutter
+      )
+    );
+    const fitsBelow =
+      anchorRect.bottom + 8 + popoverRect.height <= window.innerHeight - gutter;
+    const top = fitsBelow
+      ? anchorRect.bottom + 8
+      : Math.max(gutter, anchorRect.top - popoverRect.height - 8);
+
+    popover.style.left = `${Math.round(left)}px`;
+    popover.style.top = `${Math.round(top)}px`;
+  };
+
+  const render = () => {
+    const year = visibleMonth.getFullYear();
+    const month = visibleMonth.getMonth();
+    const firstDay = new Date(year, month, 1, 12, 0, 0);
+    const mondayOffset = (firstDay.getDay() + 6) % 7;
+    const gridStart = new Date(year, month, 1 - mondayOffset, 12, 0, 0);
+    const selectedISO = calendarISODate(selectedDate);
+    const currentISO =
+      typeof todayISO === "function"
+        ? todayISO()
+        : calendarISODate(new Date());
+    const monthLabel = new Intl.DateTimeFormat("uk-UA", {
+      month: "long",
+      year: "numeric",
+    }).format(visibleMonth);
+    const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+
+    popover.innerHTML = `
+      <div class="calendarDatePopoverHeader">
+        <button type="button" class="calendarDatePopoverNav" data-date-picker-prev aria-label="Попередній місяць">←</button>
+        <strong>${escapeHtml(monthLabel)}</strong>
+        <button type="button" class="calendarDatePopoverNav" data-date-picker-next aria-label="Наступний місяць">→</button>
+      </div>
+      <div class="calendarDatePopoverWeekdays">
+        ${weekDays.map((day) => `<span>${day}</span>`).join("")}
+      </div>
+      <div class="calendarDatePopoverGrid">
+        ${Array.from({ length: 42 }, (_, index) => {
+          const date = new Date(gridStart);
+          date.setDate(gridStart.getDate() + index);
+          const iso = calendarISODate(date);
+          const classes = ["calendarDatePopoverDay"];
+          if (date.getMonth() !== month) classes.push("isOutsideMonth");
+          if (iso === selectedISO) classes.push("isSelected");
+          if (iso === currentISO) classes.push("isToday");
+
+          return `
+            <button
+              type="button"
+              class="${classes.join(" ")}"
+              data-date-picker-day="${iso}"
+              aria-label="${escapeHtml(formatCalendarDate(iso))}"
+            >
+              ${date.getDate()}
+            </button>
+          `;
+        }).join("")}
+      </div>
+      <button type="button" class="calendarDatePopoverToday" data-date-picker-today>
+        Сьогодні
+      </button>
+    `;
+
+    popover.querySelector("[data-date-picker-prev]")?.addEventListener("click", () => {
+      visibleMonth = new Date(year, month - 1, 1, 12, 0, 0);
+      render();
+    });
+
+    popover.querySelector("[data-date-picker-next]")?.addEventListener("click", () => {
+      visibleMonth = new Date(year, month + 1, 1, 12, 0, 0);
+      render();
+    });
+
+    popover.querySelectorAll("[data-date-picker-day]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const date = button.dataset.datePickerDay;
+        close();
+        onSelect?.(date);
+      });
+    });
+
+    popover.querySelector("[data-date-picker-today]")?.addEventListener("click", () => {
+      close();
+      onSelect?.(currentISO);
+    });
+
+    requestAnimationFrame(placePopover);
+  };
+
+  render();
+  requestAnimationFrame(() => {
+    document.addEventListener("pointerdown", handleOutsideClick, true);
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+  });
+}
+
 async function renderCalendarTab() {
   const page = document.querySelector('.page[data-page="calendar"]');
   if (!page) return;
@@ -77091,15 +77232,17 @@ const monthDays =
             ←
           </button>
 
-          <div
-            class="
-              calendarDate
-            "
+          <button
+            type="button"
+            class="calendarDate calendarDatePickerButton"
+            id="calDatePickerMonth"
+            aria-label="Оберіть дату"
           >
             ${escapeHtml(
               monthLabel
             )}
-          </div>
+            <span class="calendarDatePickerChevron" aria-hidden="true">⌄</span>
+          </button>
 
           <button
             class="
@@ -77414,6 +77557,18 @@ const monthDays =
       const d = new Date(year, month + 1, 1, 12, 0, 0);
       window.__calendarDate = localISO(d);
       await renderCalendarTab();
+    });
+
+    $("#calDatePickerMonth")?.addEventListener("click", (event) => {
+      openCalendarDatePopover({
+        anchor: event.currentTarget,
+        value: today,
+        onSelect: async (date) => {
+          window.__calendarDate = date;
+          window.__calendarMonthFocusDate = date;
+          await renderCalendarTab();
+        },
+      });
     });
 
     const selectedMonthDates = new Set();
@@ -79765,6 +79920,22 @@ if (repeatMode) {
       openMonthScheduleEditor(today);
     }
 
+    if (window.__calendarMonthFocusDate) {
+      const focusDate = window.__calendarMonthFocusDate;
+      window.__calendarMonthFocusDate = null;
+      const focusCell = document.querySelector(
+        `[data-month-date="${focusDate}"]`
+      );
+
+      if (focusCell) {
+        $$("[data-month-date]").forEach((item) => {
+          item.classList.remove("selected");
+        });
+        focusCell.classList.add("selected");
+        openMonthShiftDrawer(focusDate);
+      }
+    }
+
 return;
 }
 
@@ -80705,9 +80876,15 @@ page.innerHTML = `
         ←
       </button>
 
-      <div class="calendarDate">
+      <button
+        type="button"
+        class="calendarDate calendarDatePickerButton"
+        id="calDatePickerDay"
+        aria-label="Оберіть дату"
+      >
         ${escapeHtml(formatCalendarDate(today))}
-      </div>
+        <span class="calendarDatePickerChevron" aria-hidden="true">⌄</span>
+      </button>
 
       <button
         class="ghost"
@@ -81225,6 +81402,17 @@ $("#calendarCreateVisitButton")
     d.setDate(d.getDate() + 1);
     window.__calendarDate = calendarISODate(d);
     await renderCalendarTab();
+  });
+
+  $("#calDatePickerDay")?.addEventListener("click", (event) => {
+    openCalendarDatePopover({
+      anchor: event.currentTarget,
+      value: today,
+      onSelect: async (date) => {
+        window.__calendarDate = date;
+        await renderCalendarTab();
+      },
+    });
   });
 
   $$("[data-del-calendar-event]").forEach((btn) => {
