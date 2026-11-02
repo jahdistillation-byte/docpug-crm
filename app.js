@@ -1979,6 +1979,8 @@ Object.assign(APP_TRANSLATIONS.uk, {
   "calendar.detail.could.not.start.the.visit": "Не вдалося почати прийом.",
   "calendar.detail.done": "Готово",
   "calendar.detail.close": "Закрити",
+  "calendar.detail.visit.completed": "Візит завершено",
+  "calendar.detail.go.to.payment": "Перейти до оплати",
   "calendar.detail.cancel.payment": "Скасування платежу",
   "calendar.detail.cancel.payment.2": "Скасувати платіж",
   "calendar.detail.keep.payment": "Залишити платіж",
@@ -2322,6 +2324,8 @@ Object.assign(APP_TRANSLATIONS.en, {
   "calendar.detail.could.not.start.the.visit": "Could not start the visit.",
   "calendar.detail.done": "Done",
   "calendar.detail.close": "Close",
+  "calendar.detail.visit.completed": "Visit completed",
+  "calendar.detail.go.to.payment": "Go to payment",
   "calendar.detail.cancel.payment": "Cancel payment",
   "calendar.detail.cancel.payment.2": "Cancel payment",
   "calendar.detail.keep.payment": "Keep payment",
@@ -2665,6 +2669,8 @@ Object.assign(APP_TRANSLATIONS.de, {
   "calendar.detail.could.not.start.the.visit": "Die Behandlung konnte nicht gestartet werden.",
   "calendar.detail.done": "Fertig",
   "calendar.detail.close": "Schließen",
+  "calendar.detail.visit.completed": "Besuch abgeschlossen",
+  "calendar.detail.go.to.payment": "Zur Zahlung",
   "calendar.detail.cancel.payment": "Zahlung stornieren",
   "calendar.detail.cancel.payment.2": "Zahlung stornieren",
   "calendar.detail.keep.payment": "Zahlung beibehalten",
@@ -3008,6 +3014,8 @@ Object.assign(APP_TRANSLATIONS.pl, {
   "calendar.detail.could.not.start.the.visit": "Nie udało się rozpocząć wizyty.",
   "calendar.detail.done": "Gotowe",
   "calendar.detail.close": "Zamknij",
+  "calendar.detail.visit.completed": "Wizyta zakończona",
+  "calendar.detail.go.to.payment": "Przejdź do płatności",
   "calendar.detail.cancel.payment": "Anulowanie płatności",
   "calendar.detail.cancel.payment.2": "Anuluj płatność",
   "calendar.detail.keep.payment": "Zachowaj płatność",
@@ -7762,6 +7770,56 @@ function openDeleteModal(
     confirmBtn.onclick =
       () => {
         closeDeleteModal();
+      };
+  } else if (
+    mode === "visit-completed-payment"
+  ) {
+    modal.classList.add(
+      "is-success"
+    );
+
+    if (icon) {
+      icon.textContent =
+        "✓";
+    }
+
+    if (title) {
+      title.textContent =
+        translateInterfaceText(
+          "calendar.detail.visit.completed"
+        );
+    }
+
+    confirmBtn.textContent =
+      translateInterfaceText(
+        "calendar.detail.go.to.payment"
+      );
+
+    confirmBtn.classList.add(
+      "primary"
+    );
+
+    cancelBtn.style.display =
+      "";
+
+    cancelBtn.textContent =
+      translateInterfaceText(
+        "calendar.detail.close"
+      );
+
+    confirmBtn.onclick =
+      async () => {
+        const action =
+          deleteCallback;
+
+        closeDeleteModal();
+
+        if (
+          typeof action ===
+          "function"
+        ) {
+          await action();
+        }
       };
   } else if (
     mode === "payment-cancel"
@@ -102588,9 +102646,22 @@ openDeleteModal(
     <br><br>
     Медичні дані збережені,
     а календар оновлено.
+    ${
+      isOwner() || isAdmin()
+        ? "<br><br>Можна перейти до оплати цього візиту."
+        : ""
+    }
   `,
-  null,
-  "info"
+  isOwner() || isAdmin()
+    ? async () => {
+        await openVisitPaymentModal(
+          visitId
+        );
+      }
+    : null,
+  isOwner() || isAdmin()
+    ? "visit-completed-payment"
+    : "info"
 );
 } catch (error) {
   console.error(
