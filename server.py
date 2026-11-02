@@ -5,12 +5,14 @@ import hashlib
 import secrets
 import re
 import json
+import base64
+import io
 import traceback as traceback_module
 import html
 import mimetypes
 import time
 from decimal import Decimal, InvalidOperation
-from urllib.parse import parse_qsl
+from urllib.parse import parse_qsl, urlencode
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -36,6 +38,7 @@ from werkzeug.security import (
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from supabase import create_client
+import qrcode
 
 print("### RUNNING server.py ###")
 
@@ -46,6 +49,11 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+MONOBANK_TOKEN = os.getenv("MONOBANK_TOKEN", "").strip()
+MONOBANK_API_BASE = (
+    os.getenv("MONOBANK_API_BASE")
+    or "https://api.monobank.ua"
+).rstrip("/")
 PUG_AI_MODEL = (
     os.getenv("PUG_AI_MODEL")
     or "gpt-5.6-terra"
@@ -4145,7 +4153,6 @@ def api_update_stock_item(stock_id):
         "cost": "purchase_price",
         "purchase_price":
             "purchase_price",
-        "qty": "qty",
         "min_qty": "minimum_qty",
         "minimum_qty":
             "minimum_qty",
@@ -4157,7 +4164,6 @@ def api_update_stock_item(stock_id):
     numeric_fields = {
         "price",
         "purchase_price",
-        "qty",
         "minimum_qty",
     }
 
@@ -4304,6 +4310,21 @@ def api_delete_stock_item(stock_id):
             repr(error)
         )
 
+        error_text = str(error).lower()
+
+        if (
+            "foreign key" in error_text
+            or "23503" in error_text
+            or "still referenced" in error_text
+        ):
+            return fail(
+                (
+                    "Цю позицію вже використано у візиті або закупівлі. "
+                    "Вимкніть її перемикачем замість видалення."
+                ),
+                409,
+            )
+
         return fail(
             "Не вдалося видалити позицію.",
             500
@@ -4412,13 +4433,17 @@ def api_adjust_stock_item(stock_id):
             })
             .eq("org_id", current_org)
             .eq("id", stock_id)
+            .eq("qty", quantity_before)
             .execute()
         )
 
         if not update_result.data:
             return fail(
-                "Не вдалося оновити залишок.",
-                500
+                (
+                    "Залишок уже змінився. "
+                    "Оновіть склад і повторіть дію."
+                ),
+                409
             )
 
         try:
@@ -4464,6 +4489,7 @@ def api_adjust_stock_item(stock_id):
                 })
                 .eq("org_id", current_org)
                 .eq("id", stock_id)
+                .eq("qty", quantity_after)
                 .execute()
             )
 
@@ -6572,6 +6598,700 @@ def api_create_visit_payment(
             "Не вдалося провести оплату.",
             500
         )  
+
+
+class MonobankConfigurationError(RuntimeError):
+    pass
+
+
+class MonobankApiError(RuntimeError):
+    pass
+
+
+def monobank_api_request(
+    method,
+    path,
+    *,
+    payload=None,
+    query=None,
+):
+    if not MONOBANK_TOKEN:
+        raise MonobankConfigurationError(
+            "MONOBANK_TOKEN is not configured"
+        )
+
+    url = f"{MONOBANK_API_BASE}{path}"
+
+    if query:
+        url = f"{url}?{urlencode(query)}"
+
+    body = (
+        json.dumps(payload).encode("utf-8")
+        if payload is not None
+        else None
+    )
+
+    bank_request = Request(
+        url,
+        data=body,
+        method=method,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Token": MONOBANK_TOKEN,
+            "X-Cms": "PUG CRM",
+            "X-Cms-Version": "1.0",
+        },
+    )
+
+    try:
+        with urlopen(
+            bank_request,
+            timeout=15,
+        ) as bank_response:
+            response_text = (
+                bank_response
+                .read()
+                .decode("utf-8")
+            )
+
+    except HTTPError as error:
+        response_text = (
+            error.read().decode(
+                "utf-8",
+                errors="replace",
+            )
+        )
+
+        try:
+            response_data = (
+                json.loads(response_text)
+            )
+        except json.JSONDecodeError:
+            response_data = {}
+
+        bank_message = str(
+            response_data.get("errText")
+            or response_data.get("message")
+            or ""
+        ).strip()
+
+        raise MonobankApiError(
+            bank_message
+            or f"Monobank HTTP {error.code}"
+        ) from error
+
+    except URLError as error:
+        raise MonobankApiError(
+            "Monobank is temporarily unavailable"
+        ) from error
+
+    try:
+        response_data = json.loads(
+            response_text or "{}"
+        )
+    except json.JSONDecodeError as error:
+        raise MonobankApiError(
+            "Monobank returned an invalid response"
+        ) from error
+
+    if not isinstance(response_data, dict):
+        raise MonobankApiError(
+            "Monobank returned an invalid response"
+        )
+
+    return response_data
+
+
+def make_payment_qr_data_url(value):
+    image = qrcode.make(
+        value,
+        box_size=7,
+        border=2,
+    )
+
+    output = io.BytesIO()
+    image.save(output, format="PNG")
+
+    encoded = base64.b64encode(
+        output.getvalue()
+    ).decode("ascii")
+
+    return f"data:image/png;base64,{encoded}"
+
+
+def load_visit_payment_balance(
+    visit_id,
+    current_org,
+):
+    visit_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visits")
+            .select(
+                "id,org_id,currency,discount_amount,financial_status"
+            )
+            .eq("org_id", current_org)
+            .eq("id", visit_id)
+            .limit(1)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    if not visit_result.data:
+        raise LookupError("Visit not found")
+
+    visit = visit_result.data[0]
+
+    services_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visit_services")
+            .select("qty,price_snap")
+            .eq("visit_id", visit_id)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    stock_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visit_stock")
+            .select("qty,price_snap")
+            .eq("visit_id", visit_id)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    transactions_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("finance_transactions")
+            .select(
+                "transaction_type,status,amount,currency"
+            )
+            .eq("org_id", current_org)
+            .eq("visit_id", visit_id)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    currency = str(
+        visit.get("currency") or "UAH"
+    ).strip().upper()
+
+    service_total = sum(
+        Decimal(str(finance_number(row.get("qty"))))
+        * Decimal(str(finance_number(row.get("price_snap"))))
+        for row in (services_result.data or [])
+    )
+
+    stock_total = sum(
+        Decimal(str(finance_number(row.get("qty"))))
+        * Decimal(str(finance_number(row.get("price_snap"))))
+        for row in (stock_result.data or [])
+    )
+
+    discount = max(
+        Decimal("0.00"),
+        Decimal(str(finance_number(
+            visit.get("discount_amount")
+        ))),
+    )
+
+    total = max(
+        Decimal("0.00"),
+        service_total + stock_total - discount,
+    )
+
+    paid = Decimal("0.00")
+
+    for row in (transactions_result.data or []):
+        if (
+            row.get("status") != "completed"
+            or str(
+                row.get("currency") or "UAH"
+            ).strip().upper() != currency
+        ):
+            continue
+
+        row_amount = Decimal(str(
+            finance_number(row.get("amount"))
+        ))
+
+        if row.get("transaction_type") == "payment":
+            paid += row_amount
+        elif row.get("transaction_type") == "refund":
+            paid -= row_amount
+
+    paid = max(Decimal("0.00"), paid)
+    remaining = max(
+        Decimal("0.00"),
+        total - paid,
+    )
+
+    return {
+        "visit": visit,
+        "currency": currency,
+        "total": total.quantize(Decimal("0.01")),
+        "paid": paid.quantize(Decimal("0.01")),
+        "remaining": remaining.quantize(Decimal("0.01")),
+    }
+
+
+def serialize_payment_intent(row):
+    return {
+        "id": str(row.get("id") or ""),
+        "visit_id": str(row.get("visit_id") or ""),
+        "provider": row.get("provider") or "monobank",
+        "status": row.get("status") or "created",
+        "amount": finance_number(row.get("amount")),
+        "currency": row.get("currency") or "UAH",
+        "page_url": row.get("page_url") or "",
+        "qr_data_url": (
+            make_payment_qr_data_url(row.get("page_url"))
+            if row.get("page_url")
+            else ""
+        ),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+    }
+
+
+def find_monobank_finance_transaction(
+    current_org,
+    external_reference,
+):
+    result = (
+        supabase
+        .table("finance_transactions")
+        .select("id")
+        .eq("org_id", current_org)
+        .eq("external_provider", "pugcrm")
+        .eq("external_reference", external_reference)
+        .limit(1)
+        .execute()
+    )
+
+    return (
+        result.data[0].get("id")
+        if result.data
+        else None
+    )
+
+
+@app.post(
+    "/api/visits/<visit_id>/monobank/invoices"
+)
+def api_create_monobank_invoice(visit_id):
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    if not MONOBANK_TOKEN:
+        return fail(
+            "Monobank ще не підключено в налаштуваннях сервера.",
+            503,
+        )
+
+    data = request.get_json(silent=True) or {}
+
+    try:
+        amount = parse_finance_amount(
+            data.get("amount")
+        )
+    except ValueError:
+        return fail(
+            "Вкажіть коректну суму оплати.",
+            400,
+        )
+
+    idempotency_key = str(
+        data.get("idempotency_key") or ""
+    ).strip()
+
+    if (
+        not idempotency_key
+        or len(idempotency_key) > 160
+    ):
+        return fail(
+            "Не вдалося підготувати безпечний платіж.",
+            400,
+        )
+
+    current_org = get_current_org_id()
+
+    try:
+        existing_result = (
+            supabase
+            .table("payment_intents")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("provider", "monobank")
+            .eq("idempotency_key", idempotency_key)
+            .limit(1)
+            .execute()
+        )
+
+        if existing_result.data:
+            return ok(
+                serialize_payment_intent(
+                    existing_result.data[0]
+                )
+            )
+
+        balance = load_visit_payment_balance(
+            visit_id,
+            current_org,
+        )
+
+        if balance["currency"] != "UAH":
+            return fail(
+                "Онлайн-оплата Monobank доступна лише у гривні.",
+                409,
+            )
+
+        amount_decimal = Decimal(amount)
+
+        if amount_decimal > balance["remaining"]:
+            return fail(
+                "Сума платежу перевищує залишок до сплати.",
+                409,
+            )
+
+        if balance["remaining"] <= 0:
+            return fail(
+                "Візит уже повністю оплачено.",
+                409,
+            )
+
+        amount_minor = int(
+            amount_decimal * Decimal("100")
+        )
+
+        bank_payload = {
+            "amount": amount_minor,
+            "ccy": 980,
+            "merchantPaymInfo": {
+                "reference": f"visit-{visit_id}",
+                "destination": "Оплата ветеринарного візиту",
+            },
+            "validity": 1800,
+            "paymentType": "debit",
+        }
+
+        bank_invoice = monobank_api_request(
+            "POST",
+            "/api/merchant/invoice/create",
+            payload=bank_payload,
+        )
+
+        invoice_id = str(
+            bank_invoice.get("invoiceId") or ""
+        ).strip()
+        page_url = str(
+            bank_invoice.get("pageUrl") or ""
+        ).strip()
+
+        if not invoice_id or not page_url:
+            raise MonobankApiError(
+                "Monobank did not return an invoice"
+            )
+
+        intent_result = (
+            supabase
+            .table("payment_intents")
+            .insert({
+                "org_id": current_org,
+                "visit_id": visit_id,
+                "created_by": user.get("id"),
+                "provider": "monobank",
+                "status": "created",
+                "amount": amount,
+                "currency": "UAH",
+                "provider_invoice_id": invoice_id,
+                "page_url": page_url,
+                "idempotency_key": idempotency_key,
+                "provider_payload": {
+                    "invoiceId": invoice_id,
+                    "pageUrl": page_url,
+                },
+            })
+            .execute()
+        )
+
+        if not intent_result.data:
+            raise RuntimeError(
+                "Payment intent was not saved"
+            )
+
+        return ok(
+            serialize_payment_intent(
+                intent_result.data[0]
+            )
+        )
+
+    except LookupError:
+        return fail(
+            "Візит не знайдено.",
+            404,
+        )
+    except MonobankApiError as error:
+        print(
+            "❌ Monobank invoice create:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Monobank не створив рахунок. Спробуйте ще раз.",
+            502,
+        )
+    except Exception as error:
+        print(
+            "❌ Create Monobank intent:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося створити онлайн-оплату.",
+            500,
+        )
+
+
+@app.get(
+    "/api/visits/<visit_id>/monobank/invoices/<intent_id>/status"
+)
+def api_get_monobank_invoice_status(
+    visit_id,
+    intent_id,
+):
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    if not MONOBANK_TOKEN:
+        return fail(
+            "Monobank ще не підключено в налаштуваннях сервера.",
+            503,
+        )
+
+    current_org = get_current_org_id()
+
+    try:
+        intent_result = (
+            supabase
+            .table("payment_intents")
+            .select("*")
+            .eq("org_id", current_org)
+            .eq("visit_id", visit_id)
+            .eq("provider", "monobank")
+            .eq("id", intent_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not intent_result.data:
+            return fail(
+                "Онлайн-платіж не знайдено.",
+                404,
+            )
+
+        intent = intent_result.data[0]
+
+        if (
+            intent.get("status") == "success"
+            and intent.get("finance_transaction_id")
+        ):
+            return ok(
+                serialize_payment_intent(intent)
+            )
+
+        invoice_id = str(
+            intent.get("provider_invoice_id") or ""
+        ).strip()
+
+        bank_status = monobank_api_request(
+            "GET",
+            "/api/merchant/invoice/status",
+            query={"invoiceId": invoice_id},
+        )
+
+        status = str(
+            bank_status.get("status") or "created"
+        ).strip().lower()
+
+        allowed_statuses = {
+            "created",
+            "processing",
+            "success",
+            "failure",
+            "reversed",
+            "expired",
+        }
+
+        if status not in allowed_statuses:
+            status = "processing"
+
+        update_payload = {
+            "status": status,
+            "provider_payload": bank_status,
+            "updated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+        }
+
+        if status == "success":
+            expected_minor = int(
+                Decimal(str(intent.get("amount")))
+                * Decimal("100")
+            )
+            bank_amount = int(
+                bank_status.get("amount") or 0
+            )
+            bank_currency = int(
+                bank_status.get("ccy") or 0
+            )
+
+            if (
+                bank_amount != expected_minor
+                or bank_currency != 980
+            ):
+                raise MonobankApiError(
+                    "Monobank payment amount mismatch"
+                )
+
+            payment_key = f"monobank:{invoice_id}"
+            transaction_id = find_monobank_finance_transaction(
+                current_org,
+                payment_key,
+            )
+            payment_registered_now = False
+
+            if not transaction_id:
+                try:
+                    payment_result = (
+                        supabase
+                        .rpc(
+                            "register_visit_payment",
+                            {
+                                "p_org_id": current_org,
+                                "p_visit_id": visit_id,
+                                "p_user_id": user.get("id"),
+                                "p_amount": format(
+                                    Decimal(str(intent.get("amount")))
+                                    .quantize(Decimal("0.01")),
+                                    ".2f",
+                                ),
+                                "p_method": "card",
+                                "p_idempotency_key": payment_key,
+                            },
+                        )
+                        .execute()
+                    )
+
+                    payment_data = payment_result.data or {}
+                    if isinstance(payment_data, list) and payment_data:
+                        payment_data = payment_data[0]
+
+                    if isinstance(payment_data, dict):
+                        transaction_id = payment_data.get(
+                            "transaction_id"
+                        )
+                        payment_registered_now = bool(
+                            transaction_id
+                        )
+
+                except Exception as payment_error:
+                    if "already processed" not in str(
+                        payment_error
+                    ).lower():
+                        raise
+
+                    transaction_id = find_monobank_finance_transaction(
+                        current_org,
+                        payment_key,
+                    )
+
+            if not transaction_id:
+                raise RuntimeError(
+                    "Confirmed Monobank payment was not registered"
+                )
+
+            update_payload[
+                "finance_transaction_id"
+            ] = transaction_id
+
+            if payment_registered_now:
+                write_audit_event(
+                    action="payment.created",
+                    entity_type="finance_transaction",
+                    entity_id=transaction_id,
+                    entity_label="Оплата Monobank",
+                    summary=(
+                        f"Monobank підтвердив оплату "
+                        f"{intent.get('amount')} UAH"
+                    ),
+                    after_data={
+                        "visit_id": visit_id,
+                        "amount": intent.get("amount"),
+                        "currency": "UAH",
+                        "payment_method": "card",
+                        "status": "completed",
+                    },
+                    metadata={
+                        "visit_id": visit_id,
+                        "provider": "monobank",
+                        "invoice_id": invoice_id,
+                    },
+                )
+
+        saved_result = (
+            supabase
+            .table("payment_intents")
+            .update(update_payload)
+            .eq("org_id", current_org)
+            .eq("id", intent_id)
+            .execute()
+        )
+
+        saved_intent = (
+            saved_result.data[0]
+            if saved_result.data
+            else {**intent, **update_payload}
+        )
+
+        return ok(
+            serialize_payment_intent(
+                saved_intent
+            )
+        )
+
+    except MonobankApiError as error:
+        print(
+            "❌ Monobank status:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося підтвердити оплату в Monobank.",
+            502,
+        )
+    except Exception as error:
+        print(
+            "❌ Confirm Monobank payment:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося перевірити онлайн-оплату.",
+            500,
+        )
 
 # =====================================================
 # OWNER DAILY REPORTS
@@ -11713,16 +12433,24 @@ def api_finance_purchase_create():
             or ""
         ).strip()
 
-        if stock_id:
-            try:
-                uuid.UUID(
-                    stock_id
-                )
-            except ValueError:
-                return fail(
-                    f"Некоректний товар у позиції №{index}.",
-                    400,
-                )
+        if not stock_id:
+            return fail(
+                (
+                    "Спочатку додайте товар до складу, "
+                    f"потім оберіть його у позиції №{index}."
+                ),
+                400,
+            )
+
+        try:
+            uuid.UUID(
+                stock_id
+            )
+        except ValueError:
+            return fail(
+                f"Некоректний товар у позиції №{index}.",
+                400,
+            )
 
         name_snap = str(
             raw_item.get(
@@ -11737,15 +12465,6 @@ def api_finance_purchase_create():
             )
             or "шт"
         ).strip()[:50]
-
-        if (
-            not stock_id
-            and not name_snap
-        ):
-            return fail(
-                f"Вкажіть назву товару в позиції №{index}.",
-                400,
-            )
 
         try:
             ordered_qty = float(

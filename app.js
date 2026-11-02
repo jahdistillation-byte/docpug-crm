@@ -14115,6 +14115,79 @@ async function registerVisitPaymentApi(
   return result.data;
 }
 
+async function createMonobankInvoiceApi(
+  visitId,
+  {
+    amount,
+    idempotencyKey,
+  }
+) {
+  const response = await fetch(
+    `/api/visits/${encodeURIComponent(
+      String(visitId)
+    )}/monobank/invoices`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+      body: JSON.stringify({
+        amount: normalizeFinanceAmountInput(amount),
+        idempotency_key: idempotencyKey,
+      }),
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok || !result?.data) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося створити рахунок Monobank (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+async function loadMonobankInvoiceStatusApi(
+  visitId,
+  intentId
+) {
+  const response = await fetch(
+    `/api/visits/${encodeURIComponent(
+      String(visitId)
+    )}/monobank/invoices/${encodeURIComponent(
+      String(intentId)
+    )}/status`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        ...getOrgHeaders(),
+      },
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok || !result?.data) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося перевірити оплату Monobank (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
 async function refreshVisitFinanceSummary(visitId) {
   const stateElement =
     document.getElementById("visitPaymentState");
@@ -14315,6 +14388,7 @@ async function openVisitPaymentModal(
       "Karta / terminal",
     ],
     ["Переказ", "Bank transfer", "Überweisung", "Przelew"],
+    ["Mono / QR", "Mono / QR", "Mono / QR", "Mono / QR"],
     ["Інше", "Other", "Sonstige", "Inne"],
     ["Проведено", "Recorded", "Verbucht", "Zaksięgowano"],
     ["Очікується", "Pending", "Ausstehend", "Oczekująca"],
@@ -14363,6 +14437,41 @@ async function openVisitPaymentModal(
       "Record payment",
       "Zahlung verbuchen",
       "Zaksięguj płatność",
+    ],
+    [
+      "Створити рахунок",
+      "Create payment request",
+      "Zahlungsanforderung erstellen",
+      "Utwórz żądanie płatności",
+    ],
+    [
+      "Очікуємо оплату в Monobank",
+      "Waiting for Monobank payment",
+      "Warten auf Monobank-Zahlung",
+      "Oczekiwanie na płatność Monobank",
+    ],
+    [
+      "Покажіть QR клієнту або відкрийте посилання на його телефоні.",
+      "Show the QR code to the client or open the link on their phone.",
+      "Zeigen Sie dem Kunden den QR-Code oder öffnen Sie den Link auf seinem Telefon.",
+      "Pokaż klientowi kod QR lub otwórz link na jego telefonie.",
+    ],
+    ["Відкрити оплату", "Open payment", "Zahlung öffnen", "Otwórz płatność"],
+    ["Копіювати посилання", "Copy link", "Link kopieren", "Kopiuj link"],
+    ["Посилання скопійовано", "Link copied", "Link kopiert", "Link skopiowany"],
+    ["Перевірити оплату", "Check payment", "Zahlung prüfen", "Sprawdź płatność"],
+    ["Перевіряємо…", "Checking…", "Prüfen…", "Sprawdzanie…"],
+    [
+      "Оплату підтверджено банком",
+      "Payment confirmed by the bank",
+      "Zahlung von der Bank bestätigt",
+      "Płatność potwierdzona przez bank",
+    ],
+    [
+      "Рахунок більше не активний. Створіть новий.",
+      "This payment request is no longer active. Create a new one.",
+      "Diese Zahlungsanforderung ist nicht mehr aktiv. Erstellen Sie eine neue.",
+      "To żądanie płatności nie jest już aktywne. Utwórz nowe.",
     ],
     ["ІСТОРІЯ", "HISTORY", "VERLAUF", "HISTORIA"],
     [
@@ -14460,6 +14569,7 @@ async function openVisitPaymentModal(
     cash: { icon: "💵", label: "Готівка" },
     card: { icon: "💳", label: "Картка / термінал" },
     transfer: { icon: "↗", label: "Переказ" },
+    monobank: { icon: "▣", label: "Mono / QR" },
   };
 
   const transactionStatuses = {
@@ -14474,10 +14584,20 @@ async function openVisitPaymentModal(
   let finance = null;
   let selectedMethod = "cash";
   let submitting = false;
+  let monobankIntent = null;
+  let monobankPollTimer = null;
+
+  const clearMonobankPoll = () => {
+    if (monobankPollTimer) {
+      window.clearTimeout(monobankPollTimer);
+      monobankPollTimer = null;
+    }
+  };
 
   const close = () => {
     if (submitting) return;
 
+    clearMonobankPoll();
     modal.remove();
     document.body.classList.remove("visitPaymentModalOpen");
     document.removeEventListener("keydown", onKeydown);
@@ -14488,10 +14608,14 @@ async function openVisitPaymentModal(
   };
 
   const transactionHtml = (transaction) => {
-    const method = methods[transaction.payment_method] || {
-      icon: "•",
-      label: transaction.payment_method || "Інше",
-    };
+    const method = String(
+      transaction.external_reference || ""
+    ).startsWith("monobank:")
+      ? methods.monobank
+      : methods[transaction.payment_method] || {
+          icon: "•",
+          label: transaction.payment_method || "Інше",
+        };
 
     const dateValue = new Date(
       transaction.occurred_at || transaction.created_at
@@ -14537,6 +14661,97 @@ async function openVisitPaymentModal(
         </div>
       </article>
     `;
+  };
+
+  const refreshAfterConfirmedPayment = async () => {
+    finance = await loadVisitFinanceApi(visitId);
+    await refreshVisitFinanceSummary(visitId);
+
+    if (typeof onPaymentRecorded === "function") {
+      try {
+        await onPaymentRecorded({ visitId, finance });
+      } catch (refreshError) {
+        console.error(
+          "Refresh finance workspace after payment failed:",
+          refreshError
+        );
+      }
+    }
+  };
+
+  const pollMonobankPayment = (
+    { immediate = false } = {}
+  ) => {
+    clearMonobankPoll();
+
+    if (!monobankIntent?.id) return;
+
+    const terminalStatuses = new Set([
+      "success",
+      "failure",
+      "reversed",
+      "expired",
+    ]);
+
+    let firstCheck = true;
+
+    const check = async () => {
+      if (!document.body.contains(modal)) return;
+
+      try {
+        const previousStatus = monobankIntent?.status;
+
+        monobankIntent =
+          await loadMonobankInvoiceStatusApi(
+            visitId,
+            monobankIntent.id
+          );
+
+        if (monobankIntent.status === "success") {
+          clearMonobankPoll();
+          await refreshAfterConfirmedPayment();
+          monobankIntent = null;
+          render();
+          return;
+        }
+
+        if (terminalStatuses.has(monobankIntent.status)) {
+          clearMonobankPoll();
+          showSettingsMessage(
+            text(
+              "Рахунок більше не активний. Створіть новий."
+            )
+          );
+          monobankIntent = null;
+          render();
+          return;
+        }
+
+        if (
+          previousStatus !== monobankIntent.status ||
+          (immediate && firstCheck)
+        ) {
+          render();
+        }
+      } catch (error) {
+        console.error(
+          "Monobank payment status check failed:",
+          error
+        );
+      }
+
+      firstCheck = false;
+
+      monobankPollTimer = window.setTimeout(
+        check,
+        4000
+      );
+    };
+
+    monobankPollTimer = window.setTimeout(
+      check,
+      immediate ? 0 : 4000
+    );
   };
 
     const render = () => {
@@ -14630,7 +14845,50 @@ async function openVisitPaymentModal(
                 </span>
               </section>
             `
-            : `
+            : monobankIntent
+              ? `
+                <section class="visitMonobankRequest">
+                  <div class="visitMonobankQr">
+                    <img
+                      src="${escapeHtml(monobankIntent.qr_data_url || "")}"
+                      alt="QR Monobank"
+                    >
+                  </div>
+
+                  <div class="visitMonobankMain">
+                    <span class="visitMonobankBadge">
+                      ${ui("Очікуємо оплату в Monobank")}
+                    </span>
+
+                    <h3>${money(monobankIntent.amount)}</h3>
+
+                    <p>
+                      ${ui(
+                        "Покажіть QR клієнту або відкрийте посилання на його телефоні."
+                      )}
+                    </p>
+
+                    <div class="visitMonobankActions">
+                      <a
+                        href="${escapeHtml(monobankIntent.page_url || "#")}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >${ui("Відкрити оплату")}</a>
+
+                      <button
+                        type="button"
+                        data-copy-monobank-link
+                      >${ui("Копіювати посилання")}</button>
+
+                      <button
+                        type="button"
+                        data-check-monobank-payment
+                      >${ui("Перевірити оплату")}</button>
+                    </div>
+                  </div>
+                </section>
+              `
+              : `
               <form
                 class="visitPaymentForm"
                 id="visitPaymentForm"
@@ -14705,7 +14963,11 @@ async function openVisitPaymentModal(
                   class="visitPaymentSubmit"
                   type="submit"
                 >
-                  <span>${ui("Провести оплату")}</span>
+                  <span>${ui(
+                    selectedMethod === "monobank"
+                      ? "Створити рахунок"
+                      : "Провести оплату"
+                  )}</span>
                   <strong>${money(remaining)}</strong>
                 </button>
               </form>
@@ -14786,6 +15048,39 @@ async function openVisitPaymentModal(
           );
         });
 
+      render();
+
+      return;
+    }
+
+    const copyButton = event.target.closest(
+      "[data-copy-monobank-link]"
+    );
+
+    if (copyButton && monobankIntent?.page_url) {
+      navigator.clipboard
+        ?.writeText(monobankIntent.page_url)
+        .then(() => {
+          showSettingsMessage(
+            text("Посилання скопійовано")
+          );
+        })
+        .catch(() => {
+          showSettingsMessage(
+            monobankIntent.page_url
+          );
+        });
+      return;
+    }
+
+    const checkButton = event.target.closest(
+      "[data-check-monobank-payment]"
+    );
+
+    if (checkButton && monobankIntent?.id && !submitting) {
+      checkButton.disabled = true;
+      checkButton.textContent = text("Перевіряємо…");
+      pollMonobankPayment({ immediate: true });
       return;
     }
 
@@ -14863,28 +15158,35 @@ async function openVisitPaymentModal(
     }
 
     try {
-      await registerVisitPaymentApi(visitId, {
-        amount: amountString,
-        method: selectedMethod,
-        idempotencyKey: crypto.randomUUID(),
-      });
+      if (selectedMethod === "monobank") {
+        monobankIntent =
+          await createMonobankInvoiceApi(
+            visitId,
+            {
+              amount: amountString,
+              idempotencyKey: crypto.randomUUID(),
+            }
+          );
 
-      finance = await loadVisitFinanceApi(visitId);
-      await refreshVisitFinanceSummary(visitId);
+        submitting = false;
+        render();
+        pollMonobankPayment();
+        return;
+      }
+
+      await registerVisitPaymentApi(
+        visitId,
+        {
+          amount: amountString,
+          method: selectedMethod,
+          idempotencyKey: crypto.randomUUID(),
+        }
+      );
+
+      await refreshAfterConfirmedPayment();
 
       submitting = false;
       render();
-
-      if (typeof onPaymentRecorded === "function") {
-        try {
-          await onPaymentRecorded({ visitId, finance });
-        } catch (refreshError) {
-          console.error(
-            "Refresh finance workspace after payment failed:",
-            refreshError
-          );
-        }
-      }
     } catch (error) {
       submitting = false;
 
@@ -42787,10 +43089,10 @@ supplierSelect.appendChild(
             )}
           </span>
 
-          <select name="stock_id">
-            <option value="">
+          <select name="stock_id" required>
+            <option value="" selected disabled>
               ${escapeHtml(
-                getFinanceInterfaceText("+ Нова позиція")
+                getFinanceInterfaceText("Оберіть позицію складу")
               )}
             </option>
 
@@ -42962,10 +43264,8 @@ supplierSelect.appendChild(
             unitInput.value = "шт";
             priceInput.value = 0;
 
-            nameInput.readOnly = false;
-            unitInput.readOnly = false;
-
-            nameInput.focus();
+            nameInput.readOnly = true;
+            unitInput.readOnly = true;
           }
 
           updateTotals();
@@ -43136,6 +43436,7 @@ supplierSelect.appendChild(
         const invalidItem =
           items.find(
             (item) =>
+              !item.stock_id ||
               !item.name_snap ||
               !item.unit_snap ||
               !Number.isFinite(
@@ -43153,7 +43454,7 @@ supplierSelect.appendChild(
             false;
 
           errorElement.textContent =
-            "Перевірте всі позиції закупівлі.";
+            "Оберіть складську позицію для кожного рядка закупівлі.";
 
           return;
         }
@@ -43478,6 +43779,227 @@ Object.assign(
     },
   }
 );
+function openFinancePurchaseReceiveModal(purchase, onSuccess) {
+  document.querySelector(".financePurchaseReceiveOverlay")?.remove();
+
+  const allItems = (Array.isArray(purchase?.items) ? purchase.items : [])
+    .map((item) => {
+      const ordered = Number(item.ordered_qty || 0);
+      const received = Number(item.received_qty || 0);
+
+      return {
+        ...item,
+        ordered,
+        received,
+        remaining: Math.max(0, ordered - received),
+      };
+    })
+    .filter((item) => item.remaining > 0);
+
+  const items = allItems.filter((item) => item.stock_id);
+  const unlinkedItems = allItems.filter((item) => !item.stock_id);
+
+  if (!items.length) {
+    openDeleteModal(
+      unlinkedItems.length
+        ? "Ці позиції не прив’язані до складу. Створіть нову закупівлю та оберіть товар зі складу."
+        : "Усі позиції цієї закупівлі вже прийнято.",
+      null,
+      unlinkedItems.length ? "info" : "operation-success"
+    );
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className =
+    "financeSupplierCreateOverlay financePurchaseReceiveOverlay";
+
+  overlay.innerHTML = `
+    <form
+      class="financeSupplierCreateModal financePurchaseReceiveModal"
+      id="financePurchaseReceiveForm"
+    >
+      <header class="financeSupplierCreateHeader">
+        <div class="financeSupplierCreateIcon">📥</div>
+        <div>
+          <span>ПРИЙМАННЯ ПОСТАВКИ</span>
+          <h2>Прийняти товар</h2>
+          <p>${escapeHtml(purchase.purchase_number || "Закупівля")}</p>
+        </div>
+        <button
+          type="button"
+          class="financeSupplierCreateClose"
+          aria-label="Закрити"
+        >×</button>
+      </header>
+
+      <div class="financeSupplierCreateBody">
+        <div class="financePurchaseReceiveHint">
+          Вкажіть фактично отриману кількість. Можна прийняти всю поставку
+          або лише її частину.
+        </div>
+
+        ${
+          unlinkedItems.length
+            ? `<div class="financePurchaseReceiveWarning">
+                ${unlinkedItems.length} позиц. без зв’язку зі складом не буде прийнято.
+                Для неї створіть нову закупівлю з вибором товару зі складу.
+              </div>`
+            : ""
+        }
+
+        <div class="financeSupplierCreateGrid">
+          ${items.map((item, index) => `
+            <label
+              class="is-wide financePurchaseReceiveItem"
+              data-purchase-item-id="${escapeHtml(item.id)}"
+              data-remaining="${item.remaining}"
+            >
+              <span>${index + 1}. ${escapeHtml(item.name_snap || "Без назви")}</span>
+              <small>
+                Замовлено: ${item.ordered} ${escapeHtml(item.unit_snap || "шт")}
+                · вже прийнято: ${item.received}
+                · залишилось: ${item.remaining}
+              </small>
+              <input
+                type="number"
+                name="receive_quantity"
+                min="0"
+                max="${item.remaining}"
+                step="0.001"
+                value="${item.remaining}"
+                required
+              >
+            </label>
+          `).join("")}
+        </div>
+
+        <div class="financeSupplierCreateError" hidden></div>
+      </div>
+
+      <footer class="financeSupplierCreateFooter">
+        <button
+          type="button"
+          class="financeSupplierCreateCancel financePurchaseReceiveZero"
+        >Очистити</button>
+        <button
+          type="button"
+          class="financeSupplierCreateCancel financePurchaseReceiveAll"
+        >Прийняти все</button>
+        <button
+          type="button"
+          class="financeSupplierCreateCancel financePurchaseReceiveCancel"
+        >Скасувати</button>
+        <button
+          type="submit"
+          class="financeSupplierCreateSubmit financePurchaseReceiveSubmit"
+        >Провести приймання →</button>
+      </footer>
+    </form>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.classList.add("financePurchaseModalOpen");
+
+  const form = overlay.querySelector("#financePurchaseReceiveForm");
+  const errorElement = overlay.querySelector(".financeSupplierCreateError");
+  const submitButton = overlay.querySelector(".financePurchaseReceiveSubmit");
+  let submitting = false;
+  let closed = false;
+
+  const close = () => {
+    if (closed || submitting) return;
+    closed = true;
+    overlay.remove();
+    if (!document.querySelector(".financePurchaseDetailsOverlay")) {
+      document.body.classList.remove("financePurchaseModalOpen");
+    }
+    document.removeEventListener("keydown", onKeydown);
+  };
+
+  const onKeydown = (event) => {
+    if (event.key === "Escape") close();
+  };
+
+  document.addEventListener("keydown", onKeydown);
+  overlay.querySelector(".financeSupplierCreateClose")
+    ?.addEventListener("click", close);
+  overlay.querySelector(".financePurchaseReceiveCancel")
+    ?.addEventListener("click", close);
+
+  overlay.querySelector(".financePurchaseReceiveZero")
+    ?.addEventListener("click", () => {
+      form.querySelectorAll('[name="receive_quantity"]')
+        .forEach((input) => { input.value = "0"; });
+    });
+
+  overlay.querySelector(".financePurchaseReceiveAll")
+    ?.addEventListener("click", () => {
+      form.querySelectorAll(".financePurchaseReceiveItem")
+        .forEach((row) => {
+          row.querySelector('[name="receive_quantity"]').value =
+            row.dataset.remaining || "0";
+        });
+    });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (submitting) return;
+    errorElement.hidden = true;
+
+    const receiveItems = [...form.querySelectorAll(".financePurchaseReceiveItem")]
+      .map((row) => ({
+        item_id: row.dataset.purchaseItemId,
+        quantity: Number(row.querySelector('[name="receive_quantity"]').value || 0),
+        remaining: Number(row.dataset.remaining || 0),
+      }));
+
+    if (receiveItems.some((item) =>
+      !Number.isFinite(item.quantity) ||
+      item.quantity < 0 ||
+      item.quantity > item.remaining
+    )) {
+      errorElement.hidden = false;
+      errorElement.textContent =
+        "Кількість не може бути меншою за нуль або більшою за залишок.";
+      return;
+    }
+
+    const cleanItems = receiveItems
+      .filter((item) => item.quantity > 0)
+      .map((item) => ({ item_id: item.item_id, quantity: item.quantity }));
+
+    if (!cleanItems.length) {
+      errorElement.hidden = false;
+      errorElement.textContent =
+        "Вкажіть кількість хоча б для однієї позиції.";
+      return;
+    }
+
+    submitting = true;
+    form.setAttribute("aria-busy", "true");
+    submitButton.disabled = true;
+    submitButton.setAttribute("aria-busy", "true");
+    submitButton.textContent = "Приймаємо…";
+
+    try {
+      const result = await receiveFinancePurchaseApi(purchase.id, cleanItems);
+      submitting = false;
+      close();
+      if (typeof onSuccess === "function") await onSuccess(result);
+    } catch (error) {
+      console.error("receive finance purchase failed:", error);
+      submitting = false;
+      form.removeAttribute("aria-busy");
+      submitButton.disabled = false;
+      submitButton.removeAttribute("aria-busy");
+      submitButton.textContent = "Провести приймання →";
+      errorElement.hidden = false;
+      errorElement.textContent =
+        error?.message || "Не вдалося прийняти поставку.";
+    }
+  });
+}
 function openFinancePurchaseDetailsModal(purchase) {
   document.querySelector(".financePurchaseDetailsOverlay")?.remove();
 
@@ -43485,6 +44007,17 @@ function openFinancePurchaseDetailsModal(purchase) {
   const paymentMeta = getFinancePurchasePaymentMeta(purchase.payment_status);
   const supplier = purchase.supplier || {};
   const items = Array.isArray(purchase.items) ? purchase.items : [];
+  const hasUnlinkedRemainingItems = items.some((item) =>
+    !item.stock_id &&
+    Number(item.ordered_qty || 0) > Number(item.received_qty || 0)
+  );
+  const canReceive =
+    purchase.status !== "received" &&
+    purchase.status !== "cancelled" &&
+    items.some((item) =>
+      item.stock_id &&
+      Number(item.ordered_qty || 0) > Number(item.received_qty || 0)
+    );
   const documentUrl = getSafeFinanceDocumentUrl(purchase.document_url);
   const currency = purchase.currency || "UAH";
 
@@ -43811,9 +44344,24 @@ function openFinancePurchaseDetailsModal(purchase) {
       <footer class="financePurchaseDetailsActions">
         <span>
           ${text(
-            "Приймання та оплата будуть підключені наступним етапом."
+            canReceive
+              ? "У закупівлі залишилися неприйняті позиції."
+              : purchase.status === "received"
+                ? "Поставку прийнято повністю."
+                : hasUnlinkedRemainingItems
+                  ? "Є позиції без прив’язки до складу."
+                  : "Приймання недоступне для цієї закупівлі."
           )}
         </span>
+
+        ${
+          canReceive
+            ? `<button
+                type="button"
+                class="financePurchaseDetailsReceive"
+              >📥 ${text("Прийняти поставку")}</button>`
+            : ""
+        }
 
         <button
           type="button"
@@ -43854,6 +44402,22 @@ function openFinancePurchaseDetailsModal(purchase) {
 
   overlay.querySelector(".financePurchaseDetailsDone")
     ?.addEventListener("click", close);
+
+  overlay.querySelector(".financePurchaseDetailsReceive")
+    ?.addEventListener("click", () => {
+      openFinancePurchaseReceiveModal(purchase, async (result) => {
+        close();
+        financeDashboardState.purchaseOffset = 0;
+        await renderFinanceTab();
+        openDeleteModal(
+          result?.purchase?.status === "received"
+            ? "Поставку повністю прийнято. Залишки складу оновлено."
+            : "Частину поставки прийнято. Залишки складу оновлено.",
+          null,
+          "operation-success"
+        );
+      });
+    });
 
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay) {
@@ -53193,7 +53757,11 @@ const categories =
         <div class="stockEditorRow">
           <label class="stockEditorField">
             <span>
-              Поточний залишок
+              ${
+                isEdit
+                  ? "Поточний залишок · лише перегляд"
+                  : "Початковий залишок"
+              }
             </span>
 
             <input
@@ -53208,6 +53776,11 @@ const categories =
                     )
                   : "0"
               }"
+              ${
+                isEdit
+                  ? "readonly aria-readonly=\"true\""
+                  : ""
+              }
             >
           </label>
 
@@ -53747,15 +54320,6 @@ const categories =
               )
             ),
 
-          qty:
-            Math.max(
-              0,
-              Number(
-                quantityInput?.value ||
-                0
-              )
-            ),
-
           min_qty:
             Math.max(
               0,
@@ -53801,6 +54365,17 @@ const categories =
             )?.checked !==
             false,
         };
+
+        if (!isEdit) {
+          payload.qty =
+            Math.max(
+              0,
+              Number(
+                quantityInput?.value ||
+                0
+              )
+            );
+        }
 
         const submitButton =
           modal.querySelector(

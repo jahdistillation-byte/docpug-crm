@@ -80,6 +80,105 @@ class StockInsightsSupabase:
         )
 
 
+class StockMutationQuery:
+    def __init__(
+        self,
+        client,
+        table_name,
+    ):
+        self.client = client
+        self.table_name = table_name
+        self.operation = "select"
+        self.payload = None
+
+    def select(self, *_args):
+        self.operation = "select"
+        return self
+
+    def update(self, payload):
+        self.operation = "update"
+        self.payload = dict(payload)
+        self.client.updated_payloads.append(
+            self.payload
+        )
+        return self
+
+    def eq(self, *_args):
+        return self
+
+    def limit(self, *_args):
+        return self
+
+    def execute(self):
+        if self.table_name != "stock":
+            self.data = []
+            return self
+
+        if self.operation == "select":
+            self.data = [
+                dict(self.client.stock_item)
+            ]
+            return self
+
+        if self.client.conflict_on_update:
+            self.data = []
+            return self
+
+        updated = {
+            **self.client.stock_item,
+            **(self.payload or {}),
+        }
+        self.data = [updated]
+        return self
+
+
+class StockMutationSupabase:
+    def __init__(
+        self,
+        *,
+        conflict_on_update=False,
+    ):
+        self.conflict_on_update = (
+            conflict_on_update
+        )
+        self.updated_payloads = []
+        self.stock_item = {
+            "id": STOCK_ID,
+            "org_id": ORG_ID,
+            "name": "Вакцина",
+            "unit": "фл",
+            "qty": 10,
+            "price": 250,
+            "purchase_price": 100,
+            "minimum_qty": 2,
+            "active": True,
+        }
+
+    def table(self, table_name):
+        return StockMutationQuery(
+            self,
+            table_name,
+        )
+
+
+class StockDeleteConflictQuery:
+    def delete(self):
+        return self
+
+    def eq(self, *_args):
+        return self
+
+    def execute(self):
+        raise RuntimeError(
+            "23503 foreign key violation"
+        )
+
+
+class StockDeleteConflictSupabase:
+    def table(self, _table_name):
+        return StockDeleteConflictQuery()
+
+
 class StockPugInsightsTests(
     unittest.TestCase
 ):
@@ -174,6 +273,125 @@ class StockPugInsightsTests(
                 "error"
             ],
             "Невірна дата придатності.",
+        )
+
+    def test_stock_update_does_not_override_balance_directly(
+        self,
+    ):
+        fake_supabase = (
+            StockMutationSupabase()
+        )
+
+        with patch.object(
+            server,
+            "supabase",
+            fake_supabase,
+        ):
+            response = self.client.put(
+                f"/api/stock/{STOCK_ID}",
+                json={
+                    "name": "Вакцина А",
+                    "qty": 999,
+                },
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(
+            fake_supabase
+            .updated_payloads[0]["name"],
+            "Вакцина А",
+        )
+        self.assertNotIn(
+            "qty",
+            fake_supabase
+            .updated_payloads[0],
+        )
+
+    def test_stock_adjust_detects_concurrent_balance_change(
+        self,
+    ):
+        fake_supabase = (
+            StockMutationSupabase(
+                conflict_on_update=True,
+            )
+        )
+
+        with patch.object(
+            server,
+            "supabase",
+            fake_supabase,
+        ):
+            response = self.client.post(
+                (
+                    f"/api/stock/{STOCK_ID}"
+                    "/adjust"
+                ),
+                json={
+                    "movement_type":
+                        "writeoff",
+                    "quantity": 3,
+                },
+            )
+
+        self.assertEqual(
+            response.status_code,
+            409,
+        )
+        self.assertIn(
+            "Залишок уже змінився",
+            response.get_json()["error"],
+        )
+
+    def test_purchase_requires_existing_stock_item(
+        self,
+    ):
+        response = self.client.post(
+            "/api/finance/purchases",
+            json={
+                "supplier_id": (
+                    "33333333-3333-4333-"
+                    "8333-333333333333"
+                ),
+                "items": [{
+                    "name_snap": "Новий товар",
+                    "unit_snap": "шт",
+                    "ordered_qty": 1,
+                    "purchase_price": 100,
+                }],
+            },
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+        self.assertIn(
+            "Спочатку додайте товар до складу",
+            response.get_json()["error"],
+        )
+
+    def test_used_stock_item_returns_clear_delete_conflict(
+        self,
+    ):
+        with patch.object(
+            server,
+            "supabase",
+            StockDeleteConflictSupabase(),
+        ):
+            response = self.client.delete(
+                f"/api/stock/{STOCK_ID}"
+            )
+
+        self.assertEqual(
+            response.status_code,
+            409,
+        )
+        self.assertIn(
+            "Вимкніть її перемикачем",
+            response.get_json()["error"],
         )
 
 
