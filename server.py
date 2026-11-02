@@ -9,6 +9,7 @@ import traceback as traceback_module
 import html
 import mimetypes
 import time
+from decimal import Decimal, InvalidOperation
 from urllib.parse import parse_qsl
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
@@ -2031,11 +2032,31 @@ def root():
     return send_from_directory(BASE_DIR, "index.html")
 
 
+PUBLIC_ASSET_FILES = {
+    "index.html",
+    "app.js",
+    "ach.js",
+    "style.css",
+    "manifest.json",
+    "login-clinic-bg.jpg",
+    "login-clinic-bg.png",
+}
+
+
 @app.get("/<path:path>")
 def static_any(path):
-    if path.startswith("api/") or path.startswith("uploads/"):
+    normalized_path = str(path or "").replace("\\", "/").lstrip("/")
+
+    if (
+        "/" in normalized_path
+        or normalized_path not in PUBLIC_ASSET_FILES
+    ):
         return fail("Not found", 404)
-    return send_from_directory(BASE_DIR, path)
+
+    return send_from_directory(
+        BASE_DIR,
+        normalized_path,
+    )
 
 # =========================
 # API: ORGANIZATION PROFILE
@@ -4524,6 +4545,191 @@ def check_visit_catalog_currency(visit_id, org_id):
 
     return None
 
+
+def finance_decimal_from_database(value):
+    try:
+        return Decimal(
+            str(
+                value
+                if value is not None
+                else "0"
+            )
+        )
+    except InvalidOperation:
+        return Decimal("0")
+
+
+def evaluate_visit_line_removal(
+    visit,
+    services,
+    stock_lines,
+    transactions,
+    removed_amount,
+):
+    service_total = sum(
+        (
+            finance_decimal_from_database(
+                row.get("qty")
+            )
+            * finance_decimal_from_database(
+                row.get("price_snap")
+            )
+        )
+        for row in services
+    )
+
+    stock_total = sum(
+        (
+            finance_decimal_from_database(
+                row.get("qty")
+            )
+            * finance_decimal_from_database(
+                row.get("price_snap")
+            )
+        )
+        for row in stock_lines
+    )
+
+    discount = max(
+        Decimal("0"),
+        finance_decimal_from_database(
+            visit.get("discount_amount")
+        ),
+    )
+
+    projected_total = max(
+        Decimal("0"),
+        service_total
+        + stock_total
+        - discount
+        - finance_decimal_from_database(
+            removed_amount
+        ),
+    )
+
+    net_paid = Decimal("0")
+
+    for transaction in transactions:
+        if transaction.get("status") != "completed":
+            continue
+
+        amount = finance_decimal_from_database(
+            transaction.get("amount")
+        )
+
+        if transaction.get("transaction_type") == "payment":
+            net_paid += amount
+        elif transaction.get("transaction_type") == "refund":
+            net_paid -= amount
+
+    net_paid = max(
+        Decimal("0"),
+        net_paid,
+    )
+
+    refund_required = max(
+        Decimal("0"),
+        net_paid - projected_total,
+    ).quantize(Decimal("0.01"))
+
+    return {
+        "allowed": refund_required == Decimal("0.00"),
+        "projected_total": format(
+            projected_total.quantize(Decimal("0.01")),
+            ".2f",
+        ),
+        "net_paid": format(
+            net_paid.quantize(Decimal("0.01")),
+            ".2f",
+        ),
+        "refund_required": format(
+            refund_required,
+            ".2f",
+        ),
+    }
+
+
+def check_visit_line_removal_finance(
+    visit_id,
+    org_id,
+    removed_amount,
+):
+    visit_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visits")
+            .select("id,discount_amount,currency")
+            .eq("org_id", org_id)
+            .eq("id", visit_id)
+            .limit(1)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    if not visit_result.data:
+        return fail("Візит не знайдено.", 404)
+
+    services_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visit_services")
+            .select("qty,price_snap")
+            .eq("visit_id", visit_id)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    stock_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("visit_stock")
+            .select("qty,price_snap")
+            .eq("visit_id", visit_id)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    transactions_result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("finance_transactions")
+            .select("transaction_type,status,amount")
+            .eq("org_id", org_id)
+            .eq("visit_id", visit_id)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    result = evaluate_visit_line_removal(
+        visit_result.data[0],
+        services_result.data or [],
+        stock_result.data or [],
+        transactions_result.data or [],
+        removed_amount,
+    )
+
+    if result["allowed"]:
+        return None
+
+    currency = str(
+        visit_result.data[0].get("currency")
+        or "UAH"
+    ).strip().upper()
+
+    return fail(
+        (
+            "Спочатку оформіть повернення "
+            f"{result['refund_required']} {currency}. "
+            "Після видалення позиції оплата "
+            "перевищуватиме суму чека."
+        ),
+        409,
+    )
+
 @app.post("/api/visits/<visit_id>/services")
 def api_add_service_to_visit(visit_id):
     user, auth_error = auth_required()
@@ -4703,6 +4909,22 @@ def api_remove_service_from_visit(visit_id, line_id):
             return fail("Послугу у візиті не знайдено.", 404)
 
         line = line_result.data[0]
+
+        finance_error = (
+            check_visit_line_removal_finance(
+                visit_id,
+                current_org,
+                finance_decimal_from_database(
+                    line.get("qty")
+                )
+                * finance_decimal_from_database(
+                    line.get("price_snap")
+                ),
+            )
+        )
+
+        if finance_error is not None:
+            return finance_error
 
         delete_result = execute_with_retry(
             lambda: (
@@ -5178,6 +5400,22 @@ def api_remove_stock_from_visit(
             line_result.data[0]
         )
 
+        finance_error = (
+            check_visit_line_removal_finance(
+                visit_id,
+                current_org,
+                finance_decimal_from_database(
+                    line_row.get("qty")
+                )
+                * finance_decimal_from_database(
+                    line_row.get("price_snap")
+                ),
+            )
+        )
+
+        if finance_error is not None:
+            return finance_error
+
         inventory_synced = (
             line_row.get(
                 "inventory_synced"
@@ -5515,6 +5753,56 @@ def finance_number(
             float(default),
             2
         )
+
+
+FINANCE_AMOUNT_PATTERN = re.compile(
+    r"^(?:0|[1-9]\d{0,9})(?:[\.,]\d{1,2})?$"
+)
+FINANCE_AMOUNT_MAX = Decimal("1000000000.00")
+
+
+def parse_finance_amount(
+    value,
+    *,
+    allow_zero=False,
+    maximum=FINANCE_AMOUNT_MAX,
+):
+    """Return a canonical two-decimal string for a money input.
+
+    Mutation endpoints deliberately accept strings only. This keeps JSON
+    floating-point rounding out of payments, refunds and manual expenses.
+    """
+
+    if not isinstance(value, str):
+        raise ValueError("amount must be a decimal string")
+
+    raw_value = value.strip()
+
+    if not FINANCE_AMOUNT_PATTERN.fullmatch(raw_value):
+        raise ValueError("amount must be a decimal string")
+
+    try:
+        amount = Decimal(
+            raw_value.replace(",", ".")
+        )
+    except InvalidOperation as error:
+        raise ValueError(
+            "amount must be a decimal string"
+        ) from error
+
+    minimum = (
+        Decimal("0.00")
+        if allow_zero
+        else Decimal("0.01")
+    )
+
+    if amount < minimum or amount > maximum:
+        raise ValueError("amount is outside the allowed range")
+
+    return format(
+        amount.quantize(Decimal("0.01")),
+        ".2f",
+    )
 
 
 def load_finance_org_rows(
@@ -6052,9 +6340,15 @@ def api_create_visit_payment(
         or {}
     )
 
-    amount = finance_number(
-        data.get("amount")
-    )
+    try:
+        amount = parse_finance_amount(
+            data.get("amount")
+        )
+    except ValueError:
+        return fail(
+            "Вкажіть коректну суму оплати.",
+            400,
+        )
 
     payment_method = str(
         data.get(
@@ -6071,12 +6365,6 @@ def api_create_visit_payment(
         "terminal",
         "other",
     }
-
-    if amount <= 0:
-        return fail(
-            "Вкажіть суму оплати.",
-            400
-        )
 
     if (
         payment_method
@@ -6182,7 +6470,7 @@ def api_create_visit_payment(
                 ),
                 entity_label="Оплата візиту",
                 summary=(
-                    f"Оплату {amount:g} "
+                    f"Оплату {amount} "
                     f"{payment_currency} проведено"
                 ),
                 after_data={
@@ -6240,17 +6528,22 @@ def api_create_visit_payment(
             error_text.lower()
         )
 
-        if (
-            "already paid"
-            in lowered_error
-            or "exceeds remaining"
-            in lowered_error
-            or "already processed"
-            in lowered_error
-        ):
+        if "already paid" in lowered_error:
             return fail(
-                error_text,
+                "Візит уже повністю оплачено.",
                 409
+            )
+
+        if "exceeds remaining" in lowered_error:
+            return fail(
+                "Сума платежу перевищує залишок до сплати.",
+                409,
+            )
+
+        if "already processed" in lowered_error:
+            return fail(
+                "Цей платіж уже оброблено.",
+                409,
             )
 
         if (
@@ -6262,7 +6555,7 @@ def api_create_visit_payment(
             in lowered_error
         ):
             return fail(
-                error_text,
+                "Вкажіть коректну суму оплати.",
                 400
             )
 
@@ -8207,40 +8500,12 @@ def api_finance_transaction_create():
         )
 
     try:
-        amount = round(
-            float(
-                data.get(
-                    "amount"
-                )
-            ),
-            2,
+        amount = parse_finance_amount(
+            data.get("amount")
         )
-
-    except (
-        TypeError,
-        ValueError,
-    ):
+    except ValueError:
         return fail(
             "Вкажіть коректну суму.",
-            400,
-        )
-
-    if (
-        amount != amount
-        or amount in {
-            float("inf"),
-            float("-inf"),
-        }
-        or amount <= 0
-    ):
-        return fail(
-            "Сума повинна бути більшою за нуль.",
-            400,
-        )
-
-    if amount > 1_000_000_000:
-        return fail(
-            "Сума операції перевищує допустиме значення.",
             400,
         )
 
@@ -8600,7 +8865,7 @@ def api_finance_transaction_create():
             ),
             summary=(
                 f"{allowed_types[transaction_type]}: "
-                f"{amount:g} {transaction_currency}"
+                f"{amount} {transaction_currency}"
             ),
             after_data=(
                 finance_audit_snapshot(
@@ -9382,32 +9647,12 @@ def api_finance_transaction_refund(
     )
 
     try:
-        amount = round(
-            float(
-                data.get("amount")
-            ),
-            2,
+        amount = parse_finance_amount(
+            data.get("amount")
         )
-
-    except (
-        TypeError,
-        ValueError,
-    ):
+    except ValueError:
         return fail(
             "Вкажіть коректну суму повернення.",
-            400,
-        )
-
-    if (
-        amount != amount
-        or amount in {
-            float("inf"),
-            float("-inf"),
-        }
-        or amount <= 0
-    ):
-        return fail(
-            "Сума повернення повинна бути більшою за нуль.",
             400,
         )
 
@@ -9541,7 +9786,7 @@ def api_finance_transaction_refund(
                 entity_label=
                     "Повернення оплати",
                 summary=(
-                    f"Повернено {amount:g} UAH"
+                    f"Повернено {amount} UAH"
                 ),
                 before_data=(
                     finance_audit_snapshot(
@@ -9705,31 +9950,10 @@ def api_finance_expense_update(
     )
 
     try:
-        amount = round(
-            float(
-                data.get("amount")
-            ),
-            2,
+        amount = parse_finance_amount(
+            data.get("amount")
         )
-
-    except (
-        TypeError,
-        ValueError,
-    ):
-        return fail(
-            "Вкажіть коректну суму.",
-            400,
-        )
-
-    if (
-        amount != amount
-        or amount in {
-            float("inf"),
-            float("-inf"),
-        }
-        or amount <= 0
-        or amount > 1_000_000_000
-    ):
+    except ValueError:
         return fail(
             "Вкажіть коректну суму.",
             400,
@@ -11691,27 +11915,31 @@ def api_finance_purchase_create():
             flush=True,
         )
 
-        known_validation_errors = (
-            "Supplier not found",
-            "Supplier is inactive",
-            "Purchase must contain",
-            "Invalid purchase item",
-            "Stock item not found",
-            "Discount cannot exceed",
-            "Expected date",
-            "Unsupported currency",
-        )
+        validation_messages = {
+            "supplier not found":
+                "Постачальника не знайдено.",
+            "supplier is inactive":
+                "Постачальник неактивний.",
+            "purchase must contain":
+                "Додайте хоча б одну позицію закупівлі.",
+            "invalid purchase item":
+                "Перевірте позиції закупівлі.",
+            "stock item not found":
+                "Один із товарів не знайдено на складі.",
+            "discount cannot exceed":
+                "Знижка не може перевищувати суму закупівлі.",
+            "expected date":
+                "Перевірте очікувану дату поставки.",
+            "unsupported currency":
+                "Ця валюта не підтримується.",
+        }
 
-        if any(
-            message.lower()
-            in error_text.lower()
-            for message
-            in known_validation_errors
-        ):
-            return fail(
-                error_text,
-                400,
-            )
+        for marker, safe_message in validation_messages.items():
+            if marker in error_text.lower():
+                return fail(
+                    safe_message,
+                    400,
+                )
 
         return fail(
             "Не вдалося створити закупівлю.",

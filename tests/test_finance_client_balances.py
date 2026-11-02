@@ -147,6 +147,7 @@ class FinanceClientBalanceTests(unittest.TestCase):
                     "date": "2026-07-28",
                     "dx": "Контроль",
                     "discount_amount": 0,
+                    "currency": "UAH",
                 },
                 {
                     "id": "visit-2",
@@ -155,6 +156,7 @@ class FinanceClientBalanceTests(unittest.TestCase):
                     "date": "2026-07-27",
                     "dx": "Огляд",
                     "discount_amount": 0,
+                    "currency": "UAH",
                 },
             ],
             "visit_services": [
@@ -186,6 +188,7 @@ class FinanceClientBalanceTests(unittest.TestCase):
                     "transaction_type": "payment",
                     "status": "completed",
                     "amount": 100,
+                    "currency": "UAH",
                 },
                 {
                     "org_id": ORG_ID,
@@ -193,6 +196,7 @@ class FinanceClientBalanceTests(unittest.TestCase):
                     "transaction_type": "payment",
                     "status": "failed",
                     "amount": 1000,
+                    "currency": "UAH",
                 },
                 {
                     "org_id": ORG_ID,
@@ -200,6 +204,7 @@ class FinanceClientBalanceTests(unittest.TestCase):
                     "transaction_type": "payment",
                     "status": "completed",
                     "amount": 200,
+                    "currency": "UAH",
                 },
             ],
         })

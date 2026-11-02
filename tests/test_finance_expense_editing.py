@@ -37,7 +37,7 @@ class EditExpenseRpc:
             "transaction": {
                 "id": TRANSACTION_ID,
                 "transaction_type": "expense",
-                "amount": 1250,
+                "amount": "1250.00",
                 "category": "Оренда",
             },
             "previous_amount": 1000,
@@ -99,7 +99,7 @@ class FinanceExpenseEditingTests(unittest.TestCase):
                 f"{TRANSACTION_ID}/expense"
             ),
             json={
-                "amount": 1250,
+                "amount": "1250.00",
                 "category": "Оренда",
                 "payment_method": "transfer",
                 "occurred_at": "2026-07-28T19:30",
@@ -136,7 +136,7 @@ class FinanceExpenseEditingTests(unittest.TestCase):
         )
         self.assertEqual(
             arguments["p_amount"],
-            1250,
+            "1250.00",
         )
         self.assertEqual(
             arguments["p_category"],
@@ -158,7 +158,7 @@ class FinanceExpenseEditingTests(unittest.TestCase):
                 f"{TRANSACTION_ID}/expense"
             ),
             json={
-                "amount": 0,
+                "amount": "0.00",
                 "category": "Оренда",
                 "payment_method": "cash",
                 "occurred_at": "2026-07-28T19:30",

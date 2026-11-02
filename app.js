@@ -13974,6 +13974,28 @@ async function loadVisitFinanceApi(
   return result.data;
 }
 
+function normalizeFinanceAmountInput(value) {
+  const rawValue = String(
+    value ?? ""
+  ).trim();
+
+  const match = rawValue.match(
+    /^(?:0|[1-9]\d{0,9})(?:[\.,](\d{1,2}))?$/
+  );
+
+  if (!match) return null;
+
+  const normalized = rawValue.replace(",", ".");
+  const [integerPart, decimalPart = ""] =
+    normalized.split(".");
+
+  return (
+    integerPart +
+    "." +
+    decimalPart.padEnd(2, "0")
+  );
+}
+
 async function registerVisitPaymentApi(
   visitId,
   {
@@ -14005,7 +14027,10 @@ async function registerVisitPaymentApi(
         },
 
         body: JSON.stringify({
-          amount,
+          amount:
+            normalizeFinanceAmountInput(
+              amount
+            ),
           method,
 
           idempotency_key:
@@ -14734,7 +14759,13 @@ async function openVisitPaymentModal(
     if (submitting || !finance) return;
 
     const input = modal.querySelector("#visitPaymentAmount");
-    const amount = Number(input?.value || 0);
+    const amountString =
+      normalizeFinanceAmountInput(
+        input?.value
+      );
+    const amount = Number(
+      amountString
+    );
     const remaining = Number(finance.remaining || 0);
 
     if (
@@ -14775,7 +14806,7 @@ async function openVisitPaymentModal(
 
     try {
       await registerVisitPaymentApi(visitId, {
-        amount,
+        amount: amountString,
         method: selectedMethod,
         idempotencyKey: crypto.randomUUID(),
       });
@@ -39268,8 +39299,13 @@ function openFinancePaymentRefundModal(transaction) {
 
       const formData = new FormData(form);
 
+      const amountString =
+        normalizeFinanceAmountInput(
+          formData.get("amount")
+        );
+
       const amount = Number(
-        formData.get("amount")
+        amountString
       );
 
       const reason = String(
@@ -39311,7 +39347,7 @@ function openFinancePaymentRefundModal(transaction) {
         await refundFinancePaymentApi(
           transaction.id,
           {
-            amount,
+            amount: amountString,
             reason,
             idempotency_key: idempotencyKey,
           }
@@ -39850,7 +39886,14 @@ function openFinanceExpenseModal(transaction = null) {
     if (submitting || !accountsReady) return;
 
     const formData = new FormData(form);
-    const amount = Number(formData.get("amount"));
+    const amountString =
+      normalizeFinanceAmountInput(
+        formData.get("amount")
+      );
+
+    const amount = Number(
+      amountString
+    );
     const category = String(
       formData.get("category") || ""
     ).trim();
@@ -39878,7 +39921,7 @@ function openFinanceExpenseModal(transaction = null) {
 
     const expensePayload = {
       transaction_type: "expense",
-      amount,
+      amount: amountString,
       category,
 
       financial_account_id: isEditing

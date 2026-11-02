@@ -43,10 +43,10 @@ class RefundPaymentRpc:
             "transaction": {
                 "id": "refund-1",
                 "transaction_type": "refund",
-                "amount": 40,
+                "amount": "40.00",
             },
             "payment_id": TRANSACTION_ID,
-            "refund_amount": 40,
+            "refund_amount": "40.00",
             "refundable_after": 60,
             "paid_after": 60,
             "remaining": 40,
@@ -121,7 +121,7 @@ class FinancePaymentRefundTests(
                 f"{TRANSACTION_ID}/refund"
             ),
             json={
-                "amount": 40,
+                "amount": "40.00",
                 "reason": "Переплата клієнта",
                 "idempotency_key":
                     IDEMPOTENCY_KEY,
@@ -143,7 +143,7 @@ class FinancePaymentRefundTests(
                 "p_transaction_id":
                     TRANSACTION_ID,
                 "p_user_id": USER_ID,
-                "p_amount": 40.0,
+                "p_amount": "40.00",
                 "p_reason":
                     "Переплата клієнта",
                 "p_idempotency_key":
@@ -160,7 +160,7 @@ class FinancePaymentRefundTests(
                 f"{TRANSACTION_ID}/refund"
             ),
             json={
-                "amount": 40,
+                "amount": "40.00",
                 "reason": " ",
             },
         )
@@ -182,7 +182,7 @@ class FinancePaymentRefundTests(
                 f"{TRANSACTION_ID}/refund"
             ),
             json={
-                "amount": 0,
+                "amount": "0.00",
                 "reason": "Помилка",
             },
         )
@@ -204,7 +204,7 @@ class FinancePaymentRefundTests(
                 "not-a-uuid/refund"
             ),
             json={
-                "amount": 40,
+                "amount": "40.00",
                 "reason": "Помилка",
             },
         )
