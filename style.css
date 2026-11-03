@@ -76079,3 +76079,24 @@ body[data-theme="white"] .teamPageCard .teamDirectoryCard .premiumDeleteBtn {
     font-size: 13px !important;
   }
 }
+/* Единый шрифт для всего раздела финансов */
+.page[data-page="finance"],
+.page[data-page="finance"] * {
+  font-family: var(
+    --pug-ui-font,
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif
+  ) !important;
+}
+
+.page[data-page="finance"] :is(
+  button,
+  input,
+  select,
+  textarea
+) {
+  font-family: inherit !important;
+}
