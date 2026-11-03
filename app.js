@@ -49409,6 +49409,14 @@ async function renderFinanceIntegrationsTab(page) {
               Використовуйте токен саме інтернет-еквайрингу клініки,
               а не токен особистої банківської виписки.
             </p>
+            <a
+              class="financeIntegrationHelpLink"
+              href="https://monobank.ua/knowledge-base/acquiring/online/website/api/token"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Де отримати API-токен? Відкрити інструкцію Monobank ↗
+            </a>
             <div class="financeIntegrationFormError" id="financeMonoError" hidden></div>
           </form>
         </section>

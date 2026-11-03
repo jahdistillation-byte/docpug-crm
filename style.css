@@ -17071,6 +17071,19 @@ select.clinicSettingsInput {
   font-size: 13px;
 }
 
+.financeIntegrationHelpLink {
+  width: fit-content;
+  color: #2d719d;
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.financeIntegrationHelpLink:hover {
+  color: #1f587d;
+  text-decoration: underline;
+}
+
 .financeIntegrationFormError {
   padding: 10px 12px;
   border: 1px solid #efd4d9;
