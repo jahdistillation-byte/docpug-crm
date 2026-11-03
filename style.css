@@ -16818,6 +16818,241 @@ select.clinicSettingsInput {
   }
 }
 
+/* =========================================================
+   FINANCE — READABILITY & CALM WHITE THEME
+   Final finance-only pass: larger helper text, readable actions
+   and a restrained success palette.
+   ========================================================= */
+
+@media screen {
+  .page[data-page="finance"] {
+    --finance-success: #39745f;
+    --finance-success-soft: rgba(57, 116, 95, 0.15);
+    --finance-success-border: rgba(101, 153, 133, 0.32);
+  }
+
+  .page[data-page="finance"] :is(button, input, select, textarea) {
+    font-size: 14px !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeSectionButton strong,
+    .financePanelHead > button,
+    .financeActionPanel .financePanelHead button,
+    .financeOperationActions button,
+    .financeOperationsPagination button,
+    .financeOperationsFilterActions button,
+    .financeAttentionAmount button,
+    .financePrimaryAction,
+    .financeQuietAction
+  ) {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeTodayKpis article > span,
+    .financeTodayKpis .financeKpiCard > span,
+    .financeTodayKpis article > small,
+    .financeTodayKpis .financeKpiCard > small,
+    .financeClientKpis article > span,
+    .financeAccountName,
+    .financeAccountCard small,
+    .financeAccountsHeading p,
+    .financeAccountsTotal span,
+    .financeAttentionMain span,
+    .financeSignalCard div > span,
+    .financeSignalDetails span,
+    .financeSignalDetails small,
+    .financeCompactOperations p small,
+    .financeOperationTitle span,
+    .financeOperationContent p,
+    .financeOperationContent small,
+    .financeOperationsFilters label > span,
+    .financeOperationsPagination > span,
+    .financeTransactionsEmpty span,
+    .financePartialDataNotice small
+  ) {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeAttentionMain strong,
+    .financeAttentionAmount strong,
+    .financeSignalDetails strong,
+    .financeCompactOperations p strong,
+    .financeCompactOperations b,
+    .financePositiveEmpty strong,
+    .financePartialDataNotice strong
+  ) {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeAccountsHeading > div:first-child > span,
+    .financeEyebrow,
+    .financeControlHero .financeEyebrow,
+    .financeOperationStatus,
+    .financeOperationRefundState,
+    .financeSectionButton small
+  ) {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .page[data-page="finance"] .financeAccountCard {
+    min-height: 112px;
+  }
+
+  .page[data-page="finance"] .financeOperationActions button {
+    min-height: 36px;
+    padding-inline: 13px;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeOperationAmount.is-income strong,
+    .financeTransactionAmount.is-income strong,
+    .financeTransactionIcon.is-income,
+    .financeCompactOperations b,
+    .financeSignalCard.is-good .financeSignalIcon,
+    .financePositiveEmpty > span,
+    .financeAccountCard.is-cash .financeAccountIcon
+  ) {
+    color: var(--finance-success) !important;
+    text-shadow: none !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeCompactOperations > div > span,
+    .financeTransactionIcon.is-income,
+    .financeSignalCard.is-good .financeSignalIcon,
+    .financePositiveEmpty > span,
+    .financeAccountCard.is-cash .financeAccountIcon
+  ) {
+    background: var(--finance-success-soft) !important;
+  }
+
+  .page[data-page="finance"] .financeOperationStatus.is-completed {
+    color: var(--finance-success) !important;
+    border-color: var(--finance-success-border) !important;
+    background: var(--finance-success-soft) !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeMethodsLegend i.cash,
+    .financeCashflowLegend i.is-income
+  ) {
+    background: var(--finance-success) !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-page="finance"] :is(
+    .financeIncomeBar,
+    .financeCashflowValueLabel.is-income
+  ) {
+    fill: var(--finance-success) !important;
+    filter: none !important;
+  }
+
+  .page[data-page="finance"] .financeClientCard.is-paid {
+    border-left-color: var(--finance-success) !important;
+  }
+}
+
+@media screen {
+  body[data-theme="white"] .page[data-page="finance"] {
+    --finance-success: #356e59;
+    --finance-success-soft: #eaf3ef;
+    --finance-success-border: #c4dbd1;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] :is(
+    .financeOperationActions button,
+    .financeOperationsPagination button,
+    .financeOperationsReset,
+    .financeQuietAction,
+    .financeActionPanel .financePanelHead button,
+    .financeAttentionAmount button
+  ) {
+    color: #315d78 !important;
+    border-color: #c8d7e1 !important;
+    background: #f7fafc !important;
+    box-shadow: none !important;
+    opacity: 1;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] :is(
+    .financeOperationActions button,
+    .financeOperationsPagination button,
+    .financeOperationsReset,
+    .financeQuietAction,
+    .financeActionPanel .financePanelHead button,
+    .financeAttentionAmount button
+  ):not(:disabled):hover {
+    color: #214e69 !important;
+    border-color: #91b3c7 !important;
+    background: #edf4f8 !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] :is(
+    .financeOperationsApply,
+    .financePrimaryAction,
+    .financeSectionButton.active
+  ) {
+    color: #ffffff !important;
+    border-color: #2f6f98 !important;
+    background: #2f6f98 !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] .financeSectionButton.active :is(strong, span, small) {
+    color: #ffffff !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] .financeOperationDocumentButton {
+    color: #356e59 !important;
+    border-color: #c4dbd1 !important;
+    background: #eef6f2 !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] .financeOperationCancelButton {
+    color: #a33e50 !important;
+    border-color: #ebc7ce !important;
+    background: #fff3f5 !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] .financeOperationRefundButton,
+  body[data-theme="white"] .page[data-page="finance"] .financeOperationRefundState {
+    color: #865b22 !important;
+    border-color: #e4d1b2 !important;
+    background: #fbf5ea !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] :is(
+    .financeOperationActions button,
+    .financeOperationsPagination button,
+    .financeOperationsReset
+  ):disabled {
+    color: #738794 !important;
+    border-color: #d8e1e7 !important;
+    background: #f1f5f7 !important;
+    opacity: 0.62 !important;
+  }
+
+  body[data-theme="white"] .page[data-page="finance"] :is(
+    .financeOperationAmount.is-income strong,
+    .financeTransactionAmount.is-income strong,
+    .financeTransactionIcon.is-income,
+    .financeCompactOperations b,
+    .financeSignalCard.is-good .financeSignalIcon,
+    .financePositiveEmpty > span,
+    .financeAccountCard.is-cash .financeAccountIcon
+  ) {
+    color: #356e59 !important;
+  }
+}
+
 /* Finance: clinic-owned payment integrations */
 .financeIntegrationsPage {
   --integration-border: #d9e5ec;
