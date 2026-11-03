@@ -76100,3 +76100,67 @@ body[data-theme="white"] .teamPageCard .teamDirectoryCard .premiumDeleteBtn {
 ) {
   font-family: inherit !important;
 }
+/* Финансы — заметное увеличение мелкого текста */
+.page[data-page="finance"] {
+  font-size: 16px !important;
+}
+
+.page[data-page="finance"] :is(
+  button,
+  input,
+  select,
+  textarea,
+  .financeSectionButton strong,
+  .financePrimaryAction,
+  .financeQuietAction,
+  .financeOperationActions button,
+  .financeOperationsPagination button,
+  .financeOperationsFilterActions button,
+  .financeAttentionAmount button
+) {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.page[data-page="finance"] :is(
+  p,
+  small,
+  label,
+  .financeAccountName,
+  .financeAccountCard small,
+  .financeAccountsHeading p,
+  .financeTodayKpis article > span,
+  .financeTodayKpis article > small,
+  .financeClientKpis article > span,
+  .financeSignalDetails span,
+  .financeSignalDetails small,
+  .financeOperationTitle span,
+  .financeOperationContent p,
+  .financeOperationContent small,
+  .financeOperationsFilters label > span,
+  .financeOperationsPagination > span
+) {
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+}
+
+.page[data-page="finance"] :is(
+  .financeAttentionMain strong,
+  .financeAttentionAmount strong,
+  .financeSignalDetails strong,
+  .financeCompactOperations strong,
+  .financeCompactOperations b,
+  .financePartialDataNotice strong
+) {
+  font-size: 17px !important;
+}
+
+.page[data-page="finance"] :is(
+  .financeEyebrow,
+  .financeOperationStatus,
+  .financeOperationRefundState,
+  .financeSectionButton small
+) {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
