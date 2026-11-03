@@ -76100,59 +76100,57 @@ body[data-theme="white"] .teamPageCard .teamDirectoryCard .premiumDeleteBtn {
 ) {
   font-family: inherit !important;
 }
-/* Финансы — заметное увеличение мелкого текста */
+/* Финансы — единая читаемая типографика для всех экранов */
 .page[data-page="finance"] {
-  font-size: 16px !important;
+  font-size: 17px !important;
+  color: #14283a !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Покрывает в том числе текст, который выводится напрямую в div/span. */
+.page[data-page="finance"] :is(
+  div,
+  p,
+  span,
+  small,
+  label,
+  a,
+  th,
+  td,
+  li,
+  dt,
+  dd
+) {
+  font-size: 17px !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
 }
 
 .page[data-page="finance"] :is(
   button,
   input,
   select,
-  textarea,
-  .financeSectionButton strong,
-  .financePrimaryAction,
-  .financeQuietAction,
-  .financeOperationActions button,
-  .financeOperationsPagination button,
-  .financeOperationsFilterActions button,
-  .financeAttentionAmount button
+  textarea
 ) {
   font-size: 16px !important;
-  line-height: 1.4 !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0 !important;
+  font-weight: 650 !important;
 }
 
 .page[data-page="finance"] :is(
   p,
   small,
   label,
-  .financeAccountName,
   .financeAccountCard small,
   .financeAccountsHeading p,
-  .financeTodayKpis article > span,
-  .financeTodayKpis article > small,
-  .financeClientKpis article > span,
-  .financeSignalDetails span,
-  .financeSignalDetails small,
-  .financeOperationTitle span,
   .financeOperationContent p,
   .financeOperationContent small,
-  .financeOperationsFilters label > span,
   .financeOperationsPagination > span
 ) {
-  font-size: 16px !important;
-  line-height: 1.5 !important;
-}
-
-.page[data-page="finance"] :is(
-  .financeAttentionMain strong,
-  .financeAttentionAmount strong,
-  .financeSignalDetails strong,
-  .financeCompactOperations strong,
-  .financeCompactOperations b,
-  .financePartialDataNotice strong
-) {
-  font-size: 17px !important;
+  color: #52697b !important;
+  font-weight: 500 !important;
 }
 
 .page[data-page="finance"] :is(
@@ -76161,6 +76159,57 @@ body[data-theme="white"] .teamPageCard .teamDirectoryCard .premiumDeleteBtn {
   .financeOperationRefundState,
   .financeSectionButton small
 ) {
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.4 !important;
+  font-weight: 700 !important;
+}
+
+.page[data-page="finance"] :is(
+  .financeSectionButton strong,
+  .financeAccountName,
+  .financeOperationTitle span,
+  .financeAttentionMain strong,
+  .financeSignalDetails strong,
+  .financeCompactOperations strong,
+  .financeCompactOperations b,
+  .financePartialDataNotice strong
+) {
+  font-size: 18px !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+}
+
+/* Денежные суммы остаются визуально главными и не уменьшаются общим правилом. */
+.page[data-page="finance"] :is(
+  .financeTodayKpis strong,
+  .financeClientKpis strong,
+  .financeAccountCard strong,
+  .financeAnalyticsKpis strong,
+  .financeAttentionAmount strong
+) {
+  font-size: clamp(28px, 2vw, 38px) !important;
+  line-height: 1.1 !important;
+  font-weight: 750 !important;
+}
+
+/* Контраст в светлой теме: текст кнопок больше не сливается с фоном. */
+body[data-theme="white"] .page[data-page="finance"] :is(
+  p,
+  small,
+  label,
+  .financeOperationContent p,
+  .financeOperationContent small
+) {
+  color: #52697b !important;
+}
+
+body[data-theme="white"] .page[data-page="finance"] :is(
+  .financeSectionButton.is-active,
+  .financeSectionButton.is-active *,
+  .financePrimaryAction,
+  .financePrimaryAction *,
+  button.primary,
+  button.primary *
+) {
+  color: #ffffff !important;
 }
