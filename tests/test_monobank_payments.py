@@ -152,8 +152,11 @@ class MonobankPaymentTests(unittest.TestCase):
             ),
             patch.object(
                 server,
-                "MONOBANK_TOKEN",
-                "test-token",
+                "load_monobank_connection_credentials",
+                return_value=(
+                    {"id": "connection-1"},
+                    "clinic-test-token",
+                ),
             ),
         )
 
@@ -198,14 +201,81 @@ class MonobankPaymentTests(unittest.TestCase):
             bank_calls[0][2]["payload"]["amount"],
             215000,
         )
+        self.assertEqual(
+            bank_calls[0][2]["token"],
+            "clinic-test-token",
+        )
         self.assertEqual(fake.rpc_calls, [])
         self.assertEqual(
             fake.intents[0]["status"],
             "created",
         )
+        self.assertEqual(
+            fake.intents[0]["provider_connection_id"],
+            "connection-1",
+        )
         self.assertTrue(
             response.get_json()["data"]["qr_data_url"]
             .startswith("data:image/png;base64,")
+        )
+
+    def test_connect_integration_validates_and_never_returns_token(self):
+        fake = FakeSupabase()
+        connection = {
+            "id": "connection-1",
+            "provider": "monobank",
+            "status": "connected",
+            "credentials_hint": "••••oken",
+            "merchant_id": "merchant-1",
+            "merchant_name": "ВусаХвіст",
+            "merchant_edrpou": "12345678",
+        }
+
+        with (
+            patch.object(
+                server,
+                "get_current_user",
+                return_value=self.owner,
+            ),
+            patch.object(
+                server,
+                "get_current_org_id",
+                return_value=ORG_ID,
+            ),
+            patch.object(server, "supabase", fake),
+            patch.object(
+                server,
+                "monobank_api_request",
+                return_value={
+                    "merchantId": "merchant-1",
+                    "merchantName": "ВусаХвіст",
+                    "edrpou": "12345678",
+                },
+            ) as bank_request,
+            patch.object(
+                server,
+                "load_payment_provider_connection",
+                return_value=connection,
+            ),
+            patch.object(server, "write_audit_event"),
+        ):
+            response = self.client.post(
+                "/api/finance/payment-integrations/monobank",
+                json={"token": "clinic-token-with-safe-length-1234"},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        bank_request.assert_called_once_with(
+            "GET",
+            "/api/merchant/details",
+            token="clinic-token-with-safe-length-1234",
+        )
+        payload = response.get_json()["data"]
+        self.assertTrue(payload["connected"])
+        self.assertNotIn("token", payload)
+        self.assertNotIn(
+            "clinic-token-with-safe-length-1234",
+            response.get_data(as_text=True),
         )
 
     def test_success_status_records_payment_once(self):

@@ -49,7 +49,6 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MONOBANK_TOKEN = os.getenv("MONOBANK_TOKEN", "").strip()
 MONOBANK_API_BASE = (
     os.getenv("MONOBANK_API_BASE")
     or "https://api.monobank.ua"
@@ -6612,12 +6611,17 @@ def monobank_api_request(
     method,
     path,
     *,
+    token,
     payload=None,
     query=None,
 ):
-    if not MONOBANK_TOKEN:
+    provider_token = str(
+        token or ""
+    ).strip()
+
+    if not provider_token:
         raise MonobankConfigurationError(
-            "MONOBANK_TOKEN is not configured"
+            "Monobank token is not configured"
         )
 
     url = f"{MONOBANK_API_BASE}{path}"
@@ -6638,7 +6642,7 @@ def monobank_api_request(
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "X-Token": MONOBANK_TOKEN,
+            "X-Token": provider_token,
             "X-Cms": "PUG CRM",
             "X-Cms-Version": "1.0",
         },
@@ -6701,6 +6705,361 @@ def monobank_api_request(
         )
 
     return response_data
+
+
+def serialize_payment_provider_connection(row):
+    if not row:
+        return {
+            "provider": "monobank",
+            "connected": False,
+            "status": "disconnected",
+            "credentials_hint": "",
+            "merchant_id": "",
+            "merchant_name": "",
+            "merchant_edrpou": "",
+            "last_checked_at": None,
+            "last_error": "",
+        }
+
+    status = str(
+        row.get("status") or "disabled"
+    ).strip().lower()
+
+    return {
+        "id": str(row.get("id") or ""),
+        "provider": row.get("provider") or "monobank",
+        "connected": status == "connected",
+        "status": status,
+        "credentials_hint": row.get("credentials_hint") or "",
+        "merchant_id": row.get("merchant_id") or "",
+        "merchant_name": row.get("merchant_name") or "",
+        "merchant_edrpou": row.get("merchant_edrpou") or "",
+        "last_checked_at": row.get("last_checked_at"),
+        "last_error": row.get("last_error") or "",
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+    }
+
+
+def load_payment_provider_connection(
+    current_org,
+    provider="monobank",
+):
+    result = execute_with_retry(
+        lambda: (
+            supabase
+            .table("payment_provider_connections")
+            .select(
+                "id,org_id,provider,status,credentials_hint,"
+                "merchant_id,merchant_name,merchant_edrpou,"
+                "last_checked_at,last_error,created_at,updated_at"
+            )
+            .eq("org_id", current_org)
+            .eq("provider", provider)
+            .limit(1)
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    return result.data[0] if result.data else None
+
+
+def load_payment_provider_secret(
+    current_org,
+    provider="monobank",
+):
+    result = execute_with_retry(
+        lambda: (
+            supabase.rpc(
+                "get_payment_provider_secret",
+                {
+                    "p_org_id": current_org,
+                    "p_provider": provider,
+                },
+            )
+        ),
+        attempts=4,
+        delay=0.3,
+    )
+
+    return str(result.data or "").strip()
+
+
+def load_monobank_connection_credentials(current_org):
+    connection = load_payment_provider_connection(
+        current_org,
+        "monobank",
+    )
+
+    if not connection or connection.get("status") != "connected":
+        raise MonobankConfigurationError(
+            "Clinic Monobank integration is not connected"
+        )
+
+    token = load_payment_provider_secret(
+        current_org,
+        "monobank",
+    )
+
+    if not token:
+        raise MonobankConfigurationError(
+            "Clinic Monobank token is unavailable"
+        )
+
+    return connection, token
+
+
+@app.get("/api/finance/payment-integrations")
+def api_get_payment_integrations():
+    _user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    try:
+        connection = load_payment_provider_connection(
+            get_current_org_id(),
+            "monobank",
+        )
+
+        return ok({
+            "monobank": serialize_payment_provider_connection(
+                connection
+            )
+        })
+    except Exception as error:
+        print(
+            "❌ Load payment integrations:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося завантажити платіжні інтеграції.",
+            500,
+        )
+
+
+@app.post("/api/finance/payment-integrations/monobank")
+def api_connect_monobank_integration():
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    data = request.get_json(silent=True) or {}
+    token = str(data.get("token") or "").strip()
+
+    if len(token) < 20 or len(token) > 1000:
+        return fail(
+            "Вставте коректний токен інтернет-еквайрингу Monobank.",
+            400,
+        )
+
+    current_org = get_current_org_id()
+
+    try:
+        merchant = monobank_api_request(
+            "GET",
+            "/api/merchant/details",
+            token=token,
+        )
+
+        save_result = execute_with_retry(
+            lambda: (
+                supabase.rpc(
+                    "save_payment_provider_connection",
+                    {
+                        "p_org_id": current_org,
+                        "p_user_id": user.get("id"),
+                        "p_token": token,
+                        "p_credentials_hint": (
+                            "••••" + token[-4:]
+                        ),
+                        "p_merchant": merchant,
+                    },
+                )
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        if not save_result.data:
+            raise RuntimeError(
+                "Payment provider connection was not saved"
+            )
+
+        connection = load_payment_provider_connection(
+            current_org,
+            "monobank",
+        )
+
+        write_audit_event(
+            action="payment_integration.connected",
+            entity_type="payment_provider_connection",
+            entity_id=connection.get("id") if connection else None,
+            entity_label="Monobank",
+            summary="Підключено еквайринг Monobank",
+            after_data={
+                "provider": "monobank",
+                "merchant_id": merchant.get("merchantId"),
+                "merchant_name": merchant.get("merchantName"),
+            },
+        )
+
+        return ok(
+            serialize_payment_provider_connection(
+                connection
+            )
+        )
+    except MonobankApiError as error:
+        print(
+            "❌ Connect Monobank integration:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Monobank не прийняв токен. Перевірте токен еквайрингу.",
+            400,
+        )
+    except Exception as error:
+        print(
+            "❌ Save Monobank integration:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося підключити Monobank.",
+            500,
+        )
+
+
+@app.post("/api/finance/payment-integrations/monobank/check")
+def api_check_monobank_integration():
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        connection, token = load_monobank_connection_credentials(
+            current_org
+        )
+        merchant = monobank_api_request(
+            "GET",
+            "/api/merchant/details",
+            token=token,
+        )
+
+        updated_result = (
+            supabase
+            .table("payment_provider_connections")
+            .update({
+                "status": "connected",
+                "merchant_id": merchant.get("merchantId"),
+                "merchant_name": merchant.get("merchantName"),
+                "merchant_edrpou": merchant.get("edrpou"),
+                "last_checked_at": datetime.now(
+                    timezone.utc
+                ).isoformat(),
+                "last_error": None,
+                "updated_by": user.get("id"),
+                "updated_at": datetime.now(
+                    timezone.utc
+                ).isoformat(),
+            })
+            .eq("org_id", current_org)
+            .eq("id", connection.get("id"))
+            .execute()
+        )
+
+        row = (
+            updated_result.data[0]
+            if updated_result.data
+            else load_payment_provider_connection(
+                current_org,
+                "monobank",
+            )
+        )
+
+        return ok(
+            serialize_payment_provider_connection(row)
+        )
+    except MonobankConfigurationError:
+        return fail(
+            "Спочатку підключіть Monobank.",
+            409,
+        )
+    except MonobankApiError as error:
+        print(
+            "❌ Check Monobank integration:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Monobank не підтвердив підключення. Можливо, токен відкликано.",
+            400,
+        )
+    except Exception as error:
+        print(
+            "❌ Check Monobank integration:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося перевірити Monobank.",
+            500,
+        )
+
+
+@app.delete("/api/finance/payment-integrations/monobank")
+def api_delete_monobank_integration():
+    user, auth_error = owner_or_admin_required()
+
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+
+    try:
+        result = execute_with_retry(
+            lambda: (
+                supabase.rpc(
+                    "delete_payment_provider_connection",
+                    {
+                        "p_org_id": current_org,
+                        "p_user_id": user.get("id"),
+                        "p_provider": "monobank",
+                    },
+                )
+            ),
+            attempts=4,
+            delay=0.3,
+        )
+
+        write_audit_event(
+            action="payment_integration.disconnected",
+            entity_type="payment_provider_connection",
+            entity_label="Monobank",
+            summary="Відключено еквайринг Monobank",
+            before_data={"provider": "monobank"},
+        )
+
+        return ok({
+            "deleted": bool(result.data)
+        })
+    except Exception as error:
+        print(
+            "❌ Delete Monobank integration:",
+            repr(error),
+            flush=True,
+        )
+        return fail(
+            "Не вдалося відключити Monobank.",
+            500,
+        )
 
 
 def make_payment_qr_data_url(value):
@@ -6893,12 +7252,6 @@ def api_create_monobank_invoice(visit_id):
     if auth_error:
         return auth_error
 
-    if not MONOBANK_TOKEN:
-        return fail(
-            "Monobank ще не підключено в налаштуваннях сервера.",
-            503,
-        )
-
     data = request.get_json(silent=True) or {}
 
     try:
@@ -6927,6 +7280,12 @@ def api_create_monobank_invoice(visit_id):
     current_org = get_current_org_id()
 
     try:
+        connection, provider_token = (
+            load_monobank_connection_credentials(
+                current_org
+            )
+        )
+
         existing_result = (
             supabase
             .table("payment_intents")
@@ -6988,6 +7347,7 @@ def api_create_monobank_invoice(visit_id):
         bank_invoice = monobank_api_request(
             "POST",
             "/api/merchant/invoice/create",
+            token=provider_token,
             payload=bank_payload,
         )
 
@@ -7011,6 +7371,7 @@ def api_create_monobank_invoice(visit_id):
                 "visit_id": visit_id,
                 "created_by": user.get("id"),
                 "provider": "monobank",
+                "provider_connection_id": connection.get("id"),
                 "status": "created",
                 "amount": amount,
                 "currency": "UAH",
@@ -7036,6 +7397,11 @@ def api_create_monobank_invoice(visit_id):
             )
         )
 
+    except MonobankConfigurationError:
+        return fail(
+            "Підключіть Monobank у розділі «Фінанси → Платіжні інтеграції».",
+            409,
+        )
     except LookupError:
         return fail(
             "Візит не знайдено.",
@@ -7075,15 +7441,15 @@ def api_get_monobank_invoice_status(
     if auth_error:
         return auth_error
 
-    if not MONOBANK_TOKEN:
-        return fail(
-            "Monobank ще не підключено в налаштуваннях сервера.",
-            503,
-        )
-
     current_org = get_current_org_id()
 
     try:
+        _connection, provider_token = (
+            load_monobank_connection_credentials(
+                current_org
+            )
+        )
+
         intent_result = (
             supabase
             .table("payment_intents")
@@ -7119,6 +7485,7 @@ def api_get_monobank_invoice_status(
         bank_status = monobank_api_request(
             "GET",
             "/api/merchant/invoice/status",
+            token=provider_token,
             query={"invoiceId": invoice_id},
         )
 
@@ -7272,6 +7639,11 @@ def api_get_monobank_invoice_status(
             )
         )
 
+    except MonobankConfigurationError:
+        return fail(
+            "Підключіть Monobank у розділі «Фінанси → Платіжні інтеграції».",
+            409,
+        )
     except MonobankApiError as error:
         print(
             "❌ Monobank status:",

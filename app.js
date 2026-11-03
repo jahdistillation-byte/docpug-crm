@@ -34110,6 +34110,68 @@ function getFinancePresetDates(
   };
 }
 
+async function paymentIntegrationApi(
+  path = "",
+  options = {}
+) {
+  const response = await fetch(
+    `/api/finance/payment-integrations${path}`,
+    {
+      credentials: "include",
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...(options.body
+          ? { "Content-Type": "application/json" }
+          : {}),
+        ...getOrgHeaders(),
+        ...(options.headers || {}),
+      },
+    }
+  );
+
+  const result = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok || !result?.ok) {
+    throw new Error(
+      result?.error ||
+      `Не вдалося виконати дію (HTTP ${response.status}).`
+    );
+  }
+
+  return result.data;
+}
+
+function loadPaymentIntegrationsApi() {
+  return paymentIntegrationApi();
+}
+
+function connectMonobankIntegrationApi(token) {
+  return paymentIntegrationApi(
+    "/monobank",
+    {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }
+  );
+}
+
+function checkMonobankIntegrationApi() {
+  return paymentIntegrationApi(
+    "/monobank/check",
+    { method: "POST" }
+  );
+}
+
+function deleteMonobankIntegrationApi() {
+  return paymentIntegrationApi(
+    "/monobank",
+    { method: "DELETE" }
+  );
+}
+
 async function loadFinanceOverviewApi(
   dateFrom,
   dateTo,
@@ -37823,6 +37885,11 @@ function buildFinanceSectionNavigation() {
       key: "analytics",
       icon: "⌁",
       label: getFinanceInterfaceText("Аналітика"),
+    },
+    {
+      key: "integrations",
+      icon: "⌘",
+      label: "Платіжні інтеграції",
     },
     ...(isOwner()
       ? [{
@@ -49232,6 +49299,216 @@ async function renderFinanceOwnerReportTab(
 
 
 
+async function renderFinanceIntegrationsTab(page) {
+  page.innerHTML = `
+    <div class="financePageLoading">
+      <div class="visitPaymentSpinner"></div>
+      <strong>Завантажуємо платіжні інтеграції…</strong>
+    </div>
+  `;
+
+  try {
+    const data = await loadPaymentIntegrationsApi();
+    const mono = data?.monobank || {};
+    const connected = mono.connected === true;
+    const checkedAt = mono.last_checked_at
+      ? new Date(mono.last_checked_at).toLocaleString(
+          getCalendarLocale(),
+          { dateStyle: "medium", timeStyle: "short" }
+        )
+      : "Ще не перевірялось";
+
+    page.innerHTML = `
+      <div class="financeDashboard financeIntegrationsPage">
+        ${buildFinanceSectionNavigation()}
+
+        <header class="financeHero financeIntegrationsHero">
+          <div>
+            <span class="financeEyebrow">ЕКВАЙРИНГ КЛІНІКИ</span>
+            <h1>Платіжні інтеграції</h1>
+            <p>
+              Підключіть рахунок клініки. Оплати за візити
+              надходитимуть безпосередньо цій клініці.
+            </p>
+          </div>
+          <div class="financeIntegrationSecurityNote">
+            <span>⌾</span>
+            <div>
+              <strong>Безпечне підключення</strong>
+              <small>Токен зберігається зашифрованим і не показується повторно.</small>
+            </div>
+          </div>
+        </header>
+
+        <section class="financeIntegrationCard ${connected ? "is-connected" : ""}">
+          <div class="financeIntegrationBrand">
+            <div class="financeIntegrationLogo">mono</div>
+            <div>
+              <span>ІНТЕРНЕТ-ЕКВАЙРИНГ</span>
+              <h2>Monobank</h2>
+              <p>QR, посилання та онлайн-оплата карткою.</p>
+            </div>
+          </div>
+
+          <div class="financeIntegrationStatus ${connected ? "is-ok" : ""}">
+            <i></i>
+            ${connected ? "Підключено" : "Не підключено"}
+          </div>
+
+          ${connected ? `
+            <div class="financeIntegrationDetails">
+              <div>
+                <span>Отримувач</span>
+                <strong>${escapeHtml(mono.merchant_name || "Monobank merchant")}</strong>
+              </div>
+              <div>
+                <span>ЄДРПОУ</span>
+                <strong>${escapeHtml(mono.merchant_edrpou || "—")}</strong>
+              </div>
+              <div>
+                <span>Токен</span>
+                <strong>${escapeHtml(mono.credentials_hint || "Захищено")}</strong>
+              </div>
+              <div>
+                <span>Остання перевірка</span>
+                <strong>${escapeHtml(checkedAt)}</strong>
+              </div>
+            </div>
+
+            <div class="financeIntegrationActions">
+              <button type="button" class="secondary" id="financeMonoCheck">
+                Перевірити підключення
+              </button>
+              <button type="button" class="secondary" id="financeMonoChange">
+                Змінити токен
+              </button>
+              <button type="button" class="danger" id="financeMonoDisconnect">
+                Відключити
+              </button>
+            </div>
+          ` : ""}
+
+          <form class="financeIntegrationForm" id="financeMonoForm" ${connected ? "hidden" : ""}>
+            <label>
+              <span>Токен інтернет-еквайрингу Monobank</span>
+              <div class="financeIntegrationTokenRow">
+                <input
+                  type="password"
+                  id="financeMonoToken"
+                  autocomplete="new-password"
+                  placeholder="Вставте токен з web.monobank.ua"
+                  minlength="20"
+                  required
+                >
+                <button type="submit" id="financeMonoConnect">
+                  ${connected ? "Зберегти новий токен" : "Підключити Monobank"}
+                </button>
+              </div>
+            </label>
+            <p>
+              Використовуйте токен саме інтернет-еквайрингу клініки,
+              а не токен особистої банківської виписки.
+            </p>
+            <div class="financeIntegrationFormError" id="financeMonoError" hidden></div>
+          </form>
+        </section>
+
+        <section class="financeIntegrationComingSoon">
+          <span>Інші банки</span>
+          <strong>Підключимо наступними</strong>
+          <p>Архітектура вже готова для окремих провайдерів кожної клініки.</p>
+        </section>
+      </div>
+    `;
+
+    bindFinanceSectionNavigation(page);
+
+    const form = page.querySelector("#financeMonoForm");
+    const tokenInput = page.querySelector("#financeMonoToken");
+    const errorBox = page.querySelector("#financeMonoError");
+    const connectButton = page.querySelector("#financeMonoConnect");
+
+    page.querySelector("#financeMonoChange")
+      ?.addEventListener("click", () => {
+        form.hidden = false;
+        tokenInput.focus();
+      });
+
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const token = String(tokenInput?.value || "").trim();
+
+      if (token.length < 20) {
+        errorBox.textContent = "Вставте коректний токен Monobank.";
+        errorBox.hidden = false;
+        return;
+      }
+
+      errorBox.hidden = true;
+      connectButton.disabled = true;
+      connectButton.textContent = "Перевіряємо…";
+
+      try {
+        await connectMonobankIntegrationApi(token);
+        await renderFinanceIntegrationsTab(page);
+        openDeleteModal(
+          "Monobank успішно підключено до цієї клініки.",
+          null,
+          "operation-success"
+        );
+      } catch (error) {
+        errorBox.textContent = error?.message || "Не вдалося підключити Monobank.";
+        errorBox.hidden = false;
+        connectButton.disabled = false;
+        connectButton.textContent = connected
+          ? "Зберегти новий токен"
+          : "Підключити Monobank";
+      }
+    });
+
+    page.querySelector("#financeMonoCheck")
+      ?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "Перевіряємо…";
+        try {
+          await checkMonobankIntegrationApi();
+          await renderFinanceIntegrationsTab(page);
+        } catch (error) {
+          showFinanceAlert(error?.message || "Не вдалося перевірити підключення.");
+          button.disabled = false;
+          button.textContent = "Перевірити підключення";
+        }
+      });
+
+    page.querySelector("#financeMonoDisconnect")
+      ?.addEventListener("click", () => {
+        openDeleteModal(
+          "Відключити Monobank від цієї клініки? Нові онлайн-оплати не створюватимуться.",
+          async () => {
+            try {
+              await deleteMonobankIntegrationApi();
+              await renderFinanceIntegrationsTab(page);
+            } catch (error) {
+              showFinanceAlert(error?.message || "Не вдалося відключити Monobank.");
+            }
+          }
+        );
+      });
+  } catch (error) {
+    page.innerHTML = `
+      <div class="financeLoadError">
+        <span>!</span>
+        <h2>Не вдалося завантажити інтеграції</h2>
+        <p>${escapeHtml(error?.message || "Невідома помилка")}</p>
+        <button type="button" id="financeIntegrationsRetry">Спробувати ще раз</button>
+      </div>
+    `;
+    page.querySelector("#financeIntegrationsRetry")
+      ?.addEventListener("click", () => renderFinanceIntegrationsTab(page));
+  }
+}
+
 async function renderFinanceTab(
   options = {}
 ) {
@@ -49340,6 +49617,18 @@ async function renderFinanceTab(
     "report"
   ) {
     await renderFinanceOwnerReportTab(
+      page
+    );
+
+    return;
+  }
+
+  if (
+    financeDashboardState
+      .section ===
+    "integrations"
+  ) {
+    await renderFinanceIntegrationsTab(
       page
     );
 

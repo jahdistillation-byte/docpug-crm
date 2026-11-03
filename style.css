@@ -16818,6 +16818,338 @@ select.clinicSettingsInput {
   }
 }
 
+/* Finance: clinic-owned payment integrations */
+.financeIntegrationsPage {
+  --integration-border: #d9e5ec;
+  --integration-muted: #64788a;
+}
+
+.financeIntegrationsHero {
+  align-items: center;
+}
+
+.financeIntegrationSecurityNote {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 330px;
+  padding: 14px 16px;
+  border: 1px solid var(--integration-border);
+  border-radius: 16px;
+  background: rgba(246, 250, 252, 0.92);
+}
+
+.financeIntegrationSecurityNote > span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 12px;
+  color: #25648f;
+  background: #e7f2f8;
+  font-weight: 800;
+}
+
+.financeIntegrationSecurityNote div {
+  display: grid;
+  gap: 3px;
+}
+
+.financeIntegrationSecurityNote small {
+  color: var(--integration-muted);
+  line-height: 1.35;
+}
+
+.financeIntegrationCard,
+.financeIntegrationComingSoon {
+  border: 1px solid var(--integration-border);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 44px rgba(48, 75, 94, 0.08);
+}
+
+.financeIntegrationCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  padding: 26px;
+}
+
+.financeIntegrationCard.is-connected {
+  border-color: #bfded0;
+  box-shadow: 0 18px 44px rgba(43, 117, 83, 0.08);
+}
+
+.financeIntegrationBrand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.financeIntegrationLogo {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(145deg, #131a24, #343e4c);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.financeIntegrationBrand > div:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.financeIntegrationBrand span {
+  color: #2a6b94;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.financeIntegrationBrand h2,
+.financeIntegrationBrand p {
+  margin: 0;
+}
+
+.financeIntegrationBrand p {
+  color: var(--integration-muted);
+}
+
+.financeIntegrationStatus {
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #d9e4ea;
+  border-radius: 999px;
+  color: #6f8190;
+  background: #f4f8fa;
+  font-weight: 750;
+}
+
+.financeIntegrationStatus i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #91a2ae;
+}
+
+.financeIntegrationStatus.is-ok {
+  color: #277454;
+  border-color: #c3e3d3;
+  background: #eef9f3;
+}
+
+.financeIntegrationStatus.is-ok i {
+  background: #35a873;
+  box-shadow: 0 0 0 4px rgba(53, 168, 115, 0.12);
+}
+
+.financeIntegrationDetails {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--integration-border);
+  border-radius: 16px;
+  background: #f6f9fb;
+}
+
+.financeIntegrationDetails > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 15px 17px;
+  border-right: 1px solid var(--integration-border);
+}
+
+.financeIntegrationDetails > div:last-child {
+  border-right: 0;
+}
+
+.financeIntegrationDetails span {
+  color: var(--integration-muted);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.financeIntegrationDetails strong {
+  overflow: hidden;
+  color: #20384a;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financeIntegrationActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.financeIntegrationActions button,
+.financeIntegrationForm button {
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.financeIntegrationActions .secondary {
+  color: #315d7a;
+  border-color: #cfe0e9;
+  background: #f5f9fb;
+}
+
+.financeIntegrationActions .danger {
+  margin-left: auto;
+  color: #a34f5c;
+  border-color: #eed7dc;
+  background: #fff7f8;
+}
+
+.financeIntegrationForm {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--integration-border);
+  border-radius: 16px;
+  background: #f6f9fb;
+}
+
+.financeIntegrationForm[hidden] {
+  display: none;
+}
+
+.financeIntegrationForm label {
+  display: grid;
+  gap: 8px;
+  color: #314b5e;
+  font-weight: 750;
+}
+
+.financeIntegrationTokenRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.financeIntegrationTokenRow input {
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 15px;
+  border: 1px solid #cddde6;
+  border-radius: 13px;
+  color: #183247;
+  background: #fff;
+  font: inherit;
+}
+
+.financeIntegrationTokenRow button {
+  color: #fff;
+  background: #2d719d;
+}
+
+.financeIntegrationForm p {
+  margin: 0;
+  color: var(--integration-muted);
+  font-size: 13px;
+}
+
+.financeIntegrationFormError {
+  padding: 10px 12px;
+  border: 1px solid #efd4d9;
+  border-radius: 11px;
+  color: #a14251;
+  background: #fff5f6;
+}
+
+.financeIntegrationComingSoon {
+  display: grid;
+  gap: 5px;
+  margin-top: 16px;
+  padding: 20px 24px;
+  color: var(--integration-muted);
+  box-shadow: none;
+}
+
+.financeIntegrationComingSoon span {
+  color: #708594;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.financeIntegrationComingSoon strong {
+  color: #2e4657;
+}
+
+.financeIntegrationComingSoon p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .financeIntegrationCard {
+    grid-template-columns: 1fr;
+  }
+
+  .financeIntegrationStatus {
+    justify-self: start;
+  }
+
+  .financeIntegrationDetails {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .financeIntegrationDetails > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .financeIntegrationDetails > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--integration-border);
+  }
+}
+
+@media (max-width: 600px) {
+  .financeIntegrationCard {
+    padding: 18px;
+  }
+
+  .financeIntegrationDetails,
+  .financeIntegrationTokenRow {
+    grid-template-columns: 1fr;
+  }
+
+  .financeIntegrationDetails > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--integration-border);
+  }
+
+  .financeIntegrationDetails > div:last-child {
+    border-bottom: 0;
+  }
+
+  .financeIntegrationActions .danger {
+    margin-left: 0;
+  }
+}
+
 /* Deletable clinic specialization chips. */
 body .specPill {
   display: inline-flex;
