@@ -32941,6 +32941,7 @@ function getStockGroupLabel(
 // Inline geometry keeps stock icons identical across platforms.
 function getStockIcon(name) {
   const paths = {
+    partners: '<path d="M4 21V5l8-2v18M12 9h8v12M2 21h20M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2"/>',
     box: '<path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5"/>',
     capsule: '<path d="m8 16 8-8M5 19a5.66 5.66 0 0 1 0-8l6-6a5.66 5.66 0 0 1 8 8l-6 6a5.66 5.66 0 0 1-8 0Z"/>',
     bottle: '<path d="M9 3h6v4H9zM9 7l-2 4v9h10v-9l-2-4M7 14h10"/>',
@@ -38432,7 +38433,8 @@ async function createFinancePurchaseApi(
 async function receiveFinancePurchaseApi(
   purchaseId,
   items,
-  note = ""
+  note = "",
+  requestKey = ""
 ) {
   const cleanPurchaseId =
     String(
@@ -38492,7 +38494,7 @@ async function receiveFinancePurchaseApi(
     );
   }
 
-  const idempotencyKey =
+  const idempotencyKey = String(requestKey || "").trim() || (
     typeof crypto
       ?.randomUUID ===
       "function"
@@ -38504,7 +38506,7 @@ async function receiveFinancePurchaseApi(
           Math.random()
             .toString(16)
             .slice(2),
-        ].join("-");
+        ].join("-"));
 
   const response =
     await fetch(
@@ -42152,7 +42154,7 @@ function openFinanceSupplierCreateModal(
     >
       <header class="financeSupplierCreateHeader">
         <div class="financeSupplierCreateIcon">
-          🏢
+          ${getStockIcon("partners")}
         </div>
 
         <div>
@@ -42173,8 +42175,9 @@ function openFinanceSupplierCreateModal(
         <button
           type="button"
           class="financeSupplierCreateClose"
+          aria-label="${getStockInterfaceText("Закрити")}"
         >
-          ×
+          ${getStockIcon("close")}
         </button>
       </header>
 
@@ -42496,7 +42499,7 @@ const form =
   );
 }
 
-async function openFinancePurchaseModal() {
+async function openFinancePurchaseModal(options = {}) {
   document
     .querySelector(
       ".financePurchaseCreateOverlay"
@@ -42536,12 +42539,14 @@ document.body.classList.add(
 );
 
   let closed = false;
+  let submitting = false;
 
   const close = () => {
-    if (closed) return;
+    if (closed || submitting) return;
 
     closed = true;
     overlay.remove();
+    restoreFocus();
 
     document.body.classList.remove(
       "financePurchaseModalOpen"
@@ -42553,11 +42558,12 @@ document.body.classList.add(
     );
   };
 
+  const restoreFocus = bindStockDialogKeyboard(overlay, close);
   const onKeydown = (
     event
   ) => {
     if (
-      event.key === "Escape"
+      event.key === "Escape" && !document.querySelector("#stockEditorModal, .financeSupplierCreateOverlay")
     ) {
       close();
     }
@@ -42609,12 +42615,15 @@ document.body.classList.add(
 
     overlay.innerHTML = `
       <form
-        class="financePurchaseCreateModal"
+        class="financePurchaseCreateModal stockPurchaseForm"
         id="financePurchaseCreateForm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stockPurchaseFormTitle"
       >
         <header class="financePurchaseCreateHeader">
           <div class="financePurchaseCreateHeaderIcon">
-            📦
+            ${getStockIcon("box")}
           </div>
 
           <div>
@@ -42622,152 +42631,40 @@ document.body.classList.add(
               НОВЕ ПОСТАЧАННЯ
             </span>
 
-            <h2>
-              Створити закупівлю
-            </h2>
+            <h2 id="stockPurchaseFormTitle">${escapeHtml(stockWorkspaceText("Нова закупівля"))}</h2>
 
             <p>
-              Сформуйте замовлення
-              постачальнику.
+              ${escapeHtml(stockWorkspaceText("Збереження замовлення не змінює залишки. Товар надійде на склад після приймання."))}
             </p>
           </div>
 
           <button
             type="button"
             class="financePurchaseCreateClose"
+            aria-label="${getStockInterfaceText("Закрити")}"
           >
-            ×
+            ${getStockIcon("close")}
           </button>
         </header>
 
         <div class="financePurchaseCreateBody">
+          <p class="stockPurchaseFlow">${getStockIcon("layers")}${escapeHtml(stockWorkspaceText("Замовлення → приймання → залишки на складі"))}</p>
           <section class="financePurchaseCreateGeneral">
             <div class="financePurchaseCreateSectionHead">
-              <div>
-                <span>
-                  ОСНОВНІ ДАНІ
-                </span>
-
-                <h3>
-                  Постачальник і документ
-                </h3>
-              </div>
+              <div><span>01</span><h3>${escapeHtml(stockWorkspaceText("Постачальник і документ"))}</h3></div>
+              <button type="button" id="financePurchaseAddSupplier">${getStockIcon("plus")}${escapeHtml(stockWorkspaceText("Новий постачальник"))}</button>
             </div>
-<button
-  type="button"
-  id="financePurchaseAddSupplier"
->
-  + Новий постачальник
-</button>
-            <div class="financePurchaseGeneralGrid">
-              <label class="is-wide">
-                <span>
-                  Постачальник
-                </span>
-
-                <select
-                  name="supplier_id"
-                  required
-                >
-                  <option value="">
-                    Оберіть постачальника
-                  </option>
-
-                  ${
-                    activeSuppliers
-                      .map(
-                        (supplier) => `
-                         <option
-  value="${escapeHtml(
-    supplier.id
-  )}"
-  data-finance-content
->
-  ${escapeHtml(
-    supplier.name
-  )}
-</option>
-                        `
-                      )
-                      .join("")
-                  }
+            <div class="financePurchaseGeneralGrid stockPurchaseBasics">
+              <label class="is-wide"><span>${escapeHtml(stockWorkspaceText("Постачальник"))}</span>
+                <select name="supplier_id" required>
+                  <option value="">${escapeHtml(stockWorkspaceText("Оберіть постачальника"))}</option>
+                  ${activeSuppliers.map(supplier => `<option value="${escapeHtml(supplier.id)}" data-finance-content>${escapeHtml(supplier.name)}</option>`).join("")}
                 </select>
-
-                ${
-                  activeSuppliers.length
-                    ? ""
-                    : `
-                      <small class="financePurchaseNoSuppliers">
-                        Активних постачальників немає.
-                      </small>
-                    `
-                }
+                ${activeSuppliers.length ? "" : `<small class="financePurchaseNoSuppliers">${escapeHtml(stockWorkspaceText("Додайте постачальника, щоб створити замовлення."))}</small>`}
               </label>
-
-              <label>
-                <span>
-                  Дата замовлення
-                </span>
-
-                <input
-                  type="date"
-                  name="order_date"
-                  value="${today}"
-                  required
-                >
-              </label>
-
-              <label>
-                <span>
-                  Очікувана дата
-                </span>
-
-                <input
-                  type="date"
-                  name="expected_date"
-                  min="${today}"
-                >
-              </label>
-
-              <label>
-                <span>
-                  Номер накладної
-                </span>
-
-                <input
-                  type="text"
-                  name="invoice_number"
-                  maxlength="150"
-                  placeholder="Наприклад, НК-2048"
-                >
-              </label>
-
-                            <label>
-                <span>
-                  ${escapeHtml(
-                    getFinanceInterfaceText("Валюта")
-                  )}
-                </span>
-
-                <select name="currency" required>
-                  ${
-                    CLINIC_CURRENCY_CODES
-                      .map((currency) => `
-                        <option
-                          value="${currency}"
-                          data-finance-content
-                          ${
-                            currency === getClinicCurrency()
-                              ? "selected"
-                              : ""
-                          }
-                        >
-                          ${currency}
-                        </option>
-                      `)
-                      .join("")
-                  }
-                </select>
+              <label><span>${escapeHtml(stockWorkspaceText("Дата замовлення"))}</span><input type="date" name="order_date" value="${today}" required></label>
+              <label><span>${escapeHtml(stockWorkspaceText("Валюта"))}</span>
+                <select name="currency" required>${CLINIC_CURRENCY_CODES.map(currency => `<option value="${currency}" ${currency === getClinicCurrency() ? "selected" : ""}>${currency}</option>`).join("")}</select>
               </label>
             </div>
           </section>
@@ -42775,7 +42672,7 @@ document.body.classList.add(
             <div class="financePurchaseCreateSectionHead">
               <div>
                 <span>
-                  СКЛАД ЗАМОВЛЕННЯ
+                  02
                 </span>
 
                 <h3>
@@ -42787,8 +42684,9 @@ document.body.classList.add(
                 type="button"
                 id="financePurchaseAddItem"
               >
-                + Додати позицію
+                ${getStockIcon("plus")}${escapeHtml(stockWorkspaceText("Додати позицію"))}
               </button>
+              <button type="button" id="stockPurchaseCreateItem">${getStockIcon("plus")}${escapeHtml(stockWorkspaceText("Новий товар"))}</button>
             </div>
 
             <div
@@ -42797,48 +42695,16 @@ document.body.classList.add(
             ></div>
           </section>
 
-          <section class="financePurchaseCreateAdditional">
+          <details class="financePurchaseCreateAdditional stockPurchaseAdditional">
+            <summary>${getStockIcon("chevron")}${escapeHtml(stockWorkspaceText("Додаткові дані"))}<small>${escapeHtml(stockWorkspaceText("За потреби"))}</small></summary>
             <div class="financePurchaseGeneralGrid">
-              <label>
-                <span>
-                  Знижка
-                </span>
-
-                <input
-                  type="number"
-                  name="discount_amount"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                >
-              </label>
-
-              <label class="is-wide">
-                <span>
-                  Посилання на накладну
-                </span>
-
-                <input
-                  type="url"
-                  name="document_url"
-                  maxlength="1000"
-                  placeholder="https://..."
-                >
-              </label>
-
-              <label class="is-full">
-                <span>
-                  Примітка
-                </span>
-
-                <textarea
-                  name="note"
-                  maxlength="2000"
-                  placeholder="Умови постачання або коментар…"
-                ></textarea>
-              </label>
+              <label><span>${escapeHtml(stockWorkspaceText("Очікувана дата"))}</span><input type="date" name="expected_date" min="${today}"></label>
+              <label><span>${escapeHtml(stockWorkspaceText("Номер накладної"))}</span><input type="text" name="invoice_number" maxlength="150"></label>
+              <label><span>${escapeHtml(stockWorkspaceText("Знижка"))}</span><input type="number" name="discount_amount" min="0" step="0.01" value="0"></label>
+              <label class="is-full"><span>${escapeHtml(stockWorkspaceText("Посилання на накладну"))}</span><input type="url" name="document_url" maxlength="1000" placeholder="https://…"></label>
+              <label class="is-full"><span>${escapeHtml(stockWorkspaceText("Примітка"))}</span><textarea name="note" maxlength="2000"></textarea></label>
             </div>
-          </section>
+          </details>
 
           <div
             class="financePurchaseCreateError"
@@ -42897,7 +42763,7 @@ document.body.classList.add(
                   : "disabled"
               }
             >
-              Створити закупівлю →
+              ${escapeHtml(stockWorkspaceText("Зберегти замовлення"))}
             </button>
           </div>
         </footer>
@@ -42908,6 +42774,10 @@ document.body.classList.add(
       overlay.querySelector(
         "#financePurchaseCreateForm"
       );
+    form.addEventListener("invalid", event => {
+      const details = event.target.closest("details");
+      if (details) details.open = true;
+    }, true);
 
     const itemsList =
       overlay.querySelector(
@@ -42984,7 +42854,6 @@ supplierSelect.appendChild(
   }
 );
         let rowCounter = 0;
-    let submitting = false;
 
     const getPurchaseCurrency = () =>
       form.elements.currency?.value || "UAH";
@@ -43001,6 +42870,7 @@ supplierSelect.appendChild(
           ".financePurchaseCreateItem"
         ),
       ];
+      rows.forEach((row, index) => { row.querySelector(".financePurchaseCreateItemNumber").textContent = index + 1; });
 
       const subtotal = rows.reduce((total, row) => {
         const quantity = Math.max(
@@ -43076,74 +42946,18 @@ supplierSelect.appendChild(
           ${rowCounter}
         </div>
 
-        <label class="financePurchaseStockSelect">
-          <span>
-            ${escapeHtml(
-              getFinanceInterfaceText("Позиція складу")
-            )}
-          </span>
-
-          <select name="stock_id" required>
-            <option value="" selected disabled>
-              ${escapeHtml(
-                getFinanceInterfaceText("Оберіть позицію складу")
-              )}
-            </option>
-
-            ${
-              activeStock
-                .map((item) => `
-                  <option
-                    value="${escapeHtml(String(item.id))}"
-                    data-finance-content
-                  >
-                    ${escapeHtml(item.name)}
-                    ·
-                    ${Number(item.qty || 0)}
-                    ${escapeHtml(
-                      getStockInterfaceText(
-                        item.unit || "шт"
-                      )
-                    )}
-                  </option>
-                `)
-                .join("")
-            }
+        <div class="financePurchaseStockSelect">
+          <span>${escapeHtml(stockWorkspaceText("Позиція складу"))}</span>
+          <input type="search" name="stock_search" maxlength="100" aria-label="${escapeHtml(stockWorkspaceText("Пошук у каталозі"))}" placeholder="${escapeHtml(stockWorkspaceText("Пошук у каталозі"))}">
+          <select name="stock_id" required aria-label="${escapeHtml(stockWorkspaceText("Позиція складу"))}">
+            <option value="" selected disabled>${escapeHtml(stockWorkspaceText("Оберіть позицію складу"))}</option>
+            ${activeStock.map(item => `<option value="${escapeHtml(String(item.id))}" data-finance-content>${escapeHtml(item.name)} · ${Number(item.qty || 0)} ${escapeHtml(getStockInterfaceText(item.unit || "шт"))}</option>`).join("")}
           </select>
-        </label>
-
-        <label class="financePurchaseItemNameInput">
-          <span>
-            ${escapeHtml(
-              getFinanceInterfaceText("Назва")
-            )}
-          </span>
-
-          <input
-            type="text"
-            name="name_snap"
-            maxlength="250"
-            placeholder="${escapeHtml(
-              getFinanceInterfaceText("Назва позиції")
-            )}"
-            required
-          >
-        </label>
-
-        <label>
-          <span>
-            ${escapeHtml(
-              getFinanceInterfaceText("Од.")
-            )}
-          </span>
-
-          <input
-            type="text"
-            name="unit_snap"
-            maxlength="50"
-            value="шт"
-            required
-          >
+          <input type="hidden" name="name_snap">
+        </div>
+        <label class="stockPurchaseUnitField">
+          <span>${escapeHtml(stockWorkspaceText("Од."))}</span>
+          <input type="text" name="unit_snap" maxlength="50" value="шт" readonly required>
         </label>
 
         <label>
@@ -43198,8 +43012,9 @@ supplierSelect.appendChild(
         <button
           type="button"
           class="financePurchaseItemRemove"
+          aria-label="${getStockInterfaceText("Видалити")}"
         >
-          ×
+          ${getStockIcon("close")}
         </button>
       `;
 
@@ -43209,6 +43024,17 @@ supplierSelect.appendChild(
         row.querySelector(
           '[name="stock_id"]'
         );
+
+      row.querySelector('[name="stock_search"]').addEventListener("input", (event) => {
+        const query = event.target.value.trim().toLocaleLowerCase();
+        const selected = stockSelect.value;
+        const matches = activeStock.filter(item => String(item.id) === selected ||
+          [item.name, item.category, getLocalizedStockText(item.category)].join(" ").toLocaleLowerCase().includes(query));
+        stockSelect.innerHTML = `<option value="" disabled>${escapeHtml(stockWorkspaceText("Оберіть позицію складу"))}</option>` + matches.map(item =>
+          `<option value="${escapeHtml(String(item.id))}" ${String(item.id) === selected ? "selected" : ""}>${escapeHtml(item.name)} · ${Number(item.qty || 0)} ${escapeHtml(getStockInterfaceText(item.unit || "шт"))}</option>`
+        ).join("");
+        stockSelect.value = selected;
+      });
 
       stockSelect.addEventListener(
         "change",
@@ -43312,6 +43138,29 @@ supplierSelect.appendChild(
     };
 
     addItemRow();
+    supplierSelect.focus({ preventScroll: true });
+
+    overlay.querySelector("#stockPurchaseCreateItem").addEventListener("click", () => {
+      openStockEditorModal(null, {
+        forPurchase: true,
+        onSaved: savedItem => {
+          if (closed) return;
+          const item = normalizeStockItem(savedItem);
+          activeStock.push(item);
+          const existingRows = [...itemsList.querySelectorAll(".financePurchaseCreateItem")];
+          existingRows.forEach(row => {
+            row.querySelector('[name="stock_id"]').add(new Option(item.name, item.id));
+          });
+          const row = existingRows.find(row => !row.querySelector('[name="stock_id"]').value);
+          if (!row) addItemRow();
+          const target = row || itemsList.lastElementChild;
+          const select = target.querySelector('[name="stock_id"]');
+          select.value = item.id;
+          select.dispatchEvent(new Event("change"));
+          target.querySelector('[name="ordered_qty"]').focus();
+        },
+      });
+    });
 
     overlay
       .querySelector(
@@ -43518,6 +43367,8 @@ supplierSelect.appendChild(
         }
 
         submitting = true;
+        form.inert = true;
+        form.setAttribute("aria-busy", "true");
         submitButton.disabled = true;
 
         submitButton.textContent =
@@ -43582,7 +43433,13 @@ supplierSelect.appendChild(
               items,
             });
 
+          submitting = false;
           close();
+
+          if (typeof options.onCreated === "function") {
+            await options.onCreated(purchase);
+            return;
+          }
 
           financeDashboardState
             .purchaseOffset = 0;
@@ -43604,10 +43461,11 @@ supplierSelect.appendChild(
           );
 
           submitting = false;
+          form.inert = false;
+          form.removeAttribute("aria-busy");
           submitButton.disabled = false;
 
-          submitButton.textContent =
-            "Створити закупівлю →";
+          submitButton.textContent = stockWorkspaceText("Зберегти замовлення");
 
           errorElement.hidden =
             false;
@@ -43810,27 +43668,29 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
 
   overlay.innerHTML = `
     <form
-      class="financeSupplierCreateModal financePurchaseReceiveModal"
+      class="financeSupplierCreateModal financePurchaseReceiveModal stockReceiveForm"
       id="financePurchaseReceiveForm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stockReceiveFormTitle"
     >
       <header class="financeSupplierCreateHeader">
-        <div class="financeSupplierCreateIcon">📥</div>
+        <div class="financeSupplierCreateIcon">${getStockIcon("box")}</div>
         <div>
           <span>ПРИЙМАННЯ ПОСТАВКИ</span>
-          <h2>Прийняти товар</h2>
+          <h2 id="stockReceiveFormTitle">${escapeHtml(stockWorkspaceText("Прийняти товар"))}</h2>
           <p>${escapeHtml(purchase.purchase_number || "Закупівля")}</p>
         </div>
         <button
           type="button"
           class="financeSupplierCreateClose"
           aria-label="Закрити"
-        >×</button>
+        >${getStockIcon("close")}</button>
       </header>
 
       <div class="financeSupplierCreateBody">
         <div class="financePurchaseReceiveHint">
-          Вкажіть фактично отриману кількість. Можна прийняти всю поставку
-          або лише її частину.
+          ${escapeHtml(stockWorkspaceText("Вкажіть фактично отриману кількість. Лише ці товари буде додано на склад."))}
         </div>
 
         ${
@@ -43848,6 +43708,7 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
               class="is-wide financePurchaseReceiveItem"
               data-purchase-item-id="${escapeHtml(item.id)}"
               data-remaining="${item.remaining}"
+              data-unit="${escapeHtml(item.unit_snap || "шт")}"
             >
               <span>${index + 1}. ${escapeHtml(item.name_snap || "Без назви")}</span>
               <small>
@@ -43861,14 +43722,17 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
                 min="0"
                 max="${item.remaining}"
                 step="0.001"
-                value="${item.remaining}"
+                value="0"
                 required
               >
+              <small class="stockReceiveRemaining"></small>
             </label>
           `).join("")}
         </div>
 
-        <div class="financeSupplierCreateError" hidden></div>
+        <label class="stockReceiveNote"><span>${escapeHtml(stockWorkspaceText("Примітка"))}</span><textarea name="receipt_note" maxlength="2000" rows="2"></textarea></label>
+        <p class="stockReceiveSummary" role="status"></p>
+        <div class="financeSupplierCreateError" role="alert" hidden></div>
       </div>
 
       <footer class="financeSupplierCreateFooter">
@@ -43887,7 +43751,7 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
         <button
           type="submit"
           class="financeSupplierCreateSubmit financePurchaseReceiveSubmit"
-        >Провести приймання →</button>
+        >${escapeHtml(stockWorkspaceText("Підтвердити приймання"))}</button>
       </footer>
     </form>
   `;
@@ -43900,17 +43764,40 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
   const submitButton = overlay.querySelector(".financePurchaseReceiveSubmit");
   let submitting = false;
   let closed = false;
+  let pendingReceipt = null;
+
+  const updateReceipt = () => {
+    let selected = 0;
+    let valid = true;
+    form.querySelectorAll(".financePurchaseReceiveItem").forEach(row => {
+      const value = Number(row.querySelector("input").value || 0);
+      const remaining = Number(row.dataset.remaining);
+      const acceptable = Number.isFinite(value) && value >= 0 && value <= remaining;
+      valid = valid && acceptable;
+      if (value > 0 && acceptable) selected += 1;
+      row.querySelector(".stockReceiveRemaining").textContent = acceptable
+        ? `${stockWorkspaceText("Залишиться отримати")}: ${Number((remaining - value).toFixed(6)).toLocaleString(getCalendarLocale())} ${getLocalizedStockText(row.dataset.unit)}`
+        : stockWorkspaceText("Перевірте кількість");
+    });
+    form.querySelector(".stockReceiveSummary").textContent = `${stockWorkspaceText("Позицій до приймання")}: ${selected} / ${items.length}`;
+    submitButton.disabled = submitting || !valid || selected === 0;
+  };
+  form.addEventListener("input", updateReceipt);
+  updateReceipt();
+  form.querySelector('[name="receive_quantity"]')?.focus({ preventScroll: true });
 
   const close = () => {
     if (closed || submitting) return;
     closed = true;
     overlay.remove();
+    restoreFocus();
     if (!document.querySelector(".financePurchaseDetailsOverlay")) {
       document.body.classList.remove("financePurchaseModalOpen");
     }
     document.removeEventListener("keydown", onKeydown);
   };
 
+  const restoreFocus = bindStockDialogKeyboard(overlay, close);
   const onKeydown = (event) => {
     if (event.key === "Escape") close();
   };
@@ -43925,6 +43812,7 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
     ?.addEventListener("click", () => {
       form.querySelectorAll('[name="receive_quantity"]')
         .forEach((input) => { input.value = "0"; });
+      updateReceipt();
     });
 
   overlay.querySelector(".financePurchaseReceiveAll")
@@ -43934,6 +43822,7 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
           row.querySelector('[name="receive_quantity"]').value =
             row.dataset.remaining || "0";
         });
+      updateReceipt();
     });
 
   form.addEventListener("submit", async (event) => {
@@ -43971,30 +43860,40 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
     }
 
     submitting = true;
+    form.inert = true;
     form.setAttribute("aria-busy", "true");
     submitButton.disabled = true;
     submitButton.setAttribute("aria-busy", "true");
     submitButton.textContent = "Приймаємо…";
 
     try {
-      const result = await receiveFinancePurchaseApi(purchase.id, cleanItems);
+      const note = form.elements.receipt_note.value.trim();
+      const signature = JSON.stringify({ items: cleanItems, note });
+      if (pendingReceipt?.signature !== signature) {
+        pendingReceipt = {
+          signature,
+          key: typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : `receipt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        };
+      }
+      const result = await receiveFinancePurchaseApi(purchase.id, cleanItems, note, pendingReceipt.key);
       submitting = false;
       close();
       if (typeof onSuccess === "function") await onSuccess(result);
     } catch (error) {
       console.error("receive finance purchase failed:", error);
       submitting = false;
+      form.inert = false;
       form.removeAttribute("aria-busy");
       submitButton.disabled = false;
       submitButton.removeAttribute("aria-busy");
-      submitButton.textContent = "Провести приймання →";
+      submitButton.textContent = stockWorkspaceText("Підтвердити приймання");
       errorElement.hidden = false;
       errorElement.textContent =
         error?.message || "Не вдалося прийняти поставку.";
     }
   });
 }
-function openFinancePurchaseDetailsModal(purchase) {
+function openFinancePurchaseDetailsModal(purchase, options = {}) {
   document.querySelector(".financePurchaseDetailsOverlay")?.remove();
 
   const statusMeta = getFinancePurchaseStatusMeta(purchase.status);
@@ -44072,7 +43971,7 @@ function openFinancePurchaseDetailsModal(purchase) {
     >
       <header class="financePurchaseDetailsHeader">
         <div class="financePurchaseDetailsHeaderIcon">
-          ${escapeHtml(statusMeta.icon)}
+          ${getStockIcon("box")}
         </div>
 
         <div>
@@ -44103,7 +44002,7 @@ function openFinancePurchaseDetailsModal(purchase) {
           class="financePurchaseDetailsClose"
           aria-label="${text("Закрити")}"
         >
-          ×
+          ${getStockIcon("close")}
         </button>
       </header>
 
@@ -44353,7 +44252,7 @@ function openFinancePurchaseDetailsModal(purchase) {
             ? `<button
                 type="button"
                 class="financePurchaseDetailsReceive"
-              >📥 ${text("Прийняти поставку")}</button>`
+              >${getStockIcon("box")} ${text("Прийняти поставку")}</button>`
             : ""
         }
 
@@ -44401,6 +44300,10 @@ function openFinancePurchaseDetailsModal(purchase) {
     ?.addEventListener("click", () => {
       openFinancePurchaseReceiveModal(purchase, async (result) => {
         close();
+        if (typeof options.onReceived === "function") {
+          await options.onReceived(result);
+          return;
+        }
         financeDashboardState.purchaseOffset = 0;
         await renderFinanceTab();
         openDeleteModal(
@@ -52003,6 +51906,13 @@ function renderStockTab() {
 
   if (!page) return;
 
+  page._stockWorkspaceVersion = (page._stockWorkspaceVersion || 0) + 1;
+  if (["purchases", "suppliers"].includes(state.stockSection) && isOwnerOrAdmin()) {
+    void renderStockWorkspace(page, state.stockSection);
+    return;
+  }
+  state.stockSection = "balances";
+
   if (state.stockLoadError) {
     page._stockLocalizationObserver?.disconnect();
     page.innerHTML = `<div class="stockPremiumPage">
@@ -52013,6 +51923,7 @@ function renderStockTab() {
         <button type="button" id="stockCatalogRetry">${getStockInterfaceText("Повторити")}</button>
       </section>
     </div>`;
+    mountStockNavigation(page);
     page.querySelector("#stockCatalogRetry").addEventListener("click", async (event) => {
       event.currentTarget.disabled = true;
       event.currentTarget.textContent = getStockInterfaceText("Завантаження…");
@@ -52452,6 +52363,7 @@ const currentSpecies =
     </div>
   `;
 
+    mountStockNavigation(page);
     page
     ._stockLocalizationObserver
     ?.disconnect();
@@ -53486,7 +53398,8 @@ ${getStockIcon("edit")} ${getStockInterfaceText("Редагувати")}
 // =====================================================
 
 function openStockEditorModal(
-  stockItem = null
+  stockItem = null,
+  options = {}
 ) {
   document
     .getElementById(
@@ -54041,7 +53954,9 @@ const categories =
 
   const closeModal = () => {
     modal.remove();
+    restoreFocus();
   };
+  const restoreFocus = bindStockDialogKeyboard(modal, closeModal);
 
   modal.addEventListener(
     "click",
@@ -54080,6 +53995,14 @@ const categories =
     modal.querySelector(
       "#stockEditorQuantity"
     );
+  if (options.forPurchase && !isEdit) {
+    quantityInput.value = "0";
+    quantityInput.disabled = true;
+    quantityInput.closest("label").insertAdjacentHTML("beforeend", `<small>${escapeHtml(stockWorkspaceText("Залишок буде додано під час приймання закупівлі."))}</small>`);
+    const activeInput = modal.querySelector("#stockEditorActive");
+    activeInput.checked = true;
+    activeInput.disabled = true;
+  }
 
   const traceabilityInput =
     modal.querySelector(
@@ -54480,7 +54403,8 @@ const categories =
           }
 
           closeModal();
-          renderStockTab();
+          if (typeof options.onSaved === "function") await options.onSaved(savedItem);
+          else renderStockTab();
 
         } catch (error) {
           console.error(
@@ -54513,12 +54437,7 @@ const categories =
   syncTraceabilityPanel();
   updatePreview();
 
-  setTimeout(
-    () => {
-      nameInput?.focus();
-    },
-    50
-  );
+  nameInput?.focus({ preventScroll: true });
 }
 
 function getStockAvailableQuantityMessage(

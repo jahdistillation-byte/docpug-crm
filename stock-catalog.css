@@ -1,4 +1,98 @@
 /* Stock catalog, stage 1. Scoped to inventory; uses the existing theme tokens. */
+html body .stockPurchaseForm,
+html body .stockReceiveForm {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 40px);
+  border-radius: 22px;
+  border-color: var(--module-border) !important;
+  background: var(--module-surface-2) !important;
+  color: var(--module-text);
+  box-shadow: 0 24px 80px var(--module-shadow) !important;
+}
+html body .stockPurchaseForm { width: min(1060px, 100%); }
+html body .stockReceiveForm { width: min(740px, 100%); }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(header, footer) { flex-shrink: 0; padding: 20px 24px; border-color: var(--module-border); background: var(--module-surface-2) !important; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) footer { box-shadow: none !important; }
+html body .stockReceiveForm .financeSupplierCreateHeader > div > span { color: var(--module-accent-2) !important; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(.financePurchaseCreateCancel, .financeSupplierCreateCancel) { color: var(--module-text-muted) !important; border: 1px solid var(--module-border) !important; background: var(--module-surface-soft) !important; box-shadow: none !important; font-weight: 600; }
+html body .stockReceiveForm .financePurchaseReceiveAll { color: var(--module-accent-2) !important; border-color: var(--module-border-strong) !important; background: var(--module-accent-soft) !important; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(h2, h3) { color: var(--module-text) !important; letter-spacing: -.025em; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) h2 { font-size: 24px; }
+html body .stockPurchaseForm .financePurchaseCreateHeaderIcon,
+html body .stockReceiveForm .financeSupplierCreateIcon { background: var(--module-accent-soft) !important; border-color: var(--module-border-strong) !important; color: var(--module-accent-2) !important; box-shadow: none; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(label, p, small) { color: var(--module-text-muted) !important; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) header p { max-width: 670px; font-size: 13px; line-height: 1.5; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(.financePurchaseCreateBody, .financeSupplierCreateBody) { flex: 1; min-height: 0; padding: 20px 24px; overflow-y: auto; }
+html body .stockPurchaseForm :is(.financePurchaseCreateGeneral, .financePurchaseCreateItems, .financePurchaseCreateAdditional) { padding: 0; border: 0; background: none !important; box-shadow: none; }
+html body .stockPurchaseForm .financePurchaseCreateItems { margin-top: 24px; }
+html body .stockPurchaseForm .financePurchaseCreateSectionHead h3 { font-size: 15px; }
+html body .stockPurchaseForm .financePurchaseCreateSectionHead > div { display: flex; align-items: center; gap: 10px; }
+html body .stockPurchaseForm .financePurchaseCreateSectionHead > div > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--module-accent-soft); color: var(--module-accent-2); font-size: 10px; }
+html body .stockPurchaseForm :is(#financePurchaseAddSupplier, #financePurchaseAddItem, #stockPurchaseCreateItem) { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 8px 12px; border: 1px solid var(--module-border); border-radius: 10px; background: var(--module-surface-soft); color: var(--module-accent-2); font-size: 12px; cursor: pointer; }
+html body .stockPurchaseForm .stockPurchaseFlow { display: flex; align-items: center; gap: 8px; margin: 0 0 22px; font-size: 12px; }
+html body .stockPurchaseForm .stockPurchaseBasics { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 100px; align-items: start; }
+html body .stockPurchaseForm .stockPurchaseBasics .is-wide { grid-column: auto; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(input, select, textarea) { min-height: 42px; border-radius: 10px; border-color: var(--module-border) !important; background: var(--module-input) !important; color: var(--module-text) !important; font-size: 13px; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) input[type="hidden"] { display: none; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(input, select, textarea):focus { border-color: var(--module-accent) !important; box-shadow: 0 0 0 3px var(--module-accent-soft) !important; }
+html body .stockPurchaseForm .financePurchaseCreateItem { display: grid; grid-template-columns: 24px minmax(200px, 1fr) 56px 94px 120px 100px 32px; align-items: end; gap: 10px; padding: 14px 12px; border: 1px solid var(--module-border); border-radius: 12px; background: var(--module-surface-soft); }
+html body .stockPurchaseForm .financePurchaseCreateItem > * { min-width: 0; }
+html body .stockPurchaseForm .financePurchaseCreateItemNumber { width: 24px; height: 24px; font-size: 11px; border-radius: 7px; color: var(--module-accent-2); background: var(--module-accent-soft); }
+html body .stockPurchaseForm .financePurchaseStockSelect { display: grid; gap: 6px; min-width: 0; color: var(--module-text-muted); font-size: 12px; font-weight: 600; }
+html body .stockPurchaseForm .financePurchaseStockSelect input { min-height: 34px; font-size: 12px; }
+html body .stockPurchaseForm .financePurchaseItemLine { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; padding: 0; border: 0; background: none; min-width: 0; }
+html body .stockPurchaseForm .financePurchaseItemLine span { color: var(--module-text-muted); font-size: 11px; }
+html body .stockPurchaseForm .financePurchaseItemLine strong { display: flex; align-items: center; min-height: 42px; color: var(--module-text) !important; font-size: 14px; overflow-wrap: anywhere; }
+html body .stockPurchaseForm .stockPurchaseUnitField input { padding: 0 6px; text-align: center; color: var(--module-text-muted) !important; }
+html body .stockPurchaseForm .financePurchaseItemRemove { width: 32px; height: 42px; min-height: 42px; margin: 0; color: var(--module-text-muted); background: transparent; border: 0; }
+html body .stockPurchaseAdditional { margin-top: 20px; }
+html body .stockPurchaseAdditional summary { display: flex; align-items: center; gap: 7px; min-height: 42px; list-style: none; color: var(--module-text); font-size: 13px; cursor: pointer; }
+html body .stockPurchaseAdditional summary::-webkit-details-marker { display: none; }
+html body .stockPurchaseAdditional summary > small { margin-left: auto; font-size: 11px; }
+html body .stockPurchaseAdditional .financePurchaseGeneralGrid { padding-top: 14px; }
+html body .stockPurchaseAdditional:not([open]) summary > .stockIcon { transform: rotate(-90deg); }
+html body .stockPurchaseForm .financePurchaseCreateFooter { display: flex; flex-direction: column; gap: 16px; border-top: 1px solid var(--module-border); }
+html body .stockPurchaseForm .financePurchaseCreateTotals { display: flex; justify-content: flex-end; align-items: center; gap: 28px; width: 100%; margin: 0; padding: 0; border: 0; background: none !important; }
+html body .stockPurchaseForm .financePurchaseCreateTotals > div { padding: 0; border: 0; background: none !important; }
+html body .stockPurchaseForm .financePurchaseCreateTotals span { font-size: 11px; color: var(--module-text-muted) !important; }
+html body .stockPurchaseForm .financePurchaseCreateTotals strong { font-size: 17px; color: var(--module-text) !important; }
+html body .stockPurchaseForm .financePurchaseCreateTotals .is-total strong { color: var(--module-accent-2) !important; font-size: 23px; }
+html body .stockPurchaseForm .financePurchaseCreateActions { width: 100%; justify-content: flex-end; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) button:disabled { opacity: .45; cursor: default; }
+html body :is(.stockPurchaseForm, .stockReceiveForm) :is(.financePurchaseCreateSubmit, .financeSupplierCreateSubmit) { background: var(--module-accent) !important; color: #fff !important; border-color: var(--module-accent) !important; box-shadow: none !important; font-weight: 650; }
+html body .stockReceiveForm .financePurchaseReceiveHint { padding: 12px 14px; border-radius: 11px; background: var(--module-accent-soft); border-color: var(--module-border); font-size: 13px; color: var(--module-text-muted); }
+html body .stockReceiveForm .financeSupplierCreateGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 16px; }
+html body .stockReceiveForm .financePurchaseReceiveItem { padding: 14px; border: 1px solid var(--module-border); border-radius: 12px; background: var(--module-surface-soft); }
+html body .stockReceiveForm .financePurchaseReceiveItem > span { font-size: 14px; color: var(--module-text); font-weight: 650; }
+html body .stockReceiveForm .financePurchaseReceiveItem input { width: 160px; max-width: 100%; }
+html body .stockReceiveForm .stockReceiveRemaining { font-size: 12px; }
+html body .stockReceiveForm .stockReceiveNote { display: grid; gap: 7px; margin-top: 18px; font-size: 12px; }
+html body .stockReceiveForm .stockReceiveSummary { margin: 16px 0 0; font-size: 13px; }
+html body .stockReceiveForm footer { display: flex; flex-wrap: wrap; gap: 8px; }
+html body .stockReceiveForm footer button { flex: 0 1 auto; padding: 10px 14px; min-height: 42px; font-size: 12px; }
+html body .stockReceiveForm .financePurchaseReceiveSubmit { margin-left: auto; }
+@media (max-width: 800px) {
+  html body .stockPurchaseForm .stockPurchaseBasics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html body .stockPurchaseForm .stockPurchaseBasics .is-wide { grid-column: 1 / -1; }
+  html body .stockPurchaseForm .financePurchaseCreateItem { position: relative; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  html body .stockPurchaseForm .financePurchaseCreateItemNumber { position: absolute; left: 10px; top: 14px; }
+  html body .stockPurchaseForm .financePurchaseStockSelect { grid-column: 1 / -1; grid-row: 1; padding: 0 28px; }
+  html body .stockPurchaseForm .financePurchaseItemRemove { position: absolute; right: 4px; top: 6px; }
+  html body .stockPurchaseForm .stockPurchaseUnitField { grid-column: 1; grid-row: 2; }
+  html body .stockPurchaseForm label:has([name="ordered_qty"]) { grid-column: 2; grid-row: 2; }
+  html body .stockPurchaseForm label:has([name="purchase_price"]) { grid-column: 1; grid-row: 3; }
+  html body .stockPurchaseForm .financePurchaseItemLine { grid-column: 2; grid-row: 3; }
+}
+@media (max-width: 520px) {
+  html body :is(.stockPurchaseForm, .stockReceiveForm) :is(header, footer, .financePurchaseCreateBody, .financeSupplierCreateBody) { padding: 16px; }
+  html body :is(.stockPurchaseForm, .stockReceiveForm) { border-radius: 16px; max-height: calc(100dvh - 24px); }
+  html body .stockPurchaseForm .financePurchaseCreateSectionHead { align-items: flex-start; flex-wrap: wrap; }
+  html body .stockPurchaseForm .financePurchaseCreateTotals { gap: 18px; justify-content: space-between; }
+  html body .stockPurchaseForm .financePurchaseCreateActions { flex-wrap: wrap; }
+  html body .stockPurchaseForm .financePurchaseCreateSubmit { min-width: 0; flex: 1; }
+  html body .stockReceiveForm .financePurchaseReceiveSubmit { flex-basis: 100%; margin-left: 0; }
+}
 .stockIcon {
   display: inline-block;
   width: 18px;
@@ -21,6 +115,8 @@
 .page[data-page="stock"] :is(.stockActionButton, .stockPremiumCardFooter button) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .page[data-page="stock"] .stockPremiumEmpty > div .stockIcon { width: 32px; height: 32px; }
 .page[data-page="stock"] {
+  width: 100%;
+  min-width: 0;
   --stock-ink: var(--module-text);
   --stock-muted: var(--module-text-muted);
   --stock-line: var(--module-border);
@@ -40,6 +136,58 @@ body[data-theme="white"] .page[data-page="stock"] {
   color: var(--stock-ink);
   font-variant-numeric: tabular-nums;
 }
+.page[data-page="stock"] .stockWorkspaceNav { display: flex; gap: 6px; flex-wrap: wrap; padding: 5px; margin-bottom: 18px; width: fit-content; max-width: 100%; border: 1px solid var(--stock-line); border-radius: 13px; background: var(--stock-paper); }
+.page[data-page="stock"] .stockWorkspaceNav button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 9px 16px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--stock-muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+.page[data-page="stock"] .stockWorkspaceNav button[aria-current] { color: var(--module-accent-2); border-color: var(--module-border-strong); background: var(--module-accent-soft); }
+.page[data-page="stock"] .stockWorkspaceNotice { padding: 12px 16px; border: 1px solid var(--stock-line); border-radius: 12px; color: var(--stock-green); background: var(--stock-paper); font-size: 13px; }
+.page[data-page="stock"] :is(.stockWorkspaceFilters, .stockWorkspaceSearch) { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 22px 0 18px; }
+.page[data-page="stock"] .stockWorkspaceFilters label { display: grid; gap: 7px; min-width: 200px; }
+.page[data-page="stock"] .stockWorkspaceFilters label { position: relative; }
+.page[data-page="stock"] .stockWorkspaceFilters label > .stockIcon { position: absolute; right: 12px; bottom: 13px; width: 16px; height: 16px; color: var(--stock-muted); }
+.page[data-page="stock"] .stockWorkspaceFilters label > span { color: var(--stock-muted); font-size: 12px; }
+.page[data-page="stock"] :is(.stockWorkspaceFilters, .stockWorkspacePagination, .stockWorkspaceSearch, .stockSupplierDetail) button { min-height: 42px; padding: 10px 14px; border: 1px solid var(--stock-line); border-radius: 10px; background: var(--stock-paper); color: var(--module-accent-2); font-size: 12px; font-weight: 600; cursor: pointer; }
+.page[data-page="stock"] .stockWorkspaceSearch .stockPremiumSearch { display: flex; align-items: center; gap: 10px; padding: 0 14px; }
+.page[data-page="stock"] .stockWorkspaceSearch input { width: 100%; }
+.page[data-page="stock"] .stockWorkspaceState { margin: 16px 0; padding: 32px 20px; text-align: center; color: var(--stock-muted); font-size: 14px; }
+.page[data-page="stock"] .stockWorkspaceSupplierFilter { color: var(--stock-muted); font-size: 13px; }
+.page[data-page="stock"] .stockPurchaseList { overflow: hidden; border: 1px solid var(--stock-line); border-radius: 16px; background: var(--stock-paper); }
+.page[data-page="stock"] .stockPurchaseRow { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(140px, 1fr) minmax(150px, .8fr) minmax(130px, .7fr) 20px; align-items: center; gap: 18px; width: 100%; min-width: 0; padding: 18px 20px; border: 0; background: transparent; color: var(--stock-ink); text-align: left; cursor: pointer; }
+.page[data-page="stock"] .stockPurchaseRow + .stockPurchaseRow { border-top: 1px solid var(--stock-line); }
+.page[data-page="stock"] .stockPurchaseRow:hover { background: var(--module-surface-hover); }
+.page[data-page="stock"] .stockPurchaseIdentity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.page[data-page="stock"] .stockPurchaseIdentity > .stockIcon { color: var(--module-accent-2); }
+.page[data-page="stock"] .stockPurchaseRow strong { color: var(--stock-ink); font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+.page[data-page="stock"] .stockPurchaseRow small { display: block; margin-top: 5px; color: var(--stock-muted); font-size: 11px; font-weight: 450; }
+.page[data-page="stock"] .stockPurchaseSupplier { font-size: 13px; overflow-wrap: anywhere; }
+.page[data-page="stock"] .stockPurchaseStatus { width: fit-content; padding: 6px 10px; border-radius: 7px; background: var(--module-accent-soft); color: var(--module-accent-2); font-size: 11px; font-weight: 600; }
+.page[data-page="stock"] .stockPurchaseStatus.is-received { color: var(--stock-green); background: color-mix(in srgb, var(--stock-green) 8%, transparent); }
+.page[data-page="stock"] .stockPurchaseStatus.is-partially-received { color: var(--stock-amber); background: color-mix(in srgb, var(--stock-amber) 8%, transparent); }
+.page[data-page="stock"] .stockPurchaseStatus.is-cancelled { color: var(--stock-muted); background: var(--module-surface-soft); }
+.page[data-page="stock"] .stockPurchaseAmount { font-size: 14px; font-weight: 650; text-align: right; }
+.page[data-page="stock"] .stockPurchaseRow > .stockIcon { transform: rotate(-90deg); color: var(--stock-muted); }
+.page[data-page="stock"] .stockWorkspacePagination { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 16px; }
+.page[data-page="stock"] .stockWorkspacePagination span { color: var(--stock-muted); font-size: 12px; }
+.page[data-page="stock"] .stockWorkspacePagination button:disabled { opacity: .4; cursor: default; }
+.page[data-page="stock"] .stockSupplierList { display: grid; gap: 10px; }
+.page[data-page="stock"] .stockSupplierCard { border: 1px solid var(--stock-line); border-radius: 14px; background: var(--stock-paper); overflow: hidden; }
+.page[data-page="stock"] .stockSupplierCard summary { display: flex; align-items: center; gap: 14px; padding: 18px 20px; list-style: none; cursor: pointer; }
+.page[data-page="stock"] .stockSupplierCard summary::-webkit-details-marker { display: none; }
+.page[data-page="stock"] .stockSupplierCard summary > span { flex: 1; min-width: 0; }
+.page[data-page="stock"] .stockSupplierCard summary strong { color: var(--stock-ink); font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+.page[data-page="stock"] .stockSupplierCard summary small { display: block; margin-top: 5px; color: var(--stock-muted); font-size: 12px; }
+.page[data-page="stock"] .stockSupplierCard summary > .stockIcon { color: var(--module-accent-2); }
+.page[data-page="stock"] .stockSupplierCard[open] summary > .stockIcon:last-child { transform: rotate(180deg); }
+.page[data-page="stock"] .stockSupplierDetail { padding: 0 20px 20px; }
+.page[data-page="stock"] .stockSupplierDetail dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 18px 0; margin: 0; border-top: 1px solid var(--stock-line); }
+.page[data-page="stock"] .stockSupplierDetail dt { color: var(--stock-muted); font-size: 11px; }
+.page[data-page="stock"] .stockSupplierDetail dd { margin: 6px 0 0; color: var(--stock-ink); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.financeSupplierCreateIcon .stockIcon,
+.financePurchaseCreateHeaderIcon .stockIcon,
+.financePurchaseDetailsHeaderIcon .stockIcon { width: 24px; height: 24px; }
+.financeSupplierCreateClose,
+.financePurchaseCreateClose,
+.financePurchaseDetailsClose,
+.financePurchaseItemRemove { display: grid; place-items: center; }
 .page[data-page="stock"] .stockPremiumHero {
   padding: 22px 26px;
   border-radius: 20px;
@@ -217,6 +365,12 @@ body[data-theme="white"] .page[data-page="stock"] {
 .page[data-page="stock"] .stockCatalogLoadError button { min-height: 44px; padding: 10px 18px; border: 1px solid var(--module-border-strong); border-radius: 10px; background: var(--module-accent-soft); color: var(--module-accent-2); cursor: pointer; }
 .page[data-page="stock"] :is(button, summary, select):focus-visible { outline: 2px solid var(--module-accent); outline-offset: 3px; }
 @media (max-width: 900px) {
+  .page[data-page="stock"] .stockPurchaseRow { grid-template-columns: minmax(0, 1fr) minmax(120px, .7fr) 20px; gap: 12px; }
+  .page[data-page="stock"] .stockPurchaseIdentity { grid-column: 1; grid-row: 1; }
+  .page[data-page="stock"] .stockPurchaseSupplier { grid-column: 1; grid-row: 2; padding-left: 30px; }
+  .page[data-page="stock"] .stockPurchaseStatus { grid-column: 1; grid-row: 3; margin-left: 30px; }
+  .page[data-page="stock"] .stockPurchaseAmount { grid-column: 2; grid-row: 1 / 4; }
+  .page[data-page="stock"] .stockPurchaseRow > .stockIcon { grid-column: 3; grid-row: 1 / 4; }
   .page[data-page="stock"] .stockCatalogNavigation { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .page[data-page="stock"] .stockPugBriefHeader { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .page[data-page="stock"] .stockPugBriefMetrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -227,6 +381,13 @@ body[data-theme="white"] .page[data-page="stock"] {
   .page[data-page="stock"] .stockPremiumSearch { max-width: none; flex-basis: 100%; }
 }
 @media (max-width: 600px) {
+  .page[data-page="stock"] .stockWorkspaceNav { width: 100%; gap: 2px; }
+  .page[data-page="stock"] .stockWorkspaceNav button { flex: 1; padding: 8px 6px; gap: 5px; font-size: 11px; }
+  .page[data-page="stock"] .stockWorkspaceNav .stockIcon { width: 15px; height: 15px; }
+  .page[data-page="stock"] .stockWorkspaceFilters label { min-width: 0; width: 100%; }
+  .page[data-page="stock"] .stockPurchaseRow { padding: 16px 12px; grid-template-columns: minmax(0, 1fr) 95px 16px; gap: 10px; }
+  .page[data-page="stock"] .stockPurchaseAmount { font-size: 13px; overflow-wrap: anywhere; }
+  .page[data-page="stock"] .stockSupplierDetail dl { grid-template-columns: minmax(0, 1fr); }
   .page[data-page="stock"] .stockMovementRow { flex-direction: column; gap: 6px; }
   .page[data-page="stock"] .stockMovementBalance { text-align: left; }
   .page[data-page="stock"] .stockPremiumPage { width: calc(100% - 24px); padding-top: 12px; }

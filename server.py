@@ -2046,6 +2046,7 @@ PUBLIC_ASSET_FILES = {
     "ach.js",
     "style.css",
     "stock-catalog.css",
+    "stock-workspace.js",
     "manifest.json",
     "login-clinic-bg.jpg",
     "login-clinic-bg.png",
