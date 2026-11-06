@@ -11,6 +11,7 @@ import traceback as traceback_module
 import html
 import mimetypes
 import time
+import math
 from decimal import Decimal, InvalidOperation
 from urllib.parse import parse_qsl, urlencode
 from urllib.request import Request, urlopen
@@ -2044,6 +2045,7 @@ PUBLIC_ASSET_FILES = {
     "app.js",
     "ach.js",
     "style.css",
+    "stock-catalog.css",
     "manifest.json",
     "login-clinic-bg.jpg",
     "login-clinic-bg.png",
@@ -3690,6 +3692,28 @@ def stock_optional_date(value):
         ) from error
 
 
+def stock_movement_quantity(data):
+    value = data.get("quantity")
+    if value is None:
+        value = data.get("qty")
+    if isinstance(value, bool):
+        raise ValueError("Вкажіть коректну кількість, більшу за нуль.")
+    try:
+        quantity = float(value)
+    except (TypeError, ValueError, OverflowError):
+        quantity = 0
+    if not math.isfinite(quantity) or quantity <= 0:
+        raise ValueError("Вкажіть коректну кількість, більшу за нуль.")
+    return quantity
+
+
+def stock_balance_after(before, quantity, *, income):
+    # Avoid binary floating-point dust in fractional medicine balances.
+    balance = Decimal(str(before))
+    amount = Decimal(str(quantity))
+    return float(balance + amount if income else balance - amount)
+
+
 def serialize_stock_item(row):
     if not row:
         return None
@@ -3939,6 +3963,47 @@ def api_get_stock():
             "Не вдалося завантажити склад.",
             500
         )
+
+
+@app.get("/api/stock/<stock_id>/movements")
+def api_get_stock_movements(stock_id):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+
+    current_org = get_current_org_id()
+    if not current_org:
+        return fail("Organization not selected", 400)
+
+    try:
+        offset = int(request.args.get("offset", "0"))
+        if not 0 <= offset <= 1_000_000:
+            raise ValueError()
+    except (TypeError, ValueError):
+        return fail("Invalid offset", 400)
+
+    try:
+        stock = (supabase.table("stock").select("id,unit")
+                 .eq("org_id", current_org).eq("id", stock_id)
+                 .limit(1).execute())
+        if not stock.data:
+            return fail("Позицію не знайдено.", 404)
+
+        result = (supabase.table("stock_movements")
+                  .select("id,created_at,movement_type,quantity,quantity_before,quantity_after,comment,visit_id")
+                  .eq("org_id", current_org).eq("stock_id", stock_id)
+                  .order("created_at", desc=True).order("id", desc=True)
+                  .range(offset, offset + 50).execute())
+        rows = list(result.data or [])
+        return ok({
+            "items": rows[:50],
+            "has_more": len(rows) > 50,
+            "next_offset": offset + min(len(rows), 50),
+            "unit": stock.data[0].get("unit") or "шт",
+        })
+    except Exception as error:
+        print("Stock movement history failed:", repr(error), flush=True)
+        return fail("Не вдалося завантажити історію руху.", 500)
 
 
 @app.post("/api/stock")
@@ -4235,6 +4300,25 @@ def api_update_stock_item(stock_id):
     current_org = get_current_org_id()
 
     try:
+        if "unit" in payload:
+            if not payload["unit"]:
+                return fail("Вкажіть одиницю обліку.", 400)
+            existing = (supabase.table("stock").select("id,unit,qty")
+                        .eq("org_id", current_org).eq("id", stock_id)
+                        .limit(1).execute())
+            if not existing.data:
+                return fail("Позицію не знайдено.", 404)
+            current = existing.data[0]
+            if payload["unit"] != current.get("unit"):
+                movements = (supabase.table("stock_movements").select("id")
+                             .eq("org_id", current_org).eq("stock_id", stock_id)
+                             .limit(1).execute())
+                if stock_number(current.get("qty")) > 0 or movements.data:
+                    return fail(
+                        "Одиницю обліку не можна змінити для позиції із залишком або історією руху. Створіть окрему позицію з потрібною одиницею.",
+                        409,
+                    )
+
         result = (
             supabase
             .table("stock")
@@ -4361,12 +4445,10 @@ def api_adjust_stock_item(stock_id):
             400
         )
 
-    quantity = stock_number(
-        data.get("quantity")
-        if data.get("quantity")
-        is not None
-        else data.get("qty")
-    )
+    try:
+        quantity = stock_movement_quantity(data)
+    except ValueError as error:
+        return fail(str(error), 400)
 
     if quantity <= 0:
         return fail(
@@ -4408,14 +4490,9 @@ def api_adjust_stock_item(stock_id):
                 409
             )
 
-        if movement_type == "income":
-            quantity_after = (
-                quantity_before + quantity
-            )
-        else:
-            quantity_after = (
-                quantity_before - quantity
-            )
+        quantity_after = stock_balance_after(
+            quantity_before, quantity, income=movement_type == "income"
+        )
 
         now_iso = (
             datetime
@@ -5025,12 +5102,10 @@ def api_add_stock_to_visit(
         or ""
     ).strip()
 
-    quantity = stock_number(
-        data.get("quantity")
-        if data.get("quantity")
-        is not None
-        else data.get("qty")
-    )
+    try:
+        quantity = stock_movement_quantity(data)
+    except ValueError as error:
+        return fail(str(error), 400)
 
     if not stock_id:
         return fail(
@@ -5115,10 +5190,7 @@ def api_add_stock_to_visit(
                 409
             )
 
-        quantity_after = (
-            quantity_before
-            - quantity
-        )
+        quantity_after = stock_balance_after(quantity_before, quantity, income=False)
 
         price_snap = stock_number(
             data.get("price_snap")
@@ -5551,10 +5623,7 @@ def api_remove_stock_from_visit(
             )
         )
 
-        quantity_after = (
-            quantity_before
-            + quantity
-        )
+        quantity_after = stock_balance_after(quantity_before, quantity, income=True)
 
         now_iso = (
             datetime

@@ -32795,7 +32795,7 @@ const STOCK_CATEGORY_GROUPS = [
   {
     id: "medicines",
     name: "Лікарські засоби",
-    icon: "💊",
+    icon: getStockIcon("capsule"),
     categories: [
       "Аналгетики, седативні та спазмолітики",
       "Антибактеріальні препарати",
@@ -32813,7 +32813,7 @@ const STOCK_CATEGORY_GROUPS = [
   {
     id: "local",
     name: "Місцеві препарати",
-    icon: "🧴",
+    icon: getStockIcon("bottle"),
     categories: [
       "Дерматологічні препарати",
       "Для очей та вух",
@@ -32824,7 +32824,7 @@ const STOCK_CATEGORY_GROUPS = [
   {
     id: "prevention",
     name: "Профілактика та діагностика",
-    icon: "🧪",
+    icon: getStockIcon("flask"),
     categories: [
       "Вакцини",
       "Діагностикуми та експрес-тести",
@@ -32834,7 +32834,7 @@ const STOCK_CATEGORY_GROUPS = [
   {
     id: "materials",
     name: "Матеріали та обладнання",
-    icon: "🩺",
+    icon: getStockIcon("medical"),
     categories: [
       "Витратні матеріали",
       "Інструменти та обладнання",
@@ -32844,7 +32844,7 @@ const STOCK_CATEGORY_GROUPS = [
   {
     id: "other",
     name: "Інше",
-    icon: "📦",
+    icon: getStockIcon("box"),
     categories: [
       "Інше",
     ],
@@ -32938,129 +32938,56 @@ function getStockGroupLabel(
   return group?.name || "Інше";
 }
 
-function getStockCategoryIcon(
-  category
-) {
-  const value =
-    String(category || "")
-      .trim()
-      .toLowerCase();
-
-  if (
-    value.includes("аналгет") ||
-    value.includes("седатив") ||
-    value.includes("спазм")
-  ) {
-    return "💤";
-  }
-
-  if (
-    value.includes("антибак")
-  ) {
-    return "🦠";
-  }
-
-  if (
-    value.includes("вакцин")
-  ) {
-    return "💉";
-  }
-
-  if (
-    value.includes("витрат")
-  ) {
-    return "🧤";
-  }
-
-  if (
-    value.includes("гормон")
-  ) {
-    return "🧬";
-  }
-
-  if (
-    value.includes("нпзп")
-  ) {
-    return "🔥";
-  }
-
-  if (
-    value.includes("дермат")
-  ) {
-    return "🧴";
-  }
-
-  if (
-    value.includes("діагност") ||
-    value.includes("експрес")
-  ) {
-    return "🧪";
-  }
-
-  if (
-    value.includes("очей") ||
-    value.includes("вух")
-  ) {
-    return "👁️";
-  }
-
-  if (
-    value.includes("інструмент") ||
-    value.includes("обладнання")
-  ) {
-    return "🩺";
-  }
-
-  if (
-    value.includes("кардіолог")
-  ) {
-    return "❤️";
-  }
-
-  if (
-    value.includes("блювот")
-  ) {
-    return "🫧";
-  }
-
-  if (
-    value.includes("епілеп")
-  ) {
-    return "🧠";
-  }
-
-  if (
-    value.includes("мастит")
-  ) {
-    return "🐄";
-  }
-
-  if (
-    value.includes("паразит")
-  ) {
-    return "🪱";
-  }
-
-  if (
-    value.includes("сироват") ||
-    value.includes("імуноглоб") ||
-    value.includes("імуномод")
-  ) {
-    return "🛡️";
-  }
-
-  if (
-    value.includes("спреї") ||
-    value.includes("мазі") ||
-    value.includes("гелі") ||
-    value.includes("олії")
-  ) {
-    return "🧴";
-  }
-
-  return "📦";
+// Inline geometry keeps stock icons identical across platforms.
+function getStockIcon(name) {
+  const paths = {
+    box: '<path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5"/>',
+    capsule: '<path d="m8 16 8-8M5 19a5.66 5.66 0 0 1 0-8l6-6a5.66 5.66 0 0 1 8 8l-6 6a5.66 5.66 0 0 1-8 0Z"/>',
+    bottle: '<path d="M9 3h6v4H9zM9 7l-2 4v9h10v-9l-2-4M7 14h10"/>',
+    flask: '<path d="M9 3h6M10 3v7L5 19a1.3 1.3 0 0 0 1 2h12a1.3 1.3 0 0 0 1-2l-5-9V3M8 15h8"/>',
+    medical: '<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M9 5V3h6v2M12 10v6M9 13h6"/>',
+    grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    shield: '<path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/>',
+    heart: '<path d="M20 5a5 5 0 0 0-8 1 5 5 0 0 0-8-1c-4 4 1 9 8 15 7-6 12-11 8-15Z"/><path d="M5 12h4l2-4 2 8 2-4h4"/>',
+    drop: '<path d="M12 3c-2 4-7 8-7 12a7 7 0 0 0 14 0c0-4-5-8-7-12Z"/><path d="M8 15a4 4 0 0 0 4 4"/>',
+    eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    syringe: '<path d="m16 3 5 5M18.5 5.5l-3 3M13 6l5 5M14 7l-8 8v3h3l8-8M6 18l-3 3M9 12l3 3"/>',
+    layers: '<path d="m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+    chevron: '<path d="m6 9 6 6 6-6"/>',
+    edit: '<path d="m15 4 5 5M4 20l5-1L21 7a2.1 2.1 0 0 0-4-4L5 15l-1 5Z"/>',
+    close: '<path d="m6 6 12 12M6 18 18 6"/>',
+    trash: '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    trend: '<path d="m3 6 7 7 4-4 7 9M15 18h6v-6"/>',
+  };
+  return `<svg class="stockIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] || paths.box}</svg>`;
 }
 
+function getStockCategoryIcon(category) {
+  const icons = {
+    "Аналгетики, седативні та спазмолітики": "capsule",
+    "Антибактеріальні препарати": "shield",
+    "Гормональні препарати": "flask",
+    "НПЗП": "capsule",
+    "Кардіологічні препарати": "heart",
+    "Протиблювотні препарати": "capsule",
+    "Протиепілептичні препарати": "medical",
+    "Протимаститні препарати": "bottle",
+    "Протипаразитарні препарати": "shield",
+    "Сироватки, імуноглобуліни та імуномодулятори": "shield",
+    "Дерматологічні препарати": "drop",
+    "Для очей та вух": "eye",
+    "Спреї, мазі, гелі та олії": "bottle",
+    "Вакцини": "syringe",
+    "Діагностикуми та експрес-тести": "flask",
+    "Витратні матеріали": "layers",
+    "Інструменти та обладнання": "medical",
+  };
+  return getStockIcon(icons[String(category || "").trim()] || "box");
+}
 
 function getStockCategories(
   items
@@ -50518,6 +50445,35 @@ async function renderFinanceTab(
   }
 }
 const STOCK_INTERFACE_TEXT = {
+  "Залишки не завантажено": { en: "Inventory could not be loaded", de: "Bestand konnte nicht geladen werden", pl: "Nie udało się wczytać stanów" },
+  "Це помилка завантаження, а не порожній склад. Повторіть спробу.": { en: "This is a loading error, not an empty inventory. Please try again.", de: "Dies ist ein Ladefehler, kein leerer Bestand. Bitte erneut versuchen.", pl: "To błąd wczytywania, a nie pusty magazyn. Spróbuj ponownie." },
+  "Історія руху": { en: "Stock movements", de: "Bestandsbewegungen", pl: "Historia ruchów" },
+  "Показати рух": { en: "Show movements", de: "Bewegungen anzeigen", pl: "Pokaż ruchy" },
+  "Показати ще": { en: "Show more", de: "Mehr anzeigen", pl: "Pokaż więcej" },
+  "Рухів ще немає.": { en: "No movements yet.", de: "Noch keine Bewegungen.", pl: "Brak ruchów magazynowych." },
+  "Завантаження…": { en: "Loading…", de: "Wird geladen…", pl: "Ładowanie…" },
+  "Повторити": { en: "Try again", de: "Erneut versuchen", pl: "Spróbuj ponownie" },
+  "Надходження": { en: "Receipt", de: "Wareneingang", pl: "Przyjęcie" },
+  "Списання": { en: "Write-off", de: "Abgang", pl: "Rozchód" },
+  "У візиті": { en: "In a visit", de: "Im Besuch", pl: "Podczas wizyty" },
+  "До": { en: "Before", de: "Vorher", pl: "Przed" },
+  "Після": { en: "After", de: "Nachher", pl: "Po" },
+  "Не вдалося завантажити історію руху.": { en: "Could not load movements.", de: "Bewegungen konnten nicht geladen werden.", pl: "Nie udało się wczytać historii." },
+  "Редагувати": {
+    en: "Edit", de: "Bearbeiten", pl: "Edytuj",
+  },
+  "Закрити": {
+    en: "Close", de: "Schließen", pl: "Zamknij",
+  },
+  "Скинути фільтри": {
+    en: "Reset filters", de: "Filter zurücksetzen", pl: "Wyczyść filtry",
+  },
+  "Неактивна": {
+    en: "Inactive", de: "Inaktiv", pl: "Nieaktywna",
+  },
+  "Фільтри каталогу": {
+    en: "Catalog filters", de: "Katalogfilter", pl: "Filtry katalogu",
+  },
   "ОБЛІК КЛІНІКИ": {
     en: "CLINIC INVENTORY",
     de: "KLINIKBESTAND",
@@ -51990,6 +51946,55 @@ function localizeStockElement(
     }
   );
 }
+async function loadStockMovementHistory(button) {
+  if (button.disabled) return;
+  const panel = button.closest(".stockMovementHistory");
+  const rows = panel.querySelector(".stockMovementRows");
+  const message = panel.querySelector(".stockMovementMessage");
+  button.disabled = true;
+  message.textContent = getStockInterfaceText("Завантаження…");
+
+  try {
+    const data = await stockApiRequest(
+      `/api/stock/${encodeURIComponent(button.dataset.stockHistory)}/movements?offset=${Number(button.dataset.offset || 0)}`,
+      { method: "GET" }
+    );
+    if (!panel.isConnected) return;
+    const unit = escapeHtml(getLocalizedStockText(data.unit || "шт"));
+    const number = (value) => value == null || !Number.isFinite(Number(value))
+      ? "—" : Number(value).toLocaleString(getCalendarLocale(), { maximumFractionDigits: 6 });
+    rows.insertAdjacentHTML("beforeend", (data.items || []).map((movement) => {
+      const income = movement.movement_type === "income";
+      const writeoff = movement.movement_type === "writeoff";
+      const label = income ? "Надходження" : writeoff ? "Списання" : movement.movement_type;
+      const date = new Date(movement.created_at);
+      const dateText = Number.isNaN(date.getTime()) ? "—" : date.toLocaleString(getCalendarLocale(), {
+        year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+      });
+      return `<article class="stockMovementRow">
+        <div><strong>${escapeHtml(getStockInterfaceText(label))}</strong>
+          <small>${escapeHtml(dateText)}${movement.visit_id ? " · " + escapeHtml(getStockInterfaceText("У візиті")) : ""}</small>
+          ${movement.comment ? `<p>${escapeHtml(movement.comment)}</p>` : ""}
+        </div>
+        <div class="stockMovementBalance">
+          <strong class="${income ? "is-income" : writeoff ? "is-writeoff" : ""}">${income ? "+" : writeoff ? "−" : ""}${number(movement.quantity)} ${unit}</strong>
+          <small>${getStockInterfaceText("До")}: ${number(movement.quantity_before)} · ${getStockInterfaceText("Після")}: ${number(movement.quantity_after)} ${unit}</small>
+        </div>
+      </article>`;
+    }).join(""));
+    message.textContent = rows.children.length ? "" : getStockInterfaceText("Рухів ще немає.");
+    button.dataset.offset = String(data.next_offset);
+    button.hidden = !data.has_more;
+    button.innerHTML = `${getStockIcon("clock")} ${getStockInterfaceText("Показати ще")}`;
+  } catch (error) {
+    if (!panel.isConnected) return;
+    message.textContent = getStockInterfaceText("Не вдалося завантажити історію руху.");
+    button.innerHTML = `${getStockIcon("clock")} ${getStockInterfaceText("Повторити")}`;
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderStockTab() {
   const page =
     document.querySelector(
@@ -51997,6 +52002,25 @@ function renderStockTab() {
     );
 
   if (!page) return;
+
+  if (state.stockLoadError) {
+    page._stockLocalizationObserver?.disconnect();
+    page.innerHTML = `<div class="stockPremiumPage">
+      <section class="stockCatalogLoadError" role="alert">
+        ${getStockIcon("box")}
+        <h2>${getStockInterfaceText("Залишки не завантажено")}</h2>
+        <p>${getStockInterfaceText("Це помилка завантаження, а не порожній склад. Повторіть спробу.")}</p>
+        <button type="button" id="stockCatalogRetry">${getStockInterfaceText("Повторити")}</button>
+      </section>
+    </div>`;
+    page.querySelector("#stockCatalogRetry").addEventListener("click", async (event) => {
+      event.currentTarget.disabled = true;
+      event.currentTarget.textContent = getStockInterfaceText("Завантаження…");
+      await loadStockApi(true);
+      renderStockTab();
+    });
+    return;
+  }
 
   let items =
     loadStock()
@@ -52010,14 +52034,6 @@ function renderStockTab() {
 
   const categories =
     getStockCategories(items);
-
-  const totalUnits =
-    items.reduce(
-      (sum, item) =>
-        sum +
-        Number(item.qty || 0),
-      0
-    );
 
   const totalCostValue =
     items.reduce(
@@ -52048,8 +52064,7 @@ function renderStockTab() {
         "empty"
     ).length;
 
-  const stockPugInsights =
-    buildStockPugInsights(items);
+
 
   const currentQuery =
     String(
@@ -52110,7 +52125,7 @@ const currentSpecies =
           id="stockPremiumAdd"
           type="button"
         >
-          <span>＋</span>
+          ${getStockIcon("plus")}
 
           ${getStockInterfaceText(
             "Додати позицію"
@@ -52133,26 +52148,6 @@ const currentSpecies =
           <small>
             ${getStockInterfaceText(
               "у каталозі складу"
-            )}
-          </small>
-        </div>
-
-        <div class="stockPremiumStat stockPremiumStatUnits">
-          <span>
-            ${getStockInterfaceText(
-              "Загальний залишок"
-            )}
-          </span>
-
-          <strong>
-            ${totalUnits.toLocaleString(
-              getCalendarLocale()
-            )}
-          </strong>
-
-          <small>
-            ${getStockInterfaceText(
-              "одиниць товару"
             )}
           </small>
         </div>
@@ -52217,166 +52212,9 @@ const currentSpecies =
         </div>
       </section>
 
-      <section class="stockPugBrief">
-        <header class="stockPugBriefHeader">
-          <div class="stockPugBriefIdentity">
-            <span class="stockPugBriefIcon">
-              ✦
-            </span>
-
-            <div>
-              <div class="stockPugBriefEyebrow">
-                ${getStockInterfaceText(
-                  "PUG КОРОТКО · АВТОМАТИЧНИЙ КОНТРОЛЬ"
-                )}
-              </div>
-
-              <h2>
-                ${
-                  stockPugInsights
-                    .attentionCount
-                    ? getStockAttentionText(
-                        stockPugInsights
-                          .attentionCount
-                      )
-                    : getStockInterfaceText(
-                        "На складі все спокійно"
-                      )
-                }
-              </h2>
-
-              <p>
-                ${getStockInterfaceText(
-                  "Перевіряємо залишки, терміни придатності та темп використання."
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div class="stockPugBriefMetrics">
-            <div>
-              <span>
-                ${getStockInterfaceText(
-                  "Терміни"
-                )}
-              </span>
-
-              <strong>
-                ${stockPugInsights.expiryRiskCount}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                ${getStockInterfaceText(
-                  "Прогноз"
-                )}
-              </span>
-
-              <strong>
-                ${stockPugInsights.forecastRiskCount}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                ${getStockInterfaceText(
-                  "Під ризиком"
-                )}
-              </span>
-
-              <strong>
-                ${Math.round(
-                  stockPugInsights.valueAtRisk
-                ).toLocaleString(
-                  getCalendarLocale()
-                )}
-                ₴
-              </strong>
-            </div>
-          </div>
-        </header>
-
-        <div class="stockPugBriefSignals">
-          ${
-            stockPugInsights
-              .signals.length
-              ? stockPugInsights
-                  .signals
-                  .slice(
-                    0,
-                    5
-                  )
-                  .map(
-                    (signal) => `
-                      <button
-                        type="button"
-                        class="stockPugSignal ${signal.tone}"
-                        data-stock-pug-item="${escapeHtml(
-                          signal.itemId
-                        )}"
-                      >
-                        <span class="stockPugSignalIcon">
-                          ${escapeHtml(
-                            signal.icon
-                          )}
-                        </span>
-
-                        <span class="stockPugSignalCopy">
-                          <strong
-                            data-stock-content
-                          >
-                            ${escapeHtml(
-                              signal.title
-                            )}
-                          </strong>
-
-                          <small>
-                            ${escapeHtml(
-                              signal.description
-                            )}
-                          </small>
-                        </span>
-
-                        <span class="stockPugSignalAction">
-                          ${getStockInterfaceText(
-                            "Переглянути →"
-                          )}
-                        </span>
-                      </button>
-                    `
-                  )
-                  .join("")
-              : `
-                <div class="stockPugBriefHealthy">
-                  <span>
-                    ✓
-                  </span>
-
-                  <div>
-                    <strong>
-                      ${getStockInterfaceText(
-                        "Критичних сигналів немає"
-                      )}
-                    </strong>
-
-                    <small>
-                      ${getStockInterfaceText(
-                        "PUG продовжує стежити за змінами автоматично."
-                      )}
-                    </small>
-                  </div>
-                </div>
-              `
-          }
-        </div>
-      </section>
-
-   
-
       <section class="stockPremiumControls">
         <div class="stockPremiumSearch">
-          <span>⌕</span>
+          ${getStockIcon("search")}
 
           <input
             id="stockPremiumSearch"
@@ -52439,7 +52277,8 @@ const currentSpecies =
         </div>
       </section>
 
-            <section class="stockPremiumGroupFilters">
+      <section class="stockCatalogNavigation">
+        <section class="stockPremiumGroupFilters">
         <button
           type="button"
           class="${
@@ -52449,7 +52288,7 @@ const currentSpecies =
           }"
           data-stock-group="all"
         >
-          <span>▦</span>
+          ${getStockIcon("grid")}
 
           Усі групи
 
@@ -52504,83 +52343,26 @@ const currentSpecies =
           .join("")}
       </section>
 
-      <section class="stockPremiumCategories">
-        <button
-          type="button"
-          class="${
-            currentCategory === "all"
-              ? "active"
-              : ""
-          }"
-          data-stock-category="all"
-        >
-          <span>▦</span>
-
-          Усі категорії
-
-          <b>
-            ${items.length}
-          </b>
-        </button>
-
-        ${categories
-          .filter((category) => {
-            if (
-              currentGroup === "all"
-            ) {
-              return true;
-            }
-
-            const group =
-              getStockGroupByCategory(
-                category
-              );
-
-            return (
-              String(group?.id) ===
-              String(currentGroup)
-            );
-          })
-          .map((category) => {
-            const count =
-              items.filter(
-                (item) =>
-                  String(
-                    item.category
-                  ) ===
-                  String(category)
-              ).length;
-
-            return `
-              <button
-                type="button"
-                class="${
-                  currentCategory ===
-                  category
-                    ? "active"
-                    : ""
-                }"
-                data-stock-category="${escapeHtml(
-                  category
-                )}"
-              >
-                <span>
-                  ${getStockCategoryIcon(
-                    category
-                  )}
-                </span>
-
-                ${escapeHtml(category)}
-
-                <b>
-                  ${count}
-                </b>
-              </button>
-            `;
-          })
-          .join("")}
+        <label class="stockCatalogCategory">
+          <span>${getStockInterfaceText("Категорія")}</span>
+          <div class="stockSelectWrap">
+          <select id="stockFilterCategory" class="stockPremiumSelect">
+            <option value="all">${getStockInterfaceText("Усі категорії")}</option>
+            ${categories.filter((category) =>
+              currentGroup === "all" || items.some((item) =>
+                item.category === category && item.group === currentGroup)
+            ).map((category) => {
+              const count = items.filter((item) => item.category === category &&
+                (currentGroup === "all" || item.group === currentGroup)).length;
+              return `<option value="${escapeHtml(category)}" ${currentCategory === category ? "selected" : ""}>${escapeHtml(getLocalizedStockText(category))} · ${count}</option>`;
+            }).join("")}
+          </select>
+          <span class="stockSelectArrow" aria-hidden="true">${getStockIcon("chevron")}</span>
+          </div>
+        </label>
       </section>
-
+      <details class="stockCatalogFilters" ${currentForm !== "all" || currentSpecies !== "all" ? "open" : ""}>
+        <summary>${getStockIcon("chevron")}${getStockInterfaceText("Фільтри каталогу")}</summary>
       <section class="stockAdvancedFilters">
   <label class="stockAdvancedFilter">
     <span>
@@ -52615,7 +52397,7 @@ const currentSpecies =
       </select>
 
       <span class="stockSelectArrow">
-       ⌄
+       ${getStockIcon("chevron")}
       </span>
     </div>
   </label>
@@ -52654,11 +52436,15 @@ const currentSpecies =
       </select>
 
       <span class="stockSelectArrow">
-       ⌄
+       ${getStockIcon("chevron")}
       </span>
     </div>
   </label>
 </section>
+      </details>
+      <button type="button" class="stockCatalogReset" id="stockCatalogReset" hidden>
+        ${getStockInterfaceText("Скинути фільтри")}
+      </button>
 <section
   class="stockPremiumGrid"
   id="stockPremiumGrid"
@@ -52701,6 +52487,13 @@ const currentSpecies =
 
    const renderStockCards = () => {
     if (!grid) return;
+
+    const resetButton = page.querySelector("#stockCatalogReset");
+    if (resetButton) {
+      resetButton.hidden = !String(state.stockQuery || "").trim() &&
+        [state.stockFilter, state.stockGroup, state.stockCategory, state.stockForm, state.stockSpecies]
+          .every((value) => !value || value === "all");
+    }
 
     const query =
       String(
@@ -52864,7 +52657,7 @@ const currentSpecies =
       grid.innerHTML = `
         <div class="stockPremiumEmpty">
           <div>
-            📦
+            ${getStockIcon("box")}
           </div>
 
           <h3>
@@ -53022,7 +52815,7 @@ const currentSpecies =
                           );
 
                         return `
-                          <article
+                          <details
                             class="
                               stockPremiumCard
                               stock-status-${status.key}
@@ -53037,6 +52830,26 @@ const currentSpecies =
                               item.id
                             )}"
                           >
+                            <summary class="stockCatalogRow">
+                              <span class="stockCatalogIdentity">
+                                <span class="stockCatalogIcon" aria-hidden="true">${getStockCategoryIcon(item.category)}</span>
+                                <span>
+                                  <strong data-stock-content>${escapeHtml(item.name)}</strong>
+                                  <small>${escapeHtml(getLocalizedStockText(item.category))}${item.active === false ? " · " + escapeHtml(getStockInterfaceText("Неактивна")) : ""}</small>
+                                </span>
+                              </span>
+                              <span class="stockCatalogNumber">
+                                <small>${getStockInterfaceText("Залишок")}</small>
+                                <strong>${quantity.toLocaleString(getCalendarLocale())} <small>${escapeHtml(item.unit)}</small></strong>
+                              </span>
+                              <span class="stockCatalogNumber stockCatalogPrice">
+                                <small>${getStockInterfaceText("Продаж")}</small>
+                                <strong>${escapeHtml(formatClinicMoney(salePrice))}</strong>
+                              </span>
+                              <span class="stockCatalogStatus ${status.key}"><i></i>${escapeHtml(status.label)}</span>
+<span class="stockCatalogChevron" aria-hidden="true">${getStockIcon("chevron")}</span>
+                            </summary>
+                            <div class="stockCatalogDetail">
                             <div class="stockPremiumCardTop">
                               <div class="stockPremiumCardIcon">
                                 ${getStockCategoryIcon(
@@ -53159,7 +52972,7 @@ const currentSpecies =
                                             <span
                                               class="stockPremiumExpiry ${expiry.key}"
                                             >
-                                              <b>◷</b>
+                                              ${getStockIcon("clock")}
 
                                               ${escapeHtml(
                                                 expiry.label
@@ -53197,7 +53010,7 @@ const currentSpecies =
                                           0
                                           ? `
                                             <span>
-                                              <b>↘</b>
+                                              ${getStockIcon("trend")}
 
                                               ${getStockCompactForecastText(
                                                 estimatedDaysLeft
@@ -53329,9 +53142,7 @@ const currentSpecies =
                                 )}"
                                 data-stock-adjust-mode="writeoff"
                               >
-                                ${getStockInterfaceText(
-                                  "− Списати"
-                                )}
+${getStockIcon("minus")} ${getStockInterfaceText("Списати")}
                               </button>
 
                               <button
@@ -53342,12 +53153,18 @@ const currentSpecies =
                                 )}"
                                 data-stock-adjust-mode="income"
                               >
-                                ${getStockInterfaceText(
-                                  "＋ Поповнити"
-                                )}
+${getStockIcon("plus")} ${getStockInterfaceText("Поповнити")}
                               </button>
                             </div>
 
+                            <section class="stockMovementHistory">
+                              <h4>${getStockInterfaceText("Історія руху")}</h4>
+                              <div class="stockMovementRows"></div>
+                              <p class="stockMovementMessage" role="status"></p>
+                              <button type="button" data-stock-history="${escapeHtml(item.id)}">
+                                ${getStockIcon("clock")} ${getStockInterfaceText("Показати рух")}
+                              </button>
+                            </section>
                             <div class="stockPremiumCardFooter">
                               <button
                                 type="button"
@@ -53355,9 +53172,7 @@ const currentSpecies =
                                   item.id
                                 )}"
                               >
-                                ${getStockInterfaceText(
-                                  "✎ Редагувати"
-                                )}
+${getStockIcon("edit")} ${getStockInterfaceText("Редагувати")}
                               </button>
 
                               <button
@@ -53372,7 +53187,8 @@ const currentSpecies =
                                 )}
                               </button>
                             </div>
-                          </article>
+                            </div>
+                          </details>
                         `;
                       }
                     )
@@ -53389,57 +53205,6 @@ const currentSpecies =
     );
   };
   renderStockCards();
-
-  page
-    .querySelectorAll(
-      "[data-stock-pug-item]"
-    )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          const itemId =
-            String(
-              button.dataset
-                .stockPugItem || ""
-            );
-          const item =
-            items.find(
-              (candidate) =>
-                String(
-                  candidate.id
-                ) === itemId
-            );
-
-          if (!item) return;
-
-          state.stockQuery =
-            String(item.name || "");
-          state.stockFilter = "all";
-          state.stockCategory = "all";
-          state.stockGroup = "all";
-          state.stockForm = "all";
-          state.stockSpecies = "all";
-
-          renderStockTab();
-
-          requestAnimationFrame(
-            () => {
-              document
-                .querySelector(
-                  `[data-stock-card="${CSS.escape(
-                    itemId
-                  )}"]`
-                )
-                ?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-            }
-          );
-        }
-      );
-    });
 
   page
     .querySelector(
@@ -53486,34 +53251,34 @@ const currentSpecies =
       );
     });
 
-  page
-    .querySelectorAll(
-      "[data-stock-category]"
-    )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          state.stockCategory =
-            button.dataset.stockCategory ||
-            "all";
-
-          page
-            .querySelectorAll(
-              "[data-stock-category]"
-            )
-            .forEach((item) =>
-              item.classList.remove(
-                "active"
-              )
-            );
-
-          button.classList.add("active");
-
-          renderStockCards();
-        }
-      );
+  page.querySelectorAll("[data-stock-group]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.classList.contains("active")));
+    button.addEventListener("click", () => {
+      state.stockGroup = button.dataset.stockGroup || "all";
+      state.stockCategory = "all";
+      renderStockTab();
+      page.querySelector(`[data-stock-group="${CSS.escape(state.stockGroup)}"]`)?.focus({ preventScroll: true });
     });
+  });
+
+  page.querySelector("#stockCatalogReset")?.addEventListener("click", () => {
+    state.stockQuery = "";
+    ["stockFilter", "stockGroup", "stockCategory", "stockForm", "stockSpecies"]
+      .forEach((key) => { state[key] = "all"; });
+    renderStockTab();
+    page.querySelector("#stockPremiumSearch")?.focus({ preventScroll: true });
+  });
+
+  [
+    ["#stockFilterCategory", "stockCategory"],
+    ["#stockFilterForm", "stockForm"],
+    ["#stockFilterSpecies", "stockSpecies"],
+  ].forEach(([selector, key]) => {
+    page.querySelector(selector)?.addEventListener("change", (event) => {
+      state[key] = event.target.value || "all";
+      renderStockCards();
+    });
+  });
 
   page
     .querySelector(
@@ -53529,6 +53294,11 @@ const currentSpecies =
     grid?.addEventListener(
     "click",
     async (event) => {
+      const historyButton = event.target.closest("[data-stock-history]");
+      if (historyButton) {
+        await loadStockMovementHistory(historyButton);
+        return;
+      }
       const editButton =
         event.target.closest(
           "[data-stock-edit]"
@@ -53782,17 +53552,16 @@ const categories =
       <button
         class="stockEditorClose"
         type="button"
+        aria-label="${getStockInterfaceText("Закрити")}"
         data-close-stock-editor
       >
-        ✕
+        ${getStockIcon("close")}
       </button>
 
       <header class="stockEditorHeader">
         <div class="stockEditorIcon">
           ${
-            isEdit
-              ? "✎"
-              : "＋"
+            getStockIcon(isEdit ? "edit" : "plus")
           }
         </div>
 
@@ -53860,7 +53629,6 @@ const categories =
                 : ""
             }
           >
-            ${group.icon}
             ${escapeHtml(
               group.name
             )}
@@ -54342,9 +54110,7 @@ const categories =
         if (!group) return;
 
         option.textContent =
-          `${group.icon} ${getLocalizedStockText(
-            group.name
-          )}`;
+          getLocalizedStockText(group.name);
       }
     );
   }
@@ -54399,7 +54165,7 @@ const categories =
       );
 
     if (icon) {
-      icon.textContent =
+      icon.innerHTML =
         getStockCategoryIcon(
           category
         );
@@ -54838,9 +54604,10 @@ function openStockAdjustmentModal(
       <button
         type="button"
         class="stockAdjustmentClose"
+        aria-label="${getStockInterfaceText("Закрити")}"
         data-close-stock-adjustment
       >
-        ✕
+        ${getStockIcon("close")}
       </button>
 
       <div
@@ -54854,9 +54621,7 @@ function openStockAdjustmentModal(
         "
       >
         ${
-          isIncome
-            ? "＋"
-            : "−"
+          getStockIcon(isIncome ? "plus" : "minus")
         }
       </div>
 
@@ -55241,7 +55006,7 @@ function openStockDeleteConfirm(
           aria-modal="true"
         >
           <div class="stockDeleteIcon">
-            🗑
+            ${getStockIcon("trash")}
           </div>
 
           <div class="stockDeleteEyebrow">
@@ -114297,6 +114062,10 @@ async function loadStockApi(
         }
       );
 
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid stock response");
+    }
+
     state.stock =
       Array.isArray(data)
         ? data.map(
@@ -114305,6 +114074,7 @@ async function loadStockApi(
         : [];
 
     state.stockLoaded = true;
+    state.stockLoadError = false;
 
     return state.stock;
 
@@ -114314,6 +114084,7 @@ async function loadStockApi(
       error
     );
 
+    state.stockLoadError = true;
     state.stock = [];
     state.stockLoaded = false;
 
